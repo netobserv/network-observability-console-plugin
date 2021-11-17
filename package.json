@@ -8,7 +8,9 @@
     "build-dev": "npm run pre-build && npm run ts-node ./node_modules/.bin/webpack",
     "serve": "npx http-server ./dist -p 9001 -c-1 --cors $SERVER_OPTS",
     "i18n": "i18next \"src/**/*.{js,jsx,ts,tsx}\" [-oc] -c i18next-parser.config.js",
-    "ts-node": "ts-node -O '{\"module\":\"commonjs\"}' -I '/node_modules/(?!(@openshift-console)/)/'"
+    "ts-node": "ts-node -O '{\"module\":\"commonjs\"}' -I '/node_modules/(?!(@openshift-console)/)/'",
+    "test": "",
+    "lint": ""
   },
   "devDependencies": {
     "@openshift-console/dynamic-plugin-sdk-webpack": "0.0.2",
