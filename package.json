@@ -1,0 +1,37 @@
+{
+  "name": "network-observability-plugin",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "pre-build": "rm -rf ./dist",
+    "build": "npm run pre-build && NODE_ENV=production npm run ts-node ./node_modules/.bin/webpack",
+    "build-dev": "npm run pre-build && npm run ts-node ./node_modules/.bin/webpack",
+    "serve": "npx http-server ./dist -p 9001 -c-1 --cors $SERVER_OPTS",
+    "i18n": "i18next \"src/**/*.{js,jsx,ts,tsx}\" [-oc] -c i18next-parser.config.js",
+    "ts-node": "ts-node -O '{\"module\":\"commonjs\"}' -I '/node_modules/(?!(@openshift-console)/)/'"
+  },
+  "devDependencies": {
+    "@openshift-console/dynamic-plugin-sdk-webpack": "0.0.2",
+    "@openshift-console/dynamic-plugin-sdk": "0.0.2",
+    "@types/react": "16.8.13",
+    "copy-webpack-plugin": "^6.4.1",
+    "http-server": "0.12.x",
+    "i18next-parser": "^3.3.0",
+    "ts-loader": "6.2.2",
+    "ts-node": "5.0.1",
+    "typescript": "3.8.3",
+    "webpack-cli": "4.5.x"
+  },
+  "consolePlugin": {
+    "name": "network-observability-plugin",
+    "version": "0.1.0",
+    "displayName": "Network Observability Plugin for Console",
+    "description": "This plugin adds network observability functionality to Openshift console",
+    "exposedModules": {
+      "netflowTraffic": "./components/netflow-traffic.tsx"
+    },
+    "dependencies": {
+      "@console/pluginAPI": "*"
+    }
+  }
+}

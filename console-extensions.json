@@ -1,0 +1,22 @@
+[
+    {
+    "type": "console.navigation/href",
+    "properties": {
+      "id": "netflow-traffic-link",
+      "perspective": "admin",
+      "section": "observe",
+      "name": "%plugin_network-observability-plugin~Netflow traffic%",
+      "href": "/netflow-traffic"
+    },
+    "flags": {
+      "required": ["OPENSHIFT"]
+    }
+  },
+  {
+    "type": "console.page/route",
+    "properties": {
+      "path": "/netflow-traffic",
+      "component": { "$codeRef": "netflowTraffic.default" }
+    }
+  }
+]
