@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi8/nodejs-12:1-98.1634036321
+FROM registry.access.redhat.com/ubi8/nodejs-14:1-51
 
 WORKDIR /opt/app-root/src
 
@@ -7,5 +7,7 @@ COPY package-lock.json .
 RUN npm install
 COPY . .
 RUN npm run build
+
+RUN node --version
 
 ENTRYPOINT ["./http-server.sh"]
