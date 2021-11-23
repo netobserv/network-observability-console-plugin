@@ -11,6 +11,7 @@ const NetflowTraffic: React.FC = () => {
 
   return !_.isEmpty(extensions) ? (
     <div>
+      Network Flows
     </div>
   ) : null;
 };

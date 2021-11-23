@@ -8,6 +8,4 @@ RUN npm install
 COPY . .
 RUN npm run build
 
-RUN node --version
-
 ENTRYPOINT ["./http-server.sh"]

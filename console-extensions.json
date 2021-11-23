@@ -5,7 +5,7 @@
       "id": "netflow-traffic-link",
       "perspective": "admin",
       "section": "observe",
-      "name": "%plugin_network-observability-plugin~Netflow traffic%",
+      "name": "%plugin_network-observability-plugin~Network Traffic%",
       "href": "/netflow-traffic"
     },
     "flags": {
