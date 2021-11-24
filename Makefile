@@ -36,11 +36,18 @@ test:
 	go test ./... -coverprofile ${COVERPROFILE}
 	cd web && npm run test
 
-.PHONY: build
-build:
-	@echo "### Building"
+.PHONY: build-backend
+build-backend:
+	@echo "### Building backend"
 	go build -mod vendor -o plugin-backend cmd/plugin-backend.go
+
+.PHONY: build-frontend
+build-frontend:
+	@echo "### Building frontend"
 	cd web && npm install && npm run build
+
+.PHONY: build
+build: build-backend build-frontend
 
 .PHONY: image
 image:
@@ -53,7 +60,7 @@ push:
 
 .PHONY: serve
 serve:
-	./http-server.sh
+	./plugin-backend
 
 .PHONY: bridge
 bridge:
