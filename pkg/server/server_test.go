@@ -19,8 +19,6 @@ import (
 	"strings"
 	"testing"
 	"time"
-
-	"github.com/netobserv/network-observability-console-plugin/pkg/config"
 )
 
 const (
@@ -40,9 +38,6 @@ func TestServerRunning(t *testing.T) {
 	testServerHostPort := fmt.Sprintf("%v:%v", testHostname, testPort)
 
 	rnd.Seed(time.Now().UnixNano())
-	conf := config.Config{
-		Port: testPort,
-	}
 
 	serverURL := fmt.Sprintf("http://%s", testServerHostPort)
 
@@ -54,7 +49,7 @@ func TestServerRunning(t *testing.T) {
 	}
 
 	go func() {
-		Start(&conf)
+		Start(Config{Port: testPort})
 	}()
 
 	t.Logf("Started test http server: %v", serverURL)
@@ -72,7 +67,7 @@ func TestServerRunning(t *testing.T) {
 		t.Fatalf("Failed: could not fetch static files on / (root): %v", err)
 	}
 
-	if _, err = getRequestResults(t, httpClient, serverURL+"/api/dummy"); err != nil {
+	if _, err = getRequestResults(t, httpClient, serverURL+"/api/status"); err != nil {
 		t.Fatalf("Failed: could not fetch API endpoint: %v", err)
 	}
 
@@ -117,7 +112,7 @@ func TestSecureComm(t *testing.T) {
 	defer os.Remove(testClientKeyFile)
 
 	rnd.Seed(time.Now().UnixNano())
-	conf := config.Config{
+	conf := Config{
 		CertFile:       testServerCertFile,
 		PrivateKeyFile: testServerKeyFile,
 		Port:           testPort,
@@ -133,7 +128,7 @@ func TestSecureComm(t *testing.T) {
 	}
 
 	go func() {
-		Start(&conf)
+		Start(conf)
 	}()
 	t.Logf("Started test http server: %v", serverURL)
 
@@ -156,7 +151,7 @@ func TestSecureComm(t *testing.T) {
 		t.Fatalf("Failed: could not fetch static files on / (root): %v", err)
 	}
 
-	if _, err = getRequestResults(t, httpClient, serverURL+"/api/dummy"); err != nil {
+	if _, err = getRequestResults(t, httpClient, serverURL+"/api/status"); err != nil {
 		t.Fatalf("Failed: could not fetch API endpoint: %v", err)
 	}
 

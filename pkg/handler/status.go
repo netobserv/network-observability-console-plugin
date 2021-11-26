@@ -1,4 +1,3 @@
-// TO REMOVE
 package handler
 
 import (
@@ -7,9 +6,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func Dummy(w http.ResponseWriter, r *http.Request) {
-	logrus.Info("dummy handler")
-	_, err := w.Write([]byte(""))
+func Status(w http.ResponseWriter, r *http.Request) {
+	_, err := w.Write([]byte("OK"))
 	if err != nil {
 		logrus.Errorf("could not write response: %v", err)
 	}
