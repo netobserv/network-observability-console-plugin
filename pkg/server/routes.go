@@ -10,7 +10,8 @@ import (
 
 func setupRoutes() *mux.Router {
 	r := mux.NewRouter()
-	r.HandleFunc("/api/dummy", handler.Dummy)
+	r.HandleFunc("/api/status", handler.Status)
+	r.HandleFunc("/api/loki/flows", handler.GetFlows)
 	r.PathPrefix("/").Handler(http.FileServer(http.Dir("./web/dist/")))
 	return r
 }
