@@ -45,7 +45,7 @@ func (in *StreamResult) Parse() (*ParsedStream, error) {
 		}
 		timestamp, err := strconv.ParseInt(v[0], 10, 64)
 		if err != nil {
-			return nil, fmt.Errorf("parsing Loki result failed, invalid timestamp [%s]: %v", v[0], err)
+			return nil, fmt.Errorf("parsing Loki result failed, invalid timestamp [%s]: %w", v[0], err)
 		}
 		parsedValues = append(parsedValues, ParsedStreamValue{
 			Timestamp: timestamp,
