@@ -35,11 +35,11 @@ const NetflowTraffic: React.FC = () => {
       {error && (
         <div>Error: {error}</div>
       )}
-      {flows.map(f => (
-        <ul>
-          {f.values.map(v => {
+      {flows.map((f, i) => (
+        <ul key={i}>
+          {f.values.map((v, i) => {
             return (
-              <li>
+              <li key={i}>
                 {v.blob}
               </li>
             );

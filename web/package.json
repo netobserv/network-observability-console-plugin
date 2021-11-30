@@ -10,15 +10,20 @@
     "i18n": "i18next \"src/**/*.{js,jsx,ts,tsx}\" [-oc] -c i18next-parser.config.js",
     "ts-node": "ts-node -O '{\"module\":\"commonjs\"}' -I '/node_modules/(?!(@openshift-console)/)/'",
     "test": "",
-    "lint": ""
+    "lint": "./node_modules/.bin/eslint \"./src/**/*.{ts,tsx}\""
   },
   "devDependencies": {
-    "@openshift-console/dynamic-plugin-sdk-webpack": "0.0.2",
     "@openshift-console/dynamic-plugin-sdk": "0.0.2",
+    "@openshift-console/dynamic-plugin-sdk-webpack": "0.0.2",
     "@types/react": "16.8.13",
-    "copy-webpack-plugin": "^6.4.1",
+    "@typescript-eslint/eslint-plugin": "5.5.0",
+    "@typescript-eslint/parser": "5.5.0",
+    "copy-webpack-plugin": "6.4.1",
+    "eslint": "8.3.0",
+    "eslint-plugin-react": "^7.27.1",
+    "eslint-plugin-react-hooks": "^4.3.0",
     "http-server": "0.12.x",
-    "i18next-parser": "^3.3.0",
+    "i18next-parser": "3.3.0",
     "ts-loader": "6.2.2",
     "ts-node": "5.0.1",
     "typescript": "3.8.3",
@@ -37,6 +42,7 @@
     }
   },
   "dependencies": {
-    "axios": "^0.24.0"
+    "@types/copy-webpack-plugin": "8.0.1",
+    "axios": "0.24.0"
   }
 }
