@@ -3,7 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
+	"net/url"
 	"os"
+	"time"
 
 	"github.com/sirupsen/logrus"
 
@@ -20,6 +22,9 @@ var (
 	corsMethods = flag.String("cors-methods", "", "CORS allowed methods (default: unset)")
 	corsHeaders = flag.String("cors-headers", "Origin, X-Requested-With, Content-Type, Accept", "CORS allowed headers (default: Origin, X-Requested-With, Content-Type, Accept)")
 	corsMaxAge  = flag.String("cors-max-age", "", "CORS allowed max age (default: unset)")
+	// todo: default value temporarily kept to make it work with older versions of the NOO. Remove default and force setup of loki url
+	lokiURL     = flag.String("loki", "http://localhost:3100", "URL of the loki querier host")
+	lokiTimeout = flag.Duration("loki-timeout", 10*time.Second, "Timeout of the Loki query to retrieve logs")
 	logLevel    = flag.String("loglevel", "info", "log level (default: info)")
 	versionFlag = flag.Bool("v", false, "print version")
 	appVersion  = fmt.Sprintf("%s %s", app, version)
@@ -43,7 +48,12 @@ func main() {
 	logrus.SetLevel(lvl)
 	log.Infof("Starting %s at log level %s", appVersion, *logLevel)
 
-	server.Start(server.Config{
+	lURL, err := url.Parse(*lokiURL)
+	if err != nil {
+		log.WithError(err).Fatal("wrong Loki URL")
+	}
+
+	server.Start(&server.Config{
 		Port:             *port,
 		CertFile:         *cert,
 		PrivateKeyFile:   *key,
@@ -51,5 +61,7 @@ func main() {
 		CORSAllowMethods: *corsMethods,
 		CORSAllowHeaders: *corsHeaders,
 		CORSMaxAge:       *corsMaxAge,
+		LokiURL:          lURL,
+		LokiTimeout:      *lokiTimeout,
 	})
 }
