@@ -9,19 +9,32 @@
     "serve": "npx http-server ./dist -p 9001 -c-1 --cors $SERVER_OPTS",
     "i18n": "i18next \"src/**/*.{js,jsx,ts,tsx}\" [-oc] -c i18next-parser.config.js",
     "ts-node": "ts-node -O '{\"module\":\"commonjs\"}' -I '/node_modules/(?!(@openshift-console)/)/'",
-    "test": "",
+    "test": "jest",
+    "test:clear": "jest --clearCache && npm run test",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage --colors",
     "lint": "./node_modules/.bin/eslint \"./src/**/*.{ts,tsx}\""
   },
   "devDependencies": {
     "@openshift-console/dynamic-plugin-sdk": "0.0.2",
     "@openshift-console/dynamic-plugin-sdk-webpack": "0.0.2",
-    "@types/react": "16.8.13",
+    "@types/enzyme": "3.10.x",
+    "@types/jest": "27.0.3",
+    "@types/react": "16.14.21",
+    "@types/react-dom": "16.9.14",
     "@typescript-eslint/eslint-plugin": "5.5.0",
     "@typescript-eslint/parser": "5.5.0",
     "copy-webpack-plugin": "6.4.1",
+    "enzyme": "3.11.0",
+    "enzyme-adapter-react-16": "1.15.6",
     "eslint": "8.3.0",
-    "eslint-plugin-react": "^7.27.1",
-    "eslint-plugin-react-hooks": "^4.3.0",
+    "eslint-plugin-react": "7.27.1",
+    "eslint-plugin-react-hooks": "4.3.0",
+    "jest": "27.4.2",
+    "ts-jest": "27.0.7",
+    "ts-jest-resolver": "2.0.0",
+    "react": "16.14.0",
+    "react-dom": "16.14.0",
     "http-server": "0.12.x",
     "i18next-parser": "3.3.0",
     "ts-loader": "6.2.2",
@@ -44,5 +57,27 @@
   "dependencies": {
     "@types/copy-webpack-plugin": "8.0.1",
     "axios": "0.24.0"
+  },
+  "jest": {
+    "setupFiles": [
+      "<rootDir>/enzyme.config.ts"
+    ],
+    "preset": "ts-jest",
+    "moduleFileExtensions": [
+      "js",
+      "jsx",
+      "ts",
+      "tsx"
+    ],
+    "moduleNameMapper": {
+      "@console/*": "<rootDir>/moduleMapper/dummy.ts"
+    },
+    "transform": {
+      ".+\\.(ts|tsx|js|jsx)$": "ts-jest"
+    },
+    "transformIgnorePatterns": [
+      "<rootDir>/node_modules/(?!(@patternfly|@openshift-console|@spice-project\\S*?)/.*)"
+    ],
+    "resolver": "ts-jest-resolver"
   }
 }
