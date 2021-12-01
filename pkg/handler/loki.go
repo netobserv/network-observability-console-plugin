@@ -4,36 +4,36 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
+	"strings"
 	"time"
 
-	"github.com/sirupsen/logrus"
-
 	"github.com/netobserv/network-observability-console-plugin/pkg/httpclient"
+	"github.com/sirupsen/logrus"
 )
 
 var hlog = logrus.WithField("module", "handler")
 
-func GetFlows(w http.ResponseWriter, r *http.Request) {
-	// TODO: loki with auth
-	// TODO: not hardcoded URL (program argument)
-	resp, code, err := httpclient.HTTPGet(`http://localhost:3100/loki/api/v1/query_range?query={app="netobserv-flowcollector"}`, 10*time.Second)
-	if err != nil {
-		writeError(w, http.StatusServiceUnavailable, err.Error())
-		return
+const getFlowsURLPath = `/loki/api/v1/query_range?query={app="netobserv-flowcollector"}`
+
+func GetFlows(lokiURL *url.URL, timeout time.Duration) func(w http.ResponseWriter, r *http.Request) {
+	flowsURL := strings.TrimRight(lokiURL.String(), "/") + getFlowsURLPath
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		// TODO: loki with auth
+		resp, code, err := httpclient.HTTPGet(flowsURL, timeout)
+		if err != nil {
+			writeError(w, http.StatusServiceUnavailable, err.Error())
+			return
+		}
+		if code != http.StatusOK {
+			msg := getLokiError(resp, code)
+			writeError(w, http.StatusServiceUnavailable, msg)
+			return
+		}
+		hlog.Infof("GetFlows raw response: %v", string(resp)) // TODO: remove logs
+		writeRawJSON(w, http.StatusOK, resp)
 	}
-	if code != http.StatusOK {
-		msg := getLokiError(resp, code)
-		writeError(w, http.StatusServiceUnavailable, msg)
-		return
-	}
-	hlog.Infof("GetFlows raw response: %v", string(resp)) // TODO: remove logs
-	writeRawJSON(w, http.StatusOK, resp)
-	// var streamResponse model.LokiStreamResponse
-	// err = json.Unmarshal(resp, &streamResponse)
-	// _, err := w.Write([]byte(""))
-	// if err != nil {
-	// 	logrus.Errorf("could not write response: %v", err)
-	// }
 }
 
 func getLokiError(resp []byte, code int) string {
@@ -47,22 +47,6 @@ func getLokiError(resp []byte, code int) string {
 		return fmt.Sprintf("Unknown error from Loki - no message found (code: %d)", code)
 	}
 	return fmt.Sprintf("Error from Loki (code: %d): %s", code, message)
-}
-
-func writeJSON(w http.ResponseWriter, code int, payload interface{}) {
-	response, err := json.Marshal(payload)
-	if err != nil {
-		hlog.Errorf("Marshalling error while responding JSON: %v", err)
-		writeError(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(code)
-	_, err = w.Write(response)
-	if err != nil {
-		hlog.Errorf("Error while responding JSON: %v", err)
-	}
 }
 
 func writeRawJSON(w http.ResponseWriter, code int, payload []byte) {

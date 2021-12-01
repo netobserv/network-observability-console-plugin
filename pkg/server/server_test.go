@@ -13,12 +13,18 @@ import (
 	rnd "math/rand"
 	"net"
 	"net/http"
+	"net/http/httptest"
+	"net/url"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 )
 
 const (
@@ -49,7 +55,10 @@ func TestServerRunning(t *testing.T) {
 	}
 
 	go func() {
-		Start(Config{Port: testPort})
+		Start(&Config{
+			LokiURL: &url.URL{Scheme: "http", Host: "localhost:3100"},
+			Port:    testPort,
+		})
 	}()
 
 	t.Logf("Started test http server: %v", serverURL)
@@ -112,10 +121,11 @@ func TestSecureComm(t *testing.T) {
 	defer os.Remove(testClientKeyFile)
 
 	rnd.Seed(time.Now().UnixNano())
-	conf := Config{
+	conf := &Config{
 		CertFile:       testServerCertFile,
 		PrivateKeyFile: testServerKeyFile,
 		Port:           testPort,
+		LokiURL:        &url.URL{Scheme: "http", Host: "localhost:3100"},
 	}
 
 	serverURL := fmt.Sprintf("https://%s", testServerHostPort)
@@ -172,6 +182,47 @@ func TestSecureComm(t *testing.T) {
 	if _, err = getRequestResults(t, httpClientTLS11, serverURL); err == nil {
 		t.Fatalf("Failed: should not have been able to use TLS 1.1")
 	}
+}
+
+func TestLokiConfiguration(t *testing.T) {
+	// GIVEN a Loki service
+	lokiMock := httpMock{}
+	lokiMock.On("ServeHTTP", mock.Anything, mock.Anything).Run(func(args mock.Arguments) {
+		_, _ = args.Get(0).(http.ResponseWriter).Write([]byte(`{"hello":"world!"}`))
+	}).Once()
+	lokiSvc := httptest.NewServer(&lokiMock)
+	defer lokiSvc.Close()
+	lokiURL, err := url.Parse(lokiSvc.URL)
+	require.NoError(t, err)
+
+	// THAT is accessed behind the NOO console plugin backend
+	backendRoutes := setupRoutes(&Config{
+		LokiURL:     lokiURL,
+		LokiTimeout: time.Second,
+	})
+	backendSvc := httptest.NewServer(backendRoutes)
+	defer backendSvc.Close()
+
+	// WHEN the Loki flows endpoint is queried in the backend
+	resp, err := backendSvc.Client().Get(backendSvc.URL + "/api/loki/flows")
+	require.NoError(t, err)
+
+	// THEN the query has been properly forwarded to Loki
+	req := lokiMock.Calls[0].Arguments[1].(*http.Request)
+	assert.Equal(t, `{app="netobserv-flowcollector"}`, req.URL.Query().Get("query"))
+
+	// AND the response is sent back to the client
+	body, err := ioutil.ReadAll(resp.Body)
+	require.NoError(t, err)
+	assert.Equal(t, `{"hello":"world!"}`, string(body))
+}
+
+type httpMock struct {
+	mock.Mock
+}
+
+func (l *httpMock) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	_ = l.Called(w, r)
 }
 
 func getRequestResults(t *testing.T, httpClient *http.Client, url string) (string, error) {

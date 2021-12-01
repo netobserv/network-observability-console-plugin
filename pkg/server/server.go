@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -19,10 +20,12 @@ type Config struct {
 	CORSAllowMethods string
 	CORSAllowHeaders string
 	CORSMaxAge       string
+	LokiURL          *url.URL
+	LokiTimeout      time.Duration
 }
 
-func Start(cfg Config) {
-	router := setupRoutes()
+func Start(cfg *Config) {
+	router := setupRoutes(cfg)
 	router.Use(corsHeader(cfg))
 
 	// Clients must use TLS 1.2 or higher
@@ -47,7 +50,7 @@ func Start(cfg Config) {
 	}
 }
 
-func corsHeader(cfg Config) func(next http.Handler) http.Handler {
+func corsHeader(cfg *Config) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			headers := w.Header()
