@@ -2,7 +2,7 @@
 
 Based on [Openshift Console dynamic plugin](https://github.com/openshift/console/tree/master/frontend/packages/console-dynamic-plugin-sdk), this plugin implement the console elements for Network Observability.
 
-## Building, testing
+## Building, linting, testing
 
 To build the plugin, run:
 
@@ -10,12 +10,19 @@ To build the plugin, run:
 make build
 ```
 
-This is equivalent to the npm commands `npm install && npm run build`.
-
 To run tests and linter:
 
 ```bash
 make test lint
+```
+
+These targets will build / lint / test both the backend and the frontend. They have selective equivalent to build/lint/test only the backend or the frontend (e.g. `make build-frontend`).
+
+There are also convenient targets to build+lint+test the backend or the frontend:
+
+```bash
+make frontend
+make backend
 ```
 
 ## Development environment

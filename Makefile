@@ -13,7 +13,7 @@ endif
 .PHONY: prereqs
 prereqs:
 	@echo "### Test if prerequisites are met, and installing missing dependencies"
-	test -f $(go env GOPATH)/bin/golangci-lint || go install github.com/golangci/golangci-lint/cmd/golangci-lint@${GOLANGCI_LINT_VERSION}
+	test -f $(go env GOPATH)/bin/golangci-lint || GOFLAGS="" go install github.com/golangci/golangci-lint/cmd/golangci-lint@${GOLANGCI_LINT_VERSION}
 
 .PHONY: vendors
 vendors:
@@ -24,17 +24,31 @@ vendors:
 fmt:
 	go fmt ./...
 
-.PHONY: lint
-lint: prereqs
-	@echo "### Linting code"
+.PHONY: lint-backend
+lint-backend: prereqs
+	@echo "### Linting backend code"
 	golangci-lint run ./...
+
+.PHONY: lint-frontend
+lint-frontend:
+	@echo "### Linting frontend code"
 	cd web && npm run lint
 
-.PHONY: test
-test:
-	@echo "### Testing"
+.PHONY: lint
+lint: lint-backend lint-frontend
+
+.PHONY: test-backend
+test-backend:
+	@echo "### Testing backend"
 	go test ./... -coverprofile ${COVERPROFILE}
+
+.PHONY: test-frontend
+test-frontend:
+	@echo "### Testing frontend"
 	cd web && npm run test
+
+.PHONY: test
+test: test-backend test-frontend
 
 .PHONY: build-backend
 build-backend:
@@ -48,6 +62,12 @@ build-frontend:
 
 .PHONY: build
 build: build-backend build-frontend
+
+.PHONY: frontend
+frontend: build-frontend lint-frontend test-frontend
+
+.PHONY: backend
+backend: build-backend lint-backend test-backend
 
 .PHONY: image
 image:
