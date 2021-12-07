@@ -25,20 +25,31 @@ export type StreamResult = {
 
 export interface ParsedStream {
   labels: {[ key: string ]: string };
-  values: ParsedStreamValue[];
+  value: ParsedStreamValue;
 }
 
 export interface ParsedStreamValue {
   timestamp: number;
-  blob: string; // TODO: expand to IPFIX fields
+  IPFIX: IPFIXStream;
 }
 
-export const parseStream = (raw: StreamResult): ParsedStream => {
-  return {
-    labels: raw.stream,
-    values: raw.values.map(v => ({
-      timestamp: +v[0],
-      blob: v[1]
+export interface IPFIXStream{
+    SrcAddr: string;
+    DstAddr: string;
+    SrcPod: string;
+    DstPod: string;
+    SrcPort: number;
+    DstPort: number;
+    Packets: number;
+    Proto: number;
+    Bytes: number
+}
+
+export const parseStream = (raw: StreamResult): ParsedStream[] => {
+    const values = raw.values.map(v => ({
+	timestamp: +(v[0].slice(0,13)),
+	IPFIX: JSON.parse(v[1]),
     }))
-  };
+    // making each value independent make sorting and filtering easier
+    return values.map(v => ({labels: raw.stream, value:v}));
 };

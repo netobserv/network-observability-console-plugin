@@ -9,6 +9,6 @@ export const getFlows = (): Promise<ParsedStream[]> => {
       if (r.status >= 400) {
         throw new Error(`${r.statusText} [code=${r.status}]`);
       }
-      return (r.data.data as LokiResponse).result.map(r => parseStream(r));
+	return (r.data.data as LokiResponse).result.flatMap(r => parseStream(r));
     });
 }

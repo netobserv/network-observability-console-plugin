@@ -54,9 +54,15 @@
     }
   },
   "dependencies": {
-    "axios": "0.24.0",
+    "@patternfly/react-core": "4.162.2",
+    "@patternfly/react-table": "4.31.7",
+    "@types/react": "^17.0.37",
+    "axios": "^0.24.0",
     "react": "16.14.0",
-    "react-dom": "16.14.0"
+    "css-loader": "^6.5.1",
+    "protocol-numbers": "^0.0.0",
+    "react-dom": "16.14.0",
+    "style-loader": "^3.3.1"
   },
   "jest": {
     "setupFiles": [
@@ -70,6 +76,7 @@
       "tsx"
     ],
     "moduleNameMapper": {
+      "\\.(css|less)$": "<rootDir>/moduleMapper/dummy.ts",
       "@console/*": "<rootDir>/moduleMapper/dummy.ts"
     },
     "transform": {
