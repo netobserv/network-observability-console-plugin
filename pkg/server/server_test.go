@@ -25,6 +25,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+
+	"github.com/netobserv/network-observability-console-plugin/pkg/handler"
 )
 
 const (
@@ -56,8 +58,10 @@ func TestServerRunning(t *testing.T) {
 
 	go func() {
 		Start(&Config{
-			LokiURL: &url.URL{Scheme: "http", Host: "localhost:3100"},
-			Port:    testPort,
+			Loki: handler.LokiConfig{
+				URL: &url.URL{Scheme: "http", Host: "localhost:3100"},
+			},
+			Port: testPort,
 		})
 	}()
 
@@ -125,7 +129,9 @@ func TestSecureComm(t *testing.T) {
 		CertFile:       testServerCertFile,
 		PrivateKeyFile: testServerKeyFile,
 		Port:           testPort,
-		LokiURL:        &url.URL{Scheme: "http", Host: "localhost:3100"},
+		Loki: handler.LokiConfig{
+			URL: &url.URL{Scheme: "http", Host: "localhost:3100"},
+		},
 	}
 
 	serverURL := fmt.Sprintf("https://%s", testServerHostPort)
@@ -197,8 +203,10 @@ func TestLokiConfiguration(t *testing.T) {
 
 	// THAT is accessed behind the NOO console plugin backend
 	backendRoutes := setupRoutes(&Config{
-		LokiURL:     lokiURL,
-		LokiTimeout: time.Second,
+		Loki: handler.LokiConfig{
+			URL:     lokiURL,
+			Timeout: time.Second,
+		},
 	})
 	backendSvc := httptest.NewServer(backendRoutes)
 	defer backendSvc.Close()
@@ -210,11 +218,43 @@ func TestLokiConfiguration(t *testing.T) {
 	// THEN the query has been properly forwarded to Loki
 	req := lokiMock.Calls[0].Arguments[1].(*http.Request)
 	assert.Equal(t, `{app="netobserv-flowcollector"}`, req.URL.Query().Get("query"))
+	// without any multi-tenancy header
+	assert.Empty(t, req.Header.Get("X-Scope-OrgID"))
 
 	// AND the response is sent back to the client
 	body, err := ioutil.ReadAll(resp.Body)
 	require.NoError(t, err)
 	assert.Equal(t, `{"hello":"world!"}`, string(body))
+}
+
+func TestLokiConfiguration_MultiTenant(t *testing.T) {
+	lokiMock := httpMock{}
+	lokiMock.On("ServeHTTP", mock.Anything, mock.Anything).Run(func(args mock.Arguments) {
+		_, _ = args.Get(0).(http.ResponseWriter).Write([]byte("{}"))
+	}).Once()
+	lokiSvc := httptest.NewServer(&lokiMock)
+	defer lokiSvc.Close()
+	lokiURL, err := url.Parse(lokiSvc.URL)
+	require.NoError(t, err)
+
+	// GIVEN a NOO console plugin backend configured for Multi tenant mode
+	backendRoutes := setupRoutes(&Config{
+		Loki: handler.LokiConfig{
+			URL:      lokiURL,
+			Timeout:  time.Second,
+			TenantID: "my-organisation",
+		},
+	})
+	backendSvc := httptest.NewServer(backendRoutes)
+	defer backendSvc.Close()
+
+	// WHEN the Loki flows endpoint is queried in the backend
+	_, err = backendSvc.Client().Get(backendSvc.URL + "/api/loki/flows")
+	require.NoError(t, err)
+
+	// THEN the query has been properly forwarded to Loki with the tenant ID header
+	req := lokiMock.Calls[0].Arguments[1].(*http.Request)
+	assert.Equal(t, "my-organisation", req.Header.Get("X-Scope-OrgID"))
 }
 
 type httpMock struct {

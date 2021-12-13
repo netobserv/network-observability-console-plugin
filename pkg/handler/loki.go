@@ -14,14 +14,28 @@ import (
 
 var hlog = logrus.WithField("module", "handler")
 
+const lokiOrgIDHeader = "X-Scope-OrgID"
 const getFlowsURLPath = `/loki/api/v1/query_range?query={app="netobserv-flowcollector"}`
 
-func GetFlows(lokiURL *url.URL, timeout time.Duration) func(w http.ResponseWriter, r *http.Request) {
-	flowsURL := strings.TrimRight(lokiURL.String(), "/") + getFlowsURLPath
+type LokiConfig struct {
+	URL      *url.URL
+	Timeout  time.Duration
+	TenantID string
+}
+
+func GetFlows(cfg LokiConfig) func(w http.ResponseWriter, r *http.Request) {
+	flowsURL := strings.TrimRight(cfg.URL.String(), "/") + getFlowsURLPath
+	var headers map[string][]string
+	if cfg.TenantID != "" {
+		headers = map[string][]string{
+			lokiOrgIDHeader: {cfg.TenantID},
+		}
+	}
+	// TODO: loki with auth
+	lokiClient := httpclient.NewHTTPClient(cfg.Timeout, headers)
 
 	return func(w http.ResponseWriter, r *http.Request) {
-		// TODO: loki with auth
-		resp, code, err := httpclient.HTTPGet(flowsURL, timeout)
+		resp, code, err := lokiClient.Get(flowsURL)
 		if err != nil {
 			writeError(w, http.StatusServiceUnavailable, err.Error())
 			return

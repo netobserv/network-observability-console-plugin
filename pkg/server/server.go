@@ -4,10 +4,11 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net/http"
-	"net/url"
 	"time"
 
 	"github.com/sirupsen/logrus"
+
+	"github.com/netobserv/network-observability-console-plugin/pkg/handler"
 )
 
 var slog = logrus.WithField("module", "server")
@@ -20,8 +21,7 @@ type Config struct {
 	CORSAllowMethods string
 	CORSAllowHeaders string
 	CORSMaxAge       string
-	LokiURL          *url.URL
-	LokiTimeout      time.Duration
+	Loki             handler.LokiConfig
 }
 
 func Start(cfg *Config) {
