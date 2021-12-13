@@ -31,6 +31,10 @@ const config: webpack.Configuration = {
           },
         ],
       },
+      {
+          test: /\.(css)$/,
+          use: ['css-loader'],
+      },
     ],
   },
   plugins: [

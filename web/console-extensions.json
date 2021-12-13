@@ -7,9 +7,6 @@
       "section": "observe",
       "name": "%plugin_network-observability-plugin~Network Traffic%",
       "href": "/netflow-traffic"
-    },
-    "flags": {
-      "required": ["OPENSHIFT"]
     }
   },
   {

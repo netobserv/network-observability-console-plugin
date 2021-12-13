@@ -1,3 +1,13 @@
 {
-    "Network Traffic": "Network Traffic"
+  "Date & time": "Date & time",
+  "Src pod": "Src pod",
+  "Dst pod": "Dst pod",
+  "Src namespace": "Src namespace",
+  "Dst namespace": "Dst namespace",
+  "Src port": "Src port",
+  "Dst port": "Dst port",
+  "Protocol": "Protocol",
+  "Bytes": "Bytes",
+  "Packets": "Packets",
+  "Network Traffic": "Network Traffic"
 }
