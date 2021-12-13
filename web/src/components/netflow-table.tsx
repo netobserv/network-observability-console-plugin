@@ -79,7 +79,9 @@ const NetflowTable: React.FC<{
           return flow1.value.IPFIX.DstPort - flow2.value.IPFIX.DstPort;
         }
         case ColumnsId.protocol: {
-            return protocols[flow1.value.IPFIX.Proto].name.localeCompare(protocols[flow2.value.IPFIX.Proto].name);
+          return protocols[flow1.value.IPFIX.Proto].name.localeCompare(
+            protocols[flow2.value.IPFIX.Proto].name
+          );
         }
         case ColumnsId.bytes: {
           return flow1.value.IPFIX.Bytes - flow2.value.IPFIX.Bytes;
