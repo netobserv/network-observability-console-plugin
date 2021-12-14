@@ -16,6 +16,7 @@ import {
     Text,
     TextContent,
     TextVariants,
+    Tooltip,
 } from '@patternfly/react-core';
 import { useTranslation } from "react-i18next";
 import { Column } from './netflow-table-header';
@@ -30,6 +31,7 @@ export const ColumnsModal: React.FC<{
     id?: string,
 }> = ({ id, isModalOpen, setModalOpen, columns, setColumns }) => {
     const [updatedColumns, setUpdatedColumns] = React.useState<Column[]>([]);
+    const [isSaveDisabled, setSaveDisabled] = React.useState<boolean>(true);
     const [isAllSelected, setAllSelected] = React.useState<boolean>(false);
     const { t } = useTranslation("plugin__network-observability-plugin");
 
@@ -46,6 +48,7 @@ export const ColumnsModal: React.FC<{
             }
         });
         setAllSelected(allSelected);
+        setSaveDisabled(_.isEmpty(updatedColumns.filter((col) => col.isSelected)));
     }, [updatedColumns]);
 
     const onDrop = React.useCallback(
@@ -105,6 +108,7 @@ export const ColumnsModal: React.FC<{
         [updatedColumns, setColumns, setModalOpen],
     );
 
+
     const draggableItems = (updatedColumns.map((column, i) =>
         <Draggable key={i} hasNoWrapper>
             <DataListItem
@@ -162,9 +166,17 @@ export const ColumnsModal: React.FC<{
                     <Button key="cancel" variant="link" onClick={() => setModalOpen(false)}>
                         {t('Cancel')}
                     </Button>
-                    <Button key="confirm" variant="primary" onClick={() => onSave()}>
-                        {t('Save')}
-                    </Button>
+                    <Tooltip
+                        content={t('At least one column must be selected')}
+                        isVisible={isSaveDisabled}>
+                        <Button
+                            isDisabled={isSaveDisabled}
+                            key="confirm"
+                            variant="primary"
+                            onClick={() => onSave()}>
+                            {t('Save')}
+                        </Button>
+                    </Tooltip>
                 </div>
             }>
             <div className="co-m-form-row">

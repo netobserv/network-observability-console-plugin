@@ -27,5 +27,6 @@
     "Unselect all": "Unselect all",
     "Restore default columns": "Restore default columns",
     "Selected columns will appear in the table.": "Selected columns will appear in the table.",
-    "Click and drag the items to reorder the columns in the table.": "Click and drag the items to reorder the columns in the table."
+    "Click and drag the items to reorder the columns in the table.": "Click and drag the items to reorder the columns in the table.",
+    "At least one column must be selected": "At least one column must be selected"
 }
