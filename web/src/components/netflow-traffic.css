@@ -1,0 +1,25 @@
+/*hack to keep refresh button size while loading*/
+
+.co-action-refresh-button {
+    width: 45px !important;
+    height: 33px !important;
+}
+
+
+/*rotate animation for loading icon*/
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+
+/*fix double scroller issue*/
+
+.pf-c-drawer.pf-m-inline>.pf-c-drawer__main>.pf-c-drawer__content {
+    overflow: hidden;
+}

@@ -9,13 +9,17 @@ import { getFlows } from '../api/routes';
 import { ParsedStream } from '../api/loki';
 import NetflowTable from './netflow-table';
 import {
-    PageSection
+  PageSection,
+  Button,
 } from '@patternfly/react-core';
-
 import { Column, ColumnsId } from './netflow-table-header';
 import { useTranslation } from "react-i18next";
+import { SyncAltIcon } from '@patternfly/react-icons';
+import { RefreshDropdown } from './refresh-dropdown';
+import { usePoll } from '../utils/poll-hook';
+import "./netflow-traffic.css"
 
-const NetflowTraffic: React.FC = () => {
+export const NetflowTraffic: React.FC = () => {
   const [extensions] = useResolvedExtensions<ModelFeatureFlag>(isModelFeatureFlag);
   const [loading, setLoading] = React.useState(false);
   const [flows, setFlows] = React.useState<ParsedStream[]>([]);
@@ -35,7 +39,9 @@ const NetflowTraffic: React.FC = () => {
     { id: ColumnsId.bytes, name: t("Bytes") },
     { id: ColumnsId.packets, name: t("Packets") },
   ];
-  React.useEffect(() => {
+
+  const [interval, setInterval] = React.useState<number | null>(null)
+  const tick = () => {
     setLoading(true);
     getFlows()
       .then(streams => {
@@ -47,20 +53,38 @@ const NetflowTraffic: React.FC = () => {
         setError(String(err));
         setLoading(false);
       })
-  }, [false /*temp: no refresh*/]);
+  };
+  usePoll(tick, interval);
 
-    return !_.isEmpty(extensions) ? (
-	<PageSection>
-	    <h2>Network Traffic</h2>
-	    {loading && <>Loading...</>}
-	    {error && (
-		<div>Error: {error}</div>
-	    )}
-	{!_.isEmpty(flows) &&
-	 <NetflowTable flows={flows} setFlows={setFlows} columns={Columns} />
-	}
-	</PageSection>
-    ) : null;
+  return !_.isEmpty(extensions) ? (
+    <PageSection id="pageSection">
+      <h1 className="co-m-pane__heading">
+        <span>Network Traffic</span>
+        <div className="co-actions">
+          <RefreshDropdown
+            id="refresh-dropdown"
+            interval={interval}
+            setInterval={setInterval} />
+          <Button
+            id="refresh-button"
+            className="co-action-refresh-button"
+            variant="primary"
+            onClick={() => tick()}
+            icon={
+              <SyncAltIcon style={{ animation: `spin ${loading ? 1 : 0}s linear infinite` }} />
+            } />
+        </div>
+      </h1>
+      {error && (
+        <div>Error: {error}</div>
+      )}
+      {!_.isEmpty(flows) &&
+        <NetflowTable
+          flows={flows}
+          setFlows={setFlows}
+          columns={Columns} />
+      }
+    </PageSection>) : null;
 };
 
 export default NetflowTraffic;
