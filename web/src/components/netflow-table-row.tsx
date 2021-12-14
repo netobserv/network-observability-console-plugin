@@ -80,7 +80,7 @@ const NetflowTableRow: React.FC<{ flow: ParsedStream; columns: Column[] }> = ({
   return (
     <Tr>
       {columns.map((c) => (
-        <Td key="{c.id}">{content(c)}</Td>
+        <Td key={c.id}>{content(c)}</Td>
       ))}
     </Tr>
   );
