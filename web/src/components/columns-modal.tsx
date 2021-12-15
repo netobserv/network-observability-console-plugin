@@ -36,7 +36,7 @@ export const ColumnsModal: React.FC<{
     const { t } = useTranslation("plugin__network-observability-plugin");
 
     React.useEffect(() => {
-        setUpdatedColumns([...columns]);
+        setUpdatedColumns(_.cloneDeep(columns));
     }, [columns]);
 
     React.useEffect(() => {
