@@ -70,6 +70,6 @@ describe("<NetflowTableHeader />", () => {
     );
     expect(wrapper.find(NetflowTableHeader)).toBeTruthy();
     wrapper.find("button").at(0).simulate("click");
-    expect(onSort).toHaveBeenCalled();
+    expect(onSort).toHaveBeenCalledWith(expect.anything(), 0, "desc", expect.anything());
   });
 });
