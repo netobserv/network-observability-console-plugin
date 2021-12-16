@@ -47,17 +47,11 @@ Then open http://localhost:9000/.
 
 If you have troubles trying to run the console, refer to their doc: https://github.com/openshift/console/#openshift-no-authentication.
 
-### Loki setup
+### Loki in dev mode
 
-WIP / FIXME
-
-Currently just dev mode is supported to fetch data from Loki. It means that you need to run the commands described above to run the plugin (`make serve` / `make bridge`).
-
-You also need to deploy Loki and port-forward on your host: `oc port-forward service/loki 3100:3100`
+You need to deploy Loki and port-forward on your host: `oc port-forward service/loki 3100:3100`
 
 (You don't need Grafana)
-
-For next steps, we'll need to use the console proxy feature to fetch in-cluster Loki, which will be supported via this story: https://issues.redhat.com/browse/CONSOLE-2892
 
 ## OCI Image
 
@@ -74,4 +68,23 @@ USER=myuser make image push
 
 # build and push on a different registry
 IMAGE=dockerhub.io/myuser/plugin:tag make image push
+```
+
+### Testing in OpenShift
+
+Probably the easiest way to test without dev mode (e.g. to test a pull request) is to use the [operator](https://github.com/netobserv/network-observability-operator/), build and push the image to your own registry account and update the `FlowCollector` CR to update the plugin image.
+
+E.g:
+
+```bash
+IMAGE=quay.io/${USER}/network-observability-console-plugin:pr-xx make image push
+
+oc edit FlowCollector cluster
+# Here replace image with the newly created one under .spec.consolePlugin.image
+```
+
+If you had previously used the console with the plugin installed, you may need to restart console pods to clear cache:
+
+```bash
+oc delete pods -n openshift-console -l app=console
 ```
