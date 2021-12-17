@@ -37,8 +37,10 @@ describe("<ColumnsModal />", () => {
     const updatedColumns = [...props.columns];
     updatedColumns[0].isSelected = false;
     updatedColumns[1].isSelected = false;
-    wrapper.find('[aria-labelledby="table-column-management-item-0"]').at(0).simulate('click');
-    wrapper.find('[aria-labelledby="table-column-management-item-1"]').at(0).simulate('click');
+    wrapper.find('[aria-labelledby="table-column-management-item-0"]').last()
+      .simulate('change', { target: { id: updatedColumns[0].name } });
+    wrapper.find('[aria-labelledby="table-column-management-item-1"]').last()
+      .simulate('change', { target: { id: updatedColumns[1].name } });
     wrapper.find(".pf-c-button.pf-m-primary").at(0).simulate('click');
     expect(props.setColumns).toHaveBeenNthCalledWith(2, updatedColumns);
   });
