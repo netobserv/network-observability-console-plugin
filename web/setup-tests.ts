@@ -24,3 +24,13 @@ global.cancelAnimationFrame = function (id) {
     clearTimeout(id);
 };
 copyProps(window, global);
+
+jest.mock("react-i18next", () => {
+  return {
+    useTranslation: () => {
+      return {
+        t: (s) => s,
+      };
+    },
+  };
+});
