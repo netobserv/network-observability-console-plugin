@@ -1,5 +1,7 @@
 # Network Observability plugin for Openshift Console
 
+[![Docker Repository on Quay](https://quay.io/repository/netobserv/network-observability-console-plugin/status "Docker Repository on Quay")](https://quay.io/repository/netobserv/network-observability-console-plugin)
+
 Based on [Openshift Console dynamic plugin](https://github.com/openshift/console/tree/master/frontend/packages/console-dynamic-plugin-sdk), this plugin implement the console elements for Network Observability.
 
 ## Building, linting, testing
