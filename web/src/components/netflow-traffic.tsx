@@ -33,6 +33,8 @@ export const NetflowTraffic: React.FC = () => {
     { id: ColumnsId.dstpod, name: t("Dst pod") },
     { id: ColumnsId.srcnamespace, name: t("Src namespace") },
     { id: ColumnsId.dstnamespace, name: t("Dst namespace") },
+    { id: ColumnsId.srcaddr, name: t("Src address") },
+    { id: ColumnsId.dstaddr, name: t("Dst address") },
     { id: ColumnsId.srcport, name: t("Src port") },
     { id: ColumnsId.dstport, name: t("Dst port") },
     { id: ColumnsId.protocol, name: t("Protocol") },
