@@ -4,6 +4,7 @@ import { ParsedStream } from "../api/loki";
 import { Tr, Td } from "@patternfly/react-table";
 import { Column, ColumnsId } from "./netflow-table-header";
 import protocols from "protocol-numbers";
+import {formatPort} from "../utils/port"
 
 import { ResourceLink } from "@openshift-console/dynamic-plugin-sdk";
 
@@ -61,10 +62,10 @@ const NetflowTableRow: React.FC<{ flow: ParsedStream; columns: Column[] }> = ({
         }
       }
       case ColumnsId.srcport: {
-        return flow.value.IPFIX.SrcPort;
+        return formatPort(flow.value.IPFIX.SrcPort);
       }
       case ColumnsId.dstport: {
-        return flow.value.IPFIX.DstPort;
+        return formatPort(flow.value.IPFIX.DstPort);
       }
       case ColumnsId.srcaddr: {
         return flow.value.IPFIX.SrcAddr;
