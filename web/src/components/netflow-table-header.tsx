@@ -25,6 +25,8 @@ export enum ColumnsId {
 export interface Column {
   id: number;
   name: string;
+  isSelected: boolean;
+  defaultOrder: number;
 }
 
 export const NetflowTableHeader: React.FC<{

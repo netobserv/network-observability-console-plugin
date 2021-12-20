@@ -1,6 +1,6 @@
-import * as React from 'react';
-import { shallow, render, mount } from 'enzyme';
 import { useResolvedExtensions } from '@openshift-console/dynamic-plugin-sdk';
+import { mount, render, shallow } from 'enzyme';
+import * as React from 'react';
 import { getFlows } from '../../api/routes';
 import NetflowTraffic from "../netflow-traffic";
 import { extensionsMock } from "../__tests-data__/extensions";
@@ -45,5 +45,12 @@ describe("<NetflowTraffic />", () => {
     //should have called getFlow twice after click
     wrapper.find('#refresh-button').at(0).simulate('click');
     expect(getFlowsMock).toHaveBeenCalledTimes(2);
+  });
+  it('should render toolbar components', () => {
+    const cheerio = render(
+      <NetflowTraffic />
+    );
+    expect(cheerio.find('#filter-toolbar').length).toEqual(1);
+    expect(cheerio.find('#manage-columns-button').length).toEqual(1);
   });
 });
