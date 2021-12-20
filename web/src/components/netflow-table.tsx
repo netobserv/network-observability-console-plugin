@@ -4,6 +4,7 @@ import { ParsedStream } from "../api/loki";
 import { Column, ColumnsId, NetflowTableHeader } from "./netflow-table-header";
 import NetflowTableRow from "./netflow-table-row";
 import protocols from "protocol-numbers";
+import { ipCompare } from "../utils/ip";
 
 const NetflowTable: React.FC<{
   flows: ParsedStream[];
@@ -77,6 +78,18 @@ const NetflowTable: React.FC<{
         }
         case ColumnsId.dstport: {
           return flow1.value.IPFIX.DstPort - flow2.value.IPFIX.DstPort;
+        }
+        case ColumnsId.srcaddr: {
+          return ipCompare(
+            flow1.value.IPFIX.SrcAddr,
+            flow2.value.IPFIX.SrcAddr
+          );
+        }
+        case ColumnsId.dstaddr: {
+          return ipCompare(
+            flow1.value.IPFIX.DstAddr,
+            flow2.value.IPFIX.DstAddr
+          );
         }
         case ColumnsId.protocol: {
           return protocols[flow1.value.IPFIX.Proto].name.localeCompare(

@@ -66,6 +66,12 @@ const NetflowTableRow: React.FC<{ flow: ParsedStream; columns: Column[] }> = ({
       case ColumnsId.dstport: {
         return flow.value.IPFIX.DstPort;
       }
+      case ColumnsId.srcaddr: {
+        return flow.value.IPFIX.SrcAddr;
+      }
+      case ColumnsId.dstaddr: {
+        return flow.value.IPFIX.DstAddr;
+      }
       case ColumnsId.protocol: {
         return protocols[flow.value.IPFIX.Proto].name;
       }

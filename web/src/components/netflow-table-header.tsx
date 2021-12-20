@@ -15,6 +15,8 @@ export enum ColumnsId {
   dstnamespace,
   srcport,
   dstport,
+  srcaddr,
+  dstaddr,
   protocol,
   bytes,
   packets,
