@@ -3,11 +3,12 @@ FROM registry.access.redhat.com/ubi8/nodejs-14:1-51 as web-builder
 WORKDIR /opt/app-root
 
 RUN npm install npm@8.2.0 -g
-COPY web/package.json .
-COPY web/package-lock.json .
-RUN npm install
+RUN mkdir web && chown $USER: web
+COPY web/package.json web/
+COPY web/package-lock.json web/
 COPY Makefile Makefile
-COPY web .
+RUN make install-frontend
+COPY web web
 
 RUN make build-frontend
 
@@ -26,7 +27,7 @@ RUN make build-backend
 
 FROM registry.access.redhat.com/ubi8/ubi-minimal:8.5-204
 
-COPY --from=web-builder /opt/app-root/dist ./web/dist
+COPY --from=web-builder /opt/app-root/web/dist ./web/dist
 COPY --from=go-builder /opt/app-root/plugin-backend ./
 
 ENTRYPOINT ["./plugin-backend"]
