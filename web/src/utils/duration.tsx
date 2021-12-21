@@ -15,8 +15,8 @@ export const parseDuration = (duration: string): number => {
     const parts = duration
       .trim()
       .split(/\s+/)
-      .map((p) => p.match(/^(\d+)([wdhms])$/));
-    return _.sumBy(parts, (p) => parseInt(p[1], 10) * units[p[2]]);
+      .map(p => p.match(/^(\d+)([wdhms])$/));
+    return _.sumBy(parts, p => parseInt(p[1], 10) * units[p[2]]);
   } catch (ignored) {
     // Invalid duration format
     return 0;

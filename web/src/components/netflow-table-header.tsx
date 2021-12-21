@@ -1,11 +1,5 @@
-import * as React from "react";
-import {
-  Thead,
-  Tr,
-  Th,
-  OnSort,
-  SortByDirection,
-} from "@patternfly/react-table";
+import * as React from 'react';
+import { Thead, Tr, Th, OnSort, SortByDirection } from '@patternfly/react-table';
 
 export enum ColumnsId {
   date,
@@ -19,7 +13,7 @@ export enum ColumnsId {
   dstaddr,
   protocol,
   bytes,
-  packets,
+  packets
 }
 
 export interface Column {
@@ -38,16 +32,16 @@ export const NetflowTableHeader: React.FC<{
   return (
     <Thead>
       <Tr>
-        {columns.map((c) => (
+        {columns.map(c => (
           <Th
             key={c.id}
             sort={{
               sortBy: {
                 index: sortIndex,
-                direction: SortByDirection[sortDirection],
+                direction: SortByDirection[sortDirection]
               },
               onSort: onSort,
-              columnIndex: c.id,
+              columnIndex: c.id
             }}
             modifier="wrap"
           >

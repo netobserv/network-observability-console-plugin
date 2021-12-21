@@ -14,11 +14,11 @@ const OFF_KEY = 'OFF_KEY';
 
 export const RefreshDropdown: React.FC<Props> = ({ id, interval, setInterval }) => {
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
-  const { t } = useTranslation("plugin__network-observability-plugin");
+  const { t } = useTranslation('plugin__network-observability-plugin');
 
   const onChange = React.useCallback(
     (v: string) => setInterval(v === OFF_KEY ? null : parseDuration(v)),
-    [setInterval],
+    [setInterval]
   );
 
   const refreshOptions = {
@@ -31,7 +31,7 @@ export const RefreshDropdown: React.FC<Props> = ({ id, interval, setInterval }) 
     '30m': t('{{count}} minute', { count: 30 }),
     '1h': t('{{count}} hour', { count: 1 }),
     '2h': t('{{count}} hour', { count: 2 }),
-    '1d': t('{{count}} day', { count: 1 }),
+    '1d': t('{{count}} day', { count: 1 })
   };
 
   const selectedKey = interval === null ? OFF_KEY : formatDuration(interval);
@@ -40,23 +40,18 @@ export const RefreshDropdown: React.FC<Props> = ({ id, interval, setInterval }) 
     <Dropdown
       id={id}
       dropdownItems={_.map(refreshOptions, (name, key) => (
-        <DropdownItem
-          id={key}
-          component="button"
-          key={key}
-          onClick={() => onChange(key)}>
+        <DropdownItem id={key} component="button" key={key} onClick={() => onChange(key)}>
           {name}
         </DropdownItem>
       ))}
       isOpen={isOpen}
       onSelect={() => setIsOpen(false)}
       toggle={
-        <DropdownToggle
-          id={`${id}-dropdown`}
-          onToggle={() => setIsOpen(!isOpen)}>
+        <DropdownToggle id={`${id}-dropdown`} onToggle={() => setIsOpen(!isOpen)}>
           {refreshOptions[selectedKey]}
         </DropdownToggle>
-      } />
+      }
+    />
   );
 };
 
