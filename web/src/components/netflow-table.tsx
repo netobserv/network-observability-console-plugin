@@ -1,11 +1,11 @@
-import * as React from "react";
-import { TableComposable, Tbody } from "@patternfly/react-table";
-import { ParsedStream } from "../api/loki";
-import { Column, ColumnsId, NetflowTableHeader } from "./netflow-table-header";
-import NetflowTableRow from "./netflow-table-row";
-import protocols from "protocol-numbers";
-import { ipCompare } from "../utils/ip";
-import {formatPort} from "../utils/port"
+import * as React from 'react';
+import { TableComposable, Tbody } from '@patternfly/react-table';
+import { ParsedStream } from '../api/loki';
+import { Column, ColumnsId, NetflowTableHeader } from './netflow-table-header';
+import NetflowTableRow from './netflow-table-row';
+import protocols from 'protocol-numbers';
+import { ipCompare } from '../utils/ip';
+import { formatPort } from '../utils/port';
 
 const NetflowTable: React.FC<{
   flows: ParsedStream[];
@@ -16,8 +16,7 @@ const NetflowTable: React.FC<{
   const [activeSortIndex, setActiveSortIndex] = React.useState<number>(-1);
 
   // sort direction of the currently active column
-  const [activeSortDirection, setActiveSortDirection] =
-    React.useState<string>("asc");
+  const [activeSortDirection, setActiveSortDirection] = React.useState<string>('asc');
 
   //Sort handler
   const onSort = (event, index, direction) => {
@@ -27,7 +26,7 @@ const NetflowTable: React.FC<{
     const updatedFlows = flows.sort((a, b): number => {
       let flow1: ParsedStream;
       let flow2: ParsedStream;
-      if (direction === "desc") {
+      if (direction === 'desc') {
         flow1 = a;
         flow2 = b;
       } else {
@@ -39,65 +38,39 @@ const NetflowTable: React.FC<{
           return flow1.value.timestamp - flow2.value.timestamp;
         }
         case ColumnsId.srcpod: {
-          const flow1PodName = flow1.value.IPFIX.SrcPod
-            ? flow1.value.IPFIX.SrcPod
-            : "";
-          const flow2PodName = flow2.value.IPFIX.SrcPod
-            ? flow2.value.IPFIX.SrcPod
-            : "";
+          const flow1PodName = flow1.value.IPFIX.SrcPod ? flow1.value.IPFIX.SrcPod : '';
+          const flow2PodName = flow2.value.IPFIX.SrcPod ? flow2.value.IPFIX.SrcPod : '';
           return flow1PodName.localeCompare(flow2PodName);
         }
         case ColumnsId.dstpod: {
-          const flow1PodName = flow1.value.IPFIX.DstPod
-            ? flow1.value.IPFIX.DstPod
-            : "";
-          const flow2PodName = flow2.value.IPFIX.DstPod
-            ? flow2.value.IPFIX.DstPod
-            : "";
+          const flow1PodName = flow1.value.IPFIX.DstPod ? flow1.value.IPFIX.DstPod : '';
+          const flow2PodName = flow2.value.IPFIX.DstPod ? flow2.value.IPFIX.DstPod : '';
           return flow1PodName.localeCompare(flow2PodName);
         }
         case ColumnsId.srcnamespace: {
-          const flow1NsName = flow1.labels["SrcNamespace"]
-            ? flow1.labels["SrcNamespace"]
-            : "";
-          const flow2NsName = flow2.labels["SrcNamespace"]
-            ? flow2.labels["SrcNamespace"]
-            : "";
+          const flow1NsName = flow1.labels['SrcNamespace'] ? flow1.labels['SrcNamespace'] : '';
+          const flow2NsName = flow2.labels['SrcNamespace'] ? flow2.labels['SrcNamespace'] : '';
           return flow1NsName.localeCompare(flow2NsName);
         }
         case ColumnsId.dstnamespace: {
-          const flow1NsName = flow1.labels["DstNamespace"]
-            ? flow1.labels["DstNamespace"]
-            : "";
-          const flow2NsName = flow2.labels["DstNamespace"]
-            ? flow2.labels["DstNamespace"]
-            : "";
+          const flow1NsName = flow1.labels['DstNamespace'] ? flow1.labels['DstNamespace'] : '';
+          const flow2NsName = flow2.labels['DstNamespace'] ? flow2.labels['DstNamespace'] : '';
           return flow1NsName.localeCompare(flow2NsName);
         }
         case ColumnsId.srcport: {
-          return formatPort(flow1.value.IPFIX.SrcPort)
-	    .localeCompare(formatPort(flow2.value.IPFIX.SrcPort));
+          return formatPort(flow1.value.IPFIX.SrcPort).localeCompare(formatPort(flow2.value.IPFIX.SrcPort));
         }
         case ColumnsId.dstport: {
-          return formatPort(flow1.value.IPFIX.DstPort)
-	    .localeCompare(formatPort(flow2.value.IPFIX.DstPort));
+          return formatPort(flow1.value.IPFIX.DstPort).localeCompare(formatPort(flow2.value.IPFIX.DstPort));
         }
         case ColumnsId.srcaddr: {
-          return ipCompare(
-            flow1.value.IPFIX.SrcAddr,
-            flow2.value.IPFIX.SrcAddr
-          );
+          return ipCompare(flow1.value.IPFIX.SrcAddr, flow2.value.IPFIX.SrcAddr);
         }
         case ColumnsId.dstaddr: {
-          return ipCompare(
-            flow1.value.IPFIX.DstAddr,
-            flow2.value.IPFIX.DstAddr
-          );
+          return ipCompare(flow1.value.IPFIX.DstAddr, flow2.value.IPFIX.DstAddr);
         }
         case ColumnsId.protocol: {
-          return protocols[flow1.value.IPFIX.Proto].name.localeCompare(
-            protocols[flow2.value.IPFIX.Proto].name
-          );
+          return protocols[flow1.value.IPFIX.Proto].name.localeCompare(protocols[flow2.value.IPFIX.Proto].name);
         }
         case ColumnsId.bytes: {
           return flow1.value.IPFIX.Bytes - flow2.value.IPFIX.Bytes;
@@ -106,7 +79,7 @@ const NetflowTable: React.FC<{
           return flow1.value.IPFIX.Packets - flow2.value.IPFIX.Packets;
         }
       }
-      console.log("Unknown column");
+      console.log('Unknown column');
       return 0;
     });
     setFlows(updatedFlows);

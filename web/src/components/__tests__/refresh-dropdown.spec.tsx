@@ -1,24 +1,20 @@
 import * as React from 'react';
 import { mount, shallow } from 'enzyme';
 
-import RefreshDropdown from "../refresh-dropdown";
+import RefreshDropdown from '../refresh-dropdown';
 
-describe("<RefreshDropdown />", () => {
+describe('<RefreshDropdown />', () => {
   const props = {
     interval: null,
     setInterval: jest.fn(),
-    id: "refresh",
-  }
+    id: 'refresh'
+  };
   it('should render component', () => {
-    const wrapper = shallow(
-      <RefreshDropdown {...props} />
-    );
+    const wrapper = shallow(<RefreshDropdown {...props} />);
     expect(wrapper.find(RefreshDropdown)).toBeTruthy();
   });
   it('should open and close', () => {
-    const wrapper = mount(
-      <RefreshDropdown {...props} />
-    );
+    const wrapper = mount(<RefreshDropdown {...props} />);
 
     const dropdown = wrapper.find('#refresh-dropdown');
     expect(wrapper.find('li').length).toBe(0);
@@ -34,9 +30,7 @@ describe("<RefreshDropdown />", () => {
     expect(props.setInterval).toHaveBeenCalledTimes(0);
   });
   it('should refresh on select', () => {
-    const wrapper = mount(
-      <RefreshDropdown {...props} />
-    );
+    const wrapper = mount(<RefreshDropdown {...props} />);
 
     const dropdown = wrapper.find('#refresh-dropdown');
     //open dropdown and select refresh off
@@ -51,7 +45,7 @@ describe("<RefreshDropdown />", () => {
     expect(props.setInterval).toHaveBeenCalledWith(15000);
     expect(wrapper.find('li').length).toBe(0);
 
-    //setInterval should be called twice 
+    //setInterval should be called twice
     expect(props.setInterval).toHaveBeenCalledTimes(2);
   });
 });

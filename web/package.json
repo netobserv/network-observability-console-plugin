@@ -13,7 +13,10 @@
         "test:clear": "jest --clearCache && npm run test",
         "test:watch": "jest --watch",
         "test:coverage": "jest --coverage --colors",
-        "lint": "./node_modules/.bin/eslint \"./src/**/*.{ts,tsx}\""
+        "lint": "./node_modules/.bin/eslint \"./src/**/*.{ts,tsx}\"",
+        "format": "pretty-quick --branch main",
+        "format-all": "prettier --write \"./src/**/*.{ts,tsx}\" && npm run fix-imports",
+        "fix-imports": "eslint --no-eslintrc --parser '@typescript-eslint/parser' --plugin 'unused-imports' --plugin 'react-hooks' --rule 'unused-imports/no-unused-imports:error' --fix \"./src/**/*.{ts,tsx}\""
     },
     "devDependencies": {
         "@openshift-console/dynamic-plugin-sdk": "0.0.2",
@@ -33,11 +36,14 @@
         "eslint": "8.3.0",
         "eslint-plugin-react": "7.27.1",
         "eslint-plugin-react-hooks": "4.3.0",
+        "eslint-plugin-unused-imports": "^2.0.0",
         "http-server": "0.12.x",
         "i18next-parser": "3.3.0",
         "jest": "27.4.4",
         "jsdom": "19.0.0",
         "jsdom-global": "3.0.2",
+        "prettier": "^2.5.1",
+        "pretty-quick": "^3.1.2",
         "ts-jest": "27.1.1",
         "ts-jest-resolver": "2.0.0",
         "ts-loader": "6.2.2",

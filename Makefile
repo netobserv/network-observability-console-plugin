@@ -20,9 +20,21 @@ vendors:
 	@echo "### Checking vendors"
 	go mod tidy && go mod vendor
 
-.PHONY: fmt
-fmt:
+.PHONY: install-frontend
+install-frontend:
+	@echo "### Installing frontend dependencies"
+	cd web && npm install
+
+.PHONY: fmt-backend
+fmt-backend:
 	go fmt ./...
+
+.PHONY: fmt-frontend
+fmt-frontend:
+	cd web && npm run format-all
+
+.PHONY: fmt
+fmt: fmt-backend fmt-frontend
 
 .PHONY: lint-backend
 lint-backend: prereqs
@@ -51,14 +63,14 @@ test-frontend:
 test: test-backend test-frontend
 
 .PHONY: build-backend
-build-backend:
+build-backend: fmt-backend
 	@echo "### Building backend"
 	go build -mod vendor -o plugin-backend cmd/plugin-backend.go
 
 .PHONY: build-frontend
-build-frontend:
+build-frontend: install-frontend fmt-frontend
 	@echo "### Building frontend"
-	cd web && npm install && npm run build
+	cd web && npm run build
 
 .PHONY: build
 build: build-backend build-frontend
