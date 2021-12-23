@@ -5,7 +5,7 @@ import { Column, ColumnsId, NetflowTableHeader } from './netflow-table-header';
 import NetflowTableRow from './netflow-table-row';
 import protocols from 'protocol-numbers';
 import { ipCompare } from '../utils/ip';
-import { formatPort } from '../utils/port';
+import { comparePort } from '../utils/port';
 
 const NetflowTable: React.FC<{
   flows: ParsedStream[];
@@ -58,10 +58,10 @@ const NetflowTable: React.FC<{
           return flow1NsName.localeCompare(flow2NsName);
         }
         case ColumnsId.srcport: {
-          return formatPort(flow1.value.IPFIX.SrcPort).localeCompare(formatPort(flow2.value.IPFIX.SrcPort));
+          return comparePort(flow1.value.IPFIX.SrcPort, flow2.value.IPFIX.SrcPort);
         }
         case ColumnsId.dstport: {
-          return formatPort(flow1.value.IPFIX.DstPort).localeCompare(formatPort(flow2.value.IPFIX.DstPort));
+          return comparePort(flow1.value.IPFIX.DstPort, flow2.value.IPFIX.DstPort);
         }
         case ColumnsId.srcaddr: {
           return ipCompare(flow1.value.IPFIX.SrcAddr, flow2.value.IPFIX.SrcAddr);
