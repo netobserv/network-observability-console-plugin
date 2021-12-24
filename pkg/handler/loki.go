@@ -14,8 +14,12 @@ import (
 
 var hlog = logrus.WithField("module", "handler")
 
+const dateRangeDelimiter = "<"
+const queryParam = "?query="
+const startParam = "&start="
+const endParam = "&end="
 const lokiOrgIDHeader = "X-Scope-OrgID"
-const getFlowsURLPath = `/loki/api/v1/query_range?query={app="netobserv-flowcollector"}`
+const getFlowsURLPath = "/loki/api/v1/query_range"
 
 type LokiConfig struct {
 	URL      *url.URL
@@ -23,8 +27,22 @@ type LokiConfig struct {
 	TenantID string
 }
 
+func isLabel(v string) bool {
+	switch v {
+	case
+		"SrcNamespace",
+		"SrcWorkload",
+		"DstNamespace",
+		"DstWorkload":
+		return true
+	default:
+		return false
+	}
+}
+
 func GetFlows(cfg LokiConfig) func(w http.ResponseWriter, r *http.Request) {
 	flowsURL := strings.TrimRight(cfg.URL.String(), "/") + getFlowsURLPath
+
 	var headers map[string][]string
 	if cfg.TenantID != "" {
 		headers = map[string][]string{
@@ -34,8 +52,58 @@ func GetFlows(cfg LokiConfig) func(w http.ResponseWriter, r *http.Request) {
 	// TODO: loki with auth
 	lokiClient := httpclient.NewHTTPClient(cfg.Timeout, headers)
 
+	// TODO: improve search mecanism:
+	// - better way to make difference between labels and values
+	// - don't always use regex (port number for example)
+	// - manage range (check RANGE_SPLIT_CHAR on front side)
 	return func(w http.ResponseWriter, r *http.Request) {
-		resp, code, err := lokiClient.Get(flowsURL)
+		params := r.URL.Query()
+		// TODO: remove all logs
+		hlog.Infof("GetFlows query params : %s", params)
+		labelFilters := "app=\"netobserv-flowcollector\""
+		lineFilters := ""
+		extraArgs := ""
+
+		for key := range params {
+			var regexStr = ""
+			for _, value := range strings.Split(params.Get(key), ",") {
+				if strings.Contains(value, dateRangeDelimiter) {
+					var rangeValues = strings.Split(value, dateRangeDelimiter)
+					//add start param if specified
+					if len(rangeValues[0]) > 0 {
+						extraArgs += fmt.Sprintf("%s%s", startParam, rangeValues[0])
+					}
+					//add end param if specified
+					if len(rangeValues[1]) > 0 {
+						extraArgs += fmt.Sprintf("%s%s", endParam, rangeValues[1])
+					}
+				} else {
+					if len(regexStr) > 0 {
+						regexStr += "|"
+					}
+					if isLabel(key) {
+						//match any caracter before / after value
+						regexStr += fmt.Sprintf(".*%s.*", value)
+					} else {
+						//match KEY containing VALUE \\"KEY\\":[\\"]{0,1}[^,]{0,}VALUE
+						regexStr += fmt.Sprintf("\\\"%s\\\":[\\\"]{0,1}[^,]{0,}%s", key, value)
+					}
+				}
+			}
+
+			if len(regexStr) > 0 {
+				if isLabel(key) {
+					labelFilters += fmt.Sprintf(",%s=~\"%s\"", key, regexStr)
+				} else {
+					lineFilters += fmt.Sprintf("|~\"%s\"", regexStr)
+				}
+			}
+		}
+
+		url := fmt.Sprintf("%s%s{%s}%s%s", flowsURL, queryParam, labelFilters, lineFilters, extraArgs)
+		hlog.Infof("GetFlows URL : %s", url)
+
+		resp, code, err := lokiClient.Get(url)
 		if err != nil {
 			writeError(w, http.StatusServiceUnavailable, err.Error())
 			return
@@ -45,7 +113,7 @@ func GetFlows(cfg LokiConfig) func(w http.ResponseWriter, r *http.Request) {
 			writeError(w, http.StatusServiceUnavailable, msg)
 			return
 		}
-		hlog.Infof("GetFlows raw response: %v", string(resp)) // TODO: remove logs
+		hlog.Infof("GetFlows raw response: %v", string(resp))
 		writeRawJSON(w, http.StatusOK, resp)
 	}
 }

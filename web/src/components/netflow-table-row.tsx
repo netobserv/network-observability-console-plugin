@@ -2,42 +2,39 @@ import * as React from 'react';
 
 import { ParsedStream } from '../api/loki';
 import { Tr, Td } from '@patternfly/react-table';
-import { Column, ColumnsId } from './netflow-table-header';
+import { Column, ColumnsId, getFlowValueFromColumnId } from '../utils/columns';
+import { ResourceLink } from '@openshift-console/dynamic-plugin-sdk';
 import protocols from 'protocol-numbers';
 import { formatPort } from '../utils/port';
 
-import { ResourceLink } from '@openshift-console/dynamic-plugin-sdk';
-
 const NetflowTableRow: React.FC<{ flow: ParsedStream; columns: Column[] }> = ({ flow, columns }) => {
   const content = c => {
+    const value = getFlowValueFromColumnId(flow, c.id);
     switch (c.id) {
-      case ColumnsId.date: {
-        return new Date(flow.value.timestamp).toLocaleString();
+      case ColumnsId.timestamp: {
+        return (
+          <div>
+            <span>{new Date(value).toDateString()}</span>{' '}
+            <span className="text-muted">{new Date(value).toLocaleTimeString()}</span>
+          </div>
+        );
       }
-      case ColumnsId.srcpod: {
-        if (flow.value.IPFIX.SrcPod) {
-          return <ResourceLink kind="Pod" name={flow.value.IPFIX.SrcPod} namespace={flow.labels['SrcNamespace']} />;
-        } else {
-          return '';
-        }
-      }
+      case ColumnsId.srcpod:
       case ColumnsId.dstpod: {
-        if (flow.value.IPFIX.DstPod) {
-          return <ResourceLink kind="Pod" name={flow.value.IPFIX.DstPod} namespace={flow.labels['DstNamespace']} />;
+        const nsValue = getFlowValueFromColumnId(
+          flow,
+          c.id === ColumnsId.srcpod ? ColumnsId.srcnamespace : ColumnsId.dstnamespace
+        );
+        if (value && nsValue) {
+          return <ResourceLink kind="Pod" name={value.toString()} namespace={nsValue.toString()} />;
         } else {
           return '';
         }
       }
-      case ColumnsId.srcnamespace: {
-        if (flow.labels['SrcNamespace']) {
-          return <ResourceLink kind="Namespace" name={flow.labels['SrcNamespace']} />;
-        } else {
-          return '';
-        }
-      }
+      case ColumnsId.srcnamespace:
       case ColumnsId.dstnamespace: {
-        if (flow.labels['DstNamespace']) {
-          return <ResourceLink kind="Namespace" name={flow.labels['DstNamespace']} />;
+        if (value) {
+          return <ResourceLink kind="Namespace" name={value.toString()} />;
         } else {
           return '';
         }
@@ -48,21 +45,14 @@ const NetflowTableRow: React.FC<{ flow: ParsedStream; columns: Column[] }> = ({ 
       case ColumnsId.dstport: {
         return formatPort(flow.value.IPFIX.DstPort);
       }
-      case ColumnsId.srcaddr: {
-        return flow.value.IPFIX.SrcAddr;
-      }
-      case ColumnsId.dstaddr: {
-        return flow.value.IPFIX.DstAddr;
-      }
-      case ColumnsId.protocol: {
-        return protocols[flow.value.IPFIX.Proto].name;
-      }
-      case ColumnsId.bytes: {
-        return flow.value.IPFIX.Bytes;
-      }
-      case ColumnsId.packets: {
-        return flow.value.IPFIX.Packets;
-      }
+      case ColumnsId.proto:
+        if (value) {
+          return protocols[value].name;
+        } else {
+          return '';
+        }
+      default:
+        return value;
     }
   };
   return (

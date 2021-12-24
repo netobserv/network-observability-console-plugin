@@ -24,7 +24,7 @@ export const parseDuration = (duration: string): number => {
 };
 
 // Formats a duration in milliseconds like "1h 10m"
-export const formatDuration = (ms: number) => {
+export const formatDuration = (ms: number): string => {
   if (!_.isFinite(ms) || ms < 0) {
     return '';
   }
@@ -38,4 +38,17 @@ export const formatDuration = (ms: number) => {
     }
   });
   return _.trim(str);
+};
+
+export const getDateFromSecondsString = (seconds: string): Date => {
+  const num = Number(seconds) * s;
+  if (!_.isEmpty(seconds) && num > 0) {
+    return new Date(num);
+  } else {
+    return new Date('invalid');
+  }
+};
+
+export const getDateStringInSeconds = (date: Date): string => {
+  return (date.getTime() / s).toString();
 };
