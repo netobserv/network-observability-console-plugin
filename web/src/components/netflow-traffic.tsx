@@ -37,11 +37,13 @@ export const NetflowTraffic: React.FC = () => {
     { id: ColumnsId.dstpod, name: t('Dst pod'), isSelected: true, defaultOrder: 3 },
     { id: ColumnsId.srcnamespace, name: t('Src namespace'), isSelected: true, defaultOrder: 4 },
     { id: ColumnsId.dstnamespace, name: t('Dst namespace'), isSelected: true, defaultOrder: 5 },
-    { id: ColumnsId.srcport, name: t('Src port'), isSelected: true, defaultOrder: 6 },
-    { id: ColumnsId.dstport, name: t('Dst port'), isSelected: true, defaultOrder: 7 },
-    { id: ColumnsId.protocol, name: t('Protocol'), isSelected: true, defaultOrder: 8 },
-    { id: ColumnsId.bytes, name: t('Bytes'), isSelected: true, defaultOrder: 9 },
-    { id: ColumnsId.packets, name: t('Packets'), isSelected: true, defaultOrder: 10 }
+    { id: ColumnsId.srcaddr, name: t('Src address'), isSelected: false, defaultOrder: 6 },
+    { id: ColumnsId.dstaddr, name: t('Dst address'), isSelected: false, defaultOrder: 7 },
+    { id: ColumnsId.srcport, name: t('Src port'), isSelected: true, defaultOrder: 8 },
+    { id: ColumnsId.dstport, name: t('Dst port'), isSelected: true, defaultOrder: 9 },
+    { id: ColumnsId.protocol, name: t('Protocol'), isSelected: true, defaultOrder: 10 },
+    { id: ColumnsId.bytes, name: t('Bytes'), isSelected: true, defaultOrder: 11 },
+    { id: ColumnsId.packets, name: t('Packets'), isSelected: true, defaultOrder: 12 }
   ]);
   const toolbarItems = (
     <Fragment>
