@@ -16,9 +16,9 @@ import { RefreshDropdown } from './refresh-dropdown';
 
 export const NetflowTraffic: React.FC = () => {
   const [extensions] = useResolvedExtensions<ModelFeatureFlag>(isModelFeatureFlag);
-  const [loading, setLoading] = React.useState(false);
+  const [loading, setLoading] = React.useState(true);
   const [flows, setFlows] = React.useState<ParsedStream[]>([]);
-  const [error, setError] = React.useState(undefined);
+  const [error, setError] = React.useState<string | undefined>(undefined);
   const [isModalOpen, setModalOpen] = React.useState(false);
   const { t } = useTranslation('plugin__network-observability-plugin');
 
@@ -33,13 +33,14 @@ export const NetflowTraffic: React.FC = () => {
       return;
     }
     setLoading(true);
+    setError(undefined);
     getFlows(filters)
       .then(streams => {
         setFlows(streams);
-        setError(undefined);
         setLoading(false);
       })
       .catch(err => {
+        setFlows([]);
         setError(String(err));
         setLoading(false);
       });
@@ -77,10 +78,13 @@ export const NetflowTraffic: React.FC = () => {
           </Button>
         </Tooltip>
       </FiltersToolbar>
-      {error && <div>Error: {error}</div>}
-      {!_.isEmpty(flows) && (
-        <NetflowTable flows={flows} setFlows={setFlows} columns={columns.filter(col => col.isSelected)} />
-      )}
+      <NetflowTable
+        loading={loading}
+        error={error}
+        flows={flows}
+        setFlows={setFlows}
+        columns={columns.filter(col => col.isSelected)}
+      />
       <ColumnsModal
         id="columns-modal"
         isModalOpen={isModalOpen}
