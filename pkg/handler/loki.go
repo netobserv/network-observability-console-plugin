@@ -60,50 +60,75 @@ func GetFlows(cfg LokiConfig) func(w http.ResponseWriter, r *http.Request) {
 		params := r.URL.Query()
 		// TODO: remove all logs
 		hlog.Infof("GetFlows query params : %s", params)
-		labelFilters := "app=\"netobserv-flowcollector\""
-		lineFilters := ""
-		extraArgs := ""
+		labelFilters := strings.Builder{}
+		//always filter on app
+		labelFilters.WriteString("app=\"netobserv-flowcollector\"")
+		lineFilters := strings.Builder{}
+		extraArgs := strings.Builder{}
 
 		for key := range params {
-			var regexStr = ""
+			regexStr := strings.Builder{}
 			for _, value := range strings.Split(params.Get(key), ",") {
 				if strings.Contains(value, dateRangeDelimiter) {
 					var rangeValues = strings.Split(value, dateRangeDelimiter)
 					//add start param if specified
 					if len(rangeValues[0]) > 0 {
-						extraArgs += fmt.Sprintf("%s%s", startParam, rangeValues[0])
+						extraArgs.WriteString(startParam)
+						extraArgs.WriteString(rangeValues[0])
 					}
 					//add end param if specified
 					if len(rangeValues[1]) > 0 {
-						extraArgs += fmt.Sprintf("%s%s", endParam, rangeValues[1])
+						extraArgs.WriteString(endParam)
+						extraArgs.WriteString(rangeValues[1])
 					}
 				} else {
-					if len(regexStr) > 0 {
-						regexStr += "|"
+					if len(regexStr.String()) > 0 {
+						regexStr.WriteByte('|')
 					}
 					if isLabel(key) {
-						//match any caracter before / after value
-						regexStr += fmt.Sprintf(".*%s.*", value)
+						//match any caracter before / after value : .*VALUE.*
+						regexStr.WriteString(".*")
+						regexStr.WriteString(value)
+						regexStr.WriteString(".*")
 					} else {
-						//match KEY containing VALUE \\"KEY\\":[\\"]{0,1}[^,]{0,}VALUE
-						regexStr += fmt.Sprintf("\\\"%s\\\":[\\\"]{0,1}[^,]{0,}%s", key, value)
+						//match KEY containing VALUE : "KEY":["]{0,1}[^,]{0,}VALUE
+						regexStr.WriteString("\\\"")
+						regexStr.WriteString(key)
+						regexStr.WriteString("\\\":[\\\"]{0,1}[^,]{0,}")
+						regexStr.WriteString(value)
 					}
 				}
 			}
 
-			if len(regexStr) > 0 {
+			if len(regexStr.String()) > 0 {
 				if isLabel(key) {
-					labelFilters += fmt.Sprintf(",%s=~\"%s\"", key, regexStr)
+					//label match regex : ,key=~REGEX_EXPRESSION
+					labelFilters.WriteString(",")
+					labelFilters.WriteString(key)
+					labelFilters.WriteString("=~\"")
+					labelFilters.WriteString(regexStr.String())
+					labelFilters.WriteString("\"")
 				} else {
-					lineFilters += fmt.Sprintf("|~\"%s\"", regexStr)
+					//line match regex : |~"REGEX_EXPRESSION"
+					lineFilters.WriteString("|~\"")
+					lineFilters.WriteString(regexStr.String())
+					lineFilters.WriteString("\"")
 				}
 			}
 		}
 
-		url := fmt.Sprintf("%s%s{%s}%s%s", flowsURL, queryParam, labelFilters, lineFilters, extraArgs)
-		hlog.Infof("GetFlows URL : %s", url)
+		//build final url
+		url := strings.Builder{}
+		url.WriteString(flowsURL)
+		url.WriteString(queryParam)
+		url.WriteRune('{')
+		url.WriteString(labelFilters.String())
+		url.WriteRune('}')
+		url.WriteString(lineFilters.String())
+		url.WriteString(extraArgs.String())
+		hlog.Infof("GetFlows URL : %s", url.String())
 
-		resp, code, err := lokiClient.Get(url)
+		resp, code, err := lokiClient.Get(url.String())
 		if err != nil {
 			writeError(w, http.StatusServiceUnavailable, err.Error())
 			return
