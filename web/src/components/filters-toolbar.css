@@ -1,0 +1,12 @@
+/* hide all date pickers error messages */
+
+.pf-c-date-picker__helper-text.pf-m-error {
+    display: none;
+}
+
+
+/* never show empty tooltip */
+
+.filters-tooltip-empty {
+    display: none;
+}

@@ -1,27 +1,18 @@
-import * as React from 'react';
-import { Fragment } from 'react';
-import * as _ from 'lodash';
-import { useResolvedExtensions, isModelFeatureFlag, ModelFeatureFlag } from '@openshift-console/dynamic-plugin-sdk';
-import { getFlows } from '../api/routes';
-import { ParsedStream } from '../api/loki';
-import NetflowTable from './netflow-table';
-import { PageSection, Button } from '@patternfly/react-core';
-import {
-  OverflowMenu,
-  OverflowMenuGroup,
-  OverflowMenuItem,
-  Toolbar,
-  ToolbarContent,
-  ToolbarItem,
-  Tooltip
-} from '@patternfly/react-core';
+import { isModelFeatureFlag, ModelFeatureFlag, useResolvedExtensions } from '@openshift-console/dynamic-plugin-sdk';
+import { Button, PageSection, Tooltip } from '@patternfly/react-core';
 import { ColumnsIcon, SyncAltIcon } from '@patternfly/react-icons';
-import { Column, ColumnsId } from './netflow-table-header';
+import * as _ from 'lodash';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { ColumnsModal } from './columns-modal';
-import { RefreshDropdown } from './refresh-dropdown';
+import { ParsedStream } from '../api/loki';
+import { getFlows } from '../api/routes';
+import { Column, Filter, getDefaultColumns } from '../utils/columns';
 import { usePoll } from '../utils/poll-hook';
+import { ColumnsModal } from './columns-modal';
+import { FiltersToolbar } from './filters-toolbar';
+import NetflowTable from './netflow-table';
 import './netflow-traffic.css';
+import { RefreshDropdown } from './refresh-dropdown';
 
 export const NetflowTraffic: React.FC = () => {
   const [extensions] = useResolvedExtensions<ModelFeatureFlag>(isModelFeatureFlag);
@@ -31,57 +22,18 @@ export const NetflowTraffic: React.FC = () => {
   const [isModalOpen, setModalOpen] = React.useState(false);
   const { t } = useTranslation('plugin__network-observability-plugin');
 
-  const [columns, setColumns] = React.useState<Column[]>([
-    { id: ColumnsId.date, name: t('Date & time'), isSelected: true, defaultOrder: 1 },
-    { id: ColumnsId.srcpod, name: t('Src pod'), isSelected: true, defaultOrder: 2 },
-    { id: ColumnsId.dstpod, name: t('Dst pod'), isSelected: true, defaultOrder: 3 },
-    { id: ColumnsId.srcnamespace, name: t('Src namespace'), isSelected: true, defaultOrder: 4 },
-    { id: ColumnsId.dstnamespace, name: t('Dst namespace'), isSelected: true, defaultOrder: 5 },
-    { id: ColumnsId.srcaddr, name: t('Src address'), isSelected: false, defaultOrder: 6 },
-    { id: ColumnsId.dstaddr, name: t('Dst address'), isSelected: false, defaultOrder: 7 },
-    { id: ColumnsId.srcport, name: t('Src port'), isSelected: true, defaultOrder: 8 },
-    { id: ColumnsId.dstport, name: t('Dst port'), isSelected: true, defaultOrder: 9 },
-    { id: ColumnsId.protocol, name: t('Protocol'), isSelected: true, defaultOrder: 10 },
-    { id: ColumnsId.bytes, name: t('Bytes'), isSelected: true, defaultOrder: 11 },
-    { id: ColumnsId.packets, name: t('Packets'), isSelected: true, defaultOrder: 12 }
-  ]);
-  const toolbarItems = (
-    <Fragment>
-      <ToolbarItem>
-        <OverflowMenu breakpoint="md">
-          <OverflowMenuGroup groupType="button" isPersistent>
-            <OverflowMenuItem>
-              <Tooltip content={t('Manage columns')}>
-                <Button
-                  id="manage-columns-button"
-                  variant="plain"
-                  onClick={() => setModalOpen(true)}
-                  aria-label={t('Column management')}
-                >
-                  <ColumnsIcon color="#6A6E73" />
-                </Button>
-              </Tooltip>
-            </OverflowMenuItem>
-          </OverflowMenuGroup>
-        </OverflowMenu>
-      </ToolbarItem>
-      {/* TODO : NETOBSERV-104
-      <ToolbarItem variant="pagination">
-        <Pagination
-          itemCount={flows.length}
-          widgetId="pagination-options-menu-bottom"
-          page={1}
-          variant={PaginationVariant.top}
-          isCompact
-        />
-      </ToolbarItem>*/}
-    </Fragment>
-  );
-
+  //TODO: create a number range filter type for Packets & Bytes
+  //TODO: set isSelected values from localstorage saved column ids
+  const [columns, setColumns] = React.useState<Column[]>(getDefaultColumns(t));
+  const [filters, setFilters] = React.useState<Filter[] | null>(null);
   const [interval, setInterval] = React.useState<number | null>(null);
-  const tick = () => {
+  const tick = React.useCallback(() => {
+    //skip tick while filters not initialized
+    if (filters === null) {
+      return;
+    }
     setLoading(true);
-    getFlows()
+    getFlows(filters)
       .then(streams => {
         setFlows(streams);
         setError(undefined);
@@ -91,8 +43,12 @@ export const NetflowTraffic: React.FC = () => {
         setError(String(err));
         setLoading(false);
       });
-  };
+  }, [filters]);
   usePoll(tick, interval);
+
+  React.useEffect(() => {
+    tick();
+  }, [filters, tick]);
 
   return !_.isEmpty(extensions) ? (
     <PageSection id="pageSection">
@@ -109,9 +65,18 @@ export const NetflowTraffic: React.FC = () => {
           />
         </div>
       </h1>
-      <Toolbar id="filter-toolbar">
-        <ToolbarContent>{toolbarItems}</ToolbarContent>
-      </Toolbar>
+      <FiltersToolbar id="filter-toolbar" columns={columns} filters={filters} setFilters={setFilters}>
+        <Tooltip content={t('Manage columns')}>
+          <Button
+            id="manage-columns-button"
+            variant="plain"
+            onClick={() => setModalOpen(true)}
+            aria-label={t('Column management')}
+          >
+            <ColumnsIcon color="#6A6E73" />
+          </Button>
+        </Tooltip>
+      </FiltersToolbar>
       {error && <div>Error: {error}</div>}
       {!_.isEmpty(flows) && (
         <NetflowTable flows={flows} setFlows={setFlows} columns={columns.filter(col => col.isSelected)} />

@@ -1,11 +1,12 @@
 import * as React from 'react';
 import { TableComposable, Tbody } from '@patternfly/react-table';
 import { ParsedStream } from '../api/loki';
-import { Column, ColumnsId, NetflowTableHeader } from './netflow-table-header';
+import { NetflowTableHeader } from './netflow-table-header';
 import NetflowTableRow from './netflow-table-row';
 import protocols from 'protocol-numbers';
 import { ipCompare } from '../utils/ip';
 import { comparePort } from '../utils/port';
+import { Column, ColumnsId } from '../utils/columns';
 
 const NetflowTable: React.FC<{
   flows: ParsedStream[];
@@ -19,7 +20,7 @@ const NetflowTable: React.FC<{
   const [activeSortDirection, setActiveSortDirection] = React.useState<string>('asc');
 
   //Sort handler
-  const onSort = (event, index, direction) => {
+  const onSort = (event: React.MouseEvent, index: number, direction: string) => {
     setActiveSortIndex(index);
     setActiveSortDirection(direction);
     // sorts the rows
@@ -33,8 +34,8 @@ const NetflowTable: React.FC<{
         flow1 = b;
         flow2 = a;
       }
-      switch (index) {
-        case ColumnsId.date: {
+      switch (columns[index].id) {
+        case ColumnsId.timestamp: {
           return flow1.value.timestamp - flow2.value.timestamp;
         }
         case ColumnsId.srcpod: {
@@ -69,7 +70,7 @@ const NetflowTable: React.FC<{
         case ColumnsId.dstaddr: {
           return ipCompare(flow1.value.IPFIX.DstAddr, flow2.value.IPFIX.DstAddr);
         }
-        case ColumnsId.protocol: {
+        case ColumnsId.proto: {
           return protocols[flow1.value.IPFIX.Proto].name.localeCompare(protocols[flow2.value.IPFIX.Proto].name);
         }
         case ColumnsId.bytes: {

@@ -257,6 +257,54 @@ func TestLokiConfiguration_MultiTenant(t *testing.T) {
 	assert.Equal(t, "my-organisation", req.Header.Get("X-Scope-OrgID"))
 }
 
+func TestLokiFiltering(t *testing.T) {
+	var filters = map[string]map[string]string{
+		"/api/loki/flows?SrcPod=test-pod":                                      {"query": `{app="netobserv-flowcollector"}|~"\"SrcPod\":[\"]{0,1}[^,]{0,}test-pod"`},
+		"/api/loki/flows?DstPod=test-pod-2":                                    {"query": `{app="netobserv-flowcollector"}|~"\"DstPod\":[\"]{0,1}[^,]{0,}test-pod-2"`},
+		"/api/loki/flows?Proto=6":                                              {"query": `{app="netobserv-flowcollector"}|~"\"Proto\":[\"]{0,1}[^,]{0,}6"`},
+		"/api/loki/flows?SrcNamespace=test-namespace":                          {"query": `{app="netobserv-flowcollector",SrcNamespace=~".*test-namespace.*"}`},
+		"/api/loki/flows?SrcPort=8080&SrcAddr=10.128.0.1&SrcNamespace=default": {"query": `{app="netobserv-flowcollector",SrcNamespace=~".*default.*"}|~"\"SrcPort\":[\"]{0,1}[^,]{0,}8080"|~"\"SrcAddr\":[\"]{0,1}[^,]{0,}10.128.0.1"`},
+		"/api/loki/flows?timestamp=1640991600<":                                {"query": `{app="netobserv-flowcollector"}`, "start": "1640991600"},
+		"/api/loki/flows?timestamp=<1641160800":                                {"query": `{app="netobserv-flowcollector"}`, "end": "1641160800"},
+		"/api/loki/flows?timestamp=1640991600<1641160800":                      {"query": `{app="netobserv-flowcollector"}`, "start": "1640991600", "end": "1641160800"},
+	}
+
+	// GIVEN a Loki service
+	lokiMock := httpMock{}
+	lokiMock.On("ServeHTTP", mock.Anything, mock.Anything).Run(func(args mock.Arguments) {
+		_, _ = args.Get(0).(http.ResponseWriter).Write([]byte(`{}`))
+	}).Times(len(filters))
+	lokiSvc := httptest.NewServer(&lokiMock)
+	defer lokiSvc.Close()
+	lokiURL, err := url.Parse(lokiSvc.URL)
+	require.NoError(t, err)
+
+	// THAT is accessed behind the NOO console plugin backend
+	backendRoutes := setupRoutes(&Config{
+		Loki: handler.LokiConfig{
+			URL:     lokiURL,
+			Timeout: time.Second,
+		},
+	})
+	backendSvc := httptest.NewServer(backendRoutes)
+	defer backendSvc.Close()
+
+	var index = 0
+	for endpoint, args := range filters {
+		// WHEN the Loki flows endpoint is queried in the backend
+		_, err := backendSvc.Client().Get(backendSvc.URL + endpoint)
+		require.NoError(t, err)
+
+		// THEN each filter argument has been properly forwarded to Loki
+		for arg, value := range args {
+			req := lokiMock.Calls[index].Arguments[1].(*http.Request)
+			assert.Equal(t, value, req.URL.Query().Get(arg))
+		}
+		// increment index for next call
+		index++
+	}
+}
+
 type httpMock struct {
 	mock.Mock
 }

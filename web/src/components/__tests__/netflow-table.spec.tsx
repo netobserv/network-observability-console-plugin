@@ -9,36 +9,28 @@ import { ParsedStream } from '../../api/loki';
 import { ColumnsSample } from '../__tests-data__/columns';
 import { FlowsSample } from '../__tests-data__/flows';
 
-jest.mock('@openshift-console/dynamic-plugin-sdk', () => {
-  return {
-    ResourceLink: () => {
-      return <></>;
-    }
-  };
-});
-
 describe('<NetflowTable />', () => {
   let flows: ParsedStream[] = [];
   const setFlows = jest.fn();
-  it('should render component', () => {
+  it('should render component', async () => {
     flows = FlowsSample.slice(0, FlowsSample.length);
     const wrapper = shallow(<NetflowTable flows={flows} setFlows={setFlows} columns={ColumnsSample} />);
     expect(wrapper.find(NetflowTable)).toBeTruthy();
     expect(wrapper.find(NetflowTableHeader)).toHaveLength(1);
   });
-  it('should have table rows', () => {
+  it('should have table rows', async () => {
     flows = FlowsSample.slice(0, FlowsSample.length);
     const wrapper = shallow(<NetflowTable flows={flows} setFlows={setFlows} columns={ColumnsSample} />);
     expect(wrapper.find(NetflowTable)).toBeTruthy();
     expect(wrapper.find(NetflowTableRow)).toHaveLength(FlowsSample.length);
   });
-  it('should only render given row', () => {
+  it('should only render given row', async () => {
     flows = FlowsSample.slice(0, 2);
     const wrapper = shallow(<NetflowTable flows={flows} setFlows={setFlows} columns={ColumnsSample} />);
     expect(wrapper.find(NetflowTable)).toBeTruthy();
     expect(wrapper.find(NetflowTableRow)).toHaveLength(flows.length);
   });
-  it('should sort rows on click', () => {
+  it('should sort rows on click', async () => {
     flows = FlowsSample.slice(0, FlowsSample.length);
     const wrapper = mount(<NetflowTable flows={flows} setFlows={setFlows} columns={ColumnsSample} />);
     expect(wrapper.find(NetflowTable)).toBeTruthy();

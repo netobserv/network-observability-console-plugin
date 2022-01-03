@@ -19,7 +19,7 @@ import {
   Tooltip
 } from '@patternfly/react-core';
 import { useTranslation } from 'react-i18next';
-import { Column } from './netflow-table-header';
+import { Column } from '../utils/columns';
 import * as _ from 'lodash';
 import './columns-modal.css';
 
