@@ -10,6 +10,7 @@ import {
 } from '@patternfly/react-core';
 import { mount, shallow } from 'enzyme';
 import * as React from 'react';
+import { act } from 'react-dom/test-utils';
 import { ColumnsId, Filter } from '../../utils/columns';
 import FiltersToolbar from '../filters-toolbar';
 import { ColumnsSample } from '../__tests-data__/columns';
@@ -25,7 +26,7 @@ describe('<FiltersToolbar />', () => {
   beforeEach(() => {
     props.setFilters = jest.fn();
   });
-  it('should render component', () => {
+  it('should render component', async () => {
     const wrapper = shallow(<FiltersToolbar {...props} />);
     expect(wrapper.find(FiltersToolbar)).toBeTruthy();
     expect(wrapper.find(Toolbar)).toBeTruthy();
@@ -33,7 +34,7 @@ describe('<FiltersToolbar />', () => {
     expect(wrapper.find(Dropdown)).toBeTruthy();
     expect(wrapper.find(Button)).toBeTruthy();
   });
-  it('should render filters', () => {
+  it('should render filters', async () => {
     const wrapper = shallow(<FiltersToolbar {...props} />);
     expect(wrapper.find(ToolbarFilter)).toHaveLength(props.filters.length);
 
@@ -47,7 +48,7 @@ describe('<FiltersToolbar />', () => {
     wrapper.setProps({ filters: props.filters });
     expect(wrapper.find(ToolbarFilter)).toHaveLength(props.filters.length);
   });
-  it('should open and close', () => {
+  it('should open and close', async () => {
     const wrapper = mount(<FiltersToolbar {...props} />);
 
     const dropdown = wrapper.find('#column-filter-toggle').at(0);
@@ -77,8 +78,10 @@ describe('<FiltersToolbar />', () => {
     //open dropdow and select Src pod
     dropdown.simulate('click');
     wrapper.find('[id="Src pod"]').at(0).simulate('click');
-    //set text input value and press button
-    wrapper.find(TextInput).props().onChange('ABCD', null);
+    act(() => {
+      //set text input value and press button
+      wrapper.find(TextInput).props().onChange('ABCD', null);
+    });
     search.simulate('click');
     props.filters = props.filters.concat([{ colId: ColumnsId.srcpod, values: [{ v: 'ABCD' }] }]);
     expect(props.setFilters).toHaveBeenNthCalledWith(2, props.filters);
@@ -87,8 +90,10 @@ describe('<FiltersToolbar />', () => {
     //open dropdow and select Src namespace
     dropdown.simulate('click');
     wrapper.find('[id="Src namespace"]').at(0).simulate('click');
-    //set text input value and press enter
-    wrapper.find(TextInput).props().onChange('EFGH', null);
+    act(() => {
+      //set text input value and press enter
+      wrapper.find(TextInput).props().onChange('EFGH', null);
+    });
     wrapper.find(TextInput).at(0).simulate('keypress', { key: 'Enter' });
     props.filters = props.filters.concat([{ colId: ColumnsId.srcnamespace, values: [{ v: 'EFGH' }] }]);
     expect(props.setFilters).toHaveBeenNthCalledWith(3, props.filters);
@@ -97,8 +102,10 @@ describe('<FiltersToolbar />', () => {
     //open dropdow and select valid Src port by name
     dropdown.simulate('click');
     wrapper.find('[id="Src port"]').at(0).simulate('click');
-    //set search input value and press button
-    wrapper.find(SearchInput).props().onChange(FTPSrcPortSample.values[0].display, null);
+    act(() => {
+      //set search input value and press button
+      wrapper.find(SearchInput).props().onChange(FTPSrcPortSample.values[0].display, null);
+    });
     search.simulate('click');
     props.filters = props.filters.concat([FTPSrcPortSample]);
     expect(props.setFilters).toHaveBeenNthCalledWith(4, props.filters);
@@ -107,8 +114,10 @@ describe('<FiltersToolbar />', () => {
     //open dropdow and select invalid Dst port by name
     dropdown.simulate('click');
     wrapper.find('[id="Dst port"]').at(0).simulate('click');
-    //set search input value, press enter and press button
-    wrapper.find(SearchInput).props().onChange('no match', null);
+    act(() => {
+      //set search input value, press enter and press button
+      wrapper.find(SearchInput).props().onChange('no match', null);
+    });
     wrapper.find(SearchInput).at(0).simulate('keypress', { key: 'Enter' });
     search.simulate('click');
     expect(props.setFilters).toHaveBeenCalledTimes(4);
@@ -118,14 +127,18 @@ describe('<FiltersToolbar />', () => {
     wrapper.find('[id="Date & time"]').at(0).simulate('click');
     //set start date and press button
     const datePickers = wrapper.find(DatePicker);
-    datePickers.at(0).props().onChange('2021-12-01', new Date('2021-12-01'));
+    act(() => {
+      datePickers.at(0).props().onChange('2021-12-01', new Date('2021-12-01'));
+    });
     search.simulate('click');
     props.filters = props.filters.concat([DateFilterSample1]);
     expect(props.setFilters).toHaveBeenNthCalledWith(5, props.filters);
     wrapper.setProps(props);
 
-    //set end date and press button
-    datePickers.at(1).props().onChange('2021-12-05', new Date('2021-12-05'));
+    act(() => {
+      //set end date and press button
+      datePickers.at(1).props().onChange('2021-12-05', new Date('2021-12-05'));
+    });
     search.simulate('click');
     //replace date filter since only one allowed
     props.filters[props.filters.length - 1] = DateFilterSample2;

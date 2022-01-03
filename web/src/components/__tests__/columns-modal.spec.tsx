@@ -12,11 +12,11 @@ describe('<ColumnsModal />', () => {
     setColumns: jest.fn(),
     id: 'columns-modal'
   };
-  it('should render component', () => {
+  it('should render component', async () => {
     const wrapper = shallow(<ColumnsModal {...props} />);
     expect(wrapper.find(ColumnsModal)).toBeTruthy();
   });
-  it('should save once', () => {
+  it('should save once', async () => {
     const wrapper = mount(<ColumnsModal {...props} />);
     const confirmButton = wrapper.find('.pf-c-button.pf-m-primary');
     expect(confirmButton.length).toEqual(1);
@@ -24,7 +24,7 @@ describe('<ColumnsModal />', () => {
     confirmButton.at(0).simulate('click');
     expect(props.setColumns).toHaveBeenCalledTimes(1);
   });
-  it('should update columns selected on save', () => {
+  it('should update columns selected on save', async () => {
     const wrapper = mount(<ColumnsModal {...props} />);
     expect(props.setColumns).toHaveBeenNthCalledWith(1, props.columns);
     //unselect first and second columns

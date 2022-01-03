@@ -9,24 +9,16 @@ import { FlowsSample } from '../__tests-data__/flows';
 
 import { Tr, Td } from '@patternfly/react-table';
 
-jest.mock('@openshift-console/dynamic-plugin-sdk', () => {
-  return {
-    ResourceLink: () => {
-      return <></>;
-    }
-  };
-});
-
 describe('<NetflowTableRow />', () => {
   let flows: ParsedStream[] = [];
-  it('should render component', () => {
+  it('should render component', async () => {
     flows = FlowsSample;
     const wrapper = shallow(<NetflowTableRow flow={flows[0]} columns={ColumnsSample} />);
     expect(wrapper.find(NetflowTableRow)).toBeTruthy();
     expect(wrapper.find(Tr)).toHaveLength(1);
     expect(wrapper.find(Td)).toHaveLength(ColumnsSample.length);
   });
-  it('should render given columns', () => {
+  it('should render given columns', async () => {
     flows = FlowsSample;
     const reducedColumns = ColumnsSample.slice(2, 4);
     const wrapper = shallow(<NetflowTableRow flow={flows[0]} columns={reducedColumns} />);

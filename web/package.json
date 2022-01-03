@@ -23,6 +23,7 @@
     "devDependencies": {
         "@openshift-console/dynamic-plugin-sdk": "0.0.2",
         "@openshift-console/dynamic-plugin-sdk-webpack": "0.0.2",
+        "@testing-library/react": "^12.1.2",
         "@types/copy-webpack-plugin": "8.0.1",
         "@types/enzyme": "3.10.x",
         "@types/jest": "27.0.3",

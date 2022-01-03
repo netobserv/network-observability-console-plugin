@@ -9,11 +9,11 @@ describe('<RefreshDropdown />', () => {
     setInterval: jest.fn(),
     id: 'refresh'
   };
-  it('should render component', () => {
+  it('should render component', async () => {
     const wrapper = shallow(<RefreshDropdown {...props} />);
     expect(wrapper.find(RefreshDropdown)).toBeTruthy();
   });
-  it('should open and close', () => {
+  it('should open and close', async () => {
     const wrapper = mount(<RefreshDropdown {...props} />);
 
     const dropdown = wrapper.find('#refresh-dropdown');
@@ -29,7 +29,7 @@ describe('<RefreshDropdown />', () => {
     //no setInterval should be called
     expect(props.setInterval).toHaveBeenCalledTimes(0);
   });
-  it('should refresh on select', () => {
+  it('should refresh on select', async () => {
     const wrapper = mount(<RefreshDropdown {...props} />);
 
     const dropdown = wrapper.find('#refresh-dropdown');
