@@ -1,18 +1,35 @@
 import * as React from 'react';
-import { TableComposable, Tbody } from '@patternfly/react-table';
+import { TableComposable, Tbody, Td, Tr } from '@patternfly/react-table';
 import { ParsedStream } from '../api/loki';
 import { NetflowTableHeader } from './netflow-table-header';
 import NetflowTableRow from './netflow-table-row';
+import * as _ from 'lodash';
 import protocols from 'protocol-numbers';
 import { ipCompare } from '../utils/ip';
 import { comparePort } from '../utils/port';
+import SearchIcon from '@patternfly/react-icons/dist/esm/icons/search-icon';
+import {
+  Bullseye,
+  Button,
+  EmptyState,
+  EmptyStateBody,
+  EmptyStateIcon,
+  EmptyStateVariant,
+  Spinner,
+  Title
+} from '@patternfly/react-core';
+import { useTranslation } from 'react-i18next';
 import { Column, ColumnsId } from '../utils/columns';
 
 const NetflowTable: React.FC<{
   flows: ParsedStream[];
   setFlows: React.Dispatch<React.SetStateAction<ParsedStream[]>>;
   columns: Column[];
-}> = ({ flows, setFlows, columns }) => {
+  loading?: boolean;
+  error?: string;
+}> = ({ flows, setFlows, columns, error, loading }) => {
+  const { t } = useTranslation('plugin__network-observability-plugin');
+
   // index of the currently active column
   const [activeSortIndex, setActiveSortIndex] = React.useState<number>(-1);
 
@@ -86,6 +103,54 @@ const NetflowTable: React.FC<{
     setFlows(updatedFlows);
   };
 
+  let bodyContent;
+  if (error) {
+    bodyContent = (
+      <Tr>
+        <Td colSpan={columns.length}>
+          <EmptyState data-test="error-state" variant={EmptyStateVariant.small}>
+            <Title headingLevel="h2" size="lg">
+              {t('Unable to get flows')}
+            </Title>
+            <EmptyStateBody>{error}</EmptyStateBody>
+          </EmptyState>
+        </Td>
+      </Tr>
+    );
+  } else if (_.isEmpty(flows)) {
+    if (loading) {
+      bodyContent = (
+        <Tr>
+          <Td colSpan={columns.length}>
+            <Bullseye data-test="loading-contents">
+              <Spinner size="xl" />
+            </Bullseye>
+          </Td>
+        </Tr>
+      );
+    } else {
+      bodyContent = (
+        <Tr>
+          <Td colSpan={columns.length}>
+            <Bullseye data-test="no-results-found">
+              <EmptyState variant={EmptyStateVariant.small}>
+                <EmptyStateIcon icon={SearchIcon} />
+                <Title headingLevel="h2" size="lg">
+                  {t('No results found')}
+                </Title>
+                <EmptyStateBody>{t('Clear all filters and try again.')}</EmptyStateBody>
+                {/*TODO: take onClick action after task NETOBSERV-74 is completed*/}
+                <Button variant="link">{t('Clear all filters')}</Button>
+              </EmptyState>
+            </Bullseye>
+          </Td>
+        </Tr>
+      );
+    }
+  } else {
+    bodyContent = flows.map((f, i) => <NetflowTableRow key={i} flow={f} columns={columns} />);
+  }
+
   return (
     <TableComposable aria-label="Misc table" variant="compact">
       <NetflowTableHeader
@@ -94,11 +159,7 @@ const NetflowTable: React.FC<{
         sortIndex={activeSortIndex}
         columns={columns}
       />
-      <Tbody>
-        {flows.map((f, i) => (
-          <NetflowTableRow key={i} flow={f} columns={columns} />
-        ))}
-      </Tbody>
+      <Tbody>{bodyContent}</Tbody>
     </TableComposable>
   );
 };

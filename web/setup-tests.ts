@@ -1,21 +1,21 @@
 import { JSDOM } from 'jsdom';
 
 const jsdom = new JSDOM('<!doctype html><html><body></body></html>', {
-  url: 'http://localhost/',
+  url: 'http://localhost/'
 });
 const { window } = jsdom;
 
 function copyProps(src, target) {
   Object.defineProperties(target, {
     ...Object.getOwnPropertyDescriptors(src),
-    ...Object.getOwnPropertyDescriptors(target),
+    ...Object.getOwnPropertyDescriptors(target)
   });
 }
 
 global.window = window as any;
 global.document = window.document;
 global.navigator = {
-  userAgent: 'node.js',
+  userAgent: 'node.js'
 } as any;
 global.requestAnimationFrame = function (callback) {
   return setTimeout(callback, 0);
@@ -26,13 +26,13 @@ global.cancelAnimationFrame = function (id) {
 copyProps(window, global);
 
 //Mock i18n translation to return key
-jest.mock("react-i18next", () => {
+jest.mock('react-i18next', () => {
   return {
     useTranslation: () => {
       return {
-        t: (s) => s,
+        t: s => s
       };
-    },
+    }
   };
 });
 
@@ -49,7 +49,7 @@ jest.mock('@openshift-console/dynamic-plugin-sdk', () => {
 //Mock useLayoutEffect to useEffect
 jest.mock('react', () => ({
   ...jest.requireActual('react'),
-  useLayoutEffect: jest.requireActual('react').useEffect,
+  useLayoutEffect: jest.requireActual('react').useEffect
 }));
 
 //Mock patternfly Tooltip & DatePicker components
@@ -60,6 +60,5 @@ jest.mock('@patternfly/react-core', () => ({
   },
   DatePicker: () => {
     return null;
-  },
+  }
 }));
-

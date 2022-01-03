@@ -2,11 +2,11 @@
 // You can add any exports needed by your tests here
 // Check "moduleNameMapper" in package.json
 export class Dummy extends Error {
-    constructor() {
-        super('Dummy file for exports');
-    }
+  constructor() {
+    super('Dummy file for exports');
+  }
 }
 
 export function useResolvedExtensions(isModelFeatureFlag: boolean) {
-    return [undefined, undefined, undefined];
+  return [undefined, undefined, undefined];
 }
