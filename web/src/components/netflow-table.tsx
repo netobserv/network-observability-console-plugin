@@ -25,9 +25,10 @@ const NetflowTable: React.FC<{
   flows: ParsedStream[];
   setFlows: React.Dispatch<React.SetStateAction<ParsedStream[]>>;
   columns: Column[];
+  clearFilters: () => void;
   loading?: boolean;
   error?: string;
-}> = ({ flows, setFlows, columns, error, loading }) => {
+}> = ({ flows, setFlows, columns, error, loading, clearFilters }) => {
   const { t } = useTranslation('plugin__network-observability-plugin');
 
   // index of the currently active column
@@ -139,8 +140,9 @@ const NetflowTable: React.FC<{
                   {t('No results found')}
                 </Title>
                 <EmptyStateBody>{t('Clear all filters and try again.')}</EmptyStateBody>
-                {/*TODO: take onClick action after task NETOBSERV-74 is completed*/}
-                <Button variant="link">{t('Clear all filters')}</Button>
+                <Button data-test="clear-all-filters" variant="link" onClick={clearFilters}>
+                  {t('Clear all filters')}
+                </Button>
               </EmptyState>
             </Bullseye>
           </Td>

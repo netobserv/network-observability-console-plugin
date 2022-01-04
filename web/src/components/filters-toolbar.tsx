@@ -46,8 +46,9 @@ export const FiltersToolbar: React.FC<{
   columns: Column[];
   filters: Filter[];
   setFilters: (v: Filter[]) => void;
+  clearFilters: () => void;
   id?: string;
-}> = ({ id, children, columns, filters, setFilters }) => {
+}> = ({ id, children, columns, filters, setFilters, clearFilters }) => {
   const { t } = useTranslation('plugin__network-observability-plugin');
   const searchInputRef = React.useRef(null);
   const autocompleteRef = React.useRef(null);
@@ -480,13 +481,6 @@ export const FiltersToolbar: React.FC<{
     }
   };
 
-  const clearAll = () => {
-    if (!_.isEmpty(filters)) {
-      removeQueryArguments(filters.map(f => f.colId));
-    }
-    setFilters([]);
-  };
-
   React.useEffect(() => {
     resetFilterValue();
   }, [selectedFilterColumn, resetFilterValue]);
@@ -536,7 +530,7 @@ export const FiltersToolbar: React.FC<{
   }, [protocolOptions]);
 
   return (
-    <Toolbar id={id} clearAllFilters={() => clearAll()} clearFiltersButtonText={t('Clear all filters')}>
+    <Toolbar id={id} clearAllFilters={() => clearFilters()} clearFiltersButtonText={t('Clear all filters')}>
       <ToolbarContent>
         <Fragment>
           <ToolbarItem className="co-filter-search">
