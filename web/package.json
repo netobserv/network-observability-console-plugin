@@ -18,7 +18,7 @@
     "lint": "./node_modules/.bin/eslint \"./src/**/*.{ts,tsx}\"",
     "format": "pretty-quick --branch main",
     "format-all": "prettier --write \"./src/**/*.{ts,tsx}\" && npm run fix-imports",
-    "fix-imports": "eslint --no-eslintrc --parser '@typescript-eslint/parser' --plugin 'unused-imports' --plugin 'react-hooks' --rule 'unused-imports/no-unused-imports:error' --fix \"./src/**/*.{ts,tsx}\""
+    "fix-imports": "eslint --no-eslintrc --no-inline-config --parser '@typescript-eslint/parser' --plugin 'unused-imports' --plugin 'react-hooks' --rule 'unused-imports/no-unused-imports:error' --fix \"./src/**/*.{ts,tsx}\""
   },
   "devDependencies": {
     "@openshift-console/dynamic-plugin-sdk": "0.0.2",

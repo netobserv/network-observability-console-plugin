@@ -39,6 +39,11 @@ import { getDateFromSecondsString, getDateStringInSeconds } from '../utils/durat
 import './filters-toolbar.css';
 import { getPort, getService } from 'port-numbers';
 
+interface Option {
+  name: string;
+  value: string;
+}
+
 export const SPLIT_FILTER_CHAR = ',';
 export const RANGE_SPLIT_CHAR = '<';
 
@@ -51,7 +56,7 @@ export const FiltersToolbar: React.FC<{
   const { t } = useTranslation('plugin__network-observability-plugin');
   const searchInputRef = React.useRef(null);
   const autocompleteRef = React.useRef(null);
-  const [protocolOptions, setProtocolOptions] = React.useState<any[]>([]);
+  const [protocolOptions, setProtocolOptions] = React.useState<Option[]>([]);
   const [invalidMessage, setInvalidMessage] = React.useState<string | undefined>(undefined);
   const [hint, setHint] = React.useState('');
   const [autocompleteOptions, setAutocompleteOptions] = React.useState([]);
@@ -98,7 +103,7 @@ export const FiltersToolbar: React.FC<{
     ) {
       setIsAutocompleteOpen(true);
 
-      let options;
+      let options: Option[];
       switch (selectedFilterColumn.filterType) {
         case FilterType.PORT:
           const isNumber = !isNaN(Number(newValue));
@@ -121,8 +126,8 @@ export const FiltersToolbar: React.FC<{
       }
       if (options.length > 10) {
         //check if name or value starts with input
-        options = options.filter(option =>
-          option.name.toLowerCase().startsWith(newValue.toLowerCase() || option.value.startsWith(newValue))
+        options = options.filter(
+          option => option.name.toLowerCase().startsWith(newValue.toLowerCase()) || option.value.startsWith(newValue)
         );
         if (options.length > 10) {
           options = options.slice(0, 10);
@@ -134,17 +139,18 @@ export const FiltersToolbar: React.FC<{
           ].slice(0, 10);
         }
       }
-      options = options.map(option => (
+
+      const menuItems = options.map(option => (
         <MenuItem itemId={option.value} key={option.name}>
           {option.name}
         </MenuItem>
       ));
 
       // The hint is set whenever there is only one autocomplete option left.
-      setHint(options.length === 1 ? options[0].props.itemId : '');
+      setHint(menuItems.length === 1 ? menuItems[0].props.itemId : '');
       // The menu is hidden if there are no options
-      setIsAutocompleteOpen(options.length > 0);
-      setAutocompleteOptions(options);
+      setIsAutocompleteOpen(menuItems.length > 0);
+      setAutocompleteOptions(menuItems);
     } else {
       setIsAutocompleteOpen(false);
     }
@@ -457,7 +463,7 @@ export const FiltersToolbar: React.FC<{
             min={0}
             max={Number.MAX_SAFE_INTEGER}
             onMinus={() => setFilterValue((Number(selectedFilterValue) - 1).toString())}
-            onChange={(event: any) => setFilterValue(event.target.value)}
+            onChange={event => setFilterValue((event.target as HTMLTextAreaElement).value)}
             onPlus={() => setFilterValue((Number(selectedFilterValue) + 1).toString())}
             onKeyPress={e => e.key === 'Enter' && manageFilters()}
             inputName="input"
