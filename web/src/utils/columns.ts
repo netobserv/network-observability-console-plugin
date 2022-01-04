@@ -44,6 +44,7 @@ export enum FilterType {
   NUMBER
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getDefaultColumns = (t?: any) => {
   if (!t) {
     t = (key: string) => key;

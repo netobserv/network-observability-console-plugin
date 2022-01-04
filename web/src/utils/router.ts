@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createBrowserHistory } from 'history';
 import * as _ from 'lodash';
 import { Filter } from './columns';
