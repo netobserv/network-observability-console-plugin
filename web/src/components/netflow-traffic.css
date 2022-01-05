@@ -5,6 +5,10 @@
     height: 33px !important;
 }
 
+span.pf-c-button__icon.pf-m-start {
+    width: 14px;
+    display: flex;
+}
 
 /*rotate animation for loading icon*/
 
