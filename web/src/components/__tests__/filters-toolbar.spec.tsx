@@ -21,10 +21,12 @@ describe('<FiltersToolbar />', () => {
     columns: ColumnsSample,
     filters: [] as Filter[],
     setFilters: null,
+    clearFilters: null,
     id: 'filter-toolbar'
   };
   beforeEach(() => {
     props.setFilters = jest.fn();
+    props.clearFilters = jest.fn();
   });
   it('should render component', async () => {
     const wrapper = shallow(<FiltersToolbar {...props} />);
@@ -146,12 +148,13 @@ describe('<FiltersToolbar />', () => {
     wrapper.setProps(props);
 
     //clear all filters
+    expect(props.clearFilters).not.toHaveBeenCalled();
     const button = wrapper
       .findWhere(node => {
         return node.type() === 'button' && node.text() === 'Clear all filters';
       })
       .at(0);
     button.simulate('click');
-    expect(props.setFilters).toHaveBeenNthCalledWith(7, []);
+    expect(props.clearFilters).toHaveBeenCalledTimes(1);
   });
 });

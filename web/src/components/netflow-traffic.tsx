@@ -13,6 +13,7 @@ import { FiltersToolbar } from './filters-toolbar';
 import NetflowTable from './netflow-table';
 import './netflow-traffic.css';
 import { RefreshDropdown } from './refresh-dropdown';
+import { removeQueryArguments } from '../utils/router';
 
 export const NetflowTraffic: React.FC = () => {
   const [extensions] = useResolvedExtensions<ModelFeatureFlag>(isModelFeatureFlag);
@@ -47,6 +48,21 @@ export const NetflowTraffic: React.FC = () => {
   }, [filters]);
   usePoll(tick, interval);
 
+  // updates table filters and clears up the table for proper visualization of the
+  // updating process
+  const updateTableFilters = (f: Filter[]) => {
+    setFilters(f);
+    setFlows([]);
+    setLoading(true);
+  };
+
+  const clearFilters = () => {
+    if (!_.isEmpty(filters)) {
+      removeQueryArguments(filters.map(f => f.colId));
+    }
+    updateTableFilters([]);
+  };
+
   React.useEffect(() => {
     tick();
   }, [filters, tick]);
@@ -66,7 +82,13 @@ export const NetflowTraffic: React.FC = () => {
           />
         </div>
       </h1>
-      <FiltersToolbar id="filter-toolbar" columns={columns} filters={filters} setFilters={setFilters}>
+      <FiltersToolbar
+        id="filter-toolbar"
+        columns={columns}
+        filters={filters}
+        setFilters={updateTableFilters}
+        clearFilters={clearFilters}
+      >
         <Tooltip content={t('Manage columns')}>
           <Button
             id="manage-columns-button"
@@ -83,6 +105,7 @@ export const NetflowTraffic: React.FC = () => {
         error={error}
         flows={flows}
         setFlows={setFlows}
+        clearFilters={clearFilters}
         columns={columns.filter(col => col.isSelected)}
       />
       <ColumnsModal

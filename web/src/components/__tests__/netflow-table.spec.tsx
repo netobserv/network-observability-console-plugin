@@ -11,6 +11,7 @@ import { FlowsSample } from '../__tests-data__/flows';
 const errorStateQuery = `EmptyState[data-test="error-state"]`;
 const loadingContentsQuery = `Bullseye[data-test="loading-contents"]`;
 const noResultsFoundQuery = `Bullseye[data-test="no-results-found"]`;
+const clearFiltersQuery = `Button[data-test="clear-all-filters"]`;
 
 jest.mock('@openshift-console/dynamic-plugin-sdk', () => {
   return {
@@ -21,38 +22,46 @@ jest.mock('@openshift-console/dynamic-plugin-sdk', () => {
 });
 
 describe('<NetflowTable />', () => {
-  const setFlows = jest.fn();
+  const mocks = {
+    setFlows: null,
+    clearFilters: null
+  };
+  beforeEach(() => {
+    mocks.setFlows = jest.fn();
+    mocks.clearFilters = jest.fn();
+  });
+
   it('should render component', async () => {
     const flows = FlowsSample.slice(0, FlowsSample.length);
-    const wrapper = shallow(<NetflowTable flows={flows} setFlows={setFlows} columns={ColumnsSample} />);
+    const wrapper = shallow(<NetflowTable flows={flows} columns={ColumnsSample} {...mocks} />);
     expect(wrapper.find(NetflowTable)).toBeTruthy();
     expect(wrapper.find(NetflowTableHeader)).toHaveLength(1);
   });
   it('should have table rows', async () => {
     const flows = FlowsSample.slice(0, FlowsSample.length);
-    const wrapper = shallow(<NetflowTable flows={flows} setFlows={setFlows} columns={ColumnsSample} />);
+    const wrapper = shallow(<NetflowTable flows={flows} columns={ColumnsSample} {...mocks} />);
     expect(wrapper.find(NetflowTable)).toBeTruthy();
     expect(wrapper.find(NetflowTableRow)).toHaveLength(FlowsSample.length);
   });
   it('should only render given row', async () => {
     const flows = FlowsSample.slice(0, 2);
-    const wrapper = shallow(<NetflowTable flows={flows} setFlows={setFlows} columns={ColumnsSample} />);
+    const wrapper = shallow(<NetflowTable flows={flows} columns={ColumnsSample} {...mocks} />);
     expect(wrapper.find(NetflowTable)).toBeTruthy();
     expect(wrapper.find(NetflowTableRow)).toHaveLength(flows.length);
   });
   it('should sort rows on click', async () => {
     const flows = FlowsSample.slice(0, FlowsSample.length);
-    const wrapper = mount(<NetflowTable flows={flows} setFlows={setFlows} columns={ColumnsSample} />);
+    const wrapper = mount(<NetflowTable flows={flows} columns={ColumnsSample} {...mocks} />);
     expect(wrapper.find(NetflowTable)).toBeTruthy();
     const button = wrapper.findWhere(node => {
       return node.type() === 'button' && node.text() === 'Date & time';
     });
     button.simulate('click');
     const expected = [FlowsSample[2], FlowsSample[0], FlowsSample[1]];
-    expect(setFlows).toHaveBeenCalledWith(expected);
+    expect(mocks.setFlows).toHaveBeenCalledWith(expected);
   });
   it('should render a spinning slide and then the netflow rows', async () => {
-    const wrapper = mount(<NetflowTable loading={true} flows={[]} setFlows={setFlows} columns={ColumnsSample} />);
+    const wrapper = mount(<NetflowTable loading={true} flows={[]} columns={ColumnsSample} {...mocks} />);
     expect(wrapper.find(NetflowTable)).toBeTruthy();
     expect(wrapper.find(loadingContentsQuery)).toHaveLength(1);
     wrapper.setProps({
@@ -66,7 +75,7 @@ describe('<NetflowTable />', () => {
     expect(wrapper.find(NetflowTableRow)).toHaveLength(FlowsSample.length);
   });
   it('should render a spinning slide and then a NoResultsFound message if no flows are found', async () => {
-    const wrapper = mount(<NetflowTable loading={true} flows={[]} setFlows={setFlows} columns={ColumnsSample} />);
+    const wrapper = mount(<NetflowTable loading={true} flows={[]} columns={ColumnsSample} {...mocks} />);
     expect(wrapper.find(NetflowTable)).toBeTruthy();
     expect(wrapper.find(loadingContentsQuery)).toHaveLength(1);
     wrapper.setProps({
@@ -76,9 +85,16 @@ describe('<NetflowTable />', () => {
     expect(wrapper.find(loadingContentsQuery)).toHaveLength(0);
     expect(wrapper.find(noResultsFoundQuery)).toHaveLength(1);
     expect(wrapper.find(errorStateQuery)).toHaveLength(0);
+
+    // it should have a 'clear all filters' link that clears the filters when it is clicked
+    expect(mocks.clearFilters).not.toHaveBeenCalled();
+    const clearAll = wrapper.find(clearFiltersQuery);
+    expect(clearAll).toHaveLength(1);
+    clearAll.simulate('click');
+    expect(mocks.clearFilters).toHaveBeenCalledTimes(1);
   });
   it('should render a spinning slide and then an should show an ErrorState on error', async () => {
-    const wrapper = mount(<NetflowTable loading={true} flows={[]} setFlows={setFlows} columns={ColumnsSample} />);
+    const wrapper = mount(<NetflowTable loading={true} flows={[]} columns={ColumnsSample} {...mocks} />);
     expect(wrapper.find(NetflowTable)).toBeTruthy();
     expect(wrapper.find(loadingContentsQuery)).toHaveLength(1);
     wrapper.setProps({
