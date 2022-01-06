@@ -1,43 +1,36 @@
 import {
   Button,
-  DatePicker,
   Dropdown,
   DropdownItem,
   DropdownToggle,
-  Flex,
-  FlexItem,
   InputGroup,
+  Menu,
+  MenuContent,
+  MenuItem,
+  MenuList,
   NumberInput,
   OverflowMenu,
   OverflowMenuGroup,
   OverflowMenuItem,
+  Popper,
+  SearchInput,
   TextInput,
-  TimePicker,
   Toolbar,
   ToolbarContent,
   ToolbarFilter,
   ToolbarItem,
-  Tooltip,
-  isValidDate,
-  yyyyMMddFormat,
-  Popper,
-  SearchInput,
-  Menu,
-  MenuContent,
-  MenuList,
-  MenuItem
+  Tooltip
 } from '@patternfly/react-core';
 import { SearchIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
+import { getPort, getService } from 'port-numbers';
+import protocols from 'protocol-numbers';
 import * as React from 'react';
 import { Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Column, ColumnsId, Filter, FilterType, FilterValue } from '../utils/columns';
 import { getQueryArgument, removeQueryArguments, setQueryArguments } from '../utils/router';
-import protocols from 'protocol-numbers';
-import { getDateFromSecondsString, getDateStringInSeconds } from '../utils/duration';
 import './filters-toolbar.css';
-import { getPort, getService } from 'port-numbers';
 
 interface Option {
   name: string;
@@ -45,7 +38,6 @@ interface Option {
 }
 
 export const SPLIT_FILTER_CHAR = ',';
-export const RANGE_SPLIT_CHAR = '<';
 
 export const FiltersToolbar: React.FC<{
   columns: Column[];
@@ -63,37 +55,10 @@ export const FiltersToolbar: React.FC<{
   const [autocompleteOptions, setAutocompleteOptions] = React.useState([]);
   const [isAutocompleteOpen, setIsAutocompleteOpen] = React.useState(false);
   const [isFiltersOpen, setIsOpen] = React.useState<boolean>(false);
-  const [selectedFilterColumn, setSelectedFilterColumn] = React.useState<Column>(columns[0]);
+
+  const availableFilters = columns.filter(c => c.filterType !== FilterType.NONE);
+  const [selectedFilterColumn, setSelectedFilterColumn] = React.useState<Column>(availableFilters[0]);
   const [selectedFilterValue, setSelectedFilterValue] = React.useState<string>('');
-
-  const getFilterValueDate = React.useCallback(
-    (isFrom: boolean) => {
-      const filterValueSplit = selectedFilterValue.includes(RANGE_SPLIT_CHAR)
-        ? selectedFilterValue.split(RANGE_SPLIT_CHAR)
-        : ['', ''];
-      return new Date(filterValueSplit[isFrom ? 0 : 1]);
-    },
-    [selectedFilterValue]
-  );
-
-  const getDisplayFilterValueDate = React.useCallback(
-    (isFrom: boolean) => {
-      const date = getFilterValueDate(isFrom);
-      return isValidDate(date) ? yyyyMMddFormat(date) : '';
-    },
-    [getFilterValueDate]
-  );
-
-  const setFilterValueDate = React.useCallback(
-    (date: Date, isFrom: boolean) => {
-      const filterValueSplit = selectedFilterValue.includes(RANGE_SPLIT_CHAR)
-        ? selectedFilterValue.split(RANGE_SPLIT_CHAR)
-        : ['', ''];
-      filterValueSplit[isFrom ? 0 : 1] = date.toISOString();
-      setSelectedFilterValue(filterValueSplit.join(RANGE_SPLIT_CHAR));
-    },
-    [selectedFilterValue]
-  );
 
   const onAutoCompleteChange = (newValue: string) => {
     if (
@@ -165,63 +130,8 @@ export const FiltersToolbar: React.FC<{
     searchInputRef.current.focus();
   };
 
-  const onDateChange = React.useCallback(
-    (inputDate: string, newDate: Date, isFrom: boolean) => {
-      const date = getFilterValueDate(isFrom);
-      if (isValidDate(date) && isValidDate(newDate) && inputDate === yyyyMMddFormat(newDate)) {
-        newDate.setHours(date.getHours());
-        newDate.setMinutes(date.getMinutes());
-      }
-      if (isValidDate(newDate) && inputDate === yyyyMMddFormat(newDate)) {
-        setFilterValueDate(new Date(newDate), isFrom);
-      }
-    },
-    [getFilterValueDate, setFilterValueDate]
-  );
-
-  const onTimeChange = React.useCallback(
-    (hour: number, minute: number, isFrom: boolean) => {
-      const date = getFilterValueDate(isFrom);
-      if (isValidDate(date)) {
-        const updatedDate = new Date(date);
-        updatedDate.setHours(hour);
-        updatedDate.setMinutes(minute);
-        setFilterValueDate(updatedDate, isFrom);
-      }
-    },
-    [getFilterValueDate, setFilterValueDate]
-  );
-
-  const getRangeStart = React.useCallback(
-    (isFrom: boolean) => {
-      const start = getFilterValueDate(true);
-      if (!isFrom && isValidDate(start)) {
-        return start;
-      } else {
-        return null;
-      }
-    },
-    [getFilterValueDate]
-  );
-
-  const dateValidator = React.useCallback(
-    (isFrom: boolean, date: Date): string => {
-      const d = getFilterValueDate(!isFrom);
-      if (isFrom && date > new Date()) {
-        return t('From date cannot be in the future');
-      }
-      return !isValidDate(d) || (!isFrom && date >= d) || (isFrom && date <= d)
-        ? ''
-        : t('To date must be after From date');
-    },
-    [getFilterValueDate, t]
-  );
-
   const resetFilterValue = React.useCallback(() => {
     switch (selectedFilterColumn?.filterType) {
-      case FilterType.DATETIME:
-        //keep selection since only one filter allowed for date time
-        return;
       case FilterType.NUMBER:
         setFilterValue('0');
         break;
@@ -234,17 +144,6 @@ export const FiltersToolbar: React.FC<{
   const validateFilterValue = React.useCallback(() => {
     if (selectedFilterColumn) {
       switch (selectedFilterColumn?.filterType) {
-        case FilterType.DATETIME:
-          //allow start and / or end date with start before end if both specified
-          const start = getFilterValueDate(true);
-          const end = getFilterValueDate(false);
-          if (start > new Date()) {
-            return t('From date cannot be in the future');
-          } else if (isValidDate(start) && isValidDate(end) && yyyyMMddFormat(end) < yyyyMMddFormat(start)) {
-            return t('To date must be after From date');
-          } else {
-            return '';
-          }
         case FilterType.PORT:
           //allow any port number or valid name / value
           if (!isNaN(Number(selectedFilterValue)) || getPort(selectedFilterValue)) {
@@ -268,7 +167,7 @@ export const FiltersToolbar: React.FC<{
     } else {
       return t('Column must be selected');
     }
-  }, [getFilterValueDate, protocolOptions, selectedFilterColumn, selectedFilterValue, t]);
+  }, [protocolOptions, selectedFilterColumn, selectedFilterValue, t]);
 
   const getSelectedValueAndDisplay = React.useCallback(
     (colId?: string, value?: string): FilterValue | null => {
@@ -282,28 +181,6 @@ export const FiltersToolbar: React.FC<{
         value = selectedFilterValue;
       }
       switch (column?.filterType) {
-        case FilterType.DATETIME:
-          if (value.includes(RANGE_SPLIT_CHAR)) {
-            const colFilterValues = value.split(RANGE_SPLIT_CHAR);
-            const start = isNaN(Number(colFilterValues[0]))
-              ? new Date(colFilterValues[0])
-              : getDateFromSecondsString(colFilterValues[0]);
-            const end = isNaN(Number(colFilterValues[1]))
-              ? new Date(colFilterValues[1])
-              : getDateFromSecondsString(colFilterValues[1]);
-            return {
-              v: [
-                isValidDate(start) ? getDateStringInSeconds(start) : '',
-                isValidDate(end) ? getDateStringInSeconds(end) : ''
-              ].join(RANGE_SPLIT_CHAR),
-              display: [isValidDate(start) ? start.toUTCString() : '', isValidDate(end) ? end.toUTCString() : ''].join(
-                RANGE_SPLIT_CHAR
-              )
-            };
-          } else {
-            console.error('datetime' + value + ' is invalid');
-            return null;
-          }
         case FilterType.PORT:
           const isNumber = !isNaN(Number(value));
           const foundService = isNumber ? getService(Number(value)) : null;
@@ -396,41 +273,11 @@ export const FiltersToolbar: React.FC<{
     t
   ]);
 
-  const getDatePicker = React.useCallback(
-    (isFrom: boolean) => {
-      return (
-        <InputGroup>
-          <DatePicker
-            validators={[date => dateValidator(isFrom, date)]}
-            rangeStart={getRangeStart(isFrom)}
-            value={getDisplayFilterValueDate(isFrom)}
-            onChange={(value, date) => onDateChange(value, date, isFrom)}
-          />
-          <TimePicker
-            style={{ width: '150px' }}
-            onChange={(time, hour, minute) => onTimeChange(hour, minute, isFrom)}
-            isDisabled={!isValidDate(getFilterValueDate(isFrom))}
-          />
-        </InputGroup>
-      );
-    },
-    [dateValidator, getDisplayFilterValueDate, getFilterValueDate, getRangeStart, onDateChange, onTimeChange]
-  );
-
   /*TODO: check if we can do autocomplete for pod / namespace fields
    * as implemented for protocols
    */
   const getFilterControl = (col: Column) => {
     switch (col.filterType) {
-      case FilterType.DATETIME:
-        return (
-          <Flex direction={{ default: 'column', lg: 'row' }}>
-            <FlexItem>{t('From')}</FlexItem>
-            <FlexItem>{getDatePicker(true)}</FlexItem>
-            <FlexItem>{t('To')}</FlexItem>
-            <FlexItem>{getDatePicker(false)}</FlexItem>
-          </Flex>
-        );
       case FilterType.PORT:
       case FilterType.PROTOCOL:
         return (
@@ -579,21 +426,19 @@ export const FiltersToolbar: React.FC<{
               <InputGroup>
                 <Dropdown
                   id="column-filter-dropdown"
-                  dropdownItems={columns
-                    .filter(c => c.filterType !== FilterType.NONE)
-                    .map((col, index) => (
-                      <DropdownItem
-                        id={col.name}
-                        className="column-filter-item"
-                        component="button"
-                        onClick={() => {
-                          setSelectedFilterColumn(col);
-                        }}
-                        key={index}
-                      >
-                        {col.name}
-                      </DropdownItem>
-                    ))}
+                  dropdownItems={availableFilters.map((col, index) => (
+                    <DropdownItem
+                      id={col.name}
+                      className="column-filter-item"
+                      component="button"
+                      onClick={() => {
+                        setSelectedFilterColumn(col);
+                      }}
+                      key={index}
+                    >
+                      {col.name}
+                    </DropdownItem>
+                  ))}
                   isOpen={isFiltersOpen}
                   onSelect={() => setIsOpen(false)}
                   toggle={

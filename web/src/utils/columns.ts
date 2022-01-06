@@ -39,7 +39,6 @@ export interface Filter {
 
 export enum FilterType {
   NONE,
-  DATETIME,
   POD,
   ADDRESS,
   NAMESPACE,
@@ -60,7 +59,7 @@ export const getDefaultColumns = (t?: any) => {
       name: t('Date & time'),
       isSelected: true,
       defaultOrder: 1,
-      filterType: FilterType.DATETIME,
+      filterType: FilterType.NONE,
       sort: getSortFunctionFromColumnId(ColumnsId.timestamp)
     },
     {

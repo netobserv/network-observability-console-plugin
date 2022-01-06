@@ -1,0 +1,5 @@
+/* never show empty tooltip */
+
+.time-range-tooltip-empty {
+  display: none;
+}

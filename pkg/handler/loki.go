@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
@@ -14,7 +15,6 @@ import (
 
 var hlog = logrus.WithField("module", "handler")
 
-const dateRangeDelimiter = "<"
 const queryParam = "?query="
 const startParam = "&start="
 const endParam = "&end="
@@ -68,20 +68,25 @@ func GetFlows(cfg LokiConfig) func(w http.ResponseWriter, r *http.Request) {
 
 		for key := range params {
 			regexStr := strings.Builder{}
-			for _, value := range strings.Split(params.Get(key), ",") {
-				if strings.Contains(value, dateRangeDelimiter) {
-					var rangeValues = strings.Split(value, dateRangeDelimiter)
-					//add start param if specified
-					if len(rangeValues[0]) > 0 {
-						extraArgs.WriteString(startParam)
-						extraArgs.WriteString(rangeValues[0])
-					}
-					//add end param if specified
-					if len(rangeValues[1]) > 0 {
-						extraArgs.WriteString(endParam)
-						extraArgs.WriteString(rangeValues[1])
-					}
+
+			param := params.Get(key)
+			//add start / end param if specified
+			if key == "startTime" {
+				extraArgs.WriteString(startParam)
+				extraArgs.WriteString(param)
+			} else if key == "endTime" {
+				extraArgs.WriteString(endParam)
+				extraArgs.WriteString(param)
+			} else if key == "timeRange" {
+				r, err := strconv.ParseInt(param, 10, 64)
+				if err != nil {
+					writeError(w, http.StatusServiceUnavailable, err.Error())
 				} else {
+					extraArgs.WriteString(startParam)
+					extraArgs.WriteString(strconv.FormatInt(time.Now().Unix()-r, 10))
+				}
+			} else {
+				for _, value := range strings.Split(param, ",") {
 					if len(regexStr.String()) > 0 {
 						regexStr.WriteByte('|')
 					}
@@ -98,9 +103,7 @@ func GetFlows(cfg LokiConfig) func(w http.ResponseWriter, r *http.Request) {
 						regexStr.WriteString(value)
 					}
 				}
-			}
 
-			if len(regexStr.String()) > 0 {
 				if isLabel(key) {
 					//label match regex : ,key=~REGEX_EXPRESSION
 					labelFilters.WriteString(",")
@@ -147,7 +150,7 @@ func getLokiError(resp []byte, code int) string {
 	var f map[string]string
 	err := json.Unmarshal(resp, &f)
 	if err != nil {
-		return fmt.Sprintf("Unknown error from Loki - cannot unmarshal (code: %d)", code)
+		return fmt.Sprintf("Unknown error from Loki - cannot unmarshal (code: %d resp: %v)", code, string(resp))
 	}
 	message, ok := f["message"]
 	if !ok {
