@@ -4,13 +4,14 @@ import { ColumnsIcon, SyncAltIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { ParsedStream } from '../api/loki';
 import { getFlows } from '../api/routes';
+import NetflowTable from './netflow-table/netflow-table';
 import { Column, Filter, getDefaultColumns } from '../utils/columns';
 import { usePoll } from '../utils/poll-hook';
 import { ColumnsModal } from './columns-modal';
 import { FiltersToolbar } from './filters-toolbar';
-import NetflowTable from './netflow-table';
 import './netflow-traffic.css';
 import { RefreshDropdown } from './refresh-dropdown';
 import TimeRangeDropdown from './time-range-dropdown';

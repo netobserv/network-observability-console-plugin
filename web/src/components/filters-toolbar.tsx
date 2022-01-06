@@ -26,7 +26,6 @@ import * as _ from 'lodash';
 import { getPort, getService } from 'port-numbers';
 import protocols from 'protocol-numbers';
 import * as React from 'react';
-import { Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Column, ColumnsId, Filter, FilterType, FilterValue } from '../utils/columns';
 import { getQueryArgument, removeQueryArguments, setQueryArguments } from '../utils/router';
@@ -390,7 +389,7 @@ export const FiltersToolbar: React.FC<{
   return (
     <Toolbar id={id} clearAllFilters={() => clearFilters()} clearFiltersButtonText={t('Clear all filters')}>
       <ToolbarContent>
-        <Fragment>
+        <>
           <ToolbarItem className="co-filter-search">
             {filters &&
               filters.map((filter, index) => (
@@ -481,7 +480,7 @@ export const FiltersToolbar: React.FC<{
               isCompact
             />
           </ToolbarItem>*/}
-        </Fragment>
+        </>
       </ToolbarContent>
     </Toolbar>
   );

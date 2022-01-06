@@ -1,18 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createBrowserHistory } from 'history';
 import * as _ from 'lodash';
 import { Filter } from './columns';
 import { TimeRange } from './datetime';
 
 export const history = createBrowserHistory();
-
-// Monkey patch history to slice off the base path
-(history as any).__replace__ = history.replace;
-history.replace = url => (history as any).__replace__(url);
-
-(history as any).__push__ = history.push;
-history.push = url => (history as any).__push__(url);
-(history as any).pushPath = path => (history as any).__push__(path);
 
 export const getQueryArgument = (arg: string) => {
   return new URLSearchParams(window.location.search).get(arg);

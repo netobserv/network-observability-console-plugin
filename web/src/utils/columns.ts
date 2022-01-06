@@ -1,3 +1,4 @@
+import { TFunction } from 'i18next';
 import { ParsedStream } from '../api/loki';
 import protocols from 'protocol-numbers';
 import { ipCompare } from '../utils/ip';
@@ -24,7 +25,8 @@ export interface Column {
   isSelected: boolean;
   defaultOrder: number;
   filterType: FilterType;
-  sort(a: ParsedStream, b: ParsedStream, isDesc: boolean): number;
+  value: (flow: ParsedStream) => string | number;
+  sort(a: ParsedStream, b: ParsedStream, col: Column): number;
 }
 
 export interface FilterValue {
@@ -47,12 +49,7 @@ export enum FilterType {
   NUMBER
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const getDefaultColumns = (t?: any) => {
-  if (!t) {
-    t = (key: string) => key;
-  }
-
+export const getDefaultColumns = (t: TFunction): Column[] => {
   return [
     {
       id: ColumnsId.timestamp,
@@ -60,7 +57,8 @@ export const getDefaultColumns = (t?: any) => {
       isSelected: true,
       defaultOrder: 1,
       filterType: FilterType.NONE,
-      sort: getSortFunctionFromColumnId(ColumnsId.timestamp)
+      value: f => f.timestamp,
+      sort: (a, b, col) => sortNumbers(col.value(a) as number, col.value(b) as number)
     },
     {
       id: ColumnsId.srcpod,
@@ -68,7 +66,8 @@ export const getDefaultColumns = (t?: any) => {
       isSelected: true,
       defaultOrder: 2,
       filterType: FilterType.POD,
-      sort: getSortFunctionFromColumnId(ColumnsId.srcpod)
+      value: f => f.ipfix.SrcPod,
+      sort: (a, b, col) => sortStrings(col.value(a) as string, col.value(b) as string)
     },
     {
       id: ColumnsId.dstpod,
@@ -76,7 +75,8 @@ export const getDefaultColumns = (t?: any) => {
       isSelected: true,
       defaultOrder: 3,
       filterType: FilterType.POD,
-      sort: getSortFunctionFromColumnId(ColumnsId.dstpod)
+      value: f => f.ipfix.DstPod,
+      sort: (a, b, col) => sortStrings(col.value(a) as string, col.value(b) as string)
     },
     {
       id: ColumnsId.srcnamespace,
@@ -84,7 +84,8 @@ export const getDefaultColumns = (t?: any) => {
       isSelected: true,
       defaultOrder: 4,
       filterType: FilterType.NAMESPACE,
-      sort: getSortFunctionFromColumnId(ColumnsId.srcnamespace)
+      value: f => f.labels.SrcNamespace,
+      sort: (a, b, col) => sortStrings(col.value(a) as string, col.value(b) as string)
     },
     {
       id: ColumnsId.dstnamespace,
@@ -92,7 +93,8 @@ export const getDefaultColumns = (t?: any) => {
       isSelected: true,
       defaultOrder: 5,
       filterType: FilterType.NAMESPACE,
-      sort: getSortFunctionFromColumnId(ColumnsId.dstnamespace)
+      value: f => f.labels.DstNamespace,
+      sort: (a, b, col) => sortStrings(col.value(a) as string, col.value(b) as string)
     },
     {
       id: ColumnsId.srcaddr,
@@ -100,7 +102,8 @@ export const getDefaultColumns = (t?: any) => {
       isSelected: true,
       defaultOrder: 6,
       filterType: FilterType.ADDRESS,
-      sort: getSortFunctionFromColumnId(ColumnsId.srcaddr)
+      value: f => f.ipfix.SrcAddr,
+      sort: (a, b, col) => ipCompare(col.value(a) as string, col.value(b) as string)
     },
     {
       id: ColumnsId.dstaddr,
@@ -108,7 +111,8 @@ export const getDefaultColumns = (t?: any) => {
       isSelected: true,
       defaultOrder: 7,
       filterType: FilterType.ADDRESS,
-      sort: getSortFunctionFromColumnId(ColumnsId.dstaddr)
+      value: f => f.ipfix.DstAddr,
+      sort: (a, b, col) => ipCompare(col.value(a) as string, col.value(b) as string)
     },
     {
       id: ColumnsId.srcport,
@@ -116,7 +120,8 @@ export const getDefaultColumns = (t?: any) => {
       isSelected: true,
       defaultOrder: 8,
       filterType: FilterType.PORT,
-      sort: getSortFunctionFromColumnId(ColumnsId.srcport)
+      value: f => f.ipfix.SrcPort,
+      sort: (a, b, col) => comparePort(col.value(a), col.value(b))
     },
     {
       id: ColumnsId.dstport,
@@ -124,7 +129,8 @@ export const getDefaultColumns = (t?: any) => {
       isSelected: true,
       defaultOrder: 9,
       filterType: FilterType.PORT,
-      sort: getSortFunctionFromColumnId(ColumnsId.dstport)
+      value: f => f.ipfix.DstPort,
+      sort: (a, b, col) => comparePort(col.value(a), col.value(b))
     },
     {
       id: ColumnsId.proto,
@@ -132,7 +138,8 @@ export const getDefaultColumns = (t?: any) => {
       isSelected: true,
       defaultOrder: 10,
       filterType: FilterType.PROTOCOL,
-      sort: getSortFunctionFromColumnId(ColumnsId.proto)
+      value: f => f.ipfix.Proto,
+      sort: (a, b, col) => sortProtocols(col.value(a) as number, col.value(b) as number)
     },
     {
       id: ColumnsId.bytes,
@@ -140,7 +147,8 @@ export const getDefaultColumns = (t?: any) => {
       isSelected: true,
       defaultOrder: 11,
       filterType: FilterType.NONE,
-      sort: getSortFunctionFromColumnId(ColumnsId.bytes)
+      value: f => f.ipfix.Bytes,
+      sort: (a, b, col) => sortNumbers(col.value(a) as number, col.value(b) as number)
     },
     {
       id: ColumnsId.packets,
@@ -148,112 +156,30 @@ export const getDefaultColumns = (t?: any) => {
       isSelected: true,
       defaultOrder: 12,
       filterType: FilterType.NONE,
-      sort: getSortFunctionFromColumnId(ColumnsId.packets)
+      value: f => f.ipfix.Packets,
+      sort: (a, b, col) => sortNumbers(col.value(a) as number, col.value(b) as number)
     }
   ];
 };
 
-export const getFlowValueFromColumnId = (flow: ParsedStream, colId: string) => {
-  switch (colId) {
-    case ColumnsId.timestamp: {
-      return flow.value.timestamp;
-    }
-    case ColumnsId.srcpod: {
-      return flow.value.IPFIX.SrcPod;
-    }
-    case ColumnsId.dstpod: {
-      return flow.value.IPFIX.DstPod;
-    }
-    case ColumnsId.srcnamespace: {
-      return flow.labels['SrcNamespace'];
-    }
-    case ColumnsId.dstnamespace: {
-      return flow.labels['DstNamespace'];
-    }
-    case ColumnsId.srcaddr: {
-      return flow.value.IPFIX.SrcAddr;
-    }
-    case ColumnsId.dstaddr: {
-      return flow.value.IPFIX.DstAddr;
-    }
-    case ColumnsId.srcport: {
-      return flow.value.IPFIX.SrcPort;
-    }
-    case ColumnsId.dstport: {
-      return flow.value.IPFIX.DstPort;
-    }
-    case ColumnsId.proto: {
-      return flow.value.IPFIX.Proto;
-    }
-    case ColumnsId.bytes: {
-      return flow.value.IPFIX.Bytes;
-    }
-    case ColumnsId.packets: {
-      return flow.value.IPFIX.Packets;
-    }
+const sortNumbers = (a: number, b: number) => {
+  if (!isNaN(a) && !isNaN(b)) {
+    return a - b;
+  } else if (!isNaN(a)) {
+    return 1;
   }
+  return -1;
 };
 
-export const getSortFunctionFromColumnId = (colId: ColumnsId) => {
-  switch (colId) {
-    case ColumnsId.srcport:
-    case ColumnsId.dstport: {
-      return (a: ParsedStream, b: ParsedStream, isDesc: boolean) => {
-        return comparePort(
-          getFlowValueFromColumnId(isDesc ? a : b, colId),
-          getFlowValueFromColumnId(isDesc ? b : a, colId)
-        );
-      };
-    }
-    case ColumnsId.srcaddr:
-    case ColumnsId.dstaddr: {
-      return (a: ParsedStream, b: ParsedStream, isDesc: boolean) => {
-        return ipCompare(
-          getFlowValueFromColumnId(isDesc ? a : b, colId) as string,
-          getFlowValueFromColumnId(isDesc ? b : a, colId) as string
-        );
-      };
-    }
-    case ColumnsId.proto: {
-      return (a: ParsedStream, b: ParsedStream, isDesc: boolean) => {
-        const f1Name: string = protocols[getFlowValueFromColumnId(isDesc ? a : b, colId)]?.name;
-        const f2Name: string = protocols[getFlowValueFromColumnId(isDesc ? b : a, colId)]?.name;
-        if (f1Name && f2Name) {
-          return f1Name.localeCompare(f2Name);
-        } else if (f1Name) {
-          return 1;
-        } else {
-          return -1;
-        }
-      };
-    }
-    case ColumnsId.timestamp:
-    case ColumnsId.bytes:
-    case ColumnsId.packets: {
-      return (a: ParsedStream, b: ParsedStream, isDesc: boolean) => {
-        const f1Value = Number(getFlowValueFromColumnId(isDesc ? a : b, colId));
-        const f2Value = Number(getFlowValueFromColumnId(isDesc ? b : a, colId));
-        if (!isNaN(f1Value) && !isNaN(f2Value)) {
-          return f1Value - f2Value;
-        } else if (!isNaN(f1Value)) {
-          return 1;
-        } else {
-          return -1;
-        }
-      };
-    }
-    default: {
-      return (a: ParsedStream, b: ParsedStream, isDesc: boolean) => {
-        const f1Value = getFlowValueFromColumnId(isDesc ? a : b, colId) as string;
-        const f2Value = getFlowValueFromColumnId(isDesc ? b : a, colId) as string;
-        if (f1Value && f2Value) {
-          return f1Value.localeCompare(f2Value);
-        } else if (f1Value) {
-          return 1;
-        } else {
-          return -1;
-        }
-      };
-    }
+const sortStrings = (a: string, b: string) => {
+  if (a && b) {
+    return a.localeCompare(b);
+  } else if (a) {
+    return 1;
   }
+  return -1;
+};
+
+const sortProtocols = (a: number, b: number) => {
+  return sortStrings(protocols[a]?.name, protocols[b]?.name);
 };

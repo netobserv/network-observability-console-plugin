@@ -1,10 +1,9 @@
 import * as React from 'react';
 import { shallow, mount } from 'enzyme';
-import { TableComposable, Tbody, OnSort } from '@patternfly/react-table';
+import { TableComposable, Tbody, OnSort, Thead, Tr, Th } from '@patternfly/react-table';
 import { NetflowTableHeader } from '../netflow-table-header';
-import { ColumnsSample } from '../__tests-data__/columns';
-import { Thead, Tr, Th } from '@patternfly/react-table';
-import { Column } from '../../utils/columns';
+import { ColumnsSample } from '../../__tests-data__/columns';
+import { Column } from '../../../utils/columns';
 
 const NetflowTableHeaderWrapper: React.FC<{
   onSort: OnSort;

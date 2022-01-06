@@ -1,13 +1,11 @@
 import * as React from 'react';
 import { shallow } from 'enzyme';
+import { Tr, Td } from '@patternfly/react-table';
 
 import NetflowTableRow from '../netflow-table-row';
-
-import { ParsedStream } from '../../api/loki';
-import { ColumnsSample } from '../__tests-data__/columns';
-import { FlowsSample } from '../__tests-data__/flows';
-
-import { Tr, Td } from '@patternfly/react-table';
+import { ParsedStream } from '../../../api/loki';
+import { ColumnsSample } from '../../__tests-data__/columns';
+import { FlowsSample } from '../../__tests-data__/flows';
 
 describe('<NetflowTableRow />', () => {
   let flows: ParsedStream[] = [];
