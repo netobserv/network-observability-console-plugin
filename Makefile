@@ -3,6 +3,7 @@ VERSION ?= latest
 IMAGE ?= quay.io/${USER}/network-observability-console-plugin:${VERSION}
 GOLANGCI_LINT_VERSION = v1.42.1
 COVERPROFILE = coverage.out
+NPM_INSTALL ?= install
 
 ifeq (,$(shell which podman 2>/dev/null))
 OCI_BIN ?= docker
@@ -23,7 +24,7 @@ vendors:
 .PHONY: install-frontend
 install-frontend:
 	@echo "### Installing frontend dependencies"
-	cd web && npm install
+	cd web && npm ${NPM_INSTALL}
 
 .PHONY: fmt-backend
 fmt-backend:
