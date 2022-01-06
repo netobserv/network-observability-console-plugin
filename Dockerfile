@@ -7,10 +7,10 @@ RUN mkdir web && chown $USER: web
 COPY web/package.json web/
 COPY web/package-lock.json web/
 COPY Makefile Makefile
-RUN make install-frontend
+RUN NPM_INSTALL=ci make install-frontend
 COPY web web
 
-RUN make build-frontend
+RUN NPM_INSTALL=ci make build-frontend
 
 FROM registry.access.redhat.com/ubi8/go-toolset:1.16.7-5 as go-builder
 ARG VERSION=""
