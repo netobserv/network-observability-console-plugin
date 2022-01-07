@@ -15,6 +15,9 @@ import (
 
 var hlog = logrus.WithField("module", "handler")
 
+const startTimeKey = "startTime"
+const endTimeTimeKey = "endTime"
+const timeRangeKey = "timeRange"
 const queryParam = "?query="
 const startParam = "&start="
 const endParam = "&end="
@@ -71,13 +74,14 @@ func GetFlows(cfg LokiConfig) func(w http.ResponseWriter, r *http.Request) {
 
 			param := params.Get(key)
 			//add start / end param if specified
-			if key == "startTime" {
+			switch key {
+			case startTimeKey:
 				extraArgs.WriteString(startParam)
 				extraArgs.WriteString(param)
-			} else if key == "endTime" {
+			case endTimeTimeKey:
 				extraArgs.WriteString(endParam)
 				extraArgs.WriteString(param)
-			} else if key == "timeRange" {
+			case timeRangeKey:
 				r, err := strconv.ParseInt(param, 10, 64)
 				if err != nil {
 					writeError(w, http.StatusServiceUnavailable, err.Error())
@@ -85,7 +89,7 @@ func GetFlows(cfg LokiConfig) func(w http.ResponseWriter, r *http.Request) {
 					extraArgs.WriteString(startParam)
 					extraArgs.WriteString(strconv.FormatInt(time.Now().Unix()-r, 10))
 				}
-			} else {
+			default:
 				for _, value := range strings.Split(param, ",") {
 					if len(regexStr.String()) > 0 {
 						regexStr.WriteByte('|')
@@ -150,7 +154,7 @@ func getLokiError(resp []byte, code int) string {
 	var f map[string]string
 	err := json.Unmarshal(resp, &f)
 	if err != nil {
-		return fmt.Sprintf("Unknown error from Loki - cannot unmarshal (code: %d resp: %v)", code, string(resp))
+		return fmt.Sprintf("Unknown error from Loki - cannot unmarshal (code: %d resp: %s)", code, resp)
 	}
 	message, ok := f["message"]
 	if !ok {
