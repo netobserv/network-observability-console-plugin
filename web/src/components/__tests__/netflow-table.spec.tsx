@@ -7,6 +7,7 @@ import { NetflowTableHeader } from '../netflow-table-header';
 
 import { ColumnsSample } from '../__tests-data__/columns';
 import { FlowsSample } from '../__tests-data__/flows';
+import { Td } from '@patternfly/react-table';
 
 const errorStateQuery = `EmptyState[data-test="error-state"]`;
 const loadingContentsQuery = `Bullseye[data-test="loading-contents"]`;
@@ -23,11 +24,9 @@ jest.mock('@openshift-console/dynamic-plugin-sdk', () => {
 
 describe('<NetflowTable />', () => {
   const mocks = {
-    setFlows: null,
     clearFilters: null
   };
   beforeEach(() => {
-    mocks.setFlows = jest.fn();
     mocks.clearFilters = jest.fn();
   });
 
@@ -57,8 +56,15 @@ describe('<NetflowTable />', () => {
       return node.type() === 'button' && node.text() === 'Date & time';
     });
     button.simulate('click');
-    const expected = [FlowsSample[2], FlowsSample[0], FlowsSample[1]];
-    expect(mocks.setFlows).toHaveBeenCalledWith(expected);
+    const expectedDateText =
+      new Date(FlowsSample[2].value.timestamp).toDateString() +
+      ' ' +
+      new Date(FlowsSample[2].value.timestamp).toLocaleTimeString();
+    expect(wrapper.find(NetflowTableRow).find(Td).at(0).text()).toBe(expectedDateText);
+    const expectedSrcAddress = FlowsSample[2].value.IPFIX.SrcAddr;
+    expect(wrapper.find(NetflowTableRow).at(0).text()).toContain(expectedSrcAddress);
+    const expectedDstAddress = FlowsSample[2].value.IPFIX.DstAddr;
+    expect(wrapper.find(NetflowTableRow).at(0).text()).toContain(expectedDstAddress);
   });
   it('should render a spinning slide and then the netflow rows', async () => {
     const wrapper = mount(<NetflowTable loading={true} flows={[]} columns={ColumnsSample} {...mocks} />);
