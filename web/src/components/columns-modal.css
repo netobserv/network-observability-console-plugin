@@ -21,5 +21,7 @@ button.pf-c-data-list__item-draggable-button {
 }
 
 label {
+    margin-top: auto;
     margin-bottom: auto;
+    padding: inherit;
 }

@@ -32,8 +32,34 @@ const config: webpack.Configuration = {
         ],
       },
       {
-        test: /\.(css)$/,
-        use: ['style-loader', 'css-loader'],
+        test: /(\.s*[ac]ss)$/,
+        use: [
+          // Creates `style` nodes from JS strings
+          // Insert styles at top of document head using function
+          // Check https://webpack.js.org/loaders/style-loader/#function
+          {
+            loader: "style-loader", options: {
+              insert: function insertAtTop(element) {
+                var parent = document.querySelector("head");
+                // eslint-disable-next-line no-underscore-dangle
+                var lastInsertedElement = window._lastElementInsertedByStyleLoader;
+
+                if (!lastInsertedElement) {
+                  parent.insertBefore(element, parent.firstChild);
+                } else if (lastInsertedElement.nextSibling) {
+                  parent.insertBefore(element, lastInsertedElement.nextSibling);
+                } else {
+                  parent.appendChild(element);
+                }
+
+                // eslint-disable-next-line no-underscore-dangle
+                window._lastElementInsertedByStyleLoader = element;
+              },
+            }
+          },
+          // Translates CSS into CommonJS
+          "css-loader",
+        ],
       },
     ],
   },
