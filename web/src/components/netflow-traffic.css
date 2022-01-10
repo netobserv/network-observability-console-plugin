@@ -20,10 +20,3 @@ span.pf-c-button__icon.pf-m-start {
         transform: rotate(360deg);
     }
 }
-
-
-/*fix double scroller issue*/
-
-.pf-c-drawer.pf-m-inline>.pf-c-drawer__main>.pf-c-drawer__content {
-    overflow: hidden;
-}
