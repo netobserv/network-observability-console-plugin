@@ -18,6 +18,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -258,15 +259,17 @@ func TestLokiConfiguration_MultiTenant(t *testing.T) {
 }
 
 func TestLokiFiltering(t *testing.T) {
-	var filters = map[string]map[string]string{
-		"/api/loki/flows?SrcPod=test-pod":                                      {"query": `{app="netobserv-flowcollector"}|~"\"SrcPod\":[\"]{0,1}[^,]{0,}test-pod"`},
-		"/api/loki/flows?DstPod=test-pod-2":                                    {"query": `{app="netobserv-flowcollector"}|~"\"DstPod\":[\"]{0,1}[^,]{0,}test-pod-2"`},
-		"/api/loki/flows?Proto=6":                                              {"query": `{app="netobserv-flowcollector"}|~"\"Proto\":[\"]{0,1}[^,]{0,}6"`},
-		"/api/loki/flows?SrcNamespace=test-namespace":                          {"query": `{app="netobserv-flowcollector",SrcNamespace=~".*test-namespace.*"}`},
-		"/api/loki/flows?SrcPort=8080&SrcAddr=10.128.0.1&SrcNamespace=default": {"query": `{app="netobserv-flowcollector",SrcNamespace=~".*default.*"}|~"\"SrcPort\":[\"]{0,1}[^,]{0,}8080"|~"\"SrcAddr\":[\"]{0,1}[^,]{0,}10.128.0.1"`},
-		"/api/loki/flows?timestamp=1640991600<":                                {"query": `{app="netobserv-flowcollector"}`, "start": "1640991600"},
-		"/api/loki/flows?timestamp=<1641160800":                                {"query": `{app="netobserv-flowcollector"}`, "end": "1641160800"},
-		"/api/loki/flows?timestamp=1640991600<1641160800":                      {"query": `{app="netobserv-flowcollector"}`, "start": "1640991600", "end": "1641160800"},
+	var filters = map[string]map[string][]string{
+		"/api/loki/flows?SrcPod=test-pod":                                      {"query": []string{`{app="netobserv-flowcollector"}`, `|~"\"SrcPod\":[\"]{0,1}[^,]{0,}test-pod"`}},
+		"/api/loki/flows?DstPod=test-pod-2":                                    {"query": []string{`{app="netobserv-flowcollector"}`, `|~"\"DstPod\":[\"]{0,1}[^,]{0,}test-pod-2"`}},
+		"/api/loki/flows?Proto=6":                                              {"query": []string{`{app="netobserv-flowcollector"}`, `|~"\"Proto\":[\"]{0,1}[^,]{0,}6"`}},
+		"/api/loki/flows?SrcNamespace=test-namespace":                          {"query": []string{`{app="netobserv-flowcollector",SrcNamespace=~".*test-namespace.*"}`}},
+		"/api/loki/flows?SrcPort=8080&SrcAddr=10.128.0.1&SrcNamespace=default": {"query": []string{`{app="netobserv-flowcollector",SrcNamespace=~".*default.*"}`, `|~"\"SrcPort\":[\"]{0,1}[^,]{0,}8080"`, `|~"\"SrcAddr\":[\"]{0,1}[^,]{0,}10.128.0.1"`}},
+		"/api/loki/flows?startTime=1640991600":                                 {"query": []string{`{app="netobserv-flowcollector"}`}, "start": []string{"1640991600"}},
+		"/api/loki/flows?endTime=1641160800":                                   {"query": []string{`{app="netobserv-flowcollector"}`}, "end": []string{"1641160800"}},
+		"/api/loki/flows?startTime=1640991600&endTime=1641160800":              {"query": []string{`{app="netobserv-flowcollector"}`}, "start": []string{"1640991600"}, "end": []string{"1641160800"}},
+		"/api/loki/flows?timeRange=300000":                                     {"query": []string{`{app="netobserv-flowcollector"}`}, "timeRange": []string{"300000"}},
+		"/api/loki/flows?timeRange=86400000":                                   {"query": []string{`{app="netobserv-flowcollector"}`}, "timeRange": []string{"86400000"}},
 	}
 
 	// GIVEN a Loki service
@@ -291,14 +294,25 @@ func TestLokiFiltering(t *testing.T) {
 
 	var index = 0
 	for endpoint, args := range filters {
+		now := time.Now().Unix()
 		// WHEN the Loki flows endpoint is queried in the backend
 		_, err := backendSvc.Client().Get(backendSvc.URL + endpoint)
 		require.NoError(t, err)
 
 		// THEN each filter argument has been properly forwarded to Loki
-		for arg, value := range args {
+		for arg, values := range args {
 			req := lokiMock.Calls[index].Arguments[1].(*http.Request)
-			assert.Equal(t, value, req.URL.Query().Get(arg))
+			for _, value := range values {
+				if arg == "timeRange" {
+					r, _ := strconv.ParseInt(value, 10, 64)
+					d, err := strconv.ParseInt(req.URL.Query().Get("start"), 10, 64)
+					assert.Equal(t, nil, err)
+					assert.True(t, d < now)
+					assert.True(t, d >= now-r)
+				} else {
+					assert.Contains(t, req.URL.Query().Get(arg), value)
+				}
+			}
 		}
 		// increment index for next call
 		index++

@@ -20,3 +20,9 @@ span.pf-c-button__icon.pf-m-start {
         transform: rotate(360deg);
     }
 }
+
+/*allow new lines for error text*/
+
+.pf-c-empty-state__body {
+    white-space: pre-line;
+}

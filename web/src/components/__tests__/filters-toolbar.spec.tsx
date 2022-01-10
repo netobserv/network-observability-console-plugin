@@ -1,20 +1,11 @@
-import {
-  Button,
-  DatePicker,
-  Dropdown,
-  SearchInput,
-  TextInput,
-  Toolbar,
-  ToolbarFilter,
-  ToolbarItem
-} from '@patternfly/react-core';
+import { Button, Dropdown, SearchInput, TextInput, Toolbar, ToolbarFilter, ToolbarItem } from '@patternfly/react-core';
 import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 import { act } from 'react-dom/test-utils';
 import { ColumnsId, Filter } from '../../utils/columns';
 import FiltersToolbar from '../filters-toolbar';
 import { ColumnsSample } from '../__tests-data__/columns';
-import { DateFilterSample1, DateFilterSample2, FiltersSample, FTPSrcPortSample } from '../__tests-data__/filters';
+import { FiltersSample, FTPSrcPortSample } from '../__tests-data__/filters';
 
 describe('<FiltersToolbar />', () => {
   const props = {
@@ -46,7 +37,7 @@ describe('<FiltersToolbar />', () => {
     expect(wrapper.find(ToolbarFilter)).toHaveLength(props.filters.length);
 
     //update props to set a single filter
-    props.filters = [DateFilterSample1];
+    props.filters = [FiltersSample[0]];
     wrapper.setProps({ filters: props.filters });
     expect(wrapper.find(ToolbarFilter)).toHaveLength(props.filters.length);
   });
@@ -123,29 +114,6 @@ describe('<FiltersToolbar />', () => {
     wrapper.find(SearchInput).at(0).simulate('keypress', { key: 'Enter' });
     search.simulate('click');
     expect(props.setFilters).toHaveBeenCalledTimes(4);
-
-    //open dropdow and select Date & time
-    dropdown.simulate('click');
-    wrapper.find('[id="Date & time"]').at(0).simulate('click');
-    //set start date and press button
-    const datePickers = wrapper.find(DatePicker);
-    act(() => {
-      datePickers.at(0).props().onChange('2021-12-01', new Date('2021-12-01'));
-    });
-    search.simulate('click');
-    props.filters = props.filters.concat([DateFilterSample1]);
-    expect(props.setFilters).toHaveBeenNthCalledWith(5, props.filters);
-    wrapper.setProps(props);
-
-    act(() => {
-      //set end date and press button
-      datePickers.at(1).props().onChange('2021-12-05', new Date('2021-12-05'));
-    });
-    search.simulate('click');
-    //replace date filter since only one allowed
-    props.filters[props.filters.length - 1] = DateFilterSample2;
-    expect(props.setFilters).toHaveBeenNthCalledWith(6, props.filters);
-    wrapper.setProps(props);
 
     //clear all filters
     expect(props.clearFilters).not.toHaveBeenCalled();
