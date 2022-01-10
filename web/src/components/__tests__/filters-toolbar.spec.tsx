@@ -125,4 +125,41 @@ describe('<FiltersToolbar />', () => {
     button.simulate('click');
     expect(props.clearFilters).toHaveBeenCalledTimes(1);
   });
+  it('should forward valid IP addresses', async () => {
+    props.filters = [];
+    const wrapper = mount(<FiltersToolbar {...props} />);
+    jest.clearAllMocks();
+
+    const dropdown = wrapper.find('#column-filter-toggle').at(0);
+    const search = wrapper.find('#search-button').at(0);
+    //open dropdow and select Src address
+    dropdown.simulate('click');
+    wrapper.find('[id="Src address"]').at(0).simulate('click');
+    act(() => {
+      //set text input value and press button
+      wrapper.find(TextInput).props().onChange('1.2.3.4', null);
+    });
+    search.simulate('click');
+    expect(props.setFilters).toHaveBeenCalledWith([
+      {
+        colId: ColumnsId.srcaddr,
+        values: [{ v: '1.2.3.4' }]
+      }
+    ]);
+  });
+  it('should not forward invalid IP addresses', async () => {
+    const wrapper = mount(<FiltersToolbar {...props} />);
+    jest.clearAllMocks();
+    const dropdown = wrapper.find('#column-filter-toggle').at(0);
+    const search = wrapper.find('#search-button').at(0);
+    //open dropdow and select Src address
+    dropdown.simulate('click');
+    wrapper.find('[id="Src address"]').at(0).simulate('click');
+    act(() => {
+      //set text input value and press button
+      wrapper.find(TextInput).props().onChange('asdlfkj', null);
+    });
+    search.simulate('click');
+    expect(props.setFilters).not.toHaveBeenCalled();
+  });
 });

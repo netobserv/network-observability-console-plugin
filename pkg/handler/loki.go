@@ -141,7 +141,7 @@ func GetFlows(cfg LokiConfig) func(w http.ResponseWriter, r *http.Request) {
 			writeError(w, http.StatusServiceUnavailable, msg)
 			return
 		}
-		hlog.Debugf("GetFlows raw response: %s", resp)
+		hlog.Tracef("GetFlows raw response: %s", resp)
 		writeRawJSON(w, http.StatusOK, resp)
 	}
 }
@@ -149,7 +149,7 @@ func GetFlows(cfg LokiConfig) func(w http.ResponseWriter, r *http.Request) {
 func selectTimeRange(w http.ResponseWriter, param string, extraArgs *strings.Builder) {
 	r, err := strconv.ParseInt(param, 10, 64)
 	if err != nil {
-		writeError(w, http.StatusServiceUnavailable, err.Error())
+		writeError(w, http.StatusBadRequest, err.Error())
 	} else {
 		extraArgs.WriteString(startParam)
 		extraArgs.WriteString(strconv.FormatInt(time.Now().Unix()-r, 10))
