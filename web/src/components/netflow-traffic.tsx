@@ -104,7 +104,6 @@ export const NetflowTraffic: React.FC = () => {
         loading={loading}
         error={error}
         flows={flows}
-        setFlows={setFlows}
         clearFilters={clearFilters}
         columns={columns.filter(col => col.isSelected)}
       />
