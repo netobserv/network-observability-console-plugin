@@ -4,8 +4,7 @@ import { ParsedStream } from '../api/loki';
 import { NetflowTableHeader } from './netflow-table-header';
 import NetflowTableRow from './netflow-table-row';
 import * as _ from 'lodash';
-import protocols from 'protocol-numbers';
-import { ipCompare } from '../utils/ip';
+
 import SearchIcon from '@patternfly/react-icons/dist/esm/icons/search-icon';
 import {
   Bullseye,
@@ -18,8 +17,7 @@ import {
   Title
 } from '@patternfly/react-core';
 import { useTranslation } from 'react-i18next';
-import { Column, ColumnsId, getFlowValueFromColumnId } from '../utils/columns';
-import { comparePort } from '../utils/port';
+import { Column } from '../utils/columns';
 
 const NetflowTable: React.FC<{
   flows: ParsedStream[];
@@ -41,37 +39,9 @@ const NetflowTable: React.FC<{
     if (activeSortIndex < 0 || activeSortIndex >= columns.length) {
       return flows;
     } else {
-      return flows.sort((a, b): number => {
-        const isDesc = activeSortDirection === 'desc';
-        const f1Value = getFlowValueFromColumnId(isDesc ? a : b, columns[activeSortIndex].id);
-        const f2Value = getFlowValueFromColumnId(isDesc ? b : a, columns[activeSortIndex].id);
-        switch (columns[activeSortIndex].id) {
-          case ColumnsId.srcport:
-          case ColumnsId.dstport: {
-            return comparePort(f1Value, f2Value);
-          }
-          case ColumnsId.srcaddr:
-          case ColumnsId.dstaddr: {
-            return ipCompare(f1Value as string, f2Value as string);
-          }
-          case ColumnsId.proto: {
-            return protocols[f1Value].name.localeCompare(protocols[f2Value].name);
-          }
-          default: {
-            //at least one value must be set, else we can't sort
-            if (f1Value != null || f2Value != null) {
-              if (typeof f1Value == 'string' || typeof f2Value == 'string') {
-                return String(f1Value).localeCompare(String(f2Value));
-              } else if (typeof f1Value == 'number' || typeof f2Value == 'number') {
-                return Number(f1Value) - Number(f2Value);
-              } else {
-                console.error("can't sort values", f1Value, f2Value, typeof f1Value, typeof f2Value);
-              }
-            }
-          }
-        }
-        return 0;
-      });
+      return flows.sort((a: ParsedStream, b: ParsedStream) =>
+        columns[activeSortIndex].sort(a, b, activeSortDirection === 'desc')
+      );
     }
   };
 
