@@ -13,7 +13,6 @@ import {
   OverflowMenuGroup,
   OverflowMenuItem,
   Popper,
-  SearchInput,
   TextInput,
   Toolbar,
   ToolbarContent,
@@ -47,13 +46,13 @@ export const FiltersToolbar: React.FC<{
   id?: string;
 }> = ({ id, children, columns, filters, setFilters, clearFilters }) => {
   const { t } = useTranslation('plugin__network-observability-plugin');
+  const autocompleteContainerRef = React.useRef(null);
   const searchInputRef = React.useRef(null);
   const autocompleteRef = React.useRef(null);
   const [protocolOptions, setProtocolOptions] = React.useState<Option[]>([]);
   const [invalidMessage, setInvalidMessage] = React.useState<string | undefined>(undefined);
-  const [hint, setHint] = React.useState('');
   const [autocompleteOptions, setAutocompleteOptions] = React.useState([]);
-  const [isAutocompleteOpen, setIsAutocompleteOpen] = React.useState(false);
+  const [isPopperVisible, setPopperVisible] = React.useState(false);
   const [isFiltersOpen, setIsOpen] = React.useState<boolean>(false);
 
   const availableFilters = columns.filter(c => c.filterType !== FilterType.NONE);
@@ -61,14 +60,7 @@ export const FiltersToolbar: React.FC<{
   const [selectedFilterValue, setSelectedFilterValue] = React.useState<string>('');
 
   const onAutoCompleteChange = (newValue: string) => {
-    if (
-      newValue !== '' &&
-      searchInputRef &&
-      searchInputRef.current &&
-      searchInputRef.current.contains(document.activeElement)
-    ) {
-      setIsAutocompleteOpen(true);
-
+    if (!_.isEmpty(newValue)) {
       let options: Option[];
       switch (selectedFilterColumn.filterType) {
         case FilterType.PORT:
@@ -112,13 +104,11 @@ export const FiltersToolbar: React.FC<{
         </MenuItem>
       ));
 
-      // The hint is set whenever there is only one autocomplete option left.
-      setHint(menuItems.length === 1 ? menuItems[0].props.itemId : '');
       // The menu is hidden if there are no options
-      setIsAutocompleteOpen(menuItems.length > 0);
+      setPopperVisible(menuItems.length > 0);
       setAutocompleteOptions(menuItems);
     } else {
-      setIsAutocompleteOpen(false);
+      setPopperVisible(false);
     }
     setSelectedFilterValue(newValue);
   };
@@ -126,7 +116,7 @@ export const FiltersToolbar: React.FC<{
   const onAutoCompleteSelect = (e: React.MouseEvent<Element, MouseEvent>, itemId: string) => {
     e.stopPropagation();
     setSelectedFilterValue(itemId);
-    setIsAutocompleteOpen(false);
+    setPopperVisible(false);
     searchInputRef.current.focus();
   };
 
@@ -139,37 +129,41 @@ export const FiltersToolbar: React.FC<{
         setFilterValue('');
         break;
     }
+
+    setPopperVisible(false);
   }, [selectedFilterColumn?.filterType]);
 
   const validateFilterValue = React.useCallback(() => {
-    if (selectedFilterColumn) {
-      switch (selectedFilterColumn?.filterType) {
-        case FilterType.PORT:
-          //allow any port number or valid name / value
-          if (!isNaN(Number(selectedFilterValue)) || getPort(selectedFilterValue)) {
-            return '';
-          } else {
-            return t('Unknown port');
-          }
-        case FilterType.ADDRESS:
-          return validateIPFilter(selectedFilterValue)
-            ? ''
-            : t('Not a valid IPv4 or IPv6, nor a CIDR, nor an IP range separated by hyphen');
-        case FilterType.PROTOCOL:
-          //allow any protocol number or valid name / value
-          if (
-            !isNaN(Number(selectedFilterValue)) ||
-            protocolOptions.find(p => p.name === selectedFilterValue || p.value === selectedFilterValue)
-          ) {
-            return '';
-          } else {
-            return t('Unknown protocol');
-          }
-        default:
-          return _.isEmpty(selectedFilterValue) ? t('Value is empty') : '';
-      }
-    } else {
+    if (!selectedFilterColumn) {
       return t('Column must be selected');
+    } else if (_.isEmpty(selectedFilterValue)) {
+      return t('Value is empty');
+    }
+
+    switch (selectedFilterColumn?.filterType) {
+      case FilterType.PORT:
+        //allow any port number or valid name / value
+        if (!isNaN(Number(selectedFilterValue)) || getPort(selectedFilterValue)) {
+          return '';
+        } else {
+          return t('Unknown port');
+        }
+      case FilterType.ADDRESS:
+        return validateIPFilter(selectedFilterValue)
+          ? ''
+          : t('Not a valid IPv4 or IPv6, nor a CIDR, nor an IP range separated by hyphen');
+      case FilterType.PROTOCOL:
+        //allow any protocol number or valid name / value
+        if (
+          !isNaN(Number(selectedFilterValue)) ||
+          protocolOptions.find(p => p.name === selectedFilterValue || p.value === selectedFilterValue)
+        ) {
+          return '';
+        } else {
+          return t('Unknown protocol');
+        }
+      default:
+        return '';
     }
   }, [protocolOptions, selectedFilterColumn, selectedFilterValue, t]);
 
@@ -285,28 +279,31 @@ export const FiltersToolbar: React.FC<{
       case FilterType.PORT:
       case FilterType.PROTOCOL:
         return (
-          <Popper
-            trigger={
-              <SearchInput
-                value={selectedFilterValue}
-                onChange={onAutoCompleteChange}
-                onClear={() => resetFilterValue()}
-                ref={searchInputRef}
-                hint={hint}
-                id="autocomplete-search"
-              />
-            }
-            popper={
-              <Menu ref={autocompleteRef} onSelect={onAutoCompleteSelect}>
-                <MenuContent>
-                  <MenuList>{autocompleteOptions}</MenuList>
-                </MenuContent>
-              </Menu>
-            }
-            isVisible={isAutocompleteOpen}
-            enableFlip={false}
-            appendTo={() => document.querySelector('#autocomplete-search')}
-          />
+          <div ref={autocompleteContainerRef}>
+            <Popper
+              trigger={
+                <TextInput
+                  type="search"
+                  aria-label="search"
+                  value={selectedFilterValue}
+                  onKeyPress={e => e.key === 'Enter' && manageFilters()}
+                  onChange={onAutoCompleteChange}
+                  ref={searchInputRef}
+                  id="autocomplete-search"
+                />
+              }
+              popper={
+                <Menu ref={autocompleteRef} onSelect={onAutoCompleteSelect}>
+                  <MenuContent>
+                    <MenuList>{autocompleteOptions}</MenuList>
+                  </MenuContent>
+                </Menu>
+              }
+              isVisible={isPopperVisible}
+              enableFlip={false}
+              appendTo={autocompleteContainerRef.current}
+            />
+          </div>
         );
       case FilterType.NUMBER:
         return (
@@ -333,10 +330,16 @@ export const FiltersToolbar: React.FC<{
             onChange={setFilterValue}
             onKeyPress={e => e.key === 'Enter' && manageFilters()}
             value={selectedFilterValue}
+            ref={searchInputRef}
+            id="search"
           />
         );
     }
   };
+
+  const hasFilterValue = React.useCallback(() => {
+    return filters?.find(f => f?.values?.length) ? true : false;
+  }, [filters]);
 
   React.useEffect(() => {
     resetFilterValue();
@@ -387,90 +390,91 @@ export const FiltersToolbar: React.FC<{
   }, [protocolOptions]);
 
   return (
-    <Toolbar id={id} clearAllFilters={() => clearFilters()} clearFiltersButtonText={t('Clear all filters')}>
-      <ToolbarContent>
-        <>
-          <ToolbarItem className="co-filter-search">
-            {filters &&
-              filters.map((filter, index) => (
-                <ToolbarFilter
-                  key={index}
-                  deleteChipGroup={() => {
-                    removeQueryArguments([filter.colId]);
-                    setFilters(filters.filter(f => f.colId !== filter.colId));
-                  }}
-                  chips={filter.values.map(value => (value.display ? value.display : value.v))}
-                  deleteChip={(f, value: string) => {
-                    filter.values = filter.values.filter(val =>
-                      val.display ? val.display !== value : val.v !== value
-                    );
-                    if (_.isEmpty(filter.values)) {
-                      removeQueryArguments([filter.colId]);
-                      setFilters(filters.filter(f => f.colId !== filter.colId));
-                    } else {
-                      setFiltersAndArgs(_.cloneDeep(filters));
-                    }
-                  }}
-                  categoryName={columns.find(c => c.id === filter.colId)?.name}
-                >
-                  {
-                    // set empty children to have a single filter with multiple categories
-                    <div></div>
-                  }
-                </ToolbarFilter>
-              ))}
-            <Tooltip
-              //css hide tooltip here to avoid render issue
-              className={'filters-tooltip' + (_.isEmpty(invalidMessage) ? '-empty' : '')}
-              isVisible={true}
-              content={invalidMessage}
-              trigger={''}
-              enableFlip={false}
+    <Toolbar
+      id={id}
+      clearAllFilters={clearFilters}
+      clearFiltersButtonText={hasFilterValue() ? t('Clear all filters') : null}
+    >
+      <ToolbarContent id={`${id}-content`} toolbarId={id}>
+        {filters &&
+          filters.map((filter, index) => (
+            <ToolbarFilter
+              key={index}
+              deleteChipGroup={() => {
+                removeQueryArguments([filter.colId]);
+                setFilters(filters.filter(f => f.colId !== filter.colId));
+              }}
+              chips={filter.values.map(value => (value.display ? value.display : value.v))}
+              deleteChip={(f, value: string) => {
+                filter.values = filter.values.filter(val => (val.display ? val.display !== value : val.v !== value));
+                if (_.isEmpty(filter.values)) {
+                  removeQueryArguments([filter.colId]);
+                  setFilters(filters.filter(f => f.colId !== filter.colId));
+                } else {
+                  setFiltersAndArgs(_.cloneDeep(filters));
+                }
+              }}
+              categoryName={columns.find(c => c.id === filter.colId)?.name}
             >
-              <InputGroup>
-                <Dropdown
-                  id="column-filter-dropdown"
-                  dropdownItems={availableFilters.map((col, index) => (
-                    <DropdownItem
-                      id={col.name}
-                      className="column-filter-item"
-                      component="button"
-                      onClick={() => {
-                        setSelectedFilterColumn(col);
-                      }}
-                      key={index}
-                    >
-                      {col.name}
-                    </DropdownItem>
-                  ))}
-                  isOpen={isFiltersOpen}
-                  onSelect={() => setIsOpen(false)}
-                  toggle={
-                    <DropdownToggle id="column-filter-toggle" onToggle={() => setIsOpen(!isFiltersOpen)}>
-                      {selectedFilterColumn.name}
-                    </DropdownToggle>
-                  }
-                />
-                {getFilterControl(selectedFilterColumn)}
-                <Button
-                  id="search-button"
-                  variant="control"
-                  aria-label="search button for filter"
-                  onClick={() => manageFilters()}
-                >
-                  <SearchIcon />
-                </Button>
-              </InputGroup>
-            </Tooltip>
-          </ToolbarItem>
-          <ToolbarItem>
-            <OverflowMenu breakpoint="md">
-              <OverflowMenuGroup groupType="button" isPersistent>
-                <OverflowMenuItem>{children}</OverflowMenuItem>
-              </OverflowMenuGroup>
-            </OverflowMenu>
-          </ToolbarItem>
-          {/* TODO : NETOBSERV-104
+              {
+                // set empty children to have a single filter with multiple categories
+                <div></div>
+              }
+            </ToolbarFilter>
+          ))}
+        <ToolbarItem>
+          <Tooltip
+            //css hide tooltip here to avoid render issue
+            className={'filters-tooltip' + (_.isEmpty(invalidMessage) ? '-empty' : '')}
+            isVisible={true}
+            content={invalidMessage}
+            trigger={''}
+            enableFlip={false}
+          >
+            <InputGroup>
+              <Dropdown
+                id="column-filter-dropdown"
+                dropdownItems={availableFilters.map((col, index) => (
+                  <DropdownItem
+                    id={col.name}
+                    className="column-filter-item"
+                    component="button"
+                    onClick={() => {
+                      setSelectedFilterColumn(col);
+                    }}
+                    key={index}
+                  >
+                    {col.name}
+                  </DropdownItem>
+                ))}
+                isOpen={isFiltersOpen}
+                onSelect={() => setIsOpen(false)}
+                toggle={
+                  <DropdownToggle id="column-filter-toggle" onToggle={() => setIsOpen(!isFiltersOpen)}>
+                    {selectedFilterColumn.name}
+                  </DropdownToggle>
+                }
+              />
+              {getFilterControl(selectedFilterColumn)}
+              <Button
+                id="search-button"
+                variant="control"
+                aria-label="search button for filter"
+                onClick={() => manageFilters()}
+              >
+                <SearchIcon />
+              </Button>
+            </InputGroup>
+          </Tooltip>
+        </ToolbarItem>
+        <ToolbarItem>
+          <OverflowMenu breakpoint="md">
+            <OverflowMenuGroup groupType="button" isPersistent>
+              <OverflowMenuItem>{children}</OverflowMenuItem>
+            </OverflowMenuGroup>
+          </OverflowMenu>
+        </ToolbarItem>
+        {/* TODO : NETOBSERV-104
           <ToolbarItem variant="pagination">
             <Pagination
               itemCount={flows.length}
@@ -480,7 +484,6 @@ export const FiltersToolbar: React.FC<{
               isCompact
             />
           </ToolbarItem>*/}
-        </>
       </ToolbarContent>
     </Toolbar>
   );

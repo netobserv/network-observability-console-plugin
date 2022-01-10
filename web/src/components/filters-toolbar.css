@@ -9,3 +9,9 @@
 .filters-tooltip-empty {
   display: none;
 }
+
+/* hide empty button - fix for clear all filters keep showing */
+
+button.pf-c-button.pf-m-link.pf-m-inline:empty {
+  display: none;
+}

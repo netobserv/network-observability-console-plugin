@@ -20,7 +20,7 @@ import { setQueryArguments, removeQueryArguments, getQueryArgument, getFiltersPa
 import { TimeRange } from '../utils/datetime';
 import { usePrevious } from '../utils/previous-hook';
 
-const DEFAULT_TIME_RANGE = 300000;
+const DEFAULT_TIME_RANGE = 300;
 
 export const NetflowTraffic: React.FC = () => {
   const [extensions] = useResolvedExtensions<ModelFeatureFlag>(isModelFeatureFlag);

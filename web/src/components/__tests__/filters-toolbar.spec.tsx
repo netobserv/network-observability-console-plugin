@@ -1,4 +1,4 @@
-import { Button, Dropdown, SearchInput, TextInput, Toolbar, ToolbarFilter, ToolbarItem } from '@patternfly/react-core';
+import { Button, Dropdown, TextInput, Toolbar, ToolbarFilter, ToolbarItem } from '@patternfly/react-core';
 import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 import { act } from 'react-dom/test-utils';
@@ -96,10 +96,13 @@ describe('<FiltersToolbar />', () => {
     dropdown.simulate('click');
     wrapper.find('[id="Src port"]').at(0).simulate('click');
     act(() => {
-      //set search input value and press button
-      wrapper.find(SearchInput).props().onChange(FTPSrcPortSample.values[0].display, null);
+      //set search input value
+      wrapper.find(TextInput).props().onChange(FTPSrcPortSample.values[0].display, null);
     });
-    search.simulate('click');
+    //press enter and await for popper to disapear
+    await act(async () => {
+      wrapper.find(TextInput).at(0).simulate('keypress', { key: 'Enter' });
+    });
     props.filters = props.filters.concat([FTPSrcPortSample]);
     expect(props.setFilters).toHaveBeenNthCalledWith(4, props.filters);
     wrapper.setProps(props);
@@ -109,9 +112,9 @@ describe('<FiltersToolbar />', () => {
     wrapper.find('[id="Dst port"]').at(0).simulate('click');
     act(() => {
       //set search input value, press enter and press button
-      wrapper.find(SearchInput).props().onChange('no match', null);
+      wrapper.find(TextInput).props().onChange('no match', null);
     });
-    wrapper.find(SearchInput).at(0).simulate('keypress', { key: 'Enter' });
+    wrapper.find(TextInput).at(0).simulate('keypress', { key: 'Enter' });
     search.simulate('click');
     expect(props.setFilters).toHaveBeenCalledTimes(4);
 
