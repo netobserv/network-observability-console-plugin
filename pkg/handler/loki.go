@@ -43,6 +43,10 @@ func isLabel(v string) bool {
 	}
 }
 
+func isIPAddress(v string) bool {
+	return v == "DstAddr" || v == "SrcAddr"
+}
+
 func GetFlows(cfg LokiConfig) func(w http.ResponseWriter, r *http.Request) {
 	flowsURL := strings.TrimRight(cfg.URL.String(), "/") + getFlowsURLPath
 
@@ -67,6 +71,7 @@ func GetFlows(cfg LokiConfig) func(w http.ResponseWriter, r *http.Request) {
 		//always filter on app
 		labelFilters.WriteString("app=\"netobserv-flowcollector\"")
 		lineFilters := strings.Builder{}
+		ipFilters := strings.Builder{}
 		extraArgs := strings.Builder{}
 
 		for key := range params {
@@ -82,29 +87,19 @@ func GetFlows(cfg LokiConfig) func(w http.ResponseWriter, r *http.Request) {
 				extraArgs.WriteString(endParam)
 				extraArgs.WriteString(param)
 			case timeRangeKey:
-				r, err := strconv.ParseInt(param, 10, 64)
-				if err != nil {
-					writeError(w, http.StatusServiceUnavailable, err.Error())
-				} else {
-					extraArgs.WriteString(startParam)
-					extraArgs.WriteString(strconv.FormatInt(time.Now().Unix()-r, 10))
-				}
+				selectTimeRange(w, param, &extraArgs)
 			default:
 				for _, value := range strings.Split(param, ",") {
 					if len(regexStr.String()) > 0 {
 						regexStr.WriteByte('|')
 					}
-					if isLabel(key) {
-						//match any caracter before / after value : .*VALUE.*
-						regexStr.WriteString(".*")
-						regexStr.WriteString(value)
-						regexStr.WriteString(".*")
-					} else {
-						//match KEY containing VALUE : "KEY":["]{0,1}[^,]{0,}VALUE
-						regexStr.WriteString("\\\"")
-						regexStr.WriteString(key)
-						regexStr.WriteString("\\\":[\\\"]{0,1}[^,]{0,}")
-						regexStr.WriteString(value)
+					switch {
+					case isLabel(key):
+						filterRegexInLabel(value, &regexStr)
+					case isIPAddress(key):
+						filterIPInLine(key, value, &ipFilters)
+					default:
+						filterRegexInLine(key, value, &regexStr)
 					}
 				}
 
@@ -132,6 +127,7 @@ func GetFlows(cfg LokiConfig) func(w http.ResponseWriter, r *http.Request) {
 		url.WriteString(labelFilters.String())
 		url.WriteRune('}')
 		url.WriteString(lineFilters.String())
+		url.WriteString(ipFilters.String())
 		url.WriteString(extraArgs.String())
 		hlog.Infof("GetFlows URL : %s", url.String())
 
@@ -145,9 +141,53 @@ func GetFlows(cfg LokiConfig) func(w http.ResponseWriter, r *http.Request) {
 			writeError(w, http.StatusServiceUnavailable, msg)
 			return
 		}
-		hlog.Infof("GetFlows raw response: %v", string(resp))
+		hlog.Tracef("GetFlows raw response: %s", resp)
 		writeRawJSON(w, http.StatusOK, resp)
 	}
+}
+
+func selectTimeRange(w http.ResponseWriter, param string, extraArgs *strings.Builder) {
+	r, err := strconv.ParseInt(param, 10, 64)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+	} else {
+		extraArgs.WriteString(startParam)
+		extraArgs.WriteString(strconv.FormatInt(time.Now().Unix()-r, 10))
+	}
+}
+
+func filterRegexInLine(key string, value string, regexStr *strings.Builder) {
+	if len(regexStr.String()) > 0 {
+		regexStr.WriteByte('|')
+	}
+	//match KEY containing VALUE : "KEY":["]{0,1}[^,]{0,}VALUE
+	regexStr.WriteString("\\\"")
+	regexStr.WriteString(key)
+	regexStr.WriteString("\\\":[\\\"]{0,1}[^,]{0,}")
+	regexStr.WriteString(value)
+}
+
+// filterIPInLine assumes that we are searching for that IP addresses as part
+// of the log line (not in the labels)
+func filterIPInLine(key string, value string, ipFilters *strings.Builder) {
+	if ipFilters.Len() == 0 {
+		ipFilters.WriteString(`|json`)
+	}
+	ipFilters.WriteByte('|')
+	ipFilters.WriteString(key)
+	ipFilters.WriteString(`=ip("`)
+	ipFilters.WriteString(value)
+	ipFilters.WriteString(`")`)
+}
+
+func filterRegexInLabel(value string, regexStr *strings.Builder) {
+	if len(regexStr.String()) > 0 {
+		regexStr.WriteByte('|')
+	}
+	//match any caracter before / after value : .*VALUE.*
+	regexStr.WriteString(".*")
+	regexStr.WriteString(value)
+	regexStr.WriteString(".*")
 }
 
 func getLokiError(resp []byte, code int) string {

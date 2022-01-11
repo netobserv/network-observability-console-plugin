@@ -31,6 +31,7 @@ import { useTranslation } from 'react-i18next';
 import { Column, ColumnsId, Filter, FilterType, FilterValue } from '../utils/columns';
 import { getQueryArgument, removeQueryArguments, setQueryArguments } from '../utils/router';
 import './filters-toolbar.css';
+import { validateIPFilter } from '../utils/ip';
 
 interface Option {
   name: string;
@@ -151,6 +152,10 @@ export const FiltersToolbar: React.FC<{
           } else {
             return t('Unknown port');
           }
+        case FilterType.ADDRESS:
+          return validateIPFilter(selectedFilterValue)
+            ? ''
+            : t('Not a valid IPv4 or IPv6, nor a CIDR, nor an IP range separated by hyphen');
         case FilterType.PROTOCOL:
           //allow any protocol number or valid name / value
           if (
