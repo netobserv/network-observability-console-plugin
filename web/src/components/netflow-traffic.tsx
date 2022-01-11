@@ -19,6 +19,7 @@ import TimeRangeModal from './time-range-modal';
 import { setQueryArguments, removeQueryArguments, getQueryArgument, getFiltersParams } from '../utils/router';
 import { TimeRange } from '../utils/datetime';
 import { usePrevious } from '../utils/previous-hook';
+import DisplayDropdown from './display-dropdown';
 
 const DEFAULT_TIME_RANGE = 300000;
 
@@ -27,6 +28,7 @@ export const NetflowTraffic: React.FC = () => {
   const [loading, setLoading] = React.useState(true);
   const [flows, setFlows] = React.useState<Record[]>([]);
   const [error, setError] = React.useState<string | undefined>(undefined);
+  const [size, setSize] = React.useState<string>('m');
   const [isTRModalOpen, setTRModalOpen] = React.useState(false);
   const [isColModalOpen, setColModalOpen] = React.useState(false);
   const { t } = useTranslation('plugin__network-observability-plugin');
@@ -158,11 +160,13 @@ export const NetflowTraffic: React.FC = () => {
             <ColumnsIcon color="#6A6E73" />
           </Button>
         </Tooltip>
+        <DisplayDropdown id="display-dropdown" setSize={setSize} />
       </FiltersToolbar>
       <NetflowTable
         loading={loading}
         error={error}
         flows={flows}
+        size={size}
         clearFilters={clearFilters}
         columns={columns.filter(col => col.isSelected)}
       />

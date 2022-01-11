@@ -22,10 +22,11 @@ import { Column } from '../../utils/columns';
 const NetflowTable: React.FC<{
   flows: Record[];
   columns: Column[];
+  size: string;
   clearFilters: () => void;
   loading?: boolean;
   error?: string;
-}> = ({ flows, columns, error, loading, clearFilters }) => {
+}> = ({ flows, columns, error, loading, size, clearFilters }) => {
   const { t } = useTranslation('plugin__network-observability-plugin');
 
   // index of the currently active column
@@ -98,7 +99,7 @@ const NetflowTable: React.FC<{
       );
     }
   } else {
-    bodyContent = getSortedFlows().map(f => <NetflowTableRow key={f.key} flow={f} columns={columns} />);
+    bodyContent = getSortedFlows().map(f => <NetflowTableRow key={f.key} flow={f} columns={columns} size={size} />);
   }
 
   return (

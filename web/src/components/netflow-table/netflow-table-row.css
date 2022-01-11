@@ -1,0 +1,55 @@
+/* fix ResourceLink inline not working */
+span.co-resource-item.co-resource-item--inline,
+/* max content lines to show */
+.netflow-table-content {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+span.co-resource-item.co-resource-item--inline.s,
+.netflow-table-content.s{
+  -webkit-line-clamp: 1;
+}
+
+span.co-resource-item.co-resource-item--inline.m,
+.netflow-table-content.m{
+  -webkit-line-clamp: 2;
+}
+
+span.co-resource-item.co-resource-item--inline.l,
+.netflow-table-content.l{
+  -webkit-line-clamp: 3;
+}
+
+/* table tooltips - check pf-c-tooltip__content for values */
+.netflow-table-tooltip {
+  display: flex;
+  flex-direction: column;
+  visibility: hidden;
+  transition-property: visibility;
+  transition-delay: 0.5s;
+  background-color: #151515;
+  padding: .5rem;
+  color: #fff;
+  text-align: center;
+  word-break: break-word;
+  font-size: 13px;
+  position: absolute;
+  z-index: 1;
+  width: max-content;
+  transform: translateX(-50%);
+  left: 50%;
+}
+
+/* show tooltip on content hover */
+.netflow-table-content.truncated:hover .netflow-table-tooltip {
+  visibility: visible;
+}
+
+/* hide tooltip if hovering it */
+.netflow-table-tooltip:hover {
+  display: none !important;
+}
