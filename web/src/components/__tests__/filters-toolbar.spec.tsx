@@ -2,7 +2,8 @@ import { Button, Dropdown, TextInput, Toolbar, ToolbarFilter, ToolbarItem } from
 import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 import { act } from 'react-dom/test-utils';
-import { ColumnsId, Filter } from '../../utils/columns';
+import { ColumnsId } from '../../utils/columns';
+import { Filter } from '../../utils/filters';
 import FiltersToolbar, { FiltersToolbarProps } from '../filters-toolbar';
 import { ColumnsSample } from '../__tests-data__/columns';
 import { FiltersSample, FTPSrcPortSample } from '../__tests-data__/filters';
@@ -164,5 +165,31 @@ describe('<FiltersToolbar />', () => {
     });
     search.simulate('click');
     expect(props.setFilters).not.toHaveBeenCalled();
+  });
+  it('should filter with autocompletion fast selection', async () => {
+    props.filters = [];
+    const wrapper = mount(<FiltersToolbar {...props} />);
+    jest.clearAllMocks();
+
+    const dropdown = wrapper.find('#column-filter-toggle').at(0);
+    //open dropdown and select Direction
+    dropdown.simulate('click');
+    wrapper.find('[id="Direction"]').at(0).simulate('click');
+    act(() => {
+      //set text input value and press button
+      wrapper.find(TextInput).props().onChange!('eg', null!);
+    });
+    //press enter and await for popper to disapear
+    await act(async () => {
+      wrapper.find(TextInput).at(0).simulate('keypress', { key: 'Enter' });
+    });
+    const expected: Filter[] = [
+      {
+        colId: ColumnsId.flowdir,
+        values: [{ v: '1', display: 'Egress' }]
+      }
+    ];
+    expect(props.setFilters).toHaveBeenCalledWith(expected);
+    expect(props.setFilters).toHaveBeenCalledTimes(1);
   });
 });

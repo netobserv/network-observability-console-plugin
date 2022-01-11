@@ -1,8 +1,9 @@
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Tr, Td } from '@patternfly/react-table';
 import { ResourceLink } from '@openshift-console/dynamic-plugin-sdk';
 
-import { Record } from '../../api/loki';
+import { FlowDirection, Record } from '../../api/ipfix';
 import { Column, ColumnsId } from '../../utils/columns';
 import { formatPort } from '../../utils/port';
 import { formatProtocol } from '../../utils/protocol';
@@ -11,6 +12,8 @@ import { Size } from '../display-dropdown';
 import './netflow-table-row.css';
 
 const NetflowTableRow: React.FC<{ flow: Record; columns: Column[]; size: Size }> = ({ flow, columns, size }) => {
+  const { t } = useTranslation('plugin__network-observability-plugin');
+
   const onMouseOver = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     if (event.currentTarget) {
       const isTruncated =
@@ -21,6 +24,15 @@ const NetflowTableRow: React.FC<{ flow: Record; columns: Column[]; size: Size }>
         ? `netflow-table-content truncated ${size}`
         : `netflow-table-content ${size}`;
     }
+  };
+
+  const simpleTextWithTooltip = (text: string) => {
+    return (
+      <div>
+        <span>{text}</span>
+        <div className="netflow-table-tooltip">{text}</div>
+      </div>
+    );
   };
 
   const content = (c: Column) => {
@@ -64,6 +76,16 @@ const NetflowTableRow: React.FC<{ flow: Record; columns: Column[]; size: Size }>
           return '';
         }
       }
+      case ColumnsId.srcwkd:
+      case ColumnsId.dstwkd: {
+        const nsValue = c.id === ColumnsId.srcwkd ? flow.labels.SrcNamespace : flow.labels.DstNamespace;
+        const kind = c.id === ColumnsId.srcwkd ? flow.fields.SrcWorkloadKind : flow.fields.DstWorkloadKind;
+        if (value && kind && nsValue) {
+          return <ResourceLink kind={kind} name={value.toString()} namespace={nsValue.toString()} />;
+        } else {
+          return '';
+        }
+      }
       case ColumnsId.srcnamespace:
       case ColumnsId.dstnamespace: {
         if (value) {
@@ -82,33 +104,18 @@ const NetflowTableRow: React.FC<{ flow: Record; columns: Column[]; size: Size }>
       }
       case ColumnsId.srcport:
       case ColumnsId.dstport: {
-        const portText = formatPort(value as number);
-        return (
-          <div>
-            <span>{portText}</span>
-            <div className="netflow-table-tooltip">{portText}</div>
-          </div>
-        );
+        return simpleTextWithTooltip(formatPort(value as number));
       }
       case ColumnsId.proto:
         if (value) {
-          const protoText = formatProtocol(value as number);
-          return (
-            <div>
-              <span>{protoText}</span>
-              <div className="netflow-table-tooltip">{protoText}</div>
-            </div>
-          );
+          return simpleTextWithTooltip(formatProtocol(value as number));
         } else {
           return '';
         }
+      case ColumnsId.flowdir:
+        return simpleTextWithTooltip(value === FlowDirection.Ingress ? t('Ingress') : t('Egress'));
       default:
-        return (
-          <div>
-            <span>{value}</span>
-            <div className="netflow-table-tooltip">{value}</div>
-          </div>
-        );
+        return simpleTextWithTooltip(String(value));
     }
   };
   return (

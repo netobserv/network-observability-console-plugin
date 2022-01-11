@@ -9,8 +9,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/netobserv/network-observability-console-plugin/pkg/httpclient"
 	"github.com/sirupsen/logrus"
+
+	"github.com/netobserv/network-observability-console-plugin/pkg/httpclient"
 )
 
 var hlog = logrus.WithField("module", "handler")
@@ -44,7 +45,7 @@ func isLabel(v string) bool {
 }
 
 func isIPAddress(v string) bool {
-	return v == "DstAddr" || v == "SrcAddr"
+	return v == "DstAddr" || v == "SrcAddr" || v == "DstHostIP" || v == "SrcHostIP"
 }
 
 func GetFlows(cfg LokiConfig) func(w http.ResponseWriter, r *http.Request) {

@@ -1,4 +1,4 @@
-import { Record } from '../../api/loki';
+import { FlowDirection, Record } from '../../api/ipfix';
 
 export const FlowsSample: Record[] = [
   {
@@ -17,7 +17,10 @@ export const FlowsSample: Record[] = [
       DstPort: 3100,
       Packets: 400,
       Proto: 6,
-      Bytes: 76800
+      Bytes: 76800,
+      FlowDirection: FlowDirection.Egress,
+      SrcMac: '8a:f6:69:6b:1a:cc',
+      DstMac: '0a:58:0a:80:00:17'
     }
   },
   {
@@ -36,7 +39,10 @@ export const FlowsSample: Record[] = [
       DstPort: 3000,
       Packets: 300,
       Proto: 6,
-      Bytes: 7800
+      Bytes: 7800,
+      FlowDirection: FlowDirection.Ingress,
+      SrcMac: '8a:f6:69:6b:1a:cc',
+      DstMac: '0a:58:0a:80:00:17'
     }
   },
   {
@@ -55,7 +61,10 @@ export const FlowsSample: Record[] = [
       DstPort: 3100,
       Packets: 400,
       Proto: 6,
-      Bytes: 76800
+      Bytes: 76800,
+      FlowDirection: FlowDirection.Ingress,
+      SrcMac: '8a:f6:69:6b:1a:cc',
+      DstMac: '0a:58:0a:80:00:17'
     }
   }
 ];

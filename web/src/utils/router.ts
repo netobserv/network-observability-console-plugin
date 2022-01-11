@@ -1,6 +1,7 @@
 import { createBrowserHistory } from 'history';
 import * as _ from 'lodash';
-import { ColumnsId, Filter } from './columns';
+import { ColumnsId } from './columns';
+import { Filter } from './filters';
 import { TimeRange } from './datetime';
 
 export enum QueryArguments {

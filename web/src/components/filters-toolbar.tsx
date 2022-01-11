@@ -22,19 +22,23 @@ import {
 } from '@patternfly/react-core';
 import { SearchIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
-import { getPort, getService } from 'port-numbers';
-import protocols from 'protocol-numbers';
+import { getPort } from 'port-numbers';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Column, ColumnsId, Filter, FilterType, FilterValue } from '../utils/columns';
+import { Column, ColumnsId } from '../utils/columns';
+import {
+  createFilterValue,
+  Filter,
+  FilterOption,
+  FilterType,
+  FilterValue,
+  findDirectionOption,
+  findProtocolOption,
+  getFilterOptions
+} from '../utils/filters';
 import { getQueryArgument, QueryParams, removeQueryArguments, setQueryArguments } from '../utils/router';
 import './filters-toolbar.css';
 import { validateIPFilter } from '../utils/ip';
-
-interface Option {
-  name: string;
-  value: string;
-}
 
 export const SPLIT_FILTER_CHAR = ',';
 
@@ -57,9 +61,8 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
   const { t } = useTranslation('plugin__network-observability-plugin');
   const autocompleteContainerRef = React.useRef<HTMLDivElement | null>(null);
   const searchInputRef = React.useRef<HTMLInputElement | null>(null);
-  const [protocolOptions, setProtocolOptions] = React.useState<Option[]>([]);
   const [invalidMessage, setInvalidMessage] = React.useState<string | undefined>();
-  const [autocompleteOptions, setAutocompleteOptions] = React.useState<JSX.Element[]>([]);
+  const [autocompleteOptions, setAutocompleteOptions] = React.useState<FilterOption[]>([]);
   const [isPopperVisible, setPopperVisible] = React.useState(false);
   const [isFiltersOpen, setIsOpen] = React.useState<boolean>(false);
 
@@ -68,64 +71,18 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
   const [selectedFilterValue, setSelectedFilterValue] = React.useState<string>('');
 
   const onAutoCompleteChange = (newValue: string) => {
-    if (!_.isEmpty(newValue)) {
-      let options: Option[];
-      switch (selectedFilterColumn.filterType) {
-        case FilterType.PORT:
-          const isNumber = !isNaN(Number(newValue));
-          const foundService = isNumber ? getService(Number(newValue)) : null;
-          const foundPort = !isNumber ? getPort(newValue) : null;
-          if (foundService) {
-            options = [{ name: foundService.name, value: newValue }];
-          } else if (foundPort) {
-            options = [{ name: newValue, value: foundPort.port.toString() }];
-          } else {
-            options = [];
-          }
-          break;
-        case FilterType.PROTOCOL:
-          options = protocolOptions;
-          break;
-        default:
-          options = [];
-          break;
-      }
-      if (options.length > 10) {
-        //check if name or value starts with input
-        options = options.filter(
-          option => option.name.toLowerCase().startsWith(newValue.toLowerCase()) || option.value.startsWith(newValue)
-        );
-        if (options.length > 10) {
-          options = options.slice(0, 10);
-        } else {
-          //add name or value includes if not enough results
-          options = [
-            ...options,
-            ...options.filter(option => option.name.toLowerCase().includes(newValue.toLowerCase()))
-          ].slice(0, 10);
-        }
-      }
-
-      const menuItems = options.map(option => (
-        <MenuItem itemId={option.value} key={option.name}>
-          {option.name}
-        </MenuItem>
-      ));
-
-      // The menu is hidden if there are no options
-      setPopperVisible(menuItems.length > 0);
-      setAutocompleteOptions(menuItems);
-    } else {
-      setPopperVisible(false);
-    }
+    const options = getFilterOptions(selectedFilterColumn.filterType, newValue, 10);
+    setAutocompleteOptions(options);
+    // The menu is hidden if there are no options
+    setPopperVisible(options.length > 0);
     setSelectedFilterValue(newValue);
   };
 
   const onAutoCompleteSelect = (e: React.MouseEvent<Element, MouseEvent>, itemId: string) => {
     e.stopPropagation();
-    setSelectedFilterValue(itemId);
-    setPopperVisible(false);
-    searchInputRef?.current?.focus();
+    const option = autocompleteOptions.find(opt => opt.value === itemId);
+    addFilter({ v: itemId, display: option?.name });
+    resetAutocompleteOptions();
   };
 
   const resetFilterValue = React.useCallback(() => {
@@ -137,81 +94,55 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
         setFilterValue('');
         break;
     }
-
-    setPopperVisible(false);
+    resetAutocompleteOptions();
   }, [selectedFilterColumn?.filterType]);
+
+  const resetAutocompleteOptions = () => {
+    setPopperVisible(false);
+    setAutocompleteOptions([]);
+  };
 
   const validateFilterValue = React.useCallback(() => {
     if (!selectedFilterColumn) {
-      return t('Column must be selected');
+      return { err: t('Column must be selected') };
     } else if (_.isEmpty(selectedFilterValue)) {
-      return t('Value is empty');
+      return { err: t('Value is empty') };
     }
 
     switch (selectedFilterColumn?.filterType) {
       case FilterType.PORT:
         //allow any port number or valid name / value
         if (!isNaN(Number(selectedFilterValue)) || getPort(selectedFilterValue)) {
-          return '';
+          return { val: selectedFilterValue };
         } else {
-          return t('Unknown port');
+          return { err: t('Unknown port') };
         }
       case FilterType.ADDRESS:
         return validateIPFilter(selectedFilterValue)
-          ? ''
-          : t('Not a valid IPv4 or IPv6, nor a CIDR, nor an IP range separated by hyphen');
+          ? { val: selectedFilterValue }
+          : { err: t('Not a valid IPv4 or IPv6, nor a CIDR, nor an IP range separated by hyphen') };
       case FilterType.PROTOCOL:
         //allow any protocol number or valid name / value
-        if (
-          !isNaN(Number(selectedFilterValue)) ||
-          protocolOptions.find(p => p.name === selectedFilterValue || p.value === selectedFilterValue)
-        ) {
-          return '';
+        if (!isNaN(Number(selectedFilterValue))) {
+          return { val: selectedFilterValue };
         } else {
-          return t('Unknown protocol');
+          const proto = findProtocolOption(selectedFilterValue);
+          if (proto) {
+            return { val: proto.name };
+          }
+          return { err: t('Unknown protocol') };
+        }
+      case FilterType.DIRECTION:
+        const dir = findDirectionOption(selectedFilterValue);
+        if (dir) {
+          return { val: dir.name };
+        } else {
+          return { err: t('Invalid direction') };
         }
       default:
-        return '';
+        return { val: selectedFilterValue };
     }
-  }, [protocolOptions, selectedFilterColumn, selectedFilterValue, t]);
-
-  const getValueAndDisplay = React.useCallback(
-    (column: Column, value: string): FilterValue | undefined => {
-      switch (column.filterType) {
-        case FilterType.PORT:
-          const isNumber = !isNaN(Number(value));
-          const foundService = isNumber ? getService(Number(value)) : null;
-          const foundPort = !isNumber ? getPort(value) : null;
-          if (foundService) {
-            return {
-              v: value,
-              display: foundService.name
-            };
-          } else if (foundPort) {
-            return {
-              v: foundPort.port.toString(),
-              display: value
-            };
-          }
-        case FilterType.PROTOCOL:
-          const found = protocolOptions.find(p => p.name === value || p.value === value);
-          if (found) {
-            return {
-              v: found.value,
-              display: found.name
-            };
-          } else {
-            console.warn('protocol ' + value + ' not found');
-          }
-      }
-      return { v: value };
-    },
-    [protocolOptions]
-  );
-
-  const getSelectedValueAndDisplay = React.useCallback((): FilterValue | undefined => {
-    return getValueAndDisplay(selectedFilterColumn, selectedFilterValue);
-  }, [getValueAndDisplay, selectedFilterColumn, selectedFilterValue]);
+  }, [selectedFilterColumn, selectedFilterValue, t]);
 
   const setFiltersAndArgs = React.useCallback(
     (filters: Filter[]) => {
@@ -231,44 +162,49 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
     setSelectedFilterValue(v);
   };
 
-  const manageFilters = React.useCallback(() => {
-    const error = validateFilterValue();
-    if (!_.isEmpty(error)) {
-      setInvalidMessage(error);
-      return;
-    }
-
-    const result = _.cloneDeep(filters) || [];
-    const newValue = getSelectedValueAndDisplay();
-    if (newValue) {
+  const addFilter = React.useCallback(
+    (filter: FilterValue) => {
+      const result = _.cloneDeep(filters) || [];
       const found = result.find(f => f.colId === selectedFilterColumn.id);
       if (found) {
         //only one filter can be set on timestamp to use loki start & end query params
         if (selectedFilterColumn.id === ColumnsId.timestamp) {
-          found.values = [newValue];
-        } else if (found.values.map(value => value.v).includes(newValue.v)) {
+          found.values = [filter];
+        } else if (found.values.map(value => value.v).includes(filter.v)) {
           setInvalidMessage(t('Filter already exists'));
           return;
         } else {
-          found.values.push(newValue);
+          found.values.push(filter);
         }
       } else {
-        result.push({ colId: selectedFilterColumn.id, values: [newValue] });
+        result.push({ colId: selectedFilterColumn.id, values: [filter] });
       }
       setFiltersAndArgs(result);
       resetFilterValue();
+    },
+    [t, filters, selectedFilterColumn.id, setFiltersAndArgs, resetFilterValue]
+  );
+
+  const manageFilters = React.useCallback(() => {
+    // Only one choice is present, consider this is what is desired
+    if (autocompleteOptions.length === 1) {
+      addFilter({ v: autocompleteOptions[0].value, display: autocompleteOptions[0].name });
+      return;
+    }
+
+    const validation = validateFilterValue();
+    if (!_.isEmpty(validation.err)) {
+      setInvalidMessage(validation.err);
+      return;
+    }
+
+    const newValue = createFilterValue(selectedFilterColumn.filterType, validation.val!);
+    if (newValue) {
+      addFilter(newValue);
     } else {
       console.error('manageFilters invalid newValue');
     }
-  }, [
-    validateFilterValue,
-    filters,
-    getSelectedValueAndDisplay,
-    setFiltersAndArgs,
-    resetFilterValue,
-    selectedFilterColumn.id,
-    t
-  ]);
+  }, [autocompleteOptions, validateFilterValue, selectedFilterColumn, addFilter]);
 
   /*TODO: check if we can do autocomplete for pod / namespace fields
    * as implemented for protocols
@@ -277,6 +213,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
     switch (col.filterType) {
       case FilterType.PORT:
       case FilterType.PROTOCOL:
+      case FilterType.DIRECTION:
         return (
           <div ref={autocompleteContainerRef}>
             <Popper
@@ -294,7 +231,13 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
               popper={
                 <Menu onSelect={onAutoCompleteSelect}>
                   <MenuContent>
-                    <MenuList>{autocompleteOptions}</MenuList>
+                    <MenuList>
+                      {autocompleteOptions.map(option => (
+                        <MenuItem itemId={option.value} key={option.name}>
+                          {option.name}
+                        </MenuItem>
+                      ))}
+                    </MenuList>
                   </MenuContent>
                 </Menu>
               }
@@ -342,33 +285,18 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
 
   React.useEffect(() => {
     resetFilterValue();
+    searchInputRef?.current?.focus();
   }, [selectedFilterColumn, resetFilterValue]);
 
-  // Run once on mount to set protocol options
+  //apply filters from query params
   React.useEffect(() => {
-    const pOptions = [] as Option[];
-    _.forOwn(protocols, function (__, key) {
-      if (!_.isEmpty(protocols[key].name)) {
-        pOptions.push(protocols[key]);
-      }
-    });
-    setProtocolOptions(_.orderBy(pOptions, 'name'));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  //apply filters from query params after protocolOptions set
-  React.useEffect(() => {
-    if (_.isEmpty(protocolOptions)) {
-      return;
-    }
-
     const queryParamFilters: Filter[] = [];
     columns.forEach(col => {
       const colFilterValues = getQueryArgument(col.id)?.split(SPLIT_FILTER_CHAR) ?? [];
       if (!_.isEmpty(colFilterValues)) {
         const filterValues: FilterValue[] = [];
         colFilterValues.forEach(paramValue => {
-          const value = getValueAndDisplay(col, paramValue);
+          const value = createFilterValue(col.filterType, paramValue);
           if (value) {
             filterValues.push(value);
           }
@@ -386,7 +314,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
     //reset url args here to clean invalid values
     setFiltersAndArgs(queryParamFilters);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [protocolOptions]);
+  }, []);
 
   return (
     <Toolbar
@@ -438,9 +366,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
                     id={col.name}
                     className="column-filter-item"
                     component="button"
-                    onClick={() => {
-                      setSelectedFilterColumn(col);
-                    }}
+                    onClick={() => setSelectedFilterColumn(col)}
                     key={index}
                   >
                     {col.name}

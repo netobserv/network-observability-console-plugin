@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { QueryParams } from '../utils/router';
-import { LokiResponse, Record, parseStream } from './loki';
+import { Record } from './ipfix';
+import { LokiResponse, parseStream } from './loki';
 
 const host = '/api/proxy/namespace/network-observability/service/network-observability-plugin:9001';
 

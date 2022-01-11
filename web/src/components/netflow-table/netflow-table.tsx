@@ -14,7 +14,7 @@ import {
 import { SearchIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
 
-import { Record } from '../../api/loki';
+import { Record } from '../../api/ipfix';
 import { NetflowTableHeader } from './netflow-table-header';
 import NetflowTableRow from './netflow-table-row';
 import { Column } from '../../utils/columns';

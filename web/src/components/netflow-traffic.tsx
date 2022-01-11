@@ -5,10 +5,10 @@ import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Record } from '../api/loki';
+import { Record } from '../api/ipfix';
 import { getFlows } from '../api/routes';
 import NetflowTable from './netflow-table/netflow-table';
-import { Column, Filter, getDefaultColumns } from '../utils/columns';
+import { Column, getDefaultColumns } from '../utils/columns';
 import { usePoll } from '../utils/poll-hook';
 import { ColumnsModal } from './columns-modal';
 import { FiltersToolbar } from './filters-toolbar';
@@ -33,6 +33,7 @@ import {
   LOCAL_STORAGE_SIZE_KEY,
   useLocalStorage
 } from '../utils/local-storage-hook';
+import { Filter } from '../utils/filters';
 
 const DEFAULT_TIME_RANGE = 300;
 

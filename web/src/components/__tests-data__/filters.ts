@@ -1,4 +1,5 @@
-import { ColumnsId, Filter } from '../../utils/columns';
+import { Filter } from '../../utils/filters';
+import { ColumnsId } from '../../utils/columns';
 
 export const FiltersSample: Filter[] = [
   {
