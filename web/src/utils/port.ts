@@ -1,9 +1,8 @@
 import { getService } from 'port-numbers';
 
-export const formatPort = p => {
+export const formatPort = (p: number) => {
   const service = getService(p);
   if (service) {
-    // return util.format("%s (%d)", service.name, p)
     return `${service.name} (${p})`;
   } else {
     return String(p);
@@ -12,7 +11,7 @@ export const formatPort = p => {
 
 // This sort is ordering first the port with a known service
 // then order numerically the other port
-export const comparePort = (p1, p2) => {
+export const comparePorts = (p1: number, p2: number) => {
   const s1 = getService(p1);
   const s2 = getService(p2);
   if (s1 && s2) {

@@ -23,19 +23,19 @@ export type StreamResult = {
   values: string[][];
 };
 
-export interface ParsedStream {
-  labels: IPFIXLabels;
+export interface Record {
+  labels: Labels;
   key: string;
   timestamp: number;
-  ipfix: IPFIXStream;
+  fields: Fields;
 }
 
-export interface IPFIXLabels {
+export interface Labels {
   SrcNamespace: string;
   DstNamespace: string;
 }
 
-export interface IPFIXStream {
+export interface Fields {
   SrcAddr: string;
   DstAddr: string;
   SrcPod: string;
@@ -47,14 +47,14 @@ export interface IPFIXStream {
   Bytes: number;
 }
 
-export const parseStream = (raw: StreamResult): ParsedStream[] => {
+export const parseStream = (raw: StreamResult): Record[] => {
   return raw.values.map(v => {
-    const ipfix = JSON.parse(v[1]) as IPFIXStream;
+    const fields = JSON.parse(v[1]) as Fields;
     return {
-      labels: raw.stream as unknown as IPFIXLabels,
+      labels: raw.stream as unknown as Labels,
       key: _.uniqueId('flow-'),
       timestamp: +v[0].slice(0, 13),
-      ipfix: ipfix
+      fields: fields
     };
   });
 };

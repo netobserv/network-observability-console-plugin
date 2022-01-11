@@ -59,9 +59,9 @@ describe('<NetflowTable />', () => {
     const expectedDateText =
       new Date(FlowsSample[2].timestamp).toDateString() + ' ' + new Date(FlowsSample[2].timestamp).toLocaleTimeString();
     expect(wrapper.find(NetflowTableRow).find(Td).at(0).text()).toBe(expectedDateText);
-    const expectedSrcAddress = FlowsSample[2].ipfix.SrcAddr;
+    const expectedSrcAddress = FlowsSample[2].fields.SrcAddr;
     expect(wrapper.find(NetflowTableRow).at(0).text()).toContain(expectedSrcAddress);
-    const expectedDstAddress = FlowsSample[2].ipfix.DstAddr;
+    const expectedDstAddress = FlowsSample[2].fields.DstAddr;
     expect(wrapper.find(NetflowTableRow).at(0).text()).toContain(expectedDstAddress);
   });
   it('should render a spinning slide and then the netflow rows', async () => {

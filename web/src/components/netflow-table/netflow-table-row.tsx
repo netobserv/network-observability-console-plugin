@@ -1,13 +1,13 @@
 import * as React from 'react';
 import { Tr, Td } from '@patternfly/react-table';
 import { ResourceLink } from '@openshift-console/dynamic-plugin-sdk';
-import protocols from 'protocol-numbers';
 
-import { ParsedStream } from '../../api/loki';
+import { Record } from '../../api/loki';
 import { Column, ColumnsId } from '../../utils/columns';
 import { formatPort } from '../../utils/port';
+import { formatProtocol } from '../../utils/protocol';
 
-const NetflowTableRow: React.FC<{ flow: ParsedStream; columns: Column[] }> = ({ flow, columns }) => {
+const NetflowTableRow: React.FC<{ flow: Record; columns: Column[] }> = ({ flow, columns }) => {
   const content = c => {
     const value = c.value(flow);
     switch (c.id) {
@@ -37,17 +37,13 @@ const NetflowTableRow: React.FC<{ flow: ParsedStream; columns: Column[] }> = ({ 
         }
       }
       case ColumnsId.srcport: {
-        return formatPort(flow.ipfix.SrcPort);
+        return formatPort(value);
       }
       case ColumnsId.dstport: {
-        return formatPort(flow.ipfix.DstPort);
+        return formatPort(value);
       }
       case ColumnsId.proto:
-        if (value) {
-          return protocols[value].name;
-        } else {
-          return '';
-        }
+        return formatProtocol(value);
       default:
         return value;
     }

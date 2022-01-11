@@ -1,8 +1,9 @@
 import { TFunction } from 'i18next';
-import { ParsedStream } from '../api/loki';
-import protocols from 'protocol-numbers';
-import { ipCompare } from '../utils/ip';
-import { comparePort } from '../utils/port';
+import { Record } from '../api/loki';
+import { compareIPs } from '../utils/ip';
+import { comparePorts } from '../utils/port';
+import { compareProtocols } from '../utils/protocol';
+import { compareNumbers, compareStrings } from './base-compare';
 
 export enum ColumnsId {
   timestamp = 'timestamp',
@@ -25,8 +26,8 @@ export interface Column {
   isSelected: boolean;
   defaultOrder: number;
   filterType: FilterType;
-  value: (flow: ParsedStream) => string | number;
-  sort(a: ParsedStream, b: ParsedStream, col: Column): number;
+  value: (flow: Record) => string | number;
+  sort(a: Record, b: Record, col: Column): number;
 }
 
 export interface FilterValue {
@@ -58,7 +59,7 @@ export const getDefaultColumns = (t: TFunction): Column[] => {
       defaultOrder: 1,
       filterType: FilterType.NONE,
       value: f => f.timestamp,
-      sort: (a, b, col) => sortNumbers(col.value(a) as number, col.value(b) as number)
+      sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number)
     },
     {
       id: ColumnsId.srcpod,
@@ -66,8 +67,8 @@ export const getDefaultColumns = (t: TFunction): Column[] => {
       isSelected: true,
       defaultOrder: 2,
       filterType: FilterType.POD,
-      value: f => f.ipfix.SrcPod,
-      sort: (a, b, col) => sortStrings(col.value(a) as string, col.value(b) as string)
+      value: f => f.fields.SrcPod,
+      sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string)
     },
     {
       id: ColumnsId.dstpod,
@@ -75,8 +76,8 @@ export const getDefaultColumns = (t: TFunction): Column[] => {
       isSelected: true,
       defaultOrder: 3,
       filterType: FilterType.POD,
-      value: f => f.ipfix.DstPod,
-      sort: (a, b, col) => sortStrings(col.value(a) as string, col.value(b) as string)
+      value: f => f.fields.DstPod,
+      sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string)
     },
     {
       id: ColumnsId.srcnamespace,
@@ -85,7 +86,7 @@ export const getDefaultColumns = (t: TFunction): Column[] => {
       defaultOrder: 4,
       filterType: FilterType.NAMESPACE,
       value: f => f.labels.SrcNamespace,
-      sort: (a, b, col) => sortStrings(col.value(a) as string, col.value(b) as string)
+      sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string)
     },
     {
       id: ColumnsId.dstnamespace,
@@ -94,7 +95,7 @@ export const getDefaultColumns = (t: TFunction): Column[] => {
       defaultOrder: 5,
       filterType: FilterType.NAMESPACE,
       value: f => f.labels.DstNamespace,
-      sort: (a, b, col) => sortStrings(col.value(a) as string, col.value(b) as string)
+      sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string)
     },
     {
       id: ColumnsId.srcaddr,
@@ -102,8 +103,8 @@ export const getDefaultColumns = (t: TFunction): Column[] => {
       isSelected: true,
       defaultOrder: 6,
       filterType: FilterType.ADDRESS,
-      value: f => f.ipfix.SrcAddr,
-      sort: (a, b, col) => ipCompare(col.value(a) as string, col.value(b) as string)
+      value: f => f.fields.SrcAddr,
+      sort: (a, b, col) => compareIPs(col.value(a) as string, col.value(b) as string)
     },
     {
       id: ColumnsId.dstaddr,
@@ -111,8 +112,8 @@ export const getDefaultColumns = (t: TFunction): Column[] => {
       isSelected: true,
       defaultOrder: 7,
       filterType: FilterType.ADDRESS,
-      value: f => f.ipfix.DstAddr,
-      sort: (a, b, col) => ipCompare(col.value(a) as string, col.value(b) as string)
+      value: f => f.fields.DstAddr,
+      sort: (a, b, col) => compareIPs(col.value(a) as string, col.value(b) as string)
     },
     {
       id: ColumnsId.srcport,
@@ -120,8 +121,8 @@ export const getDefaultColumns = (t: TFunction): Column[] => {
       isSelected: true,
       defaultOrder: 8,
       filterType: FilterType.PORT,
-      value: f => f.ipfix.SrcPort,
-      sort: (a, b, col) => comparePort(col.value(a), col.value(b))
+      value: f => f.fields.SrcPort,
+      sort: (a, b, col) => comparePorts(col.value(a) as number, col.value(b) as number)
     },
     {
       id: ColumnsId.dstport,
@@ -129,8 +130,8 @@ export const getDefaultColumns = (t: TFunction): Column[] => {
       isSelected: true,
       defaultOrder: 9,
       filterType: FilterType.PORT,
-      value: f => f.ipfix.DstPort,
-      sort: (a, b, col) => comparePort(col.value(a), col.value(b))
+      value: f => f.fields.DstPort,
+      sort: (a, b, col) => comparePorts(col.value(a) as number, col.value(b) as number)
     },
     {
       id: ColumnsId.proto,
@@ -138,8 +139,8 @@ export const getDefaultColumns = (t: TFunction): Column[] => {
       isSelected: true,
       defaultOrder: 10,
       filterType: FilterType.PROTOCOL,
-      value: f => f.ipfix.Proto,
-      sort: (a, b, col) => sortProtocols(col.value(a) as number, col.value(b) as number)
+      value: f => f.fields.Proto,
+      sort: (a, b, col) => compareProtocols(col.value(a) as number, col.value(b) as number)
     },
     {
       id: ColumnsId.bytes,
@@ -147,8 +148,8 @@ export const getDefaultColumns = (t: TFunction): Column[] => {
       isSelected: true,
       defaultOrder: 11,
       filterType: FilterType.NONE,
-      value: f => f.ipfix.Bytes,
-      sort: (a, b, col) => sortNumbers(col.value(a) as number, col.value(b) as number)
+      value: f => f.fields.Bytes,
+      sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number)
     },
     {
       id: ColumnsId.packets,
@@ -156,30 +157,8 @@ export const getDefaultColumns = (t: TFunction): Column[] => {
       isSelected: true,
       defaultOrder: 12,
       filterType: FilterType.NONE,
-      value: f => f.ipfix.Packets,
-      sort: (a, b, col) => sortNumbers(col.value(a) as number, col.value(b) as number)
+      value: f => f.fields.Packets,
+      sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number)
     }
   ];
-};
-
-const sortNumbers = (a: number, b: number) => {
-  if (!isNaN(a) && !isNaN(b)) {
-    return a - b;
-  } else if (!isNaN(a)) {
-    return 1;
-  }
-  return -1;
-};
-
-const sortStrings = (a: string, b: string) => {
-  if (a && b) {
-    return a.localeCompare(b);
-  } else if (a) {
-    return 1;
-  }
-  return -1;
-};
-
-const sortProtocols = (a: number, b: number) => {
-  return sortStrings(protocols[a]?.name, protocols[b]?.name);
 };

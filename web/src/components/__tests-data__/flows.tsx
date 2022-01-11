@@ -1,6 +1,6 @@
-import { ParsedStream } from '../../api/loki';
+import { Record } from '../../api/loki';
 
-export const FlowsSample: ParsedStream[] = [
+export const FlowsSample: Record[] = [
   {
     labels: {
       SrcNamespace: 'default',
@@ -8,7 +8,7 @@ export const FlowsSample: ParsedStream[] = [
     },
     key: '1',
     timestamp: 1639058287000,
-    ipfix: {
+    fields: {
       SrcAddr: '10.244.0.6',
       DstAddr: '10.244.0.7',
       SrcPod: 'loki-promtail-7bpg8',
@@ -27,7 +27,7 @@ export const FlowsSample: ParsedStream[] = [
     },
     key: '2',
     timestamp: 1639058286000,
-    ipfix: {
+    fields: {
       SrcAddr: '10.244.0.2',
       DstAddr: '10.244.0.3',
       SrcPod: undefined,
@@ -46,7 +46,7 @@ export const FlowsSample: ParsedStream[] = [
     },
     key: '3',
     timestamp: 1639058288000,
-    ipfix: {
+    fields: {
       SrcAddr: '10.244.0.9',
       DstAddr: '10.244.0.2',
       SrcPod: 'coredns-74ff55c5b-dfbff',

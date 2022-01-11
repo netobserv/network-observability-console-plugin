@@ -14,13 +14,13 @@ import {
 import { SearchIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
 
-import { ParsedStream } from '../../api/loki';
+import { Record } from '../../api/loki';
 import { NetflowTableHeader } from './netflow-table-header';
 import NetflowTableRow from './netflow-table-row';
 import { Column } from '../../utils/columns';
 
 const NetflowTable: React.FC<{
-  flows: ParsedStream[];
+  flows: Record[];
   columns: Column[];
   clearFilters: () => void;
   loading?: boolean;
@@ -39,7 +39,7 @@ const NetflowTable: React.FC<{
     if (activeSortIndex < 0 || activeSortIndex >= columns.length) {
       return flows;
     } else {
-      return flows.sort((a: ParsedStream, b: ParsedStream) => {
+      return flows.sort((a: Record, b: Record) => {
         const col = columns[activeSortIndex];
         return activeSortDirection === 'desc' ? col.sort(a, b, col) : col.sort(b, a, col);
       });
