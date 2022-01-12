@@ -19,7 +19,7 @@ import {
   Tooltip
 } from '@patternfly/react-core';
 import { useTranslation } from 'react-i18next';
-import { Column } from '../utils/columns';
+import { Column, getDefaultColumns } from '../utils/columns';
 import * as _ from 'lodash';
 import './columns-modal.css';
 
@@ -79,12 +79,8 @@ export const ColumnsModal: React.FC<{
   );
 
   const onReset = React.useCallback(() => {
-    const result = _.sortBy(updatedColumns, (col: Column) => col.defaultOrder);
-    _.forEach(result, (col: Column) => {
-      col.isSelected = true;
-    });
-    setUpdatedColumns(result);
-  }, [updatedColumns, setUpdatedColumns]);
+    setUpdatedColumns(getDefaultColumns(t));
+  }, [setUpdatedColumns, t]);
 
   const onSelectAll = React.useCallback(() => {
     const result = [...updatedColumns];

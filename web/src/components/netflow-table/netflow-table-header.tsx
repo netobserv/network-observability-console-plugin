@@ -13,6 +13,7 @@ export const NetflowTableHeader: React.FC<{
       <Tr>
         {columns.map((c, i) => (
           <Th
+            width={c.width}
             key={c.id}
             sort={{
               sortBy: {

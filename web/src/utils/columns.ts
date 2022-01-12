@@ -28,6 +28,8 @@ export interface Column {
   filterType: FilterType;
   value: (flow: Record) => string | number;
   sort(a: Record, b: Record, col: Column): number;
+  //specific header width - Allowed values are limited, check TableComposable BaseCellProps with definition
+  width: 10 | 15 | 20 | 25 | 30 | 35 | 40 | 45 | 50 | 60 | 70 | 80 | 90 | 100;
 }
 
 export interface FilterValue {
@@ -59,7 +61,8 @@ export const getDefaultColumns = (t: TFunction): Column[] => {
       defaultOrder: 1,
       filterType: FilterType.NONE,
       value: f => f.timestamp,
-      sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number)
+      sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
+      width: 30
     },
     {
       id: ColumnsId.srcpod,
@@ -68,7 +71,8 @@ export const getDefaultColumns = (t: TFunction): Column[] => {
       defaultOrder: 2,
       filterType: FilterType.POD,
       value: f => f.fields.SrcPod,
-      sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string)
+      sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
+      width: 30
     },
     {
       id: ColumnsId.dstpod,
@@ -77,7 +81,8 @@ export const getDefaultColumns = (t: TFunction): Column[] => {
       defaultOrder: 3,
       filterType: FilterType.POD,
       value: f => f.fields.DstPod,
-      sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string)
+      sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
+      width: 30
     },
     {
       id: ColumnsId.srcnamespace,
@@ -86,7 +91,8 @@ export const getDefaultColumns = (t: TFunction): Column[] => {
       defaultOrder: 4,
       filterType: FilterType.NAMESPACE,
       value: f => f.labels.SrcNamespace,
-      sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string)
+      sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
+      width: 30
     },
     {
       id: ColumnsId.dstnamespace,
@@ -95,25 +101,28 @@ export const getDefaultColumns = (t: TFunction): Column[] => {
       defaultOrder: 5,
       filterType: FilterType.NAMESPACE,
       value: f => f.labels.DstNamespace,
-      sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string)
+      sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
+      width: 30
     },
     {
       id: ColumnsId.srcaddr,
       name: t('Src address'),
-      isSelected: true,
+      isSelected: false,
       defaultOrder: 6,
       filterType: FilterType.ADDRESS,
       value: f => f.fields.SrcAddr,
-      sort: (a, b, col) => compareIPs(col.value(a) as string, col.value(b) as string)
+      sort: (a, b, col) => compareIPs(col.value(a) as string, col.value(b) as string),
+      width: 20
     },
     {
       id: ColumnsId.dstaddr,
       name: t('Dst address'),
-      isSelected: true,
+      isSelected: false,
       defaultOrder: 7,
       filterType: FilterType.ADDRESS,
       value: f => f.fields.DstAddr,
-      sort: (a, b, col) => compareIPs(col.value(a) as string, col.value(b) as string)
+      sort: (a, b, col) => compareIPs(col.value(a) as string, col.value(b) as string),
+      width: 20
     },
     {
       id: ColumnsId.srcport,
@@ -122,7 +131,8 @@ export const getDefaultColumns = (t: TFunction): Column[] => {
       defaultOrder: 8,
       filterType: FilterType.PORT,
       value: f => f.fields.SrcPort,
-      sort: (a, b, col) => comparePorts(col.value(a) as number, col.value(b) as number)
+      sort: (a, b, col) => comparePorts(col.value(a) as number, col.value(b) as number),
+      width: 20
     },
     {
       id: ColumnsId.dstport,
@@ -131,16 +141,18 @@ export const getDefaultColumns = (t: TFunction): Column[] => {
       defaultOrder: 9,
       filterType: FilterType.PORT,
       value: f => f.fields.DstPort,
-      sort: (a, b, col) => comparePorts(col.value(a) as number, col.value(b) as number)
+      sort: (a, b, col) => comparePorts(col.value(a) as number, col.value(b) as number),
+      width: 20
     },
     {
       id: ColumnsId.proto,
       name: t('Protocol'),
-      isSelected: true,
+      isSelected: false,
       defaultOrder: 10,
       filterType: FilterType.PROTOCOL,
       value: f => f.fields.Proto,
-      sort: (a, b, col) => compareProtocols(col.value(a) as number, col.value(b) as number)
+      sort: (a, b, col) => compareProtocols(col.value(a) as number, col.value(b) as number),
+      width: 20
     },
     {
       id: ColumnsId.bytes,
@@ -149,7 +161,8 @@ export const getDefaultColumns = (t: TFunction): Column[] => {
       defaultOrder: 11,
       filterType: FilterType.NONE,
       value: f => f.fields.Bytes,
-      sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number)
+      sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
+      width: 10
     },
     {
       id: ColumnsId.packets,
@@ -158,7 +171,8 @@ export const getDefaultColumns = (t: TFunction): Column[] => {
       defaultOrder: 12,
       filterType: FilterType.NONE,
       value: f => f.fields.Packets,
-      sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number)
+      sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
+      width: 10
     }
   ];
 };

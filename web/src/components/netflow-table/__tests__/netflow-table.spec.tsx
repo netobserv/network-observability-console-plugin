@@ -8,6 +8,7 @@ import { NetflowTableHeader } from '../netflow-table-header';
 
 import { ColumnsSample } from '../../__tests-data__/columns';
 import { FlowsSample } from '../../__tests-data__/flows';
+import { Size } from '../../display-dropdown';
 
 const errorStateQuery = `EmptyState[data-test="error-state"]`;
 const loadingContentsQuery = `Bullseye[data-test="loading-contents"]`;
@@ -24,6 +25,7 @@ jest.mock('@openshift-console/dynamic-plugin-sdk', () => {
 
 describe('<NetflowTable />', () => {
   const mocks = {
+    size: 'm' as Size,
     clearFilters: null
   };
   beforeEach(() => {
@@ -58,7 +60,7 @@ describe('<NetflowTable />', () => {
     button.simulate('click');
     const expectedDateText =
       new Date(FlowsSample[2].timestamp).toDateString() + ' ' + new Date(FlowsSample[2].timestamp).toLocaleTimeString();
-    expect(wrapper.find(NetflowTableRow).find(Td).at(0).text()).toBe(expectedDateText);
+    expect(wrapper.find(NetflowTableRow).find(Td).find('.datetime').at(0).text()).toBe(expectedDateText);
     const expectedSrcAddress = FlowsSample[2].fields.SrcAddr;
     expect(wrapper.find(NetflowTableRow).at(0).text()).toContain(expectedSrcAddress);
     const expectedDstAddress = FlowsSample[2].fields.DstAddr;

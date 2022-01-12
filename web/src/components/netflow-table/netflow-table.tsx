@@ -18,14 +18,16 @@ import { Record } from '../../api/loki';
 import { NetflowTableHeader } from './netflow-table-header';
 import NetflowTableRow from './netflow-table-row';
 import { Column } from '../../utils/columns';
+import { Size } from '../display-dropdown';
 
 const NetflowTable: React.FC<{
   flows: Record[];
   columns: Column[];
+  size: Size;
   clearFilters: () => void;
   loading?: boolean;
   error?: string;
-}> = ({ flows, columns, error, loading, clearFilters }) => {
+}> = ({ flows, columns, error, loading, size, clearFilters }) => {
   const { t } = useTranslation('plugin__network-observability-plugin');
 
   // index of the currently active column
@@ -98,7 +100,7 @@ const NetflowTable: React.FC<{
       );
     }
   } else {
-    bodyContent = getSortedFlows().map(f => <NetflowTableRow key={f.key} flow={f} columns={columns} />);
+    bodyContent = getSortedFlows().map(f => <NetflowTableRow key={f.key} flow={f} columns={columns} size={size} />);
   }
 
   return (
