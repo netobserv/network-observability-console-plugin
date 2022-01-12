@@ -18,12 +18,12 @@ import { Record } from '../../api/loki';
 import { NetflowTableHeader } from './netflow-table-header';
 import NetflowTableRow from './netflow-table-row';
 import { Column } from '../../utils/columns';
-import { Sizes } from '../display-dropdown';
+import { Size } from '../display-dropdown';
 
 const NetflowTable: React.FC<{
   flows: Record[];
   columns: Column[];
-  size: Sizes;
+  size: Size;
   clearFilters: () => void;
   loading?: boolean;
   error?: string;
