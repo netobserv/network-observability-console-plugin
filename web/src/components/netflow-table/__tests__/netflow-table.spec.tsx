@@ -1,13 +1,13 @@
 import * as React from 'react';
 import { shallow, mount } from 'enzyme';
+import { Td } from '@patternfly/react-table';
 
 import NetflowTable from '../netflow-table';
 import NetflowTableRow from '../netflow-table-row';
 import { NetflowTableHeader } from '../netflow-table-header';
 
-import { ColumnsSample } from '../__tests-data__/columns';
-import { FlowsSample } from '../__tests-data__/flows';
-import { Td } from '@patternfly/react-table';
+import { ColumnsSample } from '../../__tests-data__/columns';
+import { FlowsSample } from '../../__tests-data__/flows';
 
 const errorStateQuery = `EmptyState[data-test="error-state"]`;
 const loadingContentsQuery = `Bullseye[data-test="loading-contents"]`;
@@ -57,13 +57,11 @@ describe('<NetflowTable />', () => {
     });
     button.simulate('click');
     const expectedDateText =
-      new Date(FlowsSample[2].value.timestamp).toDateString() +
-      ' ' +
-      new Date(FlowsSample[2].value.timestamp).toLocaleTimeString();
+      new Date(FlowsSample[2].timestamp).toDateString() + ' ' + new Date(FlowsSample[2].timestamp).toLocaleTimeString();
     expect(wrapper.find(NetflowTableRow).find(Td).at(0).text()).toBe(expectedDateText);
-    const expectedSrcAddress = FlowsSample[2].value.IPFIX.SrcAddr;
+    const expectedSrcAddress = FlowsSample[2].fields.SrcAddr;
     expect(wrapper.find(NetflowTableRow).at(0).text()).toContain(expectedSrcAddress);
-    const expectedDstAddress = FlowsSample[2].value.IPFIX.DstAddr;
+    const expectedDstAddress = FlowsSample[2].fields.DstAddr;
     expect(wrapper.find(NetflowTableRow).at(0).text()).toContain(expectedDstAddress);
   });
   it('should render a spinning slide and then the netflow rows', async () => {

@@ -1,3 +1,5 @@
+import * as _ from 'lodash';
+
 export interface LokiQuery {
   query: string;
   limit?: number;
@@ -21,17 +23,19 @@ export type StreamResult = {
   values: string[][];
 };
 
-export interface ParsedStream {
-  labels: { [key: string]: string };
-  value: ParsedStreamValue;
-}
-
-export interface ParsedStreamValue {
+export interface Record {
+  labels: Labels;
+  key: string;
   timestamp: number;
-  IPFIX: IPFIXStream;
+  fields: Fields;
 }
 
-export interface IPFIXStream {
+export interface Labels {
+  SrcNamespace: string;
+  DstNamespace: string;
+}
+
+export interface Fields {
   SrcAddr: string;
   DstAddr: string;
   SrcPod: string;
@@ -43,11 +47,14 @@ export interface IPFIXStream {
   Bytes: number;
 }
 
-export const parseStream = (raw: StreamResult): ParsedStream[] => {
-  const values = raw.values.map(v => ({
-    timestamp: +v[0].slice(0, 13),
-    IPFIX: JSON.parse(v[1])
-  }));
-  // making each value independent make sorting and filtering easier
-  return values.map(v => ({ labels: raw.stream, value: v }));
+export const parseStream = (raw: StreamResult): Record[] => {
+  return raw.values.map(v => {
+    const fields = JSON.parse(v[1]) as Fields;
+    return {
+      labels: raw.stream as unknown as Labels,
+      key: _.uniqueId('flow-'),
+      timestamp: +v[0].slice(0, 13),
+      fields: fields
+    };
+  });
 };

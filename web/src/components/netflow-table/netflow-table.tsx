@@ -1,11 +1,6 @@
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import { TableComposable, Tbody, Td, Tr } from '@patternfly/react-table';
-import { ParsedStream } from '../api/loki';
-import { NetflowTableHeader } from './netflow-table-header';
-import NetflowTableRow from './netflow-table-row';
-import * as _ from 'lodash';
-
-import SearchIcon from '@patternfly/react-icons/dist/esm/icons/search-icon';
 import {
   Bullseye,
   Button,
@@ -16,11 +11,16 @@ import {
   Spinner,
   Title
 } from '@patternfly/react-core';
-import { useTranslation } from 'react-i18next';
-import { Column } from '../utils/columns';
+import { SearchIcon } from '@patternfly/react-icons';
+import * as _ from 'lodash';
+
+import { Record } from '../../api/loki';
+import { NetflowTableHeader } from './netflow-table-header';
+import NetflowTableRow from './netflow-table-row';
+import { Column } from '../../utils/columns';
 
 const NetflowTable: React.FC<{
-  flows: ParsedStream[];
+  flows: Record[];
   columns: Column[];
   clearFilters: () => void;
   loading?: boolean;
@@ -39,9 +39,10 @@ const NetflowTable: React.FC<{
     if (activeSortIndex < 0 || activeSortIndex >= columns.length) {
       return flows;
     } else {
-      return flows.sort((a: ParsedStream, b: ParsedStream) =>
-        columns[activeSortIndex].sort(a, b, activeSortDirection === 'desc')
-      );
+      return flows.sort((a: Record, b: Record) => {
+        const col = columns[activeSortIndex];
+        return activeSortDirection === 'desc' ? col.sort(a, b, col) : col.sort(b, a, col);
+      });
     }
   };
 
@@ -97,7 +98,7 @@ const NetflowTable: React.FC<{
       );
     }
   } else {
-    bodyContent = getSortedFlows().map((f, i) => <NetflowTableRow key={i} flow={f} columns={columns} />);
+    bodyContent = getSortedFlows().map(f => <NetflowTableRow key={f.key} flow={f} columns={columns} />);
   }
 
   return (

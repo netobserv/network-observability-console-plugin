@@ -1,15 +1,15 @@
 import * as React from 'react';
-
-import { ParsedStream } from '../api/loki';
 import { Tr, Td } from '@patternfly/react-table';
-import { Column, ColumnsId, getFlowValueFromColumnId } from '../utils/columns';
 import { ResourceLink } from '@openshift-console/dynamic-plugin-sdk';
-import protocols from 'protocol-numbers';
-import { formatPort } from '../utils/port';
 
-const NetflowTableRow: React.FC<{ flow: ParsedStream; columns: Column[] }> = ({ flow, columns }) => {
+import { Record } from '../../api/loki';
+import { Column, ColumnsId } from '../../utils/columns';
+import { formatPort } from '../../utils/port';
+import { formatProtocol } from '../../utils/protocol';
+
+const NetflowTableRow: React.FC<{ flow: Record; columns: Column[] }> = ({ flow, columns }) => {
   const content = c => {
-    const value = getFlowValueFromColumnId(flow, c.id);
+    const value = c.value(flow);
     switch (c.id) {
       case ColumnsId.timestamp: {
         return (
@@ -21,10 +21,7 @@ const NetflowTableRow: React.FC<{ flow: ParsedStream; columns: Column[] }> = ({ 
       }
       case ColumnsId.srcpod:
       case ColumnsId.dstpod: {
-        const nsValue = getFlowValueFromColumnId(
-          flow,
-          c.id === ColumnsId.srcpod ? ColumnsId.srcnamespace : ColumnsId.dstnamespace
-        );
+        const nsValue = c.id === ColumnsId.srcpod ? flow.labels.SrcNamespace : flow.labels.DstNamespace;
         if (value && nsValue) {
           return <ResourceLink kind="Pod" name={value.toString()} namespace={nsValue.toString()} />;
         } else {
@@ -40,17 +37,13 @@ const NetflowTableRow: React.FC<{ flow: ParsedStream; columns: Column[] }> = ({ 
         }
       }
       case ColumnsId.srcport: {
-        return formatPort(flow.value.IPFIX.SrcPort);
+        return formatPort(value);
       }
       case ColumnsId.dstport: {
-        return formatPort(flow.value.IPFIX.DstPort);
+        return formatPort(value);
       }
       case ColumnsId.proto:
-        if (value) {
-          return protocols[value].name;
-        } else {
-          return '';
-        }
+        return formatProtocol(value);
       default:
         return value;
     }

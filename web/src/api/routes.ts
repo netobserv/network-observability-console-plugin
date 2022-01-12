@@ -1,9 +1,9 @@
 import axios from 'axios';
-import { LokiResponse, ParsedStream, parseStream } from './loki';
+import { LokiResponse, Record, parseStream } from './loki';
 
 const host = '/api/proxy/namespace/network-observability/service/network-observability-plugin:9001';
 
-export const getFlows = (params?: URLSearchParams): Promise<ParsedStream[]> => {
+export const getFlows = (params?: URLSearchParams): Promise<Record[]> => {
   return axios.get(host + '/api/loki/flows', { params }).then(r => {
     if (r.status >= 400) {
       throw new Error(`${r.statusText} [code=${r.status}]`);

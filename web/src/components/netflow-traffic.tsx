@@ -4,13 +4,14 @@ import { ColumnsIcon, SyncAltIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { ParsedStream } from '../api/loki';
+
+import { Record } from '../api/loki';
 import { getFlows } from '../api/routes';
+import NetflowTable from './netflow-table/netflow-table';
 import { Column, Filter, getDefaultColumns } from '../utils/columns';
 import { usePoll } from '../utils/poll-hook';
 import { ColumnsModal } from './columns-modal';
 import { FiltersToolbar } from './filters-toolbar';
-import NetflowTable from './netflow-table';
 import './netflow-traffic.css';
 import { RefreshDropdown } from './refresh-dropdown';
 import TimeRangeDropdown from './time-range-dropdown';
@@ -24,7 +25,7 @@ const DEFAULT_TIME_RANGE = 300000;
 export const NetflowTraffic: React.FC = () => {
   const [extensions] = useResolvedExtensions<ModelFeatureFlag>(isModelFeatureFlag);
   const [loading, setLoading] = React.useState(true);
-  const [flows, setFlows] = React.useState<ParsedStream[]>([]);
+  const [flows, setFlows] = React.useState<Record[]>([]);
   const [error, setError] = React.useState<string | undefined>(undefined);
   const [isTRModalOpen, setTRModalOpen] = React.useState(false);
   const [isColModalOpen, setColModalOpen] = React.useState(false);
