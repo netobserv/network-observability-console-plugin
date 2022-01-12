@@ -338,7 +338,7 @@ export const FiltersToolbar: React.FC<{
   };
 
   const hasFilterValue = React.useCallback(() => {
-    return filters?.find(f => f?.values?.length) ? true : false;
+    return filters?.some(f => f?.values?.length);
   }, [filters]);
 
   React.useEffect(() => {
