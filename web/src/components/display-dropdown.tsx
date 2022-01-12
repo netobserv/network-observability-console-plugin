@@ -4,8 +4,10 @@ import { Dropdown, DropdownToggle, DropdownItem } from '@patternfly/react-core';
 import { ThIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
 
+export type Sizes = 's' | 'm' | 'l';
+
 type Props = {
-  setSize: (v: string) => void;
+  setSize: (v: Sizes) => void;
   id?: string;
 };
 
@@ -24,7 +26,7 @@ export const DisplayDropdown: React.FC<Props> = ({ id, setSize }) => {
       id={id}
       isPlain
       dropdownItems={_.map(sizeOptions, (name, key) => (
-        <DropdownItem id={key} component="button" key={key} onClick={() => setSize(key)}>
+        <DropdownItem id={key} component="button" key={key} onClick={() => setSize(key as Sizes)}>
           {name}
         </DropdownItem>
       ))}

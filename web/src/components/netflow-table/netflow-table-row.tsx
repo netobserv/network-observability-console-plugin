@@ -6,9 +6,11 @@ import { Record } from '../../api/loki';
 import { Column, ColumnsId } from '../../utils/columns';
 import { formatPort } from '../../utils/port';
 import { formatProtocol } from '../../utils/protocol';
+import { Sizes } from '../display-dropdown';
+
 import './netflow-table-row.css';
 
-const NetflowTableRow: React.FC<{ flow: Record; columns: Column[]; size: string }> = ({ flow, columns, size }) => {
+const NetflowTableRow: React.FC<{ flow: Record; columns: Column[]; size: Sizes }> = ({ flow, columns, size }) => {
   const onMouseOver = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     if (event.currentTarget) {
       const isTruncated =

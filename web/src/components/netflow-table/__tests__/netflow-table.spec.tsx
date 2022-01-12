@@ -8,6 +8,7 @@ import { NetflowTableHeader } from '../netflow-table-header';
 
 import { ColumnsSample } from '../../__tests-data__/columns';
 import { FlowsSample } from '../../__tests-data__/flows';
+import { Sizes } from '../../display-dropdown';
 
 const errorStateQuery = `EmptyState[data-test="error-state"]`;
 const loadingContentsQuery = `Bullseye[data-test="loading-contents"]`;
@@ -24,7 +25,7 @@ jest.mock('@openshift-console/dynamic-plugin-sdk', () => {
 
 describe('<NetflowTable />', () => {
   const mocks = {
-    size: 'm',
+    size: 'm' as Sizes,
     clearFilters: null
   };
   beforeEach(() => {
