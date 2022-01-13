@@ -60,6 +60,7 @@ export const ColumnsModal: React.FC<{
         setUpdatedColumns(result);
         return true;
       }
+      return false;
     },
     [updatedColumns, setUpdatedColumns]
   );

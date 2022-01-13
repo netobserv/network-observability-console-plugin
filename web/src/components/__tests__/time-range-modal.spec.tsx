@@ -1,16 +1,16 @@
 import * as React from 'react';
 import { mount, shallow } from 'enzyme';
 
-import TimeRangeModal from '../time-range-modal';
+import TimeRangeModal, { TimeRangeModalProps } from '../time-range-modal';
 import { TimeRange } from '../../utils/datetime';
 import { DatePicker, TimePicker } from '@patternfly/react-core';
 import { act } from 'react-dom/test-utils';
 
 describe('<ColumnsModal />', () => {
-  const props = {
+  const props: TimeRangeModalProps = {
     isModalOpen: true,
     setModalOpen: jest.fn(),
-    range: null,
+    range: undefined,
     setRange: jest.fn(),
     id: 'time-range-modal'
   };
@@ -39,8 +39,8 @@ describe('<ColumnsModal />', () => {
     const timePickers = wrapper.find(TimePicker);
     //set start date & time and press button
     act(() => {
-      datePickers.at(0).props().onChange('2021-12-01', new Date('2021-12-01'));
-      timePickers.at(0).props().onChange('10:15');
+      datePickers.at(0).props().onChange!('2021-12-01', new Date('2021-12-01'));
+      timePickers.at(0).props().onChange!('10:15');
     });
     nowRange.from = new Date('2021-12-01').setHours(10, 15, 0, 0) / 1000;
 
@@ -49,8 +49,8 @@ describe('<ColumnsModal />', () => {
 
     //set end date & time and press button
     act(() => {
-      datePickers.at(1).props().onChange('2021-12-15', new Date('2021-12-15'));
-      timePickers.at(1).props().onChange('23:00');
+      datePickers.at(1).props().onChange!('2021-12-15', new Date('2021-12-15'));
+      timePickers.at(1).props().onChange!('23:00');
     });
     nowRange.to = new Date('2021-12-15').setHours(23, 0, 0, 0) / 1000;
 

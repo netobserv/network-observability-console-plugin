@@ -1,18 +1,21 @@
 import { useEffect, useRef } from 'react';
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 // Slightly modified from Dan Abramov's blog post about using React hooks for polling
 // https://overreacted.io/making-setinterval-declarative-with-react-hooks/
-export const usePoll = (callback, delay, ...dependencies) => {
+export const usePoll = (callback: () => void, delay?: number, ...dependencies: any) => {
   const savedCallback = useRef(null);
 
   // Remember the latest callback.
   useEffect(() => {
-    savedCallback.current = callback;
+    // eslint-disable-next-line no-underscore-dangle
+    savedCallback.current = callback as any;
   }, [callback]);
 
   // Set up the interval.
   useEffect(() => {
-    const tick = () => savedCallback.current();
+    const tick = () => (savedCallback.current as any)();
 
     tick(); // Run first tick immediately.
 

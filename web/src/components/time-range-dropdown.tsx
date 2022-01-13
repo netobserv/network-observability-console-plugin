@@ -4,8 +4,8 @@ import { Dropdown, DropdownToggle, DropdownItem } from '@patternfly/react-core';
 import { parseDuration, formatDuration, getDateMsInSeconds, getDateSInMiliseconds } from '../utils/duration';
 import * as _ from 'lodash';
 
-type Props = {
-  range: number;
+export type TimeRangeDropdownProps = {
+  range?: number;
   setRange: (v: number) => void;
   openCustomModal: () => void;
   id?: string;
@@ -13,7 +13,7 @@ type Props = {
 
 const CUSTOM_TIME_RANGE_KEY = 'CUSTOM_TIME_RANGE_KEY';
 
-export const TimeRangeDropdown: React.FC<Props> = ({ id, range, setRange, openCustomModal }) => {
+export const TimeRangeDropdown: React.FC<TimeRangeDropdownProps> = ({ id, range, setRange, openCustomModal }) => {
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
   const { t } = useTranslation('plugin__network-observability-plugin');
 
@@ -43,7 +43,7 @@ export const TimeRangeDropdown: React.FC<Props> = ({ id, range, setRange, openCu
     '2w': t('Last {{count}} week', { count: 2 })
   };
 
-  const selectedKey = range === null ? CUSTOM_TIME_RANGE_KEY : formatDuration(getDateSInMiliseconds(range));
+  const selectedKey = range === undefined ? CUSTOM_TIME_RANGE_KEY : formatDuration(getDateSInMiliseconds(range));
 
   return (
     <Dropdown
@@ -57,7 +57,7 @@ export const TimeRangeDropdown: React.FC<Props> = ({ id, range, setRange, openCu
       onSelect={() => setIsOpen(false)}
       toggle={
         <DropdownToggle id={`${id}-dropdown`} onToggle={() => setIsOpen(!isOpen)}>
-          {timeRangeOptions[selectedKey]}
+          {timeRangeOptions[selectedKey as keyof typeof timeRangeOptions]}
         </DropdownToggle>
       }
     />

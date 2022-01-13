@@ -28,7 +28,7 @@ export const NetflowTraffic: React.FC = () => {
   const [extensions] = useResolvedExtensions<ModelFeatureFlag>(isModelFeatureFlag);
   const [loading, setLoading] = React.useState(true);
   const [flows, setFlows] = React.useState<Record[]>([]);
-  const [error, setError] = React.useState<string | undefined>(undefined);
+  const [error, setError] = React.useState<string | undefined>();
   const [size, setSize] = React.useState<Size>('m');
   const [isTRModalOpen, setTRModalOpen] = React.useState(false);
   const [isColModalOpen, setColModalOpen] = React.useState(false);
@@ -37,14 +37,14 @@ export const NetflowTraffic: React.FC = () => {
   //TODO: create a number range filter type for Packets & Bytes
   //TODO: set isSelected values from localstorage saved column ids
   const [columns, setColumns] = React.useState<Column[]>(getDefaultColumns(t));
-  const [filters, setFilters] = React.useState<Filter[] | null>(null);
-  const [range, setRange] = React.useState<number | TimeRange | null>(null);
-  const previousRange = usePrevious<number | TimeRange | null>(range);
-  const [interval, setInterval] = React.useState<number | null>(null);
+  const [filters, setFilters] = React.useState<Filter[] | undefined>();
+  const [range, setRange] = React.useState<number | TimeRange | undefined>();
+  const previousRange = usePrevious<number | TimeRange | undefined>(range);
+  const [interval, setInterval] = React.useState<number | undefined>();
 
   const tick = React.useCallback(() => {
     //skip tick while filters & range not initialized
-    if (filters === null || range === null) {
+    if (filters === undefined || range === undefined) {
       return;
     }
     setLoading(true);
@@ -79,7 +79,7 @@ export const NetflowTraffic: React.FC = () => {
 
   const clearFilters = () => {
     if (!_.isEmpty(filters)) {
-      removeQueryArguments(filters.map(f => f.colId));
+      removeQueryArguments(filters!.map(f => f.colId));
     }
     updateTableFilters([]);
   };
@@ -92,7 +92,7 @@ export const NetflowTraffic: React.FC = () => {
   //update data & arguments on range changes
   React.useEffect(() => {
     //ensure range is set and different than previous value
-    if (range === null || range === previousRange) {
+    if (range === undefined || range === previousRange) {
       return;
     }
 
@@ -130,7 +130,7 @@ export const NetflowTraffic: React.FC = () => {
         <div className="co-actions">
           <TimeRangeDropdown
             id="time-range-dropdown"
-            range={typeof range === 'number' ? range : null}
+            range={typeof range === 'number' ? range : undefined}
             setRange={setRange}
             openCustomModal={() => setTRModalOpen(true)}
           />
@@ -175,7 +175,7 @@ export const NetflowTraffic: React.FC = () => {
         id="time-range-modal"
         isModalOpen={isTRModalOpen}
         setModalOpen={setTRModalOpen}
-        range={typeof range === 'object' ? range : null}
+        range={typeof range === 'object' ? range : undefined}
         setRange={setRange}
       />
       <ColumnsModal

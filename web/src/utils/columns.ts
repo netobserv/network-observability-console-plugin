@@ -70,7 +70,7 @@ export const getDefaultColumns = (t: TFunction): Column[] => {
       isSelected: true,
       defaultOrder: 2,
       filterType: FilterType.POD,
-      value: f => f.fields.SrcPod,
+      value: f => f.fields.SrcPod || '',
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
       width: 30
     },
@@ -80,7 +80,7 @@ export const getDefaultColumns = (t: TFunction): Column[] => {
       isSelected: true,
       defaultOrder: 3,
       filterType: FilterType.POD,
-      value: f => f.fields.DstPod,
+      value: f => f.fields.DstPod || '',
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
       width: 30
     },
@@ -90,7 +90,7 @@ export const getDefaultColumns = (t: TFunction): Column[] => {
       isSelected: true,
       defaultOrder: 4,
       filterType: FilterType.NAMESPACE,
-      value: f => f.labels.SrcNamespace,
+      value: f => f.labels.SrcNamespace || '',
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
       width: 30
     },
@@ -100,7 +100,7 @@ export const getDefaultColumns = (t: TFunction): Column[] => {
       isSelected: true,
       defaultOrder: 5,
       filterType: FilterType.NAMESPACE,
-      value: f => f.labels.DstNamespace,
+      value: f => f.labels.DstNamespace || '',
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
       width: 30
     },

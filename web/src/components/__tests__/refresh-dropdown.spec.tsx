@@ -1,11 +1,11 @@
 import * as React from 'react';
 import { mount, shallow } from 'enzyme';
 
-import RefreshDropdown from '../refresh-dropdown';
+import RefreshDropdown, { RefreshDropdownProps } from '../refresh-dropdown';
 
 describe('<RefreshDropdown />', () => {
-  const props = {
-    interval: null,
+  const props: RefreshDropdownProps = {
+    interval: undefined,
     setInterval: jest.fn(),
     id: 'refresh'
   };
@@ -36,7 +36,7 @@ describe('<RefreshDropdown />', () => {
     //open dropdown and select refresh off
     dropdown.at(0).simulate('click');
     wrapper.find('[id="OFF_KEY"]').at(0).simulate('click');
-    expect(props.setInterval).toHaveBeenCalledWith(null);
+    expect(props.setInterval).toHaveBeenCalledWith(undefined);
     expect(wrapper.find('li').length).toBe(0);
 
     //open dropdown and select 15s
