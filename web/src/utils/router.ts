@@ -26,27 +26,21 @@ export const getQueryArgumentAsNumber = (arg: AnyQueryArgs) => {
   return null;
 };
 
-export const getFiltersParams = (filters: Filter[], range: number | TimeRange): URLSearchParams => {
+export const getAPIQueryParams = (filters: Filter[], range: number | TimeRange): QueryParams => {
   // Note: at the moment the browser query params and API query params are tied together;
   // we may want to decouple them in the future.
-  const queryArguments: QueryParams = {};
+  const params: QueryParams = {};
   _.each(filters, (f: Filter) => {
-    queryArguments[f.colId] = f.values.map(value => value.v);
+    params[f.colId] = f.values.map(value => value.v);
   });
   if (range) {
     if (typeof range === 'number') {
-      queryArguments[QueryArguments.TimeRange] = range;
+      params[QueryArguments.TimeRange] = range;
     } else if (typeof range === 'object') {
-      queryArguments[QueryArguments.StartTime] = range.from.toString();
-      queryArguments[QueryArguments.EndTime] = range.to.toString();
+      params[QueryArguments.StartTime] = range.from.toString();
+      params[QueryArguments.EndTime] = range.to.toString();
     }
   }
-  const params = new URLSearchParams(window.location.search);
-  _.each(queryArguments, (v, k) => {
-    if (params.get(k) !== v) {
-      params.set(k, String(v));
-    }
-  });
   return params;
 };
 

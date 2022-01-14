@@ -19,7 +19,7 @@ import TimeRangeModal from './time-range-modal';
 import {
   setQueryArguments,
   removeQueryArguments,
-  getFiltersParams,
+  getAPIQueryParams,
   QueryArguments as Q,
   getQueryArgumentAsNumber
 } from '../utils/router';
@@ -55,7 +55,7 @@ export const NetflowTraffic: React.FC = () => {
     }
     setLoading(true);
     setError(undefined);
-    getFlows(getFiltersParams(filters, range))
+    getFlows(getAPIQueryParams(filters, range))
       .then(streams => {
         setFlows(streams);
       })
