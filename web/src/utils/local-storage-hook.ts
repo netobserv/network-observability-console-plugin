@@ -1,0 +1,74 @@
+import _ from 'lodash';
+import * as React from 'react';
+
+export const LOCAL_STORAGE_PLUGIN_KEY = 'network-observability-plugin-settings';
+export const LOCAL_STORAGE_COLS_KEY = 'netflow-traffic-columns';
+export const LOCAL_STORAGE_REFRESH_KEY = 'netflow-traffic-refresh';
+export const LOCAL_STORAGE_SIZE_KEY = 'netflow-traffic-size';
+
+export interface ArraySelectionOptions {
+  id: string;
+  criteria: string;
+}
+
+export function useLocalStorage<T>(
+  key: string,
+  initialValue?: T,
+  opts?: ArraySelectionOptions
+): [T, React.Dispatch<React.SetStateAction<T>>] {
+  const [storedValue, setStoredValue] = React.useState<T>(() => {
+    // Get localStorage item if available, else fallback on initialValue
+    try {
+      const item = window.localStorage.getItem(LOCAL_STORAGE_PLUGIN_KEY);
+      const param = item ? JSON.parse(item)[key] : undefined;
+
+      // Manage array selection by ids if opts is set
+      if (opts && Array.isArray(initialValue) && Array.isArray(param)) {
+        return !_.isEmpty(param)
+          ? initialValue.map(item => {
+              item[opts.criteria] = param.includes(item[opts.id]);
+              return item;
+            })
+          : initialValue;
+      } else {
+        // Return parsed item if available
+        return param ? param : initialValue;
+      }
+    } catch (error) {
+      console.error(error);
+      return initialValue;
+    }
+  });
+
+  // Return a wrapped version of useState's setter function that persists the new value to localStorage
+  const setValue = (value: T) => {
+    try {
+      // Allow value to be a function so we have same API as useState
+      const valueToStore = value instanceof Function ? value(storedValue) : value;
+
+      // Save state and then localStorage
+      setStoredValue(valueToStore);
+
+      // Reload from localStorage
+      const item = window.localStorage.getItem(LOCAL_STORAGE_PLUGIN_KEY);
+      const parsedItem = item ? JSON.parse(item) : {};
+
+      // Set key values
+      if (opts) {
+        parsedItem[key] = valueToStore
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .filter((item: any) => item[opts.criteria])
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .map((item: any) => item[opts.id]);
+      } else {
+        parsedItem[key] = valueToStore;
+      }
+
+      // Save to localStorage
+      window.localStorage.setItem(LOCAL_STORAGE_PLUGIN_KEY, JSON.stringify(parsedItem));
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  return [storedValue, setValue];
+}

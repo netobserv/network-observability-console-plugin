@@ -27,6 +27,12 @@ import { TimeRange } from '../utils/datetime';
 import { usePrevious } from '../utils/previous-hook';
 import DisplayDropdown from './display-dropdown';
 import { Size } from './display-dropdown';
+import {
+  LOCAL_STORAGE_COLS_KEY,
+  LOCAL_STORAGE_REFRESH_KEY,
+  LOCAL_STORAGE_SIZE_KEY,
+  useLocalStorage
+} from '../utils/local-storage-hook';
 
 const DEFAULT_TIME_RANGE = 300;
 
@@ -35,18 +41,20 @@ export const NetflowTraffic: React.FC = () => {
   const [loading, setLoading] = React.useState(true);
   const [flows, setFlows] = React.useState<Record[]>([]);
   const [error, setError] = React.useState<string | undefined>();
-  const [size, setSize] = React.useState<Size>('m');
+  const [size, setSize] = useLocalStorage<Size>(LOCAL_STORAGE_SIZE_KEY, 'm');
   const [isTRModalOpen, setTRModalOpen] = React.useState(false);
   const [isColModalOpen, setColModalOpen] = React.useState(false);
   const { t } = useTranslation('plugin__network-observability-plugin');
 
   //TODO: create a number range filter type for Packets & Bytes
-  //TODO: set isSelected values from localstorage saved column ids
-  const [columns, setColumns] = React.useState<Column[]>(getDefaultColumns(t));
+  const [columns, setColumns] = useLocalStorage<Column[]>(LOCAL_STORAGE_COLS_KEY, getDefaultColumns(t), {
+    id: 'id',
+    criteria: 'isSelected'
+  });
   const [filters, setFilters] = React.useState<Filter[] | undefined>();
   const [range, setRange] = React.useState<number | TimeRange | undefined>();
   const previousRange = usePrevious<number | TimeRange | undefined>(range);
-  const [interval, setInterval] = React.useState<number | undefined>();
+  const [interval, setInterval] = useLocalStorage<number | undefined>(LOCAL_STORAGE_REFRESH_KEY);
 
   const tick = React.useCallback(() => {
     //skip tick while filters & range not initialized
