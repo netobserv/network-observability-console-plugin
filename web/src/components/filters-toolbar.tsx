@@ -392,7 +392,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
     <Toolbar
       id={id}
       clearAllFilters={clearFilters}
-      clearFiltersButtonText={hasFilterValue() ? t('Clear all filters') : undefined}
+      clearFiltersButtonText={hasFilterValue() ? t('Clear all filters') : ''}
     >
       <ToolbarContent id={`${id}-content`} toolbarId={id}>
         {filters &&

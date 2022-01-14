@@ -21,7 +21,7 @@ export enum ColumnsId {
 }
 
 export interface Column {
-  id: string;
+  id: ColumnsId;
   name: string;
   isSelected: boolean;
   defaultOrder: number;
@@ -38,7 +38,7 @@ export interface FilterValue {
 }
 
 export interface Filter {
-  colId: string;
+  colId: ColumnsId;
   values: FilterValue[];
 }
 

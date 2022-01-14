@@ -1,12 +1,5 @@
 import * as _ from 'lodash';
 
-export interface LokiQuery {
-  query: string;
-  limit?: number;
-  start?: number;
-  end?: number;
-}
-
 export interface LokiResponse {
   resultType: string;
   result: LokiResult;

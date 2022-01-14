@@ -16,7 +16,13 @@ import './netflow-traffic.css';
 import { RefreshDropdown } from './refresh-dropdown';
 import TimeRangeDropdown from './time-range-dropdown';
 import TimeRangeModal from './time-range-modal';
-import { setQueryArguments, removeQueryArguments, getQueryArgument, getFiltersParams } from '../utils/router';
+import {
+  setQueryArguments,
+  removeQueryArguments,
+  getFiltersParams,
+  QueryArguments as Q,
+  getQueryArgumentAsNumber
+} from '../utils/router';
 import { TimeRange } from '../utils/datetime';
 import { usePrevious } from '../utils/previous-hook';
 import DisplayDropdown from './display-dropdown';
@@ -67,6 +73,7 @@ export const NetflowTraffic: React.FC = () => {
         setLoading(false);
       });
   }, [filters, range]);
+
   usePoll(tick, interval);
 
   // updates table filters and clears up the table for proper visualization of the
@@ -99,25 +106,24 @@ export const NetflowTraffic: React.FC = () => {
     setTRModalOpen(false);
     if (typeof range === 'number') {
       setQueryArguments({ timeRange: range.toString() });
-      removeQueryArguments(['startTime', 'endTime']);
+      removeQueryArguments([Q.StartTime, Q.EndTime]);
     } else if (typeof range === 'object') {
       setQueryArguments({ startTime: range.from.toString(), endTime: range.to.toString() });
-      removeQueryArguments(['timeRange']);
+      removeQueryArguments([Q.TimeRange]);
     } else {
-      removeQueryArguments(['startTime', 'endTime', 'timeRange']);
+      removeQueryArguments([Q.StartTime, Q.EndTime, Q.TimeRange]);
     }
-    tick();
-  }, [previousRange, range, tick]);
+  }, [previousRange, range]);
 
   //apply range from query params at startup
   React.useEffect(() => {
-    const timeRange = getQueryArgument('timeRange');
-    const startTime = getQueryArgument('startTime');
-    const endTime = getQueryArgument('endTime');
-    if (timeRange && !isNaN(Number(timeRange))) {
-      setRange(Number(timeRange));
-    } else if ((startTime && !isNaN(Number(startTime))) || (endTime && !isNaN(Number(endTime)))) {
-      setRange({ from: Number(startTime), to: Number(endTime) });
+    const timeRange = getQueryArgumentAsNumber(Q.TimeRange);
+    const startTime = getQueryArgumentAsNumber(Q.StartTime);
+    const endTime = getQueryArgumentAsNumber(Q.EndTime);
+    if (timeRange) {
+      setRange(timeRange);
+    } else if (startTime && endTime) {
+      setRange({ from: startTime, to: endTime });
     } else {
       setRange(DEFAULT_TIME_RANGE);
     }
