@@ -1,45 +1,56 @@
 import { createBrowserHistory } from 'history';
 import * as _ from 'lodash';
-import { Filter } from './columns';
+import { ColumnsId, Filter } from './columns';
 import { TimeRange } from './datetime';
+
+export enum QueryArguments {
+  StartTime = 'startTime',
+  EndTime = 'endTime',
+  TimeRange = 'timeRange',
+  RefreshInterval = 'refresh'
+}
+type AnyQueryArgs = ColumnsId | QueryArguments;
+export type QueryParams = { [k in AnyQueryArgs]?: unknown };
 
 export const history = createBrowserHistory();
 
-export const getQueryArgument = (arg: string) => {
+export const getQueryArgument = (arg: AnyQueryArgs) => {
   return new URLSearchParams(window.location.search).get(arg);
 };
 
-export const getFiltersParams = (filters?: Filter[], range?: number | TimeRange | null): URLSearchParams => {
-  const queryArguments = {};
-  if (filters) {
-    _.each(filters, (f: Filter) => {
-      queryArguments[f.colId] = f.values.map(value => value.v);
-    });
+export const getQueryArgumentAsNumber = (arg: AnyQueryArgs) => {
+  const q = new URLSearchParams(window.location.search).get(arg);
+  if (q && !isNaN(Number(q))) {
+    return Number(q);
   }
+  return null;
+};
+
+export const getAPIQueryParams = (filters: Filter[], range: number | TimeRange): QueryParams => {
+  // Note: at the moment the browser query params and API query params are tied together;
+  // we may want to decouple them in the future.
+  const params: QueryParams = {};
+  _.each(filters, (f: Filter) => {
+    params[f.colId] = f.values.map(value => value.v);
+  });
   if (range) {
     if (typeof range === 'number') {
-      queryArguments['timeRange'] = range;
+      params[QueryArguments.TimeRange] = range;
     } else if (typeof range === 'object') {
-      queryArguments['startTime'] = range.from.toString();
-      queryArguments['endTime'] = range.to.toString();
+      params[QueryArguments.StartTime] = range.from.toString();
+      params[QueryArguments.EndTime] = range.to.toString();
     }
   }
-  const params = new URLSearchParams(window.location.search);
-  _.each(queryArguments, (v, k) => {
-    if (params.get(k) !== v) {
-      params.set(k, v);
-    }
-  });
   return params;
 };
 
-export const setQueryArguments = (newParams: { [k: string]: string }) => {
+export const setQueryArguments = (newParams: QueryParams) => {
   const params = new URLSearchParams(window.location.search);
   let update = false;
   _.each(newParams, (v, k) => {
     if (params.get(k) !== v) {
       update = true;
-      params.set(k, v);
+      params.set(k, String(v));
     }
   });
   if (update) {
@@ -48,7 +59,7 @@ export const setQueryArguments = (newParams: { [k: string]: string }) => {
   }
 };
 
-export const removeQueryArguments = (keys: string[]) => {
+export const removeQueryArguments = (keys: AnyQueryArgs[]) => {
   const params = new URLSearchParams(window.location.search);
   let update = false;
   keys.forEach(k => {

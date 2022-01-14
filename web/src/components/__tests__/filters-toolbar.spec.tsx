@@ -3,16 +3,16 @@ import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 import { act } from 'react-dom/test-utils';
 import { ColumnsId, Filter } from '../../utils/columns';
-import FiltersToolbar from '../filters-toolbar';
+import FiltersToolbar, { FiltersToolbarProps } from '../filters-toolbar';
 import { ColumnsSample } from '../__tests-data__/columns';
 import { FiltersSample, FTPSrcPortSample } from '../__tests-data__/filters';
 
 describe('<FiltersToolbar />', () => {
-  const props = {
+  const props: FiltersToolbarProps = {
     columns: ColumnsSample,
     filters: [] as Filter[],
-    setFilters: null,
-    clearFilters: null,
+    setFilters: jest.fn(),
+    clearFilters: jest.fn(),
     id: 'filter-toolbar'
   };
   beforeEach(() => {
@@ -29,7 +29,7 @@ describe('<FiltersToolbar />', () => {
   });
   it('should render filters', async () => {
     const wrapper = shallow(<FiltersToolbar {...props} />);
-    expect(wrapper.find(ToolbarFilter)).toHaveLength(props.filters.length);
+    expect(wrapper.find(ToolbarFilter)).toHaveLength(props.filters!.length);
 
     //add a bunch of filters
     props.filters = FiltersSample;
@@ -73,31 +73,31 @@ describe('<FiltersToolbar />', () => {
     wrapper.find('[id="Src pod"]').at(0).simulate('click');
     act(() => {
       //set text input value and press button
-      wrapper.find(TextInput).props().onChange('ABCD', null);
+      wrapper.find(TextInput).props().onChange!('ABCD', null!);
     });
     search.simulate('click');
     props.filters = props.filters.concat([{ colId: ColumnsId.srcpod, values: [{ v: 'ABCD' }] }]);
     expect(props.setFilters).toHaveBeenNthCalledWith(2, props.filters);
-    wrapper.setProps(props);
+    wrapper.setProps(props as Pick<FiltersToolbarProps, keyof FiltersToolbarProps>);
 
     //open dropdow and select Src namespace
     dropdown.simulate('click');
     wrapper.find('[id="Src namespace"]').at(0).simulate('click');
     act(() => {
       //set text input value and press enter
-      wrapper.find(TextInput).props().onChange('EFGH', null);
+      wrapper.find(TextInput).props().onChange!('EFGH', null!);
     });
     wrapper.find(TextInput).at(0).simulate('keypress', { key: 'Enter' });
     props.filters = props.filters.concat([{ colId: ColumnsId.srcnamespace, values: [{ v: 'EFGH' }] }]);
     expect(props.setFilters).toHaveBeenNthCalledWith(3, props.filters);
-    wrapper.setProps(props);
+    wrapper.setProps(props as Pick<FiltersToolbarProps, keyof FiltersToolbarProps>);
 
     //open dropdow and select valid Src port by name
     dropdown.simulate('click');
     wrapper.find('[id="Src port"]').at(0).simulate('click');
     act(() => {
       //set search input value
-      wrapper.find(TextInput).props().onChange(FTPSrcPortSample.values[0].display, null);
+      wrapper.find(TextInput).props().onChange!(FTPSrcPortSample.values[0].display!, null!);
     });
     //press enter and await for popper to disapear
     await act(async () => {
@@ -105,14 +105,14 @@ describe('<FiltersToolbar />', () => {
     });
     props.filters = props.filters.concat([FTPSrcPortSample]);
     expect(props.setFilters).toHaveBeenNthCalledWith(4, props.filters);
-    wrapper.setProps(props);
+    wrapper.setProps(props as Pick<FiltersToolbarProps, keyof FiltersToolbarProps>);
 
     //open dropdow and select invalid Dst port by name
     dropdown.simulate('click');
     wrapper.find('[id="Dst port"]').at(0).simulate('click');
     act(() => {
       //set search input value, press enter and press button
-      wrapper.find(TextInput).props().onChange('no match', null);
+      wrapper.find(TextInput).props().onChange!('no match', null!);
     });
     wrapper.find(TextInput).at(0).simulate('keypress', { key: 'Enter' });
     search.simulate('click');
@@ -140,7 +140,7 @@ describe('<FiltersToolbar />', () => {
     wrapper.find('[id="Src address"]').at(0).simulate('click');
     act(() => {
       //set text input value and press button
-      wrapper.find(TextInput).props().onChange('1.2.3.4', null);
+      wrapper.find(TextInput).props().onChange!('1.2.3.4', null!);
     });
     search.simulate('click');
     expect(props.setFilters).toHaveBeenCalledWith([
@@ -160,7 +160,7 @@ describe('<FiltersToolbar />', () => {
     wrapper.find('[id="Src address"]').at(0).simulate('click');
     act(() => {
       //set text input value and press button
-      wrapper.find(TextInput).props().onChange('asdlfkj', null);
+      wrapper.find(TextInput).props().onChange!('asdlfkj', null!);
     });
     search.simulate('click');
     expect(props.setFilters).not.toHaveBeenCalled();

@@ -16,7 +16,13 @@ import './netflow-traffic.css';
 import { RefreshDropdown } from './refresh-dropdown';
 import TimeRangeDropdown from './time-range-dropdown';
 import TimeRangeModal from './time-range-modal';
-import { setQueryArguments, removeQueryArguments, getQueryArgument, getFiltersParams } from '../utils/router';
+import {
+  setQueryArguments,
+  removeQueryArguments,
+  getAPIQueryParams,
+  QueryArguments as Q,
+  getQueryArgumentAsNumber
+} from '../utils/router';
 import { TimeRange } from '../utils/datetime';
 import { usePrevious } from '../utils/previous-hook';
 import DisplayDropdown from './display-dropdown';
@@ -28,7 +34,7 @@ export const NetflowTraffic: React.FC = () => {
   const [extensions] = useResolvedExtensions<ModelFeatureFlag>(isModelFeatureFlag);
   const [loading, setLoading] = React.useState(true);
   const [flows, setFlows] = React.useState<Record[]>([]);
-  const [error, setError] = React.useState<string | undefined>(undefined);
+  const [error, setError] = React.useState<string | undefined>();
   const [size, setSize] = React.useState<Size>('m');
   const [isTRModalOpen, setTRModalOpen] = React.useState(false);
   const [isColModalOpen, setColModalOpen] = React.useState(false);
@@ -37,19 +43,19 @@ export const NetflowTraffic: React.FC = () => {
   //TODO: create a number range filter type for Packets & Bytes
   //TODO: set isSelected values from localstorage saved column ids
   const [columns, setColumns] = React.useState<Column[]>(getDefaultColumns(t));
-  const [filters, setFilters] = React.useState<Filter[] | null>(null);
-  const [range, setRange] = React.useState<number | TimeRange | null>(null);
-  const previousRange = usePrevious<number | TimeRange | null>(range);
-  const [interval, setInterval] = React.useState<number | null>(null);
+  const [filters, setFilters] = React.useState<Filter[] | undefined>();
+  const [range, setRange] = React.useState<number | TimeRange | undefined>();
+  const previousRange = usePrevious<number | TimeRange | undefined>(range);
+  const [interval, setInterval] = React.useState<number | undefined>();
 
   const tick = React.useCallback(() => {
     //skip tick while filters & range not initialized
-    if (filters === null || range === null) {
+    if (filters === undefined || range === undefined) {
       return;
     }
     setLoading(true);
     setError(undefined);
-    getFlows(getFiltersParams(filters, range))
+    getFlows(getAPIQueryParams(filters, range))
       .then(streams => {
         setFlows(streams);
       })
@@ -67,6 +73,7 @@ export const NetflowTraffic: React.FC = () => {
         setLoading(false);
       });
   }, [filters, range]);
+
   usePoll(tick, interval);
 
   // updates table filters and clears up the table for proper visualization of the
@@ -79,7 +86,7 @@ export const NetflowTraffic: React.FC = () => {
 
   const clearFilters = () => {
     if (!_.isEmpty(filters)) {
-      removeQueryArguments(filters.map(f => f.colId));
+      removeQueryArguments(filters!.map(f => f.colId));
     }
     updateTableFilters([]);
   };
@@ -92,32 +99,31 @@ export const NetflowTraffic: React.FC = () => {
   //update data & arguments on range changes
   React.useEffect(() => {
     //ensure range is set and different than previous value
-    if (range === null || range === previousRange) {
+    if (range === undefined || range === previousRange) {
       return;
     }
 
     setTRModalOpen(false);
     if (typeof range === 'number') {
       setQueryArguments({ timeRange: range.toString() });
-      removeQueryArguments(['startTime', 'endTime']);
+      removeQueryArguments([Q.StartTime, Q.EndTime]);
     } else if (typeof range === 'object') {
       setQueryArguments({ startTime: range.from.toString(), endTime: range.to.toString() });
-      removeQueryArguments(['timeRange']);
+      removeQueryArguments([Q.TimeRange]);
     } else {
-      removeQueryArguments(['startTime', 'endTime', 'timeRange']);
+      removeQueryArguments([Q.StartTime, Q.EndTime, Q.TimeRange]);
     }
-    tick();
-  }, [previousRange, range, tick]);
+  }, [previousRange, range]);
 
   //apply range from query params at startup
   React.useEffect(() => {
-    const timeRange = getQueryArgument('timeRange');
-    const startTime = getQueryArgument('startTime');
-    const endTime = getQueryArgument('endTime');
-    if (timeRange && !isNaN(Number(timeRange))) {
-      setRange(Number(timeRange));
-    } else if ((startTime && !isNaN(Number(startTime))) || (endTime && !isNaN(Number(endTime)))) {
-      setRange({ from: Number(startTime), to: Number(endTime) });
+    const timeRange = getQueryArgumentAsNumber(Q.TimeRange);
+    const startTime = getQueryArgumentAsNumber(Q.StartTime);
+    const endTime = getQueryArgumentAsNumber(Q.EndTime);
+    if (timeRange) {
+      setRange(timeRange);
+    } else if (startTime && endTime) {
+      setRange({ from: startTime, to: endTime });
     } else {
       setRange(DEFAULT_TIME_RANGE);
     }
@@ -130,7 +136,7 @@ export const NetflowTraffic: React.FC = () => {
         <div className="co-actions">
           <TimeRangeDropdown
             id="time-range-dropdown"
-            range={typeof range === 'number' ? range : null}
+            range={typeof range === 'number' ? range : undefined}
             setRange={setRange}
             openCustomModal={() => setTRModalOpen(true)}
           />
@@ -175,7 +181,7 @@ export const NetflowTraffic: React.FC = () => {
         id="time-range-modal"
         isModalOpen={isTRModalOpen}
         setModalOpen={setTRModalOpen}
-        range={typeof range === 'object' ? range : null}
+        range={typeof range === 'object' ? range : undefined}
         setRange={setRange}
       />
       <ColumnsModal

@@ -7,20 +7,20 @@ const h = m * 60;
 const d = h * 24;
 const w = d * 7;
 const units = { w, d, h, m, s };
+type KeyOfUnits = keyof typeof units;
 
-// Converts a duration like "1h 10m 23s" to milliseconds or returns 0 if the duration could not be
+// precompile regexp
+const wordsRegexp = /\s+/;
+const durationRegexp = /^(\d+)([wdhms])$/;
+
+// Converts a duration like "1h 10m 23s" to milliseconds or throws an error if the duration could not be
 // parsed
 export const parseDuration = (duration: string): number => {
-  try {
-    const parts = duration
-      .trim()
-      .split(/\s+/)
-      .map(p => p.match(/^(\d+)([wdhms])$/));
-    return _.sumBy(parts, p => parseInt(p[1], 10) * units[p[2]]);
-  } catch (ignored) {
-    // Invalid duration format
-    return 0;
-  }
+  const parts = duration
+    .trim()
+    .split(wordsRegexp)
+    .map(p => p.match(durationRegexp));
+  return _.sumBy(parts, p => parseInt(p![1], 10) * units[p![2] as KeyOfUnits]);
 };
 
 // Formats a duration in milliseconds like "1h 10m"

@@ -18,7 +18,7 @@ export const NetflowTableHeader: React.FC<{
             sort={{
               sortBy: {
                 index: sortIndex,
-                direction: SortByDirection[sortDirection]
+                direction: SortByDirection[sortDirection as SortByDirection]
               },
               onSort: onSort,
               columnIndex: i

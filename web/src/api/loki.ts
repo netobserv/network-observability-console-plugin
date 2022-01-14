@@ -1,12 +1,5 @@
 import * as _ from 'lodash';
 
-export interface LokiQuery {
-  query: string;
-  limit?: number;
-  start?: number;
-  end?: number;
-}
-
 export interface LokiResponse {
   resultType: string;
   result: LokiResult;
@@ -31,15 +24,15 @@ export interface Record {
 }
 
 export interface Labels {
-  SrcNamespace: string;
-  DstNamespace: string;
+  SrcNamespace?: string;
+  DstNamespace?: string;
 }
 
 export interface Fields {
   SrcAddr: string;
   DstAddr: string;
-  SrcPod: string;
-  DstPod: string;
+  SrcPod?: string;
+  DstPod?: string;
   SrcPort: number;
   DstPort: number;
   Packets: number;

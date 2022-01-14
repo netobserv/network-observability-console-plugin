@@ -27,7 +27,7 @@ import protocols from 'protocol-numbers';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Column, ColumnsId, Filter, FilterType, FilterValue } from '../utils/columns';
-import { getQueryArgument, removeQueryArguments, setQueryArguments } from '../utils/router';
+import { getQueryArgument, QueryParams, removeQueryArguments, setQueryArguments } from '../utils/router';
 import './filters-toolbar.css';
 import { validateIPFilter } from '../utils/ip';
 
@@ -38,20 +38,28 @@ interface Option {
 
 export const SPLIT_FILTER_CHAR = ',';
 
-export const FiltersToolbar: React.FC<{
+export interface FiltersToolbarProps {
+  id: string;
   columns: Column[];
-  filters: Filter[];
+  filters?: Filter[];
   setFilters: (v: Filter[]) => void;
   clearFilters: () => void;
-  id?: string;
-}> = ({ id, children, columns, filters, setFilters, clearFilters }) => {
+}
+
+export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
+  id,
+  children,
+  columns,
+  filters,
+  setFilters,
+  clearFilters
+}) => {
   const { t } = useTranslation('plugin__network-observability-plugin');
-  const autocompleteContainerRef = React.useRef(null);
-  const searchInputRef = React.useRef(null);
-  const autocompleteRef = React.useRef(null);
+  const autocompleteContainerRef = React.useRef<HTMLDivElement | null>(null);
+  const searchInputRef = React.useRef<HTMLInputElement | null>(null);
   const [protocolOptions, setProtocolOptions] = React.useState<Option[]>([]);
-  const [invalidMessage, setInvalidMessage] = React.useState<string | undefined>(undefined);
-  const [autocompleteOptions, setAutocompleteOptions] = React.useState([]);
+  const [invalidMessage, setInvalidMessage] = React.useState<string | undefined>();
+  const [autocompleteOptions, setAutocompleteOptions] = React.useState<JSX.Element[]>([]);
   const [isPopperVisible, setPopperVisible] = React.useState(false);
   const [isFiltersOpen, setIsOpen] = React.useState<boolean>(false);
 
@@ -117,7 +125,7 @@ export const FiltersToolbar: React.FC<{
     e.stopPropagation();
     setSelectedFilterValue(itemId);
     setPopperVisible(false);
-    searchInputRef.current.focus();
+    searchInputRef?.current?.focus();
   };
 
   const resetFilterValue = React.useCallback(() => {
@@ -167,18 +175,9 @@ export const FiltersToolbar: React.FC<{
     }
   }, [protocolOptions, selectedFilterColumn, selectedFilterValue, t]);
 
-  const getSelectedValueAndDisplay = React.useCallback(
-    (colId?: string, value?: string): FilterValue | null => {
-      let column = undefined;
-      if (colId) {
-        column = columns.find(c => c.id === colId);
-      } else {
-        column = selectedFilterColumn;
-      }
-      if (!value) {
-        value = selectedFilterValue;
-      }
-      switch (column?.filterType) {
+  const getValueAndDisplay = React.useCallback(
+    (column: Column, value: string): FilterValue | undefined => {
+      switch (column.filterType) {
         case FilterType.PORT:
           const isNumber = !isNaN(Number(value));
           const foundService = isNumber ? getService(Number(value)) : null;
@@ -193,8 +192,6 @@ export const FiltersToolbar: React.FC<{
               v: foundPort.port.toString(),
               display: value
             };
-          } else {
-            console.error('port ' + value + ' not found');
           }
         case FilterType.PROTOCOL:
           const found = protocolOptions.find(p => p.name === value || p.value === value);
@@ -204,21 +201,23 @@ export const FiltersToolbar: React.FC<{
               display: found.name
             };
           } else {
-            console.error('protocolOptions' + value + ' not found');
-            return null;
+            console.warn('protocol ' + value + ' not found');
           }
-        default:
-          return { v: value };
       }
+      return { v: value };
     },
-    [columns, protocolOptions, selectedFilterColumn, selectedFilterValue]
+    [protocolOptions]
   );
+
+  const getSelectedValueAndDisplay = React.useCallback((): FilterValue | undefined => {
+    return getValueAndDisplay(selectedFilterColumn, selectedFilterValue);
+  }, [getValueAndDisplay, selectedFilterColumn, selectedFilterValue]);
 
   const setFiltersAndArgs = React.useCallback(
     (filters: Filter[]) => {
       setFilters(filters);
 
-      const queryArguments = {};
+      const queryArguments: QueryParams = {};
       _.each(filters, (f: Filter) => {
         queryArguments[f.colId] = f.values.map(value => value.v);
       });
@@ -239,10 +238,10 @@ export const FiltersToolbar: React.FC<{
       return;
     }
 
-    const result: Filter[] = _.cloneDeep(filters);
-    const found = result.find(f => f.colId === selectedFilterColumn.id);
-    const newValue: FilterValue = getSelectedValueAndDisplay();
+    const result = _.cloneDeep(filters) || [];
+    const newValue = getSelectedValueAndDisplay();
     if (newValue) {
+      const found = result.find(f => f.colId === selectedFilterColumn.id);
       if (found) {
         //only one filter can be set on timestamp to use loki start & end query params
         if (selectedFilterColumn.id === ColumnsId.timestamp) {
@@ -293,7 +292,7 @@ export const FiltersToolbar: React.FC<{
                 />
               }
               popper={
-                <Menu ref={autocompleteRef} onSelect={onAutoCompleteSelect}>
+                <Menu onSelect={onAutoCompleteSelect}>
                   <MenuContent>
                     <MenuList>{autocompleteOptions}</MenuList>
                   </MenuContent>
@@ -301,7 +300,7 @@ export const FiltersToolbar: React.FC<{
               }
               isVisible={isPopperVisible}
               enableFlip={false}
-              appendTo={autocompleteContainerRef.current}
+              appendTo={autocompleteContainerRef.current!}
             />
           </div>
         );
@@ -347,8 +346,8 @@ export const FiltersToolbar: React.FC<{
 
   // Run once on mount to set protocol options
   React.useEffect(() => {
-    const pOptions = [];
-    _.forOwn(protocols, function (value, key) {
+    const pOptions = [] as Option[];
+    _.forOwn(protocols, function (__, key) {
       if (!_.isEmpty(protocols[key].name)) {
         pOptions.push(protocols[key]);
       }
@@ -369,7 +368,7 @@ export const FiltersToolbar: React.FC<{
       if (!_.isEmpty(colFilterValues)) {
         const filterValues: FilterValue[] = [];
         colFilterValues.forEach(paramValue => {
-          const value = getSelectedValueAndDisplay(col.id, paramValue);
+          const value = getValueAndDisplay(col, paramValue);
           if (value) {
             filterValues.push(value);
           }
@@ -393,7 +392,7 @@ export const FiltersToolbar: React.FC<{
     <Toolbar
       id={id}
       clearAllFilters={clearFilters}
-      clearFiltersButtonText={hasFilterValue() ? t('Clear all filters') : null}
+      clearFiltersButtonText={hasFilterValue() ? t('Clear all filters') : ''}
     >
       <ToolbarContent id={`${id}-content`} toolbarId={id}>
         {filters &&
@@ -414,7 +413,7 @@ export const FiltersToolbar: React.FC<{
                   setFiltersAndArgs(_.cloneDeep(filters));
                 }
               }}
-              categoryName={columns.find(c => c.id === filter.colId)?.name}
+              categoryName={columns.find(c => c.id === filter.colId)?.name || ''}
             >
               {
                 // set empty children to have a single filter with multiple categories

@@ -4,20 +4,20 @@ import { Dropdown, DropdownToggle, DropdownItem } from '@patternfly/react-core';
 import * as _ from 'lodash';
 import { parseDuration, formatDuration } from '../utils/duration';
 
-type Props = {
-  interval: number;
-  setInterval: (v: number) => void;
+export type RefreshDropdownProps = {
+  interval?: number;
+  setInterval: (v?: number) => void;
   id?: string;
 };
 
 const OFF_KEY = 'OFF_KEY';
 
-export const RefreshDropdown: React.FC<Props> = ({ id, interval, setInterval }) => {
+export const RefreshDropdown: React.FC<RefreshDropdownProps> = ({ id, interval, setInterval }) => {
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
   const { t } = useTranslation('plugin__network-observability-plugin');
 
   const onChange = React.useCallback(
-    (v: string) => setInterval(v === OFF_KEY ? null : parseDuration(v)),
+    (v: string) => setInterval(v === OFF_KEY ? undefined : parseDuration(v)),
     [setInterval]
   );
 
@@ -34,7 +34,7 @@ export const RefreshDropdown: React.FC<Props> = ({ id, interval, setInterval }) 
     '1d': t('{{count}} day', { count: 1 })
   };
 
-  const selectedKey = interval === null ? OFF_KEY : formatDuration(interval);
+  const selectedKey = interval === undefined ? OFF_KEY : formatDuration(interval);
 
   return (
     <Dropdown
@@ -48,7 +48,7 @@ export const RefreshDropdown: React.FC<Props> = ({ id, interval, setInterval }) 
       onSelect={() => setIsOpen(false)}
       toggle={
         <DropdownToggle id={`${id}-dropdown`} onToggle={() => setIsOpen(!isOpen)}>
-          {refreshOptions[selectedKey]}
+          {refreshOptions[selectedKey as keyof typeof refreshOptions]}
         </DropdownToggle>
       }
     />

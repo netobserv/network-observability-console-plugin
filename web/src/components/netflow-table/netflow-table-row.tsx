@@ -23,7 +23,7 @@ const NetflowTableRow: React.FC<{ flow: Record; columns: Column[]; size: Size }>
     }
   };
 
-  const content = c => {
+  const content = (c: Column) => {
     const value = c.value(flow);
     switch (c.id) {
       case ColumnsId.timestamp: {
@@ -82,7 +82,7 @@ const NetflowTableRow: React.FC<{ flow: Record; columns: Column[]; size: Size }>
       }
       case ColumnsId.srcport:
       case ColumnsId.dstport: {
-        const portText = formatPort(value);
+        const portText = formatPort(value as number);
         return (
           <div>
             <span>{portText}</span>
@@ -92,7 +92,7 @@ const NetflowTableRow: React.FC<{ flow: Record; columns: Column[]; size: Size }>
       }
       case ColumnsId.proto:
         if (value) {
-          const protoText = formatProtocol(value);
+          const protoText = formatProtocol(value as number);
           return (
             <div>
               <span>{protoText}</span>

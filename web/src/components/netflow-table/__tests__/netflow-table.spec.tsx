@@ -26,7 +26,7 @@ jest.mock('@openshift-console/dynamic-plugin-sdk', () => {
 describe('<NetflowTable />', () => {
   const mocks = {
     size: 'm' as Size,
-    clearFilters: null
+    clearFilters: jest.fn()
   };
   beforeEach(() => {
     mocks.clearFilters = jest.fn();

@@ -1,11 +1,11 @@
 import * as React from 'react';
 import { mount, shallow } from 'enzyme';
 
-import TimeRangeDropdown from '../time-range-dropdown';
+import TimeRangeDropdown, { TimeRangeDropdownProps } from '../time-range-dropdown';
 
 describe('<TimeRangeDropdown />', () => {
-  const props = {
-    range: null,
+  const props: TimeRangeDropdownProps = {
+    range: undefined,
     setRange: jest.fn(),
     openCustomModal: jest.fn(),
     id: 'time-range'
