@@ -24,6 +24,7 @@ describe('<NetflowTraffic />', () => {
   it('should shallow component', async () => {
     const wrapper = shallow(<NetflowTraffic />);
     expect(wrapper.find(NetflowTraffic)).toBeTruthy();
+    expect(localStorage.setItem).toHaveBeenCalledTimes(0);
   });
   it('should render refresh components', async () => {
     act(() => {

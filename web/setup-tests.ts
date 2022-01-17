@@ -62,3 +62,6 @@ jest.mock('@patternfly/react-core', () => ({
     return null;
   }
 }));
+
+//SpyOn localStorage setItem
+jest.spyOn(window.localStorage.__proto__, 'setItem');
