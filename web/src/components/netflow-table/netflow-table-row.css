@@ -53,3 +53,8 @@ span.co-resource-item.co-resource-item--inline.l,
 .netflow-table-tooltip:hover {
   display: none !important;
 }
+
+/* table stripping from pf-color-black-150 value */
+tr:nth-child(even) {
+  background-color: #f5f5f5;
+}
