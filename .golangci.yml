@@ -31,4 +31,3 @@ linters-settings:
       - deprecatedComment
   cyclop:
     max-complexity: 15
-

@@ -35,6 +35,25 @@ const NetflowTableRow: React.FC<{ flow: Record; columns: Column[]; size: Size }>
     );
   };
 
+  const kubeObjContent = (value: string | undefined, kind: string | undefined, ns: string | undefined) => {
+    if (value && ns && kind) {
+      return (
+        <div className="force-truncate">
+          <ResourceLink className={size} inline={true} kind={kind} name={value} namespace={ns} />
+          <div className="netflow-table-tooltip">
+            <h4>Namespace</h4>
+            <span>{ns}</span>
+            &nbsp;
+            <h4>{kind}</h4>
+            <span>{value}</span>
+          </div>
+        </div>
+      );
+    } else {
+      return '';
+    }
+  };
+
   const content = (c: Column) => {
     const value = c.value(flow);
     switch (c.id) {
@@ -51,41 +70,19 @@ const NetflowTableRow: React.FC<{ flow: Record; columns: Column[]; size: Size }>
         );
       }
       case ColumnsId.srcpod:
-      case ColumnsId.dstpod: {
-        const nsValue = c.id === ColumnsId.srcpod ? flow.labels.SrcNamespace : flow.labels.DstNamespace;
-        if (value && nsValue) {
-          return (
-            <div className="force-truncate">
-              <ResourceLink
-                className={size}
-                inline={true}
-                kind="Pod"
-                name={value.toString()}
-                namespace={nsValue.toString()}
-              />
-              <div className="netflow-table-tooltip">
-                <h4>Namespace</h4>
-                <span>{nsValue}</span>
-                &nbsp;
-                <h4>Pod</h4>
-                <span>{value}</span>
-              </div>
-            </div>
-          );
-        } else {
-          return '';
-        }
-      }
+      case ColumnsId.dstpod:
+        return kubeObjContent(
+          value as string,
+          'Pod',
+          c.id === ColumnsId.srcpod ? flow.labels.SrcNamespace : flow.labels.DstNamespace
+        );
       case ColumnsId.srcwkd:
-      case ColumnsId.dstwkd: {
-        const nsValue = c.id === ColumnsId.srcwkd ? flow.labels.SrcNamespace : flow.labels.DstNamespace;
-        const kind = c.id === ColumnsId.srcwkd ? flow.fields.SrcWorkloadKind : flow.fields.DstWorkloadKind;
-        if (value && kind && nsValue) {
-          return <ResourceLink kind={kind} name={value.toString()} namespace={nsValue.toString()} />;
-        } else {
-          return '';
-        }
-      }
+      case ColumnsId.dstwkd:
+        return kubeObjContent(
+          value as string,
+          c.id === ColumnsId.srcwkd ? flow.fields.SrcWorkloadKind : flow.fields.DstWorkloadKind,
+          c.id === ColumnsId.srcwkd ? flow.labels.SrcNamespace : flow.labels.DstNamespace
+        );
       case ColumnsId.srcnamespace:
       case ColumnsId.dstnamespace: {
         if (value) {

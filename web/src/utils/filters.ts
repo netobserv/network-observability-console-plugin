@@ -11,8 +11,7 @@ export enum FilterType {
   NAMESPACE,
   PORT,
   PROTOCOL,
-  NUMBER,
-  DIRECTION
+  NUMBER
 }
 
 export interface FilterValue {
@@ -30,22 +29,8 @@ export interface FilterOption {
   value: string;
 }
 
-const directionOptions: FilterOption[] = [
-  {
-    name: 'Ingress',
-    value: '0'
-  },
-  {
-    name: 'Egress',
-    value: '1'
-  }
-];
-
-const getDirectionOptions = (value: string) => {
-  const opts = directionOptions.filter(
-    opt => opt.value === value || opt.name.toLowerCase().startsWith(value.toLowerCase())
-  );
-  return opts.length > 0 ? opts : directionOptions;
+export const getActiveColumnFilters = (columnId: ColumnsId, filters: Filter[]) => {
+  return filters.filter(f => f.colId === columnId).flatMap(f => f.values.map(v => v.v));
 };
 
 const protocolOptions: FilterOption[] = Object.values(protocols)
@@ -72,7 +57,6 @@ const getPortOptions = (value: string) => {
 };
 
 const filterOptions: Map<FilterType, (value: string) => FilterOption[]> = new Map([
-  [FilterType.DIRECTION, getDirectionOptions],
   [FilterType.PROTOCOL, getProtocolOptions],
   [FilterType.PORT, getPortOptions]
 ]);
@@ -105,8 +89,4 @@ export const createFilterValue = (type: FilterType, value: string): FilterValue 
 
 export const findProtocolOption = (nameOrVal: string) => {
   return protocolOptions.find(p => p.name.toLowerCase() === nameOrVal.toLowerCase() || p.value === nameOrVal);
-};
-
-export const findDirectionOption = (nameOrVal: string) => {
-  return directionOptions.find(p => p.name.toLowerCase() === nameOrVal.toLowerCase() || p.value === nameOrVal);
 };

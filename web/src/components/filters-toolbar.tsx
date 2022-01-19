@@ -32,15 +32,13 @@ import {
   FilterOption,
   FilterType,
   FilterValue,
-  findDirectionOption,
   findProtocolOption,
   getFilterOptions
 } from '../utils/filters';
-import { getQueryArgument, QueryParams, removeQueryArguments, setQueryArguments } from '../utils/router';
 import './filters-toolbar.css';
 import { validateIPFilter } from '../utils/ip';
-
-export const SPLIT_FILTER_CHAR = ',';
+import { QueryOptions } from '../model/query-options';
+import { QueryOptionsDropdown } from './query-options-dropdown';
 
 export interface FiltersToolbarProps {
   id: string;
@@ -48,15 +46,17 @@ export interface FiltersToolbarProps {
   filters?: Filter[];
   setFilters: (v: Filter[]) => void;
   clearFilters: () => void;
+  queryOptions: QueryOptions;
+  setQueryOptions: (opts: QueryOptions) => void;
 }
 
 export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
   id,
-  children,
   columns,
   filters,
   setFilters,
-  clearFilters
+  clearFilters,
+  ...props
 }) => {
   const { t } = useTranslation('plugin__network-observability-plugin');
   const autocompleteContainerRef = React.useRef<HTMLDivElement | null>(null);
@@ -64,7 +64,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
   const [invalidMessage, setInvalidMessage] = React.useState<string | undefined>();
   const [autocompleteOptions, setAutocompleteOptions] = React.useState<FilterOption[]>([]);
   const [isPopperVisible, setPopperVisible] = React.useState(false);
-  const [isFiltersOpen, setIsOpen] = React.useState<boolean>(false);
+  const [isSearchFiltersOpen, setSearchFiltersOpen] = React.useState<boolean>(false);
 
   const availableFilters = columns.filter(c => c.filterType !== FilterType.NONE);
   const [selectedFilterColumn, setSelectedFilterColumn] = React.useState<Column>(availableFilters[0]);
@@ -81,7 +81,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
   const onAutoCompleteSelect = (e: React.MouseEvent<Element, MouseEvent>, itemId: string) => {
     e.stopPropagation();
     const option = autocompleteOptions.find(opt => opt.value === itemId);
-    addFilter({ v: itemId, display: option?.name });
+    addFilter(selectedFilterColumn.id, { v: itemId, display: option?.name });
     resetAutocompleteOptions();
   };
 
@@ -132,30 +132,10 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
           }
           return { err: t('Unknown protocol') };
         }
-      case FilterType.DIRECTION:
-        const dir = findDirectionOption(selectedFilterValue);
-        if (dir) {
-          return { val: dir.name };
-        } else {
-          return { err: t('Invalid direction') };
-        }
       default:
         return { val: selectedFilterValue };
     }
   }, [selectedFilterColumn, selectedFilterValue, t]);
-
-  const setFiltersAndArgs = React.useCallback(
-    (filters: Filter[]) => {
-      setFilters(filters);
-
-      const queryArguments: QueryParams = {};
-      _.each(filters, (f: Filter) => {
-        queryArguments[f.colId] = f.values.map(value => value.v);
-      });
-      setQueryArguments(queryArguments);
-    },
-    [setFilters]
-  );
 
   const setFilterValue = (v: string) => {
     setInvalidMessage(undefined);
@@ -163,32 +143,35 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
   };
 
   const addFilter = React.useCallback(
-    (filter: FilterValue) => {
-      const result = _.cloneDeep(filters) || [];
-      const found = result.find(f => f.colId === selectedFilterColumn.id);
-      if (found) {
-        //only one filter can be set on timestamp to use loki start & end query params
-        if (selectedFilterColumn.id === ColumnsId.timestamp) {
-          found.values = [filter];
-        } else if (found.values.map(value => value.v).includes(filter.v)) {
-          setInvalidMessage(t('Filter already exists'));
-          return;
+    (colId: ColumnsId, filter: FilterValue) => {
+      const column = columns.find(c => c.id === colId);
+      if (column) {
+        const result = _.cloneDeep(filters) || [];
+        const found = result.find(f => f.colId === colId);
+        if (found) {
+          //only one filter can be set on timestamp to use loki start & end query params
+          if (colId === ColumnsId.timestamp) {
+            found.values = [filter];
+          } else if (found.values.map(value => value.v).includes(filter.v)) {
+            setInvalidMessage(t('Filter already exists'));
+            return;
+          } else {
+            found.values.push(filter);
+          }
         } else {
-          found.values.push(filter);
+          result.push({ colId: colId, values: [filter] });
         }
-      } else {
-        result.push({ colId: selectedFilterColumn.id, values: [filter] });
+        setFilters(result);
+        resetFilterValue();
       }
-      setFiltersAndArgs(result);
-      resetFilterValue();
     },
-    [t, filters, selectedFilterColumn.id, setFiltersAndArgs, resetFilterValue]
+    [t, columns, filters, setFilters, resetFilterValue]
   );
 
   const manageFilters = React.useCallback(() => {
     // Only one choice is present, consider this is what is desired
     if (autocompleteOptions.length === 1) {
-      addFilter({ v: autocompleteOptions[0].value, display: autocompleteOptions[0].name });
+      addFilter(selectedFilterColumn.id, { v: autocompleteOptions[0].value, display: autocompleteOptions[0].name });
       return;
     }
 
@@ -200,7 +183,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
 
     const newValue = createFilterValue(selectedFilterColumn.filterType, validation.val!);
     if (newValue) {
-      addFilter(newValue);
+      addFilter(selectedFilterColumn.id, newValue);
     } else {
       console.error('manageFilters invalid newValue');
     }
@@ -213,7 +196,6 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
     switch (col.filterType) {
       case FilterType.PORT:
       case FilterType.PROTOCOL:
-      case FilterType.DIRECTION:
         return (
           <div ref={autocompleteContainerRef}>
             <Popper
@@ -288,57 +270,27 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
     searchInputRef?.current?.focus();
   }, [selectedFilterColumn, resetFilterValue]);
 
-  //apply filters from query params
-  React.useEffect(() => {
-    const queryParamFilters: Filter[] = [];
-    columns.forEach(col => {
-      const colFilterValues = getQueryArgument(col.id)?.split(SPLIT_FILTER_CHAR) ?? [];
-      if (!_.isEmpty(colFilterValues)) {
-        const filterValues: FilterValue[] = [];
-        colFilterValues.forEach(paramValue => {
-          const value = createFilterValue(col.filterType, paramValue);
-          if (value) {
-            filterValues.push(value);
-          }
-        });
-        if (!_.isEmpty(filterValues)) {
-          queryParamFilters.push({
-            colId: col.id,
-            values: filterValues
-          });
-        } else {
-          removeQueryArguments([col.id]);
-        }
-      }
-    });
-    //reset url args here to clean invalid values
-    setFiltersAndArgs(queryParamFilters);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   return (
     <Toolbar
       id={id}
       clearAllFilters={clearFilters}
       clearFiltersButtonText={hasFilterValue() ? t('Clear all filters') : ''}
     >
-      <ToolbarContent id={`${id}-content`} toolbarId={id}>
+      <ToolbarContent id={`${id}-search-filters`} toolbarId={id}>
         {filters &&
           filters.map((filter, index) => (
             <ToolbarFilter
               key={index}
               deleteChipGroup={() => {
-                removeQueryArguments([filter.colId]);
                 setFilters(filters.filter(f => f.colId !== filter.colId));
               }}
               chips={filter.values.map(value => (value.display ? value.display : value.v))}
               deleteChip={(f, value: string) => {
                 filter.values = filter.values.filter(val => (val.display ? val.display !== value : val.v !== value));
                 if (_.isEmpty(filter.values)) {
-                  removeQueryArguments([filter.colId]);
                   setFilters(filters.filter(f => f.colId !== filter.colId));
                 } else {
-                  setFiltersAndArgs(_.cloneDeep(filters));
+                  setFilters(_.cloneDeep(filters));
                 }
               }}
               categoryName={columns.find(c => c.id === filter.colId)?.name || ''}
@@ -349,6 +301,9 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
               }
             </ToolbarFilter>
           ))}
+        <ToolbarItem>
+          <QueryOptionsDropdown options={props.queryOptions} setOptions={props.setQueryOptions} />
+        </ToolbarItem>
         <ToolbarItem>
           <Tooltip
             //css hide tooltip here to avoid render issue
@@ -372,10 +327,10 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
                     {col.name}
                   </DropdownItem>
                 ))}
-                isOpen={isFiltersOpen}
-                onSelect={() => setIsOpen(false)}
+                isOpen={isSearchFiltersOpen}
+                onSelect={() => setSearchFiltersOpen(false)}
                 toggle={
-                  <DropdownToggle id="column-filter-toggle" onToggle={() => setIsOpen(!isFiltersOpen)}>
+                  <DropdownToggle id="column-filter-toggle" onToggle={() => setSearchFiltersOpen(!isSearchFiltersOpen)}>
                     {selectedFilterColumn.name}
                   </DropdownToggle>
                 }
@@ -395,7 +350,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
         <ToolbarItem>
           <OverflowMenu breakpoint="md">
             <OverflowMenuGroup groupType="button" isPersistent>
-              <OverflowMenuItem>{children}</OverflowMenuItem>
+              <OverflowMenuItem>{props.children}</OverflowMenuItem>
             </OverflowMenuGroup>
           </OverflowMenu>
         </ToolbarItem>
