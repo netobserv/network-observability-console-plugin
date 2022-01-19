@@ -103,13 +103,19 @@ const NetflowTable: React.FC<{
     bodyContent = getSortedFlows().map(f => <NetflowTableRow key={f.key} flow={f} columns={columns} size={size} />);
   }
 
+  const width = columns.reduce((prev, cur) => prev + cur.width, 0);
+  if (width === 0) {
+    return null;
+  }
+
   return (
-    <TableComposable aria-label="Misc table" variant="compact">
+    <TableComposable aria-label="Misc table" variant="compact" style={{ minWidth: `${width}em` }}>
       <NetflowTableHeader
         onSort={onSort}
         sortDirection={activeSortDirection}
         sortIndex={activeSortIndex}
         columns={columns}
+        tableWidth={width}
       />
       <Tbody>{bodyContent}</Tbody>
     </TableComposable>
