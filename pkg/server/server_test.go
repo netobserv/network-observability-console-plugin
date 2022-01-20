@@ -17,7 +17,6 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strconv"
 	"strings"
 	"testing"
@@ -34,8 +33,6 @@ const (
 	testHostname = "127.0.0.1"
 )
 
-var tmpDir = os.TempDir()
-
 func TestServerRunning(t *testing.T) {
 	testPort, err := getFreePort(testHostname)
 	if err != nil {
@@ -50,12 +47,9 @@ func TestServerRunning(t *testing.T) {
 
 	serverURL := fmt.Sprintf("http://%s", testServerHostPort)
 
-	// Change working directory to serve web files
-	_, testfile, _, _ := runtime.Caller(0)
-	err = os.Chdir(filepath.Join(filepath.Dir(testfile), "../.."))
-	if err != nil {
-		t.Fatalf("Failed to change directory")
-	}
+	// Prepare directory to serve web files
+	tmpDir := prepareServerAssets(t)
+	defer os.RemoveAll(tmpDir)
 
 	go func() {
 		Start(&Config{
@@ -105,6 +99,10 @@ func TestSecureComm(t *testing.T) {
 		t.Logf("Will use free metrics port [%v] on host [%v] for tests", testMetricsPort, testHostname)
 	}
 
+	tmpDir, err := os.MkdirTemp("", "server-test")
+	require.NoError(t, err)
+	defer os.RemoveAll(tmpDir)
+
 	testServerCertFile := tmpDir + "/server-test-server.cert"
 	testServerKeyFile := tmpDir + "/server-test-server.key"
 	testServerHostPort := fmt.Sprintf("%v:%v", testHostname, testPort)
@@ -137,12 +135,9 @@ func TestSecureComm(t *testing.T) {
 
 	serverURL := fmt.Sprintf("https://%s", testServerHostPort)
 
-	// Change working directory to serve web files
-	_, testfile, _, _ := runtime.Caller(0)
-	err = os.Chdir(filepath.Join(filepath.Dir(testfile), "../.."))
-	if err != nil {
-		t.Fatalf("Failed to change directory")
-	}
+	// Prepare directory to serve web files
+	tmpDirAssets := prepareServerAssets(t)
+	defer os.RemoveAll(tmpDirAssets)
 
 	go func() {
 		Start(conf)
@@ -325,6 +320,20 @@ type httpMock struct {
 
 func (l *httpMock) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	_ = l.Called(w, r)
+}
+
+func prepareServerAssets(t *testing.T) string {
+	tmpDir, err := os.MkdirTemp("", "server-test")
+	require.NoError(t, err)
+	distpath := filepath.Join(tmpDir, "web/dist")
+	err = os.MkdirAll(distpath, os.ModePerm)
+	require.NoError(t, err)
+	dummyfile := filepath.Join(distpath, "dummy")
+	_, err = os.Create(dummyfile)
+	require.NoError(t, err)
+	err = os.Chdir(tmpDir)
+	require.NoError(t, err)
+	return tmpDir
 }
 
 func getRequestResults(t *testing.T, httpClient *http.Client, url string) (string, error) {
