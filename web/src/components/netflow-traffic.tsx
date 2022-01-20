@@ -35,6 +35,7 @@ import {
 } from '../utils/local-storage-hook';
 import { Filter } from '../utils/filters';
 import { QueryOptions } from '../model/query-options';
+import { getHTTPErrorDetails } from '../utils/errors';
 
 export const NetflowTraffic: React.FC = () => {
   const [extensions] = useResolvedExtensions<ModelFeatureFlag>(isModelFeatureFlag);
@@ -66,12 +67,7 @@ export const NetflowTraffic: React.FC = () => {
         .then(setFlows)
         .catch(err => {
           setFlows([]);
-          let errorMessage = String(err);
-          if (err?.response?.data) {
-            Object.keys(err.response.data).forEach((key: string) => {
-              errorMessage += `\n${key}: ${String(err.response.data[key])}`;
-            });
-          }
+          const errorMessage = getHTTPErrorDetails(err);
           setError(errorMessage);
         })
         .finally(() => {
