@@ -3,7 +3,7 @@ import { QueryArguments } from '../utils/router';
 import { Record } from './ipfix';
 import { LokiResponse, parseStream } from './loki';
 
-const host = '/api/proxy/namespace/network-observability/service/network-observability-plugin:9001';
+const host = '/api/proxy/network-observability-plugin/backend/';
 
 export const getFlows = (params: QueryArguments): Promise<Record[]> => {
   return axios.get(host + '/api/loki/flows', { params }).then(r => {
