@@ -2,7 +2,8 @@ import { Button, Dropdown, TextInput, Toolbar, ToolbarFilter, ToolbarItem } from
 import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 import { act } from 'react-dom/test-utils';
-import { ColumnsId, Filter } from '../../utils/columns';
+import { ColumnsId } from '../../utils/columns';
+import { Filter } from '../../utils/filters';
 import FiltersToolbar, { FiltersToolbarProps } from '../filters-toolbar';
 import { ColumnsSample } from '../__tests-data__/columns';
 import { FiltersSample, FTPSrcPortSample } from '../__tests-data__/filters';
@@ -13,7 +14,9 @@ describe('<FiltersToolbar />', () => {
     filters: [] as Filter[],
     setFilters: jest.fn(),
     clearFilters: jest.fn(),
-    id: 'filter-toolbar'
+    id: 'filter-toolbar',
+    queryOptions: { reporter: 'destination', limit: 100 },
+    setQueryOptions: jest.fn()
   };
   beforeEach(() => {
     props.setFilters = jest.fn();
@@ -23,7 +26,7 @@ describe('<FiltersToolbar />', () => {
     const wrapper = shallow(<FiltersToolbar {...props} />);
     expect(wrapper.find(FiltersToolbar)).toBeTruthy();
     expect(wrapper.find(Toolbar)).toBeTruthy();
-    expect(wrapper.find(ToolbarItem)).toHaveLength(2);
+    expect(wrapper.find(ToolbarItem)).toHaveLength(3);
     expect(wrapper.find(Dropdown)).toBeTruthy();
     expect(wrapper.find(Button)).toBeTruthy();
   });
@@ -54,16 +57,15 @@ describe('<FiltersToolbar />', () => {
     dropdown.simulate('click');
     expect(wrapper.find('.column-filter-item').length).toBe(0);
 
-    //setFilters should be called only once for startup
-    expect(props.setFilters).toHaveBeenCalledTimes(1);
-    //with empty array since url doesn't contains params
-    expect(props.setFilters).toHaveBeenCalledWith([]);
+    //setFilters should not be called at startup, because filters are supposed to be already initialized from URL
+    expect(props.setFilters).toHaveBeenCalledTimes(0);
   });
   it('should filter', async () => {
     //clear filters
     props.filters = [];
     const wrapper = mount(<FiltersToolbar {...props} />);
-    expect(props.setFilters).toHaveBeenNthCalledWith(1, []);
+    let setFilterCallsExpected = 0;
+    expect(props.setFilters).toHaveBeenCalledTimes(setFilterCallsExpected);
 
     const dropdown = wrapper.find('#column-filter-toggle').at(0);
     const search = wrapper.find('#search-button').at(0);
@@ -77,7 +79,7 @@ describe('<FiltersToolbar />', () => {
     });
     search.simulate('click');
     props.filters = props.filters.concat([{ colId: ColumnsId.srcpod, values: [{ v: 'ABCD' }] }]);
-    expect(props.setFilters).toHaveBeenNthCalledWith(2, props.filters);
+    expect(props.setFilters).toHaveBeenNthCalledWith(++setFilterCallsExpected, props.filters);
     wrapper.setProps(props as Pick<FiltersToolbarProps, keyof FiltersToolbarProps>);
 
     //open dropdow and select Src namespace
@@ -89,7 +91,7 @@ describe('<FiltersToolbar />', () => {
     });
     wrapper.find(TextInput).at(0).simulate('keypress', { key: 'Enter' });
     props.filters = props.filters.concat([{ colId: ColumnsId.srcnamespace, values: [{ v: 'EFGH' }] }]);
-    expect(props.setFilters).toHaveBeenNthCalledWith(3, props.filters);
+    expect(props.setFilters).toHaveBeenNthCalledWith(++setFilterCallsExpected, props.filters);
     wrapper.setProps(props as Pick<FiltersToolbarProps, keyof FiltersToolbarProps>);
 
     //open dropdow and select valid Src port by name
@@ -104,7 +106,7 @@ describe('<FiltersToolbar />', () => {
       wrapper.find(TextInput).at(0).simulate('keypress', { key: 'Enter' });
     });
     props.filters = props.filters.concat([FTPSrcPortSample]);
-    expect(props.setFilters).toHaveBeenNthCalledWith(4, props.filters);
+    expect(props.setFilters).toHaveBeenNthCalledWith(++setFilterCallsExpected, props.filters);
     wrapper.setProps(props as Pick<FiltersToolbarProps, keyof FiltersToolbarProps>);
 
     //open dropdow and select invalid Dst port by name
@@ -116,7 +118,7 @@ describe('<FiltersToolbar />', () => {
     });
     wrapper.find(TextInput).at(0).simulate('keypress', { key: 'Enter' });
     search.simulate('click');
-    expect(props.setFilters).toHaveBeenCalledTimes(4);
+    expect(props.setFilters).toHaveBeenCalledTimes(setFilterCallsExpected);
 
     //clear all filters
     expect(props.clearFilters).not.toHaveBeenCalled();
@@ -164,5 +166,31 @@ describe('<FiltersToolbar />', () => {
     });
     search.simulate('click');
     expect(props.setFilters).not.toHaveBeenCalled();
+  });
+  it('should filter with autocompletion fast selection', async () => {
+    props.filters = [];
+    const wrapper = mount(<FiltersToolbar {...props} />);
+    jest.clearAllMocks();
+
+    const dropdown = wrapper.find('#column-filter-toggle').at(0);
+    //open dropdown and select Protocol
+    dropdown.simulate('click');
+    wrapper.find('[id="Protocol"]').at(0).simulate('click');
+    act(() => {
+      //set text input value and press button
+      wrapper.find(TextInput).props().onChange!('tcp', null!);
+    });
+    //press enter and await for popper to disapear
+    await act(async () => {
+      wrapper.find(TextInput).at(0).simulate('keypress', { key: 'Enter' });
+    });
+    const expected: Filter[] = [
+      {
+        colId: ColumnsId.proto,
+        values: [{ v: '6', display: 'TCP' }]
+      }
+    ];
+    expect(props.setFilters).toHaveBeenCalledWith(expected);
+    expect(props.setFilters).toHaveBeenCalledTimes(1);
   });
 });

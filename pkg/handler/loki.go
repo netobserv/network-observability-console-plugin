@@ -9,8 +9,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/netobserv/network-observability-console-plugin/pkg/httpclient"
 	"github.com/sirupsen/logrus"
+
+	"github.com/netobserv/network-observability-console-plugin/pkg/httpclient"
 )
 
 var hlog = logrus.WithField("module", "handler")
@@ -18,9 +19,11 @@ var hlog = logrus.WithField("module", "handler")
 const startTimeKey = "startTime"
 const endTimeTimeKey = "endTime"
 const timeRangeKey = "timeRange"
+const limitKey = "limit"
 const queryParam = "?query="
 const startParam = "&start="
 const endParam = "&end="
+const limitParam = "&limit="
 const lokiOrgIDHeader = "X-Scope-OrgID"
 const getFlowsURLPath = "/loki/api/v1/query_range"
 
@@ -44,7 +47,7 @@ func isLabel(v string) bool {
 }
 
 func isIPAddress(v string) bool {
-	return v == "DstAddr" || v == "SrcAddr"
+	return v == "DstAddr" || v == "SrcAddr" || v == "DstHostIP" || v == "SrcHostIP"
 }
 
 func GetFlows(cfg LokiConfig) func(w http.ResponseWriter, r *http.Request) {
@@ -75,47 +78,11 @@ func GetFlows(cfg LokiConfig) func(w http.ResponseWriter, r *http.Request) {
 		extraArgs := strings.Builder{}
 
 		for key := range params {
-			regexStr := strings.Builder{}
-
 			param := params.Get(key)
-			//add start / end param if specified
-			switch key {
-			case startTimeKey:
-				extraArgs.WriteString(startParam)
-				extraArgs.WriteString(param)
-			case endTimeTimeKey:
-				extraArgs.WriteString(endParam)
-				extraArgs.WriteString(param)
-			case timeRangeKey:
-				selectTimeRange(w, param, &extraArgs)
-			default:
-				for _, value := range strings.Split(param, ",") {
-					if len(regexStr.String()) > 0 {
-						regexStr.WriteByte('|')
-					}
-					switch {
-					case isLabel(key):
-						filterRegexInLabel(value, &regexStr)
-					case isIPAddress(key):
-						filterIPInLine(key, value, &ipFilters)
-					default:
-						filterRegexInLine(key, value, &regexStr)
-					}
-				}
-
-				if isLabel(key) {
-					//label match regex : ,key=~REGEX_EXPRESSION
-					labelFilters.WriteString(",")
-					labelFilters.WriteString(key)
-					labelFilters.WriteString("=~\"")
-					labelFilters.WriteString(regexStr.String())
-					labelFilters.WriteString("\"")
-				} else {
-					//line match regex : |~"REGEX_EXPRESSION"
-					lineFilters.WriteString("|~\"")
-					lineFilters.WriteString(regexStr.String())
-					lineFilters.WriteString("\"")
-				}
+			err := processParam(key, param, &labelFilters, &lineFilters, &ipFilters, &extraArgs)
+			if err != nil {
+				writeError(w, http.StatusBadRequest, err.Error())
+				return
 			}
 		}
 
@@ -146,14 +113,63 @@ func GetFlows(cfg LokiConfig) func(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func selectTimeRange(w http.ResponseWriter, param string, extraArgs *strings.Builder) {
+func processParam(key, value string, labelFilters, lineFilters, ipFilters, extraArgs *strings.Builder) error {
+	regexStr := strings.Builder{}
+	switch key {
+	case startTimeKey:
+		extraArgs.WriteString(startParam)
+		extraArgs.WriteString(value)
+	case endTimeTimeKey:
+		extraArgs.WriteString(endParam)
+		extraArgs.WriteString(value)
+	case timeRangeKey:
+		err := selectTimeRange(value, extraArgs)
+		if err != nil {
+			return err
+		}
+	case limitKey:
+		extraArgs.WriteString(limitParam)
+		extraArgs.WriteString(value)
+	default:
+		for _, value := range strings.Split(value, ",") {
+			if len(regexStr.String()) > 0 {
+				regexStr.WriteByte('|')
+			}
+			switch {
+			case isLabel(key):
+				filterRegexInLabel(value, &regexStr)
+			case isIPAddress(key):
+				filterIPInLine(key, value, ipFilters)
+			default:
+				filterRegexInLine(key, value, &regexStr)
+			}
+		}
+
+		if isLabel(key) {
+			//label match regex : ,key=~REGEX_EXPRESSION
+			labelFilters.WriteString(",")
+			labelFilters.WriteString(key)
+			labelFilters.WriteString("=~\"")
+			labelFilters.WriteString(regexStr.String())
+			labelFilters.WriteString("\"")
+		} else {
+			//line match regex : |~"REGEX_EXPRESSION"
+			lineFilters.WriteString("|~\"")
+			lineFilters.WriteString(regexStr.String())
+			lineFilters.WriteString("\"")
+		}
+	}
+	return nil
+}
+
+func selectTimeRange(param string, extraArgs *strings.Builder) error {
 	r, err := strconv.ParseInt(param, 10, 64)
 	if err != nil {
-		writeError(w, http.StatusBadRequest, err.Error())
-	} else {
-		extraArgs.WriteString(startParam)
-		extraArgs.WriteString(strconv.FormatInt(time.Now().Unix()-r, 10))
+		return err
 	}
+	extraArgs.WriteString(startParam)
+	extraArgs.WriteString(strconv.FormatInt(time.Now().Unix()-r, 10))
+	return nil
 }
 
 func filterRegexInLine(key string, value string, regexStr *strings.Builder) {

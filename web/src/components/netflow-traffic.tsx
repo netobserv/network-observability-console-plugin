@@ -5,10 +5,10 @@ import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Record } from '../api/loki';
+import { Record } from '../api/ipfix';
 import { getFlows } from '../api/routes';
 import NetflowTable from './netflow-table/netflow-table';
-import { Column, Filter, getDefaultColumns } from '../utils/columns';
+import { Column, getDefaultColumns } from '../utils/columns';
 import { usePoll } from '../utils/poll-hook';
 import { ColumnsModal } from './columns-modal';
 import { FiltersToolbar } from './filters-toolbar';
@@ -17,14 +17,14 @@ import { RefreshDropdown } from './refresh-dropdown';
 import TimeRangeDropdown from './time-range-dropdown';
 import TimeRangeModal from './time-range-modal';
 import {
-  setQueryArguments,
-  removeQueryArguments,
-  getAPIQueryParams,
-  QueryArguments as Q,
-  getQueryArgumentAsNumber
+  setURLQueryArguments,
+  buildQueryArguments,
+  getFiltersFromURL,
+  getQueryOptionsFromURL,
+  getRangeFromURL,
+  QueryArguments
 } from '../utils/router';
 import { TimeRange } from '../utils/datetime';
-import { usePrevious } from '../utils/previous-hook';
 import DisplayDropdown from './display-dropdown';
 import { Size } from './display-dropdown';
 import {
@@ -33,8 +33,8 @@ import {
   LOCAL_STORAGE_SIZE_KEY,
   useLocalStorage
 } from '../utils/local-storage-hook';
-
-const DEFAULT_TIME_RANGE = 300;
+import { Filter } from '../utils/filters';
+import { QueryOptions } from '../model/query-options';
 
 export const NetflowTraffic: React.FC = () => {
   const [extensions] = useResolvedExtensions<ModelFeatureFlag>(isModelFeatureFlag);
@@ -51,36 +51,47 @@ export const NetflowTraffic: React.FC = () => {
     id: 'id',
     criteria: 'isSelected'
   });
-  const [filters, setFilters] = React.useState<Filter[] | undefined>();
-  const [range, setRange] = React.useState<number | TimeRange | undefined>();
-  const previousRange = usePrevious<number | TimeRange | undefined>(range);
+  const [filters, setFilters] = React.useState<Filter[]>(getFiltersFromURL(columns));
+  const [range, setRange] = React.useState<number | TimeRange>(getRangeFromURL());
+  const [queryOptions, setQueryOptions] = React.useState<QueryOptions>(getQueryOptionsFromURL());
   const [interval, setInterval] = useLocalStorage<number | undefined>(LOCAL_STORAGE_REFRESH_KEY);
+  const isInit = React.useRef(true);
 
-  const tick = React.useCallback(() => {
-    //skip tick while filters & range not initialized
-    if (filters === undefined || range === undefined) {
+  const tick = React.useCallback(
+    (queryArgs?: QueryArguments) => {
+      const qa = queryArgs ?? buildQueryArguments(filters, range, queryOptions);
+      setLoading(true);
+      setError(undefined);
+      getFlows(qa)
+        .then(setFlows)
+        .catch(err => {
+          setFlows([]);
+          let errorMessage = String(err);
+          if (err?.response?.data) {
+            Object.keys(err.response.data).forEach((key: string) => {
+              errorMessage += `\n${key}: ${String(err.response.data[key])}`;
+            });
+          }
+          setError(errorMessage);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    },
+    [filters, range, queryOptions]
+  );
+
+  // Rewrite URL params on state change and tick
+  React.useEffect(() => {
+    // Skip on init
+    if (isInit.current) {
+      isInit.current = false;
       return;
     }
-    setLoading(true);
-    setError(undefined);
-    getFlows(getAPIQueryParams(filters, range))
-      .then(streams => {
-        setFlows(streams);
-      })
-      .catch(err => {
-        setFlows([]);
-        let errorMessage = String(err);
-        if (err?.response?.data) {
-          Object.keys(err.response.data).forEach((key: string) => {
-            errorMessage += `\n${key}: ${String(err.response.data[key])}`;
-          });
-        }
-        setError(errorMessage);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, [filters, range]);
+    const qa = buildQueryArguments(filters, range, queryOptions);
+    setURLQueryArguments(qa);
+    tick(qa);
+  }, [filters, range, queryOptions, tick]);
 
   usePoll(tick, interval);
 
@@ -89,53 +100,16 @@ export const NetflowTraffic: React.FC = () => {
   const updateTableFilters = (f: Filter[]) => {
     setFilters(f);
     setFlows([]);
-    setLoading(true);
   };
 
   const clearFilters = () => {
-    if (!_.isEmpty(filters)) {
-      removeQueryArguments(filters!.map(f => f.colId));
-    }
     updateTableFilters([]);
   };
 
-  //update data on filters changes
+  //close modal on range updated
   React.useEffect(() => {
-    tick();
-  }, [filters, tick]);
-
-  //update data & arguments on range changes
-  React.useEffect(() => {
-    //ensure range is set and different than previous value
-    if (range === undefined || range === previousRange) {
-      return;
-    }
-
     setTRModalOpen(false);
-    if (typeof range === 'number') {
-      setQueryArguments({ timeRange: range.toString() });
-      removeQueryArguments([Q.StartTime, Q.EndTime]);
-    } else if (typeof range === 'object') {
-      setQueryArguments({ startTime: range.from.toString(), endTime: range.to.toString() });
-      removeQueryArguments([Q.TimeRange]);
-    } else {
-      removeQueryArguments([Q.StartTime, Q.EndTime, Q.TimeRange]);
-    }
-  }, [previousRange, range]);
-
-  //apply range from query params at startup
-  React.useEffect(() => {
-    const timeRange = getQueryArgumentAsNumber(Q.TimeRange);
-    const startTime = getQueryArgumentAsNumber(Q.StartTime);
-    const endTime = getQueryArgumentAsNumber(Q.EndTime);
-    if (timeRange) {
-      setRange(timeRange);
-    } else if (startTime && endTime) {
-      setRange({ from: startTime, to: endTime });
-    } else {
-      setRange(DEFAULT_TIME_RANGE);
-    }
-  }, []);
+  }, [range]);
 
   return !_.isEmpty(extensions) ? (
     <PageSection id="pageSection">
@@ -164,6 +138,8 @@ export const NetflowTraffic: React.FC = () => {
         filters={filters}
         setFilters={updateTableFilters}
         clearFilters={clearFilters}
+        queryOptions={queryOptions}
+        setQueryOptions={setQueryOptions}
       >
         <Tooltip content={t('Manage columns')}>
           <Button

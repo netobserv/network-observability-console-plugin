@@ -1,8 +1,9 @@
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Tr, Td } from '@patternfly/react-table';
 import { ResourceLink } from '@openshift-console/dynamic-plugin-sdk';
 
-import { Record } from '../../api/loki';
+import { FlowDirection, Record } from '../../api/ipfix';
 import { Column, ColumnsId } from '../../utils/columns';
 import { formatPort } from '../../utils/port';
 import { formatProtocol } from '../../utils/protocol';
@@ -11,6 +12,8 @@ import { Size } from '../display-dropdown';
 import './netflow-table-row.css';
 
 const NetflowTableRow: React.FC<{ flow: Record; columns: Column[]; size: Size }> = ({ flow, columns, size }) => {
+  const { t } = useTranslation('plugin__network-observability-plugin');
+
   const onMouseOver = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     if (event.currentTarget) {
       const isTruncated =
@@ -20,6 +23,34 @@ const NetflowTableRow: React.FC<{ flow: Record; columns: Column[]; size: Size }>
       event.currentTarget.className = isTruncated
         ? `netflow-table-content truncated ${size}`
         : `netflow-table-content ${size}`;
+    }
+  };
+
+  const simpleTextWithTooltip = (text: string) => {
+    return (
+      <div>
+        <span>{text}</span>
+        <div className="netflow-table-tooltip">{text}</div>
+      </div>
+    );
+  };
+
+  const kubeObjContent = (value: string | undefined, kind: string | undefined, ns: string | undefined) => {
+    if (value && ns && kind) {
+      return (
+        <div className="force-truncate">
+          <ResourceLink className={size} inline={true} kind={kind} name={value} namespace={ns} />
+          <div className="netflow-table-tooltip">
+            <h4>Namespace</h4>
+            <span>{ns}</span>
+            &nbsp;
+            <h4>{kind}</h4>
+            <span>{value}</span>
+          </div>
+        </div>
+      );
+    } else {
+      return '';
     }
   };
 
@@ -39,31 +70,19 @@ const NetflowTableRow: React.FC<{ flow: Record; columns: Column[]; size: Size }>
         );
       }
       case ColumnsId.srcpod:
-      case ColumnsId.dstpod: {
-        const nsValue = c.id === ColumnsId.srcpod ? flow.labels.SrcNamespace : flow.labels.DstNamespace;
-        if (value && nsValue) {
-          return (
-            <div className="force-truncate">
-              <ResourceLink
-                className={size}
-                inline={true}
-                kind="Pod"
-                name={value.toString()}
-                namespace={nsValue.toString()}
-              />
-              <div className="netflow-table-tooltip">
-                <h4>Namespace</h4>
-                <span>{nsValue}</span>
-                &nbsp;
-                <h4>Pod</h4>
-                <span>{value}</span>
-              </div>
-            </div>
-          );
-        } else {
-          return '';
-        }
-      }
+      case ColumnsId.dstpod:
+        return kubeObjContent(
+          value as string,
+          'Pod',
+          c.id === ColumnsId.srcpod ? flow.labels.SrcNamespace : flow.labels.DstNamespace
+        );
+      case ColumnsId.srcwkd:
+      case ColumnsId.dstwkd:
+        return kubeObjContent(
+          value as string,
+          c.id === ColumnsId.srcwkd ? flow.fields.SrcWorkloadKind : flow.fields.DstWorkloadKind,
+          c.id === ColumnsId.srcwkd ? flow.labels.SrcNamespace : flow.labels.DstNamespace
+        );
       case ColumnsId.srcnamespace:
       case ColumnsId.dstnamespace: {
         if (value) {
@@ -82,33 +101,18 @@ const NetflowTableRow: React.FC<{ flow: Record; columns: Column[]; size: Size }>
       }
       case ColumnsId.srcport:
       case ColumnsId.dstport: {
-        const portText = formatPort(value as number);
-        return (
-          <div>
-            <span>{portText}</span>
-            <div className="netflow-table-tooltip">{portText}</div>
-          </div>
-        );
+        return simpleTextWithTooltip(formatPort(value as number));
       }
       case ColumnsId.proto:
         if (value) {
-          const protoText = formatProtocol(value as number);
-          return (
-            <div>
-              <span>{protoText}</span>
-              <div className="netflow-table-tooltip">{protoText}</div>
-            </div>
-          );
+          return simpleTextWithTooltip(formatProtocol(value as number));
         } else {
           return '';
         }
+      case ColumnsId.flowdir:
+        return simpleTextWithTooltip(value === FlowDirection.Ingress ? t('Ingress') : t('Egress'));
       default:
-        return (
-          <div>
-            <span>{value}</span>
-            <div className="netflow-table-tooltip">{value}</div>
-          </div>
-        );
+        return simpleTextWithTooltip(String(value));
     }
   };
   return (

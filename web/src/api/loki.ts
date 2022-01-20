@@ -1,4 +1,5 @@
 import * as _ from 'lodash';
+import { Fields, Labels, Record } from './ipfix';
 
 export interface LokiResponse {
   resultType: string;
@@ -15,30 +16,6 @@ export type StreamResult = {
   stream: { [key: string]: string };
   values: string[][];
 };
-
-export interface Record {
-  labels: Labels;
-  key: string;
-  timestamp: number;
-  fields: Fields;
-}
-
-export interface Labels {
-  SrcNamespace?: string;
-  DstNamespace?: string;
-}
-
-export interface Fields {
-  SrcAddr: string;
-  DstAddr: string;
-  SrcPod?: string;
-  DstPod?: string;
-  SrcPort: number;
-  DstPort: number;
-  Packets: number;
-  Proto: number;
-  Bytes: number;
-}
 
 export const parseStream = (raw: StreamResult): Record[] => {
   return raw.values.map(v => {
