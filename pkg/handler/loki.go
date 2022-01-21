@@ -16,6 +16,7 @@ import (
 
 var hlog = logrus.WithField("module", "handler")
 
+const arrayIndicator = "[]"
 const startTimeKey = "startTime"
 const endTimeTimeKey = "endTime"
 const timeRangeKey = "timeRange"
@@ -79,7 +80,8 @@ func GetFlows(cfg LokiConfig) func(w http.ResponseWriter, r *http.Request) {
 
 		for key := range params {
 			param := params.Get(key)
-			err := processParam(key, param, &labelFilters, &lineFilters, &ipFilters, &extraArgs)
+			//remove array indicator [] in key and process it
+			err := processParam(strings.Replace(key, arrayIndicator, "", -1), param, &labelFilters, &lineFilters, &ipFilters, &extraArgs)
 			if err != nil {
 				writeError(w, http.StatusBadRequest, err.Error())
 				return
