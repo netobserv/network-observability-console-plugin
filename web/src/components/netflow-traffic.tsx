@@ -1,5 +1,5 @@
 import { isModelFeatureFlag, ModelFeatureFlag, useResolvedExtensions } from '@openshift-console/dynamic-plugin-sdk';
-import { Button, PageSection, Tooltip } from '@patternfly/react-core';
+import { Button, OverflowMenuItem, PageSection, Tooltip } from '@patternfly/react-core';
 import { ColumnsIcon, SyncAltIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
 import * as React from 'react';
@@ -22,7 +22,9 @@ import {
   getFiltersFromURL,
   getQueryOptionsFromURL,
   getRangeFromURL,
-  QueryArguments
+  QueryArguments,
+  NETFLOW_TRAFFIC_PATH,
+  removeURLQueryArguments
 } from '../utils/router';
 import { TimeRange } from '../utils/datetime';
 import DisplayDropdown from './display-dropdown';
@@ -36,8 +38,12 @@ import {
 import { Filter } from '../utils/filters';
 import { QueryOptions } from '../model/query-options';
 import { getHTTPErrorDetails } from '../utils/errors';
+import { useHistory } from 'react-router-dom';
 
-export const NetflowTraffic: React.FC = () => {
+export const NetflowTraffic: React.FC<{
+  forcedFilters?: Filter[];
+}> = ({ forcedFilters }) => {
+  const { push } = useHistory();
   const [extensions] = useResolvedExtensions<ModelFeatureFlag>(isModelFeatureFlag);
   const [loading, setLoading] = React.useState(true);
   const [flows, setFlows] = React.useState<Record[]>([]);
@@ -60,7 +66,7 @@ export const NetflowTraffic: React.FC = () => {
 
   const tick = React.useCallback(
     (queryArgs?: QueryArguments) => {
-      const qa = queryArgs ?? buildQueryArguments(filters, range, queryOptions);
+      const qa = queryArgs ?? buildQueryArguments(forcedFilters ? forcedFilters : filters, range, queryOptions);
       setLoading(true);
       setError(undefined);
       getFlows(qa)
@@ -74,20 +80,22 @@ export const NetflowTraffic: React.FC = () => {
           setLoading(false);
         });
     },
-    [filters, range, queryOptions]
+    [filters, forcedFilters, range, queryOptions]
   );
 
   // Rewrite URL params on state change and tick
   React.useEffect(() => {
-    // Skip on init
+    // Skip on init if forcedFilters not set
     if (isInit.current) {
       isInit.current = false;
-      return;
+      if (!forcedFilters) {
+        return;
+      }
     }
-    const qa = buildQueryArguments(filters, range, queryOptions);
+    const qa = buildQueryArguments(forcedFilters ? forcedFilters : filters, range, queryOptions);
     setURLQueryArguments(qa);
     tick(qa);
-  }, [filters, range, queryOptions, tick]);
+  }, [filters, forcedFilters, range, queryOptions, tick]);
 
   usePoll(tick, interval);
 
@@ -99,35 +107,51 @@ export const NetflowTraffic: React.FC = () => {
   };
 
   const clearFilters = () => {
-    updateTableFilters([]);
+    if (_.isEmpty(forcedFilters)) {
+      if (!_.isEmpty(filters)) {
+        removeURLQueryArguments(filters!.map(f => f.colId));
+      }
+      updateTableFilters([]);
+    } else {
+      push(NETFLOW_TRAFFIC_PATH);
+    }
   };
 
-  //close modal on range updated
+  const coActions = (
+    <div className="co-actions">
+      <TimeRangeDropdown
+        id="time-range-dropdown"
+        range={typeof range === 'number' ? range : undefined}
+        setRange={setRange}
+        openCustomModal={() => setTRModalOpen(true)}
+      />
+      <RefreshDropdown id="refresh-dropdown" interval={interval} setInterval={setInterval} />
+      <Button
+        id="refresh-button"
+        className="co-action-refresh-button"
+        variant="primary"
+        onClick={() => tick()}
+        icon={<SyncAltIcon style={{ animation: `spin ${loading ? 1 : 0}s linear infinite` }} />}
+      />
+    </div>
+  );
+
+  //update data on filters changes
   React.useEffect(() => {
     setTRModalOpen(false);
   }, [range]);
 
   return !_.isEmpty(extensions) ? (
     <PageSection id="pageSection">
-      <h1 className="co-m-pane__heading">
-        <span>Network Traffic</span>
-        <div className="co-actions">
-          <TimeRangeDropdown
-            id="time-range-dropdown"
-            range={typeof range === 'number' ? range : undefined}
-            setRange={setRange}
-            openCustomModal={() => setTRModalOpen(true)}
-          />
-          <RefreshDropdown id="refresh-dropdown" interval={interval} setInterval={setInterval} />
-          <Button
-            id="refresh-button"
-            className="co-action-refresh-button"
-            variant="primary"
-            onClick={() => tick()}
-            icon={<SyncAltIcon style={{ animation: `spin ${loading ? 1 : 0}s linear infinite` }} />}
-          />
-        </div>
-      </h1>
+      {
+        //display title only if forced filters is not set
+        _.isEmpty(forcedFilters) && (
+          <h1 className="co-m-pane__heading">
+            <span>{t('Network Traffic')}</span>
+            {coActions}
+          </h1>
+        )
+      }
       <FiltersToolbar
         id="filter-toolbar"
         columns={columns}
@@ -136,17 +160,22 @@ export const NetflowTraffic: React.FC = () => {
         clearFilters={clearFilters}
         queryOptions={queryOptions}
         setQueryOptions={setQueryOptions}
+        forcedFilters={forcedFilters}
+        //show actions next to filters if title is hidden
+        actions={!_.isEmpty(forcedFilters) ? coActions : null}
       >
-        <Tooltip content={t('Manage columns')}>
-          <Button
-            id="manage-columns-button"
-            variant="plain"
-            onClick={() => setColModalOpen(true)}
-            aria-label={t('Column management')}
-          >
-            <ColumnsIcon color="#6A6E73" />
-          </Button>
-        </Tooltip>
+        <OverflowMenuItem>
+          <Tooltip content={t('Manage columns')}>
+            <Button
+              id="manage-columns-button"
+              variant="plain"
+              onClick={() => setColModalOpen(true)}
+              aria-label={t('Column management')}
+            >
+              <ColumnsIcon color="#6A6E73" />
+            </Button>
+          </Tooltip>
+        </OverflowMenuItem>
         <DisplayDropdown id="display-dropdown" setSize={setSize} />
       </FiltersToolbar>
       <NetflowTable

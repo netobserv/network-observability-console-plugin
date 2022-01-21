@@ -12,6 +12,7 @@ describe('<FiltersToolbar />', () => {
   const props: FiltersToolbarProps = {
     columns: ColumnsSample,
     filters: [] as Filter[],
+    forcedFilters: undefined,
     setFilters: jest.fn(),
     clearFilters: jest.fn(),
     id: 'filter-toolbar',

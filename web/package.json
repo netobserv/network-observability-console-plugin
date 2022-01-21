@@ -32,6 +32,7 @@
     "@types/port-numbers": "^5.0.0",
     "@types/react": "16.14.21",
     "@types/react-dom": "16.9.14",
+    "@types/react-router-dom": "^5.3.3",
     "@typescript-eslint/eslint-plugin": "5.5.0",
     "@typescript-eslint/parser": "5.5.0",
     "@wojtekmaj/enzyme-adapter-react-17": "^0.6.6",
@@ -50,6 +51,7 @@
     "nodemon": "^2.0.15",
     "prettier": "^2.5.1",
     "pretty-quick": "^3.1.2",
+    "react-router-dom": "^5.2.0",
     "ts-jest": "27.1.1",
     "ts-jest-resolver": "2.0.0",
     "ts-loader": "6.2.2",
@@ -63,7 +65,8 @@
     "displayName": "Network Observability Plugin for Console",
     "description": "This plugin adds network observability functionality to Openshift console",
     "exposedModules": {
-      "netflowTraffic": "./components/netflow-traffic.tsx"
+      "netflowTraffic": "./components/netflow-traffic.tsx",
+      "netflowTab": "./components/netflow-tab.tsx"
     },
     "dependencies": {
       "@console/pluginAPI": "*"
