@@ -1,5 +1,7 @@
 import {
   Button,
+  Chip,
+  ChipGroup,
   Dropdown,
   DropdownItem,
   DropdownToggle,
@@ -11,7 +13,6 @@ import {
   NumberInput,
   OverflowMenu,
   OverflowMenuGroup,
-  OverflowMenuItem,
   Popper,
   TextInput,
   Toolbar,
@@ -39,11 +40,15 @@ import './filters-toolbar.css';
 import { validateIPFilter } from '../utils/ip';
 import { QueryOptions } from '../model/query-options';
 import { QueryOptionsDropdown } from './query-options-dropdown';
+import { getPathWithParams, NETFLOW_TRAFFIC_PATH } from '../utils/router';
+import { useHistory } from 'react-router-dom';
 
 export interface FiltersToolbarProps {
   id: string;
   columns: Column[];
   filters?: Filter[];
+  forcedFilters?: Filter[];
+  actions?: React.ReactNode;
   setFilters: (v: Filter[]) => void;
   clearFilters: () => void;
   queryOptions: QueryOptions;
@@ -54,10 +59,13 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
   id,
   columns,
   filters,
+  forcedFilters,
+  actions,
   setFilters,
   clearFilters,
   ...props
 }) => {
+  const { push } = useHistory();
   const { t } = useTranslation('plugin__network-observability-plugin');
   const autocompleteContainerRef = React.useRef<HTMLDivElement | null>(null);
   const searchInputRef = React.useRef<HTMLInputElement | null>(null);
@@ -277,7 +285,8 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
       clearFiltersButtonText={hasFilterValue() ? t('Clear all filters') : ''}
     >
       <ToolbarContent id={`${id}-search-filters`} toolbarId={id}>
-        {filters &&
+        {_.isEmpty(forcedFilters) &&
+          filters &&
           filters.map((filter, index) => (
             <ToolbarFilter
               key={index}
@@ -305,55 +314,93 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
           <QueryOptionsDropdown options={props.queryOptions} setOptions={props.setQueryOptions} />
         </ToolbarItem>
         <ToolbarItem>
-          <Tooltip
-            //css hide tooltip here to avoid render issue
-            className={'filters-tooltip' + (_.isEmpty(invalidMessage) ? '-empty' : '')}
-            isVisible={true}
-            content={invalidMessage}
-            trigger={''}
-            enableFlip={false}
-          >
-            <InputGroup>
-              <Dropdown
-                id="column-filter-dropdown"
-                dropdownItems={availableFilters.map((col, index) => (
-                  <DropdownItem
-                    id={col.name}
-                    className="column-filter-item"
-                    component="button"
-                    onClick={() => setSelectedFilterColumn(col)}
-                    key={index}
-                  >
-                    {col.name}
-                  </DropdownItem>
-                ))}
-                isOpen={isSearchFiltersOpen}
-                onSelect={() => setSearchFiltersOpen(false)}
-                toggle={
-                  <DropdownToggle id="column-filter-toggle" onToggle={() => setSearchFiltersOpen(!isSearchFiltersOpen)}>
-                    {selectedFilterColumn.name}
-                  </DropdownToggle>
-                }
-              />
-              {getFilterControl(selectedFilterColumn)}
-              <Button
-                id="search-button"
-                variant="control"
-                aria-label="search button for filter"
-                onClick={() => manageFilters()}
+          {_.isEmpty(forcedFilters) ? (
+            <Tooltip
+              //css hide tooltip here to avoid render issue
+              className={'filters-tooltip' + (_.isEmpty(invalidMessage) ? '-empty' : '')}
+              isVisible={true}
+              content={invalidMessage}
+              trigger={''}
+              enableFlip={false}
+            >
+              <InputGroup>
+                <Dropdown
+                  id="column-filter-dropdown"
+                  dropdownItems={availableFilters.map((col, index) => (
+                    <DropdownItem
+                      id={col.name}
+                      className="column-filter-item"
+                      component="button"
+                      onClick={() => setSelectedFilterColumn(col)}
+                      key={index}
+                    >
+                      {col.name}
+                    </DropdownItem>
+                  ))}
+                  isOpen={isSearchFiltersOpen}
+                  onSelect={() => setSearchFiltersOpen(false)}
+                  toggle={
+                    <DropdownToggle
+                      id="column-filter-toggle"
+                      onToggle={() => setSearchFiltersOpen(!isSearchFiltersOpen)}
+                    >
+                      {selectedFilterColumn.name}
+                    </DropdownToggle>
+                  }
+                />
+                {getFilterControl(selectedFilterColumn)}
+                <Button
+                  id="search-button"
+                  variant="control"
+                  aria-label="search button for filter"
+                  onClick={() => manageFilters()}
+                >
+                  <SearchIcon />
+                </Button>
+              </InputGroup>
+            </Tooltip>
+          ) : (
+            forcedFilters &&
+            forcedFilters.map((forcedFilter, ffIndex) => (
+              <ChipGroup
+                key={ffIndex}
+                isClosable={false}
+                categoryName={columns.find(c => c.id === forcedFilter.colId)?.name || ''}
               >
-                <SearchIcon />
-              </Button>
-            </InputGroup>
-          </Tooltip>
+                {forcedFilter.values.map((forcedValue, fvIndex) => (
+                  <Chip key={fvIndex} isReadOnly={true}>
+                    {forcedValue.display ? forcedValue.display : forcedValue.v}
+                  </Chip>
+                ))}
+              </ChipGroup>
+            ))
+          )}
         </ToolbarItem>
+        {!_.isEmpty(forcedFilters) && (
+          <ToolbarItem>
+            <OverflowMenu breakpoint="md">
+              <OverflowMenuGroup groupType="button" isPersistent>
+                <Button onClick={() => push(getPathWithParams(NETFLOW_TRAFFIC_PATH))}>{t('Edit filters')}</Button>
+              </OverflowMenuGroup>
+            </OverflowMenu>
+          </ToolbarItem>
+        )}
         <ToolbarItem>
           <OverflowMenu breakpoint="md">
             <OverflowMenuGroup groupType="button" isPersistent>
-              <OverflowMenuItem>{props.children}</OverflowMenuItem>
+              {props.children}
             </OverflowMenuGroup>
           </OverflowMenu>
         </ToolbarItem>
+        {actions && (
+          <ToolbarItem alignment={{ default: 'alignRight' }}>
+            <OverflowMenu breakpoint="md">
+              <OverflowMenuGroup groupType="button" isPersistent>
+                {actions}
+              </OverflowMenuGroup>
+            </OverflowMenu>
+          </ToolbarItem>
+        )}
         {/* TODO : NETOBSERV-104
           <ToolbarItem variant="pagination">
             <Pagination

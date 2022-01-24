@@ -9,6 +9,7 @@ const SPLIT_FILTER_CHAR = ',';
 const DEFAULT_TIME_RANGE = 300;
 const DEFAULT_LIMIT = 100;
 const DEFAULT_FLOWDIR = '0';
+export const NETFLOW_TRAFFIC_PATH = '/netflow-traffic';
 
 export enum QueryArgument {
   StartTime = 'startTime',
@@ -131,4 +132,8 @@ export const getQueryOptionsFromURL = (): QueryOptions => {
     limit: getURLQueryArgumentAsNumber(QueryArgument.Limit) ?? DEFAULT_LIMIT,
     reporter: flowdirToReporter[getURLQueryArgument(ColumnsId.flowdir) ?? DEFAULT_FLOWDIR]
   };
+};
+
+export const getPathWithParams = (pathName: string) => {
+  return `${pathName}?${new URLSearchParams(window.location.search).toString()}`;
 };

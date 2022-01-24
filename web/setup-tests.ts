@@ -65,3 +65,10 @@ jest.mock('@patternfly/react-core', () => ({
 
 //SpyOn localStorage setItem
 jest.spyOn(window.localStorage.__proto__, 'setItem');
+
+//Mock react-router-dom
+jest.mock('react-router-dom', () => ({
+  useHistory: () => ({
+    push: jest.fn(),
+  }),
+}));

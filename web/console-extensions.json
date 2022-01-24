@@ -1,5 +1,5 @@
 [
-    {
+  {
     "type": "console.navigation/href",
     "properties": {
       "id": "netflow-traffic-link",
@@ -13,7 +13,68 @@
     "type": "console.page/route",
     "properties": {
       "path": "/netflow-traffic",
-      "component": { "$codeRef": "netflowTraffic.default" }
+      "component": {
+        "$codeRef": "netflowTraffic.default"
+      }
+    }
+  },
+  {
+    "type": "console.page/resource/tab",
+    "properties": {
+      "model": {
+        "version": "v1",
+        "group": "",
+        "kind": "Pod"
+      },
+      "component": {
+        "$codeRef": "netflowTab.default"
+      },
+      "name": "%plugin_network-observability-plugin~Network Traffic%",
+      "href": "netflow"
+    }
+  },
+  {
+    "type": "console.page/resource/tab",
+    "properties": {
+      "model": {
+        "version": "v1",
+        "group": "",
+        "kind": "Service"
+      },
+      "component": {
+        "$codeRef": "netflowTab.default"
+      },
+      "name": "%plugin_network-observability-plugin~Network Traffic%",
+      "href": "netflow"
+    }
+  },
+  {
+    "type": "console.page/resource/tab",
+    "properties": {
+      "model": {
+        "version": "v1",
+        "group": "",
+        "kind": "Namespace"
+      },
+      "component": {
+        "$codeRef": "netflowTab.default"
+      },
+      "name": "%plugin_network-observability-plugin~Network Traffic%",
+      "href": "netflow"
+    }
+  },
+  {
+    "type": "console.page/resource/tab",
+    "properties": {
+      "model": {
+        "group": "apps",
+        "kind": "Deployment"
+      },
+      "component": {
+        "$codeRef": "netflowTab.default"
+      },
+      "name": "%plugin_network-observability-plugin~Network Traffic%",
+      "href": "netflow"
     }
   }
 ]
