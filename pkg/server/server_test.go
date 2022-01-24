@@ -255,11 +255,11 @@ func TestLokiConfiguration_MultiTenant(t *testing.T) {
 
 func TestLokiFiltering(t *testing.T) {
 	var filters = map[string]map[string][]string{
-		"/api/loki/flows?SrcPod=test-pod":                                      {"query": []string{`{app="netobserv-flowcollector"}`, `|~"\"SrcPod\":[\"]{0,1}[^,]{0,}test-pod"`}},
-		"/api/loki/flows?DstPod=test-pod-2":                                    {"query": []string{`{app="netobserv-flowcollector"}`, `|~"\"DstPod\":[\"]{0,1}[^,]{0,}test-pod-2"`}},
-		"/api/loki/flows?Proto=6":                                              {"query": []string{`{app="netobserv-flowcollector"}`, `|~"\"Proto\":[\"]{0,1}[^,]{0,}6"`}},
+		"/api/loki/flows?SrcPod=test-pod":                                      {"query": []string{`{app="netobserv-flowcollector"}`, `|~"\"SrcPod\":\"[^\"]*test-pod"`}},
+		"/api/loki/flows?DstPod=test-pod-2":                                    {"query": []string{`{app="netobserv-flowcollector"}`, `|~"\"DstPod\":\"[^\"]*test-pod-2"`}},
+		"/api/loki/flows?Proto=6":                                              {"query": []string{`{app="netobserv-flowcollector"}`, `|~"\"Proto\":6"`}},
 		"/api/loki/flows?SrcNamespace=test-namespace":                          {"query": []string{`{app="netobserv-flowcollector",SrcNamespace=~".*test-namespace.*"}`}},
-		"/api/loki/flows?SrcPort=8080&SrcAddr=10.128.0.1&SrcNamespace=default": {"query": []string{`{app="netobserv-flowcollector",SrcNamespace=~".*default.*"}`, `|~"\"SrcPort\":[\"]{0,1}[^,]{0,}8080"`, `|json|SrcAddr=ip("10.128.0.1")`}},
+		"/api/loki/flows?SrcPort=8080&SrcAddr=10.128.0.1&SrcNamespace=default": {"query": []string{`{app="netobserv-flowcollector",SrcNamespace=~".*default.*"}`, `|~"\"SrcPort\":8080"`, `|json|SrcAddr=ip("10.128.0.1")`}},
 		"/api/loki/flows?startTime=1640991600":                                 {"query": []string{`{app="netobserv-flowcollector"}`}, "start": []string{"1640991600"}},
 		"/api/loki/flows?endTime=1641160800":                                   {"query": []string{`{app="netobserv-flowcollector"}`}, "end": []string{"1641160800"}},
 		"/api/loki/flows?startTime=1640991600&endTime=1641160800":              {"query": []string{`{app="netobserv-flowcollector"}`}, "start": []string{"1640991600"}, "end": []string{"1641160800"}},

@@ -51,7 +51,7 @@ export const buildQueryArguments = (
   // we may want to decouple them in the future.
   const params: QueryArguments = {};
   _.each(filters, (f: Filter) => {
-    params[f.colId] = f.values.map(value => value.v);
+    params[f.colId] = f.values.map(value => value.v).join(SPLIT_FILTER_CHAR);
   });
   if (range) {
     if (typeof range === 'number') {
