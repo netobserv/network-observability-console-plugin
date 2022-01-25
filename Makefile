@@ -101,6 +101,6 @@ ifeq (,${CONSOLE})
 	@echo "CONSOLE must be set to your local path of the console repository clone. E.g. CONSOLE=/path/to/console make bridge"
 else
 	@echo "### Setting bridge from ${CONSOLE} to http://localhost:9000/netflow-traffic"
-	cd ${CONSOLE} && source contrib/oc-environment.sh && ./bin/bridge -plugins network-observability-plugin=http://localhost:9001/ --plugin-proxy='{"services":[{"consoleAPIPath":"/api/proxy/namespace/network-observability/service/network-observability-plugin:9001/","endpoint":"http://localhost:9001"}]}'
+	cd ${CONSOLE} && source contrib/oc-environment.sh && ./bin/bridge -plugins network-observability-plugin=http://localhost:9001/ --plugin-proxy='{"services":[{"consoleAPIPath":"/api/proxy/network-observability-plugin/backend/","endpoint":"http://localhost:9001"}]}'
 	cd -
 endif
