@@ -57,3 +57,12 @@ func TestProcessParamPortAndLimit(t *testing.T) {
 	assert.Equal(t, `&limit=500`, extraArgs.String())
 	assert.Equal(t, "|~`\"SrcPort\":80`", lineFilters.String())
 }
+
+func TestProcessParamBackquoteUnpermitted(t *testing.T) {
+	labelFilters := strings.Builder{}
+	lineFilters := strings.Builder{}
+	ipFilters := strings.Builder{}
+	extraArgs := strings.Builder{}
+	err := processParam("SrcPod", "test-p`od-1", &labelFilters, &lineFilters, &ipFilters, &extraArgs)
+	require.Error(t, err)
+}
