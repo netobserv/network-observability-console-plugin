@@ -201,22 +201,22 @@ func processLineFilters(key string, values []string, lineFilters *strings.Builde
 			regexStr.WriteByte('|')
 		}
 		//match KEY + VALUE: "KEY":"[^\"]*VALUE" (ie: contains VALUE) or, if numeric, "KEY":VALUE
-		regexStr.WriteString(`\"`)
+		regexStr.WriteString(`"`)
 		regexStr.WriteString(key)
-		regexStr.WriteString(`\":`)
+		regexStr.WriteString(`":`)
 		if isNumeric(key) {
 			regexStr.WriteString(value)
 		} else {
-			regexStr.WriteString(`\"[^\"]*`)
+			regexStr.WriteString(`"[^"]*`)
 			regexStr.WriteString(value)
 		}
 	}
 
 	if regexStr.Len() > 0 {
 		//line match regex : |~"REGEX_EXPRESSION"
-		lineFilters.WriteString(`|~"`)
+		lineFilters.WriteString("|~`")
 		lineFilters.WriteString(regexStr.String())
-		lineFilters.WriteString(`"`)
+		lineFilters.WriteString("`")
 	}
 }
 

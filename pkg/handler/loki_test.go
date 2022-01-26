@@ -21,7 +21,7 @@ func TestProcessParamTwoPodsAndFlowDirection(t *testing.T) {
 	assert.Empty(t, labelFilters.String())
 	assert.Empty(t, ipFilters.String())
 	assert.Empty(t, extraArgs.String())
-	assert.Equal(t, `|~"\"SrcPod\":\"[^\"]*test-pod-1|\"SrcPod\":\"[^\"]*test-pod-2"|~"\"FlowDirection\":0"`, lineFilters.String())
+	assert.Equal(t, "|~`\"SrcPod\":\"[^\"]*test-pod-1|\"SrcPod\":\"[^\"]*test-pod-2`|~`\"FlowDirection\":0`", lineFilters.String())
 }
 
 func TestProcessParamTwoNamespacesAndIP(t *testing.T) {
@@ -55,5 +55,5 @@ func TestProcessParamPortAndLimit(t *testing.T) {
 	assert.Empty(t, labelFilters.String())
 	assert.Empty(t, ipFilters.String())
 	assert.Equal(t, `&limit=500`, extraArgs.String())
-	assert.Equal(t, `|~"\"SrcPort\":80"`, lineFilters.String())
+	assert.Equal(t, "|~`\"SrcPort\":80`", lineFilters.String())
 }
