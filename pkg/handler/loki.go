@@ -16,7 +16,6 @@ import (
 
 var hlog = logrus.WithField("module", "handler")
 
-const arrayIndicator = "[]"
 const startTimeKey = "startTime"
 const endTimeTimeKey = "endTime"
 const timeRangeKey = "timeRange"
@@ -41,6 +40,21 @@ func isLabel(v string) bool {
 		"SrcWorkload",
 		"DstNamespace",
 		"DstWorkload":
+		return true
+	default:
+		return false
+	}
+}
+
+func isNumeric(v string) bool {
+	switch v {
+	case
+		"SrcPort",
+		"DstPort",
+		"Packets",
+		"Proto",
+		"Bytes",
+		"FlowDirection":
 		return true
 	default:
 		return false
@@ -80,8 +94,7 @@ func GetFlows(cfg LokiConfig) func(w http.ResponseWriter, r *http.Request) {
 
 		for key := range params {
 			param := params.Get(key)
-			//remove array indicator [] in key and process it
-			err := processParam(strings.Replace(key, arrayIndicator, "", -1), param, &labelFilters, &lineFilters, &ipFilters, &extraArgs)
+			err := processParam(key, param, &labelFilters, &lineFilters, &ipFilters, &extraArgs)
 			if err != nil {
 				writeError(w, http.StatusBadRequest, err.Error())
 				return
@@ -116,7 +129,6 @@ func GetFlows(cfg LokiConfig) func(w http.ResponseWriter, r *http.Request) {
 }
 
 func processParam(key, value string, labelFilters, lineFilters, ipFilters, extraArgs *strings.Builder) error {
-	regexStr := strings.Builder{}
 	switch key {
 	case startTimeKey:
 		extraArgs.WriteString(startParam)
@@ -133,35 +145,79 @@ func processParam(key, value string, labelFilters, lineFilters, ipFilters, extra
 		extraArgs.WriteString(limitParam)
 		extraArgs.WriteString(value)
 	default:
-		for _, value := range strings.Split(value, ",") {
-			if len(regexStr.String()) > 0 {
-				regexStr.WriteByte('|')
-			}
-			switch {
-			case isLabel(key):
-				filterRegexInLabel(value, &regexStr)
-			case isIPAddress(key):
-				filterIPInLine(key, value, ipFilters)
-			default:
-				filterRegexInLine(key, value, &regexStr)
-			}
-		}
-
+		values := strings.Split(value, ",")
 		if isLabel(key) {
-			//label match regex : ,key=~REGEX_EXPRESSION
-			labelFilters.WriteString(",")
-			labelFilters.WriteString(key)
-			labelFilters.WriteString("=~\"")
-			labelFilters.WriteString(regexStr.String())
-			labelFilters.WriteString("\"")
+			processLabelFilters(key, values, labelFilters)
+		} else if isIPAddress(key) {
+			processIPFilters(key, values, ipFilters)
 		} else {
-			//line match regex : |~"REGEX_EXPRESSION"
-			lineFilters.WriteString("|~\"")
-			lineFilters.WriteString(regexStr.String())
-			lineFilters.WriteString("\"")
+			processLineFilters(key, values, lineFilters)
 		}
 	}
 	return nil
+}
+
+func processLabelFilters(key string, values []string, labelFilters *strings.Builder) {
+	regexStr := strings.Builder{}
+	for i, value := range values {
+		if i > 0 {
+			regexStr.WriteByte('|')
+		}
+		//match any caracter before / after value : .*VALUE.*
+		regexStr.WriteString(".*")
+		regexStr.WriteString(value)
+		regexStr.WriteString(".*")
+	}
+
+	if regexStr.Len() > 0 {
+		//label match regex : ,key=~REGEX_EXPRESSION
+		labelFilters.WriteString(",")
+		labelFilters.WriteString(key)
+		labelFilters.WriteString(`=~"`)
+		labelFilters.WriteString(regexStr.String())
+		labelFilters.WriteString(`"`)
+	}
+}
+
+// filterIPInLine assumes that we are searching for that IP addresses as part
+// of the log line (not in the labels)
+func processIPFilters(key string, values []string, ipFilters *strings.Builder) {
+	for _, value := range values {
+		if ipFilters.Len() == 0 {
+			ipFilters.WriteString(`|json`)
+		}
+		ipFilters.WriteByte('|')
+		ipFilters.WriteString(key)
+		ipFilters.WriteString(`=ip("`)
+		ipFilters.WriteString(value)
+		ipFilters.WriteString(`")`)
+	}
+}
+
+func processLineFilters(key string, values []string, lineFilters *strings.Builder) {
+	regexStr := strings.Builder{}
+	for i, value := range values {
+		if i > 0 {
+			regexStr.WriteByte('|')
+		}
+		//match KEY + VALUE: "KEY":"[^\"]*VALUE" (ie: contains VALUE) or, if numeric, "KEY":VALUE
+		regexStr.WriteString(`\"`)
+		regexStr.WriteString(key)
+		regexStr.WriteString(`\":`)
+		if isNumeric(key) {
+			regexStr.WriteString(value)
+		} else {
+			regexStr.WriteString(`\"[^\"]*`)
+			regexStr.WriteString(value)
+		}
+	}
+
+	if regexStr.Len() > 0 {
+		//line match regex : |~"REGEX_EXPRESSION"
+		lineFilters.WriteString(`|~"`)
+		lineFilters.WriteString(regexStr.String())
+		lineFilters.WriteString(`"`)
+	}
 }
 
 func selectTimeRange(param string, extraArgs *strings.Builder) error {
@@ -172,40 +228,6 @@ func selectTimeRange(param string, extraArgs *strings.Builder) error {
 	extraArgs.WriteString(startParam)
 	extraArgs.WriteString(strconv.FormatInt(time.Now().Unix()-r, 10))
 	return nil
-}
-
-func filterRegexInLine(key string, value string, regexStr *strings.Builder) {
-	if len(regexStr.String()) > 0 {
-		regexStr.WriteByte('|')
-	}
-	//match KEY containing VALUE : "KEY":["]{0,1}[^,]{0,}VALUE
-	regexStr.WriteString("\\\"")
-	regexStr.WriteString(key)
-	regexStr.WriteString("\\\":[\\\"]{0,1}[^,]{0,}")
-	regexStr.WriteString(value)
-}
-
-// filterIPInLine assumes that we are searching for that IP addresses as part
-// of the log line (not in the labels)
-func filterIPInLine(key string, value string, ipFilters *strings.Builder) {
-	if ipFilters.Len() == 0 {
-		ipFilters.WriteString(`|json`)
-	}
-	ipFilters.WriteByte('|')
-	ipFilters.WriteString(key)
-	ipFilters.WriteString(`=ip("`)
-	ipFilters.WriteString(value)
-	ipFilters.WriteString(`")`)
-}
-
-func filterRegexInLabel(value string, regexStr *strings.Builder) {
-	if len(regexStr.String()) > 0 {
-		regexStr.WriteByte('|')
-	}
-	//match any caracter before / after value : .*VALUE.*
-	regexStr.WriteString(".*")
-	regexStr.WriteString(value)
-	regexStr.WriteString(".*")
 }
 
 func getLokiError(resp []byte, code int) string {
