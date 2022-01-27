@@ -62,19 +62,5 @@
       "name": "%plugin_network-observability-plugin~Network Traffic%",
       "href": "netflow"
     }
-  },
-  {
-    "type": "console.page/resource/tab",
-    "properties": {
-      "model": {
-        "group": "apps",
-        "kind": "Deployment"
-      },
-      "component": {
-        "$codeRef": "netflowTab.default"
-      },
-      "name": "%plugin_network-observability-plugin~Network Traffic%",
-      "href": "netflow"
-    }
   }
 ]
