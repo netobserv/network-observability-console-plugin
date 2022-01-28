@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -129,6 +130,7 @@ func GetFlows(cfg LokiConfig) func(w http.ResponseWriter, r *http.Request) {
 }
 
 func processParam(key, value string, labelFilters, lineFilters, ipFilters, extraArgs *strings.Builder) error {
+	var err error
 	switch key {
 	case startTimeKey:
 		extraArgs.WriteString(startParam)
@@ -137,10 +139,7 @@ func processParam(key, value string, labelFilters, lineFilters, ipFilters, extra
 		extraArgs.WriteString(endParam)
 		extraArgs.WriteString(value)
 	case timeRangeKey:
-		err := selectTimeRange(value, extraArgs)
-		if err != nil {
-			return err
-		}
+		err = selectTimeRange(value, extraArgs)
 	case limitKey:
 		extraArgs.WriteString(limitParam)
 		extraArgs.WriteString(value)
@@ -151,10 +150,10 @@ func processParam(key, value string, labelFilters, lineFilters, ipFilters, extra
 		} else if isIPAddress(key) {
 			processIPFilters(key, values, ipFilters)
 		} else {
-			processLineFilters(key, values, lineFilters)
+			err = processLineFilters(key, values, lineFilters)
 		}
 	}
-	return nil
+	return err
 }
 
 func processLabelFilters(key string, values []string, labelFilters *strings.Builder) {
@@ -194,30 +193,34 @@ func processIPFilters(key string, values []string, ipFilters *strings.Builder) {
 	}
 }
 
-func processLineFilters(key string, values []string, lineFilters *strings.Builder) {
+func processLineFilters(key string, values []string, lineFilters *strings.Builder) error {
 	regexStr := strings.Builder{}
 	for i, value := range values {
 		if i > 0 {
 			regexStr.WriteByte('|')
 		}
+		if strings.Contains(value, "`") {
+			return errors.New("backquote not authorized in flows requests")
+		}
 		//match KEY + VALUE: "KEY":"[^\"]*VALUE" (ie: contains VALUE) or, if numeric, "KEY":VALUE
-		regexStr.WriteString(`\"`)
+		regexStr.WriteString(`"`)
 		regexStr.WriteString(key)
-		regexStr.WriteString(`\":`)
+		regexStr.WriteString(`":`)
 		if isNumeric(key) {
 			regexStr.WriteString(value)
 		} else {
-			regexStr.WriteString(`\"[^\"]*`)
+			regexStr.WriteString(`"[^"]*`)
 			regexStr.WriteString(value)
 		}
 	}
 
 	if regexStr.Len() > 0 {
 		//line match regex : |~"REGEX_EXPRESSION"
-		lineFilters.WriteString(`|~"`)
+		lineFilters.WriteString("|~`")
 		lineFilters.WriteString(regexStr.String())
-		lineFilters.WriteString(`"`)
+		lineFilters.WriteString("`")
 	}
+	return nil
 }
 
 func selectTimeRange(param string, extraArgs *strings.Builder) error {
