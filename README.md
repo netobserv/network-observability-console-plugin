@@ -38,9 +38,14 @@ make serve
 (It's the same as running ./http-server.sh)
 
 Make sure you are logged in your OpenShift cluster before with the CLI (`oc login -u kubeadmin` ...)
-You need also to have a local clone of the [console repository](https://github.com/openshift/console).
-Then, start the console bridge with this local plugin, with:
 
+You need also to have a local copy of [console repository](https://github.com/openshift/console)
+Build it once using:
+```bash
+./build.sh
+```
+
+Then, start the console bridge with this local plugin, with:
 ```bash
 CONSOLE=/path/to/console make bridge
 ```

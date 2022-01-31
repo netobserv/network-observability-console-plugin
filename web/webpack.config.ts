@@ -82,6 +82,8 @@ if (process.env.NODE_ENV === 'production') {
   config.output.chunkFilename = '[name]-chunk-[chunkhash].min.js';
   config.optimization.chunkIds = 'deterministic';
   config.optimization.minimize = true;
+  // Causes error in --mode=production due to scope hoisting
+  config.optimization.concatenateModules = false;
 }
 
 export default config;
