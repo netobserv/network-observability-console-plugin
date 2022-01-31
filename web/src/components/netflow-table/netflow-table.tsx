@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { TableComposable, Tbody, Td, Tr } from '@patternfly/react-table';
+import { TableComposable, Tbody, Td, Tr, InnerScrollContainer, OuterScrollContainer } from '@patternfly/react-table';
 import {
   Bullseye,
   Button,
@@ -109,16 +109,20 @@ const NetflowTable: React.FC<{
   }
 
   return (
-    <TableComposable aria-label="Misc table" variant="compact" style={{ minWidth: `${width}em` }}>
-      <NetflowTableHeader
-        onSort={onSort}
-        sortDirection={activeSortDirection}
-        sortIndex={activeSortIndex}
-        columns={columns}
-        tableWidth={width}
-      />
-      <Tbody>{bodyContent}</Tbody>
-    </TableComposable>
+    <OuterScrollContainer>
+      <InnerScrollContainer>
+        <TableComposable aria-label="Netflow table" variant="compact" style={{ minWidth: `${width}em` }} isStickyHeader>
+          <NetflowTableHeader
+            onSort={onSort}
+            sortDirection={activeSortDirection}
+            sortIndex={activeSortIndex}
+            columns={columns}
+            tableWidth={width}
+          />
+          <Tbody>{bodyContent}</Tbody>
+        </TableComposable>
+      </InnerScrollContainer>
+    </OuterScrollContainer>
   );
 };
 
