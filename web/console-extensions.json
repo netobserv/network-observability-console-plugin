@@ -76,5 +76,33 @@
       "name": "%plugin_network-observability-plugin~Network Traffic%",
       "href": "netflow"
     }
+  },
+  {
+    "type": "console.page/resource/tab",
+    "properties": {
+      "model": {
+        "group": "apps",
+        "kind": "StatefulSet"
+      },
+      "component": {
+        "$codeRef": "netflowTab.default"
+      },
+      "name": "%plugin_network-observability-plugin~Network Traffic%",
+      "href": "netflow"
+    }
+  },
+  {
+    "type": "console.page/resource/tab",
+    "properties": {
+      "model": {
+        "group": "apps",
+        "kind": "DaemonSet"
+      },
+      "component": {
+        "$codeRef": "netflowTab.default"
+      },
+      "name": "%plugin_network-observability-plugin~Network Traffic%",
+      "href": "netflow"
+    }
   }
 ]

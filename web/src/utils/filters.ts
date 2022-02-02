@@ -5,13 +5,11 @@ import { ColumnsId } from './columns';
 
 export enum FilterType {
   NONE,
-  POD,
-  WORKLOAD,
   ADDRESS,
-  NAMESPACE,
   PORT,
   PROTOCOL,
-  NUMBER
+  NUMBER,
+  TEXT
 }
 
 export interface FilterValue {

@@ -21,6 +21,8 @@ export enum ColumnsId {
   packets = 'Packets',
   srcwkd = 'SrcWorkload',
   dstwkd = 'DstWorkload',
+  srcwkdkind = 'SrcWorkloadKind',
+  dstwkdkind = 'DstWorkloadKind',
   srchost = 'SrcHostIP',
   dsthost = 'DstHostIP',
   flowdir = 'FlowDirection'
@@ -52,7 +54,7 @@ export const getDefaultColumns = (t: TFunction): Column[] => {
       id: ColumnsId.srcpod,
       name: t('Src pod'),
       isSelected: true,
-      filterType: FilterType.POD,
+      filterType: FilterType.TEXT,
       value: f => f.fields.SrcPod || '',
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
       width: 30
@@ -61,16 +63,25 @@ export const getDefaultColumns = (t: TFunction): Column[] => {
       id: ColumnsId.srcwkd,
       name: t('Src workload'),
       isSelected: false,
-      filterType: FilterType.WORKLOAD,
+      filterType: FilterType.TEXT,
       value: f => f.labels.SrcWorkload || '',
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
       width: 30
     },
     {
+      id: ColumnsId.srcwkdkind,
+      name: t('Src kind'),
+      isSelected: false,
+      filterType: FilterType.TEXT,
+      value: f => f.fields.SrcWorkloadKind || '',
+      sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
+      width: 10
+    },
+    {
       id: ColumnsId.srcnamespace,
       name: t('Src namespace'),
       isSelected: true,
-      filterType: FilterType.NAMESPACE,
+      filterType: FilterType.TEXT,
       value: f => f.labels.SrcNamespace || '',
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
       width: 30
@@ -106,7 +117,7 @@ export const getDefaultColumns = (t: TFunction): Column[] => {
       id: ColumnsId.dstpod,
       name: t('Dst pod'),
       isSelected: true,
-      filterType: FilterType.POD,
+      filterType: FilterType.TEXT,
       value: f => f.fields.DstPod || '',
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
       width: 30
@@ -115,8 +126,17 @@ export const getDefaultColumns = (t: TFunction): Column[] => {
       id: ColumnsId.dstwkd,
       name: t('Dst workload'),
       isSelected: false,
-      filterType: FilterType.WORKLOAD,
+      filterType: FilterType.TEXT,
       value: f => f.labels.DstWorkload || '',
+      sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
+      width: 30
+    },
+    {
+      id: ColumnsId.dstwkdkind,
+      name: t('Dst kind'),
+      isSelected: false,
+      filterType: FilterType.TEXT,
+      value: f => f.fields.DstWorkloadKind || '',
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
       width: 30
     },
@@ -124,7 +144,7 @@ export const getDefaultColumns = (t: TFunction): Column[] => {
       id: ColumnsId.dstnamespace,
       name: t('Dst namespace'),
       isSelected: true,
-      filterType: FilterType.NAMESPACE,
+      filterType: FilterType.TEXT,
       value: f => f.labels.DstNamespace || '',
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
       width: 30

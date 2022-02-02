@@ -11,9 +11,7 @@ export const NetflowTab: React.FC<PageComponentProps> = ({ obj }) => {
 
   let forcedFilters: Filter[];
   switch (obj?.kind) {
-    case 'Deployment':
     case 'Pod':
-    case 'Service':
       forcedFilters = [
         {
           /*TODO : set SRC and DST filters after implementing OR logic NETOBSERV-73*/
@@ -23,6 +21,46 @@ export const NetflowTab: React.FC<PageComponentProps> = ({ obj }) => {
         {
           /*TODO : set SRC and DST filters after implementing OR logic NETOBSERV-73*/
           colId: ColumnsId.srcnamespace,
+          values: [{ v: obj!.metadata!.namespace as string }]
+        }
+      ];
+      break;
+    case 'Deployment':
+    case 'StatefulSet':
+    case 'DaemonSet':
+    case 'Job':
+    case 'CronJob':
+      forcedFilters = [
+        {
+          /*TODO : set SRC and DST filters after implementing OR logic NETOBSERV-73*/
+          colId: ColumnsId.srcwkdkind,
+          values: [{ v: obj!.kind }]
+        },
+        {
+          /*TODO : set SRC and DST filters after implementing OR logic NETOBSERV-73*/
+          colId: ColumnsId.srcwkd,
+          values: [{ v: obj!.metadata!.name as string }]
+        },
+        {
+          /*TODO : set SRC and DST filters after implementing OR logic NETOBSERV-73*/
+          colId: ColumnsId.srcnamespace,
+          values: [{ v: obj!.metadata!.namespace as string }]
+        }
+      ];
+      break;
+    case 'Service':
+      // NOTE: Services are always on the destination side
+      forcedFilters = [
+        {
+          colId: ColumnsId.dstwkdkind,
+          values: [{ v: 'Service' }]
+        },
+        {
+          colId: ColumnsId.dstwkd,
+          values: [{ v: obj!.metadata!.name as string }]
+        },
+        {
+          colId: ColumnsId.dstnamespace,
           values: [{ v: obj!.metadata!.namespace as string }]
         }
       ];
