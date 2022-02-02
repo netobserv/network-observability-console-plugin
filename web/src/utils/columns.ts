@@ -100,7 +100,8 @@ export const getDefaultColumns = (t: TFunction): Column[] => {
     },
     {
       id: ColumnsId.srcwkdkind,
-      name: t('Src kind'),
+      group: t('Source'),
+      name: t('Kind'),
       isSelected: false,
       filterType: FilterType.TEXT,
       value: f => f.fields.SrcWorkloadKind || '',
@@ -169,7 +170,8 @@ export const getDefaultColumns = (t: TFunction): Column[] => {
     },
     {
       id: ColumnsId.dstwkdkind,
-      name: t('Dst kind'),
+      group: t('Destination'),
+      name: t('Kind'),
       isSelected: false,
       filterType: FilterType.TEXT,
       value: f => f.fields.DstWorkloadKind || '',

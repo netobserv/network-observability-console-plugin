@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { TableComposable, Tbody, Td, Tr, InnerScrollContainer, OuterScrollContainer } from '@patternfly/react-table';
+import { TableComposable, Tbody, InnerScrollContainer, OuterScrollContainer } from '@patternfly/react-table';
 import {
   Bullseye,
   Button,
@@ -54,53 +54,38 @@ const NetflowTable: React.FC<{
     setActiveSortDirection(direction);
   };
 
-  let bodyContent;
   if (error) {
-    bodyContent = (
-      <Tr>
-        <Td colSpan={columns.length}>
-          <EmptyState data-test="error-state" variant={EmptyStateVariant.small}>
-            <Title headingLevel="h2" size="lg">
-              {t('Unable to get flows')}
-            </Title>
-            <EmptyStateBody>{error}</EmptyStateBody>
-          </EmptyState>
-        </Td>
-      </Tr>
+    return (
+      <EmptyState data-test="error-state" variant={EmptyStateVariant.small}>
+        <Title headingLevel="h2" size="lg">
+          {t('Unable to get flows')}
+        </Title>
+        <EmptyStateBody>{error}</EmptyStateBody>
+      </EmptyState>
     );
   } else if (_.isEmpty(flows)) {
     if (loading) {
-      bodyContent = (
-        <Tr>
-          <Td colSpan={columns.length}>
-            <Bullseye data-test="loading-contents">
-              <Spinner size="xl" />
-            </Bullseye>
-          </Td>
-        </Tr>
+      return (
+        <Bullseye data-test="loading-contents">
+          <Spinner size="xl" />
+        </Bullseye>
       );
     } else {
-      bodyContent = (
-        <Tr>
-          <Td colSpan={columns.length}>
-            <Bullseye data-test="no-results-found">
-              <EmptyState variant={EmptyStateVariant.small}>
-                <EmptyStateIcon icon={SearchIcon} />
-                <Title headingLevel="h2" size="lg">
-                  {t('No results found')}
-                </Title>
-                <EmptyStateBody>{t('Clear all filters and try again.')}</EmptyStateBody>
-                <Button data-test="clear-all-filters" variant="link" onClick={clearFilters}>
-                  {t('Clear all filters')}
-                </Button>
-              </EmptyState>
-            </Bullseye>
-          </Td>
-        </Tr>
+      return (
+        <Bullseye data-test="no-results-found">
+          <EmptyState variant={EmptyStateVariant.small}>
+            <EmptyStateIcon icon={SearchIcon} />
+            <Title headingLevel="h2" size="lg">
+              {t('No results found')}
+            </Title>
+            <EmptyStateBody>{t('Clear all filters and try again.')}</EmptyStateBody>
+            <Button data-test="clear-all-filters" variant="link" onClick={clearFilters}>
+              {t('Clear all filters')}
+            </Button>
+          </EmptyState>
+        </Bullseye>
       );
     }
-  } else {
-    bodyContent = getSortedFlows().map(f => <NetflowTableRow key={f.key} flow={f} columns={columns} size={size} />);
   }
 
   const width = columns.reduce((prev, cur) => prev + cur.width, 0);
@@ -119,7 +104,11 @@ const NetflowTable: React.FC<{
             columns={columns}
             tableWidth={width}
           />
-          <Tbody>{bodyContent}</Tbody>
+          <Tbody>
+            {getSortedFlows().map(f => (
+              <NetflowTableRow key={f.key} flow={f} columns={columns} size={size} />
+            ))}
+          </Tbody>
         </TableComposable>
       </InnerScrollContainer>
     </OuterScrollContainer>
