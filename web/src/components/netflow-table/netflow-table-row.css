@@ -55,6 +55,6 @@ span.co-resource-item.co-resource-item--inline.l,
 }
 
 /* table stripping from pf-color-black-150 value */
-tr:nth-child(even) {
+tbody>tr:nth-child(even) {
   background-color: #f5f5f5;
 }

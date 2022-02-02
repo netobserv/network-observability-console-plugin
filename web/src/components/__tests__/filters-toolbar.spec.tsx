@@ -5,12 +5,12 @@ import { act } from 'react-dom/test-utils';
 import { ColumnsId } from '../../utils/columns';
 import { Filter } from '../../utils/filters';
 import FiltersToolbar, { FiltersToolbarProps } from '../filters-toolbar';
-import { ColumnsSample } from '../__tests-data__/columns';
+import { ShuffledDefaultColumns } from '../__tests-data__/columns';
 import { FiltersSample, FTPSrcPortSample } from '../__tests-data__/filters';
 
 describe('<FiltersToolbar />', () => {
   const props: FiltersToolbarProps = {
-    columns: ColumnsSample,
+    columns: ShuffledDefaultColumns,
     filters: [] as Filter[],
     forcedFilters: undefined,
     setFilters: jest.fn(),
@@ -73,7 +73,7 @@ describe('<FiltersToolbar />', () => {
 
     //open dropdow and select Src pod
     dropdown.simulate('click');
-    wrapper.find('[id="Src pod"]').at(0).simulate('click');
+    wrapper.find(`[id="${ColumnsId.srcpod}"]`).at(0).simulate('click');
     act(() => {
       //set text input value and press button
       wrapper.find(TextInput).props().onChange!('ABCD', null!);
@@ -85,7 +85,7 @@ describe('<FiltersToolbar />', () => {
 
     //open dropdow and select Src namespace
     dropdown.simulate('click');
-    wrapper.find('[id="Src namespace"]').at(0).simulate('click');
+    wrapper.find(`[id="${ColumnsId.srcnamespace}"]`).at(0).simulate('click');
     act(() => {
       //set text input value and press enter
       wrapper.find(TextInput).props().onChange!('EFGH', null!);
@@ -97,7 +97,7 @@ describe('<FiltersToolbar />', () => {
 
     //open dropdow and select valid Src port by name
     dropdown.simulate('click');
-    wrapper.find('[id="Src port"]').at(0).simulate('click');
+    wrapper.find(`[id="${ColumnsId.srcport}"]`).at(0).simulate('click');
     act(() => {
       //set search input value
       wrapper.find(TextInput).props().onChange!(FTPSrcPortSample.values[0].display!, null!);
@@ -112,7 +112,7 @@ describe('<FiltersToolbar />', () => {
 
     //open dropdow and select invalid Dst port by name
     dropdown.simulate('click');
-    wrapper.find('[id="Dst port"]').at(0).simulate('click');
+    wrapper.find(`[id="${ColumnsId.dstport}"]`).at(0).simulate('click');
     act(() => {
       //set search input value, press enter and press button
       wrapper.find(TextInput).props().onChange!('no match', null!);
@@ -140,7 +140,7 @@ describe('<FiltersToolbar />', () => {
     const search = wrapper.find('#search-button').at(0);
     //open dropdow and select Src address
     dropdown.simulate('click');
-    wrapper.find('[id="Src address"]').at(0).simulate('click');
+    wrapper.find(`[id="${ColumnsId.srcaddr}"]`).at(0).simulate('click');
     act(() => {
       //set text input value and press button
       wrapper.find(TextInput).props().onChange!('1.2.3.4', null!);
@@ -160,7 +160,7 @@ describe('<FiltersToolbar />', () => {
     const search = wrapper.find('#search-button').at(0);
     //open dropdow and select Src address
     dropdown.simulate('click');
-    wrapper.find('[id="Src address"]').at(0).simulate('click');
+    wrapper.find(`[id="${ColumnsId.srcaddr}"]`).at(0).simulate('click');
     act(() => {
       //set text input value and press button
       wrapper.find(TextInput).props().onChange!('asdlfkj', null!);
@@ -176,7 +176,7 @@ describe('<FiltersToolbar />', () => {
     const dropdown = wrapper.find('#column-filter-toggle').at(0);
     //open dropdown and select Protocol
     dropdown.simulate('click');
-    wrapper.find('[id="Protocol"]').at(0).simulate('click');
+    wrapper.find(`[id="${ColumnsId.proto}"]`).at(0).simulate('click');
     act(() => {
       //set text input value and press button
       wrapper.find(TextInput).props().onChange!('tcp', null!);
