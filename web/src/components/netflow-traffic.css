@@ -33,3 +33,7 @@ span.pf-c-button__icon.pf-m-start {
     flex-direction: column;
     max-height: 90vh;
 }
+
+#drawer {
+    z-index: 0;
+}

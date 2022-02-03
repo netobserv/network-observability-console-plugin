@@ -16,7 +16,7 @@ import { useTranslation } from 'react-i18next';
 import { DEFAULT_FLOWDIR, DEFAULT_TIME_RANGE, flowdirToReporter } from '../../utils/router';
 import { Record } from '../../api/ipfix';
 import { QueryOptions } from '../../model/query-options';
-import { Column, ColumnsId } from '../../utils/columns';
+import { Column, ColumnsId, getColumnGroups } from '../../utils/columns';
 import { TimeRange } from '../../utils/datetime';
 import { getDateMsInSeconds } from '../../utils/duration';
 import { Filter } from '../../utils/filters';
@@ -120,6 +120,7 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
     };
   };
 
+  const groups = getColumnGroups(columns);
   return (
     <DrawerPanelContent id={id}>
       <DrawerHead>
@@ -131,11 +132,16 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
       <DrawerPanelBody>
         {record && (
           <>
-            {columns.map(c => (
-              <TextContent className="record-field-container" key={c.id}>
-                <Text component={TextVariants.h4}>{c.name}</Text>
-                <RecordField flow={record} column={c} size={'l'} filter={getFilter(c)} />
-              </TextContent>
+            {groups.map((g, i) => (
+              <div className="record-group-container" key={`group-${i}`}>
+                {g.title && <Text component={TextVariants.h3}>{g.title}</Text>}
+                {g.columns.map(c => (
+                  <TextContent className={`record-field-container ${g.title ? 'grouped' : ''}`} key={c.id}>
+                    <Text component={TextVariants.h4}>{c.name}</Text>
+                    <RecordField flow={record} column={c} size={'l'} filter={getFilter(c)} />
+                  </TextContent>
+                ))}
+              </div>
             ))}
             <TextContent className="record-field-container">
               <Text component={TextVariants.h4}>{t('JSON')}</Text>
