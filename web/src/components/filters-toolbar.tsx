@@ -285,31 +285,6 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
       clearFiltersButtonText={hasFilterValue() ? t('Clear all filters') : ''}
     >
       <ToolbarContent id={`${id}-search-filters`} toolbarId={id}>
-        {_.isEmpty(forcedFilters) &&
-          filters &&
-          filters.map((filter, index) => (
-            <ToolbarFilter
-              key={index}
-              deleteChipGroup={() => {
-                setFilters(filters.filter(f => f.colId !== filter.colId));
-              }}
-              chips={filter.values.map(value => (value.display ? value.display : value.v))}
-              deleteChip={(f, value: string) => {
-                filter.values = filter.values.filter(val => (val.display ? val.display !== value : val.v !== value));
-                if (_.isEmpty(filter.values)) {
-                  setFilters(filters.filter(f => f.colId !== filter.colId));
-                } else {
-                  setFilters(_.cloneDeep(filters));
-                }
-              }}
-              categoryName={columns.find(c => c.id === filter.colId)?.name || ''}
-            >
-              {
-                // set empty children to have a single filter with multiple categories
-                <div></div>
-              }
-            </ToolbarFilter>
-          ))}
         <ToolbarItem>
           <QueryOptionsDropdown options={props.queryOptions} setOptions={props.setQueryOptions} />
         </ToolbarItem>
@@ -401,6 +376,31 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
             </OverflowMenu>
           </ToolbarItem>
         )}
+        {_.isEmpty(forcedFilters) &&
+          filters &&
+          filters.map((filter, index) => (
+            <ToolbarFilter
+              key={index}
+              deleteChipGroup={() => {
+                setFilters(filters.filter(f => f.colId !== filter.colId));
+              }}
+              chips={filter.values.map(value => (value.display ? value.display : value.v))}
+              deleteChip={(f, value: string) => {
+                filter.values = filter.values.filter(val => (val.display ? val.display !== value : val.v !== value));
+                if (_.isEmpty(filter.values)) {
+                  setFilters(filters.filter(f => f.colId !== filter.colId));
+                } else {
+                  setFilters(_.cloneDeep(filters));
+                }
+              }}
+              categoryName={columns.find(c => c.id === filter.colId)?.name || ''}
+            >
+              {
+                // set empty children to have a single filter with multiple categories
+                <div></div>
+              }
+            </ToolbarFilter>
+          ))}
         {/* TODO : NETOBSERV-104
           <ToolbarItem variant="pagination">
             <Pagination
