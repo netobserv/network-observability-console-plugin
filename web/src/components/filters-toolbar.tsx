@@ -26,7 +26,7 @@ import * as _ from 'lodash';
 import { getPort } from 'port-numbers';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Column, ColumnsId } from '../utils/columns';
+import { Column, ColumnsId, getColumnGroups, getFullColumnName } from '../utils/columns';
 import {
   createFilterValue,
   Filter,
@@ -75,6 +75,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
   const [isSearchFiltersOpen, setSearchFiltersOpen] = React.useState<boolean>(false);
 
   const availableFilters = columns.filter(c => c.filterType !== FilterType.NONE);
+  const filtersGroups = getColumnGroups(availableFilters);
   const [selectedFilterColumn, setSelectedFilterColumn] = React.useState<Column>(availableFilters[0]);
   const [selectedFilterValue, setSelectedFilterValue] = React.useState<string>('');
 
@@ -301,16 +302,21 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
               <InputGroup>
                 <Dropdown
                   id="column-filter-dropdown"
-                  dropdownItems={availableFilters.map((col, index) => (
-                    <DropdownItem
-                      id={col.name}
-                      className="column-filter-item"
-                      component="button"
-                      onClick={() => setSelectedFilterColumn(col)}
-                      key={index}
-                    >
-                      {col.name}
-                    </DropdownItem>
+                  dropdownItems={filtersGroups.map((g, i) => (
+                    <div key={`group-${i}`}>
+                      {g.title && <h1 className="pf-c-dropdown__group-title">{g.title}</h1>}
+                      {g.columns.map((col, index) => (
+                        <DropdownItem
+                          id={col.id}
+                          className={`column-filter-item ${g.title ? 'grouped' : ''}`}
+                          component="button"
+                          onClick={() => setSelectedFilterColumn(col)}
+                          key={index}
+                        >
+                          {col.name}
+                        </DropdownItem>
+                      ))}
+                    </div>
                   ))}
                   isOpen={isSearchFiltersOpen}
                   onSelect={() => setSearchFiltersOpen(false)}
@@ -319,7 +325,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
                       id="column-filter-toggle"
                       onToggle={() => setSearchFiltersOpen(!isSearchFiltersOpen)}
                     >
-                      {selectedFilterColumn.name}
+                      {getFullColumnName(selectedFilterColumn)}
                     </DropdownToggle>
                   }
                 />
@@ -340,7 +346,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
               <ChipGroup
                 key={ffIndex}
                 isClosable={false}
-                categoryName={columns.find(c => c.id === forcedFilter.colId)?.name || ''}
+                categoryName={getFullColumnName(columns.find(c => c.id === forcedFilter.colId))}
               >
                 {forcedFilter.values.map((forcedValue, fvIndex) => (
                   <Chip key={fvIndex} isReadOnly={true}>

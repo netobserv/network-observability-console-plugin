@@ -1,9 +1,9 @@
+import { OnSort, TableComposable, Tbody, Th, Thead, Tr } from '@patternfly/react-table';
+import { mount } from 'enzyme';
 import * as React from 'react';
-import { shallow, mount } from 'enzyme';
-import { TableComposable, Tbody, OnSort, Thead, Tr, Th } from '@patternfly/react-table';
+import { Column, ColumnsId } from '../../../utils/columns';
+import { AllSelectedColumns, DefaultColumns, filterOrderedColumnsByIds } from '../../__tests-data__/columns';
 import { NetflowTableHeader } from '../netflow-table-header';
-import { ColumnsSample } from '../../__tests-data__/columns';
-import { Column } from '../../../utils/columns';
 
 const NetflowTableHeaderWrapper: React.FC<{
   onSort: OnSort;
@@ -20,34 +20,44 @@ const NetflowTableHeaderWrapper: React.FC<{
 };
 
 describe('<NetflowTableHeader />', () => {
+  const mocks = {
+    onSort: jest.fn(),
+    sortIndex: 0,
+    sortDirection: 'asc'
+  };
   it('should render component', async () => {
-    const onSort = jest.fn();
-    const wrapper = shallow(
-      <NetflowTableHeader onSort={onSort} sortIndex={0} sortDirection={'asc'} columns={ColumnsSample} />
-    );
+    const wrapper = mount(<NetflowTableHeaderWrapper {...mocks} columns={AllSelectedColumns} />);
     expect(wrapper.find(NetflowTableHeader)).toBeTruthy();
     expect(wrapper.find(Thead)).toHaveLength(1);
-    expect(wrapper.find(Tr)).toHaveLength(1);
-    expect(wrapper.find(Th)).toHaveLength(ColumnsSample.length);
+    expect(wrapper.find(Th).length).toBeGreaterThanOrEqual(AllSelectedColumns.length);
   });
   it('should render given columns', async () => {
-    const onSort = jest.fn();
-    const reducedColumns = ColumnsSample.slice(2, 4);
-    const wrapper = shallow(
-      <NetflowTableHeader onSort={onSort} sortIndex={0} sortDirection={'asc'} columns={reducedColumns} />
+    const wrapper = mount(
+      <NetflowTableHeaderWrapper {...mocks} columns={filterOrderedColumnsByIds([ColumnsId.timestamp])} />
     );
     expect(wrapper.find(NetflowTableHeader)).toBeTruthy();
     expect(wrapper.find(Thead)).toHaveLength(1);
     expect(wrapper.find(Tr)).toHaveLength(1);
-    expect(wrapper.find(Th)).toHaveLength(reducedColumns.length);
+    expect(wrapper.find(Th)).toHaveLength(1);
   });
   it('should call sort function on click', async () => {
-    const onSort = jest.fn();
-    const wrapper = mount(
-      <NetflowTableHeaderWrapper onSort={onSort} sortIndex={0} sortDirection={'asc'} columns={ColumnsSample} />
-    );
+    const wrapper = mount(<NetflowTableHeaderWrapper {...mocks} columns={DefaultColumns} />);
     expect(wrapper.find(NetflowTableHeader)).toBeTruthy();
     wrapper.find('button').at(0).simulate('click');
-    expect(onSort).toHaveBeenCalledWith(expect.anything(), 0, 'desc', expect.anything());
+    expect(mocks.onSort).toHaveBeenCalledWith(expect.anything(), 0, 'desc', expect.anything());
+  });
+  it('should nested consecutive group columns', async () => {
+    const selectedIds = [ColumnsId.timestamp, ColumnsId.srcpod, ColumnsId.srcport, ColumnsId.dstpod, ColumnsId.packets];
+    const wrapper = mount(<NetflowTableHeaderWrapper {...mocks} columns={filterOrderedColumnsByIds(selectedIds)} />);
+    expect(wrapper.find(Thead)).toHaveLength(1);
+    expect(wrapper.find(Tr)).toHaveLength(2);
+    expect(wrapper.find(Th).length).toBeGreaterThanOrEqual(selectedIds.length);
+  });
+  it('should keep flat non consecutive group columns', async () => {
+    const selectedIds = [ColumnsId.timestamp, ColumnsId.srcpod, ColumnsId.dstpod, ColumnsId.packets, ColumnsId.srcport];
+    const wrapper = mount(<NetflowTableHeaderWrapper {...mocks} columns={filterOrderedColumnsByIds(selectedIds)} />);
+    expect(wrapper.find(Thead)).toHaveLength(1);
+    expect(wrapper.find(Tr)).toHaveLength(1);
+    expect(wrapper.find(Th)).toHaveLength(selectedIds.length);
   });
 });

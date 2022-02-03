@@ -1,4 +1,5 @@
 import { TFunction } from 'i18next';
+import _ from 'lodash';
 import { Record } from '../api/ipfix';
 import { compareIPs } from '../utils/ip';
 import { comparePorts } from '../utils/port';
@@ -28,16 +29,45 @@ export enum ColumnsId {
   flowdir = 'FlowDirection'
 }
 
+//specific header width - Allowed values are limited, check TableComposable BaseCellProps with definition
+export type ColumnWidth = 10 | 15 | 20 | 25 | 30 | 35 | 40 | 45 | 50 | 60 | 70 | 80 | 90 | 100;
+
 export interface Column {
   id: ColumnsId;
+  group?: string;
   name: string;
   isSelected: boolean;
   filterType: FilterType;
   value: (flow: Record) => string | number;
   sort(a: Record, b: Record, col: Column): number;
-  //specific header width - Allowed values are limited, check TableComposable BaseCellProps with definition
-  width: 10 | 15 | 20 | 25 | 30 | 35 | 40 | 45 | 50 | 60 | 70 | 80 | 90 | 100;
+  width: ColumnWidth;
 }
+
+export type ColumnGroup = {
+  title?: string;
+  columns: Column[];
+};
+
+export const getColumnGroups = (columns: Column[]) => {
+  const groups: ColumnGroup[] = [];
+  _.each(columns, col => {
+    if (col.group && _.last(groups)?.title === col.group) {
+      _.last(groups)!.columns.push(col);
+    } else {
+      groups.push({ title: col.group, columns: [col] });
+    }
+  });
+
+  return groups;
+};
+
+export const getFullColumnName = (col?: Column) => {
+  if (col) {
+    return !col.group ? col.name : `${col.group} ${col.name}`;
+  } else {
+    return '';
+  }
+};
 
 export const getDefaultColumns = (t: TFunction): Column[] => {
   return [
@@ -48,25 +78,27 @@ export const getDefaultColumns = (t: TFunction): Column[] => {
       filterType: FilterType.NONE,
       value: f => f.timestamp,
       sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
-      width: 30
+      width: 20
     },
     {
       id: ColumnsId.srcpod,
-      name: t('Src pod'),
+      group: t('Source'),
+      name: t('Pod'),
       isSelected: true,
       filterType: FilterType.TEXT,
       value: f => f.fields.SrcPod || '',
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
-      width: 30
+      width: 20
     },
     {
       id: ColumnsId.srcwkd,
-      name: t('Src workload'),
+      group: t('Source'),
+      name: t('Workload'),
       isSelected: false,
       filterType: FilterType.TEXT,
       value: f => f.labels.SrcWorkload || '',
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
-      width: 30
+      width: 20
     },
     {
       id: ColumnsId.srcwkdkind,
@@ -79,57 +111,63 @@ export const getDefaultColumns = (t: TFunction): Column[] => {
     },
     {
       id: ColumnsId.srcnamespace,
-      name: t('Src namespace'),
+      group: t('Source'),
+      name: t('Namespace'),
       isSelected: true,
       filterType: FilterType.TEXT,
       value: f => f.labels.SrcNamespace || '',
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
-      width: 30
+      width: 20
     },
     {
       id: ColumnsId.srcaddr,
-      name: t('Src address'),
+      group: t('Source'),
+      name: t('Address'),
       isSelected: false,
       filterType: FilterType.ADDRESS,
       value: f => f.fields.SrcAddr,
       sort: (a, b, col) => compareIPs(col.value(a) as string, col.value(b) as string),
-      width: 20
+      width: 15
     },
     {
       id: ColumnsId.srcport,
-      name: t('Src port'),
+      group: t('Source'),
+      name: t('Port'),
       isSelected: true,
       filterType: FilterType.PORT,
       value: f => f.fields.SrcPort,
       sort: (a, b, col) => comparePorts(col.value(a) as number, col.value(b) as number),
-      width: 20
+      width: 10
     },
     {
       id: ColumnsId.srchost,
-      name: t('Src host'),
+      group: t('Source'),
+      name: t('Host'),
       isSelected: false,
       filterType: FilterType.ADDRESS,
       value: f => f.fields.SrcHostIP || '',
       sort: (a, b, col) => compareIPs(col.value(a) as string, col.value(b) as string),
-      width: 20
+      width: 15
     },
     {
       id: ColumnsId.dstpod,
-      name: t('Dst pod'),
+      group: t('Destination'),
+      name: t('Pod'),
       isSelected: true,
       filterType: FilterType.TEXT,
       value: f => f.fields.DstPod || '',
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
-      width: 30
+      width: 20
     },
     {
       id: ColumnsId.dstwkd,
-      name: t('Dst workload'),
+      group: t('Destination'),
+      name: t('Workload'),
       isSelected: false,
       filterType: FilterType.TEXT,
       value: f => f.labels.DstWorkload || '',
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
-      width: 30
+      width: 20
     },
     {
       id: ColumnsId.dstwkdkind,
@@ -142,39 +180,43 @@ export const getDefaultColumns = (t: TFunction): Column[] => {
     },
     {
       id: ColumnsId.dstnamespace,
-      name: t('Dst namespace'),
+      group: t('Destination'),
+      name: t('Namespace'),
       isSelected: true,
       filterType: FilterType.TEXT,
       value: f => f.labels.DstNamespace || '',
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
-      width: 30
+      width: 20
     },
     {
       id: ColumnsId.dstaddr,
-      name: t('Dst address'),
+      group: t('Destination'),
+      name: t('Address'),
       isSelected: false,
       filterType: FilterType.ADDRESS,
       value: f => f.fields.DstAddr,
       sort: (a, b, col) => compareIPs(col.value(a) as string, col.value(b) as string),
-      width: 20
+      width: 15
     },
     {
       id: ColumnsId.dstport,
-      name: t('Dst port'),
+      group: t('Destination'),
+      name: t('Port'),
       isSelected: true,
       filterType: FilterType.PORT,
       value: f => f.fields.DstPort,
       sort: (a, b, col) => comparePorts(col.value(a) as number, col.value(b) as number),
-      width: 20
+      width: 10
     },
     {
       id: ColumnsId.dsthost,
-      name: t('Dst host'),
+      group: t('Destination'),
+      name: t('Host'),
       isSelected: false,
       filterType: FilterType.ADDRESS,
       value: f => f.fields.DstHostIP || '',
       sort: (a, b, col) => compareIPs(col.value(a) as string, col.value(b) as string),
-      width: 20
+      width: 15
     },
     {
       id: ColumnsId.proto,
@@ -183,7 +225,7 @@ export const getDefaultColumns = (t: TFunction): Column[] => {
       filterType: FilterType.PROTOCOL,
       value: f => f.fields.Proto,
       sort: (a, b, col) => compareProtocols(col.value(a) as number, col.value(b) as number),
-      width: 20
+      width: 15
     },
     {
       id: ColumnsId.flowdir,
@@ -193,7 +235,7 @@ export const getDefaultColumns = (t: TFunction): Column[] => {
       filterType: FilterType.NONE,
       value: f => f.fields.FlowDirection,
       sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
-      width: 20
+      width: 15
     },
     {
       id: ColumnsId.bytes,

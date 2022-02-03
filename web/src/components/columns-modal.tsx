@@ -19,7 +19,7 @@ import {
   Tooltip
 } from '@patternfly/react-core';
 import { useTranslation } from 'react-i18next';
-import { Column, getDefaultColumns } from '../utils/columns';
+import { Column, getDefaultColumns, getFullColumnName } from '../utils/columns';
 import * as _ from 'lodash';
 import './columns-modal.css';
 
@@ -69,7 +69,7 @@ export const ColumnsModal: React.FC<{
     (checked, event) => {
       if (event?.target?.id) {
         const result = [...updatedColumns];
-        const selectedColumn = result.find(col => col.name === event.target.id);
+        const selectedColumn = result.find(col => col.id === event.target.id);
         if (selectedColumn) {
           selectedColumn.isSelected = !selectedColumn.isSelected;
           setUpdatedColumns(result);
@@ -110,14 +110,14 @@ export const ColumnsModal: React.FC<{
             <DataListCheck
               aria-labelledby={'table-column-management-item-' + i}
               checked={column.isSelected}
-              id={column.name}
+              id={column.id}
               onChange={onCheck}
             />
           </DataListControl>
           <DataListItemCells
             dataListCells={[
               <DataListCell key={'data-list-cell-' + i}>
-                <label htmlFor={column.name}>{column.name}</label>
+                <label htmlFor={column.id}>{getFullColumnName(column)}</label>
               </DataListCell>
             ]}
           />

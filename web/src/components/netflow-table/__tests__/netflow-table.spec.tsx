@@ -6,7 +6,7 @@ import NetflowTable from '../netflow-table';
 import NetflowTableRow from '../netflow-table-row';
 import { NetflowTableHeader } from '../netflow-table-header';
 
-import { ColumnsSample } from '../../__tests-data__/columns';
+import { ShuffledDefaultColumns } from '../../__tests-data__/columns';
 import { FlowsSample } from '../../__tests-data__/flows';
 import { Size } from '../../display-dropdown';
 
@@ -34,25 +34,25 @@ describe('<NetflowTable />', () => {
 
   it('should render component', async () => {
     const flows = FlowsSample.slice(0, FlowsSample.length);
-    const wrapper = shallow(<NetflowTable flows={flows} columns={ColumnsSample} {...mocks} />);
+    const wrapper = shallow(<NetflowTable flows={flows} columns={ShuffledDefaultColumns} {...mocks} />);
     expect(wrapper.find(NetflowTable)).toBeTruthy();
     expect(wrapper.find(NetflowTableHeader)).toHaveLength(1);
   });
   it('should have table rows', async () => {
     const flows = FlowsSample.slice(0, FlowsSample.length);
-    const wrapper = shallow(<NetflowTable flows={flows} columns={ColumnsSample} {...mocks} />);
+    const wrapper = shallow(<NetflowTable flows={flows} columns={ShuffledDefaultColumns} {...mocks} />);
     expect(wrapper.find(NetflowTable)).toBeTruthy();
     expect(wrapper.find(NetflowTableRow)).toHaveLength(FlowsSample.length);
   });
   it('should only render given row', async () => {
     const flows = FlowsSample.slice(0, 2);
-    const wrapper = shallow(<NetflowTable flows={flows} columns={ColumnsSample} {...mocks} />);
+    const wrapper = shallow(<NetflowTable flows={flows} columns={ShuffledDefaultColumns} {...mocks} />);
     expect(wrapper.find(NetflowTable)).toBeTruthy();
     expect(wrapper.find(NetflowTableRow)).toHaveLength(flows.length);
   });
   it('should sort rows on click', async () => {
     const flows = FlowsSample.slice(0, FlowsSample.length);
-    const wrapper = mount(<NetflowTable flows={flows} columns={ColumnsSample} {...mocks} />);
+    const wrapper = mount(<NetflowTable flows={flows} columns={ShuffledDefaultColumns} {...mocks} />);
     expect(wrapper.find(NetflowTable)).toBeTruthy();
     const button = wrapper.findWhere(node => {
       return node.type() === 'button' && node.text() === 'Date & time';
@@ -67,7 +67,7 @@ describe('<NetflowTable />', () => {
     expect(wrapper.find(NetflowTableRow).at(0).text()).toContain(expectedDstAddress);
   });
   it('should render a spinning slide and then the netflow rows', async () => {
-    const wrapper = mount(<NetflowTable loading={true} flows={[]} columns={ColumnsSample} {...mocks} />);
+    const wrapper = mount(<NetflowTable loading={true} flows={[]} columns={ShuffledDefaultColumns} {...mocks} />);
     expect(wrapper.find(NetflowTable)).toBeTruthy();
     expect(wrapper.find(loadingContentsQuery)).toHaveLength(1);
     wrapper.setProps({
@@ -81,7 +81,7 @@ describe('<NetflowTable />', () => {
     expect(wrapper.find(NetflowTableRow)).toHaveLength(FlowsSample.length);
   });
   it('should render a spinning slide and then a NoResultsFound message if no flows are found', async () => {
-    const wrapper = mount(<NetflowTable loading={true} flows={[]} columns={ColumnsSample} {...mocks} />);
+    const wrapper = mount(<NetflowTable loading={true} flows={[]} columns={ShuffledDefaultColumns} {...mocks} />);
     expect(wrapper.find(NetflowTable)).toBeTruthy();
     expect(wrapper.find(loadingContentsQuery)).toHaveLength(1);
     wrapper.setProps({
@@ -100,7 +100,7 @@ describe('<NetflowTable />', () => {
     expect(mocks.clearFilters).toHaveBeenCalledTimes(1);
   });
   it('should render a spinning slide and then an should show an ErrorState on error', async () => {
-    const wrapper = mount(<NetflowTable loading={true} flows={[]} columns={ColumnsSample} {...mocks} />);
+    const wrapper = mount(<NetflowTable loading={true} flows={[]} columns={ShuffledDefaultColumns} {...mocks} />);
     expect(wrapper.find(NetflowTable)).toBeTruthy();
     expect(wrapper.find(loadingContentsQuery)).toHaveLength(1);
     wrapper.setProps({

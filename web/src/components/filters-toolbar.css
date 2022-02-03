@@ -15,3 +15,7 @@
 button.pf-c-button.pf-m-link.pf-m-inline:empty {
   display: none;
 }
+
+.column-filter-item.grouped {
+  padding-left: 25px;
+}
