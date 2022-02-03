@@ -38,14 +38,15 @@ export const NetflowTableHeader: React.FC<{
   );
 
   const getTableHeader = React.useCallback(
-    (c: Column, showBorder: boolean, isDoubleSpan = false) => {
+    (c: Column) => {
       // no-explicit-any disabled: short list of number expected in Th width, but actually any number works fine
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const width = Math.floor((100 * c.width) / tableWidth) as any;
+      const showBorder =
+        headersState.useNested && headersState.nestedHeaders.find(nh => _.last(nh.columns) === c) !== undefined;
       return (
         <Th
           hasRightBorder={showBorder}
-          rowSpan={isDoubleSpan ? 2 : 1}
           width={width}
           key={c.id}
           sort={{
@@ -58,39 +59,24 @@ export const NetflowTableHeader: React.FC<{
           }}
           modifier="wrap"
         >
-          {!isDoubleSpan && headersState.useNested ? c.name : getFullColumnName(c)}
+          {headersState.useNested ? c.name : getFullColumnName(c)}
         </Th>
       );
     },
-    [columns, headersState.useNested, onSort, sortDirection, sortIndex]
+    [columns, headersState.nestedHeaders, headersState.useNested, onSort, sortDirection, sortIndex, tableWidth]
   );
 
   React.useEffect(() => {
     const nestedHeaders = getColumnGroups(columns);
     const useNested = nestedHeaders.find(nh => nh.columns.length > 1) !== undefined;
-    const headers = useNested ? nestedHeaders.filter(nh => nh.columns.length > 1).flatMap(nh => nh.columns) : columns;
+    const headers = useNested ? nestedHeaders.flatMap(nh => nh.columns) : columns;
     setHeadersState({ nestedHeaders, useNested, headers });
   }, [columns]);
 
   return (
     <Thead hasNestedHeader={headersState.useNested}>
-      {headersState.useNested && (
-        <Tr>
-          {headersState.nestedHeaders.map(nh =>
-            nh.columns.length > 1
-              ? getNestedTableHeader(nh)
-              : nh.columns.map(c => getTableHeader(c, _.last(headersState.nestedHeaders) !== nh, true))
-          )}
-        </Tr>
-      )}
-      <Tr>
-        {headersState.headers.map(c =>
-          getTableHeader(
-            c,
-            headersState.useNested && headersState.nestedHeaders.find(nh => _.last(nh.columns) === c) !== undefined
-          )
-        )}
-      </Tr>
+      {headersState.useNested && <Tr>{headersState.nestedHeaders.map(nh => getNestedTableHeader(nh))}</Tr>}
+      <Tr>{headersState.headers.map(c => getTableHeader(c))}</Tr>
     </Thead>
   );
 };

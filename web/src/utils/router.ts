@@ -6,9 +6,9 @@ import { TimeRange } from './datetime';
 import { QueryOptions, Reporter } from '../model/query-options';
 
 const SPLIT_FILTER_CHAR = ',';
-const DEFAULT_TIME_RANGE = 300;
-const DEFAULT_LIMIT = 100;
-const DEFAULT_FLOWDIR = '0';
+export const DEFAULT_TIME_RANGE = 300;
+export const DEFAULT_LIMIT = 100;
+export const DEFAULT_FLOWDIR = '0';
 export const NETFLOW_TRAFFIC_PATH = '/netflow-traffic';
 
 export enum QueryArgument {
@@ -35,12 +35,12 @@ export const getURLQueryArgumentAsNumber = (arg: AnyQueryArgs) => {
   return null;
 };
 
-const flowdirToReporter: { [flowdir: string]: Reporter } = {
+export const flowdirToReporter: { [flowdir: string]: Reporter } = {
   '0': 'destination',
   '1': 'source',
   '': 'both'
 };
-const reporterToFlowdir = _.invert(flowdirToReporter);
+export const reporterToFlowdir = _.invert(flowdirToReporter);
 
 export const buildQueryArguments = (
   filters: Filter[],

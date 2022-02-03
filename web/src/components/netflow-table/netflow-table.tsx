@@ -22,12 +22,14 @@ import { Size } from '../display-dropdown';
 
 const NetflowTable: React.FC<{
   flows: Record[];
+  selectedRecord?: Record;
   columns: Column[];
   size: Size;
+  onSelect: (record?: Record) => void;
   clearFilters: () => void;
   loading?: boolean;
   error?: string;
-}> = ({ flows, columns, error, loading, size, clearFilters }) => {
+}> = ({ flows, selectedRecord, columns, error, loading, size, onSelect, clearFilters }) => {
   const { t } = useTranslation('plugin__network-observability-plugin');
 
   // index of the currently active column
@@ -106,7 +108,14 @@ const NetflowTable: React.FC<{
           />
           <Tbody>
             {getSortedFlows().map(f => (
-              <NetflowTableRow key={f.key} flow={f} columns={columns} size={size} />
+              <NetflowTableRow
+                key={f.key}
+                flow={f}
+                columns={columns}
+                size={size}
+                selectedRecord={selectedRecord}
+                onSelect={onSelect}
+              />
             ))}
           </Tbody>
         </TableComposable>

@@ -1,4 +1,4 @@
-import * as _ from 'lodash';
+import { cyrb53 } from '../utils/hash';
 import { Fields, Labels, Record } from './ipfix';
 
 export interface LokiResponse {
@@ -22,7 +22,7 @@ export const parseStream = (raw: StreamResult): Record[] => {
     const fields = JSON.parse(v[1]) as Fields;
     return {
       labels: raw.stream as unknown as Labels,
-      key: _.uniqueId('flow-'),
+      key: cyrb53(v.join(',')),
       timestamp: +v[0].slice(0, 13),
       fields: fields
     };
