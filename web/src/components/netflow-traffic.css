@@ -26,3 +26,10 @@ span.pf-c-button__icon.pf-m-start {
 .pf-c-empty-state__body {
     white-space: pre-line;
 }
+
+/*FIXME: remove this override if a better solution for scrolling content is found with the console team*/
+#pageSection {
+    display: flex;
+    flex-direction: column;
+    max-height: 88vh;
+}

@@ -14,7 +14,8 @@ export const NetflowTableHeader: React.FC<{
   sortIndex: number;
   sortDirection: string;
   columns: Column[];
-}> = ({ onSort, sortIndex, sortDirection, columns }) => {
+  tableWidth: number;
+}> = ({ onSort, sortIndex, sortDirection, columns, tableWidth }) => {
   const [headersState, setHeadersState] = React.useState<HeadersState>({
     nestedHeaders: [],
     useNested: false,
@@ -38,11 +39,14 @@ export const NetflowTableHeader: React.FC<{
 
   const getTableHeader = React.useCallback(
     (c: Column, showBorder: boolean, isDoubleSpan = false) => {
+      // no-explicit-any disabled: short list of number expected in Th width, but actually any number works fine
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const width = Math.floor((100 * c.width) / tableWidth) as any;
       return (
         <Th
           hasRightBorder={showBorder}
           rowSpan={isDoubleSpan ? 2 : 1}
-          width={c.width}
+          width={width}
           key={c.id}
           sort={{
             sortBy: {
