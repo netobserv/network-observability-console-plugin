@@ -45,6 +45,16 @@ describe('<NetflowTable />', () => {
     expect(wrapper.find(NetflowTable)).toBeTruthy();
     expect(wrapper.find(NetflowTableRow)).toHaveLength(FlowsSample.length);
   });
+  it('should update rows on props update', async () => {
+    const flows = FlowsSample.slice(0, 1);
+    const wrapper = shallow(<NetflowTable flows={flows} columns={ShuffledDefaultColumns} {...mocks} />);
+    expect(wrapper.find(NetflowTable)).toBeTruthy();
+    expect(wrapper.find(NetflowTableRow)).toHaveLength(1);
+    const flowsupdated = FlowsSample.slice(0, FlowsSample.length);
+    wrapper.setProps({ flows: flowsupdated });
+    expect(wrapper.find(NetflowTable)).toBeTruthy();
+    expect(wrapper.find(NetflowTableRow)).toHaveLength(FlowsSample.length);
+  });
   it('should only render given row', async () => {
     const flows = FlowsSample.slice(0, 2);
     const wrapper = shallow(<NetflowTable flows={flows} columns={ShuffledDefaultColumns} {...mocks} />);
