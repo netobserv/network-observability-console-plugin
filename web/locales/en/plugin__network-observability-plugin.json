@@ -46,6 +46,8 @@
   "Custom time range": "Custom time range",
   "Ingress": "Ingress",
   "Egress": "Egress",
+  "Remove {{name}} filter": "Remove {{name}} filter",
+  "Filter on {{name}}": "Filter on {{name}}",
   "Flow Details": "Flow Details",
   "JSON": "JSON",
   "Copy": "Copy",

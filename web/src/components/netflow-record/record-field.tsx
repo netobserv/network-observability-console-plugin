@@ -1,10 +1,10 @@
 import { ResourceLink } from '@openshift-console/dynamic-plugin-sdk';
-import { Button } from '@patternfly/react-core';
+import { Button, Tooltip } from '@patternfly/react-core';
 import { FilterIcon, TimesIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { FlowDirection, Record } from '../../api/ipfix';
-import { Column, ColumnsId } from '../../utils/columns';
+import { Column, ColumnsId, getFullColumnName } from '../../utils/columns';
 import { formatPort } from '../../utils/port';
 import { formatProtocol } from '../../utils/protocol';
 import { Size } from '../display-dropdown';
@@ -127,9 +127,17 @@ export const RecordField: React.FC<{
   return filter ? (
     <div className={`record-field-flex-container`}>
       <div className={'record-field-flex'}>{content(column)}</div>
-      <Button variant="link" aria-label="Filter" onClick={() => filter.onClick(column, filter.isDelete)}>
-        {filter.isDelete ? <TimesIcon /> : <FilterIcon />}
-      </Button>
+      <Tooltip
+        content={
+          filter.isDelete
+            ? t('Remove {{name}} filter', { name: getFullColumnName(column) })
+            : t('Filter on {{name}}', { name: getFullColumnName(column) })
+        }
+      >
+        <Button variant="link" aria-label="Filter" onClick={() => filter.onClick(column, filter.isDelete)}>
+          {filter.isDelete ? <TimesIcon /> : <FilterIcon />}
+        </Button>
+      </Tooltip>
     </div>
   ) : (
     <div className={`record-field-content ${size}`} onMouseOver={onMouseOver}>

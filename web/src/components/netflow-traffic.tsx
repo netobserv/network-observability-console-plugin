@@ -210,7 +210,7 @@ export const NetflowTraffic: React.FC<{
           </Button>
         </Tooltip>
       </FiltersToolbar>
-      <Drawer id="drawer" isInline isExpanded={selectedRecord !== undefined}>
+      <Drawer id="drawer" isExpanded={selectedRecord !== undefined}>
         <DrawerContent
           id="drawerContent"
           panelContent={
