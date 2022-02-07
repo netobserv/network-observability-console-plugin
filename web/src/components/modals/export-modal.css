@@ -1,0 +1,14 @@
+/* align right popup buttons*/
+
+.footer {
+    margin-left: auto;
+}
+
+#exported-fields {
+    max-height: 50vh;
+}
+
+#export-chips {
+    margin-top: 15px;
+    margin-bottom: 10px;
+}
