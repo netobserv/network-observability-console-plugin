@@ -1,4 +1,13 @@
-import { Button, Dropdown, TextInput, Toolbar, ToolbarFilter, ToolbarItem } from '@patternfly/react-core';
+import {
+  Button,
+  Dropdown,
+  TextInput,
+  Toolbar,
+  ToolbarFilter,
+  ToolbarItem,
+  Tooltip,
+  ValidatedOptions
+} from '@patternfly/react-core';
 import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 import { act } from 'react-dom/test-utils';
@@ -13,6 +22,7 @@ describe('<FiltersToolbar />', () => {
     columns: ShuffledDefaultColumns,
     filters: [] as Filter[],
     forcedFilters: undefined,
+    skipTipsDelay: true,
     setFilters: jest.fn(),
     clearFilters: jest.fn(),
     id: 'filter-toolbar',
@@ -71,6 +81,8 @@ describe('<FiltersToolbar />', () => {
     const dropdown = wrapper.find('#column-filter-toggle').at(0);
     const search = wrapper.find('#search-button').at(0);
 
+    expect(wrapper.find(TextInput).at(0).getElement().props['validated']).toBe(ValidatedOptions.default);
+
     //open dropdow and select Src pod
     dropdown.simulate('click');
     wrapper.find(`[id="${ColumnsId.srcpod}"]`).at(0).simulate('click');
@@ -119,6 +131,7 @@ describe('<FiltersToolbar />', () => {
     });
     wrapper.find(TextInput).at(0).simulate('keypress', { key: 'Enter' });
     search.simulate('click');
+    expect(wrapper.find(TextInput).at(0).getElement().props['validated']).toBe(ValidatedOptions.error);
     expect(props.setFilters).toHaveBeenCalledTimes(setFilterCallsExpected);
 
     //clear all filters
@@ -167,6 +180,7 @@ describe('<FiltersToolbar />', () => {
     });
     search.simulate('click');
     expect(props.setFilters).not.toHaveBeenCalled();
+    expect(wrapper.find(TextInput).at(0).getElement().props['validated']).toBe(ValidatedOptions.error);
   });
   it('should filter with autocompletion fast selection', async () => {
     props.filters = [];
@@ -193,5 +207,41 @@ describe('<FiltersToolbar />', () => {
     ];
     expect(props.setFilters).toHaveBeenCalledWith(expected);
     expect(props.setFilters).toHaveBeenCalledTimes(1);
+  });
+  it('should show tips on complex fields', async () => {
+    const wrapper = mount(<FiltersToolbar {...props} />);
+    const dropdown = wrapper.find('#column-filter-toggle').at(0);
+    //open dropdow and select Src port
+    dropdown.simulate('click');
+    wrapper.find(`[id="${ColumnsId.srcport}"]`).at(0).simulate('click');
+    let tooltips = wrapper.find(Tooltip);
+    expect(tooltips).toHaveLength(1);
+    let content = tooltips.at(0).getElement().props['content'];
+    expect(content.props.className).toBe('text-left-pre');
+    //check tooltip concatenated text
+    expect(String(content.props.children)).toContain('Specify a port');
+    expect(String(content.props.children)).toContain('- A port number');
+
+    //open dropdow and select Src address
+    dropdown.simulate('click');
+    wrapper.find(`[id="${ColumnsId.srcaddr}"]`).at(0).simulate('click');
+    tooltips = wrapper.find(Tooltip);
+    expect(tooltips).toHaveLength(1);
+    content = tooltips.at(0).getElement().props['content'];
+    expect(content.props.className).toBe('text-left-pre');
+    //check tooltip concatenated text
+    expect(String(content.props.children)).toContain('Specify an adress');
+    expect(String(content.props.children)).toContain('- A single IPv4 ');
+
+    //open dropdow and select Protocol
+    dropdown.simulate('click');
+    wrapper.find(`[id="${ColumnsId.proto}"]`).at(0).simulate('click');
+    tooltips = wrapper.find(Tooltip);
+    expect(tooltips).toHaveLength(1);
+    content = tooltips.at(0).getElement().props['content'];
+    expect(content.props.className).toBe('text-left-pre');
+    //check tooltip concatenated text
+    expect(String(content.props.children)).toContain('Specify a protocol');
+    expect(String(content.props.children)).toContain('- A protocol number');
   });
 });

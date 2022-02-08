@@ -50,6 +50,7 @@ export interface FiltersToolbarProps {
   filters?: Filter[];
   forcedFilters?: Filter[];
   actions?: React.ReactNode;
+  skipTipsDelay?: boolean;
   setFilters: (v: Filter[]) => void;
   clearFilters: () => void;
   queryOptions: QueryOptions;
@@ -64,6 +65,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
   filters,
   forcedFilters,
   actions,
+  skipTipsDelay,
   setFilters,
   clearFilters,
   ...props
@@ -307,7 +309,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
   React.useEffect(() => {
     resetFilterValue();
     //allow message state to be refreshed after render to manage tooltip trigger correctly between changes
-    setTimeout(() => {
+    const manageMessage = () => {
       switch (selectedFilterColumn.filterType) {
         case FilterType.PORT:
           setMessage(`${t('Specify a port following one of these rules:')}
@@ -329,9 +331,17 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
           setMessage(undefined);
           break;
       }
-    });
+    };
+    if (skipTipsDelay) {
+      manageMessage();
+    } else {
+      setTimeout(manageMessage);
+    }
+
     searchInputRef?.current?.focus();
-  }, [selectedFilterColumn, resetFilterValue, t]);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedFilterColumn]);
 
   return (
     <Toolbar
