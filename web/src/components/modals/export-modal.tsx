@@ -153,7 +153,12 @@ export const ExportModal: React.FC<{
             isDisabled={isSaveDisabled}
             variant="primary"
             component={(props: React.FunctionComponent) => (
-              <Link {...props} target="_blank" to={getExportFlowsURL(queryArguments, getFieldNames())} />
+              <Link
+                {...props}
+                target="_blank"
+                to={getExportFlowsURL(queryArguments, getFieldNames())}
+                onClick={() => setModalOpen(false)}
+              />
             )}
           >
             {t('Export')}
