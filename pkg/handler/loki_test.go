@@ -16,10 +16,9 @@ func TestProcessParamTwoPodsAndFlowDirection(t *testing.T) {
 	lineFilters := strings.Builder{}
 	ipFilters := strings.Builder{}
 	extraArgs := strings.Builder{}
-	format := Format{csv: false}
-	err := processParam("SrcPod", "test-pod-1,test-pod-2", &labelFilters, &lineFilters, &ipFilters, &extraArgs, &format)
+	err := processParam("SrcPod", "test-pod-1,test-pod-2", &labelFilters, &lineFilters, &ipFilters, &extraArgs, nil)
 	require.NoError(t, err)
-	err = processParam("FlowDirection", "0", &labelFilters, &lineFilters, &ipFilters, &extraArgs, &format)
+	err = processParam("FlowDirection", "0", &labelFilters, &lineFilters, &ipFilters, &extraArgs, nil)
 	require.NoError(t, err)
 
 	assert.Empty(t, labelFilters.String())
@@ -33,12 +32,11 @@ func TestProcessParamTwoNamespacesAndIP(t *testing.T) {
 	lineFilters := strings.Builder{}
 	ipFilters := strings.Builder{}
 	extraArgs := strings.Builder{}
-	format := Format{csv: false}
-	err := processParam("DstNamespace", "test-ns-1,test-ns-2", &labelFilters, &lineFilters, &ipFilters, &extraArgs, &format)
+	err := processParam("DstNamespace", "test-ns-1,test-ns-2", &labelFilters, &lineFilters, &ipFilters, &extraArgs, nil)
 	require.NoError(t, err)
-	err = processParam("DstAddr", "10.0.40.0/16", &labelFilters, &lineFilters, &ipFilters, &extraArgs, &format)
+	err = processParam("DstAddr", "10.0.40.0/16", &labelFilters, &lineFilters, &ipFilters, &extraArgs, nil)
 	require.NoError(t, err)
-	err = processParam("SrcAddr", "10.0.40.0/16", &labelFilters, &lineFilters, &ipFilters, &extraArgs, &format)
+	err = processParam("SrcAddr", "10.0.40.0/16", &labelFilters, &lineFilters, &ipFilters, &extraArgs, nil)
 	require.NoError(t, err)
 
 	assert.Equal(t, `,DstNamespace=~".*test-ns-1.*|.*test-ns-2.*"`, labelFilters.String())
@@ -52,10 +50,9 @@ func TestProcessParamPortAndLimit(t *testing.T) {
 	lineFilters := strings.Builder{}
 	ipFilters := strings.Builder{}
 	extraArgs := strings.Builder{}
-	format := Format{csv: false}
-	err := processParam("SrcPort", "80", &labelFilters, &lineFilters, &ipFilters, &extraArgs, &format)
+	err := processParam("SrcPort", "80", &labelFilters, &lineFilters, &ipFilters, &extraArgs, nil)
 	require.NoError(t, err)
-	err = processParam("limit", "500", &labelFilters, &lineFilters, &ipFilters, &extraArgs, &format)
+	err = processParam("limit", "500", &labelFilters, &lineFilters, &ipFilters, &extraArgs, nil)
 	require.NoError(t, err)
 
 	assert.Empty(t, labelFilters.String())
@@ -69,8 +66,7 @@ func TestProcessParamBackquoteUnpermitted(t *testing.T) {
 	lineFilters := strings.Builder{}
 	ipFilters := strings.Builder{}
 	extraArgs := strings.Builder{}
-	format := Format{csv: false}
-	err := processParam("SrcPod", "test-p`od-1", &labelFilters, &lineFilters, &ipFilters, &extraArgs, &format)
+	err := processParam("SrcPod", "test-p`od-1", &labelFilters, &lineFilters, &ipFilters, &extraArgs, nil)
 	require.Error(t, err)
 }
 

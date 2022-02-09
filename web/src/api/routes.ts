@@ -16,9 +16,9 @@ export const getFlows = (params: QueryArguments): Promise<Record[]> => {
 
 export const getExportFlowsURL = (params: QueryArguments, filteredColumns?: string[]): string => {
   const urlParams = getURLParams(params);
-  urlParams.set('csv', String(true));
+  urlParams.set('format', 'csv');
   if (filteredColumns) {
     urlParams.set('columns', String(filteredColumns));
   }
-  return `${host}api/loki/flows?${urlParams.toString()}`;
+  return `${host}api/loki/export?${urlParams.toString()}`;
 };

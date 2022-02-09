@@ -20,7 +20,8 @@ import (
 var hlog = logrus.WithField("module", "handler")
 
 const timestampCol = "Timestamp"
-const csvKey = "csv"
+const exportFormatKey = "format"
+const exportCSVFormat = "csv"
 const columnsKey = "columns"
 const startTimeKey = "startTime"
 const endTimeTimeKey = "endTime"
@@ -39,8 +40,8 @@ type LokiConfig struct {
 	TenantID string
 }
 
-type Format struct {
-	csv     bool
+type Export struct {
+	format  *string
 	columns *[]string
 }
 
@@ -76,7 +77,7 @@ func isIPAddress(v string) bool {
 	return v == "DstAddr" || v == "SrcAddr" || v == "DstHostIP" || v == "SrcHostIP"
 }
 
-func GetFlows(cfg LokiConfig) func(w http.ResponseWriter, r *http.Request) {
+func GetFlows(cfg LokiConfig, allowExport bool) func(w http.ResponseWriter, r *http.Request) {
 	flowsURL := strings.TrimRight(cfg.URL.String(), "/") + getFlowsURLPath
 
 	var headers map[string][]string
@@ -102,11 +103,15 @@ func GetFlows(cfg LokiConfig) func(w http.ResponseWriter, r *http.Request) {
 		lineFilters := strings.Builder{}
 		ipFilters := strings.Builder{}
 		extraArgs := strings.Builder{}
-		format := Format{csv: false}
+		//allow export only on specific endpoints
+		var export *Export
+		if allowExport {
+			export = &Export{}
+		}
 
 		for key := range params {
 			param := params.Get(key)
-			err := processParam(key, param, &labelFilters, &lineFilters, &ipFilters, &extraArgs, &format)
+			err := processParam(key, param, &labelFilters, &lineFilters, &ipFilters, &extraArgs, export)
 			if err != nil {
 				writeError(w, http.StatusBadRequest, err.Error())
 				return
@@ -136,23 +141,35 @@ func GetFlows(cfg LokiConfig) func(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		hlog.Tracef("GetFlows raw response: %s", resp)
-		if format.csv {
-			writeCSV(w, http.StatusOK, resp, format.columns)
+		if allowExport {
+			switch *export.format {
+			case exportCSVFormat:
+				writeCSV(w, http.StatusOK, resp, export.columns)
+			default:
+				writeError(w, http.StatusServiceUnavailable, fmt.Sprintf("export format %s is not valid", *export.format))
+			}
 		} else {
 			writeRawJSON(w, http.StatusOK, resp)
 		}
 	}
 }
 
-func processParam(key, value string, labelFilters, lineFilters, ipFilters, extraArgs *strings.Builder, format *Format) error {
+func processParam(key, value string, labelFilters, lineFilters, ipFilters, extraArgs *strings.Builder, export *Export) error {
 	var err error
 	switch key {
-	case csvKey:
-		b, _ := strconv.ParseBool(value)
-		format.csv = b
+	case exportFormatKey:
+		if export != nil {
+			export.format = &value
+		} else {
+			err = fmt.Errorf("export format is not allowed for this endpoint")
+		}
 	case columnsKey:
-		values := strings.Split(value, ",")
-		format.columns = &values
+		if export != nil {
+			values := strings.Split(value, ",")
+			export.columns = &values
+		} else {
+			err = fmt.Errorf("export columns are not allowed for this endpoint")
+		}
 	case startTimeKey:
 		extraArgs.WriteString(startParam)
 		extraArgs.WriteString(value)

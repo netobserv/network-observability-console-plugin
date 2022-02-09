@@ -11,7 +11,8 @@ import (
 func setupRoutes(cfg *Config) *mux.Router {
 	r := mux.NewRouter()
 	r.HandleFunc("/api/status", handler.Status)
-	r.HandleFunc("/api/loki/flows", handler.GetFlows(cfg.Loki))
+	r.HandleFunc("/api/loki/flows", handler.GetFlows(cfg.Loki, false))
+	r.HandleFunc("/api/loki/export", handler.GetFlows(cfg.Loki, true))
 	r.PathPrefix("/").Handler(http.FileServer(http.Dir("./web/dist/")))
 	return r
 }
