@@ -66,11 +66,16 @@ export const buildQueryArguments = (
   return params;
 };
 
-export const setURLQueryArguments = (qa: QueryArguments) => {
+export const getURLParams = (qa: QueryArguments) => {
   const urlParams = new URLSearchParams();
   _.each(qa, (v, k) => {
     urlParams.set(k, String(v));
   });
+  return urlParams;
+};
+
+export const setURLQueryArguments = (qa: QueryArguments) => {
+  const urlParams = getURLParams(qa);
   const url = new URL(window.location.href);
   history.replace(`${url.pathname}?${urlParams.toString()}${url.hash}`);
 };
