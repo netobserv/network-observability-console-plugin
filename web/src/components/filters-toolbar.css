@@ -10,6 +10,13 @@
   display: none;
 }
 
+/* allow new lines for error text */
+
+.text-left-pre {
+  white-space: pre-line;
+  text-align: left;
+}
+
 /* hide empty button - fix for clear all filters keep showing */
 
 button.pf-c-button.pf-m-link.pf-m-inline:empty {

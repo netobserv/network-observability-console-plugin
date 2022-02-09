@@ -19,7 +19,8 @@ import {
   ToolbarContent,
   ToolbarFilter,
   ToolbarItem,
-  Tooltip
+  Tooltip,
+  ValidatedOptions
 } from '@patternfly/react-core';
 import { SearchIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
@@ -49,11 +50,14 @@ export interface FiltersToolbarProps {
   filters?: Filter[];
   forcedFilters?: Filter[];
   actions?: React.ReactNode;
+  skipTipsDelay?: boolean;
   setFilters: (v: Filter[]) => void;
   clearFilters: () => void;
   queryOptions: QueryOptions;
   setQueryOptions: (opts: QueryOptions) => void;
 }
+
+export type Indicator = 'default' | 'success' | 'warning' | 'error' | undefined;
 
 export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
   id,
@@ -61,6 +65,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
   filters,
   forcedFilters,
   actions,
+  skipTipsDelay,
   setFilters,
   clearFilters,
   ...props
@@ -69,7 +74,8 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
   const { t } = useTranslation('plugin__network-observability-plugin');
   const autocompleteContainerRef = React.useRef<HTMLDivElement | null>(null);
   const searchInputRef = React.useRef<HTMLInputElement | null>(null);
-  const [invalidMessage, setInvalidMessage] = React.useState<string | undefined>();
+  const [indicator, setIndicator] = React.useState<Indicator>(ValidatedOptions.default);
+  const [message, setMessage] = React.useState<string | undefined>();
   const [autocompleteOptions, setAutocompleteOptions] = React.useState<FilterOption[]>([]);
   const [isPopperVisible, setPopperVisible] = React.useState(false);
   const [isSearchFiltersOpen, setSearchFiltersOpen] = React.useState<boolean>(false);
@@ -94,6 +100,63 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
     resetAutocompleteOptions();
   };
 
+  const resetAutocompleteOptions = () => {
+    setPopperVisible(false);
+    setAutocompleteOptions([]);
+  };
+
+  const validateFilterValue = React.useCallback(
+    (value: string) => {
+      if (!selectedFilterColumn) {
+        return { err: t('Column must be selected') };
+      } else if (_.isEmpty(value)) {
+        return { err: t('Value is empty') };
+      }
+
+      switch (selectedFilterColumn?.filterType) {
+        case FilterType.PORT:
+          //allow any port number or valid name / value
+          if (!isNaN(Number(value)) || getPort(value)) {
+            return { val: value };
+          } else {
+            return { err: t('Unknown port') };
+          }
+        case FilterType.ADDRESS:
+          return validateIPFilter(value)
+            ? { val: value }
+            : { err: t('Not a valid IPv4 or IPv6, nor a CIDR, nor an IP range separated by hyphen') };
+        case FilterType.PROTOCOL:
+          //allow any protocol number or valid name / value
+          if (!isNaN(Number(value))) {
+            return { val: value };
+          } else {
+            const proto = findProtocolOption(value);
+            if (proto) {
+              return { val: proto.name };
+            }
+            return { err: t('Unknown protocol') };
+          }
+        default:
+          return { val: value };
+      }
+    },
+    [selectedFilterColumn, t]
+  );
+
+  const setFilterValue = React.useCallback(
+    (v: string) => {
+      //update validation icon on field on value change
+      if (!_.isEmpty(v)) {
+        const validation = validateFilterValue(v);
+        setIndicator(!_.isEmpty(validation.err) ? ValidatedOptions.warning : ValidatedOptions.success);
+      } else {
+        setIndicator(ValidatedOptions.default);
+      }
+      setSelectedFilterValue(v);
+    },
+    [validateFilterValue]
+  );
+
   const resetFilterValue = React.useCallback(() => {
     switch (selectedFilterColumn?.filterType) {
       case FilterType.NUMBER:
@@ -104,52 +167,9 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
         break;
     }
     resetAutocompleteOptions();
-  }, [selectedFilterColumn?.filterType]);
-
-  const resetAutocompleteOptions = () => {
-    setPopperVisible(false);
-    setAutocompleteOptions([]);
-  };
-
-  const validateFilterValue = React.useCallback(() => {
-    if (!selectedFilterColumn) {
-      return { err: t('Column must be selected') };
-    } else if (_.isEmpty(selectedFilterValue)) {
-      return { err: t('Value is empty') };
-    }
-
-    switch (selectedFilterColumn?.filterType) {
-      case FilterType.PORT:
-        //allow any port number or valid name / value
-        if (!isNaN(Number(selectedFilterValue)) || getPort(selectedFilterValue)) {
-          return { val: selectedFilterValue };
-        } else {
-          return { err: t('Unknown port') };
-        }
-      case FilterType.ADDRESS:
-        return validateIPFilter(selectedFilterValue)
-          ? { val: selectedFilterValue }
-          : { err: t('Not a valid IPv4 or IPv6, nor a CIDR, nor an IP range separated by hyphen') };
-      case FilterType.PROTOCOL:
-        //allow any protocol number or valid name / value
-        if (!isNaN(Number(selectedFilterValue))) {
-          return { val: selectedFilterValue };
-        } else {
-          const proto = findProtocolOption(selectedFilterValue);
-          if (proto) {
-            return { val: proto.name };
-          }
-          return { err: t('Unknown protocol') };
-        }
-      default:
-        return { val: selectedFilterValue };
-    }
-  }, [selectedFilterColumn, selectedFilterValue, t]);
-
-  const setFilterValue = (v: string) => {
-    setInvalidMessage(undefined);
-    setSelectedFilterValue(v);
-  };
+    setMessage(undefined);
+    setIndicator(ValidatedOptions.default);
+  }, [selectedFilterColumn?.filterType, setFilterValue]);
 
   const addFilter = React.useCallback(
     (colId: ColumnsId, filter: FilterValue) => {
@@ -162,7 +182,8 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
           if (colId === ColumnsId.timestamp) {
             found.values = [filter];
           } else if (found.values.map(value => value.v).includes(filter.v)) {
-            setInvalidMessage(t('Filter already exists'));
+            setMessage(t('Filter already exists'));
+            setIndicator(ValidatedOptions.error);
             return;
           } else {
             found.values.push(filter);
@@ -184,9 +205,11 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
       return;
     }
 
-    const validation = validateFilterValue();
+    const validation = validateFilterValue(selectedFilterValue);
+    //show tooltip and icon when user try to validate filter
     if (!_.isEmpty(validation.err)) {
-      setInvalidMessage(validation.err);
+      setMessage(validation.err);
+      setIndicator(ValidatedOptions.error);
       return;
     }
 
@@ -196,7 +219,14 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
     } else {
       console.error('manageFilters invalid newValue');
     }
-  }, [autocompleteOptions, validateFilterValue, selectedFilterColumn, addFilter]);
+  }, [
+    autocompleteOptions,
+    validateFilterValue,
+    selectedFilterValue,
+    selectedFilterColumn.filterType,
+    selectedFilterColumn.id,
+    addFilter
+  ]);
 
   /*TODO: check if we can do autocomplete for pod / namespace fields
    * as implemented for protocols
@@ -212,6 +242,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
                 <TextInput
                   type="search"
                   aria-label="search"
+                  validated={indicator}
                   value={selectedFilterValue}
                   onKeyPress={e => e.key === 'Enter' && manageFilters()}
                   onChange={onAutoCompleteChange}
@@ -260,6 +291,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
           <TextInput
             type="search"
             aria-label="search"
+            validated={indicator}
             onChange={setFilterValue}
             onKeyPress={e => e.key === 'Enter' && manageFilters()}
             value={selectedFilterValue}
@@ -276,8 +308,40 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
 
   React.useEffect(() => {
     resetFilterValue();
+    //allow message state to be refreshed after render to manage tooltip trigger correctly between changes
+    const manageMessage = () => {
+      switch (selectedFilterColumn.filterType) {
+        case FilterType.PORT:
+          setMessage(`${t('Specify a port following one of these rules:')}
+            - ${t('A port number like 80, 21')}
+            - ${t('A IANA name like HTTP, FTP')}`);
+          break;
+        case FilterType.ADDRESS:
+          setMessage(`${t('Specify an adress following one of these rules:')}
+            - ${t('A single IPv4 or IPv6 address like 192.0.2.0, ::1')}
+            - ${t('A range within the IP address like 192.168.0.1-192.189.10.12, 2001:db8::1-2001:db8::8')}
+            - ${t('A CIDR specification like 192.51.100.0/24, 2001:db8::/32')}`);
+          break;
+        case FilterType.PROTOCOL:
+          setMessage(`${t('Specify a protocol following one of these rules:')}
+              - ${t('A protocol number like 6, 17')}
+              - ${t('A IANA name like TCP, UDP')}`);
+          break;
+        default:
+          setMessage(undefined);
+          break;
+      }
+    };
+    if (skipTipsDelay) {
+      manageMessage();
+    } else {
+      setTimeout(manageMessage);
+    }
+
     searchInputRef?.current?.focus();
-  }, [selectedFilterColumn, resetFilterValue]);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedFilterColumn]);
 
   return (
     <Toolbar
@@ -293,11 +357,12 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
           {_.isEmpty(forcedFilters) ? (
             <Tooltip
               //css hide tooltip here to avoid render issue
-              className={'filters-tooltip' + (_.isEmpty(invalidMessage) ? '-empty' : '')}
-              isVisible={true}
-              content={invalidMessage}
-              trigger={''}
+              className={`filters-tooltip${_.isEmpty(message) ? '-empty' : ''}`}
+              isVisible={!_.isEmpty(message)}
+              content={<div className={message?.includes('\n') ? 'text-left-pre' : ''}>{message}</div>}
+              trigger={_.isEmpty(message) ? 'manual' : 'click'}
               enableFlip={false}
+              position={message?.includes('\n') ? 'bottom' : 'top'}
             >
               <InputGroup>
                 <Dropdown
