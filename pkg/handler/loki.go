@@ -307,7 +307,9 @@ func writeCSV(w http.ResponseWriter, code int, payload []byte, columns *[]string
 		return
 	}
 
-	w.Header().Set("Content-Disposition", "attachment; filename=export.csv")
+	t := time.Now()
+	//output file would be 'export-stdLongYear-stdZeroMonth-stdZeroDay-stdHour-stdZeroMinute.csv'
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=export-%s.csv", t.Format("2006-01-02-15-04")))
 	w.Header().Set("Content-Type", "text/csv")
 	w.Header().Set("Transfer-Encoding", "chunked")
 	w.WriteHeader(code)
