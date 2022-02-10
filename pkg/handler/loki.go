@@ -12,6 +12,7 @@ import (
 	"github.com/grafana/loki/pkg/loghttp"
 	"github.com/netobserv/network-observability-console-plugin/pkg/httpclient"
 	"github.com/netobserv/network-observability-console-plugin/pkg/loki"
+	"github.com/netobserv/network-observability-console-plugin/pkg/utils"
 	"github.com/sirupsen/logrus"
 )
 
@@ -28,6 +29,7 @@ type LokiConfig struct {
 	URL      *url.URL
 	Timeout  time.Duration
 	TenantID string
+	Labels   []string
 }
 
 func GetFlows(cfg LokiConfig, allowExport bool) func(w http.ResponseWriter, r *http.Request) {
@@ -50,15 +52,18 @@ func GetFlows(cfg LokiConfig, allowExport bool) func(w http.ResponseWriter, r *h
 		hlog.Infof("GetFlows query params : %s", params)
 
 		//allow export only on specific endpoints
-		queryBuilder := loki.NewQuery(allowExport)
+		queryBuilder := loki.NewQuery(cfg.Labels, allowExport)
 		for key, param := range params {
 			var val string
 			if len(param) > 0 {
 				val = param[0]
 			}
-			if err := queryBuilder.AddParam(key, val); err != nil {
-				writeError(w, http.StatusBadRequest, err.Error())
-				return
+
+			if len(val) > 0 {
+				if err := queryBuilder.AddParam(key, val); err != nil {
+					writeError(w, http.StatusBadRequest, err.Error())
+					return
+				}
 			}
 		}
 		queryBuilder, err := queryBuilder.PrepareToSubmit()
@@ -169,7 +174,7 @@ func manageStreams(streams loghttp.Streams, columns []string) ([][]string, error
 	//make csv datas containing header as first line + rows
 	datas := make([][]string, 1)
 	//set Timestamp as first data
-	if columns == nil || contains(columns, timestampCol) {
+	if columns == nil || utils.Contains(columns, timestampCol) {
 		datas[0] = append(datas[0], timestampCol)
 	}
 	//keep ordered labels / field names between each lines
@@ -181,7 +186,7 @@ func manageStreams(streams loghttp.Streams, columns []string) ([][]string, error
 		if labels == nil {
 			labels = make([]string, 0, len(stream.Labels))
 			for name := range stream.Labels {
-				if columns == nil || contains(columns, name) {
+				if columns == nil || utils.Contains(columns, name) {
 					labels = append(fields, name)
 				}
 			}
@@ -201,7 +206,7 @@ func manageStreams(streams loghttp.Streams, columns []string) ([][]string, error
 			if fields == nil {
 				fields = make([]string, 0, len(line))
 				for name := range line {
-					if columns == nil || contains(columns, name) {
+					if columns == nil || utils.Contains(columns, name) {
 						fields = append(fields, name)
 					}
 				}
@@ -220,7 +225,7 @@ func getRowDatas(stream loghttp.Stream, entry loghttp.Entry, labels []string, fi
 	rowDatas := make([]string, size)
 
 	//set timestamp
-	if columns == nil || contains(columns, timestampCol) {
+	if columns == nil || utils.Contains(columns, timestampCol) {
 		rowDatas[index] = entry.Timestamp.String()
 	}
 
@@ -253,13 +258,4 @@ func writeError(w http.ResponseWriter, code int, message string) {
 	if err != nil {
 		hlog.Errorf("Error while responding an error: %v (message was: %s)", err, message)
 	}
-}
-
-func contains(s []string, e string) bool {
-	for _, a := range s {
-		if a == e {
-			return true
-		}
-	}
-	return false
 }

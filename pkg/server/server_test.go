@@ -295,8 +295,8 @@ func TestLokiFiltering(t *testing.T) {
 	}, {
 		inputPath: "?Proto=6&SrcPod=test&FlowDirection=1&match=any",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\"}|~`(\"Proto\":6)|(\"SrcPod\":\"[^\"]*test)`|~`\"FlowDirection\":1`",
-			"?query={app=\"netobserv-flowcollector\"}|~`(\"SrcPod\":\"[^\"]*test)|(\"Proto\":6)`|~`\"FlowDirection\":1`",
+			"?query={app=\"netobserv-flowcollector\",FlowDirection=\"1\"}|~`(\"Proto\":6)|(\"SrcPod\":\"[^\"]*test)`",
+			"?query={app=\"netobserv-flowcollector\",FlowDirection=\"1\"}|~`(\"SrcPod\":\"[^\"]*test)|(\"Proto\":6)`",
 		},
 	}, {
 		inputPath: "?SrcNamespace=test-namespace&match=all",
@@ -321,7 +321,7 @@ func TestLokiFiltering(t *testing.T) {
 	}, {
 		inputPath: "?SrcPort=8080&SrcAddr=10.128.0.1&SrcNamespace=default&match=any&FlowDirection=0",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\"}|~`\"FlowDirection\":0`|json|SrcNamespace=~\".*default.*\"+or+SrcAddr=ip(\"10.128.0.1\")+or+SrcPort=8080",
+			"?query={app=\"netobserv-flowcollector\",FlowDirection=\"0\"}|json|SrcNamespace=~\".*default.*\"+or+SrcAddr=ip(\"10.128.0.1\")+or+SrcPort=8080",
 		},
 	}, {
 		inputPath:   "?startTime=1640991600&match=all",
@@ -376,6 +376,7 @@ func TestLokiFiltering(t *testing.T) {
 		Loki: handler.LokiConfig{
 			URL:     lokiURL,
 			Timeout: time.Second,
+			Labels:  []string{"SrcNamespace", "SrcWorkload", "DstNamespace", "DstWorkload", "FlowDirection"},
 		},
 	})
 	backendSvc := httptest.NewServer(backendRoutes)
