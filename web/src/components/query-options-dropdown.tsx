@@ -2,7 +2,7 @@ import { Radio, Select, Tooltip } from '@patternfly/react-core';
 import { InfoAltIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { QueryOptions, Reporter } from '../model/query-options';
+import { Match, QueryOptions, Reporter } from '../model/query-options';
 
 export interface QueryOptionsDropdownProps {
   options: QueryOptions;
@@ -10,6 +10,8 @@ export interface QueryOptionsDropdownProps {
 }
 
 type ReporterOption = { label: string; value: Reporter };
+
+type MatchOption = { label: string; value: Match };
 
 // Exported for tests
 export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({ options, setOptions }) => {
@@ -27,6 +29,17 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({ options
     {
       label: t('Both'),
       value: 'both'
+    }
+  ];
+
+  const matchOptions: MatchOption[] = [
+    {
+      label: t('Match all'),
+      value: 'all'
+    },
+    {
+      label: t('Match any'),
+      value: 'any'
     }
   ];
 
@@ -54,6 +67,34 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({ options
                 onChange={() => setOptions({ ...options, reporter: opt.value })}
                 label={opt.label}
                 id={`reporter-${opt.value}`}
+                value={opt.value}
+              />
+            </label>
+          </div>
+        ))}
+      </div>
+      <div className="pf-c-select__menu-group">
+        <Tooltip
+          content={t(
+            // eslint-disable-next-line max-len
+            'Whether each query result has to match all the filters or just any of them'
+          )}
+        >
+          <div className="pf-c-select__menu-group-title">
+            <>
+              {t('Match filters')} <InfoAltIcon />
+            </>
+          </div>
+        </Tooltip>
+        {matchOptions.map(opt => (
+          <div key={`match-${opt.value}`}>
+            <label className="pf-c-select__menu-item">
+              <Radio
+                isChecked={opt.value === options.match}
+                name={`match-${opt.value}`}
+                onChange={() => setOptions({ ...options, match: opt.value })}
+                label={opt.label}
+                id={`match-${opt.value}`}
                 value={opt.value}
               />
             </label>

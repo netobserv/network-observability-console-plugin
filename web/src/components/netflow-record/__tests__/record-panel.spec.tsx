@@ -12,7 +12,7 @@ describe('<RecordPanel />', () => {
     columns: DefaultColumns,
     filters: FiltersSample,
     range: 300,
-    options: { reporter: 'destination', limit: 100 },
+    options: { reporter: 'destination', limit: 100, match: 'all' },
     setFilters: jest.fn(),
     setRange: jest.fn(),
     setQueryOptions: jest.fn(),

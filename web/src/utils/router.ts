@@ -3,12 +3,13 @@ import * as _ from 'lodash';
 import { Column, ColumnsId } from './columns';
 import { createFilterValue, Filter, FilterType, FilterValue } from './filters';
 import { TimeRange } from './datetime';
-import { QueryOptions, Reporter } from '../model/query-options';
+import { Match, QueryOptions, Reporter } from '../model/query-options';
 
 const SPLIT_FILTER_CHAR = ',';
 export const DEFAULT_TIME_RANGE = 300;
 export const DEFAULT_LIMIT = 100;
 export const DEFAULT_FLOWDIR = '0';
+export const DEFAULT_MATCH = 'all';
 export const NETFLOW_TRAFFIC_PATH = '/netflow-traffic';
 
 export enum QueryArgument {
@@ -16,7 +17,8 @@ export enum QueryArgument {
   EndTime = 'endTime',
   TimeRange = 'timeRange',
   RefreshInterval = 'refresh',
-  Limit = 'limit'
+  Limit = 'limit',
+  Match = 'match'
 }
 type AnyQueryArgs = ColumnsId | QueryArgument;
 export type QueryArguments = { [k in AnyQueryArgs]?: unknown };
@@ -40,7 +42,13 @@ export const flowdirToReporter: { [flowdir: string]: Reporter } = {
   '1': 'source',
   '': 'both'
 };
+
 export const reporterToFlowdir = _.invert(flowdirToReporter);
+
+const stringToMatch: { [match: string]: Match } = {
+  all: 'all',
+  any: 'any'
+};
 
 export const buildQueryArguments = (
   filters: Filter[],
@@ -63,6 +71,7 @@ export const buildQueryArguments = (
   }
   params[ColumnsId.flowdir] = reporterToFlowdir[opts.reporter];
   params[QueryArgument.Limit] = opts.limit;
+  params[QueryArgument.Match] = opts.match;
   return params;
 };
 
@@ -134,6 +143,7 @@ export const getFiltersFromURL = (columns: Column[]) => {
 
 export const getQueryOptionsFromURL = (): QueryOptions => {
   return {
+    match: stringToMatch[getURLQueryArgument(QueryArgument.Match) ?? DEFAULT_MATCH] ?? DEFAULT_MATCH,
     limit: getURLQueryArgumentAsNumber(QueryArgument.Limit) ?? DEFAULT_LIMIT,
     reporter: flowdirToReporter[getURLQueryArgument(ColumnsId.flowdir) ?? DEFAULT_FLOWDIR]
   };

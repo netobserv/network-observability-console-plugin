@@ -7,7 +7,7 @@ import { QueryOptions } from '../../model/query-options';
 
 describe('<QueryOptionsDropdown />', () => {
   const props: QueryOptionsDropdownProps = {
-    options: { reporter: 'destination', limit: 100 },
+    options: { reporter: 'destination', limit: 100, match: 'all' },
     setOptions: jest.fn()
   };
   it('should render component', async () => {
@@ -19,7 +19,7 @@ describe('<QueryOptionsDropdown />', () => {
 
 describe('<QueryOptionsPanel />', () => {
   const props: QueryOptionsDropdownProps = {
-    options: { reporter: 'destination', limit: 100 },
+    options: { reporter: 'destination', limit: 100, match: 'all' },
     setOptions: jest.fn()
   };
   beforeEach(() => {
@@ -27,9 +27,9 @@ describe('<QueryOptionsPanel />', () => {
   });
   it('should render component', async () => {
     const wrapper = shallow(<QueryOptionsPanel {...props} />);
-    expect(wrapper.find('.pf-c-select__menu-group').length).toBe(1);
-    expect(wrapper.find('.pf-c-select__menu-group-title').length).toBe(2);
-    expect(wrapper.find(Radio)).toHaveLength(6);
+    expect(wrapper.find('.pf-c-select__menu-group').length).toBe(2);
+    expect(wrapper.find('.pf-c-select__menu-group-title').length).toBe(3);
+    expect(wrapper.find(Radio)).toHaveLength(8);
 
     //setOptions should not be called at startup, because it is supposed to be already initialized from URL
     expect(props.setOptions).toHaveBeenCalledTimes(0);
@@ -40,34 +40,45 @@ describe('<QueryOptionsPanel />', () => {
     expect(props.setOptions).toHaveBeenCalledTimes(setOptionsCallsExpected);
 
     act(() => {
-      // Radio 0 = reporter-source
-      wrapper.find(Radio).at(0).props().onChange!(true, {} as React.FormEvent<HTMLInputElement>);
+      wrapper.find('#reporter-source').find(Radio).props().onChange!(true, {} as React.FormEvent<HTMLInputElement>);
     });
     let expected: QueryOptions = {
       reporter: 'source',
-      limit: 100
+      limit: 100,
+      match: 'all'
     };
     expect(props.setOptions).toHaveBeenNthCalledWith(++setOptionsCallsExpected, expected);
     wrapper.setProps({ ...props, options: expected });
 
     act(() => {
-      // Radio 2 = reporter-both
-      wrapper.find(Radio).at(2).props().onChange!(true, {} as React.FormEvent<HTMLInputElement>);
+      wrapper.find('#reporter-both').find(Radio).props().onChange!(true, {} as React.FormEvent<HTMLInputElement>);
     });
     expected = {
       reporter: 'both',
-      limit: 100
+      limit: 100,
+      match: 'all'
     };
     expect(props.setOptions).toHaveBeenNthCalledWith(++setOptionsCallsExpected, expected);
     wrapper.setProps({ ...props, options: expected });
 
     act(() => {
-      // Radio 5 = limit-1000
-      wrapper.find(Radio).at(5).props().onChange!(true, {} as React.FormEvent<HTMLInputElement>);
+      wrapper.find('#limit-1000').find(Radio).props().onChange!(true, {} as React.FormEvent<HTMLInputElement>);
     });
     expected = {
       reporter: 'both',
-      limit: 1000
+      limit: 1000,
+      match: 'all'
+    };
+    expect(props.setOptions).toHaveBeenNthCalledWith(++setOptionsCallsExpected, expected);
+    wrapper.setProps({ ...props, options: expected });
+
+    act(() => {
+      wrapper.find('#match-any').find(Radio).props().onChange!(true, {} as React.FormEvent<HTMLInputElement>);
+    });
+    expected = {
+      reporter: 'both',
+      limit: 1000,
+      match: 'any'
     };
     expect(props.setOptions).toHaveBeenNthCalledWith(++setOptionsCallsExpected, expected);
     wrapper.setProps(props as Pick<QueryOptionsDropdownProps, keyof QueryOptionsDropdownProps>);

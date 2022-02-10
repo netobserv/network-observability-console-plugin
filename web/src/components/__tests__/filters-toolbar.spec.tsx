@@ -26,7 +26,7 @@ describe('<FiltersToolbar />', () => {
     setFilters: jest.fn(),
     clearFilters: jest.fn(),
     id: 'filter-toolbar',
-    queryOptions: { reporter: 'destination', limit: 100 },
+    queryOptions: { reporter: 'destination', limit: 100, match: 'all' },
     setQueryOptions: jest.fn()
   };
   beforeEach(() => {
