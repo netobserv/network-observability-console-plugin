@@ -17,6 +17,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"testing"
@@ -254,24 +255,117 @@ func TestLokiConfiguration_MultiTenant(t *testing.T) {
 }
 
 func TestLokiFiltering(t *testing.T) {
-	var filters = map[string]map[string][]string{
-		"/api/loki/flows?SrcPod=test-pod":                                      {"query": []string{`{app="netobserv-flowcollector"}`, "|~`\"SrcPod\":\"[^\"]*test-pod`"}},
-		"/api/loki/flows?DstPod=test-pod-2":                                    {"query": []string{`{app="netobserv-flowcollector"}`, "|~`\"DstPod\":\"[^\"]*test-pod-2`"}},
-		"/api/loki/flows?Proto=6":                                              {"query": []string{`{app="netobserv-flowcollector"}`, "|~`\"Proto\":6`"}},
-		"/api/loki/flows?SrcNamespace=test-namespace":                          {"query": []string{`{app="netobserv-flowcollector",SrcNamespace=~".*test-namespace.*"}`}},
-		"/api/loki/flows?SrcPort=8080&SrcAddr=10.128.0.1&SrcNamespace=default": {"query": []string{`{app="netobserv-flowcollector",SrcNamespace=~".*default.*"}`, "|~`\"SrcPort\":8080`", `|json|SrcAddr=ip("10.128.0.1")`}},
-		"/api/loki/flows?startTime=1640991600":                                 {"query": []string{`{app="netobserv-flowcollector"}`}, "start": []string{"1640991600"}},
-		"/api/loki/flows?endTime=1641160800":                                   {"query": []string{`{app="netobserv-flowcollector"}`}, "end": []string{"1641160800"}},
-		"/api/loki/flows?startTime=1640991600&endTime=1641160800":              {"query": []string{`{app="netobserv-flowcollector"}`}, "start": []string{"1640991600"}, "end": []string{"1641160800"}},
-		"/api/loki/flows?timeRange=300000":                                     {"query": []string{`{app="netobserv-flowcollector"}`}, "timeRange": []string{"300000"}},
-		"/api/loki/flows?timeRange=86400000":                                   {"query": []string{`{app="netobserv-flowcollector"}`}, "timeRange": []string{"86400000"}},
-	}
+	testCases := []struct {
+		inputPath string
+		// since some arguments might be processed/appended in different order, this field
+		// contains the different permutations for such arguments
+		outputQuery []string
+	}{{
+		inputPath: "?SrcPod=test-pod",
+		outputQuery: []string{
+			"?query={app=\"netobserv-flowcollector\"}|~`\"SrcPod\":\"[^\"]*test-pod`",
+		},
+	}, {
+		inputPath: "?SrcPod=test-pod&match=any",
+		outputQuery: []string{
+			"?query={app=\"netobserv-flowcollector\"}|~`\"SrcPod\":\"[^\"]*test-pod`",
+		},
+	}, {
+		inputPath: "?Proto=6&match=all",
+		outputQuery: []string{
+			"?query={app=\"netobserv-flowcollector\"}|~`\"Proto\":6`",
+		},
+	}, {
+		inputPath: "?Proto=6&match=any",
+		outputQuery: []string{
+			"?query={app=\"netobserv-flowcollector\"}|~`\"Proto\":6`",
+		},
+	}, {
+		inputPath: "?Proto=6&SrcPod=test",
+		outputQuery: []string{
+			"?query={app=\"netobserv-flowcollector\"}|~`\"Proto\":6`|~`\"SrcPod\":\"[^\"]*test`",
+			"?query={app=\"netobserv-flowcollector\"}|~`\"SrcPod\":\"[^\"]*test`|~`\"Proto\":6`",
+		},
+	}, {
+		inputPath: "?Proto=6&SrcPod=test&match=any",
+		outputQuery: []string{
+			"?query={app=\"netobserv-flowcollector\"}|~`(\"Proto\":6)|(\"SrcPod\":\"[^\"]*test)`",
+			"?query={app=\"netobserv-flowcollector\"}|~`(\"SrcPod\":\"[^\"]*test)|(\"Proto\":6)`",
+		},
+	}, {
+		inputPath: "?Proto=6&SrcPod=test&FlowDirection=1&match=any",
+		outputQuery: []string{
+			"?query={app=\"netobserv-flowcollector\"}|~`(\"Proto\":6)|(\"SrcPod\":\"[^\"]*test)`|~`\"FlowDirection\":1`",
+			"?query={app=\"netobserv-flowcollector\"}|~`(\"SrcPod\":\"[^\"]*test)|(\"Proto\":6)`|~`\"FlowDirection\":1`",
+		},
+	}, {
+		inputPath: "?SrcNamespace=test-namespace&match=all",
+		outputQuery: []string{
+			`?query={SrcNamespace=~".*test-namespace.*",app="netobserv-flowcollector"}`,
+		},
+	}, {
+		inputPath: "?SrcNamespace=test-namespace&match=any",
+		outputQuery: []string{
+			`?query={SrcNamespace=~".*test-namespace.*",app="netobserv-flowcollector"}`,
+		},
+	}, {
+		inputPath: "?SrcPort=8080&SrcAddr=10.128.0.1&SrcNamespace=default",
+		outputQuery: []string{
+			"?query={SrcNamespace=~\".*default.*\",app=\"netobserv-flowcollector\"}|~`\"SrcPort\":8080`|json|SrcAddr=ip(\"10.128.0.1\")",
+		},
+	}, {
+		inputPath: "?SrcPort=8080&SrcAddr=10.128.0.1&SrcNamespace=default&match=any",
+		outputQuery: []string{
+			"?query={app=\"netobserv-flowcollector\"}|json|SrcNamespace=~\".*default.*\"+or+SrcAddr=ip(\"10.128.0.1\")+or+SrcPort=8080",
+		},
+	}, {
+		inputPath: "?SrcPort=8080&SrcAddr=10.128.0.1&SrcNamespace=default&match=any&FlowDirection=0",
+		outputQuery: []string{
+			"?query={app=\"netobserv-flowcollector\"}|~`\"FlowDirection\":0`|json|SrcNamespace=~\".*default.*\"+or+SrcAddr=ip(\"10.128.0.1\")+or+SrcPort=8080",
+		},
+	}, {
+		inputPath:   "?startTime=1640991600&match=all",
+		outputQuery: []string{`?query={app="netobserv-flowcollector"}&start=1640991600`},
+	}, {
+		inputPath:   "?startTime=1640991600&match=any",
+		outputQuery: []string{`?query={app="netobserv-flowcollector"}&start=1640991600`},
+	}, {
+		inputPath:   "?endTime=1641160800",
+		outputQuery: []string{`?query={app="netobserv-flowcollector"}&end=1641160800`},
+	}, {
+		inputPath:   "?endTime=1641160800&match=any",
+		outputQuery: []string{`?query={app="netobserv-flowcollector"}&end=1641160800`},
+	}, {
+		inputPath: "?startTime=1640991600&endTime=1641160800&match=all",
+		outputQuery: []string{
+			`?query={app="netobserv-flowcollector"}&start=1640991600&end=1641160800`,
+			`?query={app="netobserv-flowcollector"}&end=1641160800&start=1640991600`,
+		},
+	}, {
+		inputPath: "?startTime=1640991600&endTime=1641160800&match=any",
+		outputQuery: []string{
+			`?query={app="netobserv-flowcollector"}&end=1641160800&start=1640991600`,
+			`?query={app="netobserv-flowcollector"}&start=1640991600&end=1641160800`,
+		},
+	}, {
+		inputPath:   "?timeRange=300000",
+		outputQuery: []string{`?query={app="netobserv-flowcollector"}&start=${timeNow-300000}`},
+	}, {
+		inputPath:   "?timeRange=300000&match=any",
+		outputQuery: []string{`?query={app="netobserv-flowcollector"}&start=${timeNow-300000}`},
+	}, {
+		inputPath:   "?timeRange=86400000&match=all",
+		outputQuery: []string{`?query={app="netobserv-flowcollector"}&start=${timeNow-86400000}`},
+	}, {
+		inputPath:   "?timeRange=86400000&match=any",
+		outputQuery: []string{`?query={app="netobserv-flowcollector"}&start=${timeNow-86400000}`},
+	}}
 
 	// GIVEN a Loki service
 	lokiMock := httpMock{}
 	lokiMock.On("ServeHTTP", mock.Anything, mock.Anything).Run(func(args mock.Arguments) {
 		_, _ = args.Get(0).(http.ResponseWriter).Write([]byte(`{}`))
-	}).Times(len(filters))
+	}).Times(len(testCases))
 	lokiSvc := httptest.NewServer(&lokiMock)
 	defer lokiSvc.Close()
 	lokiURL, err := url.Parse(lokiSvc.URL)
@@ -287,30 +381,46 @@ func TestLokiFiltering(t *testing.T) {
 	backendSvc := httptest.NewServer(backendRoutes)
 	defer backendSvc.Close()
 
-	var index = 0
-	for endpoint, args := range filters {
-		now := time.Now().Unix()
-		// WHEN the Loki flows endpoint is queried in the backend
-		_, err := backendSvc.Client().Get(backendSvc.URL + endpoint)
-		require.NoError(t, err)
+	timeNowArg := regexp.MustCompile(`\${timeNow-(\d+)}`)
 
-		// THEN each filter argument has been properly forwarded to Loki
-		for arg, values := range args {
-			req := lokiMock.Calls[index].Arguments[1].(*http.Request)
-			for _, value := range values {
-				if arg == "timeRange" {
-					r, _ := strconv.ParseInt(value, 10, 64)
-					d, err := strconv.ParseInt(req.URL.Query().Get("start"), 10, 64)
-					assert.Equal(t, nil, err)
-					assert.True(t, d < now)
-					assert.True(t, d >= now-r)
-				} else {
-					assert.Contains(t, req.URL.Query().Get(arg), value)
-				}
+	for index, tc := range testCases {
+		t.Run(tc.inputPath, func(t *testing.T) {
+			// WHEN the Loki flows endpoint is queried in the backend
+			now := time.Now().Unix()
+			res, err := backendSvc.Client().Get(backendSvc.URL + "/api/loki/flows" + tc.inputPath)
+			require.NoError(t, err)
+			body, err := ioutil.ReadAll(res.Body)
+			require.NoError(t, err)
+			require.Equalf(t, http.StatusOK, res.StatusCode,
+				"unexpected return %s: %s", res.Status, string(body))
+
+			// THEN each filter argument has been properly forwarded to Loki
+			var expectedURLs []string
+			for _, out := range tc.outputQuery {
+				expectedURLs = append(expectedURLs, "/loki/api/v1/query_range"+out)
 			}
-		}
-		// increment index for next call
-		index++
+
+			requestURL := lokiMock.Calls[index].Arguments[1].(*http.Request).URL.String()
+			if subMatches := timeNowArg.FindStringSubmatch(tc.outputQuery[0]); len(subMatches) == 0 {
+				assert.Contains(t, expectedURLs, requestURL)
+			} else {
+				// replace ${timeNow-<seconds>} by time.Now()-<seconds> for arguments where the
+				// value is dynamically calculated via the non-mockable time.Now() function
+				timeNowDiff, err := strconv.ParseInt(subMatches[1], 10, 64)
+				require.NoError(t, err)
+				// giving 1-second room to the start time to avoid flaky tests
+				expectedStart := int(now - timeNowDiff)
+				var possibleQueries []string
+				for _, exp := range expectedURLs {
+					possibleQueries = append(possibleQueries, []string{
+						timeNowArg.ReplaceAllString(exp, strconv.Itoa(expectedStart-1)),
+						timeNowArg.ReplaceAllString(exp, strconv.Itoa(expectedStart)),
+						timeNowArg.ReplaceAllString(exp, strconv.Itoa(expectedStart+1)),
+					}...)
+				}
+				assert.Contains(t, possibleQueries, requestURL)
+			}
+		})
 	}
 }
 
