@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"reflect"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -231,14 +232,16 @@ func processIPFilters(key string, values []string, ipFilters *strings.Builder) {
 	}
 }
 
+var filterRegexpValidation = regexp.MustCompile(`^[\w-\.\:\/]+$`)
+
 func processLineFilters(key string, values []string, lineFilters *strings.Builder) error {
 	regexStr := strings.Builder{}
 	for i, value := range values {
 		if i > 0 {
 			regexStr.WriteByte('|')
 		}
-		if strings.Contains(value, "`") {
-			return errors.New("backquote not authorized in flows requests")
+		if !filterRegexpValidation.MatchString(value) {
+			return errors.New("unauthorized sign in flows request")
 		}
 		//match KEY + VALUE: "KEY":"[^\"]*VALUE" (ie: contains VALUE) or, if numeric, "KEY":VALUE
 		regexStr.WriteString(`"`)
