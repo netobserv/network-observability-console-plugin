@@ -6,7 +6,7 @@ export const FlowsSample: Record[] = [
       SrcNamespace: 'default',
       DstNamespace: 'default'
     },
-    key: '1',
+    key: 1,
     timestamp: 1639058287000,
     fields: {
       SrcAddr: '10.244.0.6',
@@ -28,7 +28,7 @@ export const FlowsSample: Record[] = [
       SrcNamespace: 'openshift-console',
       DstNamespace: 'netowrk-observability'
     },
-    key: '2',
+    key: 2,
     timestamp: 1639058286000,
     fields: {
       SrcAddr: '10.244.0.2',
@@ -50,7 +50,7 @@ export const FlowsSample: Record[] = [
       SrcNamespace: 'kube-system',
       DstNamespace: 'default'
     },
-    key: '3',
+    key: 3,
     timestamp: 1639058288000,
     fields: {
       SrcAddr: '10.244.0.9',

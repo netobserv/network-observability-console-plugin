@@ -31,5 +31,9 @@ span.pf-c-button__icon.pf-m-start {
 #pageSection {
     display: flex;
     flex-direction: column;
-    max-height: 88vh;
+    max-height: 90vh;
+}
+
+#drawer {
+    z-index: 0;
 }

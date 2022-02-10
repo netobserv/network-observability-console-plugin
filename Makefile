@@ -50,6 +50,11 @@ lint-frontend:
 .PHONY: lint
 lint: lint-backend lint-frontend
 
+.PHONY: i18n
+i18n:
+	@echo "### generating frontend locales"
+	cd web && npm run i18n
+
 .PHONY: test-backend
 test-backend:
 	@echo "### Testing backend"

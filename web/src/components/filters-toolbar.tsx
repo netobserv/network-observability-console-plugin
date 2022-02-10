@@ -464,7 +464,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
                   setFilters(_.cloneDeep(filters));
                 }
               }}
-              categoryName={columns.find(c => c.id === filter.colId)?.name || ''}
+              categoryName={getFullColumnName(columns.find(c => c.id === filter.colId))}
             >
               {
                 // set empty children to have a single filter with multiple categories
