@@ -6,7 +6,7 @@
     "clean": "rm -rf ./dist",
     "build": "npm run clean && NODE_ENV=production npm run ts-node ./node_modules/.bin/webpack",
     "build-dev": "npm run clean && npm run ts-node-transpile ./node_modules/.bin/webpack",
-    "start": "yarn ts-node node_modules/.bin/webpack serve",
+    "start": "npm run ts-node-transpile ./node_modules/.bin/webpack serve",
     "serve": "npx http-server ./dist -p 9001 -c-1 --cors $SERVER_OPTS",
     "i18n": "i18next \"src/**/*.{js,jsx,ts,tsx}\" [-oc] -c i18next-parser.config.js",
     "ts-node": "ts-node -O '{\"module\":\"commonjs\"}' -I '/node_modules/(?!(@openshift-console)/)/'",
