@@ -26,7 +26,7 @@ const (
 	anyMatchValue   = "any"
 )
 
-var filterRegexpValidation = regexp.MustCompile(`^[\w-\.\:\/]+$`)
+var filterRegexpValidation = regexp.MustCompile(`^[\w-\.\:\/,]*$`)
 
 type LabelJoiner string
 
