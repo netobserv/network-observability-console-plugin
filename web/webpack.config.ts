@@ -11,6 +11,7 @@ interface Configuration extends WebpackConfiguration {
 }
 
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const NodeExternals = require('webpack-node-externals');
 
 const config: Configuration = {
   mode: 'development',
@@ -84,11 +85,11 @@ const config: Configuration = {
     },
     proxy: {
       '/api': {
-           target: 'http://localhost:9000',
-           router: () => 'http://localhost:9002',
-           logLevel: 'debug' /*optional*/
+        target: 'http://localhost:9000',
+        router: () => 'http://localhost:9002',
+        logLevel: 'debug' /*optional*/
       }
-   }
+    }
   },
   plugins: [
     new ConsoleRemotePlugin(),
@@ -111,6 +112,12 @@ if (process.env.NODE_ENV === 'production') {
   config.optimization.minimize = true;
   // Causes error in --mode=production due to scope hoisting
   config.optimization.concatenateModules = false;
+  // Manage dependencies from package.json file. Replace all devDependencies 'import' by 'require'
+  config.externals = NodeExternals({
+    fileName: './package.json',
+    includeInBundle: ['dependencies'],
+    excludeFromBundle: ['devDependencies']
+  });
 }
 
 export default config;
