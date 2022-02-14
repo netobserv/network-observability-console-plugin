@@ -9,7 +9,7 @@ export enum FilterType {
   PORT,
   PROTOCOL,
   NUMBER,
-  TEXT
+  K8S_LABEL
 }
 
 export interface FilterValue {

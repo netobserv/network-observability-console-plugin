@@ -86,7 +86,7 @@ export const getDefaultColumns = (t: TFunction): Column[] => {
       name: t('Pod'),
       fieldName: 'SrcPod',
       isSelected: true,
-      filterType: FilterType.TEXT,
+      filterType: FilterType.K8S_LABEL,
       value: f => f.fields.SrcPod || '',
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
       width: 15
@@ -97,7 +97,7 @@ export const getDefaultColumns = (t: TFunction): Column[] => {
       name: t('Workload'),
       fieldName: 'SrcWorkload',
       isSelected: false,
-      filterType: FilterType.TEXT,
+      filterType: FilterType.K8S_LABEL,
       value: f => f.labels.SrcWorkload || '',
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
       width: 15
@@ -108,7 +108,7 @@ export const getDefaultColumns = (t: TFunction): Column[] => {
       name: t('Kind'),
       fieldName: 'SrcWorkloadKind',
       isSelected: false,
-      filterType: FilterType.TEXT,
+      filterType: FilterType.K8S_LABEL,
       value: f => f.fields.SrcWorkloadKind || '',
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
       width: 10
@@ -119,7 +119,7 @@ export const getDefaultColumns = (t: TFunction): Column[] => {
       name: t('Namespace'),
       fieldName: 'SrcNamespace',
       isSelected: true,
-      filterType: FilterType.TEXT,
+      filterType: FilterType.K8S_LABEL,
       value: f => f.labels.SrcNamespace || '',
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
       width: 15
@@ -163,7 +163,7 @@ export const getDefaultColumns = (t: TFunction): Column[] => {
       name: t('Pod'),
       fieldName: 'DstPod',
       isSelected: true,
-      filterType: FilterType.TEXT,
+      filterType: FilterType.K8S_LABEL,
       value: f => f.fields.DstPod || '',
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
       width: 15
@@ -174,7 +174,7 @@ export const getDefaultColumns = (t: TFunction): Column[] => {
       name: t('Workload'),
       fieldName: 'DstWorkload',
       isSelected: false,
-      filterType: FilterType.TEXT,
+      filterType: FilterType.K8S_LABEL,
       value: f => f.labels.DstWorkload || '',
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
       width: 15
@@ -185,7 +185,7 @@ export const getDefaultColumns = (t: TFunction): Column[] => {
       name: t('Kind'),
       fieldName: 'DstWorkloadKind',
       isSelected: false,
-      filterType: FilterType.TEXT,
+      filterType: FilterType.K8S_LABEL,
       value: f => f.fields.DstWorkloadKind || '',
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
       width: 10
@@ -196,7 +196,7 @@ export const getDefaultColumns = (t: TFunction): Column[] => {
       name: t('Namespace'),
       fieldName: 'DstNamespace',
       isSelected: true,
-      filterType: FilterType.TEXT,
+      filterType: FilterType.K8S_LABEL,
       value: f => f.labels.DstNamespace || '',
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
       width: 15
