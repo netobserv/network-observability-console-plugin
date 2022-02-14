@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -25,6 +26,7 @@ var (
 	corsMaxAge  = flag.String("cors-max-age", "", "CORS allowed max age (default: unset)")
 	// todo: default value temporarily kept to make it work with older versions of the NOO. Remove default and force setup of loki url
 	lokiURL      = flag.String("loki", "http://localhost:3100", "URL of the loki querier host")
+	lokiLabels   = flag.String("loki-labels", "SrcNamespace,SrcWorkload,DstNamespace,DstWorkload,FlowDirection", "Loki labels, comma separated")
 	lokiTimeout  = flag.Duration("loki-timeout", 10*time.Second, "Timeout of the Loki query to retrieve logs")
 	lokiTenantID = flag.String("loki-tenant-id", "", "Tenant organization ID for multi-tenant-loki (submitted as the X-Scope-OrgID HTTP header)")
 	logLevel     = flag.String("loglevel", "info", "log level (default: info)")
@@ -55,6 +57,11 @@ func main() {
 		log.WithError(err).Fatal("wrong Loki URL")
 	}
 
+	lLabels := *lokiLabels
+	if len(lLabels) == 0 {
+		log.Fatal("labels cannot be empty")
+	}
+
 	server.Start(&server.Config{
 		Port:             *port,
 		CertFile:         *cert,
@@ -67,6 +74,7 @@ func main() {
 			URL:      lURL,
 			Timeout:  *lokiTimeout,
 			TenantID: *lokiTenantID,
+			Labels:   strings.Split(lLabels, ","),
 		},
 	})
 }

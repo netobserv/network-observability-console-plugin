@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/netobserv/network-observability-console-plugin/pkg/utils"
 )
 
 const (
@@ -42,6 +44,7 @@ const (
 type Query struct {
 	// urlParams for the HTTP call
 	urlParams      [][2]string
+	labelMap       map[string]struct{}
 	streamSelector []labelFilter
 	lineFilters    []string
 	labelFilters   []labelFilter
@@ -56,7 +59,7 @@ type Export struct {
 	columns []string
 }
 
-func NewQuery(export bool) *Query {
+func NewQuery(labels []string, export bool) *Query {
 	var exp *Export
 	if export {
 		exp = &Export{}
@@ -65,6 +68,7 @@ func NewQuery(export bool) *Query {
 		specialAttrs: map[string]string{},
 		labelJoiner:  joinAnd,
 		export:       exp,
+		labelMap:     utils.GetMapInterface(labels),
 	}
 }
 
@@ -142,14 +146,16 @@ func (q *Query) AddParam(key, value string) error {
 	// Attributes that have a special meaning and need to be treated apart
 	case matchParam, flowDirParam:
 		q.specialAttrs[key] = value
-	// Stream selector labels
-	case "SrcNamespace", "SrcWorkload", "DstNamespace", "DstWorkload":
-		q.processStreamSelector(key, strings.Split(value, ","))
 	// IP filter labels
 	case "DstAddr", "SrcAddr", "DstHostIP", "SrcHostIP":
 		q.processIPFilters(key, strings.Split(value, ","))
 	default:
-		return q.processLineFilters(key, strings.Split(value, ","))
+		// Stream selector labels
+		if _, ok := q.labelMap[key]; ok {
+			q.processStreamSelector(key, strings.Split(value, ","))
+		} else {
+			return q.processLineFilters(key, strings.Split(value, ","))
+		}
 	}
 	return nil
 }
@@ -174,9 +180,8 @@ func (q *Query) PrepareToSubmit() (*Query, error) {
 
 	// Filter by flow direction independently of the matching criteria (any or all)
 	if flowDir, ok := out.specialAttrs[flowDirParam]; ok {
-		if err := out.processLineFilters(flowDirParam, []string{flowDir}); err != nil {
-			return nil, err
-		}
+		out.streamSelector = append(out.streamSelector,
+			stringLabelFilter(flowDirParam, labelEqual, flowDir))
 	}
 	return out, nil
 }
