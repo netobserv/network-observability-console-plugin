@@ -107,7 +107,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
     setAutocompleteOptions(options);
     // The menu is hidden if there are no options
     setPopperVisible(options.length > 0);
-    setSelectedFilterValue(newValue);
+    setFilterValue(newValue);
   };
 
   const onAutoCompleteSelect = (e: React.MouseEvent<Element, MouseEvent>, itemId: string) => {
