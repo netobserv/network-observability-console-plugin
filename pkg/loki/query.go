@@ -44,7 +44,7 @@ const (
 type Query struct {
 	// urlParams for the HTTP call
 	urlParams      [][2]string
-	labels         []string
+	labelMap       map[string]struct{}
 	streamSelector []labelFilter
 	lineFilters    []string
 	labelFilters   []labelFilter
@@ -68,7 +68,7 @@ func NewQuery(labels []string, export bool) *Query {
 		specialAttrs: map[string]string{},
 		labelJoiner:  joinAnd,
 		export:       exp,
-		labels:       labels,
+		labelMap:     utils.GetMapInterface(labels),
 	}
 }
 
@@ -146,14 +146,16 @@ func (q *Query) AddParam(key, value string) error {
 	// Attributes that have a special meaning and need to be treated apart
 	case matchParam, flowDirParam:
 		q.specialAttrs[key] = value
-	// Stream selector labels
-	case utils.GetMatchingString(q.labels, key):
-		q.processStreamSelector(key, strings.Split(value, ","))
 	// IP filter labels
 	case "DstAddr", "SrcAddr", "DstHostIP", "SrcHostIP":
 		q.processIPFilters(key, strings.Split(value, ","))
 	default:
-		return q.processLineFilters(key, strings.Split(value, ","))
+		// Stream selector labels
+		if _, ok := q.labelMap[key]; ok {
+			q.processStreamSelector(key, strings.Split(value, ","))
+		} else {
+			return q.processLineFilters(key, strings.Split(value, ","))
+		}
 	}
 	return nil
 }

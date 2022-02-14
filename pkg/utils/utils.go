@@ -9,11 +9,10 @@ func Contains(s []string, e string) bool {
 	return false
 }
 
-func GetMatchingString(s []string, e string) string {
+func GetMapInterface(s []string) map[string]struct{} {
+	res := map[string]struct{}{}
 	for _, a := range s {
-		if a == e {
-			return e
-		}
+		res[a] = struct{}{}
 	}
-	return ""
+	return res
 }
