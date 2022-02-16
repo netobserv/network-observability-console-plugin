@@ -153,7 +153,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
             }
             return { err: t('Unknown protocol') };
           }
-        case FilterType.K8S_LABEL:
+        case FilterType.K8S_NAMES:
           return validateLabel(value) ? { val: value } : { err: t('Not a valid kubernetes label') };
         default:
           return { val: value };
@@ -354,8 +354,8 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
           - ${t('A protocol number like 6, 17')}
           - ${t('A IANA name like TCP, UDP')}`);
         break;
-      case FilterType.K8S_LABEL:
-        setMessageWithDelay(t(`Specify kubernetes label containing any alphanumeric, minus or dot caracter`));
+      case FilterType.K8S_NAMES:
+        setMessageWithDelay(t(`Specify kubernetes name containing any alphanumeric, hyphen or dot character`));
         break;
       default:
         setMessageWithDelay(undefined);

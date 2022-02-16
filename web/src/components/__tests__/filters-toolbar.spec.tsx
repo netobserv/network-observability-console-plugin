@@ -222,7 +222,7 @@ describe('<FiltersToolbar />', () => {
     let content = tooltips.at(0).getElement().props['content'];
     expect(content.props.className).toBe('');
     //check tooltip text
-    expect(String(content.props.children)).toContain('Specify kubernetes label');
+    expect(String(content.props.children)).toContain('Specify kubernetes name');
 
     //open dropdow and select Src port
     dropdown.simulate('click');
