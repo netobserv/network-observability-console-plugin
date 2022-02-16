@@ -10,11 +10,12 @@ export interface Labels {
   DstNamespace?: string;
   SrcWorkload?: string;
   DstWorkload?: string;
+  FlowDirection: FlowDirection;
 }
 
 export enum FlowDirection {
-  Ingress = 0,
-  Egress = 1
+  Ingress = '0',
+  Egress = '1'
 }
 
 export interface Fields {
@@ -33,5 +34,4 @@ export interface Fields {
   Packets: number;
   Proto: number;
   Bytes: number;
-  FlowDirection: FlowDirection;
 }

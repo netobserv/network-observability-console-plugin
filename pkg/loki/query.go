@@ -261,8 +261,7 @@ func isNumeric(v string) bool {
 		"DstPort",
 		"Packets",
 		"Proto",
-		"Bytes",
-		"FlowDirection":
+		"Bytes":
 		return true
 	default:
 		return false
