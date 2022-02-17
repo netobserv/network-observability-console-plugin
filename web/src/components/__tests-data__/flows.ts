@@ -4,16 +4,16 @@ export const FlowsSample: Record[] = [
   {
     labels: {
       FlowDirection: FlowDirection.Egress,
-      SrcNamespace: 'default',
-      DstNamespace: 'default'
+      SrcK8S_Namespace: 'default',
+      DstK8S_Namespace: 'default'
     },
     key: 1,
     timestamp: 1639058287000,
     fields: {
       SrcAddr: '10.244.0.6',
       DstAddr: '10.244.0.7',
-      SrcPod: 'loki-promtail-7bpg8',
-      DstPod: 'loki-0',
+      SrcK8S_Name: 'loki-promtail-7bpg8',
+      DstK8S_Name: 'loki-0',
       SrcPort: 60354,
       DstPort: 3100,
       Packets: 400,
@@ -26,16 +26,16 @@ export const FlowsSample: Record[] = [
   {
     labels: {
       FlowDirection: FlowDirection.Ingress,
-      SrcNamespace: 'openshift-console',
-      DstNamespace: 'netowrk-observability'
+      SrcK8S_Namespace: 'openshift-console',
+      DstK8S_Namespace: 'netowrk-observability'
     },
     key: 2,
     timestamp: 1639058286000,
     fields: {
       SrcAddr: '10.244.0.2',
       DstAddr: '10.244.0.3',
-      SrcPod: undefined,
-      DstPod: undefined,
+      SrcK8S_Name: undefined,
+      DstK8S_Name: undefined,
       SrcPort: 60350,
       DstPort: 3000,
       Packets: 300,
@@ -48,16 +48,16 @@ export const FlowsSample: Record[] = [
   {
     labels: {
       FlowDirection: FlowDirection.Ingress,
-      SrcNamespace: 'kube-system',
-      DstNamespace: 'default'
+      SrcK8S_Namespace: 'kube-system',
+      DstK8S_Namespace: 'default'
     },
     key: 3,
     timestamp: 1639058288000,
     fields: {
       SrcAddr: '10.244.0.9',
       DstAddr: '10.244.0.2',
-      SrcPod: 'coredns-74ff55c5b-dfbff',
-      DstPod: 'loki-1',
+      SrcK8S_Name: 'coredns-74ff55c5b-dfbff',
+      DstK8S_Name: 'loki-1',
       SrcPort: 60354,
       DstPort: 3100,
       Packets: 400,

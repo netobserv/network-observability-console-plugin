@@ -12,33 +12,15 @@ export const NetflowTab: React.FC<PageComponentProps> = ({ obj }) => {
   let forcedFilters: Filter[];
   switch (obj?.kind) {
     case 'Pod':
+    case 'Node':
       forcedFilters = [
         {
-          /*TODO : set SRC and DST filters after implementing OR logic NETOBSERV-73*/
-          colId: ColumnsId.srcpod,
-          values: [{ v: obj!.metadata!.name as string }]
-        },
-        {
-          /*TODO : set SRC and DST filters after implementing OR logic NETOBSERV-73*/
-          colId: ColumnsId.srcnamespace,
-          values: [{ v: obj!.metadata!.namespace as string }]
-        }
-      ];
-      break;
-    case 'Deployment':
-    case 'StatefulSet':
-    case 'DaemonSet':
-    case 'Job':
-    case 'CronJob':
-      forcedFilters = [
-        {
-          /*TODO : set SRC and DST filters after implementing OR logic NETOBSERV-73*/
-          colId: ColumnsId.srcwkdkind,
+          colId: ColumnsId.srctype,
           values: [{ v: obj!.kind }]
         },
         {
           /*TODO : set SRC and DST filters after implementing OR logic NETOBSERV-73*/
-          colId: ColumnsId.srcwkd,
+          colId: ColumnsId.srcname,
           values: [{ v: obj!.metadata!.name as string }]
         },
         {
@@ -52,15 +34,38 @@ export const NetflowTab: React.FC<PageComponentProps> = ({ obj }) => {
       // NOTE: Services are always on the destination side
       forcedFilters = [
         {
-          colId: ColumnsId.dstwkdkind,
-          values: [{ v: 'Service' }]
+          colId: ColumnsId.dsttype,
+          values: [{ v: obj!.kind }]
         },
         {
-          colId: ColumnsId.dstwkd,
+          colId: ColumnsId.dstname,
           values: [{ v: obj!.metadata!.name as string }]
         },
         {
           colId: ColumnsId.dstnamespace,
+          values: [{ v: obj!.metadata!.namespace as string }]
+        }
+      ];
+      break;
+    case 'Deployment':
+    case 'StatefulSet':
+    case 'DaemonSet':
+    case 'Job':
+    case 'CronJob':
+      forcedFilters = [
+        {
+          /*TODO : set SRC and DST filters after implementing OR logic NETOBSERV-73*/
+          colId: ColumnsId.srcownertype,
+          values: [{ v: obj!.kind }]
+        },
+        {
+          /*TODO : set SRC and DST filters after implementing OR logic NETOBSERV-73*/
+          colId: ColumnsId.srcowner,
+          values: [{ v: obj!.metadata!.name as string }]
+        },
+        {
+          /*TODO : set SRC and DST filters after implementing OR logic NETOBSERV-73*/
+          colId: ColumnsId.srcnamespace,
           values: [{ v: obj!.metadata!.namespace as string }]
         }
       ];

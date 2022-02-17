@@ -1,6 +1,6 @@
 import { TFunction } from 'i18next';
 import _ from 'lodash';
-import { Record } from '../api/ipfix';
+import { Fields, Labels, Record } from '../api/ipfix';
 import { compareIPs } from '../utils/ip';
 import { comparePorts } from '../utils/port';
 import { compareProtocols } from '../utils/protocol';
@@ -9,10 +9,12 @@ import { FilterType } from './filters';
 
 export enum ColumnsId {
   timestamp = 'timestamp',
-  srcpod = 'SrcPod',
-  dstpod = 'DstPod',
-  srcnamespace = 'SrcNamespace',
-  dstnamespace = 'DstNamespace',
+  srcname = 'SrcK8S_Name',
+  dstname = 'DstK8S_Name',
+  srctype = 'SrcK8S_Type',
+  dsttype = 'DstK8S_Type',
+  srcnamespace = 'SrcK8S_Namespace',
+  dstnamespace = 'DstK8S_Namespace',
   srcaddr = 'SrcAddr',
   dstaddr = 'DstAddr',
   srcport = 'SrcPort',
@@ -20,12 +22,12 @@ export enum ColumnsId {
   proto = 'Proto',
   bytes = 'Bytes',
   packets = 'Packets',
-  srcwkd = 'SrcWorkload',
-  dstwkd = 'DstWorkload',
-  srcwkdkind = 'SrcWorkloadKind',
-  dstwkdkind = 'DstWorkloadKind',
-  srchost = 'SrcHostIP',
-  dsthost = 'DstHostIP',
+  srcowner = 'SrcK8S_OwnerName',
+  dstowner = 'DstK8S_OwnerName',
+  srcownertype = 'SrcK8S_OwnerType',
+  dstownertype = 'DstK8S_OwnerType',
+  srchost = 'SrcK8S_HostIP',
+  dsthost = 'DstK8S_HostIP',
   flowdir = 'FlowDirection'
 }
 
@@ -33,7 +35,7 @@ export interface Column {
   id: ColumnsId;
   group?: string;
   name: string;
-  fieldName: string;
+  fieldName: keyof Fields | keyof Labels | 'Timestamp';
   isSelected: boolean;
   filterType: FilterType;
   value: (flow: Record) => string | number;
@@ -81,35 +83,46 @@ export const getDefaultColumns = (t: TFunction): Column[] => {
       width: 15
     },
     {
-      id: ColumnsId.srcpod,
+      id: ColumnsId.srcname,
       group: t('Source'),
-      name: t('Pod'),
-      fieldName: 'SrcPod',
+      name: t('Name'),
+      fieldName: 'SrcK8S_Name',
       isSelected: true,
       filterType: FilterType.K8S_NAMES,
-      value: f => f.fields.SrcPod || '',
+      value: f => f.fields.SrcK8S_Name || '',
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
       width: 15
     },
     {
-      id: ColumnsId.srcwkd,
-      group: t('Source'),
-      name: t('Workload'),
-      fieldName: 'SrcWorkload',
-      isSelected: false,
-      filterType: FilterType.K8S_NAMES,
-      value: f => f.labels.SrcWorkload || '',
-      sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
-      width: 15
-    },
-    {
-      id: ColumnsId.srcwkdkind,
+      id: ColumnsId.srctype,
       group: t('Source'),
       name: t('Kind'),
-      fieldName: 'SrcWorkloadKind',
+      fieldName: 'SrcK8S_Type',
       isSelected: false,
       filterType: FilterType.K8S_NAMES,
-      value: f => f.fields.SrcWorkloadKind || '',
+      value: f => f.fields.SrcK8S_Type || '',
+      sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
+      width: 10
+    },
+    {
+      id: ColumnsId.srcowner,
+      group: t('Source'),
+      name: t('Owner'),
+      fieldName: 'SrcK8S_OwnerName',
+      isSelected: false,
+      filterType: FilterType.K8S_NAMES,
+      value: f => f.labels.SrcK8S_OwnerName || '',
+      sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
+      width: 15
+    },
+    {
+      id: ColumnsId.srcownertype,
+      group: t('Source'),
+      name: t('Owner Kind'),
+      fieldName: 'SrcK8S_OwnerType',
+      isSelected: false,
+      filterType: FilterType.K8S_NAMES,
+      value: f => f.fields.SrcK8S_OwnerType || '',
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
       width: 10
     },
@@ -117,10 +130,10 @@ export const getDefaultColumns = (t: TFunction): Column[] => {
       id: ColumnsId.srcnamespace,
       group: t('Source'),
       name: t('Namespace'),
-      fieldName: 'SrcNamespace',
+      fieldName: 'SrcK8S_Namespace',
       isSelected: true,
       filterType: FilterType.K8S_NAMES,
-      value: f => f.labels.SrcNamespace || '',
+      value: f => f.labels.SrcK8S_Namespace || '',
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
       width: 15
     },
@@ -150,43 +163,54 @@ export const getDefaultColumns = (t: TFunction): Column[] => {
       id: ColumnsId.srchost,
       group: t('Source'),
       name: t('Host'),
-      fieldName: 'SrcHostIP',
+      fieldName: 'SrcK8S_HostIP',
       isSelected: false,
       filterType: FilterType.ADDRESS,
-      value: f => f.fields.SrcHostIP || '',
+      value: f => f.fields.SrcK8S_HostIP || '',
       sort: (a, b, col) => compareIPs(col.value(a) as string, col.value(b) as string),
       width: 10
     },
     {
-      id: ColumnsId.dstpod,
+      id: ColumnsId.dstname,
       group: t('Destination'),
-      name: t('Pod'),
-      fieldName: 'DstPod',
+      name: t('Name'),
+      fieldName: 'DstK8S_Name',
       isSelected: true,
       filterType: FilterType.K8S_NAMES,
-      value: f => f.fields.DstPod || '',
+      value: f => f.fields.DstK8S_Name || '',
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
       width: 15
     },
     {
-      id: ColumnsId.dstwkd,
+      id: ColumnsId.dstowner,
       group: t('Destination'),
-      name: t('Workload'),
-      fieldName: 'DstWorkload',
+      name: t('Owner'),
+      fieldName: 'DstK8S_OwnerName',
       isSelected: false,
       filterType: FilterType.K8S_NAMES,
-      value: f => f.labels.DstWorkload || '',
+      value: f => f.labels.DstK8S_OwnerName || '',
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
       width: 15
     },
     {
-      id: ColumnsId.dstwkdkind,
+      id: ColumnsId.dsttype,
       group: t('Destination'),
       name: t('Kind'),
-      fieldName: 'DstWorkloadKind',
+      fieldName: 'DstK8S_Type',
       isSelected: false,
       filterType: FilterType.K8S_NAMES,
-      value: f => f.fields.DstWorkloadKind || '',
+      value: f => f.fields.DstK8S_Type || '',
+      sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
+      width: 10
+    },
+    {
+      id: ColumnsId.dstownertype,
+      group: t('Destination'),
+      name: t('Owner Kind'),
+      fieldName: 'DstK8S_OwnerType',
+      isSelected: false,
+      filterType: FilterType.K8S_NAMES,
+      value: f => f.fields.DstK8S_OwnerType || '',
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
       width: 10
     },
@@ -194,10 +218,10 @@ export const getDefaultColumns = (t: TFunction): Column[] => {
       id: ColumnsId.dstnamespace,
       group: t('Destination'),
       name: t('Namespace'),
-      fieldName: 'DstNamespace',
+      fieldName: 'DstK8S_Namespace',
       isSelected: true,
       filterType: FilterType.K8S_NAMES,
-      value: f => f.labels.DstNamespace || '',
+      value: f => f.labels.DstK8S_Namespace || '',
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
       width: 15
     },
@@ -227,10 +251,10 @@ export const getDefaultColumns = (t: TFunction): Column[] => {
       id: ColumnsId.dsthost,
       group: t('Destination'),
       name: t('Host'),
-      fieldName: 'DstHostIP',
+      fieldName: 'DstK8S_HostIP',
       isSelected: false,
       filterType: FilterType.ADDRESS,
-      value: f => f.fields.DstHostIP || '',
+      value: f => f.fields.DstK8S_HostIP || '',
       sort: (a, b, col) => compareIPs(col.value(a) as string, col.value(b) as string),
       width: 10
     },

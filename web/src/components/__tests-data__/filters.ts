@@ -11,11 +11,11 @@ export const FiltersSample: Filter[] = [
     values: [{ v: '5678' }]
   },
   {
-    colId: ColumnsId.srcpod,
+    colId: ColumnsId.srcname,
     values: [{ v: 'pod or service' }]
   },
   {
-    colId: ColumnsId.dstpod,
+    colId: ColumnsId.dstname,
     values: [{ v: 'another pod or service' }]
   }
 ];

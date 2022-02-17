@@ -84,13 +84,13 @@ describe('<FiltersToolbar />', () => {
 
     //open dropdow and select Src pod
     dropdown.simulate('click');
-    wrapper.find(`[id="${ColumnsId.srcpod}"]`).at(0).simulate('click');
+    wrapper.find(`[id="${ColumnsId.srcname}"]`).at(0).simulate('click');
     act(() => {
       //set text input value and press button
       wrapper.find(TextInput).props().onChange!('ABCD', null!);
     });
     search.simulate('click');
-    props.filters = props.filters.concat([{ colId: ColumnsId.srcpod, values: [{ v: 'ABCD' }] }]);
+    props.filters = props.filters.concat([{ colId: ColumnsId.srcname, values: [{ v: 'ABCD' }] }]);
     expect(props.setFilters).toHaveBeenNthCalledWith(++setFilterCallsExpected, props.filters);
     wrapper.setProps(props as Pick<FiltersToolbarProps, keyof FiltersToolbarProps>);
 
@@ -213,7 +213,7 @@ describe('<FiltersToolbar />', () => {
 
     //open dropdow and select Src workload
     dropdown.simulate('click');
-    wrapper.find(`[id="${ColumnsId.srcwkd}"]`).at(0).simulate('click');
+    wrapper.find(`[id="${ColumnsId.srcowner}"]`).at(0).simulate('click');
     let tips = wrapper.find('#tips').at(0).getElement();
     expect(String(tips.props.children[0].props.children)).toContain('Specify a single kubernetes name');
 

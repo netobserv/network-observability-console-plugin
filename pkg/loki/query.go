@@ -151,7 +151,7 @@ func (q *Query) AddParam(key, value string) error {
 	case matchParam, flowDirParam:
 		q.specialAttrs[key] = value
 	// IP filter labels
-	case "DstAddr", "SrcAddr", "DstHostIP", "SrcHostIP":
+	case "DstAddr", "SrcAddr", "DstK8S_HostIP", "SrcK8S_HostIP":
 		q.processIPFilters(key, strings.Split(value, ","))
 	default:
 		// Stream selector labels

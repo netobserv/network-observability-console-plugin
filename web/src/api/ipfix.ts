@@ -6,10 +6,10 @@ export interface Record {
 }
 
 export interface Labels {
-  SrcNamespace?: string;
-  DstNamespace?: string;
-  SrcWorkload?: string;
-  DstWorkload?: string;
+  SrcK8S_Namespace?: string;
+  DstK8S_Namespace?: string;
+  SrcK8S_OwnerName?: string;
+  DstK8S_OwnerName?: string;
   FlowDirection: FlowDirection;
 }
 
@@ -23,14 +23,16 @@ export interface Fields {
   DstAddr: string;
   SrcMac: string;
   DstMac: string;
-  SrcPod?: string;
-  DstPod?: string;
+  SrcK8S_Name?: string;
+  DstK8S_Name?: string;
+  SrcK8S_Type?: string;
+  DstK8S_Type?: string;
   SrcPort: number;
   DstPort: number;
-  SrcWorkloadKind?: string;
-  DstWorkloadKind?: string;
-  SrcHostIP?: string;
-  DstHostIP?: string;
+  SrcK8S_OwnerType?: string;
+  DstK8S_OwnerType?: string;
+  SrcK8S_HostIP?: string;
+  DstK8S_HostIP?: string;
   Packets: number;
   Proto: number;
   Bytes: number;
