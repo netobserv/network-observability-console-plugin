@@ -43,6 +43,7 @@ import { QueryOptions } from '../model/query-options';
 import { QueryOptionsDropdown } from './query-options-dropdown';
 import { getPathWithParams, NETFLOW_TRAFFIC_PATH } from '../utils/router';
 import { useHistory } from 'react-router-dom';
+import { validateLabel } from '../utils/label';
 
 export interface FiltersToolbarProps {
   id: string;
@@ -75,6 +76,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
   const autocompleteContainerRef = React.useRef<HTMLDivElement | null>(null);
   const searchInputRef = React.useRef<HTMLInputElement | null>(null);
   const [indicator, setIndicator] = React.useState<Indicator>(ValidatedOptions.default);
+  const [skipFirstTime, setSkip] = React.useState<boolean>(true);
   const [message, setMessage] = React.useState<string | undefined>();
   const [autocompleteOptions, setAutocompleteOptions] = React.useState<FilterOption[]>([]);
   const [isPopperVisible, setPopperVisible] = React.useState(false);
@@ -85,12 +87,27 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
   const [selectedFilterColumn, setSelectedFilterColumn] = React.useState<Column>(availableFilters[0]);
   const [selectedFilterValue, setSelectedFilterValue] = React.useState<string>('');
 
+  // reset and delay message state to trigger tooltip properly
+  const setMessageWithDelay = React.useCallback(
+    (m: string | undefined) => {
+      if (skipTipsDelay) {
+        setMessage(m);
+      } else {
+        setMessage(undefined);
+        setTimeout(() => {
+          setMessage(m);
+        }, 100);
+      }
+    },
+    [skipTipsDelay]
+  );
+
   const onAutoCompleteChange = (newValue: string) => {
     const options = getFilterOptions(selectedFilterColumn.filterType, newValue, 10);
     setAutocompleteOptions(options);
     // The menu is hidden if there are no options
     setPopperVisible(options.length > 0);
-    setSelectedFilterValue(newValue);
+    setFilterValue(newValue);
   };
 
   const onAutoCompleteSelect = (e: React.MouseEvent<Element, MouseEvent>, itemId: string) => {
@@ -136,6 +153,8 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
             }
             return { err: t('Unknown protocol') };
           }
+        case FilterType.K8S_NAMES:
+          return validateLabel(value) ? { val: value } : { err: t('Not a valid kubernetes label') };
         default:
           return { val: value };
       }
@@ -167,9 +186,9 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
         break;
     }
     resetAutocompleteOptions();
-    setMessage(undefined);
+    setMessageWithDelay(undefined);
     setIndicator(ValidatedOptions.default);
-  }, [selectedFilterColumn?.filterType, setFilterValue]);
+  }, [selectedFilterColumn?.filterType, setFilterValue, setMessageWithDelay]);
 
   const addFilter = React.useCallback(
     (colId: ColumnsId, filter: FilterValue) => {
@@ -182,7 +201,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
           if (colId === ColumnsId.timestamp) {
             found.values = [filter];
           } else if (found.values.map(value => value.v).includes(filter.v)) {
-            setMessage(t('Filter already exists'));
+            setMessageWithDelay(t('Filter already exists'));
             setIndicator(ValidatedOptions.error);
             return;
           } else {
@@ -195,7 +214,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
         resetFilterValue();
       }
     },
-    [t, columns, filters, setFilters, resetFilterValue]
+    [columns, filters, setFilters, resetFilterValue, setMessageWithDelay, t]
   );
 
   const manageFilters = React.useCallback(() => {
@@ -208,7 +227,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
     const validation = validateFilterValue(selectedFilterValue);
     //show tooltip and icon when user try to validate filter
     if (!_.isEmpty(validation.err)) {
-      setMessage(validation.err);
+      setMessageWithDelay(validation.err);
       setIndicator(ValidatedOptions.error);
       return;
     }
@@ -225,7 +244,8 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
     selectedFilterValue,
     selectedFilterColumn.filterType,
     selectedFilterColumn.id,
-    addFilter
+    addFilter,
+    setMessageWithDelay
   ]);
 
   /*TODO: check if we can do autocomplete for pod / namespace fields
@@ -246,6 +266,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
                   value={selectedFilterValue}
                   onKeyPress={e => e.key === 'Enter' && manageFilters()}
                   onChange={onAutoCompleteChange}
+                  onFocus={showTips}
                   ref={searchInputRef}
                   id="autocomplete-search"
                 />
@@ -277,6 +298,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
             max={Number.MAX_SAFE_INTEGER}
             onMinus={() => setFilterValue((Number(selectedFilterValue) - 1).toString())}
             onChange={event => setFilterValue((event.target as HTMLTextAreaElement).value)}
+            onFocus={showTips}
             onPlus={() => setFilterValue((Number(selectedFilterValue) + 1).toString())}
             onKeyPress={e => e.key === 'Enter' && manageFilters()}
             inputName="input"
@@ -293,6 +315,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
             aria-label="search"
             validated={indicator}
             onChange={setFilterValue}
+            onFocus={showTips}
             onKeyPress={e => e.key === 'Enter' && manageFilters()}
             value={selectedFilterValue}
             ref={searchInputRef}
@@ -306,38 +329,43 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
     return filters?.some(f => f?.values?.length);
   }, [filters]);
 
-  React.useEffect(() => {
-    resetFilterValue();
-    //allow message state to be refreshed after render to manage tooltip trigger correctly between changes
-    const manageMessage = () => {
-      switch (selectedFilterColumn.filterType) {
-        case FilterType.PORT:
-          setMessage(`${t('Specify a port following one of these rules:')}
-            - ${t('A port number like 80, 21')}
-            - ${t('A IANA name like HTTP, FTP')}`);
-          break;
-        case FilterType.ADDRESS:
-          setMessage(`${t('Specify an adress following one of these rules:')}
-            - ${t('A single IPv4 or IPv6 address like 192.0.2.0, ::1')}
-            - ${t('A range within the IP address like 192.168.0.1-192.189.10.12, 2001:db8::1-2001:db8::8')}
-            - ${t('A CIDR specification like 192.51.100.0/24, 2001:db8::/32')}`);
-          break;
-        case FilterType.PROTOCOL:
-          setMessage(`${t('Specify a protocol following one of these rules:')}
-              - ${t('A protocol number like 6, 17')}
-              - ${t('A IANA name like TCP, UDP')}`);
-          break;
-        default:
-          setMessage(undefined);
-          break;
-      }
-    };
-    if (skipTipsDelay) {
-      manageMessage();
-    } else {
-      setTimeout(manageMessage);
+  const showTips = React.useCallback(() => {
+    //skip first message to avoid tooltip on page load
+    if (skipFirstTime) {
+      setSkip(false);
+      return;
     }
 
+    //allow message state to be refreshed after render to manage tooltip trigger correctly between changes
+    switch (selectedFilterColumn.filterType) {
+      case FilterType.PORT:
+        setMessageWithDelay(`${t('Specify a port following one of these rules:')}
+        - ${t('A port number like 80, 21')}
+        - ${t('A IANA name like HTTP, FTP')}`);
+        break;
+      case FilterType.ADDRESS:
+        setMessageWithDelay(`${t('Specify an adress following one of these rules:')}
+        - ${t('A single IPv4 or IPv6 address like 192.0.2.0, ::1')}
+        - ${t('A range within the IP address like 192.168.0.1-192.189.10.12, 2001:db8::1-2001:db8::8')}
+        - ${t('A CIDR specification like 192.51.100.0/24, 2001:db8::/32')}`);
+        break;
+      case FilterType.PROTOCOL:
+        setMessageWithDelay(`${t('Specify a protocol following one of these rules:')}
+          - ${t('A protocol number like 6, 17')}
+          - ${t('A IANA name like TCP, UDP')}`);
+        break;
+      case FilterType.K8S_NAMES:
+        setMessageWithDelay(t(`Specify kubernetes name containing any alphanumeric, hyphen or dot character`));
+        break;
+      default:
+        setMessageWithDelay(undefined);
+        break;
+    }
+  }, [selectedFilterColumn.filterType, setMessageWithDelay, skipFirstTime, t]);
+
+  React.useEffect(() => {
+    resetFilterValue();
+    showTips();
     searchInputRef?.current?.focus();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -362,7 +390,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
               content={<div className={message?.includes('\n') ? 'text-left-pre' : ''}>{message}</div>}
               trigger={_.isEmpty(message) ? 'manual' : 'click'}
               enableFlip={false}
-              position={message?.includes('\n') ? 'bottom' : 'top'}
+              position={'top'}
             >
               <InputGroup>
                 <Dropdown

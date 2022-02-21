@@ -211,12 +211,25 @@ describe('<FiltersToolbar />', () => {
   it('should show tips on complex fields', async () => {
     const wrapper = mount(<FiltersToolbar {...props} />);
     const dropdown = wrapper.find('#column-filter-toggle').at(0);
+    let tooltips = wrapper.find(Tooltip);
+    expect(tooltips.at(0).getElement().props.isVisible).toBe(false);
+
+    //open dropdow and select Src workload
+    dropdown.simulate('click');
+    wrapper.find(`[id="${ColumnsId.srcwkd}"]`).at(0).simulate('click');
+    tooltips = wrapper.find(Tooltip);
+    expect(tooltips.at(0).getElement().props.isVisible).toBe(true);
+    let content = tooltips.at(0).getElement().props['content'];
+    expect(content.props.className).toBe('');
+    //check tooltip text
+    expect(String(content.props.children)).toContain('Specify kubernetes name');
+
     //open dropdow and select Src port
     dropdown.simulate('click');
     wrapper.find(`[id="${ColumnsId.srcport}"]`).at(0).simulate('click');
-    let tooltips = wrapper.find(Tooltip);
-    expect(tooltips).toHaveLength(1);
-    let content = tooltips.at(0).getElement().props['content'];
+    tooltips = wrapper.find(Tooltip);
+    expect(tooltips.at(0).getElement().props.isVisible).toBe(true);
+    content = tooltips.at(0).getElement().props['content'];
     expect(content.props.className).toBe('text-left-pre');
     //check tooltip concatenated text
     expect(String(content.props.children)).toContain('Specify a port');
@@ -226,7 +239,7 @@ describe('<FiltersToolbar />', () => {
     dropdown.simulate('click');
     wrapper.find(`[id="${ColumnsId.srcaddr}"]`).at(0).simulate('click');
     tooltips = wrapper.find(Tooltip);
-    expect(tooltips).toHaveLength(1);
+    expect(tooltips.at(0).getElement().props.isVisible).toBe(true);
     content = tooltips.at(0).getElement().props['content'];
     expect(content.props.className).toBe('text-left-pre');
     //check tooltip concatenated text
@@ -237,7 +250,7 @@ describe('<FiltersToolbar />', () => {
     dropdown.simulate('click');
     wrapper.find(`[id="${ColumnsId.proto}"]`).at(0).simulate('click');
     tooltips = wrapper.find(Tooltip);
-    expect(tooltips).toHaveLength(1);
+    expect(tooltips.at(0).getElement().props.isVisible).toBe(true);
     content = tooltips.at(0).getElement().props['content'];
     expect(content.props.className).toBe('text-left-pre');
     //check tooltip concatenated text
