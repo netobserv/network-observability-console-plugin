@@ -26,3 +26,26 @@ button.pf-c-button.pf-m-link.pf-m-inline:empty {
 .column-filter-item.grouped {
   padding-left: 25px;
 }
+
+/* align toolbar content top */
+.flex-start {
+  align-self: flex-start;
+}
+
+/* fixed row gap to gain space as same as pods view */
+#filter-toolbar {
+  row-gap: 1rem;
+  padding-top: 0;
+}
+
+/* align tips baseline */
+#tips {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+}
+
+/* stick "Learn more" text */
+#more {
+  padding: 5px 0px 0px 5px;
+}

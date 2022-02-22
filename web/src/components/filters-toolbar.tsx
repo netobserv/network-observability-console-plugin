@@ -13,8 +13,11 @@ import {
   NumberInput,
   OverflowMenu,
   OverflowMenuGroup,
+  Popover,
   Popper,
+  Text,
   TextInput,
+  TextVariants,
   Toolbar,
   ToolbarContent,
   ToolbarFilter,
@@ -76,7 +79,6 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
   const autocompleteContainerRef = React.useRef<HTMLDivElement | null>(null);
   const searchInputRef = React.useRef<HTMLInputElement | null>(null);
   const [indicator, setIndicator] = React.useState<Indicator>(ValidatedOptions.default);
-  const [skipFirstTime, setSkip] = React.useState<boolean>(true);
   const [message, setMessage] = React.useState<string | undefined>();
   const [autocompleteOptions, setAutocompleteOptions] = React.useState<FilterOption[]>([]);
   const [isPopperVisible, setPopperVisible] = React.useState(false);
@@ -266,7 +268,6 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
                   value={selectedFilterValue}
                   onKeyPress={e => e.key === 'Enter' && manageFilters()}
                   onChange={onAutoCompleteChange}
-                  onFocus={showTips}
                   ref={searchInputRef}
                   id="autocomplete-search"
                 />
@@ -298,7 +299,6 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
             max={Number.MAX_SAFE_INTEGER}
             onMinus={() => setFilterValue((Number(selectedFilterValue) - 1).toString())}
             onChange={event => setFilterValue((event.target as HTMLTextAreaElement).value)}
-            onFocus={showTips}
             onPlus={() => setFilterValue((Number(selectedFilterValue) + 1).toString())}
             onKeyPress={e => e.key === 'Enter' && manageFilters()}
             inputName="input"
@@ -315,7 +315,6 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
             aria-label="search"
             validated={indicator}
             onChange={setFilterValue}
-            onFocus={showTips}
             onKeyPress={e => e.key === 'Enter' && manageFilters()}
             value={selectedFilterValue}
             ref={searchInputRef}
@@ -329,43 +328,62 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
     return filters?.some(f => f?.values?.length);
   }, [filters]);
 
-  const showTips = React.useCallback(() => {
-    //skip first message to avoid tooltip on page load
-    if (skipFirstTime) {
-      setSkip(false);
-      return;
-    }
-
-    //allow message state to be refreshed after render to manage tooltip trigger correctly between changes
+  const getHint = () => {
+    let hint = '';
+    let examples = '';
     switch (selectedFilterColumn.filterType) {
       case FilterType.PORT:
-        setMessageWithDelay(`${t('Specify a port following one of these rules:')}
+        hint = t('Specify a single port number or name.');
+        examples = `${t('Specify a single port following one of these rules:')}
         - ${t('A port number like 80, 21')}
-        - ${t('A IANA name like HTTP, FTP')}`);
+        - ${t('A IANA name like HTTP, FTP')}`;
         break;
       case FilterType.ADDRESS:
-        setMessageWithDelay(`${t('Specify an adress following one of these rules:')}
+        hint = t('Specify a single address or range.');
+        examples = `${t('Specify adresses following one of these rules:')}
         - ${t('A single IPv4 or IPv6 address like 192.0.2.0, ::1')}
         - ${t('A range within the IP address like 192.168.0.1-192.189.10.12, 2001:db8::1-2001:db8::8')}
-        - ${t('A CIDR specification like 192.51.100.0/24, 2001:db8::/32')}`);
+        - ${t('A CIDR specification like 192.51.100.0/24, 2001:db8::/32')}`;
         break;
       case FilterType.PROTOCOL:
-        setMessageWithDelay(`${t('Specify a protocol following one of these rules:')}
+        hint = t('Specify a single protocol number or name.');
+        examples = `${t('Specify a single protocol following one of these rules:')}
           - ${t('A protocol number like 6, 17')}
-          - ${t('A IANA name like TCP, UDP')}`);
+          - ${t('A IANA name like TCP, UDP')}`;
         break;
       case FilterType.K8S_NAMES:
-        setMessageWithDelay(t(`Specify kubernetes name containing any alphanumeric, hyphen or dot character`));
+        hint = t('Specify a single kubernetes name.');
+        examples = `${t('Specify a single kubernetes name following these rules:')}
+        - ${t('Containing any alphanumeric, hyphen or dot character')}
+        - ${t('Partial or full text like registry-, cluster-image-registry')}`;
         break;
       default:
-        setMessageWithDelay(undefined);
+        hint = '';
+        examples = '';
         break;
     }
-  }, [selectedFilterColumn.filterType, setMessageWithDelay, skipFirstTime, t]);
+    return (
+      <div id="tips">
+        <Text component={TextVariants.p}>{hint}</Text>
+        {!_.isEmpty(examples) ? (
+          <Popover
+            aria-label="Hint popover"
+            headerContent={selectedFilterColumn.name}
+            bodyContent={<div className="text-left-pre">{examples}</div>}
+            hasAutoWidth={true}
+            position={'bottom'}
+          >
+            <Button id="more" variant="link">
+              {t('Learn more')}
+            </Button>
+          </Popover>
+        ) : undefined}
+      </div>
+    );
+  };
 
   React.useEffect(() => {
     resetFilterValue();
-    showTips();
     searchInputRef?.current?.focus();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -378,60 +396,63 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
       clearFiltersButtonText={hasFilterValue() ? t('Clear all filters') : ''}
     >
       <ToolbarContent id={`${id}-search-filters`} toolbarId={id}>
-        <ToolbarItem>
+        <ToolbarItem className="flex-start">
           <QueryOptionsDropdown options={props.queryOptions} setOptions={props.setQueryOptions} />
         </ToolbarItem>
-        <ToolbarItem>
+        <ToolbarItem className="flex-start">
           {_.isEmpty(forcedFilters) ? (
             <Tooltip
               //css hide tooltip here to avoid render issue
               className={`filters-tooltip${_.isEmpty(message) ? '-empty' : ''}`}
               isVisible={!_.isEmpty(message)}
-              content={<div className={message?.includes('\n') ? 'text-left-pre' : ''}>{message}</div>}
+              content={message}
               trigger={_.isEmpty(message) ? 'manual' : 'click'}
               enableFlip={false}
               position={'top'}
             >
-              <InputGroup>
-                <Dropdown
-                  id="column-filter-dropdown"
-                  dropdownItems={filtersGroups.map((g, i) => (
-                    <div key={`group-${i}`}>
-                      {g.title && <h1 className="pf-c-dropdown__group-title">{g.title}</h1>}
-                      {g.columns.map((col, index) => (
-                        <DropdownItem
-                          id={col.id}
-                          className={`column-filter-item ${g.title ? 'grouped' : ''}`}
-                          component="button"
-                          onClick={() => setSelectedFilterColumn(col)}
-                          key={index}
-                        >
-                          {col.name}
-                        </DropdownItem>
-                      ))}
-                    </div>
-                  ))}
-                  isOpen={isSearchFiltersOpen}
-                  onSelect={() => setSearchFiltersOpen(false)}
-                  toggle={
-                    <DropdownToggle
-                      id="column-filter-toggle"
-                      onToggle={() => setSearchFiltersOpen(!isSearchFiltersOpen)}
-                    >
-                      {getFullColumnName(selectedFilterColumn)}
-                    </DropdownToggle>
-                  }
-                />
-                {getFilterControl(selectedFilterColumn)}
-                <Button
-                  id="search-button"
-                  variant="control"
-                  aria-label="search button for filter"
-                  onClick={() => manageFilters()}
-                >
-                  <SearchIcon />
-                </Button>
-              </InputGroup>
+              <div>
+                <InputGroup>
+                  <Dropdown
+                    id="column-filter-dropdown"
+                    dropdownItems={filtersGroups.map((g, i) => (
+                      <div key={`group-${i}`}>
+                        {g.title && <h1 className="pf-c-dropdown__group-title">{g.title}</h1>}
+                        {g.columns.map((col, index) => (
+                          <DropdownItem
+                            id={col.id}
+                            className={`column-filter-item ${g.title ? 'grouped' : ''}`}
+                            component="button"
+                            onClick={() => setSelectedFilterColumn(col)}
+                            key={index}
+                          >
+                            {col.name}
+                          </DropdownItem>
+                        ))}
+                      </div>
+                    ))}
+                    isOpen={isSearchFiltersOpen}
+                    onSelect={() => setSearchFiltersOpen(false)}
+                    toggle={
+                      <DropdownToggle
+                        id="column-filter-toggle"
+                        onToggle={() => setSearchFiltersOpen(!isSearchFiltersOpen)}
+                      >
+                        {getFullColumnName(selectedFilterColumn)}
+                      </DropdownToggle>
+                    }
+                  />
+                  {getFilterControl(selectedFilterColumn)}
+                  <Button
+                    id="search-button"
+                    variant="control"
+                    aria-label="search button for filter"
+                    onClick={() => manageFilters()}
+                  >
+                    <SearchIcon />
+                  </Button>
+                </InputGroup>
+                {getHint()}
+              </div>
             </Tooltip>
           ) : (
             forcedFilters &&
@@ -451,7 +472,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
           )}
         </ToolbarItem>
         {!_.isEmpty(forcedFilters) && (
-          <ToolbarItem>
+          <ToolbarItem className="flex-start">
             <OverflowMenu breakpoint="md">
               <OverflowMenuGroup groupType="button" isPersistent>
                 <Button onClick={() => push(getPathWithParams(NETFLOW_TRAFFIC_PATH))}>{t('Edit filters')}</Button>
@@ -459,7 +480,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
             </OverflowMenu>
           </ToolbarItem>
         )}
-        <ToolbarItem>
+        <ToolbarItem className="flex-start">
           <OverflowMenu breakpoint="md">
             <OverflowMenuGroup groupType="button" isPersistent>
               {props.children}
@@ -467,7 +488,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
           </OverflowMenu>
         </ToolbarItem>
         {actions && (
-          <ToolbarItem alignment={{ default: 'alignRight' }}>
+          <ToolbarItem className="flex-start" alignment={{ default: 'alignRight' }}>
             <OverflowMenu breakpoint="md">
               <OverflowMenuGroup groupType="button" isPersistent>
                 {actions}
