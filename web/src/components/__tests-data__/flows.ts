@@ -3,6 +3,7 @@ import { FlowDirection, Record } from '../../api/ipfix';
 export const FlowsSample: Record[] = [
   {
     labels: {
+      FlowDirection: FlowDirection.Egress,
       SrcNamespace: 'default',
       DstNamespace: 'default'
     },
@@ -18,13 +19,13 @@ export const FlowsSample: Record[] = [
       Packets: 400,
       Proto: 6,
       Bytes: 76800,
-      FlowDirection: FlowDirection.Egress,
       SrcMac: '8a:f6:69:6b:1a:cc',
       DstMac: '0a:58:0a:80:00:17'
     }
   },
   {
     labels: {
+      FlowDirection: FlowDirection.Ingress,
       SrcNamespace: 'openshift-console',
       DstNamespace: 'netowrk-observability'
     },
@@ -40,13 +41,13 @@ export const FlowsSample: Record[] = [
       Packets: 300,
       Proto: 6,
       Bytes: 7800,
-      FlowDirection: FlowDirection.Ingress,
       SrcMac: '8a:f6:69:6b:1a:cc',
       DstMac: '0a:58:0a:80:00:17'
     }
   },
   {
     labels: {
+      FlowDirection: FlowDirection.Ingress,
       SrcNamespace: 'kube-system',
       DstNamespace: 'default'
     },
@@ -62,7 +63,6 @@ export const FlowsSample: Record[] = [
       Packets: 400,
       Proto: 6,
       Bytes: 76800,
-      FlowDirection: FlowDirection.Ingress,
       SrcMac: '8a:f6:69:6b:1a:cc',
       DstMac: '0a:58:0a:80:00:17'
     }

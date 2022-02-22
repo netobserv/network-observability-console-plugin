@@ -251,7 +251,7 @@ export const getDefaultColumns = (t: TFunction): Column[] => {
       isSelected: false,
       // filters are managed via QuickFilters rather than per-column filter search, so set filterType to NONE
       filterType: FilterType.NONE,
-      value: f => f.fields.FlowDirection,
+      value: f => f.labels.FlowDirection,
       sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
       width: 10
     },
