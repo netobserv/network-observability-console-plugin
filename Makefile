@@ -100,6 +100,12 @@ push:
 serve:
 	./plugin-backend
 
+.PHONY: start
+start: build-backend 
+	@echo "### Starting backend on http://localhost:9002"
+	bash -c "trap 'fuser -k 9002/tcp' EXIT; \
+					./plugin-backend -port 9002 & cd web && npm run start" 
+
 .PHONY: bridge
 bridge:
 ifeq (,${CONSOLE})

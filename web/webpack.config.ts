@@ -1,13 +1,22 @@
+
 /* eslint-env node */
 
-import * as webpack from 'webpack';
+import { Configuration as WebpackConfiguration } from "webpack";
+import { Configuration as WebpackDevServerConfiguration } from "webpack-dev-server";
 import * as path from 'path';
 import { ConsoleRemotePlugin } from '@openshift-console/dynamic-plugin-sdk-webpack';
 
-const CopyWebpackPlugin = require('copy-webpack-plugin');
+interface Configuration extends WebpackConfiguration {
+  devServer?: WebpackDevServerConfiguration;
+}
 
-const config: webpack.Configuration = {
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+const NodeExternals = require('webpack-node-externals');
+
+const config: Configuration = {
   mode: 'development',
+  // No regular entry points. The remote container entry is handled by ConsoleRemotePlugin.
+  entry: {},
   context: path.resolve(__dirname, 'src'),
   output: {
     path: path.resolve(__dirname, 'dist'),
@@ -63,6 +72,25 @@ const config: webpack.Configuration = {
       },
     ],
   },
+  devServer: {
+    static: './dist',
+    port: 9001,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+      "Access-Control-Allow-Headers": "X-Requested-With, Content-Type, Authorization"
+    },
+    devMiddleware: {
+      writeToDisk: true,
+    },
+    proxy: {
+      '/api': {
+        target: 'http://localhost:9000',
+        router: () => 'http://localhost:9002',
+        logLevel: 'debug' /*optional*/
+      }
+    }
+  },
   plugins: [
     new ConsoleRemotePlugin(),
     new CopyWebpackPlugin({
@@ -84,6 +112,12 @@ if (process.env.NODE_ENV === 'production') {
   config.optimization.minimize = true;
   // Causes error in --mode=production due to scope hoisting
   config.optimization.concatenateModules = false;
+  // Manage dependencies from package.json file. Replace all devDependencies 'import' by 'require'
+  config.externals = NodeExternals({
+    fileName: './package.json',
+    includeInBundle: ['dependencies'],
+    excludeFromBundle: ['devDependencies']
+  });
 }
 
 export default config;
