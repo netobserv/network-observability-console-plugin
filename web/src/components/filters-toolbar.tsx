@@ -340,7 +340,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
         break;
       case FilterType.ADDRESS:
         hint = t('Specify a single address or range.');
-        examples = `${t('Specify adresses following one of these rules:')}
+        examples = `${t('Specify addresses following one of these rules:')}
         - ${t('A single IPv4 or IPv6 address like 192.0.2.0, ::1')}
         - ${t('A range within the IP address like 192.168.0.1-192.189.10.12, 2001:db8::1-2001:db8::8')}
         - ${t('A CIDR specification like 192.51.100.0/24, 2001:db8::/32')}`;
