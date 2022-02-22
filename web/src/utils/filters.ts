@@ -1,7 +1,8 @@
 import * as _ from 'lodash';
 import protocols from 'protocol-numbers';
-import { getPort, getService } from 'port-numbers';
+import { getPort } from 'port-numbers';
 import { ColumnsId } from './columns';
+import { getProtectedService } from './port';
 
 export enum FilterType {
   NONE,
@@ -33,7 +34,8 @@ export const getActiveColumnFilters = (columnId: ColumnsId, filters: Filter[]) =
 
 const protocolOptions: FilterOption[] = Object.values(protocols)
   .map(proto => ({ name: proto.name, value: proto.value }))
-  .filter(proto => !_.isEmpty(proto.name));
+  .filter(proto => !_.isEmpty(proto.name))
+  .filter(proto => Number(proto.value) < 1024);
 _.orderBy(protocolOptions, 'name');
 
 const getProtocolOptions = (value: string) => {
@@ -44,7 +46,7 @@ const getProtocolOptions = (value: string) => {
 
 const getPortOptions = (value: string) => {
   const isNumber = !isNaN(Number(value));
-  const foundService = isNumber ? getService(Number(value)) : null;
+  const foundService = isNumber ? getProtectedService(Number(value)) : null;
   const foundPort = !isNumber ? getPort(value) : null;
   if (foundService) {
     return [{ name: foundService.name, value: value }];

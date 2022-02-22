@@ -5,6 +5,9 @@ describe('formatport', () => {
     expect(formatPort(443)).toEqual('https (443)');
     expect(formatPort(32876)).toEqual('32876');
   });
+  it('should not format port above 1024', () => {
+    expect(formatPort(3000)).toEqual('3000');
+  });
 });
 
 describe('comparePort', () => {
