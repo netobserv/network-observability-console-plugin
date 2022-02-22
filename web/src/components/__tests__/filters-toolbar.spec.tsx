@@ -5,7 +5,6 @@ import {
   Toolbar,
   ToolbarFilter,
   ToolbarItem,
-  Tooltip,
   ValidatedOptions
 } from '@patternfly/react-core';
 import { mount, shallow } from 'enzyme';
@@ -211,50 +210,29 @@ describe('<FiltersToolbar />', () => {
   it('should show tips on complex fields', async () => {
     const wrapper = mount(<FiltersToolbar {...props} />);
     const dropdown = wrapper.find('#column-filter-toggle').at(0);
-    let tooltips = wrapper.find(Tooltip);
-    expect(tooltips.at(0).getElement().props.isVisible).toBe(false);
 
     //open dropdow and select Src workload
     dropdown.simulate('click');
     wrapper.find(`[id="${ColumnsId.srcwkd}"]`).at(0).simulate('click');
-    tooltips = wrapper.find(Tooltip);
-    expect(tooltips.at(0).getElement().props.isVisible).toBe(true);
-    let content = tooltips.at(0).getElement().props['content'];
-    expect(content.props.className).toBe('');
-    //check tooltip text
-    expect(String(content.props.children)).toContain('Specify kubernetes name');
+    let tips = wrapper.find('#tips').at(0).getElement();
+    expect(String(tips.props.children[0].props.children)).toContain('Specify a single kubernetes name');
 
     //open dropdow and select Src port
     dropdown.simulate('click');
     wrapper.find(`[id="${ColumnsId.srcport}"]`).at(0).simulate('click');
-    tooltips = wrapper.find(Tooltip);
-    expect(tooltips.at(0).getElement().props.isVisible).toBe(true);
-    content = tooltips.at(0).getElement().props['content'];
-    expect(content.props.className).toBe('text-left-pre');
-    //check tooltip concatenated text
-    expect(String(content.props.children)).toContain('Specify a port');
-    expect(String(content.props.children)).toContain('- A port number');
+    tips = wrapper.find('#tips').at(0).getElement();
+    expect(String(tips.props.children[0].props.children)).toContain('Specify a single port');
 
     //open dropdow and select Src address
     dropdown.simulate('click');
     wrapper.find(`[id="${ColumnsId.srcaddr}"]`).at(0).simulate('click');
-    tooltips = wrapper.find(Tooltip);
-    expect(tooltips.at(0).getElement().props.isVisible).toBe(true);
-    content = tooltips.at(0).getElement().props['content'];
-    expect(content.props.className).toBe('text-left-pre');
-    //check tooltip concatenated text
-    expect(String(content.props.children)).toContain('Specify an adress');
-    expect(String(content.props.children)).toContain('- A single IPv4 ');
+    tips = wrapper.find('#tips').at(0).getElement();
+    expect(String(tips.props.children[0].props.children)).toContain('Specify a single address');
 
     //open dropdow and select Protocol
     dropdown.simulate('click');
     wrapper.find(`[id="${ColumnsId.proto}"]`).at(0).simulate('click');
-    tooltips = wrapper.find(Tooltip);
-    expect(tooltips.at(0).getElement().props.isVisible).toBe(true);
-    content = tooltips.at(0).getElement().props['content'];
-    expect(content.props.className).toBe('text-left-pre');
-    //check tooltip concatenated text
-    expect(String(content.props.children)).toContain('Specify a protocol');
-    expect(String(content.props.children)).toContain('- A protocol number');
+    tips = wrapper.find('#tips').at(0).getElement();
+    expect(String(tips.props.children[0].props.children)).toContain('Specify a single protocol');
   });
 });
