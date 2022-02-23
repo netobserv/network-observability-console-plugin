@@ -263,12 +263,12 @@ func TestLokiFiltering(t *testing.T) {
 	}{{
 		inputPath: "?SrcPod=test-pod",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\"}|~`\"SrcPod\":\"[^\"]*test-pod`",
+			"?query={app=\"netobserv-flowcollector\"}|~`\"SrcPod\":\".*test-pod.*\"`",
 		},
 	}, {
 		inputPath: "?SrcPod=test-pod&match=any",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\"}|~`\"SrcPod\":\"[^\"]*test-pod`",
+			"?query={app=\"netobserv-flowcollector\"}|~`\"SrcPod\":\".*test-pod.*\"`",
 		},
 	}, {
 		inputPath: "?Proto=6&match=all",
@@ -283,20 +283,20 @@ func TestLokiFiltering(t *testing.T) {
 	}, {
 		inputPath: "?Proto=6&SrcPod=test",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\"}|~`\"Proto\":6`|~`\"SrcPod\":\"[^\"]*test`",
-			"?query={app=\"netobserv-flowcollector\"}|~`\"SrcPod\":\"[^\"]*test`|~`\"Proto\":6`",
+			"?query={app=\"netobserv-flowcollector\"}|~`\"Proto\":6`|~`\"SrcPod\":\".*test.*\"`",
+			"?query={app=\"netobserv-flowcollector\"}|~`\"SrcPod\":\".*test.*\"`|~`\"Proto\":6`",
 		},
 	}, {
 		inputPath: "?Proto=6&SrcPod=test&match=any",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\"}|~`(\"Proto\":6)|(\"SrcPod\":\"[^\"]*test)`",
-			"?query={app=\"netobserv-flowcollector\"}|~`(\"SrcPod\":\"[^\"]*test)|(\"Proto\":6)`",
+			"?query={app=\"netobserv-flowcollector\"}|~`(\"Proto\":6)|(\"SrcPod\":\".*test.*\")`",
+			"?query={app=\"netobserv-flowcollector\"}|~`(\"SrcPod\":\".*test.*\")|(\"Proto\":6)`",
 		},
 	}, {
 		inputPath: "?Proto=6&SrcPod=test&FlowDirection=1&match=any",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\",FlowDirection=\"1\"}|~`(\"Proto\":6)|(\"SrcPod\":\"[^\"]*test)`",
-			"?query={app=\"netobserv-flowcollector\",FlowDirection=\"1\"}|~`(\"SrcPod\":\"[^\"]*test)|(\"Proto\":6)`",
+			"?query={app=\"netobserv-flowcollector\",FlowDirection=\"1\"}|~`(\"Proto\":6)|(\"SrcPod\":\".*test.*\")`",
+			"?query={app=\"netobserv-flowcollector\",FlowDirection=\"1\"}|~`(\"SrcPod\":\".*test.*\")|(\"Proto\":6)`",
 		},
 	}, {
 		inputPath: "?SrcNamespace=test-namespace&match=all",
@@ -359,6 +359,46 @@ func TestLokiFiltering(t *testing.T) {
 	}, {
 		inputPath:   "?timeRange=86400000&match=any",
 		outputQuery: []string{`?query={app="netobserv-flowcollector"}&start=${timeNow-86400000}`},
+	}, {
+		inputPath: "?SrcNamespace=\"exact-namespace\"",
+		outputQuery: []string{
+			`?query={SrcNamespace=~"exact-namespace",app="netobserv-flowcollector"}`,
+		},
+	}, {
+		inputPath: "?SrcNamespace=\"start-namespace*\"",
+		outputQuery: []string{
+			`?query={SrcNamespace=~"start-namespace.*",app="netobserv-flowcollector"}`,
+		},
+	}, {
+		inputPath: "?SrcNamespace=\"*end-namespace\"",
+		outputQuery: []string{
+			`?query={SrcNamespace=~".*end-namespace",app="netobserv-flowcollector"}`,
+		},
+	}, {
+		inputPath: "?SrcNamespace=\"mid-n*e\"",
+		outputQuery: []string{
+			`?query={SrcNamespace=~"mid-n.*e",app="netobserv-flowcollector"}`,
+		},
+	}, {
+		inputPath: "?SrcPod=\"exact-pod\"",
+		outputQuery: []string{
+			"?query={app=\"netobserv-flowcollector\"}|~`\"SrcPod\":\"exact-pod\"`",
+		},
+	}, {
+		inputPath: "?SrcPod=\"start-pod*\"",
+		outputQuery: []string{
+			"?query={app=\"netobserv-flowcollector\"}|~`\"SrcPod\":\"start-pod.*\"`",
+		},
+	}, {
+		inputPath: "?SrcPod=\"*end-pod\"",
+		outputQuery: []string{
+			"?query={app=\"netobserv-flowcollector\"}|~`\"SrcPod\":\".*end-pod\"`",
+		},
+	}, {
+		inputPath: "?SrcPod=\"mid-*d\"",
+		outputQuery: []string{
+			"?query={app=\"netobserv-flowcollector\"}|~`\"SrcPod\":\"mid-.*d\"`",
+		},
 	}}
 
 	// GIVEN a Loki service

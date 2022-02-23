@@ -28,7 +28,11 @@ const (
 	anyMatchValue   = "any"
 )
 
-var filterRegexpValidation = regexp.MustCompile(`^[\w-\.\:\/,]*$`)
+// can contains only alphanumeric / '-' / '_' / '.' / ',' / '"' / '*' characteres
+var filterRegexpValidation = regexp.MustCompile(`^[\w-_.,\"*]*$`)
+
+// remove quotes and replace * by regex any
+var valueReplacer = strings.NewReplacer(`*`, `.*`, `"`, "")
 
 type LabelJoiner string
 
@@ -196,10 +200,8 @@ func (q *Query) processStreamSelector(key string, values []string) {
 		if i > 0 {
 			regexStr.WriteByte('|')
 		}
-		//match any caracter before / after value : .*VALUE.*
-		regexStr.WriteString(".*")
-		regexStr.WriteString(value)
-		regexStr.WriteString(".*")
+		//match any caracter before / after value : .*VALUE.* if not quoted
+		writeRegexValue(&regexStr, value)
 	}
 
 	if regexStr.Len() > 0 {
@@ -243,8 +245,9 @@ func (q *Query) processLineFilters(key string, values []string) error {
 		if isNumeric(key) {
 			regexStr.WriteString(value)
 		} else {
-			regexStr.WriteString(`"[^"]*`)
-			regexStr.WriteString(value)
+			regexStr.WriteString(`"`)
+			writeRegexValue(&regexStr, value)
+			regexStr.WriteString(`"`)
 		}
 	}
 
@@ -265,5 +268,15 @@ func isNumeric(v string) bool {
 		return true
 	default:
 		return false
+	}
+}
+
+func writeRegexValue(regexStr *strings.Builder, value string) {
+	if !strings.HasPrefix(value, `"`) {
+		regexStr.WriteString(".*")
+	}
+	regexStr.WriteString(valueReplacer.Replace(value))
+	if !strings.HasSuffix(value, `"`) {
+		regexStr.WriteString(".*")
 	}
 }

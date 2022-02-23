@@ -354,8 +354,12 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
       case FilterType.K8S_NAMES:
         hint = t('Specify a single kubernetes name.');
         examples = `${t('Specify a single kubernetes name following these rules:')}
-        - ${t('Containing any alphanumeric, hyphen or dot character')}
-        - ${t('Partial or full text like registry-, cluster-image-registry')}`;
+        - ${t('Containing any alphanumeric, hyphen, underscrore or dot character')}
+        - ${t('Partial text like cluster, cluster-image, image-registry')}
+        - ${t('Exact match using quotes like "cluster-image-registry"')}
+        - ${t('Starting text like cluster, "cluster-*"')}
+        - ${t('Ending text like "*-registry"')}
+        - ${t('Pattern like "cluster-*-registry", "c*-*-r*y", -i*e-')}`;
         break;
       default:
         hint = '';
