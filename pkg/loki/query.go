@@ -28,7 +28,11 @@ const (
 	anyMatchValue   = "any"
 )
 
-var filterRegexpValidation = regexp.MustCompile(`^[\w-\.\:\/,]*$`)
+// can contains only alphanumeric / '-' / '_' / '.' / ',' / '"' / '*' characteres
+var filterRegexpValidation = regexp.MustCompile(`^[\w-_.,\"*]*$`)
+
+// remove quotes and replace * by regex any
+var valueReplacer = strings.NewReplacer(`*`, `.*`, `"`, "")
 
 type LabelJoiner string
 
@@ -196,10 +200,20 @@ func (q *Query) processStreamSelector(key string, values []string) {
 		if i > 0 {
 			regexStr.WriteByte('|')
 		}
-		//match any caracter before / after value : .*VALUE.*
-		regexStr.WriteString(".*")
-		regexStr.WriteString(value)
-		regexStr.WriteString(".*")
+		//match the begining of string if quoted without a star
+		if !strings.HasPrefix(value, `"`) {
+			regexStr.WriteString(".*")
+		} else if !strings.HasPrefix(value, `"*`) {
+			regexStr.WriteString("^")
+		}
+		//inject value with regex
+		regexStr.WriteString(valueReplacer.Replace(value))
+		//match the end  of string if quoted without a star
+		if !strings.HasSuffix(value, `"`) {
+			regexStr.WriteString(".*")
+		} else if !strings.HasSuffix(value, `*"`) {
+			regexStr.WriteString("$")
+		}
 	}
 
 	if regexStr.Len() > 0 {
@@ -243,8 +257,18 @@ func (q *Query) processLineFilters(key string, values []string) error {
 		if isNumeric(key) {
 			regexStr.WriteString(value)
 		} else {
-			regexStr.WriteString(`"[^"]*`)
-			regexStr.WriteString(value)
+			regexStr.WriteString(`"`)
+			// match start any if not quoted
+			if !strings.HasPrefix(value, `"`) {
+				regexStr.WriteString(".*")
+			}
+			//inject value with regex
+			regexStr.WriteString(valueReplacer.Replace(value))
+			// match end any if not quoted
+			if !strings.HasSuffix(value, `"`) {
+				regexStr.WriteString(".*")
+			}
+			regexStr.WriteString(`"`)
 		}
 	}
 

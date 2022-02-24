@@ -29,10 +29,10 @@ func TestQuery_ToURL_ConvertToAnyMatch(t *testing.T) {
 			streamSelector: []labelFilter{
 				stringLabelFilter("app", labelEqual, "netobs"),
 			},
-			lineFilters: []string{`"DstPort":1234`, `"Namespace":"[^"]*hiya`},
+			lineFilters: []string{`"DstPort":1234`, `"Namespace":".*hiya`},
 		},
-		expect:    "query={app=\"netobs\"}|~`\"DstPort\":1234`|~`\"Namespace\":\"[^\"]*hiya`",
-		expectAny: "query={dont=\"fail\"}|json|app=\"netobs\"+or+DstPort=1234+or+Namespace=~`[^\"]*hiya.*`",
+		expect:    "query={app=\"netobs\"}|~`\"DstPort\":1234`|~`\"Namespace\":\".*hiya`",
+		expectAny: "query={dont=\"fail\"}|json|app=\"netobs\"+or+DstPort=1234+or+Namespace=~`.*hiya.*`",
 	}, {
 		title: "streamSelector with label filters",
 		in: Query{
@@ -52,10 +52,10 @@ func TestQuery_ToURL_ConvertToAnyMatch(t *testing.T) {
 			streamSelector: []labelFilter{stringLabelFilter("app", labelEqual, "the-app")},
 			labelJoiner:    joinOr,
 			labelFilters:   []labelFilter{stringLabelFilter("foo", labelMatches, "bar")},
-			lineFilters:    []string{`"DstPod":"[^"]*podaco"`},
+			lineFilters:    []string{`"DstPod":".*podaco"`},
 		},
-		expect:    "query={app=\"the-app\"}|~`\"DstPod\":\"[^\"]*podaco\"`|json|foo=~\"bar\"",
-		expectAny: "query={dont=\"fail\"}|json|app=\"the-app\"+or+foo=~\"bar\"+or+DstPod=~`[^\"]*podaco.*`",
+		expect:    "query={app=\"the-app\"}|~`\"DstPod\":\".*podaco\"`|json|foo=~\"bar\"",
+		expectAny: "query={dont=\"fail\"}|json|app=\"the-app\"+or+foo=~\"bar\"+or+DstPod=~`.*podaco.*`",
 	}} {
 		t.Run(tc.title, func(t *testing.T) {
 			urlQuery, err := tc.in.URLQuery()
