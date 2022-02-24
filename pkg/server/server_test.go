@@ -362,22 +362,22 @@ func TestLokiFiltering(t *testing.T) {
 	}, {
 		inputPath: "?SrcNamespace=\"exact-namespace\"",
 		outputQuery: []string{
-			`?query={SrcNamespace=~"exact-namespace",app="netobserv-flowcollector"}`,
+			`?query={SrcNamespace=~"^exact-namespace$",app="netobserv-flowcollector"}`,
 		},
 	}, {
 		inputPath: "?SrcNamespace=\"start-namespace*\"",
 		outputQuery: []string{
-			`?query={SrcNamespace=~"start-namespace.*",app="netobserv-flowcollector"}`,
+			`?query={SrcNamespace=~"^start-namespace.*",app="netobserv-flowcollector"}`,
 		},
 	}, {
 		inputPath: "?SrcNamespace=\"*end-namespace\"",
 		outputQuery: []string{
-			`?query={SrcNamespace=~".*end-namespace",app="netobserv-flowcollector"}`,
+			`?query={SrcNamespace=~".*end-namespace$",app="netobserv-flowcollector"}`,
 		},
 	}, {
 		inputPath: "?SrcNamespace=\"mid-n*e\"",
 		outputQuery: []string{
-			`?query={SrcNamespace=~"mid-n.*e",app="netobserv-flowcollector"}`,
+			`?query={SrcNamespace=~"^mid-n.*e$",app="netobserv-flowcollector"}`,
 		},
 	}, {
 		inputPath: "?SrcPod=\"exact-pod\"",
