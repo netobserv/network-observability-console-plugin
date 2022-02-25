@@ -77,6 +77,7 @@
   "Both": "Both",
   "Match all columns": "Match all columns",
   "Match any column": "Match any column",
+  "Match all Source or Destination": "Match all Source or Destination",
   "Every flow can be reported from the source node and/or the destination node. For in-cluster traffic, usually both source and destination nodes report flows, resulting in duplicated data. Cluster ingress traffic is only reported by destination nodes, and cluster egress by source nodes.": "Every flow can be reported from the source node and/or the destination node. For in-cluster traffic, usually both source and destination nodes report flows, resulting in duplicated data. Cluster ingress traffic is only reported by destination nodes, and cluster egress by source nodes.",
   "Whether each query result has to match all the filters or just any of them": "Whether each query result has to match all the filters or just any of them",
   "Match filters": "Match filters",

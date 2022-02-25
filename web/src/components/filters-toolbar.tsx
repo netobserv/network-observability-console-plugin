@@ -20,16 +20,17 @@ import {
   TextVariants,
   Toolbar,
   ToolbarContent,
-  ToolbarFilter,
   ToolbarItem,
   Tooltip,
   ValidatedOptions
 } from '@patternfly/react-core';
-import { SearchIcon } from '@patternfly/react-icons';
+import { SearchIcon, TimesCircleIcon, TimesIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
 import { getPort } from 'port-numbers';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
+import { useHistory } from 'react-router-dom';
+import { QueryOptions } from '../model/query-options';
 import { Column, ColumnsId, getColumnGroups, getFullColumnName } from '../utils/columns';
 import {
   createFilterValue,
@@ -38,15 +39,14 @@ import {
   FilterType,
   FilterValue,
   findProtocolOption,
+  getFilterGroups,
   getFilterOptions
 } from '../utils/filters';
-import './filters-toolbar.css';
 import { validateIPFilter } from '../utils/ip';
-import { QueryOptions } from '../model/query-options';
-import { QueryOptionsDropdown } from './query-options-dropdown';
-import { getPathWithParams, NETFLOW_TRAFFIC_PATH } from '../utils/router';
-import { useHistory } from 'react-router-dom';
 import { validateLabel } from '../utils/label';
+import { getPathWithParams, NETFLOW_TRAFFIC_PATH } from '../utils/router';
+import './filters-toolbar.css';
+import { QueryOptionsDropdown } from './query-options-dropdown';
 
 export interface FiltersToolbarProps {
   id: string;
@@ -327,7 +327,6 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
   const hasFilterValue = React.useCallback(() => {
     return filters?.some(f => f?.values?.length);
   }, [filters]);
-
   const getHint = () => {
     let hint = '';
     let examples = '';
@@ -386,6 +385,101 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
     );
   };
 
+  const getChipGroup = (filter: Filter, index: number, editable: boolean) => {
+    return (
+      <ChipGroup
+        key={index}
+        isClosable={false}
+        categoryName={getFullColumnName(columns.find(c => c.id === filter.colId))}
+      >
+        <div className="chip-group-content">
+          {filter.values.map((value, vIndex) => (
+            <div key={vIndex} className="chip-container">
+              <Chip isReadOnly={true} className="chip-custom">
+                {value.display ? value.display : value.v}
+              </Chip>
+              {editable && (
+                <Button
+                  className="chip-button"
+                  variant="plain"
+                  aria-label="Action"
+                  onClick={() => {
+                    if (!filters) {
+                      return;
+                    }
+                    filter.values = filter.values.filter(val => val.v !== value.v);
+                    if (_.isEmpty(filter.values)) {
+                      setFilters(filters.filter(f => f.colId !== filter.colId));
+                    } else {
+                      setFilters(_.cloneDeep(filters));
+                    }
+                  }}
+                >
+                  <TimesIcon />
+                </Button>
+              )}
+            </div>
+          ))}
+          {editable && (
+            <Button
+              className="group-button"
+              variant="plain"
+              aria-label="Action"
+              onClick={() => setFilters(filters ? filters.filter(f => f.colId !== filter.colId) : [])}
+            >
+              <TimesCircleIcon />
+            </Button>
+          )}
+        </div>
+      </ChipGroup>
+    );
+  };
+
+  const getGroupFilters = (filters: Filter[] | undefined, editable: boolean) => {
+    if (props.queryOptions.match == 'srcOrDst') {
+      return (
+        filters &&
+        getFilterGroups(filters, t).map((group, index, array) => (
+          <div key={index} className="group-container flex-start">
+            <div className="group">
+              {group.title && (
+                <div className="group-header">
+                  <Text component={TextVariants.p} className="group-title">
+                    {group.title}
+                  </Text>
+                  {editable && (
+                    <Button
+                      variant="plain"
+                      aria-label="Action"
+                      onClick={() => setFilters(filters.filter(f => !group.filters.includes(f)))}
+                    >
+                      <TimesIcon />
+                    </Button>
+                  )}
+                </div>
+              )}
+              <div>{group.filters.map((f, i) => getChipGroup(f, i, editable))}</div>
+            </div>
+            {index < array.length - 1 && (
+              <Text component={TextVariants.p} className="group-criteria">
+                {t('OR')}
+              </Text>
+            )}
+          </div>
+        ))
+      );
+    } else {
+      return (
+        filters &&
+        filters.map((f, i) => (
+          <div key={i} className="chip-margin">
+            {getChipGroup(f, i, editable)}
+          </div>
+        ))
+      );
+    }
+  };
+
   React.useEffect(() => {
     resetFilterValue();
     searchInputRef?.current?.focus();
@@ -394,11 +488,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
   }, [selectedFilterColumn]);
 
   return (
-    <Toolbar
-      id={id}
-      clearAllFilters={clearFilters}
-      clearFiltersButtonText={hasFilterValue() ? t('Clear all filters') : ''}
-    >
+    <Toolbar id={id}>
       <ToolbarContent id={`${id}-search-filters`} toolbarId={id}>
         <ToolbarItem className="flex-start">
           <QueryOptionsDropdown options={props.queryOptions} setOptions={props.setQueryOptions} />
@@ -459,20 +549,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
               </div>
             </Tooltip>
           ) : (
-            forcedFilters &&
-            forcedFilters.map((forcedFilter, ffIndex) => (
-              <ChipGroup
-                key={ffIndex}
-                isClosable={false}
-                categoryName={getFullColumnName(columns.find(c => c.id === forcedFilter.colId))}
-              >
-                {forcedFilter.values.map((forcedValue, fvIndex) => (
-                  <Chip key={fvIndex} isReadOnly={true}>
-                    {forcedValue.display ? forcedValue.display : forcedValue.v}
-                  </Chip>
-                ))}
-              </ChipGroup>
-            ))
+            getGroupFilters(forcedFilters, false)
           )}
         </ToolbarItem>
         {!_.isEmpty(forcedFilters) && (
@@ -500,31 +577,16 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
             </OverflowMenu>
           </ToolbarItem>
         )}
-        {_.isEmpty(forcedFilters) &&
-          filters &&
-          filters.map((filter, index) => (
-            <ToolbarFilter
-              key={index}
-              deleteChipGroup={() => {
-                setFilters(filters.filter(f => f.colId !== filter.colId));
-              }}
-              chips={filter.values.map(value => (value.display ? value.display : value.v))}
-              deleteChip={(f, value: string) => {
-                filter.values = filter.values.filter(val => (val.display ? val.display !== value : val.v !== value));
-                if (_.isEmpty(filter.values)) {
-                  setFilters(filters.filter(f => f.colId !== filter.colId));
-                } else {
-                  setFilters(_.cloneDeep(filters));
-                }
-              }}
-              categoryName={getFullColumnName(columns.find(c => c.id === filter.colId))}
-            >
-              {
-                // set empty children to have a single filter with multiple categories
-                <div></div>
-              }
-            </ToolbarFilter>
-          ))}
+        {_.isEmpty(forcedFilters) && filters && (
+          <ToolbarContent className="group-filters">
+            {getGroupFilters(filters, true)}
+            {hasFilterValue() && (
+              <Button className="chip-margin" variant="link" isInline onClick={clearFilters}>
+                {t('Clear all filters')}
+              </Button>
+            )}
+          </ToolbarContent>
+        )}
         {/* TODO : NETOBSERV-104
           <ToolbarItem variant="pagination">
             <Pagination

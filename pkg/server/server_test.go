@@ -399,6 +399,23 @@ func TestLokiFiltering(t *testing.T) {
 		outputQuery: []string{
 			"?query={app=\"netobserv-flowcollector\"}|~`\"SrcPod\":\"mid-.*d\"`",
 		},
+	}, {
+		inputPath: "?SrcPod=apiserver-xxx&DstPod=network-check-source-yyy&SrcNamespace=openshift-apiserver&DstNamespace=openshift-monitoring&match=srcOrDst",
+		outputQuery: []string{
+			"?query={app=\"netobserv-flowcollector\"}|json|(SrcNamespace=~\".*openshift-apiserver.*\"+and+SrcPod=~`.*apiserver-xxx.*`)+or+(DstNamespace=~\".*openshift-monitoring.*\"+and+DstPod=~`.*network-check-source-yyy.*`)",
+			"?query={app=\"netobserv-flowcollector\"}|json|(DstNamespace=~\".*openshift-monitoring.*\"+and+DstPod=~`.*network-check-source-yyy.*`)+or+(SrcNamespace=~\".*openshift-apiserver.*\"+and+SrcPod=~`.*apiserver-xxx.*`)",
+		},
+	}, {
+		inputPath: "?SrcPod=apiserver-xxx&DstPod=network-check-source-yyy&SrcNamespace=openshift-apiserver&match=srcOrDst",
+		outputQuery: []string{
+			"?query={app=\"netobserv-flowcollector\"}|json|(SrcNamespace=~\".*openshift-apiserver.*\"+and+SrcPod=~`.*apiserver-xxx.*`)+or+(DstPod=~`.*network-check-source-yyy.*`)",
+			"?query={app=\"netobserv-flowcollector\"}|json|(DstPod=~`.*network-check-source-yyy.*`)+or+(SrcNamespace=~\".*openshift-apiserver.*\"+and+SrcPod=~`.*apiserver-xxx.*`)",
+		},
+	}, {
+		inputPath: "?SrcPod=apiserver-xxx&match=srcOrDst",
+		outputQuery: []string{
+			"?query={app=\"netobserv-flowcollector\"}|~`\"SrcPod\":\".*apiserver-xxx.*\"`",
+		},
 	}}
 
 	// GIVEN a Loki service

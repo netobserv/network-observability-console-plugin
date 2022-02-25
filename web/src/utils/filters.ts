@@ -1,7 +1,8 @@
+import { TFunction } from 'i18next';
 import * as _ from 'lodash';
 import protocols from 'protocol-numbers';
 import { getPort } from 'port-numbers';
-import { ColumnsId } from './columns';
+import { ColumnsId, getDefaultColumns } from './columns';
 import { getProtectedService } from './port';
 
 export enum FilterType {
@@ -22,6 +23,26 @@ export interface Filter {
   colId: ColumnsId;
   values: FilterValue[];
 }
+
+export type FilterGroup = {
+  title?: string;
+  filters: Filter[];
+};
+
+export const getFilterGroups = (filters: Filter[], t: TFunction) => {
+  const groups: FilterGroup[] = [];
+  _.each(filters, filter => {
+    const group = getDefaultColumns(t).find(c => c.id === filter.colId)?.group;
+    const found = groups.find(g => g.title === group);
+    if (found) {
+      found!.filters.push(filter);
+    } else {
+      groups.push({ title: group, filters: [filter] });
+    }
+  });
+
+  return groups;
+};
 
 export interface FilterOption {
   name: string;

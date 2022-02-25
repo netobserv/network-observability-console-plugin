@@ -47,7 +47,8 @@ export const reporterToFlowdir = _.invert(flowdirToReporter);
 
 const stringToMatch: { [match: string]: Match } = {
   all: 'all',
-  any: 'any'
+  any: 'any',
+  srcOrDst: 'srcOrDst'
 };
 
 export const buildQueryArguments = (

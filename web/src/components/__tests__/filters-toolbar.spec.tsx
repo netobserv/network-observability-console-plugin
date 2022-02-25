@@ -1,12 +1,4 @@
-import {
-  Button,
-  Dropdown,
-  TextInput,
-  Toolbar,
-  ToolbarFilter,
-  ToolbarItem,
-  ValidatedOptions
-} from '@patternfly/react-core';
+import { Button, Dropdown, TextInput, Toolbar, ToolbarItem, ValidatedOptions } from '@patternfly/react-core';
 import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 import { act } from 'react-dom/test-utils';
@@ -14,7 +6,7 @@ import { ColumnsId } from '../../utils/columns';
 import { Filter } from '../../utils/filters';
 import FiltersToolbar, { FiltersToolbarProps } from '../filters-toolbar';
 import { ShuffledDefaultColumns } from '../__tests-data__/columns';
-import { FiltersSample, FTPSrcPortSample } from '../__tests-data__/filters';
+import { FiltersSample, FiltersSample2, FTPSrcPortSample } from '../__tests-data__/filters';
 
 describe('<FiltersToolbar />', () => {
   const props: FiltersToolbarProps = {
@@ -42,17 +34,33 @@ describe('<FiltersToolbar />', () => {
   });
   it('should render filters', async () => {
     const wrapper = shallow(<FiltersToolbar {...props} />);
-    expect(wrapper.find(ToolbarFilter)).toHaveLength(props.filters!.length);
+    expect(wrapper.find('.chip-container')).toHaveLength(props.filters!.length);
 
     //add a bunch of filters
     props.filters = FiltersSample;
     wrapper.setProps({ filters: props.filters });
-    expect(wrapper.find(ToolbarFilter)).toHaveLength(props.filters.length);
+    expect(wrapper.find('.chip-container')).toHaveLength(props.filters.length);
 
     //update props to set a single filter
     props.filters = [FiltersSample[0]];
     wrapper.setProps({ filters: props.filters });
-    expect(wrapper.find(ToolbarFilter)).toHaveLength(props.filters.length);
+    expect(wrapper.find('.chip-container')).toHaveLength(props.filters.length);
+  });
+  it('should render grouped filters', async () => {
+    const wrapper = shallow(<FiltersToolbar {...props} />);
+    //group by Source or Destination
+    wrapper.setProps({ queryOptions: { reporter: 'both', limit: 100, match: 'srcOrDst' } });
+
+    //set sample with 2 groups
+    props.filters = FiltersSample;
+    wrapper.setProps({ filters: props.filters });
+    const groupContainers = wrapper.find('.group-container');
+    expect(groupContainers).toHaveLength(2);
+
+    //set sample with one group
+    props.filters = FiltersSample2;
+    wrapper.setProps({ filters: props.filters });
+    expect(wrapper.find('.group-container')).toHaveLength(1);
   });
   it('should open and close', async () => {
     const wrapper = mount(<FiltersToolbar {...props} />);

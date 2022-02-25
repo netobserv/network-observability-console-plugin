@@ -49,3 +49,68 @@ button.pf-c-button.pf-m-link.pf-m-inline:empty {
 #more {
   padding: 5px 0px 0px 5px;
 }
+
+/* custom chip groups*/
+
+.pf-c-toolbar__content.group-filters {
+  padding: 0;
+  flex-basis: 100%;
+  margin-top: 5px;
+}
+
+.group-container {
+  display: flex;
+}
+
+.group-criteria {
+  align-self: center;
+  margin: 10px;
+}
+
+.group {
+  text-align: center;
+  background-color: #f0f0f0;
+  border-radius: 3px;
+}
+
+.group-header {
+  display: flex;
+}
+
+.group-title {
+  padding: 5px;
+  flex: 1;
+  align-self: center;
+}
+
+.pf-c-button.group-button {
+  padding: 5px;
+}
+
+.chip-group-content {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.chip-margin {
+  margin: 10px !important;
+}
+
+.chip-container {
+  background: white;
+  border-radius: 5px;
+  border: var(--pf-c-chip--before--BorderWidth) solid var(--pf-c-chip--before--BorderColor);
+  margin-right: 5px;
+}
+
+.chip-custom::before {
+  border: none !important;
+}
+
+.pf-c-button.chip-button {
+  position: relative;
+  right: 0;
+  top: 2px;
+  padding: 0 5px 0 0;
+}

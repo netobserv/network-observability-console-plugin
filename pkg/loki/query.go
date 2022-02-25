@@ -13,19 +13,20 @@ import (
 )
 
 const (
-	queryParam      = "query"
-	startTimeKey    = "startTime"
-	endTimeTimeKey  = "endTime"
-	timeRangeKey    = "timeRange"
-	limitKey        = "limit"
-	exportFormatKey = "format"
-	columnsKey      = "columns"
-	startParam      = "start"
-	endParam        = "end"
-	limitParam      = "limit"
-	matchParam      = "match"
-	flowDirParam    = "FlowDirection"
-	anyMatchValue   = "any"
+	queryParam         = "query"
+	startTimeKey       = "startTime"
+	endTimeTimeKey     = "endTime"
+	timeRangeKey       = "timeRange"
+	limitKey           = "limit"
+	exportFormatKey    = "format"
+	columnsKey         = "columns"
+	startParam         = "start"
+	endParam           = "end"
+	limitParam         = "limit"
+	matchParam         = "match"
+	flowDirParam       = "FlowDirection"
+	anyMatchValue      = "any"
+	srcOrDstMatchValue = "srcOrDst"
 )
 
 // can contains only alphanumeric / '-' / '_' / '.' / ',' / '"' / '*' characteres
@@ -37,9 +38,10 @@ var valueReplacer = strings.NewReplacer(`*`, `.*`, `"`, "")
 type LabelJoiner string
 
 const (
-	// joinOr spaces are escaped to avoid problems when querying Loki
-	joinOr  = LabelJoiner("+or+")
-	joinAnd = LabelJoiner("|")
+	// spaces are escaped to avoid problems when querying Loki
+	joinAnd     = LabelJoiner("+and+")
+	joinOr      = LabelJoiner("+or+")
+	joinPipeAnd = LabelJoiner("|")
 )
 
 // Query for a LogQL HTTP petition
@@ -47,12 +49,13 @@ const (
 // {streamSelector}|lineFilters|json|labelFilters
 type Query struct {
 	// urlParams for the HTTP call
-	urlParams      [][2]string
-	labelMap       map[string]struct{}
-	streamSelector []labelFilter
-	lineFilters    []string
-	labelFilters   []labelFilter
-	labelJoiner    LabelJoiner
+	urlParams           [][2]string
+	labelMap            map[string]struct{}
+	streamSelector      []labelFilter
+	lineFilters         []string
+	labelFilters        []labelFilter
+	groupedLabelFilters [][]labelFilter
+	labelJoiner         LabelJoiner
 	// Attributes with a special meaning that need to be processed independently
 	specialAttrs map[string]string
 	export       *Export
@@ -70,7 +73,7 @@ func NewQuery(labels []string, export bool) *Query {
 	}
 	return &Query{
 		specialAttrs: map[string]string{},
-		labelJoiner:  joinAnd,
+		labelJoiner:  joinPipeAnd,
 		export:       exp,
 		labelMap:     utils.GetMapInterface(labels),
 	}
@@ -94,16 +97,26 @@ func (q *Query) URLQuery() (string, error) {
 		sb.WriteString(lf)
 		sb.WriteByte('`')
 	}
-	if len(q.labelFilters) > 0 {
+	// Label filters can be single or grouped
+	// with values separated by labelJoiner (+and+ / +or+).
+	// Grouped labels will have "+or+" criteria between
+	// each group
+	if len(q.labelFilters) > 0 || len(q.groupedLabelFilters) > 0 {
 		if q.labelJoiner == "" {
 			panic("Label Joiner can't be empty")
 		}
 		sb.WriteString("|json|")
-		for i, lf := range q.labelFilters {
+		// add single label filters at first
+		q.WriteLabelFilter(&sb, &q.labelFilters)
+		// then add groups
+		for i, glf := range q.groupedLabelFilters {
 			if i > 0 {
-				sb.WriteString(string(q.labelJoiner))
+				sb.WriteString(string(joinOr))
 			}
-			lf.writeInto(&sb)
+			//group with parenthesis
+			sb.WriteByte('(')
+			q.WriteLabelFilter(&sb, &glf)
+			sb.WriteByte(')')
 		}
 	}
 	if len(q.urlParams) > 0 {
@@ -115,6 +128,15 @@ func (q *Query) URLQuery() (string, error) {
 		}
 	}
 	return sb.String(), nil
+}
+
+func (q *Query) WriteLabelFilter(sb *strings.Builder, lfs *[]labelFilter) {
+	for i, lf := range *lfs {
+		if i > 0 {
+			sb.WriteString(string(q.labelJoiner))
+		}
+		lf.writeInto(sb)
+	}
 }
 
 func (q *Query) AddParam(key, value string) error {
@@ -170,9 +192,10 @@ func (q *Query) PrepareToSubmit() (*Query, error) {
 	var out *Query
 	// If match=any, it converts the query to a query that matches when only of the given
 	// attributes match
-	if match := q.specialAttrs[matchParam]; match == anyMatchValue {
-		out = q.convertToAnyMatch()
-	} else {
+	switch q.specialAttrs[matchParam] {
+	case anyMatchValue, srcOrDstMatchValue:
+		out = q.convertTo()
+	default: //default all
 		// copy receiver query
 		cp := *q
 		out = &cp

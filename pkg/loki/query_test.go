@@ -62,7 +62,7 @@ func TestQuery_ToURL_ConvertToAnyMatch(t *testing.T) {
 			require.NoError(t, err)
 			assert.Equal(t, tc.expect, urlQuery)
 
-			anyMatchQuery := tc.in.convertToAnyMatch()
+			anyMatchQuery := tc.in.convertTo()
 			// we need to have at least a stream selector, so we add a label for testing purposes
 			// (in production, we add the app label)
 			anyMatchQuery.streamSelector = append(anyMatchQuery.streamSelector,

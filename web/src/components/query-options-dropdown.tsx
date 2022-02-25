@@ -40,6 +40,10 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({ options
     {
       label: t('Match any column'),
       value: 'any'
+    },
+    {
+      label: t('Match all Source or Destination'),
+      value: 'srcOrDst'
     }
   ];
 

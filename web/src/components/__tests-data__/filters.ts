@@ -20,6 +20,17 @@ export const FiltersSample: Filter[] = [
   }
 ];
 
+export const FiltersSample2: Filter[] = [
+  {
+    colId: ColumnsId.srcport,
+    values: [{ v: '1234' }]
+  },
+  {
+    colId: ColumnsId.srcpod,
+    values: [{ v: 'pod or service' }]
+  }
+];
+
 export const FTPSrcPortSample: Filter = {
   colId: ColumnsId.srcport,
   values: [{ v: '21', display: 'ftp' }]
