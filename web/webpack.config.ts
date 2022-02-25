@@ -113,11 +113,11 @@ if (process.env.NODE_ENV === 'production') {
   // Causes error in --mode=production due to scope hoisting
   config.optimization.concatenateModules = false;
   // Manage dependencies from package.json file. Replace all devDependencies 'import' by 'require'
-  config.externals = NodeExternals({
+  /*config.externals = NodeExternals({
     fileName: './package.json',
     includeInBundle: ['dependencies'],
     excludeFromBundle: ['devDependencies']
-  });
+  });*/
 }
 
 export default config;
