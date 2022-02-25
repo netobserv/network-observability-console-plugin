@@ -549,7 +549,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
               </div>
             </Tooltip>
           ) : (
-            getGroupFilters(forcedFilters, false)
+            <OverflowMenu breakpoint="md">{getGroupFilters(forcedFilters, false)}</OverflowMenu>
           )}
         </ToolbarItem>
         {!_.isEmpty(forcedFilters) && (

@@ -60,6 +60,7 @@ button.pf-c-button.pf-m-link.pf-m-inline:empty {
 
 .group-container {
   display: flex;
+  margin-bottom: 10px;
 }
 
 .group-criteria {
