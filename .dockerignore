@@ -1,4 +1,3 @@
 ./web/node_modules
 ./web/dist
-.git*
 ./plugin-backend
