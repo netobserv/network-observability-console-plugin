@@ -1,6 +1,12 @@
 USER ?= netobserv
-VERSION ?= latest
+VERSION ?= main
+BUILD_VERSION := $(shell git describe --long HEAD)
+BUILD_DATE := $(shell date +%Y-%m-%d\ %H:%M)
+BUILD_SHA := $(shell git rev-parse --short HEAD)
+
 IMAGE ?= quay.io/${USER}/network-observability-console-plugin:${VERSION}
+IMAGE_SHA ?= quay.io/${USER}/network-observability-console-plugin:$(BUILD_SHA)
+
 GOLANGCI_LINT_VERSION = v1.42.1
 COVERPROFILE = coverage.out
 NPM_INSTALL ?= install
@@ -71,7 +77,7 @@ test: test-backend test-frontend
 .PHONY: build-backend
 build-backend: fmt-backend
 	@echo "### Building backend"
-	go build -mod vendor -o plugin-backend cmd/plugin-backend.go
+	go build -ldflags "-X 'main.buildVersion=${BUILD_VERSION}' -X 'main.buildDate=${BUILD_DATE}'" -mod vendor -o plugin-backend cmd/plugin-backend.go
 
 .PHONY: build-frontend
 build-frontend: install-frontend fmt-frontend
@@ -91,6 +97,13 @@ backend: build-backend lint-backend test-backend
 image:
 	@echo "### Building image with ${OCI_BIN}"
 	$(OCI_BIN) build -t $(IMAGE) .
+
+.PHONY: sha-image
+sha-image: image
+	@echo "### Building sha-tagged image with ${OCI_BIN}"
+	echo "FROM ${IMAGE}" > tmp.Dockerfile && \
+		$(OCI_BIN) build --label quay.expires-after=2w -t ${IMAGE_SHA} -f tmp.Dockerfile . && \
+		rm tmp.Dockerfile
 
 .PHONY: push
 push:

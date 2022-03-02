@@ -13,9 +13,9 @@ COPY web web
 RUN NPM_INSTALL=ci make build-frontend
 
 FROM registry.access.redhat.com/ubi8/go-toolset:1.16.7-5 as go-builder
-ARG VERSION=""
 
 WORKDIR /opt/app-root
+COPY .git .git
 COPY go.mod go.mod
 COPY go.sum go.sum
 COPY vendor/ vendor/

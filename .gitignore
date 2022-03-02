@@ -7,3 +7,4 @@
 /web/yarn-error.log
 /plugin-backend
 /coverage.out
+tmp.Dockerfile
