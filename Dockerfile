@@ -4,10 +4,7 @@ WORKDIR /opt/app-root
 
 RUN npm install npm@8.2.0 -g
 RUN mkdir web && chown $USER: web
-COPY web/package.json web/
-COPY web/package-lock.json web/
 COPY Makefile Makefile
-RUN NPM_INSTALL=ci make install-frontend
 COPY web web
 
 RUN NPM_INSTALL=ci make build-frontend

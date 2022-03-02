@@ -1,11 +1,11 @@
-USER ?= netobserv
-VERSION ?= main
+IMG_USER ?= netobserv
+TAG ?= main
 BUILD_VERSION := $(shell git describe --long HEAD)
 BUILD_DATE := $(shell date +%Y-%m-%d\ %H:%M)
 BUILD_SHA := $(shell git rev-parse --short HEAD)
 
-IMAGE ?= quay.io/${USER}/network-observability-console-plugin:${VERSION}
-IMAGE_SHA ?= quay.io/${USER}/network-observability-console-plugin:$(BUILD_SHA)
+IMAGE ?= quay.io/${IMG_USER}/network-observability-console-plugin:${TAG}
+IMAGE_SHA ?= quay.io/${IMG_USER}/network-observability-console-plugin:$(BUILD_SHA)
 
 GOLANGCI_LINT_VERSION = v1.42.1
 COVERPROFILE = coverage.out

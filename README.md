@@ -67,11 +67,11 @@ Images are located on https://quay.io/repository/netobserv/network-observability
 ### Build
 
 ```bash
-# build the default image (quay.io/netobserv/network-observability-console-plugin:latest):
+# build the default image (quay.io/netobserv/network-observability-console-plugin:main):
 make image
 
-# build and push on your own quay.io account (quay.io/myuser/network-observability-console-plugin:latest):
-USER=myuser make image push
+# build and push on your own quay.io account (quay.io/myuser/network-observability-console-plugin:main):
+IMG_USER=myuser make image push
 
 # build and push on a different registry
 IMAGE=dockerhub.io/myuser/plugin:tag make image push
