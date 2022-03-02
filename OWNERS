@@ -3,13 +3,16 @@ approvers:
 - jotak
 - jpinsonneau
 - OlivierCazade
+- eranra
+- KalmanMeth
+- ronensc
 options: {}
 reviewers:
 - mariomac
 - jotak
 - jpinsonneau
 - OlivierCazade
-- andrew-ronaldson
-- jechen0648
-- memodi
 - stleerh
+- eranra
+- KalmanMeth
+- ronensc
