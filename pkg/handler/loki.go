@@ -9,11 +9,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/grafana/loki/pkg/loghttp"
+	"github.com/sirupsen/logrus"
+
 	"github.com/netobserv/network-observability-console-plugin/pkg/httpclient"
 	"github.com/netobserv/network-observability-console-plugin/pkg/loki"
+	"github.com/netobserv/network-observability-console-plugin/pkg/model"
 	"github.com/netobserv/network-observability-console-plugin/pkg/utils"
-	"github.com/sirupsen/logrus"
 )
 
 var hlog = logrus.WithField("module", "handler")
@@ -128,7 +129,7 @@ func writeRawJSON(w http.ResponseWriter, code int, payload []byte) {
 }
 
 func writeCSV(w http.ResponseWriter, code int, payload []byte, columns []string) {
-	var qr loghttp.QueryResponse
+	var qr model.QueryResponse
 	err := json.Unmarshal(payload, &qr)
 	if err != nil {
 		writeError(w, http.StatusServiceUnavailable, fmt.Sprintf("Unknown error from Loki - cannot unmarshal (code: %d resp: %s)", code, payload))
@@ -159,18 +160,18 @@ func writeCSV(w http.ResponseWriter, code int, payload []byte, columns []string)
 	writer.Flush()
 }
 
-func getCSVDatas(qr *loghttp.QueryResponse, columns []string) ([][]string, error) {
+func getCSVDatas(qr *model.QueryResponse, columns []string) ([][]string, error) {
 	if columns != nil && len(columns) == 0 {
 		return nil, fmt.Errorf("columns can't be empty if specified")
 	}
 
-	if streams, ok := qr.Data.Result.(loghttp.Streams); ok {
+	if streams, ok := qr.Data.Result.(model.Streams); ok {
 		return manageStreams(streams, columns)
 	}
 	return nil, fmt.Errorf("loki returned an unexpected type: %T", qr.Data.Result)
 }
 
-func manageStreams(streams loghttp.Streams, columns []string) ([][]string, error) {
+func manageStreams(streams model.Streams, columns []string) ([][]string, error) {
 	//make csv datas containing header as first line + rows
 	datas := make([][]string, 1)
 	//set Timestamp as first data
@@ -219,7 +220,7 @@ func manageStreams(streams loghttp.Streams, columns []string) ([][]string, error
 	return datas, nil
 }
 
-func getRowDatas(stream loghttp.Stream, entry loghttp.Entry, labels []string, fields []string,
+func getRowDatas(stream model.Stream, entry model.Entry, labels []string, fields []string,
 	line map[string]interface{}, size int, columns []string) []string {
 	index := 0
 	rowDatas := make([]string, size)
