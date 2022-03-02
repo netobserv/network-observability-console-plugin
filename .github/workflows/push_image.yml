@@ -27,7 +27,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v2
       - name: build images
-        run: USER=netobserv VERSION=${{ env.TAG }} make sha-image
+        run: make sha-image
       - name: podman login to quay.io
         uses: redhat-actions/podman-login@v1
         with:
