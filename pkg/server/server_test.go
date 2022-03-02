@@ -301,27 +301,27 @@ func TestLokiFiltering(t *testing.T) {
 	}, {
 		inputPath: "?SrcK8S_Namespace=test-namespace&match=all",
 		outputQuery: []string{
-			`?query={SrcNamespace=~"(?i).*test-namespace.*",app="netobserv-flowcollector"}`,
+			`?query={SrcK8S_Namespace=~"(?i).*test-namespace.*",app="netobserv-flowcollector"}`,
 		},
 	}, {
 		inputPath: "?SrcK8S_Namespace=test-namespace&match=any",
 		outputQuery: []string{
-			`?query={SrcNamespace=~"(?i).*test-namespace.*",app="netobserv-flowcollector"}`,
+			`?query={SrcK8S_Namespace=~"(?i).*test-namespace.*",app="netobserv-flowcollector"}`,
 		},
 	}, {
 		inputPath: "?SrcPort=8080&SrcAddr=10.128.0.1&SrcK8S_Namespace=default",
 		outputQuery: []string{
-			"?query={SrcNamespace=~\"(?i).*default.*\",app=\"netobserv-flowcollector\"}|~`\"SrcPort\":8080`|json|SrcAddr=ip(\"10.128.0.1\")",
+			"?query={SrcK8S_Namespace=~\"(?i).*default.*\",app=\"netobserv-flowcollector\"}|~`\"SrcPort\":8080`|json|SrcAddr=ip(\"10.128.0.1\")",
 		},
 	}, {
 		inputPath: "?SrcPort=8080&SrcAddr=10.128.0.1&SrcK8S_Namespace=default&match=any",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\"}|json|SrcNamespace=~\"(?i).*default.*\"+or+SrcAddr=ip(\"10.128.0.1\")+or+SrcPort=8080",
+			"?query={app=\"netobserv-flowcollector\"}|json|SrcK8S_Namespace=~\"(?i).*default.*\"+or+SrcAddr=ip(\"10.128.0.1\")+or+SrcPort=8080",
 		},
 	}, {
 		inputPath: "?SrcPort=8080&SrcAddr=10.128.0.1&SrcK8S_Namespace=default&match=any&FlowDirection=0",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\",FlowDirection=\"0\"}|json|SrcNamespace=~\"(?i).*default.*\"+or+SrcAddr=ip(\"10.128.0.1\")+or+SrcPort=8080",
+			"?query={app=\"netobserv-flowcollector\",FlowDirection=\"0\"}|json|SrcK8S_Namespace=~\"(?i).*default.*\"+or+SrcAddr=ip(\"10.128.0.1\")+or+SrcPort=8080",
 		},
 	}, {
 		inputPath:   "?startTime=1640991600&match=all",

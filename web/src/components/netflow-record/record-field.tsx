@@ -44,7 +44,7 @@ export const RecordField: React.FC<{
     );
   };
 
-  const kubeObjContent = (value: string | undefined, kind: string | undefined, ns: string | undefined, ip: string) => {
+  const kubeObjContent = (value: string | undefined, kind: string | undefined, ns: string | undefined) => {
     if (value && kind) {
       return (
         <div className="force-truncate">
@@ -63,7 +63,7 @@ export const RecordField: React.FC<{
         </div>
       );
     } else {
-      return <div>{ip}</div>;
+      return <div></div>;
     }
   };
 
@@ -83,33 +83,13 @@ export const RecordField: React.FC<{
         );
       }
       case ColumnsId.srcname:
-        return kubeObjContent(
-          value as string,
-          flow.fields.SrcK8S_Type,
-          flow.labels.SrcK8S_Namespace,
-          flow.fields.SrcAddr
-        );
+        return kubeObjContent(value as string, flow.fields.SrcK8S_Type, flow.labels.SrcK8S_Namespace);
       case ColumnsId.dstname:
-        return kubeObjContent(
-          value as string,
-          flow.fields.DstK8S_Type,
-          flow.labels.DstK8S_Namespace,
-          flow.fields.DstAddr
-        );
+        return kubeObjContent(value as string, flow.fields.DstK8S_Type, flow.labels.DstK8S_Namespace);
       case ColumnsId.srcowner:
-        return kubeObjContent(
-          value as string,
-          flow.fields.SrcK8S_OwnerType,
-          flow.labels.SrcK8S_Namespace,
-          flow.fields.SrcAddr
-        );
+        return kubeObjContent(value as string, flow.fields.SrcK8S_OwnerType, flow.labels.SrcK8S_Namespace);
       case ColumnsId.dstowner:
-        return kubeObjContent(
-          value as string,
-          flow.fields.DstK8S_OwnerType,
-          flow.labels.DstK8S_Namespace,
-          flow.fields.DstAddr
-        );
+        return kubeObjContent(value as string, flow.fields.DstK8S_OwnerType, flow.labels.DstK8S_Namespace);
       case ColumnsId.srcnamespace:
       case ColumnsId.dstnamespace: {
         if (value) {
