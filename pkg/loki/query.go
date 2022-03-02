@@ -201,8 +201,9 @@ func (q *Query) processStreamSelector(key string, values []string) {
 			regexStr.WriteByte('|')
 		}
 		//match the begining of string if quoted without a star
+		//and case insensitive if no quotes
 		if !strings.HasPrefix(value, `"`) {
-			regexStr.WriteString(".*")
+			regexStr.WriteString("(?i).*")
 		} else if !strings.HasPrefix(value, `"*`) {
 			regexStr.WriteString("^")
 		}
@@ -259,8 +260,9 @@ func (q *Query) processLineFilters(key string, values []string) error {
 		} else {
 			regexStr.WriteString(`"`)
 			// match start any if not quoted
+			// and case insensitive
 			if !strings.HasPrefix(value, `"`) {
-				regexStr.WriteString(".*")
+				regexStr.WriteString("(?i).*")
 			}
 			//inject value with regex
 			regexStr.WriteString(valueReplacer.Replace(value))
