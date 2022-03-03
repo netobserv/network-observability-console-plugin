@@ -1,4 +1,8 @@
 import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionToggle,
   Button,
   Chip,
   ChipGroup,
@@ -30,7 +34,7 @@ import * as _ from 'lodash';
 import { getPort } from 'port-numbers';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Column, ColumnsId, getColumnGroups, getFullColumnName } from '../utils/columns';
+import { Column, ColumnGroup, ColumnsId, getColumnGroups, getFullColumnName } from '../utils/columns';
 import {
   createFilterValue,
   Filter,
@@ -83,10 +87,8 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
   const [autocompleteOptions, setAutocompleteOptions] = React.useState<FilterOption[]>([]);
   const [isPopperVisible, setPopperVisible] = React.useState(false);
   const [isSearchFiltersOpen, setSearchFiltersOpen] = React.useState<boolean>(false);
-
-  const availableFilters = columns.filter(c => c.filterType !== FilterType.NONE);
-  const filtersGroups = getColumnGroups(availableFilters);
-  const [selectedFilterColumn, setSelectedFilterColumn] = React.useState<Column>(availableFilters[0]);
+  const [filtersGroups, setFiltersGroups] = React.useState<ColumnGroup[]>();
+  const [selectedFilterColumn, setSelectedFilterColumn] = React.useState<Column>(columns[0]);
   const [selectedFilterValue, setSelectedFilterValue] = React.useState<string>('');
 
   // reset and delay message state to trigger tooltip properly
@@ -157,6 +159,29 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
           }
         case FilterType.K8S_NAMES:
           return validateLabel(value) ? { val: value } : { err: t('Not a valid kubernetes label') };
+        case FilterType.FQDN:
+          //FQDN can either be namespace / pod / namespace.pod / ipaddress / port / ipaddress:port
+          if (value.includes(':')) {
+            const ipAndPort = value.split(':');
+            return validateIPFilter(ipAndPort[0]) && ipAndPort[1].length && !isNaN(Number(ipAndPort[1]))
+              ? { val: value }
+              : { err: t('Not a valid IP and port') };
+          } else if (value.includes('.')) {
+            const splittedValue = value.split('.');
+            if (splittedValue.length === 2) {
+              return validateLabel(splittedValue[0]) && validateLabel(splittedValue[1])
+                ? { val: value }
+                : { err: t('Not a valid Namespace and Pod') };
+            } else {
+              return validateIPFilter(value)
+                ? { val: value }
+                : { err: t('Not a valid IPv4 or IPv6, nor a CIDR, nor an IP range separated by hyphen') };
+            }
+          } else if (!isNaN(Number(value))) {
+            return { val: value };
+          } else {
+            return validateLabel(value) ? { val: value } : { err: t('Not a valid kubernetes label') };
+          }
         default:
           return { val: value };
       }
@@ -362,6 +387,15 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
         - ${t('Ending text like "*-registry"')}
         - ${t('Pattern like "cluster-*-registry", "c*-*-r*y", -i*e-')}`;
         break;
+      case FilterType.FQDN:
+        hint = t('Specify a full qualified name.');
+        examples = `${t('Specify a full qualified name following these rules:')}
+          - ${t('A namespace and pod like openshift.apiserver')}
+          - ${t('A single kubernetes name like openshift, apiserver')}
+          - ${t('An IP address and port like 192.168.0.1:80')}
+          - ${t('A single IPv4 or IPv6 address like 192.0.2.0, ::1')}
+          - ${t('A port number like 80, 21')}`;
+        break;
       default:
         hint = '';
         examples = '';
@@ -387,12 +421,63 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
     );
   };
 
+  const getFiltersDropdownItems = () => {
+    return [
+      <Accordion key="accordion">
+        {filtersGroups &&
+          filtersGroups.map((g, i) => (
+            <AccordionItem key={`group-${i}`}>
+              <AccordionToggle
+                onClick={() => {
+                  const expanded = !g.expanded;
+                  filtersGroups.map(fg => (fg.expanded = false));
+                  g.expanded = expanded;
+                  setFiltersGroups([...filtersGroups]);
+                }}
+                isExpanded={g.expanded}
+                id={`group-${i}-toggle`}
+              >
+                {g.title && <h1 className="pf-c-dropdown__group-title">{g.title}</h1>}
+              </AccordionToggle>
+              <AccordionContent isHidden={g.title != undefined && !g.expanded}>
+                {g.columns.map((col, index) => (
+                  <DropdownItem
+                    id={col.id}
+                    className={`column-filter-item ${g.title ? 'grouped' : ''}`}
+                    component="button"
+                    onClick={() => {
+                      setSearchFiltersOpen(false);
+                      setSelectedFilterColumn(col);
+                    }}
+                    key={index}
+                  >
+                    {col.name}
+                  </DropdownItem>
+                ))}
+              </AccordionContent>
+            </AccordionItem>
+          ))}
+      </Accordion>
+    ];
+  };
+
   React.useEffect(() => {
     resetFilterValue();
     searchInputRef?.current?.focus();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedFilterColumn]);
+
+  React.useEffect(() => {
+    //skip columns without filter types
+    const typedFilters = columns.filter(c => c.filterType !== FilterType.NONE);
+    //groups columns by Common fields / Source / Destination
+    const groups = getColumnGroups(typedFilters, t('Common'));
+    setFiltersGroups(groups);
+    //pick first column of first group
+    setSelectedFilterColumn(groups[0].columns[0]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [columns]);
 
   return (
     <Toolbar
@@ -419,24 +504,8 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
                 <InputGroup>
                   <Dropdown
                     id="column-filter-dropdown"
-                    dropdownItems={filtersGroups.map((g, i) => (
-                      <div key={`group-${i}`}>
-                        {g.title && <h1 className="pf-c-dropdown__group-title">{g.title}</h1>}
-                        {g.columns.map((col, index) => (
-                          <DropdownItem
-                            id={col.id}
-                            className={`column-filter-item ${g.title ? 'grouped' : ''}`}
-                            component="button"
-                            onClick={() => setSelectedFilterColumn(col)}
-                            key={index}
-                          >
-                            {col.name}
-                          </DropdownItem>
-                        ))}
-                      </div>
-                    ))}
+                    dropdownItems={getFiltersDropdownItems()}
                     isOpen={isSearchFiltersOpen}
-                    onSelect={() => setSearchFiltersOpen(false)}
                     toggle={
                       <DropdownToggle
                         id="column-filter-toggle"

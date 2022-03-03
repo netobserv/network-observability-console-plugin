@@ -1,4 +1,6 @@
 import {
+  Accordion,
+  AccordionItem,
   Button,
   Dropdown,
   TextInput,
@@ -62,6 +64,8 @@ describe('<FiltersToolbar />', () => {
     //open dropdow
     dropdown.simulate('click');
     expect(wrapper.find('.column-filter-item').length).toBeGreaterThan(0);
+    expect(wrapper.find(Accordion).length).toBe(1);
+    expect(wrapper.find(AccordionItem).length).toBeGreaterThan(0);
 
     //close dropdow
     dropdown.simulate('click');

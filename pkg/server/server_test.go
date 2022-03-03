@@ -263,40 +263,40 @@ func TestLokiFiltering(t *testing.T) {
 	}{{
 		inputPath: "?SrcPod=test-pod",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\"}|~`\"SrcPod\":\"(?i).*test-pod.*\"`",
+			"?query={app=\"netobserv-flowcollector\"}|~`SrcPod\":\"(?i).*test-pod.*\"`",
 		},
 	}, {
 		inputPath: "?SrcPod=test-pod&match=any",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\"}|~`\"SrcPod\":\"(?i).*test-pod.*\"`",
+			"?query={app=\"netobserv-flowcollector\"}|~`SrcPod\":\"(?i).*test-pod.*\"`",
 		},
 	}, {
 		inputPath: "?Proto=6&match=all",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\"}|~`\"Proto\":6`",
+			"?query={app=\"netobserv-flowcollector\"}|~`Proto\":6`",
 		},
 	}, {
 		inputPath: "?Proto=6&match=any",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\"}|~`\"Proto\":6`",
+			"?query={app=\"netobserv-flowcollector\"}|~`Proto\":6`",
 		},
 	}, {
 		inputPath: "?Proto=6&SrcPod=test",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\"}|~`\"Proto\":6`|~`\"SrcPod\":\"(?i).*test.*\"`",
-			"?query={app=\"netobserv-flowcollector\"}|~`\"SrcPod\":\"(?i).*test.*\"`|~`\"Proto\":6`",
+			"?query={app=\"netobserv-flowcollector\"}|~`Proto\":6`|~`SrcPod\":\"(?i).*test.*\"`",
+			"?query={app=\"netobserv-flowcollector\"}|~`SrcPod\":\"(?i).*test.*\"`|~`Proto\":6`",
 		},
 	}, {
 		inputPath: "?Proto=6&SrcPod=test&match=any",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\"}|~`(\"Proto\":6)|(\"SrcPod\":\"(?i).*test.*\")`",
-			"?query={app=\"netobserv-flowcollector\"}|~`(\"SrcPod\":\"(?i).*test.*\")|(\"Proto\":6)`",
+			"?query={app=\"netobserv-flowcollector\"}|~`(Proto\":6)|(SrcPod\":\"(?i).*test.*\")`",
+			"?query={app=\"netobserv-flowcollector\"}|~`(SrcPod\":\"(?i).*test.*\")|(Proto\":6)`",
 		},
 	}, {
 		inputPath: "?Proto=6&SrcPod=test&FlowDirection=1&match=any",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\",FlowDirection=\"1\"}|~`(\"Proto\":6)|(\"SrcPod\":\"(?i).*test.*\")`",
-			"?query={app=\"netobserv-flowcollector\",FlowDirection=\"1\"}|~`(\"SrcPod\":\"(?i).*test.*\")|(\"Proto\":6)`",
+			"?query={app=\"netobserv-flowcollector\",FlowDirection=\"1\"}|~`(Proto\":6)|(SrcPod\":\"(?i).*test.*\")`",
+			"?query={app=\"netobserv-flowcollector\",FlowDirection=\"1\"}|~`(SrcPod\":\"(?i).*test.*\")|(Proto\":6)`",
 		},
 	}, {
 		inputPath: "?SrcNamespace=test-namespace&match=all",
@@ -311,7 +311,7 @@ func TestLokiFiltering(t *testing.T) {
 	}, {
 		inputPath: "?SrcPort=8080&SrcAddr=10.128.0.1&SrcNamespace=default",
 		outputQuery: []string{
-			"?query={SrcNamespace=~\"(?i).*default.*\",app=\"netobserv-flowcollector\"}|~`\"SrcPort\":8080`|json|SrcAddr=ip(\"10.128.0.1\")",
+			"?query={SrcNamespace=~\"(?i).*default.*\",app=\"netobserv-flowcollector\"}|~`SrcPort\":8080`|json|SrcAddr=ip(\"10.128.0.1\")",
 		},
 	}, {
 		inputPath: "?SrcPort=8080&SrcAddr=10.128.0.1&SrcNamespace=default&match=any",
@@ -382,22 +382,30 @@ func TestLokiFiltering(t *testing.T) {
 	}, {
 		inputPath: "?SrcPod=\"exact-pod\"",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\"}|~`\"SrcPod\":\"exact-pod\"`",
+			"?query={app=\"netobserv-flowcollector\"}|~`SrcPod\":\"exact-pod\"`",
 		},
 	}, {
 		inputPath: "?SrcPod=\"start-pod*\"",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\"}|~`\"SrcPod\":\"start-pod.*\"`",
+			"?query={app=\"netobserv-flowcollector\"}|~`SrcPod\":\"start-pod.*\"`",
 		},
 	}, {
 		inputPath: "?SrcPod=\"*end-pod\"",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\"}|~`\"SrcPod\":\".*end-pod\"`",
+			"?query={app=\"netobserv-flowcollector\"}|~`SrcPod\":\".*end-pod\"`",
 		},
 	}, {
 		inputPath: "?SrcPod=\"mid-*d\"",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\"}|~`\"SrcPod\":\"mid-.*d\"`",
+			"?query={app=\"netobserv-flowcollector\"}|~`SrcPod\":\"mid-.*d\"`",
+		},
+	}, {
+		inputPath: "?SrcFQDN=namespace1.pod2&DstFQDN=namespace2.pod2",
+		outputQuery: []string{
+			"?query={app=\"netobserv-flowcollector\"}|json|(DstNamespace=~\"(?i).*namespace2.*\"+or+DstPod=~`(?i).*pod2.*`)|(SrcNamespace=~\"(?i).*namespace1.*\"+or+SrcPod=~`(?i).*pod2.*`)",
+			"?query={app=\"netobserv-flowcollector\"}|json|(SrcNamespace=~\"(?i).*namespace1.*\"+or+SrcPod=~`(?i).*pod2.*`)|(DstNamespace=~\"(?i).*namespace2.*\"+or+DstPod=~`(?i).*pod2.*`)",
+			"?query={app=\"netobserv-flowcollector\"}|json|(DstPod=~`(?i).*pod2.*`+or+DstNamespace=~\"(?i).*namespace2.*\")|(SrcPod=~`(?i).*pod2.*`+or+SrcNamespace=~\"(?i).*namespace1.*\")",
+			"?query={app=\"netobserv-flowcollector\"}|json|(SrcPod=~`(?i).*pod2.*`+or+SrcNamespace=~\"(?i).*namespace1.*\")|(DstPod=~`(?i).*pod2.*`+or+DstNamespace=~\"(?i).*namespace2.*\")",
 		},
 	}}
 

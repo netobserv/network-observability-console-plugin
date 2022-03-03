@@ -217,7 +217,7 @@ export const NetflowTraffic: React.FC<{
             <RecordPanel
               id="recordPanel"
               record={selectedRecord}
-              columns={columns}
+              columns={getDefaultColumns(t, false, false)}
               filters={filters}
               range={range}
               options={queryOptions}

@@ -40,6 +40,15 @@ func stringLabelFilter(labelKey string, matcher labelMatcher, value string) labe
 	}
 }
 
+func regexLabelFilter(labelKey string, matcher labelMatcher, value string) labelFilter {
+	return labelFilter{
+		key:       labelKey,
+		matcher:   labelMatches,
+		value:     value,
+		valueType: typeString,
+	}
+}
+
 func intLabelFilter(labelKey string, value int) labelFilter {
 	return labelFilter{
 		key:       labelKey,

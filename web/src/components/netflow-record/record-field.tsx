@@ -18,39 +18,44 @@ export type RecordFieldFilter = {
 export const RecordField: React.FC<{
   flow: Record;
   column: Column;
-  size: Size;
+  size?: Size;
   filter?: RecordFieldFilter;
 }> = ({ flow, column, size, filter }) => {
   const { t } = useTranslation('plugin__network-observability-plugin');
 
-  const onMouseOver = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+  const onMouseOver = (event: React.MouseEvent<HTMLDivElement, MouseEvent>, className: string) => {
     if (event.currentTarget) {
       const isTruncated =
         event.currentTarget.offsetHeight < event.currentTarget.scrollHeight ||
         event.currentTarget.offsetWidth < event.currentTarget.scrollWidth ||
         event.currentTarget.children[0].className === 'force-truncate';
-      event.currentTarget.className = isTruncated
-        ? `record-field-content truncated ${size}`
-        : `record-field-content ${size}`;
+      event.currentTarget.className = isTruncated ? `${className} truncated ${size}` : `${className} ${size}`;
     }
   };
 
-  const simpleTextWithTooltip = (text: string) => {
-    return (
-      <div>
-        <span>{text}</span>
-        <div className="record-field-tooltip">{text}</div>
-      </div>
-    );
+  const emptyText = () => {
+    return <div className="record-field-empty">-</div>;
   };
 
-  const kubeObjContent = (value: string | undefined, kind: string | undefined, ns: string | undefined) => {
+  const simpleTextWithTooltip = (text: string) => {
+    if (text) {
+      return (
+        <div>
+          <span>{text}</span>
+          <div className="record-field-tooltip">{text}</div>
+        </div>
+      );
+    }
+    return undefined;
+  };
+
+  const kubeObjContent = (value?: string, kind?: string, ns?: string) => {
     if (value && ns && kind) {
       return (
         <div className="force-truncate">
           <ResourceLink className={size} inline={true} kind={kind} name={value} namespace={ns} />
           <div className="record-field-tooltip">
-            <h4>Namespace</h4>
+            <h4>{t('Namespace')}</h4>
             <span>{ns}</span>
             &nbsp;
             <h4>{kind}</h4>
@@ -58,8 +63,58 @@ export const RecordField: React.FC<{
           </div>
         </div>
       );
+    }
+    return undefined;
+  };
+
+  const namespaceContent = (value?: string) => {
+    if (value) {
+      return (
+        <div className="force-truncate">
+          <ResourceLink className={size} inline={true} kind="Namespace" name={value} />
+          <div className="record-field-tooltip">
+            <h4>{t('Namespace')}</h4>
+            <span>{value}</span>
+          </div>
+        </div>
+      );
+    }
+    return undefined;
+  };
+
+  const doubleContainer = (child1?: JSX.Element, child2?: JSX.Element, asChild = true) => {
+    return (
+      <div className={`record-field-flex-container ${asChild ? size : ''}`}>
+        <div className="record-field-content-flex" onMouseOver={e => onMouseOver(e, 'record-field-content-flex')}>
+          {child1 ? child1 : emptyText()}
+        </div>
+        <div className="record-field-content-flex" onMouseOver={e => onMouseOver(e, 'record-field-content-flex')}>
+          {child2 && asChild && <span className="child-arrow">{'↪'}</span>}
+          {child2 ? child2 : emptyText()}
+        </div>
+      </div>
+    );
+  };
+
+  const singleContainer = (child?: JSX.Element) => {
+    return (
+      <div className={`record-field-content ${size}`} onMouseOver={e => onMouseOver(e, 'record-field-content')}>
+        {child}
+      </div>
+    );
+  };
+
+  const fqdnContent = (value: string[]) => {
+    if (value[0].includes('.')) {
+      return singleContainer(simpleTextWithTooltip(value[0]));
+    } else if (Array.isArray(value)) {
+      return doubleContainer(
+        namespaceContent(value[0] as string),
+        kubeObjContent(value[1] as string, 'Pod', value[0] as string),
+        false
+      );
     } else {
-      return <div></div>;
+      return <></>;
     }
   };
 
@@ -67,9 +122,9 @@ export const RecordField: React.FC<{
     const value = c.value(flow);
     switch (c.id) {
       case ColumnsId.timestamp: {
-        const dateText = new Date(value).toDateString();
-        const timeText = new Date(value).toLocaleTimeString();
-        return (
+        const dateText = typeof value === 'number' ? new Date(value).toDateString() : emptyText();
+        const timeText = typeof value === 'number' ? new Date(value).toLocaleTimeString() : emptyText();
+        return singleContainer(
           <div>
             <div className="datetime">
               <span>{dateText}</span> <span className="text-muted">{timeText}</span>
@@ -78,50 +133,87 @@ export const RecordField: React.FC<{
           </div>
         );
       }
+      case ColumnsId.fqdn:
+        if (Array.isArray(value)) {
+          return doubleContainer(
+            fqdnContent([value[0], value[1]] as string[]),
+            fqdnContent([value[2], value[3]] as string[])
+          );
+        } else {
+          return <></>;
+        }
+      case ColumnsId.srcfqdn:
+      case ColumnsId.dstfqdn:
+        return fqdnContent(value as string[]);
+      case ColumnsId.pod:
+        return Array.isArray(value) ? (
+          doubleContainer(
+            kubeObjContent(value[0] as string, 'Pod', flow.labels.SrcNamespace),
+            kubeObjContent(value[1] as string, 'Pod', flow.labels.DstNamespace)
+          )
+        ) : (
+          <></>
+        );
       case ColumnsId.srcpod:
       case ColumnsId.dstpod:
-        return kubeObjContent(
-          value as string,
-          'Pod',
-          c.id === ColumnsId.srcpod ? flow.labels.SrcNamespace : flow.labels.DstNamespace
+        return singleContainer(
+          kubeObjContent(
+            value as string,
+            'Pod',
+            c.id === ColumnsId.srcpod ? flow.labels.SrcNamespace : flow.labels.DstNamespace
+          )
+        );
+      case ColumnsId.wkd:
+        return Array.isArray(value) ? (
+          doubleContainer(
+            kubeObjContent(value[0] as string, flow.fields.SrcWorkloadKind, flow.labels.SrcNamespace),
+            kubeObjContent(value[1] as string, flow.fields.DstWorkloadKind, flow.labels.DstNamespace)
+          )
+        ) : (
+          <></>
         );
       case ColumnsId.srcwkd:
       case ColumnsId.dstwkd:
-        return kubeObjContent(
-          value as string,
-          c.id === ColumnsId.srcwkd ? flow.fields.SrcWorkloadKind : flow.fields.DstWorkloadKind,
-          c.id === ColumnsId.srcwkd ? flow.labels.SrcNamespace : flow.labels.DstNamespace
+        return singleContainer(
+          kubeObjContent(
+            value as string,
+            c.id === ColumnsId.srcwkd ? flow.fields.SrcWorkloadKind : flow.fields.DstWorkloadKind,
+            c.id === ColumnsId.srcwkd ? flow.labels.SrcNamespace : flow.labels.DstNamespace
+          )
+        );
+      case ColumnsId.namespace:
+        return Array.isArray(value) ? (
+          doubleContainer(namespaceContent(value[0] as string), namespaceContent(value[1] as string))
+        ) : (
+          <></>
         );
       case ColumnsId.srcnamespace:
       case ColumnsId.dstnamespace: {
-        if (value) {
-          return (
-            <div className="force-truncate">
-              <ResourceLink className={size} inline={true} kind="Namespace" name={value.toString()} />
-              <div className="record-field-tooltip">
-                <h4>Namespace</h4>
-                <span>{value}</span>
-              </div>
-            </div>
-          );
-        } else {
-          return <div></div>;
-        }
+        return singleContainer(namespaceContent(value as string));
       }
+      case ColumnsId.port:
+        return Array.isArray(value) ? (
+          doubleContainer(
+            simpleTextWithTooltip(formatPort(Number(value[0]))),
+            simpleTextWithTooltip(formatPort(Number(value[1])))
+          )
+        ) : (
+          <></>
+        );
       case ColumnsId.srcport:
       case ColumnsId.dstport: {
-        return simpleTextWithTooltip(formatPort(value as number));
+        return singleContainer(simpleTextWithTooltip(value ? formatPort(value as number) : ''));
       }
       case ColumnsId.proto:
-        if (value) {
-          return simpleTextWithTooltip(formatProtocol(value as number));
-        } else {
-          return <div></div>;
-        }
+        return singleContainer(simpleTextWithTooltip(value ? formatProtocol(value as number) : ''));
       case ColumnsId.flowdir:
-        return simpleTextWithTooltip(value === FlowDirection.Ingress ? t('Ingress') : t('Egress'));
+        return singleContainer(simpleTextWithTooltip(value === FlowDirection.Ingress ? t('Ingress') : t('Egress')));
       default:
-        return simpleTextWithTooltip(String(value));
+        if (Array.isArray(value) && value.length) {
+          return doubleContainer(simpleTextWithTooltip(String(value[0])), simpleTextWithTooltip(String(value[1])));
+        } else {
+          return singleContainer(simpleTextWithTooltip(String(value)));
+        }
     }
   };
   return filter ? (
@@ -140,9 +232,7 @@ export const RecordField: React.FC<{
       </Tooltip>
     </div>
   ) : (
-    <div className={`record-field-content ${size}`} onMouseOver={onMouseOver}>
-      {content(column)}
-    </div>
+    content(column)
   );
 };
 

@@ -1,6 +1,7 @@
 /* fix ResourceLink inline not working */
 span.co-resource-item.co-resource-item--inline,
 /* max content lines to show */
+.record-field-content-flex,
 .record-field-content {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -11,7 +12,6 @@ span.co-resource-item.co-resource-item--inline,
 
 .record-field-flex-container {
   display: flex;
-  flex-direction: row;
 }
 
 .record-field-flex {
@@ -19,19 +19,52 @@ span.co-resource-item.co-resource-item--inline,
   align-self: center;
 }
 
+.record-field-content-flex {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  flex-basis: 0;
+}
+
 span.co-resource-item.co-resource-item--inline.s,
+.record-field-content-flex.s,
 .record-field-content.s {
   -webkit-line-clamp: 1;
 }
 
 span.co-resource-item.co-resource-item--inline.m,
+.record-field-content-flex.m,
 .record-field-content.m {
   -webkit-line-clamp: 2;
 }
 
 span.co-resource-item.co-resource-item--inline.l,
+.record-field-content-flex.l,
 .record-field-content.l {
   -webkit-line-clamp: 3;
+}
+
+.record-field-flex-container.s,
+.record-field-flex-container.m,
+.record-field-flex-container.l {
+  flex-direction: column;
+}
+
+.record-field-flex-container.s {
+  height: 42px;
+}
+
+.record-field-flex-container.m {
+  height: 84px;
+}
+
+.record-field-flex-container.l {
+  min-height: 126px;
+}
+
+.record-field-empty {
+  flex: 1;
+  text-align: center;
 }
 
 /* table tooltips - check pf-c-tooltip__content for values */
@@ -55,6 +88,7 @@ span.co-resource-item.co-resource-item--inline.l,
 }
 
 /* show tooltip on content hover */
+.record-field-content-flex.truncated:hover .record-field-tooltip,
 .record-field-content.truncated:hover .record-field-tooltip {
   visibility: visible;
 }
@@ -62,4 +96,8 @@ span.co-resource-item.co-resource-item--inline.l,
 /* hide tooltip if hovering it */
 .record-field-tooltip:hover {
   display: none !important;
+}
+
+.child-arrow {
+  margin: 0 5px 0 5px;
 }

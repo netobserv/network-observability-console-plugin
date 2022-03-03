@@ -9,6 +9,20 @@ import { FilterType } from './filters';
 
 export enum ColumnsId {
   timestamp = 'timestamp',
+  pod = 'Pod',
+  namespace = 'Namespace',
+  addr = 'Addr',
+  port = 'Port',
+  wkd = 'Workload',
+  flowdir = 'FlowDirection',
+  wkdkind = 'WorkloadKind',
+  host = 'HostIP',
+  proto = 'Proto',
+  bytes = 'Bytes',
+  packets = 'Packets',
+  fqdn = 'FQDN',
+  srcfqdn = 'SrcFQDN',
+  dstfqdn = 'DstFQDN',
   srcpod = 'SrcPod',
   dstpod = 'DstPod',
   srcnamespace = 'SrcNamespace',
@@ -17,26 +31,23 @@ export enum ColumnsId {
   dstaddr = 'DstAddr',
   srcport = 'SrcPort',
   dstport = 'DstPort',
-  proto = 'Proto',
-  bytes = 'Bytes',
-  packets = 'Packets',
   srcwkd = 'SrcWorkload',
   dstwkd = 'DstWorkload',
   srcwkdkind = 'SrcWorkloadKind',
   dstwkdkind = 'DstWorkloadKind',
   srchost = 'SrcHostIP',
-  dsthost = 'DstHostIP',
-  flowdir = 'FlowDirection'
+  dsthost = 'DstHostIP'
 }
 
 export interface Column {
   id: ColumnsId;
+  ids?: ColumnsId[];
   group?: string;
   name: string;
   fieldName: string;
   isSelected: boolean;
   filterType: FilterType;
-  value: (flow: Record) => string | number;
+  value: (flow: Record) => string | number | string[] | number[];
   sort(a: Record, b: Record, col: Column): number;
   // width in "em"
   width: number;
@@ -45,17 +56,38 @@ export interface Column {
 export type ColumnGroup = {
   title?: string;
   columns: Column[];
+  expanded?: boolean;
 };
 
-export const getColumnGroups = (columns: Column[]) => {
+export const getColumnGroups = (columns: Column[], commonGroupName?: string) => {
   const groups: ColumnGroup[] = [];
-  _.each(columns, col => {
-    if (col.group && _.last(groups)?.title === col.group) {
-      _.last(groups)!.columns.push(col);
-    } else {
-      groups.push({ title: col.group, columns: [col] });
-    }
-  });
+
+  if (commonGroupName) {
+    //groups name is unique
+    //ie dropdown filters
+    //add empty expanded group at first
+    groups.push({ columns: [], expanded: true });
+    _.each(columns, col => {
+      const found = groups.find(g => g.title === col.group);
+      if (found) {
+        found.columns.push(col);
+      } else {
+        groups.push({ title: col.group, columns: [col] });
+      }
+    });
+    //set the name at the end to allow title match
+    groups[0].title = commonGroupName;
+  } else {
+    //group with same name can be added multiple times
+    //ie nested columns groups
+    _.each(columns, col => {
+      if (col.group && _.last(groups)?.title === col.group) {
+        _.last(groups)!.columns.push(col);
+      } else {
+        groups.push({ title: col.group, columns: [col] });
+      }
+    });
+  }
 
   return groups;
 };
@@ -68,18 +100,124 @@ export const getFullColumnName = (col?: Column) => {
   }
 };
 
-export const getDefaultColumns = (t: TFunction): Column[] => {
-  return [
+export const getSrcOrDstValue = (v1?: string | number, v2?: string | number): string[] | number[] => {
+  if (v1 && Number(v1) != NaN && v2 && Number(v2) != NaN) {
+    return [v1 as number, v2 as number];
+  } else if (v1 || v2) {
+    return [v1 ? (v1 as string) : '', v2 ? (v2 as string) : ''];
+  } else {
+    return [];
+  }
+};
+
+export const getFullQualifiedNameValue = (namespace?: string, pod?: string, ip?: string, port?: number): string[] => {
+  if (namespace && pod) {
+    return [namespace, pod];
+  } else if (ip && port) {
+    return [ip, String(port)];
+  } else {
+    return ['', ''];
+  }
+};
+
+export const getCommonColumns = (t: TFunction, withFQDNFields = true): Column[] => {
+  const commonColumns: Column[] = [
     {
-      id: ColumnsId.timestamp,
-      name: t('Date & time'),
-      fieldName: 'Timestamp',
-      isSelected: true,
-      filterType: FilterType.NONE,
-      value: f => f.timestamp,
-      sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
+      id: ColumnsId.pod,
+      name: t('Pods'),
+      fieldName: 'Pod',
+      isSelected: false,
+      filterType: FilterType.K8S_NAMES,
+      value: f => getSrcOrDstValue(f.fields.SrcPod, f.fields.DstPod),
+      sort: (a, b, col) => compareStrings((col.value(a) as string[]).join(''), (col.value(b) as string[]).join('')),
       width: 15
     },
+    {
+      id: ColumnsId.wkd,
+      name: t('Workloads'),
+      fieldName: 'Workload',
+      isSelected: false,
+      filterType: FilterType.K8S_NAMES,
+      value: f => getSrcOrDstValue(f.labels.SrcWorkload, f.labels.DstWorkload),
+      sort: (a, b, col) => compareStrings((col.value(a) as string[]).join(''), (col.value(b) as string[]).join('')),
+      width: 15
+    },
+    {
+      id: ColumnsId.wkdkind,
+      name: t('Kinds'),
+      fieldName: 'WorkloadKind',
+      isSelected: false,
+      filterType: FilterType.K8S_NAMES,
+      value: f => getSrcOrDstValue(f.fields.SrcWorkloadKind, f.fields.DstWorkloadKind),
+      sort: (a, b, col) => compareStrings((col.value(a) as string[]).join(''), (col.value(b) as string[]).join('')),
+      width: 10
+    },
+    {
+      id: ColumnsId.namespace,
+      name: t('Namespaces'),
+      fieldName: 'Namespace',
+      isSelected: false,
+      filterType: FilterType.K8S_NAMES,
+      value: f => getSrcOrDstValue(f.labels.SrcNamespace, f.labels.DstNamespace),
+      sort: (a, b, col) => compareStrings((col.value(a) as string[]).join(''), (col.value(b) as string[]).join('')),
+      width: 15
+    },
+    {
+      id: ColumnsId.addr,
+      name: t('Addresses'),
+      fieldName: 'Addr',
+      isSelected: false,
+      filterType: FilterType.ADDRESS,
+      value: f => getSrcOrDstValue(f.fields.SrcAddr, f.fields.DstAddr),
+      sort: (a, b, col) => compareIPs((col.value(a) as string[]).join('.'), (col.value(b) as string[]).join('.')),
+      width: 10
+    },
+    {
+      id: ColumnsId.port,
+      name: t('Ports'),
+      fieldName: 'Port',
+      isSelected: false,
+      filterType: FilterType.PORT,
+      value: f => getSrcOrDstValue(f.fields.SrcPort, f.fields.DstPort),
+      sort: (a, b, col) => compareStrings((col.value(a) as string[]).join(''), (col.value(b) as string[]).join('')),
+      width: 10
+    },
+    {
+      id: ColumnsId.host,
+      name: t('Hosts'),
+      fieldName: 'HostIP',
+      isSelected: false,
+      filterType: FilterType.ADDRESS,
+      value: f => getSrcOrDstValue(f.fields.SrcHostIP, f.fields.DstHostIP),
+      sort: (a, b, col) => compareIPs((col.value(a) as string[]).join('.'), (col.value(b) as string[]).join('.')),
+      width: 10
+    }
+  ];
+
+  if (withFQDNFields) {
+    return [
+      ...commonColumns,
+      {
+        id: ColumnsId.fqdn,
+        name: t('FQDN'),
+        fieldName: 'FQDN',
+        isSelected: false,
+        filterType: FilterType.FQDN,
+        value: f => [
+          ...getFullQualifiedNameValue(f.labels.SrcNamespace, f.fields.SrcPod, f.fields.SrcAddr, f.fields.SrcPort),
+          ...getFullQualifiedNameValue(f.labels.DstNamespace, f.fields.DstPod, f.fields.DstAddr, f.fields.DstPort)
+        ],
+        sort: (a, b, col) => compareStrings((col.value(a) as string[]).join(''), (col.value(b) as string[]).join('')),
+        width: 15
+      }
+    ];
+  } else {
+    return commonColumns;
+  }
+};
+
+export const getSrcColumns = (t: TFunction): Column[] => {
+  return [
     {
       id: ColumnsId.srcpod,
       group: t('Source'),
@@ -156,7 +294,12 @@ export const getDefaultColumns = (t: TFunction): Column[] => {
       value: f => f.fields.SrcHostIP || '',
       sort: (a, b, col) => compareIPs(col.value(a) as string, col.value(b) as string),
       width: 10
-    },
+    }
+  ];
+};
+
+export const getDstColumns = (t: TFunction): Column[] => {
+  return [
     {
       id: ColumnsId.dstpod,
       group: t('Destination'),
@@ -233,7 +376,47 @@ export const getDefaultColumns = (t: TFunction): Column[] => {
       value: f => f.fields.DstHostIP || '',
       sort: (a, b, col) => compareIPs(col.value(a) as string, col.value(b) as string),
       width: 10
-    },
+    }
+  ];
+};
+
+export const getSrcDstColumns = (t: TFunction, withFQDNFields = true): Column[] => {
+  if (withFQDNFields) {
+    return [
+      ...getSrcColumns(t),
+      {
+        id: ColumnsId.srcfqdn,
+        group: t('Source'),
+        name: t('FQDN'),
+        fieldName: 'SrcFQDN',
+        isSelected: false,
+        filterType: FilterType.FQDN,
+        value: f =>
+          getFullQualifiedNameValue(f.labels.SrcNamespace, f.fields.SrcPod, f.fields.SrcAddr, f.fields.SrcPort),
+        sort: (a, b, col) => compareStrings((col.value(a) as string[]).join(''), (col.value(b) as string[]).join('')),
+        width: 15
+      },
+      ...getDstColumns(t),
+      {
+        id: ColumnsId.dstfqdn,
+        group: t('Destination'),
+        name: t('FQDN'),
+        fieldName: 'DstFQDN',
+        isSelected: false,
+        filterType: FilterType.FQDN,
+        value: f =>
+          getFullQualifiedNameValue(f.labels.DstNamespace, f.fields.DstPod, f.fields.DstAddr, f.fields.DstPort),
+        sort: (a, b, col) => compareStrings((col.value(a) as string[]).join(''), (col.value(b) as string[]).join('')),
+        width: 15
+      }
+    ];
+  } else {
+    return [...getSrcColumns(t), ...getDstColumns(t)];
+  }
+};
+
+export const getExtraColumns = (t: TFunction): Column[] => {
+  return [
     {
       id: ColumnsId.proto,
       name: t('Protocol'),
@@ -276,4 +459,28 @@ export const getDefaultColumns = (t: TFunction): Column[] => {
       width: 5
     }
   ];
+};
+
+export const getDefaultColumns = (t: TFunction, withCommonFields = true, withFQDNFields = true): Column[] => {
+  const timestamp: Column = {
+    id: ColumnsId.timestamp,
+    name: t('Date & time'),
+    fieldName: 'Timestamp',
+    isSelected: true,
+    filterType: FilterType.NONE,
+    value: f => f.timestamp,
+    sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
+    width: 15
+  };
+
+  if (withCommonFields) {
+    return [
+      timestamp,
+      ...getSrcDstColumns(t, withFQDNFields),
+      ...getCommonColumns(t, withFQDNFields),
+      ...getExtraColumns(t)
+    ];
+  } else {
+    return [timestamp, ...getSrcDstColumns(t, withFQDNFields), ...getExtraColumns(t)];
+  }
 };
