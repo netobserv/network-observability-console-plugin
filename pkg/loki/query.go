@@ -31,7 +31,7 @@ const (
 
 var qlog = logrus.WithField("component", "loki.query")
 
-// can contains only alphanumeric / '-' / '_' / '.' / ',' / '"' / '*' characteres
+// can contains only alphanumeric / '-' / '_' / '.' / ',' / '"' / '*' / ':' characteres
 var filterRegexpValidation = regexp.MustCompile(`^[\w-_.,\"*:]*$`)
 
 // remove quotes and replace * by regex any
