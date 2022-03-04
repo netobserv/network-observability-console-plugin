@@ -263,12 +263,12 @@ func TestLokiFiltering(t *testing.T) {
 	}{{
 		inputPath: "?SrcPod=test-pod",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\"}|~`\"SrcPod\":\".*test-pod.*\"`",
+			"?query={app=\"netobserv-flowcollector\"}|~`\"SrcPod\":\"(?i).*test-pod.*\"`",
 		},
 	}, {
 		inputPath: "?SrcPod=test-pod&match=any",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\"}|~`\"SrcPod\":\".*test-pod.*\"`",
+			"?query={app=\"netobserv-flowcollector\"}|~`\"SrcPod\":\"(?i).*test-pod.*\"`",
 		},
 	}, {
 		inputPath: "?Proto=6&match=all",
@@ -283,45 +283,45 @@ func TestLokiFiltering(t *testing.T) {
 	}, {
 		inputPath: "?Proto=6&SrcPod=test",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\"}|~`\"Proto\":6`|~`\"SrcPod\":\".*test.*\"`",
-			"?query={app=\"netobserv-flowcollector\"}|~`\"SrcPod\":\".*test.*\"`|~`\"Proto\":6`",
+			"?query={app=\"netobserv-flowcollector\"}|~`\"Proto\":6`|~`\"SrcPod\":\"(?i).*test.*\"`",
+			"?query={app=\"netobserv-flowcollector\"}|~`\"SrcPod\":\"(?i).*test.*\"`|~`\"Proto\":6`",
 		},
 	}, {
 		inputPath: "?Proto=6&SrcPod=test&match=any",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\"}|~`(\"Proto\":6)|(\"SrcPod\":\".*test.*\")`",
-			"?query={app=\"netobserv-flowcollector\"}|~`(\"SrcPod\":\".*test.*\")|(\"Proto\":6)`",
+			"?query={app=\"netobserv-flowcollector\"}|~`(\"Proto\":6)|(\"SrcPod\":\"(?i).*test.*\")`",
+			"?query={app=\"netobserv-flowcollector\"}|~`(\"SrcPod\":\"(?i).*test.*\")|(\"Proto\":6)`",
 		},
 	}, {
 		inputPath: "?Proto=6&SrcPod=test&FlowDirection=1&match=any",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\",FlowDirection=\"1\"}|~`(\"Proto\":6)|(\"SrcPod\":\".*test.*\")`",
-			"?query={app=\"netobserv-flowcollector\",FlowDirection=\"1\"}|~`(\"SrcPod\":\".*test.*\")|(\"Proto\":6)`",
+			"?query={app=\"netobserv-flowcollector\",FlowDirection=\"1\"}|~`(\"Proto\":6)|(\"SrcPod\":\"(?i).*test.*\")`",
+			"?query={app=\"netobserv-flowcollector\",FlowDirection=\"1\"}|~`(\"SrcPod\":\"(?i).*test.*\")|(\"Proto\":6)`",
 		},
 	}, {
 		inputPath: "?SrcNamespace=test-namespace&match=all",
 		outputQuery: []string{
-			`?query={SrcNamespace=~".*test-namespace.*",app="netobserv-flowcollector"}`,
+			`?query={SrcNamespace=~"(?i).*test-namespace.*",app="netobserv-flowcollector"}`,
 		},
 	}, {
 		inputPath: "?SrcNamespace=test-namespace&match=any",
 		outputQuery: []string{
-			`?query={SrcNamespace=~".*test-namespace.*",app="netobserv-flowcollector"}`,
+			`?query={SrcNamespace=~"(?i).*test-namespace.*",app="netobserv-flowcollector"}`,
 		},
 	}, {
 		inputPath: "?SrcPort=8080&SrcAddr=10.128.0.1&SrcNamespace=default",
 		outputQuery: []string{
-			"?query={SrcNamespace=~\".*default.*\",app=\"netobserv-flowcollector\"}|~`\"SrcPort\":8080`|json|SrcAddr=ip(\"10.128.0.1\")",
+			"?query={SrcNamespace=~\"(?i).*default.*\",app=\"netobserv-flowcollector\"}|~`\"SrcPort\":8080`|json|SrcAddr=ip(\"10.128.0.1\")",
 		},
 	}, {
 		inputPath: "?SrcPort=8080&SrcAddr=10.128.0.1&SrcNamespace=default&match=any",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\"}|json|SrcNamespace=~\".*default.*\"+or+SrcAddr=ip(\"10.128.0.1\")+or+SrcPort=8080",
+			"?query={app=\"netobserv-flowcollector\"}|json|SrcNamespace=~\"(?i).*default.*\"+or+SrcAddr=ip(\"10.128.0.1\")+or+SrcPort=8080",
 		},
 	}, {
 		inputPath: "?SrcPort=8080&SrcAddr=10.128.0.1&SrcNamespace=default&match=any&FlowDirection=0",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\",FlowDirection=\"0\"}|json|SrcNamespace=~\".*default.*\"+or+SrcAddr=ip(\"10.128.0.1\")+or+SrcPort=8080",
+			"?query={app=\"netobserv-flowcollector\",FlowDirection=\"0\"}|json|SrcNamespace=~\"(?i).*default.*\"+or+SrcAddr=ip(\"10.128.0.1\")+or+SrcPort=8080",
 		},
 	}, {
 		inputPath:   "?startTime=1640991600&match=all",

@@ -27,6 +27,7 @@
   "Containing any alphanumeric, hyphen, underscrore or dot character": "Containing any alphanumeric, hyphen, underscrore or dot character",
   "Partial text like cluster, cluster-image, image-registry": "Partial text like cluster, cluster-image, image-registry",
   "Exact match using quotes like \"cluster-image-registry\"": "Exact match using quotes like \"cluster-image-registry\"",
+  "Case sensitive match using quotes like \"Deployment\"": "Case sensitive match using quotes like \"Deployment\"",
   "Starting text like cluster, \"cluster-*\"": "Starting text like cluster, \"cluster-*\"",
   "Ending text like \"*-registry\"": "Ending text like \"*-registry\"",
   "Pattern like \"cluster-*-registry\", \"c*-*-r*y\", -i*e-": "Pattern like \"cluster-*-registry\", \"c*-*-r*y\", -i*e-",

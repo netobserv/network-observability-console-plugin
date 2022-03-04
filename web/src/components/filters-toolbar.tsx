@@ -357,6 +357,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
         - ${t('Containing any alphanumeric, hyphen, underscrore or dot character')}
         - ${t('Partial text like cluster, cluster-image, image-registry')}
         - ${t('Exact match using quotes like "cluster-image-registry"')}
+        - ${t('Case sensitive match using quotes like "Deployment"')}
         - ${t('Starting text like cluster, "cluster-*"')}
         - ${t('Ending text like "*-registry"')}
         - ${t('Pattern like "cluster-*-registry", "c*-*-r*y", -i*e-')}`;
