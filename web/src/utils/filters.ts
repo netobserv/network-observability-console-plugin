@@ -6,12 +6,15 @@ import { getProtectedService } from './port';
 
 export enum FilterType {
   NONE,
+  ADDRESS_PORT,
   ADDRESS,
   PORT,
   PROTOCOL,
   NUMBER,
   K8S_NAMES,
-  FQDN
+  NAMESPACE_POD,
+  POD,
+  NAMESPACE
 }
 
 export interface FilterValue {
@@ -29,6 +32,10 @@ export interface FilterOption {
   value: string;
 }
 
+export const getFilterOption = (name: string): FilterOption => {
+  return { name, value: name };
+};
+
 export const getActiveColumnFilters = (columnId: ColumnsId, filters: Filter[]) => {
   return filters.filter(f => f.colId === columnId).flatMap(f => f.values.map(v => v.v));
 };
@@ -45,6 +52,65 @@ const getProtocolOptions = (value: string) => {
   );
 };
 
+const namespaces: Set<FilterOption> = new Set<FilterOption>();
+
+export const clearNamespaces = () => {
+  namespaces.clear();
+};
+
+export const setNamespaces = (ns: string[]) => {
+  namespaces.clear();
+  ns.forEach(n => namespaces.add(getFilterOption(n)));
+};
+
+const podsMap: Map<string, FilterOption[]> = new Map<string, FilterOption[]>();
+
+export const clearPods = () => {
+  podsMap.clear();
+};
+
+export const hasPods = (namespace: string) => {
+  return podsMap.has(namespace);
+};
+
+export const setPods = (namespace: string, pods: string[]) => {
+  const options = pods.map(p => getFilterOption(p));
+  podsMap.set(namespace, options);
+};
+
+export const getNamespaceOptions = (value: string) => {
+  if (value.length) {
+    return Array.from(namespaces.values()).filter(n => n.name.toLowerCase().startsWith(value.toLowerCase()));
+  } else {
+    return [];
+  }
+};
+
+export const getPodsOptions = (nameOrnamespacePod: string) => {
+  // search pods by namespace
+  if (nameOrnamespacePod.includes('.')) {
+    const namespaceAndPod = nameOrnamespacePod.split('.');
+    const pods = podsMap.get(namespaceAndPod[0]);
+    if (!pods) {
+      return [];
+    } else if (namespaceAndPod[1]) {
+      // search all pods in namespace in cache
+      return pods.filter(p => p.name.toLowerCase().startsWith(namespaceAndPod[1].toLowerCase()));
+    } else {
+      // directly show pods for "namespace & pod" when namespace is set
+      return pods;
+    }
+  } else if (nameOrnamespacePod.length) {
+    // search all pods in cache
+    return Array.from(podsMap.values())
+      .flat()
+      .filter(p => p.name.toLowerCase().startsWith(nameOrnamespacePod.toLowerCase()));
+  } else {
+    // don't show list if field is empty
+    return [];
+  }
+};
+
 const getPortOptions = (value: string) => {
   const isNumber = !isNaN(Number(value));
   const foundService = isNumber ? getProtectedService(Number(value)) : null;
@@ -59,10 +125,13 @@ const getPortOptions = (value: string) => {
 
 const filterOptions: Map<FilterType, (value: string) => FilterOption[]> = new Map([
   [FilterType.PROTOCOL, getProtocolOptions],
-  [FilterType.PORT, getPortOptions]
+  [FilterType.PORT, getPortOptions],
+  [FilterType.NAMESPACE_POD, getNamespaceOptions],
+  [FilterType.NAMESPACE, getNamespaceOptions],
+  [FilterType.POD, getPodsOptions] //must filter by namespace first, else it will be empty
 ]);
 
-export const getFilterOptions = (type: FilterType, value: string, max: number) => {
+export const getFilterOptions = (type: FilterType, value: string, max = 10) => {
   if (filterOptions.has(type)) {
     let options = filterOptions.get(type)!(value);
     if (options.length > max) {

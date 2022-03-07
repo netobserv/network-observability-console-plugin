@@ -20,9 +20,12 @@ export enum ColumnsId {
   proto = 'Proto',
   bytes = 'Bytes',
   packets = 'Packets',
-  fqdn = 'FQDN',
-  srcfqdn = 'SrcFQDN',
-  dstfqdn = 'DstFQDN',
+  addrport = 'AddrPort',
+  srcaddrport = 'SrcAddrPort',
+  dstaddrport = 'DstAddrPort',
+  namespacepod = 'NamespacePod',
+  srcnamespacepod = 'SrcNamespacePod',
+  dstnamespacepod = 'DstNamespacePod',
   srcpod = 'SrcPod',
   dstpod = 'DstPod',
   srcnamespace = 'SrcNamespace',
@@ -44,7 +47,7 @@ export interface Column {
   ids?: ColumnsId[];
   group?: string;
   name: string;
-  fieldName: string;
+  fieldName?: string;
   isSelected: boolean;
   filterType: FilterType;
   value: (flow: Record) => string | number | string[] | number[];
@@ -110,7 +113,10 @@ export const getSrcOrDstValue = (v1?: string | number, v2?: string | number): st
   }
 };
 
-export const getFullQualifiedNameValue = (namespace?: string, pod?: string, ip?: string, port?: number): string[] => {
+/* concatenate namespace / pod or ip / port for display
+ *  Namespace & Pod field will fallback on ip:port if kubernetes objects are not resolved
+ */
+export const getConcatenatedValue = (namespace?: string, pod?: string, ip?: string, port?: number): string[] => {
   if (namespace && pod) {
     return [namespace, pod];
   } else if (ip && port) {
@@ -120,14 +126,14 @@ export const getFullQualifiedNameValue = (namespace?: string, pod?: string, ip?:
   }
 };
 
-export const getCommonColumns = (t: TFunction, withFQDNFields = true): Column[] => {
+export const getCommonColumns = (t: TFunction, withConcatenatedFields = true): Column[] => {
   const commonColumns: Column[] = [
     {
       id: ColumnsId.pod,
       name: t('Pods'),
       fieldName: 'Pod',
       isSelected: false,
-      filterType: FilterType.K8S_NAMES,
+      filterType: FilterType.POD,
       value: f => getSrcOrDstValue(f.fields.SrcPod, f.fields.DstPod),
       sort: (a, b, col) => compareStrings((col.value(a) as string[]).join(''), (col.value(b) as string[]).join('')),
       width: 15
@@ -157,7 +163,7 @@ export const getCommonColumns = (t: TFunction, withFQDNFields = true): Column[] 
       name: t('Namespaces'),
       fieldName: 'Namespace',
       isSelected: false,
-      filterType: FilterType.K8S_NAMES,
+      filterType: FilterType.NAMESPACE,
       value: f => getSrcOrDstValue(f.labels.SrcNamespace, f.labels.DstNamespace),
       sort: (a, b, col) => compareStrings((col.value(a) as string[]).join(''), (col.value(b) as string[]).join('')),
       width: 15
@@ -194,18 +200,29 @@ export const getCommonColumns = (t: TFunction, withFQDNFields = true): Column[] 
     }
   ];
 
-  if (withFQDNFields) {
+  if (withConcatenatedFields) {
     return [
       ...commonColumns,
       {
-        id: ColumnsId.fqdn,
-        name: t('FQDN'),
-        fieldName: 'FQDN',
+        id: ColumnsId.namespacepod,
+        name: t('Namespace & Pod'),
         isSelected: false,
-        filterType: FilterType.FQDN,
+        filterType: FilterType.NAMESPACE_POD,
         value: f => [
-          ...getFullQualifiedNameValue(f.labels.SrcNamespace, f.fields.SrcPod, f.fields.SrcAddr, f.fields.SrcPort),
-          ...getFullQualifiedNameValue(f.labels.DstNamespace, f.fields.DstPod, f.fields.DstAddr, f.fields.DstPort)
+          ...getConcatenatedValue(f.labels.SrcNamespace, f.fields.SrcPod, f.fields.SrcAddr, f.fields.SrcPort),
+          ...getConcatenatedValue(f.labels.DstNamespace, f.fields.DstPod, f.fields.DstAddr, f.fields.DstPort)
+        ],
+        sort: (a, b, col) => compareStrings((col.value(a) as string[]).join(''), (col.value(b) as string[]).join('')),
+        width: 15
+      },
+      {
+        id: ColumnsId.addrport,
+        name: t('Addresses & Port'),
+        isSelected: false,
+        filterType: FilterType.ADDRESS_PORT,
+        value: f => [
+          ...getConcatenatedValue(undefined, undefined, f.fields.SrcAddr, f.fields.SrcPort),
+          ...getConcatenatedValue(undefined, undefined, f.fields.DstAddr, f.fields.DstPort)
         ],
         sort: (a, b, col) => compareStrings((col.value(a) as string[]).join(''), (col.value(b) as string[]).join('')),
         width: 15
@@ -224,7 +241,7 @@ export const getSrcColumns = (t: TFunction): Column[] => {
       name: t('Pod'),
       fieldName: 'SrcPod',
       isSelected: true,
-      filterType: FilterType.K8S_NAMES,
+      filterType: FilterType.POD,
       value: f => f.fields.SrcPod || '',
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
       width: 15
@@ -257,7 +274,7 @@ export const getSrcColumns = (t: TFunction): Column[] => {
       name: t('Namespace'),
       fieldName: 'SrcNamespace',
       isSelected: true,
-      filterType: FilterType.K8S_NAMES,
+      filterType: FilterType.NAMESPACE,
       value: f => f.labels.SrcNamespace || '',
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
       width: 15
@@ -306,7 +323,7 @@ export const getDstColumns = (t: TFunction): Column[] => {
       name: t('Pod'),
       fieldName: 'DstPod',
       isSelected: true,
-      filterType: FilterType.K8S_NAMES,
+      filterType: FilterType.POD,
       value: f => f.fields.DstPod || '',
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
       width: 15
@@ -339,7 +356,7 @@ export const getDstColumns = (t: TFunction): Column[] => {
       name: t('Namespace'),
       fieldName: 'DstNamespace',
       isSelected: true,
-      filterType: FilterType.K8S_NAMES,
+      filterType: FilterType.NAMESPACE,
       value: f => f.labels.DstNamespace || '',
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
       width: 15
@@ -380,32 +397,48 @@ export const getDstColumns = (t: TFunction): Column[] => {
   ];
 };
 
-export const getSrcDstColumns = (t: TFunction, withFQDNFields = true): Column[] => {
-  if (withFQDNFields) {
+export const getSrcDstColumns = (t: TFunction, withConcatenatedFields = true): Column[] => {
+  if (withConcatenatedFields) {
     return [
       ...getSrcColumns(t),
       {
-        id: ColumnsId.srcfqdn,
+        id: ColumnsId.srcnamespacepod,
         group: t('Source'),
-        name: t('FQDN'),
-        fieldName: 'SrcFQDN',
+        name: t('Namespace & Pod'),
         isSelected: false,
-        filterType: FilterType.FQDN,
-        value: f =>
-          getFullQualifiedNameValue(f.labels.SrcNamespace, f.fields.SrcPod, f.fields.SrcAddr, f.fields.SrcPort),
+        filterType: FilterType.NAMESPACE_POD,
+        value: f => getConcatenatedValue(f.labels.SrcNamespace, f.fields.SrcPod, f.fields.SrcAddr, f.fields.SrcPort),
+        sort: (a, b, col) => compareStrings((col.value(a) as string[]).join(''), (col.value(b) as string[]).join('')),
+        width: 15
+      },
+      {
+        id: ColumnsId.srcaddrport,
+        group: t('Source'),
+        name: t('Address & Port'),
+        isSelected: false,
+        filterType: FilterType.ADDRESS_PORT,
+        value: f => getConcatenatedValue(undefined, undefined, f.fields.SrcAddr, f.fields.SrcPort),
         sort: (a, b, col) => compareStrings((col.value(a) as string[]).join(''), (col.value(b) as string[]).join('')),
         width: 15
       },
       ...getDstColumns(t),
       {
-        id: ColumnsId.dstfqdn,
+        id: ColumnsId.dstnamespacepod,
         group: t('Destination'),
-        name: t('FQDN'),
-        fieldName: 'DstFQDN',
+        name: t('Namespace & Pod'),
         isSelected: false,
-        filterType: FilterType.FQDN,
-        value: f =>
-          getFullQualifiedNameValue(f.labels.DstNamespace, f.fields.DstPod, f.fields.DstAddr, f.fields.DstPort),
+        filterType: FilterType.NAMESPACE_POD,
+        value: f => getConcatenatedValue(f.labels.DstNamespace, f.fields.DstPod, f.fields.DstAddr, f.fields.DstPort),
+        sort: (a, b, col) => compareStrings((col.value(a) as string[]).join(''), (col.value(b) as string[]).join('')),
+        width: 15
+      },
+      {
+        id: ColumnsId.dstaddrport,
+        group: t('Destination'),
+        name: t('Address & Port'),
+        isSelected: false,
+        filterType: FilterType.ADDRESS_PORT,
+        value: f => getConcatenatedValue(undefined, undefined, f.fields.DstAddr, f.fields.DstPort),
         sort: (a, b, col) => compareStrings((col.value(a) as string[]).join(''), (col.value(b) as string[]).join('')),
         width: 15
       }
@@ -461,7 +494,7 @@ export const getExtraColumns = (t: TFunction): Column[] => {
   ];
 };
 
-export const getDefaultColumns = (t: TFunction, withCommonFields = true, withFQDNFields = true): Column[] => {
+export const getDefaultColumns = (t: TFunction, withCommonFields = true, withConcatenatedFields = true): Column[] => {
   const timestamp: Column = {
     id: ColumnsId.timestamp,
     name: t('Date & time'),
@@ -476,11 +509,11 @@ export const getDefaultColumns = (t: TFunction, withCommonFields = true, withFQD
   if (withCommonFields) {
     return [
       timestamp,
-      ...getSrcDstColumns(t, withFQDNFields),
-      ...getCommonColumns(t, withFQDNFields),
+      ...getSrcDstColumns(t, withConcatenatedFields),
+      ...getCommonColumns(t, withConcatenatedFields),
       ...getExtraColumns(t)
     ];
   } else {
-    return [timestamp, ...getSrcDstColumns(t, withFQDNFields), ...getExtraColumns(t)];
+    return [timestamp, ...getSrcDstColumns(t, withConcatenatedFields), ...getExtraColumns(t)];
   }
 };

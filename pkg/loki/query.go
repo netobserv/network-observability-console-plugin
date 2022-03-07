@@ -31,8 +31,8 @@ const (
 
 var qlog = logrus.WithField("component", "loki.query")
 
-// can contains only alphanumeric / '-' / '_' / '.' / ',' / '"' / '*' / ':' characteres
-var filterRegexpValidation = regexp.MustCompile(`^[\w-_.,\"*:]*$`)
+// can contains only alphanumeric / '-' / '_' / '.' / ',' / '"' / '*' / ':' / '/' characteres
+var filterRegexpValidation = regexp.MustCompile(`^[\w-_.,\"*:/]*$`)
 
 // remove quotes and replace * by regex any
 var valueReplacer = strings.NewReplacer(`*`, `.*`, `"`, "")
@@ -40,7 +40,7 @@ var valueReplacer = strings.NewReplacer(`*`, `.*`, `"`, "")
 type LabelJoiner string
 
 const (
-	// joinOr spaces are escaped to avoid problems when querying Loki
+	joinAnd     = LabelJoiner("+and+")
 	joinOr      = LabelJoiner("+or+")
 	joinPipeAnd = LabelJoiner("|")
 )
@@ -113,7 +113,8 @@ func (q *Query) URLQuery() (string, error) {
 			}
 			//group with parenthesis
 			sb.WriteByte('(')
-			q.WriteLabelFilter(&sb, &glf, joinOr)
+			//each group member must match
+			q.WriteLabelFilter(&sb, &glf, joinAnd)
 			sb.WriteByte(')')
 			i++
 		}
@@ -163,8 +164,10 @@ func (q *Query) AddParam(key, value string) error {
 		q.processIPFilters(key, strings.Split(value, ","))
 	case "Workload", "Namespace":
 		q.processCommonLabelFilter(key, strings.Split(value, ","))
-	case "FQDN", "SrcFQDN", "DstFQDN":
-		q.processFQDNFilter(key, strings.Split(value, ","))
+	case "NamespacePod", "SrcNamespacePod", "DstNamespacePod":
+		q.processNamespacePodFilter(key, strings.Split(value, ","))
+	case "AddrPort", "SrcAddrPort", "DstAddrPort":
+		q.processAddressPortFilter(key, strings.Split(value, ","))
 	default:
 		return q.addParamDefault(key, value)
 	}
@@ -372,7 +375,7 @@ func (q *Query) processCommonLabelFilter(key string, values []string) {
 	}
 }
 
-func (q *Query) processFQDNFilter(key string, values []string) {
+func (q *Query) processNamespacePodFilter(key string, values []string) {
 	prefix := ""
 	if strings.HasPrefix(key, "Src") {
 		prefix = "Src"
@@ -381,24 +384,36 @@ func (q *Query) processFQDNFilter(key string, values []string) {
 	}
 
 	for _, value := range values {
-		//FQDN can either be namespace / pod / namespace.pod / ipaddress / port / ipaddress:port
+		//can either be namespace / pod / namespace.pod / ipaddress / port / ipaddress:port
+		if strings.Contains(value, ".") {
+			splittedValue := strings.Split(value, ".")
+			q.AddParamSrcDst(prefix, "Namespace", splittedValue[0])
+			q.AddParamSrcDst(prefix, "Pod", splittedValue[1])
+		} else {
+			q.AddParamSrcDst(prefix, "Namespace", value)
+			q.AddParamSrcDst(prefix, "Pod", value)
+		}
+	}
+}
+
+func (q *Query) processAddressPortFilter(key string, values []string) {
+	prefix := ""
+	if strings.HasPrefix(key, "Src") {
+		prefix = "Src"
+	} else if strings.HasPrefix(key, "Dst") {
+		prefix = "Dst"
+	}
+
+	for _, value := range values {
+		//can either be ipaddress / port / ipaddress:port
 		if strings.Contains(value, ":") {
 			ipAndPort := strings.Split(value, ":")
 			q.AddParamSrcDst(prefix, "Addr", ipAndPort[0])
 			q.AddParamSrcDst(prefix, "Port", ipAndPort[1])
 		} else if strings.Contains(value, ".") {
-			splittedValue := strings.Split(value, ".")
-			if len(splittedValue) == 2 {
-				q.AddParamSrcDst(prefix, "Namespace", splittedValue[0])
-				q.AddParamSrcDst(prefix, "Pod", splittedValue[1])
-			} else {
-				q.AddParamSrcDst(prefix, "Addr", value)
-			}
+			q.AddParamSrcDst(prefix, "Addr", value)
 		} else if _, err := strconv.Atoi(value); err == nil {
 			q.AddParamSrcDst(prefix, "Port", value)
-		} else {
-			q.AddParamSrcDst(prefix, "Namespace", value)
-			q.AddParamSrcDst(prefix, "Pod", value)
 		}
 	}
 }

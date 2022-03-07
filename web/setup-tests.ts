@@ -72,3 +72,20 @@ jest.mock('react-router-dom', () => ({
     push: jest.fn(),
   }),
 }));
+
+//Mock routes
+jest.mock('./src/api/routes', () => ({
+  getPods: jest.fn(async () => ['ABCD']),
+  getNamespaces: jest.fn(async () => ['EFGH']),
+}));
+
+global.console = {
+  // console.log / warn / info / debug are ignored in tests
+  log: jest.fn(),
+  warn: jest.fn(),
+  info: jest.fn(),
+  debug: jest.fn(),
+
+  // Keep native behaviour for error
+  error: console.error,
+};

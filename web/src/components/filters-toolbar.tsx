@@ -36,13 +36,18 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Column, ColumnGroup, ColumnsId, getColumnGroups, getFullColumnName } from '../utils/columns';
 import {
+  clearNamespaces,
+  clearPods,
   createFilterValue,
   Filter,
   FilterOption,
   FilterType,
   FilterValue,
   findProtocolOption,
-  getFilterOptions
+  getFilterOptions,
+  hasPods,
+  setNamespaces,
+  setPods
 } from '../utils/filters';
 import './filters-toolbar.css';
 import { validateIPFilter } from '../utils/ip';
@@ -51,6 +56,7 @@ import { QueryOptionsDropdown } from './query-options-dropdown';
 import { getPathWithParams, NETFLOW_TRAFFIC_PATH } from '../utils/router';
 import { useHistory } from 'react-router-dom';
 import { validateLabel } from '../utils/label';
+import { getNamespaces, getPods } from '../api/routes';
 
 export interface FiltersToolbarProps {
   id: string;
@@ -106,24 +112,34 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
     [skipTipsDelay]
   );
 
-  const onAutoCompleteChange = (newValue: string) => {
-    const options = getFilterOptions(selectedFilterColumn.filterType, newValue, 10);
+  const manageAutoCompleteOptions = (options: FilterOption[]) => {
     setAutocompleteOptions(options);
     // The menu is hidden if there are no options
     setPopperVisible(options.length > 0);
+  };
+
+  const managePodsAutoComplete = React.useCallback((namespacePod: string, suggest = true) => {
+    const namespace = namespacePod.includes('.') ? namespacePod.split('.')[0] : namespacePod;
+    if (!hasPods(namespace)) {
+      getPods(namespace).then(pods => {
+        setPods(namespace, pods);
+        if (suggest) {
+          manageAutoCompleteOptions(getFilterOptions(FilterType.POD, namespacePod));
+        }
+      });
+    } else if (suggest) {
+      manageAutoCompleteOptions(getFilterOptions(FilterType.POD, namespacePod));
+    }
+  }, []);
+
+  const onAutoCompleteChange = (newValue: string) => {
+    if (selectedFilterColumn.filterType === FilterType.NAMESPACE_POD && newValue.includes('.')) {
+      managePodsAutoComplete(newValue);
+    } else {
+      const options = getFilterOptions(selectedFilterColumn.filterType, newValue);
+      manageAutoCompleteOptions(options);
+    }
     setFilterValue(newValue);
-  };
-
-  const onAutoCompleteSelect = (e: React.MouseEvent<Element, MouseEvent>, itemId: string) => {
-    e.stopPropagation();
-    const option = autocompleteOptions.find(opt => opt.value === itemId);
-    addFilter(selectedFilterColumn.id, { v: itemId, display: option?.name });
-    resetAutocompleteOptions();
-  };
-
-  const resetAutocompleteOptions = () => {
-    setPopperVisible(false);
-    setAutocompleteOptions([]);
   };
 
   const validateFilterValue = React.useCallback(
@@ -157,31 +173,11 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
             }
             return { err: t('Unknown protocol') };
           }
+        case FilterType.NAMESPACE:
         case FilterType.K8S_NAMES:
           return validateLabel(value) ? { val: value } : { err: t('Not a valid kubernetes label') };
-        case FilterType.FQDN:
-          //FQDN can either be namespace / pod / namespace.pod / ipaddress / port / ipaddress:port
-          if (value.includes(':')) {
-            const ipAndPort = value.split(':');
-            return validateIPFilter(ipAndPort[0]) && ipAndPort[1].length && !isNaN(Number(ipAndPort[1]))
-              ? { val: value }
-              : { err: t('Not a valid IP and port') };
-          } else if (value.includes('.')) {
-            const splittedValue = value.split('.');
-            if (splittedValue.length === 2) {
-              return validateLabel(splittedValue[0]) && validateLabel(splittedValue[1])
-                ? { val: value }
-                : { err: t('Not a valid Namespace and Pod') };
-            } else {
-              return validateIPFilter(value)
-                ? { val: value }
-                : { err: t('Not a valid IPv4 or IPv6, nor a CIDR, nor an IP range separated by hyphen') };
-            }
-          } else if (!isNaN(Number(value))) {
-            return { val: value };
-          } else {
-            return validateLabel(value) ? { val: value } : { err: t('Not a valid kubernetes label') };
-          }
+        case FilterType.NAMESPACE_POD:
+          return { err: t('You must select an existing kubernetes object from autocomplete') };
         default:
           return { val: value };
       }
@@ -244,10 +240,47 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
     [columns, filters, setFilters, resetFilterValue, setMessageWithDelay, t]
   );
 
+  const manageAutoCompleteOption = React.useCallback(
+    (option: FilterOption) => {
+      if (selectedFilterColumn.filterType === FilterType.NAMESPACE_POD) {
+        if (selectedFilterValue.includes('.')) {
+          const namespacePod = selectedFilterValue.split('.')[0] + '.' + option.name;
+          addFilter(selectedFilterColumn.id, { v: namespacePod, display: namespacePod });
+        } else {
+          const namespaceDot = option.name + '.';
+          setSelectedFilterValue(namespaceDot);
+          managePodsAutoComplete(namespaceDot);
+          searchInputRef?.current?.focus();
+        }
+      } else {
+        addFilter(selectedFilterColumn.id, { v: option.value, display: option.name });
+      }
+      resetAutocompleteOptions();
+    },
+    [addFilter, managePodsAutoComplete, selectedFilterColumn.filterType, selectedFilterColumn.id, selectedFilterValue]
+  );
+
+  const onAutoCompleteSelect = React.useCallback(
+    (e: React.MouseEvent<Element, MouseEvent> | undefined, itemId: string) => {
+      e?.stopPropagation();
+      const option = autocompleteOptions.find(opt => opt.value === itemId);
+      if (!option) {
+        return;
+      }
+      manageAutoCompleteOption(option);
+    },
+    [autocompleteOptions, manageAutoCompleteOption]
+  );
+
+  const resetAutocompleteOptions = () => {
+    setPopperVisible(false);
+    setAutocompleteOptions([]);
+  };
+
   const manageFilters = React.useCallback(() => {
     // Only one choice is present, consider this is what is desired
     if (autocompleteOptions.length === 1) {
-      addFilter(selectedFilterColumn.id, { v: autocompleteOptions[0].value, display: autocompleteOptions[0].name });
+      manageAutoCompleteOption(autocompleteOptions[0]);
       return;
     }
 
@@ -271,8 +304,9 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
     selectedFilterValue,
     selectedFilterColumn.filterType,
     selectedFilterColumn.id,
-    addFilter,
-    setMessageWithDelay
+    manageAutoCompleteOption,
+    setMessageWithDelay,
+    addFilter
   ]);
 
   /*TODO: check if we can do autocomplete for pod / namespace fields
@@ -280,6 +314,9 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
    */
   const getFilterControl = (col: Column) => {
     switch (col.filterType) {
+      case FilterType.NAMESPACE:
+      case FilterType.POD:
+      case FilterType.NAMESPACE_POD:
       case FilterType.PORT:
       case FilterType.PROTOCOL:
         return (
@@ -376,6 +413,8 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
           - ${t('A protocol number like 6, 17')}
           - ${t('A IANA name like TCP, UDP')}`;
         break;
+      case FilterType.NAMESPACE:
+      case FilterType.POD:
       case FilterType.K8S_NAMES:
         hint = t('Specify a single kubernetes name.');
         examples = `${t('Specify a single kubernetes name following these rules:')}
@@ -387,14 +426,19 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
         - ${t('Ending text like "*-registry"')}
         - ${t('Pattern like "cluster-*-registry", "c*-*-r*y", -i*e-')}`;
         break;
-      case FilterType.FQDN:
-        hint = t('Specify a full qualified name.');
-        examples = `${t('Specify a full qualified name following these rules:')}
-          - ${t('A namespace and pod like openshift.apiserver')}
-          - ${t('A single kubernetes name like openshift, apiserver')}
-          - ${t('An IP address and port like 192.168.0.1:80')}
-          - ${t('A single IPv4 or IPv6 address like 192.0.2.0, ::1')}
-          - ${t('A port number like 80, 21')}`;
+      case FilterType.NAMESPACE_POD:
+        hint = t('Specify an existing pod from its namespace.');
+        examples = `${t('Specify a namespace and pod from existing:')}
+          - ${t('Select namespace first from suggestions')}
+          - ${t('Then select pod from suggestions')}
+          ${t('You can also directly specify a namespace and pod like openshift.apiserver')}`;
+        break;
+      case FilterType.ADDRESS_PORT:
+        hint = t('Specify a single address or range with port');
+        examples = `${t('Specify addresses and port following one of these rules:')}
+        - ${t('A single IPv4 address with port like 192.0.2.0:8080')}
+        - ${t('A range within the IP address like 192.168.0.1-192.189.10.12:8080')}
+        - ${t('A CIDR specification like 192.51.100.0/24:8080')}`;
         break;
       default:
         hint = '';
@@ -461,10 +505,44 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
     ];
   };
 
+  const manageCache = () => {
+    switch (selectedFilterColumn.filterType) {
+      case FilterType.NAMESPACE_POD:
+      case FilterType.NAMESPACE:
+        // refresh available namespaces and clear pods
+        getNamespaces().then(ns => {
+          setNamespaces(ns);
+        });
+        clearPods();
+        break;
+      case FilterType.POD:
+        // refresh pods from namespace filters
+        let values: FilterValue[] | undefined = undefined;
+        if (selectedFilterColumn.id === ColumnsId.srcpod) {
+          values = filters?.find(f => f.colId === ColumnsId.srcnamespace)?.values;
+        } else if (selectedFilterColumn.id === ColumnsId.dstpod) {
+          values = filters?.find(f => f.colId === ColumnsId.dstnamespace)?.values;
+        } else {
+          values = filters?.find(f => f.colId === ColumnsId.namespace)?.values;
+        }
+
+        //set pods for each namespace found
+        values?.forEach(v => {
+          managePodsAutoComplete(v.v, false);
+        });
+        break;
+      default:
+        //clear all
+        clearNamespaces();
+        clearPods();
+        break;
+    }
+  };
+
   React.useEffect(() => {
     resetFilterValue();
     searchInputRef?.current?.focus();
-
+    manageCache();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedFilterColumn]);
 
@@ -482,7 +560,10 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
   return (
     <Toolbar
       id={id}
-      clearAllFilters={clearFilters}
+      clearAllFilters={() => {
+        clearFilters();
+        manageCache();
+      }}
       clearFiltersButtonText={hasFilterValue() ? t('Clear all filters') : ''}
     >
       <ToolbarContent id={`${id}-search-filters`} toolbarId={id}>

@@ -34,10 +34,10 @@ export const RecordField: React.FC<{
   };
 
   const emptyText = () => {
-    return <div className="record-field-empty">-</div>;
+    return <div className="record-field-flex text-muted">{t('n/a')}</div>;
   };
 
-  const simpleTextWithTooltip = (text: string) => {
+  const simpleTextWithTooltip = (text?: string) => {
     if (text) {
       return (
         <div>
@@ -89,7 +89,7 @@ export const RecordField: React.FC<{
           {child1 ? child1 : emptyText()}
         </div>
         <div className="record-field-content-flex" onMouseOver={e => onMouseOver(e, 'record-field-content-flex')}>
-          {child2 && asChild && <span className="child-arrow">{'↪'}</span>}
+          {asChild && <span className="child-arrow">{'↪'}</span>}
           {child2 ? child2 : emptyText()}
         </div>
       </div>
@@ -104,9 +104,18 @@ export const RecordField: React.FC<{
     );
   };
 
-  const fqdnContent = (value: string[]) => {
+  const ipPortContent = (value: string[], singleText = false) => {
+    if (singleText) {
+      return singleContainer(simpleTextWithTooltip(`${value[0]}:${value[1]}`));
+    } else {
+      return doubleContainer(simpleTextWithTooltip(value[0]), simpleTextWithTooltip(value[1]), false);
+    }
+  };
+
+  const namespacePodContent = (value: string[]) => {
     if (value[0].includes('.')) {
-      return singleContainer(simpleTextWithTooltip(value[0]));
+      //fallback on ip:port if kubernetes objects are not resolved
+      return ipPortContent(value);
     } else if (Array.isArray(value)) {
       return doubleContainer(
         namespaceContent(value[0] as string),
@@ -133,18 +142,30 @@ export const RecordField: React.FC<{
           </div>
         );
       }
-      case ColumnsId.fqdn:
+      case ColumnsId.addrport:
         if (Array.isArray(value)) {
           return doubleContainer(
-            fqdnContent([value[0], value[1]] as string[]),
-            fqdnContent([value[2], value[3]] as string[])
+            ipPortContent([value[0], value[1]] as string[]),
+            ipPortContent([value[2], value[3]] as string[])
           );
         } else {
           return <></>;
         }
-      case ColumnsId.srcfqdn:
-      case ColumnsId.dstfqdn:
-        return fqdnContent(value as string[]);
+      case ColumnsId.srcaddrport:
+      case ColumnsId.dstaddrport:
+        return ipPortContent(value as string[]);
+      case ColumnsId.namespacepod:
+        if (Array.isArray(value)) {
+          return doubleContainer(
+            namespacePodContent([value[0], value[1]] as string[]),
+            namespacePodContent([value[2], value[3]] as string[])
+          );
+        } else {
+          return <></>;
+        }
+      case ColumnsId.srcnamespacepod:
+      case ColumnsId.dstnamespacepod:
+        return namespacePodContent(value as string[]);
       case ColumnsId.pod:
         return Array.isArray(value) ? (
           doubleContainer(
@@ -194,8 +215,8 @@ export const RecordField: React.FC<{
       case ColumnsId.port:
         return Array.isArray(value) ? (
           doubleContainer(
-            simpleTextWithTooltip(formatPort(Number(value[0]))),
-            simpleTextWithTooltip(formatPort(Number(value[1])))
+            simpleTextWithTooltip(value[0] ? formatPort(Number(value[0])) : ''),
+            simpleTextWithTooltip(value[1] ? formatPort(Number(value[1])) : '')
           )
         ) : (
           <></>

@@ -28,6 +28,9 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/netobserv/network-observability-console-plugin/pkg/handler"
+	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	fake "k8s.io/client-go/kubernetes/fake"
 )
 
 const (
@@ -204,7 +207,7 @@ func TestLokiConfiguration(t *testing.T) {
 			URL:     lokiURL,
 			Timeout: time.Second,
 		},
-	})
+	}, nil)
 	backendSvc := httptest.NewServer(backendRoutes)
 	defer backendSvc.Close()
 
@@ -241,7 +244,7 @@ func TestLokiConfiguration_MultiTenant(t *testing.T) {
 			Timeout:  time.Second,
 			TenantID: "my-organisation",
 		},
-	})
+	}, nil)
 	backendSvc := httptest.NewServer(backendRoutes)
 	defer backendSvc.Close()
 
@@ -400,12 +403,12 @@ func TestLokiFiltering(t *testing.T) {
 			"?query={app=\"netobserv-flowcollector\"}|~`SrcPod\":\"mid-.*d\"`",
 		},
 	}, {
-		inputPath: "?SrcFQDN=namespace1.pod2&DstFQDN=namespace2.pod2",
+		inputPath: "?SrcNamespacePod=namespace1.pod2&DstNamespacePod=namespace2.pod2",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\"}|json|(DstNamespace=~\"(?i).*namespace2.*\"+or+DstPod=~`(?i).*pod2.*`)|(SrcNamespace=~\"(?i).*namespace1.*\"+or+SrcPod=~`(?i).*pod2.*`)",
-			"?query={app=\"netobserv-flowcollector\"}|json|(SrcNamespace=~\"(?i).*namespace1.*\"+or+SrcPod=~`(?i).*pod2.*`)|(DstNamespace=~\"(?i).*namespace2.*\"+or+DstPod=~`(?i).*pod2.*`)",
-			"?query={app=\"netobserv-flowcollector\"}|json|(DstPod=~`(?i).*pod2.*`+or+DstNamespace=~\"(?i).*namespace2.*\")|(SrcPod=~`(?i).*pod2.*`+or+SrcNamespace=~\"(?i).*namespace1.*\")",
-			"?query={app=\"netobserv-flowcollector\"}|json|(SrcPod=~`(?i).*pod2.*`+or+SrcNamespace=~\"(?i).*namespace1.*\")|(DstPod=~`(?i).*pod2.*`+or+DstNamespace=~\"(?i).*namespace2.*\")",
+			"?query={app=\"netobserv-flowcollector\"}|json|(DstNamespace=~\"(?i).*namespace2.*\"+and+DstPod=~`(?i).*pod2.*`)|(SrcNamespace=~\"(?i).*namespace1.*\"+and+SrcPod=~`(?i).*pod2.*`)",
+			"?query={app=\"netobserv-flowcollector\"}|json|(SrcNamespace=~\"(?i).*namespace1.*\"+and+SrcPod=~`(?i).*pod2.*`)|(DstNamespace=~\"(?i).*namespace2.*\"+and+DstPod=~`(?i).*pod2.*`)",
+			"?query={app=\"netobserv-flowcollector\"}|json|(DstPod=~`(?i).*pod2.*`+and+DstNamespace=~\"(?i).*namespace2.*\")|(SrcPod=~`(?i).*pod2.*`+and+SrcNamespace=~\"(?i).*namespace1.*\")",
+			"?query={app=\"netobserv-flowcollector\"}|json|(SrcPod=~`(?i).*pod2.*`+and+SrcNamespace=~\"(?i).*namespace1.*\")|(DstPod=~`(?i).*pod2.*`+and+DstNamespace=~\"(?i).*namespace2.*\")",
 		},
 	}}
 
@@ -426,7 +429,7 @@ func TestLokiFiltering(t *testing.T) {
 			Timeout: time.Second,
 			Labels:  []string{"SrcNamespace", "SrcWorkload", "DstNamespace", "DstWorkload", "FlowDirection"},
 		},
-	})
+	}, nil)
 	backendSvc := httptest.NewServer(backendRoutes)
 	defer backendSvc.Close()
 
@@ -650,4 +653,49 @@ func (conf *httpClientConfig) buildHTTPClient() (*http.Client, error) {
 	httpClient := http.Client{Transport: transport}
 
 	return &httpClient, nil
+}
+
+func TestResources(t *testing.T) {
+	kubernetesClient := fake.NewSimpleClientset(
+		&v1.Namespace{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "fake-ns",
+			},
+		},
+		&v1.Pod{
+			TypeMeta: metav1.TypeMeta{},
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "fake-pod",
+				Namespace: "fake-ns",
+			},
+		})
+
+	backendRoutes := setupRoutes(&Config{}, kubernetesClient)
+	backendSvc := httptest.NewServer(backendRoutes)
+	defer backendSvc.Close()
+
+	// WHEN the resources endpoint is queried in the backend
+	resp, err := backendSvc.Client().Get(backendSvc.URL + "/api/resources?resourceType=namespaces")
+	require.NoError(t, err)
+	body, err := ioutil.ReadAll(resp.Body)
+	require.NoError(t, err)
+	assert.Equal(t, `["fake-ns"]`, string(body))
+
+	resp, err = backendSvc.Client().Get(backendSvc.URL + "/api/resources?resourceType=pods&namespace=fake-ns")
+	require.NoError(t, err)
+	body, err = ioutil.ReadAll(resp.Body)
+	require.NoError(t, err)
+	assert.Equal(t, `["fake-pod"]`, string(body))
+
+	resp, err = backendSvc.Client().Get(backendSvc.URL + "/api/resources?resourceType=invalid")
+	require.NoError(t, err)
+	body, err = ioutil.ReadAll(resp.Body)
+	require.NoError(t, err)
+	assert.Equal(t, `{"Message":"unknown resourceType: invalid"}`, string(body))
+
+	resp, err = backendSvc.Client().Get(backendSvc.URL + "/api/resources?resourceType=pods")
+	require.NoError(t, err)
+	body, err = ioutil.ReadAll(resp.Body)
+	require.NoError(t, err)
+	assert.Equal(t, `{"Message":"namespace cannot be empty"}`, string(body))
 }
