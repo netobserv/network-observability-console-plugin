@@ -52,7 +52,8 @@ import TimeRangeDropdown from './time-range-dropdown';
 
 export const NetflowTraffic: React.FC<{
   forcedFilters?: Filter[];
-}> = ({ forcedFilters }) => {
+  initialQueryOptions?: QueryOptions;
+}> = ({ forcedFilters, initialQueryOptions }) => {
   const { push } = useHistory();
   const [extensions] = useResolvedExtensions<ModelFeatureFlag>(isModelFeatureFlag);
   const [loading, setLoading] = React.useState(true);
@@ -71,7 +72,9 @@ export const NetflowTraffic: React.FC<{
   });
   const [filters, setFilters] = React.useState<Filter[]>(getFiltersFromURL(columns));
   const [range, setRange] = React.useState<number | TimeRange>(getRangeFromURL());
-  const [queryOptions, setQueryOptions] = React.useState<QueryOptions>(getQueryOptionsFromURL());
+  const [queryOptions, setQueryOptions] = React.useState<QueryOptions>(
+    initialQueryOptions ? initialQueryOptions : getQueryOptionsFromURL()
+  );
   const [interval, setInterval] = useLocalStorage<number | undefined>(LOCAL_STORAGE_REFRESH_KEY);
   const isInit = React.useRef(true);
   const [selectedRecord, setSelectedRecord] = React.useState<Record | undefined>(undefined);
@@ -217,7 +220,7 @@ export const NetflowTraffic: React.FC<{
             <RecordPanel
               id="recordPanel"
               record={selectedRecord}
-              columns={columns}
+              columns={getDefaultColumns(t, false, false)}
               filters={filters}
               range={range}
               options={queryOptions}
@@ -261,7 +264,7 @@ export const NetflowTraffic: React.FC<{
         isModalOpen={isExportModalOpen}
         setModalOpen={setExportModalOpen}
         queryArguments={getQueryArguments()}
-        columns={columns}
+        columns={columns.filter(c => c.fieldName)}
         queryOptions={queryOptions}
         range={range}
         filters={forcedFilters ? forcedFilters : filters}

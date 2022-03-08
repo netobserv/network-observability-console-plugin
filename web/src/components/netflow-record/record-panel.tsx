@@ -77,10 +77,14 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
             setRange({ from: dateSeconds, to: dateSeconds + 1 });
             break;
           case ColumnsId.flowdir:
-            setQueryOptions({ ...options, reporter: flowdirToReporter[value] });
+            setQueryOptions({ ...options, reporter: flowdirToReporter[value as string] });
             break;
           default:
-            const values = [{ v: value.toString() }];
+            const values = [
+              {
+                v: Array.isArray(value) ? value.join(value.length == 2 ? '.' : ':') : value.toString()
+              }
+            ];
             const result = _.cloneDeep(filters);
             const found = result.find(f => f.colId === col.id);
             if (found) {
@@ -105,7 +109,7 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
           isDelete = typeof range !== 'number' && range.from === getDateMsInSeconds(Number(value));
           break;
         case ColumnsId.flowdir:
-          isDelete = options.reporter === flowdirToReporter[value];
+          isDelete = options.reporter === flowdirToReporter[value as string];
           break;
         default:
           isDelete =
@@ -138,7 +142,7 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
                 {g.columns.map(c => (
                   <TextContent className={`record-field-container ${g.title ? 'grouped' : ''}`} key={c.id}>
                     <Text component={TextVariants.h4}>{c.name}</Text>
-                    <RecordField flow={record} column={c} size={'l'} filter={getFilter(c)} />
+                    <RecordField flow={record} column={c} filter={getFilter(c)} size={'s'} />
                   </TextContent>
                 ))}
               </div>

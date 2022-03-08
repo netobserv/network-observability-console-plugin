@@ -22,3 +22,21 @@ export const getExportFlowsURL = (params: QueryArguments, filteredColumns?: stri
   }
   return `${host}api/loki/export?${urlParams.toString()}`;
 };
+
+export const getNamespaces = (): Promise<string[]> => {
+  return axios.get(host + '/api/resources/namespaces').then(r => {
+    if (r.status >= 400) {
+      throw new Error(`${r.statusText} [code=${r.status}]`);
+    }
+    return r.data;
+  });
+};
+
+export const getResources = (kind: string, namespace: string): Promise<string[]> => {
+  return axios.get(host + '/api/resources', { params: { kind, namespace } }).then(r => {
+    if (r.status >= 400) {
+      throw new Error(`${r.statusText} [code=${r.status}]`);
+    }
+    return r.data;
+  });
+};

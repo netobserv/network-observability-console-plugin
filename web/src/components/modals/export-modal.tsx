@@ -50,7 +50,9 @@ export const ExportModal: React.FC<{
     if (isExportAll) {
       return undefined;
     }
-    return selectedColumns.filter(c => c.isSelected).map(c => c.fieldName);
+    return selectedColumns.filter(c => c.isSelected && c.fieldName != undefined).map(c => c.fieldName) as
+      | string[]
+      | undefined;
   }, [isExportAll, selectedColumns]);
 
   const rangeText = React.useCallback(() => {

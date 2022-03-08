@@ -6,11 +6,16 @@ import { getProtectedService } from './port';
 
 export enum FilterType {
   NONE,
+  ADDRESS_PORT,
   ADDRESS,
   PORT,
   PROTOCOL,
   NUMBER,
-  K8S_NAMES
+  K8S_NAMES,
+  KIND_NAMESPACE_NAME,
+  K8S_OBJECT,
+  NAMESPACE,
+  KIND
 }
 
 export interface FilterValue {
@@ -28,6 +33,10 @@ export interface FilterOption {
   value: string;
 }
 
+export const getFilterOption = (name: string): FilterOption => {
+  return { name, value: name };
+};
+
 export const getActiveColumnFilters = (columnId: ColumnsId, filters: Filter[]) => {
   return filters.filter(f => f.colId === columnId).flatMap(f => f.values.map(v => v.v));
 };
@@ -44,6 +53,72 @@ const getProtocolOptions = (value: string) => {
   );
 };
 
+const namespaces: Set<FilterOption> = new Set<FilterOption>();
+
+export const clearNamespaces = () => {
+  namespaces.clear();
+};
+
+export const setNamespaces = (ns: string[]) => {
+  namespaces.clear();
+  ns.forEach(n => namespaces.add(getFilterOption(n)));
+};
+
+const objectsMap: Map<string, FilterOption[]> = new Map<string, FilterOption[]>();
+
+export const clearPods = () => {
+  objectsMap.clear();
+};
+
+export const hasPods = (namespace: string) => {
+  return objectsMap.has(namespace);
+};
+
+export const setObjects = (kindNamespace: string, objects: string[]) => {
+  const options = objects.map(p => getFilterOption(p));
+  objectsMap.set(kindNamespace, options);
+};
+
+export const hasNamespace = (namespace: string) => {
+  return Array.from(namespaces.values()).find(n => n.name === namespace) != undefined;
+};
+
+export const getNamespaceOptions = (value: string) => {
+  const options = Array.from(namespaces.values());
+  if (value.length) {
+    return options.filter(n => n.name.toLowerCase().startsWith(value.toLowerCase()));
+  } else {
+    return options;
+  }
+};
+
+export const getObjectsOptions = (filterValue: string) => {
+  // search objects by namespace
+  if (filterValue.includes('.')) {
+    const kindNamespaceAndPod = filterValue.split('.');
+    const pods = objectsMap.get(`${kindNamespaceAndPod[0]}.${kindNamespaceAndPod[1]}`);
+    if (!pods) {
+      return [];
+    } else if (kindNamespaceAndPod[1]) {
+      // search all pods in namespace in cache
+      return pods.filter(p =>
+        p.name.toLowerCase().startsWith(kindNamespaceAndPod[kindNamespaceAndPod.length - 1].toLowerCase())
+      );
+    } else {
+      // directly show pods for "namespace & pod" when namespace is set
+      return pods;
+    }
+  } else if (filterValue.length) {
+    // search all objects in cache
+    return Array.from(objectsMap.values())
+      .flat()
+      .filter(p => p.name.toLowerCase().startsWith(filterValue.toLowerCase()));
+  } else {
+    // don't show list if field is empty
+    return [];
+  }
+};
+
 const getPortOptions = (value: string) => {
   const isNumber = !isNaN(Number(value));
   const foundService = isNumber ? getProtectedService(Number(value)) : null;
@@ -56,12 +131,22 @@ const getPortOptions = (value: string) => {
   return [];
 };
 
+const getK8SKindOptions = (value: string) => {
+  return ['Pod', 'Service', 'Deployment', 'StatefulSet', 'DaemonSet', 'Job', 'CronJob']
+    .filter(k => k.toLowerCase().startsWith(value.toLowerCase()))
+    .map(p => getFilterOption(p));
+};
+
 const filterOptions: Map<FilterType, (value: string) => FilterOption[]> = new Map([
   [FilterType.PROTOCOL, getProtocolOptions],
-  [FilterType.PORT, getPortOptions]
+  [FilterType.PORT, getPortOptions],
+  [FilterType.KIND_NAMESPACE_NAME, getK8SKindOptions],
+  [FilterType.KIND, getK8SKindOptions],
+  [FilterType.NAMESPACE, getNamespaceOptions],
+  [FilterType.K8S_OBJECT, getObjectsOptions] //must filter by namespace first, else it will be empty
 ]);
 
-export const getFilterOptions = (type: FilterType, value: string, max: number) => {
+export const getFilterOptions = (type: FilterType, value: string, max = 10) => {
   if (filterOptions.has(type)) {
     let options = filterOptions.get(type)!(value);
     if (options.length > max) {

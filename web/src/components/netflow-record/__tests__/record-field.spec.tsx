@@ -1,10 +1,10 @@
-import * as React from 'react';
-import { shallow } from 'enzyme';
 import { Button } from '@patternfly/react-core';
-import RecordField, { RecordFieldFilter } from '../record-field';
+import { shallow } from 'enzyme';
+import * as React from 'react';
+import { Size } from '../../display-dropdown';
 import { DefaultColumns } from '../../__tests-data__/columns';
 import { FlowsSample } from '../../__tests-data__/flows';
-import { Size } from '../../display-dropdown';
+import RecordField, { RecordFieldFilter } from '../record-field';
 
 describe('<RecordField />', () => {
   const filterMock: RecordFieldFilter = {
@@ -14,7 +14,8 @@ describe('<RecordField />', () => {
   const mocks = {
     size: 'm' as Size
   };
-  it('should render component', async () => {
+  it('should render single field', async () => {
+    //datetime column will produce a single field
     const wrapper = shallow(<RecordField flow={FlowsSample[0]} column={DefaultColumns[0]} {...mocks} />);
     expect(wrapper.find(RecordField)).toBeTruthy();
     expect(wrapper.find('.record-field-content')).toHaveLength(1);

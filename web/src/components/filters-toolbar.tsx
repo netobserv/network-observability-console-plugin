@@ -1,4 +1,8 @@
 import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionToggle,
   Button,
   Chip,
   ChipGroup,
@@ -30,15 +34,21 @@ import * as _ from 'lodash';
 import { getPort } from 'port-numbers';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Column, ColumnsId, getColumnGroups, getFullColumnName } from '../utils/columns';
+import { Column, ColumnGroup, ColumnsId, getColumnGroups, getFullColumnName } from '../utils/columns';
 import {
+  clearNamespaces,
+  clearPods as clearObjects,
   createFilterValue,
   Filter,
   FilterOption,
   FilterType,
   FilterValue,
   findProtocolOption,
-  getFilterOptions
+  getFilterOptions,
+  hasNamespace,
+  hasPods as hasObjects,
+  setNamespaces,
+  setObjects
 } from '../utils/filters';
 import './filters-toolbar.css';
 import { validateIPFilter } from '../utils/ip';
@@ -47,6 +57,7 @@ import { QueryOptionsDropdown } from './query-options-dropdown';
 import { getPathWithParams, NETFLOW_TRAFFIC_PATH } from '../utils/router';
 import { useHistory } from 'react-router-dom';
 import { validateLabel } from '../utils/label';
+import { getNamespaces, getResources } from '../api/routes';
 
 export interface FiltersToolbarProps {
   id: string;
@@ -83,10 +94,8 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
   const [autocompleteOptions, setAutocompleteOptions] = React.useState<FilterOption[]>([]);
   const [isPopperVisible, setPopperVisible] = React.useState(false);
   const [isSearchFiltersOpen, setSearchFiltersOpen] = React.useState<boolean>(false);
-
-  const availableFilters = columns.filter(c => c.filterType !== FilterType.NONE);
-  const filtersGroups = getColumnGroups(availableFilters);
-  const [selectedFilterColumn, setSelectedFilterColumn] = React.useState<Column>(availableFilters[0]);
+  const [filtersGroups, setFiltersGroups] = React.useState<ColumnGroup[]>();
+  const [selectedFilterColumn, setSelectedFilterColumn] = React.useState<Column>(columns[0]);
   const [selectedFilterValue, setSelectedFilterValue] = React.useState<string>('');
 
   // reset and delay message state to trigger tooltip properly
@@ -104,24 +113,41 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
     [skipTipsDelay]
   );
 
-  const onAutoCompleteChange = (newValue: string) => {
-    const options = getFilterOptions(selectedFilterColumn.filterType, newValue, 10);
+  const manageAutoCompleteOptions = (options: FilterOption[]) => {
     setAutocompleteOptions(options);
     // The menu is hidden if there are no options
     setPopperVisible(options.length > 0);
+  };
+
+  const manageKindsAutoComplete = React.useCallback((kindNamespacePod: string, suggest = true) => {
+    const split = kindNamespacePod.split('.');
+    const kind = split[0];
+    const namespace = split[1];
+    if (namespace && hasNamespace(namespace)) {
+      const key = `${kind}.${namespace}`;
+      if (!hasObjects(key)) {
+        getResources(kind, namespace).then(pods => {
+          setObjects(key, pods);
+          if (suggest) {
+            manageAutoCompleteOptions(getFilterOptions(FilterType.K8S_OBJECT, kindNamespacePod));
+          }
+        });
+      } else if (suggest) {
+        manageAutoCompleteOptions(getFilterOptions(FilterType.K8S_OBJECT, kindNamespacePod));
+      }
+    } else {
+      manageAutoCompleteOptions(getFilterOptions(FilterType.NAMESPACE, namespace ? namespace : ''));
+    }
+  }, []);
+
+  const onAutoCompleteChange = (newValue: string) => {
+    if (selectedFilterColumn.filterType === FilterType.KIND_NAMESPACE_NAME && newValue.includes('.')) {
+      manageKindsAutoComplete(newValue);
+    } else {
+      const options = getFilterOptions(selectedFilterColumn.filterType, newValue);
+      manageAutoCompleteOptions(options);
+    }
     setFilterValue(newValue);
-  };
-
-  const onAutoCompleteSelect = (e: React.MouseEvent<Element, MouseEvent>, itemId: string) => {
-    e.stopPropagation();
-    const option = autocompleteOptions.find(opt => opt.value === itemId);
-    addFilter(selectedFilterColumn.id, { v: itemId, display: option?.name });
-    resetAutocompleteOptions();
-  };
-
-  const resetAutocompleteOptions = () => {
-    setPopperVisible(false);
-    setAutocompleteOptions([]);
   };
 
   const validateFilterValue = React.useCallback(
@@ -155,8 +181,12 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
             }
             return { err: t('Unknown protocol') };
           }
+        case FilterType.NAMESPACE:
         case FilterType.K8S_NAMES:
           return validateLabel(value) ? { val: value } : { err: t('Not a valid kubernetes label') };
+        case FilterType.KIND:
+        case FilterType.KIND_NAMESPACE_NAME:
+          return { err: t('You must select an existing kubernetes object from autocomplete') };
         default:
           return { val: value };
       }
@@ -219,10 +249,55 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
     [columns, filters, setFilters, resetFilterValue, setMessageWithDelay, t]
   );
 
+  const manageAutoCompleteOption = React.useCallback(
+    (option: FilterOption) => {
+      if (selectedFilterColumn.filterType === FilterType.KIND_NAMESPACE_NAME) {
+        if (selectedFilterValue.includes('.')) {
+          const split = selectedFilterValue.split('.');
+          if (split.length === 3) {
+            const kindNamespacePod = `${split[0]}.${split[1]}.${option.name}`;
+            addFilter(selectedFilterColumn.id, { v: kindNamespacePod, display: kindNamespacePod });
+          } else {
+            const kindNamespaceDot = `${split[0]}.${option.name}.`;
+            setSelectedFilterValue(kindNamespaceDot);
+            manageKindsAutoComplete(kindNamespaceDot);
+          }
+        } else {
+          const namespaceDot = option.name + '.';
+          setSelectedFilterValue(namespaceDot);
+          manageKindsAutoComplete(namespaceDot);
+        }
+        searchInputRef?.current?.focus();
+        return;
+      } else {
+        addFilter(selectedFilterColumn.id, { v: option.value, display: option.name });
+      }
+      resetAutocompleteOptions();
+    },
+    [addFilter, manageKindsAutoComplete, selectedFilterColumn.filterType, selectedFilterColumn.id, selectedFilterValue]
+  );
+
+  const onAutoCompleteSelect = React.useCallback(
+    (e: React.MouseEvent<Element, MouseEvent> | undefined, itemId: string) => {
+      e?.stopPropagation();
+      const option = autocompleteOptions.find(opt => opt.value === itemId);
+      if (!option) {
+        return;
+      }
+      manageAutoCompleteOption(option);
+    },
+    [autocompleteOptions, manageAutoCompleteOption]
+  );
+
+  const resetAutocompleteOptions = () => {
+    setPopperVisible(false);
+    setAutocompleteOptions([]);
+  };
+
   const manageFilters = React.useCallback(() => {
     // Only one choice is present, consider this is what is desired
     if (autocompleteOptions.length === 1) {
-      addFilter(selectedFilterColumn.id, { v: autocompleteOptions[0].value, display: autocompleteOptions[0].name });
+      manageAutoCompleteOption(autocompleteOptions[0]);
       return;
     }
 
@@ -246,8 +321,9 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
     selectedFilterValue,
     selectedFilterColumn.filterType,
     selectedFilterColumn.id,
-    addFilter,
-    setMessageWithDelay
+    manageAutoCompleteOption,
+    setMessageWithDelay,
+    addFilter
   ]);
 
   /*TODO: check if we can do autocomplete for pod / namespace fields
@@ -255,6 +331,10 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
    */
   const getFilterControl = (col: Column) => {
     switch (col.filterType) {
+      case FilterType.KIND:
+      case FilterType.NAMESPACE:
+      case FilterType.K8S_OBJECT:
+      case FilterType.KIND_NAMESPACE_NAME:
       case FilterType.PORT:
       case FilterType.PROTOCOL:
         return (
@@ -351,6 +431,8 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
           - ${t('A protocol number like 6, 17')}
           - ${t('A IANA name like TCP, UDP')}`;
         break;
+      case FilterType.NAMESPACE:
+      case FilterType.K8S_OBJECT:
       case FilterType.K8S_NAMES:
         hint = t('Specify a single kubernetes name.');
         examples = `${t('Specify a single kubernetes name following these rules:')}
@@ -361,6 +443,21 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
         - ${t('Starting text like cluster, "cluster-*"')}
         - ${t('Ending text like "*-registry"')}
         - ${t('Pattern like "cluster-*-registry", "c*-*-r*y", -i*e-')}`;
+        break;
+      case FilterType.KIND_NAMESPACE_NAME:
+        hint = t('Specify an existing object from its kind and namespace.');
+        examples = `${t('Specify a kind, namespace and name from existing:')}
+              - ${t('Select kind first from suggestions')}
+              - ${t('Then Select namespace from suggestions')}
+              - ${t('Finally select object from suggestions')}
+              ${t('You can also directly specify a kind namespace and name like pod.openshift.apiserver')}`;
+        break;
+      case FilterType.ADDRESS_PORT:
+        hint = t('Specify a single address or range with port');
+        examples = `${t('Specify addresses and port following one of these rules:')}
+        - ${t('A single IPv4 address with port like 192.0.2.0:8080')}
+        - ${t('A range within the IP address like 192.168.0.1-192.189.10.12:8080')}
+        - ${t('A CIDR specification like 192.51.100.0/24:8080')}`;
         break;
       default:
         hint = '';
@@ -387,17 +484,109 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
     );
   };
 
+  const getFiltersDropdownItems = () => {
+    return [
+      <Accordion key="accordion">
+        {filtersGroups &&
+          filtersGroups.map((g, i) => (
+            <AccordionItem key={`group-${i}`}>
+              <AccordionToggle
+                onClick={() => {
+                  const expanded = !g.expanded;
+                  filtersGroups.map(fg => (fg.expanded = false));
+                  g.expanded = expanded;
+                  setFiltersGroups([...filtersGroups]);
+                }}
+                isExpanded={g.expanded}
+                id={`group-${i}-toggle`}
+              >
+                {g.title && <h1 className="pf-c-dropdown__group-title">{g.title}</h1>}
+              </AccordionToggle>
+              <AccordionContent isHidden={g.title != undefined && !g.expanded}>
+                {g.columns.map((col, index) => (
+                  <DropdownItem
+                    id={col.id}
+                    className={`column-filter-item ${g.title ? 'grouped' : ''}`}
+                    component="button"
+                    onClick={() => {
+                      setSearchFiltersOpen(false);
+                      setSelectedFilterColumn(col);
+                    }}
+                    key={index}
+                  >
+                    {col.name}
+                  </DropdownItem>
+                ))}
+              </AccordionContent>
+            </AccordionItem>
+          ))}
+      </Accordion>
+    ];
+  };
+
+  const manageCache = () => {
+    switch (selectedFilterColumn.filterType) {
+      case FilterType.KIND_NAMESPACE_NAME:
+      case FilterType.NAMESPACE:
+        // refresh available namespaces and clear pods
+        getNamespaces().then(ns => {
+          setNamespaces(ns);
+        });
+        clearObjects();
+        break;
+      /*case FilterType.POD:
+        //clear all objects
+        clearObjects();
+
+        // get namespaces from filters
+        let values: FilterValue[] | undefined = undefined;
+        if (selectedFilterColumn.id === ColumnsId.srcpod) {
+          values = filters?.find(f => f.colId === ColumnsId.srcnamespace)?.values;
+        } else if (selectedFilterColumn.id === ColumnsId.dstpod) {
+          values = filters?.find(f => f.colId === ColumnsId.dstnamespace)?.values;
+        } else {
+          values = filters?.find(f => f.colId === ColumnsId.namespace)?.values;
+        }
+
+        //set pods for each namespace found
+        values?.forEach(v => {
+          manageKindsAutoComplete(`Pod.${v.v}.`, false);
+        });
+        break;*/
+      default:
+        //clear all
+        clearNamespaces();
+        clearObjects();
+        break;
+    }
+  };
+
   React.useEffect(() => {
     resetFilterValue();
     searchInputRef?.current?.focus();
-
+    manageCache();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedFilterColumn]);
+
+  React.useEffect(() => {
+    //skip columns without filter types
+    const typedFilters = columns.filter(c => c.filterType !== FilterType.NONE);
+    //groups columns by Common fields / Source / Destination
+    const groups = getColumnGroups(typedFilters, t('Common'), true);
+    setFiltersGroups(groups);
+    //pick name column of common group
+    const nameCol = groups.flatMap(g => g.columns).find(c => c.id === ColumnsId.name);
+    setSelectedFilterColumn(nameCol ? nameCol : typedFilters[0]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [columns]);
 
   return (
     <Toolbar
       id={id}
-      clearAllFilters={clearFilters}
+      clearAllFilters={() => {
+        clearFilters();
+        manageCache();
+      }}
       clearFiltersButtonText={hasFilterValue() ? t('Clear all filters') : ''}
     >
       <ToolbarContent id={`${id}-search-filters`} toolbarId={id}>
@@ -419,24 +608,8 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
                 <InputGroup>
                   <Dropdown
                     id="column-filter-dropdown"
-                    dropdownItems={filtersGroups.map((g, i) => (
-                      <div key={`group-${i}`}>
-                        {g.title && <h1 className="pf-c-dropdown__group-title">{g.title}</h1>}
-                        {g.columns.map((col, index) => (
-                          <DropdownItem
-                            id={col.id}
-                            className={`column-filter-item ${g.title ? 'grouped' : ''}`}
-                            component="button"
-                            onClick={() => setSelectedFilterColumn(col)}
-                            key={index}
-                          >
-                            {col.name}
-                          </DropdownItem>
-                        ))}
-                      </div>
-                    ))}
+                    dropdownItems={getFiltersDropdownItems()}
                     isOpen={isSearchFiltersOpen}
-                    onSelect={() => setSearchFiltersOpen(false)}
                     toggle={
                       <DropdownToggle
                         id="column-filter-toggle"

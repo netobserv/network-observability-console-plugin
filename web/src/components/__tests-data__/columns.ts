@@ -1,8 +1,9 @@
 import * as _ from 'lodash';
-import { Column, ColumnsId, getDefaultColumns } from '../../utils/columns';
+import { Column, ColumnsId, getDefaultColumns, getCommonColumns } from '../../utils/columns';
 
 // Customize columns order
 export const DefaultColumns = getDefaultColumns((k: string) => k);
+export const CommonColumns = getCommonColumns((k: string) => k);
 export const AllSelectedColumns = DefaultColumns.map(c => {
   c.isSelected = true;
   return c;

@@ -34,11 +34,11 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({ options
 
   const matchOptions: MatchOption[] = [
     {
-      label: t('Match all columns'),
+      label: t('Match all'),
       value: 'all'
     },
     {
-      label: t('Match any column'),
+      label: t('Match any'),
       value: 'any'
     }
   ];

@@ -54,7 +54,7 @@ func (q *Query) convertToAnyMatch() *Query {
 // Second capture: name of the field.
 // Third capture: JSON string value or empty
 // Fourth capture: JSON number value or empty
-var jsonField = regexp.MustCompile(`^"([\w.-]*)":(?:(?:"((?:(?:\^")|[^"])*)"?)|(\d+))$`)
+var jsonField = regexp.MustCompile(`([\w.-]*)":(?:(?:"((?:(?:\^")|[^"])*)"?)|(\d+))$`)
 
 // lineToLabelFilter extracts the JSON field name and value from a line filter and converts
 // it to a labelFilter
@@ -71,12 +71,16 @@ func lineToLabelFilter(lf string) (labelFilter, bool) {
 			valueType: typeNumber,
 		}, true
 	}
+
+	v := submatch[2]
+	if !strings.HasSuffix(v, `"`) && !strings.HasSuffix(v, ".*") {
+		v = v + ".*"
+	}
+
 	return labelFilter{
-		key: submatch[1],
-		// TODO: if at some point we want to filter by exact string values, we should
-		// conditionally replace the matcher and remove the .* suffix
+		key:       submatch[1],
 		matcher:   labelMatches,
-		value:     submatch[2] + ".*",
+		value:     v,
 		valueType: typeRegex,
 	}, true
 }
