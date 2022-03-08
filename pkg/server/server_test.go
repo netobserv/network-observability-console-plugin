@@ -299,29 +299,29 @@ func TestLokiFiltering(t *testing.T) {
 			"?query={app=\"netobserv-flowcollector\",FlowDirection=\"1\"}|~`(\"SrcPod\":\"(?i).*test.*\")|(\"Proto\":6)`",
 		},
 	}, {
-		inputPath: "?SrcNamespace=test-namespace&match=all",
+		inputPath: "?SrcK8S_Namespace=test-namespace&match=all",
 		outputQuery: []string{
-			`?query={SrcNamespace=~"(?i).*test-namespace.*",app="netobserv-flowcollector"}`,
+			`?query={SrcK8S_Namespace=~"(?i).*test-namespace.*",app="netobserv-flowcollector"}`,
 		},
 	}, {
-		inputPath: "?SrcNamespace=test-namespace&match=any",
+		inputPath: "?SrcK8S_Namespace=test-namespace&match=any",
 		outputQuery: []string{
-			`?query={SrcNamespace=~"(?i).*test-namespace.*",app="netobserv-flowcollector"}`,
+			`?query={SrcK8S_Namespace=~"(?i).*test-namespace.*",app="netobserv-flowcollector"}`,
 		},
 	}, {
-		inputPath: "?SrcPort=8080&SrcAddr=10.128.0.1&SrcNamespace=default",
+		inputPath: "?SrcPort=8080&SrcAddr=10.128.0.1&SrcK8S_Namespace=default",
 		outputQuery: []string{
-			"?query={SrcNamespace=~\"(?i).*default.*\",app=\"netobserv-flowcollector\"}|~`\"SrcPort\":8080`|json|SrcAddr=ip(\"10.128.0.1\")",
+			"?query={SrcK8S_Namespace=~\"(?i).*default.*\",app=\"netobserv-flowcollector\"}|~`\"SrcPort\":8080`|json|SrcAddr=ip(\"10.128.0.1\")",
 		},
 	}, {
-		inputPath: "?SrcPort=8080&SrcAddr=10.128.0.1&SrcNamespace=default&match=any",
+		inputPath: "?SrcPort=8080&SrcAddr=10.128.0.1&SrcK8S_Namespace=default&match=any",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\"}|json|SrcNamespace=~\"(?i).*default.*\"+or+SrcAddr=ip(\"10.128.0.1\")+or+SrcPort=8080",
+			"?query={app=\"netobserv-flowcollector\"}|json|SrcK8S_Namespace=~\"(?i).*default.*\"+or+SrcAddr=ip(\"10.128.0.1\")+or+SrcPort=8080",
 		},
 	}, {
-		inputPath: "?SrcPort=8080&SrcAddr=10.128.0.1&SrcNamespace=default&match=any&FlowDirection=0",
+		inputPath: "?SrcPort=8080&SrcAddr=10.128.0.1&SrcK8S_Namespace=default&match=any&FlowDirection=0",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\",FlowDirection=\"0\"}|json|SrcNamespace=~\"(?i).*default.*\"+or+SrcAddr=ip(\"10.128.0.1\")+or+SrcPort=8080",
+			"?query={app=\"netobserv-flowcollector\",FlowDirection=\"0\"}|json|SrcK8S_Namespace=~\"(?i).*default.*\"+or+SrcAddr=ip(\"10.128.0.1\")+or+SrcPort=8080",
 		},
 	}, {
 		inputPath:   "?startTime=1640991600&match=all",
@@ -360,24 +360,24 @@ func TestLokiFiltering(t *testing.T) {
 		inputPath:   "?timeRange=86400000&match=any",
 		outputQuery: []string{`?query={app="netobserv-flowcollector"}&start=${timeNow-86400000}`},
 	}, {
-		inputPath: "?SrcNamespace=\"exact-namespace\"",
+		inputPath: "?SrcK8S_Namespace=\"exact-namespace\"",
 		outputQuery: []string{
-			`?query={SrcNamespace=~"^exact-namespace$",app="netobserv-flowcollector"}`,
+			`?query={SrcK8S_Namespace=~"^exact-namespace$",app="netobserv-flowcollector"}`,
 		},
 	}, {
-		inputPath: "?SrcNamespace=\"start-namespace*\"",
+		inputPath: "?SrcK8S_Namespace=\"start-namespace*\"",
 		outputQuery: []string{
-			`?query={SrcNamespace=~"^start-namespace.*",app="netobserv-flowcollector"}`,
+			`?query={SrcK8S_Namespace=~"^start-namespace.*",app="netobserv-flowcollector"}`,
 		},
 	}, {
-		inputPath: "?SrcNamespace=\"*end-namespace\"",
+		inputPath: "?SrcK8S_Namespace=\"*end-namespace\"",
 		outputQuery: []string{
-			`?query={SrcNamespace=~".*end-namespace$",app="netobserv-flowcollector"}`,
+			`?query={SrcK8S_Namespace=~".*end-namespace$",app="netobserv-flowcollector"}`,
 		},
 	}, {
-		inputPath: "?SrcNamespace=\"mid-n*e\"",
+		inputPath: "?SrcK8S_Namespace=\"mid-n*e\"",
 		outputQuery: []string{
-			`?query={SrcNamespace=~"^mid-n.*e$",app="netobserv-flowcollector"}`,
+			`?query={SrcK8S_Namespace=~"^mid-n.*e$",app="netobserv-flowcollector"}`,
 		},
 	}, {
 		inputPath: "?SrcPod=\"exact-pod\"",
@@ -416,7 +416,7 @@ func TestLokiFiltering(t *testing.T) {
 		Loki: handler.LokiConfig{
 			URL:     lokiURL,
 			Timeout: time.Second,
-			Labels:  []string{"SrcNamespace", "SrcWorkload", "DstNamespace", "DstWorkload", "FlowDirection"},
+			Labels:  []string{"SrcK8S_Namespace", "SrcK8S_OwnerName", "DstK8S_Namespace", "DstK8S_OwnerName", "FlowDirection"},
 		},
 	})
 	backendSvc := httptest.NewServer(backendRoutes)

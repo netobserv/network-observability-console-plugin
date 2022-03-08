@@ -3,14 +3,11 @@ import { Fields, Labels, Record } from './ipfix';
 
 export interface LokiResponse {
   resultType: string;
-  result: LokiResult;
+  result: StreamResult[];
   stats: LokiStats;
 }
 
 export interface LokiStats {}
-
-// LokiResult is an union type of potential other types depending on resultType
-export type LokiResult = StreamResult[];
 
 export type StreamResult = {
   stream: { [key: string]: string };

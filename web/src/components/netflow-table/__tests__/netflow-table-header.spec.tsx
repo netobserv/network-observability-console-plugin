@@ -54,14 +54,26 @@ describe('<NetflowTableHeader />', () => {
     expect(mocks.onSort).toHaveBeenCalledWith(expect.anything(), 0, 'desc', expect.anything());
   });
   it('should nested consecutive group columns', async () => {
-    const selectedIds = [ColumnsId.timestamp, ColumnsId.srcpod, ColumnsId.srcport, ColumnsId.dstpod, ColumnsId.packets];
+    const selectedIds = [
+      ColumnsId.timestamp,
+      ColumnsId.srcname,
+      ColumnsId.srcport,
+      ColumnsId.dstname,
+      ColumnsId.packets
+    ];
     const wrapper = mount(<NetflowTableHeaderWrapper {...mocks} columns={filterOrderedColumnsByIds(selectedIds)} />);
     expect(wrapper.find(Thead)).toHaveLength(1);
     expect(wrapper.find(Tr)).toHaveLength(2);
     expect(wrapper.find(Th).length).toBeGreaterThanOrEqual(selectedIds.length);
   });
   it('should keep flat non consecutive group columns', async () => {
-    const selectedIds = [ColumnsId.timestamp, ColumnsId.srcpod, ColumnsId.dstpod, ColumnsId.packets, ColumnsId.srcport];
+    const selectedIds = [
+      ColumnsId.timestamp,
+      ColumnsId.srcname,
+      ColumnsId.dstname,
+      ColumnsId.packets,
+      ColumnsId.srcport
+    ];
     const wrapper = mount(<NetflowTableHeaderWrapper {...mocks} columns={filterOrderedColumnsByIds(selectedIds)} />);
     expect(wrapper.find(Thead)).toHaveLength(1);
     expect(wrapper.find(Tr)).toHaveLength(1);

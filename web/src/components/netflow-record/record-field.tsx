@@ -45,14 +45,18 @@ export const RecordField: React.FC<{
   };
 
   const kubeObjContent = (value: string | undefined, kind: string | undefined, ns: string | undefined) => {
-    if (value && ns && kind) {
+    if (value && kind) {
       return (
         <div className="force-truncate">
           <ResourceLink className={size} inline={true} kind={kind} name={value} namespace={ns} />
           <div className="record-field-tooltip">
-            <h4>Namespace</h4>
-            <span>{ns}</span>
-            &nbsp;
+            {ns && (
+              <>
+                <h4>Namespace</h4>
+                <span>{ns}</span>
+                &nbsp;
+              </>
+            )}
             <h4>{kind}</h4>
             <span>{value}</span>
           </div>
@@ -78,20 +82,14 @@ export const RecordField: React.FC<{
           </div>
         );
       }
-      case ColumnsId.srcpod:
-      case ColumnsId.dstpod:
-        return kubeObjContent(
-          value as string,
-          'Pod',
-          c.id === ColumnsId.srcpod ? flow.labels.SrcNamespace : flow.labels.DstNamespace
-        );
-      case ColumnsId.srcwkd:
-      case ColumnsId.dstwkd:
-        return kubeObjContent(
-          value as string,
-          c.id === ColumnsId.srcwkd ? flow.fields.SrcWorkloadKind : flow.fields.DstWorkloadKind,
-          c.id === ColumnsId.srcwkd ? flow.labels.SrcNamespace : flow.labels.DstNamespace
-        );
+      case ColumnsId.srcname:
+        return kubeObjContent(value as string, flow.fields.SrcK8S_Type, flow.labels.SrcK8S_Namespace);
+      case ColumnsId.dstname:
+        return kubeObjContent(value as string, flow.fields.DstK8S_Type, flow.labels.DstK8S_Namespace);
+      case ColumnsId.srcowner:
+        return kubeObjContent(value as string, flow.fields.SrcK8S_OwnerType, flow.labels.SrcK8S_Namespace);
+      case ColumnsId.dstowner:
+        return kubeObjContent(value as string, flow.fields.DstK8S_OwnerType, flow.labels.DstK8S_Namespace);
       case ColumnsId.srcnamespace:
       case ColumnsId.dstnamespace: {
         if (value) {
