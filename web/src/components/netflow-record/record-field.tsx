@@ -115,7 +115,7 @@ export const RecordField: React.FC<{
   const singleContainer = (child?: JSX.Element) => {
     return (
       <div className={`record-field-content ${size}`} onMouseOver={e => onMouseOver(e, 'record-field-content')}>
-        {child}
+        {child ? child : emptyText()}
       </div>
     );
   };
