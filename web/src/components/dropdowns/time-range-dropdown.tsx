@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Dropdown, DropdownToggle, DropdownItem } from '@patternfly/react-core';
-import { parseDuration, formatDuration, getDateMsInSeconds, getDateSInMiliseconds } from '../utils/duration';
-import { getTimeRangeOptions } from '../utils/datetime';
+import { parseDuration, formatDuration, getDateMsInSeconds, getDateSInMiliseconds } from '../../utils/duration';
+import { getTimeRangeOptions } from '../../utils/datetime';
 import * as _ from 'lodash';
 
 export type TimeRangeDropdownProps = {

@@ -2,7 +2,7 @@ import { Radio, Select, Tooltip } from '@patternfly/react-core';
 import { InfoAltIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Match, QueryOptions, Reporter } from '../model/query-options';
+import { Match, QueryOptions, Reporter } from '../../model/query-options';
 
 export interface QueryOptionsDropdownProps {
   options: QueryOptions;

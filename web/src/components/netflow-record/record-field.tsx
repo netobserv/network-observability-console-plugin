@@ -7,7 +7,7 @@ import { FlowDirection, Record } from '../../api/ipfix';
 import { Column, ColumnsId, getFullColumnName } from '../../utils/columns';
 import { formatPort } from '../../utils/port';
 import { formatProtocol } from '../../utils/protocol';
-import { Size } from '../display-dropdown';
+import { Size } from '../dropdowns/display-dropdown';
 import './record-field.css';
 
 export type RecordFieldFilter = {

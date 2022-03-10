@@ -3,7 +3,7 @@ import { Radio, Select } from '@patternfly/react-core';
 import { shallow } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import QueryOptionsDropdown, { QueryOptionsDropdownProps, QueryOptionsPanel } from '../query-options-dropdown';
-import { QueryOptions } from '../../model/query-options';
+import { QueryOptions } from '../../../model/query-options';
 
 describe('<QueryOptionsDropdown />', () => {
   const props: QueryOptionsDropdownProps = {

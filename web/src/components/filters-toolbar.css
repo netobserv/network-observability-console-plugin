@@ -49,3 +49,8 @@ button.pf-c-button.pf-m-link.pf-m-inline:empty {
 #more {
   padding: 5px 0px 0px 5px;
 }
+
+/* force new row for forced filters group*/
+#forced-filters {
+  flex-basis: 100%;
+}

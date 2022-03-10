@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Dropdown, DropdownToggle, DropdownItem } from '@patternfly/react-core';
 import * as _ from 'lodash';
-import { parseDuration, formatDuration } from '../utils/duration';
+import { parseDuration, formatDuration } from '../../utils/duration';
 
 export type RefreshDropdownProps = {
   interval?: number;

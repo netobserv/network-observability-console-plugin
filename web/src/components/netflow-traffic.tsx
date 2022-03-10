@@ -4,13 +4,17 @@ import {
   Drawer,
   DrawerContent,
   DrawerContentBody,
+  OverflowMenu,
+  OverflowMenuGroup,
   OverflowMenuItem,
   PageSection,
   Text,
   TextVariants,
+  ToggleGroup,
+  ToggleGroupItem,
   Tooltip
 } from '@patternfly/react-core';
-import { ColumnsIcon, ExportIcon, SyncAltIcon } from '@patternfly/react-icons';
+import { ColumnsIcon, ExportIcon, SyncAltIcon, TableIcon, TopologyIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -39,16 +43,19 @@ import {
   removeURLQueryArguments,
   setURLQueryArguments
 } from '../utils/router';
-import DisplayDropdown, { Size } from './display-dropdown';
+import DisplayDropdown, { Size } from './dropdowns/display-dropdown';
+import { RefreshDropdown } from './dropdowns/refresh-dropdown';
+import TimeRangeDropdown from './dropdowns/time-range-dropdown';
 import { FiltersToolbar } from './filters-toolbar';
 import { ColumnsModal } from './modals/columns-modal';
 import { ExportModal } from './modals/export-modal';
 import TimeRangeModal from './modals/time-range-modal';
 import { RecordPanel } from './netflow-record/record-panel';
 import NetflowTable from './netflow-table/netflow-table';
+import NetflowTopology from './netflow-topology/netflow-topology';
 import './netflow-traffic.css';
-import { RefreshDropdown } from './refresh-dropdown';
-import TimeRangeDropdown from './time-range-dropdown';
+
+export type ViewId = 'table' | 'topology';
 
 export const NetflowTraffic: React.FC<{
   forcedFilters?: Filter[];
@@ -64,6 +71,9 @@ export const NetflowTraffic: React.FC<{
   const [isColModalOpen, setColModalOpen] = React.useState(false);
   const [isExportModalOpen, setExportModalOpen] = React.useState(false);
   const { t } = useTranslation('plugin__network-observability-plugin');
+
+  //TODO: move default view to an Overview like dashboard instead of table
+  const [selectedViewId, setSelectedViewId] = React.useState<ViewId>('table');
 
   //TODO: create a number range filter type for Packets & Bytes
   const [columns, setColumns] = useLocalStorage<Column[]>(LOCAL_STORAGE_COLS_KEY, getDefaultColumns(t), {
@@ -94,18 +104,26 @@ export const NetflowTraffic: React.FC<{
       const qa = queryArgs ?? getQueryArguments();
       setLoading(true);
       setError(undefined);
-      getFlows(qa)
-        .then(setFlows)
-        .catch(err => {
-          setFlows([]);
-          const errorMessage = getHTTPErrorDetails(err);
-          setError(errorMessage);
-        })
-        .finally(() => {
+      switch (selectedViewId) {
+        case 'table':
+          getFlows(qa)
+            .then(setFlows)
+            .catch(err => {
+              setFlows([]);
+              const errorMessage = getHTTPErrorDetails(err);
+              setError(errorMessage);
+            })
+            .finally(() => {
+              setLoading(false);
+            });
+          break;
+        default:
+          console.error('tick called on not implemented view Id', selectedViewId);
           setLoading(false);
-        });
+          break;
+      }
     },
-    [getQueryArguments]
+    [getQueryArguments, selectedViewId]
   );
 
   // Rewrite URL params on state change and tick
@@ -142,24 +160,110 @@ export const NetflowTraffic: React.FC<{
     }
   };
 
-  const coActions = (
-    <div className="co-actions">
-      <TimeRangeDropdown
-        id="time-range-dropdown"
-        range={typeof range === 'number' ? range : undefined}
-        setRange={setRange}
-        openCustomModal={() => setTRModalOpen(true)}
-      />
-      <RefreshDropdown id="refresh-dropdown" interval={interval} setInterval={setInterval} />
-      <Button
-        id="refresh-button"
-        className="co-action-refresh-button"
-        variant="primary"
-        onClick={() => tick()}
-        icon={<SyncAltIcon style={{ animation: `spin ${loading ? 1 : 0}s linear infinite` }} />}
-      />
-    </div>
-  );
+  const viewToggle = () => {
+    return (
+      <ToggleGroup>
+        <ToggleGroupItem
+          icon={<TableIcon />}
+          text={t('Flow Table')}
+          buttonId="tableViewButton"
+          isSelected={selectedViewId === 'table'}
+          onChange={() => setSelectedViewId('table')}
+        />
+        <ToggleGroupItem
+          icon={<TopologyIcon />}
+          text={t('Topology')}
+          buttonId="topologyViewButton"
+          isSelected={selectedViewId === 'topology'}
+          onChange={() => setSelectedViewId('topology')}
+        />
+      </ToggleGroup>
+    );
+  };
+
+  const actions = () => {
+    switch (selectedViewId) {
+      case 'table':
+      case 'topology':
+        return (
+          <div className="co-actions">
+            <TimeRangeDropdown
+              id="time-range-dropdown"
+              range={typeof range === 'number' ? range : undefined}
+              setRange={setRange}
+              openCustomModal={() => setTRModalOpen(true)}
+            />
+            <RefreshDropdown id="refresh-dropdown" interval={interval} setInterval={setInterval} />
+            <Button
+              id="refresh-button"
+              className="co-action-refresh-button"
+              variant="primary"
+              onClick={() => tick()}
+              icon={<SyncAltIcon style={{ animation: `spin ${loading ? 1 : 0}s linear infinite` }} />}
+            />
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const pageButtons = () => {
+    switch (selectedViewId) {
+      case 'table':
+        return (
+          <OverflowMenuGroup groupType="button" isPersistent>
+            <OverflowMenuItem>
+              <Tooltip content={t('Manage columns')}>
+                <Button
+                  id="manage-columns-button"
+                  variant="plain"
+                  onClick={() => setColModalOpen(true)}
+                  aria-label={t('Column management')}
+                >
+                  <ColumnsIcon color="#6A6E73" />
+                </Button>
+              </Tooltip>
+            </OverflowMenuItem>
+            <DisplayDropdown id="display-dropdown" setSize={setSize} />
+            <Tooltip content={t('Export')}>
+              <Button
+                id="export-button"
+                variant="plain"
+                onClick={() => setExportModalOpen(true)}
+                aria-label={t('Export management')}
+              >
+                <ExportIcon color="#6A6E73" />
+              </Button>
+            </Tooltip>
+          </OverflowMenuGroup>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const pageContent = () => {
+    switch (selectedViewId) {
+      case 'table':
+        return (
+          <NetflowTable
+            loading={loading}
+            error={error}
+            flows={flows}
+            selectedRecord={selectedRecord}
+            size={size}
+            onSelect={onSelect}
+            clearFilters={clearFilters}
+            columns={columns.filter(col => col.isSelected)}
+          />
+        );
+      case 'topology':
+        return <NetflowTopology loading={loading} error={error} />;
+      default:
+        return null;
+    }
+  };
 
   //update data on filters changes
   React.useEffect(() => {
@@ -171,10 +275,12 @@ export const NetflowTraffic: React.FC<{
       {
         //display title only if forced filters is not set
         _.isEmpty(forcedFilters) && (
-          <Text component={TextVariants.h1} className="co-m-pane__heading">
-            <span>{t('Network Traffic')}</span>
-            {coActions}
-          </Text>
+          <div id="pageHeader">
+            <div className="flex">
+              <Text component={TextVariants.h1}>{t('Network Traffic')}</Text>
+            </div>
+            {viewToggle()}
+          </div>
         )
       }
       <FiltersToolbar
@@ -186,32 +292,14 @@ export const NetflowTraffic: React.FC<{
         queryOptions={queryOptions}
         setQueryOptions={setQueryOptions}
         forcedFilters={forcedFilters}
-        //show actions next to filters if title is hidden
-        actions={!_.isEmpty(forcedFilters) ? coActions : null}
+        actions={actions()}
       >
-        <OverflowMenuItem>
-          <Tooltip content={t('Manage columns')}>
-            <Button
-              id="manage-columns-button"
-              variant="plain"
-              onClick={() => setColModalOpen(true)}
-              aria-label={t('Column management')}
-            >
-              <ColumnsIcon color="#6A6E73" />
-            </Button>
-          </Tooltip>
-        </OverflowMenuItem>
-        <DisplayDropdown id="display-dropdown" setSize={setSize} />
-        <Tooltip content={t('Export')}>
-          <Button
-            id="export-button"
-            variant="plain"
-            onClick={() => setExportModalOpen(true)}
-            aria-label={t('Export management')}
-          >
-            <ExportIcon color="#6A6E73" />
-          </Button>
-        </Tooltip>
+        {
+          <OverflowMenu breakpoint="md">
+            {!_.isEmpty(forcedFilters) && viewToggle()}
+            {pageButtons()}
+          </OverflowMenu>
+        }
       </FiltersToolbar>
       <Drawer id="drawer" isExpanded={selectedRecord !== undefined}>
         <DrawerContent
@@ -231,18 +319,7 @@ export const NetflowTraffic: React.FC<{
             />
           }
         >
-          <DrawerContentBody id="drawerBody">
-            <NetflowTable
-              loading={loading}
-              error={error}
-              flows={flows}
-              selectedRecord={selectedRecord}
-              size={size}
-              onSelect={onSelect}
-              clearFilters={clearFilters}
-              columns={columns.filter(col => col.isSelected)}
-            />
-          </DrawerContentBody>
+          <DrawerContentBody id="drawerBody">{pageContent()}</DrawerContentBody>
         </DrawerContent>
       </Drawer>
       <TimeRangeModal
