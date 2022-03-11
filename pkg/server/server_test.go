@@ -28,6 +28,9 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/netobserv/network-observability-console-plugin/pkg/handler"
+	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	fake "k8s.io/client-go/kubernetes/fake"
 )
 
 const (
@@ -204,7 +207,7 @@ func TestLokiConfiguration(t *testing.T) {
 			URL:     lokiURL,
 			Timeout: time.Second,
 		},
-	})
+	}, nil)
 	backendSvc := httptest.NewServer(backendRoutes)
 	defer backendSvc.Close()
 
@@ -241,7 +244,7 @@ func TestLokiConfiguration_MultiTenant(t *testing.T) {
 			Timeout:  time.Second,
 			TenantID: "my-organisation",
 		},
-	})
+	}, nil)
 	backendSvc := httptest.NewServer(backendRoutes)
 	defer backendSvc.Close()
 
@@ -261,42 +264,42 @@ func TestLokiFiltering(t *testing.T) {
 		// contains the different permutations for such arguments
 		outputQuery []string
 	}{{
-		inputPath: "?SrcPod=test-pod",
+		inputPath: "?SrcK8S_Name=test-pod",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\"}|~`\"SrcPod\":\"(?i).*test-pod.*\"`",
+			"?query={app=\"netobserv-flowcollector\"}|~`SrcK8S_Name\":\"(?i).*test-pod.*\"`",
 		},
 	}, {
-		inputPath: "?SrcPod=test-pod&match=any",
+		inputPath: "?SrcK8S_Name=test-pod&match=any",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\"}|~`\"SrcPod\":\"(?i).*test-pod.*\"`",
+			"?query={app=\"netobserv-flowcollector\"}|~`SrcK8S_Name\":\"(?i).*test-pod.*\"`",
 		},
 	}, {
 		inputPath: "?Proto=6&match=all",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\"}|~`\"Proto\":6`",
+			"?query={app=\"netobserv-flowcollector\"}|~`Proto\":6`",
 		},
 	}, {
 		inputPath: "?Proto=6&match=any",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\"}|~`\"Proto\":6`",
+			"?query={app=\"netobserv-flowcollector\"}|~`Proto\":6`",
 		},
 	}, {
-		inputPath: "?Proto=6&SrcPod=test",
+		inputPath: "?Proto=6&SrcK8S_Name=test",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\"}|~`\"Proto\":6`|~`\"SrcPod\":\"(?i).*test.*\"`",
-			"?query={app=\"netobserv-flowcollector\"}|~`\"SrcPod\":\"(?i).*test.*\"`|~`\"Proto\":6`",
+			"?query={app=\"netobserv-flowcollector\"}|~`Proto\":6`|~`SrcK8S_Name\":\"(?i).*test.*\"`",
+			"?query={app=\"netobserv-flowcollector\"}|~`SrcK8S_Name\":\"(?i).*test.*\"`|~`Proto\":6`",
 		},
 	}, {
-		inputPath: "?Proto=6&SrcPod=test&match=any",
+		inputPath: "?Proto=6&SrcK8S_Name=test&match=any",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\"}|~`(\"Proto\":6)|(\"SrcPod\":\"(?i).*test.*\")`",
-			"?query={app=\"netobserv-flowcollector\"}|~`(\"SrcPod\":\"(?i).*test.*\")|(\"Proto\":6)`",
+			"?query={app=\"netobserv-flowcollector\"}|~`(Proto\":6)|(SrcK8S_Name\":\"(?i).*test.*\")`",
+			"?query={app=\"netobserv-flowcollector\"}|~`(SrcK8S_Name\":\"(?i).*test.*\")|(Proto\":6)`",
 		},
 	}, {
-		inputPath: "?Proto=6&SrcPod=test&FlowDirection=1&match=any",
+		inputPath: "?Proto=6&SrcK8S_Name=test&FlowDirection=1&match=any",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\",FlowDirection=\"1\"}|~`(\"Proto\":6)|(\"SrcPod\":\"(?i).*test.*\")`",
-			"?query={app=\"netobserv-flowcollector\",FlowDirection=\"1\"}|~`(\"SrcPod\":\"(?i).*test.*\")|(\"Proto\":6)`",
+			"?query={app=\"netobserv-flowcollector\",FlowDirection=\"1\"}|~`(Proto\":6)|(SrcK8S_Name\":\"(?i).*test.*\")`",
+			"?query={app=\"netobserv-flowcollector\",FlowDirection=\"1\"}|~`(SrcK8S_Name\":\"(?i).*test.*\")|(Proto\":6)`",
 		},
 	}, {
 		inputPath: "?SrcK8S_Namespace=test-namespace&match=all",
@@ -311,7 +314,7 @@ func TestLokiFiltering(t *testing.T) {
 	}, {
 		inputPath: "?SrcPort=8080&SrcAddr=10.128.0.1&SrcK8S_Namespace=default",
 		outputQuery: []string{
-			"?query={SrcK8S_Namespace=~\"(?i).*default.*\",app=\"netobserv-flowcollector\"}|~`\"SrcPort\":8080`|json|SrcAddr=ip(\"10.128.0.1\")",
+			"?query={SrcK8S_Namespace=~\"(?i).*default.*\",app=\"netobserv-flowcollector\"}|~`SrcPort\":8080`|json|SrcAddr=ip(\"10.128.0.1\")",
 		},
 	}, {
 		inputPath: "?SrcPort=8080&SrcAddr=10.128.0.1&SrcK8S_Namespace=default&match=any",
@@ -380,24 +383,34 @@ func TestLokiFiltering(t *testing.T) {
 			`?query={SrcK8S_Namespace=~"^mid-n.*e$",app="netobserv-flowcollector"}`,
 		},
 	}, {
-		inputPath: "?SrcPod=\"exact-pod\"",
+		inputPath: "?SrcK8S_Name=\"exact-pod\"",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\"}|~`\"SrcPod\":\"exact-pod\"`",
+			"?query={app=\"netobserv-flowcollector\"}|~`SrcK8S_Name\":\"exact-pod\"`",
 		},
 	}, {
-		inputPath: "?SrcPod=\"start-pod*\"",
+		inputPath: "?SrcK8S_Name=\"start-pod*\"",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\"}|~`\"SrcPod\":\"start-pod.*\"`",
+			"?query={app=\"netobserv-flowcollector\"}|~`SrcK8S_Name\":\"start-pod.*\"`",
 		},
 	}, {
-		inputPath: "?SrcPod=\"*end-pod\"",
+		inputPath: "?SrcK8S_Name=\"*end-pod\"",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\"}|~`\"SrcPod\":\".*end-pod\"`",
+			"?query={app=\"netobserv-flowcollector\"}|~`SrcK8S_Name\":\".*end-pod\"`",
 		},
 	}, {
-		inputPath: "?SrcPod=\"mid-*d\"",
+		inputPath: "?SrcK8S_Name=\"mid-*d\"",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\"}|~`\"SrcPod\":\"mid-.*d\"`",
+			"?query={app=\"netobserv-flowcollector\"}|~`SrcK8S_Name\":\"mid-.*d\"`",
+		},
+	}, {
+		inputPath: "?SrcK8S_Object=Pod.namespace.podName",
+		outputQuery: []string{
+			"?query={app=\"netobserv-flowcollector\"}|json|(SrcK8S_Type=~`(?i).*Pod.*`+and+SrcK8S_Namespace=~\"(?i).*namespace.*\"+and+SrcK8S_Name=~`(?i).*podName.*`)",
+			"?query={app=\"netobserv-flowcollector\"}|json|(SrcK8S_Type=~`(?i).*Pod.*`+and+SrcK8S_Name=~`(?i).*podName.*`+and+SrcK8S_Namespace=~\"(?i).*namespace.*\")",
+			"?query={app=\"netobserv-flowcollector\"}|json|(SrcK8S_Namespace=~\"(?i).*namespace.*\"+and+SrcK8S_Type=~`(?i).*Pod.*`+and+SrcK8S_Name=~`(?i).*podName.*`)",
+			"?query={app=\"netobserv-flowcollector\"}|json|(SrcK8S_Namespace=~\"(?i).*namespace.*\"+and+SrcK8S_Name=~`(?i).*podName.*`+and+SrcK8S_Type=~`(?i).*Pod.*`)",
+			"?query={app=\"netobserv-flowcollector\"}|json|(SrcK8S_Name=~`(?i).*podName.*`+and+SrcK8S_Namespace=~\"(?i).*namespace.*\"+and+SrcK8S_Type=~`(?i).*Pod.*`)",
+			"?query={app=\"netobserv-flowcollector\"}|json|(SrcK8S_Name=~`(?i).*podName.*`+and+SrcK8S_Type=~`(?i).*Pod.*`+and+SrcK8S_Namespace=~\"(?i).*namespace.*\")",
 		},
 	}}
 
@@ -418,7 +431,7 @@ func TestLokiFiltering(t *testing.T) {
 			Timeout: time.Second,
 			Labels:  []string{"SrcK8S_Namespace", "SrcK8S_OwnerName", "DstK8S_Namespace", "DstK8S_OwnerName", "FlowDirection"},
 		},
-	})
+	}, nil)
 	backendSvc := httptest.NewServer(backendRoutes)
 	defer backendSvc.Close()
 
@@ -642,4 +655,49 @@ func (conf *httpClientConfig) buildHTTPClient() (*http.Client, error) {
 	httpClient := http.Client{Transport: transport}
 
 	return &httpClient, nil
+}
+
+func TestResources(t *testing.T) {
+	kubernetesClient := fake.NewSimpleClientset(
+		&v1.Namespace{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "fake-ns",
+			},
+		},
+		&v1.Pod{
+			TypeMeta: metav1.TypeMeta{},
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "fake-pod",
+				Namespace: "fake-ns",
+			},
+		})
+
+	backendRoutes := setupRoutes(&Config{}, kubernetesClient)
+	backendSvc := httptest.NewServer(backendRoutes)
+	defer backendSvc.Close()
+
+	// WHEN the resources endpoint is queried in the backend
+	resp, err := backendSvc.Client().Get(backendSvc.URL + "/api/resources?kind=namespace")
+	require.NoError(t, err)
+	body, err := ioutil.ReadAll(resp.Body)
+	require.NoError(t, err)
+	assert.Equal(t, `["fake-ns"]`, string(body))
+
+	resp, err = backendSvc.Client().Get(backendSvc.URL + "/api/resources?kind=pod&namespace=fake-ns")
+	require.NoError(t, err)
+	body, err = ioutil.ReadAll(resp.Body)
+	require.NoError(t, err)
+	assert.Equal(t, `["fake-pod"]`, string(body))
+
+	resp, err = backendSvc.Client().Get(backendSvc.URL + "/api/resources?kind=invalid&namespace=fake-ns")
+	require.NoError(t, err)
+	body, err = ioutil.ReadAll(resp.Body)
+	require.NoError(t, err)
+	assert.Equal(t, `{"Message":"can't get list of invalid: unknown kind: invalid"}`, string(body))
+
+	resp, err = backendSvc.Client().Get(backendSvc.URL + "/api/resources?kind=pod")
+	require.NoError(t, err)
+	body, err = ioutil.ReadAll(resp.Body)
+	require.NoError(t, err)
+	assert.Equal(t, `{"Message":"namespace cannot be empty"}`, string(body))
 }

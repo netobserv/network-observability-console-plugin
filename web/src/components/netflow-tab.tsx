@@ -1,37 +1,36 @@
-import * as React from 'react';
 import { PageComponentProps } from '@openshift-console/dynamic-plugin-sdk';
 import { EmptyState, EmptyStateBody, EmptyStateVariant, PageSection, Title } from '@patternfly/react-core';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import NetflowTraffic from './netflow-traffic';
+import { Match, QueryOptions } from '../model/query-options';
 import { ColumnsId } from '../utils/columns';
 import { Filter } from '../utils/filters';
+import { DEFAULT_FLOWDIR, DEFAULT_LIMIT, flowdirToReporter } from '../utils/router';
+import NetflowTraffic from './netflow-traffic';
 
 export const NetflowTab: React.FC<PageComponentProps> = ({ obj }) => {
   const { t } = useTranslation('plugin__network-observability-plugin');
 
   let forcedFilters: Filter[];
+  let match: Match;
   switch (obj?.kind) {
     case 'Pod':
-    case 'Node':
+    case 'Deployment':
+    case 'StatefulSet':
+    case 'DaemonSet':
+    case 'Job':
+    case 'CronJob':
+      match = 'any';
       forcedFilters = [
         {
-          colId: ColumnsId.srctype,
-          values: [{ v: obj!.kind }]
-        },
-        {
-          /*TODO : set SRC and DST filters after implementing OR logic NETOBSERV-73*/
-          colId: ColumnsId.srcname,
-          values: [{ v: obj!.metadata!.name as string }]
-        },
-        {
-          /*TODO : set SRC and DST filters after implementing OR logic NETOBSERV-73*/
-          colId: ColumnsId.srcnamespace,
-          values: [{ v: obj!.metadata!.namespace as string }]
+          colId: ColumnsId.kubeobject,
+          values: [{ v: `${obj!.kind}.${obj!.metadata!.namespace}.${obj.metadata!.name}` }]
         }
       ];
       break;
     case 'Service':
       // NOTE: Services are always on the destination side
+      match = 'all';
       forcedFilters = [
         {
           colId: ColumnsId.dsttype,
@@ -47,34 +46,11 @@ export const NetflowTab: React.FC<PageComponentProps> = ({ obj }) => {
         }
       ];
       break;
-    case 'Deployment':
-    case 'StatefulSet':
-    case 'DaemonSet':
-    case 'Job':
-    case 'CronJob':
-      forcedFilters = [
-        {
-          /*TODO : set SRC and DST filters after implementing OR logic NETOBSERV-73*/
-          colId: ColumnsId.srcownertype,
-          values: [{ v: obj!.kind }]
-        },
-        {
-          /*TODO : set SRC and DST filters after implementing OR logic NETOBSERV-73*/
-          colId: ColumnsId.srcowner,
-          values: [{ v: obj!.metadata!.name as string }]
-        },
-        {
-          /*TODO : set SRC and DST filters after implementing OR logic NETOBSERV-73*/
-          colId: ColumnsId.srcnamespace,
-          values: [{ v: obj!.metadata!.namespace as string }]
-        }
-      ];
-      break;
     case 'Namespace':
+      match = 'any';
       forcedFilters = [
         {
-          /*TODO : set SRC and DST filters after implementing OR logic NETOBSERV-73*/
-          colId: ColumnsId.srcnamespace,
+          colId: ColumnsId.namespace,
           values: [{ v: obj!.metadata!.name as string }]
         }
       ];
@@ -93,7 +69,13 @@ export const NetflowTab: React.FC<PageComponentProps> = ({ obj }) => {
       );
   }
 
-  return <NetflowTraffic forcedFilters={forcedFilters} />;
+  const initialQueryOptions: QueryOptions = {
+    reporter: flowdirToReporter[DEFAULT_FLOWDIR],
+    match,
+    limit: DEFAULT_LIMIT
+  };
+
+  return <NetflowTraffic forcedFilters={forcedFilters} initialQueryOptions={initialQueryOptions} />;
 };
 
 export default NetflowTab;

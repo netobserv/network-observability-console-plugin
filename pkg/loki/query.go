@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/netobserv/network-observability-console-plugin/pkg/utils"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -28,8 +29,10 @@ const (
 	anyMatchValue   = "any"
 )
 
-// can contains only alphanumeric / '-' / '_' / '.' / ',' / '"' / '*' characteres
-var filterRegexpValidation = regexp.MustCompile(`^[\w-_.,\"*]*$`)
+var qlog = logrus.WithField("component", "loki.query")
+
+// can contains only alphanumeric / '-' / '_' / '.' / ',' / '"' / '*' / ':' / '/' characteres
+var filterRegexpValidation = regexp.MustCompile(`^[\w-_.,\"*:/]*$`)
 
 // remove quotes and replace * by regex any
 var valueReplacer = strings.NewReplacer(`*`, `.*`, `"`, "")
@@ -37,9 +40,9 @@ var valueReplacer = strings.NewReplacer(`*`, `.*`, `"`, "")
 type LabelJoiner string
 
 const (
-	// joinOr spaces are escaped to avoid problems when querying Loki
-	joinOr  = LabelJoiner("+or+")
-	joinAnd = LabelJoiner("|")
+	joinAnd     = LabelJoiner("+and+")
+	joinOr      = LabelJoiner("+or+")
+	joinPipeAnd = LabelJoiner("|")
 )
 
 // Query for a LogQL HTTP petition
@@ -47,12 +50,14 @@ const (
 // {streamSelector}|lineFilters|json|labelFilters
 type Query struct {
 	// urlParams for the HTTP call
-	urlParams      [][2]string
-	labelMap       map[string]struct{}
-	streamSelector []labelFilter
-	lineFilters    []string
-	labelFilters   []labelFilter
-	labelJoiner    LabelJoiner
+	urlParams           [][2]string
+	labelMap            map[string]struct{}
+	streamSelector      []labelFilter
+	lineFilters         []string
+	labelFilters        []labelFilter
+	currentGroup        *string
+	groupedLabelFilters map[string][]labelFilter
+	labelJoiner         LabelJoiner
 	// Attributes with a special meaning that need to be processed independently
 	specialAttrs map[string]string
 	export       *Export
@@ -69,10 +74,11 @@ func NewQuery(labels []string, export bool) *Query {
 		exp = &Export{}
 	}
 	return &Query{
-		specialAttrs: map[string]string{},
-		labelJoiner:  joinAnd,
-		export:       exp,
-		labelMap:     utils.GetMapInterface(labels),
+		specialAttrs:        map[string]string{},
+		labelJoiner:         joinPipeAnd,
+		export:              exp,
+		labelMap:            utils.GetMapInterface(labels),
+		groupedLabelFilters: map[string][]labelFilter{},
 	}
 }
 
@@ -94,16 +100,23 @@ func (q *Query) URLQuery() (string, error) {
 		sb.WriteString(lf)
 		sb.WriteByte('`')
 	}
-	if len(q.labelFilters) > 0 {
+	if len(q.labelFilters) > 0 || len(q.groupedLabelFilters) > 0 {
 		if q.labelJoiner == "" {
 			panic("Label Joiner can't be empty")
 		}
 		sb.WriteString("|json|")
-		for i, lf := range q.labelFilters {
+		q.WriteLabelFilter(&sb, &q.labelFilters, q.labelJoiner)
+		i := 0
+		for _, glf := range q.groupedLabelFilters {
 			if i > 0 {
 				sb.WriteString(string(q.labelJoiner))
 			}
-			lf.writeInto(&sb)
+			//group with parenthesis
+			sb.WriteByte('(')
+			//each group member must match
+			q.WriteLabelFilter(&sb, &glf, joinAnd)
+			sb.WriteByte(')')
+			i++
 		}
 	}
 	if len(q.urlParams) > 0 {
@@ -117,34 +130,30 @@ func (q *Query) URLQuery() (string, error) {
 	return sb.String(), nil
 }
 
+func (q *Query) WriteLabelFilter(sb *strings.Builder, lfs *[]labelFilter, lj LabelJoiner) {
+	for i, lf := range *lfs {
+		if i > 0 {
+			sb.WriteString(string(lj))
+		}
+		lf.writeInto(sb)
+	}
+}
+
 func (q *Query) AddParam(key, value string) error {
 	if !filterRegexpValidation.MatchString(value) {
 		return fmt.Errorf("unauthorized sign in flows request: %s", value)
 	}
 	switch key {
 	case exportFormatKey:
-		if q.export != nil {
-			q.export.format = value
-		} else {
-			return fmt.Errorf("export format is not allowed for this endpoint")
-		}
+		return q.addParamFormat(value)
 	case columnsKey:
-		if q.export != nil {
-			values := strings.Split(value, ",")
-			q.export.columns = values
-		} else {
-			return fmt.Errorf("export columns are not allowed for this endpoint")
-		}
+		return q.addParamColumns(value)
 	case startTimeKey:
 		q.addURLParam(startParam, value)
 	case endTimeTimeKey:
 		q.addURLParam(endParam, value)
 	case timeRangeKey:
-		r, err := strconv.ParseInt(value, 10, 64)
-		if err != nil {
-			return err
-		}
-		q.addURLParam(startParam, strconv.FormatInt(time.Now().Unix()-r, 10))
+		return q.addParamTime(value)
 	case limitKey:
 		q.addURLParam(limitParam, value)
 	// Attributes that have a special meaning and need to be treated apart
@@ -153,13 +162,52 @@ func (q *Query) AddParam(key, value string) error {
 	// IP filter labels
 	case "DstAddr", "SrcAddr", "DstK8S_HostIP", "SrcK8S_HostIP":
 		q.processIPFilters(key, strings.Split(value, ","))
+	case "SrcK8S_OwnerName", "DstK8S_OwnerName", "Namespace":
+		q.processCommonLabelFilter(key, strings.Split(value, ","))
+	case "K8S_Object", "SrcK8S_Object", "DstK8S_Object", "K8S_OwnerObject", "SrcK8S_OwnerObject", "DstK8S_OwnerObject":
+		return q.processK8SObjectFilter(key, strings.Split(value, ","))
+	case "AddrPort", "SrcAddrPort", "DstAddrPort":
+		q.processAddressPortFilter(key, strings.Split(value, ","))
 	default:
-		// Stream selector labels
-		if _, ok := q.labelMap[key]; ok {
-			q.processStreamSelector(key, strings.Split(value, ","))
-		} else {
-			return q.processLineFilters(key, strings.Split(value, ","))
-		}
+		return q.addParamDefault(key, value)
+	}
+	return nil
+}
+
+func (q *Query) addParamFormat(value string) error {
+	if q.export != nil {
+		q.export.format = value
+	} else {
+		return fmt.Errorf("export format is not allowed for this endpoint")
+	}
+	return nil
+}
+
+func (q *Query) addParamColumns(value string) error {
+	if q.export != nil {
+		values := strings.Split(value, ",")
+		q.export.columns = values
+	} else {
+		return fmt.Errorf("export columns are not allowed for this endpoint")
+	}
+	return nil
+}
+
+func (q *Query) addParamTime(value string) error {
+	r, err := strconv.ParseInt(value, 10, 64)
+	if err != nil {
+		return err
+	}
+	q.addURLParam(startParam, strconv.FormatInt(time.Now().Unix()-r, 10))
+	return nil
+}
+
+func (q *Query) addParamDefault(key, value string) error {
+	// Stream selector labels
+	if _, ok := q.labelMap[key]; ok {
+		q.processStreamSelector(key, strings.Split(value, ","))
+	} else {
+		return q.processLineFilters(key, strings.Split(value, ","))
 	}
 	return nil
 }
@@ -218,8 +266,13 @@ func (q *Query) processStreamSelector(key string, values []string) {
 	}
 
 	if regexStr.Len() > 0 {
-		q.streamSelector = append(q.streamSelector,
-			stringLabelFilter(key, labelMatches, regexStr.String()))
+		if q.currentGroup == nil {
+			q.streamSelector = append(q.streamSelector,
+				stringLabelFilter(key, labelMatches, regexStr.String()))
+		} else {
+			q.groupedLabelFilters[*q.currentGroup] = append(q.groupedLabelFilters[*q.currentGroup],
+				stringLabelFilter(key, labelMatches, regexStr.String()))
+		}
 	}
 }
 
@@ -227,7 +280,12 @@ func (q *Query) processStreamSelector(key string, values []string) {
 // of the log line (not in the stream selector labels)
 func (q *Query) processIPFilters(key string, values []string) {
 	for _, value := range values {
-		q.labelFilters = append(q.labelFilters, ipLabelFilter(key, value))
+		if q.currentGroup == nil {
+			q.labelFilters = append(q.labelFilters, ipLabelFilter(key, value))
+		} else {
+			q.groupedLabelFilters[*q.currentGroup] = append(q.groupedLabelFilters[*q.currentGroup],
+				ipLabelFilter(key, value))
+		}
 	}
 }
 
@@ -251,8 +309,11 @@ func (q *Query) processLineFilters(key string, values []string) error {
 		if i > 0 {
 			regexStr.WriteByte('|')
 		}
-		//match KEY + VALUE: "KEY":"[^\"]*VALUE" (ie: contains VALUE) or, if numeric, "KEY":VALUE
-		regexStr.WriteString(`"`)
+		//match end of KEY + regex VALUE:
+		//if numeric, KEY":VALUE
+		//if string KEY":"VALUE"
+		//ie 'Port' key will match both 'SrcPort":"XXX"' and 'DstPort":"XXX"
+		//VALUE can be quoted for exact match or contains * to inject regex any
 		regexStr.WriteString(key)
 		regexStr.WriteString(`":`)
 		if isNumeric(key) {
@@ -275,14 +336,124 @@ func (q *Query) processLineFilters(key string, values []string) error {
 	}
 
 	if regexStr.Len() > 0 {
-		q.lineFilters = append(q.lineFilters, regexStr.String())
+		if q.currentGroup == nil {
+			q.lineFilters = append(q.lineFilters, regexStr.String())
+		} else {
+			lf, ok := lineToLabelFilter(regexStr.String())
+			if ok {
+				q.groupedLabelFilters[*q.currentGroup] = append(q.groupedLabelFilters[*q.currentGroup], lf)
+			} else {
+				qlog.WithField("lineFilter", lf).
+					Warningf("line filter can't be parsed as json attribute. Ignoring it")
+			}
+		}
 	}
 	return nil
+}
+
+func (q *Query) processCommonLabelFilter(key string, values []string) {
+	for _, value := range values {
+		regexStr := strings.Builder{}
+		// match start any if not quoted
+		if !strings.HasPrefix(value, `"`) {
+			regexStr.WriteString(".*")
+		}
+		//inject value with regex
+		regexStr.WriteString(valueReplacer.Replace(value))
+		// match end any if not quoted
+		if !strings.HasSuffix(value, `"`) {
+			regexStr.WriteString(".*")
+		}
+		// apply filter on both Src and Dst fields
+		if q.currentGroup == nil {
+			q.labelFilters = append(q.labelFilters, regexLabelFilter("Src"+key, labelMatches, regexStr.String()))
+			q.labelFilters = append(q.labelFilters, regexLabelFilter("Dst"+key, labelMatches, regexStr.String()))
+		} else {
+			q.groupedLabelFilters[*q.currentGroup] = append(q.groupedLabelFilters[*q.currentGroup], regexLabelFilter("Src"+key, labelMatches, regexStr.String()))
+			q.groupedLabelFilters[*q.currentGroup] = append(q.groupedLabelFilters[*q.currentGroup], regexLabelFilter("Dst"+key, labelMatches, regexStr.String()))
+		}
+	}
+}
+
+func (q *Query) processK8SObjectFilter(key string, values []string) error {
+	prefix := ""
+	if strings.HasPrefix(key, "Src") {
+		prefix = "Src"
+	} else if strings.HasPrefix(key, "Dst") {
+		prefix = "Dst"
+	}
+
+	for _, value := range values {
+		//expected value is Kind.Namespace.ObjectName
+		if strings.Contains(value, ".") {
+			splittedValue := strings.Split(value, ".")
+			if strings.Contains(key, "Owner") {
+				q.AddParamSrcDst(prefix, "K8S_OwnerType", splittedValue[0])
+				q.AddParamSrcDst(prefix, "K8S_Namespace", splittedValue[1])
+				q.AddParamSrcDst(prefix, "K8S_OwnerName", splittedValue[2])
+			} else {
+				q.AddParamSrcDst(prefix, "K8S_Type", splittedValue[0])
+				q.AddParamSrcDst(prefix, "K8S_Namespace", splittedValue[1])
+				q.AddParamSrcDst(prefix, "K8S_Name", splittedValue[2])
+			}
+		} else {
+			return fmt.Errorf("invalid kubeObject filter: %s", value)
+		}
+	}
+	return nil
+}
+
+func (q *Query) processAddressPortFilter(key string, values []string) {
+	prefix := ""
+	if strings.HasPrefix(key, "Src") {
+		prefix = "Src"
+	} else if strings.HasPrefix(key, "Dst") {
+		prefix = "Dst"
+	}
+
+	for _, value := range values {
+		//can either be ipaddress / port / ipaddress:port
+		if strings.Contains(value, ":") {
+			ipAndPort := strings.Split(value, ":")
+			q.AddParamSrcDst(prefix, "Addr", ipAndPort[0])
+			q.AddParamSrcDst(prefix, "Port", ipAndPort[1])
+		} else if strings.Contains(value, ".") {
+			q.AddParamSrcDst(prefix, "Addr", value)
+		} else if _, err := strconv.Atoi(value); err == nil {
+			q.AddParamSrcDst(prefix, "Port", value)
+		}
+	}
+}
+
+func (q *Query) AddParamSrcDst(prefix, key, value string) {
+	if len(prefix) > 0 {
+		q.currentGroup = &prefix
+		err := q.AddParam(prefix+key, value)
+		if err != nil {
+			qlog.Error(err)
+		}
+		q.currentGroup = nil
+	} else {
+		srcPrefix := "Src"
+		dstPrefix := "Dst"
+		q.currentGroup = &srcPrefix
+		err := q.AddParam(srcPrefix+key, value)
+		if err != nil {
+			qlog.Error(err)
+		}
+		q.currentGroup = &dstPrefix
+		err = q.AddParam(dstPrefix+key, value)
+		if err != nil {
+			qlog.Error(err)
+		}
+		q.currentGroup = nil
+	}
 }
 
 func isNumeric(v string) bool {
 	switch v {
 	case
+		"Port",
 		"SrcPort",
 		"DstPort",
 		"Packets",
