@@ -11,7 +11,16 @@ RUN NPM_INSTALL=ci make build-frontend
 
 FROM registry.access.redhat.com/ubi8/go-toolset:1.16.7-5 as go-builder
 
+WORKDIR /tmp
+
+# TEMPORARY STEPS UNTIL ubi8 releases a go1.17 image
+RUN wget -q https://go.dev/dl/go1.17.7.linux-amd64.tar.gz && tar -xzf go1.17.7.linux-amd64.tar.gz
+ENV GOROOT /tmp/go
+ENV PATH $GOROOT/bin:$PATH
+# END OF LINES TO REMOVE
+
 WORKDIR /opt/app-root
+
 COPY .git .git
 COPY go.mod go.mod
 COPY go.sum go.sum
