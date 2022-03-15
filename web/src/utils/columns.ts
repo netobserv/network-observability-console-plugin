@@ -12,7 +12,7 @@ export enum ColumnsId {
   type = 'K8S_Type',
   srctype = 'SrcK8S_Type',
   dsttype = 'DstK8S_Type',
-  namespace = 'Namespace',
+  namespace = 'K8S_Namespace',
   srcnamespace = 'SrcK8S_Namespace',
   dstnamespace = 'DstK8S_Namespace',
   name = 'K8S_Name',
