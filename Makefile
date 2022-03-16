@@ -1,5 +1,5 @@
 IMG_USER ?= netobserv
-TAG ?= main
+TAG ?= dev
 BUILD_VERSION := $(shell git describe --long HEAD)
 BUILD_DATE := $(shell date +%Y-%m-%d\ %H:%M)
 BUILD_SHA := $(shell git rev-parse --short HEAD)
