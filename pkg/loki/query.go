@@ -9,8 +9,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/netobserv/network-observability-console-plugin/pkg/utils"
 	"github.com/sirupsen/logrus"
+
+	"github.com/netobserv/network-observability-console-plugin/pkg/utils"
 )
 
 const (
@@ -162,8 +163,6 @@ func (q *Query) AddParam(key, value string) error {
 	// IP filter labels
 	case "DstAddr", "SrcAddr", "DstK8S_HostIP", "SrcK8S_HostIP":
 		q.processIPFilters(key, strings.Split(value, ","))
-	case "SrcK8S_OwnerName", "DstK8S_OwnerName", "Namespace":
-		q.processCommonLabelFilter(key, strings.Split(value, ","))
 	case "K8S_Object", "SrcK8S_Object", "DstK8S_Object", "K8S_OwnerObject", "SrcK8S_OwnerObject", "DstK8S_OwnerObject":
 		return q.processK8SObjectFilter(key, strings.Split(value, ","))
 	case "AddrPort", "SrcAddrPort", "DstAddrPort":
@@ -206,6 +205,13 @@ func (q *Query) addParamDefault(key, value string) error {
 	// Stream selector labels
 	if _, ok := q.labelMap[key]; ok {
 		q.processStreamSelector(key, strings.Split(value, ","))
+	} else if _, ok := q.labelMap["Src"+key]; ok {
+		if _, ok := q.labelMap["Dst"+key]; !ok {
+			qlog.WithField("label", key).
+				Warningf("can't run common label filter as Src field is defined as a label, but Dst is not. Ignoring it")
+		} else {
+			q.processCommonLabelFilter(key, strings.Split(value, ","))
+		}
 	} else {
 		return q.processLineFilters(key, strings.Split(value, ","))
 	}

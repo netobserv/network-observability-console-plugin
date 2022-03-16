@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"time"
 
+	csvdata "github.com/netobserv/network-observability-console-plugin/pkg/handler/csv"
 	"github.com/netobserv/network-observability-console-plugin/pkg/model"
 )
 
@@ -27,7 +28,7 @@ func writeCSV(w http.ResponseWriter, code int, payload []byte, columns []string)
 		return
 	}
 
-	datas, err := getCSVDatas(&qr, columns)
+	datas, err := csvdata.GetCSVData(&qr, columns)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, err.Error())
 		return
