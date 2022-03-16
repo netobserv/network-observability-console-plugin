@@ -26,9 +26,13 @@ func GetCSVData(qr *model.QueryResponse, columns []string) ([][]string, error) {
 func manageStreams(streams model.Streams, columns []string) ([][]string, error) {
 	//make csv datas containing header as first line + rows
 	datas := make([][]string, 1)
+	//prepare columns for faster lookup
+	columnsMap := utils.GetMapInterface(columns)
 	//set Timestamp as first data
-	if columns == nil || utils.Contains(columns, timestampCol) {
+	includeTimestamp := false
+	if _, exists := columnsMap[timestampCol]; exists || len(columns) == 0 {
 		datas[0] = append(datas[0], timestampCol)
+		includeTimestamp = true
 	}
 	//keep ordered labels / field names between each lines
 	//filtered by columns parameter if specified
@@ -39,7 +43,7 @@ func manageStreams(streams model.Streams, columns []string) ([][]string, error) 
 		if labels == nil {
 			labels = make([]string, 0, len(stream.Labels))
 			for name := range stream.Labels {
-				if columns == nil || utils.Contains(columns, name) {
+				if _, exists := columnsMap[name]; exists || len(columns) == 0 {
 					labels = append(fields, name)
 				}
 			}
@@ -59,39 +63,36 @@ func manageStreams(streams model.Streams, columns []string) ([][]string, error) 
 			if fields == nil {
 				fields = make([]string, 0, len(line))
 				for name := range line {
-					if columns == nil || utils.Contains(columns, name) {
+					if _, exists := columnsMap[name]; exists || len(columns) == 0 {
 						fields = append(fields, name)
 					}
 				}
 				datas[0] = append(datas[0], fields...)
 			}
 
-			datas = append(datas, getRowDatas(stream, entry, labels, fields, line, len(datas[0]), columns))
+			datas = append(datas, getRowDatas(stream, entry, labels, fields, line, len(datas[0]), includeTimestamp))
 		}
 	}
 	return datas, nil
 }
 
-func getRowDatas(stream model.Stream, entry model.Entry, labels []string, fields []string,
-	line map[string]interface{}, size int, columns []string) []string {
-	index := 0
-	rowDatas := make([]string, size)
+func getRowDatas(stream model.Stream, entry model.Entry, labels, fields []string,
+	line map[string]interface{}, size int, includeTimestamp bool) []string {
+	rowDatas := make([]string, 0, size)
 
 	//set timestamp
-	if columns == nil || utils.Contains(columns, timestampCol) {
-		rowDatas[index] = entry.Timestamp.String()
+	if includeTimestamp {
+		rowDatas = append(rowDatas, entry.Timestamp.String())
 	}
 
 	//set labels values
 	for _, label := range labels {
-		index++
-		rowDatas[index] = stream.Labels[label]
+		rowDatas = append(rowDatas, stream.Labels[label])
 	}
 
 	//set field values
 	for _, field := range fields {
-		index++
-		rowDatas[index] = fmt.Sprintf("%v", line[field])
+		rowDatas = append(rowDatas, fmt.Sprint(line[field]))
 	}
 
 	return rowDatas

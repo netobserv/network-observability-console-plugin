@@ -69,7 +69,9 @@ export const buildQueryArguments = (
       params[QueryArgument.EndTime] = range.to.toString();
     }
   }
-  params[ColumnsId.flowdir] = reporterToFlowdir[opts.reporter];
+  if (opts.reporter !== 'both') {
+    params[ColumnsId.flowdir] = reporterToFlowdir[opts.reporter];
+  }
   params[QueryArgument.Limit] = opts.limit;
   params[QueryArgument.Match] = opts.match;
   return params;
