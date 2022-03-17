@@ -6,7 +6,7 @@ import NetflowTableRow from '../netflow-table-row';
 import { Record } from '../../../api/ipfix';
 import { DefaultColumns } from '../../__tests-data__/columns';
 import { FlowsSample } from '../../__tests-data__/flows';
-import { Size } from '../../display-dropdown';
+import { Size } from '../../dropdowns/display-dropdown';
 
 describe('<NetflowTableRow />', () => {
   let flows: Record[] = [];

@@ -1,5 +1,5 @@
 import { TFunction } from 'i18next';
-import { CUSTOM_TIME_RANGE_KEY } from '../components/time-range-dropdown';
+import { CUSTOM_TIME_RANGE_KEY } from '../components/dropdowns/time-range-dropdown';
 
 const zeroPad = (number: number) => (number < 10 ? `0${number}` : number);
 

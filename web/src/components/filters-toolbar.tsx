@@ -22,6 +22,7 @@ import {
   Toolbar,
   ToolbarContent,
   ToolbarFilter,
+  ToolbarGroup,
   ToolbarItem,
   Tooltip,
   ValidatedOptions
@@ -50,7 +51,7 @@ import {
 import './filters-toolbar.css';
 import { validateIPFilter } from '../utils/ip';
 import { QueryOptions } from '../model/query-options';
-import { QueryOptionsDropdown } from './query-options-dropdown';
+import { QueryOptionsDropdown } from './dropdowns/query-options-dropdown';
 import { getPathWithParams, NETFLOW_TRAFFIC_PATH } from '../utils/router';
 import { useHistory } from 'react-router-dom';
 import { validateK8SName } from '../utils/label';
@@ -524,8 +525,8 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
         <ToolbarItem className="flex-start">
           <QueryOptionsDropdown options={props.queryOptions} setOptions={props.setQueryOptions} />
         </ToolbarItem>
-        <ToolbarItem className="flex-start">
-          {_.isEmpty(forcedFilters) ? (
+        {_.isEmpty(forcedFilters) && (
+          <ToolbarItem className="flex-start">
             <Tooltip
               //css hide tooltip here to avoid render issue
               className={`filters-tooltip${_.isEmpty(message) ? '-empty' : ''}`}
@@ -563,39 +564,9 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
                 <FilterHints type={selectedFilterColumn.filterType} name={selectedFilterColumn.name} />
               </div>
             </Tooltip>
-          ) : (
-            forcedFilters &&
-            forcedFilters.map((forcedFilter, ffIndex) => (
-              <ChipGroup
-                key={ffIndex}
-                isClosable={false}
-                categoryName={getFullColumnName(columns.find(c => c.id === forcedFilter.colId))}
-              >
-                {forcedFilter.values.map((forcedValue, fvIndex) => (
-                  <Chip key={fvIndex} isReadOnly={true}>
-                    {forcedValue.display ? forcedValue.display : forcedValue.v}
-                  </Chip>
-                ))}
-              </ChipGroup>
-            ))
-          )}
-        </ToolbarItem>
-        {!_.isEmpty(forcedFilters) && (
-          <ToolbarItem className="flex-start">
-            <OverflowMenu breakpoint="md">
-              <OverflowMenuGroup groupType="button" isPersistent>
-                <Button onClick={() => push(getPathWithParams(NETFLOW_TRAFFIC_PATH))}>{t('Edit filters')}</Button>
-              </OverflowMenuGroup>
-            </OverflowMenu>
           </ToolbarItem>
         )}
-        <ToolbarItem className="flex-start">
-          <OverflowMenu breakpoint="md">
-            <OverflowMenuGroup groupType="button" isPersistent>
-              {props.children}
-            </OverflowMenuGroup>
-          </OverflowMenu>
-        </ToolbarItem>
+        {props.children && <ToolbarItem className="flex-start">{props.children}</ToolbarItem>}
         {actions && (
           <ToolbarItem className="flex-start" alignment={{ default: 'alignRight' }}>
             <OverflowMenu breakpoint="md">
@@ -605,7 +576,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
             </OverflowMenu>
           </ToolbarItem>
         )}
-        {_.isEmpty(forcedFilters) &&
+        {_.isEmpty(forcedFilters) ? (
           filters &&
           filters.map((filter, index) => (
             <ToolbarFilter
@@ -629,7 +600,34 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
                 <div></div>
               }
             </ToolbarFilter>
-          ))}
+          ))
+        ) : (
+          <ToolbarGroup id="forced-filters" variant="filter-group">
+            <ToolbarItem className="flex-start">
+              {forcedFilters &&
+                forcedFilters.map((forcedFilter, ffIndex) => (
+                  <ChipGroup
+                    key={ffIndex}
+                    isClosable={false}
+                    categoryName={getFullColumnName(columns.find(c => c.id === forcedFilter.colId))}
+                  >
+                    {forcedFilter.values.map((forcedValue, fvIndex) => (
+                      <Chip key={fvIndex} isReadOnly={true}>
+                        {forcedValue.display ? forcedValue.display : forcedValue.v}
+                      </Chip>
+                    ))}
+                  </ChipGroup>
+                ))}
+            </ToolbarItem>
+            <ToolbarItem className="flex-start">
+              <OverflowMenu breakpoint="md">
+                <OverflowMenuGroup groupType="button" isPersistent>
+                  <Button onClick={() => push(getPathWithParams(NETFLOW_TRAFFIC_PATH))}>{t('Edit filters')}</Button>
+                </OverflowMenuGroup>
+              </OverflowMenu>
+            </ToolbarItem>
+          </ToolbarGroup>
+        )}
         {/* TODO : NETOBSERV-104
           <ToolbarItem variant="pagination">
             <Pagination

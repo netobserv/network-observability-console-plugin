@@ -18,7 +18,7 @@ import { Record } from '../../api/ipfix';
 import { NetflowTableHeader } from './netflow-table-header';
 import NetflowTableRow from './netflow-table-row';
 import { Column } from '../../utils/columns';
-import { Size } from '../display-dropdown';
+import { Size } from '../dropdowns/display-dropdown';
 
 const NetflowTable: React.FC<{
   flows: Record[];
