@@ -20,10 +20,11 @@
     "fix-imports": "eslint --no-eslintrc --no-inline-config --parser '@typescript-eslint/parser' --plugin 'unused-imports' --plugin 'react-hooks' --rule 'unused-imports/no-unused-imports:error' --fix \"./src/**/*.{ts,tsx}\""
   },
   "devDependencies": {
-    "@openshift-console/dynamic-plugin-sdk": "0.0.3",
-    "@openshift-console/dynamic-plugin-sdk-webpack": "0.0.4",
+    "@openshift-console/dynamic-plugin-sdk": "0.0.6",
+    "@openshift-console/dynamic-plugin-sdk-webpack": "0.0.6",
     "@patternfly/react-core": "4.175.4",
     "@patternfly/react-table": "4.44.4",
+    "@patternfly/react-topology": "^4.46.0",
     "@testing-library/react": "^12.1.2",
     "@types/copy-webpack-plugin": "8.0.1",
     "@types/enzyme": "3.10.x",

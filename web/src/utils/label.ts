@@ -11,3 +11,10 @@ export const validateK8SName = (label: string) => {
   const quotesCount = (label.match(/"/g) || []).length;
   return (quotesCount == 0 || quotesCount == 2) && k8sName.test(label);
 };
+
+//TODO: remove kindToAbbr after integration of console ResourceIcon in topology library
+const abbrBlacklist = ['ASS'];
+export const kindToAbbr = (kind: string) => {
+  const abbrKind = (kind.replace(/[^A-Z]/g, '') || kind.toUpperCase()).slice(0, 4);
+  return abbrBlacklist.includes(abbrKind) ? abbrKind.slice(0, -1) : abbrKind;
+};
