@@ -45,23 +45,13 @@ func GetFlows(cfg LokiConfig, allowExport bool) func(w http.ResponseWriter, r *h
 	// - manage range (check RANGE_SPLIT_CHAR on front side)
 	return func(w http.ResponseWriter, r *http.Request) {
 		params := r.URL.Query()
-		// TODO: remove all logs
-		hlog.Infof("GetFlows query params : %s", params)
+		hlog.Debugf("GetFlows query params: %s", params)
 
 		//allow export only on specific endpoints
 		queryBuilder := loki.NewQuery(cfg.Labels, allowExport)
-		for key, param := range params {
-			var val string
-			if len(param) > 0 {
-				val = param[0]
-			}
-
-			if len(val) > 0 {
-				if err := queryBuilder.AddParam(key, val); err != nil {
-					writeError(w, http.StatusBadRequest, err.Error())
-					return
-				}
-			}
+		if err := queryBuilder.AddParams(params); err != nil {
+			writeError(w, http.StatusBadRequest, err.Error())
+			return
 		}
 		queryBuilder, err := queryBuilder.PrepareToSubmit()
 		if err != nil {
@@ -75,7 +65,7 @@ func GetFlows(cfg LokiConfig, allowExport bool) func(w http.ResponseWriter, r *h
 			return
 		}
 		flowsURL := strings.TrimRight(cfg.URL.String(), "/") + getFlowsURLPath + "?" + query
-		hlog.Infof("GetFlows URL: %s", flowsURL)
+		hlog.Debugf("GetFlows URL: %s", flowsURL)
 
 		resp, code, err := lokiClient.Get(flowsURL)
 		if err != nil {

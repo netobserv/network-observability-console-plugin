@@ -4,6 +4,7 @@ package loki
 import (
 	"errors"
 	"fmt"
+	"net/url"
 	"regexp"
 	"strconv"
 	"strings"
@@ -138,6 +139,21 @@ func (q *Query) WriteLabelFilter(sb *strings.Builder, lfs *[]labelFilter, lj Lab
 		}
 		lf.writeInto(sb)
 	}
+}
+
+func (q *Query) AddParams(params url.Values) error {
+	for key, values := range params {
+		if len(values) == 0 {
+			// Silently ignore
+			continue
+		}
+
+		// Note: empty string allowed
+		if err := q.AddParam(key, values[0]); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (q *Query) AddParam(key, value string) error {
