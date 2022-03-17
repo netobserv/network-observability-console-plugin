@@ -19,6 +19,7 @@ import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
+import { isAllowed, Feature } from '../utils/features-gate';
 import { Record } from '../api/ipfix';
 import { getFlows } from '../api/routes';
 import { QueryOptions } from '../model/query-options';
@@ -162,22 +163,24 @@ export const NetflowTraffic: React.FC<{
 
   const viewToggle = () => {
     return (
-      <ToggleGroup>
-        <ToggleGroupItem
-          icon={<TableIcon />}
-          text={t('Flow Table')}
-          buttonId="tableViewButton"
-          isSelected={selectedViewId === 'table'}
-          onChange={() => setSelectedViewId('table')}
-        />
-        <ToggleGroupItem
-          icon={<TopologyIcon />}
-          text={t('Topology')}
-          buttonId="topologyViewButton"
-          isSelected={selectedViewId === 'topology'}
-          onChange={() => setSelectedViewId('topology')}
-        />
-      </ToggleGroup>
+      isAllowed(Feature.Topology) && (
+        <ToggleGroup>
+          <ToggleGroupItem
+            icon={<TableIcon />}
+            text={t('Flow Table')}
+            buttonId="tableViewButton"
+            isSelected={selectedViewId === 'table'}
+            onChange={() => setSelectedViewId('table')}
+          />
+          <ToggleGroupItem
+            icon={<TopologyIcon />}
+            text={t('Topology')}
+            buttonId="topologyViewButton"
+            isSelected={selectedViewId === 'topology'}
+            onChange={() => setSelectedViewId('topology')}
+          />
+        </ToggleGroup>
+      )
     );
   };
 
