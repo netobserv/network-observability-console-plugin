@@ -1,11 +1,23 @@
-import { Bullseye, EmptyState, EmptyStateBody, EmptyStateVariant, Spinner, Title } from '@patternfly/react-core';
+import {
+  Bullseye,
+  Button,
+  EmptyState,
+  EmptyStateBody,
+  EmptyStateVariant,
+  Spinner,
+  Title
+} from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
+import { LayoutName, TopologyOptions } from '../../model/topology';
 
 const NetflowTopology: React.FC<{
   loading?: boolean;
   error?: string;
-}> = ({ error, loading }) => {
+  layout?: LayoutName;
+  options?: TopologyOptions;
+  toggleTopologyOptions?: () => void;
+}> = ({ error, loading, layout, options, toggleTopologyOptions }) => {
   const { t } = useTranslation('plugin__network-observability-plugin');
 
   if (error) {
@@ -25,7 +37,16 @@ const NetflowTopology: React.FC<{
     );
   }
 
-  return <div>{t('TODO')}</div>;
+  return (
+    <div>
+      {t('TODO')}
+      <Button variant="primary" onClick={toggleTopologyOptions}>
+        {t('Show options')}
+      </Button>
+      {layout}
+      {options && JSON.stringify(options)}
+    </div>
+  );
 };
 
 export default NetflowTopology;

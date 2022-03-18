@@ -1,0 +1,10 @@
+.options-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.options-col-container {
+  display: flex;
+  flex-direction: column;
+}
