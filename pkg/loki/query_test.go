@@ -21,8 +21,8 @@ func TestQuery_ToURL_ConvertToAnyMatch(t *testing.T) {
 			stringLabelFilter("foo", labelMatches, ".*bar.*"),
 			stringLabelFilter("baz", labelMatches, ".*bae.*"),
 		}},
-		expect:    `query={app="flows",foo=~".*bar.*",baz=~".*bae.*"}`,
-		expectAny: `query={dont="fail"}|json|app="flows"+or+foo=~".*bar.*"+or+baz=~".*bae.*"`,
+		expect:    `/loki/api/v1/query_range?query={app="flows",foo=~".*bar.*",baz=~".*bae.*"}`,
+		expectAny: `/loki/api/v1/query_range?query={dont="fail"}|json|app="flows"+or+foo=~".*bar.*"+or+baz=~".*bae.*"`,
 	}, {
 		title: "streamSelector with line filters",
 		in: Query{
@@ -31,8 +31,8 @@ func TestQuery_ToURL_ConvertToAnyMatch(t *testing.T) {
 			},
 			lineFilters: []string{`"DstPort":1234`, `"Namespace":".*hiya`},
 		},
-		expect:    "query={app=\"netobs\"}|~`\"DstPort\":1234`|~`\"Namespace\":\".*hiya`",
-		expectAny: "query={dont=\"fail\"}|json|app=\"netobs\"+or+DstPort=1234+or+Namespace=~`.*hiya.*`",
+		expect:    "/loki/api/v1/query_range?query={app=\"netobs\"}|~`\"DstPort\":1234`|~`\"Namespace\":\".*hiya`",
+		expectAny: "/loki/api/v1/query_range?query={dont=\"fail\"}|json|app=\"netobs\"+or+DstPort=1234+or+Namespace=~`.*hiya.*`",
 	}, {
 		title: "streamSelector with label filters",
 		in: Query{
@@ -44,8 +44,8 @@ func TestQuery_ToURL_ConvertToAnyMatch(t *testing.T) {
 				ipLabelFilter("SrcAddr", "123.0.0.0/16"),
 			},
 		},
-		expect:    `query={app="some-app"}|json|foo=~"bar"+or+port=1234+or+SrcAddr=ip("123.0.0.0/16")`,
-		expectAny: `query={dont="fail"}|json|app="some-app"+or+foo=~"bar"+or+port=1234+or+SrcAddr=ip("123.0.0.0/16")`,
+		expect:    `/loki/api/v1/query_range?query={app="some-app"}|json|foo=~"bar"+or+port=1234+or+SrcAddr=ip("123.0.0.0/16")`,
+		expectAny: `/loki/api/v1/query_range?query={dont="fail"}|json|app="some-app"+or+foo=~"bar"+or+port=1234+or+SrcAddr=ip("123.0.0.0/16")`,
 	}, {
 		title: "streamSelector + line filters + label filters",
 		in: Query{
@@ -54,8 +54,8 @@ func TestQuery_ToURL_ConvertToAnyMatch(t *testing.T) {
 			labelFilters:   []labelFilter{stringLabelFilter("foo", labelMatches, "bar")},
 			lineFilters:    []string{`"DstPod":".*podaco"`},
 		},
-		expect:    "query={app=\"the-app\"}|~`\"DstPod\":\".*podaco\"`|json|foo=~\"bar\"",
-		expectAny: "query={dont=\"fail\"}|json|app=\"the-app\"+or+foo=~\"bar\"+or+DstPod=~`.*podaco.*`",
+		expect:    "/loki/api/v1/query_range?query={app=\"the-app\"}|~`\"DstPod\":\".*podaco\"`|json|foo=~\"bar\"",
+		expectAny: "/loki/api/v1/query_range?query={dont=\"fail\"}|json|app=\"the-app\"+or+foo=~\"bar\"+or+DstPod=~`.*podaco.*`",
 	}} {
 		t.Run(tc.title, func(t *testing.T) {
 			urlQuery, err := tc.in.URLQuery()
@@ -82,10 +82,10 @@ func TestQuery_AddURLParam(t *testing.T) {
 	query.addURLParam("flis", "flas")
 	urlQuery, err := query.URLQuery()
 	require.NoError(t, err)
-	assert.Equal(t, `query={app="the-app"}&foo=bar&flis=flas`, urlQuery)
+	assert.Equal(t, `/loki/api/v1/query_range?query={app="the-app"}&foo=bar&flis=flas`, urlQuery)
 }
 
 func TestQuery_BackQuote_Error(t *testing.T) {
-	query := NewQuery([]string{"lab1", "lab2"}, false)
+	query := NewQuery("/", []string{"lab1", "lab2"}, false)
 	assert.Error(t, query.AddParam("key", "backquoted`val"))
 }

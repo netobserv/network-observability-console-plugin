@@ -49,15 +49,20 @@ export const RecordField: React.FC<{
     return undefined;
   };
 
-  const kubeObjContent = (value?: string, kind?: string, ns?: string) => {
-    if (value && ns && kind) {
+  const kubeObjContent = (value: string | undefined, kind: string | undefined, ns: string | undefined) => {
+    // Note: namespace is not mandatory here (e.g. Node objects)
+    if (value && kind) {
       return (
         <div className="force-truncate">
           <ResourceLink className={size} inline={true} kind={kind} name={value} namespace={ns} />
           <div className="record-field-tooltip">
-            <h4>{t('Namespace')}</h4>
-            <span>{ns}</span>
-            &nbsp;
+            {ns && (
+              <>
+                <h4>{t('Namespace')}</h4>
+                <span>{ns}</span>
+                &nbsp;
+              </>
+            )}
             <h4>{kind}</h4>
             <span>{value}</span>
           </div>
@@ -68,8 +73,9 @@ export const RecordField: React.FC<{
   };
 
   const explicitKubeObjContent = (ip: string, port: number, kind?: string, namespace?: string, name?: string) => {
-    if (name && namespace && kind) {
-      return doubleContainer(namespaceContent(namespace), kubeObjContent(name, kind, namespace), false);
+    // Note: namespace is not mandatory here (e.g. Node objects)
+    if (name && kind) {
+      return doubleContainer(kubeObjContent(name, kind, namespace), namespaceContent(namespace), false);
     } else {
       return ipPortContent(ip, port);
     }

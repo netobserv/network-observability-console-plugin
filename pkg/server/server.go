@@ -9,8 +9,6 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/netobserv/network-observability-console-plugin/pkg/handler"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/tools/clientcmd"
 )
 
 var slog = logrus.WithField("module", "server")
@@ -27,25 +25,7 @@ type Config struct {
 }
 
 func Start(cfg *Config) {
-	// Instantiate loader for kubeconfig file.
-	kubeconfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
-		clientcmd.NewDefaultClientConfigLoadingRules(),
-		&clientcmd.ConfigOverrides{},
-	)
-
-	// get a rest.Config from the kubeconfig file
-	restconfig, err := kubeconfig.ClientConfig()
-	if err != nil {
-		panic(err)
-	}
-
-	// create a Kubernetes client.
-	kubeClient, err := kubernetes.NewForConfig(restconfig)
-	if err != nil {
-		panic(err)
-	}
-
-	router := setupRoutes(cfg, kubeClient)
+	router := setupRoutes(cfg)
 	router.Use(corsHeader(cfg))
 
 	// Clients must use TLS 1.2 or higher

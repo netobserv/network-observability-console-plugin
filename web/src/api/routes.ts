@@ -32,8 +32,8 @@ export const getNamespaces = (): Promise<string[]> => {
   });
 };
 
-export const getResources = (kind: string, namespace: string): Promise<string[]> => {
-  return axios.get(host + '/api/resources', { params: { kind, namespace } }).then(r => {
+export const getResources = (namespace: string, kind: string): Promise<string[]> => {
+  return axios.get(`${host}/api/resources/namespace/${namespace}/kind/${kind}/names`).then(r => {
     if (r.status >= 400) {
       throw new Error(`${r.statusText} [code=${r.status}]`);
     }

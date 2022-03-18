@@ -4,7 +4,6 @@ package loki
 import (
 	"errors"
 	"fmt"
-	"net/url"
 	"regexp"
 	"strconv"
 	"strings"
@@ -16,7 +15,6 @@ import (
 )
 
 const (
-	queryParam      = "query"
 	startTimeKey    = "startTime"
 	endTimeTimeKey  = "endTime"
 	timeRangeKey    = "timeRange"
@@ -29,6 +27,7 @@ const (
 	matchParam      = "match"
 	flowDirParam    = "FlowDirection"
 	anyMatchValue   = "any"
+	queryRangePath  = "/loki/api/v1/query_range?query="
 )
 
 var qlog = logrus.WithField("component", "loki.query")
@@ -52,6 +51,7 @@ const (
 // {streamSelector}|lineFilters|json|labelFilters
 type Query struct {
 	// urlParams for the HTTP call
+	baseURL             string
 	urlParams           [][2]string
 	labelMap            map[string]struct{}
 	streamSelector      []labelFilter
@@ -70,12 +70,13 @@ type Export struct {
 	columns []string
 }
 
-func NewQuery(labels []string, export bool) *Query {
+func NewQuery(baseURL string, labels []string, export bool) *Query {
 	var exp *Export
 	if export {
 		exp = &Export{}
 	}
 	return &Query{
+		baseURL:             baseURL,
 		specialAttrs:        map[string]string{},
 		labelJoiner:         joinPipeAnd,
 		export:              exp,
@@ -89,7 +90,9 @@ func (q *Query) URLQuery() (string, error) {
 		return "", errors.New("there is no stream selector. At least one label matcher is needed")
 	}
 	sb := strings.Builder{}
-	sb.WriteString(queryParam + "={")
+	sb.WriteString(strings.TrimRight(q.baseURL, "/"))
+	sb.WriteString(queryRangePath)
+	sb.WriteString("{")
 	for i, ss := range q.streamSelector {
 		if i > 0 {
 			sb.WriteByte(',')
@@ -141,7 +144,7 @@ func (q *Query) WriteLabelFilter(sb *strings.Builder, lfs *[]labelFilter, lj Lab
 	}
 }
 
-func (q *Query) AddParams(params url.Values) error {
+func (q *Query) AddParams(params map[string][]string) error {
 	for key, values := range params {
 		if len(values) == 0 {
 			// Silently ignore

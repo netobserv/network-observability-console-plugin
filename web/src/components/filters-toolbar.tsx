@@ -126,7 +126,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
     if (namespace && hasNamespace(namespace)) {
       const key = `${kind}.${namespace}`;
       if (!hasObjects(key)) {
-        getResources(kind, namespace).then(pods => {
+        getResources(namespace, kind).then(pods => {
           setObjects(key, pods);
           if (suggest) {
             manageAutoCompleteOptions(getFilterOptions(FilterType.K8S_OBJECT, kindNamespacePod));
