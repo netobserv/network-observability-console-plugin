@@ -1,4 +1,4 @@
-name: push to quay.io
+name: Build and push to quay.io
 on:
   push:
     branches: [ main ]
@@ -27,7 +27,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v2
       - name: build images
-        run: IMAGE="quay.io/netobserv/${{ env.IMAGE }}:${{ env.TAG }}" make sha-image
+        run: IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE }}:${{ env.TAG }}" make sha-image
       - name: podman login to quay.io
         uses: redhat-actions/podman-login@v1
         with:
