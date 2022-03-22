@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { getURLParams, QueryArguments } from '../utils/router';
 import { Record } from './ipfix';
-import { LokiResponse, parseStream } from './loki';
+import { calculateMatrixTotals, parseStream, StreamResult, TopologyMetrics } from './loki';
 
 const host = '/api/proxy/plugin/network-observability-plugin/backend/';
 
@@ -10,7 +10,7 @@ export const getFlows = (params: QueryArguments): Promise<Record[]> => {
     if (r.status >= 400) {
       throw new Error(`${r.statusText} [code=${r.status}]`);
     }
-    return (r.data.data as LokiResponse).result.flatMap(r => parseStream(r));
+    return (r.data.data.result as StreamResult[]).flatMap(r => parseStream(r));
   });
 };
 
@@ -38,5 +38,14 @@ export const getResources = (namespace: string, kind: string): Promise<string[]>
       throw new Error(`${r.statusText} [code=${r.status}]`);
     }
     return r.data;
+  });
+};
+
+export const getTopology = (params: QueryArguments): Promise<TopologyMetrics[]> => {
+  return axios.get(host + '/api/loki/topology', { params }).then(r => {
+    if (r.status >= 400) {
+      throw new Error(`${r.statusText} [code=${r.status}]`);
+    }
+    return (r.data.data.result as TopologyMetrics[]).flatMap(r => calculateMatrixTotals(r));
   });
 };

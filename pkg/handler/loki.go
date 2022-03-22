@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -39,7 +40,7 @@ func newLokiClient(cfg *LokiConfig) httpclient.HTTPClient {
 	return httpclient.NewHTTPClient(cfg.Timeout, headers)
 }
 
-func GetFlows(cfg LokiConfig, allowExport bool) func(w http.ResponseWriter, r *http.Request) {
+func GetFlows(cfg LokiConfig, allowExport bool, topology bool) func(w http.ResponseWriter, r *http.Request) {
 	lokiClient := newLokiClient(&cfg)
 
 	// TODO: improve search mecanism:
@@ -51,7 +52,7 @@ func GetFlows(cfg LokiConfig, allowExport bool) func(w http.ResponseWriter, r *h
 		hlog.Debugf("GetFlows query params: %s", params)
 
 		//allow export only on specific endpoints
-		queryBuilder := loki.NewQuery(cfg.URL.String(), cfg.Labels, allowExport)
+		queryBuilder := loki.NewQuery(cfg.URL.String(), cfg.Labels, allowExport, topology)
 		if err := queryBuilder.AddParams(params); err != nil {
 			writeError(w, http.StatusBadRequest, err.Error())
 			return
@@ -76,6 +77,15 @@ func GetFlows(cfg LokiConfig, allowExport bool) func(w http.ResponseWriter, r *h
 			writeRawJSON(w, http.StatusOK, resp)
 		}
 	}
+}
+
+/* loki query will fail if spaces or quotes are not encoded
+ * we can't use url.QueryEscape or url.Values here since Loki doesn't manage encoded parenthesis
+ */
+func EncodeQuery(url string) string {
+	unquoted := strings.ReplaceAll(url, "\"", "%22")
+	unspaced := strings.ReplaceAll(unquoted, " ", "%20")
+	return unspaced
 }
 
 func getLokiError(resp []byte, code int) string {
@@ -103,7 +113,7 @@ func executeFlowQuery(queryBuilder *loki.Query, lokiClient httpclient.HTTPClient
 	}
 	hlog.Debugf("GetFlows URL: %s", flowsURL)
 
-	resp, code, err := lokiClient.Get(flowsURL)
+	resp, code, err := lokiClient.Get(EncodeQuery(flowsURL))
 	if err != nil {
 		return nil, http.StatusServiceUnavailable, err
 	}
