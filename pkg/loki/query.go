@@ -86,65 +86,6 @@ func NewQuery(baseURL string, labels []string, export bool) *Query {
 	}
 }
 
-func (q *Query) URLQuery() (string, error) {
-	if len(q.streamSelector) == 0 {
-		return "", errors.New("there is no stream selector. At least one label matcher is needed")
-	}
-	sb := strings.Builder{}
-	sb.WriteString(strings.TrimRight(q.baseURL, "/"))
-	sb.WriteString(queryRangePath)
-	sb.WriteString("{")
-	for i, ss := range q.streamSelector {
-		if i > 0 {
-			sb.WriteByte(',')
-		}
-		ss.writeInto(&sb)
-	}
-	sb.WriteByte('}')
-	for _, lf := range q.lineFilters {
-		sb.WriteString("|~`")
-		sb.WriteString(lf)
-		sb.WriteByte('`')
-	}
-	if len(q.labelFilters) > 0 || len(q.groupedLabelFilters) > 0 {
-		if q.labelJoiner == "" {
-			panic("Label Joiner can't be empty")
-		}
-		sb.WriteString("|json|")
-		q.WriteLabelFilter(&sb, &q.labelFilters, q.labelJoiner)
-		i := 0
-		for _, glf := range q.groupedLabelFilters {
-			if i > 0 {
-				sb.WriteString(string(q.labelJoiner))
-			}
-			//group with parenthesis
-			sb.WriteByte('(')
-			//each group member must match
-			q.WriteLabelFilter(&sb, &glf, joinAnd)
-			sb.WriteByte(')')
-			i++
-		}
-	}
-	if len(q.urlParams) > 0 {
-		for _, p := range q.urlParams {
-			sb.WriteByte('&')
-			sb.WriteString(p[0])
-			sb.WriteByte('=')
-			sb.WriteString(p[1])
-		}
-	}
-	return sb.String(), nil
-}
-
-func (q *Query) WriteLabelFilter(sb *strings.Builder, lfs *[]labelFilter, lj LabelJoiner) {
-	for i, lf := range *lfs {
-		if i > 0 {
-			sb.WriteString(string(lj))
-		}
-		lf.writeInto(sb)
-	}
-}
-
 func (q *Query) AddParams(params map[string][]string) error {
 	for key, values := range params {
 		if len(values) == 0 {
@@ -239,6 +180,65 @@ func (q *Query) addParamDefault(key, value string) error {
 		}
 	}
 	return nil
+}
+
+func (q *Query) URLQuery() (string, error) {
+	if len(q.streamSelector) == 0 {
+		return "", errors.New("there is no stream selector. At least one label matcher is needed")
+	}
+	sb := strings.Builder{}
+	sb.WriteString(strings.TrimRight(q.baseURL, "/"))
+	sb.WriteString(queryRangePath)
+	sb.WriteString("{")
+	for i, ss := range q.streamSelector {
+		if i > 0 {
+			sb.WriteByte(',')
+		}
+		ss.writeInto(&sb)
+	}
+	sb.WriteByte('}')
+	for _, lf := range q.lineFilters {
+		sb.WriteString("|~`")
+		sb.WriteString(lf)
+		sb.WriteByte('`')
+	}
+	if len(q.labelFilters) > 0 || len(q.groupedLabelFilters) > 0 {
+		if q.labelJoiner == "" {
+			panic("Label Joiner can't be empty")
+		}
+		sb.WriteString("|json|")
+		q.WriteLabelFilter(&sb, &q.labelFilters, q.labelJoiner)
+		i := 0
+		for _, glf := range q.groupedLabelFilters {
+			if i > 0 {
+				sb.WriteString(string(q.labelJoiner))
+			}
+			//group with parenthesis
+			sb.WriteByte('(')
+			//each group member must match
+			q.WriteLabelFilter(&sb, &glf, joinAnd)
+			sb.WriteByte(')')
+			i++
+		}
+	}
+	if len(q.urlParams) > 0 {
+		for _, p := range q.urlParams {
+			sb.WriteByte('&')
+			sb.WriteString(p[0])
+			sb.WriteByte('=')
+			sb.WriteString(p[1])
+		}
+	}
+	return sb.String(), nil
+}
+
+func (q *Query) WriteLabelFilter(sb *strings.Builder, lfs *[]labelFilter, lj LabelJoiner) {
+	for i, lf := range *lfs {
+		if i > 0 {
+			sb.WriteString(string(lj))
+		}
+		lf.writeInto(sb)
+	}
 }
 
 // PrepareToSubmit returns a new Query that already handles the special behavior of some attributes

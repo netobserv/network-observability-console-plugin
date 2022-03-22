@@ -38,6 +38,12 @@ button.pf-c-button.pf-m-link.pf-m-inline:empty {
   padding-top: 0;
 }
 
+/* long-enough to fit help text */
+#filter-toolbar #search,
+#filter-toolbar #autocomplete-search {
+  width: 260px;
+}
+
 /* align tips baseline */
 #tips {
   display: flex;
