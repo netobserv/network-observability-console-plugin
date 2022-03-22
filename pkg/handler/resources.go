@@ -12,6 +12,7 @@ import (
 	"github.com/netobserv/network-observability-console-plugin/pkg/httpclient"
 	"github.com/netobserv/network-observability-console-plugin/pkg/loki"
 	"github.com/netobserv/network-observability-console-plugin/pkg/model"
+	"github.com/netobserv/network-observability-console-plugin/pkg/model/fields"
 	"github.com/netobserv/network-observability-console-plugin/pkg/utils"
 )
 
@@ -19,15 +20,15 @@ func GetNamespaces(cfg LokiConfig) func(w http.ResponseWriter, r *http.Request) 
 	lokiClient := newLokiClient(&cfg)
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Fetch and merge values for SrcK8S_Namespace and DstK8S_Namespace
-		values, code, err := getLabelValues(&cfg, lokiClient, "SrcK8S_Namespace")
+		values, code, err := getLabelValues(&cfg, lokiClient, fields.SrcNamespace)
 		if err != nil {
-			writeError(w, code, "Error while fetching label 'SrcK8S_Namespace' values from Loki: "+err.Error())
+			writeError(w, code, "Error while fetching label source namespace values from Loki: "+err.Error())
 			return
 		}
 
-		values2, code, err := getLabelValues(&cfg, lokiClient, "DstK8S_Namespace")
+		values2, code, err := getLabelValues(&cfg, lokiClient, fields.DstNamespace)
 		if err != nil {
-			writeError(w, code, "Error while fetching label 'DstK8S_Namespace' values from Loki: "+err.Error())
+			writeError(w, code, "Error while fetching label destination namespace values from Loki: "+err.Error())
 			return
 		}
 
@@ -65,12 +66,12 @@ func GetNames(cfg LokiConfig) func(w http.ResponseWriter, r *http.Request) {
 		namespace := params["namespace"]
 		kind := params["kind"]
 
-		names, code, err := getNamesForPrefix(cfg, lokiClient, "Src", kind, namespace)
+		names, code, err := getNamesForPrefix(cfg, lokiClient, fields.Src, kind, namespace)
 		if err != nil {
 			writeError(w, code, err.Error())
 			return
 		}
-		names2, code, err := getNamesForPrefix(cfg, lokiClient, "Dst", kind, namespace)
+		names2, code, err := getNamesForPrefix(cfg, lokiClient, fields.Dst, kind, namespace)
 		if err != nil {
 			writeError(w, code, err.Error())
 			return
@@ -83,15 +84,15 @@ func GetNames(cfg LokiConfig) func(w http.ResponseWriter, r *http.Request) {
 
 func getNamesForPrefix(cfg LokiConfig, lokiClient httpclient.HTTPClient, prefix, kind, namespace string) ([]string, int, error) {
 	lokiParams := map[string][]string{
-		prefix + "K8S_Namespace": {exact(namespace)},
+		prefix + fields.Namespace: {exact(namespace)},
 	}
 	var fieldToExtract string
 	if utils.IsOwnerKind(kind) {
-		lokiParams["K8S_OwnerType"] = []string{exact(kind)}
-		fieldToExtract = prefix + "K8S_OwnerName"
+		lokiParams[fields.OwnerType] = []string{exact(kind)}
+		fieldToExtract = prefix + fields.OwnerName
 	} else {
-		lokiParams["K8S_Type"] = []string{exact(kind)}
-		fieldToExtract = prefix + "K8S_Name"
+		lokiParams[fields.Type] = []string{exact(kind)}
+		fieldToExtract = prefix + fields.Name
 	}
 
 	queryBuilder := loki.NewQuery(cfg.URL.String(), cfg.Labels, false)
@@ -121,7 +122,7 @@ func getNamesForPrefix(cfg LokiConfig, lokiClient httpclient.HTTPClient, prefix,
 }
 
 func exact(str string) string {
-	return fmt.Sprintf(`"%s"`, str)
+	return `"` + str + `"`
 }
 
 func extractDistinctValues(field string, streams model.Streams) []string {

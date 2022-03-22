@@ -11,6 +11,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 
+	"github.com/netobserv/network-observability-console-plugin/pkg/model/fields"
 	"github.com/netobserv/network-observability-console-plugin/pkg/utils"
 )
 
@@ -180,11 +181,11 @@ func (q *Query) AddParam(key, value string) error {
 	case matchParam, flowDirParam:
 		q.specialAttrs[key] = value
 	// IP filter labels
-	case "DstAddr", "SrcAddr", "DstK8S_HostIP", "SrcK8S_HostIP":
+	case fields.DstAddr, fields.SrcAddr, fields.DstHostIP, fields.SrcHostIP:
 		q.processIPFilters(key, strings.Split(value, ","))
-	case "K8S_Object", "SrcK8S_Object", "DstK8S_Object", "K8S_OwnerObject", "SrcK8S_OwnerObject", "DstK8S_OwnerObject":
+	case fields.K8SObject, fields.SrcK8SObject, fields.DstK8SObject, fields.K8SOwnerObject, fields.SrcK8SOwnerObject, fields.DstK8SOwnerObject:
 		return q.processK8SObjectFilter(key, strings.Split(value, ","))
-	case "AddrPort", "SrcAddrPort", "DstAddrPort":
+	case fields.AddrPort, fields.SrcAddrPort, fields.DstAddrPort:
 		q.processAddressPortFilter(key, strings.Split(value, ","))
 	default:
 		return q.addParamDefault(key, value)
@@ -224,15 +225,18 @@ func (q *Query) addParamDefault(key, value string) error {
 	// Stream selector labels
 	if _, ok := q.labelMap[key]; ok {
 		q.processStreamSelector(key, strings.Split(value, ","))
-	} else if _, ok := q.labelMap["Src"+key]; ok {
-		if _, ok := q.labelMap["Dst"+key]; !ok {
-			qlog.WithField("label", key).
-				Warningf("can't run common label filter as Src field is defined as a label, but Dst is not. Ignoring it")
-		} else {
-			q.processCommonLabelFilter(key, strings.Split(value, ","))
-		}
 	} else {
-		return q.processLineFilters(key, strings.Split(value, ","))
+		srcKey, dstKey := fields.ToSrcDst(key)
+		if _, ok := q.labelMap[srcKey]; ok {
+			if _, ok := q.labelMap[dstKey]; !ok {
+				qlog.WithField("label", key).
+					Warningf("can't run common label filter as Src field is defined as a label, but Dst is not. Ignoring it")
+			} else {
+				q.processCommonLabelFilter(key, strings.Split(value, ","))
+			}
+		} else {
+			return q.processLineFilters(key, strings.Split(value, ","))
+		}
 	}
 	return nil
 }
@@ -377,6 +381,7 @@ func (q *Query) processLineFilters(key string, values []string) error {
 }
 
 func (q *Query) processCommonLabelFilter(key string, values []string) {
+	srcKey, dstKey := fields.ToSrcDst(key)
 	for _, value := range values {
 		regexStr := strings.Builder{}
 		// match start any if not quoted
@@ -391,35 +396,38 @@ func (q *Query) processCommonLabelFilter(key string, values []string) {
 		}
 		// apply filter on both Src and Dst fields
 		if q.currentGroup == nil {
-			q.labelFilters = append(q.labelFilters, regexLabelFilter("Src"+key, labelMatches, regexStr.String()))
-			q.labelFilters = append(q.labelFilters, regexLabelFilter("Dst"+key, labelMatches, regexStr.String()))
+			q.labelFilters = append(q.labelFilters, regexLabelFilter(srcKey, labelMatches, regexStr.String()))
+			q.labelFilters = append(q.labelFilters, regexLabelFilter(dstKey, labelMatches, regexStr.String()))
 		} else {
-			q.groupedLabelFilters[*q.currentGroup] = append(q.groupedLabelFilters[*q.currentGroup], regexLabelFilter("Src"+key, labelMatches, regexStr.String()))
-			q.groupedLabelFilters[*q.currentGroup] = append(q.groupedLabelFilters[*q.currentGroup], regexLabelFilter("Dst"+key, labelMatches, regexStr.String()))
+			q.groupedLabelFilters[*q.currentGroup] = append(q.groupedLabelFilters[*q.currentGroup], regexLabelFilter(srcKey, labelMatches, regexStr.String()))
+			q.groupedLabelFilters[*q.currentGroup] = append(q.groupedLabelFilters[*q.currentGroup], regexLabelFilter(dstKey, labelMatches, regexStr.String()))
 		}
 	}
 }
 
-func (q *Query) processK8SObjectFilter(key string, values []string) error {
-	prefix := ""
-	if strings.HasPrefix(key, "Src") {
-		prefix = "Src"
-	} else if strings.HasPrefix(key, "Dst") {
-		prefix = "Dst"
+func getPrefix(field string) string {
+	if strings.HasPrefix(field, fields.Src) {
+		return fields.Src
+	} else if strings.HasPrefix(field, fields.Dst) {
+		return fields.Dst
 	}
+	return ""
+}
 
+func (q *Query) processK8SObjectFilter(key string, values []string) error {
+	prefix := getPrefix((key))
 	for _, value := range values {
 		//expected value is Kind.Namespace.ObjectName
 		if strings.Contains(value, ".") {
 			splittedValue := strings.Split(value, ".")
 			if strings.Contains(key, "Owner") {
-				q.AddParamSrcDst(prefix, "K8S_OwnerType", splittedValue[0])
-				q.AddParamSrcDst(prefix, "K8S_Namespace", splittedValue[1])
-				q.AddParamSrcDst(prefix, "K8S_OwnerName", splittedValue[2])
+				q.AddParamSrcDst(prefix, fields.OwnerType, splittedValue[0])
+				q.AddParamSrcDst(prefix, fields.Namespace, splittedValue[1])
+				q.AddParamSrcDst(prefix, fields.OwnerName, splittedValue[2])
 			} else {
-				q.AddParamSrcDst(prefix, "K8S_Type", splittedValue[0])
-				q.AddParamSrcDst(prefix, "K8S_Namespace", splittedValue[1])
-				q.AddParamSrcDst(prefix, "K8S_Name", splittedValue[2])
+				q.AddParamSrcDst(prefix, fields.Type, splittedValue[0])
+				q.AddParamSrcDst(prefix, fields.Namespace, splittedValue[1])
+				q.AddParamSrcDst(prefix, fields.Name, splittedValue[2])
 			}
 		} else {
 			return fmt.Errorf("invalid kubeObject filter: %s", value)
@@ -429,23 +437,17 @@ func (q *Query) processK8SObjectFilter(key string, values []string) error {
 }
 
 func (q *Query) processAddressPortFilter(key string, values []string) {
-	prefix := ""
-	if strings.HasPrefix(key, "Src") {
-		prefix = "Src"
-	} else if strings.HasPrefix(key, "Dst") {
-		prefix = "Dst"
-	}
-
+	prefix := getPrefix((key))
 	for _, value := range values {
 		//can either be ipaddress / port / ipaddress:port
 		if strings.Contains(value, ":") {
 			ipAndPort := strings.Split(value, ":")
-			q.AddParamSrcDst(prefix, "Addr", ipAndPort[0])
-			q.AddParamSrcDst(prefix, "Port", ipAndPort[1])
+			q.AddParamSrcDst(prefix, fields.Addr, ipAndPort[0])
+			q.AddParamSrcDst(prefix, fields.Port, ipAndPort[1])
 		} else if strings.Contains(value, ".") {
-			q.AddParamSrcDst(prefix, "Addr", value)
+			q.AddParamSrcDst(prefix, fields.Addr, value)
 		} else if _, err := strconv.Atoi(value); err == nil {
-			q.AddParamSrcDst(prefix, "Port", value)
+			q.AddParamSrcDst(prefix, fields.Port, value)
 		}
 	}
 }
@@ -459,8 +461,8 @@ func (q *Query) AddParamSrcDst(prefix, key, value string) {
 		}
 		q.currentGroup = nil
 	} else {
-		srcPrefix := "Src"
-		dstPrefix := "Dst"
+		srcPrefix := fields.Src
+		dstPrefix := fields.Dst
 		q.currentGroup = &srcPrefix
 		err := q.AddParam(srcPrefix+key, value)
 		if err != nil {
@@ -478,12 +480,12 @@ func (q *Query) AddParamSrcDst(prefix, key, value string) {
 func isNumeric(v string) bool {
 	switch v {
 	case
-		"Port",
-		"SrcPort",
-		"DstPort",
-		"Packets",
-		"Proto",
-		"Bytes":
+		fields.Port,
+		fields.SrcPort,
+		fields.DstPort,
+		fields.Packets,
+		fields.Proto,
+		fields.Bytes:
 		return true
 	default:
 		return false
