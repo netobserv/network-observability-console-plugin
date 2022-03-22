@@ -33,7 +33,7 @@ func GetNamespaces(cfg LokiConfig) func(w http.ResponseWriter, r *http.Request) 
 		}
 
 		values = append(values, values2...)
-		writeJSON(w, http.StatusOK, utils.Dedup(values))
+		writeJSON(w, http.StatusOK, utils.NonEmpty(utils.Dedup(values)))
 	}
 }
 
@@ -78,7 +78,7 @@ func GetNames(cfg LokiConfig) func(w http.ResponseWriter, r *http.Request) {
 		}
 
 		names = append(names, names2...)
-		writeJSON(w, http.StatusOK, utils.Dedup(names))
+		writeJSON(w, http.StatusOK, utils.NonEmpty(utils.Dedup(names)))
 	}
 }
 
@@ -88,10 +88,10 @@ func getNamesForPrefix(cfg LokiConfig, lokiClient httpclient.HTTPClient, prefix,
 	}
 	var fieldToExtract string
 	if utils.IsOwnerKind(kind) {
-		lokiParams[fields.OwnerType] = []string{exact(kind)}
+		lokiParams[prefix+fields.OwnerType] = []string{exact(kind)}
 		fieldToExtract = prefix + fields.OwnerName
 	} else {
-		lokiParams[fields.Type] = []string{exact(kind)}
+		lokiParams[prefix+fields.Type] = []string{exact(kind)}
 		fieldToExtract = prefix + fields.Name
 	}
 

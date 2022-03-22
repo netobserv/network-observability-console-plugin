@@ -38,3 +38,13 @@ func Dedup(s []string) []string {
 	}
 	return dedup
 }
+
+func NonEmpty(s []string) []string {
+	var nonempty []string
+	for _, v := range s {
+		if len(v) > 0 {
+			nonempty = append(nonempty, v)
+		}
+	}
+	return nonempty
+}
