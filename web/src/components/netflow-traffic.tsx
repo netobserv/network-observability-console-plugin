@@ -20,10 +20,10 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
 import { Record } from '../api/ipfix';
-import { getFlows, getTopology as getTopologyMetrics } from '../api/routes';
+import { getFlows, getTopology } from '../api/routes';
 import { QueryOptions } from '../model/query-options';
 import { TopologyMetrics } from '../api/loki';
-import { DefaultOptions, TopologyOptions } from '../model/topology';
+import { DefaultOptions, LayoutName, TopologyOptions } from '../model/topology';
 import { Column, getDefaultColumns } from '../utils/columns';
 import { TimeRange } from '../utils/datetime';
 import { getHTTPErrorDetails } from '../utils/errors';
@@ -55,7 +55,6 @@ import { ExportModal } from './modals/export-modal';
 import TimeRangeModal from './modals/time-range-modal';
 import { RecordPanel } from './netflow-record/record-panel';
 import NetflowTable from './netflow-table/netflow-table';
-import { LayoutName } from '../model/topology';
 import NetflowTopology from './netflow-topology/netflow-topology';
 import OptionsPanel from './netflow-topology/options-panel';
 import { loadConfig } from '../utils/config';
@@ -132,7 +131,7 @@ export const NetflowTraffic: React.FC<{
             });
           break;
         case 'topology':
-          getTopologyMetrics(qa)
+          getTopology(qa)
             .then(setMetrics)
             .catch(err => {
               setFlows([]);
