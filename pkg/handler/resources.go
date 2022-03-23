@@ -16,7 +16,7 @@ import (
 	"github.com/netobserv/network-observability-console-plugin/pkg/utils"
 )
 
-func GetNamespaces(cfg LokiConfig) func(w http.ResponseWriter, r *http.Request) {
+func GetNamespaces(cfg loki.Config) func(w http.ResponseWriter, r *http.Request) {
 	lokiClient := newLokiClient(&cfg)
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Fetch and merge values for SrcK8S_Namespace and DstK8S_Namespace
@@ -37,7 +37,7 @@ func GetNamespaces(cfg LokiConfig) func(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
-func getLabelValues(cfg *LokiConfig, lokiClient httpclient.HTTPClient, label string) ([]string, int, error) {
+func getLabelValues(cfg *loki.Config, lokiClient httpclient.HTTPClient, label string) ([]string, int, error) {
 	baseURL := strings.TrimRight(cfg.URL.String(), "/")
 	url := fmt.Sprintf("%s/loki/api/v1/label/%s/values", baseURL, label)
 	hlog.Debugf("getLabelValues URL: %s", url)
@@ -59,13 +59,14 @@ func getLabelValues(cfg *LokiConfig, lokiClient httpclient.HTTPClient, label str
 	return lvr.Data, http.StatusOK, nil
 }
 
-func GetNames(cfg LokiConfig) func(w http.ResponseWriter, r *http.Request) {
+func GetNames(cfg loki.Config) func(w http.ResponseWriter, r *http.Request) {
 	lokiClient := newLokiClient(&cfg)
 	return func(w http.ResponseWriter, r *http.Request) {
 		params := mux.Vars(r)
 		namespace := params["namespace"]
 		kind := params["kind"]
 
+		// TODO: parallelize
 		names, code, err := getNamesForPrefix(cfg, lokiClient, fields.Src, kind, namespace)
 		if err != nil {
 			writeError(w, code, err.Error())
@@ -82,25 +83,26 @@ func GetNames(cfg LokiConfig) func(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getNamesForPrefix(cfg LokiConfig, lokiClient httpclient.HTTPClient, prefix, kind, namespace string) ([]string, int, error) {
-	lokiParams := map[string][]string{
-		prefix + fields.Namespace: {exact(namespace)},
+func getNamesForPrefix(cfg loki.Config, lokiClient httpclient.HTTPClient, prefix, kind, namespace string) ([]string, int, error) {
+	lokiParams := map[string]string{
+		prefix + fields.Namespace: exact(namespace),
 	}
 	var fieldToExtract string
 	if utils.IsOwnerKind(kind) {
-		lokiParams[prefix+fields.OwnerType] = []string{exact(kind)}
+		lokiParams[prefix+fields.OwnerType] = exact(kind)
 		fieldToExtract = prefix + fields.OwnerName
 	} else {
-		lokiParams[prefix+fields.Type] = []string{exact(kind)}
+		lokiParams[prefix+fields.Type] = exact(kind)
 		fieldToExtract = prefix + fields.Name
 	}
 
-	queryBuilder := loki.NewQuery(cfg.URL.String(), cfg.Labels, false)
-	if err := queryBuilder.AddParams(lokiParams); err != nil {
+	queryBuilder := loki.NewFlowQueryBuilderWithDefaults(&cfg)
+	if err := queryBuilder.Filters(lokiParams); err != nil {
 		return nil, http.StatusBadRequest, err
 	}
 
-	resp, code, err := executeFlowQuery(queryBuilder, lokiClient)
+	query := queryBuilder.Build()
+	resp, code, err := executeLokiQuery(query, lokiClient)
 	if err != nil {
 		return nil, code, errors.New("Loki query failed: " + err.Error())
 	}

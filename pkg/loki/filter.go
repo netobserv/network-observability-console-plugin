@@ -2,7 +2,6 @@ package loki
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 )
 
@@ -31,16 +30,16 @@ type labelFilter struct {
 	valueType valueType
 }
 
-func stringLabelFilter(labelKey string, matcher labelMatcher, value string) labelFilter {
+func stringLabelFilter(labelKey string, value string) labelFilter {
 	return labelFilter{
 		key:       labelKey,
-		matcher:   matcher,
+		matcher:   labelEqual,
 		value:     value,
 		valueType: typeString,
 	}
 }
 
-func regexLabelFilter(labelKey string, matcher labelMatcher, value string) labelFilter {
+func regexLabelFilter(labelKey string, value string) labelFilter {
 	return labelFilter{
 		key:       labelKey,
 		matcher:   labelMatches,
@@ -49,14 +48,14 @@ func regexLabelFilter(labelKey string, matcher labelMatcher, value string) label
 	}
 }
 
-func intLabelFilter(labelKey string, value int) labelFilter {
-	return labelFilter{
-		key:       labelKey,
-		matcher:   labelEqual,
-		value:     strconv.Itoa(value),
-		valueType: typeNumber,
-	}
-}
+// func intLabelFilter(labelKey string, value int) labelFilter {
+// 	return labelFilter{
+// 		key:       labelKey,
+// 		matcher:   labelEqual,
+// 		value:     strconv.Itoa(value),
+// 		valueType: typeNumber,
+// 	}
+// }
 
 func ipLabelFilter(labelKey, cidr string) labelFilter {
 	return labelFilter{

@@ -10,7 +10,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/netobserv/network-observability-console-plugin/pkg/handler"
+	"github.com/netobserv/network-observability-console-plugin/pkg/loki"
 	"github.com/netobserv/network-observability-console-plugin/pkg/server"
 )
 
@@ -72,12 +72,7 @@ func main() {
 		CORSAllowMethods: *corsMethods,
 		CORSAllowHeaders: *corsHeaders,
 		CORSMaxAge:       *corsMaxAge,
-		Loki: handler.LokiConfig{
-			URL:      lURL,
-			Timeout:  *lokiTimeout,
-			TenantID: *lokiTenantID,
-			Labels:   strings.Split(lLabels, ","),
-		},
+		Loki:             loki.NewConfig(lURL, *lokiTimeout, *lokiTenantID, strings.Split(lLabels, ",")),
 		FrontendConfig: *frontendConfig,
 	})
 }
