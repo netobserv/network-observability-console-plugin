@@ -28,9 +28,6 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/netobserv/network-observability-console-plugin/pkg/handler"
-	v1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	fake "k8s.io/client-go/kubernetes/fake"
 )
 
 const (
@@ -207,7 +204,7 @@ func TestLokiConfiguration(t *testing.T) {
 			URL:     lokiURL,
 			Timeout: time.Second,
 		},
-	}, nil)
+	})
 	backendSvc := httptest.NewServer(backendRoutes)
 	defer backendSvc.Close()
 
@@ -244,7 +241,7 @@ func TestLokiConfiguration_MultiTenant(t *testing.T) {
 			Timeout:  time.Second,
 			TenantID: "my-organisation",
 		},
-	}, nil)
+	})
 	backendSvc := httptest.NewServer(backendRoutes)
 	defer backendSvc.Close()
 
@@ -431,7 +428,7 @@ func TestLokiFiltering(t *testing.T) {
 			Timeout: time.Second,
 			Labels:  []string{"SrcK8S_Namespace", "SrcK8S_OwnerName", "DstK8S_Namespace", "DstK8S_OwnerName", "FlowDirection"},
 		},
-	}, nil)
+	})
 	backendSvc := httptest.NewServer(backendRoutes)
 	defer backendSvc.Close()
 
@@ -655,49 +652,4 @@ func (conf *httpClientConfig) buildHTTPClient() (*http.Client, error) {
 	httpClient := http.Client{Transport: transport}
 
 	return &httpClient, nil
-}
-
-func TestResources(t *testing.T) {
-	kubernetesClient := fake.NewSimpleClientset(
-		&v1.Namespace{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "fake-ns",
-			},
-		},
-		&v1.Pod{
-			TypeMeta: metav1.TypeMeta{},
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "fake-pod",
-				Namespace: "fake-ns",
-			},
-		})
-
-	backendRoutes := setupRoutes(&Config{}, kubernetesClient)
-	backendSvc := httptest.NewServer(backendRoutes)
-	defer backendSvc.Close()
-
-	// WHEN the resources endpoint is queried in the backend
-	resp, err := backendSvc.Client().Get(backendSvc.URL + "/api/resources?kind=namespace")
-	require.NoError(t, err)
-	body, err := ioutil.ReadAll(resp.Body)
-	require.NoError(t, err)
-	assert.Equal(t, `["fake-ns"]`, string(body))
-
-	resp, err = backendSvc.Client().Get(backendSvc.URL + "/api/resources?kind=pod&namespace=fake-ns")
-	require.NoError(t, err)
-	body, err = ioutil.ReadAll(resp.Body)
-	require.NoError(t, err)
-	assert.Equal(t, `["fake-pod"]`, string(body))
-
-	resp, err = backendSvc.Client().Get(backendSvc.URL + "/api/resources?kind=invalid&namespace=fake-ns")
-	require.NoError(t, err)
-	body, err = ioutil.ReadAll(resp.Body)
-	require.NoError(t, err)
-	assert.Equal(t, `{"Message":"can't get list of invalid: unknown kind: invalid"}`, string(body))
-
-	resp, err = backendSvc.Client().Get(backendSvc.URL + "/api/resources?kind=pod")
-	require.NoError(t, err)
-	body, err = ioutil.ReadAll(resp.Body)
-	require.NoError(t, err)
-	assert.Equal(t, `{"Message":"namespace cannot be empty"}`, string(body))
 }

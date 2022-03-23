@@ -9,7 +9,7 @@ import (
 	"github.com/prometheus/common/model"
 )
 
-// QueryResponse represents the http json response to a label query
+// QueryResponse represents the http json response to a logQL query
 type QueryResponse struct {
 	Status string            `json:"status"`
 	Data   QueryResponseData `json:"data"`
@@ -160,3 +160,9 @@ type Vector []model.Sample
 
 // Matrix is a slice of SampleStreams
 type Matrix []model.SampleStream
+
+// LabelValuesResponse represents the http json response to a query for label values
+type LabelValuesResponse struct {
+	Status string   `json:"status"`
+	Data   []string `json:"data"`
+}

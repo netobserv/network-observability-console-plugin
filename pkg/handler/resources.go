@@ -1,136 +1,152 @@
 package handler
 
 import (
-	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
+	"github.com/gorilla/mux"
+
+	"github.com/netobserv/network-observability-console-plugin/pkg/httpclient"
+	"github.com/netobserv/network-observability-console-plugin/pkg/loki"
+	"github.com/netobserv/network-observability-console-plugin/pkg/model"
+	"github.com/netobserv/network-observability-console-plugin/pkg/model/fields"
+	"github.com/netobserv/network-observability-console-plugin/pkg/utils"
 )
 
-func GetResources(kubeClient kubernetes.Interface, kind string) func(w http.ResponseWriter, r *http.Request) {
+func GetNamespaces(cfg LokiConfig) func(w http.ResponseWriter, r *http.Request) {
+	lokiClient := newLokiClient(&cfg)
 	return func(w http.ResponseWriter, r *http.Request) {
-		params := r.URL.Query()
-
-		k := kind
-		if len(k) == 0 {
-			k = strings.ToLower(params.Get("kind"))
-		}
-
-		// TODO: remove all logs
-		hlog.Infof("GetResources kind : %s query params : %s\n", k, params)
-
-		var result *[]string
-		var err error
-
-		if k == "namespace" {
-			result, err = getNamespaces(r.Context(), kubeClient)
-		} else {
-			namespace := params.Get("namespace")
-			if len(namespace) == 0 {
-				writeError(w, http.StatusServiceUnavailable, "namespace cannot be empty")
-				return
-			}
-			result, err = getK8SObjects(r.Context(), kubeClient, namespace, k)
-		}
-
+		// Fetch and merge values for SrcK8S_Namespace and DstK8S_Namespace
+		values, code, err := getLabelValues(&cfg, lokiClient, fields.SrcNamespace)
 		if err != nil {
-			writeError(w, http.StatusServiceUnavailable,
-				fmt.Sprintf("can't get list of %s: %v", k, err))
+			writeError(w, code, "Error while fetching label source namespace values from Loki: "+err.Error())
 			return
 		}
 
-		resp, err := json.Marshal(result)
+		values2, code, err := getLabelValues(&cfg, lokiClient, fields.DstNamespace)
 		if err != nil {
-			writeError(w, http.StatusServiceUnavailable,
-				fmt.Sprintf("cannot marshal %v", params))
-		} else {
-			writeRawJSON(w, http.StatusOK, resp)
+			writeError(w, code, "Error while fetching label destination namespace values from Loki: "+err.Error())
+			return
 		}
+
+		values = append(values, values2...)
+		writeJSON(w, http.StatusOK, utils.NonEmpty(utils.Dedup(values)))
 	}
 }
 
-func getNamespaces(context context.Context, kubeClient kubernetes.Interface) (*[]string, error) {
-	result := []string{}
-	namespaceList, err := kubeClient.CoreV1().Namespaces().List(context, metav1.ListOptions{})
+func getLabelValues(cfg *LokiConfig, lokiClient httpclient.HTTPClient, label string) ([]string, int, error) {
+	baseURL := strings.TrimRight(cfg.URL.String(), "/")
+	url := fmt.Sprintf("%s/loki/api/v1/label/%s/values", baseURL, label)
+	hlog.Debugf("getLabelValues URL: %s", url)
+
+	resp, code, err := lokiClient.Get(url)
 	if err != nil {
-		return nil, err
+		return nil, http.StatusServiceUnavailable, err
 	}
-
-	fmt.Printf("found %d namespaces\n", len(namespaceList.Items))
-	for i := range namespaceList.Items {
-		result = append(result, namespaceList.Items[i].Name)
+	if code != http.StatusOK {
+		msg := getLokiError(resp, code)
+		return nil, http.StatusBadRequest, errors.New(msg)
 	}
-	return &result, nil
+	hlog.Tracef("GetFlows raw response: %s", resp)
+	var lvr model.LabelValuesResponse
+	err = json.Unmarshal(resp, &lvr)
+	if err != nil {
+		return nil, http.StatusInternalServerError, err
+	}
+	return lvr.Data, http.StatusOK, nil
 }
 
-//nolint:cyclop //ignore cyclomatic complexity for these cases
-func getK8SObjects(context context.Context, kubeClient kubernetes.Interface, namespace string, kind string) (*[]string, error) {
-	result := []string{}
-	switch kind {
-	case "cronjob":
-		cronJobList, err := kubeClient.BatchV1().CronJobs(namespace).List(context, metav1.ListOptions{})
+func GetNames(cfg LokiConfig) func(w http.ResponseWriter, r *http.Request) {
+	lokiClient := newLokiClient(&cfg)
+	return func(w http.ResponseWriter, r *http.Request) {
+		params := mux.Vars(r)
+		namespace := params["namespace"]
+		kind := params["kind"]
+
+		names, code, err := getNamesForPrefix(cfg, lokiClient, fields.Src, kind, namespace)
 		if err != nil {
-			return nil, err
+			writeError(w, code, err.Error())
+			return
 		}
-		for i := range cronJobList.Items {
-			result = append(result, cronJobList.Items[i].Name)
-		}
-	case "job":
-		jobList, err := kubeClient.BatchV1().Jobs(namespace).List(context, metav1.ListOptions{})
+		names2, code, err := getNamesForPrefix(cfg, lokiClient, fields.Dst, kind, namespace)
 		if err != nil {
-			return nil, err
+			writeError(w, code, err.Error())
+			return
 		}
-		for i := range jobList.Items {
-			result = append(result, jobList.Items[i].Name)
-		}
-	case "daemonset":
-		daemonSetList, err := kubeClient.AppsV1().DaemonSets(namespace).List(context, metav1.ListOptions{})
-		if err != nil {
-			return nil, err
-		}
-		for i := range daemonSetList.Items {
-			result = append(result, daemonSetList.Items[i].Name)
-		}
-	case "statefulset":
-		statefulSetList, err := kubeClient.AppsV1().StatefulSets(namespace).List(context, metav1.ListOptions{})
-		if err != nil {
-			return nil, err
-		}
-		for i := range statefulSetList.Items {
-			result = append(result, statefulSetList.Items[i].Name)
-		}
-	case "service":
-		serviceList, err := kubeClient.CoreV1().Services(namespace).List(context, metav1.ListOptions{})
-		if err != nil {
-			return nil, err
-		}
-		for i := range serviceList.Items {
-			result = append(result, serviceList.Items[i].Name)
-		}
-	case "pod":
-		podList, err := kubeClient.CoreV1().Pods(namespace).List(context, metav1.ListOptions{})
-		if err != nil {
-			return nil, err
-		}
-		for i := range podList.Items {
-			result = append(result, podList.Items[i].Name)
-		}
-	case "deployment":
-		deploymentList, err := kubeClient.AppsV1().Deployments(namespace).List(context, metav1.ListOptions{})
-		if err != nil {
-			return nil, err
-		}
-		for i := range deploymentList.Items {
-			result = append(result, deploymentList.Items[i].Name)
-		}
-	default:
-		return nil, fmt.Errorf("unknown kind: %s", kind)
+
+		names = append(names, names2...)
+		writeJSON(w, http.StatusOK, utils.NonEmpty(utils.Dedup(names)))
+	}
+}
+
+func getNamesForPrefix(cfg LokiConfig, lokiClient httpclient.HTTPClient, prefix, kind, namespace string) ([]string, int, error) {
+	lokiParams := map[string][]string{
+		prefix + fields.Namespace: {exact(namespace)},
+	}
+	var fieldToExtract string
+	if utils.IsOwnerKind(kind) {
+		lokiParams[prefix+fields.OwnerType] = []string{exact(kind)}
+		fieldToExtract = prefix + fields.OwnerName
+	} else {
+		lokiParams[prefix+fields.Type] = []string{exact(kind)}
+		fieldToExtract = prefix + fields.Name
 	}
 
-	fmt.Printf("found %d objects of kind %s in namespace %s\n", len(result), kind, namespace)
-	return &result, nil
+	queryBuilder := loki.NewQuery(cfg.URL.String(), cfg.Labels, false)
+	if err := queryBuilder.AddParams(lokiParams); err != nil {
+		return nil, http.StatusBadRequest, err
+	}
+
+	resp, code, err := executeFlowQuery(queryBuilder, lokiClient)
+	if err != nil {
+		return nil, code, errors.New("Loki query failed: " + err.Error())
+	}
+	hlog.Tracef("GetNames raw response: %s", resp)
+
+	var qr model.QueryResponse
+	err = json.Unmarshal(resp, &qr)
+	if err != nil {
+		return nil, http.StatusInternalServerError, errors.New("Failed to unmarshal Loki response: " + err.Error())
+	}
+
+	streams, ok := qr.Data.Result.(model.Streams)
+	if !ok {
+		return nil, http.StatusInternalServerError, errors.New("Loki returned unexpected type: " + string(qr.Data.ResultType))
+	}
+
+	values := extractDistinctValues(fieldToExtract, streams)
+	return values, http.StatusOK, nil
+}
+
+func exact(str string) string {
+	return `"` + str + `"`
+}
+
+func extractDistinctValues(field string, streams model.Streams) []string {
+	var values []string
+	for _, stream := range streams {
+		if v, ok := stream.Labels[field]; ok {
+			if len(v) > 0 {
+				values = append(values, v)
+			}
+		} else {
+			for _, entry := range stream.Entries {
+				var line map[string]interface{}
+				err := json.Unmarshal([]byte(entry.Line), &line)
+				if err != nil {
+					hlog.Errorf("Could not unmarshal line: %v. Error was: %v", entry.Line, err.Error())
+					continue
+				}
+				if v, ok := line[field]; ok {
+					if str, ok := v.(string); ok && len(str) > 0 {
+						values = append(values, str)
+					}
+				}
+			}
+		}
+	}
+	return utils.Dedup(values)
 }

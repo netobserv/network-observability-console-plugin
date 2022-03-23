@@ -20,11 +20,27 @@ func writeRawJSON(w http.ResponseWriter, code int, payload []byte) {
 	}
 }
 
+func writeJSON(w http.ResponseWriter, code int, payload interface{}) {
+	response, err := json.Marshal(payload)
+	if err != nil {
+		hlog.Errorf("Marshalling error while responding JSON: %v", err)
+		writeError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
+	_, err = w.Write(response)
+	if err != nil {
+		hlog.Errorf("Error while responding JSON: %v", err)
+	}
+}
+
 func writeCSV(w http.ResponseWriter, code int, payload []byte, columns []string) {
 	var qr model.QueryResponse
 	err := json.Unmarshal(payload, &qr)
 	if err != nil {
-		writeError(w, http.StatusServiceUnavailable, fmt.Sprintf("Unknown error from Loki - cannot unmarshal (code: %d resp: %s)", code, payload))
+		writeError(w, http.StatusInternalServerError, fmt.Sprintf("Unknown error from Loki - cannot unmarshal (code: %d resp: %s)", code, payload))
 		return
 	}
 
