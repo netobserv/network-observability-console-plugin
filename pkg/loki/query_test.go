@@ -86,6 +86,6 @@ func TestQuery_AddURLParam(t *testing.T) {
 }
 
 func TestQuery_BackQuote_Error(t *testing.T) {
-	query := NewQuery("/", []string{"lab1", "lab2"}, false, false)
+	query := NewQuery("/", []string{"lab1", "lab2"}, false)
 	assert.Error(t, query.AddParam("key", "backquoted`val"))
 }

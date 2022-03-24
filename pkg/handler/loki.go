@@ -40,7 +40,7 @@ func newLokiClient(cfg *LokiConfig) httpclient.HTTPClient {
 	return httpclient.NewHTTPClient(cfg.Timeout, headers)
 }
 
-func GetFlows(cfg LokiConfig, allowExport bool, topology bool) func(w http.ResponseWriter, r *http.Request) {
+func GetFlows(cfg LokiConfig, allowExport bool) func(w http.ResponseWriter, r *http.Request) {
 	lokiClient := newLokiClient(&cfg)
 
 	// TODO: improve search mecanism:
@@ -52,7 +52,7 @@ func GetFlows(cfg LokiConfig, allowExport bool, topology bool) func(w http.Respo
 		hlog.Debugf("GetFlows query params: %s", params)
 
 		//allow export only on specific endpoints
-		queryBuilder := loki.NewQuery(cfg.URL.String(), cfg.Labels, allowExport, topology)
+		queryBuilder := loki.NewQuery(cfg.URL.String(), cfg.Labels, allowExport)
 		if err := queryBuilder.AddParams(params); err != nil {
 			writeError(w, http.StatusBadRequest, err.Error())
 			return
@@ -111,7 +111,11 @@ func executeFlowQuery(queryBuilder *loki.Query, lokiClient httpclient.HTTPClient
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
-	hlog.Debugf("GetFlows URL: %s", flowsURL)
+	return executeLokiQuery(flowsURL, lokiClient)
+}
+
+func executeLokiQuery(flowsURL string, lokiClient httpclient.HTTPClient) ([]byte, int, error) {
+	hlog.Debugf("executeLokiQuery URL: %s", flowsURL)
 
 	resp, code, err := lokiClient.Get(EncodeQuery(flowsURL))
 	if err != nil {

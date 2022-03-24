@@ -95,7 +95,7 @@ func getNamesForPrefix(cfg LokiConfig, lokiClient httpclient.HTTPClient, prefix,
 		fieldToExtract = prefix + fields.Name
 	}
 
-	queryBuilder := loki.NewQuery(cfg.URL.String(), cfg.Labels, false, false)
+	queryBuilder := loki.NewQuery(cfg.URL.String(), cfg.Labels, false)
 	if err := queryBuilder.AddParams(lokiParams); err != nil {
 		return nil, http.StatusBadRequest, err
 	}
