@@ -42,12 +42,9 @@ var valueReplacer = strings.NewReplacer(`*`, `.*`, `"`, "")
 type LabelJoiner string
 
 const (
-	defaultLimit = "100"
-	defaultRange = "300"
-	metrics      = "SrcK8S_Name,SrcK8S_Type,SrcK8S_OwnerName,SrcK8S_OwnerType,SrcK8S_Namespace,SrcAddr,DstK8S_Name,DstK8S_Type,DstK8S_OwnerName,DstK8S_OwnerType,DstK8S_Namespace,DstAddr"
-	joinAnd      = LabelJoiner("+and+")
-	joinOr       = LabelJoiner("+or+")
-	joinPipeAnd  = LabelJoiner("|")
+	joinAnd     = LabelJoiner("+and+")
+	joinOr      = LabelJoiner("+or+")
+	joinPipeAnd = LabelJoiner("|")
 )
 
 // Query for a LogQL HTTP petition
@@ -67,7 +64,6 @@ type Query struct {
 	// Attributes with a special meaning that need to be processed independently
 	specialAttrs map[string]string
 	export       *Export
-	topology     *Topology
 }
 
 type Export struct {
@@ -75,30 +71,16 @@ type Export struct {
 	columns []string
 }
 
-type Topology struct {
-	limit     string
-	startTime string
-	endTime   string
-	timeRange string
-	function  string
-	dataField string
-}
-
-func NewQuery(baseURL string, labels []string, export bool, topology bool) *Query {
+func NewQuery(baseURL string, labels []string, export bool) *Query {
 	var exp *Export
 	if export {
 		exp = &Export{}
-	}
-	var topo *Topology
-	if topology {
-		topo = &Topology{}
 	}
 	return &Query{
 		baseURL:             baseURL,
 		specialAttrs:        map[string]string{},
 		labelJoiner:         joinPipeAnd,
 		export:              exp,
-		topology:            topo,
 		labelMap:            utils.GetMapInterface(labels),
 		groupedLabelFilters: map[string][]labelFilter{},
 	}
@@ -205,26 +187,14 @@ func (q *Query) URLQuery() (string, error) {
 		return "", errors.New("there is no stream selector. At least one label matcher is needed")
 	}
 
-	endpoint, mainPart, jsonPart, params := q.URLQueryParts()
-	if q.topology != nil {
-		err := q.setTopologyParams()
-		if err != nil {
-			return "", err
-		}
-
-		if len(jsonPart) > 0 {
-			jsonPart = "|" + jsonPart
-		}
-		return endpoint + fmt.Sprintf(`topk(%s,sum by(%s) (%s(%s|json%s|unwrap %s|__error__=""[%ss])))%s&step=%ss`,
-			q.topology.limit, metrics, q.topology.function, mainPart, jsonPart, q.topology.dataField, q.topology.timeRange, params, q.topology.timeRange), nil
-	}
+	endpoint, mainPart, jsonPart, params := q.urlQueryParts()
 	if len(jsonPart) > 0 {
 		return endpoint + mainPart + "|json|" + jsonPart + params, nil
 	}
 	return endpoint + mainPart + params, nil
 }
 
-func (q *Query) URLQueryParts() (string, string, string, string) {
+func (q *Query) urlQueryParts() (string, string, string, string) {
 	endpointSb := strings.Builder{}
 	querySb := strings.Builder{}
 	jsonSb := strings.Builder{}
@@ -274,41 +244,6 @@ func (q *Query) URLQueryParts() (string, string, string, string) {
 	return endpointSb.String(), querySb.String(), jsonSb.String(), paramSb.String()
 }
 
-func (q *Query) setTopologyParams() error {
-	if len(q.topology.timeRange) == 0 {
-		var startTime, endTime int64
-		var err error
-		for _, p := range q.urlParams {
-			switch p[0] {
-			case startParam:
-				startTime, err = strconv.ParseInt(p[1], 10, 64)
-			case endParam:
-				endTime, err = strconv.ParseInt(p[1], 10, 64)
-			}
-			if err != nil {
-				return fmt.Errorf("%s param should be int64", p[0])
-			}
-		}
-		rng := endTime - startTime
-		if rng > 0 {
-			q.topology.timeRange = strconv.FormatInt(rng, 10)
-		} else {
-			q.topology.timeRange = defaultRange
-		}
-	}
-
-	if len(q.topology.limit) == 0 {
-		q.topology.limit = defaultLimit
-	}
-
-	//TODO: allow rate / sum_over_time / avg_over_time / max_over_time / min_over_time
-	q.topology.function = "sum_over_time"
-	//TODO: allow other values than bytes like Packets
-	q.topology.dataField = "Bytes"
-
-	return nil
-}
-
 func (q *Query) WriteLabelFilter(sb *strings.Builder, lfs *[]labelFilter, lj LabelJoiner) {
 	for i, lf := range *lfs {
 		if i > 0 {
@@ -345,19 +280,6 @@ func (q *Query) PrepareToSubmit() (*Query, error) {
 }
 
 func (q *Query) addURLParam(key, val string) {
-	if q.topology != nil {
-		switch key {
-		case startTimeKey:
-			q.topology.startTime = val
-		case endTimeTimeKey:
-			q.topology.endTime = val
-		case limitKey:
-			q.topology.limit = val
-			//don't append limit to url params for topology since it's a topk
-			return
-		}
-	}
-
 	q.urlParams = append(q.urlParams, [2]string{key, val})
 }
 
