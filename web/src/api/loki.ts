@@ -3,7 +3,7 @@ import { Fields, Labels, Record } from './ipfix';
 
 export interface LokiResponse {
   resultType: string;
-  result: StreamResult[];
+  result: StreamResult[] | TopologyMetrics[];
   stats: LokiStats;
 }
 
@@ -24,4 +24,31 @@ export const parseStream = (raw: StreamResult): Record[] => {
       fields: fields
     };
   });
+};
+
+export interface TopologyMetric {
+  DstAddr: string;
+  DstK8S_Name: string;
+  DstK8S_Namespace: string;
+  DstK8S_OwnerName: string;
+  DstK8S_OwnerType: string;
+  DstK8S_Type: string;
+  SrcAddr: string;
+  SrcK8S_Name: string;
+  SrcK8S_Namespace: string;
+  SrcK8S_OwnerName: string;
+  SrcK8S_OwnerType: string;
+  SrcK8S_Type: string;
+}
+
+export interface TopologyMetrics {
+  metric: TopologyMetric;
+  values: (string | number)[][];
+  total: number;
+}
+
+export const calculateMatrixTotals = (tm: TopologyMetrics) => {
+  tm.total = 0;
+  tm.values.forEach(v => (tm.total += Number(v[1])));
+  return tm;
 };

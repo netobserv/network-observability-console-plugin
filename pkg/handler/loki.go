@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -78,6 +79,15 @@ func GetFlows(cfg LokiConfig, allowExport bool) func(w http.ResponseWriter, r *h
 	}
 }
 
+/* loki query will fail if spaces or quotes are not encoded
+ * we can't use url.QueryEscape or url.Values here since Loki doesn't manage encoded parenthesis
+ */
+func EncodeQuery(url string) string {
+	unquoted := strings.ReplaceAll(url, "\"", "%22")
+	unspaced := strings.ReplaceAll(unquoted, " ", "%20")
+	return unspaced
+}
+
 func getLokiError(resp []byte, code int) string {
 	var f map[string]string
 	err := json.Unmarshal(resp, &f)
@@ -101,9 +111,13 @@ func executeFlowQuery(queryBuilder *loki.Query, lokiClient httpclient.HTTPClient
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
-	hlog.Debugf("GetFlows URL: %s", flowsURL)
+	return executeLokiQuery(flowsURL, lokiClient)
+}
 
-	resp, code, err := lokiClient.Get(flowsURL)
+func executeLokiQuery(flowsURL string, lokiClient httpclient.HTTPClient) ([]byte, int, error) {
+	hlog.Debugf("executeLokiQuery URL: %s", flowsURL)
+
+	resp, code, err := lokiClient.Get(EncodeQuery(flowsURL))
 	if err != nil {
 		return nil, http.StatusServiceUnavailable, err
 	}

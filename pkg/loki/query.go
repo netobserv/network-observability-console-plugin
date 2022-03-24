@@ -186,50 +186,62 @@ func (q *Query) URLQuery() (string, error) {
 	if len(q.streamSelector) == 0 {
 		return "", errors.New("there is no stream selector. At least one label matcher is needed")
 	}
-	sb := strings.Builder{}
-	sb.WriteString(strings.TrimRight(q.baseURL, "/"))
-	sb.WriteString(queryRangePath)
-	sb.WriteString("{")
+
+	endpoint, mainPart, jsonPart, params := q.urlQueryParts()
+	if len(jsonPart) > 0 {
+		return endpoint + mainPart + "|json|" + jsonPart + params, nil
+	}
+	return endpoint + mainPart + params, nil
+}
+
+func (q *Query) urlQueryParts() (string, string, string, string) {
+	endpointSb := strings.Builder{}
+	querySb := strings.Builder{}
+	jsonSb := strings.Builder{}
+	paramSb := strings.Builder{}
+
+	endpointSb.WriteString(strings.TrimRight(q.baseURL, "/"))
+	endpointSb.WriteString(queryRangePath)
+	querySb.WriteByte('{')
 	for i, ss := range q.streamSelector {
 		if i > 0 {
-			sb.WriteByte(',')
+			querySb.WriteByte(',')
 		}
-		ss.writeInto(&sb)
+		ss.writeInto(&querySb)
 	}
-	sb.WriteByte('}')
+	querySb.WriteByte('}')
 	for _, lf := range q.lineFilters {
-		sb.WriteString("|~`")
-		sb.WriteString(lf)
-		sb.WriteByte('`')
+		querySb.WriteString("|~`")
+		querySb.WriteString(lf)
+		querySb.WriteByte('`')
 	}
 	if len(q.labelFilters) > 0 || len(q.groupedLabelFilters) > 0 {
 		if q.labelJoiner == "" {
 			panic("Label Joiner can't be empty")
 		}
-		sb.WriteString("|json|")
-		q.WriteLabelFilter(&sb, &q.labelFilters, q.labelJoiner)
+		q.WriteLabelFilter(&jsonSb, &q.labelFilters, q.labelJoiner)
 		i := 0
 		for _, glf := range q.groupedLabelFilters {
 			if i > 0 {
-				sb.WriteString(string(q.labelJoiner))
+				jsonSb.WriteString(string(q.labelJoiner))
 			}
 			//group with parenthesis
-			sb.WriteByte('(')
+			jsonSb.WriteByte('(')
 			//each group member must match
-			q.WriteLabelFilter(&sb, &glf, joinAnd)
-			sb.WriteByte(')')
+			q.WriteLabelFilter(&jsonSb, &glf, joinAnd)
+			jsonSb.WriteByte(')')
 			i++
 		}
 	}
 	if len(q.urlParams) > 0 {
 		for _, p := range q.urlParams {
-			sb.WriteByte('&')
-			sb.WriteString(p[0])
-			sb.WriteByte('=')
-			sb.WriteString(p[1])
+			paramSb.WriteByte('&')
+			paramSb.WriteString(p[0])
+			paramSb.WriteByte('=')
+			paramSb.WriteString(p[1])
 		}
 	}
-	return sb.String(), nil
+	return endpointSb.String(), querySb.String(), jsonSb.String(), paramSb.String()
 }
 
 func (q *Query) WriteLabelFilter(sb *strings.Builder, lfs *[]labelFilter, lj LabelJoiner) {

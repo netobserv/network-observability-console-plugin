@@ -192,7 +192,7 @@ func TestLokiConfiguration(t *testing.T) {
 	lokiMock := httpMock{}
 	lokiMock.On("ServeHTTP", mock.Anything, mock.Anything).Run(func(args mock.Arguments) {
 		_, _ = args.Get(0).(http.ResponseWriter).Write([]byte(`{"hello":"world!"}`))
-	}).Once()
+	}).Twice()
 	lokiSvc := httptest.NewServer(&lokiMock)
 	defer lokiSvc.Close()
 	lokiURL, err := url.Parse(lokiSvc.URL)
@@ -220,6 +220,21 @@ func TestLokiConfiguration(t *testing.T) {
 
 	// AND the response is sent back to the client
 	body, err := ioutil.ReadAll(resp.Body)
+	require.NoError(t, err)
+	assert.Equal(t, `{"hello":"world!"}`, string(body))
+
+	// WHEN the Loki flows endpoint is queried in the backend
+	resp, err = backendSvc.Client().Get(backendSvc.URL + "/api/loki/topology")
+	require.NoError(t, err)
+
+	// THEN the query has been properly forwarded to Loki
+	req = lokiMock.Calls[1].Arguments[1].(*http.Request)
+	assert.Equal(t, `topk(100,sum by(SrcK8S_Name,SrcK8S_Type,SrcK8S_OwnerName,SrcK8S_OwnerType,SrcK8S_Namespace,SrcAddr,DstK8S_Name,DstK8S_Type,DstK8S_OwnerName,DstK8S_OwnerType,DstK8S_Namespace,DstAddr) (sum_over_time({app="netobserv-flowcollector"}|json|unwrap Bytes|__error__=""[300s])))`, req.URL.Query().Get("query"))
+	// without any multi-tenancy header
+	assert.Empty(t, req.Header.Get("X-Scope-OrgID"))
+
+	// AND the response is sent back to the client
+	body, err = ioutil.ReadAll(resp.Body)
 	require.NoError(t, err)
 	assert.Equal(t, `{"hello":"world!"}`, string(body))
 }
@@ -263,151 +278,151 @@ func TestLokiFiltering(t *testing.T) {
 	}{{
 		inputPath: "?SrcK8S_Name=test-pod",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\"}|~`SrcK8S_Name\":\"(?i).*test-pod.*\"`",
+			"{app=\"netobserv-flowcollector\"}|~`SrcK8S_Name\":\"(?i).*test-pod.*\"`",
 		},
 	}, {
 		inputPath: "?SrcK8S_Name=test-pod&match=any",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\"}|~`SrcK8S_Name\":\"(?i).*test-pod.*\"`",
+			"{app=\"netobserv-flowcollector\"}|~`SrcK8S_Name\":\"(?i).*test-pod.*\"`",
 		},
 	}, {
 		inputPath: "?Proto=6&match=all",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\"}|~`Proto\":6`",
+			"{app=\"netobserv-flowcollector\"}|~`Proto\":6`",
 		},
 	}, {
 		inputPath: "?Proto=6&match=any",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\"}|~`Proto\":6`",
+			"{app=\"netobserv-flowcollector\"}|~`Proto\":6`",
 		},
 	}, {
 		inputPath: "?Proto=6&SrcK8S_Name=test",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\"}|~`Proto\":6`|~`SrcK8S_Name\":\"(?i).*test.*\"`",
-			"?query={app=\"netobserv-flowcollector\"}|~`SrcK8S_Name\":\"(?i).*test.*\"`|~`Proto\":6`",
+			"{app=\"netobserv-flowcollector\"}|~`Proto\":6`|~`SrcK8S_Name\":\"(?i).*test.*\"`",
+			"{app=\"netobserv-flowcollector\"}|~`SrcK8S_Name\":\"(?i).*test.*\"`|~`Proto\":6`",
 		},
 	}, {
 		inputPath: "?Proto=6&SrcK8S_Name=test&match=any",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\"}|~`(Proto\":6)|(SrcK8S_Name\":\"(?i).*test.*\")`",
-			"?query={app=\"netobserv-flowcollector\"}|~`(SrcK8S_Name\":\"(?i).*test.*\")|(Proto\":6)`",
+			"{app=\"netobserv-flowcollector\"}|~`(Proto\":6)|(SrcK8S_Name\":\"(?i).*test.*\")`",
+			"{app=\"netobserv-flowcollector\"}|~`(SrcK8S_Name\":\"(?i).*test.*\")|(Proto\":6)`",
 		},
 	}, {
 		inputPath: "?Proto=6&SrcK8S_Name=test&FlowDirection=1&match=any",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\",FlowDirection=\"1\"}|~`(Proto\":6)|(SrcK8S_Name\":\"(?i).*test.*\")`",
-			"?query={app=\"netobserv-flowcollector\",FlowDirection=\"1\"}|~`(SrcK8S_Name\":\"(?i).*test.*\")|(Proto\":6)`",
+			"{app=\"netobserv-flowcollector\",FlowDirection=\"1\"}|~`(Proto\":6)|(SrcK8S_Name\":\"(?i).*test.*\")`",
+			"{app=\"netobserv-flowcollector\",FlowDirection=\"1\"}|~`(SrcK8S_Name\":\"(?i).*test.*\")|(Proto\":6)`",
 		},
 	}, {
 		inputPath: "?SrcK8S_Namespace=test-namespace&match=all",
 		outputQuery: []string{
-			`?query={SrcK8S_Namespace=~"(?i).*test-namespace.*",app="netobserv-flowcollector"}`,
+			`{SrcK8S_Namespace=~"(?i).*test-namespace.*",app="netobserv-flowcollector"}`,
 		},
 	}, {
 		inputPath: "?SrcK8S_Namespace=test-namespace&match=any",
 		outputQuery: []string{
-			`?query={SrcK8S_Namespace=~"(?i).*test-namespace.*",app="netobserv-flowcollector"}`,
+			`{SrcK8S_Namespace=~"(?i).*test-namespace.*",app="netobserv-flowcollector"}`,
 		},
 	}, {
 		inputPath: "?SrcPort=8080&SrcAddr=10.128.0.1&SrcK8S_Namespace=default",
 		outputQuery: []string{
-			"?query={SrcK8S_Namespace=~\"(?i).*default.*\",app=\"netobserv-flowcollector\"}|~`SrcPort\":8080`|json|SrcAddr=ip(\"10.128.0.1\")",
+			"{SrcK8S_Namespace=~\"(?i).*default.*\",app=\"netobserv-flowcollector\"}|~`SrcPort\":8080`|json|SrcAddr=ip(\"10.128.0.1\")",
 		},
 	}, {
 		inputPath: "?SrcPort=8080&SrcAddr=10.128.0.1&SrcK8S_Namespace=default&match=any",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\"}|json|SrcK8S_Namespace=~\"(?i).*default.*\"+or+SrcAddr=ip(\"10.128.0.1\")+or+SrcPort=8080",
+			"{app=\"netobserv-flowcollector\"}|json|SrcK8S_Namespace=~\"(?i).*default.*\"+or+SrcAddr=ip(\"10.128.0.1\")+or+SrcPort=8080",
 		},
 	}, {
 		inputPath: "?SrcPort=8080&SrcAddr=10.128.0.1&SrcK8S_Namespace=default&match=any&FlowDirection=0",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\",FlowDirection=\"0\"}|json|SrcK8S_Namespace=~\"(?i).*default.*\"+or+SrcAddr=ip(\"10.128.0.1\")+or+SrcPort=8080",
+			"{app=\"netobserv-flowcollector\",FlowDirection=\"0\"}|json|SrcK8S_Namespace=~\"(?i).*default.*\"+or+SrcAddr=ip(\"10.128.0.1\")+or+SrcPort=8080",
 		},
 	}, {
 		inputPath:   "?startTime=1640991600&match=all",
-		outputQuery: []string{`?query={app="netobserv-flowcollector"}&start=1640991600`},
+		outputQuery: []string{`{app="netobserv-flowcollector"}&start=1640991600`},
 	}, {
 		inputPath:   "?startTime=1640991600&match=any",
-		outputQuery: []string{`?query={app="netobserv-flowcollector"}&start=1640991600`},
+		outputQuery: []string{`{app="netobserv-flowcollector"}&start=1640991600`},
 	}, {
 		inputPath:   "?endTime=1641160800",
-		outputQuery: []string{`?query={app="netobserv-flowcollector"}&end=1641160800`},
+		outputQuery: []string{`{app="netobserv-flowcollector"}&end=1641160800`},
 	}, {
 		inputPath:   "?endTime=1641160800&match=any",
-		outputQuery: []string{`?query={app="netobserv-flowcollector"}&end=1641160800`},
+		outputQuery: []string{`{app="netobserv-flowcollector"}&end=1641160800`},
 	}, {
 		inputPath: "?startTime=1640991600&endTime=1641160800&match=all",
 		outputQuery: []string{
-			`?query={app="netobserv-flowcollector"}&start=1640991600&end=1641160800`,
-			`?query={app="netobserv-flowcollector"}&end=1641160800&start=1640991600`,
+			`{app="netobserv-flowcollector"}&start=1640991600&end=1641160800`,
+			`{app="netobserv-flowcollector"}&end=1641160800&start=1640991600`,
 		},
 	}, {
 		inputPath: "?startTime=1640991600&endTime=1641160800&match=any",
 		outputQuery: []string{
-			`?query={app="netobserv-flowcollector"}&end=1641160800&start=1640991600`,
-			`?query={app="netobserv-flowcollector"}&start=1640991600&end=1641160800`,
+			`{app="netobserv-flowcollector"}&end=1641160800&start=1640991600`,
+			`{app="netobserv-flowcollector"}&start=1640991600&end=1641160800`,
 		},
 	}, {
 		inputPath:   "?timeRange=300000",
-		outputQuery: []string{`?query={app="netobserv-flowcollector"}&start=${timeNow-300000}`},
+		outputQuery: []string{`{app="netobserv-flowcollector"}&start=${timeNow-300000}`},
 	}, {
 		inputPath:   "?timeRange=300000&match=any",
-		outputQuery: []string{`?query={app="netobserv-flowcollector"}&start=${timeNow-300000}`},
+		outputQuery: []string{`{app="netobserv-flowcollector"}&start=${timeNow-300000}`},
 	}, {
 		inputPath:   "?timeRange=86400000&match=all",
-		outputQuery: []string{`?query={app="netobserv-flowcollector"}&start=${timeNow-86400000}`},
+		outputQuery: []string{`{app="netobserv-flowcollector"}&start=${timeNow-86400000}`},
 	}, {
 		inputPath:   "?timeRange=86400000&match=any",
-		outputQuery: []string{`?query={app="netobserv-flowcollector"}&start=${timeNow-86400000}`},
+		outputQuery: []string{`{app="netobserv-flowcollector"}&start=${timeNow-86400000}`},
 	}, {
 		inputPath: "?SrcK8S_Namespace=\"exact-namespace\"",
 		outputQuery: []string{
-			`?query={SrcK8S_Namespace=~"^exact-namespace$",app="netobserv-flowcollector"}`,
+			`{SrcK8S_Namespace=~"^exact-namespace$",app="netobserv-flowcollector"}`,
 		},
 	}, {
 		inputPath: "?SrcK8S_Namespace=\"start-namespace*\"",
 		outputQuery: []string{
-			`?query={SrcK8S_Namespace=~"^start-namespace.*",app="netobserv-flowcollector"}`,
+			`{SrcK8S_Namespace=~"^start-namespace.*",app="netobserv-flowcollector"}`,
 		},
 	}, {
 		inputPath: "?SrcK8S_Namespace=\"*end-namespace\"",
 		outputQuery: []string{
-			`?query={SrcK8S_Namespace=~".*end-namespace$",app="netobserv-flowcollector"}`,
+			`{SrcK8S_Namespace=~".*end-namespace$",app="netobserv-flowcollector"}`,
 		},
 	}, {
 		inputPath: "?SrcK8S_Namespace=\"mid-n*e\"",
 		outputQuery: []string{
-			`?query={SrcK8S_Namespace=~"^mid-n.*e$",app="netobserv-flowcollector"}`,
+			`{SrcK8S_Namespace=~"^mid-n.*e$",app="netobserv-flowcollector"}`,
 		},
 	}, {
 		inputPath: "?SrcK8S_Name=\"exact-pod\"",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\"}|~`SrcK8S_Name\":\"exact-pod\"`",
+			"{app=\"netobserv-flowcollector\"}|~`SrcK8S_Name\":\"exact-pod\"`",
 		},
 	}, {
 		inputPath: "?SrcK8S_Name=\"start-pod*\"",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\"}|~`SrcK8S_Name\":\"start-pod.*\"`",
+			"{app=\"netobserv-flowcollector\"}|~`SrcK8S_Name\":\"start-pod.*\"`",
 		},
 	}, {
 		inputPath: "?SrcK8S_Name=\"*end-pod\"",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\"}|~`SrcK8S_Name\":\".*end-pod\"`",
+			"{app=\"netobserv-flowcollector\"}|~`SrcK8S_Name\":\".*end-pod\"`",
 		},
 	}, {
 		inputPath: "?SrcK8S_Name=\"mid-*d\"",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\"}|~`SrcK8S_Name\":\"mid-.*d\"`",
+			"{app=\"netobserv-flowcollector\"}|~`SrcK8S_Name\":\"mid-.*d\"`",
 		},
 	}, {
 		inputPath: "?SrcK8S_Object=Pod.namespace.podName",
 		outputQuery: []string{
-			"?query={app=\"netobserv-flowcollector\"}|json|(SrcK8S_Type=~`(?i).*Pod.*`+and+SrcK8S_Namespace=~\"(?i).*namespace.*\"+and+SrcK8S_Name=~`(?i).*podName.*`)",
-			"?query={app=\"netobserv-flowcollector\"}|json|(SrcK8S_Type=~`(?i).*Pod.*`+and+SrcK8S_Name=~`(?i).*podName.*`+and+SrcK8S_Namespace=~\"(?i).*namespace.*\")",
-			"?query={app=\"netobserv-flowcollector\"}|json|(SrcK8S_Namespace=~\"(?i).*namespace.*\"+and+SrcK8S_Type=~`(?i).*Pod.*`+and+SrcK8S_Name=~`(?i).*podName.*`)",
-			"?query={app=\"netobserv-flowcollector\"}|json|(SrcK8S_Namespace=~\"(?i).*namespace.*\"+and+SrcK8S_Name=~`(?i).*podName.*`+and+SrcK8S_Type=~`(?i).*Pod.*`)",
-			"?query={app=\"netobserv-flowcollector\"}|json|(SrcK8S_Name=~`(?i).*podName.*`+and+SrcK8S_Namespace=~\"(?i).*namespace.*\"+and+SrcK8S_Type=~`(?i).*Pod.*`)",
-			"?query={app=\"netobserv-flowcollector\"}|json|(SrcK8S_Name=~`(?i).*podName.*`+and+SrcK8S_Type=~`(?i).*Pod.*`+and+SrcK8S_Namespace=~\"(?i).*namespace.*\")",
+			"{app=\"netobserv-flowcollector\"}|json|(SrcK8S_Type=~`(?i).*Pod.*`+and+SrcK8S_Namespace=~\"(?i).*namespace.*\"+and+SrcK8S_Name=~`(?i).*podName.*`)",
+			"{app=\"netobserv-flowcollector\"}|json|(SrcK8S_Type=~`(?i).*Pod.*`+and+SrcK8S_Name=~`(?i).*podName.*`+and+SrcK8S_Namespace=~\"(?i).*namespace.*\")",
+			"{app=\"netobserv-flowcollector\"}|json|(SrcK8S_Namespace=~\"(?i).*namespace.*\"+and+SrcK8S_Type=~`(?i).*Pod.*`+and+SrcK8S_Name=~`(?i).*podName.*`)",
+			"{app=\"netobserv-flowcollector\"}|json|(SrcK8S_Namespace=~\"(?i).*namespace.*\"+and+SrcK8S_Name=~`(?i).*podName.*`+and+SrcK8S_Type=~`(?i).*Pod.*`)",
+			"{app=\"netobserv-flowcollector\"}|json|(SrcK8S_Name=~`(?i).*podName.*`+and+SrcK8S_Namespace=~\"(?i).*namespace.*\"+and+SrcK8S_Type=~`(?i).*Pod.*`)",
+			"{app=\"netobserv-flowcollector\"}|json|(SrcK8S_Name=~`(?i).*podName.*`+and+SrcK8S_Type=~`(?i).*Pod.*`+and+SrcK8S_Namespace=~\"(?i).*namespace.*\")",
 		},
 	}}
 
@@ -448,7 +463,7 @@ func TestLokiFiltering(t *testing.T) {
 			// THEN each filter argument has been properly forwarded to Loki
 			var expectedURLs []string
 			for _, out := range tc.outputQuery {
-				expectedURLs = append(expectedURLs, "/loki/api/v1/query_range"+out)
+				expectedURLs = append(expectedURLs, "/loki/api/v1/query_range?query="+handler.EncodeQuery(out))
 			}
 
 			requestURL := lokiMock.Calls[index].Arguments[1].(*http.Request).URL.String()
