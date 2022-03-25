@@ -6,7 +6,7 @@ on:
 env:
   REGISTRY_USER: netobserv+github_ci
   REGISTRY: quay.io/netobserv
-  IMAGE: network-observability-console-plugin
+  REG_IMAGE: network-observability-console-plugin
 
 jobs:
   push-pr-image:
@@ -28,7 +28,7 @@ jobs:
         with:
           ref: "refs/pull/${{ github.event.number }}/merge"
       - name: build images
-        run: IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE }}:temp" make sha-image
+        run: BASE_IMAGE="${{ env.REGISTRY }}/${{ env.REG_IMAGE }}" TAG=temp make build-ci-images
       - name: podman login to quay.io
         uses: redhat-actions/podman-login@v1
         with:
@@ -42,7 +42,7 @@ jobs:
         id: push-to-quay
         uses: redhat-actions/push-to-registry@v2
         with:
-          image: ${{ env.IMAGE }}
+          image: ${{ env.REG_IMAGE }}
           tags: ${{ steps.shortsha.outputs.short_sha }}
           registry: ${{ env.REGISTRY }}
       - uses: actions/github-script@v5
