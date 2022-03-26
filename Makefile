@@ -4,8 +4,8 @@ BUILD_VERSION := $(shell git describe --long HEAD)
 BUILD_DATE := $(shell date +%Y-%m-%d\ %H:%M)
 BUILD_SHA := $(shell git rev-parse --short HEAD)
 
-IMAGE ?= quay.io/${IMG_USER}/network-observability-console-plugin:${TAG}
-IMAGE_SHA ?= quay.io/${IMG_USER}/network-observability-console-plugin:$(BUILD_SHA)
+BASE_IMAGE ?= quay.io/${IMG_USER}/network-observability-console-plugin
+IMAGE ?= ${BASE_IMAGE}:${TAG}
 
 GOLANGCI_LINT_VERSION = v1.42.1
 COVERPROFILE = coverage.out
@@ -98,12 +98,15 @@ image:
 	@echo "### Building image with ${OCI_BIN}"
 	$(OCI_BIN) build -t $(IMAGE) .
 
-.PHONY: sha-image
-sha-image: image
-	@echo "### Building sha-tagged image with ${OCI_BIN}"
-	echo "FROM ${IMAGE}" > tmp.Dockerfile && \
-		$(OCI_BIN) build --label quay.expires-after=2w -t ${IMAGE_SHA} -f tmp.Dockerfile . && \
-		rm tmp.Dockerfile
+.PHONY: build-ci-images
+build-ci-images:
+ifeq ($(TAG), main)
+# Also tag "latest" only for branch "main"
+	$(OCI_BIN) build -t $(IMAGE) -t $(BASE_IMAGE):latest .
+else
+	$(OCI_BIN) build -t $(IMAGE) .
+endif
+	$(OCI_BIN) build --build-arg BASE_IMAGE=$(IMAGE) -t $(BASE_IMAGE):$(BUILD_SHA) -f shortlived.Dockerfile .
 
 .PHONY: push
 push:
