@@ -15,9 +15,11 @@ import {
   withSelection
 } from '@patternfly/react-topology';
 import * as React from 'react';
-import { StyleEdge } from '../styles/styleEdge';
-import { StyleGroup } from '../styles/styleGroup';
-import { StyleNode } from '../styles/styleNode';
+
+//keep default import here to use observers
+import StyleEdge from '../styles/styleEdge';
+import StyleGroup from '../styles/styleGroup';
+import StyleNode from '../styles/styleNode';
 
 const contextMenuItem = (label: string): React.ReactElement => {
   return (

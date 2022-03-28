@@ -28,7 +28,7 @@ type StyleGroupProps = {
 } & WithContextMenuProps &
   WithSelectionProps;
 
-export const StyleGroup: React.FC<StyleGroupProps> = ({
+const StyleGroup: React.FC<StyleGroupProps> = ({
   element,
   onContextMenu,
   contextMenuOpen,
@@ -38,6 +38,16 @@ export const StyleGroup: React.FC<StyleGroupProps> = ({
 }) => {
   const data = element.getData();
   const detailsLevel = useDetailsLevel();
+
+  const passedData = React.useMemo(() => {
+    const newData = { ...data };
+    Object.keys(newData).forEach(key => {
+      if (newData[key] === undefined) {
+        delete newData[key];
+      }
+    });
+    return newData;
+  }, [data]);
 
   const renderIcon = (): React.ReactNode => {
     const iconSize = Math.min(collapsedWidth, collapsedHeight) - ICON_PADDING * 2;
@@ -50,16 +60,6 @@ export const StyleGroup: React.FC<StyleGroupProps> = ({
     );
   };
 
-  const passedData = React.useMemo(() => {
-    const newData = { ...data };
-    Object.keys(newData).forEach(key => {
-      if (newData[key] === undefined) {
-        delete newData[key];
-      }
-    });
-    return newData;
-  }, [data]);
-
   return (
     <DefaultGroup
       onContextMenu={data.showContextMenu ? onContextMenu : undefined}
@@ -67,7 +67,7 @@ export const StyleGroup: React.FC<StyleGroupProps> = ({
       element={element}
       collapsedWidth={collapsedWidth}
       collapsedHeight={collapsedHeight}
-      showLabel={detailsLevel === ScaleDetailsLevel.high}
+      showLabel={[ScaleDetailsLevel.medium, ScaleDetailsLevel.high].includes(detailsLevel)}
       {...rest}
       {...passedData}
     >

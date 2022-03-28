@@ -1,7 +1,7 @@
 import { ComponentType } from 'react';
 import { GraphElement, ComponentFactory, ModelKind, DefaultNode } from '@patternfly/react-topology';
 
-const shapesComponentFactory: ComponentFactory = (
+export const shapesComponentFactory: ComponentFactory = (
   kind: ModelKind,
   type: string
 ): ComponentType<{ element: GraphElement }> | undefined => {

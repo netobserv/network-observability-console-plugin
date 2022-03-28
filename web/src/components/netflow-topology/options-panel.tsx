@@ -107,6 +107,19 @@ export const OptionsPanel: React.FC<RecordDrawerProps> = ({ id, layout, setLayou
               }
               isReversed
             />
+            <Switch
+              id="truncate-switch"
+              label={t('Long labels are truncated')}
+              labelOff={t('Whole labels are displayed')}
+              isChecked={options.truncateLabels}
+              onChange={() =>
+                setOptions({
+                  ...options,
+                  truncateLabels: !options.truncateLabels
+                })
+              }
+              isReversed
+            />
           </div>
         )}
       </DrawerPanelBody>

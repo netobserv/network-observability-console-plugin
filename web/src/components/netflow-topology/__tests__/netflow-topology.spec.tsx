@@ -1,8 +1,8 @@
 import { EmptyState, EmptyStateBody, Spinner } from '@patternfly/react-core';
 import { shallow } from 'enzyme';
 import * as React from 'react';
-import { DefaultOptions, LayoutName } from '../../../model/topology';
 import { TopologyMetrics } from '../../../api/loki';
+import { DefaultOptions, LayoutName } from '../../../model/topology';
 import { DEFAULT_TIME_RANGE } from '../../../utils/router';
 import NetflowTopology from '../netflow-topology';
 
@@ -16,6 +16,7 @@ describe('<NetflowTopology />', () => {
     options: DefaultOptions,
     lowScale: 0.3,
     medScale: 0.5,
+    filters: [],
     toggleTopologyOptions: jest.fn()
   };
 

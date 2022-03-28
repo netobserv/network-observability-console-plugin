@@ -5,14 +5,19 @@ import {
   ForceLayout,
   ColaLayout,
   DagreLayout,
-  GridLayout
+  GridLayout,
+  ConcentricLayout
 } from '@patternfly/react-topology';
 import { LayoutName } from '../../../model/topology';
 
-export const layoutFactory: LayoutFactory = (type: LayoutName, graph: Graph): Layout | undefined => {
+const layoutFactory: LayoutFactory = (type: LayoutName, graph: Graph): Layout | undefined => {
   switch (type) {
+    case 'Cola':
+      return new ColaLayout(graph);
     case 'ColaNoForce':
       return new ColaLayout(graph, { layoutOnDrag: false });
+    case 'Concentric':
+      return new ConcentricLayout(graph);
     case 'Dagre':
       return new DagreLayout(graph);
     case 'Force':

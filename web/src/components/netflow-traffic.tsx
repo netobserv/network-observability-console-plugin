@@ -327,8 +327,7 @@ export const NetflowTraffic: React.FC<{
             metrics={metrics}
             layout={layout}
             options={topologyOptions}
-            lowScale={0.1}
-            medScale={0.3}
+            filters={filters}
             toggleTopologyOptions={() => setShowTopologyOptions(!isShowTopologyOptions)}
           />
         );

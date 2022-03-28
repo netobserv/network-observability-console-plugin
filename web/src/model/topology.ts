@@ -9,16 +9,16 @@ import {
   NodeShape,
   NodeStatus
 } from '@patternfly/react-topology';
-import { TFunction } from 'i18next';
 import _ from 'lodash';
+import { TopologyMetrics } from '../api/loki';
 import { bytesPerSeconds } from '../utils/bytes';
 import { kindToAbbr } from '../utils/label';
 import { DEFAULT_TIME_RANGE } from '../utils/router';
-import { TopologyMetrics } from '../api/loki';
 
 export enum LayoutName {
   Cola = 'Cola',
   ColaNoForce = 'ColaNoForce',
+  Concentric = 'Concentric',
   Dagre = 'Dagre',
   Force = 'Force',
   Grid = 'Grid'
@@ -39,7 +39,10 @@ export interface TopologyOptions {
   edges?: boolean;
   edgeTags?: boolean;
   startCollapsed?: boolean;
+  truncateLabels?: boolean;
   groupTypes: TopologyGroupTypes;
+  lowScale: number;
+  medScale: number;
 }
 
 export const DefaultOptions: TopologyOptions = {
@@ -50,36 +53,48 @@ export const DefaultOptions: TopologyOptions = {
   edgeTags: true,
   maxEdgeValue: 0,
   startCollapsed: false,
-  groupTypes: TopologyGroupTypes.NAMESPACES
+  truncateLabels: true,
+  groupTypes: TopologyGroupTypes.NAMESPACES,
+  lowScale: 0.3,
+  medScale: 0.5
 };
 
+export const DEFAULT_NODE_TRUNCATE_LENGTH = 25;
 export const DEFAULT_NODE_SIZE = 75;
 
-export const generateNode = (namespace: string, type: string, name: string, options: TopologyOptions): NodeModel => {
+export const generateNode = (
+  namespace: string,
+  type: string,
+  name: string,
+  addr: string,
+  options: TopologyOptions
+): NodeModel => {
+  const id = `${type}.${namespace}.${name}.${addr}`;
   return {
-    id: `${namespace}.${name}`,
+    id,
     type: 'node',
-    label: name,
+    label: name ? name : addr,
     width: DEFAULT_NODE_SIZE,
     height: DEFAULT_NODE_SIZE,
     shape: NodeShape.ellipse,
     status: NodeStatus.default,
+    style: { padding: 20 },
     data: {
-      dataType: 'Default',
       namespace,
       type,
       name,
+      addr,
       labelPosition: LabelPosition.bottom,
       //TODO: get badge and color using console ResourceIcon
       badge: options.nodeBadges && type ? kindToAbbr(type) : undefined,
-      /*badgeColor: options.nodeBadges && type ? getModel(type)?.color : undefined,
-      badgeClassName: options.nodeBadges && type ? 
-      `co-m-resource-icon co-m-resource-${type.toLowerCase()}` : undefined,*/
+      //badgeColor: options.nodeBadges && type ? getModel(type)?.color : undefined,
+      badgeClassName: options.nodeBadges && type ? `co-m-resource-icon co-m-resource-${type.toLowerCase()}` : undefined,
       showDecorators: true,
       secondaryLabel: [TopologyGroupTypes.OWNERS, TopologyGroupTypes.NONE].includes(options.groupTypes)
         ? namespace
         : undefined,
-      showContextMenu: options.contextMenus
+      showContextMenu: options.contextMenus,
+      truncateLength: options.truncateLabels ? DEFAULT_NODE_TRUNCATE_LENGTH : undefined
     }
   };
 };
@@ -118,35 +133,35 @@ export const getTagStatus = (n: number, total: number) => {
   }
 };
 
-export const getEdgeStyle = (bytes: number) => {
-  return bytes ? EdgeStyle.dashed : EdgeStyle.dotted;
+export const getEdgeStyle = (count: number) => {
+  return count ? EdgeStyle.dashed : EdgeStyle.dotted;
 };
 
-export const getEdgeTag = (bytes: number, options: TopologyOptions) => {
-  return options.edgeTags && bytes ? bytesPerSeconds(bytes, options.rangeInSeconds) : undefined;
+export const getEdgeTag = (amount: number, options: TopologyOptions) => {
+  return options.edgeTags && amount ? bytesPerSeconds(amount, options.rangeInSeconds) : undefined;
 };
 
 export const generateEdge = (
   sourceId: string,
   targetId: string,
-  bytes: number,
+  count: number,
   options: TopologyOptions
 ): EdgeModel => {
   return {
-    id: `${sourceId}-${targetId}`,
+    id: `${sourceId}.${targetId}`,
     type: 'edge',
     source: sourceId,
     target: targetId,
-    edgeStyle: getEdgeStyle(bytes),
-    animationSpeed: getAnimationSpeed(bytes, options.maxEdgeValue),
+    edgeStyle: getEdgeStyle(count),
+    animationSpeed: getAnimationSpeed(count, options.maxEdgeValue),
     data: {
       sourceId,
       targetId,
       endTerminalType: EdgeTerminalType.directional,
       endTerminalStatus: NodeStatus.default,
-      tag: getEdgeTag(bytes, options),
-      tagStatus: getTagStatus(bytes, options.maxEdgeValue),
-      bytes
+      tag: getEdgeTag(count, options),
+      tagStatus: getTagStatus(count, options.maxEdgeValue),
+      count
     }
   };
 };
@@ -154,77 +169,91 @@ export const generateEdge = (
 export const generateDataModel = (
   datas: TopologyMetrics[],
   options: TopologyOptions,
-  t: TFunction,
   nodes: NodeModel[] = [],
   edges: EdgeModel[] = []
 ): Model => {
-  const emptyText = t('n/a');
   const opts = { ...DefaultOptions, ...options };
 
   //refresh existing items
-  nodes = nodes.map(node => {
-    if (node.group) {
-      //nothing to update on groups
-      return node;
-    }
-    return {
-      ...node,
-      ...generateNode(node.data.namespace, node.data.type, node.data.name, opts) //update options
-    };
-  });
+  nodes = nodes.map(node => ({
+    ...node,
+    //update options and filter indicators
+    ...generateNode(node.data.namespace, node.data.type, node.data.name, node.data.addr, opts)
+  }));
   edges = edges.map(edge => ({
     ...edge,
-    ...generateEdge(edge.source!, edge.target!, 0, opts) //update options and reset bytes
+    //update options and reset counter
+    ...generateEdge(edge.source!, edge.target!, 0, opts)
   }));
 
-  function addGroup(name: string, parent?: NodeModel) {
-    let group = nodes.find(g => g.type === 'group' && g.data.name === name);
+  function addGroup(name: string, type: string, parent?: NodeModel, secondaryLabelPadding = false) {
+    let group = nodes.find(g => g.type === 'group' && g.data.type === type && g.data.name === name);
     if (!group) {
       group = {
-        id: name,
+        id: `${type}.${name}`,
         children: [],
         type: 'group',
         group: true,
         collapsed: options.startCollapsed,
         label: name,
+        style: { padding: secondaryLabelPadding ? 35 : 10 },
         data: {
           name,
+          type,
           labelPosition: LabelPosition.bottom,
-          collapsible: true
+          collapsible: true,
+          collapsedWidth: 75,
+          collapsedHeight: 75,
+          truncateLength: options.truncateLabels
+            ? //match node label length according to badge
+              options.nodeBadges
+              ? DEFAULT_NODE_TRUNCATE_LENGTH + 2
+              : DEFAULT_NODE_TRUNCATE_LENGTH - 3
+            : undefined
         }
       };
       nodes.push(group);
     }
 
     if (parent) {
-      parent.children!.push(group.id);
+      if (group.id !== parent.id) {
+        parent.children!.push(group.id);
+      } else {
+        console.error('group parent id must be different than child id !', group.id);
+      }
     }
 
     return group;
   }
 
-  function addNode(namespace: string, type: string, name: string, parent?: NodeModel) {
-    let node = nodes.find(n => n.data.namespace === namespace && n.data.name === name);
+  function addNode(namespace: string, type: string, name: string, addr: string, parent?: NodeModel) {
+    let node = nodes.find(
+      n => n.data.type === type && n.data.namespace === namespace && n.data.name === name && n.data.addr === addr
+    );
     if (!node) {
-      node = generateNode(namespace, type, name, opts);
+      node = generateNode(namespace, type, name, addr, opts);
       nodes.push(node);
     }
-    if (parent && !parent.children?.find(n => n === node!.id)) {
-      parent.children!.push(node.id);
+    if (parent) {
+      if (parent.id !== node.id) {
+        parent.children!.push(node.id);
+      } else {
+        console.error('node parent id must be different than child id !', node.id);
+      }
     }
 
     return node;
   }
 
-  function addEdge(sourceId: string, targetId: string, bytes: number, options: TopologyOptions) {
+  function addEdge(sourceId: string, targetId: string, count: number) {
     let edge = edges.find(e => e.data.sourceId === sourceId && e.data.targetId === targetId);
     if (edge) {
       //update style and datas
-      edge.edgeStyle = getEdgeStyle(bytes);
-      edge.animationSpeed = getAnimationSpeed(bytes, options.maxEdgeValue);
-      edge.data = { ...edge.data, tag: getEdgeTag(bytes, options), bytes };
+      edge.edgeStyle = getEdgeStyle(count);
+      edge.animationSpeed = getAnimationSpeed(count, options.maxEdgeValue);
+      edge.data = { ...edge.data, tag: getEdgeTag(count, options), count };
     } else {
-      edge = generateEdge(sourceId, targetId, bytes, options);
+      edge = generateEdge(sourceId, targetId, count, opts);
       edges.push(edge);
     }
 
@@ -242,20 +271,15 @@ export const generateDataModel = (
 
     const srcNamespaceGroup =
       [TopologyGroupTypes.ALL, TopologyGroupTypes.NAMESPACES].includes(options.groupTypes) && !_.isEmpty(namespace)
-        ? addGroup(namespace)
+        ? addGroup(namespace, 'Namespace')
         : undefined;
     const srcOwnerGroup =
       [TopologyGroupTypes.ALL, TopologyGroupTypes.OWNERS].includes(options.groupTypes) &&
       !_.isEmpty(ownerType) &&
       !_.isEmpty(ownerName)
-        ? addGroup(`${ownerType}.${ownerName}`, srcNamespaceGroup)
+        ? addGroup(ownerName, ownerType, srcNamespaceGroup, srcNamespaceGroup === undefined)
         : undefined;
-    const srcNode = addNode(
-      namespace,
-      type,
-      _.isEmpty(name) ? (_.isEmpty(addr) ? emptyText : addr) : name,
-      srcOwnerGroup ? srcOwnerGroup : srcNamespaceGroup
-    );
+    const srcNode = addNode(namespace, type, name, addr, srcOwnerGroup ? srcOwnerGroup : srcNamespaceGroup);
 
     return srcNode;
   }
@@ -265,7 +289,7 @@ export const generateDataModel = (
     const dstNode = manageNode('Dst', d);
 
     if (options.edges && srcNode && dstNode) {
-      addEdge(srcNode.id, dstNode.id, d.total, opts);
+      addEdge(srcNode.id, dstNode.id, d.total);
     }
   });
 
