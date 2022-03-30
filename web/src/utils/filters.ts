@@ -1,8 +1,8 @@
 import * as _ from 'lodash';
 import protocols from 'protocol-numbers';
-import { getPort } from 'port-numbers';
 import { ColumnsId } from './columns';
-import { getProtectedService } from './port';
+import { getService, getPort } from './port';
+import { Config } from '../model/config';
 
 export enum FilterType {
   NONE,
@@ -41,14 +41,16 @@ export const getActiveColumnFilters = (columnId: ColumnsId, filters: Filter[]) =
   return filters.filter(f => f.colId === columnId).flatMap(f => f.values.map(v => v.v));
 };
 
-const protocolOptions: FilterOption[] = Object.values(protocols)
-  .map(proto => ({ name: proto.name, value: proto.value }))
-  .filter(proto => !_.isEmpty(proto.name))
-  .filter(proto => Number(proto.value) < 1024);
-_.orderBy(protocolOptions, 'name');
+const getProtocolList = ({}: Config) => {
+  const protocolOptions = Object.values(protocols)
+    .map(proto => ({ name: proto.name, value: proto.value }))
+    .filter(proto => !_.isEmpty(proto.name));
+  _.orderBy(protocolOptions, 'name');
+  return protocolOptions;
+};
 
-const getProtocolOptions = (value: string) => {
-  return protocolOptions.filter(
+const getProtocolOptions = (value: string, config: Config) => {
+  return getProtocolList(config).filter(
     opt => opt.value.startsWith(value) || opt.name.toLowerCase().startsWith(value.toLowerCase())
   );
 };
@@ -83,7 +85,7 @@ export const hasNamespace = (namespace: string) => {
   return Array.from(namespaces.values()).find(n => n.name === namespace) != undefined;
 };
 
-export const getNamespaceOptions = (value: string) => {
+export const getNamespaceOptions = (value: string, {}: Config) => {
   const options = Array.from(namespaces.values());
   if (value.length) {
     return options.filter(n => n.name.toLowerCase().startsWith(value.toLowerCase()));
@@ -92,7 +94,7 @@ export const getNamespaceOptions = (value: string) => {
   }
 };
 
-export const getObjectsOptions = (filterValue: string) => {
+export const getObjectsOptions = (filterValue: string, {}: Config) => {
   // search objects by namespace
   if (filterValue.includes('.')) {
     const kindNamespaceAndPod = filterValue.split('.');
@@ -119,25 +121,25 @@ export const getObjectsOptions = (filterValue: string) => {
   }
 };
 
-const getPortOptions = (value: string) => {
+const getPortOptions = (value: string, config: Config) => {
   const isNumber = !isNaN(Number(value));
-  const foundService = isNumber ? getProtectedService(Number(value)) : null;
-  const foundPort = !isNumber ? getPort(value) : null;
+  const foundService = isNumber ? getService(Number(value), config) : null;
+  const foundPort = !isNumber ? getPort(value, config) : null;
   if (foundService) {
-    return [{ name: foundService.name, value: value }];
+    return [{ name: foundService, value: value }];
   } else if (foundPort) {
-    return [{ name: value, value: foundPort.port.toString() }];
+    return [{ name: value, value: foundPort }];
   }
   return [];
 };
 
-const getK8SKindOptions = (value: string) => {
+const getK8SKindOptions = (value: string, {}: Config) => {
   return ['Pod', 'Service', 'Deployment', 'StatefulSet', 'DaemonSet', 'Job', 'CronJob']
     .filter(k => k.toLowerCase().startsWith(value.toLowerCase()))
     .map(p => getFilterOption(p));
 };
 
-const filterOptions: Map<FilterType, (value: string) => FilterOption[]> = new Map([
+const filterOptions: Map<FilterType, (value: string, config: Config) => FilterOption[]> = new Map([
   [FilterType.PROTOCOL, getProtocolOptions],
   [FilterType.PORT, getPortOptions],
   [FilterType.KIND_NAMESPACE_NAME, getK8SKindOptions],
@@ -146,9 +148,9 @@ const filterOptions: Map<FilterType, (value: string) => FilterOption[]> = new Ma
   [FilterType.K8S_OBJECT, getObjectsOptions] //must filter by namespace first, else it will be empty
 ]);
 
-export const getFilterOptions = (type: FilterType, value: string, max = 10) => {
+export const getFilterOptions = (type: FilterType, value: string, config: Config, max = 10) => {
   if (filterOptions.has(type)) {
-    let options = filterOptions.get(type)!(value);
+    let options = filterOptions.get(type)!(value, config);
     if (options.length > max) {
       options = options.slice(0, max);
     }
@@ -157,9 +159,9 @@ export const getFilterOptions = (type: FilterType, value: string, max = 10) => {
   return [];
 };
 
-export const createFilterValue = (type: FilterType, value: string): FilterValue => {
+export const createFilterValue = (type: FilterType, value: string, config: Config): FilterValue => {
   if (filterOptions.has(type)) {
-    const option = filterOptions.get(type)!(value).find(p => p.name === value || p.value === value);
+    const option = filterOptions.get(type)!(value, config).find(p => p.name === value || p.value === value);
     if (option) {
       return {
         v: option.value,
@@ -172,6 +174,6 @@ export const createFilterValue = (type: FilterType, value: string): FilterValue 
   return { v: value };
 };
 
-export const findProtocolOption = (nameOrVal: string) => {
-  return protocolOptions.find(p => p.name.toLowerCase() === nameOrVal.toLowerCase() || p.value === nameOrVal);
+export const findProtocolOption = (nameOrVal: string, config: Config) => {
+  return getProtocolList(config).find(p => p.name.toLowerCase() === nameOrVal.toLowerCase() || p.value === nameOrVal);
 };

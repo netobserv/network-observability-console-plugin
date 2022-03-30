@@ -3,7 +3,7 @@ import { mount, render, shallow } from 'enzyme';
 import * as React from 'react';
 import { waitFor } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
-import { getFlows } from '../../api/routes';
+import { getFlows, getConfig } from '../../api/routes';
 import NetflowTraffic from '../netflow-traffic';
 import { extensionsMock } from '../__tests-data__/extensions';
 import { FlowsSample } from '../__tests-data__/flows';
@@ -11,14 +11,18 @@ import { FlowsSample } from '../__tests-data__/flows';
 const useResolvedExtensionsMock = useResolvedExtensions as jest.Mock;
 
 jest.mock('../../api/routes', () => ({
-  getFlows: jest.fn()
+  getFlows: jest.fn(),
+  getConfig: jest.fn()
 }));
 const getFlowsMock = getFlows as jest.Mock;
+const getConfigMock = getConfig as jest.Mock;
+const config = { portNaming: { Enable: true } };
 
 describe('<NetflowTraffic />', () => {
   beforeAll(() => {
     useResolvedExtensionsMock.mockReturnValue(extensionsMock);
     getFlowsMock.mockResolvedValue(FlowsSample);
+    getConfigMock.mockResolvedValue(config);
   });
 
   it('should shallow component', async () => {

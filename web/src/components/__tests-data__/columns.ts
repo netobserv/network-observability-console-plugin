@@ -1,9 +1,12 @@
 import * as _ from 'lodash';
 import { Column, ColumnsId, getDefaultColumns, getCommonColumns } from '../../utils/columns';
+import { Config } from '../../model/config';
+
+const config = <Config>{ portNaming: { Enable: true, portNames: new Map<string, string>() } };
 
 // Customize columns order
-export const DefaultColumns = getDefaultColumns((k: string) => k);
-export const CommonColumns = getCommonColumns((k: string) => k);
+export const DefaultColumns = getDefaultColumns((k: string) => k, config);
+export const CommonColumns = getCommonColumns((k: string) => k, config);
 export const AllSelectedColumns = DefaultColumns.map(c => {
   c.isSelected = true;
   return c;

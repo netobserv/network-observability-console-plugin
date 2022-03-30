@@ -6,6 +6,7 @@ import { comparePorts } from '../utils/port';
 import { compareProtocols } from '../utils/protocol';
 import { compareNumbers, compareStrings } from './base-compare';
 import { FilterType } from './filters';
+import { Config } from '../model/config';
 
 export enum ColumnsId {
   timestamp = 'timestamp',
@@ -141,7 +142,7 @@ export const getConcatenatedValue = (
   return `${ip}:${String(port)}`;
 };
 
-export const getCommonColumns = (t: TFunction, withConcatenatedFields = true): Column[] => {
+export const getCommonColumns = (t: TFunction, config: Config, withConcatenatedFields = true): Column[] => {
   const commonColumns: Column[] = [
     {
       id: ColumnsId.name,
@@ -203,7 +204,7 @@ export const getCommonColumns = (t: TFunction, withConcatenatedFields = true): C
       isSelected: false,
       filterType: FilterType.PORT,
       value: f => getSrcOrDstValue(f.fields.SrcPort, f.fields.DstPort),
-      sort: (a, b, col) => comparePorts(col.value(a) as number, col.value(b) as number),
+      sort: (a, b, col) => comparePorts(col.value(a) as number, col.value(b) as number, config),
       width: 10
     },
     {
@@ -286,7 +287,7 @@ export const getCommonColumns = (t: TFunction, withConcatenatedFields = true): C
   }
 };
 
-export const getSrcColumns = (t: TFunction): Column[] => {
+export const getSrcColumns = (t: TFunction, config: Config): Column[] => {
   return [
     {
       id: ColumnsId.srcname,
@@ -362,7 +363,7 @@ export const getSrcColumns = (t: TFunction): Column[] => {
       isSelected: true,
       filterType: FilterType.PORT,
       value: f => f.fields.SrcPort,
-      sort: (a, b, col) => comparePorts(col.value(a) as number, col.value(b) as number),
+      sort: (a, b, col) => comparePorts(col.value(a) as number, col.value(b) as number, config),
       width: 10
     },
     {
@@ -379,7 +380,7 @@ export const getSrcColumns = (t: TFunction): Column[] => {
   ];
 };
 
-export const getDstColumns = (t: TFunction): Column[] => {
+export const getDstColumns = (t: TFunction, config: Config): Column[] => {
   return [
     {
       id: ColumnsId.dstname,
@@ -455,7 +456,7 @@ export const getDstColumns = (t: TFunction): Column[] => {
       isSelected: true,
       filterType: FilterType.PORT,
       value: f => f.fields.DstPort,
-      sort: (a, b, col) => comparePorts(col.value(a) as number, col.value(b) as number),
+      sort: (a, b, col) => comparePorts(col.value(a) as number, col.value(b) as number, config),
       width: 10
     },
     {
@@ -472,10 +473,10 @@ export const getDstColumns = (t: TFunction): Column[] => {
   ];
 };
 
-export const getSrcDstColumns = (t: TFunction, withConcatenatedFields = true): Column[] => {
+export const getSrcDstColumns = (t: TFunction, config: Config, withConcatenatedFields = true): Column[] => {
   if (withConcatenatedFields) {
     return [
-      ...getSrcColumns(t),
+      ...getSrcColumns(t, config),
       {
         id: ColumnsId.srckubeobject,
         group: t('Source'),
@@ -520,7 +521,7 @@ export const getSrcDstColumns = (t: TFunction, withConcatenatedFields = true): C
         sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
         width: 15
       },
-      ...getDstColumns(t),
+      ...getDstColumns(t, config),
       {
         id: ColumnsId.dstkubeobject,
         group: t('Destination'),
@@ -567,7 +568,7 @@ export const getSrcDstColumns = (t: TFunction, withConcatenatedFields = true): C
       }
     ];
   } else {
-    return [...getSrcColumns(t), ...getDstColumns(t)];
+    return [...getSrcColumns(t, config), ...getDstColumns(t, config)];
   }
 };
 
@@ -617,7 +618,12 @@ export const getExtraColumns = (t: TFunction): Column[] => {
   ];
 };
 
-export const getDefaultColumns = (t: TFunction, withCommonFields = true, withConcatenatedFields = true): Column[] => {
+export const getDefaultColumns = (
+  t: TFunction,
+  config: Config,
+  withCommonFields = true,
+  withConcatenatedFields = true
+): Column[] => {
   const timestamp: Column = {
     id: ColumnsId.timestamp,
     name: t('Date & time'),
@@ -632,11 +638,11 @@ export const getDefaultColumns = (t: TFunction, withCommonFields = true, withCon
   if (withCommonFields) {
     return [
       timestamp,
-      ...getSrcDstColumns(t, withConcatenatedFields),
-      ...getCommonColumns(t, withConcatenatedFields),
+      ...getSrcDstColumns(t, config, withConcatenatedFields),
+      ...getCommonColumns(t, config, withConcatenatedFields),
       ...getExtraColumns(t)
     ];
   } else {
-    return [timestamp, ...getSrcDstColumns(t, withConcatenatedFields), ...getExtraColumns(t)];
+    return [timestamp, ...getSrcDstColumns(t, config, withConcatenatedFields), ...getExtraColumns(t)];
   }
 };
