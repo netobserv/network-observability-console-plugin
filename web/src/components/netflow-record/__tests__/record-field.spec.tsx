@@ -31,6 +31,6 @@ describe('<RecordField />', () => {
     const button = wrapper.find(Button);
     expect(button).toHaveLength(1);
     button.simulate('click');
-    expect(filterMock.onClick).toHaveBeenCalledWith(DefaultColumns[0], filterMock.isDelete);
+    expect(filterMock.onClick).toHaveBeenCalledTimes(1);
   });
 });

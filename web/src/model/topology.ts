@@ -13,7 +13,7 @@ import _ from 'lodash';
 import { TopologyMetrics } from '../api/loki';
 import { bytesPerSeconds } from '../utils/bytes';
 import { kindToAbbr } from '../utils/label';
-import { DEFAULT_TIME_RANGE } from '../utils/router';
+import { defaultTimeRange } from '../utils/router';
 
 export enum LayoutName {
   Cola = 'Cola',
@@ -22,6 +22,13 @@ export enum LayoutName {
   Dagre = 'Dagre',
   Force = 'Force',
   Grid = 'Grid'
+}
+
+export enum TopologyGroupTypes {
+  NONE = 'none',
+  NAMESPACES = 'namespaces',
+  OWNERS = 'owners',
+  ALL = 'all'
 }
 
 export enum TopologyGroupTypes {
@@ -46,7 +53,7 @@ export interface TopologyOptions {
 }
 
 export const DefaultOptions: TopologyOptions = {
-  rangeInSeconds: DEFAULT_TIME_RANGE,
+  rangeInSeconds: defaultTimeRange,
   nodeBadges: true,
   contextMenus: false,
   edges: true,

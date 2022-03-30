@@ -19,6 +19,7 @@ func ExportFlows(cfg loki.Config) func(w http.ResponseWriter, r *http.Request) {
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		params := r.URL.Query()
+		hlog.Debugf("ExportFlows query params: %s", params)
 
 		flows, code, err := getFlows(cfg, lokiClient, params)
 		if err != nil {
@@ -27,7 +28,10 @@ func ExportFlows(cfg loki.Config) func(w http.ResponseWriter, r *http.Request) {
 		}
 
 		exportFormat := params.Get(exportFormatKey)
-		exportColumns := strings.Split(params.Get(exportcolumnsKey), ",")
+		var exportColumns []string
+		if str := params.Get(exportcolumnsKey); len(str) > 0 {
+			exportColumns = strings.Split(str, ",")
+		}
 
 		switch exportFormat {
 		case exportCSVFormat:

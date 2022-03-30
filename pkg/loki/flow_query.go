@@ -57,9 +57,9 @@ func NewFlowQueryBuilderWithDefaults(cfg *Config) *FlowQueryBuilder {
 	return NewFlowQueryBuilder(cfg, "", "", "", constants.ReporterBoth)
 }
 
-func (q *FlowQueryBuilder) Filters(filters map[string]string) error {
-	for key, values := range filters {
-		if err := q.AddFilter(key, values); err != nil {
+func (q *FlowQueryBuilder) Filters(filters [][]string) error {
+	for _, filter := range filters {
+		if err := q.AddFilter(filter[0], filter[1]); err != nil {
 			return err
 		}
 	}

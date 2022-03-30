@@ -73,6 +73,6 @@ func main() {
 		CORSAllowHeaders: *corsHeaders,
 		CORSMaxAge:       *corsMaxAge,
 		Loki:             loki.NewConfig(lURL, *lokiTimeout, *lokiTenantID, strings.Split(lLabels, ",")),
-		FrontendConfig: *frontendConfig,
+		FrontendConfig:   *frontendConfig,
 	})
 }

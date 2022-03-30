@@ -1,26 +1,26 @@
-import { Filter } from '../../utils/filters';
-import { ColumnsId } from '../../utils/columns';
+import { findFilter } from '../../utils/filter-definitions';
+import { Filter } from '../../model/filters';
 
 export const FiltersSample: Filter[] = [
   {
-    colId: ColumnsId.srcport,
+    def: findFilter((k: string) => k, 'src_port')!,
     values: [{ v: '1234' }]
   },
   {
-    colId: ColumnsId.dstport,
+    def: findFilter((k: string) => k, 'dst_port')!,
     values: [{ v: '5678' }]
   },
   {
-    colId: ColumnsId.srcname,
+    def: findFilter((k: string) => k, 'src_name')!,
     values: [{ v: 'pod or service' }]
   },
   {
-    colId: ColumnsId.dstname,
+    def: findFilter((k: string) => k, 'dst_name')!,
     values: [{ v: 'another pod or service' }]
   }
 ];
 
 export const FTPSrcPortSample: Filter = {
-  colId: ColumnsId.srcport,
+  def: findFilter((k: string) => k, 'src_port')!,
   values: [{ v: '21', display: 'ftp' }]
 };

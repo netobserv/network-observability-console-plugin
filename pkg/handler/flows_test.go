@@ -14,12 +14,12 @@ func TestParseFilters(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Len(t, groups, 2)
-	assert.Equal(t, map[string]string{
-		"foo": "a,b",
-		"bar": "c",
+	assert.Equal(t, [][]string{
+		{"foo", "a,b"},
+		{"bar", "c"},
 	}, groups[0])
-	assert.Equal(t, map[string]string{
-		"baz": "d",
+	assert.Equal(t, [][]string{
+		{"baz", "d"},
 	}, groups[1])
 
 	// Resource path + port, match all
@@ -27,11 +27,11 @@ func TestParseFilters(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Len(t, groups, 1)
-	assert.Equal(t, map[string]string{
-		"SrcK8S_Type":      `"Pod"`,
-		"SrcK8S_Namespace": `"default"`,
-		"SrcK8S_Name":      `"test"`,
-		"SrcPort":          `8080`,
+	assert.Equal(t, [][]string{
+		{"SrcK8S_Type", `"Pod"`},
+		{"SrcK8S_Namespace", `"default"`},
+		{"SrcK8S_Name", `"test"`},
+		{"SrcPort", `8080`},
 	}, groups[0])
 
 	// Resource path + port, match any
@@ -39,13 +39,25 @@ func TestParseFilters(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Len(t, groups, 2)
-	assert.Equal(t, map[string]string{
-		"SrcK8S_Type":      `"Pod"`,
-		"SrcK8S_Namespace": `"default"`,
-		"SrcK8S_Name":      `"test"`,
+	assert.Equal(t, [][]string{
+		{"SrcK8S_Type", `"Pod"`},
+		{"SrcK8S_Namespace", `"default"`},
+		{"SrcK8S_Name", `"test"`},
 	}, groups[0])
 
-	assert.Equal(t, map[string]string{
-		"SrcPort": `8080`,
+	assert.Equal(t, [][]string{
+		{"SrcPort", `8080`},
 	}, groups[1])
+
+	// Resource path + name, match all
+	groups, err = parseFilters(url.QueryEscape(`SrcK8S_Type="Pod"&SrcK8S_Namespace="default"&SrcK8S_Name="test"&SrcK8S_Name="nomatch"`))
+	require.NoError(t, err)
+
+	assert.Len(t, groups, 1)
+	assert.Equal(t, [][]string{
+		{"SrcK8S_Type", `"Pod"`},
+		{"SrcK8S_Namespace", `"default"`},
+		{"SrcK8S_Name", `"test"`},
+		{"SrcK8S_Name", `"nomatch"`},
+	}, groups[0])
 }

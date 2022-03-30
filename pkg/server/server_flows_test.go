@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"regexp"
+	"strconv"
 	"testing"
 	"time"
 
@@ -16,6 +18,8 @@ import (
 	"github.com/netobserv/network-observability-console-plugin/pkg/loki"
 	"github.com/netobserv/network-observability-console-plugin/pkg/model"
 )
+
+var timeNowArg = regexp.MustCompile(`\${timeNow-(\d+)}`)
 
 func TestLokiFiltering(t *testing.T) {
 	testCases := []struct {
@@ -99,18 +103,9 @@ func TestLokiFiltering(t *testing.T) {
 	}, {
 		inputPath:     "?startTime=1640991600&endTime=1641160800",
 		outputQueries: []string{`?query={app="netobserv-flowcollector"}&start=1640991600&end=1641160800`},
-		// }, {
-		// 	inputPath:   "?timeRange=300000",
-		// 	outputQueries: []string{`?query={app="netobserv-flowcollector"}&start=${timeNow-300000}`},
-		// }, {
-		// 	inputPath:   "?timeRange=300000&match=any",
-		// 	outputQueries: []string{`?query={app="netobserv-flowcollector"}&start=${timeNow-300000}`},
-		// }, {
-		// 	inputPath:   "?timeRange=86400000&match=all",
-		// 	outputQueries: []string{`?query={app="netobserv-flowcollector"}&start=${timeNow-86400000}`},
-		// }, {
-		// 	inputPath:   "?timeRange=86400000&match=any",
-		// 	outputQueries: []string{`?query={app="netobserv-flowcollector"}&start=${timeNow-86400000}`},
+	}, {
+		inputPath:     "?timeRange=300000",
+		outputQueries: []string{`?query={app="netobserv-flowcollector"}&start=${timeNow-300000}`},
 	}, {
 		inputPath: "?filters=" + url.QueryEscape("SrcK8S_Namespace=\"exact-namespace\""),
 		outputQueries: []string{
@@ -187,13 +182,12 @@ func TestLokiFiltering(t *testing.T) {
 	backendSvc := httptest.NewServer(backendRoutes)
 	defer backendSvc.Close()
 
-	// timeNowArg := regexp.MustCompile(`\${timeNow-(\d+)}`)
 	nCall := 0
 
 	for _, tc := range testCases {
 		t.Run(tc.inputPath, func(t *testing.T) {
 			// WHEN the Loki flows endpoint is queried in the backend
-			// now := time.Now().Unix()
+			now := time.Now().Unix()
 			res, err := backendSvc.Client().Get(backendSvc.URL + "/api/loki/flows" + tc.inputPath)
 			require.NoError(t, err)
 			body, err := ioutil.ReadAll(res.Body)
@@ -207,11 +201,11 @@ func TestLokiFiltering(t *testing.T) {
 				expectedURLs = append(expectedURLs, "/loki/api/v1/query_range"+out)
 			}
 
-			// TODO: restore time mocking / testing
 			if len(expectedURLs) > 0 {
+				expectedWithTime := injectTime(t, expectedURLs, now)
 				for range expectedURLs {
 					requestURL := lokiMock.Calls[nCall].Arguments[1].(*http.Request).URL.String()
-					assert.Contains(t, expectedURLs, requestURL)
+					assert.Contains(t, expectedWithTime, requestURL)
 					nCall++
 				}
 			} else {
@@ -225,26 +219,28 @@ func TestLokiFiltering(t *testing.T) {
 				}
 				nCall++
 			}
-
-			// if subMatches := timeNowArg.FindStringSubmatch(tc.outputQueries[0]); len(subMatches) == 0 {
-			// 	assert.Contains(t, expectedURLs, requestURL)
-			// } else {
-			// 	// replace ${timeNow-<seconds>} by time.Now()-<seconds> for arguments where the
-			// 	// value is dynamically calculated via the non-mockable time.Now() function
-			// 	timeNowDiff, err := strconv.ParseInt(subMatches[1], 10, 64)
-			// 	require.NoError(t, err)
-			// 	// giving 1-second room to the start time to avoid flaky tests
-			// 	expectedStart := int(now - timeNowDiff)
-			// 	var possibleQueries []string
-			// 	for _, exp := range expectedURLs {
-			// 		possibleQueries = append(possibleQueries, []string{
-			// 			timeNowArg.ReplaceAllString(exp, strconv.Itoa(expectedStart-1)),
-			// 			timeNowArg.ReplaceAllString(exp, strconv.Itoa(expectedStart)),
-			// 			timeNowArg.ReplaceAllString(exp, strconv.Itoa(expectedStart+1)),
-			// 		}...)
-			// 	}
-			// 	assert.Contains(t, possibleQueries, requestURL)
-			// }
 		})
 	}
+}
+
+func injectTime(t *testing.T, queries []string, now int64) []string {
+	var modifiedQueries []string
+	for _, query := range queries {
+		if subMatches := timeNowArg.FindStringSubmatch(query); len(subMatches) > 0 {
+			// replace ${timeNow-<seconds>} by time.Now()-<seconds> for arguments where the
+			// value is dynamically calculated via the non-mockable time.Now() function
+			timeNowDiff, err := strconv.ParseInt(subMatches[1], 10, 64)
+			require.NoError(t, err)
+			// giving 1-second room to the start time to avoid flaky tests
+			expectedStart := int(now - timeNowDiff)
+			modifiedQueries = append(modifiedQueries, []string{
+				timeNowArg.ReplaceAllString(query, strconv.Itoa(expectedStart-1)),
+				timeNowArg.ReplaceAllString(query, strconv.Itoa(expectedStart)),
+				timeNowArg.ReplaceAllString(query, strconv.Itoa(expectedStart+1)),
+			}...)
+		} else {
+			modifiedQueries = append(modifiedQueries, query)
+		}
+	}
+	return modifiedQueries
 }

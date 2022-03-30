@@ -12,14 +12,13 @@ import NetflowTrafficParent from '../netflow-traffic-parent';
 const useResolvedExtensionsMock = useResolvedExtensions as jest.Mock;
 
 jest.mock('../../api/routes', () => ({
-  getFlows: jest.fn()
+  getFlows: jest.fn(() => Promise.resolve(FlowsSample))
 }));
 const getFlowsMock = getFlows as jest.Mock;
 
 describe('<NetflowTraffic />', () => {
   beforeAll(() => {
     useResolvedExtensionsMock.mockReturnValue(extensionsMock);
-    getFlowsMock.mockResolvedValue(FlowsSample);
   });
 
   it('should shallow component', async () => {

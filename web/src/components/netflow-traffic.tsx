@@ -21,14 +21,14 @@ import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
 import { Record } from '../api/ipfix';
 import { getFlows, getTopology } from '../api/routes';
-import { QueryOptions } from '../model/query-options';
+import { Match, FlowQuery, Reporter, groupFiltersMatchAll, groupFiltersMatchAny } from '../model/flow-query';
 import { TopologyMetrics } from '../api/loki';
 import { DefaultOptions, LayoutName, TopologyOptions } from '../model/topology';
 import { Column, getDefaultColumns } from '../utils/columns';
 import { TimeRange } from '../utils/datetime';
 import { getHTTPErrorDetails } from '../utils/errors';
 import { Feature, isAllowed } from '../utils/features-gate';
-import { Filter } from '../utils/filters';
+import { Filter } from '../model/filters';
 import {
   LOCAL_STORAGE_COLS_KEY,
   LOCAL_STORAGE_REFRESH_KEY,
@@ -37,19 +37,17 @@ import {
 } from '../utils/local-storage-hook';
 import { usePoll } from '../utils/poll-hook';
 import {
-  buildQueryArguments,
   getFiltersFromURL,
-  getQueryOptionsFromURL,
   getRangeFromURL,
-  NETFLOW_TRAFFIC_PATH,
-  QueryArguments,
-  removeURLQueryArguments,
-  setURLQueryArguments
+  setURLFilters,
+  setURLLimit,
+  setURLMatch,
+  setURLRange
 } from '../utils/router';
 import DisplayDropdown, { Size } from './dropdowns/display-dropdown';
 import { RefreshDropdown } from './dropdowns/refresh-dropdown';
 import TimeRangeDropdown from './dropdowns/time-range-dropdown';
-import { FiltersToolbar } from './filters-toolbar';
+import { FiltersToolbar } from './filters/filters-toolbar';
 import QuerySummary from './query-summary/query-summary';
 import { ColumnsModal } from './modals/columns-modal';
 import { ExportModal } from './modals/export-modal';
@@ -58,9 +56,11 @@ import { RecordPanel } from './netflow-record/record-panel';
 import NetflowTable from './netflow-table/netflow-table';
 import NetflowTopology from './netflow-topology/netflow-topology';
 import OptionsPanel from './netflow-topology/options-panel';
+import { netflowTrafficPath, removeURLParam, URLParam } from '../utils/url';
 import { loadConfig } from '../utils/config';
-import './netflow-traffic.css';
 import SummaryPanel from './query-summary/summary-panel';
+
+import './netflow-traffic.css';
 
 export type ViewId = 'table' | 'topology';
 
@@ -70,10 +70,11 @@ loadConfig();
 
 export const NetflowTraffic: React.FC<{
   forcedFilters?: Filter[];
-  initialQueryOptions?: QueryOptions;
-}> = ({ forcedFilters, initialQueryOptions }) => {
+}> = ({ forcedFilters }) => {
   const { push } = useHistory();
+  const { t } = useTranslation('plugin__network-observability-plugin');
   const [extensions] = useResolvedExtensions<ModelFeatureFlag>(isModelFeatureFlag);
+
   const [loading, setLoading] = React.useState(true);
   const [flows, setFlows] = React.useState<Record[]>([]);
   const [layout, setLayout] = React.useState<LayoutName>(LayoutName.ColaNoForce);
@@ -86,24 +87,30 @@ export const NetflowTraffic: React.FC<{
   const [isTRModalOpen, setTRModalOpen] = React.useState(false);
   const [isColModalOpen, setColModalOpen] = React.useState(false);
   const [isExportModalOpen, setExportModalOpen] = React.useState(false);
-  const { t } = useTranslation('plugin__network-observability-plugin');
-
   //TODO: move default view to an Overview like dashboard instead of table
   const [selectedViewId, setSelectedViewId] = React.useState<ViewId>('table');
+  const [filters, setFilters] = React.useState<Filter[]>([]);
+  const [match, setMatch] = React.useState<Match>('all');
+  const [reporter, setReporter] = React.useState<Reporter>('destination');
+  const [limit, setLimit] = React.useState<number>(100);
+  const [range, setRange] = React.useState<number | TimeRange>(getRangeFromURL());
+  const [interval, setInterval] = useLocalStorage<number | undefined>(LOCAL_STORAGE_REFRESH_KEY);
+  const [selectedRecord, setSelectedRecord] = React.useState<Record | undefined>(undefined);
 
-  //TODO: create a number range filter type for Packets & Bytes
+  const isInit = React.useRef(true);
   const [columns, setColumns] = useLocalStorage<Column[]>(LOCAL_STORAGE_COLS_KEY, getDefaultColumns(t), {
     id: 'id',
     criteria: 'isSelected'
   });
-  const [filters, setFilters] = React.useState<Filter[]>(getFiltersFromURL(columns));
-  const [range, setRange] = React.useState<number | TimeRange>(getRangeFromURL());
-  const [queryOptions, setQueryOptions] = React.useState<QueryOptions>(
-    initialQueryOptions ? initialQueryOptions : getQueryOptionsFromURL()
-  );
-  const [interval, setInterval] = useLocalStorage<number | undefined>(LOCAL_STORAGE_REFRESH_KEY);
-  const isInit = React.useRef(true);
-  const [selectedRecord, setSelectedRecord] = React.useState<Record | undefined>(undefined);
+
+  React.useEffect(() => {
+    // Init state from URL
+    if (!forcedFilters) {
+      getFiltersFromURL(t)?.then(setFilters);
+    }
+    // disabling exhaustive-deps: tests hang when "t" passed as dependency (useTranslation not stable?)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [forcedFilters]);
 
   const onSelect = (record?: Record) => {
     setTRModalOpen(false);
@@ -111,50 +118,61 @@ export const NetflowTraffic: React.FC<{
     setSelectedRecord(record);
   };
 
-  const getQueryArguments = React.useCallback(() => {
-    return buildQueryArguments(forcedFilters ? forcedFilters : filters, range, queryOptions);
-  }, [filters, forcedFilters, queryOptions, range]);
-
-  const tick = React.useCallback(
-    (queryArgs?: QueryArguments) => {
-      const qa = queryArgs ?? getQueryArguments();
-      setLoading(true);
-      setError(undefined);
-      switch (selectedViewId) {
-        case 'table':
-          getFlows(qa)
-            .then(setFlows)
-            .catch(err => {
-              setFlows([]);
-              const errorMessage = getHTTPErrorDetails(err);
-              setError(errorMessage);
-            })
-            .finally(() => {
-              setLoading(false);
-            });
-          break;
-        case 'topology':
-          getTopology(qa)
-            .then(setMetrics)
-            .catch(err => {
-              setFlows([]);
-              const errorMessage = getHTTPErrorDetails(err);
-              setError(errorMessage);
-            })
-            .finally(() => {
-              setLoading(false);
-            });
-          break;
-        default:
-          console.error('tick called on not implemented view Id', selectedViewId);
-          setLoading(false);
-          break;
+  const buildFlowQuery = React.useCallback((): FlowQuery => {
+    const f = forcedFilters || filters;
+    const groupedFilters = match === 'any' ? groupFiltersMatchAny(f) : groupFiltersMatchAll(f);
+    const query: FlowQuery = {
+      filters: groupedFilters,
+      limit: limit,
+      reporter: reporter
+    };
+    if (range) {
+      if (typeof range === 'number') {
+        query.timeRange = range;
+      } else if (typeof range === 'object') {
+        query.startTime = range.from.toString();
+        query.endTime = range.to.toString();
       }
-    },
-    [getQueryArguments, selectedViewId]
-  );
+    }
+    return query;
+  }, [filters, forcedFilters, match, limit, reporter, range]);
 
-  // Rewrite URL params on state change and tick
+  const tick = React.useCallback(() => {
+    setLoading(true);
+    setError(undefined);
+    switch (selectedViewId) {
+      case 'table':
+        getFlows(buildFlowQuery())
+          .then(setFlows)
+          .catch(err => {
+            setFlows([]);
+            setError(getHTTPErrorDetails(err));
+          })
+          .finally(() => {
+            setLoading(false);
+          });
+        break;
+      case 'topology':
+        getTopology(qa)
+          .then(setMetrics)
+          .catch(err => {
+            setFlows([]);
+            setError(getHTTPErrorDetails(err));
+          })
+          .finally(() => {
+            setLoading(false);
+          });
+        break;
+      default:
+        console.error('tick called on not implemented view Id', selectedViewId);
+        setLoading(false);
+        break;
+    }
+  }, [buildFlowQuery, selectedViewId]);
+
+  usePoll(tick, interval);
+
+  // tick on state change
   React.useEffect(() => {
     // Skip on init if forcedFilters not set
     if (isInit.current) {
@@ -163,12 +181,22 @@ export const NetflowTraffic: React.FC<{
         return;
       }
     }
-    const qa = getQueryArguments();
-    setURLQueryArguments(qa);
-    tick(qa);
-  }, [filters, forcedFilters, range, queryOptions, tick, getQueryArguments]);
+    tick();
+  }, [forcedFilters, tick]);
 
-  usePoll(tick, interval);
+  // Rewrite URL params on state change
+  React.useEffect(() => {
+    setURLFilters(forcedFilters || filters);
+  }, [filters, forcedFilters]);
+  React.useEffect(() => {
+    setURLRange(range);
+  }, [range]);
+  React.useEffect(() => {
+    setURLLimit(limit);
+  }, [limit]);
+  React.useEffect(() => {
+    setURLMatch(match);
+  }, [match]);
 
   // updates table filters and clears up the table for proper visualization of the
   // updating process
@@ -178,13 +206,11 @@ export const NetflowTraffic: React.FC<{
   };
 
   const clearFilters = () => {
-    if (_.isEmpty(forcedFilters)) {
-      if (!_.isEmpty(filters)) {
-        removeURLQueryArguments(filters!.map(f => f.colId));
-      }
+    if (forcedFilters) {
+      push(netflowTrafficPath);
+    } else if (filters) {
+      removeURLParam(URLParam.Filters);
       updateTableFilters([]);
-    } else {
-      push(NETFLOW_TRAFFIC_PATH);
     }
   };
 
@@ -283,10 +309,10 @@ export const NetflowTraffic: React.FC<{
           columns={getDefaultColumns(t, false, false)}
           filters={filters}
           range={range}
-          options={queryOptions}
+          reporter={reporter}
           setFilters={setFilters}
           setRange={setRange}
-          setQueryOptions={setQueryOptions}
+          setReporter={setReporter}
           onClose={() => onSelect(undefined)}
         />
       );
@@ -370,12 +396,10 @@ export const NetflowTraffic: React.FC<{
       }
       <FiltersToolbar
         id="filter-toolbar"
-        columns={columns}
         filters={filters}
         setFilters={updateTableFilters}
         clearFilters={clearFilters}
-        queryOptions={queryOptions}
-        setQueryOptions={setQueryOptions}
+        queryOptionsProps={{ limit, setLimit, match, setMatch, reporter, setReporter }}
         forcedFilters={forcedFilters}
         actions={actions()}
       >
@@ -415,9 +439,8 @@ export const NetflowTraffic: React.FC<{
         id="export-modal"
         isModalOpen={isExportModalOpen}
         setModalOpen={setExportModalOpen}
-        queryArguments={getQueryArguments()}
+        flowQuery={buildFlowQuery()}
         columns={columns.filter(c => c.fieldName)}
-        queryOptions={queryOptions}
         range={range}
         filters={forcedFilters ? forcedFilters : filters}
       />

@@ -26,25 +26,27 @@ type errorWithCode struct {
 	code int
 }
 
+type keyValues = []string
+
 // Example of raw filters (url-encoded):
 // foo=a,b&bar=c|baz=d
-func parseFilters(raw string) ([]map[string]string, error) {
-	var parsed []map[string]string
+func parseFilters(raw string) ([][]keyValues, error) {
+	var parsed [][]keyValues
 	decoded, err := url.QueryUnescape(raw)
 	if err != nil {
 		return nil, err
 	}
 	groups := strings.Split(decoded, "|")
 	for _, group := range groups {
-		m := make(map[string]string)
-		parsed = append(parsed, m)
+		var andFilters []keyValues
 		filters := strings.Split(group, "&")
 		for _, filter := range filters {
 			pair := strings.Split(filter, "=")
 			if len(pair) == 2 {
-				m[pair[0]] = pair[1]
+				andFilters = append(andFilters, pair)
 			}
 		}
+		parsed = append(parsed, andFilters)
 	}
 	return parsed, nil
 }
@@ -68,7 +70,10 @@ func GetFlows(cfg loki.Config) func(w http.ResponseWriter, r *http.Request) {
 	lokiClient := newLokiClient(&cfg)
 
 	return func(w http.ResponseWriter, r *http.Request) {
-		flows, code, err := getFlows(cfg, lokiClient, r.URL.Query())
+		params := r.URL.Query()
+		hlog.Debugf("GetFlows query params: %s", params)
+
+		flows, code, err := getFlows(cfg, lokiClient, params)
 		if err != nil {
 			writeError(w, code, err.Error())
 			return
@@ -79,8 +84,6 @@ func GetFlows(cfg loki.Config) func(w http.ResponseWriter, r *http.Request) {
 }
 
 func getFlows(cfg loki.Config, client httpclient.HTTPClient, params url.Values) ([]byte, int, error) {
-	hlog.Debugf("getFlows query params: %s", params)
-
 	start, err := getStartTime(params)
 	if err != nil {
 		return nil, http.StatusBadRequest, err
@@ -128,6 +131,6 @@ func getFlows(cfg loki.Config, client httpclient.HTTPClient, params url.Values) 
 		rawJSON = resp
 	}
 
-	hlog.Tracef("GetFlows raw response: %v", rawJSON)
+	hlog.Tracef("GetFlows raw response: %v", string(rawJSON))
 	return rawJSON, http.StatusOK, nil
 }

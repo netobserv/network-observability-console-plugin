@@ -1,11 +1,11 @@
 import { TFunction } from 'i18next';
 import _ from 'lodash';
+import { FilterId } from '../model/filters';
 import { Fields, Labels, Record } from '../api/ipfix';
 import { compareIPs } from '../utils/ip';
 import { comparePorts } from '../utils/port';
 import { compareProtocols } from '../utils/protocol';
 import { compareNumbers, compareStrings } from './base-compare';
-import { FilterType } from './filters';
 
 export enum ColumnsId {
   timestamp = 'timestamp',
@@ -54,8 +54,8 @@ export interface Column {
   group?: string;
   name: string;
   fieldName?: keyof Fields | keyof Labels | 'Timestamp';
+  quickFilter?: FilterId;
   isSelected: boolean;
-  filterType: FilterType;
   value: (flow: Record) => string | number | string[] | number[];
   sort(a: Record, b: Record, col: Column): number;
   // width in "em"
@@ -147,7 +147,6 @@ export const getCommonColumns = (t: TFunction, withConcatenatedFields = true): C
       id: ColumnsId.name,
       name: t('Names'),
       isSelected: false,
-      filterType: FilterType.K8S_NAMES,
       value: f => getSrcOrDstValue(f.fields.SrcK8S_Name, f.fields.DstK8S_Name),
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
       width: 15
@@ -156,7 +155,6 @@ export const getCommonColumns = (t: TFunction, withConcatenatedFields = true): C
       id: ColumnsId.type,
       name: t('Kinds'),
       isSelected: false,
-      filterType: FilterType.KIND,
       value: f => getSrcOrDstValue(f.fields.SrcK8S_Type, f.fields.DstK8S_Type),
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
       width: 10
@@ -165,7 +163,6 @@ export const getCommonColumns = (t: TFunction, withConcatenatedFields = true): C
       id: ColumnsId.owner,
       name: t('Owners'),
       isSelected: false,
-      filterType: FilterType.K8S_NAMES,
       value: f => getSrcOrDstValue(f.labels.SrcK8S_OwnerName, f.labels.DstK8S_OwnerName),
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
       width: 15
@@ -174,7 +171,6 @@ export const getCommonColumns = (t: TFunction, withConcatenatedFields = true): C
       id: ColumnsId.ownertype,
       name: t('Owner Kinds'),
       isSelected: false,
-      filterType: FilterType.KIND,
       value: f => getSrcOrDstValue(f.fields.SrcK8S_OwnerType, f.fields.DstK8S_OwnerType),
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
       width: 10
@@ -183,7 +179,6 @@ export const getCommonColumns = (t: TFunction, withConcatenatedFields = true): C
       id: ColumnsId.namespace,
       name: t('Namespaces'),
       isSelected: false,
-      filterType: FilterType.K8S_NAMES,
       value: f => getSrcOrDstValue(f.labels.SrcK8S_Namespace, f.labels.DstK8S_Namespace),
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
       width: 15
@@ -192,7 +187,6 @@ export const getCommonColumns = (t: TFunction, withConcatenatedFields = true): C
       id: ColumnsId.addr,
       name: t('Addresses'),
       isSelected: false,
-      filterType: FilterType.ADDRESS,
       value: f => getSrcOrDstValue(f.fields.SrcAddr, f.fields.DstAddr),
       sort: (a, b, col) => compareIPs(col.value(a) as string, col.value(b) as string),
       width: 10
@@ -201,16 +195,14 @@ export const getCommonColumns = (t: TFunction, withConcatenatedFields = true): C
       id: ColumnsId.port,
       name: t('Ports'),
       isSelected: false,
-      filterType: FilterType.PORT,
       value: f => getSrcOrDstValue(f.fields.SrcPort, f.fields.DstPort),
       sort: (a, b, col) => comparePorts(col.value(a) as number, col.value(b) as number),
       width: 10
     },
     {
       id: ColumnsId.host,
-      name: t('Hosts'),
+      name: t('Node IPs'),
       isSelected: false,
-      filterType: FilterType.ADDRESS,
       value: f => getSrcOrDstValue(f.fields.SrcK8S_HostIP, f.fields.DstK8S_HostIP),
       sort: (a, b, col) => compareIPs(col.value(a) as string, col.value(b) as string),
       width: 10
@@ -224,7 +216,6 @@ export const getCommonColumns = (t: TFunction, withConcatenatedFields = true): C
         id: ColumnsId.kubeobject,
         name: t('Kubernetes Objects'),
         isSelected: false,
-        filterType: FilterType.KIND_NAMESPACE_NAME,
         value: f => [
           ...getConcatenatedValue(
             f.fields.SrcAddr,
@@ -248,7 +239,6 @@ export const getCommonColumns = (t: TFunction, withConcatenatedFields = true): C
         id: ColumnsId.ownerkubeobject,
         name: t('Owner Kubernetes Objects'),
         isSelected: false,
-        filterType: FilterType.KIND_NAMESPACE_NAME,
         value: f => [
           ...getConcatenatedValue(
             f.fields.SrcAddr,
@@ -272,7 +262,6 @@ export const getCommonColumns = (t: TFunction, withConcatenatedFields = true): C
         id: ColumnsId.addrport,
         name: t('Addresses & Ports'),
         isSelected: false,
-        filterType: FilterType.ADDRESS_PORT,
         value: f => [
           ...getConcatenatedValue(f.fields.SrcAddr, f.fields.SrcPort),
           ...getConcatenatedValue(f.fields.DstAddr, f.fields.DstPort)
@@ -293,8 +282,8 @@ export const getSrcColumns = (t: TFunction): Column[] => {
       group: t('Source'),
       name: t('Name'),
       fieldName: 'SrcK8S_Name',
+      quickFilter: 'src_name',
       isSelected: true,
-      filterType: FilterType.K8S_NAMES,
       value: f => f.fields.SrcK8S_Name || '',
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
       width: 15
@@ -304,8 +293,8 @@ export const getSrcColumns = (t: TFunction): Column[] => {
       group: t('Source'),
       name: t('Kind'),
       fieldName: 'SrcK8S_Type',
+      quickFilter: 'src_kind',
       isSelected: false,
-      filterType: FilterType.KIND,
       value: f => f.fields.SrcK8S_Type || '',
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
       width: 10
@@ -315,8 +304,8 @@ export const getSrcColumns = (t: TFunction): Column[] => {
       group: t('Source'),
       name: t('Owner'),
       fieldName: 'SrcK8S_OwnerName',
+      quickFilter: 'src_owner_name',
       isSelected: false,
-      filterType: FilterType.K8S_NAMES,
       value: f => f.labels.SrcK8S_OwnerName || '',
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
       width: 15
@@ -326,8 +315,8 @@ export const getSrcColumns = (t: TFunction): Column[] => {
       group: t('Source'),
       name: t('Owner Kind'),
       fieldName: 'SrcK8S_OwnerType',
+      quickFilter: 'src_kind',
       isSelected: false,
-      filterType: FilterType.KIND,
       value: f => f.fields.SrcK8S_OwnerType || '',
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
       width: 10
@@ -337,8 +326,8 @@ export const getSrcColumns = (t: TFunction): Column[] => {
       group: t('Source'),
       name: t('Namespace'),
       fieldName: 'SrcK8S_Namespace',
+      quickFilter: 'src_namespace',
       isSelected: true,
-      filterType: FilterType.K8S_NAMES,
       value: f => f.labels.SrcK8S_Namespace || '',
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
       width: 15
@@ -348,8 +337,8 @@ export const getSrcColumns = (t: TFunction): Column[] => {
       group: t('Source'),
       name: t('Address'),
       fieldName: 'SrcAddr',
+      quickFilter: 'src_address',
       isSelected: false,
-      filterType: FilterType.ADDRESS,
       value: f => f.fields.SrcAddr,
       sort: (a, b, col) => compareIPs(col.value(a) as string, col.value(b) as string),
       width: 10
@@ -359,8 +348,8 @@ export const getSrcColumns = (t: TFunction): Column[] => {
       group: t('Source'),
       name: t('Port'),
       fieldName: 'SrcPort',
+      quickFilter: 'src_port',
       isSelected: true,
-      filterType: FilterType.PORT,
       value: f => f.fields.SrcPort,
       sort: (a, b, col) => comparePorts(col.value(a) as number, col.value(b) as number),
       width: 10
@@ -368,10 +357,10 @@ export const getSrcColumns = (t: TFunction): Column[] => {
     {
       id: ColumnsId.srchost,
       group: t('Source'),
-      name: t('Host'),
+      name: t('Node IP'),
       fieldName: 'SrcK8S_HostIP',
+      quickFilter: 'src_host',
       isSelected: false,
-      filterType: FilterType.ADDRESS,
       value: f => f.fields.SrcK8S_HostIP || '',
       sort: (a, b, col) => compareIPs(col.value(a) as string, col.value(b) as string),
       width: 10
@@ -386,8 +375,8 @@ export const getDstColumns = (t: TFunction): Column[] => {
       group: t('Destination'),
       name: t('Name'),
       fieldName: 'DstK8S_Name',
+      quickFilter: 'dst_name',
       isSelected: true,
-      filterType: FilterType.K8S_NAMES,
       value: f => f.fields.DstK8S_Name || '',
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
       width: 15
@@ -397,8 +386,8 @@ export const getDstColumns = (t: TFunction): Column[] => {
       group: t('Destination'),
       name: t('Owner'),
       fieldName: 'DstK8S_OwnerName',
+      quickFilter: 'dst_owner_name',
       isSelected: false,
-      filterType: FilterType.K8S_NAMES,
       value: f => f.labels.DstK8S_OwnerName || '',
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
       width: 15
@@ -408,8 +397,8 @@ export const getDstColumns = (t: TFunction): Column[] => {
       group: t('Destination'),
       name: t('Kind'),
       fieldName: 'DstK8S_Type',
+      quickFilter: 'dst_kind',
       isSelected: false,
-      filterType: FilterType.KIND,
       value: f => f.fields.DstK8S_Type || '',
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
       width: 10
@@ -419,8 +408,8 @@ export const getDstColumns = (t: TFunction): Column[] => {
       group: t('Destination'),
       name: t('Owner Kind'),
       fieldName: 'DstK8S_OwnerType',
+      quickFilter: 'dst_kind',
       isSelected: false,
-      filterType: FilterType.KIND,
       value: f => f.fields.DstK8S_OwnerType || '',
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
       width: 10
@@ -430,8 +419,8 @@ export const getDstColumns = (t: TFunction): Column[] => {
       group: t('Destination'),
       name: t('Namespace'),
       fieldName: 'DstK8S_Namespace',
+      quickFilter: 'dst_namespace',
       isSelected: true,
-      filterType: FilterType.K8S_NAMES,
       value: f => f.labels.DstK8S_Namespace || '',
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
       width: 15
@@ -441,8 +430,8 @@ export const getDstColumns = (t: TFunction): Column[] => {
       group: t('Destination'),
       name: t('Address'),
       fieldName: 'DstAddr',
+      quickFilter: 'dst_address',
       isSelected: false,
-      filterType: FilterType.ADDRESS,
       value: f => f.fields.DstAddr,
       sort: (a, b, col) => compareIPs(col.value(a) as string, col.value(b) as string),
       width: 10
@@ -452,8 +441,8 @@ export const getDstColumns = (t: TFunction): Column[] => {
       group: t('Destination'),
       name: t('Port'),
       fieldName: 'DstPort',
+      quickFilter: 'dst_port',
       isSelected: true,
-      filterType: FilterType.PORT,
       value: f => f.fields.DstPort,
       sort: (a, b, col) => comparePorts(col.value(a) as number, col.value(b) as number),
       width: 10
@@ -461,10 +450,10 @@ export const getDstColumns = (t: TFunction): Column[] => {
     {
       id: ColumnsId.dsthost,
       group: t('Destination'),
-      name: t('Host'),
+      name: t('Node IP'),
       fieldName: 'DstK8S_HostIP',
+      quickFilter: 'dst_host',
       isSelected: false,
-      filterType: FilterType.ADDRESS,
       value: f => f.fields.DstK8S_HostIP || '',
       sort: (a, b, col) => compareIPs(col.value(a) as string, col.value(b) as string),
       width: 10
@@ -481,7 +470,6 @@ export const getSrcDstColumns = (t: TFunction, withConcatenatedFields = true): C
         group: t('Source'),
         name: t('Kubernetes Object'),
         isSelected: false,
-        filterType: FilterType.KIND_NAMESPACE_NAME,
         value: f =>
           getConcatenatedValue(
             f.fields.SrcAddr,
@@ -498,7 +486,6 @@ export const getSrcDstColumns = (t: TFunction, withConcatenatedFields = true): C
         group: t('Source'),
         name: t('Owner Kubernetes Object'),
         isSelected: false,
-        filterType: FilterType.KIND_NAMESPACE_NAME,
         value: f =>
           getConcatenatedValue(
             f.fields.SrcAddr,
@@ -515,7 +502,6 @@ export const getSrcDstColumns = (t: TFunction, withConcatenatedFields = true): C
         group: t('Source'),
         name: t('Address & Port'),
         isSelected: false,
-        filterType: FilterType.ADDRESS_PORT,
         value: f => getConcatenatedValue(f.fields.SrcAddr, f.fields.SrcPort),
         sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
         width: 15
@@ -526,7 +512,6 @@ export const getSrcDstColumns = (t: TFunction, withConcatenatedFields = true): C
         group: t('Destination'),
         name: t('Kubernetes Object'),
         isSelected: false,
-        filterType: FilterType.KIND_NAMESPACE_NAME,
         value: f =>
           getConcatenatedValue(
             f.fields.DstAddr,
@@ -543,7 +528,6 @@ export const getSrcDstColumns = (t: TFunction, withConcatenatedFields = true): C
         group: t('Destination'),
         name: t('Owner Kubernetes Object'),
         isSelected: false,
-        filterType: FilterType.KIND_NAMESPACE_NAME,
         value: f =>
           getConcatenatedValue(
             f.fields.DstAddr,
@@ -560,7 +544,6 @@ export const getSrcDstColumns = (t: TFunction, withConcatenatedFields = true): C
         group: t('Destination'),
         name: t('Address & Port'),
         isSelected: false,
-        filterType: FilterType.ADDRESS_PORT,
         value: f => getConcatenatedValue(f.fields.DstAddr, f.fields.DstPort),
         sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
         width: 15
@@ -577,8 +560,8 @@ export const getExtraColumns = (t: TFunction): Column[] => {
       id: ColumnsId.proto,
       name: t('Protocol'),
       fieldName: 'Proto',
+      quickFilter: 'protocol',
       isSelected: false,
-      filterType: FilterType.PROTOCOL,
       value: f => f.fields.Proto,
       sort: (a, b, col) => compareProtocols(col.value(a) as number, col.value(b) as number),
       width: 10
@@ -588,8 +571,6 @@ export const getExtraColumns = (t: TFunction): Column[] => {
       name: t('Direction'),
       fieldName: 'FlowDirection',
       isSelected: false,
-      // filters are managed via QuickFilters rather than per-column filter search, so set filterType to NONE
-      filterType: FilterType.NONE,
       value: f => f.labels.FlowDirection,
       sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
       width: 10
@@ -599,7 +580,6 @@ export const getExtraColumns = (t: TFunction): Column[] => {
       name: t('Bytes'),
       fieldName: 'Bytes',
       isSelected: true,
-      filterType: FilterType.NONE,
       value: f => f.fields.Bytes,
       sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
       width: 5
@@ -609,7 +589,6 @@ export const getExtraColumns = (t: TFunction): Column[] => {
       name: t('Packets'),
       fieldName: 'Packets',
       isSelected: true,
-      filterType: FilterType.NONE,
       value: f => f.fields.Packets,
       sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
       width: 5
@@ -623,7 +602,6 @@ export const getDefaultColumns = (t: TFunction, withCommonFields = true, withCon
     name: t('Date & time'),
     fieldName: 'Timestamp',
     isSelected: true,
-    filterType: FilterType.NONE,
     value: f => f.timestamp,
     sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
     width: 15

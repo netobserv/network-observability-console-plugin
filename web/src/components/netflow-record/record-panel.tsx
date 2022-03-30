@@ -13,14 +13,15 @@ import {
 import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { DEFAULT_FLOWDIR, DEFAULT_TIME_RANGE, flowdirToReporter } from '../../utils/router';
+import { defaultTimeRange, flowdirToReporter } from '../../utils/router';
 import { Record } from '../../api/ipfix';
-import { QueryOptions } from '../../model/query-options';
 import { Column, ColumnsId, getColumnGroups } from '../../utils/columns';
 import { TimeRange } from '../../utils/datetime';
 import { getDateMsInSeconds } from '../../utils/duration';
-import { Filter } from '../../utils/filters';
-import RecordField from './record-field';
+import { Filter } from '../../model/filters';
+import { findFilter } from '../../utils/filter-definitions';
+import RecordField, { RecordFieldFilter } from './record-field';
+import { Reporter } from '../../model/flow-query';
 import './record-panel.css';
 
 export type RecordDrawerProps = {
@@ -28,10 +29,10 @@ export type RecordDrawerProps = {
   columns: Column[];
   filters: Filter[];
   range: number | TimeRange;
-  options: QueryOptions;
+  reporter: Reporter;
   setFilters: (v: Filter[]) => void;
   setRange: (r: number | TimeRange) => void;
-  setQueryOptions: (opts: QueryOptions) => void;
+  setReporter: (r: Reporter) => void;
   onClose: () => void;
   id?: string;
 };
@@ -42,87 +43,94 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
   columns,
   filters,
   range,
-  options,
+  reporter,
   setFilters,
   setRange,
-  setQueryOptions,
+  setReporter,
   onClose
 }) => {
   const { t } = useTranslation('plugin__network-observability-plugin');
 
-  const onClick = React.useCallback(
-    (col: Column, isDelete: boolean) => {
-      if (!record) {
-        return;
-      }
-
-      if (isDelete) {
-        switch (col.id) {
-          case ColumnsId.timestamp:
-            setRange(DEFAULT_TIME_RANGE);
-            break;
-          case ColumnsId.flowdir:
-            setQueryOptions({ ...options, reporter: flowdirToReporter[DEFAULT_FLOWDIR] });
-            break;
-          default:
-            setFilters(filters.filter((f: Filter) => f.colId !== col.id));
-            break;
-        }
-      } else {
-        const value = col.value(record);
-        switch (col.id) {
-          case ColumnsId.timestamp:
-            //Filter at exact same date in ms
-            const dateSeconds = getDateMsInSeconds(Number(value));
-            setRange({ from: dateSeconds, to: dateSeconds + 1 });
-            break;
-          case ColumnsId.flowdir:
-            setQueryOptions({ ...options, reporter: flowdirToReporter[value as string] });
-            break;
-          default:
-            const values = [
-              {
-                v: Array.isArray(value) ? value.join(value.length == 2 ? '.' : ':') : value.toString()
-              }
-            ];
-            const result = _.cloneDeep(filters);
-            const found = result.find(f => f.colId === col.id);
-            if (found) {
-              found.values = values;
-            } else {
-              result.push({ colId: col.id, values: values });
-            }
-            setFilters(result);
-            break;
-        }
-      }
-    },
-    [filters, options, record, setFilters, setQueryOptions, setRange]
-  );
-
   const getFilter = (col: Column) => {
-    let isDelete = false;
     if (record) {
       const value = col.value(record);
       switch (col.id) {
         case ColumnsId.timestamp:
-          isDelete = typeof range !== 'number' && range.from === getDateMsInSeconds(Number(value));
-          break;
+          return getTimeRangeFilter(col, value);
         case ColumnsId.flowdir:
-          isDelete = options.reporter === flowdirToReporter[value as string];
-          break;
+          return getFlowdirFilter(col, value);
         default:
-          isDelete =
-            filters.find((f: Filter) => f.colId === col.id && f.values.find(v => v.v === value.toString())) !==
-            undefined;
-          break;
+          return getGenericFilter(col, value);
       }
     }
-    return {
-      onClick,
-      isDelete
-    };
+    return undefined;
   };
+
+  const getTimeRangeFilter = React.useCallback(
+    (col: Column, value: unknown): RecordFieldFilter => {
+      const isDelete = typeof range !== 'number' && range.from === getDateMsInSeconds(Number(value));
+      return {
+        onClick: () => {
+          if (isDelete) {
+            setRange(defaultTimeRange);
+          } else {
+            //Filter at exact same date in ms
+            const dateSeconds = getDateMsInSeconds(Number(value));
+            setRange({ from: dateSeconds, to: dateSeconds + 1 });
+          }
+        },
+        isDelete: isDelete
+      };
+    },
+    [range, setRange]
+  );
+
+  const getFlowdirFilter = React.useCallback(
+    (col: Column, value: unknown): RecordFieldFilter => {
+      const recReporter = flowdirToReporter[value as string];
+      const isDelete = reporter === recReporter;
+      return {
+        onClick: () => setReporter(isDelete ? 'both' : recReporter),
+        isDelete: isDelete
+      };
+    },
+    [reporter, setReporter]
+  );
+
+  const getGenericFilter = React.useCallback(
+    (col: Column, value: unknown): RecordFieldFilter | undefined => {
+      const def = col.quickFilter ? findFilter(t, col.quickFilter) : undefined;
+      if (!def) {
+        return undefined;
+      }
+      const isDelete = filters.some(f => f.def.id === def.id && f.values.some(v => v.v === String(value)));
+      return {
+        onClick: () => {
+          if (isDelete) {
+            setFilters(filters.filter(f => f.def.id !== def.id));
+          } else {
+            const values = [
+              {
+                v: Array.isArray(value) ? value.join(value.length == 2 ? '.' : ':') : String(value)
+              }
+            ];
+            // CHECK / FIXME cloneDeep won't work?
+            // TODO: is it relevant to show composed columns?
+            const newFilters = _.cloneDeep(filters);
+            const found = newFilters.find(f => f.def.id === def.id);
+            if (found) {
+              found.values = values;
+            } else {
+              newFilters.push({ def: def, values: values });
+            }
+            setFilters(newFilters);
+          }
+        },
+        isDelete: isDelete
+      };
+    },
+    [t, filters, setFilters]
+  );
 
   const groups = getColumnGroups(columns);
   return (

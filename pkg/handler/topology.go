@@ -57,7 +57,7 @@ func getTopologyFlows(cfg loki.Config, client httpclient.HTTPClient, params url.
 		rawJSON = res
 	} else {
 		// else, run all at once
-		var filters map[string]string
+		var filters [][]string
 		if len(filterGroups) > 0 {
 			filters = filterGroups[0]
 		}
@@ -76,7 +76,7 @@ func getTopologyFlows(cfg loki.Config, client httpclient.HTTPClient, params url.
 	return rawJSON, http.StatusOK, nil
 }
 
-func buildTopologyQuery(cfg *loki.Config, filters map[string]string, start, end, limit, reporter string) (string, int, error) {
+func buildTopologyQuery(cfg *loki.Config, filters [][]string, start, end, limit, reporter string) (string, int, error) {
 	qb, err := loki.NewTopologyQuery(cfg, start, end, limit, reporter)
 	if err != nil {
 		return "", http.StatusBadRequest, err

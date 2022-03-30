@@ -19,20 +19,24 @@ import (
 func GetNamespaces(cfg loki.Config) func(w http.ResponseWriter, r *http.Request) {
 	lokiClient := newLokiClient(&cfg)
 	return func(w http.ResponseWriter, r *http.Request) {
+		// Initialize values explicitely to avoid null json when emtpy
+		values := []string{}
+
 		// Fetch and merge values for SrcK8S_Namespace and DstK8S_Namespace
-		values, code, err := getLabelValues(&cfg, lokiClient, fields.SrcNamespace)
+		values1, code, err := getLabelValues(&cfg, lokiClient, fields.SrcNamespace)
 		if err != nil {
 			writeError(w, code, "Error while fetching label source namespace values from Loki: "+err.Error())
 			return
 		}
+		values = append(values, values1...)
 
 		values2, code, err := getLabelValues(&cfg, lokiClient, fields.DstNamespace)
 		if err != nil {
 			writeError(w, code, "Error while fetching label destination namespace values from Loki: "+err.Error())
 			return
 		}
-
 		values = append(values, values2...)
+
 		writeJSON(w, http.StatusOK, utils.NonEmpty(utils.Dedup(values)))
 	}
 }
@@ -66,33 +70,38 @@ func GetNames(cfg loki.Config) func(w http.ResponseWriter, r *http.Request) {
 		namespace := params["namespace"]
 		kind := params["kind"]
 
+		// Initialize names explicitely to avoid null json when emtpy
+		names := []string{}
+
 		// TODO: parallelize
-		names, code, err := getNamesForPrefix(cfg, lokiClient, fields.Src, kind, namespace)
+		names1, code, err := getNamesForPrefix(cfg, lokiClient, fields.Src, kind, namespace)
 		if err != nil {
 			writeError(w, code, err.Error())
 			return
 		}
+		names = append(names, names1...)
+
 		names2, code, err := getNamesForPrefix(cfg, lokiClient, fields.Dst, kind, namespace)
 		if err != nil {
 			writeError(w, code, err.Error())
 			return
 		}
-
 		names = append(names, names2...)
+
 		writeJSON(w, http.StatusOK, utils.NonEmpty(utils.Dedup(names)))
 	}
 }
 
 func getNamesForPrefix(cfg loki.Config, lokiClient httpclient.HTTPClient, prefix, kind, namespace string) ([]string, int, error) {
-	lokiParams := map[string]string{
-		prefix + fields.Namespace: exact(namespace),
-	}
+	lokiParams := [][]string{{
+		prefix + fields.Namespace, exact(namespace),
+	}}
 	var fieldToExtract string
 	if utils.IsOwnerKind(kind) {
-		lokiParams[prefix+fields.OwnerType] = exact(kind)
+		lokiParams = append(lokiParams, []string{prefix + fields.OwnerType, exact(kind)})
 		fieldToExtract = prefix + fields.OwnerName
 	} else {
-		lokiParams[prefix+fields.Type] = exact(kind)
+		lokiParams = append(lokiParams, []string{prefix + fields.Type, exact(kind)})
 		fieldToExtract = prefix + fields.Name
 	}
 

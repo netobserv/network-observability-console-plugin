@@ -1,12 +1,13 @@
 import axios from 'axios';
-import { getURLParams, QueryArguments } from '../utils/router';
+import { buildExportQuery } from '../model/export-query';
+import { FlowQuery } from '../model/flow-query';
 import { Record } from './ipfix';
 import { calculateMatrixTotals, parseStream, StreamResult, TopologyMetrics } from './loki';
 import { Config, defaultConfig } from '../model/config';
 
 const host = '/api/proxy/plugin/network-observability-plugin/backend/';
 
-export const getFlows = (params: QueryArguments): Promise<Record[]> => {
+export const getFlows = (params: FlowQuery): Promise<Record[]> => {
   return axios.get(host + '/api/loki/flows', { params }).then(r => {
     if (r.status >= 400) {
       throw new Error(`${r.statusText} [code=${r.status}]`);
@@ -15,13 +16,9 @@ export const getFlows = (params: QueryArguments): Promise<Record[]> => {
   });
 };
 
-export const getExportFlowsURL = (params: QueryArguments, filteredColumns?: string[]): string => {
-  const urlParams = getURLParams(params);
-  urlParams.set('format', 'csv');
-  if (filteredColumns) {
-    urlParams.set('columns', String(filteredColumns));
-  }
-  return `${host}api/loki/export?${urlParams.toString()}`;
+export const getExportFlowsURL = (params: FlowQuery, columns?: string[]): string => {
+  const exportQuery = buildExportQuery(params, columns);
+  return `${host}api/loki/export?${exportQuery}`;
 };
 
 export const getNamespaces = (): Promise<string[]> => {
@@ -42,7 +39,7 @@ export const getResources = (namespace: string, kind: string): Promise<string[]>
   });
 };
 
-export const getTopology = (params: QueryArguments): Promise<TopologyMetrics[]> => {
+export const getTopology = (params: FlowQuery): Promise<TopologyMetrics[]> => {
   return axios.get(host + '/api/loki/topology', { params }).then(r => {
     if (r.status >= 400) {
       throw new Error(`${r.statusText} [code=${r.status}]`);
