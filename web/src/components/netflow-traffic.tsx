@@ -20,8 +20,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
 import { Record } from '../api/ipfix';
-import { getFlows, getConfig } from '../api/routes';
-import { Config, ConfigContext } from '../model/config';
+import { getFlows } from '../api/routes';
 import { QueryOptions } from '../model/query-options';
 import { DefaultOptions, TopologyOptions } from '../model/topology';
 import { Column, getDefaultColumns } from '../utils/columns';
@@ -33,7 +32,6 @@ import {
   LOCAL_STORAGE_COLS_KEY,
   LOCAL_STORAGE_REFRESH_KEY,
   LOCAL_STORAGE_SIZE_KEY,
-  LOCAL_STORAGE_CONFIG_KEY,
   useLocalStorage
 } from '../utils/local-storage-hook';
 import { usePoll } from '../utils/poll-hook';
@@ -59,9 +57,14 @@ import NetflowTable from './netflow-table/netflow-table';
 import { LayoutName } from '../model/topology';
 import NetflowTopology from './netflow-topology/netflow-topology';
 import OptionsPanel from './netflow-topology/options-panel';
+import { loadConfig } from '../utils/config';
 import './netflow-traffic.css';
 
 export type ViewId = 'table' | 'topology';
+
+// Note / improvment:
+// Could also be loaded via an intermediate loader component
+loadConfig();
 
 export const NetflowTraffic: React.FC<{
   forcedFilters?: Filter[];
@@ -76,7 +79,6 @@ export const NetflowTraffic: React.FC<{
   const [isShowTopologyOptions, setShowTopologyOptions] = React.useState<boolean>(false);
   const [error, setError] = React.useState<string | undefined>();
   const [size, setSize] = useLocalStorage<Size>(LOCAL_STORAGE_SIZE_KEY, 'm');
-  const [config, setConfig] = useLocalStorage<Config>(LOCAL_STORAGE_CONFIG_KEY);
   const [isTRModalOpen, setTRModalOpen] = React.useState(false);
   const [isColModalOpen, setColModalOpen] = React.useState(false);
   const [isExportModalOpen, setExportModalOpen] = React.useState(false);
@@ -86,11 +88,11 @@ export const NetflowTraffic: React.FC<{
   const [selectedViewId, setSelectedViewId] = React.useState<ViewId>('table');
 
   //TODO: create a number range filter type for Packets & Bytes
-  const [columns, setColumns] = useLocalStorage<Column[]>(LOCAL_STORAGE_COLS_KEY, getDefaultColumns(t, config), {
+  const [columns, setColumns] = useLocalStorage<Column[]>(LOCAL_STORAGE_COLS_KEY, getDefaultColumns(t), {
     id: 'id',
     criteria: 'isSelected'
   });
-  const [filters, setFilters] = React.useState<Filter[]>(getFiltersFromURL(columns, config));
+  const [filters, setFilters] = React.useState<Filter[]>(getFiltersFromURL(columns));
   const [range, setRange] = React.useState<number | TimeRange>(getRangeFromURL());
   const [queryOptions, setQueryOptions] = React.useState<QueryOptions>(
     initialQueryOptions ? initialQueryOptions : getQueryOptionsFromURL()
@@ -151,15 +153,6 @@ export const NetflowTraffic: React.FC<{
   }, [filters, forcedFilters, range, queryOptions, tick, getQueryArguments]);
 
   usePoll(tick, interval);
-
-  React.useEffect(() => {
-    getConfig()
-      .then(setConfig)
-      .catch(err => {
-        const errorMessage = getHTTPErrorDetails(err);
-        console.log(errorMessage);
-      });
-  }, [setConfig]);
 
   // updates table filters and clears up the table for proper visualization of the
   // updating process
@@ -270,7 +263,7 @@ export const NetflowTraffic: React.FC<{
         <RecordPanel
           id="recordPanel"
           record={selectedRecord}
-          columns={getDefaultColumns(t, config, false, false)}
+          columns={getDefaultColumns(t, false, false)}
           filters={filters}
           range={range}
           options={queryOptions}
@@ -333,66 +326,64 @@ export const NetflowTraffic: React.FC<{
 
   return !_.isEmpty(extensions) ? (
     <PageSection id="pageSection">
-      <ConfigContext.Provider value={config}>
-        {
-          //display title only if forced filters is not set
-          _.isEmpty(forcedFilters) && (
-            <div id="pageHeader">
-              <div className="flex">
-                <Text component={TextVariants.h1}>{t('Network Traffic')}</Text>
-              </div>
-              {viewToggle()}
+      {
+        //display title only if forced filters is not set
+        _.isEmpty(forcedFilters) && (
+          <div id="pageHeader">
+            <div className="flex">
+              <Text component={TextVariants.h1}>{t('Network Traffic')}</Text>
             </div>
-          )
+            {viewToggle()}
+          </div>
+        )
+      }
+      <FiltersToolbar
+        id="filter-toolbar"
+        columns={columns}
+        filters={filters}
+        setFilters={updateTableFilters}
+        clearFilters={clearFilters}
+        queryOptions={queryOptions}
+        setQueryOptions={setQueryOptions}
+        forcedFilters={forcedFilters}
+        actions={actions()}
+      >
+        {
+          <OverflowMenu breakpoint="md">
+            {!_.isEmpty(forcedFilters) && viewToggle()}
+            {pageButtons()}
+          </OverflowMenu>
         }
-        <FiltersToolbar
-          id="filter-toolbar"
-          columns={columns}
-          filters={filters}
-          setFilters={updateTableFilters}
-          clearFilters={clearFilters}
-          queryOptions={queryOptions}
-          setQueryOptions={setQueryOptions}
-          forcedFilters={forcedFilters}
-          actions={actions()}
-        >
-          {
-            <OverflowMenu breakpoint="md">
-              {!_.isEmpty(forcedFilters) && viewToggle()}
-              {pageButtons()}
-            </OverflowMenu>
-          }
-        </FiltersToolbar>
-        <Drawer id="drawer" isExpanded={selectedRecord !== undefined || isShowTopologyOptions}>
-          <DrawerContent id="drawerContent" panelContent={panelContent()}>
-            <DrawerContentBody id="drawerBody">{pageContent()}</DrawerContentBody>
-          </DrawerContent>
-        </Drawer>
-        <TimeRangeModal
-          id="time-range-modal"
-          isModalOpen={isTRModalOpen}
-          setModalOpen={setTRModalOpen}
-          range={typeof range === 'object' ? range : undefined}
-          setRange={setRange}
-        />
-        <ColumnsModal
-          id="columns-modal"
-          isModalOpen={isColModalOpen}
-          setModalOpen={setColModalOpen}
-          columns={columns}
-          setColumns={setColumns}
-        />
-        <ExportModal
-          id="export-modal"
-          isModalOpen={isExportModalOpen}
-          setModalOpen={setExportModalOpen}
-          queryArguments={getQueryArguments()}
-          columns={columns.filter(c => c.fieldName)}
-          queryOptions={queryOptions}
-          range={range}
-          filters={forcedFilters ? forcedFilters : filters}
-        />
-      </ConfigContext.Provider>
+      </FiltersToolbar>
+      <Drawer id="drawer" isExpanded={selectedRecord !== undefined || isShowTopologyOptions}>
+        <DrawerContent id="drawerContent" panelContent={panelContent()}>
+          <DrawerContentBody id="drawerBody">{pageContent()}</DrawerContentBody>
+        </DrawerContent>
+      </Drawer>
+      <TimeRangeModal
+        id="time-range-modal"
+        isModalOpen={isTRModalOpen}
+        setModalOpen={setTRModalOpen}
+        range={typeof range === 'object' ? range : undefined}
+        setRange={setRange}
+      />
+      <ColumnsModal
+        id="columns-modal"
+        isModalOpen={isColModalOpen}
+        setModalOpen={setColModalOpen}
+        columns={columns}
+        setColumns={setColumns}
+      />
+      <ExportModal
+        id="export-modal"
+        isModalOpen={isExportModalOpen}
+        setModalOpen={setExportModalOpen}
+        queryArguments={getQueryArguments()}
+        columns={columns.filter(c => c.fieldName)}
+        queryOptions={queryOptions}
+        range={range}
+        filters={forcedFilters ? forcedFilters : filters}
+      />
     </PageSection>
   ) : null;
 };

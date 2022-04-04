@@ -22,7 +22,6 @@ import { useTranslation } from 'react-i18next';
 import { Column, getDefaultColumns, getFullColumnName } from '../../utils/columns';
 import * as _ from 'lodash';
 import './columns-modal.css';
-import { ConfigContext } from '../../model/config';
 
 export const ColumnsModal: React.FC<{
   isModalOpen: boolean;
@@ -35,7 +34,6 @@ export const ColumnsModal: React.FC<{
   const [isSaveDisabled, setSaveDisabled] = React.useState<boolean>(true);
   const [isAllSelected, setAllSelected] = React.useState<boolean>(false);
   const { t } = useTranslation('plugin__network-observability-plugin');
-  const config = React.useContext(ConfigContext);
 
   React.useEffect(() => {
     setUpdatedColumns(_.cloneDeep(columns));
@@ -82,8 +80,8 @@ export const ColumnsModal: React.FC<{
   );
 
   const onReset = React.useCallback(() => {
-    setUpdatedColumns(getDefaultColumns(t, config));
-  }, [setUpdatedColumns, t, config]);
+    setUpdatedColumns(getDefaultColumns(t));
+  }, [setUpdatedColumns, t]);
 
   const onSelectAll = React.useCallback(() => {
     const result = [...updatedColumns];

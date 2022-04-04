@@ -2,7 +2,7 @@ import axios from 'axios';
 import { getURLParams, QueryArguments } from '../utils/router';
 import { Record } from './ipfix';
 import { calculateMatrixTotals, parseStream, StreamResult, TopologyMetrics } from './loki';
-import { Config } from '../model/config';
+import { Config, defaultConfig } from '../model/config';
 
 const host = '/api/proxy/plugin/network-observability-plugin/backend/';
 
@@ -52,21 +52,20 @@ export const getTopology = (params: QueryArguments): Promise<TopologyMetrics[]> 
 };
 
 export const getConfig = (): Promise<Config> => {
-  return axios
-    .get(host + '/api/frontend-config')
-    .then(r => {
-      if (r.status >= 400) {
-        throw Error(`${r.statusText} [code=${r.status}]`);
+  return axios.get(host + '/api/frontend-config').then(r => {
+    if (r.status >= 400) {
+      throw Error(`${r.statusText} [code=${r.status}]`);
+    }
+    if (!r.data) {
+      return defaultConfig;
+    }
+    return <Config>{
+      portNaming: {
+        enable: r.data.portNaming.enable ?? defaultConfig.portNaming.enable,
+        portNames: r.data.portNaming.portNames
+          ? new Map(Object.entries(r.data.portNaming.portNames))
+          : defaultConfig.portNaming.portNames
       }
-      return r.data;
-    })
-    .catch(err => {
-      console.log(err);
-    })
-    .then(c => {
-      if (c != undefined) {
-        c.portNaming.portNames = new Map(Object.entries(c.portNaming.portNames));
-      }
-      return c;
-    });
+    };
+  });
 };

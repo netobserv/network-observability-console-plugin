@@ -4,7 +4,6 @@ import { Column, ColumnsId } from './columns';
 import { createFilterValue, Filter, FilterType, FilterValue } from './filters';
 import { TimeRange } from './datetime';
 import { Match, QueryOptions, Reporter } from '../model/query-options';
-import { Config } from '../model/config';
 
 const SPLIT_FILTER_CHAR = ',';
 export const DEFAULT_TIME_RANGE = 300;
@@ -119,7 +118,7 @@ export const getRangeFromURL = (): number | TimeRange => {
   return DEFAULT_TIME_RANGE;
 };
 
-export const getFiltersFromURL = (columns: Column[], config: Config) => {
+export const getFiltersFromURL = (columns: Column[]) => {
   const filters: Filter[] = [];
   columns
     .filter(col => col.filterType !== FilterType.NONE)
@@ -128,7 +127,7 @@ export const getFiltersFromURL = (columns: Column[], config: Config) => {
       if (!_.isEmpty(colFilterValues)) {
         const filterValues: FilterValue[] = [];
         colFilterValues.forEach(paramValue => {
-          const value = createFilterValue(col.filterType, paramValue, config);
+          const value = createFilterValue(col.filterType, paramValue);
           if (value) {
             filterValues.push(value);
           }

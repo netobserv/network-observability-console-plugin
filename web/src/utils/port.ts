@@ -1,20 +1,16 @@
 import * as portnumbers from 'port-numbers';
-import { Config } from '../model/config';
+import { config } from './config';
 
-export const getService = (p: number, config: Config): string | null => {
-  if (config != undefined && config.portNaming != undefined) {
-    //default ports enabled by default
-
-    if (config.portNaming.Enable != undefined && !config.portNaming.Enable) {
-      return null;
-    }
-    if (!!config.portNaming.portNames) {
-      //cannot use .has() in if test and then return get() because then
-      //linter complains we may returns undefined
-      const customPort = config.portNaming.portNames.get(p.toString());
-      if (customPort != undefined) {
-        return customPort;
-      }
+export const getService = (p: number): string | null => {
+  if (config.portNaming.enable != undefined && !config.portNaming.enable) {
+    return null;
+  }
+  if (!!config.portNaming.portNames) {
+    //cannot use .has() in if test and then return get() because then
+    //linter complains we may returns undefined
+    const customPort = config.portNaming.portNames.get(p.toString());
+    if (customPort != undefined) {
+      return customPort;
     }
   }
   if (p < 1024) {
@@ -29,17 +25,15 @@ export const getService = (p: number, config: Config): string | null => {
   }
 };
 
-export const getPort = (p: string, config: Config): string | null => {
-  if (config != undefined && config.portNaming != undefined) {
-    //default ports enabled by default
-    if (config.portNaming.Enable != undefined && !config.portNaming.Enable) {
-      return null;
-    }
-    if (!!config.portNaming.portNames) {
-      const customPort = [...config.portNaming.portNames].find(([{}, v]) => v === p);
-      if (!!customPort) {
-        return customPort[0];
-      }
+export const getPort = (p: string): string | null => {
+  //default ports enabled by default
+  if (!config.portNaming.enable) {
+    return null;
+  }
+  if (!!config.portNaming.portNames) {
+    const customPort = [...config.portNaming.portNames].find(([{}, v]) => v === p);
+    if (!!customPort) {
+      return customPort[0];
     }
   }
   const port = portnumbers.getPort(p);
@@ -49,8 +43,8 @@ export const getPort = (p: string, config: Config): string | null => {
   return null;
 };
 
-export const formatPort = (p: number, config: Config) => {
-  const service = getService(p, config);
+export const formatPort = (p: number) => {
+  const service = getService(p);
   if (service) {
     return `${service} (${p})`;
   } else {
@@ -60,11 +54,11 @@ export const formatPort = (p: number, config: Config) => {
 
 // This sort is ordering first the port with a known service
 // then order numerically the other port
-export const comparePorts = (p1: number, p2: number, config: Config) => {
-  const s1 = getService(p1, config);
-  const s2 = getService(p2, config);
+export const comparePorts = (p1: number, p2: number) => {
+  const s1 = getService(p1);
+  const s2 = getService(p2);
   if (s1 && s2) {
-    return formatPort(p1, config).localeCompare(formatPort(p2, config));
+    return formatPort(p1).localeCompare(formatPort(p2));
   }
   if (s1) {
     return -1;

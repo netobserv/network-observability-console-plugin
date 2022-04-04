@@ -5,7 +5,6 @@ export const LOCAL_STORAGE_PLUGIN_KEY = 'network-observability-plugin-settings';
 export const LOCAL_STORAGE_COLS_KEY = 'netflow-traffic-columns';
 export const LOCAL_STORAGE_REFRESH_KEY = 'netflow-traffic-refresh';
 export const LOCAL_STORAGE_SIZE_KEY = 'netflow-traffic-size';
-export const LOCAL_STORAGE_CONFIG_KEY = 'netflow-traffic-config';
 
 export interface ArraySelectionOptions {
   id: string;
