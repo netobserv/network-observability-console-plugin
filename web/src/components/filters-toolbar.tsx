@@ -58,7 +58,6 @@ import { validateK8SName } from '../utils/label';
 import { getNamespaces, getResources } from '../api/routes';
 import { getHTTPErrorDetails } from '../utils/errors';
 import { FilterHints } from './filter-hints';
-import { ConfigContext } from '../model/config';
 
 export interface FiltersToolbarProps {
   id: string;
@@ -114,41 +113,36 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
     [skipTipsDelay]
   );
 
-  const config = React.useContext(ConfigContext);
-
   const manageAutoCompleteOptions = (options: FilterOption[]) => {
     setAutocompleteOptions(options);
     // The menu is hidden if there are no options
     setPopperVisible(options.length > 0);
   };
 
-  const manageKindsAutoComplete = React.useCallback(
-    (kindNamespacePod: string, suggest = true) => {
-      const split = kindNamespacePod.split('.');
-      const kind = split[0];
-      const namespace = split[1];
-      if (namespace && hasNamespace(namespace)) {
-        const key = `${kind}.${namespace}`;
-        if (!hasObjects(key)) {
-          getResources(namespace, kind).then(pods => {
-            setObjects(key, pods);
-            if (suggest) {
-              manageAutoCompleteOptions(getFilterOptions(FilterType.K8S_OBJECT, kindNamespacePod, config));
-            }
-          });
-        } else if (suggest) {
-          manageAutoCompleteOptions(getFilterOptions(FilterType.K8S_OBJECT, kindNamespacePod, config));
-        }
+  const manageKindsAutoComplete = React.useCallback((kindNamespacePod: string, suggest = true) => {
+    const split = kindNamespacePod.split('.');
+    const kind = split[0];
+    const namespace = split[1];
+    if (namespace && hasNamespace(namespace)) {
+      const key = `${kind}.${namespace}`;
+      if (!hasObjects(key)) {
+        getResources(namespace, kind).then(pods => {
+          setObjects(key, pods);
+          if (suggest) {
+            manageAutoCompleteOptions(getFilterOptions(FilterType.K8S_OBJECT, kindNamespacePod));
+          }
+        });
+      } else if (suggest) {
+        manageAutoCompleteOptions(getFilterOptions(FilterType.K8S_OBJECT, kindNamespacePod));
       }
-    },
-    [config]
-  );
+    }
+  }, []);
 
   const onAutoCompleteChange = (newValue: string) => {
     if (selectedFilterColumn.filterType === FilterType.KIND_NAMESPACE_NAME && newValue.includes('.')) {
       manageKindsAutoComplete(newValue);
     } else {
-      const options = getFilterOptions(selectedFilterColumn.filterType, newValue, config);
+      const options = getFilterOptions(selectedFilterColumn.filterType, newValue);
       manageAutoCompleteOptions(options);
     }
     setFilterValue(newValue);
@@ -168,7 +162,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
       switch (selectedFilterColumn.filterType) {
         case FilterType.PORT:
           //allow any port number or valid name / value
-          if (!isNaN(Number(value)) || getPort(value, config)) {
+          if (!isNaN(Number(value)) || getPort(value)) {
             return { val: value };
           } else {
             return { err: t('Unknown port') };
@@ -182,7 +176,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
           if (!isNaN(Number(value))) {
             return { val: value };
           } else {
-            const proto = findProtocolOption(value, config);
+            const proto = findProtocolOption(value);
             if (proto) {
               return { val: proto.name };
             }
@@ -198,7 +192,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
           return { val: value };
       }
     },
-    [selectedFilterColumn, t, config]
+    [selectedFilterColumn, t]
   );
 
   const setFilterValue = React.useCallback(
@@ -316,7 +310,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
       return;
     }
 
-    const newValue = createFilterValue(selectedFilterColumn.filterType, validation.val!, config);
+    const newValue = createFilterValue(selectedFilterColumn.filterType, validation.val!);
     if (newValue) {
       addFilter(selectedFilterColumn.id, newValue);
     } else {
@@ -330,8 +324,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
     selectedFilterColumn.id,
     manageAutoCompleteOption,
     setMessageWithDelay,
-    addFilter,
-    config
+    addFilter
   ]);
 
   /*TODO: check if we can do autocomplete for pod / namespace fields

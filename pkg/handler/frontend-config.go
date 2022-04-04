@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"encoding/json"
 	"io/ioutil"
 	"net/http"
 
@@ -10,37 +9,39 @@ import (
 
 type frontendConfig struct {
 	PortNaming struct {
-		Enable    bool              `yaml:"Enable,omitempty" json:"Enable,omitempty"`
-		PortNames map[string]string `yaml:"portNames,omitempty" json:"portNames,omitempty"`
-	} `yaml:"portNaming,omitempty" json:"portNaming,omitempty"`
+		Enable    bool              `yaml:"enable,omitempty" json:"enable"`
+		PortNames map[string]string `yaml:"portNames,omitempty" json:"portNames"`
+	} `yaml:"portNaming,omitempty" json:"portNaming"`
 }
 
-func readConfigFile(FrontendConfig string) ([]byte, error) {
-	resp := []byte{}
+func readConfigFile(filename string) (*frontendConfig, error) {
 	cfg := frontendConfig{}
-	yamlFile, err := ioutil.ReadFile(FrontendConfig)
-	if err == nil {
-		err = yaml.Unmarshal(yamlFile, &cfg)
-		if err == nil {
-			resp, err = json.Marshal(cfg)
-		}
+	if len(filename) == 0 {
+		return &cfg, nil
 	}
-	return resp, err
+	yamlFile, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return nil, err
+	}
+	err = yaml.Unmarshal(yamlFile, &cfg)
+	return &cfg, err
 }
 
-func GetConfig(FrontendConfig string) func(w http.ResponseWriter, r *http.Request) {
-
-	resp, err := readConfigFile(FrontendConfig)
+func GetConfig(filename string) func(w http.ResponseWriter, r *http.Request) {
+	resp, err := readConfigFile(filename)
+	if err != nil {
+		hlog.Errorf("Could not read config file: %v", err)
+	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
-			resp, err = readConfigFile(FrontendConfig)
+			resp, err = readConfigFile(filename)
 			if err != nil {
 				writeError(w, http.StatusInternalServerError, err.Error())
 			} else {
-				writeRawJSON(w, http.StatusOK, resp)
+				writeJSON(w, http.StatusOK, resp)
 			}
 		} else {
-			writeRawJSON(w, http.StatusOK, resp)
+			writeJSON(w, http.StatusOK, resp)
 		}
 	}
 }

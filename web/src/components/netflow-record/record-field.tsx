@@ -9,7 +9,6 @@ import { formatPort } from '../../utils/port';
 import { formatProtocol } from '../../utils/protocol';
 import { Size } from '../dropdowns/display-dropdown';
 import './record-field.css';
-import { ConfigContext } from '../../model/config';
 
 export type RecordFieldFilter = {
   onClick: (column: Column, isDelete: boolean) => void;
@@ -23,7 +22,6 @@ export const RecordField: React.FC<{
   filter?: RecordFieldFilter;
 }> = ({ flow, column, size, filter }) => {
   const { t } = useTranslation('plugin__network-observability-plugin');
-  const config = React.useContext(ConfigContext);
 
   const onMouseOver = (event: React.MouseEvent<HTMLDivElement, MouseEvent>, className: string) => {
     if (event.currentTarget) {
@@ -259,12 +257,12 @@ export const RecordField: React.FC<{
       }
       case ColumnsId.port:
         return doubleContainer(
-          simpleTextWithTooltip(flow.fields.SrcPort ? formatPort(flow.fields.SrcPort, config) : ''),
-          simpleTextWithTooltip(flow.fields.DstPort ? formatPort(flow.fields.DstPort, config) : '')
+          simpleTextWithTooltip(flow.fields.SrcPort ? formatPort(flow.fields.SrcPort) : ''),
+          simpleTextWithTooltip(flow.fields.DstPort ? formatPort(flow.fields.DstPort) : '')
         );
       case ColumnsId.srcport:
       case ColumnsId.dstport: {
-        return singleContainer(simpleTextWithTooltip(value ? formatPort(value as number, config) : ''));
+        return singleContainer(simpleTextWithTooltip(value ? formatPort(value as number) : ''));
       }
       case ColumnsId.proto:
         return singleContainer(simpleTextWithTooltip(value ? formatProtocol(value as number) : ''));

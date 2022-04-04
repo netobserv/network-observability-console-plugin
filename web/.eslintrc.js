@@ -9,7 +9,16 @@ module.exports = {
     'react-hooks/exhaustive-deps': 'warn',
     'react/prop-types': 'off',
     '@typescript-eslint/no-empty-interface': 'off',
-    '@typescript-eslint/no-non-null-assertion': 'off'
+    '@typescript-eslint/no-non-null-assertion': 'off',
+    "@typescript-eslint/ban-types": [
+      "error",
+      {
+        "extendDefaults": true,
+        "types": {
+          "{}": false
+        }
+      }
+    ]
   },
   settings: {
     react: {
