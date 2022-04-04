@@ -26,13 +26,14 @@ var (
 	corsHeaders  = flag.String("cors-headers", "Origin, X-Requested-With, Content-Type, Accept", "CORS allowed headers (default: Origin, X-Requested-With, Content-Type, Accept)")
 	corsMaxAge   = flag.String("cors-max-age", "", "CORS allowed max age (default: unset)")
 	// todo: default value temporarily kept to make it work with older versions of the NOO. Remove default and force setup of loki url
-	lokiURL      = flag.String("loki", "http://localhost:3100", "URL of the loki querier host")
-	lokiLabels   = flag.String("loki-labels", "SrcK8S_Namespace,SrcK8S_OwnerName,DstK8S_Namespace,DstK8S_OwnerName,FlowDirection", "Loki labels, comma separated")
-	lokiTimeout  = flag.Duration("loki-timeout", 10*time.Second, "Timeout of the Loki query to retrieve logs")
-	lokiTenantID = flag.String("loki-tenant-id", "", "Tenant organization ID for multi-tenant-loki (submitted as the X-Scope-OrgID HTTP header)")
-	logLevel     = flag.String("loglevel", "info", "log level (default: info)")
-	versionFlag  = flag.Bool("v", false, "print version")
-	log          = logrus.WithField("module", "main")
+	lokiURL        = flag.String("loki", "http://localhost:3100", "URL of the loki querier host")
+	lokiLabels     = flag.String("loki-labels", "SrcK8S_Namespace,SrcK8S_OwnerName,DstK8S_Namespace,DstK8S_OwnerName,FlowDirection", "Loki labels, comma separated")
+	lokiTimeout    = flag.Duration("loki-timeout", 10*time.Second, "Timeout of the Loki query to retrieve logs")
+	lokiTenantID   = flag.String("loki-tenant-id", "", "Tenant organization ID for multi-tenant-loki (submitted as the X-Scope-OrgID HTTP header)")
+	logLevel       = flag.String("loglevel", "info", "log level (default: info)")
+	frontendConfig = flag.String("frontend-config", "", "path to the console plugin config file")
+	versionFlag    = flag.Bool("v", false, "print version")
+	log            = logrus.WithField("module", "main")
 )
 
 func main() {
@@ -77,5 +78,6 @@ func main() {
 			TenantID: *lokiTenantID,
 			Labels:   strings.Split(lLabels, ","),
 		},
+		FrontendConfig: *frontendConfig,
 	})
 }

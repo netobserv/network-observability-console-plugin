@@ -7,6 +7,7 @@ import { ColumnsId } from '../utils/columns';
 import { Filter } from '../utils/filters';
 import { DEFAULT_FLOWDIR, DEFAULT_LIMIT, flowdirToReporter } from '../utils/router';
 import NetflowTraffic from './netflow-traffic';
+import NetflowTrafficParent from './netflow-traffic-parent';
 
 export const NetflowTab: React.FC<PageComponentProps> = ({ obj }) => {
   const { t } = useTranslation('plugin__network-observability-plugin');
@@ -75,7 +76,11 @@ export const NetflowTab: React.FC<PageComponentProps> = ({ obj }) => {
     limit: DEFAULT_LIMIT
   };
 
-  return <NetflowTraffic forcedFilters={forcedFilters} initialQueryOptions={initialQueryOptions} />;
+  return (
+    <NetflowTrafficParent>
+      <NetflowTraffic forcedFilters={forcedFilters} initialQueryOptions={initialQueryOptions} />;
+    </NetflowTrafficParent>
+  );
 };
 
 export default NetflowTab;

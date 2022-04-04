@@ -57,9 +57,14 @@ import NetflowTable from './netflow-table/netflow-table';
 import { LayoutName } from '../model/topology';
 import NetflowTopology from './netflow-topology/netflow-topology';
 import OptionsPanel from './netflow-topology/options-panel';
+import { loadConfig } from '../utils/config';
 import './netflow-traffic.css';
 
 export type ViewId = 'table' | 'topology';
+
+// Note / improvment:
+// Could also be loaded via an intermediate loader component
+loadConfig();
 
 export const NetflowTraffic: React.FC<{
   forcedFilters?: Filter[];

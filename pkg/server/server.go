@@ -22,6 +22,7 @@ type Config struct {
 	CORSAllowHeaders string
 	CORSMaxAge       string
 	Loki             handler.LokiConfig
+	FrontendConfig   string
 }
 
 func Start(cfg *Config) {

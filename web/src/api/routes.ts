@@ -2,6 +2,7 @@ import axios from 'axios';
 import { getURLParams, QueryArguments } from '../utils/router';
 import { Record } from './ipfix';
 import { calculateMatrixTotals, parseStream, StreamResult, TopologyMetrics } from './loki';
+import { Config, defaultConfig } from '../model/config';
 
 const host = '/api/proxy/plugin/network-observability-plugin/backend/';
 
@@ -47,5 +48,24 @@ export const getTopology = (params: QueryArguments): Promise<TopologyMetrics[]> 
       throw new Error(`${r.statusText} [code=${r.status}]`);
     }
     return (r.data.data.result as TopologyMetrics[]).flatMap(r => calculateMatrixTotals(r));
+  });
+};
+
+export const getConfig = (): Promise<Config> => {
+  return axios.get(host + '/api/frontend-config').then(r => {
+    if (r.status >= 400) {
+      throw Error(`${r.statusText} [code=${r.status}]`);
+    }
+    if (!r.data) {
+      return defaultConfig;
+    }
+    return <Config>{
+      portNaming: {
+        enable: r.data.portNaming.enable ?? defaultConfig.portNaming.enable,
+        portNames: r.data.portNaming.portNames
+          ? new Map(Object.entries(r.data.portNaming.portNames))
+          : defaultConfig.portNaming.portNames
+      }
+    };
   });
 };

@@ -1,8 +1,7 @@
 import * as _ from 'lodash';
 import protocols from 'protocol-numbers';
-import { getPort } from 'port-numbers';
 import { ColumnsId } from './columns';
-import { getProtectedService } from './port';
+import { getService, getPort } from './port';
 
 export enum FilterType {
   NONE,
@@ -41,14 +40,16 @@ export const getActiveColumnFilters = (columnId: ColumnsId, filters: Filter[]) =
   return filters.filter(f => f.colId === columnId).flatMap(f => f.values.map(v => v.v));
 };
 
-const protocolOptions: FilterOption[] = Object.values(protocols)
-  .map(proto => ({ name: proto.name, value: proto.value }))
-  .filter(proto => !_.isEmpty(proto.name))
-  .filter(proto => Number(proto.value) < 1024);
-_.orderBy(protocolOptions, 'name');
+const getProtocolList = () => {
+  const protocolOptions = Object.values(protocols)
+    .map(proto => ({ name: proto.name, value: proto.value }))
+    .filter(proto => !_.isEmpty(proto.name));
+  _.orderBy(protocolOptions, 'name');
+  return protocolOptions;
+};
 
 const getProtocolOptions = (value: string) => {
-  return protocolOptions.filter(
+  return getProtocolList().filter(
     opt => opt.value.startsWith(value) || opt.name.toLowerCase().startsWith(value.toLowerCase())
   );
 };
@@ -121,12 +122,12 @@ export const getObjectsOptions = (filterValue: string) => {
 
 const getPortOptions = (value: string) => {
   const isNumber = !isNaN(Number(value));
-  const foundService = isNumber ? getProtectedService(Number(value)) : null;
+  const foundService = isNumber ? getService(Number(value)) : null;
   const foundPort = !isNumber ? getPort(value) : null;
   if (foundService) {
-    return [{ name: foundService.name, value: value }];
+    return [{ name: foundService, value: value }];
   } else if (foundPort) {
-    return [{ name: value, value: foundPort.port.toString() }];
+    return [{ name: value, value: foundPort }];
   }
   return [];
 };
@@ -173,5 +174,5 @@ export const createFilterValue = (type: FilterType, value: string): FilterValue 
 };
 
 export const findProtocolOption = (nameOrVal: string) => {
-  return protocolOptions.find(p => p.name.toLowerCase() === nameOrVal.toLowerCase() || p.value === nameOrVal);
+  return getProtocolList().find(p => p.name.toLowerCase() === nameOrVal.toLowerCase() || p.value === nameOrVal);
 };

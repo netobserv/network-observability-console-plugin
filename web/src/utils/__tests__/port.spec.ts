@@ -1,12 +1,35 @@
 import { formatPort, comparePorts } from '../port';
+import { config, setConfig } from '../config';
 
 describe('formatport', () => {
+  beforeEach(() => {
+    // Reset default config
+    setConfig({
+      portNaming: {
+        enable: true,
+        portNames: new Map<string, string>()
+      }
+    });
+  });
+
   it('should format port', () => {
     expect(formatPort(443)).toEqual('https (443)');
     expect(formatPort(32876)).toEqual('32876');
   });
   it('should not format port above 1024', () => {
     expect(formatPort(3000)).toEqual('3000');
+  });
+  it('should format custom port', () => {
+    config.portNaming.portNames.set('3100', 'loki');
+    expect(formatPort(3100)).toEqual('loki (3100)');
+  });
+  it('should format custom port over default one', () => {
+    config.portNaming.portNames.set('80', 'custom name');
+    expect(formatPort(80)).toEqual('custom name (80)');
+  });
+  it('should not format when disabled', () => {
+    config.portNaming.enable = false;
+    expect(formatPort(80)).toEqual('80');
   });
 });
 

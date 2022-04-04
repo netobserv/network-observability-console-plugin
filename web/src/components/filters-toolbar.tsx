@@ -29,7 +29,7 @@ import {
 } from '@patternfly/react-core';
 import { SearchIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
-import { getPort } from 'port-numbers';
+import { getPort } from '../utils/port';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Column, ColumnGroup, ColumnsId, getColumnGroups, getFullColumnName } from '../utils/columns';
@@ -135,8 +135,6 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
       } else if (suggest) {
         manageAutoCompleteOptions(getFilterOptions(FilterType.K8S_OBJECT, kindNamespacePod));
       }
-    } else {
-      manageAutoCompleteOptions(getFilterOptions(FilterType.NAMESPACE, namespace ? namespace : ''));
     }
   }, []);
 
