@@ -14,7 +14,7 @@
     "properties": {
       "path": "/netflow-traffic",
       "component": {
-        "$codeRef": "netflowTraffic.default"
+        "$codeRef": "netflowParent.default"
       }
     }
   },
