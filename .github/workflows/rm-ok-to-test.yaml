@@ -1,6 +1,6 @@
 name: Remove ok-to-test
 on:
-  pull_request:
+  pull_request_target:
     types: [synchronize,reopened]
 
 jobs:
@@ -12,3 +12,4 @@ jobs:
       - uses: actions-ecosystem/action-remove-labels@v1
         with:
           labels: ok-to-test
+          fail_on_error: true
