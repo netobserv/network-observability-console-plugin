@@ -77,6 +77,7 @@ jest.mock('react-router-dom', () => ({
 jest.mock('./src/api/routes', () => ({
   getPods: jest.fn(async () => ['ABCD']),
   getNamespaces: jest.fn(async () => ['EFGH']),
+  getConfig: jest.fn(async () => ({ portNaming: { enable: true, portNames: new Map() } }))
 }));
 
 global.console = {

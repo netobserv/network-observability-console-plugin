@@ -1,4 +1,4 @@
-import { Config, defaultConfig } from '../model/config';
+import { defaultConfig } from '../model/config';
 import { getConfig } from '../api/routes';
 import { getHTTPErrorDetails } from './errors';
 
@@ -10,9 +10,4 @@ export const loadConfig = async () => {
   } catch (err) {
     console.log(getHTTPErrorDetails(err));
   }
-};
-
-// Only for testing
-export const setConfig = (cfg: Config) => {
-  config = cfg;
 };

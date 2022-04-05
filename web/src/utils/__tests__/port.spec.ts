@@ -1,15 +1,13 @@
 import { formatPort, comparePorts } from '../port';
-import { config, setConfig } from '../config';
+import { config } from '../config';
 
 describe('formatport', () => {
   beforeEach(() => {
     // Reset default config
-    setConfig({
-      portNaming: {
-        enable: true,
-        portNames: new Map<string, string>()
-      }
-    });
+    config.portNaming = {
+      enable: true,
+      portNames: new Map<string, string>()
+    };
   });
 
   it('should format port', () => {
