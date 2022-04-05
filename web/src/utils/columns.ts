@@ -201,7 +201,7 @@ export const getCommonColumns = (t: TFunction, withConcatenatedFields = true): C
     },
     {
       id: ColumnsId.host,
-      name: t('Node IPs'),
+      name: t('Node IP'),
       isSelected: false,
       value: f => getSrcOrDstValue(f.fields.SrcK8S_HostIP, f.fields.DstK8S_HostIP),
       sort: (a, b, col) => compareIPs(col.value(a) as string, col.value(b) as string),

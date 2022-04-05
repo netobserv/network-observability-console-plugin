@@ -15,6 +15,12 @@ import { createFilterValue, FilterDefinition, FilterOption, FilterValue } from '
 import { getHTTPErrorDetails } from '../../utils/errors';
 import { autoCompleteCache } from '../../utils/autocomplete-cache';
 import { Indicator } from './filters-helper';
+import { usePrevious } from '../../utils/previous-hook';
+
+const optionsMenuID = 'options-menu-list';
+const isMenuOption = (elt?: Element) => {
+  return elt?.parentElement?.id === optionsMenuID || elt?.parentElement?.parentElement?.id === optionsMenuID;
+};
 
 export interface AutocompleteFilterProps {
   filterDefinition: FilterDefinition;
@@ -33,18 +39,26 @@ export const AutocompleteFilter: React.FC<AutocompleteFilterProps> = ({
 }) => {
   const autocompleteContainerRef = React.useRef<HTMLDivElement | null>(null);
   const searchInputRef = React.useRef<HTMLInputElement | null>(null);
+  const optionsRef = React.useRef<HTMLDivElement | null>(null);
   const [autocompleteOptions, setAutocompleteOptions] = React.useState<FilterOption[]>([]);
   const [isPopperVisible, setPopperVisible] = React.useState(false);
   const [currentValue, setCurrentValue] = React.useState<string>('');
+  const previousFilterDefinition = usePrevious(filterDefinition);
 
   React.useEffect(() => {
-    //update validation icon on field on value change
-    if (!_.isEmpty(currentValue)) {
-      const validation = filterDefinition.validate(currentValue);
-      setIndicator(!_.isEmpty(validation.err) ? ValidatedOptions.warning : ValidatedOptions.success);
-    } else {
+    if (filterDefinition !== previousFilterDefinition) {
+      //reset filter value if definition has changed
+      resetFilterValue();
+      searchInputRef?.current?.focus();
+      autoCompleteCache.clear();
+    } else if (_.isEmpty(currentValue)) {
       setIndicator(ValidatedOptions.default);
+    } else {
+      //update validation icon on field on value change
+      const validation = filterDefinition.validate(currentValue);
+      setIndicator(validation.err ? ValidatedOptions.warning : ValidatedOptions.success);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentValue, filterDefinition, setIndicator]);
 
   React.useEffect(() => {
@@ -58,13 +72,6 @@ export const AutocompleteFilter: React.FC<AutocompleteFilterProps> = ({
     setMessageWithDelay(undefined);
     setIndicator(ValidatedOptions.default);
   }, [setCurrentValue, setAutocompleteOptions, setMessageWithDelay, setIndicator]);
-
-  React.useEffect(() => {
-    resetFilterValue();
-    searchInputRef?.current?.focus();
-    autoCompleteCache.clear();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filterDefinition]);
 
   const addFilter = React.useCallback(
     (option: FilterOption) => {
@@ -150,6 +157,17 @@ export const AutocompleteFilter: React.FC<AutocompleteFilterProps> = ({
     resetFilterValue
   ]);
 
+  const onBlur = React.useCallback(() => {
+    // Timeout hack: we need to reset autocompletion / close popup
+    // only if the focus isn't moved from the text input to the popup itself
+    // We need to skip a couple of render frames to get the new focused element
+    setTimeout(() => {
+      if (!isMenuOption(document.activeElement || undefined)) {
+        setAutocompleteOptions([]);
+      }
+    }, 50);
+  }, []);
+
   return (
     <>
       <div ref={autocompleteContainerRef}>
@@ -163,16 +181,17 @@ export const AutocompleteFilter: React.FC<AutocompleteFilterProps> = ({
               value={currentValue}
               onKeyPress={e => e.key === 'Enter' && onEnter()}
               onChange={onAutoCompleteChange}
+              onBlur={onBlur}
               ref={searchInputRef}
               id="autocomplete-search"
             />
           }
           popper={
-            <Menu onSelect={onAutoCompleteSelect}>
+            <Menu ref={optionsRef} onSelect={onAutoCompleteSelect}>
               <MenuContent>
-                <MenuList>
+                <MenuList id={optionsMenuID}>
                   {autocompleteOptions.map(option => (
-                    <MenuItem itemId={option.value} key={option.name}>
+                    <MenuItem itemId={option.value} key={option.name} onBlur={onBlur}>
                       {option.name}
                     </MenuItem>
                   ))}

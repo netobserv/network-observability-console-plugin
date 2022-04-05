@@ -81,6 +81,11 @@ func TestLokiFiltering(t *testing.T) {
 			"|DstAddr=ip(\"10.128.0.2\")",
 		},
 	}, {
+		inputPath: "?filters=" + url.QueryEscape("SrcAddr=10.128.0.1,10.128.0.2"),
+		outputQueries: []string{
+			"?query={app=\"netobserv-flowcollector\"}|json|SrcAddr=ip(\"10.128.0.1\")+or+SrcAddr=ip(\"10.128.0.2\")",
+		},
+	}, {
 		inputPath: "?filters=" + url.QueryEscape("SrcPort=8080|SrcAddr=10.128.0.1|SrcK8S_Namespace=default"),
 		outputQueries: []string{
 			"?query={app=\"netobserv-flowcollector\",SrcK8S_Namespace=~\"(?i).*default.*\"}",

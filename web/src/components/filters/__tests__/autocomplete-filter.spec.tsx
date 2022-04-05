@@ -37,7 +37,7 @@ describe('<AutocompleteFilter />', () => {
     // No initial call
     expect(props.addFilter).toHaveBeenCalledTimes(0);
     // Initial setup
-    expect(props.setIndicator).toHaveBeenCalledTimes(2); // <-- WHY ?
+    expect(props.setIndicator).toHaveBeenCalledTimes(1);
     expect(textInput.props().validated).toBe(ValidatedOptions.default);
 
     // Filter for source name
@@ -61,7 +61,7 @@ describe('<AutocompleteFilter />', () => {
     // No initial call
     expect(props.addFilter).toHaveBeenCalledTimes(0);
     // Initial setup
-    expect(props.setIndicator).toHaveBeenCalledTimes(2); // <-- WHY ?
+    expect(props.setIndicator).toHaveBeenCalledTimes(1);
     expect(textInput.props().validated).toBe(ValidatedOptions.default);
 
     // Filter for source name
@@ -69,10 +69,11 @@ describe('<AutocompleteFilter />', () => {
       textInput.props().onChange!('no match', null!);
       return waitForComponentToPaint();
     });
-    expect(props.setIndicator).toHaveBeenNthCalledWith(3, ValidatedOptions.warning);
+    wrapper.update();
+    expect(props.setIndicator).toHaveBeenNthCalledWith(2, ValidatedOptions.warning);
     textInput.simulate('keypress', { key: 'Enter' });
 
-    expect(props.setIndicator).toHaveBeenNthCalledWith(4, ValidatedOptions.error);
+    expect(props.setIndicator).toHaveBeenNthCalledWith(3, ValidatedOptions.error);
     expect(props.addFilter).toHaveBeenCalledTimes(0);
   });
 });

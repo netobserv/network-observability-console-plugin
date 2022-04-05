@@ -48,15 +48,6 @@ func regexLabelFilter(labelKey string, value string) labelFilter {
 	}
 }
 
-// func intLabelFilter(labelKey string, value int) labelFilter {
-// 	return labelFilter{
-// 		key:       labelKey,
-// 		matcher:   labelEqual,
-// 		value:     strconv.Itoa(value),
-// 		valueType: typeNumber,
-// 	}
-// }
-
 func ipLabelFilter(labelKey, cidr string) labelFilter {
 	return labelFilter{
 		key:       labelKey,

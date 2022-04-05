@@ -15,6 +15,7 @@ const (
 	endParam       = "end"
 	limitParam     = "limit"
 	queryRangePath = "/loki/api/v1/query_range?query="
+	jsonOrJoiner   = "+or+"
 )
 
 // can contains only alphanumeric / '-' / '_' / '.' / ',' / '"' / '*' / ':' / '/' characteres
@@ -31,7 +32,7 @@ type FlowQueryBuilder struct {
 	limit        string
 	labelFilters []labelFilter
 	lineFilters  []string
-	jsonFilters  []labelFilter
+	jsonFilters  [][]labelFilter
 }
 
 func NewFlowQueryBuilder(cfg *Config, start, end, limit, reporter string) *FlowQueryBuilder {
@@ -161,9 +162,11 @@ func (q *FlowQueryBuilder) addLineFilters(key string, values []string) {
 // addIPFilters assumes that we are searching for that IP addresses as part
 // of the log line (not in the stream selector labels)
 func (q *FlowQueryBuilder) addIPFilters(key string, values []string) {
+	var filtersPerKey []labelFilter
 	for _, value := range values {
-		q.jsonFilters = append(q.jsonFilters, ipLabelFilter(key, value))
+		filtersPerKey = append(filtersPerKey, ipLabelFilter(key, value))
 	}
+	q.jsonFilters = append(q.jsonFilters, filtersPerKey)
 }
 
 func (q *FlowQueryBuilder) createStringBuilderURL() *strings.Builder {
@@ -195,9 +198,14 @@ func (q *FlowQueryBuilder) appendLineFilters(sb *strings.Builder) {
 func (q *FlowQueryBuilder) appendJSON(sb *strings.Builder, forceAppend bool) {
 	if forceAppend || len(q.jsonFilters) > 0 {
 		sb.WriteString("|json")
-		for _, lf := range q.jsonFilters {
+		for _, lfPerKey := range q.jsonFilters {
 			sb.WriteByte('|')
-			lf.writeInto(sb)
+			for i, lf := range lfPerKey {
+				if i > 0 {
+					sb.WriteString(jsonOrJoiner)
+				}
+				lf.writeInto(sb)
+			}
 		}
 	}
 }
