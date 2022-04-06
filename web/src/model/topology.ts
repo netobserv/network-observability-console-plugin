@@ -173,13 +173,26 @@ export const generateDataModel = (
   edges: EdgeModel[] = []
 ): Model => {
   const opts = { ...DefaultOptions, ...options };
+  //ensure each child to have single parent
+  const childIds: string[] = [];
 
   //refresh existing items
-  nodes = nodes.map(node => ({
-    ...node,
-    //update options and filter indicators
-    ...generateNode(node.data.namespace, node.data.type, node.data.name, node.data.addr, opts)
-  }));
+  nodes = nodes.map(node =>
+    node.type === 'group'
+      ? //clear group children
+      { ...node, children: [] }
+      : {
+        ...node,
+        //update options and filter indicators
+        ...generateNode(
+          node.data.namespace,
+          node.data.type,
+          node.data.name,
+          node.data.addr,
+          opts
+        )
+      }
+  );
   edges = edges.map(edge => ({
     ...edge,
     //update options and reset counter
@@ -206,7 +219,7 @@ export const generateDataModel = (
           collapsedHeight: 75,
           truncateLength: options.truncateLabels
             ? //match node label length according to badge
-              options.nodeBadges
+            options.nodeBadges
               ? DEFAULT_NODE_TRUNCATE_LENGTH + 2
               : DEFAULT_NODE_TRUNCATE_LENGTH - 3
             : undefined
@@ -215,12 +228,9 @@ export const generateDataModel = (
       nodes.push(group);
     }
 
-    if (parent) {
-      if (group.id !== parent.id) {
-        parent.children!.push(group.id);
-      } else {
-        console.error('group parent id must be different than child id !', group.id);
-      }
+    if (parent && !childIds.includes(group.id)) {
+      parent.children!.push(group.id);
+      childIds.push(group.id);
     }
 
     return group;
@@ -234,12 +244,9 @@ export const generateDataModel = (
       node = generateNode(namespace, type, name, addr, opts);
       nodes.push(node);
     }
-    if (parent) {
-      if (parent.id !== node.id) {
-        parent.children!.push(node.id);
-      } else {
-        console.error('node parent id must be different than child id !', node.id);
-      }
+    if (parent && !childIds.includes(node.id)) {
+      parent.children!.push(node.id);
+      childIds.push(node.id);
     }
 
     return node;
@@ -275,8 +282,8 @@ export const generateDataModel = (
         : undefined;
     const srcOwnerGroup =
       [TopologyGroupTypes.ALL, TopologyGroupTypes.OWNERS].includes(options.groupTypes) &&
-      !_.isEmpty(ownerType) &&
-      !_.isEmpty(ownerName)
+        !_.isEmpty(ownerType) &&
+        !_.isEmpty(ownerName)
         ? addGroup(ownerName, ownerType, srcNamespaceGroup, srcNamespaceGroup === undefined)
         : undefined;
     const srcNode = addNode(namespace, type, name, addr, srcOwnerGroup ? srcOwnerGroup : srcNamespaceGroup);
@@ -293,5 +300,7 @@ export const generateDataModel = (
     }
   });
 
+  //remove empty groups
+  nodes = nodes.filter(n => n.type !== 'group' || (n.children && n.children.length));
   return { nodes, edges };
 };

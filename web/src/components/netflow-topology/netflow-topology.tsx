@@ -112,24 +112,29 @@ const TopologyContent: React.FC<{
     controller.fromModel(mergedModel);
   }, [controller, getNodeOptions, metrics, resetGraph]);
 
-  /*update model on layout / options / metrics / filters change
-   * reset graph and details level on specific layout / options change to force render
-   */
+  //update model on layout / options / metrics / filters change
   React.useEffect(() => {
-    if (prevLayout !== layout || prevFilters !== filters || prevOptions !== options) {
+    //update graph on layout / display change
+    if (!controller.hasGraph() || prevLayout !== layout || prevOptions !== options) {
       resetGraph();
     }
-
-    //clear existing elements on filter change
-    if (controller && controller.hasGraph() && prevFilters !== filters) {
-      controller.getElements().forEach(e => {
-        if (e.getType() !== 'graph') {
-          controller.removeElement(e);
-        }
-      });
-    }
+    //then update model
     updateModel();
-  }, [controller, filters, layout, options, prevFilters, prevLayout, prevOptions, resetGraph, updateModel]);
+  }, [controller, metrics, filters, layout, options, prevLayout, prevOptions, resetGraph, updateModel]);
+
+  //clear existing elements on query change before getting new metrics
+  React.useEffect(() => {
+    if (prevFilters !== filters) {
+      //remove all elements except graph
+      if (controller && controller.hasGraph()) {
+        controller.getElements().forEach(e => {
+          if (e.getType() !== 'graph') {
+            controller.removeElement(e);
+          }
+        });
+      }
+    }
+  }, [controller, filters, prevFilters]);
 
   useEventListener<SelectionEventListener>(SELECTION_EVENT, setSelectedIds);
 
