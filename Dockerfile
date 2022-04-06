@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi8/nodejs-14:1-51 as web-builder
+FROM registry.access.redhat.com/ubi8/nodejs-14:1-63 as web-builder
 
 WORKDIR /opt/app-root
 
@@ -31,7 +31,7 @@ COPY pkg/ pkg/
 
 RUN make build-backend
 
-FROM registry.access.redhat.com/ubi8/ubi-minimal:8.5-204
+FROM registry.access.redhat.com/ubi8/ubi-minimal:8.5-240
 
 COPY --from=web-builder /opt/app-root/web/dist ./web/dist
 COPY --from=go-builder /opt/app-root/plugin-backend ./
