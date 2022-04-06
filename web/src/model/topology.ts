@@ -180,18 +180,12 @@ export const generateDataModel = (
   nodes = nodes.map(node =>
     node.type === 'group'
       ? //clear group children
-      { ...node, children: [] }
+        { ...node, children: [] }
       : {
-        ...node,
-        //update options and filter indicators
-        ...generateNode(
-          node.data.namespace,
-          node.data.type,
-          node.data.name,
-          node.data.addr,
-          opts
-        )
-      }
+          ...node,
+          //update options and filter indicators
+          ...generateNode(node.data.namespace, node.data.type, node.data.name, node.data.addr, opts)
+        }
   );
   edges = edges.map(edge => ({
     ...edge,
@@ -219,7 +213,7 @@ export const generateDataModel = (
           collapsedHeight: 75,
           truncateLength: options.truncateLabels
             ? //match node label length according to badge
-            options.nodeBadges
+              options.nodeBadges
               ? DEFAULT_NODE_TRUNCATE_LENGTH + 2
               : DEFAULT_NODE_TRUNCATE_LENGTH - 3
             : undefined
@@ -282,8 +276,8 @@ export const generateDataModel = (
         : undefined;
     const srcOwnerGroup =
       [TopologyGroupTypes.ALL, TopologyGroupTypes.OWNERS].includes(options.groupTypes) &&
-        !_.isEmpty(ownerType) &&
-        !_.isEmpty(ownerName)
+      !_.isEmpty(ownerType) &&
+      !_.isEmpty(ownerName)
         ? addGroup(ownerName, ownerType, srcNamespaceGroup, srcNamespaceGroup === undefined)
         : undefined;
     const srcNode = addNode(namespace, type, name, addr, srcOwnerGroup ? srcOwnerGroup : srcNamespaceGroup);
