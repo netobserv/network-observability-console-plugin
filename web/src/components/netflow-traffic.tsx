@@ -49,6 +49,7 @@ import DisplayDropdown, { Size } from './dropdowns/display-dropdown';
 import { RefreshDropdown } from './dropdowns/refresh-dropdown';
 import TimeRangeDropdown from './dropdowns/time-range-dropdown';
 import { FiltersToolbar } from './filters-toolbar';
+import QuerySummary from './query-summary/query-summary';
 import { ColumnsModal } from './modals/columns-modal';
 import { ExportModal } from './modals/export-modal';
 import TimeRangeModal from './modals/time-range-modal';
@@ -59,6 +60,7 @@ import NetflowTopology from './netflow-topology/netflow-topology';
 import OptionsPanel from './netflow-topology/options-panel';
 import { loadConfig } from '../utils/config';
 import './netflow-traffic.css';
+import SummaryPanel from './query-summary/summary-panel';
 
 export type ViewId = 'table' | 'topology';
 
@@ -77,6 +79,7 @@ export const NetflowTraffic: React.FC<{
   const [layout, setLayout] = React.useState<LayoutName>(LayoutName.ColaNoForce);
   const [topologyOptions, setTopologyOptions] = React.useState<TopologyOptions>(DefaultOptions);
   const [isShowTopologyOptions, setShowTopologyOptions] = React.useState<boolean>(false);
+  const [isShowQuerySummary, setShowQuerySummary] = React.useState<boolean>(false);
   const [error, setError] = React.useState<string | undefined>();
   const [size, setSize] = useLocalStorage<Size>(LOCAL_STORAGE_SIZE_KEY, 'm');
   const [isTRModalOpen, setTRModalOpen] = React.useState(false);
@@ -284,6 +287,17 @@ export const NetflowTraffic: React.FC<{
           onClose={() => setShowTopologyOptions(false)}
         />
       );
+    } else if (isShowQuerySummary) {
+      return (
+        //TODO: bind this panel to topology query after merge
+        <SummaryPanel
+          id="summaryPanel"
+          flows={flows}
+          range={range}
+          limit={queryOptions.limit}
+          onClose={() => setShowQuerySummary(false)}
+        />
+      );
     } else {
       return null;
     }
@@ -355,11 +369,17 @@ export const NetflowTraffic: React.FC<{
           </OverflowMenu>
         }
       </FiltersToolbar>
-      <Drawer id="drawer" isExpanded={selectedRecord !== undefined || isShowTopologyOptions}>
+      <Drawer id="drawer" isExpanded={selectedRecord !== undefined || isShowTopologyOptions || isShowQuerySummary}>
         <DrawerContent id="drawerContent" panelContent={panelContent()}>
           <DrawerContentBody id="drawerBody">{pageContent()}</DrawerContentBody>
         </DrawerContent>
       </Drawer>
+      <QuerySummary
+        flows={flows}
+        range={range}
+        limit={queryOptions.limit}
+        toggleQuerySummary={() => setShowQuerySummary(!isShowQuerySummary)}
+      />
       <TimeRangeModal
         id="time-range-modal"
         isModalOpen={isTRModalOpen}
