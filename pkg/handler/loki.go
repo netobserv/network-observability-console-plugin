@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"reflect"
 	"strings"
 	"sync"
 
@@ -103,44 +102,29 @@ func fetchParallel(lokiClient httpclient.HTTPClient, queries []string) ([]byte, 
 	}
 
 	// Aggregate results
-	var aggregated model.QueryResponse
-	var aggStreams model.Streams
+	var resp *model.QueryResponse
+	merger := loki.NewStreamMerger()
 	for r := range resChan {
 		if streams, ok := r.Data.Result.(model.Streams); ok {
-			if len(aggStreams) == 0 {
-				aggStreams = streams
-				aggregated = r
-			} else {
-				aggStreams = merge(aggStreams, streams)
-				aggregated.Data.Result = aggStreams
+			merger.Add(streams)
+			if resp == nil {
+				resp = &r
 			}
 		} else {
 			return nil, http.StatusInternalServerError, fmt.Errorf("loki returned an unexpected type: %T", r.Data.Result)
 		}
 	}
 
+	if resp == nil {
+		return []byte{}, http.StatusNoContent, nil
+	}
+
 	// Encode back to json
-	encoded, err := json.Marshal(aggregated)
+	resp.Data.Result = merger.GetStreams()
+	encoded, err := json.Marshal(*resp)
 	if err != nil {
 		return nil, http.StatusInternalServerError, err
 	}
 
 	return encoded, http.StatusOK, nil
-}
-
-func merge(into, from model.Streams) model.Streams {
-	// TODO: o(n²), to optimize
-	for _, stream := range from {
-		found := false
-		for _, existing := range into {
-			if reflect.DeepEqual(stream, existing) {
-				found = true
-				break
-			}
-		}
-		if !found {
-			into = append(into, stream)
-		}
-	}
-	return into
 }
