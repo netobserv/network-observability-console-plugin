@@ -38,7 +38,7 @@ jobs:
         with:
           go-version: ${{ matrix.go }}
       - name: build images
-        run: IMAGE="quay.io/netobserv/${{ env.IMAGE }}:${{ steps.validate_tag.outputs.tag }} make image
+        run: IMAGE="quay.io/netobserv/${{ env.IMAGE }}:${{ steps.validate_tag.outputs.tag }}" make image
       - name: podman login to quay.io
         uses: redhat-actions/podman-login@v1
         with:
