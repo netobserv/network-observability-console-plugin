@@ -1,0 +1,13 @@
+.pf-c-content.summary-text-container {
+  margin-bottom: 10px;
+}
+
+.summary-container-grouped {
+  padding-left: 15px;
+}
+
+#cardinality-accordion {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}

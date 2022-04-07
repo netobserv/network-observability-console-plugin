@@ -1,0 +1,17 @@
+#query-summary {
+  position: absolute;
+  bottom: 0;
+  align-self: center;
+  padding: 10px;
+  z-index: 0;
+}
+
+#query-summary-content {
+  user-select: none;
+  width: fit-content;
+}
+
+.query-summary-warning {
+  color: #f0ab00;
+  font-weight: bold;
+}

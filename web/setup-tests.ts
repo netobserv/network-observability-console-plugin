@@ -30,7 +30,16 @@ jest.mock('react-i18next', () => {
   return {
     useTranslation: () => {
       return {
-        t: s => s
+        t: (s: string, ...args) => {
+          if (args) {
+            args.forEach(arg => {
+              Object.keys(arg).forEach(key => {
+                s = s.replace(`{{${key}}}`, arg[key]);
+              });
+            });
+          }
+          return s;
+        },
       };
     }
   };
