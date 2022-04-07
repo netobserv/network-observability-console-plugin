@@ -1,0 +1,37 @@
+.co-overlay {
+  display: flex;
+}
+
+.modal-dialog {
+  align-self: center;
+}
+
+.modal-content {
+  height: fit-content !important;
+}
+
+.modal-description {
+  padding-top: 0.5em;
+}
+
+.modal-body {
+  padding: 0 3em 0 3em !important;
+  background: none !important;
+  max-height: 50vh;
+  overflow-x: hidden;
+}
+
+.modal-body.scrollable {
+  overflow-y: scroll;
+}
+
+.modal-body.overflow-visible {
+  overflow: visible;
+}
+
+.modal-footer {
+  display: flex;
+  align-self: flex-end;
+  padding: 2em !important;
+  margin: 0 !important;
+}

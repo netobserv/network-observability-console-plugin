@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Dropdown, DropdownToggle, DropdownItem } from '@patternfly/react-core';
+import { Dropdown, DropdownToggle, DropdownItem, Text } from '@patternfly/react-core';
 import { ThIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
 
@@ -33,8 +33,14 @@ export const DisplayDropdown: React.FC<Props> = ({ id, setSize }) => {
       isOpen={isOpen}
       onSelect={() => setIsOpen(false)}
       toggle={
-        <DropdownToggle id={`${id}-dropdown`} toggleIndicator={null} onToggle={() => setIsOpen(!isOpen)}>
-          <ThIcon />
+        <DropdownToggle
+          id={`${id}-dropdown`}
+          className="overflow-button"
+          icon={<ThIcon />}
+          toggleIndicator={null}
+          onToggle={() => setIsOpen(!isOpen)}
+        >
+          <Text>{t('Display size')}</Text>
         </DropdownToggle>
       }
     />

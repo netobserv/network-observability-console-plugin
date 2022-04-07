@@ -56,3 +56,17 @@ span.pf-c-button__icon.pf-m-start {
 .flex {
     flex: 1;
 }
+
+/*force buttons to have the exact same display since they are different components*/
+#manage-columns-button,
+#display-dropdown,
+#export-button,
+.overflow-button {
+    color: #06c;
+    display: flex;
+    align-items: center;
+    margin-left: 0;
+    margin-right: 1em;
+    padding-left: 0;
+    padding-right: 0;
+}
