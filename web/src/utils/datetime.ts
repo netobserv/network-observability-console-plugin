@@ -14,6 +14,10 @@ export const twentyFourHourTime = (date: Date, showSeconds?: boolean): string =>
   return `${hours}${minutes}${seconds}`;
 };
 
+export const getDateFromUnixString = (v: string) => {
+  return new Date(Number(v) * 1000);
+};
+
 export interface TimeRange {
   from: number;
   to: number;

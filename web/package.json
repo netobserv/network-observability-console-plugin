@@ -22,6 +22,7 @@
   "devDependencies": {
     "@openshift-console/dynamic-plugin-sdk": "0.0.6",
     "@openshift-console/dynamic-plugin-sdk-webpack": "0.0.6",
+    "@patternfly/react-charts": "^6.51.19",
     "@patternfly/react-core": "^4.202.5",
     "@patternfly/react-table": "4.44.4",
     "@patternfly/react-topology": "4.49.5",
