@@ -95,20 +95,22 @@ const StyleNode: React.FC<StyleNodeProps> = ({
   }, [data]);
 
   return (
-    <DefaultNode
-      element={element}
-      {...rest}
-      {...passedData}
-      dragging={dragging}
-      regrouping={regrouping}
-      showLabel={detailsLevel === ScaleDetailsLevel.high && showLabel}
-      showStatusBackground={detailsLevel === ScaleDetailsLevel.low}
-      showStatusDecorator={detailsLevel === ScaleDetailsLevel.high && passedData.showStatusDecorator}
-      onContextMenu={data.showContextMenu ? onContextMenu : undefined}
-      contextMenuOpen={contextMenuOpen}
-    >
-      {renderIcon(passedData, element)}
-    </DefaultNode>
+    <g className={`topology ${data.shadowed ? 'shadowed' : ''}`}>
+      <DefaultNode
+        element={element}
+        {...rest}
+        {...passedData}
+        dragging={dragging}
+        regrouping={regrouping}
+        showLabel={detailsLevel === ScaleDetailsLevel.high && showLabel}
+        showStatusBackground={detailsLevel === ScaleDetailsLevel.low}
+        showStatusDecorator={detailsLevel === ScaleDetailsLevel.high && passedData.showStatusDecorator}
+        onContextMenu={data.showContextMenu ? onContextMenu : undefined}
+        contextMenuOpen={contextMenuOpen}
+      >
+        {renderIcon(passedData, element)}
+      </DefaultNode>
+    </g>
   );
 };
 

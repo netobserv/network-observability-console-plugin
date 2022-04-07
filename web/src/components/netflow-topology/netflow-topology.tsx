@@ -1,5 +1,16 @@
-import { Bullseye, EmptyState, EmptyStateBody, EmptyStateVariant, Spinner, Title } from '@patternfly/react-core';
-import { CogIcon, ExportIcon } from '@patternfly/react-icons';
+import {
+  Bullseye,
+  Button,
+  EmptyState,
+  EmptyStateBody,
+  EmptyStateVariant,
+  InputGroup,
+  Spinner,
+  TextInput,
+  Title,
+  ValidatedOptions
+} from '@patternfly/react-core';
+import { CogIcon, ExportIcon, SearchIcon } from '@patternfly/react-icons';
 import {
   createTopologyControlButtons,
   defaultControlButtonsOptions,
@@ -26,6 +37,10 @@ import { usePrevious } from '../../utils/previous-hook';
 import componentFactory from './componentFactories/componentFactory';
 import stylesComponentFactory from './componentFactories/stylesComponentFactory';
 import layoutFactory from './layouts/layoutFactory';
+import './netflow-topology.css';
+
+let lastNodeIdsFound: string[] = [];
+
 const ZOOM_IN = 4 / 3;
 const ZOOM_OUT = 3 / 4;
 const FIT_PADDING = 80;
@@ -46,6 +61,53 @@ const TopologyContent: React.FC<{
   const prevFilters = usePrevious(filters);
 
   const [selectedIds, setSelectedIds] = React.useState<string[]>([]);
+  const [searchValue, setSearchValue] = React.useState<string>('');
+  const [searchValidated, setSearchValidated] = React.useState<ValidatedOptions>();
+  const [searchResultCount, setSearchResultCount] = React.useState<string>('');
+
+  //search element by label or secondaryLabel
+  const onSearch = (searchValue: string) => {
+    if (_.isEmpty(searchValue)) {
+      return;
+    }
+
+    if (controller && controller.hasGraph()) {
+      const currentModel = controller.toModel();
+      const nodeModelsFound = currentModel.nodes?.filter(
+        n =>
+          !lastNodeIdsFound.includes(n.id) &&
+          (n.label?.includes(searchValue) || n.data?.secondaryLabel?.includes(searchValue))
+      );
+      const nodeFound = !_.isEmpty(nodeModelsFound) ? controller.getNodeById(nodeModelsFound![0].id) : undefined;
+      if (nodeFound) {
+        const id = nodeFound.getId();
+        setSelectedIds([id]);
+        lastNodeIdsFound.push(id);
+        setSearchResultCount(`${lastNodeIdsFound.length}/${lastNodeIdsFound.length + nodeModelsFound!.length - 1}`);
+        const bounds = controller.getGraph().getBounds();
+        controller.getGraph().panIntoView(nodeFound, {
+          offset: Math.min(bounds.width, bounds.height) / 2,
+          minimumVisible: 100
+        });
+        setSearchValidated(ValidatedOptions.success);
+      } else {
+        lastNodeIdsFound = [];
+        setSearchResultCount('');
+        setSelectedIds([]);
+        setSearchValidated(ValidatedOptions.error);
+      }
+    } else {
+      console.error('searchElement called before controller graph');
+    }
+  };
+
+  //update search value and clear indicators
+  const onChangeSearch = (v = '') => {
+    lastNodeIdsFound = [];
+    setSearchResultCount('');
+    setSearchValidated(ValidatedOptions.default);
+    setSearchValue(v);
+  };
 
   //fit view to elements
   const fitView = React.useCallback(() => {
@@ -109,9 +171,15 @@ const TopologyContent: React.FC<{
     }
 
     const currentModel = controller.toModel();
-    const mergedModel = generateDataModel(metrics, getNodeOptions(), currentModel.nodes, currentModel.edges);
+    const mergedModel = generateDataModel(
+      metrics,
+      getNodeOptions(),
+      searchValue,
+      currentModel.nodes,
+      currentModel.edges
+    );
     controller.fromModel(mergedModel);
-  }, [controller, getNodeOptions, metrics, resetGraph]);
+  }, [controller, searchValue, getNodeOptions, metrics, resetGraph]);
 
   //update model on layout / options / metrics / filters change
   React.useEffect(() => {
@@ -187,6 +255,35 @@ const TopologyContent: React.FC<{
       }
     >
       <VisualizationSurface state={{ selectedIds }} />
+      <div id="topology-search-container">
+        <InputGroup>
+          <TextInput
+            id="search-topology-element-input"
+            className={'search'}
+            placeholder={t('Find in view')}
+            autoFocus
+            type="search"
+            aria-label="search"
+            onKeyPress={e => e.key === 'Enter' && onSearch(searchValue)}
+            onChange={onChangeSearch}
+            value={searchValue}
+            validated={searchValidated}
+          />
+          {!_.isEmpty(searchResultCount) ? (
+            <TextInput value={searchResultCount} isDisabled id="topology-search-result-count" />
+          ) : (
+            <></>
+          )}
+          <Button
+            id="search-topology-element-button"
+            variant="plain"
+            aria-label="search button for element"
+            onClick={() => onSearch(searchValue)}
+          >
+            <SearchIcon />
+          </Button>
+        </InputGroup>
+      </div>
     </TopologyView>
   );
 };

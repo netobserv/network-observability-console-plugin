@@ -14,7 +14,7 @@ type StyleEdgeProps = {
 } & WithContextMenuProps &
   WithSelectionProps;
 
-const StyleEdge: React.FC<StyleEdgeProps> = ({ element, onContextMenu, contextMenuOpen, ...rest }) => {
+const StyleEdge: React.FC<StyleEdgeProps> = ({ element, ...rest }) => {
   const data = element.getData();
   const detailsLevel = useDetailsLevel();
 
@@ -32,13 +32,9 @@ const StyleEdge: React.FC<StyleEdgeProps> = ({ element, onContextMenu, contextMe
   }, [data, detailsLevel]);
 
   return (
-    <DefaultEdge
-      element={element}
-      {...rest}
-      {...passedData}
-      onContextMenu={data?.showContextMenu ? onContextMenu : undefined}
-      contextMenuOpen={contextMenuOpen}
-    />
+    <g className={`topology ${data.shadowed ? 'shadowed' : ''}`}>
+      <DefaultEdge element={element} {...rest} {...passedData} />
+    </g>
   );
 };
 
