@@ -17,10 +17,10 @@ import {
 import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
+import { Filter } from '../../model/filters';
 import { TopologyMetrics } from '../../api/loki';
 import { generateDataModel, LayoutName, TopologyOptions } from '../../model/topology';
 import { TimeRange } from '../../utils/datetime';
-import { Filter } from '../../utils/filters';
 import { usePrevious } from '../../utils/previous-hook';
 import componentFactory from './componentFactories/componentFactory';
 import stylesComponentFactory from './componentFactories/stylesComponentFactory';

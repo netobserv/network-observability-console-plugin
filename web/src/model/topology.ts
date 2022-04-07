@@ -31,13 +31,6 @@ export enum TopologyGroupTypes {
   ALL = 'all'
 }
 
-export enum TopologyGroupTypes {
-  NONE = 'none',
-  NAMESPACES = 'namespaces',
-  OWNERS = 'owners',
-  ALL = 'all'
-}
-
 export interface TopologyOptions {
   rangeInSeconds: number;
   maxEdgeValue: number;

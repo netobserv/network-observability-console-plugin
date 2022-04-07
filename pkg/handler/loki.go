@@ -102,26 +102,28 @@ func fetchParallel(lokiClient httpclient.HTTPClient, queries []string) ([]byte, 
 	}
 
 	// Aggregate results
-	var resp *model.QueryResponse
+	first := true
+	var resp model.QueryResponse
 	merger := loki.NewStreamMerger()
 	for r := range resChan {
 		if streams, ok := r.Data.Result.(model.Streams); ok {
 			merger.Add(streams)
-			if resp == nil {
-				resp = &r
+			if first {
+				first = false
+				resp = r
 			}
 		} else {
 			return nil, http.StatusInternalServerError, fmt.Errorf("loki returned an unexpected type: %T", r.Data.Result)
 		}
 	}
 
-	if resp == nil {
+	if first {
 		return []byte{}, http.StatusNoContent, nil
 	}
 
 	// Encode back to json
 	resp.Data.Result = merger.GetStreams()
-	encoded, err := json.Marshal(*resp)
+	encoded, err := json.Marshal(resp)
 	if err != nil {
 		return nil, http.StatusInternalServerError, err
 	}

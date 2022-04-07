@@ -140,9 +140,10 @@ export const NetflowTraffic: React.FC<{
   const tick = React.useCallback(() => {
     setLoading(true);
     setError(undefined);
+    const fq = buildFlowQuery();
     switch (selectedViewId) {
       case 'table':
-        getFlows(buildFlowQuery())
+        getFlows(fq)
           .then(setFlows)
           .catch(err => {
             setFlows([]);
@@ -153,7 +154,7 @@ export const NetflowTraffic: React.FC<{
           });
         break;
       case 'topology':
-        getTopology(qa)
+        getTopology(fq)
           .then(setMetrics)
           .catch(err => {
             setFlows([]);
@@ -334,7 +335,7 @@ export const NetflowTraffic: React.FC<{
           id="summaryPanel"
           flows={flows}
           range={range}
-          limit={queryOptions.limit}
+          limit={limit}
           onClose={() => setShowQuerySummary(false)}
         />
       );
@@ -418,7 +419,7 @@ export const NetflowTraffic: React.FC<{
       <QuerySummary
         flows={flows}
         range={range}
-        limit={queryOptions.limit}
+        limit={limit}
         toggleQuerySummary={() => setShowQuerySummary(!isShowQuerySummary)}
       />
       <TimeRangeModal
