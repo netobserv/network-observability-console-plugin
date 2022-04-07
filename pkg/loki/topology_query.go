@@ -3,8 +3,6 @@ package loki
 import (
 	"fmt"
 	"strconv"
-
-	"github.com/netobserv/network-observability-console-plugin/pkg/model/fields"
 )
 
 const (
@@ -14,10 +12,10 @@ const (
 )
 
 type Topology struct {
-	limit     string
-	timeRange string
-	function  string
-	dataField string
+	limit          string
+	timeRange      string
+	metricFunction string
+	dataField      string
 }
 
 type TopologyQueryBuilder struct {
@@ -25,7 +23,7 @@ type TopologyQueryBuilder struct {
 	topology *Topology
 }
 
-func NewTopologyQuery(cfg *Config, start, end, limit, reporter string) (*TopologyQueryBuilder, error) {
+func NewTopologyQuery(cfg *Config, start, end, limit, metricFunction, metricType, reporter string) (*TopologyQueryBuilder, error) {
 	l := limit
 	if len(l) == 0 {
 		l = topologyDefaultLimit
@@ -49,19 +47,39 @@ func NewTopologyQuery(cfg *Config, start, end, limit, reporter string) (*Topolog
 		}
 	}
 
+	var f string
+	switch metricFunction {
+	case "avg":
+		f = "avg_over_time"
+	case "max":
+		f = "max_over_time"
+	case "rate":
+		f = "rate"
+	default:
+		f = "sum_over_time"
+	}
+
+	var t string
+	switch metricType {
+	case "packets":
+		t = "Packets"
+	default:
+		t = "Bytes"
+	}
+
 	return &TopologyQueryBuilder{
 		FlowQueryBuilder: NewFlowQueryBuilder(cfg, start, end, limit, reporter),
 		topology: &Topology{
-			timeRange: timeRange,
-			limit:     l,
-			function:  "sum_over_time",
-			dataField: fields.Bytes,
+			timeRange:      timeRange,
+			limit:          l,
+			metricFunction: f,
+			dataField:      t,
 		},
 	}, nil
 }
 
 func (q *TopologyQueryBuilder) Build() string {
-	// Build something like:
+	// Build topology query like:
 	// /<url path>?query=
 	//		topk(
 	// 			<k>,
@@ -79,20 +97,22 @@ func (q *TopologyQueryBuilder) Build() string {
 	sb.WriteString(",sum by(")
 	sb.WriteString(topologyMetrics)
 	sb.WriteString(") (")
-	sb.WriteString(q.topology.function)
+	sb.WriteString(q.topology.metricFunction)
 	sb.WriteString("(")
 	q.appendLabels(sb)
 	q.appendLineFilters(sb)
 	q.appendJSON(sb, true)
-	sb.WriteString("|unwrap ")
-	sb.WriteString(q.topology.dataField)
-	sb.WriteString(`|__error__=""[`)
+	if q.topology.metricFunction != "rate" && len(q.topology.dataField) > 0 {
+		sb.WriteString("|unwrap ")
+		sb.WriteString(q.topology.dataField)
+		sb.WriteString(`|__error__=""`)
+	}
+	sb.WriteRune('[')
 	sb.WriteString(q.topology.timeRange)
 	sb.WriteString("s])))")
 	q.appendQueryParams(sb)
-	sb.WriteString("&step=")
-	sb.WriteString(q.topology.timeRange)
-	sb.WriteString("s")
+	//TODO: check if step should be configurable. 60s is forced to help calculations on front end side
+	sb.WriteString("&step=60s")
 
 	return sb.String()
 }

@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { buildExportQuery } from '../model/export-query';
-import { FlowQuery } from '../model/flow-query';
+import { FlowQuery, MetricFunction } from '../model/flow-query';
 import { Record } from './ipfix';
 import { calculateMatrixTotals, parseStream, StreamResult, TopologyMetrics } from './loki';
 import { Config, defaultConfig } from '../model/config';
@@ -44,7 +44,9 @@ export const getTopology = (params: FlowQuery): Promise<TopologyMetrics[]> => {
     if (r.status >= 400) {
       throw new Error(`${r.statusText} [code=${r.status}]`);
     }
-    return (r.data.data.result as TopologyMetrics[]).flatMap(r => calculateMatrixTotals(r));
+    return (r.data.data.result as TopologyMetrics[]).flatMap(r =>
+      calculateMatrixTotals(r, params.function as MetricFunction)
+    );
   });
 };
 

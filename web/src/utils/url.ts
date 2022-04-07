@@ -11,7 +11,9 @@ export enum URLParam {
   RefreshInterval = 'refresh',
   Limit = 'limit',
   Match = 'match',
-  Reporter = 'reporter'
+  Reporter = 'reporter',
+  MetricFunction = 'function',
+  MetricType = 'type'
 }
 export type URLParams = { [k in URLParam]?: unknown };
 

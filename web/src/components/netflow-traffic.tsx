@@ -20,7 +20,15 @@ import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
 import { Record } from '../api/ipfix';
 import { getFlows, getTopology } from '../api/routes';
-import { Match, FlowQuery, Reporter, groupFiltersMatchAll, groupFiltersMatchAny } from '../model/flow-query';
+import {
+  Match,
+  FlowQuery,
+  Reporter,
+  groupFiltersMatchAll,
+  groupFiltersMatchAny,
+  MetricFunction,
+  MetricType
+} from '../model/flow-query';
 import { TopologyMetrics } from '../api/loki';
 import { DefaultOptions, LayoutName, TopologyOptions } from '../model/topology';
 import { Column, getDefaultColumns } from '../utils/columns';
@@ -36,6 +44,8 @@ import {
 } from '../utils/local-storage-hook';
 import { usePoll } from '../utils/poll-hook';
 import {
+  defaultMetricFunction,
+  defaultMetricType,
   getFiltersFromURL,
   getLimitFromURL,
   getMatchFromURL,
@@ -45,9 +55,13 @@ import {
   setURLLimit,
   setURLMatch,
   setURLRange,
-  setURLReporter
+  setURLReporter,
+  setURLMetricFunction,
+  setURLMetricType
 } from '../utils/router';
 import DisplayDropdown, { Size } from './dropdowns/display-dropdown';
+import MetricTypeDropdown from './dropdowns/metric-type-dropdown';
+import MetricFunctionDropdown from './dropdowns/metric-function-dropdown';
 import { RefreshDropdown } from './dropdowns/refresh-dropdown';
 import TimeRangeDropdown from './dropdowns/time-range-dropdown';
 import { FiltersToolbar } from './filters/filters-toolbar';
@@ -97,6 +111,8 @@ export const NetflowTraffic: React.FC<{
   const [reporter, setReporter] = React.useState<Reporter>(getReporterFromURL());
   const [limit, setLimit] = React.useState<number>(getLimitFromURL());
   const [range, setRange] = React.useState<number | TimeRange>(getRangeFromURL());
+  const [metricFunction, setMetricFunction] = React.useState<MetricFunction>(defaultMetricFunction);
+  const [metricType, setMetricType] = React.useState<MetricType | undefined>(defaultMetricType);
   const [interval, setInterval] = useLocalStorage<number | undefined>(LOCAL_STORAGE_REFRESH_KEY);
   const [selectedRecord, setSelectedRecord] = React.useState<Record | undefined>(undefined);
 
@@ -137,8 +153,12 @@ export const NetflowTraffic: React.FC<{
         query.endTime = range.to.toString();
       }
     }
+    if (selectedViewId === 'topology') {
+      query.function = metricFunction;
+      query.type = metricType;
+    }
     return query;
-  }, [filters, forcedFilters, match, limit, reporter, range]);
+  }, [forcedFilters, filters, match, limit, reporter, range, selectedViewId, metricFunction, metricType]);
 
   const tick = React.useCallback(() => {
     setLoading(true);
@@ -160,7 +180,7 @@ export const NetflowTraffic: React.FC<{
         getTopology(fq)
           .then(setMetrics)
           .catch(err => {
-            setFlows([]);
+            setMetrics([]);
             setError(getHTTPErrorDetails(err));
           })
           .finally(() => {
@@ -204,6 +224,17 @@ export const NetflowTraffic: React.FC<{
   React.useEffect(() => {
     setURLReporter(reporter);
   }, [reporter]);
+  React.useEffect(() => {
+    setURLMetricFunction(metricFunction);
+    if (metricFunction === 'rate') {
+      setMetricType(undefined);
+    } else if (!metricType) {
+      setMetricType(defaultMetricType);
+    }
+  }, [metricFunction, metricType]);
+  React.useEffect(() => {
+    setURLMetricType(metricType);
+  }, [metricType]);
 
   // updates table filters and clears up the table for proper visualization of the
   // updating process
@@ -245,36 +276,35 @@ export const NetflowTraffic: React.FC<{
   };
 
   const actions = () => {
-    //TODO: add data dropdown for topology (bytes / packets / connections ?)
-    switch (selectedViewId) {
-      case 'table':
-      case 'topology':
-        return (
-          <div className="co-actions">
-            <TimeRangeDropdown
-              id="time-range-dropdown"
-              range={typeof range === 'number' ? range : undefined}
-              setRange={setRange}
-              openCustomModal={() => setTRModalOpen(true)}
-            />
-            <RefreshDropdown
-              id="refresh-dropdown"
-              disabled={typeof range !== 'number'}
-              interval={interval}
-              setInterval={setInterval}
-            />
-            <Button
-              id="refresh-button"
-              className="co-action-refresh-button"
-              variant="primary"
-              onClick={() => tick()}
-              icon={<SyncAltIcon style={{ animation: `spin ${loading ? 1 : 0}s linear infinite` }} />}
-            />
-          </div>
-        );
-      default:
-        return null;
-    }
+    return (
+      <div className="co-actions">
+        {selectedViewId === 'topology' && (
+          <MetricFunctionDropdown id="metricFunction" selected={metricFunction} setMetricFunction={setMetricFunction} />
+        )}
+        {selectedViewId === 'topology' && metricFunction !== 'rate' && (
+          <MetricTypeDropdown id="metricType" selected={metricType} setMetricType={setMetricType} />
+        )}
+        <TimeRangeDropdown
+          id="time-range-dropdown"
+          range={typeof range === 'number' ? range : undefined}
+          setRange={setRange}
+          openCustomModal={() => setTRModalOpen(true)}
+        />
+        <RefreshDropdown
+          id="refresh-dropdown"
+          disabled={typeof range !== 'number'}
+          interval={interval}
+          setInterval={setInterval}
+        />
+        <Button
+          id="refresh-button"
+          className="co-action-refresh-button"
+          variant="primary"
+          onClick={() => tick()}
+          icon={<SyncAltIcon style={{ animation: `spin ${loading ? 1 : 0}s linear infinite` }} />}
+        />
+      </div>
+    );
   };
 
   const pageButtons = () => {
@@ -378,6 +408,8 @@ export const NetflowTraffic: React.FC<{
             loading={loading}
             error={error}
             range={range}
+            metricFunction={metricFunction}
+            metricType={metricType}
             match={match}
             limit={limit}
             metrics={metrics}

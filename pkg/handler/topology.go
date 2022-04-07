@@ -9,6 +9,11 @@ import (
 	"github.com/netobserv/network-observability-console-plugin/pkg/loki"
 )
 
+const (
+	metricFunctionKey = "function"
+	metricTypeKey     = "type"
+)
+
 func GetTopology(cfg loki.Config) func(w http.ResponseWriter, r *http.Request) {
 	lokiClient := newLokiClient(&cfg)
 
@@ -32,6 +37,8 @@ func getTopologyFlows(cfg loki.Config, client httpclient.HTTPClient, params url.
 	}
 	end := params.Get(endTimeKey)
 	limit := params.Get(limitKey)
+	metricFunction := params.Get(metricFunctionKey)
+	metricType := params.Get(metricTypeKey)
 	reporter := params.Get(reporterKey)
 	rawFilters := params.Get(filtersKey)
 	filterGroups, err := parseFilters(rawFilters)
@@ -44,7 +51,7 @@ func getTopologyFlows(cfg loki.Config, client httpclient.HTTPClient, params url.
 		// match any, and multiple filters => run in parallel then aggregate
 		var queries []string
 		for _, group := range filterGroups {
-			query, code, err := buildTopologyQuery(&cfg, group, start, end, limit, reporter)
+			query, code, err := buildTopologyQuery(&cfg, group, start, end, limit, metricFunction, metricType, reporter)
 			if err != nil {
 				return nil, code, errors.New("Can't build query: " + err.Error())
 			}
@@ -61,7 +68,7 @@ func getTopologyFlows(cfg loki.Config, client httpclient.HTTPClient, params url.
 		if len(filterGroups) > 0 {
 			filters = filterGroups[0]
 		}
-		query, code, err := buildTopologyQuery(&cfg, filters, start, end, limit, reporter)
+		query, code, err := buildTopologyQuery(&cfg, filters, start, end, limit, metricFunction, metricType, reporter)
 		if err != nil {
 			return nil, code, err
 		}
@@ -76,8 +83,8 @@ func getTopologyFlows(cfg loki.Config, client httpclient.HTTPClient, params url.
 	return rawJSON, http.StatusOK, nil
 }
 
-func buildTopologyQuery(cfg *loki.Config, filters [][]string, start, end, limit, reporter string) (string, int, error) {
-	qb, err := loki.NewTopologyQuery(cfg, start, end, limit, reporter)
+func buildTopologyQuery(cfg *loki.Config, filters [][]string, start, end, limit, metricFunction, metricType, reporter string) (string, int, error) {
+	qb, err := loki.NewTopologyQuery(cfg, start, end, limit, metricFunction, metricType, reporter)
 	if err != nil {
 		return "", http.StatusBadRequest, err
 	}

@@ -2,6 +2,7 @@ import {
   EdgeAnimationSpeed,
   EdgeModel,
   EdgeStyle,
+  EdgeTerminalType,
   LabelPosition,
   Model,
   NodeModel,
@@ -9,9 +10,10 @@ import {
   NodeStatus
 } from '@patternfly/react-topology';
 import _ from 'lodash';
+import { elementPerMinText, roundTwoDigits } from '../utils/count';
 import { TopologyMetrics } from '../api/loki';
-import { bytesPerSeconds } from '../utils/bytes';
 import { Filter } from '../model/filters';
+import { bytesPerSeconds, humanFileSize } from '../utils/bytes';
 import { kindToAbbr } from '../utils/label';
 import { defaultTimeRange } from '../utils/router';
 
@@ -33,11 +35,22 @@ export enum TopologyGroupTypes {
   HOSTS_OWNERS = 'hosts+owners'
 }
 
+export enum TopologyMetricFunctions {
+  SUM = 'sum',
+  MAX = 'max',
+  AVG = 'avg',
+  RATE = 'rate'
+}
+
+export enum TopologyMetricTypes {
+  BYTES = 'bytes',
+  PACKETS = 'packets'
+}
+
 export interface TopologyOptions {
   rangeInSeconds: number;
   maxEdgeValue: number;
   nodeBadges?: boolean;
-  contextMenus?: boolean;
   edges?: boolean;
   edgeTags?: boolean;
   startCollapsed?: boolean;
@@ -45,12 +58,13 @@ export interface TopologyOptions {
   groupTypes: TopologyGroupTypes;
   lowScale: number;
   medScale: number;
+  metricFunction: TopologyMetricFunctions;
+  metricType: TopologyMetricTypes;
 }
 
 export const DefaultOptions: TopologyOptions = {
   rangeInSeconds: defaultTimeRange,
   nodeBadges: true,
-  contextMenus: false,
   edges: true,
   edgeTags: true,
   maxEdgeValue: 0,
@@ -58,7 +72,9 @@ export const DefaultOptions: TopologyOptions = {
   truncateLabels: true,
   groupTypes: TopologyGroupTypes.NAMESPACES,
   lowScale: 0.3,
-  medScale: 0.5
+  medScale: 0.5,
+  metricFunction: TopologyMetricFunctions.AVG,
+  metricType: TopologyMetricTypes.BYTES
 };
 
 export const DEFAULT_NODE_TRUNCATE_LENGTH = 25;
@@ -134,13 +150,13 @@ export const getAnimationSpeed = (n: number, total: number) => {
 
 export const getTagStatus = (n: number, total: number) => {
   if (total) {
-    const step = total / 3;
-    if (n > step * 2) {
-      return NodeStatus.danger;
-    } else if (n > step) {
+    const step = total / 5;
+    if (n > step * 3) {
       return NodeStatus.warning;
-    } else {
+    } else if (n > step * 2) {
       return NodeStatus.info;
+    } else {
+      return NodeStatus.default;
     }
   } else {
     return NodeStatus.default;
@@ -151,8 +167,35 @@ export const getEdgeStyle = (count: number) => {
   return count ? EdgeStyle.dashed : EdgeStyle.dotted;
 };
 
-export const getEdgeTag = (amount: number, options: TopologyOptions) => {
-  return options.edgeTags && amount ? bytesPerSeconds(amount, options.rangeInSeconds) : undefined;
+export const getEdgeTag = (count: number, options: TopologyOptions) => {
+  const roundCount = roundTwoDigits(count);
+  if (options.edgeTags && roundCount) {
+    if (options.metricFunction === TopologyMetricFunctions.RATE) {
+      return `${roundCount}%`;
+    } else {
+      switch (options.metricType) {
+        case TopologyMetricTypes.BYTES:
+          if (options.metricFunction === TopologyMetricFunctions.SUM) {
+            return humanFileSize(count, true, 0);
+          } else {
+            //get speed using default step = 60s
+            return bytesPerSeconds(count, 60);
+          }
+
+        case TopologyMetricTypes.PACKETS:
+        default:
+          switch (options.metricFunction) {
+            case TopologyMetricFunctions.MAX:
+            case TopologyMetricFunctions.AVG:
+              return elementPerMinText(count);
+            default:
+              return roundCount;
+          }
+      }
+    }
+  } else {
+    return undefined;
+  }
 };
 
 export const generateEdge = (
@@ -173,6 +216,10 @@ export const generateEdge = (
       sourceId,
       targetId,
       shadowed,
+      //edges are directed from src to dst. It will become bidirectionnal if inverted pair is found
+      startTerminalType: EdgeTerminalType.none,
+      startTerminalStatus: NodeStatus.default,
+      endTerminalType: count > 0 ? EdgeTerminalType.directional : EdgeTerminalType.none,
       endTerminalStatus: NodeStatus.default,
       tag: getEdgeTag(count, options),
       tagStatus: getTagStatus(count, options.maxEdgeValue),
@@ -279,16 +326,22 @@ export const generateDataModel = (
   }
 
   function addEdge(sourceId: string, targetId: string, count: number, shadowed = false) {
-    let edge = edges.find(e => e.data.sourceId === sourceId && e.data.targetId === targetId);
+    let edge = edges.find(
+      e =>
+        (e.data.sourceId === sourceId && e.data.targetId === targetId) ||
+        (e.data.sourceId === targetId && e.data.targetId === sourceId)
+    );
     if (edge) {
       //update style and datas
-      edge.edgeStyle = getEdgeStyle(count);
-      edge.animationSpeed = getAnimationSpeed(count, options.maxEdgeValue);
+      const totalCount = edge.data.count + count;
+      edge.edgeStyle = getEdgeStyle(totalCount);
+      edge.animationSpeed = getAnimationSpeed(totalCount, options.maxEdgeValue);
       edge.data = {
         ...edge.data,
         shadowed,
-        tag: getEdgeTag(count, options),
-        count
+        tag: getEdgeTag(totalCount, options),
+        tagStatus: getTagStatus(totalCount, options.maxEdgeValue),
+        count: totalCount
       };
     } else {
       edge = generateEdge(sourceId, targetId, count, opts, shadowed);

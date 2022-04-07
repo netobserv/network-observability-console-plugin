@@ -1,8 +1,8 @@
 import { TFunction } from 'i18next';
 import { findFilter } from './filter-definitions';
 import { TimeRange } from './datetime';
-import { Match, Reporter } from '../model/flow-query';
-import { getURLParam, getURLParamAsNumber, setURLParam, URLParam } from './url';
+import { Match, MetricFunction, MetricType, Reporter } from '../model/flow-query';
+import { getURLParam, getURLParamAsNumber, removeURLParam, setURLParam, URLParam } from './url';
 import { createFilterValue, Filter, FilterId } from '../model/filters';
 
 const filtersSeparator = ';';
@@ -12,6 +12,8 @@ export const defaultTimeRange = 300;
 const defaultLimit = 100;
 export const defaultReporter: Reporter = 'destination';
 const defaultMatch: Match = 'all';
+export const defaultMetricFunction = 'sum';
+export const defaultMetricType = 'bytes';
 
 export const flowdirToReporter: { [flowdir: string]: Reporter } = {
   '0': 'destination',
@@ -96,4 +98,20 @@ export const setURLLimit = (limit: number) => {
 
 export const setURLMatch = (match: Match) => {
   setURLParam(URLParam.Match, match);
+};
+
+export const setURLMetricFunction = (metricFunction?: MetricFunction) => {
+  if (metricFunction) {
+    setURLParam(URLParam.MetricFunction, metricFunction);
+  } else {
+    removeURLParam(URLParam.MetricFunction);
+  }
+};
+
+export const setURLMetricType = (metricType?: MetricType) => {
+  if (metricType) {
+    setURLParam(URLParam.MetricType, metricType);
+  } else {
+    removeURLParam(URLParam.MetricType);
+  }
 };
