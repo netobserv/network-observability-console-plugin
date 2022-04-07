@@ -17,6 +17,8 @@ export const LayoutDropdown: React.FC<{
         return t('Cola');
       case LayoutName.ColaNoForce:
         return t('ColaNoForce');
+      case LayoutName.Concentric:
+        return t('Concentric');
       case LayoutName.Dagre:
         return t('Dagre');
       case LayoutName.Force:

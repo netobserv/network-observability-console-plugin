@@ -20,9 +20,10 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
 import { Record } from '../api/ipfix';
-import { getFlows } from '../api/routes';
+import { getFlows, getTopology } from '../api/routes';
 import { QueryOptions } from '../model/query-options';
-import { DefaultOptions, TopologyOptions } from '../model/topology';
+import { TopologyMetrics } from '../api/loki';
+import { DefaultOptions, LayoutName, TopologyOptions } from '../model/topology';
 import { Column, getDefaultColumns } from '../utils/columns';
 import { TimeRange } from '../utils/datetime';
 import { getHTTPErrorDetails } from '../utils/errors';
@@ -54,7 +55,6 @@ import { ExportModal } from './modals/export-modal';
 import TimeRangeModal from './modals/time-range-modal';
 import { RecordPanel } from './netflow-record/record-panel';
 import NetflowTable from './netflow-table/netflow-table';
-import { LayoutName } from '../model/topology';
 import NetflowTopology from './netflow-topology/netflow-topology';
 import OptionsPanel from './netflow-topology/options-panel';
 import { loadConfig } from '../utils/config';
@@ -76,6 +76,7 @@ export const NetflowTraffic: React.FC<{
   const [flows, setFlows] = React.useState<Record[]>([]);
   const [layout, setLayout] = React.useState<LayoutName>(LayoutName.ColaNoForce);
   const [topologyOptions, setTopologyOptions] = React.useState<TopologyOptions>(DefaultOptions);
+  const [metrics, setMetrics] = React.useState<TopologyMetrics[]>([]);
   const [isShowTopologyOptions, setShowTopologyOptions] = React.useState<boolean>(false);
   const [error, setError] = React.useState<string | undefined>();
   const [size, setSize] = useLocalStorage<Size>(LOCAL_STORAGE_SIZE_KEY, 'm');
@@ -120,6 +121,18 @@ export const NetflowTraffic: React.FC<{
         case 'table':
           getFlows(qa)
             .then(setFlows)
+            .catch(err => {
+              setFlows([]);
+              const errorMessage = getHTTPErrorDetails(err);
+              setError(errorMessage);
+            })
+            .finally(() => {
+              setLoading(false);
+            });
+          break;
+        case 'topology':
+          getTopology(qa)
+            .then(setMetrics)
             .catch(err => {
               setFlows([]);
               const errorMessage = getHTTPErrorDetails(err);
@@ -196,6 +209,7 @@ export const NetflowTraffic: React.FC<{
   };
 
   const actions = () => {
+    //TODO: add data dropdown for topology (bytes / packets / connections ?)
     switch (selectedViewId) {
       case 'table':
       case 'topology':
@@ -309,8 +323,11 @@ export const NetflowTraffic: React.FC<{
           <NetflowTopology
             loading={loading}
             error={error}
+            range={range}
+            metrics={metrics}
             layout={layout}
             options={topologyOptions}
+            filters={filters}
             toggleTopologyOptions={() => setShowTopologyOptions(!isShowTopologyOptions)}
           />
         );
