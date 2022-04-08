@@ -69,7 +69,9 @@ export const generateNode = (
   addr: string,
   options: TopologyOptions,
   searchValue: string,
-  filters: Filter[]
+  filters: Filter[],
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  previousDatas?: any
 ): NodeModel => {
   const id = `${type}.${namespace}.${name}.${addr}`;
   const label = name ? name : addr;
@@ -87,6 +89,8 @@ export const generateNode = (
     status: NodeStatus.default,
     style: { padding: 20 },
     data: {
+      //keep previous datas between draws like isPinned, setPosition and point
+      ...previousDatas,
       namespace,
       type,
       name,
@@ -200,7 +204,8 @@ export const generateDataModel = (
             node.data.addr,
             opts,
             searchValue,
-            filters
+            filters,
+            node.data
           )
         }
   );

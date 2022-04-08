@@ -280,7 +280,7 @@ const StyleNode: React.FC<StyleNodeProps> = ({ element, showLabel, dragging, reg
   const { t } = useTranslation('plugin__network-observability-plugin');
   const data = element.getData();
   //TODO: check if we can have intelligent pin on view change
-  const [isPinned, setPinned] = React.useState<boolean>(false);
+  const [isPinned, setPinned] = React.useState<boolean>(data.isPinned);
   const [isFiltered, setFiltered] = React.useState<boolean>(data.isFiltered === true);
   const detailsLevel = useDetailsLevel();
 
