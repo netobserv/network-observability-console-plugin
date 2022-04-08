@@ -185,7 +185,7 @@ export const getCommonColumns = (t: TFunction, withConcatenatedFields = true): C
     },
     {
       id: ColumnsId.addr,
-      name: t('Addresses'),
+      name: t('IP'),
       isSelected: false,
       value: f => getSrcOrDstValue(f.fields.SrcAddr, f.fields.DstAddr),
       sort: (a, b, col) => compareIPs(col.value(a) as string, col.value(b) as string),
@@ -335,7 +335,7 @@ export const getSrcColumns = (t: TFunction): Column[] => {
     {
       id: ColumnsId.srcaddr,
       group: t('Source'),
-      name: t('Address'),
+      name: t('IP'),
       fieldName: 'SrcAddr',
       quickFilter: 'src_address',
       isSelected: false,
@@ -428,7 +428,7 @@ export const getDstColumns = (t: TFunction): Column[] => {
     {
       id: ColumnsId.dstaddr,
       group: t('Destination'),
-      name: t('Address'),
+      name: t('IP'),
       fieldName: 'DstAddr',
       quickFilter: 'dst_address',
       isSelected: false,
