@@ -10,7 +10,7 @@ import {
   Title,
   ValidatedOptions
 } from '@patternfly/react-core';
-import { CogIcon, ExportIcon, SearchIcon } from '@patternfly/react-icons';
+import { CogIcon, ExportIcon, SearchIcon, TimesIcon, AngleUpIcon, AngleDownIcon } from '@patternfly/react-icons';
 import {
   createTopologyControlButtons,
   defaultControlButtonsOptions,
@@ -66,18 +66,35 @@ const TopologyContent: React.FC<{
   const [searchResultCount, setSearchResultCount] = React.useState<string>('');
 
   //search element by label or secondaryLabel
-  const onSearch = (searchValue: string) => {
+  const onSearch = (searchValue: string, next = true) => {
     if (_.isEmpty(searchValue)) {
       return;
     }
 
     if (controller && controller.hasGraph()) {
       const currentModel = controller.toModel();
-      const nodeModelsFound = currentModel.nodes?.filter(
-        n =>
-          !lastNodeIdsFound.includes(n.id) &&
-          (n.label?.includes(searchValue) || n.data?.secondaryLabel?.includes(searchValue))
-      );
+      const matchingNodeModels =
+        currentModel.nodes?.filter(
+          n => n.label?.includes(searchValue) || n.data?.secondaryLabel?.includes(searchValue)
+        ) || [];
+
+      if (next) {
+        //go back to first match if last item is reached
+        if (lastNodeIdsFound.length === matchingNodeModels.length) {
+          lastNodeIdsFound = [];
+        }
+      } else {
+        if (lastNodeIdsFound.length === 1) {
+          //fill matching ids except last
+          lastNodeIdsFound = matchingNodeModels.map(n => n.id);
+          lastNodeIdsFound.splice(-1);
+        } else {
+          //remove previous match
+          lastNodeIdsFound.splice(-2);
+        }
+      }
+
+      const nodeModelsFound = matchingNodeModels.filter(n => !lastNodeIdsFound.includes(n.id));
       const nodeFound = !_.isEmpty(nodeModelsFound) ? controller.getNodeById(nodeModelsFound![0].id) : undefined;
       if (nodeFound) {
         const id = nodeFound.getId();
@@ -262,7 +279,7 @@ const TopologyContent: React.FC<{
             className={'search'}
             placeholder={t('Find in view')}
             autoFocus
-            type="search"
+            type={searchValidated !== ValidatedOptions.default ? 'text' : 'search'}
             aria-label="search"
             onKeyPress={e => e.key === 'Enter' && onSearch(searchValue)}
             onChange={onChangeSearch}
@@ -274,14 +291,43 @@ const TopologyContent: React.FC<{
           ) : (
             <></>
           )}
-          <Button
-            id="search-topology-element-button"
-            variant="plain"
-            aria-label="search button for element"
-            onClick={() => onSearch(searchValue)}
-          >
-            <SearchIcon />
-          </Button>
+          {_.isEmpty(searchResultCount) ? (
+            <Button
+              id="search-topology-element-button"
+              variant="plain"
+              aria-label="search for element button"
+              onClick={() => (searchValidated === ValidatedOptions.error ? onChangeSearch() : onSearch(searchValue))}
+            >
+              {searchValidated === ValidatedOptions.error ? <TimesIcon /> : <SearchIcon />}
+            </Button>
+          ) : (
+            <>
+              <Button
+                id="search-topology-element-button"
+                variant="plain"
+                aria-label="previous button for search element"
+                onClick={() => onSearch(searchValue, false)}
+              >
+                <AngleUpIcon />
+              </Button>
+              <Button
+                id="search-topology-element-button"
+                variant="plain"
+                aria-label="next button for search element"
+                onClick={() => onSearch(searchValue)}
+              >
+                <AngleDownIcon />
+              </Button>
+              <Button
+                id="search-topology-element-button"
+                variant="plain"
+                aria-label="clear button for search element"
+                onClick={() => onChangeSearch()}
+              >
+                <TimesIcon />
+              </Button>
+            </>
+          )}
         </InputGroup>
       </div>
     </TopologyView>
