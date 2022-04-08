@@ -28,9 +28,11 @@ import {
 import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Filter } from '../../model/filters';
 import { saveSvgAsPng } from 'save-svg-as-png';
+import { findFilter } from '../../utils/filter-definitions';
 import { TopologyMetrics } from '../../api/loki';
+import { Filter, FilterDefinition } from '../../model/filters';
+import { Match } from '../../model/flow-query';
 import { generateDataModel, LayoutName, TopologyOptions } from '../../model/topology';
 import { TimeRange } from '../../utils/datetime';
 import { usePrevious } from '../../utils/previous-hook';
@@ -38,6 +40,7 @@ import componentFactory from './componentFactories/componentFactory';
 import stylesComponentFactory from './componentFactories/stylesComponentFactory';
 import layoutFactory from './layouts/layoutFactory';
 import './netflow-topology.css';
+import { FILTER_EVENT } from './styles/styleNode';
 
 let lastNodeIdsFound: string[] = [];
 
@@ -47,16 +50,21 @@ const FIT_PADDING = 80;
 
 const TopologyContent: React.FC<{
   range: number | TimeRange;
+  match: Match;
+  limit: number;
   metrics: TopologyMetrics[];
   options: TopologyOptions;
   layout: LayoutName;
   filters: Filter[];
+  setFilters: (v: Filter[]) => void;
   toggleTopologyOptions: () => void;
-}> = ({ range, metrics, layout, options, filters, toggleTopologyOptions }) => {
+}> = ({ range, match, limit, metrics, layout, options, filters, setFilters, toggleTopologyOptions }) => {
   const { t } = useTranslation('plugin__network-observability-plugin');
   const controller = useVisualizationController();
 
   const prevLayout = usePrevious(layout);
+  const prevMatch = usePrevious(match);
+  const prevLimit = usePrevious(limit);
   const prevOptions = usePrevious(options);
   const prevFilters = usePrevious(filters);
 
@@ -126,6 +134,43 @@ const TopologyContent: React.FC<{
     setSearchValue(v);
   };
 
+  const onFilter = React.useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (data: any) => {
+      const result = _.cloneDeep(filters);
+
+      let value: string;
+      let def: FilterDefinition;
+      if (data.type && data.namespace && data.name) {
+        def = findFilter(t, 'resource')!;
+        value = `${data.type}.${data.namespace}.${data.name}`;
+      } else {
+        def = findFilter(t, 'address')!;
+        value = data.addr;
+      }
+
+      let filter = result.find(f => f.def.id === def.id);
+      if (!filter) {
+        filter = { def, values: [] };
+        result.push(filter);
+      }
+
+      if (data.isFiltered) {
+        //replace filter for kubeobject
+        if (def.id === 'resource') {
+          filter!.values = [{ v: value! }];
+        } else {
+          filter!.values.push({ v: value });
+        }
+      } else {
+        filter!.values = filter!.values.filter(v => v.v !== value);
+      }
+      setFilters(result.filter(f => !_.isEmpty(f.values)));
+      setSelectedIds([data.id]);
+    },
+    [filters, setFilters, t]
+  );
+
   //fit view to elements
   const fitView = React.useCallback(() => {
     if (controller && controller.hasGraph()) {
@@ -192,11 +237,12 @@ const TopologyContent: React.FC<{
       metrics,
       getNodeOptions(),
       searchValue,
+      filters,
       currentModel.nodes,
       currentModel.edges
     );
     controller.fromModel(mergedModel);
-  }, [controller, searchValue, getNodeOptions, metrics, resetGraph]);
+  }, [controller, searchValue, filters, getNodeOptions, metrics, resetGraph]);
 
   //update model on layout / options / metrics / filters change
   React.useEffect(() => {
@@ -210,7 +256,7 @@ const TopologyContent: React.FC<{
 
   //clear existing elements on query change before getting new metrics
   React.useEffect(() => {
-    if (prevFilters !== filters) {
+    if (prevFilters !== filters || prevMatch !== match || (prevLimit || 0) > limit) {
       //remove all elements except graph
       if (controller && controller.hasGraph()) {
         controller.getElements().forEach(e => {
@@ -220,9 +266,10 @@ const TopologyContent: React.FC<{
         });
       }
     }
-  }, [controller, filters, prevFilters]);
+  }, [controller, filters, limit, match, prevFilters, prevLimit, prevMatch]);
 
   useEventListener<SelectionEventListener>(SELECTION_EVENT, setSelectedIds);
+  useEventListener(FILTER_EVENT, onFilter);
 
   return (
     <TopologyView
@@ -338,12 +385,27 @@ const NetflowTopology: React.FC<{
   loading?: boolean;
   error?: string;
   range: number | TimeRange;
+  match: Match;
+  limit: number;
   metrics: TopologyMetrics[];
   options: TopologyOptions;
   layout: LayoutName;
   filters: Filter[];
+  setFilters: (v: Filter[]) => void;
   toggleTopologyOptions: () => void;
-}> = ({ loading, error, range, metrics, layout, options, filters, toggleTopologyOptions }) => {
+}> = ({
+  loading,
+  error,
+  range,
+  match,
+  limit,
+  metrics,
+  layout,
+  options,
+  filters,
+  setFilters,
+  toggleTopologyOptions
+}) => {
   const { t } = useTranslation('plugin__network-observability-plugin');
   const [controller, setController] = React.useState<Visualization>();
 
@@ -377,10 +439,13 @@ const NetflowTopology: React.FC<{
       <VisualizationProvider controller={controller}>
         <TopologyContent
           range={range}
+          match={match}
+          limit={limit}
           metrics={metrics}
           layout={layout}
           options={options}
           filters={filters}
+          setFilters={setFilters}
           toggleTopologyOptions={toggleTopologyOptions}
         />
       </VisualizationProvider>

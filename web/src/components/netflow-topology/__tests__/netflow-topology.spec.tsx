@@ -1,6 +1,7 @@
 import { EmptyState, EmptyStateBody, Spinner } from '@patternfly/react-core';
 import { shallow } from 'enzyme';
 import * as React from 'react';
+import { Match } from '../../../model/flow-query';
 import { TopologyMetrics } from '../../../api/loki';
 import { DefaultOptions, LayoutName } from '../../../model/topology';
 import { defaultTimeRange } from '../../../utils/router';
@@ -11,12 +12,15 @@ describe('<NetflowTopology />', () => {
     error: undefined as string | undefined,
     loading: false,
     range: defaultTimeRange,
+    match: 'all' as Match,
+    limit: 100,
     metrics: [] as TopologyMetrics[],
     layout: LayoutName.Cola,
     options: DefaultOptions,
     lowScale: 0.3,
     medScale: 0.5,
     filters: [],
+    setFilters: jest.fn(),
     toggleTopologyOptions: jest.fn()
   };
 

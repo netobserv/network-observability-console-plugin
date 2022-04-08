@@ -1,3 +1,7 @@
+.selected-decorator {
+  color: #3E8635;
+}
+
 #topology-search-result-count {
   flex: 0.5;
   text-align: center;
