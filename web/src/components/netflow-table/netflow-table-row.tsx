@@ -15,10 +15,7 @@ const NetflowTableRow: React.FC<{
   onSelect: (record?: Record) => void;
   highlight: boolean;
 }> = ({ flow, selectedRecord, columns, size, onSelect, highlight }) => {
-  const onRowClick = (event?: React.KeyboardEvent | React.MouseEvent) => {
-    if (event) {
-      console.log(event);
-    }
+  const onRowClick = () => {
     onSelect(flow);
   };
 

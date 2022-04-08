@@ -11,7 +11,7 @@ import { Size } from '../dropdowns/display-dropdown';
 import './record-field.css';
 
 export type RecordFieldFilter = {
-  onClick: (column: Column, isDelete: boolean) => void;
+  onClick: () => void;
   isDelete: boolean;
 };
 
@@ -286,7 +286,7 @@ export const RecordField: React.FC<{
             : t('Filter on {{name}}', { name: getFullColumnName(column) })
         }
       >
-        <Button variant="link" aria-label="Filter" onClick={() => filter.onClick(column, filter.isDelete)}>
+        <Button variant="link" aria-label="Filter" onClick={filter.onClick}>
           {filter.isDelete ? <TimesIcon /> : <FilterIcon />}
         </Button>
       </Tooltip>

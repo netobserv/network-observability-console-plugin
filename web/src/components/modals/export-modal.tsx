@@ -20,24 +20,33 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { getExportFlowsURL } from '../../api/routes';
-import { QueryOptions } from '../../model/query-options';
+import { FlowQuery } from '../../model/flow-query';
 import { Column, getFullColumnName } from '../../utils/columns';
 import { getTimeRangeOptions, TimeRange } from '../../utils/datetime';
 import { formatDuration, getDateSInMiliseconds } from '../../utils/duration';
-import { Filter } from '../../utils/filters';
-import { QueryArguments } from '../../utils/router';
+import { Filter } from '../../model/filters';
+import { getFilterFullName } from '../filters/filters-helper';
 import './export-modal.css';
 
-export const ExportModal: React.FC<{
+export interface ExportModalProps {
   isModalOpen: boolean;
   setModalOpen: (v: boolean) => void;
   range: number | TimeRange;
-  queryOptions: QueryOptions;
-  queryArguments: QueryArguments;
+  flowQuery: FlowQuery;
   columns: Column[];
   filters: Filter[];
   id?: string;
-}> = ({ id, isModalOpen, setModalOpen, range, queryOptions, queryArguments, columns, filters }) => {
+}
+
+export const ExportModal: React.FC<ExportModalProps> = ({
+  id,
+  isModalOpen,
+  setModalOpen,
+  range,
+  flowQuery,
+  columns,
+  filters
+}) => {
   const { t } = useTranslation('plugin__network-observability-plugin');
   const [selectedColumns, setSelectedColumns] = React.useState<Column[]>([]);
   const [isSaveDisabled, setSaveDisabled] = React.useState<boolean>(true);
@@ -124,17 +133,13 @@ export const ExportModal: React.FC<{
               <Chip isReadOnly={true}>{rangeText()}</Chip>
             </ChipGroup>
             <ChipGroup isClosable={false} categoryName={t('Reporter node')}>
-              <Chip isReadOnly={true}>{queryOptions.reporter}</Chip>
+              <Chip isReadOnly={true}>{flowQuery.reporter}</Chip>
             </ChipGroup>
             <ChipGroup isClosable={false} categoryName={t('Limit')}>
-              <Chip isReadOnly={true}>{queryOptions.limit}</Chip>
+              <Chip isReadOnly={true}>{flowQuery.limit}</Chip>
             </ChipGroup>
             {filters.map((filter, fIndex) => (
-              <ChipGroup
-                key={fIndex}
-                isClosable={false}
-                categoryName={getFullColumnName(columns.find(c => c.id === filter.colId))}
-              >
+              <ChipGroup key={fIndex} isClosable={false} categoryName={getFilterFullName(filter.def, t)}>
                 {filter.values.map((value, fvIndex) => (
                   <Chip key={fvIndex} isReadOnly={true}>
                     {value.display ? value.display : value.v}
@@ -158,7 +163,7 @@ export const ExportModal: React.FC<{
               <Link
                 {...props}
                 target="_blank"
-                to={getExportFlowsURL(queryArguments, getFieldNames())}
+                to={getExportFlowsURL(flowQuery, getFieldNames())}
                 onClick={() => setModalOpen(false)}
               />
             )}

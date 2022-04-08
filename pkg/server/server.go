@@ -8,7 +8,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/netobserv/network-observability-console-plugin/pkg/handler"
+	"github.com/netobserv/network-observability-console-plugin/pkg/loki"
 )
 
 var slog = logrus.WithField("module", "server")
@@ -21,7 +21,7 @@ type Config struct {
 	CORSAllowMethods string
 	CORSAllowHeaders string
 	CORSMaxAge       string
-	Loki             handler.LokiConfig
+	Loki             loki.Config
 	FrontendConfig   string
 }
 

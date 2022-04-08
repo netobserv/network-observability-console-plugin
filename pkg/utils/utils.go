@@ -48,3 +48,9 @@ func NonEmpty(s []string) []string {
 	}
 	return nonempty
 }
+
+func MergeMaps(into, other map[string]string) {
+	for k, v := range other {
+		into[k] = v
+	}
+}

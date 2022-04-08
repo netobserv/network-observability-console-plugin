@@ -3,7 +3,8 @@ package loki
 import (
 	"fmt"
 	"strconv"
-	"time"
+
+	"github.com/netobserv/network-observability-console-plugin/pkg/model/fields"
 )
 
 const (
@@ -14,130 +15,84 @@ const (
 
 type Topology struct {
 	limit     string
-	startTime string
-	endTime   string
 	timeRange string
 	function  string
 	dataField string
 }
 
 type TopologyQueryBuilder struct {
-	*Query
+	*FlowQueryBuilder
 	topology *Topology
 }
 
-func NewTopologyQuery(baseURL string, labels []string) *TopologyQueryBuilder {
-	return &TopologyQueryBuilder{
-		Query:    NewQuery(baseURL, labels, false),
-		topology: &Topology{},
-	}
-}
-
-func (q *TopologyQueryBuilder) AddParams(params map[string][]string) error {
-	for key, values := range params {
-		if len(values) == 0 {
-			// Silently ignore
-			continue
-		}
-
-		// Note: empty string allowed
-		if err := q.AddParam(key, values[0]); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (q *TopologyQueryBuilder) AddParam(key, value string) error {
-	if !filterRegexpValidation.MatchString(value) {
-		return fmt.Errorf("unauthorized sign in flows request: %s", value)
-	}
-	switch key {
-	case startTimeKey:
-		q.topology.startTime = value
-	case endTimeTimeKey:
-		q.topology.endTime = value
-	case timeRangeKey:
-		start, err := timeRangeToStart(value)
-		if err != nil {
-			return err
-		}
-		q.topology.startTime = start
-		return q.addParamTime(value)
-	case limitKey:
-		q.topology.limit = value
-	default:
-		return q.Query.AddParam(key, value)
-	}
-	return nil
-}
-
-func timeRangeToStart(value string) (string, error) {
-	r, err := strconv.ParseInt(value, 10, 64)
-	if err != nil {
-		return "", err
-	}
-	return strconv.FormatInt(time.Now().Unix()-r, 10), nil
-}
-
-// PrepareToSubmit returns a new TopologyQueryBuilder that already handles the special behavior of some attributes
-// that mustn't be used as part of a generic query.
-func (q *TopologyQueryBuilder) PrepareToSubmit() (*TopologyQueryBuilder, error) {
-	newQuery, err := q.Query.PrepareToSubmit()
-	if err != nil {
-		return nil, err
-	}
-	return &TopologyQueryBuilder{
-		Query:    newQuery,
-		topology: q.topology,
-	}, nil
-}
-
-func (q *TopologyQueryBuilder) URLQuery() (string, error) {
-	endpoint, mainPart, jsonPart, params := q.urlQueryParts()
-	err := q.setTopologyParams()
-	if err != nil {
-		return "", err
+func NewTopologyQuery(cfg *Config, start, end, limit, reporter string) (*TopologyQueryBuilder, error) {
+	l := limit
+	if len(l) == 0 {
+		l = topologyDefaultLimit
 	}
 
-	if len(jsonPart) > 0 {
-		jsonPart = "|" + jsonPart
-	}
-	return endpoint + fmt.Sprintf(`topk(%s,sum by(%s) (%s(%s|json%s|unwrap %s|__error__=""[%ss])))%s&step=%ss`,
-		q.topology.limit, topologyMetrics, q.topology.function, mainPart, jsonPart, q.topology.dataField, q.topology.timeRange, params, q.topology.timeRange), nil
-}
-
-func (q *TopologyQueryBuilder) setTopologyParams() error {
-	if len(q.topology.timeRange) == 0 {
+	timeRange := topologyDefaultRange
+	if len(start) > 0 && len(end) > 0 {
 		var startTime, endTime int64
 		var err error
-		for _, p := range q.urlParams {
-			switch p[0] {
-			case startParam:
-				startTime, err = strconv.ParseInt(p[1], 10, 64)
-			case endParam:
-				endTime, err = strconv.ParseInt(p[1], 10, 64)
-			}
-			if err != nil {
-				return fmt.Errorf("%s param should be int64", p[0])
-			}
+		startTime, err = strconv.ParseInt(start, 10, 64)
+		if err != nil {
+			return nil, fmt.Errorf("can't parse start param: %s", start)
+		}
+		endTime, err = strconv.ParseInt(end, 10, 64)
+		if err != nil {
+			return nil, fmt.Errorf("can't parse end param: %s", end)
 		}
 		rng := endTime - startTime
 		if rng > 0 {
-			q.topology.timeRange = strconv.FormatInt(rng, 10)
-		} else {
-			q.topology.timeRange = topologyDefaultRange
+			timeRange = strconv.FormatInt(rng, 10)
 		}
 	}
 
-	if len(q.topology.limit) == 0 {
-		q.topology.limit = topologyDefaultLimit
-	}
+	return &TopologyQueryBuilder{
+		FlowQueryBuilder: NewFlowQueryBuilder(cfg, start, end, limit, reporter),
+		topology: &Topology{
+			timeRange: timeRange,
+			limit:     l,
+			function:  "sum_over_time",
+			dataField: fields.Bytes,
+		},
+	}, nil
+}
 
-	//TODO: allow rate / sum_over_time / avg_over_time / max_over_time / min_over_time
-	q.topology.function = "sum_over_time"
-	//TODO: allow other values than bytes like Packets
-	q.topology.dataField = "Bytes"
+func (q *TopologyQueryBuilder) Build() string {
+	// Build something like:
+	// /<url path>?query=
+	//		topk(
+	// 			<k>,
+	//			sum by(<aggregations>) (
+	//				sum_over_time(
+	//					{<label filters>}|<line filters>|json|<json filters>
+	//						|unwrap Bytes|__error__=""[300s]
+	//				)
+	//			)
+	//		)
+	//		&<query params>&step=300s
+	sb := q.createStringBuilderURL()
+	sb.WriteString("topk(")
+	sb.WriteString(q.topology.limit)
+	sb.WriteString(",sum by(")
+	sb.WriteString(topologyMetrics)
+	sb.WriteString(") (")
+	sb.WriteString(q.topology.function)
+	sb.WriteString("(")
+	q.appendLabels(sb)
+	q.appendLineFilters(sb)
+	q.appendJSON(sb, true)
+	sb.WriteString("|unwrap ")
+	sb.WriteString(q.topology.dataField)
+	sb.WriteString(`|__error__=""[`)
+	sb.WriteString(q.topology.timeRange)
+	sb.WriteString("s])))")
+	q.appendQueryParams(sb)
+	sb.WriteString("&step=")
+	sb.WriteString(q.topology.timeRange)
+	sb.WriteString("s")
 
-	return nil
+	return sb.String()
 }

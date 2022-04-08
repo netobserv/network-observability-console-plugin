@@ -1,20 +1,17 @@
 import * as React from 'react';
 import { shallow } from 'enzyme';
 
-import ExportModal from '../export-modal';
+import ExportModal, { ExportModalProps } from '../export-modal';
 import { ShuffledDefaultColumns } from '../../../components/__tests-data__/columns';
-import { Filter } from '../../../utils/filters';
-import { QueryOptions } from '../../../model/query-options';
 
 describe('<ExportModal />', () => {
-  const props = {
+  const props: ExportModalProps = {
     isModalOpen: true,
     setModalOpen: jest.fn(),
-    queryArguments: {},
     columns: ShuffledDefaultColumns,
-    filters: [] as Filter[],
+    filters: [],
     range: 300,
-    queryOptions: { reporter: 'destination', limit: 100 } as QueryOptions,
+    flowQuery: { reporter: 'destination', limit: 100, filters: '' },
     id: 'export-modal'
   };
   it('should render component', async () => {

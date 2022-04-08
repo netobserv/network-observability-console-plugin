@@ -2,11 +2,15 @@ import { Radio, Select, Tooltip } from '@patternfly/react-core';
 import { InfoAltIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Match, QueryOptions, Reporter } from '../../model/query-options';
+import { Match, Reporter } from '../../model/flow-query';
 
 export interface QueryOptionsDropdownProps {
-  options: QueryOptions;
-  setOptions: (opts: QueryOptions) => void;
+  reporter: Reporter;
+  setReporter: (reporter: Reporter) => void;
+  limit: number;
+  setLimit: (limit: number) => void;
+  match: Match;
+  setMatch: (match: Match) => void;
 }
 
 type ReporterOption = { label: string; value: Reporter };
@@ -14,7 +18,14 @@ type ReporterOption = { label: string; value: Reporter };
 type MatchOption = { label: string; value: Match };
 
 // Exported for tests
-export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({ options, setOptions }) => {
+export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
+  reporter,
+  setReporter,
+  limit,
+  setLimit,
+  match,
+  setMatch
+}) => {
   const { t } = useTranslation('plugin__network-observability-plugin');
 
   const reporterOptions: ReporterOption[] = [
@@ -62,9 +73,9 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({ options
           <div key={`reporter-${opt.value}`}>
             <label className="pf-c-select__menu-item">
               <Radio
-                isChecked={opt.value === options.reporter}
+                isChecked={opt.value === reporter}
                 name={`reporter-${opt.value}`}
-                onChange={() => setOptions({ ...options, reporter: opt.value })}
+                onChange={() => setReporter(opt.value)}
                 label={opt.label}
                 id={`reporter-${opt.value}`}
                 value={opt.value}
@@ -90,9 +101,9 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({ options
           <div key={`match-${opt.value}`}>
             <label className="pf-c-select__menu-item">
               <Radio
-                isChecked={opt.value === options.match}
+                isChecked={opt.value === match}
                 name={`match-${opt.value}`}
-                onChange={() => setOptions({ ...options, match: opt.value })}
+                onChange={() => setMatch(opt.value)}
                 label={opt.label}
                 id={`match-${opt.value}`}
                 value={opt.value}
@@ -108,9 +119,9 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({ options
             <Radio
               id={'limit-' + l}
               name={'limit-' + l}
-              isChecked={l === options.limit}
+              isChecked={l === limit}
               label={String(l)}
-              onChange={() => setOptions({ ...options, limit: l })}
+              onChange={() => setLimit(l)}
               value={String(l)}
             />
           </label>

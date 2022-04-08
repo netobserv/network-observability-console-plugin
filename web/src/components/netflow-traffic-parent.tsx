@@ -20,7 +20,7 @@ class NetflowTrafficParent extends React.Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('Netobserv plugin error. This is likely a bug, this error should be caught closer to its source.');
-    console.log('Error:', error, 'errorInfo:', errorInfo);
+    console.error('Error:', error, 'errorInfo:', errorInfo);
     this.setState({ error: error });
   }
 

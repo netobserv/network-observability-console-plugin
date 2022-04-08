@@ -17,8 +17,6 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
-	"regexp"
-	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -27,7 +25,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
-	"github.com/netobserv/network-observability-console-plugin/pkg/handler"
+	"github.com/netobserv/network-observability-console-plugin/pkg/loki"
 )
 
 const (
@@ -54,7 +52,7 @@ func TestServerRunning(t *testing.T) {
 
 	go func() {
 		Start(&Config{
-			Loki: handler.LokiConfig{
+			Loki: loki.Config{
 				URL: &url.URL{Scheme: "http", Host: "localhost:3100"},
 			},
 			Port: testPort,
@@ -129,7 +127,7 @@ func TestSecureComm(t *testing.T) {
 		CertFile:       testServerCertFile,
 		PrivateKeyFile: testServerKeyFile,
 		Port:           testPort,
-		Loki: handler.LokiConfig{
+		Loki: loki.Config{
 			URL: &url.URL{Scheme: "http", Host: "localhost:3100"},
 		},
 	}
@@ -200,7 +198,7 @@ func TestLokiConfiguration(t *testing.T) {
 
 	// THAT is accessed behind the NOO console plugin backend
 	backendRoutes := setupRoutes(&Config{
-		Loki: handler.LokiConfig{
+		Loki: loki.Config{
 			URL:     lokiURL,
 			Timeout: time.Second,
 		},
@@ -251,7 +249,7 @@ func TestLokiConfiguration_MultiTenant(t *testing.T) {
 
 	// GIVEN a NOO console plugin backend configured for Multi tenant mode
 	backendRoutes := setupRoutes(&Config{
-		Loki: handler.LokiConfig{
+		Loki: loki.Config{
 			URL:      lokiURL,
 			Timeout:  time.Second,
 			TenantID: "my-organisation",
@@ -267,227 +265,6 @@ func TestLokiConfiguration_MultiTenant(t *testing.T) {
 	// THEN the query has been properly forwarded to Loki with the tenant ID header
 	req := lokiMock.Calls[0].Arguments[1].(*http.Request)
 	assert.Equal(t, "my-organisation", req.Header.Get("X-Scope-OrgID"))
-}
-
-func TestLokiFiltering(t *testing.T) {
-	testCases := []struct {
-		inputPath string
-		// since some arguments might be processed/appended in different order, this field
-		// contains the different permutations for such arguments
-		outputQuery []string
-	}{{
-		inputPath: "?SrcK8S_Name=test-pod",
-		outputQuery: []string{
-			"{app=\"netobserv-flowcollector\"}|~`SrcK8S_Name\":\"(?i).*test-pod.*\"`",
-		},
-	}, {
-		inputPath: "?SrcK8S_Name=test-pod&match=any",
-		outputQuery: []string{
-			"{app=\"netobserv-flowcollector\"}|~`SrcK8S_Name\":\"(?i).*test-pod.*\"`",
-		},
-	}, {
-		inputPath: "?Proto=6&match=all",
-		outputQuery: []string{
-			"{app=\"netobserv-flowcollector\"}|~`Proto\":6`",
-		},
-	}, {
-		inputPath: "?Proto=6&match=any",
-		outputQuery: []string{
-			"{app=\"netobserv-flowcollector\"}|~`Proto\":6`",
-		},
-	}, {
-		inputPath: "?Proto=6&SrcK8S_Name=test",
-		outputQuery: []string{
-			"{app=\"netobserv-flowcollector\"}|~`Proto\":6`|~`SrcK8S_Name\":\"(?i).*test.*\"`",
-			"{app=\"netobserv-flowcollector\"}|~`SrcK8S_Name\":\"(?i).*test.*\"`|~`Proto\":6`",
-		},
-	}, {
-		inputPath: "?Proto=6&SrcK8S_Name=test&match=any",
-		outputQuery: []string{
-			"{app=\"netobserv-flowcollector\"}|~`(Proto\":6)|(SrcK8S_Name\":\"(?i).*test.*\")`",
-			"{app=\"netobserv-flowcollector\"}|~`(SrcK8S_Name\":\"(?i).*test.*\")|(Proto\":6)`",
-		},
-	}, {
-		inputPath: "?Proto=6&SrcK8S_Name=test&FlowDirection=1&match=any",
-		outputQuery: []string{
-			"{app=\"netobserv-flowcollector\",FlowDirection=\"1\"}|~`(Proto\":6)|(SrcK8S_Name\":\"(?i).*test.*\")`",
-			"{app=\"netobserv-flowcollector\",FlowDirection=\"1\"}|~`(SrcK8S_Name\":\"(?i).*test.*\")|(Proto\":6)`",
-		},
-	}, {
-		inputPath: "?SrcK8S_Namespace=test-namespace&match=all",
-		outputQuery: []string{
-			`{SrcK8S_Namespace=~"(?i).*test-namespace.*",app="netobserv-flowcollector"}`,
-		},
-	}, {
-		inputPath: "?SrcK8S_Namespace=test-namespace&match=any",
-		outputQuery: []string{
-			`{SrcK8S_Namespace=~"(?i).*test-namespace.*",app="netobserv-flowcollector"}`,
-		},
-	}, {
-		inputPath: "?SrcPort=8080&SrcAddr=10.128.0.1&SrcK8S_Namespace=default",
-		outputQuery: []string{
-			"{SrcK8S_Namespace=~\"(?i).*default.*\",app=\"netobserv-flowcollector\"}|~`SrcPort\":8080`|json|SrcAddr=ip(\"10.128.0.1\")",
-		},
-	}, {
-		inputPath: "?SrcPort=8080&SrcAddr=10.128.0.1&SrcK8S_Namespace=default&match=any",
-		outputQuery: []string{
-			"{app=\"netobserv-flowcollector\"}|json|SrcK8S_Namespace=~\"(?i).*default.*\"+or+SrcAddr=ip(\"10.128.0.1\")+or+SrcPort=8080",
-		},
-	}, {
-		inputPath: "?SrcPort=8080&SrcAddr=10.128.0.1&SrcK8S_Namespace=default&match=any&FlowDirection=0",
-		outputQuery: []string{
-			"{app=\"netobserv-flowcollector\",FlowDirection=\"0\"}|json|SrcK8S_Namespace=~\"(?i).*default.*\"+or+SrcAddr=ip(\"10.128.0.1\")+or+SrcPort=8080",
-		},
-	}, {
-		inputPath:   "?startTime=1640991600&match=all",
-		outputQuery: []string{`{app="netobserv-flowcollector"}&start=1640991600`},
-	}, {
-		inputPath:   "?startTime=1640991600&match=any",
-		outputQuery: []string{`{app="netobserv-flowcollector"}&start=1640991600`},
-	}, {
-		inputPath:   "?endTime=1641160800",
-		outputQuery: []string{`{app="netobserv-flowcollector"}&end=1641160800`},
-	}, {
-		inputPath:   "?endTime=1641160800&match=any",
-		outputQuery: []string{`{app="netobserv-flowcollector"}&end=1641160800`},
-	}, {
-		inputPath: "?startTime=1640991600&endTime=1641160800&match=all",
-		outputQuery: []string{
-			`{app="netobserv-flowcollector"}&start=1640991600&end=1641160800`,
-			`{app="netobserv-flowcollector"}&end=1641160800&start=1640991600`,
-		},
-	}, {
-		inputPath: "?startTime=1640991600&endTime=1641160800&match=any",
-		outputQuery: []string{
-			`{app="netobserv-flowcollector"}&end=1641160800&start=1640991600`,
-			`{app="netobserv-flowcollector"}&start=1640991600&end=1641160800`,
-		},
-	}, {
-		inputPath:   "?timeRange=300000",
-		outputQuery: []string{`{app="netobserv-flowcollector"}&start=${timeNow-300000}`},
-	}, {
-		inputPath:   "?timeRange=300000&match=any",
-		outputQuery: []string{`{app="netobserv-flowcollector"}&start=${timeNow-300000}`},
-	}, {
-		inputPath:   "?timeRange=86400000&match=all",
-		outputQuery: []string{`{app="netobserv-flowcollector"}&start=${timeNow-86400000}`},
-	}, {
-		inputPath:   "?timeRange=86400000&match=any",
-		outputQuery: []string{`{app="netobserv-flowcollector"}&start=${timeNow-86400000}`},
-	}, {
-		inputPath: "?SrcK8S_Namespace=\"exact-namespace\"",
-		outputQuery: []string{
-			`{SrcK8S_Namespace=~"^exact-namespace$",app="netobserv-flowcollector"}`,
-		},
-	}, {
-		inputPath: "?SrcK8S_Namespace=\"start-namespace*\"",
-		outputQuery: []string{
-			`{SrcK8S_Namespace=~"^start-namespace.*",app="netobserv-flowcollector"}`,
-		},
-	}, {
-		inputPath: "?SrcK8S_Namespace=\"*end-namespace\"",
-		outputQuery: []string{
-			`{SrcK8S_Namespace=~".*end-namespace$",app="netobserv-flowcollector"}`,
-		},
-	}, {
-		inputPath: "?SrcK8S_Namespace=\"mid-n*e\"",
-		outputQuery: []string{
-			`{SrcK8S_Namespace=~"^mid-n.*e$",app="netobserv-flowcollector"}`,
-		},
-	}, {
-		inputPath: "?SrcK8S_Name=\"exact-pod\"",
-		outputQuery: []string{
-			"{app=\"netobserv-flowcollector\"}|~`SrcK8S_Name\":\"exact-pod\"`",
-		},
-	}, {
-		inputPath: "?SrcK8S_Name=\"start-pod*\"",
-		outputQuery: []string{
-			"{app=\"netobserv-flowcollector\"}|~`SrcK8S_Name\":\"start-pod.*\"`",
-		},
-	}, {
-		inputPath: "?SrcK8S_Name=\"*end-pod\"",
-		outputQuery: []string{
-			"{app=\"netobserv-flowcollector\"}|~`SrcK8S_Name\":\".*end-pod\"`",
-		},
-	}, {
-		inputPath: "?SrcK8S_Name=\"mid-*d\"",
-		outputQuery: []string{
-			"{app=\"netobserv-flowcollector\"}|~`SrcK8S_Name\":\"mid-.*d\"`",
-		},
-	}, {
-		inputPath: "?SrcK8S_Object=Pod.namespace.podName",
-		outputQuery: []string{
-			"{app=\"netobserv-flowcollector\"}|json|(SrcK8S_Type=~`(?i).*Pod.*`+and+SrcK8S_Namespace=~\"(?i).*namespace.*\"+and+SrcK8S_Name=~`(?i).*podName.*`)",
-			"{app=\"netobserv-flowcollector\"}|json|(SrcK8S_Type=~`(?i).*Pod.*`+and+SrcK8S_Name=~`(?i).*podName.*`+and+SrcK8S_Namespace=~\"(?i).*namespace.*\")",
-			"{app=\"netobserv-flowcollector\"}|json|(SrcK8S_Namespace=~\"(?i).*namespace.*\"+and+SrcK8S_Type=~`(?i).*Pod.*`+and+SrcK8S_Name=~`(?i).*podName.*`)",
-			"{app=\"netobserv-flowcollector\"}|json|(SrcK8S_Namespace=~\"(?i).*namespace.*\"+and+SrcK8S_Name=~`(?i).*podName.*`+and+SrcK8S_Type=~`(?i).*Pod.*`)",
-			"{app=\"netobserv-flowcollector\"}|json|(SrcK8S_Name=~`(?i).*podName.*`+and+SrcK8S_Namespace=~\"(?i).*namespace.*\"+and+SrcK8S_Type=~`(?i).*Pod.*`)",
-			"{app=\"netobserv-flowcollector\"}|json|(SrcK8S_Name=~`(?i).*podName.*`+and+SrcK8S_Type=~`(?i).*Pod.*`+and+SrcK8S_Namespace=~\"(?i).*namespace.*\")",
-		},
-	}}
-
-	// GIVEN a Loki service
-	lokiMock := httpMock{}
-	lokiMock.On("ServeHTTP", mock.Anything, mock.Anything).Run(func(args mock.Arguments) {
-		_, _ = args.Get(0).(http.ResponseWriter).Write([]byte(`{}`))
-	}).Times(len(testCases))
-	lokiSvc := httptest.NewServer(&lokiMock)
-	defer lokiSvc.Close()
-	lokiURL, err := url.Parse(lokiSvc.URL)
-	require.NoError(t, err)
-
-	// THAT is accessed behind the NOO console plugin backend
-	backendRoutes := setupRoutes(&Config{
-		Loki: handler.LokiConfig{
-			URL:     lokiURL,
-			Timeout: time.Second,
-			Labels:  []string{"SrcK8S_Namespace", "SrcK8S_OwnerName", "DstK8S_Namespace", "DstK8S_OwnerName", "FlowDirection"},
-		},
-	})
-	backendSvc := httptest.NewServer(backendRoutes)
-	defer backendSvc.Close()
-
-	timeNowArg := regexp.MustCompile(`\${timeNow-(\d+)}`)
-
-	for index, tc := range testCases {
-		t.Run(tc.inputPath, func(t *testing.T) {
-			// WHEN the Loki flows endpoint is queried in the backend
-			now := time.Now().Unix()
-			res, err := backendSvc.Client().Get(backendSvc.URL + "/api/loki/flows" + tc.inputPath)
-			require.NoError(t, err)
-			body, err := ioutil.ReadAll(res.Body)
-			require.NoError(t, err)
-			require.Equalf(t, http.StatusOK, res.StatusCode,
-				"unexpected return %s: %s", res.Status, string(body))
-
-			// THEN each filter argument has been properly forwarded to Loki
-			var expectedURLs []string
-			for _, out := range tc.outputQuery {
-				expectedURLs = append(expectedURLs, "/loki/api/v1/query_range?query="+handler.EncodeQuery(out))
-			}
-
-			requestURL := lokiMock.Calls[index].Arguments[1].(*http.Request).URL.String()
-			if subMatches := timeNowArg.FindStringSubmatch(tc.outputQuery[0]); len(subMatches) == 0 {
-				assert.Contains(t, expectedURLs, requestURL)
-			} else {
-				// replace ${timeNow-<seconds>} by time.Now()-<seconds> for arguments where the
-				// value is dynamically calculated via the non-mockable time.Now() function
-				timeNowDiff, err := strconv.ParseInt(subMatches[1], 10, 64)
-				require.NoError(t, err)
-				// giving 1-second room to the start time to avoid flaky tests
-				expectedStart := int(now - timeNowDiff)
-				var possibleQueries []string
-				for _, exp := range expectedURLs {
-					possibleQueries = append(possibleQueries, []string{
-						timeNowArg.ReplaceAllString(exp, strconv.Itoa(expectedStart-1)),
-						timeNowArg.ReplaceAllString(exp, strconv.Itoa(expectedStart)),
-						timeNowArg.ReplaceAllString(exp, strconv.Itoa(expectedStart+1)),
-					}...)
-				}
-				assert.Contains(t, possibleQueries, requestURL)
-			}
-		})
-	}
 }
 
 type httpMock struct {

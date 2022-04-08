@@ -44,11 +44,12 @@ func writeCSV(w http.ResponseWriter, code int, payload []byte, columns []string)
 		return
 	}
 
-	datas, err := csvdata.GetCSVData(&qr, columns)
+	data, err := csvdata.GetCSVData(&qr, columns)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
+	hlog.Tracef("CSV data: %v", data)
 
 	t := time.Now()
 	//output file would be 'export-stdLongYear-stdZeroMonth-stdZeroDay-stdHour-stdZeroMinute.csv'
@@ -57,7 +58,7 @@ func writeCSV(w http.ResponseWriter, code int, payload []byte, columns []string)
 	w.Header().Set("Transfer-Encoding", "chunked")
 	w.WriteHeader(code)
 	writer := csv.NewWriter(w)
-	for _, row := range datas {
+	for _, row := range data {
 		//write csv row
 		err := writer.Write(row)
 		if err != nil {
