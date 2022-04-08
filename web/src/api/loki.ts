@@ -33,12 +33,14 @@ export interface TopologyMetric {
   DstK8S_OwnerName: string;
   DstK8S_OwnerType: string;
   DstK8S_Type: string;
+  DstK8S_HostIP: string;
   SrcAddr: string;
   SrcK8S_Name: string;
   SrcK8S_Namespace: string;
   SrcK8S_OwnerName: string;
   SrcK8S_OwnerType: string;
   SrcK8S_Type: string;
+  SrcK8S_HostIP: string;
 }
 
 export interface TopologyMetrics {

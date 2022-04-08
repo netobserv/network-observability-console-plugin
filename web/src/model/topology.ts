@@ -26,9 +26,11 @@ export enum LayoutName {
 
 export enum TopologyGroupTypes {
   NONE = 'none',
+  HOSTS = 'hosts',
   NAMESPACES = 'namespaces',
   OWNERS = 'owners',
-  ALL = 'all'
+  NAMESPACES_OWNERS = 'namespaces+owners',
+  HOSTS_OWNERS = 'hosts+owners'
 }
 
 export interface TopologyOptions {
@@ -67,6 +69,7 @@ export const generateNode = (
   type: string,
   name: string,
   addr: string,
+  host: string,
   options: TopologyOptions,
   searchValue: string,
   filters: Filter[],
@@ -95,6 +98,7 @@ export const generateNode = (
       type,
       name,
       addr,
+      host,
       shadowed,
       isFiltered: filters.some(f => f.values.some(fv => fv.v === `${type}.${namespace}.${name}` || fv.v === addr)),
       labelPosition: LabelPosition.bottom,
@@ -202,6 +206,7 @@ export const generateDataModel = (
             node.data.type,
             node.data.name,
             node.data.addr,
+            node.data.host,
             opts,
             searchValue,
             filters,
@@ -252,12 +257,17 @@ export const generateDataModel = (
     return group;
   }
 
-  function addNode(namespace: string, type: string, name: string, addr: string, parent?: NodeModel) {
+  function addNode(namespace: string, type: string, name: string, addr: string, host: string, parent?: NodeModel) {
     let node = nodes.find(
-      n => n.data.type === type && n.data.namespace === namespace && n.data.name === name && n.data.addr === addr
+      n =>
+        n.data.type === type &&
+        n.data.namespace === namespace &&
+        n.data.name === name &&
+        n.data.addr === addr &&
+        n.data.host === host
     );
     if (!node) {
-      node = generateNode(namespace, type, name, addr, opts, searchValue, filters);
+      node = generateNode(namespace, type, name, addr, host, opts, searchValue, filters);
       nodes.push(node);
     }
     if (parent && !childIds.includes(node.id)) {
@@ -293,23 +303,39 @@ export const generateDataModel = (
     const namespace = m[`${prefix}K8S_Namespace`];
     const ownerType = m[`${prefix}K8S_OwnerType`];
     const ownerName = m[`${prefix}K8S_OwnerName`];
+    //TODO: enrich Host Name to use ResourceLink in element-panel
+    const host = m[`${prefix}K8S_HostIP`];
     const type = m[`${prefix}K8S_Type`];
     const name = m[`${prefix}K8S_Name`];
     const addr = m[`${prefix}Addr`];
 
-    const srcNamespaceGroup =
-      [TopologyGroupTypes.ALL, TopologyGroupTypes.NAMESPACES].includes(options.groupTypes) && !_.isEmpty(namespace)
-        ? addGroup(namespace, 'Namespace')
+    const hostGroup =
+      [TopologyGroupTypes.HOSTS_OWNERS, TopologyGroupTypes.HOSTS].includes(options.groupTypes) && !_.isEmpty(host)
+        ? addGroup(host, 'Node', undefined, true)
         : undefined;
-    const srcOwnerGroup =
-      [TopologyGroupTypes.ALL, TopologyGroupTypes.OWNERS].includes(options.groupTypes) &&
+    const namespaceGroup =
+      [TopologyGroupTypes.NAMESPACES_OWNERS, TopologyGroupTypes.NAMESPACES].includes(options.groupTypes) &&
+      !_.isEmpty(namespace)
+        ? addGroup(namespace, 'Namespace', hostGroup)
+        : undefined;
+    const ownerGroup =
+      [TopologyGroupTypes.NAMESPACES_OWNERS, TopologyGroupTypes.HOSTS_OWNERS, TopologyGroupTypes.OWNERS].includes(
+        options.groupTypes
+      ) &&
       !_.isEmpty(ownerType) &&
       !_.isEmpty(ownerName)
-        ? addGroup(ownerName, ownerType, srcNamespaceGroup, srcNamespaceGroup === undefined)
+        ? addGroup(ownerName, ownerType, namespaceGroup ? namespaceGroup : hostGroup, namespaceGroup === undefined)
         : undefined;
-    const srcNode = addNode(namespace, type, name, addr, srcOwnerGroup ? srcOwnerGroup : srcNamespaceGroup);
+    const node = addNode(
+      namespace,
+      type,
+      name,
+      addr,
+      host,
+      ownerGroup ? ownerGroup : namespaceGroup ? namespaceGroup : hostGroup
+    );
 
-    return srcNode;
+    return node;
   }
 
   datas.forEach(d => {

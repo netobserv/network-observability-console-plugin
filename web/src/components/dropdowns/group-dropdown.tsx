@@ -13,8 +13,12 @@ export const GroupDropdown: React.FC<{
 
   const getGroupDisplay = (groupType: TopologyGroupTypes) => {
     switch (groupType) {
-      case TopologyGroupTypes.ALL:
-        return t('All');
+      case TopologyGroupTypes.NAMESPACES_OWNERS:
+        return t('Namespaces + Owners');
+      case TopologyGroupTypes.HOSTS_OWNERS:
+        return t('Nodes + Owners');
+      case TopologyGroupTypes.HOSTS:
+        return t('Nodes');
       case TopologyGroupTypes.NAMESPACES:
         return t('Namespaces');
       case TopologyGroupTypes.OWNERS:

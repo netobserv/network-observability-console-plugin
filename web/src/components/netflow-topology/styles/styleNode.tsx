@@ -134,7 +134,7 @@ const renderPopoverDecorator = (
               <FlexItem>{t('Address')}</FlexItem>
             </FlexItem>
             <FlexItem>
-              <FlexItem>{t('Host')}</FlexItem>
+              <FlexItem>{t('Node')}</FlexItem>
             </FlexItem>
           </Flex>
           <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsNone' }}>

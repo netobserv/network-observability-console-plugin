@@ -6,7 +6,7 @@ import { TopologyGroupTypes } from '../../../model/topology';
 
 describe('<GroupDropdown />', () => {
   const props = {
-    selected: TopologyGroupTypes.ALL,
+    selected: TopologyGroupTypes.HOSTS,
     setGroupType: jest.fn(),
     id: 'group'
   };
@@ -40,10 +40,10 @@ describe('<GroupDropdown />', () => {
     expect(props.setGroupType).toHaveBeenCalledWith(TopologyGroupTypes.NONE);
     expect(wrapper.find('li').length).toBe(0);
 
-    //open dropdown and select ALL
+    //open dropdown and select OWNERS
     dropdown.at(0).simulate('click');
-    wrapper.find('[id="all"]').at(0).simulate('click');
-    expect(props.setGroupType).toHaveBeenCalledWith(TopologyGroupTypes.ALL);
+    wrapper.find('[id="owners"]').at(0).simulate('click');
+    expect(props.setGroupType).toHaveBeenCalledWith(TopologyGroupTypes.OWNERS);
     expect(wrapper.find('li').length).toBe(0);
 
     //setGroupType should be called twice
