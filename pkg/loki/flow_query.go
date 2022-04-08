@@ -147,7 +147,7 @@ func (q *FlowQueryBuilder) addLineFilters(key string, values []string) {
 			// match start any if not quoted
 			// and case insensitive
 			if !strings.HasPrefix(value, `"`) {
-				regexStr.WriteString("(?i).*")
+				regexStr.WriteString("(?i)[^\"]*")
 			}
 			//inject value with regex
 			regexStr.WriteString(valueReplacer.Replace(value))
