@@ -128,17 +128,22 @@ func (q *FlowQueryBuilder) addLineFilters(key string, values []string) {
 		if i > 0 {
 			regexStr.WriteByte('|')
 		}
-		//match end of KEY + regex VALUE:
-		//if numeric, KEY":VALUE
-		//if string KEY":"VALUE"
-		//ie 'Port' key will match both 'SrcPort":"XXX"' and 'DstPort":"XXX"
-		//VALUE can be quoted for exact match or contains * to inject regex any
+		// match end of KEY + regex VALUE:
+		// if numeric, KEY":VALUE,
+		// if string KEY":"VALUE"
+		// ie 'Port' key will match both 'SrcPort":"XXX"' and 'DstPort":"XXX"
+		// VALUE can be quoted for exact match or contains * to inject regex any
+		// For numeric values, exact match is implicit
+		// 	(the trick is to match for the ending coma; it works as long as the filtered field
+		// 	is not the last one (they're in alphabetic order); a less performant alternative
+		// 	but more future-proof/less hacky could be to move that to a json filter, if needed)
 		regexStr.WriteString(key)
 		regexStr.WriteString(`":`)
 		if fields.IsNumeric(key) {
 			regexStr.WriteString(value)
+			regexStr.WriteByte(',')
 		} else {
-			regexStr.WriteString(`"`)
+			regexStr.WriteByte('"')
 			// match start any if not quoted
 			// and case insensitive
 			if !strings.HasPrefix(value, `"`) {
@@ -150,7 +155,7 @@ func (q *FlowQueryBuilder) addLineFilters(key string, values []string) {
 			if !strings.HasSuffix(value, `"`) {
 				regexStr.WriteString(".*")
 			}
-			regexStr.WriteString(`"`)
+			regexStr.WriteByte('"')
 		}
 	}
 
