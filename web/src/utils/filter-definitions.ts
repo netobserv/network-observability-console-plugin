@@ -262,7 +262,7 @@ export const getFilterDefinitions = (t: TFunction): FilterDefinition[] => {
       ...peers(
         {
           id: 'address',
-          name: t('Address'),
+          name: t('IP'),
           component: FilterComponent.Text,
           category: FilterCategory.Common,
           getOptions: noOption,
