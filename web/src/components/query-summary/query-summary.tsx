@@ -5,7 +5,6 @@ import { TimeRange } from '../../utils/datetime';
 import { Record } from '../../api/ipfix';
 import { ExclamationTriangleIcon } from '@patternfly/react-icons';
 import './query-summary.css';
-import _ from 'lodash';
 
 export const QuerySummaryContent: React.FC<{
   flows: Record[];
@@ -24,7 +23,7 @@ export const QuerySummaryContent: React.FC<{
   }
 
   const limitReached = limit === flows.length;
-  const totalBytes = _.isEmpty(flows) ? 0 : flows.map(f => f.fields.Bytes).reduce((a, b) => a + b);
+  const totalBytes = flows.map(f => f.fields.Bytes).reduce((a, b) => a + b, 0);
 
   return (
     <Flex id="query-summary-content" className={className} direction={{ default: direction }}>
@@ -57,7 +56,7 @@ export const QuerySummaryContent: React.FC<{
         <Tooltip content={<Text component={TextVariants.p}>{t('Filtered sum of packets')}</Text>}>
           <Text id="packetsCount" component={TextVariants.p}>
             {t('{{count}} packets', {
-              count: flows.map(f => f.fields.Packets).reduce((a, b) => a + b)
+              count: flows.map(f => f.fields.Packets).reduce((a, b) => a + b, 0)
             })}
           </Text>
         </Tooltip>

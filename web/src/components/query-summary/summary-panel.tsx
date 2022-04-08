@@ -182,7 +182,7 @@ export const SummaryPanelContent: React.FC<{
           {typesCardinality.map(tc =>
             accordionItem(
               tc.type,
-              `${tc.objects.map(o => o.names.length).reduce((a, b) => a + b)} ${tc.type}(s)`,
+              `${tc.objects.map(o => o.names.length).reduce((a, b) => a + b, 0)} ${tc.type}(s)`,
               typeCardinalityContent(tc)
             )
           )}
