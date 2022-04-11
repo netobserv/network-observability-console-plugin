@@ -2,7 +2,6 @@ import {
   EdgeAnimationSpeed,
   EdgeModel,
   EdgeStyle,
-  EdgeTerminalType,
   LabelPosition,
   Model,
   NodeModel,
@@ -67,13 +66,19 @@ export const generateNode = (
   type: string,
   name: string,
   addr: string,
-  options: TopologyOptions
+  options: TopologyOptions,
+  searchValue: string
 ): NodeModel => {
   const id = `${type}.${namespace}.${name}.${addr}`;
+  const label = name ? name : addr;
+  const secondaryLabel = [TopologyGroupTypes.OWNERS, TopologyGroupTypes.NONE].includes(options.groupTypes)
+    ? namespace
+    : undefined;
+  const shadowed = !_.isEmpty(searchValue) && !(label.includes(searchValue) || secondaryLabel?.includes(searchValue));
   return {
     id,
     type: 'node',
-    label: name ? name : addr,
+    label,
     width: DEFAULT_NODE_SIZE,
     height: DEFAULT_NODE_SIZE,
     shape: NodeShape.ellipse,
@@ -84,16 +89,14 @@ export const generateNode = (
       type,
       name,
       addr,
+      shadowed,
       labelPosition: LabelPosition.bottom,
       //TODO: get badge and color using console ResourceIcon
       badge: options.nodeBadges && type ? kindToAbbr(type) : undefined,
       //badgeColor: options.nodeBadges && type ? getModel(type)?.color : undefined,
       badgeClassName: options.nodeBadges && type ? `co-m-resource-icon co-m-resource-${type.toLowerCase()}` : undefined,
       showDecorators: true,
-      secondaryLabel: [TopologyGroupTypes.OWNERS, TopologyGroupTypes.NONE].includes(options.groupTypes)
-        ? namespace
-        : undefined,
-      showContextMenu: options.contextMenus,
+      secondaryLabel,
       truncateLength: options.truncateLabels ? DEFAULT_NODE_TRUNCATE_LENGTH : undefined
     }
   };
@@ -145,7 +148,8 @@ export const generateEdge = (
   sourceId: string,
   targetId: string,
   count: number,
-  options: TopologyOptions
+  options: TopologyOptions,
+  shadowed = false
 ): EdgeModel => {
   return {
     id: `${sourceId}.${targetId}`,
@@ -157,7 +161,7 @@ export const generateEdge = (
     data: {
       sourceId,
       targetId,
-      endTerminalType: EdgeTerminalType.directional,
+      shadowed,
       endTerminalStatus: NodeStatus.default,
       tag: getEdgeTag(count, options),
       tagStatus: getTagStatus(count, options.maxEdgeValue),
@@ -169,6 +173,7 @@ export const generateEdge = (
 export const generateDataModel = (
   datas: TopologyMetrics[],
   options: TopologyOptions,
+  searchValue: string,
   nodes: NodeModel[] = [],
   edges: EdgeModel[] = []
 ): Model => {
@@ -184,7 +189,7 @@ export const generateDataModel = (
       : {
           ...node,
           //update options and filter indicators
-          ...generateNode(node.data.namespace, node.data.type, node.data.name, node.data.addr, opts)
+          ...generateNode(node.data.namespace, node.data.type, node.data.name, node.data.addr, opts, searchValue)
         }
   );
   edges = edges.map(edge => ({
@@ -235,7 +240,7 @@ export const generateDataModel = (
       n => n.data.type === type && n.data.namespace === namespace && n.data.name === name && n.data.addr === addr
     );
     if (!node) {
-      node = generateNode(namespace, type, name, addr, opts);
+      node = generateNode(namespace, type, name, addr, opts, searchValue);
       nodes.push(node);
     }
     if (parent && !childIds.includes(node.id)) {
@@ -246,15 +251,20 @@ export const generateDataModel = (
     return node;
   }
 
-  function addEdge(sourceId: string, targetId: string, count: number) {
+  function addEdge(sourceId: string, targetId: string, count: number, shadowed = false) {
     let edge = edges.find(e => e.data.sourceId === sourceId && e.data.targetId === targetId);
     if (edge) {
       //update style and datas
       edge.edgeStyle = getEdgeStyle(count);
       edge.animationSpeed = getAnimationSpeed(count, options.maxEdgeValue);
-      edge.data = { ...edge.data, tag: getEdgeTag(count, options), count };
+      edge.data = {
+        ...edge.data,
+        shadowed,
+        tag: getEdgeTag(count, options),
+        count
+      };
     } else {
-      edge = generateEdge(sourceId, targetId, count, opts);
+      edge = generateEdge(sourceId, targetId, count, opts, shadowed);
       edges.push(edge);
     }
 
@@ -290,7 +300,7 @@ export const generateDataModel = (
     const dstNode = manageNode('Dst', d);
 
     if (options.edges && srcNode && dstNode) {
-      addEdge(srcNode.id, dstNode.id, d.total);
+      addEdge(srcNode.id, dstNode.id, d.total, srcNode.data.shadowed || dstNode.data.shadowed);
     }
   });
 
