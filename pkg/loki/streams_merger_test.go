@@ -9,7 +9,7 @@ import (
 	"github.com/netobserv/network-observability-console-plugin/pkg/model"
 )
 
-func TestMerge(t *testing.T) {
+func TestStreamsMerge(t *testing.T) {
 	now := time.Now()
 	merger := NewStreamMerger()
 	baseline := model.Stream{
@@ -21,10 +21,10 @@ func TestMerge(t *testing.T) {
 			Line:      "{key: value}",
 		}},
 	}
-	merger.Add(model.Streams{baseline})
+	merger.AddStreams(model.Streams{baseline})
 
 	// Different label, different line => no dedup
-	merged := merger.Add(model.Streams{{
+	merged := merger.AddStreams(model.Streams{{
 		Labels: map[string]string{
 			"foo":  "bar",
 			"foo2": "bar2",
@@ -42,7 +42,7 @@ func TestMerge(t *testing.T) {
 	assert.Len(t, merged[1].Entries, 1)
 
 	// Same labels in different order => no dedup
-	merged = merger.Add(model.Streams{{
+	merged = merger.AddStreams(model.Streams{{
 		Labels: map[string]string{
 			"foo2": "bar2",
 			"foo":  "bar",
@@ -66,7 +66,7 @@ func TestMerge(t *testing.T) {
 	assert.Len(t, merged[1].Entries, 1)
 
 	// Different timestamp => no dedup
-	merged = merger.Add(model.Streams{{
+	merged = merger.AddStreams(model.Streams{{
 		Labels: baseline.Labels,
 		Entries: []model.Entry{{
 			Timestamp: now.Add(time.Hour),
@@ -78,7 +78,7 @@ func TestMerge(t *testing.T) {
 	assert.Len(t, merged[1].Entries, 1)
 
 	// some dedup
-	merged = merger.Add(model.Streams{{
+	merged = merger.AddStreams(model.Streams{{
 		// changed line => no dedup
 		Labels: baseline.Labels,
 		Entries: []model.Entry{{
