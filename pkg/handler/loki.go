@@ -104,14 +104,25 @@ func fetchParallel(lokiClient httpclient.HTTPClient, queries []string) ([]byte, 
 	// Aggregate results
 	first := true
 	var resp model.QueryResponse
-	merger := loki.NewStreamMerger()
+	var streamMerger *loki.StreamMerger
+	var matrixMerger *loki.MatrixMerger
 	for r := range resChan {
+		//TODO: resp.Data.Stats are incorrect doing that
+		if first {
+			first = false
+			resp = r
+		}
+
 		if streams, ok := r.Data.Result.(model.Streams); ok {
-			merger.Add(streams)
-			if first {
-				first = false
-				resp = r
+			if streamMerger == nil {
+				streamMerger = loki.NewStreamMerger()
 			}
+			streamMerger.AddStreams(streams)
+		} else if matrix, ok := r.Data.Result.(model.Matrix); ok {
+			if matrixMerger == nil {
+				matrixMerger = loki.NewMatrixMerger()
+			}
+			matrixMerger.AddMatrix(matrix)
 		} else {
 			return nil, http.StatusInternalServerError, fmt.Errorf("loki returned an unexpected type: %T", r.Data.Result)
 		}
@@ -122,7 +133,14 @@ func fetchParallel(lokiClient httpclient.HTTPClient, queries []string) ([]byte, 
 	}
 
 	// Encode back to json
-	resp.Data.Result = merger.GetStreams()
+	if streamMerger != nil {
+		resp.Data.Result = streamMerger.GetStreams()
+	} else if matrixMerger != nil {
+		resp.Data.Result = matrixMerger.GetMatrix()
+	} else {
+		return nil, http.StatusInternalServerError, fmt.Errorf("cannot merge result. Data should either be stream or matrix")
+	}
+
 	encoded, err := json.Marshal(resp)
 	if err != nil {
 		return nil, http.StatusInternalServerError, err

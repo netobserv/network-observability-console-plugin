@@ -12,8 +12,8 @@ type StreamMerger struct {
 	merged model.Streams
 }
 
-func NewStreamMerger() StreamMerger {
-	return StreamMerger{
+func NewStreamMerger() *StreamMerger {
+	return &StreamMerger{
 		index:  map[string]indexedStream{},
 		merged: model.Streams{},
 	}
@@ -45,7 +45,7 @@ func uniqueEntry(e *model.Entry) string {
 	return e.Timestamp.String() + e.Line
 }
 
-func (m *StreamMerger) Add(from model.Streams) model.Streams {
+func (m *StreamMerger) AddStreams(from model.Streams) model.Streams {
 	for _, stream := range from {
 		lkey := uniqueStream(&stream)
 		idxStream, streamExists := m.index[lkey]
