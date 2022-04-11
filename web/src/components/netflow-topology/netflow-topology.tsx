@@ -1,5 +1,5 @@
 import { Bullseye, EmptyState, EmptyStateBody, EmptyStateVariant, Spinner, Title } from '@patternfly/react-core';
-import { CogIcon } from '@patternfly/react-icons';
+import { CogIcon, ExportIcon } from '@patternfly/react-icons';
 import {
   createTopologyControlButtons,
   defaultControlButtonsOptions,
@@ -18,6 +18,7 @@ import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Filter } from '../../model/filters';
+import { saveSvgAsPng } from 'save-svg-as-png';
 import { TopologyMetrics } from '../../api/loki';
 import { generateDataModel, LayoutName, TopologyOptions } from '../../model/topology';
 import { TimeRange } from '../../utils/datetime';
@@ -145,6 +146,18 @@ const TopologyContent: React.FC<{
           controlButtons={createTopologyControlButtons({
             ...defaultControlButtonsOptions,
             customButtons: [
+              {
+                id: 'export',
+                icon: <ExportIcon />,
+                tooltip: t('Export'),
+                callback: () => {
+                  const svg = document.getElementsByClassName('pf-topology-visualization-surface__svg')[0];
+                  saveSvgAsPng(svg, 'topology.png', {
+                    backgroundColor: '#fff',
+                    encoderOptions: 0
+                  });
+                }
+              },
               {
                 id: 'options',
                 icon: <CogIcon />,
