@@ -61,7 +61,7 @@ span.co-resource-item.co-resource-item--inline.l,
 }
 
 .record-field-flex-container.l {
-  min-height: 126px;
+  height: 126px;
 }
 
 /* table tooltips - check pf-c-tooltip__content for values */
