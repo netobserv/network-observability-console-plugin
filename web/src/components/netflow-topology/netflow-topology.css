@@ -1,5 +1,10 @@
 .selected-decorator {
-  color: #3E8635;
+  color: white;
+}
+
+.selected-decorator>circle {
+  fill: #06c;
+  stroke: #06c;
 }
 
 #topology-search-result-count {
