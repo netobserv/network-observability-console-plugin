@@ -1,3 +1,4 @@
+import { TimeRange } from '../utils/datetime';
 import { MetricFunction } from '../model/flow-query';
 import { cyrb53 } from '../utils/hash';
 import { Fields, Labels, Record } from './ipfix';
@@ -53,7 +54,14 @@ export interface TopologyMetrics {
 /* calculate total for selected function
  * loki will return matrix with multiple values (one per step = 60s)
  */
-export const calculateMatrixTotals = (tm: TopologyMetrics, mf: MetricFunction) => {
+export const calculateMatrixTotals = (tm: TopologyMetrics, mf: MetricFunction, range: number | TimeRange) => {
+  let rangeInMinutes: number;
+  if (typeof range === 'number') {
+    rangeInMinutes = range / 60;
+  } else {
+    rangeInMinutes = (range.from - range.to) / (1000 * 60);
+  }
+
   tm.total = 0;
   switch (mf) {
     case 'max':
@@ -62,7 +70,7 @@ export const calculateMatrixTotals = (tm: TopologyMetrics, mf: MetricFunction) =
     case 'avg':
     case 'rate':
       tm.values.forEach(v => (tm.total += Number(v[1])));
-      tm.total = tm.total / tm.values.length;
+      tm.total = tm.total / rangeInMinutes;
       break;
     case 'sum':
     default:

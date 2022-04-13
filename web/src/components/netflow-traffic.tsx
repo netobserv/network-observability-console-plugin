@@ -177,7 +177,7 @@ export const NetflowTraffic: React.FC<{
           });
         break;
       case 'topology':
-        getTopology(fq)
+        getTopology(fq, range)
           .then(setMetrics)
           .catch(err => {
             setMetrics([]);
@@ -192,7 +192,7 @@ export const NetflowTraffic: React.FC<{
         setLoading(false);
         break;
     }
-  }, [buildFlowQuery, selectedViewId]);
+  }, [buildFlowQuery, range, selectedViewId]);
 
   usePoll(tick, interval);
 
