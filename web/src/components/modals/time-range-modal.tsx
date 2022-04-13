@@ -1,7 +1,18 @@
 import * as React from 'react';
 import * as _ from 'lodash';
 import { useTranslation } from 'react-i18next';
-import { Button, DatePicker, isValidDate, Modal, TimePicker, Tooltip } from '@patternfly/react-core';
+import Modal from './modal';
+import {
+  Text,
+  Button,
+  DatePicker,
+  Flex,
+  FlexItem,
+  isValidDate,
+  TimePicker,
+  Tooltip,
+  TextVariants
+} from '@patternfly/react-core';
 import { TimeRange, toISODateString, twentyFourHourTime } from '../../utils/datetime';
 import { getDateMsInSeconds, getDateSInMiliseconds } from '../../utils/duration';
 import './time-range-modal.css';
@@ -86,10 +97,10 @@ export const TimeRangeModal: React.FC<TimeRangeModalProps> = ({ id, isModalOpen,
       id={id}
       title={t('Custom time range')}
       isOpen={isModalOpen}
-      className={'modal-dialog'}
+      scrollable={false}
       onClose={() => onCancel()}
       footer={
-        <div className="footer">
+        <div>
           <Button key="cancel" variant="link" onClick={() => onCancel()}>
             {t('Cancel')}
           </Button>
@@ -106,37 +117,39 @@ export const TimeRangeModal: React.FC<TimeRangeModalProps> = ({ id, isModalOpen,
         </div>
       }
     >
-      <div className="row co-m-form-row">
-        <div className="col-sm-12">
-          <label>{t('From')}</label>
-        </div>
-        <div className="col-sm-4">
-          <DatePicker
-            validators={[date => dateValidator(true, date)]}
-            onChange={str => setFromDate(str)}
-            value={fromDate}
-          />
-        </div>
-        <div className="col-sm-4">
-          <TimePicker is24Hour onChange={setFromTime} time={fromTime} />
-        </div>
-      </div>
-      <div className="row co-m-form-row">
-        <div className="col-sm-12">
-          <label>{t('To')}</label>
-        </div>
-        <div className="col-sm-4">
-          <DatePicker
-            validators={[date => dateValidator(false, date)]}
-            rangeStart={fromDate ? new Date(Date.parse(fromDate)) : undefined}
-            onChange={str => setToDate(str)}
-            value={toDate}
-          />
-        </div>
-        <div className="col-sm-4">
-          <TimePicker is24Hour onChange={setToTime} time={toTime} />
-        </div>
-      </div>
+      <Flex direction={{ default: 'column' }}>
+        <FlexItem>
+          <Text component={TextVariants.h4}>{t('From')}</Text>
+          <Flex direction={{ default: 'row' }}>
+            <FlexItem>
+              <DatePicker
+                validators={[date => dateValidator(true, date)]}
+                onChange={str => setFromDate(str)}
+                value={fromDate}
+              />
+            </FlexItem>
+            <FlexItem>
+              <TimePicker is24Hour onChange={setFromTime} time={fromTime} />
+            </FlexItem>
+          </Flex>
+        </FlexItem>
+        <FlexItem>
+          <Text component={TextVariants.h4}>{t('To')}</Text>
+          <Flex direction={{ default: 'row' }}>
+            <FlexItem>
+              <DatePicker
+                validators={[date => dateValidator(false, date)]}
+                rangeStart={fromDate ? new Date(Date.parse(fromDate)) : undefined}
+                onChange={str => setToDate(str)}
+                value={toDate}
+              />
+            </FlexItem>
+            <FlexItem>
+              <TimePicker is24Hour onChange={setToTime} time={toTime} />
+            </FlexItem>
+          </Flex>
+        </FlexItem>
+      </Flex>
     </Modal>
   );
 };

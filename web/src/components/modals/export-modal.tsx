@@ -10,11 +10,11 @@ import {
   DataListItem,
   DataListItemCells,
   DataListItemRow,
-  Modal,
   Text,
   TextContent,
   TextVariants
 } from '@patternfly/react-core';
+import Modal from './modal';
 import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -121,7 +121,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
       id={id}
       title={t('Export')}
       isOpen={isModalOpen}
-      className={'modal-dialog'}
+      scrollable={true}
       onClose={() => setModalOpen(false)}
       description={
         <>

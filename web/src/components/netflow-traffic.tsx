@@ -11,8 +11,7 @@ import {
   Text,
   TextVariants,
   ToggleGroup,
-  ToggleGroupItem,
-  Tooltip
+  ToggleGroupItem
 } from '@patternfly/react-core';
 import { ColumnsIcon, ExportIcon, SyncAltIcon, TableIcon, TopologyIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
@@ -251,7 +250,12 @@ export const NetflowTraffic: React.FC<{
               setRange={setRange}
               openCustomModal={() => setTRModalOpen(true)}
             />
-            <RefreshDropdown id="refresh-dropdown" interval={interval} setInterval={setInterval} />
+            <RefreshDropdown
+              id="refresh-dropdown"
+              disabled={typeof range !== 'number'}
+              interval={interval}
+              setInterval={setInterval}
+            />
             <Button
               id="refresh-button"
               className="co-action-refresh-button"
@@ -272,28 +276,30 @@ export const NetflowTraffic: React.FC<{
         return (
           <OverflowMenuGroup groupType="button" isPersistent>
             <OverflowMenuItem>
-              <Tooltip content={t('Manage columns')}>
-                <Button
-                  id="manage-columns-button"
-                  variant="plain"
-                  onClick={() => setColModalOpen(true)}
-                  aria-label={t('Column management')}
-                >
-                  <ColumnsIcon color="#6A6E73" />
-                </Button>
-              </Tooltip>
+              <Button
+                id="manage-columns-button"
+                variant="link"
+                className="overflow-button"
+                icon={<ColumnsIcon />}
+                onClick={() => setColModalOpen(true)}
+              >
+                {t('Manage columns')}
+              </Button>
             </OverflowMenuItem>
-            <DisplayDropdown id="display-dropdown" setSize={setSize} />
-            <Tooltip content={t('Export')}>
+            <OverflowMenuItem>
+              <DisplayDropdown id="display" setSize={setSize} />
+            </OverflowMenuItem>
+            <OverflowMenuItem>
               <Button
                 id="export-button"
-                variant="plain"
+                variant="link"
+                className="overflow-button"
+                icon={<ExportIcon />}
                 onClick={() => setExportModalOpen(true)}
-                aria-label={t('Export management')}
               >
-                <ExportIcon color="#6A6E73" />
+                {t('Export')}
               </Button>
-            </Tooltip>
+            </OverflowMenuItem>
           </OverflowMenuGroup>
         );
       default:
@@ -414,7 +420,11 @@ export const NetflowTraffic: React.FC<{
           </OverflowMenu>
         }
       </FiltersToolbar>
-      <Drawer id="drawer" isExpanded={selectedRecord !== undefined || isShowTopologyOptions || isShowQuerySummary}>
+      <Drawer
+        id="drawer"
+        isInline
+        isExpanded={selectedRecord !== undefined || isShowTopologyOptions || isShowQuerySummary}
+      >
         <DrawerContent id="drawerContent" panelContent={panelContent()}>
           <DrawerContentBody id="drawerBody">{pageContent()}</DrawerContentBody>
         </DrawerContent>

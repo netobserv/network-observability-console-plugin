@@ -11,13 +11,13 @@ import {
   DragDrop,
   Draggable,
   Droppable,
-  Modal,
   DataListItemCells,
   Text,
   TextContent,
   TextVariants,
   Tooltip
 } from '@patternfly/react-core';
+import Modal from './modal';
 import { useTranslation } from 'react-i18next';
 import { Column, getDefaultColumns, getFullColumnName } from '../../utils/columns';
 import * as _ from 'lodash';
@@ -131,7 +131,7 @@ export const ColumnsModal: React.FC<{
       id={id}
       title={t('Manage columns')}
       isOpen={isModalOpen}
-      className={'modal-dialog'}
+      scrollable={true}
       onClose={() => setModalOpen(false)}
       description={
         <TextContent>

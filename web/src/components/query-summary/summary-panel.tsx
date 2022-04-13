@@ -202,7 +202,7 @@ export const SummaryPanelContent: React.FC<{
   return (
     <>
       <TextContent className="summary-text-container">
-        <Text component={TextVariants.h3}>{t('Infos')}</Text>
+        <Text component={TextVariants.h3}>{t('Results')}</Text>
         <QuerySummaryContent
           className="summary-container-grouped"
           direction={'column'}

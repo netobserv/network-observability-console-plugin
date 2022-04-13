@@ -5,6 +5,7 @@ import * as _ from 'lodash';
 import { parseDuration, formatDuration } from '../../utils/duration';
 
 export type RefreshDropdownProps = {
+  disabled?: boolean;
   interval?: number;
   setInterval: (v?: number) => void;
   id?: string;
@@ -12,7 +13,7 @@ export type RefreshDropdownProps = {
 
 const OFF_KEY = 'OFF_KEY';
 
-export const RefreshDropdown: React.FC<RefreshDropdownProps> = ({ id, interval, setInterval }) => {
+export const RefreshDropdown: React.FC<RefreshDropdownProps> = ({ disabled, id, interval, setInterval }) => {
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
   const { t } = useTranslation('plugin__network-observability-plugin');
 
@@ -36,6 +37,13 @@ export const RefreshDropdown: React.FC<RefreshDropdownProps> = ({ id, interval, 
 
   const selectedKey = interval === undefined ? OFF_KEY : formatDuration(interval);
 
+  //unselect interval when dropdown is disabled
+  React.useEffect(() => {
+    if (disabled && interval) {
+      setInterval(undefined);
+    }
+  }, [disabled, interval, setInterval]);
+
   return (
     <Dropdown
       id={id}
@@ -47,7 +55,7 @@ export const RefreshDropdown: React.FC<RefreshDropdownProps> = ({ id, interval, 
       isOpen={isOpen}
       onSelect={() => setIsOpen(false)}
       toggle={
-        <DropdownToggle id={`${id}-dropdown`} onToggle={() => setIsOpen(!isOpen)}>
+        <DropdownToggle id={`${id}-dropdown`} isDisabled={disabled} onToggle={() => setIsOpen(!isOpen)}>
           {refreshOptions[selectedKey as keyof typeof refreshOptions]}
         </DropdownToggle>
       }
