@@ -227,7 +227,7 @@ func TestLokiConfiguration(t *testing.T) {
 
 	// THEN the query has been properly forwarded to Loki
 	req = lokiMock.Calls[1].Arguments[1].(*http.Request)
-	assert.Equal(t, `topk(100,sum by(SrcK8S_Name,SrcK8S_Type,SrcK8S_OwnerName,SrcK8S_OwnerType,SrcK8S_Namespace,SrcAddr,DstK8S_Name,DstK8S_Type,DstK8S_OwnerName,DstK8S_OwnerType,DstK8S_Namespace,DstAddr) (sum_over_time({app="netobserv-flowcollector"}|json|unwrap Bytes|__error__=""[300s])))`, req.URL.Query().Get("query"))
+	assert.Equal(t, `topk(100,sum by(SrcK8S_Name,SrcK8S_Type,SrcK8S_OwnerName,SrcK8S_OwnerType,SrcK8S_Namespace,SrcAddr,SrcK8S_HostIP,DstK8S_Name,DstK8S_Type,DstK8S_OwnerName,DstK8S_OwnerType,DstK8S_Namespace,DstAddr,DstK8S_HostIP) (sum_over_time({app="netobserv-flowcollector"}|json|unwrap Bytes|__error__=""[300s])))`, req.URL.Query().Get("query"))
 	// without any multi-tenancy header
 	assert.Empty(t, req.Header.Get("X-Scope-OrgID"))
 
