@@ -365,10 +365,13 @@ export const NetflowTraffic: React.FC<{
             loading={loading}
             error={error}
             range={range}
+            match={match}
+            limit={limit}
             metrics={metrics}
             layout={layout}
             options={topologyOptions}
             filters={filters}
+            setFilters={setFilters}
             toggleTopologyOptions={() => setShowTopologyOptions(!isShowTopologyOptions)}
           />
         );

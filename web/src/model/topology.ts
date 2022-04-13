@@ -11,6 +11,7 @@ import {
 import _ from 'lodash';
 import { TopologyMetrics } from '../api/loki';
 import { bytesPerSeconds } from '../utils/bytes';
+import { Filter } from '../model/filters';
 import { kindToAbbr } from '../utils/label';
 import { defaultTimeRange } from '../utils/router';
 
@@ -67,7 +68,10 @@ export const generateNode = (
   name: string,
   addr: string,
   options: TopologyOptions,
-  searchValue: string
+  searchValue: string,
+  filters: Filter[],
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  previousDatas?: any
 ): NodeModel => {
   const id = `${type}.${namespace}.${name}.${addr}`;
   const label = name ? name : addr;
@@ -85,11 +89,14 @@ export const generateNode = (
     status: NodeStatus.default,
     style: { padding: 20 },
     data: {
+      //keep previous datas between draws like isPinned, setPosition and point
+      ...previousDatas,
       namespace,
       type,
       name,
       addr,
       shadowed,
+      isFiltered: filters.some(f => f.values.some(fv => fv.v === `${type}.${namespace}.${name}` || fv.v === addr)),
       labelPosition: LabelPosition.bottom,
       //TODO: get badge and color using console ResourceIcon
       badge: options.nodeBadges && type ? kindToAbbr(type) : undefined,
@@ -174,6 +181,7 @@ export const generateDataModel = (
   datas: TopologyMetrics[],
   options: TopologyOptions,
   searchValue: string,
+  filters: Filter[],
   nodes: NodeModel[] = [],
   edges: EdgeModel[] = []
 ): Model => {
@@ -189,7 +197,16 @@ export const generateDataModel = (
       : {
           ...node,
           //update options and filter indicators
-          ...generateNode(node.data.namespace, node.data.type, node.data.name, node.data.addr, opts, searchValue)
+          ...generateNode(
+            node.data.namespace,
+            node.data.type,
+            node.data.name,
+            node.data.addr,
+            opts,
+            searchValue,
+            filters,
+            node.data
+          )
         }
   );
   edges = edges.map(edge => ({
@@ -240,7 +257,7 @@ export const generateDataModel = (
       n => n.data.type === type && n.data.namespace === namespace && n.data.name === name && n.data.addr === addr
     );
     if (!node) {
-      node = generateNode(namespace, type, name, addr, opts, searchValue);
+      node = generateNode(namespace, type, name, addr, opts, searchValue, filters);
       nodes.push(node);
     }
     if (parent && !childIds.includes(node.id)) {
