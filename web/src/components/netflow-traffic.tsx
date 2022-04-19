@@ -37,11 +37,15 @@ import {
 import { usePoll } from '../utils/poll-hook';
 import {
   getFiltersFromURL,
+  getLimitFromURL,
+  getMatchFromURL,
   getRangeFromURL,
+  getReporterFromURL,
   setURLFilters,
   setURLLimit,
   setURLMatch,
-  setURLRange
+  setURLRange,
+  setURLReporter
 } from '../utils/router';
 import DisplayDropdown, { Size } from './dropdowns/display-dropdown';
 import { RefreshDropdown } from './dropdowns/refresh-dropdown';
@@ -89,9 +93,9 @@ export const NetflowTraffic: React.FC<{
   //TODO: move default view to an Overview like dashboard instead of table
   const [selectedViewId, setSelectedViewId] = React.useState<ViewId>('table');
   const [filters, setFilters] = React.useState<Filter[]>([]);
-  const [match, setMatch] = React.useState<Match>('all');
-  const [reporter, setReporter] = React.useState<Reporter>('destination');
-  const [limit, setLimit] = React.useState<number>(100);
+  const [match, setMatch] = React.useState<Match>(getMatchFromURL());
+  const [reporter, setReporter] = React.useState<Reporter>(getReporterFromURL());
+  const [limit, setLimit] = React.useState<number>(getLimitFromURL());
   const [range, setRange] = React.useState<number | TimeRange>(getRangeFromURL());
   const [interval, setInterval] = useLocalStorage<number | undefined>(LOCAL_STORAGE_REFRESH_KEY);
   const [selectedRecord, setSelectedRecord] = React.useState<Record | undefined>(undefined);
@@ -197,6 +201,9 @@ export const NetflowTraffic: React.FC<{
   React.useEffect(() => {
     setURLMatch(match);
   }, [match]);
+  React.useEffect(() => {
+    setURLReporter(reporter);
+  }, [reporter]);
 
   // updates table filters and clears up the table for proper visualization of the
   // updating process
