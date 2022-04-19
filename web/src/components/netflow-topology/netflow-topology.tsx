@@ -42,6 +42,8 @@ import layoutFactory from './layouts/layoutFactory';
 import './netflow-topology.css';
 import { FILTER_EVENT } from './styles/styleNode';
 
+export const HOVER_EVENT = 'hover';
+
 let lastNodeIdsFound: string[] = [];
 
 const ZOOM_IN = 4 / 3;
@@ -85,6 +87,7 @@ const TopologyContent: React.FC<{
   const prevFilters = usePrevious(filters);
 
   const [selectedIds, setSelectedIds] = React.useState<string[]>([]);
+  const [hoveredId, setHoveredId] = React.useState<string>('');
   const [searchValue, setSearchValue] = React.useState<string>('');
   const [searchValidated, setSearchValidated] = React.useState<ValidatedOptions>();
   const [searchResultCount, setSearchResultCount] = React.useState<string>('');
@@ -187,6 +190,14 @@ const TopologyContent: React.FC<{
     [filters, setFilters, t]
   );
 
+  const onHover = React.useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (data: any) => {
+      setHoveredId(data.isHovered ? data.id : '');
+    },
+    []
+  );
+
   //fit view to elements
   const fitView = React.useCallback(() => {
     if (controller && controller.hasGraph()) {
@@ -254,17 +265,24 @@ const TopologyContent: React.FC<{
       console.error('updateModel called while controller has no graph');
     }
 
+    //highlight either hoveredId or selected id
+    let highlightedId = hoveredId;
+    if (!highlightedId && selectedIds.length === 1) {
+      highlightedId = selectedIds[0];
+    }
+
     const currentModel = controller.toModel();
     const mergedModel = generateDataModel(
       metrics,
       getOptions(),
       searchValue,
+      highlightedId,
       filters,
       currentModel.nodes,
       currentModel.edges
     );
     controller.fromModel(mergedModel);
-  }, [controller, searchValue, filters, getOptions, metrics]);
+  }, [controller, hoveredId, selectedIds, metrics, getOptions, searchValue, filters]);
 
   //update model on layout / options / metrics / filters change
   React.useEffect(() => {
@@ -311,6 +329,7 @@ const TopologyContent: React.FC<{
 
   useEventListener<SelectionEventListener>(SELECTION_EVENT, setSelectedIds);
   useEventListener(FILTER_EVENT, onFilter);
+  useEventListener(HOVER_EVENT, onHover);
 
   return (
     <TopologyView
