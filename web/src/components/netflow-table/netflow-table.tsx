@@ -34,7 +34,8 @@ const NetflowTable: React.FC<{
 }> = ({ flows, selectedRecord, columns, error, loading, size, onSelect, clearFilters }) => {
   const { t } = useTranslation('plugin__network-observability-plugin');
 
-  const [containerHeight, setContainerHeight] = React.useState(0);
+  //default to 300 to allow content to be rendered in tests
+  const [containerHeight, setContainerHeight] = React.useState(300);
   const previousContainerHeight = usePrevious(containerHeight);
   const [scrollPosition, setScrollPosition] = React.useState(0);
   const previousScrollPosition = usePrevious(scrollPosition);
