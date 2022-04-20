@@ -30,44 +30,23 @@ import { roundTwoDigits } from '../../utils/count';
 import { getDateFromUnixString, twentyFourHourTime } from '../../utils/datetime';
 import './element-panel.css';
 
-export type ElementDrawerProps = {
-  onClose: () => void;
+export const ElementPanelContent: React.FC<{
   element: GraphElement;
   metrics: TopologyMetrics[];
   metricFunction: MetricFunction;
   metricType: MetricType;
-  id?: string;
-};
-
-export const ElementPanel: React.FC<ElementDrawerProps> = ({
-  id,
-  element,
-  metrics,
-  metricFunction,
-  metricType,
-  onClose
-}) => {
+}> = ({ element, metrics, metricFunction, metricType }) => {
   const { t } = useTranslation('plugin__network-observability-plugin');
   const data = element.getData();
   const type = element.getType();
 
-  const titleContent = React.useCallback(() => {
-    if (data.type) {
-      return <Text component={TextVariants.h2}>{data.type}</Text>;
-    } else if (element instanceof BaseEdge) {
-      return <Text component={TextVariants.h2}>{t('Edge')}</Text>;
-    } else {
-      return <Text component={TextVariants.h2}>{t('Unknown')}</Text>;
-    }
-  }, [data.type, element, t]);
-
-  const ressourceInfos = React.useCallback(
+  const resourceInfos = React.useCallback(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (d: any) => {
       let infos: React.ReactElement | undefined;
       if (d.type && d.name) {
         infos = (
-          <TextContent className="element-text-container grouped">
+          <TextContent id="resourcelink" className="element-text-container grouped">
             <Text component={TextVariants.h4}>{d.type}</Text>
             <ResourceLink inline={true} kind={d.type} name={d.name} namespace={d.namespace} />
           </TextContent>
@@ -77,9 +56,9 @@ export const ElementPanel: React.FC<ElementDrawerProps> = ({
         infos = (
           <>
             {infos}
-            <TextContent className="element-text-container grouped">
+            <TextContent id="address" className="element-text-container grouped">
               <Text component={TextVariants.h4}>{t('Address')}</Text>
-              <Text>{d.addr}</Text>
+              <Text id="addressValue">{d.addr}</Text>
             </TextContent>
           </>
         );
@@ -140,13 +119,13 @@ export const ElementPanel: React.FC<ElementDrawerProps> = ({
           </Flex>
           <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsNone' }}>
             <FlexItem>
-              <Text>{metricValue(fromCount)}</Text>
+              <Text id="fromCount">{metricValue(fromCount)}</Text>
             </FlexItem>
             <FlexItem>
-              <Text>{metricValue(toCount)}</Text>
+              <Text id="toCount">{metricValue(toCount)}</Text>
             </FlexItem>
             <FlexItem>
-              <Text>{metricValue(toCount + fromCount)}</Text>
+              <Text id="total">{metricValue(toCount + fromCount)}</Text>
             </FlexItem>
           </Flex>
         </Flex>
@@ -235,106 +214,126 @@ export const ElementPanel: React.FC<ElementDrawerProps> = ({
     [metricTitle, metricValue, metrics, t]
   );
 
-  const bodyContent = React.useCallback(() => {
-    let srcCount = 0;
-    let dstCount = 0;
+  let srcCount = 0;
+  let dstCount = 0;
 
-    if (element instanceof BaseNode) {
-      const nodeMetrics =
-        type === 'group'
-          ? metrics.filter(m =>
-              //namespace must match exclusively Source OR Destination
-              data.type === 'Namespace'
-                ? m.metric.SrcK8S_Namespace !== m.metric.DstK8S_Namespace &&
-                  (m.metric.SrcK8S_Namespace === data.name || m.metric.DstK8S_Namespace === data.name)
-                : //host must match exclusively Source OR Destination
-                data.type === 'Node'
-                ? m.metric.SrcK8S_HostIP !== m.metric.DstK8S_HostIP &&
-                  (m.metric.SrcK8S_HostIP === data.name || m.metric.DstK8S_HostIP === data.name)
-                : //fallback on Owners match exclusively Source OR Destination
-                  m.metric.SrcK8S_OwnerName !== m.metric.DstK8S_OwnerName &&
-                  (m.metric.SrcK8S_OwnerName === data.name || m.metric.DstK8S_OwnerName === data.name)
-            )
-          : //Pods / Services must match Source, Destination or both
-            metrics.filter(m => m.metric.SrcAddr === data.addr || m.metric.DstAddr === data.addr);
-      nodeMetrics.forEach(m => {
-        if (type === 'group') {
-          if (data.type === 'Namespace') {
-            if (m.metric.SrcK8S_Namespace === data.name) {
-              srcCount += m.total;
-            } else {
-              dstCount += m.total;
-            }
-          } else if (data.type === 'Node') {
-            if (m.metric.SrcK8S_HostIP === data.name) {
-              srcCount += m.total;
-            } else {
-              dstCount += m.total;
-            }
+  if (element instanceof BaseNode) {
+    const nodeMetrics =
+      type === 'group'
+        ? metrics.filter(m =>
+            //namespace must match exclusively Source OR Destination
+            data.type === 'Namespace'
+              ? m.metric.SrcK8S_Namespace !== m.metric.DstK8S_Namespace &&
+                (m.metric.SrcK8S_Namespace === data.name || m.metric.DstK8S_Namespace === data.name)
+              : //host must match exclusively Source OR Destination
+              data.type === 'Node'
+              ? m.metric.SrcK8S_HostIP !== m.metric.DstK8S_HostIP &&
+                (m.metric.SrcK8S_HostIP === data.name || m.metric.DstK8S_HostIP === data.name)
+              : //fallback on Owners match exclusively Source OR Destination
+                m.metric.SrcK8S_OwnerName !== m.metric.DstK8S_OwnerName &&
+                (m.metric.SrcK8S_OwnerName === data.name || m.metric.DstK8S_OwnerName === data.name)
+          )
+        : //Pods / Services must match Source, Destination or both
+          metrics.filter(m => m.metric.SrcAddr === data.addr || m.metric.DstAddr === data.addr);
+    nodeMetrics.forEach(m => {
+      if (type === 'group') {
+        if (data.type === 'Namespace') {
+          if (m.metric.SrcK8S_Namespace === data.name) {
+            srcCount += m.total;
           } else {
-            if (m.metric.SrcK8S_OwnerName === data.name) {
-              srcCount += m.total;
-            } else {
-              dstCount += m.total;
-            }
+            dstCount += m.total;
+          }
+        } else if (data.type === 'Node') {
+          if (m.metric.SrcK8S_HostIP === data.name) {
+            srcCount += m.total;
+          } else {
+            dstCount += m.total;
           }
         } else {
-          if (m.metric.SrcAddr === data.addr) {
+          if (m.metric.SrcK8S_OwnerName === data.name) {
             srcCount += m.total;
           } else {
             dstCount += m.total;
           }
         }
-      });
-      return (
-        <>
-          <TextContent className="element-text-container">
-            <Text component={TextVariants.h3}>{t('Infos')}</Text>
-            {ressourceInfos(data)}
-          </TextContent>
-          <TextContent className="element-text-container">
-            <Text component={TextVariants.h3}>{metricTitle()}</Text>
-            {metricCounts(srcCount, dstCount, false)}
-            {chart(`node-${data.addr}`, nodeMetrics, data.addr)}
-          </TextContent>
-        </>
-      );
-    } else if (element instanceof BaseEdge) {
-      const srcData = element.getSource().getData();
-      const tgtData = element.getTarget().getData();
-      const edgeMetrics = metrics.filter(
-        m =>
-          (m.metric.SrcAddr === srcData.addr && m.metric.DstAddr === tgtData.addr) ||
-          (m.metric.SrcAddr === tgtData.addr && m.metric.DstAddr === srcData.addr)
-      );
-      edgeMetrics.forEach(m => {
-        if (m.metric.SrcAddr === srcData.addr) {
+      } else {
+        if (m.metric.SrcAddr === data.addr) {
           srcCount += m.total;
         } else {
           dstCount += m.total;
         }
-      });
-      return (
-        <>
-          <TextContent className="element-text-container">
-            <Text component={TextVariants.h3}>{t('Source')}</Text>
-            {ressourceInfos(srcData)}
-          </TextContent>
-          <TextContent className="element-text-container">
-            <Text component={TextVariants.h3}>{t('Destination')}</Text>
-            {ressourceInfos(tgtData)}
-          </TextContent>
-          <TextContent className="element-text-container">
-            <Text component={TextVariants.h3}>{metricTitle()}</Text>
-            {metricCounts(dstCount, srcCount, true)}
-            {chart(`edge-${srcData.addr}-${tgtData.addr}`, edgeMetrics)}
-          </TextContent>
-        </>
-      );
+      }
+    });
+    return (
+      <>
+        <TextContent id="resourceInfos" className="element-text-container">
+          <Text component={TextVariants.h3}>{t('Infos')}</Text>
+          {resourceInfos(data)}
+        </TextContent>
+        <TextContent id="metrics" className="element-text-container">
+          <Text component={TextVariants.h3}>{metricTitle()}</Text>
+          {metricCounts(srcCount, dstCount, false)}
+          {chart(`node-${data.addr}`, nodeMetrics, data.addr)}
+        </TextContent>
+      </>
+    );
+  } else if (element instanceof BaseEdge) {
+    const srcData = element.getSource().getData();
+    const tgtData = element.getTarget().getData();
+    const edgeMetrics = metrics.filter(
+      m =>
+        (m.metric.SrcAddr === srcData.addr && m.metric.DstAddr === tgtData.addr) ||
+        (m.metric.SrcAddr === tgtData.addr && m.metric.DstAddr === srcData.addr)
+    );
+    edgeMetrics.forEach(m => {
+      if (m.metric.SrcAddr === srcData.addr) {
+        srcCount += m.total;
+      } else {
+        dstCount += m.total;
+      }
+    });
+    return (
+      <>
+        <TextContent id="source" className="element-text-container">
+          <Text component={TextVariants.h3}>{t('Source')}</Text>
+          {resourceInfos(srcData)}
+        </TextContent>
+        <TextContent id="destination" className="element-text-container">
+          <Text component={TextVariants.h3}>{t('Destination')}</Text>
+          {resourceInfos(tgtData)}
+        </TextContent>
+        <TextContent id="metrics" className="element-text-container">
+          <Text component={TextVariants.h3}>{metricTitle()}</Text>
+          {metricCounts(dstCount, srcCount, true)}
+          {chart(`edge-${srcData.addr}-${tgtData.addr}`, edgeMetrics)}
+        </TextContent>
+      </>
+    );
+  } else {
+    return <></>;
+  }
+};
+
+export const ElementPanel: React.FC<{
+  onClose: () => void;
+  element: GraphElement;
+  metrics: TopologyMetrics[];
+  metricFunction: MetricFunction;
+  metricType: MetricType;
+  id?: string;
+}> = ({ id, element, metrics, metricFunction, metricType, onClose }) => {
+  const { t } = useTranslation('plugin__network-observability-plugin');
+  const data = element.getData();
+
+  const titleContent = React.useCallback(() => {
+    if (data.type) {
+      return <Text component={TextVariants.h2}>{data.type}</Text>;
+    } else if (element instanceof BaseEdge) {
+      return <Text component={TextVariants.h2}>{t('Edge')}</Text>;
     } else {
-      return undefined;
+      return <Text component={TextVariants.h2}>{t('Unknown')}</Text>;
     }
-  }, [chart, data, element, metricCounts, metricTitle, metrics, ressourceInfos, t, type]);
+  }, [data.type, element, t]);
 
   return (
     <DrawerPanelContent id={id}>
@@ -344,7 +343,14 @@ export const ElementPanel: React.FC<ElementDrawerProps> = ({
           <DrawerCloseButton onClick={onClose} />
         </DrawerActions>
       </DrawerHead>
-      <DrawerPanelBody>{bodyContent()}</DrawerPanelBody>
+      <DrawerPanelBody>
+        <ElementPanelContent
+          element={element}
+          metrics={metrics}
+          metricFunction={metricFunction}
+          metricType={metricType}
+        />
+      </DrawerPanelBody>
     </DrawerPanelContent>
   );
 };
