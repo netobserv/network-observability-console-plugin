@@ -22,6 +22,8 @@ import { TimeRange } from '../../utils/datetime';
 import { QuerySummaryContent } from './query-summary';
 import './summary-panel.css';
 import _ from 'lodash';
+import { formatPort } from '../../utils/port';
+import { formatProtocol } from '../../utils/protocol';
 
 type TypeCardinality = {
   type: string;
@@ -186,11 +188,15 @@ export const SummaryPanelContent: React.FC<{
               typeCardinalityContent(tc)
             )
           )}
-          {accordionItem('ports', t('{{count}} Port(s)', { count: ports.length }), listCardinalityContent(ports))}
+          {accordionItem(
+            'ports',
+            t('{{count}} Port(s)', { count: ports.length }),
+            listCardinalityContent(ports.map(p => formatPort(p)))
+          )}
           {accordionItem(
             'protocols',
             t('{{count}} Protocol(s)', { count: protocols.length }),
-            listCardinalityContent(protocols)
+            listCardinalityContent(protocols.map(p => formatProtocol(p)))
           )}
         </Accordion>
       );
