@@ -278,4 +278,4 @@ export const response = {
   }
 };
 
-export const datas = (response.data.result as TopologyMetrics[]).flatMap(r => calculateMatrixTotals(r));
+export const datas = (response.data.result as TopologyMetrics[]).flatMap(r => calculateMatrixTotals(r, 'sum', 300));
