@@ -32,7 +32,7 @@ import { saveSvgAsPng } from 'save-svg-as-png';
 import { findFilter } from '../../utils/filter-definitions';
 import { TopologyMetrics } from '../../api/loki';
 import { Filter, FilterDefinition } from '../../model/filters';
-import { Match } from '../../model/flow-query';
+import { Match, MetricFunction, MetricType } from '../../model/flow-query';
 import { generateDataModel, LayoutName, TopologyOptions } from '../../model/topology';
 import { TimeRange } from '../../utils/datetime';
 import { usePrevious } from '../../utils/previous-hook';
@@ -50,6 +50,8 @@ const FIT_PADDING = 80;
 
 const TopologyContent: React.FC<{
   range: number | TimeRange;
+  metricFunction?: MetricFunction;
+  metricType?: MetricType;
   match: Match;
   limit: number;
   metrics: TopologyMetrics[];
@@ -58,11 +60,25 @@ const TopologyContent: React.FC<{
   filters: Filter[];
   setFilters: (v: Filter[]) => void;
   toggleTopologyOptions: () => void;
-}> = ({ range, match, limit, metrics, layout, options, filters, setFilters, toggleTopologyOptions }) => {
+}> = ({
+  range,
+  metricFunction,
+  metricType,
+  match,
+  limit,
+  metrics,
+  layout,
+  options,
+  filters,
+  setFilters,
+  toggleTopologyOptions
+}) => {
   const { t } = useTranslation('plugin__network-observability-plugin');
   const controller = useVisualizationController();
 
   const prevLayout = usePrevious(layout);
+  const prevMetricFunction = usePrevious(metricFunction);
+  const prevMetricType = usePrevious(metricType);
   const prevMatch = usePrevious(match);
   const prevLimit = usePrevious(limit);
   const prevOptions = usePrevious(options);
@@ -181,7 +197,7 @@ const TopologyContent: React.FC<{
   }, [controller]);
 
   //get options with updated time range and max edge value
-  const getNodeOptions = React.useCallback(() => {
+  const getOptions = React.useCallback(() => {
     let rangeInSeconds: number;
     if (typeof range === 'number') {
       rangeInSeconds = range;
@@ -191,8 +207,14 @@ const TopologyContent: React.FC<{
     const maxEdgeValue = _.isEmpty(metrics)
       ? 0
       : metrics.reduce((prev, current) => (prev.total > current.total ? prev : current)).total;
-    return { ...options, rangeInSeconds, maxEdgeValue } as TopologyOptions;
-  }, [metrics, options, range]);
+    return {
+      ...options,
+      rangeInSeconds,
+      maxEdgeValue,
+      metricFunction,
+      metricType
+    } as TopologyOptions;
+  }, [range, metrics, options, metricFunction, metricType]);
 
   //update graph details level
   const setDetailsLevel = React.useCallback(() => {
@@ -229,20 +251,20 @@ const TopologyContent: React.FC<{
     if (!controller) {
       return;
     } else if (!controller.hasGraph()) {
-      resetGraph();
+      console.error('updateModel called while controller has no graph');
     }
 
     const currentModel = controller.toModel();
     const mergedModel = generateDataModel(
       metrics,
-      getNodeOptions(),
+      getOptions(),
       searchValue,
       filters,
       currentModel.nodes,
       currentModel.edges
     );
     controller.fromModel(mergedModel);
-  }, [controller, searchValue, filters, getNodeOptions, metrics, resetGraph]);
+  }, [controller, searchValue, filters, getOptions, metrics]);
 
   //update model on layout / options / metrics / filters change
   React.useEffect(() => {
@@ -256,7 +278,7 @@ const TopologyContent: React.FC<{
 
   //clear existing elements on query change before getting new metrics
   React.useEffect(() => {
-    if (prevFilters !== filters || prevMatch !== match || (prevLimit || 0) > limit) {
+    if (prevFilters !== filters || (prevMatch && prevMatch !== match) || (prevLimit && prevLimit > limit)) {
       //remove all elements except graph
       if (controller && controller.hasGraph()) {
         controller.getElements().forEach(e => {
@@ -265,8 +287,27 @@ const TopologyContent: React.FC<{
           }
         });
       }
+    } else if (prevMetricFunction !== metricFunction || prevMetricType !== metricType) {
+      //remove edge tags on metrics change
+      controller.getElements().forEach(e => {
+        if (e.getType() === 'edge') {
+          e.setData({ ...e.getData(), tag: undefined });
+        }
+      });
     }
-  }, [controller, filters, limit, match, prevFilters, prevLimit, prevMatch]);
+  }, [
+    controller,
+    filters,
+    limit,
+    match,
+    metricFunction,
+    metricType,
+    prevFilters,
+    prevLimit,
+    prevMatch,
+    prevMetricFunction,
+    prevMetricType
+  ]);
 
   useEventListener<SelectionEventListener>(SELECTION_EVENT, setSelectedIds);
   useEventListener(FILTER_EVENT, onFilter);
@@ -385,6 +426,8 @@ const NetflowTopology: React.FC<{
   loading?: boolean;
   error?: string;
   range: number | TimeRange;
+  metricFunction?: MetricFunction;
+  metricType?: MetricType;
   match: Match;
   limit: number;
   metrics: TopologyMetrics[];
@@ -397,6 +440,8 @@ const NetflowTopology: React.FC<{
   loading,
   error,
   range,
+  metricFunction,
+  metricType,
   match,
   limit,
   metrics,
@@ -439,6 +484,8 @@ const NetflowTopology: React.FC<{
       <VisualizationProvider controller={controller}>
         <TopologyContent
           range={range}
+          metricFunction={metricFunction}
+          metricType={metricType}
           match={match}
           limit={limit}
           metrics={metrics}

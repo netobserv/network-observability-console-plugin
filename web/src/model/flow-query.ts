@@ -2,7 +2,8 @@ import { Filter } from './filters';
 
 export type Reporter = 'source' | 'destination' | 'both';
 export type Match = 'all' | 'any';
-
+export type MetricFunction = 'sum' | 'avg' | 'max' | 'rate';
+export type MetricType = 'bytes' | 'packets';
 export interface FlowQuery {
   timeRange?: number;
   startTime?: string;
@@ -10,6 +11,8 @@ export interface FlowQuery {
   filters: string;
   reporter: Reporter;
   limit: number;
+  function?: MetricFunction;
+  type?: MetricType;
 }
 
 // All filters in AND-group (ie. usually for "match all") are set in a list of [key-values]

@@ -1,9 +1,10 @@
 import axios from 'axios';
 import { buildExportQuery } from '../model/export-query';
-import { FlowQuery } from '../model/flow-query';
+import { FlowQuery, MetricFunction } from '../model/flow-query';
 import { Record } from './ipfix';
 import { calculateMatrixTotals, parseStream, StreamResult, TopologyMetrics } from './loki';
 import { Config, defaultConfig } from '../model/config';
+import { TimeRange } from '../utils/datetime';
 
 const host = '/api/proxy/plugin/network-observability-plugin/backend/';
 
@@ -39,12 +40,14 @@ export const getResources = (namespace: string, kind: string): Promise<string[]>
   });
 };
 
-export const getTopology = (params: FlowQuery): Promise<TopologyMetrics[]> => {
+export const getTopology = (params: FlowQuery, range: number | TimeRange): Promise<TopologyMetrics[]> => {
   return axios.get(host + '/api/loki/topology', { params }).then(r => {
     if (r.status >= 400) {
       throw new Error(`${r.statusText} [code=${r.status}]`);
     }
-    return (r.data.data.result as TopologyMetrics[]).flatMap(r => calculateMatrixTotals(r));
+    return (r.data.data.result as TopologyMetrics[]).flatMap(r =>
+      calculateMatrixTotals(r, params.function as MetricFunction, range)
+    );
   });
 };
 
