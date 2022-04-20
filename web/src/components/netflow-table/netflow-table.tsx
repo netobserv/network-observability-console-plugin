@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { TableComposable, Tbody, InnerScrollContainer, OuterScrollContainer } from '@patternfly/react-table';
+import { TableComposable, Tbody } from '@patternfly/react-table';
 import {
   Bullseye,
   Button,
@@ -19,6 +19,8 @@ import { NetflowTableHeader } from './netflow-table-header';
 import NetflowTableRow from './netflow-table-row';
 import { Column } from '../../utils/columns';
 import { Size } from '../dropdowns/display-dropdown';
+import { usePrevious } from '../../utils/previous-hook';
+import './netflow-table.css';
 
 const NetflowTable: React.FC<{
   flows: Record[];
@@ -32,13 +34,20 @@ const NetflowTable: React.FC<{
 }> = ({ flows, selectedRecord, columns, error, loading, size, onSelect, clearFilters }) => {
   const { t } = useTranslation('plugin__network-observability-plugin');
 
+  //default to 300 to allow content to be rendered in tests
+  const [containerHeight, setContainerHeight] = React.useState(300);
+  const previousContainerHeight = usePrevious(containerHeight);
+  const [scrollPosition, setScrollPosition] = React.useState(0);
+  const previousScrollPosition = usePrevious(scrollPosition);
   // index of the currently active column
   const [activeSortIndex, setActiveSortIndex] = React.useState<number>(-1);
-
+  const previousActiveSortIndex = usePrevious(activeSortIndex);
   // sort direction of the currently active column
   const [activeSortDirection, setActiveSortDirection] = React.useState<string>('asc');
-
+  const previousActiveSortDirection = usePrevious(activeSortDirection);
   const firstRender = React.useRef(true);
+
+  const width = columns.reduce((prev, cur) => prev + cur.width, 0);
 
   React.useEffect(() => {
     if (firstRender.current) {
@@ -47,8 +56,54 @@ const NetflowTable: React.FC<{
     }
   }, [flows]);
 
+  //get row height from display size
+  //these values match netflow-table.css and record-field.css
+  const getRowHeight = React.useCallback(() => {
+    switch (size) {
+      case 'l':
+        return 143;
+      case 'm':
+        return 101;
+      case 's':
+      default:
+        return 59;
+    }
+  }, [size]);
+
+  //update table container height on window resize
+  const handleResize = React.useCallback(() => {
+    const container = document.getElementById('table-container');
+    if (container) {
+      setContainerHeight(container.clientHeight);
+    }
+  }, []);
+
+  const handleScroll = React.useCallback(() => {
+    const rowHeight = getRowHeight();
+    const container = document.getElementById('table-container');
+    const header = container?.children[0].children[0];
+    if (container && header) {
+      const position = container.scrollTop - header.clientHeight;
+      //updates only when position moved more than one row height
+      if (scrollPosition < position - rowHeight || scrollPosition > position + rowHeight) {
+        setScrollPosition(position);
+      }
+    }
+  }, [getRowHeight, scrollPosition]);
+
+  React.useEffect(() => {
+    const container = document.getElementById('table-container');
+    if (container && container.getAttribute('listener') !== 'true') {
+      container.addEventListener('scroll', handleScroll);
+      window.addEventListener('resize', handleResize);
+    }
+
+    handleScroll();
+    handleResize();
+  }, [handleResize, handleScroll, loading]);
+
   // sort function
-  const getSortedFlows = () => {
+  const getSortedFlows = React.useCallback(() => {
     if (activeSortIndex < 0 || activeSortIndex >= columns.length) {
       return flows;
     } else {
@@ -57,7 +112,7 @@ const NetflowTable: React.FC<{
         return activeSortDirection === 'desc' ? col.sort(a, b, col) : col.sort(b, a, col);
       });
     }
-  };
+  }, [activeSortDirection, activeSortIndex, columns, flows]);
 
   // sort handler
   const onSort = (event: React.MouseEvent, index: number, direction: string) => {
@@ -65,7 +120,52 @@ const NetflowTable: React.FC<{
     setActiveSortDirection(direction);
   };
 
-  if (error) {
+  const getBody = React.useCallback(() => {
+    const rowHeight = getRowHeight();
+    return getSortedFlows().map((f, i) =>
+      scrollPosition <= i * rowHeight && scrollPosition + containerHeight > i * rowHeight ? (
+        <NetflowTableRow
+          key={f.key}
+          flow={f}
+          columns={columns}
+          size={size}
+          selectedRecord={selectedRecord}
+          onSelect={onSelect}
+          highlight={
+            previousContainerHeight === containerHeight &&
+            previousScrollPosition === scrollPosition &&
+            previousActiveSortDirection === activeSortDirection &&
+            previousActiveSortIndex === activeSortIndex &&
+            !firstRender.current
+          }
+          height={rowHeight}
+          tableWidth={width}
+        />
+      ) : (
+        <tr className={`empty-row ${size}`} key={f.key} />
+      )
+    );
+  }, [
+    activeSortDirection,
+    activeSortIndex,
+    columns,
+    containerHeight,
+    getRowHeight,
+    getSortedFlows,
+    onSelect,
+    previousActiveSortDirection,
+    previousActiveSortIndex,
+    previousContainerHeight,
+    previousScrollPosition,
+    scrollPosition,
+    selectedRecord,
+    size,
+    width
+  ]);
+
+  if (width === 0) {
+    return null;
+  } else if (error) {
     return (
       <EmptyState data-test="error-state" variant={EmptyStateVariant.small}>
         <Title headingLevel="h2" size="lg">
@@ -99,38 +199,19 @@ const NetflowTable: React.FC<{
     }
   }
 
-  const width = columns.reduce((prev, cur) => prev + cur.width, 0);
-  if (width === 0) {
-    return null;
-  }
-
   return (
-    <OuterScrollContainer>
-      <InnerScrollContainer>
-        <TableComposable aria-label="Netflow table" variant="compact" style={{ minWidth: `${width}em` }} isStickyHeader>
-          <NetflowTableHeader
-            onSort={onSort}
-            sortDirection={activeSortDirection}
-            sortIndex={activeSortIndex}
-            columns={columns}
-            tableWidth={width}
-          />
-          <Tbody>
-            {getSortedFlows().map(f => (
-              <NetflowTableRow
-                key={f.key}
-                flow={f}
-                columns={columns}
-                size={size}
-                selectedRecord={selectedRecord}
-                onSelect={onSelect}
-                highlight={!firstRender.current}
-              />
-            ))}
-          </Tbody>
-        </TableComposable>
-      </InnerScrollContainer>
-    </OuterScrollContainer>
+    <div id="table-container">
+      <TableComposable aria-label="Netflow table" variant="compact" style={{ minWidth: `${width}em` }} isStickyHeader>
+        <NetflowTableHeader
+          onSort={onSort}
+          sortDirection={activeSortDirection}
+          sortIndex={activeSortIndex}
+          columns={columns}
+          tableWidth={width}
+        />
+        <Tbody>{getBody()}</Tbody>
+      </TableComposable>
+    </div>
   );
 };
 

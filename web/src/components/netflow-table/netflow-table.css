@@ -1,0 +1,16 @@
+div#table-container {
+  overflow: auto;
+  height: 100%;
+}
+
+tr.empty-row.s {
+  height: 59px;
+}
+
+tr.empty-row.m {
+  height: 101px;
+}
+
+tr.empty-row.l {
+  height: 143px;
+}

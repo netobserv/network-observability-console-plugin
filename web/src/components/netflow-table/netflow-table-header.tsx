@@ -39,15 +39,11 @@ export const NetflowTableHeader: React.FC<{
 
   const getTableHeader = React.useCallback(
     (c: Column) => {
-      // no-explicit-any disabled: short list of number expected in Th width, but actually any number works fine
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const width = Math.floor((100 * c.width) / tableWidth) as any;
       const showBorder =
         headersState.useNested && headersState.nestedHeaders.find(nh => _.last(nh.columns) === c) !== undefined;
       return (
         <Th
           hasRightBorder={showBorder}
-          width={width}
           key={c.id}
           sort={{
             sortBy: {
@@ -58,6 +54,7 @@ export const NetflowTableHeader: React.FC<{
             columnIndex: columns.indexOf(c)
           }}
           modifier="wrap"
+          style={{ width: `${Math.floor((100 * c.width) / tableWidth)}%` }}
         >
           {headersState.useNested ? c.name : getFullColumnName(c)}
         </Th>
