@@ -57,6 +57,16 @@ span.pf-c-button__icon.pf-m-start {
     padding-right: var(--pf-global--spacer--md);
 }
 
+#pagination {
+    height: 20px;
+    padding: 0;
+}
+
+.pf-c-pagination__nav-page-select>span {
+    user-select: none;
+    cursor: default;
+}
+
 .flex {
     flex: 1;
 }

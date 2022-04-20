@@ -8,6 +8,8 @@ import {
   OverflowMenuGroup,
   OverflowMenuItem,
   PageSection,
+  Pagination,
+  PaginationVariant,
   Text,
   TextVariants,
   ToggleGroup,
@@ -93,6 +95,8 @@ export const NetflowTraffic: React.FC<{
   const [extensions] = useResolvedExtensions<ModelFeatureFlag>(isModelFeatureFlag);
 
   const [loading, setLoading] = React.useState(true);
+  const [perPage, setPerPage] = React.useState<number>(100);
+  const [page, setPage] = React.useState<number>(1);
   const [flows, setFlows] = React.useState<Record[]>([]);
   const [layout, setLayout] = React.useState<LayoutName>(LayoutName.ColaNoForce);
   const [topologyOptions, setTopologyOptions] = React.useState<TopologyOptions>(DefaultOptions);
@@ -243,14 +247,14 @@ export const NetflowTraffic: React.FC<{
     setFlows([]);
   };
 
-  const clearFilters = () => {
+  const clearFilters = React.useCallback(() => {
     if (forcedFilters) {
       push(netflowTrafficPath);
     } else if (filters) {
       removeURLParam(URLParam.Filters);
       updateTableFilters([]);
     }
-  };
+  }, [filters, forcedFilters, push]);
 
   const viewToggle = () => {
     return (
@@ -387,14 +391,15 @@ export const NetflowTraffic: React.FC<{
     }
   };
 
-  const pageContent = () => {
+  const pageContent = React.useCallback(() => {
     switch (selectedViewId) {
       case 'table':
+        const start = (page - 1) * perPage;
         return (
           <NetflowTable
             loading={loading}
             error={error}
-            flows={flows}
+            flows={flows.slice(start, start + perPage)}
             selectedRecord={selectedRecord}
             size={size}
             onSelect={onSelect}
@@ -423,12 +428,40 @@ export const NetflowTraffic: React.FC<{
       default:
         return null;
     }
-  };
+  }, [
+    clearFilters,
+    columns,
+    error,
+    filters,
+    flows,
+    isShowTopologyOptions,
+    layout,
+    limit,
+    loading,
+    match,
+    metricFunction,
+    metricType,
+    metrics,
+    page,
+    perPage,
+    range,
+    selectedRecord,
+    selectedViewId,
+    size,
+    topologyOptions
+  ]);
 
   //update data on filters changes
   React.useEffect(() => {
     setTRModalOpen(false);
   }, [range]);
+
+  React.useEffect(() => {
+    const start = (page - 1) * perPage;
+    if (start >= flows.length) {
+      setPage(1);
+    }
+  }, [flows, page, perPage]);
 
   return !_.isEmpty(extensions) ? (
     <PageSection id="pageSection">
@@ -472,6 +505,27 @@ export const NetflowTraffic: React.FC<{
         flows={flows}
         range={range}
         limit={limit}
+        pagination={
+          selectedViewId === 'table' && (
+            <Pagination
+              id="pagination"
+              itemCount={flows.length}
+              page={page}
+              perPage={perPage}
+              perPageOptions={[
+                { title: '100', value: 100 },
+                { title: '500', value: 500 },
+                { title: '1000', value: 1000 }
+              ]}
+              onSetPage={(e, n) => setPage(n)}
+              onPerPageSelect={(e, n) => {
+                setPage(1);
+                setPerPage(n);
+              }}
+              variant={PaginationVariant.bottom}
+            />
+          )
+        }
         toggleQuerySummary={() => setShowQuerySummary(!isShowQuerySummary)}
       />
       <TimeRangeModal

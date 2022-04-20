@@ -1,4 +1,4 @@
-import { Card, Flex, FlexItem, Text, TextVariants, Tooltip } from '@patternfly/react-core';
+import { Card, Flex, FlexItem, Text, TextVariants, ToolbarItem, Tooltip } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { TimeRange } from '../../utils/datetime';
@@ -7,12 +7,14 @@ import { ExclamationTriangleIcon } from '@patternfly/react-icons';
 import './query-summary.css';
 
 export const QuerySummaryContent: React.FC<{
+  pagination?: React.ReactNode;
   flows: Record[];
   range: number | TimeRange;
   limit: number;
   direction: 'row' | 'column';
   className?: string;
-}> = ({ flows, range, limit, direction, className }) => {
+  toggleQuerySummary?: () => void;
+}> = ({ pagination, flows, range, limit, direction, className, toggleQuerySummary }) => {
   const { t } = useTranslation('plugin__network-observability-plugin');
 
   let rangeInSeconds: number;
@@ -30,29 +32,39 @@ export const QuerySummaryContent: React.FC<{
       <FlexItem>
         <Flex direction={{ default: 'row' }}>
           {limitReached && (
-            <FlexItem>
+            <FlexItem className={toggleQuerySummary ? 'query-summary-clickable' : ''} onClick={toggleQuerySummary}>
               <Tooltip content={<Text component={TextVariants.p}>{t('Query limit reached')}</Text>}>
                 <ExclamationTriangleIcon className="query-summary-warning" />
               </Tooltip>
             </FlexItem>
           )}
           <FlexItem>
-            <Tooltip content={<Text component={TextVariants.p}>{t('Filtered flows count')}</Text>}>
-              <Text id="flowsCount" component={TextVariants.p} className={limitReached ? 'query-summary-warning' : ''}>
-                {t('{{count}} flows', { count: flows.length })}
-              </Text>
-            </Tooltip>
+            {pagination ? (
+              <ToolbarItem id="pagination-container" variant="pagination">
+                {pagination}
+              </ToolbarItem>
+            ) : (
+              <Tooltip content={<Text component={TextVariants.p}>{t('Filtered flows count')}</Text>}>
+                <Text
+                  id="flowsCount"
+                  component={TextVariants.p}
+                  className={limitReached ? 'query-summary-warning' : ''}
+                >
+                  {t('{{count}} flows', { count: flows.length })}
+                </Text>
+              </Tooltip>
+            )}
           </FlexItem>
         </Flex>
       </FlexItem>
-      <FlexItem>
+      <FlexItem className={toggleQuerySummary ? 'query-summary-clickable' : ''} onClick={toggleQuerySummary}>
         <Tooltip content={<Text component={TextVariants.p}>{t('Filtered sum of bytes')}</Text>}>
           <Text id="bytesCount" component={TextVariants.p}>
             {t('{{count}} bytes', { count: totalBytes })}
           </Text>
         </Tooltip>
       </FlexItem>
-      <FlexItem>
+      <FlexItem className={toggleQuerySummary ? 'query-summary-clickable' : ''} onClick={toggleQuerySummary}>
         <Tooltip content={<Text component={TextVariants.p}>{t('Filtered sum of packets')}</Text>}>
           <Text id="packetsCount" component={TextVariants.p}>
             {t('{{count}} packets', {
@@ -61,7 +73,7 @@ export const QuerySummaryContent: React.FC<{
           </Text>
         </Tooltip>
       </FlexItem>
-      <FlexItem>
+      <FlexItem className={toggleQuerySummary ? 'query-summary-clickable' : ''} onClick={toggleQuerySummary}>
         <Tooltip content={<Text component={TextVariants.p}>{t('Filtered average speed')}</Text>}>
           <Text id="bpsCount" component={TextVariants.p}>
             {t('{{count}} Bps', {
@@ -75,15 +87,23 @@ export const QuerySummaryContent: React.FC<{
 };
 
 export const QuerySummary: React.FC<{
+  pagination?: React.ReactNode;
   flows: Record[] | undefined;
   range: number | TimeRange;
   limit: number;
   toggleQuerySummary: () => void;
-}> = ({ flows, range, limit, toggleQuerySummary }) => {
+}> = ({ pagination, flows, range, limit, toggleQuerySummary }) => {
   if (flows && flows.length) {
     return (
-      <Card id="query-summary" isSelectable onClick={toggleQuerySummary}>
-        <QuerySummaryContent direction="row" flows={flows} range={range} limit={limit} />
+      <Card id="query-summary" isSelectable>
+        <QuerySummaryContent
+          pagination={pagination}
+          direction="row"
+          flows={flows}
+          range={range}
+          limit={limit}
+          toggleQuerySummary={toggleQuerySummary}
+        />
       </Card>
     );
   }
