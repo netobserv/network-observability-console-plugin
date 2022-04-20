@@ -5,6 +5,7 @@ import { TimeRange } from '../../utils/datetime';
 import { Record } from '../../api/ipfix';
 import { ExclamationTriangleIcon } from '@patternfly/react-icons';
 import './query-summary.css';
+import { bytesPerSeconds, humanFileSize } from '../../utils/bytes';
 
 export const QuerySummaryContent: React.FC<{
   flows: Record[];
@@ -48,7 +49,7 @@ export const QuerySummaryContent: React.FC<{
       <FlexItem>
         <Tooltip content={<Text component={TextVariants.p}>{t('Filtered sum of bytes')}</Text>}>
           <Text id="bytesCount" component={TextVariants.p}>
-            {t('{{count}} bytes', { count: totalBytes })}
+            {humanFileSize(totalBytes, true, 0)}
           </Text>
         </Tooltip>
       </FlexItem>
@@ -64,9 +65,7 @@ export const QuerySummaryContent: React.FC<{
       <FlexItem>
         <Tooltip content={<Text component={TextVariants.p}>{t('Filtered average speed')}</Text>}>
           <Text id="bpsCount" component={TextVariants.p}>
-            {t('{{count}} Bps', {
-              count: Math.round(totalBytes / rangeInSeconds)
-            })}
+            {bytesPerSeconds(totalBytes, rangeInSeconds)}
           </Text>
         </Tooltip>
       </FlexItem>
