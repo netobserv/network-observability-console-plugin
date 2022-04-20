@@ -12,7 +12,6 @@ import {
 } from '@patternfly/react-icons';
 import {
   Decorator,
-  DefaultNode,
   DEFAULT_DECORATOR_RADIUS,
   getDefaultShapeDecoratorCenter,
   Node,
@@ -25,6 +24,7 @@ import {
   WithDragNodeProps,
   WithSelectionProps
 } from '@patternfly/react-topology';
+import BaseNode from '../components/node';
 import useDetailsLevel from '@patternfly/react-topology/dist/esm/hooks/useDetailsLevel';
 import { TFunction } from 'i18next';
 import * as React from 'react';
@@ -305,24 +305,22 @@ const StyleNode: React.FC<StyleNodeProps> = ({ element, showLabel, dragging, reg
   }
 
   return (
-    <g className={`topology ${data.shadowed ? 'shadowed' : ''}`}>
-      <DefaultNode
-        element={element}
-        {...updatedRest}
-        {...passedData}
-        dragging={isPinned ? false : dragging}
-        regrouping={isPinned ? false : regrouping}
-        showLabel={detailsLevel === ScaleDetailsLevel.high && showLabel}
-        showStatusBackground={detailsLevel === ScaleDetailsLevel.low}
-        showStatusDecorator={detailsLevel === ScaleDetailsLevel.high && passedData.showStatusDecorator}
-        attachments={
-          detailsLevel === ScaleDetailsLevel.high &&
-          renderDecorators(t, element, data, isPinned, setPinned, isFiltered, setFiltered, rest.getShapeDecoratorCenter)
-        }
-      >
-        {renderIcon(passedData, element)}
-      </DefaultNode>
-    </g>
+    <BaseNode
+      element={element}
+      {...updatedRest}
+      {...passedData}
+      dragging={isPinned ? false : dragging}
+      regrouping={isPinned ? false : regrouping}
+      showLabel={detailsLevel === ScaleDetailsLevel.high && showLabel}
+      showStatusBackground={detailsLevel === ScaleDetailsLevel.low}
+      showStatusDecorator={detailsLevel === ScaleDetailsLevel.high && passedData.showStatusDecorator}
+      attachments={
+        detailsLevel === ScaleDetailsLevel.high &&
+        renderDecorators(t, element, data, isPinned, setPinned, isFiltered, setFiltered, rest.getShapeDecoratorCenter)
+      }
+    >
+      {renderIcon(passedData, element)}
+    </BaseNode>
   );
 };
 

@@ -44,3 +44,13 @@ span.pf-topology-control-bar {
 g.topology.shadowed {
   opacity: 0.5;
 }
+
+g.topology.node-highlighted>g>ellipse {
+  stroke: #0066CC;
+  stroke-width: 3px;
+}
+
+g.topology.edge-highlighted>.pf-topology__edge__link,
+g.topology.edge-highlighted>.pf-topology-connector-arrow {
+  stroke: #0066CC;
+}

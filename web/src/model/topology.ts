@@ -88,6 +88,7 @@ export const generateNode = (
   host: string,
   options: TopologyOptions,
   searchValue: string,
+  highlightedId: string,
   filters: Filter[],
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   previousDatas?: any
@@ -98,6 +99,7 @@ export const generateNode = (
     ? namespace
     : undefined;
   const shadowed = !_.isEmpty(searchValue) && !(label.includes(searchValue) || secondaryLabel?.includes(searchValue));
+  const highlighted = !shadowed && !_.isEmpty(highlightedId) && highlightedId.includes(id);
   return {
     id,
     type: 'node',
@@ -116,6 +118,7 @@ export const generateNode = (
       addr,
       host,
       shadowed,
+      highlighted,
       isFiltered: filters.some(f => f.values.some(fv => fv.v === `${type}.${namespace}.${name}` || fv.v === addr)),
       labelPosition: LabelPosition.bottom,
       //TODO: get badge and color using console ResourceIcon
@@ -203,8 +206,11 @@ export const generateEdge = (
   targetId: string,
   count: number,
   options: TopologyOptions,
-  shadowed = false
+  shadowed = false,
+  highlightedId: string
 ): EdgeModel => {
+  const id = `${sourceId}.${targetId}`;
+  const highlighted = !shadowed && !_.isEmpty(highlightedId) && id.includes(highlightedId);
   return {
     id: `${sourceId}.${targetId}`,
     type: 'edge',
@@ -216,6 +222,7 @@ export const generateEdge = (
       sourceId,
       targetId,
       shadowed,
+      highlighted,
       //edges are directed from src to dst. It will become bidirectionnal if inverted pair is found
       startTerminalType: EdgeTerminalType.none,
       startTerminalStatus: NodeStatus.default,
@@ -232,6 +239,7 @@ export const generateDataModel = (
   datas: TopologyMetrics[],
   options: TopologyOptions,
   searchValue: string,
+  highlightedId: string,
   filters: Filter[],
   nodes: NodeModel[] = [],
   edges: EdgeModel[] = []
@@ -256,6 +264,7 @@ export const generateDataModel = (
             node.data.host,
             opts,
             searchValue,
+            highlightedId,
             filters,
             node.data
           )
@@ -264,7 +273,7 @@ export const generateDataModel = (
   edges = edges.map(edge => ({
     ...edge,
     //update options and reset counter
-    ...generateEdge(edge.source!, edge.target!, 0, opts)
+    ...generateEdge(edge.source!, edge.target!, 0, opts, edge.data.shadowed, highlightedId)
   }));
 
   function addGroup(name: string, type: string, parent?: NodeModel, secondaryLabelPadding = false) {
@@ -314,7 +323,7 @@ export const generateDataModel = (
         n.data.host === host
     );
     if (!node) {
-      node = generateNode(namespace, type, name, addr, host, opts, searchValue, filters);
+      node = generateNode(namespace, type, name, addr, host, opts, searchValue, highlightedId, filters);
       nodes.push(node);
     }
     if (parent && !childIds.includes(node.id)) {
@@ -344,7 +353,7 @@ export const generateDataModel = (
         count: totalCount
       };
     } else {
-      edge = generateEdge(sourceId, targetId, count, opts, shadowed);
+      edge = generateEdge(sourceId, targetId, count, opts, shadowed, highlightedId);
       edges.push(edge);
     }
 
