@@ -23,6 +23,14 @@ global.requestAnimationFrame = function (callback) {
 global.cancelAnimationFrame = function (id) {
   clearTimeout(id);
 };
+const actualComputedStyle = window.getComputedStyle;
+global.getComputedStyle = elt => {
+  const style = actualComputedStyle(elt);
+  if (elt === document.documentElement) {
+    return { ...style, fontSize: "16" };
+  }
+  return style;
+};
 copyProps(window, global);
 
 //Mock i18n translation to return key
