@@ -22,6 +22,8 @@ import { Size } from '../dropdowns/display-dropdown';
 import { usePrevious } from '../../utils/previous-hook';
 import './netflow-table.css';
 
+const remToPxl = (rem: number) => Math.floor(rem * parseFloat(getComputedStyle(document.documentElement).fontSize));
+
 const NetflowTable: React.FC<{
   flows: Record[];
   selectedRecord?: Record;
@@ -61,12 +63,12 @@ const NetflowTable: React.FC<{
   const getRowHeight = React.useCallback(() => {
     switch (size) {
       case 'l':
-        return 143;
+        return remToPxl(4.8);
       case 'm':
-        return 101;
+        return remToPxl(3.4);
       case 's':
       default:
-        return 59;
+        return remToPxl(2);
     }
   }, [size]);
 

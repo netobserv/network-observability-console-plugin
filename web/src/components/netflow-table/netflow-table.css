@@ -4,13 +4,13 @@ div#table-container {
 }
 
 tr.empty-row.s {
-  height: 59px;
+  height: 2rem;
 }
 
 tr.empty-row.m {
-  height: 101px;
+  height: 3.4rem;
 }
 
 tr.empty-row.l {
-  height: 143px;
+  height: 4.8rem;
 }
