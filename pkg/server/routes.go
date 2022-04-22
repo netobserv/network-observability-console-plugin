@@ -16,6 +16,7 @@ func setupRoutes(cfg *Config) *mux.Router {
 	r.HandleFunc("/api/loki/topology", handler.GetTopology(cfg.Loki))
 	r.HandleFunc("/api/resources/namespaces", handler.GetNamespaces(cfg.Loki))
 	r.HandleFunc("/api/resources/namespace/{namespace}/kind/{kind}/names", handler.GetNames(cfg.Loki))
+	r.HandleFunc("/api/resources/kind/{kind}/names", handler.GetNames(cfg.Loki))
 	r.HandleFunc("/api/frontend-config", handler.GetConfig(cfg.FrontendConfig))
 	r.PathPrefix("/").Handler(http.FileServer(http.Dir("./web/dist/")))
 	return r

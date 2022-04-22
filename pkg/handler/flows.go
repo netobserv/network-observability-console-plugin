@@ -83,7 +83,7 @@ func GetFlows(cfg loki.Config) func(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getFlows(cfg loki.Config, client httpclient.HTTPClient, params url.Values) ([]byte, int, error) {
+func getFlows(cfg loki.Config, client httpclient.Interface, params url.Values) ([]byte, int, error) {
 	start, err := getStartTime(params)
 	if err != nil {
 		return nil, http.StatusBadRequest, err

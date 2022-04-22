@@ -28,7 +28,7 @@ func GetTopology(cfg loki.Config) func(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getTopologyFlows(cfg loki.Config, client httpclient.HTTPClient, params url.Values) ([]byte, int, error) {
+func getTopologyFlows(cfg loki.Config, client httpclient.Interface, params url.Values) ([]byte, int, error) {
 	hlog.Debugf("GetTopology query params: %s", params)
 
 	start, err := getStartTime(params)
