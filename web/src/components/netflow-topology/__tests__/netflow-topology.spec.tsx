@@ -23,7 +23,9 @@ describe('<NetflowTopology />', () => {
     medScale: 0.5,
     filters: [],
     setFilters: jest.fn(),
-    toggleTopologyOptions: jest.fn()
+    toggleTopologyOptions: jest.fn(),
+    selected: undefined,
+    onSelect: jest.fn()
   };
 
   it('should render component', async () => {

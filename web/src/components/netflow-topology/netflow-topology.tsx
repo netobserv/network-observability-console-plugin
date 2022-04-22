@@ -14,6 +14,7 @@ import { CogIcon, ExportIcon, SearchIcon, TimesIcon, AngleUpIcon, AngleDownIcon 
 import {
   createTopologyControlButtons,
   defaultControlButtonsOptions,
+  GraphElement,
   Model,
   SelectionEventListener,
   SELECTION_EVENT,
@@ -62,6 +63,8 @@ const TopologyContent: React.FC<{
   filters: Filter[];
   setFilters: (v: Filter[]) => void;
   toggleTopologyOptions: () => void;
+  selected: GraphElement | undefined;
+  onSelect: (e: GraphElement | undefined) => void;
 }> = ({
   range,
   metricFunction,
@@ -73,7 +76,9 @@ const TopologyContent: React.FC<{
   options,
   filters,
   setFilters,
-  toggleTopologyOptions
+  toggleTopologyOptions,
+  selected,
+  onSelect
 }) => {
   const { t } = useTranslation('plugin__network-observability-plugin');
   const controller = useVisualizationController();
@@ -125,7 +130,7 @@ const TopologyContent: React.FC<{
       const nodeFound = !_.isEmpty(nodeModelsFound) ? controller.getNodeById(nodeModelsFound![0].id) : undefined;
       if (nodeFound) {
         const id = nodeFound.getId();
-        setSelectedIds([id]);
+        onSelectIds([id]);
         lastNodeIdsFound.push(id);
         setSearchResultCount(`${lastNodeIdsFound.length}/${lastNodeIdsFound.length + nodeModelsFound!.length - 1}`);
         const bounds = controller.getGraph().getBounds();
@@ -137,7 +142,7 @@ const TopologyContent: React.FC<{
       } else {
         lastNodeIdsFound = [];
         setSearchResultCount('');
-        setSelectedIds([]);
+        onSelectIds([]);
         setSearchValidated(ValidatedOptions.error);
       }
     } else {
@@ -196,6 +201,14 @@ const TopologyContent: React.FC<{
       setHoveredId(data.isHovered ? data.id : '');
     },
     []
+  );
+
+  const onSelectIds = React.useCallback(
+    (ids: string[]) => {
+      setSelectedIds(ids);
+      onSelect(ids.length ? controller.getElementById(ids[0]) : undefined);
+    },
+    [controller, onSelect]
   );
 
   //fit view to elements
@@ -327,7 +340,16 @@ const TopologyContent: React.FC<{
     prevMetricType
   ]);
 
-  useEventListener<SelectionEventListener>(SELECTION_EVENT, setSelectedIds);
+  //refresh UI selected items
+  React.useEffect(() => {
+    const elementId = selected?.getId();
+    const selectedId = _.isEmpty(selectedIds) ? undefined : selectedIds[0];
+    if (elementId !== selectedId) {
+      setSelectedIds(elementId ? [elementId] : []);
+    }
+  }, [selected, selectedIds]);
+
+  useEventListener<SelectionEventListener>(SELECTION_EVENT, onSelectIds);
   useEventListener(FILTER_EVENT, onFilter);
   useEventListener(HOVER_EVENT, onHover);
 
@@ -455,6 +477,8 @@ const NetflowTopology: React.FC<{
   filters: Filter[];
   setFilters: (v: Filter[]) => void;
   toggleTopologyOptions: () => void;
+  selected: GraphElement | undefined;
+  onSelect: (e: GraphElement | undefined) => void;
 }> = ({
   loading,
   error,
@@ -468,7 +492,9 @@ const NetflowTopology: React.FC<{
   options,
   filters,
   setFilters,
-  toggleTopologyOptions
+  toggleTopologyOptions,
+  selected,
+  onSelect
 }) => {
   const { t } = useTranslation('plugin__network-observability-plugin');
   const [controller, setController] = React.useState<Visualization>();
@@ -513,6 +539,8 @@ const NetflowTopology: React.FC<{
           filters={filters}
           setFilters={setFilters}
           toggleTopologyOptions={toggleTopologyOptions}
+          selected={selected}
+          onSelect={onSelect}
         />
       </VisualizationProvider>
     );

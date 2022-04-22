@@ -1,0 +1,12 @@
+.pf-c-content.element-text-container {
+  margin-bottom: 10px;
+}
+
+.metrics-flex-container,
+.element-text-container.grouped {
+  padding-left: 15px;
+}
+
+.element-text {
+  margin-top: 0 !important;
+}

@@ -76,6 +76,8 @@ import OptionsPanel from './netflow-topology/options-panel';
 import { netflowTrafficPath, removeURLParam, URLParam } from '../utils/url';
 import { loadConfig } from '../utils/config';
 import SummaryPanel from './query-summary/summary-panel';
+import { GraphElement } from '@patternfly/react-topology';
+import ElementPanel from './netflow-topology/element-panel';
 
 import './netflow-traffic.css';
 
@@ -115,6 +117,7 @@ export const NetflowTraffic: React.FC<{
   const [metricType, setMetricType] = React.useState<MetricType | undefined>(defaultMetricType);
   const [interval, setInterval] = useLocalStorage<number | undefined>(LOCAL_STORAGE_REFRESH_KEY);
   const [selectedRecord, setSelectedRecord] = React.useState<Record | undefined>(undefined);
+  const [selectedElement, setSelectedElement] = React.useState<GraphElement | undefined>(undefined);
 
   const isInit = React.useRef(true);
   const [columns, setColumns] = useLocalStorage<Column[]>(LOCAL_STORAGE_COLS_KEY, getDefaultColumns(t), {
@@ -131,10 +134,20 @@ export const NetflowTraffic: React.FC<{
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [forcedFilters]);
 
-  const onSelect = (record?: Record) => {
+  const onRecordSelect = (record?: Record) => {
     setTRModalOpen(false);
     setColModalOpen(false);
     setSelectedRecord(record);
+    setShowTopologyOptions(false);
+    setSelectedElement(undefined);
+  };
+
+  const onElementSelect = (element?: GraphElement) => {
+    setTRModalOpen(false);
+    setColModalOpen(false);
+    setSelectedRecord(undefined);
+    setShowTopologyOptions(false);
+    setSelectedElement(element);
   };
 
   const buildFlowQuery = React.useCallback((): FlowQuery => {
@@ -357,7 +370,7 @@ export const NetflowTraffic: React.FC<{
           setFilters={setFilters}
           setRange={setRange}
           setReporter={setReporter}
-          onClose={() => onSelect(undefined)}
+          onClose={() => onRecordSelect(undefined)}
         />
       );
     } else if (isShowTopologyOptions) {
@@ -382,6 +395,18 @@ export const NetflowTraffic: React.FC<{
           onClose={() => setShowQuerySummary(false)}
         />
       );
+    } else if (selectedElement) {
+      return (
+        <ElementPanel
+          id="elementPanel"
+          element={selectedElement}
+          metrics={metrics}
+          //force to default values until NETOBSERV-240 merge
+          metricFunction={'sum'}
+          metricType={'bytes'}
+          onClose={() => onElementSelect(undefined)}
+        />
+      );
     } else {
       return null;
     }
@@ -397,7 +422,7 @@ export const NetflowTraffic: React.FC<{
             flows={flows}
             selectedRecord={selectedRecord}
             size={size}
-            onSelect={onSelect}
+            onSelect={onRecordSelect}
             clearFilters={clearFilters}
             columns={columns.filter(col => col.isSelected)}
           />
@@ -418,6 +443,8 @@ export const NetflowTraffic: React.FC<{
             filters={filters}
             setFilters={setFilters}
             toggleTopologyOptions={() => setShowTopologyOptions(!isShowTopologyOptions)}
+            selected={selectedElement}
+            onSelect={onElementSelect}
           />
         );
       default:
@@ -462,7 +489,9 @@ export const NetflowTraffic: React.FC<{
       <Drawer
         id="drawer"
         isInline
-        isExpanded={selectedRecord !== undefined || isShowTopologyOptions || isShowQuerySummary}
+        isExpanded={
+          selectedRecord !== undefined || selectedElement !== undefined || isShowTopologyOptions || isShowQuerySummary
+        }
       >
         <DrawerContent id="drawerContent" panelContent={panelContent()}>
           <DrawerContentBody id="drawerBody">{pageContent()}</DrawerContentBody>

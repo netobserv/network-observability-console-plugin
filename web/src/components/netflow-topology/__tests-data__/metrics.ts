@@ -1,3 +1,5 @@
+import { calculateMatrixTotals, TopologyMetrics } from '../../../api/loki';
+
 export const response = {
   status: 'success',
   data: {
@@ -275,3 +277,5 @@ export const response = {
     }
   }
 };
+
+export const datas = (response.data.result as TopologyMetrics[]).flatMap(r => calculateMatrixTotals(r, 'sum', 300));
