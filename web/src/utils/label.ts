@@ -1,12 +1,12 @@
 /* validate any k8s name
  *  if enclosed in quotes, switch to exact match
  *  else:
- *    allow upper / lower case alphanumeric (case ignored)
+ *    allow upper / lower case alphanumeric (case ignored) and '.' (for nodes)
  *    allow '*'
  *    don't force to start / end with alphanumeric since we can filter on partial names
  */
-export const k8sName = RegExp('^[-a-zA-Z0-9*]*$');
-export const strictK8sName = RegExp('^[a-z0-9]([-a-z0-9]*[a-z0-9])?$');
+export const k8sName = RegExp('^[-a-zA-Z0-9.*]*$');
+export const strictK8sName = RegExp('^[a-z0-9]([-a-z0-9.]*[a-z0-9])?$');
 
 // validate regex and ensure we don't have quotes or only two
 export const validateK8SName = (name: string) => {

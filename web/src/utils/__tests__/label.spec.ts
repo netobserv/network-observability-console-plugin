@@ -13,8 +13,11 @@ describe('K8S name validation', () => {
     expect(validateK8SName('ab*c')).toBe(true);
   });
 
+  it('should validate partial match node name with dots', () => {
+    expect(validateK8SName('ip-10-0-131-71.ec2.internal')).toBe(true);
+  });
+
   it('should invalidate partial match with disallowed special chars', () => {
-    expect(validateK8SName('ab.c')).toBe(false);
     expect(validateK8SName('ab_c')).toBe(false);
     expect(validateK8SName('ab"c')).toBe(false);
     expect(validateK8SName('ab/c')).toBe(false);
@@ -31,10 +34,13 @@ describe('K8S name validation', () => {
     expect(validateK8SName('"a-1"')).toBe(true);
   });
 
+  it('should validate exact match node name with dots', () => {
+    expect(validateK8SName('"ip-10-0-131-71.ec2.internal"')).toBe(true);
+  });
+
   it('should invalidate exact match with special chars', () => {
     expect(validateK8SName('"ab@c"')).toBe(false);
     expect(validateK8SName('"ab/c"')).toBe(false);
-    expect(validateK8SName('"ab.c"')).toBe(false);
     expect(validateK8SName('"ab|c"')).toBe(false);
     expect(validateK8SName('"ab&c"')).toBe(false);
     expect(validateK8SName('"ab?c"')).toBe(false);

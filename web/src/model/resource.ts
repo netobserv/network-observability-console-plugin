@@ -8,17 +8,18 @@ type SplitResource = { kind: string; namespace: string; name: string; stage: Spl
 const isNode = (kind: string) => kind.toLowerCase() === 'node';
 
 export const splitResource = (resource: string): SplitResource => {
-  const parts = resource.split('.');
-  if (parts.length === 1) {
-    return { kind: parts[0], namespace: '', name: '', stage: SplitStage.PartialKind };
-  } else if (parts.length === 2) {
-    if (isNode(parts[0])) {
-      // Node is not namespace-scoped
-      return { kind: parts[0], namespace: '', name: parts[1], stage: SplitStage.Completed };
-    }
-    return { kind: parts[0], namespace: parts[1], name: '', stage: SplitStage.PartialNamespace };
+  const [kind, ...rest] = resource.split('.');
+  if (rest.length === 0) {
+    return { kind: kind, namespace: '', name: '', stage: SplitStage.PartialKind };
   }
-  return { kind: parts[0], namespace: parts[1], name: parts[2], stage: SplitStage.Completed };
+  if (isNode(kind)) {
+    // Node is not namespace-scoped; beware that it may contain dots, unlike usual names
+    return { kind: kind, namespace: '', name: rest.join('.'), stage: SplitStage.Completed };
+  }
+  if (rest.length === 1) {
+    return { kind: kind, namespace: rest[0], name: '', stage: SplitStage.PartialNamespace };
+  }
+  return { kind: kind, namespace: rest[0], name: rest[1], stage: SplitStage.Completed };
 };
 
 export const joinResource = (resource: SplitResource): string => {
