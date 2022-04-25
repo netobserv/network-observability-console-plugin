@@ -34,7 +34,7 @@ export const ElementPanelContent: React.FC<{
   element: GraphElement;
   metrics: TopologyMetrics[];
   metricFunction: MetricFunction;
-  metricType: MetricType;
+  metricType?: MetricType;
 }> = ({ element, metrics, metricFunction, metricType }) => {
   const { t } = useTranslation('plugin__network-observability-plugin');
   const data = element.getData();
@@ -319,7 +319,7 @@ export const ElementPanel: React.FC<{
   element: GraphElement;
   metrics: TopologyMetrics[];
   metricFunction: MetricFunction;
-  metricType: MetricType;
+  metricType?: MetricType;
   id?: string;
 }> = ({ id, element, metrics, metricFunction, metricType, onClose }) => {
   const { t } = useTranslation('plugin__network-observability-plugin');
