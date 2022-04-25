@@ -41,7 +41,7 @@ func GetNamespaces(cfg loki.Config) func(w http.ResponseWriter, r *http.Request)
 	}
 }
 
-func getLabelValues(cfg *loki.Config, lokiClient httpclient.Interface, label string) ([]string, int, error) {
+func getLabelValues(cfg *loki.Config, lokiClient httpclient.Caller, label string) ([]string, int, error) {
 	baseURL := strings.TrimRight(cfg.URL.String(), "/")
 	url := fmt.Sprintf("%s/loki/api/v1/label/%s/values", baseURL, label)
 	hlog.Debugf("getLabelValues URL: %s", url)
@@ -92,7 +92,7 @@ func GetNames(cfg loki.Config) func(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getNamesForPrefix(cfg loki.Config, lokiClient httpclient.Interface, prefix, kind, namespace string) ([]string, int, error) {
+func getNamesForPrefix(cfg loki.Config, lokiClient httpclient.Caller, prefix, kind, namespace string) ([]string, int, error) {
 	lokiParams := [][]string{}
 	if namespace != "" {
 		lokiParams = append(lokiParams, []string{prefix + fields.Namespace, exact(namespace)})

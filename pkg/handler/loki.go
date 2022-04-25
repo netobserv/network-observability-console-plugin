@@ -21,7 +21,7 @@ const (
 	lokiOrgIDHeader = "X-Scope-OrgID"
 )
 
-func newLokiClient(cfg *loki.Config) httpclient.Interface {
+func newLokiClient(cfg *loki.Config) httpclient.Caller {
 	var headers map[string][]string
 	if cfg.TenantID != "" {
 		headers = map[string][]string{
@@ -54,7 +54,7 @@ func getLokiError(resp []byte, code int) string {
 	return fmt.Sprintf("Error from Loki (code: %d): %s", code, message)
 }
 
-func executeLokiQuery(flowsURL string, lokiClient httpclient.Interface) ([]byte, int, error) {
+func executeLokiQuery(flowsURL string, lokiClient httpclient.Caller) ([]byte, int, error) {
 	hlog.Debugf("executeLokiQuery URL: %s", flowsURL)
 
 	resp, code, err := lokiClient.Get(flowsURL)
@@ -68,7 +68,7 @@ func executeLokiQuery(flowsURL string, lokiClient httpclient.Interface) ([]byte,
 	return resp, http.StatusOK, nil
 }
 
-func fetchParallel(lokiClient httpclient.Interface, queries []string) ([]byte, int, error) {
+func fetchParallel(lokiClient httpclient.Caller, queries []string) ([]byte, int, error) {
 	// Run queries in parallel, then aggregate them
 	resChan := make(chan model.QueryResponse, len(queries))
 	errChan := make(chan errorWithCode, len(queries))

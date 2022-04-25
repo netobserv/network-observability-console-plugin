@@ -7,17 +7,17 @@ import (
 	"time"
 )
 
-type Interface interface {
+type Caller interface {
 	Get(url string) ([]byte, int, error)
 }
 
 type httpClient struct {
-	Interface
+	Caller
 	client  http.Client
 	headers map[string][]string
 }
 
-func NewHTTPClient(timeout time.Duration, overrideHeaders map[string][]string) Interface {
+func NewHTTPClient(timeout time.Duration, overrideHeaders map[string][]string) Caller {
 	transport := &http.Transport{
 		DialContext:     (&net.Dialer{Timeout: timeout}).DialContext,
 		IdleConnTimeout: timeout,
