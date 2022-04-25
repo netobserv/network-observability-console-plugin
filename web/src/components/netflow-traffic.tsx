@@ -401,9 +401,8 @@ export const NetflowTraffic: React.FC<{
           id="elementPanel"
           element={selectedElement}
           metrics={metrics}
-          //force to default values until NETOBSERV-240 merge
-          metricFunction={'sum'}
-          metricType={'bytes'}
+          metricFunction={metricFunction}
+          metricType={metricType}
           onClose={() => onElementSelect(undefined)}
         />
       );
