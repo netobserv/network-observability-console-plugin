@@ -2,15 +2,3 @@ div#table-container {
   overflow: auto;
   height: 100%;
 }
-
-tr.empty-row.s {
-  height: 2rem;
-}
-
-tr.empty-row.m {
-  height: 3.4rem;
-}
-
-tr.empty-row.l {
-  height: 4.8rem;
-}

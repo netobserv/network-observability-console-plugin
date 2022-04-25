@@ -1,10 +1,10 @@
 import { Button } from '@patternfly/react-core';
 import { shallow } from 'enzyme';
 import * as React from 'react';
+import { Size } from '../../netflow-table/netflow-table-helper';
 import { DefaultColumns } from '../../__tests-data__/columns';
 import { FlowsSample } from '../../__tests-data__/flows';
 import RecordField, { RecordFieldFilter } from '../record-field';
-import { Size } from '../../dropdowns/display-dropdown';
 
 describe('<RecordField />', () => {
   const filterMock: RecordFieldFilter = {

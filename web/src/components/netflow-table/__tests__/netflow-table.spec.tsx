@@ -8,7 +8,7 @@ import { NetflowTableHeader } from '../netflow-table-header';
 
 import { ShuffledDefaultColumns } from '../../__tests-data__/columns';
 import { FlowsSample } from '../../__tests-data__/flows';
-import { Size } from '../../dropdowns/display-dropdown';
+import { Size } from '../netflow-table-helper';
 
 const errorStateQuery = `EmptyState[data-test="error-state"]`;
 const loadingContentsQuery = `Bullseye[data-test="loading-contents"]`;

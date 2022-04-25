@@ -52,18 +52,6 @@ span.co-resource-item.co-resource-item--inline.l,
   flex-direction: column;
 }
 
-.record-field-flex-container.s {
-  height: 42px;
-}
-
-.record-field-flex-container.m {
-  height: 84px;
-}
-
-.record-field-flex-container.l {
-  height: 126px;
-}
-
 /* table tooltips - check pf-c-tooltip__content for values */
 .record-field-tooltip {
   display: flex;

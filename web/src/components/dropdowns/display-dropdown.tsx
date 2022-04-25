@@ -3,8 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Dropdown, DropdownToggle, DropdownItem, Text } from '@patternfly/react-core';
 import { ThIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
-
-export type Size = 's' | 'm' | 'l';
+import { Size } from '../netflow-table/netflow-table-helper';
 
 type Props = {
   setSize: (v: Size) => void;

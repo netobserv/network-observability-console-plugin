@@ -59,7 +59,7 @@ import {
   setURLMetricFunction,
   setURLMetricType
 } from '../utils/router';
-import DisplayDropdown, { Size } from './dropdowns/display-dropdown';
+import DisplayDropdown from './dropdowns/display-dropdown';
 import MetricTypeDropdown from './dropdowns/metric-type-dropdown';
 import MetricFunctionDropdown from './dropdowns/metric-function-dropdown';
 import { RefreshDropdown } from './dropdowns/refresh-dropdown';
@@ -78,6 +78,7 @@ import { loadConfig } from '../utils/config';
 import SummaryPanel from './query-summary/summary-panel';
 import { GraphElement } from '@patternfly/react-topology';
 import ElementPanel from './netflow-topology/element-panel';
+import { Size } from './netflow-table/netflow-table-helper';
 
 import './netflow-traffic.css';
 

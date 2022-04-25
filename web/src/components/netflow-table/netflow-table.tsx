@@ -18,11 +18,9 @@ import { Record } from '../../api/ipfix';
 import { NetflowTableHeader } from './netflow-table-header';
 import NetflowTableRow from './netflow-table-row';
 import { Column } from '../../utils/columns';
-import { Size } from '../dropdowns/display-dropdown';
 import { usePrevious } from '../../utils/previous-hook';
+import { Size, sizeToPxl } from './netflow-table-helper';
 import './netflow-table.css';
-
-const remToPxl = (rem: number) => Math.floor(rem * parseFloat(getComputedStyle(document.documentElement).fontSize));
 
 const NetflowTable: React.FC<{
   flows: Record[];
@@ -59,18 +57,7 @@ const NetflowTable: React.FC<{
   }, [flows]);
 
   //get row height from display size
-  //these values match netflow-table.css and record-field.css
-  const getRowHeight = React.useCallback(() => {
-    switch (size) {
-      case 'l':
-        return remToPxl(4.8);
-      case 'm':
-        return remToPxl(3.4);
-      case 's':
-      default:
-        return remToPxl(2);
-    }
-  }, [size]);
+  const rowHeight = React.useMemo(() => sizeToPxl(size), [size]);
 
   //update table container height on window resize
   const handleResize = React.useCallback(() => {
@@ -81,7 +68,6 @@ const NetflowTable: React.FC<{
   }, []);
 
   const handleScroll = React.useCallback(() => {
-    const rowHeight = getRowHeight();
     const container = document.getElementById('table-container');
     const header = container?.children[0].children[0];
     if (container && header) {
@@ -91,7 +77,7 @@ const NetflowTable: React.FC<{
         setScrollPosition(position);
       }
     }
-  }, [getRowHeight, scrollPosition]);
+  }, [rowHeight, scrollPosition]);
 
   React.useEffect(() => {
     const container = document.getElementById('table-container');
@@ -123,7 +109,6 @@ const NetflowTable: React.FC<{
   };
 
   const getBody = React.useCallback(() => {
-    const rowHeight = getRowHeight();
     return getSortedFlows().map((f, i) =>
       scrollPosition <= i * rowHeight && scrollPosition + containerHeight > i * rowHeight ? (
         <NetflowTableRow
@@ -144,7 +129,7 @@ const NetflowTable: React.FC<{
           tableWidth={width}
         />
       ) : (
-        <tr className={`empty-row ${size}`} key={f.key} />
+        <tr style={{ height: rowHeight }} key={f.key} />
       )
     );
   }, [
@@ -152,7 +137,7 @@ const NetflowTable: React.FC<{
     activeSortIndex,
     columns,
     containerHeight,
-    getRowHeight,
+    rowHeight,
     getSortedFlows,
     onSelect,
     previousActiveSortDirection,
