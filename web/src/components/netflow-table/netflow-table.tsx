@@ -13,6 +13,7 @@ import {
 } from '@patternfly/react-core';
 import { SearchIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
+import { style } from 'typestyle';
 
 import { Record } from '../../api/ipfix';
 import { NetflowTableHeader } from './netflow-table-header';
@@ -58,6 +59,7 @@ const NetflowTable: React.FC<{
 
   //get row height from display size
   const rowHeight = React.useMemo(() => sizeToPxl(size), [size]);
+  const heightClass = style({ height: rowHeight });
 
   //update table container height on window resize
   const handleResize = React.useCallback(() => {
@@ -125,11 +127,11 @@ const NetflowTable: React.FC<{
             previousActiveSortIndex === activeSortIndex &&
             !firstRender.current
           }
-          height={rowHeight}
+          className={heightClass}
           tableWidth={width}
         />
       ) : (
-        <tr style={{ height: rowHeight }} key={f.key} />
+        <tr className={heightClass} key={f.key} />
       )
     );
   }, [

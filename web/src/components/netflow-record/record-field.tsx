@@ -7,7 +7,7 @@ import { FlowDirection, Record } from '../../api/ipfix';
 import { Column, ColumnsId, getFullColumnName } from '../../utils/columns';
 import { formatPort } from '../../utils/port';
 import { formatProtocol } from '../../utils/protocol';
-import { Size, sizeToPxl } from '../netflow-table/netflow-table-helper';
+import { Size } from '../netflow-table/netflow-table-helper';
 import './record-field.css';
 
 export type RecordFieldFilter = {
@@ -20,19 +20,17 @@ export const RecordField: React.FC<{
   column: Column;
   size: Size;
   filter?: RecordFieldFilter;
-}> = ({ flow, column, size, filter }) => {
+  className?: string;
+}> = ({ flow, column, size, filter, className }) => {
   const { t } = useTranslation('plugin__network-observability-plugin');
 
-  //get row height from display size
-  const height = React.useMemo(() => sizeToPxl(size), [size]);
-
-  const onMouseOver = (event: React.MouseEvent<HTMLDivElement, MouseEvent>, className: string) => {
+  const onMouseOver = (event: React.MouseEvent<HTMLDivElement, MouseEvent>, cn: string) => {
     if (event.currentTarget) {
       const isTruncated =
         event.currentTarget.offsetHeight < event.currentTarget.scrollHeight ||
         event.currentTarget.offsetWidth < event.currentTarget.scrollWidth ||
         event.currentTarget.children[0].className === 'force-truncate';
-      event.currentTarget.className = isTruncated ? `${className} truncated ${size}` : `${className} ${size}`;
+      event.currentTarget.className = isTruncated ? `${cn} truncated ${size}` : `${cn} ${size}`;
     }
   };
 
@@ -109,7 +107,7 @@ export const RecordField: React.FC<{
 
   const doubleContainer = (child1?: JSX.Element, child2?: JSX.Element, asChild = true) => {
     return (
-      <div className={`record-field-flex-container ${asChild ? size : ''}`} style={{ height }}>
+      <div className={`record-field-flex-container ${asChild ? size : ''} ${className}`}>
         <div className="record-field-content-flex" onMouseOver={e => onMouseOver(e, 'record-field-content-flex')}>
           {child1 ? child1 : emptyText()}
         </div>
