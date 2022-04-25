@@ -16,14 +16,15 @@ import {
 } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { compareNumbers, compareStrings } from '../../utils/base-compare';
+import { compareStrings } from '../../utils/base-compare';
 import { Record } from '../../api/ipfix';
 import { TimeRange } from '../../utils/datetime';
 import { QuerySummaryContent } from './query-summary';
 import './summary-panel.css';
 import _ from 'lodash';
-import { formatPort } from '../../utils/port';
+import { comparePorts, formatPort } from '../../utils/port';
 import { formatProtocol } from '../../utils/protocol';
+import { compareIPs } from '../../utils/ip';
 
 type TypeCardinality = {
   type: string;
@@ -91,10 +92,11 @@ export const SummaryPanelContent: React.FC<{
     );
   };
 
-  const listCardinalityContent = (values: string[] | number[]) => {
-    const sortedStrings = values.sort((a: string | number, b: string | number) =>
-      typeof a === 'string' ? compareStrings(a as string, b as string) : compareNumbers(a as number, b as number)
-    ) as string[];
+  const listCardinalityContent = (
+    values: (string | number)[],
+    compareFn: (a: string | number, b: string | number) => number
+  ) => {
+    const sortedStrings = values.sort((a: string | number, b: string | number) => compareFn(a, b)) as string[];
     return (
       <>
         {sortedStrings.map((v: string) => (
@@ -179,7 +181,7 @@ export const SummaryPanelContent: React.FC<{
           {accordionItem(
             'addresses',
             t('{{count}} Address(es)', { count: addresses.length }),
-            listCardinalityContent(addresses)
+            listCardinalityContent(addresses, compareIPs)
           )}
           {typesCardinality.map(tc =>
             accordionItem(
@@ -191,12 +193,18 @@ export const SummaryPanelContent: React.FC<{
           {accordionItem(
             'ports',
             t('{{count}} Port(s)', { count: ports.length }),
-            listCardinalityContent(ports.map(p => formatPort(p)))
+            listCardinalityContent(
+              ports.map(p => formatPort(p)),
+              comparePorts
+            )
           )}
           {accordionItem(
             'protocols',
             t('{{count}} Protocol(s)', { count: protocols.length }),
-            listCardinalityContent(protocols.map(p => formatProtocol(p)))
+            listCardinalityContent(
+              protocols.map(p => formatProtocol(p)),
+              compareStrings
+            )
           )}
         </Accordion>
       );
