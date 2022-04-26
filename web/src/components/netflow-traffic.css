@@ -49,6 +49,10 @@ span.pf-c-button__icon.pf-m-start {
     overflow: hidden;
 }
 
+.pf-c-drawer__panel.pf-m-resizable{
+    overflow: hidden;
+}
+
 /* flex page header */
 #pageHeader {
     display: flex;

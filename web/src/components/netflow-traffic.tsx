@@ -134,20 +134,38 @@ export const NetflowTraffic: React.FC<{
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [forcedFilters]);
 
-  const onRecordSelect = (record?: Record) => {
-    setTRModalOpen(false);
-    setColModalOpen(false);
-    setSelectedRecord(record);
-    setShowTopologyOptions(false);
-    setSelectedElement(undefined);
-  };
-
-  const onElementSelect = (element?: GraphElement) => {
+  const clearSelections = () => {
     setTRModalOpen(false);
     setColModalOpen(false);
     setSelectedRecord(undefined);
     setShowTopologyOptions(false);
+    setShowQuerySummary(false);
+    setSelectedElement(undefined);
+  };
+
+  const selectView = (view: ViewId) => {
+    clearSelections();
+    setSelectedViewId(view);
+  };
+
+  const onRecordSelect = (record?: Record) => {
+    clearSelections();
+    setSelectedRecord(record);
+  };
+
+  const onElementSelect = (element?: GraphElement) => {
+    clearSelections();
     setSelectedElement(element);
+  };
+
+  const onToggleTopologyOptions = (v: boolean) => {
+    clearSelections();
+    setShowTopologyOptions(v);
+  };
+
+  const onToggleQuerySummary = (v: boolean) => {
+    clearSelections();
+    setShowQuerySummary(v);
   };
 
   const buildFlowQuery = React.useCallback((): FlowQuery => {
@@ -274,14 +292,14 @@ export const NetflowTraffic: React.FC<{
             text={t('Flow Table')}
             buttonId="tableViewButton"
             isSelected={selectedViewId === 'table'}
-            onChange={() => setSelectedViewId('table')}
+            onChange={() => selectView('table')}
           />
           <ToggleGroupItem
             icon={<TopologyIcon />}
             text={t('Topology')}
             buttonId="topologyViewButton"
             isSelected={selectedViewId === 'topology'}
-            onChange={() => setSelectedViewId('topology')}
+            onChange={() => selectView('topology')}
           />
         </ToggleGroup>
       )
@@ -441,7 +459,7 @@ export const NetflowTraffic: React.FC<{
             options={topologyOptions}
             filters={filters}
             setFilters={setFilters}
-            toggleTopologyOptions={() => setShowTopologyOptions(!isShowTopologyOptions)}
+            toggleTopologyOptions={() => onToggleTopologyOptions(!isShowTopologyOptions)}
             selected={selectedElement}
             onSelect={onElementSelect}
           />
@@ -500,7 +518,7 @@ export const NetflowTraffic: React.FC<{
         flows={flows}
         range={range}
         limit={limit}
-        toggleQuerySummary={() => setShowQuerySummary(!isShowQuerySummary)}
+        toggleQuerySummary={() => onToggleQuerySummary(!isShowQuerySummary)}
       />
       <TimeRangeModal
         id="time-range-modal"

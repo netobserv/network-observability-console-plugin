@@ -13,6 +13,7 @@ import {
 import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
+import { defaultSize, maxSize, minSize } from '../../utils/panel';
 import { defaultTimeRange, flowdirToReporter } from '../../utils/router';
 import { Record } from '../../api/ipfix';
 import { Column, ColumnsId, getColumnGroups } from '../../utils/columns';
@@ -134,7 +135,7 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
 
   const groups = getColumnGroups(columns);
   return (
-    <DrawerPanelContent id={id}>
+    <DrawerPanelContent id={id} isResizable defaultSize={defaultSize} minSize={minSize} maxSize={maxSize}>
       <DrawerHead>
         <Text component={TextVariants.h2}>{t('Flow Details')}</Text>
         <DrawerActions>

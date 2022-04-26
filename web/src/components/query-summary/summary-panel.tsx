@@ -16,6 +16,7 @@ import {
 } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
+import { defaultSize, maxSize, minSize } from '../../utils/panel';
 import { compareStrings } from '../../utils/base-compare';
 import { Record } from '../../api/ipfix';
 import { TimeRange } from '../../utils/datetime';
@@ -244,7 +245,7 @@ export const SummaryPanel: React.FC<{
   const { t } = useTranslation('plugin__network-observability-plugin');
 
   return (
-    <DrawerPanelContent id={id}>
+    <DrawerPanelContent id={id} isResizable defaultSize={defaultSize} minSize={minSize} maxSize={maxSize}>
       <DrawerHead>
         <Text component={TextVariants.h2}>{t('Query summary')}</Text>
         <DrawerActions>
