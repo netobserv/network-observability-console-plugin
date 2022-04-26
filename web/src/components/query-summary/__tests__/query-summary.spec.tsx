@@ -27,7 +27,7 @@ describe('<QuerySummary />', () => {
 
   it('should toggle panel', async () => {
     const wrapper = mount(<QuerySummary {...mocks} />);
-    wrapper.find('#query-summary').last().simulate('click');
+    wrapper.find('.query-summary-clickable').last().simulate('click');
     expect(mocks.toggleQuerySummary).toHaveBeenCalledTimes(1);
   });
 });
