@@ -89,9 +89,7 @@ export const generateNode = (
   options: TopologyOptions,
   searchValue: string,
   highlightedId: string,
-  filters: Filter[],
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  previousDatas?: any
+  filters: Filter[]
 ): NodeModel => {
   const id = `${type}.${namespace}.${name}.${addr}`;
   const label = name ? name : addr;
@@ -110,8 +108,6 @@ export const generateNode = (
     status: NodeStatus.default,
     style: { padding: 20 },
     data: {
-      //keep previous datas between draws like isPinned, setPosition and point
-      ...previousDatas,
       namespace,
       type,
       name,
@@ -240,41 +236,13 @@ export const generateDataModel = (
   options: TopologyOptions,
   searchValue: string,
   highlightedId: string,
-  filters: Filter[],
-  nodes: NodeModel[] = [],
-  edges: EdgeModel[] = []
+  filters: Filter[]
 ): Model => {
+  let nodes: NodeModel[] = [];
+  const edges: EdgeModel[] = [];
   const opts = { ...DefaultOptions, ...options };
   //ensure each child to have single parent
   const childIds: string[] = [];
-
-  //refresh existing items
-  nodes = nodes.map(node =>
-    node.type === 'group'
-      ? //clear group children
-        { ...node, children: [] }
-      : {
-          ...node,
-          //update options and filter indicators
-          ...generateNode(
-            node.data.namespace,
-            node.data.type,
-            node.data.name,
-            node.data.addr,
-            node.data.host,
-            opts,
-            searchValue,
-            highlightedId,
-            filters,
-            node.data
-          )
-        }
-  );
-  edges = edges.map(edge => ({
-    ...edge,
-    //update options and reset counter
-    ...generateEdge(edge.source!, edge.target!, 0, opts, edge.data.shadowed, highlightedId)
-  }));
 
   function addGroup(name: string, type: string, parent?: NodeModel, secondaryLabelPadding = false) {
     let group = nodes.find(g => g.type === 'group' && g.data.type === type && g.data.name === name);
