@@ -3,18 +3,32 @@ import { MetricFunction } from '../model/flow-query';
 import { cyrb53 } from '../utils/hash';
 import { Fields, Labels, Record } from './ipfix';
 
-export interface LokiResponse {
+export interface AggregatedQueryResponse {
   resultType: string;
   result: StreamResult[] | TopologyMetrics[];
-  stats: LokiStats;
+  stats: Stats;
 }
 
-export interface LokiStats {}
+export interface Stats {
+  numQueries: number;
+  limitReached: boolean;
+  // Here, more (raw) stats available in queriesStats array
+}
 
-export type StreamResult = {
+export interface StreamResult {
   stream: { [key: string]: string };
   values: string[][];
-};
+}
+
+export interface RecordsResult {
+  records: Record[];
+  stats: Stats;
+}
+
+export interface TopologyResult {
+  metrics: TopologyMetrics[];
+  stats: Stats;
+}
 
 export const parseStream = (raw: StreamResult): Record[] => {
   return raw.values.map(v => {

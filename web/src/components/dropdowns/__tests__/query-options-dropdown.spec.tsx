@@ -36,7 +36,7 @@ describe('<QueryOptionsPanel />', () => {
   });
   it('should render component', async () => {
     const wrapper = shallow(<QueryOptionsPanel {...props} />);
-    expect(wrapper.find('.pf-c-select__menu-group').length).toBe(2);
+    expect(wrapper.find('.pf-c-select__menu-group').length).toBe(3);
     expect(wrapper.find('.pf-c-select__menu-group-title').length).toBe(3);
     expect(wrapper.find(Radio)).toHaveLength(8);
 

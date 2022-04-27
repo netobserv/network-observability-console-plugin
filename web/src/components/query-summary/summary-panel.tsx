@@ -25,6 +25,7 @@ import { QuerySummaryContent } from './query-summary';
 import { comparePorts, formatPort } from '../../utils/port';
 import { formatProtocol } from '../../utils/protocol';
 import { compareIPs } from '../../utils/ip';
+import { Stats } from '../../api/loki';
 import './summary-panel.css';
 
 type TypeCardinality = {
@@ -39,9 +40,9 @@ type K8SObjectCardinality = {
 
 export const SummaryPanelContent: React.FC<{
   flows: Record[] | undefined;
+  stats: Stats | undefined;
   range: number | TimeRange;
-  limit: number;
-}> = ({ flows, range, limit }) => {
+}> = ({ flows, stats, range }) => {
   const { t } = useTranslation('plugin__network-observability-plugin');
   const [expanded, setExpanded] = React.useState<string>('');
 
@@ -224,8 +225,8 @@ export const SummaryPanelContent: React.FC<{
           className="summary-container-grouped"
           direction={'column'}
           flows={flows || []}
+          limitReached={stats?.limitReached || false}
           range={range}
-          limit={limit}
         />
       </TextContent>
       <TextContent className="summary-text-container">
@@ -240,10 +241,10 @@ export const SummaryPanelContent: React.FC<{
 export const SummaryPanel: React.FC<{
   onClose: () => void;
   flows: Record[] | undefined;
+  stats: Stats | undefined;
   range: number | TimeRange;
-  limit: number;
   id?: string;
-}> = ({ flows, range, limit, id, onClose }) => {
+}> = ({ flows, stats, range, id, onClose }) => {
   const { t } = useTranslation('plugin__network-observability-plugin');
 
   return (
@@ -255,7 +256,7 @@ export const SummaryPanel: React.FC<{
         </DrawerActions>
       </DrawerHead>
       <DrawerPanelBody>
-        <SummaryPanelContent flows={flows} range={range} limit={limit} />
+        <SummaryPanelContent flows={flows} stats={stats} range={range} />
       </DrawerPanelBody>
     </DrawerPanelContent>
   );

@@ -112,21 +112,34 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
           </div>
         ))}
       </div>
-      <div className="pf-c-select__menu-group-title">{t('Limit')}</div>
-      {[100, 500, 1000].map(l => (
-        <div key={'limit-' + l}>
-          <label className="pf-c-select__menu-item">
-            <Radio
-              id={'limit-' + l}
-              name={'limit-' + l}
-              isChecked={l === limit}
-              label={String(l)}
-              onChange={() => setLimit(l)}
-              value={String(l)}
-            />
-          </label>
-        </div>
-      ))}
+      <div className="pf-c-select__menu-group">
+        <Tooltip
+          content={t(
+            // eslint-disable-next-line max-len
+            'Query limit for Loki. Depending on the matching and filter settings, several Loki queries can be performed under the cover, resulting in having more results than the limit set.'
+          )}
+        >
+          <div className="pf-c-select__menu-group-title">
+            <>
+              {t('Limit')} <InfoAltIcon />
+            </>
+          </div>
+        </Tooltip>
+        {[100, 500, 1000].map(l => (
+          <div key={'limit-' + l}>
+            <label className="pf-c-select__menu-item">
+              <Radio
+                id={'limit-' + l}
+                name={'limit-' + l}
+                isChecked={l === limit}
+                label={String(l)}
+                onChange={() => setLimit(l)}
+                value={String(l)}
+              />
+            </label>
+          </div>
+        ))}
+      </div>
     </>
   );
 };

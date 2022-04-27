@@ -12,8 +12,8 @@ const (
 	timestampCol = "Timestamp"
 )
 
-func GetCSVData(qr *model.QueryResponse, columns []string) ([][]string, error) {
-	if streams, ok := qr.Data.Result.(model.Streams); ok { //make csv datas containing header as first line + rows
+func GetCSVData(qr *model.AggregatedQueryResponse, columns []string) ([][]string, error) {
+	if streams, ok := qr.Result.(model.Streams); ok { //make csv datas containing header as first line + rows
 		data := make([][]string, 1)
 		//prepare columns for faster lookup
 		columnsMap := utils.GetMapInterface(columns)
@@ -64,7 +64,7 @@ func GetCSVData(qr *model.QueryResponse, columns []string) ([][]string, error) {
 		}
 		return data, nil
 	}
-	return nil, fmt.Errorf("loki returned an unexpected type: %T", qr.Data.Result)
+	return nil, fmt.Errorf("loki returned an unexpected type: %T", qr.Result)
 }
 
 func getRowDatas(stream model.Stream, entry model.Entry, labels, fields []string,

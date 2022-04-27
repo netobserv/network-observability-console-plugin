@@ -6,6 +6,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"crypto/x509/pkix"
+	"encoding/json"
 	"encoding/pem"
 	"fmt"
 	"io/ioutil"
@@ -26,6 +27,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/netobserv/network-observability-console-plugin/pkg/loki"
+	"github.com/netobserv/network-observability-console-plugin/pkg/model"
 )
 
 const (
@@ -189,8 +191,8 @@ func TestLokiConfiguration(t *testing.T) {
 	// GIVEN a Loki service
 	lokiMock := httpMock{}
 	lokiMock.On("ServeHTTP", mock.Anything, mock.Anything).Run(func(args mock.Arguments) {
-		_, _ = args.Get(0).(http.ResponseWriter).Write([]byte(`{"hello":"world!"}`))
-	}).Twice()
+		_, _ = args.Get(0).(http.ResponseWriter).Write([]byte(`{"status":"","data":{"resultType":"streams","result":[]}}`))
+	})
 	lokiSvc := httptest.NewServer(&lokiMock)
 	defer lokiSvc.Close()
 	lokiURL, err := url.Parse(lokiSvc.URL)
@@ -219,22 +221,50 @@ func TestLokiConfiguration(t *testing.T) {
 	// AND the response is sent back to the client
 	body, err := ioutil.ReadAll(resp.Body)
 	require.NoError(t, err)
-	assert.Equal(t, `{"hello":"world!"}`, string(body))
+	var qr model.AggregatedQueryResponse
+	err = json.Unmarshal(body, &qr)
+	require.NoError(t, err)
+	assert.NotNil(t, qr.Result)
+}
+
+func TestLokiConfigurationForTopology(t *testing.T) {
+	// GIVEN a Loki service
+	lokiMock := httpMock{}
+	lokiMock.On("ServeHTTP", mock.Anything, mock.Anything).Run(func(args mock.Arguments) {
+		_, _ = args.Get(0).(http.ResponseWriter).Write([]byte(`{"status":"","data":{"resultType":"matrix","result":[]}}`))
+	})
+	lokiSvc := httptest.NewServer(&lokiMock)
+	defer lokiSvc.Close()
+	lokiURL, err := url.Parse(lokiSvc.URL)
+	require.NoError(t, err)
+
+	// THAT is accessed behind the NOO console plugin backend
+	backendRoutes := setupRoutes(&Config{
+		Loki: loki.Config{
+			URL:     lokiURL,
+			Timeout: time.Second,
+		},
+	})
+	backendSvc := httptest.NewServer(backendRoutes)
+	defer backendSvc.Close()
 
 	// WHEN the Loki flows endpoint is queried in the backend
-	resp, err = backendSvc.Client().Get(backendSvc.URL + "/api/loki/topology")
+	resp, err := backendSvc.Client().Get(backendSvc.URL + "/api/loki/topology")
 	require.NoError(t, err)
 
 	// THEN the query has been properly forwarded to Loki
-	req = lokiMock.Calls[1].Arguments[1].(*http.Request)
+	req := lokiMock.Calls[0].Arguments[1].(*http.Request)
 	assert.Equal(t, `topk(100,sum by(SrcK8S_Name,SrcK8S_Type,SrcK8S_OwnerName,SrcK8S_OwnerType,SrcK8S_Namespace,SrcAddr,SrcK8S_HostIP,DstK8S_Name,DstK8S_Type,DstK8S_OwnerName,DstK8S_OwnerType,DstK8S_Namespace,DstAddr,DstK8S_HostIP) (sum_over_time({app="netobserv-flowcollector"}|json|unwrap Bytes|__error__=""[300s])))`, req.URL.Query().Get("query"))
 	// without any multi-tenancy header
 	assert.Empty(t, req.Header.Get("X-Scope-OrgID"))
 
 	// AND the response is sent back to the client
-	body, err = ioutil.ReadAll(resp.Body)
+	body, err := ioutil.ReadAll(resp.Body)
 	require.NoError(t, err)
-	assert.Equal(t, `{"hello":"world!"}`, string(body))
+	var qr model.AggregatedQueryResponse
+	err = json.Unmarshal(body, &qr)
+	require.NoError(t, err)
+	assert.NotNil(t, qr.Result)
 }
 
 func TestLokiConfiguration_MultiTenant(t *testing.T) {

@@ -1,6 +1,7 @@
 package loki
 
 import (
+	"fmt"
 	"sort"
 	"strings"
 
@@ -8,14 +9,21 @@ import (
 )
 
 type StreamMerger struct {
-	index  map[string]indexedStream
-	merged model.Streams
+	Merger
+	index        map[string]indexedStream
+	merged       model.Streams
+	stats        []interface{}
+	numQueries   int
+	reqLimit     int
+	limitReached bool
 }
 
-func NewStreamMerger() *StreamMerger {
+func NewStreamMerger(reqLimit int) *StreamMerger {
 	return &StreamMerger{
-		index:  map[string]indexedStream{},
-		merged: model.Streams{},
+		reqLimit: reqLimit,
+		index:    map[string]indexedStream{},
+		merged:   model.Streams{},
+		stats:    []interface{}{},
 	}
 }
 
@@ -45,8 +53,16 @@ func uniqueEntry(e *model.Entry) string {
 	return e.Timestamp.String() + e.Line
 }
 
-func (m *StreamMerger) AddStreams(from model.Streams) model.Streams {
-	for _, stream := range from {
+func (m *StreamMerger) Add(from model.QueryResponseData) (model.ResultValue, error) {
+	streams, ok := from.Result.(model.Streams)
+	if !ok {
+		return nil, fmt.Errorf("loki returned an unexpected type for StreamMerger: %T", from)
+	}
+
+	m.numQueries++
+	m.stats = append(m.stats, from.Stats)
+	totalEntries := 0
+	for _, stream := range streams {
 		lkey := uniqueStream(&stream)
 		idxStream, streamExists := m.index[lkey]
 		if !streamExists {
@@ -59,6 +75,7 @@ func (m *StreamMerger) AddStreams(from model.Streams) model.Streams {
 		}
 		// Merge content (entries)
 		for _, e := range stream.Entries {
+			totalEntries++
 			ekey := uniqueEntry(&e)
 			if _, entryExists := idxStream.entries[ekey]; !entryExists {
 				// Add entry to the existing stream, and mark it as existing in idxStream.entries
@@ -77,9 +94,20 @@ func (m *StreamMerger) AddStreams(from model.Streams) model.Streams {
 			m.merged[idxStream.index] = idxStream.stream
 		}
 	}
-	return m.merged
+	if totalEntries >= m.reqLimit {
+		m.limitReached = true
+	}
+	return m.merged, nil
 }
 
-func (m *StreamMerger) GetStreams() model.Streams {
-	return m.merged
+func (m *StreamMerger) Get() *model.AggregatedQueryResponse {
+	return &model.AggregatedQueryResponse{
+		ResultType: model.ResultTypeStream,
+		Result:     m.merged,
+		Stats: model.AggregatedStats{
+			NumQueries:   m.numQueries,
+			LimitReached: m.limitReached,
+			QueriesStats: m.stats,
+		},
+	}
 }

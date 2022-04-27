@@ -8,7 +8,10 @@ describe('<QuerySummary />', () => {
     toggleQuerySummary: jest.fn(),
     flows: FlowsSample,
     range: 300,
-    limit: 100
+    stats: {
+      limitReached: false,
+      numQueries: 1
+    }
   };
 
   it('should shallow component', async () => {

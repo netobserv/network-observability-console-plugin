@@ -6,13 +6,13 @@ import { act } from 'react-dom/test-utils';
 import { getFlows } from '../../api/routes';
 import NetflowTraffic from '../netflow-traffic';
 import { extensionsMock } from '../__tests-data__/extensions';
-import { FlowsSample } from '../__tests-data__/flows';
+import { FlowsResultSample } from '../__tests-data__/flows';
 import NetflowTrafficParent from '../netflow-traffic-parent';
 
 const useResolvedExtensionsMock = useResolvedExtensions as jest.Mock;
 
 jest.mock('../../api/routes', () => ({
-  getFlows: jest.fn(() => Promise.resolve(FlowsSample))
+  getFlows: jest.fn(() => Promise.resolve(FlowsResultSample))
 }));
 const getFlowsMock = getFlows as jest.Mock;
 
