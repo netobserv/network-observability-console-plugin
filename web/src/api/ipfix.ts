@@ -36,4 +36,7 @@ export interface Fields {
   Packets: number;
   Proto: number;
   Bytes: number;
+  TimeFlowStart: number;
+  TimeFlowEnd: number;
+  TimeReceived: number;
 }

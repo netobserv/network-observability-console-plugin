@@ -45,7 +45,11 @@ export enum ColumnsId {
   host = 'K8S_HostIP',
   srchost = 'SrcK8S_HostIP',
   dsthost = 'DstK8S_HostIP',
-  flowdir = 'FlowDirection'
+  flowdir = 'FlowDirection',
+  duration = 'FlowDuration',
+  starttime = 'StartTime',
+  collectiontime = 'CollectionTime',
+  collectionlatency = 'CollectionLatency'
 }
 
 export interface Column {
@@ -594,6 +598,40 @@ export const getExtraColumns = (t: TFunction): Column[] => {
       fieldName: 'Packets',
       isSelected: true,
       value: f => f.fields.Packets,
+      sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
+      width: 5
+    },
+    {
+      id: ColumnsId.starttime,
+      name: t('Start Time'),
+      fieldName: 'TimeFlowStart',
+      isSelected: false,
+      value: f => f.fields.TimeFlowStart,
+      sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
+      width: 15
+    },
+    {
+      id: ColumnsId.duration,
+      name: t('Duration'),
+      isSelected: false,
+      value: f => f.fields.TimeFlowEnd - f.fields.TimeFlowStart,
+      sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
+      width: 5
+    },
+    {
+      id: ColumnsId.collectiontime,
+      name: t('Collection Time'),
+      fieldName: 'TimeReceived',
+      isSelected: false,
+      value: f => f.fields.TimeReceived,
+      sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
+      width: 15
+    },
+    {
+      id: ColumnsId.collectionlatency,
+      name: t('Collection Latency'),
+      isSelected: false,
+      value: f => f.fields.TimeReceived - f.fields.TimeFlowEnd,
       sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
       width: 5
     }
