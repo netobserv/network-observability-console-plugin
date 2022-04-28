@@ -95,9 +95,11 @@ export const SummaryPanelContent: React.FC<{
 
   const listCardinalityContent = (
     values: (string | number)[],
-    compareFn: (a: string | number, b: string | number) => number
+    compareFn?: (a: string | number, b: string | number) => number
   ) => {
-    const sortedStrings = values.sort((a: string | number, b: string | number) => compareFn(a, b)) as string[];
+    const sortedStrings = compareFn
+      ? (values.sort((a: string | number, b: string | number) => compareFn(a, b)) as string[])
+      : values;
     return (
       <>
         {sortedStrings.map((v: string) => (
@@ -195,8 +197,8 @@ export const SummaryPanelContent: React.FC<{
             'ports',
             t('{{count}} Port(s)', { count: ports.length }),
             listCardinalityContent(
-              ports.map(p => formatPort(p)),
-              comparePorts
+              //sort ports before format to keep number order
+              ports.sort((p1, p2) => comparePorts(p1, p2)).map(p => formatPort(p))
             )
           )}
           {accordionItem(
