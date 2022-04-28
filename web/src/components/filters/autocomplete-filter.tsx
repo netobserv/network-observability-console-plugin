@@ -75,11 +75,14 @@ export const AutocompleteFilter: React.FC<AutocompleteFilterProps> = ({
 
   const addFilter = React.useCallback(
     (option: FilterOption) => {
-      if (addFilterParent({ v: option.value, display: option.name })) {
+      const filter: FilterValue = filterDefinition.autoCompleteAddsQuotes
+        ? { v: `"${option.value}"`, display: `"${option.name}"` }
+        : { v: option.value, display: option.name };
+      if (addFilterParent(filter)) {
         resetFilterValue();
       }
     },
-    [addFilterParent, resetFilterValue]
+    [filterDefinition, addFilterParent, resetFilterValue]
   );
 
   const onAutoCompleteChange = React.useCallback(

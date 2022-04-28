@@ -55,6 +55,7 @@ export interface FilterDefinition {
   getOptions: (value: string) => Promise<FilterOption[]>;
   validate: (value: string) => { val?: string; err?: string };
   checkCompletion?: (value: string, selected: string) => { completed: boolean; option: FilterOption };
+  autoCompleteAddsQuotes?: boolean;
   hint?: string;
   examples?: string;
   placeholder?: string;
