@@ -61,13 +61,16 @@ jest.mock('react', () => ({
   useLayoutEffect: jest.requireActual('react').useEffect
 }));
 
-//Mock patternfly Tooltip & DatePicker components
+//Mock patternfly Tooltip, DatePicker & OverflowMenuControl components
 jest.mock('@patternfly/react-core', () => ({
   ...jest.requireActual('@patternfly/react-core'),
   Tooltip: (props: any) => {
     return props.children;
   },
   DatePicker: () => {
+    return null;
+  },
+  OverflowMenuControl: ()=> {
     return null;
   }
 }));

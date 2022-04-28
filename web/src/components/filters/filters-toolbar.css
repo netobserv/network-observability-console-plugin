@@ -60,3 +60,12 @@ button.pf-c-button.pf-m-link.pf-m-inline:empty {
 #forced-filters {
   flex-basis: 100%;
 }
+
+/* align toolbar with title and table */
+div#filter-toolbar-search-filters {
+  padding: 0;
+}
+
+.pf-c-toolbar__item.pf-m-align-right {
+  margin-right: 0;
+}

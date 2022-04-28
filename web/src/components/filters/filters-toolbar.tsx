@@ -6,6 +6,8 @@ import {
   ChipGroup,
   InputGroup,
   OverflowMenu,
+  OverflowMenuContent,
+  OverflowMenuControl,
   OverflowMenuGroup,
   Toolbar,
   ToolbarContent,
@@ -39,6 +41,8 @@ export interface FiltersToolbarProps {
   setFilters: (v: Filter[]) => void;
   clearFilters: () => void;
   queryOptionsProps: QueryOptionsDropdownProps;
+  menuContent?: JSX.Element[];
+  menuControl?: JSX.Element;
 }
 
 export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
@@ -147,14 +151,23 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
             </Tooltip>
           </ToolbarItem>
         )}
-        {props.children && <ToolbarItem className="flex-start">{props.children}</ToolbarItem>}
+        {!_.isEmpty(props.menuContent) && (
+          <ToolbarItem className="flex-start">
+            <OverflowMenu breakpoint="2xl">
+              <OverflowMenuContent isPersistent>
+                <OverflowMenuGroup groupType="button" isPersistent className="flex-start">
+                  {props.menuContent}
+                </OverflowMenuGroup>
+              </OverflowMenuContent>
+              {props.menuControl && (
+                <OverflowMenuControl className="flex-start">{props.menuControl}</OverflowMenuControl>
+              )}
+            </OverflowMenu>
+          </ToolbarItem>
+        )}
         {actions && (
           <ToolbarItem className="flex-start" alignment={{ default: 'alignRight' }}>
-            <OverflowMenu breakpoint="md">
-              <OverflowMenuGroup groupType="button" isPersistent>
-                {actions}
-              </OverflowMenuGroup>
-            </OverflowMenu>
+            {actions}
           </ToolbarItem>
         )}
         {_.isEmpty(forcedFilters) ? (

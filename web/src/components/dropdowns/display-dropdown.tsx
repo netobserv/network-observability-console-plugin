@@ -40,7 +40,7 @@ export const DisplayDropdown: React.FC<Props> = ({ id, setSize }) => {
           toggleIndicator={null}
           onToggle={() => setIsOpen(!isOpen)}
         >
-          <Text>{t('Display size')}</Text>
+          <Text>{t('Display')}</Text>
         </DropdownToggle>
       }
     />

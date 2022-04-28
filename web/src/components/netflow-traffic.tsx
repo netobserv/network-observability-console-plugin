@@ -4,8 +4,9 @@ import {
   Drawer,
   DrawerContent,
   DrawerContentBody,
-  OverflowMenu,
-  OverflowMenuGroup,
+  Dropdown,
+  DropdownGroup,
+  DropdownItem,
   OverflowMenuItem,
   PageSection,
   Text,
@@ -13,7 +14,16 @@ import {
   ToggleGroup,
   ToggleGroupItem
 } from '@patternfly/react-core';
-import { ColumnsIcon, ExportIcon, SyncAltIcon, TableIcon, TopologyIcon } from '@patternfly/react-icons';
+import {
+  ColumnsIcon,
+  ExportIcon,
+  EllipsisVIcon,
+  ExpandIcon,
+  CompressIcon,
+  SyncAltIcon,
+  TableIcon,
+  TopologyIcon
+} from '@patternfly/react-icons';
 import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -94,6 +104,8 @@ export const NetflowTraffic: React.FC<{
   const { t } = useTranslation('plugin__network-observability-plugin');
   const [extensions] = useResolvedExtensions<ModelFeatureFlag>(isModelFeatureFlag);
 
+  const [isOverflowMenuOpen, setOverflowMenuOpen] = React.useState(false);
+  const [isFullScreen, setFullScreen] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
   const [flows, setFlows] = React.useState<Record[]>([]);
   const [layout, setLayout] = React.useState<LayoutName>(LayoutName.ColaNoForce);
@@ -342,41 +354,109 @@ export const NetflowTraffic: React.FC<{
     );
   };
 
-  const pageButtons = () => {
-    switch (selectedViewId) {
-      case 'table':
-        return (
-          <OverflowMenuGroup groupType="button" isPersistent>
-            <OverflowMenuItem>
-              <Button
-                id="manage-columns-button"
-                variant="link"
-                className="overflow-button"
-                icon={<ColumnsIcon />}
-                onClick={() => setColModalOpen(true)}
-              >
-                {t('Manage columns')}
-              </Button>
-            </OverflowMenuItem>
-            <OverflowMenuItem>
-              <DisplayDropdown id="display" setSize={setSize} />
-            </OverflowMenuItem>
-            <OverflowMenuItem>
-              <Button
-                id="export-button"
-                variant="link"
-                className="overflow-button"
-                icon={<ExportIcon />}
-                onClick={() => setExportModalOpen(true)}
-              >
-                {t('Export')}
-              </Button>
-            </OverflowMenuItem>
-          </OverflowMenuGroup>
-        );
-      default:
-        return null;
+  const menuContent = () => {
+    const items: JSX.Element[] = [];
+
+    const viewToggleElement = viewToggle();
+    if (!_.isEmpty(forcedFilters) && viewToggleElement) {
+      items.push(<OverflowMenuItem isPersistent>{viewToggleElement}</OverflowMenuItem>);
     }
+
+    if (selectedViewId === 'table') {
+      items.push(
+        <OverflowMenuItem isPersistent key="columns">
+          <Button
+            id="manage-columns-button"
+            variant="link"
+            className="overflow-button"
+            icon={<ColumnsIcon />}
+            onClick={() => setColModalOpen(true)}
+          >
+            {t('Manage columns')}
+          </Button>
+        </OverflowMenuItem>
+      );
+      items.push(
+        <OverflowMenuItem key="display">
+          <DisplayDropdown id="display" setSize={setSize} />
+        </OverflowMenuItem>
+      );
+      items.push(
+        <OverflowMenuItem key="export">
+          <Button
+            id="export-button"
+            variant="link"
+            className="overflow-button"
+            icon={<ExportIcon />}
+            onClick={() => setExportModalOpen(true)}
+          >
+            {t('Export')}
+          </Button>
+        </OverflowMenuItem>
+      );
+    }
+
+    items.push(
+      <OverflowMenuItem key="fullscreen" isPersistent={selectedViewId === 'topology'}>
+        <Button
+          id="fullscreen-button"
+          variant="link"
+          className="overflow-button"
+          icon={isFullScreen ? <CompressIcon /> : <ExpandIcon />}
+          onClick={() => setFullScreen(!isFullScreen)}
+        >
+          {isFullScreen ? t('Collapse') : t('Expand')}
+        </Button>
+      </OverflowMenuItem>
+    );
+    return items;
+  };
+
+  const menuControl = () => {
+    if (selectedViewId !== 'table') {
+      return undefined;
+    }
+    return (
+      <Dropdown
+        id="more-options-dropdown"
+        onSelect={() => setOverflowMenuOpen(false)}
+        toggle={
+          <Button
+            id="more-options-button"
+            variant="link"
+            className="overflow-button"
+            icon={<EllipsisVIcon />}
+            onClick={() => setOverflowMenuOpen(!isOverflowMenuOpen)}
+          >
+            {t('More options')}
+          </Button>
+        }
+        isOpen={isOverflowMenuOpen}
+        dropdownItems={[
+          <DropdownGroup key="display-group" label={t('Display')}>
+            <DropdownItem key="s" onClick={() => setSize('s')}>
+              {t('Compact')}
+            </DropdownItem>
+            <DropdownItem key="m" onClick={() => setSize('m')}>
+              {t('Normal')}
+            </DropdownItem>
+            <DropdownItem key="l" onClick={() => setSize('l')}>
+              {t('Large')}
+            </DropdownItem>
+          </DropdownGroup>,
+          <DropdownGroup key="export-group" label={t('Actions')}>
+            <DropdownItem key="export" onClick={() => setExportModalOpen(true)}>
+              {t('Export')}
+            </DropdownItem>
+          </DropdownGroup>,
+          <DropdownGroup key="fullscreen-group" label={t('View')}>
+            <DropdownItem key="fullscreen" onClick={() => setFullScreen(!isFullScreen)}>
+              {isFullScreen ? t('Collapse') : t('Expand')}
+            </DropdownItem>
+          </DropdownGroup>
+        ]}
+      />
+    );
   };
 
   const panelContent = () => {
@@ -478,6 +558,20 @@ export const NetflowTraffic: React.FC<{
     setTRModalOpen(false);
   }, [range]);
 
+  //update page on full screen change
+  React.useEffect(() => {
+    const header = document.getElementById('page-main-header');
+    const sideBar = document.getElementById('page-sidebar');
+    const notification = document.getElementsByClassName('co-global-notifications');
+    [header, sideBar, ...notification].forEach(e => {
+      if (isFullScreen) {
+        e?.classList.add('hidden');
+      } else {
+        e?.classList.remove('hidden');
+      }
+    });
+  }, [isFullScreen]);
+
   return !_.isEmpty(extensions) ? (
     <PageSection id="pageSection">
       {
@@ -507,14 +601,9 @@ export const NetflowTraffic: React.FC<{
         }}
         forcedFilters={forcedFilters}
         actions={actions()}
-      >
-        {
-          <OverflowMenu breakpoint="md">
-            {!_.isEmpty(forcedFilters) && viewToggle()}
-            {pageButtons()}
-          </OverflowMenu>
-        }
-      </FiltersToolbar>
+        menuContent={menuContent()}
+        menuControl={menuControl()}
+      />
       <Drawer
         id="drawer"
         isInline
