@@ -98,7 +98,7 @@ describe('<FiltersToolbar />', () => {
     dropdown.simulate('click');
     wrapper.find(`[id="src_address"]`).at(0).simulate('click');
     tips = wrapper.find('#tips').at(0).getElement();
-    expect(String(tips.props.children[0].props.children)).toContain('Specify a single address');
+    expect(String(tips.props.children[0].props.children)).toContain('Specify a single IP');
 
     //open dropdow and select Protocol
     dropdown.simulate('click');

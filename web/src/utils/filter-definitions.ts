@@ -100,15 +100,6 @@ const isOwnerKind = (kind: string) => {
 const valid = (newValue: string) => ({ val: newValue });
 const invalid = (msg: string) => ({ err: msg });
 
-// TODO: add missing filters
-// case FilterType.ADDRESS_PORT:
-//   hint = t('Specify a single address or range with port'),
-//   examples = `${t('Specify addresses and port following one of these rules:')}
-//   - ${t('A single IPv4 address with port like 192.0.2.0:8080')}
-//   - ${t('A range within the IP address like 192.168.0.1-192.189.10.12:8080')}
-//   - ${t('A CIDR specification like 192.51.100.0/24:8080')}`
-//   break;
-
 let filterDefinitions: FilterDefinition[] | undefined = undefined;
 export const getFilterDefinitions = (t: TFunction): FilterDefinition[] => {
   if (!filterDefinitions) {
@@ -138,10 +129,10 @@ export const getFilterDefinitions = (t: TFunction): FilterDefinition[] => {
     - ${t('Ending text like "*-registry"')}
     - ${t('Pattern like "cluster-*-registry", "c*-*-r*y", -i*e-')}`;
 
-    const ipHint = t('Specify a single address or range.');
-    const ipExamples = `${t('Specify addresses following one of these rules:')}
+    const ipHint = t('Specify a single IP or range.');
+    const ipExamples = `${t('Specify IP following one of these rules:')}
     - ${t('A single IPv4 or IPv6 address like 192.0.2.0, ::1')}
-    - ${t('A range within the IP address like 192.168.0.1-192.189.10.12, 2001:db8::1-2001:db8::8')}
+    - ${t('An IP address range like 192.168.0.1-192.189.10.12, 2001:db8::1-2001:db8::8')}
     - ${t('A CIDR specification like 192.51.100.0/24, 2001:db8::/32')}`;
 
     const invalidIPMessage = t('Not a valid IPv4 or IPv6, nor a CIDR, nor an IP range separated by hyphen');

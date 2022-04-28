@@ -59,8 +59,8 @@ describe('<ElementPanel />', () => {
 
     //update to edge
     wrapper.setProps({ ...mocks, element: getEdge() });
-    expect(wrapper.find('#source').last().text()).toBe('SourceAddress10.131.0.18');
-    expect(wrapper.find('#destination').last().text()).toBe('DestinationAddress172.30.0.10');
+    expect(wrapper.find('#source').last().text()).toBe('SourceIP10.131.0.18');
+    expect(wrapper.find('#destination').last().text()).toBe('DestinationIP172.30.0.10');
     expect(wrapper.find('#fromCount').last().text()).toBe('78 kB');
     expect(wrapper.find('#toCount').last().text()).toBe('317 kB');
     expect(wrapper.find('#total').last().text()).toBe('396 kB');

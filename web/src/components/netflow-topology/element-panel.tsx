@@ -58,7 +58,7 @@ export const ElementPanelContent: React.FC<{
           <>
             {infos}
             <TextContent id="address" className="element-text-container grouped">
-              <Text component={TextVariants.h4}>{t('Address')}</Text>
+              <Text component={TextVariants.h4}>{t('IP')}</Text>
               <Text id="addressValue">{d.addr}</Text>
             </TextContent>
           </>

@@ -24,19 +24,18 @@ export interface TimeRange {
 }
 
 export const getTimeRangeOptions = (t: TFunction) => {
-  const timeRangeOptions = {
+  return {
     [CUSTOM_TIME_RANGE_KEY]: t('Custom time range'),
-    '5m': t('Last {{count}} minute', { count: 5 }),
-    '15m': t('Last {{count}} minute', { count: 15 }),
-    '30m': t('Last {{count}} minute', { count: 30 }),
-    '1h': t('Last {{count}} hour', { count: 1 }),
-    '2h': t('Last {{count}} hour', { count: 2 }),
-    '6h': t('Last {{count}} hour', { count: 6 }),
-    '12h': t('Last {{count}} hour', { count: 12 }),
-    '1d': t('Last {{count}} day', { count: 1 }),
-    '2d': t('Last {{count}} day', { count: 2 }),
-    '1w': t('Last {{count}} week', { count: 1 }),
-    '2w': t('Last {{count}} week', { count: 2 })
+    '5m': t('Last 5 minutes'),
+    '15m': t('Last 15 minutes'),
+    '30m': t('Last 30 minutes'),
+    '1h': t('Last 1 hour'),
+    '2h': t('Last 2 hours'),
+    '6h': t('Last 6 hours'),
+    '12h': t('Last 12 hours'),
+    '1d': t('Last 1 day'),
+    '2d': t('Last 2 days'),
+    '1w': t('Last 1 week'),
+    '2w': t('Last 2 weeks')
   };
-  return timeRangeOptions;
 };

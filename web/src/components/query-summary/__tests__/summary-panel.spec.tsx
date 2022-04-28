@@ -25,7 +25,7 @@ describe('<SummaryPanel />', () => {
     expect(wrapper.find(Accordion)).toHaveLength(1);
     expect(wrapper.find(AccordionItem)).toHaveLength(3);
 
-    expect(wrapper.find('#addresses').last().text()).toBe('5 Address(es)');
+    expect(wrapper.find('#addresses').last().text()).toBe('5 IP(s)');
     expect(wrapper.find('#ports').last().text()).toBe('4 Port(s)');
     expect(wrapper.find('#protocols').last().text()).toBe('1 Protocol(s)');
   });

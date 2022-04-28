@@ -131,7 +131,7 @@ const renderPopoverDecorator = (
               <FlexItem>{t('Name')}</FlexItem>
             </FlexItem>
             <FlexItem>
-              <FlexItem>{t('Address')}</FlexItem>
+              <FlexItem>{t('IP')}</FlexItem>
             </FlexItem>
             <FlexItem>
               <FlexItem>{t('Node')}</FlexItem>
