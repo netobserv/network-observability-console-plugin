@@ -264,7 +264,7 @@ export const getCommonColumns = (t: TFunction, withConcatenatedFields = true): C
       },
       {
         id: ColumnsId.addrport,
-        name: t('Addresses & Ports'),
+        name: t('IPs & Ports'),
         isSelected: false,
         value: f => [
           ...getConcatenatedValue(f.fields.SrcAddr, f.fields.SrcPort),
@@ -504,7 +504,7 @@ export const getSrcDstColumns = (t: TFunction, withConcatenatedFields = true): C
       {
         id: ColumnsId.srcaddrport,
         group: t('Source'),
-        name: t('Address & Port'),
+        name: t('IP & Port'),
         isSelected: false,
         value: f => getConcatenatedValue(f.fields.SrcAddr, f.fields.SrcPort),
         sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
@@ -546,7 +546,7 @@ export const getSrcDstColumns = (t: TFunction, withConcatenatedFields = true): C
       {
         id: ColumnsId.dstaddrport,
         group: t('Destination'),
-        name: t('Address & Port'),
+        name: t('IP & Port'),
         isSelected: false,
         value: f => getConcatenatedValue(f.fields.DstAddr, f.fields.DstPort),
         sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),

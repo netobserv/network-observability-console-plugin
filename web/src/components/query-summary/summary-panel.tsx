@@ -16,16 +16,16 @@ import {
 } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
+import _ from 'lodash';
 import { defaultSize, maxSize, minSize } from '../../utils/panel';
 import { compareStrings } from '../../utils/base-compare';
 import { Record } from '../../api/ipfix';
 import { TimeRange } from '../../utils/datetime';
 import { QuerySummaryContent } from './query-summary';
-import './summary-panel.css';
-import _ from 'lodash';
 import { comparePorts, formatPort } from '../../utils/port';
 import { formatProtocol } from '../../utils/protocol';
 import { compareIPs } from '../../utils/ip';
+import './summary-panel.css';
 
 type TypeCardinality = {
   type: string;
@@ -183,7 +183,7 @@ export const SummaryPanelContent: React.FC<{
         <Accordion id="cardinality-accordion">
           {accordionItem(
             'addresses',
-            t('{{count}} Address(es)', { count: addresses.length }),
+            t('{{count}} IP(s)', { count: addresses.length }),
             listCardinalityContent(addresses, compareIPs)
           )}
           {typesCardinality.map(tc =>

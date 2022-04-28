@@ -24,15 +24,15 @@ export const RefreshDropdown: React.FC<RefreshDropdownProps> = ({ disabled, id, 
 
   const refreshOptions = {
     OFF_KEY: t('Refresh off'),
-    '15s': t('{{count}} second', { count: 15 }),
-    '30s': t('{{count}} second', { count: 30 }),
-    '1m': t('{{count}} minute', { count: 1 }),
-    '5m': t('{{count}} minute', { count: 5 }),
-    '15m': t('{{count}} minute', { count: 15 }),
-    '30m': t('{{count}} minute', { count: 30 }),
-    '1h': t('{{count}} hour', { count: 1 }),
-    '2h': t('{{count}} hour', { count: 2 }),
-    '1d': t('{{count}} day', { count: 1 })
+    '15s': t('15 seconds'),
+    '30s': t('30 seconds'),
+    '1m': t('1 minute'),
+    '5m': t('5 minutes'),
+    '15m': t('15 minutes'),
+    '30m': t('30 minutes'),
+    '1h': t('1 hour'),
+    '2h': t('2 hours'),
+    '1d': t('1 day')
   };
 
   const selectedKey = interval === undefined ? OFF_KEY : formatDuration(interval);
