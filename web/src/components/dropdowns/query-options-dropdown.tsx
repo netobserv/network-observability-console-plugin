@@ -7,6 +7,7 @@ import { Match, Reporter } from '../../model/flow-query';
 export interface QueryOptionsDropdownProps {
   reporter: Reporter;
   setReporter: (reporter: Reporter) => void;
+  allowReporterBoth: boolean;
   limit: number;
   setLimit: (limit: number) => void;
   match: Match;
@@ -21,6 +22,7 @@ type MatchOption = { label: string; value: Match };
 export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
   reporter,
   setReporter,
+  allowReporterBoth,
   limit,
   setLimit,
   match,
@@ -69,20 +71,29 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
             </>
           </div>
         </Tooltip>
-        {reporterOptions.map(opt => (
-          <div key={`reporter-${opt.value}`}>
-            <label className="pf-c-select__menu-item">
-              <Radio
-                isChecked={opt.value === reporter}
-                name={`reporter-${opt.value}`}
-                onChange={() => setReporter(opt.value)}
-                label={opt.label}
-                id={`reporter-${opt.value}`}
-                value={opt.value}
-              />
-            </label>
-          </div>
-        ))}
+        {reporterOptions.map(opt => {
+          const disabled = !allowReporterBoth && opt.value === 'both';
+          return (
+            <div key={`reporter-${opt.value}`}>
+              <label className="pf-c-select__menu-item">
+                <Tooltip
+                  trigger={disabled ? 'mouseenter focus' : ''}
+                  content={disabled ? t('Disabled for topology view') : undefined}
+                >
+                  <Radio
+                    isChecked={opt.value === reporter}
+                    isDisabled={disabled}
+                    name={`reporter-${opt.value}`}
+                    onChange={() => setReporter(opt.value)}
+                    label={opt.label}
+                    id={`reporter-${opt.value}`}
+                    value={opt.value}
+                  />
+                </Tooltip>
+              </label>
+            </div>
+          );
+        })}
       </div>
       <div className="pf-c-select__menu-group">
         <Tooltip

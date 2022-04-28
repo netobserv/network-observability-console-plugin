@@ -24,6 +24,7 @@ describe('<FiltersToolbar />', () => {
     queryOptionsProps: {
       limit: 100,
       reporter: 'destination',
+      allowReporterBoth: true,
       match: 'all',
       setLimit: jest.fn(),
       setMatch: jest.fn(),

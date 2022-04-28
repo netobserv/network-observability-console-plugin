@@ -7,6 +7,7 @@ import QueryOptionsDropdown, { QueryOptionsDropdownProps, QueryOptionsPanel } fr
 describe('<QueryOptionsDropdown />', () => {
   const props: QueryOptionsDropdownProps = {
     reporter: 'destination',
+    allowReporterBoth: true,
     limit: 100,
     match: 'all',
     setLimit: jest.fn(),
@@ -23,6 +24,7 @@ describe('<QueryOptionsDropdown />', () => {
 describe('<QueryOptionsPanel />', () => {
   const props: QueryOptionsDropdownProps = {
     reporter: 'destination',
+    allowReporterBoth: true,
     limit: 100,
     match: 'all',
     setLimit: jest.fn(),

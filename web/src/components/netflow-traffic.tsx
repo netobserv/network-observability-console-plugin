@@ -145,6 +145,10 @@ export const NetflowTraffic: React.FC<{
 
   const selectView = (view: ViewId) => {
     clearSelections();
+    //reporter 'both' is disabled for topology view
+    if (view === 'topology' && reporter === 'both') {
+      setReporter('source');
+    }
     setSelectedViewId(view);
   };
 
@@ -492,7 +496,15 @@ export const NetflowTraffic: React.FC<{
         filters={filters}
         setFilters={updateTableFilters}
         clearFilters={clearFilters}
-        queryOptionsProps={{ limit, setLimit, match, setMatch, reporter, setReporter }}
+        queryOptionsProps={{
+          limit,
+          setLimit,
+          match,
+          setMatch,
+          reporter,
+          setReporter,
+          allowReporterBoth: selectedViewId === 'table'
+        }}
         forcedFilters={forcedFilters}
         actions={actions()}
       >
