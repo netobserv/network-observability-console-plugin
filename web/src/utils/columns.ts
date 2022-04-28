@@ -148,7 +148,7 @@ export const getCommonColumns = (t: TFunction, withConcatenatedFields = true): C
       name: t('Names'),
       isSelected: false,
       value: f => getSrcOrDstValue(f.fields.SrcK8S_Name, f.fields.DstK8S_Name),
-      sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
+      sort: (a, b, col) => compareStrings((col.value(a) as string[]).join(''), (col.value(b) as string[]).join('')),
       width: 15
     },
     {
@@ -156,7 +156,7 @@ export const getCommonColumns = (t: TFunction, withConcatenatedFields = true): C
       name: t('Kinds'),
       isSelected: false,
       value: f => getSrcOrDstValue(f.fields.SrcK8S_Type, f.fields.DstK8S_Type),
-      sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
+      sort: (a, b, col) => compareStrings((col.value(a) as string[]).join(''), (col.value(b) as string[]).join('')),
       width: 10
     },
     {
@@ -164,7 +164,7 @@ export const getCommonColumns = (t: TFunction, withConcatenatedFields = true): C
       name: t('Owners'),
       isSelected: false,
       value: f => getSrcOrDstValue(f.labels.SrcK8S_OwnerName, f.labels.DstK8S_OwnerName),
-      sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
+      sort: (a, b, col) => compareStrings((col.value(a) as string[]).join(''), (col.value(b) as string[]).join('')),
       width: 15
     },
     {
@@ -172,7 +172,7 @@ export const getCommonColumns = (t: TFunction, withConcatenatedFields = true): C
       name: t('Owner Kinds'),
       isSelected: false,
       value: f => getSrcOrDstValue(f.fields.SrcK8S_OwnerType, f.fields.DstK8S_OwnerType),
-      sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
+      sort: (a, b, col) => compareStrings((col.value(a) as string[]).join(''), (col.value(b) as string[]).join('')),
       width: 10
     },
     {
@@ -180,7 +180,7 @@ export const getCommonColumns = (t: TFunction, withConcatenatedFields = true): C
       name: t('Namespaces'),
       isSelected: false,
       value: f => getSrcOrDstValue(f.labels.SrcK8S_Namespace, f.labels.DstK8S_Namespace),
-      sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
+      sort: (a, b, col) => compareStrings((col.value(a) as string[]).join(''), (col.value(b) as string[]).join('')),
       width: 15
     },
     {
@@ -188,7 +188,7 @@ export const getCommonColumns = (t: TFunction, withConcatenatedFields = true): C
       name: t('IP'),
       isSelected: false,
       value: f => getSrcOrDstValue(f.fields.SrcAddr, f.fields.DstAddr),
-      sort: (a, b, col) => compareIPs(col.value(a) as string, col.value(b) as string),
+      sort: (a, b, col) => compareIPs((col.value(a) as string[]).join(''), (col.value(b) as string[]).join('')),
       width: 10
     },
     {
@@ -196,7 +196,11 @@ export const getCommonColumns = (t: TFunction, withConcatenatedFields = true): C
       name: t('Ports'),
       isSelected: false,
       value: f => getSrcOrDstValue(f.fields.SrcPort, f.fields.DstPort),
-      sort: (a, b, col) => comparePorts(col.value(a) as number, col.value(b) as number),
+      sort: (a, b, col) =>
+        comparePorts(
+          (col.value(a) as number[]).reduce((a, b) => a + b, 0),
+          (col.value(b) as number[]).reduce((a, b) => a + b, 0)
+        ),
       width: 10
     },
     {
@@ -204,7 +208,7 @@ export const getCommonColumns = (t: TFunction, withConcatenatedFields = true): C
       name: t('Node IP'),
       isSelected: false,
       value: f => getSrcOrDstValue(f.fields.SrcK8S_HostIP, f.fields.DstK8S_HostIP),
-      sort: (a, b, col) => compareIPs(col.value(a) as string, col.value(b) as string),
+      sort: (a, b, col) => compareIPs((col.value(a) as string[]).join(''), (col.value(b) as string[]).join('')),
       width: 10
     }
   ];
