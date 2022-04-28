@@ -452,8 +452,6 @@ export const NetflowTraffic: React.FC<{
             range={range}
             metricFunction={metricFunction}
             metricType={metricType}
-            match={match}
-            limit={limit}
             metrics={metrics}
             layout={layout}
             options={topologyOptions}
