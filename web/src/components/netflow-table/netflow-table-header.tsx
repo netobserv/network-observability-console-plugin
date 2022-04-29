@@ -1,6 +1,6 @@
+import * as React from 'react';
 import { OnSort, SortByDirection, Th, Thead, Tr } from '@patternfly/react-table';
 import _ from 'lodash';
-import * as React from 'react';
 import { Column, ColumnGroup, getColumnGroups, getFullColumnName } from '../../utils/columns';
 
 export type HeadersState = {
@@ -55,6 +55,7 @@ export const NetflowTableHeader: React.FC<{
           }}
           modifier="wrap"
           style={{ width: `${Math.floor((100 * c.width) / tableWidth)}%` }}
+          info={c.tooltip ? { tooltip: c.tooltip } : undefined}
         >
           {headersState.useNested ? c.name : getFullColumnName(c)}
         </Th>

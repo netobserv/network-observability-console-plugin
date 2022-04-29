@@ -22,7 +22,6 @@ export const parseStream = (raw: StreamResult): Record[] => {
     return {
       labels: raw.stream as unknown as Labels,
       key: cyrb53(v.join(',')),
-      timestamp: +v[0].slice(0, 13),
       fields: fields
     };
   });

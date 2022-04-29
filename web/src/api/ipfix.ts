@@ -1,7 +1,6 @@
 export interface Record {
   labels: Labels;
   key: number;
-  timestamp: number;
   fields: Fields;
 }
 

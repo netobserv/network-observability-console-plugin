@@ -105,8 +105,7 @@ export const RecordField: React.FC<{
     }
   };
 
-  const dateTimeContent = (value: number | undefined) => {
-    const date = value ? new Date(value) : undefined;
+  const dateTimeContent = (date: Date | undefined) => {
     const dateText = date?.toDateString() || emptyText();
     const timeText = date?.toLocaleTimeString() || emptyText();
     return singleContainer(
@@ -144,11 +143,10 @@ export const RecordField: React.FC<{
   const content = (c: Column) => {
     const value = c.value(flow);
     switch (c.id) {
-      case ColumnsId.timestamp:
-        return dateTimeContent(typeof value === 'number' ? value : undefined);
       case ColumnsId.collectiontime:
       case ColumnsId.starttime:
-        return dateTimeContent(typeof value === 'number' ? value * 1000 : undefined);
+      case ColumnsId.endtime:
+        return dateTimeContent(typeof value === 'number' ? new Date(value * 1000) : undefined);
       case ColumnsId.collectionlatency:
       case ColumnsId.duration:
         return singleContainer(
