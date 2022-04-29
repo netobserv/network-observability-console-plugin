@@ -372,6 +372,7 @@ const TopologyContent: React.FC<{
         <TopologyControlBar
           controlButtons={createTopologyControlButtons({
             ...defaultControlButtonsOptions,
+            fitToScreen: false,
             customButtons: [
               {
                 id: 'export',
@@ -400,9 +401,9 @@ const TopologyContent: React.FC<{
             zoomOutCallback: () => {
               controller && controller.getGraph().scaleBy(ZOOM_OUT);
             },
-            fitToScreenCallback: fitView,
             resetViewCallback: () => {
               if (controller) {
+                requestFit = true;
                 controller.getGraph().reset();
                 controller.getGraph().layout();
               }
