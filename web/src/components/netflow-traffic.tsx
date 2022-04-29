@@ -34,7 +34,6 @@ import { DefaultOptions, LayoutName, TopologyOptions } from '../model/topology';
 import { Column, getDefaultColumns } from '../utils/columns';
 import { TimeRange } from '../utils/datetime';
 import { getHTTPErrorDetails } from '../utils/errors';
-import { Feature, isAllowed } from '../utils/features-gate';
 import { Filter } from '../model/filters';
 import {
   LOCAL_STORAGE_COLS_KEY,
@@ -285,24 +284,22 @@ export const NetflowTraffic: React.FC<{
 
   const viewToggle = () => {
     return (
-      isAllowed(Feature.Topology) && (
-        <ToggleGroup>
-          <ToggleGroupItem
-            icon={<TableIcon />}
-            text={t('Flow Table')}
-            buttonId="tableViewButton"
-            isSelected={selectedViewId === 'table'}
-            onChange={() => selectView('table')}
-          />
-          <ToggleGroupItem
-            icon={<TopologyIcon />}
-            text={t('Topology')}
-            buttonId="topologyViewButton"
-            isSelected={selectedViewId === 'topology'}
-            onChange={() => selectView('topology')}
-          />
-        </ToggleGroup>
-      )
+      <ToggleGroup>
+        <ToggleGroupItem
+          icon={<TableIcon />}
+          text={t('Flow Table')}
+          buttonId="tableViewButton"
+          isSelected={selectedViewId === 'table'}
+          onChange={() => selectView('table')}
+        />
+        <ToggleGroupItem
+          icon={<TopologyIcon />}
+          text={t('Topology')}
+          buttonId="topologyViewButton"
+          isSelected={selectedViewId === 'topology'}
+          onChange={() => selectView('topology')}
+        />
+      </ToggleGroup>
     );
   };
 
