@@ -116,7 +116,7 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
         <Tooltip
           content={t(
             // eslint-disable-next-line max-len
-            'Query limit for Loki. Depending on the matching and filter settings, several Loki queries can be performed under the cover, resulting in having more results than the limit set.'
+            'Limit for internal backend queries. Depending on the matching and filter settings, several queries can be performed under the cover, each with this limit set, resulting in more results after aggregation.'
           )}
         >
           <div className="pf-c-select__menu-group-title">
