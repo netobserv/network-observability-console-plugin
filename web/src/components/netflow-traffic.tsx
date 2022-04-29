@@ -537,6 +537,8 @@ export const NetflowTraffic: React.FC<{
           metricFunction={metricFunction}
           metricType={metricType}
           options={topologyOptions}
+          filters={filters}
+          setFilters={setFilters}
           onClose={() => onElementSelect(undefined)}
         />
       );

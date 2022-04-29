@@ -12,10 +12,11 @@ import {
 import _ from 'lodash';
 import { elementPerMinText, roundTwoDigits } from '../utils/count';
 import { TopologyMetrics } from '../api/loki';
-import { Filter } from '../model/filters';
+import { Filter, FilterDefinition } from '../model/filters';
 import { bytesPerSeconds, humanFileSize } from '../utils/bytes';
 import { kindToAbbr } from '../utils/label';
 import { defaultTimeRange } from '../utils/router';
+import { findFilter } from '../utils/filter-definitions';
 import { TFunction } from 'i18next';
 
 export enum LayoutName {
@@ -99,6 +100,86 @@ export const DefaultOptions: TopologyOptions = {
   metricType: TopologyMetricTypes.BYTES
 };
 
+export type ElementData = {
+  type?: string;
+  namespace?: string;
+  name?: string;
+  addr?: string;
+  host?: string;
+};
+
+export const getFilterDefValue = (d: ElementData, t: TFunction) => {
+  let def: FilterDefinition | undefined;
+  let value: string | undefined;
+  if (d.type && d.namespace && d.name) {
+    def = findFilter(t, 'resource')!;
+    value = `${d.type}.${d.namespace}.${d.name}`;
+  } else if (d.type === 'Node' && (d.host || d.name)) {
+    def = findFilter(t, 'host_name')!;
+    value = d.host ? d.host! : d.name!;
+  } else if (d.type === 'Namespace' && (d.namespace || d.name)) {
+    def = findFilter(t, 'namespace')!;
+    value = d.namespace ? d.namespace! : d.name!;
+  } else if (d.type && d.name) {
+    if (['Service', 'Pod'].includes(d.type)) {
+      def = findFilter(t, 'name')!;
+    } else {
+      def = findFilter(t, 'owner_name')!;
+    }
+    value = d.name;
+  } else if (d.addr) {
+    def = findFilter(t, 'address')!;
+    value = d.addr!;
+  }
+  return def && value ? { def, value } : undefined;
+};
+
+export const isElementFiltered = (d: ElementData, filters: Filter[], t: TFunction) => {
+  const defValue = getFilterDefValue(d, t);
+  if (!defValue) {
+    return false;
+  }
+  const filter = filters.find(f => f.def.id === defValue.def.id);
+  return filter !== undefined && filter.values.find(v => v.v === defValue.value) !== undefined;
+};
+
+export const toggleElementFilter = (
+  d: ElementData,
+  isFiltered: boolean,
+  filters: Filter[],
+  setFilters: (filters: Filter[]) => void,
+  t: TFunction
+) => {
+  if (!setFilters) {
+    return;
+  }
+
+  const result = _.cloneDeep(filters);
+  const defValue = getFilterDefValue(d, t);
+  if (!defValue) {
+    console.error("can't find defValue for elementData", d);
+    return;
+  }
+  let filter = result.find(f => f.def.id === defValue.def.id);
+  if (!filter) {
+    filter = { def: defValue.def, values: [] };
+    result.push(filter);
+  }
+
+  if (!isFiltered) {
+    //replace filter for kubeobject
+    if (defValue.def.id === 'resource') {
+      filter!.values = [{ v: defValue.value! }];
+    } else {
+      filter!.values.push({ v: defValue.value });
+    }
+  } else {
+    filter!.values = filter!.values.filter(v => v.v !== defValue.value);
+  }
+  setFilters(result.filter(f => !_.isEmpty(f.values)));
+};
+
+export const DEFAULT_NODE_TRUNCATE_LENGTH = 25;
 export const DEFAULT_NODE_SIZE = 75;
 
 export type NodeData = {
@@ -116,7 +197,8 @@ export const generateNode = (
   options: TopologyOptions,
   searchValue: string,
   highlightedId: string,
-  filters: Filter[]
+  filters: Filter[],
+  t: TFunction
 ): NodeModel => {
   const id = `${data.type}.${data.namespace}.${data.name}.${data.addr}.${data.host}`;
   const label = data.name
@@ -154,9 +236,7 @@ export const generateNode = (
       ...data,
       shadowed,
       highlighted,
-      isFiltered: filters.some(f =>
-        f.values.some(fv => fv.v === `${data.type}.${data.namespace}.${data.name}` || fv.v === data.addr)
-      ),
+      isFiltered: isElementFiltered(data, filters, t),
       labelPosition: LabelPosition.bottom,
       //TODO: get badge and color using console ResourceIcon
       badge: options.nodeBadges && data.type ? kindToAbbr(data.type) : undefined,
@@ -335,7 +415,7 @@ export const generateDataModel = (
         n.data.host === data.host
     );
     if (!node) {
-      node = generateNode(data, opts, searchValue, highlightedId, filters);
+      node = generateNode(data, opts, searchValue, highlightedId, filters, t);
       nodes.push(node);
     }
 
@@ -429,7 +509,7 @@ export const generateDataModel = (
             ? //metrics without namespace will be grouped as 'Unknown'
               { displayName: t('Unknown') }
             : //valid metrics will be Namespaces with namespace as name + host infos
-              { type: 'Namespace', namespace, host, canStepInto: true },
+              { type: 'Namespace', name: namespace, host, canStepInto: true },
           parent
         );
       case TopologyScopes.OWNER:

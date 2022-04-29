@@ -1,8 +1,9 @@
-import { DrawerCloseButton } from '@patternfly/react-core';
+import { Button, DrawerCloseButton } from '@patternfly/react-core';
 import { BaseEdge, BaseNode } from '@patternfly/react-topology';
 import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 import { DefaultOptions, TopologyScopes } from '../../../model/topology';
+import { Filter } from '../../../model/filters';
 import { TopologyMetrics } from '../../../api/loki';
 import { MetricFunction, MetricType } from '../../../model/flow-query';
 import { ElementPanel, ElementPanelContent } from '../element-panel';
@@ -34,6 +35,8 @@ describe('<ElementPanel />', () => {
       ...DefaultOptions,
       scope: TopologyScopes.RESOURCE
     },
+    filters: [] as Filter[],
+    setFilters: jest.fn(),
     onClose: jest.fn(),
     id: 'element-panel-test'
   };
@@ -69,5 +72,17 @@ describe('<ElementPanel />', () => {
     expect(wrapper.find('#fromCount').last().text()).toBe('78 kB');
     expect(wrapper.find('#toCount').last().text()).toBe('317 kB');
     expect(wrapper.find('#total').last().text()).toBe('396 kB');
+  });
+
+  it('should filter content', async () => {
+    const wrapper = mount(<ElementPanelContent {...mocks} />);
+    const filterButton = wrapper.find(Button);
+    filterButton.simulate('click');
+    expect(mocks.setFilters).toHaveBeenCalledWith([
+      {
+        def: expect.any(Object),
+        values: [{ v: '10.129.0.15' }]
+      }
+    ]);
   });
 });

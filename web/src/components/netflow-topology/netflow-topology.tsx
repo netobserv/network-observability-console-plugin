@@ -32,16 +32,17 @@ import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { saveSvgAsPng } from 'save-svg-as-png';
-import { findFilter } from '../../utils/filter-definitions';
 import { TopologyMetrics } from '../../api/loki';
-import { Filter, FilterDefinition } from '../../model/filters';
+import { Filter } from '../../model/filters';
 import { MetricFunction, MetricType } from '../../model/flow-query';
 import {
   generateDataModel,
   LayoutName,
   TopologyGroupTypes,
   TopologyOptions,
-  TopologyScopes
+  TopologyScopes,
+  isElementFiltered,
+  toggleElementFilter
 } from '../../model/topology';
 import { TimeRange } from '../../utils/datetime';
 import { usePrevious } from '../../utils/previous-hook';
@@ -162,41 +163,8 @@ const TopologyContent: React.FC<{
   const onFilter = React.useCallback(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (data: any) => {
-      const result = data.isClearFilters ? [] : _.cloneDeep(filters);
-
-      let value: string;
-      let def: FilterDefinition;
-      if (data.type && data.namespace && data.name) {
-        def = findFilter(t, 'resource')!;
-        value = `${data.type}.${data.namespace}.${data.name}`;
-      } else if (data.type === 'Node' && data.host) {
-        def = findFilter(t, 'host_name')!;
-        value = data.host;
-      } else if (data.type === 'Namespace' && data.namespace) {
-        def = findFilter(t, 'namespace')!;
-        value = data.namespace;
-      } else {
-        def = findFilter(t, 'address')!;
-        value = data.addr;
-      }
-
-      let filter = result.find(f => f.def.id === def.id);
-      if (!filter) {
-        filter = { def, values: [] };
-        result.push(filter);
-      }
-
-      if (data.isFiltered) {
-        //replace filter for kubeobject
-        if (def.id === 'resource') {
-          filter!.values = [{ v: value! }];
-        } else {
-          filter!.values.push({ v: value });
-        }
-      } else {
-        filter!.values = filter!.values.filter(v => v.v !== value);
-      }
-      setFilters(result.filter(f => !_.isEmpty(f.values)));
+      const isFiltered = isElementFiltered(data, filters, t);
+      toggleElementFilter(data, isFiltered, filters, setFilters, t);
       setSelectedIds([data.id]);
     },
     [filters, setFilters, t]
