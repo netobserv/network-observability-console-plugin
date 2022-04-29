@@ -70,6 +70,7 @@
   "To date must be after From date": "To date must be after From date",
   "Invalid date / time": "Invalid date / time",
   "Custom time range": "Custom time range",
+  "Select a custom time range. Flows are selected based on their End Time value.": "Select a custom time range. Flows are selected based on their End Time value.",
   "n/a": "n/a",
   "Namespace": "Namespace",
   "Ingress": "Ingress",
