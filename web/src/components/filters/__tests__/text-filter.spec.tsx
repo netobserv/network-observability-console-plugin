@@ -83,7 +83,7 @@ describe('<TextFilter />', () => {
   });
 
   it('should not filter invalid IP', done => {
-    const wrapper = mount(<TextFilter {...props} filterDefinition={findFilter(t, 'dst_host')!} />);
+    const wrapper = mount(<TextFilter {...props} filterDefinition={findFilter(t, 'dst_host_address')!} />);
     const textInput = wrapper.find(TextInput).at(0);
     const searchButton = wrapper.find('#search-button').at(0);
 

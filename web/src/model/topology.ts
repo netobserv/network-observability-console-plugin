@@ -379,8 +379,10 @@ export const generateDataModel = (
     const namespace = m[`${prefix}K8S_Namespace`];
     const ownerType = m[`${prefix}K8S_OwnerType`];
     const ownerName = m[`${prefix}K8S_OwnerName`];
-    //TODO: enrich Host Name to use ResourceLink in element-panel
-    const host = m[`${prefix}K8S_HostIP`];
+    const host = m[`${prefix}K8S_HostName`];
+    const type = m[`${prefix}K8S_Type`];
+    const name = m[`${prefix}K8S_Name`];
+    const addr = m[`${prefix}Addr`];
 
     const hostGroup =
       [TopologyGroupTypes.HOSTS_NAMESPACES, TopologyGroupTypes.HOSTS_OWNERS, TopologyGroupTypes.HOSTS].includes(
@@ -444,9 +446,9 @@ export const generateDataModel = (
         return addNode(
           {
             namespace,
-            type: m[`${prefix}K8S_Type`],
-            name: m[`${prefix}K8S_Name`],
-            addr: m[`${prefix}Addr`],
+            type,
+            name,
+            addr,
             host
           },
           parent

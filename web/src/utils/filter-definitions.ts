@@ -300,7 +300,7 @@ export const getFilterDefinitions = (t: TFunction): FilterDefinition[] => {
       ),
       ...peers(
         {
-          id: 'host',
+          id: 'host_address',
           name: t('Node IP'),
           component: FilterComponent.Text,
           category: FilterCategory.Common,
@@ -317,6 +317,21 @@ export const getFilterDefinitions = (t: TFunction): FilterDefinition[] => {
         },
         singleFieldMapping('SrcK8S_HostIP'),
         singleFieldMapping('DstK8S_HostIP')
+      ),
+      ...peers(
+        {
+          id: 'host_name',
+          name: t('Node Name'),
+          component: FilterComponent.Text,
+          category: FilterCategory.Common,
+          getOptions: noOption,
+          validate: k8sNameValidation,
+          hint: k8sNameHint,
+          examples: k8sNameExamples,
+          fieldMatching: {}
+        },
+        singleFieldMapping('SrcK8S_HostName'),
+        singleFieldMapping('DstK8S_HostName')
       ),
       {
         id: 'protocol',

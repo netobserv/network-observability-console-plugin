@@ -76,19 +76,19 @@ export const RecordField: React.FC<{
   const explicitKubeObjContent = (ip: string, port: number, kind?: string, namespace?: string, name?: string) => {
     // Note: namespace is not mandatory here (e.g. Node objects)
     if (name && kind) {
-      return doubleContainer(kubeObjContent(name, kind, namespace), namespaceContent(namespace), false);
+      return doubleContainer(kubeObjContent(name, kind, namespace), kindContent('Namespace', namespace), false);
     } else {
       return ipPortContent(ip, port);
     }
   };
 
-  const namespaceContent = (value?: string) => {
+  const kindContent = (kind: 'Namespace' | 'Node', value?: string) => {
     if (value) {
       return (
         <div className="force-truncate">
-          <ResourceLink className={size} inline={true} kind="Namespace" name={value} />
+          <ResourceLink className={size} inline={true} kind={kind} name={value} />
           <div className="record-field-tooltip">
-            <h4>{t('Namespace')}</h4>
+            <h4>{t(kind)}</h4>
             <span>{value}</span>
           </div>
         </div>
@@ -259,12 +259,21 @@ export const RecordField: React.FC<{
         );
       case ColumnsId.namespace:
         return doubleContainer(
-          namespaceContent(flow.labels.SrcK8S_Namespace),
-          namespaceContent(flow.labels.DstK8S_Namespace)
+          kindContent('Namespace', flow.labels.SrcK8S_Namespace),
+          kindContent('Namespace', flow.labels.DstK8S_Namespace)
         );
       case ColumnsId.srcnamespace:
       case ColumnsId.dstnamespace: {
-        return singleContainer(namespaceContent(value as string));
+        return singleContainer(kindContent('Namespace', value as string));
+      }
+      case ColumnsId.hostname:
+        return doubleContainer(
+          kindContent('Node', flow.fields.SrcK8S_HostName),
+          kindContent('Node', flow.fields.DstK8S_HostName)
+        );
+      case ColumnsId.srchostname:
+      case ColumnsId.dsthostname: {
+        return singleContainer(kindContent('Node', value as string));
       }
       case ColumnsId.port:
         return doubleContainer(

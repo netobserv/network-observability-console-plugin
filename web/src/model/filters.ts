@@ -42,9 +42,12 @@ export type FilterId =
   | 'port'
   | 'src_port'
   | 'dst_port'
-  | 'host'
-  | 'src_host'
-  | 'dst_host'
+  | 'host_address'
+  | 'src_host_address'
+  | 'dst_host_address'
+  | 'host_name'
+  | 'src_host_name'
+  | 'dst_host_name'
   | 'protocol';
 
 export interface FilterDefinition {

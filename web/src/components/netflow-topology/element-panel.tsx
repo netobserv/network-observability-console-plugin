@@ -146,10 +146,10 @@ export const ElementPanelContent: React.FC<{
       function getName(m: TopologyMetrics) {
         switch (options.scope) {
           case TopologyScopes.HOST:
-            const srcNode = m.metric.SrcK8S_HostIP ? m.metric.SrcK8S_HostIP : t('External');
-            const dstNode = m.metric.DstK8S_HostIP ? m.metric.DstK8S_HostIP : t('External');
+            const srcNode = m.metric.SrcK8S_HostName ? m.metric.SrcK8S_HostName : t('External');
+            const dstNode = m.metric.DstK8S_HostName ? m.metric.DstK8S_HostName : t('External');
             return nodeData?.host
-              ? m.metric.SrcK8S_HostIP === nodeData.host
+              ? m.metric.SrcK8S_HostName === nodeData.host
                 ? `${t('To')} ${dstNode}`
                 : `${t('From')} ${srcNode}`
               : `${srcNode} -> ${dstNode}`;
@@ -325,7 +325,7 @@ export const ElementPanelContent: React.FC<{
             dstCount += m.total;
           }
         } else if (data.type === 'Node') {
-          if (m.metric.SrcK8S_HostIP === data.name) {
+          if (m.metric.SrcK8S_HostName === data.name) {
             srcCount += m.total;
           } else {
             dstCount += m.total;
@@ -369,8 +369,8 @@ export const ElementPanelContent: React.FC<{
       switch (options.scope) {
         case TopologyScopes.HOST:
           return (
-            (m.metric.SrcK8S_HostIP === srcData.host && m.metric.DstK8S_HostIP === tgtData.host) ||
-            (m.metric.SrcK8S_HostIP === tgtData.host && m.metric.DstK8S_HostIP === srcData.host)
+            (m.metric.SrcK8S_HostName === srcData.host && m.metric.DstK8S_HostName === tgtData.host) ||
+            (m.metric.SrcK8S_HostName === tgtData.host && m.metric.DstK8S_HostName === srcData.host)
           );
         case TopologyScopes.NAMESPACE:
           return (
@@ -392,7 +392,7 @@ export const ElementPanelContent: React.FC<{
     });
     edgeMetrics.forEach(m => {
       if (
-        (options.scope === TopologyScopes.HOST && m.metric.SrcK8S_HostIP === srcData.host) ||
+        (options.scope === TopologyScopes.HOST && m.metric.SrcK8S_HostName === srcData.host) ||
         m.metric.SrcAddr === srcData.addr
       ) {
         srcCount += m.total;
