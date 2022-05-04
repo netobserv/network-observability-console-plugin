@@ -66,19 +66,27 @@ describe('<NetflowTable />', () => {
     const flows = FlowsSample.slice(0, FlowsSample.length);
     const wrapper = mount(<NetflowTable flows={flows} columns={ShuffledDefaultColumns} {...mocks} />);
     expect(wrapper.find(NetflowTable)).toBeTruthy();
+
+    const timestampIdx = ShuffledDefaultColumns.findIndex(c => c.id === ColumnsId.endtime);
+    let expectedDate = new Date(FlowsSample[2].fields.TimeFlowEnd * 1000);
+    // table should be sorted by date asc by default
+    expect(wrapper.find(NetflowTableRow).find(Td).at(timestampIdx).find('.datetime').at(0).text()).toBe(
+      expectedDate.toDateString() + ' ' + expectedDate.toLocaleTimeString()
+    );
+
     const button = wrapper.findWhere(node => {
       return node.type() === 'button' && node.text() === 'End Time';
     });
-    const timestampIdx = ShuffledDefaultColumns.findIndex(c => c.id === ColumnsId.endtime);
     button.simulate('click');
-    const expectedDate = new Date(FlowsSample[2].fields.TimeFlowEnd * 1000);
-    const expectedDateText = expectedDate.toDateString() + ' ' + expectedDate.toLocaleTimeString();
+    expectedDate = new Date(FlowsSample[1].fields.TimeFlowEnd * 1000);
+    // then should sort date desc on click
     expect(wrapper.find(NetflowTableRow).find(Td).at(timestampIdx).find('.datetime').at(0).text()).toBe(
-      expectedDateText
+      expectedDate.toDateString() + ' ' + expectedDate.toLocaleTimeString()
     );
-    const expectedSrcAddress = FlowsSample[2].fields.SrcAddr;
+
+    const expectedSrcAddress = FlowsSample[1].fields.SrcAddr;
     expect(wrapper.find(NetflowTableRow).at(0).text()).toContain(expectedSrcAddress);
-    const expectedDstAddress = FlowsSample[2].fields.DstAddr;
+    const expectedDstAddress = FlowsSample[1].fields.DstAddr;
     expect(wrapper.find(NetflowTableRow).at(0).text()).toContain(expectedDstAddress);
   });
   it('should render a spinning slide and then the netflow rows', async () => {

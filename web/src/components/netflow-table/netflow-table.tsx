@@ -17,7 +17,7 @@ import * as _ from 'lodash';
 import { Record } from '../../api/ipfix';
 import { NetflowTableHeader } from './netflow-table-header';
 import NetflowTableRow from './netflow-table-row';
-import { Column } from '../../utils/columns';
+import { Column, ColumnsId } from '../../utils/columns';
 import { Size } from '../dropdowns/display-dropdown';
 import { usePrevious } from '../../utils/previous-hook';
 import './netflow-table.css';
@@ -55,6 +55,13 @@ const NetflowTable: React.FC<{
       return;
     }
   }, [flows]);
+
+  //reset sort index & directions to default on columns update
+  React.useEffect(() => {
+    const endTimeColumn = columns.find(c => c.id === ColumnsId.endtime);
+    setActiveSortIndex(endTimeColumn ? columns.indexOf(endTimeColumn) : -1);
+    setActiveSortDirection('asc');
+  }, [columns]);
 
   //get row height from display size
   //these values match netflow-table.css and record-field.css
