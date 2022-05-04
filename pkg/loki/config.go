@@ -11,14 +11,16 @@ type Config struct {
 	URL      *url.URL
 	Timeout  time.Duration
 	TenantID string
+	SkipTLS  bool
 	Labels   map[string]struct{}
 }
 
-func NewConfig(url *url.URL, timeout time.Duration, tenantID string, labels []string) Config {
+func NewConfig(url *url.URL, timeout time.Duration, tenantID string, skipTLS bool, labels []string) Config {
 	return Config{
 		URL:      url,
 		Timeout:  timeout,
 		TenantID: tenantID,
+		SkipTLS:  skipTLS,
 		Labels:   utils.GetMapInterface(labels),
 	}
 }

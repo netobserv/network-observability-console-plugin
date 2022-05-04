@@ -1,6 +1,7 @@
 package httpclient
 
 import (
+	"crypto/tls"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -17,10 +18,15 @@ type httpClient struct {
 	headers map[string][]string
 }
 
-func NewHTTPClient(timeout time.Duration, overrideHeaders map[string][]string) Caller {
+func NewHTTPClient(timeout time.Duration, overrideHeaders map[string][]string, skipTLS bool) Caller {
 	transport := &http.Transport{
 		DialContext:     (&net.Dialer{Timeout: timeout}).DialContext,
 		IdleConnTimeout: timeout,
+	}
+
+	//TODO: add loki tls config https://issues.redhat.com/browse/NETOBSERV-309
+	if skipTLS {
+		transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	}
 
 	return &httpClient{
