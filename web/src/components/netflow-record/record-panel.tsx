@@ -18,7 +18,6 @@ import { defaultTimeRange, flowdirToReporter } from '../../utils/router';
 import { Record } from '../../api/ipfix';
 import { Column, ColumnsId, getColumnGroups } from '../../utils/columns';
 import { TimeRange } from '../../utils/datetime';
-import { getDateMsInSeconds } from '../../utils/duration';
 import { Filter } from '../../model/filters';
 import { findFilter } from '../../utils/filter-definitions';
 import RecordField, { RecordFieldFilter } from './record-field';
@@ -56,7 +55,7 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
     if (record) {
       const value = col.value(record);
       switch (col.id) {
-        case ColumnsId.timestamp:
+        case ColumnsId.endtime:
           return getTimeRangeFilter(col, value);
         case ColumnsId.flowdir:
           return getFlowdirFilter(col, value);
@@ -69,14 +68,14 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
 
   const getTimeRangeFilter = React.useCallback(
     (col: Column, value: unknown): RecordFieldFilter => {
-      const isDelete = typeof range !== 'number' && range.from === getDateMsInSeconds(Number(value));
+      const isDelete = typeof range !== 'number' && range.from === Number(value);
       return {
         onClick: () => {
           if (isDelete) {
             setRange(defaultTimeRange);
           } else {
-            //Filter at exact same date in ms
-            const dateSeconds = getDateMsInSeconds(Number(value));
+            //Filter at exact same date
+            const dateSeconds = Number(value);
             setRange({ from: dateSeconds, to: dateSeconds + 1 });
           }
         },

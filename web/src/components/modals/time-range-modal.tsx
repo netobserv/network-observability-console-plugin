@@ -11,7 +11,8 @@ import {
   isValidDate,
   TimePicker,
   Tooltip,
-  TextVariants
+  TextVariants,
+  TextContent
 } from '@patternfly/react-core';
 import { TimeRange, toISODateString, twentyFourHourTime } from '../../utils/datetime';
 import { getDateMsInSeconds, getDateSInMiliseconds } from '../../utils/duration';
@@ -117,6 +118,11 @@ export const TimeRangeModal: React.FC<TimeRangeModalProps> = ({ id, isModalOpen,
         </div>
       }
     >
+      <TextContent>
+        <Text component={TextVariants.p}>
+          {t('Select a custom time range. Flows are selected based on their End Time value.')}
+        </Text>
+      </TextContent>
       <Flex direction={{ default: 'column' }}>
         <FlexItem>
           <Text component={TextVariants.h4}>{t('From')}</Text>

@@ -9,7 +9,6 @@ export const FlowsSample: Record[] = [
       DstK8S_Namespace: 'default'
     },
     key: 1,
-    timestamp: 1639058287000,
     fields: {
       SrcAddr: '10.244.0.6',
       DstAddr: '10.244.0.7',
@@ -21,7 +20,10 @@ export const FlowsSample: Record[] = [
       Proto: 6,
       Bytes: 76800,
       SrcMac: '8a:f6:69:6b:1a:cc',
-      DstMac: '0a:58:0a:80:00:17'
+      DstMac: '0a:58:0a:80:00:17',
+      TimeFlowEnd: 1639058287,
+      TimeFlowStart: 1639058286,
+      TimeReceived: 1639058290
     }
   },
   {
@@ -31,7 +33,6 @@ export const FlowsSample: Record[] = [
       DstK8S_Namespace: 'netowrk-observability'
     },
     key: 2,
-    timestamp: 1639058286000,
     fields: {
       SrcAddr: '10.244.0.2',
       DstAddr: '10.244.0.3',
@@ -43,7 +44,10 @@ export const FlowsSample: Record[] = [
       Proto: 6,
       Bytes: 7800,
       SrcMac: '8a:f6:69:6b:1a:cc',
-      DstMac: '0a:58:0a:80:00:17'
+      DstMac: '0a:58:0a:80:00:17',
+      TimeFlowEnd: 1639058286,
+      TimeFlowStart: 1639058285,
+      TimeReceived: 1639058290
     }
   },
   {
@@ -53,7 +57,6 @@ export const FlowsSample: Record[] = [
       DstK8S_Namespace: 'default'
     },
     key: 3,
-    timestamp: 1639058288000,
     fields: {
       SrcAddr: '10.244.0.9',
       DstAddr: '10.244.0.2',
@@ -65,7 +68,10 @@ export const FlowsSample: Record[] = [
       Proto: 6,
       Bytes: 76800,
       SrcMac: '8a:f6:69:6b:1a:cc',
-      DstMac: '0a:58:0a:80:00:17'
+      DstMac: '0a:58:0a:80:00:17',
+      TimeFlowEnd: 1639058288,
+      TimeFlowStart: 1639058286,
+      TimeReceived: 1639058291
     }
   }
 ];

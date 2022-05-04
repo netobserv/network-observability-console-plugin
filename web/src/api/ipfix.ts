@@ -1,7 +1,6 @@
 export interface Record {
   labels: Labels;
   key: number;
-  timestamp: number;
   fields: Fields;
 }
 
@@ -36,4 +35,7 @@ export interface Fields {
   Packets: number;
   Proto: number;
   Bytes: number;
+  TimeFlowStart: number;
+  TimeFlowEnd: number;
+  TimeReceived: number;
 }

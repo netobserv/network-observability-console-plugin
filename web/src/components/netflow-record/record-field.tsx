@@ -3,6 +3,7 @@ import { Button, Tooltip } from '@patternfly/react-core';
 import { FilterIcon, TimesIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
+import { formatDurationAboveSecond } from '../../utils/duration';
 import { FlowDirection, Record } from '../../api/ipfix';
 import { Column, ColumnsId, getFullColumnName } from '../../utils/columns';
 import { formatPort } from '../../utils/port';
@@ -104,6 +105,19 @@ export const RecordField: React.FC<{
     }
   };
 
+  const dateTimeContent = (date: Date | undefined) => {
+    const dateText = date?.toDateString() || emptyText();
+    const timeText = date?.toLocaleTimeString() || emptyText();
+    return singleContainer(
+      <div>
+        <div className="datetime">
+          <span>{dateText}</span> <span className="text-muted">{timeText}</span>
+        </div>
+        <div className="record-field-tooltip">{`${dateText} ${timeText}`}</div>
+      </div>
+    );
+  };
+
   const doubleContainer = (child1?: JSX.Element, child2?: JSX.Element, asChild = true) => {
     return (
       <div className={`record-field-flex-container ${asChild ? size : ''}`}>
@@ -129,18 +143,15 @@ export const RecordField: React.FC<{
   const content = (c: Column) => {
     const value = c.value(flow);
     switch (c.id) {
-      case ColumnsId.timestamp: {
-        const dateText = typeof value === 'number' ? new Date(value).toDateString() : emptyText();
-        const timeText = typeof value === 'number' ? new Date(value).toLocaleTimeString() : emptyText();
+      case ColumnsId.collectiontime:
+      case ColumnsId.starttime:
+      case ColumnsId.endtime:
+        return dateTimeContent(typeof value === 'number' ? new Date(value * 1000) : undefined);
+      case ColumnsId.collectionlatency:
+      case ColumnsId.duration:
         return singleContainer(
-          <div>
-            <div className="datetime">
-              <span>{dateText}</span> <span className="text-muted">{timeText}</span>
-            </div>
-            <div className="record-field-tooltip">{`${dateText} ${timeText}`}</div>
-          </div>
+          simpleTextWithTooltip(value !== undefined ? formatDurationAboveSecond(value as number) : '')
         );
-      }
       case ColumnsId.name:
         return doubleContainer(
           kubeObjContent(flow.fields.SrcK8S_Name, flow.fields.SrcK8S_Type, flow.labels.SrcK8S_Namespace),

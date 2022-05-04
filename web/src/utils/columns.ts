@@ -8,7 +8,8 @@ import { compareProtocols } from '../utils/protocol';
 import { compareNumbers, compareStrings } from './base-compare';
 
 export enum ColumnsId {
-  timestamp = 'timestamp',
+  starttime = 'StartTime',
+  endtime = 'EndTime',
   type = 'K8S_Type',
   srctype = 'SrcK8S_Type',
   dsttype = 'DstK8S_Type',
@@ -45,7 +46,10 @@ export enum ColumnsId {
   host = 'K8S_HostIP',
   srchost = 'SrcK8S_HostIP',
   dsthost = 'DstK8S_HostIP',
-  flowdir = 'FlowDirection'
+  flowdir = 'FlowDirection',
+  duration = 'FlowDuration',
+  collectiontime = 'CollectionTime',
+  collectionlatency = 'CollectionLatency'
 }
 
 export interface Column {
@@ -53,7 +57,8 @@ export interface Column {
   ids?: ColumnsId[];
   group?: string;
   name: string;
-  fieldName?: keyof Fields | keyof Labels | 'Timestamp';
+  fieldName?: keyof Fields | keyof Labels;
+  tooltip?: string;
   quickFilter?: FilterId;
   isSelected: boolean;
   value: (flow: Record) => string | number | string[] | number[];
@@ -596,29 +601,76 @@ export const getExtraColumns = (t: TFunction): Column[] => {
       value: f => f.fields.Packets,
       sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
       width: 5
+    },
+    {
+      id: ColumnsId.duration,
+      name: t('Duration'),
+      tooltip: t('Time elapsed between flow Start Time and End Time.'),
+      isSelected: false,
+      value: f => f.fields.TimeFlowEnd - f.fields.TimeFlowStart,
+      sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
+      width: 5
+    },
+    {
+      id: ColumnsId.collectiontime,
+      name: t('Collection Time'),
+      tooltip: t('Reception time of the flow by the flow collector.'),
+      fieldName: 'TimeReceived',
+      isSelected: false,
+      value: f => f.fields.TimeReceived,
+      sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
+      width: 15
+    },
+    {
+      id: ColumnsId.collectionlatency,
+      name: t('Collection Latency'),
+      tooltip: t('Time elapsed between flow End Time and Collection Time.'),
+      isSelected: false,
+      value: f => f.fields.TimeReceived - f.fields.TimeFlowEnd,
+      sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
+      width: 5
     }
   ];
 };
 
 export const getDefaultColumns = (t: TFunction, withCommonFields = true, withConcatenatedFields = true): Column[] => {
-  const timestamp: Column = {
-    id: ColumnsId.timestamp,
-    name: t('Date & time'),
-    fieldName: 'Timestamp',
-    isSelected: true,
-    value: f => f.timestamp,
-    sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
-    width: 15
-  };
+  const timeCols: Column[] = [
+    {
+      id: ColumnsId.starttime,
+      name: t('Start Time'),
+      tooltip: t(
+        // eslint-disable-next-line max-len
+        'Time of the first packet observed per flow. Unlike End Time, it is not used in queries to select flows in an interval.'
+      ),
+      fieldName: 'TimeFlowStart',
+      isSelected: false,
+      value: f => f.fields.TimeFlowStart,
+      sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
+      width: 15
+    },
+    {
+      id: ColumnsId.endtime,
+      name: t('End Time'),
+      tooltip: t(
+        // eslint-disable-next-line max-len
+        'Time of the last packet observed per flow. This is what is used in queries to select flows in an interval.'
+      ),
+      fieldName: 'TimeFlowEnd',
+      isSelected: true,
+      value: f => f.fields.TimeFlowEnd,
+      sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
+      width: 15
+    }
+  ];
 
   if (withCommonFields) {
     return [
-      timestamp,
+      ...timeCols,
       ...getSrcDstColumns(t, withConcatenatedFields),
       ...getCommonColumns(t, withConcatenatedFields),
       ...getExtraColumns(t)
     ];
   } else {
-    return [timestamp, ...getSrcDstColumns(t, withConcatenatedFields), ...getExtraColumns(t)];
+    return [...timeCols, ...getSrcDstColumns(t, withConcatenatedFields), ...getExtraColumns(t)];
   }
 };

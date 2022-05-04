@@ -9,6 +9,7 @@ import { NetflowTableHeader } from '../netflow-table-header';
 import { ShuffledDefaultColumns } from '../../__tests-data__/columns';
 import { FlowsSample } from '../../__tests-data__/flows';
 import { Size } from '../../dropdowns/display-dropdown';
+import { ColumnsId } from '../../../utils/columns';
 
 const errorStateQuery = `EmptyState[data-test="error-state"]`;
 const loadingContentsQuery = `Bullseye[data-test="loading-contents"]`;
@@ -66,12 +67,15 @@ describe('<NetflowTable />', () => {
     const wrapper = mount(<NetflowTable flows={flows} columns={ShuffledDefaultColumns} {...mocks} />);
     expect(wrapper.find(NetflowTable)).toBeTruthy();
     const button = wrapper.findWhere(node => {
-      return node.type() === 'button' && node.text() === 'Date & time';
+      return node.type() === 'button' && node.text() === 'End Time';
     });
+    const timestampIdx = ShuffledDefaultColumns.findIndex(c => c.id === ColumnsId.endtime);
     button.simulate('click');
-    const expectedDateText =
-      new Date(FlowsSample[2].timestamp).toDateString() + ' ' + new Date(FlowsSample[2].timestamp).toLocaleTimeString();
-    expect(wrapper.find(NetflowTableRow).find(Td).find('.datetime').at(0).text()).toBe(expectedDateText);
+    const expectedDate = new Date(FlowsSample[2].fields.TimeFlowEnd * 1000);
+    const expectedDateText = expectedDate.toDateString() + ' ' + expectedDate.toLocaleTimeString();
+    expect(wrapper.find(NetflowTableRow).find(Td).at(timestampIdx).find('.datetime').at(0).text()).toBe(
+      expectedDateText
+    );
     const expectedSrcAddress = FlowsSample[2].fields.SrcAddr;
     expect(wrapper.find(NetflowTableRow).at(0).text()).toContain(expectedSrcAddress);
     const expectedDstAddress = FlowsSample[2].fields.DstAddr;
