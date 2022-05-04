@@ -1,3 +1,4 @@
+import { RecordsResult } from '../../api/loki';
 import { FlowDirection, Record } from '../../api/ipfix';
 
 export const FlowsSample: Record[] = [
@@ -68,3 +69,11 @@ export const FlowsSample: Record[] = [
     }
   }
 ];
+
+export const FlowsResultSample: RecordsResult = {
+  records: FlowsSample,
+  stats: {
+    limitReached: false,
+    numQueries: 1
+  }
+};

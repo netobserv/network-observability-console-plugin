@@ -68,7 +68,22 @@ func executeLokiQuery(flowsURL string, lokiClient httpclient.Caller) ([]byte, in
 	return resp, http.StatusOK, nil
 }
 
-func fetchParallel(lokiClient httpclient.Caller, queries []string) ([]byte, int, error) {
+func fetchSingle(lokiClient httpclient.Caller, flowsURL string, merger loki.Merger) (int, error) {
+	resp, code, err := executeLokiQuery(flowsURL, lokiClient)
+	if err != nil {
+		return code, err
+	}
+	var qr model.QueryResponse
+	if err := json.Unmarshal(resp, &qr); err != nil {
+		return http.StatusInternalServerError, err
+	}
+	if _, err := merger.Add(qr.Data); err != nil {
+		return http.StatusInternalServerError, err
+	}
+	return code, nil
+}
+
+func fetchParallel(lokiClient httpclient.Caller, queries []string, merger loki.Merger) (int, error) {
 	// Run queries in parallel, then aggregate them
 	resChan := make(chan model.QueryResponse, len(queries))
 	errChan := make(chan errorWithCode, len(queries))
@@ -98,53 +113,14 @@ func fetchParallel(lokiClient httpclient.Caller, queries []string) ([]byte, int,
 	close(errChan)
 
 	for errWithCode := range errChan {
-		return nil, errWithCode.code, errWithCode.err
+		return errWithCode.code, errWithCode.err
 	}
 
 	// Aggregate results
-	first := true
-	var resp model.QueryResponse
-	var streamMerger *loki.StreamMerger
-	var matrixMerger *loki.MatrixMerger
 	for r := range resChan {
-		//TODO: resp.Data.Stats are incorrect doing that
-		if first {
-			first = false
-			resp = r
-		}
-
-		if streams, ok := r.Data.Result.(model.Streams); ok {
-			if streamMerger == nil {
-				streamMerger = loki.NewStreamMerger()
-			}
-			streamMerger.AddStreams(streams)
-		} else if matrix, ok := r.Data.Result.(model.Matrix); ok {
-			if matrixMerger == nil {
-				matrixMerger = loki.NewMatrixMerger()
-			}
-			matrixMerger.AddMatrix(matrix)
-		} else {
-			return nil, http.StatusInternalServerError, fmt.Errorf("loki returned an unexpected type: %T", r.Data.Result)
+		if _, err := merger.Add(r.Data); err != nil {
+			return http.StatusInternalServerError, err
 		}
 	}
-
-	if first {
-		return []byte{}, http.StatusNoContent, nil
-	}
-
-	// Encode back to json
-	if streamMerger != nil {
-		resp.Data.Result = streamMerger.GetStreams()
-	} else if matrixMerger != nil {
-		resp.Data.Result = matrixMerger.GetMatrix()
-	} else {
-		return nil, http.StatusInternalServerError, fmt.Errorf("cannot merge result. Data should either be stream or matrix")
-	}
-
-	encoded, err := json.Marshal(resp)
-	if err != nil {
-		return nil, http.StatusInternalServerError, err
-	}
-
-	return encoded, http.StatusOK, nil
+	return http.StatusOK, nil
 }

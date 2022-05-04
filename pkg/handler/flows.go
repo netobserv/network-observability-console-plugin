@@ -10,6 +10,7 @@ import (
 
 	"github.com/netobserv/network-observability-console-plugin/pkg/httpclient"
 	"github.com/netobserv/network-observability-console-plugin/pkg/loki"
+	"github.com/netobserv/network-observability-console-plugin/pkg/model"
 )
 
 const (
@@ -66,6 +67,20 @@ func getStartTime(params url.Values) (string, error) {
 	return start, nil
 }
 
+// getLimit returns limit as string (used for logQL) and as int (used to check if reached)
+func getLimit(params url.Values) (string, int, error) {
+	limit := params.Get(limitKey)
+	var reqLimit int
+	if len(limit) > 0 {
+		l, err := strconv.ParseInt(limit, 10, 64)
+		if err != nil {
+			return "", 0, errors.New("Could not parse limit: " + err.Error())
+		}
+		reqLimit = int(l)
+	}
+	return limit, reqLimit, nil
+}
+
 func GetFlows(cfg loki.Config) func(w http.ResponseWriter, r *http.Request) {
 	lokiClient := newLokiClient(&cfg)
 
@@ -79,17 +94,20 @@ func GetFlows(cfg loki.Config) func(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		writeRawJSON(w, http.StatusOK, flows)
+		writeJSON(w, http.StatusOK, flows)
 	}
 }
 
-func getFlows(cfg loki.Config, client httpclient.Caller, params url.Values) ([]byte, int, error) {
+func getFlows(cfg loki.Config, client httpclient.Caller, params url.Values) (*model.AggregatedQueryResponse, int, error) {
 	start, err := getStartTime(params)
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
 	end := params.Get(endTimeKey)
-	limit := params.Get(limitKey)
+	limit, reqLimit, err := getLimit(params)
+	if err != nil {
+		return nil, http.StatusBadRequest, err
+	}
 	reporter := params.Get(reporterKey)
 	rawFilters := params.Get(filtersKey)
 	filterGroups, err := parseFilters(rawFilters)
@@ -97,7 +115,7 @@ func getFlows(cfg loki.Config, client httpclient.Caller, params url.Values) ([]b
 		return nil, http.StatusBadRequest, err
 	}
 
-	var rawJSON []byte
+	merger := loki.NewStreamMerger(reqLimit)
 	if len(filterGroups) > 1 {
 		// match any, and multiple filters => run in parallel then aggregate
 		var queries []string
@@ -109,11 +127,10 @@ func getFlows(cfg loki.Config, client httpclient.Caller, params url.Values) ([]b
 			}
 			queries = append(queries, qb.Build())
 		}
-		res, code, err := fetchParallel(client, queries)
+		code, err := fetchParallel(client, queries, merger)
 		if err != nil {
 			return nil, code, errors.New("Error while fetching flows from Loki: " + err.Error())
 		}
-		rawJSON = res
 	} else {
 		// else, run all at once
 		qb := loki.NewFlowQueryBuilder(&cfg, start, end, limit, reporter)
@@ -124,13 +141,13 @@ func getFlows(cfg loki.Config, client httpclient.Caller, params url.Values) ([]b
 			}
 		}
 		query := qb.Build()
-		resp, code, err := executeLokiQuery(query, client)
+		code, err := fetchSingle(client, query, merger)
 		if err != nil {
 			return nil, code, errors.New("Error while fetching flows from Loki: " + err.Error())
 		}
-		rawJSON = resp
 	}
 
-	hlog.Tracef("GetFlows raw response: %v", string(rawJSON))
-	return rawJSON, http.StatusOK, nil
+	qr := merger.Get()
+	hlog.Tracef("GetFlows response: %v", qr)
+	return qr, http.StatusOK, nil
 }

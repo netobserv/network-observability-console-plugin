@@ -29,7 +29,7 @@ import {
   MetricFunction,
   MetricType
 } from '../model/flow-query';
-import { TopologyMetrics } from '../api/loki';
+import { Stats, TopologyMetrics } from '../api/loki';
 import { DefaultOptions, LayoutName, TopologyOptions } from '../model/topology';
 import { Column, getDefaultColumns } from '../utils/columns';
 import { TimeRange } from '../utils/datetime';
@@ -95,6 +95,7 @@ export const NetflowTraffic: React.FC<{
 
   const [loading, setLoading] = React.useState(true);
   const [flows, setFlows] = React.useState<Record[]>([]);
+  const [stats, setStats] = React.useState<Stats | undefined>(undefined);
   const [layout, setLayout] = React.useState<LayoutName>(LayoutName.ColaNoForce);
   const [topologyOptions, setTopologyOptions] = React.useState<TopologyOptions>(DefaultOptions);
   const [metrics, setMetrics] = React.useState<TopologyMetrics[]>([]);
@@ -197,7 +198,10 @@ export const NetflowTraffic: React.FC<{
     switch (selectedViewId) {
       case 'table':
         getFlows(fq)
-          .then(setFlows)
+          .then(result => {
+            setFlows(result.records);
+            setStats(result.stats);
+          })
           .catch(err => {
             setFlows([]);
             setError(getHTTPErrorDetails(err));
@@ -208,7 +212,10 @@ export const NetflowTraffic: React.FC<{
         break;
       case 'topology':
         getTopology(fq, range)
-          .then(setMetrics)
+          .then(result => {
+            setMetrics(result.metrics);
+            setStats(result.stats);
+          })
           .catch(err => {
             setMetrics([]);
             setError(getHTTPErrorDetails(err));
@@ -405,8 +412,8 @@ export const NetflowTraffic: React.FC<{
         <SummaryPanel
           id="summaryPanel"
           flows={flows}
+          stats={stats}
           range={range}
-          limit={limit}
           onClose={() => setShowQuerySummary(false)}
         />
       );
@@ -512,7 +519,7 @@ export const NetflowTraffic: React.FC<{
       <QuerySummary
         flows={flows}
         range={range}
-        limit={limit}
+        stats={stats}
         toggleQuerySummary={() => onToggleQuerySummary(!isShowQuerySummary)}
       />
       <TimeRangeModal

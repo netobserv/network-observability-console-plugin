@@ -6,14 +6,15 @@ import { Record } from '../../api/ipfix';
 import { ExclamationTriangleIcon } from '@patternfly/react-icons';
 import './query-summary.css';
 import { bytesPerSeconds, humanFileSize } from '../../utils/bytes';
+import { Stats } from '../../api/loki';
 
 export const QuerySummaryContent: React.FC<{
   flows: Record[];
+  limitReached: boolean;
   range: number | TimeRange;
-  limit: number;
   direction: 'row' | 'column';
   className?: string;
-}> = ({ flows, range, limit, direction, className }) => {
+}> = ({ flows, limitReached, range, direction, className }) => {
   const { t } = useTranslation('plugin__network-observability-plugin');
 
   let rangeInSeconds: number;
@@ -23,7 +24,6 @@ export const QuerySummaryContent: React.FC<{
     rangeInSeconds = (range.to - range.from) / 1000;
   }
 
-  const limitReached = limit === flows.length;
   const totalBytes = flows.map(f => f.fields.Bytes).reduce((a, b) => a + b, 0);
 
   return (
@@ -75,14 +75,14 @@ export const QuerySummaryContent: React.FC<{
 
 export const QuerySummary: React.FC<{
   flows: Record[] | undefined;
+  stats: Stats | undefined;
   range: number | TimeRange;
-  limit: number;
   toggleQuerySummary: () => void;
-}> = ({ flows, range, limit, toggleQuerySummary }) => {
-  if (flows && flows.length) {
+}> = ({ flows, stats, range, toggleQuerySummary }) => {
+  if (flows && flows.length && stats) {
     return (
       <Card id="query-summary" isSelectable onClick={toggleQuerySummary}>
-        <QuerySummaryContent direction="row" flows={flows} range={range} limit={limit} />
+        <QuerySummaryContent direction="row" flows={flows} limitReached={stats.limitReached} range={range} />
       </Card>
     );
   }

@@ -11,15 +11,6 @@ import (
 	"github.com/netobserv/network-observability-console-plugin/pkg/model"
 )
 
-func writeRawJSON(w http.ResponseWriter, code int, payload []byte) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(code)
-	_, err := w.Write(payload)
-	if err != nil {
-		hlog.Errorf("Error while responding raw JSON: %v", err)
-	}
-}
-
 func writeJSON(w http.ResponseWriter, code int, payload interface{}) {
 	response, err := json.Marshal(payload)
 	if err != nil {
@@ -36,15 +27,8 @@ func writeJSON(w http.ResponseWriter, code int, payload interface{}) {
 	}
 }
 
-func writeCSV(w http.ResponseWriter, code int, payload []byte, columns []string) {
-	var qr model.QueryResponse
-	err := json.Unmarshal(payload, &qr)
-	if err != nil {
-		writeError(w, http.StatusInternalServerError, fmt.Sprintf("Unknown error from Loki - cannot unmarshal (code: %d resp: %s)", code, payload))
-		return
-	}
-
-	data, err := csvdata.GetCSVData(&qr, columns)
+func writeCSV(w http.ResponseWriter, code int, qr *model.AggregatedQueryResponse, columns []string) {
+	data, err := csvdata.GetCSVData(qr, columns)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, err.Error())
 		return

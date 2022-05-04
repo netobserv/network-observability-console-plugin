@@ -7,6 +7,7 @@ import (
 
 	"github.com/netobserv/network-observability-console-plugin/pkg/httpclient"
 	"github.com/netobserv/network-observability-console-plugin/pkg/loki"
+	"github.com/netobserv/network-observability-console-plugin/pkg/model"
 )
 
 const (
@@ -24,11 +25,11 @@ func GetTopology(cfg loki.Config) func(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		writeRawJSON(w, http.StatusOK, flows)
+		writeJSON(w, http.StatusOK, flows)
 	}
 }
 
-func getTopologyFlows(cfg loki.Config, client httpclient.Caller, params url.Values) ([]byte, int, error) {
+func getTopologyFlows(cfg loki.Config, client httpclient.Caller, params url.Values) (*model.AggregatedQueryResponse, int, error) {
 	hlog.Debugf("GetTopology query params: %s", params)
 
 	start, err := getStartTime(params)
@@ -36,7 +37,10 @@ func getTopologyFlows(cfg loki.Config, client httpclient.Caller, params url.Valu
 		return nil, http.StatusBadRequest, err
 	}
 	end := params.Get(endTimeKey)
-	limit := params.Get(limitKey)
+	limit, reqLimit, err := getLimit(params)
+	if err != nil {
+		return nil, http.StatusBadRequest, err
+	}
 	metricFunction := params.Get(metricFunctionKey)
 	metricType := params.Get(metricTypeKey)
 	reporter := params.Get(reporterKey)
@@ -46,7 +50,7 @@ func getTopologyFlows(cfg loki.Config, client httpclient.Caller, params url.Valu
 		return nil, http.StatusBadRequest, err
 	}
 
-	var rawJSON []byte
+	merger := loki.NewMatrixMerger(reqLimit)
 	if len(filterGroups) > 1 {
 		// match any, and multiple filters => run in parallel then aggregate
 		var queries []string
@@ -57,11 +61,10 @@ func getTopologyFlows(cfg loki.Config, client httpclient.Caller, params url.Valu
 			}
 			queries = append(queries, query)
 		}
-		res, code, err := fetchParallel(client, queries)
+		code, err := fetchParallel(client, queries, merger)
 		if err != nil {
 			return nil, code, errors.New("Error while fetching flows from Loki: " + err.Error())
 		}
-		rawJSON = res
 	} else {
 		// else, run all at once
 		var filters [][]string
@@ -72,15 +75,15 @@ func getTopologyFlows(cfg loki.Config, client httpclient.Caller, params url.Valu
 		if err != nil {
 			return nil, code, err
 		}
-		resp, code, err := executeLokiQuery(query, client)
+		code, err = fetchSingle(client, query, merger)
 		if err != nil {
 			return nil, code, errors.New("Error while fetching flows from Loki: " + err.Error())
 		}
-		rawJSON = resp
 	}
 
-	hlog.Tracef("GetTopology raw response: %v", rawJSON)
-	return rawJSON, http.StatusOK, nil
+	qr := merger.Get()
+	hlog.Tracef("GetTopology response: %v", qr)
+	return qr, http.StatusOK, nil
 }
 
 func buildTopologyQuery(cfg *loki.Config, filters [][]string, start, end, limit, metricFunction, metricType, reporter string) (string, int, error) {

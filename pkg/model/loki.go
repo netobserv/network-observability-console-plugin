@@ -15,6 +15,20 @@ type QueryResponse struct {
 	Data   QueryResponseData `json:"data"`
 }
 
+// AggregatedQueryResponse represents the modified json response to one or more logQL queries
+type AggregatedQueryResponse struct {
+	ResultType ResultType      `json:"resultType"`
+	Result     ResultValue     `json:"result"`
+	Stats      AggregatedStats `json:"stats"`
+}
+
+// AggregatedStats represents the stats to one or more logQL queries
+type AggregatedStats struct {
+	NumQueries   int           `json:"numQueries"`
+	LimitReached bool          `json:"limitReached"`
+	QueriesStats []interface{} `json:"queriesStats"`
+}
+
 // ResultType holds the type of the result
 type ResultType string
 
@@ -35,6 +49,7 @@ type ResultValue interface {
 type QueryResponseData struct {
 	ResultType ResultType  `json:"resultType"`
 	Result     ResultValue `json:"result"`
+	Stats      interface{} `json:"-"`
 }
 
 // Type implements the promql.Value interface
@@ -66,14 +81,39 @@ type Entry struct {
 
 // UnmarshalJSON implements the json.Unmarshaler interface.
 func (q *QueryResponseData) UnmarshalJSON(data []byte) error {
+	t, result, stats, err := unmarshalQueryResponseData(data)
+	if err != nil {
+		return err
+	}
+	q.ResultType = t
+	q.Result = result
+	q.Stats = stats
+
+	return nil
+}
+
+// UnmarshalJSON implements the json.Unmarshaler interface.
+func (q *AggregatedQueryResponse) UnmarshalJSON(data []byte) error {
+	t, result, _, err := unmarshalQueryResponseData(data)
+	if err != nil {
+		return err
+	}
+	q.ResultType = t
+	q.Result = result
+
+	return nil
+}
+
+func unmarshalQueryResponseData(data []byte) (ResultType, ResultValue, interface{}, error) {
 	unmarshal := struct {
 		Type   ResultType      `json:"resultType"`
 		Result json.RawMessage `json:"result"`
+		Stats  interface{}     `json:"stats"`
 	}{}
 
 	err := json.Unmarshal(data, &unmarshal)
 	if err != nil {
-		return err
+		return "", nil, nil, err
 	}
 
 	var value ResultValue
@@ -97,17 +137,14 @@ func (q *QueryResponseData) UnmarshalJSON(data []byte) error {
 		err = json.Unmarshal(unmarshal.Result, &v)
 		value = v
 	default:
-		return fmt.Errorf("unknown type: %s", unmarshal.Type)
+		return "", nil, nil, fmt.Errorf("unknown type: %s", unmarshal.Type)
 	}
 
 	if err != nil {
-		return err
+		return "", nil, nil, err
 	}
 
-	q.ResultType = unmarshal.Type
-	q.Result = value
-
-	return nil
+	return unmarshal.Type, value, unmarshal.Stats, nil
 }
 
 // MarshalJSON implements the json.Marshaler interface.

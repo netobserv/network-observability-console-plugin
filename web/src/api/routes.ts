@@ -1,19 +1,30 @@
 import axios from 'axios';
 import { buildExportQuery } from '../model/export-query';
 import { FlowQuery, MetricFunction } from '../model/flow-query';
-import { Record } from './ipfix';
-import { calculateMatrixTotals, parseStream, StreamResult, TopologyMetrics } from './loki';
+import {
+  AggregatedQueryResponse,
+  calculateMatrixTotals,
+  parseStream,
+  RecordsResult,
+  StreamResult,
+  TopologyMetrics,
+  TopologyResult
+} from './loki';
 import { Config, defaultConfig } from '../model/config';
 import { TimeRange } from '../utils/datetime';
 
 const host = '/api/proxy/plugin/network-observability-plugin/backend/';
 
-export const getFlows = (params: FlowQuery): Promise<Record[]> => {
+export const getFlows = (params: FlowQuery): Promise<RecordsResult> => {
   return axios.get(host + '/api/loki/flows', { params }).then(r => {
     if (r.status >= 400) {
       throw new Error(`${r.statusText} [code=${r.status}]`);
     }
-    return (r.data.data.result as StreamResult[]).flatMap(r => parseStream(r));
+    const aggQR: AggregatedQueryResponse = r.data;
+    return {
+      records: (aggQR.result as StreamResult[]).flatMap(r => parseStream(r)),
+      stats: aggQR.stats
+    };
   });
 };
 
@@ -43,14 +54,16 @@ export const getResources = (namespace: string, kind: string): Promise<string[]>
   });
 };
 
-export const getTopology = (params: FlowQuery, range: number | TimeRange): Promise<TopologyMetrics[]> => {
+export const getTopology = (params: FlowQuery, range: number | TimeRange): Promise<TopologyResult> => {
   return axios.get(host + '/api/loki/topology', { params }).then(r => {
     if (r.status >= 400) {
       throw new Error(`${r.statusText} [code=${r.status}]`);
     }
-    return (r.data.data.result as TopologyMetrics[]).flatMap(r =>
+    const aggQR: AggregatedQueryResponse = r.data;
+    const metrics = (aggQR.result as TopologyMetrics[]).flatMap(r =>
       calculateMatrixTotals(r, params.function as MetricFunction, range)
     );
+    return { metrics: metrics, stats: aggQR.stats };
   });
 };
 

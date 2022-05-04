@@ -9,7 +9,10 @@ describe('<SummaryPanel />', () => {
     onClose: jest.fn(),
     flows: FlowsSample,
     range: 300,
-    limit: 100,
+    stats: {
+      limitReached: false,
+      numQueries: 1
+    },
     id: 'summary-panel'
   };
 

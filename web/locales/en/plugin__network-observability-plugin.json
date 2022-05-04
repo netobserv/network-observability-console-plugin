@@ -31,6 +31,7 @@
   "Reporter node": "Reporter node",
   "Whether each query result has to match all the filters or just any of them": "Whether each query result has to match all the filters or just any of them",
   "Match filters": "Match filters",
+  "Limit for internal backend queries. Depending on the matching and filter settings, several queries can be performed under the cover, each with this limit set, resulting in more results after aggregation.": "Limit for internal backend queries. Depending on the matching and filter settings, several queries can be performed under the cover, each with this limit set, resulting in more results after aggregation.",
   "Limit": "Limit",
   "Query Options": "Query Options",
   "Refresh off": "Refresh off",

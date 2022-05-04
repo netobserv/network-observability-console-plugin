@@ -4,15 +4,16 @@ import (
 	"testing"
 	"time"
 
+	pmodel "github.com/prometheus/common/model"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/netobserv/network-observability-console-plugin/pkg/model"
-	pmodel "github.com/prometheus/common/model"
 )
 
 func TestMatrixMerge(t *testing.T) {
 	now := pmodel.Now()
-	merger := NewMatrixMerger()
+	merger := NewMatrixMerger(100)
 	baseline := pmodel.SampleStream{
 		Metric: pmodel.Metric{
 			"foo": "bar",
@@ -22,10 +23,11 @@ func TestMatrixMerge(t *testing.T) {
 			Value:     pmodel.SampleValue(42),
 		}},
 	}
-	merger.AddMatrix(model.Matrix{baseline})
+	_, err := merger.Add(qrData(model.Matrix{baseline}))
+	require.NoError(t, err)
 
 	// Different metric, different value pair => no dedup
-	merged := merger.AddMatrix(model.Matrix{{
+	merged, err := merger.Add(qrData(model.Matrix{{
 		Metric: pmodel.Metric{
 			"foo":  "bar",
 			"foo2": "bar2",
@@ -37,13 +39,14 @@ func TestMatrixMerge(t *testing.T) {
 			Timestamp: now,
 			Value:     pmodel.SampleValue(12),
 		}},
-	}})
+	}}))
+	require.NoError(t, err)
 	assert.Len(t, merged, 2)
-	assert.Len(t, merged[0].Values, 2)
-	assert.Len(t, merged[1].Values, 1)
+	assert.Len(t, merged.(model.Matrix)[0].Values, 2)
+	assert.Len(t, merged.(model.Matrix)[1].Values, 1)
 
 	// Same metrics in different order => no dedup
-	merged = merger.AddMatrix(model.Matrix{{
+	merged, err = merger.Add(qrData(model.Matrix{{
 		Metric: pmodel.Metric{
 			"foo2": "bar2",
 			"foo":  "bar",
@@ -61,25 +64,27 @@ func TestMatrixMerge(t *testing.T) {
 			"foo2": "bar2",
 		},
 		Values: baseline.Values,
-	}})
+	}}))
+	require.NoError(t, err)
 	assert.Len(t, merged, 2)
-	assert.Len(t, merged[0].Values, 2)
-	assert.Len(t, merged[1].Values, 1)
+	assert.Len(t, merged.(model.Matrix)[0].Values, 2)
+	assert.Len(t, merged.(model.Matrix)[1].Values, 1)
 
 	// Different timestamp => no dedup
-	merged = merger.AddMatrix(model.Matrix{{
+	merged, err = merger.Add(qrData(model.Matrix{{
 		Metric: baseline.Metric,
 		Values: []pmodel.SamplePair{{
 			Timestamp: now.Add(time.Hour),
 			Value:     pmodel.SampleValue(12),
 		}},
-	}})
+	}}))
+	require.NoError(t, err)
 	assert.Len(t, merged, 2)
-	assert.Len(t, merged[0].Values, 3)
-	assert.Len(t, merged[1].Values, 1)
+	assert.Len(t, merged.(model.Matrix)[0].Values, 3)
+	assert.Len(t, merged.(model.Matrix)[1].Values, 1)
 
 	// some dedup
-	merged = merger.AddMatrix(model.Matrix{{
+	merged, err = merger.Add(qrData(model.Matrix{{
 		// changed value => no dedup
 		Metric: baseline.Metric,
 		Values: []pmodel.SamplePair{{
@@ -103,10 +108,77 @@ func TestMatrixMerge(t *testing.T) {
 	},
 		// baseline itself => must be ignored
 		baseline,
-	})
+	}))
 
 	// Different timestamp
+	require.NoError(t, err)
 	assert.Len(t, merged, 2)
-	assert.Len(t, merged[0].Values, 6)
-	assert.Len(t, merged[1].Values, 1)
+	assert.Len(t, merged.(model.Matrix)[0].Values, 6)
+	assert.Len(t, merged.(model.Matrix)[1].Values, 1)
+}
+
+func TestMatrixLimitReached(t *testing.T) {
+	now := pmodel.Now()
+	merger := NewMatrixMerger(2)
+
+	// Single entry => should not reach limit
+	first := pmodel.SampleStream{
+		Metric: pmodel.Metric{
+			"foo": "bar",
+		},
+		Values: []pmodel.SamplePair{{
+			Timestamp: now,
+			Value:     pmodel.SampleValue(42),
+		}},
+	}
+	_, err := merger.Add(qrData(model.Matrix{first}))
+	require.NoError(t, err)
+	assert.False(t, merger.limitReached)
+
+	// Another single entry => limit still not reached (even if total is 2)
+	_, err = merger.Add(qrData(model.Matrix{pmodel.SampleStream{
+		Metric: pmodel.Metric{
+			"foo": "bar",
+		},
+		Values: []pmodel.SamplePair{{
+			Timestamp: now,
+			Value:     pmodel.SampleValue(42),
+		}},
+	}}))
+	require.NoError(t, err)
+	assert.False(t, merger.limitReached)
+
+	// 2 entries => limit reached
+	_, err = merger.Add(qrData(model.Matrix{pmodel.SampleStream{
+		Metric: pmodel.Metric{
+			"foo": "bar",
+		},
+		Values: []pmodel.SamplePair{{
+			Timestamp: now,
+			Value:     pmodel.SampleValue(42),
+		}},
+	}, pmodel.SampleStream{
+		Metric: pmodel.Metric{
+			"foo": "baz",
+		},
+		Values: []pmodel.SamplePair{{
+			Timestamp: now,
+			Value:     pmodel.SampleValue(42),
+		}},
+	}}))
+	require.NoError(t, err)
+	assert.True(t, merger.limitReached)
+
+	// Another single entry => limit still reached
+	_, err = merger.Add(qrData(model.Matrix{pmodel.SampleStream{
+		Metric: pmodel.Metric{
+			"foo": "bar",
+		},
+		Values: []pmodel.SamplePair{{
+			Timestamp: now,
+			Value:     pmodel.SampleValue(42),
+		}},
+	}}))
+	require.NoError(t, err)
+	assert.True(t, merger.limitReached)
 }
