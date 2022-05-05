@@ -27,6 +27,7 @@ import { formatDuration, getDateSInMiliseconds } from '../../utils/duration';
 import { Filter } from '../../model/filters';
 import { getFilterFullName } from '../filters/filters-helper';
 import './export-modal.css';
+import { LOCAL_STORAGE_EXPORT_COLS_KEY, useLocalStorage } from '../../utils/local-storage-hook';
 
 export interface ExportModalProps {
   isModalOpen: boolean;
@@ -48,11 +49,21 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   filters
 }) => {
   const { t } = useTranslation('plugin__network-observability-plugin');
-  const [selectedColumns, setSelectedColumns] = React.useState<Column[]>([]);
+  const [selectedColumns, setSelectedColumns] = useLocalStorage<Column[]>(
+    LOCAL_STORAGE_EXPORT_COLS_KEY,
+    //select all columns by default
+    columns.map(c => ({ ...c, isSelected: true })),
+    {
+      id: 'id',
+      criteria: 'isSelected'
+    }
+  );
   const [isSaveDisabled, setSaveDisabled] = React.useState<boolean>(true);
-
   const [isAllSelected, setAllSelected] = React.useState<boolean>(false);
-  const [isExportAll, setExportAll] = React.useState<boolean>(true);
+  const [isExportAll, setExportAll] = React.useState<boolean>(
+    //show columns details if not all columns are selected
+    selectedColumns.filter(c => c.isSelected).length === columns.length
+  );
   const options = getTimeRangeOptions(t);
 
   const getFieldNames = React.useCallback(() => {
@@ -96,10 +107,6 @@ export const ExportModal: React.FC<ExportModalProps> = ({
     });
     setSelectedColumns(result);
   }, [selectedColumns, setSelectedColumns, isAllSelected]);
-
-  React.useEffect(() => {
-    setSelectedColumns(_.cloneDeep(columns));
-  }, [columns]);
 
   React.useEffect(() => {
     let allSelected = true;

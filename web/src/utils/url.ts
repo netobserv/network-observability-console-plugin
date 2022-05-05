@@ -1,4 +1,5 @@
 import { createBrowserHistory } from 'history';
+import _ from 'lodash';
 
 export const netflowTrafficPath = '/netflow-traffic';
 
@@ -19,16 +20,29 @@ export type URLParams = { [k in URLParam]?: unknown };
 
 export const history = createBrowserHistory();
 
+export const hasEmptyParams = () => {
+  return _.isEmpty(window.location.search);
+};
+
+export const getURLParams = () => {
+  return new URLSearchParams(window.location.search);
+};
+
 export const getURLParam = (arg: URLParam) => {
-  return new URLSearchParams(window.location.search).get(arg);
+  return getURLParams().get(arg);
 };
 
 export const getURLParamAsNumber = (arg: URLParam) => {
-  const q = new URLSearchParams(window.location.search).get(arg);
+  const q = getURLParam(arg);
   if (q && !isNaN(Number(q))) {
     return Number(q);
   }
   return null;
+};
+
+export const setURLParams = (params: string) => {
+  const url = new URL(window.location.href);
+  history.push(`${url.pathname}?${params}${url.hash}`);
 };
 
 export const setURLParam = (param: URLParam, value: string) => {
@@ -47,6 +61,6 @@ export const removeURLParam = (param: URLParam) => {
   }
 };
 
-export const getPathWithParams = (pathName: string) => {
+export const getPathWithParams = (pathName = '') => {
   return `${pathName}?${new URLSearchParams(window.location.search).toString()}`;
 };
