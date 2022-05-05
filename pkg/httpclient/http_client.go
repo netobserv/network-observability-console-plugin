@@ -6,6 +6,8 @@ import (
 	"net"
 	"net/http"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
 type Caller interface {
@@ -18,6 +20,8 @@ type httpClient struct {
 	headers map[string][]string
 }
 
+var slog = logrus.WithField("module", "server")
+
 func NewHTTPClient(timeout time.Duration, overrideHeaders map[string][]string, skipTLS bool) Caller {
 	transport := &http.Transport{
 		DialContext:     (&net.Dialer{Timeout: timeout}).DialContext,
@@ -27,6 +31,7 @@ func NewHTTPClient(timeout time.Duration, overrideHeaders map[string][]string, s
 	//TODO: add loki tls config https://issues.redhat.com/browse/NETOBSERV-309
 	if skipTLS {
 		transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+		slog.Warn("skipping TLS checks. SSL certificate verification is now disabled !")
 	}
 
 	return &httpClient{
