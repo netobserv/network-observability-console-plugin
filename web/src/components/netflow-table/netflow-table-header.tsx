@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { OnSort, SortByDirection, Th, Thead, Tr } from '@patternfly/react-table';
+import { SortByDirection, Th, Thead, Tr } from '@patternfly/react-table';
 import _ from 'lodash';
-import { Column, ColumnGroup, getColumnGroups, getFullColumnName } from '../../utils/columns';
+import { Column, ColumnGroup, ColumnsId, getColumnGroups, getFullColumnName } from '../../utils/columns';
 
 export type HeadersState = {
   nestedHeaders: ColumnGroup[];
@@ -10,12 +10,12 @@ export type HeadersState = {
 };
 
 export const NetflowTableHeader: React.FC<{
-  onSort: OnSort;
-  sortIndex: number;
-  sortDirection: string;
+  onSort: (id: ColumnsId, direction: SortByDirection) => void;
+  sortId: ColumnsId;
+  sortDirection: SortByDirection;
   columns: Column[];
   tableWidth: number;
-}> = ({ onSort, sortIndex, sortDirection, columns, tableWidth }) => {
+}> = ({ onSort, sortId, sortDirection, columns, tableWidth }) => {
   const [headersState, setHeadersState] = React.useState<HeadersState>({
     nestedHeaders: [],
     useNested: false,
@@ -47,10 +47,10 @@ export const NetflowTableHeader: React.FC<{
           key={c.id}
           sort={{
             sortBy: {
-              index: sortIndex,
+              index: columns.findIndex(c => c.id === sortId),
               direction: SortByDirection[sortDirection as SortByDirection]
             },
-            onSort: onSort,
+            onSort: (event, index, direction) => onSort(c.id, direction),
             columnIndex: columns.indexOf(c)
           }}
           modifier="wrap"
@@ -61,7 +61,7 @@ export const NetflowTableHeader: React.FC<{
         </Th>
       );
     },
-    [columns, headersState.nestedHeaders, headersState.useNested, onSort, sortDirection, sortIndex, tableWidth]
+    [columns, headersState.nestedHeaders, headersState.useNested, onSort, sortDirection, sortId, tableWidth]
   );
 
   React.useEffect(() => {

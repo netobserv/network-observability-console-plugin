@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { TableComposable, Tbody } from '@patternfly/react-table';
+import { SortByDirection, TableComposable, Tbody } from '@patternfly/react-table';
 import {
   Bullseye,
   Button,
@@ -17,10 +17,15 @@ import * as _ from 'lodash';
 import { Record } from '../../api/ipfix';
 import { NetflowTableHeader } from './netflow-table-header';
 import NetflowTableRow from './netflow-table-row';
-import { Column } from '../../utils/columns';
+import { Column, ColumnsId } from '../../utils/columns';
 import { Size } from '../dropdowns/display-dropdown';
 import { usePrevious } from '../../utils/previous-hook';
 import './netflow-table.css';
+import {
+  LOCAL_STORAGE_SORT_DIRECTION_KEY,
+  LOCAL_STORAGE_SORT_ID_KEY,
+  useLocalStorage
+} from '../../utils/local-storage-hook';
 
 const NetflowTable: React.FC<{
   flows: Record[];
@@ -40,10 +45,13 @@ const NetflowTable: React.FC<{
   const [scrollPosition, setScrollPosition] = React.useState(0);
   const previousScrollPosition = usePrevious(scrollPosition);
   // index of the currently active column
-  const [activeSortIndex, setActiveSortIndex] = React.useState<number>(-1);
-  const previousActiveSortIndex = usePrevious(activeSortIndex);
+  const [activeSortId, setActiveSortId] = useLocalStorage<ColumnsId>(LOCAL_STORAGE_SORT_ID_KEY, ColumnsId.endtime);
+  const previousActiveSortIndex = usePrevious(activeSortId);
   // sort direction of the currently active column
-  const [activeSortDirection, setActiveSortDirection] = React.useState<string>('asc');
+  const [activeSortDirection, setActiveSortDirection] = useLocalStorage<SortByDirection>(
+    LOCAL_STORAGE_SORT_DIRECTION_KEY,
+    SortByDirection.asc
+  );
   const previousActiveSortDirection = usePrevious(activeSortDirection);
   const firstRender = React.useRef(true);
 
@@ -55,6 +63,16 @@ const NetflowTable: React.FC<{
       return;
     }
   }, [flows]);
+
+  //reset sort index & directions to default on columns update
+  React.useEffect(() => {
+    const found = columns.find(c => c.id === activeSortId);
+    if (!found) {
+      setActiveSortId(ColumnsId.endtime);
+      setActiveSortDirection(SortByDirection.asc);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [columns]);
 
   //get row height from display size
   //these values match netflow-table.css and record-field.css
@@ -104,19 +122,19 @@ const NetflowTable: React.FC<{
 
   // sort function
   const getSortedFlows = React.useCallback(() => {
-    if (activeSortIndex < 0 || activeSortIndex >= columns.length) {
+    const found = activeSortId && columns.find(c => c.id === activeSortId);
+    if (!found) {
       return flows;
     } else {
       return flows.sort((a: Record, b: Record) => {
-        const col = columns[activeSortIndex];
-        return activeSortDirection === 'desc' ? col.sort(a, b, col) : col.sort(b, a, col);
+        return activeSortDirection === 'desc' ? found.sort(a, b, found) : found.sort(b, a, found);
       });
     }
-  }, [activeSortDirection, activeSortIndex, columns, flows]);
+  }, [activeSortDirection, activeSortId, columns, flows]);
 
   // sort handler
-  const onSort = (event: React.MouseEvent, index: number, direction: string) => {
-    setActiveSortIndex(index);
+  const onSort = (columnId: ColumnsId, direction: SortByDirection) => {
+    setActiveSortId(columnId);
     setActiveSortDirection(direction);
   };
 
@@ -135,7 +153,7 @@ const NetflowTable: React.FC<{
             previousContainerHeight === containerHeight &&
             previousScrollPosition === scrollPosition &&
             previousActiveSortDirection === activeSortDirection &&
-            previousActiveSortIndex === activeSortIndex &&
+            previousActiveSortIndex === activeSortId &&
             !firstRender.current
           }
           height={rowHeight}
@@ -147,7 +165,7 @@ const NetflowTable: React.FC<{
     );
   }, [
     activeSortDirection,
-    activeSortIndex,
+    activeSortId,
     columns,
     containerHeight,
     getRowHeight,
@@ -205,7 +223,7 @@ const NetflowTable: React.FC<{
         <NetflowTableHeader
           onSort={onSort}
           sortDirection={activeSortDirection}
-          sortIndex={activeSortIndex}
+          sortId={activeSortId}
           columns={columns}
           tableWidth={width}
         />

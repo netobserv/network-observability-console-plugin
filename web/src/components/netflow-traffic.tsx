@@ -47,8 +47,12 @@ import { getHTTPErrorDetails } from '../utils/errors';
 import { Filter } from '../model/filters';
 import {
   LOCAL_STORAGE_COLS_KEY,
+  LOCAL_STORAGE_QUERY_PARAMS_KEY,
   LOCAL_STORAGE_REFRESH_KEY,
   LOCAL_STORAGE_SIZE_KEY,
+  LOCAL_STORAGE_TOPOLOGY_LAYOUT_KEY,
+  LOCAL_STORAGE_TOPOLOGY_OPTIONS_KEY,
+  LOCAL_STORAGE_VIEW_ID_KEY,
   useLocalStorage
 } from '../utils/local-storage-hook';
 import { usePoll } from '../utils/poll-hook';
@@ -82,7 +86,7 @@ import { RecordPanel } from './netflow-record/record-panel';
 import NetflowTable from './netflow-table/netflow-table';
 import NetflowTopology from './netflow-topology/netflow-topology';
 import OptionsPanel from './netflow-topology/options-panel';
-import { netflowTrafficPath, removeURLParam, URLParam } from '../utils/url';
+import { getURLParams, hasEmptyParams, netflowTrafficPath, removeURLParam, setURLParams, URLParam } from '../utils/url';
 import { loadConfig } from '../utils/config';
 import SummaryPanel from './query-summary/summary-panel';
 import { GraphElement } from '@patternfly/react-topology';
@@ -102,14 +106,22 @@ export const NetflowTraffic: React.FC<{
   const { push } = useHistory();
   const { t } = useTranslation('plugin__network-observability-plugin');
   const [extensions] = useResolvedExtensions<ModelFeatureFlag>(isModelFeatureFlag);
+  const [queryParams, setQueryParams] = useLocalStorage<string>(LOCAL_STORAGE_QUERY_PARAMS_KEY);
+  // set url params from local storage saved items at startup if empty
+  if (hasEmptyParams() && queryParams) {
+    setURLParams(queryParams);
+  }
 
   const [isOverflowMenuOpen, setOverflowMenuOpen] = React.useState(false);
   const [isFullScreen, setFullScreen] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
   const [flows, setFlows] = React.useState<Record[]>([]);
   const [stats, setStats] = React.useState<Stats | undefined>(undefined);
-  const [layout, setLayout] = React.useState<LayoutName>(LayoutName.ColaNoForce);
-  const [topologyOptions, setTopologyOptions] = React.useState<TopologyOptions>(DefaultOptions);
+  const [layout, setLayout] = useLocalStorage<LayoutName>(LOCAL_STORAGE_TOPOLOGY_LAYOUT_KEY, LayoutName.ColaNoForce);
+  const [topologyOptions, setTopologyOptions] = useLocalStorage<TopologyOptions>(
+    LOCAL_STORAGE_TOPOLOGY_OPTIONS_KEY,
+    DefaultOptions
+  );
   const [metrics, setMetrics] = React.useState<TopologyMetrics[]>([]);
   const [isShowTopologyOptions, setShowTopologyOptions] = React.useState<boolean>(false);
   const [isShowQuerySummary, setShowQuerySummary] = React.useState<boolean>(false);
@@ -119,7 +131,7 @@ export const NetflowTraffic: React.FC<{
   const [isColModalOpen, setColModalOpen] = React.useState(false);
   const [isExportModalOpen, setExportModalOpen] = React.useState(false);
   //TODO: move default view to an Overview like dashboard instead of table
-  const [selectedViewId, setSelectedViewId] = React.useState<ViewId>('table');
+  const [selectedViewId, setSelectedViewId] = useLocalStorage<ViewId>(LOCAL_STORAGE_VIEW_ID_KEY, 'table');
   const [filters, setFilters] = React.useState<Filter[]>([]);
   const [match, setMatch] = React.useState<Match>(getMatchFromURL());
   const [reporter, setReporter] = React.useState<Reporter>(getReporterFromURL());
@@ -284,10 +296,15 @@ export const NetflowTraffic: React.FC<{
     } else if (!metricType) {
       setMetricType(defaultMetricType);
     }
-  }, [metricFunction, metricType]);
-  React.useEffect(() => {
     setURLMetricType(metricType);
-  }, [metricType]);
+  }, [metricFunction, metricType]);
+
+  // update local storage saved query params
+  React.useEffect(() => {
+    if (!forcedFilters) {
+      setQueryParams(getURLParams().toString());
+    }
+  }, [filters, range, limit, match, reporter, metricFunction, metricType, setQueryParams, forcedFilters]);
 
   // updates table filters and clears up the table for proper visualization of the
   // updating process
