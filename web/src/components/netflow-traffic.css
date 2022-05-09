@@ -49,7 +49,7 @@ span.pf-c-button__icon.pf-m-start {
     overflow: hidden;
 }
 
-.pf-c-drawer__panel.pf-m-resizable{
+.pf-c-drawer__panel.pf-m-resizable {
     overflow: hidden;
 }
 
@@ -58,7 +58,6 @@ span.pf-c-button__icon.pf-m-start {
     display: flex;
     flex-direction: row;
     margin-bottom: 10px;
-    padding-right: var(--pf-global--spacer--md);
 }
 
 .flex {
@@ -69,12 +68,25 @@ span.pf-c-button__icon.pf-m-start {
 #manage-columns-button,
 #display-dropdown,
 #export-button,
+#fullscreen-button,
+#more-options-button,
 .overflow-button {
     color: #06c;
     display: flex;
     align-items: center;
     margin-left: 0;
-    margin-right: 1em;
+    margin-right: 5px;
     padding-left: 0;
     padding-right: 0;
+}
+
+/*hide some content for fullscreen mode*/
+.hidden {
+    display: none !important;
+}
+
+/*remove bullets from dropdown*/
+.pf-c-dropdown__group>ul {
+    list-style: none;
+    padding-left: 10px;
 }

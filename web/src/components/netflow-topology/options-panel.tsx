@@ -11,9 +11,10 @@ import {
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { defaultSize, maxSize, minSize } from '../../utils/panel';
-import { LayoutName, TopologyGroupTypes, TopologyOptions } from '../../model/topology';
+import { LayoutName, TopologyGroupTypes, TopologyOptions, TopologyTruncateLength } from '../../model/topology';
 import { GroupDropdown } from '../dropdowns/group-dropdown';
 import { LayoutDropdown } from '../dropdowns/layout-dropdown';
+import TruncateDropdown from '../dropdowns/truncate-dropdown';
 import './options-panel.css';
 
 export type RecordDrawerProps = {
@@ -32,6 +33,13 @@ export const OptionsPanel: React.FC<RecordDrawerProps> = ({ id, layout, setLayou
     setOptions({
       ...options,
       groupTypes
+    });
+  };
+
+  const setTruncateLength = (truncateLength: TopologyTruncateLength) => {
+    setOptions({
+      ...options,
+      truncateLength
     });
   };
 
@@ -108,19 +116,10 @@ export const OptionsPanel: React.FC<RecordDrawerProps> = ({ id, layout, setLayou
               }
               isReversed
             />
-            <Switch
-              id="truncate-switch"
-              label={t('Long labels are truncated')}
-              labelOff={t('Whole labels are displayed')}
-              isChecked={options.truncateLabels}
-              onChange={() =>
-                setOptions({
-                  ...options,
-                  truncateLabels: !options.truncateLabels
-                })
-              }
-              isReversed
-            />
+            <div className="options-col-container">
+              <Text component={TextVariants.h4}>{t('Truncate labels')}</Text>
+              <TruncateDropdown id="truncate" selected={options.truncateLength} setTruncateLength={setTruncateLength} />
+            </div>
           </div>
         )}
       </DrawerPanelBody>

@@ -47,6 +47,15 @@ export enum TopologyMetricTypes {
   PACKETS = 'packets'
 }
 
+export enum TopologyTruncateLength {
+  OFF = 0,
+  XS = 10,
+  S = 20,
+  M = 25,
+  L = 30,
+  XL = 40
+}
+
 export interface TopologyOptions {
   rangeInSeconds: number;
   maxEdgeValue: number;
@@ -54,7 +63,7 @@ export interface TopologyOptions {
   edges?: boolean;
   edgeTags?: boolean;
   startCollapsed?: boolean;
-  truncateLabels?: boolean;
+  truncateLength: TopologyTruncateLength;
   groupTypes: TopologyGroupTypes;
   lowScale: number;
   medScale: number;
@@ -69,7 +78,7 @@ export const DefaultOptions: TopologyOptions = {
   edgeTags: true,
   maxEdgeValue: 0,
   startCollapsed: false,
-  truncateLabels: true,
+  truncateLength: TopologyTruncateLength.M,
   groupTypes: TopologyGroupTypes.NAMESPACES,
   lowScale: 0.3,
   medScale: 0.5,
@@ -77,7 +86,6 @@ export const DefaultOptions: TopologyOptions = {
   metricType: TopologyMetricTypes.BYTES
 };
 
-export const DEFAULT_NODE_TRUNCATE_LENGTH = 25;
 export const DEFAULT_NODE_SIZE = 75;
 
 export const generateNode = (
@@ -123,7 +131,7 @@ export const generateNode = (
       badgeClassName: options.nodeBadges && type ? `co-m-resource-icon co-m-resource-${type.toLowerCase()}` : undefined,
       showDecorators: true,
       secondaryLabel,
-      truncateLength: options.truncateLabels ? DEFAULT_NODE_TRUNCATE_LENGTH : undefined
+      truncateLength: options.truncateLength !== TopologyTruncateLength.OFF ? options.truncateLength : undefined
     }
   };
 };
@@ -262,12 +270,13 @@ export const generateDataModel = (
           collapsible: true,
           collapsedWidth: 75,
           collapsedHeight: 75,
-          truncateLength: options.truncateLabels
-            ? //match node label length according to badge
-              options.nodeBadges
-              ? DEFAULT_NODE_TRUNCATE_LENGTH + 2
-              : DEFAULT_NODE_TRUNCATE_LENGTH - 3
-            : undefined
+          truncateLength:
+            options.truncateLength !== TopologyTruncateLength.OFF
+              ? //match node label length according to badge
+                options.nodeBadges
+                ? options.truncateLength + 2
+                : options.truncateLength - 3
+              : undefined
         }
       };
       nodes.push(group);
