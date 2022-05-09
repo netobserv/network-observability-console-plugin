@@ -41,14 +41,13 @@ export const NetflowTableHeader: React.FC<{
     (c: Column) => {
       const showBorder =
         headersState.useNested && headersState.nestedHeaders.find(nh => _.last(nh.columns) === c) !== undefined;
-      const found = columns.find(c => c.id === sortId);
       return (
         <Th
           hasRightBorder={showBorder}
           key={c.id}
           sort={{
             sortBy: {
-              index: found ? columns.indexOf(found) : -1,
+              index: columns.findIndex(c => c.id === sortId),
               direction: SortByDirection[sortDirection as SortByDirection]
             },
             onSort: (event, index, direction) => onSort(c.id, direction),
