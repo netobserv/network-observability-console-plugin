@@ -15,6 +15,7 @@ import {
   createTopologyControlButtons,
   defaultControlButtonsOptions,
   GraphElement,
+  GRAPH_LAYOUT_END_EVENT,
   Model,
   Node,
   SelectionEventListener,
@@ -46,6 +47,7 @@ import { FILTER_EVENT } from './styles/styleNode';
 
 export const HOVER_EVENT = 'hover';
 
+let requestFit = false;
 let lastNodeIdsFound: string[] = [];
 
 const ZOOM_IN = 4 / 3;
@@ -214,6 +216,21 @@ const TopologyContent: React.FC<{
     }
   }, [controller]);
 
+  const onLayoutEnd = React.useCallback(() => {
+    //fit view to new loaded elements
+    if (requestFit) {
+      requestFit = false;
+      if ([LayoutName.Concentric, LayoutName.Dagre, LayoutName.Grid].includes(layout)) {
+        fitView();
+      } else {
+        //TODO: find a smoother way to fit while elements are still moving
+        setTimeout(fitView, 100);
+        setTimeout(fitView, 250);
+        setTimeout(fitView, 500);
+      }
+    }
+  }, [fitView, layout]);
+
   //get options with updated time range and max edge value
   const getOptions = React.useCallback(() => {
     let rangeInSeconds: number;
@@ -316,6 +333,11 @@ const TopologyContent: React.FC<{
     updateModel();
   }, [controller, metrics, filters, layout, options, prevLayout, prevOptions, resetGraph, updateModel]);
 
+  //request fit on layout end when filter / options change
+  React.useEffect(() => {
+    requestFit = true;
+  }, [filters, options]);
+
   //clear existing edge tags on query change before getting new metrics
   React.useEffect(() => {
     if (controller && controller.hasGraph()) {
@@ -342,6 +364,7 @@ const TopologyContent: React.FC<{
   useEventListener<SelectionEventListener>(SELECTION_EVENT, onSelectIds);
   useEventListener(FILTER_EVENT, onFilter);
   useEventListener(HOVER_EVENT, onHover);
+  useEventListener(GRAPH_LAYOUT_END_EVENT, onLayoutEnd);
 
   return (
     <TopologyView
@@ -349,6 +372,7 @@ const TopologyContent: React.FC<{
         <TopologyControlBar
           controlButtons={createTopologyControlButtons({
             ...defaultControlButtonsOptions,
+            fitToScreen: false,
             customButtons: [
               {
                 id: 'export',
@@ -377,9 +401,9 @@ const TopologyContent: React.FC<{
             zoomOutCallback: () => {
               controller && controller.getGraph().scaleBy(ZOOM_OUT);
             },
-            fitToScreenCallback: fitView,
             resetViewCallback: () => {
               if (controller) {
+                requestFit = true;
                 controller.getGraph().reset();
                 controller.getGraph().layout();
               }
