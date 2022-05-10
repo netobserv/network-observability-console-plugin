@@ -24,7 +24,8 @@ import { BaseEdge, BaseNode, GraphElement } from '@patternfly/react-topology';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { defaultSize, maxSize, minSize } from '../../utils/panel';
-import { MetricFunction, MetricType } from 'src/model/flow-query';
+import { MetricFunction, MetricType } from '../../model/flow-query';
+import { TopologyOptions, TopologyScopes } from '../../model/topology';
 import { TopologyMetrics } from '../../api/loki';
 import { humanFileSize } from '../../utils/bytes';
 import { roundTwoDigits } from '../../utils/count';
@@ -36,7 +37,8 @@ export const ElementPanelContent: React.FC<{
   metrics: TopologyMetrics[];
   metricFunction: MetricFunction;
   metricType?: MetricType;
-}> = ({ element, metrics, metricFunction, metricType }) => {
+  options: TopologyOptions;
+}> = ({ element, metrics, metricFunction, metricType, options }) => {
   const { t } = useTranslation('plugin__network-observability-plugin');
   const data = element.getData();
   const type = element.getType();
@@ -72,7 +74,7 @@ export const ElementPanelContent: React.FC<{
   const metricTitle = React.useCallback(() => {
     if (metricFunction === 'rate') {
       return t('Flows rate');
-    } else {
+    } else if (metricType) {
       switch (metricFunction) {
         case 'avg':
           return t('Average {{type}} (1m frame)', { type: metricType });
@@ -83,6 +85,9 @@ export const ElementPanelContent: React.FC<{
         default:
           return '';
       }
+    } else {
+      console.error('metricType cannot be undefined');
+      return '';
     }
   }, [metricFunction, metricType, t]);
 
@@ -100,16 +105,16 @@ export const ElementPanelContent: React.FC<{
           <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsNone' }}>
             <FlexItem>
               <FlexItem>
-                <Text className="element-text" component={TextVariants.h4}>{`${
-                  forEdge ? t('Source to destination:') : t('In:')
-                }`}</Text>
+                <Text className="element-text" component={TextVariants.h4}>
+                  {`${forEdge ? t('Source to destination:') : t('In:')}`}
+                </Text>
               </FlexItem>
             </FlexItem>
             <FlexItem>
               <FlexItem>
-                <Text className="element-text" component={TextVariants.h4}>{`${
-                  forEdge ? t('Destination to source:') : t('Out:')
-                }`}</Text>
+                <Text className="element-text" component={TextVariants.h4}>
+                  {`${forEdge ? t('Destination to source:') : t('Out:')}`}
+                </Text>
               </FlexItem>
             </FlexItem>
             <FlexItem>
@@ -136,15 +141,66 @@ export const ElementPanelContent: React.FC<{
   );
 
   const chart = React.useCallback(
-    (id: string, elementMetrics: TopologyMetrics[], addr?: string) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (id: string, elementMetrics: TopologyMetrics[], nodeData?: any) => {
       function getName(m: TopologyMetrics) {
-        return addr
-          ? m.metric.SrcAddr === addr
-            ? `${t('To')} ${m.metric.DstK8S_Name ? m.metric.DstK8S_Name : m.metric.DstAddr}`
-            : `${t('From')} ${m.metric.SrcK8S_Name ? m.metric.SrcK8S_Name : m.metric.SrcAddr}`
-          : `${m.metric.SrcK8S_Name ? m.metric.SrcK8S_Name : m.metric.SrcAddr} -> ${
-              m.metric.DstK8S_Name ? m.metric.DstK8S_Name : m.metric.DstAddr
-            }`;
+        switch (options.scope) {
+          case TopologyScopes.HOST:
+            const srcNode = m.metric.SrcK8S_HostIP ? m.metric.SrcK8S_HostIP : t('External');
+            const dstNode = m.metric.DstK8S_HostIP ? m.metric.DstK8S_HostIP : t('External');
+            return nodeData?.host
+              ? m.metric.SrcK8S_HostIP === nodeData.host
+                ? `${t('To')} ${dstNode}`
+                : `${t('From')} ${srcNode}`
+              : `${srcNode} -> ${dstNode}`;
+          case TopologyScopes.NAMESPACE:
+            const srcNamespace = m.metric.SrcK8S_Namespace ? m.metric.SrcK8S_Namespace : t('Unknown');
+            const dstNamespace = m.metric.DstK8S_Namespace ? m.metric.DstK8S_Namespace : t('Unknown');
+            return nodeData?.namespace
+              ? m.metric.SrcK8S_Namespace === nodeData.namespace
+                ? `${t('To')} ${dstNamespace}`
+                : `${t('From')} ${srcNamespace}`
+              : `${srcNamespace} -> ${dstNamespace}`;
+          case TopologyScopes.OWNER:
+            let srcOwner = t('Unknown');
+            if (m.metric.SrcK8S_Namespace && m.metric.SrcK8S_OwnerName) {
+              srcOwner = `${m.metric.SrcK8S_Namespace}.${m.metric.SrcK8S_OwnerName}`;
+            } else if (m.metric.SrcK8S_OwnerName) {
+              srcOwner = m.metric.SrcK8S_OwnerName;
+            }
+
+            let dstOwner = t('Unknown');
+            if (m.metric.DstK8S_Namespace && m.metric.DstK8S_OwnerName) {
+              dstOwner = `${m.metric.DstK8S_Namespace}.${m.metric.DstK8S_OwnerName}`;
+            } else if (m.metric.DstK8S_OwnerName) {
+              dstOwner = m.metric.DstK8S_OwnerName;
+            }
+            return nodeData?.namespace
+              ? m.metric.SrcK8S_Namespace === nodeData.namespace
+                ? `${t('To')} ${dstOwner}`
+                : `${t('From')} ${srcOwner}`
+              : `${srcOwner} -> ${dstOwner}`;
+          case TopologyScopes.RESOURCE:
+          default:
+            let src = m.metric.SrcAddr;
+            if (m.metric.SrcK8S_Namespace && m.metric.SrcK8S_Name) {
+              src = `${m.metric.SrcK8S_Namespace}.${m.metric.SrcK8S_Name}`;
+            } else if (m.metric.SrcK8S_Name) {
+              src = m.metric.SrcK8S_Name;
+            }
+
+            let dst = m.metric.DstAddr;
+            if (m.metric.DstK8S_Namespace && m.metric.DstK8S_Name) {
+              dst = `${m.metric.DstK8S_Namespace}.${m.metric.DstK8S_Name}`;
+            } else if (m.metric.DstK8S_Name) {
+              dst = m.metric.DstK8S_Name;
+            }
+            return nodeData?.addr
+              ? m.metric.SrcAddr === nodeData.addr
+                ? `${t('To')} ${dst}`
+                : `${t('From')} ${src}`
+              : `${src} -> ${dst}`;
+        }
       }
 
       const legendData = elementMetrics.map(m => ({
@@ -212,30 +268,54 @@ export const ElementPanelContent: React.FC<{
         </div>
       );
     },
-    [metricTitle, metricValue, metrics, t]
+    [metricTitle, metricValue, metrics, options.scope, t]
   );
 
   let srcCount = 0;
   let dstCount = 0;
 
   if (element instanceof BaseNode) {
+    function matchExclusively(d: TopologyMetrics, field: string, value: string) {
+      const m = d.metric as never;
+
+      return (
+        m[`SrcK8S_${field}`] !== m[`DstK8S_${field}`] &&
+        (m[`SrcK8S_${field}`] === value || m[`DstK8S_${field}`] === value)
+      );
+    }
+
     const nodeMetrics =
       type === 'group'
-        ? metrics.filter(m =>
-            //namespace must match exclusively Source OR Destination
-            data.type === 'Namespace'
-              ? m.metric.SrcK8S_Namespace !== m.metric.DstK8S_Namespace &&
-                (m.metric.SrcK8S_Namespace === data.name || m.metric.DstK8S_Namespace === data.name)
-              : //host must match exclusively Source OR Destination
-              data.type === 'Node'
-              ? m.metric.SrcK8S_HostIP !== m.metric.DstK8S_HostIP &&
-                (m.metric.SrcK8S_HostIP === data.name || m.metric.DstK8S_HostIP === data.name)
-              : //fallback on Owners match exclusively Source OR Destination
-                m.metric.SrcK8S_OwnerName !== m.metric.DstK8S_OwnerName &&
-                (m.metric.SrcK8S_OwnerName === data.name || m.metric.DstK8S_OwnerName === data.name)
-          )
-        : //Pods / Services must match Source, Destination or both
-          metrics.filter(m => m.metric.SrcAddr === data.addr || m.metric.DstAddr === data.addr);
+        ? metrics.filter(m => {
+            switch (data.type) {
+              case 'Namespace':
+                //namespace must match exclusively Source OR Destination
+                return matchExclusively(m, 'Namespace', data.name);
+              case 'Node':
+                //host must match exclusively Source OR Destination
+                return matchExclusively(m, 'HostIP', data.name);
+              default:
+                //fallback on Owners match exclusively Source OR Destination
+                return matchExclusively(m, 'OwnerName', data.name);
+            }
+          })
+        : metrics.filter(m => {
+            switch (options.scope) {
+              case TopologyScopes.NAMESPACE:
+                //namespace must match exclusively Source OR Destination
+                return matchExclusively(m, 'Namespace', data.namespace);
+              case TopologyScopes.HOST:
+                //host must match exclusively Source OR Destination
+                return matchExclusively(m, 'HostIP', data.host);
+              case TopologyScopes.OWNER:
+                //owner must match exclusively Source OR Destination
+                return matchExclusively(m, 'OwnerName', data.name);
+              case TopologyScopes.RESOURCE:
+              default:
+                //fallback on ip addresses
+                return m.metric.SrcAddr === data.addr || m.metric.DstAddr === data.addr;
+            }
+          });
     nodeMetrics.forEach(m => {
       if (type === 'group') {
         if (data.type === 'Namespace') {
@@ -265,48 +345,81 @@ export const ElementPanelContent: React.FC<{
         }
       }
     });
+    const infos = resourceInfos(data);
     return (
       <>
-        <TextContent id="resourceInfos" className="element-text-container">
-          <Text component={TextVariants.h3}>{t('Infos')}</Text>
-          {resourceInfos(data)}
-        </TextContent>
+        {infos && (
+          <TextContent id="resourceInfos" className="element-text-container">
+            <Text component={TextVariants.h3}>{t('Infos')}</Text>
+            {infos}
+          </TextContent>
+        )}
         <TextContent id="metrics" className="element-text-container">
           <Text component={TextVariants.h3}>{metricTitle()}</Text>
           {metricCounts(srcCount, dstCount, false)}
-          {chart(`node-${data.addr}`, nodeMetrics, data.addr)}
+          {chart(`node-${data.id}`, nodeMetrics, data)}
         </TextContent>
       </>
     );
   } else if (element instanceof BaseEdge) {
     const srcData = element.getSource().getData();
     const tgtData = element.getTarget().getData();
-    const edgeMetrics = metrics.filter(
-      m =>
-        (m.metric.SrcAddr === srcData.addr && m.metric.DstAddr === tgtData.addr) ||
-        (m.metric.SrcAddr === tgtData.addr && m.metric.DstAddr === srcData.addr)
-    );
+    const edgeMetrics = metrics.filter(m => {
+      //must match Source / Destination
+      switch (options.scope) {
+        case TopologyScopes.HOST:
+          return (
+            (m.metric.SrcK8S_HostIP === srcData.host && m.metric.DstK8S_HostIP === tgtData.host) ||
+            (m.metric.SrcK8S_HostIP === tgtData.host && m.metric.DstK8S_HostIP === srcData.host)
+          );
+        case TopologyScopes.NAMESPACE:
+          return (
+            (m.metric.SrcK8S_Namespace === srcData.namespace && m.metric.DstK8S_Namespace === tgtData.namespace) ||
+            (m.metric.SrcK8S_Namespace === tgtData.namespace && m.metric.DstK8S_Namespace === srcData.namespace)
+          );
+        case TopologyScopes.OWNER:
+          return (
+            (m.metric.SrcK8S_OwnerName === srcData.name && m.metric.DstK8S_OwnerName === tgtData.name) ||
+            (m.metric.SrcK8S_OwnerName === tgtData.name && m.metric.DstK8S_OwnerName === srcData.name)
+          );
+        case TopologyScopes.RESOURCE:
+        default:
+          return (
+            (m.metric.SrcAddr === srcData.addr && m.metric.DstAddr === tgtData.addr) ||
+            (m.metric.SrcAddr === tgtData.addr && m.metric.DstAddr === srcData.addr)
+          );
+      }
+    });
     edgeMetrics.forEach(m => {
-      if (m.metric.SrcAddr === srcData.addr) {
+      if (
+        (options.scope === TopologyScopes.HOST && m.metric.SrcK8S_HostIP === srcData.host) ||
+        m.metric.SrcAddr === srcData.addr
+      ) {
         srcCount += m.total;
       } else {
         dstCount += m.total;
       }
     });
+    const srcInfos = resourceInfos(srcData);
+    const tgtInfos = resourceInfos(tgtData);
     return (
       <>
-        <TextContent id="source" className="element-text-container">
-          <Text component={TextVariants.h3}>{t('Source')}</Text>
-          {resourceInfos(srcData)}
-        </TextContent>
-        <TextContent id="destination" className="element-text-container">
-          <Text component={TextVariants.h3}>{t('Destination')}</Text>
-          {resourceInfos(tgtData)}
-        </TextContent>
+        {srcInfos && (
+          <TextContent id="source" className="element-text-container">
+            <Text component={TextVariants.h3}>{t('Source')}</Text>
+            {srcInfos}
+          </TextContent>
+        )}
+        {tgtInfos && (
+          <TextContent id="destination" className="element-text-container">
+            <Text component={TextVariants.h3}>{t('Destination')}</Text>
+            {tgtInfos}
+          </TextContent>
+        )}
         <TextContent id="metrics" className="element-text-container">
           <Text component={TextVariants.h3}>{metricTitle()}</Text>
           {metricCounts(dstCount, srcCount, true)}
-          {chart(`edge-${srcData.addr}-${tgtData.addr}`, edgeMetrics)}
+          {chart(`edge-${srcData.id}-${tgtData.id}`, edgeMetrics)}
         </TextContent>
       </>
     );
@@ -321,8 +434,9 @@ export const ElementPanel: React.FC<{
   metrics: TopologyMetrics[];
   metricFunction: MetricFunction;
   metricType?: MetricType;
+  options: TopologyOptions;
   id?: string;
-}> = ({ id, element, metrics, metricFunction, metricType, onClose }) => {
+}> = ({ id, element, metrics, metricFunction, metricType, options, onClose }) => {
   const { t } = useTranslation('plugin__network-observability-plugin');
   const data = element.getData();
 
@@ -350,6 +464,7 @@ export const ElementPanel: React.FC<{
           metrics={metrics}
           metricFunction={metricFunction}
           metricType={metricType}
+          options={options}
         />
       </DrawerPanelBody>
     </DrawerPanelContent>

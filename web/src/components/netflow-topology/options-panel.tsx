@@ -11,23 +11,42 @@ import {
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { defaultSize, maxSize, minSize } from '../../utils/panel';
-import { LayoutName, TopologyGroupTypes, TopologyOptions, TopologyTruncateLength } from '../../model/topology';
+import {
+  LayoutName,
+  TopologyGroupTypes,
+  TopologyOptions,
+  TopologyScopes,
+  TopologyTruncateLength
+} from '../../model/topology';
 import { GroupDropdown } from '../dropdowns/group-dropdown';
 import { LayoutDropdown } from '../dropdowns/layout-dropdown';
+import ScopeDropdown from '../dropdowns/scope-dropdown';
 import TruncateDropdown from '../dropdowns/truncate-dropdown';
 import './options-panel.css';
 
 export type RecordDrawerProps = {
-  layout: LayoutName;
-  setLayout: (l: LayoutName) => void;
   options: TopologyOptions;
   setOptions: (opts: TopologyOptions) => void;
   onClose: () => void;
   id?: string;
 };
 
-export const OptionsPanel: React.FC<RecordDrawerProps> = ({ id, layout, setLayout, options, setOptions, onClose }) => {
+export const OptionsPanel: React.FC<RecordDrawerProps> = ({ id, options, setOptions, onClose }) => {
   const { t } = useTranslation('plugin__network-observability-plugin');
+
+  const setLayout = (layout: LayoutName) => {
+    setOptions({
+      ...options,
+      layout
+    });
+  };
+
+  const setScope = (scope: TopologyScopes) => {
+    setOptions({
+      ...options,
+      scope
+    });
+  };
 
   const setGroupType = (groupTypes: TopologyGroupTypes) => {
     setOptions({
@@ -56,11 +75,21 @@ export const OptionsPanel: React.FC<RecordDrawerProps> = ({ id, layout, setLayou
           <div className="options-container">
             <div className="options-col-container">
               <Text component={TextVariants.h4}>{t('Display')}</Text>
-              <LayoutDropdown id="layout" selected={layout} setLayout={setLayout} />
+              <LayoutDropdown id="layout" selected={options.layout} setLayout={setLayout} />
+            </div>
+            <div className="options-col-container">
+              <Text component={TextVariants.h4}>{t('Scope')}</Text>
+              <ScopeDropdown id="scope" selected={options.scope} setScopeType={setScope} />
             </div>
             <div className="options-col-container">
               <Text component={TextVariants.h4}>{t('Groups')}</Text>
-              <GroupDropdown id="group" selected={options.groupTypes} setGroupType={setGroupType} />
+              <GroupDropdown
+                id="group"
+                disabled={options.scope === TopologyScopes.HOST}
+                scope={options.scope}
+                selected={options.groupTypes}
+                setGroupType={setGroupType}
+              />
             </div>
             <Switch
               id="group-collapsed-switch"

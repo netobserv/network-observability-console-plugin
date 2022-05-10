@@ -7,7 +7,6 @@ export const LOCAL_STORAGE_EXPORT_COLS_KEY = 'netflow-traffic-export-columns';
 export const LOCAL_STORAGE_REFRESH_KEY = 'netflow-traffic-refresh';
 export const LOCAL_STORAGE_SIZE_KEY = 'netflow-traffic-size-size';
 export const LOCAL_STORAGE_VIEW_ID_KEY = 'netflow-traffic-view-id';
-export const LOCAL_STORAGE_TOPOLOGY_LAYOUT_KEY = 'netflow-traffic-topology-layout';
 export const LOCAL_STORAGE_TOPOLOGY_OPTIONS_KEY = 'netflow-traffic-topology-options';
 export const LOCAL_STORAGE_QUERY_PARAMS_KEY = 'netflow-traffic-query-params';
 export const LOCAL_STORAGE_SORT_ID_KEY = 'netflow-traffic-sort-id';

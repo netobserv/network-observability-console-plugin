@@ -1,13 +1,11 @@
 import { DrawerCloseButton, Switch } from '@patternfly/react-core';
 import { shallow } from 'enzyme';
 import * as React from 'react';
-import { DefaultOptions, LayoutName } from '../../../model/topology';
+import { DefaultOptions } from '../../../model/topology';
 import { OptionsPanel } from '../options-panel';
 
 describe('<OptionsPanel />', () => {
   const mocks = {
-    layout: LayoutName.Cola,
-    setLayout: jest.fn(),
     options: DefaultOptions,
     setOptions: jest.fn(),
     onClose: jest.fn(),

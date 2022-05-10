@@ -17,6 +17,7 @@ describe('<NetflowTopology />', () => {
     metrics: [] as TopologyMetrics[],
     layout: LayoutName.Cola,
     options: DefaultOptions,
+    setOptions: jest.fn(),
     lowScale: 0.3,
     medScale: 0.5,
     filters: [],

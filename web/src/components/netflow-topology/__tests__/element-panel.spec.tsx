@@ -2,6 +2,7 @@ import { DrawerCloseButton } from '@patternfly/react-core';
 import { BaseEdge, BaseNode } from '@patternfly/react-topology';
 import { mount, shallow } from 'enzyme';
 import * as React from 'react';
+import { DefaultOptions, TopologyScopes } from '../../../model/topology';
 import { TopologyMetrics } from '../../../api/loki';
 import { MetricFunction, MetricType } from '../../../model/flow-query';
 import { ElementPanel, ElementPanelContent } from '../element-panel';
@@ -29,6 +30,10 @@ describe('<ElementPanel />', () => {
     metrics: datas as TopologyMetrics[],
     metricFunction: 'sum' as MetricFunction,
     metricType: 'bytes' as MetricType,
+    options: {
+      ...DefaultOptions,
+      scope: TopologyScopes.RESOURCE
+    },
     onClose: jest.fn(),
     id: 'element-panel-test'
   };
