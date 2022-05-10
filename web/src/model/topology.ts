@@ -16,6 +16,7 @@ import { Filter } from '../model/filters';
 import { bytesPerSeconds, humanFileSize } from '../utils/bytes';
 import { kindToAbbr } from '../utils/label';
 import { defaultTimeRange } from '../utils/router';
+import { TFunction } from 'i18next';
 
 export enum LayoutName {
   Cola = 'Cola',
@@ -26,13 +27,21 @@ export enum LayoutName {
   Grid = 'Grid'
 }
 
+export enum TopologyScopes {
+  HOST = 'host',
+  NAMESPACE = 'namespace',
+  OWNER = 'owner',
+  RESOURCE = 'resource'
+}
+
 export enum TopologyGroupTypes {
   NONE = 'none',
   HOSTS = 'hosts',
+  HOSTS_NAMESPACES = 'hosts+namespaces',
+  HOSTS_OWNERS = 'hosts+owners',
   NAMESPACES = 'namespaces',
-  OWNERS = 'owners',
   NAMESPACES_OWNERS = 'namespaces+owners',
-  HOSTS_OWNERS = 'hosts+owners'
+  OWNERS = 'owners'
 }
 
 export enum TopologyMetricFunctions {
@@ -64,6 +73,8 @@ export interface TopologyOptions {
   edgeTags?: boolean;
   startCollapsed?: boolean;
   truncateLength: TopologyTruncateLength;
+  layout: LayoutName;
+  scope: TopologyScopes;
   groupTypes: TopologyGroupTypes;
   lowScale: number;
   medScale: number;
@@ -79,7 +90,9 @@ export const DefaultOptions: TopologyOptions = {
   maxEdgeValue: 0,
   startCollapsed: false,
   truncateLength: TopologyTruncateLength.M,
-  groupTypes: TopologyGroupTypes.NAMESPACES,
+  layout: LayoutName.ColaNoForce,
+  scope: TopologyScopes.NAMESPACE,
+  groupTypes: TopologyGroupTypes.NONE,
   lowScale: 0.3,
   medScale: 0.5,
   metricFunction: TopologyMetricFunctions.AVG,
@@ -88,22 +101,44 @@ export const DefaultOptions: TopologyOptions = {
 
 export const DEFAULT_NODE_SIZE = 75;
 
+export type NodeData = {
+  namespace?: string;
+  type?: string;
+  name?: string;
+  displayName?: string;
+  addr?: string;
+  host?: string;
+  canStepInto?: boolean;
+};
+
 export const generateNode = (
-  namespace: string,
-  type: string,
-  name: string,
-  addr: string,
-  host: string,
+  data: NodeData,
   options: TopologyOptions,
   searchValue: string,
   highlightedId: string,
   filters: Filter[]
 ): NodeModel => {
-  const id = `${type}.${namespace}.${name}.${addr}`;
-  const label = name ? name : addr;
-  const secondaryLabel = [TopologyGroupTypes.OWNERS, TopologyGroupTypes.NONE].includes(options.groupTypes)
-    ? namespace
-    : undefined;
+  const id = `${data.type}.${data.namespace}.${data.name}.${data.addr}.${data.host}`;
+  const label = data.name
+    ? data.name
+    : data.addr
+    ? data.addr
+    : data.namespace
+    ? data.namespace
+    : data.host
+    ? data.host
+    : data.displayName
+    ? data.displayName
+    : '';
+  const secondaryLabel =
+    data.type !== 'Namespace' &&
+    ![
+      TopologyGroupTypes.NAMESPACES,
+      TopologyGroupTypes.NAMESPACES_OWNERS,
+      TopologyGroupTypes.HOSTS_NAMESPACES
+    ].includes(options.groupTypes)
+      ? data.namespace
+      : undefined;
   const shadowed = !_.isEmpty(searchValue) && !(label.includes(searchValue) || secondaryLabel?.includes(searchValue));
   const highlighted = !shadowed && !_.isEmpty(highlightedId) && highlightedId.includes(id);
   return {
@@ -116,19 +151,18 @@ export const generateNode = (
     status: NodeStatus.default,
     style: { padding: 20 },
     data: {
-      namespace,
-      type,
-      name,
-      addr,
-      host,
+      ...data,
       shadowed,
       highlighted,
-      isFiltered: filters.some(f => f.values.some(fv => fv.v === `${type}.${namespace}.${name}` || fv.v === addr)),
+      isFiltered: filters.some(f =>
+        f.values.some(fv => fv.v === `${data.type}.${data.namespace}.${data.name}` || fv.v === data.addr)
+      ),
       labelPosition: LabelPosition.bottom,
       //TODO: get badge and color using console ResourceIcon
-      badge: options.nodeBadges && type ? kindToAbbr(type) : undefined,
+      badge: options.nodeBadges && data.type ? kindToAbbr(data.type) : undefined,
       //badgeColor: options.nodeBadges && type ? getModel(type)?.color : undefined,
-      badgeClassName: options.nodeBadges && type ? `co-m-resource-icon co-m-resource-${type.toLowerCase()}` : undefined,
+      badgeClassName:
+        options.nodeBadges && data.type ? `co-m-resource-icon co-m-resource-${data.type.toLowerCase()}` : undefined,
       showDecorators: true,
       secondaryLabel,
       truncateLength: options.truncateLength !== TopologyTruncateLength.OFF ? options.truncateLength : undefined
@@ -244,7 +278,8 @@ export const generateDataModel = (
   options: TopologyOptions,
   searchValue: string,
   highlightedId: string,
-  filters: Filter[]
+  filters: Filter[],
+  t: TFunction
 ): Model => {
   let nodes: NodeModel[] = [];
   const edges: EdgeModel[] = [];
@@ -290,19 +325,20 @@ export const generateDataModel = (
     return group;
   }
 
-  function addNode(namespace: string, type: string, name: string, addr: string, host: string, parent?: NodeModel) {
+  function addNode(data: NodeData, parent?: NodeModel) {
     let node = nodes.find(
       n =>
-        n.data.type === type &&
-        n.data.namespace === namespace &&
-        n.data.name === name &&
-        n.data.addr === addr &&
-        n.data.host === host
+        n.data.type === data.type &&
+        n.data.namespace === data.namespace &&
+        n.data.name === data.name &&
+        n.data.addr === data.addr &&
+        n.data.host === data.host
     );
     if (!node) {
-      node = generateNode(namespace, type, name, addr, host, opts, searchValue, highlightedId, filters);
+      node = generateNode(data, opts, searchValue, highlightedId, filters);
       nodes.push(node);
     }
+
     if (parent && !childIds.includes(node.id)) {
       parent.children!.push(node.id);
       childIds.push(node.id);
@@ -339,17 +375,17 @@ export const generateDataModel = (
 
   function manageNode(prefix: 'Src' | 'Dst', d: TopologyMetrics) {
     const m = d.metric as never;
+
     const namespace = m[`${prefix}K8S_Namespace`];
     const ownerType = m[`${prefix}K8S_OwnerType`];
     const ownerName = m[`${prefix}K8S_OwnerName`];
     //TODO: enrich Host Name to use ResourceLink in element-panel
     const host = m[`${prefix}K8S_HostIP`];
-    const type = m[`${prefix}K8S_Type`];
-    const name = m[`${prefix}K8S_Name`];
-    const addr = m[`${prefix}Addr`];
 
     const hostGroup =
-      [TopologyGroupTypes.HOSTS_OWNERS, TopologyGroupTypes.HOSTS].includes(options.groupTypes) && !_.isEmpty(host)
+      [TopologyGroupTypes.HOSTS_NAMESPACES, TopologyGroupTypes.HOSTS_OWNERS, TopologyGroupTypes.HOSTS].includes(
+        options.groupTypes
+      ) && !_.isEmpty(host)
         ? addGroup(host, 'Node', undefined, true)
         : undefined;
     const namespaceGroup =
@@ -358,23 +394,64 @@ export const generateDataModel = (
         ? addGroup(namespace, 'Namespace', hostGroup)
         : undefined;
     const ownerGroup =
-      [TopologyGroupTypes.NAMESPACES_OWNERS, TopologyGroupTypes.HOSTS_OWNERS, TopologyGroupTypes.OWNERS].includes(
-        options.groupTypes
-      ) &&
+      [
+        TopologyGroupTypes.NAMESPACES_OWNERS,
+        TopologyGroupTypes.HOSTS_NAMESPACES,
+        TopologyGroupTypes.HOSTS_OWNERS,
+        TopologyGroupTypes.OWNERS
+      ].includes(options.groupTypes) &&
       !_.isEmpty(ownerType) &&
       !_.isEmpty(ownerName)
-        ? addGroup(ownerName, ownerType, namespaceGroup ? namespaceGroup : hostGroup, namespaceGroup === undefined)
+        ? addGroup(
+            ownerName,
+            `${ownerType}.${ownerName}`,
+            namespaceGroup ? namespaceGroup : hostGroup,
+            namespaceGroup === undefined
+          )
         : undefined;
-    const node = addNode(
-      namespace,
-      type,
-      name,
-      addr,
-      host,
-      ownerGroup ? ownerGroup : namespaceGroup ? namespaceGroup : hostGroup
-    );
 
-    return node;
+    const parent = ownerGroup ? ownerGroup : namespaceGroup ? namespaceGroup : hostGroup;
+    switch (options.scope) {
+      case TopologyScopes.HOST:
+        return addNode(
+          _.isEmpty(host)
+            ? //metrics without host will be grouped as 'External'
+              { displayName: t('External') }
+            : //valid metrics will be Nodes with ips
+              { type: 'Node', host, canStepInto: true },
+          parent
+        );
+      case TopologyScopes.NAMESPACE:
+        return addNode(
+          _.isEmpty(namespace)
+            ? //metrics without namespace will be grouped as 'Unknown'
+              { displayName: t('Unknown') }
+            : //valid metrics will be Namespaces with namespace as name + host infos
+              { type: 'Namespace', namespace, host, canStepInto: true },
+          parent
+        );
+      case TopologyScopes.OWNER:
+        return addNode(
+          _.isEmpty(ownerName)
+            ? //metrics without owner name will be grouped as 'Unknown'
+              { displayName: t('Unknown') }
+            : //valid metrics will be owner type & name + namespace & host infos
+              { namespace, type: ownerType, name: ownerName, host, canStepInto: true },
+          parent
+        );
+      case TopologyScopes.RESOURCE:
+      default:
+        return addNode(
+          {
+            namespace,
+            type: m[`${prefix}K8S_Type`],
+            name: m[`${prefix}K8S_Name`],
+            addr: m[`${prefix}Addr`],
+            host
+          },
+          parent
+        );
+    }
   }
 
   datas.forEach(d => {

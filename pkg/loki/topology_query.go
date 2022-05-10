@@ -3,12 +3,14 @@ package loki
 import (
 	"fmt"
 	"strconv"
+	"strings"
+
+	"github.com/netobserv/network-observability-console-plugin/pkg/utils"
 )
 
 const (
 	topologyDefaultLimit = "100"
 	topologyDefaultRange = "300"
-	topologyMetrics      = "SrcK8S_Name,SrcK8S_Type,SrcK8S_OwnerName,SrcK8S_OwnerType,SrcK8S_Namespace,SrcAddr,SrcK8S_HostIP,DstK8S_Name,DstK8S_Type,DstK8S_OwnerName,DstK8S_OwnerType,DstK8S_Namespace,DstAddr,DstK8S_HostIP"
 )
 
 type Topology struct {
@@ -16,6 +18,7 @@ type Topology struct {
 	timeRange      string
 	metricFunction string
 	dataField      string
+	fields         string
 }
 
 type TopologyQueryBuilder struct {
@@ -23,7 +26,7 @@ type TopologyQueryBuilder struct {
 	topology *Topology
 }
 
-func NewTopologyQuery(cfg *Config, start, end, limit, metricFunction, metricType, reporter string) (*TopologyQueryBuilder, error) {
+func NewTopologyQuery(cfg *Config, start, end, limit, metricFunction, metricType, reporter, scope, groups string) (*TopologyQueryBuilder, error) {
 	l := limit
 	if len(l) == 0 {
 		l = topologyDefaultLimit
@@ -74,8 +77,45 @@ func NewTopologyQuery(cfg *Config, start, end, limit, metricFunction, metricType
 			limit:          l,
 			metricFunction: f,
 			dataField:      t,
+			fields:         getFields(scope, groups),
 		},
 	}, nil
+}
+
+func getFields(scope, groups string) string {
+	var fields []string
+	switch scope {
+	case "host":
+		fields = []string{"SrcK8S_HostIP", "DstK8S_HostIP"}
+	case "namespace":
+		fields = []string{"SrcK8S_Namespace", "DstK8S_Namespace"}
+	case "owner":
+		fields = []string{"SrcK8S_OwnerName", "SrcK8S_OwnerType", "DstK8S_OwnerName", "DstK8S_OwnerType"}
+	default:
+		fields = []string{"SrcK8S_Name", "SrcK8S_Type", "SrcK8S_OwnerName", "SrcK8S_OwnerType", "SrcK8S_Namespace", "SrcAddr", "SrcK8S_HostIP", "DstK8S_Name", "DstK8S_Type", "DstK8S_OwnerName", "DstK8S_OwnerType", "DstK8S_Namespace", "DstAddr", "DstK8S_HostIP"}
+	}
+
+	if len(groups) > 0 {
+		if strings.Contains(groups, "hosts") {
+			if !utils.Contains(fields, "SrcK8S_HostIP") {
+				fields = append(fields, "SrcK8S_HostIP", "DstK8S_HostIP")
+			}
+		}
+
+		if strings.Contains(groups, "namespaces") {
+			if !utils.Contains(fields, "SrcK8S_Namespace") {
+				fields = append(fields, "SrcK8S_Namespace", "DstK8S_Namespace")
+			}
+		}
+
+		if strings.Contains(groups, "owners") {
+			if !utils.Contains(fields, "SrcK8S_OwnerName") {
+				fields = append(fields, "SrcK8S_OwnerName", "SrcK8S_OwnerType", "DstK8S_OwnerName", "DstK8S_OwnerType")
+			}
+		}
+	}
+
+	return strings.Join(fields[:], ",")
 }
 
 func (q *TopologyQueryBuilder) Build() string {
@@ -95,7 +135,7 @@ func (q *TopologyQueryBuilder) Build() string {
 	sb.WriteString("topk(")
 	sb.WriteString(q.topology.limit)
 	sb.WriteString(",sum by(")
-	sb.WriteString(topologyMetrics)
+	sb.WriteString(q.topology.fields)
 	sb.WriteString(") (")
 	sb.WriteString(q.topology.metricFunction)
 	sb.WriteString("(")

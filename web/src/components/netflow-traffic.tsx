@@ -40,7 +40,7 @@ import {
   MetricType
 } from '../model/flow-query';
 import { Stats, TopologyMetrics } from '../api/loki';
-import { DefaultOptions, LayoutName, TopologyOptions } from '../model/topology';
+import { DefaultOptions, TopologyGroupTypes, TopologyOptions } from '../model/topology';
 import { Column, getDefaultColumns } from '../utils/columns';
 import { TimeRange } from '../utils/datetime';
 import { getHTTPErrorDetails } from '../utils/errors';
@@ -50,7 +50,6 @@ import {
   LOCAL_STORAGE_QUERY_PARAMS_KEY,
   LOCAL_STORAGE_REFRESH_KEY,
   LOCAL_STORAGE_SIZE_KEY,
-  LOCAL_STORAGE_TOPOLOGY_LAYOUT_KEY,
   LOCAL_STORAGE_TOPOLOGY_OPTIONS_KEY,
   LOCAL_STORAGE_VIEW_ID_KEY,
   useLocalStorage
@@ -117,7 +116,6 @@ export const NetflowTraffic: React.FC<{
   const [loading, setLoading] = React.useState(true);
   const [flows, setFlows] = React.useState<Record[]>([]);
   const [stats, setStats] = React.useState<Stats | undefined>(undefined);
-  const [layout, setLayout] = useLocalStorage<LayoutName>(LOCAL_STORAGE_TOPOLOGY_LAYOUT_KEY, LayoutName.ColaNoForce);
   const [topologyOptions, setTopologyOptions] = useLocalStorage<TopologyOptions>(
     LOCAL_STORAGE_TOPOLOGY_OPTIONS_KEY,
     DefaultOptions
@@ -215,9 +213,23 @@ export const NetflowTraffic: React.FC<{
     if (selectedViewId === 'topology') {
       query.function = metricFunction;
       query.type = metricType;
+      query.scope = topologyOptions.scope;
+      query.groups = topologyOptions.groupTypes !== TopologyGroupTypes.NONE ? topologyOptions.groupTypes : undefined;
     }
     return query;
-  }, [forcedFilters, filters, match, limit, reporter, range, selectedViewId, metricFunction, metricType]);
+  }, [
+    forcedFilters,
+    filters,
+    match,
+    limit,
+    reporter,
+    range,
+    selectedViewId,
+    metricFunction,
+    metricType,
+    topologyOptions.scope,
+    topologyOptions.groupTypes
+  ]);
 
   const tick = React.useCallback(() => {
     setLoading(true);
@@ -500,8 +512,6 @@ export const NetflowTraffic: React.FC<{
       return (
         <OptionsPanel
           id="optionsPanel"
-          layout={layout}
-          setLayout={setLayout}
           options={topologyOptions}
           setOptions={setTopologyOptions}
           onClose={() => setShowTopologyOptions(false)}
@@ -526,6 +536,7 @@ export const NetflowTraffic: React.FC<{
           metrics={metrics}
           metricFunction={metricFunction}
           metricType={metricType}
+          options={topologyOptions}
           onClose={() => onElementSelect(undefined)}
         />
       );
@@ -558,8 +569,8 @@ export const NetflowTraffic: React.FC<{
             metricFunction={metricFunction}
             metricType={metricType}
             metrics={metrics}
-            layout={layout}
             options={topologyOptions}
+            setOptions={setTopologyOptions}
             filters={filters}
             setFilters={setFilters}
             toggleTopologyOptions={() => onToggleTopologyOptions(!isShowTopologyOptions)}

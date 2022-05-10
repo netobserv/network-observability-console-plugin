@@ -36,14 +36,20 @@ import { findFilter } from '../../utils/filter-definitions';
 import { TopologyMetrics } from '../../api/loki';
 import { Filter, FilterDefinition } from '../../model/filters';
 import { MetricFunction, MetricType } from '../../model/flow-query';
-import { generateDataModel, LayoutName, TopologyOptions } from '../../model/topology';
+import {
+  generateDataModel,
+  LayoutName,
+  TopologyGroupTypes,
+  TopologyOptions,
+  TopologyScopes
+} from '../../model/topology';
 import { TimeRange } from '../../utils/datetime';
 import { usePrevious } from '../../utils/previous-hook';
 import componentFactory from './componentFactories/componentFactory';
 import stylesComponentFactory from './componentFactories/stylesComponentFactory';
 import layoutFactory from './layouts/layoutFactory';
 import './netflow-topology.css';
-import { FILTER_EVENT } from './styles/styleNode';
+import { STEP_INTO_EVENT, FILTER_EVENT } from './styles/styleNode';
 
 export const HOVER_EVENT = 'hover';
 
@@ -60,7 +66,7 @@ const TopologyContent: React.FC<{
   metricType?: MetricType;
   metrics: TopologyMetrics[];
   options: TopologyOptions;
-  layout: LayoutName;
+  setOptions: (o: TopologyOptions) => void;
   filters: Filter[];
   setFilters: (v: Filter[]) => void;
   toggleTopologyOptions: () => void;
@@ -71,8 +77,8 @@ const TopologyContent: React.FC<{
   metricFunction,
   metricType,
   metrics,
-  layout,
   options,
+  setOptions,
   filters,
   setFilters,
   toggleTopologyOptions,
@@ -82,7 +88,6 @@ const TopologyContent: React.FC<{
   const { t } = useTranslation('plugin__network-observability-plugin');
   const controller = useVisualizationController();
 
-  const prevLayout = usePrevious(layout);
   const prevMetricFunction = usePrevious(metricFunction);
   const prevMetricType = usePrevious(metricType);
   const prevOptions = usePrevious(options);
@@ -157,13 +162,19 @@ const TopologyContent: React.FC<{
   const onFilter = React.useCallback(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (data: any) => {
-      const result = _.cloneDeep(filters);
+      const result = data.isClearFilters ? [] : _.cloneDeep(filters);
 
       let value: string;
       let def: FilterDefinition;
       if (data.type && data.namespace && data.name) {
         def = findFilter(t, 'resource')!;
         value = `${data.type}.${data.namespace}.${data.name}`;
+      } else if (data.type === 'Node' && data.host) {
+        def = findFilter(t, 'host')!;
+        value = data.host;
+      } else if (data.type === 'Namespace' && data.namespace) {
+        def = findFilter(t, 'namespace')!;
+        value = data.namespace;
       } else {
         def = findFilter(t, 'address')!;
         value = data.addr;
@@ -189,6 +200,42 @@ const TopologyContent: React.FC<{
       setSelectedIds([data.id]);
     },
     [filters, setFilters, t]
+  );
+
+  const onStepInto = React.useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (data: any) => {
+      let scope: TopologyScopes;
+      let groupTypes: TopologyGroupTypes;
+      switch (options.scope) {
+        case TopologyScopes.HOST:
+          scope = TopologyScopes.NAMESPACE;
+          groupTypes = TopologyGroupTypes.NONE;
+          break;
+        case TopologyScopes.NAMESPACE:
+          scope = TopologyScopes.OWNER;
+          groupTypes = TopologyGroupTypes.NAMESPACES;
+          break;
+        default:
+          scope = TopologyScopes.RESOURCE;
+          groupTypes = TopologyGroupTypes.OWNERS;
+      }
+      setOptions({
+        ...options,
+        scope,
+        groupTypes
+      });
+      onFilter({
+        ...data,
+        isFiltered: true,
+        isClearFilters: true
+      });
+      //clear search
+      onChangeSearch();
+      //clear selection
+      onSelect(undefined);
+    },
+    [onFilter, onSelect, options, setOptions]
   );
 
   const onHover = React.useCallback(
@@ -220,7 +267,7 @@ const TopologyContent: React.FC<{
     //fit view to new loaded elements
     if (requestFit) {
       requestFit = false;
-      if ([LayoutName.Concentric, LayoutName.Dagre, LayoutName.Grid].includes(layout)) {
+      if ([LayoutName.Concentric, LayoutName.Dagre, LayoutName.Grid].includes(options.layout)) {
         fitView();
       } else {
         //TODO: find a smoother way to fit while elements are still moving
@@ -229,7 +276,7 @@ const TopologyContent: React.FC<{
         setTimeout(fitView, 500);
       }
     }
-  }, [fitView, layout]);
+  }, [fitView, options.layout]);
 
   //get options with updated time range and max edge value
   const getOptions = React.useCallback(() => {
@@ -268,13 +315,13 @@ const TopologyContent: React.FC<{
         graph: {
           id: 'g1',
           type: 'graph',
-          layout: layout
+          layout: options.layout
         }
       };
       controller.fromModel(model, false);
       setDetailsLevel();
     }
-  }, [controller, layout, setDetailsLevel]);
+  }, [controller, options.layout, setDetailsLevel]);
 
   //update details on low / med scale change
   React.useEffect(() => {
@@ -295,7 +342,7 @@ const TopologyContent: React.FC<{
       highlightedId = selectedIds[0];
     }
 
-    const updatedModel = generateDataModel(metrics, getOptions(), searchValue, highlightedId, filters);
+    const updatedModel = generateDataModel(metrics, getOptions(), searchValue, highlightedId, filters, t);
     const allIds = [...(updatedModel.nodes || []), ...(updatedModel.edges || [])].map(item => item.id);
     controller.getElements().forEach(e => {
       if (e.getType() !== 'graph') {
@@ -321,17 +368,17 @@ const TopologyContent: React.FC<{
       }
     });
     controller.fromModel(updatedModel);
-  }, [controller, hoveredId, selectedIds, metrics, getOptions, searchValue, filters]);
+  }, [controller, hoveredId, selectedIds, metrics, getOptions, searchValue, filters, t]);
 
-  //update model on layout / options / metrics / filters change
+  //update model on layout / metrics / filters change
   React.useEffect(() => {
-    //update graph on layout / display change
-    if (!controller.hasGraph() || prevLayout !== layout || prevOptions !== options) {
+    //update graph
+    if (!controller.hasGraph() || prevOptions?.layout !== options.layout) {
       resetGraph();
     }
     //then update model
     updateModel();
-  }, [controller, metrics, filters, layout, options, prevLayout, prevOptions, resetGraph, updateModel]);
+  }, [controller, metrics, filters, options, prevOptions, resetGraph, updateModel]);
 
   //request fit on layout end when filter / options change
   React.useEffect(() => {
@@ -363,6 +410,7 @@ const TopologyContent: React.FC<{
 
   useEventListener<SelectionEventListener>(SELECTION_EVENT, onSelectIds);
   useEventListener(FILTER_EVENT, onFilter);
+  useEventListener(STEP_INTO_EVENT, onStepInto);
   useEventListener(HOVER_EVENT, onHover);
   useEventListener(GRAPH_LAYOUT_END_EVENT, onLayoutEnd);
 
@@ -485,7 +533,7 @@ const NetflowTopology: React.FC<{
   metricType?: MetricType;
   metrics: TopologyMetrics[];
   options: TopologyOptions;
-  layout: LayoutName;
+  setOptions: (o: TopologyOptions) => void;
   filters: Filter[];
   setFilters: (v: Filter[]) => void;
   toggleTopologyOptions: () => void;
@@ -498,8 +546,8 @@ const NetflowTopology: React.FC<{
   metricFunction,
   metricType,
   metrics,
-  layout,
   options,
+  setOptions,
   filters,
   setFilters,
   toggleTopologyOptions,
@@ -542,8 +590,8 @@ const NetflowTopology: React.FC<{
           metricFunction={metricFunction}
           metricType={metricType}
           metrics={metrics}
-          layout={layout}
           options={options}
+          setOptions={setOptions}
           filters={filters}
           setFilters={setFilters}
           toggleTopologyOptions={toggleTopologyOptions}

@@ -2,13 +2,16 @@ import { ResourceLink } from '@openshift-console/dynamic-plugin-sdk';
 import { Flex, FlexItem, Popover } from '@patternfly/react-core';
 import {
   CubeIcon,
+  CubesIcon,
+  LevelDownAltIcon,
   FilterIcon,
   InfoCircleIcon,
   OutlinedHddIcon,
   QuestionCircleIcon,
   ServiceIcon,
   ThumbtackIcon,
-  TimesIcon
+  TimesIcon,
+  UsersIcon
 } from '@patternfly/react-icons';
 import {
   Decorator,
@@ -31,6 +34,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 
 export const FILTER_EVENT = 'filter';
+export const STEP_INTO_EVENT = 'step_into';
 export enum DataTypes {
   Default
 }
@@ -49,23 +53,40 @@ type StyleNodeProps = {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const getTypeIcon = (dataType?: string): React.ComponentClass<any, any> => {
-  switch (dataType?.toLowerCase()) {
-    case 'service':
+  /*TODO: try using console ResourceIcon when available
+   * https://issues.redhat.com/browse/CONSOLE-3140
+   */
+  switch (dataType) {
+    case 'Service':
       return ServiceIcon;
-    case 'pod':
+    case 'Pod':
       return CubeIcon;
-    case 'node':
+    case 'Namespace':
+      return UsersIcon;
+    case 'Node':
       return OutlinedHddIcon;
+    case 'CatalogSource':
+    case 'DaemonSet':
+    case 'Deployment':
+    case 'StatefulSet':
+    case 'Job':
+      return CubesIcon;
     default:
       return QuestionCircleIcon;
   }
 };
 
 const getTypeIconColor = (dataType?: string): string => {
-  switch (dataType?.toLowerCase()) {
-    case 'service':
-    case 'pod':
-    case 'node':
+  switch (dataType) {
+    case 'Service':
+    case 'Pod':
+    case 'Namespace':
+    case 'Node':
+    case 'CatalogSource':
+    case 'DaemonSet':
+    case 'Deployment':
+    case 'StatefulSet':
+    case 'Job':
       return '#393F44';
     default:
       return '#c9190b';
@@ -108,47 +129,63 @@ const renderPopoverDecorator = (
     : getDefaultShapeDecoratorCenter(quadrant, element);
 
   return (
-    <Popover
-      hideOnOutsideClick={true}
-      hasAutoWidth
-      headerContent={
-        data.type && data.name && data.namespace ? (
-          <ResourceLink inline={true} kind={data.type} name={data.name} namespace={data.namespace} />
-        ) : (
-          data.addr
-        )
-      }
-      bodyContent={
-        <Flex>
-          <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsNone' }}>
-            <FlexItem>
-              <FlexItem>{t('Kind')}</FlexItem>
-            </FlexItem>
-            <FlexItem>
-              <FlexItem>{t('Namespace')}</FlexItem>
-            </FlexItem>
-            <FlexItem>
-              <FlexItem>{t('Name')}</FlexItem>
-            </FlexItem>
-            <FlexItem>
-              <FlexItem>{t('IP')}</FlexItem>
-            </FlexItem>
-            <FlexItem>
-              <FlexItem>{t('Node')}</FlexItem>
-            </FlexItem>
+    (data.type || data.namespace || data.name || data.addr || data.host) && (
+      <Popover
+        hideOnOutsideClick={true}
+        hasAutoWidth
+        headerContent={
+          data.type && data.name && data.namespace ? (
+            <ResourceLink inline={true} kind={data.type} name={data.name} namespace={data.namespace} />
+          ) : data.type === 'Namespace' && data.namespace ? (
+            <ResourceLink inline={true} kind={'Namespace'} name={data.namespace} />
+          ) : data.type === 'Node' && data.host ? (
+            <ResourceLink inline={true} kind={'Node'} name={data.host} />
+          ) : (
+            data.addr
+          )
+        }
+        bodyContent={
+          <Flex>
+            <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsNone' }}>
+              {data.type && (
+                <FlexItem>
+                  <FlexItem>{t('Kind')}</FlexItem>
+                </FlexItem>
+              )}
+              {data.namespace && (
+                <FlexItem>
+                  <FlexItem>{t('Namespace')}</FlexItem>
+                </FlexItem>
+              )}
+              {data.name && (
+                <FlexItem>
+                  <FlexItem>{t('Name')}</FlexItem>
+                </FlexItem>
+              )}
+              {data.addr && (
+                <FlexItem>
+                  <FlexItem>{t('IP')}</FlexItem>
+                </FlexItem>
+              )}
+              {data.host && (
+                <FlexItem>
+                  <FlexItem>{t('Node')}</FlexItem>
+                </FlexItem>
+              )}
+            </Flex>
+            <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsNone' }}>
+              {data.type && <FlexItem>{data.type}</FlexItem>}
+              {data.namespace && <FlexItem>{data.namespace}</FlexItem>}
+              {data.name && <FlexItem>{data.name}</FlexItem>}
+              {data.addr && <FlexItem>{data.addr}</FlexItem>}
+              {data.host && <FlexItem>{data.host}</FlexItem>}
+            </Flex>
           </Flex>
-          <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsNone' }}>
-            <FlexItem className={data.type ? '' : 'text-muted'}>{data.type || t('n/a')}</FlexItem>
-            <FlexItem className={data.namespace ? '' : 'text-muted'}>{data.namespace || t('n/a')}</FlexItem>
-            <FlexItem className={data.name ? '' : 'text-muted'}>{data.name || t('n/a')}</FlexItem>
-            <FlexItem className={data.addr ? '' : 'text-muted'}>{data.addr || t('n/a')}</FlexItem>
-            <FlexItem className={data.host ? '' : 'text-muted'}>{data.host || t('n/a')}</FlexItem>
-          </Flex>
-        </Flex>
-      }
-    >
-      <Decorator x={x} y={y} radius={DEFAULT_DECORATOR_RADIUS} showBackground icon={icon} />
-    </Popover>
+        }
+      >
+        <Decorator x={x} y={y} radius={DEFAULT_DECORATOR_RADIUS} showBackground icon={icon} />
+      </Popover>
+    )
   );
 };
 
@@ -194,9 +231,11 @@ const renderDecorators = (
     type?: string;
     namespace?: string;
     addr?: string;
+    host?: string;
     point?: Point;
     isPinned?: boolean;
     setPosition?: (location: Point) => void;
+    canStepInto?: boolean;
   },
   isPinned: boolean,
   setPinned: (v: boolean) => void,
@@ -244,17 +283,35 @@ const renderDecorators = (
     setFiltered(updatedIsFiltered);
   };
 
+  const onStepIntoClick = () => {
+    element.getController().fireEvent(STEP_INTO_EVENT, {
+      ...data,
+      id: element.getId()
+    });
+  };
+
   return (
     <>
-      {renderClickableDecorator(
-        t,
-        element,
-        TopologyQuadrant.lowerLeft,
-        isFiltered ? <TimesIcon /> : <FilterIcon />,
-        false,
-        onFilterClick,
-        getShapeDecoratorCenter
-      )}
+      {data.canStepInto &&
+        renderClickableDecorator(
+          t,
+          element,
+          TopologyQuadrant.upperLeft,
+          <LevelDownAltIcon />,
+          false,
+          onStepIntoClick,
+          getShapeDecoratorCenter
+        )}
+      {(data.namespace || data.name || data.addr || data.host) &&
+        renderClickableDecorator(
+          t,
+          element,
+          TopologyQuadrant.lowerLeft,
+          isFiltered ? <TimesIcon /> : <FilterIcon />,
+          false,
+          onFilterClick,
+          getShapeDecoratorCenter
+        )}
       {renderClickableDecorator(
         t,
         element,
