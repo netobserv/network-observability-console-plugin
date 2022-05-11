@@ -27,6 +27,9 @@ const (
 	HostIP        = "K8S_HostIP"
 	SrcHostIP     = Src + HostIP
 	DstHostIP     = Dst + HostIP
+	HostName      = "K8S_HostName"
+	SrcHostName   = Src + HostName
+	DstHostName   = Dst + HostName
 	Packets       = "Packets"
 	Proto         = "Proto"
 	Bytes         = "Bytes"

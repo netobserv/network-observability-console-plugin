@@ -32,6 +32,8 @@ export interface Fields {
   DstK8S_OwnerType?: string;
   SrcK8S_HostIP?: string;
   DstK8S_HostIP?: string;
+  SrcK8S_HostName?: string;
+  DstK8S_HostName?: string;
   Packets: number;
   Proto: number;
   Bytes: number;

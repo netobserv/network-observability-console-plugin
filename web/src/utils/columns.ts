@@ -44,12 +44,16 @@ export enum ColumnsId {
   srcownerkubeobject = 'SrcK8S_OwnerObject',
   dstownerkubeobject = 'DstK8S_OwnerObject',
   host = 'K8S_HostIP',
-  srchost = 'SrcK8S_HostIP',
-  dsthost = 'DstK8S_HostIP',
-  flowdir = 'FlowDirection',
   duration = 'FlowDuration',
   collectiontime = 'CollectionTime',
-  collectionlatency = 'CollectionLatency'
+  collectionlatency = 'CollectionLatency',
+  hostaddr = 'K8S_HostIP',
+  srchostaddr = 'SrcK8S_HostIP',
+  dsthostaddr = 'DstK8S_HostIP',
+  hostname = 'K8S_HostName',
+  srchostname = 'SrcK8S_HostName',
+  dsthostname = 'DstK8S_HostName',
+  flowdir = 'FlowDirection'
 }
 
 export interface Column {
@@ -209,12 +213,20 @@ export const getCommonColumns = (t: TFunction, withConcatenatedFields = true): C
       width: 10
     },
     {
-      id: ColumnsId.host,
+      id: ColumnsId.hostaddr,
       name: t('Node IP'),
       isSelected: false,
       value: f => getSrcOrDstValue(f.fields.SrcK8S_HostIP, f.fields.DstK8S_HostIP),
       sort: (a, b, col) => compareIPs((col.value(a) as string[]).join(''), (col.value(b) as string[]).join('')),
       width: 10
+    },
+    {
+      id: ColumnsId.hostname,
+      name: t('Node Name'),
+      isSelected: false,
+      value: f => getSrcOrDstValue(f.fields.SrcK8S_HostName, f.fields.DstK8S_HostName),
+      sort: (a, b, col) => compareStrings((col.value(a) as string[]).join(''), (col.value(b) as string[]).join('')),
+      width: 15
     }
   ];
 
@@ -364,15 +376,26 @@ export const getSrcColumns = (t: TFunction): Column[] => {
       width: 10
     },
     {
-      id: ColumnsId.srchost,
+      id: ColumnsId.srchostaddr,
       group: t('Source'),
       name: t('Node IP'),
       fieldName: 'SrcK8S_HostIP',
-      quickFilter: 'src_host',
+      quickFilter: 'src_host_address',
       isSelected: false,
       value: f => f.fields.SrcK8S_HostIP || '',
       sort: (a, b, col) => compareIPs(col.value(a) as string, col.value(b) as string),
       width: 10
+    },
+    {
+      id: ColumnsId.srchostname,
+      group: t('Source'),
+      name: t('Node Name'),
+      fieldName: 'SrcK8S_HostName',
+      quickFilter: 'src_host_name',
+      isSelected: false,
+      value: f => f.fields.SrcK8S_HostName || '',
+      sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
+      width: 15
     }
   ];
 };
@@ -457,15 +480,26 @@ export const getDstColumns = (t: TFunction): Column[] => {
       width: 10
     },
     {
-      id: ColumnsId.dsthost,
+      id: ColumnsId.dsthostaddr,
       group: t('Destination'),
       name: t('Node IP'),
       fieldName: 'DstK8S_HostIP',
-      quickFilter: 'dst_host',
+      quickFilter: 'dst_host_address',
       isSelected: false,
       value: f => f.fields.DstK8S_HostIP || '',
       sort: (a, b, col) => compareIPs(col.value(a) as string, col.value(b) as string),
       width: 10
+    },
+    {
+      id: ColumnsId.dsthostname,
+      group: t('Destination'),
+      name: t('Node Name'),
+      fieldName: 'DstK8S_HostName',
+      quickFilter: 'dst_host_name',
+      isSelected: false,
+      value: f => f.fields.DstK8S_HostName || '',
+      sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
+      width: 15
     }
   ];
 };

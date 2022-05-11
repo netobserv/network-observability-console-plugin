@@ -157,6 +157,7 @@
   "Owner Kinds": "Owner Kinds",
   "Ports": "Ports",
   "Node IP": "Node IP",
+  "Node Name": "Node Name",
   "Kubernetes Objects": "Kubernetes Objects",
   "Owner Kubernetes Objects": "Owner Kubernetes Objects",
   "IPs & Ports": "IPs & Ports",

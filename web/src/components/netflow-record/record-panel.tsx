@@ -132,7 +132,28 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
     [t, filters, setFilters]
   );
 
-  const groups = getColumnGroups(columns);
+  const groups = getColumnGroups(
+    columns.filter(
+      c =>
+        //remove empty / duplicates columns for Node
+        (record?.fields.SrcK8S_Type !== 'Node' ||
+          ![
+            ColumnsId.srcnamespace,
+            ColumnsId.srcowner,
+            ColumnsId.srcownertype,
+            ColumnsId.srchostaddr,
+            ColumnsId.srchostname
+          ].includes(c.id)) &&
+        (record?.fields.DstK8S_Type !== 'Node' ||
+          ![
+            ColumnsId.dstnamespace,
+            ColumnsId.dstowner,
+            ColumnsId.dstownertype,
+            ColumnsId.dsthostaddr,
+            ColumnsId.dsthostname
+          ].includes(c.id))
+    )
+  );
   return (
     <DrawerPanelContent id={id} isResizable defaultSize={defaultSize} minSize={minSize} maxSize={maxSize}>
       <DrawerHead>

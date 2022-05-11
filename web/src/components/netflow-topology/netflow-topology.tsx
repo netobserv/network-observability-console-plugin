@@ -170,7 +170,7 @@ const TopologyContent: React.FC<{
         def = findFilter(t, 'resource')!;
         value = `${data.type}.${data.namespace}.${data.name}`;
       } else if (data.type === 'Node' && data.host) {
-        def = findFilter(t, 'host')!;
+        def = findFilter(t, 'host_name')!;
         value = data.host;
       } else if (data.type === 'Namespace' && data.namespace) {
         def = findFilter(t, 'namespace')!;

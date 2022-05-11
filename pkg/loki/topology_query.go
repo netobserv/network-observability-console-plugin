@@ -86,19 +86,19 @@ func getFields(scope, groups string) string {
 	var fields []string
 	switch scope {
 	case "host":
-		fields = []string{"SrcK8S_HostIP", "DstK8S_HostIP"}
+		fields = []string{"SrcK8S_HostName", "DstK8S_HostName"}
 	case "namespace":
 		fields = []string{"SrcK8S_Namespace", "DstK8S_Namespace"}
 	case "owner":
 		fields = []string{"SrcK8S_OwnerName", "SrcK8S_OwnerType", "DstK8S_OwnerName", "DstK8S_OwnerType"}
 	default:
-		fields = []string{"SrcK8S_Name", "SrcK8S_Type", "SrcK8S_OwnerName", "SrcK8S_OwnerType", "SrcK8S_Namespace", "SrcAddr", "SrcK8S_HostIP", "DstK8S_Name", "DstK8S_Type", "DstK8S_OwnerName", "DstK8S_OwnerType", "DstK8S_Namespace", "DstAddr", "DstK8S_HostIP"}
+		fields = []string{"SrcK8S_Name", "SrcK8S_Type", "SrcK8S_OwnerName", "SrcK8S_OwnerType", "SrcK8S_Namespace", "SrcAddr", "SrcK8S_HostName", "DstK8S_Name", "DstK8S_Type", "DstK8S_OwnerName", "DstK8S_OwnerType", "DstK8S_Namespace", "DstAddr", "DstK8S_HostName"}
 	}
 
 	if len(groups) > 0 {
 		if strings.Contains(groups, "hosts") {
-			if !utils.Contains(fields, "SrcK8S_HostIP") {
-				fields = append(fields, "SrcK8S_HostIP", "DstK8S_HostIP")
+			if !utils.Contains(fields, "SrcK8S_HostName") {
+				fields = append(fields, "SrcK8S_HostName", "DstK8S_HostName")
 			}
 		}
 
