@@ -40,9 +40,10 @@ describe('<ColumnsModal />', () => {
     //set start date & time and press button
     act(() => {
       datePickers.at(0).props().onChange!('2021-12-01', new Date('2021-12-01'));
-      timePickers.at(0).props().onChange!('10:15');
+      // set hours minutes and seconds
+      timePickers.at(0).props().onChange!('10:15:30');
     });
-    nowRange.from = new Date('2021-12-01').setHours(10, 15, 0, 0) / 1000;
+    nowRange.from = new Date('2021-12-01').setHours(10, 15, 30, 0) / 1000;
 
     wrapper.find('.pf-c-button.pf-m-primary').at(0).simulate('click');
     expect(props.setRange).toHaveBeenNthCalledWith(2, nowRange);
@@ -50,6 +51,7 @@ describe('<ColumnsModal />', () => {
     //set end date & time and press button
     act(() => {
       datePickers.at(1).props().onChange!('2021-12-15', new Date('2021-12-15'));
+      // set only hours and minutes, seconds should be automatically set to 0
       timePickers.at(1).props().onChange!('23:00');
     });
     nowRange.to = new Date('2021-12-15').setHours(23, 0, 0, 0) / 1000;

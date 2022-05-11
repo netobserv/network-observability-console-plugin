@@ -26,6 +26,10 @@ export interface TimeRangeModalProps {
   id?: string;
 }
 
+//keep displayed values separated. These will be set at startup to avoid TimePicker to loose value on every render
+let displayedFromTime: string | undefined;
+let displayedToTime: string | undefined;
+
 export const TimeRangeModal: React.FC<TimeRangeModalProps> = ({ id, isModalOpen, setModalOpen, range, setRange }) => {
   const { t } = useTranslation();
   const [error, setError] = React.useState<string | undefined>();
@@ -58,9 +62,9 @@ export const TimeRangeModal: React.FC<TimeRangeModalProps> = ({ id, isModalOpen,
     }
 
     setFromDate(toISODateString(from));
-    setFromTime(twentyFourHourTime(from));
+    setFromTime(twentyFourHourTime(from, true));
     setToDate(toISODateString(to));
-    setToTime(twentyFourHourTime(to));
+    setToTime(twentyFourHourTime(to, true));
   }, [range]);
 
   const onCancel = React.useCallback(() => {
@@ -69,6 +73,9 @@ export const TimeRangeModal: React.FC<TimeRangeModalProps> = ({ id, isModalOpen,
   }, [resetInputs, setModalOpen]);
 
   const onSave = React.useCallback(() => {
+    //update time inputs
+    displayedFromTime = fromTime;
+    displayedToTime = toTime;
     const from = getDateMsInSeconds(Date.parse(`${fromDate} ${fromTime}`));
     const to = getDateMsInSeconds(Date.parse(`${toDate} ${toTime}`));
     setRange({ from, to });
@@ -92,6 +99,16 @@ export const TimeRangeModal: React.FC<TimeRangeModalProps> = ({ id, isModalOpen,
   React.useEffect(() => {
     resetInputs();
   }, [range, resetInputs]);
+
+  //set display values
+  React.useEffect(() => {
+    if (!displayedFromTime) {
+      displayedFromTime = fromTime;
+    }
+    if (!displayedToTime) {
+      displayedToTime = toTime;
+    }
+  }, [fromTime, toTime]);
 
   return (
     <Modal
@@ -135,7 +152,13 @@ export const TimeRangeModal: React.FC<TimeRangeModalProps> = ({ id, isModalOpen,
               />
             </FlexItem>
             <FlexItem>
-              <TimePicker is24Hour onChange={setFromTime} time={fromTime} />
+              <TimePicker
+                is24Hour
+                includeSeconds
+                placeholder="hh:mm:ss"
+                onChange={setFromTime}
+                time={displayedFromTime}
+              />
             </FlexItem>
           </Flex>
         </FlexItem>
@@ -151,7 +174,7 @@ export const TimeRangeModal: React.FC<TimeRangeModalProps> = ({ id, isModalOpen,
               />
             </FlexItem>
             <FlexItem>
-              <TimePicker is24Hour onChange={setToTime} time={toTime} />
+              <TimePicker is24Hour includeSeconds placeholder="hh:mm:ss" onChange={setToTime} time={displayedToTime} />
             </FlexItem>
           </Flex>
         </FlexItem>
