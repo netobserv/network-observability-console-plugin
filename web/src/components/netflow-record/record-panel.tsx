@@ -75,7 +75,7 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
             setRange(defaultTimeRange);
           } else {
             //Filter at exact same date
-            const dateSeconds = Number(value);
+            const dateSeconds = Math.floor(Number(value) / 1000);
             setRange({ from: dateSeconds, to: dateSeconds + 1 });
           }
         },

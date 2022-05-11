@@ -641,7 +641,7 @@ export const getExtraColumns = (t: TFunction): Column[] => {
       name: t('Duration'),
       tooltip: t('Time elapsed between flow Start Time and End Time.'),
       isSelected: false,
-      value: f => f.fields.TimeFlowEnd - f.fields.TimeFlowStart,
+      value: f => f.fields.TimeFlowEndMs - f.fields.TimeFlowStartMs,
       sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
       width: 5
     },
@@ -651,7 +651,7 @@ export const getExtraColumns = (t: TFunction): Column[] => {
       tooltip: t('Reception time of the flow by the flow collector.'),
       fieldName: 'TimeReceived',
       isSelected: false,
-      value: f => f.fields.TimeReceived,
+      value: f => f.fields.TimeReceived * 1000,
       sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
       width: 15
     },
@@ -660,7 +660,7 @@ export const getExtraColumns = (t: TFunction): Column[] => {
       name: t('Collection Latency'),
       tooltip: t('Time elapsed between flow End Time and Collection Time.'),
       isSelected: false,
-      value: f => f.fields.TimeReceived - f.fields.TimeFlowEnd,
+      value: f => f.fields.TimeReceived * 1000 - f.fields.TimeFlowEndMs,
       sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
       width: 5
     }
@@ -676,9 +676,9 @@ export const getDefaultColumns = (t: TFunction, withCommonFields = true, withCon
         // eslint-disable-next-line max-len
         'Time of the first packet observed per flow. Unlike End Time, it is not used in queries to select flows in an interval.'
       ),
-      fieldName: 'TimeFlowStart',
+      fieldName: 'TimeFlowStartMs',
       isSelected: false,
-      value: f => f.fields.TimeFlowStart,
+      value: f => f.fields.TimeFlowStartMs,
       sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
       width: 15
     },
@@ -689,9 +689,9 @@ export const getDefaultColumns = (t: TFunction, withCommonFields = true, withCon
         // eslint-disable-next-line max-len
         'Time of the last packet observed per flow. This is what is used in queries to select flows in an interval.'
       ),
-      fieldName: 'TimeFlowEnd',
+      fieldName: 'TimeFlowEndMs',
       isSelected: true,
-      value: f => f.fields.TimeFlowEnd,
+      value: f => f.fields.TimeFlowEndMs,
       sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
       width: 15
     }

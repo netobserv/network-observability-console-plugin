@@ -68,7 +68,7 @@ describe('<NetflowTable />', () => {
     expect(wrapper.find(NetflowTable)).toBeTruthy();
 
     const timestampIdx = ShuffledDefaultColumns.findIndex(c => c.id === ColumnsId.endtime);
-    let expectedDate = new Date(FlowsSample[2].fields.TimeFlowEnd * 1000);
+    let expectedDate = new Date(FlowsSample[2].fields.TimeFlowEndMs);
     // table should be sorted by date asc by default
     expect(wrapper.find(NetflowTableRow).find(Td).at(timestampIdx).find('.datetime').at(0).text()).toBe(
       expectedDate.toDateString() + ' ' + expectedDate.toLocaleTimeString()
@@ -78,7 +78,7 @@ describe('<NetflowTable />', () => {
       return node.type() === 'button' && node.text() === 'End Time';
     });
     button.simulate('click');
-    expectedDate = new Date(FlowsSample[1].fields.TimeFlowEnd * 1000);
+    expectedDate = new Date(FlowsSample[1].fields.TimeFlowEndMs);
     // then should sort date desc on click
     expect(wrapper.find(NetflowTableRow).find(Td).at(timestampIdx).find('.datetime').at(0).text()).toBe(
       expectedDate.toDateString() + ' ' + expectedDate.toLocaleTimeString()
