@@ -1,4 +1,5 @@
 import { TFunction } from 'i18next';
+import moment from 'moment';
 import { CUSTOM_TIME_RANGE_KEY } from '../components/dropdowns/time-range-dropdown';
 
 const zeroPad = (number: number) => (number < 10 ? `0${number}` : number);
@@ -38,4 +39,8 @@ export const getTimeRangeOptions = (t: TFunction) => {
     '1w': t('Last 1 week'),
     '2w': t('Last 2 weeks')
   };
+};
+
+export const getFormattedDate = (date: Date, format = 'llll') => {
+  return moment(date).format(format);
 };

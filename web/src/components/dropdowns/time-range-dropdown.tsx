@@ -2,7 +2,7 @@ import { Dropdown, DropdownItem, DropdownToggle, Tooltip } from '@patternfly/rea
 import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { getTimeRangeOptions, TimeRange } from '../../utils/datetime';
+import { getFormattedDate, getTimeRangeOptions, TimeRange } from '../../utils/datetime';
 import {
   formatDuration,
   getDateFromSecondsString,
@@ -45,9 +45,9 @@ export const TimeRangeDropdown: React.FC<TimeRangeDropdownProps> = ({ id, range,
       const to = getDateFromSecondsString(timeRange.to?.toString());
       return (
         <>
-          {`${t('From')} ${from.toDateString()} ${from.toLocaleTimeString()}`}
+          {`${t('From')} ${getFormattedDate(from)}`}
           <br />
-          {`${t('To')} ${to.toDateString()} ${to.toLocaleTimeString()}`}
+          {`${t('To')} ${getFormattedDate(to)}`}
         </>
       );
     } else {
