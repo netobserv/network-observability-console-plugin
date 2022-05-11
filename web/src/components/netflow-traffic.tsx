@@ -366,7 +366,7 @@ export const NetflowTraffic: React.FC<{
         )}
         <TimeRangeDropdown
           id="time-range-dropdown"
-          range={typeof range === 'number' ? range : undefined}
+          range={range}
           setRange={setRange}
           openCustomModal={() => setTRModalOpen(true)}
         />

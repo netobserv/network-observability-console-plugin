@@ -5,7 +5,7 @@ import TimeRangeDropdown, { TimeRangeDropdownProps } from '../time-range-dropdow
 
 describe('<TimeRangeDropdown />', () => {
   const props: TimeRangeDropdownProps = {
-    range: undefined,
+    range: 300,
     setRange: jest.fn(),
     openCustomModal: jest.fn(),
     id: 'time-range'
