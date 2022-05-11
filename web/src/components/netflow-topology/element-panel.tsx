@@ -293,7 +293,7 @@ export const ElementPanelContent: React.FC<{
                 return matchExclusively(m, 'Namespace', data.name);
               case 'Node':
                 //host must match exclusively Source OR Destination
-                return matchExclusively(m, 'HostIP', data.name);
+                return matchExclusively(m, 'HostName', data.name);
               default:
                 //fallback on Owners match exclusively Source OR Destination
                 return matchExclusively(m, 'OwnerName', data.name);
@@ -306,7 +306,7 @@ export const ElementPanelContent: React.FC<{
                 return matchExclusively(m, 'Namespace', data.namespace);
               case TopologyScopes.HOST:
                 //host must match exclusively Source OR Destination
-                return matchExclusively(m, 'HostIP', data.host);
+                return matchExclusively(m, 'HostName', data.host);
               case TopologyScopes.OWNER:
                 //owner must match exclusively Source OR Destination
                 return matchExclusively(m, 'OwnerName', data.name);
