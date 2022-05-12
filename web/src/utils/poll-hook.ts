@@ -14,8 +14,6 @@ export const usePoll = (callback: () => void, delay?: number, dependencies?: Rea
   useEffect(() => {
     const tick = () => (savedCallback?.current ? savedCallback.current() : null);
 
-    tick(); // Run first tick immediately.
-
     if (delay) {
       // Only start interval if a delay is provided.
       const id = setInterval(tick, delay);

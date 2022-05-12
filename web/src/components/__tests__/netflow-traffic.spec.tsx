@@ -37,14 +37,12 @@ describe('<NetflowTraffic />', () => {
 
   it('should refresh on button click', async () => {
     const wrapper = mount(<NetflowTrafficParent />);
-    //should show flows at first load
-    expect(getFlowsMock).toHaveBeenCalledTimes(1);
     act(() => {
       //should have called getFlow twice after click
       wrapper.find('#refresh-button').at(0).simulate('click');
     });
     await waitFor(() => {
-      expect(getFlowsMock).toHaveBeenCalledTimes(2);
+      expect(getFlowsMock).toHaveBeenCalledTimes(1);
     });
   });
 
