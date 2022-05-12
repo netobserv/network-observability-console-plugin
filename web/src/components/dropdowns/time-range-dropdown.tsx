@@ -1,12 +1,18 @@
+import { Dropdown, DropdownItem, DropdownToggle, Tooltip } from '@patternfly/react-core';
+import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Dropdown, DropdownToggle, DropdownItem } from '@patternfly/react-core';
-import { parseDuration, formatDuration, getDateMsInSeconds, getDateSInMiliseconds } from '../../utils/duration';
-import { getTimeRangeOptions } from '../../utils/datetime';
-import * as _ from 'lodash';
+import { getFormattedDate, getTimeRangeOptions, TimeRange } from '../../utils/datetime';
+import {
+  formatDuration,
+  getDateFromSecondsString,
+  getDateMsInSeconds,
+  getDateSInMiliseconds,
+  parseDuration
+} from '../../utils/duration';
 
 export type TimeRangeDropdownProps = {
-  range?: number;
+  range: number | TimeRange;
   setRange: (v: number) => void;
   openCustomModal: () => void;
   id?: string;
@@ -30,7 +36,24 @@ export const TimeRangeDropdown: React.FC<TimeRangeDropdownProps> = ({ id, range,
   );
 
   const timeRangeOptions = getTimeRangeOptions(t);
-  const selectedKey = range === undefined ? CUSTOM_TIME_RANGE_KEY : formatDuration(getDateSInMiliseconds(range));
+  const selectedKey = typeof range !== 'number' ? CUSTOM_TIME_RANGE_KEY : formatDuration(getDateSInMiliseconds(range));
+
+  const textContent = () => {
+    if (selectedKey === CUSTOM_TIME_RANGE_KEY) {
+      const timeRange = range as TimeRange;
+      const from = getDateFromSecondsString(timeRange.from?.toString());
+      const to = getDateFromSecondsString(timeRange.to?.toString());
+      return (
+        <>
+          {`${t('From')} ${getFormattedDate(from)}`}
+          <br />
+          {`${t('To')} ${getFormattedDate(to)}`}
+        </>
+      );
+    } else {
+      return;
+    }
+  };
 
   return (
     <Dropdown
@@ -43,9 +66,15 @@ export const TimeRangeDropdown: React.FC<TimeRangeDropdownProps> = ({ id, range,
       isOpen={isOpen}
       onSelect={() => setIsOpen(false)}
       toggle={
-        <DropdownToggle id={`${id}-dropdown`} onToggle={() => setIsOpen(!isOpen)}>
-          {timeRangeOptions[selectedKey as keyof typeof timeRangeOptions]}
-        </DropdownToggle>
+        <Tooltip
+          trigger={selectedKey === CUSTOM_TIME_RANGE_KEY ? 'mouseenter focus' : ''}
+          position="top"
+          content={textContent()}
+        >
+          <DropdownToggle id={`${id}-dropdown`} onToggle={() => setIsOpen(!isOpen)}>
+            {timeRangeOptions[selectedKey as keyof typeof timeRangeOptions]}
+          </DropdownToggle>
+        </Tooltip>
       }
     />
   );
