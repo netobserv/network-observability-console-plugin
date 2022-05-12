@@ -6,11 +6,13 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/gorilla/mux"
 
 	"github.com/netobserv/network-observability-console-plugin/pkg/httpclient"
 	"github.com/netobserv/network-observability-console-plugin/pkg/loki"
+	"github.com/netobserv/network-observability-console-plugin/pkg/metrics"
 	"github.com/netobserv/network-observability-console-plugin/pkg/model"
 	"github.com/netobserv/network-observability-console-plugin/pkg/model/fields"
 	"github.com/netobserv/network-observability-console-plugin/pkg/utils"
@@ -19,6 +21,12 @@ import (
 func GetNamespaces(cfg loki.Config) func(w http.ResponseWriter, r *http.Request) {
 	lokiClient := newLokiClient(&cfg)
 	return func(w http.ResponseWriter, r *http.Request) {
+		var code int
+		startTime := time.Now()
+		defer func() {
+			metrics.ObserveHTTPCall("GetNamespaces", code, startTime)
+		}()
+
 		// Initialize values explicitely to avoid null json when emtpy
 		values := []string{}
 
@@ -37,7 +45,8 @@ func GetNamespaces(cfg loki.Config) func(w http.ResponseWriter, r *http.Request)
 		}
 		values = append(values, values2...)
 
-		writeJSON(w, http.StatusOK, utils.NonEmpty(utils.Dedup(values)))
+		code = http.StatusOK
+		writeJSON(w, code, utils.NonEmpty(utils.Dedup(values)))
 	}
 }
 
@@ -66,6 +75,11 @@ func getLabelValues(cfg *loki.Config, lokiClient httpclient.Caller, label string
 func GetNames(cfg loki.Config) func(w http.ResponseWriter, r *http.Request) {
 	lokiClient := newLokiClient(&cfg)
 	return func(w http.ResponseWriter, r *http.Request) {
+		var code int
+		startTime := time.Now()
+		defer func() {
+			metrics.ObserveHTTPCall("GetNames", code, startTime)
+		}()
 		params := mux.Vars(r)
 		namespace := params["namespace"]
 		kind := params["kind"]
@@ -88,7 +102,8 @@ func GetNames(cfg loki.Config) func(w http.ResponseWriter, r *http.Request) {
 		}
 		names = append(names, names2...)
 
-		writeJSON(w, http.StatusOK, utils.NonEmpty(utils.Dedup(names)))
+		code = http.StatusOK
+		writeJSON(w, code, utils.NonEmpty(utils.Dedup(names)))
 	}
 }
 

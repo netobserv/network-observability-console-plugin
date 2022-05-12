@@ -4,9 +4,11 @@ import (
 	"errors"
 	"net/http"
 	"net/url"
+	"time"
 
 	"github.com/netobserv/network-observability-console-plugin/pkg/httpclient"
 	"github.com/netobserv/network-observability-console-plugin/pkg/loki"
+	"github.com/netobserv/network-observability-console-plugin/pkg/metrics"
 	"github.com/netobserv/network-observability-console-plugin/pkg/model"
 )
 
@@ -21,13 +23,20 @@ func GetTopology(cfg loki.Config) func(w http.ResponseWriter, r *http.Request) {
 	lokiClient := newLokiClient(&cfg)
 
 	return func(w http.ResponseWriter, r *http.Request) {
+		var code int
+		startTime := time.Now()
+		defer func() {
+			metrics.ObserveHTTPCall("GetTopology", code, startTime)
+		}()
+
 		flows, code, err := getTopologyFlows(cfg, lokiClient, r.URL.Query())
 		if err != nil {
 			writeError(w, code, err.Error())
 			return
 		}
 
-		writeJSON(w, http.StatusOK, flows)
+		code = http.StatusOK
+		writeJSON(w, code, flows)
 	}
 }
 
