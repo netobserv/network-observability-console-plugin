@@ -16,6 +16,7 @@ import {
   defaultControlButtonsOptions,
   GraphElement,
   GRAPH_LAYOUT_END_EVENT,
+  GRAPH_POSITION_CHANGE_EVENT,
   Model,
   Node,
   SelectionEventListener,
@@ -278,6 +279,16 @@ const TopologyContent: React.FC<{
     }
   }, [fitView, options.layout]);
 
+  const onLayoutPositionChange = React.useCallback(() => {
+    if (controller && controller.hasGraph()) {
+      //hide popovers on pan / zoom
+      const popover = document.querySelector('[aria-labelledby="popover-decorator-header"]');
+      if (popover) {
+        (popover as HTMLElement).style.display = 'none';
+      }
+    }
+  }, [controller]);
+
   //get options with updated time range and max edge value
   const getOptions = React.useCallback(() => {
     let rangeInSeconds: number;
@@ -413,6 +424,7 @@ const TopologyContent: React.FC<{
   useEventListener(STEP_INTO_EVENT, onStepInto);
   useEventListener(HOVER_EVENT, onHover);
   useEventListener(GRAPH_LAYOUT_END_EVENT, onLayoutEnd);
+  useEventListener(GRAPH_POSITION_CHANGE_EVENT, onLayoutPositionChange);
 
   return (
     <TopologyView
