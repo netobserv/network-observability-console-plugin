@@ -3,7 +3,7 @@ import { Button, Tooltip } from '@patternfly/react-core';
 import { FilterIcon, TimesIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { formatDurationAboveSecond } from '../../utils/duration';
+import { formatDurationAboveMillisecond } from '../../utils/duration';
 import { FlowDirection, Record } from '../../api/ipfix';
 import { Column, ColumnsId, getFullColumnName } from '../../utils/columns';
 import { formatPort } from '../../utils/port';
@@ -146,11 +146,11 @@ export const RecordField: React.FC<{
       case ColumnsId.collectiontime:
       case ColumnsId.starttime:
       case ColumnsId.endtime:
-        return dateTimeContent(typeof value === 'number' ? new Date(value * 1000) : undefined);
+        return dateTimeContent(typeof value === 'number' ? new Date(value) : undefined);
       case ColumnsId.collectionlatency:
       case ColumnsId.duration:
         return singleContainer(
-          simpleTextWithTooltip(value !== undefined ? formatDurationAboveSecond(value as number) : '')
+          simpleTextWithTooltip(value !== undefined ? formatDurationAboveMillisecond(value as number) : '')
         );
       case ColumnsId.name:
         return doubleContainer(

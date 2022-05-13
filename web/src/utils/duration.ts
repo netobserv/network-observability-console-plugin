@@ -40,12 +40,15 @@ export const formatDuration = (ms: number): string => {
   return _.trim(str);
 };
 
-export const formatDurationAboveSecond = (seconds: number): string => {
-  if (seconds < 1) {
-    // In general second can be 0. Sometimes could even be negative (unsynced server time?)
-    return '< 1s';
+export const formatDurationAboveMillisecond = (ms: number): string => {
+  if (ms < 1) {
+    // Sometimes ms is 0. Sometimes could even be negative (unsynced server time?)
+    return '< 1ms';
   }
-  return formatDuration(seconds * 1000);
+  if (ms < 1000) {
+    return `${ms}ms`;
+  }
+  return formatDuration(ms);
 };
 
 export const getDateFromSecondsString = (seconds: string): Date => {

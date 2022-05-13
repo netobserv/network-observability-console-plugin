@@ -21,8 +21,8 @@ export const FlowsSample: Record[] = [
       Bytes: 76800,
       SrcMac: '8a:f6:69:6b:1a:cc',
       DstMac: '0a:58:0a:80:00:17',
-      TimeFlowEnd: 1639058287,
-      TimeFlowStart: 1639058286,
+      TimeFlowEndMs: 1639058287000,
+      TimeFlowStartMs: 1639058286000,
       TimeReceived: 1639058290
     }
   },
@@ -45,8 +45,8 @@ export const FlowsSample: Record[] = [
       Bytes: 7800,
       SrcMac: '8a:f6:69:6b:1a:cc',
       DstMac: '0a:58:0a:80:00:17',
-      TimeFlowEnd: 1639058286,
-      TimeFlowStart: 1639058285,
+      TimeFlowEndMs: 1639058286000,
+      TimeFlowStartMs: 1639058285000,
       TimeReceived: 1639058290
     }
   },
@@ -69,8 +69,8 @@ export const FlowsSample: Record[] = [
       Bytes: 76800,
       SrcMac: '8a:f6:69:6b:1a:cc',
       DstMac: '0a:58:0a:80:00:17',
-      TimeFlowEnd: 1639058288,
-      TimeFlowStart: 1639058286,
+      TimeFlowEndMs: 1639058288000,
+      TimeFlowStartMs: 1639058286000,
       TimeReceived: 1639058291
     }
   }
