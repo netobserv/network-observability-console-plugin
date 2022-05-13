@@ -8,3 +8,4 @@
 /plugin-backend
 /coverage.out
 tmp.Dockerfile
+/web/cypress/videos

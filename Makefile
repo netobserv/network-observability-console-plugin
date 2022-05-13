@@ -71,6 +71,11 @@ test-frontend:
 	@echo "### Testing frontend"
 	cd web && npm run test
 
+.PHONY: cypress
+cypress:
+	@echo "### Opening cypress"
+	cd web && npm run cypress:open
+
 .PHONY: test
 test: test-backend test-frontend
 
