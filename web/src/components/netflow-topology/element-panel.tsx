@@ -9,6 +9,7 @@ import {
   ChartThemeColor
 } from '@patternfly/react-charts';
 import {
+  Button,
   DrawerActions,
   DrawerCloseButton,
   DrawerHead,
@@ -30,6 +31,9 @@ import { TopologyMetrics } from '../../api/loki';
 import { humanFileSize } from '../../utils/bytes';
 import { roundTwoDigits } from '../../utils/count';
 import { getDateFromUnixString, twentyFourHourTime } from '../../utils/datetime';
+import { FilterIcon, TimesIcon } from '@patternfly/react-icons';
+import { Filter } from '../../model/filters';
+import { ElementData, isElementFiltered, toggleElementFilter } from '../../model/topology';
 import './element-panel.css';
 
 export const ElementPanelContent: React.FC<{
@@ -38,37 +42,78 @@ export const ElementPanelContent: React.FC<{
   metricFunction: MetricFunction;
   metricType?: MetricType;
   options: TopologyOptions;
-}> = ({ element, metrics, metricFunction, metricType, options }) => {
+  filters: Filter[];
+  setFilters: (filters: Filter[]) => void;
+}> = ({ element, metrics, metricFunction, metricType, options, filters, setFilters }) => {
   const { t } = useTranslation('plugin__network-observability-plugin');
   const data = element.getData();
   const type = element.getType();
 
+  const isFiltered = React.useCallback(
+    (d: ElementData) => {
+      return isElementFiltered(d, filters, t);
+    },
+    [filters, t]
+  );
+
+  const onFilter = React.useCallback(
+    (d: ElementData) => {
+      toggleElementFilter(d, isFiltered(d), filters, setFilters, t);
+    },
+    [filters, isFiltered, setFilters, t]
+  );
+
   const resourceInfos = React.useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (d: any) => {
+    (d: ElementData) => {
       let infos: React.ReactElement | undefined;
       if (d.type && d.name) {
+        const resourceData = {
+          type: d.type,
+          namespace: d.namespace,
+          name: d.name
+        };
         infos = (
           <TextContent id="resourcelink" className="element-text-container grouped">
             <Text component={TextVariants.h4}>{d.type}</Text>
-            <ResourceLink inline={true} kind={d.type} name={d.name} namespace={d.namespace} />
+            <Flex>
+              <FlexItem flex={{ default: 'flex_1' }}>
+                <ResourceLink inline={true} kind={d.type} name={d.name} namespace={d.namespace} />
+              </FlexItem>
+              <FlexItem>
+                <Button variant="link" aria-label="Filter" onClick={() => onFilter(resourceData)}>
+                  {isFiltered(resourceData) ? <TimesIcon /> : <FilterIcon />}
+                </Button>
+              </FlexItem>
+            </Flex>
           </TextContent>
         );
       }
       if (d.addr) {
+        const addressData = {
+          addr: d.addr
+        };
         infos = (
           <>
             {infos}
             <TextContent id="address" className="element-text-container grouped">
               <Text component={TextVariants.h4}>{t('IP')}</Text>
-              <Text id="addressValue">{d.addr}</Text>
+              <Flex>
+                <FlexItem flex={{ default: 'flex_1' }}>
+                  <Text id="addressValue">{d.addr}</Text>
+                </FlexItem>
+                <FlexItem>
+                  <Button variant="link" aria-label="Filter" onClick={() => onFilter(addressData)}>
+                    {isFiltered(addressData) ? <TimesIcon /> : <FilterIcon />}
+                  </Button>
+                </FlexItem>
+              </Flex>
             </TextContent>
           </>
         );
       }
       return infos;
     },
-    [t]
+    [isFiltered, onFilter, t]
   );
 
   const metricTitle = React.useCallback(() => {
@@ -435,8 +480,10 @@ export const ElementPanel: React.FC<{
   metricFunction: MetricFunction;
   metricType?: MetricType;
   options: TopologyOptions;
+  filters: Filter[];
+  setFilters: (filters: Filter[]) => void;
   id?: string;
-}> = ({ id, element, metrics, metricFunction, metricType, options, onClose }) => {
+}> = ({ id, element, metrics, metricFunction, metricType, options, filters, setFilters, onClose }) => {
   const { t } = useTranslation('plugin__network-observability-plugin');
   const data = element.getData();
 
@@ -465,6 +512,8 @@ export const ElementPanel: React.FC<{
           metricFunction={metricFunction}
           metricType={metricType}
           options={options}
+          filters={filters}
+          setFilters={setFilters}
         />
       </DrawerPanelBody>
     </DrawerPanelContent>
