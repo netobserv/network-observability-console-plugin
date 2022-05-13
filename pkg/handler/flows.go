@@ -10,6 +10,7 @@ import (
 
 	"github.com/netobserv/network-observability-console-plugin/pkg/httpclient"
 	"github.com/netobserv/network-observability-console-plugin/pkg/loki"
+	"github.com/netobserv/network-observability-console-plugin/pkg/metrics"
 	"github.com/netobserv/network-observability-console-plugin/pkg/model"
 )
 
@@ -85,6 +86,12 @@ func GetFlows(cfg loki.Config) func(w http.ResponseWriter, r *http.Request) {
 	lokiClient := newLokiClient(&cfg)
 
 	return func(w http.ResponseWriter, r *http.Request) {
+		var code int
+		startTime := time.Now()
+		defer func() {
+			metrics.ObserveHTTPCall("GetFlows", code, startTime)
+		}()
+
 		params := r.URL.Query()
 		hlog.Debugf("GetFlows query params: %s", params)
 
@@ -94,7 +101,8 @@ func GetFlows(cfg loki.Config) func(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		writeJSON(w, http.StatusOK, flows)
+		code = http.StatusOK
+		writeJSON(w, code, flows)
 	}
 }
 

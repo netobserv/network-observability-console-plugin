@@ -7,11 +7,13 @@ import (
 	"net/http"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/sirupsen/logrus"
 
 	"github.com/netobserv/network-observability-console-plugin/pkg/httpclient"
 	"github.com/netobserv/network-observability-console-plugin/pkg/loki"
+	"github.com/netobserv/network-observability-console-plugin/pkg/metrics"
 	"github.com/netobserv/network-observability-console-plugin/pkg/model"
 )
 
@@ -56,6 +58,11 @@ func getLokiError(resp []byte, code int) string {
 
 func executeLokiQuery(flowsURL string, lokiClient httpclient.Caller) ([]byte, int, error) {
 	hlog.Debugf("executeLokiQuery URL: %s", flowsURL)
+	var code int
+	startTime := time.Now()
+	defer func() {
+		metrics.ObserveLokiUnitCall(code, startTime)
+	}()
 
 	resp, code, err := lokiClient.Get(flowsURL)
 	if err != nil {
@@ -65,10 +72,17 @@ func executeLokiQuery(flowsURL string, lokiClient httpclient.Caller) ([]byte, in
 		msg := getLokiError(resp, code)
 		return nil, http.StatusBadRequest, errors.New("Loki backend responded: " + msg)
 	}
-	return resp, http.StatusOK, nil
+	code = http.StatusOK
+	return resp, code, nil
 }
 
 func fetchSingle(lokiClient httpclient.Caller, flowsURL string, merger loki.Merger) (int, error) {
+	var code int
+	startTime := time.Now()
+	defer func() {
+		metrics.ObserveLokiParallelCall(fmt.Sprintf("%T", merger), code, 1, startTime)
+	}()
+
 	resp, code, err := executeLokiQuery(flowsURL, lokiClient)
 	if err != nil {
 		return code, err
@@ -84,6 +98,12 @@ func fetchSingle(lokiClient httpclient.Caller, flowsURL string, merger loki.Merg
 }
 
 func fetchParallel(lokiClient httpclient.Caller, queries []string, merger loki.Merger) (int, error) {
+	var codeOut int
+	startTime := time.Now()
+	defer func() {
+		metrics.ObserveLokiParallelCall(fmt.Sprintf("%T", merger), codeOut, len(queries), startTime)
+	}()
+
 	// Run queries in parallel, then aggregate them
 	resChan := make(chan model.QueryResponse, len(queries))
 	errChan := make(chan errorWithCode, len(queries))
@@ -113,14 +133,17 @@ func fetchParallel(lokiClient httpclient.Caller, queries []string, merger loki.M
 	close(errChan)
 
 	for errWithCode := range errChan {
+		codeOut = errWithCode.code
 		return errWithCode.code, errWithCode.err
 	}
 
 	// Aggregate results
 	for r := range resChan {
 		if _, err := merger.Add(r.Data); err != nil {
-			return http.StatusInternalServerError, err
+			codeOut = http.StatusInternalServerError
+			return codeOut, err
 		}
 	}
-	return http.StatusOK, nil
+	codeOut = http.StatusOK
+	return codeOut, nil
 }

@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/netobserv/network-observability-console-plugin/pkg/loki"
+	"github.com/netobserv/network-observability-console-plugin/pkg/metrics"
 )
 
 const (
@@ -18,6 +20,12 @@ func ExportFlows(cfg loki.Config) func(w http.ResponseWriter, r *http.Request) {
 	lokiClient := newLokiClient(&cfg)
 
 	return func(w http.ResponseWriter, r *http.Request) {
+		var code int
+		startTime := time.Now()
+		defer func() {
+			metrics.ObserveHTTPCall("ExportFlows", code, startTime)
+		}()
+
 		params := r.URL.Query()
 		hlog.Debugf("ExportFlows query params: %s", params)
 
@@ -35,9 +43,11 @@ func ExportFlows(cfg loki.Config) func(w http.ResponseWriter, r *http.Request) {
 
 		switch exportFormat {
 		case exportCSVFormat:
-			writeCSV(w, http.StatusOK, flows, exportColumns)
+			code = http.StatusOK
+			writeCSV(w, code, flows, exportColumns)
 		default:
-			writeError(w, http.StatusBadRequest, fmt.Sprintf("export format %q is not valid", exportFormat))
+			code = http.StatusBadRequest
+			writeError(w, code, fmt.Sprintf("export format %q is not valid", exportFormat))
 		}
 	}
 }
