@@ -150,7 +150,7 @@ export const NetflowTraffic: React.FC<{
   React.useEffect(() => {
     // Init state from URL
     if (!forcedFilters) {
-      getFiltersFromURL(t)?.then(setFilters);
+      getFiltersFromURL(t)?.then(updateTableFilters);
     }
     // disabling exhaustive-deps: tests hang when "t" passed as dependency (useTranslation not stable?)
     // eslint-disable-next-line react-hooks/exhaustive-deps
