@@ -136,7 +136,7 @@ const BaseNode: React.FC<BaseNodeProps> = ({
   const [hovered, hoverRef] = useHover();
   const status = element.getNodeStatus();
   const { width, height } = element.getDimensions();
-  const isHover = hover !== undefined ? hover : hovered;
+  const isHover = hovered || hover;
 
   const statusDecorator = React.useMemo(() => {
     if (!status || !showStatusDecorator) {
@@ -215,7 +215,7 @@ const BaseNode: React.FC<BaseNodeProps> = ({
   }
 
   return (
-    <Layer id={dragging || hover || highlighted ? TOP_LAYER : undefined}>
+    <Layer id={dragging || isHover || highlighted ? TOP_LAYER : undefined}>
       <g ref={hoverRef as React.LegacyRef<SVGGElement> | undefined} className={groupClassName}>
         <NodeShadows />
         <g ref={dragNodeRef} onClick={onSelect} onContextMenu={onContextMenu}>
@@ -257,7 +257,7 @@ const BaseNode: React.FC<BaseNodeProps> = ({
           {children}
         </g>
         {statusDecorator}
-        {hovered && attachments}
+        {isHover && attachments}
       </g>
     </Layer>
   );

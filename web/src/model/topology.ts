@@ -540,7 +540,7 @@ export const generateDataModel = (
     const srcNode = manageNode('Src', d);
     const dstNode = manageNode('Dst', d);
 
-    if (options.edges && srcNode && dstNode) {
+    if (options.edges && srcNode && dstNode && srcNode.id !== dstNode.id) {
       addEdge(srcNode.id, dstNode.id, d.total, srcNode.data.shadowed || dstNode.data.shadowed);
     }
   });

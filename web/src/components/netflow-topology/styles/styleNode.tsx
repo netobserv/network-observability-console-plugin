@@ -131,7 +131,20 @@ const renderPopoverDecorator = (
   return (
     (data.type || data.namespace || data.name || data.addr || data.host) && (
       <Popover
+        id="decorator"
         hideOnOutsideClick={true}
+        onShow={() => {
+          element.setData({
+            ...element.getData(),
+            hover: true //force hover state when popover is opened
+          });
+        }}
+        onHide={() => {
+          element.setData({
+            ...element.getData(),
+            hover: undefined //restore hover state when popover is closed
+          });
+        }}
         hasAutoWidth
         headerContent={
           data.type && data.name && data.namespace ? (
