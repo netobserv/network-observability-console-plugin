@@ -134,12 +134,9 @@ const renderPopoverDecorator = (
         hideOnOutsideClick={true}
         hasAutoWidth
         headerContent={
-          data.type && data.name && data.namespace ? (
+          //namespace is optionnal here for Node and Namespace kinds
+          data.type && data.name ? (
             <ResourceLink inline={true} kind={data.type} name={data.name} namespace={data.namespace} />
-          ) : data.type === 'Namespace' && data.namespace ? (
-            <ResourceLink inline={true} kind={'Namespace'} name={data.namespace} />
-          ) : data.type === 'Node' && data.host ? (
-            <ResourceLink inline={true} kind={'Node'} name={data.host} />
           ) : (
             data.addr
           )

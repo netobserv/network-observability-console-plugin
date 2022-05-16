@@ -500,7 +500,7 @@ export const generateDataModel = (
             ? //metrics without host will be grouped as 'External'
               { displayName: t('External') }
             : //valid metrics will be Nodes with ips
-              { type: 'Node', host, canStepInto: true },
+              { type: 'Node', name: host, canStepInto: true },
           parent
         );
       case TopologyScopes.NAMESPACE:
