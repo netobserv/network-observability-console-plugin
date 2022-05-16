@@ -202,7 +202,7 @@ export const ElementPanelContent: React.FC<{
             const srcNamespace = m.metric.SrcK8S_Namespace ? m.metric.SrcK8S_Namespace : t('Unknown');
             const dstNamespace = m.metric.DstK8S_Namespace ? m.metric.DstK8S_Namespace : t('Unknown');
             return nodeData?.namespace
-              ? m.metric.SrcK8S_Namespace === nodeData.namespace
+              ? m.metric.SrcK8S_Namespace === nodeData.name
                 ? `${t('To')} ${dstNamespace}`
                 : `${t('From')} ${srcNamespace}`
               : `${srcNamespace} -> ${dstNamespace}`;
@@ -419,8 +419,8 @@ export const ElementPanelContent: React.FC<{
           );
         case TopologyScopes.NAMESPACE:
           return (
-            (m.metric.SrcK8S_Namespace === srcData.namespace && m.metric.DstK8S_Namespace === tgtData.namespace) ||
-            (m.metric.SrcK8S_Namespace === tgtData.namespace && m.metric.DstK8S_Namespace === srcData.namespace)
+            (m.metric.SrcK8S_Namespace === srcData.name && m.metric.DstK8S_Namespace === tgtData.name) ||
+            (m.metric.SrcK8S_Namespace === tgtData.name && m.metric.DstK8S_Namespace === srcData.name)
           );
         case TopologyScopes.OWNER:
           return (
