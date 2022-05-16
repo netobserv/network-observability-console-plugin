@@ -82,9 +82,12 @@ export const setURLFilters = (filters: Filter[]) => {
 export const setURLRange = (range: number | TimeRange) => {
   if (typeof range === 'number') {
     setURLParam(URLParam.TimeRange, String(range));
+    removeURLParam(URLParam.StartTime);
+    removeURLParam(URLParam.EndTime);
   } else if (typeof range === 'object') {
     setURLParam(URLParam.StartTime, String(range.from));
     setURLParam(URLParam.EndTime, String(range.to));
+    removeURLParam(URLParam.TimeRange);
   }
 };
 
