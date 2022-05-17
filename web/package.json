@@ -121,6 +121,9 @@
       "ts",
       "tsx"
     ],
+    "modulePathIgnorePatterns": [
+      "cypress"
+    ],
     "moduleNameMapper": {
       "\\.(css|less)$": "<rootDir>/moduleMapper/dummy.ts",
       "@console/*": "<rootDir>/moduleMapper/dummy.ts"
