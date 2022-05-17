@@ -14,10 +14,10 @@ import { elementPerMinText, roundTwoDigits } from '../utils/count';
 import { TopologyMetrics } from '../api/loki';
 import { Filter, FilterDefinition } from '../model/filters';
 import { bytesPerSeconds, humanFileSize } from '../utils/bytes';
-import { kindToAbbr } from '../utils/label';
 import { defaultTimeRange } from '../utils/router';
 import { findFilter } from '../utils/filter-definitions';
 import { TFunction } from 'i18next';
+import { K8sModel } from '@openshift-console/dynamic-plugin-sdk';
 
 export enum LayoutName {
   Cola = 'Cola',
@@ -198,7 +198,8 @@ export const generateNode = (
   searchValue: string,
   highlightedId: string,
   filters: Filter[],
-  t: TFunction
+  t: TFunction,
+  k8sModels: { [key: string]: K8sModel }
 ): NodeModel => {
   const id = `${data.type}.${data.namespace}.${data.name}.${data.addr}.${data.host}`;
   const label = data.name
@@ -223,6 +224,7 @@ export const generateNode = (
       : undefined;
   const shadowed = !_.isEmpty(searchValue) && !(label.includes(searchValue) || secondaryLabel?.includes(searchValue));
   const highlighted = !shadowed && !_.isEmpty(highlightedId) && highlightedId.includes(id);
+  const k8sModel = options.nodeBadges && data.type ? k8sModels[data.type] : undefined;
   return {
     id,
     type: 'node',
@@ -238,11 +240,9 @@ export const generateNode = (
       highlighted,
       isFiltered: isElementFiltered(data, filters, t),
       labelPosition: LabelPosition.bottom,
-      //TODO: get badge and color using console ResourceIcon
-      badge: options.nodeBadges && data.type ? kindToAbbr(data.type) : undefined,
-      //badgeColor: options.nodeBadges && type ? getModel(type)?.color : undefined,
-      badgeClassName:
-        options.nodeBadges && data.type ? `co-m-resource-icon co-m-resource-${data.type.toLowerCase()}` : undefined,
+      badge: k8sModel?.abbr,
+      badgeColor: k8sModel?.color ? k8sModel.color : '#2b9af3',
+      badgeClassName: 'topology-icon',
       showDecorators: true,
       secondaryLabel,
       truncateLength: options.truncateLength !== TopologyTruncateLength.OFF ? options.truncateLength : undefined
@@ -359,7 +359,8 @@ export const generateDataModel = (
   searchValue: string,
   highlightedId: string,
   filters: Filter[],
-  t: TFunction
+  t: TFunction,
+  k8sModels: { [key: string]: K8sModel }
 ): Model => {
   let nodes: NodeModel[] = [];
   const edges: EdgeModel[] = [];
@@ -415,7 +416,7 @@ export const generateDataModel = (
         n.data.host === data.host
     );
     if (!node) {
-      node = generateNode(data, opts, searchValue, highlightedId, filters, t);
+      node = generateNode(data, opts, searchValue, highlightedId, filters, t, k8sModels);
       nodes.push(node);
     }
 

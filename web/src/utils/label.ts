@@ -20,10 +20,3 @@ export const validateK8SName = (name: string) => {
 export const validateStrictK8SName = (name: string) => {
   return strictK8sName.test(name);
 };
-
-//TODO: remove kindToAbbr after integration of console ResourceIcon in topology library
-const abbrBlacklist = ['ASS'];
-export const kindToAbbr = (kind: string) => {
-  const abbrKind = (kind.replace(/[^A-Z]/g, '') || kind.toUpperCase()).slice(0, 4);
-  return abbrBlacklist.includes(abbrKind) ? abbrKind.slice(0, -1) : abbrKind;
-};

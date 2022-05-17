@@ -54,3 +54,11 @@ g.topology.edge-highlighted>.pf-topology__edge__link,
 g.topology.edge-highlighted>.pf-topology-connector-arrow {
   stroke: #0066CC;
 }
+
+.topology-icon {
+  border: none;
+}
+
+.topology-icon > text {
+  fill: white;
+}

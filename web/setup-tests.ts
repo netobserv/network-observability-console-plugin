@@ -49,6 +49,9 @@ jest.mock('react-i18next', () => {
 jest.mock('@openshift-console/dynamic-plugin-sdk', () => {
   return {
     useResolvedExtensions: jest.fn(),
+    useK8sModels: () => {
+      return [{}, false];
+    },
     ResourceLink: () => {
       return null;
     }
@@ -70,7 +73,7 @@ jest.mock('@patternfly/react-core', () => ({
   DatePicker: () => {
     return null;
   },
-  OverflowMenuControl: ()=> {
+  OverflowMenuControl: () => {
     return null;
   }
 }));

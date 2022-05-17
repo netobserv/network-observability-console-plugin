@@ -52,6 +52,7 @@ import stylesComponentFactory from './componentFactories/stylesComponentFactory'
 import layoutFactory from './layouts/layoutFactory';
 import './netflow-topology.css';
 import { STEP_INTO_EVENT, FILTER_EVENT } from './styles/styleNode';
+import { K8sModel } from '@openshift-console/dynamic-plugin-sdk';
 
 export const HOVER_EVENT = 'hover';
 
@@ -64,6 +65,7 @@ const ZOOM_OUT = 3 / 4;
 const FIT_PADDING = 80;
 
 const TopologyContent: React.FC<{
+  k8sModels: { [key: string]: K8sModel };
   range: number | TimeRange;
   metricFunction?: MetricFunction;
   metricType?: MetricType;
@@ -76,6 +78,7 @@ const TopologyContent: React.FC<{
   selected: GraphElement | undefined;
   onSelect: (e: GraphElement | undefined) => void;
 }> = ({
+  k8sModels,
   range,
   metricFunction,
   metricType,
@@ -326,7 +329,7 @@ const TopologyContent: React.FC<{
       highlightedId = selectedIds[0];
     }
 
-    const updatedModel = generateDataModel(metrics, getOptions(), searchValue, highlightedId, filters, t);
+    const updatedModel = generateDataModel(metrics, getOptions(), searchValue, highlightedId, filters, t, k8sModels);
     const allIds = [...(updatedModel.nodes || []), ...(updatedModel.edges || [])].map(item => item.id);
     controller.getElements().forEach(e => {
       if (e.getType() !== 'graph') {
@@ -352,7 +355,7 @@ const TopologyContent: React.FC<{
       }
     });
     controller.fromModel(updatedModel);
-  }, [controller, prevMetrics, metrics, hoveredId, selectedIds, getOptions, searchValue, filters, t]);
+  }, [controller, prevMetrics, metrics, hoveredId, selectedIds, getOptions, searchValue, filters, t, k8sModels]);
 
   //update model on layout / metrics / filters change
   React.useEffect(() => {
@@ -523,6 +526,7 @@ const TopologyContent: React.FC<{
 
 const NetflowTopology: React.FC<{
   loading?: boolean;
+  k8sModels: { [key: string]: K8sModel };
   error?: string;
   range: number | TimeRange;
   metricFunction?: MetricFunction;
@@ -537,6 +541,7 @@ const NetflowTopology: React.FC<{
   onSelect: (e: GraphElement | undefined) => void;
 }> = ({
   loading,
+  k8sModels,
   error,
   range,
   metricFunction,
@@ -582,6 +587,7 @@ const NetflowTopology: React.FC<{
     return (
       <VisualizationProvider controller={controller}>
         <TopologyContent
+          k8sModels={k8sModels}
           range={range}
           metricFunction={metricFunction}
           metricType={metricType}
