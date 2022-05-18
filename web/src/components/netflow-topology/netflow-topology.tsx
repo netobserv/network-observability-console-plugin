@@ -55,6 +55,7 @@ import { STEP_INTO_EVENT, FILTER_EVENT } from './styles/styleNode';
 export const HOVER_EVENT = 'hover';
 
 let requestFit = false;
+let waitForMetrics = false;
 let lastNodeIdsFound: string[] = [];
 
 const ZOOM_IN = 4 / 3;
@@ -89,6 +90,7 @@ const TopologyContent: React.FC<{
   const { t } = useTranslation('plugin__network-observability-plugin');
   const controller = useVisualizationController();
 
+  const prevMetrics = usePrevious(metrics);
   const prevMetricFunction = usePrevious(metricFunction);
   const prevMetricType = usePrevious(metricType);
   const prevOptions = usePrevious(options);
@@ -302,7 +304,10 @@ const TopologyContent: React.FC<{
       return;
     } else if (!controller.hasGraph()) {
       console.error('updateModel called while controller has no graph');
+    } else if (waitForMetrics && prevMetrics === metrics) {
+      return;
     }
+    waitForMetrics = false;
 
     //highlight either hoveredId or selected id
     let highlightedId = hoveredId;
@@ -336,14 +341,25 @@ const TopologyContent: React.FC<{
       }
     });
     controller.fromModel(updatedModel);
-  }, [controller, hoveredId, selectedIds, metrics, getOptions, searchValue, filters, t]);
+  }, [controller, prevMetrics, metrics, hoveredId, selectedIds, getOptions, searchValue, filters, t]);
 
   //update model on layout / metrics / filters change
   React.useEffect(() => {
     //update graph
-    if (!controller.hasGraph() || prevOptions?.layout !== options.layout) {
+    if (
+      !controller.hasGraph() ||
+      prevOptions?.layout !== options.layout ||
+      prevOptions.startCollapsed !== options.startCollapsed
+    ) {
       resetGraph();
     }
+
+    //skip refresh if scope / group changed. It will refresh after getting new metrics
+    if (prevOptions && (prevOptions.scope !== options.scope || prevOptions.groupTypes !== options.groupTypes)) {
+      waitForMetrics = true;
+      return;
+    }
+
     //then update model
     updateModel();
   }, [controller, metrics, filters, options, prevOptions, resetGraph, updateModel]);
