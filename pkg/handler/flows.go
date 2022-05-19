@@ -64,8 +64,27 @@ func getStartTime(params url.Values) (string, error) {
 			}
 			start = strconv.FormatInt(time.Now().Unix()-r, 10)
 		}
+	} else {
+		// Make sure it is a valid int
+		_, err := strconv.ParseInt(start, 10, 64)
+		if err != nil {
+			return "", errors.New("Could not parse start time: " + err.Error())
+		}
 	}
 	return start, nil
+}
+
+// getEndTime will parse end time and ceil it to the next second
+func getEndTime(params url.Values) (string, error) {
+	end := params.Get(endTimeKey)
+	if len(end) > 0 {
+		r, err := strconv.ParseInt(end, 10, 64)
+		if err != nil {
+			return "", errors.New("Could not parse end time: " + err.Error())
+		}
+		end = strconv.Itoa(int(r) + 1)
+	}
+	return end, nil
 }
 
 // getLimit returns limit as string (used for logQL) and as int (used to check if reached)
@@ -111,7 +130,10 @@ func getFlows(cfg loki.Config, client httpclient.Caller, params url.Values) (*mo
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
-	end := params.Get(endTimeKey)
+	end, err := getEndTime(params)
+	if err != nil {
+		return nil, http.StatusBadRequest, err
+	}
 	limit, reqLimit, err := getLimit(params)
 	if err != nil {
 		return nil, http.StatusBadRequest, err

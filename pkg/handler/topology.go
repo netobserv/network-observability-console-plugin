@@ -47,7 +47,10 @@ func getTopologyFlows(cfg loki.Config, client httpclient.Caller, params url.Valu
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
-	end := params.Get(endTimeKey)
+	end, err := getEndTime(params)
+	if err != nil {
+		return nil, http.StatusBadRequest, err
+	}
 	limit, reqLimit, err := getLimit(params)
 	if err != nil {
 		return nil, http.StatusBadRequest, err

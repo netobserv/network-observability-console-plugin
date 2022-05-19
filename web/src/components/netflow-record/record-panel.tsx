@@ -76,7 +76,8 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
           } else {
             //Filter at exact same date
             const dateSeconds = Math.floor(Number(value) / 1000);
-            setRange({ from: dateSeconds, to: dateSeconds + 1 });
+            // Note: "to" field will be rounded up to the next second from the backend
+            setRange({ from: dateSeconds, to: dateSeconds });
           }
         },
         isDelete: isDelete
