@@ -104,10 +104,10 @@ func TestLokiFiltering(t *testing.T) {
 		outputQueries: []string{`?query={app="netobserv-flowcollector"}&start=1640991600`},
 	}, {
 		inputPath:     "?endTime=1641160800",
-		outputQueries: []string{`?query={app="netobserv-flowcollector"}&end=1641160800`},
+		outputQueries: []string{`?query={app="netobserv-flowcollector"}&end=1641160801`},
 	}, {
 		inputPath:     "?startTime=1640991600&endTime=1641160800",
-		outputQueries: []string{`?query={app="netobserv-flowcollector"}&start=1640991600&end=1641160800`},
+		outputQueries: []string{`?query={app="netobserv-flowcollector"}&start=1640991600&end=1641160801`},
 	}, {
 		inputPath:     "?timeRange=300000",
 		outputQueries: []string{`?query={app="netobserv-flowcollector"}&start=${timeNow-300000}`},
