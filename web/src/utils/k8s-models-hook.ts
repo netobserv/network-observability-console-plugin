@@ -6,7 +6,6 @@ export function useK8sModelsWithColors() {
   function setColor(kind: string, color: string) {
     if (k8sModels && k8sModels[kind]) {
       k8sModels[kind].color = color;
-      console.log(kind, color);
     }
   }
 

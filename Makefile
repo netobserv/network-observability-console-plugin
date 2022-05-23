@@ -91,8 +91,16 @@ build-frontend: install-frontend fmt-frontend
 	@echo "### Building frontend"
 	cd web && npm run build
 
+.PHONY: build-frontend-standalone
+build-frontend-standalone: install-frontend fmt-frontend
+	@echo "### Building frontend standalone"
+	cd web && npm run build:standalone
+
 .PHONY: build
 build: build-backend build-frontend
+
+.PHONY: build-standalone
+build-standalone: build-backend build-frontend-standalone
 
 .PHONY: frontend
 frontend: build-frontend lint-frontend test-frontend
@@ -132,6 +140,12 @@ start: build-backend
 	@echo "### Starting backend on http://localhost:9002"
 	bash -c "trap 'fuser -k 9002/tcp' EXIT; \
 					./plugin-backend -port 9002 & cd web && npm run start" 
+
+.PHONY: start-standalone
+start-standalone: build-backend 
+	@echo "### Starting backend on http://localhost:9002"
+	bash -c "trap 'fuser -k 9002/tcp' EXIT; \
+					./plugin-backend -port 9002 & cd web && npm run start:standalone"
 
 .PHONY: bridge
 bridge:

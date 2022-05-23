@@ -91,6 +91,7 @@ import { loadConfig } from '../utils/config';
 import SummaryPanel from './query-summary/summary-panel';
 import { GraphElement } from '@patternfly/react-topology';
 import ElementPanel from './netflow-topology/element-panel';
+import { ContextSingleton } from '../utils/context';
 
 import './netflow-traffic.css';
 
@@ -107,6 +108,8 @@ export const NetflowTraffic: React.FC<{
   const { t } = useTranslation('plugin__network-observability-plugin');
   const [extensions] = useResolvedExtensions<ModelFeatureFlag>(isModelFeatureFlag);
   const k8sModels = useK8sModelsWithColors();
+  //set context from extensions. Standalone will return a "dummy" flag
+  ContextSingleton.setContext(extensions);
   const [queryParams, setQueryParams] = useLocalStorage<string>(LOCAL_STORAGE_QUERY_PARAMS_KEY);
   // set url params from local storage saved items at startup if empty
   if (hasEmptyParams() && queryParams) {
