@@ -10,6 +10,9 @@
     "i18n": "i18next \"src/**/*.{js,jsx,ts,tsx}\" [-oc] -c i18next-parser.config.js",
     "ts-node": "ts-node -O '{\"module\":\"commonjs\"}' -I '/node_modules/(?!(@openshift-console)/)/'",
     "ts-node-transpile": "ts-node --transpile-only -O '{\"module\":\"commonjs\"}' -I '/node_modules/(?!(@openshift-console)/)/'",
+    "cypress:open": "cypress open",
+    "cypress:record": "cypress run --record --headless",
+    "cypress:run": "cypress run",
     "test": "jest",
     "test:clear": "jest --clearCache && npm run test",
     "test:watch": "jest --watch",
@@ -46,6 +49,7 @@
     "axios": "^0.24.0",
     "copy-webpack-plugin": "6.4.1",
     "css-loader": "^6.5.1",
+    "cypress": "^9.6.1",
     "enzyme": "3.11.0",
     "enzyme-adapter-react-16": "1.15.6",
     "eslint": "8.3.0",
@@ -116,6 +120,9 @@
       "jsx",
       "ts",
       "tsx"
+    ],
+    "modulePathIgnorePatterns": [
+      "cypress"
     ],
     "moduleNameMapper": {
       "\\.(css|less)$": "<rootDir>/moduleMapper/dummy.ts",
