@@ -136,13 +136,13 @@ serve-mock:
 	./plugin-backend --loki-mock --loglevel trace
 
 .PHONY: start
-start: build-backend 
+start: build-backend install-frontend
 	@echo "### Starting backend on http://localhost:9002"
 	bash -c "trap 'fuser -k 9002/tcp' EXIT; \
 					./plugin-backend -port 9002 & cd web && npm run start" 
 
 .PHONY: start-standalone
-start-standalone: build-backend 
+start-standalone: build-backend install-frontend
 	@echo "### Starting backend on http://localhost:9002"
 	bash -c "trap 'fuser -k 9002/tcp' EXIT; \
 					./plugin-backend -port 9002 & cd web && npm run start:standalone"
