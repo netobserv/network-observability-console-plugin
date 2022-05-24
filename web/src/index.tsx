@@ -7,6 +7,7 @@ import httpBackend from 'i18next-http-backend';
 
 import '@patternfly/react-core/dist/styles/base.css';
 import '@patternfly/patternfly/patternfly-theme-dark.css';
+import '@patternfly/patternfly/patternfly-charts-theme-dark.css';
 
 import App from './app';
 import './index.css';
