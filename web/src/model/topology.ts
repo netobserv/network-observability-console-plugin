@@ -116,17 +116,17 @@ export const getFilterDefValue = (d: ElementData, t: TFunction) => {
     value = `${d.type}.${d.namespace}.${d.name}`;
   } else if (d.type === 'Node' && (d.host || d.name)) {
     def = findFilter(t, 'host_name')!;
-    value = d.host ? d.host! : d.name!;
+    value = `"${d.host ? d.host! : d.name!}"`;
   } else if (d.type === 'Namespace' && (d.namespace || d.name)) {
     def = findFilter(t, 'namespace')!;
-    value = d.namespace ? d.namespace! : d.name!;
+    value = `"${d.namespace ? d.namespace! : d.name!}"`;
   } else if (d.type && d.name) {
     if (['Service', 'Pod'].includes(d.type)) {
       def = findFilter(t, 'name')!;
     } else {
       def = findFilter(t, 'owner_name')!;
     }
-    value = d.name;
+    value = `"${d.name}"`;
   } else if (d.addr) {
     def = findFilter(t, 'address')!;
     value = d.addr!;
