@@ -85,9 +85,9 @@ func (f *labelFilter) writeInto(sb *strings.Builder) {
 		sb.WriteString(f.value)
 		sb.WriteString(`")`)
 	case typeRegex:
-		sb.WriteByte('`')
+		sb.WriteString("`(?i).*")
 		sb.WriteString(f.value)
-		sb.WriteByte('`')
+		sb.WriteString(".*`")
 	default:
 		panic(fmt.Sprint("wrong filter value type", int(f.valueType)))
 	}
@@ -95,13 +95,13 @@ func (f *labelFilter) writeInto(sb *strings.Builder) {
 
 func (f *lineFilter) asLabelFilters() []labelFilter {
 	lfs := make([]labelFilter, 0, len(f.values))
-	for _, value := range f.values {
+	for _, v := range f.values {
 		lf := labelFilter{
 			key:       f.key,
-			valueType: value.valueType,
-			value:     value.value,
+			valueType: v.valueType,
+			value:     v.value,
 		}
-		if value.valueType == typeRegex {
+		if v.valueType == typeRegex {
 			lf.matcher = labelMatches
 		} else {
 			lf.matcher = labelEqual

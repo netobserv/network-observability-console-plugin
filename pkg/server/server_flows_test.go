@@ -160,7 +160,7 @@ func TestLokiFiltering(t *testing.T) {
 	}, {
 		inputPath: "?filters=" + url.QueryEscape(`SrcK8S_Name="",foo&DstK8S_Name="hello"`),
 		outputQueries: []string{
-			"?query={app=\"netobserv-flowcollector\"}|~`DstK8S_Name\":\"hello\"`|json|SrcK8S_Name=\"\"+or+SrcK8S_Name=~`foo`",
+			"?query={app=\"netobserv-flowcollector\"}|~`DstK8S_Name\":\"hello\"`|json|SrcK8S_Name=\"\"+or+SrcK8S_Name=~`(?i).*foo.*`",
 		},
 	}, {
 		inputPath: "?filters=" + url.QueryEscape(`SrcK8S_Namespace=""|DstPort=70`),
@@ -178,7 +178,7 @@ func TestLokiFiltering(t *testing.T) {
 		inputPath: "?filters=" + url.QueryEscape(`SrcK8S_Name="",foo|DstK8S_Name="hello"`),
 		outputQueries: []string{
 			"?query={app=\"netobserv-flowcollector\"}|~`DstK8S_Name\":\"hello\"`",
-			"?query={app=\"netobserv-flowcollector\"}|json|SrcK8S_Name=\"\"+or+SrcK8S_Name=~`foo`",
+			"?query={app=\"netobserv-flowcollector\"}|json|SrcK8S_Name=\"\"+or+SrcK8S_Name=~`(?i).*foo.*`",
 		},
 	}}
 
