@@ -5,6 +5,9 @@ import (
 	"strings"
 )
 
+// remove quotes and replace * by regex any
+var valueReplacer = strings.NewReplacer(`*`, `.*`, `"`, "")
+
 type labelMatcher string
 
 const (
@@ -28,6 +31,16 @@ type labelFilter struct {
 	matcher   labelMatcher
 	value     string
 	valueType valueType
+}
+
+type lineMatch struct {
+	value     string
+	valueType valueType
+}
+
+type lineFilter struct {
+	key    string
+	values []lineMatch
 }
 
 func stringLabelFilter(labelKey string, value string) labelFilter {
@@ -77,5 +90,58 @@ func (f *labelFilter) writeInto(sb *strings.Builder) {
 		sb.WriteByte('`')
 	default:
 		panic(fmt.Sprint("wrong filter value type", int(f.valueType)))
+	}
+}
+
+func (f *lineFilter) asLabelFilters() []labelFilter {
+	lfs := make([]labelFilter, 0, len(f.values))
+	for _, value := range f.values {
+		lf := labelFilter{
+			key:       f.key,
+			valueType: value.valueType,
+			value:     value.value,
+		}
+		if value.valueType == typeRegex {
+			lf.matcher = labelMatches
+		} else {
+			lf.matcher = labelEqual
+		}
+		lfs = append(lfs, lf)
+	}
+	return lfs
+}
+
+func (f *lineFilter) writeInto(sb *strings.Builder) {
+	for i, v := range f.values {
+		if i > 0 {
+			sb.WriteByte('|')
+		}
+		// match end of KEY + regex VALUE:
+		// if numeric, KEY":VALUE,
+		// if string KEY":"VALUE"
+		// ie 'Port' key will match both 'SrcPort":"XXX"' and 'DstPort":"XXX"
+		// VALUE can be quoted for exact match or contains * to inject regex any
+		// For numeric values, exact match is implicit
+		// 	(the trick is to match for the ending coma; it works as long as the filtered field
+		// 	is not the last one (they're in alphabetic order); a less performant alternative
+		// 	but more future-proof/less hacky could be to move that to a json filter, if needed)
+		sb.WriteString(f.key)
+		sb.WriteString(`":`)
+		switch v.valueType {
+		case typeNumber:
+			sb.WriteString(v.value)
+			// a number can be followed by } if it's the last property of a JSON document
+			sb.WriteString("[,}]")
+		case typeString:
+			// exact matches are specified as just strings
+			sb.WriteByte('"')
+			sb.WriteString(valueReplacer.Replace(v.value))
+			sb.WriteByte('"')
+		// contains-match are specified as regular expressions
+		case typeRegex:
+			sb.WriteString(`"(?i)[^"]*`)
+			sb.WriteString(valueReplacer.Replace(v.value))
+			sb.WriteString(`.*"`)
+		}
 	}
 }

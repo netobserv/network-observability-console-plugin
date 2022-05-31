@@ -21,9 +21,6 @@ const (
 // can contains only alphanumeric / '-' / '_' / '.' / ',' / '"' / '*' / ':' / '/' characteres
 var filterRegexpValidation = regexp.MustCompile(`^[\w-_.,\"*:/]*$`)
 
-// remove quotes and replace * by regex any
-var valueReplacer = strings.NewReplacer(`*`, `.*`, `"`, "")
-
 // FlowQueryBuilder stores a state to build a LogQL query
 type FlowQueryBuilder struct {
 	config       *Config
@@ -31,7 +28,7 @@ type FlowQueryBuilder struct {
 	endTime      string
 	limit        string
 	labelFilters []labelFilter
-	lineFilters  []string
+	lineFilters  []lineFilter
 	jsonFilters  [][]labelFilter
 }
 
@@ -123,44 +120,33 @@ func (q *FlowQueryBuilder) addLabelRegex(key string, values []string) {
 }
 
 func (q *FlowQueryBuilder) addLineFilters(key string, values []string) {
-	regexStr := strings.Builder{}
-	for i, value := range values {
-		if i > 0 {
-			regexStr.WriteByte('|')
-		}
-		// match end of KEY + regex VALUE:
-		// if numeric, KEY":VALUE,
-		// if string KEY":"VALUE"
-		// ie 'Port' key will match both 'SrcPort":"XXX"' and 'DstPort":"XXX"
-		// VALUE can be quoted for exact match or contains * to inject regex any
-		// For numeric values, exact match is implicit
-		// 	(the trick is to match for the ending coma; it works as long as the filtered field
-		// 	is not the last one (they're in alphabetic order); a less performant alternative
-		// 	but more future-proof/less hacky could be to move that to a json filter, if needed)
-		regexStr.WriteString(key)
-		regexStr.WriteString(`":`)
-		if fields.IsNumeric(key) {
-			regexStr.WriteString(value)
-			regexStr.WriteByte(',')
-		} else {
-			regexStr.WriteByte('"')
-			// match start any if not quoted
-			// and case insensitive
-			if !strings.HasPrefix(value, `"`) {
-				regexStr.WriteString("(?i)[^\"]*")
-			}
-			//inject value with regex
-			regexStr.WriteString(valueReplacer.Replace(value))
-			// match end any if not quoted
-			if !strings.HasSuffix(value, `"`) {
-				regexStr.WriteString(".*")
-			}
-			regexStr.WriteByte('"')
-		}
+	if len(values) == 0 {
+		return
 	}
-
-	if regexStr.Len() > 0 {
-		q.lineFilters = append(q.lineFilters, regexStr.String())
+	lf := lineFilter{
+		key: key,
+	}
+	isNumeric := fields.IsNumeric(key)
+	emptyMatches := false
+	for _, value := range values {
+		lm := lineMatch{}
+		switch {
+		case isNumeric:
+			lm = lineMatch{valueType: typeNumber, value: value}
+		case isExactMatch(value):
+			lm = lineMatch{valueType: typeString, value: trimExactMatch(value)}
+			emptyMatches = emptyMatches || len(lm.value) == 0
+		default:
+			lm = lineMatch{valueType: typeRegex, value: value}
+		}
+		lf.values = append(lf.values, lm)
+	}
+	// if there is at least an empty exact match, we should use JSON label matchers
+	// instead of text line matchers
+	if emptyMatches {
+		q.jsonFilters = append(q.jsonFilters, lf.asLabelFilters())
+	} else {
+		q.lineFilters = append(q.lineFilters, lf)
 	}
 }
 
@@ -195,7 +181,7 @@ func (q *FlowQueryBuilder) appendLabels(sb *strings.Builder) {
 func (q *FlowQueryBuilder) appendLineFilters(sb *strings.Builder) {
 	for _, lf := range q.lineFilters {
 		sb.WriteString("|~`")
-		sb.WriteString(lf)
+		lf.writeInto(sb)
 		sb.WriteByte('`')
 	}
 }
