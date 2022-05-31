@@ -132,7 +132,7 @@ func (f *lineFilter) writeInto(sb *strings.Builder) {
 			sb.WriteString(v.value)
 			// a number can be followed by } if it's the last property of a JSON document
 			sb.WriteString("[,}]")
-		case typeString:
+		case typeString, typeIP:
 			// exact matches are specified as just strings
 			sb.WriteByte('"')
 			sb.WriteString(valueReplacer.Replace(v.value))

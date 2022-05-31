@@ -147,6 +147,39 @@ func TestLokiFiltering(t *testing.T) {
 			"?query={app=\"netobserv-flowcollector\",DstK8S_Namespace=~\"(?i).*test.*\"}",
 			"?query={app=\"netobserv-flowcollector\"}|~`Port\":8080[,}]`",
 		},
+	}, {
+		inputPath: "?filters=" + url.QueryEscape(`SrcK8S_Namespace=""&DstPort=70`),
+		outputQueries: []string{
+			"?query={app=\"netobserv-flowcollector\",SrcK8S_Namespace=\"\"}|~`DstPort\":70[,}]`",
+		},
+	}, {
+		inputPath: "?filters=" + url.QueryEscape(`SrcK8S_Name=""&DstPort=70`),
+		outputQueries: []string{
+			"?query={app=\"netobserv-flowcollector\"}|~`DstPort\":70[,}]`|json|SrcK8S_Name=\"\"",
+		},
+	}, {
+		inputPath: "?filters=" + url.QueryEscape(`SrcK8S_Name="",foo&DstK8S_Name="hello"`),
+		outputQueries: []string{
+			"?query={app=\"netobserv-flowcollector\"}|~`DstK8S_Name\":\"hello\"`|json|SrcK8S_Name=\"\"+or+SrcK8S_Name=~`foo`",
+		},
+	}, {
+		inputPath: "?filters=" + url.QueryEscape(`SrcK8S_Namespace=""|DstPort=70`),
+		outputQueries: []string{
+			"?query={app=\"netobserv-flowcollector\",SrcK8S_Namespace=\"\"}",
+			"?query={app=\"netobserv-flowcollector\"}|~`DstPort\":70[,}]`",
+		},
+	}, {
+		inputPath: "?filters=" + url.QueryEscape(`SrcK8S_Name=""|DstPort=70`),
+		outputQueries: []string{
+			"?query={app=\"netobserv-flowcollector\"}|~`DstPort\":70[,}]`",
+			"?query={app=\"netobserv-flowcollector\"}|json|SrcK8S_Name=\"\"",
+		},
+	}, {
+		inputPath: "?filters=" + url.QueryEscape(`SrcK8S_Name="",foo|DstK8S_Name="hello"`),
+		outputQueries: []string{
+			"?query={app=\"netobserv-flowcollector\"}|~`DstK8S_Name\":\"hello\"`",
+			"?query={app=\"netobserv-flowcollector\"}|json|SrcK8S_Name=\"\"+or+SrcK8S_Name=~`foo`",
+		},
 	}}
 
 	numberQueriesExpected := 0
