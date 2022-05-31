@@ -20,6 +20,7 @@ global.navigator = {
 global.requestAnimationFrame = function (callback) {
   return setTimeout(callback, 0);
 };
+window.requestAnimationFrame = global.requestAnimationFrame;
 global.cancelAnimationFrame = function (id) {
   clearTimeout(id);
 };

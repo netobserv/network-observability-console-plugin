@@ -1,6 +1,13 @@
 import { calculateMatrixTotals, TopologyMetrics } from '../../../api/loki';
+import topologyJson from '../../../../../mocks/loki/topology.json';
 
-export const response = {
+export const responseMock = topologyJson;
+
+export const dataMock = (responseMock.data.result as TopologyMetrics[]).flatMap(r =>
+  calculateMatrixTotals(r, 'sum', 300)
+);
+
+export const responseSample = {
   status: 'success',
   data: {
     resultType: 'matrix',
@@ -278,4 +285,6 @@ export const response = {
   }
 };
 
-export const datas = (response.data.result as TopologyMetrics[]).flatMap(r => calculateMatrixTotals(r, 'sum', 300));
+export const dataSample = (responseSample.data.result as TopologyMetrics[]).flatMap(r =>
+  calculateMatrixTotals(r, 'sum', 300)
+);

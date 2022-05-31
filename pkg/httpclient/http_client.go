@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/netobserv/network-observability-console-plugin/pkg/httpclient/httpclienttest"
 	"github.com/sirupsen/logrus"
 )
 
@@ -22,7 +23,7 @@ type httpClient struct {
 
 var slog = logrus.WithField("module", "server")
 
-func NewHTTPClient(timeout time.Duration, overrideHeaders map[string][]string, skipTLS bool) Caller {
+func NewHTTPClient(timeout time.Duration, overrideHeaders map[string][]string, skipTLS bool, useMocks bool) Caller {
 	transport := &http.Transport{
 		DialContext:     (&net.Dialer{Timeout: timeout}).DialContext,
 		IdleConnTimeout: timeout,
@@ -32,6 +33,11 @@ func NewHTTPClient(timeout time.Duration, overrideHeaders map[string][]string, s
 	if skipTLS {
 		transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 		slog.Warn("skipping TLS checks. SSL certificate verification is now disabled !")
+	}
+
+	if useMocks {
+		slog.Debug("Mocking HTTP Client")
+		return new(httpclienttest.HTTPClientJSONMock)
 	}
 
 	return &httpClient{

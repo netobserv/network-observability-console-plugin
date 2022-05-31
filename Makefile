@@ -82,7 +82,7 @@ test: test-backend test-frontend
 .PHONY: build-backend
 build-backend: fmt-backend
 	@echo "### Building backend"
-	go build -ldflags "-X 'main.buildVersion=${BUILD_VERSION}' -X 'main.buildDate=${BUILD_DATE}'" -mod vendor -o plugin-backend cmd/plugin-backend.go
+	go build -gcflags='-N -l' -ldflags "-X 'main.buildVersion=${BUILD_VERSION}' -X 'main.buildDate=${BUILD_DATE}'" -mod vendor -o plugin-backend cmd/plugin-backend.go
 
 .PHONY: build-frontend
 build-frontend: install-frontend fmt-frontend
@@ -120,6 +120,10 @@ push:
 .PHONY: serve
 serve:
 	./plugin-backend
+
+.PHONY: serve-mock
+serve-mock:
+	./plugin-backend --loki-mock --loglevel trace
 
 .PHONY: start
 start: build-backend 

@@ -1,5 +1,16 @@
-import { RecordsResult } from '../../api/loki';
+import { parseStream, RecordsResult, StreamResult } from '../../api/loki';
 import { FlowDirection, Record } from '../../api/ipfix';
+import flowsJson from '../../../../mocks/loki/flows.json';
+
+export const FlowsMock: Record[] = (flowsJson.data.result as StreamResult[]).flatMap(r => parseStream(r));
+
+export const FlowsResultMock: RecordsResult = {
+  records: FlowsMock,
+  stats: {
+    limitReached: FlowsMock.length >= 100,
+    numQueries: 1
+  }
+};
 
 export const FlowsSample: Record[] = [
   {

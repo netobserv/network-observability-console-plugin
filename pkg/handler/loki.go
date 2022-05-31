@@ -31,7 +31,7 @@ func newLokiClient(cfg *loki.Config) httpclient.Caller {
 		}
 	}
 	// TODO: loki with auth
-	return httpclient.NewHTTPClient(cfg.Timeout, headers, cfg.SkipTLS)
+	return httpclient.NewHTTPClient(cfg.Timeout, headers, cfg.SkipTLS, cfg.UseMocks)
 }
 
 /* loki query will fail if spaces or quotes are not encoded

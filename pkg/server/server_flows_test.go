@@ -220,6 +220,7 @@ func TestLokiFiltering(t *testing.T) {
 			time.Second,
 			"",
 			false,
+			false,
 			[]string{"SrcK8S_Namespace", "SrcK8S_OwnerName", "DstK8S_Namespace", "DstK8S_OwnerName", "FlowDirection"},
 		),
 	})

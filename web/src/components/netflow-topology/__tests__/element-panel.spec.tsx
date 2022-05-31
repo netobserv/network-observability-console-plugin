@@ -7,7 +7,7 @@ import { Filter } from '../../../model/filters';
 import { TopologyMetrics } from '../../../api/loki';
 import { MetricFunction, MetricType } from '../../../model/flow-query';
 import { ElementPanel, ElementPanelContent } from '../element-panel';
-import { datas } from '../__tests-data__/metrics';
+import { dataSample } from '../__tests-data__/metrics';
 
 describe('<ElementPanel />', () => {
   const getNode = (name: string, addr: string) => {
@@ -28,7 +28,7 @@ describe('<ElementPanel />', () => {
 
   const mocks = {
     element: getNode('loki-distributor-loki-76598c8449-csmh2', '10.129.0.15'),
-    metrics: datas as TopologyMetrics[],
+    metrics: dataSample as TopologyMetrics[],
     metricFunction: 'sum' as MetricFunction,
     metricType: 'bytes' as MetricType,
     options: {

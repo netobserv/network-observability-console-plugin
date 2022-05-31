@@ -31,6 +31,7 @@ var (
 	lokiTimeout    = flag.Duration("loki-timeout", 10*time.Second, "Timeout of the Loki query to retrieve logs")
 	lokiTenantID   = flag.String("loki-tenant-id", "", "Tenant organization ID for multi-tenant-loki (submitted as the X-Scope-OrgID HTTP header)")
 	lokiSkipTLS    = flag.Bool("loki-skip-tls", false, "Skip TLS checks for loki HTTPS connection")
+	lokiMock       = flag.Bool("loki-mock", false, "Fake loki results using saved mocks")
 	logLevel       = flag.String("loglevel", "info", "log level (default: info)")
 	frontendConfig = flag.String("frontend-config", "", "path to the console plugin config file")
 	versionFlag    = flag.Bool("v", false, "print version")
@@ -73,7 +74,7 @@ func main() {
 		CORSAllowMethods: *corsMethods,
 		CORSAllowHeaders: *corsHeaders,
 		CORSMaxAge:       *corsMaxAge,
-		Loki:             loki.NewConfig(lURL, *lokiTimeout, *lokiTenantID, *lokiSkipTLS, strings.Split(lLabels, ",")),
+		Loki:             loki.NewConfig(lURL, *lokiTimeout, *lokiTenantID, *lokiSkipTLS, *lokiMock, strings.Split(lLabels, ",")),
 		FrontendConfig:   *frontendConfig,
 	})
 }
