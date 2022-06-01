@@ -223,9 +223,11 @@
   "Specify a single port following one of these rules:": "Specify a single port following one of these rules:",
   "A port number like 80, 21": "A port number like 80, 21",
   "A IANA name like HTTP, FTP": "A IANA name like HTTP, FTP",
+  "Empty double quotes \"\" for undefined port": "Empty double quotes \"\" for undefined port",
   "Unknown protocol": "Unknown protocol",
   "Specify a single protocol number or name.": "Specify a single protocol number or name.",
   "Specify a single protocol following one of these rules:": "Specify a single protocol following one of these rules:",
   "A protocol number like 6, 17": "A protocol number like 6, 17",
-  "A IANA name like TCP, UDP": "A IANA name like TCP, UDP"
+  "A IANA name like TCP, UDP": "A IANA name like TCP, UDP",
+  "Empty double quotes \"\" for undefined protocol": "Empty double quotes \"\" for undefined protocol"
 }

@@ -132,11 +132,11 @@ func (q *FlowQueryBuilder) addLineFilters(key string, values []string) {
 	for _, value := range values {
 		lm := lineMatch{}
 		switch {
-		case isNumeric:
-			lm = lineMatch{valueType: typeNumber, value: value}
 		case isExactMatch(value):
 			lm = lineMatch{valueType: typeString, value: trimExactMatch(value)}
 			emptyMatches = emptyMatches || len(lm.value) == 0
+		case isNumeric:
+			lm = lineMatch{valueType: typeNumber, value: value}
 		default:
 			lm = lineMatch{valueType: typeRegex, value: value}
 		}

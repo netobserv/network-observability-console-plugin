@@ -191,6 +191,11 @@ func TestLokiFiltering(t *testing.T) {
 			"?query={app=\"netobserv-flowcollector\"}|json|DstAddr=\"\"",
 			"?query={app=\"netobserv-flowcollector\"}|json|SrcAddr=\"\"",
 		},
+	}, {
+		inputPath: "?filters=" + url.QueryEscape(`SrcPort=""`),
+		outputQueries: []string{
+			"?query={app=\"netobserv-flowcollector\"}|json|SrcPort=\"\"",
+		},
 	}}
 
 	numberQueriesExpected := 0

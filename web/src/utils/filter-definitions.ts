@@ -25,7 +25,7 @@ import {
 } from './filter-options';
 
 // Convenience string to filter by for empty or null field values
-export const emptyField = '""';
+export const emptyOrNull = '""';
 
 type Field = keyof Fields | keyof Labels;
 
@@ -288,7 +288,7 @@ export const getFilterDefinitions = (t: TFunction): FilterDefinition[] => {
               return invalid(t('Value is empty'));
             }
             //allow any port number or valid name / value
-            if (!isNaN(Number(value)) || getPort(value)) {
+            if (value == emptyOrNull || !isNaN(Number(value)) || getPort(value)) {
               return valid(value);
             }
             return invalid(t('Unknown port'));
@@ -296,7 +296,8 @@ export const getFilterDefinitions = (t: TFunction): FilterDefinition[] => {
           hint: t('Specify a single port number or name.'),
           examples: `${t('Specify a single port following one of these rules:')}
         - ${t('A port number like 80, 21')}
-        - ${t('A IANA name like HTTP, FTP')}`,
+        - ${t('A IANA name like HTTP, FTP')}
+        - ${t('Empty double quotes "" for undefined port')}`,
           fieldMatching: {}
         },
         singleFieldMapping('SrcPort'),
@@ -348,7 +349,7 @@ export const getFilterDefinitions = (t: TFunction): FilterDefinition[] => {
             return invalid(t('Value is empty'));
           }
           //allow any protocol number or valid name / value
-          if (!isNaN(Number(value))) {
+          if (value == emptyOrNull || !isNaN(Number(value))) {
             return valid(value);
           } else {
             const proto = findProtocolOption(value);
@@ -361,7 +362,8 @@ export const getFilterDefinitions = (t: TFunction): FilterDefinition[] => {
         hint: t('Specify a single protocol number or name.'),
         examples: `${t('Specify a single protocol following one of these rules:')}
         - ${t('A protocol number like 6, 17')}
-        - ${t('A IANA name like TCP, UDP')}`,
+        - ${t('A IANA name like TCP, UDP')}
+        - ${t('Empty double quotes "" for undefined protocol')}`,
         fieldMatching: { always: singleFieldMapping('Proto') }
       }
     ];

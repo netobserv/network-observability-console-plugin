@@ -1,4 +1,4 @@
-import { emptyField } from './filter-definitions';
+import { emptyOrNull } from './filter-definitions';
 
 export const compareIPs = (ip1: string, ip2: string) => {
   const splitIp2 = ip2.split('.');
@@ -20,7 +20,7 @@ export const compareIPs = (ip1: string, ip2: string) => {
  */
 export const validateIPFilter = (ipFilter: string) => {
   ipFilter = ipFilter.trim();
-  if (ipFilter == emptyField || ipv4.test(ipFilter) || ipv6.test(ipFilter)) {
+  if (ipFilter == emptyOrNull || ipv4.test(ipFilter) || ipv6.test(ipFilter)) {
     return true;
   }
   const ips = ipFilter.split('-');
