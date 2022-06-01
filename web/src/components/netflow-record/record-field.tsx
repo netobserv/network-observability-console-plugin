@@ -110,7 +110,7 @@ export const RecordField: React.FC<{
     const timeText = date?.toLocaleTimeString() || emptyText();
     return singleContainer(
       <div>
-        <div className="datetime">
+        <div className={`datetime ${size}`}>
           <span>{dateText}</span> <span className="text-muted">{timeText}</span>
         </div>
         <div className="record-field-tooltip">{`${dateText} ${timeText}`}</div>

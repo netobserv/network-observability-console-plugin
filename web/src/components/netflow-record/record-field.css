@@ -1,8 +1,12 @@
-/* fix ResourceLink inline not working */
-span.co-resource-item.co-resource-item--inline,
+/* force datetime to be singleline on small size*/
+.datetime.s {
+  white-space: nowrap
+}
+
 /* max content lines to show */
-.record-field-content-flex,
-.record-field-content {
+.co-resource-item.s>.co-resource-item__resource-name,
+.co-resource-item.m>.co-resource-item__resource-name,
+.co-resource-item.l>.co-resource-item__resource-name {
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
@@ -11,9 +15,10 @@ span.co-resource-item.co-resource-item--inline,
 }
 
 .record-field-flex-container {
+  height: 100%;
   flex: 1;
   display: flex;
-  gap: 5px;
+  gap: .3rem;
 }
 
 .record-field-flex {
@@ -28,21 +33,15 @@ span.co-resource-item.co-resource-item--inline,
   flex-basis: 0;
 }
 
-span.co-resource-item.co-resource-item--inline.s,
-.record-field-content-flex.s,
-.record-field-content.s {
+.co-resource-item.s>.co-resource-item__resource-name {
   -webkit-line-clamp: 1;
 }
 
-span.co-resource-item.co-resource-item--inline.m,
-.record-field-content-flex.m,
-.record-field-content.m {
+.co-resource-item.m>.co-resource-item__resource-name {
   -webkit-line-clamp: 2;
 }
 
-span.co-resource-item.co-resource-item--inline.l,
-.record-field-content-flex.l,
-.record-field-content.l {
+.co-resource-item.l>.co-resource-item__resource-name {
   -webkit-line-clamp: 3;
 }
 
@@ -50,18 +49,6 @@ span.co-resource-item.co-resource-item--inline.l,
 .record-field-flex-container.m,
 .record-field-flex-container.l {
   flex-direction: column;
-}
-
-.record-field-flex-container.s {
-  height: 42px;
-}
-
-.record-field-flex-container.m {
-  height: 84px;
-}
-
-.record-field-flex-container.l {
-  height: 126px;
 }
 
 /* table tooltips - check pf-c-tooltip__content for values */
