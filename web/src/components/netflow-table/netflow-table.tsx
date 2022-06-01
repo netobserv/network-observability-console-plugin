@@ -80,7 +80,8 @@ const NetflowTable: React.FC<{
     const containsDoubleLine = columns.find(c => doubleSizeColumnIds.includes(c.id)) !== undefined;
 
     function convertRemToPixels(rem: number) {
-      return rem * parseFloat(getComputedStyle(document.documentElement).fontSize);
+      //get fontSize from document or fallback to 16 for jest
+      return rem * (parseFloat(getComputedStyle(document.documentElement).fontSize) || 16);
     }
 
     switch (size) {
@@ -92,7 +93,7 @@ const NetflowTable: React.FC<{
       default:
         return convertRemToPixels(containsDoubleLine ? 4 : 2.5);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [columns, size]);
 
   //update table container height on window resize

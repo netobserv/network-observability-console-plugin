@@ -18,8 +18,7 @@ describe('<RecordField />', () => {
     //datetime column will produce a single field
     const wrapper = shallow(<RecordField flow={FlowsSample[0]} column={DefaultColumns[0]} {...mocks} />);
     expect(wrapper.find(RecordField)).toBeTruthy();
-    expect(wrapper.find('.record-field-content')).toHaveLength(1);
-    expect(wrapper.find('.m')).toHaveLength(1);
+    expect(wrapper.find('.record-field-content.m')).toHaveLength(1);
   });
   it('should filter', async () => {
     const wrapper = shallow(
