@@ -141,8 +141,8 @@ func (q *FlowQueryBuilder) addLineFilters(key string, values []string) {
 		}
 		lf.values = append(lf.values, lm)
 	}
-	// if there is at least an empty exact match, we should use JSON label matchers
-	// instead of text line matchers
+	// if there is at least an empty exact match, there is no uniform/safe way to filter by text,
+	// so we should use JSON label matchers instead of text line matchers
 	if emptyMatches {
 		q.jsonFilters = append(q.jsonFilters, lf.asLabelFilters())
 	} else {

@@ -33,14 +33,15 @@ type labelFilter struct {
 	valueType valueType
 }
 
-type lineMatch struct {
-	value     string
-	valueType valueType
-}
-
+// lineFilter represents a condition based on a JSON raw text match.
 type lineFilter struct {
 	key    string
 	values []lineMatch
+}
+
+type lineMatch struct {
+	value     string
+	valueType valueType
 }
 
 func stringLabelFilter(labelKey string, value string) labelFilter {
@@ -93,6 +94,8 @@ func (f *labelFilter) writeInto(sb *strings.Builder) {
 	}
 }
 
+// asLabelFilters transforms a lineFilter (raw text match) into a group of
+// labelFilters (attributes match)
 func (f *lineFilter) asLabelFilters() []labelFilter {
 	lfs := make([]labelFilter, 0, len(f.values))
 	for _, v := range f.values {
@@ -111,6 +114,8 @@ func (f *lineFilter) asLabelFilters() []labelFilter {
 	return lfs
 }
 
+// writeInto transforms a lineFilter to its corresponding part of a LogQL query
+// under construction (contained in the provided strings.Builder)
 func (f *lineFilter) writeInto(sb *strings.Builder) {
 	for i, v := range f.values {
 		if i > 0 {
