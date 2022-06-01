@@ -1,14 +1,14 @@
-package httpclienttest
+package lokiclientmock
 
 import (
 	"io/ioutil"
 	"strings"
 )
 
-type HTTPClientJSONMock struct {
+type LokiClientMock struct {
 }
 
-func (o *HTTPClientJSONMock) Get(url string) ([]byte, int, error) {
+func (o *LokiClientMock) Get(url string) ([]byte, int, error) {
 	var path string
 
 	isLabel := strings.Contains(url, "/label/")
