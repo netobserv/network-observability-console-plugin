@@ -1,3 +1,5 @@
+import { emptyField } from './filter-definitions';
+
 export const compareIPs = (ip1: string, ip2: string) => {
   const splitIp2 = ip2.split('.');
   const tmpRes = ip1.split('.').map((num, i) => Number(num) - Number(splitIp2[i]));
@@ -14,10 +16,11 @@ export const compareIPs = (ip1: string, ip2: string) => {
  * - A single IPv4 or IPv6 address. Examples: 192.0.2.0, ::1
  * - A range within the IP address. Examples: 192.168.0.1-192.189.10.12, 2001:db8::1-2001:db8::8
  * - A CIDR specification. Examples: 192.51.100.0/24, 2001:db8::/32
+ * - Empty double quotes "" for empty/null IP
  */
 export const validateIPFilter = (ipFilter: string) => {
   ipFilter = ipFilter.trim();
-  if (ipv4.test(ipFilter) || ipv6.test(ipFilter)) {
+  if (ipFilter == emptyField || ipv4.test(ipFilter) || ipv6.test(ipFilter)) {
     return true;
   }
   const ips = ipFilter.split('-');

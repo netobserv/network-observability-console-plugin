@@ -205,6 +205,7 @@
   "A single IPv4 or IPv6 address like 192.0.2.0, ::1": "A single IPv4 or IPv6 address like 192.0.2.0, ::1",
   "An IP address range like 192.168.0.1-192.189.10.12, 2001:db8::1-2001:db8::8": "An IP address range like 192.168.0.1-192.189.10.12, 2001:db8::1-2001:db8::8",
   "A CIDR specification like 192.51.100.0/24, 2001:db8::/32": "A CIDR specification like 192.51.100.0/24, 2001:db8::/32",
+  "Empty double quotes \"\" for an empty IP": "Empty double quotes \"\" for an empty IP",
   "Not a valid IPv4 or IPv6, nor a CIDR, nor an IP range separated by hyphen": "Not a valid IPv4 or IPv6, nor a CIDR, nor an IP range separated by hyphen",
   "Owner Name": "Owner Name",
   "Incomplete resource name, either kind, namespace or name is missing.": "Incomplete resource name, either kind, namespace or name is missing.",

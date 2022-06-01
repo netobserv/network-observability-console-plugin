@@ -24,6 +24,9 @@ import {
   cap10
 } from './filter-options';
 
+// Convenience string to filter by for empty or null field values
+export const emptyField = '""';
+
 type Field = keyof Fields | keyof Labels;
 
 const singleFieldMapping = (field: Field) => {
@@ -133,7 +136,8 @@ export const getFilterDefinitions = (t: TFunction): FilterDefinition[] => {
     const ipExamples = `${t('Specify IP following one of these rules:')}
     - ${t('A single IPv4 or IPv6 address like 192.0.2.0, ::1')}
     - ${t('An IP address range like 192.168.0.1-192.189.10.12, 2001:db8::1-2001:db8::8')}
-    - ${t('A CIDR specification like 192.51.100.0/24, 2001:db8::/32')}`;
+    - ${t('A CIDR specification like 192.51.100.0/24, 2001:db8::/32')}
+    - ${t('Empty double quotes "" for an empty IP')}`;
 
     const invalidIPMessage = t('Not a valid IPv4 or IPv6, nor a CIDR, nor an IP range separated by hyphen');
 
