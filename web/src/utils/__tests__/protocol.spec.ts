@@ -21,7 +21,7 @@ describe('compareProtocol', () => {
 
 describe('validateProtocol', () => {
   it('should accept empty double quotes for empty/undefined protocols', () => {
-    const protocolFilter = getFilterDefinitions(t).find(f => f.id == 'protocol')!!;
+    const protocolFilter = getFilterDefinitions(t).find(f => f.id == 'protocol')!;
     expect(protocolFilter.validate(`""`)).toEqual({ val: '""' });
   });
 });

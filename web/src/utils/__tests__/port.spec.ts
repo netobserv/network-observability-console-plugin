@@ -52,7 +52,7 @@ describe('comparePort', () => {
 
 describe('validatePort', () => {
   it('should accept empty double quotes for empty/undefined ports', () => {
-    const portFilter = getFilterDefinitions(t).find(f => f.id == 'port')!!;
+    const portFilter = getFilterDefinitions(t).find(f => f.id == 'port')!;
     expect(portFilter.validate(`""`)).toEqual({ val: '""' });
   });
 });
