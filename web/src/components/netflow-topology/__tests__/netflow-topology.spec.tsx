@@ -11,6 +11,7 @@ describe('<NetflowTopology />', () => {
   const mocks = {
     error: undefined as string | undefined,
     loading: false,
+    k8sModels: {},
     range: defaultTimeRange,
     metricFunction: 'sum' as MetricFunction,
     metricType: 'bytes' as MetricType,

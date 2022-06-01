@@ -39,6 +39,7 @@ import {
   MetricFunction,
   MetricType
 } from '../model/flow-query';
+import { useK8sModelsWithColors } from '../utils/k8s-models-hook';
 import { Stats, TopologyMetrics } from '../api/loki';
 import { DefaultOptions, TopologyGroupTypes, TopologyOptions } from '../model/topology';
 import { Column, getDefaultColumns } from '../utils/columns';
@@ -105,6 +106,7 @@ export const NetflowTraffic: React.FC<{
   const { push } = useHistory();
   const { t } = useTranslation('plugin__network-observability-plugin');
   const [extensions] = useResolvedExtensions<ModelFeatureFlag>(isModelFeatureFlag);
+  const k8sModels = useK8sModelsWithColors();
   const [queryParams, setQueryParams] = useLocalStorage<string>(LOCAL_STORAGE_QUERY_PARAMS_KEY);
   // set url params from local storage saved items at startup if empty
   if (hasEmptyParams() && queryParams) {
@@ -566,6 +568,7 @@ export const NetflowTraffic: React.FC<{
         return (
           <NetflowTopology
             loading={loading}
+            k8sModels={k8sModels}
             error={error}
             range={range}
             metricFunction={metricFunction}

@@ -1,13 +1,17 @@
 /* table stripping from pf-color-black-150 value */
-tbody>tr:nth-child(even) {
+.light-stripped:nth-child(even) {
   background-color: #f5f5f5;
 }
 
+.dark-stripped:nth-child(even) {
+  background-color: #050505;
+}
+
 .newflow-appear {
-   background-color: #73bcf755;
+  background-color: #73bcf755;
 }
 
 .newflow-appear-done {
-    background-color: transparent;
-    transition: background-color 5s;
+  background-color: transparent;
+  transition: background-color 5s;
 }

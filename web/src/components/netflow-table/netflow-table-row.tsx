@@ -6,6 +6,7 @@ import { Size } from '../dropdowns/display-dropdown';
 import { RecordField } from '../netflow-record/record-field';
 import './netflow-table-row.css';
 import CSSTransition from 'react-transition-group/CSSTransition';
+import { isDark } from '../../utils/theme';
 
 const NetflowTableRow: React.FC<{
   flow: Record;
@@ -24,7 +25,11 @@ const NetflowTableRow: React.FC<{
   const shouldHighlight = React.useRef(highlight);
 
   return (
-    <Tr isRowSelected={flow.key === selectedRecord?.key} onRowClick={onRowClick}>
+    <Tr
+      isRowSelected={flow.key === selectedRecord?.key}
+      onRowClick={onRowClick}
+      className={`${isDark() ? 'dark' : 'light'}-stripped`}
+    >
       {columns.map(c => (
         <CSSTransition
           key={c.id}
