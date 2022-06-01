@@ -69,4 +69,7 @@ describe('validate IP filter', () => {
     expect(validateIPFilter('1.3.3.4/')).toBe(false);
     expect(validateIPFilter('1.3.3.4/3.2.1.0')).toBe(false);
   });
+  it('should validate empty IPs', () => {
+    expect(validateIPFilter('""')).toBe(true);
+  });
 });

@@ -16,6 +16,7 @@ const (
 	limitParam     = "limit"
 	queryRangePath = "/loki/api/v1/query_range?query="
 	jsonOrJoiner   = "+or+"
+	emptyMatch     = `""`
 )
 
 // can contains only alphanumeric / '-' / '_' / '.' / ',' / '"' / '*' / ':' / '/' characteres
@@ -131,11 +132,11 @@ func (q *FlowQueryBuilder) addLineFilters(key string, values []string) {
 	for _, value := range values {
 		lm := lineMatch{}
 		switch {
-		case isNumeric:
-			lm = lineMatch{valueType: typeNumber, value: value}
 		case isExactMatch(value):
 			lm = lineMatch{valueType: typeString, value: trimExactMatch(value)}
 			emptyMatches = emptyMatches || len(lm.value) == 0
+		case isNumeric:
+			lm = lineMatch{valueType: typeNumber, value: value}
 		default:
 			lm = lineMatch{valueType: typeRegex, value: value}
 		}
@@ -153,9 +154,14 @@ func (q *FlowQueryBuilder) addLineFilters(key string, values []string) {
 // addIPFilters assumes that we are searching for that IP addresses as part
 // of the log line (not in the stream selector labels)
 func (q *FlowQueryBuilder) addIPFilters(key string, values []string) {
-	var filtersPerKey []labelFilter
+	filtersPerKey := make([]labelFilter, 0, len(values))
 	for _, value := range values {
-		filtersPerKey = append(filtersPerKey, ipLabelFilter(key, value))
+		// empty exact matches should be treated as attribute filters looking for empty IP
+		if value == emptyMatch {
+			filtersPerKey = append(filtersPerKey, stringLabelFilter(key, ""))
+		} else {
+			filtersPerKey = append(filtersPerKey, ipLabelFilter(key, value))
+		}
 	}
 	q.jsonFilters = append(q.jsonFilters, filtersPerKey)
 }

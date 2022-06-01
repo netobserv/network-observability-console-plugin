@@ -1,5 +1,8 @@
 import { formatPort, comparePorts } from '../port';
 import { config } from '../config';
+import { getFilterDefinitions } from '../filter-definitions';
+
+const t = (k: string) => k;
 
 describe('formatport', () => {
   beforeEach(() => {
@@ -44,5 +47,12 @@ describe('comparePort', () => {
     expect(comparePorts(34890, 17239)).toBeGreaterThan(0);
     expect(comparePorts(9756, 17239)).toBeLessThan(0);
     expect(comparePorts(45392, 45392)).toEqual(0);
+  });
+});
+
+describe('validatePort', () => {
+  it('should accept empty double quotes for empty/undefined ports', () => {
+    const portFilter = getFilterDefinitions(t).find(f => f.id == 'port')!;
+    expect(portFilter.validate(`""`)).toEqual({ val: '""' });
   });
 });

@@ -24,6 +24,9 @@ import {
   cap10
 } from './filter-options';
 
+// Convenience string to filter by undefined field values
+export const undefinedValue = '""';
+
 type Field = keyof Fields | keyof Labels;
 
 const singleFieldMapping = (field: Field) => {
@@ -133,7 +136,8 @@ export const getFilterDefinitions = (t: TFunction): FilterDefinition[] => {
     const ipExamples = `${t('Specify IP following one of these rules:')}
     - ${t('A single IPv4 or IPv6 address like 192.0.2.0, ::1')}
     - ${t('An IP address range like 192.168.0.1-192.189.10.12, 2001:db8::1-2001:db8::8')}
-    - ${t('A CIDR specification like 192.51.100.0/24, 2001:db8::/32')}`;
+    - ${t('A CIDR specification like 192.51.100.0/24, 2001:db8::/32')}
+    - ${t('Empty double quotes "" for an empty IP')}`;
 
     const invalidIPMessage = t('Not a valid IPv4 or IPv6, nor a CIDR, nor an IP range separated by hyphen');
 
@@ -284,7 +288,7 @@ export const getFilterDefinitions = (t: TFunction): FilterDefinition[] => {
               return invalid(t('Value is empty'));
             }
             //allow any port number or valid name / value
-            if (!isNaN(Number(value)) || getPort(value)) {
+            if (value == undefinedValue || !isNaN(Number(value)) || getPort(value)) {
               return valid(value);
             }
             return invalid(t('Unknown port'));
@@ -292,7 +296,8 @@ export const getFilterDefinitions = (t: TFunction): FilterDefinition[] => {
           hint: t('Specify a single port number or name.'),
           examples: `${t('Specify a single port following one of these rules:')}
         - ${t('A port number like 80, 21')}
-        - ${t('A IANA name like HTTP, FTP')}`,
+        - ${t('A IANA name like HTTP, FTP')}
+        - ${t('Empty double quotes "" for undefined port')}`,
           fieldMatching: {}
         },
         singleFieldMapping('SrcPort'),
@@ -344,7 +349,7 @@ export const getFilterDefinitions = (t: TFunction): FilterDefinition[] => {
             return invalid(t('Value is empty'));
           }
           //allow any protocol number or valid name / value
-          if (!isNaN(Number(value))) {
+          if (value == undefinedValue || !isNaN(Number(value))) {
             return valid(value);
           } else {
             const proto = findProtocolOption(value);
@@ -357,7 +362,8 @@ export const getFilterDefinitions = (t: TFunction): FilterDefinition[] => {
         hint: t('Specify a single protocol number or name.'),
         examples: `${t('Specify a single protocol following one of these rules:')}
         - ${t('A protocol number like 6, 17')}
-        - ${t('A IANA name like TCP, UDP')}`,
+        - ${t('A IANA name like TCP, UDP')}
+        - ${t('Empty double quotes "" for undefined protocol')}`,
         fieldMatching: { always: singleFieldMapping('Proto') }
       }
     ];

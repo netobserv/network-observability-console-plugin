@@ -185,6 +185,17 @@ func TestLokiFiltering(t *testing.T) {
 		outputQueries: []string{
 			"?query={app=\"netobserv-flowcollector\"}|json|SrcK8S_Type=\"\"+or+SrcK8S_Type=\"Pod\"",
 		},
+	}, {
+		inputPath: "?filters=" + url.QueryEscape(`SrcAddr=""|DstAddr=""`),
+		outputQueries: []string{
+			"?query={app=\"netobserv-flowcollector\"}|json|DstAddr=\"\"",
+			"?query={app=\"netobserv-flowcollector\"}|json|SrcAddr=\"\"",
+		},
+	}, {
+		inputPath: "?filters=" + url.QueryEscape(`SrcPort=""`),
+		outputQueries: []string{
+			"?query={app=\"netobserv-flowcollector\"}|json|SrcPort=\"\"",
+		},
 	}}
 
 	numberQueriesExpected := 0
