@@ -2,6 +2,8 @@ IMG_USER ?= netobserv
 TAG ?= dev
 BUILD_VERSION := $(shell git describe --long HEAD)
 BUILD_DATE := $(shell date +%Y-%m-%d\ %H:%M)
+# You can add GO Build flags like -gcflags=all="-N -l" here to remove optimizations for debugging
+BUILD_FLAGS ?= -ldflags "-X 'main.buildVersion=${BUILD_VERSION}' -X 'main.buildDate=${BUILD_DATE}'"
 BUILD_SHA := $(shell git rev-parse --short HEAD)
 
 BASE_IMAGE ?= quay.io/${IMG_USER}/network-observability-console-plugin
@@ -82,7 +84,7 @@ test: test-backend test-frontend
 .PHONY: build-backend
 build-backend: fmt-backend
 	@echo "### Building backend"
-	go build -gcflags='-N -l' -ldflags "-X 'main.buildVersion=${BUILD_VERSION}' -X 'main.buildDate=${BUILD_DATE}'" -mod vendor -o plugin-backend cmd/plugin-backend.go
+	go build ${BUILD_FLAGS} -mod vendor -o plugin-backend cmd/plugin-backend.go
 
 .PHONY: build-frontend
 build-frontend: install-frontend fmt-frontend
