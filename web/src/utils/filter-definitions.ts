@@ -24,8 +24,8 @@ import {
   cap10
 } from './filter-options';
 
-// Convenience string to filter by for empty or null field values
-export const emptyOrNull = '""';
+// Convenience string to filter by undefined field values
+export const undefinedValue = '""';
 
 type Field = keyof Fields | keyof Labels;
 
@@ -288,7 +288,7 @@ export const getFilterDefinitions = (t: TFunction): FilterDefinition[] => {
               return invalid(t('Value is empty'));
             }
             //allow any port number or valid name / value
-            if (value == emptyOrNull || !isNaN(Number(value)) || getPort(value)) {
+            if (value == undefinedValue || !isNaN(Number(value)) || getPort(value)) {
               return valid(value);
             }
             return invalid(t('Unknown port'));
@@ -349,7 +349,7 @@ export const getFilterDefinitions = (t: TFunction): FilterDefinition[] => {
             return invalid(t('Value is empty'));
           }
           //allow any protocol number or valid name / value
-          if (value == emptyOrNull || !isNaN(Number(value))) {
+          if (value == undefinedValue || !isNaN(Number(value))) {
             return valid(value);
           } else {
             const proto = findProtocolOption(value);
