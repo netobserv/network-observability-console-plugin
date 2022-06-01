@@ -1,13 +1,13 @@
 import * as React from 'react';
 import { shallow, mount } from 'enzyme';
-import { Td } from '@patternfly/react-table';
+import { Td, Tbody } from '@patternfly/react-table';
 
 import NetflowTable from '../netflow-table';
 import NetflowTableRow from '../netflow-table-row';
 import { NetflowTableHeader } from '../netflow-table-header';
 
 import { ShuffledDefaultColumns } from '../../__tests-data__/columns';
-import { FlowsSample } from '../../__tests-data__/flows';
+import { FlowsMock, FlowsSample } from '../../__tests-data__/flows';
 import { Size } from '../../dropdowns/display-dropdown';
 import { ColumnsId } from '../../../utils/columns';
 
@@ -40,11 +40,17 @@ describe('<NetflowTable />', () => {
     expect(wrapper.find(NetflowTable)).toBeTruthy();
     expect(wrapper.find(NetflowTableHeader)).toHaveLength(1);
   });
-  it('should have table rows', async () => {
+  it('should have table rows with sample', async () => {
     const flows = FlowsSample.slice(0, FlowsSample.length);
     const wrapper = shallow(<NetflowTable flows={flows} columns={ShuffledDefaultColumns} {...mocks} />);
     expect(wrapper.find(NetflowTable)).toBeTruthy();
     expect(wrapper.find(NetflowTableRow)).toHaveLength(FlowsSample.length);
+  });
+  it('should have table rows with mock', async () => {
+    const flows = FlowsMock.slice(0, FlowsMock.length);
+    const wrapper = shallow(<NetflowTable flows={flows} columns={ShuffledDefaultColumns} {...mocks} />);
+    expect(wrapper.find(NetflowTable)).toBeTruthy();
+    expect(wrapper.find(Tbody).children()).toHaveLength(FlowsMock.length);
   });
   it('should update rows on props update', async () => {
     const flows = FlowsSample.slice(0, 1);

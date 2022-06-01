@@ -12,15 +12,17 @@ type Config struct {
 	Timeout  time.Duration
 	TenantID string
 	SkipTLS  bool
+	UseMocks bool
 	Labels   map[string]struct{}
 }
 
-func NewConfig(url *url.URL, timeout time.Duration, tenantID string, skipTLS bool, labels []string) Config {
+func NewConfig(url *url.URL, timeout time.Duration, tenantID string, skipTLS bool, useMocks bool, labels []string) Config {
 	return Config{
 		URL:      url,
 		Timeout:  timeout,
 		TenantID: tenantID,
 		SkipTLS:  skipTLS,
+		UseMocks: useMocks,
 		Labels:   utils.GetMapInterface(labels),
 	}
 }

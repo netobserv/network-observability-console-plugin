@@ -6,6 +6,7 @@ RUN npm install npm@8.2.0 -g
 RUN mkdir web && chown $USER: web
 COPY Makefile Makefile
 COPY web web
+COPY mocks mocks
 
 RUN NPM_INSTALL=ci make build-frontend
 

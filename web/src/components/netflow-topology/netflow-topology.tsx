@@ -64,7 +64,7 @@ const ZOOM_IN = 4 / 3;
 const ZOOM_OUT = 3 / 4;
 const FIT_PADDING = 80;
 
-const TopologyContent: React.FC<{
+export const TopologyContent: React.FC<{
   k8sModels: { [key: string]: K8sModel };
   range: number | TimeRange;
   metricFunction?: MetricFunction;
@@ -524,7 +524,7 @@ const TopologyContent: React.FC<{
   );
 };
 
-const NetflowTopology: React.FC<{
+export const NetflowTopology: React.FC<{
   loading?: boolean;
   k8sModels: { [key: string]: K8sModel };
   error?: string;

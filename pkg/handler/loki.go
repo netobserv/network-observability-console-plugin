@@ -11,6 +11,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 
+	"github.com/netobserv/network-observability-console-plugin/pkg/handler/lokiclientmock"
 	"github.com/netobserv/network-observability-console-plugin/pkg/httpclient"
 	"github.com/netobserv/network-observability-console-plugin/pkg/loki"
 	"github.com/netobserv/network-observability-console-plugin/pkg/metrics"
@@ -30,6 +31,12 @@ func newLokiClient(cfg *loki.Config) httpclient.Caller {
 			lokiOrgIDHeader: {cfg.TenantID},
 		}
 	}
+
+	if cfg.UseMocks {
+		hlog.Debug("Mocking Loki Client")
+		return new(lokiclientmock.LokiClientMock)
+	}
+
 	// TODO: loki with auth
 	return httpclient.NewHTTPClient(cfg.Timeout, headers, cfg.SkipTLS)
 }

@@ -1,11 +1,13 @@
 import { EmptyState, EmptyStateBody, Spinner } from '@patternfly/react-core';
+import { TopologyView, VisualizationSurface } from '@patternfly/react-topology';
 import { shallow } from 'enzyme';
 import * as React from 'react';
-import { MetricFunction, MetricType } from '../../../model/flow-query';
 import { TopologyMetrics } from '../../../api/loki';
+import { MetricFunction, MetricType } from '../../../model/flow-query';
 import { DefaultOptions, LayoutName } from '../../../model/topology';
 import { defaultTimeRange } from '../../../utils/router';
-import NetflowTopology from '../netflow-topology';
+import { NetflowTopology, TopologyContent } from '../netflow-topology';
+import { dataSample } from '../__tests-data__/metrics';
 
 describe('<NetflowTopology />', () => {
   const mocks = {
@@ -31,6 +33,12 @@ describe('<NetflowTopology />', () => {
   it('should render component', async () => {
     const wrapper = shallow(<NetflowTopology {...mocks} />);
     expect(wrapper.find(NetflowTopology)).toBeTruthy();
+  });
+
+  it('should have topology view', async () => {
+    const wrapper = shallow(<TopologyContent {...mocks} metrics={dataSample} />);
+    expect(wrapper.find(TopologyView)).toHaveLength(1);
+    expect(wrapper.find(VisualizationSurface)).toHaveLength(1);
   });
 
   it('should render loading', async () => {
