@@ -17,7 +17,7 @@ import * as _ from 'lodash';
 import { Record } from '../../api/ipfix';
 import { NetflowTableHeader } from './netflow-table-header';
 import NetflowTableRow from './netflow-table-row';
-import { Column, ColumnsId } from '../../utils/columns';
+import { Column, ColumnsId, getCommonColumns } from '../../utils/columns';
 import { Size } from '../dropdowns/display-dropdown';
 import { usePrevious } from '../../utils/previous-hook';
 import './netflow-table.css';
@@ -75,18 +75,26 @@ const NetflowTable: React.FC<{
   }, [columns]);
 
   //get row height from display size
-  //these values match netflow-table.css and record-field.css
   const getRowHeight = React.useCallback(() => {
+    const doubleSizeColumnIds = getCommonColumns(t).map(c => c.id);
+    const containsDoubleLine = columns.find(c => doubleSizeColumnIds.includes(c.id)) !== undefined;
+
+    function convertRemToPixels(rem: number) {
+      //get fontSize from document or fallback to 16 for jest
+      return rem * (parseFloat(getComputedStyle(document.documentElement).fontSize) || 16);
+    }
+
     switch (size) {
       case 'l':
-        return 143;
+        return convertRemToPixels(containsDoubleLine ? 8 : 4.5);
       case 'm':
-        return 101;
+        return convertRemToPixels(containsDoubleLine ? 6 : 3.5);
       case 's':
       default:
-        return 59;
+        return convertRemToPixels(containsDoubleLine ? 4 : 2.5);
     }
-  }, [size]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [columns, size]);
 
   //update table container height on window resize
   const handleResize = React.useCallback(() => {
@@ -160,7 +168,7 @@ const NetflowTable: React.FC<{
           tableWidth={width}
         />
       ) : (
-        <tr className={`empty-row ${size}`} key={f.key} />
+        <tr className={`empty-row`} style={{ height: rowHeight }} key={f.key} />
       )
     );
   }, [
