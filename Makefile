@@ -147,6 +147,12 @@ start-standalone: build-backend install-frontend
 	bash -c "trap 'fuser -k 9002/tcp' EXIT; \
 					./plugin-backend -port 9002 & cd web && npm run start:standalone"
 
+.PHONY: start-standalone-mock
+start-standalone-mock: build-backend install-frontend
+	@echo "### Starting backend on http://localhost:9002 using mock"
+	bash -c "trap 'fuser -k 9002/tcp' EXIT; \
+					./plugin-backend -port 9002 --loki-mock --loglevel trace & cd web && npm run start:standalone"
+
 .PHONY: bridge
 bridge:
 ifeq (,${CONSOLE})
