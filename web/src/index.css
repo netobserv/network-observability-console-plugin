@@ -45,7 +45,12 @@ label.pf-c-select__menu-item {
   --pf-global--FontSize--sm: 13px;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--pf-global--FontFamily--heading--sans-serif);
   font-weight: var(--pf-global--FontWeight--normal);
   line-height: var(--pf-global--LineHeight--md);
@@ -66,11 +71,17 @@ h3 {
   font-size: var(--pf-global--FontSize--lg);
 }
 
-h4, h5, h6 {
+h4,
+h5,
+h6 {
   font-size: var(--pf-global--FontSize--md);
 }
 
-button, input, optgroup, select, textarea,
+button,
+input,
+optgroup,
+select,
+textarea,
 .pf-c-badge {
   font-family: var(--pf-global--FontFamily--sans-serif);
 }
@@ -99,11 +110,13 @@ button, input, optgroup, select, textarea,
   outline: 0;
   position: relative;
   width: 100%;
+
+  --os-modal-dialog--BackgroundColor: var(--pf-global--BackgroundColor--100);
+  background: var(--os-modal-dialog--BackgroundColor);
 }
 
 .modal-content {
   height: fit-content !important;
-  background-color: #fff;
   background-clip: padding-box;
   border: 1px solid rgba(0, 0, 0, .2);
   box-shadow: 0 3px 9px rgb(0 0 0 / 50%);
@@ -114,7 +127,6 @@ button, input, optgroup, select, textarea,
 }
 
 .modal-header {
-  background-color: #fff;
   padding: 2rem 2rem 1.5rem;
 }
 
@@ -164,4 +176,39 @@ button, input, optgroup, select, textarea,
   padding: 1px 4px;
   text-align: center;
   white-space: nowrap;
+}
+
+/* fix selector color*/
+.pf-theme-dark .pf-c-toggle-group__button.pf-m-selected {
+  --pf-c-toggle-group__button--BackgroundColor: #06c;
+  --pf-c-toggle-group__button--ZIndex: 100;
+  --pf-c-toggle-group__button--before--BorderColor: #1fa7f8;
+}
+
+/* fix primary button color*/
+.pf-theme-dark .pf-m-primary {
+  color: #fff;
+  background-color: #06c;
+}
+
+/* fix chip background colors */
+.pf-theme-dark .pf-c-chip {
+  --pf-c-chip--BackgroundColor: var(--pf-global--BackgroundColor--100);
+  --pf-c-chip--before--BorderColor: var(--pf-global--BorderColor--100);
+  --pf-c-chip--m-draggable--BackgroundColor: var(--pf-global--palette--black-600);
+}
+
+/* hide options texts */
+.pf-u-screen-reader {
+  display: none;
+}
+
+/* fix search input*/
+.pf-theme-dark .pf-c-input-group {
+  --pf-c-input-group--BackgroundColor: transparent;
+  --pf-c-input-group__text--BorderTopColor: transparent;
+  --pf-c-input-group__text--BorderRightColor: transparent;
+  --pf-c-input-group__text--BorderBottomColor: var(--pf-global--BorderColor--400);
+  --pf-c-input-group__text--BorderLeftColor: transparent;
+  --pf-c-input-group__text--BackgroundColor: var(--pf-global--palette--black-600);
 }
