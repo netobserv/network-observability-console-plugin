@@ -13,7 +13,8 @@ describe('<NetflowTableRow />', () => {
   const mocks = {
     size: 'm' as Size,
     onSelect: jest.fn(),
-    tableWidth: 100
+    tableWidth: 100,
+    showContent: true
   };
   it('should render component', async () => {
     flows = FlowsSample;

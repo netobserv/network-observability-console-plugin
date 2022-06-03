@@ -148,29 +148,26 @@ const NetflowTable: React.FC<{
 
   const getBody = React.useCallback(() => {
     const rowHeight = getRowHeight();
-    return getSortedFlows().map((f, i) =>
-      scrollPosition <= i * rowHeight && scrollPosition + containerHeight > i * rowHeight ? (
-        <NetflowTableRow
-          key={f.key}
-          flow={f}
-          columns={columns}
-          size={size}
-          selectedRecord={selectedRecord}
-          onSelect={onSelect}
-          highlight={
-            previousContainerHeight === containerHeight &&
-            previousScrollPosition === scrollPosition &&
-            previousActiveSortDirection === activeSortDirection &&
-            previousActiveSortIndex === activeSortId &&
-            !firstRender.current
-          }
-          height={rowHeight}
-          tableWidth={width}
-        />
-      ) : (
-        <tr className={`empty-row`} style={{ height: rowHeight }} key={f.key} />
-      )
-    );
+    return getSortedFlows().map((f, i) => (
+      <NetflowTableRow
+        key={f.key}
+        flow={f}
+        columns={columns}
+        size={size}
+        selectedRecord={selectedRecord}
+        onSelect={onSelect}
+        highlight={
+          previousContainerHeight === containerHeight &&
+          previousScrollPosition === scrollPosition &&
+          previousActiveSortDirection === activeSortDirection &&
+          previousActiveSortIndex === activeSortId &&
+          !firstRender.current
+        }
+        height={rowHeight}
+        showContent={scrollPosition <= i * rowHeight && scrollPosition + containerHeight > i * rowHeight}
+        tableWidth={width}
+      />
+    ));
   }, [
     activeSortDirection,
     activeSortId,
