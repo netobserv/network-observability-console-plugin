@@ -91,8 +91,16 @@ build-frontend: install-frontend fmt-frontend
 	@echo "### Building frontend"
 	cd web && npm run build
 
+.PHONY: build-frontend-standalone
+build-frontend-standalone: install-frontend fmt-frontend
+	@echo "### Building frontend standalone"
+	cd web && npm run build:standalone
+
 .PHONY: build
 build: build-backend build-frontend
+
+.PHONY: build-standalone
+build-standalone: build-backend build-frontend-standalone
 
 .PHONY: frontend
 frontend: build-frontend lint-frontend test-frontend
@@ -128,10 +136,22 @@ serve-mock:
 	./plugin-backend --loki-mock --loglevel trace
 
 .PHONY: start
-start: build-backend 
+start: build-backend install-frontend
 	@echo "### Starting backend on http://localhost:9002"
 	bash -c "trap 'fuser -k 9002/tcp' EXIT; \
 					./plugin-backend -port 9002 & cd web && npm run start" 
+
+.PHONY: start-standalone
+start-standalone: build-backend install-frontend
+	@echo "### Starting backend on http://localhost:9002"
+	bash -c "trap 'fuser -k 9002/tcp' EXIT; \
+					./plugin-backend -port 9002 & cd web && npm run start:standalone"
+
+.PHONY: start-standalone-mock
+start-standalone-mock: build-backend install-frontend
+	@echo "### Starting backend on http://localhost:9002 using mock"
+	bash -c "trap 'fuser -k 9002/tcp' EXIT; \
+					./plugin-backend -port 9002 --loki-mock --loglevel trace & cd web && npm run start:standalone"
 
 .PHONY: bridge
 bridge:

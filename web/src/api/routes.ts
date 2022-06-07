@@ -12,11 +12,10 @@ import {
 } from './loki';
 import { Config, defaultConfig } from '../model/config';
 import { TimeRange } from '../utils/datetime';
-
-const host = '/api/proxy/plugin/network-observability-plugin/backend/';
+import { ContextSingleton } from '../utils/context';
 
 export const getFlows = (params: FlowQuery): Promise<RecordsResult> => {
-  return axios.get(host + '/api/loki/flows', { params }).then(r => {
+  return axios.get(ContextSingleton.getHost() + '/api/loki/flows', { params }).then(r => {
     if (r.status >= 400) {
       throw new Error(`${r.statusText} [code=${r.status}]`);
     }
@@ -30,11 +29,11 @@ export const getFlows = (params: FlowQuery): Promise<RecordsResult> => {
 
 export const getExportFlowsURL = (params: FlowQuery, columns?: string[]): string => {
   const exportQuery = buildExportQuery(params, columns);
-  return `${host}api/loki/export?${exportQuery}`;
+  return `${ContextSingleton.getHost()}api/loki/export?${exportQuery}`;
 };
 
 export const getNamespaces = (): Promise<string[]> => {
-  return axios.get(host + '/api/resources/namespaces').then(r => {
+  return axios.get(ContextSingleton.getHost() + '/api/resources/namespaces').then(r => {
     if (r.status >= 400) {
       throw new Error(`${r.statusText} [code=${r.status}]`);
     }
@@ -44,8 +43,8 @@ export const getNamespaces = (): Promise<string[]> => {
 
 export const getResources = (namespace: string, kind: string): Promise<string[]> => {
   const url = namespace
-    ? `${host}/api/resources/namespace/${namespace}/kind/${kind}/names`
-    : `${host}/api/resources/kind/${kind}/names`;
+    ? `${ContextSingleton.getHost()}/api/resources/namespace/${namespace}/kind/${kind}/names`
+    : `${ContextSingleton.getHost()}/api/resources/kind/${kind}/names`;
   return axios.get(url).then(r => {
     if (r.status >= 400) {
       throw new Error(`${r.statusText} [code=${r.status}]`);
@@ -55,7 +54,7 @@ export const getResources = (namespace: string, kind: string): Promise<string[]>
 };
 
 export const getTopology = (params: FlowQuery, range: number | TimeRange): Promise<TopologyResult> => {
-  return axios.get(host + '/api/loki/topology', { params }).then(r => {
+  return axios.get(ContextSingleton.getHost() + '/api/loki/topology', { params }).then(r => {
     if (r.status >= 400) {
       throw new Error(`${r.statusText} [code=${r.status}]`);
     }
@@ -68,7 +67,7 @@ export const getTopology = (params: FlowQuery, range: number | TimeRange): Promi
 };
 
 export const getConfig = (): Promise<Config> => {
-  return axios.get(host + '/api/frontend-config').then(r => {
+  return axios.get(ContextSingleton.getHost() + '/api/frontend-config').then(r => {
     if (r.status >= 400) {
       throw Error(`${r.statusText} [code=${r.status}]`);
     }

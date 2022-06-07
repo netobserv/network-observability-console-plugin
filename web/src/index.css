@@ -1,0 +1,214 @@
+/*This file regroup various console changes on top of PF*/
+
+/* fix page height*/
+div#app {
+  width: 100%;
+  height: 100%;
+}
+
+/* fix page background color & spacing*/
+.pf-c-page__main-section,
+section#pageSection {
+  background: transparent !important;
+  padding: 10px;
+}
+
+body>#app>.pf-c-page {
+  background: #fff;
+}
+
+.pf-theme-dark>body>#app>.pf-c-page {
+  background: var(--pf-c-page__main-section--BackgroundColor);
+}
+
+.pf-c-page__main-section {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding-bottom: 1.5em !important;
+}
+
+/* TODO: fix select. For now it only reduce size but doesn't match with console style */
+label.pf-c-select__menu-item {
+  position: relative;
+  left: 16px;
+  padding: 0;
+}
+
+/*set font & titles styles*/
+:root {
+  --pf-c-code-block--BackgroundColor: var(--pf-global--BackgroundColor--200);
+  --pf-c-code-block__pre--FontFamily: var(--pf-global--FontFamily--monospace);
+  --pf-c-code-block__pre--FontSize: var(--pf-global--FontSize--sm);
+  --pf-c-content--MarginBottom: var(--pf-global--spacer--md);
+  --pf-global--FontSize--md: 14px;
+  --pf-global--FontSize--sm: 13px;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--pf-global--FontFamily--heading--sans-serif);
+  font-weight: var(--pf-global--FontWeight--normal);
+  line-height: var(--pf-global--LineHeight--md);
+  margin-bottom: var(--pf-global--spacer--sm);
+  word-break: break-word;
+}
+
+h1 {
+  font-size: var(--pf-global--FontSize--2xl);
+  line-height: var(--pf-global--LineHeight--sm);
+}
+
+h2 {
+  font-size: var(--pf-global--FontSize--xl);
+}
+
+h3 {
+  font-size: var(--pf-global--FontSize--lg);
+}
+
+h4,
+h5,
+h6 {
+  font-size: var(--pf-global--FontSize--md);
+}
+
+button,
+input,
+optgroup,
+select,
+textarea,
+.pf-c-badge {
+  font-family: var(--pf-global--FontFamily--sans-serif);
+}
+
+/* set popups styles. check _modals.scss*/
+.co-overlay {
+  display: flex;
+  justify-content: center;
+  background: rgba(0, 0, 0, .5);
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  cursor: default;
+  overflow-x: hidden;
+  overflow-y: auto;
+  z-index: 1050;
+}
+
+.modal-dialog {
+  max-width: 600px;
+  align-self: center;
+  margin: 10px;
+  margin-bottom: 0;
+  outline: 0;
+  position: relative;
+  width: 100%;
+
+  --os-modal-dialog--BackgroundColor: var(--pf-global--BackgroundColor--100);
+  background: var(--os-modal-dialog--BackgroundColor);
+}
+
+.modal-content {
+  height: fit-content !important;
+  background-clip: padding-box;
+  border: 1px solid rgba(0, 0, 0, .2);
+  box-shadow: 0 3px 9px rgb(0 0 0 / 50%);
+  display: flex;
+  flex-direction: column;
+  outline: 0;
+  position: relative;
+}
+
+.modal-header {
+  padding: 2rem 2rem 1.5rem;
+}
+
+.modal-description {
+  padding-top: 0.5em;
+}
+
+.modal-body {
+  padding: 0 3em 0 3em !important;
+  background: none !important;
+  max-height: 50vh;
+  overflow-x: hidden;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+  position: relative;
+}
+
+.modal-body.scrollable {
+  overflow-y: scroll;
+}
+
+.modal-body.overflow-visible {
+  overflow: visible;
+}
+
+.modal-footer {
+  display: flex;
+  align-self: flex-end;
+  padding: 2em !important;
+  margin: 0 !important;
+}
+
+/* resource icons */
+.co-m-resource-icon {
+  background-color: #2b9af3;
+  border-radius: 20px;
+  color: var(--pf-global--palette--white);
+  display: inline-block;
+  flex-shrink: 0;
+  font-size: 14px;
+  line-height: 16px;
+  margin-right: 4px;
+  min-width: 18px;
+  padding: 1px 4px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* fix selector color*/
+.pf-theme-dark .pf-c-toggle-group__button.pf-m-selected {
+  --pf-c-toggle-group__button--BackgroundColor: #06c;
+  --pf-c-toggle-group__button--ZIndex: 100;
+  --pf-c-toggle-group__button--before--BorderColor: #1fa7f8;
+}
+
+/* fix primary button color*/
+.pf-theme-dark .pf-m-primary {
+  color: #fff;
+  background-color: #06c;
+}
+
+/* fix chip background colors */
+.pf-theme-dark .pf-c-chip {
+  --pf-c-chip--BackgroundColor: var(--pf-global--BackgroundColor--100);
+  --pf-c-chip--before--BorderColor: var(--pf-global--BorderColor--100);
+  --pf-c-chip--m-draggable--BackgroundColor: var(--pf-global--palette--black-600);
+}
+
+/* hide options texts */
+.pf-u-screen-reader {
+  display: none;
+}
+
+/* fix search input*/
+.pf-theme-dark .pf-c-input-group {
+  --pf-c-input-group--BackgroundColor: transparent;
+  --pf-c-input-group__text--BorderTopColor: transparent;
+  --pf-c-input-group__text--BorderRightColor: transparent;
+  --pf-c-input-group__text--BorderBottomColor: var(--pf-global--BorderColor--400);
+  --pf-c-input-group__text--BorderLeftColor: transparent;
+  --pf-c-input-group__text--BackgroundColor: var(--pf-global--palette--black-600);
+}
