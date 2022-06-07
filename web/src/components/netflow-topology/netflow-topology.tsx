@@ -415,8 +415,10 @@ export const TopologyContent: React.FC<{
 
   return (
     <TopologyView
+      data-test="topology-view"
       controlBar={
         <TopologyControlBar
+          data-test="topology-control-bar"
           controlButtons={createTopologyControlButtons({
             ...defaultControlButtonsOptions,
             fitToScreen: false,
@@ -461,10 +463,11 @@ export const TopologyContent: React.FC<{
         />
       }
     >
-      <VisualizationSurface state={{ selectedIds }} />
-      <div id="topology-search-container">
+      <VisualizationSurface data-test="visualization-surface" state={{ selectedIds }} />
+      <div id="topology-search-container" data-test="topology-search-container">
         <InputGroup>
           <TextInput
+            data-test="search-topology-element-input"
             id="search-topology-element-input"
             className={'search'}
             placeholder={t('Find in view')}
@@ -477,12 +480,18 @@ export const TopologyContent: React.FC<{
             validated={searchValidated}
           />
           {!_.isEmpty(searchResultCount) ? (
-            <TextInput value={searchResultCount} isDisabled id="topology-search-result-count" />
+            <TextInput
+              value={searchResultCount}
+              isDisabled
+              id="topology-search-result-count"
+              data-test="topology-search-result-count"
+            />
           ) : (
             <></>
           )}
           {_.isEmpty(searchResultCount) ? (
             <Button
+              data-test="search-topology-element-button"
               id="search-topology-element-button"
               variant="plain"
               aria-label="search for element button"
@@ -493,7 +502,8 @@ export const TopologyContent: React.FC<{
           ) : (
             <>
               <Button
-                id="search-topology-element-button"
+                data-test="prev-search-topology-element-button"
+                id="prev-search-topology-element-button"
                 variant="plain"
                 aria-label="previous button for search element"
                 onClick={() => onSearch(searchValue, false)}
@@ -501,7 +511,8 @@ export const TopologyContent: React.FC<{
                 <AngleUpIcon />
               </Button>
               <Button
-                id="search-topology-element-button"
+                data-test="next-search-topology-element-button"
+                id="next-search-topology-element-button"
                 variant="plain"
                 aria-label="next button for search element"
                 onClick={() => onSearch(searchValue)}
@@ -509,7 +520,8 @@ export const TopologyContent: React.FC<{
                 <AngleDownIcon />
               </Button>
               <Button
-                id="search-topology-element-button"
+                data-test="clear-search-topology-element-button"
+                id="clear-search-topology-element-button"
                 variant="plain"
                 aria-label="clear button for search element"
                 onClick={() => onChangeSearch()}
@@ -585,7 +597,7 @@ export const NetflowTopology: React.FC<{
     );
   } else {
     return (
-      <VisualizationProvider controller={controller}>
+      <VisualizationProvider data-test="visualization-provider" controller={controller}>
         <TopologyContent
           k8sModels={k8sModels}
           range={range}

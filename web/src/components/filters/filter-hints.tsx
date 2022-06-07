@@ -13,7 +13,7 @@ export const FilterHints: React.FC<FilterHintsProps> = ({ def }) => {
     return null;
   }
   return (
-    <div id="tips">
+    <div data-test="tips" id="tips">
       <Text component={TextVariants.p}>{def.hint}</Text>
       {def.examples && (
         <Popover
@@ -23,7 +23,7 @@ export const FilterHints: React.FC<FilterHintsProps> = ({ def }) => {
           hasAutoWidth={true}
           position={'bottom'}
         >
-          <Button id="more" variant="link">
+          <Button data-test="more" id="more" variant="link">
             {t('Learn more')}
           </Button>
         </Popover>

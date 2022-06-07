@@ -19,6 +19,7 @@ const CustomModal: React.FC<{
 }> = ({ id, scrollable, isOpen, onClose, title, description, children, footer }) => {
   return isOpen ? (
     <Modal
+      data-test={id}
       id={id}
       isOpen={isOpen}
       className={'modal-dialog'}
@@ -27,12 +28,13 @@ const CustomModal: React.FC<{
       overlayClassName="co-overlay"
     >
       <div className="modal-content modal-content--no-inner-scroll">
-        <div className="modal-header">
+        <div data-test={`${id}-header`} className="modal-header">
           <TextContent>
             <Text component={TextVariants.h1}>
               {title}
               {onClose && (
                 <Button
+                  data-test={`${id}-close-button`}
                   className={'co-close-button co-close-button--float-right'}
                   onClick={e => {
                     e.stopPropagation();
@@ -48,9 +50,15 @@ const CustomModal: React.FC<{
           {description && <div className="modal-description">{description}</div>}
         </div>
         {children && (
-          <div className={`${'modal-body'} ${scrollable ? 'scrollable' : 'overflow-visible'}`}>{children}</div>
+          <div data-test={`${id}-body`} className={`${'modal-body'} ${scrollable ? 'scrollable' : 'overflow-visible'}`}>
+            {children}
+          </div>
         )}
-        {footer && <div className="modal-footer">{footer}</div>}
+        {footer && (
+          <div data-test={`${id}-footer`} className="modal-footer">
+            {footer}
+          </div>
+        )}
       </div>
     </Modal>
   ) : (

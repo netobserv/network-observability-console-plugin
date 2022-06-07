@@ -63,7 +63,14 @@ export const OptionsPanel: React.FC<RecordDrawerProps> = ({ id, options, setOpti
   };
 
   return (
-    <DrawerPanelContent id={id} isResizable defaultSize={defaultSize} minSize={minSize} maxSize={maxSize}>
+    <DrawerPanelContent
+      data-test={id}
+      id={id}
+      isResizable
+      defaultSize={defaultSize}
+      minSize={minSize}
+      maxSize={maxSize}
+    >
       <DrawerHead>
         <Text component={TextVariants.h2}>{t('Options')}</Text>
         <DrawerActions>

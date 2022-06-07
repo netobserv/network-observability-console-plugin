@@ -41,7 +41,7 @@ export const RecordField: React.FC<{
   const simpleTextWithTooltip = (text?: string) => {
     if (text) {
       return (
-        <div>
+        <div data-test={`field-text-${text}`}>
           <span>{text}</span>
           <div className="record-field-tooltip">{text}</div>
         </div>
@@ -54,7 +54,7 @@ export const RecordField: React.FC<{
     // Note: namespace is not mandatory here (e.g. Node objects)
     if (value && kind) {
       return (
-        <div className="force-truncate">
+        <div data-test={`field-resource-${kind}.${ns}.${value}`} className="force-truncate">
           <ResourceLink className={size} inline={true} kind={kind} name={value} namespace={ns} />
           <div className="record-field-tooltip">
             {ns && (
@@ -85,7 +85,7 @@ export const RecordField: React.FC<{
   const kindContent = (kind: 'Namespace' | 'Node', value?: string) => {
     if (value) {
       return (
-        <div className="force-truncate">
+        <div data-test={`field-kind-${kind}.${value}`} className="force-truncate">
           <ResourceLink className={size} inline={true} kind={kind} name={value} />
           <div className="record-field-tooltip">
             <h4>{t(kind)}</h4>
@@ -109,7 +109,7 @@ export const RecordField: React.FC<{
     const dateText = date?.toDateString() || emptyText();
     const timeText = date?.toLocaleTimeString() || emptyText();
     return singleContainer(
-      <div>
+      <div data-test={`field-date-${dateText}-${timeText}`}>
         <div className={`datetime ${size}`}>
           <span>{dateText}</span> <span className="text-muted">{timeText}</span>
         </div>

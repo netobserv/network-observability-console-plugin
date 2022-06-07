@@ -248,7 +248,14 @@ export const SummaryPanel: React.FC<{
   const { t } = useTranslation('plugin__network-observability-plugin');
 
   return (
-    <DrawerPanelContent id={id} isResizable defaultSize={defaultSize} minSize={minSize} maxSize={maxSize}>
+    <DrawerPanelContent
+      data-test={id}
+      id={id}
+      isResizable
+      defaultSize={defaultSize}
+      minSize={minSize}
+      maxSize={maxSize}
+    >
       <DrawerHead>
         <Text component={TextVariants.h2}>{t('Query summary')}</Text>
         <DrawerActions>

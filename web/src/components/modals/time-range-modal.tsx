@@ -112,6 +112,7 @@ export const TimeRangeModal: React.FC<TimeRangeModalProps> = ({ id, isModalOpen,
 
   return (
     <Modal
+      data-test={id}
       id={id}
       title={t('Custom time range')}
       isOpen={isModalOpen}
@@ -119,7 +120,7 @@ export const TimeRangeModal: React.FC<TimeRangeModalProps> = ({ id, isModalOpen,
       onClose={() => onCancel()}
       footer={
         <div>
-          <Button key="cancel" variant="link" onClick={() => onCancel()}>
+          <Button data-test="time-range-cancel" key="cancel" variant="link" onClick={() => onCancel()}>
             {t('Cancel')}
           </Button>
           <Tooltip
@@ -128,7 +129,13 @@ export const TimeRangeModal: React.FC<TimeRangeModalProps> = ({ id, isModalOpen,
             content={error}
             isVisible={error !== undefined}
           >
-            <Button isDisabled={error !== undefined} key="confirm" variant="primary" onClick={() => onSave()}>
+            <Button
+              data-test="time-range-save"
+              isDisabled={error !== undefined}
+              key="confirm"
+              variant="primary"
+              onClick={() => onSave()}
+            >
               {t('Save')}
             </Button>
           </Tooltip>
@@ -146,6 +153,7 @@ export const TimeRangeModal: React.FC<TimeRangeModalProps> = ({ id, isModalOpen,
           <Flex direction={{ default: 'row' }}>
             <FlexItem>
               <DatePicker
+                data-test="from-date-picker"
                 validators={[date => dateValidator(true, date)]}
                 onChange={str => setFromDate(str)}
                 value={fromDate}
@@ -153,6 +161,7 @@ export const TimeRangeModal: React.FC<TimeRangeModalProps> = ({ id, isModalOpen,
             </FlexItem>
             <FlexItem>
               <TimePicker
+                data-test="from-time-picker"
                 is24Hour
                 includeSeconds
                 placeholder="hh:mm:ss"
@@ -167,6 +176,7 @@ export const TimeRangeModal: React.FC<TimeRangeModalProps> = ({ id, isModalOpen,
           <Flex direction={{ default: 'row' }}>
             <FlexItem>
               <DatePicker
+                data-test="to-date-picker"
                 validators={[date => dateValidator(false, date)]}
                 rangeStart={fromDate ? new Date(Date.parse(fromDate)) : undefined}
                 onChange={str => setToDate(str)}
@@ -174,7 +184,14 @@ export const TimeRangeModal: React.FC<TimeRangeModalProps> = ({ id, isModalOpen,
               />
             </FlexItem>
             <FlexItem>
-              <TimePicker is24Hour includeSeconds placeholder="hh:mm:ss" onChange={setToTime} time={displayedToTime} />
+              <TimePicker
+                data-test="to-time-picker"
+                is24Hour
+                includeSeconds
+                placeholder="hh:mm:ss"
+                onChange={setToTime}
+                time={displayedToTime}
+              />
             </FlexItem>
           </Flex>
         </FlexItem>

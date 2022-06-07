@@ -61,10 +61,12 @@ export const GroupDropdown: React.FC<{
 
   return (
     <Dropdown
+      data-test={id}
       id={id}
       position={DropdownPosition.right}
       toggle={
         <DropdownToggle
+          data-test={`${id}-dropdown`}
           id={`${id}-dropdown`}
           isDisabled={disabled}
           onToggle={() => setGroupDropdownOpen(!groupDropdownOpen)}
@@ -75,6 +77,7 @@ export const GroupDropdown: React.FC<{
       isOpen={groupDropdownOpen}
       dropdownItems={getAvailableGroups().map(v => (
         <DropdownItem
+          data-test={v}
           id={v}
           key={v}
           onClick={() => {

@@ -498,7 +498,14 @@ export const ElementPanel: React.FC<{
   }, [data.type, element, t]);
 
   return (
-    <DrawerPanelContent id={id} isResizable defaultSize={defaultSize} minSize={minSize} maxSize={maxSize}>
+    <DrawerPanelContent
+      data-test={id}
+      id={id}
+      isResizable
+      defaultSize={defaultSize}
+      minSize={minSize}
+      maxSize={maxSize}
+    >
       <DrawerHead>
         {titleContent()}
         <DrawerActions>

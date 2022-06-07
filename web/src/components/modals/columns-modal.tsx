@@ -102,6 +102,7 @@ export const ColumnsModal: React.FC<{
         key={'data-list-item-' + i}
         aria-labelledby={'table-column-management-item' + i}
         className="data-list-item"
+        data-test={'data-' + i}
         id={'data-' + i}
       >
         <DataListItemRow key={'data-list-item-row-' + i}>
@@ -128,6 +129,7 @@ export const ColumnsModal: React.FC<{
 
   return (
     <Modal
+      data-test={id}
       id={id}
       title={t('Manage columns')}
       isOpen={isModalOpen}
@@ -146,14 +148,20 @@ export const ColumnsModal: React.FC<{
       }
       footer={
         <div className="footer">
-          <Button key="reset" variant="link" onClick={() => onReset()}>
+          <Button data-test="columns-reset-button" key="reset" variant="link" onClick={() => onReset()}>
             {t('Restore default columns')}
           </Button>
-          <Button key="cancel" variant="link" onClick={() => setModalOpen(false)}>
+          <Button data-test="columns-cancel-button" key="cancel" variant="link" onClick={() => setModalOpen(false)}>
             {t('Cancel')}
           </Button>
           <Tooltip content={t('At least one column must be selected')} isVisible={isSaveDisabled}>
-            <Button isDisabled={isSaveDisabled} key="confirm" variant="primary" onClick={() => onSave()}>
+            <Button
+              data-test="columns-save-button"
+              isDisabled={isSaveDisabled}
+              key="confirm"
+              variant="primary"
+              onClick={() => onSave()}
+            >
               {t('Save')}
             </Button>
           </Tooltip>
@@ -163,7 +171,12 @@ export const ColumnsModal: React.FC<{
       <div className="co-m-form-row">
         <DragDrop onDrop={onDrop}>
           <Droppable hasNoWrapper>
-            <DataList aria-label="Table column management" id="table-column-management" isCompact>
+            <DataList
+              aria-label="Table column management"
+              data-test="table-column-management"
+              id="table-column-management"
+              isCompact
+            >
               {draggableItems}
             </DataList>
           </Droppable>

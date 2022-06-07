@@ -26,16 +26,22 @@ export const ScopeDropdown: React.FC<{
 
   return (
     <Dropdown
+      data-test={id}
       id={id}
       position={DropdownPosition.right}
       toggle={
-        <DropdownToggle id={`${id}-dropdown`} onToggle={() => setScopeDropdownOpen(!scopeDropdownOpen)}>
+        <DropdownToggle
+          data-test={`${id}-dropdown`}
+          id={`${id}-dropdown`}
+          onToggle={() => setScopeDropdownOpen(!scopeDropdownOpen)}
+        >
           {getScopeDisplay(selected)}
         </DropdownToggle>
       }
       isOpen={scopeDropdownOpen}
       dropdownItems={Object.values(TopologyScopes).map(v => (
         <DropdownItem
+          data-test={v}
           id={v}
           key={v}
           onClick={() => {

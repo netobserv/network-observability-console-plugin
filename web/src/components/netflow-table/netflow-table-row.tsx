@@ -26,6 +26,7 @@ const NetflowTableRow: React.FC<{
 
   return (
     <Tr
+      data-test={`tr-${flow.key}`}
       isRowSelected={flow.key === selectedRecord?.key}
       onRowClick={onRowClick}
       className={`${isDark() ? 'dark' : 'light'}-stripped`}
@@ -38,7 +39,11 @@ const NetflowTableRow: React.FC<{
           timeout={100}
           classNames="newflow"
         >
-          <Td key={c.id} style={{ height, width: `${Math.floor((100 * c.width) / tableWidth)}%` }}>
+          <Td
+            data-test={`td-${flow.key}`}
+            key={c.id}
+            style={{ height, width: `${Math.floor((100 * c.width) / tableWidth)}%` }}
+          >
             {<RecordField flow={flow} column={c} size={size}></RecordField>}
           </Td>
         </CSSTransition>

@@ -113,7 +113,7 @@ const BaseEdge: React.FC<BaseEdgeProps> = ({
     <Layer id={dragging || hover || highlighted ? TOP_LAYER : undefined}>
       <g
         ref={hoverRef as React.LegacyRef<SVGGElement> | undefined}
-        data-test-id="edge-handler"
+        data-test="edge-handler"
         className={groupClassName}
         onClick={onSelect}
         onContextMenu={onContextMenu}
