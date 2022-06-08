@@ -17,7 +17,7 @@ describe('getHTTPErrorDetails', () => {
         }
       }
     };
-    expect(getHTTPErrorDetails(err)).toEqual('message: there was an error\ncode: ABCD');
+    expect(getHTTPErrorDetails(err)).toEqual('there was an error\nABCD');
   });
   it('should build error from thrown Error', () => {
     const err = new Error('there was an error [code=ABCD]');
@@ -33,7 +33,7 @@ describe('getHTTPErrorDetails', () => {
   });
   it('should build error from CustomError', () => {
     const err = new CustomError(404, 'not found', { data: { details: 'file xyz not found on server' } });
-    expect(getHTTPErrorDetails(err)).toEqual('Error: [404] not found\ndetails: file xyz not found on server');
+    expect(getHTTPErrorDetails(err)).toEqual('Error: [404] not found\nfile xyz not found on server');
   });
   it('should build error from unexpected response', () => {
     const err = 'unexpected response';

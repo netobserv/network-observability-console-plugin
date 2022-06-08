@@ -84,3 +84,39 @@ export const getConfig = (): Promise<Config> => {
     };
   });
 };
+
+export const getLokiReady = (): Promise<string> => {
+  return axios.get(ContextSingleton.getHost() + '/api/loki/ready').then(r => {
+    if (r.status >= 400) {
+      throw new Error(`${r.statusText} [code=${r.status}]`);
+    }
+    return r.data;
+  });
+};
+
+export const getMetrics = (): Promise<string> => {
+  return axios.get(ContextSingleton.getHost() + '/api/loki/metrics').then(r => {
+    if (r.status >= 400) {
+      throw new Error(`${r.statusText} [code=${r.status}]`);
+    }
+    return r.data;
+  });
+};
+
+export const getBuildInfo = (): Promise<unknown> => {
+  return axios.get(ContextSingleton.getHost() + '/api/loki/buildinfo').then(r => {
+    if (r.status >= 400) {
+      throw new Error(`${r.statusText} [code=${r.status}]`);
+    }
+    return r.data;
+  });
+};
+
+export const getLimits = (): Promise<unknown> => {
+  return axios.get(ContextSingleton.getHost() + '/api/loki/config/limits').then(r => {
+    if (r.status >= 400) {
+      throw new Error(`${r.statusText} [code=${r.status}]`);
+    }
+    return r.data;
+  });
+};

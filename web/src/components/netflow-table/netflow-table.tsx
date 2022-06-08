@@ -26,6 +26,7 @@ import {
   LOCAL_STORAGE_SORT_ID_KEY,
   useLocalStorage
 } from '../../utils/local-storage-hook';
+import { LokiError } from '../messages/loki-error';
 
 const NetflowTable: React.FC<{
   flows: Record[];
@@ -192,14 +193,7 @@ const NetflowTable: React.FC<{
   if (width === 0) {
     return null;
   } else if (error) {
-    return (
-      <EmptyState data-test="error-state" variant={EmptyStateVariant.small}>
-        <Title headingLevel="h2" size="lg">
-          {t('Unable to get flows')}
-        </Title>
-        <EmptyStateBody>{error}</EmptyStateBody>
-      </EmptyState>
-    );
+    return <LokiError title={t('Unable to get flows')} error={error} />;
   } else if (_.isEmpty(flows)) {
     if (loading) {
       return (

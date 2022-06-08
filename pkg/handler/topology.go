@@ -79,7 +79,7 @@ func getTopologyFlows(cfg loki.Config, client httpclient.Caller, params url.Valu
 		}
 		code, err := fetchParallel(client, queries, merger)
 		if err != nil {
-			return nil, code, errors.New("Error while fetching flows from Loki: " + err.Error())
+			return nil, code, err
 		}
 	} else {
 		// else, run all at once
@@ -93,7 +93,7 @@ func getTopologyFlows(cfg loki.Config, client httpclient.Caller, params url.Valu
 		}
 		code, err = fetchSingle(client, query, merger)
 		if err != nil {
-			return nil, code, errors.New("Error while fetching flows from Loki: " + err.Error())
+			return nil, code, err
 		}
 	}
 

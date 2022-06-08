@@ -1,4 +1,4 @@
-import { EmptyState, EmptyStateBody, Spinner } from '@patternfly/react-core';
+import { Spinner } from '@patternfly/react-core';
 import { TopologyView, VisualizationSurface } from '@patternfly/react-topology';
 import { shallow } from 'enzyme';
 import * as React from 'react';
@@ -8,6 +8,7 @@ import { DefaultOptions, LayoutName } from '../../../model/topology';
 import { defaultTimeRange } from '../../../utils/router';
 import { NetflowTopology, TopologyContent } from '../netflow-topology';
 import { dataSample } from '../__tests-data__/metrics';
+import { LokiError } from '../../messages/loki-error';
 
 describe('<NetflowTopology />', () => {
   const mocks = {
@@ -50,7 +51,6 @@ describe('<NetflowTopology />', () => {
   it('should render error', async () => {
     mocks.error = 'test error message';
     const wrapper = shallow(<NetflowTopology {...mocks} />);
-    expect(wrapper.find(EmptyState)).toHaveLength(1);
-    expect(wrapper.find(EmptyStateBody)).toHaveLength(1);
+    expect(wrapper.find(LokiError)).toHaveLength(1);
   });
 });

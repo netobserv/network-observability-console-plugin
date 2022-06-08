@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/sirupsen/logrus"
+	"gopkg.in/yaml.v3"
 
 	"github.com/netobserv/network-observability-console-plugin/pkg/handler/lokiclientmock"
 	"github.com/netobserv/network-observability-console-plugin/pkg/httpclient"
@@ -17,6 +18,11 @@ import (
 	"github.com/netobserv/network-observability-console-plugin/pkg/metrics"
 	"github.com/netobserv/network-observability-console-plugin/pkg/model"
 )
+
+type LokiError struct {
+	DisplayMessage string
+	Message        string
+}
 
 var hlog = logrus.WithField("module", "handler")
 
@@ -52,15 +58,18 @@ func EncodeQuery(url string) string {
 
 func getLokiError(resp []byte, code int) string {
 	var f map[string]string
+	if code == http.StatusBadRequest {
+		return fmt.Sprintf("Loki message: %s", resp)
+	}
 	err := json.Unmarshal(resp, &f)
 	if err != nil {
-		return fmt.Sprintf("Unknown error from Loki - cannot unmarshal (code: %d resp: %s)", code, resp)
+		return fmt.Sprintf("Unknown error from Loki\ncannot unmarshal\n%s", resp)
 	}
 	message, ok := f["message"]
 	if !ok {
-		return fmt.Sprintf("Unknown error from Loki - no message found (code: %d)", code)
+		return "Unknown error from Loki\nno message found"
 	}
-	return fmt.Sprintf("Error from Loki (code: %d): %s", code, message)
+	return fmt.Sprintf("Loki message: %s", message)
 }
 
 func executeLokiQuery(flowsURL string, lokiClient httpclient.Caller) ([]byte, int, error) {
@@ -77,7 +86,7 @@ func executeLokiQuery(flowsURL string, lokiClient httpclient.Caller) ([]byte, in
 	}
 	if code != http.StatusOK {
 		msg := getLokiError(resp, code)
-		return nil, http.StatusBadRequest, errors.New("Loki backend responded: " + msg)
+		return nil, http.StatusBadRequest, errors.New(msg)
 	}
 	code = http.StatusOK
 	return resp, code, nil
@@ -153,4 +162,81 @@ func fetchParallel(lokiClient httpclient.Caller, queries []string, merger loki.M
 	}
 	codeOut = http.StatusOK
 	return codeOut, nil
+}
+
+func LokiReady(cfg loki.Config) func(w http.ResponseWriter, r *http.Request) {
+	lokiClient := newLokiClient(&cfg)
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		baseURL := strings.TrimRight(cfg.URL.String(), "/")
+
+		resp, code, err := executeLokiQuery(fmt.Sprintf("%s/%s", baseURL, "ready"), lokiClient)
+		if err != nil {
+			writeError(w, code, err.Error())
+			return
+		}
+
+		status := string(resp)
+		if strings.Contains(status, "ready") {
+			code = http.StatusOK
+			writeText(w, code, resp)
+			return
+		}
+
+		writeError(w, code, fmt.Sprintf("Loki returned a non ready status: %s", status))
+	}
+}
+
+func LokiMetrics(cfg loki.Config) func(w http.ResponseWriter, r *http.Request) {
+	lokiClient := newLokiClient(&cfg)
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		baseURL := strings.TrimRight(cfg.URL.String(), "/")
+
+		resp, code, err := executeLokiQuery(fmt.Sprintf("%s/%s", baseURL, "metrics"), lokiClient)
+		if err != nil {
+			writeError(w, code, err.Error())
+			return
+		}
+
+		writeText(w, code, resp)
+	}
+}
+
+func LokiBuildInfos(cfg loki.Config) func(w http.ResponseWriter, r *http.Request) {
+	lokiClient := newLokiClient(&cfg)
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		baseURL := strings.TrimRight(cfg.URL.String(), "/")
+
+		resp, code, err := executeLokiQuery(fmt.Sprintf("%s/%s", baseURL, "loki/api/v1/status/buildinfo"), lokiClient)
+		if err != nil {
+			writeError(w, code, err.Error())
+			return
+		}
+
+		writeText(w, code, resp)
+	}
+}
+
+func LokiConfig(cfg loki.Config, param string) func(w http.ResponseWriter, r *http.Request) {
+	lokiClient := newLokiClient(&cfg)
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		baseURL := strings.TrimRight(cfg.URL.String(), "/")
+
+		resp, code, err := executeLokiQuery(fmt.Sprintf("%s/%s", baseURL, "config"), lokiClient)
+		if err != nil {
+			writeError(w, code, err.Error())
+			return
+		}
+
+		cfg := make(map[string]interface{})
+		err = yaml.Unmarshal(resp, &cfg)
+		if err != nil {
+			writeError(w, code, err.Error())
+			return
+		}
+		writeJSON(w, code, cfg[param])
+	}
 }

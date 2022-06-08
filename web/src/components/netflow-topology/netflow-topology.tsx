@@ -1,15 +1,4 @@
-import {
-  Bullseye,
-  Button,
-  EmptyState,
-  EmptyStateBody,
-  EmptyStateVariant,
-  InputGroup,
-  Spinner,
-  TextInput,
-  Title,
-  ValidatedOptions
-} from '@patternfly/react-core';
+import { Bullseye, Button, InputGroup, Spinner, TextInput, ValidatedOptions } from '@patternfly/react-core';
 import { CogIcon, ExportIcon, SearchIcon, TimesIcon, AngleUpIcon, AngleDownIcon } from '@patternfly/react-icons';
 import {
   createTopologyControlButtons,
@@ -53,6 +42,7 @@ import layoutFactory from './layouts/layoutFactory';
 import './netflow-topology.css';
 import { STEP_INTO_EVENT, FILTER_EVENT } from './styles/styleNode';
 import { K8sModel } from '@openshift-console/dynamic-plugin-sdk';
+import LokiError from '../messages/loki-error';
 
 export const HOVER_EVENT = 'hover';
 
@@ -569,14 +559,7 @@ export const NetflowTopology: React.FC<{
   }, []);
 
   if (error) {
-    return (
-      <EmptyState data-test="error-state" variant={EmptyStateVariant.small}>
-        <Title headingLevel="h2" size="lg">
-          {t('Unable to get topology')}
-        </Title>
-        <EmptyStateBody>{error}</EmptyStateBody>
-      </EmptyState>
-    );
+    return <LokiError title={t('Unable to get topology')} error={error} />;
   } else if (!controller || (_.isEmpty(metrics) && loading)) {
     return (
       <Bullseye data-test="loading-contents">
