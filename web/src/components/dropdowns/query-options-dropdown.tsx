@@ -86,6 +86,7 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
                     name={`reporter-${opt.value}`}
                     onChange={() => setReporter(opt.value)}
                     label={opt.label}
+                    data-test={`reporter-${opt.value}`}
                     id={`reporter-${opt.value}`}
                     value={opt.value}
                   />
@@ -116,6 +117,7 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
                 name={`match-${opt.value}`}
                 onChange={() => setMatch(opt.value)}
                 label={opt.label}
+                data-test={`match-${opt.value}`}
                 id={`match-${opt.value}`}
                 value={opt.value}
               />
@@ -140,6 +142,7 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
           <div key={'limit-' + l}>
             <label className="pf-c-select__menu-item">
               <Radio
+                data-test={'limit-' + l}
                 id={'limit-' + l}
                 name={'limit-' + l}
                 isChecked={l === limit}
@@ -159,8 +162,9 @@ export const QueryOptionsDropdown: React.FC<QueryOptionsDropdownProps> = props =
   const { t } = useTranslation('plugin__network-observability-plugin');
   const [isOpen, setOpen] = React.useState<boolean>(false);
   return (
-    <div data-test-id="query-options-dropdown-container">
+    <div data-test="query-options-dropdown-container">
       <Select
+        data-test="query-options-dropdown"
         id="query-options-dropdown"
         placeholderText={<span>{t('Query Options')}</span>}
         isOpen={isOpen}

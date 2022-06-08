@@ -30,10 +30,15 @@ export const TruncateDropdown: React.FC<{
 
   return (
     <Dropdown
+      data-test={id}
       id={id}
       position={DropdownPosition.right}
       toggle={
-        <DropdownToggle id={`${id}-dropdown`} onToggle={() => setTruncateDropdownOpen(!truncateDropdownOpen)}>
+        <DropdownToggle
+          data-test={`${id}-dropdown`}
+          id={`${id}-dropdown`}
+          onToggle={() => setTruncateDropdownOpen(!truncateDropdownOpen)}
+        >
           {getTruncateDisplay(selected)}
         </DropdownToggle>
       }
@@ -47,6 +52,7 @@ export const TruncateDropdown: React.FC<{
         TopologyTruncateLength.XL
       ].map((v: TopologyTruncateLength) => (
         <DropdownItem
+          data-test={String(v)}
           id={String(v)}
           key={v}
           onClick={() => {

@@ -26,6 +26,7 @@ export const NetflowTableHeader: React.FC<{
     (nh: ColumnGroup) => {
       return (
         <Th
+          data-test={`nested-th-${nh.title || 'empty'}`}
           key={`nested-${nh.title}-${headersState.nestedHeaders.indexOf(nh)}`}
           hasRightBorder={_.last(headersState.nestedHeaders) !== nh}
           colSpan={nh.columns.length}
@@ -43,6 +44,7 @@ export const NetflowTableHeader: React.FC<{
         headersState.useNested && headersState.nestedHeaders.find(nh => _.last(nh.columns) === c) !== undefined;
       return (
         <Th
+          data-test={`th-${c.id}`}
           hasRightBorder={showBorder}
           key={c.id}
           sort={{
@@ -72,9 +74,9 @@ export const NetflowTableHeader: React.FC<{
   }, [columns]);
 
   return (
-    <Thead hasNestedHeader={headersState.useNested}>
+    <Thead data-test="thead" hasNestedHeader={headersState.useNested}>
       {headersState.useNested && <Tr>{headersState.nestedHeaders.map(nh => getNestedTableHeader(nh))}</Tr>}
-      <Tr>{headersState.headers.map(c => getTableHeader(c))}</Tr>
+      <Tr data-test="thead-tr">{headersState.headers.map(c => getTableHeader(c))}</Tr>
     </Thead>
   );
 };

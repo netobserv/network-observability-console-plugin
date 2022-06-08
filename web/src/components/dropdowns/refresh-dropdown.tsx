@@ -46,16 +46,22 @@ export const RefreshDropdown: React.FC<RefreshDropdownProps> = ({ disabled, id, 
 
   return (
     <Dropdown
+      data-test={id}
       id={id}
       dropdownItems={_.map(refreshOptions, (name, key) => (
-        <DropdownItem id={key} component="button" key={key} onClick={() => onChange(key)}>
+        <DropdownItem data-test={key} id={key} component="button" key={key} onClick={() => onChange(key)}>
           {name}
         </DropdownItem>
       ))}
       isOpen={isOpen}
       onSelect={() => setIsOpen(false)}
       toggle={
-        <DropdownToggle id={`${id}-dropdown`} isDisabled={disabled} onToggle={() => setIsOpen(!isOpen)}>
+        <DropdownToggle
+          data-test={`${id}-dropdown`}
+          id={`${id}-dropdown`}
+          isDisabled={disabled}
+          onToggle={() => setIsOpen(!isOpen)}
+        >
           {refreshOptions[selectedKey as keyof typeof refreshOptions]}
         </DropdownToggle>
       }

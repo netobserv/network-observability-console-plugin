@@ -57,9 +57,10 @@ export const TimeRangeDropdown: React.FC<TimeRangeDropdownProps> = ({ id, range,
 
   return (
     <Dropdown
+      data-test={id}
       id={id}
       dropdownItems={_.map(timeRangeOptions, (name, key) => (
-        <DropdownItem id={key} component="button" key={key} onClick={() => onChange(key)}>
+        <DropdownItem data-test={key} id={key} component="button" key={key} onClick={() => onChange(key)}>
           {name}
         </DropdownItem>
       ))}
@@ -71,7 +72,7 @@ export const TimeRangeDropdown: React.FC<TimeRangeDropdownProps> = ({ id, range,
           position="top"
           content={textContent()}
         >
-          <DropdownToggle id={`${id}-dropdown`} onToggle={() => setIsOpen(!isOpen)}>
+          <DropdownToggle data-test={`${id}-dropdown`} id={`${id}-dropdown`} onToggle={() => setIsOpen(!isOpen)}>
             {timeRangeOptions[selectedKey as keyof typeof timeRangeOptions]}
           </DropdownToggle>
         </Tooltip>

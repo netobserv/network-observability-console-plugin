@@ -227,15 +227,22 @@ const NetflowTable: React.FC<{
 
   return (
     <div id="table-container">
-      <TableComposable aria-label="Netflow table" variant="compact" style={{ minWidth: `${width}em` }} isStickyHeader>
+      <TableComposable
+        data-test="table-composable"
+        aria-label="Netflow table"
+        variant="compact"
+        style={{ minWidth: `${width}em` }}
+        isStickyHeader
+      >
         <NetflowTableHeader
+          data-test="table-header"
           onSort={onSort}
           sortDirection={activeSortDirection}
           sortId={activeSortId}
           columns={columns}
           tableWidth={width}
         />
-        <Tbody>{getBody()}</Tbody>
+        <Tbody data-test="table-body">{getBody()}</Tbody>
       </TableComposable>
     </div>
   );

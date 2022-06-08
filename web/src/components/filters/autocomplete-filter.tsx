@@ -173,7 +173,7 @@ export const AutocompleteFilter: React.FC<AutocompleteFilterProps> = ({
 
   return (
     <>
-      <div ref={autocompleteContainerRef}>
+      <div data-test="autocomplete-container" ref={autocompleteContainerRef}>
         <Popper
           trigger={
             <TextInput
@@ -186,6 +186,7 @@ export const AutocompleteFilter: React.FC<AutocompleteFilterProps> = ({
               onChange={onAutoCompleteChange}
               onBlur={onBlur}
               ref={searchInputRef}
+              data-test="autocomplete-search"
               id="autocomplete-search"
             />
           }
@@ -194,7 +195,7 @@ export const AutocompleteFilter: React.FC<AutocompleteFilterProps> = ({
               <MenuContent>
                 <MenuList id={optionsMenuID}>
                   {autocompleteOptions.map(option => (
-                    <MenuItem itemId={option.value} key={option.name} onBlur={onBlur}>
+                    <MenuItem data-test={option.value} itemId={option.value} key={option.name} onBlur={onBlur}>
                       {option.name}
                     </MenuItem>
                   ))}
@@ -207,7 +208,13 @@ export const AutocompleteFilter: React.FC<AutocompleteFilterProps> = ({
           appendTo={autocompleteContainerRef.current!}
         />
       </div>
-      <Button id="search-button" variant="control" aria-label="search button for filter" onClick={() => onEnter()}>
+      <Button
+        data-test="search-button"
+        id="search-button"
+        variant="control"
+        aria-label="search button for filter"
+        onClick={() => onEnter()}
+      >
         <SearchIcon />
       </Button>
     </>

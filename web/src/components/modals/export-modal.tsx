@@ -135,7 +135,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           <TextContent>
             <Text component={TextVariants.p}>{t('Following query will be exported as CSV format:')}&nbsp;</Text>
           </TextContent>
-          <div id="export-chips">
+          <div data-test="export-chips" id="export-chips">
             <ChipGroup isClosable={false} categoryName={t('Time Range')}>
               <Chip isReadOnly={true}>{rangeText()}</Chip>
             </ChipGroup>
@@ -159,10 +159,11 @@ export const ExportModal: React.FC<ExportModalProps> = ({
       }
       footer={
         <div className="footer">
-          <Button key="close" variant="link" onClick={() => setModalOpen(false)}>
+          <Button data-test="export-close-button" key="close" variant="link" onClick={() => setModalOpen(false)}>
             {t('Close')}
           </Button>
           <Button
+            data-test="export-button"
             key="confirm"
             isDisabled={isSaveDisabled}
             variant="primary"
@@ -182,6 +183,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
     >
       <div>
         <Checkbox
+          data-test="export-all"
           id="export-all"
           isChecked={isExportAll}
           onChange={checked => setExportAll(checked)}
@@ -206,6 +208,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                       key={'data-list-item-' + i}
                       aria-labelledby={'table-column-management-item' + i}
                       className="data-list-item"
+                      data-test={'data-' + i}
                       id={'data-' + i}
                     >
                       <DataListItemRow key={'data-list-item-row-' + i}>
@@ -213,6 +216,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                           <DataListCheck
                             aria-labelledby={'table-column-management-item-' + i}
                             checked={column.isSelected}
+                            data-test={column.id}
                             id={column.id}
                             onChange={onCheck}
                           />

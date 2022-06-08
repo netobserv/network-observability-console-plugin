@@ -24,16 +24,22 @@ export const MetricTypeDropdown: React.FC<{
 
   return (
     <Dropdown
+      data-test={id}
       id={id}
       position={DropdownPosition.right}
       toggle={
-        <DropdownToggle id={`${id}-dropdown`} onToggle={() => setMetricDropdownOpen(!metricDropdownOpen)}>
+        <DropdownToggle
+          data-test={`${id}-dropdown`}
+          id={`${id}-dropdown`}
+          onToggle={() => setMetricDropdownOpen(!metricDropdownOpen)}
+        >
           {getMetricDisplay(selected)}
         </DropdownToggle>
       }
       isOpen={metricDropdownOpen}
       dropdownItems={Object.values(TopologyMetricTypes).map(v => (
         <DropdownItem
+          data-test={v}
           id={v}
           key={v}
           onClick={() => {

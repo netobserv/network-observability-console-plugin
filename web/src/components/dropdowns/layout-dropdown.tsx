@@ -32,16 +32,22 @@ export const LayoutDropdown: React.FC<{
 
   return (
     <Dropdown
+      data-test={id}
       id={id}
       position={DropdownPosition.right}
       toggle={
-        <DropdownToggle id={`${id}-dropdown`} onToggle={() => setLayoutDropdownOpen(!layoutDropdownOpen)}>
+        <DropdownToggle
+          data-test={`${id}-dropdown`}
+          id={`${id}-dropdown`}
+          onToggle={() => setLayoutDropdownOpen(!layoutDropdownOpen)}
+        >
           {getLayoutDisplay(selected)}
         </DropdownToggle>
       }
       isOpen={layoutDropdownOpen}
       dropdownItems={Object.values(LayoutName).map(v => (
         <DropdownItem
+          data-test={v}
           id={v}
           key={v}
           onClick={() => {

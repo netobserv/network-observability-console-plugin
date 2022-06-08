@@ -119,6 +119,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
 
   return (
     <Toolbar
+      data-test={id}
       id={id}
       clearAllFilters={() => {
         clearFilters();
@@ -126,7 +127,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
       }}
       clearFiltersButtonText={hasFilterValues() ? t('Clear all filters') : ''}
     >
-      <ToolbarContent id={`${id}-search-filters`} toolbarId={id}>
+      <ToolbarContent data-test={`${id}-search-filters`} id={`${id}-search-filters`} toolbarId={id}>
         <ToolbarItem className="flex-start">
           <QueryOptionsDropdown {...props.queryOptionsProps} />
         </ToolbarItem>
@@ -195,7 +196,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
             </ToolbarFilter>
           ))
         ) : (
-          <ToolbarGroup id="forced-filters" variant="filter-group">
+          <ToolbarGroup data-test="forced-filters" id="forced-filters" variant="filter-group">
             <ToolbarItem className="flex-start">
               {forcedFilters &&
                 forcedFilters.map((forcedFilter, ffIndex) => (

@@ -23,10 +23,11 @@ export const DisplayDropdown: React.FC<Props> = ({ id, setSize }) => {
 
   return (
     <Dropdown
+      data-test={id}
       id={id}
       isPlain
       dropdownItems={_.map(sizeOptions, (name, key) => (
-        <DropdownItem id={key} component="button" key={key} onClick={() => setSize(key as Size)}>
+        <DropdownItem data-test={key} id={key} component="button" key={key} onClick={() => setSize(key as Size)}>
           {name}
         </DropdownItem>
       ))}
@@ -34,6 +35,7 @@ export const DisplayDropdown: React.FC<Props> = ({ id, setSize }) => {
       onSelect={() => setIsOpen(false)}
       toggle={
         <DropdownToggle
+          data-test={`${id}-dropdown`}
           id={`${id}-dropdown`}
           className="overflow-button"
           icon={<ThIcon />}

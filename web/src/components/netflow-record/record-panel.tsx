@@ -156,30 +156,44 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
     )
   );
   return (
-    <DrawerPanelContent id={id} isResizable defaultSize={defaultSize} minSize={minSize} maxSize={maxSize}>
-      <DrawerHead>
-        <Text component={TextVariants.h2}>{t('Flow Details')}</Text>
+    <DrawerPanelContent
+      data-test={id}
+      id={id}
+      isResizable
+      defaultSize={defaultSize}
+      minSize={minSize}
+      maxSize={maxSize}
+    >
+      <DrawerHead data-test="drawer-head">
+        <Text data-test="drawer-head-text" component={TextVariants.h2}>
+          {t('Flow Details')}
+        </Text>
         <DrawerActions>
-          <DrawerCloseButton onClick={onClose} />
+          <DrawerCloseButton data-test="drawer-close-button" onClick={onClose} />
         </DrawerActions>
       </DrawerHead>
-      <DrawerPanelBody>
+      <DrawerPanelBody data-test="drawer-body">
         {record && (
           <>
             {groups.map((g, i) => (
-              <div className="record-group-container" key={`group-${i}`}>
+              <div className="record-group-container" key={`group-${i}`} data-test={`drawer-group-${g.title}`}>
                 {g.title && <Text component={TextVariants.h3}>{g.title}</Text>}
                 {g.columns.map(c => (
-                  <TextContent className={`record-field-container ${g.title ? 'grouped' : ''}`} key={c.id}>
+                  <TextContent
+                    className={`record-field-container ${g.title ? 'grouped' : ''}`}
+                    key={c.id}
+                    data-test={`drawer-field-${c.id}`}
+                  >
                     <Text component={TextVariants.h4}>{c.name}</Text>
                     <RecordField flow={record} column={c} filter={getFilter(c)} size={'s'} />
                   </TextContent>
                 ))}
               </div>
             ))}
-            <TextContent className="record-field-container">
+            <TextContent className="record-field-container" data-test="drawer-json-container">
               <Text component={TextVariants.h4}>{t('JSON')}</Text>
               <ClipboardCopy
+                data-test="drawer-json-copy"
                 isCode
                 isExpanded
                 hoverTip={t('Copy')}

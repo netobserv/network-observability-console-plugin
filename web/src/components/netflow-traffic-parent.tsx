@@ -27,7 +27,7 @@ class NetflowTrafficParent extends React.Component<Props, State> {
   render() {
     if (this.state.error) {
       return (
-        <div style={{ padding: 10 }}>
+        <div data-test="error-message" style={{ padding: 10 }}>
           <h1>Unexpected error</h1>
           <p>{this.state.error.toString()}</p>
           <p>(check logs for more information)</p>

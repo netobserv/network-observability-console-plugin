@@ -343,6 +343,7 @@ export const NetflowTraffic: React.FC<{
     return (
       <ToggleGroup>
         <ToggleGroupItem
+          data-test="table-view-button"
           icon={<TableIcon />}
           text={t('Flow Table')}
           buttonId="tableViewButton"
@@ -350,6 +351,7 @@ export const NetflowTraffic: React.FC<{
           onChange={() => selectView('table')}
         />
         <ToggleGroupItem
+          data-test="topology-view-button"
           icon={<TopologyIcon />}
           text={t('Topology')}
           buttonId="topologyViewButton"
@@ -364,24 +366,37 @@ export const NetflowTraffic: React.FC<{
     return (
       <div className="co-actions">
         {selectedViewId === 'topology' && (
-          <MetricFunctionDropdown id="metricFunction" selected={metricFunction} setMetricFunction={setMetricFunction} />
+          <MetricFunctionDropdown
+            data-test="metricFunction"
+            id="metricFunction"
+            selected={metricFunction}
+            setMetricFunction={setMetricFunction}
+          />
         )}
         {selectedViewId === 'topology' && metricFunction !== 'rate' && (
-          <MetricTypeDropdown id="metricType" selected={metricType} setMetricType={setMetricType} />
+          <MetricTypeDropdown
+            data-test="metricType"
+            id="metricType"
+            selected={metricType}
+            setMetricType={setMetricType}
+          />
         )}
         <TimeRangeDropdown
+          data-test="time-range-dropdown"
           id="time-range-dropdown"
           range={range}
           setRange={setRange}
           openCustomModal={() => setTRModalOpen(true)}
         />
         <RefreshDropdown
+          data-test="refresh-dropdown"
           id="refresh-dropdown"
           disabled={typeof range !== 'number'}
           interval={interval}
           setInterval={setInterval}
         />
         <Button
+          data-test="refresh-button"
           id="refresh-button"
           className="co-action-refresh-button"
           variant="primary"
@@ -404,6 +419,7 @@ export const NetflowTraffic: React.FC<{
       items.push(
         <OverflowMenuItem isPersistent key="columns">
           <Button
+            data-test="manage-columns-button"
             id="manage-columns-button"
             variant="link"
             className="overflow-button"
@@ -416,12 +432,13 @@ export const NetflowTraffic: React.FC<{
       );
       items.push(
         <OverflowMenuItem key="display">
-          <DisplayDropdown id="display" setSize={setSize} />
+          <DisplayDropdown data-test="display" id="display" setSize={setSize} />
         </OverflowMenuItem>
       );
       items.push(
         <OverflowMenuItem key="export">
           <Button
+            data-test="export-button"
             id="export-button"
             variant="link"
             className="overflow-button"
@@ -437,6 +454,7 @@ export const NetflowTraffic: React.FC<{
     items.push(
       <OverflowMenuItem key="fullscreen" isPersistent={selectedViewId === 'topology'}>
         <Button
+          data-test="fullscreen-button"
           id="fullscreen-button"
           variant="link"
           className="overflow-button"
@@ -456,10 +474,12 @@ export const NetflowTraffic: React.FC<{
     }
     return (
       <Dropdown
+        data-test="more-options-dropdown"
         id="more-options-dropdown"
         onSelect={() => setOverflowMenuOpen(false)}
         toggle={
           <Button
+            data-test="more-options-button"
             id="more-options-button"
             variant="link"
             className="overflow-button"
@@ -524,7 +544,6 @@ export const NetflowTraffic: React.FC<{
       );
     } else if (isShowQuerySummary) {
       return (
-        //TODO: bind this panel to topology query after merge
         <SummaryPanel
           id="summaryPanel"
           flows={flows}
