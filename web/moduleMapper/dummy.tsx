@@ -47,12 +47,12 @@ export const ResourceLink: React.FC<ResourceLinkProps> = ({
   return (
     //TODO: add icon here
     <span className={className}>
-      <span
+      {k8sModels[kind!] && <span
         className="co-m-resource-icon"
         style={{ backgroundColor: k8sModels[kind!].color }}
         title={kind}>
         {k8sModels[kind!].abbr}
-      </span>
+      </span>}
       <span className="co-resource-item__resource-name" data-test-id={value} data-test={dataTest}>
         {value}
       </span>
