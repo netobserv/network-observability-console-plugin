@@ -1,5 +1,7 @@
 import { isModelFeatureFlag, ModelFeatureFlag, useResolvedExtensions } from '@openshift-console/dynamic-plugin-sdk';
 import {
+  Alert,
+  AlertActionCloseButton,
   Button,
   Drawer,
   DrawerContent,
@@ -45,7 +47,7 @@ import { DefaultOptions, TopologyGroupTypes, TopologyOptions } from '../model/to
 import { Column, getDefaultColumns } from '../utils/columns';
 import { TimeRange } from '../utils/datetime';
 import { getHTTPErrorDetails } from '../utils/errors';
-import { DisabledFilters, Filter, getDisabledFiltersRecord, getEnabledFilters } from '../model/filters';
+import { DisabledFilters, Filter, hasIndexFields, getDisabledFiltersRecord, getEnabledFilters } from '../model/filters';
 import {
   LOCAL_STORAGE_COLS_KEY,
   LOCAL_STORAGE_DISABLED_FILTERS_KEY,
@@ -119,6 +121,8 @@ export const NetflowTraffic: React.FC<{
     setURLParams(queryParams);
   }
 
+  const warningTimeOut = React.useRef<NodeJS.Timeout | undefined>();
+  const [warningMessage, setWarningMessage] = React.useState<string | undefined>();
   const [isOverflowMenuOpen, setOverflowMenuOpen] = React.useState(false);
   const [isFullScreen, setFullScreen] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
@@ -240,45 +244,67 @@ export const NetflowTraffic: React.FC<{
     topologyOptions.groupTypes
   ]);
 
+  const manageWarnings = React.useCallback(
+    (query: Promise<unknown>) => {
+      Promise.race([query, new Promise((resolve, reject) => setTimeout(reject, 2000, 'slow'))]).then(
+        null,
+        (reason: string) => {
+          if (reason === 'slow') {
+            setWarningMessage(`${t('Query is slow')}`);
+          }
+        }
+      );
+    },
+    // i18n t dependency kills jest
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
   const tick = React.useCallback(() => {
     setLoading(true);
     setError(undefined);
     const fq = buildFlowQuery();
     switch (selectedViewId) {
       case 'table':
-        getFlows(fq)
-          .then(result => {
-            setFlows(result.records);
-            setStats(result.stats);
-          })
-          .catch(err => {
-            setFlows([]);
-            setError(getHTTPErrorDetails(err));
-          })
-          .finally(() => {
-            setLoading(false);
-          });
+        manageWarnings(
+          getFlows(fq)
+            .then(result => {
+              setFlows(result.records);
+              setStats(result.stats);
+            })
+            .catch(err => {
+              setFlows([]);
+              setError(getHTTPErrorDetails(err));
+              setWarningMessage(undefined);
+            })
+            .finally(() => {
+              setLoading(false);
+            })
+        );
         break;
       case 'topology':
-        getTopology(fq, range)
-          .then(result => {
-            setMetrics(result.metrics);
-            setStats(result.stats);
-          })
-          .catch(err => {
-            setMetrics([]);
-            setError(getHTTPErrorDetails(err));
-          })
-          .finally(() => {
-            setLoading(false);
-          });
+        manageWarnings(
+          getTopology(fq, range)
+            .then(result => {
+              setMetrics(result.metrics);
+              setStats(result.stats);
+            })
+            .catch(err => {
+              setMetrics([]);
+              setError(getHTTPErrorDetails(err));
+              setWarningMessage(undefined);
+            })
+            .finally(() => {
+              setLoading(false);
+            })
+        );
         break;
       default:
         console.error('tick called on not implemented view Id', selectedViewId);
         setLoading(false);
         break;
     }
-  }, [buildFlowQuery, range, selectedViewId]);
+  }, [buildFlowQuery, manageWarnings, range, selectedViewId]);
 
   usePoll(tick, interval);
 
@@ -333,11 +359,21 @@ export const NetflowTraffic: React.FC<{
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters]);
 
+  //clear warning message after 10s
+  React.useEffect(() => {
+    if (warningTimeOut.current) {
+      clearTimeout(warningTimeOut.current);
+    }
+
+    warningTimeOut.current = setTimeout(() => setWarningMessage(undefined), 10000);
+  }, [warningMessage]);
+
   // updates table filters and clears up the table for proper visualization of the
   // updating process
   const updateTableFilters = (f: Filter[]) => {
     setFilters(f);
     setFlows([]);
+    setWarningMessage(undefined);
   };
 
   const clearFilters = () => {
@@ -711,6 +747,18 @@ export const NetflowTraffic: React.FC<{
         range={range}
         filters={forcedFilters ? forcedFilters : filters}
       />
+      {!_.isEmpty(warningMessage) && (
+        <Alert
+          id="netflow-warning"
+          title={warningMessage}
+          variant="warning"
+          actionClose={<AlertActionCloseButton onClose={() => setWarningMessage(undefined)} />}
+        >
+          {hasIndexFields(filters)
+            ? t('Add more filters or decrease limit / range to improve the query performance')
+            : t('Add Namespace, Owner or Resource filters (which use indexed fields) to improve the query performance')}
+        </Alert>
+      )}
     </PageSection>
   ) : null;
 };

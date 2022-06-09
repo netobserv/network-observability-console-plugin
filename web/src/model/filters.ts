@@ -123,3 +123,14 @@ export const getDisabledFiltersRecord = (filters: Filter[]) => {
   });
   return disabledFilters;
 };
+
+export const hasIndexFields = (filters: Filter[]) => {
+  return (
+    filters.find(
+      f =>
+        f.def.id.includes('namespace') ||
+        f.def.id.includes('owner') ||
+        ['name', 'src_name', 'dst_name'].includes(f.def.id.toString())
+    ) !== undefined
+  );
+};

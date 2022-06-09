@@ -95,3 +95,10 @@ span.pf-c-button__icon.pf-m-start {
     list-style: none;
     padding-left: 10px;
 }
+
+#netflow-warning {
+    position: absolute;
+    right: 2em;
+    bottom: 3em;
+    z-index: 999;
+}
