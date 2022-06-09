@@ -132,9 +132,17 @@ export const LokiError: React.FC<Props> = ({ title, error }) => {
                 </>
               )}
               {(error.includes('deadline exceeded') || error.includes('maximum of series')) && (
-                <Text component={TextVariants.blockquote}>
-                  {t('Add some filters like Namespace or Name to reduce the number of results')}
-                </Text>
+                <>
+                  <Text component={TextVariants.blockquote}>
+                    {t(
+                      // eslint-disable-next-line max-len
+                      'Add Namespace, Owner or Resource filters (which use indexed fields) to improve the query performance'
+                    )}
+                  </Text>
+                  <Text component={TextVariants.blockquote}>
+                    {t('Reduce limit and time range to decrease the number of results')}
+                  </Text>
+                </>
               )}
               {(error.includes('time range exceeds') || error.includes('maximum resolution')) && (
                 <>
