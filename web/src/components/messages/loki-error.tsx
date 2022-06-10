@@ -116,11 +116,24 @@ export const LokiError: React.FC<Props> = ({ title, error }) => {
           <Text className="loki-error-message" component={TextVariants.p}>
             {error}
           </Text>
-          {_.isEmpty(ready) ? (
+          {
             <TextContent className="error-text-content">
+              {!_.isEmpty(ready) && (
+                <>
+                  <Text component={TextVariants.p}>{t(`Loki '/ready' endpoint returned the following error`)}</Text>
+                  <Text className="loki-error-message" component={TextVariants.p}>
+                    {ready}
+                  </Text>
+                </>
+              )}
               <Text component={TextVariants.p}>
                 {t('You may consider the following query changes to avoid this error')}
               </Text>
+              {!_.isEmpty(ready) && (
+                <Text component={TextVariants.blockquote}>
+                  {t(`Check if Loki is running correctly. '/ready' endpoint should respond "ready"`)}
+                </Text>
+              )}
               {error.includes('max entries limit') && (
                 <>
                   <Text component={TextVariants.blockquote}>
@@ -155,11 +168,7 @@ export const LokiError: React.FC<Props> = ({ title, error }) => {
                 </>
               )}
             </TextContent>
-          ) : (
-            <Text className="loki-error-message" component={TextVariants.p}>
-              {ready}
-            </Text>
-          )}
+          }
         </EmptyStateBody>
         <Button
           variant="primary"

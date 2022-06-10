@@ -13,6 +13,7 @@
 .loki-error-icon,
 .loki-error-message {
   color: #A30000 !important;
+  margin-bottom: 1em;
 }
 
 .health-config-text,
