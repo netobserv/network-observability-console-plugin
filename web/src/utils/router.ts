@@ -3,7 +3,7 @@ import { findFilter } from './filter-definitions';
 import { TimeRange } from './datetime';
 import { Match, MetricFunction, MetricType, Reporter } from '../model/flow-query';
 import { getURLParam, getURLParamAsNumber, removeURLParam, setURLParam, URLParam } from './url';
-import { createFilterValue, Filter, FilterId } from '../model/filters';
+import { createFilterValue, DisabledFilters, Filter, FilterId, GroupDisabledKey } from '../model/filters';
 
 const filtersSeparator = ';';
 const filterKVSeparator = '=';
@@ -45,7 +45,7 @@ export const getMatchFromURL = (): Match => {
   return (getURLParam(URLParam.Match) as Match | null) || defaultMatch;
 };
 
-export const getFiltersFromURL = (t: TFunction): Promise<Filter[]> => {
+export const getFiltersFromURL = (t: TFunction, disabledFilters: DisabledFilters): Promise<Filter[]> => {
   const urlParam = getURLParam(URLParam.Filters) || '';
   const filterPromises: Promise<Filter>[] = [];
   const filters = urlParam.split(filtersSeparator);
@@ -57,9 +57,15 @@ export const getFiltersFromURL = (t: TFunction): Promise<Filter[]> => {
         const values = pair[1].split(filterValuesSeparator);
         filterPromises.push(
           Promise.all(values.map(v => createFilterValue(def, v))).then(filterValues => {
+            filterValues.forEach(fv => {
+              if (disabledFilters[def.id]?.split(',').includes(fv.v)) {
+                fv.disabled = true;
+              }
+            });
             return {
               id: def.id,
               def: def,
+              disabled: disabledFilters[def.id] === GroupDisabledKey,
               values: filterValues
             };
           })

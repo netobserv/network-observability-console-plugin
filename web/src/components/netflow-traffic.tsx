@@ -45,9 +45,10 @@ import { DefaultOptions, TopologyGroupTypes, TopologyOptions } from '../model/to
 import { Column, getDefaultColumns } from '../utils/columns';
 import { TimeRange } from '../utils/datetime';
 import { getHTTPErrorDetails } from '../utils/errors';
-import { Filter } from '../model/filters';
+import { DisabledFilters, Filter, getDisabledFiltersRecord, getEnabledFilters } from '../model/filters';
 import {
   LOCAL_STORAGE_COLS_KEY,
+  LOCAL_STORAGE_DISABLED_FILTERS_KEY,
   LOCAL_STORAGE_QUERY_PARAMS_KEY,
   LOCAL_STORAGE_REFRESH_KEY,
   LOCAL_STORAGE_SIZE_KEY,
@@ -111,6 +112,7 @@ export const NetflowTraffic: React.FC<{
   //set context from extensions. Standalone will return a "dummy" flag
   ContextSingleton.setContext(extensions);
   const [queryParams, setQueryParams] = useLocalStorage<string>(LOCAL_STORAGE_QUERY_PARAMS_KEY);
+  const [disabledFilters, setDisabledFilters] = useLocalStorage<DisabledFilters>(LOCAL_STORAGE_DISABLED_FILTERS_KEY);
   // set url params from local storage saved items at startup if empty
   if (hasEmptyParams() && queryParams) {
     setURLParams(queryParams);
@@ -155,7 +157,7 @@ export const NetflowTraffic: React.FC<{
   React.useEffect(() => {
     // Init state from URL
     if (!forcedFilters) {
-      getFiltersFromURL(t)?.then(updateTableFilters);
+      getFiltersFromURL(t, disabledFilters)?.then(updateTableFilters);
     }
     // disabling exhaustive-deps: tests hang when "t" passed as dependency (useTranslation not stable?)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -200,8 +202,9 @@ export const NetflowTraffic: React.FC<{
   };
 
   const buildFlowQuery = React.useCallback((): FlowQuery => {
-    const f = forcedFilters || filters;
-    const groupedFilters = match === 'any' ? groupFiltersMatchAny(f) : groupFiltersMatchAll(f);
+    const enabledFilters = getEnabledFilters(forcedFilters || filters);
+    const groupedFilters =
+      match === 'any' ? groupFiltersMatchAny(enabledFilters) : groupFiltersMatchAll(enabledFilters);
     const query: FlowQuery = {
       filters: groupedFilters,
       limit: limit,
@@ -322,6 +325,12 @@ export const NetflowTraffic: React.FC<{
       setQueryParams(getURLParams().toString());
     }
   }, [filters, range, limit, match, reporter, metricFunction, metricType, setQueryParams, forcedFilters]);
+
+  // update local storage enabled filters
+  React.useEffect(() => {
+    setDisabledFilters(getDisabledFiltersRecord(filters));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters]);
 
   // updates table filters and clears up the table for proper visualization of the
   // updating process

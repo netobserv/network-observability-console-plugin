@@ -9,6 +9,7 @@ export const LOCAL_STORAGE_SIZE_KEY = 'netflow-traffic-size-size';
 export const LOCAL_STORAGE_VIEW_ID_KEY = 'netflow-traffic-view-id';
 export const LOCAL_STORAGE_TOPOLOGY_OPTIONS_KEY = 'netflow-traffic-topology-options';
 export const LOCAL_STORAGE_QUERY_PARAMS_KEY = 'netflow-traffic-query-params';
+export const LOCAL_STORAGE_DISABLED_FILTERS_KEY = 'netflow-traffic-disabled-filters';
 export const LOCAL_STORAGE_SORT_ID_KEY = 'netflow-traffic-sort-id';
 export const LOCAL_STORAGE_SORT_DIRECTION_KEY = 'netflow-traffic-sort-direction';
 
