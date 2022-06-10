@@ -1,9 +1,9 @@
 /* table stripping from pf-color-black-150 value */
-.light-stripped:nth-child(even) {
+:not(.newflow-appear).light-stripped:nth-child(even) {
   background-color: #f5f5f5;
 }
 
-.dark-stripped:nth-child(even) {
+:not(.newflow-appear).dark-stripped:nth-child(even) {
   background-color: #050505;
 }
 

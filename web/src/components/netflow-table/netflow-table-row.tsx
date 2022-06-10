@@ -16,39 +16,34 @@ const NetflowTableRow: React.FC<{
   onSelect: (record?: Record) => void;
   highlight: boolean;
   height?: number;
+  showContent?: boolean;
   tableWidth: number;
-}> = ({ flow, selectedRecord, columns, size, onSelect, highlight, height, tableWidth }) => {
+}> = ({ flow, selectedRecord, columns, size, onSelect, highlight, height, showContent, tableWidth }) => {
   const onRowClick = () => {
     onSelect(flow);
   };
 
-  const shouldHighlight = React.useRef(highlight);
-
   return (
-    <Tr
-      data-test={`tr-${flow.key}`}
-      isRowSelected={flow.key === selectedRecord?.key}
-      onRowClick={onRowClick}
-      className={`${isDark() ? 'dark' : 'light'}-stripped`}
-    >
-      {columns.map(c => (
-        <CSSTransition
-          key={c.id}
-          in={shouldHighlight.current}
-          appear={shouldHighlight.current}
-          timeout={100}
-          classNames="newflow"
-        >
-          <Td
-            data-test={`td-${flow.key}`}
-            key={c.id}
-            style={{ height, width: `${Math.floor((100 * c.width) / tableWidth)}%` }}
-          >
-            {<RecordField flow={flow} column={c} size={size}></RecordField>}
-          </Td>
-        </CSSTransition>
-      ))}
-    </Tr>
+    <CSSTransition in={highlight} appear={highlight} timeout={100} classNames="newflow">
+      <Tr
+        data-test={`tr-${flow.key}`}
+        isRowSelected={flow.key === selectedRecord?.key}
+        onRowClick={onRowClick}
+        className={`${isDark() ? 'dark' : 'light'}-stripped`}
+        style={{ height }}
+      >
+        {showContent &&
+          columns.map(c => (
+            <Td
+              data-test={`td-${flow.key}`}
+              key={c.id}
+              style={{ height: '100%', width: `${Math.floor((100 * c.width) / tableWidth)}%` }}
+            >
+              {<RecordField flow={flow} column={c} size={size}></RecordField>}
+            </Td>
+          ))}
+      </Tr>
+    </CSSTransition>
   );
 };
 

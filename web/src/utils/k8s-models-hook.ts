@@ -75,6 +75,5 @@ export function useK8sModelsWithColors() {
     setColor('Ingress', '#1F0066');
   }
 
-  console.log(k8sModels);
   return k8sModels;
 }
