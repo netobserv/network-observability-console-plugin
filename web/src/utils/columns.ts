@@ -25,6 +25,9 @@ export enum ColumnsId {
   addr = 'Addr',
   srcaddr = 'SrcAddr',
   dstaddr = 'DstAddr',
+  mac = 'Mac',
+  srcmac = 'SrcMac',
+  dstmac = 'DstMac',
   port = 'Port',
   srcport = 'SrcPort',
   dstport = 'DstPort',
@@ -213,6 +216,14 @@ export const getCommonColumns = (t: TFunction, withConcatenatedFields = true): C
       width: 10
     },
     {
+      id: ColumnsId.mac,
+      name: t('MAC'),
+      isSelected: false,
+      value: f => getSrcOrDstValue(f.fields.SrcMac, f.fields.DstMac),
+      sort: (a, b, col) => compareStrings((col.value(a) as string[]).join(''), (col.value(b) as string[]).join('')),
+      width: 10
+    },
+    {
       id: ColumnsId.hostaddr,
       name: t('Node IP'),
       isSelected: false,
@@ -376,6 +387,17 @@ export const getSrcColumns = (t: TFunction): Column[] => {
       width: 10
     },
     {
+      id: ColumnsId.srcmac,
+      group: t('Source'),
+      name: t('MAC'),
+      fieldName: 'SrcMac',
+      quickFilter: 'src_mac',
+      isSelected: false,
+      value: f => f.fields.SrcMac,
+      sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
+      width: 10
+    },
+    {
       id: ColumnsId.srchostaddr,
       group: t('Source'),
       name: t('Node IP'),
@@ -477,6 +499,17 @@ export const getDstColumns = (t: TFunction): Column[] => {
       isSelected: true,
       value: f => f.fields.DstPort,
       sort: (a, b, col) => comparePorts(col.value(a) as number, col.value(b) as number),
+      width: 10
+    },
+    {
+      id: ColumnsId.dstmac,
+      group: t('Destination'),
+      name: t('MAC'),
+      fieldName: 'DstMac',
+      quickFilter: 'dst_mac',
+      isSelected: false,
+      value: f => f.fields.DstMac,
+      sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
       width: 10
     },
     {
