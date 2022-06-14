@@ -19,7 +19,7 @@ import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
-import { Filter, FilterComponent, FilterDefinition, FilterValue } from '../../model/filters';
+import { Filter, FilterComponent, FilterDefinition, FilterValue, hasEnabledFilterValues } from '../../model/filters';
 import { autoCompleteCache } from '../../utils/autocomplete-cache';
 import { findFilter } from '../../utils/filter-definitions';
 import { getPathWithParams, netflowTrafficPath } from '../../utils/url';
@@ -130,9 +130,12 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
         <ToolbarItem className="flex-start">
           {chipFilters &&
             chipFilters.map((chipFilter, cfIndex) => (
-              <div key={cfIndex} className={`custom-chip-group ${chipFilter.disabled ? 'disabled-group' : ''}`}>
+              <div
+                key={cfIndex}
+                className={`custom-chip-group ${!hasEnabledFilterValues(chipFilter) ? 'disabled-group' : ''}`}
+              >
                 <Tooltip
-                  content={`${chipFilter.disabled ? t('Enable') : t('Disable')} '${getFilterFullName(
+                  content={`${!hasEnabledFilterValues(chipFilter) ? t('Enable') : t('Disable')} '${getFilterFullName(
                     chipFilter.def,
                     t
                   )}' ${t('group filter')}`}
@@ -141,13 +144,11 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
                     className="pf-c-chip-group__label"
                     component={TextVariants.p}
                     onClick={() => {
-                      chipFilter.disabled = !chipFilter.disabled;
-                      //restore all valus if no remaining
-                      if (!chipFilter.values.find(fv => fv.disabled !== true)) {
-                        chipFilter.values.forEach(fv => {
-                          fv.disabled = false;
-                        });
-                      }
+                      //switch all values if no remaining
+                      const isEnabled = hasEnabledFilterValues(chipFilter);
+                      chipFilter.values.forEach(fv => {
+                        fv.disabled = isEnabled;
+                      });
                       setFilters(_.cloneDeep(filters!));
                     }}
                   >
@@ -155,32 +156,18 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
                   </Text>
                 </Tooltip>
                 {chipFilter.values.map((chipFilterValue, fvIndex) => (
-                  <div
-                    key={fvIndex}
-                    className={`custom-chip ${chipFilter.disabled || chipFilterValue.disabled ? 'disabled-value' : ''}`}
-                  >
+                  <div key={fvIndex} className={`custom-chip ${chipFilterValue.disabled ? 'disabled-value' : ''}`}>
                     <Tooltip
-                      content={`${
-                        chipFilter.disabled || chipFilterValue.disabled ? t('Enable') : t('Disable')
-                      } ${getFilterFullName(chipFilter.def, t)} '${chipFilterValue.display || chipFilterValue.v}' ${t(
-                        'filter'
-                      )}`}
+                      content={`${chipFilterValue.disabled ? t('Enable') : t('Disable')} ${getFilterFullName(
+                        chipFilter.def,
+                        t
+                      )} '${chipFilterValue.display || chipFilterValue.v}' ${t('filter')}`}
                     >
                       <Text
                         component={TextVariants.p}
                         onClick={() => {
-                          //restore group filter & value if disabled
-                          if (chipFilter.disabled) {
-                            chipFilter.disabled = false;
-                            chipFilterValue.disabled = false;
-                          } else {
-                            //else switch value
-                            chipFilterValue.disabled = !chipFilterValue.disabled;
-                            //disable parent if no value remaining
-                            if (!chipFilter.values.find(fv => fv.disabled !== true)) {
-                              chipFilter.disabled = true;
-                            }
-                          }
+                          //switch value
+                          chipFilterValue.disabled = !chipFilterValue.disabled;
                           setFilters(_.cloneDeep(filters!));
                         }}
                       >
