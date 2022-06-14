@@ -59,6 +59,7 @@ button.pf-c-button.pf-m-link.pf-m-inline:empty {
 /* force new row for forced filters group*/
 #forced-filters {
   flex-basis: 100%;
+  margin-top: 1.5em;
 }
 
 /* align toolbar with title and table */
