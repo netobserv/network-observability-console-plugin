@@ -56,6 +56,11 @@ button.pf-c-button.pf-m-link.pf-m-inline:empty {
   padding: 5px 0px 0px 5px;
 }
 
+#filters {
+  width: 100%;
+  margin-top: 1em;
+}
+
 /* force new row for forced filters group*/
 #forced-filters {
   flex-basis: 100%;
@@ -69,4 +74,118 @@ div#filter-toolbar-search-filters {
 
 .pf-c-toolbar__item.pf-m-align-right {
   margin-right: 0;
+}
+
+.custom-chip-group,
+.custom-chip {
+  border-radius: 3px;
+  box-shadow: 0 0.0625rem 0.125rem 0 rgb(3 3 3 / 12%), 0 0 0.125rem 0 rgb(3 3 3 / 6%);
+  display: inline-flex;
+  align-items: center;
+}
+
+.custom-chip-group {
+  padding: 0.2em 0.5em 0.2em 0.5em;
+  margin: 0 1em 0 0;
+  color: #000;
+  background-color: #f0f0f0;
+}
+
+.custom-chip-group>p {
+  font-size: 0.85rem;
+}
+
+.custom-chip {
+  min-height: 2em;
+  padding: 0;
+  padding-left: 1em;
+  margin-right: 0.5em;
+  color: #000;
+  background-color: #fff;
+}
+
+.disabled-group,
+.disabled-value {
+  opacity: 0.75;
+}
+
+.custom-chip-group.disabled-group,
+.custom-chip-group.disabled-group>button,
+.custom-chip-group.disabled-group>* {
+  color: #000;
+  background-color: #D2D2D2;
+}
+
+.custom-chip.disabled-value,
+.custom-chip.disabled-value>button,
+.custom-chip.disabled-value>* {
+  color: #fff;
+  background-color: #6A6E73;
+}
+
+.pf-theme-dark .custom-chip-group,
+.pf-theme-dark .custom-chip-group>button,
+.pf-theme-dark .custom-chip-group>* {
+  color: #fff;
+  background-color: #004080;
+}
+
+.pf-theme-dark .custom-chip,
+.pf-theme-dark .custom-chip>button,
+.pf-theme-dark .custom-chip>* {
+  color: #fff;
+  background-color: #06c;
+}
+
+.pf-theme-dark .custom-chip-group.disabled-group,
+.pf-theme-dark .custom-chip-group.disabled-group>button,
+.pf-theme-dark .custom-chip-group.disabled-group>* {
+  color: #fff;
+  background-color: #6A6E73;
+}
+
+.pf-theme-dark .custom-chip.disabled-value,
+.pf-theme-dark .custom-chip.disabled-value>button,
+.pf-theme-dark .custom-chip.disabled-value>* {
+  color: #000;
+  background-color: #D2D2D2;
+}
+
+.custom-chip>p {
+  font-size: 0.75rem;
+}
+
+.custom-chip-group>*:hover {
+  color: #06c;
+}
+
+.custom-chip>*:hover {
+  color: #004080;
+}
+
+.custom-chip-group.disabled-group>*:hover,
+.custom-chip.disabled-value>*:hover {
+  color: #4F5255
+}
+
+.custom-chip-group>button,
+.custom-chip>button {
+  padding: 0.3em 0.5em 0.3em 0.5em;
+}
+
+.custom-chip-group>p,
+.custom-chip>p {
+  cursor: pointer;
+  user-select: none;
+  max-width: 18ch;
+  margin-right: 0.5rem;
+  overflow: hidden;
+  display: inline-block;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#clear-all-filters-button {
+  padding: 0;
 }

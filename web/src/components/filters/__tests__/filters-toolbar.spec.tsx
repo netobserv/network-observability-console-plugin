@@ -1,12 +1,4 @@
-import {
-  Accordion,
-  AccordionItem,
-  Button,
-  Dropdown,
-  Toolbar,
-  ToolbarFilter,
-  ToolbarItem
-} from '@patternfly/react-core';
+import { Accordion, AccordionItem, Button, Dropdown, Toolbar, ToolbarItem } from '@patternfly/react-core';
 import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 import { Filter } from '../../../model/filters';
@@ -47,17 +39,17 @@ describe('<FiltersToolbar />', () => {
 
   it('should render filters', async () => {
     const wrapper = shallow(<FiltersToolbar {...props} />);
-    expect(wrapper.find(ToolbarFilter)).toHaveLength(props.filters!.length);
+    expect(wrapper.find('.custom-chip-group')).toHaveLength(props.filters!.length);
 
     //add a bunch of filters
     props.filters = FiltersSample;
     wrapper.setProps({ filters: props.filters });
-    expect(wrapper.find(ToolbarFilter)).toHaveLength(props.filters.length);
+    expect(wrapper.find('.custom-chip-group')).toHaveLength(props.filters.length);
 
     //update props to set a single filter
     props.filters = [FiltersSample[0]];
     wrapper.setProps({ filters: props.filters });
-    expect(wrapper.find(ToolbarFilter)).toHaveLength(props.filters.length);
+    expect(wrapper.find('.custom-chip-group')).toHaveLength(props.filters.length);
   });
 
   it('should open and close', async () => {
