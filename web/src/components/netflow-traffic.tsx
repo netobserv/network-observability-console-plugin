@@ -103,7 +103,8 @@ loadConfig();
 
 export const NetflowTraffic: React.FC<{
   forcedFilters?: Filter[];
-}> = ({ forcedFilters }) => {
+  isTab?: boolean;
+}> = ({ forcedFilters, isTab }) => {
   const { push } = useHistory();
   const { t } = useTranslation('plugin__network-observability-plugin');
   const [extensions] = useResolvedExtensions<ModelFeatureFlag>(isModelFeatureFlag);
@@ -630,7 +631,7 @@ export const NetflowTraffic: React.FC<{
   }, [isFullScreen]);
 
   return !_.isEmpty(extensions) ? (
-    <PageSection id="pageSection">
+    <PageSection id="pageSection" className={isTab ? 'tab' : ''}>
       {
         //display title only if forced filters is not set
         _.isEmpty(forcedFilters) && (

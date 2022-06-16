@@ -41,6 +41,11 @@ span.pf-c-button__icon.pf-m-start {
     padding-bottom: 3em;
 }
 
+/* set max height to avoid huge table load if tab force scroll */ 
+#pageSection.tab {
+    max-height: 75vh;
+}
+
 #drawer {
     z-index: 1;
 }
