@@ -1,0 +1,26 @@
+#loki-error-container {
+  overflow: auto;
+  height: 100%;
+}
+
+.error-text-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.loki-error-icon,
+.loki-error-message {
+  color: #A30000 !important;
+  margin-bottom: 1em;
+}
+
+.health-config-text,
+.error-text-content>p {
+  margin-top: 1em !important;
+}
+
+.error-text-content>blockquote {
+  width: 50%;
+}

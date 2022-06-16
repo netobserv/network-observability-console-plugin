@@ -10,6 +10,7 @@ import { ShuffledDefaultColumns } from '../../__tests-data__/columns';
 import { FlowsMock, FlowsSample } from '../../__tests-data__/flows';
 import { Size } from '../../dropdowns/display-dropdown';
 import { ColumnsId } from '../../../utils/columns';
+import { LokiError } from '../../messages/loki-error';
 
 const errorStateQuery = `EmptyState[data-test="error-state"]`;
 const loadingContentsQuery = `Bullseye[data-test="loading-contents"]`;
@@ -129,15 +130,13 @@ describe('<NetflowTable />', () => {
     expect(mocks.clearFilters).toHaveBeenCalledTimes(1);
   });
   it('should render a spinning slide and then an should show an ErrorState on error', async () => {
-    const wrapper = mount(<NetflowTable loading={true} flows={[]} columns={ShuffledDefaultColumns} {...mocks} />);
+    const wrapper = shallow(<NetflowTable loading={true} flows={[]} columns={ShuffledDefaultColumns} {...mocks} />);
     expect(wrapper.find(NetflowTable)).toBeTruthy();
     expect(wrapper.find(loadingContentsQuery)).toHaveLength(1);
     wrapper.setProps({
       error: 'pum!'
     });
     wrapper.update();
-    expect(wrapper.find(loadingContentsQuery)).toHaveLength(0);
-    expect(wrapper.find(noResultsFoundQuery)).toHaveLength(0);
-    expect(wrapper.find(errorStateQuery)).toHaveLength(1);
+    expect(wrapper.find(LokiError)).toHaveLength(1);
   });
 });

@@ -129,7 +129,7 @@ push:
 
 .PHONY: serve
 serve:
-	./plugin-backend
+	./plugin-backend --loglevel trace
 
 .PHONY: serve-mock
 serve-mock:

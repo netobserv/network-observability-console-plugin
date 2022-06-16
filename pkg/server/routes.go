@@ -12,6 +12,10 @@ import (
 func setupRoutes(cfg *Config) *mux.Router {
 	r := mux.NewRouter()
 	r.HandleFunc("/api/status", handler.Status)
+	r.HandleFunc("/api/loki/ready", handler.LokiReady(cfg.Loki))
+	r.HandleFunc("/api/loki/metrics", handler.LokiMetrics(cfg.Loki))
+	r.HandleFunc("/api/loki/buildinfo", handler.LokiBuildInfos(cfg.Loki))
+	r.HandleFunc("/api/loki/config/limits", handler.LokiConfig(cfg.Loki, "limits_config"))
 	r.HandleFunc("/api/loki/flows", handler.GetFlows(cfg.Loki))
 	r.HandleFunc("/api/loki/export", handler.ExportFlows(cfg.Loki))
 	r.HandleFunc("/api/loki/topology", handler.GetTopology(cfg.Loki))
