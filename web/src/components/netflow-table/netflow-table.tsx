@@ -45,6 +45,7 @@ const NetflowTable: React.FC<{
   const previousContainerHeight = usePrevious(containerHeight);
   const [scrollPosition, setScrollPosition] = React.useState(0);
   const previousScrollPosition = usePrevious(scrollPosition);
+  const [lastRender, setLastRender] = React.useState<string>('');
   // index of the currently active column
   const [activeSortId, setActiveSortId] = useLocalStorage<ColumnsId>(LOCAL_STORAGE_SORT_ID_KEY, ColumnsId.endtime);
   const previousActiveSortIndex = usePrevious(activeSortId);
@@ -55,7 +56,6 @@ const NetflowTable: React.FC<{
   );
   const previousActiveSortDirection = usePrevious(activeSortDirection);
   const firstRender = React.useRef(true);
-
   const width = columns.reduce((prev, cur) => prev + cur.width, 0);
 
   React.useEffect(() => {
@@ -63,7 +63,25 @@ const NetflowTable: React.FC<{
       firstRender.current = firstRender.current && flows.length == 0;
       return;
     }
+    setLastRender(String(Date.now()));
   }, [flows]);
+
+  /* remove rows from previous rendering that should not appear anymore in body
+   * this fix a bug in PF TableComposable when refresh occurs after scroll
+   * without rebuilding the entire table */
+  React.useEffect(() => {
+    const tbody = document.getElementById('table-body');
+    if (tbody) {
+      const children = Array.from(tbody.children);
+      for (let i = 0; i < children.length; i++) {
+        const child = children[i];
+        const childLastRender = child.getAttribute('data-last-render');
+        if (childLastRender !== lastRender) {
+          child.remove();
+        }
+      }
+    }
+  }, [lastRender]);
 
   //reset sort index & directions to default on columns update
   React.useEffect(() => {
@@ -149,10 +167,12 @@ const NetflowTable: React.FC<{
 
   const getBody = React.useCallback(() => {
     const rowHeight = getRowHeight();
+
     return getSortedFlows().map((f, i) => (
       <NetflowTableRow
         key={f.key}
         flow={f}
+        lastRender={lastRender}
         columns={columns}
         size={size}
         selectedRecord={selectedRecord}
@@ -170,6 +190,7 @@ const NetflowTable: React.FC<{
       />
     ));
   }, [
+    lastRender,
     activeSortDirection,
     activeSortId,
     columns,
@@ -233,7 +254,9 @@ const NetflowTable: React.FC<{
           columns={columns}
           tableWidth={width}
         />
-        <Tbody data-test="table-body">{getBody()}</Tbody>
+        <Tbody id="table-body" data-test="table-body">
+          {getBody()}
+        </Tbody>
       </TableComposable>
     </div>
   );
