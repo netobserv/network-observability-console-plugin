@@ -140,6 +140,7 @@ export const getFilterDefinitions = (t: TFunction): FilterDefinition[] => {
     - ${t('Empty double quotes "" for an empty IP')}`;
 
     const invalidIPMessage = t('Not a valid IPv4 or IPv6, nor a CIDR, nor an IP range separated by hyphen');
+    const invalidMACMessage = t('Not a valid MAC address');
 
     filterDefinitions = [
       ...peers(
@@ -302,6 +303,25 @@ export const getFilterDefinitions = (t: TFunction): FilterDefinition[] => {
         },
         singleFieldMapping('SrcPort'),
         singleFieldMapping('DstPort')
+      ),
+      ...peers(
+        {
+          id: 'mac',
+          name: t('MAC'),
+          component: FilterComponent.Text,
+          category: FilterCategory.Common,
+          getOptions: noOption,
+          validate: (value: string) => {
+            if (_.isEmpty(value)) {
+              return invalid(t('Value is empty'));
+            }
+            return /^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})/.test(value) ? valid(value) : invalid(invalidMACMessage);
+          },
+          hint: t('Specify a single MAC address.'),
+          fieldMatching: {}
+        },
+        singleFieldMapping('SrcMac'),
+        singleFieldMapping('DstMac')
       ),
       ...peers(
         {
