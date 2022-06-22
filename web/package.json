@@ -97,11 +97,11 @@
     }
   },
   "dependencies": {
-    "@patternfly/patternfly": "4.194.4",
-    "@patternfly/react-charts": "^6.67.1",
-    "@patternfly/react-core": "^4.214.1",
-    "@patternfly/react-table": "4.83.1",
-    "@patternfly/react-topology": "4.61.1",
+    "@patternfly/patternfly": "4.196.7",
+    "@patternfly/react-charts": "6.74.3",
+    "@patternfly/react-core": "4.221.3",
+    "@patternfly/react-table": "4.90.3",
+    "@patternfly/react-topology": "4.68.3",
     "history": "^5.1.0",
     "i18next": "^19.8.3",
     "i18next-http-backend": "^1.0.21",

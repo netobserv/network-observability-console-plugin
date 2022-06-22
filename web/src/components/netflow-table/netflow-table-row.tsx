@@ -9,6 +9,7 @@ import CSSTransition from 'react-transition-group/CSSTransition';
 import { isDark } from '../../utils/theme';
 
 const NetflowTableRow: React.FC<{
+  lastRender?: string;
   flow: Record;
   selectedRecord?: Record;
   columns: Column[];
@@ -18,7 +19,7 @@ const NetflowTableRow: React.FC<{
   height?: number;
   showContent?: boolean;
   tableWidth: number;
-}> = ({ flow, selectedRecord, columns, size, onSelect, highlight, height, showContent, tableWidth }) => {
+}> = ({ lastRender, flow, selectedRecord, columns, size, onSelect, highlight, height, showContent, tableWidth }) => {
   const onRowClick = () => {
     onSelect(flow);
   };
@@ -26,6 +27,7 @@ const NetflowTableRow: React.FC<{
   return (
     <CSSTransition in={highlight} appear={highlight} timeout={100} classNames="newflow">
       <Tr
+        data-last-render={lastRender || ''}
         data-test={`tr-${flow.key}`}
         isRowSelected={flow.key === selectedRecord?.key}
         onRowClick={onRowClick}
