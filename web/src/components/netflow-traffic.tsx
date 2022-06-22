@@ -47,7 +47,14 @@ import { DefaultOptions, TopologyGroupTypes, TopologyOptions } from '../model/to
 import { Column, getDefaultColumns } from '../utils/columns';
 import { TimeRange } from '../utils/datetime';
 import { getHTTPErrorDetails } from '../utils/errors';
-import { DisabledFilters, Filter, hasIndexFields, getDisabledFiltersRecord, getEnabledFilters } from '../model/filters';
+import {
+  DisabledFilters,
+  Filter,
+  hasIndexFields,
+  getDisabledFiltersRecord,
+  getEnabledFilters,
+  hasNonIndexFields
+} from '../model/filters';
 import {
   LOCAL_STORAGE_COLS_KEY,
   LOCAL_STORAGE_DISABLED_FILTERS_KEY,
@@ -675,6 +682,20 @@ export const NetflowTraffic: React.FC<{
     });
   }, [isFullScreen]);
 
+  const slownessReason = React.useCallback(() => {
+    if (match === 'any' && hasNonIndexFields(filters)) {
+      return t(
+        'When in "Match any" mode, try using only Namespace, Owner or Resource filters (which use indexed fields), or decrease limit / range, to improve the query performance'
+      );
+    }
+    if (match === 'all' && !hasIndexFields(filters)) {
+      return t(
+        'Add Namespace, Owner or Resource filters (which use indexed fields), or decrease limit / range, to improve the query performance'
+      );
+    }
+    return t('Add more filters or decrease limit / range to improve the query performance');
+  }, [match, filters]);
+
   return !_.isEmpty(extensions) ? (
     <PageSection id="pageSection" className={isTab ? 'tab' : ''}>
       {
@@ -754,9 +775,7 @@ export const NetflowTraffic: React.FC<{
           variant="warning"
           actionClose={<AlertActionCloseButton onClose={() => setWarningMessage(undefined)} />}
         >
-          {hasIndexFields(filters)
-            ? t('Add more filters or decrease limit / range to improve the query performance')
-            : t('Add Namespace, Owner or Resource filters (which use indexed fields) to improve the query performance')}
+          {slownessReason()}
         </Alert>
       )}
     </PageSection>

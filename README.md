@@ -4,6 +4,16 @@
 
 Based on [Openshift Console dynamic plugin](https://github.com/openshift/console/tree/master/frontend/packages/console-dynamic-plugin-sdk), this plugin implement the console elements for Network Observability.
 
+## First setup
+
+You will need Go, Node.js and npm in order to run the `make` commands described below. You can take a look at the [Dockerfile](./Dockerfile) to get known working versions of these tools. In particular, node and npm are known to often break builds if you don't use the expected versions (even patch versions for npm). You can use [nvm](https://github.com/nvm-sh/nvm) to manage installed node / npm versions.
+
+Once these tools are installed, run the following command:
+
+```bash
+make install-frontend
+```
+
 ## Building, linting, testing
 
 To build the plugin, run:
