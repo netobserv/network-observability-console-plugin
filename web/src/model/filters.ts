@@ -127,13 +127,14 @@ export const getDisabledFiltersRecord = (filters: Filter[]) => {
   return disabledFilters;
 };
 
+const isIndexed = (f: Filter) => {
+  return f.def.id.includes('namespace') || f.def.id.includes('owner') || f.def.id.includes('resource');
+};
+
 export const hasIndexFields = (filters: Filter[]) => {
-  return (
-    filters.find(
-      f =>
-        f.def.id.includes('namespace') ||
-        f.def.id.includes('owner') ||
-        ['name', 'src_name', 'dst_name'].includes(f.def.id.toString())
-    ) !== undefined
-  );
+  return filters.some(isIndexed);
+};
+
+export const hasNonIndexFields = (filters: Filter[]) => {
+  return filters.some(f => !isIndexed(f));
 };
