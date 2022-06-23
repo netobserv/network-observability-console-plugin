@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi8/nodejs-14:1-63 as web-builder
+FROM registry.access.redhat.com/ubi8/nodejs-14:1 as web-builder
 
 WORKDIR /opt/app-root
 
@@ -10,15 +10,7 @@ COPY mocks mocks
 
 RUN NPM_INSTALL=ci make build-frontend
 
-FROM registry.access.redhat.com/ubi8/go-toolset:1.16.7-5 as go-builder
-
-WORKDIR /tmp
-
-# TEMPORARY STEPS UNTIL ubi8 releases a go1.17 image
-RUN wget -q https://go.dev/dl/go1.17.7.linux-amd64.tar.gz && tar -xzf go1.17.7.linux-amd64.tar.gz
-ENV GOROOT /tmp/go
-ENV PATH $GOROOT/bin:$PATH
-# END OF LINES TO REMOVE
+FROM registry.access.redhat.com/ubi8/go-toolset:1.17.7 as go-builder
 
 WORKDIR /opt/app-root
 
@@ -32,7 +24,7 @@ COPY pkg/ pkg/
 
 RUN make build-backend
 
-FROM registry.access.redhat.com/ubi8/ubi-minimal:8.5-240.1648458092
+FROM registry.access.redhat.com/ubi8/ubi-minimal:8.6
 
 COPY --from=web-builder /opt/app-root/web/dist ./web/dist
 COPY --from=go-builder /opt/app-root/plugin-backend ./
