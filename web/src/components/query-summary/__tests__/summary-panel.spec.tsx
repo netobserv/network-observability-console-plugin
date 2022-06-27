@@ -13,6 +13,7 @@ describe('<SummaryPanel />', () => {
       limitReached: false,
       numQueries: 1
     },
+    lastRefresh: new Date(),
     id: 'summary-panel'
   };
 

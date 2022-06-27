@@ -12,9 +12,10 @@ export const QuerySummaryContent: React.FC<{
   flows: Record[];
   limitReached: boolean;
   range: number | TimeRange;
+  lastRefresh: Date | undefined;
   direction: 'row' | 'column';
   className?: string;
-}> = ({ flows, limitReached, range, direction, className }) => {
+}> = ({ flows, limitReached, range, lastRefresh, direction, className }) => {
   const { t } = useTranslation('plugin__network-observability-plugin');
 
   let rangeInSeconds: number;
@@ -69,6 +70,13 @@ export const QuerySummaryContent: React.FC<{
           </Text>
         </Tooltip>
       </FlexItem>
+      <FlexItem>
+        <Text id="lastRefresh" component={TextVariants.p}>
+          {t('last refresh: {{time}}', {
+            time: lastRefresh ? lastRefresh.toLocaleTimeString() : ''
+          })}
+        </Text>
+      </FlexItem>
     </Flex>
   );
 };
@@ -77,12 +85,19 @@ export const QuerySummary: React.FC<{
   flows: Record[] | undefined;
   stats: Stats | undefined;
   range: number | TimeRange;
+  lastRefresh: Date | undefined;
   toggleQuerySummary: () => void;
-}> = ({ flows, stats, range, toggleQuerySummary }) => {
-  if (flows && flows.length && stats) {
+}> = ({ flows, stats, range, lastRefresh, toggleQuerySummary }) => {
+  if (flows && flows.length && stats && lastRefresh) {
     return (
       <Card id="query-summary" isSelectable onClick={toggleQuerySummary}>
-        <QuerySummaryContent direction="row" flows={flows} limitReached={stats.limitReached} range={range} />
+        <QuerySummaryContent
+          direction="row"
+          flows={flows}
+          limitReached={stats.limitReached}
+          range={range}
+          lastRefresh={lastRefresh}
+        />
       </Card>
     );
   }
