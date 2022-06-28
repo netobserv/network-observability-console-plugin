@@ -5,7 +5,7 @@
       "id": "netflow-traffic-link",
       "perspective": "admin",
       "section": "observe",
-      "name": "%plugin_network-observability-plugin~Network Traffic%",
+      "name": "%plugin__network-observability-plugin~Network Traffic%",
       "href": "/netflow-traffic"
     }
   },
@@ -30,7 +30,7 @@
         "$codeRef": "netflowTab.default"
       },
       "page": {
-        "name": "%plugin_network-observability-plugin~Network Traffic%",
+        "name": "%plugin__network-observability-plugin~Network Traffic%",
         "href": "netflow"
       }
     }
@@ -47,7 +47,7 @@
         "$codeRef": "netflowTab.default"
       },
       "page": {
-        "name": "%plugin_network-observability-plugin~Network Traffic%",
+        "name": "%plugin__network-observability-plugin~Network Traffic%",
         "href": "netflow"
       }
     }
@@ -64,7 +64,7 @@
         "$codeRef": "netflowTab.default"
       },
       "page": {
-        "name": "%plugin_network-observability-plugin~Network Traffic%",
+        "name": "%plugin__network-observability-plugin~Network Traffic%",
         "href": "netflow"
       }
     }
@@ -81,7 +81,7 @@
         "$codeRef": "netflowTab.default"
       },
       "page": {
-        "name": "%plugin_network-observability-plugin~Network Traffic%",
+        "name": "%plugin__network-observability-plugin~Network Traffic%",
         "href": "netflow"
       }
     }
@@ -98,7 +98,7 @@
         "$codeRef": "netflowTab.default"
       },
       "page": {
-        "name": "%plugin_network-observability-plugin~Network Traffic%",
+        "name": "%plugin__network-observability-plugin~Network Traffic%",
         "href": "netflow"
       }
     }
@@ -115,7 +115,7 @@
         "$codeRef": "netflowTab.default"
       },
       "page": {
-        "name": "%plugin_network-observability-plugin~Network Traffic%",
+        "name": "%plugin__network-observability-plugin~Network Traffic%",
         "href": "netflow"
       }
     }
@@ -132,7 +132,7 @@
         "$codeRef": "netflowTab.default"
       },
       "page": {
-        "name": "%plugin_network-observability-plugin~Network Traffic%",
+        "name": "%plugin__network-observability-plugin~Network Traffic%",
         "href": "netflow"
       }
     }
@@ -149,7 +149,7 @@
         "$codeRef": "netflowTab.default"
       },
       "page": {
-        "name": "%plugin_network-observability-plugin~Network Traffic%",
+        "name": "%plugin__network-observability-plugin~Network Traffic%",
         "href": "netflow"
       }
     }
@@ -166,7 +166,7 @@
         "$codeRef": "netflowTab.default"
       },
       "page": {
-        "name": "%plugin_network-observability-plugin~Network Traffic%",
+        "name": "%plugin__network-observability-plugin~Network Traffic%",
         "href": "netflow"
       }
     }
@@ -183,7 +183,7 @@
         "$codeRef": "netflowTab.default"
       },
       "page": {
-        "name": "%plugin_network-observability-plugin~Network Traffic%",
+        "name": "%plugin__network-observability-plugin~Network Traffic%",
         "href": "netflow"
       }
     }
@@ -200,7 +200,7 @@
         "$codeRef": "netflowTab.default"
       },
       "page": {
-        "name": "%plugin_network-observability-plugin~Network Traffic%",
+        "name": "%plugin__network-observability-plugin~Network Traffic%",
         "href": "netflow"
       }
     }
@@ -217,7 +217,7 @@
         "$codeRef": "netflowTab.default"
       },
       "page": {
-        "name": "%plugin_network-observability-plugin~Network Traffic%",
+        "name": "%plugin__network-observability-plugin~Network Traffic%",
         "href": "netflow"
       }
     }
