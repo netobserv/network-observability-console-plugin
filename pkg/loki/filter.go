@@ -11,8 +11,9 @@ var valueReplacer = strings.NewReplacer(`*`, `.*`, `"`, "")
 type labelMatcher string
 
 const (
-	labelEqual   = labelMatcher("=")
-	labelMatches = labelMatcher("=~")
+	labelEqual    = labelMatcher("=")
+	labelMatches  = labelMatcher("=~")
+	labelNotMatch = labelMatcher("!~")
 )
 
 type valueType int
@@ -57,6 +58,15 @@ func regexLabelFilter(labelKey string, value string) labelFilter {
 	return labelFilter{
 		key:       labelKey,
 		matcher:   labelMatches,
+		value:     value,
+		valueType: typeString,
+	}
+}
+
+func regexNoLabelFilter(labelKey string, value string) labelFilter {
+	return labelFilter{
+		key:       labelKey,
+		matcher:   labelNotMatch,
 		value:     value,
 		valueType: typeString,
 	}

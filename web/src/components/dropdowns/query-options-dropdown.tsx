@@ -2,11 +2,13 @@ import { Radio, Select, Tooltip } from '@patternfly/react-core';
 import { InfoAltIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Match, Reporter } from '../../model/flow-query';
+import { Layer, Match, Reporter } from '../../model/flow-query';
 
 export interface QueryOptionsDropdownProps {
   reporter: Reporter;
   setReporter: (reporter: Reporter) => void;
+  layer: Layer;
+  setLayer: (application: Layer) => void;
   allowReporterBoth: boolean;
   limit: number;
   setLimit: (limit: number) => void;
@@ -16,12 +18,16 @@ export interface QueryOptionsDropdownProps {
 
 type ReporterOption = { label: string; value: Reporter };
 
+type ApplicationOption = { label: string; value: Layer };
+
 type MatchOption = { label: string; value: Match };
 
 // Exported for tests
 export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
   reporter,
   setReporter,
+  layer: application,
+  setLayer: setLayer,
   allowReporterBoth,
   limit,
   setLimit,
@@ -38,6 +44,21 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
     {
       label: t('Destination'),
       value: 'destination'
+    },
+    {
+      label: t('Both'),
+      value: 'both'
+    }
+  ];
+
+  const applicationOptions: ApplicationOption[] = [
+    {
+      label: t('Infrastructure'),
+      value: 'infrastructure'
+    },
+    {
+      label: t('Applications'),
+      value: 'application'
     },
     {
       label: t('Both'),
@@ -124,6 +145,32 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
             </label>
           </div>
         ))}
+      </div>
+      <div className="pf-c-select__menu-group">
+        <Tooltip content={t('Filter results on infrastructure-related flows or host application flows, or no filter')}>
+          <div className="pf-c-select__menu-group-title">
+            <>
+              {t('Traffic Scope')} <InfoAltIcon />
+            </>
+          </div>
+        </Tooltip>
+        {applicationOptions.map(opt => {
+          return (
+            <div key={`layer-${opt.value}`}>
+              <label className="pf-c-select__menu-item">
+                <Radio
+                  isChecked={opt.value === application}
+                  name={`layer-${opt.value}`}
+                  onChange={() => setLayer(opt.value)}
+                  label={opt.label}
+                  data-test={`layer-${opt.value}`}
+                  id={`layer-${opt.value}`}
+                  value={opt.value}
+                />
+              </label>
+            </div>
+          );
+        })}
       </div>
       <div className="pf-c-select__menu-group">
         <Tooltip

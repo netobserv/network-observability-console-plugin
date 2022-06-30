@@ -11,12 +11,13 @@ import (
 )
 
 const (
-	startParam     = "start"
-	endParam       = "end"
-	limitParam     = "limit"
-	queryRangePath = "/loki/api/v1/query_range?query="
-	jsonOrJoiner   = "+or+"
-	emptyMatch     = `""`
+	startParam          = "start"
+	endParam            = "end"
+	limitParam          = "limit"
+	queryRangePath      = "/loki/api/v1/query_range?query="
+	jsonOrJoiner        = "+or+"
+	emptyMatch          = `""`
+	infrastructureRegex = `(kube-|openshift-).*`
 )
 
 // can contains only alphanumeric / '-' / '_' / '.' / ',' / '"' / '*' / ':' / '/' characteres
@@ -33,7 +34,7 @@ type FlowQueryBuilder struct {
 	jsonFilters  [][]labelFilter
 }
 
-func NewFlowQueryBuilder(cfg *Config, start, end, limit, reporter string) *FlowQueryBuilder {
+func NewFlowQueryBuilder(cfg *Config, start, end, limit, reporter, layer string) *FlowQueryBuilder {
 	// Always use app stream selector, which will apply whichever matching criteria (any or all)
 	labelFilters := []labelFilter{
 		stringLabelFilter(constants.AppLabel, constants.AppLabelValue),
@@ -42,6 +43,13 @@ func NewFlowQueryBuilder(cfg *Config, start, end, limit, reporter string) *FlowQ
 		labelFilters = append(labelFilters, stringLabelFilter(fields.FlowDirection, "1"))
 	} else if reporter == constants.ReporterDestination {
 		labelFilters = append(labelFilters, stringLabelFilter(fields.FlowDirection, "0"))
+	}
+	if layer == constants.LayerInfrastructure {
+		labelFilters = append(labelFilters, regexLabelFilter(fields.SrcNamespace, infrastructureRegex))
+		labelFilters = append(labelFilters, regexLabelFilter(fields.DstNamespace, infrastructureRegex))
+	} else if layer == constants.LayerApplication {
+		labelFilters = append(labelFilters, regexNoLabelFilter(fields.SrcNamespace, infrastructureRegex))
+		labelFilters = append(labelFilters, regexNoLabelFilter(fields.DstNamespace, infrastructureRegex))
 	}
 	return &FlowQueryBuilder{
 		config:       cfg,
@@ -53,7 +61,7 @@ func NewFlowQueryBuilder(cfg *Config, start, end, limit, reporter string) *FlowQ
 }
 
 func NewFlowQueryBuilderWithDefaults(cfg *Config) *FlowQueryBuilder {
-	return NewFlowQueryBuilder(cfg, "", "", "", constants.ReporterBoth)
+	return NewFlowQueryBuilder(cfg, "", "", "", constants.ReporterBoth, constants.LayerBoth)
 }
 
 func (q *FlowQueryBuilder) Filters(filters [][]string) error {

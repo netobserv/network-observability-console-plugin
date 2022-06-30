@@ -26,7 +26,7 @@ type TopologyQueryBuilder struct {
 	topology *Topology
 }
 
-func NewTopologyQuery(cfg *Config, start, end, limit, metricFunction, metricType, reporter, scope, groups string) (*TopologyQueryBuilder, error) {
+func NewTopologyQuery(cfg *Config, start, end, limit, metricFunction, metricType, reporter, layer, scope, groups string) (*TopologyQueryBuilder, error) {
 	l := limit
 	if len(l) == 0 {
 		l = topologyDefaultLimit
@@ -71,7 +71,7 @@ func NewTopologyQuery(cfg *Config, start, end, limit, metricFunction, metricType
 	}
 
 	return &TopologyQueryBuilder{
-		FlowQueryBuilder: NewFlowQueryBuilder(cfg, start, end, limit, reporter),
+		FlowQueryBuilder: NewFlowQueryBuilder(cfg, start, end, limit, reporter, layer),
 		topology: &Topology{
 			timeRange:      timeRange,
 			limit:          l,

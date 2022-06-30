@@ -58,6 +58,7 @@ func getTopologyFlows(cfg loki.Config, client httpclient.Caller, params url.Valu
 	metricFunction := params.Get(metricFunctionKey)
 	metricType := params.Get(metricTypeKey)
 	reporter := params.Get(reporterKey)
+	layer := params.Get(layerKey)
 	scope := params.Get(scopeKey)
 	groups := params.Get(groupsKey)
 	rawFilters := params.Get(filtersKey)
@@ -71,7 +72,7 @@ func getTopologyFlows(cfg loki.Config, client httpclient.Caller, params url.Valu
 		// match any, and multiple filters => run in parallel then aggregate
 		var queries []string
 		for _, group := range filterGroups {
-			query, code, err := buildTopologyQuery(&cfg, group, start, end, limit, metricFunction, metricType, reporter, scope, groups)
+			query, code, err := buildTopologyQuery(&cfg, group, start, end, limit, metricFunction, metricType, reporter, layer, scope, groups)
 			if err != nil {
 				return nil, code, errors.New("Can't build query: " + err.Error())
 			}
@@ -87,7 +88,7 @@ func getTopologyFlows(cfg loki.Config, client httpclient.Caller, params url.Valu
 		if len(filterGroups) > 0 {
 			filters = filterGroups[0]
 		}
-		query, code, err := buildTopologyQuery(&cfg, filters, start, end, limit, metricFunction, metricType, reporter, scope, groups)
+		query, code, err := buildTopologyQuery(&cfg, filters, start, end, limit, metricFunction, metricType, reporter, layer, scope, groups)
 		if err != nil {
 			return nil, code, err
 		}
@@ -102,8 +103,8 @@ func getTopologyFlows(cfg loki.Config, client httpclient.Caller, params url.Valu
 	return qr, http.StatusOK, nil
 }
 
-func buildTopologyQuery(cfg *loki.Config, filters [][]string, start, end, limit, metricFunction, metricType, reporter, scope, groups string) (string, int, error) {
-	qb, err := loki.NewTopologyQuery(cfg, start, end, limit, metricFunction, metricType, reporter, scope, groups)
+func buildTopologyQuery(cfg *loki.Config, filters [][]string, start, end, limit, metricFunction, metricType, reporter, layer, scope, groups string) (string, int, error) {
+	qb, err := loki.NewTopologyQuery(cfg, start, end, limit, metricFunction, metricType, reporter, layer, scope, groups)
 	if err != nil {
 		return "", http.StatusBadRequest, err
 	}

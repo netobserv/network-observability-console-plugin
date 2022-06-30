@@ -6,4 +6,7 @@ const (
 	ReporterSource      = "source"
 	ReporterDestination = "destination"
 	ReporterBoth        = "both"
+	LayerInfrastructure = "infrastructure"
+	LayerApplication    = "application"
+	LayerBoth           = "both"
 )
