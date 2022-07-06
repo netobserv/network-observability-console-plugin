@@ -71,11 +71,19 @@ export const QuerySummaryContent: React.FC<{
         </Tooltip>
       </FlexItem>
       <FlexItem>
-        <Text id="lastRefresh" component={TextVariants.p}>
-          {t('last refresh: {{time}}', {
-            time: lastRefresh ? lastRefresh.toLocaleTimeString() : ''
-          })}
-        </Text>
+        <Tooltip
+          content={
+            <Text component={TextVariants.p}>
+              {t('Last refresh: {{time}}', {
+                time: lastRefresh ? lastRefresh.toLocaleString() : ''
+              })}
+            </Text>
+          }
+        >
+          <Text id="lastRefresh" component={TextVariants.p}>
+            {lastRefresh ? lastRefresh.toLocaleTimeString() : ''}
+          </Text>
+        </Tooltip>
       </FlexItem>
     </Flex>
   );

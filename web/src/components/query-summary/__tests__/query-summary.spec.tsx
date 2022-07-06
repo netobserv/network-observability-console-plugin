@@ -29,7 +29,7 @@ describe('<QuerySummary />', () => {
     expect(wrapper.find('#bytesCount').last().text()).toBe('161 kB');
     expect(wrapper.find('#packetsCount').last().text()).toBe('1100 packets');
     expect(wrapper.find('#bpsCount').last().text()).toBe('538 Bps');
-    expect(wrapper.find('#lastRefresh').last().text()).toBe('last refresh: ' + now.toLocaleTimeString());
+    expect(wrapper.find('#lastRefresh').last().text()).toBe(now.toLocaleTimeString());
   });
 
   it('should toggle panel', async () => {
