@@ -2,6 +2,7 @@ package httpclient
 
 import (
 	"crypto/tls"
+	"crypto/x509"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -22,16 +23,24 @@ type httpClient struct {
 
 var slog = logrus.WithField("module", "server")
 
-func NewHTTPClient(timeout time.Duration, overrideHeaders map[string][]string, skipTLS bool) Caller {
+func NewHTTPClient(timeout time.Duration, overrideHeaders map[string][]string, skipTLS bool, capath string) Caller {
 	transport := &http.Transport{
 		DialContext:     (&net.Dialer{Timeout: timeout}).DialContext,
 		IdleConnTimeout: timeout,
 	}
 
-	//TODO: add loki tls config https://issues.redhat.com/browse/NETOBSERV-309
 	if skipTLS {
 		transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 		slog.Warn("skipping TLS checks. SSL certificate verification is now disabled !")
+	} else if capath != "" {
+		caCert, err := ioutil.ReadFile(capath)
+		if err != nil {
+			slog.Errorf("Cannot load loki ca certificate: %v", err)
+		} else {
+			pool := x509.NewCertPool()
+			pool.AppendCertsFromPEM(caCert)
+			transport.TLSClientConfig = &tls.Config{RootCAs: pool}
+		}
 	}
 
 	return &httpClient{
