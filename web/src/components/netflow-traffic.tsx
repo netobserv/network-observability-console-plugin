@@ -142,6 +142,7 @@ export const NetflowTraffic: React.FC<{
   const [metrics, setMetrics] = React.useState<TopologyMetrics[]>([]);
   const [isShowTopologyOptions, setShowTopologyOptions] = React.useState<boolean>(false);
   const [isShowQuerySummary, setShowQuerySummary] = React.useState<boolean>(false);
+  const [lastRefresh, setLastRefresh] = React.useState<Date | undefined>(undefined);
   const [error, setError] = React.useState<string | undefined>();
   const [size, setSize] = useLocalStorage<Size>(LOCAL_STORAGE_SIZE_KEY, 'm');
   const [isTRModalOpen, setTRModalOpen] = React.useState(false);
@@ -278,10 +279,12 @@ export const NetflowTraffic: React.FC<{
             .then(result => {
               setFlows(result.records);
               setStats(result.stats);
+              setLastRefresh(new Date());
             })
             .catch(err => {
               setFlows([]);
               setError(getHTTPErrorDetails(err));
+              setLastRefresh(new Date());
               setWarningMessage(undefined);
             })
             .finally(() => {
@@ -601,6 +604,7 @@ export const NetflowTraffic: React.FC<{
           id="summaryPanel"
           flows={flows}
           stats={stats}
+          lastRefresh={lastRefresh}
           range={range}
           onClose={() => setShowQuerySummary(false)}
         />
@@ -743,6 +747,7 @@ export const NetflowTraffic: React.FC<{
         flows={flows}
         range={range}
         stats={stats}
+        lastRefresh={lastRefresh}
         toggleQuerySummary={() => onToggleQuerySummary(!isShowQuerySummary)}
       />
       <TimeRangeModal

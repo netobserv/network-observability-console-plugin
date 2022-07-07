@@ -42,7 +42,8 @@ export const SummaryPanelContent: React.FC<{
   flows: Record[] | undefined;
   stats: Stats | undefined;
   range: number | TimeRange;
-}> = ({ flows, stats, range }) => {
+  lastRefresh: Date | undefined;
+}> = ({ flows, stats, range, lastRefresh }) => {
   const { t } = useTranslation('plugin__network-observability-plugin');
   const [expanded, setExpanded] = React.useState<string>('');
 
@@ -227,6 +228,7 @@ export const SummaryPanelContent: React.FC<{
           flows={flows || []}
           limitReached={stats?.limitReached || false}
           range={range}
+          lastRefresh={lastRefresh}
         />
       </TextContent>
       <TextContent className="summary-text-container">
@@ -243,8 +245,9 @@ export const SummaryPanel: React.FC<{
   flows: Record[] | undefined;
   stats: Stats | undefined;
   range: number | TimeRange;
+  lastRefresh: Date | undefined;
   id?: string;
-}> = ({ flows, stats, range, id, onClose }) => {
+}> = ({ flows, stats, range, lastRefresh, id, onClose }) => {
   const { t } = useTranslation('plugin__network-observability-plugin');
 
   return (
@@ -263,7 +266,7 @@ export const SummaryPanel: React.FC<{
         </DrawerActions>
       </DrawerHead>
       <DrawerPanelBody>
-        <SummaryPanelContent flows={flows} stats={stats} range={range} />
+        <SummaryPanelContent flows={flows} stats={stats} range={range} lastRefresh={lastRefresh} />
       </DrawerPanelBody>
     </DrawerPanelContent>
   );

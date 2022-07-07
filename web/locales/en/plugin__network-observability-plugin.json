@@ -167,6 +167,7 @@
   "{{count}} packets": "{{count}} packets",
   "{{count}} packets_plural": "{{count}} packets",
   "Filtered average speed": "Filtered average speed",
+  "Last refresh: {{time}}": "Last refresh: {{time}}",
   "{{count}} IP(s)": "{{count}} IP(s)",
   "{{count}} IP(s)_plural": "{{count}} IP(s)",
   "{{count}} Port(s)": "{{count}} Port(s)",
