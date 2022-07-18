@@ -698,15 +698,18 @@ export const NetflowTraffic: React.FC<{
   const slownessReason = React.useCallback(() => {
     if (match === 'any' && hasNonIndexFields(filters)) {
       return t(
+        // eslint-disable-next-line max-len
         'When in "Match any" mode, try using only Namespace, Owner or Resource filters (which use indexed fields), or decrease limit / range, to improve the query performance'
       );
     }
     if (match === 'all' && !hasIndexFields(filters)) {
       return t(
+        // eslint-disable-next-line max-len
         'Add Namespace, Owner or Resource filters (which use indexed fields), or decrease limit / range, to improve the query performance'
       );
     }
     return t('Add more filters or decrease limit / range to improve the query performance');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [match, filters]);
 
   return !_.isEmpty(extensions) ? (

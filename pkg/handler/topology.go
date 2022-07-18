@@ -19,8 +19,8 @@ const (
 	groupsKey         = "groups"
 )
 
-func GetTopology(cfg loki.Config) func(w http.ResponseWriter, r *http.Request) {
-	lokiClient := newLokiClient(&cfg)
+func GetTopology(cfg *loki.Config) func(w http.ResponseWriter, r *http.Request) {
+	lokiClient := newLokiClient(cfg)
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		var code int
@@ -40,7 +40,7 @@ func GetTopology(cfg loki.Config) func(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getTopologyFlows(cfg loki.Config, client httpclient.Caller, params url.Values) (*model.AggregatedQueryResponse, int, error) {
+func getTopologyFlows(cfg *loki.Config, client httpclient.Caller, params url.Values) (*model.AggregatedQueryResponse, int, error) {
 	hlog.Debugf("GetTopology query params: %s", params)
 
 	start, err := getStartTime(params)
@@ -72,7 +72,7 @@ func getTopologyFlows(cfg loki.Config, client httpclient.Caller, params url.Valu
 		// match any, and multiple filters => run in parallel then aggregate
 		var queries []string
 		for _, group := range filterGroups {
-			query, code, err := buildTopologyQuery(&cfg, group, start, end, limit, metricFunction, metricType, reporter, layer, scope, groups)
+			query, code, err := buildTopologyQuery(cfg, group, start, end, limit, metricFunction, metricType, reporter, layer, scope, groups)
 			if err != nil {
 				return nil, code, errors.New("Can't build query: " + err.Error())
 			}
@@ -88,7 +88,7 @@ func getTopologyFlows(cfg loki.Config, client httpclient.Caller, params url.Valu
 		if len(filterGroups) > 0 {
 			filters = filterGroups[0]
 		}
-		query, code, err := buildTopologyQuery(&cfg, filters, start, end, limit, metricFunction, metricType, reporter, layer, scope, groups)
+		query, code, err := buildTopologyQuery(cfg, filters, start, end, limit, metricFunction, metricType, reporter, layer, scope, groups)
 		if err != nil {
 			return nil, code, err
 		}

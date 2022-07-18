@@ -11,13 +11,12 @@ import (
 )
 
 const (
-	startParam          = "start"
-	endParam            = "end"
-	limitParam          = "limit"
-	queryRangePath      = "/loki/api/v1/query_range?query="
-	jsonOrJoiner        = "+or+"
-	emptyMatch          = `""`
-	infrastructureRegex = `(kube-|openshift-).*`
+	startParam     = "start"
+	endParam       = "end"
+	limitParam     = "limit"
+	queryRangePath = "/loki/api/v1/query_range?query="
+	jsonOrJoiner   = "+or+"
+	emptyMatch     = `""`
 )
 
 // can contains only alphanumeric / '-' / '_' / '.' / ',' / '"' / '*' / ':' / '/' characteres
@@ -25,13 +24,14 @@ var filterRegexpValidation = regexp.MustCompile(`^[\w-_.,\"*:/]*$`)
 
 // FlowQueryBuilder stores a state to build a LogQL query
 type FlowQueryBuilder struct {
-	config       *Config
-	startTime    string
-	endTime      string
-	limit        string
-	labelFilters []labelFilter
-	lineFilters  []lineFilter
-	jsonFilters  [][]labelFilter
+	config           *Config
+	startTime        string
+	endTime          string
+	limit            string
+	labelFilters     []labelFilter
+	lineFilters      []lineFilter
+	extraLineFilters []string
+	jsonFilters      [][]labelFilter
 }
 
 func NewFlowQueryBuilder(cfg *Config, start, end, limit, reporter, layer string) *FlowQueryBuilder {
@@ -39,24 +39,24 @@ func NewFlowQueryBuilder(cfg *Config, start, end, limit, reporter, layer string)
 	labelFilters := []labelFilter{
 		stringLabelFilter(constants.AppLabel, constants.AppLabelValue),
 	}
+	extraLineFilters := []string{}
 	if reporter == constants.ReporterSource {
 		labelFilters = append(labelFilters, stringLabelFilter(fields.FlowDirection, "1"))
 	} else if reporter == constants.ReporterDestination {
 		labelFilters = append(labelFilters, stringLabelFilter(fields.FlowDirection, "0"))
 	}
 	if layer == constants.LayerInfrastructure {
-		labelFilters = append(labelFilters, regexLabelFilter(fields.SrcNamespace, infrastructureRegex))
-		labelFilters = append(labelFilters, regexLabelFilter(fields.DstNamespace, infrastructureRegex))
+		extraLineFilters = append(extraLineFilters, `|`+layerLineFilter(true, cfg.IngressMatcher))
 	} else if layer == constants.LayerApplication {
-		labelFilters = append(labelFilters, regexNoLabelFilter(fields.SrcNamespace, infrastructureRegex))
-		labelFilters = append(labelFilters, regexNoLabelFilter(fields.DstNamespace, infrastructureRegex))
+		extraLineFilters = append(extraLineFilters, `|`+layerLineFilter(false, cfg.IngressMatcher))
 	}
 	return &FlowQueryBuilder{
-		config:       cfg,
-		startTime:    start,
-		endTime:      end,
-		limit:        limit,
-		labelFilters: labelFilters,
+		config:           cfg,
+		startTime:        start,
+		endTime:          end,
+		limit:            limit,
+		labelFilters:     labelFilters,
+		extraLineFilters: extraLineFilters,
 	}
 }
 
@@ -197,6 +197,10 @@ func (q *FlowQueryBuilder) appendLineFilters(sb *strings.Builder) {
 		sb.WriteString("|~`")
 		lf.writeInto(sb)
 		sb.WriteByte('`')
+	}
+
+	for _, glf := range q.extraLineFilters {
+		sb.WriteString(glf)
 	}
 }
 

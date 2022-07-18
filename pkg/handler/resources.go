@@ -18,8 +18,8 @@ import (
 	"github.com/netobserv/network-observability-console-plugin/pkg/utils"
 )
 
-func GetNamespaces(cfg loki.Config) func(w http.ResponseWriter, r *http.Request) {
-	lokiClient := newLokiClient(&cfg)
+func GetNamespaces(cfg *loki.Config) func(w http.ResponseWriter, r *http.Request) {
+	lokiClient := newLokiClient(cfg)
 	return func(w http.ResponseWriter, r *http.Request) {
 		var code int
 		startTime := time.Now()
@@ -31,14 +31,14 @@ func GetNamespaces(cfg loki.Config) func(w http.ResponseWriter, r *http.Request)
 		values := []string{}
 
 		// Fetch and merge values for SrcK8S_Namespace and DstK8S_Namespace
-		values1, code, err := getLabelValues(&cfg, lokiClient, fields.SrcNamespace)
+		values1, code, err := getLabelValues(cfg, lokiClient, fields.SrcNamespace)
 		if err != nil {
 			writeError(w, code, "Error while fetching label source namespace values from Loki: "+err.Error())
 			return
 		}
 		values = append(values, values1...)
 
-		values2, code, err := getLabelValues(&cfg, lokiClient, fields.DstNamespace)
+		values2, code, err := getLabelValues(cfg, lokiClient, fields.DstNamespace)
 		if err != nil {
 			writeError(w, code, "Error while fetching label destination namespace values from Loki: "+err.Error())
 			return
@@ -72,8 +72,8 @@ func getLabelValues(cfg *loki.Config, lokiClient httpclient.Caller, label string
 	return lvr.Data, http.StatusOK, nil
 }
 
-func GetNames(cfg loki.Config) func(w http.ResponseWriter, r *http.Request) {
-	lokiClient := newLokiClient(&cfg)
+func GetNames(cfg *loki.Config) func(w http.ResponseWriter, r *http.Request) {
+	lokiClient := newLokiClient(cfg)
 	return func(w http.ResponseWriter, r *http.Request) {
 		var code int
 		startTime := time.Now()
@@ -107,7 +107,7 @@ func GetNames(cfg loki.Config) func(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getNamesForPrefix(cfg loki.Config, lokiClient httpclient.Caller, prefix, kind, namespace string) ([]string, int, error) {
+func getNamesForPrefix(cfg *loki.Config, lokiClient httpclient.Caller, prefix, kind, namespace string) ([]string, int, error) {
 	lokiParams := [][]string{}
 	if namespace != "" {
 		lokiParams = append(lokiParams, []string{prefix + fields.Namespace, exact(namespace)})
@@ -121,7 +121,7 @@ func getNamesForPrefix(cfg loki.Config, lokiClient httpclient.Caller, prefix, ki
 		fieldToExtract = prefix + fields.Name
 	}
 
-	queryBuilder := loki.NewFlowQueryBuilderWithDefaults(&cfg)
+	queryBuilder := loki.NewFlowQueryBuilderWithDefaults(cfg)
 	if err := queryBuilder.Filters(lokiParams); err != nil {
 		return nil, http.StatusBadRequest, err
 	}
