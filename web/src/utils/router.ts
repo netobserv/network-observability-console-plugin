@@ -1,7 +1,7 @@
 import { TFunction } from 'i18next';
 import { findFilter } from './filter-definitions';
 import { TimeRange } from './datetime';
-import { Match, MetricFunction, MetricType, Reporter } from '../model/flow-query';
+import { Layer, Match, MetricFunction, MetricType, Reporter } from '../model/flow-query';
 import { getURLParam, getURLParamAsNumber, removeURLParam, setURLParam, URLParam } from './url';
 import { createFilterValue, DisabledFilters, Filter, FilterId, GroupDisabledKey } from '../model/filters';
 
@@ -11,6 +11,8 @@ const filterValuesSeparator = ',';
 export const defaultTimeRange = 300;
 const defaultLimit = 100;
 export const defaultReporter: Reporter = 'destination';
+//TODO: improve performances before applying 'application' layer by default
+export const defaultLayer: Layer = 'both';
 const defaultMatch: Match = 'all';
 export const defaultMetricFunction = 'sum';
 export const defaultMetricType = 'bytes';
@@ -35,6 +37,10 @@ export const getRangeFromURL = (): number | TimeRange => {
 
 export const getReporterFromURL = (): Reporter => {
   return (getURLParam(URLParam.Reporter) as Reporter | null) || defaultReporter;
+};
+
+export const getLayerFromURL = (): Layer => {
+  return (getURLParam(URLParam.Layer) as Layer | null) || defaultLayer;
 };
 
 export const getLimitFromURL = (): number => {
@@ -99,6 +105,10 @@ export const setURLRange = (range: number | TimeRange) => {
 
 export const setURLReporter = (reporter: Reporter) => {
   setURLParam(URLParam.Reporter, reporter);
+};
+
+export const setURLLayer = (layer: Layer) => {
+  setURLParam(URLParam.Layer, layer);
 };
 
 export const setURLLimit = (limit: number) => {

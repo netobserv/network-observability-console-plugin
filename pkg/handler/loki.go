@@ -164,8 +164,8 @@ func fetchParallel(lokiClient httpclient.Caller, queries []string, merger loki.M
 	return codeOut, nil
 }
 
-func LokiReady(cfg loki.Config) func(w http.ResponseWriter, r *http.Request) {
-	lokiClient := newLokiClient(&cfg)
+func LokiReady(cfg *loki.Config) func(w http.ResponseWriter, r *http.Request) {
+	lokiClient := newLokiClient(cfg)
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		baseURL := strings.TrimRight(cfg.URL.String(), "/")
@@ -187,8 +187,8 @@ func LokiReady(cfg loki.Config) func(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func LokiMetrics(cfg loki.Config) func(w http.ResponseWriter, r *http.Request) {
-	lokiClient := newLokiClient(&cfg)
+func LokiMetrics(cfg *loki.Config) func(w http.ResponseWriter, r *http.Request) {
+	lokiClient := newLokiClient(cfg)
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		baseURL := strings.TrimRight(cfg.URL.String(), "/")
@@ -203,8 +203,8 @@ func LokiMetrics(cfg loki.Config) func(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func LokiBuildInfos(cfg loki.Config) func(w http.ResponseWriter, r *http.Request) {
-	lokiClient := newLokiClient(&cfg)
+func LokiBuildInfos(cfg *loki.Config) func(w http.ResponseWriter, r *http.Request) {
+	lokiClient := newLokiClient(cfg)
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		baseURL := strings.TrimRight(cfg.URL.String(), "/")
@@ -219,8 +219,8 @@ func LokiBuildInfos(cfg loki.Config) func(w http.ResponseWriter, r *http.Request
 	}
 }
 
-func LokiConfig(cfg loki.Config, param string) func(w http.ResponseWriter, r *http.Request) {
-	lokiClient := newLokiClient(&cfg)
+func LokiConfig(cfg *loki.Config, param string) func(w http.ResponseWriter, r *http.Request) {
+	lokiClient := newLokiClient(cfg)
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		baseURL := strings.TrimRight(cfg.URL.String(), "/")

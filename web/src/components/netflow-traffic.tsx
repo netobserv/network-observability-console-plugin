@@ -39,7 +39,8 @@ import {
   groupFiltersMatchAll,
   groupFiltersMatchAny,
   MetricFunction,
-  MetricType
+  MetricType,
+  Layer
 } from '../model/flow-query';
 import { useK8sModelsWithColors } from '../utils/k8s-models-hook';
 import { Stats, TopologyMetrics } from '../api/loki';
@@ -80,7 +81,9 @@ import {
   setURLRange,
   setURLReporter,
   setURLMetricFunction,
-  setURLMetricType
+  setURLMetricType,
+  getLayerFromURL as getLayerFromURL,
+  setURLLayer
 } from '../utils/router';
 import DisplayDropdown, { Size } from './dropdowns/display-dropdown';
 import MetricTypeDropdown from './dropdowns/metric-type-dropdown';
@@ -153,6 +156,7 @@ export const NetflowTraffic: React.FC<{
   const [filters, setFilters] = React.useState<Filter[]>([]);
   const [match, setMatch] = React.useState<Match>(getMatchFromURL());
   const [reporter, setReporter] = React.useState<Reporter>(getReporterFromURL());
+  const [layer, setLayer] = React.useState<Layer>(getLayerFromURL());
   const [limit, setLimit] = React.useState<number>(getLimitFromURL());
   const [range, setRange] = React.useState<number | TimeRange>(getRangeFromURL());
   const [metricFunction, setMetricFunction] = React.useState<MetricFunction>(defaultMetricFunction);
@@ -221,7 +225,8 @@ export const NetflowTraffic: React.FC<{
     const query: FlowQuery = {
       filters: groupedFilters,
       limit: limit,
-      reporter: reporter
+      reporter: reporter,
+      layer: layer
     };
     if (range) {
       if (typeof range === 'number') {
@@ -244,6 +249,7 @@ export const NetflowTraffic: React.FC<{
     match,
     limit,
     reporter,
+    layer,
     range,
     selectedViewId,
     metricFunction,
@@ -347,6 +353,9 @@ export const NetflowTraffic: React.FC<{
     setURLReporter(reporter);
   }, [reporter]);
   React.useEffect(() => {
+    setURLLayer(layer);
+  }, [layer]);
+  React.useEffect(() => {
     setURLMetricFunction(metricFunction);
     if (metricFunction === 'rate') {
       setMetricType(undefined);
@@ -361,7 +370,7 @@ export const NetflowTraffic: React.FC<{
     if (!forcedFilters) {
       setQueryParams(getURLParams().toString());
     }
-  }, [filters, range, limit, match, reporter, metricFunction, metricType, setQueryParams, forcedFilters]);
+  }, [filters, range, limit, match, reporter, layer, metricFunction, metricType, setQueryParams, forcedFilters]);
 
   // update local storage enabled filters
   React.useEffect(() => {
@@ -689,15 +698,18 @@ export const NetflowTraffic: React.FC<{
   const slownessReason = React.useCallback(() => {
     if (match === 'any' && hasNonIndexFields(filters)) {
       return t(
+        // eslint-disable-next-line max-len
         'When in "Match any" mode, try using only Namespace, Owner or Resource filters (which use indexed fields), or decrease limit / range, to improve the query performance'
       );
     }
     if (match === 'all' && !hasIndexFields(filters)) {
       return t(
+        // eslint-disable-next-line max-len
         'Add Namespace, Owner or Resource filters (which use indexed fields), or decrease limit / range, to improve the query performance'
       );
     }
     return t('Add more filters or decrease limit / range to improve the query performance');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [match, filters]);
 
   return !_.isEmpty(extensions) ? (
@@ -725,7 +737,9 @@ export const NetflowTraffic: React.FC<{
           setMatch,
           reporter,
           setReporter,
-          allowReporterBoth: selectedViewId === 'table'
+          allowReporterBoth: selectedViewId === 'table',
+          layer: layer,
+          setLayer: setLayer
         }}
         forcedFilters={forcedFilters}
         actions={actions()}

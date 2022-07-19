@@ -31,7 +31,7 @@ func TestGetSourceOwnerNames(t *testing.T) {
 			url,
 		)
 	})
-	_, _, _ = getNamesForPrefix(testLokiConfig, lokiClientMock, "Src", "Deployment", "default")
+	_, _, _ = getNamesForPrefix(&testLokiConfig, lokiClientMock, "Src", "Deployment", "default")
 
 	lokiClientMock.AssertNumberOfCalls(t, "Get", 1)
 }
@@ -45,7 +45,7 @@ func TestGetDestPodNames(t *testing.T) {
 			url,
 		)
 	})
-	_, _, _ = getNamesForPrefix(testLokiConfig, lokiClientMock, "Dst", "Pod", "default")
+	_, _, _ = getNamesForPrefix(&testLokiConfig, lokiClientMock, "Dst", "Pod", "default")
 
 	lokiClientMock.AssertNumberOfCalls(t, "Get", 1)
 }
@@ -59,7 +59,7 @@ func TestGetSourceNodeNames(t *testing.T) {
 			url,
 		)
 	})
-	_, _, _ = getNamesForPrefix(testLokiConfig, lokiClientMock, "Src", "Node", "")
+	_, _, _ = getNamesForPrefix(&testLokiConfig, lokiClientMock, "Src", "Node", "")
 
 	lokiClientMock.AssertNumberOfCalls(t, "Get", 1)
 }

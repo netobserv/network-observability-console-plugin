@@ -20,6 +20,7 @@ const (
 	timeRangeKey = "timeRange"
 	limitKey     = "limit"
 	reporterKey  = "reporter"
+	layerKey     = "layer"
 	filtersKey   = "filters"
 )
 
@@ -101,8 +102,8 @@ func getLimit(params url.Values) (string, int, error) {
 	return limit, reqLimit, nil
 }
 
-func GetFlows(cfg loki.Config) func(w http.ResponseWriter, r *http.Request) {
-	lokiClient := newLokiClient(&cfg)
+func GetFlows(cfg *loki.Config) func(w http.ResponseWriter, r *http.Request) {
+	lokiClient := newLokiClient(cfg)
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		var code int
@@ -125,7 +126,7 @@ func GetFlows(cfg loki.Config) func(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getFlows(cfg loki.Config, client httpclient.Caller, params url.Values) (*model.AggregatedQueryResponse, int, error) {
+func getFlows(cfg *loki.Config, client httpclient.Caller, params url.Values) (*model.AggregatedQueryResponse, int, error) {
 	start, err := getStartTime(params)
 	if err != nil {
 		return nil, http.StatusBadRequest, err
@@ -139,6 +140,7 @@ func getFlows(cfg loki.Config, client httpclient.Caller, params url.Values) (*mo
 		return nil, http.StatusBadRequest, err
 	}
 	reporter := params.Get(reporterKey)
+	layer := params.Get(layerKey)
 	rawFilters := params.Get(filtersKey)
 	filterGroups, err := parseFilters(rawFilters)
 	if err != nil {
@@ -150,7 +152,7 @@ func getFlows(cfg loki.Config, client httpclient.Caller, params url.Values) (*mo
 		// match any, and multiple filters => run in parallel then aggregate
 		var queries []string
 		for _, group := range filterGroups {
-			qb := loki.NewFlowQueryBuilder(&cfg, start, end, limit, reporter)
+			qb := loki.NewFlowQueryBuilder(cfg, start, end, limit, reporter, layer)
 			err := qb.Filters(group)
 			if err != nil {
 				return nil, http.StatusBadRequest, errors.New("Can't build query: " + err.Error())
@@ -163,7 +165,7 @@ func getFlows(cfg loki.Config, client httpclient.Caller, params url.Values) (*mo
 		}
 	} else {
 		// else, run all at once
-		qb := loki.NewFlowQueryBuilder(&cfg, start, end, limit, reporter)
+		qb := loki.NewFlowQueryBuilder(cfg, start, end, limit, reporter, layer)
 		if len(filterGroups) > 0 {
 			err := qb.Filters(filterGroups[0])
 			if err != nil {
