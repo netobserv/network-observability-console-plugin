@@ -11,7 +11,8 @@ const filterValuesSeparator = ',';
 export const defaultTimeRange = 300;
 const defaultLimit = 100;
 export const defaultReporter: Reporter = 'destination';
-export const defaultLayer: Layer = 'application';
+//TODO: improve performances before applying 'application' layer by default
+export const defaultLayer: Layer = 'both';
 const defaultMatch: Match = 'all';
 export const defaultMetricFunction = 'sum';
 export const defaultMetricType = 'bytes';
