@@ -27,15 +27,18 @@ type LokiError struct {
 var hlog = logrus.WithField("module", "handler")
 
 const (
-	lokiOrgIDHeader = "X-Scope-OrgID"
+	lokiOrgIDHeader         = "X-Scope-OrgID"
+	lokiAuthorizationHeader = "Authorization"
 )
 
 func newLokiClient(cfg *loki.Config) httpclient.Caller {
-	var headers map[string][]string
+	headers := map[string][]string{}
 	if cfg.TenantID != "" {
-		headers = map[string][]string{
-			lokiOrgIDHeader: {cfg.TenantID},
-		}
+		headers[lokiOrgIDHeader] = []string{cfg.TenantID}
+	}
+
+	if cfg.Authorization != "" {
+		headers[lokiAuthorizationHeader] = []string{cfg.Authorization}
 	}
 
 	if cfg.UseMocks {

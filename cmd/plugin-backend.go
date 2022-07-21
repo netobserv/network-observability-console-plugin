@@ -30,6 +30,7 @@ var (
 	lokiLabels     = flag.String("loki-labels", "SrcK8S_Namespace,SrcK8S_OwnerName,DstK8S_Namespace,DstK8S_OwnerName,FlowDirection", "Loki labels, comma separated")
 	lokiTimeout    = flag.Duration("loki-timeout", 10*time.Second, "Timeout of the Loki query to retrieve logs")
 	lokiTenantID   = flag.String("loki-tenant-id", "", "Tenant organization ID for multi-tenant-loki (submitted as the X-Scope-OrgID HTTP header)")
+	lokiTokenPath  = flag.String("loki-token-path", "", "Path to Bearer authorization header for loki gateway)")
 	lokiCAPath     = flag.String("loki-ca-path", "", "Path to loki CA certificate")
 	lokiSkipTLS    = flag.Bool("loki-skip-tls", false, "Skip TLS checks for loki HTTPS connection")
 	lokiMock       = flag.Bool("loki-mock", false, "Fake loki results using saved mocks")
@@ -76,7 +77,7 @@ func main() {
 		CORSAllowMethods: *corsMethods,
 		CORSAllowHeaders: *corsHeaders,
 		CORSMaxAge:       *corsMaxAge,
-		Loki:             loki.NewConfig(lURL, *lokiTimeout, *lokiTenantID, *lokiSkipTLS, *lokiCAPath, *lokiMock, *ingressMatcher, strings.Split(lLabels, ",")),
+		Loki:             loki.NewConfig(lURL, *lokiTimeout, *lokiTenantID, *lokiTokenPath, *lokiSkipTLS, *lokiCAPath, *lokiMock, *ingressMatcher, strings.Split(lLabels, ",")),
 		FrontendConfig:   *frontendConfig,
 	})
 }
