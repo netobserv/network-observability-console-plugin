@@ -230,6 +230,7 @@ func TestLokiFiltering(t *testing.T) {
 			lokiURL,
 			time.Second,
 			"",
+			"",
 			false,
 			"",
 			false,

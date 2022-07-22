@@ -280,9 +280,10 @@ func TestLokiConfiguration_MultiTenant(t *testing.T) {
 	// GIVEN a NOO console plugin backend configured for Multi tenant mode
 	backendRoutes := setupRoutes(&Config{
 		Loki: loki.Config{
-			URL:      lokiURL,
-			Timeout:  time.Second,
-			TenantID: "my-organisation",
+			URL:           lokiURL,
+			Timeout:       time.Second,
+			TenantID:      "my-organisation",
+			Authorization: "Bearer XXX",
 		},
 	})
 	backendSvc := httptest.NewServer(backendRoutes)
@@ -295,6 +296,7 @@ func TestLokiConfiguration_MultiTenant(t *testing.T) {
 	// THEN the query has been properly forwarded to Loki with the tenant ID header
 	req := lokiMock.Calls[0].Arguments[1].(*http.Request)
 	assert.Equal(t, "my-organisation", req.Header.Get("X-Scope-OrgID"))
+	assert.Equal(t, "Bearer XXX", req.Header.Get("Authorization"))
 }
 
 type httpMock struct {
