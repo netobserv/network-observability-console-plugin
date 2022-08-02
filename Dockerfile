@@ -10,7 +10,7 @@ COPY mocks mocks
 
 RUN NPM_INSTALL=ci make build-frontend
 
-FROM registry.access.redhat.com/ubi8/go-toolset:1.17.7 as go-builder
+FROM registry.access.redhat.com/ubi8/go-toolset:1.17 as go-builder
 
 WORKDIR /opt/app-root
 
