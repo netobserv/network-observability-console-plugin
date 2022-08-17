@@ -12,7 +12,7 @@ import (
 func TestFlowQuery_AddLabelFilters(t *testing.T) {
 	lokiURL, err := url.Parse("/")
 	require.NoError(t, err)
-	cfg := NewConfig(lokiURL, time.Second, "", false, "", false, ".*-ingress$", []string{"foo", "flis"})
+	cfg := NewConfig(lokiURL, time.Second, "", "", false, "", false, ".*-ingress$", []string{"foo", "flis"})
 	query := NewFlowQueryBuilderWithDefaults(&cfg)
 	err = query.AddFilter("foo", `"bar"`)
 	require.NoError(t, err)
@@ -25,7 +25,7 @@ func TestFlowQuery_AddLabelFilters(t *testing.T) {
 func TestQuery_BackQuote_Error(t *testing.T) {
 	lokiURL, err := url.Parse("/")
 	require.NoError(t, err)
-	cfg := NewConfig(lokiURL, time.Second, "", false, "", false, ".*-ingress$", []string{"lab1", "lab2"})
+	cfg := NewConfig(lokiURL, time.Second, "", "", false, "", false, ".*-ingress$", []string{"lab1", "lab2"})
 	query := NewFlowQueryBuilderWithDefaults(&cfg)
 	assert.Error(t, query.AddFilter("key", "backquoted`val"))
 }
