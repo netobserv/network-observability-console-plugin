@@ -171,7 +171,7 @@ func LokiReady(cfg *loki.Config) func(w http.ResponseWriter, r *http.Request) {
 	lokiClient := newLokiClient(cfg)
 
 	return func(w http.ResponseWriter, r *http.Request) {
-		baseURL := strings.TrimRight(cfg.URL.String(), "/")
+		baseURL := strings.TrimRight(cfg.StatusURL.String(), "/")
 
 		resp, code, err := executeLokiQuery(fmt.Sprintf("%s/%s", baseURL, "ready"), lokiClient)
 		if err != nil {
@@ -194,7 +194,7 @@ func LokiMetrics(cfg *loki.Config) func(w http.ResponseWriter, r *http.Request) 
 	lokiClient := newLokiClient(cfg)
 
 	return func(w http.ResponseWriter, r *http.Request) {
-		baseURL := strings.TrimRight(cfg.URL.String(), "/")
+		baseURL := strings.TrimRight(cfg.StatusURL.String(), "/")
 
 		resp, code, err := executeLokiQuery(fmt.Sprintf("%s/%s", baseURL, "metrics"), lokiClient)
 		if err != nil {
@@ -210,7 +210,7 @@ func LokiBuildInfos(cfg *loki.Config) func(w http.ResponseWriter, r *http.Reques
 	lokiClient := newLokiClient(cfg)
 
 	return func(w http.ResponseWriter, r *http.Request) {
-		baseURL := strings.TrimRight(cfg.URL.String(), "/")
+		baseURL := strings.TrimRight(cfg.StatusURL.String(), "/")
 
 		resp, code, err := executeLokiQuery(fmt.Sprintf("%s/%s", baseURL, "loki/api/v1/status/buildinfo"), lokiClient)
 		if err != nil {
@@ -226,7 +226,7 @@ func LokiConfig(cfg *loki.Config, param string) func(w http.ResponseWriter, r *h
 	lokiClient := newLokiClient(cfg)
 
 	return func(w http.ResponseWriter, r *http.Request) {
-		baseURL := strings.TrimRight(cfg.URL.String(), "/")
+		baseURL := strings.TrimRight(cfg.StatusURL.String(), "/")
 
 		resp, code, err := executeLokiQuery(fmt.Sprintf("%s/%s", baseURL, "config"), lokiClient)
 		if err != nil {

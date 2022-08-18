@@ -228,6 +228,7 @@ func TestLokiFiltering(t *testing.T) {
 	backendRoutes := setupRoutes(&Config{
 		Loki: loki.NewConfig(
 			lokiURL,
+			lokiURL,
 			time.Second,
 			"",
 			"",
