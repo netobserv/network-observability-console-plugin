@@ -1,11 +1,9 @@
-FROM registry.access.redhat.com/ubi8/nodejs-14:1 as web-builder
+FROM registry.access.redhat.com/ubi8/nodejs-16:1 as web-builder
 
 WORKDIR /opt/app-root
 
-RUN npm install npm@8.2.0 -g
-RUN mkdir web && chown $USER: web
-COPY Makefile Makefile
-COPY web web
+COPY --chown=default Makefile Makefile
+COPY --chown=default web web
 COPY mocks mocks
 
 RUN NPM_INSTALL=ci make build-frontend
