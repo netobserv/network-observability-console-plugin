@@ -2,7 +2,7 @@ import protocols from 'protocol-numbers';
 import { compareStrings } from './base-compare';
 
 export const formatProtocol = (p: number) => {
-  if (p !== undefined) {
+  if (p !== undefined && protocols[p]) {
     return protocols[p].name;
   } else {
     return 'N/A';
