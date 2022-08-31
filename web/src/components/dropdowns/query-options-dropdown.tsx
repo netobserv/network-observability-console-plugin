@@ -4,12 +4,15 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Layer, Match, Reporter } from '../../model/flow-query';
 
+export const TOP_VALUES = [5, 10, 15];
+export const LIMIT_VALUES = [100, 500, 1000];
 export interface QueryOptionsDropdownProps {
   reporter: Reporter;
   setReporter: (reporter: Reporter) => void;
   layer: Layer;
   setLayer: (application: Layer) => void;
   allowReporterBoth: boolean;
+  useTopK: boolean;
   limit: number;
   setLimit: (limit: number) => void;
   match: Match;
@@ -29,6 +32,7 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
   layer: application,
   setLayer: setLayer,
   allowReporterBoth,
+  useTopK,
   limit,
   setLimit,
   match,
@@ -76,6 +80,8 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
       value: 'any'
     }
   ];
+
+  const limitValues = useTopK ? TOP_VALUES : LIMIT_VALUES;
 
   return (
     <>
@@ -174,18 +180,22 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
       </div>
       <div className="pf-c-select__menu-group">
         <Tooltip
-          content={t(
-            // eslint-disable-next-line max-len
-            'Limit for internal backend queries. Depending on the matching and filter settings, several queries can be performed under the cover, each with this limit set, resulting in more results after aggregation.'
-          )}
+          content={
+            t(useTopK ? 'Top items for internal backend queries.' : 'Limit for internal backend queries.') +
+            ' ' +
+            t(
+              // eslint-disable-next-line max-len
+              'Depending on the matching and filter settings, several queries can be performed under the cover, each with this parameter set, resulting in more results after aggregation.'
+            )
+          }
         >
           <div className="pf-c-select__menu-group-title">
             <>
-              {t('Limit')} <InfoAltIcon />
+              {useTopK ? t('Top') : t('Limit')} <InfoAltIcon />
             </>
           </div>
         </Tooltip>
-        {[100, 500, 1000].map(l => (
+        {limitValues.map(l => (
           <div key={'limit-' + l}>
             <label className="pf-c-select__menu-item">
               <Radio

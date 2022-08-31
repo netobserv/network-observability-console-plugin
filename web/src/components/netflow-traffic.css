@@ -41,7 +41,7 @@ span.pf-c-button__icon.pf-m-start {
     padding-bottom: 3em;
 }
 
-/* set max height to avoid huge table load if tab force scroll */ 
+/* set max height to avoid huge table load if tab force scroll */
 #pageSection.tab {
     max-height: 75vh;
 }
@@ -70,6 +70,7 @@ span.pf-c-button__icon.pf-m-start {
 }
 
 /*force buttons to have the exact same display since they are different components*/
+#manage-overview-panels-button,
 #manage-columns-button,
 #display-dropdown,
 #export-button,
@@ -101,4 +102,13 @@ span.pf-c-button__icon.pf-m-start {
     right: 2em;
     bottom: 3em;
     z-index: 999;
+}
+
+/*fix tabs styling*/
+#netflow-traffic-tabs {
+    padding-left: 0;
+}
+
+.netflow-traffic-tab>button {
+    padding: 0 1rem 1rem;
 }
