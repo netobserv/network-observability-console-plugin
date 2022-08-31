@@ -27,6 +27,7 @@ var (
 	corsMaxAge   = flag.String("cors-max-age", "", "CORS allowed max age (default: unset)")
 	// todo: default value temporarily kept to make it work with older versions of the NOO. Remove default and force setup of loki url
 	lokiURL        = flag.String("loki", "http://localhost:3100", "URL of the loki querier host")
+	lokiStatusURL  = flag.String("loki-status", "", "URL for loki /ready /metrics /config endpoints. (default: loki flag value")
 	lokiLabels     = flag.String("loki-labels", "SrcK8S_Namespace,SrcK8S_OwnerName,DstK8S_Namespace,DstK8S_OwnerName,FlowDirection", "Loki labels, comma separated")
 	lokiTimeout    = flag.Duration("loki-timeout", 10*time.Second, "Timeout of the Loki query to retrieve logs")
 	lokiTenantID   = flag.String("loki-tenant-id", "", "Tenant organization ID for multi-tenant-loki (submitted as the X-Scope-OrgID HTTP header)")
@@ -64,6 +65,16 @@ func main() {
 		log.WithError(err).Fatal("wrong Loki URL")
 	}
 
+	var lStatusURL *url.URL
+	if *lokiStatusURL != "" {
+		lStatusURL, err = url.Parse(*lokiStatusURL)
+		if err != nil {
+			log.WithError(err).Fatal("wrong Loki status URL")
+		}
+	} else {
+		lStatusURL = lURL
+	}
+
 	lLabels := *lokiLabels
 	if len(lLabels) == 0 {
 		log.Fatal("labels cannot be empty")
@@ -77,7 +88,7 @@ func main() {
 		CORSAllowMethods: *corsMethods,
 		CORSAllowHeaders: *corsHeaders,
 		CORSMaxAge:       *corsMaxAge,
-		Loki:             loki.NewConfig(lURL, *lokiTimeout, *lokiTenantID, *lokiTokenPath, *lokiSkipTLS, *lokiCAPath, *lokiMock, *ingressMatcher, strings.Split(lLabels, ",")),
+		Loki:             loki.NewConfig(lURL, lStatusURL, *lokiTimeout, *lokiTenantID, *lokiTokenPath, *lokiSkipTLS, *lokiCAPath, *lokiMock, *ingressMatcher, strings.Split(lLabels, ",")),
 		FrontendConfig:   *frontendConfig,
 	})
 }

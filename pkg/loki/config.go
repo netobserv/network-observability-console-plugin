@@ -13,6 +13,7 @@ var log = logrus.WithField("module", "loki config")
 
 type Config struct {
 	URL            *url.URL
+	StatusURL      *url.URL
 	Timeout        time.Duration
 	TenantID       string
 	Authorization  string
@@ -23,7 +24,7 @@ type Config struct {
 	Labels         map[string]struct{}
 }
 
-func NewConfig(url *url.URL, timeout time.Duration, tenantID string, tokenPath string, skipTLS bool, capath string, useMocks bool, ingressMatcher string, labels []string) Config {
+func NewConfig(url *url.URL, statusURL *url.URL, timeout time.Duration, tenantID string, tokenPath string, skipTLS bool, capath string, useMocks bool, ingressMatcher string, labels []string) Config {
 	authorization := ""
 	if tokenPath != "" {
 		bytes, err := ioutil.ReadFile(tokenPath)
@@ -35,6 +36,7 @@ func NewConfig(url *url.URL, timeout time.Duration, tenantID string, tokenPath s
 
 	return Config{
 		URL:            url,
+		StatusURL:      statusURL,
 		Timeout:        timeout,
 		TenantID:       tenantID,
 		Authorization:  authorization,
