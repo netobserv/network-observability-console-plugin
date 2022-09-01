@@ -2,7 +2,7 @@ import { Dropdown, DropdownItem, DropdownPosition, DropdownToggle } from '@patte
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { MetricType } from '../../model/flow-query';
-import { TopologyMetricTypes } from '../../model/topology';
+import { MetricTypeOptions } from '../../model/metrics';
 
 export const MetricTypeDropdown: React.FC<{
   selected?: string;
@@ -13,10 +13,10 @@ export const MetricTypeDropdown: React.FC<{
   const [metricDropdownOpen, setMetricDropdownOpen] = React.useState(false);
 
   const getMetricDisplay = (metricType?: string) => {
-    switch (metricType as TopologyMetricTypes) {
-      case TopologyMetricTypes.PACKETS:
+    switch (metricType as MetricTypeOptions) {
+      case MetricTypeOptions.PACKETS:
         return t('Packets');
-      case TopologyMetricTypes.BYTES:
+      case MetricTypeOptions.BYTES:
       default:
         return t('Bytes');
     }
@@ -37,7 +37,7 @@ export const MetricTypeDropdown: React.FC<{
         </DropdownToggle>
       }
       isOpen={metricDropdownOpen}
-      dropdownItems={Object.values(TopologyMetricTypes).map(v => (
+      dropdownItems={Object.values(MetricTypeOptions).map(v => (
         <DropdownItem
           data-test={v}
           id={v}

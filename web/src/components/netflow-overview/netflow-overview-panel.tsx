@@ -3,17 +3,18 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { OverviewPanel } from '../../utils/overview-panels';
 import { TopologyMetrics } from '../../api/loki';
-import { MetricFunction, MetricType } from '../../model/flow-query';
+import { MetricFunction, MetricType, MetricScope } from '../../model/flow-query';
 import './netflow-overview-panel.css';
 
 export const NetflowOverviewPanel: React.FC<{
   panel: OverviewPanel;
   metricFunction?: MetricFunction;
   metricType?: MetricType;
+  metricScope: MetricScope;
   metrics: TopologyMetrics[];
   loading?: boolean;
-}> = ({ panel, metricFunction, metricType, metrics, loading }) => {
-  const { t } = useTranslation('plugin__network-observability-plugin');
+}> = ({ panel, metricFunction, metricType, metricScope, metrics, loading }) => {
+  const { t } = useTranslation('plugin__plugin__netobserv-plugin');
 
   const getContent = React.useCallback(() => {
     if (loading) {

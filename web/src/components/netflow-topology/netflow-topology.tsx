@@ -24,16 +24,16 @@ import { useTranslation } from 'react-i18next';
 import { saveSvgAsPng } from 'save-svg-as-png';
 import { TopologyMetrics } from '../../api/loki';
 import { Filter } from '../../model/filters';
-import { MetricFunction, MetricType } from '../../model/flow-query';
+import { MetricFunction, MetricScope, MetricType } from '../../model/flow-query';
 import {
   generateDataModel,
   LayoutName,
   TopologyGroupTypes,
   TopologyOptions,
-  TopologyScopes,
   isElementFiltered,
   toggleElementFilter
 } from '../../model/topology';
+import { MetricScopeOptions } from '../../model/metrics';
 import { TimeRange } from '../../utils/datetime';
 import { usePrevious } from '../../utils/previous-hook';
 import componentFactory from './componentFactories/componentFactory';
@@ -59,6 +59,8 @@ export const TopologyContent: React.FC<{
   range: number | TimeRange;
   metricFunction?: MetricFunction;
   metricType?: MetricType;
+  metricScope: MetricScope;
+  setMetricScope: (ms: MetricScope) => void;
   metrics: TopologyMetrics[];
   options: TopologyOptions;
   setOptions: (o: TopologyOptions) => void;
@@ -72,6 +74,8 @@ export const TopologyContent: React.FC<{
   range,
   metricFunction,
   metricType,
+  metricScope,
+  setMetricScope,
   metrics,
   options,
   setOptions,
@@ -87,6 +91,7 @@ export const TopologyContent: React.FC<{
   const prevMetrics = usePrevious(metrics);
   const prevMetricFunction = usePrevious(metricFunction);
   const prevMetricType = usePrevious(metricType);
+  const prevMetricScope = usePrevious(metricScope);
   const prevOptions = usePrevious(options);
 
   const [selectedIds, setSelectedIds] = React.useState<string[]>([]);
@@ -169,24 +174,24 @@ export const TopologyContent: React.FC<{
   const onStepInto = React.useCallback(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (data: any) => {
-      let scope: TopologyScopes;
+      let scope: MetricScopeOptions;
       let groupTypes: TopologyGroupTypes;
-      switch (options.scope) {
-        case TopologyScopes.HOST:
-          scope = TopologyScopes.NAMESPACE;
+      switch (metricScope) {
+        case MetricScopeOptions.HOST:
+          scope = MetricScopeOptions.NAMESPACE;
           groupTypes = TopologyGroupTypes.NONE;
           break;
-        case TopologyScopes.NAMESPACE:
-          scope = TopologyScopes.OWNER;
+        case MetricScopeOptions.NAMESPACE:
+          scope = MetricScopeOptions.OWNER;
           groupTypes = TopologyGroupTypes.NAMESPACES;
           break;
         default:
-          scope = TopologyScopes.RESOURCE;
+          scope = MetricScopeOptions.RESOURCE;
           groupTypes = TopologyGroupTypes.OWNERS;
       }
+      setMetricScope(scope);
       setOptions({
         ...options,
-        scope,
         groupTypes
       });
       onFilter({
@@ -199,7 +204,7 @@ export const TopologyContent: React.FC<{
       //clear selection
       onSelect(undefined);
     },
-    [onFilter, onSelect, options, setOptions]
+    [metricScope, onFilter, onSelect, options, setMetricScope, setOptions]
   );
 
   const onHover = React.useCallback(
@@ -319,7 +324,16 @@ export const TopologyContent: React.FC<{
       highlightedId = selectedIds[0];
     }
 
-    const updatedModel = generateDataModel(metrics, getOptions(), searchValue, highlightedId, filters, t, k8sModels);
+    const updatedModel = generateDataModel(
+      metrics,
+      getOptions(),
+      metricScope,
+      searchValue,
+      highlightedId,
+      filters,
+      t,
+      k8sModels
+    );
     const allIds = [...(updatedModel.nodes || []), ...(updatedModel.edges || [])].map(item => item.id);
     controller.getElements().forEach(e => {
       if (e.getType() !== 'graph') {
@@ -345,7 +359,19 @@ export const TopologyContent: React.FC<{
       }
     });
     controller.fromModel(updatedModel);
-  }, [controller, prevMetrics, metrics, hoveredId, selectedIds, getOptions, searchValue, filters, t, k8sModels]);
+  }, [
+    controller,
+    prevMetrics,
+    metrics,
+    hoveredId,
+    selectedIds,
+    getOptions,
+    metricScope,
+    searchValue,
+    filters,
+    t,
+    k8sModels
+  ]);
 
   //update model on layout / metrics / filters change
   React.useEffect(() => {
@@ -359,14 +385,14 @@ export const TopologyContent: React.FC<{
     }
 
     //skip refresh if scope / group changed. It will refresh after getting new metrics
-    if (prevOptions && (prevOptions.scope !== options.scope || prevOptions.groupTypes !== options.groupTypes)) {
+    if (prevOptions && (prevMetricScope !== metricScope || prevOptions.groupTypes !== options.groupTypes)) {
       waitForMetrics = true;
       return;
     }
 
     //then update model
     updateModel();
-  }, [controller, metrics, filters, options, prevOptions, resetGraph, updateModel]);
+  }, [controller, metrics, filters, options, prevOptions, resetGraph, updateModel, prevMetricScope, metricScope]);
 
   //request fit on layout end when filter / options change
   React.useEffect(() => {
@@ -533,6 +559,8 @@ export const NetflowTopology: React.FC<{
   range: number | TimeRange;
   metricFunction?: MetricFunction;
   metricType?: MetricType;
+  metricScope: MetricScope;
+  setMetricScope: (ms: MetricScope) => void;
   metrics: TopologyMetrics[];
   options: TopologyOptions;
   setOptions: (o: TopologyOptions) => void;
@@ -548,6 +576,8 @@ export const NetflowTopology: React.FC<{
   range,
   metricFunction,
   metricType,
+  metricScope,
+  setMetricScope,
   metrics,
   options,
   setOptions,
@@ -586,6 +616,8 @@ export const NetflowTopology: React.FC<{
           range={range}
           metricFunction={metricFunction}
           metricType={metricType}
+          metricScope={metricScope}
+          setMetricScope={setMetricScope}
           metrics={metrics}
           options={options}
           setOptions={setOptions}

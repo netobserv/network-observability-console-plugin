@@ -10,41 +10,30 @@ import {
 } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
+import { MetricScope } from '../../model/flow-query';
+import { MetricScopeOptions } from '../../model/metrics';
+import { LayoutName, TopologyGroupTypes, TopologyOptions, TopologyTruncateLength } from '../../model/topology';
 import { defaultSize, maxSize, minSize } from '../../utils/panel';
-import {
-  LayoutName,
-  TopologyGroupTypes,
-  TopologyOptions,
-  TopologyScopes,
-  TopologyTruncateLength
-} from '../../model/topology';
 import { GroupDropdown } from '../dropdowns/group-dropdown';
 import { LayoutDropdown } from '../dropdowns/layout-dropdown';
-import ScopeDropdown from '../dropdowns/scope-dropdown';
 import TruncateDropdown from '../dropdowns/truncate-dropdown';
 import './options-panel.css';
 
 export type RecordDrawerProps = {
   options: TopologyOptions;
   setOptions: (opts: TopologyOptions) => void;
+  metricScope: MetricScope;
   onClose: () => void;
   id?: string;
 };
 
-export const OptionsPanel: React.FC<RecordDrawerProps> = ({ id, options, setOptions, onClose }) => {
+export const OptionsPanel: React.FC<RecordDrawerProps> = ({ id, options, metricScope, setOptions, onClose }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   const setLayout = (layout: LayoutName) => {
     setOptions({
       ...options,
       layout
-    });
-  };
-
-  const setScope = (scope: TopologyScopes) => {
-    setOptions({
-      ...options,
-      scope
     });
   };
 
@@ -85,15 +74,11 @@ export const OptionsPanel: React.FC<RecordDrawerProps> = ({ id, options, setOpti
               <LayoutDropdown id="layout" selected={options.layout} setLayout={setLayout} />
             </div>
             <div className="options-col-container">
-              <Text component={TextVariants.h4}>{t('Scope')}</Text>
-              <ScopeDropdown id="scope" selected={options.scope} setScopeType={setScope} />
-            </div>
-            <div className="options-col-container">
               <Text component={TextVariants.h4}>{t('Groups')}</Text>
               <GroupDropdown
                 id="group"
-                disabled={options.scope === TopologyScopes.HOST}
-                scope={options.scope}
+                disabled={metricScope === MetricScopeOptions.HOST}
+                scope={metricScope as MetricScopeOptions}
                 selected={options.groupTypes}
                 setGroupType={setGroupType}
               />

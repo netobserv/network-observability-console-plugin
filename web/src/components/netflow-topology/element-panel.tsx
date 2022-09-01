@@ -2,11 +2,11 @@ import { ResourceLink } from '@openshift-console/dynamic-plugin-sdk';
 import {
   Chart,
   ChartArea,
-  ChartScatter,
   ChartAxis,
   ChartGroup,
-  ChartVoronoiContainer,
-  ChartThemeColor
+  ChartScatter,
+  ChartThemeColor,
+  ChartVoronoiContainer
 } from '@patternfly/react-charts';
 import {
   Button,
@@ -21,19 +21,19 @@ import {
   TextContent,
   TextVariants
 } from '@patternfly/react-core';
+import { FilterIcon, TimesIcon } from '@patternfly/react-icons';
 import { BaseEdge, BaseNode, GraphElement } from '@patternfly/react-topology';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { defaultSize, maxSize, minSize } from '../../utils/panel';
-import { MetricFunction, MetricType } from '../../model/flow-query';
-import { TopologyOptions, TopologyScopes } from '../../model/topology';
 import { TopologyMetrics } from '../../api/loki';
+import { Filter } from '../../model/filters';
+import { MetricFunction, MetricScope, MetricType } from '../../model/flow-query';
+import { MetricScopeOptions } from '../../model/metrics';
+import { ElementData, isElementFiltered, toggleElementFilter } from '../../model/topology';
 import { humanFileSize } from '../../utils/bytes';
 import { roundTwoDigits } from '../../utils/count';
 import { getDateFromUnixString, twentyFourHourTime } from '../../utils/datetime';
-import { FilterIcon, TimesIcon } from '@patternfly/react-icons';
-import { Filter } from '../../model/filters';
-import { ElementData, isElementFiltered, toggleElementFilter } from '../../model/topology';
+import { defaultSize, maxSize, minSize } from '../../utils/panel';
 import './element-panel.css';
 
 export const ElementPanelContent: React.FC<{
@@ -41,10 +41,10 @@ export const ElementPanelContent: React.FC<{
   metrics: TopologyMetrics[];
   metricFunction: MetricFunction;
   metricType?: MetricType;
-  options: TopologyOptions;
+  metricScope: MetricScope;
   filters: Filter[];
   setFilters: (filters: Filter[]) => void;
-}> = ({ element, metrics, metricFunction, metricType, options, filters, setFilters }) => {
+}> = ({ element, metrics, metricFunction, metricType, metricScope, filters, setFilters }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const data = element.getData();
   const type = element.getType();
@@ -189,8 +189,8 @@ export const ElementPanelContent: React.FC<{
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (id: string, elementMetrics: TopologyMetrics[], nodeData?: any) => {
       function getName(m: TopologyMetrics) {
-        switch (options.scope) {
-          case TopologyScopes.HOST:
+        switch (metricScope) {
+          case MetricScopeOptions.HOST:
             const srcNode = m.metric.SrcK8S_HostName ? m.metric.SrcK8S_HostName : t('External');
             const dstNode = m.metric.DstK8S_HostName ? m.metric.DstK8S_HostName : t('External');
             return nodeData?.host
@@ -198,7 +198,7 @@ export const ElementPanelContent: React.FC<{
                 ? `${t('To')} ${dstNode}`
                 : `${t('From')} ${srcNode}`
               : `${srcNode} -> ${dstNode}`;
-          case TopologyScopes.NAMESPACE:
+          case MetricScopeOptions.NAMESPACE:
             const srcNamespace = m.metric.SrcK8S_Namespace ? m.metric.SrcK8S_Namespace : t('Unknown');
             const dstNamespace = m.metric.DstK8S_Namespace ? m.metric.DstK8S_Namespace : t('Unknown');
             return nodeData?.namespace
@@ -206,7 +206,7 @@ export const ElementPanelContent: React.FC<{
                 ? `${t('To')} ${dstNamespace}`
                 : `${t('From')} ${srcNamespace}`
               : `${srcNamespace} -> ${dstNamespace}`;
-          case TopologyScopes.OWNER:
+          case MetricScopeOptions.OWNER:
             let srcOwner = t('Unknown');
             if (m.metric.SrcK8S_Namespace && m.metric.SrcK8S_OwnerName) {
               srcOwner = `${m.metric.SrcK8S_Namespace}.${m.metric.SrcK8S_OwnerName}`;
@@ -225,7 +225,7 @@ export const ElementPanelContent: React.FC<{
                 ? `${t('To')} ${dstOwner}`
                 : `${t('From')} ${srcOwner}`
               : `${srcOwner} -> ${dstOwner}`;
-          case TopologyScopes.RESOURCE:
+          case MetricScopeOptions.RESOURCE:
           default:
             let src = m.metric.SrcAddr;
             if (m.metric.SrcK8S_Namespace && m.metric.SrcK8S_Name) {
@@ -313,7 +313,7 @@ export const ElementPanelContent: React.FC<{
         </div>
       );
     },
-    [metricTitle, metricValue, metrics, options.scope, t]
+    [metricTitle, metricValue, metrics, metricScope, t]
   );
 
   let srcCount = 0;
@@ -345,17 +345,17 @@ export const ElementPanelContent: React.FC<{
             }
           })
         : metrics.filter(m => {
-            switch (options.scope) {
-              case TopologyScopes.NAMESPACE:
+            switch (metricScope) {
+              case MetricScopeOptions.NAMESPACE:
                 //namespace must match exclusively Source OR Destination
                 return matchExclusively(m, 'Namespace', data.namespace);
-              case TopologyScopes.HOST:
+              case MetricScopeOptions.HOST:
                 //host must match exclusively Source OR Destination
                 return matchExclusively(m, 'HostName', data.host);
-              case TopologyScopes.OWNER:
+              case MetricScopeOptions.OWNER:
                 //owner must match exclusively Source OR Destination
                 return matchExclusively(m, 'OwnerName', data.name);
-              case TopologyScopes.RESOURCE:
+              case MetricScopeOptions.RESOURCE:
               default:
                 //fallback on ip addresses
                 return m.metric.SrcAddr === data.addr || m.metric.DstAddr === data.addr;
@@ -411,23 +411,23 @@ export const ElementPanelContent: React.FC<{
     const tgtData = element.getTarget().getData();
     const edgeMetrics = metrics.filter(m => {
       //must match Source / Destination
-      switch (options.scope) {
-        case TopologyScopes.HOST:
+      switch (metricScope) {
+        case MetricScopeOptions.HOST:
           return (
             (m.metric.SrcK8S_HostName === srcData.host && m.metric.DstK8S_HostName === tgtData.host) ||
             (m.metric.SrcK8S_HostName === tgtData.host && m.metric.DstK8S_HostName === srcData.host)
           );
-        case TopologyScopes.NAMESPACE:
+        case MetricScopeOptions.NAMESPACE:
           return (
             (m.metric.SrcK8S_Namespace === srcData.name && m.metric.DstK8S_Namespace === tgtData.name) ||
             (m.metric.SrcK8S_Namespace === tgtData.name && m.metric.DstK8S_Namespace === srcData.name)
           );
-        case TopologyScopes.OWNER:
+        case MetricScopeOptions.OWNER:
           return (
             (m.metric.SrcK8S_OwnerName === srcData.name && m.metric.DstK8S_OwnerName === tgtData.name) ||
             (m.metric.SrcK8S_OwnerName === tgtData.name && m.metric.DstK8S_OwnerName === srcData.name)
           );
-        case TopologyScopes.RESOURCE:
+        case MetricScopeOptions.RESOURCE:
         default:
           return (
             (m.metric.SrcAddr === srcData.addr && m.metric.DstAddr === tgtData.addr) ||
@@ -437,7 +437,7 @@ export const ElementPanelContent: React.FC<{
     });
     edgeMetrics.forEach(m => {
       if (
-        (options.scope === TopologyScopes.HOST && m.metric.SrcK8S_HostName === srcData.host) ||
+        (metricScope === MetricScopeOptions.HOST && m.metric.SrcK8S_HostName === srcData.host) ||
         m.metric.SrcAddr === srcData.addr
       ) {
         srcCount += m.total;
@@ -479,12 +479,12 @@ export const ElementPanel: React.FC<{
   metrics: TopologyMetrics[];
   metricFunction: MetricFunction;
   metricType?: MetricType;
-  options: TopologyOptions;
+  metricScope: MetricScope;
   filters: Filter[];
   setFilters: (filters: Filter[]) => void;
   id?: string;
 }> = ({ id, element, metrics, metricFunction, metricType, options, filters, setFilters, onClose }) => {
-  const { t } = useTranslation('plugin__netobserv-plugin');
+  const { t } = useTranslation('plugin__plugin__netobserv-plugin');
   const data = element.getData();
 
   const titleContent = React.useCallback(() => {
@@ -518,7 +518,7 @@ export const ElementPanel: React.FC<{
           metrics={metrics}
           metricFunction={metricFunction}
           metricType={metricType}
-          options={options}
+          metricScope={metricScope as MetricScopeOptions}
           filters={filters}
           setFilters={setFilters}
         />
