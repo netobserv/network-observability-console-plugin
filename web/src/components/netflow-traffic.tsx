@@ -15,21 +15,9 @@ import {
   Tabs,
   TabTitleText,
   Text,
-  TextVariants,
-  ToggleGroup,
-  ToggleGroupItem
+  TextVariants
 } from '@patternfly/react-core';
-import {
-  ColumnsIcon,
-  CompressIcon,
-  EllipsisVIcon,
-  ExpandIcon,
-  ExportIcon,
-  SyncAltIcon,
-  TableIcon,
-  TachometerAltIcon,
-  TopologyIcon
-} from '@patternfly/react-icons';
+import { ColumnsIcon, CompressIcon, EllipsisVIcon, ExpandIcon, ExportIcon, SyncAltIcon } from '@patternfly/react-icons';
 import { GraphElement } from '@patternfly/react-topology';
 import * as _ from 'lodash';
 import * as React from 'react';
@@ -440,63 +428,31 @@ export const NetflowTraffic: React.FC<{
     }
   };
 
-  const viewToggle = (asTabs?: boolean) => {
-    if (asTabs) {
-      return (
-        <Tabs
-          id="netflow-traffic-tabs"
-          usePageInsets
-          activeKey={selectedViewId}
-          onSelect={(event, eventkey) => selectView(eventkey as ViewId)}
-          role="region"
-        >
-          <Tab
-            className="netflow-traffic-tab"
-            eventKey={'overview'}
-            title={<TabTitleText>{t('Overview')}</TabTitleText>}
-          />
-          <Tab
-            className="netflow-traffic-tab"
-            eventKey={'table'}
-            title={<TabTitleText>{t('Flow Table')}</TabTitleText>}
-          />
-          <Tab
-            className="netflow-traffic-tab"
-            eventKey={'topology'}
-            title={<TabTitleText>{t('Topology')}</TabTitleText>}
-          />
-        </Tabs>
-      );
-    }
+  const viewTabs = () => {
     return (
-      <ToggleGroup id="netflow-traffic-toggle-group">
-        {isAllowed(Feature.Overview) && (
-          <ToggleGroupItem
-            data-test="overview-view-button"
-            icon={<TachometerAltIcon />}
-            text={t('Overview')}
-            buttonId="overviewViewButton"
-            isSelected={selectedViewId === 'overview'}
-            onChange={() => selectView('overview')}
-          />
-        )}
-        <ToggleGroupItem
-          data-test="table-view-button"
-          icon={<TableIcon />}
-          text={t('Traffic flows')}
-          buttonId="tableViewButton"
-          isSelected={selectedViewId === 'table'}
-          onChange={() => selectView('table')}
+      <Tabs
+        id="netflow-traffic-tabs"
+        usePageInsets
+        activeKey={selectedViewId}
+        onSelect={(event, eventkey) => selectView(eventkey as ViewId)}
+        role="region"
+      >
+        <Tab
+          className="netflow-traffic-tab"
+          eventKey={'overview'}
+          title={<TabTitleText>{t('Overview')}</TabTitleText>}
         />
-        <ToggleGroupItem
-          data-test="topology-view-button"
-          icon={<TopologyIcon />}
-          text={t('Topology')}
-          buttonId="topologyViewButton"
-          isSelected={selectedViewId === 'topology'}
-          onChange={() => selectView('topology')}
+        <Tab
+          className="netflow-traffic-tab"
+          eventKey={'table'}
+          title={<TabTitleText>{t('Flow Table')}</TabTitleText>}
         />
-      </ToggleGroup>
+        <Tab
+          className="netflow-traffic-tab"
+          eventKey={'topology'}
+          title={<TabTitleText>{t('Topology')}</TabTitleText>}
+        />
+      </Tabs>
     );
   };
 
@@ -547,11 +503,6 @@ export const NetflowTraffic: React.FC<{
 
   const menuContent = () => {
     const items: JSX.Element[] = [];
-
-    const viewToggleElement = viewToggle();
-    if (!_.isEmpty(forcedFilters) && viewToggleElement) {
-      items.push(<OverflowMenuItem isPersistent>{viewToggleElement}</OverflowMenuItem>);
-    }
 
     if (selectedViewId === 'overview') {
       items.push(
@@ -846,7 +797,7 @@ export const NetflowTraffic: React.FC<{
         menuContent={menuContent()}
         menuControl={menuControl()}
       />
-      {_.isEmpty(forcedFilters) && viewToggle(true)}
+      {viewTabs()}
       <Drawer
         id="drawer"
         isInline
