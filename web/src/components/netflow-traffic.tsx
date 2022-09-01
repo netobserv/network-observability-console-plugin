@@ -451,11 +451,11 @@ export const NetflowTraffic: React.FC<{
         onSelect={(event, eventkey) => selectView(eventkey as ViewId)}
         role="region"
       >
-        <Tab
+        {isAllowed(Feature.Overview) && <Tab
           className="netflow-traffic-tab"
           eventKey={'overview'}
           title={<TabTitleText>{t('Overview')}</TabTitleText>}
-        />
+        />}
         <Tab
           className="netflow-traffic-tab"
           eventKey={'table'}
