@@ -108,7 +108,3 @@ span.pf-c-button__icon.pf-m-start {
 #netflow-traffic-tabs {
     padding-left: 0;
 }
-
-.netflow-traffic-tab>button {
-    padding: 0 1rem 1rem;
-}

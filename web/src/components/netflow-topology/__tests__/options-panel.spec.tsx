@@ -1,6 +1,7 @@
 import { DrawerCloseButton, Switch } from '@patternfly/react-core';
 import { shallow } from 'enzyme';
 import * as React from 'react';
+import { MetricScope } from '../../../model/flow-query';
 import { DefaultOptions } from '../../../model/topology';
 import { OptionsPanel } from '../options-panel';
 
@@ -9,6 +10,7 @@ describe('<OptionsPanel />', () => {
     options: DefaultOptions,
     setOptions: jest.fn(),
     onClose: jest.fn(),
+    metricScope: 'host' as MetricScope,
     id: 'options-panel-test'
   };
   it('should render component', async () => {

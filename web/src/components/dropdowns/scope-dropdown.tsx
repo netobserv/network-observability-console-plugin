@@ -1,23 +1,24 @@
 import { Dropdown, DropdownItem, DropdownPosition, DropdownToggle } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { TopologyScopes } from '../../model/topology';
+import { MetricScope } from '../../model/flow-query';
+import { MetricScopeOptions } from '../../model/metrics';
 
 export const ScopeDropdown: React.FC<{
-  selected: TopologyScopes;
-  setScopeType: (v: TopologyScopes) => void;
+  selected: MetricScope;
+  setScopeType: (v: MetricScope) => void;
   id?: string;
 }> = ({ selected, setScopeType, id }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [scopeDropdownOpen, setScopeDropdownOpen] = React.useState(false);
 
-  const getScopeDisplay = (scopeType: TopologyScopes) => {
+  const getScopeDisplay = (scopeType: MetricScopeOptions) => {
     switch (scopeType) {
-      case TopologyScopes.HOST:
+      case MetricScopeOptions.HOST:
         return t('Node');
-      case TopologyScopes.NAMESPACE:
+      case MetricScopeOptions.NAMESPACE:
         return t('Namespace');
-      case TopologyScopes.OWNER:
+      case MetricScopeOptions.OWNER:
         return t('Owner');
       default:
         return t('Resource');
@@ -35,11 +36,11 @@ export const ScopeDropdown: React.FC<{
           id={`${id}-dropdown`}
           onToggle={() => setScopeDropdownOpen(!scopeDropdownOpen)}
         >
-          {getScopeDisplay(selected)}
+          {getScopeDisplay(selected as MetricScopeOptions)}
         </DropdownToggle>
       }
       isOpen={scopeDropdownOpen}
-      dropdownItems={Object.values(TopologyScopes).map(v => (
+      dropdownItems={Object.values(MetricScopeOptions).map(v => (
         <DropdownItem
           data-test={v}
           id={v}

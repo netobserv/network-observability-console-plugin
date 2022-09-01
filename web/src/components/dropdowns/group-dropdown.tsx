@@ -1,11 +1,12 @@
 import { Dropdown, DropdownItem, DropdownPosition, DropdownToggle } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { TopologyGroupTypes, TopologyScopes } from '../../model/topology';
+import { TopologyGroupTypes } from '../../model/topology';
+import { MetricScopeOptions } from '../../model/metrics';
 
 export const GroupDropdown: React.FC<{
   disabled?: boolean;
-  scope: TopologyScopes;
+  scope: MetricScopeOptions;
   selected: TopologyGroupTypes;
   setGroupType: (v: TopologyGroupTypes) => void;
   id?: string;
@@ -34,18 +35,18 @@ export const GroupDropdown: React.FC<{
 
   const getAvailableGroups = React.useCallback(() => {
     switch (scope) {
-      case TopologyScopes.HOST:
+      case MetricScopeOptions.HOST:
         return [TopologyGroupTypes.NONE];
-      case TopologyScopes.NAMESPACE:
+      case MetricScopeOptions.NAMESPACE:
         return [TopologyGroupTypes.NONE, TopologyGroupTypes.HOSTS];
-      case TopologyScopes.OWNER:
+      case MetricScopeOptions.OWNER:
         return [
           TopologyGroupTypes.NONE,
           TopologyGroupTypes.HOSTS,
           TopologyGroupTypes.HOSTS_NAMESPACES,
           TopologyGroupTypes.NAMESPACES
         ];
-      case TopologyScopes.RESOURCE:
+      case MetricScopeOptions.RESOURCE:
       default:
         return Object.values(TopologyGroupTypes);
     }

@@ -4,6 +4,7 @@ import * as React from 'react';
 import { PanelMainBody, Spinner } from '@patternfly/react-core';
 import { TopologyMetrics } from '../../../api/loki';
 import { MetricFunction, MetricType } from '../../../model/flow-query';
+import { MetricScopeOptions } from '../../../model/metrics';
 import { metrics } from '../../__tests-data__/metrics';
 import { SamplePanel } from '../../__tests-data__/panels';
 import { NetflowOverview } from '../netflow-overview';
@@ -15,6 +16,7 @@ describe('<NetflowOverviewPanel />', () => {
     loading: false,
     metricFunction: 'sum' as MetricFunction,
     metricType: 'bytes' as MetricType,
+    metricScope: MetricScopeOptions.HOST,
     metrics: [] as TopologyMetrics[]
   };
   it('should render component', async () => {

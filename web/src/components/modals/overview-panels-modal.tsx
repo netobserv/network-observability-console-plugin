@@ -33,7 +33,7 @@ export const OverviewPanelsModal: React.FC<{
   const [updatedPanels, setUpdatedPanels] = React.useState<OverviewPanel[]>([]);
   const [isSaveDisabled, setSaveDisabled] = React.useState<boolean>(true);
   const [isAllSelected, setAllSelected] = React.useState<boolean>(false);
-  const { t } = useTranslation('plugin__network-observability-plugin');
+  const { t } = useTranslation('plugin__plugin__netobserv-plugin');
 
   React.useEffect(() => {
     setUpdatedPanels(_.cloneDeep(panels));
