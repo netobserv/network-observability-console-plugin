@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import * as React from 'react';
 
-export const LOCAL_STORAGE_PLUGIN_KEY = 'network-observability-plugin-settings';
+export const LOCAL_STORAGE_PLUGIN_KEY = 'netobserv-plugin-settings';
 export const LOCAL_STORAGE_COLS_KEY = 'netflow-traffic-columns';
 export const LOCAL_STORAGE_EXPORT_COLS_KEY = 'netflow-traffic-export-columns';
 export const LOCAL_STORAGE_REFRESH_KEY = 'netflow-traffic-refresh';

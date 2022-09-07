@@ -15,7 +15,7 @@ const OFF_KEY = 'OFF_KEY';
 
 export const RefreshDropdown: React.FC<RefreshDropdownProps> = ({ disabled, id, interval, setInterval }) => {
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
-  const { t } = useTranslation('plugin__network-observability-plugin');
+  const { t } = useTranslation('plugin__netobserv-plugin');
 
   const onChange = React.useCallback(
     (v: string) => setInterval(v === OFF_KEY ? undefined : parseDuration(v)),

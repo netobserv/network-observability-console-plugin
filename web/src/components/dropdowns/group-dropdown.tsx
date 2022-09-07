@@ -10,7 +10,7 @@ export const GroupDropdown: React.FC<{
   setGroupType: (v: TopologyGroupTypes) => void;
   id?: string;
 }> = ({ disabled, scope, selected, setGroupType, id }) => {
-  const { t } = useTranslation('plugin__network-observability-plugin');
+  const { t } = useTranslation('plugin__netobserv-plugin');
   const [groupDropdownOpen, setGroupDropdownOpen] = React.useState(false);
 
   const getGroupDisplay = (groupType: TopologyGroupTypes) => {

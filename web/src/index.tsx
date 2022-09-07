@@ -30,7 +30,7 @@ i18n
     load: 'languageOnly',
     debug: process.env.NODE_ENV === 'development',
     contextSeparator: '~',
-    ns: ['plugin__network-observability-plugin'],
+    ns: ['plugin__netobserv-plugin'],
     defaultNS: 'public',
     nsSeparator: '~',
     keySeparator: false,

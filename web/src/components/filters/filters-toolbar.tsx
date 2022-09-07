@@ -55,7 +55,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
   ...props
 }) => {
   const { push } = useHistory();
-  const { t } = useTranslation('plugin__network-observability-plugin');
+  const { t } = useTranslation('plugin__netobserv-plugin');
   const [indicator, setIndicator] = React.useState<Indicator>(ValidatedOptions.default);
   const [message, setMessage] = React.useState<string | undefined>();
   const [selectedFilter, setSelectedFilter] = React.useState<FilterDefinition>(findFilter(t, 'namespace')!);

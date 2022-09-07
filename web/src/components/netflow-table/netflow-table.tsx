@@ -38,7 +38,7 @@ const NetflowTable: React.FC<{
   loading?: boolean;
   error?: string;
 }> = ({ flows, selectedRecord, columns, error, loading, size, onSelect, clearFilters }) => {
-  const { t } = useTranslation('plugin__network-observability-plugin');
+  const { t } = useTranslation('plugin__netobserv-plugin');
 
   //default to 300 to allow content to be rendered in tests
   const [containerHeight, setContainerHeight] = React.useState(300);

@@ -44,7 +44,7 @@ export const SummaryPanelContent: React.FC<{
   range: number | TimeRange;
   lastRefresh: Date | undefined;
 }> = ({ flows, stats, range, lastRefresh }) => {
-  const { t } = useTranslation('plugin__network-observability-plugin');
+  const { t } = useTranslation('plugin__netobserv-plugin');
   const [expanded, setExpanded] = React.useState<string>('');
 
   const accordionItem = (id: string, label: string, content: JSX.Element) => {
@@ -248,7 +248,7 @@ export const SummaryPanel: React.FC<{
   lastRefresh: Date | undefined;
   id?: string;
 }> = ({ flows, stats, range, lastRefresh, id, onClose }) => {
-  const { t } = useTranslation('plugin__network-observability-plugin');
+  const { t } = useTranslation('plugin__netobserv-plugin');
 
   return (
     <DrawerPanelContent

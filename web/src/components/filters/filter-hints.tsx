@@ -8,7 +8,7 @@ interface FilterHintsProps {
 }
 
 export const FilterHints: React.FC<FilterHintsProps> = ({ def }) => {
-  const { t } = useTranslation('plugin__network-observability-plugin');
+  const { t } = useTranslation('plugin__netobserv-plugin');
   if (!def.hint) {
     return null;
   }

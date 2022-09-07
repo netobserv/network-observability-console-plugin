@@ -34,7 +34,7 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
   match,
   setMatch
 }) => {
-  const { t } = useTranslation('plugin__network-observability-plugin');
+  const { t } = useTranslation('plugin__netobserv-plugin');
 
   const reporterOptions: ReporterOption[] = [
     {
@@ -206,7 +206,7 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
 };
 
 export const QueryOptionsDropdown: React.FC<QueryOptionsDropdownProps> = props => {
-  const { t } = useTranslation('plugin__network-observability-plugin');
+  const { t } = useTranslation('plugin__netobserv-plugin');
   const [isOpen, setOpen] = React.useState<boolean>(false);
   return (
     <div data-test="query-options-dropdown-container">

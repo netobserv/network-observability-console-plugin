@@ -2,7 +2,7 @@ module.exports = {
   createOldCatalogs: false,
   keySeparator: false,
   locales: ['en'],
-  defaultNamespace: 'plugin__network-observability-plugin',
+  defaultNamespace: 'plugin__netobserv-plugin',
   namespaceSeparator: '~',
   reactNamespace: false,
   useKeysAsDefaultValue: true

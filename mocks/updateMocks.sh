@@ -1,6 +1,6 @@
 # This shell script allow you to update fake loki results from a running instance.
 # Simply run your loki on http://localhost:3100
-# or port forward it using 'oc port-forward service/loki 3100:3100 -n network-observability'
+# or port forward it using 'oc port-forward service/loki 3100:3100 -n netobserv'
 
 # flows.json contains query result for table display
 curl -o ./loki/flows.json 'http://localhost:3100/loki/api/v1/query_range?query=\{app=%22netobserv-flowcollector%22,FlowDirection=%221%22\}&limit=100' \

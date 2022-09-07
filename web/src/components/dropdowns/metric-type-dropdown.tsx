@@ -9,7 +9,7 @@ export const MetricTypeDropdown: React.FC<{
   setMetricType: (v: MetricType) => void;
   id?: string;
 }> = ({ selected, setMetricType, id }) => {
-  const { t } = useTranslation('plugin__network-observability-plugin');
+  const { t } = useTranslation('plugin__netobserv-plugin');
   const [metricDropdownOpen, setMetricDropdownOpen] = React.useState(false);
 
   const getMetricDisplay = (metricType?: string) => {

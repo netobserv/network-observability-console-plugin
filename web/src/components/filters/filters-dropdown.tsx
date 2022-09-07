@@ -18,7 +18,7 @@ interface FiltersDropdownProps {
 }
 
 export const FiltersDropdown: React.FC<FiltersDropdownProps> = ({ selectedFilter, setSelectedFilter }) => {
-  const { t } = useTranslation('plugin__network-observability-plugin');
+  const { t } = useTranslation('plugin__netobserv-plugin');
   const groups = buildGroups(t);
 
   const [isSearchFiltersOpen, setSearchFiltersOpen] = React.useState<boolean>(false);
