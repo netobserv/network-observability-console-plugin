@@ -26,7 +26,7 @@ type HPAProps = K8sResourceCommon & {
 };
 
 export const NetflowTab: React.FC<PageComponentProps> = ({ obj }) => {
-  const { t } = useTranslation('plugin__network-observability-plugin');
+  const { t } = useTranslation('plugin__netobserv-plugin');
 
   let forcedFilters: Filter[];
   switch (obj?.kind) {

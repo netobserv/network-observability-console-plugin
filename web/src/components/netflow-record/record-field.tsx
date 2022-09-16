@@ -22,7 +22,7 @@ export const RecordField: React.FC<{
   size?: Size;
   filter?: RecordFieldFilter;
 }> = ({ flow, column, size, filter }) => {
-  const { t } = useTranslation('plugin__network-observability-plugin');
+  const { t } = useTranslation('plugin__netobserv-plugin');
 
   const onMouseOver = (event: React.MouseEvent<HTMLDivElement, MouseEvent>, className: string) => {
     if (event.currentTarget) {

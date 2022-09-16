@@ -16,7 +16,7 @@ export const QuerySummaryContent: React.FC<{
   direction: 'row' | 'column';
   className?: string;
 }> = ({ flows, limitReached, range, lastRefresh, direction, className }) => {
-  const { t } = useTranslation('plugin__network-observability-plugin');
+  const { t } = useTranslation('plugin__netobserv-plugin');
 
   let rangeInSeconds: number;
   if (typeof range === 'number') {

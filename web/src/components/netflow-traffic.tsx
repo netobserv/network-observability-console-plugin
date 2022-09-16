@@ -119,7 +119,7 @@ export const NetflowTraffic: React.FC<{
   isTab?: boolean;
 }> = ({ forcedFilters, isTab }) => {
   const { push } = useHistory();
-  const { t } = useTranslation('plugin__network-observability-plugin');
+  const { t } = useTranslation('plugin__netobserv-plugin');
   const [extensions] = useResolvedExtensions<ModelFeatureFlag>(isModelFeatureFlag);
   const k8sModels = useK8sModelsWithColors();
   //set context from extensions. Standalone will return a "dummy" flag

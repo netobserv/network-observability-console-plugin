@@ -37,7 +37,7 @@ type Props = {
 };
 
 export const LokiError: React.FC<Props> = ({ title, error }) => {
-  const { t } = useTranslation('plugin__network-observability-plugin');
+  const { t } = useTranslation('plugin__netobserv-plugin');
   const [loading, setLoading] = React.useState(true);
   const [ready, setReady] = React.useState<string | undefined>();
   const [infoName, setInfoName] = React.useState<string | undefined>();

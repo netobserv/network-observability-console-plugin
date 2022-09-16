@@ -344,7 +344,7 @@ const renderDecorators = (
 };
 
 const StyleNode: React.FC<StyleNodeProps> = ({ element, showLabel, dragging, regrouping, ...rest }) => {
-  const { t } = useTranslation('plugin__network-observability-plugin');
+  const { t } = useTranslation('plugin__netobserv-plugin');
   const data = element.getData();
   //TODO: check if we can have intelligent pin on view change
   const [isPinned, setPinned] = React.useState<boolean>(data.isPinned);

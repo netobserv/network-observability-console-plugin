@@ -48,7 +48,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   columns,
   filters
 }) => {
-  const { t } = useTranslation('plugin__network-observability-plugin');
+  const { t } = useTranslation('plugin__netobserv-plugin');
   const [selectedColumns, setSelectedColumns] = useLocalStorage<Column[]>(
     LOCAL_STORAGE_EXPORT_COLS_KEY,
     //select all columns by default

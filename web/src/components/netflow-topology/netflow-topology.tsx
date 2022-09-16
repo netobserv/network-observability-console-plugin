@@ -81,7 +81,7 @@ export const TopologyContent: React.FC<{
   selected,
   onSelect
 }) => {
-  const { t } = useTranslation('plugin__network-observability-plugin');
+  const { t } = useTranslation('plugin__netobserv-plugin');
   const controller = useVisualizationController();
 
   const prevMetrics = usePrevious(metrics);
@@ -557,7 +557,7 @@ export const NetflowTopology: React.FC<{
   selected,
   onSelect
 }) => {
-  const { t } = useTranslation('plugin__network-observability-plugin');
+  const { t } = useTranslation('plugin__netobserv-plugin');
   const [controller, setController] = React.useState<Visualization>();
 
   //create controller on startup and register factories

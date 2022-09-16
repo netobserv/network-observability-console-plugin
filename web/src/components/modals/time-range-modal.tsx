@@ -31,7 +31,7 @@ let displayedFromTime: string | undefined;
 let displayedToTime: string | undefined;
 
 export const TimeRangeModal: React.FC<TimeRangeModalProps> = ({ id, isModalOpen, setModalOpen, range, setRange }) => {
-  const { t } = useTranslation('plugin__network-observability-plugin');
+  const { t } = useTranslation('plugin__netobserv-plugin');
   const [error, setError] = React.useState<string | undefined>();
   const [fromDate, setFromDate] = React.useState<string | undefined>();
   const [fromTime, setFromTime] = React.useState<string | undefined>();

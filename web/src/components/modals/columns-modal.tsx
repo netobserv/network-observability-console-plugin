@@ -33,7 +33,7 @@ export const ColumnsModal: React.FC<{
   const [updatedColumns, setUpdatedColumns] = React.useState<Column[]>([]);
   const [isSaveDisabled, setSaveDisabled] = React.useState<boolean>(true);
   const [isAllSelected, setAllSelected] = React.useState<boolean>(false);
-  const { t } = useTranslation('plugin__network-observability-plugin');
+  const { t } = useTranslation('plugin__netobserv-plugin');
 
   React.useEffect(() => {
     setUpdatedColumns(_.cloneDeep(columns));

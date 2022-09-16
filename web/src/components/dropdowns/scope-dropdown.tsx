@@ -8,7 +8,7 @@ export const ScopeDropdown: React.FC<{
   setScopeType: (v: TopologyScopes) => void;
   id?: string;
 }> = ({ selected, setScopeType, id }) => {
-  const { t } = useTranslation('plugin__network-observability-plugin');
+  const { t } = useTranslation('plugin__netobserv-plugin');
   const [scopeDropdownOpen, setScopeDropdownOpen] = React.useState(false);
 
   const getScopeDisplay = (scopeType: TopologyScopes) => {

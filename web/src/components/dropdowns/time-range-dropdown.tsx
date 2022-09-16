@@ -22,7 +22,7 @@ export const CUSTOM_TIME_RANGE_KEY = 'CUSTOM_TIME_RANGE_KEY';
 
 export const TimeRangeDropdown: React.FC<TimeRangeDropdownProps> = ({ id, range, setRange, openCustomModal }) => {
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
-  const { t } = useTranslation('plugin__network-observability-plugin');
+  const { t } = useTranslation('plugin__netobserv-plugin');
 
   const onChange = React.useCallback(
     (v: string) => {

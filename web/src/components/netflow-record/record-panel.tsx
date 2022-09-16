@@ -49,7 +49,7 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
   setReporter,
   onClose
 }) => {
-  const { t } = useTranslation('plugin__network-observability-plugin');
+  const { t } = useTranslation('plugin__netobserv-plugin');
 
   const getFilter = (col: Column) => {
     if (record) {

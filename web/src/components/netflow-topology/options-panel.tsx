@@ -32,7 +32,7 @@ export type RecordDrawerProps = {
 };
 
 export const OptionsPanel: React.FC<RecordDrawerProps> = ({ id, options, setOptions, onClose }) => {
-  const { t } = useTranslation('plugin__network-observability-plugin');
+  const { t } = useTranslation('plugin__netobserv-plugin');
 
   const setLayout = (layout: LayoutName) => {
     setOptions({

@@ -8,7 +8,7 @@ export const LayoutDropdown: React.FC<{
   setLayout: (l: LayoutName) => void;
   id?: string;
 }> = ({ selected, setLayout, id }) => {
-  const { t } = useTranslation('plugin__network-observability-plugin');
+  const { t } = useTranslation('plugin__netobserv-plugin');
   const [layoutDropdownOpen, setLayoutDropdownOpen] = React.useState(false);
 
   const getLayoutDisplay = (layoutName: LayoutName) => {

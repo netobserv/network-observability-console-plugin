@@ -13,7 +13,7 @@ type Props = {
 
 export const DisplayDropdown: React.FC<Props> = ({ id, setSize }) => {
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
-  const { t } = useTranslation('plugin__network-observability-plugin');
+  const { t } = useTranslation('plugin__netobserv-plugin');
 
   const sizeOptions = {
     s: t('Compact'),

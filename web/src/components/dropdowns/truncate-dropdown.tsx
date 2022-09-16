@@ -8,7 +8,7 @@ export const TruncateDropdown: React.FC<{
   setTruncateLength: (v: TopologyTruncateLength) => void;
   id?: string;
 }> = ({ selected, setTruncateLength, id }) => {
-  const { t } = useTranslation('plugin__network-observability-plugin');
+  const { t } = useTranslation('plugin__netobserv-plugin');
   const [truncateDropdownOpen, setTruncateDropdownOpen] = React.useState(false);
 
   const getTruncateDisplay = (v: TopologyTruncateLength) => {
