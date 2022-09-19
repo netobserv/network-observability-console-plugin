@@ -1,6 +1,14 @@
 import { TFunction } from 'i18next';
 
-export type OverviewPanelType = 'overview' | 'bar' | 'donut' | 'sankey' | 'total_timeseries' | 'top_timeseries';
+export type OverviewPanelType =
+  | 'overview'
+  | 'bar'
+  | 'donut'
+  | 'sankey'
+  | 'total_timeseries'
+  | 'top_timeseries'
+  | 'packets_dropped'
+  | 'inbound_flows_region';
 
 export type OverviewPanel = {
   id: OverviewPanelType;
@@ -9,7 +17,16 @@ export type OverviewPanel = {
 };
 
 export const getDefaultOverviewPanels = (t: TFunction) => {
-  return ['overview', 'total_timeseries', 'bar', 'donut', 'sankey', 'top_timeseries'].map(id => {
+  return [
+    'overview',
+    'total_timeseries',
+    'bar',
+    'donut',
+    'sankey',
+    'top_timeseries',
+    'packets_dropped',
+    'inbound_flows_region'
+  ].map(id => {
     return { id, title: getOverviewPanelTitle(t, id as OverviewPanelType), isSelected: true } as OverviewPanel;
   });
 };
@@ -28,6 +45,10 @@ export const getOverviewPanelTitle = (t: TFunction, type: OverviewPanelType) => 
       return t('Total flows time series');
     case 'top_timeseries':
       return t('Network traffic over time');
+    case 'packets_dropped':
+      return t('Packets dropped');
+    case 'inbound_flows_region':
+      return t('Inbound flows by region');
     default:
       return t('Error: Unknown panel type');
   }

@@ -483,7 +483,7 @@ export const ElementPanel: React.FC<{
   filters: Filter[];
   setFilters: (filters: Filter[]) => void;
   id?: string;
-}> = ({ id, element, metrics, metricFunction, metricType, options, filters, setFilters, onClose }) => {
+}> = ({ id, element, metrics, metricFunction, metricType, metricScope, filters, setFilters, onClose }) => {
   const { t } = useTranslation('plugin__plugin__netobserv-plugin');
   const data = element.getData();
 
