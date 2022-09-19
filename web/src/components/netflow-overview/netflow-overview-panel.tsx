@@ -38,6 +38,10 @@ export const NetflowOverviewPanel: React.FC<{
           return 'Total time series content';
         case 'top_timeseries':
           return 'Large top time series content';
+        case 'packets_dropped':
+          return 'Packets dropped content';
+        case 'inbound_flows_region':
+          return 'Inbound flows by region content';
         default:
           return t('Error: Unknown panel type');
       }
