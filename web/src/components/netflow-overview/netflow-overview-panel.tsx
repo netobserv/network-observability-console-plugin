@@ -14,7 +14,7 @@ export const NetflowOverviewPanel: React.FC<{
   metrics: TopologyMetrics[];
   loading?: boolean;
 }> = ({ panel, metricFunction, metricType, metricScope, metrics, loading }) => {
-  const { t } = useTranslation('plugin__plugin__netobserv-plugin');
+  const { t } = useTranslation('plugin__netobserv-plugin');
 
   const getContent = React.useCallback(() => {
     if (loading) {

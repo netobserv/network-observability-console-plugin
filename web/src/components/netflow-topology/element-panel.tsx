@@ -484,7 +484,7 @@ export const ElementPanel: React.FC<{
   setFilters: (filters: Filter[]) => void;
   id?: string;
 }> = ({ id, element, metrics, metricFunction, metricType, metricScope, filters, setFilters, onClose }) => {
-  const { t } = useTranslation('plugin__plugin__netobserv-plugin');
+  const { t } = useTranslation('plugin__netobserv-plugin');
   const data = element.getData();
 
   const titleContent = React.useCallback(() => {
