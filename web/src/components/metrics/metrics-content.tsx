@@ -243,10 +243,7 @@ export const MetricsContent: React.FC<{
                   <ChartBar
                     name={`bar-${metrics.indexOf(m)}`}
                     key={`bar-${metrics.indexOf(m)}`}
-                    sortKey={'time'}
-                    sortOrder={'ascending'}
                     data={m.values.map(v => ({
-                      time: getDateFromUnixString(v[0] as string).getTime(),
                       name: getName(m.metric),
                       x: twentyFourHourTime(getDateFromUnixString(v[0] as string), true),
                       y: Number(v[1])
@@ -261,10 +258,7 @@ export const MetricsContent: React.FC<{
                   <ChartArea
                     name={`area-${metrics.indexOf(m)}`}
                     key={`area-${metrics.indexOf(m)}`}
-                    sortKey={'time'}
-                    sortOrder={'ascending'}
                     data={m.values.map(v => ({
-                      time: getDateFromUnixString(v[0] as string).getTime(),
                       name: getName(m.metric),
                       x: twentyFourHourTime(getDateFromUnixString(v[0] as string), true),
                       y: Number(v[1])
@@ -280,10 +274,7 @@ export const MetricsContent: React.FC<{
                   <ChartScatter
                     name={`scatter-${metrics.indexOf(m)}`}
                     key={`scatter-${metrics.indexOf(m)}`}
-                    sortKey={'time'}
-                    sortOrder={'ascending'}
                     data={m.values.map(v => ({
-                      time: getDateFromUnixString(v[0] as string).getTime(),
                       name: getName(m.metric),
                       x: twentyFourHourTime(getDateFromUnixString(v[0] as string), true),
                       y: Number(v[1])
