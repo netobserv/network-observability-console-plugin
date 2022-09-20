@@ -9,30 +9,37 @@ import (
 )
 
 const (
-	topologyDefaultLimit = "100"
-	topologyDefaultRange = "300"
+	metricsDefaultLimit = "100"
+	metricsDefaultStep  = "60"
+	metricsDefaultRange = "300"
 )
 
-type Topology struct {
+type Metrics struct {
 	limit          string
+	step           string
 	timeRange      string
 	metricFunction string
 	dataField      string
 	fields         string
 }
 
-type TopologyQueryBuilder struct {
+type MetricsQueryBuilder struct {
 	*FlowQueryBuilder
-	topology *Topology
+	metrics *Metrics
 }
 
-func NewTopologyQuery(cfg *Config, start, end, limit, metricFunction, metricType, reporter, layer, scope, groups string) (*TopologyQueryBuilder, error) {
+func NewMetricsQuery(cfg *Config, start, end, limit, step, metricFunction, metricType, reporter, layer, scope, groups string) (*MetricsQueryBuilder, error) {
 	l := limit
 	if len(l) == 0 {
-		l = topologyDefaultLimit
+		l = metricsDefaultLimit
 	}
 
-	timeRange := topologyDefaultRange
+	s := step
+	if len(s) == 0 {
+		s = metricsDefaultStep
+	}
+
+	timeRange := metricsDefaultRange
 	if len(start) > 0 && len(end) > 0 {
 		var startTime, endTime int64
 		var err error
@@ -70,11 +77,12 @@ func NewTopologyQuery(cfg *Config, start, end, limit, metricFunction, metricType
 		t = "Bytes"
 	}
 
-	return &TopologyQueryBuilder{
+	return &MetricsQueryBuilder{
 		FlowQueryBuilder: NewFlowQueryBuilder(cfg, start, end, limit, reporter, layer),
-		topology: &Topology{
+		metrics: &Metrics{
 			timeRange:      timeRange,
 			limit:          l,
+			step:           s,
 			metricFunction: f,
 			dataField:      t,
 			fields:         getFields(scope, groups),
@@ -85,6 +93,8 @@ func NewTopologyQuery(cfg *Config, start, end, limit, metricFunction, metricType
 func getFields(scope, groups string) string {
 	var fields []string
 	switch scope {
+	case "app":
+		fields = []string{"app"}
 	case "host":
 		fields = []string{"SrcK8S_HostName", "DstK8S_HostName"}
 	case "namespace":
@@ -118,41 +128,41 @@ func getFields(scope, groups string) string {
 	return strings.Join(fields[:], ",")
 }
 
-func (q *TopologyQueryBuilder) Build() string {
-	// Build topology query like:
+func (q *MetricsQueryBuilder) Build() string {
+	// Build metrics query like:
 	// /<url path>?query=
 	//		topk(
 	// 			<k>,
 	//			sum by(<aggregations>) (
 	//				sum_over_time(
 	//					{<label filters>}|<line filters>|json|<json filters>
-	//						|unwrap Bytes|__error__=""[300s]
+	//						|unwrap Bytes[300s]
 	//				)
 	//			)
 	//		)
 	//		&<query params>&step=300s
 	sb := q.createStringBuilderURL()
 	sb.WriteString("topk(")
-	sb.WriteString(q.topology.limit)
+	sb.WriteString(q.metrics.limit)
 	sb.WriteString(",sum by(")
-	sb.WriteString(q.topology.fields)
+	sb.WriteString(q.metrics.fields)
 	sb.WriteString(") (")
-	sb.WriteString(q.topology.metricFunction)
+	sb.WriteString(q.metrics.metricFunction)
 	sb.WriteString("(")
 	q.appendLabels(sb)
 	q.appendLineFilters(sb)
 	q.appendJSON(sb, true)
-	if q.topology.metricFunction != "rate" && len(q.topology.dataField) > 0 {
+	if q.metrics.metricFunction != "rate" && len(q.metrics.dataField) > 0 {
 		sb.WriteString("|unwrap ")
-		sb.WriteString(q.topology.dataField)
-		sb.WriteString(`|__error__=""`)
+		sb.WriteString(q.metrics.dataField)
 	}
 	sb.WriteRune('[')
-	sb.WriteString(q.topology.timeRange)
+	sb.WriteString(q.metrics.timeRange)
 	sb.WriteString("s])))")
 	q.appendQueryParams(sb)
-	//TODO: check if step should be configurable. 60s is forced to help calculations on front end side
-	sb.WriteString("&step=60s")
+	sb.WriteString("&step=")
+	sb.WriteString(q.metrics.step)
+	sb.WriteString("s")
 
 	return sb.String()
 }

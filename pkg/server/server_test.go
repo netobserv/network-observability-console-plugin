@@ -248,13 +248,13 @@ func TestLokiConfigurationForTopology(t *testing.T) {
 	backendSvc := httptest.NewServer(backendRoutes)
 	defer backendSvc.Close()
 
-	// WHEN the Loki flows endpoint is queried in the backend
-	resp, err := backendSvc.Client().Get(backendSvc.URL + "/api/loki/topology")
+	// WHEN the Loki metrics endpoint is queried in the backend
+	resp, err := backendSvc.Client().Get(backendSvc.URL + "/api/loki/metrics")
 	require.NoError(t, err)
 
 	// THEN the query has been properly forwarded to Loki
-	req := lokiMock.Calls[0].Arguments[1].(*http.Request)
-	assert.Equal(t, `topk(100,sum by(SrcK8S_Name,SrcK8S_Type,SrcK8S_OwnerName,SrcK8S_OwnerType,SrcK8S_Namespace,SrcAddr,SrcK8S_HostName,DstK8S_Name,DstK8S_Type,DstK8S_OwnerName,DstK8S_OwnerType,DstK8S_Namespace,DstAddr,DstK8S_HostName) (sum_over_time({app="netobserv-flowcollector"}|json|unwrap Bytes|__error__=""[300s])))`, req.URL.Query().Get("query"))
+	req := lokiMock.Calls[1].Arguments[1].(*http.Request)
+	assert.Equal(t, `topk(100,sum by(SrcK8S_Name,SrcK8S_Type,SrcK8S_OwnerName,SrcK8S_OwnerType,SrcK8S_Namespace,SrcAddr,SrcK8S_HostName,DstK8S_Name,DstK8S_Type,DstK8S_OwnerName,DstK8S_OwnerType,DstK8S_Namespace,DstAddr,DstK8S_HostName) (sum_over_time({app="netobserv-flowcollector"}|json|unwrap Bytes[300s])))`, req.URL.Query().Get("query"))
 	// without any multi-tenancy header
 	assert.Empty(t, req.Header.Get("X-Scope-OrgID"))
 
