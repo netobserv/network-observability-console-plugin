@@ -32,7 +32,7 @@ export const NetflowOverview: React.FC<{
   error?: string;
   clearFilters: () => void;
 }> = ({ panels, metricFunction, metricType, metricScope, metrics, loading, error, clearFilters }) => {
-  const { t } = useTranslation('plugin__plugin__netobserv-plugin');
+  const { t } = useTranslation('plugin__netobserv-plugin');
 
   if (error) {
     return <LokiError title={t('Unable to get overview')} error={error} />;

@@ -146,7 +146,6 @@
   "Find in view": "Find in view",
   "Unable to get topology": "Unable to get topology",
   "Options": "Options",
-  "Scope": "Scope",
   "Groups": "Groups",
   "Groups are expanded": "Groups are expanded",
   "Groups are collapsed": "Groups are collapsed",
@@ -163,7 +162,6 @@
   "Overview": "Overview",
   "Flow Table": "Flow Table",
   "Topology": "Topology",
-  "Traffic flows": "Traffic flows",
   "Collapse": "Collapse",
   "Expand": "Expand",
   "Actions": "Actions",
@@ -277,5 +275,7 @@
   "Top flows donut chart": "Top flows donut chart",
   "Top flows sankey chart": "Top flows sankey chart",
   "Total flows time series": "Total flows time series",
-  "Network traffic over time": "Network traffic over time"
+  "Network traffic over time": "Network traffic over time",
+  "Packets dropped": "Packets dropped",
+  "Inbound flows by region": "Inbound flows by region"
 }
