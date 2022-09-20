@@ -1,14 +1,5 @@
 import { ResourceLink } from '@openshift-console/dynamic-plugin-sdk';
 import {
-  Chart,
-  ChartArea,
-  ChartAxis,
-  ChartGroup,
-  ChartScatter,
-  ChartThemeColor,
-  ChartVoronoiContainer
-} from '@patternfly/react-charts';
-import {
   Button,
   DrawerActions,
   DrawerCloseButton,
@@ -25,16 +16,14 @@ import { FilterIcon, TimesIcon } from '@patternfly/react-icons';
 import { BaseEdge, BaseNode, GraphElement } from '@patternfly/react-topology';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { TopologyMetrics } from '../../api/loki';
-import { Filter } from '../../model/filters';
-import { MetricFunction, MetricScope, MetricType } from '../../model/flow-query';
-import { MetricScopeOptions } from '../../model/metrics';
-import { ElementData, isElementFiltered, toggleElementFilter } from '../../model/topology';
-import { humanFileSize } from '../../utils/bytes';
-import { roundTwoDigits } from '../../utils/count';
-import { getDateFromUnixString, twentyFourHourTime } from '../../utils/datetime';
 import { defaultSize, maxSize, minSize } from '../../utils/panel';
+import { MetricFunction, MetricScope, MetricType } from '../../model/flow-query';
+import { getMetricValue, TopologyMetrics } from '../../api/loki';
+import { Filter } from '../../model/filters';
+import { ElementData, isElementFiltered, toggleElementFilter } from '../../model/topology';
 import './element-panel.css';
+import MetricsContent from '../metrics/metrics-content';
+import { MetricScopeOptions } from '../../model/metrics';
 
 export const ElementPanelContent: React.FC<{
   element: GraphElement;
@@ -116,33 +105,6 @@ export const ElementPanelContent: React.FC<{
     [isFiltered, onFilter, t]
   );
 
-  const metricTitle = React.useCallback(() => {
-    if (metricFunction === 'rate') {
-      return t('Flows rate');
-    } else if (metricType) {
-      switch (metricFunction) {
-        case 'avg':
-          return t('Average {{type}} (1m frame)', { type: metricType });
-        case 'max':
-          return t('Max {{type}} (1m frame)', { type: metricType });
-        case 'sum':
-          return t('Total {{type}}', { type: metricType });
-        default:
-          return '';
-      }
-    } else {
-      console.error('metricType cannot be undefined');
-      return '';
-    }
-  }, [metricFunction, metricType, t]);
-
-  const metricValue = React.useCallback(
-    (v: number) => {
-      return metricFunction !== 'rate' && metricType === 'bytes' ? humanFileSize(v, true, 0) : roundTwoDigits(v);
-    },
-    [metricFunction, metricType]
-  );
-
   const metricCounts = React.useCallback(
     (toCount: number, fromCount: number, forEdge: boolean) => {
       return (
@@ -170,150 +132,19 @@ export const ElementPanelContent: React.FC<{
           </Flex>
           <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsNone' }}>
             <FlexItem>
-              <Text id="fromCount">{metricValue(fromCount)}</Text>
+              <Text id="fromCount">{getMetricValue(fromCount, metricFunction, metricType)}</Text>
             </FlexItem>
             <FlexItem>
-              <Text id="toCount">{metricValue(toCount)}</Text>
+              <Text id="toCount">{getMetricValue(toCount, metricFunction, metricType)}</Text>
             </FlexItem>
             <FlexItem>
-              <Text id="total">{metricValue(toCount + fromCount)}</Text>
+              <Text id="total">{getMetricValue(toCount + fromCount, metricFunction, metricType)}</Text>
             </FlexItem>
           </Flex>
         </Flex>
       );
     },
-    [metricValue, t]
-  );
-
-  const chart = React.useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (id: string, elementMetrics: TopologyMetrics[], nodeData?: any) => {
-      function getName(m: TopologyMetrics) {
-        switch (metricScope) {
-          case MetricScopeOptions.HOST:
-            const srcNode = m.metric.SrcK8S_HostName ? m.metric.SrcK8S_HostName : t('External');
-            const dstNode = m.metric.DstK8S_HostName ? m.metric.DstK8S_HostName : t('External');
-            return nodeData?.host
-              ? m.metric.SrcK8S_HostName === nodeData.host
-                ? `${t('To')} ${dstNode}`
-                : `${t('From')} ${srcNode}`
-              : `${srcNode} -> ${dstNode}`;
-          case MetricScopeOptions.NAMESPACE:
-            const srcNamespace = m.metric.SrcK8S_Namespace ? m.metric.SrcK8S_Namespace : t('Unknown');
-            const dstNamespace = m.metric.DstK8S_Namespace ? m.metric.DstK8S_Namespace : t('Unknown');
-            return nodeData?.namespace
-              ? m.metric.SrcK8S_Namespace === nodeData.name
-                ? `${t('To')} ${dstNamespace}`
-                : `${t('From')} ${srcNamespace}`
-              : `${srcNamespace} -> ${dstNamespace}`;
-          case MetricScopeOptions.OWNER:
-            let srcOwner = t('Unknown');
-            if (m.metric.SrcK8S_Namespace && m.metric.SrcK8S_OwnerName) {
-              srcOwner = `${m.metric.SrcK8S_Namespace}.${m.metric.SrcK8S_OwnerName}`;
-            } else if (m.metric.SrcK8S_OwnerName) {
-              srcOwner = m.metric.SrcK8S_OwnerName;
-            }
-
-            let dstOwner = t('Unknown');
-            if (m.metric.DstK8S_Namespace && m.metric.DstK8S_OwnerName) {
-              dstOwner = `${m.metric.DstK8S_Namespace}.${m.metric.DstK8S_OwnerName}`;
-            } else if (m.metric.DstK8S_OwnerName) {
-              dstOwner = m.metric.DstK8S_OwnerName;
-            }
-            return nodeData?.namespace
-              ? m.metric.SrcK8S_Namespace === nodeData.namespace
-                ? `${t('To')} ${dstOwner}`
-                : `${t('From')} ${srcOwner}`
-              : `${srcOwner} -> ${dstOwner}`;
-          case MetricScopeOptions.RESOURCE:
-          default:
-            let src = m.metric.SrcAddr;
-            if (m.metric.SrcK8S_Namespace && m.metric.SrcK8S_Name) {
-              src = `${m.metric.SrcK8S_Namespace}.${m.metric.SrcK8S_Name}`;
-            } else if (m.metric.SrcK8S_Name) {
-              src = m.metric.SrcK8S_Name;
-            }
-
-            let dst = m.metric.DstAddr;
-            if (m.metric.DstK8S_Namespace && m.metric.DstK8S_Name) {
-              dst = `${m.metric.DstK8S_Namespace}.${m.metric.DstK8S_Name}`;
-            } else if (m.metric.DstK8S_Name) {
-              dst = m.metric.DstK8S_Name;
-            }
-            return nodeData?.addr
-              ? m.metric.SrcAddr === nodeData.addr
-                ? `${t('To')} ${dst}`
-                : `${t('From')} ${src}`
-              : `${src} -> ${dst}`;
-        }
-      }
-
-      const legendData = elementMetrics.map(m => ({
-        name: getName(m)
-      }));
-
-      return (
-        <div id={`${id}-chart`}>
-          <Chart
-            themeColor={ChartThemeColor.multiUnordered}
-            ariaTitle={metricTitle()}
-            containerComponent={
-              <ChartVoronoiContainer
-                labels={({ datum }) => (datum.childName.includes('area-') ? `${datum.name}: ${datum.y}` : '')}
-                constrainToVisibleArea
-              />
-            }
-            legendData={legendData}
-            legendOrientation="vertical"
-            legendPosition="bottom-left"
-            legendAllowWrap={true}
-            //TODO: fix refresh on selection change to enable animation
-            //animate={true}
-            //TODO: check if time scale could be interesting (buggy with current strings)
-            scale={{ x: 'linear', y: 'sqrt' }}
-            height={300 + legendData.length * 25}
-            domainPadding={{ x: 0, y: 0 }}
-            padding={{
-              bottom: legendData.length * 25 + 50,
-              left: 75,
-              right: 50,
-              top: 50
-            }}
-          >
-            <ChartAxis fixLabelOverlap />
-            <ChartAxis dependentAxis showGrid fixLabelOverlap tickFormat={y => metricValue(y)} />
-            <ChartGroup>
-              {elementMetrics.map(m => (
-                <ChartArea
-                  name={`area-${metrics.indexOf(m)}`}
-                  key={`area-${metrics.indexOf(m)}`}
-                  data={m.values.map(v => ({
-                    name: getName(m),
-                    x: twentyFourHourTime(getDateFromUnixString(v[0] as string), true),
-                    y: Number(v[1])
-                  }))}
-                  interpolation="monotoneX"
-                />
-              ))}
-            </ChartGroup>
-            <ChartGroup>
-              {elementMetrics.map(m => (
-                <ChartScatter
-                  name={`scatter-${metrics.indexOf(m)}`}
-                  key={`scatter-${metrics.indexOf(m)}`}
-                  data={m.values.map(v => ({
-                    name: getName(m),
-                    x: twentyFourHourTime(getDateFromUnixString(v[0] as string), true),
-                    y: Number(v[1])
-                  }))}
-                />
-              ))}
-            </ChartGroup>
-          </Chart>
-        </div>
-      );
-    },
-    [metricTitle, metricValue, metrics, metricScope, t]
+    [metricFunction, metricType, t]
   );
 
   let srcCount = 0;
@@ -399,11 +230,18 @@ export const ElementPanelContent: React.FC<{
             {infos}
           </TextContent>
         )}
-        <TextContent id="metrics" className="element-text-container">
-          <Text component={TextVariants.h3}>{metricTitle()}</Text>
-          {metricCounts(srcCount, dstCount, false)}
-          {chart(`node-${data.id}`, nodeMetrics, data)}
-        </TextContent>
+        <MetricsContent
+          id={`node-${data.id}`}
+          metricFunction={metricFunction}
+          metricType={metricType}
+          metrics={nodeMetrics}
+          scope={metricScope as MetricScopeOptions}
+          data={data}
+          counters={metricCounts(srcCount, dstCount, false)}
+          showTitle
+          showArea
+          showScatter
+        />
       </>
     );
   } else if (element instanceof BaseEdge) {
@@ -461,11 +299,17 @@ export const ElementPanelContent: React.FC<{
             {tgtInfos}
           </TextContent>
         )}
-        <TextContent id="metrics" className="element-text-container">
-          <Text component={TextVariants.h3}>{metricTitle()}</Text>
-          {metricCounts(dstCount, srcCount, true)}
-          {chart(`edge-${srcData.id}-${tgtData.id}`, edgeMetrics)}
-        </TextContent>
+        <MetricsContent
+          id={`edge-${srcData.id}-${tgtData.id}`}
+          metricFunction={metricFunction}
+          metricType={metricType}
+          metrics={edgeMetrics}
+          scope={metricScope as MetricScopeOptions}
+          counters={metricCounts(dstCount, srcCount, true)}
+          showTitle
+          showArea
+          showScatter
+        />
       </>
     );
   } else {

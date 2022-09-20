@@ -1,5 +1,9 @@
+import { TFunction } from 'i18next';
+import { MetricScopeOptions } from '../model/metrics';
+import { MetricFunction, MetricType } from '../model/flow-query';
+import { humanFileSize } from '../utils/bytes';
+import { roundTwoDigits } from '../utils/count';
 import { TimeRange } from '../utils/datetime';
-import { MetricFunction } from '../model/flow-query';
 import { cyrb53 } from '../utils/hash';
 import { Fields, Labels, Record } from './ipfix';
 
@@ -58,6 +62,38 @@ export interface TopologyMetric {
   SrcK8S_HostName: string;
 }
 
+export const getMetricName = (metric: TopologyMetric, scope: MetricScopeOptions, src: boolean, t: TFunction) => {
+  const m = metric as never;
+  const prefix = src ? 'Src' : 'Dst';
+  switch (scope) {
+    case MetricScopeOptions.HOST:
+      return m[`${prefix}K8S_HostName`]
+        ? m[`${prefix}K8S_HostName`]
+        : m[`${prefix}K8S_Type`] === 'Node'
+        ? m[`${prefix}K8S_Name`]
+        : t('External');
+    case MetricScopeOptions.NAMESPACE:
+      return m[`${prefix}K8S_Namespace`]
+        ? m[`${prefix}K8S_Namespace`]
+        : m[`${prefix}K8S_Type`] === 'Namespace'
+        ? m[`${prefix}K8S_Name`]
+        : t('Unknown');
+    case MetricScopeOptions.OWNER:
+      return m[`${prefix}K8S_Namespace`] && m[`${prefix}K8S_OwnerName`]
+        ? `${m[`${prefix}K8S_Namespace`]}.${m[`${prefix}K8S_OwnerName`]}`
+        : m[`${prefix}K8S_OwnerName`]
+        ? m[`${prefix}K8S_OwnerName`]
+        : t('Unknown');
+    case MetricScopeOptions.RESOURCE:
+    default:
+      return m[`${prefix}K8S_Namespace`] && m[`${prefix}K8S_Name`]
+        ? `${m[`${prefix}K8S_Namespace`]}.${m[`${prefix}K8S_Name`]}`
+        : m[`${prefix}K8S_Name`]
+        ? m[`${prefix}K8S_Name`]
+        : m[`${prefix}Addr`];
+  }
+};
+
 export interface TopologyMetrics {
   metric: TopologyMetric;
   values: (string | number)[][];
@@ -91,4 +127,8 @@ export const calculateMatrixTotals = (tm: TopologyMetrics, mf: MetricFunction, r
       break;
   }
   return tm;
+};
+
+export const getMetricValue = (v: number, metricFunction?: MetricFunction, metricType?: MetricType) => {
+  return metricFunction !== 'rate' && metricType === 'bytes' ? humanFileSize(v, true, 0) : roundTwoDigits(v);
 };

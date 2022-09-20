@@ -1,7 +1,7 @@
 import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 
-import { PanelMainBody, Spinner } from '@patternfly/react-core';
+import { PanelMainBody } from '@patternfly/react-core';
 import { TopologyMetrics } from '../../../api/loki';
 import { MetricFunction, MetricType } from '../../../model/flow-query';
 import { MetricScopeOptions } from '../../../model/metrics';
@@ -12,8 +12,8 @@ import NetflowOverviewPanel from '../netflow-overview-panel';
 
 describe('<NetflowOverviewPanel />', () => {
   const props = {
+    limit: 5,
     panel: SamplePanel,
-    loading: false,
     metricFunction: 'sum' as MetricFunction,
     metricType: 'bytes' as MetricType,
     metricScope: MetricScopeOptions.HOST,
@@ -22,14 +22,6 @@ describe('<NetflowOverviewPanel />', () => {
   it('should render component', async () => {
     const wrapper = shallow(<NetflowOverviewPanel {...props} />);
     expect(wrapper.find(NetflowOverview)).toBeTruthy();
-  });
-  it('should render loading', async () => {
-    const wrapper = shallow(<NetflowOverviewPanel {...props} />);
-    wrapper.setProps({
-      loading: true
-    });
-    wrapper.update();
-    expect(wrapper.find(Spinner)).toHaveLength(1);
   });
   it('should render content', async () => {
     const wrapper = mount(<NetflowOverviewPanel {...props} metrics={metrics} />);

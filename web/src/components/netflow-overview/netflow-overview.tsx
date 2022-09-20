@@ -14,7 +14,8 @@ import { SearchIcon } from '@patternfly/react-icons';
 import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { TopologyMetrics } from '../../api/loki';
+import { MetricScopeOptions } from 'src/model/metrics';
+import { getMetricName, TopologyMetrics } from '../../api/loki';
 import { MetricFunction, MetricType, MetricScope } from '../../model/flow-query';
 import { OverviewPanel, OverviewPanelType } from '../../utils/overview-panels';
 import LokiError from '../messages/loki-error';
@@ -23,6 +24,7 @@ import { NetflowOverviewPanel } from './netflow-overview-panel';
 import './netflow-overview.css';
 
 export const NetflowOverview: React.FC<{
+  limit: number;
   panels: OverviewPanel[];
   metricFunction?: MetricFunction;
   metricType?: MetricType;
@@ -31,7 +33,7 @@ export const NetflowOverview: React.FC<{
   loading?: boolean;
   error?: string;
   clearFilters: () => void;
-}> = ({ panels, metricFunction, metricType, metricScope, metrics, loading, error, clearFilters }) => {
+}> = ({ limit, panels, metricFunction, metricType, metricScope, metrics, loading, error, clearFilters }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   if (error) {
@@ -61,15 +63,32 @@ export const NetflowOverview: React.FC<{
     }
   }
 
-  const getMinWidth = (type: OverviewPanelType) => {
-    switch (type) {
-      case 'overview':
-      case 'top_timeseries':
-        return '99%';
-      default:
-        return '48%';
+  const isDoubleWidth = (type: OverviewPanelType) => {
+    if (panels.length > 1) {
+      switch (type) {
+        case 'overview':
+        case 'top_timeseries':
+          return true;
+        default:
+          return false;
+      }
     }
+    return true;
   };
+
+  const isSrcDstEqual = (m: TopologyMetrics) => {
+    const scope = metricScope as MetricScopeOptions;
+    const tFunc = (s: string) => s;
+    return getMetricName(m.metric, scope, true, tFunc) === getMetricName(m.metric, scope, false, tFunc);
+  };
+
+  //skip metrics with sources equals to destinations
+  //sort by top total item first
+  //limit to top X since multiple queries can run in parallel
+  const filteredMetrics = metrics
+    .filter(m => !isSrcDstEqual(m))
+    .sort((a, b) => b.total - a.total)
+    .slice(0, limit);
 
   return (
     <div id="overview-container">
@@ -77,14 +96,19 @@ export const NetflowOverview: React.FC<{
         {panels
           .filter(p => p.isSelected)
           .map((panel, i) => (
-            <FlexItem style={{ minWidth: getMinWidth(panel.id) }} className="overview-flex-item" key={i}>
+            <FlexItem
+              style={{ minWidth: isDoubleWidth(panel.id) ? '99%' : '48%' }}
+              className="overview-flex-item"
+              key={i}
+            >
               <NetflowOverviewPanel
+                limit={limit}
                 panel={panel}
                 metricFunction={metricFunction}
                 metricType={metricType}
                 metricScope={metricScope}
-                metrics={metrics}
-                loading={loading}
+                metrics={filteredMetrics}
+                doubleWidth={isDoubleWidth(panel.id)}
               />
             </FlexItem>
           ))}

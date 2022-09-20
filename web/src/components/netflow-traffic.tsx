@@ -186,7 +186,7 @@ export const NetflowTraffic: React.FC<{
   const isInit = React.useRef(true);
   const [panels, setSelectedPanels] = useLocalStorage<OverviewPanel[]>(
     LOCAL_STORAGE_OVERVIEW_IDS_KEY,
-    getDefaultOverviewPanels(t),
+    getDefaultOverviewPanels(),
     {
       id: 'id',
       criteria: 'isSelected'
@@ -218,8 +218,8 @@ export const NetflowTraffic: React.FC<{
 
   const selectView = (view: ViewId) => {
     clearSelections();
-    //reporter 'both' is disabled for topology view
-    if (view === 'topology' && reporter === 'both') {
+    //reporter 'both' is only available in table view
+    if (view !== 'table' && reporter === 'both') {
       setReporter('source');
     }
     //save / restore top / limit parameter according to selected view
@@ -277,6 +277,10 @@ export const NetflowTraffic: React.FC<{
       query.scope = metricScope;
       if (selectedViewId === 'topology') {
         query.groups = topologyOptions.groupTypes !== TopologyGroupTypes.NONE ? topologyOptions.groupTypes : undefined;
+      } else if (selectedViewId === 'overview') {
+        //TODO: filter loki results like "metric":{} and sources equal to destinations from server side
+        query.limit = limit + 5;
+        query.groups = undefined;
       }
     }
     return query;
@@ -682,6 +686,7 @@ export const NetflowTraffic: React.FC<{
       case 'overview':
         return (
           <NetflowOverview
+            limit={limit}
             panels={panels}
             metricFunction={metricFunction}
             metricType={metricType}
