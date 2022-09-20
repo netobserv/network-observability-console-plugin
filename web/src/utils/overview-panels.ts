@@ -2,9 +2,9 @@ import { TFunction } from 'i18next';
 
 export type OverviewPanelType =
   | 'overview'
-  | 'bar'
-  | 'donut'
-  | 'sankey'
+  | 'top_bar'
+  | 'top_donut'
+  | 'top_sankey'
   | 'total_timeseries'
   | 'top_timeseries'
   | 'packets_dropped'
@@ -12,35 +12,34 @@ export type OverviewPanelType =
 
 export type OverviewPanel = {
   id: OverviewPanelType;
-  title: string;
   isSelected: boolean;
 };
 
-export const getDefaultOverviewPanels = (t: TFunction) => {
+export const getDefaultOverviewPanels = () => {
   return [
     'overview',
     'total_timeseries',
-    'bar',
-    'donut',
-    'sankey',
+    'top_bar',
+    'top_donut',
+    'top_sankey',
     'top_timeseries',
     'packets_dropped',
     'inbound_flows_region'
   ].map(id => {
-    return { id, title: getOverviewPanelTitle(t, id as OverviewPanelType), isSelected: true } as OverviewPanel;
+    return { id, isSelected: true } as OverviewPanel;
   });
 };
 
-export const getOverviewPanelTitle = (t: TFunction, type: OverviewPanelType) => {
+export const getOverviewPanelTitle = (t: TFunction, type: OverviewPanelType, limit = 'X') => {
   switch (type) {
     case 'overview':
       return t('Network overview');
-    case 'bar':
-      return t('Top flows bar chart');
-    case 'donut':
-      return t('Top flows donut chart');
-    case 'sankey':
-      return t('Top flows sankey chart');
+    case 'top_bar':
+      return t('Top {{limit}} flows bar chart', { limit });
+    case 'top_donut':
+      return t('Top {{limit}} flows donut chart', { limit });
+    case 'top_sankey':
+      return t('Top {{limit}} flows sankey chart', { limit });
     case 'total_timeseries':
       return t('Total flows time series');
     case 'top_timeseries':

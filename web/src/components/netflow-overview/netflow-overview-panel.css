@@ -1,3 +1,7 @@
 .overview-panel-body {
-  min-height: 400px;
+  min-height: 640px;
+}
+
+.overview-panel-body-small {
+  height: 200px;
 }

@@ -105,7 +105,7 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
               <label className="pf-c-select__menu-item">
                 <Tooltip
                   trigger={disabled ? 'mouseenter focus' : ''}
-                  content={disabled ? t('Disabled for topology view') : undefined}
+                  content={disabled ? t('Only available in Flow Table view') : undefined}
                 >
                   <Radio
                     isChecked={opt.value === reporter}

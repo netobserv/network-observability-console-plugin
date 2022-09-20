@@ -144,7 +144,9 @@ export const LokiError: React.FC<Props> = ({ title, error }) => {
                   </Text>
                 </>
               )}
-              {(error.includes('deadline exceeded') || error.includes('maximum of series')) && (
+              {(error.includes('deadline exceeded') ||
+                error.includes('maximum of series') ||
+                error.includes('too many outstanding requests')) && (
                 <>
                   <Text component={TextVariants.blockquote}>
                     {t(
@@ -155,6 +157,19 @@ export const LokiError: React.FC<Props> = ({ title, error }) => {
                   <Text component={TextVariants.blockquote}>
                     {t('Reduce limit and time range to decrease the number of results')}
                   </Text>
+                  <Text component={TextVariants.blockquote}>
+                    {t('Increase time step to decrease the number of parallel queries')}
+                  </Text>
+                  {error.includes('too many outstanding requests') && (
+                    <Text component={TextVariants.blockquote}>
+                      {
+                        // eslint-disable-next-line max-len
+                        t(
+                          'Ensure Loki config contains "parallelise_shardable_queries: true" and "max_outstanding_requests_per_tenant: 2048"'
+                        )
+                      }
+                    </Text>
+                  )}
                 </>
               )}
               {(error.includes('time range exceeds') || error.includes('maximum resolution')) && (
