@@ -316,7 +316,11 @@ export const MetricsContent: React.FC<{
 
   return (
     <TextContent id="metrics" className="metrics-content-div">
-      {showTitle && <Text component={TextVariants.h3}>{metricTitle()}</Text>}
+      {showTitle && (
+        <Text id="metrics-title" component={TextVariants.h3}>
+          {metricTitle()}
+        </Text>
+      )}
       {counters}
       {chart()}
     </TextContent>
