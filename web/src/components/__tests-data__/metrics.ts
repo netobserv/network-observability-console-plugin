@@ -1,6 +1,6 @@
-import { TopologyMetrics } from '../../api/loki';
+import { Metrics } from '../../api/loki';
 
-export const metric1: TopologyMetrics = {
+export const metric1: Metrics = {
   metric: {
     DstAddr: '172.30.139.153',
     DstK8S_Name: 'loki',
@@ -27,7 +27,7 @@ export const metric1: TopologyMetrics = {
   total: 22594577
 };
 
-export const metric2: TopologyMetrics = {
+export const metric2: Metrics = {
   metric: {
     DstAddr: '172.30.139.153',
     DstK8S_Name: 'loki',
@@ -54,7 +54,7 @@ export const metric2: TopologyMetrics = {
   total: 6912000
 };
 
-export const metric3: TopologyMetrics = {
+export const metric3: Metrics = {
   metric: {
     DstAddr: '172.30.139.100',
     DstK8S_Name: 'pod 2',
@@ -81,4 +81,4 @@ export const metric3: TopologyMetrics = {
   total: 19210522
 };
 
-export const metrics: TopologyMetrics[] = [metric1, metric2, metric3];
+export const metrics: Metrics[] = [metric1, metric2, metric3];

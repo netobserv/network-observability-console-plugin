@@ -25,9 +25,10 @@ import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
+import { getMinimumStepFromRange, isStepDurationOutsideRange } from '../utils/duration';
 import { Record } from '../api/ipfix';
-import { Stats, TopologyMetrics } from '../api/loki';
-import { getFlows, getTopology } from '../api/routes';
+import { Metrics, Stats } from '../api/loki';
+import { getFlows, getMetrics } from '../api/routes';
 import {
   DisabledFilters,
   Filter,
@@ -76,12 +77,14 @@ import { usePoll } from '../utils/poll-hook';
 import {
   defaultMetricFunction,
   defaultMetricType,
+  defaultStep,
   getFiltersFromURL,
   getLayerFromURL,
   getLimitFromURL,
   getMatchFromURL,
   getRangeFromURL,
   getReporterFromURL,
+  getStepFromURL,
   setURLFilters,
   setURLLayer,
   setURLLimit,
@@ -98,6 +101,7 @@ import MetricTypeDropdown from './dropdowns/metric-type-dropdown';
 import { LIMIT_VALUES, TOP_VALUES } from './dropdowns/query-options-dropdown';
 import { RefreshDropdown } from './dropdowns/refresh-dropdown';
 import ScopeDropdown from './dropdowns/scope-dropdown';
+import StepDropdown from './dropdowns/step-dropdown';
 import TimeRangeDropdown from './dropdowns/time-range-dropdown';
 import { FiltersToolbar } from './filters/filters-toolbar';
 import { ColumnsModal } from './modals/columns-modal';
@@ -143,12 +147,13 @@ export const NetflowTraffic: React.FC<{
   const [isFullScreen, setFullScreen] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
   const [flows, setFlows] = React.useState<Record[]>([]);
+  const [metrics, setMetrics] = React.useState<Metrics[]>([]);
+  const [appMetrics, setAppMetrics] = React.useState<Metrics>();
   const [stats, setStats] = React.useState<Stats | undefined>(undefined);
   const [topologyOptions, setTopologyOptions] = useLocalStorage<TopologyOptions>(
     LOCAL_STORAGE_TOPOLOGY_OPTIONS_KEY,
     DefaultOptions
   );
-  const [metrics, setMetrics] = React.useState<TopologyMetrics[]>([]);
   const [isShowTopologyOptions, setShowTopologyOptions] = React.useState<boolean>(false);
   const [isShowQuerySummary, setShowQuerySummary] = React.useState<boolean>(false);
   const [lastRefresh, setLastRefresh] = React.useState<Date | undefined>(undefined);
@@ -170,6 +175,7 @@ export const NetflowTraffic: React.FC<{
   const [lastLimit, setLastLimit] = useLocalStorage<number>(LOCAL_STORAGE_LAST_LIMIT_KEY, LIMIT_VALUES[0]);
   const [lastTop, setLastTop] = useLocalStorage<number>(LOCAL_STORAGE_LAST_TOP_KEY, TOP_VALUES[0]);
   const [range, setRange] = React.useState<number | TimeRange>(getRangeFromURL());
+  const [metricStep, setMetricStep] = React.useState<number>(getStepFromURL());
   const [metricScope, setMetricScope] = useLocalStorage<MetricScope>(LOCAL_STORAGE_METRIC_SCOPE_KEY, 'namespace');
   const [metricFunction, setMetricFunction] = useLocalStorage<MetricFunction>(
     LOCAL_STORAGE_METRIC_FUNCTION_KEY,
@@ -272,6 +278,7 @@ export const NetflowTraffic: React.FC<{
       }
     }
     if (selectedViewId !== 'table') {
+      query.step = metricStep;
       query.function = metricFunction;
       query.type = metricType;
       query.scope = metricScope;
@@ -293,6 +300,7 @@ export const NetflowTraffic: React.FC<{
     layer,
     range,
     selectedViewId,
+    metricStep,
     metricFunction,
     metricType,
     metricScope,
@@ -342,13 +350,15 @@ export const NetflowTraffic: React.FC<{
       case 'overview':
       case 'topology':
         manageWarnings(
-          getTopology(fq, range)
+          getMetrics(fq)
             .then(result => {
               setMetrics(result.metrics);
+              setAppMetrics(result.appMetrics);
               setStats(result.stats);
             })
             .catch(err => {
               setMetrics([]);
+              setAppMetrics(undefined);
               setError(getHTTPErrorDetails(err));
               setWarningMessage(undefined);
             })
@@ -362,7 +372,7 @@ export const NetflowTraffic: React.FC<{
         setLoading(false);
         break;
     }
-  }, [buildFlowQuery, manageWarnings, range, selectedViewId]);
+  }, [buildFlowQuery, manageWarnings, selectedViewId]);
 
   usePoll(tick, interval);
 
@@ -384,7 +394,10 @@ export const NetflowTraffic: React.FC<{
   }, [filters, forcedFilters]);
   React.useEffect(() => {
     setURLRange(range);
-  }, [range]);
+    if (isStepDurationOutsideRange(range, metricStep)) {
+      setMetricStep(getMinimumStepFromRange(range) || defaultStep);
+    }
+  }, [metricStep, range]);
   React.useEffect(() => {
     setURLLimit(limit);
   }, [limit]);
@@ -493,6 +506,15 @@ export const NetflowTraffic: React.FC<{
           interval={interval}
           setInterval={setInterval}
         />
+        {selectedViewId !== 'table' && (
+          <StepDropdown
+            data-test="step-dropdown"
+            id="step-dropdown"
+            range={range}
+            step={metricStep}
+            setStep={setMetricStep}
+          />
+        )}
         <Button
           data-test="refresh-button"
           id="refresh-button"
@@ -668,6 +690,7 @@ export const NetflowTraffic: React.FC<{
           id="elementPanel"
           element={selectedElement}
           metrics={metrics}
+          metricStep={metricStep}
           metricFunction={metricFunction}
           metricType={metricType}
           metricScope={metricScope}
@@ -687,11 +710,13 @@ export const NetflowTraffic: React.FC<{
         return (
           <NetflowOverview
             limit={limit}
-            panels={panels}
+            panels={panels.filter(p => p.isSelected)}
+            metricStep={metricStep}
             metricFunction={metricFunction}
             metricType={metricType}
             metricScope={metricScope}
             metrics={metrics}
+            appMetrics={appMetrics}
             loading={loading}
             error={error}
             clearFilters={clearFilters}
@@ -717,6 +742,7 @@ export const NetflowTraffic: React.FC<{
             k8sModels={k8sModels}
             error={error}
             range={range}
+            metricStep={metricStep}
             metricFunction={metricFunction}
             metricType={metricType}
             metricScope={metricScope}
@@ -846,6 +872,10 @@ export const NetflowTraffic: React.FC<{
       {selectedViewId === 'table' && (
         <QuerySummary
           flows={flows}
+          //TODO NETOBSERV-591: show query summary from metrics
+          //metrics={metrics}
+          //appMetrics={appMetrics}
+          //metricStep={metricStep}
           range={range}
           stats={stats}
           lastRefresh={lastRefresh}

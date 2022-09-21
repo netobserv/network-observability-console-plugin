@@ -40,19 +40,21 @@ export const ScopeDropdown: React.FC<{
         </DropdownToggle>
       }
       isOpen={scopeDropdownOpen}
-      dropdownItems={Object.values(MetricScopeOptions).map(v => (
-        <DropdownItem
-          data-test={v}
-          id={v}
-          key={v}
-          onClick={() => {
-            setScopeDropdownOpen(false);
-            setScopeType(v);
-          }}
-        >
-          {getScopeDisplay(v)}
-        </DropdownItem>
-      ))}
+      dropdownItems={Object.values(MetricScopeOptions)
+        .filter(v => v !== MetricScopeOptions.APP)
+        .map(v => (
+          <DropdownItem
+            data-test={v}
+            id={v}
+            key={v}
+            onClick={() => {
+              setScopeDropdownOpen(false);
+              setScopeType(v as MetricScope);
+            }}
+          >
+            {getScopeDisplay(v)}
+          </DropdownItem>
+        ))}
     />
   );
 };

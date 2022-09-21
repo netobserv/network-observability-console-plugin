@@ -16,17 +16,19 @@ import { Text, TextContent, TextVariants } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { MetricScopeOptions } from '../../model/metrics';
-import { getMetricName, getMetricValue, TopologyMetric, TopologyMetrics } from '../../api/loki';
+import { getMetricName, getMetricValue, Metric, Metrics } from '../../api/loki';
 import { MetricFunction, MetricType } from '../../model/flow-query';
 import { getDateFromUnixString, twentyFourHourTime } from '../../utils/datetime';
+import { formatDuration, getDateSInMiliseconds } from '../../utils/duration';
 import './metrics-content.css';
 
 export const MetricsContent: React.FC<{
   id: string;
   sizePx?: number;
+  metricStep: number;
   metricFunction?: MetricFunction;
   metricType?: MetricType;
-  metrics: TopologyMetrics[];
+  metrics: Metrics[];
   scope: MetricScopeOptions;
   counters?: JSX.Element;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -41,6 +43,7 @@ export const MetricsContent: React.FC<{
 }> = ({
   id,
   sizePx,
+  metricStep,
   metricFunction,
   metricType,
   metrics,
@@ -61,11 +64,12 @@ export const MetricsContent: React.FC<{
     if (metricFunction === 'rate') {
       return t('Flows rate');
     } else if (metricType) {
+      const stepString = formatDuration(getDateSInMiliseconds(metricStep));
       switch (metricFunction) {
         case 'avg':
-          return t('Average {{type}} (1m frame)', { type: metricType });
+          return t('Average {{type}} ({{step}} frame)', { type: metricType, step: stepString });
         case 'max':
-          return t('Max {{type}} (1m frame)', { type: metricType });
+          return t('Max {{type}} ({{step}} frame)', { type: metricType, step: stepString });
         case 'sum':
           return t('Total {{type}}', { type: metricType });
         default:
@@ -75,7 +79,7 @@ export const MetricsContent: React.FC<{
       console.error('metricType cannot be undefined');
       return '';
     }
-  }, [metricFunction, metricType, t]);
+  }, [metricFunction, metricStep, metricType, t]);
 
   const chart = React.useCallback(() => {
     function truncate(input: string) {
@@ -87,6 +91,9 @@ export const MetricsContent: React.FC<{
     }
 
     function truncateParts(input: string) {
+      if (!input) {
+        return input;
+      }
       if (input.includes('.')) {
         const splitted = input.split('.');
         const result: string[] = [];
@@ -98,8 +105,10 @@ export const MetricsContent: React.FC<{
       return truncate(input);
     }
 
-    function getName(m: TopologyMetric) {
+    function getName(m: Metric) {
       switch (scope) {
+        case MetricScopeOptions.APP:
+          return `${t('app')} ${m.app}`;
         case MetricScopeOptions.HOST:
           const srcNode = truncateParts(getMetricName(m, scope, true, t));
           const dstNode = truncateParts(getMetricName(m, scope, false, t));
@@ -196,7 +205,7 @@ export const MetricsContent: React.FC<{
             height={350}
             data={metrics
               .sort((a, b) => a.total - b.total)
-              .map((m: TopologyMetrics) => ({ x: `${((m.total / total) * 100).toFixed(2)}%`, y: m.total }))}
+              .map((m: Metrics) => ({ x: `${((m.total / total) * 100).toFixed(2)}%`, y: m.total }))}
             padding={{
               bottom: 20,
               left: 20,
@@ -243,10 +252,7 @@ export const MetricsContent: React.FC<{
                   <ChartBar
                     name={`bar-${metrics.indexOf(m)}`}
                     key={`bar-${metrics.indexOf(m)}`}
-                    sortKey={'time'}
-                    sortOrder={'ascending'}
                     data={m.values.map(v => ({
-                      time: getDateFromUnixString(v[0] as string).getTime(),
                       name: getName(m.metric),
                       x: twentyFourHourTime(getDateFromUnixString(v[0] as string), true),
                       y: Number(v[1])
@@ -261,10 +267,7 @@ export const MetricsContent: React.FC<{
                   <ChartArea
                     name={`area-${metrics.indexOf(m)}`}
                     key={`area-${metrics.indexOf(m)}`}
-                    sortKey={'time'}
-                    sortOrder={'ascending'}
                     data={m.values.map(v => ({
-                      time: getDateFromUnixString(v[0] as string).getTime(),
                       name: getName(m.metric),
                       x: twentyFourHourTime(getDateFromUnixString(v[0] as string), true),
                       y: Number(v[1])
@@ -280,10 +283,7 @@ export const MetricsContent: React.FC<{
                   <ChartScatter
                     name={`scatter-${metrics.indexOf(m)}`}
                     key={`scatter-${metrics.indexOf(m)}`}
-                    sortKey={'time'}
-                    sortOrder={'ascending'}
                     data={m.values.map(v => ({
-                      time: getDateFromUnixString(v[0] as string).getTime(),
                       name: getName(m.metric),
                       x: twentyFourHourTime(getDateFromUnixString(v[0] as string), true),
                       y: Number(v[1])
@@ -316,7 +316,11 @@ export const MetricsContent: React.FC<{
 
   return (
     <TextContent id="metrics" className="metrics-content-div">
-      {showTitle && <Text id='metrics-title' component={TextVariants.h3}>{metricTitle()}</Text>}
+      {showTitle && (
+        <Text id="metrics-title" component={TextVariants.h3}>
+          {metricTitle()}
+        </Text>
+      )}
       {counters}
       {chart()}
     </TextContent>

@@ -11,6 +11,7 @@ export enum MetricTypeOptions {
 }
 
 export enum MetricScopeOptions {
+  APP = 'app',
   HOST = 'host',
   NAMESPACE = 'namespace',
   OWNER = 'owner',

@@ -1,15 +1,15 @@
-import { TFunction } from 'i18next';
-import { MetricScopeOptions } from '../model/metrics';
+//import { getDateSInMinutes, getRangeInMinutes } from '../utils/duration';
 import { MetricFunction, MetricType } from '../model/flow-query';
 import { humanFileSize } from '../utils/bytes';
 import { roundTwoDigits } from '../utils/count';
-import { TimeRange } from '../utils/datetime';
 import { cyrb53 } from '../utils/hash';
 import { Fields, Labels, Record } from './ipfix';
+import { MetricScopeOptions } from '../model/metrics';
+import { TFunction } from 'i18next';
 
 export interface AggregatedQueryResponse {
   resultType: string;
-  result: StreamResult[] | TopologyMetrics[];
+  result: StreamResult[] | Metrics[];
   stats: Stats;
 }
 
@@ -29,8 +29,9 @@ export interface RecordsResult {
   stats: Stats;
 }
 
-export interface TopologyResult {
-  metrics: TopologyMetrics[];
+export interface MetricsResult {
+  metrics: Metrics[];
+  appMetrics?: Metrics;
   stats: Stats;
 }
 
@@ -45,7 +46,8 @@ export const parseStream = (raw: StreamResult): Record[] => {
   });
 };
 
-export interface TopologyMetric {
+export interface Metric {
+  app?: string;
   DstAddr: string;
   DstK8S_Name: string;
   DstK8S_Namespace: string;
@@ -62,7 +64,7 @@ export interface TopologyMetric {
   SrcK8S_HostName: string;
 }
 
-export const getMetricName = (metric: TopologyMetric, scope: MetricScopeOptions, src: boolean, t: TFunction) => {
+export const getMetricName = (metric: Metric, scope: MetricScopeOptions, src: boolean, t: TFunction) => {
   const m = metric as never;
   const prefix = src ? 'Src' : 'Dst';
   switch (scope) {
@@ -94,23 +96,17 @@ export const getMetricName = (metric: TopologyMetric, scope: MetricScopeOptions,
   }
 };
 
-export interface TopologyMetrics {
-  metric: TopologyMetric;
+export interface Metrics {
+  metric: Metric;
   values: (string | number)[][];
   total: number;
 }
 
 /* calculate total for selected function
- * loki will return matrix with multiple values (one per step = 60s)
+ * loki will return matrix with multiple values (approximatively one per step)
+ * relying on value.length is safer than counting steps in a range
  */
-export const calculateMatrixTotals = (tm: TopologyMetrics, mf: MetricFunction, range: number | TimeRange) => {
-  let rangeInMinutes: number;
-  if (typeof range === 'number') {
-    rangeInMinutes = range / 60;
-  } else {
-    rangeInMinutes = (range.from - range.to) / (1000 * 60);
-  }
-
+export const calculateMatrixTotals = (tm: Metrics, mf: MetricFunction) => {
   tm.total = 0;
   switch (mf) {
     case 'max':
@@ -119,7 +115,7 @@ export const calculateMatrixTotals = (tm: TopologyMetrics, mf: MetricFunction, r
     case 'avg':
     case 'rate':
       tm.values.forEach(v => (tm.total += Number(v[1])));
-      tm.total = tm.total / rangeInMinutes;
+      tm.total = tm.total / tm.values.length;
       break;
     case 'sum':
     default:

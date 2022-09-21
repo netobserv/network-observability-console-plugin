@@ -11,7 +11,7 @@ import {
 } from '@patternfly/react-topology';
 import _ from 'lodash';
 import { elementPerMinText, roundTwoDigits } from '../utils/count';
-import { TopologyMetrics } from '../api/loki';
+import { Metrics } from '../api/loki';
 import { Filter, FilterDefinition } from '../model/filters';
 import { bytesPerSeconds, humanFileSize } from '../utils/bytes';
 import { defaultTimeRange } from '../utils/router';
@@ -269,7 +269,7 @@ export const getEdgeStyle = (count: number) => {
   return count ? EdgeStyle.dashed : EdgeStyle.dotted;
 };
 
-export const getEdgeTag = (count: number, options: TopologyOptions) => {
+export const getEdgeTag = (count: number, options: TopologyOptions, step: number) => {
   const roundCount = roundTwoDigits(count);
   if (options.edgeTags && roundCount) {
     if (options.metricFunction === MetricFunctionOptions.RATE) {
@@ -280,8 +280,7 @@ export const getEdgeTag = (count: number, options: TopologyOptions) => {
           if (options.metricFunction === MetricFunctionOptions.SUM) {
             return humanFileSize(count, true, 0);
           } else {
-            //get speed using default step = 60s
-            return bytesPerSeconds(count, 60);
+            return bytesPerSeconds(count, step);
           }
 
         case MetricTypeOptions.PACKETS:
@@ -305,6 +304,7 @@ export const generateEdge = (
   targetId: string,
   count: number,
   options: TopologyOptions,
+  step: number,
   shadowed = false,
   highlightedId: string
 ): EdgeModel => {
@@ -327,7 +327,7 @@ export const generateEdge = (
       startTerminalStatus: NodeStatus.default,
       endTerminalType: count > 0 ? EdgeTerminalType.directional : EdgeTerminalType.none,
       endTerminalStatus: NodeStatus.default,
-      tag: getEdgeTag(count, options),
+      tag: getEdgeTag(count, options, step),
       tagStatus: getTagStatus(count, options.maxEdgeValue),
       count
     }
@@ -335,8 +335,9 @@ export const generateEdge = (
 };
 
 export const generateDataModel = (
-  datas: TopologyMetrics[],
+  datas: Metrics[],
   options: TopologyOptions,
+  metricStep: number,
   metricScope: MetricScope,
   searchValue: string,
   highlightedId: string,
@@ -426,19 +427,19 @@ export const generateDataModel = (
         shadowed,
         //edges are directed from src to dst. It will become bidirectionnal if inverted pair is found
         startTerminalType: edge.data.sourceId !== sourceId ? EdgeTerminalType.directional : edge.data.startTerminalType,
-        tag: getEdgeTag(totalCount, options),
+        tag: getEdgeTag(totalCount, options, metricStep),
         tagStatus: getTagStatus(totalCount, options.maxEdgeValue),
         count: totalCount
       };
     } else {
-      edge = generateEdge(sourceId, targetId, count, opts, shadowed, highlightedId);
+      edge = generateEdge(sourceId, targetId, count, opts, metricStep, shadowed, highlightedId);
       edges.push(edge);
     }
 
     return edge;
   }
 
-  function manageNode(prefix: 'Src' | 'Dst', d: TopologyMetrics) {
+  function manageNode(prefix: 'Src' | 'Dst', d: Metrics) {
     const m = d.metric as never;
 
     const namespace = m[`${prefix}K8S_Namespace`];

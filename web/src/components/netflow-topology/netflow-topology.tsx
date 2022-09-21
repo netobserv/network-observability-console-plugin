@@ -22,7 +22,7 @@ import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { saveSvgAsPng } from 'save-svg-as-png';
-import { TopologyMetrics } from '../../api/loki';
+import { Metrics } from '../../api/loki';
 import { Filter } from '../../model/filters';
 import { MetricFunction, MetricScope, MetricType } from '../../model/flow-query';
 import {
@@ -57,11 +57,12 @@ const FIT_PADDING = 80;
 export const TopologyContent: React.FC<{
   k8sModels: { [key: string]: K8sModel };
   range: number | TimeRange;
+  metricStep: number;
   metricFunction?: MetricFunction;
   metricType?: MetricType;
   metricScope: MetricScope;
   setMetricScope: (ms: MetricScope) => void;
-  metrics: TopologyMetrics[];
+  metrics: Metrics[];
   options: TopologyOptions;
   setOptions: (o: TopologyOptions) => void;
   filters: Filter[];
@@ -72,6 +73,7 @@ export const TopologyContent: React.FC<{
 }> = ({
   k8sModels,
   range,
+  metricStep,
   metricFunction,
   metricType,
   metricScope,
@@ -89,6 +91,7 @@ export const TopologyContent: React.FC<{
   const controller = useVisualizationController();
 
   const prevMetrics = usePrevious(metrics);
+  const prevMetricStep = usePrevious(metricStep);
   const prevMetricFunction = usePrevious(metricFunction);
   const prevMetricType = usePrevious(metricType);
   const prevMetricScope = usePrevious(metricScope);
@@ -327,6 +330,7 @@ export const TopologyContent: React.FC<{
     const updatedModel = generateDataModel(
       metrics,
       getOptions(),
+      metricStep,
       metricScope,
       searchValue,
       highlightedId,
@@ -366,6 +370,7 @@ export const TopologyContent: React.FC<{
     hoveredId,
     selectedIds,
     getOptions,
+    metricStep,
     metricScope,
     searchValue,
     filters,
@@ -385,14 +390,31 @@ export const TopologyContent: React.FC<{
     }
 
     //skip refresh if scope / group changed. It will refresh after getting new metrics
-    if (prevOptions && (prevMetricScope !== metricScope || prevOptions.groupTypes !== options.groupTypes)) {
+    if (
+      prevOptions &&
+      (prevMetricStep !== metricStep ||
+        prevMetricScope !== metricScope ||
+        prevOptions.groupTypes !== options.groupTypes)
+    ) {
       waitForMetrics = true;
       return;
     }
 
     //then update model
     updateModel();
-  }, [controller, metrics, filters, options, prevOptions, resetGraph, updateModel, prevMetricScope, metricScope]);
+  }, [
+    controller,
+    metrics,
+    filters,
+    options,
+    prevOptions,
+    resetGraph,
+    updateModel,
+    prevMetricStep,
+    metricStep,
+    prevMetricScope,
+    metricScope
+  ]);
 
   //request fit on layout end when filter / options change
   React.useEffect(() => {
@@ -557,11 +579,12 @@ export const NetflowTopology: React.FC<{
   k8sModels: { [key: string]: K8sModel };
   error?: string;
   range: number | TimeRange;
+  metricStep: number;
   metricFunction?: MetricFunction;
   metricType?: MetricType;
   metricScope: MetricScope;
   setMetricScope: (ms: MetricScope) => void;
-  metrics: TopologyMetrics[];
+  metrics: Metrics[];
   options: TopologyOptions;
   setOptions: (o: TopologyOptions) => void;
   filters: Filter[];
@@ -574,6 +597,7 @@ export const NetflowTopology: React.FC<{
   k8sModels,
   error,
   range,
+  metricStep,
   metricFunction,
   metricType,
   metricScope,
@@ -614,6 +638,7 @@ export const NetflowTopology: React.FC<{
         <TopologyContent
           k8sModels={k8sModels}
           range={range}
+          metricStep={metricStep}
           metricFunction={metricFunction}
           metricType={metricType}
           metricScope={metricScope}

@@ -17,6 +17,7 @@ export interface FlowQuery {
   limit: number;
   function?: MetricFunction;
   type?: MetricType;
+  step?: number;
   scope?: MetricScope;
   groups?: Groups;
 }

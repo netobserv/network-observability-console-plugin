@@ -9,6 +9,7 @@ const filtersSeparator = ';';
 const filterKVSeparator = '=';
 const filterValuesSeparator = ',';
 export const defaultTimeRange = 300;
+export const defaultStep = 60;
 const defaultLimit = 100;
 export const defaultReporter: Reporter = 'destination';
 //TODO: improve performances before applying 'application' layer by default
@@ -33,6 +34,14 @@ export const getRangeFromURL = (): number | TimeRange => {
     return { from: startTime, to: endTime };
   }
   return defaultTimeRange;
+};
+
+export const getStepFromURL = (): number => {
+  const step = getURLParamAsNumber(URLParam.Step);
+  if (step) {
+    return step;
+  }
+  return defaultStep;
 };
 
 export const getReporterFromURL = (): Reporter => {

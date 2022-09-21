@@ -7,11 +7,10 @@ import {
   parseStream,
   RecordsResult,
   StreamResult,
-  TopologyMetrics,
-  TopologyResult
+  Metrics,
+  MetricsResult
 } from './loki';
 import { Config, defaultConfig } from '../model/config';
-import { TimeRange } from '../utils/datetime';
 import { ContextSingleton } from '../utils/context';
 
 export const getFlows = (params: FlowQuery): Promise<RecordsResult> => {
@@ -53,16 +52,20 @@ export const getResources = (namespace: string, kind: string): Promise<string[]>
   });
 };
 
-export const getTopology = (params: FlowQuery, range: number | TimeRange): Promise<TopologyResult> => {
-  return axios.get(ContextSingleton.getHost() + '/api/loki/topology', { params }).then(r => {
+export const getMetrics = (params: FlowQuery): Promise<MetricsResult> => {
+  return axios.get(ContextSingleton.getHost() + '/api/loki/metrics', { params }).then(r => {
     if (r.status >= 400) {
       throw new Error(`${r.statusText} [code=${r.status}]`);
     }
     const aggQR: AggregatedQueryResponse = r.data;
-    const metrics = (aggQR.result as TopologyMetrics[]).flatMap(r =>
-      calculateMatrixTotals(r, params.function as MetricFunction, range)
+    const metrics = (aggQR.result as Metrics[]).flatMap(r =>
+      calculateMatrixTotals(r, params.function as MetricFunction)
     );
-    return { metrics: metrics, stats: aggQR.stats };
+    return {
+      metrics: metrics.filter(m => !m.metric.app),
+      appMetrics: metrics.find(m => m.metric.app),
+      stats: aggQR.stats
+    };
   });
 };
 
@@ -85,8 +88,8 @@ export const getConfig = (): Promise<Config> => {
   });
 };
 
-export const getLokiReady = (): Promise<string> => {
-  return axios.get(ContextSingleton.getHost() + '/api/loki/ready').then(r => {
+export const getLokiStatusReady = (): Promise<string> => {
+  return axios.get(ContextSingleton.getHost() + '/api/loki/status/ready').then(r => {
     if (r.status >= 400) {
       throw new Error(`${r.statusText} [code=${r.status}]`);
     }
@@ -94,8 +97,8 @@ export const getLokiReady = (): Promise<string> => {
   });
 };
 
-export const getMetrics = (): Promise<string> => {
-  return axios.get(ContextSingleton.getHost() + '/api/loki/metrics').then(r => {
+export const getLokiStatusMetrics = (): Promise<string> => {
+  return axios.get(ContextSingleton.getHost() + '/api/loki/status/metrics').then(r => {
     if (r.status >= 400) {
       throw new Error(`${r.statusText} [code=${r.status}]`);
     }
@@ -103,7 +106,7 @@ export const getMetrics = (): Promise<string> => {
   });
 };
 
-export const getBuildInfo = (): Promise<unknown> => {
+export const getLokiBuildInfo = (): Promise<unknown> => {
   return axios.get(ContextSingleton.getHost() + '/api/loki/buildinfo').then(r => {
     if (r.status >= 400) {
       throw new Error(`${r.statusText} [code=${r.status}]`);

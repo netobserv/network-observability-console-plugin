@@ -2,10 +2,10 @@ import { Spinner } from '@patternfly/react-core';
 import { TopologyView, VisualizationSurface } from '@patternfly/react-topology';
 import { shallow } from 'enzyme';
 import * as React from 'react';
-import { TopologyMetrics } from '../../../api/loki';
+import { Metrics } from '../../../api/loki';
 import { MetricFunction, MetricScope, MetricType } from '../../../model/flow-query';
 import { DefaultOptions, LayoutName } from '../../../model/topology';
-import { defaultTimeRange } from '../../../utils/router';
+import { defaultStep, defaultTimeRange } from '../../../utils/router';
 import { NetflowTopology, TopologyContent } from '../netflow-topology';
 import { dataSample } from '../__tests-data__/metrics';
 import { LokiError } from '../../messages/loki-error';
@@ -16,11 +16,12 @@ describe('<NetflowTopology />', () => {
     loading: false,
     k8sModels: {},
     range: defaultTimeRange,
+    metricStep: defaultStep,
     metricFunction: 'sum' as MetricFunction,
     metricType: 'bytes' as MetricType,
     metricScope: 'host' as MetricScope,
     setMetricScope: jest.fn(),
-    metrics: [] as TopologyMetrics[],
+    metrics: [] as Metrics[],
     layout: LayoutName.Cola,
     options: DefaultOptions,
     setOptions: jest.fn(),

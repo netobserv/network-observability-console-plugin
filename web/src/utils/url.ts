@@ -8,6 +8,7 @@ export enum URLParam {
   StartTime = 'startTime',
   EndTime = 'endTime',
   TimeRange = 'timeRange',
+  Step = 'step',
   Filters = 'filters',
   RefreshInterval = 'refresh',
   Limit = 'limit',

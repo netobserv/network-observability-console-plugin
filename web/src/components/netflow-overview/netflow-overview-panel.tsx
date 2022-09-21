@@ -1,26 +1,27 @@
 import { Divider, Panel, PanelHeader, PanelMain, PanelMainBody } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { getOverviewPanelTitle, OverviewPanel } from '../../utils/overview-panels';
-import { TopologyMetrics } from '../../api/loki';
-import { MetricFunction, MetricType, MetricScope } from '../../model/flow-query';
+import { Metrics } from '../../api/loki';
+import { MetricFunction, MetricScope, MetricType } from '../../model/flow-query';
 import { MetricScopeOptions } from '../../model/metrics';
+import { getOverviewPanelTitle, OverviewPanel } from '../../utils/overview-panels';
+import { MetricsContent } from '../metrics/metrics-content';
 import './netflow-overview-panel.css';
-import MetricsContent from '../metrics/metrics-content';
 
 export const NetflowOverviewPanel: React.FC<{
   limit: number;
   panel: OverviewPanel;
+  metricStep: number;
   metricFunction?: MetricFunction;
   metricType?: MetricType;
   metricScope: MetricScope;
-  metrics: TopologyMetrics[];
+  metrics: Metrics[];
+  appMetrics?: Metrics;
   doubleWidth?: boolean;
-}> = ({ limit, panel, metricFunction, metricType, metricScope, metrics, doubleWidth }) => {
+}> = ({ limit, panel, metricStep, metricFunction, metricType, metricScope, metrics, appMetrics, doubleWidth }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   const getContent = React.useCallback(() => {
-    //TODO: put content here
     switch (panel.id) {
       case 'overview':
         return 'Large overview content';
@@ -32,10 +33,11 @@ export const NetflowOverviewPanel: React.FC<{
           <MetricsContent
             id={panel.id}
             sizePx={600}
+            metricStep={metricStep}
             metricFunction={metricFunction}
             metricType={metricType}
-            metrics={metrics}
-            scope={metricScope as MetricScopeOptions}
+            metrics={panel.id === 'total_timeseries' ? (appMetrics ? [appMetrics] : []) : metrics}
+            scope={panel.id === 'total_timeseries' ? MetricScopeOptions.APP : (metricScope as MetricScopeOptions)}
             showDonut={panel.id === 'top_donut'}
             showBar={panel.id === 'top_bar'}
             showArea={panel.id.endsWith('_timeseries')}
@@ -53,7 +55,7 @@ export const NetflowOverviewPanel: React.FC<{
       default:
         return t('Error: Unknown panel type');
     }
-  }, [panel.id, metricFunction, metricType, metrics, metricScope, doubleWidth, t]);
+  }, [panel.id, metricStep, metricFunction, metricType, appMetrics, metrics, metricScope, doubleWidth, t]);
 
   return (
     <Panel variant="raised">

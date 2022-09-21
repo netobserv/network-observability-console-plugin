@@ -2,9 +2,10 @@ import { Button, DrawerCloseButton } from '@patternfly/react-core';
 import { BaseEdge, BaseNode } from '@patternfly/react-topology';
 import { mount, shallow } from 'enzyme';
 import * as React from 'react';
+import { Metrics } from '../../../api/loki';
 import { Filter } from '../../../model/filters';
-import { TopologyMetrics } from '../../../api/loki';
 import { MetricFunction, MetricScope, MetricType } from '../../../model/flow-query';
+import { defaultStep } from '../../../utils/router';
 import { ElementPanel, ElementPanelContent } from '../element-panel';
 import { dataSample } from '../__tests-data__/metrics';
 
@@ -27,7 +28,8 @@ describe('<ElementPanel />', () => {
 
   const mocks = {
     element: getNode('loki-distributor-loki-76598c8449-csmh2', '10.129.0.15'),
-    metrics: dataSample as TopologyMetrics[],
+    metrics: dataSample as Metrics[],
+    metricStep: defaultStep,
     metricFunction: 'sum' as MetricFunction,
     metricType: 'bytes' as MetricType,
     metricScope: 'resource' as MetricScope,

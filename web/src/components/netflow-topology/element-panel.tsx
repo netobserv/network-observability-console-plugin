@@ -18,7 +18,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { defaultSize, maxSize, minSize } from '../../utils/panel';
 import { MetricFunction, MetricScope, MetricType } from '../../model/flow-query';
-import { getMetricValue, TopologyMetrics } from '../../api/loki';
+import { getMetricValue, Metrics } from '../../api/loki';
 import { Filter } from '../../model/filters';
 import { ElementData, isElementFiltered, toggleElementFilter } from '../../model/topology';
 import './element-panel.css';
@@ -27,13 +27,14 @@ import { MetricScopeOptions } from '../../model/metrics';
 
 export const ElementPanelContent: React.FC<{
   element: GraphElement;
-  metrics: TopologyMetrics[];
+  metrics: Metrics[];
+  metricStep: number;
   metricFunction: MetricFunction;
   metricType?: MetricType;
   metricScope: MetricScope;
   filters: Filter[];
   setFilters: (filters: Filter[]) => void;
-}> = ({ element, metrics, metricFunction, metricType, metricScope, filters, setFilters }) => {
+}> = ({ element, metrics, metricStep, metricFunction, metricType, metricScope, filters, setFilters }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const data = element.getData();
   const type = element.getType();
@@ -151,7 +152,7 @@ export const ElementPanelContent: React.FC<{
   let dstCount = 0;
 
   if (element instanceof BaseNode) {
-    function matchExclusively(d: TopologyMetrics, field: string, value: string) {
+    function matchExclusively(d: Metrics, field: string, value: string) {
       const m = d.metric as never;
 
       return (
@@ -232,6 +233,7 @@ export const ElementPanelContent: React.FC<{
         )}
         <MetricsContent
           id={`node-${data.id}`}
+          metricStep={metricStep}
           metricFunction={metricFunction}
           metricType={metricType}
           metrics={nodeMetrics}
@@ -301,6 +303,7 @@ export const ElementPanelContent: React.FC<{
         )}
         <MetricsContent
           id={`edge-${srcData.id}-${tgtData.id}`}
+          metricStep={metricStep}
           metricFunction={metricFunction}
           metricType={metricType}
           metrics={edgeMetrics}
@@ -320,14 +323,15 @@ export const ElementPanelContent: React.FC<{
 export const ElementPanel: React.FC<{
   onClose: () => void;
   element: GraphElement;
-  metrics: TopologyMetrics[];
+  metrics: Metrics[];
+  metricStep: number;
   metricFunction: MetricFunction;
   metricType?: MetricType;
   metricScope: MetricScope;
   filters: Filter[];
   setFilters: (filters: Filter[]) => void;
   id?: string;
-}> = ({ id, element, metrics, metricFunction, metricType, metricScope, filters, setFilters, onClose }) => {
+}> = ({ id, element, metrics, metricStep, metricFunction, metricType, metricScope, filters, setFilters, onClose }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const data = element.getData();
 
@@ -360,9 +364,10 @@ export const ElementPanel: React.FC<{
         <ElementPanelContent
           element={element}
           metrics={metrics}
+          metricStep={metricStep}
           metricFunction={metricFunction}
           metricType={metricType}
-          metricScope={metricScope as MetricScopeOptions}
+          metricScope={metricScope as MetricScope}
           filters={filters}
           setFilters={setFilters}
         />
