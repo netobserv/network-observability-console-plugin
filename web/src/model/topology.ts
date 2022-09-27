@@ -18,6 +18,7 @@ import { defaultTimeRange } from '../utils/router';
 import { findFilter } from '../utils/filter-definitions';
 import { TFunction } from 'i18next';
 import { K8sModel } from '@openshift-console/dynamic-plugin-sdk';
+import { getTopologyEdgeId, getTopologyGroupId, getTopologyNodeId } from '../utils/ids';
 
 export enum LayoutName {
   Cola = 'Cola',
@@ -201,7 +202,7 @@ export const generateNode = (
   t: TFunction,
   k8sModels: { [key: string]: K8sModel }
 ): NodeModel => {
-  const id = `${data.type}.${data.namespace}.${data.name}.${data.addr}.${data.host}`;
+  const id = getTopologyNodeId(data.type, data.namespace, data.name, data.addr, data.host);
   const label = data.name
     ? data.name
     : data.addr
@@ -330,7 +331,7 @@ export const generateEdge = (
   const id = `${sourceId}.${targetId}`;
   const highlighted = !shadowed && !_.isEmpty(highlightedId) && id.includes(highlightedId);
   return {
-    id: `${sourceId}.${targetId}`,
+    id: getTopologyEdgeId(sourceId, targetId),
     type: 'edge',
     source: sourceId,
     target: targetId,
@@ -371,7 +372,7 @@ export const generateDataModel = (
     let group = nodes.find(g => g.type === 'group' && g.id === id);
     if (!group) {
       group = {
-        id,
+        id: getTopologyGroupId(type, name),
         children: [],
         type: 'group',
         group: true,
