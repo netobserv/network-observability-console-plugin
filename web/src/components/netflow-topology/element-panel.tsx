@@ -320,47 +320,47 @@ export const ElementPanelContent: React.FC<{
   let dstCount = 0;
 
   if (element instanceof BaseNode) {
-    function matchExclusively(d: TopologyMetrics, field: string, value: string) {
+    function getFieldFromType(type: string) {
+      switch (type.toLowerCase()) {
+        case 'namespace':
+          return 'Namespace';
+        case 'host':
+        case 'node':
+          return 'HostName';
+        default:
+          return 'OwnerName';
+      }
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    function match(d: TopologyMetrics, data: any, elementType: string) {
       const m = d.metric as never;
 
+      const field = getFieldFromType(elementType);
+      if (data.parentType && data.parentName) {
+        const parentField = getFieldFromType(data.parentType);
+
+        //match both parent / child source or dest criterias
+        return (
+          (m[`SrcK8S_${field}`] === data.name && m[`SrcK8S_${parentField}`] === data.parentName) ||
+          (m[`DstK8S_${field}`] === data.name && m[`DstK8S_${parentField}`] === data.parentName)
+        );
+      }
+
+      //match exclusively src or dest criteria
       return (
         m[`SrcK8S_${field}`] !== m[`DstK8S_${field}`] &&
-        (m[`SrcK8S_${field}`] === value || m[`DstK8S_${field}`] === value)
+        (m[`SrcK8S_${field}`] === data.name || m[`DstK8S_${field}`] === data.name)
       );
     }
 
-    const nodeMetrics =
+    const nodeMetrics = metrics.filter(m =>
       type === 'group'
-        ? metrics.filter(m => {
-            switch (data.type) {
-              case 'Namespace':
-                //namespace must match exclusively Source OR Destination
-                return matchExclusively(m, 'Namespace', data.name);
-              case 'Node':
-                //host must match exclusively Source OR Destination
-                return matchExclusively(m, 'HostName', data.name);
-              default:
-                //fallback on Owners match exclusively Source OR Destination
-                return matchExclusively(m, 'OwnerName', data.name);
-            }
-          })
-        : metrics.filter(m => {
-            switch (options.scope) {
-              case TopologyScopes.NAMESPACE:
-                //namespace must match exclusively Source OR Destination
-                return matchExclusively(m, 'Namespace', data.namespace);
-              case TopologyScopes.HOST:
-                //host must match exclusively Source OR Destination
-                return matchExclusively(m, 'HostName', data.host);
-              case TopologyScopes.OWNER:
-                //owner must match exclusively Source OR Destination
-                return matchExclusively(m, 'OwnerName', data.name);
-              case TopologyScopes.RESOURCE:
-              default:
-                //fallback on ip addresses
-                return m.metric.SrcAddr === data.addr || m.metric.DstAddr === data.addr;
-            }
-          });
+        ? match(m, data, data.type)
+        : options.scope === TopologyScopes.RESOURCE
+        ? m.metric.SrcAddr === data.addr || m.metric.DstAddr === data.addr
+        : match(m, data, options.scope)
+    );
     nodeMetrics.forEach(m => {
       if (type === 'group') {
         if (data.type === 'Namespace') {

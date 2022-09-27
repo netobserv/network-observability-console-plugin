@@ -365,14 +365,13 @@ export const generateDataModel = (
   let nodes: NodeModel[] = [];
   const edges: EdgeModel[] = [];
   const opts = { ...DefaultOptions, ...options };
-  //ensure each child to have single parent
-  const childIds: string[] = [];
 
   function addGroup(name: string, type: string, parent?: NodeModel, secondaryLabelPadding = false) {
-    let group = nodes.find(g => g.type === 'group' && g.data.type === type && g.data.name === name);
+    const id = `${parent ? parent.id + '.' : ''}${type}.${name}`;
+    let group = nodes.find(g => g.type === 'group' && g.id === id);
     if (!group) {
       group = {
-        id: `${type}.${name}`,
+        id,
         children: [],
         type: 'group',
         group: true,
@@ -382,6 +381,8 @@ export const generateDataModel = (
         data: {
           name,
           type,
+          parentType: parent?.data?.type,
+          parentName: parent?.data?.name,
           labelPosition: LabelPosition.bottom,
           collapsible: true,
           collapsedWidth: 75,
@@ -398,9 +399,8 @@ export const generateDataModel = (
       nodes.push(group);
     }
 
-    if (parent && !childIds.includes(group.id)) {
+    if (parent && !parent.children!.includes(group.id)) {
       parent.children!.push(group.id);
-      childIds.push(group.id);
     }
 
     return group;
@@ -420,9 +420,8 @@ export const generateDataModel = (
       nodes.push(node);
     }
 
-    if (parent && !childIds.includes(node.id)) {
+    if (parent && !parent.children!.includes(node.id)) {
       parent.children!.push(node.id);
-      childIds.push(node.id);
     }
 
     return node;
@@ -474,25 +473,20 @@ export const generateDataModel = (
         ? addGroup(host, 'Node', undefined, true)
         : undefined;
     const namespaceGroup =
-      [TopologyGroupTypes.NAMESPACES_OWNERS, TopologyGroupTypes.NAMESPACES].includes(options.groupTypes) &&
-      !_.isEmpty(namespace)
+      [
+        TopologyGroupTypes.HOSTS_NAMESPACES,
+        TopologyGroupTypes.NAMESPACES_OWNERS,
+        TopologyGroupTypes.NAMESPACES
+      ].includes(options.groupTypes) && !_.isEmpty(namespace)
         ? addGroup(namespace, 'Namespace', hostGroup)
         : undefined;
     const ownerGroup =
-      [
-        TopologyGroupTypes.NAMESPACES_OWNERS,
-        TopologyGroupTypes.HOSTS_NAMESPACES,
-        TopologyGroupTypes.HOSTS_OWNERS,
-        TopologyGroupTypes.OWNERS
-      ].includes(options.groupTypes) &&
+      [TopologyGroupTypes.NAMESPACES_OWNERS, TopologyGroupTypes.HOSTS_OWNERS, TopologyGroupTypes.OWNERS].includes(
+        options.groupTypes
+      ) &&
       !_.isEmpty(ownerType) &&
       !_.isEmpty(ownerName)
-        ? addGroup(
-            ownerName,
-            `${ownerType}.${ownerName}`,
-            namespaceGroup ? namespaceGroup : hostGroup,
-            namespaceGroup === undefined
-          )
+        ? addGroup(ownerName, ownerType, namespaceGroup ? namespaceGroup : hostGroup, namespaceGroup === undefined)
         : undefined;
 
     const parent = ownerGroup ? ownerGroup : namespaceGroup ? namespaceGroup : hostGroup;
