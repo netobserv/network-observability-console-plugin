@@ -2,7 +2,7 @@ import { Dropdown, DropdownItem, DropdownPosition, DropdownToggle } from '@patte
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { MetricFunction } from '../../model/flow-query';
-import { TopologyMetricFunctions } from '../../model/topology';
+import { MetricFunctionOptions } from '../../model/metrics';
 
 export const MetricFunctionDropdown: React.FC<{
   selected?: string;
@@ -13,14 +13,14 @@ export const MetricFunctionDropdown: React.FC<{
   const [metricDropdownOpen, setMetricDropdownOpen] = React.useState(false);
 
   const getMetricDisplay = (metricType?: string) => {
-    switch (metricType as TopologyMetricFunctions) {
-      case TopologyMetricFunctions.SUM:
+    switch (metricType as MetricFunctionOptions) {
+      case MetricFunctionOptions.SUM:
         return t('Sum');
-      case TopologyMetricFunctions.MAX:
+      case MetricFunctionOptions.MAX:
         return t('Max');
-      case TopologyMetricFunctions.RATE:
+      case MetricFunctionOptions.RATE:
         return t('Rate');
-      case TopologyMetricFunctions.AVG:
+      case MetricFunctionOptions.AVG:
       default:
         return t('Avg');
     }
@@ -41,7 +41,7 @@ export const MetricFunctionDropdown: React.FC<{
         </DropdownToggle>
       }
       isOpen={metricDropdownOpen}
-      dropdownItems={Object.values(TopologyMetricFunctions).map(v => (
+      dropdownItems={Object.values(MetricFunctionOptions).map(v => (
         <DropdownItem
           data-test={v}
           id={v}

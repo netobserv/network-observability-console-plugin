@@ -2,11 +2,11 @@ import * as React from 'react';
 import { mount, shallow } from 'enzyme';
 
 import MetricFunctionDropdown from '../metric-function-dropdown';
-import { TopologyMetricFunctions } from '../../../model/topology';
+import { MetricFunctionOptions } from '../../../model/metrics';
 
 describe('<MetricDropdown />', () => {
   const props = {
-    selected: TopologyMetricFunctions.AVG,
+    selected: MetricFunctionOptions.AVG,
     setMetricFunction: jest.fn(),
     id: 'metric'
   };
@@ -37,13 +37,13 @@ describe('<MetricDropdown />', () => {
     //open dropdown and select RATE
     dropdown.at(0).simulate('click');
     wrapper.find('[id="rate"]').at(0).simulate('click');
-    expect(props.setMetricFunction).toHaveBeenCalledWith(TopologyMetricFunctions.RATE);
+    expect(props.setMetricFunction).toHaveBeenCalledWith(MetricFunctionOptions.RATE);
     expect(wrapper.find('li').length).toBe(0);
 
     //open dropdown and select MAX
     dropdown.at(0).simulate('click');
     wrapper.find('[id="max"]').at(0).simulate('click');
-    expect(props.setMetricFunction).toHaveBeenCalledWith(TopologyMetricFunctions.MAX);
+    expect(props.setMetricFunction).toHaveBeenCalledWith(MetricFunctionOptions.MAX);
     expect(wrapper.find('li').length).toBe(0);
 
     //setMetricFunction should be called twice

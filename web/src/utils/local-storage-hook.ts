@@ -12,6 +12,12 @@ export const LOCAL_STORAGE_QUERY_PARAMS_KEY = 'netflow-traffic-query-params';
 export const LOCAL_STORAGE_DISABLED_FILTERS_KEY = 'netflow-traffic-disabled-filters';
 export const LOCAL_STORAGE_SORT_ID_KEY = 'netflow-traffic-sort-id';
 export const LOCAL_STORAGE_SORT_DIRECTION_KEY = 'netflow-traffic-sort-direction';
+export const LOCAL_STORAGE_OVERVIEW_IDS_KEY = 'netflows-traffic-overview-ids';
+export const LOCAL_STORAGE_LAST_LIMIT_KEY = 'netflow-traffic-limit';
+export const LOCAL_STORAGE_LAST_TOP_KEY = 'netflow-traffic-top';
+export const LOCAL_STORAGE_METRIC_SCOPE_KEY = 'netflow-traffic-metric-scope';
+export const LOCAL_STORAGE_METRIC_FUNCTION_KEY = 'netflow-traffic-metric-function';
+export const LOCAL_STORAGE_METRIC_TYPE_KEY = 'netflow-traffic-metric-type';
 
 export interface ArraySelectionOptions {
   id: string;

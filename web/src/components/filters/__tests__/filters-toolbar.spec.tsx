@@ -18,6 +18,7 @@ describe('<FiltersToolbar />', () => {
       reporter: 'destination',
       layer: 'infrastructure',
       allowReporterBoth: true,
+      useTopK: false,
       match: 'all',
       setLimit: jest.fn(),
       setMatch: jest.fn(),

@@ -1,0 +1,27 @@
+/* align right popup buttons*/
+
+.footer {
+    margin-left: auto;
+}
+
+
+/* vertical align drag icon*/
+
+.pf-c-data-list__cell {
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+
+/* vertical align label*/
+
+button.pf-c-data-list__item-draggable-button {
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+label {
+    margin-top: auto;
+    margin-bottom: auto;
+    padding: inherit;
+}

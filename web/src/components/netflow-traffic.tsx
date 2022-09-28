@@ -9,56 +9,61 @@ import {
   Dropdown,
   DropdownGroup,
   DropdownItem,
+  Flex,
+  FlexItem,
   OverflowMenuItem,
   PageSection,
+  Tab,
+  Tabs,
+  TabTitleText,
   Text,
-  TextVariants,
-  ToggleGroup,
-  ToggleGroupItem
+  TextVariants
 } from '@patternfly/react-core';
-import {
-  ColumnsIcon,
-  ExportIcon,
-  EllipsisVIcon,
-  ExpandIcon,
-  CompressIcon,
-  SyncAltIcon,
-  TableIcon,
-  TopologyIcon
-} from '@patternfly/react-icons';
+import { ColumnsIcon, CompressIcon, EllipsisVIcon, ExpandIcon, ExportIcon, SyncAltIcon } from '@patternfly/react-icons';
+import { GraphElement } from '@patternfly/react-topology';
 import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
 import { Record } from '../api/ipfix';
-import { getFlows, getTopology } from '../api/routes';
-import {
-  Match,
-  FlowQuery,
-  Reporter,
-  groupFiltersMatchAll,
-  groupFiltersMatchAny,
-  MetricFunction,
-  MetricType,
-  Layer
-} from '../model/flow-query';
-import { useK8sModelsWithColors } from '../utils/k8s-models-hook';
 import { Stats, TopologyMetrics } from '../api/loki';
-import { DefaultOptions, TopologyGroupTypes, TopologyOptions } from '../model/topology';
-import { Column, getDefaultColumns } from '../utils/columns';
-import { TimeRange } from '../utils/datetime';
-import { getHTTPErrorDetails } from '../utils/errors';
+import { getFlows, getTopology } from '../api/routes';
 import {
   DisabledFilters,
   Filter,
-  hasIndexFields,
   getDisabledFiltersRecord,
   getEnabledFilters,
+  hasIndexFields,
   hasNonIndexFields
 } from '../model/filters';
 import {
+  FlowQuery,
+  groupFiltersMatchAll,
+  groupFiltersMatchAny,
+  Layer,
+  Match,
+  MetricFunction,
+  MetricScope,
+  MetricType,
+  Reporter
+} from '../model/flow-query';
+import { DefaultOptions, TopologyGroupTypes, TopologyOptions } from '../model/topology';
+import { Column, getDefaultColumns } from '../utils/columns';
+import { loadConfig } from '../utils/config';
+import { ContextSingleton } from '../utils/context';
+import { TimeRange } from '../utils/datetime';
+import { getHTTPErrorDetails } from '../utils/errors';
+import { Feature, isAllowed } from '../utils/features-gate';
+import { useK8sModelsWithColors } from '../utils/k8s-models-hook';
+import {
   LOCAL_STORAGE_COLS_KEY,
   LOCAL_STORAGE_DISABLED_FILTERS_KEY,
+  LOCAL_STORAGE_LAST_LIMIT_KEY,
+  LOCAL_STORAGE_LAST_TOP_KEY,
+  LOCAL_STORAGE_METRIC_FUNCTION_KEY,
+  LOCAL_STORAGE_METRIC_SCOPE_KEY,
+  LOCAL_STORAGE_METRIC_TYPE_KEY,
+  LOCAL_STORAGE_OVERVIEW_IDS_KEY,
   LOCAL_STORAGE_QUERY_PARAMS_KEY,
   LOCAL_STORAGE_REFRESH_KEY,
   LOCAL_STORAGE_SIZE_KEY,
@@ -66,49 +71,50 @@ import {
   LOCAL_STORAGE_VIEW_ID_KEY,
   useLocalStorage
 } from '../utils/local-storage-hook';
+import { getDefaultOverviewPanels, OverviewPanel } from '../utils/overview-panels';
 import { usePoll } from '../utils/poll-hook';
 import {
   defaultMetricFunction,
   defaultMetricType,
   getFiltersFromURL,
+  getLayerFromURL,
   getLimitFromURL,
   getMatchFromURL,
   getRangeFromURL,
   getReporterFromURL,
   setURLFilters,
+  setURLLayer,
   setURLLimit,
   setURLMatch,
-  setURLRange,
-  setURLReporter,
   setURLMetricFunction,
   setURLMetricType,
-  getLayerFromURL as getLayerFromURL,
-  setURLLayer
+  setURLRange,
+  setURLReporter
 } from '../utils/router';
+import { getURLParams, hasEmptyParams, netflowTrafficPath, removeURLParam, setURLParams, URLParam } from '../utils/url';
 import DisplayDropdown, { Size } from './dropdowns/display-dropdown';
-import MetricTypeDropdown from './dropdowns/metric-type-dropdown';
 import MetricFunctionDropdown from './dropdowns/metric-function-dropdown';
+import MetricTypeDropdown from './dropdowns/metric-type-dropdown';
+import { LIMIT_VALUES, TOP_VALUES } from './dropdowns/query-options-dropdown';
 import { RefreshDropdown } from './dropdowns/refresh-dropdown';
+import ScopeDropdown from './dropdowns/scope-dropdown';
 import TimeRangeDropdown from './dropdowns/time-range-dropdown';
 import { FiltersToolbar } from './filters/filters-toolbar';
-import QuerySummary from './query-summary/query-summary';
 import { ColumnsModal } from './modals/columns-modal';
 import { ExportModal } from './modals/export-modal';
+import OverviewPanelsModal from './modals/overview-panels-modal';
 import TimeRangeModal from './modals/time-range-modal';
+import NetflowOverview from './netflow-overview/netflow-overview';
 import { RecordPanel } from './netflow-record/record-panel';
 import NetflowTable from './netflow-table/netflow-table';
+import ElementPanel from './netflow-topology/element-panel';
 import NetflowTopology from './netflow-topology/netflow-topology';
 import OptionsPanel from './netflow-topology/options-panel';
-import { getURLParams, hasEmptyParams, netflowTrafficPath, removeURLParam, setURLParams, URLParam } from '../utils/url';
-import { loadConfig } from '../utils/config';
-import SummaryPanel from './query-summary/summary-panel';
-import { GraphElement } from '@patternfly/react-topology';
-import ElementPanel from './netflow-topology/element-panel';
-import { ContextSingleton } from '../utils/context';
-
 import './netflow-traffic.css';
+import QuerySummary from './query-summary/query-summary';
+import SummaryPanel from './query-summary/summary-panel';
 
-export type ViewId = 'table' | 'topology';
+export type ViewId = 'overview' | 'table' | 'topology';
 
 // Note / improvment:
 // Could also be loaded via an intermediate loader component
@@ -149,23 +155,43 @@ export const NetflowTraffic: React.FC<{
   const [error, setError] = React.useState<string | undefined>();
   const [size, setSize] = useLocalStorage<Size>(LOCAL_STORAGE_SIZE_KEY, 'm');
   const [isTRModalOpen, setTRModalOpen] = React.useState(false);
+  const [isOverviewModalOpen, setOverviewModalOpen] = React.useState(false);
   const [isColModalOpen, setColModalOpen] = React.useState(false);
   const [isExportModalOpen, setExportModalOpen] = React.useState(false);
-  //TODO: move default view to an Overview like dashboard instead of table
-  const [selectedViewId, setSelectedViewId] = useLocalStorage<ViewId>(LOCAL_STORAGE_VIEW_ID_KEY, 'table');
+  const [selectedViewId, setSelectedViewId] = useLocalStorage<ViewId>(
+    LOCAL_STORAGE_VIEW_ID_KEY,
+    isAllowed(Feature.Overview) ? 'overview' : 'table'
+  );
   const [filters, setFilters] = React.useState<Filter[]>([]);
   const [match, setMatch] = React.useState<Match>(getMatchFromURL());
   const [reporter, setReporter] = React.useState<Reporter>(getReporterFromURL());
   const [layer, setLayer] = React.useState<Layer>(getLayerFromURL());
   const [limit, setLimit] = React.useState<number>(getLimitFromURL());
+  const [lastLimit, setLastLimit] = useLocalStorage<number>(LOCAL_STORAGE_LAST_LIMIT_KEY, LIMIT_VALUES[0]);
+  const [lastTop, setLastTop] = useLocalStorage<number>(LOCAL_STORAGE_LAST_TOP_KEY, TOP_VALUES[0]);
   const [range, setRange] = React.useState<number | TimeRange>(getRangeFromURL());
-  const [metricFunction, setMetricFunction] = React.useState<MetricFunction>(defaultMetricFunction);
-  const [metricType, setMetricType] = React.useState<MetricType | undefined>(defaultMetricType);
+  const [metricScope, setMetricScope] = useLocalStorage<MetricScope>(LOCAL_STORAGE_METRIC_SCOPE_KEY, 'namespace');
+  const [metricFunction, setMetricFunction] = useLocalStorage<MetricFunction>(
+    LOCAL_STORAGE_METRIC_FUNCTION_KEY,
+    defaultMetricFunction
+  );
+  const [metricType, setMetricType] = useLocalStorage<MetricType | undefined>(
+    LOCAL_STORAGE_METRIC_TYPE_KEY,
+    defaultMetricType
+  );
   const [interval, setInterval] = useLocalStorage<number | undefined>(LOCAL_STORAGE_REFRESH_KEY);
   const [selectedRecord, setSelectedRecord] = React.useState<Record | undefined>(undefined);
   const [selectedElement, setSelectedElement] = React.useState<GraphElement | undefined>(undefined);
 
   const isInit = React.useRef(true);
+  const [panels, setSelectedPanels] = useLocalStorage<OverviewPanel[]>(
+    LOCAL_STORAGE_OVERVIEW_IDS_KEY,
+    getDefaultOverviewPanels(t),
+    {
+      id: 'id',
+      criteria: 'isSelected'
+    }
+  );
   const [columns, setColumns] = useLocalStorage<Column[]>(LOCAL_STORAGE_COLS_KEY, getDefaultColumns(t), {
     id: 'id',
     criteria: 'isSelected'
@@ -182,6 +208,7 @@ export const NetflowTraffic: React.FC<{
 
   const clearSelections = () => {
     setTRModalOpen(false);
+    setOverviewModalOpen(false);
     setColModalOpen(false);
     setSelectedRecord(undefined);
     setShowTopologyOptions(false);
@@ -194,6 +221,14 @@ export const NetflowTraffic: React.FC<{
     //reporter 'both' is disabled for topology view
     if (view === 'topology' && reporter === 'both') {
       setReporter('source');
+    }
+    //save / restore top / limit parameter according to selected view
+    if (view === 'overview' && selectedViewId !== 'overview') {
+      setLastLimit(limit);
+      setLimit(lastTop);
+    } else if (view !== 'overview' && selectedViewId === 'overview') {
+      setLastTop(limit);
+      setLimit(lastLimit);
     }
     setSelectedViewId(view);
   };
@@ -236,11 +271,13 @@ export const NetflowTraffic: React.FC<{
         query.endTime = range.to.toString();
       }
     }
-    if (selectedViewId === 'topology') {
+    if (selectedViewId !== 'table') {
       query.function = metricFunction;
       query.type = metricType;
-      query.scope = topologyOptions.scope;
-      query.groups = topologyOptions.groupTypes !== TopologyGroupTypes.NONE ? topologyOptions.groupTypes : undefined;
+      query.scope = metricScope;
+      if (selectedViewId === 'topology') {
+        query.groups = topologyOptions.groupTypes !== TopologyGroupTypes.NONE ? topologyOptions.groupTypes : undefined;
+      }
     }
     return query;
   }, [
@@ -254,7 +291,7 @@ export const NetflowTraffic: React.FC<{
     selectedViewId,
     metricFunction,
     metricType,
-    topologyOptions.scope,
+    metricScope,
     topologyOptions.groupTypes
   ]);
 
@@ -298,6 +335,7 @@ export const NetflowTraffic: React.FC<{
             })
         );
         break;
+      case 'overview':
       case 'topology':
         manageWarnings(
           getTopology(fq, range)
@@ -363,7 +401,7 @@ export const NetflowTraffic: React.FC<{
       setMetricType(defaultMetricType);
     }
     setURLMetricType(metricType);
-  }, [metricFunction, metricType]);
+  }, [metricFunction, metricType, setMetricType]);
 
   // update local storage saved query params
   React.useEffect(() => {
@@ -404,48 +442,39 @@ export const NetflowTraffic: React.FC<{
     }
   };
 
-  const viewToggle = () => {
+  const viewTabs = () => {
     return (
-      <ToggleGroup>
-        <ToggleGroupItem
-          data-test="table-view-button"
-          icon={<TableIcon />}
-          text={t('Flow Table')}
-          buttonId="tableViewButton"
-          isSelected={selectedViewId === 'table'}
-          onChange={() => selectView('table')}
+      <Tabs
+        id="netflow-traffic-tabs"
+        usePageInsets
+        activeKey={selectedViewId}
+        onSelect={(event, eventkey) => selectView(eventkey as ViewId)}
+        role="region"
+      >
+        {isAllowed(Feature.Overview) && (
+          <Tab
+            className="netflow-traffic-tab"
+            eventKey={'overview'}
+            title={<TabTitleText>{t('Overview')}</TabTitleText>}
+          />
+        )}
+        <Tab
+          className="netflow-traffic-tab"
+          eventKey={'table'}
+          title={<TabTitleText>{t('Flow Table')}</TabTitleText>}
         />
-        <ToggleGroupItem
-          data-test="topology-view-button"
-          icon={<TopologyIcon />}
-          text={t('Topology')}
-          buttonId="topologyViewButton"
-          isSelected={selectedViewId === 'topology'}
-          onChange={() => selectView('topology')}
+        <Tab
+          className="netflow-traffic-tab"
+          eventKey={'topology'}
+          title={<TabTitleText>{t('Topology')}</TabTitleText>}
         />
-      </ToggleGroup>
+      </Tabs>
     );
   };
 
   const actions = () => {
     return (
       <div className="co-actions">
-        {selectedViewId === 'topology' && (
-          <MetricFunctionDropdown
-            data-test="metricFunction"
-            id="metricFunction"
-            selected={metricFunction}
-            setMetricFunction={setMetricFunction}
-          />
-        )}
-        {selectedViewId === 'topology' && metricFunction !== 'rate' && (
-          <MetricTypeDropdown
-            data-test="metricType"
-            id="metricType"
-            selected={metricType}
-            setMetricType={setMetricType}
-          />
-        )}
         <TimeRangeDropdown
           data-test="time-range-dropdown"
           id="time-range-dropdown"
@@ -475,12 +504,22 @@ export const NetflowTraffic: React.FC<{
   const menuContent = () => {
     const items: JSX.Element[] = [];
 
-    const viewToggleElement = viewToggle();
-    if (!_.isEmpty(forcedFilters) && viewToggleElement) {
-      items.push(<OverflowMenuItem isPersistent>{viewToggleElement}</OverflowMenuItem>);
-    }
-
-    if (selectedViewId === 'table') {
+    if (selectedViewId === 'overview') {
+      items.push(
+        <OverflowMenuItem isPersistent key="columns">
+          <Button
+            data-test="manage-overview-panels-button"
+            id="manage-overview-panels-button"
+            variant="link"
+            className="overflow-button"
+            icon={<ColumnsIcon />}
+            onClick={() => setOverviewModalOpen(true)}
+          >
+            {t('Manage panels')}
+          </Button>
+        </OverflowMenuItem>
+      );
+    } else if (selectedViewId === 'table') {
       items.push(
         <OverflowMenuItem isPersistent key="columns">
           <Button
@@ -604,6 +643,7 @@ export const NetflowTraffic: React.FC<{
           id="optionsPanel"
           options={topologyOptions}
           setOptions={setTopologyOptions}
+          metricScope={metricScope}
           onClose={() => setShowTopologyOptions(false)}
         />
       );
@@ -626,7 +666,7 @@ export const NetflowTraffic: React.FC<{
           metrics={metrics}
           metricFunction={metricFunction}
           metricType={metricType}
-          options={topologyOptions}
+          metricScope={metricScope}
           filters={filters}
           setFilters={setFilters}
           onClose={() => onElementSelect(undefined)}
@@ -639,6 +679,19 @@ export const NetflowTraffic: React.FC<{
 
   const pageContent = () => {
     switch (selectedViewId) {
+      case 'overview':
+        return (
+          <NetflowOverview
+            panels={panels}
+            metricFunction={metricFunction}
+            metricType={metricType}
+            metricScope={metricScope}
+            metrics={metrics}
+            loading={loading}
+            error={error}
+            clearFilters={clearFilters}
+          />
+        );
       case 'table':
         return (
           <NetflowTable
@@ -661,6 +714,8 @@ export const NetflowTraffic: React.FC<{
             range={range}
             metricFunction={metricFunction}
             metricType={metricType}
+            metricScope={metricScope}
+            setMetricScope={setMetricScope}
             metrics={metrics}
             options={topologyOptions}
             setOptions={setTopologyOptions}
@@ -721,7 +776,6 @@ export const NetflowTraffic: React.FC<{
             <div className="flex">
               <Text component={TextVariants.h1}>{t('Network Traffic')}</Text>
             </div>
-            {viewToggle()}
           </div>
         )
       }
@@ -738,6 +792,7 @@ export const NetflowTraffic: React.FC<{
           reporter,
           setReporter,
           allowReporterBoth: selectedViewId === 'table',
+          useTopK: selectedViewId === 'overview',
           layer: layer,
           setLayer: setLayer
         }}
@@ -746,6 +801,32 @@ export const NetflowTraffic: React.FC<{
         menuContent={menuContent()}
         menuControl={menuControl()}
       />
+      {
+        <Flex>
+          <FlexItem flex={{ default: 'flex_1' }}>{viewTabs()}</FlexItem>
+          <FlexItem>
+            {selectedViewId !== 'table' && (
+              <MetricFunctionDropdown
+                data-test="metricFunction"
+                id="metricFunction"
+                selected={metricFunction}
+                setMetricFunction={setMetricFunction}
+              />
+            )}
+            {selectedViewId !== 'table' && metricFunction !== 'rate' && (
+              <MetricTypeDropdown
+                data-test="metricType"
+                id="metricType"
+                selected={metricType}
+                setMetricType={setMetricType}
+              />
+            )}
+            {selectedViewId !== 'table' && (
+              <ScopeDropdown data-test="scope" id="scope" selected={metricScope} setScopeType={setMetricScope} />
+            )}
+          </FlexItem>
+        </Flex>
+      }
       <Drawer
         id="drawer"
         isInline
@@ -757,19 +838,28 @@ export const NetflowTraffic: React.FC<{
           <DrawerContentBody id="drawerBody">{pageContent()}</DrawerContentBody>
         </DrawerContent>
       </Drawer>
-      <QuerySummary
-        flows={flows}
-        range={range}
-        stats={stats}
-        lastRefresh={lastRefresh}
-        toggleQuerySummary={() => onToggleQuerySummary(!isShowQuerySummary)}
-      />
+      {selectedViewId === 'table' && (
+        <QuerySummary
+          flows={flows}
+          range={range}
+          stats={stats}
+          lastRefresh={lastRefresh}
+          toggleQuerySummary={() => onToggleQuerySummary(!isShowQuerySummary)}
+        />
+      )}
       <TimeRangeModal
         id="time-range-modal"
         isModalOpen={isTRModalOpen}
         setModalOpen={setTRModalOpen}
         range={typeof range === 'object' ? range : undefined}
         setRange={setRange}
+      />
+      <OverviewPanelsModal
+        id="overview-panels-modal"
+        isModalOpen={isOverviewModalOpen}
+        setModalOpen={setOverviewModalOpen}
+        panels={panels}
+        setPanels={setSelectedPanels}
       />
       <ColumnsModal
         id="columns-modal"

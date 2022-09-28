@@ -19,6 +19,8 @@ import { findFilter } from '../utils/filter-definitions';
 import { TFunction } from 'i18next';
 import { K8sModel } from '@openshift-console/dynamic-plugin-sdk';
 import { getTopologyEdgeId, getTopologyGroupId, getTopologyNodeId } from '../utils/ids';
+import { MetricScopeOptions, MetricFunctionOptions, MetricTypeOptions } from './metrics';
+import { MetricScope } from './flow-query';
 
 export enum LayoutName {
   Cola = 'Cola',
@@ -29,13 +31,6 @@ export enum LayoutName {
   Grid = 'Grid'
 }
 
-export enum TopologyScopes {
-  HOST = 'host',
-  NAMESPACE = 'namespace',
-  OWNER = 'owner',
-  RESOURCE = 'resource'
-}
-
 export enum TopologyGroupTypes {
   NONE = 'none',
   HOSTS = 'hosts',
@@ -44,18 +39,6 @@ export enum TopologyGroupTypes {
   NAMESPACES = 'namespaces',
   NAMESPACES_OWNERS = 'namespaces+owners',
   OWNERS = 'owners'
-}
-
-export enum TopologyMetricFunctions {
-  SUM = 'sum',
-  MAX = 'max',
-  AVG = 'avg',
-  RATE = 'rate'
-}
-
-export enum TopologyMetricTypes {
-  BYTES = 'bytes',
-  PACKETS = 'packets'
 }
 
 export enum TopologyTruncateLength {
@@ -76,12 +59,11 @@ export interface TopologyOptions {
   startCollapsed?: boolean;
   truncateLength: TopologyTruncateLength;
   layout: LayoutName;
-  scope: TopologyScopes;
   groupTypes: TopologyGroupTypes;
   lowScale: number;
   medScale: number;
-  metricFunction: TopologyMetricFunctions;
-  metricType: TopologyMetricTypes;
+  metricFunction: MetricFunctionOptions;
+  metricType: MetricTypeOptions;
 }
 
 export const DefaultOptions: TopologyOptions = {
@@ -93,12 +75,11 @@ export const DefaultOptions: TopologyOptions = {
   startCollapsed: false,
   truncateLength: TopologyTruncateLength.M,
   layout: LayoutName.ColaNoForce,
-  scope: TopologyScopes.NAMESPACE,
   groupTypes: TopologyGroupTypes.NONE,
   lowScale: 0.3,
   medScale: 0.5,
-  metricFunction: TopologyMetricFunctions.AVG,
-  metricType: TopologyMetricTypes.BYTES
+  metricFunction: MetricFunctionOptions.AVG,
+  metricType: MetricTypeOptions.BYTES
 };
 
 export type ElementData = {
@@ -292,23 +273,23 @@ export const getEdgeStyle = (count: number) => {
 export const getEdgeTag = (count: number, options: TopologyOptions) => {
   const roundCount = roundTwoDigits(count);
   if (options.edgeTags && roundCount) {
-    if (options.metricFunction === TopologyMetricFunctions.RATE) {
+    if (options.metricFunction === MetricFunctionOptions.RATE) {
       return `${roundCount}%`;
     } else {
       switch (options.metricType) {
-        case TopologyMetricTypes.BYTES:
-          if (options.metricFunction === TopologyMetricFunctions.SUM) {
+        case MetricTypeOptions.BYTES:
+          if (options.metricFunction === MetricFunctionOptions.SUM) {
             return humanFileSize(count, true, 0);
           } else {
             //get speed using default step = 60s
             return bytesPerSeconds(count, 60);
           }
 
-        case TopologyMetricTypes.PACKETS:
+        case MetricTypeOptions.PACKETS:
         default:
           switch (options.metricFunction) {
-            case TopologyMetricFunctions.MAX:
-            case TopologyMetricFunctions.AVG:
+            case MetricFunctionOptions.MAX:
+            case MetricFunctionOptions.AVG:
               return elementPerMinText(count);
             default:
               return roundCount;
@@ -357,6 +338,7 @@ export const generateEdge = (
 export const generateDataModel = (
   datas: TopologyMetrics[],
   options: TopologyOptions,
+  metricScope: MetricScope,
   searchValue: string,
   highlightedId: string,
   filters: Filter[],
@@ -491,8 +473,8 @@ export const generateDataModel = (
         : undefined;
 
     const parent = ownerGroup ? ownerGroup : namespaceGroup ? namespaceGroup : hostGroup;
-    switch (options.scope) {
-      case TopologyScopes.HOST:
+    switch (metricScope) {
+      case MetricScopeOptions.HOST:
         return addNode(
           _.isEmpty(host)
             ? //metrics without host will be grouped as 'External'
@@ -501,7 +483,7 @@ export const generateDataModel = (
               { type: 'Node', name: host, canStepInto: true },
           parent
         );
-      case TopologyScopes.NAMESPACE:
+      case MetricScopeOptions.NAMESPACE:
         return addNode(
           _.isEmpty(namespace)
             ? //metrics without namespace will be grouped as 'Unknown'
@@ -510,7 +492,7 @@ export const generateDataModel = (
               { type: 'Namespace', name: namespace, host, canStepInto: true },
           parent
         );
-      case TopologyScopes.OWNER:
+      case MetricScopeOptions.OWNER:
         return addNode(
           _.isEmpty(ownerName)
             ? //metrics without owner name will be grouped as 'Unknown'
@@ -519,7 +501,7 @@ export const generateDataModel = (
               { namespace, type: ownerType, name: ownerName, host, canStepInto: true },
           parent
         );
-      case TopologyScopes.RESOURCE:
+      case MetricScopeOptions.RESOURCE:
       default:
         return addNode(
           {

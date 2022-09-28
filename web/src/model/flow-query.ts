@@ -5,7 +5,7 @@ export type Layer = 'infrastructure' | 'application' | 'both';
 export type Match = 'all' | 'any';
 export type MetricFunction = 'sum' | 'avg' | 'max' | 'rate';
 export type MetricType = 'bytes' | 'packets';
-export type Scope = 'host' | 'namespace' | 'owner' | 'resource';
+export type MetricScope = 'host' | 'namespace' | 'owner' | 'resource';
 export type Groups = 'hosts' | 'hosts+namespaces' | 'hosts+owners' | 'namespaces' | 'namespaces+owners' | 'owners';
 export interface FlowQuery {
   timeRange?: number;
@@ -17,7 +17,7 @@ export interface FlowQuery {
   limit: number;
   function?: MetricFunction;
   type?: MetricType;
-  scope?: Scope;
+  scope?: MetricScope;
   groups?: Groups;
 }
 

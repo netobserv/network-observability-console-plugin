@@ -1,5 +1,6 @@
 //List in progress features here
 export enum Feature {
+  Overview = 'overview',
   Topology = 'topology'
 }
 

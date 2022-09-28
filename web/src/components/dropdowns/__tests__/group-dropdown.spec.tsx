@@ -2,11 +2,12 @@ import * as React from 'react';
 import { mount, shallow } from 'enzyme';
 
 import GroupDropdown from '../group-dropdown';
-import { TopologyGroupTypes, TopologyScopes } from '../../../model/topology';
+import { TopologyGroupTypes } from '../../../model/topology';
+import { MetricScopeOptions } from '../../../model/metrics';
 
 describe('<GroupDropdown />', () => {
   const props = {
-    scope: TopologyScopes.RESOURCE,
+    scope: MetricScopeOptions.RESOURCE,
     selected: TopologyGroupTypes.HOSTS,
     setGroupType: jest.fn(),
     id: 'group'
