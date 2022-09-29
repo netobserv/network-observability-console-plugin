@@ -10,8 +10,8 @@
  * This could either be Host, Namespace or Owner name
  * @returns string that identify the group
  */
-export const getTopologyGroupId = (groupType: string, name: string) => {
-  return `${groupType}.${name}`.toLowerCase();
+export const getTopologyGroupId = (groupType: string, name: string, parentId?: string) => {
+  return `${parentId ? parentId + '.' : ''}${groupType}.${name}`.toLowerCase();
 };
 
 /**
