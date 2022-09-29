@@ -350,11 +350,11 @@ export const generateDataModel = (
   const opts = { ...DefaultOptions, ...options };
 
   function addGroup(name: string, type: string, parent?: NodeModel, secondaryLabelPadding = false) {
-    const id = `${parent ? parent.id + '.' : ''}${type}.${name}`;
+    const id = getTopologyGroupId(type, name, parent ? parent.id : undefined);
     let group = nodes.find(g => g.type === 'group' && g.id === id);
     if (!group) {
       group = {
-        id: getTopologyGroupId(type, name),
+        id,
         children: [],
         type: 'group',
         group: true,
