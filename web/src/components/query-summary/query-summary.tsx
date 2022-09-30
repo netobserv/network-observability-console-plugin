@@ -66,7 +66,7 @@ export const QuerySummaryContent: React.FC<{
       <FlexItem>
         <Tooltip content={<Text component={TextVariants.p}>{t('Filtered average speed')}</Text>}>
           <Text id="bpsCount" component={TextVariants.p}>
-            {bytesPerSeconds(totalBytes, rangeInSeconds)}
+            {bytesPerSeconds(totalBytes / rangeInSeconds)}
           </Text>
         </Tooltip>
       </FlexItem>

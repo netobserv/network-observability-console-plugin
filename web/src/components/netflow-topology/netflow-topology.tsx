@@ -57,8 +57,8 @@ const FIT_PADDING = 80;
 export const TopologyContent: React.FC<{
   k8sModels: { [key: string]: K8sModel };
   range: number | TimeRange;
-  metricFunction?: MetricFunction;
-  metricType?: MetricType;
+  metricFunction: MetricFunction;
+  metricType: MetricType;
   metricScope: MetricScope;
   setMetricScope: (ms: MetricScope) => void;
   metrics: TopologyMetrics[];
@@ -265,13 +265,11 @@ export const TopologyContent: React.FC<{
     } else {
       rangeInSeconds = (range.from - range.to) / 1000;
     }
-    const maxEdgeValue = _.isEmpty(metrics)
-      ? 0
-      : metrics.reduce((prev, current) => (prev.total > current.total ? prev : current)).total;
+    const maxEdgeAvg = Math.max(...metrics.map(m => m.stats.avg));
     return {
       ...options,
       rangeInSeconds,
-      maxEdgeValue,
+      maxEdgeAvg,
       metricFunction,
       metricType
     } as TopologyOptions;
@@ -557,8 +555,8 @@ export const NetflowTopology: React.FC<{
   k8sModels: { [key: string]: K8sModel };
   error?: string;
   range: number | TimeRange;
-  metricFunction?: MetricFunction;
-  metricType?: MetricType;
+  metricFunction: MetricFunction;
+  metricType: MetricType;
   metricScope: MetricScope;
   setMetricScope: (ms: MetricScope) => void;
   metrics: TopologyMetrics[];

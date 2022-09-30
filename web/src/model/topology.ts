@@ -10,17 +10,16 @@ import {
   NodeStatus
 } from '@patternfly/react-topology';
 import _ from 'lodash';
-import { elementPerMinText, roundTwoDigits } from '../utils/count';
-import { TopologyMetrics } from '../api/loki';
+import { MetricStats, TopologyMetrics } from '../api/loki';
 import { Filter, FilterDefinition } from '../model/filters';
-import { bytesPerSeconds, humanFileSize } from '../utils/bytes';
 import { defaultTimeRange } from '../utils/router';
 import { findFilter } from '../utils/filter-definitions';
 import { TFunction } from 'i18next';
 import { K8sModel } from '@openshift-console/dynamic-plugin-sdk';
 import { getTopologyEdgeId, getTopologyGroupId, getTopologyNodeId } from '../utils/ids';
 import { MetricScopeOptions, MetricFunctionOptions, MetricTypeOptions } from './metrics';
-import { MetricScope } from './flow-query';
+import { MetricFunction, MetricScope, MetricType } from './flow-query';
+import { getMetricValue } from '../utils/metrics';
 
 export enum LayoutName {
   BreadthFirst = 'BreadthFirst',
@@ -54,7 +53,7 @@ export enum TopologyTruncateLength {
 
 export interface TopologyOptions {
   rangeInSeconds: number;
-  maxEdgeValue: number;
+  maxEdgeAvg: number;
   nodeBadges?: boolean;
   edges?: boolean;
   edgeTags?: boolean;
@@ -73,7 +72,7 @@ export const DefaultOptions: TopologyOptions = {
   nodeBadges: true,
   edges: true,
   edgeTags: true,
-  maxEdgeValue: 0,
+  maxEdgeAvg: 0,
   startCollapsed: false,
   truncateLength: TopologyTruncateLength.M,
   layout: LayoutName.ColaNoForce,
@@ -272,41 +271,19 @@ export const getEdgeStyle = (count: number) => {
   return count ? EdgeStyle.dashed : EdgeStyle.dotted;
 };
 
-export const getEdgeTag = (count: number, options: TopologyOptions) => {
-  const roundCount = roundTwoDigits(count);
-  if (options.edgeTags && roundCount) {
-    if (options.metricFunction === MetricFunctionOptions.RATE) {
-      return `${roundCount}%`;
-    } else {
-      switch (options.metricType) {
-        case MetricTypeOptions.BYTES:
-          if (options.metricFunction === MetricFunctionOptions.SUM) {
-            return humanFileSize(count, true, 0);
-          } else {
-            //get speed using default step = 60s
-            return bytesPerSeconds(count, 60);
-          }
+export const getStat = (stats: MetricStats, mf: MetricFunction): number => {
+  return mf === 'avg' ? stats.avg : mf === 'max' ? stats.max : mf === 'last' ? stats.latest : stats.total;
+};
 
-        case MetricTypeOptions.PACKETS:
-        default:
-          switch (options.metricFunction) {
-            case MetricFunctionOptions.MAX:
-            case MetricFunctionOptions.AVG:
-              return elementPerMinText(count);
-            default:
-              return roundCount;
-          }
-      }
-    }
-  } else {
-    return undefined;
-  }
+const getStatForDisplay = (stats: MetricStats, mt: MetricType, mf: MetricFunction): string => {
+  const stat = getStat(stats, mf);
+  return getMetricValue(stat, mt, mf);
 };
 
 export const generateEdge = (
   sourceId: string,
   targetId: string,
-  count: number,
+  stats: MetricStats,
   options: TopologyOptions,
   shadowed = false,
   highlightedId: string
@@ -318,8 +295,8 @@ export const generateEdge = (
     type: 'edge',
     source: sourceId,
     target: targetId,
-    edgeStyle: getEdgeStyle(count),
-    animationSpeed: getAnimationSpeed(count, options.maxEdgeValue),
+    edgeStyle: getEdgeStyle(stats.avg),
+    animationSpeed: getAnimationSpeed(stats.avg, options.maxEdgeAvg),
     data: {
       sourceId,
       targetId,
@@ -328,11 +305,11 @@ export const generateEdge = (
       //edges are directed from src to dst. It will become bidirectionnal if inverted pair is found
       startTerminalType: EdgeTerminalType.none,
       startTerminalStatus: NodeStatus.default,
-      endTerminalType: count > 0 ? EdgeTerminalType.directional : EdgeTerminalType.none,
+      endTerminalType: stats.avg > 0 ? EdgeTerminalType.directional : EdgeTerminalType.none,
       endTerminalStatus: NodeStatus.default,
-      tag: getEdgeTag(count, options),
-      tagStatus: getTagStatus(count, options.maxEdgeValue),
-      count
+      tag: getStatForDisplay(stats, options.metricType, options.metricFunction),
+      tagStatus: getTagStatus(stats.avg, options.maxEdgeAvg),
+      bps: stats.avg
     }
   };
 };
@@ -412,7 +389,7 @@ export const generateDataModel = (
     return node;
   }
 
-  function addEdge(sourceId: string, targetId: string, count: number, shadowed = false) {
+  function addEdge(sourceId: string, targetId: string, stats: MetricStats, shadowed = false) {
     let edge = edges.find(
       e =>
         (e.data.sourceId === sourceId && e.data.targetId === targetId) ||
@@ -420,20 +397,19 @@ export const generateDataModel = (
     );
     if (edge) {
       //update style and datas
-      const totalCount = edge.data.count + count;
-      edge.edgeStyle = getEdgeStyle(totalCount);
-      edge.animationSpeed = getAnimationSpeed(totalCount, options.maxEdgeValue);
+      edge.edgeStyle = getEdgeStyle(stats.avg);
+      edge.animationSpeed = getAnimationSpeed(stats.avg, options.maxEdgeAvg);
       edge.data = {
         ...edge.data,
         shadowed,
         //edges are directed from src to dst. It will become bidirectionnal if inverted pair is found
         startTerminalType: edge.data.sourceId !== sourceId ? EdgeTerminalType.directional : edge.data.startTerminalType,
-        tag: getEdgeTag(totalCount, options),
-        tagStatus: getTagStatus(totalCount, options.maxEdgeValue),
-        count: totalCount
+        tag: getStatForDisplay(stats, options.metricType, options.metricFunction),
+        tagStatus: getTagStatus(stats.avg, options.maxEdgeAvg),
+        bps: stats.avg
       };
     } else {
-      edge = generateEdge(sourceId, targetId, count, opts, shadowed, highlightedId);
+      edge = generateEdge(sourceId, targetId, stats, opts, shadowed, highlightedId);
       edges.push(edge);
     }
 
@@ -523,7 +499,7 @@ export const generateDataModel = (
     const dstNode = manageNode('Dst', d);
 
     if (options.edges && srcNode && dstNode && srcNode.id !== dstNode.id) {
-      addEdge(srcNode.id, dstNode.id, d.total, srcNode.data.shadowed || dstNode.data.shadowed);
+      addEdge(srcNode.id, dstNode.id, d.stats, srcNode.data.shadowed || dstNode.data.shadowed);
     }
   });
 

@@ -1,11 +1,9 @@
-import { calculateMatrixTotals, TopologyMetrics } from '../../../api/loki';
+import { TopologyMetrics } from '../../../api/loki';
 import topologyJson from '../../../../../mocks/loki/topology.json';
+import { computeStats } from '../../../utils/metrics';
 
 export const responseMock = topologyJson;
-
-export const dataMock = (responseMock.data.result as TopologyMetrics[]).flatMap(r =>
-  calculateMatrixTotals(r, 'sum', 300)
-);
+export const dataMock = (responseMock.data.result as TopologyMetrics[]).map(m => computeStats(m, 300));
 
 export const responseSample = {
   status: 'success',
@@ -285,6 +283,4 @@ export const responseSample = {
   }
 };
 
-export const dataSample = (responseSample.data.result as TopologyMetrics[]).flatMap(r =>
-  calculateMatrixTotals(r, 'sum', 300)
-);
+export const dataSample = (responseSample.data.result as TopologyMetrics[]).map(m => computeStats(m, 300));

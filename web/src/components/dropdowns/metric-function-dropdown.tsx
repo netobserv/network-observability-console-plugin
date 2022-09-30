@@ -15,14 +15,13 @@ export const MetricFunctionDropdown: React.FC<{
   const getMetricDisplay = (metricType?: string) => {
     switch (metricType as MetricFunctionOptions) {
       case MetricFunctionOptions.SUM:
-        return t('Sum');
+        return t('Total');
+      case MetricFunctionOptions.LAST:
+        return t('Latest rate');
       case MetricFunctionOptions.MAX:
-        return t('Max');
-      case MetricFunctionOptions.RATE:
-        return t('Rate');
+        return t('Max rate');
       case MetricFunctionOptions.AVG:
-      default:
-        return t('Avg');
+        return t('Average rate');
     }
   };
 

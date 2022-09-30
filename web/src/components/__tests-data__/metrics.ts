@@ -1,6 +1,7 @@
-import { TopologyMetrics } from '../../api/loki';
+import { computeStats } from '../../utils/metrics';
+import { RawTopologyMetrics } from '../../api/loki';
 
-export const metric1: TopologyMetrics = {
+export const metric1: RawTopologyMetrics = {
   metric: {
     DstAddr: '172.30.139.153',
     DstK8S_Name: 'loki',
@@ -23,11 +24,10 @@ export const metric1: TopologyMetrics = {
     [1653989926.227, '1234000'],
     [1653989986.227, '5678000'],
     [1653990046.227, '9999999']
-  ],
-  total: 22594577
+  ]
 };
 
-export const metric2: TopologyMetrics = {
+export const metric2: RawTopologyMetrics = {
   metric: {
     DstAddr: '172.30.139.153',
     DstK8S_Name: 'loki',
@@ -50,11 +50,10 @@ export const metric2: TopologyMetrics = {
     [1653989926.227, '0'],
     [1653989986.227, '0'],
     [1653990046.227, '0']
-  ],
-  total: 6912000
+  ]
 };
 
-export const metric3: TopologyMetrics = {
+export const metric3: RawTopologyMetrics = {
   metric: {
     DstAddr: '172.30.139.100',
     DstK8S_Name: 'pod 2',
@@ -77,8 +76,7 @@ export const metric3: TopologyMetrics = {
     [1653989926.227, '9813321'],
     [1653989986.227, '1234567'],
     [1653990046.227, '1234567']
-  ],
-  total: 19210522
+  ]
 };
 
-export const metrics: TopologyMetrics[] = [metric1, metric2, metric3];
+export const metrics = [metric1, metric2, metric3].map(m => computeStats(m, 300));

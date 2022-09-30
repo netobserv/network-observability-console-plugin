@@ -18,18 +18,19 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { defaultSize, maxSize, minSize } from '../../utils/panel';
 import { MetricFunction, MetricScope, MetricType } from '../../model/flow-query';
-import { getMetricValue, TopologyMetrics } from '../../api/loki';
+import { TopologyMetrics } from '../../api/loki';
 import { Filter } from '../../model/filters';
-import { ElementData, isElementFiltered, toggleElementFilter } from '../../model/topology';
+import { ElementData, getStat, isElementFiltered, toggleElementFilter } from '../../model/topology';
 import './element-panel.css';
 import MetricsContent from '../metrics/metrics-content';
 import { MetricScopeOptions } from '../../model/metrics';
+import { getMetricValue } from '../../utils/metrics';
 
 export const ElementPanelContent: React.FC<{
   element: GraphElement;
   metrics: TopologyMetrics[];
   metricFunction: MetricFunction;
-  metricType?: MetricType;
+  metricType: MetricType;
   metricScope: MetricScope;
   filters: Filter[];
   setFilters: (filters: Filter[]) => void;
@@ -132,13 +133,13 @@ export const ElementPanelContent: React.FC<{
           </Flex>
           <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsNone' }}>
             <FlexItem>
-              <Text id="fromCount">{getMetricValue(fromCount, metricFunction, metricType)}</Text>
+              <Text id="fromCount">{getMetricValue(fromCount, metricType, metricFunction)}</Text>
             </FlexItem>
             <FlexItem>
-              <Text id="toCount">{getMetricValue(toCount, metricFunction, metricType)}</Text>
+              <Text id="toCount">{getMetricValue(toCount, metricType, metricFunction)}</Text>
             </FlexItem>
             <FlexItem>
-              <Text id="total">{getMetricValue(toCount + fromCount, metricFunction, metricType)}</Text>
+              <Text id="total">{getMetricValue(toCount + fromCount, metricType, metricFunction)}</Text>
             </FlexItem>
           </Flex>
         </Flex>
@@ -193,31 +194,32 @@ export const ElementPanelContent: React.FC<{
         : match(m, data, metricScope)
     );
     nodeMetrics.forEach(m => {
+      const value = getStat(m.stats, metricFunction);
       if (type === 'group') {
         if (data.type === 'Namespace') {
           if (m.metric.SrcK8S_Namespace === data.name) {
-            srcCount += m.total;
+            srcCount += value;
           } else {
-            dstCount += m.total;
+            dstCount += value;
           }
         } else if (data.type === 'Node') {
           if (m.metric.SrcK8S_HostName === data.name) {
-            srcCount += m.total;
+            srcCount += value;
           } else {
-            dstCount += m.total;
+            dstCount += value;
           }
         } else {
           if (m.metric.SrcK8S_OwnerName === data.name) {
-            srcCount += m.total;
+            srcCount += value;
           } else {
-            dstCount += m.total;
+            dstCount += value;
           }
         }
       } else {
         if (m.metric.SrcAddr === data.addr) {
-          srcCount += m.total;
+          srcCount += value;
         } else {
-          dstCount += m.total;
+          dstCount += value;
         }
       }
     });
@@ -274,13 +276,14 @@ export const ElementPanelContent: React.FC<{
       }
     });
     edgeMetrics.forEach(m => {
+      const value = getStat(m.stats, metricFunction);
       if (
         (metricScope === MetricScopeOptions.HOST && m.metric.SrcK8S_HostName === srcData.host) ||
         m.metric.SrcAddr === srcData.addr
       ) {
-        srcCount += m.total;
+        srcCount += value;
       } else {
-        dstCount += m.total;
+        dstCount += value;
       }
     });
     const srcInfos = resourceInfos(srcData);
@@ -322,7 +325,7 @@ export const ElementPanel: React.FC<{
   element: GraphElement;
   metrics: TopologyMetrics[];
   metricFunction: MetricFunction;
-  metricType?: MetricType;
+  metricType: MetricType;
   metricScope: MetricScope;
   filters: Filter[];
   setFilters: (filters: Filter[]) => void;

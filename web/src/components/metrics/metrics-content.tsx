@@ -16,16 +16,18 @@ import { Text, TextContent, TextVariants } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { MetricScopeOptions } from '../../model/metrics';
-import { getMetricName, getMetricValue, TopologyMetric, TopologyMetrics } from '../../api/loki';
+import { TopologyMetric, TopologyMetrics } from '../../api/loki';
 import { MetricFunction, MetricType } from '../../model/flow-query';
 import { getDateFromUnixString, twentyFourHourTime } from '../../utils/datetime';
 import './metrics-content.css';
+import { getMetricName, getMetricValue } from '../../utils/metrics';
+import { getStat } from '../../model/topology';
 
 export const MetricsContent: React.FC<{
   id: string;
   sizePx?: number;
-  metricFunction?: MetricFunction;
-  metricType?: MetricType;
+  metricFunction: MetricFunction;
+  metricType: MetricType;
   metrics: TopologyMetrics[];
   scope: MetricScopeOptions;
   counters?: JSX.Element;
@@ -58,22 +60,17 @@ export const MetricsContent: React.FC<{
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   const metricTitle = React.useCallback(() => {
-    if (metricFunction === 'rate') {
-      return t('Flows rate');
-    } else if (metricType) {
-      switch (metricFunction) {
-        case 'avg':
-          return t('Average {{type}} (1m frame)', { type: metricType });
-        case 'max':
-          return t('Max {{type}} (1m frame)', { type: metricType });
-        case 'sum':
-          return t('Total {{type}}', { type: metricType });
-        default:
-          return '';
-      }
-    } else {
-      console.error('metricType cannot be undefined');
-      return '';
+    switch (metricFunction) {
+      case 'last':
+        return t('Latest {{type}} rate', { type: metricType });
+      case 'avg':
+        return t('Average {{type}} rate', { type: metricType });
+      case 'max':
+        return t('Max {{type}} rate', { type: metricType });
+      case 'sum':
+        return t('Total {{type}}', { type: metricType });
+      default:
+        return '';
     }
   }, [metricFunction, metricType, t]);
 
@@ -140,7 +137,8 @@ export const MetricsContent: React.FC<{
       }
     }
 
-    const total = metrics.reduce((prev, cur) => prev + cur.total, 0);
+    const values = metrics.map(m => getStat(m.stats, metricFunction));
+    const total = values.reduce((prev, cur) => prev + cur, 0);
 
     const legendData = metrics.map(m => ({
       childName: `${showBar ? 'bar-' : 'area-'}${metrics.indexOf(m)}`,
@@ -194,16 +192,16 @@ export const MetricsContent: React.FC<{
             labels={({ datum }) => datum.x}
             width={doubleWidth ? 1000 : 500}
             height={350}
-            data={metrics
-              .sort((a, b) => a.total - b.total)
-              .map((m: TopologyMetrics) => ({ x: `${((m.total / total) * 100).toFixed(2)}%`, y: m.total }))}
+            data={values
+              .sort((a, b) => a - b) /* to check: sorting here may mess up with legend correlation? */
+              .map(v => ({ x: `${((v / total) * 100).toFixed(2)}%`, y: v }))}
             padding={{
               bottom: 20,
               left: 20,
               right: 300,
               top: 20
             }}
-            title={`${getMetricValue(total, metricFunction, metricType)}`}
+            title={`${getMetricValue(total, metricType, metricFunction)}`}
             subTitle={metricTitle()}
           />
         ) : (
@@ -231,12 +229,7 @@ export const MetricsContent: React.FC<{
             }}
           >
             <ChartAxis fixLabelOverlap />
-            <ChartAxis
-              dependentAxis
-              showGrid
-              fixLabelOverlap
-              tickFormat={y => getMetricValue(y, metricFunction, metricType)}
-            />
+            <ChartAxis dependentAxis showGrid fixLabelOverlap tickFormat={y => getMetricValue(y, metricType, 'avg')} />
             {showBar && (
               <ChartGroup>
                 {metrics.map(m => (

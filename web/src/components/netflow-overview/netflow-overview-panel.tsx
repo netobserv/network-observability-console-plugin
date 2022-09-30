@@ -11,8 +11,8 @@ import MetricsContent from '../metrics/metrics-content';
 export const NetflowOverviewPanel: React.FC<{
   limit: number;
   panel: OverviewPanel;
-  metricFunction?: MetricFunction;
-  metricType?: MetricType;
+  metricFunction: MetricFunction;
+  metricType: MetricType;
   metricScope: MetricScope;
   metrics: TopologyMetrics[];
   doubleWidth?: boolean;

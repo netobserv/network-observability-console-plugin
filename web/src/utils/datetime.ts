@@ -1,6 +1,7 @@
 import { TFunction } from 'i18next';
 import moment from 'moment';
 import { CUSTOM_TIME_RANGE_KEY } from '../components/dropdowns/time-range-dropdown';
+import { getDateSInMiliseconds } from './duration';
 
 const zeroPad = (number: number) => (number < 10 ? `0${number}` : number);
 
@@ -43,4 +44,31 @@ export const getTimeRangeOptions = (t: TFunction) => {
 
 export const getFormattedDate = (date: Date, format = 'llll') => {
   return moment(date).format(format);
+};
+
+export const rangeToSeconds = (range: TimeRange | number): number => {
+  if (typeof range === 'number') {
+    return range;
+  }
+  return range.to - range.from;
+};
+
+export const computeStepInterval = (range: TimeRange | number) => {
+  const seconds = rangeToSeconds(range);
+  let interval = Math.floor(seconds / 10);
+  if (interval < 30) {
+    interval = 30;
+  }
+  const step = Math.floor(interval / 2);
+  return {
+    rateIntervalSeconds: interval,
+    stepSeconds: step
+  };
+};
+
+export const getRangeEnd = (range: TimeRange | number): Date => {
+  if (typeof range === 'number') {
+    return new Date();
+  }
+  return new Date(getDateSInMiliseconds(range.to));
 };

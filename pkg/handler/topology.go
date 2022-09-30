@@ -13,10 +13,14 @@ import (
 )
 
 const (
-	metricFunctionKey = "function"
-	metricTypeKey     = "type"
-	scopeKey          = "scope"
-	groupsKey         = "groups"
+	metricTypeKey   = "type"
+	scopeKey        = "scope"
+	groupsKey       = "groups"
+	rateIntervalKey = "rateInterval"
+	stepKey         = "step"
+
+	defaultRateInterval = "1m"
+	defaultStep         = "30s"
 )
 
 func GetTopology(cfg *loki.Config) func(w http.ResponseWriter, r *http.Request) {
@@ -54,7 +58,14 @@ func getTopologyFlows(cfg *loki.Config, client httpclient.Caller, params url.Val
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
-	metricFunction := params.Get(metricFunctionKey)
+	rateInterval := params.Get(rateIntervalKey)
+	if rateInterval == "" {
+		rateInterval = defaultRateInterval
+	}
+	step := params.Get(stepKey)
+	if step == "" {
+		step = defaultStep
+	}
 	metricType := params.Get(metricTypeKey)
 	reporter := params.Get(reporterKey)
 	layer := params.Get(layerKey)
@@ -71,7 +82,7 @@ func getTopologyFlows(cfg *loki.Config, client httpclient.Caller, params url.Val
 		// match any, and multiple filters => run in parallel then aggregate
 		var queries []string
 		for _, group := range filterGroups {
-			query, code, err := buildTopologyQuery(cfg, group, start, end, limit, metricFunction, metricType, reporter, layer, scope, groups)
+			query, code, err := buildTopologyQuery(cfg, group, start, end, limit, rateInterval, step, metricType, reporter, layer, scope, groups)
 			if err != nil {
 				return nil, code, errors.New("Can't build query: " + err.Error())
 			}
@@ -87,7 +98,7 @@ func getTopologyFlows(cfg *loki.Config, client httpclient.Caller, params url.Val
 		if len(filterGroups) > 0 {
 			filters = filterGroups[0]
 		}
-		query, code, err := buildTopologyQuery(cfg, filters, start, end, limit, metricFunction, metricType, reporter, layer, scope, groups)
+		query, code, err := buildTopologyQuery(cfg, filters, start, end, limit, rateInterval, step, metricType, reporter, layer, scope, groups)
 		if err != nil {
 			return nil, code, err
 		}
@@ -102,8 +113,8 @@ func getTopologyFlows(cfg *loki.Config, client httpclient.Caller, params url.Val
 	return qr, http.StatusOK, nil
 }
 
-func buildTopologyQuery(cfg *loki.Config, filters [][]string, start, end, limit, metricFunction, metricType, reporter, layer, scope, groups string) (string, int, error) {
-	qb, err := loki.NewTopologyQuery(cfg, start, end, limit, metricFunction, metricType, reporter, layer, scope, groups)
+func buildTopologyQuery(cfg *loki.Config, filters [][]string, start, end, limit, rateInterval, step, metricType, reporter, layer, scope, groups string) (string, int, error) {
+	qb, err := loki.NewTopologyQuery(cfg, start, end, limit, rateInterval, step, metricType, reporter, layer, scope, groups)
 	if err != nil {
 		return "", http.StatusBadRequest, err
 	}

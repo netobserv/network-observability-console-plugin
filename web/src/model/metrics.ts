@@ -1,8 +1,8 @@
 export enum MetricFunctionOptions {
-  SUM = 'sum',
-  MAX = 'max',
+  LAST = 'last',
   AVG = 'avg',
-  RATE = 'rate'
+  MAX = 'max',
+  SUM = 'sum'
 }
 
 export enum MetricTypeOptions {

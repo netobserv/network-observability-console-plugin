@@ -34,11 +34,6 @@ describe('<MetricDropdown />', () => {
     const wrapper = mount(<MetricFunctionDropdown {...props} />);
 
     const dropdown = wrapper.find('#metric-dropdown');
-    //open dropdown and select RATE
-    dropdown.at(0).simulate('click');
-    wrapper.find('[id="rate"]').at(0).simulate('click');
-    expect(props.setMetricFunction).toHaveBeenCalledWith(MetricFunctionOptions.RATE);
-    expect(wrapper.find('li').length).toBe(0);
 
     //open dropdown and select MAX
     dropdown.at(0).simulate('click');
@@ -47,6 +42,6 @@ describe('<MetricDropdown />', () => {
     expect(wrapper.find('li').length).toBe(0);
 
     //setMetricFunction should be called twice
-    expect(props.setMetricFunction).toHaveBeenCalledTimes(2);
+    expect(props.setMetricFunction).toHaveBeenCalledTimes(1);
   });
 });

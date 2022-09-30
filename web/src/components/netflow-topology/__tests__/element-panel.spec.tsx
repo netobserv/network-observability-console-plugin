@@ -57,17 +57,17 @@ describe('<ElementPanel />', () => {
 
     //check node infos
     expect(wrapper.find('#addressValue').last().text()).toBe('10.129.0.15');
-    expect(wrapper.find('#fromCount').last().text()).toBe('7 MB');
-    expect(wrapper.find('#toCount').last().text()).toBe('286 kB');
-    expect(wrapper.find('#total').last().text()).toBe('7 MB');
+    expect(wrapper.find('#fromCount').last().text()).toBe('100 MB');
+    expect(wrapper.find('#toCount').last().text()).toBe('4 MB');
+    expect(wrapper.find('#total').last().text()).toBe('104 MB');
 
     //update to edge
     wrapper.setProps({ ...mocks, element: getEdge() });
     expect(wrapper.find('#source').last().text()).toBe('SourceIP10.131.0.18');
     expect(wrapper.find('#destination').last().text()).toBe('DestinationIP172.30.0.10');
-    expect(wrapper.find('#fromCount').last().text()).toBe('78 kB');
-    expect(wrapper.find('#toCount').last().text()).toBe('317 kB');
-    expect(wrapper.find('#total').last().text()).toBe('396 kB');
+    expect(wrapper.find('#fromCount').last().text()).toBe('1 MB');
+    expect(wrapper.find('#toCount').last().text()).toBe('5 MB');
+    expect(wrapper.find('#total').last().text()).toBe('6 MB');
   });
 
   it('should filter content', async () => {

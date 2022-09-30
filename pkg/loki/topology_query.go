@@ -1,8 +1,6 @@
 package loki
 
 import (
-	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/netobserv/network-observability-console-plugin/pkg/utils"
@@ -10,15 +8,14 @@ import (
 
 const (
 	topologyDefaultLimit = "100"
-	topologyDefaultRange = "300"
 )
 
 type Topology struct {
-	limit          string
-	timeRange      string
-	metricFunction string
-	dataField      string
-	fields         string
+	limit        string
+	rateInterval string
+	step         string
+	dataField    string
+	fields       string
 }
 
 type TopologyQueryBuilder struct {
@@ -26,40 +23,10 @@ type TopologyQueryBuilder struct {
 	topology *Topology
 }
 
-func NewTopologyQuery(cfg *Config, start, end, limit, metricFunction, metricType, reporter, layer, scope, groups string) (*TopologyQueryBuilder, error) {
+func NewTopologyQuery(cfg *Config, start, end, limit, rateInterval, step, metricType, reporter, layer, scope, groups string) (*TopologyQueryBuilder, error) {
 	l := limit
 	if len(l) == 0 {
 		l = topologyDefaultLimit
-	}
-
-	timeRange := topologyDefaultRange
-	if len(start) > 0 && len(end) > 0 {
-		var startTime, endTime int64
-		var err error
-		startTime, err = strconv.ParseInt(start, 10, 64)
-		if err != nil {
-			return nil, fmt.Errorf("can't parse start param: %s", start)
-		}
-		endTime, err = strconv.ParseInt(end, 10, 64)
-		if err != nil {
-			return nil, fmt.Errorf("can't parse end param: %s", end)
-		}
-		rng := endTime - startTime
-		if rng > 0 {
-			timeRange = strconv.FormatInt(rng, 10)
-		}
-	}
-
-	var f string
-	switch metricFunction {
-	case "avg":
-		f = "avg_over_time"
-	case "max":
-		f = "max_over_time"
-	case "rate":
-		f = "rate"
-	default:
-		f = "sum_over_time"
 	}
 
 	var t string
@@ -73,11 +40,11 @@ func NewTopologyQuery(cfg *Config, start, end, limit, metricFunction, metricType
 	return &TopologyQueryBuilder{
 		FlowQueryBuilder: NewFlowQueryBuilder(cfg, start, end, limit, reporter, layer),
 		topology: &Topology{
-			timeRange:      timeRange,
-			limit:          l,
-			metricFunction: f,
-			dataField:      t,
-			fields:         getFields(scope, groups),
+			rateInterval: rateInterval,
+			step:         step,
+			limit:        l,
+			dataField:    t,
+			fields:       getFields(scope, groups),
 		},
 	}, nil
 }
@@ -124,7 +91,7 @@ func (q *TopologyQueryBuilder) Build() string {
 	//		topk(
 	// 			<k>,
 	//			sum by(<aggregations>) (
-	//				sum_over_time(
+	//				rate(
 	//					{<label filters>}|<line filters>|json|<json filters>
 	//						|unwrap Bytes|__error__=""[300s]
 	//				)
@@ -136,23 +103,21 @@ func (q *TopologyQueryBuilder) Build() string {
 	sb.WriteString(q.topology.limit)
 	sb.WriteString(",sum by(")
 	sb.WriteString(q.topology.fields)
-	sb.WriteString(") (")
-	sb.WriteString(q.topology.metricFunction)
-	sb.WriteString("(")
+	sb.WriteString(") (rate(")
 	q.appendLabels(sb)
 	q.appendLineFilters(sb)
 	q.appendJSON(sb, true)
-	if q.topology.metricFunction != "rate" && len(q.topology.dataField) > 0 {
+	if len(q.topology.dataField) > 0 {
 		sb.WriteString("|unwrap ")
 		sb.WriteString(q.topology.dataField)
 		sb.WriteString(`|__error__=""`)
 	}
 	sb.WriteRune('[')
-	sb.WriteString(q.topology.timeRange)
-	sb.WriteString("s])))")
+	sb.WriteString(q.topology.rateInterval)
+	sb.WriteString("])))")
 	q.appendQueryParams(sb)
-	//TODO: check if step should be configurable. 60s is forced to help calculations on front end side
-	sb.WriteString("&step=60s")
+	sb.WriteString("&step=")
+	sb.WriteString(q.topology.step)
 
 	return sb.String()
 }
