@@ -233,6 +233,7 @@ func TestLokiFiltering(t *testing.T) {
 			"",
 			"",
 			false,
+			false,
 			"",
 			false,
 			".*-ingress$",
