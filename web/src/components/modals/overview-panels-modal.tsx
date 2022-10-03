@@ -19,7 +19,7 @@ import {
 import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { getDefaultOverviewPanels, OverviewPanel } from '../../utils/overview-panels';
+import { getDefaultOverviewPanels, getOverviewPanelTitle, OverviewPanel } from '../../utils/overview-panels';
 import Modal from './modal';
 import './overview-panels-modal.css';
 
@@ -80,8 +80,8 @@ export const OverviewPanelsModal: React.FC<{
   );
 
   const onReset = React.useCallback(() => {
-    setUpdatedPanels(getDefaultOverviewPanels(t));
-  }, [setUpdatedPanels, t]);
+    setUpdatedPanels(getDefaultOverviewPanels());
+  }, [setUpdatedPanels]);
 
   const onSelectAll = React.useCallback(() => {
     const result = [...updatedPanels];
@@ -118,7 +118,7 @@ export const OverviewPanelsModal: React.FC<{
           <DataListItemCells
             dataListCells={[
               <DataListCell key={'data-list-cell-' + i}>
-                <label htmlFor={panel.id}>{panel.title}</label>
+                <label htmlFor={panel.id}>{getOverviewPanelTitle(t, panel.id)}</label>
               </DataListCell>
             ]}
           />

@@ -1,0 +1,9 @@
+.metrics-content-div {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+}
+
+.small-chart-label>tspan {
+  font-size: 10px !important;
+}

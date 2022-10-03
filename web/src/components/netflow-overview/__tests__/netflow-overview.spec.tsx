@@ -13,6 +13,7 @@ import NetflowOverviewPanel from '../netflow-overview-panel';
 
 describe('<NetflowOverview />', () => {
   const props = {
+    limit: 5,
     panels: ShuffledDefaultPanels,
     error: undefined as string | undefined,
     loading: false,
