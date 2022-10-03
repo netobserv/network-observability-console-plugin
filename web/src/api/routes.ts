@@ -12,7 +12,7 @@ import {
 import { Config, defaultConfig } from '../model/config';
 import { TimeRange } from '../utils/datetime';
 import { ContextSingleton } from '../utils/context';
-import { computeStats } from '../utils/metrics';
+import { parseMetrics } from '../utils/metrics';
 
 export const getFlows = (params: FlowQuery): Promise<RecordsResult> => {
   return axios.get(ContextSingleton.getHost() + '/api/loki/flows', { params }).then(r => {
@@ -59,7 +59,7 @@ export const getTopology = (params: FlowQuery, range: number | TimeRange): Promi
       throw new Error(`${r.statusText} [code=${r.status}]`);
     }
     const aggQR: AggregatedQueryResponse = r.data;
-    const metrics = (aggQR.result as RawTopologyMetrics[]).map(m => computeStats(m, range));
+    const metrics = (aggQR.result as RawTopologyMetrics[]).map(raw => parseMetrics(raw, range));
     return { metrics: metrics, stats: aggQR.stats };
   });
 };

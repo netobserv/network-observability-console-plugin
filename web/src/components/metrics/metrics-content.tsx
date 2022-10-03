@@ -16,7 +16,7 @@ import { Text, TextContent, TextVariants } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { MetricScopeOptions } from '../../model/metrics';
-import { TopologyMetric, TopologyMetrics } from '../../api/loki';
+import { TopologyMetricPeer, TopologyMetrics } from '../../api/loki';
 import { MetricFunction, MetricType } from '../../model/flow-query';
 import { getDateFromUnixString, twentyFourHourTime } from '../../utils/datetime';
 import './metrics-content.css';
@@ -95,45 +95,35 @@ export const MetricsContent: React.FC<{
       return truncate(input);
     }
 
-    function getName(m: TopologyMetric) {
+    function getName(source: TopologyMetricPeer, dest: TopologyMetricPeer) {
+      const srcName = truncateParts(getMetricName(source, scope, t));
+      const dstName = truncateParts(getMetricName(dest, scope, t));
       switch (scope) {
         case MetricScopeOptions.HOST:
-          const srcNode = truncateParts(getMetricName(m, scope, true, t));
-          const dstNode = truncateParts(getMetricName(m, scope, false, t));
-
           return data?.host
-            ? m.SrcK8S_HostName === data.host
-              ? `${t('To')} ${dstNode}`
-              : `${t('From')} ${srcNode}`
-            : `${srcNode} -> ${dstNode}`;
+            ? source.hostName === data.host
+              ? `${t('To')} ${dstName}`
+              : `${t('From')} ${srcName}`
+            : `${srcName} -> ${dstName}`;
         case MetricScopeOptions.NAMESPACE:
-          const srcNamespace = truncateParts(getMetricName(m, scope, true, t));
-          const dstNamespace = truncateParts(getMetricName(m, scope, false, t));
-
           return data?.namespace
-            ? m.SrcK8S_Namespace === data.name
-              ? `${t('To')} ${dstNamespace}`
-              : `${t('From')} ${srcNamespace}`
-            : `${srcNamespace} -> ${dstNamespace}`;
+            ? source.namespace === data.name
+              ? `${t('To')} ${dstName}`
+              : `${t('From')} ${srcName}`
+            : `${srcName} -> ${dstName}`;
         case MetricScopeOptions.OWNER:
-          const srcOwner = truncateParts(getMetricName(m, scope, true, t));
-          const dstOwner = truncateParts(getMetricName(m, scope, false, t));
-
           return data?.namespace
-            ? m.SrcK8S_Namespace === data.namespace
-              ? `${t('To')} ${dstOwner}`
-              : `${t('From')} ${srcOwner}`
-            : `${srcOwner} -> ${dstOwner}`;
+            ? source.namespace === data.namespace
+              ? `${t('To')} ${dstName}`
+              : `${t('From')} ${srcName}`
+            : `${srcName} -> ${dstName}`;
         case MetricScopeOptions.RESOURCE:
         default:
-          const src = truncateParts(getMetricName(m, scope, true, t));
-          const dst = truncateParts(getMetricName(m, scope, false, t));
-
           return data?.addr
-            ? m.SrcAddr === data.addr
-              ? `${t('To')} ${dst}`
-              : `${t('From')} ${src}`
-            : `${src} -> ${dst}`;
+            ? source.addr === data.addr
+              ? `${t('To')} ${dstName}`
+              : `${t('From')} ${srcName}`
+            : `${srcName} -> ${dstName}`;
       }
     }
 
@@ -142,7 +132,7 @@ export const MetricsContent: React.FC<{
 
     const legendData = metrics.map(m => ({
       childName: `${showBar ? 'bar-' : 'area-'}${metrics.indexOf(m)}`,
-      name: getName(m.metric)
+      name: getName(m.source, m.destination)
     }));
 
     const CursorVoronoiContainer = createContainer('voronoi', 'cursor');
@@ -237,7 +227,7 @@ export const MetricsContent: React.FC<{
                     name={`bar-${metrics.indexOf(m)}`}
                     key={`bar-${metrics.indexOf(m)}`}
                     data={m.values.map(v => ({
-                      name: getName(m.metric),
+                      name: getName(m.source, m.destination),
                       x: twentyFourHourTime(getDateFromUnixString(v[0] as string), true),
                       y: Number(v[1])
                     }))}
@@ -252,7 +242,7 @@ export const MetricsContent: React.FC<{
                     name={`area-${metrics.indexOf(m)}`}
                     key={`area-${metrics.indexOf(m)}`}
                     data={m.values.map(v => ({
-                      name: getName(m.metric),
+                      name: getName(m.source, m.destination),
                       x: twentyFourHourTime(getDateFromUnixString(v[0] as string), true),
                       y: Number(v[1])
                     }))}
@@ -268,7 +258,7 @@ export const MetricsContent: React.FC<{
                     name={`scatter-${metrics.indexOf(m)}`}
                     key={`scatter-${metrics.indexOf(m)}`}
                     data={m.values.map(v => ({
-                      name: getName(m.metric),
+                      name: getName(m.source, m.destination),
                       x: twentyFourHourTime(getDateFromUnixString(v[0] as string), true),
                       y: Number(v[1])
                     }))}

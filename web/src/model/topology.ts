@@ -10,7 +10,7 @@ import {
   NodeStatus
 } from '@patternfly/react-topology';
 import _ from 'lodash';
-import { MetricStats, TopologyMetrics } from '../api/loki';
+import { MetricStats, TopologyMetricPeer, TopologyMetrics } from '../api/loki';
 import { Filter, FilterDefinition } from '../model/filters';
 import { defaultTimeRange } from '../utils/router';
 import { findFilter } from '../utils/filter-definitions';
@@ -416,78 +416,79 @@ export const generateDataModel = (
     return edge;
   }
 
-  function manageNode(prefix: 'Src' | 'Dst', d: TopologyMetrics) {
-    const m = d.metric as never;
-
-    const namespace = m[`${prefix}K8S_Namespace`];
-    const ownerType = m[`${prefix}K8S_OwnerType`];
-    const ownerName = m[`${prefix}K8S_OwnerName`];
-    const host = m[`${prefix}K8S_HostName`];
-    const type = m[`${prefix}K8S_Type`];
-    const name = m[`${prefix}K8S_Name`];
-    const addr = m[`${prefix}Addr`];
-
+  function manageNode(peer: TopologyMetricPeer) {
     const hostGroup =
       [TopologyGroupTypes.HOSTS_NAMESPACES, TopologyGroupTypes.HOSTS_OWNERS, TopologyGroupTypes.HOSTS].includes(
         options.groupTypes
-      ) && !_.isEmpty(host)
-        ? addGroup(host, 'Node', undefined, true)
+      ) && !_.isEmpty(peer.hostName)
+        ? addGroup(peer.hostName!, 'Node', undefined, true)
         : undefined;
     const namespaceGroup =
       [
         TopologyGroupTypes.HOSTS_NAMESPACES,
         TopologyGroupTypes.NAMESPACES_OWNERS,
         TopologyGroupTypes.NAMESPACES
-      ].includes(options.groupTypes) && !_.isEmpty(namespace)
-        ? addGroup(namespace, 'Namespace', hostGroup)
+      ].includes(options.groupTypes) && !_.isEmpty(peer.namespace)
+        ? addGroup(peer.namespace!, 'Namespace', hostGroup)
         : undefined;
     const ownerGroup =
       [TopologyGroupTypes.NAMESPACES_OWNERS, TopologyGroupTypes.HOSTS_OWNERS, TopologyGroupTypes.OWNERS].includes(
         options.groupTypes
       ) &&
-      !_.isEmpty(ownerType) &&
-      !_.isEmpty(ownerName)
-        ? addGroup(ownerName, ownerType, namespaceGroup ? namespaceGroup : hostGroup, namespaceGroup === undefined)
+      !_.isEmpty(peer.ownerType) &&
+      !_.isEmpty(peer.ownerName)
+        ? addGroup(
+            peer.ownerName!,
+            peer.ownerType!,
+            namespaceGroup ? namespaceGroup : hostGroup,
+            namespaceGroup === undefined
+          )
         : undefined;
 
     const parent = ownerGroup ? ownerGroup : namespaceGroup ? namespaceGroup : hostGroup;
     switch (metricScope) {
       case MetricScopeOptions.HOST:
         return addNode(
-          _.isEmpty(host)
+          _.isEmpty(peer.hostName)
             ? //metrics without host will be grouped as 'External'
               { displayName: t('External') }
             : //valid metrics will be Nodes with ips
-              { type: 'Node', name: host, canStepInto: true },
+              { type: 'Node', name: peer.hostName, canStepInto: true },
           parent
         );
       case MetricScopeOptions.NAMESPACE:
         return addNode(
-          _.isEmpty(namespace)
+          _.isEmpty(peer.namespace)
             ? //metrics without namespace will be grouped as 'Unknown'
               { displayName: t('Unknown') }
             : //valid metrics will be Namespaces with namespace as name + host infos
-              { type: 'Namespace', name: namespace, host, canStepInto: true },
+              { type: 'Namespace', name: peer.namespace, host: peer.hostName, canStepInto: true },
           parent
         );
       case MetricScopeOptions.OWNER:
         return addNode(
-          _.isEmpty(ownerName)
+          _.isEmpty(peer.ownerName)
             ? //metrics without owner name will be grouped as 'Unknown'
               { displayName: t('Unknown') }
             : //valid metrics will be owner type & name + namespace & host infos
-              { namespace, type: ownerType, name: ownerName, host, canStepInto: true },
+              {
+                namespace: peer.namespace,
+                type: peer.ownerType,
+                name: peer.ownerName,
+                host: peer.hostName,
+                canStepInto: true
+              },
           parent
         );
       case MetricScopeOptions.RESOURCE:
       default:
         return addNode(
           {
-            namespace,
-            type,
-            name,
-            addr,
-            host
+            namespace: peer.namespace,
+            type: peer.type,
+            name: peer.name,
+            addr: peer.addr,
+            host: peer.hostName
           },
           parent
         );
@@ -495,8 +496,8 @@ export const generateDataModel = (
   }
 
   datas.forEach(d => {
-    const srcNode = manageNode('Src', d);
-    const dstNode = manageNode('Dst', d);
+    const srcNode = manageNode(d.source);
+    const dstNode = manageNode(d.destination);
 
     if (options.edges && srcNode && dstNode && srcNode.id !== dstNode.id) {
       addEdge(srcNode.id, dstNode.id, d.stats, srcNode.data.shadowed || dstNode.data.shadowed);

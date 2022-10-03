@@ -1,4 +1,3 @@
-import { RawTopologyMetrics, TopologyMetric } from '../../api/loki';
 import { computeStepInterval } from '../datetime';
 import { computeStats } from '../metrics';
 
@@ -22,16 +21,12 @@ describe('computeStats', () => {
       }
     } // sum = 153
 
-    const raw: RawTopologyMetrics = {
-      metric: {} as TopologyMetric,
-      values: values
-    };
-    const m = computeStats(raw, range);
+    const stats = computeStats(values, range);
 
-    expect(m.stats.latest).toEqual(8);
-    expect(m.stats.max).toEqual(10);
-    expect(m.stats.avg).toEqual(7.65 /* 153/20 */);
-    expect(m.stats.total).toEqual(2295 /* 7.65*300 */);
+    expect(stats.latest).toEqual(8);
+    expect(stats.max).toEqual(10);
+    expect(stats.avg).toEqual(7.65 /* 153/20 */);
+    expect(stats.total).toEqual(2295 /* 7.65*300 */);
   });
 
   it('should compute stats with missing data points', () => {
@@ -52,15 +47,11 @@ describe('computeStats', () => {
       }
     } // sum = 105
 
-    const raw: RawTopologyMetrics = {
-      metric: {} as TopologyMetric,
-      values: values
-    };
-    const m = computeStats(raw, range);
+    const stats = computeStats(values, range);
 
-    expect(m.stats.latest).toEqual(0);
-    expect(m.stats.max).toEqual(10);
-    expect(m.stats.avg).toEqual(5.25 /* 105/20 */);
-    expect(m.stats.total).toEqual(1575 /* 5.25*300 */);
+    expect(stats.latest).toEqual(0);
+    expect(stats.max).toEqual(10);
+    expect(stats.avg).toEqual(5.25 /* 105/20 */);
+    expect(stats.total).toEqual(1575 /* 5.25*300 */);
   });
 });

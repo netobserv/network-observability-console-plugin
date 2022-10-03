@@ -3,7 +3,7 @@ import { Fields, Labels, Record } from './ipfix';
 
 export interface AggregatedQueryResponse {
   resultType: string;
-  result: StreamResult[] | TopologyMetrics[];
+  result: StreamResult[] | RawTopologyMetrics[];
   stats: Stats;
 }
 
@@ -39,29 +39,42 @@ export const parseStream = (raw: StreamResult): Record[] => {
   });
 };
 
-export interface TopologyMetric {
-  DstAddr: string;
-  DstK8S_Name: string;
-  DstK8S_Namespace: string;
-  DstK8S_OwnerName: string;
-  DstK8S_OwnerType: string;
-  DstK8S_Type: string;
-  DstK8S_HostName: string;
-  SrcAddr: string;
-  SrcK8S_Name: string;
-  SrcK8S_Namespace: string;
-  SrcK8S_OwnerName: string;
-  SrcK8S_OwnerType: string;
-  SrcK8S_Type: string;
-  SrcK8S_HostName: string;
+export interface RawTopologyMetric {
+  DstAddr?: string;
+  DstK8S_Name?: string;
+  DstK8S_Namespace?: string;
+  DstK8S_OwnerName?: string;
+  DstK8S_OwnerType?: string;
+  DstK8S_Type?: string;
+  DstK8S_HostName?: string;
+  SrcAddr?: string;
+  SrcK8S_Name?: string;
+  SrcK8S_Namespace?: string;
+  SrcK8S_OwnerName?: string;
+  SrcK8S_OwnerType?: string;
+  SrcK8S_Type?: string;
+  SrcK8S_HostName?: string;
 }
 
 export interface RawTopologyMetrics {
-  metric: TopologyMetric;
+  metric: RawTopologyMetric;
   values: (string | number)[][];
 }
 
-export type TopologyMetrics = RawTopologyMetrics & {
+export interface TopologyMetricPeer {
+  addr?: string;
+  name?: string;
+  namespace?: string;
+  ownerName?: string;
+  ownerType?: string;
+  type?: string;
+  hostName?: string;
+}
+
+export type TopologyMetrics = {
+  source: TopologyMetricPeer;
+  destination: TopologyMetricPeer;
+  values: (string | number)[][];
   stats: MetricStats;
 };
 

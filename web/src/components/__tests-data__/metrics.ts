@@ -1,4 +1,4 @@
-import { computeStats } from '../../utils/metrics';
+import { parseMetrics } from '../../utils/metrics';
 import { RawTopologyMetrics } from '../../api/loki';
 
 export const metric1: RawTopologyMetrics = {
@@ -19,11 +19,11 @@ export const metric1: RawTopologyMetrics = {
     SrcK8S_Type: 'Pod'
   },
   values: [
-    [1653989806.227, '3182578'],
-    [1653989866.227, '2500000'],
-    [1653989926.227, '1234000'],
-    [1653989986.227, '5678000'],
-    [1653990046.227, '9999999']
+    [1653989806.227, '31825.78'],
+    [1653989866.227, '25000.00'],
+    [1653989926.227, '12340.00'],
+    [1653989986.227, '56780.00'],
+    [1653990046.227, '99999.99']
   ]
 };
 
@@ -45,8 +45,8 @@ export const metric2: RawTopologyMetrics = {
     SrcK8S_Type: 'Pod'
   },
   values: [
-    [1653989806.227, '1234000'],
-    [1653989866.227, '5678000'],
+    [1653989806.227, '12340.00'],
+    [1653989866.227, '56780.00'],
     [1653989926.227, '0'],
     [1653989986.227, '0'],
     [1653990046.227, '0']
@@ -71,12 +71,12 @@ export const metric3: RawTopologyMetrics = {
     SrcK8S_Type: 'Pod'
   },
   values: [
-    [1653989806.227, '1245923'],
-    [1653989866.227, '5682144'],
-    [1653989926.227, '9813321'],
-    [1653989986.227, '1234567'],
-    [1653990046.227, '1234567']
+    [1653989806.227, '12459.23'],
+    [1653989866.227, '56821.44'],
+    [1653989926.227, '98133.21'],
+    [1653989986.227, '12345.67'],
+    [1653990046.227, '12345.67']
   ]
 };
 
-export const metrics = [metric1, metric2, metric3].map(m => computeStats(m, 300));
+export const metrics = [metric1, metric2, metric3].map(m => parseMetrics(m, 300));

@@ -81,7 +81,7 @@ export const NetflowOverview: React.FC<{
   const isSrcDstEqual = (m: TopologyMetrics) => {
     const scope = metricScope as MetricScopeOptions;
     const tFunc = (s: string) => s;
-    return getMetricName(m.metric, scope, true, tFunc) === getMetricName(m.metric, scope, false, tFunc);
+    return getMetricName(m.source, scope, tFunc) === getMetricName(m.destination, scope, tFunc);
   };
 
   //skip metrics with sources equals to destinations
@@ -89,7 +89,7 @@ export const NetflowOverview: React.FC<{
   //limit to top X since multiple queries can run in parallel
   const filteredMetrics = metrics
     .filter(m => !isSrcDstEqual(m))
-    .sort((a, b) => getStat(a.stats, metricFunction) - getStat(a.stats, metricFunction))
+    .sort((a, b) => getStat(a.stats, metricFunction) - getStat(b.stats, metricFunction))
     .slice(0, limit);
 
   return (
