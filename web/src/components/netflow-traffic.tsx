@@ -20,7 +20,6 @@ import {
   TextVariants
 } from '@patternfly/react-core';
 import { ColumnsIcon, CompressIcon, EllipsisVIcon, ExpandIcon, ExportIcon, SyncAltIcon } from '@patternfly/react-icons';
-import { GraphElement } from '@patternfly/react-topology';
 import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -47,7 +46,7 @@ import {
   MetricType,
   Reporter
 } from '../model/flow-query';
-import { DefaultOptions, TopologyGroupTypes, TopologyOptions } from '../model/topology';
+import { DefaultOptions, GraphElementPeer, TopologyGroupTypes, TopologyOptions } from '../model/topology';
 import { Column, getDefaultColumns } from '../utils/columns';
 import { loadConfig } from '../utils/config';
 import { ContextSingleton } from '../utils/context';
@@ -178,7 +177,7 @@ export const NetflowTraffic: React.FC<{
   const [metricType, setMetricType] = useLocalStorage<MetricType>(LOCAL_STORAGE_METRIC_TYPE_KEY, defaultMetricType);
   const [interval, setInterval] = useLocalStorage<number | undefined>(LOCAL_STORAGE_REFRESH_KEY);
   const [selectedRecord, setSelectedRecord] = React.useState<Record | undefined>(undefined);
-  const [selectedElement, setSelectedElement] = React.useState<GraphElement | undefined>(undefined);
+  const [selectedElement, setSelectedElement] = React.useState<GraphElementPeer | undefined>(undefined);
 
   const isInit = React.useRef(true);
   const [panels, setSelectedPanels] = useLocalStorage<OverviewPanel[]>(
@@ -235,7 +234,7 @@ export const NetflowTraffic: React.FC<{
     setSelectedRecord(record);
   };
 
-  const onElementSelect = (element?: GraphElement) => {
+  const onElementSelect = (element?: GraphElementPeer) => {
     clearSelections();
     setSelectedElement(element);
   };

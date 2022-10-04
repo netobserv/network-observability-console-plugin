@@ -3,7 +3,6 @@ import { CogIcon, ExportIcon, SearchIcon, TimesIcon, AngleUpIcon, AngleDownIcon 
 import {
   createTopologyControlButtons,
   defaultControlButtonsOptions,
-  GraphElement,
   GRAPH_LAYOUT_END_EVENT,
   GRAPH_POSITION_CHANGE_EVENT,
   Model,
@@ -31,7 +30,10 @@ import {
   TopologyGroupTypes,
   TopologyOptions,
   isElementFiltered,
-  toggleElementFilter
+  toggleElementFilter,
+  GraphElementPeer,
+  ElementData,
+  Decorated
 } from '../../model/topology';
 import { MetricScopeOptions } from '../../model/metrics';
 import { TimeRange } from '../../utils/datetime';
@@ -67,8 +69,8 @@ export const TopologyContent: React.FC<{
   filters: Filter[];
   setFilters: (v: Filter[]) => void;
   toggleTopologyOptions: () => void;
-  selected: GraphElement | undefined;
-  onSelect: (e: GraphElement | undefined) => void;
+  selected: GraphElementPeer | undefined;
+  onSelect: (e: GraphElementPeer | undefined) => void;
 }> = ({
   k8sModels,
   range,
@@ -162,8 +164,7 @@ export const TopologyContent: React.FC<{
   };
 
   const onFilter = React.useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (data: any) => {
+    (data: Decorated<ElementData>) => {
       const isFiltered = isElementFiltered(data, filters, t);
       toggleElementFilter(data, isFiltered, filters, setFilters, t);
       setSelectedIds([data.id]);
@@ -172,8 +173,7 @@ export const TopologyContent: React.FC<{
   );
 
   const onStepInto = React.useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (data: any) => {
+    (data: Decorated<ElementData>) => {
       let scope: MetricScopeOptions;
       let groupTypes: TopologyGroupTypes;
       switch (metricScope) {
@@ -207,13 +207,9 @@ export const TopologyContent: React.FC<{
     [metricScope, onFilter, onSelect, options, setMetricScope, setOptions]
   );
 
-  const onHover = React.useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (data: any) => {
-      setHoveredId(data.isHovered ? data.id : '');
-    },
-    []
-  );
+  const onHover = React.useCallback((data: Decorated<ElementData>) => {
+    setHoveredId(data.isHovered ? data.id : '');
+  }, []);
 
   const onSelectIds = React.useCallback(
     (ids: string[]) => {
@@ -565,8 +561,8 @@ export const NetflowTopology: React.FC<{
   filters: Filter[];
   setFilters: (v: Filter[]) => void;
   toggleTopologyOptions: () => void;
-  selected: GraphElement | undefined;
-  onSelect: (e: GraphElement | undefined) => void;
+  selected: GraphElementPeer | undefined;
+  onSelect: (e: GraphElementPeer | undefined) => void;
 }> = ({
   loading,
   k8sModels,

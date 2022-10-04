@@ -2,7 +2,6 @@ import {
   ComponentFactory,
   GraphComponent,
   graphDropTargetSpec,
-  GraphElement,
   groupDropTargetSpec,
   ModelKind,
   nodeDragSourceSpec,
@@ -13,6 +12,7 @@ import {
   withSelection
 } from '@patternfly/react-topology';
 import * as React from 'react';
+import { GraphElementPeer } from '../../../model/topology';
 
 //keep default import here to use observers
 import StyleEdge from '../styles/styleEdge';
@@ -22,7 +22,7 @@ import StyleNode from '../styles/styleNode';
 export const stylesComponentFactory: ComponentFactory = (
   kind: ModelKind,
   type: string
-): React.ComponentType<{ element: GraphElement }> | undefined => {
+): React.ComponentType<{ element: GraphElementPeer }> | undefined => {
   if (kind === ModelKind.graph) {
     return withDndDrop(graphDropTargetSpec([NODE_DRAG_TYPE]))(withPanZoom()(GraphComponent));
   }

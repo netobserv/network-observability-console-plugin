@@ -79,4 +79,4 @@ export const metric3: RawTopologyMetrics = {
   ]
 };
 
-export const metrics = [metric1, metric2, metric3].map(m => parseMetrics(m, 300));
+export const metrics = parseMetrics([metric1, metric2, metric3], 300, 'resource');

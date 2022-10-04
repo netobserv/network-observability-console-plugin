@@ -1,5 +1,5 @@
 import { Button, DrawerCloseButton } from '@patternfly/react-core';
-import { BaseEdge, BaseNode } from '@patternfly/react-topology';
+import { BaseEdge, BaseNode, NodeModel } from '@patternfly/react-topology';
 import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 import { Filter } from '../../../model/filters';
@@ -7,11 +7,13 @@ import { TopologyMetrics } from '../../../api/loki';
 import { MetricFunction, MetricScope, MetricType } from '../../../model/flow-query';
 import { ElementPanel, ElementPanelContent } from '../element-panel';
 import { dataSample } from '../__tests-data__/metrics';
+import { NodeData } from '../../../model/topology';
 
 describe('<ElementPanel />', () => {
   const getNode = (name: string, addr: string) => {
-    const bn = new BaseNode();
+    const bn = new BaseNode<NodeModel, NodeData>();
     bn.setData({
+      nodeType: 'resource',
       name,
       addr
     });

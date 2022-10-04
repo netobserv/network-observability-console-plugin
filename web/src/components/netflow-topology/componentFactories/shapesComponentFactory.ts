@@ -1,10 +1,11 @@
 import { ComponentType } from 'react';
-import { GraphElement, ComponentFactory, ModelKind, DefaultNode } from '@patternfly/react-topology';
+import { ComponentFactory, ModelKind, DefaultNode } from '@patternfly/react-topology';
+import { GraphElementPeer } from '../../../model/topology';
 
 export const shapesComponentFactory: ComponentFactory = (
   kind: ModelKind,
   type: string
-): ComponentType<{ element: GraphElement }> | undefined => {
+): ComponentType<{ element: GraphElementPeer }> | undefined => {
   switch (type) {
     //TODO: try different shapes by Owner Kind for example
     case 'node':

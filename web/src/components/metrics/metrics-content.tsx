@@ -20,8 +20,8 @@ import { TopologyMetricPeer, TopologyMetrics } from '../../api/loki';
 import { MetricFunction, MetricType } from '../../model/flow-query';
 import { getDateFromUnixString, twentyFourHourTime } from '../../utils/datetime';
 import './metrics-content.css';
-import { getMetricName, getMetricValue } from '../../utils/metrics';
-import { getStat } from '../../model/topology';
+import { getMetricValue, matchPeer } from '../../utils/metrics';
+import { getStat, NodeData } from '../../model/topology';
 
 export const MetricsContent: React.FC<{
   id: string;
@@ -31,8 +31,7 @@ export const MetricsContent: React.FC<{
   metrics: TopologyMetrics[];
   scope: MetricScopeOptions;
   counters?: JSX.Element;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  data?: any;
+  data?: NodeData;
   showTitle?: boolean;
   showDonut?: boolean;
   showBar?: boolean;
@@ -75,56 +74,39 @@ export const MetricsContent: React.FC<{
   }, [metricFunction, metricType, t]);
 
   const chart = React.useCallback(() => {
-    function truncate(input: string) {
-      const length = doubleWidth ? 64 : showDonut ? 10 : 18;
-      if (input.length > length) {
-        return input.substring(0, length / 2) + '…' + input.substring(input.length - length / 2);
-      }
-      return input;
-    }
+    // function truncate(input: string) {
+    //   const length = doubleWidth ? 64 : showDonut ? 10 : 18;
+    //   if (input.length > length) {
+    //     return input.substring(0, length / 2) + '…' + input.substring(input.length - length / 2);
+    //   }
+    //   return input;
+    // }
 
-    function truncateParts(input: string) {
-      if (input.includes('.')) {
-        const splitted = input.split('.');
-        const result: string[] = [];
-        splitted.forEach(s => {
-          result.push(truncate(s));
-        });
-        return result.join('.');
-      }
-      return truncate(input);
-    }
+    // function truncateParts(input: string) {
+    //   if (input.includes('.')) {
+    //     const splitted = input.split('.');
+    //     const result: string[] = [];
+    //     splitted.forEach(s => {
+    //       result.push(truncate(s));
+    //     });
+    //     return result.join('.');
+    //   }
+    //   return truncate(input);
+    // }
+
+    const getPeerName = (peer: TopologyMetricPeer): string => {
+      return peer.displayName || (scope === MetricScopeOptions.HOST ? t('External') : t('Unknown'));
+    };
 
     function getName(source: TopologyMetricPeer, dest: TopologyMetricPeer) {
-      const srcName = truncateParts(getMetricName(source, scope, t));
-      const dstName = truncateParts(getMetricName(dest, scope, t));
-      switch (scope) {
-        case MetricScopeOptions.HOST:
-          return data?.host
-            ? source.hostName === data.host
-              ? `${t('To')} ${dstName}`
-              : `${t('From')} ${srcName}`
-            : `${srcName} -> ${dstName}`;
-        case MetricScopeOptions.NAMESPACE:
-          return data?.namespace
-            ? source.namespace === data.name
-              ? `${t('To')} ${dstName}`
-              : `${t('From')} ${srcName}`
-            : `${srcName} -> ${dstName}`;
-        case MetricScopeOptions.OWNER:
-          return data?.namespace
-            ? source.namespace === data.namespace
-              ? `${t('To')} ${dstName}`
-              : `${t('From')} ${srcName}`
-            : `${srcName} -> ${dstName}`;
-        case MetricScopeOptions.RESOURCE:
-        default:
-          return data?.addr
-            ? source.addr === data.addr
-              ? `${t('To')} ${dstName}`
-              : `${t('From')} ${srcName}`
-            : `${srcName} -> ${dstName}`;
+      const srcName = getPeerName(source);
+      const dstName = getPeerName(dest);
+      if (data && matchPeer(data, source)) {
+        return `${t('To')} ${dstName}`;
+      } else if (data && matchPeer(data, dest)) {
+        return `${t('From')} ${srcName}`;
       }
+      return `${srcName} -> ${dstName}`;
     }
 
     const values = metrics.map(m => getStat(m.stats, metricFunction));

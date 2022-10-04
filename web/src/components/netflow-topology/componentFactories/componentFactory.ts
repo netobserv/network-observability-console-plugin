@@ -4,15 +4,15 @@ import {
   DefaultGroup,
   DefaultNode,
   GraphComponent,
-  GraphElement,
   ModelKind
 } from '@patternfly/react-topology';
 import { ComponentType } from 'react';
+import { GraphElementPeer } from '../../../model/topology';
 
 export const componentFactory: ComponentFactory = (
   kind: ModelKind,
   type: string
-): ComponentType<{ element: GraphElement }> | undefined => {
+): ComponentType<{ element: GraphElementPeer }> | undefined => {
   switch (type) {
     case 'group':
       return DefaultGroup;

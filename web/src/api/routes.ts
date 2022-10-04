@@ -59,7 +59,7 @@ export const getTopology = (params: FlowQuery, range: number | TimeRange): Promi
       throw new Error(`${r.statusText} [code=${r.status}]`);
     }
     const aggQR: AggregatedQueryResponse = r.data;
-    const metrics = (aggQR.result as RawTopologyMetrics[]).map(raw => parseMetrics(raw, range));
+    const metrics = parseMetrics(aggQR.result as RawTopologyMetrics[], range, params.scope!);
     return { metrics: metrics, stats: aggQR.stats };
   });
 };

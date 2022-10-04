@@ -69,7 +69,20 @@ export interface TopologyMetricPeer {
   ownerType?: string;
   type?: string;
   hostName?: string;
+  displayName?: string;
 }
+
+export const peersEqual = (p1: TopologyMetricPeer, p2: TopologyMetricPeer): boolean => {
+  return (
+    p1.addr === p2.addr &&
+    p1.hostName === p2.hostName &&
+    p1.name === p2.name &&
+    p1.type === p2.type &&
+    p1.namespace === p2.namespace &&
+    p1.ownerName === p2.ownerName &&
+    p1.ownerType === p2.ownerType
+  );
+};
 
 export type TopologyMetrics = {
   source: TopologyMetricPeer;

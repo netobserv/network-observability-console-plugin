@@ -3,11 +3,14 @@ import {
   EdgeModel,
   EdgeStyle,
   EdgeTerminalType,
+  ElementModel,
+  GraphElement,
   LabelPosition,
   Model,
   NodeModel,
   NodeShape,
-  NodeStatus
+  NodeStatus,
+  Point
 } from '@patternfly/react-topology';
 import _ from 'lodash';
 import { MetricStats, TopologyMetricPeer, TopologyMetrics } from '../api/loki';
@@ -18,7 +21,7 @@ import { TFunction } from 'i18next';
 import { K8sModel } from '@openshift-console/dynamic-plugin-sdk';
 import { getTopologyEdgeId, getTopologyGroupId, getTopologyNodeId } from '../utils/ids';
 import { MetricScopeOptions, MetricFunctionOptions, MetricTypeOptions } from './metrics';
-import { MetricFunction, MetricScope, MetricType } from './flow-query';
+import { MetricFunction, MetricScope, MetricType, NodeType } from './flow-query';
 import { getMetricValue } from '../utils/metrics';
 
 export enum LayoutName {
@@ -83,32 +86,40 @@ export const DefaultOptions: TopologyOptions = {
   metricType: MetricTypeOptions.BYTES
 };
 
-export type ElementData = {
-  type?: string;
-  namespace?: string;
-  name?: string;
-  addr?: string;
-  host?: string;
+export type GraphElementPeer = GraphElement<ElementModel, NodeData>;
+export type ElementData = Partial<NodeData>;
+export type Decorated<T> = T & {
+  id: string;
+  isHovered?: boolean;
+  hover?: boolean;
+  isFiltered?: boolean;
+  isClearFilters?: boolean;
+  isPinned?: boolean;
+  showDecorators?: boolean;
+  showStatusDecorator?: boolean;
+  point?: Point;
+  setPosition?: (location: Point) => void;
+  canStepInto?: boolean;
 };
+export const decorated = <T>(t: T): Decorated<T> => t as Decorated<T>;
 
 export const getFilterDefValue = (d: ElementData, t: TFunction) => {
   let def: FilterDefinition | undefined;
   let value: string | undefined;
-  if (d.type && d.namespace && d.name) {
+  if (d.resourceKind && d.namespace && d.name) {
     def = findFilter(t, 'resource')!;
-    value = `${d.type}.${d.namespace}.${d.name}`;
-  } else if (d.type === 'Node' && (d.host || d.name)) {
+    value = `${d.resourceKind}.${d.namespace}.${d.name}`;
+  } else if (d.nodeType === 'host' && (d.host || d.name)) {
     def = findFilter(t, 'host_name')!;
-    value = `"${d.host ? d.host! : d.name!}"`;
-  } else if (d.type === 'Namespace' && (d.namespace || d.name)) {
+    value = `"${d.host || d.name}"`;
+  } else if (d.nodeType === 'namespace' && (d.namespace || d.name)) {
     def = findFilter(t, 'namespace')!;
-    value = `"${d.namespace ? d.namespace! : d.name!}"`;
-  } else if (d.type && d.name) {
-    if (['Service', 'Pod'].includes(d.type)) {
-      def = findFilter(t, 'name')!;
-    } else {
-      def = findFilter(t, 'owner_name')!;
-    }
+    value = `"${d.namespace || d.name}"`;
+  } else if (d.nodeType === 'resource' && d.name) {
+    def = findFilter(t, 'name')!;
+    value = `"${d.name}"`;
+  } else if (d.nodeType === 'owner' && d.name) {
+    def = findFilter(t, 'owner_name')!;
     value = `"${d.name}"`;
   } else if (d.addr) {
     def = findFilter(t, 'address')!;
@@ -166,13 +177,16 @@ export const DEFAULT_NODE_TRUNCATE_LENGTH = 25;
 export const DEFAULT_NODE_SIZE = 75;
 
 export type NodeData = {
+  nodeType: NodeType;
+  resourceKind?: string;
   namespace?: string;
-  type?: string;
   name?: string;
   displayName?: string;
   addr?: string;
   host?: string;
   canStepInto?: boolean;
+  parentKind?: string;
+  parentName?: string;
 };
 
 export const generateNode = (
@@ -184,20 +198,10 @@ export const generateNode = (
   t: TFunction,
   k8sModels: { [key: string]: K8sModel }
 ): NodeModel => {
-  const id = getTopologyNodeId(data.type, data.namespace, data.name, data.addr, data.host);
-  const label = data.name
-    ? data.name
-    : data.addr
-    ? data.addr
-    : data.namespace
-    ? data.namespace
-    : data.host
-    ? data.host
-    : data.displayName
-    ? data.displayName
-    : '';
+  const id = getTopologyNodeId(data.resourceKind, data.namespace, data.name, data.addr, data.host);
+  const label = data.displayName || data.name || data.addr || 'DEBUG ME';
   const secondaryLabel =
-    data.type !== 'Namespace' &&
+    data.nodeType !== 'namespace' &&
     ![
       TopologyGroupTypes.NAMESPACES,
       TopologyGroupTypes.NAMESPACES_OWNERS,
@@ -207,7 +211,7 @@ export const generateNode = (
       : undefined;
   const shadowed = !_.isEmpty(searchValue) && !(label.includes(searchValue) || secondaryLabel?.includes(searchValue));
   const highlighted = !shadowed && !_.isEmpty(highlightedId) && highlightedId.includes(id);
-  const k8sModel = options.nodeBadges && data.type ? k8sModels[data.type] : undefined;
+  const k8sModel = options.nodeBadges && data.resourceKind ? k8sModels[data.resourceKind] : undefined;
   return {
     id,
     type: 'node',
@@ -328,9 +332,16 @@ export const generateDataModel = (
   const edges: EdgeModel[] = [];
   const opts = { ...DefaultOptions, ...options };
 
-  function addGroup(name: string, type: string, parent?: NodeModel, secondaryLabelPadding = false) {
-    const id = getTopologyGroupId(type, name, parent ? parent.id : undefined);
+  function addGroup(
+    name: string,
+    nodeType: NodeType,
+    resourceKind: string,
+    parent?: NodeModel,
+    secondaryLabelPadding = false
+  ) {
+    const id = getTopologyGroupId(resourceKind, name, parent ? parent.id : undefined);
     let group = nodes.find(g => g.type === 'group' && g.id === id);
+    const parentData = parent?.data as NodeData | undefined;
     if (!group) {
       group = {
         id,
@@ -342,9 +353,10 @@ export const generateDataModel = (
         style: { padding: secondaryLabelPadding ? 35 : 10 },
         data: {
           name,
-          type,
-          parentType: parent?.data?.type,
-          parentName: parent?.data?.name,
+          nodeType,
+          resourceKind,
+          parentKind: parentData?.resourceKind,
+          parentName: parentData?.name,
           labelPosition: LabelPosition.bottom,
           collapsible: true,
           collapsedWidth: 75,
@@ -371,7 +383,8 @@ export const generateDataModel = (
   function addNode(data: NodeData, parent?: NodeModel) {
     let node = nodes.find(
       n =>
-        n.data.type === data.type &&
+        n.data.nodeType === data.nodeType &&
+        n.data.resourceKind === data.resourceKind &&
         n.data.namespace === data.namespace &&
         n.data.name === data.name &&
         n.data.addr === data.addr &&
@@ -421,7 +434,7 @@ export const generateDataModel = (
       [TopologyGroupTypes.HOSTS_NAMESPACES, TopologyGroupTypes.HOSTS_OWNERS, TopologyGroupTypes.HOSTS].includes(
         options.groupTypes
       ) && !_.isEmpty(peer.hostName)
-        ? addGroup(peer.hostName!, 'Node', undefined, true)
+        ? addGroup(peer.hostName!, 'host', 'Node', undefined, true)
         : undefined;
     const namespaceGroup =
       [
@@ -429,7 +442,7 @@ export const generateDataModel = (
         TopologyGroupTypes.NAMESPACES_OWNERS,
         TopologyGroupTypes.NAMESPACES
       ].includes(options.groupTypes) && !_.isEmpty(peer.namespace)
-        ? addGroup(peer.namespace!, 'Namespace', hostGroup)
+        ? addGroup(peer.namespace!, 'namespace', 'Namespace', hostGroup)
         : undefined;
     const ownerGroup =
       [TopologyGroupTypes.NAMESPACES_OWNERS, TopologyGroupTypes.HOSTS_OWNERS, TopologyGroupTypes.OWNERS].includes(
@@ -439,6 +452,7 @@ export const generateDataModel = (
       !_.isEmpty(peer.ownerName)
         ? addGroup(
             peer.ownerName!,
+            'owner',
             peer.ownerType!,
             namespaceGroup ? namespaceGroup : hostGroup,
             namespaceGroup === undefined
@@ -451,29 +465,36 @@ export const generateDataModel = (
         return addNode(
           _.isEmpty(peer.hostName)
             ? //metrics without host will be grouped as 'External'
-              { displayName: t('External') }
+              { nodeType: 'unknown', displayName: t('External') }
             : //valid metrics will be Nodes with ips
-              { type: 'Node', name: peer.hostName, canStepInto: true },
+              { nodeType: 'host', resourceKind: 'Node', name: peer.hostName, canStepInto: true },
           parent
         );
       case MetricScopeOptions.NAMESPACE:
         return addNode(
           _.isEmpty(peer.namespace)
             ? //metrics without namespace will be grouped as 'Unknown'
-              { displayName: t('Unknown') }
+              { nodeType: 'unknown', displayName: t('Unknown') }
             : //valid metrics will be Namespaces with namespace as name + host infos
-              { type: 'Namespace', name: peer.namespace, host: peer.hostName, canStepInto: true },
+              {
+                nodeType: 'namespace',
+                resourceKind: 'Namespace',
+                name: peer.namespace,
+                host: peer.hostName,
+                canStepInto: true
+              },
           parent
         );
       case MetricScopeOptions.OWNER:
         return addNode(
           _.isEmpty(peer.ownerName)
             ? //metrics without owner name will be grouped as 'Unknown'
-              { displayName: t('Unknown') }
+              { nodeType: 'unknown', displayName: t('Unknown') }
             : //valid metrics will be owner type & name + namespace & host infos
               {
                 namespace: peer.namespace,
-                type: peer.ownerType,
+                nodeType: 'owner',
+                resourceKind: peer.ownerType,
                 name: peer.ownerName,
                 host: peer.hostName,
                 canStepInto: true
@@ -485,7 +506,8 @@ export const generateDataModel = (
         return addNode(
           {
             namespace: peer.namespace,
-            type: peer.type,
+            nodeType: 'resource',
+            resourceKind: peer.type,
             name: peer.name,
             addr: peer.addr,
             host: peer.hostName

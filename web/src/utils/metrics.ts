@@ -1,33 +1,97 @@
-import { TFunction } from 'i18next';
 import _ from 'lodash';
 import { RawTopologyMetrics, MetricStats, TopologyMetricPeer, TopologyMetrics } from '../api/loki';
-import { MetricScopeOptions } from '../model/metrics';
-import { MetricFunction, MetricType } from '../model/flow-query';
+import { MetricFunction, MetricScope, MetricType } from '../model/flow-query';
 import { elementPerMinText, roundTwoDigits } from './count';
 import { computeStepInterval, getRangeEnd, rangeToSeconds, TimeRange } from './datetime';
 import { bytesPerSeconds, humanFileSize } from './bytes';
+import { NodeData } from '../model/topology';
 
-export const parseMetrics = (raw: RawTopologyMetrics, range: number | TimeRange): TopologyMetrics => {
+const shortKindMap: { [k: string]: string } = {
+  Service: 'svc',
+  Deployment: 'depl',
+  DaemonSet: 'ds',
+  StatefulSet: 'sts'
+};
+
+export const parseMetrics = (
+  raw: RawTopologyMetrics[],
+  range: number | TimeRange,
+  scope: MetricScope
+): TopologyMetrics[] => {
+  const metrics = raw.map(r => parseMetric(r, range, scope));
+
+  // Disambiguate display names with kind when necessary
+  if (scope === 'owner' || scope === 'resource') {
+    // Define some helpers
+    const getKind = scope === 'owner' ? (p: TopologyMetricPeer) => p.ownerType : (p: TopologyMetricPeer) => p.type;
+    const addKind = (p: TopologyMetricPeer) => {
+      if (p.displayName) {
+        let existing = nameKinds.get(p.displayName);
+        if (!existing) {
+          existing = new Set();
+          nameKinds.set(p.displayName, existing);
+        }
+        const k = getKind(p);
+        if (k) {
+          existing.add(k);
+        }
+      }
+    };
+    const disambiguate = (p: TopologyMetricPeer) => {
+      if (p.displayName) {
+        const kinds = nameKinds.get(p.displayName);
+        if (kinds && kinds.size > 1) {
+          let k = getKind(p);
+          if (k) {
+            k = shortKindMap[k] || k.toLowerCase();
+            p.displayName = `${p.displayName} (${k})`;
+          }
+        }
+      }
+    };
+
+    // First pass: extract all names+kind couples
+    const nameKinds = new Map<string, Set<string>>();
+    metrics.forEach(m => {
+      addKind(m.source);
+      addKind(m.destination);
+    });
+
+    // Second pass: update names if necessary
+    metrics.forEach(m => {
+      disambiguate(m.source);
+      disambiguate(m.destination);
+    });
+  }
+  console.log('PARSED METRICS:', metrics);
+  return metrics;
+};
+
+const parseMetric = (raw: RawTopologyMetrics, range: number | TimeRange, scope: MetricScope): TopologyMetrics => {
   const stats = computeStats(raw.values, range);
+  const source: TopologyMetricPeer = {
+    addr: raw.metric.SrcAddr,
+    name: raw.metric.SrcK8S_Name,
+    namespace: raw.metric.SrcK8S_Namespace,
+    ownerName: raw.metric.SrcK8S_OwnerName,
+    ownerType: raw.metric.SrcK8S_OwnerType,
+    type: raw.metric.SrcK8S_Type,
+    hostName: raw.metric.SrcK8S_HostName
+  };
+  const destination: TopologyMetricPeer = {
+    addr: raw.metric.DstAddr,
+    name: raw.metric.DstK8S_Name,
+    namespace: raw.metric.DstK8S_Namespace,
+    ownerName: raw.metric.DstK8S_OwnerName,
+    ownerType: raw.metric.DstK8S_OwnerType,
+    type: raw.metric.DstK8S_Type,
+    hostName: raw.metric.DstK8S_HostName
+  };
+  source.displayName = buildPeerDisplayName(source, scope);
+  destination.displayName = buildPeerDisplayName(destination, scope);
   return {
-    source: {
-      addr: raw.metric.SrcAddr,
-      name: raw.metric.SrcK8S_Name,
-      namespace: raw.metric.SrcK8S_Namespace,
-      ownerName: raw.metric.SrcK8S_OwnerName,
-      ownerType: raw.metric.SrcK8S_OwnerType,
-      type: raw.metric.SrcK8S_Type,
-      hostName: raw.metric.SrcK8S_HostName
-    },
-    destination: {
-      addr: raw.metric.DstAddr,
-      name: raw.metric.DstK8S_Name,
-      namespace: raw.metric.DstK8S_Namespace,
-      ownerName: raw.metric.DstK8S_OwnerName,
-      ownerType: raw.metric.DstK8S_OwnerType,
-      type: raw.metric.DstK8S_Type,
-      hostName: raw.metric.DstK8S_HostName
-    },
+    source: source,
+    destination: destination,
     values: raw.values,
     stats: stats
   };
@@ -70,25 +134,25 @@ export const computeStats = (values: (string | number)[][], range: number | Time
   };
 };
 
-export const getMetricName = (peer: TopologyMetricPeer, scope: MetricScopeOptions, t: TFunction): string => {
+const buildPeerDisplayName = (peer: TopologyMetricPeer, scope: MetricScope): string | undefined => {
   switch (scope) {
-    case MetricScopeOptions.HOST:
-      return peer.hostName ? peer.hostName : peer.type === 'Node' ? peer.name! : t('External');
-    case MetricScopeOptions.NAMESPACE:
-      return peer.namespace ? peer.namespace : peer.type === 'Namespace' ? peer.name! : t('Unknown');
-    case MetricScopeOptions.OWNER:
+    case 'host':
+      return peer.hostName ? peer.hostName : peer.type === 'Node' ? peer.name! : undefined;
+    case 'namespace':
+      return peer.namespace ? peer.namespace : peer.type === 'Namespace' ? peer.name! : undefined;
+    case 'owner':
       return peer.namespace && peer.ownerName
         ? `${peer.namespace}.${peer.ownerName}`
         : peer.ownerName
         ? peer.ownerName
-        : t('Unknown');
-    case MetricScopeOptions.RESOURCE:
+        : undefined;
+    case 'resource':
     default:
       return peer.namespace && peer.name
         ? `${peer.namespace}.${peer.name}`
         : peer.name
         ? peer.name
-        : peer.addr || t('Unknown');
+        : peer.addr || undefined;
   }
 };
 
@@ -101,17 +165,24 @@ export const getMetricValue = (v: number, mt: MetricType, mf: MetricFunction): s
   }
 };
 
-export const matchPeer = (
-  type: string,
-  namespace: string,
-  name: string,
-  addr: string,
-  peer: TopologyMetricPeer
+const matchPeerInternal = (
+  peer: TopologyMetricPeer,
+  kind?: string,
+  name?: string,
+  namespace?: string,
+  addr?: string
 ): boolean => {
   return (
-    (type === 'Namespace' && name === peer.namespace) ||
-    (type === 'Node' && name === peer.hostName) ||
-    (type === peer.ownerType && name === peer.ownerName && namespace === peer.namespace) ||
+    (kind === 'Namespace' && name === peer.namespace) ||
+    (kind === 'Node' && name === peer.hostName) ||
+    (kind === peer.ownerType && name === peer.ownerName && namespace === peer.namespace) ||
     (!!addr && addr === peer.addr)
   );
+};
+
+export const matchPeer = (data: NodeData, peer: TopologyMetricPeer): boolean => {
+  if (data.parentKind && data.parentName && !matchPeerInternal(peer, data.parentKind, data.parentName)) {
+    return false;
+  }
+  return matchPeerInternal(peer, data.resourceKind, data.name, data.namespace, data.addr);
 };

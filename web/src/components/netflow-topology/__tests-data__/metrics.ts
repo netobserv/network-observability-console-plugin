@@ -3,7 +3,7 @@ import topologyJson from '../../../../../mocks/loki/topology.json';
 import { parseMetrics } from '../../../utils/metrics';
 
 export const responseMock = topologyJson;
-export const dataMock = (responseMock.data.result as RawTopologyMetrics[]).map(m => parseMetrics(m, 300));
+export const dataMock = parseMetrics(responseMock.data.result as RawTopologyMetrics[], 300, 'resource');
 
 export const responseSample = {
   status: 'success',
@@ -283,4 +283,4 @@ export const responseSample = {
   }
 };
 
-export const dataSample = (responseSample.data.result as RawTopologyMetrics[]).map(m => parseMetrics(m, 300));
+export const dataSample = parseMetrics(responseSample.data.result as RawTopologyMetrics[], 300, 'resource');

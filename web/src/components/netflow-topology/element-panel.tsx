@@ -13,21 +13,29 @@ import {
   TextVariants
 } from '@patternfly/react-core';
 import { FilterIcon, TimesIcon } from '@patternfly/react-icons';
-import { BaseEdge, BaseNode, GraphElement } from '@patternfly/react-topology';
+import { BaseEdge, BaseNode } from '@patternfly/react-topology';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { defaultSize, maxSize, minSize } from '../../utils/panel';
 import { MetricFunction, MetricScope, MetricType } from '../../model/flow-query';
-import { TopologyMetricPeer, TopologyMetrics } from '../../api/loki';
+import { TopologyMetrics } from '../../api/loki';
 import { Filter } from '../../model/filters';
-import { ElementData, getStat, isElementFiltered, toggleElementFilter } from '../../model/topology';
+import {
+  decorated,
+  ElementData,
+  getStat,
+  GraphElementPeer,
+  isElementFiltered,
+  NodeData,
+  toggleElementFilter
+} from '../../model/topology';
 import './element-panel.css';
 import MetricsContent from '../metrics/metrics-content';
 import { MetricScopeOptions } from '../../model/metrics';
 import { getMetricValue, matchPeer } from '../../utils/metrics';
 
 export const ElementPanelContent: React.FC<{
-  element: GraphElement;
+  element: GraphElementPeer;
   metrics: TopologyMetrics[];
   metricFunction: MetricFunction;
   metricType: MetricType;
@@ -37,7 +45,7 @@ export const ElementPanelContent: React.FC<{
 }> = ({ element, metrics, metricFunction, metricType, metricScope, filters, setFilters }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const data = element.getData();
-  const type = element.getType();
+  // const type = element.getType();
 
   const isFiltered = React.useCallback(
     (d: ElementData) => {
@@ -54,20 +62,20 @@ export const ElementPanelContent: React.FC<{
   );
 
   const resourceInfos = React.useCallback(
-    (d: ElementData) => {
+    (d: NodeData) => {
       let infos: React.ReactElement | undefined;
-      if (d.type && d.name) {
+      if (d.resourceKind && d.name) {
         const resourceData = {
-          type: d.type,
+          resourceKind: d.resourceKind,
           namespace: d.namespace,
           name: d.name
         };
         infos = (
           <TextContent id="resourcelink" className="element-text-container grouped">
-            <Text component={TextVariants.h4}>{d.type}</Text>
+            <Text component={TextVariants.h4}>{d.resourceKind}</Text>
             <Flex>
               <FlexItem flex={{ default: 'flex_1' }}>
-                <ResourceLink inline={true} kind={d.type} name={d.name} namespace={d.namespace} />
+                <ResourceLink inline={true} kind={d.resourceKind} name={d.name} namespace={d.namespace} />
               </FlexItem>
               <FlexItem>
                 <Button variant="link" aria-label="Filter" onClick={() => onFilter(resourceData)}>
@@ -107,7 +115,7 @@ export const ElementPanelContent: React.FC<{
   );
 
   const metricCounts = React.useCallback(
-    (toCount: number, fromCount: number, forEdge: boolean) => {
+    (inCount: number, outCount: number, forEdge: boolean) => {
       return (
         <Flex className="metrics-flex-container">
           <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsNone' }}>
@@ -133,13 +141,13 @@ export const ElementPanelContent: React.FC<{
           </Flex>
           <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsNone' }}>
             <FlexItem>
-              <Text id="fromCount">{getMetricValue(fromCount, metricType, metricFunction)}</Text>
+              <Text id="inCount">{getMetricValue(inCount, metricType, metricFunction)}</Text>
             </FlexItem>
             <FlexItem>
-              <Text id="toCount">{getMetricValue(toCount, metricType, metricFunction)}</Text>
+              <Text id="outCount">{getMetricValue(outCount, metricType, metricFunction)}</Text>
             </FlexItem>
             <FlexItem>
-              <Text id="total">{getMetricValue(toCount + fromCount, metricType, metricFunction)}</Text>
+              <Text id="total">{getMetricValue(inCount + outCount, metricType, metricFunction)}</Text>
             </FlexItem>
           </Flex>
         </Flex>
@@ -148,158 +156,78 @@ export const ElementPanelContent: React.FC<{
     [metricFunction, metricType, t]
   );
 
-  let srcCount = 0;
-  let dstCount = 0;
-
-  if (data) {
-    if (element instanceof BaseNode) {
-      function getNameFromType(type: string, peer: TopologyMetricPeer) {
-        switch (type.toLowerCase()) {
-          case 'namespace':
-            return peer.namespace;
-          case 'host':
-          case 'node':
-            return peer.hostName;
-          default:
-            return peer.ownerName;
-        }
-      }
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    function match(d: TopologyMetrics, data: any, elementType: string) {
-        const src = getNameFromType(elementType, d.source);
-        const dst = getNameFromType(elementType, d.destination);
-        if (data.parentType && data.parentName) {
-          const parentSrc = getNameFromType(data.parentType, d.source);
-          const parentDst = getNameFromType(data.parentType, d.destination);
-
-          //match both parent / child source or dest criterias
-          return (
-            (src === data.name && parentSrc === data.parentName) || (dst === data.name && parentDst === data.parentName)
-          );
-        }
-
-        //match exclusively src or dest criteria
-        return src !== dst && (src === data.name || dst === data.name);
-      }
-
-      const nodeMetrics = metrics.filter(m =>
-        type === 'group'
-          ? match(m, data, data.type)
-          : metricScope === MetricScopeOptions.RESOURCE
-          ? m.source.addr === data.addr || m.destination.addr === data.addr
-          : match(m, data, metricScope)
-      );
-      nodeMetrics.forEach(m => {
-        const value = getStat(m.stats, metricFunction);
-        if (matchPeer(data.type, data.namespace, data.name, data.addr, m.source)) {
-          srcCount += value;
-        } else if (matchPeer(data.type, data.namespace, data.name, data.addr, m.destination)) {
-          dstCount += value;
-        } else {
-          console.warn(`Unexpected metric for ${data.type} / ${data.name} / ${data.addr}:`, m.source, m.destination);
-        }
-      });
-      const infos = resourceInfos(data);
-      return (
-        <>
-          {infos && (
-            <TextContent id="resourceInfos" className="element-text-container">
-              <Text component={TextVariants.h3}>{t('Infos')}</Text>
-              {infos}
-            </TextContent>
-          )}
-          <MetricsContent
-            id={`node-${data.id}`}
-            metricFunction={metricFunction}
-            metricType={metricType}
-            metrics={nodeMetrics}
-            scope={metricScope as MetricScopeOptions}
-            data={data}
-            counters={metricCounts(srcCount, dstCount, false)}
-            showTitle
-            showArea
-            showScatter
-          />
-        </>
-      );
-    } else if (element instanceof BaseEdge) {
-      const srcData = element.getSource().getData();
-      const tgtData = element.getTarget().getData();
-      const edgeMetrics = metrics.filter(m => {
-        //must match Source / Destination
-        switch (metricScope) {
-          case MetricScopeOptions.HOST:
-            return (
-              (m.source.hostName === srcData.host && m.destination.hostName === tgtData.host) ||
-              (m.source.hostName === tgtData.host && m.destination.hostName === srcData.host)
-            );
-          case MetricScopeOptions.NAMESPACE:
-            return (
-              (m.source.namespace === srcData.name && m.destination.namespace === tgtData.name) ||
-              (m.source.namespace === tgtData.name && m.destination.namespace === srcData.name)
-            );
-          case MetricScopeOptions.OWNER:
-            return (
-              (m.source.ownerName === srcData.name && m.destination.ownerName === tgtData.name) ||
-              (m.source.ownerName === tgtData.name && m.destination.ownerName === srcData.name)
-            );
-          case MetricScopeOptions.RESOURCE:
-          default:
-            return (
-              (m.source.addr === srcData.addr && m.destination.addr === tgtData.addr) ||
-              (m.source.addr === tgtData.addr && m.destination.addr === srcData.addr)
-            );
-        }
-      });
-      edgeMetrics.forEach(m => {
-        const value = getStat(m.stats, metricFunction);
-        if (
-          (metricScope === MetricScopeOptions.HOST && m.source.hostName === srcData.host) ||
-          m.source.addr === srcData.addr
-        ) {
-          srcCount += value;
-        } else {
-          dstCount += value;
-        }
-      });
-      const srcInfos = resourceInfos(srcData);
-      const tgtInfos = resourceInfos(tgtData);
-      return (
-        <>
-          {srcInfos && (
-            <TextContent id="source" className="element-text-container">
-              <Text component={TextVariants.h3}>{t('Source')}</Text>
-              {srcInfos}
-            </TextContent>
-          )}
-          {tgtInfos && (
-            <TextContent id="destination" className="element-text-container">
-              <Text component={TextVariants.h3}>{t('Destination')}</Text>
-              {tgtInfos}
-            </TextContent>
-          )}
-          <MetricsContent
-            id={`edge-${srcData.id}-${tgtData.id}`}
-            metricFunction={metricFunction}
-            metricType={metricType}
-            metrics={edgeMetrics}
-            scope={metricScope as MetricScopeOptions}
-            counters={metricCounts(dstCount, srcCount, true)}
-            showTitle
-            showArea
-            showScatter
-          />
-        </>
-      );
-    }
+  if (element instanceof BaseNode && data) {
+    const outMetrics = metrics.filter(m => matchPeer(data, m.source));
+    const inMetrics = metrics.filter(m => matchPeer(data, m.destination));
+    const outCount = outMetrics.reduce((prev, cur) => prev + getStat(cur.stats, metricFunction), 0);
+    const inCount = inMetrics.reduce((prev, cur) => prev + getStat(cur.stats, metricFunction), 0);
+    const infos = resourceInfos(data);
+    return (
+      <>
+        {infos && (
+          <TextContent id="resourceInfos" className="element-text-container">
+            <Text component={TextVariants.h3}>{t('Infos')}</Text>
+            {infos}
+          </TextContent>
+        )}
+        <MetricsContent
+          id={`node-${decorated(data).id}`}
+          metricFunction={metricFunction}
+          metricType={metricType}
+          metrics={[...inMetrics, ...outMetrics]}
+          scope={metricScope as MetricScopeOptions}
+          data={data}
+          counters={metricCounts(inCount, outCount, false)}
+          showTitle
+          showArea
+          showScatter
+        />
+      </>
+    );
+  } else if (element instanceof BaseEdge) {
+    // Edge A to B (prefering neutral naming here as there is no assumption about what is source, what is destination
+    const aData = element.getSource().getData();
+    const bData = element.getTarget().getData();
+    const aToBMetrics = metrics.filter(m => matchPeer(aData, m.source) && matchPeer(bData, m.destination));
+    const bToAMetrics = metrics.filter(m => matchPeer(bData, m.source) && matchPeer(aData, m.destination));
+    const aToBCount = aToBMetrics.reduce((prev, cur) => prev + getStat(cur.stats, metricFunction), 0);
+    const bToACount = bToAMetrics.reduce((prev, cur) => prev + getStat(cur.stats, metricFunction), 0);
+    const aInfos = resourceInfos(aData);
+    const bInfos = resourceInfos(bData);
+    return (
+      <>
+        {aInfos && (
+          <TextContent id="source" className="element-text-container">
+            <Text component={TextVariants.h3}>{t('Source')}</Text>
+            {aInfos}
+          </TextContent>
+        )}
+        {bInfos && (
+          <TextContent id="destination" className="element-text-container">
+            <Text component={TextVariants.h3}>{t('Destination')}</Text>
+            {bInfos}
+          </TextContent>
+        )}
+        <MetricsContent
+          id={`edge-${aData.id}-${bData.id}`}
+          metricFunction={metricFunction}
+          metricType={metricType}
+          metrics={[...aToBMetrics, ...bToAMetrics]}
+          scope={metricScope as MetricScopeOptions}
+          counters={metricCounts(aToBCount, bToACount, true)}
+          showTitle
+          showArea
+          showScatter
+        />
+      </>
+    );
   }
   return <></>;
 };
 
 export const ElementPanel: React.FC<{
   onClose: () => void;
-  element: GraphElement;
+  element: GraphElementPeer;
   metrics: TopologyMetrics[];
   metricFunction: MetricFunction;
   metricType: MetricType;
@@ -310,16 +238,17 @@ export const ElementPanel: React.FC<{
 }> = ({ id, element, metrics, metricFunction, metricType, metricScope, filters, setFilters, onClose }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const data = element.getData();
+  const dataKind = data?.resourceKind;
 
   const titleContent = React.useCallback(() => {
-    if (data.type) {
-      return <Text component={TextVariants.h2}>{data.type}</Text>;
+    if (dataKind) {
+      return <Text component={TextVariants.h2}>{dataKind}</Text>;
     } else if (element instanceof BaseEdge) {
       return <Text component={TextVariants.h2}>{t('Edge')}</Text>;
     } else {
       return <Text component={TextVariants.h2}>{t('Unknown')}</Text>;
     }
-  }, [data.type, element, t]);
+  }, [dataKind, element, t]);
 
   return (
     <DrawerPanelContent

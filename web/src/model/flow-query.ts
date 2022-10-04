@@ -6,6 +6,7 @@ export type Match = 'all' | 'any';
 export type MetricFunction = 'sum' | 'avg' | 'max' | 'last';
 export type MetricType = 'bytes' | 'packets';
 export type MetricScope = 'host' | 'namespace' | 'owner' | 'resource';
+export type NodeType = MetricScope | 'unknown';
 export type Groups = 'hosts' | 'hosts+namespaces' | 'hosts+owners' | 'namespaces' | 'namespaces+owners' | 'owners';
 export interface FlowQuery {
   timeRange?: number;
