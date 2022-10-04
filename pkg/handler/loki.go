@@ -41,6 +41,8 @@ func newLokiClient(cfg *loki.Config, requestHeader http.Header) httpclient.Calle
 		token := requestHeader.Get(lokiAuthorizationHeader)
 		if token != "" {
 			headers[lokiAuthorizationHeader] = []string{token}
+		} else {
+			hlog.Debug("Missing Authorization token in user request")
 		}
 	} else if cfg.Authorization != "" {
 		headers[lokiAuthorizationHeader] = []string{cfg.Authorization}
