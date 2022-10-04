@@ -103,9 +103,8 @@ func getLimit(params url.Values) (string, int, error) {
 }
 
 func GetFlows(cfg *loki.Config) func(w http.ResponseWriter, r *http.Request) {
-	lokiClient := newLokiClient(cfg)
-
 	return func(w http.ResponseWriter, r *http.Request) {
+		lokiClient := newLokiClient(cfg, r.Header)
 		var code int
 		startTime := time.Now()
 		defer func() {

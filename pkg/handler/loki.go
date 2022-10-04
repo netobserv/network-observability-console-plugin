@@ -31,13 +31,20 @@ const (
 	lokiAuthorizationHeader = "Authorization"
 )
 
-func newLokiClient(cfg *loki.Config) httpclient.Caller {
+func newLokiClient(cfg *loki.Config, requestHeader http.Header) httpclient.Caller {
 	headers := map[string][]string{}
 	if cfg.TenantID != "" {
 		headers[lokiOrgIDHeader] = []string{cfg.TenantID}
 	}
 
-	if cfg.Authorization != "" {
+	if cfg.ForwardUserToken {
+		token := requestHeader.Get(lokiAuthorizationHeader)
+		if token != "" {
+			headers[lokiAuthorizationHeader] = []string{token}
+		} else {
+			hlog.Debug("Missing Authorization token in user request")
+		}
+	} else if cfg.Authorization != "" {
 		headers[lokiAuthorizationHeader] = []string{cfg.Authorization}
 	}
 
@@ -168,9 +175,8 @@ func fetchParallel(lokiClient httpclient.Caller, queries []string, merger loki.M
 }
 
 func LokiReady(cfg *loki.Config) func(w http.ResponseWriter, r *http.Request) {
-	lokiClient := newLokiClient(cfg)
-
 	return func(w http.ResponseWriter, r *http.Request) {
+		lokiClient := newLokiClient(cfg, r.Header)
 		baseURL := strings.TrimRight(cfg.StatusURL.String(), "/")
 
 		resp, code, err := executeLokiQuery(fmt.Sprintf("%s/%s", baseURL, "ready"), lokiClient)
@@ -191,9 +197,8 @@ func LokiReady(cfg *loki.Config) func(w http.ResponseWriter, r *http.Request) {
 }
 
 func LokiMetrics(cfg *loki.Config) func(w http.ResponseWriter, r *http.Request) {
-	lokiClient := newLokiClient(cfg)
-
 	return func(w http.ResponseWriter, r *http.Request) {
+		lokiClient := newLokiClient(cfg, r.Header)
 		baseURL := strings.TrimRight(cfg.StatusURL.String(), "/")
 
 		resp, code, err := executeLokiQuery(fmt.Sprintf("%s/%s", baseURL, "metrics"), lokiClient)
@@ -207,9 +212,8 @@ func LokiMetrics(cfg *loki.Config) func(w http.ResponseWriter, r *http.Request) 
 }
 
 func LokiBuildInfos(cfg *loki.Config) func(w http.ResponseWriter, r *http.Request) {
-	lokiClient := newLokiClient(cfg)
-
 	return func(w http.ResponseWriter, r *http.Request) {
+		lokiClient := newLokiClient(cfg, r.Header)
 		baseURL := strings.TrimRight(cfg.StatusURL.String(), "/")
 
 		resp, code, err := executeLokiQuery(fmt.Sprintf("%s/%s", baseURL, "loki/api/v1/status/buildinfo"), lokiClient)
@@ -223,9 +227,8 @@ func LokiBuildInfos(cfg *loki.Config) func(w http.ResponseWriter, r *http.Reques
 }
 
 func LokiConfig(cfg *loki.Config, param string) func(w http.ResponseWriter, r *http.Request) {
-	lokiClient := newLokiClient(cfg)
-
 	return func(w http.ResponseWriter, r *http.Request) {
+		lokiClient := newLokiClient(cfg, r.Header)
 		baseURL := strings.TrimRight(cfg.StatusURL.String(), "/")
 
 		resp, code, err := executeLokiQuery(fmt.Sprintf("%s/%s", baseURL, "config"), lokiClient)
