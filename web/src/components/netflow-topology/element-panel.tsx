@@ -18,7 +18,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { defaultSize, maxSize, minSize } from '../../utils/panel';
 import { MetricFunction, MetricScope, MetricType } from '../../model/flow-query';
-import { TopologyMetrics } from '../../api/loki';
+import { peersEqual, TopologyMetrics } from '../../api/loki';
 import { Filter } from '../../model/filters';
 import {
   decorated,
@@ -157,8 +157,9 @@ export const ElementPanelContent: React.FC<{
   );
 
   if (element instanceof BaseNode && data) {
-    const outMetrics = metrics.filter(m => matchPeer(data, m.source));
-    const inMetrics = metrics.filter(m => matchPeer(data, m.destination));
+    const filteredMetrics = metrics.filter(m => !peersEqual(m.source, m.destination));
+    const outMetrics = filteredMetrics.filter(m => matchPeer(data, m.source));
+    const inMetrics = filteredMetrics.filter(m => matchPeer(data, m.destination));
     const outCount = outMetrics.reduce((prev, cur) => prev + getStat(cur.stats, metricFunction), 0);
     const inCount = inMetrics.reduce((prev, cur) => prev + getStat(cur.stats, metricFunction), 0);
     const infos = resourceInfos(data);

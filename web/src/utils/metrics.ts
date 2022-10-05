@@ -63,7 +63,6 @@ export const parseMetrics = (
       disambiguate(m.destination);
     });
   }
-  console.log('PARSED METRICS:', metrics);
   return metrics;
 };
 
@@ -175,8 +174,12 @@ const matchPeerInternal = (
   return (
     (kind === 'Namespace' && name === peer.namespace) ||
     (kind === 'Node' && name === peer.hostName) ||
-    (kind === peer.ownerType && name === peer.ownerName && namespace === peer.namespace) ||
-    (!!addr && addr === peer.addr)
+    /* For owner nodes */ (kind &&
+      kind === peer.ownerType &&
+      name === peer.ownerName &&
+      namespace === peer.namespace) ||
+    /* For resource nodes */ (kind && kind === peer.type && addr === peer.addr) ||
+    /* For unknown nodes */ (!kind && !peer.displayName && addr === peer.addr)
   );
 };
 
