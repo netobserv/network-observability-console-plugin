@@ -3,3 +3,8 @@
 .time-range-tooltip-empty {
   display: none;
 }
+
+/* force time picker to overflow popup */
+.time-range-row {
+  height: 33px;
+}

@@ -1,4 +1,5 @@
 import * as React from 'react';
+import * as _ from 'lodash';
 import { css } from '@patternfly/react-styles';
 import styles from '@patternfly/react-styles/css/components/Topology/topology-components';
 import {
@@ -20,9 +21,12 @@ import {
   observer
 } from '@patternfly/react-topology';
 import DefaultConnectorTag from '@patternfly/react-topology/dist/esm/components/edges/DefaultConnectorTag';
+import { getConnectorStartPoint } from '@patternfly/react-topology/dist/esm/components/edges/terminals/terminalUtils';
+
 import { HOVER_EVENT } from '../netflow-topology';
 
 type BaseEdgeProps = {
+  children?: React.ReactNode;
   element: Edge;
   dragging?: boolean;
   className?: string;
@@ -30,19 +34,19 @@ type BaseEdgeProps = {
   startTerminalType?: EdgeTerminalType;
   startTerminalClass?: string;
   startTerminalStatus?: NodeStatus;
+  startTerminalSize?: number;
   endTerminalType?: EdgeTerminalType;
   endTerminalClass?: string;
   endTerminalStatus?: NodeStatus;
+  endTerminalSize?: number;
   shadowed?: boolean;
   highlighted?: boolean;
   tag?: string;
   tagClass?: string;
   tagStatus?: NodeStatus;
-} & WithRemoveConnectorProps &
-  WithSourceDragProps &
-  WithTargetDragProps &
-  WithSelectionProps &
-  Partial<WithContextMenuProps>;
+} & Partial<
+  WithRemoveConnectorProps & WithSourceDragProps & WithTargetDragProps & WithSelectionProps & WithContextMenuProps
+>;
 
 // BaseEdge: slightly modified from @patternfly/react-topology/src/components/edges/DefaultEdge.tsx
 // to support shadow / hover behaviors
@@ -58,9 +62,11 @@ const BaseEdge: React.FC<BaseEdgeProps> = ({
   startTerminalType = EdgeTerminalType.none,
   startTerminalClass,
   startTerminalStatus,
+  startTerminalSize = 14,
   endTerminalType = EdgeTerminalType.directional,
   endTerminalClass,
   endTerminalStatus,
+  endTerminalSize = 14,
   shadowed,
   highlighted,
   tag,
@@ -109,20 +115,30 @@ const BaseEdge: React.FC<BaseEdgeProps> = ({
     endPoint.x
   } ${endPoint.y}`;
 
+  const bgStartPoint =
+    !startTerminalType || startTerminalType === EdgeTerminalType.none
+      ? [startPoint.x, startPoint.y]
+      : getConnectorStartPoint(_.head(bendpoints) || endPoint, startPoint, startTerminalSize);
+  const bgEndPoint =
+    !endTerminalType || endTerminalType === EdgeTerminalType.none
+      ? [endPoint.x, endPoint.y]
+      : getConnectorStartPoint(_.last(bendpoints) || startPoint, endPoint, endTerminalSize);
+  const backgroundPath = `M${bgStartPoint[0]} ${bgStartPoint[1]} ${bendpoints
+    .map((b: Point) => `L${b.x} ${b.y} `)
+    .join('')}L${bgEndPoint[0]} ${bgEndPoint[1]}`;
+
   return (
-    <Layer id={dragging || hover || highlighted ? TOP_LAYER : undefined}>
+    <Layer id={dragging || hover ? TOP_LAYER : undefined}>
       <g
         ref={hoverRef as React.LegacyRef<SVGGElement> | undefined}
-        data-test="edge-handler"
+        data-test-id="edge-handler"
         className={groupClassName}
         onClick={onSelect}
         onContextMenu={onContextMenu}
       >
         <path
-          strokeWidth={10}
-          stroke="transparent"
-          d={d}
-          fill="none"
+          className={css(styles.topologyEdgeBackground)}
+          d={backgroundPath}
           onMouseEnter={onShowRemoveConnector}
           onMouseLeave={onHideRemoveConnector}
         />
@@ -140,6 +156,7 @@ const BaseEdge: React.FC<BaseEdgeProps> = ({
           className={startTerminalClass}
           isTarget={false}
           edge={element}
+          size={startTerminalSize}
           dragRef={sourceDragRef}
           terminalType={startTerminalType}
           status={startTerminalStatus}
@@ -150,6 +167,7 @@ const BaseEdge: React.FC<BaseEdgeProps> = ({
           isTarget
           dragRef={targetDragRef}
           edge={element}
+          size={endTerminalSize}
           terminalType={endTerminalType}
           status={endTerminalStatus}
           highlight={dragging || hover || highlighted}

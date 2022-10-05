@@ -24,7 +24,7 @@ const StyleEdge: React.FC<StyleEdgeProps> = ({ element, ...rest }) => {
     return newData;
   }, [data, detailsLevel]);
 
-  return <BaseEdge element={element} {...rest} {...passedData} />;
+  return <BaseEdge className="netobserv" element={element} {...rest} {...passedData} />;
 };
 
 export default observer(StyleEdge);

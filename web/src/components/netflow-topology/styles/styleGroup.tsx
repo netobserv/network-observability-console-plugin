@@ -5,6 +5,7 @@ import {
   observer,
   ScaleDetailsLevel,
   ShapeProps,
+  WithDragNodeProps,
   WithSelectionProps
 } from '@patternfly/react-topology';
 import useDetailsLevel from '@patternfly/react-topology/dist/esm/hooks/useDetailsLevel';
@@ -13,7 +14,8 @@ import * as React from 'react';
 const ICON_PADDING = 20;
 
 export enum DataTypes {
-  Default
+  Default,
+  Alternate
 }
 
 type StyleGroupProps = {
@@ -24,11 +26,27 @@ type StyleGroupProps = {
   onCollapseChange?: (group: Node, collapsed: boolean) => void;
   getCollapsedShape?: (node: Node) => React.FC<ShapeProps>;
   collapsedShadowOffset?: number; // defaults to 10
-} & WithSelectionProps;
+} & WithDragNodeProps &
+  WithSelectionProps;
 
-const StyleGroup: React.FC<StyleGroupProps> = ({ element, collapsedWidth = 75, collapsedHeight = 75, ...rest }) => {
+const StyleGroup: React.FunctionComponent<StyleGroupProps> = ({
+  element,
+  collapsedWidth = 75,
+  collapsedHeight = 75,
+  ...rest
+}) => {
   const data = element.getData();
   const detailsLevel = useDetailsLevel();
+
+  const renderIcon = (): React.ReactNode => {
+    const iconSize = Math.min(collapsedWidth, collapsedHeight) - ICON_PADDING * 2;
+
+    return (
+      <g transform={`translate(${(collapsedWidth - iconSize) / 2}, ${(collapsedHeight - iconSize) / 2})`}>
+        <CubesIcon style={{ color: '#393F44' }} width={iconSize} height={iconSize} />
+      </g>
+    );
+  };
 
   const passedData = React.useMemo(() => {
     const newData = { ...data };
@@ -40,30 +58,18 @@ const StyleGroup: React.FC<StyleGroupProps> = ({ element, collapsedWidth = 75, c
     return newData;
   }, [data]);
 
-  const renderIcon = (): React.ReactNode => {
-    const iconSize = Math.min(collapsedWidth, collapsedHeight) - ICON_PADDING * 2;
-    const Component = CubesIcon;
-
-    return (
-      <g transform={`translate(${(collapsedWidth - iconSize) / 2}, ${(collapsedHeight - iconSize) / 2})`}>
-        <Component style={{ color: '#393F44' }} width={iconSize} height={iconSize} />
-      </g>
-    );
-  };
-
   return (
-    <g className={`topology ${data.shadowed ? 'shadowed' : ''}`}>
-      <DefaultGroup
-        element={element}
-        collapsedWidth={collapsedWidth}
-        collapsedHeight={collapsedHeight}
-        showLabel={[ScaleDetailsLevel.medium, ScaleDetailsLevel.high].includes(detailsLevel)}
-        {...rest}
-        {...passedData}
-      >
-        {element.isCollapsed() ? renderIcon() : null}
-      </DefaultGroup>
-    </g>
+    <DefaultGroup
+      className="netobserv"
+      element={element}
+      collapsedWidth={collapsedWidth}
+      collapsedHeight={collapsedHeight}
+      showLabel={detailsLevel === ScaleDetailsLevel.high}
+      {...rest}
+      {...passedData}
+    >
+      {element.isCollapsed() ? renderIcon() : null}
+    </DefaultGroup>
   );
 };
 

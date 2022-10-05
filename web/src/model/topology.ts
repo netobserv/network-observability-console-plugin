@@ -23,12 +23,14 @@ import { MetricScopeOptions, MetricFunctionOptions, MetricTypeOptions } from './
 import { MetricScope } from './flow-query';
 
 export enum LayoutName {
+  BreadthFirst = 'BreadthFirst',
   Cola = 'Cola',
   ColaNoForce = 'ColaNoForce',
   Concentric = 'Concentric',
   Dagre = 'Dagre',
   Force = 'Force',
-  Grid = 'Grid'
+  Grid = 'Grid',
+  ColaGroups = 'ColaGroups'
 }
 
 export enum TopologyGroupTypes {

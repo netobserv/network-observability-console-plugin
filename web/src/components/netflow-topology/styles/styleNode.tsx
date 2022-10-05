@@ -16,7 +16,9 @@ import {
 import {
   Decorator,
   DEFAULT_DECORATOR_RADIUS,
+  DEFAULT_LAYER,
   getDefaultShapeDecoratorCenter,
+  Layer,
   Node,
   NodeShape,
   observer,
@@ -24,6 +26,8 @@ import {
   ScaleDetailsLevel,
   ShapeProps,
   TopologyQuadrant,
+  TOP_LAYER,
+  useHover,
   WithDragNodeProps,
   WithSelectionProps
 } from '@patternfly/react-topology';
@@ -53,9 +57,6 @@ type StyleNodeProps = {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const getTypeIcon = (dataType?: string): React.ComponentClass<any, any> => {
-  /*TODO: try using console ResourceIcon when available
-   * https://issues.redhat.com/browse/CONSOLE-3140
-   */
   switch (dataType) {
     case 'Service':
       return ServiceIcon;
@@ -204,7 +205,7 @@ const renderClickableDecorator = (
   element: Node,
   quadrant: TopologyQuadrant,
   icon: React.ReactNode,
-  isPinned: boolean,
+  isActive: boolean,
   onClick: (element: Node) => void,
   getShapeDecoratorCenter?: (
     quadrant: TopologyQuadrant,
@@ -226,7 +227,7 @@ const renderClickableDecorator = (
       radius={DEFAULT_DECORATOR_RADIUS}
       showBackground
       icon={icon}
-      className={isPinned ? 'selected-decorator' : ''}
+      className={isActive ? 'selected-decorator' : ''}
       onClick={() => onClick(element)}
     />
   );
@@ -318,7 +319,7 @@ const renderDecorators = (
           element,
           TopologyQuadrant.lowerLeft,
           isFiltered ? <TimesIcon /> : <FilterIcon />,
-          false,
+          isFiltered,
           onFilterClick,
           getShapeDecoratorCenter
         )}
@@ -350,6 +351,7 @@ const StyleNode: React.FC<StyleNodeProps> = ({ element, showLabel, dragging, reg
   const [isPinned, setPinned] = React.useState<boolean>(data.isPinned);
   const [isFiltered, setFiltered] = React.useState<boolean>(data.isFiltered === true);
   const detailsLevel = useDetailsLevel();
+  const [hover, hoverRef] = useHover();
 
   const passedData = React.useMemo(() => {
     const newData = { ...data };
@@ -372,22 +374,38 @@ const StyleNode: React.FC<StyleNodeProps> = ({ element, showLabel, dragging, reg
   }
 
   return (
-    <BaseNode
-      element={element}
-      {...updatedRest}
-      {...passedData}
-      dragging={isPinned ? false : dragging}
-      regrouping={isPinned ? false : regrouping}
-      showLabel={detailsLevel === ScaleDetailsLevel.high && showLabel}
-      showStatusBackground={detailsLevel === ScaleDetailsLevel.low}
-      showStatusDecorator={detailsLevel === ScaleDetailsLevel.high && passedData.showStatusDecorator}
-      attachments={
-        detailsLevel === ScaleDetailsLevel.high &&
-        renderDecorators(t, element, data, isPinned, setPinned, isFiltered, setFiltered, rest.getShapeDecoratorCenter)
-      }
-    >
-      {renderIcon(passedData, element)}
-    </BaseNode>
+    <Layer id={passedData.dragging || hover || passedData.hover || passedData.highlighted ? TOP_LAYER : DEFAULT_LAYER}>
+      <g ref={hoverRef as never}>
+        <BaseNode
+          className="netobserv"
+          element={element}
+          scaleLabel={detailsLevel !== ScaleDetailsLevel.high}
+          scaleNode={hover && detailsLevel === ScaleDetailsLevel.low}
+          {...updatedRest}
+          {...passedData}
+          dragging={isPinned ? false : dragging}
+          regrouping={isPinned ? false : regrouping}
+          showLabel={hover || (detailsLevel === ScaleDetailsLevel.high && showLabel)}
+          showStatusBackground={detailsLevel === ScaleDetailsLevel.low}
+          showStatusDecorator={detailsLevel === ScaleDetailsLevel.high && passedData.showStatusDecorator}
+          attachments={
+            (hover || detailsLevel === ScaleDetailsLevel.high) &&
+            renderDecorators(
+              t,
+              element,
+              data,
+              isPinned,
+              setPinned,
+              isFiltered,
+              setFiltered,
+              rest.getShapeDecoratorCenter
+            )
+          }
+        >
+          {(hover || detailsLevel !== ScaleDetailsLevel.low) && renderIcon(passedData, element)}
+        </BaseNode>
+      </g>
+    </Layer>
   );
 };
 

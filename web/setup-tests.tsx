@@ -1,3 +1,4 @@
+import * as React from 'react';
 import { JSDOM } from 'jsdom';
 
 const jsdom = new JSDOM('<!doctype html><html><body></body></html>', {
@@ -49,12 +50,18 @@ jest.mock('react-i18next', () => {
 //Mock all console sdk components used here
 jest.mock('@openshift-console/dynamic-plugin-sdk', () => {
   return {
+    isModelFeatureFlag(e: never) {
+      return null;
+    },
     useResolvedExtensions: jest.fn(),
     useK8sModels: () => {
       return [{}, false];
     },
+    ResourceIcon: () => {
+      return <></>;
+    },
     ResourceLink: () => {
-      return null;
+      return <></>;
     }
   };
 });

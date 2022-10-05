@@ -17,14 +17,6 @@ const loadingContentsQuery = `Bullseye[data-test="loading-contents"]`;
 const noResultsFoundQuery = `Bullseye[data-test="no-results-found"]`;
 const clearFiltersQuery = `Button[data-test="clear-all-filters"]`;
 
-jest.mock('@openshift-console/dynamic-plugin-sdk', () => {
-  return {
-    ResourceLink: () => {
-      return <></>;
-    }
-  };
-});
-
 describe('<NetflowTable />', () => {
   const mocks = {
     size: 'm' as Size,

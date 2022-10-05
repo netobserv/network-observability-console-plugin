@@ -5,7 +5,8 @@ import Modal from 'react-modal';
 import './modal.css';
 
 /* This Modal component replace patternfly one that has issues with overflows
- * it is based on console approach but their component is not exported in @openshift-console/dynamic-plugin-sdk
+ * it is based on console approach but their component doesn't manage non scrollable content & overflow
+ * in @openshift-console/dynamic-plugin-sdk
  * https://github.com/openshift/console/blob/master/frontend/public/components/factory/modal.tsx
  */
 const CustomModal: React.FC<{

@@ -1,10 +1,9 @@
-.selected-decorator {
-  color: white;
+.selected-decorator>g>.pf-topology__node__decorator__icon>svg {
+  fill: white;
 }
 
 .selected-decorator>circle {
   fill: #06c;
-  stroke: #06c;
 }
 
 #topology-search-result-count {
@@ -41,18 +40,33 @@ span.pf-topology-control-bar {
   box-shadow: 0 0.25rem 0.5rem 0rem rgba(3, 3, 3, 0.12), 0 0 0.25rem 0 rgba(3, 3, 3, 0.06);
 }
 
-g.topology.shadowed {
+g.netobserv.topology.shadowed {
   opacity: 0.5;
 }
 
-g.topology.node-highlighted>g>ellipse {
+g.netobserv.topology.node-highlighted>g>ellipse {
   stroke: #0066CC;
   stroke-width: 3px;
+  --pf-topology__node__background--Fill: white;
 }
 
-g.topology.edge-highlighted>.pf-topology__edge__link,
-g.topology.edge-highlighted>.pf-topology-connector-arrow {
+g.netobserv.topology.edge-highlighted>.pf-topology__edge__link,
+g.netobserv.topology.edge-highlighted>.pf-topology-connector-arrow {
   stroke: #0066CC;
+}
+
+g.netobserv.pf-topology__group>.pf-topology__group__background {
+  fill: #D2D2D2;
+  fill-opacity: 0.5;
+}
+
+g.netobserv.pf-topology__group.pf-m-hover>.pf-topology__group__background {
+  stroke: #4F5255;
+}
+
+g.netobserv.pf-topology__group.pf-m-selected>.pf-topology__group__background {
+  stroke: #0066CC;
+  fill: #A5C4E2;
 }
 
 .topology-icon {

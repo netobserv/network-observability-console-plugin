@@ -13,6 +13,8 @@ export const LayoutDropdown: React.FC<{
 
   const getLayoutDisplay = (layoutName: LayoutName) => {
     switch (layoutName) {
+      case LayoutName.BreadthFirst:
+        return t('BreadthFirst');
       case LayoutName.Cola:
         return t('Cola');
       case LayoutName.ColaNoForce:
@@ -25,6 +27,8 @@ export const LayoutDropdown: React.FC<{
         return t('Force');
       case LayoutName.Grid:
         return t('Grid');
+      case LayoutName.ColaGroups:
+        return t('ColaGroups');
       default:
         return t('Invalid');
     }
