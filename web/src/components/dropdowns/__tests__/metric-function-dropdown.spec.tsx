@@ -41,7 +41,7 @@ describe('<MetricDropdown />', () => {
     expect(props.setMetricFunction).toHaveBeenCalledWith(MetricFunctionOptions.MAX);
     expect(wrapper.find('li').length).toBe(0);
 
-    //setMetricFunction should be called twice
+    //setMetricFunction should be called once
     expect(props.setMetricFunction).toHaveBeenCalledTimes(1);
   });
 });
