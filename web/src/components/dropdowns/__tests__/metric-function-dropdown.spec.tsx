@@ -2,11 +2,10 @@ import * as React from 'react';
 import { mount, shallow } from 'enzyme';
 
 import MetricFunctionDropdown from '../metric-function-dropdown';
-import { MetricFunctionOptions } from '../../../model/metrics';
 
 describe('<MetricDropdown />', () => {
   const props = {
-    selected: MetricFunctionOptions.AVG,
+    selected: 'avg',
     setMetricFunction: jest.fn(),
     id: 'metric'
   };
@@ -38,7 +37,7 @@ describe('<MetricDropdown />', () => {
     //open dropdown and select MAX
     dropdown.at(0).simulate('click');
     wrapper.find('[id="max"]').at(0).simulate('click');
-    expect(props.setMetricFunction).toHaveBeenCalledWith(MetricFunctionOptions.MAX);
+    expect(props.setMetricFunction).toHaveBeenCalledWith('max');
     expect(wrapper.find('li').length).toBe(0);
 
     //setMetricFunction should be called once

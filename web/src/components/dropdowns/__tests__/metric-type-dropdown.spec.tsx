@@ -2,11 +2,10 @@ import * as React from 'react';
 import { mount, shallow } from 'enzyme';
 
 import MetricTypeDropdown from '../metric-type-dropdown';
-import { MetricTypeOptions } from '../../../model/metrics';
 
 describe('<MetricDropdown />', () => {
   const props = {
-    selected: MetricTypeOptions.BYTES,
+    selected: 'bytes',
     setMetricType: jest.fn(),
     id: 'metric'
   };
@@ -37,13 +36,13 @@ describe('<MetricDropdown />', () => {
     //open dropdown and select PACKETS
     dropdown.at(0).simulate('click');
     wrapper.find('[id="packets"]').at(0).simulate('click');
-    expect(props.setMetricType).toHaveBeenCalledWith(MetricTypeOptions.PACKETS);
+    expect(props.setMetricType).toHaveBeenCalledWith('packets');
     expect(wrapper.find('li').length).toBe(0);
 
     //open dropdown and select BYTES
     dropdown.at(0).simulate('click');
     wrapper.find('[id="bytes"]').at(0).simulate('click');
-    expect(props.setMetricType).toHaveBeenCalledWith(MetricTypeOptions.BYTES);
+    expect(props.setMetricType).toHaveBeenCalledWith('bytes');
     expect(wrapper.find('li').length).toBe(0);
 
     //setMetricType should be called twice

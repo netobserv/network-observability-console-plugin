@@ -15,14 +15,14 @@ import {
 import _ from 'lodash';
 import { MetricStats, TopologyMetricPeer, TopologyMetrics } from '../api/loki';
 import { Filter, FilterDefinition } from '../model/filters';
-import { defaultTimeRange } from '../utils/router';
+import { defaultMetricFunction, defaultMetricType, defaultTimeRange } from '../utils/router';
 import { findFilter } from '../utils/filter-definitions';
 import { TFunction } from 'i18next';
 import { K8sModel } from '@openshift-console/dynamic-plugin-sdk';
 import { getTopologyEdgeId, getTopologyGroupId, getTopologyNodeId } from '../utils/ids';
-import { MetricScopeOptions, MetricFunctionOptions, MetricTypeOptions } from './metrics';
+import { MetricScopeOptions } from './metrics';
 import { MetricFunction, MetricScope, MetricType, NodeType } from './flow-query';
-import { getMetricValue } from '../utils/metrics';
+import { getFormattedValue } from '../utils/metrics';
 
 export enum LayoutName {
   BreadthFirst = 'BreadthFirst',
@@ -56,7 +56,7 @@ export enum TopologyTruncateLength {
 
 export interface TopologyOptions {
   rangeInSeconds: number;
-  maxEdgeAvg: number;
+  maxEdgeStat: number;
   nodeBadges?: boolean;
   edges?: boolean;
   edgeTags?: boolean;
@@ -66,8 +66,8 @@ export interface TopologyOptions {
   groupTypes: TopologyGroupTypes;
   lowScale: number;
   medScale: number;
-  metricFunction: MetricFunctionOptions;
-  metricType: MetricTypeOptions;
+  metricFunction: MetricFunction;
+  metricType: MetricType;
 }
 
 export const DefaultOptions: TopologyOptions = {
@@ -75,15 +75,15 @@ export const DefaultOptions: TopologyOptions = {
   nodeBadges: true,
   edges: true,
   edgeTags: true,
-  maxEdgeAvg: 0,
+  maxEdgeStat: 0,
   startCollapsed: false,
   truncateLength: TopologyTruncateLength.M,
   layout: LayoutName.ColaNoForce,
   groupTypes: TopologyGroupTypes.NONE,
   lowScale: 0.3,
   medScale: 0.5,
-  metricFunction: MetricFunctionOptions.AVG,
-  metricType: MetricTypeOptions.BYTES
+  metricFunction: defaultMetricFunction,
+  metricType: defaultMetricType
 };
 
 export type GraphElementPeer = GraphElement<ElementModel, NodeData>;
@@ -199,7 +199,7 @@ export const generateNode = (
   k8sModels: { [key: string]: K8sModel }
 ): NodeModel => {
   const id = getTopologyNodeId(data.resourceKind, data.namespace, data.name, data.addr, data.host);
-  const label = data.displayName || data.name || data.addr || 'DEBUG ME';
+  const label = data.displayName || data.name || data.addr || ''; // should never be empty
   const secondaryLabel =
     data.nodeType !== 'namespace' &&
     ![
@@ -279,15 +279,10 @@ export const getStat = (stats: MetricStats, mf: MetricFunction): number => {
   return mf === 'avg' ? stats.avg : mf === 'max' ? stats.max : mf === 'last' ? stats.latest : stats.total;
 };
 
-const getStatForDisplay = (stats: MetricStats, mt: MetricType, mf: MetricFunction): string => {
-  const stat = getStat(stats, mf);
-  return getMetricValue(stat, mt, mf);
-};
-
 export const generateEdge = (
   sourceId: string,
   targetId: string,
-  stats: MetricStats,
+  stat: number,
   options: TopologyOptions,
   shadowed = false,
   highlightedId: string
@@ -299,8 +294,8 @@ export const generateEdge = (
     type: 'edge',
     source: sourceId,
     target: targetId,
-    edgeStyle: getEdgeStyle(stats.avg),
-    animationSpeed: getAnimationSpeed(stats.avg, options.maxEdgeAvg),
+    edgeStyle: getEdgeStyle(stat),
+    animationSpeed: getAnimationSpeed(stat, options.maxEdgeStat),
     data: {
       sourceId,
       targetId,
@@ -309,11 +304,11 @@ export const generateEdge = (
       //edges are directed from src to dst. It will become bidirectionnal if inverted pair is found
       startTerminalType: EdgeTerminalType.none,
       startTerminalStatus: NodeStatus.default,
-      endTerminalType: stats.avg > 0 ? EdgeTerminalType.directional : EdgeTerminalType.none,
+      endTerminalType: stat > 0 ? EdgeTerminalType.directional : EdgeTerminalType.none,
       endTerminalStatus: NodeStatus.default,
-      tag: getStatForDisplay(stats, options.metricType, options.metricFunction),
-      tagStatus: getTagStatus(stats.avg, options.maxEdgeAvg),
-      bps: stats.avg
+      tag: getFormattedValue(stat, options.metricType, options.metricFunction),
+      tagStatus: getTagStatus(stat, options.maxEdgeStat),
+      bps: stat
     }
   };
 };
@@ -403,6 +398,7 @@ export const generateDataModel = (
   }
 
   function addEdge(sourceId: string, targetId: string, stats: MetricStats, shadowed = false) {
+    const stat = getStat(stats, options.metricFunction);
     let edge = edges.find(
       e =>
         (e.data.sourceId === sourceId && e.data.targetId === targetId) ||
@@ -410,19 +406,19 @@ export const generateDataModel = (
     );
     if (edge) {
       //update style and datas
-      edge.edgeStyle = getEdgeStyle(stats.avg);
-      edge.animationSpeed = getAnimationSpeed(stats.avg, options.maxEdgeAvg);
+      edge.edgeStyle = getEdgeStyle(stat);
+      edge.animationSpeed = getAnimationSpeed(stat, options.maxEdgeStat);
       edge.data = {
         ...edge.data,
         shadowed,
         //edges are directed from src to dst. It will become bidirectionnal if inverted pair is found
         startTerminalType: edge.data.sourceId !== sourceId ? EdgeTerminalType.directional : edge.data.startTerminalType,
-        tag: getStatForDisplay(stats, options.metricType, options.metricFunction),
-        tagStatus: getTagStatus(stats.avg, options.maxEdgeAvg),
-        bps: stats.avg
+        tag: getFormattedValue(stat, options.metricType, options.metricFunction),
+        tagStatus: getTagStatus(stat, options.maxEdgeStat),
+        bps: stat
       };
     } else {
-      edge = generateEdge(sourceId, targetId, stats, opts, shadowed, highlightedId);
+      edge = generateEdge(sourceId, targetId, stat, opts, shadowed, highlightedId);
       edges.push(edge);
     }
 

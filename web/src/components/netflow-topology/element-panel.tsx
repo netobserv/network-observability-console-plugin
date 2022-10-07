@@ -32,7 +32,7 @@ import {
 import './element-panel.css';
 import MetricsContent from '../metrics/metrics-content';
 import { MetricScopeOptions } from '../../model/metrics';
-import { getMetricValue, matchPeer } from '../../utils/metrics';
+import { getFormattedValue, matchPeer } from '../../utils/metrics';
 
 export const ElementPanelContent: React.FC<{
   element: GraphElementPeer;
@@ -141,13 +141,13 @@ export const ElementPanelContent: React.FC<{
           </Flex>
           <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsNone' }}>
             <FlexItem>
-              <Text id="inCount">{getMetricValue(inCount, metricType, metricFunction)}</Text>
+              <Text id="inCount">{getFormattedValue(inCount, metricType, metricFunction)}</Text>
             </FlexItem>
             <FlexItem>
-              <Text id="outCount">{getMetricValue(outCount, metricType, metricFunction)}</Text>
+              <Text id="outCount">{getFormattedValue(outCount, metricType, metricFunction)}</Text>
             </FlexItem>
             <FlexItem>
-              <Text id="total">{getMetricValue(inCount + outCount, metricType, metricFunction)}</Text>
+              <Text id="total">{getFormattedValue(inCount + outCount, metricType, metricFunction)}</Text>
             </FlexItem>
           </Flex>
         </Flex>

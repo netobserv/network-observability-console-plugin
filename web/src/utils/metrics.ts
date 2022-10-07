@@ -155,12 +155,25 @@ const buildPeerDisplayName = (peer: TopologyMetricPeer, scope: MetricScope): str
   }
 };
 
-export const getMetricValue = (v: number, mt: MetricType, mf: MetricFunction): string => {
+export const getFormattedValue = (v: number, mt: MetricType, mf: MetricFunction): string => {
+  if (mf === 'sum') {
+    switch (mt) {
+      case 'bytes':
+        return humanFileSize(v, true, 0);
+      case 'packets':
+        return String(v);
+    }
+  } else {
+    return getFormattedRateValue(v, mt);
+  }
+};
+
+export const getFormattedRateValue = (v: number, mt: MetricType): string => {
   switch (mt) {
     case 'bytes':
-      return mf === 'sum' ? humanFileSize(v, true, 0) : bytesPerSeconds(v);
+      return bytesPerSeconds(v);
     case 'packets':
-      return mf === 'sum' ? String(v) : elementPerMinText(v);
+      return elementPerMinText(v);
   }
 };
 

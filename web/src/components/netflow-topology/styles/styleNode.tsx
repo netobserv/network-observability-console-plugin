@@ -54,7 +54,7 @@ type StyleNodeProps = {
   getShapeDecoratorCenter?: (quadrant: TopologyQuadrant, node: NodePeer, radius?: number) => { x: number; y: number };
   showLabel?: boolean;
   showStatusDecorator?: boolean;
-  // TODO / TO CHECK: is this used? (not declared in BaseNodeProps) regrouping?: boolean;
+  regrouping?: boolean;
   dragging?: boolean;
 } & WithDragNodeProps &
   WithSelectionProps;
@@ -339,7 +339,7 @@ const renderDecorators = (
   );
 };
 
-const StyleNode: React.FC<StyleNodeProps> = ({ element, showLabel, dragging, ...rest }) => {
+const StyleNode: React.FC<StyleNodeProps> = ({ element, showLabel, dragging, regrouping, ...rest }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const data = element.getData() as Decorated<NodeData> | undefined;
   //TODO: check if we can have intelligent pin on view change

@@ -20,7 +20,7 @@ import { TopologyMetricPeer, TopologyMetrics } from '../../api/loki';
 import { MetricFunction, MetricType } from '../../model/flow-query';
 import { getDateFromUnixString, twentyFourHourTime } from '../../utils/datetime';
 import './metrics-content.css';
-import { getMetricValue, matchPeer } from '../../utils/metrics';
+import { getFormattedValue, getFormattedRateValue, matchPeer } from '../../utils/metrics';
 import { getStat, NodeData } from '../../model/topology';
 
 export const MetricsContent: React.FC<{
@@ -173,7 +173,7 @@ export const MetricsContent: React.FC<{
               right: 300,
               top: 20
             }}
-            title={`${getMetricValue(total, metricType, metricFunction)}`}
+            title={`${getFormattedValue(total, metricType, metricFunction)}`}
             subTitle={metricTitle()}
           />
         ) : (
@@ -201,7 +201,7 @@ export const MetricsContent: React.FC<{
             }}
           >
             <ChartAxis fixLabelOverlap />
-            <ChartAxis dependentAxis showGrid fixLabelOverlap tickFormat={y => getMetricValue(y, metricType, 'avg')} />
+            <ChartAxis dependentAxis showGrid fixLabelOverlap tickFormat={y => getFormattedRateValue(y, metricType)} />
             {showBar && (
               <ChartGroup>
                 {metrics.map(m => (

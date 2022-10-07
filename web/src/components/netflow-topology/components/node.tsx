@@ -75,6 +75,7 @@ type BaseNodeProps = {
   labelIconClass?: string; // Icon to show in label
   labelIcon?: React.ReactNode;
   labelIconPadding?: number;
+  regrouping?: boolean;
   badge?: string;
   badgeColor?: string;
   badgeTextColor?: string;

@@ -33,7 +33,8 @@ import {
   toggleElementFilter,
   GraphElementPeer,
   ElementData,
-  Decorated
+  Decorated,
+  getStat
 } from '../../model/topology';
 import { MetricScopeOptions } from '../../model/metrics';
 import { TimeRange } from '../../utils/datetime';
@@ -261,11 +262,11 @@ export const TopologyContent: React.FC<{
     } else {
       rangeInSeconds = (range.from - range.to) / 1000;
     }
-    const maxEdgeAvg = Math.max(...metrics.map(m => m.stats.avg));
+    const maxEdgeStat = Math.max(...metrics.map(m => getStat(m.stats, metricFunction)));
     return {
       ...options,
       rangeInSeconds,
-      maxEdgeAvg,
+      maxEdgeStat,
       metricFunction,
       metricType
     } as TopologyOptions;

@@ -14,8 +14,8 @@ export const defaultReporter: Reporter = 'destination';
 //TODO: improve performances before applying 'application' layer by default
 export const defaultLayer: Layer = 'both';
 const defaultMatch: Match = 'all';
-export const defaultMetricFunction = 'sum';
-export const defaultMetricType = 'bytes';
+export const defaultMetricFunction: MetricFunction = 'last';
+export const defaultMetricType: MetricType = 'bytes';
 
 export const flowdirToReporter: { [flowdir: string]: Reporter } = {
   '0': 'destination',
