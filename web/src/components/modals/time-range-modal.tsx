@@ -150,7 +150,7 @@ export const TimeRangeModal: React.FC<TimeRangeModalProps> = ({ id, isModalOpen,
       <Flex direction={{ default: 'column' }}>
         <FlexItem>
           <Text component={TextVariants.h4}>{t('From')}</Text>
-          <Flex direction={{ default: 'row' }}>
+          <Flex direction={{ default: 'row' }} className="time-range-row">
             <FlexItem>
               <DatePicker
                 data-test="from-date-picker"
@@ -173,7 +173,7 @@ export const TimeRangeModal: React.FC<TimeRangeModalProps> = ({ id, isModalOpen,
         </FlexItem>
         <FlexItem>
           <Text component={TextVariants.h4}>{t('To')}</Text>
-          <Flex direction={{ default: 'row' }}>
+          <Flex direction={{ default: 'row' }} className="time-range-row">
             <FlexItem>
               <DatePicker
                 data-test="to-date-picker"

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ResourceLinkProps } from '@openshift-console/dynamic-plugin-sdk';
+import { ResourceIconProps, ResourceLinkProps } from '@openshift-console/dynamic-plugin-sdk';
 import { useK8sModelsWithColors } from '../src/utils/k8s-models-hook';
 import { k8sModels } from './k8s-models';
 
@@ -33,6 +33,26 @@ export function useK8sModels() {
   ]
 }
 
+export const ResourceIcon: React.FC<ResourceIconProps> = ({
+  className,
+  kind,
+  children,
+}) => {
+  const k8sModels = useK8sModelsWithColors();
+
+  return (
+    <span className={className}>
+      {k8sModels[kind!] && <span
+        className="co-m-resource-icon"
+        style={{ backgroundColor: k8sModels[kind!].color }}
+        title={kind}>
+        {k8sModels[kind!].abbr}
+      </span>}
+      {children}
+    </span>
+  );
+};
+
 export const ResourceLink: React.FC<ResourceLinkProps> = ({
   className,
   displayName,
@@ -45,7 +65,6 @@ export const ResourceLink: React.FC<ResourceLinkProps> = ({
   const value = displayName ? displayName : name;
 
   return (
-    //TODO: add icon here
     <span className={className}>
       {k8sModels[kind!] && <span
         className="co-m-resource-icon"

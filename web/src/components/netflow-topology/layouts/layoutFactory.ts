@@ -6,12 +6,16 @@ import {
   ColaLayout,
   DagreLayout,
   GridLayout,
-  ConcentricLayout
+  ConcentricLayout,
+  BreadthFirstLayout,
+  ColaGroupsLayout
 } from '@patternfly/react-topology';
 import { LayoutName } from '../../../model/topology';
 
 const layoutFactory: LayoutFactory = (type: LayoutName, graph: Graph): Layout | undefined => {
   switch (type) {
+    case 'BreadthFirst':
+      return new BreadthFirstLayout(graph);
     case 'Cola':
       return new ColaLayout(graph);
     case 'ColaNoForce':
@@ -24,6 +28,8 @@ const layoutFactory: LayoutFactory = (type: LayoutName, graph: Graph): Layout | 
       return new ForceLayout(graph);
     case 'Grid':
       return new GridLayout(graph);
+    case 'ColaGroups':
+      return new ColaGroupsLayout(graph, { layoutOnDrag: false });
     default:
       return new ColaLayout(graph, { layoutOnDrag: false });
   }

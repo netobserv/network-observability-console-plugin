@@ -30,8 +30,8 @@
     "@babel/preset-env": "^7.17.12",
     "@babel/preset-react": "^7.17.12",
     "@babel/preset-typescript": "^7.17.12",
-    "@openshift-console/dynamic-plugin-sdk": "0.0.11",
-    "@openshift-console/dynamic-plugin-sdk-webpack": "0.0.7",
+    "@openshift-console/dynamic-plugin-sdk": "0.0.17",
+    "@openshift-console/dynamic-plugin-sdk-webpack": "0.0.8",
     "@testing-library/react": "^12.1.2",
     "@types/copy-webpack-plugin": "8.0.1",
     "@types/enzyme": "3.10.x",
@@ -96,11 +96,11 @@
     }
   },
   "dependencies": {
-    "@patternfly/patternfly": "4.196.7",
-    "@patternfly/react-charts": "6.74.3",
-    "@patternfly/react-core": "4.221.3",
-    "@patternfly/react-table": "4.90.3",
-    "@patternfly/react-topology": "4.68.3",
+    "@patternfly/patternfly": "4.215.1",
+    "@patternfly/react-charts": "6.92.0",
+    "@patternfly/react-core": "4.239.0",
+    "@patternfly/react-table": "4.108.0",
+    "@patternfly/react-topology": "4.86.0",
     "history": "^5.1.0",
     "i18next": "^19.8.3",
     "i18next-http-backend": "^1.0.21",
@@ -110,8 +110,8 @@
     "react-dom": "^17.0.1",
     "react-i18next": "^11.8.11",
     "react-modal": "^3.14.4",
-    "react-router": "^4.3.1",
-    "react-router-dom": "^5.2.0",
+    "react-router": "5.2.0",
+    "react-router-dom": "5.2.0",
     "save-svg-as-png": "^1.4.17"
   },
   "jest": {
@@ -126,7 +126,7 @@
       "<rootDir>/enzyme.config.ts"
     ],
     "setupFilesAfterEnv": [
-      "<rootDir>setup-tests.ts"
+      "<rootDir>setup-tests.tsx"
     ],
     "preset": "ts-jest",
     "moduleFileExtensions": [

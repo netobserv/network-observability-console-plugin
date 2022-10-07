@@ -1,11 +1,11 @@
-import { ResourceLink } from '@openshift-console/dynamic-plugin-sdk';
+import { ResourceIcon, ResourceLink } from '@openshift-console/dynamic-plugin-sdk';
 import { Button, Tooltip } from '@patternfly/react-core';
 import { FilterIcon, TimesIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { formatDurationAboveMillisecond } from '../../utils/duration';
 import { FlowDirection, Record } from '../../api/ipfix';
 import { Column, ColumnsId, getFullColumnName } from '../../utils/columns';
+import { formatDurationAboveMillisecond } from '../../utils/duration';
 import { formatPort } from '../../utils/port';
 import { formatProtocol } from '../../utils/protocol';
 import { Size } from '../dropdowns/display-dropdown';
@@ -20,8 +20,9 @@ export const RecordField: React.FC<{
   flow: Record;
   column: Column;
   size?: Size;
+  useLinks: boolean;
   filter?: RecordFieldFilter;
-}> = ({ flow, column, size, filter }) => {
+}> = ({ flow, column, size, filter, useLinks }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   const onMouseOver = (event: React.MouseEvent<HTMLDivElement, MouseEvent>, className: string) => {
@@ -50,21 +51,36 @@ export const RecordField: React.FC<{
     return undefined;
   };
 
+  const resourceIconText = (value: string, kind: string, ns?: string) => {
+    return (
+      //force ResourceLink when ResourceIcon is not defined (ie OCP < 4.12)
+      !ResourceIcon || useLinks ? (
+        <ResourceLink className={size} inline={true} kind={kind} name={value} namespace={ns} />
+      ) : (
+        <span className={`co-resource-item ${size}`}>
+          <ResourceIcon kind={kind} />
+          <span className="co-resource-item__resource-name" data-test-id={value}>
+            {value}
+          </span>
+        </span>
+      )
+    );
+  };
+
   const kubeObjContent = (value: string | undefined, kind: string | undefined, ns: string | undefined) => {
     // Note: namespace is not mandatory here (e.g. Node objects)
     if (value && kind) {
       return (
         <div data-test={`field-resource-${kind}.${ns}.${value}`} className="force-truncate">
-          <ResourceLink className={size} inline={true} kind={kind} name={value} namespace={ns} />
+          {resourceIconText(value, kind, ns)}
           <div className="record-field-tooltip">
             {ns && (
               <>
                 <h4>{t('Namespace')}</h4>
                 <span>{ns}</span>
-                &nbsp;
               </>
             )}
-            <h4>{kind}</h4>
+            <h4 className="record-field-tooltip-margin">{kind}</h4>
             <span>{value}</span>
           </div>
         </div>
@@ -86,7 +102,7 @@ export const RecordField: React.FC<{
     if (value) {
       return (
         <div data-test={`field-kind-${kind}.${value}`} className="force-truncate">
-          <ResourceLink className={size} inline={true} kind={kind} name={value} />
+          {resourceIconText(value, kind)}
           <div className="record-field-tooltip">
             <h4>{t(kind)}</h4>
             <span>{value}</span>

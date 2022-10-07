@@ -30,7 +30,7 @@ export const stylesComponentFactory: ComponentFactory = (
     case 'node':
       return withDragNode(nodeDragSourceSpec('node', true, true))(withSelection()(StyleNode));
     case 'group':
-      return withDndDrop(groupDropTargetSpec)(withSelection()(StyleGroup));
+      return withDndDrop(groupDropTargetSpec)(withDragNode(nodeDragSourceSpec('group'))(withSelection()(StyleGroup)));
     case 'edge':
       return withSelection()(StyleEdge);
     default:

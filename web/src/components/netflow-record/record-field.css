@@ -71,6 +71,10 @@
   left: 50%;
 }
 
+.record-field-tooltip-margin{
+  margin-top: 0.5em;
+}
+
 /* show tooltip on content hover */
 .record-field-content-flex.truncated:hover .record-field-tooltip,
 .record-field-content.truncated:hover .record-field-tooltip {
