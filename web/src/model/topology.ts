@@ -92,6 +92,8 @@ export type Decorated<T> = T & {
   id: string;
   isHovered?: boolean;
   hover?: boolean;
+  dragging?: boolean;
+  highlighted?: boolean;
   isFiltered?: boolean;
   isClearFilters?: boolean;
   isPinned?: boolean;

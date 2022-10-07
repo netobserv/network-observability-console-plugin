@@ -12,7 +12,6 @@ import {
   DEFAULT_DECORATOR_RADIUS,
   getDefaultShapeDecoratorCenter,
   getShapeComponent,
-  GraphElement,
   LabelPosition,
   Node,
   NodeLabel,
