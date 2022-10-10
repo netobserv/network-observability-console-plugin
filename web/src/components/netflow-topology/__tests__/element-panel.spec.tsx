@@ -60,9 +60,9 @@ describe('<ElementPanel />', () => {
 
     //check node infos
     expect(wrapper.find('#addressValue').last().text()).toBe('10.129.0.15');
-    expect(wrapper.find('#inCount').last().text()).toBe('100 MB');
+    expect(wrapper.find('#inCount').last().text()).toBe('95 MB');
     expect(wrapper.find('#outCount').last().text()).toBe('4 MB');
-    expect(wrapper.find('#total').last().text()).toBe('104 MB');
+    expect(wrapper.find('#total').last().text()).toBe('99 MB');
 
     //update to edge
     wrapper.setProps({ ...mocks, element: getEdge() });

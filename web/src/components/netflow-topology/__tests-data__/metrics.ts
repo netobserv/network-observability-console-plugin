@@ -1,9 +1,5 @@
 import { RawTopologyMetrics } from '../../../api/loki';
-import topologyJson from '../../../../../mocks/loki/topology.json';
 import { parseMetrics } from '../../../utils/metrics';
-
-export const responseMock = topologyJson;
-export const dataMock = parseMetrics(responseMock.data.result as RawTopologyMetrics[], 300, 'resource');
 
 export const responseSample = {
   status: 'success',
@@ -27,8 +23,8 @@ export const responseSample = {
         },
         values: [
           [1647965100, '2210400'],
-          [1647965400, '919800'],
-          [1647965700, '3517100']
+          [1647965200, '919800'],
+          [1647965300, '3517100']
         ]
       },
       {
@@ -48,8 +44,8 @@ export const responseSample = {
         },
         values: [
           [1647965100, '1491100'],
-          [1647965400, '1611400'],
-          [1647965700, '858100']
+          [1647965200, '1611400'],
+          [1647965300, '858100']
         ]
       },
       {
@@ -69,8 +65,8 @@ export const responseSample = {
         },
         values: [
           [1647965100, '128300'],
-          [1647965400, '105300'],
-          [1647965700, '52000']
+          [1647965200, '105300'],
+          [1647965300, '52000']
         ]
       },
       {
@@ -90,8 +86,8 @@ export const responseSample = {
         },
         values: [
           [1647965100, '104700'],
-          [1647965400, '47600'],
-          [1647965700, '46300']
+          [1647965200, '47600'],
+          [1647965300, '46300']
         ]
       },
       {
@@ -111,8 +107,8 @@ export const responseSample = {
         },
         values: [
           [1647965100, '20500'],
-          [1647965400, '42100'],
-          [1647965700, '43200']
+          [1647965200, '42100'],
+          [1647965300, '43200']
         ]
       },
       {
@@ -127,8 +123,8 @@ export const responseSample = {
         },
         values: [
           [1647965100, '801800'],
-          [1647965400, '891300'],
-          [1647965700, '1089700']
+          [1647965200, '891300'],
+          [1647965300, '1089700']
         ]
       },
       {
@@ -143,8 +139,8 @@ export const responseSample = {
         },
         values: [
           [1647965100, '1304200'],
-          [1647965400, '1932100'],
-          [1647965700, '1336400']
+          [1647965200, '1932100'],
+          [1647965300, '1336400']
         ]
       },
       {
@@ -159,8 +155,8 @@ export const responseSample = {
         },
         values: [
           [1647965100, '1428500'],
-          [1647965400, '1330400'],
-          [1647965700, '949100']
+          [1647965200, '1330400'],
+          [1647965300, '949100']
         ]
       },
       {
@@ -180,8 +176,8 @@ export const responseSample = {
         },
         values: [
           [1647965100, '63700'],
-          [1647965400, '168400'],
-          [1647965700, '85300']
+          [1647965200, '168400'],
+          [1647965300, '85300']
         ]
       },
       {
@@ -201,8 +197,8 @@ export const responseSample = {
         },
         values: [
           [1647965100, '55900'],
-          [1647965400, '47100'],
-          [1647965700, '88100']
+          [1647965200, '47100'],
+          [1647965300, '88100']
         ]
       },
       {
@@ -222,8 +218,8 @@ export const responseSample = {
         },
         values: [
           [1647965100, '22400'],
-          [1647965400, '33600'],
-          [1647965700, '22400']
+          [1647965200, '33600'],
+          [1647965300, '22400']
         ]
       },
       {
@@ -243,8 +239,8 @@ export const responseSample = {
         },
         values: [
           [1647965100, '458800'],
-          [1647965400, '1789200'],
-          [1647965700, '932000']
+          [1647965200, '1789200'],
+          [1647965300, '932000']
         ]
       }
     ],
@@ -283,4 +279,8 @@ export const responseSample = {
   }
 };
 
-export const dataSample = parseMetrics(responseSample.data.result as RawTopologyMetrics[], 300, 'resource');
+export const dataSample = parseMetrics(
+  responseSample.data.result as RawTopologyMetrics[],
+  { from: 1647965100, to: 1647965400 },
+  'resource'
+);

@@ -1,7 +1,6 @@
 import { TFunction } from 'i18next';
 import moment from 'moment';
 import { CUSTOM_TIME_RANGE_KEY } from '../components/dropdowns/time-range-dropdown';
-import { getDateSInMiliseconds } from './duration';
 
 const zeroPad = (number: number) => (number < 10 ? `0${number}` : number);
 
@@ -16,8 +15,8 @@ export const twentyFourHourTime = (date: Date, showSeconds?: boolean): string =>
   return `${hours}${minutes}${seconds}`;
 };
 
-export const getDateFromUnixString = (v: string) => {
-  return new Date(Number(v) * 1000);
+export const getDateFromUnix = (v: number) => {
+  return new Date(v * 1000);
 };
 
 export interface TimeRange {
@@ -64,11 +63,4 @@ export const computeStepInterval = (range: TimeRange | number) => {
     rateIntervalSeconds: interval,
     stepSeconds: step
   };
-};
-
-export const getRangeEnd = (range: TimeRange | number): Date => {
-  if (typeof range === 'number') {
-    return new Date();
-  }
-  return new Date(getDateSInMiliseconds(range.to));
 };

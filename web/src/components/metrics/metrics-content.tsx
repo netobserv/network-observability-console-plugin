@@ -18,7 +18,7 @@ import { useTranslation } from 'react-i18next';
 import { MetricScopeOptions } from '../../model/metrics';
 import { TopologyMetricPeer, TopologyMetrics } from '../../api/loki';
 import { MetricFunction, MetricType } from '../../model/flow-query';
-import { getDateFromUnixString, twentyFourHourTime } from '../../utils/datetime';
+import { getDateFromUnix, twentyFourHourTime } from '../../utils/datetime';
 import './metrics-content.css';
 import { getFormattedValue, getFormattedRateValue, matchPeer } from '../../utils/metrics';
 import { getStat, NodeData } from '../../model/topology';
@@ -210,7 +210,7 @@ export const MetricsContent: React.FC<{
                     key={`bar-${metrics.indexOf(m)}`}
                     data={m.values.map(v => ({
                       name: getName(m.source, m.destination),
-                      x: twentyFourHourTime(getDateFromUnixString(v[0] as string), true),
+                      x: twentyFourHourTime(getDateFromUnix(v[0]), true),
                       y: Number(v[1])
                     }))}
                   />
@@ -225,7 +225,7 @@ export const MetricsContent: React.FC<{
                     key={`area-${metrics.indexOf(m)}`}
                     data={m.values.map(v => ({
                       name: getName(m.source, m.destination),
-                      x: twentyFourHourTime(getDateFromUnixString(v[0] as string), true),
+                      x: twentyFourHourTime(getDateFromUnix(v[0]), true),
                       y: Number(v[1])
                     }))}
                     interpolation="monotoneX"
@@ -241,7 +241,7 @@ export const MetricsContent: React.FC<{
                     key={`scatter-${metrics.indexOf(m)}`}
                     data={m.values.map(v => ({
                       name: getName(m.source, m.destination),
-                      x: twentyFourHourTime(getDateFromUnixString(v[0] as string), true),
+                      x: twentyFourHourTime(getDateFromUnix(v[0]), true),
                       y: Number(v[1])
                     }))}
                   />

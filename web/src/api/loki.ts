@@ -58,7 +58,7 @@ export interface RawTopologyMetric {
 
 export interface RawTopologyMetrics {
   metric: RawTopologyMetric;
-  values: (string | number)[][];
+  values: [number, unknown][];
 }
 
 export interface TopologyMetricPeer {
@@ -87,7 +87,7 @@ export const peersEqual = (p1: TopologyMetricPeer, p2: TopologyMetricPeer): bool
 export type TopologyMetrics = {
   source: TopologyMetricPeer;
   destination: TopologyMetricPeer;
-  values: (string | number)[][];
+  values: [number, number][];
   stats: MetricStats;
 };
 

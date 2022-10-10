@@ -2,9 +2,14 @@ import _ from 'lodash';
 import { RawTopologyMetrics, MetricStats, TopologyMetricPeer, TopologyMetrics } from '../api/loki';
 import { MetricFunction, MetricScope, MetricType } from '../model/flow-query';
 import { elementPerMinText, roundTwoDigits } from './count';
-import { computeStepInterval, getRangeEnd, rangeToSeconds, TimeRange } from './datetime';
+import { computeStepInterval, rangeToSeconds, TimeRange } from './datetime';
 import { bytesPerSeconds, humanFileSize } from './bytes';
 import { NodeData } from '../model/topology';
+
+// Tolerance, in seconds, to assume presence/emptiness of the last datapoint fetched, when it is
+// close to "now", to accomodate with potential collection latency.
+// Past this tolerance delay, missing datapoints are considered being 0.
+const latencyTolerance = 120;
 
 const shortKindMap: { [k: string]: string } = {
   Service: 'svc',
@@ -18,7 +23,11 @@ export const parseMetrics = (
   range: number | TimeRange,
   scope: MetricScope
 ): TopologyMetrics[] => {
-  const metrics = raw.map(r => parseMetric(r, range, scope));
+  const { start, end, step } = calibrateRange(
+    raw.map(r => r.values),
+    range
+  );
+  const metrics = raw.map(r => parseMetric(r, start, end, step, scope));
 
   // Disambiguate display names with kind when necessary
   if (scope === 'owner' || scope === 'resource') {
@@ -66,8 +75,16 @@ export const parseMetrics = (
   return metrics;
 };
 
-const parseMetric = (raw: RawTopologyMetrics, range: number | TimeRange, scope: MetricScope): TopologyMetrics => {
-  const stats = computeStats(raw.values, range);
+const parseMetric = (
+  raw: RawTopologyMetrics,
+  start: number,
+  end: number,
+  step: number,
+  scope: MetricScope
+): TopologyMetrics => {
+  const normalized = normalizeMetrics(raw.values, start, end, step);
+  const stats = computeStats(normalized);
+
   const source: TopologyMetricPeer = {
     addr: raw.metric.SrcAddr,
     name: raw.metric.SrcK8S_Name,
@@ -91,45 +108,96 @@ const parseMetric = (raw: RawTopologyMetrics, range: number | TimeRange, scope: 
   return {
     source: source,
     destination: destination,
-    values: raw.values,
+    values: normalized,
     stats: stats
   };
+};
+
+export const calibrateRange = (
+  raw: [number, unknown][][],
+  range: number | TimeRange
+): { start: number; end: number; step: number } => {
+  // Extract some info based on range, and apply a tolerance about end range when it is close to "now"
+  const info = computeStepInterval(range);
+  const rangeInSeconds = rangeToSeconds(range);
+  let start: number;
+  let endWithTolerance: number;
+  if (typeof range === 'number') {
+    const end = Math.floor(new Date().getTime() / 1000);
+    endWithTolerance = end - latencyTolerance;
+    start = end - rangeInSeconds;
+  } else {
+    start = range.from;
+    endWithTolerance = range.to;
+  }
+
+  let firstTimestamp = start;
+  // Calibrate start date based on actual timestamps, to avoid inaccurate stepping from there
+  //  (which screws up the chart display)
+  const allFirsts = raw.filter(dp => dp.length > 0).map(dp => dp[0][0]);
+  if (allFirsts.length > 0) {
+    firstTimestamp = Math.min(...allFirsts);
+    while (firstTimestamp > start) {
+      firstTimestamp -= info.stepSeconds;
+    }
+  }
+
+  return {
+    start: firstTimestamp,
+    end: endWithTolerance,
+    step: info.stepSeconds
+  };
+};
+
+/**
+ * normalizeMetrics fills all missing or NaN datapoints with zeros
+ */
+export const normalizeMetrics = (
+  values: [number, unknown][],
+  start: number,
+  end: number,
+  step: number
+): [number, number][] => {
+  // Normalize by counting all NaN as zeros
+  const normalized: [number, number][] = values.map(dp => {
+    let val = Number(dp[1]);
+    if (_.isNaN(val)) {
+      val = 0;
+    }
+    return [dp[0], val];
+  });
+
+  // Normalize by filling missing datapoints with zeros
+  const tolerance = step / 2;
+  for (let current = start; current < end; current += step) {
+    if (!normalized.some(rv => rv[0] > current - tolerance && rv[0] < current + tolerance)) {
+      normalized.push([current, 0]);
+    }
+  }
+
+  return normalized.sort((a, b) => a[0] - b[0]);
 };
 
 /**
  * computeStats computes avg, max and total. Input metric is always the bytes rate (Bps).
  */
-export const computeStats = (values: (string | number)[][], range: number | TimeRange): MetricStats => {
-  const filtered = values.map(dp => Number(dp[1])).filter(v => !_.isNaN(v));
-  if (filtered.length === 0) {
+export const computeStats = (ts: [number, number][]): MetricStats => {
+  if (ts.length === 0) {
     return { latest: 0, avg: 0, max: 0, total: 0 };
   }
-
-  // TODO: fill missing dp with 0
-
-  // Figure out what's the expected number of datapoints, because series may not contain all datapoints
-  // We'll assume that missing datapoints are zeros
-  const info = computeStepInterval(range);
-  const rangeInSeconds = rangeToSeconds(range);
-  const expectedDatapoints = Math.floor(rangeInSeconds / info.stepSeconds);
+  const values = ts.map(dp => dp[1]);
 
   // Compute stats
-  const sum = filtered.reduce((prev, cur) => prev + cur, 0);
-  const avg = sum / expectedDatapoints;
-  const max = Math.max(...filtered);
-
-  // Get last datapoint. If the serie ends too early before the expected end range, we assume it's 0
-  // (with a tolerance margin)
-  const tolerance = 5 * info.stepSeconds;
-  const endRange = getRangeEnd(range).getTime() / 1000;
-  const lastDP = values[values.length - 1] as [number, string];
-  const latest = lastDP[0] >= endRange - tolerance ? Number(lastDP[1]) : 0;
+  const sum = values.reduce((prev, cur) => prev + cur, 0);
+  const avg = sum / values.length;
+  const max = Math.max(...values);
+  const latest = values[values.length - 1];
 
   return {
     latest: roundTwoDigits(latest),
     avg: roundTwoDigits(avg),
     max: roundTwoDigits(max),
-    total: Math.floor(avg * rangeInSeconds)
+    total: Math.floor(avg * (ts[ts.length - 1][0] - ts[0][0]))
   };
 };
 

@@ -1,60 +1,179 @@
 import { RawTopologyMetrics, TopologyMetricPeer } from '../../api/loki';
 import { NodeData } from '../../model/topology';
-import { computeStepInterval } from '../datetime';
-import { computeStats, matchPeer, parseMetrics } from '../metrics';
+import { calibrateRange, computeStats, matchPeer, normalizeMetrics, parseMetrics } from '../metrics';
 
-describe('computeStats', () => {
-  it('should compute simple stats', () => {
-    // 300s range
-    const range = { from: 1664372000, to: 1664372300 };
-    const info = computeStepInterval(range);
-    expect(info.stepSeconds).toEqual(15);
-    const values = [] as [number, string][];
-    for (let i = range.from; i < range.to; i += info.stepSeconds) {
-      if (i < 1664372100) {
-        // 7 times "5"
-        values.push([i, '5']);
-      } else if (i < 1664372200) {
-        // then 7 times "10"
-        values.push([i, '10']);
-      } else {
-        // then 6 times "8"
-        values.push([i, '8']);
-      }
-    } // sum = 153
+describe('normalize and computeStats', () => {
+  it('should normalize and compute simple stats', () => {
+    const values: [number, unknown][] = [
+      [1664372000, '5'],
+      [1664372015, '5'],
+      [1664372030, '5'],
+      [1664372045, '5'],
+      [1664372060, '5'],
+      [1664372075, '5'],
+      [1664372090, '5'],
+      [1664372105, '10'],
+      [1664372120, '10'],
+      [1664372135, '10'],
+      [1664372150, '10'],
+      [1664372165, '10'],
+      [1664372180, '10'],
+      [1664372195, '10'],
+      [1664372210, '8'],
+      [1664372225, '8'],
+      [1664372240, '8'],
+      [1664372255, '8'],
+      [1664372270, '8'],
+      [1664372285, '8'],
+      [1664372300, '8']
+    ];
 
-    const stats = computeStats(values, range);
+    const { start, end, step } = calibrateRange([values], { from: 1664372000, to: 1664372300 });
+    const norm = normalizeMetrics(values, start, end, step);
+    expect(norm).toEqual([
+      [1664372000, 5],
+      [1664372015, 5],
+      [1664372030, 5],
+      [1664372045, 5],
+      [1664372060, 5],
+      [1664372075, 5],
+      [1664372090, 5],
+      [1664372105, 10],
+      [1664372120, 10],
+      [1664372135, 10],
+      [1664372150, 10],
+      [1664372165, 10],
+      [1664372180, 10],
+      [1664372195, 10],
+      [1664372210, 8],
+      [1664372225, 8],
+      [1664372240, 8],
+      [1664372255, 8],
+      [1664372270, 8],
+      [1664372285, 8],
+      [1664372300, 8]
+    ]);
+
+    const stats = computeStats(norm);
+
+    expect(stats.latest).toEqual(8);
+    expect(stats.max).toEqual(10);
+    expect(stats.avg).toEqual(7.67 /* 161/21 */);
+    expect(stats.total).toEqual(2300 /* 7.67*300 */);
+  });
+
+  it('should normalize and compute stats with missing close to "now"', () => {
+    // Building data so that there is a missing datapoint at +300s, which is close to "now"
+    // This missing datapoint should be ignored for tolerance, rather than counted as a zero
+    const now = Math.floor(new Date().getTime() / 1000);
+    const first = now - 330;
+    const values: [number, unknown][] = [
+      [first, '5'],
+      [first + 15, '5'],
+      [first + 30, '5'],
+      [first + 45, '5'],
+      [first + 60, '5'],
+      [first + 75, '5'],
+      [first + 90, '5'],
+      [first + 105, '10'],
+      [first + 120, '10'],
+      [first + 135, '10'],
+      [first + 150, '10'],
+      [first + 165, '10'],
+      [first + 180, '10'],
+      [first + 195, '10'],
+      [first + 210, '8'],
+      [first + 225, '8'],
+      [first + 240, '8'],
+      [first + 255, '8'],
+      [first + 270, '8'],
+      [first + 285, '8']
+    ];
+
+    const { start, end, step } = calibrateRange([values], 300);
+    const norm = normalizeMetrics(values, start, end, step);
+    expect(norm).toEqual([
+      [first, 5],
+      [first + 15, 5],
+      [first + 30, 5],
+      [first + 45, 5],
+      [first + 60, 5],
+      [first + 75, 5],
+      [first + 90, 5],
+      [first + 105, 10],
+      [first + 120, 10],
+      [first + 135, 10],
+      [first + 150, 10],
+      [first + 165, 10],
+      [first + 180, 10],
+      [first + 195, 10],
+      [first + 210, 8],
+      [first + 225, 8],
+      [first + 240, 8],
+      [first + 255, 8],
+      [first + 270, 8],
+      [first + 285, 8]
+    ]);
+
+    const stats = computeStats(norm);
 
     expect(stats.latest).toEqual(8);
     expect(stats.max).toEqual(10);
     expect(stats.avg).toEqual(7.65 /* 153/20 */);
-    expect(stats.total).toEqual(2295 /* 7.65*300 */);
+    expect(stats.total).toEqual(2180 /* 7.65*285 */);
   });
 
-  it('should compute stats with missing data points', () => {
-    // 300s range
-    const range = { from: 1664372000, to: 1664372300 };
-    const info = computeStepInterval(range);
-    expect(info.stepSeconds).toEqual(15);
-    const values = [] as [number, string][];
-    for (let i = range.from; i < range.to; i += info.stepSeconds) {
-      if (i < 1664372100) {
-        // 7 times "5"
-        values.push([i, '5']);
-      } else if (i < 1664372200) {
-        // then 7 times "10"
-        values.push([i, '10']);
-      } else {
-        // missing data points, stands for "0"
-      }
-    } // sum = 105
+  it('should normalize and compute stats with missing data points', () => {
+    // No data between 1664372105 and 1664372195
+    const values: [number, unknown][] = [
+      [1664372000, '5'],
+      [1664372015, '5'],
+      [1664372030, '5'],
+      [1664372045, '5'],
+      [1664372060, '5'],
+      [1664372075, '5'],
+      [1664372090, '5'],
+      [1664372210, '8'],
+      [1664372225, '8'],
+      [1664372240, '8'],
+      [1664372255, '8'],
+      [1664372270, '8'],
+      [1664372285, '8'],
+      [1664372300, '8']
+    ];
 
-    const stats = computeStats(values, range);
+    const { start, end, step } = calibrateRange([values], { from: 1664372000, to: 1664372300 });
+    const norm = normalizeMetrics(values, start, end, step);
+    expect(norm).toEqual([
+      [1664372000, 5],
+      [1664372015, 5],
+      [1664372030, 5],
+      [1664372045, 5],
+      [1664372060, 5],
+      [1664372075, 5],
+      [1664372090, 5],
+      [1664372105, 0],
+      [1664372120, 0],
+      [1664372135, 0],
+      [1664372150, 0],
+      [1664372165, 0],
+      [1664372180, 0],
+      [1664372195, 0],
+      [1664372210, 8],
+      [1664372225, 8],
+      [1664372240, 8],
+      [1664372255, 8],
+      [1664372270, 8],
+      [1664372285, 8],
+      [1664372300, 8]
+    ]);
 
-    expect(stats.latest).toEqual(0);
-    expect(stats.max).toEqual(10);
-    expect(stats.avg).toEqual(5.25 /* 105/20 */);
-    expect(stats.total).toEqual(1575 /* 5.25*300 */);
+    const stats = computeStats(norm);
+
+    expect(stats.latest).toEqual(8);
+    expect(stats.max).toEqual(8);
+    expect(stats.avg).toEqual(4.33 /* 91/21 */);
+    expect(stats.total).toEqual(1300 /* 4.33*300 */);
   });
 });
 
