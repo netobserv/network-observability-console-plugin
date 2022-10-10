@@ -18,7 +18,7 @@ import { useTranslation } from 'react-i18next';
 import { MetricScopeOptions } from '../../model/metrics';
 import { TopologyMetricPeer, TopologyMetrics } from '../../api/loki';
 import { MetricFunction, MetricType } from '../../model/flow-query';
-import { getDateFromUnix, twentyFourHourTime } from '../../utils/datetime';
+import { getDateFromUnix } from '../../utils/datetime';
 import './metrics-content.css';
 import { getFormattedValue, getFormattedRateValue, matchPeer } from '../../utils/metrics';
 import { getStat, NodeData } from '../../model/topology';
@@ -189,7 +189,7 @@ export const MetricsContent: React.FC<{
             //TODO: fix refresh on selection change to enable animation
             //animate={true}
             //TODO: check if time scale could be interesting (buggy with current strings)
-            scale={{ x: 'linear', y: 'sqrt' }}
+            scale={{ x: 'time', y: 'sqrt' }}
             width={doubleWidth ? 1400 : 700}
             height={600}
             domainPadding={{ x: 0, y: 0 }}
@@ -210,7 +210,7 @@ export const MetricsContent: React.FC<{
                     key={`bar-${metrics.indexOf(m)}`}
                     data={m.values.map(v => ({
                       name: getName(m.source, m.destination),
-                      x: twentyFourHourTime(getDateFromUnix(v[0]), true),
+                      x: getDateFromUnix(v[0]),
                       y: Number(v[1])
                     }))}
                   />
@@ -225,7 +225,7 @@ export const MetricsContent: React.FC<{
                     key={`area-${metrics.indexOf(m)}`}
                     data={m.values.map(v => ({
                       name: getName(m.source, m.destination),
-                      x: twentyFourHourTime(getDateFromUnix(v[0]), true),
+                      x: getDateFromUnix(v[0]),
                       y: Number(v[1])
                     }))}
                     interpolation="monotoneX"
@@ -241,7 +241,7 @@ export const MetricsContent: React.FC<{
                     key={`scatter-${metrics.indexOf(m)}`}
                     data={m.values.map(v => ({
                       name: getName(m.source, m.destination),
-                      x: twentyFourHourTime(getDateFromUnix(v[0]), true),
+                      x: getDateFromUnix(v[0]),
                       y: Number(v[1])
                     }))}
                   />
