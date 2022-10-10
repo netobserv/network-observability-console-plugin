@@ -281,6 +281,13 @@ export const getStat = (stats: MetricStats, mf: MetricFunction): number => {
   return mf === 'avg' ? stats.avg : mf === 'max' ? stats.max : mf === 'last' ? stats.latest : stats.total;
 };
 
+export const getEdgeTag = (value: number, options: TopologyOptions) => {
+  if (options.edgeTags && value) {
+    return getFormattedValue(value, options.metricType, options.metricFunction);
+  }
+  return undefined;
+};
+
 export const generateEdge = (
   sourceId: string,
   targetId: string,
@@ -308,7 +315,7 @@ export const generateEdge = (
       startTerminalStatus: NodeStatus.default,
       endTerminalType: stat > 0 ? EdgeTerminalType.directional : EdgeTerminalType.none,
       endTerminalStatus: NodeStatus.default,
-      tag: getFormattedValue(stat, options.metricType, options.metricFunction),
+      tag: getEdgeTag(stat, options),
       tagStatus: getTagStatus(stat, options.maxEdgeStat),
       bps: stat
     }
@@ -415,7 +422,7 @@ export const generateDataModel = (
         shadowed,
         //edges are directed from src to dst. It will become bidirectionnal if inverted pair is found
         startTerminalType: edge.data.sourceId !== sourceId ? EdgeTerminalType.directional : edge.data.startTerminalType,
-        tag: getFormattedValue(stat, options.metricType, options.metricFunction),
+        tag: getEdgeTag(stat, options),
         tagStatus: getTagStatus(stat, options.maxEdgeStat),
         bps: stat
       };
