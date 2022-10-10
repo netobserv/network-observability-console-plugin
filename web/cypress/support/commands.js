@@ -27,7 +27,7 @@ Cypress.Commands.add('checkColumns', (groups = 5, cols = 9) => {
     //Should have nested columns
     cy.get('thead>tr').should('have.length', 2);
 
-    //Should have correct number of groups
+    //Should have correct number of groups (regrouping of several columns)
     cy.get('thead>tr').eq(0).children().should('have.length', groups);
     //Should have correct number of columns
     cy.get('thead>tr').eq(1).children().should('have.length', cols);
