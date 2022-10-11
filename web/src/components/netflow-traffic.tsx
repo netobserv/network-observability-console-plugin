@@ -870,7 +870,7 @@ export const NetflowTraffic: React.FC<{
         isModalOpen={isExportModalOpen}
         setModalOpen={setExportModalOpen}
         flowQuery={buildFlowQuery()}
-        columns={columns.filter(c => c.fieldName)}
+        columns={columns.filter(c => c.fieldName && !c.fieldName.startsWith('Time'))}
         range={range}
         filters={forcedFilters ? forcedFilters : filters}
       />
