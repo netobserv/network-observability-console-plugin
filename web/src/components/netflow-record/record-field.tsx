@@ -129,7 +129,7 @@ export const RecordField: React.FC<{
     }
 
     const dateText = getFormattedDate(date, longDates ? 'ddd ll' : 'MM/DD/YYYY');
-    const timeText = getFormattedDate(date, longDates ? 'h:mm:ss.SSS A' : 'HH:mm:ss.SSS');
+    const timeText = getFormattedDate(date, 'HH:mm:ss.SSS');
     return singleContainer(
       <div data-test={`field-date-${dateText}-${timeText}`}>
         <div className={`datetime ${size}`}>

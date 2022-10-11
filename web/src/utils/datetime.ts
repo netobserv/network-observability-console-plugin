@@ -42,6 +42,9 @@ export const getTimeRangeOptions = (t: TFunction) => {
 };
 
 export const getFormattedDate = (date: Date, format = 'llll') => {
+  if (window.navigator.language.length && moment.locale() !== window.navigator.language) {
+    moment.locale(window.navigator.language);
+  }
   return moment(date).format(format);
 };
 
