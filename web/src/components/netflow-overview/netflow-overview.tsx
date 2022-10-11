@@ -30,10 +30,22 @@ export const NetflowOverview: React.FC<{
   metricType: MetricType;
   metricScope: MetricScope;
   metrics: TopologyMetrics[];
+  appMetrics: TopologyMetrics[];
   loading?: boolean;
   error?: string;
   clearFilters: () => void;
-}> = ({ limit, panels, metricFunction, metricType, metricScope, metrics, loading, error, clearFilters }) => {
+}> = ({
+  limit,
+  panels,
+  metricFunction,
+  metricType,
+  metricScope,
+  metrics,
+  appMetrics,
+  loading,
+  error,
+  clearFilters
+}) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   if (error) {
@@ -102,6 +114,7 @@ export const NetflowOverview: React.FC<{
                 metricType={metricType}
                 metricScope={metricScope}
                 metrics={filteredMetrics}
+                appMetrics={appMetrics}
                 doubleWidth={isDoubleWidth(panel.id)}
               />
             </FlexItem>

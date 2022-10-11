@@ -17,7 +17,8 @@ describe('<NetflowOverviewPanel />', () => {
     metricFunction: 'sum' as MetricFunction,
     metricType: 'bytes' as MetricType,
     metricScope: MetricScopeOptions.HOST,
-    metrics: [] as TopologyMetrics[]
+    metrics: [] as TopologyMetrics[],
+    appMetrics: [] as TopologyMetrics[]
   };
   it('should render component', async () => {
     const wrapper = shallow(<NetflowOverviewPanel {...props} />);

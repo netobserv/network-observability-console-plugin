@@ -6,7 +6,7 @@ import { Record } from '../../api/ipfix';
 import { ExclamationTriangleIcon } from '@patternfly/react-icons';
 import './query-summary.css';
 import { bytesPerSeconds, humanFileSize } from '../../utils/bytes';
-import { Stats } from '../../api/loki';
+import { Stats, TopologyMetrics } from '../../api/loki';
 
 export const QuerySummaryContent: React.FC<{
   flows: Record[];
@@ -91,7 +91,10 @@ export const QuerySummaryContent: React.FC<{
 
 export const QuerySummary: React.FC<{
   flows: Record[] | undefined;
+  metrics: TopologyMetrics[] | undefined;
+  appMetrics: TopologyMetrics[] | undefined;
   stats: Stats | undefined;
+  appStats: Stats | undefined;
   range: number | TimeRange;
   lastRefresh: Date | undefined;
   toggleQuerySummary: () => void;

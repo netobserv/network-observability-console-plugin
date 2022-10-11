@@ -9,11 +9,14 @@ describe('<QuerySummary />', () => {
   const mocks = {
     toggleQuerySummary: jest.fn(),
     flows: FlowsSample,
-    range: 300,
+    metrics: undefined,
+    appMetrics: undefined,
     stats: {
       limitReached: false,
       numQueries: 1
     },
+    appStats: undefined,
+    range: 300,
     lastRefresh: now
   };
 

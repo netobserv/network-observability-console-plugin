@@ -21,6 +21,7 @@ describe('<NetflowOverview />', () => {
     metricType: 'bytes' as MetricType,
     metricScope: MetricScopeOptions.HOST,
     metrics: [] as TopologyMetrics[],
+    appMetrics: [] as TopologyMetrics[],
     clearFilters: jest.fn()
   };
   it('should render component', async () => {

@@ -99,6 +99,7 @@
   "Total {{type}}": "Total {{type}}",
   "External": "External",
   "Unknown": "Unknown",
+  "Collected flows": "Collected flows",
   "Manage columns": "Manage columns",
   "Selected columns will appear in the table.": "Selected columns will appear in the table.",
   "Click and drag the items to reorder the columns in the table.": "Click and drag the items to reorder the columns in the table.",
