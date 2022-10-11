@@ -41,7 +41,7 @@ export const QuerySummaryContent: React.FC<{
           <FlexItem>
             <Tooltip content={<Text component={TextVariants.p}>{t('Filtered flows count')}</Text>}>
               <Text id="flowsCount" component={TextVariants.p} className={limitReached ? 'query-summary-warning' : ''}>
-                {t('{{count}} flows', { count: flows.length })}
+                {`${flows.length}${limitReached ? '+' : ''} ${t('flows')}`}
               </Text>
             </Tooltip>
           </FlexItem>
@@ -50,23 +50,21 @@ export const QuerySummaryContent: React.FC<{
       <FlexItem>
         <Tooltip content={<Text component={TextVariants.p}>{t('Filtered sum of bytes')}</Text>}>
           <Text id="bytesCount" component={TextVariants.p}>
-            {humanFileSize(totalBytes, true, 0)}
+            {humanFileSize(totalBytes, true, 0, limitReached)}
           </Text>
         </Tooltip>
       </FlexItem>
       <FlexItem>
         <Tooltip content={<Text component={TextVariants.p}>{t('Filtered sum of packets')}</Text>}>
           <Text id="packetsCount" component={TextVariants.p}>
-            {t('{{count}} packets', {
-              count: flows.map(f => f.fields.Packets).reduce((a, b) => a + b, 0)
-            })}
+            {`${flows.map(f => f.fields.Packets).reduce((a, b) => a + b, 0)}${limitReached ? '+' : ''} ${t('packets')}`}
           </Text>
         </Tooltip>
       </FlexItem>
       <FlexItem>
         <Tooltip content={<Text component={TextVariants.p}>{t('Filtered average speed')}</Text>}>
           <Text id="bpsCount" component={TextVariants.p}>
-            {bytesPerSeconds(totalBytes / rangeInSeconds)}
+            {bytesPerSeconds(totalBytes / rangeInSeconds, limitReached)}
           </Text>
         </Tooltip>
       </FlexItem>
