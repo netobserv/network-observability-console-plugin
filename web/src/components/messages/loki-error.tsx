@@ -13,7 +13,7 @@ import {
   TextVariants,
   Title
 } from '@patternfly/react-core';
-import { ExclamationCircleIcon } from '@patternfly/react-icons';
+import { ExclamationCircleIcon, ExternalLinkSquareAltIcon } from '@patternfly/react-icons';
 import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -186,7 +186,9 @@ export const LokiError: React.FC<Props> = ({ title, error }) => {
           }
         </EmptyStateBody>
         <Button
-          variant="primary"
+          variant="link"
+          icon={<ExternalLinkSquareAltIcon />}
+          iconPosition="right"
           component={(props: React.FunctionComponent) => (
             <Link {...props} target="_blank" to={{ pathname: 'https://grafana.com/docs/loki/latest/configuration/' }} />
           )}
