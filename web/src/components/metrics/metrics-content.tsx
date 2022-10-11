@@ -16,21 +16,22 @@ import { Text, TextContent, TextVariants } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { MetricScopeOptions } from '../../model/metrics';
-import { getMetricName, getMetricValue, TopologyMetric, TopologyMetrics } from '../../api/loki';
+import { TopologyMetricPeer, TopologyMetrics } from '../../api/loki';
 import { MetricFunction, MetricType } from '../../model/flow-query';
-import { getDateFromUnixString, twentyFourHourTime } from '../../utils/datetime';
+import { getDateFromUnix } from '../../utils/datetime';
 import './metrics-content.css';
+import { getFormattedValue, getFormattedRateValue, matchPeer } from '../../utils/metrics';
+import { getStat, NodeData } from '../../model/topology';
 
 export const MetricsContent: React.FC<{
   id: string;
   sizePx?: number;
-  metricFunction?: MetricFunction;
-  metricType?: MetricType;
+  metricFunction: MetricFunction;
+  metricType: MetricType;
   metrics: TopologyMetrics[];
   scope: MetricScopeOptions;
   counters?: JSX.Element;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  data?: any;
+  data?: NodeData;
   showTitle?: boolean;
   showDonut?: boolean;
   showBar?: boolean;
@@ -58,93 +59,62 @@ export const MetricsContent: React.FC<{
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   const metricTitle = React.useCallback(() => {
-    if (metricFunction === 'rate') {
-      return t('Flows rate');
-    } else if (metricType) {
-      switch (metricFunction) {
-        case 'avg':
-          return t('Average {{type}} (1m frame)', { type: metricType });
-        case 'max':
-          return t('Max {{type}} (1m frame)', { type: metricType });
-        case 'sum':
-          return t('Total {{type}}', { type: metricType });
-        default:
-          return '';
-      }
-    } else {
-      console.error('metricType cannot be undefined');
-      return '';
+    switch (metricFunction) {
+      case 'last':
+        return t('Latest {{type}} rate', { type: metricType });
+      case 'avg':
+        return t('Average {{type}} rate', { type: metricType });
+      case 'max':
+        return t('Max {{type}} rate', { type: metricType });
+      case 'sum':
+        return t('Total {{type}}', { type: metricType });
+      default:
+        return '';
     }
   }, [metricFunction, metricType, t]);
 
   const chart = React.useCallback(() => {
-    function truncate(input: string) {
-      const length = doubleWidth ? 64 : showDonut ? 10 : 18;
-      if (input.length > length) {
-        return input.substring(0, length / 2) + '…' + input.substring(input.length - length / 2);
+    // function truncate(input: string) {
+    //   const length = doubleWidth ? 64 : showDonut ? 10 : 18;
+    //   if (input.length > length) {
+    //     return input.substring(0, length / 2) + '…' + input.substring(input.length - length / 2);
+    //   }
+    //   return input;
+    // }
+
+    // function truncateParts(input: string) {
+    //   if (input.includes('.')) {
+    //     const splitted = input.split('.');
+    //     const result: string[] = [];
+    //     splitted.forEach(s => {
+    //       result.push(truncate(s));
+    //     });
+    //     return result.join('.');
+    //   }
+    //   return truncate(input);
+    // }
+
+    const getPeerName = (peer: TopologyMetricPeer): string => {
+      return peer.displayName || (scope === MetricScopeOptions.HOST ? t('External') : t('Unknown'));
+    };
+
+    function getName(source: TopologyMetricPeer, dest: TopologyMetricPeer) {
+      const srcName = getPeerName(source);
+      const dstName = getPeerName(dest);
+      if (data && matchPeer(data, source)) {
+        return `${t('To')} ${dstName}`;
+      } else if (data && matchPeer(data, dest)) {
+        return `${t('From')} ${srcName}`;
       }
-      return input;
+      return `${srcName} -> ${dstName}`;
     }
 
-    function truncateParts(input: string) {
-      if (input.includes('.')) {
-        const splitted = input.split('.');
-        const result: string[] = [];
-        splitted.forEach(s => {
-          result.push(truncate(s));
-        });
-        return result.join('.');
-      }
-      return truncate(input);
-    }
-
-    function getName(m: TopologyMetric) {
-      switch (scope) {
-        case MetricScopeOptions.HOST:
-          const srcNode = truncateParts(getMetricName(m, scope, true, t));
-          const dstNode = truncateParts(getMetricName(m, scope, false, t));
-
-          return data?.host
-            ? m.SrcK8S_HostName === data.host
-              ? `${t('To')} ${dstNode}`
-              : `${t('From')} ${srcNode}`
-            : `${srcNode} -> ${dstNode}`;
-        case MetricScopeOptions.NAMESPACE:
-          const srcNamespace = truncateParts(getMetricName(m, scope, true, t));
-          const dstNamespace = truncateParts(getMetricName(m, scope, false, t));
-
-          return data?.namespace
-            ? m.SrcK8S_Namespace === data.name
-              ? `${t('To')} ${dstNamespace}`
-              : `${t('From')} ${srcNamespace}`
-            : `${srcNamespace} -> ${dstNamespace}`;
-        case MetricScopeOptions.OWNER:
-          const srcOwner = truncateParts(getMetricName(m, scope, true, t));
-          const dstOwner = truncateParts(getMetricName(m, scope, false, t));
-
-          return data?.namespace
-            ? m.SrcK8S_Namespace === data.namespace
-              ? `${t('To')} ${dstOwner}`
-              : `${t('From')} ${srcOwner}`
-            : `${srcOwner} -> ${dstOwner}`;
-        case MetricScopeOptions.RESOURCE:
-        default:
-          const src = truncateParts(getMetricName(m, scope, true, t));
-          const dst = truncateParts(getMetricName(m, scope, false, t));
-
-          return data?.addr
-            ? m.SrcAddr === data.addr
-              ? `${t('To')} ${dst}`
-              : `${t('From')} ${src}`
-            : `${src} -> ${dst}`;
-      }
-    }
-
-    const total = metrics.reduce((prev, cur) => prev + cur.total, 0);
+    const values = metrics.map(m => getStat(m.stats, metricFunction));
+    const total = values.reduce((prev, cur) => prev + cur, 0);
 
     const legendData = metrics.map(m => ({
       childName: `${showBar ? 'bar-' : 'area-'}${metrics.indexOf(m)}`,
-      name: getName(m.metric)
+      name: getName(m.source, m.destination)
     }));
 
     const CursorVoronoiContainer = createContainer('voronoi', 'cursor');
@@ -194,16 +164,16 @@ export const MetricsContent: React.FC<{
             labels={({ datum }) => datum.x}
             width={doubleWidth ? 1000 : 500}
             height={350}
-            data={metrics
-              .sort((a, b) => a.total - b.total)
-              .map((m: TopologyMetrics) => ({ x: `${((m.total / total) * 100).toFixed(2)}%`, y: m.total }))}
+            data={values
+              .sort((a, b) => a - b) /* to check: sorting here may mess up with legend correlation? */
+              .map(v => ({ x: `${((v / total) * 100).toFixed(2)}%`, y: v }))}
             padding={{
               bottom: 20,
               left: 20,
               right: 300,
               top: 20
             }}
-            title={`${getMetricValue(total, metricFunction, metricType)}`}
+            title={`${getFormattedValue(total, metricType, metricFunction)}`}
             subTitle={metricTitle()}
           />
         ) : (
@@ -219,7 +189,7 @@ export const MetricsContent: React.FC<{
             //TODO: fix refresh on selection change to enable animation
             //animate={true}
             //TODO: check if time scale could be interesting (buggy with current strings)
-            scale={{ x: 'linear', y: 'sqrt' }}
+            scale={{ x: 'time', y: 'sqrt' }}
             width={doubleWidth ? 1400 : 700}
             height={600}
             domainPadding={{ x: 0, y: 0 }}
@@ -231,12 +201,7 @@ export const MetricsContent: React.FC<{
             }}
           >
             <ChartAxis fixLabelOverlap />
-            <ChartAxis
-              dependentAxis
-              showGrid
-              fixLabelOverlap
-              tickFormat={y => getMetricValue(y, metricFunction, metricType)}
-            />
+            <ChartAxis dependentAxis showGrid fixLabelOverlap tickFormat={y => getFormattedRateValue(y, metricType)} />
             {showBar && (
               <ChartGroup>
                 {metrics.map(m => (
@@ -244,8 +209,8 @@ export const MetricsContent: React.FC<{
                     name={`bar-${metrics.indexOf(m)}`}
                     key={`bar-${metrics.indexOf(m)}`}
                     data={m.values.map(v => ({
-                      name: getName(m.metric),
-                      x: twentyFourHourTime(getDateFromUnixString(v[0] as string), true),
+                      name: getName(m.source, m.destination),
+                      x: getDateFromUnix(v[0]),
                       y: Number(v[1])
                     }))}
                   />
@@ -259,8 +224,8 @@ export const MetricsContent: React.FC<{
                     name={`area-${metrics.indexOf(m)}`}
                     key={`area-${metrics.indexOf(m)}`}
                     data={m.values.map(v => ({
-                      name: getName(m.metric),
-                      x: twentyFourHourTime(getDateFromUnixString(v[0] as string), true),
+                      name: getName(m.source, m.destination),
+                      x: getDateFromUnix(v[0]),
                       y: Number(v[1])
                     }))}
                     interpolation="monotoneX"
@@ -275,8 +240,8 @@ export const MetricsContent: React.FC<{
                     name={`scatter-${metrics.indexOf(m)}`}
                     key={`scatter-${metrics.indexOf(m)}`}
                     data={m.values.map(v => ({
-                      name: getName(m.metric),
-                      x: twentyFourHourTime(getDateFromUnixString(v[0] as string), true),
+                      name: getName(m.source, m.destination),
+                      x: getDateFromUnix(v[0]),
                       y: Number(v[1])
                     }))}
                   />

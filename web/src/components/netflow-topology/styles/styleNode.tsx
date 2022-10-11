@@ -1,3 +1,4 @@
+import * as _ from 'lodash';
 import { ResourceLink } from '@openshift-console/dynamic-plugin-sdk';
 import { Flex, FlexItem, Popover } from '@patternfly/react-core';
 import {
@@ -20,9 +21,9 @@ import {
   getDefaultShapeDecoratorCenter,
   Layer,
   Node,
+  NodeModel,
   NodeShape,
   observer,
-  Point,
   ScaleDetailsLevel,
   ShapeProps,
   TopologyQuadrant,
@@ -36,6 +37,7 @@ import useDetailsLevel from '@patternfly/react-topology/dist/esm/hooks/useDetail
 import { TFunction } from 'i18next';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
+import { Decorated, NodeData } from '../../../model/topology';
 
 export const FILTER_EVENT = 'filter';
 export const STEP_INTO_EVENT = 'step_into';
@@ -44,10 +46,12 @@ export enum DataTypes {
 }
 const ICON_PADDING = 20;
 
+type NodePeer = Node<NodeModel, Decorated<NodeData>>;
+
 type StyleNodeProps = {
-  element: Node;
+  element: NodePeer;
   getCustomShape?: (node: Node) => React.FC<ShapeProps>;
-  getShapeDecoratorCenter?: (quadrant: TopologyQuadrant, node: Node, radius?: number) => { x: number; y: number };
+  getShapeDecoratorCenter?: (quadrant: TopologyQuadrant, node: NodePeer, radius?: number) => { x: number; y: number };
   showLabel?: boolean;
   showStatusDecorator?: boolean;
   regrouping?: boolean;
@@ -56,8 +60,8 @@ type StyleNodeProps = {
   WithSelectionProps;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const getTypeIcon = (dataType?: string): React.ComponentClass<any, any> => {
-  switch (dataType) {
+const getTypeIcon = (resourceKind?: string): React.ComponentClass<any, any> => {
+  switch (resourceKind) {
     case 'Service':
       return ServiceIcon;
     case 'Pod':
@@ -77,8 +81,8 @@ const getTypeIcon = (dataType?: string): React.ComponentClass<any, any> => {
   }
 };
 
-const getTypeIconColor = (dataType?: string): string => {
-  switch (dataType) {
+const getTypeIconColor = (resourceKind?: string): string => {
+  switch (resourceKind) {
     case 'Service':
     case 'Pod':
     case 'Namespace':
@@ -94,14 +98,14 @@ const getTypeIconColor = (dataType?: string): string => {
   }
 };
 
-const renderIcon = (data: { type?: string }, element: Node): React.ReactNode => {
+const renderIcon = (data: Decorated<NodeData>, element: NodePeer): React.ReactNode => {
   const { width, height } = element.getDimensions();
   const shape = element.getNodeShape();
   const iconSize =
     (shape === NodeShape.trapezoid ? width : Math.min(width, height)) -
     (shape === NodeShape.stadium ? 5 : ICON_PADDING) * 2;
-  const Component = getTypeIcon(data.type);
-  const color = getTypeIconColor(data.type);
+  const Component = getTypeIcon(data.resourceKind);
+  const color = getTypeIconColor(data.resourceKind);
 
   return (
     <g transform={`translate(${(width - iconSize) / 2}, ${(height - iconSize) / 2})`}>
@@ -112,13 +116,13 @@ const renderIcon = (data: { type?: string }, element: Node): React.ReactNode => 
 
 const renderPopoverDecorator = (
   t: TFunction,
-  element: Node,
+  element: NodePeer,
   quadrant: TopologyQuadrant,
   icon: React.ReactNode,
-  data: { name?: string; type?: string; namespace?: string; addr?: string; host?: string },
+  data: NodeData,
   getShapeDecoratorCenter?: (
     quadrant: TopologyQuadrant,
-    node: Node,
+    node: NodePeer,
     radius?: number
   ) => {
     x: number;
@@ -130,27 +134,29 @@ const renderPopoverDecorator = (
     : getDefaultShapeDecoratorCenter(quadrant, element);
 
   return (
-    (data.type || data.namespace || data.name || data.addr || data.host) && (
+    (data.resourceKind || data.namespace || data.name || data.addr || data.host) && (
       <Popover
         id="decorator"
         hideOnOutsideClick={true}
         onShow={() => {
-          element.setData({
-            ...element.getData(),
-            hover: true //force hover state when popover is opened
-          });
+          const data = element.getData();
+          if (data) {
+            //force hover state when popover is opened
+            element.setData({ ...data, hover: true });
+          }
         }}
         onHide={() => {
-          element.setData({
-            ...element.getData(),
-            hover: undefined //restore hover state when popover is closed
-          });
+          const data = element.getData();
+          if (data) {
+            //restore hover state when popover is closed
+            element.setData({ ...data, hover: undefined });
+          }
         }}
         hasAutoWidth
         headerContent={
           //namespace is optionnal here for Node and Namespace kinds
-          data.type && data.name ? (
-            <ResourceLink inline={true} kind={data.type} name={data.name} namespace={data.namespace} />
+          data.resourceKind && data.name ? (
+            <ResourceLink inline={true} kind={data.resourceKind} name={data.name} namespace={data.namespace} />
           ) : (
             data.addr
           )
@@ -158,7 +164,7 @@ const renderPopoverDecorator = (
         bodyContent={
           <Flex>
             <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsNone' }}>
-              {data.type && (
+              {data.resourceKind && (
                 <FlexItem>
                   <FlexItem>{t('Kind')}</FlexItem>
                 </FlexItem>
@@ -185,7 +191,7 @@ const renderPopoverDecorator = (
               )}
             </Flex>
             <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsNone' }}>
-              {data.type && <FlexItem>{data.type}</FlexItem>}
+              {data.resourceKind && <FlexItem>{data.resourceKind}</FlexItem>}
               {data.namespace && <FlexItem>{data.namespace}</FlexItem>}
               {data.name && <FlexItem>{data.name}</FlexItem>}
               {data.addr && <FlexItem>{data.addr}</FlexItem>}
@@ -202,14 +208,14 @@ const renderPopoverDecorator = (
 
 const renderClickableDecorator = (
   t: TFunction,
-  element: Node,
+  element: NodePeer,
   quadrant: TopologyQuadrant,
   icon: React.ReactNode,
   isActive: boolean,
-  onClick: (element: Node) => void,
+  onClick: (element: NodePeer) => void,
   getShapeDecoratorCenter?: (
     quadrant: TopologyQuadrant,
-    node: Node,
+    node: NodePeer,
     radius?: number
   ) => {
     x: number;
@@ -235,26 +241,15 @@ const renderClickableDecorator = (
 
 const renderDecorators = (
   t: TFunction,
-  element: Node,
-  data: {
-    showDecorators?: boolean;
-    name?: string;
-    type?: string;
-    namespace?: string;
-    addr?: string;
-    host?: string;
-    point?: Point;
-    isPinned?: boolean;
-    setPosition?: (location: Point) => void;
-    canStepInto?: boolean;
-  },
+  element: NodePeer,
+  data: Decorated<NodeData>,
   isPinned: boolean,
   setPinned: (v: boolean) => void,
   isFiltered: boolean,
   setFiltered: (v: boolean) => void,
   getShapeDecoratorCenter?: (
     quadrant: TopologyQuadrant,
-    node: Node,
+    node: NodePeer,
     radius?: number
   ) => {
     x: number;
@@ -346,22 +341,20 @@ const renderDecorators = (
 
 const StyleNode: React.FC<StyleNodeProps> = ({ element, showLabel, dragging, regrouping, ...rest }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
-  const data = element.getData();
+  const data = element.getData() as Decorated<NodeData> | undefined;
   //TODO: check if we can have intelligent pin on view change
-  const [isPinned, setPinned] = React.useState<boolean>(data.isPinned);
-  const [isFiltered, setFiltered] = React.useState<boolean>(data.isFiltered === true);
+  const [isPinned, setPinned] = React.useState<boolean>(data?.isPinned === true);
+  const [isFiltered, setFiltered] = React.useState<boolean>(data?.isFiltered === true);
   const detailsLevel = useDetailsLevel();
   const [hover, hoverRef] = useHover();
 
   const passedData = React.useMemo(() => {
-    const newData = { ...data };
-    Object.keys(newData).forEach(key => {
-      if (newData[key] === undefined) {
-        delete newData[key];
-      }
-    });
-    return newData;
+    return _.omitBy(data, _.isUndefined) as Decorated<NodeData> | undefined;
   }, [data]);
+
+  if (!data || !passedData) {
+    return null;
+  }
 
   const updatedRest = { ...rest };
   if (isPinned) {

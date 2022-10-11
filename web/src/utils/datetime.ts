@@ -15,8 +15,8 @@ export const twentyFourHourTime = (date: Date, showSeconds?: boolean): string =>
   return `${hours}${minutes}${seconds}`;
 };
 
-export const getDateFromUnixString = (v: string) => {
-  return new Date(Number(v) * 1000);
+export const getDateFromUnix = (v: number) => {
+  return new Date(v * 1000);
 };
 
 export interface TimeRange {
@@ -43,4 +43,24 @@ export const getTimeRangeOptions = (t: TFunction) => {
 
 export const getFormattedDate = (date: Date, format = 'llll') => {
   return moment(date).format(format);
+};
+
+export const rangeToSeconds = (range: TimeRange | number): number => {
+  if (typeof range === 'number') {
+    return range;
+  }
+  return range.to - range.from;
+};
+
+export const computeStepInterval = (range: TimeRange | number) => {
+  const seconds = rangeToSeconds(range);
+  let interval = Math.floor(seconds / 10);
+  if (interval < 30) {
+    interval = 30;
+  }
+  const step = Math.floor(interval / 2);
+  return {
+    rateIntervalSeconds: interval,
+    stepSeconds: step
+  };
 };

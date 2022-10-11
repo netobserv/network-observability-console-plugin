@@ -2,7 +2,8 @@ import { Dropdown, DropdownItem, DropdownPosition, DropdownToggle } from '@patte
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { MetricFunction } from '../../model/flow-query';
-import { MetricFunctionOptions } from '../../model/metrics';
+
+const metricFunctionOptions: MetricFunction[] = ['last', 'avg', 'max', 'sum'];
 
 export const MetricFunctionDropdown: React.FC<{
   selected?: string;
@@ -12,19 +13,21 @@ export const MetricFunctionDropdown: React.FC<{
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [metricDropdownOpen, setMetricDropdownOpen] = React.useState(false);
 
-  const getMetricDisplay = (metricType?: string) => {
-    switch (metricType as MetricFunctionOptions) {
-      case MetricFunctionOptions.SUM:
-        return t('Sum');
-      case MetricFunctionOptions.MAX:
-        return t('Max');
-      case MetricFunctionOptions.RATE:
-        return t('Rate');
-      case MetricFunctionOptions.AVG:
-      default:
-        return t('Avg');
-    }
-  };
+  const getMetricDisplay = React.useCallback(
+    (mf: MetricFunction): string => {
+      switch (mf) {
+        case 'sum':
+          return t('Total');
+        case 'last':
+          return t('Latest rate');
+        case 'max':
+          return t('Max rate');
+        case 'avg':
+          return t('Average rate');
+      }
+    },
+    [t]
+  );
 
   return (
     <Dropdown
@@ -37,18 +40,18 @@ export const MetricFunctionDropdown: React.FC<{
           id={`${id}-dropdown`}
           onToggle={() => setMetricDropdownOpen(!metricDropdownOpen)}
         >
-          {getMetricDisplay(selected)}
+          {getMetricDisplay(selected as MetricFunction)}
         </DropdownToggle>
       }
       isOpen={metricDropdownOpen}
-      dropdownItems={Object.values(MetricFunctionOptions).map(v => (
+      dropdownItems={metricFunctionOptions.map(v => (
         <DropdownItem
           data-test={v}
           id={v}
           key={v}
           onClick={() => {
             setMetricDropdownOpen(false);
-            setMetricFunction(v as unknown as MetricFunction);
+            setMetricFunction(v);
           }}
         >
           {getMetricDisplay(v)}

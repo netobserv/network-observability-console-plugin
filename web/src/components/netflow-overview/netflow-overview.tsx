@@ -14,20 +14,20 @@ import { SearchIcon } from '@patternfly/react-icons';
 import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { MetricScopeOptions } from 'src/model/metrics';
-import { getMetricName, TopologyMetrics } from '../../api/loki';
+import { peersEqual, TopologyMetrics } from '../../api/loki';
 import { MetricFunction, MetricType, MetricScope } from '../../model/flow-query';
 import { OverviewPanel, OverviewPanelType } from '../../utils/overview-panels';
 import LokiError from '../messages/loki-error';
 import { NetflowOverviewPanel } from './netflow-overview-panel';
+import { getStat } from '../../model/topology';
 
 import './netflow-overview.css';
 
 export const NetflowOverview: React.FC<{
   limit: number;
   panels: OverviewPanel[];
-  metricFunction?: MetricFunction;
-  metricType?: MetricType;
+  metricFunction: MetricFunction;
+  metricType: MetricType;
   metricScope: MetricScope;
   metrics: TopologyMetrics[];
   loading?: boolean;
@@ -76,18 +76,12 @@ export const NetflowOverview: React.FC<{
     return true;
   };
 
-  const isSrcDstEqual = (m: TopologyMetrics) => {
-    const scope = metricScope as MetricScopeOptions;
-    const tFunc = (s: string) => s;
-    return getMetricName(m.metric, scope, true, tFunc) === getMetricName(m.metric, scope, false, tFunc);
-  };
-
   //skip metrics with sources equals to destinations
   //sort by top total item first
   //limit to top X since multiple queries can run in parallel
   const filteredMetrics = metrics
-    .filter(m => !isSrcDstEqual(m))
-    .sort((a, b) => b.total - a.total)
+    .filter(m => !peersEqual(m.source, m.destination))
+    .sort((a, b) => getStat(a.stats, metricFunction) - getStat(b.stats, metricFunction))
     .slice(0, limit);
 
   return (

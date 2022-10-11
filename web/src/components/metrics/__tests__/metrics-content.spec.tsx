@@ -29,7 +29,7 @@ describe('<MetricsContent />', () => {
 
     const donut = wrapper.find(ChartDonut);
     expect(donut).toHaveLength(1);
-    expect(donut.props().title).toBe('49 MB');
+    expect(donut.props().title).toBe('7 MB');
     expect(donut.props().subTitle).toBe('Total bytes');
     expect(donut.props().data?.length).toBe(metrics.length);
     expect(wrapper.find(Chart)).toHaveLength(0);

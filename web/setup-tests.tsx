@@ -112,8 +112,9 @@ global.console = {
   log: jest.fn(),
   warn: jest.fn(),
   info: jest.fn(),
-  debug: jest.fn(),
-
-  // Keep native behaviour for error
+  
+  // Keep native behaviour for error, and allow logging for debugging
+  debug: console.log,
   error: console.error,
+
 };

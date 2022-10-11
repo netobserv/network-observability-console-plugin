@@ -30,7 +30,7 @@ describe('netflow-table', () => {
 
     //Save
     cy.get('#columns-modal').contains('Save').click();
-    cy.checkColumns(23, 45);
+    cy.checkColumns(24, 48);
 
     //reopen modal
     cy.openColumnsModal();

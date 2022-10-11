@@ -12,7 +12,6 @@ import {
   DEFAULT_DECORATOR_RADIUS,
   getDefaultShapeDecoratorCenter,
   getShapeComponent,
-  GraphElement,
   LabelPosition,
   Node,
   NodeLabel,
@@ -35,6 +34,7 @@ import {
   NODE_SHADOW_FILTER_ID_HOVER
 } from '@patternfly/react-topology/dist/esm/components/nodes/NodeShadows';
 import { HOVER_EVENT } from '../netflow-topology';
+import { GraphElementPeer } from '../../../model/topology';
 
 const StatusQuadrant = TopologyQuadrant.upperLeft;
 
@@ -74,6 +74,7 @@ type BaseNodeProps = {
   labelIconClass?: string; // Icon to show in label
   labelIcon?: React.ReactNode;
   labelIconPadding?: number;
+  regrouping?: boolean;
   badge?: string;
   badgeColor?: string;
   badgeTextColor?: string;
@@ -85,7 +86,7 @@ type BaseNodeProps = {
   showStatusBackground?: boolean;
   showStatusDecorator?: boolean;
   statusDecoratorTooltip?: React.ReactNode;
-  onStatusDecoratorClick?: (event: React.MouseEvent<SVGGElement, MouseEvent>, element: GraphElement) => void;
+  onStatusDecoratorClick?: (event: React.MouseEvent<SVGGElement, MouseEvent>, element: GraphElementPeer) => void;
   getCustomShape?: (node: Node) => React.FC<ShapeProps>;
   getShapeDecoratorCenter?: (quadrant: TopologyQuadrant, node: Node) => { x: number; y: number };
 } & Partial<

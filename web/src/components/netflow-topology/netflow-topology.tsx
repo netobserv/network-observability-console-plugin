@@ -3,7 +3,6 @@ import { CogIcon, ExportIcon, SearchIcon, TimesIcon, AngleUpIcon, AngleDownIcon 
 import {
   createTopologyControlButtons,
   defaultControlButtonsOptions,
-  GraphElement,
   GRAPH_LAYOUT_END_EVENT,
   GRAPH_POSITION_CHANGE_EVENT,
   Model,
@@ -31,7 +30,11 @@ import {
   TopologyGroupTypes,
   TopologyOptions,
   isElementFiltered,
-  toggleElementFilter
+  toggleElementFilter,
+  GraphElementPeer,
+  ElementData,
+  Decorated,
+  getStat
 } from '../../model/topology';
 import { MetricScopeOptions } from '../../model/metrics';
 import { TimeRange } from '../../utils/datetime';
@@ -57,8 +60,8 @@ const FIT_PADDING = 80;
 export const TopologyContent: React.FC<{
   k8sModels: { [key: string]: K8sModel };
   range: number | TimeRange;
-  metricFunction?: MetricFunction;
-  metricType?: MetricType;
+  metricFunction: MetricFunction;
+  metricType: MetricType;
   metricScope: MetricScope;
   setMetricScope: (ms: MetricScope) => void;
   metrics: TopologyMetrics[];
@@ -67,8 +70,8 @@ export const TopologyContent: React.FC<{
   filters: Filter[];
   setFilters: (v: Filter[]) => void;
   toggleTopologyOptions: () => void;
-  selected: GraphElement | undefined;
-  onSelect: (e: GraphElement | undefined) => void;
+  selected: GraphElementPeer | undefined;
+  onSelect: (e: GraphElementPeer | undefined) => void;
 }> = ({
   k8sModels,
   range,
@@ -162,8 +165,7 @@ export const TopologyContent: React.FC<{
   };
 
   const onFilter = React.useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (data: any) => {
+    (data: Decorated<ElementData>) => {
       const isFiltered = isElementFiltered(data, filters, t);
       toggleElementFilter(data, isFiltered, filters, setFilters, t);
       setSelectedIds([data.id]);
@@ -172,8 +174,7 @@ export const TopologyContent: React.FC<{
   );
 
   const onStepInto = React.useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (data: any) => {
+    (data: Decorated<ElementData>) => {
       let scope: MetricScopeOptions;
       let groupTypes: TopologyGroupTypes;
       switch (metricScope) {
@@ -207,13 +208,9 @@ export const TopologyContent: React.FC<{
     [metricScope, onFilter, onSelect, options, setMetricScope, setOptions]
   );
 
-  const onHover = React.useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (data: any) => {
-      setHoveredId(data.isHovered ? data.id : '');
-    },
-    []
-  );
+  const onHover = React.useCallback((data: Decorated<ElementData>) => {
+    setHoveredId(data.isHovered ? data.id : '');
+  }, []);
 
   const onSelectIds = React.useCallback(
     (ids: string[]) => {
@@ -265,13 +262,11 @@ export const TopologyContent: React.FC<{
     } else {
       rangeInSeconds = (range.from - range.to) / 1000;
     }
-    const maxEdgeValue = _.isEmpty(metrics)
-      ? 0
-      : metrics.reduce((prev, current) => (prev.total > current.total ? prev : current)).total;
+    const maxEdgeStat = Math.max(...metrics.map(m => getStat(m.stats, metricFunction)));
     return {
       ...options,
       rangeInSeconds,
-      maxEdgeValue,
+      maxEdgeStat,
       metricFunction,
       metricType
     } as TopologyOptions;
@@ -557,8 +552,8 @@ export const NetflowTopology: React.FC<{
   k8sModels: { [key: string]: K8sModel };
   error?: string;
   range: number | TimeRange;
-  metricFunction?: MetricFunction;
-  metricType?: MetricType;
+  metricFunction: MetricFunction;
+  metricType: MetricType;
   metricScope: MetricScope;
   setMetricScope: (ms: MetricScope) => void;
   metrics: TopologyMetrics[];
@@ -567,8 +562,8 @@ export const NetflowTopology: React.FC<{
   filters: Filter[];
   setFilters: (v: Filter[]) => void;
   toggleTopologyOptions: () => void;
-  selected: GraphElement | undefined;
-  onSelect: (e: GraphElement | undefined) => void;
+  selected: GraphElementPeer | undefined;
+  onSelect: (e: GraphElementPeer | undefined) => void;
 }> = ({
   loading,
   k8sModels,

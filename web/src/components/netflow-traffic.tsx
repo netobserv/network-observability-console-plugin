@@ -20,7 +20,6 @@ import {
   TextVariants
 } from '@patternfly/react-core';
 import { ColumnsIcon, CompressIcon, EllipsisVIcon, ExpandIcon, ExportIcon, SyncAltIcon } from '@patternfly/react-icons';
-import { GraphElement } from '@patternfly/react-topology';
 import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -47,11 +46,11 @@ import {
   MetricType,
   Reporter
 } from '../model/flow-query';
-import { DefaultOptions, TopologyGroupTypes, TopologyOptions } from '../model/topology';
+import { DefaultOptions, GraphElementPeer, TopologyGroupTypes, TopologyOptions } from '../model/topology';
 import { Column, getDefaultColumns } from '../utils/columns';
 import { loadConfig } from '../utils/config';
 import { ContextSingleton } from '../utils/context';
-import { TimeRange } from '../utils/datetime';
+import { computeStepInterval, TimeRange } from '../utils/datetime';
 import { getHTTPErrorDetails } from '../utils/errors';
 import { Feature, isAllowed } from '../utils/features-gate';
 import { useK8sModelsWithColors } from '../utils/k8s-models-hook';
@@ -175,13 +174,10 @@ export const NetflowTraffic: React.FC<{
     LOCAL_STORAGE_METRIC_FUNCTION_KEY,
     defaultMetricFunction
   );
-  const [metricType, setMetricType] = useLocalStorage<MetricType | undefined>(
-    LOCAL_STORAGE_METRIC_TYPE_KEY,
-    defaultMetricType
-  );
+  const [metricType, setMetricType] = useLocalStorage<MetricType>(LOCAL_STORAGE_METRIC_TYPE_KEY, defaultMetricType);
   const [interval, setInterval] = useLocalStorage<number | undefined>(LOCAL_STORAGE_REFRESH_KEY);
   const [selectedRecord, setSelectedRecord] = React.useState<Record | undefined>(undefined);
-  const [selectedElement, setSelectedElement] = React.useState<GraphElement | undefined>(undefined);
+  const [selectedElement, setSelectedElement] = React.useState<GraphElementPeer | undefined>(undefined);
 
   const isInit = React.useRef(true);
   const [panels, setSelectedPanels] = useLocalStorage<OverviewPanel[]>(
@@ -238,7 +234,7 @@ export const NetflowTraffic: React.FC<{
     setSelectedRecord(record);
   };
 
-  const onElementSelect = (element?: GraphElement) => {
+  const onElementSelect = (element?: GraphElementPeer) => {
     clearSelections();
     setSelectedElement(element);
   };
@@ -272,7 +268,6 @@ export const NetflowTraffic: React.FC<{
       }
     }
     if (selectedViewId !== 'table') {
-      query.function = metricFunction;
       query.type = metricType;
       query.scope = metricScope;
       if (selectedViewId === 'topology') {
@@ -282,6 +277,9 @@ export const NetflowTraffic: React.FC<{
         query.limit = limit + 5;
         query.groups = undefined;
       }
+      const info = computeStepInterval(range);
+      query.rateInterval = `${info.rateIntervalSeconds}s`;
+      query.step = `${info.stepSeconds}s`;
     }
     return query;
   }, [
@@ -293,7 +291,6 @@ export const NetflowTraffic: React.FC<{
     layer,
     range,
     selectedViewId,
-    metricFunction,
     metricType,
     metricScope,
     topologyOptions.groupTypes
@@ -399,13 +396,8 @@ export const NetflowTraffic: React.FC<{
   }, [layer]);
   React.useEffect(() => {
     setURLMetricFunction(metricFunction);
-    if (metricFunction === 'rate') {
-      setMetricType(undefined);
-    } else if (!metricType) {
-      setMetricType(defaultMetricType);
-    }
     setURLMetricType(metricType);
-  }, [metricFunction, metricType, setMetricType]);
+  }, [metricFunction, metricType]);
 
   // update local storage saved query params
   React.useEffect(() => {
@@ -818,7 +810,7 @@ export const NetflowTraffic: React.FC<{
                 setMetricFunction={setMetricFunction}
               />
             )}
-            {selectedViewId !== 'table' && metricFunction !== 'rate' && (
+            {selectedViewId !== 'table' && (
               <MetricTypeDropdown
                 data-test="metricType"
                 id="metricType"
