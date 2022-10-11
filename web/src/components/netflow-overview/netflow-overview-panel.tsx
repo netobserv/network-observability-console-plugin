@@ -15,8 +15,9 @@ export const NetflowOverviewPanel: React.FC<{
   metricType: MetricType;
   metricScope: MetricScope;
   metrics: TopologyMetrics[];
+  appMetrics: TopologyMetrics[];
   doubleWidth?: boolean;
-}> = ({ limit, panel, metricFunction, metricType, metricScope, metrics, doubleWidth }) => {
+}> = ({ limit, panel, metricFunction, metricType, metricScope, metrics, appMetrics, doubleWidth }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   const getContent = React.useCallback(() => {
@@ -34,7 +35,7 @@ export const NetflowOverviewPanel: React.FC<{
             sizePx={600}
             metricFunction={metricFunction}
             metricType={metricType}
-            metrics={metrics}
+            metrics={panel.id === 'total_timeseries' ? appMetrics : metrics}
             scope={metricScope as MetricScopeOptions}
             showDonut={panel.id === 'top_donut'}
             showBar={panel.id === 'top_bar'}
@@ -53,7 +54,7 @@ export const NetflowOverviewPanel: React.FC<{
       default:
         return t('Error: Unknown panel type');
     }
-  }, [panel.id, metricFunction, metricType, metrics, metricScope, doubleWidth, t]);
+  }, [panel.id, metricFunction, metricType, appMetrics, metrics, metricScope, doubleWidth, t]);
 
   return (
     <Panel variant="raised">

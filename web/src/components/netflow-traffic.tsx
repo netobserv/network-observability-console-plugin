@@ -143,11 +143,13 @@ export const NetflowTraffic: React.FC<{
   const [loading, setLoading] = React.useState(true);
   const [flows, setFlows] = React.useState<Record[]>([]);
   const [stats, setStats] = React.useState<Stats | undefined>(undefined);
+  const [appStats, setAppStats] = React.useState<Stats | undefined>(undefined);
   const [topologyOptions, setTopologyOptions] = useLocalStorage<TopologyOptions>(
     LOCAL_STORAGE_TOPOLOGY_OPTIONS_KEY,
     DefaultOptions
   );
   const [metrics, setMetrics] = React.useState<TopologyMetrics[]>([]);
+  const [appMetrics, setAppMetrics] = React.useState<TopologyMetrics[]>([]);
   const [isShowTopologyOptions, setShowTopologyOptions] = React.useState<boolean>(false);
   const [isShowQuerySummary, setShowQuerySummary] = React.useState<boolean>(false);
   const [lastRefresh, setLastRefresh] = React.useState<Date | undefined>(undefined);
@@ -338,14 +340,29 @@ export const NetflowTraffic: React.FC<{
         break;
       case 'overview':
       case 'topology':
+        //run same query on current scope / app scope for total flows
+        const promises = [getTopology(fq, range)];
+        if (selectedViewId === 'overview') {
+          promises.push(getTopology({ ...fq, scope: 'app' }, range));
+        }
         manageWarnings(
-          getTopology(fq, range)
-            .then(result => {
-              setMetrics(result.metrics);
-              setStats(result.stats);
+          Promise.all(promises)
+            .then(results => {
+              //set metrics
+              setMetrics(results[0].metrics);
+              setStats(results[0].stats);
+              //set app metrics
+              if (results.length > 1) {
+                setAppMetrics(results[1].metrics);
+                setAppStats(results[1].stats);
+              } else {
+                setAppMetrics([]);
+                setAppStats(undefined);
+              }
             })
             .catch(err => {
               setMetrics([]);
+              setAppMetrics([]);
               setError(getHTTPErrorDetails(err));
               setWarningMessage(undefined);
             })
@@ -648,7 +665,10 @@ export const NetflowTraffic: React.FC<{
         <SummaryPanel
           id="summaryPanel"
           flows={flows}
+          metrics={metrics}
+          appMetrics={appMetrics}
           stats={stats}
+          appStats={appStats}
           lastRefresh={lastRefresh}
           range={range}
           onClose={() => setShowQuerySummary(false)}
@@ -684,6 +704,7 @@ export const NetflowTraffic: React.FC<{
             metricType={metricType}
             metricScope={metricScope}
             metrics={metrics}
+            appMetrics={appMetrics}
             loading={loading}
             error={error}
             clearFilters={clearFilters}
@@ -838,9 +859,13 @@ export const NetflowTraffic: React.FC<{
       {selectedViewId === 'table' && (
         <QuerySummary
           flows={flows}
-          range={range}
+          //TODO: NETOBSERV-591 QuerySummary from metrics
+          metrics={metrics}
+          appMetrics={appMetrics}
           stats={stats}
+          appStats={appStats}
           lastRefresh={lastRefresh}
+          range={range}
           toggleQuerySummary={() => onToggleQuerySummary(!isShowQuerySummary)}
         />
       )}

@@ -25,7 +25,7 @@ import { QuerySummaryContent } from './query-summary';
 import { comparePorts, formatPort } from '../../utils/port';
 import { formatProtocol } from '../../utils/protocol';
 import { compareIPs } from '../../utils/ip';
-import { Stats } from '../../api/loki';
+import { Stats, TopologyMetrics } from '../../api/loki';
 import './summary-panel.css';
 
 type TypeCardinality = {
@@ -243,7 +243,10 @@ export const SummaryPanelContent: React.FC<{
 export const SummaryPanel: React.FC<{
   onClose: () => void;
   flows: Record[] | undefined;
+  metrics: TopologyMetrics[] | undefined;
+  appMetrics: TopologyMetrics[] | undefined;
   stats: Stats | undefined;
+  appStats: Stats | undefined;
   range: number | TimeRange;
   lastRefresh: Date | undefined;
   id?: string;

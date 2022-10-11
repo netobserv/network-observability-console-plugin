@@ -52,6 +52,8 @@ func NewTopologyQuery(cfg *Config, start, end, limit, rateInterval, step, metric
 func getFields(scope, groups string) string {
 	var fields []string
 	switch scope {
+	case "app":
+		fields = []string{"app"}
 	case "host":
 		fields = []string{"SrcK8S_HostName", "DstK8S_HostName"}
 	case "namespace":

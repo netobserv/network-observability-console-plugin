@@ -30,7 +30,7 @@ var (
 	lokiStatusURL        = flag.String("loki-status", "", "URL for loki /ready /metrics /config endpoints. (default: loki flag value")
 	lokiLabels           = flag.String("loki-labels", "SrcK8S_Namespace,SrcK8S_OwnerName,DstK8S_Namespace,DstK8S_OwnerName,FlowDirection", "Loki labels, comma separated")
 	lokiTimeout          = flag.Duration("loki-timeout", 10*time.Second, "Timeout of the Loki query to retrieve logs")
-	lokiTenantID         = flag.String("loki-tenant-id", "", "Tenant organization ID for multi-tenant-loki (submitted as the X-Scope-OrgID HTTP header)")
+	lokiTenantID         = flag.String("loki-tenant-id", "netobserv", "Tenant organization ID for multi-tenant-loki (submitted as the X-Scope-OrgID HTTP header)")
 	lokiTokenPath        = flag.String("loki-token-path", "", "Path to Bearer authorization header for loki gateway)")
 	lokiForwardUserToken = flag.Bool("loki-forward-user-token", false, "Forward the user Bearer authorization header for loki gateway), this override loki-token-path option")
 	lokiCAPath           = flag.String("loki-ca-path", "", "Path to loki CA certificate")

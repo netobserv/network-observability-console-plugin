@@ -8,11 +8,14 @@ describe('<SummaryPanel />', () => {
   const mocks = {
     onClose: jest.fn(),
     flows: FlowsSample,
-    range: 300,
+    metrics: undefined,
+    appMetrics: undefined,
     stats: {
       limitReached: false,
       numQueries: 1
     },
+    appStats: undefined,
+    range: 300,
     lastRefresh: new Date(),
     id: 'summary-panel'
   };

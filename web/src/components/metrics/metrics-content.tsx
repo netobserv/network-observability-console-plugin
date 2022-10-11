@@ -18,7 +18,7 @@ import { useTranslation } from 'react-i18next';
 import { MetricScopeOptions } from '../../model/metrics';
 import { TopologyMetricPeer, TopologyMetrics } from '../../api/loki';
 import { MetricFunction, MetricType } from '../../model/flow-query';
-import { getDateFromUnix } from '../../utils/datetime';
+import { getDateFromUnix, getFormattedDate } from '../../utils/datetime';
 import './metrics-content.css';
 import { getFormattedValue, getFormattedRateValue, matchPeer } from '../../utils/metrics';
 import { getStat, NodeData } from '../../model/topology';
@@ -74,6 +74,7 @@ export const MetricsContent: React.FC<{
   }, [metricFunction, metricType, t]);
 
   const chart = React.useCallback(() => {
+    //TODO: NETOBSERV-635 add this as tab options
     // function truncate(input: string) {
     //   const length = doubleWidth ? 64 : showDonut ? 10 : 18;
     //   if (input.length > length) {
@@ -98,12 +99,15 @@ export const MetricsContent: React.FC<{
       return peer.displayName || (scope === MetricScopeOptions.HOST ? t('External') : t('Unknown'));
     };
 
-    function getName(source: TopologyMetricPeer, dest: TopologyMetricPeer) {
-      const srcName = getPeerName(source);
-      const dstName = getPeerName(dest);
-      if (data && matchPeer(data, source)) {
+    function getName(source?: TopologyMetricPeer, dest?: TopologyMetricPeer) {
+      if (id === 'total_timeseries') {
+        return t('Collected flows');
+      }
+      const srcName = getPeerName(source!);
+      const dstName = getPeerName(dest!);
+      if (data && matchPeer(data, source!)) {
         return `${t('To')} ${dstName}`;
-      } else if (data && matchPeer(data, dest)) {
+      } else if (data && matchPeer(data, dest!)) {
         return `${t('From')} ${srcName}`;
       }
       return `${srcName} -> ${dstName}`;
@@ -127,9 +131,9 @@ export const MetricsContent: React.FC<{
         }: {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           datum: any;
-        }) => `${datum.y !== null ? datum.y : 'no data'}`}
+        }) => `${datum.y !== null ? getFormattedRateValue(datum.y, metricType) : 'no data'}`}
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        labelComponent={<ChartLegendTooltip legendData={legendData} title={(datum: any) => datum.x} />}
+        labelComponent={<ChartLegendTooltip legendData={legendData} title={(datum: any) => datum.date} />}
         mouseFollowTooltips
         voronoiDimension="x"
         voronoiPadding={50}
@@ -195,7 +199,7 @@ export const MetricsContent: React.FC<{
             domainPadding={{ x: 0, y: 0 }}
             padding={{
               bottom: legendData.length * 25 + 50,
-              left: 75,
+              left: 90,
               right: 50,
               top: 50
             }}
@@ -210,6 +214,7 @@ export const MetricsContent: React.FC<{
                     key={`bar-${metrics.indexOf(m)}`}
                     data={m.values.map(v => ({
                       name: getName(m.source, m.destination),
+                      date: getFormattedDate(getDateFromUnix(v[0])),
                       x: getDateFromUnix(v[0]),
                       y: Number(v[1])
                     }))}
@@ -225,6 +230,7 @@ export const MetricsContent: React.FC<{
                     key={`area-${metrics.indexOf(m)}`}
                     data={m.values.map(v => ({
                       name: getName(m.source, m.destination),
+                      date: getFormattedDate(getDateFromUnix(v[0])),
                       x: getDateFromUnix(v[0]),
                       y: Number(v[1])
                     }))}
@@ -241,6 +247,7 @@ export const MetricsContent: React.FC<{
                     key={`scatter-${metrics.indexOf(m)}`}
                     data={m.values.map(v => ({
                       name: getName(m.source, m.destination),
+                      date: getFormattedDate(getDateFromUnix(v[0])),
                       x: getDateFromUnix(v[0]),
                       y: Number(v[1])
                     }))}
