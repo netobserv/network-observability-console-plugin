@@ -3,6 +3,7 @@ import { Button, Tooltip } from '@patternfly/react-core';
 import { FilterIcon, TimesIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
+import { getFormattedDate } from '../../utils/datetime';
 import { FlowDirection, Record } from '../../api/ipfix';
 import { Column, ColumnsId, getFullColumnName } from '../../utils/columns';
 import { formatDurationAboveMillisecond } from '../../utils/duration';
@@ -21,8 +22,9 @@ export const RecordField: React.FC<{
   column: Column;
   size?: Size;
   useLinks: boolean;
+  longDates: boolean;
   filter?: RecordFieldFilter;
-}> = ({ flow, column, size, filter, useLinks }) => {
+}> = ({ flow, column, size, filter, useLinks, longDates }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   const onMouseOver = (event: React.MouseEvent<HTMLDivElement, MouseEvent>, className: string) => {
@@ -122,8 +124,12 @@ export const RecordField: React.FC<{
   };
 
   const dateTimeContent = (date: Date | undefined) => {
-    const dateText = date?.toDateString() || emptyText();
-    const timeText = date?.toLocaleTimeString() || emptyText();
+    if (!date) {
+      return emptyText();
+    }
+
+    const dateText = getFormattedDate(date, longDates ? 'ddd ll' : 'MM/DD/YYYY');
+    const timeText = getFormattedDate(date, longDates ? 'h:mm:ss.SSS A' : 'HH:mm:ss.SSS');
     return singleContainer(
       <div data-test={`field-date-${dateText}-${timeText}`}>
         <div className={`datetime ${size}`}>

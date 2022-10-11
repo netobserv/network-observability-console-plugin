@@ -13,7 +13,8 @@ describe('<RecordField />', () => {
   };
   const mocks = {
     size: 'm' as Size,
-    useLinks: true
+    useLinks: true,
+    longDates: true
   };
   it('should render single field', async () => {
     //datetime column will produce a single field
