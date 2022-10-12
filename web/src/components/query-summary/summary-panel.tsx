@@ -221,10 +221,18 @@ export const SummaryPanelContent: React.FC<{
   return (
     <>
       <TextContent className="summary-text-container">
+        {stats?.limitReached && (
+          <Text component={TextVariants.p}>
+            {t(
+              // eslint-disable-next-line max-len
+              'Flow per request limit reached, following metrics can be inaccurate. Narrow down your search or increase limit.'
+            )}
+          </Text>
+        )}
         <Text component={TextVariants.h3}>{t('Results')}</Text>
         <QuerySummaryContent
           className="summary-container-grouped"
-          direction={'column'}
+          direction="column"
           flows={flows || []}
           limitReached={stats?.limitReached || false}
           range={range}

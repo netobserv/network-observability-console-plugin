@@ -4,6 +4,7 @@
 
 .summary-container-grouped {
   padding-left: 15px;
+  flex-direction: column !important;
 }
 
 #cardinality-accordion {
