@@ -188,7 +188,7 @@
   "{{count}} Port(s)_plural": "{{count}} Port(s)",
   "{{count}} Protocol(s)": "{{count}} Protocol(s)",
   "{{count}} Protocol(s)_plural": "{{count}} Protocol(s)",
-  "The following metrics are incomplete. Add more filters or increase limit.": "The following metrics are incomplete. Add more filters or increase limit.",
+  "Flow per request limit reached, following metrics can be inaccurate. Narrow down your search or increase limit.": "Flow per request limit reached, following metrics can be inaccurate. Narrow down your search or increase limit.",
   "Results": "Results",
   "Cardinality": "Cardinality",
   "Query summary": "Query summary",

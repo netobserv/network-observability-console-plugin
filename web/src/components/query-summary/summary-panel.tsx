@@ -223,7 +223,10 @@ export const SummaryPanelContent: React.FC<{
       <TextContent className="summary-text-container">
         {stats?.limitReached && (
           <Text component={TextVariants.p}>
-            {t('The following metrics are incomplete. Add more filters or increase limit.')}
+            {t(
+              // eslint-disable-next-line max-len
+              'Flow per request limit reached, following metrics can be inaccurate. Narrow down your search or increase limit.'
+            )}
           </Text>
         )}
         <Text component={TextVariants.h3}>{t('Results')}</Text>
