@@ -34,8 +34,7 @@ import {
   GraphElementPeer,
   ElementData,
   Decorated,
-  getStat,
-  getAvailableGroups
+  getStat
 } from '../../model/topology';
 import { MetricScopeOptions } from '../../model/metrics';
 import { TimeRange } from '../../utils/datetime';
@@ -208,14 +207,6 @@ export const TopologyContent: React.FC<{
     },
     [metricScope, onFilter, onSelect, options, setMetricScope, setOptions]
   );
-
-  //invalidate or adapt groups if necessary, when metrics scope changed
-  React.useEffect(() => {
-    const groups = getAvailableGroups(metricScope as MetricScopeOptions);
-    if (!groups.includes(options.groupTypes)) {
-      setOptions({ ...options, groupTypes: groups[groups.length - 1] });
-    }
-  }, [metricScope, options, setOptions]);
 
   const onHover = React.useCallback((data: Decorated<ElementData>) => {
     setHoveredId(data.isHovered ? data.id : '');

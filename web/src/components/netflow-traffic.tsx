@@ -46,7 +46,14 @@ import {
   MetricType,
   Reporter
 } from '../model/flow-query';
-import { DefaultOptions, GraphElementPeer, TopologyGroupTypes, TopologyOptions } from '../model/topology';
+import { MetricScopeOptions } from '../model/metrics';
+import {
+  DefaultOptions,
+  getAvailableGroups,
+  GraphElementPeer,
+  TopologyGroupTypes,
+  TopologyOptions
+} from '../model/topology';
 import { Column, getDefaultColumns } from '../utils/columns';
 import { loadConfig } from '../utils/config';
 import { ContextSingleton } from '../utils/context';
@@ -437,6 +444,14 @@ export const NetflowTraffic: React.FC<{
 
     warningTimeOut.current = setTimeout(() => setWarningMessage(undefined), 10000);
   }, [warningMessage]);
+
+  //invalidate groups if necessary, when metrics scope changed
+  React.useEffect(() => {
+    const groups = getAvailableGroups(metricScope as MetricScopeOptions);
+    if (!groups.includes(topologyOptions.groupTypes)) {
+      setTopologyOptions({ ...topologyOptions, groupTypes: TopologyGroupTypes.NONE });
+    }
+  }, [metricScope, topologyOptions, setTopologyOptions]);
 
   // updates table filters and clears up the table for proper visualization of the
   // updating process
