@@ -1,12 +1,15 @@
 package constants
 
+type Reporter string
+type Layer string
+
 const (
-	AppLabel            = "app"
-	AppLabelValue       = "netobserv-flowcollector"
-	ReporterSource      = "source"
-	ReporterDestination = "destination"
-	ReporterBoth        = "both"
-	LayerInfrastructure = "infrastructure"
-	LayerApplication    = "application"
-	LayerBoth           = "both"
+	AppLabel                     = "app"
+	AppLabelValue                = "netobserv-flowcollector"
+	ReporterSource      Reporter = "source"
+	ReporterDestination Reporter = "destination"
+	ReporterBoth        Reporter = "both"
+	LayerInfrastructure Layer    = "infrastructure"
+	LayerApplication    Layer    = "application"
+	LayerBoth           Layer    = "both"
 )

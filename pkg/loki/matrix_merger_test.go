@@ -27,7 +27,7 @@ func TestMatrixMerge(t *testing.T) {
 	require.NoError(t, err)
 
 	// Different metric, different value pair => no dedup
-	merged, err := merger.Add(qrData(model.Matrix{{
+	_, err = merger.Add(qrData(model.Matrix{{
 		Metric: pmodel.Metric{
 			"foo":  "bar",
 			"foo2": "bar2",
@@ -41,12 +41,15 @@ func TestMatrixMerge(t *testing.T) {
 		}},
 	}}))
 	require.NoError(t, err)
-	assert.Len(t, merged, 2)
-	assert.Len(t, merged.(model.Matrix)[0].Values, 2)
-	assert.Len(t, merged.(model.Matrix)[1].Values, 1)
+	result := merger.Get().Result.(model.Matrix)
+	assert.Len(t, result, 2)
+	assert.Len(t, result[0].Values, 1)
+	assert.Equal(t, result[0].Values[0].Value, pmodel.SampleValue(54))
+	assert.Len(t, result[1].Values, 1)
+	assert.Equal(t, result[1].Values[0].Value, pmodel.SampleValue(42))
 
 	// Same metrics in different order => no dedup
-	merged, err = merger.Add(qrData(model.Matrix{{
+	_, err = merger.Add(qrData(model.Matrix{{
 		Metric: pmodel.Metric{
 			"foo2": "bar2",
 			"foo":  "bar",
@@ -66,12 +69,15 @@ func TestMatrixMerge(t *testing.T) {
 		Values: baseline.Values,
 	}}))
 	require.NoError(t, err)
-	assert.Len(t, merged, 2)
-	assert.Len(t, merged.(model.Matrix)[0].Values, 2)
-	assert.Len(t, merged.(model.Matrix)[1].Values, 1)
+	result = merger.Get().Result.(model.Matrix)
+	assert.Len(t, result, 2)
+	assert.Len(t, result[0].Values, 1)
+	assert.Equal(t, result[0].Values[0].Value, pmodel.SampleValue(54))
+	assert.Len(t, result[1].Values, 1)
+	assert.Equal(t, result[1].Values[0].Value, pmodel.SampleValue(168))
 
 	// Different timestamp => no dedup
-	merged, err = merger.Add(qrData(model.Matrix{{
+	_, err = merger.Add(qrData(model.Matrix{{
 		Metric: baseline.Metric,
 		Values: []pmodel.SamplePair{{
 			Timestamp: now.Add(time.Hour),
@@ -79,12 +85,16 @@ func TestMatrixMerge(t *testing.T) {
 		}},
 	}}))
 	require.NoError(t, err)
-	assert.Len(t, merged, 2)
-	assert.Len(t, merged.(model.Matrix)[0].Values, 3)
-	assert.Len(t, merged.(model.Matrix)[1].Values, 1)
+	result = merger.Get().Result.(model.Matrix)
+	assert.Len(t, result, 2)
+	assert.Len(t, result[0].Values, 2)
+	assert.Equal(t, result[0].Values[0].Value, pmodel.SampleValue(54))
+	assert.Equal(t, result[0].Values[1].Value, pmodel.SampleValue(12))
+	assert.Len(t, result[1].Values, 1)
+	assert.Equal(t, result[1].Values[0].Value, pmodel.SampleValue(168))
 
-	// some dedup
-	merged, err = merger.Add(qrData(model.Matrix{{
+	// no dedup
+	_, err = merger.Add(qrData(model.Matrix{{
 		// changed value => no dedup
 		Metric: baseline.Metric,
 		Values: []pmodel.SamplePair{{
@@ -106,15 +116,19 @@ func TestMatrixMerge(t *testing.T) {
 			Value:     pmodel.SampleValue(42),
 		}},
 	},
-		// baseline itself => must be ignored
+		// baseline itself => still added
 		baseline,
 	}))
 
 	// Different timestamp
 	require.NoError(t, err)
-	assert.Len(t, merged, 2)
-	assert.Len(t, merged.(model.Matrix)[0].Values, 6)
-	assert.Len(t, merged.(model.Matrix)[1].Values, 1)
+	result = merger.Get().Result.(model.Matrix)
+	assert.Len(t, result, 2)
+	assert.Len(t, result[0].Values, 2)
+	assert.Equal(t, result[0].Values[0].Value, pmodel.SampleValue(104))
+	assert.Equal(t, result[0].Values[1].Value, pmodel.SampleValue(54))
+	assert.Len(t, result[1].Values, 1)
+	assert.Equal(t, result[1].Values[0].Value, pmodel.SampleValue(168))
 }
 
 func TestMatrixLimitReached(t *testing.T) {
