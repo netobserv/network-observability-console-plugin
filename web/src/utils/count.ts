@@ -2,11 +2,6 @@ export const roundTwoDigits = (count: number) => {
   return Math.round(count * 100) / 100;
 };
 
-export const elementPerMinText = (count: number): string => {
-  const [value, unit] = scale(count);
-  return `${value.toFixed(1)} ${unit}/sec`;
-};
-
 export const scale = (count: number, si = false, dp = 1): [number, string] => {
   const thresh = si ? 1000 : 1024;
 

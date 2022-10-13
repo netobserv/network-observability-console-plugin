@@ -1,3 +1,4 @@
+import { MetricScope } from '../model/flow-query';
 import { cyrb53 } from '../utils/hash';
 import { Fields, Labels, Record } from './ipfix';
 
@@ -72,23 +73,17 @@ export interface TopologyMetricPeer {
   displayName?: string;
 }
 
-export const peersEqual = (p1: TopologyMetricPeer, p2: TopologyMetricPeer): boolean => {
-  return (
-    p1.addr === p2.addr &&
-    p1.hostName === p2.hostName &&
-    p1.name === p2.name &&
-    p1.type === p2.type &&
-    p1.namespace === p2.namespace &&
-    p1.ownerName === p2.ownerName &&
-    p1.ownerType === p2.ownerType
-  );
-};
-
 export type TopologyMetrics = {
   source: TopologyMetricPeer;
   destination: TopologyMetricPeer;
   values: [number, number][];
   stats: MetricStats;
+  scope: MetricScope;
+};
+
+export type NamedMetric = TopologyMetrics & {
+  name: string;
+  isInternal: boolean;
 };
 
 export interface MetricStats {

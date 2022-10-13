@@ -1,6 +1,6 @@
 import { RawTopologyMetrics, TopologyMetricPeer } from '../../api/loki';
 import { NodeData } from '../../model/topology';
-import { calibrateRange, computeStats, matchPeer, normalizeMetrics, parseMetrics } from '../metrics';
+import { calibrateRange, computeStats, getFormattedValue, matchPeer, normalizeMetrics, parseMetrics } from '../metrics';
 
 describe('normalize and computeStats', () => {
   it('should normalize and compute simple stats', () => {
@@ -428,5 +428,31 @@ describe('parseMetrics', () => {
     expect(parsed[0].destination.displayName).toEqual('ns1.B (pod)');
     expect(parsed[1].source.displayName).toEqual('ns1.A');
     expect(parsed[1].destination.displayName).toEqual('ns1.B (svc)');
+  });
+});
+
+describe('getFormattedValue', () => {
+  it('should format BPS', () => {
+    expect(getFormattedValue(500, 'bytes', 'last')).toBe('500 Bps');
+    expect(getFormattedValue(1300, 'bytes', 'avg')).toBe('1.3 kBps');
+    expect(getFormattedValue(10500, 'bytes', 'max')).toBe('10.5 kBps');
+    expect(getFormattedValue(1500000, 'bytes', 'avg')).toBe('1.5 MBps');
+  });
+
+  it('should format absolute bytes', () => {
+    expect(getFormattedValue(500, 'bytes', 'sum')).toBe('500 B');
+    expect(getFormattedValue(10500, 'bytes', 'sum')).toBe('10.5 kB');
+  });
+
+  it('should format packets rate', () => {
+    expect(getFormattedValue(500, 'packets', 'last')).toBe('500 /sec');
+    expect(getFormattedValue(1300, 'packets', 'avg')).toBe('1.3 k/sec');
+    expect(getFormattedValue(10500, 'packets', 'max')).toBe('10.5 k/sec');
+    expect(getFormattedValue(1500000, 'packets', 'avg')).toBe('1.5 M/sec');
+  });
+
+  it('should format absolute packets', () => {
+    expect(getFormattedValue(500, 'packets', 'sum')).toBe('500');
+    expect(getFormattedValue(10500, 'packets', 'sum')).toBe('10.5k');
   });
 });

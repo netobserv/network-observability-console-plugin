@@ -156,7 +156,7 @@ export const NetflowTraffic: React.FC<{
     DefaultOptions
   );
   const [metrics, setMetrics] = React.useState<TopologyMetrics[]>([]);
-  const [appMetrics, setAppMetrics] = React.useState<TopologyMetrics[]>([]);
+  const [totalMetric, setTotalMetric] = React.useState<TopologyMetrics | undefined>(undefined);
   const [isShowTopologyOptions, setShowTopologyOptions] = React.useState<boolean>(false);
   const [isShowQuerySummary, setShowQuerySummary] = React.useState<boolean>(false);
   const [lastRefresh, setLastRefresh] = React.useState<Date | undefined>(undefined);
@@ -341,7 +341,7 @@ export const NetflowTraffic: React.FC<{
             .finally(() => {
               //clear metrics
               setMetrics([]);
-              setAppMetrics([]);
+              setTotalMetric(undefined);
               setLoading(false);
               setLastRefresh(new Date());
             })
@@ -362,16 +362,16 @@ export const NetflowTraffic: React.FC<{
               setStats(results[0].stats);
               //set app metrics
               if (results.length > 1) {
-                setAppMetrics(results[1].metrics);
+                setTotalMetric(results[1].metrics[0]);
                 setAppStats(results[1].stats);
               } else {
-                setAppMetrics([]);
+                setTotalMetric(undefined);
                 setAppStats(undefined);
               }
             })
             .catch(err => {
               setMetrics([]);
-              setAppMetrics([]);
+              setTotalMetric(undefined);
               setError(getHTTPErrorDetails(err));
               setWarningMessage(undefined);
             })
@@ -686,7 +686,7 @@ export const NetflowTraffic: React.FC<{
           id="summaryPanel"
           flows={flows}
           metrics={metrics}
-          appMetrics={appMetrics}
+          appMetrics={totalMetric ? [totalMetric] : []}
           metricType={metricType}
           stats={stats}
           appStats={appStats}
@@ -704,7 +704,6 @@ export const NetflowTraffic: React.FC<{
           metrics={metrics}
           metricFunction={metricFunction}
           metricType={metricType}
-          metricScope={metricScope}
           filters={filters}
           setFilters={setFilters}
           onClose={() => onElementSelect(undefined)}
@@ -722,11 +721,9 @@ export const NetflowTraffic: React.FC<{
           <NetflowOverview
             limit={limit}
             panels={panels}
-            metricFunction={metricFunction}
             metricType={metricType}
-            metricScope={metricScope}
             metrics={metrics}
-            appMetrics={appMetrics}
+            totalMetric={totalMetric}
             loading={loading}
             error={error}
             clearFilters={clearFilters}
@@ -845,7 +842,7 @@ export const NetflowTraffic: React.FC<{
         <Flex>
           <FlexItem flex={{ default: 'flex_1' }}>{viewTabs()}</FlexItem>
           <FlexItem>
-            {selectedViewId !== 'table' && (
+            {selectedViewId === 'topology' && (
               <MetricFunctionDropdown
                 data-test="metricFunction"
                 id="metricFunction"
@@ -881,7 +878,7 @@ export const NetflowTraffic: React.FC<{
       <QuerySummary
         flows={flows}
         metrics={metrics}
-        appMetrics={appMetrics}
+        appMetrics={totalMetric ? [totalMetric] : []}
         metricType={metricType}
         stats={stats}
         appStats={appStats}

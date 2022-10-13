@@ -1,9 +1,11 @@
 import { TFunction } from 'i18next';
 
-export type OverviewPanelType =
+export type OverviewPanelId =
   | 'overview'
   | 'top_bar'
-  | 'top_donut'
+  | 'top_bar_total'
+  | 'top_avg_donut'
+  | 'top_latest_donut'
   | 'top_sankey'
   | 'total_timeseries'
   | 'top_timeseries'
@@ -11,44 +13,46 @@ export type OverviewPanelType =
   | 'inbound_flows_region';
 
 export type OverviewPanel = {
-  id: OverviewPanelType;
+  id: OverviewPanelId;
   isSelected: boolean;
 };
 
-export const getDefaultOverviewPanels = () => {
+export const getDefaultOverviewPanels = (): OverviewPanel[] => {
   return [
-    'overview',
-    'total_timeseries',
-    'top_bar',
-    'top_donut',
-    'top_sankey',
-    'top_timeseries',
-    'packets_dropped',
-    'inbound_flows_region'
-  ].map(id => {
-    return { id, isSelected: true } as OverviewPanel;
-  });
+    { id: 'overview', isSelected: true },
+    { id: 'top_avg_donut', isSelected: true },
+    { id: 'top_latest_donut', isSelected: true },
+    { id: 'top_bar', isSelected: true },
+    { id: 'total_timeseries', isSelected: true },
+    { id: 'top_bar_total', isSelected: true },
+    { id: 'top_timeseries', isSelected: true },
+    { id: 'top_sankey', isSelected: true },
+    { id: 'packets_dropped', isSelected: true },
+    { id: 'inbound_flows_region', isSelected: true }
+  ];
 };
 
-export const getOverviewPanelTitle = (t: TFunction, type: OverviewPanelType, limit = 'X') => {
-  switch (type) {
+export const getOverviewPanelTitle = (t: TFunction, id: OverviewPanelId, limit: string | number = 'X'): string => {
+  switch (id) {
     case 'overview':
       return t('Network overview');
     case 'top_bar':
-      return t('Top {{limit}} flows bar chart', { limit });
-    case 'top_donut':
-      return t('Top {{limit}} flows donut chart', { limit });
-    case 'top_sankey':
-      return t('Top {{limit}} flows sankey chart', { limit });
-    case 'total_timeseries':
-      return t('Total flows time series');
+      return t('Top {{limit}} flow rates', { limit });
+    case 'top_bar_total':
+      return t('Top {{limit}} flow rates with total', { limit });
     case 'top_timeseries':
       return t('Network traffic over time');
+    case 'top_avg_donut':
+      return t('Top {{limit}} average rates', { limit });
+    case 'top_latest_donut':
+      return t('Top {{limit}} latest rates', { limit });
+    case 'top_sankey':
+      return t('Top {{limit}} flows distribution', { limit });
+    case 'total_timeseries':
+      return t('Total flows time series');
     case 'packets_dropped':
       return t('Packets dropped');
     case 'inbound_flows_region':
       return t('Inbound flows by region');
-    default:
-      return t('Error: Unknown panel type');
   }
 };

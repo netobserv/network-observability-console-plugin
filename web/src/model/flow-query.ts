@@ -53,7 +53,6 @@ export const groupFiltersMatchAll = (filters: Filter[]): string => {
     }
   });
   const joined = needSrcDstSplit ? `${srcMatch.join('&')}|${dstMatch.join('&')}` : srcMatch.join('&');
-  console.log(joined);
   return encodeURIComponent(joined);
 };
 
