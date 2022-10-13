@@ -15,6 +15,7 @@ import (
 	"github.com/netobserv/network-observability-console-plugin/pkg/metrics"
 	"github.com/netobserv/network-observability-console-plugin/pkg/model"
 	"github.com/netobserv/network-observability-console-plugin/pkg/model/fields"
+	"github.com/netobserv/network-observability-console-plugin/pkg/model/filters"
 	"github.com/netobserv/network-observability-console-plugin/pkg/utils"
 )
 
@@ -108,16 +109,16 @@ func GetNames(cfg *loki.Config) func(w http.ResponseWriter, r *http.Request) {
 }
 
 func getNamesForPrefix(cfg *loki.Config, lokiClient httpclient.Caller, prefix, kind, namespace string) ([]string, int, error) {
-	lokiParams := [][]string{}
+	lokiParams := filters.SingleQuery{}
 	if namespace != "" {
-		lokiParams = append(lokiParams, []string{prefix + fields.Namespace, exact(namespace)})
+		lokiParams = append(lokiParams, filters.NewMatch(prefix+fields.Namespace, exact(namespace)))
 	}
 	var fieldToExtract string
 	if utils.IsOwnerKind(kind) {
-		lokiParams = append(lokiParams, []string{prefix + fields.OwnerType, exact(kind)})
+		lokiParams = append(lokiParams, filters.NewMatch(prefix+fields.OwnerType, exact(kind)))
 		fieldToExtract = prefix + fields.OwnerName
 	} else {
-		lokiParams = append(lokiParams, []string{prefix + fields.Type, exact(kind)})
+		lokiParams = append(lokiParams, filters.NewMatch(prefix+fields.Type, exact(kind)))
 		fieldToExtract = prefix + fields.Name
 	}
 

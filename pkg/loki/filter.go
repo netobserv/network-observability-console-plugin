@@ -13,8 +13,10 @@ var valueReplacer = strings.NewReplacer(`*`, `.*`, `"`, "")
 type labelMatcher string
 
 const (
-	labelEqual   = labelMatcher("=")
-	labelMatches = labelMatcher("=~")
+	labelEqual     = labelMatcher("=")
+	labelMatches   = labelMatcher("=~")
+	labelNotEqual  = labelMatcher("!=")
+	labelNoMatches = labelMatcher("!~")
 	//infrastructure regex match any empty namespace or starting with kube- or openshift-
 	infrastructureRegex = `^$|(kube-|openshift-).*`
 )
@@ -61,6 +63,24 @@ func regexLabelFilter(labelKey string, value string) labelFilter {
 	return labelFilter{
 		key:       labelKey,
 		matcher:   labelMatches,
+		value:     value,
+		valueType: typeString,
+	}
+}
+
+func notStringLabelFilter(labelKey string, value string) labelFilter {
+	return labelFilter{
+		key:       labelKey,
+		matcher:   labelNotEqual,
+		value:     value,
+		valueType: typeString,
+	}
+}
+
+func notRegexLabelFilter(labelKey string, value string) labelFilter {
+	return labelFilter{
+		key:       labelKey,
+		matcher:   labelNoMatches,
 		value:     value,
 		valueType: typeString,
 	}

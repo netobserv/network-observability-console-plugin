@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/netobserv/network-observability-console-plugin/pkg/utils"
+	"github.com/netobserv/network-observability-console-plugin/pkg/utils/constants"
 )
 
 const (
@@ -23,7 +24,7 @@ type TopologyQueryBuilder struct {
 	topology *Topology
 }
 
-func NewTopologyQuery(cfg *Config, start, end, limit, rateInterval, step, metricType, reporter, layer, scope, groups string) (*TopologyQueryBuilder, error) {
+func NewTopologyQuery(cfg *Config, start, end, limit, rateInterval, step, metricType string, reporter constants.Reporter, layer constants.Layer, scope, groups string) (*TopologyQueryBuilder, error) {
 	l := limit
 	if len(l) == 0 {
 		l = topologyDefaultLimit

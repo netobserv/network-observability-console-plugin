@@ -5,13 +5,14 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/netobserv/network-observability-console-plugin/pkg/httpclient"
 	"github.com/netobserv/network-observability-console-plugin/pkg/loki"
 	"github.com/netobserv/network-observability-console-plugin/pkg/metrics"
 	"github.com/netobserv/network-observability-console-plugin/pkg/model"
+	"github.com/netobserv/network-observability-console-plugin/pkg/model/filters"
+	"github.com/netobserv/network-observability-console-plugin/pkg/utils/constants"
 )
 
 const (
@@ -27,31 +28,6 @@ const (
 type errorWithCode struct {
 	err  error
 	code int
-}
-
-type keyValues = []string
-
-// Example of raw filters (url-encoded):
-// foo=a,b&bar=c|baz=d
-func parseFilters(raw string) ([][]keyValues, error) {
-	var parsed [][]keyValues
-	decoded, err := url.QueryUnescape(raw)
-	if err != nil {
-		return nil, err
-	}
-	groups := strings.Split(decoded, "|")
-	for _, group := range groups {
-		var andFilters []keyValues
-		filters := strings.Split(group, "&")
-		for _, filter := range filters {
-			pair := strings.Split(filter, "=")
-			if len(pair) == 2 {
-				andFilters = append(andFilters, pair)
-			}
-		}
-		parsed = append(parsed, andFilters)
-	}
-	return parsed, nil
 }
 
 func getStartTime(params url.Values) (string, error) {
@@ -138,10 +114,10 @@ func getFlows(cfg *loki.Config, client httpclient.Caller, params url.Values) (*m
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
-	reporter := params.Get(reporterKey)
-	layer := params.Get(layerKey)
+	reporter := constants.Reporter(params.Get(reporterKey))
+	layer := constants.Layer(params.Get(layerKey))
 	rawFilters := params.Get(filtersKey)
-	filterGroups, err := parseFilters(rawFilters)
+	filterGroups, err := filters.Parse(rawFilters)
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}

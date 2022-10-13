@@ -24,7 +24,7 @@ export interface FlowQuery {
 }
 
 // All filters in AND-group (ie. usually for "match all") are set in a list of [key-values]
-type AndGroup = { key: string; values: string[] }[];
+type AndGroup = { key: string; values: string[]; not?: boolean }[];
 // All filters in OR-group (ie. usually for "match any") are set as elements of AndGroup array
 type OrGroup = AndGroup[];
 
@@ -54,6 +54,7 @@ export const groupFiltersMatchAll = (filters: Filter[]): string => {
       // Filters here are applied for their Src/Dst group split
       f.def.fieldMatching.ifSrc!(f.values).forEach(filter => {
         srcMatch.push(filter);
+        dstMatch.push({ ...filter, not: true });
       });
       f.def.fieldMatching.ifDst!(f.values).forEach(filter => {
         dstMatch.push(filter);
@@ -78,6 +79,8 @@ export const groupFiltersMatchAny = (filters: Filter[]): string => {
 
 const encodeFilters = (filters: OrGroup): string => {
   // Example of output: foo=a,b&bar=c|baz=d (url-encoded)
-  const str = filters.map(group => group.map(filter => `${filter.key}=${filter.values.join(',')}`).join('&')).join('|');
+  const str = filters
+    .map(group => group.map(filter => `${filter.key}${filter.not ? '!' : ''}=${filter.values.join(',')}`).join('&'))
+    .join('|');
   return encodeURIComponent(str);
 };

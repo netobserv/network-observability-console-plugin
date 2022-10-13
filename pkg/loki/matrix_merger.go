@@ -2,6 +2,7 @@ package loki
 
 import (
 	"fmt"
+	"sort"
 
 	pmodel "github.com/prometheus/common/model"
 
@@ -30,9 +31,8 @@ func NewMatrixMerger(reqLimit int) *MatrixMerger {
 
 //indexedSampleStream stores a unique SampleStream at a specific index with merged values
 type indexedSampleStream struct {
-	sampleStream pmodel.SampleStream
-	values       map[string]interface{}
-	index        int
+	values map[pmodel.Time]pmodel.SampleValue
+	index  int
 }
 
 func (m *MatrixMerger) Add(from model.QueryResponseData) (model.ResultValue, error) {
@@ -54,35 +54,39 @@ func (m *MatrixMerger) Add(from model.QueryResponseData) (model.ResultValue, err
 		if !sampleStreamExists {
 			// SampleStream doesn't exist => create new index
 			idxSampleStream = indexedSampleStream{
-				sampleStream: sampleStream,
-				values:       map[string]interface{}{},
-				index:        len(m.index),
+				values: map[pmodel.Time]pmodel.SampleValue{},
+				index:  len(m.index),
 			}
+			m.merged = append(m.merged, pmodel.SampleStream{Metric: sampleStream.Metric.Clone()})
+			// Add index
+			m.index[skey] = idxSampleStream
 		}
 		// Merge content (values)
 		for _, v := range sampleStream.Values {
-			vkey := v.String()
-			if _, valueExists := idxSampleStream.values[vkey]; !valueExists {
-				// Add value to the existing sampleStream, and mark it as existing in idxSampleStream.values
-				idxSampleStream.values[vkey] = nil
-				if sampleStreamExists {
-					idxSampleStream.sampleStream.Values = append(m.index[skey].sampleStream.Values, v)
-				}
-			} // Else: entry found => ignore duplicate
-		}
-		// Add or overwrite index
-		m.index[skey] = idxSampleStream
-		if !sampleStreamExists {
-			// SampleStream doesn't exist => append it
-			m.merged = append(m.merged, idxSampleStream.sampleStream)
-		} else {
-			m.merged[idxSampleStream.index] = idxSampleStream.sampleStream
+			if prev, valueExists := idxSampleStream.values[v.Timestamp]; valueExists {
+				// Add value to the existing sampleStream
+				idxSampleStream.values[v.Timestamp] = prev + v.Value
+			} else {
+				// New value
+				idxSampleStream.values[v.Timestamp] = v.Value
+			}
 		}
 	}
 	return m.merged, nil
 }
 
 func (m *MatrixMerger) Get() *model.AggregatedQueryResponse {
+	for idx, stream := range m.merged {
+		skey := stream.Metric.String()
+		if indexed, ok := m.index[skey]; ok {
+			values := []pmodel.SamplePair{}
+			for timestamp, value := range indexed.values {
+				values = append(values, pmodel.SamplePair{Timestamp: timestamp, Value: value})
+			}
+			sort.Slice(values, func(i, j int) bool { return values[i].Timestamp.Before(values[j].Timestamp) })
+			m.merged[idx].Values = values
+		}
+	}
 	return &model.AggregatedQueryResponse{
 		ResultType: model.ResultTypeMatrix,
 		Result:     m.merged,
