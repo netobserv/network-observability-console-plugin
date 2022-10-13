@@ -1,7 +1,7 @@
 import { Dropdown, DropdownItem, DropdownPosition, DropdownToggle } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { TopologyGroupTypes } from '../../model/topology';
+import { getAvailableGroups, TopologyGroupTypes } from '../../model/topology';
 import { MetricScopeOptions } from '../../model/metrics';
 
 export const GroupDropdown: React.FC<{
@@ -33,33 +33,6 @@ export const GroupDropdown: React.FC<{
     }
   };
 
-  const getAvailableGroups = React.useCallback(() => {
-    switch (scope) {
-      case MetricScopeOptions.HOST:
-        return [TopologyGroupTypes.NONE];
-      case MetricScopeOptions.NAMESPACE:
-        return [TopologyGroupTypes.NONE, TopologyGroupTypes.HOSTS];
-      case MetricScopeOptions.OWNER:
-        return [
-          TopologyGroupTypes.NONE,
-          TopologyGroupTypes.HOSTS,
-          TopologyGroupTypes.HOSTS_NAMESPACES,
-          TopologyGroupTypes.NAMESPACES
-        ];
-      case MetricScopeOptions.RESOURCE:
-      default:
-        return Object.values(TopologyGroupTypes);
-    }
-  }, [scope]);
-
-  //reset to last available group on scope change
-  React.useEffect(() => {
-    const availableGroups = getAvailableGroups();
-    if (!availableGroups.includes(selected)) {
-      setGroupType(availableGroups[availableGroups.length - 1]);
-    }
-  }, [getAvailableGroups, scope, selected, setGroupType]);
-
   return (
     <Dropdown
       data-test={id}
@@ -76,7 +49,7 @@ export const GroupDropdown: React.FC<{
         </DropdownToggle>
       }
       isOpen={groupDropdownOpen}
-      dropdownItems={getAvailableGroups().map(v => (
+      dropdownItems={getAvailableGroups(scope).map(v => (
         <DropdownItem
           data-test={v}
           id={v}
