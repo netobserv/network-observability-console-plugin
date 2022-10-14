@@ -11,7 +11,7 @@ import { FlowsMock, FlowsSample } from '../../__tests-data__/flows';
 import { Size } from '../../dropdowns/display-dropdown';
 import { ColumnsId } from '../../../utils/columns';
 import { LokiError } from '../../messages/loki-error';
-import { getFormattedDate } from '../../../utils/datetime';
+import { dateTimeMSFormatter, getFormattedDate } from '../../../utils/datetime';
 
 const errorStateQuery = `EmptyState[data-test="error-state"]`;
 const loadingContentsQuery = `Bullseye[data-test="loading-contents"]`;
@@ -71,7 +71,7 @@ describe('<NetflowTable />', () => {
     let expectedDate = new Date(FlowsSample[2].fields.TimeFlowEndMs);
     // table should be sorted by date asc by default
     expect(wrapper.find(NetflowTableRow).find(Td).at(timestampIdx).find('.datetime').at(0).text()).toBe(
-      getFormattedDate(expectedDate, 'MM/DD/YYYY HH:mm:ss.SSS')
+      getFormattedDate(expectedDate, dateTimeMSFormatter)
     );
 
     const button = wrapper.findWhere(node => {
@@ -81,7 +81,7 @@ describe('<NetflowTable />', () => {
     expectedDate = new Date(FlowsSample[1].fields.TimeFlowEndMs);
     // then should sort date desc on click
     expect(wrapper.find(NetflowTableRow).find(Td).at(timestampIdx).find('.datetime').at(0).text()).toBe(
-      getFormattedDate(expectedDate, 'MM/DD/YYYY HH:mm:ss.SSS')
+      getFormattedDate(expectedDate, dateTimeMSFormatter)
     );
 
     const expectedSrcAddress = FlowsSample[1].fields.SrcAddr;

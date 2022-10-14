@@ -1,11 +1,17 @@
 import { ResourceIcon, ResourceLink } from '@openshift-console/dynamic-plugin-sdk';
 import { Button, Tooltip } from '@patternfly/react-core';
-import { FilterIcon, TimesIcon } from '@patternfly/react-icons';
+import { FilterIcon, GlobeAmericasIcon, TimesIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { getFormattedDate } from '../../utils/datetime';
 import { FlowDirection, Record } from '../../api/ipfix';
 import { Column, ColumnsId, getFullColumnName } from '../../utils/columns';
+import {
+  dateFormatter,
+  getFormattedDate,
+  longDateFormatter,
+  timeMSFormatter,
+  utcDateTimeFormatter
+} from '../../utils/datetime';
 import { formatDurationAboveMillisecond } from '../../utils/duration';
 import { formatPort } from '../../utils/port';
 import { formatProtocol } from '../../utils/protocol';
@@ -128,14 +134,23 @@ export const RecordField: React.FC<{
       return emptyText();
     }
 
-    const dateText = getFormattedDate(date, longDates ? 'ddd ll' : 'MM/DD/YYYY');
-    const timeText = getFormattedDate(date, 'HH:mm:ss.SSS');
+    const fullDateText = getFormattedDate(date, utcDateTimeFormatter);
+    const dateText = getFormattedDate(date, longDates ? longDateFormatter : dateFormatter) + ',';
+    const timeText = getFormattedDate(date, timeMSFormatter);
     return singleContainer(
-      <div data-test={`field-date-${dateText}-${timeText}`}>
-        <div className={`datetime ${size}`}>
-          <span>{dateText}</span> <span className="text-muted">{timeText}</span>
-        </div>
-        <div className="record-field-tooltip">{`${dateText} ${timeText}`}</div>
+      <div data-test={`field-date-${dateText}-${timeText}`} className="record-field-date">
+        <GlobeAmericasIcon className="record-field-date-icon" />
+        <Tooltip
+          content={[
+            <span className="co-nowrap" key="co-timestamp">
+              {fullDateText}
+            </span>
+          ]}
+        >
+          <div className={`datetime ${size}`}>
+            <span>{dateText}</span> <span className="text-muted">{timeText}</span>
+          </div>
+        </Tooltip>
       </div>
     );
   };
