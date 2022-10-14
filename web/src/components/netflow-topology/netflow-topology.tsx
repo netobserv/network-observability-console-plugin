@@ -374,6 +374,7 @@ export const TopologyContent: React.FC<{
     if (
       !controller.hasGraph() ||
       prevOptions?.layout !== options.layout ||
+      prevOptions?.groupTypes !== options.groupTypes ||
       prevOptions.startCollapsed !== options.startCollapsed
     ) {
       resetGraph();

@@ -45,6 +45,25 @@ export enum TopologyGroupTypes {
   OWNERS = 'owners'
 }
 
+export const getAvailableGroups = (scope: MetricScopeOptions) => {
+  switch (scope) {
+    case MetricScopeOptions.HOST:
+      return [TopologyGroupTypes.NONE];
+    case MetricScopeOptions.NAMESPACE:
+      return [TopologyGroupTypes.NONE, TopologyGroupTypes.HOSTS];
+    case MetricScopeOptions.OWNER:
+      return [
+        TopologyGroupTypes.NONE,
+        TopologyGroupTypes.HOSTS,
+        TopologyGroupTypes.HOSTS_NAMESPACES,
+        TopologyGroupTypes.NAMESPACES
+      ];
+    case MetricScopeOptions.RESOURCE:
+    default:
+      return Object.values(TopologyGroupTypes);
+  }
+};
+
 export enum TopologyTruncateLength {
   OFF = 0,
   XS = 10,
