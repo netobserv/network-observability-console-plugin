@@ -65,11 +65,6 @@ export const ElementPanelContent: React.FC<{
     (d: NodeData) => {
       let infos: React.ReactElement | undefined;
       if (d.resourceKind && d.name) {
-        const resourceData = {
-          resourceKind: d.resourceKind,
-          namespace: d.namespace,
-          name: d.name
-        };
         infos = (
           <TextContent id="resourcelink" className="element-text-container grouped">
             <Text component={TextVariants.h4}>{d.resourceKind}</Text>
@@ -78,8 +73,8 @@ export const ElementPanelContent: React.FC<{
                 <ResourceLink inline={true} kind={d.resourceKind} name={d.name} namespace={d.namespace} />
               </FlexItem>
               <FlexItem>
-                <Button variant="link" aria-label="Filter" onClick={() => onFilter(resourceData)}>
-                  {isFiltered(resourceData) ? <TimesIcon /> : <FilterIcon />}
+                <Button variant="link" aria-label="Filter" onClick={() => onFilter(d)}>
+                  {isFiltered(d) ? <TimesIcon /> : <FilterIcon />}
                 </Button>
               </FlexItem>
             </Flex>
