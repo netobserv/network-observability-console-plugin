@@ -46,6 +46,24 @@ describe('groupFiltersMatchAll', () => {
     expect(grouped).toEqual('SrcK8S_Name=test1,test2&SrcPort=443|DstK8S_Name=test1,test2&DstPort=443');
   });
 
+  it('should generate AND groups, ORed by Src/Dst&!Src', () => {
+    const grouped = decodeURIComponent(
+      groupFiltersMatchAll([
+        {
+          def: findFilter(t, 'namespace')!,
+          values: [{ v: 'test1' }, { v: 'test2' }]
+        },
+        {
+          def: findFilter(t, 'port')!,
+          values: [{ v: '443' }]
+        }
+      ])
+    );
+    expect(grouped).toEqual(
+      'SrcK8S_Namespace=test1,test2&SrcPort=443|DstK8S_Namespace=test1,test2&SrcK8S_Namespace!=test1,test2&DstPort=443'
+    );
+  });
+
   it('should generate AND groups, ORed by Src/Dst, mixed with non-Src/Dst grouped', () => {
     const grouped = decodeURIComponent(
       groupFiltersMatchAll([

@@ -1,13 +1,6 @@
 import _ from 'lodash';
-import { Fields, Labels } from '../api/ipfix';
 
-type Field = keyof Fields | keyof Labels;
-export type FieldMapping = (values: FilterValue[]) => { key: Field; values: string[] }[];
-type FieldMatching = {
-  always?: FieldMapping;
-  ifSrc?: FieldMapping;
-  ifDst?: FieldMapping;
-};
+export type FiltersEncoder = (values: FilterValue[], matchAny: boolean, not?: boolean) => string;
 
 export enum FilterComponent {
   Autocomplete,
@@ -66,7 +59,7 @@ export interface FilterDefinition {
   hint?: string;
   examples?: string;
   placeholder?: string;
-  fieldMatching: FieldMatching;
+  encoders: { simpleEncode?: FiltersEncoder; common?: { srcEncode: FiltersEncoder; dstEncode: FiltersEncoder } };
 }
 
 export interface FilterValue {

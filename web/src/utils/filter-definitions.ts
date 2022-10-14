@@ -2,16 +2,16 @@ import * as _ from 'lodash';
 import { TFunction } from 'i18next';
 import { getPort } from '../utils/port';
 import { validateK8SName, validateStrictK8SName } from './label';
-import { joinResource, splitResource, SplitStage } from '../model/resource';
+import { joinResource, SplitResource, splitResource, SplitStage } from '../model/resource';
 import { validateIPFilter } from './ip';
 import { Fields, Labels } from '../api/ipfix';
 import {
   FilterId,
-  FieldMapping,
   FilterValue,
   FilterDefinition,
   FilterCategory,
-  FilterComponent
+  FilterComponent,
+  FiltersEncoder
 } from '../model/filters';
 import {
   findProtocolOption,
@@ -29,63 +29,92 @@ export const undefinedValue = '""';
 
 type Field = keyof Fields | keyof Labels;
 
-const singleFieldMapping = (field: Field) => {
-  const fm: FieldMapping = (values: FilterValue[]) => {
-    return [
-      {
-        key: field,
-        values: values.map(value => value.v)
-      }
-    ];
+const simpleFiltersEncoder = (field: Field): FiltersEncoder => {
+  return (values: FilterValue[], matchAny: boolean, not?: boolean) => {
+    return `${field}${not ? '!=' : '='}${values.map(value => value.v).join(',')}`;
   };
-  return fm;
 };
 
 // As owner / non-owner kind filters are mixed, they are disambiguated via this function
-const kindFieldMapping = (base: Field, owner: Field) => {
-  const fm: FieldMapping = (values: FilterValue[]) => {
-    return [
-      { key: base, values: values.map(value => value.v).filter(k => !isOwnerKind(k)) },
-      { key: owner, values: values.map(value => value.v).filter(isOwnerKind) }
-    ].filter(f => f.values.length > 0);
+const kindFiltersEncoder = (base: Field, owner: Field): FiltersEncoder => {
+  return (values: FilterValue[], matchAny: boolean) => {
+    const { baseValues, ownerValues } = _.groupBy(values, value => {
+      return isOwnerKind(value.v) ? 'ownerValues' : 'baseValues';
+    });
+    const filters: string[] = [];
+    if (baseValues && baseValues.length > 0) {
+      filters.push(`${base}=${baseValues.map(value => value.v).join(',')}`);
+    }
+    if (ownerValues && ownerValues.length > 0) {
+      filters.push(`${owner}=${ownerValues.map(value => value.v).join(',')}`);
+    }
+    return filters.join(matchAny ? '|' : '&');
   };
-  return fm;
 };
 
-const k8sResourceMapping = (kind: Field, ownerKind: Field, namespace: Field, name: Field, ownerName: Field) => {
-  const fm: FieldMapping = (values: FilterValue[]) => {
+const k8sResourceFiltersEncoder = (
+  kind: Field,
+  ownerKind: Field,
+  namespace: Field,
+  name: Field,
+  ownerName: Field
+): FiltersEncoder => {
+  return (values: FilterValue[], matchAny: boolean) => {
     const splitValues = values.map(value => splitResource(value.v));
-    return [
-      { key: kind, values: splitValues.filter(r => !isOwnerKind(r.kind)).map(r => `"${r.kind}"`) },
-      { key: ownerKind, values: splitValues.filter(r => isOwnerKind(r.kind)).map(r => `"${r.kind}"`) },
-      { key: namespace, values: splitValues.map(r => `"${r.namespace}"`) },
-      { key: name, values: splitValues.filter(r => !isOwnerKind(r.kind)).map(r => `"${r.name}"`) },
-      { key: ownerName, values: splitValues.filter(r => isOwnerKind(r.kind)).map(r => `"${r.name}"`) }
-    ].filter(f => f.values.length > 0);
+    return splitValues
+      .map(res => {
+        if (isOwnerKind(res.kind)) {
+          return k8sSingleResourceEncode(ownerKind, namespace, ownerName, res);
+        } else {
+          return k8sSingleResourceEncode(kind, namespace, name, res);
+        }
+      })
+      .join(matchAny ? '|' : '&');
   };
-  return fm;
 };
 
-const peers = (base: FilterDefinition, srcFields: FieldMapping, dstFields: FieldMapping): FilterDefinition[] => {
+const k8sSingleResourceEncode = (kind: Field, namespace: Field, name: Field, res: SplitResource) => {
+  return `${kind}="${res.kind}"&${namespace}="${res.namespace}"&${name}="${res.name}"`;
+};
+
+const peers = (
+  base: Omit<FilterDefinition, 'encoders'>,
+  srcEncoder: FiltersEncoder,
+  dstEncoder: FiltersEncoder
+): FilterDefinition[] => {
   return [
     {
       ...base,
       id: ('src_' + base.id) as FilterId,
       category: FilterCategory.Source,
-      fieldMatching: { always: srcFields }
+      encoders: { simpleEncode: srcEncoder }
     },
     {
       ...base,
       id: ('dst_' + base.id) as FilterId,
       category: FilterCategory.Destination,
-      fieldMatching: { always: dstFields }
+      encoders: { simpleEncode: dstEncoder }
     },
     {
       ...base,
       category: FilterCategory.Common,
-      fieldMatching: { ifSrc: srcFields, ifDst: dstFields }
+      encoders: { common: { srcEncode: srcEncoder, dstEncode: dstEncoder } }
     }
   ];
+};
+
+const peersWithOverlap = (
+  base: Omit<FilterDefinition, 'encoders'>,
+  srcEncoder: FiltersEncoder,
+  dstEncoder: FiltersEncoder
+): FilterDefinition[] => {
+  const defs = peers(base, srcEncoder, dstEncoder);
+  // Modify Common (defs[2]) filter encoder to exclude overlap between src and dest matches
+  defs[2].encoders.common!.dstEncode = (values: FilterValue[], matchAny: boolean) => {
+    // Stands for: ... OR (<dst filters> AND NOT <src filters>)
+    return dstEncoder(values, matchAny) + '&' + srcEncoder(values, matchAny, true);
+  };
+  return defs;
 };
 
 const isOwnerKind = (kind: string) => {
@@ -143,7 +172,7 @@ export const getFilterDefinitions = (t: TFunction): FilterDefinition[] => {
     const invalidMACMessage = t('Not a valid MAC address');
 
     filterDefinitions = [
-      ...peers(
+      ...peersWithOverlap(
         {
           id: 'namespace',
           name: t('Namespace'),
@@ -153,11 +182,10 @@ export const getFilterDefinitions = (t: TFunction): FilterDefinition[] => {
           getOptions: cap10(getNamespaceOptions),
           validate: k8sNameValidation,
           hint: k8sNameHint,
-          examples: k8sNameExamples,
-          fieldMatching: {}
+          examples: k8sNameExamples
         },
-        singleFieldMapping('SrcK8S_Namespace'),
-        singleFieldMapping('DstK8S_Namespace')
+        simpleFiltersEncoder('SrcK8S_Namespace'),
+        simpleFiltersEncoder('DstK8S_Namespace')
       ),
       ...peers(
         {
@@ -168,11 +196,10 @@ export const getFilterDefinitions = (t: TFunction): FilterDefinition[] => {
           getOptions: noOption,
           validate: k8sNameValidation,
           hint: k8sNameHint,
-          examples: k8sNameExamples,
-          fieldMatching: {}
+          examples: k8sNameExamples
         },
-        singleFieldMapping('SrcK8S_Name'),
-        singleFieldMapping('DstK8S_Name')
+        simpleFiltersEncoder('SrcK8S_Name'),
+        simpleFiltersEncoder('DstK8S_Name')
       ),
       ...peers(
         {
@@ -182,13 +209,12 @@ export const getFilterDefinitions = (t: TFunction): FilterDefinition[] => {
           autoCompleteAddsQuotes: true,
           category: FilterCategory.Common,
           getOptions: cap10(getKindOptions),
-          validate: rejectEmptyValue,
-          fieldMatching: {}
+          validate: rejectEmptyValue
         },
-        kindFieldMapping('SrcK8S_Type', 'SrcK8S_OwnerType'),
-        kindFieldMapping('DstK8S_Type', 'DstK8S_OwnerType')
+        kindFiltersEncoder('SrcK8S_Type', 'SrcK8S_OwnerType'),
+        kindFiltersEncoder('DstK8S_Type', 'DstK8S_OwnerType')
       ),
-      ...peers(
+      ...peersWithOverlap(
         {
           id: 'owner_name',
           name: t('Owner Name'),
@@ -197,11 +223,10 @@ export const getFilterDefinitions = (t: TFunction): FilterDefinition[] => {
           getOptions: noOption,
           validate: k8sNameValidation,
           hint: k8sNameHint,
-          examples: k8sNameExamples,
-          fieldMatching: {}
+          examples: k8sNameExamples
         },
-        singleFieldMapping('SrcK8S_OwnerName'),
-        singleFieldMapping('DstK8S_OwnerName')
+        simpleFiltersEncoder('SrcK8S_OwnerName'),
+        simpleFiltersEncoder('DstK8S_OwnerName')
       ),
       ...peers(
         {
@@ -251,11 +276,22 @@ export const getFilterDefinitions = (t: TFunction): FilterDefinition[] => {
         - ${t('Select kind first from suggestions')}
         - ${t('Then Select namespace from suggestions')}
         - ${t('Finally select name from suggestions')}
-        ${t('You can also directly specify a kind, namespace and name like pod.openshift.apiserver')}`,
-          fieldMatching: {}
+        ${t('You can also directly specify a kind, namespace and name like pod.openshift.apiserver')}`
         },
-        k8sResourceMapping('SrcK8S_Type', 'SrcK8S_OwnerType', 'SrcK8S_Namespace', 'SrcK8S_Name', 'SrcK8S_OwnerName'),
-        k8sResourceMapping('DstK8S_Type', 'DstK8S_OwnerType', 'DstK8S_Namespace', 'DstK8S_Name', 'DstK8S_OwnerName')
+        k8sResourceFiltersEncoder(
+          'SrcK8S_Type',
+          'SrcK8S_OwnerType',
+          'SrcK8S_Namespace',
+          'SrcK8S_Name',
+          'SrcK8S_OwnerName'
+        ),
+        k8sResourceFiltersEncoder(
+          'DstK8S_Type',
+          'DstK8S_OwnerType',
+          'DstK8S_Namespace',
+          'DstK8S_Name',
+          'DstK8S_OwnerName'
+        )
       ),
       ...peers(
         {
@@ -271,11 +307,10 @@ export const getFilterDefinitions = (t: TFunction): FilterDefinition[] => {
             return validateIPFilter(value) ? valid(value) : invalid(invalidIPMessage);
           },
           hint: ipHint,
-          examples: ipExamples,
-          fieldMatching: {}
+          examples: ipExamples
         },
-        singleFieldMapping('SrcAddr'),
-        singleFieldMapping('DstAddr')
+        simpleFiltersEncoder('SrcAddr'),
+        simpleFiltersEncoder('DstAddr')
       ),
       ...peers(
         {
@@ -298,11 +333,10 @@ export const getFilterDefinitions = (t: TFunction): FilterDefinition[] => {
           examples: `${t('Specify a single port following one of these rules:')}
         - ${t('A port number like 80, 21')}
         - ${t('A IANA name like HTTP, FTP')}
-        - ${t('Empty double quotes "" for undefined port')}`,
-          fieldMatching: {}
+        - ${t('Empty double quotes "" for undefined port')}`
         },
-        singleFieldMapping('SrcPort'),
-        singleFieldMapping('DstPort')
+        simpleFiltersEncoder('SrcPort'),
+        simpleFiltersEncoder('DstPort')
       ),
       ...peers(
         {
@@ -317,11 +351,10 @@ export const getFilterDefinitions = (t: TFunction): FilterDefinition[] => {
             }
             return /^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})/.test(value) ? valid(value) : invalid(invalidMACMessage);
           },
-          hint: t('Specify a single MAC address.'),
-          fieldMatching: {}
+          hint: t('Specify a single MAC address.')
         },
-        singleFieldMapping('SrcMac'),
-        singleFieldMapping('DstMac')
+        simpleFiltersEncoder('SrcMac'),
+        simpleFiltersEncoder('DstMac')
       ),
       ...peers(
         {
@@ -337,13 +370,12 @@ export const getFilterDefinitions = (t: TFunction): FilterDefinition[] => {
             return validateIPFilter(value) ? valid(value) : invalid(invalidIPMessage);
           },
           hint: ipHint,
-          examples: ipExamples,
-          fieldMatching: {}
+          examples: ipExamples
         },
-        singleFieldMapping('SrcK8S_HostIP'),
-        singleFieldMapping('DstK8S_HostIP')
+        simpleFiltersEncoder('SrcK8S_HostIP'),
+        simpleFiltersEncoder('DstK8S_HostIP')
       ),
-      ...peers(
+      ...peersWithOverlap(
         {
           id: 'host_name',
           name: t('Node Name'),
@@ -352,11 +384,10 @@ export const getFilterDefinitions = (t: TFunction): FilterDefinition[] => {
           getOptions: noOption,
           validate: k8sNameValidation,
           hint: k8sNameHint,
-          examples: k8sNameExamples,
-          fieldMatching: {}
+          examples: k8sNameExamples
         },
-        singleFieldMapping('SrcK8S_HostName'),
-        singleFieldMapping('DstK8S_HostName')
+        simpleFiltersEncoder('SrcK8S_HostName'),
+        simpleFiltersEncoder('DstK8S_HostName')
       ),
       {
         id: 'protocol',
@@ -384,7 +415,7 @@ export const getFilterDefinitions = (t: TFunction): FilterDefinition[] => {
         - ${t('A protocol number like 6, 17')}
         - ${t('A IANA name like TCP, UDP')}
         - ${t('Empty double quotes "" for undefined protocol')}`,
-        fieldMatching: { always: singleFieldMapping('Proto') }
+        encoders: { simpleEncode: simpleFiltersEncoder('Proto') }
       }
     ];
   }

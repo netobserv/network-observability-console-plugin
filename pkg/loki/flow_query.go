@@ -93,9 +93,12 @@ func (q *FlowQueryBuilder) addFilter(filter filters.Match) error {
 			q.addLabelRegex(filter.Key, values, filter.Not)
 		}
 	} else if fields.IsIP(filter.Key) {
+		if filter.Not {
+			return fmt.Errorf("'not' operation not allowed in IP filters")
+		}
 		q.addIPFilters(filter.Key, values)
 	} else {
-		q.addLineFilters(filter.Key, values)
+		q.addLineFilters(filter.Key, values, filter.Not)
 	}
 
 	return nil
@@ -133,12 +136,13 @@ func (q *FlowQueryBuilder) addLabelRegex(key string, values []string, not bool) 
 	}
 }
 
-func (q *FlowQueryBuilder) addLineFilters(key string, values []string) {
+func (q *FlowQueryBuilder) addLineFilters(key string, values []string, not bool) {
 	if len(values) == 0 {
 		return
 	}
 	lf := lineFilter{
 		key: key,
+		not: not,
 	}
 	isNumeric := fields.IsNumeric(key)
 	emptyMatches := false
@@ -199,9 +203,7 @@ func (q *FlowQueryBuilder) appendLabels(sb *strings.Builder) {
 
 func (q *FlowQueryBuilder) appendLineFilters(sb *strings.Builder) {
 	for _, lf := range q.lineFilters {
-		sb.WriteString("|~`")
 		lf.writeInto(sb)
-		sb.WriteByte('`')
 	}
 
 	for _, glf := range q.extraLineFilters {

@@ -23,11 +23,6 @@ export interface FlowQuery {
   step?: string;
 }
 
-// All filters in AND-group (ie. usually for "match all") are set in a list of [key-values]
-type AndGroup = { key: string; values: string[]; not?: boolean }[];
-// All filters in OR-group (ie. usually for "match any") are set as elements of AndGroup array
-type OrGroup = AndGroup[];
-
 // E.g.: OrGroup=[AndGroup={foo=a,bar=b}] is match all: foo=a AND bar=b
 // OrGroup=[AndGroup={foo=a},AndGroup={bar=b}] is match any: foo=a OR bar=b
 // Things get more complicated with the Src/Dst group split,
@@ -39,48 +34,38 @@ type OrGroup = AndGroup[];
 // Match all: put all filters in a single AndGroup, except if there's a Src/Dst group split found
 // in which case there will be Src-AndGroup OR Dst-AndGroup
 export const groupFiltersMatchAll = (filters: Filter[]): string => {
-  const srcMatch: AndGroup = [];
-  const dstMatch: AndGroup = [];
+  const srcMatch: string[] = [];
+  const dstMatch: string[] = [];
   let needSrcDstSplit = false;
   filters.forEach(f => {
-    if (f.def.fieldMatching.always) {
+    if (f.def.encoders.simpleEncode) {
       // Filters here are always applied, regardless Src/Dst group split
-      f.def.fieldMatching.always(f.values).forEach(filter => {
-        srcMatch.push(filter);
-        dstMatch.push(filter);
-      });
-    } else {
+      const str = f.def.encoders.simpleEncode(f.values, false);
+      srcMatch.push(str);
+      dstMatch.push(str);
+    } else if (f.def.encoders.common) {
       needSrcDstSplit = true;
       // Filters here are applied for their Src/Dst group split
-      f.def.fieldMatching.ifSrc!(f.values).forEach(filter => {
-        srcMatch.push(filter);
-        dstMatch.push({ ...filter, not: true });
-      });
-      f.def.fieldMatching.ifDst!(f.values).forEach(filter => {
-        dstMatch.push(filter);
-      });
+      const src = f.def.encoders.common.srcEncode(f.values, false);
+      srcMatch.push(src);
+      const dst = f.def.encoders.common.dstEncode(f.values, false);
+      dstMatch.push(dst);
     }
   });
-  return encodeFilters(needSrcDstSplit ? [srcMatch, dstMatch] : [srcMatch]);
+  const joined = needSrcDstSplit ? `${srcMatch.join('&')}|${dstMatch.join('&')}` : srcMatch.join('&');
+  console.log(joined);
+  return encodeURIComponent(joined);
 };
 
 export const groupFiltersMatchAny = (filters: Filter[]): string => {
-  const orGroup: OrGroup = [];
+  const orGroup: string[] = [];
   filters.forEach(f => {
-    if (f.def.fieldMatching.always) {
-      orGroup.push(f.def.fieldMatching.always(f.values));
-    } else {
-      orGroup.push(f.def.fieldMatching.ifSrc!(f.values));
-      orGroup.push(f.def.fieldMatching.ifDst!(f.values));
+    if (f.def.encoders.simpleEncode) {
+      orGroup.push(f.def.encoders.simpleEncode(f.values, true));
+    } else if (f.def.encoders.common) {
+      orGroup.push(f.def.encoders.common.srcEncode(f.values, true));
+      orGroup.push(f.def.encoders.common.dstEncode(f.values, true));
     }
   });
-  return encodeFilters(orGroup);
-};
-
-const encodeFilters = (filters: OrGroup): string => {
-  // Example of output: foo=a,b&bar=c|baz=d (url-encoded)
-  const str = filters
-    .map(group => group.map(filter => `${filter.key}${filter.not ? '!' : ''}=${filter.values.join(',')}`).join('&'))
-    .join('|');
-  return encodeURIComponent(str);
+  return encodeURIComponent(orGroup.join('|'));
 };

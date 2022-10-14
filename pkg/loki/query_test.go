@@ -43,3 +43,44 @@ func TestFlowQuery_AddNotLabelFilters(t *testing.T) {
 	urlQuery := query.Build()
 	assert.Equal(t, `/loki/api/v1/query_range?query={app="netobserv-flowcollector",foo="bar",flis!="flas"}`, urlQuery)
 }
+
+func backtick(str string) string {
+	return "`" + str + "`"
+}
+
+func TestFlowQuery_AddLineFilterMultipleValues(t *testing.T) {
+	lokiURL, err := url.Parse("/")
+	require.NoError(t, err)
+	cfg := NewConfig(lokiURL, lokiURL, time.Second, "", "", false, false, "", false, ".*-ingress$", []string{})
+	query := NewFlowQueryBuilderWithDefaults(&cfg)
+	err = query.addFilter(filters.NewMatch("foo", `bar,baz`))
+	require.NoError(t, err)
+	urlQuery := query.Build()
+	assert.Equal(t, `/loki/api/v1/query_range?query={app="netobserv-flowcollector"}|~`+backtick(`foo":"(?i)[^"]*bar.*"|foo":"(?i)[^"]*baz.*"`), urlQuery)
+}
+
+func TestFlowQuery_AddNotLineFilters(t *testing.T) {
+	lokiURL, err := url.Parse("/")
+	require.NoError(t, err)
+	cfg := NewConfig(lokiURL, lokiURL, time.Second, "", "", false, false, "", false, ".*-ingress$", []string{})
+	query := NewFlowQueryBuilderWithDefaults(&cfg)
+	err = query.addFilter(filters.NewMatch("foo", `"bar"`))
+	require.NoError(t, err)
+	err = query.addFilter(filters.NewNotMatch("flis", `"flas"`))
+	require.NoError(t, err)
+	urlQuery := query.Build()
+	assert.Equal(t, `/loki/api/v1/query_range?query={app="netobserv-flowcollector"}|~`+backtick(`foo":"bar"`)+`!~`+backtick(`flis":"flas"`), urlQuery)
+}
+
+func TestFlowQuery_AddLineFiltersWithEmpty(t *testing.T) {
+	lokiURL, err := url.Parse("/")
+	require.NoError(t, err)
+	cfg := NewConfig(lokiURL, lokiURL, time.Second, "", "", false, false, "", false, ".*-ingress$", []string{})
+	query := NewFlowQueryBuilderWithDefaults(&cfg)
+	err = query.addFilter(filters.NewMatch("foo", `"bar"`))
+	require.NoError(t, err)
+	err = query.addFilter(filters.NewMatch("flis", `""`))
+	require.NoError(t, err)
+	urlQuery := query.Build()
+	assert.Equal(t, `/loki/api/v1/query_range?query={app="netobserv-flowcollector"}|~`+backtick(`foo":"bar"`)+`|json|flis=""`, urlQuery)
+}
