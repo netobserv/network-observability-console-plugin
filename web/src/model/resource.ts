@@ -3,7 +3,7 @@ export enum SplitStage {
   PartialNamespace,
   Completed
 }
-type SplitResource = { kind: string; namespace: string; name: string; stage: SplitStage };
+export type SplitResource = { kind: string; namespace: string; name: string; stage: SplitStage };
 
 const isNode = (kind: string) => kind.toLowerCase() === 'node';
 
