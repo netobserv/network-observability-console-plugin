@@ -293,7 +293,9 @@ export const SummaryPanelContent: React.FC<{
             )}
           </Text>
         )}
-        <Text component={TextVariants.h3}>{t('Results')}</Text>
+        <Text component={TextVariants.h3}>{`${t('Results')} ${
+          !_.isEmpty(metrics) && _.isEmpty(appMetrics) ? t('(top {{count}} metrics)', { count: limit }) : ''
+        }`}</Text>
         <QuerySummaryContent
           className="summary-container-grouped"
           direction="column"
