@@ -332,16 +332,18 @@ export const NetflowTraffic: React.FC<{
             .then(result => {
               setFlows(result.records);
               setStats(result.stats);
-              setLastRefresh(new Date());
             })
             .catch(err => {
               setFlows([]);
               setError(getHTTPErrorDetails(err));
-              setLastRefresh(new Date());
               setWarningMessage(undefined);
             })
             .finally(() => {
+              //clear metrics
+              setMetrics([]);
+              setAppMetrics([]);
               setLoading(false);
+              setLastRefresh(new Date());
             })
         );
         break;
@@ -374,7 +376,10 @@ export const NetflowTraffic: React.FC<{
               setWarningMessage(undefined);
             })
             .finally(() => {
+              //clear flows
+              setFlows([]);
               setLoading(false);
+              setLastRefresh(new Date());
             })
         );
         break;
@@ -682,8 +687,10 @@ export const NetflowTraffic: React.FC<{
           flows={flows}
           metrics={metrics}
           appMetrics={appMetrics}
+          metricType={metricType}
           stats={stats}
           appStats={appStats}
+          limit={limit}
           lastRefresh={lastRefresh}
           range={range}
           onClose={() => setShowQuerySummary(false)}
@@ -871,19 +878,17 @@ export const NetflowTraffic: React.FC<{
           <DrawerContentBody id="drawerBody">{pageContent()}</DrawerContentBody>
         </DrawerContent>
       </Drawer>
-      {selectedViewId === 'table' && (
-        <QuerySummary
-          flows={flows}
-          //TODO: NETOBSERV-591 QuerySummary from metrics
-          metrics={metrics}
-          appMetrics={appMetrics}
-          stats={stats}
-          appStats={appStats}
-          lastRefresh={lastRefresh}
-          range={range}
-          toggleQuerySummary={() => onToggleQuerySummary(!isShowQuerySummary)}
-        />
-      )}
+      <QuerySummary
+        flows={flows}
+        metrics={metrics}
+        appMetrics={appMetrics}
+        metricType={metricType}
+        stats={stats}
+        appStats={appStats}
+        lastRefresh={lastRefresh}
+        range={range}
+        toggleQuerySummary={() => onToggleQuerySummary(!isShowQuerySummary)}
+      />
       <TimeRangeModal
         id="time-range-modal"
         isModalOpen={isTRModalOpen}
