@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { clearLocalStorage } from '../utils/local-storage-hook';
 import NetflowTraffic from './netflow-traffic';
 
 type Props = {};
@@ -22,6 +23,7 @@ class NetflowTrafficParent extends React.Component<Props, State> {
     console.error('Netobserv plugin error. This is likely a bug, this error should be caught closer to its source.');
     console.error('Error:', error, 'errorInfo:', errorInfo);
     this.setState({ error: error });
+    clearLocalStorage();
   }
 
   render() {

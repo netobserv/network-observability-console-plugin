@@ -9,7 +9,6 @@ const filtersSeparator = ';';
 const filterKVSeparator = '=';
 const filterValuesSeparator = ',';
 export const defaultTimeRange = 300;
-const defaultLimit = 100;
 export const defaultReporter: Reporter = 'destination';
 //TODO: improve performances before applying 'application' layer by default
 export const defaultLayer: Layer = 'both';
@@ -43,8 +42,8 @@ export const getLayerFromURL = (): Layer => {
   return (getURLParam(URLParam.Layer) as Layer | null) || defaultLayer;
 };
 
-export const getLimitFromURL = (): number => {
-  return getURLParamAsNumber(URLParam.Limit) || defaultLimit;
+export const getLimitFromURL = (fallback: number): number => {
+  return getURLParamAsNumber(URLParam.Limit) || fallback;
 };
 
 export const getMatchFromURL = (): Match => {
