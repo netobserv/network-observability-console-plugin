@@ -105,3 +105,62 @@ If you had previously used the console with the plugin installed, you may need t
 ```bash
 oc delete pods -n openshift-console -l app=console
 ```
+
+## Standalone console
+
+To build a standalone console (ie. not tied to the OpenShift Console as a plugin), simply run these steps:
+
+```bash
+make build-standalone
+```
+
+If you have a running cluster with NetObserv and Loki installed, you can serve the standalone console using a port-forwarded Loki:
+
+```bash
+kubectl port-forward service/loki 3100:3100
+make start-standalone
+```
+
+Alternatively, you can start it without Loki/NetObserv, using mocked flows:
+
+```bash
+make serve-mock
+```
+
+Both options will start the standalone console server on http://localhost:9001/.
+
+Note: there are currently no provided build of the standalone mode. If you're interested contributing, please [see this issue](https://github.com/netobserv/network-observability-console-plugin/issues/200).
+
+Also note: this will provide a single page showing the main Netflow Traffic page. However, the OpenShift Console integration goes further, by providing more views directly integrated in other pages. These views obviously cannot be rendered without the OpenShift Console.
+
+## Cypress tests
+
+[Cypress](https://www.cypress.io/) is a framework for running frontend integration tests. Our tests are defined in [cypress/integration](./web/cypress/integration/).
+
+You can run the cypress tests either with the OpenShift Console + NetObserv as a plugin, or with the NetObserv console deployed as a standalone as documented above.
+
+### With OpenShift Console and NetObserv as a plugin
+
+1. Start your [dev environment](#development-environment) as documented above, including port-forwarding Loki. You should have the console accessible and working on http://localhost:9000/netflow-traffic
+
+2. Start cypress:
+
+```bash
+make cypress
+```
+
+3. Click on "Run N integration specs"
+
+### With the standalone mode
+
+1. Start the [standalone mode](#standalone-console) as documented above. You should have the console accessible and working on http://localhost:9001
+
+2. Edit [consts.js](./web/cypress/support/const.js) to set the URL to "http://localhost:9001".
+
+3. Start cypress:
+
+```bash
+make cypress
+```
+
+4. Click on "Run N integration specs"
