@@ -185,14 +185,7 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
                     data-test={`drawer-field-${c.id}`}
                   >
                     <Text component={TextVariants.h4}>{c.name}</Text>
-                    <RecordField
-                      flow={record}
-                      column={c}
-                      filter={getFilter(c)}
-                      size={'s'}
-                      useLinks={true}
-                      longDates={true}
-                    />
+                    <RecordField flow={record} column={c} filter={getFilter(c)} size={'s'} useLinks={true} />
                   </TextContent>
                 ))}
               </div>

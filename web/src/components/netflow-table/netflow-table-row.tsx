@@ -41,7 +41,7 @@ const NetflowTableRow: React.FC<{
               key={c.id}
               style={{ height: '100%', width: `${Math.floor((100 * c.width) / tableWidth)}%` }}
             >
-              {<RecordField flow={flow} column={c} size={size} useLinks={false} longDates={false}></RecordField>}
+              {<RecordField flow={flow} column={c} size={size} useLinks={false}></RecordField>}
             </Td>
           ))}
       </Tr>

@@ -5,13 +5,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { FlowDirection, Record } from '../../api/ipfix';
 import { Column, ColumnsId, getFullColumnName } from '../../utils/columns';
-import {
-  dateFormatter,
-  getFormattedDate,
-  longDateFormatter,
-  timeMSFormatter,
-  utcDateTimeFormatter
-} from '../../utils/datetime';
+import { dateFormatter, getFormattedDate, timeMSFormatter, utcDateTimeFormatter } from '../../utils/datetime';
 import { formatDurationAboveMillisecond } from '../../utils/duration';
 import { formatPort } from '../../utils/port';
 import { formatProtocol } from '../../utils/protocol';
@@ -28,9 +22,8 @@ export const RecordField: React.FC<{
   column: Column;
   size?: Size;
   useLinks: boolean;
-  longDates: boolean;
   filter?: RecordFieldFilter;
-}> = ({ flow, column, size, filter, useLinks, longDates }) => {
+}> = ({ flow, column, size, filter, useLinks }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   const onMouseOver = (event: React.MouseEvent<HTMLDivElement, MouseEvent>, className: string) => {
@@ -135,7 +128,7 @@ export const RecordField: React.FC<{
     }
 
     const fullDateText = getFormattedDate(date, utcDateTimeFormatter);
-    const dateText = getFormattedDate(date, longDates ? longDateFormatter : dateFormatter) + ',';
+    const dateText = getFormattedDate(date, dateFormatter) + ',';
     const timeText = getFormattedDate(date, timeMSFormatter);
     return singleContainer(
       <div data-test={`field-date-${dateText}-${timeText}`} className="record-field-date">

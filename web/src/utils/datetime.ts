@@ -41,13 +41,6 @@ export const getTimeRangeOptions = (t: TFunction) => {
   };
 };
 
-export const longDateFormatter = new Intl.DateTimeFormat(getLanguage(), {
-  weekday: 'short',
-  month: 'short',
-  day: 'numeric',
-  year: 'numeric'
-});
-
 export const dateFormatter = new Intl.DateTimeFormat(getLanguage(), {
   month: 'short',
   day: 'numeric',
