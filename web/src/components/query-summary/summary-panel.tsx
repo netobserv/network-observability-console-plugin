@@ -27,6 +27,7 @@ import { formatProtocol } from '../../utils/protocol';
 import { compareIPs } from '../../utils/ip';
 import { Stats, TopologyMetrics } from '../../api/loki';
 import './summary-panel.css';
+import { MetricType } from '../../model/flow-query';
 
 type TypeCardinality = {
   type: string;
@@ -40,10 +41,14 @@ type K8SObjectCardinality = {
 
 export const SummaryPanelContent: React.FC<{
   flows: Record[] | undefined;
+  metrics: TopologyMetrics[] | undefined;
+  appMetrics: TopologyMetrics[] | undefined;
+  metricType: MetricType;
   stats: Stats | undefined;
+  limit: number;
   range: number | TimeRange;
   lastRefresh: Date | undefined;
-}> = ({ flows, stats, range, lastRefresh }) => {
+}> = ({ flows, metrics, appMetrics, metricType, stats, limit, range, lastRefresh }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [expanded, setExpanded] = React.useState<string>('');
 
@@ -114,11 +119,14 @@ export const SummaryPanelContent: React.FC<{
   };
 
   const cardinalityContent = () => {
-    if (flows && flows.length) {
-      //regroup all k8s objects per type + namespace
-      const typesCardinality: TypeCardinality[] = [];
-      const namespaces: string[] = [];
+    //regroup all k8s objects per type + namespace
+    const namespaces: string[] = [];
+    const typesCardinality: TypeCardinality[] = [];
+    let addresses: string[] = [];
+    let ports: number[] = [];
+    let protocols: number[] = [];
 
+    if (flows && flows.length) {
       //list all types
       const types = Array.from(new Set(flows.flatMap(f => [f.fields.SrcK8S_Type, f.fields.DstK8S_Type])));
       types
@@ -177,51 +185,107 @@ export const SummaryPanelContent: React.FC<{
         });
       }
 
-      const addresses = Array.from(new Set(flows.map(f => f.fields.SrcAddr).concat(flows.map(f => f.fields.DstAddr))));
-      const ports = Array.from(new Set(flows.map(f => f.fields.SrcPort).concat(flows.map(f => f.fields.DstPort))));
-      const protocols = Array.from(new Set(flows.map(f => f.fields.Proto)));
+      addresses = Array.from(new Set(flows.map(f => f.fields.SrcAddr).concat(flows.map(f => f.fields.DstAddr))));
+      ports = Array.from(new Set(flows.map(f => f.fields.SrcPort).concat(flows.map(f => f.fields.DstPort))));
+      protocols = Array.from(new Set(flows.map(f => f.fields.Proto)));
+    } else if (metrics && metrics.length) {
+      function manageTypeCardinality(hostName?: string, namespace?: string, type?: string, name?: string) {
+        if (namespace && !namespaces.includes(namespace)) {
+          namespaces.push(namespace);
+        }
 
-      return (
-        <Accordion id="cardinality-accordion">
-          {accordionItem(
-            'addresses',
-            t('{{count}} IP(s)', { count: addresses.length }),
-            listCardinalityContent(addresses, compareIPs)
-          )}
-          {typesCardinality.map(tc =>
-            accordionItem(
-              tc.type,
-              `${tc.objects.map(o => o.names.length).reduce((a, b) => a + b, 0)} ${tc.type}(s)`,
-              typeCardinalityContent(tc)
-            )
-          )}
-          {accordionItem(
-            'ports',
-            t('{{count}} Port(s)', { count: ports.length }),
-            listCardinalityContent(
-              //sort ports before format to keep number order
-              ports.sort((p1, p2) => comparePorts(p1, p2)).map(p => formatPort(p))
-            )
-          )}
-          {accordionItem(
-            'protocols',
-            t('{{count}} Protocol(s)', { count: protocols.length }),
-            listCardinalityContent(
-              protocols.map(p => formatProtocol(p)),
-              compareStrings
-            )
-          )}
-        </Accordion>
-      );
-    } else {
-      return <></>;
+        if (type) {
+          let tc = typesCardinality.find(t => t.type === type);
+          if (!tc) {
+            tc = { type: type, objects: [] };
+            typesCardinality.push(tc);
+          }
+
+          let object = tc.objects.find(o => o.namespace === namespace);
+          if (!object) {
+            object = { names: [], namespace: namespace };
+            tc.objects.push(object);
+          }
+
+          if (name && !object.names.includes(name)) {
+            object.names.push(name);
+          }
+        }
+
+        if (hostName) {
+          manageTypeCardinality('', '', 'Node', hostName);
+        }
+      }
+
+      metrics.forEach(m => {
+        console.log('cardinality', m);
+        manageTypeCardinality(m.source.hostName, m.source.namespace, m.source.type, m.source.name);
+        manageTypeCardinality(m.destination.hostName, m.destination.namespace, m.destination.type, m.destination.name);
+      });
+
+      addresses = Array.from(
+        new Set(metrics.map(m => m.source.addr).concat(metrics.map(m => m.destination.addr)))
+      ).filter(v => !_.isEmpty(v)) as string[];
     }
+
+    if (!_.isEmpty(namespaces)) {
+      typesCardinality.push({
+        type: 'Namespace',
+        objects: [{ names: namespaces }]
+      });
+    }
+
+    return addresses.length || typesCardinality.length || ports.length || protocols.length ? (
+      <TextContent className="summary-text-container">
+        <Text component={TextVariants.h3}>{`${t('Cardinality')} ${
+          !_.isEmpty(metrics) ? t('(top {{count}} metrics)', { count: limit }) : ''
+        }`}</Text>
+        <Accordion id="cardinality-accordion">
+          {addresses.length
+            ? accordionItem(
+                'addresses',
+                t('{{count}} IP(s)', { count: addresses.length }),
+                listCardinalityContent(addresses, compareIPs)
+              )
+            : undefined}
+          {typesCardinality.length
+            ? typesCardinality.map(tc =>
+                accordionItem(
+                  tc.type,
+                  `${tc.objects.map(o => o.names.length).reduce((a, b) => a + b, 0)} ${tc.type}(s)`,
+                  typeCardinalityContent(tc)
+                )
+              )
+            : undefined}
+          {ports.length
+            ? accordionItem(
+                'ports',
+                t('{{count}} Port(s)', { count: ports.length }),
+                listCardinalityContent(
+                  //sort ports before format to keep number order
+                  ports.sort((p1, p2) => comparePorts(p1, p2)).map(p => formatPort(p))
+                )
+              )
+            : undefined}
+          {protocols.length
+            ? accordionItem(
+                'protocols',
+                t('{{count}} Protocol(s)', { count: protocols.length }),
+                listCardinalityContent(
+                  protocols.map(p => formatProtocol(p)),
+                  compareStrings
+                )
+              )
+            : undefined}
+        </Accordion>
+      </TextContent>
+    ) : undefined;
   };
 
   return (
     <>
       <TextContent className="summary-text-container">
-        {stats?.limitReached && (
+        {!_.isEmpty(flows) && stats?.limitReached && (
           <Text component={TextVariants.p}>
             {t(
               // eslint-disable-next-line max-len
@@ -229,20 +293,23 @@ export const SummaryPanelContent: React.FC<{
             )}
           </Text>
         )}
-        <Text component={TextVariants.h3}>{t('Results')}</Text>
+        <Text component={TextVariants.h3}>{`${t('Results')} ${
+          !_.isEmpty(metrics) && _.isEmpty(appMetrics) ? t('(top {{count}} metrics)', { count: limit }) : ''
+        }`}</Text>
         <QuerySummaryContent
           className="summary-container-grouped"
           direction="column"
-          flows={flows || []}
+          flows={flows}
+          metrics={metrics}
+          appMetrics={appMetrics}
+          metricType={metricType}
           limitReached={stats?.limitReached || false}
           range={range}
           lastRefresh={lastRefresh}
         />
       </TextContent>
-      <TextContent className="summary-text-container">
-        <Text component={TextVariants.h3}>{t('Cardinality')}</Text>
-        {cardinalityContent()}
-      </TextContent>
+
+      {cardinalityContent()}
       {/*TODO: NETOBSERV-225 for extra stats on query*/}
     </>
   );
@@ -253,12 +320,14 @@ export const SummaryPanel: React.FC<{
   flows: Record[] | undefined;
   metrics: TopologyMetrics[] | undefined;
   appMetrics: TopologyMetrics[] | undefined;
+  metricType: MetricType;
   stats: Stats | undefined;
   appStats: Stats | undefined;
+  limit: number;
   range: number | TimeRange;
   lastRefresh: Date | undefined;
   id?: string;
-}> = ({ flows, stats, range, lastRefresh, id, onClose }) => {
+}> = ({ flows, metrics, appMetrics, metricType, stats, limit, range, lastRefresh, id, onClose }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   return (
@@ -277,7 +346,16 @@ export const SummaryPanel: React.FC<{
         </DrawerActions>
       </DrawerHead>
       <DrawerPanelBody>
-        <SummaryPanelContent flows={flows} stats={stats} range={range} lastRefresh={lastRefresh} />
+        <SummaryPanelContent
+          flows={flows}
+          metrics={metrics}
+          appMetrics={appMetrics}
+          metricType={metricType}
+          stats={stats}
+          limit={limit}
+          range={range}
+          lastRefresh={lastRefresh}
+        />
       </DrawerPanelBody>
     </DrawerPanelContent>
   );

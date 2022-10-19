@@ -1,6 +1,7 @@
 import { Accordion, AccordionItem, DrawerCloseButton } from '@patternfly/react-core';
 import { mount, shallow } from 'enzyme';
 import * as React from 'react';
+import { MetricType } from '../../../model/flow-query';
 import { FlowsSample } from '../../../components/__tests-data__/flows';
 import SummaryPanel, { SummaryPanelContent } from '../summary-panel';
 
@@ -10,11 +11,13 @@ describe('<SummaryPanel />', () => {
     flows: FlowsSample,
     metrics: undefined,
     appMetrics: undefined,
+    metricType: 'bytes' as MetricType,
     stats: {
       limitReached: false,
       numQueries: 1
     },
     appStats: undefined,
+    limit: 5,
     range: 300,
     lastRefresh: new Date(),
     id: 'summary-panel'

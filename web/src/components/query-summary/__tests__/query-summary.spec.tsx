@@ -1,5 +1,6 @@
 import { mount, shallow } from 'enzyme';
 import * as React from 'react';
+import { MetricType } from '../../../model/flow-query';
 import { FlowsSample } from '../../../components/__tests-data__/flows';
 import { QuerySummary, QuerySummaryContent } from '../query-summary';
 
@@ -11,6 +12,7 @@ describe('<QuerySummary />', () => {
     flows: FlowsSample,
     metrics: undefined,
     appMetrics: undefined,
+    metricType: 'bytes' as MetricType,
     stats: {
       limitReached: false,
       numQueries: 1
