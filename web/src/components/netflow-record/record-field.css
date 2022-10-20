@@ -89,3 +89,13 @@
 .child-arrow {
   margin: 0 5px 0 5px;
 }
+
+.record-field-date {
+  display: flex;
+  align-items: baseline;
+}
+
+.record-field-date-icon {
+  flex-shrink: 0;
+  margin-right: 5px;
+}

@@ -1,6 +1,6 @@
 import { TFunction } from 'i18next';
-import moment from 'moment';
 import { CUSTOM_TIME_RANGE_KEY } from '../components/dropdowns/time-range-dropdown';
+import { getLanguage } from './language';
 
 const zeroPad = (number: number) => (number < 10 ? `0${number}` : number);
 
@@ -41,8 +41,53 @@ export const getTimeRangeOptions = (t: TFunction) => {
   };
 };
 
-export const getFormattedDate = (date: Date, format = 'llll') => {
-  return moment(date).format(format);
+export const dateFormatter = new Intl.DateTimeFormat(getLanguage(), {
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric'
+});
+
+export const timeMSFormatter = new Intl.DateTimeFormat(getLanguage(), {
+  hour: 'numeric',
+  minute: 'numeric',
+  second: 'numeric',
+  fractionalSecondDigits: 3
+});
+
+export const dateTimeFormatter = new Intl.DateTimeFormat(getLanguage(), {
+  month: 'short',
+  day: 'numeric',
+  hour: 'numeric',
+  minute: 'numeric',
+  second: 'numeric',
+  year: 'numeric'
+});
+
+export const dateTimeMSFormatter = new Intl.DateTimeFormat(getLanguage(), {
+  month: 'short',
+  day: 'numeric',
+  hour: 'numeric',
+  minute: 'numeric',
+  second: 'numeric',
+  fractionalSecondDigits: 3,
+  year: 'numeric'
+});
+
+export const utcDateTimeFormatter = new Intl.DateTimeFormat(getLanguage(), {
+  weekday: 'short',
+  month: 'short',
+  day: 'numeric',
+  hour: 'numeric',
+  minute: 'numeric',
+  second: 'numeric',
+  fractionalSecondDigits: 3,
+  year: 'numeric',
+  timeZone: 'UTC',
+  timeZoneName: 'short'
+});
+
+export const getFormattedDate = (date: Date, format = dateTimeFormatter) => {
+  return format.format(date);
 };
 
 export const rangeToSeconds = (range: TimeRange | number): number => {
