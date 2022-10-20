@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { SortByDirection, TableComposable, Tbody } from '@patternfly/react-table';
 import {
   Bullseye,
-  Button,
   EmptyState,
   EmptyStateBody,
   EmptyStateIcon,
@@ -34,11 +33,11 @@ const NetflowTable: React.FC<{
   columns: Column[];
   size: Size;
   onSelect: (record?: Record) => void;
-  clearFilters: () => void;
   loading?: boolean;
   error?: string;
+  filterActionLinks: JSX.Element;
   isDark?: boolean;
-}> = ({ flows, selectedRecord, columns, error, loading, size, onSelect, clearFilters, isDark }) => {
+}> = ({ flows, selectedRecord, columns, error, loading, size, onSelect, filterActionLinks, isDark }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   //default to 300 to allow content to be rendered in tests
@@ -230,10 +229,8 @@ const NetflowTable: React.FC<{
             <Title headingLevel="h2" size="lg">
               {t('No results found')}
             </Title>
-            <EmptyStateBody>{t('Clear all filters and try again.')}</EmptyStateBody>
-            <Button data-test="clear-all-filters" variant="link" onClick={clearFilters}>
-              {t('Clear all filters')}
-            </Button>
+            <EmptyStateBody>{t('Clear or reset filters and try again.')}</EmptyStateBody>
+            {filterActionLinks}
           </EmptyState>
         </Bullseye>
       );

@@ -48,6 +48,7 @@ import {
   Reporter
 } from '../model/flow-query';
 import { MetricScopeOptions } from '../model/metrics';
+import { parseQuickFilters } from '../model/quick-filters';
 import {
   DefaultOptions,
   getAvailableGroups,
@@ -116,15 +117,14 @@ import NetflowTable from './netflow-table/netflow-table';
 import ElementPanel from './netflow-topology/element-panel';
 import NetflowTopology from './netflow-topology/netflow-topology';
 import OptionsPanel from './netflow-topology/options-panel';
-import './netflow-traffic.css';
 import QuerySummary from './query-summary/query-summary';
 import SummaryPanel from './query-summary/summary-panel';
+import { Config, defaultConfig } from '../model/config';
+import { FilterActionLinks } from './filters/filter-action-links';
+
+import './netflow-traffic.css';
 
 export type ViewId = 'overview' | 'table' | 'topology';
-
-// Note / improvment:
-// Could also be loaded via an intermediate loader component
-loadConfig();
 
 export const NetflowTraffic: React.FC<{
   forcedFilters?: Filter[];
@@ -147,6 +147,7 @@ export const NetflowTraffic: React.FC<{
   }
 
   const warningTimeOut = React.useRef<NodeJS.Timeout | undefined>();
+  const [config, setConfig] = React.useState<Config>(defaultConfig);
   const [warningMessage, setWarningMessage] = React.useState<string | undefined>();
   const [isOverflowMenuOpen, setOverflowMenuOpen] = React.useState(false);
   const [isFullScreen, setFullScreen] = React.useState(false);
@@ -205,13 +206,44 @@ export const NetflowTraffic: React.FC<{
   });
 
   React.useEffect(() => {
+    loadConfig().then(setConfig);
+  }, [setConfig]);
+
+  const getQuickFilters = React.useCallback(() => parseQuickFilters(t, config.quickFilters), [t, config]);
+
+  const getDefaultFilters = React.useCallback(() => {
+    const quickFilters = getQuickFilters();
+    return quickFilters.filter(qf => qf.default).flatMap(qf => qf.filters);
+  }, [getQuickFilters]);
+
+  // updates table filters and clears up the table for proper visualization of the
+  // updating process
+  const updateTableFilters = React.useCallback(
+    (f: Filter[]) => {
+      setFilters(f);
+      setFlows([]);
+      setWarningMessage(undefined);
+    },
+    [setFilters, setFlows, setWarningMessage]
+  );
+
+  const resetDefaultFilters = React.useCallback(() => {
+    updateTableFilters(getDefaultFilters());
+  }, [getDefaultFilters, updateTableFilters]);
+
+  React.useEffect(() => {
     // Init state from URL
     if (!forcedFilters) {
-      getFiltersFromURL(t, disabledFilters)?.then(updateTableFilters);
+      const filtersPromise = getFiltersFromURL(t, disabledFilters);
+      if (filtersPromise) {
+        filtersPromise.then(updateTableFilters);
+      } else {
+        resetDefaultFilters();
+      }
     }
-    // disabling exhaustive-deps: tests hang when "t" passed as dependency (useTranslation not stable?)
+    // disabling exhaustive-deps: only for init
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [forcedFilters]);
+  }, [forcedFilters, config]);
 
   const clearSelections = () => {
     setTRModalOpen(false);
@@ -459,22 +491,14 @@ export const NetflowTraffic: React.FC<{
     }
   }, [metricScope, topologyOptions, setTopologyOptions]);
 
-  // updates table filters and clears up the table for proper visualization of the
-  // updating process
-  const updateTableFilters = (f: Filter[]) => {
-    setFilters(f);
-    setFlows([]);
-    setWarningMessage(undefined);
-  };
-
-  const clearFilters = () => {
+  const clearFilters = React.useCallback(() => {
     if (forcedFilters) {
       push(netflowTrafficPath);
     } else if (filters) {
       removeURLParam(URLParam.Filters);
       updateTableFilters([]);
     }
-  };
+  }, [forcedFilters, push, filters, updateTableFilters]);
 
   const viewTabs = () => {
     return (
@@ -713,6 +737,18 @@ export const NetflowTraffic: React.FC<{
     }
   };
 
+  const filterLinks = React.useCallback(() => {
+    const defFilters = getDefaultFilters();
+    return (
+      <FilterActionLinks
+        showClear={filters.length > 0}
+        showReset={defFilters.length > 0 && !_.isEqual(filters, defFilters)}
+        clearFilters={clearFilters}
+        resetFilters={resetDefaultFilters}
+      />
+    );
+  }, [getDefaultFilters, filters, clearFilters, resetDefaultFilters]);
+
   const pageContent = () => {
     let content: JSX.Element | null = null;
     switch (selectedViewId) {
@@ -727,7 +763,7 @@ export const NetflowTraffic: React.FC<{
             loading={loading}
             error={error}
             isDark={isDarkTheme}
-            clearFilters={clearFilters}
+            filterActionLinks={filterLinks()}
           />
         );
         break;
@@ -740,8 +776,8 @@ export const NetflowTraffic: React.FC<{
             selectedRecord={selectedRecord}
             size={size}
             onSelect={onRecordSelect}
-            clearFilters={clearFilters}
             columns={columns.filter(col => col.isSelected)}
+            filterActionLinks={filterLinks()}
             isDark={isDarkTheme}
           />
         );
@@ -847,6 +883,7 @@ export const NetflowTraffic: React.FC<{
         filters={filters}
         setFilters={updateTableFilters}
         clearFilters={clearFilters}
+        resetFilters={resetDefaultFilters}
         queryOptionsProps={{
           limit,
           setLimit,
@@ -863,6 +900,7 @@ export const NetflowTraffic: React.FC<{
         actions={actions()}
         menuContent={menuContent()}
         menuControl={menuControl()}
+        quickFilters={getQuickFilters()}
       />
       {
         <Flex className="netflow-traffic-tabs">

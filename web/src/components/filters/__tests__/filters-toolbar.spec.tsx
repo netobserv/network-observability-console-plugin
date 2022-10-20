@@ -12,6 +12,7 @@ describe('<FiltersToolbar />', () => {
     skipTipsDelay: true,
     setFilters: jest.fn(),
     clearFilters: jest.fn(),
+    resetFilters: jest.fn(),
     id: 'filter-toolbar',
     queryOptionsProps: {
       limit: 100,
@@ -24,7 +25,8 @@ describe('<FiltersToolbar />', () => {
       setMatch: jest.fn(),
       setReporter: jest.fn(),
       setLayer: jest.fn()
-    }
+    },
+    quickFilters: []
   };
   beforeEach(() => {
     props.setFilters = jest.fn();

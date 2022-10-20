@@ -3,7 +3,7 @@ import { findFilter } from './filter-definitions';
 import { TimeRange } from './datetime';
 import { Layer, Match, MetricFunction, MetricType, Reporter } from '../model/flow-query';
 import { getURLParam, getURLParamAsNumber, removeURLParam, setURLParam, URLParam } from './url';
-import { createFilterValue, DisabledFilters, Filter, FilterId, GroupDisabledKey } from '../model/filters';
+import { createFilterValue, DisabledFilters, Filter, filterKey, fromFilterKey } from '../model/filters';
 
 const filtersSeparator = ';';
 const filterKVSeparator = '=';
@@ -50,41 +50,49 @@ export const getMatchFromURL = (): Match => {
   return (getURLParam(URLParam.Match) as Match | null) || defaultMatch;
 };
 
-export const getFiltersFromURL = (t: TFunction, disabledFilters: DisabledFilters): Promise<Filter[]> => {
-  const urlParam = getURLParam(URLParam.Filters) || '';
+export const getFiltersFromURL = (t: TFunction, disabledFilters: DisabledFilters): Promise<Filter[]> | undefined => {
+  const urlParam = getURLParam(URLParam.Filters);
+  if (!urlParam) {
+    return undefined;
+  }
   const filterPromises: Promise<Filter>[] = [];
   const filters = urlParam.split(filtersSeparator);
   filters.forEach(keyValue => {
     const pair = keyValue.split(filterKVSeparator);
     if (pair.length === 2) {
-      const def = findFilter(t, pair[0] as FilterId);
+      const { id, not } = fromFilterKey(pair[0]);
+      const def = findFilter(t, id);
       if (def) {
+        const disabledValues = disabledFilters[pair[0]]?.split(',') || [];
         const values = pair[1].split(filterValuesSeparator);
         filterPromises.push(
           Promise.all(values.map(v => createFilterValue(def, v))).then(filterValues => {
             filterValues.forEach(fv => {
-              if (disabledFilters[def.id]?.split(',').includes(fv.v)) {
+              if (disabledValues.includes(fv.v)) {
                 fv.disabled = true;
               }
             });
-            return {
-              id: def.id,
+            const f: Filter = {
               def: def,
-              disabled: disabledFilters[def.id] === GroupDisabledKey,
+              not: not,
               values: filterValues
             };
+            return f;
           })
         );
       }
     }
   });
-  return Promise.all(filterPromises);
+  if (filterPromises.length > 0) {
+    return Promise.all(filterPromises);
+  }
+  return undefined;
 };
 
 export const setURLFilters = (filters: Filter[]) => {
   const urlFilters = filters
     .map(filter => {
-      return filter.def.id + filterKVSeparator + filter.values.map(v => v.v).join(filterValuesSeparator);
+      return filterKey(filter) + filterKVSeparator + filter.values.map(v => v.v).join(filterValuesSeparator);
     })
     .join(filtersSeparator);
   setURLParam(URLParam.Filters, urlFilters);

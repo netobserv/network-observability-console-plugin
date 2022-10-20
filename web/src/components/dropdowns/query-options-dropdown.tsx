@@ -181,7 +181,7 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
       <div className="pf-c-select__menu-group">
         <Tooltip
           content={
-            t(useTopK ? 'Top items for internal backend queries.' : 'Limit for internal backend queries.') +
+            (useTopK ? t('Top items for internal backend queries.') : t('Limit for internal backend queries.')) +
             ' ' +
             t(
               // eslint-disable-next-line max-len

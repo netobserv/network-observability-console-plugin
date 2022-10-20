@@ -16,17 +16,13 @@ import { dateTimeMSFormatter, getFormattedDate } from '../../../utils/datetime';
 const errorStateQuery = `EmptyState[data-test="error-state"]`;
 const loadingContentsQuery = `Bullseye[data-test="loading-contents"]`;
 const noResultsFoundQuery = `Bullseye[data-test="no-results-found"]`;
-const clearFiltersQuery = `Button[data-test="clear-all-filters"]`;
 
 describe('<NetflowTable />', () => {
   const mocks = {
     size: 'm' as Size,
     onSelect: jest.fn(),
-    clearFilters: jest.fn()
+    filterActionLinks: <></>
   };
-  beforeEach(() => {
-    mocks.clearFilters = jest.fn();
-  });
 
   it('should render component', async () => {
     const flows = FlowsSample.slice(0, FlowsSample.length);
@@ -114,13 +110,6 @@ describe('<NetflowTable />', () => {
     expect(wrapper.find(loadingContentsQuery)).toHaveLength(0);
     expect(wrapper.find(noResultsFoundQuery)).toHaveLength(1);
     expect(wrapper.find(errorStateQuery)).toHaveLength(0);
-
-    // it should have a 'clear all filters' link that clears the filters when it is clicked
-    expect(mocks.clearFilters).not.toHaveBeenCalled();
-    const clearAll = wrapper.find(clearFiltersQuery);
-    expect(clearAll).toHaveLength(1);
-    clearAll.simulate('click');
-    expect(mocks.clearFilters).toHaveBeenCalledTimes(1);
   });
   it('should render a spinning slide and then an should show an ErrorState on error', async () => {
     const wrapper = shallow(<NetflowTable loading={true} flows={[]} columns={ShuffledDefaultColumns} {...mocks} />);

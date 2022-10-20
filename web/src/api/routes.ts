@@ -78,7 +78,8 @@ export const getConfig = (): Promise<Config> => {
         portNames: r.data.portNaming.portNames
           ? new Map(Object.entries(r.data.portNaming.portNames))
           : defaultConfig.portNaming.portNames
-      }
+      },
+      quickFilters: r.data.quickFilters
     };
   });
 };

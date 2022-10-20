@@ -19,17 +19,28 @@ import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
-import { Filter, FilterComponent, FilterDefinition, FilterValue, hasEnabledFilterValues } from '../../model/filters';
+import {
+  Filter,
+  FilterComponent,
+  FilterDefinition,
+  FilterValue,
+  findFromFilters,
+  hasEnabledFilterValues,
+  removeFromFilters
+} from '../../model/filters';
+import { QuickFilter } from '../../model/quick-filters';
 import { autoCompleteCache } from '../../utils/autocomplete-cache';
 import { findFilter } from '../../utils/filter-definitions';
 import { getPathWithParams, netflowTrafficPath } from '../../utils/url';
 import { QueryOptionsDropdown, QueryOptionsDropdownProps } from '../dropdowns/query-options-dropdown';
+import { QuickFilters } from './quick-filters';
 import AutocompleteFilter from './autocomplete-filter';
+import { FilterActionLinks } from './filter-action-links';
 import { FilterHints } from './filter-hints';
 import FiltersDropdown from './filters-dropdown';
 import { getFilterFullName, Indicator } from './filters-helper';
-import './filters-toolbar.css';
 import TextFilter from './text-filter';
+import './filters-toolbar.css';
 
 export interface FiltersToolbarProps {
   id: string;
@@ -39,9 +50,11 @@ export interface FiltersToolbarProps {
   skipTipsDelay?: boolean;
   setFilters: (v: Filter[]) => void;
   clearFilters: () => void;
+  resetFilters: () => void;
   queryOptionsProps: QueryOptionsDropdownProps;
   menuContent?: JSX.Element[];
   menuControl?: JSX.Element;
+  quickFilters: QuickFilter[];
 }
 
 export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
@@ -52,6 +65,8 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
   skipTipsDelay,
   setFilters,
   clearFilters,
+  resetFilters,
+  quickFilters,
   ...props
 }) => {
   const { push } = useHistory();
@@ -78,7 +93,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
   const addFilter = React.useCallback(
     (filterValue: FilterValue) => {
       const newFilters = _.cloneDeep(filters) || [];
-      const found = newFilters.find(f => f.def.id === selectedFilter.id);
+      const found = findFromFilters(newFilters, { def: selectedFilter });
       if (found) {
         if (found.values.map(value => value.v).includes(filterValue.v)) {
           setMessageWithDelay(t('Filter already exists'));
@@ -115,10 +130,13 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
   const getFiltersChips = React.useCallback(() => {
     const isForced = !_.isEmpty(forcedFilters);
     const chipFilters = isForced ? forcedFilters : filters;
+    const defaultFilters = quickFilters.filter(qf => qf.default).flatMap(qf => qf.filters);
 
-    if (_.isEmpty(chipFilters)) {
+    if (_.isEmpty(chipFilters) && _.isEmpty(defaultFilters)) {
       return null;
     }
+
+    const isDefaultFilters = _.isEqual(chipFilters, defaultFilters);
 
     return (
       <ToolbarGroup
@@ -129,78 +147,74 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
       >
         <ToolbarItem className="flex-start">
           {chipFilters &&
-            chipFilters.map((chipFilter, cfIndex) => (
-              <div
-                key={cfIndex}
-                className={`custom-chip-group ${!hasEnabledFilterValues(chipFilter) ? 'disabled-group' : ''}`}
-              >
-                <Tooltip
-                  content={`${!hasEnabledFilterValues(chipFilter) ? t('Enable') : t('Disable')} '${getFilterFullName(
-                    chipFilter.def,
-                    t
-                  )}' ${t('group filter')}`}
-                >
-                  <Text
-                    className="pf-c-chip-group__label"
-                    component={TextVariants.p}
-                    onClick={() => {
-                      //switch all values if no remaining
-                      const isEnabled = hasEnabledFilterValues(chipFilter);
-                      chipFilter.values.forEach(fv => {
-                        fv.disabled = isEnabled;
-                      });
-                      setFilters(_.cloneDeep(filters!));
-                    }}
-                  >
-                    {getFilterFullName(chipFilter.def, t)}
-                  </Text>
-                </Tooltip>
-                {chipFilter.values.map((chipFilterValue, fvIndex) => (
-                  <div key={fvIndex} className={`custom-chip ${chipFilterValue.disabled ? 'disabled-value' : ''}`}>
-                    <Tooltip
-                      content={`${chipFilterValue.disabled ? t('Enable') : t('Disable')} ${getFilterFullName(
-                        chipFilter.def,
-                        t
-                      )} '${chipFilterValue.display || chipFilterValue.v}' ${t('filter')}`}
+            chipFilters.map((chipFilter, cfIndex) => {
+              let fullName = getFilterFullName(chipFilter.def, t);
+              if (chipFilter.not) {
+                fullName += ' ' + t('Not');
+              }
+              const someEnabled = hasEnabledFilterValues(chipFilter);
+              return (
+                <div key={cfIndex} className={`custom-chip-group ${someEnabled ? '' : 'disabled-group'}`}>
+                  <Tooltip content={`${someEnabled ? t('Disable') : t('Enable')} '${fullName}' ${t('group filter')}`}>
+                    <Text
+                      className="pf-c-chip-group__label"
+                      component={TextVariants.p}
+                      onClick={() => {
+                        //switch all values if no remaining
+                        chipFilter.values.forEach(fv => {
+                          fv.disabled = someEnabled;
+                        });
+                        setFilters(_.cloneDeep(filters!));
+                      }}
                     >
-                      <Text
-                        component={TextVariants.p}
-                        onClick={() => {
-                          //switch value
-                          chipFilterValue.disabled = !chipFilterValue.disabled;
-                          setFilters(_.cloneDeep(filters!));
-                        }}
-                      >
-                        {chipFilterValue.display ? chipFilterValue.display : chipFilterValue.v}
-                      </Text>
-                    </Tooltip>
-                    {!isForced && (
-                      <Button
-                        variant="plain"
-                        onClick={() => {
-                          chipFilter.values = chipFilter.values.filter(val => val.v !== chipFilterValue.v);
-                          if (_.isEmpty(chipFilter.values)) {
-                            setFilters(filters!.filter(f => f.def.id !== chipFilter.def.id));
-                          } else {
-                            setFilters(_.cloneDeep(filters!));
-                          }
-                        }}
-                      >
-                        <TimesIcon />
-                      </Button>
-                    )}
-                  </div>
-                ))}
-                {!isForced && (
-                  <Button
-                    variant="plain"
-                    onClick={() => setFilters(filters!.filter(f => f.def.id !== chipFilter.def.id))}
-                  >
-                    <TimesCircleIcon />
-                  </Button>
-                )}
-              </div>
-            ))}
+                      {fullName}
+                    </Text>
+                  </Tooltip>
+                  {chipFilter.values.map((chipFilterValue, fvIndex) => {
+                    return (
+                      <div key={fvIndex} className={`custom-chip ${chipFilterValue.disabled ? 'disabled-value' : ''}`}>
+                        <Tooltip
+                          content={`${chipFilterValue.disabled ? t('Enable') : t('Disable')} ${fullName} '${
+                            chipFilterValue.display || chipFilterValue.v
+                          }' ${t('filter')}`}
+                        >
+                          <Text
+                            component={TextVariants.p}
+                            onClick={() => {
+                              //switch value
+                              chipFilterValue.disabled = !chipFilterValue.disabled;
+                              setFilters(_.cloneDeep(filters!));
+                            }}
+                          >
+                            {chipFilterValue.display ? chipFilterValue.display : chipFilterValue.v}
+                          </Text>
+                        </Tooltip>
+                        {!isForced && (
+                          <Button
+                            variant="plain"
+                            onClick={() => {
+                              chipFilter.values = chipFilter.values.filter(val => val.v !== chipFilterValue.v);
+                              if (_.isEmpty(chipFilter.values)) {
+                                setFilters(removeFromFilters(filters!, chipFilter));
+                              } else {
+                                setFilters(_.cloneDeep(filters!));
+                              }
+                            }}
+                          >
+                            <TimesIcon />
+                          </Button>
+                        )}
+                      </div>
+                    );
+                  })}
+                  {!isForced && (
+                    <Button variant="plain" onClick={() => setFilters(removeFromFilters(filters!, chipFilter))}>
+                      <TimesCircleIcon />
+                    </Button>
+                  )}
+                </div>
+              );
+            })}
         </ToolbarItem>
         {isForced ? (
           <Button
@@ -211,21 +225,24 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
             {t('Edit filters')}
           </Button>
         ) : (
-          <Button
-            id="clear-all-filters-button"
-            data-test="clear-all-filters-button"
-            variant="link"
-            onClick={() => {
-              clearFilters();
-              autoCompleteCache.clear();
-            }}
-          >
-            {t('Clear all filters')}
-          </Button>
+          <>
+            <FilterActionLinks
+              showClear={!_.isEmpty(chipFilters)}
+              showReset={defaultFilters.length > 0 && !isDefaultFilters}
+              clearFilters={() => {
+                clearFilters();
+                autoCompleteCache.clear();
+              }}
+              resetFilters={() => {
+                resetFilters();
+                autoCompleteCache.clear();
+              }}
+            />
+          </>
         )}
       </ToolbarGroup>
     );
-  }, [clearFilters, filters, forcedFilters, push, setFilters, t]);
+  }, [clearFilters, filters, forcedFilters, quickFilters, push, setFilters, resetFilters, t]);
 
   return (
     <Toolbar data-test={id} id={id}>
@@ -233,6 +250,11 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
         <ToolbarItem className="flex-start">
           <QueryOptionsDropdown {...props.queryOptionsProps} />
         </ToolbarItem>
+        {quickFilters.length > 0 && (
+          <ToolbarItem className="flex-start">
+            <QuickFilters quickFilters={quickFilters} activeFilters={filters || []} setFilters={setFilters} />
+          </ToolbarItem>
+        )}
         {_.isEmpty(forcedFilters) && (
           <ToolbarItem className="flex-start">
             <Tooltip

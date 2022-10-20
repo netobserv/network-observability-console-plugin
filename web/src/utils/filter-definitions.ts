@@ -29,24 +29,42 @@ export const undefinedValue = '""';
 
 type Field = keyof Fields | keyof Labels;
 
+const matcher = (left: string, right: string[], not: boolean) => `${left}${not ? '!=' : '='}${right.join(',')}`;
+
 const simpleFiltersEncoder = (field: Field): FiltersEncoder => {
-  return (values: FilterValue[], matchAny: boolean, not?: boolean) => {
-    return `${field}${not ? '!=' : '='}${values.map(value => value.v).join(',')}`;
+  return (values: FilterValue[], matchAny: boolean, not: boolean) => {
+    return matcher(
+      field,
+      values.map(v => v.v),
+      not
+    );
   };
 };
 
 // As owner / non-owner kind filters are mixed, they are disambiguated via this function
 const kindFiltersEncoder = (base: Field, owner: Field): FiltersEncoder => {
-  return (values: FilterValue[], matchAny: boolean) => {
+  return (values: FilterValue[], matchAny: boolean, not: boolean) => {
     const { baseValues, ownerValues } = _.groupBy(values, value => {
       return isOwnerKind(value.v) ? 'ownerValues' : 'baseValues';
     });
     const filters: string[] = [];
     if (baseValues && baseValues.length > 0) {
-      filters.push(`${base}=${baseValues.map(value => value.v).join(',')}`);
+      filters.push(
+        matcher(
+          base,
+          baseValues.map(value => value.v),
+          not
+        )
+      );
     }
     if (ownerValues && ownerValues.length > 0) {
-      filters.push(`${owner}=${ownerValues.map(value => value.v).join(',')}`);
+      filters.push(
+        matcher(
+          owner,
+          ownerValues.map(value => value.v),
+          not
+        )
+      );
     }
     return filters.join(matchAny ? '|' : '&');
   };
@@ -59,21 +77,24 @@ const k8sResourceFiltersEncoder = (
   name: Field,
   ownerName: Field
 ): FiltersEncoder => {
-  return (values: FilterValue[], matchAny: boolean) => {
+  return (values: FilterValue[], matchAny: boolean, not: boolean) => {
     const splitValues = values.map(value => splitResource(value.v));
     return splitValues
       .map(res => {
         if (isOwnerKind(res.kind)) {
-          return k8sSingleResourceEncode(ownerKind, namespace, ownerName, res);
+          return k8sSingleResourceEncode(ownerKind, namespace, ownerName, res, not);
         } else {
-          return k8sSingleResourceEncode(kind, namespace, name, res);
+          return k8sSingleResourceEncode(kind, namespace, name, res, not);
         }
       })
       .join(matchAny ? '|' : '&');
   };
 };
 
-const k8sSingleResourceEncode = (kind: Field, namespace: Field, name: Field, res: SplitResource) => {
+const k8sSingleResourceEncode = (kind: Field, namespace: Field, name: Field, res: SplitResource, not: boolean) => {
+  if (not) {
+    return `${kind}!="${res.kind}"|${namespace}!="${res.namespace}"|${name}!="${res.name}"`;
+  }
   return `${kind}="${res.kind}"&${namespace}="${res.namespace}"&${name}="${res.name}"`;
 };
 
@@ -110,9 +131,9 @@ const peersWithOverlap = (
 ): FilterDefinition[] => {
   const defs = peers(base, srcEncoder, dstEncoder);
   // Modify Common (defs[2]) filter encoder to exclude overlap between src and dest matches
-  defs[2].encoders.common!.dstEncode = (values: FilterValue[], matchAny: boolean) => {
+  defs[2].encoders.common!.dstEncode = (values: FilterValue[], matchAny: boolean, not: boolean) => {
     // Stands for: ... OR (<dst filters> AND NOT <src filters>)
-    return dstEncoder(values, matchAny) + '&' + srcEncoder(values, matchAny, true);
+    return dstEncoder(values, matchAny, not) + '&' + srcEncoder(values, matchAny, !not);
   };
   return defs;
 };

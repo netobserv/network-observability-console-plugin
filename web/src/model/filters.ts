@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-export type FiltersEncoder = (values: FilterValue[], matchAny: boolean, not?: boolean) => string;
+export type FiltersEncoder = (values: FilterValue[], matchAny: boolean, not: boolean) => string;
 
 export enum FilterComponent {
   Autocomplete,
@@ -70,6 +70,7 @@ export interface FilterValue {
 
 export interface Filter {
   def: FilterDefinition;
+  not?: boolean;
   values: FilterValue[];
 }
 
@@ -104,7 +105,14 @@ export const getEnabledFilters = (filters: Filter[]) => {
 };
 
 export type DisabledFilters = Record<string, string>;
-export const GroupDisabledKey = 'all';
+
+export const filterKey = (filter: Filter) => filter.def.id + (filter.not ? '!' : '');
+export const fromFilterKey = (key: string) => {
+  if (key.endsWith('!')) {
+    return { id: key.substring(0, key.length - 1) as FilterId, not: true };
+  }
+  return { id: key as FilterId };
+};
 
 export const getDisabledFiltersRecord = (filters: Filter[]) => {
   const disabledFilters: DisabledFilters = {};
@@ -114,7 +122,7 @@ export const getDisabledFiltersRecord = (filters: Filter[]) => {
       .map(fv => fv.v)
       .join(',');
     if (!_.isEmpty(values)) {
-      disabledFilters[f.def.id] = values;
+      disabledFilters[filterKey(f)] = values;
     }
   });
   return disabledFilters;
@@ -130,4 +138,27 @@ export const hasIndexFields = (filters: Filter[]) => {
 
 export const hasNonIndexFields = (filters: Filter[]) => {
   return filters.some(f => !isIndexed(f));
+};
+
+type FilterKey = Omit<Filter, 'values'>;
+
+export const findFromFilters = (activeFilters: Filter[], search: FilterKey): Filter | undefined => {
+  return activeFilters.find(f => filtersEqual(f, search));
+};
+
+export const removeFromFilters = (activeFilters: Filter[], search: FilterKey): Filter[] => {
+  return activeFilters.filter(f => !filtersEqual(f, search));
+};
+
+export const filtersEqual = (f1: FilterKey, f2: FilterKey): boolean => {
+  return f1.def.id === f2.def.id && f1.not == f2.not;
+};
+
+export const doesIncludeFilter = (activeFilters: Filter[], search: FilterKey, values: FilterValue[]): boolean => {
+  const found = findFromFilters(activeFilters, search);
+  if (found) {
+    // Return true if every value in "values" is found in "found.values"
+    return values.every(mustMatch => found.values.some(v => v.v === String(mustMatch.v)));
+  }
+  return false;
 };

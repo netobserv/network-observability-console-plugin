@@ -1,0 +1,20 @@
+portNaming:
+  enable: true
+  portNames:
+    "3100": loki
+quickFilters:
+  - name: Applications
+    filter:
+      src_namespace!: 'openshift-'
+      dst_namespace!: 'openshift-'
+    default: true
+  - name: Exclude services
+    filter:
+      dst_kind!: 'Service'
+      src_kind!: 'Service'
+  - name: OpenShift Infrastructure
+    filter:
+      namespace: 'openshift-*'
+  - name: NetObserv
+    filter:
+      namespace: '"netobserv"'
