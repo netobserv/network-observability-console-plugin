@@ -88,6 +88,7 @@ span.pf-c-button__icon.pf-m-start {
 #display-dropdown,
 #export-button,
 #fullscreen-button,
+#view-options-button,
 #more-options-button,
 .overflow-button {
     color: #06c;
@@ -97,6 +98,11 @@ span.pf-c-button__icon.pf-m-start {
     margin-right: 5px;
     padding-left: 0;
     padding-right: 0;
+}
+
+#view-options-toolbar {
+    z-index: 5;
+    box-shadow: 0 0.125rem 0.1rem -0.0625rem rgba(3, 3, 3, 0.16);
 }
 
 /*hide some content for fullscreen mode*/
@@ -119,5 +125,15 @@ span.pf-c-button__icon.pf-m-start {
 
 /*fix tabs styling*/
 .netflow-traffic-tabs {
-    padding: 1rem 1.5rem 0 0;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+#view-options-toolbar {
+    display: flex;
+}
+
+#search-container {
+    max-width: 430px;
+    background: white;
 }

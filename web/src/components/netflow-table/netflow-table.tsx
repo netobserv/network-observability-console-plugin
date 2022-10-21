@@ -17,7 +17,7 @@ import { Record } from '../../api/ipfix';
 import { NetflowTableHeader } from './netflow-table-header';
 import NetflowTableRow from './netflow-table-row';
 import { Column, ColumnsId, getCommonColumns } from '../../utils/columns';
-import { Size } from '../dropdowns/display-dropdown';
+import { Size } from '../dropdowns/table-display-dropdown';
 import { usePrevious } from '../../utils/previous-hook';
 import './netflow-table.css';
 import {

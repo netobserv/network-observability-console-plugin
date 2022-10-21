@@ -9,7 +9,7 @@ import { dateFormatter, getFormattedDate, timeMSFormatter, utcDateTimeFormatter 
 import { formatDurationAboveMillisecond } from '../../utils/duration';
 import { formatPort } from '../../utils/port';
 import { formatProtocol } from '../../utils/protocol';
-import { Size } from '../dropdowns/display-dropdown';
+import { Size } from '../dropdowns/table-display-dropdown';
 import './record-field.css';
 
 export type RecordFieldFilter = {

@@ -1,8 +1,8 @@
-import { Dropdown, DropdownItem, DropdownPosition, DropdownToggle } from '@patternfly/react-core';
+import { Dropdown, DropdownItem, DropdownToggle } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { getAvailableGroups, TopologyGroupTypes } from '../../model/topology';
 import { MetricScopeOptions } from '../../model/metrics';
+import { getAvailableGroups, TopologyGroupTypes } from '../../model/topology';
 
 export const GroupDropdown: React.FC<{
   disabled?: boolean;
@@ -37,7 +37,6 @@ export const GroupDropdown: React.FC<{
     <Dropdown
       data-test={id}
       id={id}
-      position={DropdownPosition.right}
       toggle={
         <DropdownToggle
           data-test={`${id}-dropdown`}

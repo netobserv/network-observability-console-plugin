@@ -18,6 +18,7 @@ export const LOCAL_STORAGE_LAST_TOP_KEY = 'netflow-traffic-top';
 export const LOCAL_STORAGE_METRIC_SCOPE_KEY = 'netflow-traffic-metric-scope';
 export const LOCAL_STORAGE_METRIC_FUNCTION_KEY = 'netflow-traffic-metric-function';
 export const LOCAL_STORAGE_METRIC_TYPE_KEY = 'netflow-traffic-metric-type';
+export const LOCAL_STORAGE_SHOW_OPTIONS_KEY = 'netflow-traffic-show-options';
 
 export interface ArraySelectionOptions {
   id: string;

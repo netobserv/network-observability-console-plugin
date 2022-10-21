@@ -176,7 +176,7 @@ export const QueryOptionsDropdown: React.FC<QueryOptionsDropdownProps> = props =
       <Select
         data-test="query-options-dropdown"
         id="query-options-dropdown"
-        placeholderText={<span>{t('Query Options')}</span>}
+        placeholderText={<span>{t('Query options')}</span>}
         isOpen={isOpen}
         onToggle={() => setOpen(!isOpen)}
         customContent={<QueryOptionsPanel {...props} />}

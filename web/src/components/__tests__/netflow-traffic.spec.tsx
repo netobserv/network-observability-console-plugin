@@ -56,7 +56,7 @@ describe('<NetflowTraffic />', () => {
     act(() => {
       const cheerio = render(<NetflowTrafficParent />);
       expect(cheerio.find('#filter-toolbar').length).toEqual(1);
-      expect(cheerio.find('#manage-overview-panels-button').length).toEqual(1);
+      expect(cheerio.find('#fullscreen-button').length).toEqual(1);
     });
   });
 });

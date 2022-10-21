@@ -23,21 +23,8 @@
   box-shadow: 0 0.0625rem 0.125rem 0 rgba(3, 3, 3, 0.12), 0 0 0.125rem 0 rgba(3, 3, 3, 0.06);
 }
 
-#topology-search-container {
-  position: absolute;
-  top: 1rem;
-  left: 1rem;
-  max-width: 430px;
-  background: white;
-}
-
 span.pf-topology-control-bar {
   left: 0;
-}
-
-#topology-search-container:hover {
-  border: none;
-  box-shadow: 0 0.25rem 0.5rem 0rem rgba(3, 3, 3, 0.12), 0 0 0.25rem 0 rgba(3, 3, 3, 0.06);
 }
 
 g.netobserv.topology.shadowed {
