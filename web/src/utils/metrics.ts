@@ -1,9 +1,9 @@
 import _ from 'lodash';
 import { RawTopologyMetrics, MetricStats, TopologyMetricPeer, TopologyMetrics } from '../api/loki';
 import { MetricFunction, MetricScope, MetricType } from '../model/flow-query';
-import { elementPerMinText, roundTwoDigits } from './count';
+import { roundTwoDigits } from './count';
 import { computeStepInterval, rangeToSeconds, TimeRange } from './datetime';
-import { bytesPerSeconds, humanFileSize } from './bytes';
+import { byteRateFormat, byteFormat, simpleRateFormat, simpleValueFormat } from './format';
 import { NodeData } from '../model/topology';
 
 // Tolerance, in seconds, to assume presence/emptiness of the last datapoint fetched, when it is
@@ -109,7 +109,8 @@ const parseMetric = (
     source: source,
     destination: destination,
     values: normalized,
-    stats: stats
+    stats: stats,
+    scope: scope
   };
 };
 
@@ -204,9 +205,9 @@ export const computeStats = (ts: [number, number][]): MetricStats => {
 const buildPeerDisplayName = (peer: TopologyMetricPeer, scope: MetricScope): string | undefined => {
   switch (scope) {
     case 'host':
-      return peer.hostName ? peer.hostName : peer.type === 'Node' ? peer.name! : undefined;
+      return peer.hostName ? peer.hostName : peer.type === 'Node' ? peer.name : undefined;
     case 'namespace':
-      return peer.namespace ? peer.namespace : peer.type === 'Namespace' ? peer.name! : undefined;
+      return peer.namespace ? peer.namespace : peer.type === 'Namespace' ? peer.name : undefined;
     case 'owner':
       return peer.namespace && peer.ownerName
         ? `${peer.namespace}.${peer.ownerName}`
@@ -227,9 +228,9 @@ export const getFormattedValue = (v: number, mt: MetricType, mf: MetricFunction)
   if (mf === 'sum') {
     switch (mt) {
       case 'bytes':
-        return humanFileSize(v, true, 0);
+        return byteFormat(v);
       case 'packets':
-        return String(v);
+        return simpleValueFormat(v);
     }
   } else {
     return getFormattedRateValue(v, mt);
@@ -239,9 +240,9 @@ export const getFormattedValue = (v: number, mt: MetricType, mf: MetricFunction)
 export const getFormattedRateValue = (v: number, mt: MetricType): string => {
   switch (mt) {
     case 'bytes':
-      return bytesPerSeconds(v);
+      return byteRateFormat(v);
     case 'packets':
-      return elementPerMinText(v);
+      return simpleRateFormat(v);
   }
 };
 
@@ -270,3 +271,7 @@ export const matchPeer = (data: NodeData, peer: TopologyMetricPeer): boolean => 
   }
   return matchPeerInternal(peer, data.resourceKind, data.name, data.namespace, data.addr);
 };
+
+export const peersEqual = (p1: TopologyMetricPeer, p2: TopologyMetricPeer): boolean =>
+  p1.displayName === p2.displayName;
+export const isUnknownPeer = (peer: TopologyMetricPeer): boolean => peer.displayName === undefined;

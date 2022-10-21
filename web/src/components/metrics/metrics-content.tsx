@@ -3,151 +3,76 @@ import {
   ChartArea,
   ChartAxis,
   ChartBar,
-  ChartDonut,
   ChartGroup,
   ChartLabel,
   ChartLegend,
-  ChartLegendTooltip,
   ChartScatter,
-  ChartThemeColor,
-  createContainer
+  ChartStack,
+  ChartThemeColor
 } from '@patternfly/react-charts';
 import { Text, TextContent, TextVariants } from '@patternfly/react-core';
 import * as React from 'react';
-import { useTranslation } from 'react-i18next';
-import { MetricScopeOptions } from '../../model/metrics';
-import { TopologyMetricPeer, TopologyMetrics } from '../../api/loki';
-import { MetricFunction, MetricType } from '../../model/flow-query';
-import { getDateFromUnix, getFormattedDate } from '../../utils/datetime';
+import { NamedMetric } from '../../api/loki';
+import { MetricType } from '../../model/flow-query';
+import { getFormattedRateValue } from '../../utils/metrics';
+import { ChartDataPoint, chartVoronoi, toDatapoints } from './metrics-helper';
 import './metrics-content.css';
-import { getFormattedValue, getFormattedRateValue, matchPeer } from '../../utils/metrics';
-import { getStat, NodeData } from '../../model/topology';
 
-export const MetricsContent: React.FC<{
+export type MetricsContentProps = {
   id: string;
+  title: string;
   sizePx?: number;
-  metricFunction: MetricFunction;
   metricType: MetricType;
-  metrics: TopologyMetrics[];
-  scope: MetricScopeOptions;
+  metrics: NamedMetric[];
+  limit: number;
   counters?: JSX.Element;
-  data?: NodeData;
   showTitle?: boolean;
-  showDonut?: boolean;
   showBar?: boolean;
   showArea?: boolean;
   showScatter?: boolean;
   smallerTexts?: boolean;
   doubleWidth?: boolean;
-}> = ({
+};
+
+export const MetricsContent: React.FC<MetricsContentProps> = ({
   id,
+  title,
   sizePx,
-  metricFunction,
   metricType,
   metrics,
-  scope,
+  limit,
   counters,
-  data,
   showTitle,
-  showDonut,
   showBar,
   showArea,
   showScatter,
   smallerTexts,
   doubleWidth
 }) => {
-  const { t } = useTranslation('plugin__netobserv-plugin');
+  const filteredMetrics = metrics.slice(0, limit);
 
-  const metricTitle = React.useCallback(() => {
-    switch (metricFunction) {
-      case 'last':
-        return t('Latest {{type}} rate', { type: metricType });
-      case 'avg':
-        return t('Average {{type}} rate', { type: metricType });
-      case 'max':
-        return t('Max {{type}} rate', { type: metricType });
-      case 'sum':
-        return t('Total {{type}}', { type: metricType });
-      default:
-        return '';
-    }
-  }, [metricFunction, metricType, t]);
+  const legendData = filteredMetrics.map((m, idx) => ({
+    childName: `${showBar ? 'bar-' : 'area-'}${idx}`,
+    name: m.name
+  }));
 
-  const chart = React.useCallback(() => {
-    //TODO: NETOBSERV-635 add this as tab options
-    // function truncate(input: string) {
-    //   const length = doubleWidth ? 64 : showDonut ? 10 : 18;
-    //   if (input.length > length) {
-    //     return input.substring(0, length / 2) + '…' + input.substring(input.length - length / 2);
-    //   }
-    //   return input;
-    // }
+  const topKDatapoints: ChartDataPoint[][] = filteredMetrics.map(toDatapoints);
 
-    // function truncateParts(input: string) {
-    //   if (input.includes('.')) {
-    //     const splitted = input.split('.');
-    //     const result: string[] = [];
-    //     splitted.forEach(s => {
-    //       result.push(truncate(s));
-    //     });
-    //     return result.join('.');
-    //   }
-    //   return truncate(input);
-    // }
+  const legentComponent = (
+    <ChartLegend
+      labelComponent={<ChartLabel className={smallerTexts ? 'small-chart-label' : ''} />}
+      data={legendData}
+    />
+  );
 
-    const getPeerName = (peer: TopologyMetricPeer): string => {
-      return peer.displayName || (scope === MetricScopeOptions.HOST ? t('External') : t('Unknown'));
-    };
-
-    function getName(source?: TopologyMetricPeer, dest?: TopologyMetricPeer) {
-      if (id === 'total_timeseries') {
-        return t('Collected flows');
-      }
-      const srcName = getPeerName(source!);
-      const dstName = getPeerName(dest!);
-      if (data && matchPeer(data, source!)) {
-        return `${t('To')} ${dstName}`;
-      } else if (data && matchPeer(data, dest!)) {
-        return `${t('From')} ${srcName}`;
-      }
-      return `${srcName} -> ${dstName}`;
-    }
-
-    const values = metrics.map(m => getStat(m.stats, metricFunction));
-    const total = values.reduce((prev, cur) => prev + cur, 0);
-
-    const legendData = metrics.map(m => ({
-      childName: `${showBar ? 'bar-' : 'area-'}${metrics.indexOf(m)}`,
-      name: getName(m.source, m.destination)
-    }));
-
-    const CursorVoronoiContainer = createContainer('voronoi', 'cursor');
-
-    const containerComponent = (
-      <CursorVoronoiContainer
-        cursorDimension="x"
-        labels={({
-          datum
-        }: {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          datum: any;
-        }) => `${datum.y !== null ? getFormattedRateValue(datum.y, metricType) : 'no data'}`}
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        labelComponent={<ChartLegendTooltip legendData={legendData} title={(datum: any) => datum.date} />}
-        mouseFollowTooltips
-        voronoiDimension="x"
-        voronoiPadding={50}
-      />
-    );
-
-    const legentComponent = (
-      <ChartLegend
-        labelComponent={<ChartLabel className={smallerTexts ? 'small-chart-label' : ''} />}
-        data={legendData}
-      />
-    );
-
-    return (
+  return (
+    <TextContent id="metrics" className="metrics-content-div">
+      {showTitle && (
+        <Text id="metrics-title" component={TextVariants.h3}>
+          {title}
+        </Text>
+      )}
+      {counters}
       <div
         id={`chart-${id}`}
         style={{
@@ -156,136 +81,53 @@ export const MetricsContent: React.FC<{
           alignSelf: 'center'
         }}
       >
-        {showDonut ? (
-          <ChartDonut
-            themeColor={ChartThemeColor.multiUnordered}
-            constrainToVisibleArea
-            legendData={legendData}
-            legendOrientation="vertical"
-            legendPosition="right"
-            legendAllowWrap={true}
-            legendComponent={legentComponent}
-            labels={({ datum }) => datum.x}
-            width={doubleWidth ? 1000 : 500}
-            height={350}
-            data={values
-              .sort((a, b) => a - b) /* to check: sorting here may mess up with legend correlation? */
-              .map(v => ({ x: `${((v / total) * 100).toFixed(2)}%`, y: v }))}
-            padding={{
-              bottom: 20,
-              left: 20,
-              right: 300,
-              top: 20
-            }}
-            title={`${getFormattedValue(total, metricType, metricFunction)}`}
-            subTitle={metricTitle()}
-          />
-        ) : (
-          <Chart
-            themeColor={ChartThemeColor.multiUnordered}
-            ariaTitle={metricTitle()}
-            containerComponent={containerComponent}
-            legendData={legendData}
-            legendOrientation="vertical"
-            legendPosition="bottom-left"
-            legendAllowWrap={true}
-            legendComponent={legentComponent}
-            //TODO: fix refresh on selection change to enable animation
-            //animate={true}
-            //TODO: check if time scale could be interesting (buggy with current strings)
-            scale={{ x: 'time', y: 'sqrt' }}
-            width={doubleWidth ? 1400 : 700}
-            height={600}
-            domainPadding={{ x: 0, y: 0 }}
-            padding={{
-              bottom: legendData.length * 25 + 50,
-              left: 90,
-              right: 50,
-              top: 50
-            }}
-          >
-            <ChartAxis fixLabelOverlap />
-            <ChartAxis dependentAxis showGrid fixLabelOverlap tickFormat={y => getFormattedRateValue(y, metricType)} />
-            {showBar && (
-              <ChartGroup>
-                {metrics.map(m => (
-                  <ChartBar
-                    name={`bar-${metrics.indexOf(m)}`}
-                    key={`bar-${metrics.indexOf(m)}`}
-                    data={m.values.map(v => ({
-                      name: getName(m.source, m.destination),
-                      date: getFormattedDate(getDateFromUnix(v[0])),
-                      x: getDateFromUnix(v[0]),
-                      y: Number(v[1])
-                    }))}
-                  />
-                ))}
-              </ChartGroup>
-            )}
-            {showArea && (
-              <ChartGroup>
-                {metrics.map(m => (
-                  <ChartArea
-                    name={`area-${metrics.indexOf(m)}`}
-                    key={`area-${metrics.indexOf(m)}`}
-                    data={m.values.map(v => ({
-                      name: getName(m.source, m.destination),
-                      date: getFormattedDate(getDateFromUnix(v[0])),
-                      x: getDateFromUnix(v[0]),
-                      y: Number(v[1])
-                    }))}
-                    interpolation="monotoneX"
-                  />
-                ))}
-              </ChartGroup>
-            )}
-            {showScatter && (
-              <ChartGroup>
-                {metrics.map(m => (
-                  <ChartScatter
-                    name={`scatter-${metrics.indexOf(m)}`}
-                    key={`scatter-${metrics.indexOf(m)}`}
-                    data={m.values.map(v => ({
-                      name: getName(m.source, m.destination),
-                      date: getFormattedDate(getDateFromUnix(v[0])),
-                      x: getDateFromUnix(v[0]),
-                      y: Number(v[1])
-                    }))}
-                  />
-                ))}
-              </ChartGroup>
-            )}
-          </Chart>
-        )}
+        <Chart
+          themeColor={ChartThemeColor.multiUnordered}
+          ariaTitle={title}
+          containerComponent={chartVoronoi(legendData, metricType)}
+          legendData={legendData}
+          legendOrientation="vertical"
+          legendPosition="bottom-left"
+          legendAllowWrap={true}
+          legendComponent={legentComponent}
+          //TODO: fix refresh on selection change to enable animation
+          //animate={true}
+          scale={{ x: 'time', y: showBar ? 'linear' : 'sqrt' }}
+          width={doubleWidth ? 1400 : 700}
+          height={600}
+          domainPadding={{ x: 0, y: 0 }}
+          padding={{
+            bottom: legendData.length * 25 + 50,
+            left: 90,
+            right: 50,
+            top: 50
+          }}
+        >
+          <ChartAxis fixLabelOverlap />
+          <ChartAxis dependentAxis showGrid fixLabelOverlap tickFormat={y => getFormattedRateValue(y, metricType)} />
+          {showBar && (
+            <ChartStack>
+              {topKDatapoints.map((datapoints, idx) => (
+                <ChartBar name={`bar-${idx}`} key={`bar-${idx}`} data={datapoints} />
+              ))}
+            </ChartStack>
+          )}
+          {showArea && (
+            <ChartGroup>
+              {topKDatapoints.map((datapoints, idx) => (
+                <ChartArea name={`area-${idx}`} key={`area-${idx}`} data={datapoints} interpolation="monotoneX" />
+              ))}
+            </ChartGroup>
+          )}
+          {showScatter && (
+            <ChartGroup>
+              {topKDatapoints.map((datapoints, idx) => (
+                <ChartScatter name={`scatter-${idx}`} key={`scatter-${idx}`} data={datapoints} />
+              ))}
+            </ChartGroup>
+          )}
+        </Chart>
       </div>
-    );
-  }, [
-    data,
-    doubleWidth,
-    id,
-    metricFunction,
-    metricTitle,
-    metricType,
-    metrics,
-    scope,
-    showArea,
-    showBar,
-    showDonut,
-    showScatter,
-    sizePx,
-    smallerTexts,
-    t
-  ]);
-
-  return (
-    <TextContent id="metrics" className="metrics-content-div">
-      {showTitle && (
-        <Text id="metrics-title" component={TextVariants.h3}>
-          {metricTitle()}
-        </Text>
-      )}
-      {counters}
-      {chart()}
     </TextContent>
   );
 };

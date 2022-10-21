@@ -2,26 +2,22 @@ import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 
 import { EmptyState } from '@patternfly/react-core';
-import { TopologyMetrics } from '../../../api/loki';
 import LokiError from '../../../components/messages/loki-error';
 import { metrics } from '../../../components/__tests-data__/metrics';
-import { MetricFunction, MetricType } from '../../../model/flow-query';
-import { MetricScopeOptions } from '../../../model/metrics';
+import { MetricType } from '../../../model/flow-query';
 import { SamplePanel, ShuffledDefaultPanels } from '../../__tests-data__/panels';
-import { NetflowOverview } from '../netflow-overview';
-import NetflowOverviewPanel from '../netflow-overview-panel';
+import { NetflowOverview, NetflowOverviewProps } from '../netflow-overview';
+import { NetflowOverviewPanel } from '../netflow-overview-panel';
 
 describe('<NetflowOverview />', () => {
-  const props = {
+  const props: NetflowOverviewProps = {
     limit: 5,
     panels: ShuffledDefaultPanels,
     error: undefined as string | undefined,
     loading: false,
-    metricFunction: 'sum' as MetricFunction,
     metricType: 'bytes' as MetricType,
-    metricScope: MetricScopeOptions.HOST,
-    metrics: [] as TopologyMetrics[],
-    appMetrics: [] as TopologyMetrics[],
+    metrics: [],
+    totalMetric: undefined,
     clearFilters: jest.fn()
   };
   it('should render component', async () => {
@@ -42,7 +38,7 @@ describe('<NetflowOverview />', () => {
     expect(containerDiv.length).toEqual(1);
   });
   it('should render panels', async () => {
-    const wrapper = mount(<NetflowOverview {...props} metrics={metrics} />);
+    const wrapper = mount(<NetflowOverview {...props} metrics={metrics} totalMetric={metrics[0]} />);
     expect(wrapper.find(NetflowOverviewPanel)).toHaveLength(props.panels.length);
     wrapper.setProps({
       panels: [SamplePanel]

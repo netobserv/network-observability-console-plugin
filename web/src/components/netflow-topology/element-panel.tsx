@@ -17,8 +17,8 @@ import { BaseEdge, BaseNode } from '@patternfly/react-topology';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { defaultSize, maxSize, minSize } from '../../utils/panel';
-import { MetricFunction, MetricScope, MetricType } from '../../model/flow-query';
-import { peersEqual, TopologyMetrics } from '../../api/loki';
+import { MetricFunction, MetricType } from '../../model/flow-query';
+import { TopologyMetrics } from '../../api/loki';
 import { Filter } from '../../model/filters';
 import {
   decorated,
@@ -30,22 +30,20 @@ import {
   toggleElementFilter
 } from '../../model/topology';
 import './element-panel.css';
-import MetricsContent from '../metrics/metrics-content';
-import { MetricScopeOptions } from '../../model/metrics';
-import { getFormattedValue, matchPeer } from '../../utils/metrics';
+import { MetricsContent } from '../metrics/metrics-content';
+import { getFormattedValue, matchPeer, peersEqual } from '../../utils/metrics';
+import { toNamedMetric } from '../metrics/metrics-helper';
 
 export const ElementPanelContent: React.FC<{
   element: GraphElementPeer;
   metrics: TopologyMetrics[];
   metricFunction: MetricFunction;
   metricType: MetricType;
-  metricScope: MetricScope;
   filters: Filter[];
   setFilters: (filters: Filter[]) => void;
-}> = ({ element, metrics, metricFunction, metricType, metricScope, filters, setFilters }) => {
+}> = ({ element, metrics, metricFunction, metricType, filters, setFilters }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const data = element.getData();
-  // const type = element.getType();
 
   const isFiltered = React.useCallback(
     (d: ElementData) => {
@@ -153,8 +151,8 @@ export const ElementPanelContent: React.FC<{
 
   if (element instanceof BaseNode && data) {
     const filteredMetrics = metrics.filter(m => !peersEqual(m.source, m.destination));
-    const outMetrics = filteredMetrics.filter(m => matchPeer(data, m.source));
-    const inMetrics = filteredMetrics.filter(m => matchPeer(data, m.destination));
+    const outMetrics = filteredMetrics.filter(m => matchPeer(data, m.source)).map(m => toNamedMetric(t, m, data));
+    const inMetrics = filteredMetrics.filter(m => matchPeer(data, m.destination)).map(m => toNamedMetric(t, m, data));
     const outCount = outMetrics.reduce((prev, cur) => prev + getStat(cur.stats, metricFunction), 0);
     const inCount = inMetrics.reduce((prev, cur) => prev + getStat(cur.stats, metricFunction), 0);
     const infos = resourceInfos(data);
@@ -168,12 +166,11 @@ export const ElementPanelContent: React.FC<{
         )}
         <MetricsContent
           id={`node-${decorated(data).id}`}
-          metricFunction={metricFunction}
+          title={t('{{type}} rate', { type: metricType.charAt(0).toUpperCase() + metricType.slice(1) })}
           metricType={metricType}
-          metrics={[...inMetrics, ...outMetrics]}
-          scope={metricScope as MetricScopeOptions}
-          data={data}
+          metrics={[...inMetrics, ...outMetrics].sort((a, b) => getStat(b.stats, 'sum') - getStat(a.stats, 'sum'))}
           counters={metricCounts(inCount, outCount, false)}
+          limit={10}
           showTitle
           showArea
           showScatter
@@ -184,8 +181,12 @@ export const ElementPanelContent: React.FC<{
     // Edge A to B (prefering neutral naming here as there is no assumption about what is source, what is destination
     const aData = element.getSource().getData();
     const bData = element.getTarget().getData();
-    const aToBMetrics = metrics.filter(m => matchPeer(aData, m.source) && matchPeer(bData, m.destination));
-    const bToAMetrics = metrics.filter(m => matchPeer(bData, m.source) && matchPeer(aData, m.destination));
+    const aToBMetrics = metrics
+      .filter(m => matchPeer(aData, m.source) && matchPeer(bData, m.destination))
+      .map(m => toNamedMetric(t, m, data));
+    const bToAMetrics = metrics
+      .filter(m => matchPeer(bData, m.source) && matchPeer(aData, m.destination))
+      .map(m => toNamedMetric(t, m, data));
     const aToBCount = aToBMetrics.reduce((prev, cur) => prev + getStat(cur.stats, metricFunction), 0);
     const bToACount = bToAMetrics.reduce((prev, cur) => prev + getStat(cur.stats, metricFunction), 0);
     const aInfos = resourceInfos(aData);
@@ -206,11 +207,11 @@ export const ElementPanelContent: React.FC<{
         )}
         <MetricsContent
           id={`edge-${aData.id}-${bData.id}`}
-          metricFunction={metricFunction}
+          title={t('{{type}} rate', { type: metricType.charAt(0).toUpperCase() + metricType.slice(1) })}
           metricType={metricType}
-          metrics={[...aToBMetrics, ...bToAMetrics]}
-          scope={metricScope as MetricScopeOptions}
+          metrics={[...aToBMetrics, ...bToAMetrics].sort((a, b) => getStat(b.stats, 'sum') - getStat(a.stats, 'sum'))}
           counters={metricCounts(aToBCount, bToACount, true)}
+          limit={10}
           showTitle
           showArea
           showScatter
@@ -227,11 +228,10 @@ export const ElementPanel: React.FC<{
   metrics: TopologyMetrics[];
   metricFunction: MetricFunction;
   metricType: MetricType;
-  metricScope: MetricScope;
   filters: Filter[];
   setFilters: (filters: Filter[]) => void;
   id?: string;
-}> = ({ id, element, metrics, metricFunction, metricType, metricScope, filters, setFilters, onClose }) => {
+}> = ({ id, element, metrics, metricFunction, metricType, filters, setFilters, onClose }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const data = element.getData();
   const dataKind = data?.resourceKind;
@@ -267,7 +267,6 @@ export const ElementPanel: React.FC<{
           metrics={metrics}
           metricFunction={metricFunction}
           metricType={metricType}
-          metricScope={metricScope as MetricScopeOptions}
           filters={filters}
           setFilters={setFilters}
         />

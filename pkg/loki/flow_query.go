@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/netobserv/network-observability-console-plugin/pkg/model/fields"
+	"github.com/netobserv/network-observability-console-plugin/pkg/model/filters"
 	"github.com/netobserv/network-observability-console-plugin/pkg/utils/constants"
 )
 
@@ -34,7 +35,7 @@ type FlowQueryBuilder struct {
 	jsonFilters      [][]labelFilter
 }
 
-func NewFlowQueryBuilder(cfg *Config, start, end, limit, reporter, layer string) *FlowQueryBuilder {
+func NewFlowQueryBuilder(cfg *Config, start, end, limit string, reporter constants.Reporter, layer constants.Layer) *FlowQueryBuilder {
 	// Always use app stream selector, which will apply whichever matching criteria (any or all)
 	labelFilters := []labelFilter{
 		stringLabelFilter(constants.AppLabel, constants.AppLabelValue),
@@ -64,43 +65,46 @@ func NewFlowQueryBuilderWithDefaults(cfg *Config) *FlowQueryBuilder {
 	return NewFlowQueryBuilder(cfg, "", "", "", constants.ReporterBoth, constants.LayerBoth)
 }
 
-func (q *FlowQueryBuilder) Filters(filters [][]string) error {
-	for _, filter := range filters {
-		if err := q.AddFilter(filter[0], filter[1]); err != nil {
+func (q *FlowQueryBuilder) Filters(queryFilters filters.SingleQuery) error {
+	for _, filter := range queryFilters {
+		if err := q.addFilter(filter); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (q *FlowQueryBuilder) AddFilter(key, joinedValues string) error {
-	if !filterRegexpValidation.MatchString(joinedValues) {
-		return fmt.Errorf("unauthorized sign in flows request: %s", joinedValues)
+func (q *FlowQueryBuilder) addFilter(filter filters.Match) error {
+	if !filterRegexpValidation.MatchString(filter.Values) {
+		return fmt.Errorf("unauthorized sign in flows request: %s", filter.Values)
 	}
 
-	values := strings.Split(joinedValues, ",")
+	values := strings.Split(filter.Values, ",")
 
 	// Stream selector labels
-	if q.config.IsLabel(key) {
+	if q.config.IsLabel(filter.Key) {
 		if len(values) == 1 && isExactMatch(values[0]) {
-			q.addExactMatchSingleLabel(key, trimExactMatch(values[0]))
+			if filter.Not {
+				q.labelFilters = append(q.labelFilters, notStringLabelFilter(filter.Key, trimExactMatch(values[0])))
+			} else {
+				q.labelFilters = append(q.labelFilters, stringLabelFilter(filter.Key, trimExactMatch(values[0])))
+			}
 		} else {
-			q.addLabelRegex(key, values)
+			q.addLabelRegex(filter.Key, values, filter.Not)
 		}
-	} else if fields.IsIP(key) {
-		q.addIPFilters(key, values)
+	} else if fields.IsIP(filter.Key) {
+		if filter.Not {
+			return fmt.Errorf("'not' operation not allowed in IP filters")
+		}
+		q.addIPFilters(filter.Key, values)
 	} else {
-		q.addLineFilters(key, values)
+		q.addLineFilters(filter.Key, values, filter.Not)
 	}
 
 	return nil
 }
 
-func (q *FlowQueryBuilder) addExactMatchSingleLabel(key string, value string) {
-	q.labelFilters = append(q.labelFilters, stringLabelFilter(key, value))
-}
-
-func (q *FlowQueryBuilder) addLabelRegex(key string, values []string) {
+func (q *FlowQueryBuilder) addLabelRegex(key string, values []string, not bool) {
 	regexStr := strings.Builder{}
 	for i, value := range values {
 		if i > 0 {
@@ -124,16 +128,21 @@ func (q *FlowQueryBuilder) addLabelRegex(key string, values []string) {
 	}
 
 	if regexStr.Len() > 0 {
-		q.labelFilters = append(q.labelFilters, regexLabelFilter(key, regexStr.String()))
+		if not {
+			q.labelFilters = append(q.labelFilters, notRegexLabelFilter(key, regexStr.String()))
+		} else {
+			q.labelFilters = append(q.labelFilters, regexLabelFilter(key, regexStr.String()))
+		}
 	}
 }
 
-func (q *FlowQueryBuilder) addLineFilters(key string, values []string) {
+func (q *FlowQueryBuilder) addLineFilters(key string, values []string, not bool) {
 	if len(values) == 0 {
 		return
 	}
 	lf := lineFilter{
 		key: key,
+		not: not,
 	}
 	isNumeric := fields.IsNumeric(key)
 	emptyMatches := false
@@ -194,9 +203,7 @@ func (q *FlowQueryBuilder) appendLabels(sb *strings.Builder) {
 
 func (q *FlowQueryBuilder) appendLineFilters(sb *strings.Builder) {
 	for _, lf := range q.lineFilters {
-		sb.WriteString("|~`")
 		lf.writeInto(sb)
-		sb.WriteByte('`')
 	}
 
 	for _, glf := range q.extraLineFilters {

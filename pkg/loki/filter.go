@@ -13,8 +13,10 @@ var valueReplacer = strings.NewReplacer(`*`, `.*`, `"`, "")
 type labelMatcher string
 
 const (
-	labelEqual   = labelMatcher("=")
-	labelMatches = labelMatcher("=~")
+	labelEqual     = labelMatcher("=")
+	labelMatches   = labelMatcher("=~")
+	labelNotEqual  = labelMatcher("!=")
+	labelNoMatches = labelMatcher("!~")
 	//infrastructure regex match any empty namespace or starting with kube- or openshift-
 	infrastructureRegex = `^$|(kube-|openshift-).*`
 )
@@ -41,6 +43,7 @@ type labelFilter struct {
 type lineFilter struct {
 	key    string
 	values []lineMatch
+	not    bool
 }
 
 type lineMatch struct {
@@ -61,6 +64,24 @@ func regexLabelFilter(labelKey string, value string) labelFilter {
 	return labelFilter{
 		key:       labelKey,
 		matcher:   labelMatches,
+		value:     value,
+		valueType: typeString,
+	}
+}
+
+func notStringLabelFilter(labelKey string, value string) labelFilter {
+	return labelFilter{
+		key:       labelKey,
+		matcher:   labelNotEqual,
+		value:     value,
+		valueType: typeString,
+	}
+}
+
+func notRegexLabelFilter(labelKey string, value string) labelFilter {
+	return labelFilter{
+		key:       labelKey,
+		matcher:   labelNoMatches,
 		value:     value,
 		valueType: typeString,
 	}
@@ -128,9 +149,17 @@ func (f *lineFilter) asLabelFilters() []labelFilter {
 			value:     v.value,
 		}
 		if v.valueType == typeRegex {
-			lf.matcher = labelMatches
+			if f.not {
+				lf.matcher = labelNoMatches
+			} else {
+				lf.matcher = labelMatches
+			}
 		} else {
-			lf.matcher = labelEqual
+			if f.not {
+				lf.matcher = labelNotEqual
+			} else {
+				lf.matcher = labelEqual
+			}
 		}
 		lfs = append(lfs, lf)
 	}
@@ -140,6 +169,11 @@ func (f *lineFilter) asLabelFilters() []labelFilter {
 // writeInto transforms a lineFilter to its corresponding part of a LogQL query
 // under construction (contained in the provided strings.Builder)
 func (f *lineFilter) writeInto(sb *strings.Builder) {
+	if f.not {
+		sb.WriteString("!~`")
+	} else {
+		sb.WriteString("|~`")
+	}
 	for i, v := range f.values {
 		if i > 0 {
 			sb.WriteByte('|')
@@ -172,4 +206,5 @@ func (f *lineFilter) writeInto(sb *strings.Builder) {
 			sb.WriteString(`.*"`)
 		}
 	}
+	sb.WriteRune('`')
 }

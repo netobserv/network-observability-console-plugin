@@ -2,30 +2,37 @@ import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 
 import { PanelMainBody } from '@patternfly/react-core';
-import { TopologyMetrics } from '../../../api/loki';
-import { MetricFunction, MetricType } from '../../../model/flow-query';
-import { MetricScopeOptions } from '../../../model/metrics';
+import { MetricType } from '../../../model/flow-query';
 import { metrics } from '../../__tests-data__/metrics';
 import { SamplePanel } from '../../__tests-data__/panels';
 import { NetflowOverview } from '../netflow-overview';
-import NetflowOverviewPanel from '../netflow-overview-panel';
+import { NetflowOverviewPanel } from '../netflow-overview-panel';
+import { MetricsContent, MetricsContentProps } from '../../metrics/metrics-content';
 
 describe('<NetflowOverviewPanel />', () => {
-  const props = {
-    limit: 5,
-    panel: SamplePanel,
-    metricFunction: 'sum' as MetricFunction,
+  const panelProps = {
+    doubleWidth: false,
+    bodyClassSmall: false,
+    title: 'title',
+    kebabItems: []
+  };
+  const contentProps: MetricsContentProps = {
+    id: SamplePanel.id,
+    title: 'title',
     metricType: 'bytes' as MetricType,
-    metricScope: MetricScopeOptions.HOST,
-    metrics: [] as TopologyMetrics[],
-    appMetrics: [] as TopologyMetrics[]
+    metrics: metrics.map(m => ({ ...m, name: 'whatever', isInternal: false })),
+    limit: 5
   };
   it('should render component', async () => {
-    const wrapper = shallow(<NetflowOverviewPanel {...props} />);
+    const wrapper = shallow(<NetflowOverviewPanel {...panelProps} />);
     expect(wrapper.find(NetflowOverview)).toBeTruthy();
   });
   it('should render content', async () => {
-    const wrapper = mount(<NetflowOverviewPanel {...props} metrics={metrics} />);
+    const wrapper = mount(
+      <NetflowOverviewPanel {...panelProps}>
+        <MetricsContent {...contentProps} />
+      </NetflowOverviewPanel>
+    );
     expect(wrapper.find(PanelMainBody)).toHaveLength(1);
   });
 });

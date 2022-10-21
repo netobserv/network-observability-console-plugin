@@ -5,7 +5,7 @@ import { TimeRange } from '../../utils/datetime';
 import { Record } from '../../api/ipfix';
 import { ExclamationTriangleIcon } from '@patternfly/react-icons';
 import './query-summary.css';
-import { bytesPerSeconds, humanFileSize } from '../../utils/bytes';
+import { byteFormat, byteRateFormat } from '../../utils/format';
 import { Stats, TopologyMetrics } from '../../api/loki';
 import _ from 'lodash';
 import { MetricType } from 'src/model/flow-query';
@@ -53,8 +53,8 @@ export const QuerySummaryContent: React.FC<{
           <FlexItem>
             <Tooltip content={<Text component={TextVariants.p}>{t('Filtered sum of bytes')}</Text>}>
               <Text id="bytesCount" component={TextVariants.p}>
-                {`${humanFileSize(bytes, true, 0, !_.isEmpty(flows) && limitReached)}${
-                  totalBytes > 0 ? ' / ' + humanFileSize(totalBytes, true, 0) : ''
+                {`${byteFormat(bytes, 0, !_.isEmpty(flows) && limitReached)}${
+                  totalBytes > 0 ? ' / ' + byteFormat(totalBytes, 0) : ''
                 }`}
               </Text>
             </Tooltip>
@@ -75,8 +75,8 @@ export const QuerySummaryContent: React.FC<{
           <FlexItem>
             <Tooltip content={<Text component={TextVariants.p}>{t('Filtered average speed')}</Text>}>
               <Text id="bpsCount" component={TextVariants.p}>
-                {`${bytesPerSeconds(bytes / rangeInSeconds, !_.isEmpty(flows) && limitReached)}${
-                  totalBytes > 0 ? ' / ' + bytesPerSeconds(totalBytes / rangeInSeconds) : ''
+                {`${byteRateFormat(bytes / rangeInSeconds, 2, !_.isEmpty(flows) && limitReached)}${
+                  totalBytes > 0 ? ' / ' + byteRateFormat(totalBytes / rangeInSeconds, 2) : ''
                 }`}
               </Text>
             </Tooltip>
