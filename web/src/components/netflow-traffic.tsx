@@ -174,7 +174,9 @@ export const NetflowTraffic: React.FC<{
   const [match, setMatch] = React.useState<Match>(getMatchFromURL());
   const [reporter, setReporter] = React.useState<Reporter>(getReporterFromURL());
   const [layer, setLayer] = React.useState<Layer>(getLayerFromURL());
-  const [limit, setLimit] = React.useState<number>(getLimitFromURL());
+  const [limit, setLimit] = React.useState<number>(
+    getLimitFromURL(selectedViewId === 'table' ? LIMIT_VALUES[0] : TOP_VALUES[0])
+  );
   const [lastLimit, setLastLimit] = useLocalStorage<number>(LOCAL_STORAGE_LAST_LIMIT_KEY, LIMIT_VALUES[0]);
   const [lastTop, setLastTop] = useLocalStorage<number>(LOCAL_STORAGE_LAST_TOP_KEY, TOP_VALUES[0]);
   const [range, setRange] = React.useState<number | TimeRange>(getRangeFromURL());
@@ -264,7 +266,7 @@ export const NetflowTraffic: React.FC<{
       match === 'any' ? groupFiltersMatchAny(enabledFilters) : groupFiltersMatchAll(enabledFilters);
     const query: FlowQuery = {
       filters: groupedFilters,
-      limit: limit,
+      limit: LIMIT_VALUES.includes(limit) ? limit : LIMIT_VALUES[0],
       reporter: reporter,
       layer: layer
     };
@@ -282,8 +284,7 @@ export const NetflowTraffic: React.FC<{
       if (selectedViewId === 'topology') {
         query.groups = topologyOptions.groupTypes !== TopologyGroupTypes.NONE ? topologyOptions.groupTypes : undefined;
       } else if (selectedViewId === 'overview') {
-        //TODO: filter loki results like "metric":{} and sources equal to destinations from server side
-        query.limit = limit + 5;
+        query.limit = TOP_VALUES.includes(limit) ? limit : TOP_VALUES[0];
         query.groups = undefined;
       }
       const info = computeStepInterval(range);

@@ -49,6 +49,7 @@ export function useLocalStorage<T>(
       }
     } catch (error) {
       console.error(error);
+      clearLocalStorage();
       return initialValue;
     }
   });
@@ -81,7 +82,17 @@ export function useLocalStorage<T>(
       window.localStorage.setItem(LOCAL_STORAGE_PLUGIN_KEY, JSON.stringify(parsedItem));
     } catch (error) {
       console.error(error);
+      clearLocalStorage();
     }
   };
   return [storedValue, setValue];
+}
+
+export function clearLocalStorage() {
+  try {
+    console.info('clearing local storage ' + LOCAL_STORAGE_PLUGIN_KEY);
+    window.localStorage.removeItem(LOCAL_STORAGE_PLUGIN_KEY);
+  } catch (error) {
+    console.error(error);
+  }
 }

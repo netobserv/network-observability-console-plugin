@@ -1,4 +1,6 @@
 import * as React from 'react';
+import { clearURLParams } from '../utils/url';
+import { clearLocalStorage } from '../utils/local-storage-hook';
 import NetflowTraffic from './netflow-traffic';
 
 type Props = {};
@@ -24,6 +26,11 @@ class NetflowTrafficParent extends React.Component<Props, State> {
     this.setState({ error: error });
   }
 
+  reset() {
+    clearLocalStorage();
+    clearURLParams();
+  }
+
   render() {
     if (this.state.error) {
       return (
@@ -31,6 +38,10 @@ class NetflowTrafficParent extends React.Component<Props, State> {
           <h1>Unexpected error</h1>
           <p>{this.state.error.toString()}</p>
           <p>(check logs for more information)</p>
+          &nbsp;
+          <p>If the error persists, use the reset button below</p>
+          <p>to clear the local storage and remove url parameters before reloading the page</p>
+          <button onClick={() => this.reset()}>Reset</button>
         </div>
       );
     }

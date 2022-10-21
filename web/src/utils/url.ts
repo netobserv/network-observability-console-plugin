@@ -62,6 +62,12 @@ export const removeURLParam = (param: URLParam) => {
   }
 };
 
+export const clearURLParams = () => {
+  const url = new URL(window.location.href);
+  console.info('clearing url parameters ' + url);
+  history.push(url.pathname);
+};
+
 export const getPathWithParams = (pathName = '') => {
   return `${pathName}?${new URLSearchParams(window.location.search).toString()}`;
 };
