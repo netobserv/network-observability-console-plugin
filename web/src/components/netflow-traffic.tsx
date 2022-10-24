@@ -946,7 +946,9 @@ export const NetflowTraffic: React.FC<{
       />
       {
         <Flex className="netflow-traffic-tabs">
-          <FlexItem id="tabs-container" flex={{ default: 'flex_1' }}>{viewTabs()}</FlexItem>
+          <FlexItem id="tabs-container" flex={{ default: 'flex_1' }}>
+            {viewTabs()}
+          </FlexItem>
           <FlexItem className={`${isDark() ? 'dark' : 'light'}-bottom-border`}>
             <Button
               data-test="show-view-options-button"
