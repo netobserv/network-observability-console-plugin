@@ -32,6 +32,7 @@ import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
 import { useTheme } from '../utils/theme-hook';
 import { saveSvgAsPng } from 'save-svg-as-png';
+import { isDark } from '../utils/theme';
 import { Record } from '../api/ipfix';
 import { Stats, TopologyMetrics } from '../api/loki';
 import { getFlows, getTopology } from '../api/routes';
@@ -945,8 +946,8 @@ export const NetflowTraffic: React.FC<{
       />
       {
         <Flex className="netflow-traffic-tabs">
-          <FlexItem flex={{ default: 'flex_1' }}>{viewTabs()}</FlexItem>
-          <FlexItem>
+          <FlexItem id="tabs-container" flex={{ default: 'flex_1' }}>{viewTabs()}</FlexItem>
+          <FlexItem className={`${isDark() ? 'dark' : 'light'}-bottom-border`}>
             <Button
               data-test="show-view-options-button"
               id="show-view-options-button"

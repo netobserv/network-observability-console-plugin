@@ -137,3 +137,15 @@ span.pf-c-button__icon.pf-m-start {
     max-width: 430px;
     background: white;
 }
+
+#tabs-container {
+    margin: 0;
+}
+
+.light-bottom-border {
+    border-bottom: 1px #d2d2d2 solid;
+}
+
+.dark-bottom-border {
+    border-bottom: 1px #444548 solid;
+}
