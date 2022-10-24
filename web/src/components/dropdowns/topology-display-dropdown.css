@@ -1,11 +1,12 @@
-#topology-display-dropdown>.pf-c-select__menu-group {
-  width: 100%;
+#topology-display-dropdown {
+  min-width: 260px;
 }
 
 .display-dropdown-padding {
   padding: 0 1em 1em 1em !important;
 }
 
+#scope>.pf-c-dropdown__menu,
 #layout>.pf-c-dropdown__menu,
 #group>.pf-c-dropdown__menu,
 #truncate>.pf-c-dropdown__menu {

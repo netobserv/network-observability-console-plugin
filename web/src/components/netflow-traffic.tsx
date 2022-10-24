@@ -104,14 +104,12 @@ import {
   setURLReporter
 } from '../utils/router';
 import { getURLParams, hasEmptyParams, netflowTrafficPath, removeURLParam, setURLParams, URLParam } from '../utils/url';
-import MetricFunctionDropdown from './dropdowns/metric-function-dropdown';
-import MetricTypeDropdown from './dropdowns/metric-type-dropdown';
+import { OverviewDisplayDropdown } from './dropdowns/overview-display-dropdown';
 import { LIMIT_VALUES, TOP_VALUES } from './dropdowns/query-options-dropdown';
 import { RefreshDropdown } from './dropdowns/refresh-dropdown';
-import ScopeDropdown from './dropdowns/scope-dropdown';
-import TableDisplayDropdown, { Size } from './dropdowns/table-display-dropdown';
+import { TableDisplayDropdown, Size } from './dropdowns/table-display-dropdown';
 import TimeRangeDropdown from './dropdowns/time-range-dropdown';
-import TopologyDisplayDropdown from './dropdowns/topology-display-dropdown';
+import { TopologyDisplayDropdown } from './dropdowns/topology-display-dropdown';
 import { FiltersToolbar } from './filters/filters-toolbar';
 import { ColumnsModal } from './modals/columns-modal';
 import { ExportModal } from './modals/export-modal';
@@ -965,10 +963,23 @@ export const NetflowTraffic: React.FC<{
         <Toolbar data-test-id="view-options-toolbar" id="view-options-toolbar">
           <ToolbarItem className="flex-start">
             <OverflowMenuItem key="display">
+              {selectedViewId === 'overview' && (
+                <OverviewDisplayDropdown
+                  metricType={metricType}
+                  setMetricType={setMetricType}
+                  metricScope={metricScope}
+                  setMetricScope={setMetricScope}
+                />
+              )}
               {selectedViewId === 'table' && <TableDisplayDropdown size={size} setSize={setSize} />}
               {selectedViewId === 'topology' && (
                 <TopologyDisplayDropdown
+                  metricFunction={metricFunction}
+                  setMetricFunction={setMetricFunction}
+                  metricType={metricType}
+                  setMetricType={setMetricType}
                   metricScope={metricScope}
+                  setMetricScope={setMetricScope}
                   topologyOptions={topologyOptions}
                   setTopologyOptions={setTopologyOptions}
                 />
@@ -978,25 +989,6 @@ export const NetflowTraffic: React.FC<{
           {selectedViewId === 'topology' && (
             <ToolbarItem className="flex-start" id="search-container" data-test="search-container">
               <SearchComponent ref={searchRef} setSearchEvent={setSearchEvent} />
-            </ToolbarItem>
-          )}
-          {selectedViewId !== 'table' && (
-            <ToolbarItem className="flex-start">
-              <OverflowMenuItem key="metrics">
-                <MetricFunctionDropdown
-                  data-test="metricFunction"
-                  id="metricFunction"
-                  selected={metricFunction}
-                  setMetricFunction={setMetricFunction}
-                />
-                <MetricTypeDropdown
-                  data-test="metricType"
-                  id="metricType"
-                  selected={metricType}
-                  setMetricType={setMetricType}
-                />
-                <ScopeDropdown data-test="scope" id="scope" selected={metricScope} setScopeType={setMetricScope} />
-              </OverflowMenuItem>
             </ToolbarItem>
           )}
           <ToolbarItem className="flex-start" alignment={{ default: 'alignRight' }}>

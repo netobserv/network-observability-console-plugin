@@ -1,8 +1,8 @@
-import { Checkbox, Select, Switch, Tooltip } from '@patternfly/react-core';
+import { Checkbox, Flex, FlexItem, Select, Switch, Tooltip } from '@patternfly/react-core';
 import { InfoAltIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { MetricScope } from '../../model/flow-query';
+import { MetricFunction, MetricScope, MetricType } from '../../model/flow-query';
 import { MetricScopeOptions } from '../../model/metrics';
 import { LayoutName, TopologyGroupTypes, TopologyOptions, TopologyTruncateLength } from '../../model/topology';
 import GroupDropdown from './group-dropdown';
@@ -10,14 +10,31 @@ import LayoutDropdown from './layout-dropdown';
 import TruncateDropdown from './truncate-dropdown';
 
 import './topology-display-dropdown.css';
+import MetricFunctionDropdown from './metric-function-dropdown';
+import MetricTypeDropdown from './metric-type-dropdown';
+import ScopeDropdown from './scope-dropdown';
 
 export type Size = 's' | 'm' | 'l';
 
 export const TopologyDisplayOptions: React.FC<{
+  metricFunction: MetricFunction;
+  setMetricFunction: (f: MetricFunction) => void;
+  metricType: MetricType;
+  setMetricType: (t: MetricType) => void;
   metricScope: MetricScope;
+  setMetricScope: (s: MetricScope) => void;
   topologyOptions: TopologyOptions;
   setTopologyOptions: (o: TopologyOptions) => void;
-}> = ({ metricScope, topologyOptions, setTopologyOptions }) => {
+}> = ({
+  metricFunction,
+  setMetricFunction,
+  metricType,
+  setMetricType,
+  metricScope,
+  setMetricScope,
+  topologyOptions,
+  setTopologyOptions
+}) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   const setLayout = (layout: LayoutName) => {
@@ -44,15 +61,44 @@ export const TopologyDisplayOptions: React.FC<{
   return (
     <>
       <div className="pf-c-select__menu-group">
-        <Tooltip content={t('The way in which topology items are arranged.')}>
+        <Tooltip content={t('Measurement to show as edge labels.')}>
           <div className="pf-c-select__menu-group-title">
             <>
-              {t('Layout')} <InfoAltIcon />
+              {t('Edge labels')} <InfoAltIcon />
             </>
           </div>
         </Tooltip>
         <div className="display-dropdown-padding">
-          <LayoutDropdown id="layout" selected={topologyOptions.layout} setLayout={setLayout} />
+          <Flex>
+            <FlexItem>
+              <MetricFunctionDropdown
+                data-test="metricFunction"
+                id="metricFunction"
+                selected={metricFunction}
+                setMetricFunction={setMetricFunction}
+              />
+            </FlexItem>
+            <FlexItem>
+              <MetricTypeDropdown
+                data-test="metricType"
+                id="metricType"
+                selected={metricType}
+                setMetricType={setMetricType}
+              />
+            </FlexItem>
+          </Flex>
+        </div>
+      </div>
+      <div className="pf-c-select__menu-group">
+        <Tooltip content={t('The level of details represented.')}>
+          <div className="pf-c-select__menu-group-title">
+            <>
+              {t('Scope')} <InfoAltIcon />
+            </>
+          </div>
+        </Tooltip>
+        <div className="display-dropdown-padding">
+          <ScopeDropdown data-test="scope" id="scope" selected={metricScope} setScopeType={setMetricScope} />
         </div>
       </div>
       <div className="pf-c-select__menu-group">
@@ -71,6 +117,18 @@ export const TopologyDisplayOptions: React.FC<{
             selected={topologyOptions.groupTypes}
             setGroupType={setGroupType}
           />
+        </div>
+      </div>
+      <div className="pf-c-select__menu-group">
+        <Tooltip content={t('The way in which topology items are arranged.')}>
+          <div className="pf-c-select__menu-group-title">
+            <>
+              {t('Layout')} <InfoAltIcon />
+            </>
+          </div>
+        </Tooltip>
+        <div className="display-dropdown-padding">
+          <LayoutDropdown id="layout" selected={topologyOptions.layout} setLayout={setLayout} />
         </div>
       </div>
       <div className="pf-c-select__menu-group">
@@ -157,10 +215,24 @@ export const TopologyDisplayOptions: React.FC<{
 };
 
 export const TopologyDisplayDropdown: React.FC<{
+  metricFunction: MetricFunction;
+  setMetricFunction: (f: MetricFunction) => void;
+  metricType: MetricType;
+  setMetricType: (t: MetricType) => void;
   metricScope: MetricScope;
+  setMetricScope: (s: MetricScope) => void;
   topologyOptions: TopologyOptions;
   setTopologyOptions: (o: TopologyOptions) => void;
-}> = ({ metricScope, topologyOptions, setTopologyOptions }) => {
+}> = ({
+  metricFunction,
+  setMetricFunction,
+  metricType,
+  setMetricType,
+  metricScope,
+  setMetricScope,
+  topologyOptions,
+  setTopologyOptions
+}) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [isOpen, setOpen] = React.useState<boolean>(false);
 
@@ -173,7 +245,12 @@ export const TopologyDisplayDropdown: React.FC<{
         onToggle={() => setOpen(!isOpen)}
         customContent={
           <TopologyDisplayOptions
+            metricFunction={metricFunction}
+            setMetricFunction={setMetricFunction}
+            metricType={metricType}
+            setMetricType={setMetricType}
             metricScope={metricScope}
+            setMetricScope={setMetricScope}
             topologyOptions={topologyOptions}
             setTopologyOptions={setTopologyOptions}
           />
