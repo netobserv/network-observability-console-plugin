@@ -45,7 +45,6 @@ Plugin can be served locally using the following command:
 make serve
 ```
 
-(It's the same as running ./http-server.sh)
 
 Make sure you are logged in your OpenShift cluster before with the CLI (`oc login -u kubeadmin` ...)
 
