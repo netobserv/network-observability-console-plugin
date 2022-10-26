@@ -5,6 +5,7 @@ BUILD_DATE := $(shell date +%Y-%m-%d\ %H:%M)
 # You can add GO Build flags like -gcflags=all="-N -l" here to remove optimizations for debugging
 BUILD_FLAGS ?= -ldflags "-X 'main.buildVersion=${BUILD_VERSION}' -X 'main.buildDate=${BUILD_DATE}'"
 BUILD_SHA := $(shell git rev-parse --short HEAD)
+SHELL := /bin/bash
 
 BASE_IMAGE ?= quay.io/${IMG_USER}/network-observability-console-plugin
 IMAGE ?= ${BASE_IMAGE}:${TAG}
