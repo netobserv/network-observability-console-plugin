@@ -1,4 +1,5 @@
 import { TFunction } from 'i18next';
+import { Feature, isAllowed } from './features-gate';
 
 export type OverviewPanelId =
   | 'overview'
@@ -18,18 +19,27 @@ export type OverviewPanel = {
 };
 
 export const getDefaultOverviewPanels = (): OverviewPanel[] => {
-  return [
-    { id: 'overview', isSelected: true },
+  let panels: OverviewPanel[] = [];
+
+  panels = panels.concat([
     { id: 'top_avg_donut', isSelected: true },
     { id: 'top_latest_donut', isSelected: true },
     { id: 'top_bar', isSelected: true },
     { id: 'total_timeseries', isSelected: true },
     { id: 'top_bar_total', isSelected: true },
-    { id: 'top_timeseries', isSelected: true },
-    { id: 'top_sankey', isSelected: true },
-    { id: 'packets_dropped', isSelected: true },
-    { id: 'inbound_flows_region', isSelected: true }
-  ];
+    { id: 'top_timeseries', isSelected: true }
+  ]);
+  if (isAllowed(Feature.Overview)) {
+    panels.unshift({ id: 'overview', isSelected: true });
+
+    panels = panels.concat([
+      { id: 'top_sankey', isSelected: true },
+      { id: 'packets_dropped', isSelected: true },
+      { id: 'inbound_flows_region', isSelected: true }
+    ]);
+  }
+
+  return panels;
 };
 
 export const getOverviewPanelTitle = (t: TFunction, id: OverviewPanelId, limit: string | number = 'X'): string => {

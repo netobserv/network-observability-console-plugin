@@ -59,7 +59,6 @@ import { loadConfig } from '../utils/config';
 import { ContextSingleton } from '../utils/context';
 import { computeStepInterval, TimeRange } from '../utils/datetime';
 import { getHTTPErrorDetails } from '../utils/errors';
-import { Feature, isAllowed } from '../utils/features-gate';
 import { useK8sModelsWithColors } from '../utils/k8s-models-hook';
 import {
   LOCAL_STORAGE_COLS_KEY,
@@ -166,10 +165,7 @@ export const NetflowTraffic: React.FC<{
   const [isOverviewModalOpen, setOverviewModalOpen] = React.useState(false);
   const [isColModalOpen, setColModalOpen] = React.useState(false);
   const [isExportModalOpen, setExportModalOpen] = React.useState(false);
-  const [selectedViewId, setSelectedViewId] = useLocalStorage<ViewId>(
-    LOCAL_STORAGE_VIEW_ID_KEY,
-    isAllowed(Feature.Overview) ? 'overview' : 'table'
-  );
+  const [selectedViewId, setSelectedViewId] = useLocalStorage<ViewId>(LOCAL_STORAGE_VIEW_ID_KEY, 'overview');
   const [filters, setFilters] = React.useState<Filter[]>([]);
   const [match, setMatch] = React.useState<Match>(getMatchFromURL());
   const [reporter, setReporter] = React.useState<Reporter>(getReporterFromURL());
@@ -485,13 +481,11 @@ export const NetflowTraffic: React.FC<{
         onSelect={(event, eventkey) => selectView(eventkey as ViewId)}
         role="region"
       >
-        {isAllowed(Feature.Overview) && (
-          <Tab
-            className="netflow-traffic-tab"
-            eventKey={'overview'}
-            title={<TabTitleText>{t('Overview')}</TabTitleText>}
-          />
-        )}
+        <Tab
+          className="netflow-traffic-tab"
+          eventKey={'overview'}
+          title={<TabTitleText>{t('Overview')}</TabTitleText>}
+        />
         <Tab
           className="netflow-traffic-tab"
           eventKey={'table'}
