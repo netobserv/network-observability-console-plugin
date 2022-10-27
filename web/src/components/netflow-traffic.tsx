@@ -40,7 +40,6 @@ import {
   FlowQuery,
   groupFiltersMatchAll,
   groupFiltersMatchAny,
-  Layer,
   Match,
   MetricFunction,
   MetricScope,
@@ -84,13 +83,11 @@ import {
   defaultMetricFunction,
   defaultMetricType,
   getFiltersFromURL,
-  getLayerFromURL,
   getLimitFromURL,
   getMatchFromURL,
   getRangeFromURL,
   getReporterFromURL,
   setURLFilters,
-  setURLLayer,
   setURLLimit,
   setURLMatch,
   setURLMetricFunction,
@@ -174,7 +171,6 @@ export const NetflowTraffic: React.FC<{
   const [filters, setFilters] = React.useState<Filter[]>([]);
   const [match, setMatch] = React.useState<Match>(getMatchFromURL());
   const [reporter, setReporter] = React.useState<Reporter>(getReporterFromURL());
-  const [layer, setLayer] = React.useState<Layer>(getLayerFromURL());
   const [limit, setLimit] = React.useState<number>(
     getLimitFromURL(selectedViewId === 'table' ? LIMIT_VALUES[0] : TOP_VALUES[0])
   );
@@ -299,8 +295,7 @@ export const NetflowTraffic: React.FC<{
     const query: FlowQuery = {
       filters: groupedFilters,
       limit: LIMIT_VALUES.includes(limit) ? limit : LIMIT_VALUES[0],
-      reporter: reporter,
-      layer: layer
+      reporter: reporter
     };
     if (range) {
       if (typeof range === 'number') {
@@ -330,7 +325,6 @@ export const NetflowTraffic: React.FC<{
     match,
     limit,
     reporter,
-    layer,
     range,
     selectedViewId,
     metricType,
@@ -454,9 +448,6 @@ export const NetflowTraffic: React.FC<{
     setURLReporter(reporter);
   }, [reporter]);
   React.useEffect(() => {
-    setURLLayer(layer);
-  }, [layer]);
-  React.useEffect(() => {
     setURLMetricFunction(metricFunction);
     setURLMetricType(metricType);
   }, [metricFunction, metricType]);
@@ -466,7 +457,7 @@ export const NetflowTraffic: React.FC<{
     if (!forcedFilters) {
       setQueryParams(getURLParams().toString());
     }
-  }, [filters, range, limit, match, reporter, layer, metricFunction, metricType, setQueryParams, forcedFilters]);
+  }, [filters, range, limit, match, reporter, metricFunction, metricType, setQueryParams, forcedFilters]);
 
   // update local storage enabled filters
   React.useEffect(() => {
@@ -892,9 +883,7 @@ export const NetflowTraffic: React.FC<{
           reporter,
           setReporter,
           allowReporterBoth: selectedViewId === 'table',
-          useTopK: selectedViewId === 'overview',
-          layer: layer,
-          setLayer: setLayer
+          useTopK: selectedViewId === 'overview'
         }}
         forcedFilters={forcedFilters}
         actions={actions()}

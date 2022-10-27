@@ -7,15 +7,13 @@ import QueryOptionsDropdown, { QueryOptionsDropdownProps, QueryOptionsPanel } fr
 describe('<QueryOptionsDropdown />', () => {
   const props: QueryOptionsDropdownProps = {
     reporter: 'destination',
-    layer: 'infrastructure',
     allowReporterBoth: true,
     useTopK: false,
     limit: 100,
     match: 'all',
     setLimit: jest.fn(),
     setMatch: jest.fn(),
-    setReporter: jest.fn(),
-    setLayer: jest.fn()
+    setReporter: jest.fn()
   };
   it('should render component', async () => {
     const wrapper = shallow(<QueryOptionsDropdown {...props} />);
@@ -27,15 +25,13 @@ describe('<QueryOptionsDropdown />', () => {
 describe('<QueryOptionsPanel />', () => {
   const props: QueryOptionsDropdownProps = {
     reporter: 'destination',
-    layer: 'infrastructure',
     allowReporterBoth: true,
     useTopK: false,
     limit: 100,
     match: 'all',
     setLimit: jest.fn(),
     setMatch: jest.fn(),
-    setReporter: jest.fn(),
-    setLayer: jest.fn()
+    setReporter: jest.fn()
   };
   beforeEach(() => {
     props.setLimit = jest.fn();
@@ -44,9 +40,9 @@ describe('<QueryOptionsPanel />', () => {
   });
   it('should render component', async () => {
     const wrapper = shallow(<QueryOptionsPanel {...props} />);
-    expect(wrapper.find('.pf-c-select__menu-group').length).toBe(4);
-    expect(wrapper.find('.pf-c-select__menu-group-title').length).toBe(4);
-    expect(wrapper.find(Radio)).toHaveLength(11);
+    expect(wrapper.find('.pf-c-select__menu-group').length).toBe(3);
+    expect(wrapper.find('.pf-c-select__menu-group-title').length).toBe(3);
+    expect(wrapper.find(Radio)).toHaveLength(8);
 
     //setOptions should not be called at startup, because it is supposed to be already initialized from URL
     expect(props.setLimit).toHaveBeenCalledTimes(0);
@@ -58,7 +54,6 @@ describe('<QueryOptionsPanel />', () => {
     expect(props.setLimit).toHaveBeenCalledTimes(0);
     expect(props.setReporter).toHaveBeenCalledTimes(0);
     expect(props.setMatch).toHaveBeenCalledTimes(0);
-    expect(props.setLayer).toHaveBeenCalledTimes(0);
 
     act(() => {
       wrapper.find('#reporter-source').find(Radio).props().onChange!(true, {} as React.FormEvent<HTMLInputElement>);
@@ -66,7 +61,6 @@ describe('<QueryOptionsPanel />', () => {
     expect(props.setLimit).toHaveBeenCalledTimes(0);
     expect(props.setReporter).toHaveBeenNthCalledWith(1, 'source');
     expect(props.setMatch).toHaveBeenCalledTimes(0);
-    expect(props.setLayer).toHaveBeenCalledTimes(0);
     wrapper.setProps({ ...props, reporter: 'source' });
 
     act(() => {
@@ -75,7 +69,6 @@ describe('<QueryOptionsPanel />', () => {
     expect(props.setLimit).toHaveBeenCalledTimes(0);
     expect(props.setReporter).toHaveBeenNthCalledWith(2, 'both');
     expect(props.setMatch).toHaveBeenCalledTimes(0);
-    expect(props.setLayer).toHaveBeenCalledTimes(0);
     wrapper.setProps({ ...props, reporter: 'both' });
 
     act(() => {
@@ -84,17 +77,7 @@ describe('<QueryOptionsPanel />', () => {
     expect(props.setLimit).toHaveBeenNthCalledWith(1, 1000);
     expect(props.setReporter).toHaveBeenNthCalledWith(2, 'both');
     expect(props.setMatch).toHaveBeenCalledTimes(0);
-    expect(props.setLayer).toHaveBeenCalledTimes(0);
     wrapper.setProps({ ...props, limit: 1000 });
-
-    act(() => {
-      wrapper.find('#layer-application').find(Radio).props().onChange!(true, {} as React.FormEvent<HTMLInputElement>);
-    });
-    expect(props.setLimit).toHaveBeenNthCalledWith(1, 1000);
-    expect(props.setReporter).toHaveBeenNthCalledWith(2, 'both');
-    expect(props.setMatch).toHaveBeenCalledTimes(0);
-    expect(props.setLayer).toHaveBeenNthCalledWith(1, 'application');
-    wrapper.setProps({ ...props, application: 'application' });
 
     act(() => {
       wrapper.find('#match-any').find(Radio).props().onChange!(true, {} as React.FormEvent<HTMLInputElement>);
@@ -102,6 +85,5 @@ describe('<QueryOptionsPanel />', () => {
     expect(props.setLimit).toHaveBeenNthCalledWith(1, 1000);
     expect(props.setReporter).toHaveBeenNthCalledWith(2, 'both');
     expect(props.setMatch).toHaveBeenNthCalledWith(1, 'any');
-    expect(props.setLayer).toHaveBeenNthCalledWith(1, 'application');
   });
 });

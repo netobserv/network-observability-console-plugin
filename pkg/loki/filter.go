@@ -3,8 +3,6 @@ package loki
 import (
 	"fmt"
 	"strings"
-
-	"github.com/netobserv/network-observability-console-plugin/pkg/model/fields"
 )
 
 // remove quotes and replace * by regex any
@@ -17,8 +15,6 @@ const (
 	labelMatches   = labelMatcher("=~")
 	labelNotEqual  = labelMatcher("!=")
 	labelNoMatches = labelMatcher("!~")
-	//infrastructure regex match any empty namespace or starting with kube- or openshift-
-	infrastructureRegex = `^$|(kube-|openshift-).*`
 )
 
 type valueType int
@@ -94,25 +90,6 @@ func ipLabelFilter(labelKey, cidr string) labelFilter {
 		value:     cidr,
 		valueType: typeIP,
 	}
-}
-
-//layerLineFilter match or exclude infrastructure namespaces
-//keeping related kubernetes service flows
-func layerLineFilter(match bool, ingressMatcher string) string {
-	var matcher string
-	if match {
-		matcher = `=~`
-	} else {
-		matcher = `!~`
-	}
-
-	return `(` +
-		`(` + fields.SrcNamespace + matcher + `"` + infrastructureRegex + `"` +
-		`+or+` + fields.SrcNamespace + `=~"` + ingressMatcher + `")` +
-		`+and+` +
-		`(` + fields.DstNamespace + matcher + `"` + infrastructureRegex + `"` +
-		`+or+` + fields.DstNamespace + `=~"` + ingressMatcher + `")` +
-		`)`
 }
 
 func (f *labelFilter) writeInto(sb *strings.Builder) {

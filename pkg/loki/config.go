@@ -20,12 +20,11 @@ type Config struct {
 	SkipTLS          bool
 	CAPath           string
 	UseMocks         bool
-	IngressMatcher   string
 	ForwardUserToken bool
 	Labels           map[string]struct{}
 }
 
-func NewConfig(url *url.URL, statusURL *url.URL, timeout time.Duration, tenantID string, tokenPath string, forwardUserToken bool, skipTLS bool, capath string, useMocks bool, ingressMatcher string, labels []string) Config {
+func NewConfig(url *url.URL, statusURL *url.URL, timeout time.Duration, tenantID string, tokenPath string, forwardUserToken bool, skipTLS bool, capath string, useMocks bool, labels []string) Config {
 	authorization := ""
 	if tokenPath != "" {
 		bytes, err := ioutil.ReadFile(tokenPath)
@@ -44,7 +43,6 @@ func NewConfig(url *url.URL, statusURL *url.URL, timeout time.Duration, tenantID
 		SkipTLS:          skipTLS,
 		CAPath:           capath,
 		UseMocks:         useMocks,
-		IngressMatcher:   ingressMatcher,
 		ForwardUserToken: forwardUserToken,
 		Labels:           utils.GetMapInterface(labels),
 	}

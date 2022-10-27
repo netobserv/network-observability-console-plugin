@@ -1,7 +1,6 @@
 import { Filter } from './filters';
 
 export type Reporter = 'source' | 'destination' | 'both';
-export type Layer = 'infrastructure' | 'application' | 'both';
 export type Match = 'all' | 'any';
 export type MetricFunction = 'sum' | 'avg' | 'max' | 'last';
 export type MetricType = 'bytes' | 'packets';
@@ -14,7 +13,6 @@ export interface FlowQuery {
   endTime?: string;
   filters: string;
   reporter: Reporter;
-  layer: Layer;
   limit: number;
   type?: MetricType;
   scope?: MetricScope;

@@ -35,7 +35,7 @@ type FlowQueryBuilder struct {
 	jsonFilters      [][]labelFilter
 }
 
-func NewFlowQueryBuilder(cfg *Config, start, end, limit string, reporter constants.Reporter, layer constants.Layer) *FlowQueryBuilder {
+func NewFlowQueryBuilder(cfg *Config, start, end, limit string, reporter constants.Reporter) *FlowQueryBuilder {
 	// Always use app stream selector, which will apply whichever matching criteria (any or all)
 	labelFilters := []labelFilter{
 		stringLabelFilter(constants.AppLabel, constants.AppLabelValue),
@@ -45,11 +45,6 @@ func NewFlowQueryBuilder(cfg *Config, start, end, limit string, reporter constan
 		labelFilters = append(labelFilters, stringLabelFilter(fields.FlowDirection, "1"))
 	} else if reporter == constants.ReporterDestination {
 		labelFilters = append(labelFilters, stringLabelFilter(fields.FlowDirection, "0"))
-	}
-	if layer == constants.LayerInfrastructure {
-		extraLineFilters = append(extraLineFilters, `|`+layerLineFilter(true, cfg.IngressMatcher))
-	} else if layer == constants.LayerApplication {
-		extraLineFilters = append(extraLineFilters, `|`+layerLineFilter(false, cfg.IngressMatcher))
 	}
 	return &FlowQueryBuilder{
 		config:           cfg,
@@ -62,7 +57,7 @@ func NewFlowQueryBuilder(cfg *Config, start, end, limit string, reporter constan
 }
 
 func NewFlowQueryBuilderWithDefaults(cfg *Config) *FlowQueryBuilder {
-	return NewFlowQueryBuilder(cfg, "", "", "", constants.ReporterBoth, constants.LayerBoth)
+	return NewFlowQueryBuilder(cfg, "", "", "", constants.ReporterBoth)
 }
 
 func (q *FlowQueryBuilder) Filters(queryFilters filters.SingleQuery) error {

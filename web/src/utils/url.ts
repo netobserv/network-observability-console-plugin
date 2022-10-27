@@ -13,7 +13,6 @@ export enum URLParam {
   Limit = 'limit',
   Match = 'match',
   Reporter = 'reporter',
-  Layer = 'layer',
   MetricFunction = 'function',
   MetricType = 'type'
 }
