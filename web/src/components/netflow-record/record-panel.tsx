@@ -195,6 +195,7 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
               <ClipboardCopy
                 data-test="drawer-json-copy"
                 isCode
+                isReadOnly
                 isExpanded
                 hoverTip={t('Copy')}
                 clickTip={t('Copied')}
