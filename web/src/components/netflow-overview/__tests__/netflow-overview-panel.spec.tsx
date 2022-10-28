@@ -1,7 +1,7 @@
 import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 
-import { PanelMainBody } from '@patternfly/react-core';
+import { Card } from '@patternfly/react-core';
 import { MetricType } from '../../../model/flow-query';
 import { metrics } from '../../__tests-data__/metrics';
 import { SamplePanel } from '../../__tests-data__/panels';
@@ -33,6 +33,6 @@ describe('<NetflowOverviewPanel />', () => {
         <MetricsContent {...contentProps} />
       </NetflowOverviewPanel>
     );
-    expect(wrapper.find(PanelMainBody)).toHaveLength(1);
+    expect(wrapper.find(Card)).toHaveLength(1);
   });
 });

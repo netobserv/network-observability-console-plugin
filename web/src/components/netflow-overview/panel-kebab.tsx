@@ -2,6 +2,7 @@ import { Checkbox, Dropdown, DropdownItem, DropdownPosition, KebabToggle } from 
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { OverviewPanelId } from '../../utils/overview-panels';
+import './panel-kebab.css';
 
 export type PanelKebabOptions = {
   showTotal?: boolean;
@@ -104,7 +105,7 @@ export const PanelKebab: React.FC<PanelKebabProps> = ({ id, options, setOptions 
 
   return (
     <Dropdown
-      style={{ float: 'right' }}
+      className="panel-kebab"
       toggle={<KebabToggle onToggle={() => setShowOptions(!showOptions)} />}
       dropdownItems={items}
       isPlain={true}

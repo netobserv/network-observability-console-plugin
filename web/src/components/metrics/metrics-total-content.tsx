@@ -15,18 +15,24 @@ import * as React from 'react';
 import { NamedMetric } from '../../api/loki';
 import { MetricType } from '../../model/flow-query';
 import { getFormattedRateValue, isUnknownPeer } from '../../utils/metrics';
-import { ChartDataPoint, chartVoronoi, LegendDataItem, toDatapoints } from './metrics-helper';
+import {
+  ChartDataPoint,
+  chartVoronoi,
+  defaultDimensions,
+  Dimensions,
+  LegendDataItem,
+  observe,
+  toDatapoints
+} from './metrics-helper';
 import './metrics-content.css';
 
 export type MetricsTotalContentProps = {
   id: string;
   title: string;
-  sizePx?: number;
   metricType: MetricType;
   topKMetrics: NamedMetric[];
   totalMetric: NamedMetric;
   limit: number;
-  doubleWidth?: boolean;
   showTotal: boolean;
   showInternal: boolean;
   showOutOfScope: boolean;
@@ -35,12 +41,10 @@ export type MetricsTotalContentProps = {
 export const MetricsTotalContent: React.FC<MetricsTotalContentProps> = ({
   id,
   title,
-  sizePx,
   metricType,
   topKMetrics,
   totalMetric,
   limit,
-  doubleWidth,
   showTotal,
   showInternal,
   showOutOfScope
@@ -69,17 +73,16 @@ export const MetricsTotalContent: React.FC<MetricsTotalContentProps> = ({
 
   const legentComponent = <ChartLegend labelComponent={<ChartLabel />} data={legendData} />;
 
+  const containerRef = React.createRef<HTMLDivElement>();
+  const [dimensions, setDimensions] = React.useState<Dimensions>(defaultDimensions);
+  React.useEffect(() => {
+    observe(containerRef, dimensions, setDimensions);
+  }, [containerRef, dimensions]);
+
   return (
     <>
       <TextContent id="metrics" className="metrics-content-div">
-        <div
-          id={`chart-${id}`}
-          style={{
-            width: sizePx ? `${doubleWidth ? 2 * sizePx : sizePx}px` : '100%',
-            height: sizePx ? `${sizePx}px` : '100%',
-            alignSelf: 'center'
-          }}
-        >
+        <div id={`chart-${id}`} className="metrics-content-div" ref={containerRef}>
           <Chart
             themeColor={ChartThemeColor.multiUnordered}
             ariaTitle={title}
@@ -92,11 +95,11 @@ export const MetricsTotalContent: React.FC<MetricsTotalContentProps> = ({
             //TODO: fix refresh on selection change to enable animation
             //animate={true}
             scale={{ x: 'time', y: 'linear' }}
-            width={doubleWidth ? 1400 : 700}
-            height={600}
+            width={dimensions.width}
+            height={dimensions.height}
             domainPadding={{ x: 0, y: 0 }}
             padding={{
-              bottom: legendData.length * 25 + 50,
+              bottom: legendData.length * 25 + 75,
               left: 90,
               right: 50,
               top: 50

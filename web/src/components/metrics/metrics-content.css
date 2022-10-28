@@ -1,7 +1,6 @@
 .metrics-content-div {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 10px;
+  width: 100%;
+  height: 100%;
 }
 
 .small-chart-label>tspan {

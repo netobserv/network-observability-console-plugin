@@ -1,6 +1,8 @@
-div#overview-container {
-  overflow: auto;
+#overview-container {
+  overflow: inherit;
   height: 100%;
+  padding: 0 0 0 1.5rem;
+  background: #f0f0f0;
 }
 
 #overview-flex {
@@ -8,5 +10,10 @@ div#overview-container {
 }
 
 .overview-flex-item {
-  margin: 0 1em 1em 0;
+  margin: 0 !important;
+  width: 50%;
+}
+
+.overview-flex-item.full {
+  width: 100%;
 }

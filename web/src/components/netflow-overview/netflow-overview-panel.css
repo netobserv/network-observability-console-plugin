@@ -3,5 +3,17 @@
 }
 
 .overview-panel-body-small {
-  height: 200px;
+  height: 320px;
+}
+
+.overview-card-content {
+  padding: 1em 2em 1em 2em;
+}
+
+.overview-title {
+  align-self: center;
+}
+
+.overview-card {
+  margin: 0 1em 1em 0 !important;
 }

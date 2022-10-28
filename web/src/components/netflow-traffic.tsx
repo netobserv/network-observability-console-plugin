@@ -710,9 +710,10 @@ export const NetflowTraffic: React.FC<{
   };
 
   const pageContent = () => {
+    let content: JSX.Element | null = null;
     switch (selectedViewId) {
       case 'overview':
-        return (
+        content = (
           <NetflowOverview
             limit={limit}
             panels={panels}
@@ -724,8 +725,9 @@ export const NetflowTraffic: React.FC<{
             clearFilters={clearFilters}
           />
         );
+        break;
       case 'table':
-        return (
+        content = (
           <NetflowTable
             loading={loading}
             error={error}
@@ -737,8 +739,9 @@ export const NetflowTraffic: React.FC<{
             columns={columns.filter(col => col.isSelected)}
           />
         );
+        break;
       case 'topology':
-        return (
+        content = (
           <NetflowTopology
             loading={loading}
             k8sModels={k8sModels}
@@ -758,9 +761,31 @@ export const NetflowTraffic: React.FC<{
             onSelect={onElementSelect}
           />
         );
+        break;
       default:
-        return null;
+        content = null;
+        break;
     }
+
+    return (
+      <Flex id="page-content-flex" direction={{ default: 'column' }}>
+        <FlexItem flex={{ default: 'flex_1' }}>{content}</FlexItem>
+        <FlexItem>
+          <QuerySummary
+            flows={flows}
+            metrics={metrics}
+            appMetrics={totalMetric ? [totalMetric] : []}
+            metricType={metricType}
+            stats={stats}
+            appStats={appStats}
+            lastRefresh={lastRefresh}
+            range={range}
+            isShowQuerySummary={isShowQuerySummary}
+            toggleQuerySummary={() => onToggleQuerySummary(!isShowQuerySummary)}
+          />
+        </FlexItem>
+      </Flex>
+    );
   };
 
   //update data on filters changes
@@ -834,7 +859,7 @@ export const NetflowTraffic: React.FC<{
         menuControl={menuControl()}
       />
       {
-        <Flex>
+        <Flex className="netflow-traffic-tabs">
           <FlexItem flex={{ default: 'flex_1' }}>{viewTabs()}</FlexItem>
           <FlexItem>
             {selectedViewId === 'topology' && (
@@ -870,17 +895,6 @@ export const NetflowTraffic: React.FC<{
           <DrawerContentBody id="drawerBody">{pageContent()}</DrawerContentBody>
         </DrawerContent>
       </Drawer>
-      <QuerySummary
-        flows={flows}
-        metrics={metrics}
-        appMetrics={totalMetric ? [totalMetric] : []}
-        metricType={metricType}
-        stats={stats}
-        appStats={appStats}
-        lastRefresh={lastRefresh}
-        range={range}
-        toggleQuerySummary={() => onToggleQuerySummary(!isShowQuerySummary)}
-      />
       <TimeRangeModal
         id="time-range-modal"
         isModalOpen={isTRModalOpen}
