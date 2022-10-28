@@ -6,3 +6,7 @@
 .element-text {
   margin-top: 0 !important;
 }
+
+.element-metrics-container {
+  height: 400px;
+}
