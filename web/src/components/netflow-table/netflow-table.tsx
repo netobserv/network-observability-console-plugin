@@ -37,7 +37,8 @@ const NetflowTable: React.FC<{
   clearFilters: () => void;
   loading?: boolean;
   error?: string;
-}> = ({ flows, selectedRecord, columns, error, loading, size, onSelect, clearFilters }) => {
+  isDark?: boolean;
+}> = ({ flows, selectedRecord, columns, error, loading, size, onSelect, clearFilters, isDark }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   //default to 300 to allow content to be rendered in tests
@@ -187,6 +188,7 @@ const NetflowTable: React.FC<{
         height={rowHeight}
         showContent={scrollPosition <= i * rowHeight && scrollPosition + containerHeight > i * rowHeight}
         tableWidth={width}
+        isDark={isDark}
       />
     ));
   }, [

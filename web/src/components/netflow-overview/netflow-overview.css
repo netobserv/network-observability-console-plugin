@@ -2,6 +2,13 @@
   overflow: inherit;
   height: 100%;
   padding: 0 0 0 1.5rem;
+}
+
+#overview-container.dark {
+  background: #0f1214;
+}
+
+#overview-container.light {
   background: #f0f0f0;
 }
 

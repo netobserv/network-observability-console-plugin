@@ -24,6 +24,7 @@ import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
+import { useTheme } from '../utils/theme-hook';
 import { Record } from '../api/ipfix';
 import { Stats, TopologyMetrics } from '../api/loki';
 import { getFlows, getTopology } from '../api/routes';
@@ -135,6 +136,9 @@ export const NetflowTraffic: React.FC<{
   const k8sModels = useK8sModelsWithColors();
   //set context from extensions. Standalone will return a "dummy" flag
   ContextSingleton.setContext(extensions);
+  //observe html class list
+  const isDarkTheme = useTheme();
+
   const [queryParams, setQueryParams] = useLocalStorage<string>(LOCAL_STORAGE_QUERY_PARAMS_KEY);
   const [disabledFilters, setDisabledFilters] = useLocalStorage<DisabledFilters>(LOCAL_STORAGE_DISABLED_FILTERS_KEY);
   // set url params from local storage saved items at startup if empty
@@ -722,6 +726,7 @@ export const NetflowTraffic: React.FC<{
             totalMetric={totalMetric}
             loading={loading}
             error={error}
+            isDark={isDarkTheme}
             clearFilters={clearFilters}
           />
         );
@@ -737,6 +742,7 @@ export const NetflowTraffic: React.FC<{
             onSelect={onRecordSelect}
             clearFilters={clearFilters}
             columns={columns.filter(col => col.isSelected)}
+            isDark={isDarkTheme}
           />
         );
         break;
