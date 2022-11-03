@@ -207,7 +207,8 @@ const NetflowTable: React.FC<{
     scrollPosition,
     selectedRecord,
     size,
-    width
+    width,
+    isDark
   ]);
 
   if (width === 0) {
