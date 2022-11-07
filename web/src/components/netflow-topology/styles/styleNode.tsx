@@ -1,3 +1,4 @@
+import { Tooltip, TooltipPosition } from '@patternfly/react-core';
 import {
   CubeIcon,
   CubesIcon,
@@ -119,6 +120,7 @@ const renderClickableDecorator = (
   element: NodePeer,
   quadrant: TopologyQuadrant,
   icon: React.ReactNode,
+  tooltip: string,
   isActive: boolean,
   onClick: (element: NodePeer) => void,
   getShapeDecoratorCenter?: (
@@ -136,16 +138,18 @@ const renderClickableDecorator = (
     : getDefaultShapeDecoratorCenter(quadrant, element);
 
   return (
-    <Decorator
-      x={x}
-      y={y}
-      radius={DEFAULT_DECORATOR_RADIUS}
-      padding={padding}
-      showBackground
-      icon={icon}
-      className={isActive ? 'selected-decorator' : ''}
-      onClick={() => onClick(element)}
-    />
+    <Tooltip content={tooltip} position={TooltipPosition.right}>
+      <Decorator
+        x={x}
+        y={y}
+        radius={DEFAULT_DECORATOR_RADIUS}
+        padding={padding}
+        showBackground
+        icon={icon}
+        className={isActive ? 'selected-decorator' : ''}
+        onClick={() => onClick(element)}
+      />
+    </Tooltip>
   );
 };
 
@@ -214,6 +218,7 @@ const renderDecorators = (
           element,
           TopologyQuadrant.lowerRight,
           <LevelDownAltIcon />,
+          t('Step into this {{name}}', { name: data.resourceKind?.toLowerCase() }),
           false,
           onStepIntoClick,
           getShapeDecoratorCenter,
@@ -225,6 +230,9 @@ const renderDecorators = (
           element,
           TopologyQuadrant.lowerLeft,
           isFiltered ? <TimesIcon /> : <FilterIcon />,
+          isFiltered
+            ? t('Remove {{name}} filter', { name: data.resourceKind?.toLowerCase() })
+            : t('Add {{name}} filter', { name: data.resourceKind?.toLowerCase() }),
           isFiltered,
           onFilterClick,
           getShapeDecoratorCenter,
@@ -235,6 +243,7 @@ const renderDecorators = (
         element,
         TopologyQuadrant.upperRight,
         <ThumbtackIcon />,
+        isPinned ? t('Unpin this element') : t('Pin this element'),
         isPinned,
         onPinClick,
         getShapeDecoratorCenter,
