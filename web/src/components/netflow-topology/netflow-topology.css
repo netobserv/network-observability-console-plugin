@@ -25,15 +25,30 @@ g.netobserv.topology.shadowed {
   opacity: 0.5;
 }
 
+g.netobserv.topology.node-filtered>g>ellipse {
+  stroke: #EF9234;
+  stroke-width: 2px;
+}
+
+g.netobserv.topology.edge-filtered>.pf-topology__edge__link,
+g.netobserv.topology.edge-filtered>.pf-topology-connector-arrow {
+  stroke: #EF9234;
+  fill: #773D00;
+}
+
+g.netobserv.topology>g>ellipse {
+  fill: #FFFFFF;
+}
+
 g.netobserv.topology.node-highlighted>g>ellipse {
   stroke: #0066CC;
-  stroke-width: 3px;
-  --pf-topology__node__background--Fill: white;
+  stroke-width: 2px;
 }
 
 g.netobserv.topology.edge-highlighted>.pf-topology__edge__link,
 g.netobserv.topology.edge-highlighted>.pf-topology-connector-arrow {
   stroke: #0066CC;
+  fill: #002952;
 }
 
 g.netobserv.pf-topology__group>.pf-topology__group__background {

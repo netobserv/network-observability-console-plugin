@@ -63,6 +63,7 @@ type BaseNodeProps = {
   dropTarget?: boolean;
   scaleNode?: boolean; // Whether or not to scale the node, best on hover of node at lowest scale level
   shadowed?: boolean;
+  filtered?: boolean;
   highlighted?: boolean;
   label?: string; // Defaults to element.getLabel()
   secondaryLabel?: string;
@@ -112,6 +113,7 @@ const BaseNode: React.FunctionComponent<BaseNodeProps> = ({
   showLabel = true,
   label,
   shadowed,
+  filtered,
   highlighted,
   secondaryLabel,
   labelClassName,
@@ -216,6 +218,7 @@ const BaseNode: React.FunctionComponent<BaseNodeProps> = ({
     StatusModifier[status],
     'topology',
     shadowed && 'shadowed',
+    filtered && 'node-filtered',
     highlighted && 'node-highlighted'
   );
 
@@ -342,7 +345,10 @@ const BaseNode: React.FunctionComponent<BaseNodeProps> = ({
         {children}
       </g>
       {statusDecorator}
-      {isHover && attachments}
+      {
+        //isHover &&
+        attachments
+      }
     </g>
   );
 };

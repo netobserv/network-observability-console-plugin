@@ -208,6 +208,7 @@ export type NodeData = {
   canStepInto?: boolean;
   parentKind?: string;
   parentName?: string;
+  badgeColor?: string;
 };
 
 export const generateNode = (
@@ -231,6 +232,7 @@ export const generateNode = (
       ? data.namespace
       : undefined;
   const shadowed = !_.isEmpty(searchValue) && !(label.includes(searchValue) || secondaryLabel?.includes(searchValue));
+  const filtered = !_.isEmpty(searchValue) && !shadowed;
   const highlighted = !shadowed && !_.isEmpty(highlightedId) && highlightedId.includes(id);
   const k8sModel = options.nodeBadges && data.resourceKind ? k8sModels[data.resourceKind] : undefined;
   return {
@@ -245,6 +247,7 @@ export const generateNode = (
     data: {
       ...data,
       shadowed,
+      filtered,
       highlighted,
       isFiltered: isElementFiltered(data, filters, t),
       labelPosition: LabelPosition.bottom,
@@ -313,9 +316,11 @@ export const generateEdge = (
   stat: number,
   options: TopologyOptions,
   shadowed = false,
+  filtered = false,
   highlightedId: string
 ): EdgeModel => {
   const id = `${sourceId}.${targetId}`;
+
   const highlighted = !shadowed && !_.isEmpty(highlightedId) && id.includes(highlightedId);
   return {
     id: getTopologyEdgeId(sourceId, targetId),
@@ -328,6 +333,7 @@ export const generateEdge = (
       sourceId,
       targetId,
       shadowed,
+      filtered,
       highlighted,
       //edges are directed from src to dst. It will become bidirectionnal if inverted pair is found
       startTerminalType: EdgeTerminalType.none,
@@ -425,7 +431,7 @@ export const generateDataModel = (
     return node;
   }
 
-  function addEdge(sourceId: string, targetId: string, stats: MetricStats, shadowed = false) {
+  function addEdge(sourceId: string, targetId: string, stats: MetricStats, shadowed = false, filtered = false) {
     const stat = getStat(stats, options.metricFunction);
     let edge = edges.find(
       e =>
@@ -439,6 +445,7 @@ export const generateDataModel = (
       edge.data = {
         ...edge.data,
         shadowed,
+        filtered,
         //edges are directed from src to dst. It will become bidirectionnal if inverted pair is found
         startTerminalType: edge.data.sourceId !== sourceId ? EdgeTerminalType.directional : edge.data.startTerminalType,
         tag: getEdgeTag(stat, options),
@@ -446,7 +453,7 @@ export const generateDataModel = (
         bps: stat
       };
     } else {
-      edge = generateEdge(sourceId, targetId, stat, opts, shadowed, highlightedId);
+      edge = generateEdge(sourceId, targetId, stat, opts, shadowed, filtered, highlightedId);
       edges.push(edge);
     }
 
@@ -546,7 +553,13 @@ export const generateDataModel = (
     const dstNode = manageNode(d.destination);
 
     if (options.edges && srcNode && dstNode && srcNode.id !== dstNode.id) {
-      addEdge(srcNode.id, dstNode.id, d.stats, srcNode.data.shadowed || dstNode.data.shadowed);
+      addEdge(
+        srcNode.id,
+        dstNode.id,
+        d.stats,
+        srcNode.data.shadowed || dstNode.data.shadowed,
+        srcNode.data.filtered || dstNode.data.filtered
+      );
     }
   });
 
