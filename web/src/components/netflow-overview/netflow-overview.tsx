@@ -15,15 +15,15 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { TopologyMetrics } from '../../api/loki';
 import { MetricType } from '../../model/flow-query';
+import { getStat } from '../../model/topology';
+import { peersEqual } from '../../utils/metrics';
 import { getOverviewPanelTitle, OverviewPanel, OverviewPanelId } from '../../utils/overview-panels';
 import LokiError from '../messages/loki-error';
-import { NetflowOverviewPanel } from './netflow-overview-panel';
 import { MetricsContent } from '../metrics/metrics-content';
-import { StatDonut } from '../metrics/stat-donut';
 import { toNamedMetric } from '../metrics/metrics-helper';
-import { getStat } from '../../model/topology';
 import { MetricsTotalContent } from '../metrics/metrics-total-content';
-import { peersEqual } from '../../utils/metrics';
+import { StatDonut } from '../metrics/stat-donut';
+import { NetflowOverviewPanel } from './netflow-overview-panel';
 
 import './netflow-overview.css';
 import { PanelKebab, PanelKebabOptions } from './panel-kebab';
@@ -43,6 +43,7 @@ export type NetflowOverviewProps = {
   totalMetric?: TopologyMetrics;
   loading?: boolean;
   error?: string;
+  isDark?: boolean;
   clearFilters: () => void;
 };
 
@@ -54,6 +55,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
   totalMetric,
   loading,
   error,
+  isDark,
   clearFilters
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
@@ -117,15 +119,14 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
             <MetricsContent
               id={id}
               title={title}
-              sizePx={600}
               metricType={metricType}
               metrics={noInternalTopK}
               limit={limit}
               showBar={true}
               showArea={false}
               showScatter={false}
+              //TODO: NETOBSERV-688 make options for truncate / text size
               smallerTexts={false}
-              doubleWidth={false}
             />
           ),
           doubleWidth: false
@@ -136,15 +137,14 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
             <MetricsContent
               id={id}
               title={title}
-              sizePx={600}
               metricType={metricType}
               metrics={[namedTotalMetric]}
               limit={limit}
               showBar={false}
               showArea={true}
               showScatter={true}
+              //TODO: NETOBSERV-688 make options for truncate / text size
               smallerTexts={false}
-              doubleWidth={false}
             />
           ),
           doubleWidth: false
@@ -160,12 +160,10 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
             <MetricsTotalContent
               id={id}
               title={title}
-              sizePx={600}
               metricType={metricType}
               topKMetrics={topKMetrics}
               totalMetric={namedTotalMetric}
               limit={limit}
-              doubleWidth={true}
               showTotal={options.showTotal!}
               showInternal={options.showInternal!}
               showOutOfScope={options.showOutOfScope!}
@@ -181,15 +179,14 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
             <MetricsContent
               id={id}
               title={title}
-              sizePx={600}
               metricType={metricType}
               metrics={noInternalTopK}
               limit={limit}
               showBar={false}
               showArea={true}
               showScatter={true}
+              //TODO: NETOBSERV-688 make options for truncate / text size
               smallerTexts={false}
-              doubleWidth={true}
             />
           ),
           doubleWidth: true
@@ -212,9 +209,12 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
               showOthers={options.showOthers!}
               showInternal={options.showInternal!}
               showOutOfScope={options.showOutOfScope!}
+              //TODO: NETOBSERV-688 make options for truncate / text size
+              smallerTexts={true}
             />
           ),
-          kebab: <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} />
+          kebab: <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} />,
+          bodyClassSmall: true
         };
       }
       case 'top_latest_donut': {
@@ -235,9 +235,12 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
               showOthers={options.showOthers!}
               showInternal={options.showInternal!}
               showOutOfScope={options.showOutOfScope!}
+              //TODO: NETOBSERV-688 make options for truncate / text size
+              smallerTexts={true}
             />
           ),
-          kebab: <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} />
+          kebab: <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} />,
+          bodyClassSmall: true
         };
       }
       case 'top_sankey':
@@ -250,7 +253,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
   };
 
   return (
-    <div id="overview-container">
+    <div id="overview-container" className={isDark ? 'dark' : 'light'}>
       <Flex id="overview-flex" justifyContent={{ default: 'justifyContentSpaceBetween' }}>
         {panels
           .filter(p => p.isSelected)

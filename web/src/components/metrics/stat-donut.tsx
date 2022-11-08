@@ -7,6 +7,7 @@ import { getFormattedRateValue, isUnknownPeer } from '../../utils/metrics';
 import { getStat } from '../../model/topology';
 
 import './metrics-content.css';
+import { defaultDimensions, Dimensions, observe } from './metrics-helper';
 
 export type StatDonutProps = {
   id: string;
@@ -18,6 +19,7 @@ export type StatDonutProps = {
   showOthers: boolean;
   showInternal: boolean;
   showOutOfScope: boolean;
+  smallerTexts?: boolean;
 };
 
 export const StatDonut: React.FC<StatDonutProps> = ({
@@ -29,7 +31,8 @@ export const StatDonut: React.FC<StatDonutProps> = ({
   totalMetric,
   showOthers,
   showInternal,
-  showOutOfScope
+  showOutOfScope,
+  smallerTexts
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
@@ -79,19 +82,20 @@ export const StatDonut: React.FC<StatDonutProps> = ({
   }));
 
   const legentComponent = (
-    <ChartLegend labelComponent={<ChartLabel className={'small-chart-label'} />} data={legendData} />
+    <ChartLegend
+      labelComponent={<ChartLabel className={smallerTexts ? 'small-chart-label' : ''} />}
+      data={legendData}
+    />
   );
 
+  const containerRef = React.createRef<HTMLDivElement>();
+  const [dimensions, setDimensions] = React.useState<Dimensions>(defaultDimensions);
+  React.useEffect(() => {
+    observe(containerRef, dimensions, setDimensions);
+  }, [containerRef, dimensions]);
+
   return (
-    <div
-      id={id}
-      className="metrics-content-div"
-      style={{
-        width: '600px',
-        height: '600px',
-        alignSelf: 'center'
-      }}
-    >
+    <div id={id} className="metrics-content-div" ref={containerRef}>
       <ChartDonut
         themeColor={ChartThemeColor.multiUnordered}
         constrainToVisibleArea
@@ -101,8 +105,10 @@ export const StatDonut: React.FC<StatDonutProps> = ({
         legendAllowWrap={true}
         legendComponent={legentComponent}
         labels={({ datum }) => datum.x}
-        width={500}
-        height={350}
+        //TODO: fix refresh on selection change to enable animation
+        //animate={true}
+        width={dimensions.width}
+        height={dimensions.height}
         data={sliced.map(m => ({ x: `${m.name}: ${getFormattedRateValue(m.value, metricType)}`, y: m.value }))}
         padding={{
           bottom: 20,

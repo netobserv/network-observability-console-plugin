@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { ChartLegendTooltip, createContainer } from '@patternfly/react-charts';
+import { ChartLegendTooltip, createContainer, getResizeObserver } from '@patternfly/react-charts';
 import { TFunction } from 'i18next';
 import { NamedMetric, TopologyMetricPeer, TopologyMetrics } from '../../api/loki';
 import { NodeData } from '../../model/topology';
@@ -51,7 +51,7 @@ export const chartVoronoi = (legendData: LegendDataItem[], metricType: MetricTyp
   );
 };
 
-//TODO: NETOBSERV-635 add this as tab options
+//TODO: NETOBSERV-688 add this as tab options
 // function truncate(input: string) {
 //   const length = doubleWidth ? 64 : showDonut ? 10 : 18;
 //   if (input.length > length) {
@@ -128,4 +128,33 @@ export const toNamedMetric = (t: TFunction, m: TopologyMetrics, data?: NodeData)
     name: `${srcName} -> ${dstName}`,
     isInternal: false
   };
+};
+
+export type Dimensions = {
+  width: number;
+  height: number;
+};
+
+export const defaultDimensions: Dimensions = {
+  width: 500,
+  height: 500
+};
+
+export const observe = (
+  containerRef: React.RefObject<HTMLDivElement>,
+  dimensions: Dimensions,
+  setDimensions: React.Dispatch<React.SetStateAction<Dimensions>>
+) => {
+  getResizeObserver(containerRef.current!, () => {
+    if (containerRef?.current?.clientWidth || containerRef?.current?.clientHeight) {
+      const newDimension = {
+        width: containerRef?.current?.clientWidth || defaultDimensions.width,
+        height: containerRef?.current?.clientHeight || defaultDimensions.height
+      };
+
+      if (newDimension.width !== dimensions.width || newDimension.height !== dimensions.height) {
+        setDimensions(newDimension);
+      }
+    }
+  });
 };

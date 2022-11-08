@@ -6,7 +6,6 @@ import { Size } from '../dropdowns/display-dropdown';
 import { RecordField } from '../netflow-record/record-field';
 import './netflow-table-row.css';
 import CSSTransition from 'react-transition-group/CSSTransition';
-import { isDark } from '../../utils/theme';
 
 const NetflowTableRow: React.FC<{
   lastRender?: string;
@@ -19,7 +18,20 @@ const NetflowTableRow: React.FC<{
   height?: number;
   showContent?: boolean;
   tableWidth: number;
-}> = ({ lastRender, flow, selectedRecord, columns, size, onSelect, highlight, height, showContent, tableWidth }) => {
+  isDark?: boolean;
+}> = ({
+  lastRender,
+  flow,
+  selectedRecord,
+  columns,
+  size,
+  onSelect,
+  highlight,
+  height,
+  showContent,
+  tableWidth,
+  isDark
+}) => {
   const onRowClick = () => {
     onSelect(flow);
   };
@@ -31,7 +43,7 @@ const NetflowTableRow: React.FC<{
         data-test={`tr-${flow.key}`}
         isRowSelected={flow.key === selectedRecord?.key}
         onRowClick={onRowClick}
-        className={`${isDark() ? 'dark' : 'light'}-stripped`}
+        className={`${isDark ? 'dark' : 'light'}-stripped`}
         style={{ height }}
       >
         {showContent &&

@@ -1,0 +1,7 @@
+.panel-kebab {
+  float: right;
+}
+
+.panel-kebab>button {
+  padding-right: 0 !important;
+}

@@ -164,17 +164,19 @@ export const ElementPanelContent: React.FC<{
             {infos}
           </TextContent>
         )}
-        <MetricsContent
-          id={`node-${decorated(data).id}`}
-          title={t('{{type}} rate', { type: metricType.charAt(0).toUpperCase() + metricType.slice(1) })}
-          metricType={metricType}
-          metrics={[...inMetrics, ...outMetrics].sort((a, b) => getStat(b.stats, 'sum') - getStat(a.stats, 'sum'))}
-          counters={metricCounts(inCount, outCount, false)}
-          limit={10}
-          showTitle
-          showArea
-          showScatter
-        />
+        <div className="element-metrics-container">
+          <MetricsContent
+            id={`node-${decorated(data).id}`}
+            title={t('{{type}} rate', { type: metricType.charAt(0).toUpperCase() + metricType.slice(1) })}
+            metricType={metricType}
+            metrics={[...inMetrics, ...outMetrics].sort((a, b) => getStat(b.stats, 'sum') - getStat(a.stats, 'sum'))}
+            counters={metricCounts(inCount, outCount, false)}
+            limit={10}
+            showTitle
+            showArea
+            showScatter
+          />
+        </div>
       </>
     );
   } else if (element instanceof BaseEdge) {
@@ -205,17 +207,19 @@ export const ElementPanelContent: React.FC<{
             {bInfos}
           </TextContent>
         )}
-        <MetricsContent
-          id={`edge-${aData.id}-${bData.id}`}
-          title={t('{{type}} rate', { type: metricType.charAt(0).toUpperCase() + metricType.slice(1) })}
-          metricType={metricType}
-          metrics={[...aToBMetrics, ...bToAMetrics].sort((a, b) => getStat(b.stats, 'sum') - getStat(a.stats, 'sum'))}
-          counters={metricCounts(aToBCount, bToACount, true)}
-          limit={10}
-          showTitle
-          showArea
-          showScatter
-        />
+        <div className="element-metrics-container">
+          <MetricsContent
+            id={`edge-${aData.id}-${bData.id}`}
+            title={t('{{type}} rate', { type: metricType.charAt(0).toUpperCase() + metricType.slice(1) })}
+            metricType={metricType}
+            metrics={[...aToBMetrics, ...bToAMetrics].sort((a, b) => getStat(b.stats, 'sum') - getStat(a.stats, 'sum'))}
+            counters={metricCounts(aToBCount, bToACount, true)}
+            limit={10}
+            showTitle
+            showArea
+            showScatter
+          />
+        </div>
       </>
     );
   }

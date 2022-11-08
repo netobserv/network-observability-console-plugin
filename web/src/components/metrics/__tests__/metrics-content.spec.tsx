@@ -9,12 +9,10 @@ describe('<MetricsContent />', () => {
   const props: MetricsContentProps = {
     id: 'chart-test',
     title: 'chart-test',
-    sizePx: 600,
     metricType: 'bytes',
     metrics: metrics.map(m => ({ ...m, name: 'whatever', isInternal: false })),
     showTitle: true,
     smallerTexts: false,
-    doubleWidth: true,
     limit: 5
   };
   it('should render component', async () => {

@@ -1,17 +1,19 @@
 #query-summary {
-  position: absolute;
-  bottom: 0;
-  align-self: center;
-  padding: 10px;
-  z-index: 0;
-}
-
-#query-summary-content {
-  user-select: none;
-  width: fit-content;
+  padding: 1.2em;
 }
 
 .query-summary-warning {
-  color: #f0ab00;
-  font-weight: bold;
+  color: #2B9AF3;
+}
+
+#query-summary-title {
+  margin: 0;
+}
+
+#query-summary-warning-icon-container {
+  margin: 0 5px 0 0;
+}
+
+#query-summary-content>div {
+  margin-right: 2.5em;
 }

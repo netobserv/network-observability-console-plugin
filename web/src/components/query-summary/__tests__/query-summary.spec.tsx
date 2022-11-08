@@ -8,6 +8,7 @@ describe('<QuerySummary />', () => {
   const now = new Date();
 
   const mocks = {
+    isShowQuerySummary: false,
     toggleQuerySummary: jest.fn(),
     flows: FlowsSample,
     metrics: undefined,
@@ -39,7 +40,7 @@ describe('<QuerySummary />', () => {
 
   it('should toggle panel', async () => {
     const wrapper = mount(<QuerySummary {...mocks} />);
-    wrapper.find('#query-summary').last().simulate('click');
+    wrapper.find('#query-summary-toggle').last().simulate('click');
     expect(mocks.toggleQuerySummary).toHaveBeenCalledTimes(1);
   });
 });

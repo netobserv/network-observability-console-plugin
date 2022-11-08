@@ -24,6 +24,7 @@ import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
+import { useTheme } from '../utils/theme-hook';
 import { Record } from '../api/ipfix';
 import { Stats, TopologyMetrics } from '../api/loki';
 import { getFlows, getTopology } from '../api/routes';
@@ -135,6 +136,9 @@ export const NetflowTraffic: React.FC<{
   const k8sModels = useK8sModelsWithColors();
   //set context from extensions. Standalone will return a "dummy" flag
   ContextSingleton.setContext(extensions);
+  //observe html class list
+  const isDarkTheme = useTheme();
+
   const [queryParams, setQueryParams] = useLocalStorage<string>(LOCAL_STORAGE_QUERY_PARAMS_KEY);
   const [disabledFilters, setDisabledFilters] = useLocalStorage<DisabledFilters>(LOCAL_STORAGE_DISABLED_FILTERS_KEY);
   // set url params from local storage saved items at startup if empty
@@ -710,9 +714,10 @@ export const NetflowTraffic: React.FC<{
   };
 
   const pageContent = () => {
+    let content: JSX.Element | null = null;
     switch (selectedViewId) {
       case 'overview':
-        return (
+        content = (
           <NetflowOverview
             limit={limit}
             panels={panels}
@@ -721,11 +726,13 @@ export const NetflowTraffic: React.FC<{
             totalMetric={totalMetric}
             loading={loading}
             error={error}
+            isDark={isDarkTheme}
             clearFilters={clearFilters}
           />
         );
+        break;
       case 'table':
-        return (
+        content = (
           <NetflowTable
             loading={loading}
             error={error}
@@ -735,10 +742,12 @@ export const NetflowTraffic: React.FC<{
             onSelect={onRecordSelect}
             clearFilters={clearFilters}
             columns={columns.filter(col => col.isSelected)}
+            isDark={isDarkTheme}
           />
         );
+        break;
       case 'topology':
-        return (
+        content = (
           <NetflowTopology
             loading={loading}
             k8sModels={k8sModels}
@@ -758,9 +767,31 @@ export const NetflowTraffic: React.FC<{
             onSelect={onElementSelect}
           />
         );
+        break;
       default:
-        return null;
+        content = null;
+        break;
     }
+
+    return (
+      <Flex id="page-content-flex" direction={{ default: 'column' }}>
+        <FlexItem flex={{ default: 'flex_1' }}>{content}</FlexItem>
+        <FlexItem>
+          <QuerySummary
+            flows={flows}
+            metrics={metrics}
+            appMetrics={totalMetric ? [totalMetric] : []}
+            metricType={metricType}
+            stats={stats}
+            appStats={appStats}
+            lastRefresh={lastRefresh}
+            range={range}
+            isShowQuerySummary={isShowQuerySummary}
+            toggleQuerySummary={() => onToggleQuerySummary(!isShowQuerySummary)}
+          />
+        </FlexItem>
+      </Flex>
+    );
   };
 
   //update data on filters changes
@@ -834,7 +865,7 @@ export const NetflowTraffic: React.FC<{
         menuControl={menuControl()}
       />
       {
-        <Flex>
+        <Flex className="netflow-traffic-tabs">
           <FlexItem flex={{ default: 'flex_1' }}>{viewTabs()}</FlexItem>
           <FlexItem>
             {selectedViewId === 'topology' && (
@@ -870,17 +901,6 @@ export const NetflowTraffic: React.FC<{
           <DrawerContentBody id="drawerBody">{pageContent()}</DrawerContentBody>
         </DrawerContent>
       </Drawer>
-      <QuerySummary
-        flows={flows}
-        metrics={metrics}
-        appMetrics={totalMetric ? [totalMetric] : []}
-        metricType={metricType}
-        stats={stats}
-        appStats={appStats}
-        lastRefresh={lastRefresh}
-        range={range}
-        toggleQuerySummary={() => onToggleQuerySummary(!isShowQuerySummary)}
-      />
       <TimeRangeModal
         id="time-range-modal"
         isModalOpen={isTRModalOpen}
