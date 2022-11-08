@@ -21,13 +21,14 @@ import { defaultSize, maxSize, minSize } from '../../utils/panel';
 import { compareStrings } from '../../utils/base-compare';
 import { Record } from '../../api/ipfix';
 import { TimeRange } from '../../utils/datetime';
-import { QuerySummaryContent } from './query-summary';
+import { FlowsQuerySummaryContent } from './flows-query-summary';
 import { comparePorts, formatPort } from '../../utils/port';
 import { formatProtocol } from '../../utils/protocol';
 import { compareIPs } from '../../utils/ip';
 import { Stats, TopologyMetrics } from '../../api/loki';
 import './summary-panel.css';
 import { MetricType } from '../../model/flow-query';
+import { MetricsQuerySummaryContent } from './metrics-query-summary';
 
 type TypeCardinality = {
   type: string;
@@ -42,7 +43,7 @@ type K8SObjectCardinality = {
 export const SummaryPanelContent: React.FC<{
   flows: Record[] | undefined;
   metrics: TopologyMetrics[] | undefined;
-  appMetrics: TopologyMetrics[] | undefined;
+  appMetrics: TopologyMetrics | undefined;
   metricType: MetricType;
   stats: Stats | undefined;
   limit: number;
@@ -288,17 +289,25 @@ export const SummaryPanelContent: React.FC<{
         <Text component={TextVariants.h3}>{`${t('Results')} ${
           !_.isEmpty(metrics) && _.isEmpty(appMetrics) ? t('(top {{count}} metrics)', { count: limit }) : ''
         }`}</Text>
-        <QuerySummaryContent
-          className="summary-container-grouped"
-          direction="column"
-          flows={flows}
-          metrics={metrics}
-          appMetrics={appMetrics}
-          metricType={metricType}
-          limitReached={stats?.limitReached || false}
-          range={range}
-          lastRefresh={lastRefresh}
-        />
+        {_.isEmpty(flows) ? (
+          <MetricsQuerySummaryContent
+            className="summary-container-grouped"
+            direction="column"
+            metrics={metrics || []}
+            appMetrics={appMetrics}
+            metricType={metricType}
+            lastRefresh={lastRefresh}
+          />
+        ) : (
+          <FlowsQuerySummaryContent
+            className="summary-container-grouped"
+            direction="column"
+            flows={flows!}
+            limitReached={stats?.limitReached || false}
+            range={range}
+            lastRefresh={lastRefresh}
+          />
+        )}
       </TextContent>
 
       {cardinalityContent()}
@@ -311,7 +320,7 @@ export const SummaryPanel: React.FC<{
   onClose: () => void;
   flows: Record[] | undefined;
   metrics: TopologyMetrics[] | undefined;
-  appMetrics: TopologyMetrics[] | undefined;
+  appMetrics: TopologyMetrics | undefined;
   metricType: MetricType;
   stats: Stats | undefined;
   appStats: Stats | undefined;

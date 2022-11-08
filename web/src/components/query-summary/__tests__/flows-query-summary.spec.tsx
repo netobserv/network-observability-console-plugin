@@ -1,36 +1,33 @@
 import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 import { MetricType } from '../../../model/flow-query';
-import { FlowsSample } from '../../../components/__tests-data__/flows';
-import { QuerySummary, QuerySummaryContent } from '../query-summary';
+import { FlowsSample } from '../../__tests-data__/flows';
+import { FlowsQuerySummary, FlowsQuerySummaryContent } from '../flows-query-summary';
 
-describe('<QuerySummary />', () => {
+describe('<FlowsQuerySummary />', () => {
   const now = new Date();
 
   const mocks = {
     isShowQuerySummary: false,
     toggleQuerySummary: jest.fn(),
     flows: FlowsSample,
-    metrics: undefined,
-    appMetrics: undefined,
     metricType: 'bytes' as MetricType,
     stats: {
       limitReached: false,
       numQueries: 1
     },
-    appStats: undefined,
     range: 300,
     lastRefresh: now
   };
 
   it('should shallow component', async () => {
-    const wrapper = shallow(<QuerySummary {...mocks} />);
-    expect(wrapper.find(QuerySummaryContent)).toBeTruthy();
-    expect(wrapper.find(QuerySummaryContent)).toHaveLength(1);
+    const wrapper = shallow(<FlowsQuerySummary {...mocks} />);
+    expect(wrapper.find(FlowsQuerySummaryContent)).toBeTruthy();
+    expect(wrapper.find(FlowsQuerySummaryContent)).toHaveLength(1);
   });
 
   it('should show summary', async () => {
-    const wrapper = mount(<QuerySummary {...mocks} />);
+    const wrapper = mount(<FlowsQuerySummary {...mocks} />);
     expect(wrapper.find('#flowsCount').last().text()).toBe('3 flows');
     expect(wrapper.find('#bytesCount').last().text()).toBe('161 kB');
     expect(wrapper.find('#packetsCount').last().text()).toBe('1100 packets');
@@ -39,7 +36,7 @@ describe('<QuerySummary />', () => {
   });
 
   it('should toggle panel', async () => {
-    const wrapper = mount(<QuerySummary {...mocks} />);
+    const wrapper = mount(<FlowsQuerySummary {...mocks} />);
     wrapper.find('#query-summary-toggle').last().simulate('click');
     expect(mocks.toggleQuerySummary).toHaveBeenCalledTimes(1);
   });
