@@ -17,7 +17,17 @@ func (o *LokiClientMock) Get(url string) ([]byte, int, error) {
 	} else {
 		isTopology := strings.Contains(url, "query=topk")
 		if isTopology {
-			path = "mocks/loki/topology.json"
+			if strings.Contains(url, "scope=app") {
+				path = "mocks/loki/topology_app.json"
+			} else if strings.Contains(url, "scope=host") {
+				path = "mocks/loki/topology_host.json"
+			} else if strings.Contains(url, "scope=namespace") {
+				path = "mocks/loki/topology_namespace.json"
+			} else if strings.Contains(url, "scope=owner") {
+				path = "mocks/loki/topology_owner.json"
+			} else {
+				path = "mocks/loki/topology_resource.json"
+			}
 		} else {
 			path = "mocks/loki/flows.json"
 		}
