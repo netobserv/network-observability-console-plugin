@@ -176,7 +176,7 @@ export const RecordField: React.FC<{
       case ColumnsId.collectiontime:
       case ColumnsId.starttime:
       case ColumnsId.endtime:
-        return dateTimeContent(typeof value === 'number' ? new Date(value) : undefined);
+        return dateTimeContent(typeof value === 'number' && !isNaN(value) ? new Date(value) : undefined);
       case ColumnsId.collectionlatency:
       case ColumnsId.duration:
         return singleContainer(
