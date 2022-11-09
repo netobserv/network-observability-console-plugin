@@ -5,16 +5,18 @@ portNaming:
 quickFilters:
   - name: Applications
     filter:
-      src_namespace!: 'openshift-'
-      dst_namespace!: 'openshift-'
+      src_namespace!: 'openshift-,netobserv'
+      dst_namespace!: 'openshift-,netobserv'
     default: true
-  - name: Exclude services
+  - name: Infrastructure
     filter:
-      dst_kind!: 'Service'
-      src_kind!: 'Service'
-  - name: OpenShift Infrastructure
+      src_namespace: 'openshift-,netobserv'
+      dst_namespace: 'openshift-,netobserv'
+  - name: Pods network
     filter:
-      namespace: 'openshift-*'
-  - name: NetObserv
+      src_kind: 'Pod'
+      dst_kind: 'Pod'
+    default: true
+  - name: Services network
     filter:
-      namespace: '"netobserv"'
+      dst_kind: 'Service'
