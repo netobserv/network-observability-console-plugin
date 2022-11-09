@@ -7,15 +7,24 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+type QuickFilter struct {
+	Name    string            `yaml:"name,omitempty" json:"name"`
+	Filter  map[string]string `yaml:"filter,omitempty" json:"filter"`
+	Default bool              `yaml:"default,omitempty" json:"default"`
+}
+
 type frontendConfig struct {
 	PortNaming struct {
 		Enable    bool              `yaml:"enable,omitempty" json:"enable"`
 		PortNames map[string]string `yaml:"portNames,omitempty" json:"portNames"`
 	} `yaml:"portNaming,omitempty" json:"portNaming"`
+	QuickFilters []QuickFilter `yaml:"quickFilters" json:"quickFilters"`
 }
 
 func readConfigFile(filename string) (*frontendConfig, error) {
-	cfg := frontendConfig{}
+	cfg := frontendConfig{
+		QuickFilters: []QuickFilter{},
+	}
 	if len(filename) == 0 {
 		return &cfg, nil
 	}

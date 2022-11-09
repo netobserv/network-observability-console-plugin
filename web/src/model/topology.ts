@@ -14,7 +14,7 @@ import {
 } from '@patternfly/react-topology';
 import _ from 'lodash';
 import { MetricStats, TopologyMetricPeer, TopologyMetrics } from '../api/loki';
-import { Filter, FilterDefinition } from '../model/filters';
+import { Filter, FilterDefinition, findFromFilters } from '../model/filters';
 import { defaultMetricFunction, defaultMetricType, defaultTimeRange } from '../utils/router';
 import { findFilter } from '../utils/filter-definitions';
 import { TFunction } from 'i18next';
@@ -154,7 +154,7 @@ export const isElementFiltered = (d: ElementData, filters: Filter[], t: TFunctio
   if (!defValue) {
     return false;
   }
-  const filter = filters.find(f => f.def.id === defValue.def.id);
+  const filter = findFromFilters(filters, { def: defValue.def });
   return filter !== undefined && filter.values.find(v => v.v === defValue.value) !== undefined;
 };
 
@@ -175,7 +175,7 @@ export const toggleElementFilter = (
     console.error("can't find defValue for elementData", d);
     return;
   }
-  let filter = result.find(f => f.def.id === defValue.def.id);
+  let filter = findFromFilters(result, { def: defValue.def });
   if (!filter) {
     filter = { def: defValue.def, values: [] };
     result.push(filter);

@@ -10,4 +10,5 @@ export const loadConfig = async () => {
   } catch (err) {
     console.log(getHTTPErrorDetails(err));
   }
+  return config;
 };

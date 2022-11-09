@@ -18,7 +18,7 @@ describe('<NetflowOverview />', () => {
     metricType: 'bytes' as MetricType,
     metrics: [],
     totalMetric: undefined,
-    clearFilters: jest.fn()
+    filterActionLinks: <></>
   };
   it('should render component', async () => {
     const wrapper = shallow(<NetflowOverview {...props} />);

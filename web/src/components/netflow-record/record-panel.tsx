@@ -18,7 +18,7 @@ import { defaultTimeRange, flowdirToReporter } from '../../utils/router';
 import { Record } from '../../api/ipfix';
 import { Column, ColumnsId, getColumnGroups } from '../../utils/columns';
 import { TimeRange } from '../../utils/datetime';
-import { Filter } from '../../model/filters';
+import { doesIncludeFilter, Filter, findFromFilters, removeFromFilters } from '../../model/filters';
 import { findFilter } from '../../utils/filter-definitions';
 import RecordField, { RecordFieldFilter } from './record-field';
 import { Reporter } from '../../model/flow-query';
@@ -104,21 +104,21 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
       if (!def) {
         return undefined;
       }
-      const isDelete = filters.some(f => f.def.id === def.id && f.values.some(v => v.v === String(value)));
+      const filterKey = { def: def };
+      const isDelete = doesIncludeFilter(filters, filterKey, [{ v: String(value) }]);
       return {
         onClick: () => {
           if (isDelete) {
-            setFilters(filters.filter(f => f.def.id !== def.id));
+            setFilters(removeFromFilters(filters, filterKey));
           } else {
             const values = [
               {
                 v: Array.isArray(value) ? value.join(value.length == 2 ? '.' : ':') : String(value)
               }
             ];
-            // CHECK / FIXME cloneDeep won't work?
             // TODO: is it relevant to show composed columns?
             const newFilters = _.cloneDeep(filters);
-            const found = newFilters.find(f => f.def.id === def.id);
+            const found = findFromFilters(newFilters, filterKey);
             if (found) {
               found.values = values;
             } else {

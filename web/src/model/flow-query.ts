@@ -1,7 +1,6 @@
 import { Filter } from './filters';
 
 export type Reporter = 'source' | 'destination' | 'both';
-export type Layer = 'infrastructure' | 'application' | 'both';
 export type Match = 'all' | 'any';
 export type MetricFunction = 'sum' | 'avg' | 'max' | 'last';
 export type MetricType = 'bytes' | 'packets';
@@ -14,7 +13,6 @@ export interface FlowQuery {
   endTime?: string;
   filters: string;
   reporter: Reporter;
-  layer: Layer;
   limit: number;
   type?: MetricType;
   scope?: MetricScope;
@@ -40,15 +38,15 @@ export const groupFiltersMatchAll = (filters: Filter[]): string => {
   filters.forEach(f => {
     if (f.def.encoders.simpleEncode) {
       // Filters here are always applied, regardless Src/Dst group split
-      const str = f.def.encoders.simpleEncode(f.values, false);
+      const str = f.def.encoders.simpleEncode(f.values, false, f.not || false);
       srcMatch.push(str);
       dstMatch.push(str);
     } else if (f.def.encoders.common) {
       needSrcDstSplit = true;
       // Filters here are applied for their Src/Dst group split
-      const src = f.def.encoders.common.srcEncode(f.values, false);
+      const src = f.def.encoders.common.srcEncode(f.values, false, f.not || false);
       srcMatch.push(src);
-      const dst = f.def.encoders.common.dstEncode(f.values, false);
+      const dst = f.def.encoders.common.dstEncode(f.values, false, f.not || false);
       dstMatch.push(dst);
     }
   });
@@ -60,10 +58,10 @@ export const groupFiltersMatchAny = (filters: Filter[]): string => {
   const orGroup: string[] = [];
   filters.forEach(f => {
     if (f.def.encoders.simpleEncode) {
-      orGroup.push(f.def.encoders.simpleEncode(f.values, true));
+      orGroup.push(f.def.encoders.simpleEncode(f.values, true, f.not || false));
     } else if (f.def.encoders.common) {
-      orGroup.push(f.def.encoders.common.srcEncode(f.values, true));
-      orGroup.push(f.def.encoders.common.dstEncode(f.values, true));
+      orGroup.push(f.def.encoders.common.srcEncode(f.values, true, f.not || false));
+      orGroup.push(f.def.encoders.common.dstEncode(f.values, true, f.not || false));
     }
   });
   return encodeURIComponent(orGroup.join('|'));

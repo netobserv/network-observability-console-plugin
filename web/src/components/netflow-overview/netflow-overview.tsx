@@ -1,6 +1,5 @@
 import {
   Bullseye,
-  Button,
   EmptyState,
   EmptyStateBody,
   EmptyStateIcon,
@@ -44,7 +43,7 @@ export type NetflowOverviewProps = {
   loading?: boolean;
   error?: string;
   isDark?: boolean;
-  clearFilters: () => void;
+  filterActionLinks: JSX.Element;
 };
 
 export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
@@ -56,7 +55,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
   loading,
   error,
   isDark,
-  clearFilters
+  filterActionLinks
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [kebabMap, setKebabMap] = React.useState(new Map<OverviewPanelId, PanelKebabOptions>());
@@ -86,10 +85,8 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
             <Title headingLevel="h2" size="lg">
               {t('No results found')}
             </Title>
-            <EmptyStateBody>{t('Clear all filters and try again.')}</EmptyStateBody>
-            <Button data-test="clear-all-filters" variant="link" onClick={clearFilters}>
-              {t('Clear all filters')}
-            </Button>
+            <EmptyStateBody>{t('Clear or reset filters and try again.')}</EmptyStateBody>
+            {filterActionLinks}
           </EmptyState>
         </Bullseye>
       );

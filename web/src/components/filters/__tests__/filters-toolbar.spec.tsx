@@ -12,19 +12,19 @@ describe('<FiltersToolbar />', () => {
     skipTipsDelay: true,
     setFilters: jest.fn(),
     clearFilters: jest.fn(),
+    resetFilters: jest.fn(),
     id: 'filter-toolbar',
     queryOptionsProps: {
       limit: 100,
       reporter: 'destination',
-      layer: 'infrastructure',
       allowReporterBoth: true,
       useTopK: false,
       match: 'all',
       setLimit: jest.fn(),
       setMatch: jest.fn(),
-      setReporter: jest.fn(),
-      setLayer: jest.fn()
-    }
+      setReporter: jest.fn()
+    },
+    quickFilters: []
   };
   beforeEach(() => {
     props.setFilters = jest.fn();

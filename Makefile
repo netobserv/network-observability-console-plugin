@@ -14,6 +14,8 @@ GOLANGCI_LINT_VERSION = v1.42.1
 COVERPROFILE = coverage.out
 NPM_INSTALL ?= install
 
+CMDLINE_ARGS ?= --loglevel trace --loki-tenant-id netobserv --frontend-config config/sample-frontend-config.yaml
+
 ifeq (,$(shell which podman 2>/dev/null))
 OCI_BIN ?= docker
 else
@@ -130,29 +132,29 @@ push:
 
 .PHONY: serve
 serve:
-	./plugin-backend --loglevel trace
+	./plugin-backend $(CMDLINE_ARGS)
 
 .PHONY: serve-mock
 serve-mock:
-	./plugin-backend --loki-mock --loglevel trace
+	./plugin-backend --loki-mock $(CMDLINE_ARGS)
 
 .PHONY: start
 start: build-backend install-frontend
 	@echo "### Starting backend on http://localhost:9002"
 	bash -c "trap 'fuser -k 9002/tcp' EXIT; \
-					./plugin-backend -port 9002 & cd web && npm run start" 
+					./plugin-backend -port 9002 $(CMDLINE_ARGS) & cd web && npm run start" 
 
 .PHONY: start-standalone
 start-standalone: build-backend install-frontend
 	@echo "### Starting backend on http://localhost:9002"
 	bash -c "trap 'fuser -k 9002/tcp' EXIT; \
-					./plugin-backend -loki-tenant-id netobserv -port 9002 & cd web && npm run start:standalone"
+					./plugin-backend -port 9002 $(CMDLINE_ARGS) & cd web && npm run start:standalone"
 
 .PHONY: start-standalone-mock
 start-standalone-mock: build-backend install-frontend
 	@echo "### Starting backend on http://localhost:9002 using mock"
 	bash -c "trap 'fuser -k 9002/tcp' EXIT; \
-					./plugin-backend -port 9002 --loki-mock --loglevel trace & cd web && npm run start:standalone"
+					./plugin-backend -port 9002 $(CMDLINE_ARGS) & cd web && npm run start:standalone"
 
 .PHONY: bridge
 bridge:
