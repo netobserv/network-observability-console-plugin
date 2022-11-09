@@ -14,6 +14,12 @@
   align-self: center;
 }
 
+/* e.g. InfoAltIcon */
+.overview-title svg {
+  margin-left: 10px;
+  vertical-align: -0.125em;
+}
+
 .overview-card {
   margin: 0 1em 1em 0 !important;
 }

@@ -42,27 +42,34 @@ export const getDefaultOverviewPanels = (): OverviewPanel[] => {
   return panels;
 };
 
-export const getOverviewPanelTitle = (t: TFunction, id: OverviewPanelId, limit: string | number = 'X'): string => {
+export const getOverviewPanelTitleAndTooltip = (
+  t: TFunction,
+  id: OverviewPanelId,
+  limit: string | number = 'X'
+): [string, string?] => {
   switch (id) {
     case 'overview':
-      return t('Network overview');
+      return [t('Network overview')];
     case 'top_bar':
-      return t('Top {{limit}} flow rates', { limit });
+      return [t('Top {{limit}} flow rates', { limit })];
     case 'top_bar_total':
-      return t('Top {{limit}} flow rates with total', { limit });
+      return [t('Top {{limit}} flow rates with total', { limit })];
     case 'top_timeseries':
-      return t('Network traffic over time');
+      return [t('Network traffic over time')];
     case 'top_avg_donut':
-      return t('Top {{limit}} average rates', { limit });
+      return [t('Top {{limit}} average rates', { limit }), t('This is the average rate over the selected interval')];
     case 'top_latest_donut':
-      return t('Top {{limit}} latest rates', { limit });
+      return [
+        t('Top {{limit}} latest rates', { limit }),
+        t('This is the last measured rate from the selected interval')
+      ];
     case 'top_sankey':
-      return t('Top {{limit}} flows distribution', { limit });
+      return [t('Top {{limit}} flows distribution', { limit })];
     case 'total_timeseries':
-      return t('Total flows time series');
+      return [t('Total flows time series')];
     case 'packets_dropped':
-      return t('Packets dropped');
+      return [t('Packets dropped')];
     case 'inbound_flows_region':
-      return t('Inbound flows by region');
+      return [t('Inbound flows by region')];
   }
 };

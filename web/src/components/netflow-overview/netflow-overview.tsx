@@ -16,7 +16,7 @@ import { TopologyMetrics } from '../../api/loki';
 import { MetricType } from '../../model/flow-query';
 import { getStat } from '../../model/topology';
 import { peersEqual } from '../../utils/metrics';
-import { getOverviewPanelTitle, OverviewPanel, OverviewPanelId } from '../../utils/overview-panels';
+import { getOverviewPanelTitleAndTooltip, OverviewPanel, OverviewPanelId } from '../../utils/overview-panels';
 import LokiError from '../messages/loki-error';
 import { MetricsContent } from '../metrics/metrics-content';
 import { toNamedMetric } from '../metrics/metrics-helper';
@@ -255,7 +255,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
         {panels
           .filter(p => p.isSelected)
           .map((panel, i) => {
-            const title = getOverviewPanelTitle(t, panel.id, limit);
+            const [title, tooltip] = getOverviewPanelTitleAndTooltip(t, panel.id, limit);
             const content = getPanelContent(panel.id, title);
             return (
               <NetflowOverviewPanel
@@ -263,6 +263,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
                 bodyClassSmall={!!content.bodyClassSmall}
                 doubleWidth={!!content.doubleWidth}
                 title={title}
+                titleTooltip={tooltip}
                 kebab={content.kebab}
               >
                 {content.element}

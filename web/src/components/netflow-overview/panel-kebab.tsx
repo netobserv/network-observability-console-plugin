@@ -62,9 +62,7 @@ export const PanelKebab: React.FC<PanelKebabProps> = ({ id, options, setOptions 
   if (options.showTotal !== undefined) {
     items.push(
       <DropdownItem key={`${id}-show-total`}>
-        <Tooltip
-          content={<Text component={TextVariants.p}>{t('Also show total traffic for the selected filters')}</Text>}
-        >
+        <Tooltip content={<Text component={TextVariants.p}>{t('Show total traffic for the selected filters')}</Text>}>
           <Checkbox
             id={`${id}-show-total`}
             isChecked={options.showTotal}
@@ -79,7 +77,9 @@ export const PanelKebab: React.FC<PanelKebabProps> = ({ id, options, setOptions 
   if (options.showOthers !== undefined) {
     items.push(
       <DropdownItem key={`${id}-show-others`}>
-        <Tooltip content={<Text component={TextVariants.p}>{t('Show other traffic')}</Text>}>
+        <Tooltip
+          content={<Text component={TextVariants.p}>{t('Show other traffic grouped in a separate series')}</Text>}
+        >
           <Checkbox
             id={`${id}-show-others`}
             isChecked={options.showOthers}
@@ -98,7 +98,7 @@ export const PanelKebab: React.FC<PanelKebabProps> = ({ id, options, setOptions 
           content={
             <Text component={TextVariants.p}>
               {t(
-                'Show scope-internal traffic, depending on the selected scope (node-internal traffic, namespace-internal traffic)'
+                'Show scope-internal traffic, depending on the selected scope (e.g. node-internal traffic, namespace-internal traffic)'
               )}
             </Text>
           }
@@ -120,7 +120,7 @@ export const PanelKebab: React.FC<PanelKebabProps> = ({ id, options, setOptions 
         <Tooltip
           content={
             <Text component={TextVariants.p}>
-              {t('Show out of scope traffic, e.g. host-network traffic when scope is not Node.')}
+              {t('Show out of scope traffic (e.g. host-network traffic when scope is different from "Node")')}
             </Text>
           }
         >
