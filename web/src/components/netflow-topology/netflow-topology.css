@@ -25,28 +25,56 @@ g.netobserv.topology.shadowed {
   opacity: 0.5;
 }
 
-g.netobserv.topology.node-filtered>g>ellipse {
+g.netobserv.topology.pf-topology__edge>.pf-topology__edge__background {
+  stroke-width: 6px;
+}
+
+g.netobserv.topology.pf-topology__edge.dark>.pf-topology__edge__tag>.pf-topology__edge__tag__background{
+  fill: #E0E0E0;
+}
+
+g.netobserv.topology.pf-topology__edge>.pf-topology__edge__link,
+g.netobserv.topology.pf-topology__edge>.pf-topology-connector-arrow {
+  stroke: #6A6E73;
+  fill: #E0E0E0;
+}
+
+g.netobserv.topology.pf-topology__edge.dark>.pf-topology__edge__link,
+g.netobserv.topology.pf-topology__edge.dark>.pf-topology-connector-arrow {
+  stroke: #E0E0E0;
+  fill: #6A6E73;
+}
+
+g.netobserv.topology.node-filtered>g>.pf-topology__node__background {
   stroke: #EF9234;
   stroke-width: 2px;
 }
 
-g.netobserv.topology.edge-filtered>.pf-topology__edge__link,
-g.netobserv.topology.edge-filtered>.pf-topology-connector-arrow {
+g.netobserv.topology.pf-topology__edge.edge-filtered>.pf-topology__edge__link,
+g.netobserv.topology.pf-topology__edge.edge-filtered>.pf-topology-connector-arrow,
+g.netobserv.topology.pf-topology__edge.edge-filtered.dark>.pf-topology__edge__link,
+g.netobserv.topology.pf-topology__edge.edge-filtered.dark>.pf-topology-connector-arrow {
   stroke: #EF9234;
   fill: #773D00;
 }
 
-g.netobserv.topology>g>ellipse {
+g.netobserv.topology>g>.pf-topology__node__background {
   fill: #FFFFFF;
 }
 
-g.netobserv.topology.node-highlighted>g>ellipse {
+g.netobserv.topology.dark>g>.pf-topology__node__background {
+  fill: #26292D;
+}
+
+g.netobserv.topology.node-highlighted>g>.pf-topology__node__background {
   stroke: #0066CC;
   stroke-width: 2px;
 }
 
-g.netobserv.topology.edge-highlighted>.pf-topology__edge__link,
-g.netobserv.topology.edge-highlighted>.pf-topology-connector-arrow {
+g.netobserv.topology.pf-topology__edge.edge-highlighted>.pf-topology__edge__link,
+g.netobserv.topology.pf-topology__edge.edge-highlighted>.pf-topology-connector-arrow,
+g.netobserv.topology.pf-topology__edge.edge-highlighted.dark>.pf-topology__edge__link,
+g.netobserv.topology.pf-topology__edge.edge-highlighted.dark>.pf-topology-connector-arrow {
   stroke: #0066CC;
   fill: #002952;
 }
@@ -69,6 +97,6 @@ g.netobserv.pf-topology__group.pf-m-selected>.pf-topology__group__background {
   border: none;
 }
 
-.topology-icon > text {
+.topology-icon>text {
   fill: white;
 }

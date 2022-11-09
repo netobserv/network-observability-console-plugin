@@ -82,23 +82,6 @@ const getTypeIcon = (resourceKind?: string): React.ComponentClass<any, any> => {
   }
 };
 
-const getTypeIconColor = (resourceKind?: string): string => {
-  switch (resourceKind) {
-    case 'Service':
-    case 'Pod':
-    case 'Namespace':
-    case 'Node':
-    case 'CatalogSource':
-    case 'DaemonSet':
-    case 'Deployment':
-    case 'StatefulSet':
-    case 'Job':
-      return '#393F44';
-    default:
-      return '#c9190b';
-  }
-};
-
 const renderIcon = (data: Decorated<NodeData>, element: NodePeer): React.ReactNode => {
   const { width, height } = element.getDimensions();
   const shape = element.getNodeShape();
@@ -106,11 +89,10 @@ const renderIcon = (data: Decorated<NodeData>, element: NodePeer): React.ReactNo
     (shape === NodeShape.trapezoid ? width : Math.min(width, height)) -
     (shape === NodeShape.stadium ? 5 : ICON_PADDING) * 2;
   const Component = getTypeIcon(data.resourceKind);
-  const color = getTypeIconColor(data.resourceKind);
 
   return (
     <g transform={`translate(${(width - iconSize) / 2}, ${(height - iconSize) / 2})`}>
-      <Component style={{ fill: color }} width={iconSize} height={iconSize} />
+      <Component width={iconSize} height={iconSize} />
     </g>
   );
 };

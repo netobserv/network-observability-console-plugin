@@ -844,6 +844,7 @@ export const NetflowTraffic: React.FC<{
             onSelect={onElementSelect}
             searchHandle={searchRef?.current}
             searchEvent={searchEvent}
+            isDark={isDarkTheme}
           />
         );
         break;

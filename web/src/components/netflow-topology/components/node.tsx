@@ -65,6 +65,7 @@ type BaseNodeProps = {
   shadowed?: boolean;
   filtered?: boolean;
   highlighted?: boolean;
+  isDark?: boolean;
   label?: string; // Defaults to element.getLabel()
   secondaryLabel?: string;
   showLabel?: boolean; // Defaults to true
@@ -115,6 +116,7 @@ const BaseNode: React.FunctionComponent<BaseNodeProps> = ({
   shadowed,
   filtered,
   highlighted,
+  isDark,
   secondaryLabel,
   labelClassName,
   labelPosition,
@@ -219,7 +221,8 @@ const BaseNode: React.FunctionComponent<BaseNodeProps> = ({
     'topology',
     shadowed && 'shadowed',
     filtered && 'node-filtered',
-    highlighted && 'node-highlighted'
+    highlighted && 'node-highlighted',
+    isDark && 'dark'
   );
 
   const backgroundClassName = css(
