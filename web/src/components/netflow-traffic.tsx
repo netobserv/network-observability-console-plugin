@@ -508,7 +508,7 @@ export const NetflowTraffic: React.FC<{
         <Tab
           className="netflow-traffic-tab"
           eventKey={'table'}
-          title={<TabTitleText>{t('Flow Table')}</TabTitleText>}
+          title={<TabTitleText>{t('Traffic flows')}</TabTitleText>}
         />
         <Tab
           className="netflow-traffic-tab"

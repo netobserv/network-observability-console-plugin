@@ -1,11 +1,19 @@
 import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionToggle,
   ClipboardCopy,
   ClipboardCopyVariant,
+  Divider,
   DrawerActions,
   DrawerCloseButton,
   DrawerHead,
   DrawerPanelBody,
   DrawerPanelContent,
+  Tab,
+  Tabs,
+  TabTitleText,
   Text,
   TextContent,
   TextVariants
@@ -16,7 +24,7 @@ import { useTranslation } from 'react-i18next';
 import { defaultSize, maxSize, minSize } from '../../utils/panel';
 import { defaultTimeRange, flowdirToReporter } from '../../utils/router';
 import { Record } from '../../api/ipfix';
-import { Column, ColumnsId, getColumnGroups } from '../../utils/columns';
+import { Column, ColumnGroup, ColumnsId, getColumnGroups } from '../../utils/columns';
 import { TimeRange } from '../../utils/datetime';
 import { doesIncludeFilter, Filter, findFromFilters, removeFromFilters } from '../../model/filters';
 import { findFilter } from '../../utils/filter-definitions';
@@ -25,7 +33,7 @@ import { Reporter } from '../../model/flow-query';
 import './record-panel.css';
 
 export type RecordDrawerProps = {
-  record?: Record;
+  record: Record;
   columns: Column[];
   filters: Filter[];
   range: number | TimeRange;
@@ -50,6 +58,18 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
   onClose
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
+  const [hidden, setHidden] = React.useState<string[]>([]);
+  const [activeTab, setActiveTab] = React.useState<string>('details');
+
+  const toggle = React.useCallback(
+    (id: string) => {
+      const index = hidden.indexOf(id);
+      const newExpanded: string[] =
+        index >= 0 ? [...hidden.slice(0, index), ...hidden.slice(index + 1, hidden.length)] : [...hidden, id];
+      setHidden(newExpanded);
+    },
+    [hidden]
+  );
 
   const getFilter = (col: Column) => {
     if (record) {
@@ -133,6 +153,42 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
     [t, filters, setFilters]
   );
 
+  const getGroup = React.useCallback(
+    (g: ColumnGroup, i: number, content: React.ReactElement) => {
+      const toggleId = `toggle-${i}`;
+      const key = `group-${i}`;
+      return g.title ? (
+        <div className="record-group-container" key={key} data-test-id={key}>
+          <Divider />
+          <AccordionItem data-test-id={key}>
+            {
+              <AccordionToggle
+                className="borderless-accordion"
+                onClick={() => toggle(toggleId)}
+                isExpanded={!hidden.includes(toggleId)}
+                id={toggleId}
+              >
+                {g.title}
+              </AccordionToggle>
+            }
+            <AccordionContent
+              className="borderless-accordion"
+              id={toggleId + '-content'}
+              isHidden={hidden.includes(toggleId)}
+            >
+              {content}
+            </AccordionContent>
+          </AccordionItem>
+        </div>
+      ) : (
+        <div className="record-group-container" key={key} data-test-id={key}>
+          {content}
+        </div>
+      );
+    },
+    [hidden, toggle]
+  );
+
   const groups = getColumnGroups(
     columns.filter(
       c =>
@@ -157,43 +213,58 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
   );
   return (
     <DrawerPanelContent
-      data-test={id}
+      data-test-id={id}
       id={id}
+      className="drawer-panel-content"
       isResizable
       defaultSize={defaultSize}
       minSize={minSize}
       maxSize={maxSize}
     >
-      <DrawerHead data-test="drawer-head">
-        <Text data-test="drawer-head-text" component={TextVariants.h2}>
-          {t('Flow Details')}
+      <DrawerHead id={`${id}-drawer-head`} data-test-id="drawer-head" className="drawer-head">
+        <Text data-test-id="drawer-head-text" component={TextVariants.h2}>
+          {t('Flow information')}
         </Text>
         <DrawerActions>
-          <DrawerCloseButton data-test="drawer-close-button" onClick={onClose} />
+          <DrawerCloseButton data-test-id="drawer-close-button" className="drawer-close-button" onClick={onClose} />
         </DrawerActions>
       </DrawerHead>
-      <DrawerPanelBody data-test="drawer-body">
-        {record && (
-          <>
-            {groups.map((g, i) => (
-              <div className="record-group-container" key={`group-${i}`} data-test={`drawer-group-${g.title}`}>
-                {g.title && <Text component={TextVariants.h3}>{g.title}</Text>}
-                {g.columns.map(c => (
-                  <TextContent
-                    className={`record-field-container ${g.title ? 'grouped' : ''}`}
-                    key={c.id}
-                    data-test={`drawer-field-${c.id}`}
-                  >
-                    <Text component={TextVariants.h4}>{c.name}</Text>
-                    <RecordField flow={record} column={c} filter={getFilter(c)} size={'s'} useLinks={true} />
-                  </TextContent>
-                ))}
-              </div>
-            ))}
-            <TextContent className="record-field-container" data-test="drawer-json-container">
+      <Divider />
+      <DrawerPanelBody id={`${id}-drawer-body`} className="drawer-body" data-test-id="drawer-body">
+        <Tabs
+          id="drawer-tabs"
+          activeKey={activeTab}
+          usePageInsets
+          onSelect={(e, key) => setActiveTab(key as string)}
+          role="region"
+        >
+          <Tab className="drawer-tab" eventKey={'details'} title={<TabTitleText>{t('Details')}</TabTitleText>}>
+            <Accordion asDefinitionList={false}>
+              {groups.map((g, i) =>
+                getGroup(
+                  g,
+                  i,
+                  <div className="record-group-container">
+                    {g.columns.map(c => (
+                      <TextContent
+                        className={`record-field-container ${g.title ? 'grouped' : ''}`}
+                        key={c.id}
+                        data-test-id={`drawer-field-${c.id}`}
+                      >
+                        <Text component={TextVariants.h4}>{c.name}</Text>
+                        <RecordField flow={record} column={c} filter={getFilter(c)} size={'s'} useLinks={true} />
+                      </TextContent>
+                    ))}
+                  </div>
+                )
+              )}
+            </Accordion>
+          </Tab>
+          <Tab className="drawer-tab" eventKey={'raw'} title={<TabTitleText>{t('Raw')}</TabTitleText>}>
+            <TextContent className="record-field-container" data-test-id="drawer-json-container">
               <Text component={TextVariants.h4}>{t('JSON')}</Text>
               <ClipboardCopy
-                data-test="drawer-json-copy"
+                data-test-id="drawer-json-copy"
                 isCode
                 isReadOnly
                 isExpanded
@@ -204,8 +275,8 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
                 {JSON.stringify(record, null, 2)}
               </ClipboardCopy>
             </TextContent>
-          </>
-        )}
+          </Tab>
+        </Tabs>
       </DrawerPanelBody>
     </DrawerPanelContent>
   );
