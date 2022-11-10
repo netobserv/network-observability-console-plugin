@@ -8,8 +8,8 @@ export type OverviewPanelId =
   | 'top_avg_donut'
   | 'top_latest_donut'
   | 'top_sankey'
-  | 'total_timeseries'
-  | 'top_timeseries'
+  | 'total_line'
+  | 'top_lines'
   | 'packets_dropped'
   | 'inbound_flows_region';
 
@@ -18,16 +18,22 @@ export type OverviewPanel = {
   isSelected: boolean;
 };
 
+export type OverviewPanelInfo = {
+  title: string;
+  chartType?: string;
+  tooltip?: string;
+};
+
 export const getDefaultOverviewPanels = (): OverviewPanel[] => {
   let panels: OverviewPanel[] = [];
 
   panels = panels.concat([
     { id: 'top_avg_donut', isSelected: true },
     { id: 'top_latest_donut', isSelected: true },
-    { id: 'top_bar', isSelected: true },
-    { id: 'total_timeseries', isSelected: true },
+    { id: 'top_bar', isSelected: false },
+    { id: 'total_line', isSelected: false },
     { id: 'top_bar_total', isSelected: true },
-    { id: 'top_timeseries', isSelected: true }
+    { id: 'top_lines', isSelected: true }
   ]);
   if (isAllowed(Feature.Overview)) {
     panels.unshift({ id: 'overview', isSelected: true });
@@ -42,34 +48,31 @@ export const getDefaultOverviewPanels = (): OverviewPanel[] => {
   return panels;
 };
 
-export const getOverviewPanelTitleAndTooltip = (
+export const getOverviewPanelInfo = (
   t: TFunction,
   id: OverviewPanelId,
   limit: string | number = 'X'
-): [string, string?] => {
+): OverviewPanelInfo => {
   switch (id) {
     case 'overview':
-      return [t('Network overview')];
+      return { title: t('Network overview') };
     case 'top_bar':
-      return [t('Top {{limit}} flow rates', { limit })];
+      return { title: t('Top {{limit}} flow rates stacked', { limit }), chartType: t('bars') };
     case 'top_bar_total':
-      return [t('Top {{limit}} flow rates with total', { limit })];
-    case 'top_timeseries':
-      return [t('Network traffic over time')];
+      return { title: t('Top {{limit}} flow rates stacked with total', { limit }), chartType: t('bars') };
+    case 'top_lines':
+      return { title: t('Top {{limit}} flow rates', { limit }), chartType: t('lines') };
     case 'top_avg_donut':
-      return [t('Top {{limit}} average rates', { limit }), t('This is the average rate over the selected interval')];
+      return { title: t('Top {{limit}} average rates', { limit }), chartType: t('donut'), tooltip: t('This is the average rate over the selected interval') };
     case 'top_latest_donut':
-      return [
-        t('Top {{limit}} latest rates', { limit }),
-        t('This is the last measured rate from the selected interval')
-      ];
+      return { title: t('Top {{limit}} latest rates', { limit }), chartType: t('donut'), tooltip: t('This is the last measured rate from the selected interval') };
     case 'top_sankey':
-      return [t('Top {{limit}} flows distribution', { limit })];
-    case 'total_timeseries':
-      return [t('Total flows time series')];
+      return { title: t('Top {{limit}} flows distribution', { limit }), chartType: t('sankey') };
+    case 'total_line':
+      return { title: t('Total rate'), chartType: t('line') };
     case 'packets_dropped':
-      return [t('Packets dropped')];
+      return { title: t('Packets dropped') };
     case 'inbound_flows_region':
-      return [t('Inbound flows by region')];
+      return { title: t('Inbound flows by region') };
   }
 };
