@@ -32,7 +32,6 @@ import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
 import { useTheme } from '../utils/theme-hook';
 import { saveSvgAsPng } from 'save-svg-as-png';
-import { isDark } from '../utils/theme';
 import { Record } from '../api/ipfix';
 import { Stats, TopologyMetrics } from '../api/loki';
 import { getFlows, getTopology } from '../api/routes';
@@ -945,11 +944,11 @@ export const NetflowTraffic: React.FC<{
         menuControl={filtersExtraControl()}
       />
       {
-        <Flex className="netflow-traffic-tabs">
+        <Flex className="netflow-traffic-tabs-container">
           <FlexItem id="tabs-container" flex={{ default: 'flex_1' }}>
             {viewTabs()}
           </FlexItem>
-          <FlexItem className={`${isDark() ? 'dark' : 'light'}-bottom-border`}>
+          <FlexItem className={`${isDarkTheme ? 'dark' : 'light'}-bottom-border`}>
             <Button
               data-test="show-view-options-button"
               id="show-view-options-button"
@@ -963,8 +962,8 @@ export const NetflowTraffic: React.FC<{
         </Flex>
       }
       {showViewOptions && (
-        <Toolbar data-test-id="view-options-toolbar" id="view-options-toolbar">
-          <ToolbarItem className="flex-start">
+        <Toolbar data-test-id="view-options-toolbar" id="view-options-toolbar" className={isDarkTheme ? 'dark' : ''}>
+          <ToolbarItem className="flex-start view-options-first">
             <OverflowMenuItem key="display">
               {selectedViewId === 'overview' && (
                 <OverviewDisplayDropdown
@@ -991,10 +990,10 @@ export const NetflowTraffic: React.FC<{
           </ToolbarItem>
           {selectedViewId === 'topology' && (
             <ToolbarItem className="flex-start" id="search-container" data-test="search-container">
-              <SearchComponent ref={searchRef} setSearchEvent={setSearchEvent} />
+              <SearchComponent ref={searchRef} setSearchEvent={setSearchEvent} isDark={isDarkTheme} />
             </ToolbarItem>
           )}
-          <ToolbarItem className="flex-start" alignment={{ default: 'alignRight' }}>
+          <ToolbarItem className="flex-start view-options-last" alignment={{ default: 'alignRight' }}>
             <OverflowMenu breakpoint="2xl">
               <OverflowMenuContent isPersistent>
                 <OverflowMenuGroup groupType="button" isPersistent className="flex-start">

@@ -16,6 +16,7 @@ export type SearchHandle = {
 };
 
 export const SearchComponent: React.FC<{
+  isDark?: boolean;
   setSearchEvent: (se: SearchEvent) => void;
   ref?: React.Ref<SearchHandle>;
   children?: React.ReactNode;
@@ -73,7 +74,8 @@ export const SearchComponent: React.FC<{
         <Button
           data-test="search-topology-element-button"
           id="search-topology-element-button"
-          variant="plain"
+          className={`${props.isDark ? 'dark' : 'light'}`}
+          variant="control"
           aria-label="search for element button"
           onClick={() =>
             searchValidated === ValidatedOptions.error
@@ -88,7 +90,7 @@ export const SearchComponent: React.FC<{
           <Button
             data-test="prev-search-topology-element-button"
             id="prev-search-topology-element-button"
-            variant="plain"
+            variant="control"
             aria-label="previous button for search element"
             onClick={() => props.setSearchEvent({ searchValue, type: 'searchPrevious' })}
           >
@@ -97,7 +99,7 @@ export const SearchComponent: React.FC<{
           <Button
             data-test="next-search-topology-element-button"
             id="next-search-topology-element-button"
-            variant="plain"
+            variant="control"
             aria-label="next button for search element"
             onClick={() => props.setSearchEvent({ searchValue, type: 'searchNext' })}
           >
@@ -106,7 +108,7 @@ export const SearchComponent: React.FC<{
           <Button
             data-test="clear-search-topology-element-button"
             id="clear-search-topology-element-button"
-            variant="plain"
+            variant="control"
             aria-label="clear button for search element"
             onClick={() => onChangeSearch()}
           >
