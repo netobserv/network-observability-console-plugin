@@ -178,13 +178,6 @@ export const SummaryPanelContent: React.FC<{
           typesCardinality.push(tc);
         });
 
-      if (!_.isEmpty(namespaces)) {
-        typesCardinality.push({
-          type: 'Namespace',
-          objects: [{ names: namespaces }]
-        });
-      }
-
       addresses = Array.from(new Set(flows.map(f => f.fields.SrcAddr).concat(flows.map(f => f.fields.DstAddr))));
       ports = Array.from(new Set(flows.map(f => f.fields.SrcPort).concat(flows.map(f => f.fields.DstPort))));
       protocols = Array.from(new Set(flows.map(f => f.fields.Proto)));
