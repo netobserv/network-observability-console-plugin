@@ -146,7 +146,7 @@ export const calibrateRange = (
     }
   }
 
-  // End time needs to be overridden to avoid huge range since mock is outdated compated to current date
+  // End time needs to be overridden to avoid huge range since mock is outdated compared to current date
   if (isMock) {
     endWithTolerance = Math.max(...raw.filter(dp => dp.length > 0).map(dp => dp[dp.length - 1][0]));
   }
