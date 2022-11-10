@@ -21,11 +21,13 @@ const shortKindMap: { [k: string]: string } = {
 export const parseMetrics = (
   raw: RawTopologyMetrics[],
   range: number | TimeRange,
-  scope: MetricScope
+  scope: MetricScope,
+  isMock?: boolean
 ): TopologyMetrics[] => {
   const { start, end, step } = calibrateRange(
     raw.map(r => r.values),
-    range
+    range,
+    isMock
   );
   const metrics = raw.map(r => parseMetric(r, start, end, step, scope));
 
@@ -116,7 +118,8 @@ const parseMetric = (
 
 export const calibrateRange = (
   raw: [number, unknown][][],
-  range: number | TimeRange
+  range: number | TimeRange,
+  isMock?: boolean
 ): { start: number; end: number; step: number } => {
   // Extract some info based on range, and apply a tolerance about end range when it is close to "now"
   const info = computeStepInterval(range);
@@ -141,6 +144,11 @@ export const calibrateRange = (
     while (firstTimestamp > start) {
       firstTimestamp -= info.stepSeconds;
     }
+  }
+
+  // End time needs to be overridden to avoid huge range since mock is outdated compated to current date
+  if (isMock) {
+    endWithTolerance = Math.max(...raw.filter(dp => dp.length > 0).map(dp => dp[dp.length - 1][0]));
   }
 
   return {

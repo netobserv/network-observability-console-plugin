@@ -6,6 +6,7 @@ export interface AggregatedQueryResponse {
   resultType: string;
   result: StreamResult[] | RawTopologyMetrics[];
   stats: Stats;
+  isMock: boolean;
 }
 
 export interface Stats {
