@@ -109,6 +109,7 @@ func (q *TopologyQueryBuilder) Build() string {
 	sb.WriteString(") (rate(")
 	q.appendLabels(sb)
 	q.appendLineFilters(sb)
+	q.appendDeduplicateFilter(sb)
 	q.appendJSON(sb, true)
 	if len(q.topology.dataField) > 0 {
 		sb.WriteString("|unwrap ")
