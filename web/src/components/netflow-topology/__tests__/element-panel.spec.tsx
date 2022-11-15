@@ -5,7 +5,7 @@ import * as React from 'react';
 import { Filter } from '../../../model/filters';
 import { TopologyMetrics } from '../../../api/loki';
 import { MetricFunction, MetricScope, MetricType } from '../../../model/flow-query';
-import { ElementPanel, ElementPanelContent } from '../element-panel';
+import { ElementPanel, ElementPanelDetailsContent, ElementPanelMetricsContent } from '../element-panel';
 import { dataSample } from '../__tests-data__/metrics';
 import { NodeData } from '../../../model/topology';
 
@@ -54,27 +54,37 @@ describe('<ElementPanel />', () => {
     expect(mocks.onClose).toHaveBeenCalled();
   });
 
-  it('should render content', async () => {
-    const wrapper = mount(<ElementPanelContent {...mocks} />);
-    expect(wrapper.find(ElementPanelContent)).toBeTruthy();
+  it('should render <ElementPanelDetailsContent />', async () => {
+    const wrapper = mount(<ElementPanelDetailsContent {...mocks} />);
+    expect(wrapper.find(ElementPanelDetailsContent)).toBeTruthy();
 
     //check node infos
     expect(wrapper.find('#addressValue').last().text()).toBe('10.129.0.15');
+
+    //update to edge
+    wrapper.setProps({ ...mocks, element: getEdge() });
+    expect(wrapper.find('#source-content').last().text()).toBe('PodIP10.131.0.18');
+    expect(wrapper.find('#destination-content').last().text()).toBe('ServiceIP172.30.0.10');
+  });
+
+  it('should render <ElementPanelMetricsContent />', async () => {
+    const wrapper = mount(<ElementPanelMetricsContent {...mocks} />);
+    expect(wrapper.find(ElementPanelMetricsContent)).toBeTruthy();
+
+    //check node metrics
     expect(wrapper.find('#inCount').last().text()).toBe('94.7 MB');
     expect(wrapper.find('#outCount').last().text()).toBe('4.1 MB');
     expect(wrapper.find('#total').last().text()).toBe('98.8 MB');
 
     //update to edge
     wrapper.setProps({ ...mocks, element: getEdge() });
-    expect(wrapper.find('#source').last().text()).toBe('SourcePodIP10.131.0.18');
-    expect(wrapper.find('#destination').last().text()).toBe('DestinationServiceIP172.30.0.10');
     expect(wrapper.find('#inCount').last().text()).toBe('1.1 MB');
     expect(wrapper.find('#outCount').last().text()).toBe('4.5 MB');
     expect(wrapper.find('#total').last().text()).toBe('5.6 MB');
   });
 
-  it('should filter content', async () => {
-    const wrapper = mount(<ElementPanelContent {...mocks} />);
+  it('should filter <ElementPanelDetailsContent />', async () => {
+    const wrapper = mount(<ElementPanelDetailsContent {...mocks} />);
     const filterButtons = wrapper.find(Button);
     // Two buttons: first for pod filter, second for IP filter
     filterButtons.last().simulate('click');

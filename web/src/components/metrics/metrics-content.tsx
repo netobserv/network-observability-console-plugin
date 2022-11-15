@@ -70,7 +70,7 @@ export const MetricsContent: React.FC<MetricsContentProps> = ({
   return (
     <TextContent id="metrics" className="metrics-content-div">
       {showTitle && (
-        <Text id="metrics-title" component={TextVariants.h3}>
+        <Text id="metrics-title" component={TextVariants.h4}>
           {title}
         </Text>
       )}
