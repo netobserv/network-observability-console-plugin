@@ -1,10 +1,8 @@
-import { ResourceLink } from '@openshift-console/dynamic-plugin-sdk';
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionToggle,
-  Button,
   Divider,
   DrawerActions,
   DrawerCloseButton,
@@ -17,30 +15,22 @@ import {
   Tabs,
   TabTitleText,
   Text,
-  TextContent,
   TextVariants
 } from '@patternfly/react-core';
-import { FilterIcon, TimesIcon } from '@patternfly/react-icons';
 import { BaseEdge, BaseNode } from '@patternfly/react-topology';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { defaultSize, maxSize, minSize } from '../../utils/panel';
-import { MetricFunction, MetricType, NodeType } from '../../model/flow-query';
+import { MetricFunction, MetricType } from '../../model/flow-query';
 import { TopologyMetrics } from '../../api/loki';
 import { Filter } from '../../model/filters';
-import {
-  decorated,
-  ElementData,
-  getStat,
-  GraphElementPeer,
-  isElementFiltered,
-  NodeData,
-  toggleElementFilter
-} from '../../model/topology';
+import { decorated, getStat, GraphElementPeer, NodeData } from '../../model/topology';
 import './element-panel.css';
 import { MetricsContent } from '../metrics/metrics-content';
-import { getFormattedValue, matchPeer, peersEqual } from '../../utils/metrics';
+import { getFormattedValue, matchPeer } from '../../utils/metrics';
 import { toNamedMetric } from '../metrics/metrics-helper';
+import { ElementFields } from './element-fields';
+import { PeerResourceLink } from './peer-resource-link';
 import { TruncateLength } from '../dropdowns/truncate-dropdown';
 
 export const ElementPanelDetailsContent: React.FC<{
@@ -62,148 +52,61 @@ export const ElementPanelDetailsContent: React.FC<{
     [hidden]
   );
 
-  const isFiltered = React.useCallback(
-    (d: ElementData) => {
-      return isElementFiltered(d, filters, t);
-    },
-    [filters, t]
-  );
-
-  const onFilter = React.useCallback(
-    (d: ElementData) => {
-      toggleElementFilter(d, isFiltered(d), filters, setFilters, t);
-    },
-    [filters, isFiltered, setFilters, t]
-  );
-
-  const resourceInfos = React.useCallback(
-    (d: NodeData) => {
-      let infos: React.ReactElement | undefined;
-
-      const addInfos = (id: string, title: string, content: React.ReactElement, data: ElementData) => {
-        infos = (
-          <>
-            {infos}
-            <TextContent id={id} className="record-field-container">
-              <Text component={TextVariants.h4}>{title}</Text>
-              <Flex>
-                <FlexItem flex={{ default: 'flex_1' }}>{content}</FlexItem>
-                <FlexItem>
-                  <Button variant="link" aria-label="Filter" onClick={() => onFilter(data)}>
-                    {isFiltered(data) ? <TimesIcon /> : <FilterIcon />}
-                  </Button>
-                </FlexItem>
-              </Flex>
-            </TextContent>
-          </>
-        );
-      };
-
-      if (d.resourceKind && d.name) {
-        addInfos(
-          'resourcelink',
-          element instanceof BaseNode ? t('Name') : d.resourceKind,
-          element instanceof BaseNode ? (
-            <Text>{d.name}</Text>
-          ) : (
-            <ResourceLink inline={true} kind={d.resourceKind} name={d.name} namespace={d.namespace} />
-          ),
-          d
-        );
-      }
-      if (d.namespace) {
-        addInfos('namespace', t('Namespace'), <ResourceLink inline={true} kind={'Namespace'} name={d.namespace} />, {
-          nodeType: 'namespace' as NodeType,
-          name: d.namespace
-        });
-      }
-      if (d.host) {
-        addInfos('host', t('Node Name'), <ResourceLink inline={true} kind={'Node'} name={d.host} />, {
-          nodeType: 'host' as NodeType,
-          name: d.host
-        });
-      }
-      if (d.addr) {
-        addInfos('address', t('IP'), <Text id="addressValue">{d.addr}</Text>, {
-          addr: d.addr
-        });
-      }
-
-      if (!infos) {
-        infos = (
-          <TextContent id="no-infos" className="record-field-container">
-            {
-              // eslint-disable-next-line max-len
-              <Text component={TextVariants.p}>
-                {t('No information available for this content. Change scope to get more details.')}
-              </Text>
-            }
-          </TextContent>
-        );
-      }
-      return infos;
-    },
-    [element, isFiltered, onFilter, t]
-  );
-
   if (element instanceof BaseNode && data) {
-    const infos = resourceInfos(data);
-    return <>{infos}</>;
+    return (
+      <ElementFields
+        id="node-info"
+        data={data}
+        forceFirstAsText={true}
+        activeFilters={filters}
+        setFilters={setFilters}
+      />
+    );
   } else if (element instanceof BaseEdge) {
     // Edge A to B (prefering neutral naming here as there is no assumption about what is source, what is destination
-    const aData = element.getSource().getData();
-    const bData = element.getTarget().getData();
-    const aInfos = resourceInfos(aData);
-    const bInfos = resourceInfos(bData);
+    const aData: NodeData = element.getSource().getData();
+    const bData: NodeData = element.getTarget().getData();
     return (
       <Accordion asDefinitionList={false}>
-        {aInfos && (
-          <div className="record-group-container" key={'source'} data-test-id={'source'}>
-            <AccordionItem data-test-id={'source'}>
-              {
-                <AccordionToggle
-                  className="borderless-accordion"
-                  onClick={() => toggle('source')}
-                  isExpanded={!hidden.includes('source')}
-                  id={'source'}
-                >
-                  {t('Source')}
-                </AccordionToggle>
-              }
-              <AccordionContent
+        <div className="record-group-container" key={'source'} data-test-id={'source'}>
+          <AccordionItem data-test-id={'source'}>
+            {
+              <AccordionToggle
                 className="borderless-accordion"
-                id="source-content"
-                isHidden={hidden.includes('source')}
+                onClick={() => toggle('source')}
+                isExpanded={!hidden.includes('source')}
+                id={'source'}
               >
-                {aInfos}
-              </AccordionContent>
-            </AccordionItem>
-          </div>
-        )}
-        {bInfos && (
-          <div className="record-group-container" key={'destination'} data-test-id={'destination'}>
-            <Divider />
-            <AccordionItem data-test-id={'destination'}>
-              {
-                <AccordionToggle
-                  className="borderless-accordion"
-                  onClick={() => toggle('destination')}
-                  isExpanded={!hidden.includes('destination')}
-                  id={'destination'}
-                >
-                  {t('Destination')}
-                </AccordionToggle>
-              }
-              <AccordionContent
+                {t('Source')}
+              </AccordionToggle>
+            }
+            <AccordionContent className="borderless-accordion" id="source-content" isHidden={hidden.includes('source')}>
+              <ElementFields id="source-info" data={aData} activeFilters={filters} setFilters={setFilters} />
+            </AccordionContent>
+          </AccordionItem>
+        </div>
+        <div className="record-group-container" key={'destination'} data-test-id={'destination'}>
+          <Divider />
+          <AccordionItem data-test-id={'destination'}>
+            {
+              <AccordionToggle
                 className="borderless-accordion"
-                id="destination-content"
-                isHidden={hidden.includes('destination')}
+                onClick={() => toggle('destination')}
+                isExpanded={!hidden.includes('destination')}
+                id={'destination'}
               >
-                {bInfos}
-              </AccordionContent>
-            </AccordionItem>
-          </div>
-        )}
+                {t('Destination')}
+              </AccordionToggle>
+            }
+            <AccordionContent
+              className="borderless-accordion"
+              id="destination-content"
+              isHidden={hidden.includes('destination')}
+            >
+              <ElementFields id="destination-info" data={bData} activeFilters={filters} setFilters={setFilters} />
+            </AccordionContent>
+          </AccordionItem>
+        </div>
       </Accordion>
     );
   }
@@ -263,13 +166,14 @@ export const ElementPanelMetricsContent: React.FC<{
   );
 
   if (element instanceof BaseNode && data) {
-    const filteredMetrics = metrics.filter(m => !peersEqual(m.source, m.destination));
+    // TODO: fix metrics naming when a group is selected (ambiguous)
+    const filteredMetrics = metrics.filter(m => m.source.id !== m.destination.id);
     const outMetrics = filteredMetrics
       .filter(m => matchPeer(data, m.source))
-      .map(m => toNamedMetric(t, m, data, truncateLength));
+      .map(m => toNamedMetric(t, m, truncateLength, data));
     const inMetrics = filteredMetrics
       .filter(m => matchPeer(data, m.destination))
-      .map(m => toNamedMetric(t, m, data, truncateLength));
+      .map(m => toNamedMetric(t, m, truncateLength, data));
     const outCount = outMetrics.reduce((prev, cur) => prev + getStat(cur.stats, metricFunction), 0);
     const inCount = inMetrics.reduce((prev, cur) => prev + getStat(cur.stats, metricFunction), 0);
     return (
@@ -294,10 +198,10 @@ export const ElementPanelMetricsContent: React.FC<{
     const bData = element.getTarget().getData();
     const aToBMetrics = metrics
       .filter(m => matchPeer(aData, m.source) && matchPeer(bData, m.destination))
-      .map(m => toNamedMetric(t, m, data, truncateLength));
+      .map(m => toNamedMetric(t, m, truncateLength));
     const bToAMetrics = metrics
       .filter(m => matchPeer(bData, m.source) && matchPeer(aData, m.destination))
-      .map(m => toNamedMetric(t, m, data, truncateLength));
+      .map(m => toNamedMetric(t, m, truncateLength));
     const aToBCount = aToBMetrics.reduce((prev, cur) => prev + getStat(cur.stats, metricFunction), 0);
     const bToACount = bToAMetrics.reduce((prev, cur) => prev + getStat(cur.stats, metricFunction), 0);
     return (
@@ -334,19 +238,14 @@ export const ElementPanel: React.FC<{
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [activeTab, setActiveTab] = React.useState<string>('details');
 
-  const data = element.getData();
-
   const titleContent = React.useCallback(() => {
-    if (element instanceof BaseNode && data?.resourceKind && data?.name) {
-      return <ResourceLink inline={true} kind={data.resourceKind} name={data.name} namespace={data.namespace} />;
-    } else if (data?.resourceKind) {
-      return <Text component={TextVariants.h2}>{data?.resourceKind}</Text>;
-    } else if (element instanceof BaseEdge) {
+    if (element instanceof BaseEdge) {
       return <Text component={TextVariants.h2}>{t('Edge')}</Text>;
     } else {
-      return <Text component={TextVariants.h2}>{t('Unknown')}</Text>;
+      const data = element.getData();
+      return <>{data && <PeerResourceLink fields={data.peer} />}</>;
     }
-  }, [data, element, t]);
+  }, [element, t]);
 
   return (
     <DrawerPanelContent

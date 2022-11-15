@@ -1,3 +1,5 @@
+import * as React from 'react';
+import * as _ from 'lodash';
 import { Tooltip, TooltipPosition } from '@patternfly/react-core';
 import {
   CubeIcon,
@@ -32,8 +34,6 @@ import {
 } from '@patternfly/react-topology';
 import useDetailsLevel from '@patternfly/react-topology/dist/esm/hooks/useDetailsLevel';
 import { TFunction } from 'i18next';
-import * as _ from 'lodash';
-import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Decorated, NodeData } from '../../../../model/topology';
 import BaseNode from '../components/node';
@@ -88,7 +88,7 @@ const renderIcon = (data: Decorated<NodeData>, element: NodePeer): React.ReactNo
   const iconSize =
     (shape === NodeShape.trapezoid ? width : Math.min(width, height)) -
     (shape === NodeShape.stadium ? 5 : ICON_PADDING) * 2;
-  const Component = getTypeIcon(data.resourceKind);
+  const Component = getTypeIcon(data.peer.resourceKind);
 
   return (
     <g transform={`translate(${(width - iconSize) / 2}, ${(height - iconSize) / 2})`}>
@@ -200,21 +200,21 @@ const renderDecorators = (
           element,
           TopologyQuadrant.lowerRight,
           <LevelDownAltIcon />,
-          t('Step into this {{name}}', { name: data.resourceKind?.toLowerCase() }),
+          t('Step into this {{name}}', { name: data.peer.resourceKind?.toLowerCase() }),
           false,
           onStepIntoClick,
           getShapeDecoratorCenter,
           MEDIUM_DECORATOR_PADDING
         )}
-      {(data.namespace || data.name || data.addr || data.host) &&
+      {(data.peer.namespace || data.peer.resource || data.peer.owner || data.peer.addr || data.peer.hostName) &&
         renderClickableDecorator(
           t,
           element,
           TopologyQuadrant.lowerLeft,
           isFiltered ? <TimesIcon /> : <FilterIcon />,
           isFiltered
-            ? t('Remove {{name}} filter', { name: data.resourceKind?.toLowerCase() })
-            : t('Add {{name}} filter', { name: data.resourceKind?.toLowerCase() }),
+            ? t('Remove {{name}} filter', { name: data.peer.resourceKind?.toLowerCase() })
+            : t('Add {{name}} filter', { name: data.peer.resourceKind?.toLowerCase() }),
           isFiltered,
           onFilterClick,
           getShapeDecoratorCenter,

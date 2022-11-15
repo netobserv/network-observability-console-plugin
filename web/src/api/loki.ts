@@ -64,13 +64,13 @@ export interface RawTopologyMetrics {
 }
 
 export interface TopologyMetricPeer {
+  id: string;
   addr?: string;
-  name?: string;
   namespace?: string;
-  ownerName?: string;
-  ownerType?: string;
-  type?: string;
+  owner?: { name: string; type: string };
+  resource?: { name: string; type: string };
   hostName?: string;
+  resourceKind?: string;
   displayName?: string;
 }
 

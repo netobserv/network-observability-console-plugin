@@ -1,6 +1,14 @@
 import { RawTopologyMetrics, TopologyMetricPeer } from '../../api/loki';
 import { NodeData } from '../../model/topology';
-import { calibrateRange, computeStats, getFormattedValue, matchPeer, normalizeMetrics, parseMetrics } from '../metrics';
+import {
+  calibrateRange,
+  computeStats,
+  createPeer,
+  getFormattedValue,
+  matchPeer,
+  normalizeMetrics,
+  parseMetrics
+} from '../metrics';
 
 describe('normalize and computeStats', () => {
   it('should normalize and compute simple stats', () => {
@@ -179,19 +187,12 @@ describe('normalize and computeStats', () => {
 
 describe('matchPeers', () => {
   it('should match namespace nodes', () => {
-    const peers: TopologyMetricPeer[] = [
-      {
-        namespace: ''
-      },
-      {
-        namespace: 'test',
-        displayName: 'test'
-      }
-    ];
+    const peers: TopologyMetricPeer[] = [createPeer({ namespace: '' }), createPeer({ namespace: 'test' })];
 
     // With unknown
     const data: NodeData = {
-      nodeType: 'unknown'
+      nodeType: 'unknown',
+      peer: createPeer({})
     };
 
     let matches = peers.filter(p => matchPeer(data, p));
@@ -199,16 +200,13 @@ describe('matchPeers', () => {
 
     // With test namespace
     data.nodeType = 'namespace';
-    data.resourceKind = 'Namespace';
-    data.name = 'test';
+    data.peer = createPeer({ namespace: 'test' });
 
     matches = peers.filter(p => matchPeer(data, p));
     expect(matches).toEqual([peers[1]]);
 
     // With another namespace
-    data.nodeType = 'namespace';
-    data.resourceKind = 'Namespace';
-    data.name = 'test2';
+    data.peer = createPeer({ namespace: 'test2' });
 
     matches = peers.filter(p => matchPeer(data, p));
     expect(matches).toEqual([]);
@@ -216,38 +214,29 @@ describe('matchPeers', () => {
 
   it('should match owner nodes', () => {
     const peers: TopologyMetricPeer[] = [
-      {
-        namespace: ''
-      },
-      {
+      createPeer({ namespace: '' }),
+      createPeer({
         namespace: 'ns1',
-        ownerName: 'depl-a',
-        ownerType: 'Deployment',
-        displayName: 'depl-a (depl)'
-      },
-      {
+        owner: { name: 'depl-a', type: 'Deployment' }
+      }),
+      createPeer({
         namespace: 'ns1',
-        ownerName: 'depl-b',
-        ownerType: 'Deployment',
-        displayName: 'depl-b'
-      },
-      {
+        owner: { name: 'depl-b', type: 'Deployment' }
+      }),
+      createPeer({
         namespace: 'ns1',
-        ownerName: 'depl-a',
-        ownerType: 'DaemonSet',
-        displayName: 'depl-a (ds)'
-      },
-      {
+        owner: { name: 'depl-a', type: 'DaemonSet' }
+      }),
+      createPeer({
         namespace: 'ns2',
-        ownerName: 'depl-a',
-        ownerType: 'Deployment',
-        displayName: 'depl-a (depl)'
-      }
+        owner: { name: 'depl-a', type: 'Deployment' }
+      })
     ];
 
     // With unknown
     const data: NodeData = {
-      nodeType: 'unknown'
+      nodeType: 'unknown',
+      peer: createPeer({})
     };
 
     let matches = peers.filter(p => matchPeer(data, p));
@@ -255,9 +244,7 @@ describe('matchPeers', () => {
 
     // With depl-a deployment
     data.nodeType = 'owner';
-    data.resourceKind = 'Deployment';
-    data.name = 'depl-a';
-    data.namespace = 'ns1';
+    data.peer = createPeer({ owner: { type: 'Deployment', name: 'depl-a' }, namespace: 'ns1' });
 
     matches = peers.filter(p => matchPeer(data, p));
     expect(matches).toEqual([peers[1]]);
@@ -265,59 +252,49 @@ describe('matchPeers', () => {
 
   it('should match resource nodes', () => {
     const peers: TopologyMetricPeer[] = [
-      {
-        namespace: ''
-      },
-      {
+      createPeer({ namespace: '' }),
+      createPeer({
         namespace: 'ns1',
-        ownerName: 'depl-a',
-        ownerType: 'Deployment',
-        type: 'Pod',
-        name: 'depl-a-12345',
-        addr: '1.2.3.4',
-        displayName: 'depl-a-12345'
-      },
-      {
+        owner: { name: 'depl-a', type: 'Deployment' },
+        resource: { name: 'depl-a-12345', type: 'Pod' },
+        addr: '1.2.3.4'
+      }),
+      createPeer({
         namespace: 'ns1',
-        ownerName: 'depl-b',
-        ownerType: 'Deployment',
-        type: 'Pod',
-        name: 'depl-b-67890',
-        addr: '1.2.3.5',
-        displayName: 'depl-b-67890'
-      },
-      {
+        owner: { name: 'depl-b', type: 'Deployment' },
+        resource: { name: 'depl-b-67890', type: 'Pod' },
+        addr: '1.2.3.5'
+      }),
+      createPeer({
         namespace: 'ns1',
-        type: 'Service',
-        name: 'svc-a',
-        addr: '1.2.3.6',
-        displayName: 'svc-a'
-      },
-      {
+        resource: { name: 'svc-a', type: 'Service' },
+        addr: '1.2.3.6'
+      }),
+      createPeer({
         namespace: 'ns2',
-        ownerName: 'depl-a',
-        ownerType: 'Deployment',
-        type: 'Pod',
-        name: 'depl-a-12345',
-        addr: '1.2.3.7',
-        displayName: 'depl-a-12345'
-      }
+        owner: { name: 'depl-a', type: 'Deployment' },
+        resource: { name: 'depl-a-12345', type: 'Pod' },
+        addr: '1.2.3.7'
+      })
     ];
 
     // With unknown
     const data: NodeData = {
-      nodeType: 'unknown'
+      nodeType: 'unknown',
+      peer: createPeer({})
     };
 
     let matches = peers.filter(p => matchPeer(data, p));
     expect(matches).toEqual([peers[0]]);
 
-    // With depl-a deployment
+    // With depl-a-12345 pod
     data.nodeType = 'resource';
-    data.resourceKind = 'Pod';
-    data.name = 'depl-a';
-    data.namespace = 'ns1';
-    data.addr = '1.2.3.4';
+    data.peer = createPeer({
+      resource: { name: 'depl-a-12345', type: 'Pod' },
+      owner: { name: 'depl-a', type: 'Deployment' },
+      namespace: 'ns1',
+      addr: '1.2.3.4'
+    });
 
     matches = peers.filter(p => matchPeer(data, p));
     expect(matches).toEqual([peers[1]]);
@@ -325,53 +302,39 @@ describe('matchPeers', () => {
 
   it('should match group', () => {
     const peers: TopologyMetricPeer[] = [
-      {
-        namespace: ''
-      },
-      {
+      createPeer({ namespace: '' }),
+      createPeer({
         namespace: 'ns1',
         hostName: 'host1',
-        ownerName: 'depl-a',
-        ownerType: 'Deployment',
-        type: 'Pod',
-        name: 'depl-a-12345',
-        addr: '1.2.3.4',
-        displayName: 'depl-a-12345'
-      },
-      {
+        owner: { name: 'depl-a', type: 'Deployment' },
+        resource: { name: 'depl-a-12345', type: 'Pod' },
+        addr: '1.2.3.4'
+      }),
+      createPeer({
         namespace: 'ns1',
         hostName: 'host2',
-        ownerName: 'depl-b',
-        ownerType: 'Deployment',
-        type: 'Pod',
-        name: 'depl-b-67890',
-        addr: '1.2.3.5',
-        displayName: 'depl-b-67890'
-      },
-      {
+        owner: { name: 'depl-b', type: 'Deployment' },
+        resource: { name: 'depl-b-6789', type: 'Pod' },
+        addr: '1.2.3.5'
+      }),
+      createPeer({
         namespace: 'ns1',
-        type: 'Service',
-        name: 'svc-a',
-        addr: '1.2.3.6',
-        displayName: 'svc-a'
-      },
-      {
+        resource: { name: 'Service', type: 'scv-a' },
+        addr: '1.2.3.6'
+      }),
+      createPeer({
         namespace: 'ns2',
         hostName: 'host1',
-        ownerName: 'depl-a',
-        ownerType: 'Deployment',
-        type: 'Pod',
-        name: 'depl-a-12345',
-        addr: '1.2.3.7',
-        displayName: 'depl-a-12345'
-      }
+        owner: { name: 'depl-a', type: 'Deployment' },
+        resource: { name: 'depl-a-12345', type: 'Pod' },
+        addr: '1.2.3.7'
+      })
     ];
 
     // With namespace group
     const data: NodeData = {
       nodeType: 'namespace',
-      resourceKind: 'Namespace',
-      name: 'ns1'
+      peer: createPeer({ namespace: 'ns1' })
     };
 
     let matches = peers.filter(p => matchPeer(data, p));
@@ -379,15 +342,13 @@ describe('matchPeers', () => {
 
     // With node group
     data.nodeType = 'host';
-    data.resourceKind = 'Node';
-    data.name = 'host1';
+    data.peer = createPeer({ hostName: 'host1' });
 
     matches = peers.filter(p => matchPeer(data, p));
     expect(matches).toEqual([peers[1], peers[4]]);
 
     // With node+namespace
-    data.parentKind = 'Namespace';
-    data.parentName = 'ns2';
+    data.peer = createPeer({ namespace: 'ns2', hostName: 'host1' });
 
     matches = peers.filter(p => matchPeer(data, p));
     expect(matches).toEqual([peers[4]]);

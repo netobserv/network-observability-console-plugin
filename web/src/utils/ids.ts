@@ -2,17 +2,9 @@
  *  Please keep them updated of any change
  */
 
-/**
- * getTopologyGroupId gets a unique group id
- * @param groupType string that represent group type.
- * This could either be 'Node', 'Namespace' or any valid K8S Owner / Resource type
- * @param name string that represent group name
- * This could either be Host, Namespace or Owner name
- * @returns string that identify the group
- */
-export const getTopologyGroupId = (groupType: string, name: string, parentId?: string) => {
-  return `${parentId ? parentId + '.' : ''}${groupType}.${name}`.toLowerCase();
-};
+import { TopologyMetricPeer } from '../api/loki';
+
+export const idUnknown = '-';
 
 /**
  * getTopologyEdgeId gets a unique edge id between two nodes
@@ -26,38 +18,26 @@ export const getTopologyEdgeId = (sourceId: string, targetId: string) => {
 };
 
 /**
- * getTopologyNodeId gets a unique node id
- * @param nodeType string that represent node type
- * This could either be 'Node', 'Namespace' or any valid K8S Ower / Resource type
- * @param namespace string that represent namespace (may be empty for external / host)
- * @param name string that represent name (may be empty for external)
- * @param addr string containing ip address (may be empty for external when scope is not ressources)
- * @param host string containing host (may be empty for services / external)
- * @returns string that identify the node
+ * getPeerId gets a unique peer id for provided set of fields
+ * @param fields list of fields returned from metrics that identify the element
+ * @returns string that identify the peer
  */
-export const getTopologyNodeId = (
-  nodeType?: string,
-  namespace?: string,
-  name?: string,
-  addr?: string,
-  host?: string
-) => {
-  const strs: string[] = [];
-
-  function addStr(str?: string) {
-    if (str) {
-      strs.push(str);
-    }
+export const getPeerId = (fields: Omit<TopologyMetricPeer, 'id'>): string => {
+  const parts = [];
+  if (fields.hostName) {
+    parts.push('h=' + fields.hostName);
   }
-
-  addStr(nodeType);
-  addStr(namespace);
-  addStr(name);
-  addStr(addr);
-  addStr(host);
-
-  if (strs.length) {
-    return strs.join('.').toLowerCase();
+  if (fields.namespace) {
+    parts.push('n=' + fields.namespace);
   }
-  return 'external';
+  if (fields.owner) {
+    parts.push('o=' + fields.owner.type + '.' + fields.owner.name);
+  }
+  if (fields.resource) {
+    parts.push('r=' + fields.resource.type + '.' + fields.resource.name);
+  }
+  if (fields.addr) {
+    parts.push('a=' + fields.addr);
+  }
+  return parts.length > 0 ? parts.join(',') : idUnknown;
 };

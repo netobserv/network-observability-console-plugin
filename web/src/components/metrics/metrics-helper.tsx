@@ -103,8 +103,8 @@ const getPeerName = (
 export const toNamedMetric = (
   t: TFunction,
   m: TopologyMetrics,
-  data?: NodeData,
-  truncateLength: TruncateLength = TruncateLength.OFF
+  truncateLength: TruncateLength,
+  data?: NodeData
 ): NamedMetric => {
   const srcName = getPeerName(t, m.source, m.scope, truncateLength);
   const srcFullName = getPeerName(t, m.source, m.scope);

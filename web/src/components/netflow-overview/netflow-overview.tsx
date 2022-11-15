@@ -15,7 +15,6 @@ import { useTranslation } from 'react-i18next';
 import { TopologyMetrics } from '../../api/loki';
 import { MetricType } from '../../model/flow-query';
 import { getStat } from '../../model/topology';
-import { peersEqual } from '../../utils/metrics';
 import { getOverviewPanelInfo, OverviewPanel, OverviewPanelId } from '../../utils/overview-panels';
 import { TruncateLength } from '../dropdowns/truncate-dropdown';
 import LokiError from '../messages/loki-error';
@@ -101,9 +100,9 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
   //limit to top X since multiple queries can run in parallel
   const topKMetrics = metrics
     .sort((a, b) => getStat(b.stats, 'sum') - getStat(a.stats, 'sum'))
-    .map(m => toNamedMetric(t, m, undefined, truncateLength));
-  const namedTotalMetric = toNamedMetric(t, totalMetric, undefined, truncateLength);
-  const noInternalTopK = topKMetrics.filter(m => !peersEqual(m.source, m.destination));
+    .map(m => toNamedMetric(t, m, truncateLength));
+  const namedTotalMetric = toNamedMetric(t, totalMetric, truncateLength);
+  const noInternalTopK = topKMetrics.filter(m => m.source.id !== m.destination.id);
 
   const smallerTexts = truncateLength >= TruncateLength.M;
 
