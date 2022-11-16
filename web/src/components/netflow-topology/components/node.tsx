@@ -63,7 +63,9 @@ type BaseNodeProps = {
   dropTarget?: boolean;
   scaleNode?: boolean; // Whether or not to scale the node, best on hover of node at lowest scale level
   shadowed?: boolean;
+  filtered?: boolean;
   highlighted?: boolean;
+  isDark?: boolean;
   label?: string; // Defaults to element.getLabel()
   secondaryLabel?: string;
   showLabel?: boolean; // Defaults to true
@@ -112,7 +114,9 @@ const BaseNode: React.FunctionComponent<BaseNodeProps> = ({
   showLabel = true,
   label,
   shadowed,
+  filtered,
   highlighted,
+  isDark,
   secondaryLabel,
   labelClassName,
   labelPosition,
@@ -216,7 +220,9 @@ const BaseNode: React.FunctionComponent<BaseNodeProps> = ({
     StatusModifier[status],
     'topology',
     shadowed && 'shadowed',
-    highlighted && 'node-highlighted'
+    filtered && 'node-filtered',
+    highlighted && 'node-highlighted',
+    isDark && 'dark'
   );
 
   const backgroundClassName = css(
@@ -342,7 +348,10 @@ const BaseNode: React.FunctionComponent<BaseNodeProps> = ({
         {children}
       </g>
       {statusDecorator}
-      {isHover && attachments}
+      {
+        //isHover &&
+        attachments
+      }
     </g>
   );
 };

@@ -72,6 +72,7 @@ export const TopologyContent: React.FC<{
   onSelect: (e: GraphElementPeer | undefined) => void;
   searchHandle: SearchHandle | null;
   searchEvent?: SearchEvent;
+  isDark?: boolean;
 }> = ({
   k8sModels,
   range,
@@ -87,7 +88,8 @@ export const TopologyContent: React.FC<{
   selected,
   onSelect,
   searchHandle,
-  searchEvent
+  searchEvent,
+  isDark
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const controller = useVisualizationController();
@@ -324,7 +326,8 @@ export const TopologyContent: React.FC<{
       highlightedId,
       filters,
       t,
-      k8sModels
+      k8sModels,
+      isDark
     );
     const allIds = [...(updatedModel.nodes || []), ...(updatedModel.edges || [])].map(item => item.id);
     controller.getElements().forEach(e => {
@@ -362,7 +365,8 @@ export const TopologyContent: React.FC<{
     searchEvent?.searchValue,
     filters,
     t,
-    k8sModels
+    k8sModels,
+    isDark
   ]);
 
   //update model on layout / metrics / filters change
@@ -493,6 +497,7 @@ export const NetflowTopology: React.FC<{
   onSelect: (e: GraphElementPeer | undefined) => void;
   searchHandle: SearchHandle | null;
   searchEvent?: SearchEvent;
+  isDark?: boolean;
 }> = ({
   loading,
   k8sModels,
@@ -510,7 +515,8 @@ export const NetflowTopology: React.FC<{
   selected,
   onSelect,
   searchHandle,
-  searchEvent
+  searchEvent,
+  isDark
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [controller, setController] = React.useState<Visualization>();
@@ -552,6 +558,7 @@ export const NetflowTopology: React.FC<{
           onSelect={onSelect}
           searchHandle={searchHandle}
           searchEvent={searchEvent}
+          isDark={isDark}
         />
       </VisualizationProvider>
     );

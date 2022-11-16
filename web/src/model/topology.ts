@@ -208,6 +208,7 @@ export type NodeData = {
   canStepInto?: boolean;
   parentKind?: string;
   parentName?: string;
+  badgeColor?: string;
 };
 
 export const generateNode = (
@@ -217,7 +218,8 @@ export const generateNode = (
   highlightedId: string,
   filters: Filter[],
   t: TFunction,
-  k8sModels: { [key: string]: K8sModel }
+  k8sModels: { [key: string]: K8sModel },
+  isDark?: boolean
 ): NodeModel => {
   const id = getTopologyNodeId(data.resourceKind, data.namespace, data.name, data.addr, data.host);
   const label = data.displayName || data.name || data.addr || ''; // should never be empty
@@ -231,6 +233,7 @@ export const generateNode = (
       ? data.namespace
       : undefined;
   const shadowed = !_.isEmpty(searchValue) && !(label.includes(searchValue) || secondaryLabel?.includes(searchValue));
+  const filtered = !_.isEmpty(searchValue) && !shadowed;
   const highlighted = !shadowed && !_.isEmpty(highlightedId) && highlightedId.includes(id);
   const k8sModel = options.nodeBadges && data.resourceKind ? k8sModels[data.resourceKind] : undefined;
   return {
@@ -239,13 +242,15 @@ export const generateNode = (
     label,
     width: DEFAULT_NODE_SIZE,
     height: DEFAULT_NODE_SIZE,
-    shape: NodeShape.ellipse,
+    shape: k8sModel ? NodeShape.ellipse : NodeShape.rect,
     status: NodeStatus.default,
     style: { padding: 20 },
     data: {
       ...data,
       shadowed,
+      filtered,
       highlighted,
+      isDark,
       isFiltered: isElementFiltered(data, filters, t),
       labelPosition: LabelPosition.bottom,
       badge: k8sModel?.abbr,
@@ -313,9 +318,12 @@ export const generateEdge = (
   stat: number,
   options: TopologyOptions,
   shadowed = false,
-  highlightedId: string
+  filtered = false,
+  highlightedId: string,
+  isDark?: boolean
 ): EdgeModel => {
   const id = `${sourceId}.${targetId}`;
+
   const highlighted = !shadowed && !_.isEmpty(highlightedId) && id.includes(highlightedId);
   return {
     id: getTopologyEdgeId(sourceId, targetId),
@@ -328,7 +336,9 @@ export const generateEdge = (
       sourceId,
       targetId,
       shadowed,
+      filtered,
       highlighted,
+      isDark,
       //edges are directed from src to dst. It will become bidirectionnal if inverted pair is found
       startTerminalType: EdgeTerminalType.none,
       startTerminalStatus: NodeStatus.default,
@@ -349,7 +359,8 @@ export const generateDataModel = (
   highlightedId: string,
   filters: Filter[],
   t: TFunction,
-  k8sModels: { [key: string]: K8sModel }
+  k8sModels: { [key: string]: K8sModel },
+  isDark?: boolean
 ): Model => {
   let nodes: NodeModel[] = [];
   const edges: EdgeModel[] = [];
@@ -378,6 +389,7 @@ export const generateDataModel = (
           name,
           nodeType,
           resourceKind,
+          isDark,
           parentKind: parentData?.resourceKind,
           parentName: parentData?.name,
           labelPosition: LabelPosition.bottom,
@@ -414,7 +426,7 @@ export const generateDataModel = (
         n.data.host === data.host
     );
     if (!node) {
-      node = generateNode(data, opts, searchValue, highlightedId, filters, t, k8sModels);
+      node = generateNode(data, opts, searchValue, highlightedId, filters, t, k8sModels, isDark);
       nodes.push(node);
     }
 
@@ -425,7 +437,7 @@ export const generateDataModel = (
     return node;
   }
 
-  function addEdge(sourceId: string, targetId: string, stats: MetricStats, shadowed = false) {
+  function addEdge(sourceId: string, targetId: string, stats: MetricStats, shadowed = false, filtered = false) {
     const stat = getStat(stats, options.metricFunction);
     let edge = edges.find(
       e =>
@@ -439,6 +451,8 @@ export const generateDataModel = (
       edge.data = {
         ...edge.data,
         shadowed,
+        filtered,
+        isDark,
         //edges are directed from src to dst. It will become bidirectionnal if inverted pair is found
         startTerminalType: edge.data.sourceId !== sourceId ? EdgeTerminalType.directional : edge.data.startTerminalType,
         tag: getEdgeTag(stat, options),
@@ -446,7 +460,7 @@ export const generateDataModel = (
         bps: stat
       };
     } else {
-      edge = generateEdge(sourceId, targetId, stat, opts, shadowed, highlightedId);
+      edge = generateEdge(sourceId, targetId, stat, opts, shadowed, filtered, highlightedId, isDark);
       edges.push(edge);
     }
 
@@ -546,7 +560,13 @@ export const generateDataModel = (
     const dstNode = manageNode(d.destination);
 
     if (options.edges && srcNode && dstNode && srcNode.id !== dstNode.id) {
-      addEdge(srcNode.id, dstNode.id, d.stats, srcNode.data.shadowed || dstNode.data.shadowed);
+      addEdge(
+        srcNode.id,
+        dstNode.id,
+        d.stats,
+        srcNode.data.shadowed || dstNode.data.shadowed,
+        srcNode.data.filtered || dstNode.data.filtered
+      );
     }
   });
 

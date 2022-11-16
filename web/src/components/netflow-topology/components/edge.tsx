@@ -40,7 +40,9 @@ type BaseEdgeProps = {
   endTerminalStatus?: NodeStatus;
   endTerminalSize?: number;
   shadowed?: boolean;
+  filtered?: boolean;
   highlighted?: boolean;
+  isDark?: boolean;
   tag?: string;
   tagClass?: string;
   tagStatus?: NodeStatus;
@@ -68,7 +70,9 @@ const BaseEdge: React.FC<BaseEdgeProps> = ({
   endTerminalStatus,
   endTerminalSize = 14,
   shadowed,
+  filtered,
   highlighted,
+  isDark,
   tag,
   tagClass,
   tagStatus,
@@ -103,7 +107,9 @@ const BaseEdge: React.FC<BaseEdgeProps> = ({
     selected && 'pf-m-selected',
     'topology',
     shadowed && 'shadowed',
-    highlighted && 'edge-highlighted'
+    filtered && 'edge-filtered',
+    highlighted && 'edge-highlighted',
+    isDark && 'dark'
   );
 
   const edgeAnimationDuration = animationDuration ?? getEdgeAnimationDuration(element.getEdgeAnimationSpeed());

@@ -1,12 +1,9 @@
-import * as _ from 'lodash';
-import { ResourceLink } from '@openshift-console/dynamic-plugin-sdk';
-import { Flex, FlexItem, Popover } from '@patternfly/react-core';
+import { Tooltip, TooltipPosition } from '@patternfly/react-core';
 import {
   CubeIcon,
   CubesIcon,
-  LevelDownAltIcon,
   FilterIcon,
-  InfoCircleIcon,
+  LevelDownAltIcon,
   OutlinedHddIcon,
   QuestionCircleIcon,
   ServiceIcon,
@@ -16,6 +13,7 @@ import {
 } from '@patternfly/react-icons';
 import {
   Decorator,
+  DEFAULT_DECORATOR_PADDING,
   DEFAULT_DECORATOR_RADIUS,
   DEFAULT_LAYER,
   getDefaultShapeDecoratorCenter,
@@ -32,12 +30,13 @@ import {
   WithDragNodeProps,
   WithSelectionProps
 } from '@patternfly/react-topology';
-import BaseNode from '../components/node';
 import useDetailsLevel from '@patternfly/react-topology/dist/esm/hooks/useDetailsLevel';
 import { TFunction } from 'i18next';
+import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Decorated, NodeData } from '../../../model/topology';
+import BaseNode from '../components/node';
 
 export const FILTER_EVENT = 'filter';
 export const STEP_INTO_EVENT = 'step_into';
@@ -45,6 +44,8 @@ export enum DataTypes {
   Default
 }
 const ICON_PADDING = 20;
+const MEDIUM_DECORATOR_PADDING = 5;
+const LARGE_DECORATOR_PADDING = 6;
 
 type NodePeer = Node<NodeModel, Decorated<NodeData>>;
 
@@ -81,23 +82,6 @@ const getTypeIcon = (resourceKind?: string): React.ComponentClass<any, any> => {
   }
 };
 
-const getTypeIconColor = (resourceKind?: string): string => {
-  switch (resourceKind) {
-    case 'Service':
-    case 'Pod':
-    case 'Namespace':
-    case 'Node':
-    case 'CatalogSource':
-    case 'DaemonSet':
-    case 'Deployment':
-    case 'StatefulSet':
-    case 'Job':
-      return '#393F44';
-    default:
-      return '#c9190b';
-  }
-};
-
 const renderIcon = (data: Decorated<NodeData>, element: NodePeer): React.ReactNode => {
   const { width, height } = element.getDimensions();
   const shape = element.getNodeShape();
@@ -105,104 +89,11 @@ const renderIcon = (data: Decorated<NodeData>, element: NodePeer): React.ReactNo
     (shape === NodeShape.trapezoid ? width : Math.min(width, height)) -
     (shape === NodeShape.stadium ? 5 : ICON_PADDING) * 2;
   const Component = getTypeIcon(data.resourceKind);
-  const color = getTypeIconColor(data.resourceKind);
 
   return (
     <g transform={`translate(${(width - iconSize) / 2}, ${(height - iconSize) / 2})`}>
-      <Component style={{ color }} width={iconSize} height={iconSize} />
+      <Component width={iconSize} height={iconSize} />
     </g>
-  );
-};
-
-const renderPopoverDecorator = (
-  t: TFunction,
-  element: NodePeer,
-  quadrant: TopologyQuadrant,
-  icon: React.ReactNode,
-  data: NodeData,
-  getShapeDecoratorCenter?: (
-    quadrant: TopologyQuadrant,
-    node: NodePeer,
-    radius?: number
-  ) => {
-    x: number;
-    y: number;
-  }
-): React.ReactNode => {
-  const { x, y } = getShapeDecoratorCenter
-    ? getShapeDecoratorCenter(quadrant, element)
-    : getDefaultShapeDecoratorCenter(quadrant, element);
-
-  return (
-    (data.resourceKind || data.namespace || data.name || data.addr || data.host) && (
-      <Popover
-        id="decorator"
-        hideOnOutsideClick={true}
-        onShow={() => {
-          const data = element.getData();
-          if (data) {
-            //force hover state when popover is opened
-            element.setData({ ...data, hover: true });
-          }
-        }}
-        onHide={() => {
-          const data = element.getData();
-          if (data) {
-            //restore hover state when popover is closed
-            element.setData({ ...data, hover: undefined });
-          }
-        }}
-        hasAutoWidth
-        headerContent={
-          //namespace is optionnal here for Node and Namespace kinds
-          data.resourceKind && data.name ? (
-            <ResourceLink inline={true} kind={data.resourceKind} name={data.name} namespace={data.namespace} />
-          ) : (
-            data.addr
-          )
-        }
-        bodyContent={
-          <Flex>
-            <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsNone' }}>
-              {data.resourceKind && (
-                <FlexItem>
-                  <FlexItem>{t('Kind')}</FlexItem>
-                </FlexItem>
-              )}
-              {data.namespace && (
-                <FlexItem>
-                  <FlexItem>{t('Namespace')}</FlexItem>
-                </FlexItem>
-              )}
-              {data.name && (
-                <FlexItem>
-                  <FlexItem>{t('Name')}</FlexItem>
-                </FlexItem>
-              )}
-              {data.addr && (
-                <FlexItem>
-                  <FlexItem>{t('IP')}</FlexItem>
-                </FlexItem>
-              )}
-              {data.host && (
-                <FlexItem>
-                  <FlexItem>{t('Node')}</FlexItem>
-                </FlexItem>
-              )}
-            </Flex>
-            <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsNone' }}>
-              {data.resourceKind && <FlexItem>{data.resourceKind}</FlexItem>}
-              {data.namespace && <FlexItem>{data.namespace}</FlexItem>}
-              {data.name && <FlexItem>{data.name}</FlexItem>}
-              {data.addr && <FlexItem>{data.addr}</FlexItem>}
-              {data.host && <FlexItem>{data.host}</FlexItem>}
-            </Flex>
-          </Flex>
-        }
-      >
-        <Decorator x={x} y={y} radius={DEFAULT_DECORATOR_RADIUS} showBackground icon={icon} />
-      </Popover>
-    )
   );
 };
 
@@ -211,6 +102,7 @@ const renderClickableDecorator = (
   element: NodePeer,
   quadrant: TopologyQuadrant,
   icon: React.ReactNode,
+  tooltip: string,
   isActive: boolean,
   onClick: (element: NodePeer) => void,
   getShapeDecoratorCenter?: (
@@ -220,22 +112,26 @@ const renderClickableDecorator = (
   ) => {
     x: number;
     y: number;
-  }
+  },
+  padding?: number
 ): React.ReactNode => {
   const { x, y } = getShapeDecoratorCenter
     ? getShapeDecoratorCenter(quadrant, element)
     : getDefaultShapeDecoratorCenter(quadrant, element);
 
   return (
-    <Decorator
-      x={x}
-      y={y}
-      radius={DEFAULT_DECORATOR_RADIUS}
-      showBackground
-      icon={icon}
-      className={isActive ? 'selected-decorator' : ''}
-      onClick={() => onClick(element)}
-    />
+    <Tooltip content={tooltip} position={TooltipPosition.right}>
+      <Decorator
+        x={x}
+        y={y}
+        radius={DEFAULT_DECORATOR_RADIUS}
+        padding={padding}
+        showBackground
+        icon={icon}
+        className={isActive ? 'selected-decorator' : ''}
+        onClick={() => onClick(element)}
+      />
+    </Tooltip>
   );
 };
 
@@ -302,11 +198,13 @@ const renderDecorators = (
         renderClickableDecorator(
           t,
           element,
-          TopologyQuadrant.upperLeft,
+          TopologyQuadrant.lowerRight,
           <LevelDownAltIcon />,
+          t('Step into this {{name}}', { name: data.resourceKind?.toLowerCase() }),
           false,
           onStepIntoClick,
-          getShapeDecoratorCenter
+          getShapeDecoratorCenter,
+          MEDIUM_DECORATOR_PADDING
         )}
       {(data.namespace || data.name || data.addr || data.host) &&
         renderClickableDecorator(
@@ -314,26 +212,24 @@ const renderDecorators = (
           element,
           TopologyQuadrant.lowerLeft,
           isFiltered ? <TimesIcon /> : <FilterIcon />,
+          isFiltered
+            ? t('Remove {{name}} filter', { name: data.resourceKind?.toLowerCase() })
+            : t('Add {{name}} filter', { name: data.resourceKind?.toLowerCase() }),
           isFiltered,
           onFilterClick,
-          getShapeDecoratorCenter
+          getShapeDecoratorCenter,
+          isFiltered ? DEFAULT_DECORATOR_PADDING : LARGE_DECORATOR_PADDING
         )}
       {renderClickableDecorator(
         t,
         element,
         TopologyQuadrant.upperRight,
         <ThumbtackIcon />,
+        isPinned ? t('Unpin this element') : t('Pin this element'),
         isPinned,
         onPinClick,
-        getShapeDecoratorCenter
-      )}
-      {renderPopoverDecorator(
-        t,
-        element,
-        TopologyQuadrant.lowerRight,
-        <InfoCircleIcon />,
-        data,
-        getShapeDecoratorCenter
+        getShapeDecoratorCenter,
+        MEDIUM_DECORATOR_PADDING
       )}
     </>
   );
