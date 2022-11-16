@@ -11,7 +11,6 @@ describe('<MetricsContent />', () => {
     title: 'chart-test',
     metricType: 'bytes',
     metrics: metrics.map(m => ({ ...m, fullName: 'whatever', shortName: 'whatever', isInternal: false })),
-    showTitle: true,
     smallerTexts: false,
     limit: 5,
     tooltipsTruncate: true
@@ -19,7 +18,7 @@ describe('<MetricsContent />', () => {
   it('should render component', async () => {
     const wrapper = mount(<MetricsContent {...props} />);
     expect(wrapper.find(MetricsContent)).toBeTruthy();
-    expect(wrapper.find('#metrics-title').last().text()).toBe('chart-test');
+    expect(wrapper.find(Chart).last().props().ariaTitle).toBe('chart-test');
   });
   it('should render bar', async () => {
     const wrapper = mount(<MetricsContent {...props} showBar={true} />);

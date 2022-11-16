@@ -794,7 +794,6 @@ export const NetflowTraffic: React.FC<{
           id="elementPanel"
           element={selectedElement}
           metrics={metrics}
-          metricFunction={metricFunction}
           metricType={metricType}
           truncateLength={topologyOptions.truncateLength}
           filters={filters}

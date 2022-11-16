@@ -4,10 +4,11 @@ import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 import { Filter } from '../../../model/filters';
 import { TopologyMetrics } from '../../../api/loki';
-import { MetricFunction, MetricScope, MetricType } from '../../../model/flow-query';
-import { ElementPanel, ElementPanelDetailsContent, ElementPanelMetricsContent } from '../element-panel';
+import { MetricScope, MetricType } from '../../../model/flow-query';
+import { ElementPanel, ElementPanelDetailsContent } from '../element-panel';
 import { dataSample } from '../__tests-data__/metrics';
 import { NodeData } from '../../../model/topology';
+import { ElementPanelMetrics } from '../element-panel-metrics';
 import { createPeer } from '../../../utils/metrics';
 import { TruncateLength } from '../../../components/dropdowns/truncate-dropdown';
 
@@ -34,7 +35,6 @@ describe('<ElementPanel />', () => {
   const mocks = {
     element: getNode('Pod', 'loki-distributor-loki-76598c8449-csmh2', '10.129.0.15'),
     metrics: dataSample as TopologyMetrics[],
-    metricFunction: 'sum' as MetricFunction,
     metricType: 'bytes' as MetricType,
     metricScope: 'resource' as MetricScope,
     filters: [] as Filter[],
@@ -71,20 +71,78 @@ describe('<ElementPanel />', () => {
     expect(wrapper.find('#destination-content').last().text()).toBe('ServiceIP172.30.0.10');
   });
 
-  it('should render <ElementPanelMetricsContent />', async () => {
-    const wrapper = mount(<ElementPanelMetricsContent {...mocks} />);
-    expect(wrapper.find(ElementPanelMetricsContent)).toBeTruthy();
+  it('should render <ElementPanelMetricsContent /> node inbound', async () => {
+    const wrapper = mount(
+      <ElementPanelMetrics
+        metricType={mocks.metricType}
+        metrics={mocks.metrics}
+        aData={mocks.element.getData()!}
+        context={'to-node'}
+        truncateLength={TruncateLength.M}
+      />
+    );
+    expect(wrapper.find(ElementPanelMetrics)).toBeTruthy();
 
     //check node metrics
-    expect(wrapper.find('#inCount').last().text()).toBe('94.7 MB');
-    expect(wrapper.find('#outCount').last().text()).toBe('4.1 MB');
-    expect(wrapper.find('#total').last().text()).toBe('98.8 MB');
+    expect(wrapper.find('#metrics-stats-total').last().text()).toBe('94.7 MB');
+    expect(wrapper.find('#metrics-stats-avg').last().text()).toBe('332.4 kBps');
+    expect(wrapper.find('#metrics-stats-latest').last().text()).toBe('0 Bps');
+  });
 
-    //update to edge
-    wrapper.setProps({ ...mocks, element: getEdge() });
-    expect(wrapper.find('#inCount').last().text()).toBe('1.1 MB');
-    expect(wrapper.find('#outCount').last().text()).toBe('4.5 MB');
-    expect(wrapper.find('#total').last().text()).toBe('5.6 MB');
+  it('should render <ElementPanelMetricsContent /> node outbound', async () => {
+    const wrapper = mount(
+      <ElementPanelMetrics
+        metricType={mocks.metricType}
+        metrics={mocks.metrics}
+        aData={mocks.element.getData()!}
+        context={'from-node'}
+        truncateLength={TruncateLength.M}
+      />
+    );
+    expect(wrapper.find(ElementPanelMetrics)).toBeTruthy();
+
+    //check node metrics
+    expect(wrapper.find('#metrics-stats-total').last().text()).toBe('4.1 MB');
+    expect(wrapper.find('#metrics-stats-avg').last().text()).toBe('14.3 kBps');
+    expect(wrapper.find('#metrics-stats-latest').last().text()).toBe('0 Bps');
+  });
+
+  it('should render <ElementPanelMetricsContent /> edge a->b', async () => {
+    const edge = getEdge();
+    const wrapper = mount(
+      <ElementPanelMetrics
+        metricType={mocks.metricType}
+        metrics={mocks.metrics}
+        aData={edge.getSource().getData()}
+        bData={edge.getTarget().getData()}
+        context={'a-to-b'}
+        truncateLength={TruncateLength.M}
+      />
+    );
+    expect(wrapper.find(ElementPanelMetrics)).toBeTruthy();
+
+    expect(wrapper.find('#metrics-stats-total').last().text()).toBe('1.1 MB');
+    expect(wrapper.find('#metrics-stats-avg').last().text()).toBe('3.9 kBps');
+    expect(wrapper.find('#metrics-stats-latest').last().text()).toBe('0 Bps');
+  });
+
+  it('should render <ElementPanelMetricsContent /> edge b->a', async () => {
+    const edge = getEdge();
+    const wrapper = mount(
+      <ElementPanelMetrics
+        metricType={mocks.metricType}
+        metrics={mocks.metrics}
+        aData={edge.getSource().getData()}
+        bData={edge.getTarget().getData()}
+        context={'b-to-a'}
+        truncateLength={TruncateLength.M}
+      />
+    );
+    expect(wrapper.find(ElementPanelMetrics)).toBeTruthy();
+
+    expect(wrapper.find('#metrics-stats-total').last().text()).toBe('4.5 MB');
+    expect(wrapper.find('#metrics-stats-avg').last().text()).toBe('15.9 kBps');
+    expect(wrapper.find('#metrics-stats-latest').last().text()).toBe('0 Bps');
   });
 
   it('should filter <ElementPanelDetailsContent />', async () => {
