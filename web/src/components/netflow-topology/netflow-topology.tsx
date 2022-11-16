@@ -418,7 +418,6 @@ export const TopologyContent: React.FC<{
   }, [selected, selectedIds]);
 
   React.useEffect(() => {
-    console.log('search effect', searchEvent, searchHandle);
     if (searchHandle && searchEvent) {
       switch (searchEvent.type) {
         case 'change':
