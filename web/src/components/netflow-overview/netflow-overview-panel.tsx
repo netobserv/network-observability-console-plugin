@@ -1,5 +1,6 @@
-import { Card, Flex, FlexItem, Text, TextVariants } from '@patternfly/react-core';
 import * as React from 'react';
+import { Card, Flex, FlexItem, Text, TextVariants, Tooltip } from '@patternfly/react-core';
+import { InfoAltIcon } from '@patternfly/react-icons';
 
 import './netflow-overview-panel.css';
 
@@ -7,8 +8,9 @@ export const NetflowOverviewPanel: React.FC<{
   doubleWidth: boolean;
   bodyClassSmall: boolean;
   title: string;
+  titleTooltip?: string;
   kebab?: JSX.Element;
-}> = ({ doubleWidth, bodyClassSmall, title, kebab, children }) => {
+}> = ({ doubleWidth, bodyClassSmall, title, titleTooltip, kebab, children }) => {
   return (
     <FlexItem className={`overview-flex-item ${doubleWidth ? 'full' : ''}`}>
       <Card isFlat className="overview-card">
@@ -16,7 +18,14 @@ export const NetflowOverviewPanel: React.FC<{
           <FlexItem>
             <Flex direction={{ default: 'row' }}>
               <FlexItem flex={{ default: 'flex_1' }} className="overview-title">
-                <Text component={TextVariants.h3}>{title}</Text>
+                <Text component={TextVariants.h3}>
+                  {title}
+                  {titleTooltip && (
+                    <Tooltip content={titleTooltip}>
+                      <InfoAltIcon />
+                    </Tooltip>
+                  )}
+                </Text>
               </FlexItem>
               <FlexItem>{kebab}</FlexItem>
             </Flex>

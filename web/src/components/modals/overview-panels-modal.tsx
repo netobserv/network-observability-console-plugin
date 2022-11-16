@@ -19,7 +19,7 @@ import {
 import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { getDefaultOverviewPanels, getOverviewPanelTitle, OverviewPanel } from '../../utils/overview-panels';
+import { getDefaultOverviewPanels, getOverviewPanelTitleAndTooltip, OverviewPanel } from '../../utils/overview-panels';
 import Modal from './modal';
 import './overview-panels-modal.css';
 
@@ -118,7 +118,7 @@ export const OverviewPanelsModal: React.FC<{
           <DataListItemCells
             dataListCells={[
               <DataListCell key={'data-list-cell-' + i}>
-                <label htmlFor={panel.id}>{getOverviewPanelTitle(t, panel.id)}</label>
+                <label htmlFor={panel.id}>{getOverviewPanelTitleAndTooltip(t, panel.id)[0]}</label>
               </DataListCell>
             ]}
           />
