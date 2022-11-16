@@ -115,8 +115,6 @@ export const TopologyContent: React.FC<{
         return;
       }
 
-      console.log('onSearch', searchValue, next, lastNodeIdsFound);
-
       if (controller && controller.hasGraph()) {
         const currentModel = controller.toModel();
         const matchingNodeModels =
