@@ -122,8 +122,9 @@ import ElementPanel from './netflow-topology/element-panel';
 import NetflowTopology from './netflow-topology/netflow-topology';
 import { Config, defaultConfig } from '../model/config';
 import { FilterActionLinks } from './filters/filter-action-links';
-import QuerySummary from './query-summary/query-summary';
 import SummaryPanel from './query-summary/summary-panel';
+import MetricsQuerySummary from './query-summary/metrics-query-summary';
+import FlowsQuerySummary from './query-summary/flows-query-summary';
 import { SearchComponent, SearchEvent, SearchHandle } from './search/search';
 import './netflow-traffic.css';
 
@@ -751,7 +752,7 @@ export const NetflowTraffic: React.FC<{
           id="summaryPanel"
           flows={flows}
           metrics={metrics}
-          appMetrics={totalMetric ? [totalMetric] : []}
+          appMetrics={totalMetric}
           metricType={metricType}
           stats={stats}
           appStats={appStats}
@@ -857,18 +858,25 @@ export const NetflowTraffic: React.FC<{
       <Flex id="page-content-flex" direction={{ default: 'column' }}>
         <FlexItem flex={{ default: 'flex_1' }}>{content}</FlexItem>
         <FlexItem>
-          <QuerySummary
-            flows={flows}
-            metrics={metrics}
-            appMetrics={totalMetric ? [totalMetric] : []}
-            metricType={metricType}
-            stats={stats}
-            appStats={appStats}
-            lastRefresh={lastRefresh}
-            range={range}
-            isShowQuerySummary={isShowQuerySummary}
-            toggleQuerySummary={() => onToggleQuerySummary(!isShowQuerySummary)}
-          />
+          {_.isEmpty(flows) ? (
+            <MetricsQuerySummary
+              metrics={metrics}
+              appMetrics={totalMetric}
+              metricType={metricType}
+              lastRefresh={lastRefresh}
+              isShowQuerySummary={isShowQuerySummary}
+              toggleQuerySummary={() => onToggleQuerySummary(!isShowQuerySummary)}
+            />
+          ) : (
+            <FlowsQuerySummary
+              flows={flows}
+              stats={stats}
+              lastRefresh={lastRefresh}
+              range={range}
+              isShowQuerySummary={isShowQuerySummary}
+              toggleQuerySummary={() => onToggleQuerySummary(!isShowQuerySummary)}
+            />
+          )}
         </FlexItem>
       </Flex>
     );
