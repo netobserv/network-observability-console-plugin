@@ -8,7 +8,7 @@ import { NetflowTableHeader } from '../netflow-table-header';
 
 import { ShuffledDefaultColumns } from '../../__tests-data__/columns';
 import { FlowsMock, FlowsSample } from '../../__tests-data__/flows';
-import { Size } from '../../dropdowns/display-dropdown';
+import { Size } from '../../dropdowns/table-display-dropdown';
 import { ColumnsId } from '../../../utils/columns';
 import { LokiError } from '../../messages/loki-error';
 import { dateTimeMSFormatter, getFormattedDate } from '../../../utils/datetime';

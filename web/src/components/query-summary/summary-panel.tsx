@@ -211,7 +211,6 @@ export const SummaryPanelContent: React.FC<{
       }
 
       metrics.forEach(m => {
-        console.log('cardinality', m);
         manageTypeCardinality(m.source.hostName, m.source.namespace, m.source.type, m.source.name);
         manageTypeCardinality(m.destination.hostName, m.destination.namespace, m.destination.type, m.destination.name);
       });

@@ -1,5 +1,5 @@
-import { Bullseye, Button, InputGroup, Spinner, TextInput, ValidatedOptions } from '@patternfly/react-core';
-import { CogIcon, ExportIcon, SearchIcon, TimesIcon, AngleUpIcon, AngleDownIcon } from '@patternfly/react-icons';
+import { K8sModel } from '@openshift-console/dynamic-plugin-sdk';
+import { Bullseye, Spinner, ValidatedOptions } from '@patternfly/react-core';
 import {
   createTopologyControlButtons,
   defaultControlButtonsOptions,
@@ -20,32 +20,31 @@ import {
 import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { saveSvgAsPng } from 'save-svg-as-png';
 import { TopologyMetrics } from '../../api/loki';
 import { Filter } from '../../model/filters';
 import { MetricFunction, MetricScope, MetricType } from '../../model/flow-query';
-import {
-  generateDataModel,
-  LayoutName,
-  TopologyGroupTypes,
-  TopologyOptions,
-  isElementFiltered,
-  toggleElementFilter,
-  GraphElementPeer,
-  ElementData,
-  Decorated,
-  getStat
-} from '../../model/topology';
 import { MetricScopeOptions } from '../../model/metrics';
+import {
+  Decorated,
+  ElementData,
+  generateDataModel,
+  getStat,
+  GraphElementPeer,
+  isElementFiltered,
+  LayoutName,
+  toggleElementFilter,
+  TopologyGroupTypes,
+  TopologyOptions
+} from '../../model/topology';
 import { TimeRange } from '../../utils/datetime';
 import { usePrevious } from '../../utils/previous-hook';
+import LokiError from '../messages/loki-error';
+import { SearchEvent, SearchHandle } from '../search/search';
 import componentFactory from './componentFactories/componentFactory';
 import stylesComponentFactory from './componentFactories/stylesComponentFactory';
 import layoutFactory from './layouts/layoutFactory';
 import './netflow-topology.css';
-import { STEP_INTO_EVENT, FILTER_EVENT } from './styles/styleNode';
-import { K8sModel } from '@openshift-console/dynamic-plugin-sdk';
-import LokiError from '../messages/loki-error';
+import { FILTER_EVENT, STEP_INTO_EVENT } from './styles/styleNode';
 
 export const HOVER_EVENT = 'hover';
 
@@ -69,9 +68,10 @@ export const TopologyContent: React.FC<{
   setOptions: (o: TopologyOptions) => void;
   filters: Filter[];
   setFilters: (v: Filter[]) => void;
-  toggleTopologyOptions: () => void;
   selected: GraphElementPeer | undefined;
   onSelect: (e: GraphElementPeer | undefined) => void;
+  searchHandle: SearchHandle | null;
+  searchEvent?: SearchEvent;
 }> = ({
   k8sModels,
   range,
@@ -84,13 +84,13 @@ export const TopologyContent: React.FC<{
   setOptions,
   filters,
   setFilters,
-  toggleTopologyOptions,
   selected,
-  onSelect
+  onSelect,
+  searchHandle,
+  searchEvent
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const controller = useVisualizationController();
-
   const prevMetrics = usePrevious(metrics);
   const prevMetricFunction = usePrevious(metricFunction);
   const prevMetricType = usePrevious(metricType);
@@ -99,69 +99,74 @@ export const TopologyContent: React.FC<{
 
   const [selectedIds, setSelectedIds] = React.useState<string[]>([]);
   const [hoveredId, setHoveredId] = React.useState<string>('');
-  const [searchValue, setSearchValue] = React.useState<string>('');
-  const [searchValidated, setSearchValidated] = React.useState<ValidatedOptions>();
-  const [searchResultCount, setSearchResultCount] = React.useState<string>('');
+
+  const onSelectIds = React.useCallback(
+    (ids: string[]) => {
+      setSelectedIds(ids);
+      onSelect(ids.length ? controller.getElementById(ids[0]) : undefined);
+    },
+    [controller, onSelect]
+  );
 
   //search element by label or secondaryLabel
-  const onSearch = (searchValue: string, next = true) => {
-    if (_.isEmpty(searchValue)) {
-      return;
-    }
+  const onSearch = React.useCallback(
+    (searchValue: string, next = true) => {
+      if (!searchHandle || _.isEmpty(searchValue)) {
+        return;
+      }
 
-    if (controller && controller.hasGraph()) {
-      const currentModel = controller.toModel();
-      const matchingNodeModels =
-        currentModel.nodes?.filter(
-          n => n.label?.includes(searchValue) || n.data?.secondaryLabel?.includes(searchValue)
-        ) || [];
+      if (controller && controller.hasGraph()) {
+        const currentModel = controller.toModel();
+        const matchingNodeModels =
+          currentModel.nodes?.filter(
+            n => n.label?.includes(searchValue) || n.data?.secondaryLabel?.includes(searchValue)
+          ) || [];
 
-      if (next) {
-        //go back to first match if last item is reached
-        if (lastNodeIdsFound.length === matchingNodeModels.length) {
-          lastNodeIdsFound = [];
-        }
-      } else {
-        if (lastNodeIdsFound.length === 1) {
-          //fill matching ids except last
-          lastNodeIdsFound = matchingNodeModels.map(n => n.id);
-          lastNodeIdsFound.splice(-1);
+        if (next) {
+          //go back to first match if last item is reached
+          if (lastNodeIdsFound.length === matchingNodeModels.length) {
+            lastNodeIdsFound = [];
+          }
         } else {
-          //remove previous match
-          lastNodeIdsFound.splice(-2);
+          if (lastNodeIdsFound.length === 1) {
+            //fill matching ids except last
+            lastNodeIdsFound = matchingNodeModels.map(n => n.id);
+            lastNodeIdsFound.splice(-1);
+          } else {
+            //remove previous match
+            lastNodeIdsFound.splice(-2);
+          }
         }
-      }
 
-      const nodeModelsFound = matchingNodeModels.filter(n => !lastNodeIdsFound.includes(n.id));
-      const nodeFound = !_.isEmpty(nodeModelsFound) ? controller.getNodeById(nodeModelsFound![0].id) : undefined;
-      if (nodeFound) {
-        const id = nodeFound.getId();
-        onSelectIds([id]);
-        lastNodeIdsFound.push(id);
-        setSearchResultCount(`${lastNodeIdsFound.length}/${lastNodeIdsFound.length + nodeModelsFound!.length - 1}`);
-        const bounds = controller.getGraph().getBounds();
-        controller.getGraph().panIntoView(nodeFound, {
-          offset: Math.min(bounds.width, bounds.height) / 2,
-          minimumVisible: 100
-        });
-        setSearchValidated(ValidatedOptions.success);
+        const nodeModelsFound = matchingNodeModels.filter(n => !lastNodeIdsFound.includes(n.id));
+        const nodeFound = !_.isEmpty(nodeModelsFound) ? controller.getNodeById(nodeModelsFound![0].id) : undefined;
+        if (nodeFound) {
+          const id = nodeFound.getId();
+          onSelectIds([id]);
+          lastNodeIdsFound.push(id);
+          searchHandle.updateIndicators(
+            `${lastNodeIdsFound.length}/${lastNodeIdsFound.length + nodeModelsFound!.length - 1}`,
+            ValidatedOptions.success
+          );
+          const bounds = controller.getGraph().getBounds();
+          controller.getGraph().panIntoView(nodeFound, {
+            offset: Math.min(bounds.width, bounds.height) / 2,
+            minimumVisible: 100
+          });
+        } else {
+          lastNodeIdsFound = [];
+          searchHandle.updateIndicators('', ValidatedOptions.error);
+          onSelectIds([]);
+        }
       } else {
-        lastNodeIdsFound = [];
-        setSearchResultCount('');
-        onSelectIds([]);
-        setSearchValidated(ValidatedOptions.error);
+        console.error('searchElement called before controller graph');
       }
-    } else {
-      console.error('searchElement called before controller graph');
-    }
-  };
+    },
+    [controller, onSelectIds, searchHandle]
+  );
 
-  //update search value and clear indicators
-  const onChangeSearch = (v = '') => {
+  const onChangeSearch = () => {
     lastNodeIdsFound = [];
-    setSearchResultCount('');
-    setSearchValidated(ValidatedOptions.default);
-    setSearchValue(v);
   };
 
   const onFilter = React.useCallback(
@@ -211,14 +216,6 @@ export const TopologyContent: React.FC<{
   const onHover = React.useCallback((data: Decorated<ElementData>) => {
     setHoveredId(data.isHovered ? data.id : '');
   }, []);
-
-  const onSelectIds = React.useCallback(
-    (ids: string[]) => {
-      setSelectedIds(ids);
-      onSelect(ids.length ? controller.getElementById(ids[0]) : undefined);
-    },
-    [controller, onSelect]
-  );
 
   //fit view to elements
   const fitView = React.useCallback(() => {
@@ -323,7 +320,7 @@ export const TopologyContent: React.FC<{
       metrics,
       getOptions(),
       metricScope,
-      searchValue,
+      searchEvent?.searchValue || '',
       highlightedId,
       filters,
       t,
@@ -362,7 +359,7 @@ export const TopologyContent: React.FC<{
     selectedIds,
     getOptions,
     metricScope,
-    searchValue,
+    searchEvent?.searchValue,
     filters,
     t,
     k8sModels
@@ -418,6 +415,26 @@ export const TopologyContent: React.FC<{
     }
   }, [selected, selectedIds]);
 
+  React.useEffect(() => {
+    if (searchHandle && searchEvent) {
+      switch (searchEvent.type) {
+        case 'change':
+          onChangeSearch();
+          break;
+        case 'searchNext':
+          onSearch(searchEvent.searchValue, true);
+          break;
+        case 'searchPrevious':
+          onSearch(searchEvent.searchValue, false);
+          break;
+        default:
+          throw new Error('unimplemented search type ' + searchEvent.type);
+      }
+    }
+    // only trigger this on event change to avoid looping
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchEvent]);
+
   useEventListener<SelectionEventListener>(SELECTION_EVENT, onSelectIds);
   useEventListener(FILTER_EVENT, onFilter);
   useEventListener(STEP_INTO_EVENT, onStepInto);
@@ -434,28 +451,6 @@ export const TopologyContent: React.FC<{
           controlButtons={createTopologyControlButtons({
             ...defaultControlButtonsOptions,
             fitToScreen: false,
-            customButtons: [
-              {
-                id: 'export',
-                icon: <ExportIcon />,
-                tooltip: t('Export'),
-                callback: () => {
-                  const svg = document.getElementsByClassName('pf-topology-visualization-surface__svg')[0];
-                  saveSvgAsPng(svg, 'topology.png', {
-                    backgroundColor: '#fff',
-                    encoderOptions: 0
-                  });
-                }
-              },
-              {
-                id: 'options',
-                icon: <CogIcon />,
-                tooltip: t('More options'),
-                callback: () => {
-                  toggleTopologyOptions();
-                }
-              }
-            ],
             zoomInCallback: () => {
               controller && controller.getGraph().scaleBy(ZOOM_IN);
             },
@@ -476,74 +471,6 @@ export const TopologyContent: React.FC<{
       }
     >
       <VisualizationSurface data-test="visualization-surface" state={{ selectedIds }} />
-      <div id="topology-search-container" data-test="topology-search-container">
-        <InputGroup>
-          <TextInput
-            data-test="search-topology-element-input"
-            id="search-topology-element-input"
-            className={'search'}
-            placeholder={t('Find in view')}
-            autoFocus
-            type={searchValidated !== ValidatedOptions.default ? 'text' : 'search'}
-            aria-label="search"
-            onKeyPress={e => e.key === 'Enter' && onSearch(searchValue)}
-            onChange={onChangeSearch}
-            value={searchValue}
-            validated={searchValidated}
-          />
-          {!_.isEmpty(searchResultCount) ? (
-            <TextInput
-              value={searchResultCount}
-              isDisabled
-              id="topology-search-result-count"
-              data-test="topology-search-result-count"
-            />
-          ) : (
-            <></>
-          )}
-          {_.isEmpty(searchResultCount) ? (
-            <Button
-              data-test="search-topology-element-button"
-              id="search-topology-element-button"
-              variant="plain"
-              aria-label="search for element button"
-              onClick={() => (searchValidated === ValidatedOptions.error ? onChangeSearch() : onSearch(searchValue))}
-            >
-              {searchValidated === ValidatedOptions.error ? <TimesIcon /> : <SearchIcon />}
-            </Button>
-          ) : (
-            <>
-              <Button
-                data-test="prev-search-topology-element-button"
-                id="prev-search-topology-element-button"
-                variant="plain"
-                aria-label="previous button for search element"
-                onClick={() => onSearch(searchValue, false)}
-              >
-                <AngleUpIcon />
-              </Button>
-              <Button
-                data-test="next-search-topology-element-button"
-                id="next-search-topology-element-button"
-                variant="plain"
-                aria-label="next button for search element"
-                onClick={() => onSearch(searchValue)}
-              >
-                <AngleDownIcon />
-              </Button>
-              <Button
-                data-test="clear-search-topology-element-button"
-                id="clear-search-topology-element-button"
-                variant="plain"
-                aria-label="clear button for search element"
-                onClick={() => onChangeSearch()}
-              >
-                <TimesIcon />
-              </Button>
-            </>
-          )}
-        </InputGroup>
-      </div>
     </TopologyView>
   );
 };
@@ -562,9 +489,10 @@ export const NetflowTopology: React.FC<{
   setOptions: (o: TopologyOptions) => void;
   filters: Filter[];
   setFilters: (v: Filter[]) => void;
-  toggleTopologyOptions: () => void;
   selected: GraphElementPeer | undefined;
   onSelect: (e: GraphElementPeer | undefined) => void;
+  searchHandle: SearchHandle | null;
+  searchEvent?: SearchEvent;
 }> = ({
   loading,
   k8sModels,
@@ -579,9 +507,10 @@ export const NetflowTopology: React.FC<{
   setOptions,
   filters,
   setFilters,
-  toggleTopologyOptions,
   selected,
-  onSelect
+  onSelect,
+  searchHandle,
+  searchEvent
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [controller, setController] = React.useState<Visualization>();
@@ -619,9 +548,10 @@ export const NetflowTopology: React.FC<{
           setOptions={setOptions}
           filters={filters}
           setFilters={setFilters}
-          toggleTopologyOptions={toggleTopologyOptions}
           selected={selected}
           onSelect={onSelect}
+          searchHandle={searchHandle}
+          searchEvent={searchEvent}
         />
       </VisualizationProvider>
     );

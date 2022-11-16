@@ -88,15 +88,24 @@ span.pf-c-button__icon.pf-m-start {
 #display-dropdown,
 #export-button,
 #fullscreen-button,
+#view-options-button,
 #more-options-button,
 .overflow-button {
-    color: #06c;
     display: flex;
     align-items: center;
     margin-left: 0;
     margin-right: 5px;
     padding-left: 0;
     padding-right: 0;
+}
+
+#view-options-toolbar {
+    z-index: 5;
+    box-shadow: 0 0.125rem 0.1rem -0.0625rem rgba(3, 3, 3, 0.16);
+}
+
+#view-options-toolbar.dark {
+    box-shadow: 0 0.125rem 0.1rem -0.0625rem rgba(255, 255, 255, 0.16);
 }
 
 /*hide some content for fullscreen mode*/
@@ -118,6 +127,39 @@ span.pf-c-button__icon.pf-m-start {
 }
 
 /*fix tabs styling*/
-.netflow-traffic-tabs {
-    padding: 1rem 1.5rem 0 0;
+.netflow-traffic-tabs-container {
+    margin: 1rem 0 0 0;
+    padding: 0;
+}
+
+.netflow-traffic-tabs-container>div:last-child {
+    margin-right: 1rem;
+}
+
+#view-options-toolbar {
+    display: flex;
+}
+
+#view-options-toolbar>.view-options-first {
+    margin-left: 1.5rem;
+}
+
+#view-options-toolbar>.view-options-last {
+    margin-right: 1.5rem;
+}
+
+#search-container {
+    max-width: 430px;
+}
+
+#tabs-container {
+    margin: 0;
+}
+
+.light-bottom-border {
+    border-bottom: 1px #d2d2d2 solid;
+}
+
+.dark-bottom-border {
+    border-bottom: 1px #444548 solid;
 }

@@ -30,7 +30,9 @@ describe('<NetflowTopology />', () => {
     setFilters: jest.fn(),
     toggleTopologyOptions: jest.fn(),
     selected: undefined,
-    onSelect: jest.fn()
+    onSelect: jest.fn(),
+    searchHandle: null,
+    searchEvent: undefined
   };
 
   it('should render component', async () => {

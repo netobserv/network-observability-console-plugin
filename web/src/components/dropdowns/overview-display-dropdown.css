@@ -1,0 +1,9 @@
+.display-dropdown-padding {
+  padding: 0 1em 1em 1em !important;
+}
+
+#type>.pf-c-dropdown__menu,
+#scope>.pf-c-dropdown__menu {
+  top: 0;
+  left: 100%;
+}

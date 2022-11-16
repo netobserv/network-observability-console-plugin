@@ -11,13 +11,19 @@ import {
   DropdownItem,
   Flex,
   FlexItem,
+  OverflowMenu,
+  OverflowMenuContent,
+  OverflowMenuControl,
+  OverflowMenuGroup,
   OverflowMenuItem,
   PageSection,
   Tab,
   Tabs,
   TabTitleText,
   Text,
-  TextVariants
+  TextVariants,
+  Toolbar,
+  ToolbarItem
 } from '@patternfly/react-core';
 import { ColumnsIcon, CompressIcon, EllipsisVIcon, ExpandIcon, ExportIcon, SyncAltIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
@@ -25,6 +31,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
 import { useTheme } from '../utils/theme-hook';
+import { saveSvgAsPng } from 'save-svg-as-png';
 import { Record } from '../api/ipfix';
 import { Stats, TopologyMetrics } from '../api/loki';
 import { getFlows, getTopology } from '../api/routes';
@@ -72,6 +79,7 @@ import {
   LOCAL_STORAGE_OVERVIEW_IDS_KEY,
   LOCAL_STORAGE_QUERY_PARAMS_KEY,
   LOCAL_STORAGE_REFRESH_KEY,
+  LOCAL_STORAGE_SHOW_OPTIONS_KEY,
   LOCAL_STORAGE_SIZE_KEY,
   LOCAL_STORAGE_TOPOLOGY_OPTIONS_KEY,
   LOCAL_STORAGE_VIEW_ID_KEY,
@@ -96,13 +104,12 @@ import {
   setURLReporter
 } from '../utils/router';
 import { getURLParams, hasEmptyParams, netflowTrafficPath, removeURLParam, setURLParams, URLParam } from '../utils/url';
-import DisplayDropdown, { Size } from './dropdowns/display-dropdown';
-import MetricFunctionDropdown from './dropdowns/metric-function-dropdown';
-import MetricTypeDropdown from './dropdowns/metric-type-dropdown';
+import { OverviewDisplayDropdown } from './dropdowns/overview-display-dropdown';
 import { LIMIT_VALUES, TOP_VALUES } from './dropdowns/query-options-dropdown';
 import { RefreshDropdown } from './dropdowns/refresh-dropdown';
-import ScopeDropdown from './dropdowns/scope-dropdown';
+import { TableDisplayDropdown, Size } from './dropdowns/table-display-dropdown';
 import TimeRangeDropdown from './dropdowns/time-range-dropdown';
+import { TopologyDisplayDropdown } from './dropdowns/topology-display-dropdown';
 import { FiltersToolbar } from './filters/filters-toolbar';
 import { ColumnsModal } from './modals/columns-modal';
 import { ExportModal } from './modals/export-modal';
@@ -113,12 +120,11 @@ import { RecordPanel } from './netflow-record/record-panel';
 import NetflowTable from './netflow-table/netflow-table';
 import ElementPanel from './netflow-topology/element-panel';
 import NetflowTopology from './netflow-topology/netflow-topology';
-import OptionsPanel from './netflow-topology/options-panel';
-import QuerySummary from './query-summary/query-summary';
-import SummaryPanel from './query-summary/summary-panel';
 import { Config, defaultConfig } from '../model/config';
 import { FilterActionLinks } from './filters/filter-action-links';
-
+import QuerySummary from './query-summary/query-summary';
+import SummaryPanel from './query-summary/summary-panel';
+import { SearchComponent, SearchEvent, SearchHandle } from './search/search';
 import './netflow-traffic.css';
 
 export type ViewId = 'overview' | 'table' | 'topology';
@@ -146,7 +152,9 @@ export const NetflowTraffic: React.FC<{
   const warningTimeOut = React.useRef<NodeJS.Timeout | undefined>();
   const [config, setConfig] = React.useState<Config>(defaultConfig);
   const [warningMessage, setWarningMessage] = React.useState<string | undefined>();
-  const [isOverflowMenuOpen, setOverflowMenuOpen] = React.useState(false);
+  const [showViewOptions, setShowViewOptions] = useLocalStorage<boolean>(LOCAL_STORAGE_SHOW_OPTIONS_KEY, false);
+  const [isFilterOverflowMenuOpen, setFiltersOverflowMenuOpen] = React.useState(false);
+  const [isViewOptionOverflowMenuOpen, setViewOptionOverflowMenuOpen] = React.useState(false);
   const [isFullScreen, setFullScreen] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
   const [flows, setFlows] = React.useState<Record[]>([]);
@@ -158,7 +166,6 @@ export const NetflowTraffic: React.FC<{
   );
   const [metrics, setMetrics] = React.useState<TopologyMetrics[]>([]);
   const [totalMetric, setTotalMetric] = React.useState<TopologyMetrics | undefined>(undefined);
-  const [isShowTopologyOptions, setShowTopologyOptions] = React.useState<boolean>(false);
   const [isShowQuerySummary, setShowQuerySummary] = React.useState<boolean>(false);
   const [lastRefresh, setLastRefresh] = React.useState<Date | undefined>(undefined);
   const [error, setError] = React.useState<string | undefined>();
@@ -186,7 +193,8 @@ export const NetflowTraffic: React.FC<{
   const [interval, setInterval] = useLocalStorage<number | undefined>(LOCAL_STORAGE_REFRESH_KEY);
   const [selectedRecord, setSelectedRecord] = React.useState<Record | undefined>(undefined);
   const [selectedElement, setSelectedElement] = React.useState<GraphElementPeer | undefined>(undefined);
-
+  const searchRef = React.useRef<SearchHandle>(null);
+  const [searchEvent, setSearchEvent] = React.useState<SearchEvent | undefined>(undefined);
   const isInit = React.useRef(true);
   const [panels, setSelectedPanels] = useLocalStorage<OverviewPanel[]>(
     LOCAL_STORAGE_OVERVIEW_IDS_KEY,
@@ -246,7 +254,6 @@ export const NetflowTraffic: React.FC<{
     setOverviewModalOpen(false);
     setColModalOpen(false);
     setSelectedRecord(undefined);
-    setShowTopologyOptions(false);
     setShowQuerySummary(false);
     setSelectedElement(undefined);
   };
@@ -276,11 +283,6 @@ export const NetflowTraffic: React.FC<{
   const onElementSelect = (element?: GraphElementPeer) => {
     clearSelections();
     setSelectedElement(element);
-  };
-
-  const onToggleTopologyOptions = (v: boolean) => {
-    clearSelections();
-    setShowTopologyOptions(v);
   };
 
   const onToggleQuerySummary = (v: boolean) => {
@@ -494,7 +496,7 @@ export const NetflowTraffic: React.FC<{
   const viewTabs = () => {
     return (
       <Tabs
-        id="netflow-traffic-tabs"
+        className="netflow-traffic-tabs"
         usePageInsets
         activeKey={selectedViewId}
         onSelect={(event, eventkey) => selectView(eventkey as ViewId)}
@@ -516,6 +518,136 @@ export const NetflowTraffic: React.FC<{
           title={<TabTitleText>{t('Topology')}</TabTitleText>}
         />
       </Tabs>
+    );
+  };
+
+  const viewOptionsContent = () => {
+    const items: JSX.Element[] = [];
+
+    if (selectedViewId === 'overview') {
+      items.push(
+        <OverflowMenuItem isPersistent key="columns">
+          <Button
+            data-test="manage-overview-panels-button"
+            id="manage-overview-panels-button"
+            variant="link"
+            className="overflow-button"
+            icon={<ColumnsIcon />}
+            onClick={() => setOverviewModalOpen(true)}
+          >
+            {t('Manage panels')}
+          </Button>
+        </OverflowMenuItem>
+      );
+      //TODO: implements overview export
+      /*items.push(
+        <OverflowMenuItem key="export">
+          <Button
+            data-test="export-button"
+            id="export-button"
+            variant="link"
+            className="overflow-button"
+            icon={<ExportIcon />}
+            onClick={() => {
+
+            }}
+          >
+            {t('Export metrics')}
+          </Button>
+        </OverflowMenuItem>
+      );*/
+    } else if (selectedViewId === 'table') {
+      items.push(
+        <OverflowMenuItem isPersistent key="columns">
+          <Button
+            data-test="manage-columns-button"
+            id="manage-columns-button"
+            variant="link"
+            className="overflow-button"
+            icon={<ColumnsIcon />}
+            onClick={() => setColModalOpen(true)}
+          >
+            {t('Manage columns')}
+          </Button>
+        </OverflowMenuItem>
+      );
+      items.push(
+        <OverflowMenuItem key="export">
+          <Button
+            data-test="export-button"
+            id="export-button"
+            variant="link"
+            className="overflow-button"
+            icon={<ExportIcon />}
+            onClick={() => setExportModalOpen(true)}
+          >
+            {t('Export data')}
+          </Button>
+        </OverflowMenuItem>
+      );
+    } else if (selectedViewId === 'topology') {
+      items.push(
+        <OverflowMenuItem key="export">
+          <Button
+            data-test="export-button"
+            id="export-button"
+            variant="link"
+            className="overflow-button"
+            icon={<ExportIcon />}
+            onClick={() => {
+              const svg = document.getElementsByClassName('pf-topology-visualization-surface__svg')[0];
+              saveSvgAsPng(svg, 'topology.png', {
+                backgroundColor: '#fff',
+                encoderOptions: 0
+              });
+            }}
+          >
+            {t('Export topology view')}
+          </Button>
+        </OverflowMenuItem>
+      );
+    }
+    return items;
+  };
+
+  const viewOptionsControl = () => {
+    return (
+      <Dropdown
+        data-test="view-options-dropdown"
+        id="view-options-dropdown"
+        onSelect={() => setViewOptionOverflowMenuOpen(false)}
+        toggle={
+          <Button
+            data-test="view-options-button"
+            id="view-options-button"
+            variant="link"
+            className="overflow-button"
+            icon={<EllipsisVIcon />}
+            onClick={() => setViewOptionOverflowMenuOpen(!isViewOptionOverflowMenuOpen)}
+          >
+            {t('More options')}
+          </Button>
+        }
+        isOpen={isViewOptionOverflowMenuOpen}
+        dropdownItems={[
+          <DropdownGroup key="display-group" label={t('Display')}>
+            <DropdownItem key="s" onClick={() => setSize('s')}>
+              {t('Compact')}
+            </DropdownItem>
+            <DropdownItem key="m" onClick={() => setSize('m')}>
+              {t('Normal')}
+            </DropdownItem>
+            <DropdownItem key="l" onClick={() => setSize('l')}>
+              {t('Large')}
+            </DropdownItem>
+          </DropdownGroup>,
+          <DropdownGroup key="export-group" label={t('Actions')}>
+            <DropdownItem key="export" onClick={() => setExportModalOpen(true)}>
+              {t('Export')}
+            </DropdownItem>
+          </DropdownGroup>
+        ]}
+      />
     );
   };
 
@@ -548,60 +680,8 @@ export const NetflowTraffic: React.FC<{
     );
   };
 
-  const menuContent = () => {
+  const filtersExtraContent = () => {
     const items: JSX.Element[] = [];
-
-    if (selectedViewId === 'overview') {
-      items.push(
-        <OverflowMenuItem isPersistent key="columns">
-          <Button
-            data-test="manage-overview-panels-button"
-            id="manage-overview-panels-button"
-            variant="link"
-            className="overflow-button"
-            icon={<ColumnsIcon />}
-            onClick={() => setOverviewModalOpen(true)}
-          >
-            {t('Manage panels')}
-          </Button>
-        </OverflowMenuItem>
-      );
-    } else if (selectedViewId === 'table') {
-      items.push(
-        <OverflowMenuItem isPersistent key="columns">
-          <Button
-            data-test="manage-columns-button"
-            id="manage-columns-button"
-            variant="link"
-            className="overflow-button"
-            icon={<ColumnsIcon />}
-            onClick={() => setColModalOpen(true)}
-          >
-            {t('Manage columns')}
-          </Button>
-        </OverflowMenuItem>
-      );
-      items.push(
-        <OverflowMenuItem key="display">
-          <DisplayDropdown data-test="display" id="display" setSize={setSize} />
-        </OverflowMenuItem>
-      );
-      items.push(
-        <OverflowMenuItem key="export">
-          <Button
-            data-test="export-button"
-            id="export-button"
-            variant="link"
-            className="overflow-button"
-            icon={<ExportIcon />}
-            onClick={() => setExportModalOpen(true)}
-          >
-            {t('Export')}
-          </Button>
-        </OverflowMenuItem>
-      );
-    }
-
     items.push(
       <OverflowMenuItem key="fullscreen" isPersistent={selectedViewId === 'topology'}>
         <Button
@@ -619,15 +699,12 @@ export const NetflowTraffic: React.FC<{
     return items;
   };
 
-  const menuControl = () => {
-    if (selectedViewId !== 'table') {
-      return undefined;
-    }
+  const filtersExtraControl = () => {
     return (
       <Dropdown
         data-test="more-options-dropdown"
         id="more-options-dropdown"
-        onSelect={() => setOverflowMenuOpen(false)}
+        onSelect={() => setFiltersOverflowMenuOpen(false)}
         toggle={
           <Button
             data-test="more-options-button"
@@ -635,29 +712,13 @@ export const NetflowTraffic: React.FC<{
             variant="link"
             className="overflow-button"
             icon={<EllipsisVIcon />}
-            onClick={() => setOverflowMenuOpen(!isOverflowMenuOpen)}
+            onClick={() => setFiltersOverflowMenuOpen(!isFilterOverflowMenuOpen)}
           >
             {t('More options')}
           </Button>
         }
-        isOpen={isOverflowMenuOpen}
+        isOpen={isFilterOverflowMenuOpen}
         dropdownItems={[
-          <DropdownGroup key="display-group" label={t('Display')}>
-            <DropdownItem key="s" onClick={() => setSize('s')}>
-              {t('Compact')}
-            </DropdownItem>
-            <DropdownItem key="m" onClick={() => setSize('m')}>
-              {t('Normal')}
-            </DropdownItem>
-            <DropdownItem key="l" onClick={() => setSize('l')}>
-              {t('Large')}
-            </DropdownItem>
-          </DropdownGroup>,
-          <DropdownGroup key="export-group" label={t('Actions')}>
-            <DropdownItem key="export" onClick={() => setExportModalOpen(true)}>
-              {t('Export')}
-            </DropdownItem>
-          </DropdownGroup>,
           <DropdownGroup key="fullscreen-group" label={t('View')}>
             <DropdownItem key="fullscreen" onClick={() => setFullScreen(!isFullScreen)}>
               {isFullScreen ? t('Collapse') : t('Expand')}
@@ -682,16 +743,6 @@ export const NetflowTraffic: React.FC<{
           setRange={setRange}
           setReporter={setReporter}
           onClose={() => onRecordSelect(undefined)}
-        />
-      );
-    } else if (isShowTopologyOptions) {
-      return (
-        <OptionsPanel
-          id="optionsPanel"
-          options={topologyOptions}
-          setOptions={setTopologyOptions}
-          metricScope={metricScope}
-          onClose={() => setShowTopologyOptions(false)}
         />
       );
     } else if (isShowQuerySummary) {
@@ -789,9 +840,10 @@ export const NetflowTraffic: React.FC<{
             setOptions={setTopologyOptions}
             filters={filters}
             setFilters={setFilters}
-            toggleTopologyOptions={() => onToggleTopologyOptions(!isShowTopologyOptions)}
             selected={selectedElement}
             onSelect={onElementSelect}
+            searchHandle={searchRef?.current}
+            searchEvent={searchEvent}
           />
         );
         break;
@@ -887,42 +939,76 @@ export const NetflowTraffic: React.FC<{
         }}
         forcedFilters={forcedFilters}
         actions={actions()}
-        menuContent={menuContent()}
-        menuControl={menuControl()}
         quickFilters={getQuickFilters()}
+        menuContent={filtersExtraContent()}
+        menuControl={filtersExtraControl()}
       />
       {
-        <Flex className="netflow-traffic-tabs">
-          <FlexItem flex={{ default: 'flex_1' }}>{viewTabs()}</FlexItem>
-          <FlexItem>
-            {selectedViewId === 'topology' && (
-              <MetricFunctionDropdown
-                data-test="metricFunction"
-                id="metricFunction"
-                selected={metricFunction}
-                setMetricFunction={setMetricFunction}
-              />
-            )}
-            {selectedViewId !== 'table' && (
-              <MetricTypeDropdown
-                data-test="metricType"
-                id="metricType"
-                selected={metricType}
-                setMetricType={setMetricType}
-              />
-            )}
-            {selectedViewId !== 'table' && (
-              <ScopeDropdown data-test="scope" id="scope" selected={metricScope} setScopeType={setMetricScope} />
-            )}
+        <Flex className="netflow-traffic-tabs-container">
+          <FlexItem id="tabs-container" flex={{ default: 'flex_1' }}>
+            {viewTabs()}
+          </FlexItem>
+          <FlexItem className={`${isDarkTheme ? 'dark' : 'light'}-bottom-border`}>
+            <Button
+              data-test="show-view-options-button"
+              id="show-view-options-button"
+              variant="link"
+              className="overflow-button"
+              onClick={() => setShowViewOptions(!showViewOptions)}
+            >
+              {showViewOptions ? t('Hide advanced options') : t('Show advanced options')}
+            </Button>
           </FlexItem>
         </Flex>
       }
+      {showViewOptions && (
+        <Toolbar data-test-id="view-options-toolbar" id="view-options-toolbar" className={isDarkTheme ? 'dark' : ''}>
+          <ToolbarItem className="flex-start view-options-first">
+            <OverflowMenuItem key="display">
+              {selectedViewId === 'overview' && (
+                <OverviewDisplayDropdown
+                  metricType={metricType}
+                  setMetricType={setMetricType}
+                  metricScope={metricScope}
+                  setMetricScope={setMetricScope}
+                />
+              )}
+              {selectedViewId === 'table' && <TableDisplayDropdown size={size} setSize={setSize} />}
+              {selectedViewId === 'topology' && (
+                <TopologyDisplayDropdown
+                  metricFunction={metricFunction}
+                  setMetricFunction={setMetricFunction}
+                  metricType={metricType}
+                  setMetricType={setMetricType}
+                  metricScope={metricScope}
+                  setMetricScope={setMetricScope}
+                  topologyOptions={topologyOptions}
+                  setTopologyOptions={setTopologyOptions}
+                />
+              )}
+            </OverflowMenuItem>
+          </ToolbarItem>
+          {selectedViewId === 'topology' && (
+            <ToolbarItem className="flex-start" id="search-container" data-test="search-container">
+              <SearchComponent ref={searchRef} setSearchEvent={setSearchEvent} isDark={isDarkTheme} />
+            </ToolbarItem>
+          )}
+          <ToolbarItem className="flex-start view-options-last" alignment={{ default: 'alignRight' }}>
+            <OverflowMenu breakpoint="2xl">
+              <OverflowMenuContent isPersistent>
+                <OverflowMenuGroup groupType="button" isPersistent className="flex-start">
+                  {viewOptionsContent()}
+                </OverflowMenuGroup>
+              </OverflowMenuContent>
+              <OverflowMenuControl className="flex-start">{viewOptionsControl()}</OverflowMenuControl>
+            </OverflowMenu>
+          </ToolbarItem>
+        </Toolbar>
+      )}
       <Drawer
         id="drawer"
         isInline
-        isExpanded={
-          selectedRecord !== undefined || selectedElement !== undefined || isShowTopologyOptions || isShowQuerySummary
-        }
+        isExpanded={selectedRecord !== undefined || selectedElement !== undefined || isShowQuerySummary}
       >
         <DrawerContent id="drawerContent" panelContent={panelContent()}>
           <DrawerContentBody id="drawerBody">{pageContent()}</DrawerContentBody>
