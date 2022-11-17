@@ -35,7 +35,7 @@ describe('<FiltersToolbar />', () => {
     const wrapper = shallow(<FiltersToolbar {...props} />);
     expect(wrapper.find(FiltersToolbar)).toBeTruthy();
     expect(wrapper.find(Toolbar)).toBeTruthy();
-    expect(wrapper.find(ToolbarItem)).toHaveLength(2);
+    expect(wrapper.find(ToolbarItem)).toHaveLength(3);
     expect(wrapper.find(Dropdown)).toBeTruthy();
     expect(wrapper.find(Button)).toBeTruthy();
   });

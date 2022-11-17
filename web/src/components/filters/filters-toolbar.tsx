@@ -40,6 +40,7 @@ import { FilterHints } from './filter-hints';
 import FiltersDropdown from './filters-dropdown';
 import { getFilterFullName, Indicator } from './filters-helper';
 import TextFilter from './text-filter';
+import { LOCAL_STORAGE_SHOW_FILTERS_KEY, useLocalStorage } from '../../utils/local-storage-hook';
 import './filters-toolbar.css';
 
 export interface FiltersToolbarProps {
@@ -72,6 +73,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
   const [indicator, setIndicator] = React.useState<Indicator>(ValidatedOptions.default);
   const [message, setMessage] = React.useState<string | undefined>();
   const [selectedFilter, setSelectedFilter] = React.useState<FilterDefinition>(findFilter(t, 'namespace')!);
+  const [showFilters, setShowFilters] = useLocalStorage<boolean>(LOCAL_STORAGE_SHOW_FILTERS_KEY, true);
 
   // reset and delay message state to trigger tooltip properly
   const setMessageWithDelay = React.useCallback(
@@ -242,6 +244,8 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
     );
   }, [clearFilters, filters, forcedFilters, quickFilters, push, setFilters, resetFilters, t]);
 
+  const countActiveFilters = (forcedFilters || filters || []).reduce((prev, cur) => prev + cur.values.length, 0);
+
   return (
     <Toolbar data-test={id} id={id}>
       <ToolbarContent data-test={`${id}-search-filters`} id={`${id}-search-filters`} toolbarId={id}>
@@ -274,6 +278,17 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
             </Tooltip>
           </ToolbarItem>
         )}
+        <ToolbarItem className="flex-start">
+          <Button
+            data-test="show-filters-button"
+            id="show-filters-button"
+            variant="link"
+            className="overflow-button"
+            onClick={() => setShowFilters(!showFilters)}
+          >
+            {showFilters ? t('Hide filters') : t('Show {{count}} filters', { count: countActiveFilters })}
+          </Button>
+        </ToolbarItem>
         {!_.isEmpty(props.menuContent) && (
           <ToolbarItem className="flex-start">
             <OverflowMenu breakpoint="2xl">
@@ -288,7 +303,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
             </OverflowMenu>
           </ToolbarItem>
         )}
-        {getFiltersChips()}
+        {showFilters && getFiltersChips()}
       </ToolbarContent>
     </Toolbar>
   );
