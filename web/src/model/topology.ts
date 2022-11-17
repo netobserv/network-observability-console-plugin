@@ -15,7 +15,7 @@ import {
 import _ from 'lodash';
 import { MetricStats, TopologyMetricPeer, TopologyMetrics } from '../api/loki';
 import { Filter, FilterDefinition, findFromFilters } from '../model/filters';
-import { defaultMetricFunction, defaultMetricType, defaultTimeRange } from '../utils/router';
+import { defaultMetricFunction, defaultMetricType } from '../utils/router';
 import { findFilter } from '../utils/filter-definitions';
 import { TFunction } from 'i18next';
 import { K8sModel } from '@openshift-console/dynamic-plugin-sdk';
@@ -74,7 +74,6 @@ export enum TopologyTruncateLength {
 }
 
 export interface TopologyOptions {
-  rangeInSeconds: number;
   maxEdgeStat: number;
   nodeBadges?: boolean;
   edges?: boolean;
@@ -90,7 +89,6 @@ export interface TopologyOptions {
 }
 
 export const DefaultOptions: TopologyOptions = {
-  rangeInSeconds: defaultTimeRange,
   nodeBadges: true,
   edges: true,
   edgeTags: true,

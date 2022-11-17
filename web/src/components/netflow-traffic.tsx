@@ -831,7 +831,6 @@ export const NetflowTraffic: React.FC<{
             loading={loading}
             k8sModels={k8sModels}
             error={error}
-            range={range}
             metricFunction={metricFunction}
             metricType={metricType}
             metricScope={metricScope}
