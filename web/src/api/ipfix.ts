@@ -10,6 +10,7 @@ export interface Labels {
   SrcK8S_OwnerName?: string;
   DstK8S_OwnerName?: string;
   FlowDirection: FlowDirection;
+  _RecordType?: string;
 }
 
 export enum FlowDirection {
@@ -35,9 +36,15 @@ export interface Fields {
   SrcK8S_HostName?: string;
   DstK8S_HostName?: string;
   Packets: number;
+  Packets_AB?: number;
+  Packets_BA?: number;
   Proto: number;
   Bytes: number;
+  Bytes_AB?: number;
+  Bytes_BA?: number;
   TimeFlowStartMs: number;
   TimeFlowEndMs: number;
   TimeReceived: number;
+  _HashId?: string;
+  _IsFirst?: string;
 }

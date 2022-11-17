@@ -56,7 +56,14 @@ export enum ColumnsId {
   hostname = 'K8S_HostName',
   srchostname = 'SrcK8S_HostName',
   dsthostname = 'DstK8S_HostName',
-  flowdir = 'FlowDirection'
+  flowdir = 'FlowDirection',
+  recordtype = 'RecordType',
+  connectionid = 'ConnectionID',
+  bytesab = 'Bytes_AB',
+  bytesba = 'Bytes_BA',
+  packetsab = 'Packets_AB',
+  packetsba = 'Packets_BA',
+  isfirst = 'IsFirst'
 }
 
 export interface Column {
@@ -359,7 +366,7 @@ export const getSrcColumns = (t: TFunction): Column[] => {
       name: t('Namespace'),
       fieldName: 'SrcK8S_Namespace',
       quickFilter: 'src_namespace',
-      isSelected: true,
+      isSelected: false,
       value: f => f.labels.SrcK8S_Namespace || '',
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
       width: 15
@@ -474,7 +481,7 @@ export const getDstColumns = (t: TFunction): Column[] => {
       name: t('Namespace'),
       fieldName: 'DstK8S_Namespace',
       quickFilter: 'dst_namespace',
-      isSelected: true,
+      isSelected: false,
       value: f => f.labels.DstK8S_Namespace || '',
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
       width: 15
@@ -646,7 +653,7 @@ export const getExtraColumns = (t: TFunction): Column[] => {
       id: ColumnsId.flowdir,
       name: t('Direction'),
       fieldName: 'FlowDirection',
-      isSelected: false,
+      isSelected: true,
       value: f => f.labels.FlowDirection,
       sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
       width: 10
@@ -683,7 +690,7 @@ export const getExtraColumns = (t: TFunction): Column[] => {
       name: t('Collection Time'),
       tooltip: t('Reception time of the flow by the flow collector.'),
       fieldName: 'TimeReceived',
-      isSelected: false,
+      isSelected: true,
       value: f => f.fields.TimeReceived * 1000,
       sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
       width: 15
@@ -694,6 +701,62 @@ export const getExtraColumns = (t: TFunction): Column[] => {
       tooltip: t('Time elapsed between flow End Time and Collection Time.'),
       isSelected: false,
       value: f => f.fields.TimeReceived * 1000 - f.fields.TimeFlowEndMs,
+      sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
+      width: 5
+    },
+    {
+      id: ColumnsId.recordtype,
+      name: t('Record Type'),
+      isSelected: true,
+      value: f => f.labels._RecordType || '',
+      sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
+      width: 10
+    },
+    {
+      id: ColumnsId.connectionid,
+      name: t('Connection ID'),
+      isSelected: true,
+      value: f => f.fields._HashId || '',
+      sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
+      width: 12
+    },
+    {
+      id: ColumnsId.bytesab,
+      name: t('Bytes AB'),
+      isSelected: true,
+      value: f => f.fields.Bytes_AB || '',
+      sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
+      width: 5
+    },
+    {
+      id: ColumnsId.bytesba,
+      name: t('Bytes BA'),
+      isSelected: true,
+      value: f => f.fields.Bytes_BA || '',
+      sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
+      width: 5
+    },
+    {
+      id: ColumnsId.packetsab,
+      name: t('Packets AB'),
+      isSelected: true,
+      value: f => f.fields.Packets_AB || '',
+      sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
+      width: 5
+    },
+    {
+      id: ColumnsId.packetsba,
+      name: t('Packets BA'),
+      isSelected: true,
+      value: f => f.fields.Packets_BA || '',
+      sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
+      width: 5
+    },
+    {
+      id: ColumnsId.isfirst,
+      name: t('Is First'),
+      isSelected: true,
+      value: f => f.fields._IsFirst || '',
       sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
       width: 5
     }
