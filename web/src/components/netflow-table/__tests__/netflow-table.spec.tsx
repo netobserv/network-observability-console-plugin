@@ -21,7 +21,8 @@ describe('<NetflowTable />', () => {
   const mocks = {
     size: 'm' as Size,
     onSelect: jest.fn(),
-    filterActionLinks: <></>
+    filterActionLinks: <></>,
+    setColumns: jest.fn()
   };
 
   it('should render component', async () => {

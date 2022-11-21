@@ -1,0 +1,17 @@
+th.netobserv-header {
+  cursor: pointer;
+}
+
+th.netobserv-header.dragged:not(.dark) {
+  opacity: 0.25;
+  background: #fff;
+}
+
+th.netobserv-header.dragged.dark {
+  opacity: 0.25;
+  background: #1b1d21;
+}
+
+th.netobserv-header.dropzone:not(.dragged) {
+  box-shadow: inset 5px 0px 0px 0px #0066CC;
+}
