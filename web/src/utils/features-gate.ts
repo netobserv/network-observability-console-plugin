@@ -1,7 +1,6 @@
 //List in progress features here
 export enum Feature {
-  Overview = 'overview',
-  Topology = 'topology'
+  Overview = 'overview'
 }
 
 /*Use isAllowed function to display in progress features
@@ -10,5 +9,5 @@ export enum Feature {
  */
 export const isAllowed = (f: Feature) => {
   const url = window.location.toString();
-  return url.includes('localhost:9000') || url.includes(`${f}=preview`);
+  return url.includes(`${f}=preview`);
 };

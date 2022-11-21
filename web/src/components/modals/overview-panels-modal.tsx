@@ -19,7 +19,7 @@ import {
 import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { getDefaultOverviewPanels, getOverviewPanelTitleAndTooltip, OverviewPanel } from '../../utils/overview-panels';
+import { getDefaultOverviewPanels, getOverviewPanelInfo, OverviewPanel } from '../../utils/overview-panels';
 import Modal from './modal';
 import './overview-panels-modal.css';
 
@@ -96,36 +96,42 @@ export const OverviewPanelsModal: React.FC<{
     setModalOpen(false);
   }, [updatedPanels, setPanels, setModalOpen]);
 
-  const draggableItems = updatedPanels.map((panel, i) => (
-    <Draggable key={i} hasNoWrapper>
-      <DataListItem
-        key={'data-list-item-' + i}
-        aria-labelledby={'overview-panel-management-item' + i}
-        className="data-list-item"
-        data-test={'data-' + i}
-        id={'data-' + i}
-      >
-        <DataListItemRow key={'data-list-item-row-' + i}>
-          <DataListControl>
-            <DataListDragButton aria-label="Reorder" aria-labelledby={'overview-panel-management-item' + i} />
-            <DataListCheck
-              aria-labelledby={'overview-panel-management-item-' + i}
-              checked={panel.isSelected}
-              id={panel.id}
-              onChange={onCheck}
+  const draggableItems = updatedPanels.map((panel, i) => {
+    const info = getOverviewPanelInfo(t, panel.id);
+    return (
+      <Draggable key={i} hasNoWrapper>
+        <DataListItem
+          key={'data-list-item-' + i}
+          aria-labelledby={'overview-panel-management-item' + i}
+          className="data-list-item"
+          data-test={'data-' + i}
+          id={'data-' + i}
+        >
+          <DataListItemRow key={'data-list-item-row-' + i}>
+            <DataListControl>
+              <DataListDragButton aria-label="Reorder" aria-labelledby={'overview-panel-management-item' + i} />
+              <DataListCheck
+                aria-labelledby={'overview-panel-management-item-' + i}
+                checked={panel.isSelected}
+                id={panel.id}
+                onChange={onCheck}
+              />
+            </DataListControl>
+            <DataListItemCells
+              dataListCells={[
+                <DataListCell key={'data-list-cell-' + i}>
+                  <label htmlFor={panel.id}>
+                    {info.title}
+                    {info.chartType && <>{' (' + info.chartType + ')'}</>}
+                  </label>
+                </DataListCell>
+              ]}
             />
-          </DataListControl>
-          <DataListItemCells
-            dataListCells={[
-              <DataListCell key={'data-list-cell-' + i}>
-                <label htmlFor={panel.id}>{getOverviewPanelTitleAndTooltip(t, panel.id)[0]}</label>
-              </DataListCell>
-            ]}
-          />
-        </DataListItemRow>
-      </DataListItem>
-    </Draggable>
-  ));
+          </DataListItemRow>
+        </DataListItem>
+      </Draggable>
+    );
+  });
 
   return (
     <Modal
