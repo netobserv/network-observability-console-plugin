@@ -1,7 +1,7 @@
 import { Card, Flex, FlexItem, Text, TextVariants, Tooltip } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { TimeRange } from '../../utils/datetime';
+import { rangeToSeconds, TimeRange } from '../../utils/datetime';
 import { Record } from '../../api/ipfix';
 import { InfoCircleIcon } from '@patternfly/react-icons';
 import './query-summary.css';
@@ -21,13 +21,7 @@ export const FlowsQuerySummaryContent: React.FC<{
 }> = ({ flows, limitReached, range, lastRefresh, direction, className, isShowQuerySummary, toggleQuerySummary }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
-  let rangeInSeconds: number;
-  if (typeof range === 'number') {
-    rangeInSeconds = range;
-  } else {
-    rangeInSeconds = (range.to - range.from) / 1000;
-  }
-
+  const rangeInSeconds = rangeToSeconds(range);
   const counters = React.useCallback(() => {
     const bytes = flows.map(f => f.fields.Bytes).reduce((a, b) => a + b, 0);
     const packets = flows.map(f => f.fields.Packets).reduce((a, b) => a + b, 0);

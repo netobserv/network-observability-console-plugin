@@ -36,7 +36,6 @@ import {
   TopologyGroupTypes,
   TopologyOptions
 } from '../../model/topology';
-import { TimeRange } from '../../utils/datetime';
 import { usePrevious } from '../../utils/previous-hook';
 import LokiError from '../messages/loki-error';
 import { SearchEvent, SearchHandle } from '../search/search';
@@ -58,7 +57,6 @@ const FIT_PADDING = 80;
 
 export const TopologyContent: React.FC<{
   k8sModels: { [key: string]: K8sModel };
-  range: number | TimeRange;
   metricFunction: MetricFunction;
   metricType: MetricType;
   metricScope: MetricScope;
@@ -75,7 +73,6 @@ export const TopologyContent: React.FC<{
   isDark?: boolean;
 }> = ({
   k8sModels,
-  range,
   metricFunction,
   metricType,
   metricScope,
@@ -253,23 +250,17 @@ export const TopologyContent: React.FC<{
     }
   }, [controller]);
 
-  //get options with updated time range and max edge value
+  //get options with updated max edge value, metric type and function
   const getOptions = React.useCallback(() => {
-    let rangeInSeconds: number;
-    if (typeof range === 'number') {
-      rangeInSeconds = range;
-    } else {
-      rangeInSeconds = (range.from - range.to) / 1000;
-    }
     const maxEdgeStat = Math.max(...metrics.map(m => getStat(m.stats, metricFunction)));
-    return {
+    const opts: TopologyOptions = {
       ...options,
-      rangeInSeconds,
       maxEdgeStat,
       metricFunction,
       metricType
-    } as TopologyOptions;
-  }, [range, metrics, options, metricFunction, metricType]);
+    };
+    return opts;
+  }, [metrics, options, metricFunction, metricType]);
 
   //update graph details level
   const setDetailsLevel = React.useCallback(() => {
@@ -483,7 +474,6 @@ export const NetflowTopology: React.FC<{
   loading?: boolean;
   k8sModels: { [key: string]: K8sModel };
   error?: string;
-  range: number | TimeRange;
   metricFunction: MetricFunction;
   metricType: MetricType;
   metricScope: MetricScope;
@@ -502,7 +492,6 @@ export const NetflowTopology: React.FC<{
   loading,
   k8sModels,
   error,
-  range,
   metricFunction,
   metricType,
   metricScope,
@@ -544,7 +533,6 @@ export const NetflowTopology: React.FC<{
       <VisualizationProvider data-test="visualization-provider" controller={controller}>
         <TopologyContent
           k8sModels={k8sModels}
-          range={range}
           metricFunction={metricFunction}
           metricType={metricType}
           metricScope={metricScope}
