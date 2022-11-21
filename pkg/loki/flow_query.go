@@ -206,6 +206,13 @@ func (q *FlowQueryBuilder) appendLineFilters(sb *strings.Builder) {
 	}
 }
 
+func (q *FlowQueryBuilder) appendDeduplicateFilter(sb *strings.Builder) {
+	// |~`Duplicate":false`
+	sb.WriteString("|~`")
+	sb.WriteString(`Duplicate":false`)
+	sb.WriteString("`")
+}
+
 func (q *FlowQueryBuilder) appendJSON(sb *strings.Builder, forceAppend bool) {
 	if forceAppend || len(q.jsonFilters) > 0 {
 		sb.WriteString("|json")
