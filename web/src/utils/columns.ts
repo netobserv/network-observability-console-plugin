@@ -74,6 +74,10 @@ export interface Column {
   width: number;
 }
 
+export type ColumnSizeMap = {
+  [id in ColumnsId]?: string;
+};
+
 export type ColumnGroup = {
   title?: string;
   columns: Column[];

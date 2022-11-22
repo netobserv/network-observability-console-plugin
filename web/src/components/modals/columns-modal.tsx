@@ -1,35 +1,36 @@
-import * as React from 'react';
 import {
   Button,
   DataList,
-  DataListControl,
-  DataListItem,
-  DataListItemRow,
-  DataListDragButton,
-  DataListCheck,
   DataListCell,
+  DataListCheck,
+  DataListControl,
+  DataListDragButton,
+  DataListItem,
+  DataListItemCells,
+  DataListItemRow,
   DragDrop,
   Draggable,
   Droppable,
-  DataListItemCells,
   Text,
   TextContent,
   TextVariants,
   Tooltip
 } from '@patternfly/react-core';
-import Modal from './modal';
-import { useTranslation } from 'react-i18next';
-import { Column, getDefaultColumns, getFullColumnName } from '../../utils/columns';
 import * as _ from 'lodash';
+import * as React from 'react';
+import { useTranslation } from 'react-i18next';
+import { Column, ColumnSizeMap, getDefaultColumns, getFullColumnName } from '../../utils/columns';
 import './columns-modal.css';
+import Modal from './modal';
 
 export const ColumnsModal: React.FC<{
   isModalOpen: boolean;
   setModalOpen: (v: boolean) => void;
   columns: Column[];
   setColumns: (v: Column[]) => void;
+  setColumnSizes: (v: ColumnSizeMap) => void;
   id?: string;
-}> = ({ id, isModalOpen, setModalOpen, columns, setColumns }) => {
+}> = ({ id, isModalOpen, setModalOpen, columns, setColumns, setColumnSizes }) => {
   const [updatedColumns, setUpdatedColumns] = React.useState<Column[]>([]);
   const [isSaveDisabled, setSaveDisabled] = React.useState<boolean>(true);
   const [isAllSelected, setAllSelected] = React.useState<boolean>(false);
@@ -80,8 +81,9 @@ export const ColumnsModal: React.FC<{
   );
 
   const onReset = React.useCallback(() => {
+    setColumnSizes({});
     setUpdatedColumns(getDefaultColumns(t));
-  }, [setUpdatedColumns, t]);
+  }, [setColumnSizes, setUpdatedColumns, t]);
 
   const onSelectAll = React.useCallback(() => {
     const result = [...updatedColumns];
