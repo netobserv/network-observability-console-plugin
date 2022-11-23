@@ -46,7 +46,6 @@ export interface FiltersToolbarProps {
   id: string;
   filters?: Filter[];
   forcedFilters?: Filter[];
-  actions?: React.ReactNode;
   skipTipsDelay?: boolean;
   setFilters: (v: Filter[]) => void;
   clearFilters: () => void;
@@ -61,7 +60,6 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
   id,
   filters,
   forcedFilters,
-  actions,
   skipTipsDelay,
   setFilters,
   clearFilters,
@@ -288,11 +286,6 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
                 <OverflowMenuControl className="flex-start">{props.menuControl}</OverflowMenuControl>
               )}
             </OverflowMenu>
-          </ToolbarItem>
-        )}
-        {actions && (
-          <ToolbarItem className="flex-start" alignment={{ default: 'alignRight' }}>
-            {actions}
           </ToolbarItem>
         )}
         {getFiltersChips()}
