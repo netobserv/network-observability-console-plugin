@@ -820,7 +820,7 @@ export const NetflowTraffic: React.FC<{
             size={size}
             onSelect={onRecordSelect}
             columns={columns.filter(col => col.isSelected)}
-            setColumns={setColumns}
+            setColumns={(v: Column[]) => setColumns(v.concat(columns.filter(col => !col.isSelected)))}
             filterActionLinks={filterLinks()}
             isDark={isDarkTheme}
           />
