@@ -20,6 +20,7 @@ type AggregatedQueryResponse struct {
 	ResultType ResultType      `json:"resultType"`
 	Result     ResultValue     `json:"result"`
 	Stats      AggregatedStats `json:"stats"`
+	IsMock     bool            `json:"isMock"`
 }
 
 // AggregatedStats represents the stats to one or more logQL queries
