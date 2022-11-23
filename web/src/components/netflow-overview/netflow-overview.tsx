@@ -17,6 +17,7 @@ import { MetricType } from '../../model/flow-query';
 import { getStat } from '../../model/topology';
 import { peersEqual } from '../../utils/metrics';
 import { getOverviewPanelInfo, OverviewPanel, OverviewPanelId } from '../../utils/overview-panels';
+import { TruncateLength } from '../dropdowns/truncate-dropdown';
 import LokiError from '../messages/loki-error';
 import { MetricsContent } from '../metrics/metrics-content';
 import { toNamedMetric } from '../metrics/metrics-helper';
@@ -44,6 +45,7 @@ export type NetflowOverviewProps = {
   error?: string;
   isDark?: boolean;
   filterActionLinks: JSX.Element;
+  truncateLength: TruncateLength;
 };
 
 export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
@@ -55,7 +57,8 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
   loading,
   error,
   isDark,
-  filterActionLinks
+  filterActionLinks,
+  truncateLength
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [kebabMap, setKebabMap] = React.useState(new Map<OverviewPanelId, PanelKebabOptions>());
@@ -98,9 +101,11 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
   //limit to top X since multiple queries can run in parallel
   const topKMetrics = metrics
     .sort((a, b) => getStat(b.stats, 'sum') - getStat(a.stats, 'sum'))
-    .map(m => toNamedMetric(t, m));
-  const namedTotalMetric = toNamedMetric(t, totalMetric);
+    .map(m => toNamedMetric(t, m, undefined, truncateLength));
+  const namedTotalMetric = toNamedMetric(t, totalMetric, undefined, truncateLength);
   const noInternalTopK = topKMetrics.filter(m => !peersEqual(m.source, m.destination));
+
+  const smallerTexts = truncateLength >= TruncateLength.M;
 
   const getPanelContent = (id: OverviewPanelId, title: string): PanelContent => {
     switch (id) {
@@ -122,8 +127,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
               showBar={true}
               showArea={false}
               showScatter={false}
-              //TODO: NETOBSERV-688 make options for truncate / text size
-              smallerTexts={false}
+              smallerTexts={smallerTexts}
             />
           ),
           doubleWidth: false
@@ -140,8 +144,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
               showBar={false}
               showArea={true}
               showScatter={true}
-              //TODO: NETOBSERV-688 make options for truncate / text size
-              smallerTexts={false}
+              smallerTexts={smallerTexts}
             />
           ),
           doubleWidth: false
@@ -164,6 +167,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
               showTotal={options.showTotal!}
               showInternal={options.showInternal!}
               showOutOfScope={options.showOutOfScope!}
+              smallerTexts={smallerTexts}
             />
           ),
           kebab: <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} />,
@@ -182,8 +186,8 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
               showBar={false}
               showArea={true}
               showScatter={true}
-              //TODO: NETOBSERV-688 make options for truncate / text size
-              smallerTexts={false}
+              itemsPerRow={2}
+              smallerTexts={smallerTexts}
             />
           ),
           doubleWidth: true
@@ -206,8 +210,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
               showOthers={options.showOthers!}
               showInternal={options.showInternal!}
               showOutOfScope={options.showOutOfScope!}
-              //TODO: NETOBSERV-688 make options for truncate / text size
-              smallerTexts={true}
+              smallerTexts={smallerTexts}
             />
           ),
           kebab: <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} />,
@@ -232,8 +235,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
               showOthers={options.showOthers!}
               showInternal={options.showInternal!}
               showOutOfScope={options.showOutOfScope!}
-              //TODO: NETOBSERV-688 make options for truncate / text size
-              smallerTexts={true}
+              smallerTexts={smallerTexts}
             />
           ),
           kebab: <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} />,

@@ -113,7 +113,7 @@ export const StatDonut: React.FC<StatDonutProps> = ({
         padding={{
           bottom: 20,
           left: 20,
-          right: 300,
+          right: 400,
           top: 20
         }}
         title={`${getFormattedRateValue(total, metricType)}`}

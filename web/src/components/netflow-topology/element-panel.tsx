@@ -41,6 +41,7 @@ import './element-panel.css';
 import { MetricsContent } from '../metrics/metrics-content';
 import { getFormattedValue, matchPeer, peersEqual } from '../../utils/metrics';
 import { toNamedMetric } from '../metrics/metrics-helper';
+import { TruncateLength } from '../dropdowns/truncate-dropdown';
 
 export const ElementPanelDetailsContent: React.FC<{
   element: GraphElementPeer;
@@ -214,7 +215,8 @@ export const ElementPanelMetricsContent: React.FC<{
   metrics: TopologyMetrics[];
   metricFunction: MetricFunction;
   metricType: MetricType;
-}> = ({ element, metrics, metricFunction, metricType }) => {
+  truncateLength: TruncateLength;
+}> = ({ element, metrics, metricFunction, metricType, truncateLength }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const data = element.getData();
 
@@ -262,8 +264,12 @@ export const ElementPanelMetricsContent: React.FC<{
 
   if (element instanceof BaseNode && data) {
     const filteredMetrics = metrics.filter(m => !peersEqual(m.source, m.destination));
-    const outMetrics = filteredMetrics.filter(m => matchPeer(data, m.source)).map(m => toNamedMetric(t, m, data));
-    const inMetrics = filteredMetrics.filter(m => matchPeer(data, m.destination)).map(m => toNamedMetric(t, m, data));
+    const outMetrics = filteredMetrics
+      .filter(m => matchPeer(data, m.source))
+      .map(m => toNamedMetric(t, m, data, truncateLength));
+    const inMetrics = filteredMetrics
+      .filter(m => matchPeer(data, m.destination))
+      .map(m => toNamedMetric(t, m, data, truncateLength));
     const outCount = outMetrics.reduce((prev, cur) => prev + getStat(cur.stats, metricFunction), 0);
     const inCount = inMetrics.reduce((prev, cur) => prev + getStat(cur.stats, metricFunction), 0);
     return (
@@ -287,10 +293,10 @@ export const ElementPanelMetricsContent: React.FC<{
     const bData = element.getTarget().getData();
     const aToBMetrics = metrics
       .filter(m => matchPeer(aData, m.source) && matchPeer(bData, m.destination))
-      .map(m => toNamedMetric(t, m, data));
+      .map(m => toNamedMetric(t, m, data, truncateLength));
     const bToAMetrics = metrics
       .filter(m => matchPeer(bData, m.source) && matchPeer(aData, m.destination))
-      .map(m => toNamedMetric(t, m, data));
+      .map(m => toNamedMetric(t, m, data, truncateLength));
     const aToBCount = aToBMetrics.reduce((prev, cur) => prev + getStat(cur.stats, metricFunction), 0);
     const bToACount = bToAMetrics.reduce((prev, cur) => prev + getStat(cur.stats, metricFunction), 0);
     return (
@@ -320,8 +326,9 @@ export const ElementPanel: React.FC<{
   metricType: MetricType;
   filters: Filter[];
   setFilters: (filters: Filter[]) => void;
+  truncateLength: TruncateLength;
   id?: string;
-}> = ({ id, element, metrics, metricFunction, metricType, filters, setFilters, onClose }) => {
+}> = ({ id, element, metrics, metricFunction, metricType, filters, setFilters, onClose, truncateLength }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [activeTab, setActiveTab] = React.useState<string>('details');
 
@@ -373,6 +380,7 @@ export const ElementPanel: React.FC<{
               metrics={metrics}
               metricFunction={metricFunction}
               metricType={metricType}
+              truncateLength={truncateLength}
             />
           </Tab>
         </Tabs>

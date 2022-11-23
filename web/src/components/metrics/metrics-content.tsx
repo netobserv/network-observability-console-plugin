@@ -30,6 +30,7 @@ export type MetricsContentProps = {
   showArea?: boolean;
   showScatter?: boolean;
   smallerTexts?: boolean;
+  itemsPerRow?: number;
 };
 
 export const MetricsContent: React.FC<MetricsContentProps> = ({
@@ -43,7 +44,8 @@ export const MetricsContent: React.FC<MetricsContentProps> = ({
   showBar,
   showArea,
   showScatter,
-  smallerTexts
+  smallerTexts,
+  itemsPerRow
 }) => {
   const filteredMetrics = metrics.slice(0, limit);
 
@@ -56,6 +58,7 @@ export const MetricsContent: React.FC<MetricsContentProps> = ({
 
   const legentComponent = (
     <ChartLegend
+      itemsPerRow={itemsPerRow ? itemsPerRow : 1}
       labelComponent={<ChartLabel className={smallerTexts ? 'small-chart-label' : ''} />}
       data={legendData}
     />
@@ -81,7 +84,7 @@ export const MetricsContent: React.FC<MetricsContentProps> = ({
           ariaTitle={title}
           containerComponent={chartVoronoi(legendData, metricType)}
           legendData={legendData}
-          legendOrientation="vertical"
+          legendOrientation={'horizontal'}
           legendPosition="bottom-left"
           legendAllowWrap={true}
           legendComponent={legentComponent}
@@ -92,7 +95,7 @@ export const MetricsContent: React.FC<MetricsContentProps> = ({
           height={dimensions.height}
           domainPadding={{ x: 0, y: 0 }}
           padding={{
-            bottom: legendData.length * 25 + 75,
+            bottom: (itemsPerRow && itemsPerRow > 1 ? legendData.length / 2 + 1 : legendData.length) * 25 + 75,
             left: 90,
             right: 50,
             top: 50

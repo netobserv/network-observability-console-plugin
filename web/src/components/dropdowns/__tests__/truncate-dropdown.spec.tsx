@@ -1,12 +1,11 @@
 import * as React from 'react';
 import { mount, shallow } from 'enzyme';
 
-import TruncateDropdown from '../truncate-dropdown';
-import { TopologyTruncateLength } from '../../../model/topology';
+import { TruncateDropdown, TruncateLength } from '../truncate-dropdown';
 
 describe('<TruncateDropdown />', () => {
   const props = {
-    selected: TopologyTruncateLength.M,
+    selected: TruncateLength.M,
     setTruncateLength: jest.fn(),
     id: 'truncate'
   };
@@ -37,13 +36,13 @@ describe('<TruncateDropdown />', () => {
     //open dropdown and select NONE
     dropdown.at(0).simulate('click');
     wrapper.find('[id="0"]').at(0).simulate('click');
-    expect(props.setTruncateLength).toHaveBeenCalledWith(TopologyTruncateLength.OFF);
+    expect(props.setTruncateLength).toHaveBeenCalledWith(TruncateLength.OFF);
     expect(wrapper.find('li').length).toBe(0);
 
     //open dropdown and select OWNERS
     dropdown.at(0).simulate('click');
     wrapper.find('[id="40"]').at(0).simulate('click');
-    expect(props.setTruncateLength).toHaveBeenCalledWith(TopologyTruncateLength.XL);
+    expect(props.setTruncateLength).toHaveBeenCalledWith(TruncateLength.XL);
     expect(wrapper.find('li').length).toBe(0);
 
     //setTruncateLength should be called twice

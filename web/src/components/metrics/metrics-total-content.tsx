@@ -36,6 +36,7 @@ export type MetricsTotalContentProps = {
   showTotal: boolean;
   showInternal: boolean;
   showOutOfScope: boolean;
+  smallerTexts?: boolean;
 };
 
 export const MetricsTotalContent: React.FC<MetricsTotalContentProps> = ({
@@ -47,7 +48,8 @@ export const MetricsTotalContent: React.FC<MetricsTotalContentProps> = ({
   limit,
   showTotal,
   showInternal,
-  showOutOfScope
+  showOutOfScope,
+  smallerTexts
 }) => {
   let filtered = topKMetrics;
   if (!showInternal) {
@@ -71,7 +73,13 @@ export const MetricsTotalContent: React.FC<MetricsTotalContentProps> = ({
   const topKDatapoints: ChartDataPoint[][] = filtered.map(toDatapoints);
   const totalDatapoints: ChartDataPoint[] = toDatapoints(totalMetric);
 
-  const legentComponent = <ChartLegend labelComponent={<ChartLabel />} data={legendData} />;
+  const legentComponent = (
+    <ChartLegend
+      itemsPerRow={2}
+      labelComponent={<ChartLabel className={smallerTexts ? 'small-chart-label' : ''} />}
+      data={legendData}
+    />
+  );
 
   const containerRef = React.createRef<HTMLDivElement>();
   const [dimensions, setDimensions] = React.useState<Dimensions>(defaultDimensions);
@@ -88,7 +96,7 @@ export const MetricsTotalContent: React.FC<MetricsTotalContentProps> = ({
             ariaTitle={title}
             containerComponent={chartVoronoi(legendData, metricType)}
             legendData={legendData}
-            legendOrientation="vertical"
+            legendOrientation="horizontal"
             legendPosition="bottom-left"
             legendAllowWrap={true}
             legendComponent={legentComponent}
@@ -99,7 +107,7 @@ export const MetricsTotalContent: React.FC<MetricsTotalContentProps> = ({
             height={dimensions.height}
             domainPadding={{ x: 0, y: 0 }}
             padding={{
-              bottom: legendData.length * 25 + 75,
+              bottom: (legendData.length / 2) * 25 + 100,
               left: 90,
               right: 50,
               top: 50

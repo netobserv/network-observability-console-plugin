@@ -1,27 +1,35 @@
 import { Dropdown, DropdownItem, DropdownToggle } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { TopologyTruncateLength } from '../../model/topology';
+
+export enum TruncateLength {
+  OFF = 0,
+  XS = 10,
+  S = 20,
+  M = 25,
+  L = 30,
+  XL = 40
+}
 
 export const TruncateDropdown: React.FC<{
-  selected: TopologyTruncateLength;
-  setTruncateLength: (v: TopologyTruncateLength) => void;
+  selected: TruncateLength;
+  setTruncateLength: (v: TruncateLength) => void;
   id?: string;
 }> = ({ selected, setTruncateLength, id }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [truncateDropdownOpen, setTruncateDropdownOpen] = React.useState(false);
 
-  const getTruncateDisplay = (v: TopologyTruncateLength) => {
+  const getTruncateDisplay = (v: TruncateLength) => {
     switch (v) {
-      case TopologyTruncateLength.XL:
+      case TruncateLength.XL:
         return t('XL');
-      case TopologyTruncateLength.L:
+      case TruncateLength.L:
         return t('L');
-      case TopologyTruncateLength.M:
+      case TruncateLength.M:
         return t('M');
-      case TopologyTruncateLength.S:
+      case TruncateLength.S:
         return t('S');
-      case TopologyTruncateLength.XS:
+      case TruncateLength.XS:
         return t('XS');
       default:
         return t('None');
@@ -43,13 +51,13 @@ export const TruncateDropdown: React.FC<{
       }
       isOpen={truncateDropdownOpen}
       dropdownItems={[
-        TopologyTruncateLength.OFF,
-        TopologyTruncateLength.XS,
-        TopologyTruncateLength.S,
-        TopologyTruncateLength.M,
-        TopologyTruncateLength.L,
-        TopologyTruncateLength.XL
-      ].map((v: TopologyTruncateLength) => (
+        TruncateLength.OFF,
+        TruncateLength.XS,
+        TruncateLength.S,
+        TruncateLength.M,
+        TruncateLength.L,
+        TruncateLength.XL
+      ].map((v: TruncateLength) => (
         <DropdownItem
           data-test={String(v)}
           id={String(v)}

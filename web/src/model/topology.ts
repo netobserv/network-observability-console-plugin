@@ -23,6 +23,7 @@ import { getTopologyEdgeId, getTopologyGroupId, getTopologyNodeId } from '../uti
 import { MetricScopeOptions } from './metrics';
 import { MetricFunction, MetricScope, MetricType, NodeType } from './flow-query';
 import { getFormattedValue } from '../utils/metrics';
+import { TruncateLength } from '../components/dropdowns/truncate-dropdown';
 
 export enum LayoutName {
   BreadthFirst = 'BreadthFirst',
@@ -64,22 +65,13 @@ export const getAvailableGroups = (scope: MetricScopeOptions) => {
   }
 };
 
-export enum TopologyTruncateLength {
-  OFF = 0,
-  XS = 10,
-  S = 20,
-  M = 25,
-  L = 30,
-  XL = 40
-}
-
 export interface TopologyOptions {
   maxEdgeStat: number;
   nodeBadges?: boolean;
   edges?: boolean;
   edgeTags?: boolean;
   startCollapsed?: boolean;
-  truncateLength: TopologyTruncateLength;
+  truncateLength: TruncateLength;
   layout: LayoutName;
   groupTypes: TopologyGroupTypes;
   lowScale: number;
@@ -94,7 +86,7 @@ export const DefaultOptions: TopologyOptions = {
   edgeTags: true,
   maxEdgeStat: 0,
   startCollapsed: false,
-  truncateLength: TopologyTruncateLength.M,
+  truncateLength: TruncateLength.M,
   layout: LayoutName.ColaNoForce,
   groupTypes: TopologyGroupTypes.NONE,
   lowScale: 0.3,
@@ -256,7 +248,7 @@ export const generateNode = (
       badgeClassName: 'topology-icon',
       showDecorators: true,
       secondaryLabel,
-      truncateLength: options.truncateLength !== TopologyTruncateLength.OFF ? options.truncateLength : undefined
+      truncateLength: options.truncateLength !== TruncateLength.OFF ? options.truncateLength : undefined
     }
   };
 };
@@ -395,7 +387,7 @@ export const generateDataModel = (
           collapsedWidth: 75,
           collapsedHeight: 75,
           truncateLength:
-            options.truncateLength !== TopologyTruncateLength.OFF
+            options.truncateLength !== TruncateLength.OFF
               ? //match node label length according to badge
                 options.nodeBadges
                 ? options.truncateLength + 2

@@ -1,11 +1,12 @@
-import * as React from 'react';
 import { ChartLegendTooltip, createContainer, getResizeObserver } from '@patternfly/react-charts';
 import { TFunction } from 'i18next';
+import * as React from 'react';
 import { NamedMetric, TopologyMetricPeer, TopologyMetrics } from '../../api/loki';
+import { MetricScope, MetricType } from '../../model/flow-query';
 import { NodeData } from '../../model/topology';
 import { getDateFromUnix, getFormattedDate } from '../../utils/datetime';
 import { getFormattedRateValue, matchPeer } from '../../utils/metrics';
-import { MetricScope, MetricType } from '../../model/flow-query';
+import { TruncateLength } from '../dropdowns/truncate-dropdown';
 
 export type LegendDataItem = {
   childName?: string;
@@ -51,30 +52,37 @@ export const chartVoronoi = (legendData: LegendDataItem[], metricType: MetricTyp
   );
 };
 
-//TODO: NETOBSERV-688 add this as tab options
-// function truncate(input: string) {
-//   const length = doubleWidth ? 64 : showDonut ? 10 : 18;
-//   if (input.length > length) {
-//     return input.substring(0, length / 2) + '…' + input.substring(input.length - length / 2);
-//   }
-//   return input;
-// }
+const truncate = (input: string, length: number) => {
+  if (input.length > length) {
+    return input.substring(0, length / 2) + '…' + input.substring(input.length - length / 2);
+  }
+  return input;
+};
 
-// function truncateParts(input: string) {
-//   if (input.includes('.')) {
-//     const splitted = input.split('.');
-//     const result: string[] = [];
-//     splitted.forEach(s => {
-//       result.push(truncate(s));
-//     });
-//     return result.join('.');
-//   }
-//   return truncate(input);
-// }
+const truncateParts = (input: string, length: number) => {
+  if (length === 0) {
+    return input;
+  }
 
-const getPeerName = (t: TFunction, peer: TopologyMetricPeer, scope: MetricScope): string => {
+  if (input.includes('.')) {
+    const splitted = input.split('.');
+    const result: string[] = [];
+    splitted.forEach(s => {
+      result.push(truncate(s, length / splitted.length));
+    });
+    return result.join('.');
+  }
+  return truncate(input, length);
+};
+
+const getPeerName = (
+  t: TFunction,
+  peer: TopologyMetricPeer,
+  scope: MetricScope,
+  truncateLength: TruncateLength = TruncateLength.OFF
+): string => {
   if (peer.displayName) {
-    return peer.displayName;
+    return truncateParts(peer.displayName, truncateLength);
   }
   if (scope === 'app') {
     // No peer distinction here
@@ -90,9 +98,14 @@ const getPeerName = (t: TFunction, peer: TopologyMetricPeer, scope: MetricScope)
   }
 };
 
-export const toNamedMetric = (t: TFunction, m: TopologyMetrics, data?: NodeData): NamedMetric => {
-  const srcName = getPeerName(t, m.source, m.scope);
-  const dstName = getPeerName(t, m.destination, m.scope);
+export const toNamedMetric = (
+  t: TFunction,
+  m: TopologyMetrics,
+  data?: NodeData,
+  truncateLength: TruncateLength = TruncateLength.OFF
+): NamedMetric => {
+  const srcName = getPeerName(t, m.source, m.scope, truncateLength);
+  const dstName = getPeerName(t, m.destination, m.scope, truncateLength);
   if (srcName === dstName) {
     if (m.source.displayName) {
       // E.g: namespace "netobserv" to "netobserv"

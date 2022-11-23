@@ -8,6 +8,7 @@ import { MetricFunction, MetricScope, MetricType } from '../../../model/flow-que
 import { ElementPanel, ElementPanelDetailsContent, ElementPanelMetricsContent } from '../element-panel';
 import { dataSample } from '../__tests-data__/metrics';
 import { NodeData } from '../../../model/topology';
+import { TruncateLength } from '../../../components/dropdowns/truncate-dropdown';
 
 describe('<ElementPanel />', () => {
   const getNode = (kind: string, name: string, addr: string) => {
@@ -37,6 +38,7 @@ describe('<ElementPanel />', () => {
     filters: [] as Filter[],
     setFilters: jest.fn(),
     onClose: jest.fn(),
+    truncateLength: TruncateLength.M,
     id: 'element-panel-test'
   };
 
