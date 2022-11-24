@@ -7,7 +7,7 @@ import {
   ModelKind
 } from '@patternfly/react-topology';
 import { ComponentType } from 'react';
-import { GraphElementPeer } from '../../../model/topology';
+import { GraphElementPeer } from '../../../../model/topology';
 
 export const componentFactory: ComponentFactory = (
   kind: ModelKind,

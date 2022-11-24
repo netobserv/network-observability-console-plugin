@@ -1,6 +1,7 @@
 import { Dropdown, DropdownItem, DropdownToggle } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
+import { Feature, isAllowed } from '../../utils/features-gate';
 import { LayoutName } from '../../model/topology';
 
 export const LayoutDropdown: React.FC<{
@@ -13,6 +14,8 @@ export const LayoutDropdown: React.FC<{
 
   const getLayoutDisplay = (layoutName: LayoutName) => {
     switch (layoutName) {
+      case LayoutName.ThreeD:
+        return t('3D');
       case LayoutName.BreadthFirst:
         return t('BreadthFirst');
       case LayoutName.Cola:
@@ -48,19 +51,21 @@ export const LayoutDropdown: React.FC<{
         </DropdownToggle>
       }
       isOpen={layoutDropdownOpen}
-      dropdownItems={Object.values(LayoutName).map(v => (
-        <DropdownItem
-          data-test={v}
-          id={v}
-          key={v}
-          onClick={() => {
-            setLayoutDropdownOpen(false);
-            setLayout(v);
-          }}
-        >
-          {getLayoutDisplay(v)}
-        </DropdownItem>
-      ))}
+      dropdownItems={Object.values(LayoutName)
+        .filter(v => v != LayoutName.ThreeD || isAllowed(Feature.ThreeD))
+        .map(v => (
+          <DropdownItem
+            data-test={v}
+            id={v}
+            key={v}
+            onClick={() => {
+              setLayoutDropdownOpen(false);
+              setLayout(v);
+            }}
+          >
+            {getLayoutDisplay(v)}
+          </DropdownItem>
+        ))}
     />
   );
 };

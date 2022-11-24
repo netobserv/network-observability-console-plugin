@@ -25,6 +25,7 @@ import { MetricFunction, MetricScope, MetricType, NodeType } from './flow-query'
 import { getFormattedValue } from '../utils/metrics';
 
 export enum LayoutName {
+  ThreeD = '3d',
   BreadthFirst = 'BreadthFirst',
   Cola = 'Cola',
   ColaNoForce = 'ColaNoForce',

@@ -12,7 +12,7 @@ import {
   withSelection
 } from '@patternfly/react-topology';
 import * as React from 'react';
-import { GraphElementPeer } from '../../../model/topology';
+import { GraphElementPeer } from '../../../../model/topology';
 
 //keep default import here to use observers
 import StyleEdge from '../styles/styleEdge';
