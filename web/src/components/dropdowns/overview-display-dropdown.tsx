@@ -7,6 +7,7 @@ import { MetricScope, MetricType } from '../../model/flow-query';
 import MetricTypeDropdown from './metric-type-dropdown';
 import './overview-display-dropdown.css';
 import ScopeDropdown from './scope-dropdown';
+import TruncateDropdown, { TruncateLength } from './truncate-dropdown';
 
 export type Size = 's' | 'm' | 'l';
 
@@ -15,7 +16,9 @@ export const OverviewDisplayOptions: React.FC<{
   setMetricType: (t: MetricType) => void;
   metricScope: MetricScope;
   setMetricScope: (s: MetricScope) => void;
-}> = ({ metricType, setMetricType, metricScope, setMetricScope }) => {
+  truncateLength: TruncateLength;
+  setTruncateLength: (v: TruncateLength) => void;
+}> = ({ metricType, setMetricType, metricScope, setMetricScope, truncateLength, setTruncateLength }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   return (
@@ -46,6 +49,18 @@ export const OverviewDisplayOptions: React.FC<{
           <ScopeDropdown data-test="scope" id="scope" selected={metricScope} setScopeType={setMetricScope} />
         </div>
       </div>
+      <div className="pf-c-select__menu-group">
+        <Tooltip content={t('Long labels can reduce visibility.')}>
+          <div className="pf-c-select__menu-group-title">
+            <>
+              {t('Truncate labels')} <InfoAltIcon />
+            </>
+          </div>
+        </Tooltip>
+        <div className="display-dropdown-padding">
+          <TruncateDropdown id="truncate" selected={truncateLength} setTruncateLength={setTruncateLength} />
+        </div>
+      </div>
     </>
   );
 };
@@ -55,7 +70,9 @@ export const OverviewDisplayDropdown: React.FC<{
   setMetricType: (t: MetricType) => void;
   metricScope: MetricScope;
   setMetricScope: (s: MetricScope) => void;
-}> = ({ metricType, setMetricType, metricScope, setMetricScope }) => {
+  truncateLength: TruncateLength;
+  setTruncateLength: (v: TruncateLength) => void;
+}> = ({ metricType, setMetricType, metricScope, setMetricScope, truncateLength, setTruncateLength }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [isOpen, setOpen] = React.useState<boolean>(false);
 
@@ -72,6 +89,8 @@ export const OverviewDisplayDropdown: React.FC<{
             setMetricType={setMetricType}
             metricScope={metricScope}
             setMetricScope={setMetricScope}
+            truncateLength={truncateLength}
+            setTruncateLength={setTruncateLength}
           />
         }
       />

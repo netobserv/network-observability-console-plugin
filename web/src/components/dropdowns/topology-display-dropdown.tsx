@@ -4,10 +4,10 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { MetricFunction, MetricScope, MetricType } from '../../model/flow-query';
 import { MetricScopeOptions } from '../../model/metrics';
-import { LayoutName, TopologyGroupTypes, TopologyOptions, TopologyTruncateLength } from '../../model/topology';
+import { LayoutName, TopologyGroupTypes, TopologyOptions } from '../../model/topology';
 import GroupDropdown from './group-dropdown';
 import LayoutDropdown from './layout-dropdown';
-import TruncateDropdown from './truncate-dropdown';
+import TruncateDropdown, { TruncateLength } from './truncate-dropdown';
 
 import './topology-display-dropdown.css';
 import MetricFunctionDropdown from './metric-function-dropdown';
@@ -51,7 +51,7 @@ export const TopologyDisplayOptions: React.FC<{
     });
   };
 
-  const setTruncateLength = (truncateLength: TopologyTruncateLength) => {
+  const setTruncateLength = (truncateLength: TruncateLength) => {
     setTopologyOptions({
       ...topologyOptions,
       truncateLength

@@ -77,6 +77,7 @@ import {
   LOCAL_STORAGE_METRIC_SCOPE_KEY,
   LOCAL_STORAGE_METRIC_TYPE_KEY,
   LOCAL_STORAGE_OVERVIEW_IDS_KEY,
+  LOCAL_STORAGE_OVERVIEW_TRUNCATE_KEY,
   LOCAL_STORAGE_QUERY_PARAMS_KEY,
   LOCAL_STORAGE_REFRESH_KEY,
   LOCAL_STORAGE_SHOW_OPTIONS_KEY,
@@ -127,6 +128,7 @@ import MetricsQuerySummary from './query-summary/metrics-query-summary';
 import FlowsQuerySummary from './query-summary/flows-query-summary';
 import { SearchComponent, SearchEvent, SearchHandle } from './search/search';
 import './netflow-traffic.css';
+import { TruncateLength } from './dropdowns/truncate-dropdown';
 
 export type ViewId = 'overview' | 'table' | 'topology';
 
@@ -161,6 +163,10 @@ export const NetflowTraffic: React.FC<{
   const [flows, setFlows] = React.useState<Record[]>([]);
   const [stats, setStats] = React.useState<Stats | undefined>(undefined);
   const [appStats, setAppStats] = React.useState<Stats | undefined>(undefined);
+  const [overviewTruncateLength, setOverviewTruncateLength] = useLocalStorage<TruncateLength>(
+    LOCAL_STORAGE_OVERVIEW_TRUNCATE_KEY,
+    TruncateLength.M
+  );
   const [topologyOptions, setTopologyOptions] = useLocalStorage<TopologyOptions>(
     LOCAL_STORAGE_TOPOLOGY_OPTIONS_KEY,
     DefaultOptions
@@ -770,6 +776,7 @@ export const NetflowTraffic: React.FC<{
           metrics={metrics}
           metricFunction={metricFunction}
           metricType={metricType}
+          truncateLength={topologyOptions.truncateLength}
           filters={filters}
           setFilters={setFilters}
           onClose={() => onElementSelect(undefined)}
@@ -807,6 +814,7 @@ export const NetflowTraffic: React.FC<{
             error={error}
             isDark={isDarkTheme}
             filterActionLinks={filterLinks()}
+            truncateLength={overviewTruncateLength}
           />
         );
         break;
@@ -979,6 +987,8 @@ export const NetflowTraffic: React.FC<{
                   setMetricType={setMetricType}
                   metricScope={metricScope}
                   setMetricScope={setMetricScope}
+                  truncateLength={overviewTruncateLength}
+                  setTruncateLength={setOverviewTruncateLength}
                 />
               )}
               {selectedViewId === 'table' && <TableDisplayDropdown size={size} setSize={setSize} />}

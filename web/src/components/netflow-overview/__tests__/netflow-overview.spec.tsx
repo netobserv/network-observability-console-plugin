@@ -8,6 +8,7 @@ import { MetricType } from '../../../model/flow-query';
 import { SamplePanel, ShuffledDefaultPanels } from '../../__tests-data__/panels';
 import { NetflowOverview, NetflowOverviewProps } from '../netflow-overview';
 import { NetflowOverviewPanel } from '../netflow-overview-panel';
+import { TruncateLength } from '../../../components/dropdowns/truncate-dropdown';
 
 describe('<NetflowOverview />', () => {
   const props: NetflowOverviewProps = {
@@ -18,7 +19,8 @@ describe('<NetflowOverview />', () => {
     metricType: 'bytes' as MetricType,
     metrics: [],
     totalMetric: undefined,
-    filterActionLinks: <></>
+    filterActionLinks: <></>,
+    truncateLength: TruncateLength.M
   };
   it('should render component', async () => {
     const wrapper = shallow(<NetflowOverview {...props} />);
