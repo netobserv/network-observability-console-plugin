@@ -137,7 +137,7 @@ func getNamesForPrefix(cfg *loki.Config, lokiClient httpclient.Caller, prefix, k
 	var qr model.QueryResponse
 	err = json.Unmarshal(resp, &qr)
 	if err != nil {
-		hlog.Errorf("Cannot unmarshal (%v). Response was: %s", err, string(resp))
+		hlog.WithError(err).Errorf("cannot unmarshal, response was: %v", string(resp))
 		return nil, http.StatusInternalServerError, errors.New("Failed to unmarshal Loki response: " + err.Error())
 	}
 

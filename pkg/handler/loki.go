@@ -73,7 +73,7 @@ func getLokiError(resp []byte, code int) string {
 	}
 	err := json.Unmarshal(resp, &f)
 	if err != nil {
-		hlog.Errorf("Cannot unmarshal (%v). Response was: %s", err, string(resp))
+		hlog.WithError(err).Errorf("cannot unmarshal, response was: %v", string(resp))
 		return fmt.Sprintf("Unknown error from Loki\ncannot unmarshal\n%s", resp)
 	}
 	message, ok := f["message"]
@@ -116,7 +116,7 @@ func fetchSingle(lokiClient httpclient.Caller, flowsURL string, merger loki.Merg
 	}
 	var qr model.QueryResponse
 	if err := json.Unmarshal(resp, &qr); err != nil {
-		hlog.Errorf("Cannot unmarshal (%v). Response was: %s", err, string(resp))
+		hlog.WithError(err).Errorf("cannot unmarshal, response was: %v", string(resp))
 		return http.StatusInternalServerError, err
 	}
 	if _, err := merger.Add(qr.Data); err != nil {
@@ -148,7 +148,7 @@ func fetchParallel(lokiClient httpclient.Caller, queries []string, merger loki.M
 				var qr model.QueryResponse
 				err := json.Unmarshal(resp, &qr)
 				if err != nil {
-					hlog.Errorf("Cannot unmarshal (%v). Response was: %s", err, string(resp))
+					hlog.WithError(err).Errorf("cannot unmarshal, response was: %v", string(resp))
 					errChan <- errorWithCode{err: err, code: http.StatusInternalServerError}
 				} else {
 					resChan <- qr
@@ -243,7 +243,7 @@ func LokiConfig(cfg *loki.Config, param string) func(w http.ResponseWriter, r *h
 		cfg := make(map[string]interface{})
 		err = yaml.Unmarshal(resp, &cfg)
 		if err != nil {
-			hlog.Errorf("Cannot unmarshal (%v). Response was: %s", err, string(resp))
+			hlog.WithError(err).Errorf("cannot unmarshal, response was: %v", string(resp))
 			writeError(w, code, err.Error())
 			return
 		}
