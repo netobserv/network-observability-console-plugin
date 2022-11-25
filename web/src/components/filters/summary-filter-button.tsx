@@ -1,11 +1,12 @@
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { OptionsMenu, OptionsMenuItem, OptionsMenuPosition, OptionsMenuToggle } from '@patternfly/react-core';
+import { Checkbox, OptionsMenu, OptionsMenuItem, OptionsMenuPosition, OptionsMenuToggle } from '@patternfly/react-core';
 import { FilterIcon } from '@patternfly/react-icons';
 import { Filter } from '../../model/filters';
 import { FilterDir, isElementFiltered, toggleElementFilter } from '../../model/topology';
 import { TopologyMetricPeer } from '../../api/loki';
 import { NodeType } from '../../model/flow-query';
+import './summary-filter-button.css';
 
 export interface SummaryFilterButtonProps {
   id: string;
@@ -33,19 +34,26 @@ export const SummaryFilterButton: React.FC<SummaryFilterButtonProps> = ({
     isElementFiltered(filterType, fields, dir, activeFilters, t)
   );
 
-  const onSelect = (dir: FilterDir) => {
+  const onSelect = (dir: FilterDir, e: React.BaseSyntheticEvent) => {
     toggleElementFilter(filterType, fields, dir, selected.includes(dir), activeFilters, setFilters, t);
+    e.preventDefault();
   };
 
   const menuItem = (id: FilterDir, label: string) => (
-    <OptionsMenuItem id={id} key={id} isSelected={selected.includes(id)} onSelect={() => onSelect(id)}>
-      {label}
+    <OptionsMenuItem id={id} key={id} onSelect={e => onSelect(id, e!)}>
+      <Checkbox
+        id={id + '-checkbox'}
+        label={label}
+        isChecked={selected.includes(id)}
+        onChange={(_, e) => onSelect(id, e)}
+      />
     </OptionsMenuItem>
   );
 
   return (
     <OptionsMenu
       id={id}
+      className={'summary-filter-menu'}
       data-test={id}
       toggle={<OptionsMenuToggle toggleTemplate={<FilterIcon />} onToggle={setIsOpen} hideCaret />}
       menuItems={[menuItem('src', t('Source')), menuItem('dst', t('Destination')), menuItem('any', t('Common'))]}
