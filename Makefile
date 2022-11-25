@@ -89,10 +89,13 @@ build-backend: fmt-backend
 	@echo "### Building backend"
 	go build ${BUILD_FLAGS} -mod vendor -o plugin-backend cmd/plugin-backend.go
 
-.PHONY: build-frontend
-build-frontend: install-frontend fmt-frontend
+.PHONY: just-build-frontend
+just-build-frontend:
 	@echo "### Building frontend"
 	cd web && npm run build
+
+.PHONY: build-frontend
+build-frontend: install-frontend fmt-frontend just-build-frontend
 
 .PHONY: build-frontend-standalone
 build-frontend-standalone: install-frontend fmt-frontend
