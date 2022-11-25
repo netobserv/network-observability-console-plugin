@@ -11,6 +11,7 @@ import { TruncateLength } from '../dropdowns/truncate-dropdown';
 export type LegendDataItem = {
   childName?: string;
   name?: string;
+  tooltipName?: string;
   labels?: {
     fill?: string;
   };
@@ -29,7 +30,7 @@ export type ChartDataPoint = {
 
 export const toDatapoints = (metric: NamedMetric): ChartDataPoint[] => {
   return metric.values.map(v => ({
-    name: metric.name,
+    name: metric.shortName,
     date: getFormattedDate(getDateFromUnix(v[0])),
     x: getDateFromUnix(v[0]),
     y: Number(v[1])
@@ -38,13 +39,14 @@ export const toDatapoints = (metric: NamedMetric): ChartDataPoint[] => {
 
 export const chartVoronoi = (legendData: LegendDataItem[], metricType: MetricType) => {
   const CursorVoronoiContainer = createContainer('voronoi', 'cursor');
+  const tooltipData = legendData.map(item => ({ ...item, name: item.tooltipName }));
   return (
     <CursorVoronoiContainer
       cursorDimension="x"
       labels={(dp: { datum: ChartDataPoint }) => {
         return dp.datum.y || dp.datum.y === 0 ? getFormattedRateValue(dp.datum.y, metricType) : 'n/a';
       }}
-      labelComponent={<ChartLegendTooltip legendData={legendData} title={(datum: ChartDataPoint) => datum.date} />}
+      labelComponent={<ChartLegendTooltip legendData={tooltipData} title={(datum: ChartDataPoint) => datum.date} />}
       mouseFollowTooltips
       voronoiDimension="x"
       voronoiPadding={50}
@@ -105,20 +107,24 @@ export const toNamedMetric = (
   truncateLength: TruncateLength = TruncateLength.OFF
 ): NamedMetric => {
   const srcName = getPeerName(t, m.source, m.scope, truncateLength);
+  const srcFullName = getPeerName(t, m.source, m.scope);
   const dstName = getPeerName(t, m.destination, m.scope, truncateLength);
-  if (srcName === dstName) {
+  const dstFullName = getPeerName(t, m.destination, m.scope);
+  if (srcFullName === dstFullName) {
     if (m.source.displayName) {
       // E.g: namespace "netobserv" to "netobserv"
       return {
         ...m,
-        name: `${srcName} (${t('internal')})`,
+        shortName: `${srcName} (${t('internal')})`,
+        fullName: `${srcFullName} (${t('internal')})`,
         isInternal: true
       };
     } else {
       // E.g: host-network traffic while scope is "namespaces"
       return {
         ...m,
-        name: srcName,
+        shortName: srcName,
+        fullName: srcFullName,
         isInternal: false
       };
     }
@@ -126,19 +132,22 @@ export const toNamedMetric = (
   if (data && matchPeer(data, m.source)) {
     return {
       ...m,
-      name: `${t('To')} ${dstName}`,
+      shortName: `${t('To')} ${dstName}`,
+      fullName: `${t('To')} ${dstFullName}`,
       isInternal: false
     };
   } else if (data && matchPeer(data, m.destination)) {
     return {
       ...m,
-      name: `${t('From')} ${srcName}`,
+      shortName: `${t('From')} ${srcName}`,
+      fullName: `${t('From')} ${srcFullName}`,
       isInternal: false
     };
   }
   return {
     ...m,
-    name: `${srcName} -> ${dstName}`,
+    shortName: `${srcName} -> ${dstName}`,
+    fullName: `${srcFullName} -> ${dstFullName}`,
     isInternal: false
   };
 };

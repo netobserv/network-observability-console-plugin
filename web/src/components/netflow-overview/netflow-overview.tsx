@@ -128,6 +128,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
               showArea={false}
               showScatter={false}
               smallerTexts={smallerTexts}
+              tooltipsTruncate={false}
             />
           ),
           doubleWidth: false
@@ -145,6 +146,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
               showArea={true}
               showScatter={true}
               smallerTexts={smallerTexts}
+              tooltipsTruncate={false}
             />
           ),
           doubleWidth: false
@@ -188,6 +190,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
               showScatter={true}
               itemsPerRow={2}
               smallerTexts={smallerTexts}
+              tooltipsTruncate={false}
             />
           ),
           doubleWidth: true

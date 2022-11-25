@@ -10,10 +10,11 @@ describe('<MetricsContent />', () => {
     id: 'chart-test',
     title: 'chart-test',
     metricType: 'bytes',
-    metrics: metrics.map(m => ({ ...m, name: 'whatever', isInternal: false })),
+    metrics: metrics.map(m => ({ ...m, fullName: 'whatever', shortName: 'whatever', isInternal: false })),
     showTitle: true,
     smallerTexts: false,
-    limit: 5
+    limit: 5,
+    tooltipsTruncate: true
   };
   it('should render component', async () => {
     const wrapper = mount(<MetricsContent {...props} />);

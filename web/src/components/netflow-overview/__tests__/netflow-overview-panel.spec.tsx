@@ -20,8 +20,9 @@ describe('<NetflowOverviewPanel />', () => {
     id: SamplePanel.id,
     title: 'title',
     metricType: 'bytes' as MetricType,
-    metrics: metrics.map(m => ({ ...m, name: 'whatever', isInternal: false })),
-    limit: 5
+    metrics: metrics.map(m => ({ ...m, shortName: 'whatever', fullName: 'whatever', isInternal: false })),
+    limit: 5,
+    tooltipsTruncate: true
   };
   it('should render component', async () => {
     const wrapper = shallow(<NetflowOverviewPanel {...panelProps} />);
