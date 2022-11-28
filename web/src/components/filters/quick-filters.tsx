@@ -68,7 +68,7 @@ export const QuickFilters: React.FC<QuickFiltersProps> = ({ quickFilters, active
       onSelect={onSelect}
       placeholderText={
         <>
-          <FilterIcon /> {t('Filters')}
+          <FilterIcon /> {t('Quick filters')}
         </>
       }
       selections={selectedList}

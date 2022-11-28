@@ -148,7 +148,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
             chipFilters.map((chipFilter, cfIndex) => {
               let fullName = getFilterFullName(chipFilter.def, t);
               if (chipFilter.not) {
-                fullName += ' ' + t('Not');
+                fullName = t('Not') + ' ' + fullName;
               }
               const someEnabled = hasEnabledFilterValues(chipFilter);
               return (
