@@ -3,10 +3,13 @@ FROM registry.access.redhat.com/ubi8/nodejs-16:1 as web-builder
 WORKDIR /opt/app-root
 
 COPY --chown=default Makefile Makefile
+COPY --chown=default web/package.json web/package.json
+COPY --chown=default web/package-lock.json web/package-lock.json
+RUN NPM_INSTALL=ci make install-frontend
+
 COPY --chown=default web web
 COPY mocks mocks
-
-RUN NPM_INSTALL=ci make build-frontend
+RUN make fmt-frontend just-build-frontend
 
 FROM registry.access.redhat.com/ubi8/go-toolset:1.17 as go-builder
 
