@@ -22,7 +22,7 @@ export const getTopologyEdgeId = (sourceId: string, targetId: string) => {
  * @param fields list of fields returned from metrics that identify the element
  * @returns string that identify the peer
  */
-export const getPeerId = (fields: Omit<TopologyMetricPeer, 'id'>): string => {
+export const getPeerId = (fields: Partial<TopologyMetricPeer>): string => {
   const parts = [];
   if (fields.hostName) {
     parts.push('h=' + fields.hostName);

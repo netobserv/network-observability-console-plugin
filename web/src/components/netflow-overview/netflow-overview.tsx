@@ -100,8 +100,8 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
   //limit to top X since multiple queries can run in parallel
   const topKMetrics = metrics
     .sort((a, b) => getStat(b.stats, 'sum') - getStat(a.stats, 'sum'))
-    .map(m => toNamedMetric(t, m, truncateLength));
-  const namedTotalMetric = toNamedMetric(t, totalMetric, truncateLength);
+    .map(m => toNamedMetric(t, m, truncateLength, true, true));
+  const namedTotalMetric = toNamedMetric(t, totalMetric, truncateLength, false, false);
   const noInternalTopK = topKMetrics.filter(m => m.source.id !== m.destination.id);
 
   const smallerTexts = truncateLength >= TruncateLength.M;

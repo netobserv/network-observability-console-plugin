@@ -385,10 +385,10 @@ describe('parseMetrics', () => {
     const parsed = parseMetrics(metrics, 300, 'resource');
 
     expect(parsed).toHaveLength(2);
-    expect(parsed[0].source.displayName).toEqual('ns1.A');
-    expect(parsed[0].destination.displayName).toEqual('ns1.B (pod)');
-    expect(parsed[1].source.displayName).toEqual('ns1.A');
-    expect(parsed[1].destination.displayName).toEqual('ns1.B (svc)');
+    expect(parsed[0].source.getDisplayName(true, true)).toEqual('ns1.A');
+    expect(parsed[0].destination.getDisplayName(true, true)).toEqual('ns1.B (pod)');
+    expect(parsed[1].source.getDisplayName(true, true)).toEqual('ns1.A');
+    expect(parsed[1].destination.getDisplayName(true, true)).toEqual('ns1.B (svc)');
   });
 });
 

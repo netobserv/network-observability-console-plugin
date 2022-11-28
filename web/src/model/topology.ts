@@ -22,7 +22,7 @@ import { K8sModel } from '@openshift-console/dynamic-plugin-sdk';
 import { getTopologyEdgeId } from '../utils/ids';
 import { MetricScopeOptions } from './metrics';
 import { MetricFunction, MetricScope, MetricType, NodeType } from './flow-query';
-import { createPeer, getFormattedValue, peerNameAndKind } from '../utils/metrics';
+import { createPeer, getFormattedValue } from '../utils/metrics';
 import { TruncateLength } from '../components/dropdowns/truncate-dropdown';
 
 export enum LayoutName {
@@ -211,10 +211,8 @@ const generateNode = (
   k8sModels: { [key: string]: K8sModel },
   isDark?: boolean
 ): NodeModel => {
-  const nk = peerNameAndKind(data.peer, false);
-  const label = nk?.name || (scope === 'host' ? t('External') : t('Unknown'))!;
-  data.peer.displayName = label;
-  const resourceKind = nk?.kind;
+  const label = data.peer.getDisplayName(false, false) || (scope === 'host' ? t('External') : t('Unknown'))!;
+  const resourceKind = data.peer.resourceKind;
   const secondaryLabel =
     data.nodeType !== 'namespace' &&
     ![
@@ -359,12 +357,13 @@ export const generateDataModel = (
   const opts = { ...DefaultOptions, ...options };
 
   const addGroup = (
-    metricFields: Omit<TopologyMetricPeer, 'id'>,
+    fields: Partial<TopologyMetricPeer>,
     scope: MetricScope,
     parent?: NodeModel,
     secondaryLabelPadding = false
   ): NodeModel => {
-    const groupDef = createPeer(metricFields);
+    const groupDef = createPeer(fields);
+    const groupName = groupDef.getDisplayName(false, false);
     let group = nodes.find(g => g.type === 'group' && g.id === groupDef.id);
     if (!group) {
       const data: NodeData = {
@@ -377,11 +376,11 @@ export const generateDataModel = (
         type: 'group',
         group: true,
         collapsed: options.startCollapsed,
-        label: groupDef.displayName,
+        label: groupName,
         style: { padding: secondaryLabelPadding ? 35 : 10 },
         data: {
           ...data,
-          name: groupDef.displayName,
+          name: groupName,
           isDark,
           labelPosition: LabelPosition.bottom,
           collapsible: true,
@@ -488,22 +487,27 @@ export const generateDataModel = (
     return ownerGroup || namespaceGroup || hostGroup;
   };
 
-  const dataBuilder: (p: TopologyMetricPeer) => NodeData =
-    metricScope === 'host'
-      ? p =>
-          _.isEmpty(p.hostName) ? { peer: p, nodeType: 'unknown' } : { peer: p, nodeType: 'host', canStepInto: true }
-      : metricScope === 'namespace'
-      ? p =>
-          _.isEmpty(p.namespace)
-            ? { peer: p, nodeType: 'unknown' }
-            : { peer: p, nodeType: 'namespace', canStepInto: true }
-      : metricScope === 'owner'
-      ? p => (p.owner ? { peer: p, nodeType: 'owner', canStepInto: true } : { peer: p, nodeType: 'unknown' })
-      : p => ({ peer: p, nodeType: 'resource' });
+  const peerToNodeData = (p: TopologyMetricPeer): NodeData => {
+    switch (metricScope) {
+      case 'host':
+        return _.isEmpty(p.hostName)
+          ? { peer: p, nodeType: 'unknown' }
+          : { peer: p, nodeType: 'host', canStepInto: true };
+      case 'namespace':
+        return _.isEmpty(p.namespace)
+          ? { peer: p, nodeType: 'unknown' }
+          : { peer: p, nodeType: 'namespace', canStepInto: true };
+      case 'owner':
+        return p.owner ? { peer: p, nodeType: 'owner', canStepInto: true } : { peer: p, nodeType: 'unknown' };
+      case 'resource':
+      default:
+        return { peer: p, nodeType: 'resource' };
+    }
+  };
 
   metrics.forEach(m => {
-    const srcNode = addNode(dataBuilder(m.source), metricScope);
-    const dstNode = addNode(dataBuilder(m.destination), metricScope);
+    const srcNode = addNode(peerToNodeData(m.source), metricScope);
+    const dstNode = addNode(peerToNodeData(m.destination), metricScope);
 
     if (options.edges && srcNode && dstNode && srcNode.id !== dstNode.id) {
       addEdge(

@@ -63,15 +63,21 @@ export interface RawTopologyMetrics {
   values: [number, unknown][];
 }
 
+export interface NameAndType {
+  name: string;
+  type: string;
+}
+
 export interface TopologyMetricPeer {
   id: string;
   addr?: string;
   namespace?: string;
-  owner?: { name: string; type: string };
-  resource?: { name: string; type: string };
+  owner?: NameAndType;
+  resource?: NameAndType;
   hostName?: string;
   resourceKind?: string;
-  displayName?: string;
+  isAmbiguous: boolean;
+  getDisplayName: (inclNamespace: boolean, disambiguate: boolean) => string | undefined;
 }
 
 export type TopologyMetrics = {

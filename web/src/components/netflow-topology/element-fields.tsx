@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Filter } from '../../model/filters';
 import { NodeData } from '../../model/topology';
 import { ElementField } from './element-field';
+import { createPeer } from '../../utils/metrics';
 
 export const ElementFields: React.FC<{
   id: string;
@@ -26,7 +27,7 @@ export const ElementFields: React.FC<{
         forcedText={forceAsText ? data.peer.resource.name : undefined}
         activeFilters={activeFilters}
         filterType={'resource'}
-        fields={data.peer}
+        peer={data.peer}
         setFilters={setFilters}
       />
     );
@@ -41,7 +42,7 @@ export const ElementFields: React.FC<{
         forcedText={forceAsText ? data.peer.owner.name : undefined}
         activeFilters={activeFilters}
         filterType={'owner'}
-        fields={{ owner: data.peer.owner, namespace: data.peer.namespace }}
+        peer={createPeer({ owner: data.peer.owner, namespace: data.peer.namespace })}
         setFilters={setFilters}
       />
     );
@@ -56,7 +57,7 @@ export const ElementFields: React.FC<{
         forcedText={forceAsText ? data.peer.namespace : undefined}
         activeFilters={activeFilters}
         filterType={'namespace'}
-        fields={{ namespace: data.peer.namespace }}
+        peer={createPeer({ namespace: data.peer.namespace })}
         setFilters={setFilters}
       />
     );
@@ -71,7 +72,7 @@ export const ElementFields: React.FC<{
         forcedText={forceAsText ? data.peer.hostName : undefined}
         activeFilters={activeFilters}
         filterType={'host'}
-        fields={{ hostName: data.peer.hostName }}
+        peer={createPeer({ hostName: data.peer.hostName })}
         setFilters={setFilters}
       />
     );
@@ -85,7 +86,7 @@ export const ElementFields: React.FC<{
         label={t('IP')}
         activeFilters={activeFilters}
         filterType={'resource'}
-        fields={{ addr: data.peer.addr }}
+        peer={createPeer({ addr: data.peer.addr })}
         setFilters={setFilters}
       />
     );

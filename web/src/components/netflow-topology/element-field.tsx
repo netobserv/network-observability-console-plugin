@@ -11,23 +11,23 @@ export const ElementField: React.FC<{
   label: string;
   filterType: NodeType;
   forcedText?: string;
-  fields: Partial<TopologyMetricPeer>;
+  peer: TopologyMetricPeer;
   activeFilters: Filter[];
   setFilters: (filters: Filter[]) => void;
-}> = ({ id, label, filterType, forcedText, fields, activeFilters, setFilters }) => {
+}> = ({ id, label, filterType, forcedText, peer, activeFilters, setFilters }) => {
   return (
     <TextContent id={id} className="record-field-container">
       <Text component={TextVariants.h4}>{label}</Text>
       <Flex>
         <FlexItem flex={{ default: 'flex_1' }}>
-          {forcedText ? <Text>{forcedText}</Text> : <PeerResourceLink fields={fields} />}
+          {forcedText ? <Text>{forcedText}</Text> : <PeerResourceLink peer={peer} />}
         </FlexItem>
         <FlexItem>
           <SummaryFilterButton
             id={id + '-filter'}
             activeFilters={activeFilters}
             filterType={filterType}
-            fields={fields}
+            fields={peer}
             setFilters={setFilters}
           />
         </FlexItem>

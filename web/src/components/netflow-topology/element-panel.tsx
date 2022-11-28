@@ -166,14 +166,14 @@ export const ElementPanelMetricsContent: React.FC<{
   );
 
   if (element instanceof BaseNode && data) {
-    // TODO: fix metrics naming when a group is selected (ambiguous)
+    const leafData = element.getType() === 'group' ? undefined : data;
     const filteredMetrics = metrics.filter(m => m.source.id !== m.destination.id);
     const outMetrics = filteredMetrics
       .filter(m => matchPeer(data, m.source))
-      .map(m => toNamedMetric(t, m, truncateLength, data));
+      .map(m => toNamedMetric(t, m, truncateLength, false, false, leafData));
     const inMetrics = filteredMetrics
       .filter(m => matchPeer(data, m.destination))
-      .map(m => toNamedMetric(t, m, truncateLength, data));
+      .map(m => toNamedMetric(t, m, truncateLength, false, false, leafData));
     const outCount = outMetrics.reduce((prev, cur) => prev + getStat(cur.stats, metricFunction), 0);
     const inCount = inMetrics.reduce((prev, cur) => prev + getStat(cur.stats, metricFunction), 0);
     return (
@@ -198,10 +198,10 @@ export const ElementPanelMetricsContent: React.FC<{
     const bData = element.getTarget().getData();
     const aToBMetrics = metrics
       .filter(m => matchPeer(aData, m.source) && matchPeer(bData, m.destination))
-      .map(m => toNamedMetric(t, m, truncateLength));
+      .map(m => toNamedMetric(t, m, truncateLength, false, false));
     const bToAMetrics = metrics
       .filter(m => matchPeer(bData, m.source) && matchPeer(aData, m.destination))
-      .map(m => toNamedMetric(t, m, truncateLength));
+      .map(m => toNamedMetric(t, m, truncateLength, false, false));
     const aToBCount = aToBMetrics.reduce((prev, cur) => prev + getStat(cur.stats, metricFunction), 0);
     const bToACount = bToAMetrics.reduce((prev, cur) => prev + getStat(cur.stats, metricFunction), 0);
     return (
@@ -243,7 +243,7 @@ export const ElementPanel: React.FC<{
       return <Text component={TextVariants.h2}>{t('Edge')}</Text>;
     } else {
       const data = element.getData();
-      return <>{data && <PeerResourceLink fields={data.peer} />}</>;
+      return <>{data && <PeerResourceLink peer={data.peer} />}</>;
     }
   }, [element, t]);
 

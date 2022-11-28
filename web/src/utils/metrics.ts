@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { RawTopologyMetrics, MetricStats, TopologyMetricPeer, TopologyMetrics } from '../api/loki';
+import { RawTopologyMetrics, MetricStats, TopologyMetricPeer, TopologyMetrics, NameAndType } from '../api/loki';
 import { MetricFunction, MetricScope, MetricType } from '../model/flow-query';
 import { roundTwoDigits } from './count';
 import { computeStepInterval, rangeToSeconds, TimeRange } from './datetime';
@@ -36,25 +36,24 @@ export const parseMetrics = (
   if (scope === 'owner' || scope === 'resource') {
     // Define some helpers
     const addKind = (p: TopologyMetricPeer) => {
-      if (p.displayName) {
-        let existing = nameKinds.get(p.displayName);
+      const name = p.getDisplayName(true, false);
+      if (name) {
+        let existing = nameKinds.get(name);
         if (!existing) {
           existing = new Set();
-          nameKinds.set(p.displayName, existing);
+          nameKinds.set(name, existing);
         }
         if (p.resourceKind) {
           existing.add(p.resourceKind);
         }
       }
     };
-    const disambiguate = (p: TopologyMetricPeer) => {
-      if (p.displayName) {
-        const kinds = nameKinds.get(p.displayName);
-        if (kinds && kinds.size > 1) {
-          if (p.resourceKind) {
-            const shortKind = shortKindMap[p.resourceKind] || p.resourceKind.toLowerCase();
-            p.displayName = `${p.displayName} (${shortKind})`;
-          }
+    const checkAmbiguous = (p: TopologyMetricPeer) => {
+      const name = p.getDisplayName(true, false);
+      if (name) {
+        const kinds = nameKinds.get(name);
+        if (kinds && kinds.size > 1 && p.resourceKind) {
+          p.isAmbiguous = true;
         }
       }
     };
@@ -66,53 +65,57 @@ export const parseMetrics = (
       addKind(m.destination);
     });
 
-    // Second pass: update names if necessary
+    // Second pass: mark if ambiguous
     metrics.forEach(m => {
-      disambiguate(m.source);
-      disambiguate(m.destination);
+      checkAmbiguous(m.source);
+      checkAmbiguous(m.destination);
     });
   }
   return metrics;
 };
 
-export const peerNameAndKind = (
-  fields: Partial<TopologyMetricPeer>,
-  inclNamespace: boolean
-): { name: string; kind?: string } | undefined => {
-  if (fields.resource) {
-    // Resource kind
-    const name =
-      fields.namespace && inclNamespace ? `${fields.namespace}.${fields.resource.name}` : fields.resource.name;
-    return { name, kind: fields.resource.type };
-  }
-  if (fields.owner) {
-    // Owner kind
-    const name = fields.namespace && inclNamespace ? `${fields.namespace}.${fields.owner.name}` : fields.owner.name;
-    return { name, kind: fields.owner.type };
-  }
-  if (fields.namespace) {
-    // Since name / ownerName aren't defined then it must be a namespace-kind aggregation
-    return { name: fields.namespace, kind: 'Namespace' };
-  }
-  if (fields.hostName) {
-    // Since name isn't defined then it must be a host-kind aggregation
-    return { name: fields.hostName, kind: 'Node' };
-  }
-  return fields.addr ? { name: fields.addr } : undefined;
-};
-
-export const createPeer = (fields: Omit<TopologyMetricPeer, 'id'>): TopologyMetricPeer => {
-  const nk = peerNameAndKind(fields, true);
-  return {
+export const createPeer = (fields: Partial<TopologyMetricPeer>): TopologyMetricPeer => {
+  const newPeer: TopologyMetricPeer = {
     id: getPeerId(fields),
     addr: fields.addr,
     resource: fields.resource,
     namespace: fields.namespace,
     owner: fields.owner,
     hostName: fields.hostName,
-    resourceKind: nk?.kind,
-    displayName: nk?.name
+    isAmbiguous: false,
+    getDisplayName: () => undefined
   };
+  const setForNameAndType = (nt: NameAndType) => {
+    const { type, name } = nt;
+    newPeer.resourceKind = type;
+    newPeer.getDisplayName = (inclNamespace, disambiguate) => {
+      const disamb = disambiguate && newPeer.isAmbiguous ? ` (${shortKindMap[type] || type.toLowerCase()})` : '';
+      return (newPeer.namespace && inclNamespace ? `${newPeer.namespace}.${name}` : name) + disamb;
+    };
+  };
+
+  if (fields.resource) {
+    // Resource kind
+    setForNameAndType(fields.resource);
+  } else if (fields.owner) {
+    // Owner kind
+    setForNameAndType(fields.owner);
+  } else if (fields.namespace) {
+    // Since name / ownerName aren't defined then it must be a namespace-kind aggregation
+    newPeer.resourceKind = 'Namespace';
+    newPeer.getDisplayName = () => fields.namespace;
+  } else if (fields.hostName) {
+    // Since name isn't defined then it must be a host-kind aggregation
+    newPeer.resourceKind = 'Node';
+    newPeer.getDisplayName = () => fields.hostName;
+  } else if (fields.addr) {
+    newPeer.getDisplayName = () => fields.addr;
+  }
+  return newPeer;
+};
+
+const nameAndType = (name?: string, type?: string): NameAndType | undefined => {
+  return name && type ? { name, type } : undefined;
 };
 
 const parseMetric = (
@@ -126,39 +129,15 @@ const parseMetric = (
   const stats = computeStats(normalized);
   const source = createPeer({
     addr: raw.metric.SrcAddr,
-    resource:
-      raw.metric.SrcK8S_Name && raw.metric.SrcK8S_Type
-        ? {
-            name: raw.metric.SrcK8S_Name,
-            type: raw.metric.SrcK8S_Type
-          }
-        : undefined,
-    owner:
-      raw.metric.SrcK8S_OwnerName && raw.metric.SrcK8S_OwnerType
-        ? {
-            name: raw.metric.SrcK8S_OwnerName,
-            type: raw.metric.SrcK8S_OwnerType
-          }
-        : undefined,
+    resource: nameAndType(raw.metric.SrcK8S_Name, raw.metric.SrcK8S_Type),
+    owner: nameAndType(raw.metric.SrcK8S_OwnerName, raw.metric.SrcK8S_OwnerType),
     namespace: raw.metric.SrcK8S_Namespace,
     hostName: raw.metric.SrcK8S_HostName
   });
   const destination = createPeer({
     addr: raw.metric.DstAddr,
-    resource:
-      raw.metric.DstK8S_Name && raw.metric.DstK8S_Type
-        ? {
-            name: raw.metric.DstK8S_Name,
-            type: raw.metric.DstK8S_Type
-          }
-        : undefined,
-    owner:
-      raw.metric.DstK8S_OwnerName && raw.metric.DstK8S_OwnerType
-        ? {
-            name: raw.metric.DstK8S_OwnerName,
-            type: raw.metric.DstK8S_OwnerType
-          }
-        : undefined,
+    resource: nameAndType(raw.metric.DstK8S_Name, raw.metric.DstK8S_Type),
+    owner: nameAndType(raw.metric.DstK8S_OwnerName, raw.metric.DstK8S_OwnerType),
     namespace: raw.metric.DstK8S_Namespace,
     hostName: raw.metric.DstK8S_HostName
   });
@@ -296,4 +275,4 @@ export const matchPeer = (data: NodeData, peer: TopologyMetricPeer): boolean => 
   return peer.id.includes(data.peer.id);
 };
 
-export const isUnknownPeer = (peer: TopologyMetricPeer): boolean => peer.displayName === undefined;
+export const isUnknownPeer = (peer: TopologyMetricPeer): boolean => peer.id === idUnknown;
