@@ -10,7 +10,8 @@ const NetflowTableHeaderWrapper: React.FC<{
   sortId: ColumnsId;
   sortDirection: SortByDirection;
   columns: Column[];
-}> = ({ onSort, sortId, sortDirection, columns }) => {
+  setColumns: (v: Column[]) => void;
+}> = ({ onSort, sortId, sortDirection, columns, setColumns }) => {
   return (
     <TableComposable aria-label="Misc table" variant="compact">
       <NetflowTableHeader
@@ -18,6 +19,7 @@ const NetflowTableHeaderWrapper: React.FC<{
         sortDirection={sortDirection}
         sortId={sortId}
         columns={columns}
+        setColumns={setColumns}
         tableWidth={100}
       />
       <Tbody></Tbody>
@@ -30,7 +32,8 @@ describe('<NetflowTableHeader />', () => {
     onSort: jest.fn(),
     sortId: ColumnsId.endtime,
     sortDirection: SortByDirection.asc,
-    tableWidth: 100
+    tableWidth: 100,
+    setColumns: jest.fn()
   };
   it('should render component', async () => {
     const wrapper = mount(<NetflowTableHeaderWrapper {...mocks} columns={AllSelectedColumns} />);

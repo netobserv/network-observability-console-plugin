@@ -31,13 +31,14 @@ const NetflowTable: React.FC<{
   flows: Record[];
   selectedRecord?: Record;
   columns: Column[];
+  setColumns: (v: Column[]) => void;
   size: Size;
   onSelect: (record?: Record) => void;
   loading?: boolean;
   error?: string;
   filterActionLinks: JSX.Element;
   isDark?: boolean;
-}> = ({ flows, selectedRecord, columns, error, loading, size, onSelect, filterActionLinks, isDark }) => {
+}> = ({ flows, selectedRecord, columns, setColumns, error, loading, size, onSelect, filterActionLinks, isDark }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   //default to 300 to allow content to be rendered in tests
@@ -252,7 +253,9 @@ const NetflowTable: React.FC<{
           sortDirection={activeSortDirection}
           sortId={activeSortId}
           columns={columns}
+          setColumns={setColumns}
           tableWidth={width}
+          isDark={isDark}
         />
         <Tbody id="table-body" data-test="table-body">
           {getBody()}
