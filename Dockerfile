@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi8/nodejs-16:1 as web-builder
+FROM registry.access.redhat.com/ubi8/nodejs-16:1-72 as web-builder
 
 WORKDIR /opt/app-root
 

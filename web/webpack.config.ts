@@ -1,19 +1,12 @@
 
 /* eslint-env node */
-
-import { Configuration as WebpackConfiguration } from "webpack";
-import { Configuration as WebpackDevServerConfiguration } from "webpack-dev-server";
 import * as path from 'path';
 import { ConsoleRemotePlugin } from '@openshift-console/dynamic-plugin-sdk-webpack';
+import CopyWebpackPlugin from 'copy-webpack-plugin';
 
-interface Configuration extends WebpackConfiguration {
-  devServer?: WebpackDevServerConfiguration;
-}
+//const NodeExternals = require('webpack-node-externals');
 
-const CopyWebpackPlugin = require('copy-webpack-plugin');
-const NodeExternals = require('webpack-node-externals');
-
-const config: Configuration = {
+module.exports = {
   mode: 'development',
   // No regular entry points. The remote container entry is handled by ConsoleRemotePlugin.
   entry: {},
@@ -24,7 +17,7 @@ const config: Configuration = {
     chunkFilename: '[name]-chunk.js',
   },
   resolve: {
-    extensions: ['.ts', '.tsx', '.js', '.jsx'],
+    extensions: ['.ts', '.tsx', '.js', '.jsx']
   },
   module: {
     rules: [
@@ -48,21 +41,21 @@ const config: Configuration = {
           // Check https://webpack.js.org/loaders/style-loader/#function
           {
             loader: "style-loader", options: {
-              insert: function insertAtTop(element) {
-                var parent = document.querySelector("head");
-                // eslint-disable-next-line no-underscore-dangle
-                var lastInsertedElement = window._lastElementInsertedByStyleLoader;
+              insert: function insertAtTop(element: any) {
+                const parent = document.querySelector("head");
+                // eslint-disable-next-line no-underscore-dangle, @typescript-eslint/no-explicit-any
+                const lastInsertedElement = (window as any)._lastElementInsertedByStyleLoader;
 
                 if (!lastInsertedElement) {
-                  parent.insertBefore(element, parent.firstChild);
+                  parent!.insertBefore(element, parent!.firstChild);
                 } else if (lastInsertedElement.nextSibling) {
-                  parent.insertBefore(element, lastInsertedElement.nextSibling);
+                  parent!.insertBefore(element, lastInsertedElement.nextSibling);
                 } else {
-                  parent.appendChild(element);
+                  parent!.appendChild(element);
                 }
 
-                // eslint-disable-next-line no-underscore-dangle
-                window._lastElementInsertedByStyleLoader = element;
+                // eslint-disable-next-line no-underscore-dangle, @typescript-eslint/no-explicit-any
+                (window as any)._lastElementInsertedByStyleLoader = element;
               },
             }
           },
@@ -105,19 +98,19 @@ const config: Configuration = {
 };
 
 if (process.env.NODE_ENV === 'production') {
-  config.mode = 'production';
-  config.output.filename = '[name]-bundle-[hash].min.js';
-  config.output.chunkFilename = '[name]-chunk-[chunkhash].min.js';
-  config.optimization.chunkIds = 'deterministic';
-  config.optimization.minimize = true;
+  module.exports.mode = 'production';
+  module.exports.output.filename = '[name]-bundle-[hash].min.js';
+  module.exports.output.chunkFilename = '[name]-chunk-[chunkhash].min.js';
+  module.exports.optimization.chunkIds = 'deterministic';
+  module.exports.optimization.minimize = true;
   // Causes error in --mode=production due to scope hoisting
-  config.optimization.concatenateModules = false;
+  module.exports.optimization.concatenateModules = false;
   // Manage dependencies from package.json file. Replace all devDependencies 'import' by 'require'
-  /*config.externals = NodeExternals({
+  /*module.exports.externals = NodeExternals({
     fileName: './package.json',
     includeInBundle: ['dependencies'],
     excludeFromBundle: ['devDependencies']
   });*/
 }
 
-export default config;
+export default module.exports;
