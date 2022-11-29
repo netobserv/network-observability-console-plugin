@@ -660,30 +660,50 @@ export const NetflowTraffic: React.FC<{
 
   const actions = () => {
     return (
-      <div className="co-actions">
-        <TimeRangeDropdown
-          data-test="time-range-dropdown"
-          id="time-range-dropdown"
-          range={range}
-          setRange={setRange}
-          openCustomModal={() => setTRModalOpen(true)}
-        />
-        <RefreshDropdown
-          data-test="refresh-dropdown"
-          id="refresh-dropdown"
-          disabled={typeof range !== 'number'}
-          interval={interval}
-          setInterval={setInterval}
-        />
-        <Button
-          data-test="refresh-button"
-          id="refresh-button"
-          className="co-action-refresh-button"
-          variant="primary"
-          onClick={() => tick()}
-          icon={<SyncAltIcon style={{ animation: `spin ${loading ? 1 : 0}s linear infinite` }} />}
-        />
-      </div>
+      <Flex direction={{ default: 'row' }}>
+        <FlexItem>
+          <Flex direction={{ default: 'column' }}>
+            <FlexItem className="netobserv-action-title">
+              <Text component={TextVariants.h4}>{t('Time range')}</Text>
+            </FlexItem>
+            <FlexItem flex={{ default: 'flex_1' }}>
+              <TimeRangeDropdown
+                data-test="time-range-dropdown"
+                id="time-range-dropdown"
+                range={range}
+                setRange={setRange}
+                openCustomModal={() => setTRModalOpen(true)}
+              />
+            </FlexItem>
+          </Flex>
+        </FlexItem>
+        <FlexItem className="netobserv-refresh-interval-container">
+          <Flex direction={{ default: 'column' }}>
+            <FlexItem className="netobserv-action-title">
+              <Text component={TextVariants.h4}>{t('Refresh interval')}</Text>
+            </FlexItem>
+            <FlexItem flex={{ default: 'flex_1' }}>
+              <RefreshDropdown
+                data-test="refresh-dropdown"
+                id="refresh-dropdown"
+                disabled={typeof range !== 'number'}
+                interval={interval}
+                setInterval={setInterval}
+              />
+            </FlexItem>
+          </Flex>
+        </FlexItem>
+        <FlexItem className="netobserv-refresh-container">
+          <Button
+            data-test="refresh-button"
+            id="refresh-button"
+            className="co-action-refresh-button"
+            variant="primary"
+            onClick={() => tick()}
+            icon={<SyncAltIcon style={{ animation: `spin ${loading ? 1 : 0}s linear infinite` }} />}
+          />
+        </FlexItem>
+      </Flex>
     );
   };
 
@@ -932,9 +952,12 @@ export const NetflowTraffic: React.FC<{
         //display title only if forced filters is not set
         _.isEmpty(forcedFilters) && (
           <div id="pageHeader">
-            <div className="flex">
-              <Text component={TextVariants.h1}>{t('Network Traffic')}</Text>
-            </div>
+            <Flex direction={{ default: 'row' }}>
+              <FlexItem flex={{ default: 'flex_1' }}>
+                <Text component={TextVariants.h1}>{t('Network Traffic')}</Text>
+              </FlexItem>
+              <FlexItem>{actions()}</FlexItem>
+            </Flex>
           </div>
         )
       }
@@ -955,7 +978,6 @@ export const NetflowTraffic: React.FC<{
           useTopK: selectedViewId === 'overview'
         }}
         forcedFilters={forcedFilters}
-        actions={actions()}
         quickFilters={getQuickFilters()}
         menuContent={filtersExtraContent()}
         menuControl={filtersExtraControl()}
