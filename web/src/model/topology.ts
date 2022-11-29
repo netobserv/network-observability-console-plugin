@@ -26,6 +26,7 @@ import { getFormattedValue } from '../utils/metrics';
 import { TruncateLength } from '../components/dropdowns/truncate-dropdown';
 
 export enum LayoutName {
+  ThreeD = '3d',
   BreadthFirst = 'BreadthFirst',
   Cola = 'Cola',
   ColaNoForce = 'ColaNoForce',

@@ -35,7 +35,7 @@ import { TFunction } from 'i18next';
 import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Decorated, NodeData } from '../../../model/topology';
+import { Decorated, NodeData } from '../../../../model/topology';
 import BaseNode from '../components/node';
 
 export const FILTER_EVENT = 'filter';

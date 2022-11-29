@@ -1,6 +1,7 @@
 //List in progress features here
 export enum Feature {
-  Overview = 'overview'
+  Overview = 'overview',
+  ThreeD = '3d'
 }
 
 /*Use isAllowed function to display in progress features

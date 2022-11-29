@@ -33,8 +33,8 @@ import {
   NODE_SHADOW_FILTER_ID_DANGER,
   NODE_SHADOW_FILTER_ID_HOVER
 } from '@patternfly/react-topology/dist/esm/components/nodes/NodeShadows';
-import { HOVER_EVENT } from '../netflow-topology';
-import { GraphElementPeer } from '../../../model/topology';
+import { HOVER_EVENT } from '../topology-content';
+import { GraphElementPeer } from '../../../../model/topology';
 
 const StatusQuadrant = TopologyQuadrant.upperLeft;
 

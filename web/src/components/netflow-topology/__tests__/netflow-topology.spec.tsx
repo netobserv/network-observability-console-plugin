@@ -6,7 +6,8 @@ import { TopologyMetrics } from '../../../api/loki';
 import { MetricFunction, MetricScope, MetricType } from '../../../model/flow-query';
 import { DefaultOptions, LayoutName } from '../../../model/topology';
 import { defaultTimeRange } from '../../../utils/router';
-import { NetflowTopology, TopologyContent } from '../netflow-topology';
+import { NetflowTopology } from '../netflow-topology';
+import { TopologyContent } from '../2d/topology-content';
 import { dataSample } from '../__tests-data__/metrics';
 import { LokiError } from '../../messages/loki-error';
 
