@@ -15,7 +15,15 @@ import * as React from 'react';
 import { NamedMetric } from '../../api/loki';
 import { MetricType } from '../../model/flow-query';
 import { getFormattedRateValue } from '../../utils/metrics';
-import { ChartDataPoint, chartVoronoi, Dimensions, defaultDimensions, observe, toDatapoints } from './metrics-helper';
+import {
+  ChartDataPoint,
+  chartVoronoi,
+  Dimensions,
+  defaultDimensions,
+  observe,
+  toDatapoints,
+  LegendDataItem
+} from './metrics-helper';
 import './metrics-content.css';
 
 export type MetricsContentProps = {
@@ -31,6 +39,7 @@ export type MetricsContentProps = {
   showScatter?: boolean;
   smallerTexts?: boolean;
   itemsPerRow?: number;
+  tooltipsTruncate: boolean;
 };
 
 export const MetricsContent: React.FC<MetricsContentProps> = ({
@@ -45,13 +54,15 @@ export const MetricsContent: React.FC<MetricsContentProps> = ({
   showArea,
   showScatter,
   smallerTexts,
-  itemsPerRow
+  itemsPerRow,
+  tooltipsTruncate
 }) => {
   const filteredMetrics = metrics.slice(0, limit);
 
-  const legendData = filteredMetrics.map((m, idx) => ({
+  const legendData: LegendDataItem[] = filteredMetrics.map((m, idx) => ({
     childName: `${showBar ? 'bar-' : 'area-'}${idx}`,
-    name: m.name
+    name: m.shortName,
+    tooltipName: tooltipsTruncate ? m.shortName : m.fullName
   }));
 
   const topKDatapoints: ChartDataPoint[][] = filteredMetrics.map(toDatapoints);

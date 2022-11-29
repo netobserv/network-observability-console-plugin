@@ -83,7 +83,8 @@ export type TopologyMetrics = {
 };
 
 export type NamedMetric = TopologyMetrics & {
-  name: string;
+  fullName: string;
+  shortName: string;
   isInternal: boolean;
 };
 

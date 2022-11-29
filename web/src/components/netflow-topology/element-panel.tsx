@@ -284,6 +284,7 @@ export const ElementPanelMetricsContent: React.FC<{
           showTitle
           showArea
           showScatter
+          tooltipsTruncate={true}
         />
       </div>
     );
@@ -311,6 +312,7 @@ export const ElementPanelMetricsContent: React.FC<{
           showTitle
           showArea
           showScatter
+          tooltipsTruncate={true}
         />
       </div>
     );

@@ -12,7 +12,7 @@ describe('<StatDonut />', () => {
     stat: 'sum',
     limit: 5,
     metricType: 'bytes',
-    topKMetrics: metrics.map(m => ({ ...m, name: 'whatever', isInternal: false })),
+    topKMetrics: metrics.map(m => ({ ...m, fullName: 'whatever', shortName: 'whatever', isInternal: false })),
     totalMetric: { stats: { total: 500 } } as NamedMetric,
     showInternal: true,
     showOthers: true,

@@ -61,7 +61,8 @@ export const StatDonut: React.FC<StatDonutProps> = ({
 
   const sliced = filtered
     .map(m => ({
-      name: m.name,
+      shortName: m.shortName,
+      fullName: m.fullName,
       value: getStat(m.stats, stat)
     }))
     .sort((a, b) => b.value - a.value)
@@ -70,7 +71,7 @@ export const StatDonut: React.FC<StatDonutProps> = ({
   const others = Math.max(0, total - sliced.reduce((prev, cur) => prev + cur.value, 0));
   if (showOthers) {
     if (others > 0) {
-      sliced.push({ name: t('Others'), value: others });
+      sliced.push({ fullName: t('Others'), shortName: t('Others'), value: others });
     }
   } else {
     total -= others;
@@ -78,7 +79,7 @@ export const StatDonut: React.FC<StatDonutProps> = ({
 
   const legendData = sliced.map((m, idx) => ({
     childName: `${'area-'}${idx}`,
-    name: m.name
+    name: m.shortName
   }));
 
   const legentComponent = (
@@ -109,7 +110,7 @@ export const StatDonut: React.FC<StatDonutProps> = ({
         //animate={true}
         width={dimensions.width}
         height={dimensions.height}
-        data={sliced.map(m => ({ x: `${m.name}: ${getFormattedRateValue(m.value, metricType)}`, y: m.value }))}
+        data={sliced.map(m => ({ x: `${m.fullName}: ${getFormattedRateValue(m.value, metricType)}`, y: m.value }))}
         padding={{
           bottom: 20,
           left: 20,

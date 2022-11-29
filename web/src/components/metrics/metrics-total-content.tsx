@@ -62,11 +62,13 @@ export const MetricsTotalContent: React.FC<MetricsTotalContentProps> = ({
 
   const legendData: LegendDataItem[] = filtered.map((m, idx) => ({
     childName: `bar-${idx}`,
-    name: m.name
+    name: m.shortName,
+    tooltipName: m.fullName
   }));
   legendData.push({
     childName: 'area-total',
-    name: totalMetric.name,
+    name: totalMetric.shortName,
+    tooltipName: totalMetric.fullName,
     symbol: { fill: '#8B8D8F' }
   });
 
