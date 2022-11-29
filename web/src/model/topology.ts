@@ -19,10 +19,10 @@ import { defaultMetricFunction, defaultMetricType } from '../utils/router';
 import { findFilter } from '../utils/filter-definitions';
 import { TFunction } from 'i18next';
 import { K8sModel } from '@openshift-console/dynamic-plugin-sdk';
-import { getTopologyEdgeId, getTopologyGroupId, getTopologyNodeId } from '../utils/ids';
+import { getTopologyEdgeId } from '../utils/ids';
 import { MetricScopeOptions } from './metrics';
 import { MetricFunction, MetricScope, MetricType, NodeType } from './flow-query';
-import { getFormattedValue } from '../utils/metrics';
+import { createPeer, getFormattedValue } from '../utils/metrics';
 import { TruncateLength } from '../components/dropdowns/truncate-dropdown';
 
 export enum LayoutName {
@@ -115,33 +115,40 @@ export type Decorated<T> = T & {
 };
 export const decorated = <T>(t: T): Decorated<T> => t as Decorated<T>;
 
-export const getFilterDefValue = (d: ElementData, t: TFunction) => {
+export type FilterDir = 'src' | 'dst' | 'any';
+const getFilterDefValue = (nodeType: NodeType, fields: Partial<TopologyMetricPeer>, dir: FilterDir, t: TFunction) => {
   let def: FilterDefinition | undefined;
   let value: string | undefined;
-  if (d.resourceKind && d.namespace && d.name) {
-    def = findFilter(t, 'resource')!;
-    value = `${d.resourceKind}.${d.namespace}.${d.name}`;
-  } else if (d.nodeType === 'host' && (d.host || d.name)) {
-    def = findFilter(t, 'host_name')!;
-    value = `"${d.host || d.name}"`;
-  } else if (d.nodeType === 'namespace' && (d.namespace || d.name)) {
-    def = findFilter(t, 'namespace')!;
-    value = `"${d.namespace || d.name}"`;
-  } else if (d.nodeType === 'resource' && d.name) {
-    def = findFilter(t, 'name')!;
-    value = `"${d.name}"`;
-  } else if (d.nodeType === 'owner' && d.name) {
-    def = findFilter(t, 'owner_name')!;
-    value = `"${d.name}"`;
-  } else if (d.addr) {
-    def = findFilter(t, 'address')!;
-    value = d.addr!;
+  if (fields.resource && fields.namespace) {
+    def = findFilter(t, dir === 'src' ? 'src_resource' : dir === 'dst' ? 'dst_resource' : 'resource')!;
+    value = `${fields.resource.type}.${fields.namespace}.${fields.resource.name}`;
+  } else if (nodeType === 'host' && (fields.hostName || fields.resource)) {
+    def = findFilter(t, dir === 'src' ? 'src_host_name' : dir === 'dst' ? 'dst_host_name' : 'host_name')!;
+    value = `"${fields.hostName || fields.resource?.name}"`;
+  } else if (nodeType === 'namespace' && (fields.namespace || fields.resource)) {
+    def = findFilter(t, dir === 'src' ? 'src_namespace' : dir === 'dst' ? 'dst_namespace' : 'namespace')!;
+    value = `"${fields.namespace || fields.resource?.name}"`;
+  } else if (nodeType === 'resource' && fields.resource) {
+    def = findFilter(t, dir === 'src' ? 'src_name' : dir === 'dst' ? 'dst_name' : 'name')!;
+    value = `"${fields.resource.name}"`;
+  } else if (nodeType === 'owner' && fields.owner) {
+    def = findFilter(t, dir === 'src' ? 'src_owner_name' : dir === 'dst' ? 'dst_owner_name' : 'owner_name')!;
+    value = `"${fields.owner.name}"`;
+  } else if (fields.addr) {
+    def = findFilter(t, dir === 'src' ? 'src_address' : dir === 'dst' ? 'dst_address' : 'address')!;
+    value = fields.addr!;
   }
   return def && value ? { def, value } : undefined;
 };
 
-export const isElementFiltered = (d: ElementData, filters: Filter[], t: TFunction) => {
-  const defValue = getFilterDefValue(d, t);
+export const isElementFiltered = (
+  nodeType: NodeType,
+  fields: Partial<TopologyMetricPeer>,
+  dir: FilterDir,
+  filters: Filter[],
+  t: TFunction
+) => {
+  const defValue = getFilterDefValue(nodeType, fields, dir, t);
   if (!defValue) {
     return false;
   }
@@ -150,20 +157,18 @@ export const isElementFiltered = (d: ElementData, filters: Filter[], t: TFunctio
 };
 
 export const toggleElementFilter = (
-  d: ElementData,
+  nodeType: NodeType,
+  fields: Partial<TopologyMetricPeer>,
+  dir: FilterDir,
   isFiltered: boolean,
   filters: Filter[],
   setFilters: (filters: Filter[]) => void,
   t: TFunction
 ) => {
-  if (!setFilters) {
-    return;
-  }
-
   const result = _.cloneDeep(filters);
-  const defValue = getFilterDefValue(d, t);
+  const defValue = getFilterDefValue(nodeType, fields, dir, t);
   if (!defValue) {
-    console.error("can't find defValue for elementData", d);
+    console.error("can't find defValue for fields", fields);
     return;
   }
   let filter = findFromFilters(result, { def: defValue.def });
@@ -190,20 +195,14 @@ export const DEFAULT_NODE_SIZE = 75;
 
 export type NodeData = {
   nodeType: NodeType;
-  resourceKind?: string;
-  namespace?: string;
-  name?: string;
-  displayName?: string;
-  addr?: string;
-  host?: string;
+  peer: TopologyMetricPeer;
   canStepInto?: boolean;
-  parentKind?: string;
-  parentName?: string;
   badgeColor?: string;
 };
 
-export const generateNode = (
+const generateNode = (
   data: NodeData,
+  scope: MetricScope,
   options: TopologyOptions,
   searchValue: string,
   highlightedId: string,
@@ -212,8 +211,8 @@ export const generateNode = (
   k8sModels: { [key: string]: K8sModel },
   isDark?: boolean
 ): NodeModel => {
-  const id = getTopologyNodeId(data.resourceKind, data.namespace, data.name, data.addr, data.host);
-  const label = data.displayName || data.name || data.addr || ''; // should never be empty
+  const label = data.peer.getDisplayName(false, false) || (scope === 'host' ? t('External') : t('Unknown'))!;
+  const resourceKind = data.peer.resourceKind;
   const secondaryLabel =
     data.nodeType !== 'namespace' &&
     ![
@@ -221,14 +220,14 @@ export const generateNode = (
       TopologyGroupTypes.NAMESPACES_OWNERS,
       TopologyGroupTypes.HOSTS_NAMESPACES
     ].includes(options.groupTypes)
-      ? data.namespace
+      ? data.peer.namespace
       : undefined;
   const shadowed = !_.isEmpty(searchValue) && !(label.includes(searchValue) || secondaryLabel?.includes(searchValue));
   const filtered = !_.isEmpty(searchValue) && !shadowed;
-  const highlighted = !shadowed && !_.isEmpty(highlightedId) && highlightedId.includes(id);
-  const k8sModel = options.nodeBadges && data.resourceKind ? k8sModels[data.resourceKind] : undefined;
+  const highlighted = !shadowed && !_.isEmpty(highlightedId) && highlightedId.includes(data.peer.id);
+  const k8sModel = options.nodeBadges && resourceKind ? k8sModels[resourceKind] : undefined;
   return {
-    id,
+    id: data.peer.id,
     type: 'node',
     label,
     width: DEFAULT_NODE_SIZE,
@@ -242,7 +241,7 @@ export const generateNode = (
       filtered,
       highlighted,
       isDark,
-      isFiltered: isElementFiltered(data, filters, t),
+      isFiltered: isElementFiltered(data.nodeType, data.peer, 'any', filters, t),
       labelPosition: LabelPosition.bottom,
       badge: k8sModel?.abbr,
       badgeColor: k8sModel?.color ? k8sModel.color : '#2b9af3',
@@ -254,7 +253,7 @@ export const generateNode = (
   };
 };
 
-export const getAnimationSpeed = (n: number, total: number) => {
+const getAnimationSpeed = (n: number, total: number) => {
   if (total) {
     const step = total / 5;
     if (n > step * 4) {
@@ -273,7 +272,7 @@ export const getAnimationSpeed = (n: number, total: number) => {
   }
 };
 
-export const getTagStatus = (n: number, total: number) => {
+const getTagStatus = (n: number, total: number) => {
   if (total) {
     const step = total / 5;
     if (n > step * 3) {
@@ -288,7 +287,7 @@ export const getTagStatus = (n: number, total: number) => {
   }
 };
 
-export const getEdgeStyle = (count: number) => {
+const getEdgeStyle = (count: number) => {
   return count ? EdgeStyle.dashed : EdgeStyle.dotted;
 };
 
@@ -296,14 +295,14 @@ export const getStat = (stats: MetricStats, mf: MetricFunction): number => {
   return mf === 'avg' ? stats.avg : mf === 'max' ? stats.max : mf === 'last' ? stats.latest : stats.total;
 };
 
-export const getEdgeTag = (value: number, options: TopologyOptions) => {
+const getEdgeTag = (value: number, options: TopologyOptions) => {
   if (options.edgeTags && value) {
     return getFormattedValue(value, options.metricType, options.metricFunction);
   }
   return undefined;
 };
 
-export const generateEdge = (
+const generateEdge = (
   sourceId: string,
   targetId: string,
   stat: number,
@@ -343,7 +342,7 @@ export const generateEdge = (
 };
 
 export const generateDataModel = (
-  datas: TopologyMetrics[],
+  metrics: TopologyMetrics[],
   options: TopologyOptions,
   metricScope: MetricScope,
   searchValue: string,
@@ -357,32 +356,32 @@ export const generateDataModel = (
   const edges: EdgeModel[] = [];
   const opts = { ...DefaultOptions, ...options };
 
-  function addGroup(
-    name: string,
-    nodeType: NodeType,
-    resourceKind: string,
+  const addGroup = (
+    fields: Partial<TopologyMetricPeer>,
+    scope: MetricScope,
     parent?: NodeModel,
     secondaryLabelPadding = false
-  ) {
-    const id = getTopologyGroupId(resourceKind, name, parent ? parent.id : undefined);
-    let group = nodes.find(g => g.type === 'group' && g.id === id);
-    const parentData = parent?.data as NodeData | undefined;
+  ): NodeModel => {
+    const groupDef = createPeer(fields);
+    const groupName = groupDef.getDisplayName(false, false);
+    let group = nodes.find(g => g.type === 'group' && g.id === groupDef.id);
     if (!group) {
+      const data: NodeData = {
+        nodeType: scope,
+        peer: groupDef
+      };
       group = {
-        id,
+        id: groupDef.id,
         children: [],
         type: 'group',
         group: true,
         collapsed: options.startCollapsed,
-        label: name,
+        label: groupName,
         style: { padding: secondaryLabelPadding ? 35 : 10 },
         data: {
-          name,
-          nodeType,
-          resourceKind,
+          ...data,
+          name: groupName,
           isDark,
-          parentKind: parentData?.resourceKind,
-          parentName: parentData?.name,
           labelPosition: LabelPosition.bottom,
           collapsible: true,
           collapsedWidth: 75,
@@ -404,20 +403,13 @@ export const generateDataModel = (
     }
 
     return group;
-  }
+  };
 
-  function addNode(data: NodeData, parent?: NodeModel) {
-    let node = nodes.find(
-      n =>
-        n.data.nodeType === data.nodeType &&
-        n.data.resourceKind === data.resourceKind &&
-        n.data.namespace === data.namespace &&
-        n.data.name === data.name &&
-        n.data.addr === data.addr &&
-        n.data.host === data.host
-    );
+  const addNode = (data: NodeData, scope: MetricScope): NodeModel => {
+    const parent = addPossibleGroups(data.peer);
+    let node = nodes.find(n => n.id === data.peer.id);
     if (!node) {
-      node = generateNode(data, opts, searchValue, highlightedId, filters, t, k8sModels, isDark);
+      node = generateNode(data, scope, opts, searchValue, highlightedId, filters, t, k8sModels, isDark);
       nodes.push(node);
     }
 
@@ -426,9 +418,15 @@ export const generateDataModel = (
     }
 
     return node;
-  }
+  };
 
-  function addEdge(sourceId: string, targetId: string, stats: MetricStats, shadowed = false, filtered = false) {
+  const addEdge = (
+    sourceId: string,
+    targetId: string,
+    stats: MetricStats,
+    shadowed = false,
+    filtered = false
+  ): EdgeModel => {
     const stat = getStat(stats, options.metricFunction);
     let edge = edges.find(
       e =>
@@ -456,14 +454,15 @@ export const generateDataModel = (
     }
 
     return edge;
-  }
+  };
 
-  function manageNode(peer: TopologyMetricPeer) {
+  // addPossibleGroups adds peer to one or more groups when relevant, and returns the smallest one
+  const addPossibleGroups = (peer: TopologyMetricPeer): NodeModel | undefined => {
     const hostGroup =
       [TopologyGroupTypes.HOSTS_NAMESPACES, TopologyGroupTypes.HOSTS_OWNERS, TopologyGroupTypes.HOSTS].includes(
         options.groupTypes
       ) && !_.isEmpty(peer.hostName)
-        ? addGroup(peer.hostName!, 'host', 'Node', undefined, true)
+        ? addGroup({ hostName: peer.hostName }, 'host', undefined, true)
         : undefined;
     const namespaceGroup =
       [
@@ -471,90 +470,50 @@ export const generateDataModel = (
         TopologyGroupTypes.NAMESPACES_OWNERS,
         TopologyGroupTypes.NAMESPACES
       ].includes(options.groupTypes) && !_.isEmpty(peer.namespace)
-        ? addGroup(peer.namespace!, 'namespace', 'Namespace', hostGroup)
+        ? addGroup({ namespace: peer.namespace }, 'namespace', hostGroup)
         : undefined;
     const ownerGroup =
       [TopologyGroupTypes.NAMESPACES_OWNERS, TopologyGroupTypes.HOSTS_OWNERS, TopologyGroupTypes.OWNERS].includes(
         options.groupTypes
-      ) &&
-      !_.isEmpty(peer.ownerType) &&
-      !_.isEmpty(peer.ownerName)
+      ) && peer.owner
         ? addGroup(
-            peer.ownerName!,
+            { namespace: peer.namespace, owner: peer.owner },
             'owner',
-            peer.ownerType!,
-            namespaceGroup ? namespaceGroup : hostGroup,
+            namespaceGroup || hostGroup,
             namespaceGroup === undefined
           )
         : undefined;
 
-    const parent = ownerGroup ? ownerGroup : namespaceGroup ? namespaceGroup : hostGroup;
-    switch (metricScope) {
-      case MetricScopeOptions.HOST:
-        return addNode(
-          _.isEmpty(peer.hostName)
-            ? //metrics without host will be grouped as 'External'
-              { nodeType: 'unknown', displayName: t('External') }
-            : //valid metrics will be Nodes with ips
-              { nodeType: 'host', resourceKind: 'Node', name: peer.hostName, canStepInto: true },
-          parent
-        );
-      case MetricScopeOptions.NAMESPACE:
-        return addNode(
-          _.isEmpty(peer.namespace)
-            ? //metrics without namespace will be grouped as 'Unknown'
-              { nodeType: 'unknown', displayName: t('Unknown') }
-            : //valid metrics will be Namespaces with namespace as name + host infos
-              {
-                nodeType: 'namespace',
-                resourceKind: 'Namespace',
-                name: peer.namespace,
-                host: peer.hostName,
-                canStepInto: true
-              },
-          parent
-        );
-      case MetricScopeOptions.OWNER:
-        return addNode(
-          _.isEmpty(peer.ownerName)
-            ? //metrics without owner name will be grouped as 'Unknown'
-              { nodeType: 'unknown', displayName: t('Unknown') }
-            : //valid metrics will be owner type & name + namespace & host infos
-              {
-                namespace: peer.namespace,
-                nodeType: 'owner',
-                resourceKind: peer.ownerType,
-                name: peer.ownerName,
-                host: peer.hostName,
-                canStepInto: true
-              },
-          parent
-        );
-      case MetricScopeOptions.RESOURCE:
-      default:
-        return addNode(
-          {
-            namespace: peer.namespace,
-            nodeType: 'resource',
-            resourceKind: peer.type,
-            name: peer.name,
-            addr: peer.addr,
-            host: peer.hostName
-          },
-          parent
-        );
-    }
-  }
+    return ownerGroup || namespaceGroup || hostGroup;
+  };
 
-  datas.forEach(d => {
-    const srcNode = manageNode(d.source);
-    const dstNode = manageNode(d.destination);
+  const peerToNodeData = (p: TopologyMetricPeer): NodeData => {
+    switch (metricScope) {
+      case 'host':
+        return _.isEmpty(p.hostName)
+          ? { peer: p, nodeType: 'unknown' }
+          : { peer: p, nodeType: 'host', canStepInto: true };
+      case 'namespace':
+        return _.isEmpty(p.namespace)
+          ? { peer: p, nodeType: 'unknown' }
+          : { peer: p, nodeType: 'namespace', canStepInto: true };
+      case 'owner':
+        return p.owner ? { peer: p, nodeType: 'owner', canStepInto: true } : { peer: p, nodeType: 'unknown' };
+      case 'resource':
+      default:
+        return { peer: p, nodeType: 'resource' };
+    }
+  };
+
+  metrics.forEach(m => {
+    const srcNode = addNode(peerToNodeData(m.source), metricScope);
+    const dstNode = addNode(peerToNodeData(m.destination), metricScope);
 
     if (options.edges && srcNode && dstNode && srcNode.id !== dstNode.id) {
       addEdge(
         srcNode.id,
         dstNode.id,
-        d.stats,
+        m.stats,
         srcNode.data.shadowed || dstNode.data.shadowed,
         srcNode.data.filtered || dstNode.data.filtered
       );

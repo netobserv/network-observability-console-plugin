@@ -5,7 +5,7 @@ import { NamedMetric, TopologyMetricPeer, TopologyMetrics } from '../../api/loki
 import { MetricScope, MetricType } from '../../model/flow-query';
 import { NodeData } from '../../model/topology';
 import { getDateFromUnix, getFormattedDate } from '../../utils/datetime';
-import { getFormattedRateValue, matchPeer } from '../../utils/metrics';
+import { getFormattedRateValue, isUnknownPeer, matchPeer } from '../../utils/metrics';
 import { TruncateLength } from '../dropdowns/truncate-dropdown';
 
 export type LegendDataItem = {
@@ -81,10 +81,13 @@ const getPeerName = (
   t: TFunction,
   peer: TopologyMetricPeer,
   scope: MetricScope,
-  truncateLength: TruncateLength = TruncateLength.OFF
+  truncateLength: TruncateLength,
+  inclNamespace: boolean,
+  disambiguate: boolean
 ): string => {
-  if (peer.displayName) {
-    return truncateParts(peer.displayName, truncateLength);
+  const name = peer.getDisplayName(inclNamespace, disambiguate);
+  if (name) {
+    return truncateParts(name, truncateLength);
   }
   if (scope === 'app') {
     // No peer distinction here
@@ -103,15 +106,17 @@ const getPeerName = (
 export const toNamedMetric = (
   t: TFunction,
   m: TopologyMetrics,
-  data?: NodeData,
-  truncateLength: TruncateLength = TruncateLength.OFF
+  truncateLength: TruncateLength,
+  inclNamespace: boolean,
+  disambiguate: boolean,
+  data?: NodeData
 ): NamedMetric => {
-  const srcName = getPeerName(t, m.source, m.scope, truncateLength);
-  const srcFullName = getPeerName(t, m.source, m.scope);
-  const dstName = getPeerName(t, m.destination, m.scope, truncateLength);
-  const dstFullName = getPeerName(t, m.destination, m.scope);
+  const srcName = getPeerName(t, m.source, m.scope, truncateLength, inclNamespace, disambiguate);
+  const srcFullName = getPeerName(t, m.source, m.scope, TruncateLength.OFF, inclNamespace, disambiguate);
+  const dstName = getPeerName(t, m.destination, m.scope, truncateLength, inclNamespace, disambiguate);
+  const dstFullName = getPeerName(t, m.destination, m.scope, TruncateLength.OFF, inclNamespace, disambiguate);
   if (srcFullName === dstFullName) {
-    if (m.source.displayName) {
+    if (!isUnknownPeer(m.source)) {
       // E.g: namespace "netobserv" to "netobserv"
       return {
         ...m,

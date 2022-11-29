@@ -164,9 +164,11 @@ export const TopologyContent: React.FC<{
 
   const onFilter = React.useCallback(
     (data: Decorated<ElementData>) => {
-      const isFiltered = isElementFiltered(data, filters, t);
-      toggleElementFilter(data, isFiltered, filters, setFilters, t);
-      setSelectedIds([data.id]);
+      if (data.nodeType && data.peer) {
+        const isFiltered = isElementFiltered(data.nodeType, data.peer, 'any', filters, t);
+        toggleElementFilter(data.nodeType, data.peer, 'any', isFiltered, filters, setFilters, t);
+        setSelectedIds([data.id]);
+      }
     },
     [filters, setFilters, t]
   );

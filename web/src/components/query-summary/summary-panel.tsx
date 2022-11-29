@@ -212,8 +212,13 @@ export const SummaryPanelContent: React.FC<{
       }
 
       metrics.forEach(m => {
-        manageTypeCardinality(m.source.hostName, m.source.namespace, m.source.type, m.source.name);
-        manageTypeCardinality(m.destination.hostName, m.destination.namespace, m.destination.type, m.destination.name);
+        manageTypeCardinality(m.source.hostName, m.source.namespace, m.source.resource?.type, m.source.resource?.name);
+        manageTypeCardinality(
+          m.destination.hostName,
+          m.destination.namespace,
+          m.destination.resource?.type,
+          m.destination.resource?.name
+        );
       });
 
       addresses = Array.from(

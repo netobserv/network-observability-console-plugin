@@ -1,10 +1,11 @@
 import _ from 'lodash';
-import { RawTopologyMetrics, MetricStats, TopologyMetricPeer, TopologyMetrics } from '../api/loki';
+import { RawTopologyMetrics, MetricStats, TopologyMetricPeer, TopologyMetrics, NameAndType } from '../api/loki';
 import { MetricFunction, MetricScope, MetricType } from '../model/flow-query';
 import { roundTwoDigits } from './count';
 import { computeStepInterval, rangeToSeconds, TimeRange } from './datetime';
 import { byteRateFormat, byteFormat, simpleRateFormat, simpleValueFormat } from './format';
 import { NodeData } from '../model/topology';
+import { getPeerId, idUnknown } from './ids';
 
 // Tolerance, in seconds, to assume presence/emptiness of the last datapoint fetched, when it is
 // close to "now", to accomodate with potential collection latency.
@@ -34,29 +35,25 @@ export const parseMetrics = (
   // Disambiguate display names with kind when necessary
   if (scope === 'owner' || scope === 'resource') {
     // Define some helpers
-    const getKind = scope === 'owner' ? (p: TopologyMetricPeer) => p.ownerType : (p: TopologyMetricPeer) => p.type;
     const addKind = (p: TopologyMetricPeer) => {
-      if (p.displayName) {
-        let existing = nameKinds.get(p.displayName);
+      const name = p.getDisplayName(true, false);
+      if (name) {
+        let existing = nameKinds.get(name);
         if (!existing) {
           existing = new Set();
-          nameKinds.set(p.displayName, existing);
+          nameKinds.set(name, existing);
         }
-        const k = getKind(p);
-        if (k) {
-          existing.add(k);
+        if (p.resourceKind) {
+          existing.add(p.resourceKind);
         }
       }
     };
-    const disambiguate = (p: TopologyMetricPeer) => {
-      if (p.displayName) {
-        const kinds = nameKinds.get(p.displayName);
-        if (kinds && kinds.size > 1) {
-          let k = getKind(p);
-          if (k) {
-            k = shortKindMap[k] || k.toLowerCase();
-            p.displayName = `${p.displayName} (${k})`;
-          }
+    const checkAmbiguous = (p: TopologyMetricPeer) => {
+      const name = p.getDisplayName(true, false);
+      if (name) {
+        const kinds = nameKinds.get(name);
+        if (kinds && kinds.size > 1 && p.resourceKind) {
+          p.isAmbiguous = true;
         }
       }
     };
@@ -68,13 +65,57 @@ export const parseMetrics = (
       addKind(m.destination);
     });
 
-    // Second pass: update names if necessary
+    // Second pass: mark if ambiguous
     metrics.forEach(m => {
-      disambiguate(m.source);
-      disambiguate(m.destination);
+      checkAmbiguous(m.source);
+      checkAmbiguous(m.destination);
     });
   }
   return metrics;
+};
+
+export const createPeer = (fields: Partial<TopologyMetricPeer>): TopologyMetricPeer => {
+  const newPeer: TopologyMetricPeer = {
+    id: getPeerId(fields),
+    addr: fields.addr,
+    resource: fields.resource,
+    namespace: fields.namespace,
+    owner: fields.owner,
+    hostName: fields.hostName,
+    isAmbiguous: false,
+    getDisplayName: () => undefined
+  };
+  const setForNameAndType = (nt: NameAndType) => {
+    const { type, name } = nt;
+    newPeer.resourceKind = type;
+    newPeer.getDisplayName = (inclNamespace, disambiguate) => {
+      const disamb = disambiguate && newPeer.isAmbiguous ? ` (${shortKindMap[type] || type.toLowerCase()})` : '';
+      return (newPeer.namespace && inclNamespace ? `${newPeer.namespace}.${name}` : name) + disamb;
+    };
+  };
+
+  if (fields.resource) {
+    // Resource kind
+    setForNameAndType(fields.resource);
+  } else if (fields.owner) {
+    // Owner kind
+    setForNameAndType(fields.owner);
+  } else if (fields.namespace) {
+    // Since name / ownerName aren't defined then it must be a namespace-kind aggregation
+    newPeer.resourceKind = 'Namespace';
+    newPeer.getDisplayName = () => fields.namespace;
+  } else if (fields.hostName) {
+    // Since name isn't defined then it must be a host-kind aggregation
+    newPeer.resourceKind = 'Node';
+    newPeer.getDisplayName = () => fields.hostName;
+  } else if (fields.addr) {
+    newPeer.getDisplayName = () => fields.addr;
+  }
+  return newPeer;
+};
+
+const nameAndType = (name?: string, type?: string): NameAndType | undefined => {
+  return name && type ? { name, type } : undefined;
 };
 
 const parseMetric = (
@@ -86,27 +127,20 @@ const parseMetric = (
 ): TopologyMetrics => {
   const normalized = normalizeMetrics(raw.values, start, end, step);
   const stats = computeStats(normalized);
-
-  const source: TopologyMetricPeer = {
+  const source = createPeer({
     addr: raw.metric.SrcAddr,
-    name: raw.metric.SrcK8S_Name,
+    resource: nameAndType(raw.metric.SrcK8S_Name, raw.metric.SrcK8S_Type),
+    owner: nameAndType(raw.metric.SrcK8S_OwnerName, raw.metric.SrcK8S_OwnerType),
     namespace: raw.metric.SrcK8S_Namespace,
-    ownerName: raw.metric.SrcK8S_OwnerName,
-    ownerType: raw.metric.SrcK8S_OwnerType,
-    type: raw.metric.SrcK8S_Type,
     hostName: raw.metric.SrcK8S_HostName
-  };
-  const destination: TopologyMetricPeer = {
+  });
+  const destination = createPeer({
     addr: raw.metric.DstAddr,
-    name: raw.metric.DstK8S_Name,
+    resource: nameAndType(raw.metric.DstK8S_Name, raw.metric.DstK8S_Type),
+    owner: nameAndType(raw.metric.DstK8S_OwnerName, raw.metric.DstK8S_OwnerType),
     namespace: raw.metric.DstK8S_Namespace,
-    ownerName: raw.metric.DstK8S_OwnerName,
-    ownerType: raw.metric.DstK8S_OwnerType,
-    type: raw.metric.DstK8S_Type,
     hostName: raw.metric.DstK8S_HostName
-  };
-  source.displayName = buildPeerDisplayName(source, scope);
-  destination.displayName = buildPeerDisplayName(destination, scope);
+  });
   return {
     source: source,
     destination: destination,
@@ -210,28 +244,6 @@ export const computeStats = (ts: [number, number][]): MetricStats => {
   };
 };
 
-const buildPeerDisplayName = (peer: TopologyMetricPeer, scope: MetricScope): string | undefined => {
-  switch (scope) {
-    case 'host':
-      return peer.hostName ? peer.hostName : peer.type === 'Node' ? peer.name : undefined;
-    case 'namespace':
-      return peer.namespace ? peer.namespace : peer.type === 'Namespace' ? peer.name : undefined;
-    case 'owner':
-      return peer.namespace && peer.ownerName
-        ? `${peer.namespace}.${peer.ownerName}`
-        : peer.ownerName
-        ? peer.ownerName
-        : undefined;
-    case 'resource':
-    default:
-      return peer.namespace && peer.name
-        ? `${peer.namespace}.${peer.name}`
-        : peer.name
-        ? peer.name
-        : peer.addr || undefined;
-  }
-};
-
 export const getFormattedValue = (v: number, mt: MetricType, mf: MetricFunction): string => {
   if (mf === 'sum') {
     switch (mt) {
@@ -254,32 +266,13 @@ export const getFormattedRateValue = (v: number, mt: MetricType): string => {
   }
 };
 
-const matchPeerInternal = (
-  peer: TopologyMetricPeer,
-  kind?: string,
-  name?: string,
-  namespace?: string,
-  addr?: string
-): boolean => {
-  return (
-    (kind === 'Namespace' && name === peer.namespace) ||
-    (kind === 'Node' && name === peer.hostName) ||
-    /* For owner nodes */ (kind &&
-      kind === peer.ownerType &&
-      name === peer.ownerName &&
-      namespace === peer.namespace) ||
-    /* For resource nodes */ (kind && kind === peer.type && addr === peer.addr) ||
-    /* For unknown nodes */ (!kind && !peer.displayName && addr === peer.addr)
-  );
-};
-
+// matchPeer returns true is the peer id (= a given metric) equals, or contains the node id
+//  E.g: peer id "h=host1,n=ns2,o=Deployment.depl-a,r=Pod.depl-a-12345,a=1.2.3.7" contains group id "h=host1"
 export const matchPeer = (data: NodeData, peer: TopologyMetricPeer): boolean => {
-  if (data.parentKind && data.parentName && !matchPeerInternal(peer, data.parentKind, data.parentName)) {
-    return false;
+  if (data.peer.id === idUnknown) {
+    return peer.id === idUnknown;
   }
-  return matchPeerInternal(peer, data.resourceKind, data.name, data.namespace, data.addr);
+  return peer.id.includes(data.peer.id);
 };
 
-export const peersEqual = (p1: TopologyMetricPeer, p2: TopologyMetricPeer): boolean =>
-  p1.displayName === p2.displayName;
-export const isUnknownPeer = (peer: TopologyMetricPeer): boolean => peer.displayName === undefined;
+export const isUnknownPeer = (peer: TopologyMetricPeer): boolean => peer.id === idUnknown;
