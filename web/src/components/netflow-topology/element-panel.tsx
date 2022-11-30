@@ -9,8 +9,6 @@ import {
   DrawerHead,
   DrawerPanelBody,
   DrawerPanelContent,
-  Flex,
-  FlexItem,
   Tab,
   Tabs,
   TabTitleText,
@@ -24,11 +22,13 @@ import { defaultSize, maxSize, minSize } from '../../utils/panel';
 import { MetricType } from '../../model/flow-query';
 import { TopologyMetrics } from '../../api/loki';
 import { Filter } from '../../model/filters';
-import { ElementData, GraphElementPeer, isElementFiltered, NodeData, toggleElementFilter } from '../../model/topology';
+import { GraphElementPeer, NodeData } from '../../model/topology';
 import { ElementPanelMetrics } from './element-panel-metrics';
 import { PanelMetricsContext } from './element-panel-stats';
 import { TruncateLength } from '../dropdowns/truncate-dropdown';
 import './element-panel.css';
+import { ElementFields } from './element-fields';
+import { PeerResourceLink } from './peer-resource-link';
 
 export const ElementPanelDetailsContent: React.FC<{
   element: GraphElementPeer;
@@ -177,6 +177,7 @@ export const ElementPanel: React.FC<{
             <ElementPanelMetrics
               aData={aData}
               bData={bData}
+              isGroup={element.getType() === 'group'}
               context={contexts[0]}
               metrics={metrics}
               metricType={metricType}
@@ -187,6 +188,7 @@ export const ElementPanel: React.FC<{
             <ElementPanelMetrics
               aData={aData}
               bData={bData}
+              isGroup={element.getType() === 'group'}
               context={contexts[1]}
               metrics={metrics}
               metricType={metricType}

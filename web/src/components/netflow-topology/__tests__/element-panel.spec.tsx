@@ -79,6 +79,7 @@ describe('<ElementPanel />', () => {
         aData={mocks.element.getData()!}
         context={'to-node'}
         truncateLength={TruncateLength.M}
+        isGroup={false}
       />
     );
     expect(wrapper.find(ElementPanelMetrics)).toBeTruthy();
@@ -97,6 +98,7 @@ describe('<ElementPanel />', () => {
         aData={mocks.element.getData()!}
         context={'from-node'}
         truncateLength={TruncateLength.M}
+        isGroup={false}
       />
     );
     expect(wrapper.find(ElementPanelMetrics)).toBeTruthy();
@@ -117,6 +119,7 @@ describe('<ElementPanel />', () => {
         bData={edge.getTarget().getData()}
         context={'a-to-b'}
         truncateLength={TruncateLength.M}
+        isGroup={false}
       />
     );
     expect(wrapper.find(ElementPanelMetrics)).toBeTruthy();
@@ -136,6 +139,7 @@ describe('<ElementPanel />', () => {
         bData={edge.getTarget().getData()}
         context={'b-to-a'}
         truncateLength={TruncateLength.M}
+        isGroup={false}
       />
     );
     expect(wrapper.find(ElementPanelMetrics)).toBeTruthy();

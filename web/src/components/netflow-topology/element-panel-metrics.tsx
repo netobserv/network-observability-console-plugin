@@ -5,7 +5,7 @@ import { MetricType } from '../../model/flow-query';
 import { TopologyMetrics } from '../../api/loki';
 import { decorated, getStat, NodeData } from '../../model/topology';
 import { MetricsContent } from '../metrics/metrics-content';
-import { matchPeer, peersEqual } from '../../utils/metrics';
+import { matchPeer } from '../../utils/metrics';
 import { toNamedMetric } from '../metrics/metrics-helper';
 import { ElementPanelStats, PanelMetricsContext } from './element-panel-stats';
 import { TruncateLength } from '../dropdowns/truncate-dropdown';
@@ -13,11 +13,12 @@ import { TruncateLength } from '../dropdowns/truncate-dropdown';
 export const ElementPanelMetrics: React.FC<{
   aData: NodeData;
   bData?: NodeData;
+  isGroup: boolean;
   metrics: TopologyMetrics[];
   metricType: MetricType;
   context: PanelMetricsContext;
   truncateLength: TruncateLength;
-}> = ({ aData, bData, metrics, metricType, context, truncateLength }) => {
+}> = ({ aData, bData, isGroup, metrics, metricType, context, truncateLength }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const titleStats = t('Stats');
   const titleChart = t('Top 5 rates');
@@ -27,26 +28,26 @@ export const ElementPanelMetrics: React.FC<{
   let focusNode: NodeData | undefined;
   switch (context) {
     case 'a-to-b':
-      id = `edge-${aData.name}-${bData!.name}`;
+      id = `edge-${aData.peer.id}-${bData!.peer.id}`;
       filtered = metrics.filter(m => matchPeer(aData, m.source) && matchPeer(bData!, m.destination));
       break;
     case 'b-to-a':
-      id = `edge-${bData!.name}-${aData.name}`;
+      id = `edge-${bData!.peer.id}-${aData.peer.id}`;
       filtered = metrics.filter(m => matchPeer(bData!, m.source) && matchPeer(aData, m.destination));
       break;
     case 'from-node':
       focusNode = aData;
       id = `node-${decorated(focusNode).id}`;
-      filtered = metrics.filter(m => !peersEqual(m.source, m.destination) && matchPeer(focusNode!, m.source));
+      filtered = metrics.filter(m => m.source.id !== m.destination.id && matchPeer(focusNode!, m.source));
       break;
     case 'to-node':
       focusNode = aData;
       id = `node-${decorated(focusNode).id}`;
-      filtered = metrics.filter(m => !peersEqual(m.source, m.destination) && matchPeer(focusNode!, m.destination));
+      filtered = metrics.filter(m => m.source.id !== m.destination.id && matchPeer(focusNode!, m.destination));
       break;
   }
   const top5 = filtered
-    .map(m => toNamedMetric(t, m, truncateLength, focusNode))
+    .map(m => toNamedMetric(t, m, truncateLength, false, false, isGroup ? undefined : focusNode))
     .sort((a, b) => getStat(b.stats, 'sum') - getStat(a.stats, 'sum'));
 
   return (
@@ -68,6 +69,7 @@ export const ElementPanelMetrics: React.FC<{
         limit={5}
         showArea
         showScatter
+        tooltipsTruncate={true}
       />
     </div>
   );
