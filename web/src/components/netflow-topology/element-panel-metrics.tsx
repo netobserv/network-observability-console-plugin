@@ -66,42 +66,36 @@ export const ElementPanelMetrics: React.FC<{
           metricsBoth={metricsBoth}
           isEdge={!!bData}
         />
-        <Flex direction={{ default: 'column' }}>
+        <Text id="metrics-chart-title" component={TextVariants.h4}>
+          {titleChart}
+        </Text>
+        <Flex>
           <FlexItem>
-            <Text id="metrics-chart-title" component={TextVariants.h4}>
-              {titleChart}
-            </Text>
+            <Radio
+              isChecked={metricsRadio === 'in'}
+              name="radio-in"
+              onChange={() => setMetricsRadio('in')}
+              label={bData ? t('A -> B') : t('In')}
+              id="radio-in"
+            />
           </FlexItem>
           <FlexItem>
-            <Flex>
-              <FlexItem>
-                <Radio
-                  isChecked={metricsRadio === 'in'}
-                  name="radio-in"
-                  onChange={() => setMetricsRadio('in')}
-                  label={bData ? t('A -> B') : t('In')}
-                  id="radio-in"
-                />
-              </FlexItem>
-              <FlexItem>
-                <Radio
-                  isChecked={metricsRadio === 'out'}
-                  name="radio-out"
-                  onChange={() => setMetricsRadio('out')}
-                  label={bData ? t('B -> A') : t('Out')}
-                  id="radio-out"
-                />
-              </FlexItem>
-              <FlexItem>
-                <Radio
-                  isChecked={metricsRadio === 'both'}
-                  name="radio-both"
-                  onChange={() => setMetricsRadio('both')}
-                  label={t('Both')}
-                  id="radio-both"
-                />
-              </FlexItem>
-            </Flex>
+            <Radio
+              isChecked={metricsRadio === 'out'}
+              name="radio-out"
+              onChange={() => setMetricsRadio('out')}
+              label={bData ? t('B -> A') : t('Out')}
+              id="radio-out"
+            />
+          </FlexItem>
+          <FlexItem>
+            <Radio
+              isChecked={metricsRadio === 'both'}
+              name="radio-both"
+              onChange={() => setMetricsRadio('both')}
+              label={t('Both')}
+              id="radio-both"
+            />
           </FlexItem>
         </Flex>
       </TextContent>
