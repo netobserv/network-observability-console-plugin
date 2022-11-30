@@ -48,6 +48,67 @@ export const TimeRangeModal: React.FC<TimeRangeModalProps> = ({ id, isModalOpen,
       : t('To date must be after From date');
   };
 
+  //this is a hack to allow user to type into date / time inputs without having to delete previous content
+  const onInput = (e: React.FormEvent<HTMLDivElement>, type: 'date' | 'time') => {
+    const input = e.target as HTMLInputElement;
+    const inputEvent = e.nativeEvent as InputEvent;
+
+    //save cursor position
+    let start = input.selectionStart as number;
+    let end = input.selectionEnd as number;
+
+    //split date / time accordingly
+    const delimiter = type === 'date' ? '-' : ':';
+    const valueParts = input.value.split(delimiter);
+
+    //hack delimiters only when caracters are added one by one
+    if (start === end && inputEvent.inputType === 'insertText' && inputEvent.data !== delimiter) {
+      //new caracter has been added before the delimiter, we need to move it to the next part
+      switch (type) {
+        case 'date':
+          if (start === 5 && valueParts.length > 1) {
+            valueParts[1] = inputEvent.data + valueParts[1];
+            start++;
+          } else if (start === 8 && valueParts.length > 2) {
+            valueParts[2] = inputEvent.data + valueParts[2];
+            start++;
+          }
+          break;
+        case 'time':
+          if (start === 3 && valueParts.length > 1) {
+            valueParts[1] = inputEvent.data + valueParts[1];
+            start++;
+          } else if (start === 6 && valueParts.length > 2) {
+            valueParts[2] = inputEvent.data + valueParts[2];
+            start++;
+          }
+          break;
+      }
+      end = start;
+    }
+
+    let truncatedValue = '';
+    for (let i = 0; i < 3; i++) {
+      if (truncatedValue.length) {
+        truncatedValue += delimiter;
+      }
+
+      const isYear = type === 'date' && i === 0;
+      if (valueParts.length > i) {
+        const len = isYear ? 4 : 2;
+        truncatedValue += valueParts[i].slice(0, len).padEnd(len, '0');
+      } else {
+        truncatedValue += isYear ? '0000' : '00';
+      }
+    }
+
+    //update input value
+    input.value = truncatedValue;
+
+    //restore position
+    input.setSelectionRange(start, end);
+  };
+
   const resetInputs = React.useCallback(() => {
     let from: Date;
     let to: Date;
@@ -156,6 +217,7 @@ export const TimeRangeModal: React.FC<TimeRangeModalProps> = ({ id, isModalOpen,
                 data-test="from-date-picker"
                 validators={[date => dateValidator(true, date)]}
                 onChange={str => setFromDate(str)}
+                onInput={e => onInput(e, 'date')}
                 value={fromDate}
               />
             </FlexItem>
@@ -166,6 +228,7 @@ export const TimeRangeModal: React.FC<TimeRangeModalProps> = ({ id, isModalOpen,
                 includeSeconds
                 placeholder="hh:mm:ss"
                 onChange={setFromTime}
+                onInput={e => onInput(e, 'time')}
                 time={displayedFromTime}
               />
             </FlexItem>
@@ -180,6 +243,7 @@ export const TimeRangeModal: React.FC<TimeRangeModalProps> = ({ id, isModalOpen,
                 validators={[date => dateValidator(false, date)]}
                 rangeStart={fromDate ? new Date(Date.parse(fromDate)) : undefined}
                 onChange={str => setToDate(str)}
+                onInput={e => onInput(e, 'date')}
                 value={toDate}
               />
             </FlexItem>
@@ -190,6 +254,7 @@ export const TimeRangeModal: React.FC<TimeRangeModalProps> = ({ id, isModalOpen,
                 includeSeconds
                 placeholder="hh:mm:ss"
                 onChange={setToTime}
+                onInput={e => onInput(e, 'time')}
                 time={displayedToTime}
               />
             </FlexItem>
