@@ -24,11 +24,10 @@ import { TopologyMetrics } from '../../api/loki';
 import { Filter } from '../../model/filters';
 import { GraphElementPeer, NodeData } from '../../model/topology';
 import { ElementPanelMetrics } from './element-panel-metrics';
-import { PanelMetricsContext } from './element-panel-stats';
 import { TruncateLength } from '../dropdowns/truncate-dropdown';
-import './element-panel.css';
 import { ElementFields } from './element-fields';
 import { PeerResourceLink } from './peer-resource-link';
+import './element-panel.css';
 
 export const ElementPanelDetailsContent: React.FC<{
   element: GraphElementPeer;
@@ -126,14 +125,11 @@ export const ElementPanel: React.FC<{
   const data = element.getData();
   let aData: NodeData;
   let bData: NodeData | undefined;
-  let contexts: [PanelMetricsContext, PanelMetricsContext];
   if (element instanceof BaseEdge) {
     aData = element.getSource().getData();
     bData = element.getTarget().getData();
-    contexts = ['a-to-b', 'b-to-a'];
   } else {
     aData = data!;
-    contexts = ['to-node', 'from-node'];
   }
 
   const titleContent = React.useCallback(() => {
@@ -173,23 +169,11 @@ export const ElementPanel: React.FC<{
           <Tab className="drawer-tab" eventKey={'details'} title={<TabTitleText>{t('Details')}</TabTitleText>}>
             <ElementPanelDetailsContent element={element} filters={filters} setFilters={setFilters} />
           </Tab>
-          <Tab className="drawer-tab" eventKey={'metrics-in'} title={<TabTitleText>{t('Metrics In')}</TabTitleText>}>
+          <Tab className="drawer-tab" eventKey={'metrics'} title={<TabTitleText>{t('Metrics')}</TabTitleText>}>
             <ElementPanelMetrics
               aData={aData}
               bData={bData}
               isGroup={element.getType() === 'group'}
-              context={contexts[0]}
-              metrics={metrics}
-              metricType={metricType}
-              truncateLength={truncateLength}
-            />
-          </Tab>
-          <Tab className="drawer-tab" eventKey={'metrics-out'} title={<TabTitleText>{t('Metrics Out')}</TabTitleText>}>
-            <ElementPanelMetrics
-              aData={aData}
-              bData={bData}
-              isGroup={element.getType() === 'group'}
-              context={contexts[1]}
               metrics={metrics}
               metricType={metricType}
               truncateLength={truncateLength}

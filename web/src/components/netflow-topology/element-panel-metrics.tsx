@@ -1,14 +1,16 @@
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Text, TextContent, TextVariants } from '@patternfly/react-core';
+import { Flex, FlexItem, Radio, Text, TextContent, TextVariants } from '@patternfly/react-core';
 import { MetricType } from '../../model/flow-query';
 import { TopologyMetrics } from '../../api/loki';
 import { decorated, getStat, NodeData } from '../../model/topology';
 import { MetricsContent } from '../metrics/metrics-content';
 import { matchPeer } from '../../utils/metrics';
 import { toNamedMetric } from '../metrics/metrics-helper';
-import { ElementPanelStats, PanelMetricsContext } from './element-panel-stats';
+import { ElementPanelStats } from './element-panel-stats';
 import { TruncateLength } from '../dropdowns/truncate-dropdown';
+
+type MetricsRadio = 'in' | 'out' | 'both';
 
 export const ElementPanelMetrics: React.FC<{
   aData: NodeData;
@@ -16,37 +18,38 @@ export const ElementPanelMetrics: React.FC<{
   isGroup: boolean;
   metrics: TopologyMetrics[];
   metricType: MetricType;
-  context: PanelMetricsContext;
   truncateLength: TruncateLength;
-}> = ({ aData, bData, isGroup, metrics, metricType, context, truncateLength }) => {
+}> = ({ aData, bData, isGroup, metrics, metricType, truncateLength }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
+  const [metricsRadio, setMetricsRadio] = React.useState<MetricsRadio>('both');
+
   const titleStats = t('Stats');
   const titleChart = t('Top 5 rates');
 
   let id = '';
-  let filtered: TopologyMetrics[] = [];
-  let focusNode: NodeData | undefined;
-  switch (context) {
-    case 'a-to-b':
-      id = `edge-${aData.peer.id}-${bData!.peer.id}`;
-      filtered = metrics.filter(m => matchPeer(aData, m.source) && matchPeer(bData!, m.destination));
-      break;
-    case 'b-to-a':
-      id = `edge-${bData!.peer.id}-${aData.peer.id}`;
-      filtered = metrics.filter(m => matchPeer(bData!, m.source) && matchPeer(aData, m.destination));
-      break;
-    case 'from-node':
-      focusNode = aData;
-      id = `node-${decorated(focusNode).id}`;
-      filtered = metrics.filter(m => m.source.id !== m.destination.id && matchPeer(focusNode!, m.source));
-      break;
-    case 'to-node':
-      focusNode = aData;
-      id = `node-${decorated(focusNode).id}`;
-      filtered = metrics.filter(m => m.source.id !== m.destination.id && matchPeer(focusNode!, m.destination));
-      break;
+  let metricsIn: TopologyMetrics[] = [];
+  let metricsOut: TopologyMetrics[] = [];
+  let metricsBoth: TopologyMetrics[] = [];
+
+  if (bData) {
+    // Edge selected
+    id = `edge-${aData.peer.id}-${bData!.peer.id}`;
+    metricsIn = metrics.filter(m => matchPeer(aData, m.source) && matchPeer(bData, m.destination));
+    metricsOut = metrics.filter(m => matchPeer(bData, m.source) && matchPeer(aData, m.destination));
+    metricsBoth = [...metricsIn, ...metricsOut];
+  } else {
+    // Node or group selected
+    id = `node-${decorated(aData).id}`;
+    metricsIn = metrics.filter(m => m.source.id !== m.destination.id && matchPeer(aData, m.destination));
+    metricsOut = metrics.filter(m => m.source.id !== m.destination.id && matchPeer(aData, m.source));
+    // Note that metricsBoth is not always the concat of in+out:
+    //  when a group is selected, there might be an overlap of in and out, so we don't want to count them twice
+    metricsBoth = metrics.filter(
+      m => m.source.id !== m.destination.id && (matchPeer(aData, m.source) || matchPeer(aData, m.destination))
+    );
   }
-  const top5 = filtered
+  const focusNode = bData ? undefined : aData;
+  const top5 = (metricsRadio === 'in' ? metricsIn : metricsRadio === 'out' ? metricsOut : metricsBoth)
     .map(m => toNamedMetric(t, m, truncateLength, false, false, isGroup ? undefined : focusNode))
     .sort((a, b) => getStat(b.stats, 'sum') - getStat(a.stats, 'sum'));
 
@@ -56,10 +59,51 @@ export const ElementPanelMetrics: React.FC<{
         <Text id="metrics-stats-title" component={TextVariants.h4}>
           {titleStats}
         </Text>
-        <ElementPanelStats metricType={metricType} metrics={filtered} context={context} />
-        <Text id="metrics-chart-title" component={TextVariants.h4}>
-          {titleChart}
-        </Text>
+        <ElementPanelStats
+          metricType={metricType}
+          metricsIn={metricsIn}
+          metricsOut={metricsOut}
+          metricsBoth={metricsBoth}
+          isEdge={!!bData}
+        />
+        <Flex direction={{ default: 'column' }}>
+          <FlexItem>
+            <Text id="metrics-chart-title" component={TextVariants.h4}>
+              {titleChart}
+            </Text>
+          </FlexItem>
+          <FlexItem>
+            <Flex>
+              <FlexItem>
+                <Radio
+                  isChecked={metricsRadio === 'in'}
+                  name="radio-in"
+                  onChange={() => setMetricsRadio('in')}
+                  label={bData ? t('A -> B') : t('In')}
+                  id="radio-in"
+                />
+              </FlexItem>
+              <FlexItem>
+                <Radio
+                  isChecked={metricsRadio === 'out'}
+                  name="radio-out"
+                  onChange={() => setMetricsRadio('out')}
+                  label={bData ? t('B -> A') : t('Out')}
+                  id="radio-out"
+                />
+              </FlexItem>
+              <FlexItem>
+                <Radio
+                  isChecked={metricsRadio === 'both'}
+                  name="radio-both"
+                  onChange={() => setMetricsRadio('both')}
+                  label={t('Both')}
+                  id="radio-both"
+                />
+              </FlexItem>
+            </Flex>
+          </FlexItem>
+        </Flex>
       </TextContent>
       <MetricsContent
         id={id}

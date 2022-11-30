@@ -71,13 +71,12 @@ describe('<ElementPanel />', () => {
     expect(wrapper.find('#destination-content').last().text()).toBe('ServiceIP172.30.0.10');
   });
 
-  it('should render <ElementPanelMetricsContent /> node inbound', async () => {
+  it('should render <ElementPanelMetricsContent /> node', async () => {
     const wrapper = mount(
       <ElementPanelMetrics
         metricType={mocks.metricType}
         metrics={mocks.metrics}
         aData={mocks.element.getData()!}
-        context={'to-node'}
         truncateLength={TruncateLength.M}
         isGroup={false}
       />
@@ -85,28 +84,12 @@ describe('<ElementPanel />', () => {
     expect(wrapper.find(ElementPanelMetrics)).toBeTruthy();
 
     //check node metrics
-    expect(wrapper.find('#metrics-stats-total').last().text()).toBe('94.7 MB');
-    expect(wrapper.find('#metrics-stats-avg').last().text()).toBe('332.4 kBps');
-    expect(wrapper.find('#metrics-stats-latest').last().text()).toBe('0 Bps');
-  });
-
-  it('should render <ElementPanelMetricsContent /> node outbound', async () => {
-    const wrapper = mount(
-      <ElementPanelMetrics
-        metricType={mocks.metricType}
-        metrics={mocks.metrics}
-        aData={mocks.element.getData()!}
-        context={'from-node'}
-        truncateLength={TruncateLength.M}
-        isGroup={false}
-      />
-    );
-    expect(wrapper.find(ElementPanelMetrics)).toBeTruthy();
-
-    //check node metrics
-    expect(wrapper.find('#metrics-stats-total').last().text()).toBe('4.1 MB');
-    expect(wrapper.find('#metrics-stats-avg').last().text()).toBe('14.3 kBps');
-    expect(wrapper.find('#metrics-stats-latest').last().text()).toBe('0 Bps');
+    expect(wrapper.find('#metrics-stats-total-in').last().text()).toBe('94.7 MB');
+    expect(wrapper.find('#metrics-stats-avg-in').last().text()).toBe('332.4 kBps');
+    expect(wrapper.find('#metrics-stats-latest-in').last().text()).toBe('0 Bps');
+    expect(wrapper.find('#metrics-stats-total-out').last().text()).toBe('4.1 MB');
+    expect(wrapper.find('#metrics-stats-avg-out').last().text()).toBe('14.3 kBps');
+    expect(wrapper.find('#metrics-stats-latest-out').last().text()).toBe('0 Bps');
   });
 
   it('should render <ElementPanelMetricsContent /> edge a->b', async () => {
@@ -117,36 +100,18 @@ describe('<ElementPanel />', () => {
         metrics={mocks.metrics}
         aData={edge.getSource().getData()}
         bData={edge.getTarget().getData()}
-        context={'a-to-b'}
         truncateLength={TruncateLength.M}
         isGroup={false}
       />
     );
     expect(wrapper.find(ElementPanelMetrics)).toBeTruthy();
 
-    expect(wrapper.find('#metrics-stats-total').last().text()).toBe('1.1 MB');
-    expect(wrapper.find('#metrics-stats-avg').last().text()).toBe('3.9 kBps');
-    expect(wrapper.find('#metrics-stats-latest').last().text()).toBe('0 Bps');
-  });
-
-  it('should render <ElementPanelMetricsContent /> edge b->a', async () => {
-    const edge = getEdge();
-    const wrapper = mount(
-      <ElementPanelMetrics
-        metricType={mocks.metricType}
-        metrics={mocks.metrics}
-        aData={edge.getSource().getData()}
-        bData={edge.getTarget().getData()}
-        context={'b-to-a'}
-        truncateLength={TruncateLength.M}
-        isGroup={false}
-      />
-    );
-    expect(wrapper.find(ElementPanelMetrics)).toBeTruthy();
-
-    expect(wrapper.find('#metrics-stats-total').last().text()).toBe('4.5 MB');
-    expect(wrapper.find('#metrics-stats-avg').last().text()).toBe('15.9 kBps');
-    expect(wrapper.find('#metrics-stats-latest').last().text()).toBe('0 Bps');
+    expect(wrapper.find('#metrics-stats-total-in').last().text()).toBe('1.1 MB');
+    expect(wrapper.find('#metrics-stats-avg-in').last().text()).toBe('3.9 kBps');
+    expect(wrapper.find('#metrics-stats-latest-in').last().text()).toBe('0 Bps');
+    expect(wrapper.find('#metrics-stats-total-out').last().text()).toBe('4.5 MB');
+    expect(wrapper.find('#metrics-stats-avg-out').last().text()).toBe('15.9 kBps');
+    expect(wrapper.find('#metrics-stats-latest-out').last().text()).toBe('0 Bps');
   });
 
   it('should filter <ElementPanelDetailsContent />', async () => {

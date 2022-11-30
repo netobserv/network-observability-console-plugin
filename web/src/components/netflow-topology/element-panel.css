@@ -9,8 +9,8 @@
   margin-bottom: 15px;
 }
 
-#metrics-stats-title {
-  margin-bottom: 15px;
+#metrics-chart-title {
+  margin-top: 15px;
 }
 
 .element-stats-title {
@@ -23,8 +23,11 @@
   height: 400px;
 }
 
+.element-metrics-container .pf-c-radio {
+  grid-gap: 0;
+}
+
 #pf-tab-section-details-drawer-tabs,
-#pf-tab-section-metrics-in-drawer-tabs,
-#pf-tab-section-metrics-out-drawer-tabs {
+#pf-tab-section-metrics-drawer-tabs {
   padding: var(--pf-c-drawer--child--PaddingTop) var(--pf-c-drawer--child--PaddingRight) var(--pf-c-drawer--child--PaddingBottom) var(--pf-c-drawer--child--PaddingLeft);
 }
