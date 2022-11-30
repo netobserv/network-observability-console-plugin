@@ -10,6 +10,7 @@ import * as RTTopology from '@jpinsonneau/react-three-topology';
 import _ from 'lodash';
 import './three-d-topology-content.css';
 import { BaseNode } from '@patternfly/react-topology';
+import { createPeer } from '../../../utils/metrics';
 
 export const ThreeDTopologyContent: React.FC<{
   k8sModels: { [key: string]: K8sModel };
@@ -117,71 +118,71 @@ export const ThreeDTopologyContent: React.FC<{
     const srcNamespace = srcNode?.children.find((ns: RTTopology.Item) => ns.name === m.source.namespace);
     if (
       srcNamespace &&
-      !_.isEmpty(m.source.ownerName) &&
-      !srcNamespace.children.find((o: RTTopology.Item) => o.name === m.source.ownerName)
+      !_.isEmpty(m.source.owner?.name) &&
+      !srcNamespace.children.find((o: RTTopology.Item) => o.name === m.source.owner?.name)
     ) {
       srcNamespace.children.push({
-        name: m.source.ownerName!,
+        name: m.source.owner!.name!,
         namespace: m.source.namespace,
-        type: m.source.ownerType,
+        type: m.source.owner!.type,
         children: [],
-        color: k8sModels[m.source.ownerType!]?.color || defaultColor
+        color: k8sModels[m.source.owner!.type!]?.color || defaultColor
       });
     }
 
     const dstNamespace = dstNode?.children.find((ns: RTTopology.Item) => ns.name === m.destination.namespace);
     if (
       dstNamespace &&
-      !_.isEmpty(m.destination.ownerName) &&
-      !dstNamespace.children.find((o: RTTopology.Item) => o.name === m.destination.ownerName)
+      !_.isEmpty(m.destination.owner?.name) &&
+      !dstNamespace.children.find((o: RTTopology.Item) => o.name === m.destination.owner?.name)
     ) {
       dstNamespace.children.push({
-        name: m.destination.ownerName!,
+        name: m.destination.owner!.name!,
         namespace: m.destination.namespace,
-        type: m.destination.ownerType,
+        type: m.destination.owner!.type,
         children: [],
-        color: k8sModels[m.destination.ownerType!]?.color || defaultColor
+        color: k8sModels[m.destination.owner!.type!]?.color || defaultColor
       });
     }
 
-    const srcOwner = srcNamespace?.children.find((o: RTTopology.Item) => o.name === m.source.ownerName);
-    if (srcOwner && !_.isEmpty(m.source.name)) {
+    const srcOwner = srcNamespace?.children.find((o: RTTopology.Item) => o.name === m.source.owner?.name);
+    if (srcOwner && !_.isEmpty(m.source.resource?.name)) {
       from = {
-        name: m.source.name!,
+        name: m.source.resource!.name!,
         namespace: m.source.namespace,
-        type: m.source.type,
+        type: m.source.resource!.type,
         children: [],
-        color: k8sModels[m.source.type!]?.color || defaultColor
+        color: k8sModels[m.source.resource!.type!]?.color || defaultColor
       };
       if (!srcOwner.children.find((r: RTTopology.Item) => r.name === from!.name)) {
         srcOwner.children.push(from);
       }
     }
 
-    const dstOwner = dstNamespace?.children.find((o: RTTopology.Item) => o.name === m.destination.ownerName);
-    if (dstOwner && !_.isEmpty(m.destination.name)) {
+    const dstOwner = dstNamespace?.children.find((o: RTTopology.Item) => o.name === m.destination.owner?.name);
+    if (dstOwner && !_.isEmpty(m.destination.resource?.name)) {
       to = {
-        name: m.destination.name!,
+        name: m.destination.resource!.name!,
         namespace: m.destination.namespace,
-        type: m.destination.type,
+        type: m.destination.resource!.type,
         children: [],
-        color: k8sModels[m.destination.type!]?.color || defaultColor
+        color: k8sModels[m.destination.resource!.type!]?.color || defaultColor
       };
       if (!dstOwner.children.find((r: RTTopology.Item) => r.name === to!.name)) {
         dstOwner.children.push(to);
       }
     }
 
-    if (_.isEmpty(m.source.type)) {
+    if (_.isEmpty(m.source.resource?.type)) {
       from = { name: m.source.addr!, children: [] };
       if (!externals.find(e => e.name === m.source.addr)) {
         externals.push(from);
       }
-    } else if (m.source.type === 'Service') {
+    } else if (m.source.resource?.type === 'Service') {
       from = {
-        name: m.source.name!,
+        name: m.source.resource!.name!,
         namespace: m.source.namespace,
-        type: m.source.type,
+        type: m.source.resource!.type,
         children: [],
         color: k8sModels['Service']?.color || defaultColor
       };
@@ -190,20 +191,20 @@ export const ThreeDTopologyContent: React.FC<{
       }
     }
 
-    if (_.isEmpty(m.destination.type)) {
+    if (_.isEmpty(m.destination.resource?.type)) {
       to = { name: m.destination.addr!, children: [] };
       if (!externals.find(e => e.name === to!.name)) {
         externals.push({ name: m.destination.addr!, children: [] });
       }
-    } else if (m.destination.type === 'Service') {
+    } else if (m.destination.resource?.type === 'Service') {
       to = {
-        name: m.destination.name!,
+        name: m.destination.resource!.name!,
         namespace: m.destination.namespace,
-        type: m.destination.type,
+        type: m.destination.resource!.type,
         children: [],
         color: k8sModels['Service']?.color || defaultColor
       };
-      if (!services.find(s => s.name === m.destination.name)) {
+      if (!services.find(s => s.name === to!.name)) {
         services.push(to);
       }
     }
@@ -241,10 +242,15 @@ export const ThreeDTopologyContent: React.FC<{
       onClick={(i: RTTopology.Item) => {
         const selectedNode = new BaseNode();
 
-        let host = i.parent;
+        let host: RTTopology.Item | undefined = i.parent;
         while (host !== undefined && host!.type !== 'Node') {
           host = host!.parent;
         }
+
+        let owner: RTTopology.Item | undefined = i;
+        do {
+          owner = owner.parent;
+        } while (owner !== undefined && owner.parent?.type !== 'Namespace');
 
         let nodeType = undefined;
         switch (i.type) {
@@ -265,12 +271,21 @@ export const ThreeDTopologyContent: React.FC<{
 
         selectedNode.setData({
           nodeType,
-          resourceKind: i.type,
-          namespace: i.namespace,
-          name: i.name,
-          parentKind: i.parent?.type,
-          parentName: i.parent?.name,
-          host: host?.name
+          peer: createPeer({
+            addr: '',
+            resource: {
+              name: i.name,
+              type: i.type!
+            },
+            namespace: i.namespace,
+            owner: owner
+              ? {
+                  name: owner.name,
+                  type: owner.type!
+                }
+              : undefined,
+            hostName: host?.name
+          })
         } as NodeData);
         onSelect(selectedNode);
       }}
