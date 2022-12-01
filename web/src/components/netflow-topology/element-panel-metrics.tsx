@@ -69,7 +69,7 @@ export const ElementPanelMetrics: React.FC<{
         <Text id="metrics-chart-title" component={TextVariants.h4}>
           {titleChart}
         </Text>
-        <Flex>
+        <Flex className="metrics-justify-content">
           <FlexItem>
             <Radio
               isChecked={metricsRadio === 'in'}

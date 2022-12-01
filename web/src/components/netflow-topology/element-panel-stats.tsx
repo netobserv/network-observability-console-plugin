@@ -25,7 +25,7 @@ export const ElementPanelStats: React.FC<{
   const averageBoth = metricsBoth.reduce((prev, cur) => prev + getStat(cur.stats, 'avg'), 0);
   const totalBoth = metricsBoth.reduce((prev, cur) => prev + getStat(cur.stats, 'sum'), 0);
   return (
-    <Flex className="metrics-flex-container">
+    <Flex className="metrics-justify-content">
       <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsNone' }}>
         <FlexItem>
           <FlexItem>
