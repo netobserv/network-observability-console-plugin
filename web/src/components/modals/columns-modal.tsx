@@ -31,6 +31,7 @@ export const ColumnsModal: React.FC<{
   setColumnSizes: (v: ColumnSizeMap) => void;
   id?: string;
 }> = ({ id, isModalOpen, setModalOpen, columns, setColumns, setColumnSizes }) => {
+  const [resetClicked, setResetClicked] = React.useState<boolean>(false);
   const [updatedColumns, setUpdatedColumns] = React.useState<Column[]>([]);
   const [isSaveDisabled, setSaveDisabled] = React.useState<boolean>(true);
   const [isAllSelected, setAllSelected] = React.useState<boolean>(false);
@@ -81,9 +82,9 @@ export const ColumnsModal: React.FC<{
   );
 
   const onReset = React.useCallback(() => {
-    setColumnSizes({});
+    setResetClicked(true);
     setUpdatedColumns(getDefaultColumns(t));
-  }, [setColumnSizes, setUpdatedColumns, t]);
+  }, [setResetClicked, setUpdatedColumns, t]);
 
   const onSelectAll = React.useCallback(() => {
     const result = [...updatedColumns];
@@ -93,10 +94,18 @@ export const ColumnsModal: React.FC<{
     setUpdatedColumns(result);
   }, [updatedColumns, setUpdatedColumns, isAllSelected]);
 
-  const onSave = React.useCallback(() => {
-    setColumns(updatedColumns);
+  const onClose = React.useCallback(() => {
+    setResetClicked(false);
     setModalOpen(false);
-  }, [updatedColumns, setColumns, setModalOpen]);
+  }, [setModalOpen]);
+
+  const onSave = React.useCallback(() => {
+    if (resetClicked) {
+      setColumnSizes({});
+    }
+    setColumns(updatedColumns);
+    onClose();
+  }, [resetClicked, setColumns, updatedColumns, onClose, setColumnSizes]);
 
   const draggableItems = updatedColumns.map((column, i) => (
     <Draggable key={i} hasNoWrapper>
@@ -136,7 +145,7 @@ export const ColumnsModal: React.FC<{
       title={t('Manage columns')}
       isOpen={isModalOpen}
       scrollable={true}
-      onClose={() => setModalOpen(false)}
+      onClose={onClose}
       description={
         <TextContent>
           <Text component={TextVariants.p}>
@@ -153,10 +162,10 @@ export const ColumnsModal: React.FC<{
           <Button data-test="columns-reset-button" key="reset" variant="link" onClick={() => onReset()}>
             {t('Restore default columns')}
           </Button>
-          <Button data-test="columns-cancel-button" key="cancel" variant="link" onClick={() => setModalOpen(false)}>
+          <Button data-test="columns-cancel-button" key="cancel" variant="link" onClick={() => onClose()}>
             {t('Cancel')}
           </Button>
-          <Tooltip content={t('At least one column must be selected')} isVisible={isSaveDisabled}>
+          <Tooltip content={t('At least one column must be selected')} trigger="" isVisible={isSaveDisabled}>
             <Button
               data-test="columns-save-button"
               isDisabled={isSaveDisabled}
