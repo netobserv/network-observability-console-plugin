@@ -10,7 +10,6 @@ import {
   ChartStack,
   ChartThemeColor
 } from '@patternfly/react-charts';
-import { Text, TextContent, TextVariants } from '@patternfly/react-core';
 import * as React from 'react';
 import { NamedMetric } from '../../api/loki';
 import { MetricType } from '../../model/flow-query';
@@ -32,8 +31,6 @@ export type MetricsContentProps = {
   metricType: MetricType;
   metrics: NamedMetric[];
   limit: number;
-  counters?: JSX.Element;
-  showTitle?: boolean;
   showBar?: boolean;
   showArea?: boolean;
   showScatter?: boolean;
@@ -48,8 +45,6 @@ export const MetricsContent: React.FC<MetricsContentProps> = ({
   metricType,
   metrics,
   limit,
-  counters,
-  showTitle,
   showBar,
   showArea,
   showScatter,
@@ -82,62 +77,54 @@ export const MetricsContent: React.FC<MetricsContentProps> = ({
   }, [containerRef, dimensions]);
 
   return (
-    <TextContent id="metrics" className="metrics-content-div">
-      {showTitle && (
-        <Text id="metrics-title" component={TextVariants.h4}>
-          {title}
-        </Text>
-      )}
-      {counters}
-      <div id={`chart-${id}`} className="metrics-content-div" ref={containerRef}>
-        <Chart
-          themeColor={ChartThemeColor.multiUnordered}
-          ariaTitle={title}
-          containerComponent={chartVoronoi(legendData, metricType)}
-          legendData={legendData}
-          legendOrientation={'horizontal'}
-          legendPosition="bottom-left"
-          legendAllowWrap={true}
-          legendComponent={legentComponent}
-          //TODO: fix refresh on selection change to enable animation
-          //animate={true}
-          scale={{ x: 'time', y: showBar ? 'linear' : 'sqrt' }}
-          width={dimensions.width}
-          height={dimensions.height}
-          domainPadding={{ x: 0, y: 0 }}
-          padding={{
-            bottom: (itemsPerRow && itemsPerRow > 1 ? legendData.length / 2 + 1 : legendData.length) * 25 + 75,
-            left: 90,
-            right: 50,
-            top: 50
-          }}
-        >
-          <ChartAxis fixLabelOverlap />
-          <ChartAxis dependentAxis showGrid fixLabelOverlap tickFormat={y => getFormattedRateValue(y, metricType)} />
-          {showBar && (
-            <ChartStack>
-              {topKDatapoints.map((datapoints, idx) => (
-                <ChartBar name={`bar-${idx}`} key={`bar-${idx}`} data={datapoints} />
-              ))}
-            </ChartStack>
-          )}
-          {showArea && (
-            <ChartGroup>
-              {topKDatapoints.map((datapoints, idx) => (
-                <ChartArea name={`area-${idx}`} key={`area-${idx}`} data={datapoints} interpolation="monotoneX" />
-              ))}
-            </ChartGroup>
-          )}
-          {showScatter && (
-            <ChartGroup>
-              {topKDatapoints.map((datapoints, idx) => (
-                <ChartScatter name={`scatter-${idx}`} key={`scatter-${idx}`} data={datapoints} />
-              ))}
-            </ChartGroup>
-          )}
-        </Chart>
-      </div>
-    </TextContent>
+    <div id={`chart-${id}`} className="metrics-content-div" ref={containerRef}>
+      <Chart
+        themeColor={ChartThemeColor.multiUnordered}
+        ariaTitle={title}
+        containerComponent={chartVoronoi(legendData, metricType)}
+        legendData={legendData}
+        legendOrientation={'horizontal'}
+        legendPosition="bottom-left"
+        legendAllowWrap={true}
+        legendComponent={legentComponent}
+        //TODO: fix refresh on selection change to enable animation
+        //animate={true}
+        scale={{ x: 'time', y: showBar ? 'linear' : 'sqrt' }}
+        width={dimensions.width}
+        height={dimensions.height}
+        domainPadding={{ x: 0, y: 0 }}
+        padding={{
+          bottom: (itemsPerRow && itemsPerRow > 1 ? legendData.length / 2 + 1 : legendData.length) * 25 + 75,
+          left: 90,
+          right: 50,
+          top: 50
+        }}
+      >
+        <ChartAxis fixLabelOverlap />
+        <ChartAxis dependentAxis showGrid fixLabelOverlap tickFormat={y => getFormattedRateValue(y, metricType)} />
+        {showBar && (
+          <ChartStack>
+            {topKDatapoints.map((datapoints, idx) => (
+              <ChartBar name={`bar-${idx}`} key={`bar-${idx}`} data={datapoints} />
+            ))}
+          </ChartStack>
+        )}
+        {showArea && (
+          <ChartGroup>
+            {topKDatapoints.map((datapoints, idx) => (
+              <ChartArea name={`area-${idx}`} key={`area-${idx}`} data={datapoints} interpolation="monotoneX" />
+            ))}
+          </ChartGroup>
+        )}
+        {showScatter && (
+          <ChartGroup>
+            {topKDatapoints.map((datapoints, idx) => (
+              <ChartScatter name={`scatter-${idx}`} key={`scatter-${idx}`} data={datapoints} />
+            ))}
+          </ChartGroup>
+        )}
+      </Chart>
+    </div>
   );
 };
 

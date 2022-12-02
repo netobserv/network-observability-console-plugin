@@ -1,23 +1,32 @@
-.metrics-flex-container,
-.element-text-container.grouped {
-  padding-left: 15px;
-}
-
 #source-content>.pf-c-accordion__expanded-content-body,
 #destination-content>.pf-c-accordion__expanded-content-body {
   padding-left: 2.2em !important;
   margin-bottom: 15px;
 }
 
-.element-text {
+#metrics-chart-title {
+  margin-top: 15px;
+}
+
+.element-stats-title {
+  /* Fix stats titles misaligned */
   margin-top: 0 !important;
+  margin-bottom: 0 !important;
 }
 
 .element-metrics-container {
   height: 400px;
 }
 
+.element-metrics-container .pf-c-radio {
+  grid-gap: 0;
+}
+
 #pf-tab-section-details-drawer-tabs,
 #pf-tab-section-metrics-drawer-tabs {
   padding: var(--pf-c-drawer--child--PaddingTop) var(--pf-c-drawer--child--PaddingRight) var(--pf-c-drawer--child--PaddingBottom) var(--pf-c-drawer--child--PaddingLeft);
+}
+
+.metrics-justify-content {
+  justify-content: space-evenly;
 }
