@@ -1,7 +1,7 @@
 import { SortByDirection, TableComposable, Tbody, Th, Thead, Tr } from '@patternfly/react-table';
 import { mount } from 'enzyme';
 import * as React from 'react';
-import { Column, ColumnsId } from '../../../utils/columns';
+import { Column, ColumnsId, ColumnSizeMap } from '../../../utils/columns';
 import { AllSelectedColumns, DefaultColumns, filterOrderedColumnsByIds } from '../../__tests-data__/columns';
 import { NetflowTableHeader } from '../netflow-table-header';
 
@@ -11,7 +11,9 @@ const NetflowTableHeaderWrapper: React.FC<{
   sortDirection: SortByDirection;
   columns: Column[];
   setColumns: (v: Column[]) => void;
-}> = ({ onSort, sortId, sortDirection, columns, setColumns }) => {
+  columnSizes: ColumnSizeMap;
+  setColumnSizes: (v: ColumnSizeMap) => void;
+}> = ({ onSort, sortId, sortDirection, columns, setColumns, columnSizes, setColumnSizes }) => {
   return (
     <TableComposable aria-label="Misc table" variant="compact">
       <NetflowTableHeader
@@ -20,6 +22,8 @@ const NetflowTableHeaderWrapper: React.FC<{
         sortId={sortId}
         columns={columns}
         setColumns={setColumns}
+        columnSizes={columnSizes}
+        setColumnSizes={setColumnSizes}
         tableWidth={100}
       />
       <Tbody></Tbody>
@@ -33,7 +37,9 @@ describe('<NetflowTableHeader />', () => {
     sortId: ColumnsId.endtime,
     sortDirection: SortByDirection.asc,
     tableWidth: 100,
-    setColumns: jest.fn()
+    setColumns: jest.fn(),
+    columnSizes: {},
+    setColumnSizes: jest.fn()
   };
   it('should render component', async () => {
     const wrapper = mount(<NetflowTableHeaderWrapper {...mocks} columns={AllSelectedColumns} />);

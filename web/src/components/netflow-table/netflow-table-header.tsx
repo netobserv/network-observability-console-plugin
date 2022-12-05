@@ -1,7 +1,7 @@
-import * as React from 'react';
 import { SortByDirection, Th, Thead, Tr } from '@patternfly/react-table';
 import _ from 'lodash';
-import { Column, ColumnGroup, ColumnsId, getColumnGroups, getFullColumnName } from '../../utils/columns';
+import * as React from 'react';
+import { Column, ColumnGroup, ColumnsId, ColumnSizeMap, getColumnGroups, getFullColumnName } from '../../utils/columns';
 import './netflow-table-header.css';
 
 export type HeadersState = {
@@ -10,15 +10,24 @@ export type HeadersState = {
   headers: Column[];
 };
 
+export type ResizedElement = {
+  target: HTMLElement;
+  startClientX: number;
+  startClentWidth: number;
+};
+
 export const NetflowTableHeader: React.FC<{
   onSort: (id: ColumnsId, direction: SortByDirection) => void;
   sortId: ColumnsId;
   sortDirection: SortByDirection;
   columns: Column[];
   setColumns: (v: Column[]) => void;
+  columnSizes: ColumnSizeMap;
+  setColumnSizes: (v: ColumnSizeMap) => void;
   tableWidth: number;
   isDark?: boolean;
-}> = ({ onSort, sortId, sortDirection, columns, setColumns, tableWidth, isDark }) => {
+}> = ({ onSort, sortId, sortDirection, columns, setColumns, columnSizes, setColumnSizes, tableWidth, isDark }) => {
+  const resizedElement = React.useRef<ResizedElement>();
   const draggedElement = React.useRef<HTMLElement>();
 
   const [headersState, setHeadersState] = React.useState<HeadersState>({
@@ -26,6 +35,48 @@ export const NetflowTableHeader: React.FC<{
     useNested: false,
     headers: []
   });
+
+  const mouseEvent = React.useCallback(
+    (e: MouseEvent) => {
+      const diffPx = e.clientX - resizedElement.current!.startClientX;
+      switch (e.type) {
+        case 'mousemove':
+          const minWidth = Number(resizedElement.current!.target.style.minWidth?.replace('px', '')) || 0;
+          if (Math.abs(minWidth - diffPx) > 10) {
+            const minWidth = `${resizedElement.current!.startClentWidth + diffPx}px`;
+            columnSizes[resizedElement.current!.target.id as ColumnsId] = minWidth;
+            resizedElement.current!.target.style.minWidth = minWidth;
+          }
+          break;
+        default:
+          document.getElementById('cursor-style')!.remove();
+          resizedElement.current!.target.classList.remove('resizing');
+          document.removeEventListener('mousemove', mouseEvent);
+          document.removeEventListener('mouseup', mouseEvent);
+          setColumnSizes(columnSizes);
+          break;
+      }
+    },
+    [columnSizes, setColumnSizes]
+  );
+
+  const onMouseDown = React.useCallback(
+    (e: React.MouseEvent<HTMLElement>) => {
+      const target = e.currentTarget;
+      if (target.classList.contains('column') && e.nativeEvent.offsetX > target.clientWidth - 15) {
+        target.classList.add('resizing');
+        const cursorStyle = document.createElement('style');
+        cursorStyle.innerHTML = '*{cursor: col-resize!important;}';
+        cursorStyle.id = 'cursor-style';
+        document.head.appendChild(cursorStyle);
+        resizedElement.current = { target, startClientX: e.clientX, startClentWidth: target.clientWidth };
+        document.addEventListener('mousemove', mouseEvent);
+        document.addEventListener('mouseup', mouseEvent);
+        e.preventDefault();
+      }
+    },
+    [mouseEvent]
+  );
 
   const onDragStart = React.useCallback((e: React.DragEvent<HTMLElement>) => {
     const target = e.currentTarget;
@@ -126,6 +177,7 @@ export const NetflowTableHeader: React.FC<{
           }}
           colSpan={1}
           draggable
+          onMouseDown={onMouseDown}
           onDragStart={onDragStart}
           onDragOver={e => {
             if (draggedElement.current?.classList.contains('column')) {
@@ -140,7 +192,7 @@ export const NetflowTableHeader: React.FC<{
           onDrop={onDrop}
           onDragEnd={clearDragEffects}
           modifier="wrap"
-          style={{ width: `${Math.floor((100 * c.width) / tableWidth)}%` }}
+          style={{ width: `${Math.floor((100 * c.width) / tableWidth)}%`, minWidth: columnSizes[c.id] }}
           info={c.tooltip ? { tooltip: c.tooltip } : undefined}
         >
           {headersState.useNested ? c.name : getFullColumnName(c)}
@@ -148,12 +200,14 @@ export const NetflowTableHeader: React.FC<{
       );
     },
     [
+      columnSizes,
       columns,
       headersState.nestedHeaders,
       headersState.useNested,
       isDark,
       onDragStart,
       onDrop,
+      onMouseDown,
       onSort,
       sortDirection,
       sortId,

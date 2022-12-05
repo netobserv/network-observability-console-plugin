@@ -22,7 +22,9 @@ describe('<NetflowTable />', () => {
     size: 'm' as Size,
     onSelect: jest.fn(),
     filterActionLinks: <></>,
-    setColumns: jest.fn()
+    setColumns: jest.fn(),
+    columnSizes: {},
+    setColumnSizes: jest.fn()
   };
 
   it('should render component', async () => {

@@ -10,6 +10,7 @@ describe('<ColumnsModal />', () => {
     setModalOpen: jest.fn(),
     columns: ShuffledDefaultColumns,
     setColumns: jest.fn(),
+    setColumnSizes: jest.fn(),
     id: 'columns-modal'
   };
   it('should render component', async () => {

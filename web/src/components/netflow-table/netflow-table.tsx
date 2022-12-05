@@ -16,7 +16,7 @@ import * as _ from 'lodash';
 import { Record } from '../../api/ipfix';
 import { NetflowTableHeader } from './netflow-table-header';
 import NetflowTableRow from './netflow-table-row';
-import { Column, ColumnsId, getCommonColumns } from '../../utils/columns';
+import { Column, ColumnsId, ColumnSizeMap, getCommonColumns } from '../../utils/columns';
 import { Size } from '../dropdowns/table-display-dropdown';
 import { usePrevious } from '../../utils/previous-hook';
 import './netflow-table.css';
@@ -32,13 +32,28 @@ const NetflowTable: React.FC<{
   selectedRecord?: Record;
   columns: Column[];
   setColumns: (v: Column[]) => void;
+  columnSizes: ColumnSizeMap;
+  setColumnSizes: (v: ColumnSizeMap) => void;
   size: Size;
   onSelect: (record?: Record) => void;
   loading?: boolean;
   error?: string;
   filterActionLinks: JSX.Element;
   isDark?: boolean;
-}> = ({ flows, selectedRecord, columns, setColumns, error, loading, size, onSelect, filterActionLinks, isDark }) => {
+}> = ({
+  flows,
+  selectedRecord,
+  columns,
+  setColumns,
+  columnSizes,
+  setColumnSizes,
+  error,
+  loading,
+  size,
+  onSelect,
+  filterActionLinks,
+  isDark
+}) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   //default to 300 to allow content to be rendered in tests
@@ -254,6 +269,8 @@ const NetflowTable: React.FC<{
           sortId={activeSortId}
           columns={columns}
           setColumns={setColumns}
+          columnSizes={columnSizes}
+          setColumnSizes={setColumnSizes}
           tableWidth={width}
           isDark={isDark}
         />

@@ -2,6 +2,16 @@ th.netobserv-header {
   cursor: pointer;
 }
 
+th.netobserv-header.column:hover:not(.dragged)::after {
+  position: absolute;
+  top: 0;
+  right: 0;
+  content: ' ';
+  cursor: col-resize;
+  height: 100%;
+  width: 15px;
+}
+
 th.netobserv-header.dragged:not(.dark) {
   opacity: 0.25;
   background: #fff;
@@ -10,6 +20,10 @@ th.netobserv-header.dragged:not(.dark) {
 th.netobserv-header.dragged.dark {
   opacity: 0.25;
   background: #1b1d21;
+}
+
+th.netobserv-header.resizing {
+  border-bottom: solid #0066CC;
 }
 
 th.netobserv-header.dropzone:not(.dragged) {

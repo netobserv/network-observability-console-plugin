@@ -62,7 +62,7 @@ import {
   TopologyGroupTypes,
   TopologyOptions
 } from '../model/topology';
-import { Column, getDefaultColumns } from '../utils/columns';
+import { Column, ColumnSizeMap, getDefaultColumns } from '../utils/columns';
 import { loadConfig } from '../utils/config';
 import { ContextSingleton } from '../utils/context';
 import { computeStepInterval, TimeRange } from '../utils/datetime';
@@ -70,6 +70,7 @@ import { getHTTPErrorDetails } from '../utils/errors';
 import { useK8sModelsWithColors } from '../utils/k8s-models-hook';
 import {
   LOCAL_STORAGE_COLS_KEY,
+  LOCAL_STORAGE_COLS_SIZES_KEY,
   LOCAL_STORAGE_DISABLED_FILTERS_KEY,
   LOCAL_STORAGE_LAST_LIMIT_KEY,
   LOCAL_STORAGE_LAST_TOP_KEY,
@@ -215,6 +216,7 @@ export const NetflowTraffic: React.FC<{
     id: 'id',
     criteria: 'isSelected'
   });
+  const [columnSizes, setColumnSizes] = useLocalStorage<ColumnSizeMap>(LOCAL_STORAGE_COLS_SIZES_KEY, {});
 
   React.useEffect(() => {
     loadConfig().then(setConfig);
@@ -848,6 +850,8 @@ export const NetflowTraffic: React.FC<{
             onSelect={onRecordSelect}
             columns={columns.filter(col => col.isSelected)}
             setColumns={(v: Column[]) => setColumns(v.concat(columns.filter(col => !col.isSelected)))}
+            columnSizes={columnSizes}
+            setColumnSizes={setColumnSizes}
             filterActionLinks={filterLinks()}
             isDark={isDarkTheme}
           />
@@ -1074,6 +1078,7 @@ export const NetflowTraffic: React.FC<{
         setModalOpen={setColModalOpen}
         columns={columns}
         setColumns={setColumns}
+        setColumnSizes={setColumnSizes}
       />
       <ExportModal
         id="export-modal"
