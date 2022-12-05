@@ -3,6 +3,7 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionToggle,
+  Button,
   ClipboardCopy,
   ClipboardCopyVariant,
   Divider,
@@ -11,6 +12,7 @@ import {
   DrawerHead,
   DrawerPanelBody,
   DrawerPanelContent,
+  Popover,
   Tab,
   Tabs,
   TabTitleText,
@@ -251,7 +253,30 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
                         key={c.id}
                         data-test-id={`drawer-field-${c.id}`}
                       >
-                        <Text component={TextVariants.h4}>{c.name}</Text>
+                        {c.tooltip ? (
+                          <Popover
+                            headerContent={c.name}
+                            bodyContent={<div className="record-field-popover-body">{c.tooltip}</div>}
+                            footerContent={
+                              c.docURL ? (
+                                <div className="record-field-popover-footer">
+                                  {`${t('Mode info')}: `}
+                                  <a href={c.docURL} target="_blank" rel="noopener noreferrer">
+                                    {c.docURL}
+                                  </a>
+                                </div>
+                              ) : undefined
+                            }
+                          >
+                            <Button variant="plain" className="record-field-title-popover-button">
+                              <Text component={TextVariants.h4}>{c.name}</Text>
+                            </Button>
+                          </Popover>
+                        ) : (
+                          <Text component={TextVariants.h4} className="record-field-title">
+                            {c.name}
+                          </Text>
+                        )}
                         <RecordField flow={record} column={c} filter={getFilter(c)} size={'s'} useLinks={true} />
                       </TextContent>
                     ))}

@@ -193,7 +193,13 @@ export const NetflowTableHeader: React.FC<{
           onDragEnd={clearDragEffects}
           modifier="wrap"
           style={{ width: `${Math.floor((100 * c.width) / tableWidth)}%`, minWidth: columnSizes[c.id] }}
-          info={c.tooltip ? { tooltip: c.tooltip } : undefined}
+          info={
+            [ColumnsId.starttime, ColumnsId.endtime, ColumnsId.collectiontime, ColumnsId.collectionlatency].includes(
+              c.id
+            ) && c.tooltip
+              ? { tooltip: c.tooltip }
+              : undefined
+          }
         >
           {headersState.useNested ? c.name : getFullColumnName(c)}
         </Th>
