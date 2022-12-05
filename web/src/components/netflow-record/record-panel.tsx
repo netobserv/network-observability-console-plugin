@@ -260,7 +260,7 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
                             footerContent={
                               c.docURL ? (
                                 <div className="record-field-popover-footer">
-                                  {`${t('Mode info')}: `}
+                                  {`${t('More info')}: `}
                                   <a href={c.docURL} target="_blank" rel="noopener noreferrer">
                                     {c.docURL}
                                   </a>
