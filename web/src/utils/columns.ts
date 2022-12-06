@@ -66,6 +66,7 @@ export interface Column {
   name: string;
   fieldName?: keyof Fields | keyof Labels;
   tooltip?: string;
+  docURL?: string;
   quickFilter?: FilterId;
   isSelected: boolean;
   value: (flow: Record) => string | number | string[] | number[];
@@ -312,11 +313,14 @@ export const getCommonColumns = (t: TFunction, withConcatenatedFields = true): C
 };
 
 export const getSrcColumns = (t: TFunction): Column[] => {
+  const group = t('Source');
   return [
     {
       id: ColumnsId.srcname,
-      group: t('Source'),
+      group,
       name: t('Name'),
+      tooltip: t('The {{group}} name of the related kubernetes resource.', { group: group.toLowerCase() }),
+      docURL: 'http://kubernetes.io/docs/user-guide/identifiers#names',
       fieldName: 'SrcK8S_Name',
       quickFilter: 'src_name',
       isSelected: true,
@@ -326,8 +330,12 @@ export const getSrcColumns = (t: TFunction): Column[] => {
     },
     {
       id: ColumnsId.srctype,
-      group: t('Source'),
+      group,
       name: t('Kind'),
+      tooltip: `${t('The {{group}} kind of the related kubernetes resource. Examples:')}
+      - ${t('Pod')}
+      - ${t('Service')}
+      - ${t('Node')}`,
       fieldName: 'SrcK8S_Type',
       quickFilter: 'src_kind',
       isSelected: false,
@@ -337,8 +345,10 @@ export const getSrcColumns = (t: TFunction): Column[] => {
     },
     {
       id: ColumnsId.srcowner,
-      group: t('Source'),
+      group,
       name: t('Owner'),
+      tooltip: t('The {{group}} owner name of the related kubernetes resource.', { group: group.toLowerCase() }),
+      docURL: 'https://kubernetes.io/docs/concepts/overview/working-with-objects/owners-dependents/',
       fieldName: 'SrcK8S_OwnerName',
       quickFilter: 'src_owner_name',
       isSelected: false,
@@ -348,8 +358,14 @@ export const getSrcColumns = (t: TFunction): Column[] => {
     },
     {
       id: ColumnsId.srcownertype,
-      group: t('Source'),
+      group,
       name: t('Owner Kind'),
+      tooltip: `${t('The {{group}} owner kind of the related kubernetes resource. Examples:')}
+      - ${t('Deployment')}
+      - ${t('StatefulSet')}
+      - ${t('DaemonSet')}
+      - ${t('Job')}
+      - ${t('CronJob')}`,
       fieldName: 'SrcK8S_OwnerType',
       quickFilter: 'src_kind',
       isSelected: false,
@@ -359,8 +375,10 @@ export const getSrcColumns = (t: TFunction): Column[] => {
     },
     {
       id: ColumnsId.srcnamespace,
-      group: t('Source'),
+      group,
       name: t('Namespace'),
+      tooltip: t('The {{group}} namespace of the related kubernetes resource.', { group: group.toLowerCase() }),
+      docURL: 'http://kubernetes.io/docs/user-guide/identifiers#namespaces',
       fieldName: 'SrcK8S_Namespace',
       quickFilter: 'src_namespace',
       isSelected: true,
@@ -370,8 +388,9 @@ export const getSrcColumns = (t: TFunction): Column[] => {
     },
     {
       id: ColumnsId.srcaddr,
-      group: t('Source'),
+      group,
       name: t('IP'),
+      tooltip: t('The {{group}} IP address. Can be either in IPv4 or IPv6 format.', { group: group.toLowerCase() }),
       fieldName: 'SrcAddr',
       quickFilter: 'src_address',
       isSelected: false,
@@ -381,8 +400,9 @@ export const getSrcColumns = (t: TFunction): Column[] => {
     },
     {
       id: ColumnsId.srcport,
-      group: t('Source'),
+      group,
       name: t('Port'),
+      tooltip: t('The {{group}} port number.', { group: group.toLowerCase() }),
       fieldName: 'SrcPort',
       quickFilter: 'src_port',
       isSelected: true,
@@ -392,8 +412,9 @@ export const getSrcColumns = (t: TFunction): Column[] => {
     },
     {
       id: ColumnsId.srcmac,
-      group: t('Source'),
+      group,
       name: t('MAC'),
+      tooltip: t('The {{group}} MAC address.', { group: group.toLowerCase() }),
       fieldName: 'SrcMac',
       quickFilter: 'src_mac',
       isSelected: false,
@@ -403,8 +424,11 @@ export const getSrcColumns = (t: TFunction): Column[] => {
     },
     {
       id: ColumnsId.srchostaddr,
-      group: t('Source'),
+      group,
       name: t('Node IP'),
+      tooltip: t('The {{group}} node IP address. Can be either in IPv4 or IPv6 format.', {
+        group: group.toLowerCase()
+      }),
       fieldName: 'SrcK8S_HostIP',
       quickFilter: 'src_host_address',
       isSelected: false,
@@ -414,8 +438,10 @@ export const getSrcColumns = (t: TFunction): Column[] => {
     },
     {
       id: ColumnsId.srchostname,
-      group: t('Source'),
+      group,
       name: t('Node Name'),
+      tooltip: t('The {{group}} name of the node running the workload.', { group: group.toLowerCase() }),
+      docURL: 'https://kubernetes.io/docs/concepts/architecture/nodes/',
       fieldName: 'SrcK8S_HostName',
       quickFilter: 'src_host_name',
       isSelected: false,
@@ -427,11 +453,14 @@ export const getSrcColumns = (t: TFunction): Column[] => {
 };
 
 export const getDstColumns = (t: TFunction): Column[] => {
+  const group = t('Destination');
   return [
     {
       id: ColumnsId.dstname,
-      group: t('Destination'),
+      group,
       name: t('Name'),
+      tooltip: t('The {{group}} name of the related kubernetes resource.', { group: group.toLowerCase() }),
+      docURL: 'http://kubernetes.io/docs/user-guide/identifiers#names',
       fieldName: 'DstK8S_Name',
       quickFilter: 'dst_name',
       isSelected: true,
@@ -440,20 +469,13 @@ export const getDstColumns = (t: TFunction): Column[] => {
       width: 15
     },
     {
-      id: ColumnsId.dstowner,
-      group: t('Destination'),
-      name: t('Owner'),
-      fieldName: 'DstK8S_OwnerName',
-      quickFilter: 'dst_owner_name',
-      isSelected: false,
-      value: f => f.labels.DstK8S_OwnerName || '',
-      sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
-      width: 15
-    },
-    {
       id: ColumnsId.dsttype,
-      group: t('Destination'),
+      group,
       name: t('Kind'),
+      tooltip: `${t('The {{group}} kind of the related kubernetes resource. Examples:')}
+      - ${t('Pod')}
+      - ${t('Service')}
+      - ${t('Node')}`,
       fieldName: 'DstK8S_Type',
       quickFilter: 'dst_kind',
       isSelected: false,
@@ -462,9 +484,28 @@ export const getDstColumns = (t: TFunction): Column[] => {
       width: 10
     },
     {
+      id: ColumnsId.dstowner,
+      group,
+      name: t('Owner'),
+      tooltip: t('The {{group}} owner name of the related kubernetes resource.', { group: group.toLowerCase() }),
+      docURL: 'https://kubernetes.io/docs/concepts/overview/working-with-objects/owners-dependents/',
+      fieldName: 'DstK8S_OwnerName',
+      quickFilter: 'dst_owner_name',
+      isSelected: false,
+      value: f => f.labels.DstK8S_OwnerName || '',
+      sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
+      width: 15
+    },
+    {
       id: ColumnsId.dstownertype,
-      group: t('Destination'),
+      group,
       name: t('Owner Kind'),
+      tooltip: `${t('The {{group}} owner kind of the related kubernetes resource. Examples:')}
+      - ${t('Deployment')}
+      - ${t('StatefulSet')}
+      - ${t('DaemonSet')}
+      - ${t('Job')}
+      - ${t('CronJob')}`,
       fieldName: 'DstK8S_OwnerType',
       quickFilter: 'dst_kind',
       isSelected: false,
@@ -474,8 +515,10 @@ export const getDstColumns = (t: TFunction): Column[] => {
     },
     {
       id: ColumnsId.dstnamespace,
-      group: t('Destination'),
+      group,
       name: t('Namespace'),
+      tooltip: t('The {{group}} namespace of the related kubernetes resource.', { group: group.toLowerCase() }),
+      docURL: 'http://kubernetes.io/docs/user-guide/identifiers#namespaces',
       fieldName: 'DstK8S_Namespace',
       quickFilter: 'dst_namespace',
       isSelected: true,
@@ -485,8 +528,9 @@ export const getDstColumns = (t: TFunction): Column[] => {
     },
     {
       id: ColumnsId.dstaddr,
-      group: t('Destination'),
+      group,
       name: t('IP'),
+      tooltip: t('The {{group}} IP address. Can be either in IPv4 or IPv6 format.', { group: group.toLowerCase() }),
       fieldName: 'DstAddr',
       quickFilter: 'dst_address',
       isSelected: false,
@@ -496,8 +540,9 @@ export const getDstColumns = (t: TFunction): Column[] => {
     },
     {
       id: ColumnsId.dstport,
-      group: t('Destination'),
+      group,
       name: t('Port'),
+      tooltip: t('The {{group}} port number.', { group: group.toLowerCase() }),
       fieldName: 'DstPort',
       quickFilter: 'dst_port',
       isSelected: true,
@@ -507,8 +552,9 @@ export const getDstColumns = (t: TFunction): Column[] => {
     },
     {
       id: ColumnsId.dstmac,
-      group: t('Destination'),
+      group,
       name: t('MAC'),
+      tooltip: t('The {{group}} MAC address.', { group: group.toLowerCase() }),
       fieldName: 'DstMac',
       quickFilter: 'dst_mac',
       isSelected: false,
@@ -518,8 +564,11 @@ export const getDstColumns = (t: TFunction): Column[] => {
     },
     {
       id: ColumnsId.dsthostaddr,
-      group: t('Destination'),
+      group,
       name: t('Node IP'),
+      tooltip: t('The {{group}} node IP address. Can be either in IPv4 or IPv6 format.', {
+        group: group.toLowerCase()
+      }),
       fieldName: 'DstK8S_HostIP',
       quickFilter: 'dst_host_address',
       isSelected: false,
@@ -529,8 +578,10 @@ export const getDstColumns = (t: TFunction): Column[] => {
     },
     {
       id: ColumnsId.dsthostname,
-      group: t('Destination'),
+      group,
       name: t('Node Name'),
+      tooltip: t('The {{group}} name of the node running the workload.', { group: group.toLowerCase() }),
+      docURL: 'https://kubernetes.io/docs/concepts/architecture/nodes/',
       fieldName: 'DstK8S_HostName',
       quickFilter: 'dst_host_name',
       isSelected: false,
@@ -639,6 +690,7 @@ export const getExtraColumns = (t: TFunction): Column[] => {
     {
       id: ColumnsId.proto,
       name: t('Protocol'),
+      tooltip: t('The value of the protocol number in the IP packet header'),
       fieldName: 'Proto',
       quickFilter: 'protocol',
       isSelected: false,
@@ -649,6 +701,7 @@ export const getExtraColumns = (t: TFunction): Column[] => {
     {
       id: ColumnsId.flowdir,
       name: t('Direction'),
+      tooltip: t('The direction of the Flow observed at the Observation Point.'),
       fieldName: 'FlowDirection',
       isSelected: false,
       value: f => f.labels.FlowDirection,
@@ -658,6 +711,7 @@ export const getExtraColumns = (t: TFunction): Column[] => {
     {
       id: ColumnsId.bytes,
       name: t('Bytes'),
+      tooltip: t('The total aggregated number of bytes.'),
       fieldName: 'Bytes',
       isSelected: true,
       value: f => f.fields.Bytes,
@@ -667,6 +721,7 @@ export const getExtraColumns = (t: TFunction): Column[] => {
     {
       id: ColumnsId.packets,
       name: t('Packets'),
+      tooltip: t('The total aggregated number of packets.'),
       fieldName: 'Packets',
       isSelected: true,
       value: f => f.fields.Packets,

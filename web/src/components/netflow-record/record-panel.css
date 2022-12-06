@@ -64,5 +64,26 @@ button.borderless-accordion {
 
 #pf-tab-section-details-drawer-tabs,
 #pf-tab-section-raw-drawer-tabs {
-    padding: var(--pf-c-drawer--child--PaddingTop) var(--pf-c-drawer--child--PaddingRight) var(--pf-c-drawer--child--PaddingBottom) var(--pf-c-drawer--child--PaddingLeft);
+  padding: var(--pf-c-drawer--child--PaddingTop) var(--pf-c-drawer--child--PaddingRight) var(--pf-c-drawer--child--PaddingBottom) var(--pf-c-drawer--child--PaddingLeft);
+}
+
+h4.record-field-title,
+button.record-field-title-popover-button {
+  color: inherit !important;
+  font-weight: inherit !important;
+  margin-bottom: 3px !important;
+  padding: 0 !important;
+}
+
+button.record-field-title-popover-button {
+  background-image: linear-gradient(to right, var(--pf-c-button--m-plain--Color) 33%, rgba(255, 255, 255, 0) 0%);
+  background-position: bottom;
+  background-size: 3px 1px;
+  background-repeat: repeat-x;
+}
+
+div.record-field-popover-body,
+div.record-field-popover-footer {
+  white-space: pre-line;
+  word-break: break-word;
 }
