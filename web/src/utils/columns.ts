@@ -332,7 +332,7 @@ export const getSrcColumns = (t: TFunction): Column[] => {
       id: ColumnsId.srctype,
       group,
       name: t('Kind'),
-      tooltip: `${t('The {{group}} kind of the related kubernetes resource. Available values are:')}
+      tooltip: `${t('The {{group}} kind of the related kubernetes resource. Examples:')}
       - ${t('Pod')}
       - ${t('Service')}
       - ${t('Node')}`,
@@ -360,7 +360,7 @@ export const getSrcColumns = (t: TFunction): Column[] => {
       id: ColumnsId.srcownertype,
       group,
       name: t('Owner Kind'),
-      tooltip: `${t('The {{group}} owner kind of the related kubernetes resource. Available values are:')}
+      tooltip: `${t('The {{group}} owner kind of the related kubernetes resource. Examples:')}
       - ${t('Deployment')}
       - ${t('StatefulSet')}
       - ${t('DaemonSet')}
@@ -377,7 +377,7 @@ export const getSrcColumns = (t: TFunction): Column[] => {
       id: ColumnsId.srcnamespace,
       group,
       name: t('Namespace'),
-      tooltip: t('The {{group}} project of the related kubernetes resource.', { group: group.toLowerCase() }),
+      tooltip: t('The {{group}} namespace of the related kubernetes resource.', { group: group.toLowerCase() }),
       docURL: 'http://kubernetes.io/docs/user-guide/identifiers#namespaces',
       fieldName: 'SrcK8S_Namespace',
       quickFilter: 'src_namespace',
@@ -472,7 +472,7 @@ export const getDstColumns = (t: TFunction): Column[] => {
       id: ColumnsId.dsttype,
       group,
       name: t('Kind'),
-      tooltip: `${t('The {{group}} kind of the related kubernetes resource. Available values are:')}
+      tooltip: `${t('The {{group}} kind of the related kubernetes resource. Examples:')}
       - ${t('Pod')}
       - ${t('Service')}
       - ${t('Node')}`,
@@ -500,7 +500,7 @@ export const getDstColumns = (t: TFunction): Column[] => {
       id: ColumnsId.dstownertype,
       group,
       name: t('Owner Kind'),
-      tooltip: `${t('The {{group}} owner kind of the related kubernetes resource. Available values are:')}
+      tooltip: `${t('The {{group}} owner kind of the related kubernetes resource. Examples:')}
       - ${t('Deployment')}
       - ${t('StatefulSet')}
       - ${t('DaemonSet')}
@@ -517,7 +517,7 @@ export const getDstColumns = (t: TFunction): Column[] => {
       id: ColumnsId.dstnamespace,
       group,
       name: t('Namespace'),
-      tooltip: t('The {{group}} project of the related kubernetes resource.', { group: group.toLowerCase() }),
+      tooltip: t('The {{group}} namespace of the related kubernetes resource.', { group: group.toLowerCase() }),
       docURL: 'http://kubernetes.io/docs/user-guide/identifiers#namespaces',
       fieldName: 'DstK8S_Namespace',
       quickFilter: 'dst_namespace',
