@@ -96,8 +96,9 @@ export const ColumnsModal: React.FC<{
 
   const onClose = React.useCallback(() => {
     setResetClicked(false);
+    setUpdatedColumns(_.cloneDeep(columns));
     setModalOpen(false);
-  }, [setModalOpen]);
+  }, [columns, setModalOpen]);
 
   const onSave = React.useCallback(() => {
     if (resetClicked) {
