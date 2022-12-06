@@ -25,7 +25,7 @@ COPY pkg/ pkg/
 
 RUN make build-backend
 
-FROM registry.access.redhat.com/ubi8/ubi-minimal:8.6
+FROM registry.access.redhat.com/ubi8/ubi-minimal:8.7
 
 COPY --from=web-builder /opt/app-root/web/dist ./web/dist
 COPY --from=go-builder /opt/app-root/plugin-backend ./
