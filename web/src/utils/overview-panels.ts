@@ -59,20 +59,24 @@ export const getOverviewPanelInfo = (
     case 'top_bar':
       return { title: t('Top {{limit}} flow rates stacked', { limit }), chartType: t('bars') };
     case 'top_bar_total':
-      return { title: t('Top {{limit}} flow rates stacked with total', { limit }), chartType: t('bars') };
+      return {
+        title: t('Top {{limit}} flow rates stacked with total', { limit }),
+        chartType: t('bars'),
+        tooltip: t('The top rates as bar compared to total as line over the selected interval')
+      };
     case 'top_lines':
       return { title: t('Top {{limit}} flow rates', { limit }), chartType: t('lines') };
     case 'top_avg_donut':
       return {
         title: t('Top {{limit}} average rates', { limit }),
         chartType: t('donut'),
-        tooltip: t('This is the average rate over the selected interval')
+        tooltip: t('The average rate over the selected interval')
       };
     case 'top_latest_donut':
       return {
         title: t('Top {{limit}} latest rates', { limit }),
         chartType: t('donut'),
-        tooltip: t('This is the last measured rate from the selected interval')
+        tooltip: t('The last measured rate from the selected interval')
       };
     case 'top_sankey':
       return { title: t('Top {{limit}} flows distribution', { limit }), chartType: t('sankey') };
