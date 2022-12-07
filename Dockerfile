@@ -11,7 +11,7 @@ COPY --chown=default web web
 COPY mocks mocks
 RUN make fmt-frontend just-build-frontend
 
-FROM registry.access.redhat.com/ubi8/go-toolset:1.17 as go-builder
+FROM registry.access.redhat.com/ubi8/go-toolset:1.18 as go-builder
 
 WORKDIR /opt/app-root
 
