@@ -282,5 +282,6 @@ export const responseSample = {
 export const dataSample = parseMetrics(
   responseSample.data.result as RawTopologyMetrics[],
   { from: 1647965100, to: 1647965400 },
-  'resource'
+  'resource',
+  0
 );

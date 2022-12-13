@@ -36,7 +36,7 @@ describe('normalize and computeStats', () => {
       [1664372300, '8']
     ];
 
-    const { start, end, step } = calibrateRange([values], { from: 1664372000, to: 1664372300 });
+    const { start, end, step } = calibrateRange([values], { from: 1664372000, to: 1664372300 }, 1664372300, true);
     const norm = normalizeMetrics(values, start, end, step);
     expect(norm).toEqual([
       [1664372000, 5],
@@ -98,7 +98,7 @@ describe('normalize and computeStats', () => {
       [first + 285, '8']
     ];
 
-    const { start, end, step } = calibrateRange([values], 300);
+    const { start, end, step } = calibrateRange([values], 300, now, true);
     const norm = normalizeMetrics(values, start, end, step);
     expect(norm).toEqual([
       [first, 5],
@@ -150,7 +150,7 @@ describe('normalize and computeStats', () => {
       [1664372300, '8']
     ];
 
-    const { start, end, step } = calibrateRange([values], { from: 1664372000, to: 1664372300 });
+    const { start, end, step } = calibrateRange([values], { from: 1664372000, to: 1664372300 }, 1664372300, true);
     const norm = normalizeMetrics(values, start, end, step);
     expect(norm).toEqual([
       [1664372000, 5],
@@ -382,7 +382,7 @@ describe('parseMetrics', () => {
       }
     ];
 
-    const parsed = parseMetrics(metrics, 300, 'resource');
+    const parsed = parseMetrics(metrics, 300, 'resource', 0, true);
 
     expect(parsed).toHaveLength(2);
     expect(parsed[0].source.getDisplayName(true, true)).toEqual('ns1.A');
