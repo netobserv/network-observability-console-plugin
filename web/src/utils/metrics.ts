@@ -23,11 +23,13 @@ export const parseMetrics = (
   raw: RawTopologyMetrics[],
   range: number | TimeRange,
   scope: MetricScope,
+  unixTimestamp: number,
   isMock?: boolean
 ): TopologyMetrics[] => {
   const { start, end, step } = calibrateRange(
     raw.map(r => r.values),
     range,
+    unixTimestamp,
     isMock
   );
   const metrics = raw.map(r => parseMetric(r, start, end, step, scope));
@@ -153,6 +155,7 @@ const parseMetric = (
 export const calibrateRange = (
   raw: [number, unknown][][],
   range: number | TimeRange,
+  unixTimestamp: number,
   isMock?: boolean
 ): { start: number; end: number; step: number } => {
   // Extract some info based on range, and apply a tolerance about end range when it is close to "now"
@@ -161,9 +164,8 @@ export const calibrateRange = (
   let start: number;
   let endWithTolerance: number;
   if (typeof range === 'number') {
-    const end = Math.floor(new Date().getTime() / 1000);
-    endWithTolerance = end - latencyTolerance;
-    start = end - rangeInSeconds;
+    endWithTolerance = unixTimestamp - latencyTolerance;
+    start = unixTimestamp - rangeInSeconds;
   } else {
     start = range.from;
     endWithTolerance = range.to;

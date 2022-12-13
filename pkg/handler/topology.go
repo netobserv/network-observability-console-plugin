@@ -111,6 +111,7 @@ func getTopologyFlows(cfg *loki.Config, client httpclient.Caller, params url.Val
 
 	qr := merger.Get()
 	qr.IsMock = cfg.UseMocks
+	qr.UnixTimestamp = time.Now().Unix()
 	hlog.Tracef("GetTopology response: %v", qr)
 	return qr, http.StatusOK, nil
 }
