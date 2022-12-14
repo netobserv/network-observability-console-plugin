@@ -1,7 +1,7 @@
 import { ExtensionK8sModel, ModelFeatureFlag, ResolvedExtension } from '@openshift-console/dynamic-plugin-sdk';
 import _ from 'lodash';
 
-export const DEFAULT_HOST = '/api/proxy/plugin/netobserv-plugin/backend/';
+export const DEFAULT_HOST = '/api/proxy/plugin/netobserv-plugin/backend';
 export class ContextSingleton {
   private static instance: ContextSingleton;
   private isStandalone: boolean;

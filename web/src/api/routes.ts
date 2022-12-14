@@ -29,7 +29,7 @@ export const getFlows = (params: FlowQuery): Promise<RecordsResult> => {
 
 export const getExportFlowsURL = (params: FlowQuery, columns?: string[]): string => {
   const exportQuery = buildExportQuery(params, columns);
-  return `${ContextSingleton.getHost()}api/loki/export?${exportQuery}`;
+  return `${ContextSingleton.getHost()}/api/loki/export?${exportQuery}`;
 };
 
 export const getNamespaces = (): Promise<string[]> => {
