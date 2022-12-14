@@ -21,11 +21,11 @@ jobs:
       - name: install make
         run: sudo apt-get install make
       - name: set up go 1.x
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3
         with:
           go-version: ${{ matrix.go }}
       - name: checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: build images
         run: BASE_IMAGE="${{ env.REGISTRY }}/${{ env.REG_IMAGE }}" TAG="${{ env.REG_TAG }}" make build-ci-images
       - name: podman login to quay.io
@@ -35,14 +35,13 @@ jobs:
           password: ${{ env.REGISTRY_PASSWORD }}
           registry: quay.io
       - name: get short sha
-        id: shortsha
-        run: echo "::set-output name=short_sha::$(git rev-parse --short HEAD)"
+        run: echo "short_sha=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
       - name: push to quay.io
         id: push-to-quay
         uses: redhat-actions/push-to-registry@v2
         with:
           image: ${{ env.REG_IMAGE }}
-          tags: ${{ env.REG_TAG }} ${{ steps.shortsha.outputs.short_sha }}
+          tags: ${{ env.REG_TAG }} ${{ env.short_sha }}
           registry: ${{ env.REGISTRY }}
       - name: print image url
         run: echo "Image pushed to ${{ steps.push-to-quay.outputs.registry-paths }}"

@@ -10,7 +10,7 @@ SHELL := /bin/bash
 BASE_IMAGE ?= quay.io/${IMG_USER}/network-observability-console-plugin
 IMAGE ?= ${BASE_IMAGE}:${TAG}
 
-GOLANGCI_LINT_VERSION = v1.42.1
+GOLANGCI_LINT_VERSION = v1.50.1
 COVERPROFILE = coverage.out
 NPM_INSTALL ?= install
 
