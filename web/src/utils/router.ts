@@ -46,7 +46,8 @@ export const getMatchFromURL = (): Match => {
 
 export const getFiltersFromURL = (t: TFunction, disabledFilters: DisabledFilters): Promise<Filter[]> | undefined => {
   const urlParam = getURLParam(URLParam.Filters);
-  if (!urlParam) {
+  //skip filters only if url param is missing
+  if (urlParam === null) {
     return undefined;
   }
   const filterPromises: Promise<Filter>[] = [];
@@ -77,10 +78,7 @@ export const getFiltersFromURL = (t: TFunction, disabledFilters: DisabledFilters
       }
     }
   });
-  if (filterPromises.length > 0) {
-    return Promise.all(filterPromises);
-  }
-  return undefined;
+  return Promise.all(filterPromises);
 };
 
 export const setURLFilters = (filters: Filter[]) => {
