@@ -44,11 +44,11 @@ func TestAggregatedQueryResponseMarshal(t *testing.T) {
 
 	js, err := json.Marshal(qr)
 	require.NoError(t, err)
-	assert.Equal(t, `{"resultType":"streams","result":[],"stats":{"numQueries":1,"limitReached":false,"queriesStats":null},"isMock":false}`, string(js))
+	assert.Equal(t, `{"resultType":"streams","result":[],"stats":{"numQueries":1,"limitReached":false,"queriesStats":null},"isMock":false,"unixTimestamp":0}`, string(js))
 }
 
 func TestAggregatedQueryResponseUnmarshal(t *testing.T) {
-	js := `{"resultType":"streams","result":[],"stats":{"numQueries":1,"limitReached":false,"queriesStats":null},"isMock":false}`
+	js := `{"resultType":"streams","result":[],"stats":{"numQueries":1,"limitReached":false,"queriesStats":null},"isMock":false,"unixTimestamp":0}`
 	var qr AggregatedQueryResponse
 	err := json.Unmarshal([]byte(js), &qr)
 	require.NoError(t, err)
@@ -95,11 +95,11 @@ func TestAggregatedQueryResponseMatrixMarshal(t *testing.T) {
 
 	js, err := json.Marshal(qr)
 	require.NoError(t, err)
-	assert.Equal(t, `{"resultType":"matrix","result":[],"stats":{"numQueries":1,"limitReached":false,"queriesStats":null},"isMock":false}`, string(js))
+	assert.Equal(t, `{"resultType":"matrix","result":[],"stats":{"numQueries":1,"limitReached":false,"queriesStats":null},"isMock":false,"unixTimestamp":0}`, string(js))
 }
 
 func TestAggregatedQueryResponseMatrixUnmarshal(t *testing.T) {
-	js := `{"resultType":"matrix","result":[],"stats":{"numQueries":1,"limitReached":false,"queriesStats":null},"isMock":false}`
+	js := `{"resultType":"matrix","result":[],"stats":{"numQueries":1,"limitReached":false,"queriesStats":null},"isMock":false,"unixTimestamp":0}`
 	var qr AggregatedQueryResponse
 	err := json.Unmarshal([]byte(js), &qr)
 	require.NoError(t, err)
@@ -126,5 +126,5 @@ func TestReencodeStats(t *testing.T) {
 	}
 	reencoded, err := json.Marshal(agg)
 	require.NoError(t, err)
-	assert.Equal(t, `{"resultType":"streams","result":[],"stats":{"numQueries":1,"limitReached":false,"queriesStats":[{"ingester":{"foo":"bar"}}]},"isMock":false}`, string(reencoded))
+	assert.Equal(t, `{"resultType":"streams","result":[],"stats":{"numQueries":1,"limitReached":false,"queriesStats":[{"ingester":{"foo":"bar"}}]},"isMock":false,"unixTimestamp":0}`, string(reencoded))
 }
