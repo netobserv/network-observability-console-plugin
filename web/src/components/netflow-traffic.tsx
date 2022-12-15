@@ -444,7 +444,7 @@ export const NetflowTraffic: React.FC<{
 
   // Rewrite URL params on state change
   React.useEffect(() => {
-    //writh forced filters in url if specified
+    //with forced filters in url if specified
     if (forcedFilters) {
       setURLFilters(forcedFilters!);
     } else if (!_.isEmpty(filters)) {
