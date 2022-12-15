@@ -105,7 +105,7 @@ import {
   setURLRange,
   setURLReporter
 } from '../utils/router';
-import { getURLParams, hasEmptyParams, netflowTrafficPath, removeURLParam, setURLParams, URLParam } from '../utils/url';
+import { getURLParams, hasEmptyParams, netflowTrafficPath, setURLParams } from '../utils/url';
 import { OverviewDisplayDropdown } from './dropdowns/overview-display-dropdown';
 import { LIMIT_VALUES, TOP_VALUES } from './dropdowns/query-options-dropdown';
 import { RefreshDropdown } from './dropdowns/refresh-dropdown';
@@ -444,7 +444,13 @@ export const NetflowTraffic: React.FC<{
 
   // Rewrite URL params on state change
   React.useEffect(() => {
-    setURLFilters(forcedFilters || filters);
+    //writh forced filters in url if specified
+    if (forcedFilters) {
+      setURLFilters(forcedFilters!);
+    } else if (!_.isEmpty(filters)) {
+      //write filters in url if not empty
+      setURLFilters(filters);
+    }
   }, [filters, forcedFilters]);
   React.useEffect(() => {
     setURLRange(range);
@@ -497,7 +503,8 @@ export const NetflowTraffic: React.FC<{
     if (forcedFilters) {
       push(netflowTrafficPath);
     } else if (filters) {
-      removeURLParam(URLParam.Filters);
+      //set URL Param to empty value to be able to restore state coming from another page
+      setURLFilters([]);
       updateTableFilters([]);
     }
   }, [forcedFilters, push, filters, updateTableFilters]);
