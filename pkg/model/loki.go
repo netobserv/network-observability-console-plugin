@@ -17,10 +17,11 @@ type QueryResponse struct {
 
 // AggregatedQueryResponse represents the modified json response to one or more logQL queries
 type AggregatedQueryResponse struct {
-	ResultType ResultType      `json:"resultType"`
-	Result     ResultValue     `json:"result"`
-	Stats      AggregatedStats `json:"stats"`
-	IsMock     bool            `json:"isMock"`
+	ResultType    ResultType      `json:"resultType"`
+	Result        ResultValue     `json:"result"`
+	Stats         AggregatedStats `json:"stats"`
+	IsMock        bool            `json:"isMock"`
+	UnixTimestamp int64           `json:"unixTimestamp"`
 }
 
 // AggregatedStats represents the stats to one or more logQL queries
