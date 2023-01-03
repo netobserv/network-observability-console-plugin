@@ -91,10 +91,15 @@ export const OverviewPanelsModal: React.FC<{
     setUpdatedPanels(result);
   }, [updatedPanels, setUpdatedPanels, isAllSelected]);
 
+  const onClose = React.useCallback(() => {
+    setUpdatedPanels(_.cloneDeep(panels));
+    setModalOpen(false);
+  }, [panels, setModalOpen]);
+
   const onSave = React.useCallback(() => {
     setPanels(updatedPanels);
-    setModalOpen(false);
-  }, [updatedPanels, setPanels, setModalOpen]);
+    onClose();
+  }, [setPanels, updatedPanels, onClose]);
 
   const draggableItems = updatedPanels.map((panel, i) => {
     const info = getOverviewPanelInfo(t, panel.id);
@@ -140,7 +145,7 @@ export const OverviewPanelsModal: React.FC<{
       title={t('Manage panels')}
       isOpen={isModalOpen}
       scrollable={true}
-      onClose={() => setModalOpen(false)}
+      onClose={() => onClose()}
       description={
         <TextContent>
           <Text component={TextVariants.p}>
@@ -157,7 +162,7 @@ export const OverviewPanelsModal: React.FC<{
           <Button data-test="panels-reset-button" key="reset" variant="link" onClick={() => onReset()}>
             {t('Restore default panels')}
           </Button>
-          <Button data-test="panels-cancel-button" key="cancel" variant="link" onClick={() => setModalOpen(false)}>
+          <Button data-test="panels-cancel-button" key="cancel" variant="link" onClick={() => onClose()}>
             {t('Cancel')}
           </Button>
           <Tooltip content={t('At least one panel must be selected')} isVisible={isSaveDisabled}>
