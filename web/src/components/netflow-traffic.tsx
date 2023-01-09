@@ -537,12 +537,20 @@ export const NetflowTraffic: React.FC<{
     );
   };
 
+  const onTopologyExport = () => {
+    const svg = document.getElementsByClassName('pf-topology-visualization-surface__svg')[0];
+    saveSvgAsPng(svg, 'topology.png', {
+      backgroundColor: '#fff',
+      encoderOptions: 0
+    });
+  };
+
   const viewOptionsContent = () => {
     const items: JSX.Element[] = [];
 
     if (selectedViewId === 'overview') {
       items.push(
-        <OverflowMenuItem isPersistent key="columns">
+        <OverflowMenuItem key="panels">
           <Button
             data-test="manage-overview-panels-button"
             id="manage-overview-panels-button"
@@ -574,7 +582,7 @@ export const NetflowTraffic: React.FC<{
       );*/
     } else if (selectedViewId === 'table') {
       items.push(
-        <OverflowMenuItem isPersistent key="columns">
+        <OverflowMenuItem key="columns">
           <Button
             data-test="manage-columns-button"
             id="manage-columns-button"
@@ -610,13 +618,7 @@ export const NetflowTraffic: React.FC<{
             variant="link"
             className="overflow-button"
             icon={<ExportIcon />}
-            onClick={() => {
-              const svg = document.getElementsByClassName('pf-topology-visualization-surface__svg')[0];
-              saveSvgAsPng(svg, 'topology.png', {
-                backgroundColor: '#fff',
-                encoderOptions: 0
-              });
-            }}
+            onClick={() => onTopologyExport()}
           >
             {t('Export topology view')}
           </Button>
@@ -627,6 +629,41 @@ export const NetflowTraffic: React.FC<{
   };
 
   const viewOptionsControl = () => {
+    const dropdownItems: JSX.Element[] = [];
+
+    if (selectedViewId === 'overview') {
+      dropdownItems.push(
+        <DropdownGroup key="panels" label={t('Manage')}>
+          <DropdownItem key="export" onClick={() => setOverviewModalOpen(true)}>
+            {t('Panels')}
+          </DropdownItem>
+        </DropdownGroup>
+      );
+    } else if (selectedViewId === 'table') {
+      dropdownItems.push(
+        <DropdownGroup key="columns" label={t('Manage')}>
+          <DropdownItem key="export" onClick={() => setColModalOpen(true)}>
+            {t('Columns')}
+          </DropdownItem>
+        </DropdownGroup>
+      );
+      dropdownItems.push(
+        <DropdownGroup key="export-group" label={t('Actions')}>
+          <DropdownItem key="export" onClick={() => setExportModalOpen(true)}>
+            {t('Export')}
+          </DropdownItem>
+        </DropdownGroup>
+      );
+    } else if (selectedViewId === 'topology') {
+      dropdownItems.push(
+        <DropdownGroup key="export-group" label={t('Actions')}>
+          <DropdownItem key="export" onClick={() => onTopologyExport()}>
+            {t('Export view')}
+          </DropdownItem>
+        </DropdownGroup>
+      );
+    }
+
     return (
       <Dropdown
         data-test="view-options-dropdown"
@@ -645,24 +682,7 @@ export const NetflowTraffic: React.FC<{
           </Button>
         }
         isOpen={isViewOptionOverflowMenuOpen}
-        dropdownItems={[
-          <DropdownGroup key="display-group" label={t('Display')}>
-            <DropdownItem key="s" onClick={() => setSize('s')}>
-              {t('Compact')}
-            </DropdownItem>
-            <DropdownItem key="m" onClick={() => setSize('m')}>
-              {t('Normal')}
-            </DropdownItem>
-            <DropdownItem key="l" onClick={() => setSize('l')}>
-              {t('Large')}
-            </DropdownItem>
-          </DropdownGroup>,
-          <DropdownGroup key="export-group" label={t('Actions')}>
-            <DropdownItem key="export" onClick={() => setExportModalOpen(true)}>
-              {t('Export')}
-            </DropdownItem>
-          </DropdownGroup>
-        ]}
+        dropdownItems={dropdownItems}
       />
     );
   };
@@ -719,7 +739,7 @@ export const NetflowTraffic: React.FC<{
   const filtersExtraContent = () => {
     const items: JSX.Element[] = [];
     items.push(
-      <OverflowMenuItem key="fullscreen" isPersistent={selectedViewId === 'topology'}>
+      <OverflowMenuItem key="fullscreen">
         <Button
           data-test="fullscreen-button"
           id="fullscreen-button"
