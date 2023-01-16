@@ -15,6 +15,7 @@ type Topology struct {
 	limit        string
 	rateInterval string
 	step         string
+	function     string
 	dataField    string
 	fields       string
 }
@@ -30,11 +31,15 @@ func NewTopologyQuery(cfg *Config, start, end, limit, rateInterval, step, metric
 		l = topologyDefaultLimit
 	}
 
-	var t string
+	var f, t string
 	switch metricType {
+	case "count":
+		f = "count_over_time"
 	case "packets":
+		f = "rate"
 		t = "Packets"
 	default:
+		f = "rate"
 		t = "Bytes"
 	}
 
@@ -44,6 +49,7 @@ func NewTopologyQuery(cfg *Config, start, end, limit, rateInterval, step, metric
 			rateInterval: rateInterval,
 			step:         step,
 			limit:        l,
+			function:     f,
 			dataField:    t,
 			fields:       getFields(scope, groups),
 		},
@@ -94,7 +100,7 @@ func (q *TopologyQueryBuilder) Build() string {
 	//		topk(
 	// 			<k>,
 	//			sum by(<aggregations>) (
-	//				rate(
+	//				<function>(
 	//					{<label filters>}|<line filters>|json|<json filters>
 	//						|unwrap Bytes|__error__=""[300s]
 	//				)
@@ -106,7 +112,9 @@ func (q *TopologyQueryBuilder) Build() string {
 	sb.WriteString(q.topology.limit)
 	sb.WriteString(",sum by(")
 	sb.WriteString(q.topology.fields)
-	sb.WriteString(") (rate(")
+	sb.WriteString(") (")
+	sb.WriteString(q.topology.function)
+	sb.WriteString("(")
 	q.appendLabels(sb)
 	q.appendLineFilters(sb)
 	q.appendDeduplicateFilter(sb)
