@@ -102,11 +102,11 @@ func (q *TopologyQueryBuilder) Build() string {
 	//			sum by(<aggregations>) (
 	//				<function>(
 	//					{<label filters>}|<line filters>|json|<json filters>
-	//						|unwrap Bytes|__error__=""[300s]
+	//						|unwrap Bytes|__error__=""[<interval>]
 	//				)
 	//			)
 	//		)
-	//		&<query params>&step=300s
+	//		&<query params>&step=<step>
 	sb := q.createStringBuilderURL()
 	sb.WriteString("topk(")
 	sb.WriteString(q.topology.limit)
@@ -125,7 +125,11 @@ func (q *TopologyQueryBuilder) Build() string {
 		sb.WriteString(`|__error__=""`)
 	}
 	sb.WriteRune('[')
-	sb.WriteString(q.topology.rateInterval)
+	if q.topology.function == "count_over_time" {
+		sb.WriteString(q.topology.step)
+	} else {
+		sb.WriteString(q.topology.rateInterval)
+	}
 	sb.WriteString("])))")
 	q.appendQueryParams(sb)
 	sb.WriteString("&step=")
