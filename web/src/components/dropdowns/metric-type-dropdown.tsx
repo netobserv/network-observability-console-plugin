@@ -20,6 +20,8 @@ export const MetricTypeDropdown: React.FC<{
           return t('Packets');
         case 'bytes':
           return t('Bytes');
+        default:
+          throw new Error('getMetricDisplay called with invalid metricType: ' + metricType);
       }
     },
     [t]

@@ -247,7 +247,9 @@ export const computeStats = (ts: [number, number][]): MetricStats => {
 };
 
 export const getFormattedValue = (v: number, mt: MetricType, mf: MetricFunction): string => {
-  if (mf === 'sum') {
+  if (mt === 'count') {
+    return simpleValueFormat(v);
+  } else if (mf === 'sum') {
     switch (mt) {
       case 'bytes':
         return byteFormat(v);
@@ -261,6 +263,8 @@ export const getFormattedValue = (v: number, mt: MetricType, mf: MetricFunction)
 
 export const getFormattedRateValue = (v: number, mt: MetricType): string => {
   switch (mt) {
+    case 'count':
+      return simpleValueFormat(v);
     case 'bytes':
       return byteRateFormat(v);
     case 'packets':
