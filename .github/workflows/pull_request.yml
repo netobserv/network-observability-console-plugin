@@ -7,7 +7,7 @@ on:
 jobs:
   build-test-backend:
     name: Build, lint, test backend
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         go: ['1.18']
