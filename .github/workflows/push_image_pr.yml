@@ -44,7 +44,7 @@ jobs:
           image: ${{ env.REG_IMAGE }}
           tags: ${{ env.short_sha }}
           registry: ${{ env.REGISTRY }}
-      - uses: actions/github-script@v5
+      - uses: actions/github-script@v6
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
