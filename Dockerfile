@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi8/nodejs-16:1-72 as web-builder
+FROM registry.access.redhat.com/ubi9/nodejs-16:1 as web-builder
 
 WORKDIR /opt/app-root
 
@@ -11,7 +11,7 @@ COPY --chown=default web web
 COPY mocks mocks
 RUN make fmt-frontend just-build-frontend
 
-FROM registry.access.redhat.com/ubi8/go-toolset:1.18 as go-builder
+FROM registry.access.redhat.com/ubi9/go-toolset:1.18 as go-builder
 
 WORKDIR /opt/app-root
 
@@ -25,7 +25,7 @@ COPY pkg/ pkg/
 
 RUN make build-backend
 
-FROM registry.access.redhat.com/ubi8/ubi-minimal:8.7
+FROM registry.access.redhat.com/ubi9/ubi-minimal:9.1.0
 
 COPY --from=web-builder /opt/app-root/web/dist ./web/dist
 COPY --from=go-builder /opt/app-root/plugin-backend ./
