@@ -136,7 +136,7 @@ import HistogramContainer from './metrics/histogram';
 export type ViewId = 'overview' | 'table' | 'topology';
 
 export const NetflowTraffic: React.FC<{
-  forcedFilters?: Filter[];
+  forcedFilters?: Filter[] | null;
   isTab?: boolean;
 }> = ({ forcedFilters, isTab }) => {
   const { push } = useHistory();
@@ -207,7 +207,8 @@ export const NetflowTraffic: React.FC<{
   const [selectedElement, setSelectedElement] = React.useState<GraphElementPeer | undefined>(undefined);
   const searchRef = React.useRef<SearchHandle>(null);
   const [searchEvent, setSearchEvent] = React.useState<SearchEvent | undefined>(undefined);
-  const isInit = React.useRef(true);
+  //use this ref to list any props / content loading state & events to skip tick function
+  const initState = React.useRef<string[]>([]);
   const [panels, setSelectedPanels] = useLocalStorage<OverviewPanel[]>(
     LOCAL_STORAGE_OVERVIEW_IDS_KEY,
     getDefaultOverviewPanels(),
@@ -221,10 +222,6 @@ export const NetflowTraffic: React.FC<{
     criteria: 'isSelected'
   });
   const [columnSizes, setColumnSizes] = useLocalStorage<ColumnSizeMap>(LOCAL_STORAGE_COLS_SIZES_KEY, {});
-
-  React.useEffect(() => {
-    loadConfig().then(setConfig);
-  }, [setConfig]);
 
   const getQuickFilters = React.useCallback(() => parseQuickFilters(t, config.quickFilters), [t, config]);
 
@@ -248,20 +245,6 @@ export const NetflowTraffic: React.FC<{
   const resetDefaultFilters = React.useCallback(() => {
     updateTableFilters(getDefaultFilters());
   }, [getDefaultFilters, updateTableFilters]);
-
-  React.useEffect(() => {
-    // Init state from URL
-    if (!forcedFilters) {
-      const filtersPromise = getFiltersFromURL(t, disabledFilters);
-      if (filtersPromise) {
-        filtersPromise.then(updateTableFilters);
-      } else {
-        resetDefaultFilters();
-      }
-    }
-    // disabling exhaustive-deps: only for init
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [forcedFilters, config]);
 
   const clearSelections = () => {
     setTRModalOpen(false);
@@ -374,6 +357,14 @@ export const NetflowTraffic: React.FC<{
   );
 
   const tick = React.useCallback(() => {
+    // skip tick while forcedFilters & config are not loaded
+    // this check ensure tick will not be called during init
+    // as it's difficult to manage react state changes
+    if (!initState.current.includes('forcedFiltersLoaded') || !initState.current.includes('configLoaded')) {
+      console.error('tick skipped', initState.current);
+      return;
+    }
+
     setLoading(true);
     setError(undefined);
     const fq = buildFlowQuery();
@@ -455,21 +446,50 @@ export const NetflowTraffic: React.FC<{
         setLoading(false);
         break;
     }
-  }, [buildFlowQuery, histogramRange, manageWarnings, range, selectedViewId, showHistogram]);
+  }, [buildFlowQuery, histogramRange, manageWarnings, range, selectedViewId, showHistogram, initState]);
 
   usePoll(tick, interval);
 
   // tick on state change
   React.useEffect(() => {
-    // Skip on init if forcedFilters not set
-    if (isInit.current) {
-      isInit.current = false;
+    // init function will be triggered only once
+    if (!initState.current.includes('initDone')) {
+      initState.current.push('initDone');
+
+      // init state from URL
       if (!forcedFilters) {
+        const filtersPromise = getFiltersFromURL(t, disabledFilters);
+        if (filtersPromise) {
+          filtersPromise.then(updateTableFilters);
+        } else {
+          resetDefaultFilters();
+        }
+      }
+
+      // load config only once and track its state
+      if (!initState.current.includes('configLoading')) {
+        initState.current.push('configLoading');
+        loadConfig().then(v => {
+          initState.current.push('configLoaded');
+          setConfig(v);
+        });
+      }
+
+      // init will trigger this useEffect update loop as soon as config is loaded
+      return;
+    }
+
+    if (!initState.current.includes('forcedFiltersLoaded') && forcedFilters !== undefined) {
+      initState.current.push('forcedFiltersLoaded');
+      //in case forcedFilters are null, we only track config update
+      if (forcedFilters === null) {
         return;
       }
     }
+
     tick();
-  }, [forcedFilters, tick]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [forcedFilters, config, tick, setConfig]);
 
   // Rewrite URL params on state change
   React.useEffect(() => {
