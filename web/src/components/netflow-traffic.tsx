@@ -208,7 +208,7 @@ export const NetflowTraffic: React.FC<{
   const searchRef = React.useRef<SearchHandle>(null);
   const [searchEvent, setSearchEvent] = React.useState<SearchEvent | undefined>(undefined);
   //use this ref to list any props / content loading state & events to skip tick function
-  const initState = React.useRef<string[]>([]);
+  const initState = React.useRef<Array<'initDone' | 'configLoading' | 'configLoaded' | 'forcedFiltersLoaded'>>([]);
   const [panels, setSelectedPanels] = useLocalStorage<OverviewPanel[]>(
     LOCAL_STORAGE_OVERVIEW_IDS_KEY,
     getDefaultOverviewPanels(),
