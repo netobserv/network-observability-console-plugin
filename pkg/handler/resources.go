@@ -28,7 +28,7 @@ func GetNamespaces(cfg *loki.Config) func(w http.ResponseWriter, r *http.Request
 			metrics.ObserveHTTPCall("GetNamespaces", code, startTime)
 		}()
 
-		// Initialize values explicitely to avoid null json when emtpy
+		// Initialize values explicitly to avoid null json when empty
 		values := []string{}
 
 		// Fetch and merge values for SrcK8S_Namespace and DstK8S_Namespace
@@ -85,7 +85,7 @@ func GetNames(cfg *loki.Config) func(w http.ResponseWriter, r *http.Request) {
 		namespace := params["namespace"]
 		kind := params["kind"]
 
-		// Initialize names explicitely to avoid null json when emtpy
+		// Initialize names explicitly to avoid null json when empty
 		names := []string{}
 
 		// TODO: parallelize
