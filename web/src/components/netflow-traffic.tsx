@@ -223,12 +223,15 @@ export const NetflowTraffic: React.FC<{
   });
   const [columnSizes, setColumnSizes] = useLocalStorage<ColumnSizeMap>(LOCAL_STORAGE_COLS_SIZES_KEY, {});
 
-  const getQuickFilters = React.useCallback(() => parseQuickFilters(t, config.quickFilters), [t, config]);
+  const getQuickFilters = React.useCallback((c = config) => parseQuickFilters(t, c.quickFilters), [t, config]);
 
-  const getDefaultFilters = React.useCallback(() => {
-    const quickFilters = getQuickFilters();
-    return quickFilters.filter(qf => qf.default).flatMap(qf => qf.filters);
-  }, [getQuickFilters]);
+  const getDefaultFilters = React.useCallback(
+    (c = config) => {
+      const quickFilters = getQuickFilters(c);
+      return quickFilters.filter(qf => qf.default).flatMap(qf => qf.filters);
+    },
+    [config, getQuickFilters]
+  );
 
   // updates table filters and clears up the table for proper visualization of the
   // updating process
@@ -242,9 +245,12 @@ export const NetflowTraffic: React.FC<{
     [setFilters, setFlows, setWarningMessage]
   );
 
-  const resetDefaultFilters = React.useCallback(() => {
-    updateTableFilters(getDefaultFilters());
-  }, [getDefaultFilters, updateTableFilters]);
+  const resetDefaultFilters = React.useCallback(
+    (c = config) => {
+      updateTableFilters(getDefaultFilters(c));
+    },
+    [config, getDefaultFilters, updateTableFilters]
+  );
 
   const clearSelections = () => {
     setTRModalOpen(false);
@@ -456,22 +462,21 @@ export const NetflowTraffic: React.FC<{
     if (!initState.current.includes('initDone')) {
       initState.current.push('initDone');
 
-      // init state from URL
-      if (!forcedFilters) {
-        const filtersPromise = getFiltersFromURL(t, disabledFilters);
-        if (filtersPromise) {
-          filtersPromise.then(updateTableFilters);
-        } else {
-          resetDefaultFilters();
-        }
-      }
-
       // load config only once and track its state
       if (!initState.current.includes('configLoading')) {
         initState.current.push('configLoading');
         loadConfig().then(v => {
           initState.current.push('configLoaded');
           setConfig(v);
+          if (forcedFilters === null) {
+            //set filters from url or freshly loaded quick filters defaults
+            const filtersPromise = getFiltersFromURL(t, disabledFilters);
+            if (filtersPromise) {
+              filtersPromise.then(updateTableFilters);
+            } else {
+              resetDefaultFilters(v);
+            }
+          }
         });
       }
 
