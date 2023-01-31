@@ -1,0 +1,24 @@
+name: PR labels
+
+on:
+  pull_request:
+    types: [opened, labeled, unlabeled, synchronize]
+    branches: ['*']
+
+jobs:
+  premerge-labels:
+    name: Pre-merge labels
+    runs-on: ubuntu-latest
+    steps:
+      - name: QE approval
+        uses: mheap/github-action-required-labels@v3
+        with:
+          mode: minimum
+          count: 1
+          labels: "qe-approved, no-qe"
+      - name: Doc approval
+        uses: mheap/github-action-required-labels@v3
+        with:
+          mode: minimum
+          count: 1
+          labels: "doc-approved, no-doc"
