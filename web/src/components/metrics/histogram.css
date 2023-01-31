@@ -1,7 +1,14 @@
-.histogram-range {
+.histogram-range-container {
   position: absolute;
-  left: 0;
-  right: 0;
-  text-align: center;
-  margin: 5px;
+  height: 33px;
+  overflow: hidden;
+  left: 1.5rem;
+  right: 1.5rem;
+  justify-content: center;
+  margin: 0;
+  z-index: 999;
+}
+
+.histogram-zoom-container {
+  justify-content: end !important;
 }

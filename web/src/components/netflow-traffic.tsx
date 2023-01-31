@@ -65,7 +65,7 @@ import {
 import { Column, ColumnSizeMap, getDefaultColumns } from '../utils/columns';
 import { loadConfig } from '../utils/config';
 import { ContextSingleton } from '../utils/context';
-import { computeStepInterval, TimeRange } from '../utils/datetime';
+import { computeStepInterval, getTimeRangeOptions, TimeRange } from '../utils/datetime';
 import { getHTTPErrorDetails } from '../utils/errors';
 import { useK8sModelsWithColors } from '../utils/k8s-models-hook';
 import {
@@ -93,6 +93,7 @@ import { usePoll } from '../utils/poll-hook';
 import {
   defaultMetricFunction,
   defaultMetricType,
+  defaultTimeRange,
   getFiltersFromURL,
   getLimitFromURL,
   getMatchFromURL,
@@ -132,6 +133,7 @@ import { SearchComponent, SearchEvent, SearchHandle } from './search/search';
 import './netflow-traffic.css';
 import { TruncateLength } from './dropdowns/truncate-dropdown';
 import HistogramContainer from './metrics/histogram';
+import { formatDuration, getDateMsInSeconds, getDateSInMiliseconds, parseDuration } from '../utils/duration';
 
 export type ViewId = 'overview' | 'table' | 'topology';
 
@@ -1005,6 +1007,70 @@ export const NetflowTraffic: React.FC<{
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [match, filters]);
 
+  const moveRange = React.useCallback(
+    (next: boolean) => {
+      const now = lastRefresh ? lastRefresh.getTime() : new Date().getTime();
+
+      if (typeof range === 'number') {
+        if (next) {
+          //call refresh as we can't move in the future
+          tick();
+        } else {
+          setRange({ from: getDateMsInSeconds(now) - 2 * range, to: getDateMsInSeconds(now) - range });
+        }
+      } else {
+        const updatedRange = { ...range };
+        const factor = (next ? 1 : -1) * (range.to - range.from);
+
+        updatedRange.from += factor;
+        updatedRange.to += factor;
+
+        if (getDateSInMiliseconds(updatedRange.to) > now) {
+          updatedRange.to = getDateMsInSeconds(now);
+        }
+
+        if (updatedRange.to - updatedRange.from < defaultTimeRange) {
+          setRange(defaultTimeRange);
+        } else {
+          setRange(updatedRange);
+        }
+      }
+    },
+    [lastRefresh, range, tick]
+  );
+
+  const zoomRange = React.useCallback(
+    (zoomIn: boolean) => {
+      if (typeof range === 'number') {
+        const timeRangeOptions = getTimeRangeOptions(t, false);
+        const keys = Object.keys(timeRangeOptions);
+        const selectedKey = formatDuration(getDateSInMiliseconds(range as number));
+        let index = keys.indexOf(selectedKey);
+        if (zoomIn && index > 0) {
+          index--;
+        } else if (!zoomIn && index < keys.length) {
+          index++;
+        }
+
+        setRange(getDateMsInSeconds(parseDuration(keys[index])));
+      } else {
+        const updatedRange = { ...range };
+        const factor = ((zoomIn ? -1 : 1) * (range.to - range.from)) / 2;
+
+        updatedRange.from += factor;
+        updatedRange.to += factor;
+
+        const now = lastRefresh ? lastRefresh.getTime() : new Date().getTime();
+        if (getDateSInMiliseconds(updatedRange.to) > now) {
+          updatedRange.to = getDateMsInSeconds(now);
+        }
+
+        setRange(updatedRange);
+      }
+    },
+    [lastRefresh, range, t]
+  );
+
   const isShowViewOptions = selectedViewId === 'table' ? showViewOptions && !showHistogram : showViewOptions;
 
   return !_.isEmpty(extensions) ? (
@@ -1098,6 +1164,8 @@ export const NetflowTraffic: React.FC<{
               isDark={isDarkTheme}
               range={histogramRange}
               setRange={setHistogramRange}
+              moveRange={moveRange}
+              zoomRange={zoomRange}
             />
           </ToolbarItem>
         </Toolbar>

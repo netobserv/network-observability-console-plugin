@@ -2,7 +2,7 @@ import { Dropdown, DropdownItem, DropdownToggle, Tooltip } from '@patternfly/rea
 import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { getFormattedDate, getTimeRangeOptions, TimeRange } from '../../utils/datetime';
+import { dateFormatter, getFormattedDate, getTimeRangeOptions, timeFormatter, TimeRange } from '../../utils/datetime';
 import {
   formatDuration,
   getDateFromSecondsString,
@@ -38,18 +38,29 @@ export const TimeRangeDropdown: React.FC<TimeRangeDropdownProps> = ({ id, range,
   const timeRangeOptions = getTimeRangeOptions(t);
   const selectedKey = typeof range !== 'number' ? CUSTOM_TIME_RANGE_KEY : formatDuration(getDateSInMiliseconds(range));
 
-  const textContent = () => {
+  const textContent = (prettyPrint = true) => {
     if (selectedKey === CUSTOM_TIME_RANGE_KEY) {
       const timeRange = range as TimeRange;
       const from = getDateFromSecondsString(timeRange.from?.toString());
+      const fromText = getFormattedDate(from);
+
       const to = getDateFromSecondsString(timeRange.to?.toString());
-      return (
-        <>
-          {`${t('From')} ${getFormattedDate(from)}`}
-          <br />
-          {`${t('To')} ${getFormattedDate(to)}`}
-        </>
-      );
+      let toText = getFormattedDate(to);
+      if (prettyPrint) {
+        return (
+          <>
+            {`${t('From')} ${fromText}`}
+            <br />
+            {`${t('To')} ${toText}`}
+          </>
+        );
+      } else {
+        //remove common part of date if possible
+        if (getFormattedDate(from, dateFormatter) === getFormattedDate(to, dateFormatter)) {
+          toText = getFormattedDate(to, timeFormatter);
+        }
+        return `${fromText} - ${toText}`;
+      }
     } else {
       return;
     }
@@ -73,7 +84,9 @@ export const TimeRangeDropdown: React.FC<TimeRangeDropdownProps> = ({ id, range,
           content={textContent()}
         >
           <DropdownToggle data-test={`${id}-dropdown`} id={`${id}-dropdown`} onToggle={() => setIsOpen(!isOpen)}>
-            {timeRangeOptions[selectedKey as keyof typeof timeRangeOptions]}
+            {selectedKey === CUSTOM_TIME_RANGE_KEY
+              ? textContent(false)
+              : timeRangeOptions[selectedKey as keyof typeof timeRangeOptions]}
           </DropdownToggle>
         </Tooltip>
       }
