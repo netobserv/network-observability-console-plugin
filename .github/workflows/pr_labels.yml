@@ -1,0 +1,18 @@
+name: PR labels
+
+on:
+  pull_request:
+    types: [opened, labeled, unlabeled, synchronize]
+    branches: ['*']
+
+jobs:
+  check-labels:
+    name: qe-approve|no-qe, doc-approve|no-doc
+    runs-on: ubuntu-latest
+    steps:
+      - name: QE approval
+        if: "!contains( github.event.pull_request.labels.*.name, 'qe-approved') && !contains( github.event.pull_request.labels.*.name, 'no-qe')"
+        run: exit 1
+      - name: Doc approval
+        if: "!contains( github.event.pull_request.labels.*.name, 'doc-approved') && !contains( github.event.pull_request.labels.*.name, 'no-doc')"
+        run: exit 1
