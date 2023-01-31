@@ -3,21 +3,24 @@ import { mount, render, shallow } from 'enzyme';
 import * as React from 'react';
 import { waitFor } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
-import { getFlows, getTopology } from '../../api/routes';
+import { getConfig, getFlows, getTopology } from '../../api/routes';
 import NetflowTraffic from '../netflow-traffic';
 import { extensionsMock } from '../__tests-data__/extensions';
 import { FlowsResultSample } from '../__tests-data__/flows';
 import NetflowTrafficParent from '../netflow-traffic-parent';
 import { TopologyResult } from '../../api/loki';
+import { ConfigResultSample } from '../__tests-data__/config';
 
 const useResolvedExtensionsMock = useResolvedExtensions as jest.Mock;
 
 jest.mock('../../api/routes', () => ({
+  getConfig: jest.fn(() => Promise.resolve(ConfigResultSample)),
   getFlows: jest.fn(() => Promise.resolve(FlowsResultSample)),
   getTopology: jest.fn(() =>
     Promise.resolve({ metrics: [], stats: { numQueries: 0, limitReached: false } } as TopologyResult)
   )
 }));
+const getConfigMock = getConfig as jest.Mock;
 const getFlowsMock = getFlows as jest.Mock;
 const getTopologyMock = getTopology as jest.Mock;
 
@@ -41,13 +44,22 @@ describe('<NetflowTraffic />', () => {
   });
 
   it('should refresh on button click', async () => {
-    act(() => {
-      const wrapper = mount(<NetflowTrafficParent />);
-      //should have called getTopology 4 times after click (2 for current scope and 2 for app)
+    const wrapper = mount(<NetflowTrafficParent />);
+    await waitFor(() => {
+      //config is get only once
+      expect(getConfigMock).toHaveBeenCalledTimes(1);
+      expect(getFlowsMock).toHaveBeenCalledTimes(0);
+      //should have called getTopology 2 times on render (1 for current scope and 1 for app)
+      expect(getTopologyMock).toHaveBeenCalledTimes(2);
+    });
+    await act(async () => {
       wrapper.find('#refresh-button').at(0).simulate('click');
     });
     await waitFor(() => {
+      //config is get only once
+      expect(getConfigMock).toHaveBeenCalledTimes(1);
       expect(getFlowsMock).toHaveBeenCalledTimes(0);
+      //should have called getTopology 4 times after click (2 for current scope and 2 for app)
       expect(getTopologyMock).toHaveBeenCalledTimes(4);
     });
   });

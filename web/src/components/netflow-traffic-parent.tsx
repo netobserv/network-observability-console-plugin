@@ -49,7 +49,7 @@ class NetflowTrafficParent extends React.Component<Props, State> {
       return this.props.children;
     }
     // else render default NetworkTraffic
-    return <NetflowTraffic />;
+    return <NetflowTraffic forcedFilters={null} />;
   }
 }
 
