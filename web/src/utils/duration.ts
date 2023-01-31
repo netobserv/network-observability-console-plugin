@@ -65,7 +65,7 @@ export const getDateStringInSeconds = (date: Date): string => {
 };
 
 export const getDateMsInSeconds = (time: number): number => {
-  return time / s;
+  return Math.floor(time / s);
 };
 
 export const getDateSInMiliseconds = (time: number): number => {

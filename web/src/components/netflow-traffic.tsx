@@ -33,7 +33,7 @@ import { useHistory } from 'react-router-dom';
 import { useTheme } from '../utils/theme-hook';
 import { saveSvgAsPng } from 'save-svg-as-png';
 import { Record } from '../api/ipfix';
-import { Stats, TopologyMetrics } from '../api/loki';
+import { RecordsResult, Stats, TopologyMetrics, TopologyResult } from '../api/loki';
 import { getFlows, getTopology } from '../api/routes';
 import {
   DisabledFilters,
@@ -82,6 +82,7 @@ import {
   LOCAL_STORAGE_QUERY_PARAMS_KEY,
   LOCAL_STORAGE_REFRESH_KEY,
   LOCAL_STORAGE_SHOW_OPTIONS_KEY,
+  LOCAL_STORAGE_SHOW_HISTOGRAM_KEY,
   LOCAL_STORAGE_SIZE_KEY,
   LOCAL_STORAGE_TOPOLOGY_OPTIONS_KEY,
   LOCAL_STORAGE_VIEW_ID_KEY,
@@ -130,6 +131,7 @@ import FlowsQuerySummary from './query-summary/flows-query-summary';
 import { SearchComponent, SearchEvent, SearchHandle } from './search/search';
 import './netflow-traffic.css';
 import { TruncateLength } from './dropdowns/truncate-dropdown';
+import HistogramContainer from './metrics/histogram';
 
 export type ViewId = 'overview' | 'table' | 'topology';
 
@@ -157,6 +159,7 @@ export const NetflowTraffic: React.FC<{
   const [config, setConfig] = React.useState<Config>(defaultConfig);
   const [warningMessage, setWarningMessage] = React.useState<string | undefined>();
   const [showViewOptions, setShowViewOptions] = useLocalStorage<boolean>(LOCAL_STORAGE_SHOW_OPTIONS_KEY, false);
+  const [showHistogram, setShowHistogram] = useLocalStorage<boolean>(LOCAL_STORAGE_SHOW_HISTOGRAM_KEY, false);
   const [isFilterOverflowMenuOpen, setFiltersOverflowMenuOpen] = React.useState(false);
   const [isViewOptionOverflowMenuOpen, setViewOptionOverflowMenuOpen] = React.useState(false);
   const [isFullScreen, setFullScreen] = React.useState(false);
@@ -192,6 +195,7 @@ export const NetflowTraffic: React.FC<{
   const [lastLimit, setLastLimit] = useLocalStorage<number>(LOCAL_STORAGE_LAST_LIMIT_KEY, LIMIT_VALUES[0]);
   const [lastTop, setLastTop] = useLocalStorage<number>(LOCAL_STORAGE_LAST_TOP_KEY, TOP_VALUES[0]);
   const [range, setRange] = React.useState<number | TimeRange>(getRangeFromURL());
+  const [histogramRange, setHistogramRange] = React.useState<TimeRange>();
   const [metricScope, setMetricScope] = useLocalStorage<MetricScope>(LOCAL_STORAGE_METRIC_SCOPE_KEY, 'namespace');
   const [metricFunction, setMetricFunction] = useLocalStorage<MetricFunction>(
     LOCAL_STORAGE_METRIC_FUNCTION_KEY,
@@ -235,6 +239,7 @@ export const NetflowTraffic: React.FC<{
     (f: Filter[]) => {
       setFilters(f);
       setFlows([]);
+      setTotalMetric(undefined);
       setWarningMessage(undefined);
     },
     [setFilters, setFlows, setWarningMessage]
@@ -281,6 +286,12 @@ export const NetflowTraffic: React.FC<{
       setLastTop(limit);
       setLimit(lastLimit);
     }
+
+    if (view !== selectedViewId) {
+      setFlows([]);
+      setMetrics([]);
+      setTotalMetric(undefined);
+    }
     setSelectedViewId(view);
   };
 
@@ -315,8 +326,14 @@ export const NetflowTraffic: React.FC<{
         query.startTime = range.from.toString();
         query.endTime = range.to.toString();
       }
+
+      const info = computeStepInterval(range);
+      query.rateInterval = `${info.rateIntervalSeconds}s`;
+      query.step = `${info.stepSeconds}s`;
     }
-    if (selectedViewId !== 'table') {
+    if (selectedViewId === 'table') {
+      query.type = 'count';
+    } else {
       query.type = metricType;
       query.scope = metricScope;
       if (selectedViewId === 'topology') {
@@ -325,9 +342,6 @@ export const NetflowTraffic: React.FC<{
         query.limit = TOP_VALUES.includes(limit) ? limit : TOP_VALUES[0];
         query.groups = undefined;
       }
-      const info = computeStepInterval(range);
-      query.rateInterval = `${info.rateIntervalSeconds}s`;
-      query.step = `${info.stepSeconds}s`;
     }
     return query;
   }, [
@@ -363,13 +377,29 @@ export const NetflowTraffic: React.FC<{
     setLoading(true);
     setError(undefined);
     const fq = buildFlowQuery();
+    const promises: Promise<RecordsResult | TopologyResult>[] = [];
     switch (selectedViewId) {
       case 'table':
+        // table query is based on histogram range if available
+        const tableQuery = { ...fq };
+        if (histogramRange) {
+          tableQuery.startTime = histogramRange.from.toString();
+          tableQuery.endTime = histogramRange.to.toString();
+        }
+        promises.push(getFlows(tableQuery));
+        if (showHistogram) {
+          promises.push(getTopology({ ...fq, scope: 'app' }, range));
+        }
         manageWarnings(
-          getFlows(fq)
-            .then(result => {
-              setFlows(result.records);
-              setStats(result.stats);
+          Promise.all(promises)
+            .then(results => {
+              setFlows((results[0] as RecordsResult).records);
+              setStats(results[0].stats);
+              //set app metrics
+              if (results.length > 1) {
+                setTotalMetric((results[1] as TopologyResult).metrics[0]);
+                setAppStats(results[1].stats);
+              }
             })
             .catch(err => {
               setFlows([]);
@@ -379,7 +409,6 @@ export const NetflowTraffic: React.FC<{
             .finally(() => {
               //clear metrics
               setMetrics([]);
-              setTotalMetric(undefined);
               setLoading(false);
               setLastRefresh(new Date());
             })
@@ -388,7 +417,7 @@ export const NetflowTraffic: React.FC<{
       case 'overview':
       case 'topology':
         //run same query on current scope / app scope for total flows
-        const promises = [getTopology(fq, range)];
+        promises.push(getTopology(fq, range));
         if (selectedViewId === 'overview') {
           promises.push(getTopology({ ...fq, scope: 'app' }, range));
         }
@@ -396,11 +425,11 @@ export const NetflowTraffic: React.FC<{
           Promise.all(promises)
             .then(results => {
               //set metrics
-              setMetrics(results[0].metrics);
+              setMetrics((results[0] as TopologyResult).metrics);
               setStats(results[0].stats);
               //set app metrics
               if (results.length > 1) {
-                setTotalMetric(results[1].metrics[0]);
+                setTotalMetric((results[1] as TopologyResult).metrics[0]);
                 setAppStats(results[1].stats);
               } else {
                 setTotalMetric(undefined);
@@ -426,7 +455,7 @@ export const NetflowTraffic: React.FC<{
         setLoading(false);
         break;
     }
-  }, [buildFlowQuery, manageWarnings, range, selectedViewId]);
+  }, [buildFlowQuery, histogramRange, manageWarnings, range, selectedViewId, showHistogram]);
 
   usePoll(tick, interval);
 
@@ -976,6 +1005,8 @@ export const NetflowTraffic: React.FC<{
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [match, filters]);
 
+  const isShowViewOptions = selectedViewId === 'table' ? showViewOptions && !showHistogram : showViewOptions;
+
   return !_.isEmpty(extensions) ? (
     <PageSection id="pageSection" className={isTab ? 'tab' : ''}>
       {
@@ -1017,20 +1048,61 @@ export const NetflowTraffic: React.FC<{
           <FlexItem id="tabs-container" flex={{ default: 'flex_1' }}>
             {viewTabs()}
           </FlexItem>
+          {selectedViewId === 'table' && (
+            <FlexItem className={`${isDarkTheme ? 'dark' : 'light'}-bottom-border`}>
+              <Button
+                data-test="show-histogram-button"
+                id="show-histogram-button"
+                variant="link"
+                className="overflow-button"
+                onClick={() => {
+                  setShowViewOptions(false);
+                  setShowHistogram(!showHistogram);
+                  setHistogramRange(undefined);
+                }}
+              >
+                {showHistogram ? t('Hide histogram') : t('Show histogram')}
+              </Button>
+            </FlexItem>
+          )}
           <FlexItem className={`${isDarkTheme ? 'dark' : 'light'}-bottom-border`}>
             <Button
               data-test="show-view-options-button"
               id="show-view-options-button"
               variant="link"
               className="overflow-button"
-              onClick={() => setShowViewOptions(!showViewOptions)}
+              onClick={() => {
+                setShowViewOptions(!isShowViewOptions);
+                setShowHistogram(false);
+                setHistogramRange(undefined);
+              }}
             >
-              {showViewOptions ? t('Hide advanced options') : t('Show advanced options')}
+              {isShowViewOptions ? t('Hide advanced options') : t('Show advanced options')}
             </Button>
           </FlexItem>
         </Flex>
       }
-      {showViewOptions && (
+      {selectedViewId === 'table' && showHistogram && (
+        <Toolbar
+          data-test-id="histogram-toolbar"
+          id="histogram-toolbar"
+          isFullHeight
+          className={isDarkTheme ? 'dark' : ''}
+        >
+          <ToolbarItem className="histogram" widths={{ default: '100%' }}>
+            <HistogramContainer
+              id={'histogram'}
+              loading={loading}
+              totalMetric={totalMetric}
+              limit={limit}
+              isDark={isDarkTheme}
+              range={histogramRange}
+              setRange={setHistogramRange}
+            />
+          </ToolbarItem>
+        </Toolbar>
+      )}
+      {isShowViewOptions && (
         <Toolbar data-test-id="view-options-toolbar" id="view-options-toolbar" className={isDarkTheme ? 'dark' : ''}>
           <ToolbarItem className="flex-start view-options-first">
             <OverflowMenuItem key="display">
