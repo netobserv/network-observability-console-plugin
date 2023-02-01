@@ -12,6 +12,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
 
+	"github.com/netobserv/network-observability-console-plugin/pkg/handler/auth"
 	"github.com/netobserv/network-observability-console-plugin/pkg/handler/lokiclientmock"
 	"github.com/netobserv/network-observability-console-plugin/pkg/httpclient"
 	"github.com/netobserv/network-observability-console-plugin/pkg/loki"
@@ -27,8 +28,7 @@ type LokiError struct {
 var hlog = logrus.WithField("module", "handler")
 
 const (
-	lokiOrgIDHeader         = "X-Scope-OrgID"
-	lokiAuthorizationHeader = "Authorization"
+	lokiOrgIDHeader = "X-Scope-OrgID"
 )
 
 func newLokiClient(cfg *loki.Config, requestHeader http.Header) httpclient.Caller {
@@ -38,14 +38,14 @@ func newLokiClient(cfg *loki.Config, requestHeader http.Header) httpclient.Calle
 	}
 
 	if cfg.ForwardUserToken {
-		token := requestHeader.Get(lokiAuthorizationHeader)
+		token := requestHeader.Get(auth.AuthHeader)
 		if token != "" {
-			headers[lokiAuthorizationHeader] = []string{token}
+			headers[auth.AuthHeader] = []string{token}
 		} else {
 			hlog.Debug("Missing Authorization token in user request")
 		}
 	} else if cfg.Authorization != "" {
-		headers[lokiAuthorizationHeader] = []string{cfg.Authorization}
+		headers[auth.AuthHeader] = []string{cfg.Authorization}
 	}
 
 	if cfg.UseMocks {
