@@ -209,6 +209,8 @@ func TestLokiFiltering(t *testing.T) {
 
 	// GIVEN a Loki service
 	lokiMock := httpMock{}
+	authM := authMock{}
+	authM.MockGranted()
 	emptyResponse, _ := json.Marshal(model.QueryResponse{
 		Status: "",
 		Data: model.QueryResponseData{
@@ -238,7 +240,7 @@ func TestLokiFiltering(t *testing.T) {
 			false,
 			[]string{"SrcK8S_Namespace", "SrcK8S_OwnerName", "DstK8S_Namespace", "DstK8S_OwnerName", "FlowDirection"},
 		),
-	})
+	}, &authM)
 	backendSvc := httptest.NewServer(backendRoutes)
 	defer backendSvc.Close()
 
