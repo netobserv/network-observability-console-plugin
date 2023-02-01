@@ -12,11 +12,11 @@ import (
 	"github.com/netobserv/network-observability-console-plugin/pkg/handler/auth"
 )
 
-func setupRoutes(cfg *Config) *mux.Router {
+func setupRoutes(cfg *Config, authChecker auth.Checker) *mux.Router {
 	r := mux.NewRouter()
 	r.Use(func(orig http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if err := auth.CheckAuth(context.TODO(), r.Header); err != nil {
+			if err := authChecker.CheckAuth(context.TODO(), r.Header); err != nil {
 				w.WriteHeader(http.StatusUnauthorized)
 				_, err2 := w.Write([]byte(err.Error()))
 				if err2 != nil {

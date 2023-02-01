@@ -16,7 +16,15 @@ var hlog = logrus.WithField("module", "handler.auth")
 
 const AuthHeader = "Authorization"
 
-func GetUserToken(header http.Header) (string, error) {
+type Checker interface {
+	CheckAuth(ctx context.Context, header http.Header) error
+}
+
+type BearerTokenChecker struct {
+	Checker
+}
+
+func getUserToken(header http.Header) (string, error) {
 	authValue := header.Get(AuthHeader)
 	if authValue != "" {
 		parts := strings.Split(authValue, "Bearer ")
@@ -28,9 +36,9 @@ func GetUserToken(header http.Header) (string, error) {
 	return "", errors.New("missing Authorization header")
 }
 
-func CheckAuth(ctx context.Context, header http.Header) error {
+func (b *BearerTokenChecker) CheckAuth(ctx context.Context, header http.Header) error {
 	hlog.Debug("Checking authenticated user")
-	token, err := GetUserToken(header)
+	token, err := getUserToken(header)
 	if err != nil {
 		return err
 	}
