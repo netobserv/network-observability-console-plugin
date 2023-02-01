@@ -10,6 +10,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 
+	"github.com/netobserv/network-observability-console-plugin/pkg/handler/auth"
 	"github.com/netobserv/network-observability-console-plugin/pkg/loki"
 	"github.com/netobserv/network-observability-console-plugin/pkg/server"
 )
@@ -90,5 +91,5 @@ func main() {
 		CORSMaxAge:       *corsMaxAge,
 		Loki:             loki.NewConfig(lURL, lStatusURL, *lokiTimeout, *lokiTenantID, *lokiTokenPath, *lokiForwardUserToken, *lokiSkipTLS, *lokiCAPath, *lokiMock, strings.Split(lLabels, ",")),
 		FrontendConfig:   *frontendConfig,
-	})
+	}, &auth.BearerTokenChecker{})
 }
