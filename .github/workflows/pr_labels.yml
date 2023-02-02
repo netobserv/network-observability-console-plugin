@@ -16,9 +16,11 @@ jobs:
           mode: minimum
           count: 1
           labels: "qe-approved, no-qe"
+          add_comment: true
       - name: Doc approval
         uses: mheap/github-action-required-labels@v3
         with:
           mode: minimum
           count: 1
           labels: "doc-approved, no-doc"
+          add_comment: true
