@@ -11,16 +11,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: QE approval
+        id: check-qe-label
         uses: mheap/github-action-required-labels@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           mode: minimum
           count: 1
           labels: "qe-approved, no-qe"
           add_comment: true
+          exit_type: success
       - name: Doc approval
+        id: check-doc-label
         uses: mheap/github-action-required-labels@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           mode: minimum
           count: 1
           labels: "doc-approved, no-doc"
           add_comment: true
+          exit_type: success
+      - run: echo FAILURE && exit 1
+        if: steps.check-qe-label.outputs.status != 'success' || steps.check-doc-label.outputs.status != 'success'
