@@ -13,9 +13,8 @@ jobs:
       - name: QE approval
         id: check-qe-label
         uses: mheap/github-action-required-labels@v3
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           mode: minimum
           count: 1
           labels: "qe-approved, no-qe"
@@ -24,9 +23,8 @@ jobs:
       - name: Doc approval
         id: check-doc-label
         uses: mheap/github-action-required-labels@v3
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           mode: minimum
           count: 1
           labels: "doc-approved, no-doc"
