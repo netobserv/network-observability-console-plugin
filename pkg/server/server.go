@@ -8,6 +8,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 
+	"github.com/netobserv/network-observability-console-plugin/pkg/handler/auth"
 	"github.com/netobserv/network-observability-console-plugin/pkg/loki"
 )
 
@@ -25,8 +26,8 @@ type Config struct {
 	FrontendConfig   string
 }
 
-func Start(cfg *Config) {
-	router := setupRoutes(cfg)
+func Start(cfg *Config, authChecker auth.Checker) {
+	router := setupRoutes(cfg, authChecker)
 	router.Use(corsHeader(cfg))
 
 	// Clients must use TLS 1.2 or higher
