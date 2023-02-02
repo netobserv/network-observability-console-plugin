@@ -7,12 +7,12 @@ on:
 
 jobs:
   check-labels:
-    name: qe-approve|no-qe, doc-approve|no-doc
+    name: qe-approved|no-qe & docs-approved|no-docs
     runs-on: ubuntu-latest
     steps:
       - name: QE approval
         if: "!contains( github.event.pull_request.labels.*.name, 'qe-approved') && !contains( github.event.pull_request.labels.*.name, 'no-qe')"
         run: exit 1
-      - name: Doc approval
-        if: "!contains( github.event.pull_request.labels.*.name, 'doc-approved') && !contains( github.event.pull_request.labels.*.name, 'no-doc')"
+      - name: Docs approval
+        if: "!contains( github.event.pull_request.labels.*.name, 'docs-approved') && !contains( github.event.pull_request.labels.*.name, 'no-docs')"
         run: exit 1
