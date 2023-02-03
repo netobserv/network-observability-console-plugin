@@ -5,7 +5,7 @@ import { rangeToSeconds, TimeRange } from '../../utils/datetime';
 import { Record } from '../../api/ipfix';
 import { InfoCircleIcon } from '@patternfly/react-icons';
 import './query-summary.css';
-import { byteFormat, byteRateFormat } from '../../utils/format';
+import { valueFormat } from '../../utils/format';
 import { Stats } from '../../api/loki';
 import _ from 'lodash';
 
@@ -32,7 +32,7 @@ export const FlowsQuerySummaryContent: React.FC<{
           <FlexItem>
             <Tooltip content={<Text component={TextVariants.p}>{t('Filtered sum of bytes')}</Text>}>
               <Text id="bytesCount" component={TextVariants.p}>
-                {byteFormat(bytes, 0, limitReached)}
+                {valueFormat(bytes, 0, t('B'), limitReached)}
               </Text>
             </Tooltip>
           </FlexItem>
@@ -41,7 +41,7 @@ export const FlowsQuerySummaryContent: React.FC<{
           <FlexItem>
             <Tooltip content={<Text component={TextVariants.p}>{t('Filtered sum of packets')}</Text>}>
               <Text id="packetsCount" component={TextVariants.p}>
-                {`${packets}${limitReached ? '+' : ''} ${t('packets')}`}
+                {valueFormat(packets, 0, t('P'), limitReached)}
               </Text>
             </Tooltip>
           </FlexItem>
@@ -50,7 +50,7 @@ export const FlowsQuerySummaryContent: React.FC<{
           <FlexItem>
             <Tooltip content={<Text component={TextVariants.p}>{t('Filtered average speed')}</Text>}>
               <Text id="bpsCount" component={TextVariants.p}>
-                {byteRateFormat(bytes / rangeInSeconds, 2, limitReached)}
+                {valueFormat(bytes / rangeInSeconds, 2, t('Bps'), limitReached)}
               </Text>
             </Tooltip>
           </FlexItem>
@@ -81,7 +81,7 @@ export const FlowsQuerySummaryContent: React.FC<{
             <FlexItem>
               <Tooltip content={<Text component={TextVariants.p}>{t('Filtered flows count')}</Text>}>
                 <Text id="flowsCount" component={TextVariants.p}>
-                  {`${flows!.length}${limitReached ? '+' : ''} ${t('flows')}`}
+                  {valueFormat(flows!.length, 0, t('flows'), limitReached)}
                 </Text>
               </Tooltip>
             </FlexItem>

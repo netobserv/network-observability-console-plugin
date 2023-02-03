@@ -59,13 +59,13 @@ export const ElementPanelStats: React.FC<{
           <Text id="metrics-stats-in">{isEdge ? t('A -> B') : t('In')}</Text>
         </FlexItem>
         <FlexItem>
-          <Text id="metrics-stats-avg-in">{getFormattedValue(averageIn, metricType, 'avg')}</Text>
+          <Text id="metrics-stats-avg-in">{getFormattedValue(averageIn, metricType, 'avg', t)}</Text>
         </FlexItem>
         <FlexItem>
-          <Text id="metrics-stats-latest-in">{getFormattedValue(latestIn, metricType, 'last')}</Text>
+          <Text id="metrics-stats-latest-in">{getFormattedValue(latestIn, metricType, 'last', t)}</Text>
         </FlexItem>
         <FlexItem>
-          <Text id="metrics-stats-total-in">{getFormattedValue(totalIn, metricType, 'sum')}</Text>
+          <Text id="metrics-stats-total-in">{getFormattedValue(totalIn, metricType, 'sum', t)}</Text>
         </FlexItem>
       </Flex>
       <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsNone' }}>
@@ -73,13 +73,13 @@ export const ElementPanelStats: React.FC<{
           <Text id="metrics-stats-out">{isEdge ? t('B -> A') : t('Out')}</Text>
         </FlexItem>
         <FlexItem>
-          <Text id="metrics-stats-avg-out">{getFormattedValue(averageOut, metricType, 'avg')}</Text>
+          <Text id="metrics-stats-avg-out">{getFormattedValue(averageOut, metricType, 'avg', t)}</Text>
         </FlexItem>
         <FlexItem>
-          <Text id="metrics-stats-latest-out">{getFormattedValue(latestOut, metricType, 'last')}</Text>
+          <Text id="metrics-stats-latest-out">{getFormattedValue(latestOut, metricType, 'last', t)}</Text>
         </FlexItem>
         <FlexItem>
-          <Text id="metrics-stats-total-out">{getFormattedValue(totalOut, metricType, 'sum')}</Text>
+          <Text id="metrics-stats-total-out">{getFormattedValue(totalOut, metricType, 'sum', t)}</Text>
         </FlexItem>
       </Flex>
       <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsNone' }}>
@@ -87,13 +87,13 @@ export const ElementPanelStats: React.FC<{
           <Text id="metrics-stats-both">{t('Both')}</Text>
         </FlexItem>
         <FlexItem>
-          <Text id="metrics-stats-avg-both">{getFormattedValue(averageBoth, metricType, 'avg')}</Text>
+          <Text id="metrics-stats-avg-both">{getFormattedValue(averageBoth, metricType, 'avg', t)}</Text>
         </FlexItem>
         <FlexItem>
-          <Text id="metrics-stats-latest-both">{getFormattedValue(latestBoth, metricType, 'last')}</Text>
+          <Text id="metrics-stats-latest-both">{getFormattedValue(latestBoth, metricType, 'last', t)}</Text>
         </FlexItem>
         <FlexItem>
-          <Text id="metrics-stats-total-both">{getFormattedValue(totalBoth, metricType, 'sum')}</Text>
+          <Text id="metrics-stats-total-both">{getFormattedValue(totalBoth, metricType, 'sum', t)}</Text>
         </FlexItem>
       </Flex>
     </Flex>

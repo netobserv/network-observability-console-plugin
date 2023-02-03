@@ -110,14 +110,14 @@ export const StatDonut: React.FC<StatDonutProps> = ({
         //animate={true}
         width={dimensions.width}
         height={dimensions.height}
-        data={sliced.map(m => ({ x: `${m.fullName}: ${getFormattedRateValue(m.value, metricType)}`, y: m.value }))}
+        data={sliced.map(m => ({ x: `${m.fullName}: ${getFormattedRateValue(m.value, metricType, t)}`, y: m.value }))}
         padding={{
           bottom: 20,
           left: 20,
           right: 400,
           top: 20
         }}
-        title={`${getFormattedRateValue(total, metricType)}`}
+        title={`${getFormattedRateValue(total, metricType, t)}`}
         subTitle={t('Total')}
       />
     </div>

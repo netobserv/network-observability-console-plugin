@@ -2,7 +2,7 @@ import * as React from 'react';
 import _ from 'lodash';
 import { useTranslation } from 'react-i18next';
 import { Card, Flex, FlexItem, Text, TextVariants, Tooltip } from '@patternfly/react-core';
-import { byteFormat, byteRateFormat } from '../../utils/format';
+import { valueFormat } from '../../utils/format';
 import { TopologyMetrics } from '../../api/loki';
 import { MetricType } from '../../model/flow-query';
 import './query-summary.css';
@@ -35,11 +35,11 @@ export const MetricsQuerySummaryContent: React.FC<{
       const textAbs = appMetrics ? t('Filtered sum of top-k bytes / filtered total bytes') : t('Filtered sum of bytes');
       const textRate = appMetrics ? t('Filtered top-k byte rate / filtered total byte rate') : t('Filtered byte rate');
       const valAbs = appMetrics
-        ? byteFormat(absSum, 1) + ' / ' + byteFormat(appMetrics.stats.total, 1)
-        : byteFormat(absSum, 1);
+        ? valueFormat(absSum, 1, t('B')) + ' / ' + valueFormat(appMetrics.stats.total, 1, t('B'))
+        : valueFormat(absSum, 1, t('B'));
       const valRate = appMetrics
-        ? byteRateFormat(rateSum, 2) + ' / ' + byteRateFormat(appMetrics.stats.avg, 2)
-        : byteRateFormat(rateSum, 2);
+        ? valueFormat(rateSum, 2, t('Bps')) + ' / ' + valueFormat(appMetrics.stats.avg, 2, t('Bps'))
+        : valueFormat(rateSum, 2, t('Bps'));
       return (
         <>
           <FlexItem>

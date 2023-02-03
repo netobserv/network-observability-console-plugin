@@ -30,7 +30,7 @@ describe('<FlowsQuerySummary />', () => {
     const wrapper = mount(<FlowsQuerySummary {...mocks} />);
     expect(wrapper.find('#flowsCount').last().text()).toBe('3 flows');
     expect(wrapper.find('#bytesCount').last().text()).toBe('161 kB');
-    expect(wrapper.find('#packetsCount').last().text()).toBe('1100 packets');
+    expect(wrapper.find('#packetsCount').last().text()).toBe('1 kP');
     expect(wrapper.find('#bpsCount').last().text()).toBe('538 Bps');
     expect(wrapper.find('#lastRefresh').last().text()).toBe(now.toLocaleTimeString());
   });

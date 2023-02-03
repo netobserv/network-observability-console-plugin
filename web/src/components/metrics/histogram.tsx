@@ -30,6 +30,8 @@ export const Histogram: React.FC<{
   range?: TimeRange;
   setRange: (tr: TimeRange) => void;
 }> = ({ id, totalMetric, limit, isDark, range, setRange }) => {
+  const { t } = useTranslation('plugin__netobserv-plugin');
+
   const datapoints: ChartDataPoint[] = toHistogramDatapoints(totalMetric);
   const defaultRange = getHistogramRangeFromLimit(totalMetric, limit);
 
@@ -94,7 +96,7 @@ export const Histogram: React.FC<{
         }}
       >
         <ChartAxis fixLabelOverlap />
-        <ChartAxis dependentAxis showGrid fixLabelOverlap tickFormat={y => getFormattedRateValue(y, 'count')} />
+        <ChartAxis dependentAxis showGrid fixLabelOverlap tickFormat={y => getFormattedRateValue(y, 'count', t)} />
         <ChartStack>
           <ChartBar
             name={`bar-${id}`}
