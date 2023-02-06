@@ -11,6 +11,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/netobserv/network-observability-console-plugin/pkg/kubernetes/auth"
+	"github.com/netobserv/network-observability-console-plugin/pkg/kubernetes/client"
 	"github.com/netobserv/network-observability-console-plugin/pkg/loki"
 	"github.com/netobserv/network-observability-console-plugin/pkg/server"
 )
@@ -86,7 +87,7 @@ func main() {
 	if checkType == auth.CheckNone {
 		log.Warn("INSECURE: auth checker is disabled")
 	}
-	checker, err := auth.NewChecker(checkType)
+	checker, err := auth.NewChecker(checkType, client.NewInCluster)
 	if err != nil {
 		log.WithError(err).Fatal("auth checker error")
 	}

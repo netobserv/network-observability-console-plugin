@@ -28,14 +28,14 @@ type Checker interface {
 	CheckAuth(ctx context.Context, header http.Header) error
 }
 
-func NewChecker(typez CheckType) (Checker, error) {
+func NewChecker(typez CheckType, apiProvider client.APIProvider) (Checker, error) {
 	switch typez {
 	case CheckNone:
 		return &NoopChecker{}, nil
 	case CheckAuthenticated:
-		return &ValidBearerTokenChecker{apiProvider: client.NewInCluster}, nil
+		return &BearerTokenChecker{apiProvider: apiProvider, predicates: []tokenReviewPredicate{mustBeAuthenticated}}, nil
 	case CheckAdmin:
-		return &AdminBearerTokenChecker{apiProvider: client.NewInCluster}, nil
+		return &BearerTokenChecker{apiProvider: apiProvider, predicates: []tokenReviewPredicate{mustBeAuthenticated, mustBeClusterAdmin}}, nil
 	}
 	return nil, fmt.Errorf("auth checker type unknown: %s. Must be one of %s, %s, %s", typez, CheckAdmin, CheckAuthenticated, CheckNone)
 }
@@ -101,39 +101,20 @@ func mustBeClusterAdmin(rvw *authv1.TokenReview) error {
 	return errors.New("user not in cluster-admins group")
 }
 
-type ValidBearerTokenChecker struct {
+type BearerTokenChecker struct {
 	Checker
 	apiProvider client.APIProvider
+	predicates  []tokenReviewPredicate
 }
 
-func (c *ValidBearerTokenChecker) CheckAuth(ctx context.Context, header http.Header) error {
+func (c *BearerTokenChecker) CheckAuth(ctx context.Context, header http.Header) error {
 	hlog.Debug("Checking authenticated user")
 	token, err := getUserToken(header)
 	if err != nil {
 		return err
 	}
 	hlog.Debug("Checking auth: token found")
-	if err = runTokenReview(ctx, c.apiProvider, token, []tokenReviewPredicate{mustBeAuthenticated}); err != nil {
-		return err
-	}
-
-	hlog.Debug("Checking auth: passed")
-	return nil
-}
-
-type AdminBearerTokenChecker struct {
-	Checker
-	apiProvider client.APIProvider
-}
-
-func (c *AdminBearerTokenChecker) CheckAuth(ctx context.Context, header http.Header) error {
-	hlog.Debug("Checking authenticated user")
-	token, err := getUserToken(header)
-	if err != nil {
-		return err
-	}
-	hlog.Debug("Checking auth: token found")
-	if err = runTokenReview(ctx, c.apiProvider, token, []tokenReviewPredicate{mustBeAuthenticated, mustBeClusterAdmin}); err != nil {
+	if err = runTokenReview(ctx, c.apiProvider, token, c.predicates); err != nil {
 		return err
 	}
 

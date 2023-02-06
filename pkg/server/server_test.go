@@ -115,7 +115,7 @@ func TestServerUnauthorized(t *testing.T) {
 				URL: &url.URL{Scheme: "http", Host: "localhost:3100"},
 			},
 			Port: testPort,
-		}, &auth.AdminBearerTokenChecker{})
+		}, &auth.BearerTokenChecker{})
 	}()
 
 	t.Logf("Started test http server: %v", serverURL)

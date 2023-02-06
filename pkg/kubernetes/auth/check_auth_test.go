@@ -13,12 +13,17 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+func setupChecker(typez CheckType, m *TokenReviewMock) Checker {
+	checker, _ := NewChecker(typez, func() (client.KubeAPI, error) { return m, nil })
+	return checker
+}
+
 func TestCheckAuth_NoAuth(t *testing.T) {
 	m := TokenReviewMock{}
 	m.mockNoAuth()
 
 	// Any user authenticated mode
-	checkAny := ValidBearerTokenChecker{apiProvider: func() (client.KubeAPI, error) { return &m, nil }}
+	checkAny := setupChecker(CheckAuthenticated, &m)
 
 	// No header => fail
 	err := checkAny.CheckAuth(context.TODO(), http.Header{})
@@ -30,7 +35,7 @@ func TestCheckAuth_NoAuth(t *testing.T) {
 	require.Equal(t, "user not authenticated", err.Error())
 
 	// Admin mode
-	checkerAdmin := AdminBearerTokenChecker{apiProvider: func() (client.KubeAPI, error) { return &m, nil }}
+	checkerAdmin := setupChecker(CheckAdmin, &m)
 
 	// No header => fail
 	err = checkerAdmin.CheckAuth(context.TODO(), http.Header{})
@@ -54,7 +59,7 @@ func TestCheckAuth_NormalUser(t *testing.T) {
 	m.mockNormalUser()
 
 	// Any user authenticated mode
-	checkAny := ValidBearerTokenChecker{apiProvider: func() (client.KubeAPI, error) { return &m, nil }}
+	checkAny := setupChecker(CheckAuthenticated, &m)
 
 	// No header => fail
 	err := checkAny.CheckAuth(context.TODO(), http.Header{})
@@ -65,7 +70,7 @@ func TestCheckAuth_NormalUser(t *testing.T) {
 	require.NoError(t, err)
 
 	// Admin mode
-	checkerAdmin := AdminBearerTokenChecker{apiProvider: func() (client.KubeAPI, error) { return &m, nil }}
+	checkerAdmin := setupChecker(CheckAdmin, &m)
 
 	// No header => fail
 	err = checkerAdmin.CheckAuth(context.TODO(), http.Header{})
@@ -89,7 +94,7 @@ func TestCheckAuth_Admin(t *testing.T) {
 	m.mockAdmin()
 
 	// Any user authenticated mode
-	checkAny := ValidBearerTokenChecker{apiProvider: func() (client.KubeAPI, error) { return &m, nil }}
+	checkAny := setupChecker(CheckAuthenticated, &m)
 
 	// No header => fail
 	err := checkAny.CheckAuth(context.TODO(), http.Header{})
@@ -100,7 +105,7 @@ func TestCheckAuth_Admin(t *testing.T) {
 	require.NoError(t, err)
 
 	// Admin mode
-	checkerAdmin := AdminBearerTokenChecker{apiProvider: func() (client.KubeAPI, error) { return &m, nil }}
+	checkerAdmin := setupChecker(CheckAdmin, &m)
 
 	// No header => fail
 	err = checkerAdmin.CheckAuth(context.TODO(), http.Header{})
@@ -125,7 +130,7 @@ func TestCheckAuth_APIError(t *testing.T) {
 	m.mockError()
 
 	// Any user authenticated mode
-	checkAny := ValidBearerTokenChecker{apiProvider: func() (client.KubeAPI, error) { return &m, nil }}
+	checkAny := setupChecker(CheckAuthenticated, &m)
 
 	// No header => fail
 	err := checkAny.CheckAuth(context.TODO(), http.Header{})
@@ -137,7 +142,7 @@ func TestCheckAuth_APIError(t *testing.T) {
 	require.Equal(t, fakeError, err.Error())
 
 	// Admin mode
-	checkerAdmin := AdminBearerTokenChecker{apiProvider: func() (client.KubeAPI, error) { return &m, nil }}
+	checkerAdmin := setupChecker(CheckAdmin, &m)
 
 	// No header => fail
 	err = checkerAdmin.CheckAuth(context.TODO(), http.Header{})
