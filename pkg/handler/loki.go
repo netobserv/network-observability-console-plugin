@@ -12,9 +12,9 @@ import (
 	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
 
-	"github.com/netobserv/network-observability-console-plugin/pkg/handler/auth"
 	"github.com/netobserv/network-observability-console-plugin/pkg/handler/lokiclientmock"
 	"github.com/netobserv/network-observability-console-plugin/pkg/httpclient"
+	"github.com/netobserv/network-observability-console-plugin/pkg/kubernetes/auth"
 	"github.com/netobserv/network-observability-console-plugin/pkg/loki"
 	"github.com/netobserv/network-observability-console-plugin/pkg/metrics"
 	"github.com/netobserv/network-observability-console-plugin/pkg/model"

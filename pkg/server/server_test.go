@@ -27,7 +27,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
-	"github.com/netobserv/network-observability-console-plugin/pkg/handler/auth"
+	"github.com/netobserv/network-observability-console-plugin/pkg/kubernetes/auth"
 	"github.com/netobserv/network-observability-console-plugin/pkg/loki"
 	"github.com/netobserv/network-observability-console-plugin/pkg/model"
 )
@@ -115,7 +115,7 @@ func TestServerUnauthorized(t *testing.T) {
 				URL: &url.URL{Scheme: "http", Host: "localhost:3100"},
 			},
 			Port: testPort,
-		}, &auth.BearerTokenChecker{})
+		}, &auth.AdminBearerTokenChecker{})
 	}()
 
 	t.Logf("Started test http server: %v", serverURL)

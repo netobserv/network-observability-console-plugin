@@ -8,7 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/netobserv/network-observability-console-plugin/pkg/handler"
-	"github.com/netobserv/network-observability-console-plugin/pkg/handler/auth"
+	"github.com/netobserv/network-observability-console-plugin/pkg/kubernetes/auth"
 )
 
 func setupRoutes(cfg *Config, authChecker auth.Checker) *mux.Router {

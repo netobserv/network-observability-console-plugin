@@ -10,7 +10,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/netobserv/network-observability-console-plugin/pkg/handler/auth"
+	"github.com/netobserv/network-observability-console-plugin/pkg/kubernetes/auth"
 	"github.com/netobserv/network-observability-console-plugin/pkg/loki"
 	"github.com/netobserv/network-observability-console-plugin/pkg/server"
 )
@@ -39,6 +39,7 @@ var (
 	lokiMock             = flag.Bool("loki-mock", false, "Fake loki results using saved mocks")
 	logLevel             = flag.String("loglevel", "info", "log level (default: info)")
 	frontendConfig       = flag.String("frontend-config", "", "path to the console plugin config file")
+	authCheck            = flag.String("auth-check", "admin", "type of authentication check: authenticated, admin or none (default is admin)")
 	versionFlag          = flag.Bool("v", false, "print version")
 	log                  = logrus.WithField("module", "main")
 )
@@ -81,6 +82,15 @@ func main() {
 		log.Fatal("labels cannot be empty")
 	}
 
+	checkType := auth.CheckType(*authCheck)
+	if checkType == auth.CheckNone {
+		log.Warn("INSECURE: auth checker is disabled")
+	}
+	checker, err := auth.NewChecker(checkType)
+	if err != nil {
+		log.WithError(err).Fatal("auth checker error")
+	}
+
 	server.Start(&server.Config{
 		Port:             *port,
 		CertFile:         *cert,
@@ -91,5 +101,5 @@ func main() {
 		CORSMaxAge:       *corsMaxAge,
 		Loki:             loki.NewConfig(lURL, lStatusURL, *lokiTimeout, *lokiTenantID, *lokiTokenPath, *lokiForwardUserToken, *lokiSkipTLS, *lokiCAPath, *lokiMock, strings.Split(lLabels, ",")),
 		FrontendConfig:   *frontendConfig,
-	}, &auth.BearerTokenChecker{})
+	}, checker)
 }
