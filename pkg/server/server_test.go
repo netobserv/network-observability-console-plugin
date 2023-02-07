@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/tls"
@@ -26,6 +27,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
+	"github.com/netobserv/network-observability-console-plugin/pkg/handler/auth"
 	"github.com/netobserv/network-observability-console-plugin/pkg/loki"
 	"github.com/netobserv/network-observability-console-plugin/pkg/model"
 )
@@ -52,13 +54,16 @@ func TestServerRunning(t *testing.T) {
 	tmpDir := prepareServerAssets(t)
 	defer os.RemoveAll(tmpDir)
 
+	authM := authMock{}
+	authM.MockGranted()
+
 	go func() {
 		Start(&Config{
 			Loki: loki.Config{
 				URL: &url.URL{Scheme: "http", Host: "localhost:3100"},
 			},
 			Port: testPort,
-		})
+		}, &authM)
 	}()
 
 	t.Logf("Started test http server: %v", serverURL)
@@ -84,6 +89,57 @@ func TestServerRunning(t *testing.T) {
 	if _, err = getRequestResults(t, httpClient, serverURL+"/badroot"); err == nil {
 		t.Fatalf("Failed: Should have failed going to /badroot")
 	}
+}
+
+func TestServerUnauthorized(t *testing.T) {
+	testPort, err := getFreePort(testHostname)
+	if err != nil {
+		t.Fatalf("Cannot get a free port to run tests on host [%v]", testHostname)
+	} else {
+		t.Logf("Will use free port [%v] on host [%v] for tests", testPort, testHostname)
+	}
+
+	testServerHostPort := fmt.Sprintf("%v:%v", testHostname, testPort)
+
+	rnd.Seed(time.Now().UnixNano())
+
+	serverURL := fmt.Sprintf("http://%s", testServerHostPort)
+
+	// Prepare directory to serve web files
+	tmpDir := prepareServerAssets(t)
+	defer os.RemoveAll(tmpDir)
+
+	go func() {
+		Start(&Config{
+			Loki: loki.Config{
+				URL: &url.URL{Scheme: "http", Host: "localhost:3100"},
+			},
+			Port: testPort,
+		}, &auth.BearerTokenChecker{})
+	}()
+
+	t.Logf("Started test http server: %v", serverURL)
+
+	httpConfig := httpClientConfig{}
+	httpClient, err := httpConfig.buildHTTPClient()
+	if err != nil {
+		t.Fatalf("Failed to create http client")
+	}
+
+	// wait for our test http server to come up
+	checkHTTPReady(httpClient, serverURL)
+
+	msg, err := getRequestResults(t, httpClient, serverURL)
+	require.Error(t, err)
+	require.Equal(t, "missing Authorization header", msg)
+
+	msg, err = getRequestResults(t, httpClient, serverURL+"/api/status")
+	require.Error(t, err)
+	require.Equal(t, "missing Authorization header", msg)
+
+	msg, err = getRequestResults(t, httpClient, serverURL+"/api/loki/flows")
+	require.Error(t, err)
+	require.Equal(t, "missing Authorization header", msg)
 }
 
 func TestSecureComm(t *testing.T) {
@@ -140,8 +196,11 @@ func TestSecureComm(t *testing.T) {
 	tmpDirAssets := prepareServerAssets(t)
 	defer os.RemoveAll(tmpDirAssets)
 
+	authM := authMock{}
+	authM.MockGranted()
+
 	go func() {
-		Start(conf)
+		Start(conf, &authM)
 	}()
 	t.Logf("Started test http server: %v", serverURL)
 
@@ -195,6 +254,8 @@ func TestLokiConfiguration(t *testing.T) {
 	})
 	lokiSvc := httptest.NewServer(&lokiMock)
 	defer lokiSvc.Close()
+	authM := &authMock{}
+	authM.MockGranted()
 	lokiURL, err := url.Parse(lokiSvc.URL)
 	require.NoError(t, err)
 
@@ -204,7 +265,7 @@ func TestLokiConfiguration(t *testing.T) {
 			URL:     lokiURL,
 			Timeout: time.Second,
 		},
-	})
+	}, authM)
 	backendSvc := httptest.NewServer(backendRoutes)
 	defer backendSvc.Close()
 
@@ -235,6 +296,8 @@ func TestLokiConfigurationForTopology(t *testing.T) {
 	})
 	lokiSvc := httptest.NewServer(&lokiMock)
 	defer lokiSvc.Close()
+	authM := &authMock{}
+	authM.MockGranted()
 	lokiURL, err := url.Parse(lokiSvc.URL)
 	require.NoError(t, err)
 
@@ -244,7 +307,7 @@ func TestLokiConfigurationForTopology(t *testing.T) {
 			URL:     lokiURL,
 			Timeout: time.Second,
 		},
-	})
+	}, authM)
 	backendSvc := httptest.NewServer(backendRoutes)
 	defer backendSvc.Close()
 
@@ -275,6 +338,8 @@ func TestLokiConfigurationForTableHistogram(t *testing.T) {
 	})
 	lokiSvc := httptest.NewServer(&lokiMock)
 	defer lokiSvc.Close()
+	authM := &authMock{}
+	authM.MockGranted()
 	lokiURL, err := url.Parse(lokiSvc.URL)
 	require.NoError(t, err)
 
@@ -284,7 +349,7 @@ func TestLokiConfigurationForTableHistogram(t *testing.T) {
 			URL:     lokiURL,
 			Timeout: time.Second,
 		},
-	})
+	}, authM)
 	backendSvc := httptest.NewServer(backendRoutes)
 	defer backendSvc.Close()
 
@@ -312,6 +377,8 @@ func TestLokiConfiguration_MultiTenant(t *testing.T) {
 	lokiMock.On("ServeHTTP", mock.Anything, mock.Anything).Run(func(args mock.Arguments) {
 		_, _ = args.Get(0).(http.ResponseWriter).Write([]byte("{}"))
 	}).Once()
+	authM := &authMock{}
+	authM.MockGranted()
 	lokiSvc := httptest.NewServer(&lokiMock)
 	defer lokiSvc.Close()
 	lokiURL, err := url.Parse(lokiSvc.URL)
@@ -325,7 +392,7 @@ func TestLokiConfiguration_MultiTenant(t *testing.T) {
 			TenantID:      "my-organisation",
 			Authorization: "Bearer XXX",
 		},
-	})
+	}, authM)
 	backendSvc := httptest.NewServer(backendRoutes)
 	defer backendSvc.Close()
 
@@ -345,6 +412,19 @@ type httpMock struct {
 
 func (l *httpMock) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	_ = l.Called(w, r)
+}
+
+type authMock struct {
+	mock.Mock
+}
+
+func (a *authMock) CheckAuth(ctx context.Context, header http.Header) error {
+	args := a.Called(ctx, header)
+	return args.Error(0)
+}
+
+func (a *authMock) MockGranted() {
+	a.On("CheckAuth", mock.Anything, mock.Anything).Return(nil)
 }
 
 func prepareServerAssets(t *testing.T) string {
@@ -373,15 +453,15 @@ func getRequestResults(t *testing.T, httpClient *http.Client, url string) (strin
 		return "", err
 	}
 	defer resp.Body.Close()
+	bodyBytes, err2 := ioutil.ReadAll(resp.Body)
+	if err2 != nil {
+		return "", err2
+	}
+	bodyString := string(bodyBytes)
 	if resp.StatusCode == http.StatusOK {
-		bodyBytes, err2 := ioutil.ReadAll(resp.Body)
-		if err2 != nil {
-			return "", err2
-		}
-		bodyString := string(bodyBytes)
 		return bodyString, nil
 	}
-	return "", fmt.Errorf("Bad status: %v", resp.StatusCode)
+	return bodyString, fmt.Errorf("Bad status: %v", resp.StatusCode)
 }
 
 func generateCertificate(t *testing.T, certPath string, keyPath string, host string) error {

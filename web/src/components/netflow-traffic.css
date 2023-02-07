@@ -115,13 +115,26 @@ span.pf-c-button__icon.pf-m-start {
     padding-right: 0;
 }
 
+/* histogram is maximum 2x standard toolbar height */
+#histogram-toolbar {
+    max-height: 130px;
+}
+
+#histogram-toolbar,
 #view-options-toolbar {
     z-index: 5;
     box-shadow: 0 0.125rem 0.1rem -0.0625rem rgba(3, 3, 3, 0.16);
 }
 
+#histogram-toolbar.dark,
 #view-options-toolbar.dark {
     box-shadow: 0 0.125rem 0.1rem -0.0625rem rgba(255, 255, 255, 0.16);
+}
+
+.histogram {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /*hide some content for fullscreen mode*/
@@ -152,14 +165,17 @@ span.pf-c-button__icon.pf-m-start {
     margin-right: 1rem;
 }
 
+#histogram-toolbar,
 #view-options-toolbar {
     display: flex;
 }
 
+#histogram-toolbar>.histogram,
 #view-options-toolbar>.view-options-first {
     margin-left: 1.5rem;
 }
 
+#histogram-toolbar>.histogram,
 #view-options-toolbar>.view-options-last {
     margin-right: 1.5rem;
 }

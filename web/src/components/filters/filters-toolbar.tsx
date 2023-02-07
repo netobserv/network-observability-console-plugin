@@ -46,7 +46,7 @@ import './filters-toolbar.css';
 export interface FiltersToolbarProps {
   id: string;
   filters?: Filter[];
-  forcedFilters?: Filter[];
+  forcedFilters?: Filter[] | null;
   skipTipsDelay?: boolean;
   setFilters: (v: Filter[]) => void;
   clearFilters: () => void;

@@ -21,12 +21,12 @@ export interface StreamResult {
   values: string[][];
 }
 
-export interface RecordsResult {
+export class RecordsResult {
   records: Record[];
   stats: Stats;
 }
 
-export interface TopologyResult {
+export class TopologyResult {
   metrics: TopologyMetrics[];
   stats: Stats;
 }
