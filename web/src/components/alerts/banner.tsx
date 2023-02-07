@@ -15,9 +15,9 @@ export const AlertBanner: React.FC<{
   rule: AlertsRule;
   onDelete: () => void;
 }> = ({ rule, onDelete }) => {
-  let history = useHistory();
+  const history = useHistory();
   const routeChange = () => {
-    let path = `/monitoring/alerts/${rule.id}?alertname=${rule.name}&namespace=${rule.labels.namespace}&severity=${rule.labels.severity}`;
+    const path = `/monitoring/alerts/${rule.id}?alertname=${rule.name}&namespace=${rule.labels.namespace}&severity=${rule.labels.severity}`;
     history.push(path);
   };
   return (
