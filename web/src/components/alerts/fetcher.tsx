@@ -10,27 +10,31 @@ type AlertFetcherProps = {};
 export const AlertFetcher: React.FC<AlertFetcherProps> = ({ children }) => {
   const [alerts, setAlerts] = React.useState<Rule[]>([]);
   React.useEffect(() => {
-    getAlerts().then(result => {
-      setAlerts(
-        result.data.groups.flatMap(group => {
-          return group.rules
-            .filter(rule => !!rule.labels.namespace && rule.labels.namespace == 'netobserv' && rule.state == 'firing')
-            .map(rule => {
-              const key = [
-                group.file,
-                group.name,
-                rule.name,
-                String(rule.duration),
-                rule.query,
-                `${rule.labels.namespace}=namespace`,
-                `${rule.labels.severity}=severity`
-              ].join(',');
-              rule.id = String(murmur3(key, 0));
-              return rule;
-            });
-        })
-      );
-    });
+    getAlerts()
+      .then(result => {
+        setAlerts(
+          result.data.groups.flatMap(group => {
+            return group.rules
+              .filter(rule => !!rule.labels.namespace && rule.labels.namespace == 'netobserv' && rule.state == 'firing')
+              .map(rule => {
+                const key = [
+                  group.file,
+                  group.name,
+                  rule.name,
+                  String(rule.duration),
+                  rule.query,
+                  `${rule.labels.namespace}=namespace`,
+                  `${rule.labels.severity}=severity`
+                ].join(',');
+                rule.id = String(murmur3(key, 0));
+                return rule;
+              });
+          })
+        );
+      })
+      .catch(() => {
+        console.log('Could not get alerts');
+      });
     return;
   }, []);
   return (
