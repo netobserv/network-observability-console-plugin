@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Match, Reporter } from '../../model/flow-query';
 
 export const TOP_VALUES = [5, 10, 15];
-export const LIMIT_VALUES = [100, 500, 1000];
+export const LIMIT_VALUES = [50, 100, 500, 1000];
 export interface QueryOptionsDropdownProps {
   reporter: Reporter;
   setReporter: (reporter: Reporter) => void;
