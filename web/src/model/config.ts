@@ -6,7 +6,7 @@ export type Config = {
     portNames: Map<string, string>;
   };
   quickFilters: RawQuickFilter[];
-  alertNamespaces: String[];
+  alertNamespaces: string[];
 };
 
 export const defaultConfig: Config = {
