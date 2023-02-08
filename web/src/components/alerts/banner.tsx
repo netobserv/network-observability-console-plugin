@@ -16,6 +16,7 @@ export const AlertBanner: React.FC<{
   onDelete: () => void;
 }> = ({ rule, onDelete }) => {
   const history = useHistory();
+  const { t } = useTranslation('plugin__netobserv-plugin');
   const routeChange = () => {
     let path = `/monitoring/alerts/${rule.id}`;
     path += `?alertname=${rule.name}&namespace=${rule.labels.namespace}&severity=${rule.labels.severity}`;
