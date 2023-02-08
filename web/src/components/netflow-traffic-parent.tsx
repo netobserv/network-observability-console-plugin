@@ -53,7 +53,7 @@ class NetflowTrafficParent extends React.Component<Props, State> {
 
     return (
       <AlertFetcher>
-        <NetflowTraffic forcedFilters={null}/>
+        <NetflowTraffic forcedFilters={null} />
       </AlertFetcher>
     );
   }
