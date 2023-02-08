@@ -95,7 +95,8 @@ export const getConfig = (): Promise<Config> => {
           ? new Map(Object.entries(r.data.portNaming.portNames))
           : defaultConfig.portNaming.portNames
       },
-      quickFilters: r.data.quickFilters
+      quickFilters: r.data.quickFilters,
+      alertNamespaces: r.data.alertNamespaces
     };
   });
 };

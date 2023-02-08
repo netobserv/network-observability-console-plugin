@@ -2,6 +2,7 @@ import * as React from 'react';
 import AlertBanner from './banner';
 import { getAlerts } from '../../api/routes';
 import { Rule } from '@openshift-console/dynamic-plugin-sdk';
+import { config } from '../../utils/config';
 
 import { murmur3 } from 'murmurhash-js';
 
@@ -15,7 +16,12 @@ export const AlertFetcher: React.FC<AlertFetcherProps> = ({ children }) => {
         setAlerts(
           result.data.groups.flatMap(group => {
             return group.rules
-              .filter(rule => !!rule.labels.namespace && rule.labels.namespace == 'netobserv' && rule.state == 'firing')
+              .filter(
+                rule =>
+                  !!rule.labels.namespace &&
+                  config.alertNamespaces.findIndex(elem => elem == rule.labels.namespace) > -1 &&
+                  rule.state == 'firing'
+              )
               .map(rule => {
                 const key = [
                   group.file,
