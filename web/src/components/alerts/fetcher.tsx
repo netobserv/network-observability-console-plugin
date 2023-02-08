@@ -1,14 +1,14 @@
 import * as React from 'react';
 import AlertBanner from './banner';
 import { getAlerts } from '../../api/routes';
-import { AlertsRule } from '../../api/alert';
+import { Rule } from '@openshift-console/dynamic-plugin-sdk';
 
 import { murmur3 } from 'murmurhash-js';
 
 type AlertFetcherProps = {};
 
 export const AlertFetcher: React.FC<AlertFetcherProps> = ({ children }) => {
-  const [alerts, setAlerts] = React.useState<AlertsRule[]>([]);
+  const [alerts, setAlerts] = React.useState<Rule[]>([]);
   React.useEffect(() => {
     getAlerts().then(result => {
       setAlerts(

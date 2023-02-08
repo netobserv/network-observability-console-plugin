@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import * as React from 'react';
 import {
   Alert,
@@ -8,11 +9,11 @@ import {
   TextVariants
 } from '@patternfly/react-core';
 import './banner.css';
-import { AlertsRule } from '../../api/alert';
+import { Rule } from '@openshift-console/dynamic-plugin-sdk';
 import { useHistory } from 'react-router-dom';
 
 export const AlertBanner: React.FC<{
-  rule: AlertsRule;
+  rule: Rule;
   onDelete: () => void;
 }> = ({ rule, onDelete }) => {
   const history = useHistory();
