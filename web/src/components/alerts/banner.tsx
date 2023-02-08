@@ -30,7 +30,7 @@ export const AlertBanner: React.FC<{
         actionClose={<AlertActionCloseButton onClose={onDelete} />}
         actionLinks={
           <React.Fragment>
-            <AlertActionLink onClick={routeChange}>View alert details</AlertActionLink>
+            <AlertActionLink onClick={routeChange}>{t('View alert details')}</AlertActionLink>
           </React.Fragment>
         }
       >
