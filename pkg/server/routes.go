@@ -13,7 +13,9 @@ import (
 
 func setupRoutes(cfg *Config, authChecker auth.Checker) *mux.Router {
 	r := mux.NewRouter()
-	r.Use(func(orig http.Handler) http.Handler {
+
+	api := r.PathPrefix("/api").Subrouter()
+	api.Use(func(orig http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if err := authChecker.CheckAuth(context.TODO(), r.Header); err != nil {
 				w.WriteHeader(http.StatusUnauthorized)
@@ -26,18 +28,19 @@ func setupRoutes(cfg *Config, authChecker auth.Checker) *mux.Router {
 			orig.ServeHTTP(w, r)
 		})
 	})
-	r.HandleFunc("/api/status", handler.Status)
-	r.HandleFunc("/api/loki/ready", handler.LokiReady(&cfg.Loki))
-	r.HandleFunc("/api/loki/metrics", handler.LokiMetrics(&cfg.Loki))
-	r.HandleFunc("/api/loki/buildinfo", handler.LokiBuildInfos(&cfg.Loki))
-	r.HandleFunc("/api/loki/config/limits", handler.LokiConfig(&cfg.Loki, "limits_config"))
-	r.HandleFunc("/api/loki/flows", handler.GetFlows(&cfg.Loki))
-	r.HandleFunc("/api/loki/export", handler.ExportFlows(&cfg.Loki))
-	r.HandleFunc("/api/loki/topology", handler.GetTopology(&cfg.Loki))
-	r.HandleFunc("/api/resources/namespaces", handler.GetNamespaces(&cfg.Loki))
-	r.HandleFunc("/api/resources/namespace/{namespace}/kind/{kind}/names", handler.GetNames(&cfg.Loki))
-	r.HandleFunc("/api/resources/kind/{kind}/names", handler.GetNames(&cfg.Loki))
-	r.HandleFunc("/api/frontend-config", handler.GetConfig(cfg.FrontendConfig))
+	api.HandleFunc("/status", handler.Status)
+	api.HandleFunc("/loki/ready", handler.LokiReady(&cfg.Loki))
+	api.HandleFunc("/loki/metrics", handler.LokiMetrics(&cfg.Loki))
+	api.HandleFunc("/loki/buildinfo", handler.LokiBuildInfos(&cfg.Loki))
+	api.HandleFunc("/loki/config/limits", handler.LokiConfig(&cfg.Loki, "limits_config"))
+	api.HandleFunc("/loki/flows", handler.GetFlows(&cfg.Loki))
+	api.HandleFunc("/loki/export", handler.ExportFlows(&cfg.Loki))
+	api.HandleFunc("/loki/topology", handler.GetTopology(&cfg.Loki))
+	api.HandleFunc("/resources/namespaces", handler.GetNamespaces(&cfg.Loki))
+	api.HandleFunc("/resources/namespace/{namespace}/kind/{kind}/names", handler.GetNames(&cfg.Loki))
+	api.HandleFunc("/resources/kind/{kind}/names", handler.GetNames(&cfg.Loki))
+	api.HandleFunc("/frontend-config", handler.GetConfig(cfg.FrontendConfig))
+
 	// Temporary removal of metrics
 	//	r.Handle("/metrics", promhttp.Handler())
 	r.PathPrefix("/").Handler(http.FileServer(http.Dir("./web/dist/")))
