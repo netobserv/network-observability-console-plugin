@@ -18,7 +18,8 @@ type frontendConfig struct {
 		Enable    bool              `yaml:"enable,omitempty" json:"enable"`
 		PortNames map[string]string `yaml:"portNames,omitempty" json:"portNames"`
 	} `yaml:"portNaming,omitempty" json:"portNaming"`
-	QuickFilters []QuickFilter `yaml:"quickFilters" json:"quickFilters"`
+	QuickFilters    []QuickFilter `yaml:"quickFilters" json:"quickFilters"`
+	AlertNamespaces []string      `yaml:"alertNamespaces" json:"alertNamespaces"`
 }
 
 func readConfigFile(filename string) (*frontendConfig, error) {
