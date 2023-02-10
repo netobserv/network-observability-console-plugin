@@ -129,11 +129,12 @@ func TestServerUnauthorized(t *testing.T) {
 	// wait for our test http server to come up
 	checkHTTPReady(httpClient, serverURL)
 
-	msg, err := getRequestResults(t, httpClient, serverURL)
-	require.Error(t, err)
-	require.Equal(t, "missing Authorization header", msg)
+	_, err = getRequestResults(t, httpClient, serverURL)
+	if err != nil {
+		t.Fatalf("Failed: could not fetch static files on / (root): %v", err)
+	}
 
-	msg, err = getRequestResults(t, httpClient, serverURL+"/api/status")
+	msg, err := getRequestResults(t, httpClient, serverURL+"/api/status")
 	require.Error(t, err)
 	require.Equal(t, "missing Authorization header", msg)
 
