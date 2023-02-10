@@ -7,6 +7,11 @@
   flex-direction: column !important;
 }
 
+.summary-config-item {
+  padding-left: 15px;
+  flex-direction: column !important;
+}
+
 #cardinality-accordion {
   display: flex;
   flex-direction: column;

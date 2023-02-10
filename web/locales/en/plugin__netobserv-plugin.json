@@ -235,6 +235,8 @@
   "Filtered byte rate": "Filtered byte rate",
   "Filtered sum of top-k packets / filtered total packets": "Filtered sum of top-k packets / filtered total packets",
   "packets": "packets",
+  "Configuration": "Configuration",
+  "Sampling": "Sampling",
   "Cardinality": "Cardinality",
   "(top {{count}} metrics)": "(top {{count}} metrics)",
   "(top {{count}} metrics)_plural": "(top {{count}} metrics)",
