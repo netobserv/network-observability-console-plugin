@@ -10,7 +10,7 @@ import (
 	"encoding/json"
 	"encoding/pem"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"math/big"
 	rnd "math/rand"
 	"net"
@@ -281,7 +281,7 @@ func TestLokiConfiguration(t *testing.T) {
 	assert.Empty(t, req.Header.Get("X-Scope-OrgID"))
 
 	// AND the response is sent back to the client
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	require.NoError(t, err)
 	var qr model.AggregatedQueryResponse
 	err = json.Unmarshal(body, &qr)
@@ -323,7 +323,7 @@ func TestLokiConfigurationForTopology(t *testing.T) {
 	assert.Empty(t, req.Header.Get("X-Scope-OrgID"))
 
 	// AND the response is sent back to the client
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	require.NoError(t, err)
 	var qr model.AggregatedQueryResponse
 	err = json.Unmarshal(body, &qr)
@@ -365,7 +365,7 @@ func TestLokiConfigurationForTableHistogram(t *testing.T) {
 	assert.Empty(t, req.Header.Get("X-Scope-OrgID"))
 
 	// AND the response is sent back to the client
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	require.NoError(t, err)
 	var qr model.AggregatedQueryResponse
 	err = json.Unmarshal(body, &qr)
@@ -454,7 +454,7 @@ func getRequestResults(t *testing.T, httpClient *http.Client, url string) (strin
 		return "", err
 	}
 	defer resp.Body.Close()
-	bodyBytes, err2 := ioutil.ReadAll(resp.Body)
+	bodyBytes, err2 := io.ReadAll(resp.Body)
 	if err2 != nil {
 		return "", err2
 	}
