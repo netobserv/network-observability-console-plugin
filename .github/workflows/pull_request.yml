@@ -8,9 +8,6 @@ jobs:
   build-test-backend:
     name: Build, lint, test backend
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        go: ['1.18']
         
     steps:
     - name: install make
@@ -18,7 +15,7 @@ jobs:
     - name: set up go 1.x
       uses: actions/setup-go@v3
       with:
-        go-version: ${{ matrix.go }}
+        go-version: '1.19'
     - name: checkout
       uses: actions/checkout@v3
     - name: build, lint, test
@@ -27,9 +24,6 @@ jobs:
   build-test-frontend:
     name: Build, lint, test frontend
     runs-on: ubuntu-20.04
-    strategy:
-      matrix:
-        go: ['1.18']
     steps:
     - name: install make
       run: sudo apt-get install make
