@@ -258,7 +258,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
         <ToolbarItem className="flex-start">
           <QueryOptionsDropdown {...props.queryOptionsProps} />
         </ToolbarItem>
-        {quickFilters.length > 0 && (
+        {_.isEmpty(forcedFilters) && quickFilters.length > 0 && (
           <ToolbarItem className="flex-start">
             <QuickFilters quickFilters={quickFilters} activeFilters={filters || []} setFilters={setFilters} />
           </ToolbarItem>
