@@ -47,7 +47,7 @@ type ResultValue interface {
 	Type() ResultType
 }
 
-//QueryResponseData represents the http json response to a label query
+// QueryResponseData represents the http json response to a label query
 type QueryResponseData struct {
 	ResultType ResultType  `json:"resultType"`
 	Result     ResultValue `json:"result"`
@@ -69,13 +69,13 @@ func (Matrix) Type() ResultType { return ResultTypeMatrix }
 // Streams is a slice of Stream
 type Streams []Stream
 
-//Stream represents a log stream.  It includes a set of log entries and their labels.
+// Stream represents a log stream.  It includes a set of log entries and their labels.
 type Stream struct {
 	Labels  map[string]string `json:"stream"`
 	Entries []Entry           `json:"values"`
 }
 
-//Entry represents a log entry.  It includes a log message and the time it occurred at.
+// Entry represents a log entry.  It includes a log message and the time it occurred at.
 type Entry struct {
 	Timestamp time.Time
 	Line      string

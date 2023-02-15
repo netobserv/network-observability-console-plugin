@@ -11,7 +11,7 @@ COPY --chown=default web web
 COPY mocks mocks
 RUN make fmt-frontend just-build-frontend
 
-FROM registry.access.redhat.com/ubi9/go-toolset:1.18 as go-builder
+FROM docker.io/library/golang:1.19 as go-builder
 
 WORKDIR /opt/app-root
 

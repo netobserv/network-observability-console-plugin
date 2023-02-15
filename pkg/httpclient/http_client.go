@@ -3,9 +3,10 @@ package httpclient
 import (
 	"crypto/tls"
 	"crypto/x509"
-	"io/ioutil"
+	"io"
 	"net"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -33,7 +34,7 @@ func NewHTTPClient(timeout time.Duration, overrideHeaders map[string][]string, s
 		transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 		slog.Warn("skipping TLS checks. SSL certificate verification is now disabled !")
 	} else if capath != "" {
-		caCert, err := ioutil.ReadFile(capath)
+		caCert, err := os.ReadFile(capath)
 		if err != nil {
 			slog.Errorf("Cannot load loki ca certificate: %v", err)
 		} else {
@@ -65,6 +66,6 @@ func (hc *httpClient) Get(url string) ([]byte, int, error) {
 		return nil, 0, err
 	}
 	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	return body, resp.StatusCode, err
 }
