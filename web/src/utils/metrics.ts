@@ -3,9 +3,10 @@ import { RawTopologyMetrics, MetricStats, TopologyMetricPeer, TopologyMetrics, N
 import { MetricFunction, MetricScope, MetricType } from '../model/flow-query';
 import { roundTwoDigits } from './count';
 import { computeStepInterval, rangeToSeconds, TimeRange } from './datetime';
-import { byteRateFormat, byteFormat, simpleRateFormat, simpleValueFormat } from './format';
+import { valueFormat } from './format';
 import { NodeData } from '../model/topology';
 import { getPeerId, idUnknown } from './ids';
+import { TFunction } from 'i18next';
 
 // Tolerance, in seconds, to assume presence/emptiness of the last datapoint fetched, when it is
 // close to "now", to accomodate with potential collection latency.
@@ -246,29 +247,29 @@ export const computeStats = (ts: [number, number][]): MetricStats => {
   };
 };
 
-export const getFormattedValue = (v: number, mt: MetricType, mf: MetricFunction): string => {
+export const getFormattedValue = (v: number, mt: MetricType, mf: MetricFunction, t: TFunction): string => {
   if (mt === 'count') {
-    return simpleValueFormat(v);
+    return valueFormat(v);
   } else if (mf === 'sum') {
     switch (mt) {
       case 'bytes':
-        return byteFormat(v);
+        return valueFormat(v, 1, t('B'));
       case 'packets':
-        return simpleValueFormat(v);
+        return valueFormat(v, 1, t('P'));
     }
   } else {
-    return getFormattedRateValue(v, mt);
+    return getFormattedRateValue(v, mt, t);
   }
 };
 
-export const getFormattedRateValue = (v: number, mt: MetricType): string => {
+export const getFormattedRateValue = (v: number, mt: MetricType, t: TFunction): string => {
   switch (mt) {
     case 'count':
-      return simpleValueFormat(v);
+      return valueFormat(v);
     case 'bytes':
-      return byteRateFormat(v);
+      return valueFormat(v, 1, t('Bps'));
     case 'packets':
-      return simpleRateFormat(v);
+      return valueFormat(v, 1, t('Pps'));
   }
 };
 

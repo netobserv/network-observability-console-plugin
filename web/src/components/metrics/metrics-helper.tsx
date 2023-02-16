@@ -51,14 +51,14 @@ export const toHistogramDatapoints = (metric: NamedMetric): ChartDataPoint[] => 
   return result;
 };
 
-export const chartVoronoi = (legendData: LegendDataItem[], metricType: MetricType) => {
+export const chartVoronoi = (legendData: LegendDataItem[], metricType: MetricType, t: TFunction) => {
   const CursorVoronoiContainer = createContainer('voronoi', 'cursor');
   const tooltipData = legendData.map(item => ({ ...item, name: item.tooltipName }));
   return (
     <CursorVoronoiContainer
       cursorDimension="x"
       labels={(dp: { datum: ChartDataPoint }) => {
-        return dp.datum.y || dp.datum.y === 0 ? getFormattedRateValue(dp.datum.y, metricType) : 'n/a';
+        return dp.datum.y || dp.datum.y === 0 ? getFormattedRateValue(dp.datum.y, metricType, t) : 'n/a';
       }}
       labelComponent={<ChartLegendTooltip legendData={tooltipData} title={(datum: ChartDataPoint) => datum.date} />}
       mouseFollowTooltips

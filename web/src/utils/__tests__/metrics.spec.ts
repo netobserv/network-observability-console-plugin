@@ -10,6 +10,8 @@ import {
   parseMetrics
 } from '../metrics';
 
+const t = (k: string) => k;
+
 describe('normalize and computeStats', () => {
   it('should normalize and compute simple stats', () => {
     const values: [number, unknown][] = [
@@ -394,26 +396,26 @@ describe('parseMetrics', () => {
 
 describe('getFormattedValue', () => {
   it('should format BPS', () => {
-    expect(getFormattedValue(500, 'bytes', 'last')).toBe('500 Bps');
-    expect(getFormattedValue(1300, 'bytes', 'avg')).toBe('1.3 kBps');
-    expect(getFormattedValue(10500, 'bytes', 'max')).toBe('10.5 kBps');
-    expect(getFormattedValue(1500000, 'bytes', 'avg')).toBe('1.5 MBps');
+    expect(getFormattedValue(500, 'bytes', 'last', t)).toBe('500 Bps');
+    expect(getFormattedValue(1300, 'bytes', 'avg', t)).toBe('1.3 kBps');
+    expect(getFormattedValue(10500, 'bytes', 'max', t)).toBe('10.5 kBps');
+    expect(getFormattedValue(1500000, 'bytes', 'avg', t)).toBe('1.5 MBps');
   });
 
   it('should format absolute bytes', () => {
-    expect(getFormattedValue(500, 'bytes', 'sum')).toBe('500 B');
-    expect(getFormattedValue(10500, 'bytes', 'sum')).toBe('10.5 kB');
+    expect(getFormattedValue(500, 'bytes', 'sum', t)).toBe('500 B');
+    expect(getFormattedValue(10500, 'bytes', 'sum', t)).toBe('10.5 kB');
   });
 
   it('should format packets rate', () => {
-    expect(getFormattedValue(500, 'packets', 'last')).toBe('500 /sec');
-    expect(getFormattedValue(1300, 'packets', 'avg')).toBe('1.3 k/sec');
-    expect(getFormattedValue(10500, 'packets', 'max')).toBe('10.5 k/sec');
-    expect(getFormattedValue(1500000, 'packets', 'avg')).toBe('1.5 M/sec');
+    expect(getFormattedValue(500, 'packets', 'last', t)).toBe('500 Pps');
+    expect(getFormattedValue(1300, 'packets', 'avg', t)).toBe('1.3 kPps');
+    expect(getFormattedValue(10500, 'packets', 'max', t)).toBe('10.5 kPps');
+    expect(getFormattedValue(1500000, 'packets', 'avg', t)).toBe('1.5 MPps');
   });
 
   it('should format absolute packets', () => {
-    expect(getFormattedValue(500, 'packets', 'sum')).toBe('500');
-    expect(getFormattedValue(10500, 'packets', 'sum')).toBe('10.5k');
+    expect(getFormattedValue(500, 'packets', 'sum', t)).toBe('500 P');
+    expect(getFormattedValue(10500, 'packets', 'sum', t)).toBe('10.5 kP');
   });
 });

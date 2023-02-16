@@ -24,6 +24,7 @@ import {
   LegendDataItem
 } from './metrics-helper';
 import './metrics-content.css';
+import { useTranslation } from 'react-i18next';
 
 export type MetricsContentProps = {
   id: string;
@@ -52,6 +53,8 @@ export const MetricsContent: React.FC<MetricsContentProps> = ({
   itemsPerRow,
   tooltipsTruncate
 }) => {
+  const { t } = useTranslation('plugin__netobserv-plugin');
+
   const filteredMetrics = metrics.slice(0, limit);
 
   const legendData: LegendDataItem[] = filteredMetrics.map((m, idx) => ({
@@ -81,7 +84,7 @@ export const MetricsContent: React.FC<MetricsContentProps> = ({
       <Chart
         themeColor={ChartThemeColor.multiUnordered}
         ariaTitle={title}
-        containerComponent={chartVoronoi(legendData, metricType)}
+        containerComponent={chartVoronoi(legendData, metricType, t)}
         legendData={legendData}
         legendOrientation={'horizontal'}
         legendPosition="bottom-left"
@@ -101,7 +104,7 @@ export const MetricsContent: React.FC<MetricsContentProps> = ({
         }}
       >
         <ChartAxis fixLabelOverlap />
-        <ChartAxis dependentAxis showGrid fixLabelOverlap tickFormat={y => getFormattedRateValue(y, metricType)} />
+        <ChartAxis dependentAxis showGrid fixLabelOverlap tickFormat={y => getFormattedRateValue(y, metricType, t)} />
         {showBar && (
           <ChartStack>
             {topKDatapoints.map((datapoints, idx) => (

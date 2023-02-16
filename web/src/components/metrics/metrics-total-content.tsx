@@ -25,6 +25,7 @@ import {
   toDatapoints
 } from './metrics-helper';
 import './metrics-content.css';
+import { useTranslation } from 'react-i18next';
 
 export type MetricsTotalContentProps = {
   id: string;
@@ -51,6 +52,8 @@ export const MetricsTotalContent: React.FC<MetricsTotalContentProps> = ({
   showOutOfScope,
   smallerTexts
 }) => {
+  const { t } = useTranslation('plugin__netobserv-plugin');
+
   let filtered = topKMetrics;
   if (!showInternal) {
     filtered = filtered.filter(m => !m.isInternal);
@@ -96,7 +99,7 @@ export const MetricsTotalContent: React.FC<MetricsTotalContentProps> = ({
           <Chart
             themeColor={ChartThemeColor.multiUnordered}
             ariaTitle={title}
-            containerComponent={chartVoronoi(legendData, metricType)}
+            containerComponent={chartVoronoi(legendData, metricType, t)}
             legendData={legendData}
             legendOrientation="horizontal"
             legendPosition="bottom-left"
@@ -116,7 +119,12 @@ export const MetricsTotalContent: React.FC<MetricsTotalContentProps> = ({
             }}
           >
             <ChartAxis fixLabelOverlap />
-            <ChartAxis dependentAxis showGrid fixLabelOverlap tickFormat={y => getFormattedRateValue(y, metricType)} />
+            <ChartAxis
+              dependentAxis
+              showGrid
+              fixLabelOverlap
+              tickFormat={y => getFormattedRateValue(y, metricType, t)}
+            />
             <ChartStack>
               {topKDatapoints.map((datapoints, idx) => (
                 <ChartBar name={`bar-${idx}`} key={`bar-${idx}`} data={datapoints} />

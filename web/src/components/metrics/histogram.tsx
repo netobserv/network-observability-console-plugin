@@ -234,7 +234,7 @@ export const Histogram: React.FC<{
         }}
       >
         <ChartAxis fixLabelOverlap />
-        <ChartAxis dependentAxis showGrid fixLabelOverlap tickFormat={y => getFormattedRateValue(y, 'count')} />
+        <ChartAxis dependentAxis showGrid fixLabelOverlap tickFormat={y => getFormattedRateValue(y, 'count', t)} />
         <ChartStack>
           <ChartBar
             name={`bar-${id}`}

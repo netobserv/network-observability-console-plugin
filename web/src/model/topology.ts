@@ -295,9 +295,9 @@ export const getStat = (stats: MetricStats, mf: MetricFunction): number => {
   return mf === 'avg' ? stats.avg : mf === 'max' ? stats.max : mf === 'last' ? stats.latest : stats.total;
 };
 
-const getEdgeTag = (value: number, options: TopologyOptions) => {
+const getEdgeTag = (value: number, options: TopologyOptions, t: TFunction) => {
   if (options.edgeTags && value) {
-    return getFormattedValue(value, options.metricType, options.metricFunction);
+    return getFormattedValue(value, options.metricType, options.metricFunction, t);
   }
   return undefined;
 };
@@ -310,6 +310,7 @@ const generateEdge = (
   shadowed = false,
   filtered = false,
   highlightedId: string,
+  t: TFunction,
   isDark?: boolean
 ): EdgeModel => {
   const id = `${sourceId}.${targetId}`;
@@ -334,7 +335,7 @@ const generateEdge = (
       startTerminalStatus: NodeStatus.default,
       endTerminalType: stat > 0 ? EdgeTerminalType.directional : EdgeTerminalType.none,
       endTerminalStatus: NodeStatus.default,
-      tag: getEdgeTag(stat, options),
+      tag: getEdgeTag(stat, options, t),
       tagStatus: getTagStatus(stat, options.maxEdgeStat),
       bps: stat
     }
@@ -425,7 +426,8 @@ export const generateDataModel = (
     targetId: string,
     stats: MetricStats,
     shadowed = false,
-    filtered = false
+    filtered = false,
+    t: TFunction
   ): EdgeModel => {
     const stat = getStat(stats, options.metricFunction);
     let edge = edges.find(
@@ -444,12 +446,12 @@ export const generateDataModel = (
         isDark,
         //edges are directed from src to dst. It will become bidirectionnal if inverted pair is found
         startTerminalType: edge.data.sourceId !== sourceId ? EdgeTerminalType.directional : edge.data.startTerminalType,
-        tag: getEdgeTag(stat, options),
+        tag: getEdgeTag(stat, options, t),
         tagStatus: getTagStatus(stat, options.maxEdgeStat),
         bps: stat
       };
     } else {
-      edge = generateEdge(sourceId, targetId, stat, opts, shadowed, filtered, highlightedId, isDark);
+      edge = generateEdge(sourceId, targetId, stat, opts, shadowed, filtered, highlightedId, t, isDark);
       edges.push(edge);
     }
 
@@ -515,7 +517,8 @@ export const generateDataModel = (
         dstNode.id,
         m.stats,
         srcNode.data.shadowed || dstNode.data.shadowed,
-        srcNode.data.filtered || dstNode.data.filtered
+        srcNode.data.filtered || dstNode.data.filtered,
+        t
       );
     }
   });
