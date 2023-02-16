@@ -2,7 +2,7 @@ package server
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -252,7 +252,7 @@ func TestLokiFiltering(t *testing.T) {
 			now := time.Now().Unix()
 			res, err := backendSvc.Client().Get(backendSvc.URL + "/api/loki/flows" + tc.inputPath)
 			require.NoError(t, err)
-			body, err := ioutil.ReadAll(res.Body)
+			body, err := io.ReadAll(res.Body)
 			require.NoError(t, err)
 			require.Equalf(t, http.StatusOK, res.StatusCode,
 				"unexpected return %s: %s", res.Status, string(body))

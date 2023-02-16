@@ -2,6 +2,7 @@ import * as React from 'react';
 import { clearURLParams } from '../utils/url';
 import { clearLocalStorage } from '../utils/local-storage-hook';
 import NetflowTraffic from './netflow-traffic';
+import AlertFetcher from './alerts/fetcher';
 
 type Props = {};
 type State = {
@@ -49,7 +50,12 @@ class NetflowTrafficParent extends React.Component<Props, State> {
       return this.props.children;
     }
     // else render default NetworkTraffic
-    return <NetflowTraffic forcedFilters={null} />;
+
+    return (
+      <AlertFetcher>
+        <NetflowTraffic forcedFilters={null} />
+      </AlertFetcher>
+    );
   }
 }
 

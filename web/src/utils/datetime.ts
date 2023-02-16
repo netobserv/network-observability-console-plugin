@@ -24,9 +24,8 @@ export interface TimeRange {
   to: number;
 }
 
-export const getTimeRangeOptions = (t: TFunction) => {
-  return {
-    [CUSTOM_TIME_RANGE_KEY]: t('Custom time range'),
+export const getTimeRangeOptions = (t: TFunction, includeCustom = true) => {
+  const timeOptions = {
     '5m': t('Last 5 minutes'),
     '15m': t('Last 15 minutes'),
     '30m': t('Last 30 minutes'),
@@ -39,12 +38,27 @@ export const getTimeRangeOptions = (t: TFunction) => {
     '1w': t('Last 1 week'),
     '2w': t('Last 2 weeks')
   };
+
+  if (includeCustom) {
+    return {
+      [CUSTOM_TIME_RANGE_KEY]: t('Custom time range'),
+      ...timeOptions
+    };
+  } else {
+    return timeOptions;
+  }
 };
 
 export const dateFormatter = new Intl.DateTimeFormat(getLanguage(), {
   month: 'short',
   day: 'numeric',
   year: 'numeric'
+});
+
+export const timeFormatter = new Intl.DateTimeFormat(getLanguage(), {
+  hour: 'numeric',
+  minute: 'numeric',
+  second: 'numeric'
 });
 
 export const timeMSFormatter = new Intl.DateTimeFormat(getLanguage(), {

@@ -10,7 +10,7 @@ import (
 	"encoding/json"
 	"encoding/pem"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"math/big"
 	rnd "math/rand"
 	"net"
@@ -129,11 +129,12 @@ func TestServerUnauthorized(t *testing.T) {
 	// wait for our test http server to come up
 	checkHTTPReady(httpClient, serverURL)
 
-	msg, err := getRequestResults(t, httpClient, serverURL)
-	require.Error(t, err)
-	require.Equal(t, "missing Authorization header", msg)
+	_, err = getRequestResults(t, httpClient, serverURL)
+	if err != nil {
+		t.Fatalf("Failed: could not fetch static files on / (root): %v", err)
+	}
 
-	msg, err = getRequestResults(t, httpClient, serverURL+"/api/status")
+	msg, err := getRequestResults(t, httpClient, serverURL+"/api/status")
 	require.Error(t, err)
 	require.Equal(t, "missing Authorization header", msg)
 
@@ -280,7 +281,7 @@ func TestLokiConfiguration(t *testing.T) {
 	assert.Empty(t, req.Header.Get("X-Scope-OrgID"))
 
 	// AND the response is sent back to the client
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	require.NoError(t, err)
 	var qr model.AggregatedQueryResponse
 	err = json.Unmarshal(body, &qr)
@@ -322,7 +323,7 @@ func TestLokiConfigurationForTopology(t *testing.T) {
 	assert.Empty(t, req.Header.Get("X-Scope-OrgID"))
 
 	// AND the response is sent back to the client
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	require.NoError(t, err)
 	var qr model.AggregatedQueryResponse
 	err = json.Unmarshal(body, &qr)
@@ -364,7 +365,7 @@ func TestLokiConfigurationForTableHistogram(t *testing.T) {
 	assert.Empty(t, req.Header.Get("X-Scope-OrgID"))
 
 	// AND the response is sent back to the client
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	require.NoError(t, err)
 	var qr model.AggregatedQueryResponse
 	err = json.Unmarshal(body, &qr)
@@ -453,7 +454,7 @@ func getRequestResults(t *testing.T, httpClient *http.Client, url string) (strin
 		return "", err
 	}
 	defer resp.Body.Close()
-	bodyBytes, err2 := ioutil.ReadAll(resp.Body)
+	bodyBytes, err2 := io.ReadAll(resp.Body)
 	if err2 != nil {
 		return "", err2
 	}

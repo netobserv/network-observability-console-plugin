@@ -6,6 +6,7 @@ export type Config = {
     portNames: Map<string, string>;
   };
   quickFilters: RawQuickFilter[];
+  alertNamespaces: string[];
 };
 
 export const defaultConfig: Config = {
@@ -13,5 +14,6 @@ export const defaultConfig: Config = {
     enable: true,
     portNames: new Map()
   },
-  quickFilters: []
+  quickFilters: [],
+  alertNamespaces: ['netobserv']
 };

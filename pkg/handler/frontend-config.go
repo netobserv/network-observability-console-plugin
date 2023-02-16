@@ -1,8 +1,8 @@
 package handler
 
 import (
-	"io/ioutil"
 	"net/http"
+	"os"
 
 	"gopkg.in/yaml.v3"
 )
@@ -18,7 +18,8 @@ type frontendConfig struct {
 		Enable    bool              `yaml:"enable,omitempty" json:"enable"`
 		PortNames map[string]string `yaml:"portNames,omitempty" json:"portNames"`
 	} `yaml:"portNaming,omitempty" json:"portNaming"`
-	QuickFilters []QuickFilter `yaml:"quickFilters" json:"quickFilters"`
+	QuickFilters    []QuickFilter `yaml:"quickFilters" json:"quickFilters"`
+	AlertNamespaces []string      `yaml:"alertNamespaces" json:"alertNamespaces"`
 }
 
 func readConfigFile(filename string) (*frontendConfig, error) {
@@ -28,7 +29,7 @@ func readConfigFile(filename string) (*frontendConfig, error) {
 	if len(filename) == 0 {
 		return &cfg, nil
 	}
-	yamlFile, err := ioutil.ReadFile(filename)
+	yamlFile, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, err
 	}
