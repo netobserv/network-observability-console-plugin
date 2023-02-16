@@ -1,8 +1,8 @@
 package loki
 
 import (
-	"io/ioutil"
 	"net/url"
+	"os"
 	"time"
 
 	"github.com/netobserv/network-observability-console-plugin/pkg/utils"
@@ -27,7 +27,7 @@ type Config struct {
 func NewConfig(url *url.URL, statusURL *url.URL, timeout time.Duration, tenantID string, tokenPath string, forwardUserToken bool, skipTLS bool, capath string, useMocks bool, labels []string) Config {
 	authorization := ""
 	if tokenPath != "" {
-		bytes, err := ioutil.ReadFile(tokenPath)
+		bytes, err := os.ReadFile(tokenPath)
 		if err != nil {
 			log.WithError(err).Fatalf("failed to parse authorization path: %s", tokenPath)
 		}

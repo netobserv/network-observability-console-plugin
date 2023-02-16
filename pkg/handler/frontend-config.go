@@ -1,8 +1,8 @@
 package handler
 
 import (
-	"io/ioutil"
 	"net/http"
+	"os"
 
 	"gopkg.in/yaml.v3"
 )
@@ -29,7 +29,7 @@ func readConfigFile(filename string) (*frontendConfig, error) {
 	if len(filename) == 0 {
 		return &cfg, nil
 	}
-	yamlFile, err := ioutil.ReadFile(filename)
+	yamlFile, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, err
 	}

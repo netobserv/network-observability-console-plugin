@@ -1,7 +1,7 @@
 package lokiclientmock
 
 import (
-	"io/ioutil"
+	"os"
 	"strings"
 )
 
@@ -33,7 +33,7 @@ func (o *LokiClientMock) Get(url string) ([]byte, int, error) {
 		}
 	}
 
-	file, err := ioutil.ReadFile(path)
+	file, err := os.ReadFile(path)
 	if err != nil {
 		return nil, 500, err
 	}

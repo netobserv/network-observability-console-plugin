@@ -9,7 +9,7 @@ import (
 	"github.com/netobserv/network-observability-console-plugin/pkg/model"
 )
 
-//MatrixMerger stores a state to build unique Matrix from multiple ones
+// MatrixMerger stores a state to build unique Matrix from multiple ones
 type MatrixMerger struct {
 	Merger
 	index        map[string]indexedSampleStream
@@ -29,7 +29,7 @@ func NewMatrixMerger(reqLimit int) *MatrixMerger {
 	}
 }
 
-//indexedSampleStream stores a unique SampleStream at a specific index with merged values
+// indexedSampleStream stores a unique SampleStream at a specific index with merged values
 type indexedSampleStream struct {
 	values map[pmodel.Time]pmodel.SampleValue
 	index  int
