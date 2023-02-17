@@ -40,7 +40,7 @@ var (
 	lokiMock             = flag.Bool("loki-mock", false, "Fake loki results using saved mocks")
 	logLevel             = flag.String("loglevel", "info", "log level (default: info)")
 	frontendConfig       = flag.String("frontend-config", "", "path to the console plugin config file")
-	authCheck            = flag.String("auth-check", "admin", "type of authentication check: authenticated, admin or none (default is admin)")
+	authCheck            = flag.String("auth-check", "auto", "type of authentication check: authenticated, admin, auto or none (default is auto, based on loki auth mode)")
 	versionFlag          = flag.Bool("v", false, "print version")
 	log                  = logrus.WithField("module", "main")
 )
@@ -83,7 +83,17 @@ func main() {
 		log.Fatal("labels cannot be empty")
 	}
 
-	checkType := auth.CheckType(*authCheck)
+	var checkType auth.CheckType
+	if *authCheck == "auto" {
+		if *lokiForwardUserToken {
+			checkType = auth.CheckAuthenticated
+		} else {
+			checkType = auth.CheckAdmin
+		}
+		log.Info(fmt.Sprintf("auth-check 'auto' resolved to '%s'", checkType))
+	} else {
+		checkType = auth.CheckType(*authCheck)
+	}
 	if checkType == auth.CheckNone {
 		log.Warn("INSECURE: auth checker is disabled")
 	}

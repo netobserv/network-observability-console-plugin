@@ -61,8 +61,8 @@ func getLabelValues(cfg *loki.Config, lokiClient httpclient.Caller, label string
 		return nil, http.StatusServiceUnavailable, err
 	}
 	if code != http.StatusOK {
-		msg := getLokiError(resp, code)
-		return nil, http.StatusBadRequest, errors.New(msg)
+		newCode, msg := getLokiError(resp, code)
+		return nil, newCode, errors.New(msg)
 	}
 	hlog.Tracef("GetFlows raw response: %s", resp)
 	var lvr model.LabelValuesResponse
