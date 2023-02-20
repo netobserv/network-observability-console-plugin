@@ -1,3 +1,9 @@
 .netobserv-alert {
-    margin: 1em;
+    margin: 1.5rem;
+}
+
+.netobserv-alerts-container {
+    position: absolute;
+    width: -webkit-fill-available;
+    z-index: 999;
 }

@@ -44,12 +44,14 @@ export const AlertFetcher: React.FC<AlertFetcherProps> = ({ children }) => {
     return;
   }, []);
   return (
-    <div>
-      {alerts.map(a => (
-        <AlertBanner key={a.name} rule={a} onDelete={() => setAlerts(alerts.filter(alert => alert.name != a.name))} />
-      ))}
+    <>
+      <div className="netobserv-alerts-container">
+        {alerts.map(a => (
+          <AlertBanner key={a.name} rule={a} onDelete={() => setAlerts(alerts.filter(alert => alert.name != a.name))} />
+        ))}
+      </div>
       {!!children ? children : ''}
-    </div>
+    </>
   );
 };
 
