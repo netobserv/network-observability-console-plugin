@@ -8,6 +8,7 @@ import { Size } from '../../dropdowns/table-display-dropdown';
 
 describe('<RecordField />', () => {
   const filterMock: RecordFieldFilter = {
+    type: 'filter',
     onClick: jest.fn(),
     isDelete: false
   };

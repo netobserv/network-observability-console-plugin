@@ -1,7 +1,7 @@
 import { TFunction } from 'i18next';
 import { findFilter } from './filter-definitions';
 import { TimeRange } from './datetime';
-import { Match, MetricFunction, MetricType, Reporter } from '../model/flow-query';
+import { Match, MetricFunction, MetricType, RecordType, Reporter } from '../model/flow-query';
 import { getURLParam, getURLParamAsNumber, removeURLParam, setURLParam, URLParam } from './url';
 import { createFilterValue, DisabledFilters, Filter, filterKey, fromFilterKey } from '../model/filters';
 
@@ -9,6 +9,7 @@ const filtersSeparator = ';';
 const filterKVSeparator = '=';
 const filterValuesSeparator = ',';
 export const defaultTimeRange = 300;
+export const defaultRecordType: RecordType = 'flowLog';
 export const defaultReporter: Reporter = 'destination';
 const defaultMatch: Match = 'all';
 export const defaultMetricFunction: MetricFunction = 'last';
@@ -30,6 +31,10 @@ export const getRangeFromURL = (): number | TimeRange => {
     return { from: startTime, to: endTime };
   }
   return defaultTimeRange;
+};
+
+export const getRecordTypeFromURL = (): RecordType => {
+  return (getURLParam(URLParam.RecordType) as RecordType | null) || defaultRecordType;
 };
 
 export const getReporterFromURL = (): Reporter => {

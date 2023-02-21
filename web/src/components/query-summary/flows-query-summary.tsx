@@ -8,9 +8,11 @@ import './query-summary.css';
 import { valueFormat } from '../../utils/format';
 import { Stats } from '../../api/loki';
 import _ from 'lodash';
+import { RecordType } from 'src/model/flow-query';
 
 export const FlowsQuerySummaryContent: React.FC<{
   flows: Record[];
+  type: RecordType;
   limitReached: boolean;
   range: number | TimeRange;
   lastRefresh: Date | undefined;
@@ -18,13 +20,24 @@ export const FlowsQuerySummaryContent: React.FC<{
   className?: string;
   isShowQuerySummary?: boolean;
   toggleQuerySummary?: () => void;
-}> = ({ flows, limitReached, range, lastRefresh, direction, className, isShowQuerySummary, toggleQuerySummary }) => {
+}> = ({
+  flows,
+  type,
+  limitReached,
+  range,
+  lastRefresh,
+  direction,
+  className,
+  isShowQuerySummary,
+  toggleQuerySummary
+}) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
+  const filteredFlows = flows.filter(r => ['endConnection', 'flowLog'].includes(r.labels._RecordType!));
 
   const rangeInSeconds = rangeToSeconds(range);
   const counters = React.useCallback(() => {
-    const bytes = flows.map(f => f.fields.Bytes).reduce((a, b) => a + b, 0);
-    const packets = flows.map(f => f.fields.Packets).reduce((a, b) => a + b, 0);
+    const bytes = filteredFlows.map(f => f.fields.Bytes).reduce((a, b) => a + b, 0);
+    const packets = filteredFlows.map(f => f.fields.Packets).reduce((a, b) => a + b, 0);
 
     return (
       <>
@@ -57,7 +70,7 @@ export const FlowsQuerySummaryContent: React.FC<{
         )}
       </>
     );
-  }, [flows, limitReached, rangeInSeconds, t]);
+  }, [filteredFlows, limitReached, rangeInSeconds, t]);
 
   return (
     <Flex id="query-summary-content" className={className} direction={{ default: direction }}>
@@ -79,9 +92,20 @@ export const FlowsQuerySummaryContent: React.FC<{
               </FlexItem>
             )}
             <FlexItem>
-              <Tooltip content={<Text component={TextVariants.p}>{t('Filtered flows count')}</Text>}>
+              <Tooltip
+                content={
+                  <Text component={TextVariants.p}>
+                    {type === 'flowLog' ? t('Filtered flows count') : t('Filtered ended conversations count')}
+                  </Text>
+                }
+              >
                 <Text id="flowsCount" component={TextVariants.p}>
-                  {valueFormat(flows!.length, 0, t('flows'), limitReached)}
+                  {valueFormat(
+                    filteredFlows!.length,
+                    0,
+                    type === 'flowLog' ? t('flows') : t('ended conversations'),
+                    limitReached
+                  )}
                 </Text>
               </Tooltip>
             </FlexItem>
@@ -118,17 +142,19 @@ export const FlowsQuerySummaryContent: React.FC<{
 export const FlowsQuerySummary: React.FC<{
   flows: Record[];
   stats: Stats | undefined;
+  type: RecordType;
   range: number | TimeRange;
   lastRefresh: Date | undefined;
   isShowQuerySummary?: boolean;
   toggleQuerySummary?: () => void;
-}> = ({ flows, stats, range, lastRefresh, isShowQuerySummary, toggleQuerySummary }) => {
+}> = ({ flows, stats, type, range, lastRefresh, isShowQuerySummary, toggleQuerySummary }) => {
   if (!_.isEmpty(flows) && stats) {
     return (
       <Card id="query-summary" isFlat>
         <FlowsQuerySummaryContent
           direction="row"
           flows={flows}
+          type={type}
           limitReached={stats.limitReached}
           range={range}
           lastRefresh={lastRefresh}

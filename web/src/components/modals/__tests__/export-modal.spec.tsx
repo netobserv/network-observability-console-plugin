@@ -11,7 +11,7 @@ describe('<ExportModal />', () => {
     columns: ShuffledDefaultColumns,
     filters: [],
     range: 300,
-    flowQuery: { reporter: 'destination', limit: 100, filters: '' },
+    flowQuery: { recordType: 'flowLog', reporter: 'destination', limit: 100, filters: '' },
     id: 'export-modal'
   };
   it('should render component', async () => {

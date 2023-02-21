@@ -1,6 +1,6 @@
 import { mount, shallow } from 'enzyme';
 import * as React from 'react';
-import { MetricType } from '../../../model/flow-query';
+import { MetricType, RecordType } from '../../../model/flow-query';
 import { FlowsSample } from '../../__tests-data__/flows';
 import { FlowsQuerySummary, FlowsQuerySummaryContent } from '../flows-query-summary';
 
@@ -11,6 +11,7 @@ describe('<FlowsQuerySummary />', () => {
     isShowQuerySummary: false,
     toggleQuerySummary: jest.fn(),
     flows: FlowsSample,
+    type: 'flowLog' as RecordType,
     metricType: 'bytes' as MetricType,
     stats: {
       limitReached: false,

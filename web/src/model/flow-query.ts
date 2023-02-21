@@ -1,6 +1,7 @@
 import { Filter } from './filters';
 
 export type Reporter = 'source' | 'destination' | 'both';
+export type RecordType = 'allConnections' | 'newConnection' | 'heartbeat' | 'endConnection' | 'flowLog';
 export type Match = 'all' | 'any';
 export type MetricFunction = 'sum' | 'avg' | 'max' | 'last';
 export type MetricType = 'count' | 'bytes' | 'packets';
@@ -12,7 +13,8 @@ export interface FlowQuery {
   startTime?: string;
   endTime?: string;
   filters: string;
-  reporter: Reporter;
+  reporter?: Reporter;
+  recordType: RecordType;
   limit: number;
   type?: MetricType;
   scope?: MetricScope;
@@ -65,4 +67,8 @@ export const groupFiltersMatchAny = (filters: Filter[]): string => {
     }
   });
   return encodeURIComponent(orGroup.join('|'));
+};
+
+export const filterByHashId = (hashId: string): string => {
+  return encodeURIComponent(`_HashId="${hashId}"`);
 };

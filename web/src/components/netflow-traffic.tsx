@@ -51,6 +51,7 @@ import {
   MetricFunction,
   MetricScope,
   MetricType,
+  RecordType,
   Reporter
 } from '../model/flow-query';
 import { MetricScopeOptions } from '../model/metrics';
@@ -98,6 +99,7 @@ import {
   getLimitFromURL,
   getMatchFromURL,
   getRangeFromURL,
+  getRecordTypeFromURL,
   getReporterFromURL,
   setURLFilters,
   setURLLimit,
@@ -190,6 +192,7 @@ export const NetflowTraffic: React.FC<{
   const [selectedViewId, setSelectedViewId] = useLocalStorage<ViewId>(LOCAL_STORAGE_VIEW_ID_KEY, 'overview');
   const [filters, setFilters] = React.useState<Filter[]>([]);
   const [match, setMatch] = React.useState<Match>(getMatchFromURL());
+  const [recordType, setRecordType] = React.useState<RecordType>(getRecordTypeFromURL());
   const [reporter, setReporter] = React.useState<Reporter>(getReporterFromURL());
   const [limit, setLimit] = React.useState<number>(
     getLimitFromURL(selectedViewId === 'table' ? LIMIT_VALUES[0] : TOP_VALUES[0])
@@ -265,9 +268,15 @@ export const NetflowTraffic: React.FC<{
 
   const selectView = (view: ViewId) => {
     clearSelections();
-    //reporter 'both' is only available in table view
-    if (view !== 'table' && reporter === 'both') {
-      setReporter('source');
+    if (view !== 'table') {
+      //connection events are not available outside of table
+      if (recordType !== 'flowLog') {
+        setRecordType('flowLog');
+      }
+      //reporter 'both' is only available in table view
+      if (reporter === 'both') {
+        setReporter('source');
+      }
     }
     //save / restore top / limit parameter according to selected view
     if (view === 'overview' && selectedViewId !== 'overview') {
@@ -308,7 +317,8 @@ export const NetflowTraffic: React.FC<{
     const query: FlowQuery = {
       filters: groupedFilters,
       limit: LIMIT_VALUES.includes(limit) ? limit : LIMIT_VALUES[0],
-      reporter: reporter
+      recordType: recordType,
+      reporter: recordType === 'flowLog' ? reporter : 'both'
     };
     if (range) {
       if (typeof range === 'number') {
@@ -340,6 +350,7 @@ export const NetflowTraffic: React.FC<{
     filters,
     match,
     limit,
+    recordType,
     reporter,
     range,
     selectedViewId,
@@ -851,9 +862,11 @@ export const NetflowTraffic: React.FC<{
           filters={filters}
           range={range}
           reporter={reporter}
+          type={recordType}
           setFilters={setFilters}
           setRange={setRange}
           setReporter={setReporter}
+          setType={setRecordType}
           onClose={() => onRecordSelect(undefined)}
         />
       );
@@ -864,6 +877,7 @@ export const NetflowTraffic: React.FC<{
           flows={flows}
           metrics={metrics}
           appMetrics={totalMetric}
+          type={recordType}
           metricType={metricType}
           stats={stats}
           appStats={appStats}
@@ -987,6 +1001,7 @@ export const NetflowTraffic: React.FC<{
               stats={stats}
               lastRefresh={lastRefresh}
               range={range}
+              type={recordType}
               isShowQuerySummary={isShowQuerySummary}
               toggleQuerySummary={() => onToggleQuerySummary(!isShowQuerySummary)}
             />
@@ -1124,8 +1139,11 @@ export const NetflowTraffic: React.FC<{
           setLimit,
           match,
           setMatch,
+          recordType,
+          setRecordType,
           reporter,
           setReporter,
+          allowConnection: selectedViewId === 'table',
           allowReporterBoth: selectedViewId === 'table',
           useTopK: selectedViewId === 'overview'
         }}

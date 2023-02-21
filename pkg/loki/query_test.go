@@ -20,7 +20,7 @@ func TestFlowQuery_AddLabelFilters(t *testing.T) {
 	err = query.addFilter(filters.NewMatch("flis", `"flas"`))
 	require.NoError(t, err)
 	urlQuery := query.Build()
-	assert.Equal(t, `/loki/api/v1/query_range?query={app="netobserv-flowcollector",foo="bar",flis="flas"}`, urlQuery)
+	assert.Equal(t, `/loki/api/v1/query_range?query={app="netobserv-flowcollector",_RecordType="flowLog",foo="bar",flis="flas"}`, urlQuery)
 }
 
 func TestQuery_BackQuote_Error(t *testing.T) {
@@ -41,7 +41,7 @@ func TestFlowQuery_AddNotLabelFilters(t *testing.T) {
 	err = query.addFilter(filters.NewNotMatch("flis", `"flas"`))
 	require.NoError(t, err)
 	urlQuery := query.Build()
-	assert.Equal(t, `/loki/api/v1/query_range?query={app="netobserv-flowcollector",foo="bar",flis!="flas"}`, urlQuery)
+	assert.Equal(t, `/loki/api/v1/query_range?query={app="netobserv-flowcollector",_RecordType="flowLog",foo="bar",flis!="flas"}`, urlQuery)
 }
 
 func backtick(str string) string {
@@ -56,7 +56,7 @@ func TestFlowQuery_AddLineFilterMultipleValues(t *testing.T) {
 	err = query.addFilter(filters.NewMatch("foo", `bar,baz`))
 	require.NoError(t, err)
 	urlQuery := query.Build()
-	assert.Equal(t, `/loki/api/v1/query_range?query={app="netobserv-flowcollector"}|~`+backtick(`foo":"(?i)[^"]*bar.*"|foo":"(?i)[^"]*baz.*"`), urlQuery)
+	assert.Equal(t, `/loki/api/v1/query_range?query={app="netobserv-flowcollector",_RecordType="flowLog"}|~`+backtick(`foo":"(?i)[^"]*bar.*"|foo":"(?i)[^"]*baz.*"`), urlQuery)
 }
 
 func TestFlowQuery_AddNotLineFilters(t *testing.T) {
@@ -69,7 +69,7 @@ func TestFlowQuery_AddNotLineFilters(t *testing.T) {
 	err = query.addFilter(filters.NewNotMatch("flis", `"flas"`))
 	require.NoError(t, err)
 	urlQuery := query.Build()
-	assert.Equal(t, `/loki/api/v1/query_range?query={app="netobserv-flowcollector"}|~`+backtick(`foo":"bar"`)+`!~`+backtick(`flis":"flas"`), urlQuery)
+	assert.Equal(t, `/loki/api/v1/query_range?query={app="netobserv-flowcollector",_RecordType="flowLog"}|~`+backtick(`foo":"bar"`)+`!~`+backtick(`flis":"flas"`), urlQuery)
 }
 
 func TestFlowQuery_AddLineFiltersWithEmpty(t *testing.T) {
@@ -82,5 +82,5 @@ func TestFlowQuery_AddLineFiltersWithEmpty(t *testing.T) {
 	err = query.addFilter(filters.NewMatch("flis", `""`))
 	require.NoError(t, err)
 	urlQuery := query.Build()
-	assert.Equal(t, `/loki/api/v1/query_range?query={app="netobserv-flowcollector"}|~`+backtick(`foo":"bar"`)+`|json|flis=""`, urlQuery)
+	assert.Equal(t, `/loki/api/v1/query_range?query={app="netobserv-flowcollector",_RecordType="flowLog"}|~`+backtick(`foo":"bar"`)+`|json|flis=""`, urlQuery)
 }

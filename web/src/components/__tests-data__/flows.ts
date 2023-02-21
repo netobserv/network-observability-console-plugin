@@ -15,6 +15,7 @@ export const FlowsResultMock: RecordsResult = {
 export const FlowsSample: Record[] = [
   {
     labels: {
+      _RecordType: 'flowLog',
       FlowDirection: FlowDirection.Egress,
       SrcK8S_Namespace: 'default',
       DstK8S_Namespace: 'default'
@@ -39,6 +40,7 @@ export const FlowsSample: Record[] = [
   },
   {
     labels: {
+      _RecordType: 'flowLog',
       FlowDirection: FlowDirection.Ingress,
       SrcK8S_Namespace: 'openshift-console',
       DstK8S_Namespace: 'netowrk-observability'
@@ -63,6 +65,7 @@ export const FlowsSample: Record[] = [
   },
   {
     labels: {
+      _RecordType: 'flowLog',
       FlowDirection: FlowDirection.Ingress,
       SrcK8S_Namespace: 'kube-system',
       DstK8S_Namespace: 'default'

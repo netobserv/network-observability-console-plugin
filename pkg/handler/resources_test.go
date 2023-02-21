@@ -27,7 +27,7 @@ func TestGetSourceOwnerNames(t *testing.T) {
 	lokiClientMock.SpyURL(func(url string) {
 		assert.Equal(
 			t,
-			testLokiBaseURL+"query_range?query={app=\"netobserv-flowcollector\",SrcK8S_Namespace=\"default\"}|~`SrcK8S_OwnerType\":\"Deployment\"`",
+			testLokiBaseURL+"query_range?query={app=\"netobserv-flowcollector\",_RecordType=\"flowLog\",SrcK8S_Namespace=\"default\"}|~`SrcK8S_OwnerType\":\"Deployment\"`",
 			url,
 		)
 	})
@@ -41,7 +41,7 @@ func TestGetDestPodNames(t *testing.T) {
 	lokiClientMock.SpyURL(func(url string) {
 		assert.Equal(
 			t,
-			testLokiBaseURL+"query_range?query={app=\"netobserv-flowcollector\",DstK8S_Namespace=\"default\"}|~`DstK8S_Type\":\"Pod\"`",
+			testLokiBaseURL+"query_range?query={app=\"netobserv-flowcollector\",_RecordType=\"flowLog\",DstK8S_Namespace=\"default\"}|~`DstK8S_Type\":\"Pod\"`",
 			url,
 		)
 	})
@@ -55,7 +55,7 @@ func TestGetSourceNodeNames(t *testing.T) {
 	lokiClientMock.SpyURL(func(url string) {
 		assert.Equal(
 			t,
-			testLokiBaseURL+"query_range?query={app=\"netobserv-flowcollector\"}|~`SrcK8S_Type\":\"Node\"`",
+			testLokiBaseURL+"query_range?query={app=\"netobserv-flowcollector\",_RecordType=\"flowLog\"}|~`SrcK8S_Type\":\"Node\"`",
 			url,
 		)
 	})

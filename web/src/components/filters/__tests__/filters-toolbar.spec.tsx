@@ -16,13 +16,16 @@ describe('<FiltersToolbar />', () => {
     id: 'filter-toolbar',
     queryOptionsProps: {
       limit: 100,
+      recordType: 'allConnections',
       reporter: 'destination',
+      allowConnection: true,
       allowReporterBoth: true,
       useTopK: false,
       match: 'all',
       setLimit: jest.fn(),
       setMatch: jest.fn(),
-      setReporter: jest.fn()
+      setReporter: jest.fn(),
+      setRecordType: jest.fn()
     },
     quickFilters: []
   };
