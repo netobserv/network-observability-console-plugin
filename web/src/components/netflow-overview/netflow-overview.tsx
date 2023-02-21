@@ -13,7 +13,7 @@ import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { TopologyMetrics } from '../../api/loki';
-import { MetricType } from '../../model/flow-query';
+import { MetricType, RecordType } from '../../model/flow-query';
 import { getStat } from '../../model/topology';
 import { getOverviewPanelInfo, OverviewPanel, OverviewPanelId } from '../../utils/overview-panels';
 import { TruncateLength } from '../dropdowns/truncate-dropdown';
@@ -37,6 +37,7 @@ type PanelContent = {
 export type NetflowOverviewProps = {
   limit: number;
   panels: OverviewPanel[];
+  recordType: RecordType;
   metricType: MetricType;
   metrics: TopologyMetrics[];
   totalMetric?: TopologyMetrics;
@@ -50,6 +51,7 @@ export type NetflowOverviewProps = {
 export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
   limit,
   panels,
+  recordType,
   metricType,
   metrics,
   totalMetric,
@@ -248,7 +250,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
         return { element: <>Sankey content</> };
       case 'packets_dropped':
         return { element: <>Packets dropped content</> };
-      case 'inbound_flows_region':
+      case 'inbound_region':
         return { element: <>Inbound flows by region content</> };
     }
   };
@@ -259,7 +261,12 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
         {panels
           .filter(p => p.isSelected)
           .map((panel, i) => {
-            const { title, tooltip } = getOverviewPanelInfo(t, panel.id, limit);
+            const { title, tooltip } = getOverviewPanelInfo(
+              t,
+              panel.id,
+              limit,
+              recordType === 'flowLog' ? t('flow') : t('conversation')
+            );
             const content = getPanelContent(panel.id, title);
             return (
               <NetflowOverviewPanel

@@ -15,11 +15,16 @@ import { buildGroups, getFilterFullName } from './filters-helper';
 interface FiltersDropdownProps {
   selectedFilter: FilterDefinition;
   setSelectedFilter: (f: FilterDefinition) => void;
+  allowConnectionFilter?: boolean;
 }
 
-export const FiltersDropdown: React.FC<FiltersDropdownProps> = ({ selectedFilter, setSelectedFilter }) => {
+export const FiltersDropdown: React.FC<FiltersDropdownProps> = ({
+  selectedFilter,
+  setSelectedFilter,
+  allowConnectionFilter
+}) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
-  const groups = buildGroups(t);
+  const groups = buildGroups(t, allowConnectionFilter);
 
   const [isSearchFiltersOpen, setSearchFiltersOpen] = React.useState<boolean>(false);
   const [expandedGroup, setExpandedGroup] = React.useState(0);

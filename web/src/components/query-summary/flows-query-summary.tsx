@@ -32,7 +32,9 @@ export const FlowsQuerySummaryContent: React.FC<{
   toggleQuerySummary
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
-  const filteredFlows = flows.filter(r => ['endConnection', 'flowLog'].includes(r.labels._RecordType!));
+  const filteredFlows = flows.filter(
+    r => !r.labels._RecordType || ['endConnection', 'flowLog'].includes(r.labels._RecordType)
+  );
 
   const rangeInSeconds = rangeToSeconds(range);
   const counters = React.useCallback(() => {

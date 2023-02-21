@@ -154,7 +154,7 @@ const valid = (newValue: string) => ({ val: newValue });
 const invalid = (msg: string) => ({ err: msg });
 
 let filterDefinitions: FilterDefinition[] | undefined = undefined;
-export const getFilterDefinitions = (t: TFunction): FilterDefinition[] => {
+export const getFilterDefinitions = (t: TFunction, allowConnectionFilter?: boolean): FilterDefinition[] => {
   if (!filterDefinitions) {
     const rejectEmptyValue = (value: string) => {
       if (_.isEmpty(value)) {
@@ -437,8 +437,11 @@ export const getFilterDefinitions = (t: TFunction): FilterDefinition[] => {
         - ${t('A IANA name like TCP, UDP')}
         - ${t('Empty double quotes "" for undefined protocol')}`,
         encoders: { simpleEncode: simpleFiltersEncoder('Proto') }
-      },
-      {
+      }
+    ];
+
+    if (allowConnectionFilter) {
+      filterDefinitions.push({
         id: 'id',
         name: t('Conversation Id'),
         category: FilterCategory.None,
@@ -447,8 +450,8 @@ export const getFilterDefinitions = (t: TFunction): FilterDefinition[] => {
         validate: rejectEmptyValue,
         hint: t('Specify a single conversation hash Id.'),
         encoders: { simpleEncode: simpleFiltersEncoder('_HashId') }
-      }
-    ];
+      });
+    }
   }
   return filterDefinitions;
 };

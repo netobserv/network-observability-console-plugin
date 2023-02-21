@@ -84,7 +84,12 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
   return (
     <>
       <div className="pf-c-select__menu-group">
-        <Tooltip content={t('Log type to query. A conversation is an aggregation of flows between same peers.')}>
+        <Tooltip
+          content={t(
+            // eslint-disable-next-line max-len
+            'Log type to query. A conversation is an aggregation of flows between same peers. Only ended conversations will appear in Overview and Topology tabs.'
+          )}
+        >
           <div className="pf-c-select__menu-group-title">
             <>
               {t('Log type')} <InfoAltIcon />
@@ -98,7 +103,14 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
               <label className="pf-c-select__menu-item">
                 <Tooltip
                   trigger={disabled ? 'mouseenter focus' : ''}
-                  content={disabled ? t('Only available in Flow Table view') : undefined}
+                  content={
+                    disabled
+                      ? t(
+                          // eslint-disable-next-line max-len
+                          'Only available when FlowCollector.processor.outputRecordTypes option includes at least "newConnection", "heartbeat" or "endConnection"'
+                        )
+                      : undefined
+                  }
                 >
                   <Radio
                     isChecked={opt.value === recordType}

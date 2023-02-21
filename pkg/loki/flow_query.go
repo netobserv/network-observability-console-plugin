@@ -13,12 +13,13 @@ import (
 )
 
 const (
-	startParam     = "start"
-	endParam       = "end"
-	limitParam     = "limit"
-	queryRangePath = "/loki/api/v1/query_range?query="
-	jsonOrJoiner   = "+or+"
-	emptyMatch     = `""`
+	recordTypeField = "_RecordType"
+	startParam      = "start"
+	endParam        = "end"
+	limitParam      = "limit"
+	queryRangePath  = "/loki/api/v1/query_range?query="
+	jsonOrJoiner    = "+or+"
+	emptyMatch      = `""`
 )
 
 // can contains only alphanumeric / '-' / '_' / '.' / ',' / '"' / '*' / ':' / '/' characteres
@@ -43,12 +44,15 @@ func NewFlowQueryBuilder(cfg *Config, start, end, limit string, reporter constan
 		stringLabelFilter(constants.AppLabel, constants.AppLabelValue),
 	}
 
-	if recordType == constants.RecordTypeAllConnections {
-		// connection _RecordType including newConnection, heartbeat or endConnection
-		labelFilters = append(labelFilters, regexLabelFilter(constants.RecordTypeLabel, strings.Join(constants.ConnectionTypes, "|")))
-	} else if len(recordType) > 0 {
-		// specific _RecordType either newConnection, heartbeat, endConnection or flowLog
-		labelFilters = append(labelFilters, stringLabelFilter(constants.RecordTypeLabel, string(recordType)))
+	// only filter on _RecordType if available
+	if cfg.IsLabel(recordTypeField) {
+		if recordType == constants.RecordTypeAllConnections {
+			// connection _RecordType including newConnection, heartbeat or endConnection
+			labelFilters = append(labelFilters, regexLabelFilter(constants.RecordTypeLabel, strings.Join(constants.ConnectionTypes, "|")))
+		} else if len(recordType) > 0 {
+			// specific _RecordType either newConnection, heartbeat, endConnection or flowLog
+			labelFilters = append(labelFilters, stringLabelFilter(constants.RecordTypeLabel, string(recordType)))
+		}
 	}
 
 	extraLineFilters := []string{}

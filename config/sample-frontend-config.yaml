@@ -1,3 +1,5 @@
+recordTypes:
+  - flowLog
 portNaming:
   enable: true
   portNames:

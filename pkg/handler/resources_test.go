@@ -13,6 +13,7 @@ import (
 var testLokiConfig = loki.Config{
 	URL: &url.URL{Scheme: "http", Host: "loki"},
 	Labels: map[string]struct{}{
+		"_RecordType":      {},
 		"SrcK8S_Namespace": {},
 		"DstK8S_Namespace": {},
 		"SrcK8S_OwnerName": {},

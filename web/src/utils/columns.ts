@@ -142,7 +142,7 @@ export const getFullColumnName = (col?: Column) => {
 };
 
 export const getSrcOrDstValue = (v1?: string | number, v2?: string | number): string[] | number[] => {
-  if (v1 && Number(v1) != NaN && v2 && Number(v2) != NaN) {
+  if (v1 && !Number.isNaN(v1) && v2 && !Number.isNaN(v2)) {
     return [v1 as number, v2 as number];
   } else if (v1 || v2) {
     return [v1 ? (v1 as string) : '', v2 ? (v2 as string) : ''];
@@ -807,16 +807,15 @@ export const getDefaultColumns = (t: TFunction, withCommonFields = true, withCon
       isSelected: true,
       value: (f): string => {
         switch (f.labels._RecordType) {
-          case 'flowLog':
-            return t('Flow');
           case 'newConnection':
             return t('Conversation start');
           case 'heartbeat':
             return t('Conversation tick');
           case 'endConnection':
             return t('Conversation end');
+          case 'flowLog':
           default:
-            return t('Conversations');
+            return t('Flow');
         }
       },
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),

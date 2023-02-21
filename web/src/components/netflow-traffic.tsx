@@ -63,7 +63,7 @@ import {
   TopologyGroupTypes,
   TopologyOptions
 } from '../model/topology';
-import { Column, ColumnSizeMap, getDefaultColumns } from '../utils/columns';
+import { Column, ColumnsId, ColumnSizeMap, getDefaultColumns } from '../utils/columns';
 import { loadConfig } from '../utils/config';
 import { ContextSingleton } from '../utils/context';
 import { computeStepInterval, getTimeRangeOptions, TimeRange } from '../utils/datetime';
@@ -269,10 +269,6 @@ export const NetflowTraffic: React.FC<{
   const selectView = (view: ViewId) => {
     clearSelections();
     if (view !== 'table') {
-      //connection events are not available outside of table
-      if (recordType !== 'flowLog') {
-        setRecordType('flowLog');
-      }
       //reporter 'both' is only available in table view
       if (reporter === 'both') {
         setReporter('source');
@@ -468,6 +464,10 @@ export const NetflowTraffic: React.FC<{
   }, [buildFlowQuery, histogramRange, manageWarnings, range, selectedViewId, showHistogram, initState]);
 
   usePoll(tick, interval);
+
+  const isConnectionTracking = React.useCallback(() => {
+    return config.recordTypes.some(rt => rt === 'newConnection' || rt === 'heartbeat' || rt === 'endConnection');
+  }, [config.recordTypes]);
 
   // tick on state change
   React.useEffect(() => {
@@ -858,7 +858,9 @@ export const NetflowTraffic: React.FC<{
         <RecordPanel
           id="recordPanel"
           record={selectedRecord}
-          columns={getDefaultColumns(t, false, false)}
+          columns={getDefaultColumns(t, false, false).filter(
+            col => isConnectionTracking() || ![ColumnsId.recordtype, ColumnsId.hashid].includes(col.id)
+          )}
           filters={filters}
           range={range}
           reporter={reporter}
@@ -925,6 +927,7 @@ export const NetflowTraffic: React.FC<{
           <NetflowOverview
             limit={limit}
             panels={panels}
+            recordType={recordType}
             metricType={metricType}
             metrics={metrics}
             totalMetric={totalMetric}
@@ -945,7 +948,10 @@ export const NetflowTraffic: React.FC<{
             selectedRecord={selectedRecord}
             size={size}
             onSelect={onRecordSelect}
-            columns={columns.filter(col => col.isSelected)}
+            columns={columns.filter(
+              col =>
+                col.isSelected && (isConnectionTracking() || ![ColumnsId.recordtype, ColumnsId.hashid].includes(col.id))
+            )}
             setColumns={(v: Column[]) => setColumns(v.concat(columns.filter(col => !col.isSelected)))}
             columnSizes={columnSizes}
             setColumnSizes={setColumnSizes}
@@ -1143,7 +1149,7 @@ export const NetflowTraffic: React.FC<{
           setRecordType,
           reporter,
           setReporter,
-          allowConnection: selectedViewId === 'table',
+          allowConnection: isConnectionTracking(),
           allowReporterBoth: selectedViewId === 'table',
           useTopK: selectedViewId === 'overview'
         }}
@@ -1151,6 +1157,7 @@ export const NetflowTraffic: React.FC<{
         quickFilters={getQuickFilters()}
         menuContent={filtersExtraContent()}
         menuControl={filtersExtraControl()}
+        allowConnectionFilter={isConnectionTracking()}
       />
       {
         <Flex className="netflow-traffic-tabs-container">
@@ -1279,6 +1286,7 @@ export const NetflowTraffic: React.FC<{
         id="overview-panels-modal"
         isModalOpen={isOverviewModalOpen}
         setModalOpen={setOverviewModalOpen}
+        recordType={recordType}
         panels={panels}
         setPanels={setSelectedPanels}
       />
@@ -1286,7 +1294,9 @@ export const NetflowTraffic: React.FC<{
         id="columns-modal"
         isModalOpen={isColModalOpen}
         setModalOpen={setColModalOpen}
-        columns={columns}
+        columns={columns.filter(
+          col => isConnectionTracking() || ![ColumnsId.recordtype, ColumnsId.hashid].includes(col.id)
+        )}
         setColumns={setColumns}
         setColumnSizes={setColumnSizes}
       />

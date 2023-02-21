@@ -208,6 +208,18 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
     [hidden, toggle]
   );
 
+  const getTitle = React.useCallback(() => {
+    switch (record.labels._RecordType) {
+      case 'newConnection':
+      case 'heartbeat':
+      case 'endConnection':
+        return t('Conversation event information');
+      case 'flowLog':
+      default:
+        return t('Flow information');
+    }
+  }, [record.labels._RecordType, t]);
+
   const groups = getColumnGroups(
     columns.filter(
       c =>
@@ -242,7 +254,7 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
     >
       <DrawerHead id={`${id}-drawer-head`} data-test-id="drawer-head" className="drawer-head">
         <Text data-test-id="drawer-head-text" component={TextVariants.h2}>
-          {record.labels._RecordType === 'flowLog' ? t('Flow information') : t('Conversation event information')}
+          {getTitle()}
         </Text>
         <DrawerActions>
           <DrawerCloseButton data-test-id="drawer-close-button" className="drawer-close-button" onClick={onClose} />

@@ -19,6 +19,7 @@ import {
 import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
+import { RecordType } from '../../model/flow-query';
 import { getDefaultOverviewPanels, getOverviewPanelInfo, OverviewPanel } from '../../utils/overview-panels';
 import Modal from './modal';
 import './overview-panels-modal.css';
@@ -26,10 +27,11 @@ import './overview-panels-modal.css';
 export const OverviewPanelsModal: React.FC<{
   isModalOpen: boolean;
   setModalOpen: (v: boolean) => void;
+  recordType: RecordType;
   panels: OverviewPanel[];
   setPanels: (v: OverviewPanel[]) => void;
   id?: string;
-}> = ({ id, isModalOpen, setModalOpen, panels, setPanels }) => {
+}> = ({ id, isModalOpen, setModalOpen, recordType, panels, setPanels }) => {
   const [updatedPanels, setUpdatedPanels] = React.useState<OverviewPanel[]>([]);
   const [isSaveDisabled, setSaveDisabled] = React.useState<boolean>(true);
   const [isAllSelected, setAllSelected] = React.useState<boolean>(false);
@@ -102,7 +104,7 @@ export const OverviewPanelsModal: React.FC<{
   }, [setPanels, updatedPanels, onClose]);
 
   const draggableItems = updatedPanels.map((panel, i) => {
-    const info = getOverviewPanelInfo(t, panel.id);
+    const info = getOverviewPanelInfo(t, panel.id, undefined, recordType === 'flowLog' ? t('flow') : t('conversation'));
     return (
       <Draggable key={i} hasNoWrapper>
         <DataListItem

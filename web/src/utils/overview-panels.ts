@@ -11,7 +11,7 @@ export type OverviewPanelId =
   | 'total_line'
   | 'top_lines'
   | 'packets_dropped'
-  | 'inbound_flows_region';
+  | 'inbound_region';
 
 export type OverviewPanel = {
   id: OverviewPanelId;
@@ -41,7 +41,7 @@ export const getDefaultOverviewPanels = (): OverviewPanel[] => {
     panels = panels.concat([
       { id: 'top_sankey', isSelected: true },
       { id: 'packets_dropped', isSelected: true },
-      { id: 'inbound_flows_region', isSelected: true }
+      { id: 'inbound_region', isSelected: true }
     ]);
   }
 
@@ -51,21 +51,22 @@ export const getDefaultOverviewPanels = (): OverviewPanel[] => {
 export const getOverviewPanelInfo = (
   t: TFunction,
   id: OverviewPanelId,
-  limit: string | number = 'X'
+  limit: string | number = 'X',
+  type: string
 ): OverviewPanelInfo => {
   switch (id) {
     case 'overview':
       return { title: t('Network overview') };
     case 'top_bar':
-      return { title: t('Top {{limit}} flow rates stacked', { limit }), chartType: t('bars') };
+      return { title: t('Top {{limit}} {{type}} rates stacked', { limit, type }), chartType: t('bars') };
     case 'top_bar_total':
       return {
-        title: t('Top {{limit}} flow rates stacked with total', { limit }),
+        title: t('Top {{limit}} {{type}} rates stacked with total', { limit, type }),
         chartType: t('bars'),
         tooltip: t('The top rates as bar compared to total as line over the selected interval')
       };
     case 'top_lines':
-      return { title: t('Top {{limit}} flow rates', { limit }), chartType: t('lines') };
+      return { title: t('Top {{limit}} {{type}} rates', { limit, type }), chartType: t('lines') };
     case 'top_avg_donut':
       return {
         title: t('Top {{limit}} average rates', { limit }),
@@ -79,12 +80,12 @@ export const getOverviewPanelInfo = (
         tooltip: t('The last measured rate from the selected interval')
       };
     case 'top_sankey':
-      return { title: t('Top {{limit}} flows distribution', { limit }), chartType: t('sankey') };
+      return { title: t('Top {{limit}} {{type}} distribution', { limit, type }), chartType: t('sankey') };
     case 'total_line':
       return { title: t('Total rate'), chartType: t('line') };
     case 'packets_dropped':
       return { title: t('Packets dropped') };
-    case 'inbound_flows_region':
-      return { title: t('Inbound flows by region') };
+    case 'inbound_region':
+      return { title: t('Inbound {{type}} by region', { type }) };
   }
 };

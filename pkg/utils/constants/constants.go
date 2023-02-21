@@ -17,6 +17,13 @@ const (
 	RecordTypeLog            RecordType = "flowLog"
 )
 
+var AnyConnectionType = []string{
+	string(RecordTypeAllConnections),
+	string(RecordTypeNewConnection),
+	string(RecordTypeHeartbeat),
+	string(RecordTypeEndConnection),
+}
+
 var ConnectionTypes = []string{
 	string(RecordTypeNewConnection),
 	string(RecordTypeHeartbeat),

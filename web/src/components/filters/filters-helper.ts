@@ -9,8 +9,8 @@ export type FilterGroup = {
   filters: FilterDefinition[];
 };
 
-export const buildGroups = (t: TFunction): FilterGroup[] => {
-  const defs = getFilterDefinitions(t);
+export const buildGroups = (t: TFunction, allowConnectionFilter?: boolean): FilterGroup[] => {
+  const defs = getFilterDefinitions(t, allowConnectionFilter);
   return [
     {
       title: t('Common'),
