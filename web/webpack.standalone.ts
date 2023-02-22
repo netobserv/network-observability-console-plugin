@@ -86,7 +86,10 @@ module.exports = {
       }
     ),
     new CopyWebpackPlugin({
-      patterns: [{ from: path.resolve(__dirname, 'locales'), to: 'locales' }],
+      patterns: [
+        { from: path.resolve(__dirname, 'locales'), to: 'locales' },
+        { from: path.resolve(__dirname, 'assets'), to: 'assets' },
+      ],
     }),
     new HtmlWebpackPlugin({
       favicon: path.join(__dirname, "static", "favicon.ico"),

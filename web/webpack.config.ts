@@ -1,8 +1,8 @@
 
 /* eslint-env node */
-import * as path from 'path';
 import { ConsoleRemotePlugin } from '@openshift-console/dynamic-plugin-sdk-webpack';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
+import * as path from 'path';
 
 //const NodeExternals = require('webpack-node-externals');
 
@@ -87,7 +87,10 @@ module.exports = {
   plugins: [
     new ConsoleRemotePlugin(),
     new CopyWebpackPlugin({
-      patterns: [{ from: path.resolve(__dirname, 'locales'), to: 'locales' }],
+      patterns: [
+        { from: path.resolve(__dirname, 'locales'), to: 'locales' },
+        { from: path.resolve(__dirname, 'assets'), to: 'assets' },
+      ],
     }),
   ],
   devtool: 'source-map',
