@@ -22,7 +22,8 @@
     "lint": "./node_modules/.bin/eslint \"./src/**/*.{ts,tsx}\"",
     "format": "pretty-quick --branch main",
     "format-all": "prettier --write \"./src/**/*.{ts,tsx}\" && npm run fix-imports",
-    "fix-imports": "eslint --no-eslintrc --no-inline-config --parser '@typescript-eslint/parser' --plugin 'unused-imports' --plugin 'react-hooks' --rule 'unused-imports/no-unused-imports:error' --fix \"./src/**/*.{ts,tsx}\""
+    "fix-imports": "eslint --no-eslintrc --no-inline-config --parser '@typescript-eslint/parser' --plugin 'unused-imports' --plugin 'react-hooks' --rule 'unused-imports/no-unused-imports:error' --fix \"./src/**/*.{ts,tsx}\"",
+    "generate-doc": "typedoc --sort source-order --categorizeByGroup false --githubPages false --readme none --disableSources --out docs src/api/ipfix.ts --hideBreadcrumbs true --hideInPageTOC true"
   },
   "devDependencies": {
     "@babel/core": "^7.17.12",
@@ -75,6 +76,8 @@
     "ts-jest-resolver": "2.0.0",
     "ts-loader": "9.3.1",
     "ts-node": "10.8.2",
+    "typedoc": "^0.23.25",
+    "typedoc-plugin-markdown": "^3.14.0",
     "typescript": "4.7.4",
     "webpack": "^5.73.0",
     "webpack-cli": "^4.10.0",

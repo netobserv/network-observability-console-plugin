@@ -168,3 +168,7 @@ else
 	cd ${CONSOLE} && source contrib/oc-environment.sh && ./bin/bridge -plugins netobserv-plugin=http://localhost:9001/ --plugin-proxy='{"services":[{"consoleAPIPath":"/api/proxy/plugin/netobserv-plugin/backend/","endpoint":"http://localhost:9001"}]}'
 	cd -
 endif
+
+.PHONY: generate-doc
+generate-doc: ## Generate documentation of the flows JSON format
+	cd web && npm run generate-doc
