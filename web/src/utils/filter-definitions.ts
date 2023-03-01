@@ -437,11 +437,8 @@ export const getFilterDefinitions = (t: TFunction, allowConnectionFilter?: boole
         - ${t('A IANA name like TCP, UDP')}
         - ${t('Empty double quotes "" for undefined protocol')}`,
         encoders: { simpleEncode: simpleFiltersEncoder('Proto') }
-      }
-    ];
-
-    if (allowConnectionFilter) {
-      filterDefinitions.push({
+      },
+      {
         id: 'id',
         name: t('Conversation Id'),
         category: FilterCategory.None,
@@ -450,11 +447,16 @@ export const getFilterDefinitions = (t: TFunction, allowConnectionFilter?: boole
         validate: rejectEmptyValue,
         hint: t('Specify a single conversation hash Id.'),
         encoders: { simpleEncode: simpleFiltersEncoder('_HashId') }
-      });
-    }
+      }
+    ];
   }
-  return filterDefinitions;
+
+  if (allowConnectionFilter) {
+    return filterDefinitions;
+  } else {
+    return filterDefinitions.filter(fd => fd.id !== 'id');
+  }
 };
 /* eslint-enable max-len */
 
-export const findFilter = (t: TFunction, id: FilterId) => getFilterDefinitions(t).find(def => def.id === id);
+export const findFilter = (t: TFunction, id: FilterId) => getFilterDefinitions(t, true).find(def => def.id === id);
