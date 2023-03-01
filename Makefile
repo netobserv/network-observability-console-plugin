@@ -14,7 +14,7 @@ GOLANGCI_LINT_VERSION = v1.50.1
 COVERPROFILE = coverage.out
 NPM_INSTALL ?= install
 
-CMDLINE_ARGS ?= --loglevel trace --loki-tenant-id netobserv --frontend-config config/sample-frontend-config.yaml
+CMDLINE_ARGS ?= --loglevel trace --loki-tenant-id netobserv --frontend-config config/sample-frontend-config.yaml --auth-check none
 
 ifeq (,$(shell which podman 2>/dev/null))
 OCI_BIN ?= docker
