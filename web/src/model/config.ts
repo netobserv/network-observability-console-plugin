@@ -7,6 +7,7 @@ export type Config = {
   };
   quickFilters: RawQuickFilter[];
   alertNamespaces: string[];
+  sampling: number;
 };
 
 export const defaultConfig: Config = {
@@ -15,5 +16,6 @@ export const defaultConfig: Config = {
     portNames: new Map()
   },
   quickFilters: [],
-  alertNamespaces: ['netobserv']
+  alertNamespaces: ['netobserv'],
+  sampling: 50
 };

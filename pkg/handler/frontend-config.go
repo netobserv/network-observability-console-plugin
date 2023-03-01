@@ -20,6 +20,7 @@ type frontendConfig struct {
 	} `yaml:"portNaming,omitempty" json:"portNaming"`
 	QuickFilters    []QuickFilter `yaml:"quickFilters" json:"quickFilters"`
 	AlertNamespaces []string      `yaml:"alertNamespaces" json:"alertNamespaces"`
+	Sampling        int           `yaml:"sampling" json:"sampling"`
 }
 
 func readConfigFile(filename string) (*frontendConfig, error) {
