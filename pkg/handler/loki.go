@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -12,9 +11,9 @@ import (
 	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
 
-	"github.com/netobserv/network-observability-console-plugin/pkg/handler/auth"
 	"github.com/netobserv/network-observability-console-plugin/pkg/handler/lokiclientmock"
 	"github.com/netobserv/network-observability-console-plugin/pkg/httpclient"
+	"github.com/netobserv/network-observability-console-plugin/pkg/kubernetes/auth"
 	"github.com/netobserv/network-observability-console-plugin/pkg/loki"
 	"github.com/netobserv/network-observability-console-plugin/pkg/metrics"
 	"github.com/netobserv/network-observability-console-plugin/pkg/model"
@@ -66,21 +65,24 @@ func EncodeQuery(url string) string {
 	return unspaced
 }
 
-func getLokiError(resp []byte, code int) string {
+func getLokiError(resp []byte, code int) (int, string) {
 	var f map[string]string
 	if code == http.StatusBadRequest {
-		return fmt.Sprintf("Loki message: %s", resp)
+		return code, fmt.Sprintf("Loki message: %s", resp)
+	}
+	if code == http.StatusForbidden {
+		return code, fmt.Sprintf("Forbidden: %s", resp)
 	}
 	err := json.Unmarshal(resp, &f)
 	if err != nil {
 		hlog.WithError(err).Errorf("cannot unmarshal, response was: %v", string(resp))
-		return fmt.Sprintf("Unknown error from Loki\ncannot unmarshal\n%s", resp)
+		return http.StatusBadRequest, fmt.Sprintf("Unknown error from Loki\ncannot unmarshal\n%s", resp)
 	}
 	message, ok := f["message"]
 	if !ok {
-		return "Unknown error from Loki\nno message found"
+		return http.StatusBadRequest, "Unknown error from Loki\nno message found"
 	}
-	return fmt.Sprintf("Loki message: %s", message)
+	return http.StatusBadRequest, fmt.Sprintf("Loki message: %s", message)
 }
 
 func executeLokiQuery(flowsURL string, lokiClient httpclient.Caller) ([]byte, int, error) {
@@ -96,11 +98,10 @@ func executeLokiQuery(flowsURL string, lokiClient httpclient.Caller) ([]byte, in
 		return nil, http.StatusServiceUnavailable, err
 	}
 	if code != http.StatusOK {
-		msg := getLokiError(resp, code)
-		return nil, http.StatusBadRequest, errors.New(msg)
+		newCode, msg := getLokiError(resp, code)
+		return nil, newCode, fmt.Errorf("[%d] %s", code, msg)
 	}
-	code = http.StatusOK
-	return resp, code, nil
+	return resp, http.StatusOK, nil
 }
 
 func fetchSingle(lokiClient httpclient.Caller, flowsURL string, merger loki.Merger) (int, error) {
