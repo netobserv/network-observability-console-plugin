@@ -97,7 +97,8 @@ export const getConfig = (): Promise<Config> => {
           : defaultConfig.portNaming.portNames
       },
       quickFilters: r.data.quickFilters,
-      alertNamespaces: r.data.alertNamespaces
+      alertNamespaces: r.data.alertNamespaces,
+      sampling: r.data.sampling
     };
   });
 };

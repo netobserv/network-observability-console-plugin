@@ -24,3 +24,4 @@ quickFilters:
       dst_kind: 'Service'
 alertNamespaces:
   - netobserv
+sampling: 50

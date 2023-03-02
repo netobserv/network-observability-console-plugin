@@ -29,6 +29,7 @@ import { Stats, TopologyMetrics } from '../../api/loki';
 import './summary-panel.css';
 import { MetricType, RecordType } from '../../model/flow-query';
 import { MetricsQuerySummaryContent } from './metrics-query-summary';
+import { config } from '../../utils/config';
 
 type TypeCardinality = {
   type: string;
@@ -117,6 +118,15 @@ export const SummaryPanelContent: React.FC<{
           </AccordionExpandedContentBody>
         ))}
       </>
+    );
+  };
+
+  const configContent = () => {
+    return (
+      <TextContent className="summary-text-container">
+        <Text component={TextVariants.h3}>{`${t('Configuration')}`}</Text>
+        <Text className="summary-config-item">{`${t('Sampling')}: ${config.sampling}`}</Text>
+      </TextContent>
     );
   };
 
@@ -319,6 +329,8 @@ export const SummaryPanelContent: React.FC<{
 
       {cardinalityContent()}
       {/*TODO: NETOBSERV-225 for extra stats on query*/}
+
+      {configContent()}
     </>
   );
 };
