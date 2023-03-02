@@ -4,7 +4,7 @@ import * as React from 'react';
 import { EmptyState } from '@patternfly/react-core';
 import LokiError from '../../../components/messages/loki-error';
 import { metrics } from '../../../components/__tests-data__/metrics';
-import { MetricType } from '../../../model/flow-query';
+import { MetricType, RecordType } from '../../../model/flow-query';
 import { SamplePanel, ShuffledDefaultPanels } from '../../__tests-data__/panels';
 import { NetflowOverview, NetflowOverviewProps } from '../netflow-overview';
 import { NetflowOverviewPanel } from '../netflow-overview-panel';
@@ -16,6 +16,7 @@ describe('<NetflowOverview />', () => {
     panels: ShuffledDefaultPanels,
     error: undefined as string | undefined,
     loading: false,
+    recordType: 'flowLog' as RecordType,
     metricType: 'bytes' as MetricType,
     metrics: [],
     totalMetric: undefined,

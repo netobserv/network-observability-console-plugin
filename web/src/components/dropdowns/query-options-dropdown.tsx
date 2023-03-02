@@ -2,13 +2,16 @@ import { Radio, Select, Tooltip } from '@patternfly/react-core';
 import { InfoAltIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Match, Reporter } from '../../model/flow-query';
+import { Match, RecordType, Reporter } from '../../model/flow-query';
 
 export const TOP_VALUES = [5, 10, 15];
 export const LIMIT_VALUES = [50, 100, 500, 1000];
 export interface QueryOptionsDropdownProps {
+  recordType: RecordType;
+  setRecordType: (recordType: RecordType) => void;
   reporter: Reporter;
   setReporter: (reporter: Reporter) => void;
+  allowConnection: boolean;
   allowReporterBoth: boolean;
   useTopK: boolean;
   limit: number;
@@ -17,14 +20,19 @@ export interface QueryOptionsDropdownProps {
   setMatch: (match: Match) => void;
 }
 
+type recordTypeOption = { label: string; value: RecordType };
+
 type ReporterOption = { label: string; value: Reporter };
 
 type MatchOption = { label: string; value: Match };
 
 // Exported for tests
 export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
+  recordType,
+  setRecordType,
   reporter,
   setReporter,
+  allowConnection,
   allowReporterBoth,
   useTopK,
   limit,
@@ -33,6 +41,17 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
   setMatch
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
+
+  const recordTypeOptions: recordTypeOption[] = [
+    {
+      label: t('Conversation'),
+      value: 'allConnections'
+    },
+    {
+      label: t('Flow'),
+      value: 'flowLog'
+    }
+  ];
 
   const reporterOptions: ReporterOption[] = [
     {
@@ -68,6 +87,51 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
         <Tooltip
           content={t(
             // eslint-disable-next-line max-len
+            'Log type to query. A conversation is an aggregation of flows between same peers. Only ended conversations will appear in Overview and Topology tabs.'
+          )}
+        >
+          <div className="pf-c-select__menu-group-title">
+            <>
+              {t('Log type')} <InfoAltIcon />
+            </>
+          </div>
+        </Tooltip>
+        {recordTypeOptions.map(opt => {
+          const disabled = !allowConnection && opt.value === 'allConnections';
+          return (
+            <div key={`recordType-${opt.value}`}>
+              <label className="pf-c-select__menu-item">
+                <Tooltip
+                  trigger={disabled ? 'mouseenter focus' : ''}
+                  content={
+                    disabled
+                      ? t(
+                          // eslint-disable-next-line max-len
+                          'Only available when FlowCollector.processor.outputRecordTypes option includes at least "newConnection", "heartbeat" or "endConnection"'
+                        )
+                      : undefined
+                  }
+                >
+                  <Radio
+                    isChecked={opt.value === recordType}
+                    isDisabled={disabled}
+                    name={`recordType-${opt.value}`}
+                    onChange={() => setRecordType(opt.value)}
+                    label={opt.label}
+                    data-test={`recordType-${opt.value}`}
+                    id={`recordType-${opt.value}`}
+                    value={opt.value}
+                  />
+                </Tooltip>
+              </label>
+            </div>
+          );
+        })}
+      </div>
+      <div className="pf-c-select__menu-group">
+        <Tooltip
+          content={t(
+            // eslint-disable-next-line max-len
             'Every flow can be reported from the source node and/or the destination node. For in-cluster traffic, usually both source and destination nodes report flows, resulting in duplicated data. Cluster ingress traffic is only reported by destination nodes, and cluster egress by source nodes.'
           )}
         >
@@ -78,7 +142,7 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
           </div>
         </Tooltip>
         {reporterOptions.map(opt => {
-          const disabled = !allowReporterBoth && opt.value === 'both';
+          const disabled = recordType === 'allConnections' || (!allowReporterBoth && opt.value === 'both');
           return (
             <div key={`reporter-${opt.value}`}>
               <label className="pf-c-select__menu-item">

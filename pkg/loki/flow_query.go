@@ -8,16 +8,18 @@ import (
 
 	"github.com/netobserv/network-observability-console-plugin/pkg/model/fields"
 	"github.com/netobserv/network-observability-console-plugin/pkg/model/filters"
+	"github.com/netobserv/network-observability-console-plugin/pkg/utils"
 	"github.com/netobserv/network-observability-console-plugin/pkg/utils/constants"
 )
 
 const (
-	startParam     = "start"
-	endParam       = "end"
-	limitParam     = "limit"
-	queryRangePath = "/loki/api/v1/query_range?query="
-	jsonOrJoiner   = "+or+"
-	emptyMatch     = `""`
+	recordTypeField = "_RecordType"
+	startParam      = "start"
+	endParam        = "end"
+	limitParam      = "limit"
+	queryRangePath  = "/loki/api/v1/query_range?query="
+	jsonOrJoiner    = "+or+"
+	emptyMatch      = `""`
 )
 
 // can contains only alphanumeric / '-' / '_' / '.' / ',' / '"' / '*' / ':' / '/' characteres
@@ -35,16 +37,31 @@ type FlowQueryBuilder struct {
 	jsonFilters      [][]labelFilter
 }
 
-func NewFlowQueryBuilder(cfg *Config, start, end, limit string, reporter constants.Reporter) *FlowQueryBuilder {
-	// Always use app stream selector, which will apply whichever matching criteria (any or all)
+func NewFlowQueryBuilder(cfg *Config, start, end, limit string, reporter constants.Reporter, recordType constants.RecordType) *FlowQueryBuilder {
+	// Always use following stream selectors
 	labelFilters := []labelFilter{
+		// app, which will apply whichever matching criteria (any or all)
 		stringLabelFilter(constants.AppLabel, constants.AppLabelValue),
 	}
+
+	// only filter on _RecordType if available
+	if cfg.IsLabel(recordTypeField) {
+		if recordType == constants.RecordTypeAllConnections {
+			// connection _RecordType including newConnection, heartbeat or endConnection
+			labelFilters = append(labelFilters, regexLabelFilter(constants.RecordTypeLabel, strings.Join(constants.ConnectionTypes, "|")))
+		} else if len(recordType) > 0 {
+			// specific _RecordType either newConnection, heartbeat, endConnection or flowLog
+			labelFilters = append(labelFilters, stringLabelFilter(constants.RecordTypeLabel, string(recordType)))
+		}
+	}
+
 	extraLineFilters := []string{}
-	if reporter == constants.ReporterSource {
-		labelFilters = append(labelFilters, stringLabelFilter(fields.FlowDirection, "1"))
-	} else if reporter == constants.ReporterDestination {
-		labelFilters = append(labelFilters, stringLabelFilter(fields.FlowDirection, "0"))
+	if !utils.Contains(constants.ConnectionTypes, string(recordType)) {
+		if reporter == constants.ReporterSource {
+			labelFilters = append(labelFilters, stringLabelFilter(fields.FlowDirection, "1"))
+		} else if reporter == constants.ReporterDestination {
+			labelFilters = append(labelFilters, stringLabelFilter(fields.FlowDirection, "0"))
+		}
 	}
 	return &FlowQueryBuilder{
 		config:           cfg,
@@ -57,7 +74,7 @@ func NewFlowQueryBuilder(cfg *Config, start, end, limit string, reporter constan
 }
 
 func NewFlowQueryBuilderWithDefaults(cfg *Config) *FlowQueryBuilder {
-	return NewFlowQueryBuilder(cfg, "", "", "", constants.ReporterBoth)
+	return NewFlowQueryBuilder(cfg, "", "", "", constants.ReporterBoth, constants.RecordTypeLog)
 }
 
 func (q *FlowQueryBuilder) Filters(queryFilters filters.SingleQuery) error {

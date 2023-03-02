@@ -1,6 +1,6 @@
 import { ResourceIcon, ResourceLink } from '@openshift-console/dynamic-plugin-sdk';
 import { Button, Tooltip } from '@patternfly/react-core';
-import { FilterIcon, GlobeAmericasIcon, TimesIcon } from '@patternfly/react-icons';
+import { FilterIcon, ToggleOnIcon, ToggleOffIcon, GlobeAmericasIcon, TimesIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { FlowDirection, Record } from '../../api/ipfix';
@@ -13,6 +13,7 @@ import { Size } from '../dropdowns/table-display-dropdown';
 import './record-field.css';
 
 export type RecordFieldFilter = {
+  type: 'filter' | 'switch';
   onClick: () => void;
   isDelete: boolean;
 };
@@ -317,7 +318,11 @@ export const RecordField: React.FC<{
       case ColumnsId.proto:
         return singleContainer(simpleTextWithTooltip(value ? formatProtocol(value as number) : ''));
       case ColumnsId.flowdir:
-        return singleContainer(simpleTextWithTooltip(value === FlowDirection.Ingress ? t('Ingress') : t('Egress')));
+        return singleContainer(
+          simpleTextWithTooltip(
+            value === FlowDirection.Ingress ? t('Ingress') : value === FlowDirection.Egress ? t('Egress') : t('n/a')
+          )
+        );
       default:
         if (Array.isArray(value) && value.length) {
           return doubleContainer(simpleTextWithTooltip(String(value[0])), simpleTextWithTooltip(String(value[1])));
@@ -331,13 +336,25 @@ export const RecordField: React.FC<{
       <div className={'record-field-flex'}>{content(column)}</div>
       <Tooltip
         content={
-          filter.isDelete
-            ? t('Remove {{name}} filter', { name: getFullColumnName(column) })
-            : t('Filter on {{name}}', { name: getFullColumnName(column) })
+          filter.type === 'filter'
+            ? filter.isDelete
+              ? t('Remove {{name}} filter', { name: getFullColumnName(column) })
+              : t('Filter on {{name}}', { name: getFullColumnName(column) })
+            : t('Switch {{name}} option', { name: getFullColumnName(column) })
         }
       >
         <Button variant="link" aria-label="Filter" onClick={filter.onClick}>
-          {filter.isDelete ? <TimesIcon /> : <FilterIcon />}
+          {filter.type === 'filter' ? (
+            filter.isDelete ? (
+              <TimesIcon />
+            ) : (
+              <FilterIcon />
+            )
+          ) : filter.isDelete ? (
+            <ToggleOffIcon />
+          ) : (
+            <ToggleOnIcon />
+          )}
         </Button>
       </Tooltip>
     </div>

@@ -1,3 +1,5 @@
+import { RecordType } from '../model/flow-query';
+
 export interface Record {
   labels: Labels;
   key: number;
@@ -15,6 +17,7 @@ export interface Labels {
   DstK8S_OwnerName?: string;
   /** Flow direction from the node observation point */
   FlowDirection: FlowDirection;
+  _RecordType?: RecordType;
 }
 
 export enum FlowDirection {
@@ -61,12 +64,20 @@ export interface Fields {
   Proto: number;
   /** Number of packets in this flow */
   Packets: number;
+  Packets_AB?: number;
+  Packets_BA?: number;
   /** Number of bytes in this flow */
   Bytes: number;
+  Bytes_AB?: number;
+  Bytes_BA?: number;
   /** Start timestamp of this flow, in milliseconds */
   TimeFlowStartMs: number;
   /** End timestamp of this flow, in milliseconds */
   TimeFlowEndMs: number;
   /** Timestamp when this flow was received and processed by the flow collector, in seconds */
   TimeReceived: number;
+  _HashId?: string;
+  _IsFirst?: string;
+  numFlowLogs?: number;
+  Interface?: string;
 }

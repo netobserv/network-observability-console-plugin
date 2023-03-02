@@ -1,7 +1,7 @@
 import { TFunction } from 'i18next';
 import _ from 'lodash';
-import { FilterId } from '../model/filters';
 import { Fields, Labels, Record } from '../api/ipfix';
+import { FilterId } from '../model/filters';
 import { compareIPs } from '../utils/ip';
 import { comparePorts } from '../utils/port';
 import { compareProtocols } from '../utils/protocol';
@@ -56,7 +56,16 @@ export enum ColumnsId {
   hostname = 'K8S_HostName',
   srchostname = 'SrcK8S_HostName',
   dsthostname = 'DstK8S_HostName',
-  flowdir = 'FlowDirection'
+  flowdir = 'FlowDirection',
+  hashid = '_HashId',
+  interface = 'Interface',
+  recordtype = 'RecordType',
+  bytesab = 'Bytes_AB',
+  bytesba = 'Bytes_BA',
+  packetsab = 'Packets_AB',
+  packetsba = 'Packets_BA',
+  isfirst = 'IsFirst',
+  numflow = 'numFlowLogs'
 }
 
 export interface Column {
@@ -133,7 +142,7 @@ export const getFullColumnName = (col?: Column) => {
 };
 
 export const getSrcOrDstValue = (v1?: string | number, v2?: string | number): string[] | number[] => {
-  if (v1 && Number(v1) != NaN && v2 && Number(v2) != NaN) {
+  if (v1 && !Number.isNaN(v1) && v2 && !Number.isNaN(v2)) {
     return [v1 as number, v2 as number];
   } else if (v1 || v2) {
     return [v1 ? (v1 as string) : '', v2 ? (v2 as string) : ''];
@@ -731,7 +740,7 @@ export const getExtraColumns = (t: TFunction): Column[] => {
     {
       id: ColumnsId.duration,
       name: t('Duration'),
-      tooltip: t('Time elapsed between flow Start Time and End Time.'),
+      tooltip: t('Time elapsed between Start Time and End Time.'),
       isSelected: false,
       value: f => f.fields.TimeFlowEndMs - f.fields.TimeFlowStartMs,
       sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
@@ -740,7 +749,7 @@ export const getExtraColumns = (t: TFunction): Column[] => {
     {
       id: ColumnsId.collectiontime,
       name: t('Collection Time'),
-      tooltip: t('Reception time of the flow by the flow collector.'),
+      tooltip: t('Reception time of the record by the collector.'),
       fieldName: 'TimeReceived',
       isSelected: false,
       value: f => f.fields.TimeReceived * 1000,
@@ -750,7 +759,7 @@ export const getExtraColumns = (t: TFunction): Column[] => {
     {
       id: ColumnsId.collectionlatency,
       name: t('Collection Latency'),
-      tooltip: t('Time elapsed between flow End Time and Collection Time.'),
+      tooltip: t('Time elapsed between End Time and Collection Time.'),
       isSelected: false,
       value: f => f.fields.TimeReceived * 1000 - f.fields.TimeFlowEndMs,
       sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
@@ -766,7 +775,7 @@ export const getDefaultColumns = (t: TFunction, withCommonFields = true, withCon
       name: t('Start Time'),
       tooltip: t(
         // eslint-disable-next-line max-len
-        'Time of the first packet observed per flow. Unlike End Time, it is not used in queries to select flows in an interval.'
+        'Time of the first packet observed. Unlike End Time, it is not used in queries to select records in an interval.'
       ),
       fieldName: 'TimeFlowStartMs',
       isSelected: false,
@@ -779,7 +788,7 @@ export const getDefaultColumns = (t: TFunction, withCommonFields = true, withCon
       name: t('End Time'),
       tooltip: t(
         // eslint-disable-next-line max-len
-        'Time of the last packet observed per flow. This is what is used in queries to select flows in an interval.'
+        'Time of the last packet observed. This is what is used in queries to select records in an interval.'
       ),
       fieldName: 'TimeFlowEndMs',
       isSelected: true,
@@ -789,14 +798,50 @@ export const getDefaultColumns = (t: TFunction, withCommonFields = true, withCon
     }
   ];
 
+  const identifierCols: Column[] = [
+    {
+      id: ColumnsId.recordtype,
+      name: t('Event / Type'),
+      fieldName: '_RecordType',
+      quickFilter: 'type',
+      isSelected: true,
+      value: (f): string => {
+        switch (f.labels._RecordType) {
+          case 'newConnection':
+            return t('Conversation start');
+          case 'heartbeat':
+            return t('Conversation tick');
+          case 'endConnection':
+            return t('Conversation end');
+          case 'flowLog':
+          default:
+            return t('Flow');
+        }
+      },
+      sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
+      width: 15
+    },
+    {
+      id: ColumnsId.hashid,
+      name: t('Conversation Id'),
+      fieldName: '_HashId',
+      quickFilter: 'id',
+      isSelected: true,
+      value: f => f.fields._HashId || '',
+      sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
+      width: 15
+    }
+  ];
+
   if (withCommonFields) {
     return [
       ...timeCols,
+      ...identifierCols,
       ...getSrcDstColumns(t, withConcatenatedFields),
       ...getCommonColumns(t, withConcatenatedFields),
       ...getExtraColumns(t)
     ];
   } else {
-    return [...timeCols, ...getSrcDstColumns(t, withConcatenatedFields), ...getExtraColumns(t)];
+    return [...timeCols, ...identifierCols, ...getSrcDstColumns(t, withConcatenatedFields), ...getExtraColumns(t)];
   }
 };

@@ -31,7 +31,7 @@ import { TimeRange } from '../../utils/datetime';
 import { doesIncludeFilter, Filter, findFromFilters, removeFromFilters } from '../../model/filters';
 import { findFilter } from '../../utils/filter-definitions';
 import RecordField, { RecordFieldFilter } from './record-field';
-import { Reporter } from '../../model/flow-query';
+import { RecordType, Reporter } from '../../model/flow-query';
 import './record-panel.css';
 
 export type RecordDrawerProps = {
@@ -40,9 +40,11 @@ export type RecordDrawerProps = {
   filters: Filter[];
   range: number | TimeRange;
   reporter: Reporter;
+  type: RecordType;
   setFilters: (v: Filter[]) => void;
   setRange: (r: number | TimeRange) => void;
   setReporter: (r: Reporter) => void;
+  setType: (r: RecordType) => void;
   onClose: () => void;
   id?: string;
 };
@@ -54,9 +56,11 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
   filters,
   range,
   reporter,
+  type,
   setFilters,
   setRange,
   setReporter,
+  setType,
   onClose
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
@@ -81,6 +85,8 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
           return getTimeRangeFilter(col, value);
         case ColumnsId.flowdir:
           return getFlowdirFilter(col, value);
+        case ColumnsId.recordtype:
+          return getRecordTypeFilter();
         default:
           return getGenericFilter(col, value);
       }
@@ -92,6 +98,7 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
     (col: Column, value: unknown): RecordFieldFilter => {
       const isDelete = typeof range !== 'number' && range.from === Number(value);
       return {
+        type: 'filter',
         onClick: () => {
           if (isDelete) {
             setRange(defaultTimeRange);
@@ -113,12 +120,21 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
       const recReporter = flowdirToReporter[value as string];
       const isDelete = reporter === recReporter;
       return {
+        type: 'filter',
         onClick: () => setReporter(isDelete ? 'both' : recReporter),
         isDelete: isDelete
       };
     },
     [reporter, setReporter]
   );
+
+  const getRecordTypeFilter = React.useCallback((): RecordFieldFilter => {
+    return {
+      type: 'switch',
+      onClick: () => setType(type === 'allConnections' ? 'flowLog' : 'allConnections'),
+      isDelete: type !== 'allConnections'
+    };
+  }, [setType, type]);
 
   const getGenericFilter = React.useCallback(
     (col: Column, value: unknown): RecordFieldFilter | undefined => {
@@ -129,6 +145,7 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
       const filterKey = { def: def };
       const isDelete = doesIncludeFilter(filters, filterKey, [{ v: String(value) }]);
       return {
+        type: 'filter',
         onClick: () => {
           if (isDelete) {
             setFilters(removeFromFilters(filters, filterKey));
@@ -191,6 +208,18 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
     [hidden, toggle]
   );
 
+  const getTitle = React.useCallback(() => {
+    switch (record.labels._RecordType) {
+      case 'newConnection':
+      case 'heartbeat':
+      case 'endConnection':
+        return t('Conversation event information');
+      case 'flowLog':
+      default:
+        return t('Flow information');
+    }
+  }, [record.labels._RecordType, t]);
+
   const groups = getColumnGroups(
     columns.filter(
       c =>
@@ -225,7 +254,7 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
     >
       <DrawerHead id={`${id}-drawer-head`} data-test-id="drawer-head" className="drawer-head">
         <Text data-test-id="drawer-head-text" component={TextVariants.h2}>
-          {t('Flow information')}
+          {getTitle()}
         </Text>
         <DrawerActions>
           <DrawerCloseButton data-test-id="drawer-close-button" className="drawer-close-button" onClick={onClose} />

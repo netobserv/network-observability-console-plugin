@@ -27,7 +27,7 @@ import { formatProtocol } from '../../utils/protocol';
 import { compareIPs } from '../../utils/ip';
 import { Stats, TopologyMetrics } from '../../api/loki';
 import './summary-panel.css';
-import { MetricType } from '../../model/flow-query';
+import { MetricType, RecordType } from '../../model/flow-query';
 import { MetricsQuerySummaryContent } from './metrics-query-summary';
 import { config } from '../../utils/config';
 
@@ -45,12 +45,13 @@ export const SummaryPanelContent: React.FC<{
   flows: Record[] | undefined;
   metrics: TopologyMetrics[] | undefined;
   appMetrics: TopologyMetrics | undefined;
+  type: RecordType;
   metricType: MetricType;
   stats: Stats | undefined;
   limit: number;
   range: number | TimeRange;
   lastRefresh: Date | undefined;
-}> = ({ flows, metrics, appMetrics, metricType, stats, limit, range, lastRefresh }) => {
+}> = ({ flows, metrics, appMetrics, type, metricType, stats, limit, range, lastRefresh }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [expanded, setExpanded] = React.useState<string>('');
 
@@ -317,6 +318,7 @@ export const SummaryPanelContent: React.FC<{
           <FlowsQuerySummaryContent
             className="summary-container-grouped"
             direction="column"
+            type={type}
             flows={flows!}
             limitReached={stats?.limitReached || false}
             range={range}
@@ -338,6 +340,7 @@ export const SummaryPanel: React.FC<{
   flows: Record[] | undefined;
   metrics: TopologyMetrics[] | undefined;
   appMetrics: TopologyMetrics | undefined;
+  type: RecordType;
   metricType: MetricType;
   stats: Stats | undefined;
   appStats: Stats | undefined;
@@ -345,7 +348,7 @@ export const SummaryPanel: React.FC<{
   range: number | TimeRange;
   lastRefresh: Date | undefined;
   id?: string;
-}> = ({ flows, metrics, appMetrics, metricType, stats, limit, range, lastRefresh, id, onClose }) => {
+}> = ({ flows, metrics, appMetrics, type, metricType, stats, limit, range, lastRefresh, id, onClose }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   return (
@@ -368,6 +371,7 @@ export const SummaryPanel: React.FC<{
           flows={flows}
           metrics={metrics}
           appMetrics={appMetrics}
+          type={type}
           metricType={metricType}
           stats={stats}
           limit={limit}

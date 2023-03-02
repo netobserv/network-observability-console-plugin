@@ -14,7 +14,8 @@ type QuickFilter struct {
 }
 
 type frontendConfig struct {
-	PortNaming struct {
+	RecordTypes []string `yaml:"recordTypes" json:"recordTypes"`
+	PortNaming  struct {
 		Enable    bool              `yaml:"enable,omitempty" json:"enable"`
 		PortNames map[string]string `yaml:"portNames,omitempty" json:"portNames"`
 	} `yaml:"portNaming,omitempty" json:"portNaming"`

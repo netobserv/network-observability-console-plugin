@@ -6,14 +6,17 @@ import QueryOptionsDropdown, { QueryOptionsDropdownProps, QueryOptionsPanel } fr
 
 describe('<QueryOptionsDropdown />', () => {
   const props: QueryOptionsDropdownProps = {
+    recordType: 'allConnections',
     reporter: 'destination',
+    allowConnection: true,
     allowReporterBoth: true,
     useTopK: false,
     limit: 100,
     match: 'all',
     setLimit: jest.fn(),
     setMatch: jest.fn(),
-    setReporter: jest.fn()
+    setReporter: jest.fn(),
+    setRecordType: jest.fn()
   };
   it('should render component', async () => {
     const wrapper = shallow(<QueryOptionsDropdown {...props} />);
@@ -24,14 +27,17 @@ describe('<QueryOptionsDropdown />', () => {
 
 describe('<QueryOptionsPanel />', () => {
   const props: QueryOptionsDropdownProps = {
+    recordType: 'allConnections',
     reporter: 'destination',
+    allowConnection: true,
     allowReporterBoth: true,
     useTopK: false,
     limit: 100,
     match: 'all',
     setLimit: jest.fn(),
     setMatch: jest.fn(),
-    setReporter: jest.fn()
+    setReporter: jest.fn(),
+    setRecordType: jest.fn()
   };
   beforeEach(() => {
     props.setLimit = jest.fn();
@@ -40,9 +46,9 @@ describe('<QueryOptionsPanel />', () => {
   });
   it('should render component', async () => {
     const wrapper = shallow(<QueryOptionsPanel {...props} />);
-    expect(wrapper.find('.pf-c-select__menu-group').length).toBe(3);
-    expect(wrapper.find('.pf-c-select__menu-group-title').length).toBe(3);
-    expect(wrapper.find(Radio)).toHaveLength(9);
+    expect(wrapper.find('.pf-c-select__menu-group').length).toBe(4);
+    expect(wrapper.find('.pf-c-select__menu-group-title').length).toBe(4);
+    expect(wrapper.find(Radio)).toHaveLength(11);
 
     //setOptions should not be called at startup, because it is supposed to be already initialized from URL
     expect(props.setLimit).toHaveBeenCalledTimes(0);

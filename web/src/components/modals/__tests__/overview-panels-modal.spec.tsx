@@ -3,11 +3,13 @@ import { mount, shallow } from 'enzyme';
 
 import OverviewPanelsModal from '../overview-panels-modal';
 import { ShuffledDefaultPanels } from '../../__tests-data__/panels';
+import { RecordType } from '../../../model/flow-query';
 
 describe('<OverviewPanelsModal />', () => {
   const props = {
     isModalOpen: true,
     setModalOpen: jest.fn(),
+    recordType: 'flowLog' as RecordType,
     panels: ShuffledDefaultPanels,
     setPanels: jest.fn(),
     id: 'panels-modal'

@@ -18,6 +18,7 @@ type Topology struct {
 	function     string
 	dataField    string
 	fields       string
+	dedup        bool
 }
 
 type TopologyQueryBuilder struct {
@@ -25,7 +26,7 @@ type TopologyQueryBuilder struct {
 	topology *Topology
 }
 
-func NewTopologyQuery(cfg *Config, start, end, limit, rateInterval, step, metricType string, reporter constants.Reporter, scope, groups string) (*TopologyQueryBuilder, error) {
+func NewTopologyQuery(cfg *Config, start, end, limit, rateInterval, step, metricType string, recordType constants.RecordType, reporter constants.Reporter, scope, groups string) (*TopologyQueryBuilder, error) {
 	l := limit
 	if len(l) == 0 {
 		l = topologyDefaultLimit
@@ -43,8 +44,18 @@ func NewTopologyQuery(cfg *Config, start, end, limit, rateInterval, step, metric
 		t = "Bytes"
 	}
 
+	var d bool
+	var rt constants.RecordType
+	if utils.Contains(constants.AnyConnectionType, string(recordType)) {
+		d = false
+		rt = "endConnection"
+	} else {
+		d = true
+		rt = "flowLog"
+	}
+
 	return &TopologyQueryBuilder{
-		FlowQueryBuilder: NewFlowQueryBuilder(cfg, start, end, limit, reporter),
+		FlowQueryBuilder: NewFlowQueryBuilder(cfg, start, end, limit, reporter, rt),
 		topology: &Topology{
 			rateInterval: rateInterval,
 			step:         step,
@@ -52,6 +63,7 @@ func NewTopologyQuery(cfg *Config, start, end, limit, rateInterval, step, metric
 			function:     f,
 			dataField:    t,
 			fields:       getFields(scope, groups),
+			dedup:        d,
 		},
 	}, nil
 }
@@ -117,7 +129,9 @@ func (q *TopologyQueryBuilder) Build() string {
 	sb.WriteString("(")
 	q.appendLabels(sb)
 	q.appendLineFilters(sb)
-	q.appendDeduplicateFilter(sb)
+	if q.topology.dedup {
+		q.appendDeduplicateFilter(sb)
+	}
 	q.appendJSON(sb, true)
 	if len(q.topology.dataField) > 0 {
 		sb.WriteString("|unwrap ")

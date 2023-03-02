@@ -89,6 +89,7 @@ export const getConfig = (): Promise<Config> => {
       return defaultConfig;
     }
     return <Config>{
+      recordTypes: r.data.recordTypes,
       portNaming: {
         enable: r.data.portNaming.enable ?? defaultConfig.portNaming.enable,
         portNames: r.data.portNaming.portNames
