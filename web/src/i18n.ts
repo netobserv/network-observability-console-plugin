@@ -2,3 +2,4 @@
 // labels declared in console-extensions.json are added to the message catalog.
 
 // t('plugin__netobserv-plugin~Network Traffic')
+// t('plugin__netobserv-plugin~Observe')

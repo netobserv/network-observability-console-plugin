@@ -10,6 +10,27 @@
     }
   },
   {
+    "type": "console.navigation/section",
+    "properties": {
+      "perspective": "admin",
+      "id": "observe-projectadmin",
+      "insertBefore": ["compute", "usermanagement"],
+      "name": "%plugin__netobserv-plugin~Observe%"
+    },
+    "flags": { "disallowed": ["CAN_LIST_NS"] }
+  },
+  {
+    "type": "console.navigation/href",
+    "properties": {
+      "id": "netflow-traffic-link-projectadmin",
+      "perspective": "admin",
+      "section": "observe-netobserv",
+      "name": "%plugin__netobserv-plugin~Network Traffic%",
+      "href": "/netflow-traffic"
+    },
+    "flags": { "disallowed": ["CAN_LIST_NS"] }
+  },
+  {
     "type": "console.page/route",
     "properties": {
       "path": "/netflow-traffic",
