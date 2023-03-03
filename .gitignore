@@ -5,7 +5,8 @@
 /web/dist
 /web/node_modules
 /web/yarn-error.log
+/web/coverage
 /plugin-backend
-/coverage.out
+/cover.out
 tmp.Dockerfile
 /web/cypress/videos
