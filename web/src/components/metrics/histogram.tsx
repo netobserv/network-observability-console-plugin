@@ -153,7 +153,7 @@ export const Histogram: React.FC<{
         title: t('Histogram'),
         description: t(
           // eslint-disable-next-line max-len
-          'The following bar chart represent the number of logs across time. You can select a portion of it to drill down into the selected time range and filter the content below accordingly.'
+          'The following bar chart represents the number of logs across time. You can select a portion of it to drill down into the selected time range and filter the content below accordingly.'
         ),
         assetName: 'histogram.gif',
         minWidth: '500px',
