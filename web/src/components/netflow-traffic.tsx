@@ -585,21 +585,9 @@ export const NetflowTraffic: React.FC<{
         onSelect={(event, eventkey) => selectView(eventkey as ViewId)}
         role="region"
       >
-        <Tab
-          className="netflow-traffic-tab"
-          eventKey={'overview'}
-          title={<TabTitleText>{t('Overview')}</TabTitleText>}
-        />
-        <Tab
-          className="netflow-traffic-tab"
-          eventKey={'table'}
-          title={<TabTitleText>{t('Traffic flows')}</TabTitleText>}
-        />
-        <Tab
-          className="netflow-traffic-tab"
-          eventKey={'topology'}
-          title={<TabTitleText>{t('Topology')}</TabTitleText>}
-        />
+        <Tab className="overviewTabButton" eventKey={'overview'} title={<TabTitleText>{t('Overview')}</TabTitleText>} />
+        <Tab className="tableTabButton" eventKey={'table'} title={<TabTitleText>{t('Traffic flows')}</TabTitleText>} />
+        <Tab className="topologyTabButton" eventKey={'topology'} title={<TabTitleText>{t('Topology')}</TabTitleText>} />
       </Tabs>
     );
   };

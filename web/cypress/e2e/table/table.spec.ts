@@ -5,19 +5,23 @@ import * as c from '../../support/const'
 describe('netflow-table', () => {
   beforeEach(() => {
     cy.openNetflowTrafficPage();
+    //move to table view
+    cy.get('.tableTabButton').click();
+    //clear default app filters
+    cy.get('#clear-all-filters-button').click();
   });
 
   it('displays table and rows', () => {
     cy.get('#table-container').should('exist');
     //expect 100 results without filters
     cy.get('#table-container').find('tr').its('length').should('be.gte', 100);
-    cy.get('#flowsCount').contains('100 flows');
+    cy.get('#flowsCount').contains('100+ flows');
 
     cy.addCommonFilter('namespace', c.namespace);
     cy.addCommonFilter('name', c.pod);
     cy.changeQueryOption('Match all');
     cy.changeQueryOption('Both');
-    cy.changeQueryOption('1000');    
+    cy.changeQueryOption('1000');
     cy.changeTimeRange('Last 1 day');
   });
 
@@ -42,7 +46,7 @@ describe('netflow-table', () => {
     cy.get('#columns-modal').contains('Save').should('be.disabled');
 
     //Select some columns
-    cy.selectColumns(['Start Time', 'Names', 'Packets']);
+    cy.selectPopupItems('#columns-modal', ['Start Time', 'Names', 'Packets']);
 
     //Save new columns
     cy.get('#columns-modal').contains('Save').click();
@@ -55,7 +59,7 @@ describe('netflow-table', () => {
 
     //add End Time, Owners, Ports
     //remove Packets
-    cy.selectColumns(['End Time', 'Owners', 'Ports', 'Packets']);
+    cy.selectPopupItems('#columns-modal', ['End Time', 'Owners', 'Ports', 'Packets']);
 
     //Save new columns
     cy.get('#columns-modal').contains('Save').click();

@@ -77,7 +77,7 @@ export const OverviewDisplayDropdown: React.FC<{
   const [isOpen, setOpen] = React.useState<boolean>(false);
 
   return (
-    <div data-test="display-dropdown-container">
+    <div id="display-dropdown-container" data-test="display-dropdown-container">
       <Select
         id="overview-display-dropdown"
         placeholderText={<span>{t('Display options')}</span>}
