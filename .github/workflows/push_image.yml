@@ -46,8 +46,8 @@ jobs:
       - name: print image url
         run: echo "Image pushed to ${{ steps.push-to-quay.outputs.registry-paths }}"
 
-  codecov:
-    name: Codecov upload
+  codecov-back:
+    name: Codecov backend upload
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -62,10 +62,31 @@ jobs:
     - name: checkout
       uses: actions/checkout@v3
     - name: Test
-      run: make test
+      run: make test-backend
     - name: Report coverage
       uses: codecov/codecov-action@v2.1.0
       with:
         files: ./cover.out
         flags: unittests
+        fail_ci_if_error: false
+
+  codecov-front:
+    name: Codecov frontend upload
+    runs-on: ubuntu-latest
+    steps:
+    - name: install make
+      run: sudo apt-get install make
+    - name: set up node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 16
+    - name: checkout
+      uses: actions/checkout@v3
+    - name: Test
+      run: make test-frontend
+    - name: Report coverage
+      uses: codecov/codecov-action@v2.1.0
+      with:
+        files: ./web/coverage/cobertura-coverage.xml
+        flags: uitests
         fail_ci_if_error: false

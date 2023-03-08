@@ -32,7 +32,7 @@ jobs:
 
   build-test-frontend:
     name: Build, lint, test frontend
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
     - name: install make
       run: sudo apt-get install make
@@ -49,4 +49,4 @@ jobs:
       with:
         files: ./web/coverage/cobertura-coverage.xml
         flags: uitests
-        fail_ci_if_error: false 
+        fail_ci_if_error: false
