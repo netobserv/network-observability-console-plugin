@@ -28,7 +28,7 @@ jobs:
       with:
         files: ./cover.out
         flags: unittests
-        fail_ci_if_error: true 
+        fail_ci_if_error: false 
 
   build-test-frontend:
     name: Build, lint, test frontend
@@ -49,4 +49,4 @@ jobs:
       with:
         files: ./web/coverage/cobertura-coverage.xml
         flags: uitests
-        fail_ci_if_error: true 
+        fail_ci_if_error: false 
