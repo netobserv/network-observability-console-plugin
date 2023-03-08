@@ -120,6 +120,8 @@
     "save-svg-as-png": "^1.4.17"
   },
   "jest": {
+    "collectCoverage": true,
+    "coverageReporters": ["cobertura"],
     "testURL": "http://localhost/",
     "maxWorkers": 1,
     "globals": {

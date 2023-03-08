@@ -11,7 +11,6 @@ BASE_IMAGE ?= quay.io/${IMG_USER}/network-observability-console-plugin
 IMAGE ?= ${BASE_IMAGE}:${TAG}
 
 GOLANGCI_LINT_VERSION = v1.50.1
-COVERPROFILE = coverage.out
 NPM_INSTALL ?= install
 
 CMDLINE_ARGS ?= --loglevel trace --loki-tenant-id netobserv --frontend-config config/sample-frontend-config.yaml --auth-check none
@@ -69,7 +68,7 @@ i18n:
 .PHONY: test-backend
 test-backend:
 	@echo "### Testing backend"
-	go test ./... -coverprofile ${COVERPROFILE}
+	go test ./... -coverpkg=./... -coverprofile cover.out
 
 .PHONY: test-frontend
 test-frontend:
