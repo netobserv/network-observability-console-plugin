@@ -13,11 +13,16 @@ export type GuidedTourItem = {
   ref: React.RefObject<HTMLDivElement>;
 };
 
+export type IndexChangeFunction = (index: number | undefined) => void;
+
 export type GuidedTourHandle = {
   startTour: () => void;
   updateTourItems: (items: GuidedTourItem[]) => void;
+  addOnIndexChangeListener: (fn: IndexChangeFunction) => void;
+  clearOnIndexChangeListener: () => void;
 };
 
+const onIndexChangeFunctions: IndexChangeFunction[] = [];
 export const GuidedTourPopover: React.FC<{
   id: string;
   ref?: React.Ref<GuidedTourHandle>;
@@ -29,7 +34,9 @@ export const GuidedTourPopover: React.FC<{
 
   React.useImperativeHandle(ref, () => ({
     startTour,
-    updateTourItems
+    updateTourItems,
+    addOnIndexChangeListener,
+    clearOnIndexChangeListener
   }));
 
   const startTour = () => {
@@ -45,6 +52,14 @@ export const GuidedTourPopover: React.FC<{
     if (!items.length) {
       console.error('updateTourItems called while items = ', items);
     }
+  };
+
+  const addOnIndexChangeListener = (fn: IndexChangeFunction) => {
+    onIndexChangeFunctions.push(fn);
+  };
+
+  const clearOnIndexChangeListener = () => {
+    onIndexChangeFunctions.splice(0);
   };
 
   const previous = React.useCallback(() => {
@@ -66,6 +81,12 @@ export const GuidedTourPopover: React.FC<{
       setIndex(undefined);
     }
   }, [hasNext, index]);
+
+  React.useEffect(() => {
+    onIndexChangeFunctions.forEach(fn => {
+      fn(index);
+    });
+  }, [index]);
 
   let currentItem = undefined;
   if (index !== undefined) {

@@ -7,7 +7,8 @@ import {
   FlexItem,
   PopoverPosition,
   Spinner,
-  Text
+  Text,
+  Tooltip
 } from '@patternfly/react-core';
 import {
   AngleDoubleLeftIcon,
@@ -20,10 +21,10 @@ import {
 } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { LOCAL_STORAGE_HISTOGRAM_GUIDED_TOUR_DONE_KEY, useLocalStorage } from '../../utils/local-storage-hook';
 import { NamedMetric, TopologyMetrics } from '../../api/loki';
 import { TimeRange } from '../../utils/datetime';
 import { getDateMsInSeconds } from '../../utils/duration';
+import { LOCAL_STORAGE_HISTOGRAM_GUIDED_TOUR_DONE_KEY, useLocalStorage } from '../../utils/local-storage-hook';
 import { getFormattedRateValue } from '../../utils/metrics';
 import { TruncateLength } from '../dropdowns/truncate-dropdown';
 import { GuidedTourHandle } from '../guided-tour/guided-tour';
@@ -58,6 +59,7 @@ export const Histogram: React.FC<{
   const datapoints: ChartDataPoint[] = toHistogramDatapoints(totalMetric);
   const defaultRange = getHistogramRangeFromLimit(totalMetric, limit);
 
+  const [tooltipsTrigger, setTooltipsTrigger] = React.useState<'manual' | 'mouseenter'>('mouseenter');
   const containerRef = React.createRef<HTMLDivElement>();
   const zoomRef = React.createRef<HTMLInputElement>();
   const pageRef = React.createRef<HTMLInputElement>();
@@ -152,6 +154,7 @@ export const Histogram: React.FC<{
       return;
     }
 
+    guidedTourHandle.clearOnIndexChangeListener();
     guidedTourHandle.updateTourItems([
       {
         title: t('Histogram'),
@@ -160,7 +163,7 @@ export const Histogram: React.FC<{
           'The following bar chart represents the number of logs over time. You can select a portion of it to drill down into the selected time range, accordingly/consequently filtering the following flows information.'
         ),
         assetName: 'histogram.gif',
-        minWidth: '500px',
+        minWidth: '600px',
         ref: containerRef
       },
       {
@@ -179,7 +182,7 @@ export const Histogram: React.FC<{
         title: t('Page buttons'),
         description: pageButtonTips(),
         assetName: 'histogram-pages.gif',
-        minWidth: '500px',
+        minWidth: '600px',
         position: PopoverPosition.bottom,
         ref: pageRef
       }
@@ -189,6 +192,10 @@ export const Histogram: React.FC<{
       setGuidedTourDone(true);
       guidedTourHandle.startTour();
     }
+
+    guidedTourHandle.addOnIndexChangeListener(index =>
+      setTooltipsTrigger(index !== undefined ? 'manual' : 'mouseenter')
+    );
   }, [
     arrowButtonTips,
     arrowRef,
@@ -214,36 +221,71 @@ export const Histogram: React.FC<{
       <Flex className="histogram-range-container" direction={{ default: 'row' }}>
         <FlexItem flex={{ default: 'flex_1' }} />
         <FlexItem>
-          <Button variant="plain" onClick={() => moveRange(false)} ref={arrowRef}>
-            <AngleDoubleLeftIcon />
-          </Button>
-
-          <Button variant="plain" onClick={() => moveHistogramRange(false)} ref={pageRef}>
-            <AngleLeftIcon />
-          </Button>
+          <Tooltip
+            content={arrowButtonTips()}
+            trigger={tooltipsTrigger}
+            isVisible={tooltipsTrigger === 'manual' ? false : undefined}
+          >
+            <Button variant="plain" onClick={() => moveRange(false)} ref={arrowRef}>
+              <AngleDoubleLeftIcon />
+            </Button>
+          </Tooltip>
+          <Tooltip
+            content={pageButtonTips()}
+            trigger={tooltipsTrigger}
+            isVisible={tooltipsTrigger === 'manual' ? false : undefined}
+          >
+            <Button variant="plain" onClick={() => moveHistogramRange(false)} ref={pageRef}>
+              <AngleLeftIcon />
+            </Button>
+          </Tooltip>
         </FlexItem>
         <FlexItem>
           <Text>{getDomainDisplayText(range ? range : defaultRange)}</Text>
         </FlexItem>
         <FlexItem>
-          <Button variant="plain" onClick={() => moveHistogramRange(true)}>
-            <AngleRightIcon />
-          </Button>
-          <Button variant="plain" onClick={() => moveRange(true)}>
-            <AngleDoubleRightIcon />
-          </Button>
+          <Tooltip
+            content={pageButtonTips()}
+            trigger={tooltipsTrigger}
+            isVisible={tooltipsTrigger === 'manual' ? false : undefined}
+          >
+            <Button variant="plain" onClick={() => moveHistogramRange(true)}>
+              <AngleRightIcon />
+            </Button>
+          </Tooltip>
+          <Tooltip
+            content={arrowButtonTips()}
+            trigger={tooltipsTrigger}
+            isVisible={tooltipsTrigger === 'manual' ? false : undefined}
+          >
+            <Button variant="plain" onClick={() => moveRange(true)}>
+              <AngleDoubleRightIcon />
+            </Button>
+          </Tooltip>
         </FlexItem>
         <FlexItem flex={{ default: 'flex_1' }}>
           <Flex className="histogram-zoom-container" direction={{ default: 'row' }}>
             <FlexItem>
-              <Button variant="plain" onClick={() => zoomRange(false)} ref={zoomRef}>
-                <SearchMinusIcon />
-              </Button>
+              <Tooltip
+                content={zoomButtonTips()}
+                trigger={tooltipsTrigger}
+                isVisible={tooltipsTrigger === 'manual' ? false : undefined}
+              >
+                <Button variant="plain" onClick={() => zoomRange(false)} ref={zoomRef}>
+                  <SearchMinusIcon />
+                </Button>
+              </Tooltip>
             </FlexItem>
             <FlexItem>
-              <Button variant="plain" onClick={() => zoomRange(true)}>
-                <SearchPlusIcon />
-              </Button>
+              <Tooltip
+                content={zoomButtonTips()}
+                trigger={tooltipsTrigger}
+                isVisible={tooltipsTrigger === 'manual' ? false : undefined}
+              >
+                <Button variant="plain" onClick={() => zoomRange(true)}>
+                  <SearchPlusIcon />
+                </Button>
+              </Tooltip>
             </FlexItem>
           </Flex>
         </FlexItem>
