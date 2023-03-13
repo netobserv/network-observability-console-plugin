@@ -131,15 +131,19 @@ export const Histogram: React.FC<{
   );
 
   const zoomButtonTips = React.useCallback(() => {
-    return t('Zoom in / out histogram. You can also use plus or minus buttons while histogram is focused.');
+    return t(
+      'Zoom in / zoom out of the histogram. You can also use the plus or minus buttons while the histogram is focused.'
+    );
   }, [t]);
 
   const pageButtonTips = React.useCallback(() => {
-    return t('Move selected range. You can also use page up or down buttons while histogram is focused.');
+    return t('Move the selected range. You can also use the page up or down buttons while the histogram is focused.');
   }, [t]);
 
   const arrowButtonTips = React.useCallback(() => {
-    return t('Move displayed range. You can also use arrow left or right buttons while histogram is focused.');
+    return t(
+      'Move the displayed range. You can also use the arrow left or right buttons while the histogram is focused.'
+    );
   }, [t]);
 
   const [guidedTourDone, setGuidedTourDone] = useLocalStorage<boolean>(LOCAL_STORAGE_HISTOGRAM_GUIDED_TOUR_DONE_KEY);
@@ -153,7 +157,7 @@ export const Histogram: React.FC<{
         title: t('Histogram'),
         description: t(
           // eslint-disable-next-line max-len
-          'The following bar chart represents the number of logs across time. You can select a portion of it to drill down into the selected time range and filter the content below accordingly.'
+          'The following bar chart represents the number of logs over time. You can select a portion of it to drill down into the selected time range, accordingly/consequently filtering the following flows information.'
         ),
         assetName: 'histogram.gif',
         minWidth: '500px',
