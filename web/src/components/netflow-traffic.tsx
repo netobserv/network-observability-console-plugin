@@ -136,6 +136,7 @@ import './netflow-traffic.css';
 import { TruncateLength } from './dropdowns/truncate-dropdown';
 import HistogramContainer from './metrics/histogram';
 import { formatDuration, getDateMsInSeconds, getDateSInMiliseconds, parseDuration } from '../utils/duration';
+import GuidedTourPopover, { GuidedTourHandle } from './guided-tour/guided-tour';
 
 export type ViewId = 'overview' | 'table' | 'topology';
 
@@ -212,6 +213,8 @@ export const NetflowTraffic: React.FC<{
   const [selectedElement, setSelectedElement] = React.useState<GraphElementPeer | undefined>(undefined);
   const searchRef = React.useRef<SearchHandle>(null);
   const [searchEvent, setSearchEvent] = React.useState<SearchEvent | undefined>(undefined);
+  const guidedTourRef = React.useRef<GuidedTourHandle>(null);
+
   //use this ref to list any props / content loading state & events to skip tick function
   const initState = React.useRef<Array<'initDone' | 'configLoading' | 'configLoaded' | 'forcedFiltersLoaded'>>([]);
   const [panels, setSelectedPanels] = useLocalStorage<OverviewPanel[]>(
@@ -1213,6 +1216,7 @@ export const NetflowTraffic: React.FC<{
               limit={limit}
               isDark={isDarkTheme}
               range={histogramRange}
+              guidedTourHandle={guidedTourRef.current}
               setRange={setHistogramRange}
               moveRange={moveRange}
               zoomRange={zoomRange}
@@ -1319,6 +1323,7 @@ export const NetflowTraffic: React.FC<{
           {slownessReason()}
         </Alert>
       )}
+      <GuidedTourPopover id="netobserv" ref={guidedTourRef} />
     </PageSection>
   ) : null;
 };

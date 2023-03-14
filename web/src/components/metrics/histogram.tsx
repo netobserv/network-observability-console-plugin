@@ -1,21 +1,35 @@
 import { Chart, ChartAxis, ChartBar, ChartStack, ChartThemeColor, createContainer } from '@patternfly/react-charts';
 import {
-  AngleRightIcon,
-  AngleLeftIcon,
-  SearchMinusIcon,
-  SearchPlusIcon,
+  Bullseye,
+  Button,
+  EmptyStateBody,
+  Flex,
+  FlexItem,
+  PopoverPosition,
+  Spinner,
+  Text,
+  Tooltip
+} from '@patternfly/react-core';
+import {
   AngleDoubleLeftIcon,
-  AngleDoubleRightIcon
+  AngleDoubleRightIcon,
+  AngleLeftIcon,
+  AngleRightIcon,
+  QuestionCircleIcon,
+  SearchMinusIcon,
+  SearchPlusIcon
 } from '@patternfly/react-icons';
-import { Bullseye, Button, EmptyStateBody, Flex, FlexItem, Spinner, Text, Tooltip } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { NamedMetric, TopologyMetrics } from '../../api/loki';
 import { TimeRange } from '../../utils/datetime';
 import { getDateMsInSeconds } from '../../utils/duration';
+import { LOCAL_STORAGE_HISTOGRAM_GUIDED_TOUR_DONE_KEY, useLocalStorage } from '../../utils/local-storage-hook';
 import { getFormattedRateValue } from '../../utils/metrics';
 import { TruncateLength } from '../dropdowns/truncate-dropdown';
+import { GuidedTourHandle } from '../guided-tour/guided-tour';
 import BrushHandleComponent from './brush-handle';
+import './histogram.css';
 import {
   ChartDataPoint,
   Dimensions,
@@ -26,7 +40,6 @@ import {
   toHistogramDatapoints,
   toNamedMetric
 } from './metrics-helper';
-import './histogram.css';
 
 export const VoronoiContainer = createContainer('voronoi', 'brush');
 
@@ -36,16 +49,22 @@ export const Histogram: React.FC<{
   limit: number;
   isDark: boolean;
   range?: TimeRange;
+  guidedTourHandle: GuidedTourHandle | null;
   setRange: (tr: TimeRange) => void;
   moveRange: (next: boolean) => void;
   zoomRange: (zoom: boolean) => void;
-}> = ({ id, totalMetric, limit, isDark, range, setRange, moveRange, zoomRange }) => {
+}> = ({ id, totalMetric, limit, isDark, range, guidedTourHandle, setRange, moveRange, zoomRange }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   const datapoints: ChartDataPoint[] = toHistogramDatapoints(totalMetric);
   const defaultRange = getHistogramRangeFromLimit(totalMetric, limit);
 
+  const [tooltipsTrigger, setTooltipsTrigger] = React.useState<'manual' | 'mouseenter'>('mouseenter');
   const containerRef = React.createRef<HTMLDivElement>();
+  const zoomRef = React.createRef<HTMLInputElement>();
+  const pageRef = React.createRef<HTMLInputElement>();
+  const arrowRef = React.createRef<HTMLInputElement>();
+
   const [dimensions, setDimensions] = React.useState<Dimensions>({ width: 3000, height: 300 });
   React.useEffect(() => {
     observe(containerRef, dimensions, setDimensions);
@@ -113,17 +132,83 @@ export const Histogram: React.FC<{
     [moveHistogramRange, moveRange, zoomRange]
   );
 
-  const zoomButtonTips = () => {
-    return t('Zoom in / out histogram. You can also use plus or minus buttons while histogram is focused.');
-  };
+  const zoomButtonTips = React.useCallback(() => {
+    return t(
+      'Zoom in / zoom out of the histogram. You can also use the plus or minus buttons while the histogram is focused.'
+    );
+  }, [t]);
 
-  const pageButtonTips = () => {
-    return t('Move selected range. You can also use page up or down buttons while histogram is focused.');
-  };
+  const pageButtonTips = React.useCallback(() => {
+    return t('Move the selected range. You can also use the page up or down buttons while the histogram is focused.');
+  }, [t]);
 
-  const arrowButtonTips = () => {
-    return t('Move displayed range. You can also use arrow left or right buttons while histogram is focused.');
-  };
+  const arrowButtonTips = React.useCallback(() => {
+    return t(
+      'Move the displayed range. You can also use the arrow left or right buttons while the histogram is focused.'
+    );
+  }, [t]);
+
+  const [guidedTourDone, setGuidedTourDone] = useLocalStorage<boolean>(LOCAL_STORAGE_HISTOGRAM_GUIDED_TOUR_DONE_KEY);
+  React.useEffect(() => {
+    if (!guidedTourHandle) {
+      return;
+    }
+
+    guidedTourHandle.clearOnIndexChangeListener();
+    guidedTourHandle.updateTourItems([
+      {
+        title: t('Histogram'),
+        description: t(
+          // eslint-disable-next-line max-len
+          'The following bar chart represents the number of logs over time. You can select a portion of it to drill down into the selected time range, accordingly/consequently filtering the following flows information.'
+        ),
+        assetName: 'histogram.gif',
+        minWidth: '600px',
+        ref: containerRef
+      },
+      {
+        title: t('Zoom buttons'),
+        description: zoomButtonTips(),
+        assetName: 'histogram-zoom.gif',
+        position: PopoverPosition.bottom,
+        ref: zoomRef
+      },
+      {
+        title: t('Arrow buttons'),
+        description: arrowButtonTips(),
+        ref: arrowRef
+      },
+      {
+        title: t('Page buttons'),
+        description: pageButtonTips(),
+        assetName: 'histogram-pages.gif',
+        minWidth: '600px',
+        position: PopoverPosition.bottom,
+        ref: pageRef
+      }
+    ]);
+
+    if (!guidedTourDone) {
+      setGuidedTourDone(true);
+      guidedTourHandle.startTour();
+    }
+
+    guidedTourHandle.addOnIndexChangeListener(index =>
+      setTooltipsTrigger(index !== undefined ? 'manual' : 'mouseenter')
+    );
+  }, [
+    arrowButtonTips,
+    arrowRef,
+    containerRef,
+    guidedTourDone,
+    guidedTourHandle,
+    pageButtonTips,
+    pageRef,
+    setGuidedTourDone,
+    t,
+    zoomButtonTips,
+    zoomRef
+  ]);
 
   return (
     <div
@@ -136,13 +221,21 @@ export const Histogram: React.FC<{
       <Flex className="histogram-range-container" direction={{ default: 'row' }}>
         <FlexItem flex={{ default: 'flex_1' }} />
         <FlexItem>
-          <Tooltip content={arrowButtonTips()}>
-            <Button variant="plain" onClick={() => moveRange(false)}>
+          <Tooltip
+            content={arrowButtonTips()}
+            trigger={tooltipsTrigger}
+            isVisible={tooltipsTrigger === 'manual' ? false : undefined}
+          >
+            <Button variant="plain" onClick={() => moveRange(false)} ref={arrowRef}>
               <AngleDoubleLeftIcon />
             </Button>
           </Tooltip>
-          <Tooltip content={pageButtonTips()}>
-            <Button variant="plain" onClick={() => moveHistogramRange(false)}>
+          <Tooltip
+            content={pageButtonTips()}
+            trigger={tooltipsTrigger}
+            isVisible={tooltipsTrigger === 'manual' ? false : undefined}
+          >
+            <Button variant="plain" onClick={() => moveHistogramRange(false)} ref={pageRef}>
               <AngleLeftIcon />
             </Button>
           </Tooltip>
@@ -151,12 +244,20 @@ export const Histogram: React.FC<{
           <Text>{getDomainDisplayText(range ? range : defaultRange)}</Text>
         </FlexItem>
         <FlexItem>
-          <Tooltip content={pageButtonTips()}>
+          <Tooltip
+            content={pageButtonTips()}
+            trigger={tooltipsTrigger}
+            isVisible={tooltipsTrigger === 'manual' ? false : undefined}
+          >
             <Button variant="plain" onClick={() => moveHistogramRange(true)}>
               <AngleRightIcon />
             </Button>
           </Tooltip>
-          <Tooltip content={arrowButtonTips()}>
+          <Tooltip
+            content={arrowButtonTips()}
+            trigger={tooltipsTrigger}
+            isVisible={tooltipsTrigger === 'manual' ? false : undefined}
+          >
             <Button variant="plain" onClick={() => moveRange(true)}>
               <AngleDoubleRightIcon />
             </Button>
@@ -165,20 +266,33 @@ export const Histogram: React.FC<{
         <FlexItem flex={{ default: 'flex_1' }}>
           <Flex className="histogram-zoom-container" direction={{ default: 'row' }}>
             <FlexItem>
-              <Tooltip content={zoomButtonTips()}>
-                <Button variant="plain" onClick={() => zoomRange(false)}>
+              <Tooltip
+                content={zoomButtonTips()}
+                trigger={tooltipsTrigger}
+                isVisible={tooltipsTrigger === 'manual' ? false : undefined}
+              >
+                <Button variant="plain" onClick={() => zoomRange(false)} ref={zoomRef}>
                   <SearchMinusIcon />
                 </Button>
               </Tooltip>
             </FlexItem>
             <FlexItem>
-              <Tooltip content={zoomButtonTips()}>
+              <Tooltip
+                content={zoomButtonTips()}
+                trigger={tooltipsTrigger}
+                isVisible={tooltipsTrigger === 'manual' ? false : undefined}
+              >
                 <Button variant="plain" onClick={() => zoomRange(true)}>
                   <SearchPlusIcon />
                 </Button>
               </Tooltip>
             </FlexItem>
           </Flex>
+        </FlexItem>
+        <FlexItem>
+          <Button variant="plain" onClick={() => guidedTourHandle?.startTour()}>
+            <QuestionCircleIcon />
+          </Button>
         </FlexItem>
       </Flex>
       <Chart
@@ -256,10 +370,11 @@ export const HistogramContainer: React.FC<{
   limit: number;
   isDark: boolean;
   range?: TimeRange;
+  guidedTourHandle: GuidedTourHandle | null;
   setRange: (tr: TimeRange) => void;
   moveRange: (next: boolean) => void;
   zoomRange: (zoom: boolean) => void;
-}> = ({ id, loading, totalMetric, limit, isDark, range, setRange, moveRange, zoomRange }) => {
+}> = ({ id, loading, totalMetric, limit, isDark, range, guidedTourHandle, setRange, moveRange, zoomRange }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   return totalMetric ? (
@@ -269,6 +384,7 @@ export const HistogramContainer: React.FC<{
       limit={limit}
       isDark={isDark}
       range={range}
+      guidedTourHandle={guidedTourHandle}
       setRange={setRange}
       moveRange={moveRange}
       zoomRange={zoomRange}
