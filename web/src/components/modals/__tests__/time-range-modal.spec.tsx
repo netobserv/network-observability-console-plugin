@@ -7,6 +7,8 @@ import { DatePicker, TimePicker } from '@patternfly/react-core';
 import { act } from 'react-dom/test-utils';
 
 describe('<ColumnsModal />', () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const fakeEvent: any = {};
   const props: TimeRangeModalProps = {
     isModalOpen: true,
     setModalOpen: jest.fn(),
@@ -39,9 +41,9 @@ describe('<ColumnsModal />', () => {
     const timePickers = wrapper.find(TimePicker);
     //set start date & time and press button
     act(() => {
-      datePickers.at(0).props().onChange!('2021-12-01', new Date('2021-12-01'));
+      datePickers.at(0).props().onChange!(fakeEvent, '2021-12-01', new Date('2021-12-01'));
       // set hours minutes and seconds
-      timePickers.at(0).props().onChange!('10:15:30');
+      timePickers.at(0).props().onChange!(fakeEvent, '10:15:30');
     });
     nowRange.from = new Date('2021-12-01').setHours(10, 15, 30, 0) / 1000;
 
@@ -50,9 +52,9 @@ describe('<ColumnsModal />', () => {
 
     //set end date & time and press button
     act(() => {
-      datePickers.at(1).props().onChange!('2021-12-15', new Date('2021-12-15'));
+      datePickers.at(1).props().onChange!(fakeEvent, '2021-12-15', new Date('2021-12-15'));
       // set only hours and minutes, seconds should be automatically set to 0
-      timePickers.at(1).props().onChange!('23:00');
+      timePickers.at(1).props().onChange!(fakeEvent, '23:00');
     });
     nowRange.to = new Date('2021-12-15').setHours(23, 0, 0, 0) / 1000;
 

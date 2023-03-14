@@ -216,7 +216,7 @@ export const TimeRangeModal: React.FC<TimeRangeModalProps> = ({ id, isModalOpen,
               <DatePicker
                 data-test="from-date-picker"
                 validators={[date => dateValidator(true, date)]}
-                onChange={str => setFromDate(str)}
+                onChange={(e, v) => setFromDate(v)}
                 onInput={e => onInput(e, 'date')}
                 value={fromDate}
               />
@@ -227,7 +227,7 @@ export const TimeRangeModal: React.FC<TimeRangeModalProps> = ({ id, isModalOpen,
                 is24Hour
                 includeSeconds
                 placeholder="hh:mm:ss"
-                onChange={setFromTime}
+                onChange={(e, v) => setFromTime(v)}
                 onInput={e => onInput(e, 'time')}
                 time={displayedFromTime}
               />
@@ -242,7 +242,7 @@ export const TimeRangeModal: React.FC<TimeRangeModalProps> = ({ id, isModalOpen,
                 data-test="to-date-picker"
                 validators={[date => dateValidator(false, date)]}
                 rangeStart={fromDate ? new Date(Date.parse(fromDate)) : undefined}
-                onChange={str => setToDate(str)}
+                onChange={(e, v) => setToDate(v)}
                 onInput={e => onInput(e, 'date')}
                 value={toDate}
               />
@@ -253,7 +253,7 @@ export const TimeRangeModal: React.FC<TimeRangeModalProps> = ({ id, isModalOpen,
                 is24Hour
                 includeSeconds
                 placeholder="hh:mm:ss"
-                onChange={setToTime}
+                onChange={(e, v) => setToTime(v)}
                 onInput={e => onInput(e, 'time')}
                 time={displayedToTime}
               />

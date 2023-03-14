@@ -6,7 +6,9 @@ describe('netflow-topology', () => {
   beforeEach(() => {
     cy.openNetflowTrafficPage();
     //move to topology view
-    cy.get('#topologyViewButton').click();
+    cy.get('.topologyTabButton').click();
+    //clear default app filters
+    cy.get('#clear-all-filters-button').click();
   });
 
   it('displays topology and namespaces', () => {
@@ -16,10 +18,6 @@ describe('netflow-topology', () => {
 
     cy.addCommonFilter('namespace', c.namespace, true);
     cy.addCommonFilter('name', c.pod, true);
-    cy.changeMetricFunction('Rate');
-    cy.changeMetricFunction('Max');
-    cy.changeMetricFunction('Avg');
-    cy.changeMetricFunction('Sum');
     cy.changeMetricType('Packets');
     cy.changeMetricType('Bytes');
     cy.changeQueryOption('Both', true);
@@ -28,13 +26,16 @@ describe('netflow-topology', () => {
   });
 
   it('find network observability namespace', () => {
+    //show advanced options
+    cy.showAdvancedOptions();
     //type our namespace name and press enter
     cy.get('#search-topology-element-input').type(`${c.namespace}{enter}`);
     //cy.get('.node-highlighted').should('exist');
 
     //should show the drawer
     cy.get('.pf-c-drawer__panel-main').should('exist');
-    cy.get('#metrics').should('exist');
+    cy.get('#pf-tab-metrics-drawer-tabs').click();
+    cy.get('.element-metrics-container').should('exist');
     cy.get('.pf-c-chart').should('exist');
 
     //close drawer
@@ -44,27 +45,38 @@ describe('netflow-topology', () => {
 
   it('update options', () => {
     //open options panel
-    cy.get('.pf-topology-control-bar').find('#options').click();
-    cy.get('.pf-c-drawer__panel-main').should('exist');
+    cy.showAdvancedOptions();
+    cy.showDisplayOptions();
 
     //select some displays
+    cy.wait(c.waitTime);
     cy.dropdownSelect('layout-dropdown', 'Cola');
+    cy.wait(c.waitTime);
     cy.dropdownSelect('layout-dropdown', 'Dagre');
+    cy.wait(c.waitTime);
     cy.dropdownSelect('layout-dropdown', 'Concentric');
+    cy.wait(c.waitTime);
     cy.dropdownSelect('layout-dropdown', 'Grid');
+    cy.wait(c.waitTime);
+
 
     //select some scopes / groups
     cy.dropdownSelect('scope-dropdown', 'host');
     cy.get('#group-dropdown').should('be.disabled');
 
+    cy.wait(c.waitTime);
     cy.dropdownSelect('scope-dropdown', 'namespace');
+    cy.wait(c.waitTime);
     cy.dropdownSelect('group-dropdown', 'hosts');
-
+    cy.wait(c.waitTime);
     cy.dropdownSelect('scope-dropdown', 'owner');
+    cy.wait(c.waitTime);
     cy.dropdownSelect('group-dropdown', 'namespaces');
-
+    cy.wait(c.waitTime);
     cy.dropdownSelect('scope-dropdown', 'resource');
+    cy.wait(c.waitTime);
     cy.dropdownSelect('group-dropdown', 'owners');
+    cy.wait(c.waitTime);
 
     //toggle switches
     cy.get('#group-collapsed-switch').click();

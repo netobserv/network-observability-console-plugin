@@ -237,7 +237,7 @@ export const TopologyDisplayDropdown: React.FC<{
   const [isOpen, setOpen] = React.useState<boolean>(false);
 
   return (
-    <div data-test="display-dropdown-container">
+    <div id="display-dropdown-container" data-test="display-dropdown-container">
       <Select
         id="topology-display-dropdown"
         placeholderText={<span>{t('Display options')}</span>}
