@@ -17,22 +17,23 @@ export const AlertFetcher: React.FC<AlertFetcherProps> = ({ children }) => {
           result.data.groups.flatMap(group => {
             return group.rules
               .filter(
-                rule =>
-                  !!rule.labels.namespace &&
-                  config.alertNamespaces.findIndex(elem => elem == rule.labels.namespace) > -1 &&
-                  rule.state == 'firing'
+                  rule =>
+                      !!rule.labels.app &&
+			rule.labels.app == "netobserv" &&
+			rule.state == 'firing'
               )
-              .map(rule => {
-                const key = [
-                  group.file,
-                  group.name,
-                  rule.name,
-                  String(rule.duration),
-                  rule.query,
-                  `${rule.labels.namespace}=namespace`,
-                  `${rule.labels.severity}=severity`
-                ].join(',');
-                rule.id = String(murmur3(key, 0));
+			.map(rule => {
+                  const key = [
+                      group.file,
+                      group.name,
+                      rule.name,
+                      String(rule.duration),
+                      rule.query,
+                      `${rule.labels.app}=app`,
+                      `${rule.labels.prometheus}=prometheus`,
+                      `${rule.labels.severity}=severity`
+                  ].join(',');
+                  rule.id = String(murmur3(key, 0));
                 return rule;
               });
           })

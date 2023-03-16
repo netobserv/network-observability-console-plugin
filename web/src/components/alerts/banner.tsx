@@ -20,7 +20,7 @@ export const AlertBanner: React.FC<{
   const { t } = useTranslation('plugin__netobserv-plugin');
   const routeChange = () => {
     let path = `/monitoring/alerts/${rule.id}`;
-    path += `?alertname=${rule.name}&namespace=${rule.labels.namespace}&severity=${rule.labels.severity}`;
+    path += `?alertname=${rule.name}&app=${rule.labels.app}&severity=${rule.labels.severity}`;
     history.push(path);
   };
   return (
