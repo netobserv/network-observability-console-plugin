@@ -2,7 +2,6 @@ import * as React from 'react';
 import AlertBanner from './banner';
 import { getAlerts } from '../../api/routes';
 import { Rule } from '@openshift-console/dynamic-plugin-sdk';
-import { config } from '../../utils/config';
 
 import { murmur3 } from 'murmurhash-js';
 
@@ -16,24 +15,19 @@ export const AlertFetcher: React.FC<AlertFetcherProps> = ({ children }) => {
         setAlerts(
           result.data.groups.flatMap(group => {
             return group.rules
-              .filter(
-                  rule =>
-                      !!rule.labels.app &&
-			rule.labels.app == "netobserv" &&
-			rule.state == 'firing'
-              )
-			.map(rule => {
-                  const key = [
-                      group.file,
-                      group.name,
-                      rule.name,
-                      String(rule.duration),
-                      rule.query,
-                      `${rule.labels.app}=app`,
-                      `${rule.labels.prometheus}=prometheus`,
-                      `${rule.labels.severity}=severity`
-                  ].join(',');
-                  rule.id = String(murmur3(key, 0));
+              .filter(rule => !!rule.labels.app && rule.labels.app == 'netobserv' && rule.state == 'firing')
+              .map(rule => {
+                const key = [
+                  group.file,
+                  group.name,
+                  rule.name,
+                  String(rule.duration),
+                  rule.query,
+                  `${rule.labels.app}=app`,
+                  `${rule.labels.prometheus}=prometheus`,
+                  `${rule.labels.severity}=severity`
+                ].join(',');
+                rule.id = String(murmur3(key, 0));
                 return rule;
               });
           })

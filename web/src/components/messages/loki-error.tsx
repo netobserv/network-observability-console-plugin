@@ -21,6 +21,7 @@ import { Link } from 'react-router-dom';
 import { getBuildInfo, getLimits, getMetrics, getLokiReady } from '../../api/routes';
 import { getHTTPErrorDetails } from '../../utils/errors';
 import './loki-error.css';
+import { useHistory } from 'react-router-dom';
 
 export type Size = 's' | 'm' | 'l';
 
@@ -42,6 +43,7 @@ export const LokiError: React.FC<Props> = ({ title, error }) => {
   const [ready, setReady] = React.useState<string | undefined>();
   const [infoName, setInfoName] = React.useState<string | undefined>();
   const [info, setInfo] = React.useState<string | undefined>();
+  const history = useHistory();
 
   const updateInfo = React.useCallback(
     (type: LokiInfo) => {
@@ -204,6 +206,12 @@ export const LokiError: React.FC<Props> = ({ title, error }) => {
           </Button>
           <Button onClick={() => updateInfo(LokiInfo.Limits)} variant="link">
             {t('Show configuration limits')}
+          </Button>
+          <Button
+            onClick={() => history.push('/monitoring/dashboards/grafana-dashboard-netobserv-health')}
+            variant="link"
+          >
+            {t('Show health dashboard')}
           </Button>
         </EmptyStateSecondaryActions>
       </EmptyState>

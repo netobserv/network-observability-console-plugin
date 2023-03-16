@@ -18,9 +18,13 @@ export const AlertBanner: React.FC<{
 }> = ({ rule, onDelete }) => {
   const history = useHistory();
   const { t } = useTranslation('plugin__netobserv-plugin');
-  const routeChange = () => {
+  const routeAlert = () => {
     let path = `/monitoring/alerts/${rule.id}`;
     path += `?alertname=${rule.name}&app=${rule.labels.app}&severity=${rule.labels.severity}`;
+    history.push(path);
+  };
+  const routeDashboard = () => {
+    const path = `/monitoring/dashboards/grafana-dashboard-netobserv-health`;
     history.push(path);
   };
   return (
@@ -32,7 +36,8 @@ export const AlertBanner: React.FC<{
         actionClose={<AlertActionCloseButton onClose={onDelete} />}
         actionLinks={
           <React.Fragment>
-            <AlertActionLink onClick={routeChange}>{t('View alert details')}</AlertActionLink>
+            <AlertActionLink onClick={routeAlert}>{t('View alert details')}</AlertActionLink>
+            <AlertActionLink onClick={routeDashboard}>{t('View health dashboard')}</AlertActionLink>
           </React.Fragment>
         }
       >
