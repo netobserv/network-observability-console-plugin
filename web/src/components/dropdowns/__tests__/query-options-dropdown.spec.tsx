@@ -8,6 +8,7 @@ describe('<QueryOptionsDropdown />', () => {
   const props: QueryOptionsDropdownProps = {
     recordType: 'allConnections',
     reporter: 'destination',
+    allowFlow: true,
     allowConnection: true,
     allowReporterBoth: true,
     useTopK: false,
@@ -29,6 +30,7 @@ describe('<QueryOptionsPanel />', () => {
   const props: QueryOptionsDropdownProps = {
     recordType: 'allConnections',
     reporter: 'destination',
+    allowFlow: true,
     allowConnection: true,
     allowReporterBoth: true,
     useTopK: false,

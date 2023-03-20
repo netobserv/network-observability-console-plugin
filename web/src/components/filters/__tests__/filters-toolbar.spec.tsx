@@ -18,6 +18,7 @@ describe('<FiltersToolbar />', () => {
       limit: 100,
       recordType: 'allConnections',
       reporter: 'destination',
+      allowFlow: true,
       allowConnection: true,
       allowReporterBoth: true,
       useTopK: false,

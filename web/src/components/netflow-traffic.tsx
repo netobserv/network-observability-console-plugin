@@ -468,9 +468,23 @@ export const NetflowTraffic: React.FC<{
 
   usePoll(tick, interval);
 
+  const isFlow = React.useCallback(() => {
+    return config.recordTypes.some(rt => rt === 'flowLog');
+  }, [config.recordTypes]);
+
   const isConnectionTracking = React.useCallback(() => {
     return config.recordTypes.some(rt => rt === 'newConnection' || rt === 'heartbeat' || rt === 'endConnection');
   }, [config.recordTypes]);
+
+  React.useEffect(() => {
+    if (initState.current.includes('configLoaded')) {
+      if (recordType === 'flowLog' && !isFlow() && isConnectionTracking()) {
+        setRecordType('allConnections');
+      } else if (recordType === 'allConnections' && isFlow() && !isConnectionTracking()) {
+        setRecordType('flowLog');
+      }
+    }
+  }, [config.recordTypes, isConnectionTracking, isFlow, recordType]);
 
   // tick on state change
   React.useEffect(() => {
@@ -1140,6 +1154,7 @@ export const NetflowTraffic: React.FC<{
           setRecordType,
           reporter,
           setReporter,
+          allowFlow: isFlow(),
           allowConnection: isConnectionTracking(),
           allowReporterBoth: selectedViewId === 'table',
           useTopK: selectedViewId === 'overview'
