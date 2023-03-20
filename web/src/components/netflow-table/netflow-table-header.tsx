@@ -229,7 +229,11 @@ export const NetflowTableHeader: React.FC<{
   }, [columns]);
 
   return (
-    <Thead data-test="thead" hasNestedHeader={headersState.useNested}>
+    <Thead
+      className={`${isDark ? 'dark' : 'light'}-bottom-shadow`}
+      data-test="thead"
+      hasNestedHeader={headersState.useNested}
+    >
       {headersState.useNested && <Tr>{headersState.nestedHeaders.map(nh => getNestedTableHeader(nh))}</Tr>}
       <Tr data-test="thead-tr">{headersState.headers.map(c => getTableHeader(c))}</Tr>
     </Thead>

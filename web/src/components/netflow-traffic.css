@@ -133,7 +133,7 @@ span.pf-c-button__icon.pf-m-start {
 
 /* histogram is maximum 2x standard toolbar height */
 #histogram-toolbar {
-    max-height: 130px;
+    max-height: 150px;
 }
 
 #histogram-toolbar,
@@ -204,10 +204,28 @@ span.pf-c-button__icon.pf-m-start {
     margin: 0;
 }
 
+/* outside bottom border */
 .light-bottom-border {
+    margin: 0 !important;
+    align-self: flex-end;
     border-bottom: 1px #d2d2d2 solid;
 }
 
 .dark-bottom-border {
+    margin: 0 !important;
+    align-self: flex-end;
     border-bottom: 1px #444548 solid;
+}
+
+/* inside bottom border */
+.light-bottom-shadow {
+    -webkit-box-shadow: inset 0 -1px 0 0 #d2d2d2;
+    -moz-box-shadow: inset 0 -1px 0 0 #d2d2d2;
+    box-shadow: inset 0 -1px 0 0 #d2d2d2;
+}
+
+.dark-bottom-shadow {
+    -webkit-box-shadow: inset 0 -1px 0 0 #444548;
+    -moz-box-shadow: inset 0 -1px 0 0 #444548;
+    box-shadow: inset 0 -1px 0 0 #444548;
 }
