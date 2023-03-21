@@ -107,6 +107,10 @@ export const setURLRange = (range: number | TimeRange) => {
   }
 };
 
+export const setURLRecortType = (recordType: RecordType) => {
+  setURLParam(URLParam.RecordType, recordType);
+};
+
 export const setURLReporter = (reporter: Reporter) => {
   setURLParam(URLParam.Reporter, reporter);
 };

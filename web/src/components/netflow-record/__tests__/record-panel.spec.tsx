@@ -14,6 +14,7 @@ describe('<RecordPanel />', () => {
     range: 300,
     reporter: 'destination',
     type: 'flowLog',
+    canSwitchTypes: false,
     setFilters: jest.fn(),
     setRange: jest.fn(),
     setReporter: jest.fn(),

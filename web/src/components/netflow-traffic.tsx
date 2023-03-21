@@ -107,6 +107,7 @@ import {
   setURLMetricFunction,
   setURLMetricType,
   setURLRange,
+  setURLRecortType,
   setURLReporter
 } from '../utils/router';
 import { getURLParams, hasEmptyParams, netflowTrafficPath, setURLParams } from '../utils/url';
@@ -552,6 +553,9 @@ export const NetflowTraffic: React.FC<{
     setURLMetricFunction(metricFunction);
     setURLMetricType(metricType);
   }, [metricFunction, metricType]);
+  React.useEffect(() => {
+    setURLRecortType(recordType);
+  }, [recordType]);
 
   // update local storage saved query params
   React.useEffect(() => {
@@ -870,6 +874,7 @@ export const NetflowTraffic: React.FC<{
           range={range}
           reporter={reporter}
           type={recordType}
+          canSwitchTypes={isFlow() && isConnectionTracking()}
           setFilters={setFilters}
           setRange={setRange}
           setReporter={setReporter}
