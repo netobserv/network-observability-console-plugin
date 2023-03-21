@@ -41,7 +41,7 @@ fmt-backend:
 	go fmt ./...
 
 .PHONY: fmt-frontend
-fmt-frontend:
+fmt-frontend: i18n
 	cd web && npm run format-all
 
 .PHONY: fmt
