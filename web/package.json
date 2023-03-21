@@ -119,6 +119,9 @@
     "react-router-dom": "^5.2.0",
     "save-svg-as-png": "^1.4.17"
   },
+  "overrides": {
+    "glob-parent": "^6.0.1"
+  },
   "jest": {
     "collectCoverage": true,
     "coverageReporters": ["cobertura"],
