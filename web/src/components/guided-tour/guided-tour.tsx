@@ -1,7 +1,9 @@
-import { Button, Flex, FlexItem, Popover, PopoverPosition } from '@patternfly/react-core';
+import { Button, Flex, FlexItem, Popover, PopoverPosition, Text, TextVariants } from '@patternfly/react-core';
 import { TimesIcon } from '@patternfly/react-icons';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { ContextSingleton } from '../../utils/context';
+import { useHighLight } from '../../utils/highlight-hook';
 import './guided-tour.css';
 
 export type GuidedTourItem = {
@@ -26,9 +28,12 @@ const onIndexChangeFunctions: IndexChangeFunction[] = [];
 export const GuidedTourPopover: React.FC<{
   id: string;
   ref?: React.Ref<GuidedTourHandle>;
+  isDark: boolean;
   // eslint-disable-next-line react/display-name
 }> = React.forwardRef((props, ref: React.Ref<GuidedTourHandle>) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
+  const isStandalone = ContextSingleton.isStandalone();
+  const { highlightElement, clearHighlights } = useHighLight(props.isDark);
   const [items, setItems] = React.useState<GuidedTourItem[]>([]);
   const [index, setIndex] = React.useState<number | undefined>();
 
@@ -62,13 +67,18 @@ export const GuidedTourPopover: React.FC<{
     onIndexChangeFunctions.splice(0);
   };
 
+  const clearIndex = React.useCallback(() => {
+    setIndex(undefined);
+    clearHighlights();
+  }, [clearHighlights]);
+
   const previous = React.useCallback(() => {
     if (index) {
       setIndex(index - 1);
     } else {
-      setIndex(undefined);
+      clearIndex();
     }
-  }, [index]);
+  }, [clearIndex, index]);
 
   const hasNext = React.useCallback(() => {
     return index != undefined && index < items.length - 1;
@@ -78,15 +88,32 @@ export const GuidedTourPopover: React.FC<{
     if (hasNext()) {
       setIndex(index! + 1);
     } else {
-      setIndex(undefined);
+      clearIndex();
     }
-  }, [hasNext, index]);
+  }, [clearIndex, hasNext, index]);
+
+  const handleHighlights = React.useCallback(() => {
+    if (index != undefined && items.length > index && items[index].ref.current) {
+      highlightElement(items[index].ref.current!);
+    } else {
+      clearHighlights();
+    }
+  }, [clearHighlights, highlightElement, index, items]);
 
   React.useEffect(() => {
     onIndexChangeFunctions.forEach(fn => {
       fn(index);
     });
-  }, [index]);
+
+    handleHighlights();
+  }, [highlightElement, index, items, clearHighlights, handleHighlights]);
+
+  React.useEffect(() => {
+    window.addEventListener('resize', handleHighlights);
+    return () => {
+      window.removeEventListener('resize', handleHighlights);
+    };
+  }, [handleHighlights]);
 
   let currentItem = undefined;
   if (index !== undefined) {
@@ -104,7 +131,7 @@ export const GuidedTourPopover: React.FC<{
         <Flex direction={{ default: 'row' }}>
           <FlexItem flex={{ default: 'flex_1' }}>{currentItem!.title}</FlexItem>
           <FlexItem>
-            <Button variant="plain" className="guided-tour-close-button" onClick={() => setIndex(undefined)}>
+            <Button variant="plain" className="guided-tour-close-button" onClick={() => clearIndex()}>
               <TimesIcon />
             </Button>
           </FlexItem>
@@ -114,23 +141,32 @@ export const GuidedTourPopover: React.FC<{
         <Flex direction={{ default: 'column' }}>
           <FlexItem flex={{ default: 'flex_1' }}>{currentItem!.description}</FlexItem>
           <FlexItem>
-            {currentItem!.assetName && <img src={`/api/plugins/netobserv-plugin/assets/${currentItem.assetName}`} />}
+            {currentItem!.assetName && (
+              <img
+                src={`${isStandalone ? '/assets/' : '/api/plugins/netobserv-plugin/assets/'}${currentItem.assetName}`}
+              />
+            )}
           </FlexItem>
         </Flex>
       }
       footerContent={
         <Flex direction={{ default: 'row' }}>
           <FlexItem flex={{ default: 'flex_1' }}>
+            <Text component={TextVariants.p} className="text-muted">
+              {t('Step {{index}}/{{count}}', { index: (index || 0) + 1, count: items.length })}
+            </Text>
+          </FlexItem>
+          <FlexItem>
             {index ? (
-              <Button variant="link" className="guided-tour-tips-button" onClick={() => previous()}>
+              <Button variant="secondary" className="guided-tour-tips-button" onClick={() => previous()}>
                 {t('Previous tip')}
               </Button>
             ) : (
               <></>
             )}
           </FlexItem>
-          <FlexItem flex={{ default: 'flex_1' }}>
-            <Button variant="link" className="guided-tour-tips-button" onClick={() => next()}>
+          <FlexItem>
+            <Button variant="primary" className="guided-tour-tips-button" onClick={() => next()}>
               {hasNext() ? t('Next tip') : t('Close tips')}
             </Button>
           </FlexItem>

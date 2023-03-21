@@ -787,7 +787,7 @@ export const NetflowTraffic: React.FC<{
               <RefreshDropdown
                 data-test="refresh-dropdown"
                 id="refresh-dropdown"
-                disabled={typeof range !== 'number'}
+                disabled={showHistogram || typeof range !== 'number'}
                 interval={interval}
                 setInterval={setInterval}
               />
@@ -1092,9 +1092,10 @@ export const NetflowTraffic: React.FC<{
 
   const zoomRange = React.useCallback(
     (zoomIn: boolean) => {
+      const timeRangeOptions = getTimeRangeOptions(t, false);
+      const keys = Object.keys(timeRangeOptions);
+
       if (typeof range === 'number') {
-        const timeRangeOptions = getTimeRangeOptions(t, false);
-        const keys = Object.keys(timeRangeOptions);
         const selectedKey = formatDuration(getDateSInMiliseconds(range as number));
         let index = keys.indexOf(selectedKey);
         if (zoomIn && index > 0) {
@@ -1106,17 +1107,19 @@ export const NetflowTraffic: React.FC<{
         setRange(getDateMsInSeconds(parseDuration(keys[index])));
       } else {
         const updatedRange = { ...range };
-        const factor = ((zoomIn ? -1 : 1) * (range.to - range.from)) / 2;
+        const factor = Math.floor(((zoomIn ? -1 : 1) * (range.to - range.from)) / (zoomIn ? 4 : 2));
 
-        updatedRange.from += factor;
+        updatedRange.from -= factor;
         updatedRange.to += factor;
 
-        const now = lastRefresh ? lastRefresh.getTime() : new Date().getTime();
-        if (getDateSInMiliseconds(updatedRange.to) > now) {
-          updatedRange.to = getDateMsInSeconds(now);
-        }
+        if (updatedRange.to - updatedRange.from >= getDateMsInSeconds(parseDuration(keys[0]))) {
+          const now = lastRefresh ? lastRefresh.getTime() : new Date().getTime();
+          if (getDateSInMiliseconds(updatedRange.to) > now) {
+            updatedRange.to = getDateMsInSeconds(now);
+          }
 
-        setRange(updatedRange);
+          setRange(updatedRange);
+        }
       }
     },
     [lastRefresh, range, t]
@@ -1223,6 +1226,7 @@ export const NetflowTraffic: React.FC<{
               setRange={setHistogramRange}
               moveRange={moveRange}
               zoomRange={zoomRange}
+              resetRange={() => setRange(defaultTimeRange)}
             />
           </ToolbarItem>
         </Toolbar>
@@ -1326,7 +1330,7 @@ export const NetflowTraffic: React.FC<{
           {slownessReason()}
         </Alert>
       )}
-      <GuidedTourPopover id="netobserv" ref={guidedTourRef} />
+      <GuidedTourPopover id="netobserv" ref={guidedTourRef} isDark={isDarkTheme} />
     </PageSection>
   ) : null;
 };
