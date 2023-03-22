@@ -1,5 +1,6 @@
 {
   "View alert details": "View alert details",
+  "View health dashboard": "View health dashboard",
   "Namespaces + Owners": "Namespaces + Owners",
   "Nodes + Namespaces": "Nodes + Namespaces",
   "Nodes + Owners": "Nodes + Owners",
@@ -129,6 +130,7 @@
   "Show metrics": "Show metrics",
   "Show build info": "Show build info",
   "Show configuration limits": "Show configuration limits",
+  "Show health dashboard": "Show health dashboard",
   "Copy": "Copy",
   "Copied": "Copied",
   "Zoom in / zoom out the histogram displayed time range. The selected time range in the top right corner will adapt accordingly. You can also use the plus or minus buttons while the histogram is focused.": "Zoom in / zoom out the histogram displayed time range. The selected time range in the top right corner will adapt accordingly. You can also use the plus or minus buttons while the histogram is focused.",
