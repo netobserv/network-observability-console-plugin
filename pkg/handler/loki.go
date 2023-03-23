@@ -25,6 +25,11 @@ type LokiError struct {
 	Message        string
 }
 
+type errorWithCode struct {
+	err  error
+	code int
+}
+
 var hlog = logrus.WithField("module", "handler")
 
 const (

@@ -1,20 +1,20 @@
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChartDonut, ChartLabel, ChartLegend, ChartThemeColor } from '@patternfly/react-charts';
-import { SingleTopologyMetrics, NamedMetric } from '../../api/loki';
+import { GenericMetric, NamedMetric } from '../../api/loki';
 import { MetricType, MetricFunction } from '../../model/flow-query';
 import { getFormattedRateValue } from '../../utils/metrics';
 import { getStat } from '../../model/topology';
+import { defaultDimensions, Dimensions, observe } from './metrics-helper';
 
 import './metrics-content.css';
-import { defaultDimensions, Dimensions, observe } from './metrics-helper';
 
 export type DroppedDonutProps = {
   id: string;
   stat: MetricFunction;
   limit: number;
   metricType: MetricType;
-  topKMetrics: SingleTopologyMetrics[];
+  topKMetrics: GenericMetric[];
   totalMetric: NamedMetric;
   showOthers: boolean;
   smallerTexts?: boolean;

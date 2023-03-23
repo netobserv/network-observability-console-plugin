@@ -1,6 +1,6 @@
 import { mount, shallow } from 'enzyme';
 import * as React from 'react';
-import { PairTopologyMetrics } from '../../../api/loki';
+import { TopologyMetrics } from '../../../api/loki';
 import { MetricType } from '../../../model/flow-query';
 import { metrics } from '../../__tests-data__/metrics';
 import { MetricsQuerySummary, MetricsQuerySummaryContent } from '../metrics-query-summary';
@@ -12,7 +12,7 @@ describe('<MetricsQuerySummary />', () => {
     isShowQuerySummary: false,
     toggleQuerySummary: jest.fn(),
     metrics: metrics,
-    droppedMetrics: [] as PairTopologyMetrics[],
+    droppedMetrics: [] as TopologyMetrics[],
     appMetrics: undefined,
     appDroppedMetrics: undefined,
     metricType: 'bytes' as MetricType,

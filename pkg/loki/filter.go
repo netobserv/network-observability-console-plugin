@@ -24,6 +24,7 @@ type valueType int
 
 const (
 	typeNumber valueType = iota
+	typeBool
 	typeString
 	typeRegex
 	typeRegexContains
@@ -111,7 +112,7 @@ func (f *labelFilter) writeInto(sb *strings.Builder) {
 	sb.WriteString(f.key)
 	sb.WriteString(string(f.matcher))
 	switch f.valueType {
-	case typeNumber, typeRegex:
+	case typeNumber, typeBool, typeRegex:
 		sb.WriteString(f.value)
 	case typeString:
 		sb.WriteByte('"')
@@ -305,6 +306,8 @@ func (f *lineFilter) writeInto(sb *strings.Builder) {
 				}
 				// a number or regex can be followed by } if it's the last property of a JSON document
 				sb.WriteString("[,}]")
+			case typeBool:
+				sb.WriteString(v.value)
 			case typeString, typeIP:
 				// exact matches are specified as just strings
 				sb.WriteByte('"')

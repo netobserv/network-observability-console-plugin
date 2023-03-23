@@ -4,7 +4,7 @@ import { Visualization, VisualizationProvider } from '@patternfly/react-topology
 import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { PairTopologyMetrics } from '../../api/loki';
+import { TopologyMetrics } from '../../api/loki';
 import { Filter, Filters } from '../../model/filters';
 import { MetricFunction, FlowScope, MetricType } from '../../model/flow-query';
 import { GraphElementPeer, LayoutName, TopologyOptions } from '../../model/topology';
@@ -25,8 +25,8 @@ export const NetflowTopology: React.FC<{
   metricType: MetricType;
   metricScope: FlowScope;
   setMetricScope: (ms: FlowScope) => void;
-  metrics: PairTopologyMetrics[];
-  droppedMetrics: PairTopologyMetrics[];
+  metrics: TopologyMetrics[];
+  droppedMetrics: TopologyMetrics[];
   options: TopologyOptions;
   setOptions: (o: TopologyOptions) => void;
   filters: Filters;

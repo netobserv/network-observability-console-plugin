@@ -8,7 +8,6 @@ import (
 
 	"github.com/netobserv/network-observability-console-plugin/pkg/model/fields"
 	"github.com/netobserv/network-observability-console-plugin/pkg/model/filters"
-	"github.com/netobserv/network-observability-console-plugin/pkg/utils"
 	"github.com/netobserv/network-observability-console-plugin/pkg/utils/constants"
 )
 
@@ -27,17 +26,16 @@ var filterRegexpValidation = regexp.MustCompile(`^[\w-_.,\"*:/]*$`)
 
 // FlowQueryBuilder stores a state to build a LogQL query
 type FlowQueryBuilder struct {
-	config           *Config
-	startTime        string
-	endTime          string
-	limit            string
-	labelFilters     []labelFilter
-	lineFilters      []lineFilter
-	extraLineFilters []string
-	jsonFilters      [][]labelFilter
+	config       *Config
+	startTime    string
+	endTime      string
+	limit        string
+	labelFilters []labelFilter
+	lineFilters  []lineFilter
+	jsonFilters  [][]labelFilter
 }
 
-func NewFlowQueryBuilder(cfg *Config, start, end, limit string, reporter constants.Reporter,
+func NewFlowQueryBuilder(cfg *Config, start, end, limit string, dedup bool,
 	recordType constants.RecordType, packetLoss constants.PacketLoss) *FlowQueryBuilder {
 	// Always use following stream selectors
 	labelFilters := []labelFilter{
@@ -56,15 +54,17 @@ func NewFlowQueryBuilder(cfg *Config, start, end, limit string, reporter constan
 		}
 	}
 
-	if !utils.Contains(constants.ConnectionTypes, string(recordType)) {
-		if reporter == constants.ReporterSource {
-			labelFilters = append(labelFilters, stringEqualLabelFilter(fields.FlowDirection, "1"))
-		} else if reporter == constants.ReporterDestination {
-			labelFilters = append(labelFilters, stringEqualLabelFilter(fields.FlowDirection, "0"))
-		}
+	lineFilters := []lineFilter{}
+	if dedup {
+		lineFilters = append(lineFilters, lineFilter{
+			key: fields.Duplicate,
+			values: []lineMatch{{
+				valueType: typeBool,
+				value:     "false",
+			}},
+		})
 	}
 
-	lineFilters := []lineFilter{}
 	if packetLoss == constants.PacketLossDropped {
 		// match 0 packet sent and 1+ packets dropped
 		lineFilters = append(lineFilters,
@@ -95,7 +95,7 @@ func NewFlowQueryBuilder(cfg *Config, start, end, limit string, reporter constan
 }
 
 func NewFlowQueryBuilderWithDefaults(cfg *Config) *FlowQueryBuilder {
-	return NewFlowQueryBuilder(cfg, "", "", "", constants.ReporterBoth, constants.RecordTypeLog, constants.PacketLossAll)
+	return NewFlowQueryBuilder(cfg, "", "", "", false, constants.RecordTypeLog, constants.PacketLossAll)
 }
 
 func (q *FlowQueryBuilder) Filters(queryFilters filters.SingleQuery) error {
@@ -241,17 +241,6 @@ func (q *FlowQueryBuilder) appendLineFilters(sb *strings.Builder) {
 	for _, lf := range q.lineFilters {
 		lf.writeInto(sb)
 	}
-
-	for _, glf := range q.extraLineFilters {
-		sb.WriteString(glf)
-	}
-}
-
-func (q *FlowQueryBuilder) appendDeduplicateFilter(sb *strings.Builder) {
-	// |~`"Duplicate":false`
-	sb.WriteString("|~`")
-	sb.WriteString(`"Duplicate":false`)
-	sb.WriteString("`")
 }
 
 func (q *FlowQueryBuilder) appendPktDropStateFilter(sb *strings.Builder) {

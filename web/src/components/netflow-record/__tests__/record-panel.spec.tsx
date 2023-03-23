@@ -12,12 +12,10 @@ describe('<RecordPanel />', () => {
     columns: DefaultColumns,
     filters: FiltersSample,
     range: 300,
-    reporter: 'destination',
     type: 'flowLog',
     canSwitchTypes: false,
     setFilters: jest.fn(),
     setRange: jest.fn(),
-    setReporter: jest.fn(),
     setType: jest.fn(),
     onClose: jest.fn(),
     id: 'record-panel-test'

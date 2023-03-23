@@ -14,7 +14,7 @@ import { TextContent } from '@patternfly/react-core';
 import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { NamedMetric, SingleTopologyMetrics } from '../../api/loki';
+import { NamedMetric, GenericMetric } from '../../api/loki';
 import { MetricType } from '../../model/flow-query';
 import { getFormattedRateValue } from '../../utils/metrics';
 import './metrics-content.css';
@@ -32,7 +32,7 @@ export type SingleMetricsTotalContentProps = {
   id: string;
   title: string;
   metricType: MetricType;
-  topKMetrics: SingleTopologyMetrics[];
+  topKMetrics: GenericMetric[];
   totalMetric: NamedMetric;
   limit: number;
   showTotal: boolean;
@@ -62,7 +62,7 @@ export const SingleMetricsTotalContent: React.FC<SingleMetricsTotalContentProps>
       values: _.cloneDeep(totalMetric.values),
       aggregateBy: 'dnsRCode',
       stats: totalMetric.stats
-    } as SingleTopologyMetrics;
+    } as GenericMetric;
     filtered.forEach(m => {
       for (let i = 0; i < m.values.length; i++) {
         others.values[i][1] -= m.values[i][1];

@@ -1,19 +1,19 @@
-import { Radio, Select, Tooltip } from '@patternfly/react-core';
+import { Checkbox, Radio, Select, Tooltip } from '@patternfly/react-core';
 import { InfoAltIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Match, PacketLoss, RecordType, Reporter } from '../../model/flow-query';
+import { Match, PacketLoss, RecordType } from '../../model/flow-query';
 
 export const TOP_VALUES = [5, 10, 15];
 export const LIMIT_VALUES = [50, 100, 500, 1000];
 export interface QueryOptionsDropdownProps {
   recordType: RecordType;
   setRecordType: (recordType: RecordType) => void;
-  reporter: Reporter;
-  setReporter: (reporter: Reporter) => void;
+  showDuplicates: boolean;
+  setShowDuplicates: (showDuplicates: boolean) => void;
   allowFlow: boolean;
   allowConnection: boolean;
-  allowReporterBoth: boolean;
+  allowShowDuplicates: boolean;
   allowPktDrops: boolean;
   useTopK: boolean;
   limit: number;
@@ -24,10 +24,7 @@ export interface QueryOptionsDropdownProps {
   setPacketLoss: (pl: PacketLoss) => void;
 }
 
-type recordTypeOption = { label: string; value: RecordType };
-
-type ReporterOption = { label: string; value: Reporter };
-
+type RecordTypeOption = { label: string; value: RecordType };
 type MatchOption = { label: string; value: Match };
 
 type PacketLossOption = { label: string; value: PacketLoss };
@@ -36,11 +33,11 @@ type PacketLossOption = { label: string; value: PacketLoss };
 export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
   recordType,
   setRecordType,
-  reporter,
-  setReporter,
+  showDuplicates,
+  setShowDuplicates,
   allowFlow,
   allowConnection,
-  allowReporterBoth,
+  allowShowDuplicates,
   allowPktDrops,
   useTopK,
   limit,
@@ -52,7 +49,7 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
-  const recordTypeOptions: recordTypeOption[] = [
+  const recordTypeOptions: RecordTypeOption[] = [
     {
       label: t('Conversation'),
       value: 'allConnections'
@@ -60,21 +57,6 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
     {
       label: t('Flow'),
       value: 'flowLog'
-    }
-  ];
-
-  const reporterOptions: ReporterOption[] = [
-    {
-      label: t('Source'),
-      value: 'source'
-    },
-    {
-      label: t('Destination'),
-      value: 'destination'
-    },
-    {
-      label: t('Both'),
-      value: 'both'
     }
   ];
 
@@ -167,39 +149,26 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
         <Tooltip
           content={t(
             // eslint-disable-next-line max-len
-            'Every flow can be reported from the source node and/or the destination node. For in-cluster traffic, usually both source and destination nodes report flows, resulting in duplicated data. Cluster ingress traffic is only reported by destination nodes, and cluster egress by source nodes.'
+            'A flow might be reported from several interfaces, and from both the source and the destination nodes, making it appear several times. By default, duplicates are hidden. Showing duplicates is not possible in Overview and Topology tabs.'
           )}
         >
           <div className="pf-c-select__menu-group-title">
             <>
-              {t('Reporter node')} <InfoAltIcon />
+              {t('Duplicated flows')} <InfoAltIcon />
             </>
           </div>
         </Tooltip>
-        {reporterOptions.map(opt => {
-          const disabled = !allowReporterBoth && opt.value === 'both';
-          return (
-            <div key={`reporter-${opt.value}`}>
-              <label className="pf-c-select__menu-item">
-                <Tooltip
-                  trigger={disabled ? 'mouseenter focus' : ''}
-                  content={disabled ? t('Only available in Table view.') : undefined}
-                >
-                  <Radio
-                    isChecked={opt.value === reporter}
-                    isDisabled={disabled}
-                    name={`reporter-${opt.value}`}
-                    onChange={() => setReporter(opt.value)}
-                    label={opt.label}
-                    data-test={`reporter-${opt.value}`}
-                    id={`reporter-${opt.value}`}
-                    value={opt.value}
-                  />
-                </Tooltip>
-              </label>
-            </div>
-          );
-        })}
+        <label className="pf-c-select__menu-item">
+          <Checkbox
+            isChecked={allowShowDuplicates ? showDuplicates : false}
+            isDisabled={!allowShowDuplicates}
+            name={'show-duplicates'}
+            onChange={() => setShowDuplicates(!showDuplicates)}
+            label={t('Show duplicates')}
+            data-test={'show-duplicates'}
+            id={'show-duplicates'}
+          />
+        </label>
       </div>
       <div className="pf-c-select__menu-group">
         <Tooltip

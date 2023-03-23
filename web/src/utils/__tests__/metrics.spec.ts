@@ -1,4 +1,4 @@
-import { RawTopologyMetrics, TopologyMetricPeer, PairTopologyMetrics } from '../../api/loki';
+import { RawTopologyMetrics, TopologyMetricPeer, TopologyMetrics } from '../../api/loki';
 import { NodeData } from '../../model/topology';
 import {
   calibrateRange,
@@ -7,7 +7,7 @@ import {
   getFormattedValue,
   matchPeer,
   normalizeMetrics,
-  parseMetrics
+  parseTopologyMetrics
 } from '../metrics';
 
 const t = (k: string) => k;
@@ -357,7 +357,7 @@ describe('matchPeers', () => {
   });
 });
 
-describe('parseMetrics', () => {
+describe('parseTopologyMetrics', () => {
   it('should disambiguate same names', () => {
     const metrics: RawTopologyMetrics[] = [
       {
@@ -384,7 +384,7 @@ describe('parseMetrics', () => {
       }
     ];
 
-    const parsed = parseMetrics(metrics, 300, 'resource', 0, true) as PairTopologyMetrics[];
+    const parsed = parseTopologyMetrics(metrics, 300, 'resource', 0, true) as TopologyMetrics[];
 
     expect(parsed).toHaveLength(2);
     expect(parsed[0].source.getDisplayName(true, true)).toEqual('ns1.A');

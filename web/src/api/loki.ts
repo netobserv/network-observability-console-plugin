@@ -1,4 +1,4 @@
-import { AggregateBy, FlowScope } from '../model/flow-query';
+import { GenericAggregation, FlowScope } from '../model/flow-query';
 import { cyrb53 } from '../utils/hash';
 import { Fields, Labels, Record } from './ipfix';
 
@@ -26,8 +26,13 @@ export class RecordsResult {
   stats: Stats;
 }
 
-export class TopologyResult {
-  metrics: (PairTopologyMetrics | SingleTopologyMetrics)[];
+export class TopologyMetricsResult {
+  metrics: TopologyMetrics[];
+  stats: Stats;
+}
+
+export class GenericMetricsResult {
+  metrics: GenericMetric[];
   stats: Stats;
 }
 
@@ -84,14 +89,14 @@ export interface TopologyMetricPeer {
   getDisplayName: (inclNamespace: boolean, disambiguate: boolean) => string | undefined;
 }
 
-export type SingleTopologyMetrics = {
+export type GenericMetric = {
   name: string;
   values: [number, number][];
   stats: MetricStats;
-  aggregateBy: AggregateBy;
+  aggregateBy: GenericAggregation;
 };
 
-export type PairTopologyMetrics = {
+export type TopologyMetrics = {
   source: TopologyMetricPeer;
   destination: TopologyMetricPeer;
   values: [number, number][];
@@ -99,7 +104,7 @@ export type PairTopologyMetrics = {
   scope: FlowScope;
 };
 
-export type NamedMetric = PairTopologyMetrics & {
+export type NamedMetric = TopologyMetrics & {
   fullName: string;
   shortName: string;
   isInternal: boolean;

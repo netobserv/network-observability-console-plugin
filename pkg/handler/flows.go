@@ -4,7 +4,6 @@ import (
 	"errors"
 	"net/http"
 	"net/url"
-	"strconv"
 	"time"
 
 	"github.com/netobserv/network-observability-console-plugin/pkg/httpclient"
@@ -12,7 +11,6 @@ import (
 	"github.com/netobserv/network-observability-console-plugin/pkg/metrics"
 	"github.com/netobserv/network-observability-console-plugin/pkg/model"
 	"github.com/netobserv/network-observability-console-plugin/pkg/model/filters"
-	"github.com/netobserv/network-observability-console-plugin/pkg/utils/constants"
 )
 
 const (
@@ -20,64 +18,11 @@ const (
 	endTimeKey    = "endTime"
 	timeRangeKey  = "timeRange"
 	limitKey      = "limit"
-	reporterKey   = "reporter"
+	dedupKey      = "dedup"
 	recordTypeKey = "recordType"
 	filtersKey    = "filters"
 	packetLossKey = "packetLoss"
 )
-
-type errorWithCode struct {
-	err  error
-	code int
-}
-
-func getStartTime(params url.Values) (string, error) {
-	start := params.Get(startTimeKey)
-	if len(start) == 0 {
-		tr := params.Get(timeRangeKey)
-		if len(tr) > 0 {
-			r, err := strconv.ParseInt(tr, 10, 64)
-			if err != nil {
-				return "", errors.New("Could not parse time range: " + err.Error())
-			}
-			start = strconv.FormatInt(time.Now().Unix()-r, 10)
-		}
-	} else {
-		// Make sure it is a valid int
-		_, err := strconv.ParseInt(start, 10, 64)
-		if err != nil {
-			return "", errors.New("Could not parse start time: " + err.Error())
-		}
-	}
-	return start, nil
-}
-
-// getEndTime will parse end time and ceil it to the next second
-func getEndTime(params url.Values) (string, error) {
-	end := params.Get(endTimeKey)
-	if len(end) > 0 {
-		r, err := strconv.ParseInt(end, 10, 64)
-		if err != nil {
-			return "", errors.New("Could not parse end time: " + err.Error())
-		}
-		end = strconv.Itoa(int(r) + 1)
-	}
-	return end, nil
-}
-
-// getLimit returns limit as string (used for logQL) and as int (used to check if reached)
-func getLimit(params url.Values) (string, int, error) {
-	limit := params.Get(limitKey)
-	var reqLimit int
-	if len(limit) > 0 {
-		l, err := strconv.ParseInt(limit, 10, 64)
-		if err != nil {
-			return "", 0, errors.New("Could not parse limit: " + err.Error())
-		}
-		reqLimit = int(l)
-	}
-	return limit, reqLimit, nil
-}
 
 func GetFlows(cfg *loki.Config) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -115,9 +60,15 @@ func getFlows(cfg *loki.Config, client httpclient.Caller, params url.Values) (*m
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
-	reporter := constants.Reporter(params.Get(reporterKey))
-	recordType := constants.RecordType(params.Get(recordTypeKey))
-	packetLoss := constants.PacketLoss(params.Get(packetLossKey))
+	dedup := params.Get(dedupKey) == "true"
+	recordType, err := getRecordType(params)
+	if err != nil {
+		return nil, http.StatusBadRequest, err
+	}
+	packetLoss, err := getPacketLoss(params)
+	if err != nil {
+		return nil, http.StatusBadRequest, err
+	}
 	rawFilters := params.Get(filtersKey)
 	filterGroups, err := filters.Parse(rawFilters)
 	if err != nil {
@@ -129,7 +80,7 @@ func getFlows(cfg *loki.Config, client httpclient.Caller, params url.Values) (*m
 		// match any, and multiple filters => run in parallel then aggregate
 		var queries []string
 		for _, group := range filterGroups {
-			qb := loki.NewFlowQueryBuilder(cfg, start, end, limit, reporter, recordType, packetLoss)
+			qb := loki.NewFlowQueryBuilder(cfg, start, end, limit, dedup, recordType, packetLoss)
 			err := qb.Filters(group)
 			if err != nil {
 				return nil, http.StatusBadRequest, errors.New("Can't build query: " + err.Error())
@@ -142,7 +93,7 @@ func getFlows(cfg *loki.Config, client httpclient.Caller, params url.Values) (*m
 		}
 	} else {
 		// else, run all at once
-		qb := loki.NewFlowQueryBuilder(cfg, start, end, limit, reporter, recordType, packetLoss)
+		qb := loki.NewFlowQueryBuilder(cfg, start, end, limit, dedup, recordType, packetLoss)
 		if len(filterGroups) > 0 {
 			err := qb.Filters(filterGroups[0])
 			if err != nil {

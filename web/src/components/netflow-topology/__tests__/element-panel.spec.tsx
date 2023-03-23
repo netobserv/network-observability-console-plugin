@@ -3,7 +3,7 @@ import { BaseEdge, BaseNode, NodeModel } from '@patternfly/react-topology';
 import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 import { Filter } from '../../../model/filters';
-import { PairTopologyMetrics } from '../../../api/loki';
+import { TopologyMetrics } from '../../../api/loki';
 import { FlowScope, MetricType } from '../../../model/flow-query';
 import { ElementPanel, ElementPanelDetailsContent } from '../element-panel';
 import { dataSample } from '../__tests-data__/metrics';
@@ -34,7 +34,7 @@ describe('<ElementPanel />', () => {
 
   const mocks = {
     element: getNode('Pod', 'loki-distributor-loki-76598c8449-csmh2', '10.129.0.15'),
-    metrics: dataSample as PairTopologyMetrics[],
+    metrics: dataSample as TopologyMetrics[],
     metricType: 'bytes' as MetricType,
     metricScope: 'resource' as FlowScope,
     filters: [] as Filter[],

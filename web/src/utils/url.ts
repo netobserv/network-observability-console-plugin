@@ -14,7 +14,7 @@ export enum URLParam {
   Match = 'match',
   PacketLoss = 'packetLoss',
   RecordType = 'recordType',
-  Reporter = 'reporter',
+  ShowDuplicates = 'showDup',
   MetricFunction = 'function',
   MetricType = 'type',
   BackAndForth = 'bnf'

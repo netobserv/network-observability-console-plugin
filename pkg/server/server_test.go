@@ -19,6 +19,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"testing"
 	"time"
@@ -30,6 +31,8 @@ import (
 	"github.com/netobserv/network-observability-console-plugin/pkg/kubernetes/auth"
 	"github.com/netobserv/network-observability-console-plugin/pkg/loki"
 	"github.com/netobserv/network-observability-console-plugin/pkg/model"
+	"github.com/netobserv/network-observability-console-plugin/pkg/model/fields"
+	"github.com/netobserv/network-observability-console-plugin/pkg/utils"
 )
 
 const (
@@ -307,6 +310,7 @@ func TestLokiConfigurationForTopology(t *testing.T) {
 		Loki: loki.Config{
 			URL:     lokiURL,
 			Timeout: time.Second,
+			Labels:  utils.GetMapInterface([]string{fields.SrcNamespace, fields.DstNamespace, fields.SrcOwnerName, fields.DstOwnerName, fields.FlowDirection}),
 		},
 	}, authM)
 	backendSvc := httptest.NewServer(backendRoutes)
@@ -317,10 +321,23 @@ func TestLokiConfigurationForTopology(t *testing.T) {
 	require.NoError(t, err)
 
 	// THEN the query has been properly forwarded to Loki
-	req := lokiMock.Calls[0].Arguments[1].(*http.Request)
-	assert.Equal(t, `topk(100,sum by(SrcK8S_Name,SrcK8S_Type,SrcK8S_OwnerName,SrcK8S_OwnerType,SrcK8S_Namespace,SrcAddr,SrcK8S_HostName,DstK8S_Name,DstK8S_Type,DstK8S_OwnerName,DstK8S_OwnerType,DstK8S_Namespace,DstAddr,DstK8S_HostName) (rate({app="netobserv-flowcollector"}|~`+"`"+`"Duplicate":false`+"`"+`|json|unwrap Bytes|__error__=""[1m])))`, req.URL.Query().Get("query"))
+	// Two queries for dedup
+	assert.Len(t, lokiMock.Calls, 2)
+	req1 := lokiMock.Calls[0].Arguments[1].(*http.Request)
+	req2 := lokiMock.Calls[1].Arguments[1].(*http.Request)
+	queries := []string{req1.URL.Query().Get("query"), req2.URL.Query().Get("query")}
+	expected := []string{
+		`topk(100,sum by(SrcK8S_Name,SrcK8S_Type,SrcK8S_OwnerName,SrcK8S_OwnerType,SrcK8S_Namespace,SrcAddr,SrcK8S_HostName,DstK8S_Name,DstK8S_Type,DstK8S_OwnerName,DstK8S_OwnerType,DstK8S_Namespace,DstAddr,DstK8S_HostName) (rate({app="netobserv-flowcollector",FlowDirection="1"}|~` + "`" + `Duplicate":false` + "`" + `|json|unwrap Bytes|__error__=""[1m])))`,
+		`topk(100,sum by(SrcK8S_Name,SrcK8S_Type,SrcK8S_OwnerName,SrcK8S_OwnerType,SrcK8S_Namespace,SrcAddr,SrcK8S_HostName,DstK8S_Name,DstK8S_Type,DstK8S_OwnerName,DstK8S_OwnerType,DstK8S_Namespace,DstAddr,DstK8S_HostName) (rate({app="netobserv-flowcollector",FlowDirection="0",SrcK8S_OwnerName=""}|~` + "`" + `Duplicate":false` + "`" + `|json|unwrap Bytes|__error__=""[1m])))`,
+	}
+	// We don't predict the order so sort both actual and expected
+	sort.Strings(queries)
+	sort.Strings(expected)
+	assert.Equal(t, expected, queries)
+
 	// without any multi-tenancy header
-	assert.Empty(t, req.Header.Get("X-Scope-OrgID"))
+	assert.Empty(t, req1.Header.Get("X-Scope-OrgID"))
+	assert.Empty(t, req2.Header.Get("X-Scope-OrgID"))
 
 	// AND the response is sent back to the client
 	body, err := io.ReadAll(resp.Body)
@@ -349,6 +366,7 @@ func TestLokiConfigurationForTableHistogram(t *testing.T) {
 		Loki: loki.Config{
 			URL:     lokiURL,
 			Timeout: time.Second,
+			Labels:  utils.GetMapInterface([]string{fields.SrcNamespace, fields.DstNamespace, fields.SrcOwnerName, fields.DstOwnerName, fields.FlowDirection}),
 		},
 	}, authM)
 	backendSvc := httptest.NewServer(backendRoutes)
@@ -359,10 +377,16 @@ func TestLokiConfigurationForTableHistogram(t *testing.T) {
 	require.NoError(t, err)
 
 	// THEN the query has been properly forwarded to Loki
-	req := lokiMock.Calls[0].Arguments[1].(*http.Request)
-	assert.Equal(t, `topk(100,sum by(SrcK8S_Name,SrcK8S_Type,SrcK8S_OwnerName,SrcK8S_OwnerType,SrcK8S_Namespace,SrcAddr,SrcK8S_HostName,DstK8S_Name,DstK8S_Type,DstK8S_OwnerName,DstK8S_OwnerType,DstK8S_Namespace,DstAddr,DstK8S_HostName) (count_over_time({app="netobserv-flowcollector"}|~`+"`"+`"Duplicate":false`+"`"+`|json[30s])))`, req.URL.Query().Get("query"))
+	// Single query: no dedup for "count"
+	assert.Len(t, lokiMock.Calls, 1)
+	req1 := lokiMock.Calls[0].Arguments[1].(*http.Request)
+	query := req1.URL.Query().Get("query")
+	expected :=
+		`topk(100,sum by(SrcK8S_Name,SrcK8S_Type,SrcK8S_OwnerName,SrcK8S_OwnerType,SrcK8S_Namespace,SrcAddr,SrcK8S_HostName,DstK8S_Name,DstK8S_Type,DstK8S_OwnerName,DstK8S_OwnerType,DstK8S_Namespace,DstAddr,DstK8S_HostName) (count_over_time({app="netobserv-flowcollector"}|~` + "`" + `Duplicate":false` + "`" + `|json[30s])))`
+	assert.Equal(t, expected, query)
+
 	// without any multi-tenancy header
-	assert.Empty(t, req.Header.Get("X-Scope-OrgID"))
+	assert.Empty(t, req1.Header.Get("X-Scope-OrgID"))
 
 	// AND the response is sent back to the client
 	body, err := io.ReadAll(resp.Body)

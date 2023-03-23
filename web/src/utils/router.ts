@@ -1,7 +1,7 @@
 import { TFunction } from 'i18next';
 import { findFilter } from './filter-definitions';
 import { TimeRange } from './datetime';
-import { Match, MetricFunction, MetricType, PacketLoss, RecordType, Reporter } from '../model/flow-query';
+import { Match, MetricFunction, MetricType, PacketLoss, RecordType } from '../model/flow-query';
 import {
   getURLParam,
   getURLParamAsBool,
@@ -18,17 +18,11 @@ const filterKVSeparator = '=';
 const filterValuesSeparator = ',';
 export const defaultTimeRange = 300;
 export const defaultRecordType: RecordType = 'flowLog';
-export const defaultReporter: Reporter = 'destination';
 export const defaultMatch: Match = 'all';
 export const defaultPacketLoss: PacketLoss = 'all';
 export const defaultMetricFunction: MetricFunction = 'last';
 export const defaultMetricType: MetricType = 'bytes';
-
-export const flowdirToReporter: { [flowdir: string]: Reporter } = {
-  '0': 'destination',
-  '1': 'source',
-  '': 'both'
-};
+const defaultShowDuplicates = false;
 
 export const getRangeFromURL = (): number | TimeRange => {
   const timeRange = getURLParamAsNumber(URLParam.TimeRange);
@@ -46,8 +40,8 @@ export const getRecordTypeFromURL = (): RecordType => {
   return (getURLParam(URLParam.RecordType) as RecordType | null) || defaultRecordType;
 };
 
-export const getReporterFromURL = (): Reporter => {
-  return (getURLParam(URLParam.Reporter) as Reporter | null) || defaultReporter;
+export const getShowDupFromURL = (): boolean => {
+  return getURLParamAsBool(URLParam.ShowDuplicates) || defaultShowDuplicates;
 };
 
 export const getLimitFromURL = (fallback: number): number => {
@@ -137,12 +131,12 @@ export const setURLRecortType = (recordType: RecordType, replace?: boolean) => {
   setURLParam(URLParam.RecordType, recordType, replace);
 };
 
-export const setURLReporter = (reporter: Reporter, replace?: boolean) => {
-  setURLParam(URLParam.Reporter, reporter, replace);
-};
-
 export const setURLLimit = (limit: number, replace?: boolean) => {
   setURLParam(URLParam.Limit, String(limit), replace);
+};
+
+export const setURLShowDup = (show: boolean, replace?: boolean) => {
+  setURLParam(URLParam.ShowDuplicates, String(show), replace);
 };
 
 export const setURLMatch = (match: Match, replace?: boolean) => {
