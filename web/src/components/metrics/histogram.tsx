@@ -82,7 +82,7 @@ export const Histogram: React.FC<{
     animationWhitelist: ['data', 'domain']
   };
 
-  const [dimensions, setDimensions] = React.useState<Dimensions>({ width: 3000, height: 130 });
+  const [dimensions, setDimensions] = React.useState<Dimensions>({ width: 3000, height: 150 });
   React.useEffect(() => {
     observe(containerRef, dimensions, setDimensions);
   }, [containerRef, dimensions]);
@@ -241,7 +241,9 @@ export const Histogram: React.FC<{
       onKeyDown={e => onKeyDown(e.key)}
     >
       <Flex className="histogram-range-container" direction={{ default: 'row' }}>
-        <FlexItem flex={{ default: 'flex_1' }} />
+        <FlexItem flex={{ default: 'flex_1' }}>
+          <Text>{t('Number of logs over time')}</Text>
+        </FlexItem>
         <FlexItem>
           <Tooltip
             content={arrowButtonTips()}
@@ -395,9 +397,9 @@ export const Histogram: React.FC<{
         width={dimensions.width}
         height={dimensions.height}
         padding={{
-          top: 30,
+          top: 45,
           right: 25,
-          bottom: 35,
+          bottom: 40,
           left: 60
         }}
       >
