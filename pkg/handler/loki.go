@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -43,8 +44,12 @@ func newLokiClient(cfg *loki.Config, requestHeader http.Header) httpclient.Calle
 		} else {
 			hlog.Debug("Missing Authorization token in user request")
 		}
-	} else if cfg.Authorization != "" {
-		headers[auth.AuthHeader] = []string{cfg.Authorization}
+	} else if cfg.TokenPath != "" {
+		bytes, err := os.ReadFile(cfg.TokenPath)
+		if err != nil {
+			hlog.WithError(err).Fatalf("failed to parse authorization path: %s", cfg.TokenPath)
+		}
+		headers[auth.AuthHeader] = []string{"Bearer " + string(bytes)}
 	}
 
 	if cfg.UseMocks {

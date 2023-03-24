@@ -373,11 +373,30 @@ func TestLokiConfigurationForTableHistogram(t *testing.T) {
 	assert.NotNil(t, qr.Result)
 }
 
+func prepareTokenFile(t *testing.T) (string, *os.File) {
+	tmpDir, err := os.MkdirTemp("", "server-test")
+	require.NoError(t, err)
+	tokensPath := filepath.Join(tmpDir, "/var/run/secrets/tokens/")
+	err = os.MkdirAll(tokensPath, os.ModePerm)
+	require.NoError(t, err)
+	dummyfile := filepath.Join(tokensPath, "netobserv-plugin")
+	f, err := os.Create(dummyfile)
+	require.NoError(t, err)
+	_, err = f.WriteString("XXX")
+	require.NoError(t, err)
+	err = os.Chdir(tmpDir)
+	require.NoError(t, err)
+	return tmpDir, f
+}
+
 func TestLokiConfiguration_MultiTenant(t *testing.T) {
+	tmpDir, file := prepareTokenFile(t)
+	defer os.RemoveAll(tmpDir)
+
 	lokiMock := httpMock{}
 	lokiMock.On("ServeHTTP", mock.Anything, mock.Anything).Run(func(args mock.Arguments) {
 		_, _ = args.Get(0).(http.ResponseWriter).Write([]byte("{}"))
-	}).Once()
+	}).Twice()
 	authM := &authMock{}
 	authM.MockGranted()
 	lokiSvc := httptest.NewServer(&lokiMock)
@@ -385,13 +404,13 @@ func TestLokiConfiguration_MultiTenant(t *testing.T) {
 	lokiURL, err := url.Parse(lokiSvc.URL)
 	require.NoError(t, err)
 
-	// GIVEN a NOO console plugin backend configured for Multi tenant mode
+	// GIVEN a NOO console plugin backend configured for HOST Multi tenant mode
 	backendRoutes := setupRoutes(&Config{
 		Loki: loki.Config{
-			URL:           lokiURL,
-			Timeout:       time.Second,
-			TenantID:      "my-organisation",
-			Authorization: "Bearer XXX",
+			URL:       lokiURL,
+			Timeout:   time.Second,
+			TenantID:  "my-organisation",
+			TokenPath: tmpDir + "/var/run/secrets/tokens/netobserv-plugin",
 		},
 	}, authM)
 	backendSvc := httptest.NewServer(backendRoutes)
@@ -405,6 +424,19 @@ func TestLokiConfiguration_MultiTenant(t *testing.T) {
 	req := lokiMock.Calls[0].Arguments[1].(*http.Request)
 	assert.Equal(t, "my-organisation", req.Header.Get("X-Scope-OrgID"))
 	assert.Equal(t, "Bearer XXX", req.Header.Get("Authorization"))
+
+	// UPDATE token file
+	_, err = file.WriteString("+updated")
+	require.NoError(t, err)
+
+	// RUN another query
+	_, err = backendSvc.Client().Get(backendSvc.URL + "/api/loki/flows")
+	require.NoError(t, err)
+
+	// THEN Bearer token is correctly updated
+	req = lokiMock.Calls[1].Arguments[1].(*http.Request)
+	assert.Equal(t, "my-organisation", req.Header.Get("X-Scope-OrgID"))
+	assert.Equal(t, "Bearer XXX+updated", req.Header.Get("Authorization"))
 }
 
 type httpMock struct {
