@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sirupsen/logrus"
 
 	"github.com/netobserv/network-observability-console-plugin/pkg/handler"
@@ -41,8 +42,7 @@ func setupRoutes(cfg *Config, authChecker auth.Checker) *mux.Router {
 	api.HandleFunc("/resources/kind/{kind}/names", handler.GetNames(&cfg.Loki))
 	api.HandleFunc("/frontend-config", handler.GetConfig(cfg.FrontendConfig))
 
-	// Temporary removal of metrics
-	//	r.Handle("/metrics", promhttp.Handler())
+	r.Handle("/metrics", promhttp.Handler())
 	r.PathPrefix("/").Handler(http.FileServer(http.Dir("./web/dist/")))
 	return r
 }
