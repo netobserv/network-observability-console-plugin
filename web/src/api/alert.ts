@@ -16,3 +16,18 @@ export interface AlertsGroups {
   limit?: number;
   rules: Rule[];
 }
+
+export interface SilencedAlert {
+  id: string;
+  status: SilencedAlertStatus;
+  matchers: SilenceMatcher[];
+}
+
+export interface SilencedAlertStatus {
+  state: string;
+}
+
+export interface SilenceMatcher {
+  name: string;
+  value: string;
+}
