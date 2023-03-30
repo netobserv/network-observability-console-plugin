@@ -225,6 +225,12 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
     }
   }, [record.labels._RecordType, t]);
 
+  const getSortedJSON = React.useCallback(() => {
+    const allKeys = new Set<string>();
+    JSON.stringify(record, (key, value) => (allKeys.add(key), value));
+    return JSON.stringify(record, Array.from(allKeys).sort(), 2);
+  }, [record]);
+
   const groups = getColumnGroups(
     columns.filter(
       c =>
@@ -331,7 +337,7 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
                 clickTip={t('Copied')}
                 variant={ClipboardCopyVariant.expansion}
               >
-                {JSON.stringify(record, null, 2)}
+                {getSortedJSON()}
               </ClipboardCopy>
             </TextContent>
           </Tab>
