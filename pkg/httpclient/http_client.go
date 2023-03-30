@@ -24,7 +24,7 @@ type httpClient struct {
 
 var slog = logrus.WithField("module", "server")
 
-func NewHTTPClient(timeout time.Duration, overrideHeaders map[string][]string, skipTLS bool, capath string) Caller {
+func NewHTTPClient(timeout time.Duration, overrideHeaders map[string][]string, skipTLS bool, capath string, userCertPath string, userKeyPath string) Caller {
 	transport := &http.Transport{
 		DialContext:     (&net.Dialer{Timeout: timeout}).DialContext,
 		IdleConnTimeout: timeout,
@@ -33,14 +33,27 @@ func NewHTTPClient(timeout time.Duration, overrideHeaders map[string][]string, s
 	if skipTLS {
 		transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 		slog.Warn("skipping TLS checks. SSL certificate verification is now disabled !")
-	} else if capath != "" {
-		caCert, err := os.ReadFile(capath)
-		if err != nil {
-			slog.Errorf("Cannot load loki ca certificate: %v", err)
-		} else {
-			pool := x509.NewCertPool()
-			pool.AppendCertsFromPEM(caCert)
-			transport.TLSClientConfig = &tls.Config{RootCAs: pool}
+	} else if capath != "" || userCertPath != "" {
+		transport.TLSClientConfig = &tls.Config{}
+
+		if capath != "" {
+			caCert, err := os.ReadFile(capath)
+			if err != nil {
+				slog.Errorf("Cannot load loki ca certificate: %v", err)
+			} else {
+				pool := x509.NewCertPool()
+				pool.AppendCertsFromPEM(caCert)
+				transport.TLSClientConfig.RootCAs = pool
+			}
+		}
+
+		if userCertPath != "" {
+			cert, err := tls.LoadX509KeyPair(userCertPath, userKeyPath)
+			if err != nil {
+				slog.Errorf("Cannot load loki user certificate: %v", err)
+			} else {
+				transport.TLSClientConfig.Certificates = []tls.Certificate{cert}
+			}
 		}
 	}
 
