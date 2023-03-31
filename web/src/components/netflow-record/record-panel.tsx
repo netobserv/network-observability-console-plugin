@@ -41,6 +41,7 @@ export type RecordDrawerProps = {
   range: number | TimeRange;
   reporter: Reporter;
   type: RecordType;
+  canSwitchTypes: boolean;
   setFilters: (v: Filter[]) => void;
   setRange: (r: number | TimeRange) => void;
   setReporter: (r: Reporter) => void;
@@ -57,6 +58,7 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
   range,
   reporter,
   type,
+  canSwitchTypes,
   setFilters,
   setRange,
   setReporter,
@@ -128,13 +130,16 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
     [reporter, setReporter]
   );
 
-  const getRecordTypeFilter = React.useCallback((): RecordFieldFilter => {
+  const getRecordTypeFilter = React.useCallback((): RecordFieldFilter | undefined => {
+    if (!canSwitchTypes) {
+      return undefined;
+    }
     return {
       type: 'switch',
       onClick: () => setType(type === 'allConnections' ? 'flowLog' : 'allConnections'),
       isDelete: type !== 'allConnections'
     };
-  }, [setType, type]);
+  }, [canSwitchTypes, setType, type]);
 
   const getGenericFilter = React.useCallback(
     (col: Column, value: unknown): RecordFieldFilter | undefined => {

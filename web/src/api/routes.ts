@@ -13,7 +13,7 @@ import { Config, defaultConfig } from '../model/config';
 import { TimeRange } from '../utils/datetime';
 import { ContextSingleton } from '../utils/context';
 import { parseMetrics } from '../utils/metrics';
-import { AlertsResult } from './alert';
+import { AlertsResult, SilencedAlert } from './alert';
 
 export const getFlows = (params: FlowQuery): Promise<RecordsResult> => {
   return axios.get(ContextSingleton.getHost() + '/api/loki/flows', { params }).then(r => {
@@ -30,6 +30,15 @@ export const getFlows = (params: FlowQuery): Promise<RecordsResult> => {
 
 export const getAlerts = (): Promise<AlertsResult> => {
   return axios.get('/api/prometheus/api/v1/rules?type=alert').then(r => {
+    if (r.status >= 400) {
+      throw new Error(`${r.statusText} [code=${r.status}]`);
+    }
+    return r.data;
+  });
+};
+
+export const getSilencedAlerts = (): Promise<SilencedAlert[]> => {
+  return axios.get('/api/alertmanager/api/v2/silences').then(r => {
     if (r.status >= 400) {
       throw new Error(`${r.statusText} [code=${r.status}]`);
     }

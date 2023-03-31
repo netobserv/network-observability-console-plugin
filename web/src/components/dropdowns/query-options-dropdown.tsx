@@ -11,6 +11,7 @@ export interface QueryOptionsDropdownProps {
   setRecordType: (recordType: RecordType) => void;
   reporter: Reporter;
   setReporter: (reporter: Reporter) => void;
+  allowFlow: boolean;
   allowConnection: boolean;
   allowReporterBoth: boolean;
   useTopK: boolean;
@@ -32,6 +33,7 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
   setRecordType,
   reporter,
   setReporter,
+  allowFlow,
   allowConnection,
   allowReporterBoth,
   useTopK,
@@ -97,7 +99,8 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
           </div>
         </Tooltip>
         {recordTypeOptions.map(opt => {
-          const disabled = !allowConnection && opt.value === 'allConnections';
+          const disabled =
+            (!allowFlow && opt.value === 'flowLog') || (!allowConnection && opt.value === 'allConnections');
           return (
             <div key={`recordType-${opt.value}`}>
               <label className="pf-c-select__menu-item">
@@ -105,10 +108,15 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
                   trigger={disabled ? 'mouseenter focus' : ''}
                   content={
                     disabled
-                      ? t(
-                          // eslint-disable-next-line max-len
-                          'Only available when FlowCollector.processor.outputRecordTypes option includes at least "newConnection", "heartbeat" or "endConnection"'
-                        )
+                      ? opt.value === 'allConnections'
+                        ? t(
+                            // eslint-disable-next-line max-len
+                            'Only available when FlowCollector.processor.outputRecordTypes option equals "CONNECTIONS", "ENDED_CONNECTIONS" or "ALL"'
+                          )
+                        : t(
+                            // eslint-disable-next-line max-len
+                            'Only available when FlowCollector.processor.outputRecordTypes option equals "FLOWS" or "ALL"'
+                          )
                       : undefined
                   }
                 >
@@ -148,7 +156,11 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
               <label className="pf-c-select__menu-item">
                 <Tooltip
                   trigger={disabled ? 'mouseenter focus' : ''}
-                  content={disabled ? t('Only available in Flow Table view') : undefined}
+                  content={
+                    disabled
+                      ? t('Only available using "Flow" log type. This option will be ignored for "Conversation".')
+                      : undefined
+                  }
                 >
                   <Radio
                     isChecked={opt.value === reporter}

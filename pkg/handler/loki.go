@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -30,7 +31,7 @@ const (
 	lokiOrgIDHeader = "X-Scope-OrgID"
 )
 
-func newLokiClient(cfg *loki.Config, requestHeader http.Header) httpclient.Caller {
+func newLokiClient(cfg *loki.Config, requestHeader http.Header, useStatusConfig bool) httpclient.Caller {
 	headers := map[string][]string{}
 	if cfg.TenantID != "" {
 		headers[lokiOrgIDHeader] = []string{cfg.TenantID}
@@ -43,8 +44,12 @@ func newLokiClient(cfg *loki.Config, requestHeader http.Header) httpclient.Calle
 		} else {
 			hlog.Debug("Missing Authorization token in user request")
 		}
-	} else if cfg.Authorization != "" {
-		headers[auth.AuthHeader] = []string{cfg.Authorization}
+	} else if cfg.TokenPath != "" {
+		bytes, err := os.ReadFile(cfg.TokenPath)
+		if err != nil {
+			hlog.WithError(err).Fatalf("failed to parse authorization path: %s", cfg.TokenPath)
+		}
+		headers[auth.AuthHeader] = []string{"Bearer " + string(bytes)}
 	}
 
 	if cfg.UseMocks {
@@ -52,8 +57,19 @@ func newLokiClient(cfg *loki.Config, requestHeader http.Header) httpclient.Calle
 		return new(lokiclientmock.LokiClientMock)
 	}
 
+	skipTLS := cfg.SkipTLS
+	caPath := cfg.CAPath
+	userCertPath := ""
+	userKeyPath := ""
+	if useStatusConfig {
+		skipTLS = cfg.StatusSkipTLS
+		caPath = cfg.StatusCAPath
+		userCertPath = cfg.StatusUserCertPath
+		userKeyPath = cfg.StatusUserKeyPath
+	}
+
 	// TODO: loki with auth
-	return httpclient.NewHTTPClient(cfg.Timeout, headers, cfg.SkipTLS, cfg.CAPath)
+	return httpclient.NewHTTPClient(cfg.Timeout, headers, skipTLS, caPath, userCertPath, userKeyPath)
 }
 
 /* loki query will fail if spaces or quotes are not encoded
@@ -180,7 +196,7 @@ func fetchParallel(lokiClient httpclient.Caller, queries []string, merger loki.M
 
 func LokiReady(cfg *loki.Config) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		lokiClient := newLokiClient(cfg, r.Header)
+		lokiClient := newLokiClient(cfg, r.Header, true)
 		baseURL := strings.TrimRight(cfg.StatusURL.String(), "/")
 
 		resp, code, err := executeLokiQuery(fmt.Sprintf("%s/%s", baseURL, "ready"), lokiClient)
@@ -202,7 +218,7 @@ func LokiReady(cfg *loki.Config) func(w http.ResponseWriter, r *http.Request) {
 
 func LokiMetrics(cfg *loki.Config) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		lokiClient := newLokiClient(cfg, r.Header)
+		lokiClient := newLokiClient(cfg, r.Header, true)
 		baseURL := strings.TrimRight(cfg.StatusURL.String(), "/")
 
 		resp, code, err := executeLokiQuery(fmt.Sprintf("%s/%s", baseURL, "metrics"), lokiClient)
@@ -217,7 +233,7 @@ func LokiMetrics(cfg *loki.Config) func(w http.ResponseWriter, r *http.Request) 
 
 func LokiBuildInfos(cfg *loki.Config) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		lokiClient := newLokiClient(cfg, r.Header)
+		lokiClient := newLokiClient(cfg, r.Header, true)
 		baseURL := strings.TrimRight(cfg.StatusURL.String(), "/")
 
 		resp, code, err := executeLokiQuery(fmt.Sprintf("%s/%s", baseURL, "loki/api/v1/status/buildinfo"), lokiClient)
@@ -232,7 +248,7 @@ func LokiBuildInfos(cfg *loki.Config) func(w http.ResponseWriter, r *http.Reques
 
 func LokiConfig(cfg *loki.Config, param string) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		lokiClient := newLokiClient(cfg, r.Header)
+		lokiClient := newLokiClient(cfg, r.Header, true)
 		baseURL := strings.TrimRight(cfg.StatusURL.String(), "/")
 
 		resp, code, err := executeLokiQuery(fmt.Sprintf("%s/%s", baseURL, "config"), lokiClient)

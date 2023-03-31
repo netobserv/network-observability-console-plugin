@@ -18,7 +18,7 @@ const (
 
 func ExportFlows(cfg *loki.Config) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		lokiClient := newLokiClient(cfg, r.Header)
+		lokiClient := newLokiClient(cfg, r.Header, false)
 		var code int
 		startTime := time.Now()
 		defer func() {

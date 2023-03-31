@@ -107,6 +107,7 @@ import {
   setURLMetricFunction,
   setURLMetricType,
   setURLRange,
+  setURLRecortType,
   setURLReporter
 } from '../utils/router';
 import { getURLParams, hasEmptyParams, netflowTrafficPath, setURLParams } from '../utils/url';
@@ -136,6 +137,7 @@ import './netflow-traffic.css';
 import { TruncateLength } from './dropdowns/truncate-dropdown';
 import HistogramContainer from './metrics/histogram';
 import { formatDuration, getDateMsInSeconds, getDateSInMiliseconds, parseDuration } from '../utils/duration';
+import GuidedTourPopover, { GuidedTourHandle } from './guided-tour/guided-tour';
 
 export type ViewId = 'overview' | 'table' | 'topology';
 
@@ -212,6 +214,8 @@ export const NetflowTraffic: React.FC<{
   const [selectedElement, setSelectedElement] = React.useState<GraphElementPeer | undefined>(undefined);
   const searchRef = React.useRef<SearchHandle>(null);
   const [searchEvent, setSearchEvent] = React.useState<SearchEvent | undefined>(undefined);
+  const guidedTourRef = React.useRef<GuidedTourHandle>(null);
+
   //use this ref to list any props / content loading state & events to skip tick function
   const initState = React.useRef<Array<'initDone' | 'configLoading' | 'configLoaded' | 'forcedFiltersLoaded'>>([]);
   const [panels, setSelectedPanels] = useLocalStorage<OverviewPanel[]>(
@@ -465,9 +469,23 @@ export const NetflowTraffic: React.FC<{
 
   usePoll(tick, interval);
 
+  const isFlow = React.useCallback(() => {
+    return config.recordTypes.some(rt => rt === 'flowLog');
+  }, [config.recordTypes]);
+
   const isConnectionTracking = React.useCallback(() => {
     return config.recordTypes.some(rt => rt === 'newConnection' || rt === 'heartbeat' || rt === 'endConnection');
   }, [config.recordTypes]);
+
+  React.useEffect(() => {
+    if (initState.current.includes('configLoaded')) {
+      if (recordType === 'flowLog' && !isFlow() && isConnectionTracking()) {
+        setRecordType('allConnections');
+      } else if (recordType === 'allConnections' && isFlow() && !isConnectionTracking()) {
+        setRecordType('flowLog');
+      }
+    }
+  }, [config.recordTypes, isConnectionTracking, isFlow, recordType]);
 
   // tick on state change
   React.useEffect(() => {
@@ -535,6 +553,9 @@ export const NetflowTraffic: React.FC<{
     setURLMetricFunction(metricFunction);
     setURLMetricType(metricType);
   }, [metricFunction, metricType]);
+  React.useEffect(() => {
+    setURLRecortType(recordType);
+  }, [recordType]);
 
   // update local storage saved query params
   React.useEffect(() => {
@@ -770,7 +791,7 @@ export const NetflowTraffic: React.FC<{
               <RefreshDropdown
                 data-test="refresh-dropdown"
                 id="refresh-dropdown"
-                disabled={typeof range !== 'number'}
+                disabled={showHistogram || typeof range !== 'number'}
                 interval={interval}
                 setInterval={setInterval}
               />
@@ -853,6 +874,7 @@ export const NetflowTraffic: React.FC<{
           range={range}
           reporter={reporter}
           type={recordType}
+          canSwitchTypes={isFlow() && isConnectionTracking()}
           setFilters={setFilters}
           setRange={setRange}
           setReporter={setReporter}
@@ -1075,9 +1097,10 @@ export const NetflowTraffic: React.FC<{
 
   const zoomRange = React.useCallback(
     (zoomIn: boolean) => {
+      const timeRangeOptions = getTimeRangeOptions(t, false);
+      const keys = Object.keys(timeRangeOptions);
+
       if (typeof range === 'number') {
-        const timeRangeOptions = getTimeRangeOptions(t, false);
-        const keys = Object.keys(timeRangeOptions);
         const selectedKey = formatDuration(getDateSInMiliseconds(range as number));
         let index = keys.indexOf(selectedKey);
         if (zoomIn && index > 0) {
@@ -1089,17 +1112,19 @@ export const NetflowTraffic: React.FC<{
         setRange(getDateMsInSeconds(parseDuration(keys[index])));
       } else {
         const updatedRange = { ...range };
-        const factor = ((zoomIn ? -1 : 1) * (range.to - range.from)) / 2;
+        const factor = Math.floor(((zoomIn ? -1 : 1) * (range.to - range.from)) / (zoomIn ? 4 : 2));
 
-        updatedRange.from += factor;
+        updatedRange.from -= factor;
         updatedRange.to += factor;
 
-        const now = lastRefresh ? lastRefresh.getTime() : new Date().getTime();
-        if (getDateSInMiliseconds(updatedRange.to) > now) {
-          updatedRange.to = getDateMsInSeconds(now);
-        }
+        if (updatedRange.to - updatedRange.from >= getDateMsInSeconds(parseDuration(keys[0]))) {
+          const now = lastRefresh ? lastRefresh.getTime() : new Date().getTime();
+          if (getDateSInMiliseconds(updatedRange.to) > now) {
+            updatedRange.to = getDateMsInSeconds(now);
+          }
 
-        setRange(updatedRange);
+          setRange(updatedRange);
+        }
       }
     },
     [lastRefresh, range, t]
@@ -1137,6 +1162,7 @@ export const NetflowTraffic: React.FC<{
           setRecordType,
           reporter,
           setReporter,
+          allowFlow: isFlow(),
           allowConnection: isConnectionTracking(),
           allowReporterBoth: selectedViewId === 'table',
           useTopK: selectedViewId === 'overview'
@@ -1201,9 +1227,11 @@ export const NetflowTraffic: React.FC<{
               limit={limit}
               isDark={isDarkTheme}
               range={histogramRange}
+              guidedTourHandle={guidedTourRef.current}
               setRange={setHistogramRange}
               moveRange={moveRange}
               zoomRange={zoomRange}
+              resetRange={() => setRange(defaultTimeRange)}
             />
           </ToolbarItem>
         </Toolbar>
@@ -1307,6 +1335,7 @@ export const NetflowTraffic: React.FC<{
           {slownessReason()}
         </Alert>
       )}
+      <GuidedTourPopover id="netobserv" ref={guidedTourRef} isDark={isDarkTheme} />
     </PageSection>
   ) : null;
 };

@@ -23,6 +23,7 @@ export const LOCAL_STORAGE_METRIC_TYPE_KEY = 'netflow-traffic-metric-type';
 export const LOCAL_STORAGE_SHOW_OPTIONS_KEY = 'netflow-traffic-show-options';
 export const LOCAL_STORAGE_SHOW_HISTOGRAM_KEY = 'netflow-traffic-show-histogram';
 export const LOCAL_STORAGE_SHOW_FILTERS_KEY = 'netflow-traffic-show-filters';
+export const LOCAL_STORAGE_HISTOGRAM_GUIDED_TOUR_DONE_KEY = 'netflow-traffic-histogram-guided-tour-done';
 
 export interface ArraySelectionOptions {
   id: string;

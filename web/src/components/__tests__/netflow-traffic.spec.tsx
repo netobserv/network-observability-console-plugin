@@ -9,7 +9,7 @@ import { extensionsMock } from '../__tests-data__/extensions';
 import { FlowsResultSample } from '../__tests-data__/flows';
 import NetflowTrafficParent from '../netflow-traffic-parent';
 import { TopologyResult } from '../../api/loki';
-import { AlertsResult } from '../../api/alert';
+import { AlertsResult, SilencedAlert } from '../../api/alert';
 import { ConfigResultSample } from '../__tests-data__/config';
 
 const useResolvedExtensionsMock = useResolvedExtensions as jest.Mock;
@@ -20,7 +20,8 @@ jest.mock('../../api/routes', () => ({
   getTopology: jest.fn(() =>
     Promise.resolve({ metrics: [], stats: { numQueries: 0, limitReached: false } } as TopologyResult)
   ),
-  getAlerts: jest.fn(() => Promise.resolve({ data: { groups: [] }, status: 'success' } as AlertsResult))
+  getAlerts: jest.fn(() => Promise.resolve({ data: { groups: [] }, status: 'success' } as AlertsResult)),
+  getSilencedAlerts: jest.fn(() => Promise.resolve([] as SilencedAlert[]))
 }));
 const getConfigMock = getConfig as jest.Mock;
 const getFlowsMock = getFlows as jest.Mock;
