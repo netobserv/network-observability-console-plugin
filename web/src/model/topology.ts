@@ -399,23 +399,31 @@ export const generateDataModel = (
       nodes.push(group);
     }
 
-    if (parent && !parent.children!.includes(group.id)) {
-      parent.children!.push(group.id);
+    if (parent) {
+      if (parent.id == group.id) {
+        console.error('addGroup parent === group', parent, group);
+      } else if (!parent.children!.includes(group.id)) {
+        parent.children!.push(group.id);
+      }
     }
 
     return group;
   };
 
   const addNode = (data: NodeData, scope: MetricScope): NodeModel => {
-    const parent = addPossibleGroups(data.peer);
-    let node = nodes.find(n => n.id === data.peer.id);
+    const parent = data.nodeType !== 'unknown' ? addPossibleGroups(data.peer) : undefined;
+    let node = nodes.find(n => n.type === 'node' && n.id === data.peer.id);
     if (!node) {
       node = generateNode(data, scope, opts, searchValue, highlightedId, filters, t, k8sModels, isDark);
       nodes.push(node);
     }
 
-    if (parent && !parent.children!.includes(node.id)) {
-      parent.children!.push(node.id);
+    if (parent) {
+      if (parent.id == node.id) {
+        console.error('addNode parent === node', parent, node);
+      } else if (!parent.children!.includes(node.id)) {
+        parent.children!.push(node.id);
+      }
     }
 
     return node;
