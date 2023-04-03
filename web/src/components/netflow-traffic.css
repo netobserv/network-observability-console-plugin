@@ -65,11 +65,6 @@ span.pf-c-button__icon.pf-m-start {
     padding: 0;
 }
 
-/* set max height to avoid huge table load if tab force scroll */
-#pageSection.tab {
-    max-height: 75vh;
-}
-
 #filter-toolbar {
     padding: 0 1.5rem 0 1.5rem;
 }
