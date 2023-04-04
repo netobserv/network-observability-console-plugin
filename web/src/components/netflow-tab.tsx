@@ -105,14 +105,13 @@ export const NetflowTab: React.FC<PageComponentProps> = ({ obj }) => {
             </Title>
             <EmptyStateBody>{obj?.kind}</EmptyStateBody>
           </EmptyState>
-          );
         </PageSection>
       );
   }
 
   return (
     <NetflowTrafficParent>
-      <NetflowTraffic forcedFilters={forcedFilters} isTab />;
+      <NetflowTraffic forcedFilters={forcedFilters} isTab />
     </NetflowTrafficParent>
   );
 };
