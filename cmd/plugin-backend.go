@@ -90,9 +90,14 @@ func main() {
 	var checkType auth.CheckType
 	if *authCheck == "auto" {
 		if *lokiForwardUserToken {
+			// FORWARD lokiAuth mode
 			checkType = auth.CheckAuthenticated
-		} else {
+		} else if *lokiTokenPath != "" {
+			// HOST lokiAuth mode
 			checkType = auth.CheckAdmin
+		} else {
+			// DISABLED lokiAuth mode
+			checkType = auth.CheckAuthenticated
 		}
 		log.Info(fmt.Sprintf("auth-check 'auto' resolved to '%s'", checkType))
 	} else {
