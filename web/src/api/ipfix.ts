@@ -90,7 +90,7 @@ export interface Fields {
   TimeReceived: number;
   /** In conversation tracking, the conversation identifier */
   _HashId?: string;
-  /** In conversation tracking, flag identifying the first flow */
+  /** In conversation tracking, a flag identifying the first flow */
   _IsFirst?: string;
   /** In conversation tracking, a counter of flow logs per conversation */
   numFlowLogs?: number;
