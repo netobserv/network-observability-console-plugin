@@ -138,6 +138,14 @@ L4 protocol
 
 ___
 
+### Interface
+
+• `Optional` **Interface**: `string`
+
+Network interface
+
+___
+
 ### Packets
 
 • **Packets**: `number`
@@ -146,11 +154,43 @@ Number of packets in this flow
 
 ___
 
+### Packets\_AB
+
+• `Optional` **Packets\_AB**: `number`
+
+In conversation tracking, A to B packets counter per conversation
+
+___
+
+### Packets\_BA
+
+• `Optional` **Packets\_BA**: `number`
+
+In conversation tracking, B to A packets counter per conversation
+
+___
+
 ### Bytes
 
 • **Bytes**: `number`
 
 Number of bytes in this flow
+
+___
+
+### Bytes\_AB
+
+• `Optional` **Bytes\_AB**: `number`
+
+In conversation tracking, A to B bytes counter per conversation
+
+___
+
+### Bytes\_BA
+
+• `Optional` **Bytes\_BA**: `number`
+
+In conversation tracking, B to A bytes counter per conversation
 
 ___
 
@@ -175,3 +215,27 @@ ___
 • **TimeReceived**: `number`
 
 Timestamp when this flow was received and processed by the flow collector, in seconds
+
+___
+
+### \_HashId
+
+• `Optional` **\_HashId**: `string`
+
+In conversation tracking, the conversation identifier
+
+___
+
+### \_IsFirst
+
+• `Optional` **\_IsFirst**: `string`
+
+In conversation tracking, flag identifying the first flow
+
+___
+
+### numFlowLogs
+
+• `Optional` **numFlowLogs**: `number`
+
+In conversation tracking, a counter of flow logs per conversation

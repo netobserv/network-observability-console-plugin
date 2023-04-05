@@ -39,3 +39,12 @@ ___
 • **FlowDirection**: [`FlowDirection`](../enums/FlowDirection.md)
 
 Flow direction from the node observation point
+
+___
+
+### \_RecordType
+
+• `Optional` **\_RecordType**: `RecordType`
+
+Type of record: 'flowLog' for regular flow logs, or 'allConnections',
+'newConnection', 'heartbeat', 'endConnection' for conversation tracking
