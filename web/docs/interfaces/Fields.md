@@ -230,7 +230,7 @@ ___
 
 • `Optional` **\_IsFirst**: `string`
 
-In conversation tracking, flag identifying the first flow
+In conversation tracking, a flag identifying the first flow
 
 ___
 
