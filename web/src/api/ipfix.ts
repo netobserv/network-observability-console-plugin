@@ -1,5 +1,9 @@
 import { RecordType } from '../model/flow-query';
 
+// Please keep this file documented: it is used in doc generation
+// To regenerate doc, run `make generate-doc` - and also check this page:
+// https://github.com/netobserv/network-observability-operator/blob/main/docs/GeneratingAsciidocAPI.md#generate-asciidoc-for-flows-json-format-reference
+
 export interface Record {
   labels: Labels;
   key: number;
@@ -17,6 +21,8 @@ export interface Labels {
   DstK8S_OwnerName?: string;
   /** Flow direction from the node observation point */
   FlowDirection: FlowDirection;
+  /** Type of record: 'flowLog' for regular flow logs, or 'allConnections',
+   * 'newConnection', 'heartbeat', 'endConnection' for conversation tracking */
   _RecordType?: RecordType;
 }
 
@@ -62,13 +68,19 @@ export interface Fields {
   DstK8S_HostName?: string;
   /** L4 protocol */
   Proto: number;
+  /** Network interface */
+  Interface?: string;
   /** Number of packets in this flow */
   Packets: number;
+  /** In conversation tracking, A to B packets counter per conversation */
   Packets_AB?: number;
+  /** In conversation tracking, B to A packets counter per conversation */
   Packets_BA?: number;
   /** Number of bytes in this flow */
   Bytes: number;
+  /** In conversation tracking, A to B bytes counter per conversation */
   Bytes_AB?: number;
+  /** In conversation tracking, B to A bytes counter per conversation */
   Bytes_BA?: number;
   /** Start timestamp of this flow, in milliseconds */
   TimeFlowStartMs: number;
@@ -76,8 +88,10 @@ export interface Fields {
   TimeFlowEndMs: number;
   /** Timestamp when this flow was received and processed by the flow collector, in seconds */
   TimeReceived: number;
+  /** In conversation tracking, the conversation identifier */
   _HashId?: string;
+  /** In conversation tracking, a flag identifying the first flow */
   _IsFirst?: string;
+  /** In conversation tracking, a counter of flow logs per conversation */
   numFlowLogs?: number;
-  Interface?: string;
 }
