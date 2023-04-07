@@ -106,6 +106,7 @@
     "@patternfly/react-topology": "4.91.38",
     "@types/murmurhash-js": "^1.0.3",
     "history": "^5.1.0",
+    "html-to-image": "^1.11.11",
     "i18next": "^19.8.3",
     "i18next-http-backend": "^1.0.21",
     "murmurhash-js": "^1.0.0",
@@ -116,15 +117,16 @@
     "react-i18next": "^11.8.11",
     "react-modal": "^3.14.4",
     "react-router": "^5.2.0",
-    "react-router-dom": "^5.2.0",
-    "save-svg-as-png": "^1.4.17"
+    "react-router-dom": "^5.2.0"
   },
   "overrides": {
     "glob-parent": "^6.0.1"
   },
   "jest": {
     "collectCoverage": true,
-    "coverageReporters": ["cobertura"],
+    "coverageReporters": [
+      "cobertura"
+    ],
     "testURL": "http://localhost/",
     "maxWorkers": 1,
     "globals": {

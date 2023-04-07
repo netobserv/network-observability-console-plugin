@@ -270,6 +270,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
             const content = getPanelContent(panel.id, title);
             return (
               <NetflowOverviewPanel
+                id={panel.id}
                 key={i}
                 bodyClassSmall={!!content.bodyClassSmall}
                 doubleWidth={!!content.doubleWidth}

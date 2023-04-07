@@ -31,7 +31,6 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
 import { useTheme } from '../utils/theme-hook';
-import { saveSvgAsPng } from 'save-svg-as-png';
 import { Record } from '../api/ipfix';
 import { RecordsResult, Stats, TopologyMetrics, TopologyResult } from '../api/loki';
 import { getFlows, getTopology } from '../api/routes';
@@ -138,6 +137,8 @@ import { TruncateLength } from './dropdowns/truncate-dropdown';
 import HistogramContainer from './metrics/histogram';
 import { formatDuration, getDateMsInSeconds, getDateSInMiliseconds, parseDuration } from '../utils/duration';
 import GuidedTourPopover, { GuidedTourHandle } from './guided-tour/guided-tour';
+
+import { toPng } from 'html-to-image';
 
 export type ViewId = 'overview' | 'table' | 'topology';
 
@@ -614,11 +615,35 @@ export const NetflowTraffic: React.FC<{
   };
 
   const onTopologyExport = () => {
-    const svg = document.getElementsByClassName('pf-topology-visualization-surface__svg')[0];
-    saveSvgAsPng(svg, 'topology.png', {
-      backgroundColor: '#fff',
-      encoderOptions: 0
-    });
+    const topology_flex = document.getElementById('page-content-flex');
+    if (topology_flex) (
+      toPng(topology_flex, { cacheBust: true, })
+        .then((dataUrl) => {
+          const link = document.createElement('a')
+          link.download = 'topology.png'
+          link.href = dataUrl
+          link.click()
+        })
+        .catch((err) => {
+          console.log(err)
+        })
+    )
+  };
+
+  const onOverviewExport = () => {
+    const overview_flex = document.getElementById('overview-flex');
+    if (overview_flex) (
+      toPng(overview_flex, { cacheBust: true, })
+        .then((dataUrl) => {
+          const link = document.createElement('a')
+          link.download = 'overview.png'
+          link.href = dataUrl
+          link.click()
+        })
+        .catch((err) => {
+          console.log(err)
+        })
+    )
   };
 
   const viewOptionsContent = () => {
@@ -639,8 +664,7 @@ export const NetflowTraffic: React.FC<{
           </Button>
         </OverflowMenuItem>
       );
-      //TODO: implements overview export
-      /*items.push(
+      items.push(
         <OverflowMenuItem key="export">
           <Button
             data-test="export-button"
@@ -648,14 +672,12 @@ export const NetflowTraffic: React.FC<{
             variant="link"
             className="overflow-button"
             icon={<ExportIcon />}
-            onClick={() => {
-
-            }}
+            onClick={() => onOverviewExport()}
           >
-            {t('Export metrics')}
+            {t('Export overview')}
           </Button>
         </OverflowMenuItem>
-      );*/
+      );
     } else if (selectedViewId === 'table') {
       items.push(
         <OverflowMenuItem key="columns">
@@ -712,6 +734,13 @@ export const NetflowTraffic: React.FC<{
         <DropdownGroup key="panels" label={t('Manage')}>
           <DropdownItem key="export" onClick={() => setOverviewModalOpen(true)}>
             {t('Panels')}
+          </DropdownItem>
+        </DropdownGroup>
+      );
+      dropdownItems.push(
+        <DropdownGroup key="export-group" label={t('Actions')}>
+          <DropdownItem key="export" onClick={() => onOverviewExport()}>
+            {t('Export overview')}
           </DropdownItem>
         </DropdownGroup>
       );
