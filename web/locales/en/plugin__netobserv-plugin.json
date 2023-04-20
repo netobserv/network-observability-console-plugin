@@ -188,6 +188,7 @@
   "Show internal": "Show internal",
   "Show out of scope traffic (e.g. host-network traffic when scope is different from \"Node\")": "Show out of scope traffic (e.g. host-network traffic when scope is different from \"Node\")",
   "Show out of scope": "Show out of scope",
+  "Export panel": "Export panel",
   "n/a": "n/a",
   "Ingress": "Ingress",
   "Egress": "Egress",

@@ -173,7 +173,9 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
               smallerTexts={smallerTexts}
             />
           ),
-          kebab: <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} />,
+          kebab: (
+            <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} isDark={isDark} />
+          ),
           doubleWidth: true
         };
       }
@@ -217,7 +219,9 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
               smallerTexts={smallerTexts}
             />
           ),
-          kebab: <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} />,
+          kebab: (
+            <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} isDark={isDark} />
+          ),
           bodyClassSmall: true
         };
       }
@@ -242,7 +246,9 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
               smallerTexts={smallerTexts}
             />
           ),
-          kebab: <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} />,
+          kebab: (
+            <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} isDark={isDark} />
+          ),
           bodyClassSmall: true
         };
       }

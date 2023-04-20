@@ -436,6 +436,7 @@ export const TopologyContent: React.FC<{
   return (
     <TopologyView
       data-test="topology-view"
+      id="topology-view"
       controlBar={
         <TopologyControlBar
           data-test="topology-control-bar"

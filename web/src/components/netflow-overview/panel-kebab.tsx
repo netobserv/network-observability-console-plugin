@@ -12,6 +12,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { OverviewPanelId } from '../../utils/overview-panels';
 import './panel-kebab.css';
+import { toPng } from 'html-to-image';
 
 export type PanelKebabOptions = {
   showTotal?: boolean;
@@ -24,9 +25,10 @@ export type PanelKebabProps = {
   id: OverviewPanelId;
   options: PanelKebabOptions;
   setOptions: (opts: PanelKebabOptions) => void;
+  isDark?: boolean;
 };
 
-export const PanelKebab: React.FC<PanelKebabProps> = ({ id, options, setOptions }) => {
+export const PanelKebab: React.FC<PanelKebabProps> = ({ id, options, setOptions, isDark }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [showOptions, setShowOptions] = React.useState(false);
 
@@ -57,6 +59,23 @@ export const PanelKebab: React.FC<PanelKebabProps> = ({ id, options, setOptions 
     },
     [setOptions, options]
   );
+
+  const onOverviewExport = React.useCallback(() => {
+    const overview_flex = document.getElementById(id);
+
+    setShowOptions(false);
+    if (overview_flex)
+      toPng(overview_flex, { cacheBust: true, backgroundColor: isDark ? '#0f1214' : '#f0f0f0' })
+        .then(dataUrl => {
+          const link = document.createElement('a');
+          link.download = 'overview.png';
+          link.href = dataUrl;
+          link.click();
+        })
+        .catch(err => {
+          console.log(err);
+        });
+  }, [setOptions, id]);
 
   const items = [];
   if (options.showTotal !== undefined) {
@@ -135,6 +154,12 @@ export const PanelKebab: React.FC<PanelKebabProps> = ({ id, options, setOptions 
       </DropdownItem>
     );
   }
+
+  items.push(
+    <DropdownItem key={`${id}-export`} onClick={onOverviewExport}>
+      {t('Export panel')}
+    </DropdownItem>
+  );
 
   return (
     <Dropdown

@@ -615,35 +615,33 @@ export const NetflowTraffic: React.FC<{
   };
 
   const onTopologyExport = () => {
-    const topology_flex = document.getElementById('page-content-flex');
-    if (topology_flex) (
-      toPng(topology_flex, { cacheBust: true, })
-        .then((dataUrl) => {
-          const link = document.createElement('a')
-          link.download = 'topology.png'
-          link.href = dataUrl
-          link.click()
+    const topology_flex = document.getElementsByClassName('pf-topology-visualization-surface__svg')[0];
+    if (topology_flex)
+      toPng(topology_flex as HTMLElement, { cacheBust: true, backgroundColor: isDarkTheme ? '#0f1214' : '#f0f0f0' })
+        .then(dataUrl => {
+          const link = document.createElement('a');
+          link.download = 'topology.png';
+          link.href = dataUrl;
+          link.click();
         })
-        .catch((err) => {
-          console.log(err)
-        })
-    )
+        .catch(err => {
+          console.log(err);
+        });
   };
 
   const onOverviewExport = () => {
     const overview_flex = document.getElementById('overview-flex');
-    if (overview_flex) (
-      toPng(overview_flex, { cacheBust: true, })
-        .then((dataUrl) => {
-          const link = document.createElement('a')
-          link.download = 'overview.png'
-          link.href = dataUrl
-          link.click()
+    if (overview_flex)
+      toPng(overview_flex, { cacheBust: true, backgroundColor: isDarkTheme ? '#0f1214' : '#f0f0f0' })
+        .then(dataUrl => {
+          const link = document.createElement('a');
+          link.download = 'overview.png';
+          link.href = dataUrl;
+          link.click();
         })
-        .catch((err) => {
-          console.log(err)
-        })
-    )
+        .catch(err => {
+          console.log(err);
+        });
   };
 
   const viewOptionsContent = () => {
