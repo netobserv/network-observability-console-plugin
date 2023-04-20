@@ -7,11 +7,11 @@
 .netobserv-overlay {
     position: absolute;
     z-index: 999;
-    background: hsla(0, 0%, 1%, 0.62);
+    background: rgba(3, 3, 3, 0.62);
 }
 
 .netobserv-overlay.dark {
-    background: hsla(0, 0%, 78%, 0.329);
+    background: rgba(200, 200, 200, 0.33);
 }
 
 .actions {
