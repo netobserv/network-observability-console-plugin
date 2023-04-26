@@ -111,11 +111,11 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
                       ? opt.value === 'allConnections'
                         ? t(
                             // eslint-disable-next-line max-len
-                            'Only available when FlowCollector.processor.outputRecordTypes option equals "CONNECTIONS", "ENDED_CONNECTIONS" or "ALL"'
+                            'Only available when FlowCollector.processor.logTypes option equals "CONNECTIONS", "ENDED_CONNECTIONS" or "ALL"'
                           )
                         : t(
                             // eslint-disable-next-line max-len
-                            'Only available when FlowCollector.processor.outputRecordTypes option equals "FLOWS" or "ALL"'
+                            'Only available when FlowCollector.processor.logTypes option equals "FLOWS" or "ALL"'
                           )
                       : undefined
                   }
