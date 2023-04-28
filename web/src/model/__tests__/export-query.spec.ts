@@ -6,6 +6,7 @@ describe('buildExportQuery', () => {
       filters: 'SrcK8S_Name%3Dtest1%2Ctest2',
       reporter: 'destination',
       recordType: 'flowLog',
+      packetLoss: 'all',
       limit: 500,
       timeRange: 300
     });
@@ -20,6 +21,7 @@ describe('buildExportQuery', () => {
         filters: '',
         reporter: 'destination',
         recordType: 'flowLog',
+        packetLoss: 'all',
         limit: 500
       },
       ['foo', 'bar']

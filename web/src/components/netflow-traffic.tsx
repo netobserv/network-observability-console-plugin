@@ -49,6 +49,7 @@ import {
   MetricFunction,
   MetricScope,
   MetricType,
+  PacketLoss,
   RecordType,
   Reporter
 } from '../model/flow-query';
@@ -96,6 +97,7 @@ import {
   getFiltersFromURL,
   getLimitFromURL,
   getMatchFromURL,
+  getPacketLossFromURL,
   getRangeFromURL,
   getRecordTypeFromURL,
   getReporterFromURL,
@@ -104,6 +106,7 @@ import {
   setURLMatch,
   setURLMetricFunction,
   setURLMetricType,
+  setURLPacketLoss,
   setURLRange,
   setURLRecortType,
   setURLReporter
@@ -197,6 +200,7 @@ export const NetflowTraffic: React.FC<{
   const [selectedViewId, setSelectedViewId] = useLocalStorage<ViewId>(LOCAL_STORAGE_VIEW_ID_KEY, 'overview');
   const [filters, setFilters] = React.useState<Filter[]>([]);
   const [match, setMatch] = React.useState<Match>(getMatchFromURL());
+  const [packetLoss, setPacketLoss] = React.useState<PacketLoss>(getPacketLossFromURL());
   const [recordType, setRecordType] = React.useState<RecordType>(getRecordTypeFromURL());
   const [reporter, setReporter] = React.useState<Reporter>(getReporterFromURL());
   const [limit, setLimit] = React.useState<number>(
@@ -321,7 +325,8 @@ export const NetflowTraffic: React.FC<{
       filters: groupedFilters,
       limit: LIMIT_VALUES.includes(limit) ? limit : LIMIT_VALUES[0],
       recordType: recordType,
-      reporter: reporter
+      reporter: reporter,
+      packetLoss: packetLoss
     };
     if (range) {
       if (typeof range === 'number') {
@@ -355,6 +360,7 @@ export const NetflowTraffic: React.FC<{
     limit,
     recordType,
     reporter,
+    packetLoss,
     range,
     selectedViewId,
     metricType,
@@ -556,6 +562,9 @@ export const NetflowTraffic: React.FC<{
     setURLMetricFunction(metricFunction, !initState.current.includes('configLoaded'));
     setURLMetricType(metricType, !initState.current.includes('configLoaded'));
   }, [metricFunction, metricType]);
+  React.useEffect(() => {
+    setURLPacketLoss(packetLoss);
+  }, [packetLoss]);
   React.useEffect(() => {
     setURLRecortType(recordType, !initState.current.includes('configLoaded'));
   }, [recordType]);
@@ -1167,6 +1176,8 @@ export const NetflowTraffic: React.FC<{
           setLimit,
           match,
           setMatch,
+          packetLoss,
+          setPacketLoss,
           recordType,
           setRecordType,
           reporter,

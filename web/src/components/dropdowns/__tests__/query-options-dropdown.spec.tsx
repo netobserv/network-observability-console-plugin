@@ -14,8 +14,10 @@ describe('<QueryOptionsDropdown />', () => {
     useTopK: false,
     limit: 100,
     match: 'all',
+    packetLoss: 'all',
     setLimit: jest.fn(),
     setMatch: jest.fn(),
+    setPacketLoss: jest.fn(),
     setReporter: jest.fn(),
     setRecordType: jest.fn()
   };
@@ -36,8 +38,10 @@ describe('<QueryOptionsPanel />', () => {
     useTopK: false,
     limit: 100,
     match: 'all',
+    packetLoss: 'all',
     setLimit: jest.fn(),
     setMatch: jest.fn(),
+    setPacketLoss: jest.fn(),
     setReporter: jest.fn(),
     setRecordType: jest.fn()
   };

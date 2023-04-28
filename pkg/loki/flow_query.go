@@ -37,7 +37,8 @@ type FlowQueryBuilder struct {
 	jsonFilters      [][]labelFilter
 }
 
-func NewFlowQueryBuilder(cfg *Config, start, end, limit string, reporter constants.Reporter, recordType constants.RecordType) *FlowQueryBuilder {
+func NewFlowQueryBuilder(cfg *Config, start, end, limit string, reporter constants.Reporter,
+	recordType constants.RecordType, packetLoss constants.PacketLoss) *FlowQueryBuilder {
 	// Always use following stream selectors
 	labelFilters := []labelFilter{
 		// app, which will apply whichever matching criteria (any or all)
@@ -55,7 +56,6 @@ func NewFlowQueryBuilder(cfg *Config, start, end, limit string, reporter constan
 		}
 	}
 
-	extraLineFilters := []string{}
 	if !utils.Contains(constants.ConnectionTypes, string(recordType)) {
 		if reporter == constants.ReporterSource {
 			labelFilters = append(labelFilters, stringLabelFilter(fields.FlowDirection, "1"))
@@ -63,6 +63,20 @@ func NewFlowQueryBuilder(cfg *Config, start, end, limit string, reporter constan
 			labelFilters = append(labelFilters, stringLabelFilter(fields.FlowDirection, "0"))
 		}
 	}
+
+	extraLineFilters := []string{}
+	if packetLoss == constants.PacketLossDropped {
+		// match 0 packet sent and 1+ packets dropped
+		extraLineFilters = append(extraLineFilters, "|~`Packets\":0[,}]")
+		extraLineFilters = append(extraLineFilters, "|~`DroppedPackets\":[1-9]*[,}]")
+	} else if packetLoss == constants.PacketLossHasDrop {
+		// match 1+ packets dropped
+		extraLineFilters = append(extraLineFilters, "|~`DroppedPackets\":[1-9]*[,}]")
+	} else if packetLoss == constants.PacketLossSent {
+		// match 1+ packets sent
+		extraLineFilters = append(extraLineFilters, "|~`Packets\":[1-9]*[,}]")
+	}
+
 	return &FlowQueryBuilder{
 		config:           cfg,
 		startTime:        start,
@@ -74,7 +88,7 @@ func NewFlowQueryBuilder(cfg *Config, start, end, limit string, reporter constan
 }
 
 func NewFlowQueryBuilderWithDefaults(cfg *Config) *FlowQueryBuilder {
-	return NewFlowQueryBuilder(cfg, "", "", "", constants.ReporterBoth, constants.RecordTypeLog)
+	return NewFlowQueryBuilder(cfg, "", "", "", constants.ReporterBoth, constants.RecordTypeLog, constants.PacketLossAll)
 }
 
 func (q *FlowQueryBuilder) Filters(queryFilters filters.SingleQuery) error {

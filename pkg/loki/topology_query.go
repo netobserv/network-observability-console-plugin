@@ -26,7 +26,9 @@ type TopologyQueryBuilder struct {
 	topology *Topology
 }
 
-func NewTopologyQuery(cfg *Config, start, end, limit, rateInterval, step, metricType string, recordType constants.RecordType, reporter constants.Reporter, scope, groups string) (*TopologyQueryBuilder, error) {
+func NewTopologyQuery(cfg *Config, start, end, limit, rateInterval, step, metricType string,
+	recordType constants.RecordType, reporter constants.Reporter, packetLoss constants.PacketLoss,
+	scope, groups string) (*TopologyQueryBuilder, error) {
 	l := limit
 	if len(l) == 0 {
 		l = topologyDefaultLimit
@@ -55,7 +57,7 @@ func NewTopologyQuery(cfg *Config, start, end, limit, rateInterval, step, metric
 	}
 
 	return &TopologyQueryBuilder{
-		FlowQueryBuilder: NewFlowQueryBuilder(cfg, start, end, limit, reporter, rt),
+		FlowQueryBuilder: NewFlowQueryBuilder(cfg, start, end, limit, reporter, rt, packetLoss),
 		topology: &Topology{
 			rateInterval: rateInterval,
 			step:         step,

@@ -723,7 +723,7 @@ export const getExtraColumns = (t: TFunction): Column[] => {
       tooltip: t('The total aggregated number of bytes.'),
       fieldName: 'Bytes',
       isSelected: true,
-      value: f => f.fields.Bytes,
+      value: f => [String(f.fields.Bytes), String(f.fields.DroppedBytes || t('n/a'))],
       sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
       width: 5
     },
@@ -733,7 +733,7 @@ export const getExtraColumns = (t: TFunction): Column[] => {
       tooltip: t('The total aggregated number of packets.'),
       fieldName: 'Packets',
       isSelected: true,
-      value: f => f.fields.Packets,
+      value: f => [String(f.fields.Packets), String(f.fields.DroppedPackets || t('n/a'))],
       sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
       width: 5
     },
