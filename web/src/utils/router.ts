@@ -1,7 +1,7 @@
 import { TFunction } from 'i18next';
 import { findFilter } from './filter-definitions';
 import { TimeRange } from './datetime';
-import { Match, MetricFunction, MetricType, RecordType, Reporter } from '../model/flow-query';
+import { Match, MetricFunction, MetricType, PacketLoss, RecordType, Reporter } from '../model/flow-query';
 import { getURLParam, getURLParamAsNumber, removeURLParam, setURLParam, URLParam } from './url';
 import { createFilterValue, DisabledFilters, Filter, filterKey, fromFilterKey } from '../model/filters';
 
@@ -11,7 +11,8 @@ const filterValuesSeparator = ',';
 export const defaultTimeRange = 300;
 export const defaultRecordType: RecordType = 'flowLog';
 export const defaultReporter: Reporter = 'destination';
-const defaultMatch: Match = 'all';
+export const defaultMatch: Match = 'all';
+export const defaultPacketLoss: PacketLoss = 'all';
 export const defaultMetricFunction: MetricFunction = 'last';
 export const defaultMetricType: MetricType = 'bytes';
 
@@ -47,6 +48,10 @@ export const getLimitFromURL = (fallback: number): number => {
 
 export const getMatchFromURL = (): Match => {
   return (getURLParam(URLParam.Match) as Match | null) || defaultMatch;
+};
+
+export const getPacketLossFromURL = (): PacketLoss => {
+  return (getURLParam(URLParam.PacketLoss) as PacketLoss | null) || defaultPacketLoss;
 };
 
 export const getFiltersFromURL = (t: TFunction, disabledFilters: DisabledFilters): Promise<Filter[]> | undefined => {
@@ -121,6 +126,10 @@ export const setURLLimit = (limit: number) => {
 
 export const setURLMatch = (match: Match) => {
   setURLParam(URLParam.Match, match);
+};
+
+export const setURLPacketLoss = (pl: PacketLoss) => {
+  setURLParam(URLParam.PacketLoss, pl);
 };
 
 export const setURLMetricFunction = (metricFunction?: MetricFunction) => {

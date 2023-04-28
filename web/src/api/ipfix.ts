@@ -70,6 +70,8 @@ export interface Fields {
   Proto: number;
   /** Network interface */
   Interface?: string;
+  /** TCP flags */
+  Flags?: number;
   /** Number of packets in this flow */
   Packets: number;
   /** In conversation tracking, A to B packets counter per conversation */
@@ -82,6 +84,20 @@ export interface Fields {
   Bytes_AB?: number;
   /** In conversation tracking, B to A bytes counter per conversation */
   Bytes_BA?: number;
+  /** TCP flags for drops */
+  DroppedFlags?: number;
+  /** Number of packets dropped in this flow */
+  DroppedPackets?: number;
+  /** In conversation tracking, A to B packets dropped counter per conversation */
+  DroppedPackets_AB?: number;
+  /** In conversation tracking, B to A packets dropped counter per conversation */
+  DroppedPackets_BA?: number;
+  /** Number of bytes dropped in this flow */
+  DroppedBytes?: number;
+  /** In conversation tracking, A to B bytes dropped counter per conversation */
+  DroppedBytes_AB?: number;
+  /** In conversation tracking, B to A bytes dropped counter per conversation */
+  DroppedBytes_BA?: number;
   /** Start timestamp of this flow, in milliseconds */
   TimeFlowStartMs: number;
   /** End timestamp of this flow, in milliseconds */

@@ -29,7 +29,15 @@ func (o *LokiClientMock) Get(url string) ([]byte, int, error) {
 				path = "mocks/loki/topology_resource.json"
 			}
 		} else {
-			path = "mocks/loki/flows.json"
+			if strings.Contains(url, "|~`Packets\":0[,}]|~`DroppedPackets\":[1-9]*[,}]") {
+				path = "mocks/loki/flows_dropped.json"
+			} else if strings.Contains(url, "|~`DroppedPackets\":[1-9]*[,}]") {
+				path = "mocks/loki/flows_has_dropped.json"
+			} else if strings.Contains(url, "|~`Packets\":[1-9]*[,}]") {
+				path = "mocks/loki/flows_has_sent.json"
+			} else {
+				path = "mocks/loki/flows.json"
+			}
 		}
 	}
 

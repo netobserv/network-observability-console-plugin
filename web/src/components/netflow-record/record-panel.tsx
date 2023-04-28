@@ -316,7 +316,14 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
                             {c.name}
                           </Text>
                         )}
-                        <RecordField flow={record} column={c} filter={getFilter(c)} size={'s'} useLinks={true} />
+                        <RecordField
+                          flow={record}
+                          column={c}
+                          filter={getFilter(c)}
+                          size={'s'}
+                          useLinks={true}
+                          detailed={true}
+                        />
                       </TextContent>
                     ))}
                   </div>

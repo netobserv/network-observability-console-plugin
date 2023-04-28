@@ -2,7 +2,7 @@ import { Radio, Select, Tooltip } from '@patternfly/react-core';
 import { InfoAltIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Match, RecordType, Reporter } from '../../model/flow-query';
+import { Match, PacketLoss, RecordType, Reporter } from '../../model/flow-query';
 
 export const TOP_VALUES = [5, 10, 15];
 export const LIMIT_VALUES = [50, 100, 500, 1000];
@@ -19,6 +19,8 @@ export interface QueryOptionsDropdownProps {
   setLimit: (limit: number) => void;
   match: Match;
   setMatch: (match: Match) => void;
+  packetLoss: PacketLoss;
+  setPacketLoss: (pl: PacketLoss) => void;
 }
 
 type recordTypeOption = { label: string; value: RecordType };
@@ -26,6 +28,8 @@ type recordTypeOption = { label: string; value: RecordType };
 type ReporterOption = { label: string; value: Reporter };
 
 type MatchOption = { label: string; value: Match };
+
+type PacketLossOption = { label: string; value: PacketLoss };
 
 // Exported for tests
 export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
@@ -40,7 +44,9 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
   limit,
   setLimit,
   match,
-  setMatch
+  setMatch,
+  packetLoss,
+  setPacketLoss
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
@@ -78,6 +84,25 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
     {
       label: t('Match any'),
       value: 'any'
+    }
+  ];
+
+  const packetLossOptions: PacketLossOption[] = [
+    {
+      label: t('Dropped'),
+      value: 'dropped'
+    },
+    {
+      label: t('Contains drops'),
+      value: 'hasDrops'
+    },
+    {
+      label: t('Sent'),
+      value: 'sent'
+    },
+    {
+      label: t('All'),
+      value: 'all'
     }
   ];
 
@@ -197,6 +222,35 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
                 label={opt.label}
                 data-test={`match-${opt.value}`}
                 id={`match-${opt.value}`}
+                value={opt.value}
+              />
+            </label>
+          </div>
+        ))}
+      </div>
+      <div className="pf-c-select__menu-group">
+        <Tooltip
+          content={t(
+            // eslint-disable-next-line max-len
+            'Records to show from dropped, sent or mix of both.'
+          )}
+        >
+          <div className="pf-c-select__menu-group-title">
+            <>
+              {t('Packet loss')} <InfoAltIcon />
+            </>
+          </div>
+        </Tooltip>
+        {packetLossOptions.map(opt => (
+          <div key={`packet-loss-${opt.value}`}>
+            <label className="pf-c-select__menu-item">
+              <Radio
+                isChecked={opt.value === packetLoss}
+                name={`packet-loss-${opt.value}`}
+                onChange={() => setPacketLoss(opt.value)}
+                label={opt.label}
+                data-test={`packet-loss-${opt.value}`}
+                id={`packet-loss-${opt.value}`}
                 value={opt.value}
               />
             </label>

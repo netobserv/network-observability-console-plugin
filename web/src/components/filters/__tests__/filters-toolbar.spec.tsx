@@ -23,8 +23,10 @@ describe('<FiltersToolbar />', () => {
       allowReporterBoth: true,
       useTopK: false,
       match: 'all',
+      packetLoss: 'all',
       setLimit: jest.fn(),
       setMatch: jest.fn(),
+      setPacketLoss: jest.fn(),
       setReporter: jest.fn(),
       setRecordType: jest.fn()
     },

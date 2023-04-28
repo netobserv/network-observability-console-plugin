@@ -24,7 +24,8 @@ export const RecordField: React.FC<{
   size?: Size;
   useLinks: boolean;
   filter?: RecordFieldFilter;
-}> = ({ flow, column, size, filter, useLinks }) => {
+  detailed?: boolean;
+}> = ({ flow, column, size, filter, useLinks, detailed }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   const onMouseOver = (event: React.MouseEvent<HTMLDivElement, MouseEvent>, className: string) => {
@@ -41,11 +42,11 @@ export const RecordField: React.FC<{
     return <div className="record-field-flex text-muted">{t('n/a')}</div>;
   };
 
-  const simpleTextWithTooltip = (text?: string) => {
+  const simpleTextWithTooltip = (text?: string, color?: string) => {
     if (text) {
       return (
         <div data-test={`field-text-${text}`}>
-          <span>{text}</span>
+          <span style={{ color }}>{text}</span>
           <div className="record-field-tooltip">{text}</div>
         </div>
       );
@@ -149,14 +150,14 @@ export const RecordField: React.FC<{
     );
   };
 
-  const doubleContainer = (child1?: JSX.Element, child2?: JSX.Element, asChild = true) => {
+  const doubleContainer = (child1?: JSX.Element, child2?: JSX.Element, asChild = true, childIcon = true) => {
     return (
       <div className={`record-field-flex-container ${asChild ? size : ''}`}>
         <div className="record-field-content-flex" onMouseOver={e => onMouseOver(e, 'record-field-content-flex')}>
           {child1 ? child1 : emptyText()}
         </div>
         <div className="record-field-content-flex" onMouseOver={e => onMouseOver(e, 'record-field-content-flex')}>
-          {asChild && <span className="child-arrow">{'↪'}</span>}
+          {asChild && childIcon && <span className="child-arrow">{'↪'}</span>}
           {child2 ? child2 : emptyText()}
         </div>
       </div>
@@ -322,6 +323,18 @@ export const RecordField: React.FC<{
           simpleTextWithTooltip(
             value === FlowDirection.Ingress ? t('Ingress') : value === FlowDirection.Egress ? t('Egress') : t('n/a')
           )
+        );
+      case ColumnsId.packets:
+      case ColumnsId.bytes:
+        const values = value as string[];
+        return doubleContainer(
+          simpleTextWithTooltip(detailed ? `${values[0]} ${c.name.toLowerCase()} ${t('sent')}` : values[0], '#1E4F18'),
+          simpleTextWithTooltip(
+            detailed ? `${values[0]} ${c.name.toLowerCase()} ${t('dropped')}` : values[1],
+            '#A30000'
+          ),
+          true,
+          false
         );
       default:
         if (Array.isArray(value) && value.length) {

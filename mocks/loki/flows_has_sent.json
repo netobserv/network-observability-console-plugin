@@ -627,22 +627,6 @@
       },
       {
         "stream": {
-          "DstK8S_OwnerName": "router-default",
-          "FlowDirection": "0",
-          "SrcK8S_Namespace": "openshift-console-operator",
-          "SrcK8S_OwnerName": "console-operator",
-          "app": "netobserv-flowcollector",
-          "DstK8S_Namespace": "openshift-ingress"
-        },
-        "values": [
-          [
-            "1667835814080000000",
-            "{\"DstK8S_HostName\":\"ci-ln-xz1644k-72292-ch8kk-worker-a-6rjxl\",\"SrcK8S_HostIP\":\"10.0.0.5\",\"SrcK8S_Type\":\"Pod\",\"DstMac\":\"0A:58:0A:81:02:02\",\"TimeReceived\":1667835814,\"Interface\":\"vxlan_sys_4789\",\"DstAddr\":\"10.129.2.2\",\"SrcMac\":\"66:CB:09:C1:55:04\",\"DstK8S_HostIP\":\"10.0.128.2\",\"SrcPort\":36720,\"DstPort\":443,\"DstK8S_Name\":\"router-default-798cd94f5b-26whx\",\"DstK8S_OwnerType\":\"Deployment\",\"Etype\":2048,\"DstK8S_Type\":\"Pod\",\"TimeFlowEndMs\":1667835814080,\"SrcK8S_Name\":\"console-operator-7b68655f7c-zksgq\",\"Proto\":6,\"SrcK8S_HostName\":\"ci-ln-xz1644k-72292-ch8kk-master-0\",\"SrcAddr\":\"10.128.0.35\",\"TimeFlowStartMs\":1667835814080,\"Packets\":0,\"DroppedPackets\":10,\"Bytes\":0,\"DroppedBytes\":128,\"SrcK8S_OwnerType\":\"Deployment\"}"
-          ]
-        ]
-      },
-      {
-        "stream": {
           "SrcK8S_OwnerName": "prometheus-k8s",
           "app": "netobserv-flowcollector",
           "DstK8S_Namespace": "openshift-ingress-operator",
@@ -913,10 +897,6 @@
           "app": "netobserv-flowcollector"
         },
         "values": [
-          [
-            "1667835814105999872",
-            "{\"SrcAddr\":\"130.211.1.79\",\"DstMac\":\"42:01:0A:00:00:04\",\"Packets\":1,\"DroppedPackets\":1,\"TimeFlowEndMs\":1667835814106,\"SrcMac\":\"42:01:0A:00:00:01\",\"DstPort\":6443,\"Etype\":2048,\"Bytes\":138,\"DroppedBytes\":138,\"TimeReceived\":1667835814,\"SrcPort\":47000,\"Proto\":6,\"TimeFlowStartMs\":1667835814106,\"Interface\":\"ens4\",\"DstAddr\":\"10.0.0.2\"}"
-          ],
           [
             "1667835813830000128",
             "{\"SrcMac\":\"0A:58:0A:82:00:0D\",\"DstMac\":\"CA:24:26:C4:E3:1B\",\"SrcPort\":0,\"TimeFlowEndMs\":1667835813830,\"SrcAddr\":\"0.0.0.0\",\"Etype\":2054,\"Bytes\":42,\"Proto\":0,\"TimeReceived\":1667835814,\"TimeFlowStartMs\":1667835813830,\"Packets\":1,\"DstPort\":0,\"Interface\":\"veth96ea9ef0\",\"DstAddr\":\"0.0.0.0\"}"
