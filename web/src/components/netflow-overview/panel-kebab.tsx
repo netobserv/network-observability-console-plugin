@@ -61,21 +61,21 @@ export const PanelKebab: React.FC<PanelKebabProps> = ({ id, options, setOptions,
   );
 
   const onOverviewExport = React.useCallback(() => {
-    const overview_flex = document.getElementById(id);
+    const overview_flex = document.getElementById(id)?.children[0] as HTMLElement | undefined;
 
     setShowOptions(false);
     if (overview_flex)
       toPng(overview_flex, { cacheBust: true, backgroundColor: isDark ? '#0f1214' : '#f0f0f0' })
         .then(dataUrl => {
           const link = document.createElement('a');
-          link.download = 'overview.png';
+          link.download = `overview_${id}.png`;
           link.href = dataUrl;
           link.click();
         })
         .catch(err => {
-          console.log(err);
+          console.error(err);
         });
-  }, [setOptions, id]);
+  }, [id, isDark]);
 
   const items = [];
   if (options.showTotal !== undefined) {
