@@ -15,7 +15,7 @@
         "values": [
           [
             "1667835814080000000",
-            "{\"DstK8S_HostName\":\"ci-ln-xz1644k-72292-ch8kk-worker-a-6rjxl\",\"SrcK8S_HostIP\":\"10.0.0.5\",\"SrcK8S_Type\":\"Pod\",\"DstMac\":\"0A:58:0A:81:02:02\",\"TimeReceived\":1667835814,\"Interface\":\"vxlan_sys_4789\",\"DstAddr\":\"10.129.2.2\",\"SrcMac\":\"66:CB:09:C1:55:04\",\"DstK8S_HostIP\":\"10.0.128.2\",\"SrcPort\":36720,\"DstPort\":443,\"DstK8S_Name\":\"router-default-798cd94f5b-26whx\",\"DstK8S_OwnerType\":\"Deployment\",\"Etype\":2048,\"DstK8S_Type\":\"Pod\",\"TimeFlowEndMs\":1667835814080,\"SrcK8S_Name\":\"console-operator-7b68655f7c-zksgq\",\"Proto\":6,\"SrcK8S_HostName\":\"ci-ln-xz1644k-72292-ch8kk-master-0\",\"SrcAddr\":\"10.128.0.35\",\"TimeFlowStartMs\":1667835814080,\"Packets\":0,\"DroppedPackets\":10,\"Bytes\":0,\"DroppedBytes\":128,\"SrcK8S_OwnerType\":\"Deployment\"}"
+            "{\"DstK8S_HostName\":\"ci-ln-xz1644k-72292-ch8kk-worker-a-6rjxl\",\"SrcK8S_HostIP\":\"10.0.0.5\",\"SrcK8S_Type\":\"Pod\",\"DstMac\":\"0A:58:0A:81:02:02\",\"TimeReceived\":1667835814,\"Interface\":\"vxlan_sys_4789\",\"DstAddr\":\"10.129.2.2\",\"SrcMac\":\"66:CB:09:C1:55:04\",\"DstK8S_HostIP\":\"10.0.128.2\",\"SrcPort\":36720,\"DstPort\":443,\"DstK8S_Name\":\"router-default-798cd94f5b-26whx\",\"DstK8S_OwnerType\":\"Deployment\",\"Etype\":2048,\"DstK8S_Type\":\"Pod\",\"TimeFlowEndMs\":1667835814080,\"SrcK8S_Name\":\"console-operator-7b68655f7c-zksgq\",\"Proto\":6,\"SrcK8S_HostName\":\"ci-ln-xz1644k-72292-ch8kk-master-0\",\"SrcAddr\":\"10.128.0.35\",\"TimeFlowStartMs\":1667835814080,\"Packets\":0,\"TcpDropPackets\":10,\"Bytes\":0,\"TcpDropBytes\":128,\"SrcK8S_OwnerType\":\"Deployment\"}"
           ]
         ]
       }
