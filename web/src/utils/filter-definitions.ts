@@ -439,6 +439,16 @@ export const getFilterDefinitions = (t: TFunction, allowConnectionFilter?: boole
         encoders: { simpleEncode: simpleFiltersEncoder('Proto') }
       },
       {
+        id: 'interface',
+        name: t('Network interface'),
+        category: FilterCategory.None,
+        component: FilterComponent.Text,
+        getOptions: noOption,
+        validate: rejectEmptyValue,
+        hint: t('Specify a network interface.'),
+        encoders: { simpleEncode: simpleFiltersEncoder('Interface') }
+      },
+      {
         id: 'id',
         name: t('Conversation Id'),
         category: FilterCategory.None,
