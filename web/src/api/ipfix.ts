@@ -84,20 +84,22 @@ export interface Fields {
   Bytes_AB?: number;
   /** In conversation tracking, B to A bytes counter per conversation */
   Bytes_BA?: number;
+  /** TCP state for drops */
+  TcpDropState?: number;
   /** TCP flags for drops */
-  DroppedFlags?: number;
+  TcpDropFlags?: number;
   /** Number of packets dropped in this flow */
-  DroppedPackets?: number;
+  TcpDropPackets?: number;
   /** In conversation tracking, A to B packets dropped counter per conversation */
-  DroppedPackets_AB?: number;
+  TcpDropPackets_AB?: number;
   /** In conversation tracking, B to A packets dropped counter per conversation */
-  DroppedPackets_BA?: number;
+  TcpDropPackets_BA?: number;
   /** Number of bytes dropped in this flow */
-  DroppedBytes?: number;
+  TcpDropBytes?: number;
   /** In conversation tracking, A to B bytes dropped counter per conversation */
-  DroppedBytes_AB?: number;
+  TcpDropBytes_AB?: number;
   /** In conversation tracking, B to A bytes dropped counter per conversation */
-  DroppedBytes_BA?: number;
+  TcpDropBytes_BA?: number;
   /** Start timestamp of this flow, in milliseconds */
   TimeFlowStartMs: number;
   /** End timestamp of this flow, in milliseconds */

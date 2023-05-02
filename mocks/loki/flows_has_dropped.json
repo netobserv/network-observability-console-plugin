@@ -15,7 +15,7 @@
         "values": [
           [
             "1667835811111000064",
-            "{\"SrcK8S_Type\":\"Node\",\"DstPort\":2379,\"SrcMac\":\"42:01:0A:00:00:01\",\"TimeReceived\":1667835811,\"DstAddr\":\"10.0.0.5\",\"DstK8S_Type\":\"Node\",\"SrcPort\":39400,\"Packets\":99,\"DroppedPackets\":1,\"Bytes\":56,\"DroppedBytes\":10,\"TimeFlowEndMs\":1667835811111,\"SrcAddr\":\"10.0.0.3\",\"Interface\":\"ens4\",\"DstMac\":\"42:01:0A:00:00:05\",\"TimeFlowStartMs\":1667835811111,\"SrcK8S_OwnerType\":\"Node\",\"DstK8S_Name\":\"ci-ln-xz1644k-72292-ch8kk-master-0\",\"Etype\":2048,\"Proto\":6,\"DstK8S_OwnerType\":\"Node\",\"SrcK8S_Name\":\"ci-ln-xz1644k-72292-ch8kk-master-2\"}"
+            "{\"SrcK8S_Type\":\"Node\",\"DstPort\":2379,\"SrcMac\":\"42:01:0A:00:00:01\",\"TimeReceived\":1667835811,\"DstAddr\":\"10.0.0.5\",\"DstK8S_Type\":\"Node\",\"SrcPort\":39400,\"Packets\":99,\"TcpDropPackets\":1,\"Bytes\":56,\"TcpDropBytes\":10,\"TimeFlowEndMs\":1667835811111,\"SrcAddr\":\"10.0.0.3\",\"Interface\":\"ens4\",\"DstMac\":\"42:01:0A:00:00:05\",\"TimeFlowStartMs\":1667835811111,\"SrcK8S_OwnerType\":\"Node\",\"DstK8S_Name\":\"ci-ln-xz1644k-72292-ch8kk-master-0\",\"Etype\":2048,\"Proto\":6,\"DstK8S_OwnerType\":\"Node\",\"SrcK8S_Name\":\"ci-ln-xz1644k-72292-ch8kk-master-2\"}"
           ]
         ]
       },
@@ -31,7 +31,7 @@
         "values": [
           [
             "1667835813508000000",
-            "{\"TimeFlowStartMs\":1667835809469,\"DstK8S_Name\":\"ci-ln-xz1644k-72292-ch8kk-master-1\",\"SrcAddr\":\"10.0.0.5\",\"Proto\":6,\"TimeFlowEndMs\":1667835813508,\"DstAddr\":\"10.0.0.4\",\"TimeReceived\":1667835814,\"DstK8S_OwnerType\":\"Node\",\"DstPort\":48998,\"SrcMac\":\"42:01:0A:00:00:01\",\"Packets\":7,\"DroppedPackets\":3,\"SrcK8S_Name\":\"ci-ln-xz1644k-72292-ch8kk-master-0\",\"Etype\":2048,\"SrcK8S_OwnerType\":\"Node\",\"Interface\":\"ens4\",\"SrcPort\":2380,\"SrcK8S_Type\":\"Node\",\"DstMac\":\"42:01:0A:00:00:04\",\"Bytes\":1136,\"DroppedBytes\":256,\"DstK8S_Type\":\"Node\"}"
+            "{\"TimeFlowStartMs\":1667835809469,\"DstK8S_Name\":\"ci-ln-xz1644k-72292-ch8kk-master-1\",\"SrcAddr\":\"10.0.0.5\",\"Proto\":6,\"TimeFlowEndMs\":1667835813508,\"DstAddr\":\"10.0.0.4\",\"TimeReceived\":1667835814,\"DstK8S_OwnerType\":\"Node\",\"DstPort\":48998,\"SrcMac\":\"42:01:0A:00:00:01\",\"Packets\":7,\"TcpDropPackets\":3,\"SrcK8S_Name\":\"ci-ln-xz1644k-72292-ch8kk-master-0\",\"Etype\":2048,\"SrcK8S_OwnerType\":\"Node\",\"Interface\":\"ens4\",\"SrcPort\":2380,\"SrcK8S_Type\":\"Node\",\"DstMac\":\"42:01:0A:00:00:04\",\"Bytes\":1136,\"TcpDropBytes\":256,\"DstK8S_Type\":\"Node\"}"
           ]
         ]
       },
@@ -47,7 +47,7 @@
         "values": [
           [
             "1667835814041999872",
-            "{\"SrcMac\":\"42:01:0A:00:00:01\",\"SrcK8S_OwnerType\":\"Node\",\"Bytes\":1518,\"DroppedBytes\":64,\"SrcPort\":2380,\"Interface\":\"ens4\",\"Packets\":9,\"DroppedPackets\":4,\"DstPort\":43118,\"DstK8S_Name\":\"ci-ln-xz1644k-72292-ch8kk-master-1\",\"TimeFlowStartMs\":1667835809459,\"SrcAddr\":\"10.0.0.3\",\"SrcK8S_Name\":\"ci-ln-xz1644k-72292-ch8kk-master-2\",\"DstMac\":\"42:01:0A:00:00:04\",\"DstK8S_Type\":\"Node\",\"DstAddr\":\"10.0.0.4\",\"TimeFlowEndMs\":1667835814042,\"Proto\":6,\"SrcK8S_Type\":\"Node\",\"TimeReceived\":1667835814,\"DstK8S_OwnerType\":\"Node\",\"Etype\":2048}"
+            "{\"SrcMac\":\"42:01:0A:00:00:01\",\"SrcK8S_OwnerType\":\"Node\",\"Bytes\":1518,\"TcpDropBytes\":64,\"SrcPort\":2380,\"Interface\":\"ens4\",\"Packets\":9,\"TcpDropPackets\":4,\"DstPort\":43118,\"DstK8S_Name\":\"ci-ln-xz1644k-72292-ch8kk-master-1\",\"TimeFlowStartMs\":1667835809459,\"SrcAddr\":\"10.0.0.3\",\"SrcK8S_Name\":\"ci-ln-xz1644k-72292-ch8kk-master-2\",\"DstMac\":\"42:01:0A:00:00:04\",\"DstK8S_Type\":\"Node\",\"DstAddr\":\"10.0.0.4\",\"TimeFlowEndMs\":1667835814042,\"Proto\":6,\"SrcK8S_Type\":\"Node\",\"TimeReceived\":1667835814,\"DstK8S_OwnerType\":\"Node\",\"Etype\":2048}"
           ]
         ]
       },
@@ -63,7 +63,7 @@
         "values": [
           [
             "1667835814080000000",
-            "{\"DstK8S_HostName\":\"ci-ln-xz1644k-72292-ch8kk-worker-a-6rjxl\",\"SrcK8S_HostIP\":\"10.0.0.5\",\"SrcK8S_Type\":\"Pod\",\"DstMac\":\"0A:58:0A:81:02:02\",\"TimeReceived\":1667835814,\"Interface\":\"vxlan_sys_4789\",\"DstAddr\":\"10.129.2.2\",\"SrcMac\":\"66:CB:09:C1:55:04\",\"DstK8S_HostIP\":\"10.0.128.2\",\"SrcPort\":36720,\"DstPort\":443,\"DstK8S_Name\":\"router-default-798cd94f5b-26whx\",\"DstK8S_OwnerType\":\"Deployment\",\"Etype\":2048,\"DstK8S_Type\":\"Pod\",\"TimeFlowEndMs\":1667835814080,\"SrcK8S_Name\":\"console-operator-7b68655f7c-zksgq\",\"Proto\":6,\"SrcK8S_HostName\":\"ci-ln-xz1644k-72292-ch8kk-master-0\",\"SrcAddr\":\"10.128.0.35\",\"TimeFlowStartMs\":1667835814080,\"Packets\":0,\"DroppedPackets\":10,\"Bytes\":0,\"DroppedBytes\":128,\"SrcK8S_OwnerType\":\"Deployment\"}"
+            "{\"DstK8S_HostName\":\"ci-ln-xz1644k-72292-ch8kk-worker-a-6rjxl\",\"SrcK8S_HostIP\":\"10.0.0.5\",\"SrcK8S_Type\":\"Pod\",\"DstMac\":\"0A:58:0A:81:02:02\",\"TimeReceived\":1667835814,\"Interface\":\"vxlan_sys_4789\",\"DstAddr\":\"10.129.2.2\",\"SrcMac\":\"66:CB:09:C1:55:04\",\"DstK8S_HostIP\":\"10.0.128.2\",\"SrcPort\":36720,\"DstPort\":443,\"DstK8S_Name\":\"router-default-798cd94f5b-26whx\",\"DstK8S_OwnerType\":\"Deployment\",\"Etype\":2048,\"DstK8S_Type\":\"Pod\",\"TimeFlowEndMs\":1667835814080,\"SrcK8S_Name\":\"console-operator-7b68655f7c-zksgq\",\"Proto\":6,\"SrcK8S_HostName\":\"ci-ln-xz1644k-72292-ch8kk-master-0\",\"SrcAddr\":\"10.128.0.35\",\"TimeFlowStartMs\":1667835814080,\"Packets\":0,\"TcpDropPackets\":10,\"Bytes\":0,\"TcpDropBytes\":128,\"SrcK8S_OwnerType\":\"Deployment\"}"
           ]
         ]
       },
@@ -75,7 +75,7 @@
         "values": [
           [
             "1667835814105999872",
-            "{\"SrcAddr\":\"130.211.1.79\",\"DstMac\":\"42:01:0A:00:00:04\",\"Packets\":1,\"DroppedPackets\":1,\"TimeFlowEndMs\":1667835814106,\"SrcMac\":\"42:01:0A:00:00:01\",\"DstPort\":6443,\"Etype\":2048,\"Bytes\":138,\"DroppedBytes\":138,\"TimeReceived\":1667835814,\"SrcPort\":47000,\"Proto\":6,\"TimeFlowStartMs\":1667835814106,\"Interface\":\"ens4\",\"DstAddr\":\"10.0.0.2\"}"
+            "{\"SrcAddr\":\"130.211.1.79\",\"DstMac\":\"42:01:0A:00:00:04\",\"Packets\":1,\"TcpDropPackets\":1,\"TimeFlowEndMs\":1667835814106,\"SrcMac\":\"42:01:0A:00:00:01\",\"DstPort\":6443,\"Etype\":2048,\"Bytes\":138,\"TcpDropBytes\":138,\"TimeReceived\":1667835814,\"SrcPort\":47000,\"Proto\":6,\"TimeFlowStartMs\":1667835814106,\"Interface\":\"ens4\",\"DstAddr\":\"10.0.0.2\"}"
           ]
         ]
       }
