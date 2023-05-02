@@ -326,16 +326,27 @@ export const RecordField: React.FC<{
         );
       case ColumnsId.packets:
       case ColumnsId.bytes:
-        const values = value as string[];
-        return doubleContainer(
-          simpleTextWithTooltip(detailed ? `${values[0]} ${c.name.toLowerCase()} ${t('sent')}` : values[0], '#1E4F18'),
-          simpleTextWithTooltip(
-            detailed ? `${values[0]} ${c.name.toLowerCase()} ${t('dropped')}` : values[1],
-            '#A30000'
-          ),
-          true,
-          false
-        );
+        if (Array.isArray(value) && value.length) {
+          return doubleContainer(
+            simpleTextWithTooltip(
+              detailed ? `${String(value[0])} ${c.name.toLowerCase()} ${t('sent')}` : String(value[0]),
+              '#1E4F18'
+            ),
+            simpleTextWithTooltip(
+              detailed ? `${String(value[1])} ${c.name.toLowerCase()} ${t('dropped')}` : String(value[1]),
+              '#A30000'
+            ),
+            true,
+            false
+          );
+        } else {
+          return singleContainer(
+            simpleTextWithTooltip(
+              detailed ? `${String(value)} ${c.name.toLowerCase()} ${t('sent')}` : String(value),
+              '#1E4F18'
+            )
+          );
+        }
       default:
         if (Array.isArray(value) && value.length) {
           return doubleContainer(simpleTextWithTooltip(String(value[0])), simpleTextWithTooltip(String(value[1])));

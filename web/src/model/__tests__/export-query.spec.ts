@@ -12,7 +12,7 @@ describe('buildExportQuery', () => {
     });
     expect(query).toEqual(
       // eslint-disable-next-line max-len
-      'filters=SrcK8S_Name%253Dtest1%252Ctest2&reporter=destination&recordType=flowLog&limit=500&timeRange=300&format=csv'
+      'filters=SrcK8S_Name%253Dtest1%252Ctest2&reporter=destination&recordType=flowLog&packetLoss=all&limit=500&timeRange=300&format=csv'
     );
   });
   it('should build with columns', () => {
@@ -26,6 +26,8 @@ describe('buildExportQuery', () => {
       },
       ['foo', 'bar']
     );
-    expect(query).toEqual('filters=&reporter=destination&recordType=flowLog&limit=500&format=csv&columns=foo%2Cbar');
+    expect(query).toEqual(
+      'filters=&reporter=destination&recordType=flowLog&packetLoss=all&limit=500&format=csv&columns=foo%2Cbar'
+    );
   });
 });

@@ -65,16 +65,28 @@ func NewFlowQueryBuilder(cfg *Config, start, end, limit string, reporter constan
 	}
 
 	extraLineFilters := []string{}
-	if packetLoss == constants.PacketLossDropped {
-		// match 0 packet sent and 1+ packets dropped
-		extraLineFilters = append(extraLineFilters, "|~`Packets\":0[,}]")
-		extraLineFilters = append(extraLineFilters, "|~`TcpDropPackets\":[1-9]*[,}]")
-	} else if packetLoss == constants.PacketLossHasDrop {
-		// match 1+ packets dropped
-		extraLineFilters = append(extraLineFilters, "|~`TcpDropPackets\":[1-9]*[,}]")
-	} else if packetLoss == constants.PacketLossSent {
-		// match 1+ packets sent
-		extraLineFilters = append(extraLineFilters, "|~`Packets\":[1-9]*[,}]")
+	if packetLoss != constants.PacketLossAll {
+		sb := strings.Builder{}
+		if packetLoss == constants.PacketLossDropped {
+			// match 0 packet sent and 1+ packets dropped
+			sb.WriteString("|~`")
+			sb.WriteString(`Packets":0[,}]`)
+			sb.WriteString("`")
+			sb.WriteString("|~`")
+			sb.WriteString(`TcpDropPackets":[1-9]*[,}]`)
+			sb.WriteString("`")
+		} else if packetLoss == constants.PacketLossHasDrop {
+			// match 1+ packets dropped
+			sb.WriteString("|~`")
+			sb.WriteString(`TcpDropPackets":[1-9]*[,}]`)
+			sb.WriteString("`")
+		} else if packetLoss == constants.PacketLossSent {
+			// match 1+ packets sent
+			sb.WriteString("|~`")
+			sb.WriteString(`Packets":[1-9]*[,}]`)
+			sb.WriteString("`")
+		}
+		extraLineFilters = append(extraLineFilters, sb.String())
 	}
 
 	return &FlowQueryBuilder{
