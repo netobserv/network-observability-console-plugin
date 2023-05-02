@@ -718,6 +718,17 @@ export const getExtraColumns = (t: TFunction): Column[] => {
       width: 10
     },
     {
+      id: ColumnsId.interface,
+      name: t('Interface'),
+      tooltip: t('The network interface of the Flow.'),
+      fieldName: 'Interface',
+      quickFilter: 'interface',
+      isSelected: false,
+      value: f => f.fields.Interface || '',
+      sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
+      width: 10
+    },
+    {
       id: ColumnsId.bytes,
       name: t('Bytes'),
       tooltip: t('The total aggregated number of bytes.'),
