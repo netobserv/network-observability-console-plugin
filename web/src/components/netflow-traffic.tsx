@@ -138,7 +138,7 @@ import HistogramContainer from './metrics/histogram';
 import { formatDuration, getDateMsInSeconds, getDateSInMiliseconds, parseDuration } from '../utils/duration';
 import GuidedTourPopover, { GuidedTourHandle } from './guided-tour/guided-tour';
 
-import { toPng } from 'html-to-image';
+import { exportfunc } from '../utils/export';
 
 export type ViewId = 'overview' | 'table' | 'topology';
 
@@ -616,32 +616,12 @@ export const NetflowTraffic: React.FC<{
 
   const onTopologyExport = () => {
     const topology_flex = document.getElementsByClassName('pf-topology-visualization-surface__svg')[0];
-    if (topology_flex)
-      toPng(topology_flex as HTMLElement, { cacheBust: true, backgroundColor: isDarkTheme ? '#0f1214' : '#f0f0f0' })
-        .then(dataUrl => {
-          const link = document.createElement('a');
-          link.download = 'topology.png';
-          link.href = dataUrl;
-          link.click();
-        })
-        .catch(err => {
-          console.log(err);
-        });
+    if (topology_flex) exportfunc('topology', topology_flex as HTMLElement, isDarkTheme);
   };
 
   const onOverviewExport = () => {
     const overview_flex = document.getElementById('overview-flex');
-    if (overview_flex)
-      toPng(overview_flex, { cacheBust: true, backgroundColor: isDarkTheme ? '#0f1214' : '#f0f0f0' })
-        .then(dataUrl => {
-          const link = document.createElement('a');
-          link.download = 'overview.png';
-          link.href = dataUrl;
-          link.click();
-        })
-        .catch(err => {
-          console.log(err);
-        });
+    if (overview_flex) exportfunc('overview_page', overview_flex as HTMLElement, isDarkTheme);
   };
 
   const viewOptionsContent = () => {

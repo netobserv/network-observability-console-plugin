@@ -41,8 +41,6 @@ func setupRoutes(cfg *Config, authChecker auth.Checker) *mux.Router {
 	api.HandleFunc("/resources/kind/{kind}/names", handler.GetNames(&cfg.Loki))
 	api.HandleFunc("/frontend-config", handler.GetConfig(cfg.FrontendConfig))
 
-	// Temporary removal of metrics
-	//	r.Handle("/metrics", promhttp.Handler())
 	r.PathPrefix("/").Handler(http.FileServer(http.Dir("./web/dist/")))
 	return r
 }

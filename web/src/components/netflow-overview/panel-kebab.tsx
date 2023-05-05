@@ -12,7 +12,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { OverviewPanelId } from '../../utils/overview-panels';
 import './panel-kebab.css';
-import { toPng } from 'html-to-image';
+import { exportfunc } from '../../utils/export';
 
 export type PanelKebabOptions = {
   showTotal?: boolean;
@@ -64,17 +64,7 @@ export const PanelKebab: React.FC<PanelKebabProps> = ({ id, options, setOptions,
     const overview_flex = document.getElementById(id)?.children[0] as HTMLElement | undefined;
 
     setShowOptions(false);
-    if (overview_flex)
-      toPng(overview_flex, { cacheBust: true, backgroundColor: isDark ? '#0f1214' : '#f0f0f0' })
-        .then(dataUrl => {
-          const link = document.createElement('a');
-          link.download = `overview_${id}.png`;
-          link.href = dataUrl;
-          link.click();
-        })
-        .catch(err => {
-          console.error(err);
-        });
+    if (overview_flex) exportfunc('overview_panel', overview_flex as HTMLElement, isDark, id);
   }, [id, isDark]);
 
   const items = [];
