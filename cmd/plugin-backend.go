@@ -21,6 +21,7 @@ var (
 	buildDate    = "unknown"
 	app          = "netobserv-console-plugin"
 	port         = flag.Int("port", 9001, "server port to listen on (default: 9001)")
+	metricsPort  = flag.Int("metrics-port", 9002, "Metrics (prometheus) server port to listen on (default: 9002)")
 	cert         = flag.String("cert", "", "cert file path to enable TLS (disabled by default)")
 	key          = flag.String("key", "", "private key file path to enable TLS (disabled by default)")
 	corsOrigin   = flag.String("cors-origin", "*", "CORS allowed origin (default: *)")
@@ -110,6 +111,12 @@ func main() {
 	if err != nil {
 		log.WithError(err).Fatal("auth checker error")
 	}
+
+	go server.StartMetrics(&server.MetricsConfig{
+		Port:           *metricsPort,
+		CertFile:       *cert,
+		PrivateKeyFile: *key,
+	})
 
 	server.Start(&server.Config{
 		Port:             *port,
