@@ -24,7 +24,7 @@
     "properties": {
       "id": "netflow-traffic-link-projectadmin",
       "perspective": "admin",
-      "section": "observe-netobserv",
+      "section": "observe-projectadmin",
       "name": "%plugin__netobserv-plugin~Network Traffic%",
       "href": "/netflow-traffic"
     },
