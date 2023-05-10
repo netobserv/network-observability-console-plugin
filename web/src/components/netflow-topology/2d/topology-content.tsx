@@ -56,6 +56,7 @@ export const TopologyContent: React.FC<{
   metricScope: MetricScope;
   setMetricScope: (ms: MetricScope) => void;
   metrics: TopologyMetrics[];
+  droppedMetrics: TopologyMetrics[];
   options: TopologyOptions;
   setOptions: (o: TopologyOptions) => void;
   filters: Filter[];
@@ -72,6 +73,7 @@ export const TopologyContent: React.FC<{
   metricScope,
   setMetricScope,
   metrics,
+  droppedMetrics,
   options,
   setOptions,
   filters,
@@ -307,6 +309,7 @@ export const TopologyContent: React.FC<{
 
     const updatedModel = generateDataModel(
       metrics,
+      droppedMetrics,
       getOptions(),
       metricScope,
       searchEvent?.searchValue || '',
@@ -345,6 +348,7 @@ export const TopologyContent: React.FC<{
     controller,
     prevMetrics,
     metrics,
+    droppedMetrics,
     hoveredId,
     selectedIds,
     getOptions,

@@ -40,7 +40,9 @@ export type NetflowOverviewProps = {
   recordType: RecordType;
   metricType: MetricType;
   metrics: TopologyMetrics[];
+  droppedMetrics: TopologyMetrics[];
   totalMetric?: TopologyMetrics;
+  totalDroppedMetric?: TopologyMetrics;
   loading?: boolean;
   error?: string;
   isDark?: boolean;
@@ -54,7 +56,9 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
   recordType,
   metricType,
   metrics,
+  droppedMetrics,
   totalMetric,
+  totalDroppedMetric,
   loading,
   error,
   isDark,
@@ -74,7 +78,8 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
 
   if (error) {
     return <LokiError title={t('Unable to get overview')} error={error} />;
-  } else if (_.isEmpty(metrics) || !totalMetric) {
+  } else if (_.isEmpty(metrics) || _.isEmpty(droppedMetrics) || !totalMetric || !totalDroppedMetric) {
+    //TODO: manage each metrics loading state separately
     if (loading) {
       return (
         <Bullseye data-test="loading-contents">
@@ -103,8 +108,15 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
   const topKMetrics = metrics
     .sort((a, b) => getStat(b.stats, 'sum') - getStat(a.stats, 'sum'))
     .map(m => toNamedMetric(t, m, truncateLength, true, true));
-  const namedTotalMetric = toNamedMetric(t, totalMetric, truncateLength, false, false);
   const noInternalTopK = topKMetrics.filter(m => m.source.id !== m.destination.id);
+
+  const topKDroppedMetrics = droppedMetrics
+    .sort((a, b) => getStat(b.stats, 'sum') - getStat(a.stats, 'sum'))
+    .map(m => toNamedMetric(t, m, truncateLength, true, true));
+  const noInternalTopKDropped = topKDroppedMetrics.filter(m => m.source.id !== m.destination.id);
+
+  const namedTotalMetric = toNamedMetric(t, totalMetric, truncateLength, false, false);
+  const namedTotalDroppedMetric = toNamedMetric(t, totalDroppedMetric, truncateLength, false, false);
 
   const smallerTexts = truncateLength >= TruncateLength.M;
 
@@ -254,8 +266,67 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
       }
       case 'top_sankey':
         return { element: <>Sankey content</> };
-      case 'packets_dropped':
-        return { element: <>Packets dropped content</> };
+      case 'top_dropped_bar':
+        return {
+          element: (
+            <MetricsContent
+              id={id}
+              title={title}
+              metricType={metricType}
+              metrics={noInternalTopKDropped}
+              limit={limit}
+              showBar={true}
+              showArea={false}
+              showScatter={false}
+              smallerTexts={smallerTexts}
+              tooltipsTruncate={false}
+            />
+          ),
+          doubleWidth: false
+        };
+      case 'total_dropped_line':
+        return {
+          element: (
+            <MetricsContent
+              id={id}
+              title={title}
+              metricType={metricType}
+              metrics={[namedTotalDroppedMetric]}
+              limit={limit}
+              showBar={false}
+              showArea={true}
+              showScatter={true}
+              smallerTexts={smallerTexts}
+              tooltipsTruncate={false}
+            />
+          ),
+          doubleWidth: false
+        };
+      case 'top_dropped_bar_total':
+        const options = kebabMap.get(id) || {
+          showTotal: true,
+          showInternal: true,
+          showOutOfScope: false,
+          compareToDropped: false
+        };
+        return {
+          element: (
+            <MetricsTotalContent
+              id={id}
+              title={title}
+              metricType={metricType}
+              topKMetrics={topKDroppedMetrics}
+              totalMetric={options.compareToDropped ? namedTotalDroppedMetric : namedTotalMetric}
+              limit={limit}
+              showTotal={options.showTotal!}
+              showInternal={options.showInternal!}
+              showOutOfScope={options.showOutOfScope!}
+              smallerTexts={smallerTexts}
+            />
+          ),
+          kebab: <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} />,
+          doubleWidth: true
+        };
       case 'inbound_region':
         return { element: <>Inbound flows by region content</> };
     }

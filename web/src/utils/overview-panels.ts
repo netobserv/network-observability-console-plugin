@@ -10,7 +10,9 @@ export type OverviewPanelId =
   | 'top_sankey'
   | 'total_line'
   | 'top_lines'
-  | 'packets_dropped'
+  | 'top_dropped_bar'
+  | 'total_dropped_line'
+  | 'top_dropped_bar_total'
   | 'inbound_region';
 
 export type OverviewPanel = {
@@ -33,14 +35,16 @@ export const getDefaultOverviewPanels = (): OverviewPanel[] => {
     { id: 'top_bar', isSelected: false },
     { id: 'total_line', isSelected: false },
     { id: 'top_bar_total', isSelected: true },
-    { id: 'top_lines', isSelected: true }
+    { id: 'top_lines', isSelected: true },
+    { id: 'top_dropped_bar', isSelected: false },
+    { id: 'total_dropped_line', isSelected: false },
+    { id: 'top_dropped_bar_total', isSelected: true }
   ]);
   if (isAllowed(Feature.Overview)) {
     panels.unshift({ id: 'overview', isSelected: true });
 
     panels = panels.concat([
       { id: 'top_sankey', isSelected: true },
-      { id: 'packets_dropped', isSelected: true },
       { id: 'inbound_region', isSelected: true }
     ]);
   }
@@ -83,8 +87,16 @@ export const getOverviewPanelInfo = (
       return { title: t('Top {{limit}} {{type}} distribution', { limit, type }), chartType: t('sankey') };
     case 'total_line':
       return { title: t('Total rate'), chartType: t('line') };
-    case 'packets_dropped':
-      return { title: t('Packets dropped') };
+    case 'top_dropped_bar':
+      return { title: t('Top {{limit}} {{type}} dropped rates stacked', { limit, type }), chartType: t('bars') };
+    case 'total_dropped_line':
+      return { title: t('Total dropped rate'), chartType: t('line') };
+    case 'top_dropped_bar_total':
+      return {
+        title: t('Top {{limit}} {{type}} dropped rates stacked with total', { limit, type }),
+        chartType: t('bars'),
+        tooltip: t('The top dropped rates as bar compared to total as line over the selected interval')
+      };
     case 'inbound_region':
       return { title: t('Inbound {{type}} by region', { type }) };
   }
