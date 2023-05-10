@@ -1,0 +1,6364 @@
+{
+  "status": "success",
+  "data": {
+    "resultType": "matrix",
+    "result": [
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "netobserv",
+          "SrcK8S_OwnerName": "flowlogs-pipeline",
+          "SrcK8S_OwnerType": "DaemonSet"
+        },
+        "values": [
+          [
+            1683714600,
+            "0.22"
+          ],
+          [
+            1683714960,
+            "0.5"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "netobserv",
+          "SrcK8S_OwnerName": "netobserv-controller-manager",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683714600,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-authentication",
+          "SrcK8S_OwnerName": "oauth-openshift",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683714960,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-authentication-operator",
+          "SrcK8S_OwnerName": "authentication-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683714960,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-cloud-credential-operator",
+          "SrcK8S_OwnerName": "pod-identity-webhook",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-cluster-csi-drivers",
+          "SrcK8S_OwnerName": "aws-ebs-csi-driver-controller",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-cluster-node-tuning-operator",
+          "SrcK8S_OwnerName": "cluster-node-tuning-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-cluster-samples-operator",
+          "SrcK8S_OwnerName": "cluster-samples-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683714240,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-cluster-storage-operator",
+          "SrcK8S_OwnerName": "cluster-storage-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-cluster-storage-operator",
+          "SrcK8S_OwnerName": "csi-snapshot-controller",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683714960,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-cluster-storage-operator",
+          "SrcK8S_OwnerName": "csi-snapshot-webhook",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683714960,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-console",
+          "SrcK8S_OwnerName": "console",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-console-operator",
+          "SrcK8S_OwnerName": "console-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-controller-manager",
+          "SrcK8S_OwnerName": "controller-manager",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-controller-manager-operator",
+          "SrcK8S_OwnerName": "openshift-controller-manager-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683714960,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-dns-operator",
+          "SrcK8S_OwnerName": "dns-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683713880,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-etcd-operator",
+          "SrcK8S_OwnerName": "etcd-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-image-registry",
+          "SrcK8S_OwnerName": "image-registry",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-ingress",
+          "SrcK8S_OwnerName": "router-default",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-ingress-operator",
+          "SrcK8S_OwnerName": "ingress-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-kube-apiserver",
+          "SrcK8S_OwnerName": "revision-status-4",
+          "SrcK8S_OwnerType": "ConfigMap"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-kube-apiserver",
+          "SrcK8S_OwnerName": "revision-status-8",
+          "SrcK8S_OwnerType": "ConfigMap"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-kube-apiserver-operator",
+          "SrcK8S_OwnerName": "kube-apiserver-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683714960,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-kube-controller-manager-operator",
+          "SrcK8S_OwnerName": "kube-controller-manager-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683714600,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-kube-scheduler",
+          "SrcK8S_OwnerName": "revision-status-6",
+          "SrcK8S_OwnerType": "ConfigMap"
+        },
+        "values": [
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-kube-scheduler",
+          "SrcK8S_OwnerName": "revision-status-7",
+          "SrcK8S_OwnerType": "ConfigMap"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-kube-scheduler-operator",
+          "SrcK8S_OwnerName": "openshift-kube-scheduler-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-kube-storage-version-migrator",
+          "SrcK8S_OwnerName": "migrator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-kube-storage-version-migrator-operator",
+          "SrcK8S_OwnerName": "kube-storage-version-migrator-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683715320,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-machine-api",
+          "SrcK8S_OwnerName": "cluster-autoscaler-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683715680,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-machine-api",
+          "SrcK8S_OwnerName": "cluster-baremetal-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683714960,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-machine-api",
+          "SrcK8S_OwnerName": "machine-api-controllers",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683714240,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-machine-api",
+          "SrcK8S_OwnerName": "machine-api-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-machine-config-operator",
+          "SrcK8S_OwnerName": "machine-config-controller",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683714240,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-marketplace",
+          "SrcK8S_OwnerName": "marketplace-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683715320,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "alertmanager-main",
+          "SrcK8S_OwnerType": "StatefulSet"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "kube-state-metrics",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "openshift-state-metrics",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "prometheus-adapter",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "prometheus-k8s",
+          "SrcK8S_OwnerType": "StatefulSet"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-multus",
+          "SrcK8S_OwnerName": "network-metrics-daemon",
+          "SrcK8S_OwnerType": "DaemonSet"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-network-diagnostics",
+          "SrcK8S_OwnerName": "network-check-source",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-oauth-apiserver",
+          "SrcK8S_OwnerName": "apiserver",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-operator-lifecycle-manager",
+          "SrcK8S_OwnerName": "catalog-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-operator-lifecycle-manager",
+          "SrcK8S_OwnerName": "olm-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683715320,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-operator-lifecycle-manager",
+          "SrcK8S_OwnerName": "package-server-manager",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-operator-lifecycle-manager",
+          "SrcK8S_OwnerName": "packageserver",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-route-controller-manager",
+          "SrcK8S_OwnerName": "route-controller-manager",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-service-ca",
+          "SrcK8S_OwnerName": "service-ca",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "netobserv",
+          "DstK8S_OwnerName": "flowlogs-pipeline",
+          "DstK8S_OwnerType": "DaemonSet",
+          "SrcK8S_OwnerName": "ip-10-0-188-152.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "netobserv",
+          "DstK8S_OwnerName": "flowlogs-pipeline",
+          "DstK8S_OwnerType": "DaemonSet",
+          "SrcK8S_OwnerName": "ip-10-0-227-198.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "netobserv",
+          "DstK8S_OwnerName": "flowlogs-pipeline",
+          "DstK8S_OwnerType": "DaemonSet",
+          "SrcK8S_OwnerName": "ip-10-0-230-190.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "netobserv",
+          "DstK8S_OwnerName": "loki",
+          "DstK8S_OwnerType": "Pod",
+          "SrcK8S_Namespace": "netobserv",
+          "SrcK8S_OwnerName": "flowlogs-pipeline",
+          "SrcK8S_OwnerType": "DaemonSet"
+        },
+        "values": [
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "netobserv",
+          "DstK8S_OwnerName": "loki",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "netobserv",
+          "SrcK8S_OwnerName": "flowlogs-pipeline",
+          "SrcK8S_OwnerType": "DaemonSet"
+        },
+        "values": [
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "netobserv",
+          "DstK8S_OwnerName": "netobserv-controller-manager",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_OwnerName": "ip-10-0-227-198.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "netobserv",
+          "DstK8S_OwnerName": "netobserv-plugin",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-console",
+          "SrcK8S_OwnerName": "console",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "netobserv",
+          "DstK8S_OwnerName": "netobserv-webhook-service",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-kube-apiserver-operator",
+          "SrcK8S_OwnerName": "kube-apiserver-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-apiserver",
+          "DstK8S_OwnerName": "api",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-network-diagnostics",
+          "SrcK8S_OwnerName": "network-check-source",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-apiserver",
+          "DstK8S_OwnerName": "apiserver",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "prometheus-k8s",
+          "SrcK8S_OwnerType": "StatefulSet"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-apiserver",
+          "DstK8S_OwnerName": "apiserver",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-network-diagnostics",
+          "SrcK8S_OwnerName": "network-check-source",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-apiserver",
+          "DstK8S_OwnerName": "apiserver",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_OwnerName": "ip-10-0-242-23.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-apiserver-operator",
+          "DstK8S_OwnerName": "openshift-apiserver-operator",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "prometheus-k8s",
+          "SrcK8S_OwnerType": "StatefulSet"
+        },
+        "values": [
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-authentication",
+          "DstK8S_OwnerName": "oauth-openshift",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-authentication-operator",
+          "SrcK8S_OwnerName": "authentication-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-authentication",
+          "DstK8S_OwnerName": "oauth-openshift",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-ingress",
+          "SrcK8S_OwnerName": "router-default",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-authentication",
+          "DstK8S_OwnerName": "oauth-openshift",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_OwnerName": "ip-10-0-242-23.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683715680,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-authentication",
+          "DstK8S_OwnerName": "oauth-openshift",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-authentication-operator",
+          "SrcK8S_OwnerName": "authentication-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-authentication-operator",
+          "DstK8S_OwnerName": "authentication-operator",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-authentication",
+          "SrcK8S_OwnerName": "oauth-openshift",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-authentication-operator",
+          "DstK8S_OwnerName": "authentication-operator",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "prometheus-k8s",
+          "SrcK8S_OwnerType": "StatefulSet"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-cloud-credential-operator",
+          "DstK8S_OwnerName": "cloud-credential-operator",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "prometheus-k8s",
+          "SrcK8S_OwnerType": "StatefulSet"
+        },
+        "values": [
+          [
+            1683714600,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-cloud-credential-operator",
+          "DstK8S_OwnerName": "pod-identity-webhook",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-kube-apiserver-operator",
+          "SrcK8S_OwnerName": "kube-apiserver-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683715680,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-cloud-credential-operator",
+          "DstK8S_OwnerName": "pod-identity-webhook",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-kube-apiserver-operator",
+          "SrcK8S_OwnerName": "kube-apiserver-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-cluster-csi-drivers",
+          "DstK8S_OwnerName": "aws-ebs-csi-driver-controller",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_OwnerName": "ip-10-0-188-152.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-cluster-node-tuning-operator",
+          "DstK8S_OwnerName": "cluster-node-tuning-operator",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-kube-apiserver-operator",
+          "SrcK8S_OwnerName": "kube-apiserver-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-cluster-samples-operator",
+          "DstK8S_OwnerName": "cluster-samples-operator",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "prometheus-k8s",
+          "SrcK8S_OwnerType": "StatefulSet"
+        },
+        "values": [
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-cluster-storage-operator",
+          "DstK8S_OwnerName": "cluster-storage-operator",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "prometheus-k8s",
+          "SrcK8S_OwnerType": "StatefulSet"
+        },
+        "values": [
+          [
+            1683715680,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-cluster-storage-operator",
+          "DstK8S_OwnerName": "csi-snapshot-controller-operator",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_OwnerName": "ip-10-0-188-152.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683714960,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-cluster-storage-operator",
+          "DstK8S_OwnerName": "csi-snapshot-webhook",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-kube-apiserver-operator",
+          "SrcK8S_OwnerName": "kube-apiserver-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-cluster-storage-operator",
+          "DstK8S_OwnerName": "csi-snapshot-webhook",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-kube-apiserver-operator",
+          "SrcK8S_OwnerName": "kube-apiserver-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-config-operator",
+          "DstK8S_OwnerName": "openshift-config-operator",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "prometheus-k8s",
+          "SrcK8S_OwnerType": "StatefulSet"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-config-operator",
+          "DstK8S_OwnerName": "openshift-config-operator",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_OwnerName": "ip-10-0-188-152.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-console",
+          "DstK8S_OwnerName": "console",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "netobserv",
+          "SrcK8S_OwnerName": "netobserv-plugin",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-console",
+          "DstK8S_OwnerName": "console",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-ingress",
+          "SrcK8S_OwnerName": "router-default",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683716040,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-console",
+          "DstK8S_OwnerName": "console",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "alertmanager-main",
+          "SrcK8S_OwnerType": "StatefulSet"
+        },
+        "values": [
+          [
+            1683714960,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-console",
+          "DstK8S_OwnerName": "console",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "prometheus-k8s",
+          "SrcK8S_OwnerType": "StatefulSet"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-console",
+          "DstK8S_OwnerName": "console",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_OwnerName": "ip-10-0-188-152.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-console",
+          "DstK8S_OwnerName": "console",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_OwnerName": "ip-10-0-242-23.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-console",
+          "DstK8S_OwnerName": "downloads",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-ingress",
+          "SrcK8S_OwnerName": "router-default",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-console",
+          "DstK8S_OwnerName": "downloads",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_OwnerName": "ip-10-0-186-75.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-console",
+          "DstK8S_OwnerName": "downloads",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_OwnerName": "ip-10-0-227-198.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683714960,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-console-operator",
+          "DstK8S_OwnerName": "console-operator",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-kube-apiserver-operator",
+          "SrcK8S_OwnerName": "kube-apiserver-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-console-operator",
+          "DstK8S_OwnerName": "console-operator",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_OwnerName": "ip-10-0-242-23.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683715320,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-controller-manager",
+          "DstK8S_OwnerName": "controller-manager",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "prometheus-k8s",
+          "SrcK8S_OwnerType": "StatefulSet"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-controller-manager",
+          "DstK8S_OwnerName": "controller-manager",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_OwnerName": "ip-10-0-188-152.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-controller-manager",
+          "DstK8S_OwnerName": "controller-manager",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_OwnerName": "ip-10-0-242-23.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-controller-manager-operator",
+          "DstK8S_OwnerName": "openshift-controller-manager-operator",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "prometheus-k8s",
+          "SrcK8S_OwnerType": "StatefulSet"
+        },
+        "values": [
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-dns",
+          "DstK8S_OwnerName": "dns-default",
+          "DstK8S_OwnerType": "DaemonSet",
+          "SrcK8S_Namespace": "openshift-authentication-operator",
+          "SrcK8S_OwnerName": "authentication-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-dns",
+          "DstK8S_OwnerName": "dns-default",
+          "DstK8S_OwnerType": "DaemonSet",
+          "SrcK8S_Namespace": "openshift-console",
+          "SrcK8S_OwnerName": "console",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-dns",
+          "DstK8S_OwnerName": "dns-default",
+          "DstK8S_OwnerType": "DaemonSet",
+          "SrcK8S_Namespace": "openshift-image-registry",
+          "SrcK8S_OwnerName": "cluster-image-registry-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-dns",
+          "DstK8S_OwnerName": "dns-default",
+          "DstK8S_OwnerType": "DaemonSet",
+          "SrcK8S_Namespace": "openshift-insights",
+          "SrcK8S_OwnerName": "insights-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-dns",
+          "DstK8S_OwnerName": "dns-default",
+          "DstK8S_OwnerType": "DaemonSet",
+          "SrcK8S_Namespace": "openshift-kube-apiserver",
+          "SrcK8S_OwnerName": "revision-status-8",
+          "SrcK8S_OwnerType": "ConfigMap"
+        },
+        "values": [
+          [
+            1683714240,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-dns",
+          "DstK8S_OwnerName": "dns-default",
+          "DstK8S_OwnerType": "DaemonSet",
+          "SrcK8S_Namespace": "openshift-kube-apiserver-operator",
+          "SrcK8S_OwnerName": "kube-apiserver-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-dns",
+          "DstK8S_OwnerName": "dns-default",
+          "DstK8S_OwnerType": "DaemonSet",
+          "SrcK8S_Namespace": "openshift-kube-controller-manager-operator",
+          "SrcK8S_OwnerName": "kube-controller-manager-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-dns",
+          "DstK8S_OwnerName": "dns-default",
+          "DstK8S_OwnerType": "DaemonSet",
+          "SrcK8S_Namespace": "openshift-kube-scheduler",
+          "SrcK8S_OwnerName": "revision-status-7",
+          "SrcK8S_OwnerType": "ConfigMap"
+        },
+        "values": [
+          [
+            1683714600,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-dns",
+          "DstK8S_OwnerName": "dns-default",
+          "DstK8S_OwnerType": "DaemonSet",
+          "SrcK8S_Namespace": "openshift-machine-api",
+          "SrcK8S_OwnerName": "machine-api-controllers",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-dns",
+          "DstK8S_OwnerName": "dns-default",
+          "DstK8S_OwnerType": "DaemonSet",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "alertmanager-main",
+          "SrcK8S_OwnerType": "StatefulSet"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-dns",
+          "DstK8S_OwnerName": "dns-default",
+          "DstK8S_OwnerType": "DaemonSet",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "prometheus-k8s",
+          "SrcK8S_OwnerType": "StatefulSet"
+        },
+        "values": [
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-dns",
+          "DstK8S_OwnerName": "dns-default",
+          "DstK8S_OwnerType": "DaemonSet",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "telemeter-client",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-dns",
+          "DstK8S_OwnerName": "dns-default",
+          "DstK8S_OwnerType": "DaemonSet",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "thanos-querier",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-dns",
+          "DstK8S_OwnerName": "dns-default",
+          "DstK8S_OwnerType": "DaemonSet",
+          "SrcK8S_Namespace": "openshift-network-diagnostics",
+          "SrcK8S_OwnerName": "network-check-source",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-dns",
+          "DstK8S_OwnerName": "dns-default",
+          "DstK8S_OwnerType": "DaemonSet",
+          "SrcK8S_OwnerName": "ip-10-0-151-208.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-dns",
+          "DstK8S_OwnerName": "dns-default",
+          "DstK8S_OwnerType": "DaemonSet",
+          "SrcK8S_OwnerName": "ip-10-0-186-75.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-dns",
+          "DstK8S_OwnerName": "dns-default",
+          "DstK8S_OwnerType": "DaemonSet",
+          "SrcK8S_OwnerName": "ip-10-0-188-152.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-dns",
+          "DstK8S_OwnerName": "dns-default",
+          "DstK8S_OwnerType": "DaemonSet",
+          "SrcK8S_OwnerName": "ip-10-0-227-198.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-dns",
+          "DstK8S_OwnerName": "dns-default",
+          "DstK8S_OwnerType": "DaemonSet",
+          "SrcK8S_OwnerName": "ip-10-0-242-23.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-dns",
+          "DstK8S_OwnerName": "dns-default",
+          "DstK8S_OwnerType": "DaemonSet"
+        },
+        "values": [
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-dns",
+          "DstK8S_OwnerName": "dns-default",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "netobserv",
+          "SrcK8S_OwnerName": "flowlogs-pipeline",
+          "SrcK8S_OwnerType": "DaemonSet"
+        },
+        "values": [
+          [
+            1683714960,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-dns",
+          "DstK8S_OwnerName": "dns-default",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-authentication-operator",
+          "SrcK8S_OwnerName": "authentication-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683715680,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-dns",
+          "DstK8S_OwnerName": "dns-default",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-console",
+          "SrcK8S_OwnerName": "console",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-dns",
+          "DstK8S_OwnerName": "dns-default",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-etcd-operator",
+          "SrcK8S_OwnerName": "etcd-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-dns",
+          "DstK8S_OwnerName": "dns-default",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-image-registry",
+          "SrcK8S_OwnerName": "image-registry",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-dns",
+          "DstK8S_OwnerName": "dns-default",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-ingress-operator",
+          "SrcK8S_OwnerName": "ingress-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-dns",
+          "DstK8S_OwnerName": "dns-default",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-kube-apiserver-operator",
+          "SrcK8S_OwnerName": "kube-apiserver-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683714960,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-dns",
+          "DstK8S_OwnerName": "dns-default",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "alertmanager-main",
+          "SrcK8S_OwnerType": "StatefulSet"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-dns",
+          "DstK8S_OwnerName": "dns-default",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "telemeter-client",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-dns",
+          "DstK8S_OwnerName": "dns-default",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-network-diagnostics",
+          "SrcK8S_OwnerName": "network-check-source",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-dns",
+          "DstK8S_OwnerName": "dns-default",
+          "DstK8S_OwnerType": "Service"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-dns-operator",
+          "DstK8S_OwnerName": "dns-operator",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "prometheus-k8s",
+          "SrcK8S_OwnerType": "StatefulSet"
+        },
+        "values": [
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-dns-operator",
+          "DstK8S_OwnerName": "dns-operator",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_OwnerName": "ip-10-0-188-152.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683714960,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-etcd-operator",
+          "DstK8S_OwnerName": "etcd-operator",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "prometheus-k8s",
+          "SrcK8S_OwnerType": "StatefulSet"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-etcd-operator",
+          "DstK8S_OwnerName": "etcd-operator",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_OwnerName": "ip-10-0-188-152.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-image-registry",
+          "DstK8S_OwnerName": "cluster-image-registry-operator",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_OwnerName": "ip-10-0-188-152.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-image-registry",
+          "DstK8S_OwnerName": "image-registry",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_OwnerName": "ip-10-0-186-75.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-image-registry",
+          "DstK8S_OwnerName": "image-registry",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_OwnerName": "ip-10-0-227-198.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-ingress",
+          "DstK8S_OwnerName": "router-default",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-console",
+          "SrcK8S_OwnerName": "console",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-ingress",
+          "DstK8S_OwnerName": "router-default",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-ingress-canary",
+          "SrcK8S_OwnerName": "ingress-canary",
+          "SrcK8S_OwnerType": "DaemonSet"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-ingress",
+          "DstK8S_OwnerName": "router-default",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-kube-apiserver",
+          "SrcK8S_OwnerName": "revision-status-4",
+          "SrcK8S_OwnerType": "ConfigMap"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-ingress",
+          "DstK8S_OwnerName": "router-default",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "thanos-querier",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-ingress",
+          "DstK8S_OwnerName": "router-default",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_OwnerName": "ip-10-0-151-208.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-ingress",
+          "DstK8S_OwnerName": "router-default",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_OwnerName": "ip-10-0-230-190.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-ingress-canary",
+          "DstK8S_OwnerName": "ingress-canary",
+          "DstK8S_OwnerType": "DaemonSet",
+          "SrcK8S_Namespace": "openshift-ingress",
+          "SrcK8S_OwnerName": "router-default",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683715680,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-ingress-operator",
+          "DstK8S_OwnerName": "ingress-operator",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "prometheus-k8s",
+          "SrcK8S_OwnerType": "StatefulSet"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-ingress-operator",
+          "DstK8S_OwnerName": "ingress-operator",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_OwnerName": "ip-10-0-188-152.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683714960,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-insights",
+          "DstK8S_OwnerName": "insights-operator",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_OwnerName": "ip-10-0-188-152.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-kube-apiserver",
+          "DstK8S_OwnerName": "apiserver",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-network-diagnostics",
+          "SrcK8S_OwnerName": "network-check-source",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-kube-apiserver",
+          "DstK8S_OwnerName": "revision-status-4",
+          "DstK8S_OwnerType": "ConfigMap",
+          "SrcK8S_Namespace": "openshift-authentication-operator",
+          "SrcK8S_OwnerName": "authentication-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-kube-apiserver",
+          "DstK8S_OwnerName": "revision-status-4",
+          "DstK8S_OwnerType": "ConfigMap",
+          "SrcK8S_Namespace": "openshift-ingress",
+          "SrcK8S_OwnerName": "router-default",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683714240,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-kube-apiserver",
+          "DstK8S_OwnerName": "revision-status-4",
+          "DstK8S_OwnerType": "ConfigMap",
+          "SrcK8S_OwnerName": "ip-10-0-242-23.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-kube-apiserver",
+          "DstK8S_OwnerName": "revision-status-8",
+          "DstK8S_OwnerType": "ConfigMap",
+          "SrcK8S_Namespace": "openshift-kube-apiserver-operator",
+          "SrcK8S_OwnerName": "kube-apiserver-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683715680,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-kube-apiserver",
+          "DstK8S_OwnerName": "revision-status-8",
+          "DstK8S_OwnerType": "ConfigMap",
+          "SrcK8S_OwnerName": "ip-10-0-242-23.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-kube-apiserver-operator",
+          "DstK8S_OwnerName": "kube-apiserver-operator",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-cluster-storage-operator",
+          "SrcK8S_OwnerName": "csi-snapshot-webhook",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-kube-apiserver-operator",
+          "DstK8S_OwnerName": "kube-apiserver-operator",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-kube-apiserver",
+          "SrcK8S_OwnerName": "revision-status-8",
+          "SrcK8S_OwnerType": "ConfigMap"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683713880,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-kube-controller-manager",
+          "DstK8S_OwnerName": "revision-status-4",
+          "DstK8S_OwnerType": "ConfigMap",
+          "SrcK8S_OwnerName": "ip-10-0-188-152.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683713520,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-kube-controller-manager-operator",
+          "DstK8S_OwnerName": "kube-controller-manager-operator",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "prometheus-k8s",
+          "SrcK8S_OwnerType": "StatefulSet"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-kube-controller-manager-operator",
+          "DstK8S_OwnerName": "kube-controller-manager-operator",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "thanos-querier",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683715680,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-kube-controller-manager-operator",
+          "DstK8S_OwnerName": "kube-controller-manager-operator",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_OwnerName": "ip-10-0-188-152.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-kube-scheduler",
+          "DstK8S_OwnerName": "revision-status-6",
+          "DstK8S_OwnerType": "ConfigMap",
+          "SrcK8S_Namespace": "openshift-network-diagnostics",
+          "SrcK8S_OwnerName": "network-check-source",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683714600,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-kube-scheduler",
+          "DstK8S_OwnerName": "revision-status-6",
+          "DstK8S_OwnerType": "ConfigMap",
+          "SrcK8S_OwnerName": "ip-10-0-188-152.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-kube-scheduler",
+          "DstK8S_OwnerName": "revision-status-6",
+          "DstK8S_OwnerType": "ConfigMap",
+          "SrcK8S_OwnerName": "ip-10-0-242-23.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-kube-scheduler",
+          "DstK8S_OwnerName": "revision-status-7",
+          "DstK8S_OwnerType": "ConfigMap",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "prometheus-k8s",
+          "SrcK8S_OwnerType": "StatefulSet"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-kube-scheduler",
+          "DstK8S_OwnerName": "revision-status-7",
+          "DstK8S_OwnerType": "ConfigMap",
+          "SrcK8S_OwnerName": "ip-10-0-188-152.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-kube-scheduler",
+          "DstK8S_OwnerName": "revision-status-7",
+          "DstK8S_OwnerType": "ConfigMap",
+          "SrcK8S_OwnerName": "ip-10-0-242-23.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-kube-storage-version-migrator-operator",
+          "DstK8S_OwnerName": "kube-storage-version-migrator-operator",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_OwnerName": "ip-10-0-188-152.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-machine-api",
+          "DstK8S_OwnerName": "cluster-autoscaler-operator",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "prometheus-k8s",
+          "SrcK8S_OwnerType": "StatefulSet"
+        },
+        "values": [
+          [
+            1683714600,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-machine-api",
+          "DstK8S_OwnerName": "cluster-autoscaler-operator",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_OwnerName": "ip-10-0-188-152.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683715680,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-machine-api",
+          "DstK8S_OwnerName": "cluster-autoscaler-operator",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-kube-apiserver-operator",
+          "SrcK8S_OwnerName": "kube-apiserver-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-machine-api",
+          "DstK8S_OwnerName": "cluster-baremetal-operator",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-kube-apiserver-operator",
+          "SrcK8S_OwnerName": "kube-apiserver-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-machine-api",
+          "DstK8S_OwnerName": "cluster-baremetal-operator",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_OwnerName": "ip-10-0-188-152.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-machine-api",
+          "DstK8S_OwnerName": "cluster-baremetal-webhook-service",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-kube-apiserver-operator",
+          "SrcK8S_OwnerName": "kube-apiserver-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-machine-api",
+          "DstK8S_OwnerName": "control-plane-machine-set-operator",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_OwnerName": "ip-10-0-188-152.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-machine-api",
+          "DstK8S_OwnerName": "control-plane-machine-set-operator",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-kube-apiserver-operator",
+          "SrcK8S_OwnerName": "kube-apiserver-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683714960,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-machine-api",
+          "DstK8S_OwnerName": "machine-api-controllers",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-kube-apiserver-operator",
+          "SrcK8S_OwnerName": "kube-apiserver-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683715680,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-machine-api",
+          "DstK8S_OwnerName": "machine-api-controllers",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "prometheus-k8s",
+          "SrcK8S_OwnerType": "StatefulSet"
+        },
+        "values": [
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-machine-api",
+          "DstK8S_OwnerName": "machine-api-controllers",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_OwnerName": "ip-10-0-188-152.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-machine-api",
+          "DstK8S_OwnerName": "machine-api-operator",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "prometheus-k8s",
+          "SrcK8S_OwnerType": "StatefulSet"
+        },
+        "values": [
+          [
+            1683715680,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-machine-api",
+          "DstK8S_OwnerName": "machine-api-operator",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_OwnerName": "ip-10-0-188-152.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-machine-api",
+          "DstK8S_OwnerName": "machine-api-operator-webhook",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-kube-apiserver-operator",
+          "SrcK8S_OwnerName": "kube-apiserver-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683714240,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-machine-config-operator",
+          "DstK8S_OwnerName": "machine-config-controller",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "prometheus-k8s",
+          "SrcK8S_OwnerType": "StatefulSet"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-machine-config-operator",
+          "DstK8S_OwnerName": "machine-config-operator",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_OwnerName": "ip-10-0-188-152.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-marketplace",
+          "DstK8S_OwnerName": "community-operators",
+          "DstK8S_OwnerType": "CatalogSource",
+          "SrcK8S_Namespace": "openshift-operator-lifecycle-manager",
+          "SrcK8S_OwnerName": "packageserver",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683715680,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-marketplace",
+          "DstK8S_OwnerName": "community-operators",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-operator-lifecycle-manager",
+          "SrcK8S_OwnerName": "catalog-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683715680,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-marketplace",
+          "DstK8S_OwnerName": "community-operators",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-operator-lifecycle-manager",
+          "SrcK8S_OwnerName": "packageserver",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683714600,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-marketplace",
+          "DstK8S_OwnerName": "marketplace-operator",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "prometheus-k8s",
+          "SrcK8S_OwnerType": "StatefulSet"
+        },
+        "values": [
+          [
+            1683714960,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-marketplace",
+          "DstK8S_OwnerName": "marketplace-operator",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_OwnerName": "ip-10-0-188-152.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-marketplace",
+          "DstK8S_OwnerName": "redhat-marketplace",
+          "DstK8S_OwnerType": "CatalogSource",
+          "SrcK8S_Namespace": "openshift-operator-lifecycle-manager",
+          "SrcK8S_OwnerName": "catalog-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683715320,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-marketplace",
+          "DstK8S_OwnerName": "redhat-marketplace",
+          "DstK8S_OwnerType": "CatalogSource",
+          "SrcK8S_Namespace": "openshift-operator-lifecycle-manager",
+          "SrcK8S_OwnerName": "packageserver",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-marketplace",
+          "DstK8S_OwnerName": "redhat-marketplace",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-operator-lifecycle-manager",
+          "SrcK8S_OwnerName": "catalog-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-marketplace",
+          "DstK8S_OwnerName": "redhat-marketplace",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-operator-lifecycle-manager",
+          "SrcK8S_OwnerName": "packageserver",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-marketplace",
+          "DstK8S_OwnerName": "redhat-operators",
+          "DstK8S_OwnerType": "CatalogSource",
+          "SrcK8S_Namespace": "openshift-operator-lifecycle-manager",
+          "SrcK8S_OwnerName": "packageserver",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-marketplace",
+          "DstK8S_OwnerName": "redhat-operators",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-operator-lifecycle-manager",
+          "SrcK8S_OwnerName": "catalog-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683713880,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-marketplace",
+          "DstK8S_OwnerName": "redhat-operators",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-operator-lifecycle-manager",
+          "SrcK8S_OwnerName": "packageserver",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683715680,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "alertmanager-main",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-console",
+          "SrcK8S_OwnerName": "console",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "alertmanager-main",
+          "DstK8S_OwnerType": "StatefulSet",
+          "SrcK8S_Namespace": "openshift-console",
+          "SrcK8S_OwnerName": "console",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "alertmanager-main",
+          "DstK8S_OwnerType": "StatefulSet",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "prometheus-k8s",
+          "SrcK8S_OwnerType": "StatefulSet"
+        },
+        "values": [
+          [
+            1683714960,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "cluster-monitoring-operator",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "prometheus-k8s",
+          "SrcK8S_OwnerType": "StatefulSet"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "cluster-monitoring-operator",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_OwnerName": "ip-10-0-188-152.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "kube-state-metrics",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "prometheus-k8s",
+          "SrcK8S_OwnerType": "StatefulSet"
+        },
+        "values": [
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "prometheus-adapter",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "prometheus-k8s",
+          "SrcK8S_OwnerType": "StatefulSet"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "prometheus-adapter",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_OwnerName": "ip-10-0-151-208.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "prometheus-adapter",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_OwnerName": "ip-10-0-242-23.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "prometheus-k8s",
+          "DstK8S_OwnerType": "StatefulSet",
+          "SrcK8S_Namespace": "openshift-apiserver",
+          "SrcK8S_OwnerName": "apiserver",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "prometheus-k8s",
+          "DstK8S_OwnerType": "StatefulSet",
+          "SrcK8S_Namespace": "openshift-authentication",
+          "SrcK8S_OwnerName": "oauth-openshift",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "prometheus-k8s",
+          "DstK8S_OwnerType": "StatefulSet",
+          "SrcK8S_Namespace": "openshift-cluster-csi-drivers",
+          "SrcK8S_OwnerName": "aws-ebs-csi-driver-controller",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "prometheus-k8s",
+          "DstK8S_OwnerType": "StatefulSet",
+          "SrcK8S_Namespace": "openshift-cluster-node-tuning-operator",
+          "SrcK8S_OwnerName": "cluster-node-tuning-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "prometheus-k8s",
+          "DstK8S_OwnerType": "StatefulSet",
+          "SrcK8S_Namespace": "openshift-cluster-samples-operator",
+          "SrcK8S_OwnerName": "cluster-samples-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "prometheus-k8s",
+          "DstK8S_OwnerType": "StatefulSet",
+          "SrcK8S_Namespace": "openshift-cluster-storage-operator",
+          "SrcK8S_OwnerName": "cluster-storage-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "prometheus-k8s",
+          "DstK8S_OwnerType": "StatefulSet",
+          "SrcK8S_Namespace": "openshift-config-operator",
+          "SrcK8S_OwnerName": "openshift-config-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "prometheus-k8s",
+          "DstK8S_OwnerType": "StatefulSet",
+          "SrcK8S_Namespace": "openshift-console-operator",
+          "SrcK8S_OwnerName": "console-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683715680,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "prometheus-k8s",
+          "DstK8S_OwnerType": "StatefulSet",
+          "SrcK8S_Namespace": "openshift-controller-manager",
+          "SrcK8S_OwnerName": "controller-manager",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "prometheus-k8s",
+          "DstK8S_OwnerType": "StatefulSet",
+          "SrcK8S_Namespace": "openshift-controller-manager-operator",
+          "SrcK8S_OwnerName": "openshift-controller-manager-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "prometheus-k8s",
+          "DstK8S_OwnerType": "StatefulSet",
+          "SrcK8S_Namespace": "openshift-dns",
+          "SrcK8S_OwnerName": "dns-default",
+          "SrcK8S_OwnerType": "DaemonSet"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "prometheus-k8s",
+          "DstK8S_OwnerType": "StatefulSet",
+          "SrcK8S_Namespace": "openshift-dns-operator",
+          "SrcK8S_OwnerName": "dns-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "prometheus-k8s",
+          "DstK8S_OwnerType": "StatefulSet",
+          "SrcK8S_Namespace": "openshift-etcd-operator",
+          "SrcK8S_OwnerName": "etcd-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "prometheus-k8s",
+          "DstK8S_OwnerType": "StatefulSet",
+          "SrcK8S_Namespace": "openshift-image-registry",
+          "SrcK8S_OwnerName": "cluster-image-registry-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "prometheus-k8s",
+          "DstK8S_OwnerType": "StatefulSet",
+          "SrcK8S_Namespace": "openshift-image-registry",
+          "SrcK8S_OwnerName": "image-registry",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "prometheus-k8s",
+          "DstK8S_OwnerType": "StatefulSet",
+          "SrcK8S_Namespace": "openshift-ingress",
+          "SrcK8S_OwnerName": "router-default",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "prometheus-k8s",
+          "DstK8S_OwnerType": "StatefulSet",
+          "SrcK8S_Namespace": "openshift-ingress-operator",
+          "SrcK8S_OwnerName": "ingress-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683714960,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "prometheus-k8s",
+          "DstK8S_OwnerType": "StatefulSet",
+          "SrcK8S_Namespace": "openshift-kube-apiserver",
+          "SrcK8S_OwnerName": "revision-status-4",
+          "SrcK8S_OwnerType": "ConfigMap"
+        },
+        "values": [
+          [
+            1683714960,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "prometheus-k8s",
+          "DstK8S_OwnerType": "StatefulSet",
+          "SrcK8S_Namespace": "openshift-kube-apiserver",
+          "SrcK8S_OwnerName": "revision-status-8",
+          "SrcK8S_OwnerType": "ConfigMap"
+        },
+        "values": [
+          [
+            1683715680,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "prometheus-k8s",
+          "DstK8S_OwnerType": "StatefulSet",
+          "SrcK8S_Namespace": "openshift-kube-controller-manager-operator",
+          "SrcK8S_OwnerName": "kube-controller-manager-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "prometheus-k8s",
+          "DstK8S_OwnerType": "StatefulSet",
+          "SrcK8S_Namespace": "openshift-kube-scheduler",
+          "SrcK8S_OwnerName": "revision-status-6",
+          "SrcK8S_OwnerType": "ConfigMap"
+        },
+        "values": [
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "prometheus-k8s",
+          "DstK8S_OwnerType": "StatefulSet",
+          "SrcK8S_Namespace": "openshift-kube-scheduler",
+          "SrcK8S_OwnerName": "revision-status-7",
+          "SrcK8S_OwnerType": "ConfigMap"
+        },
+        "values": [
+          [
+            1683716040,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "prometheus-k8s",
+          "DstK8S_OwnerType": "StatefulSet",
+          "SrcK8S_Namespace": "openshift-machine-api",
+          "SrcK8S_OwnerName": "cluster-autoscaler-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "prometheus-k8s",
+          "DstK8S_OwnerType": "StatefulSet",
+          "SrcK8S_Namespace": "openshift-machine-api",
+          "SrcK8S_OwnerName": "machine-api-controllers",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "prometheus-k8s",
+          "DstK8S_OwnerType": "StatefulSet",
+          "SrcK8S_Namespace": "openshift-machine-config-operator",
+          "SrcK8S_OwnerName": "machine-config-controller",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "prometheus-k8s",
+          "DstK8S_OwnerType": "StatefulSet",
+          "SrcK8S_Namespace": "openshift-marketplace",
+          "SrcK8S_OwnerName": "marketplace-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "prometheus-k8s",
+          "DstK8S_OwnerType": "StatefulSet",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "cluster-monitoring-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "prometheus-k8s",
+          "DstK8S_OwnerType": "StatefulSet",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "kube-state-metrics",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683715680,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "prometheus-k8s",
+          "DstK8S_OwnerType": "StatefulSet",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "openshift-state-metrics",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683715320,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "prometheus-k8s",
+          "DstK8S_OwnerType": "StatefulSet",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "prometheus-adapter",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "prometheus-k8s",
+          "DstK8S_OwnerType": "StatefulSet",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "prometheus-k8s",
+          "SrcK8S_OwnerType": "StatefulSet"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "prometheus-k8s",
+          "DstK8S_OwnerType": "StatefulSet",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "thanos-querier",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "prometheus-k8s",
+          "DstK8S_OwnerType": "StatefulSet",
+          "SrcK8S_Namespace": "openshift-multus",
+          "SrcK8S_OwnerName": "network-metrics-daemon",
+          "SrcK8S_OwnerType": "DaemonSet"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "prometheus-k8s",
+          "DstK8S_OwnerType": "StatefulSet",
+          "SrcK8S_Namespace": "openshift-operator-lifecycle-manager",
+          "SrcK8S_OwnerName": "catalog-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "prometheus-k8s",
+          "DstK8S_OwnerType": "StatefulSet",
+          "SrcK8S_Namespace": "openshift-operator-lifecycle-manager",
+          "SrcK8S_OwnerName": "olm-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "prometheus-k8s",
+          "DstK8S_OwnerType": "StatefulSet",
+          "SrcK8S_Namespace": "openshift-route-controller-manager",
+          "SrcK8S_OwnerName": "route-controller-manager",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "prometheus-k8s",
+          "DstK8S_OwnerType": "StatefulSet",
+          "SrcK8S_OwnerName": "ip-10-0-151-208.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "prometheus-operator-admission-webhook",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-kube-apiserver-operator",
+          "SrcK8S_OwnerName": "kube-apiserver-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "prometheus-operator-admission-webhook",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_OwnerName": "ip-10-0-151-208.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "prometheus-operator-admission-webhook",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_OwnerName": "ip-10-0-230-190.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "thanos-querier",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-console",
+          "SrcK8S_OwnerName": "console",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "thanos-querier",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-etcd-operator",
+          "SrcK8S_OwnerName": "etcd-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "thanos-querier",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "prometheus-k8s",
+          "SrcK8S_OwnerType": "StatefulSet"
+        },
+        "values": [
+          [
+            1683714600,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "thanos-querier",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_OwnerName": "ip-10-0-151-208.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "thanos-querier",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_OwnerName": "ip-10-0-230-190.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "thanos-querier",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-console",
+          "SrcK8S_OwnerName": "console",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683714240,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "thanos-querier",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-kube-controller-manager-operator",
+          "SrcK8S_OwnerName": "kube-controller-manager-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-multus",
+          "DstK8S_OwnerName": "multus-admission-controller",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-kube-apiserver-operator",
+          "SrcK8S_OwnerName": "kube-apiserver-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683714960,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-multus",
+          "DstK8S_OwnerName": "multus-admission-controller",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "prometheus-k8s",
+          "SrcK8S_OwnerType": "StatefulSet"
+        },
+        "values": [
+          [
+            1683715680,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-multus",
+          "DstK8S_OwnerName": "multus-admission-controller",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_OwnerName": "ip-10-0-188-152.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-multus",
+          "DstK8S_OwnerName": "multus-admission-controller",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-kube-apiserver-operator",
+          "SrcK8S_OwnerName": "kube-apiserver-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-multus",
+          "DstK8S_OwnerName": "network-metrics-daemon",
+          "DstK8S_OwnerType": "DaemonSet",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "prometheus-k8s",
+          "SrcK8S_OwnerType": "StatefulSet"
+        },
+        "values": [
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-network-diagnostics",
+          "DstK8S_OwnerName": "network-check-source",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-apiserver",
+          "SrcK8S_OwnerName": "apiserver",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-network-diagnostics",
+          "DstK8S_OwnerName": "network-check-source",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-kube-scheduler",
+          "SrcK8S_OwnerName": "revision-status-6",
+          "SrcK8S_OwnerType": "ConfigMap"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-network-diagnostics",
+          "DstK8S_OwnerName": "network-check-source",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-kube-scheduler",
+          "SrcK8S_OwnerName": "revision-status-7",
+          "SrcK8S_OwnerType": "ConfigMap"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-network-diagnostics",
+          "DstK8S_OwnerName": "network-check-source",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "prometheus-k8s",
+          "SrcK8S_OwnerType": "StatefulSet"
+        },
+        "values": [
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-network-diagnostics",
+          "DstK8S_OwnerName": "network-check-target",
+          "DstK8S_OwnerType": "DaemonSet",
+          "SrcK8S_Namespace": "openshift-network-diagnostics",
+          "SrcK8S_OwnerName": "network-check-source",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-network-diagnostics",
+          "DstK8S_OwnerName": "network-check-target",
+          "DstK8S_OwnerType": "DaemonSet",
+          "SrcK8S_OwnerName": "ip-10-0-151-208.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-network-diagnostics",
+          "DstK8S_OwnerName": "network-check-target",
+          "DstK8S_OwnerType": "DaemonSet",
+          "SrcK8S_OwnerName": "ip-10-0-186-75.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-network-diagnostics",
+          "DstK8S_OwnerName": "network-check-target",
+          "DstK8S_OwnerType": "DaemonSet",
+          "SrcK8S_OwnerName": "ip-10-0-188-152.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-network-diagnostics",
+          "DstK8S_OwnerName": "network-check-target",
+          "DstK8S_OwnerType": "DaemonSet",
+          "SrcK8S_OwnerName": "ip-10-0-227-198.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-network-diagnostics",
+          "DstK8S_OwnerName": "network-check-target",
+          "DstK8S_OwnerType": "DaemonSet",
+          "SrcK8S_OwnerName": "ip-10-0-230-190.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-network-diagnostics",
+          "DstK8S_OwnerName": "network-check-target",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-network-diagnostics",
+          "SrcK8S_OwnerName": "network-check-source",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-oauth-apiserver",
+          "DstK8S_OwnerName": "api",
+          "DstK8S_OwnerType": "Service"
+        },
+        "values": [
+          [
+            1683715680,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-oauth-apiserver",
+          "DstK8S_OwnerName": "apiserver",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_OwnerName": "ip-10-0-188-152.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-oauth-apiserver",
+          "DstK8S_OwnerName": "apiserver",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_OwnerName": "ip-10-0-242-23.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-oauth-apiserver",
+          "DstK8S_OwnerName": "apiserver",
+          "DstK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-operator-lifecycle-manager",
+          "DstK8S_OwnerName": "catalog-operator",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-marketplace",
+          "SrcK8S_OwnerName": "certified-operators",
+          "SrcK8S_OwnerType": "CatalogSource"
+        },
+        "values": [
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-operator-lifecycle-manager",
+          "DstK8S_OwnerName": "catalog-operator",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-marketplace",
+          "SrcK8S_OwnerName": "community-operators",
+          "SrcK8S_OwnerType": "CatalogSource"
+        },
+        "values": [
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-operator-lifecycle-manager",
+          "DstK8S_OwnerName": "catalog-operator",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-marketplace",
+          "SrcK8S_OwnerName": "redhat-marketplace",
+          "SrcK8S_OwnerType": "CatalogSource"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-operator-lifecycle-manager",
+          "DstK8S_OwnerName": "catalog-operator",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-marketplace",
+          "SrcK8S_OwnerName": "redhat-operators",
+          "SrcK8S_OwnerType": "CatalogSource"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-operator-lifecycle-manager",
+          "DstK8S_OwnerName": "catalog-operator",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "prometheus-k8s",
+          "SrcK8S_OwnerType": "StatefulSet"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-operator-lifecycle-manager",
+          "DstK8S_OwnerName": "catalog-operator",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_OwnerName": "ip-10-0-188-152.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683714600,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-operator-lifecycle-manager",
+          "DstK8S_OwnerName": "collect-profiles-28061910",
+          "DstK8S_OwnerType": "Job",
+          "SrcK8S_Namespace": "openshift-operator-lifecycle-manager",
+          "SrcK8S_OwnerName": "olm-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683714960,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-operator-lifecycle-manager",
+          "DstK8S_OwnerName": "olm-operator",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-operator-lifecycle-manager",
+          "SrcK8S_OwnerName": "collect-profiles-28061895",
+          "SrcK8S_OwnerType": "Job"
+        },
+        "values": [
+          [
+            1683714240,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-operator-lifecycle-manager",
+          "DstK8S_OwnerName": "olm-operator",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-operator-lifecycle-manager",
+          "SrcK8S_OwnerName": "collect-profiles-28061925",
+          "SrcK8S_OwnerType": "Job"
+        },
+        "values": [
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-operator-lifecycle-manager",
+          "DstK8S_OwnerName": "olm-operator",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_OwnerName": "ip-10-0-188-152.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-operator-lifecycle-manager",
+          "DstK8S_OwnerName": "packageserver",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_OwnerName": "ip-10-0-188-152.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-operator-lifecycle-manager",
+          "DstK8S_OwnerName": "packageserver",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_OwnerName": "ip-10-0-242-23.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-route-controller-manager",
+          "DstK8S_OwnerName": "route-controller-manager",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "prometheus-k8s",
+          "SrcK8S_OwnerType": "StatefulSet"
+        },
+        "values": [
+          [
+            1683714240,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-route-controller-manager",
+          "DstK8S_OwnerName": "route-controller-manager",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_OwnerName": "ip-10-0-242-23.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683714600,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-service-ca-operator",
+          "DstK8S_OwnerName": "service-ca-operator",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "prometheus-k8s",
+          "SrcK8S_OwnerType": "StatefulSet"
+        },
+        "values": [
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-service-ca-operator",
+          "DstK8S_OwnerName": "service-ca-operator",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_OwnerName": "ip-10-0-188-152.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_OwnerName": "ip-10-0-151-208.us-west-1.compute.internal",
+          "DstK8S_OwnerType": "Node",
+          "SrcK8S_OwnerName": "ip-10-0-186-75.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_OwnerName": "ip-10-0-151-208.us-west-1.compute.internal",
+          "DstK8S_OwnerType": "Node",
+          "SrcK8S_OwnerName": "ip-10-0-188-152.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_OwnerName": "ip-10-0-151-208.us-west-1.compute.internal",
+          "DstK8S_OwnerType": "Node",
+          "SrcK8S_OwnerName": "ip-10-0-227-198.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_OwnerName": "ip-10-0-151-208.us-west-1.compute.internal",
+          "DstK8S_OwnerType": "Node",
+          "SrcK8S_OwnerName": "ip-10-0-230-190.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_OwnerName": "ip-10-0-151-208.us-west-1.compute.internal",
+          "DstK8S_OwnerType": "Node",
+          "SrcK8S_OwnerName": "ip-10-0-242-23.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683716040,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_OwnerName": "ip-10-0-186-75.us-west-1.compute.internal",
+          "DstK8S_OwnerType": "Node",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "prometheus-k8s",
+          "SrcK8S_OwnerType": "StatefulSet"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_OwnerName": "ip-10-0-186-75.us-west-1.compute.internal",
+          "DstK8S_OwnerType": "Node",
+          "SrcK8S_OwnerName": "ip-10-0-151-208.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_OwnerName": "ip-10-0-186-75.us-west-1.compute.internal",
+          "DstK8S_OwnerType": "Node",
+          "SrcK8S_OwnerName": "ip-10-0-188-152.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_OwnerName": "ip-10-0-186-75.us-west-1.compute.internal",
+          "DstK8S_OwnerType": "Node",
+          "SrcK8S_OwnerName": "ip-10-0-227-198.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_OwnerName": "ip-10-0-186-75.us-west-1.compute.internal",
+          "DstK8S_OwnerType": "Node",
+          "SrcK8S_OwnerName": "ip-10-0-230-190.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_OwnerName": "ip-10-0-186-75.us-west-1.compute.internal",
+          "DstK8S_OwnerType": "Node",
+          "SrcK8S_OwnerName": "ip-10-0-242-23.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683714240,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_OwnerName": "ip-10-0-188-152.us-west-1.compute.internal",
+          "DstK8S_OwnerType": "Node",
+          "SrcK8S_Namespace": "openshift-apiserver",
+          "SrcK8S_OwnerName": "apiserver",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_OwnerName": "ip-10-0-188-152.us-west-1.compute.internal",
+          "DstK8S_OwnerType": "Node",
+          "SrcK8S_Namespace": "openshift-kube-scheduler",
+          "SrcK8S_OwnerName": "revision-status-7",
+          "SrcK8S_OwnerType": "ConfigMap"
+        },
+        "values": [
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_OwnerName": "ip-10-0-188-152.us-west-1.compute.internal",
+          "DstK8S_OwnerType": "Node",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "prometheus-adapter",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683713880,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_OwnerName": "ip-10-0-188-152.us-west-1.compute.internal",
+          "DstK8S_OwnerType": "Node",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "prometheus-operator-admission-webhook",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_OwnerName": "ip-10-0-188-152.us-west-1.compute.internal",
+          "DstK8S_OwnerType": "Node",
+          "SrcK8S_Namespace": "openshift-network-diagnostics",
+          "SrcK8S_OwnerName": "network-check-source",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_OwnerName": "ip-10-0-188-152.us-west-1.compute.internal",
+          "DstK8S_OwnerType": "Node",
+          "SrcK8S_OwnerName": "ip-10-0-151-208.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_OwnerName": "ip-10-0-188-152.us-west-1.compute.internal",
+          "DstK8S_OwnerType": "Node",
+          "SrcK8S_OwnerName": "ip-10-0-186-75.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_OwnerName": "ip-10-0-188-152.us-west-1.compute.internal",
+          "DstK8S_OwnerType": "Node",
+          "SrcK8S_OwnerName": "ip-10-0-227-198.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_OwnerName": "ip-10-0-188-152.us-west-1.compute.internal",
+          "DstK8S_OwnerType": "Node",
+          "SrcK8S_OwnerName": "ip-10-0-230-190.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683715680,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_OwnerName": "ip-10-0-188-152.us-west-1.compute.internal",
+          "DstK8S_OwnerType": "Node",
+          "SrcK8S_OwnerName": "ip-10-0-242-23.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683715680,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_OwnerName": "ip-10-0-227-198.us-west-1.compute.internal",
+          "DstK8S_OwnerType": "Node",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "prometheus-k8s",
+          "SrcK8S_OwnerType": "StatefulSet"
+        },
+        "values": [
+          [
+            1683715320,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_OwnerName": "ip-10-0-227-198.us-west-1.compute.internal",
+          "DstK8S_OwnerType": "Node",
+          "SrcK8S_OwnerName": "ip-10-0-151-208.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_OwnerName": "ip-10-0-227-198.us-west-1.compute.internal",
+          "DstK8S_OwnerType": "Node",
+          "SrcK8S_OwnerName": "ip-10-0-186-75.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_OwnerName": "ip-10-0-227-198.us-west-1.compute.internal",
+          "DstK8S_OwnerType": "Node",
+          "SrcK8S_OwnerName": "ip-10-0-188-152.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_OwnerName": "ip-10-0-227-198.us-west-1.compute.internal",
+          "DstK8S_OwnerType": "Node",
+          "SrcK8S_OwnerName": "ip-10-0-230-190.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_OwnerName": "ip-10-0-227-198.us-west-1.compute.internal",
+          "DstK8S_OwnerType": "Node",
+          "SrcK8S_OwnerName": "ip-10-0-242-23.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_OwnerName": "ip-10-0-230-190.us-west-1.compute.internal",
+          "DstK8S_OwnerType": "Node",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "prometheus-k8s",
+          "SrcK8S_OwnerType": "StatefulSet"
+        },
+        "values": [
+          [
+            1683715680,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_OwnerName": "ip-10-0-230-190.us-west-1.compute.internal",
+          "DstK8S_OwnerType": "Node",
+          "SrcK8S_OwnerName": "ip-10-0-151-208.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_OwnerName": "ip-10-0-230-190.us-west-1.compute.internal",
+          "DstK8S_OwnerType": "Node",
+          "SrcK8S_OwnerName": "ip-10-0-186-75.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683715320,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_OwnerName": "ip-10-0-230-190.us-west-1.compute.internal",
+          "DstK8S_OwnerType": "Node",
+          "SrcK8S_OwnerName": "ip-10-0-188-152.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683715680,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_OwnerName": "ip-10-0-230-190.us-west-1.compute.internal",
+          "DstK8S_OwnerType": "Node",
+          "SrcK8S_OwnerName": "ip-10-0-242-23.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_OwnerName": "ip-10-0-242-23.us-west-1.compute.internal",
+          "DstK8S_OwnerType": "Node",
+          "SrcK8S_Namespace": "openshift-apiserver",
+          "SrcK8S_OwnerName": "apiserver",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683714240,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_OwnerName": "ip-10-0-242-23.us-west-1.compute.internal",
+          "DstK8S_OwnerType": "Node",
+          "SrcK8S_Namespace": "openshift-authentication-operator",
+          "SrcK8S_OwnerName": "authentication-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683715320,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_OwnerName": "ip-10-0-242-23.us-west-1.compute.internal",
+          "DstK8S_OwnerType": "Node",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "prometheus-adapter",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683715320,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_OwnerName": "ip-10-0-242-23.us-west-1.compute.internal",
+          "DstK8S_OwnerType": "Node",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "prometheus-k8s",
+          "SrcK8S_OwnerType": "StatefulSet"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683713880,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_OwnerName": "ip-10-0-242-23.us-west-1.compute.internal",
+          "DstK8S_OwnerType": "Node",
+          "SrcK8S_Namespace": "openshift-network-diagnostics",
+          "SrcK8S_OwnerName": "network-check-source",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_OwnerName": "ip-10-0-242-23.us-west-1.compute.internal",
+          "DstK8S_OwnerType": "Node",
+          "SrcK8S_Namespace": "openshift-oauth-apiserver",
+          "SrcK8S_OwnerName": "apiserver",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_OwnerName": "ip-10-0-242-23.us-west-1.compute.internal",
+          "DstK8S_OwnerType": "Node",
+          "SrcK8S_OwnerName": "ip-10-0-151-208.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_OwnerName": "ip-10-0-242-23.us-west-1.compute.internal",
+          "DstK8S_OwnerType": "Node",
+          "SrcK8S_OwnerName": "ip-10-0-186-75.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683714600,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_OwnerName": "ip-10-0-242-23.us-west-1.compute.internal",
+          "DstK8S_OwnerType": "Node",
+          "SrcK8S_OwnerName": "ip-10-0-188-152.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683716040,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_OwnerName": "ip-10-0-242-23.us-west-1.compute.internal",
+          "DstK8S_OwnerType": "Node",
+          "SrcK8S_OwnerName": "ip-10-0-227-198.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_Namespace": "openshift-authentication-operator",
+          "SrcK8S_OwnerName": "authentication-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_Namespace": "openshift-cloud-credential-operator",
+          "SrcK8S_OwnerName": "cloud-credential-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_Namespace": "openshift-cloud-network-config-controller",
+          "SrcK8S_OwnerName": "cloud-network-config-controller",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_Namespace": "openshift-console",
+          "SrcK8S_OwnerName": "console",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_Namespace": "openshift-controller-manager",
+          "SrcK8S_OwnerName": "controller-manager",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_Namespace": "openshift-dns",
+          "SrcK8S_OwnerName": "dns-default",
+          "SrcK8S_OwnerType": "DaemonSet"
+        },
+        "values": [
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_Namespace": "openshift-image-registry",
+          "SrcK8S_OwnerName": "cluster-image-registry-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683714240,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_Namespace": "openshift-ingress",
+          "SrcK8S_OwnerName": "router-default",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_Namespace": "openshift-ingress-operator",
+          "SrcK8S_OwnerName": "ingress-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_Namespace": "openshift-kube-apiserver",
+          "SrcK8S_OwnerName": "revision-status-8",
+          "SrcK8S_OwnerType": "ConfigMap"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_Namespace": "openshift-kube-scheduler",
+          "SrcK8S_OwnerName": "revision-status-7",
+          "SrcK8S_OwnerType": "ConfigMap"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_Namespace": "openshift-machine-api",
+          "SrcK8S_OwnerName": "machine-api-controllers",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683714960,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "telemeter-client",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_Namespace": "openshift-oauth-apiserver",
+          "SrcK8S_OwnerName": "apiserver",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1683714600,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_OwnerName": "ip-10-0-151-208.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_OwnerName": "ip-10-0-186-75.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_OwnerName": "ip-10-0-188-152.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683714240,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_OwnerName": "ip-10-0-227-198.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_OwnerName": "ip-10-0-230-190.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_OwnerName": "ip-10-0-242-23.us-west-1.compute.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {},
+        "values": [
+          [
+            1683713520,
+            "0"
+          ]
+        ]
+      }
+    ],
+    "stats": {
+      "summary": {
+        "bytesProcessedPerSecond": 359680783,
+        "linesProcessedPerSecond": 420212,
+        "totalBytesProcessed": 63870163,
+        "totalLinesProcessed": 74619,
+        "execTime": 0.177574577,
+        "queueTime": 0.141825886,
+        "subqueries": 5,
+        "totalEntriesReturned": 346
+      },
+      "querier": {
+        "store": {
+          "totalChunksRef": 0,
+          "totalChunksDownloaded": 0,
+          "chunksDownloadTime": 0,
+          "chunk": {
+            "headChunkBytes": 0,
+            "headChunkLines": 0,
+            "decompressedBytes": 0,
+            "decompressedLines": 0,
+            "compressedBytes": 0,
+            "totalDuplicates": 0
+          }
+        }
+      },
+      "ingester": {
+        "totalReached": 16,
+        "totalChunksMatched": 431,
+        "totalBatches": 100,
+        "totalLinesSent": 46911,
+        "store": {
+          "totalChunksRef": 3,
+          "totalChunksDownloaded": 3,
+          "chunksDownloadTime": 1114137,
+          "chunk": {
+            "headChunkBytes": 12223533,
+            "headChunkLines": 14540,
+            "decompressedBytes": 51646630,
+            "decompressedLines": 60079,
+            "compressedBytes": 11320798,
+            "totalDuplicates": 0
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,4037 @@
+{
+  "status": "success",
+  "data": {
+    "resultType": "matrix",
+    "result": [
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "SrcK8S_Namespace": "netobserv"
+        },
+        "values": [
+          [
+            1683715680,
+            "0.5"
+          ],
+          [
+            1683716400,
+            "0.5"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "SrcK8S_Namespace": "openshift-apiserver"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "SrcK8S_Namespace": "openshift-apiserver-operator"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "SrcK8S_Namespace": "openshift-authentication"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "SrcK8S_Namespace": "openshift-authentication-operator"
+        },
+        "values": [
+          [
+            1683714960,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "SrcK8S_Namespace": "openshift-cloud-credential-operator"
+        },
+        "values": [
+          [
+            1683715320,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "SrcK8S_Namespace": "openshift-cluster-csi-drivers"
+        },
+        "values": [
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "SrcK8S_Namespace": "openshift-cluster-node-tuning-operator"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "SrcK8S_Namespace": "openshift-cluster-samples-operator"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "SrcK8S_Namespace": "openshift-cluster-storage-operator"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "SrcK8S_Namespace": "openshift-config-operator"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "SrcK8S_Namespace": "openshift-console"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "SrcK8S_Namespace": "openshift-console-operator"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "SrcK8S_Namespace": "openshift-controller-manager"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "SrcK8S_Namespace": "openshift-dns"
+        },
+        "values": [
+          [
+            1683714960,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "SrcK8S_Namespace": "openshift-dns-operator"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "SrcK8S_Namespace": "openshift-etcd-operator"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "SrcK8S_Namespace": "openshift-image-registry"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683713160,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "SrcK8S_Namespace": "openshift-ingress"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "SrcK8S_Namespace": "openshift-ingress-operator"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "SrcK8S_Namespace": "openshift-insights"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "SrcK8S_Namespace": "openshift-kube-apiserver"
+        },
+        "values": [
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "SrcK8S_Namespace": "openshift-kube-apiserver-operator"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "SrcK8S_Namespace": "openshift-kube-controller-manager"
+        },
+        "values": [
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "SrcK8S_Namespace": "openshift-kube-controller-manager-operator"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "SrcK8S_Namespace": "openshift-kube-scheduler"
+        },
+        "values": [
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "SrcK8S_Namespace": "openshift-kube-scheduler-operator"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "SrcK8S_Namespace": "openshift-kube-storage-version-migrator"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "SrcK8S_Namespace": "openshift-kube-storage-version-migrator-operator"
+        },
+        "values": [
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "SrcK8S_Namespace": "openshift-machine-api"
+        },
+        "values": [
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "SrcK8S_Namespace": "openshift-machine-config-operator"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "SrcK8S_Namespace": "openshift-marketplace"
+        },
+        "values": [
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "SrcK8S_Namespace": "openshift-monitoring"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "SrcK8S_Namespace": "openshift-multus"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683713520,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "SrcK8S_Namespace": "openshift-network-diagnostics"
+        },
+        "values": [
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "SrcK8S_Namespace": "openshift-oauth-apiserver"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "SrcK8S_Namespace": "openshift-operator-lifecycle-manager"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "SrcK8S_Namespace": "openshift-route-controller-manager"
+        },
+        "values": [
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "SrcK8S_Namespace": "openshift-service-ca"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "SrcK8S_Namespace": "openshift-service-ca-operator"
+        },
+        "values": [
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "netobserv",
+          "SrcK8S_Namespace": "netobserv"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "netobserv",
+          "SrcK8S_Namespace": "openshift-console"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "netobserv",
+          "SrcK8S_Namespace": "openshift-kube-apiserver-operator"
+        },
+        "values": [
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "netobserv"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-apiserver",
+          "SrcK8S_Namespace": "openshift-monitoring"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-apiserver",
+          "SrcK8S_Namespace": "openshift-network-diagnostics"
+        },
+        "values": [
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-apiserver"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-apiserver-operator",
+          "SrcK8S_Namespace": "openshift-monitoring"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-apiserver-operator"
+        },
+        "values": [
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-authentication",
+          "SrcK8S_Namespace": "openshift-authentication-operator"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-authentication",
+          "SrcK8S_Namespace": "openshift-ingress"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-authentication",
+          "SrcK8S_Namespace": "openshift-monitoring"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-authentication"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-authentication-operator",
+          "SrcK8S_Namespace": "openshift-authentication"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683713520,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-authentication-operator",
+          "SrcK8S_Namespace": "openshift-kube-apiserver"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-authentication-operator"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-cloud-credential-operator",
+          "SrcK8S_Namespace": "openshift-kube-apiserver-operator"
+        },
+        "values": [
+          [
+            1683715320,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-cloud-credential-operator",
+          "SrcK8S_Namespace": "openshift-monitoring"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-cluster-csi-drivers",
+          "SrcK8S_Namespace": "openshift-monitoring"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-cluster-csi-drivers"
+        },
+        "values": [
+          [
+            1683715680,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-cluster-node-tuning-operator",
+          "SrcK8S_Namespace": "openshift-kube-apiserver-operator"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-cluster-node-tuning-operator"
+        },
+        "values": [
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-cluster-samples-operator",
+          "SrcK8S_Namespace": "openshift-monitoring"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-cluster-samples-operator"
+        },
+        "values": [
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-cluster-storage-operator",
+          "SrcK8S_Namespace": "openshift-kube-apiserver-operator"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-cluster-storage-operator",
+          "SrcK8S_Namespace": "openshift-monitoring"
+        },
+        "values": [
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-cluster-storage-operator"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-config-operator",
+          "SrcK8S_Namespace": "openshift-monitoring"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-config-operator"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-console",
+          "SrcK8S_Namespace": "netobserv"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-console",
+          "SrcK8S_Namespace": "openshift-ingress"
+        },
+        "values": [
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-console",
+          "SrcK8S_Namespace": "openshift-monitoring"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-console"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-console-operator",
+          "SrcK8S_Namespace": "openshift-kube-apiserver-operator"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-console-operator",
+          "SrcK8S_Namespace": "openshift-monitoring"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-console-operator"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-controller-manager"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-controller-manager-operator",
+          "SrcK8S_Namespace": "openshift-monitoring"
+        },
+        "values": [
+          [
+            1683715680,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-controller-manager-operator"
+        },
+        "values": [
+          [
+            1683714240,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-dns",
+          "SrcK8S_Namespace": "netobserv"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-dns",
+          "SrcK8S_Namespace": "openshift-apiserver"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-dns",
+          "SrcK8S_Namespace": "openshift-authentication-operator"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683713520,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-dns",
+          "SrcK8S_Namespace": "openshift-console"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-dns",
+          "SrcK8S_Namespace": "openshift-console-operator"
+        },
+        "values": [
+          [
+            1683714240,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-dns",
+          "SrcK8S_Namespace": "openshift-etcd-operator"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-dns",
+          "SrcK8S_Namespace": "openshift-image-registry"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-dns",
+          "SrcK8S_Namespace": "openshift-ingress-operator"
+        },
+        "values": [
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-dns",
+          "SrcK8S_Namespace": "openshift-insights"
+        },
+        "values": [
+          [
+            1683716040,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-dns",
+          "SrcK8S_Namespace": "openshift-kube-apiserver"
+        },
+        "values": [
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-dns",
+          "SrcK8S_Namespace": "openshift-kube-apiserver-operator"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-dns",
+          "SrcK8S_Namespace": "openshift-kube-controller-manager-operator"
+        },
+        "values": [
+          [
+            1683716040,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-dns",
+          "SrcK8S_Namespace": "openshift-kube-scheduler"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-dns",
+          "SrcK8S_Namespace": "openshift-machine-api"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-dns",
+          "SrcK8S_Namespace": "openshift-monitoring"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-dns",
+          "SrcK8S_Namespace": "openshift-network-diagnostics"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-dns"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-dns-operator",
+          "SrcK8S_Namespace": "openshift-monitoring"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-dns-operator"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-etcd-operator",
+          "SrcK8S_Namespace": "openshift-monitoring"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-etcd-operator"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-image-registry",
+          "SrcK8S_Namespace": "openshift-monitoring"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-image-registry"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-ingress",
+          "SrcK8S_Namespace": "openshift-authentication"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-ingress",
+          "SrcK8S_Namespace": "openshift-console"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-ingress",
+          "SrcK8S_Namespace": "openshift-ingress-canary"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-ingress",
+          "SrcK8S_Namespace": "openshift-kube-apiserver"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-ingress",
+          "SrcK8S_Namespace": "openshift-monitoring"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-ingress"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-ingress-canary",
+          "SrcK8S_Namespace": "openshift-ingress"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-ingress-operator",
+          "SrcK8S_Namespace": "openshift-monitoring"
+        },
+        "values": [
+          [
+            1683715320,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-ingress-operator"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-insights",
+          "SrcK8S_Namespace": "openshift-monitoring"
+        },
+        "values": [
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-insights"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-kube-apiserver",
+          "SrcK8S_Namespace": "openshift-authentication-operator"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-kube-apiserver",
+          "SrcK8S_Namespace": "openshift-ingress"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-kube-apiserver",
+          "SrcK8S_Namespace": "openshift-kube-apiserver-operator"
+        },
+        "values": [
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-kube-apiserver",
+          "SrcK8S_Namespace": "openshift-monitoring"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-kube-apiserver",
+          "SrcK8S_Namespace": "openshift-network-diagnostics"
+        },
+        "values": [
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-kube-apiserver"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-kube-apiserver-operator",
+          "SrcK8S_Namespace": "netobserv"
+        },
+        "values": [
+          [
+            1683714960,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-kube-apiserver-operator",
+          "SrcK8S_Namespace": "openshift-cluster-storage-operator"
+        },
+        "values": [
+          [
+            1683714600,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-kube-apiserver-operator",
+          "SrcK8S_Namespace": "openshift-kube-apiserver"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683713880,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-kube-apiserver-operator",
+          "SrcK8S_Namespace": "openshift-monitoring"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-kube-apiserver-operator"
+        },
+        "values": [
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-kube-controller-manager",
+          "SrcK8S_Namespace": "openshift-kube-apiserver-operator"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-kube-controller-manager"
+        },
+        "values": [
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-kube-controller-manager-operator",
+          "SrcK8S_Namespace": "openshift-monitoring"
+        },
+        "values": [
+          [
+            1683714960,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-kube-controller-manager-operator"
+        },
+        "values": [
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-kube-scheduler",
+          "SrcK8S_Namespace": "openshift-kube-apiserver-operator"
+        },
+        "values": [
+          [
+            1683715680,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-kube-scheduler",
+          "SrcK8S_Namespace": "openshift-monitoring"
+        },
+        "values": [
+          [
+            1683714960,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-kube-scheduler",
+          "SrcK8S_Namespace": "openshift-network-diagnostics"
+        },
+        "values": [
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-kube-scheduler"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-kube-scheduler-operator",
+          "SrcK8S_Namespace": "openshift-monitoring"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-kube-scheduler-operator"
+        },
+        "values": [
+          [
+            1683714960,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-kube-storage-version-migrator-operator"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-machine-api",
+          "SrcK8S_Namespace": "openshift-kube-apiserver-operator"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-machine-api",
+          "SrcK8S_Namespace": "openshift-monitoring"
+        },
+        "values": [
+          [
+            1683714240,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-machine-api"
+        },
+        "values": [
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-machine-config-operator",
+          "SrcK8S_Namespace": "openshift-monitoring"
+        },
+        "values": [
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-machine-config-operator"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683713160,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-marketplace",
+          "SrcK8S_Namespace": "openshift-monitoring"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-marketplace",
+          "SrcK8S_Namespace": "openshift-operator-lifecycle-manager"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-marketplace"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_Namespace": "openshift-apiserver"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_Namespace": "openshift-apiserver-operator"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_Namespace": "openshift-authentication"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_Namespace": "openshift-authentication-operator"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_Namespace": "openshift-cloud-credential-operator"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_Namespace": "openshift-cluster-node-tuning-operator"
+        },
+        "values": [
+          [
+            1683714960,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_Namespace": "openshift-cluster-samples-operator"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_Namespace": "openshift-cluster-storage-operator"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_Namespace": "openshift-config-operator"
+        },
+        "values": [
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_Namespace": "openshift-console"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_Namespace": "openshift-console-operator"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_Namespace": "openshift-controller-manager"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_Namespace": "openshift-controller-manager-operator"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_Namespace": "openshift-dns"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_Namespace": "openshift-dns-operator"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683713160,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_Namespace": "openshift-etcd-operator"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_Namespace": "openshift-image-registry"
+        },
+        "values": [
+          [
+            1683715680,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_Namespace": "openshift-ingress"
+        },
+        "values": [
+          [
+            1683714960,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_Namespace": "openshift-ingress-operator"
+        },
+        "values": [
+          [
+            1683714960,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_Namespace": "openshift-insights"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_Namespace": "openshift-kube-apiserver"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_Namespace": "openshift-kube-apiserver-operator"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_Namespace": "openshift-kube-controller-manager-operator"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_Namespace": "openshift-kube-scheduler"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_Namespace": "openshift-kube-scheduler-operator"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_Namespace": "openshift-machine-api"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_Namespace": "openshift-machine-config-operator"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_Namespace": "openshift-marketplace"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_Namespace": "openshift-multus"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_Namespace": "openshift-network-diagnostics"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_Namespace": "openshift-operator-lifecycle-manager"
+        },
+        "values": [
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_Namespace": "openshift-route-controller-manager"
+        },
+        "values": [
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_Namespace": "openshift-service-ca-operator"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683713520,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-multus",
+          "SrcK8S_Namespace": "openshift-kube-apiserver-operator"
+        },
+        "values": [
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-multus",
+          "SrcK8S_Namespace": "openshift-monitoring"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-multus"
+        },
+        "values": [
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-network-diagnostics",
+          "SrcK8S_Namespace": "openshift-apiserver"
+        },
+        "values": [
+          [
+            1683714600,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-network-diagnostics",
+          "SrcK8S_Namespace": "openshift-kube-scheduler"
+        },
+        "values": [
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-network-diagnostics",
+          "SrcK8S_Namespace": "openshift-monitoring"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-network-diagnostics",
+          "SrcK8S_Namespace": "openshift-network-diagnostics"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-network-diagnostics"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-oauth-apiserver"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-operator-lifecycle-manager",
+          "SrcK8S_Namespace": "openshift-marketplace"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683713520,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-operator-lifecycle-manager",
+          "SrcK8S_Namespace": "openshift-monitoring"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-operator-lifecycle-manager"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683714600,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-route-controller-manager",
+          "SrcK8S_Namespace": "openshift-monitoring"
+        },
+        "values": [
+          [
+            1683714960,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-route-controller-manager"
+        },
+        "values": [
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-service-ca-operator",
+          "SrcK8S_Namespace": "openshift-monitoring"
+        },
+        "values": [
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-service-ca-operator"
+        },
+        "values": [
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_Namespace": "openshift-apiserver"
+        },
+        "values": [
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_Namespace": "openshift-authentication-operator"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_Namespace": "openshift-cloud-network-config-controller"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_Namespace": "openshift-console"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_Namespace": "openshift-console-operator"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_Namespace": "openshift-dns"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_Namespace": "openshift-etcd-operator"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_Namespace": "openshift-image-registry"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_Namespace": "openshift-ingress"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_Namespace": "openshift-ingress-operator"
+        },
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_Namespace": "openshift-kube-apiserver"
+        },
+        "values": [
+          [
+            1683714600,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_Namespace": "openshift-machine-api"
+        },
+        "values": [
+          [
+            1683714960,
+            "0"
+          ],
+          [
+            1683715320,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_Namespace": "openshift-monitoring"
+        },
+        "values": [
+          [
+            1683712800,
+            "0"
+          ],
+          [
+            1683713520,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_Namespace": "openshift-network-diagnostics"
+        },
+        "values": [
+          [
+            1683714240,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_Namespace": "openshift-oauth-apiserver"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683714960,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_Namespace": "openshift-operator-lifecycle-manager"
+        },
+        "values": [
+          [
+            1683713880,
+            "0"
+          ],
+          [
+            1683715680,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ],
+          [
+            1683716400,
+            "0"
+          ]
+        ]
+      },
+      {
+        "metric": {},
+        "values": [
+          [
+            1683713160,
+            "0"
+          ],
+          [
+            1683716040,
+            "0"
+          ]
+        ]
+      }
+    ],
+    "stats": {
+      "summary": {
+        "bytesProcessedPerSecond": 386962227,
+        "linesProcessedPerSecond": 452084,
+        "totalBytesProcessed": 63870163,
+        "totalLinesProcessed": 74619,
+        "execTime": 0.165055291,
+        "queueTime": 0.119809228,
+        "subqueries": 5,
+        "totalEntriesReturned": 210
+      },
+      "querier": {
+        "store": {
+          "totalChunksRef": 0,
+          "totalChunksDownloaded": 0,
+          "chunksDownloadTime": 0,
+          "chunk": {
+            "headChunkBytes": 0,
+            "headChunkLines": 0,
+            "decompressedBytes": 0,
+            "decompressedLines": 0,
+            "compressedBytes": 0,
+            "totalDuplicates": 0
+          }
+        }
+      },
+      "ingester": {
+        "totalReached": 16,
+        "totalChunksMatched": 431,
+        "totalBatches": 100,
+        "totalLinesSent": 46911,
+        "store": {
+          "totalChunksRef": 3,
+          "totalChunksDownloaded": 3,
+          "chunksDownloadTime": 1036341,
+          "chunk": {
+            "headChunkBytes": 12223533,
+            "headChunkLines": 14540,
+            "decompressedBytes": 51646630,
+            "decompressedLines": 60079,
+            "compressedBytes": 11320798,
+            "totalDuplicates": 0
+          }
+        }
+      }
+    }
+  }
+}

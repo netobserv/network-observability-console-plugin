@@ -3,44 +3,56 @@ package lokiclientmock
 import (
 	"os"
 	"strings"
+
+	"github.com/sirupsen/logrus"
 )
+
+var mlog = logrus.WithField("module", "lokiclientmock")
 
 type LokiClientMock struct {
 }
 
 func (o *LokiClientMock) Get(url string) ([]byte, int, error) {
 	var path string
+	mlog.Debugf("Get url: %s", url)
 
 	isLabel := strings.Contains(url, "/label/")
 	if isLabel {
 		path = "mocks/loki/namespaces.json"
 	} else {
-		isTopology := strings.Contains(url, "query=topk")
-		if isTopology {
-			if strings.Contains(url, "scope=app") {
-				path = "mocks/loki/topology_app.json"
-			} else if strings.Contains(url, "scope=host") {
-				path = "mocks/loki/topology_host.json"
-			} else if strings.Contains(url, "scope=namespace") {
-				path = "mocks/loki/topology_namespace.json"
-			} else if strings.Contains(url, "scope=owner") {
-				path = "mocks/loki/topology_owner.json"
+		if strings.Contains(url, "query=topk") {
+			path = "mocks/loki/topology"
+
+			if strings.Contains(url, "|unwrap%20TcpDrop") {
+				path += "_dropped"
+			}
+
+			if strings.Contains(url, "by(app)") {
+				path += "_app.json"
+			} else if strings.Contains(url, "by(SrcK8S_HostName,DstK8S_HostName)") {
+				path += "_host.json"
+			} else if strings.Contains(url, "by(SrcK8S_Namespace,DstK8S_Namespace)") {
+				path += "_namespace.json"
+			} else if strings.Contains(url, "by(SrcK8S_OwnerName,SrcK8S_OwnerType,DstK8S_OwnerName,DstK8S_OwnerType,SrcK8S_Namespace,DstK8S_Namespace)") {
+				path += "_owner.json"
 			} else {
-				path = "mocks/loki/topology_resource.json"
+				path += "_resource.json"
 			}
 		} else {
+			path = "mocks/loki/flows"
 			if strings.Contains(url, "|~`Packets\":0[,}]|~`TcpDropPackets\":[1-9]*[,}]") {
-				path = "mocks/loki/flows_dropped.json"
+				path += "_dropped.json"
 			} else if strings.Contains(url, "|~`TcpDropPackets\":[1-9]*[,}]") {
-				path = "mocks/loki/flows_has_dropped.json"
+				path += "_has_dropped.json"
 			} else if strings.Contains(url, "|~`Packets\":[1-9]*[,}]") {
-				path = "mocks/loki/flows_has_sent.json"
+				path += "_sent.json"
 			} else {
-				path = "mocks/loki/flows.json"
+				path += ".json"
 			}
 		}
 	}
 
+	mlog.Debugf("Reading file path: %s", path)
 	file, err := os.ReadFile(path)
 	if err != nil {
 		return nil, 500, err

@@ -2,33 +2,17 @@
   "status": "success",
   "data": {
     "resultType": "streams",
-    "result": [
-      {
-        "stream": {
-          "DstK8S_OwnerName": "router-default",
-          "FlowDirection": "0",
-          "SrcK8S_Namespace": "openshift-console-operator",
-          "SrcK8S_OwnerName": "console-operator",
-          "app": "netobserv-flowcollector",
-          "DstK8S_Namespace": "openshift-ingress"
-        },
-        "values": [
-          [
-            "1667835814080000000",
-            "{\"DstK8S_HostName\":\"ci-ln-xz1644k-72292-ch8kk-worker-a-6rjxl\",\"SrcK8S_HostIP\":\"10.0.0.5\",\"SrcK8S_Type\":\"Pod\",\"DstMac\":\"0A:58:0A:81:02:02\",\"TimeReceived\":1667835814,\"Interface\":\"vxlan_sys_4789\",\"DstAddr\":\"10.129.2.2\",\"SrcMac\":\"66:CB:09:C1:55:04\",\"DstK8S_HostIP\":\"10.0.128.2\",\"SrcPort\":36720,\"DstPort\":443,\"DstK8S_Name\":\"router-default-798cd94f5b-26whx\",\"DstK8S_OwnerType\":\"Deployment\",\"Etype\":2048,\"DstK8S_Type\":\"Pod\",\"TimeFlowEndMs\":1667835814080,\"SrcK8S_Name\":\"console-operator-7b68655f7c-zksgq\",\"Proto\":6,\"SrcK8S_HostName\":\"ci-ln-xz1644k-72292-ch8kk-master-0\",\"SrcAddr\":\"10.128.0.35\",\"TimeFlowStartMs\":1667835814080,\"Packets\":0,\"TcpDropPackets\":10,\"Bytes\":0,\"TcpDropBytes\":128,\"SrcK8S_OwnerType\":\"Deployment\"}"
-          ]
-        ]
-      }
-    ],
+    "result": [],
     "stats": {
       "summary": {
-        "bytesProcessedPerSecond": 591053237,
-        "linesProcessedPerSecond": 1144301,
-        "totalBytesProcessed": 18068858,
-        "totalLinesProcessed": 34982,
-        "execTime": 0.03057061,
-        "queueTime": 0.000092387,
-        "subqueries": 1
+        "bytesProcessedPerSecond": 0,
+        "linesProcessedPerSecond": 0,
+        "totalBytesProcessed": 0,
+        "totalLinesProcessed": 0,
+        "execTime": 0.127880794,
+        "queueTime": 2.418521599,
+        "subqueries": 61,
+        "totalEntriesReturned": 0
       },
       "querier": {
         "store": {
@@ -46,20 +30,20 @@
         }
       },
       "ingester": {
-        "totalReached": 1,
-        "totalChunksMatched": 343,
-        "totalBatches": 1,
-        "totalLinesSent": 100,
+        "totalReached": 208,
+        "totalChunksMatched": 0,
+        "totalBatches": 0,
+        "totalLinesSent": 0,
         "store": {
           "totalChunksRef": 0,
           "totalChunksDownloaded": 0,
           "chunksDownloadTime": 0,
           "chunk": {
-            "headChunkBytes": 10955233,
-            "headChunkLines": 20460,
-            "decompressedBytes": 7113625,
-            "decompressedLines": 14522,
-            "compressedBytes": 1491681,
+            "headChunkBytes": 0,
+            "headChunkLines": 0,
+            "decompressedBytes": 0,
+            "decompressedLines": 0,
+            "compressedBytes": 0,
             "totalDuplicates": 0
           }
         }
