@@ -26,6 +26,7 @@ type frontendConfig struct {
 
 func readConfigFile(filename string) (*frontendConfig, error) {
 	cfg := frontendConfig{
+		RecordTypes:  []string{"flowLog"},
 		QuickFilters: []QuickFilter{},
 	}
 	if len(filename) == 0 {

@@ -19,6 +19,7 @@ export type PanelKebabOptions = {
   showOthers?: boolean;
   showInternal?: boolean;
   showOutOfScope?: boolean;
+  compareToDropped?: boolean;
 };
 
 export type PanelKebabProps = {
@@ -56,6 +57,13 @@ export const PanelKebab: React.FC<PanelKebabProps> = ({ id, options, setOptions,
   const setShowOutOfScope = React.useCallback(
     (checked: boolean) => {
       setOptions({ ...options, showOutOfScope: checked });
+    },
+    [setOptions, options]
+  );
+
+  const setCompareToDropped = React.useCallback(
+    (checked: boolean) => {
+      setOptions({ ...options, compareToDropped: checked });
     },
     [setOptions, options]
   );
@@ -107,6 +115,7 @@ export const PanelKebab: React.FC<PanelKebabProps> = ({ id, options, setOptions,
           content={
             <Text component={TextVariants.p}>
               {t(
+                // eslint-disable-next-line max-len
                 'Show scope-internal traffic, depending on the selected scope (e.g. node-internal traffic, namespace-internal traffic)'
               )}
             </Text>
@@ -139,6 +148,23 @@ export const PanelKebab: React.FC<PanelKebabProps> = ({ id, options, setOptions,
             onChange={setShowOutOfScope}
             label={t('Show out of scope')}
             aria-label="Show out of scope"
+          />
+        </Tooltip>
+      </DropdownItem>
+    );
+  }
+  if (options.compareToDropped !== undefined) {
+    items.push(
+      <DropdownItem key={`${id}-compare-to-dropped`}>
+        <Tooltip
+          content={<Text component={TextVariants.p}>{t('Compare to total dropped instead of total sent.')}</Text>}
+        >
+          <Checkbox
+            id={`${id}-compare-to-dropped`}
+            isChecked={options.compareToDropped}
+            onChange={setCompareToDropped}
+            label={t('Compare to total dropped')}
+            aria-label="SCompare to total dropped"
           />
         </Tooltip>
       </DropdownItem>

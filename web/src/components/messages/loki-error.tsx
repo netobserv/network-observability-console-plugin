@@ -164,12 +164,10 @@ export const LokiError: React.FC<Props> = ({ title, error }) => {
                   </Text>
                   {error.includes('too many outstanding requests') && (
                     <Text component={TextVariants.blockquote}>
-                      {
+                      {t(
                         // eslint-disable-next-line max-len
-                        t(
-                          'Ensure Loki config contains "parallelise_shardable_queries: true" and "max_outstanding_requests_per_tenant: 2048"'
-                        )
-                      }
+                        'Ensure Loki config contains "parallelise_shardable_queries: true" and "max_outstanding_requests_per_tenant: 2048"'
+                      )}
                     </Text>
                   )}
                 </>

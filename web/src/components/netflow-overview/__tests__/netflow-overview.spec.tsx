@@ -19,6 +19,7 @@ describe('<NetflowOverview />', () => {
     recordType: 'flowLog' as RecordType,
     metricType: 'bytes' as MetricType,
     metrics: [],
+    droppedMetrics: [],
     totalMetric: undefined,
     filterActionLinks: <></>,
     truncateLength: TruncateLength.M

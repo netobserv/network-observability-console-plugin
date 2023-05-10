@@ -2,6 +2,7 @@ import { RecordType } from '../model/flow-query';
 
 // Please keep this file documented: it is used in doc generation
 // To regenerate doc, run `make generate-doc` - and also check this page:
+// eslint-disable-next-line max-len
 // https://github.com/netobserv/network-observability-operator/blob/main/docs/GeneratingAsciidocAPI.md#generate-asciidoc-for-flows-json-format-reference
 
 export interface Record {

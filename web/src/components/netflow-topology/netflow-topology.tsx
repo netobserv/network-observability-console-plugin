@@ -25,6 +25,7 @@ export const NetflowTopology: React.FC<{
   metricScope: MetricScope;
   setMetricScope: (ms: MetricScope) => void;
   metrics: TopologyMetrics[];
+  droppedMetrics: TopologyMetrics[];
   options: TopologyOptions;
   setOptions: (o: TopologyOptions) => void;
   filters: Filter[];
@@ -43,6 +44,7 @@ export const NetflowTopology: React.FC<{
   metricScope,
   setMetricScope,
   metrics,
+  droppedMetrics,
   options,
   setOptions,
   filters,
@@ -104,6 +106,7 @@ export const NetflowTopology: React.FC<{
           metricScope={metricScope}
           setMetricScope={setMetricScope}
           metrics={metrics}
+          droppedMetrics={droppedMetrics}
           options={options}
           setOptions={setOptions}
           filters={filters}

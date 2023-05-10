@@ -340,10 +340,10 @@ export const SummaryPanel: React.FC<{
   flows: Record[] | undefined;
   metrics: TopologyMetrics[] | undefined;
   appMetrics: TopologyMetrics | undefined;
+  appDroppedMetrics: TopologyMetrics | undefined;
   type: RecordType;
   metricType: MetricType;
   stats: Stats | undefined;
-  appStats: Stats | undefined;
   limit: number;
   range: number | TimeRange;
   lastRefresh: Date | undefined;

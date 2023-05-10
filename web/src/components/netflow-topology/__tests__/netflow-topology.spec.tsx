@@ -22,6 +22,7 @@ describe('<NetflowTopology />', () => {
     metricScope: 'host' as MetricScope,
     setMetricScope: jest.fn(),
     metrics: [] as TopologyMetrics[],
+    droppedMetrics: [] as TopologyMetrics[],
     layout: LayoutName.Cola,
     options: DefaultOptions,
     setOptions: jest.fn(),

@@ -58,6 +58,14 @@ g.netobserv.topology.pf-topology__edge.edge-filtered.dark>.pf-topology-connector
   fill: #773D00;
 }
 
+g.netobserv.topology.pf-topology__edge.edge-has-drops>.pf-topology__edge__link,
+g.netobserv.topology.pf-topology__edge.edge-has-drops>.pf-topology-connector-arrow,
+g.netobserv.topology.pf-topology__edge.edge-has-drops.dark>.pf-topology__edge__link,
+g.netobserv.topology.pf-topology__edge.edge-has-drops.dark>.pf-topology-connector-arrow {
+  stroke: #C9190B;
+  fill: #A30000;
+}
+
 g.netobserv.topology>g>.pf-topology__node__background {
   fill: #FFFFFF;
 }

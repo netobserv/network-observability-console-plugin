@@ -176,7 +176,6 @@ export const NetflowTraffic: React.FC<{
   const [loading, setLoading] = React.useState(true);
   const [flows, setFlows] = React.useState<Record[]>([]);
   const [stats, setStats] = React.useState<Stats | undefined>(undefined);
-  const [appStats, setAppStats] = React.useState<Stats | undefined>(undefined);
   const [overviewTruncateLength, setOverviewTruncateLength] = useLocalStorage<TruncateLength>(
     LOCAL_STORAGE_OVERVIEW_TRUNCATE_KEY,
     TruncateLength.M
@@ -186,7 +185,9 @@ export const NetflowTraffic: React.FC<{
     DefaultOptions
   );
   const [metrics, setMetrics] = React.useState<TopologyMetrics[]>([]);
+  const [droppedMetrics, setDroppedMetrics] = React.useState<TopologyMetrics[]>([]);
   const [totalMetric, setTotalMetric] = React.useState<TopologyMetrics | undefined>(undefined);
+  const [totalDroppedMetric, setTotalDroppedMetric] = React.useState<TopologyMetrics | undefined>(undefined);
   const [isShowQuerySummary, setShowQuerySummary] = React.useState<boolean>(false);
   const [lastRefresh, setLastRefresh] = React.useState<Date | undefined>(undefined);
   const [error, setError] = React.useState<string | undefined>();
@@ -254,6 +255,7 @@ export const NetflowTraffic: React.FC<{
       setFilters(f);
       setFlows([]);
       setTotalMetric(undefined);
+      setTotalDroppedMetric(undefined);
       setWarningMessage(undefined);
     },
     [setFilters, setFlows, setWarningMessage]
@@ -296,6 +298,7 @@ export const NetflowTraffic: React.FC<{
       setFlows([]);
       setMetrics([]);
       setTotalMetric(undefined);
+      setTotalDroppedMetric(undefined);
     }
     setSelectedViewId(view);
   };
@@ -394,6 +397,8 @@ export const NetflowTraffic: React.FC<{
     setLoading(true);
     setError(undefined);
     const fq = buildFlowQuery();
+    const droppedType = fq.type === 'bytes' ? 'droppedBytes' : 'droppedPackets';
+
     const promises: Promise<RecordsResult | TopologyResult>[] = [];
     switch (selectedViewId) {
       case 'table':
@@ -406,17 +411,30 @@ export const NetflowTraffic: React.FC<{
         promises.push(getFlows(tableQuery));
         if (showHistogram) {
           promises.push(getTopology({ ...fq, scope: 'app' }, range));
+          promises.push(getTopology({ ...fq, scope: 'app', type: droppedType }, range));
         }
         manageWarnings(
           Promise.all(promises)
             .then(results => {
+              //get stats from first result
+              const stats = results[0].stats;
+
+              //set flows
               setFlows((results[0] as RecordsResult).records);
-              setStats(results[0].stats);
+
               //set app metrics
               if (results.length > 1) {
                 setTotalMetric((results[1] as TopologyResult).metrics[0]);
-                setAppStats(results[1].stats);
+                stats.limitReached = stats.limitReached || results[1].stats.limitReached;
+                stats.numQueries += results[1].stats.numQueries;
+                setTotalDroppedMetric((results[2] as TopologyResult).metrics[0]);
+                stats.limitReached = stats.limitReached || results[2].stats.limitReached;
+                stats.numQueries += results[2].stats.numQueries;
+              } else {
+                setTotalMetric(undefined);
+                setTotalDroppedMetric(undefined);
               }
+              setStats(stats);
             })
             .catch(err => {
               setFlows([]);
@@ -433,28 +451,48 @@ export const NetflowTraffic: React.FC<{
         break;
       case 'overview':
       case 'topology':
-        //run same query on current scope / app scope for total flows
+        //TODO: manage each metrics separately
         promises.push(getTopology(fq, range));
+        //get dropped bytes or packets
+        promises.push(getTopology({ ...fq, type: droppedType }, range));
+        //run same query on current scope / app scope for total flows
         if (selectedViewId === 'overview') {
           promises.push(getTopology({ ...fq, scope: 'app' }, range));
+          promises.push(getTopology({ ...fq, scope: 'app', type: droppedType }, range));
         }
+
         manageWarnings(
           Promise.all(promises)
             .then(results => {
+              //get stats from first result
+              const stats = results[0].stats;
+
               //set metrics
               setMetrics((results[0] as TopologyResult).metrics);
-              setStats(results[0].stats);
+
+              //set dropped metrics
+              setDroppedMetrics((results[1] as TopologyResult).metrics);
+              stats.limitReached = stats.limitReached || results[1].stats.limitReached;
+              stats.numQueries += results[1].stats.numQueries;
+
               //set app metrics
-              if (results.length > 1) {
-                setTotalMetric((results[1] as TopologyResult).metrics[0]);
-                setAppStats(results[1].stats);
+              if (results.length > 2) {
+                setTotalMetric((results[2] as TopologyResult).metrics[0]);
+                stats.limitReached = stats.limitReached || results[2].stats.limitReached;
+                stats.numQueries += results[2].stats.numQueries;
+
+                setTotalDroppedMetric((results[3] as TopologyResult).metrics[0]);
+                stats.limitReached = stats.limitReached || results[3].stats.limitReached;
+                stats.numQueries += results[3].stats.numQueries;
               } else {
                 setTotalMetric(undefined);
-                setAppStats(undefined);
+                setTotalDroppedMetric(undefined);
               }
+              setStats(stats);
             })
             .catch(err => {
               setMetrics([]);
+              setDroppedMetrics([]);
               setTotalMetric(undefined);
               setError(getHTTPErrorDetails(err));
               setWarningMessage(undefined);
@@ -905,10 +943,10 @@ export const NetflowTraffic: React.FC<{
           flows={flows}
           metrics={metrics}
           appMetrics={totalMetric}
+          appDroppedMetrics={totalDroppedMetric}
           type={recordType}
           metricType={metricType}
           stats={stats}
-          appStats={appStats}
           limit={limit}
           lastRefresh={lastRefresh}
           range={range}
@@ -956,7 +994,9 @@ export const NetflowTraffic: React.FC<{
             recordType={recordType}
             metricType={metricType}
             metrics={metrics}
+            droppedMetrics={droppedMetrics}
             totalMetric={totalMetric}
+            totalDroppedMetric={totalDroppedMetric}
             loading={loading}
             error={error}
             isDark={isDarkTheme}
@@ -997,6 +1037,7 @@ export const NetflowTraffic: React.FC<{
             metricScope={metricScope}
             setMetricScope={setMetricScope}
             metrics={metrics}
+            droppedMetrics={droppedMetrics}
             options={topologyOptions}
             setOptions={setTopologyOptions}
             filters={filters}
@@ -1021,7 +1062,9 @@ export const NetflowTraffic: React.FC<{
           {_.isEmpty(flows) ? (
             <MetricsQuerySummary
               metrics={metrics}
+              droppedMetrics={droppedMetrics}
               appMetrics={totalMetric}
+              appDroppedMetrics={totalDroppedMetric}
               metricType={metricType}
               lastRefresh={lastRefresh}
               isShowQuerySummary={isShowQuerySummary}
@@ -1242,6 +1285,7 @@ export const NetflowTraffic: React.FC<{
               id={'histogram'}
               loading={loading}
               totalMetric={totalMetric}
+              totalDroppedMetric={totalDroppedMetric}
               limit={limit}
               isDark={isDarkTheme}
               range={histogramRange}

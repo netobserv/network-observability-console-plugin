@@ -41,6 +41,7 @@ type BaseEdgeProps = {
   endTerminalSize?: number;
   shadowed?: boolean;
   filtered?: boolean;
+  drops?: number;
   highlighted?: boolean;
   isDark?: boolean;
   tag?: string;
@@ -71,6 +72,7 @@ const BaseEdge: React.FC<BaseEdgeProps> = ({
   endTerminalSize = 14,
   shadowed,
   filtered,
+  drops,
   highlighted,
   isDark,
   tag,
@@ -108,6 +110,7 @@ const BaseEdge: React.FC<BaseEdgeProps> = ({
     'topology',
     shadowed && 'shadowed',
     filtered && 'edge-filtered',
+    drops && 'edge-has-drops',
     highlighted && 'edge-highlighted',
     isDark && 'dark'
   );

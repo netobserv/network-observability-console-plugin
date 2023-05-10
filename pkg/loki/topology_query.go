@@ -38,9 +38,15 @@ func NewTopologyQuery(cfg *Config, start, end, limit, rateInterval, step, metric
 	switch metricType {
 	case "count":
 		f = "count_over_time"
+	case "droppedPackets":
+		f = "rate"
+		t = "TcpDropPackets"
 	case "packets":
 		f = "rate"
 		t = "Packets"
+	case "droppedBytes":
+		f = "rate"
+		t = "TcpDropBytes"
 	default:
 		f = "rate"
 		t = "Bytes"

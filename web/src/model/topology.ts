@@ -306,6 +306,7 @@ const generateEdge = (
   sourceId: string,
   targetId: string,
   stat: number,
+  droppedStat: number,
   options: TopologyOptions,
   shadowed = false,
   filtered = false,
@@ -337,13 +338,15 @@ const generateEdge = (
       endTerminalStatus: NodeStatus.default,
       tag: getEdgeTag(stat, options, t),
       tagStatus: getTagStatus(stat, options.maxEdgeStat),
-      bps: stat
+      bps: stat,
+      drops: droppedStat
     }
   };
 };
 
 export const generateDataModel = (
   metrics: TopologyMetrics[],
+  droppedMetrics: TopologyMetrics[],
   options: TopologyOptions,
   metricScope: MetricScope,
   searchValue: string,
@@ -433,11 +436,13 @@ export const generateDataModel = (
     sourceId: string,
     targetId: string,
     stats: MetricStats,
+    droppedStats: MetricStats | undefined,
     shadowed = false,
     filtered = false,
     t: TFunction
   ): EdgeModel => {
     const stat = getStat(stats, options.metricFunction);
+    const droppedStat = droppedStats ? getStat(droppedStats, options.metricFunction) : 0;
     let edge = edges.find(
       e =>
         (e.data.sourceId === sourceId && e.data.targetId === targetId) ||
@@ -456,10 +461,11 @@ export const generateDataModel = (
         startTerminalType: edge.data.sourceId !== sourceId ? EdgeTerminalType.directional : edge.data.startTerminalType,
         tag: getEdgeTag(stat, options, t),
         tagStatus: getTagStatus(stat, options.maxEdgeStat),
-        bps: stat
+        bps: stat,
+        drops: droppedStat
       };
     } else {
-      edge = generateEdge(sourceId, targetId, stat, opts, shadowed, filtered, highlightedId, t, isDark);
+      edge = generateEdge(sourceId, targetId, stat, droppedStat, opts, shadowed, filtered, highlightedId, t, isDark);
       edges.push(edge);
     }
 
@@ -520,10 +526,12 @@ export const generateDataModel = (
     const dstNode = addNode(peerToNodeData(m.destination), metricScope);
 
     if (options.edges && srcNode && dstNode && srcNode.id !== dstNode.id) {
+      const drops = droppedMetrics.find(dm => dm.source.id === m.source.id && dm.destination.id === m.destination.id);
       addEdge(
         srcNode.id,
         dstNode.id,
         m.stats,
+        drops?.stats,
         srcNode.data.shadowed || dstNode.data.shadowed,
         srcNode.data.filtered || dstNode.data.filtered,
         t

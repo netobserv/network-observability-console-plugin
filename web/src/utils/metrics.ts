@@ -252,8 +252,10 @@ export const getFormattedValue = (v: number, mt: MetricType, mf: MetricFunction,
     return valueFormat(v);
   } else if (mf === 'sum') {
     switch (mt) {
+      case 'droppedBytes':
       case 'bytes':
         return valueFormat(v, 1, t('B'));
+      case 'droppedPackets':
       case 'packets':
         return valueFormat(v, 1, t('P'));
     }
@@ -266,8 +268,10 @@ export const getFormattedRateValue = (v: number, mt: MetricType, t: TFunction): 
   switch (mt) {
     case 'count':
       return valueFormat(v);
+    case 'droppedBytes':
     case 'bytes':
       return valueFormat(v, 1, t('Bps'));
+    case 'droppedPackets':
     case 'packets':
       return valueFormat(v, 1, t('Pps'));
   }
