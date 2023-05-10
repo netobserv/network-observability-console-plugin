@@ -10,59 +10,59 @@
         "values": [
           [
             1683712800,
-            "60.583333333333336"
+            "0.22"
           ],
           [
             1683713160,
-            "59.836111111111116"
+            "0.256"
           ],
           [
             1683713520,
-            "62.69305555555556"
+            "1.3"
           ],
           [
             1683713880,
-            "61.56111111111113"
+            "0.5"
           ],
           [
             1683714240,
-            "60.21666666666667"
+            "0.1"
           ],
           [
             1683714600,
-            "60.95972222222222"
+            "0"
           ],
           [
             1683714960,
-            "60.96805555555556"
+            "0"
           ],
           [
             1683715320,
-            "62.905555555555566"
+            "0"
           ],
           [
             1683715680,
-            "61.654166666666654"
+            "0"
           ],
           [
             1683716040,
-            "62.54444444444446"
+            "0"
           ],
           [
             1683716400,
-            "62.18055555555555"
+            "0"
           ]
         ]
       }
     ],
     "stats": {
       "summary": {
-        "bytesProcessedPerSecond": 16837708,
-        "linesProcessedPerSecond": 19671,
+        "bytesProcessedPerSecond": 385637752,
+        "linesProcessedPerSecond": 450537,
         "totalBytesProcessed": 63870163,
         "totalLinesProcessed": 74619,
-        "execTime": 3.793281125,
-        "queueTime": 57.50998162,
+        "execTime": 0.165622174,
+        "queueTime": 0.111442383,
         "subqueries": 5,
         "totalEntriesReturned": 1
       },
@@ -89,7 +89,7 @@
         "store": {
           "totalChunksRef": 3,
           "totalChunksDownloaded": 3,
-          "chunksDownloadTime": 1029366,
+          "chunksDownloadTime": 1064888,
           "chunk": {
             "headChunkBytes": 12223533,
             "headChunkLines": 14540,

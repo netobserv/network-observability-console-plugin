@@ -2,93 +2,17 @@
   "status": "success",
   "data": {
     "resultType": "streams",
-    "result": [
-      {
-        "stream": {
-          "SrcK8S_OwnerName": "ci-ln-xz1644k-72292-ch8kk-master-2",
-          "app": "netobserv-flowcollector",
-          "DstK8S_Namespace": "",
-          "DstK8S_OwnerName": "ci-ln-xz1644k-72292-ch8kk-master-0",
-          "FlowDirection": "0",
-          "SrcK8S_Namespace": ""
-        },
-        "values": [
-          [
-            "1667835811111000064",
-            "{\"SrcK8S_Type\":\"Node\",\"DstPort\":2379,\"SrcMac\":\"42:01:0A:00:00:01\",\"TimeReceived\":1667835811,\"DstAddr\":\"10.0.0.5\",\"DstK8S_Type\":\"Node\",\"SrcPort\":39400,\"Packets\":99,\"TcpDropPackets\":1,\"Bytes\":56,\"TcpDropBytes\":10,\"TimeFlowEndMs\":1667835811111,\"SrcAddr\":\"10.0.0.3\",\"Interface\":\"ens4\",\"DstMac\":\"42:01:0A:00:00:05\",\"TimeFlowStartMs\":1667835811111,\"SrcK8S_OwnerType\":\"Node\",\"DstK8S_Name\":\"ci-ln-xz1644k-72292-ch8kk-master-0\",\"Etype\":2048,\"Proto\":6,\"DstK8S_OwnerType\":\"Node\",\"SrcK8S_Name\":\"ci-ln-xz1644k-72292-ch8kk-master-2\"}"
-          ]
-        ]
-      },
-      {
-        "stream": {
-          "SrcK8S_Namespace": "",
-          "SrcK8S_OwnerName": "ci-ln-xz1644k-72292-ch8kk-master-0",
-          "app": "netobserv-flowcollector",
-          "DstK8S_Namespace": "",
-          "DstK8S_OwnerName": "ci-ln-xz1644k-72292-ch8kk-master-1",
-          "FlowDirection": "0"
-        },
-        "values": [
-          [
-            "1667835813508000000",
-            "{\"TimeFlowStartMs\":1667835809469,\"DstK8S_Name\":\"ci-ln-xz1644k-72292-ch8kk-master-1\",\"SrcAddr\":\"10.0.0.5\",\"Proto\":6,\"TimeFlowEndMs\":1667835813508,\"DstAddr\":\"10.0.0.4\",\"TimeReceived\":1667835814,\"DstK8S_OwnerType\":\"Node\",\"DstPort\":48998,\"SrcMac\":\"42:01:0A:00:00:01\",\"Packets\":7,\"TcpDropPackets\":3,\"SrcK8S_Name\":\"ci-ln-xz1644k-72292-ch8kk-master-0\",\"Etype\":2048,\"SrcK8S_OwnerType\":\"Node\",\"Interface\":\"ens4\",\"SrcPort\":2380,\"SrcK8S_Type\":\"Node\",\"DstMac\":\"42:01:0A:00:00:04\",\"Bytes\":1136,\"TcpDropBytes\":256,\"DstK8S_Type\":\"Node\"}"
-          ]
-        ]
-      },
-      {
-        "stream": {
-          "DstK8S_Namespace": "",
-          "DstK8S_OwnerName": "ci-ln-xz1644k-72292-ch8kk-master-1",
-          "FlowDirection": "0",
-          "SrcK8S_Namespace": "",
-          "SrcK8S_OwnerName": "ci-ln-xz1644k-72292-ch8kk-master-2",
-          "app": "netobserv-flowcollector"
-        },
-        "values": [
-          [
-            "1667835814041999872",
-            "{\"SrcMac\":\"42:01:0A:00:00:01\",\"SrcK8S_OwnerType\":\"Node\",\"Bytes\":1518,\"TcpDropBytes\":64,\"SrcPort\":2380,\"Interface\":\"ens4\",\"Packets\":9,\"TcpDropPackets\":4,\"DstPort\":43118,\"DstK8S_Name\":\"ci-ln-xz1644k-72292-ch8kk-master-1\",\"TimeFlowStartMs\":1667835809459,\"SrcAddr\":\"10.0.0.3\",\"SrcK8S_Name\":\"ci-ln-xz1644k-72292-ch8kk-master-2\",\"DstMac\":\"42:01:0A:00:00:04\",\"DstK8S_Type\":\"Node\",\"DstAddr\":\"10.0.0.4\",\"TimeFlowEndMs\":1667835814042,\"Proto\":6,\"SrcK8S_Type\":\"Node\",\"TimeReceived\":1667835814,\"DstK8S_OwnerType\":\"Node\",\"Etype\":2048}"
-          ]
-        ]
-      },
-      {
-        "stream": {
-          "DstK8S_OwnerName": "router-default",
-          "FlowDirection": "0",
-          "SrcK8S_Namespace": "openshift-console-operator",
-          "SrcK8S_OwnerName": "console-operator",
-          "app": "netobserv-flowcollector",
-          "DstK8S_Namespace": "openshift-ingress"
-        },
-        "values": [
-          [
-            "1667835814080000000",
-            "{\"DstK8S_HostName\":\"ci-ln-xz1644k-72292-ch8kk-worker-a-6rjxl\",\"SrcK8S_HostIP\":\"10.0.0.5\",\"SrcK8S_Type\":\"Pod\",\"DstMac\":\"0A:58:0A:81:02:02\",\"TimeReceived\":1667835814,\"Interface\":\"vxlan_sys_4789\",\"DstAddr\":\"10.129.2.2\",\"SrcMac\":\"66:CB:09:C1:55:04\",\"DstK8S_HostIP\":\"10.0.128.2\",\"SrcPort\":36720,\"DstPort\":443,\"DstK8S_Name\":\"router-default-798cd94f5b-26whx\",\"DstK8S_OwnerType\":\"Deployment\",\"Etype\":2048,\"DstK8S_Type\":\"Pod\",\"TimeFlowEndMs\":1667835814080,\"SrcK8S_Name\":\"console-operator-7b68655f7c-zksgq\",\"Proto\":6,\"SrcK8S_HostName\":\"ci-ln-xz1644k-72292-ch8kk-master-0\",\"SrcAddr\":\"10.128.0.35\",\"TimeFlowStartMs\":1667835814080,\"Packets\":0,\"TcpDropPackets\":10,\"Bytes\":0,\"TcpDropBytes\":128,\"SrcK8S_OwnerType\":\"Deployment\"}"
-          ]
-        ]
-      },
-      {
-        "stream": {
-          "FlowDirection": "0",
-          "app": "netobserv-flowcollector"
-        },
-        "values": [
-          [
-            "1667835814105999872",
-            "{\"SrcAddr\":\"130.211.1.79\",\"DstMac\":\"42:01:0A:00:00:04\",\"Packets\":1,\"TcpDropPackets\":1,\"TimeFlowEndMs\":1667835814106,\"SrcMac\":\"42:01:0A:00:00:01\",\"DstPort\":6443,\"Etype\":2048,\"Bytes\":138,\"TcpDropBytes\":138,\"TimeReceived\":1667835814,\"SrcPort\":47000,\"Proto\":6,\"TimeFlowStartMs\":1667835814106,\"Interface\":\"ens4\",\"DstAddr\":\"10.0.0.2\"}"
-          ]
-        ]
-      }
-    ],
+    "result": [],
     "stats": {
       "summary": {
-        "bytesProcessedPerSecond": 591053237,
-        "linesProcessedPerSecond": 1144301,
-        "totalBytesProcessed": 18068858,
-        "totalLinesProcessed": 34982,
-        "execTime": 0.03057061,
-        "queueTime": 0.000092387,
-        "subqueries": 1
+        "bytesProcessedPerSecond": 0,
+        "linesProcessedPerSecond": 0,
+        "totalBytesProcessed": 0,
+        "totalLinesProcessed": 0,
+        "execTime": 0.108595794,
+        "queueTime": 2.079171715,
+        "subqueries": 61,
+        "totalEntriesReturned": 0
       },
       "querier": {
         "store": {
@@ -106,20 +30,20 @@
         }
       },
       "ingester": {
-        "totalReached": 1,
-        "totalChunksMatched": 343,
-        "totalBatches": 1,
-        "totalLinesSent": 100,
+        "totalReached": 208,
+        "totalChunksMatched": 0,
+        "totalBatches": 0,
+        "totalLinesSent": 0,
         "store": {
           "totalChunksRef": 0,
           "totalChunksDownloaded": 0,
           "chunksDownloadTime": 0,
           "chunk": {
-            "headChunkBytes": 10955233,
-            "headChunkLines": 20460,
-            "decompressedBytes": 7113625,
-            "decompressedLines": 14522,
-            "compressedBytes": 1491681,
+            "headChunkBytes": 0,
+            "headChunkLines": 0,
+            "decompressedBytes": 0,
+            "decompressedLines": 0,
+            "compressedBytes": 0,
             "totalDuplicates": 0
           }
         }
