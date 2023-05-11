@@ -11,7 +11,7 @@ jobs:
     strategy:
       matrix:
         go: ['1.18','1.19']
-        
+
     steps:
     - name: install make
       run: sudo apt-get install make

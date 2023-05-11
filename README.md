@@ -78,13 +78,16 @@ Images are located on https://quay.io/repository/netobserv/network-observability
 
 ```bash
 # build the default image (quay.io/netobserv/network-observability-console-plugin:main):
-make image
+make image-build
 
-# build and push on your own quay.io account (quay.io/myuser/network-observability-console-plugin:main):
-IMG_USER=myuser make image push
+# push the default image (quay.io/netobserv/network-observability-console-plugin:main):
+make image-push
+
+# build and push on your own quay.io account (quay.io/myuser/network-observability-console-plugin:dev):
+IMAGE_ORG=myuser VERSION=dev make images
 
 # build and push on a different registry
-IMAGE=dockerhub.io/myuser/plugin:tag make image push
+IMAGE=dockerhub.io/myuser/plugin:tag make images
 ```
 
 ### Testing in OpenShift
@@ -94,7 +97,7 @@ Probably the easiest way to test without dev mode (e.g. to test a pull request) 
 E.g:
 
 ```bash
-IMAGE=quay.io/${USER}/network-observability-console-plugin:pr-xx make image push
+IMAGE=quay.io/${USER}/network-observability-console-plugin:pr-xx make images
 
 oc edit FlowCollector cluster
 # Here replace image with the newly created one under .spec.consolePlugin.image
