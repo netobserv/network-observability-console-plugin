@@ -33,9 +33,9 @@ func NewChecker(typez CheckType, apiProvider client.APIProvider) (Checker, error
 	case CheckNone:
 		return &NoopChecker{}, nil
 	case CheckAuthenticated:
-		return &BearerTokenChecker{apiProvider: apiProvider, predicates: []tokenReviewPredicate{mustBeAuthenticated}}, nil
+		return &BearerTokenChecker{apiProvider: apiProvider, predicates: []authPredicate{mustBeAuthenticated}}, nil
 	case CheckAdmin:
-		return &BearerTokenChecker{apiProvider: apiProvider, predicates: []tokenReviewPredicate{mustBeAuthenticated, mustBeClusterAdmin}}, nil
+		return &BearerTokenChecker{apiProvider: apiProvider, predicates: []authPredicate{mustBeAuthenticated, mustBeClusterAdmin}}, nil
 	}
 	return nil, fmt.Errorf("auth checker type unknown: %s. Must be one of %s, %s, %s", typez, CheckAdmin, CheckAuthenticated, CheckNone)
 }
@@ -61,13 +61,23 @@ func getUserToken(header http.Header) (string, error) {
 	return "", errors.New("missing Authorization header")
 }
 
-func runTokenReview(ctx context.Context, apiProvider client.APIProvider, token string, preds []tokenReviewPredicate) error {
+func runTokenReview(ctx context.Context, apiProvider client.APIProvider, token string, preds []authPredicate) error {
 	client, err := apiProvider()
 	if err != nil {
 		return err
 	}
+	for _, predFunc := range preds {
+		if err = predFunc(ctx, client, token); err != nil {
+			return err
+		}
+	}
+	return nil
+}
 
-	rvw, err := client.CreateTokenReview(ctx, &authv1.TokenReview{
+type authPredicate func(context.Context, client.KubeAPI, string) error
+
+func mustBeAuthenticated(ctx context.Context, cl client.KubeAPI, token string) error {
+	rvw, err := cl.CreateTokenReview(ctx, &authv1.TokenReview{
 		Spec: authv1.TokenReviewSpec{
 			Token: token,
 		},
@@ -75,36 +85,23 @@ func runTokenReview(ctx context.Context, apiProvider client.APIProvider, token s
 	if err != nil {
 		return err
 	}
-	for _, predFunc := range preds {
-		if err = predFunc(rvw); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-type tokenReviewPredicate func(*authv1.TokenReview) error
-
-func mustBeAuthenticated(rvw *authv1.TokenReview) error {
 	if !rvw.Status.Authenticated {
 		return errors.New("user not authenticated")
 	}
 	return nil
 }
 
-func mustBeClusterAdmin(rvw *authv1.TokenReview) error {
-	for _, group := range rvw.Status.User.Groups {
-		if group == "system:cluster-admins" {
-			return nil
-		}
+func mustBeClusterAdmin(ctx context.Context, cl client.KubeAPI, token string) error {
+	if err := cl.CheckAdmin(ctx, token); err != nil {
+		return errors.New("user not an admin")
 	}
-	return errors.New("user not in cluster-admins group")
+	return nil
 }
 
 type BearerTokenChecker struct {
 	Checker
 	apiProvider client.APIProvider
-	predicates  []tokenReviewPredicate
+	predicates  []authPredicate
 }
 
 func (c *BearerTokenChecker) CheckAuth(ctx context.Context, header http.Header) error {
