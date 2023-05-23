@@ -27,7 +27,7 @@ export class RecordsResult {
 }
 
 export class TopologyResult {
-  metrics: TopologyMetrics[];
+  metrics: (TopologyMetrics | DroppedTopologyMetrics)[];
   stats: Stats;
 }
 
@@ -57,6 +57,8 @@ export interface RawTopologyMetric {
   SrcK8S_OwnerType?: string;
   SrcK8S_Type?: string;
   SrcK8S_HostName?: string;
+  TcpDropState?: number;
+  TcpDropCause?: number;
 }
 
 export interface RawTopologyMetrics {
@@ -80,6 +82,14 @@ export interface TopologyMetricPeer {
   isAmbiguous: boolean;
   getDisplayName: (inclNamespace: boolean, disambiguate: boolean) => string | undefined;
 }
+
+export type DroppedTopologyMetrics = {
+  value: number;
+  name: string;
+  values: [number, number][];
+  stats: MetricStats;
+  scope: MetricScope;
+};
 
 export type TopologyMetrics = {
   source: TopologyMetricPeer;

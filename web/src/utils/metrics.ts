@@ -1,5 +1,12 @@
 import _ from 'lodash';
-import { RawTopologyMetrics, MetricStats, TopologyMetricPeer, TopologyMetrics, NameAndType } from '../api/loki';
+import {
+  RawTopologyMetrics,
+  MetricStats,
+  TopologyMetricPeer,
+  TopologyMetrics,
+  NameAndType,
+  DroppedTopologyMetrics
+} from '../api/loki';
 import { MetricFunction, MetricScope, MetricType } from '../model/flow-query';
 import { roundTwoDigits } from './count';
 import { computeStepInterval, rangeToSeconds, TimeRange } from './datetime';
@@ -7,6 +14,7 @@ import { valueFormat } from './format';
 import { NodeData } from '../model/topology';
 import { getPeerId, idUnknown } from './ids';
 import { TFunction } from 'i18next';
+import { getCause, getState } from './tcp-drop';
 
 // Tolerance, in seconds, to assume presence/emptiness of the last datapoint fetched, when it is
 // close to "now", to accomodate with potential collection latency.
@@ -26,7 +34,7 @@ export const parseMetrics = (
   scope: MetricScope,
   unixTimestamp: number,
   isMock?: boolean
-): TopologyMetrics[] => {
+): (TopologyMetrics | DroppedTopologyMetrics)[] => {
   const { start, end, step } = calibrateRange(
     raw.map(r => r.values),
     range,
@@ -63,13 +71,13 @@ export const parseMetrics = (
 
     // First pass: extract all names+kind couples
     const nameKinds = new Map<string, Set<string>>();
-    metrics.forEach(m => {
+    metrics.forEach((m: TopologyMetrics) => {
       addKind(m.source);
       addKind(m.destination);
     });
 
     // Second pass: mark if ambiguous
-    metrics.forEach(m => {
+    metrics.forEach((m: TopologyMetrics) => {
       checkAmbiguous(m.source);
       checkAmbiguous(m.destination);
     });
@@ -127,30 +135,48 @@ const parseMetric = (
   end: number,
   step: number,
   scope: MetricScope
-): TopologyMetrics => {
+): TopologyMetrics | DroppedTopologyMetrics => {
   const normalized = normalizeMetrics(raw.values, start, end, step);
   const stats = computeStats(normalized);
-  const source = createPeer({
-    addr: raw.metric.SrcAddr,
-    resource: nameAndType(raw.metric.SrcK8S_Name, raw.metric.SrcK8S_Type),
-    owner: nameAndType(raw.metric.SrcK8S_OwnerName, raw.metric.SrcK8S_OwnerType),
-    namespace: raw.metric.SrcK8S_Namespace,
-    hostName: raw.metric.SrcK8S_HostName
-  });
-  const destination = createPeer({
-    addr: raw.metric.DstAddr,
-    resource: nameAndType(raw.metric.DstK8S_Name, raw.metric.DstK8S_Type),
-    owner: nameAndType(raw.metric.DstK8S_OwnerName, raw.metric.DstK8S_OwnerType),
-    namespace: raw.metric.DstK8S_Namespace,
-    hostName: raw.metric.DstK8S_HostName
-  });
-  return {
-    source: source,
-    destination: destination,
-    values: normalized,
-    stats: stats,
-    scope: scope
-  };
+  if (scope === 'droppedState') {
+    return {
+      value: raw.metric.TcpDropState,
+      name: getState(raw.metric.TcpDropState),
+      values: normalized,
+      stats: stats,
+      scope: scope
+    } as DroppedTopologyMetrics;
+  } else if (scope === 'droppedCause') {
+    return {
+      value: raw.metric.TcpDropCause,
+      name: getCause(raw.metric.TcpDropCause),
+      values: normalized,
+      stats: stats,
+      scope: scope
+    } as DroppedTopologyMetrics;
+  } else {
+    const source = createPeer({
+      addr: raw.metric.SrcAddr,
+      resource: nameAndType(raw.metric.SrcK8S_Name, raw.metric.SrcK8S_Type),
+      owner: nameAndType(raw.metric.SrcK8S_OwnerName, raw.metric.SrcK8S_OwnerType),
+      namespace: raw.metric.SrcK8S_Namespace,
+      hostName: raw.metric.SrcK8S_HostName
+    });
+    const destination = createPeer({
+      addr: raw.metric.DstAddr,
+      resource: nameAndType(raw.metric.DstK8S_Name, raw.metric.DstK8S_Type),
+      owner: nameAndType(raw.metric.DstK8S_OwnerName, raw.metric.DstK8S_OwnerType),
+      namespace: raw.metric.DstK8S_Namespace,
+      hostName: raw.metric.DstK8S_HostName
+    });
+    return {
+      source: source,
+      destination: destination,
+      values: normalized,
+      stats: stats,
+      scope: scope
+    } as TopologyMetrics;
+  }
 };
 
 export const calibrateRange = (

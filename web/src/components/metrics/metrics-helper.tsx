@@ -147,6 +147,9 @@ const getPeerName = (
   if (name) {
     return truncateParts(name, truncateLength);
   }
+  if (scope === 'droppedCause' || scope === 'droppedState') {
+    throw new Error("getPeerName can't be applied on tcp drop metrics");
+  }
   if (scope === 'app') {
     // No peer distinction here
     return t('Total');

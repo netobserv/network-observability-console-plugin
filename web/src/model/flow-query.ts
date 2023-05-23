@@ -6,7 +6,7 @@ export type Match = 'all' | 'any';
 export type PacketLoss = 'dropped' | 'hasDrops' | 'sent' | 'all';
 export type MetricFunction = 'sum' | 'avg' | 'max' | 'last';
 export type MetricType = 'count' | 'bytes' | 'packets' | 'droppedBytes' | 'droppedPackets';
-export type MetricScope = 'app' | 'host' | 'namespace' | 'owner' | 'resource';
+export type MetricScope = 'app' | 'host' | 'namespace' | 'owner' | 'resource' | 'droppedState' | 'droppedCause';
 export type NodeType = MetricScope | 'unknown';
 export type Groups = 'hosts' | 'hosts+namespaces' | 'hosts+owners' | 'namespaces' | 'namespaces+owners' | 'owners';
 export interface FlowQuery {

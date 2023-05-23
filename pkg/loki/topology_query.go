@@ -34,6 +34,7 @@ func NewTopologyQuery(cfg *Config, start, end, limit, rateInterval, step, metric
 		l = topologyDefaultLimit
 	}
 
+	fields := getFields(scope, groups)
 	var f, t string
 	switch metricType {
 	case "count":
@@ -70,7 +71,7 @@ func NewTopologyQuery(cfg *Config, start, end, limit, rateInterval, step, metric
 			limit:        l,
 			function:     f,
 			dataField:    t,
-			fields:       getFields(scope, groups),
+			fields:       fields,
 			dedup:        d,
 		},
 	}, nil
@@ -81,6 +82,10 @@ func getFields(scope, groups string) string {
 	switch scope {
 	case "app":
 		fields = []string{"app"}
+	case "droppedState":
+		fields = []string{"TcpDropState"}
+	case "droppedCause":
+		fields = []string{"TcpDropCause"}
 	case "host":
 		fields = []string{"SrcK8S_HostName", "DstK8S_HostName"}
 	case "namespace":

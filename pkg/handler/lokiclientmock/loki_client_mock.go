@@ -29,6 +29,10 @@ func (o *LokiClientMock) Get(url string) ([]byte, int, error) {
 
 			if strings.Contains(url, "by(app)") {
 				path += "_app.json"
+			} else if strings.Contains(url, "by(TcpDropState)") {
+				path += "_state.json"
+			} else if strings.Contains(url, "by(TcpDropCause)") {
+				path += "_cause.json"
 			} else if strings.Contains(url, "by(SrcK8S_HostName,DstK8S_HostName)") {
 				path += "_host.json"
 			} else if strings.Contains(url, "by(SrcK8S_Namespace,DstK8S_Namespace)") {

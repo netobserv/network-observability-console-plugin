@@ -7,6 +7,8 @@ export type OverviewPanelId =
   | 'top_bar_total'
   | 'top_avg_donut'
   | 'top_latest_donut'
+  | 'top_dropped_state_donut'
+  | 'top_dropped_cause_donut'
   | 'top_sankey'
   | 'total_line'
   | 'top_lines'
@@ -38,6 +40,8 @@ export const getDefaultOverviewPanels = (): OverviewPanel[] => {
     { id: 'top_lines', isSelected: true },
     { id: 'top_dropped_bar', isSelected: false },
     { id: 'total_dropped_line', isSelected: false },
+    { id: 'top_dropped_state_donut', isSelected: false },
+    { id: 'top_dropped_cause_donut', isSelected: true },
     { id: 'top_dropped_bar_total', isSelected: true }
   ]);
   if (isAllowed(Feature.Overview)) {
@@ -91,6 +95,18 @@ export const getOverviewPanelInfo = (
       return { title: t('Top {{limit}} {{type}} dropped rates stacked', { limit, type }), chartType: t('bars') };
     case 'total_dropped_line':
       return { title: t('Total dropped rate'), chartType: t('line') };
+    case 'top_dropped_state_donut':
+      return {
+        title: t('Top {{limit}} dropped state', { limit }),
+        chartType: t('donut'),
+        tooltip: t('The top dropped states over the selected interval')
+      };
+    case 'top_dropped_cause_donut':
+      return {
+        title: t('Top {{limit}} dropped cause', { limit }),
+        chartType: t('donut'),
+        tooltip: t('The top drop causes over the selected interval')
+      };
     case 'top_dropped_bar_total':
       return {
         title: t('Top {{limit}} {{type}} dropped rates stacked with total', { limit, type }),
