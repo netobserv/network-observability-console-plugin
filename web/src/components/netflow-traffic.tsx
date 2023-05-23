@@ -32,7 +32,7 @@ import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
 import { useTheme } from '../utils/theme-hook';
 import { Record } from '../api/ipfix';
-import { RecordsResult, Stats, TopologyMetrics, TopologyResult } from '../api/loki';
+import { DroppedTopologyMetrics, RecordsResult, Stats, TopologyMetrics, TopologyResult } from '../api/loki';
 import { getFlows, getTopology } from '../api/routes';
 import {
   DisabledFilters,
@@ -188,6 +188,8 @@ export const NetflowTraffic: React.FC<{
   const [droppedMetrics, setDroppedMetrics] = React.useState<TopologyMetrics[]>([]);
   const [totalMetric, setTotalMetric] = React.useState<TopologyMetrics | undefined>(undefined);
   const [totalDroppedMetric, setTotalDroppedMetric] = React.useState<TopologyMetrics | undefined>(undefined);
+  const [droppedStateMetrics, setDroppedStateMetrics] = React.useState<DroppedTopologyMetrics[] | undefined>(undefined);
+  const [droppedCauseMetrics, setDroppedCauseMetrics] = React.useState<DroppedTopologyMetrics[] | undefined>(undefined);
   const [isShowQuerySummary, setShowQuerySummary] = React.useState<boolean>(false);
   const [lastRefresh, setLastRefresh] = React.useState<Date | undefined>(undefined);
   const [error, setError] = React.useState<string | undefined>();
@@ -424,10 +426,10 @@ export const NetflowTraffic: React.FC<{
 
               //set app metrics
               if (results.length > 1) {
-                setTotalMetric((results[1] as TopologyResult).metrics[0]);
+                setTotalMetric((results[1] as TopologyResult).metrics[0] as TopologyMetrics);
                 stats.limitReached = stats.limitReached || results[1].stats.limitReached;
                 stats.numQueries += results[1].stats.numQueries;
-                setTotalDroppedMetric((results[2] as TopologyResult).metrics[0]);
+                setTotalDroppedMetric((results[2] as TopologyResult).metrics[0] as TopologyMetrics);
                 stats.limitReached = stats.limitReached || results[2].stats.limitReached;
                 stats.numQueries += results[2].stats.numQueries;
               } else {
@@ -455,10 +457,14 @@ export const NetflowTraffic: React.FC<{
         promises.push(getTopology(fq, range));
         //get dropped bytes or packets
         promises.push(getTopology({ ...fq, type: droppedType }, range));
-        //run same query on current scope / app scope for total flows
         if (selectedViewId === 'overview') {
+          //run same query on app scope for total flows
           promises.push(getTopology({ ...fq, scope: 'app' }, range));
           promises.push(getTopology({ ...fq, scope: 'app', type: droppedType }, range));
+
+          //get dropped state and cause
+          promises.push(getTopology({ ...fq, type: droppedType, scope: 'droppedState' }, range));
+          promises.push(getTopology({ ...fq, type: droppedType, scope: 'droppedCause' }, range));
         }
 
         manageWarnings(
@@ -468,25 +474,36 @@ export const NetflowTraffic: React.FC<{
               const stats = results[0].stats;
 
               //set metrics
-              setMetrics((results[0] as TopologyResult).metrics);
+              setMetrics((results[0] as TopologyResult).metrics as TopologyMetrics[]);
 
               //set dropped metrics
-              setDroppedMetrics((results[1] as TopologyResult).metrics);
+              setDroppedMetrics((results[1] as TopologyResult).metrics as TopologyMetrics[]);
               stats.limitReached = stats.limitReached || results[1].stats.limitReached;
               stats.numQueries += results[1].stats.numQueries;
 
-              //set app metrics
               if (results.length > 2) {
-                setTotalMetric((results[2] as TopologyResult).metrics[0]);
+                //set app metrics
+                setTotalMetric((results[2] as TopologyResult).metrics[0] as TopologyMetrics);
                 stats.limitReached = stats.limitReached || results[2].stats.limitReached;
                 stats.numQueries += results[2].stats.numQueries;
 
-                setTotalDroppedMetric((results[3] as TopologyResult).metrics[0]);
+                setTotalDroppedMetric((results[3] as TopologyResult).metrics[0] as TopologyMetrics);
                 stats.limitReached = stats.limitReached || results[3].stats.limitReached;
                 stats.numQueries += results[3].stats.numQueries;
+
+                //set dropped state and cause
+                setDroppedStateMetrics((results[4] as TopologyResult).metrics as DroppedTopologyMetrics[]);
+                stats.limitReached = stats.limitReached || results[4].stats.limitReached;
+                stats.numQueries += results[4].stats.numQueries;
+
+                setDroppedCauseMetrics((results[5] as TopologyResult).metrics as DroppedTopologyMetrics[]);
+                stats.limitReached = stats.limitReached || results[5].stats.limitReached;
+                stats.numQueries += results[5].stats.numQueries;
               } else {
                 setTotalMetric(undefined);
                 setTotalDroppedMetric(undefined);
+                setDroppedStateMetrics(undefined);
+                setDroppedCauseMetrics(undefined);
               }
               setStats(stats);
             })
@@ -997,6 +1014,8 @@ export const NetflowTraffic: React.FC<{
             droppedMetrics={droppedMetrics}
             totalMetric={totalMetric}
             totalDroppedMetric={totalDroppedMetric}
+            droppedStateMetrics={droppedStateMetrics}
+            droppedCauseMetrics={droppedCauseMetrics}
             loading={loading}
             error={error}
             isDark={isDarkTheme}

@@ -12,12 +12,13 @@ import { SearchIcon } from '@patternfly/react-icons';
 import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { TopologyMetrics } from '../../api/loki';
+import { DroppedTopologyMetrics, TopologyMetrics } from '../../api/loki';
 import { MetricType, RecordType } from '../../model/flow-query';
 import { getStat } from '../../model/topology';
 import { getOverviewPanelInfo, OverviewPanel, OverviewPanelId } from '../../utils/overview-panels';
 import { TruncateLength } from '../dropdowns/truncate-dropdown';
 import LokiError from '../messages/loki-error';
+import { DroppedDonut } from '../metrics/dropped-donut';
 import { MetricsContent } from '../metrics/metrics-content';
 import { toNamedMetric } from '../metrics/metrics-helper';
 import { MetricsTotalContent } from '../metrics/metrics-total-content';
@@ -43,6 +44,8 @@ export type NetflowOverviewProps = {
   droppedMetrics: TopologyMetrics[];
   totalMetric?: TopologyMetrics;
   totalDroppedMetric?: TopologyMetrics;
+  droppedStateMetrics?: DroppedTopologyMetrics[];
+  droppedCauseMetrics?: DroppedTopologyMetrics[];
   loading?: boolean;
   error?: string;
   isDark?: boolean;
@@ -59,6 +62,8 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
   droppedMetrics,
   totalMetric,
   totalDroppedMetric,
+  droppedStateMetrics,
+  droppedCauseMetrics,
   loading,
   error,
   isDark,
@@ -114,6 +119,12 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
     .sort((a, b) => getStat(b.stats, 'sum') - getStat(a.stats, 'sum'))
     .map(m => toNamedMetric(t, m, truncateLength, true, true));
   const noInternalTopKDropped = topKDroppedMetrics.filter(m => m.source.id !== m.destination.id);
+
+  const topKDroppedStateMetrics =
+    droppedStateMetrics?.sort((a, b) => getStat(b.stats, 'sum') - getStat(a.stats, 'sum')) || [];
+
+  const topKDroppedCauseMetrics =
+    droppedCauseMetrics?.sort((a, b) => getStat(b.stats, 'sum') - getStat(a.stats, 'sum')) || [];
 
   const namedTotalMetric = toNamedMetric(t, totalMetric, truncateLength, false, false);
   const namedTotalDroppedMetric = toNamedMetric(t, totalDroppedMetric, truncateLength, false, false);
@@ -302,6 +313,48 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
           ),
           doubleWidth: false
         };
+      case 'top_dropped_state_donut': {
+        const options = kebabMap.get(id) || {
+          showOthers: true
+        };
+        return {
+          element: (
+            <DroppedDonut
+              id={id}
+              limit={limit}
+              metricType={metricType}
+              stat="avg"
+              topKMetrics={topKDroppedStateMetrics}
+              totalMetric={namedTotalDroppedMetric}
+              showOthers={options.showOthers!}
+              smallerTexts={smallerTexts}
+            />
+          ),
+          kebab: <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} />,
+          bodyClassSmall: true
+        };
+      }
+      case 'top_dropped_cause_donut': {
+        const options = kebabMap.get(id) || {
+          showOthers: true
+        };
+        return {
+          element: (
+            <DroppedDonut
+              id={id}
+              limit={limit}
+              metricType={metricType}
+              stat="avg"
+              topKMetrics={topKDroppedCauseMetrics}
+              totalMetric={namedTotalDroppedMetric}
+              showOthers={options.showOthers!}
+              smallerTexts={smallerTexts}
+            />
+          ),
+          kebab: <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} />,
+          bodyClassSmall: true
+        };
+      }
       case 'top_dropped_bar_total':
         const options = kebabMap.get(id) || {
           showTotal: true,

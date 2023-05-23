@@ -1,4 +1,4 @@
-import { RawTopologyMetrics } from '../../../api/loki';
+import { RawTopologyMetrics, TopologyMetrics } from '../../../api/loki';
 import { parseMetrics } from '../../../utils/metrics';
 
 export const responseSample = {
@@ -284,4 +284,4 @@ export const dataSample = parseMetrics(
   { from: 1647965100, to: 1647965400 },
   'resource',
   0
-);
+) as TopologyMetrics[];
