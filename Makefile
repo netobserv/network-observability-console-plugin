@@ -33,8 +33,8 @@ IMAGE_TAG_BASE ?= quay.io/${IMAGE_ORG}/network-observability-console-plugin
 IMAGE ?= ${IMAGE_TAG_BASE}:${VERSION}
 OCI_BUILD_OPTS ?=
 
-# Image building tool (docker / podman)
-OCI_BIN_PATH = $(shell which podman  || which docker)
+# Image building tool (docker / podman) - docker is preferred in CI
+OCI_BIN_PATH = $(shell which docker || which podman)
 OCI_BIN ?= $(shell basename ${OCI_BIN_PATH})
 
 GOLANGCI_LINT_VERSION = v1.50.1
