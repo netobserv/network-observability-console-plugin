@@ -42,6 +42,7 @@ import { getFilterFullName, Indicator } from './filters-helper';
 import TextFilter from './text-filter';
 import { LOCAL_STORAGE_SHOW_FILTERS_KEY, useLocalStorage } from '../../utils/local-storage-hook';
 import './filters-toolbar.css';
+import CompareFilter, { FilterCompare } from './compare-filter';
 
 export interface FiltersToolbarProps {
   id: string;
@@ -75,6 +76,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
   const [indicator, setIndicator] = React.useState<Indicator>(ValidatedOptions.default);
   const [message, setMessage] = React.useState<string | undefined>();
   const [selectedFilter, setSelectedFilter] = React.useState<FilterDefinition>(findFilter(t, 'namespace')!);
+  const [selectedCompare, setSelectedCompare] = React.useState<FilterCompare>(FilterCompare.EQUAL);
   const [showFilters, setShowFilters] = useLocalStorage<boolean>(LOCAL_STORAGE_SHOW_FILTERS_KEY, true);
 
   // reset and delay message state to trigger tooltip properly
@@ -95,7 +97,8 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
   const addFilter = React.useCallback(
     (filterValue: FilterValue) => {
       const newFilters = _.cloneDeep(filters) || [];
-      const found = findFromFilters(newFilters, { def: selectedFilter });
+      const not = selectedCompare === FilterCompare.NOT_EQUAL ? true : false;
+      const found = findFromFilters(newFilters, { def: selectedFilter, not });
       if (found) {
         if (found.values.map(value => value.v).includes(filterValue.v)) {
           setMessageWithDelay(t('Filter already exists'));
@@ -105,12 +108,12 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
           found.values.push(filterValue);
         }
       } else {
-        newFilters.push({ def: selectedFilter, values: [filterValue] });
+        newFilters.push({ def: selectedFilter, not, values: [filterValue] });
       }
       setFilters(newFilters);
       return true;
     },
-    [selectedFilter, filters, setFilters, setMessageWithDelay, t]
+    [filters, selectedCompare, selectedFilter, setFilters, setMessageWithDelay, t]
   );
 
   const getFilterControl = React.useCallback(() => {
@@ -283,6 +286,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
                     setSelectedFilter={setSelectedFilter}
                     allowConnectionFilter={allowConnectionFilter}
                   />
+                  <CompareFilter state={selectedCompare} setState={setSelectedCompare} />
                   {getFilterControl()}
                 </InputGroup>
                 <FilterHints def={selectedFilter} />
