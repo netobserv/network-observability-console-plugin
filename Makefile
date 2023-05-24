@@ -18,7 +18,7 @@ endif
 
 # Go architecture and targets images to build
 GOARCH ?= amd64
-MULTIARCH_TARGETS := amd64 arm64 ppc64le
+MULTIARCH_TARGETS ?= amd64
 
 # Setting SHELL to bash allows bash commands to be executed by recipes.
 SHELL := /usr/bin/env bash
@@ -31,10 +31,10 @@ IMAGE_TAG_BASE ?= quay.io/${IMAGE_ORG}/network-observability-console-plugin
 
 # Image URL to use all building/pushing image targets
 IMAGE ?= ${IMAGE_TAG_BASE}:${VERSION}
-IMAGE_SHA = $(IMAGE_TAG_BASE):$(BUILD_SHA)
+OCI_BUILD_OPTS ?=
 
-# Image building tool (docker / podman)
-OCI_BIN_PATH = $(shell which podman  || which docker)
+# Image building tool (docker / podman) - docker is preferred in CI
+OCI_BIN_PATH = $(shell which docker || which podman)
 OCI_BIN ?= $(shell basename ${OCI_BIN_PATH})
 
 GOLANGCI_LINT_VERSION = v1.50.1
@@ -48,7 +48,7 @@ BUILD_FLAGS ?= -ldflags "-X 'main.buildVersion=${BUILD_VERSION}' -X 'main.buildD
 # build a single arch target provided as argument
 define build_target
 	echo 'building image for arch $(1)'; \
-	DOCKER_BUILDKIT=1 $(OCI_BIN) buildx build --load --build-arg TARGETPLATFORM=linux/$(1) --build-arg TARGETARCH=$(1) --build-arg BUILDPLATFORM=linux/amd64 -t ${IMAGE}-$(1) -f Dockerfile .;
+	DOCKER_BUILDKIT=1 $(OCI_BIN) buildx build --load --build-arg TARGETPLATFORM=linux/$(1) --build-arg TARGETARCH=$(1) --build-arg BUILDPLATFORM=linux/amd64 ${OCI_BUILD_OPTS} -t ${IMAGE}-$(1) -f Dockerfile .;
 endef
 
 # push a single arch target image
@@ -58,8 +58,8 @@ define push_target
 endef
 
 # manifest create a single arch target provided as argument
-define manifest_create_target
-	echo 'manifest create for arch $(1)'; \
+define manifest_add_target
+	echo 'manifest add target $(1)'; \
 	DOCKER_BUILDKIT=1 $(OCI_BIN) manifest add ${IMAGE} ${IMAGE}-$(target);
 endef
 
@@ -204,9 +204,14 @@ image-push: ## Push MULTIARCH_TARGETS images
 
 .PHONY: manifest-build
 manifest-build: ## Build MULTIARCH_TARGETS manifest
+	@echo 'building manifest $(IMAGE)'
+ifeq (${OCI_BIN}, docker)
+	DOCKER_BUILDKIT=1 $(OCI_BIN) manifest create ${IMAGE} $(foreach target,$(MULTIARCH_TARGETS), --amend ${IMAGE}-$(target));
+else
 	trap 'exit' INT; \
-	DOCKER_BUILDKIT=1 $(OCI_BIN) manifest create ${IMAGE}
-	$(foreach target,$(MULTIARCH_TARGETS),$(call manifest_create_target,$(target)))
+	DOCKER_BUILDKIT=1 $(OCI_BIN) manifest create ${IMAGE} ||:
+	$(foreach target,$(MULTIARCH_TARGETS),$(call manifest_add_target,$(target)))
+endif
 
 .PHONY: manifest-push
 manifest-push: ## Push MULTIARCH_TARGETS manifest
@@ -216,22 +221,5 @@ ifeq (${OCI_BIN}, docker)
 else
 	DOCKER_BUILDKIT=1 $(OCI_BIN) manifest push ${IMAGE} docker://${IMAGE};
 endif
-
-.PHONY: ci-manifest-build
-ci-manifest-build: manifest-build ## Build CI manifest
-	$(OCI_BIN) build --build-arg BASE_IMAGE=$(IMAGE) -t $(IMAGE_SHA) -f shortlived.Dockerfile .
-ifeq ($(VERSION), main)
-# Also tag "latest" only for branch "main"
-	$(OCI_BIN) build -t $(IMAGE) -t $(IMAGE_TAG_BASE):latest .
-endif
-
-.PHONY: ci-manifest-push
-ci-manifest-push: ## Push CI manifest
-	$(OCI_BIN) push $(IMAGE_SHA)
-	ifeq ($(VERSION), main)
-# Also tag "latest" only for branch "main"
-		$(OCI_BIN) push $(IMAGE)
-		$(OCI_BIN) push $(IMAGE_TAG_BASE):latest
-	endif
 
 include .mk/shortcuts.mk

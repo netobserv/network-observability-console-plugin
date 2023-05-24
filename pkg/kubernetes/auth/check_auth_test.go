@@ -13,13 +13,13 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func setupChecker(typez CheckType, m *TokenReviewMock) Checker {
+func setupChecker(typez CheckType, m *AuthCheckMock) Checker {
 	checker, _ := NewChecker(typez, func() (client.KubeAPI, error) { return m, nil })
 	return checker
 }
 
 func TestCheckAuth_NoAuth(t *testing.T) {
-	m := TokenReviewMock{}
+	m := AuthCheckMock{}
 	m.mockNoAuth()
 
 	// Any user authenticated mode
@@ -55,7 +55,7 @@ func TestCheckAuth_NoAuth(t *testing.T) {
 }
 
 func TestCheckAuth_NormalUser(t *testing.T) {
-	m := TokenReviewMock{}
+	m := AuthCheckMock{}
 	m.mockNormalUser()
 
 	// Any user authenticated mode
@@ -79,7 +79,7 @@ func TestCheckAuth_NormalUser(t *testing.T) {
 
 	err = checkerAdmin.CheckAuth(context.TODO(), http.Header{"Authorization": []string{"Bearer abcdef"}})
 	require.Error(t, err)
-	require.Equal(t, "user not in cluster-admins group", err.Error())
+	require.Equal(t, "user not an admin", err.Error())
 
 	// Noop mode
 	checkerNoop := NoopChecker{}
@@ -90,7 +90,7 @@ func TestCheckAuth_NormalUser(t *testing.T) {
 }
 
 func TestCheckAuth_Admin(t *testing.T) {
-	m := TokenReviewMock{}
+	m := AuthCheckMock{}
 	m.mockAdmin()
 
 	// Any user authenticated mode
@@ -126,7 +126,7 @@ func TestCheckAuth_Admin(t *testing.T) {
 const fakeError = "an error occured"
 
 func TestCheckAuth_APIError(t *testing.T) {
-	m := TokenReviewMock{}
+	m := AuthCheckMock{}
 	m.mockError()
 
 	// Any user authenticated mode
@@ -161,39 +161,47 @@ func TestCheckAuth_APIError(t *testing.T) {
 	require.NoError(t, err)
 }
 
-type TokenReviewMock struct {
+type AuthCheckMock struct {
 	mock.Mock
 	client.KubeAPI
 }
 
-func (m *TokenReviewMock) CreateTokenReview(ctx context.Context, tr *authv1.TokenReview, opts *metav1.CreateOptions) (*authv1.TokenReview, error) {
+func (m *AuthCheckMock) CreateTokenReview(ctx context.Context, tr *authv1.TokenReview, opts *metav1.CreateOptions) (*authv1.TokenReview, error) {
 	args := m.Called(ctx, tr, opts)
 	return args.Get(0).(*authv1.TokenReview), args.Error(1)
 }
 
-func (m *TokenReviewMock) mockError() {
+func (m *AuthCheckMock) CheckAdmin(ctx context.Context, token string) error {
+	args := m.Called(ctx, token)
+	return args.Error(0)
+}
+
+func (m *AuthCheckMock) mockError() {
 	m.On("CreateTokenReview", mock.Anything, mock.Anything, mock.Anything).Return(&authv1.TokenReview{}, errors.New(fakeError))
 }
 
-func (m *TokenReviewMock) mockNoAuth() {
+func (m *AuthCheckMock) mockNoAuth() {
 	m.On("CreateTokenReview", mock.Anything, mock.Anything, mock.Anything).Return(&authv1.TokenReview{
-		Status: mockedTokenReviewStatus(false, true),
+		Status: mockedTokenReviewStatus(false),
 	}, nil)
+	m.On("CheckAdmin", mock.Anything, mock.Anything).Return(errors.New("User is not an admin"))
 }
 
-func (m *TokenReviewMock) mockNormalUser() {
+func (m *AuthCheckMock) mockNormalUser() {
 	m.On("CreateTokenReview", mock.Anything, mock.Anything, mock.Anything).Return(&authv1.TokenReview{
-		Status: mockedTokenReviewStatus(true, false),
+		Status: mockedTokenReviewStatus(true),
 	}, nil)
+	m.On("CheckAdmin", mock.Anything, mock.Anything).Return(errors.New("User is not an admin"))
 }
 
-func (m *TokenReviewMock) mockAdmin() {
+func (m *AuthCheckMock) mockAdmin() {
 	m.On("CreateTokenReview", mock.Anything, mock.Anything, mock.Anything).Return(&authv1.TokenReview{
-		Status: mockedTokenReviewStatus(true, true),
+		Status: mockedTokenReviewStatus(true),
 	}, nil)
+	m.On("CheckAdmin", mock.Anything, mock.Anything).Return(nil)
 }
 
-func mockedTokenReviewStatus(isAuth, isAdmin bool) authv1.TokenReviewStatus {
+func mockedTokenReviewStatus(isAuth bool) authv1.TokenReviewStatus {
 	st := authv1.TokenReviewStatus{
 		Authenticated: isAuth,
 		User: authv1.UserInfo{
@@ -204,9 +212,6 @@ func mockedTokenReviewStatus(isAuth, isAdmin bool) authv1.TokenReviewStatus {
 	}
 	if isAuth {
 		st.User.Groups = append(st.User.Groups, "system:authenticated")
-	}
-	if isAdmin {
-		st.User.Groups = append(st.User.Groups, "system:cluster-admins")
 	}
 	return st
 }
