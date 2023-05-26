@@ -3,6 +3,7 @@ import { Button, Tooltip } from '@patternfly/react-core';
 import { FilterIcon, ToggleOnIcon, ToggleOffIcon, GlobeAmericasIcon, TimesIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
+import { getCause } from '../../utils/tcp-drop';
 import { FlowDirection, Record } from '../../api/ipfix';
 import { Column, ColumnsId, getFullColumnName } from '../../utils/columns';
 import { dateFormatter, getFormattedDate, timeMSFormatter, utcDateTimeFormatter } from '../../utils/datetime';
@@ -327,13 +328,17 @@ export const RecordField: React.FC<{
       case ColumnsId.packets:
       case ColumnsId.bytes:
         if (Array.isArray(value) && value.length) {
+          let droppedText = t('dropped');
+          if (c.id === ColumnsId.bytes && (value[2] as number) > 0) {
+            droppedText = t('dropped by {{reason}}', { reason: getCause(value[2] as number) });
+          }
           return doubleContainer(
             simpleTextWithTooltip(
               detailed ? `${String(value[0])} ${c.name.toLowerCase()} ${t('sent')}` : String(value[0]),
               '#1E4F18'
             ),
             simpleTextWithTooltip(
-              detailed ? `${String(value[1])} ${c.name.toLowerCase()} ${t('dropped')}` : String(value[1]),
+              detailed ? `${String(value[1])} ${c.name.toLowerCase()} ${droppedText}` : String(value[1]),
               '#A30000'
             ),
             true,

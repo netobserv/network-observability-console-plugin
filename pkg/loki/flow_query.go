@@ -256,6 +256,20 @@ func (q *FlowQueryBuilder) appendDeduplicateFilter(sb *strings.Builder) {
 	sb.WriteString("`")
 }
 
+func (q *FlowQueryBuilder) appendTcpDropStateFilter(sb *strings.Builder) {
+	// !~`TcpDropState":0`
+	sb.WriteString("!~`")
+	sb.WriteString(`TcpDropState":0`)
+	sb.WriteString("`")
+}
+
+func (q *FlowQueryBuilder) appendTcpDropCauseFilter(sb *strings.Builder) {
+	// !~`TcpDropCause":0`
+	sb.WriteString("!~`")
+	sb.WriteString(`TcpDropCause":0`)
+	sb.WriteString("`")
+}
+
 func (q *FlowQueryBuilder) appendJSON(sb *strings.Builder, forceAppend bool) {
 	if forceAppend || len(q.jsonFilters) > 0 {
 		sb.WriteString("|json")

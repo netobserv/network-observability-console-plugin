@@ -87,6 +87,8 @@ export interface Fields {
   Bytes_BA?: number;
   /** TCP state for drops */
   TcpDropState?: number;
+  /** TCP cause for drops */
+  TcpDropCause?: number;
   /** TCP flags for drops */
   TcpDropFlags?: number;
   /** Number of packets dropped in this flow */

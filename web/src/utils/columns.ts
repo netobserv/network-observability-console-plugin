@@ -734,7 +734,8 @@ export const getExtraColumns = (t: TFunction): Column[] => {
       tooltip: t('The total aggregated number of bytes.'),
       fieldName: 'Bytes',
       isSelected: true,
-      value: f => (f.fields.TcpDropBytes ? [f.fields.Bytes, f.fields.TcpDropBytes] : f.fields.Bytes),
+      value: f =>
+        f.fields.TcpDropBytes ? [f.fields.Bytes, f.fields.TcpDropBytes, f.fields.TcpDropCause || 0] : f.fields.Bytes,
       sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
       width: 5
     },
