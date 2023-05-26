@@ -12,6 +12,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { OverviewPanelId } from '../../utils/overview-panels';
 import './panel-kebab.css';
+import { exportToPng } from '../../utils/export';
 
 export type PanelKebabOptions = {
   showTotal?: boolean;
@@ -24,9 +25,10 @@ export type PanelKebabProps = {
   id: OverviewPanelId;
   options: PanelKebabOptions;
   setOptions: (opts: PanelKebabOptions) => void;
+  isDark?: boolean;
 };
 
-export const PanelKebab: React.FC<PanelKebabProps> = ({ id, options, setOptions }) => {
+export const PanelKebab: React.FC<PanelKebabProps> = ({ id, options, setOptions, isDark }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [showOptions, setShowOptions] = React.useState(false);
 
@@ -57,6 +59,13 @@ export const PanelKebab: React.FC<PanelKebabProps> = ({ id, options, setOptions 
     },
     [setOptions, options]
   );
+
+  const onOverviewExport = React.useCallback(() => {
+    const overview_flex = document.getElementById(id)?.children[0] as HTMLElement | undefined;
+
+    setShowOptions(false);
+    exportToPng('overview_panel', overview_flex as HTMLElement, isDark, id);
+  }, [id, isDark]);
 
   const items = [];
   if (options.showTotal !== undefined) {
@@ -135,6 +144,12 @@ export const PanelKebab: React.FC<PanelKebabProps> = ({ id, options, setOptions 
       </DropdownItem>
     );
   }
+
+  items.push(
+    <DropdownItem key={`${id}-export`} onClick={onOverviewExport}>
+      {t('Export panel')}
+    </DropdownItem>
+  );
 
   return (
     <Dropdown

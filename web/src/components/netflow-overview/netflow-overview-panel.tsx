@@ -10,9 +10,10 @@ export const NetflowOverviewPanel: React.FC<{
   title: string;
   titleTooltip?: string;
   kebab?: JSX.Element;
-}> = ({ doubleWidth, bodyClassSmall, title, titleTooltip, kebab, children }) => {
+  id?: string;
+}> = ({ id, doubleWidth, bodyClassSmall, title, titleTooltip, kebab, children }) => {
   return (
-    <FlexItem className={`overview-flex-item ${doubleWidth ? 'full' : ''}`}>
+    <FlexItem id={id} className={`overview-flex-item ${doubleWidth ? 'full' : ''}`}>
       <Card isFlat className="overview-card">
         <Flex className="overview-card-content" direction={{ default: 'column' }}>
           <FlexItem>
