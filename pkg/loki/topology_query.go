@@ -12,13 +12,15 @@ const (
 )
 
 type Topology struct {
-	limit        string
-	rateInterval string
-	step         string
-	function     string
-	dataField    string
-	fields       string
-	dedup        bool
+	limit              string
+	rateInterval       string
+	step               string
+	function           string
+	dataField          string
+	fields             string
+	dedup              bool
+	skipEmptyDropState bool
+	skipEmptyDropCause bool
 }
 
 type TopologyQueryBuilder struct {
@@ -66,13 +68,15 @@ func NewTopologyQuery(cfg *Config, start, end, limit, rateInterval, step, metric
 	return &TopologyQueryBuilder{
 		FlowQueryBuilder: NewFlowQueryBuilder(cfg, start, end, limit, reporter, rt, packetLoss),
 		topology: &Topology{
-			rateInterval: rateInterval,
-			step:         step,
-			limit:        l,
-			function:     f,
-			dataField:    t,
-			fields:       fields,
-			dedup:        d,
+			rateInterval:       rateInterval,
+			step:               step,
+			limit:              l,
+			function:           f,
+			dataField:          t,
+			fields:             fields,
+			dedup:              d,
+			skipEmptyDropState: scope == "droppedState",
+			skipEmptyDropCause: scope == "droppedCause",
 		},
 	}, nil
 }
@@ -144,6 +148,11 @@ func (q *TopologyQueryBuilder) Build() string {
 	q.appendLineFilters(sb)
 	if q.topology.dedup {
 		q.appendDeduplicateFilter(sb)
+	}
+	if q.topology.skipEmptyDropState {
+		q.appendTcpDropStateFilter(sb)
+	} else if q.topology.skipEmptyDropCause {
+		q.appendTcpDropCauseFilter(sb)
 	}
 	q.appendJSON(sb, true)
 	if len(q.topology.dataField) > 0 {
