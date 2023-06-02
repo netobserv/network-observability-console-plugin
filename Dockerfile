@@ -35,7 +35,7 @@ COPY pkg/ pkg/
 
 RUN CGO_ENABLED=0 GOARCH=$TARGETARCH make build-backend
 
-FROM  --platform=$TARGETPLATFORM registry.access.redhat.com/ubi9/ubi-minimal:9.1
+FROM  --platform=$TARGETPLATFORM registry.access.redhat.com/ubi9/ubi-minimal:9.2
 
 COPY --from=web-builder /opt/app-root/web/dist ./web/dist
 COPY --from=go-builder /opt/app-root/plugin-backend ./
