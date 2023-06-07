@@ -1,9 +1,11 @@
 # We do not use --platform feature to auto fill this ARG because of incompatibility between podman and docker
+ARG BUILDSCRIPT=
 ARG TARGETPLATFORM=linux/amd64
 ARG BUILDPLATFORM=linux/amd64
 FROM --platform=$BUILDPLATFORM docker.io/library/node:16-alpine as web-builder
 USER node
 
+ARG BUILDSCRIPT
 ARG TARGETPLATFORM
 ARG TARGETARCH=amd64
 WORKDIR /opt/app-root
@@ -16,7 +18,7 @@ RUN cd web && npm ci
 COPY --chown=node web web
 COPY mocks mocks
 RUN cd web && npm run format-all
-RUN cd web && npm run build
+RUN cd web && npm run build$BUILDSCRIPT
 
 FROM --platform=$BUILDPLATFORM docker.io/library/golang:1.19 as go-builder
 

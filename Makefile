@@ -29,8 +29,18 @@ IMAGE_ORG ?= $(USER)
 # IMAGE_TAG_BASE defines the namespace and part of the image name for remote images.
 IMAGE_TAG_BASE ?= quay.io/${IMAGE_ORG}/network-observability-console-plugin
 
+# Standalone `true` is used to build frontend outside of OCP Console environment
+STANDALONE ?= false
+BUILDSCRIPT = 
+
+ifeq (${STANDALONE}, true)
+	BUILDSCRIPT := :standalone
+	IMAGE_TAG_BASE := quay.io/${IMAGE_ORG}/network-observability-standalone-frontend
+endif
+
 # Image URL to use all building/pushing image targets
 IMAGE ?= ${IMAGE_TAG_BASE}:${VERSION}
+
 OCI_BUILD_OPTS ?=
 
 # Image building tool (docker / podman) - docker is preferred in CI
@@ -48,7 +58,7 @@ BUILD_FLAGS ?= -ldflags "-X 'main.buildVersion=${BUILD_VERSION}' -X 'main.buildD
 # build a single arch target provided as argument
 define build_target
 	echo 'building image for arch $(1)'; \
-	DOCKER_BUILDKIT=1 $(OCI_BIN) buildx build --load --build-arg TARGETPLATFORM=linux/$(1) --build-arg TARGETARCH=$(1) --build-arg BUILDPLATFORM=linux/amd64 ${OCI_BUILD_OPTS} -t ${IMAGE}-$(1) -f Dockerfile .;
+	DOCKER_BUILDKIT=1 $(OCI_BIN) buildx build --load --build-arg BUILDSCRIPT=${BUILDSCRIPT} --build-arg TARGETPLATFORM=linux/$(1) --build-arg TARGETARCH=$(1) --build-arg BUILDPLATFORM=linux/amd64 ${OCI_BUILD_OPTS} -t ${IMAGE}-$(1) -f Dockerfile .;
 endef
 
 # push a single arch target image

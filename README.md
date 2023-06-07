@@ -109,15 +109,16 @@ If you had previously used the console with the plugin installed, you may need t
 oc delete pods -n openshift-console -l app=console
 ```
 
-## Standalone console
+## Standalone frontend
 
-To build a standalone console (ie. not tied to the OpenShift Console as a plugin), simply run these steps:
+To build a standalone frontend (ie. not tied to the OpenShift Console as a plugin), simply run these steps:
 
 ```bash
-make build-standalone
+# build and push on your own quay.io account (quay.io/myuser/network-observability-standalone-frontend:dev):
+STANDALONE=true IMAGE_ORG=myuser VERSION=dev make images
 ```
 
-If you have a running cluster with NetObserv and Loki installed, you can serve the standalone console using a port-forwarded Loki:
+If you have a running cluster with NetObserv and Loki installed, you can serve the standalone frontend using a port-forwarded Loki:
 
 ```bash
 kubectl port-forward service/loki 3100:3100
@@ -132,9 +133,7 @@ make serve-mock
 
 Both options will start the standalone console server on http://localhost:9001/.
 
-Note: there are currently no provided build of the standalone mode. If you're interested contributing, please [see this issue](https://github.com/netobserv/network-observability-console-plugin/issues/200).
-
-Also note: this will provide a single page showing the main Netflow Traffic page. However, the OpenShift Console integration goes further, by providing more views directly integrated in other pages. These views obviously cannot be rendered without the OpenShift Console.
+Note: this will provide a single page showing the main Netflow Traffic page. However, the OpenShift Console integration goes further, by providing more views directly integrated in other pages. These views obviously cannot be rendered without the OpenShift Console.
 
 ## Cypress tests
 
