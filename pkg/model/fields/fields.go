@@ -34,11 +34,13 @@ const (
 	Proto         = "Proto"
 	Bytes         = "Bytes"
 	FlowDirection = "FlowDirection"
+	DNSID         = "DnsId"
 )
 
 func IsNumeric(v string) bool {
 	switch v {
 	case
+		DNSID,
 		Port,
 		SrcPort,
 		DstPort,

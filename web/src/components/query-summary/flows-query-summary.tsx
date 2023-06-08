@@ -7,8 +7,8 @@ import { InfoCircleIcon } from '@patternfly/react-icons';
 import './query-summary.css';
 import { valueFormat } from '../../utils/format';
 import { Stats } from '../../api/loki';
+import { RecordType } from '../../model/flow-query';
 import _ from 'lodash';
-import { RecordType } from 'src/model/flow-query';
 
 export const FlowsQuerySummaryContent: React.FC<{
   flows: Record[];
@@ -37,6 +37,7 @@ export const FlowsQuerySummaryContent: React.FC<{
   );
 
   const rangeInSeconds = rangeToSeconds(range);
+
   const counters = React.useCallback(() => {
     const bytes = filteredFlows.map(f => f.fields.Bytes).reduce((a, b) => a + b, 0);
     const packets = filteredFlows.map(f => f.fields.Packets).reduce((a, b) => a + b, 0);

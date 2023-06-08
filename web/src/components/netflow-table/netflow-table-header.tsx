@@ -194,9 +194,15 @@ export const NetflowTableHeader: React.FC<{
           modifier="wrap"
           style={{ width: `${Math.floor((100 * c.width) / tableWidth)}%`, minWidth: columnSizes[c.id] }}
           info={
-            [ColumnsId.starttime, ColumnsId.endtime, ColumnsId.collectiontime, ColumnsId.collectionlatency].includes(
-              c.id
-            ) && c.tooltip
+            [
+              ColumnsId.starttime,
+              ColumnsId.endtime,
+              ColumnsId.dnsrequesttime,
+              ColumnsId.dnsresponsetime,
+              ColumnsId.collectiontime,
+              ColumnsId.collectionlatency,
+              ColumnsId.dnslatency
+            ].includes(c.id) && c.tooltip
               ? { tooltip: c.tooltip }
               : undefined
           }

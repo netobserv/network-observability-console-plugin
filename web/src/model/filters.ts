@@ -48,7 +48,8 @@ export type FilterId =
   | 'protocol'
   | 'interface'
   | 'type'
-  | 'id';
+  | 'id'
+  | 'dns_id';
 
 export interface FilterDefinition {
   id: FilterId;

@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { setRecordsDNSTimes } from '../utils/dns';
 import { Config, defaultConfig } from '../model/config';
 import { buildExportQuery } from '../model/export-query';
 import { FlowQuery } from '../model/flow-query';
@@ -22,7 +23,7 @@ export const getFlows = (params: FlowQuery): Promise<RecordsResult> => {
     }
     const aggQR: AggregatedQueryResponse = r.data;
     return {
-      records: (aggQR.result as StreamResult[]).flatMap(r => parseStream(r)),
+      records: setRecordsDNSTimes((aggQR.result as StreamResult[]).flatMap(r => parseStream(r))),
       stats: aggQR.stats
     };
   });

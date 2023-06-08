@@ -150,9 +150,9 @@ func (q *TopologyQueryBuilder) Build() string {
 		q.appendDeduplicateFilter(sb)
 	}
 	if q.topology.skipEmptyDropState {
-		q.appendTcpDropStateFilter(sb)
+		q.appendTCPDropStateFilter(sb)
 	} else if q.topology.skipEmptyDropCause {
-		q.appendTcpDropCauseFilter(sb)
+		q.appendTCPDropCauseFilter(sb)
 	}
 	q.appendJSON(sb, true)
 	if len(q.topology.dataField) > 0 {

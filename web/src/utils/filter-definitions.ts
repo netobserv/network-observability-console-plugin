@@ -457,6 +457,16 @@ export const getFilterDefinitions = (t: TFunction, allowConnectionFilter?: boole
         validate: rejectEmptyValue,
         hint: t('Specify a single conversation hash Id.'),
         encoders: { simpleEncode: simpleFiltersEncoder('_HashId') }
+      },
+      {
+        id: 'dns_id',
+        name: t('DNS Id'),
+        category: FilterCategory.None,
+        component: FilterComponent.Text,
+        getOptions: noOption,
+        validate: rejectEmptyValue,
+        hint: t('Specify a single DNS Id.'),
+        encoders: { simpleEncode: simpleFiltersEncoder('DnsId') }
       }
     ];
   }
