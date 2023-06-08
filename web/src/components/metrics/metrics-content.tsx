@@ -80,7 +80,7 @@ export const MetricsContent: React.FC<MetricsContentProps> = ({
   }, [containerRef, dimensions]);
 
   return (
-    <div id={`chart-${id}`} className="metrics-content-div" ref={containerRef} data-test-metrics={metrics}>
+    <div id={`chart-${id}`} className="metrics-content-div" ref={containerRef} data-test-metrics={metrics.length}>
       <Chart
         themeColor={ChartThemeColor.multiUnordered}
         ariaTitle={title}
