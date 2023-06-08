@@ -319,7 +319,7 @@ export const NetflowTraffic: React.FC<{
       filters: groupedFilters,
       limit: LIMIT_VALUES.includes(limit) ? limit : LIMIT_VALUES[0],
       recordType: recordType,
-      reporter: recordType === 'flowLog' ? reporter : 'both'
+      reporter: reporter
     };
     if (range) {
       if (typeof range === 'number') {
