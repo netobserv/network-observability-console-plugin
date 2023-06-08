@@ -945,6 +945,7 @@ export const NetflowTraffic: React.FC<{
           range={range}
           reporter={reporter}
           type={recordType}
+          isDark={isDarkTheme}
           canSwitchTypes={isFlow() && isConnectionTracking()}
           setFilters={setFilters}
           setRange={setRange}

@@ -3,13 +3,13 @@ import { Button, Tooltip } from '@patternfly/react-core';
 import { FilterIcon, ToggleOnIcon, ToggleOffIcon, GlobeAmericasIcon, TimesIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { getCause } from '../../utils/tcp-drop';
 import { FlowDirection, Record } from '../../api/ipfix';
 import { Column, ColumnsId, getFullColumnName } from '../../utils/columns';
 import { dateFormatter, getFormattedDate, timeMSFormatter, utcDateTimeFormatter } from '../../utils/datetime';
 import { formatDurationAboveMillisecond } from '../../utils/duration';
 import { formatPort } from '../../utils/port';
 import { formatProtocol } from '../../utils/protocol';
+import { getCode, getType } from '../../utils/icmp';
 import { Size } from '../dropdowns/table-display-dropdown';
 import './record-field.css';
 
@@ -26,7 +26,8 @@ export const RecordField: React.FC<{
   useLinks: boolean;
   filter?: RecordFieldFilter;
   detailed?: boolean;
-}> = ({ flow, column, size, filter, useLinks, detailed }) => {
+  isDark?: boolean;
+}> = ({ flow, column, size, filter, useLinks, detailed, isDark }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   const onMouseOver = (event: React.MouseEvent<HTMLDivElement, MouseEvent>, className: string) => {
@@ -179,11 +180,16 @@ export const RecordField: React.FC<{
       case ColumnsId.collectiontime:
       case ColumnsId.starttime:
       case ColumnsId.endtime:
+      case ColumnsId.dnsrequesttime:
+      case ColumnsId.dnsresponsetime:
         return dateTimeContent(typeof value === 'number' && !isNaN(value) ? new Date(value) : undefined);
       case ColumnsId.collectionlatency:
+      case ColumnsId.dnslatency:
       case ColumnsId.duration:
         return singleContainer(
-          simpleTextWithTooltip(value !== undefined ? formatDurationAboveMillisecond(value as number) : '')
+          typeof value === 'number' && !isNaN(value)
+            ? simpleTextWithTooltip(formatDurationAboveMillisecond(value as number))
+            : undefined
         );
       case ColumnsId.name:
         return doubleContainer(
@@ -328,18 +334,28 @@ export const RecordField: React.FC<{
       case ColumnsId.packets:
       case ColumnsId.bytes:
         if (Array.isArray(value) && value.length) {
+          let sentText = t('sent');
           let droppedText = t('dropped');
-          if (c.id === ColumnsId.bytes && (value[2] as number) > 0) {
-            droppedText = t('dropped by {{reason}}', { reason: getCause(value[2] as number) });
+          if (c.id === ColumnsId.bytes) {
+            if (flow.fields.IcmpType) {
+              sentText = t('sent reporting {{type}} {{code}}', {
+                type: getType(flow.fields.IcmpType),
+                code: getCode(flow.fields.IcmpType, flow.fields.IcmpCode)
+              });
+            }
+
+            if (flow.fields.TcpDropCause) {
+              droppedText = t('dropped by {{reason}}', { reason: flow.fields.TcpDropCause });
+            }
           }
           return doubleContainer(
             simpleTextWithTooltip(
-              detailed ? `${String(value[0])} ${c.name.toLowerCase()} ${t('sent')}` : String(value[0]),
-              '#1E4F18'
+              detailed ? `${String(value[0])} ${c.name.toLowerCase()} ${sentText}` : String(value[0]),
+              isDark ? '#3E8635' : '#1E4F18'
             ),
             simpleTextWithTooltip(
               detailed ? `${String(value[1])} ${c.name.toLowerCase()} ${droppedText}` : String(value[1]),
-              '#A30000'
+              isDark ? '#C9190B' : '#A30000'
             ),
             true,
             false
@@ -348,7 +364,7 @@ export const RecordField: React.FC<{
           return singleContainer(
             simpleTextWithTooltip(
               detailed ? `${String(value)} ${c.name.toLowerCase()} ${t('sent')}` : String(value),
-              '#1E4F18'
+              isDark ? '#3E8635' : '#1E4F18'
             )
           );
         }

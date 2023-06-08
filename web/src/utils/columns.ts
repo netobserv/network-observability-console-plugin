@@ -10,6 +10,8 @@ import { compareNumbers, compareStrings } from './base-compare';
 export enum ColumnsId {
   starttime = 'StartTime',
   endtime = 'EndTime',
+  dnsrequesttime = 'DNS_RequestTime',
+  dnsresponsetime = 'DNS_ResponseTime',
   type = 'K8S_Type',
   srctype = 'SrcK8S_Type',
   dsttype = 'DstK8S_Type',
@@ -50,6 +52,8 @@ export enum ColumnsId {
   duration = 'FlowDuration',
   collectiontime = 'CollectionTime',
   collectionlatency = 'CollectionLatency',
+  dnsid = 'DNSId',
+  dnslatency = 'DNSLatency',
   hostaddr = 'K8S_HostIP',
   srchostaddr = 'SrcK8S_HostIP',
   dsthostaddr = 'DstK8S_HostIP',
@@ -734,8 +738,7 @@ export const getExtraColumns = (t: TFunction): Column[] => {
       tooltip: t('The total aggregated number of bytes.'),
       fieldName: 'Bytes',
       isSelected: true,
-      value: f =>
-        f.fields.TcpDropBytes ? [f.fields.Bytes, f.fields.TcpDropBytes, f.fields.TcpDropCause || 0] : f.fields.Bytes,
+      value: f => (f.fields.TcpDropBytes ? [f.fields.Bytes, f.fields.TcpDropBytes] : f.fields.Bytes),
       sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
       width: 5
     },
@@ -776,6 +779,27 @@ export const getExtraColumns = (t: TFunction): Column[] => {
       value: f => f.fields.TimeReceived * 1000 - f.fields.TimeFlowEndMs,
       sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
       width: 5
+    },
+    {
+      id: ColumnsId.dnsid,
+      name: t('DNS Id'),
+      tooltip: t('DNS request identifier.'),
+      fieldName: 'DnsId',
+      quickFilter: 'dns_id',
+      isSelected: false,
+      value: f => f.fields.DnsId || Number.NaN,
+      sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
+      width: 5
+    },
+    {
+      id: ColumnsId.dnslatency,
+      name: t('DNS Latency'),
+      tooltip: t('Time elapsed between DNS request and response.'),
+      isSelected: false,
+      // zero is valid value here
+      value: f => f.fields.DnsLatencyMs !== undefined ? f.fields.DnsLatencyMs : Number.NaN,
+      sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
+      width: 5
     }
   ];
 };
@@ -810,6 +834,26 @@ export const getDefaultColumns = (t: TFunction, withCommonFields = true, withCon
       sort: (a, b, col) =>
         compareNumbers(col.value(a) as number, col.value(b) as number) ||
         compareStrings(b.labels._RecordType!, a.labels._RecordType!),
+      width: 15
+    },
+    {
+      id: ColumnsId.dnsrequesttime,
+      name: t('DNS Request Time'),
+      tooltip: t('Time of the DNS request.'),
+      fieldName: 'DnsRequestTimeMs',
+      isSelected: false,
+      value: f => f.fields.DnsRequestTimeMs || Number.NaN,
+      sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
+      width: 15
+    },
+    {
+      id: ColumnsId.dnsresponsetime,
+      name: t('DNS Response Time'),
+      tooltip: t('Time of the DNS response.'),
+      fieldName: 'DnsResponseTimeMs',
+      isSelected: false,
+      value: f => f.fields.DnsResponseTimeMs || Number.NaN,
+      sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
       width: 15
     }
   ];

@@ -30,6 +30,7 @@ import './summary-panel.css';
 import { MetricType, RecordType } from '../../model/flow-query';
 import { MetricsQuerySummaryContent } from './metrics-query-summary';
 import { config } from '../../utils/config';
+import { formatDurationAboveMillisecond } from '../../utils/duration';
 
 type TypeCardinality = {
   type: string;
@@ -291,6 +292,32 @@ export const SummaryPanelContent: React.FC<{
     ) : undefined;
   };
 
+  const timeContent = () => {
+    const filteredFlows = flows || [];
+    const duration =
+      filteredFlows.map(f => f.fields.TimeFlowEndMs - f.fields.TimeFlowStartMs).reduce((a, b) => a + b, 0) /
+      filteredFlows.length;
+    const collectionLatency =
+      filteredFlows.map(f => f.fields.TimeReceived * 1000 - f.fields.TimeFlowEndMs).reduce((a, b) => a + b, 0) /
+      filteredFlows.length;
+    const dnsLatency =
+      filteredFlows
+        .map(f => (f.fields.DnsResponseTimeMs || 0) - (f.fields.DnsRequestTimeMs || 0))
+        .reduce((a, b) => a + b, 0) / filteredFlows.length;
+    return (
+      <TextContent className="summary-text-container">
+        <Text component={TextVariants.h3}>{`${t('Average time')}`}</Text>
+        <Text className="summary-config-item">{`${t('Duration')}: ${formatDurationAboveMillisecond(duration)}`}</Text>
+        <Text className="summary-config-item">{`${t('Collection latency')}: ${formatDurationAboveMillisecond(
+          collectionLatency
+        )}`}</Text>
+        <Text className="summary-config-item">{`${t('DNS latency')}: ${formatDurationAboveMillisecond(
+          dnsLatency
+        )}`}</Text>
+      </TextContent>
+    );
+  };
+
   return (
     <>
       <TextContent className="summary-text-container">
@@ -326,6 +353,8 @@ export const SummaryPanelContent: React.FC<{
           />
         )}
       </TextContent>
+
+      {timeContent()}
 
       {cardinalityContent()}
       {/*TODO: NETOBSERV-225 for extra stats on query*/}

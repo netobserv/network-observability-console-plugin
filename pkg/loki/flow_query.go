@@ -256,14 +256,14 @@ func (q *FlowQueryBuilder) appendDeduplicateFilter(sb *strings.Builder) {
 	sb.WriteString("`")
 }
 
-func (q *FlowQueryBuilder) appendTcpDropStateFilter(sb *strings.Builder) {
+func (q *FlowQueryBuilder) appendTCPDropStateFilter(sb *strings.Builder) {
 	// !~`TcpDropState":0`
 	sb.WriteString("!~`")
 	sb.WriteString(`TcpDropState":0`)
 	sb.WriteString("`")
 }
 
-func (q *FlowQueryBuilder) appendTcpDropCauseFilter(sb *strings.Builder) {
+func (q *FlowQueryBuilder) appendTCPDropCauseFilter(sb *strings.Builder) {
 	// !~`TcpDropCause":0`
 	sb.WriteString("!~`")
 	sb.WriteString(`TcpDropCause":0`)

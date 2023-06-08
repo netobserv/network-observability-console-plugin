@@ -85,10 +85,14 @@ export interface Fields {
   Bytes_AB?: number;
   /** In conversation tracking, B to A bytes counter per conversation */
   Bytes_BA?: number;
+  /** ICMP type */
+  IcmpType?: number;
+  /** ICMP code */
+  IcmpCode?: number;
   /** TCP state for drops */
-  TcpDropState?: number;
+  TcpDropState?: string;
   /** TCP cause for drops */
-  TcpDropCause?: number;
+  TcpDropCause?: string;
   /** TCP flags for drops */
   TcpDropFlags?: number;
   /** Number of packets dropped in this flow */
@@ -103,6 +107,16 @@ export interface Fields {
   TcpDropBytes_AB?: number;
   /** In conversation tracking, B to A bytes dropped counter per conversation */
   TcpDropBytes_BA?: number;
+  /** DNS record id */
+  DnsId?: number;
+  /** TCP flags for DNS record */
+  DnsFlags?: number;
+  /** Timestamp of DNS request, in milliseconds */
+  DnsRequestTimeMs?: number;
+  /** Timestamp of DNS response, in milliseconds */
+  DnsResponseTimeMs?: number;
+  /** Calculated time between response and request, in milliseconds */
+  DnsLatencyMs?: number;
   /** Start timestamp of this flow, in milliseconds */
   TimeFlowStartMs: number;
   /** End timestamp of this flow, in milliseconds */

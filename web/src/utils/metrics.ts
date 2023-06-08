@@ -14,7 +14,6 @@ import { valueFormat } from './format';
 import { NodeData } from '../model/topology';
 import { getPeerId, idUnknown } from './ids';
 import { TFunction } from 'i18next';
-import { getCause, getState } from './tcp-drop';
 
 // Tolerance, in seconds, to assume presence/emptiness of the last datapoint fetched, when it is
 // close to "now", to accomodate with potential collection latency.
@@ -140,16 +139,14 @@ const parseMetric = (
   const stats = computeStats(normalized);
   if (scope === 'droppedState') {
     return {
-      value: raw.metric.TcpDropState,
-      name: getState(raw.metric.TcpDropState),
+      name: raw.metric.TcpDropState,
       values: normalized,
       stats: stats,
       scope: scope
     } as DroppedTopologyMetrics;
   } else if (scope === 'droppedCause') {
     return {
-      value: raw.metric.TcpDropCause,
-      name: getCause(raw.metric.TcpDropCause),
+      name: raw.metric.TcpDropCause,
       values: normalized,
       stats: stats,
       scope: scope

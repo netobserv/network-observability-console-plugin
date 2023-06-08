@@ -57,8 +57,8 @@ export interface RawTopologyMetric {
   SrcK8S_OwnerType?: string;
   SrcK8S_Type?: string;
   SrcK8S_HostName?: string;
-  TcpDropState?: number;
-  TcpDropCause?: number;
+  TcpDropState?: string;
+  TcpDropCause?: string;
 }
 
 export interface RawTopologyMetrics {

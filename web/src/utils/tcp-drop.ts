@@ -1,3 +1,9 @@
+/** TODO: remove this file, replaced by https://github.com/netobserv/flowlogs-pipeline/pull/429/files#r1219203830 */
+
+/** see https://elixir.bootlin.com/linux/v6.3/source/include/net/tcp_states.h#L12
+ *  and https://elixir.bootlin.com/linux/latest/source/include/net/dropreason.h#L88
+ */
+
 enum TCP_STATES {
   TCP_ESTABLISHED = 1,
   TCP_SYN_SENT,

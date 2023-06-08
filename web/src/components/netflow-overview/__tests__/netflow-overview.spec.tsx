@@ -3,7 +3,8 @@ import * as React from 'react';
 
 import { EmptyState } from '@patternfly/react-core';
 import LokiError from '../../../components/messages/loki-error';
-import { metrics } from '../../../components/__tests-data__/metrics';
+import { metrics, droppedMetrics } from '../../../components/__tests-data__/metrics';
+
 import { MetricType, RecordType } from '../../../model/flow-query';
 import { SamplePanel, ShuffledDefaultPanels } from '../../__tests-data__/panels';
 import { NetflowOverview, NetflowOverviewProps } from '../netflow-overview';
@@ -42,7 +43,15 @@ describe('<NetflowOverview />', () => {
     expect(containerDiv.length).toEqual(1);
   });
   it('should render panels', async () => {
-    const wrapper = mount(<NetflowOverview {...props} metrics={metrics} totalMetric={metrics[0]} />);
+    const wrapper = mount(
+      <NetflowOverview
+        {...props}
+        metrics={metrics}
+        droppedMetrics={droppedMetrics}
+        totalMetric={metrics[0]}
+        totalDroppedMetric={droppedMetrics[0]}
+      />
+    );
     expect(wrapper.find(NetflowOverviewPanel)).toHaveLength(props.panels.length);
     wrapper.setProps({
       panels: [SamplePanel]

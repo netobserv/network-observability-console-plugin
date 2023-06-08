@@ -42,6 +42,7 @@ export type RecordDrawerProps = {
   reporter: Reporter;
   type: RecordType;
   canSwitchTypes: boolean;
+  isDark?: boolean;
   setFilters: (v: Filter[]) => void;
   setRange: (r: number | TimeRange) => void;
   setReporter: (r: Reporter) => void;
@@ -59,6 +60,7 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
   reporter,
   type,
   canSwitchTypes,
+  isDark,
   setFilters,
   setRange,
   setReporter,
@@ -323,6 +325,7 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
                           size={'s'}
                           useLinks={true}
                           detailed={true}
+                          isDark={isDark}
                         />
                       </TextContent>
                     ))}

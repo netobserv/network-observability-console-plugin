@@ -79,8 +79,41 @@ export const metric3: RawTopologyMetrics = {
   ]
 };
 
+export const metric4: RawTopologyMetrics = {
+  metric: {
+    DstAddr: '172.30.139.153',
+    DstK8S_Name: 'loki',
+    DstK8S_Namespace: 'network-observability',
+    DstK8S_OwnerName: 'loki',
+    DstK8S_OwnerType: 'Service',
+    DstK8S_Type: 'Service',
+    DstK8S_HostName: 'ip-10-0-142-22.ec2.internal',
+    SrcAddr: '10.131.0.14',
+    SrcK8S_HostName: 'ip-10-0-142-24.ec2.internal',
+    SrcK8S_Name: 'flowlogs-pipeline-tskw2',
+    SrcK8S_Namespace: 'network-observability',
+    SrcK8S_OwnerName: 'flowlogs-pipeline',
+    SrcK8S_OwnerType: 'DaemonSet',
+    SrcK8S_Type: 'Pod'
+  },
+  values: [
+    [1653989806.227, '25.78'],
+    [1653989866.227, '00.00'],
+    [1653989926.227, '40.00'],
+    [1653989986.227, '80.00'],
+    [1653990046.227, '99.99']
+  ]
+};
+
 export const metrics = parseMetrics(
   [metric1, metric2, metric3],
+  { from: 1653989800, to: 1653990100 },
+  'resource',
+  0
+) as TopologyMetrics[];
+
+export const droppedMetrics = parseMetrics(
+  [metric4],
   { from: 1653989800, to: 1653990100 },
   'resource',
   0
