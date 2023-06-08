@@ -780,7 +780,9 @@ export const getDefaultColumns = (t: TFunction, withCommonFields = true, withCon
       fieldName: 'TimeFlowStartMs',
       isSelected: false,
       value: f => f.fields.TimeFlowStartMs,
-      sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
+      sort: (a, b, col) =>
+        compareNumbers(col.value(a) as number, col.value(b) as number) ||
+        compareStrings(b.labels._RecordType!, a.labels._RecordType!),
       width: 15
     },
     {
@@ -793,7 +795,9 @@ export const getDefaultColumns = (t: TFunction, withCommonFields = true, withCon
       fieldName: 'TimeFlowEndMs',
       isSelected: true,
       value: f => f.fields.TimeFlowEndMs,
-      sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
+      sort: (a, b, col) =>
+        compareNumbers(col.value(a) as number, col.value(b) as number) ||
+        compareStrings(b.labels._RecordType!, a.labels._RecordType!),
       width: 15
     }
   ];

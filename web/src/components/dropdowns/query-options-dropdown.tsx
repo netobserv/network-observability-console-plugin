@@ -150,17 +150,13 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
           </div>
         </Tooltip>
         {reporterOptions.map(opt => {
-          const disabled = recordType === 'allConnections' || (!allowReporterBoth && opt.value === 'both');
+          const disabled = !allowReporterBoth && opt.value === 'both';
           return (
             <div key={`reporter-${opt.value}`}>
               <label className="pf-c-select__menu-item">
                 <Tooltip
                   trigger={disabled ? 'mouseenter focus' : ''}
-                  content={
-                    disabled
-                      ? t('Only available using "Flow" log type. This option will be ignored for "Conversation".')
-                      : undefined
-                  }
+                  content={disabled ? t('Only available in Table view.') : undefined}
                 >
                   <Radio
                     isChecked={opt.value === reporter}
