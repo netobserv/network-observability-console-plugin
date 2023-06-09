@@ -96,7 +96,7 @@ export const StatDonut: React.FC<StatDonutProps> = ({
   }, [containerRef, dimensions]);
 
   return (
-    <div id={id} className="metrics-content-div" ref={containerRef} data-test-metrics={topKMetrics}>
+    <div id={id} className="metrics-content-div" ref={containerRef} data-test-metrics={topKMetrics.length}>
       <ChartDonut
         themeColor={ChartThemeColor.multiUnordered}
         constrainToVisibleArea
