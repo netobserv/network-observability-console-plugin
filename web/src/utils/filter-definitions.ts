@@ -99,44 +99,16 @@ const k8sSingleResourceEncode = (kind: Field, namespace: Field, name: Field, res
   return `${kind}="${res.kind}"&${namespace}="${res.namespace}"&${name}="${res.name}"`;
 };
 
-const peers = (
-  base: Omit<FilterDefinition, 'encoders'>,
-  srcEncoder: FiltersEncoder,
-  dstEncoder: FiltersEncoder
-): FilterDefinition[] => {
+const withDest = (src: FilterDefinition, dstEncoder: FiltersEncoder): FilterDefinition[] => {
   return [
+    src,
     {
-      ...base,
-      id: ('src_' + base.id) as FilterId,
-      category: FilterCategory.Source,
-      encoders: { simpleEncode: srcEncoder }
-    },
-    {
-      ...base,
-      id: ('dst_' + base.id) as FilterId,
+      ...src,
+      id: src.id.replace('src_', 'dst_') as FilterId,
       category: FilterCategory.Destination,
-      encoders: { simpleEncode: dstEncoder }
-    },
-    {
-      ...base,
-      category: FilterCategory.Common,
-      encoders: { common: { srcEncode: srcEncoder, dstEncode: dstEncoder } }
+      encoder: dstEncoder
     }
   ];
-};
-
-const peersWithOverlap = (
-  base: Omit<FilterDefinition, 'encoders'>,
-  srcEncoder: FiltersEncoder,
-  dstEncoder: FiltersEncoder
-): FilterDefinition[] => {
-  const defs = peers(base, srcEncoder, dstEncoder);
-  // Modify Common (defs[2]) filter encoder to exclude overlap between src and dest matches
-  defs[2].encoders.common!.dstEncode = (values: FilterValue[], matchAny: boolean, not: boolean) => {
-    // Stands for: ... OR (<dst filters> AND NOT <src filters>)
-    return dstEncoder(values, matchAny, not) + '&' + srcEncoder(values, matchAny, !not);
-  };
-  return defs;
 };
 
 const isOwnerKind = (kind: string) => {
@@ -198,68 +170,72 @@ export const getFilterDefinitions = (
     const invalidMACMessage = t('Not a valid MAC address');
 
     filterDefinitions = [
-      ...peersWithOverlap(
+      ...withDest(
         {
-          id: 'namespace',
+          id: 'src_namespace',
           name: t('Namespace'),
           component: FilterComponent.Autocomplete,
           autoCompleteAddsQuotes: true,
-          category: FilterCategory.Common,
+          category: FilterCategory.Source,
           getOptions: cap10(getNamespaceOptions),
           validate: k8sNameValidation,
           hint: k8sNameHint,
-          examples: k8sNameExamples
+          examples: k8sNameExamples,
+          encoder: simpleFiltersEncoder('SrcK8S_Namespace'),
+          overlap: true
         },
-        simpleFiltersEncoder('SrcK8S_Namespace'),
         simpleFiltersEncoder('DstK8S_Namespace')
       ),
-      ...peers(
+      ...withDest(
         {
-          id: 'name',
+          id: 'src_name',
           name: t('Name'),
           component: FilterComponent.Text,
-          category: FilterCategory.Common,
+          category: FilterCategory.Source,
           getOptions: noOption,
           validate: k8sNameValidation,
           hint: k8sNameHint,
-          examples: k8sNameExamples
+          examples: k8sNameExamples,
+          encoder: simpleFiltersEncoder('SrcK8S_Name'),
+          overlap: false
         },
-        simpleFiltersEncoder('SrcK8S_Name'),
         simpleFiltersEncoder('DstK8S_Name')
       ),
-      ...peers(
+      ...withDest(
         {
-          id: 'kind',
+          id: 'src_kind',
           name: t('Kind'),
           component: FilterComponent.Autocomplete,
           autoCompleteAddsQuotes: true,
-          category: FilterCategory.Common,
+          category: FilterCategory.Source,
           getOptions: cap10(getKindOptions),
-          validate: rejectEmptyValue
+          validate: rejectEmptyValue,
+          encoder: kindFiltersEncoder('SrcK8S_Type', 'SrcK8S_OwnerType'),
+          overlap: false
         },
-        kindFiltersEncoder('SrcK8S_Type', 'SrcK8S_OwnerType'),
         kindFiltersEncoder('DstK8S_Type', 'DstK8S_OwnerType')
       ),
-      ...peersWithOverlap(
+      ...withDest(
         {
-          id: 'owner_name',
+          id: 'src_owner_name',
           name: t('Owner Name'),
           component: FilterComponent.Text,
-          category: FilterCategory.Common,
+          category: FilterCategory.Source,
           getOptions: noOption,
           validate: k8sNameValidation,
           hint: k8sNameHint,
-          examples: k8sNameExamples
+          examples: k8sNameExamples,
+          encoder: simpleFiltersEncoder('SrcK8S_OwnerName'),
+          overlap: true
         },
-        simpleFiltersEncoder('SrcK8S_OwnerName'),
         simpleFiltersEncoder('DstK8S_OwnerName')
       ),
-      ...peers(
+      ...withDest(
         {
-          id: 'resource',
+          id: 'src_resource',
           name: t('Resource'),
           component: FilterComponent.Autocomplete,
-          category: FilterCategory.Common,
+          category: FilterCategory.Source,
           getOptions: cap10(getResourceOptions),
           validate: (value: string) => {
             const resource = splitResource(value);
@@ -302,15 +278,16 @@ export const getFilterDefinitions = (
         - ${t('Select kind first from suggestions')}
         - ${t('Then Select namespace from suggestions')}
         - ${t('Finally select name from suggestions')}
-        ${t('You can also directly specify a kind, namespace and name like pod.openshift.apiserver')}`
+        ${t('You can also directly specify a kind, namespace and name like pod.openshift.apiserver')}`,
+          encoder: k8sResourceFiltersEncoder(
+            'SrcK8S_Type',
+            'SrcK8S_OwnerType',
+            'SrcK8S_Namespace',
+            'SrcK8S_Name',
+            'SrcK8S_OwnerName'
+          ),
+          overlap: false
         },
-        k8sResourceFiltersEncoder(
-          'SrcK8S_Type',
-          'SrcK8S_OwnerType',
-          'SrcK8S_Namespace',
-          'SrcK8S_Name',
-          'SrcK8S_OwnerName'
-        ),
         k8sResourceFiltersEncoder(
           'DstK8S_Type',
           'DstK8S_OwnerType',
@@ -319,12 +296,12 @@ export const getFilterDefinitions = (
           'DstK8S_OwnerName'
         )
       ),
-      ...peers(
+      ...withDest(
         {
-          id: 'address',
+          id: 'src_address',
           name: t('IP'),
           component: FilterComponent.Text,
-          category: FilterCategory.Common,
+          category: FilterCategory.Source,
           getOptions: noOption,
           validate: (value: string) => {
             if (_.isEmpty(value)) {
@@ -333,17 +310,18 @@ export const getFilterDefinitions = (
             return validateIPFilter(value) ? valid(value) : invalid(invalidIPMessage);
           },
           hint: ipHint,
-          examples: ipExamples
+          examples: ipExamples,
+          encoder: simpleFiltersEncoder('SrcAddr'),
+          overlap: false
         },
-        simpleFiltersEncoder('SrcAddr'),
         simpleFiltersEncoder('DstAddr')
       ),
-      ...peers(
+      ...withDest(
         {
-          id: 'port',
+          id: 'src_port',
           name: t('Port'),
           component: FilterComponent.Autocomplete,
-          category: FilterCategory.Common,
+          category: FilterCategory.Source,
           getOptions: cap10(getPortOptions),
           validate: (value: string) => {
             if (_.isEmpty(value)) {
@@ -359,17 +337,18 @@ export const getFilterDefinitions = (
           examples: `${t('Specify a single port following one of these rules:')}
         - ${t('A port number like 80, 21')}
         - ${t('A IANA name like HTTP, FTP')}
-        - ${t('Empty double quotes "" for undefined port')}`
+        - ${t('Empty double quotes "" for undefined port')}`,
+          encoder: simpleFiltersEncoder('SrcPort'),
+          overlap: false
         },
-        simpleFiltersEncoder('SrcPort'),
         simpleFiltersEncoder('DstPort')
       ),
-      ...peers(
+      ...withDest(
         {
-          id: 'mac',
+          id: 'src_mac',
           name: t('MAC'),
           component: FilterComponent.Text,
-          category: FilterCategory.Common,
+          category: FilterCategory.Source,
           getOptions: noOption,
           validate: (value: string) => {
             if (_.isEmpty(value)) {
@@ -377,17 +356,18 @@ export const getFilterDefinitions = (
             }
             return /^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})/.test(value) ? valid(value) : invalid(invalidMACMessage);
           },
-          hint: t('Specify a single MAC address.')
+          hint: t('Specify a single MAC address.'),
+          encoder: simpleFiltersEncoder('SrcMac'),
+          overlap: false
         },
-        simpleFiltersEncoder('SrcMac'),
         simpleFiltersEncoder('DstMac')
       ),
-      ...peers(
+      ...withDest(
         {
-          id: 'host_address',
+          id: 'src_host_address',
           name: t('Node IP'),
           component: FilterComponent.Text,
-          category: FilterCategory.Common,
+          category: FilterCategory.Source,
           getOptions: noOption,
           validate: (value: string) => {
             if (_.isEmpty(value)) {
@@ -396,23 +376,25 @@ export const getFilterDefinitions = (
             return validateIPFilter(value) ? valid(value) : invalid(invalidIPMessage);
           },
           hint: ipHint,
-          examples: ipExamples
+          examples: ipExamples,
+          encoder: simpleFiltersEncoder('SrcK8S_HostIP'),
+          overlap: true
         },
-        simpleFiltersEncoder('SrcK8S_HostIP'),
         simpleFiltersEncoder('DstK8S_HostIP')
       ),
-      ...peersWithOverlap(
+      ...withDest(
         {
-          id: 'host_name',
+          id: 'src_host_name',
           name: t('Node Name'),
           component: FilterComponent.Text,
-          category: FilterCategory.Common,
+          category: FilterCategory.Source,
           getOptions: noOption,
           validate: k8sNameValidation,
           hint: k8sNameHint,
-          examples: k8sNameExamples
+          examples: k8sNameExamples,
+          encoder: simpleFiltersEncoder('SrcK8S_HostName'),
+          overlap: true
         },
-        simpleFiltersEncoder('SrcK8S_HostName'),
         simpleFiltersEncoder('DstK8S_HostName')
       ),
       {
@@ -441,7 +423,8 @@ export const getFilterDefinitions = (
         - ${t('A protocol number like 6, 17')}
         - ${t('A IANA name like TCP, UDP')}
         - ${t('Empty double quotes "" for undefined protocol')}`,
-        encoders: { simpleEncode: simpleFiltersEncoder('Proto') }
+        encoder: simpleFiltersEncoder('Proto'),
+        overlap: false
       },
       {
         id: 'interface',
@@ -451,7 +434,8 @@ export const getFilterDefinitions = (
         getOptions: noOption,
         validate: rejectEmptyValue,
         hint: t('Specify a network interface.'),
-        encoders: { simpleEncode: simpleFiltersEncoder('Interface') }
+        encoder: simpleFiltersEncoder('Interface'),
+        overlap: false
       },
       {
         id: 'id',
@@ -461,7 +445,8 @@ export const getFilterDefinitions = (
         getOptions: noOption,
         validate: rejectEmptyValue,
         hint: t('Specify a single conversation hash Id.'),
-        encoders: { simpleEncode: simpleFiltersEncoder('_HashId') }
+        encoder: simpleFiltersEncoder('_HashId'),
+        overlap: false
       },
       {
         id: 'dns_id',
@@ -471,7 +456,8 @@ export const getFilterDefinitions = (
         getOptions: noOption,
         validate: rejectEmptyValue,
         hint: t('Specify a single DNS Id.'),
-        encoders: { simpleEncode: simpleFiltersEncoder('DnsId') }
+        encoder: simpleFiltersEncoder('DnsId'),
+        overlap: false
       },
       {
         id: 'dns_flag_response_code',
@@ -485,7 +471,8 @@ export const getFilterDefinitions = (
         - ${t('A IANA RCODE number like 0, 3, 9')}
         - ${t('A IANA RCODE name like NoError, NXDomain, NotAuth')}
         - ${t('Empty double quotes "" for undefined response code')}`,
-        encoders: { simpleEncode: simpleFiltersEncoder('DnsFlagsResponseCode') }
+        encoder: simpleFiltersEncoder('DnsFlagsResponseCode'),
+        overlap: false
       }
     ];
   }

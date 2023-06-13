@@ -1,24 +1,15 @@
 import * as React from 'react';
 import * as _ from 'lodash';
-import { Tooltip, TooltipPosition } from '@patternfly/react-core';
 import {
   CubeIcon,
   CubesIcon,
-  FilterIcon,
-  LevelDownAltIcon,
   OutlinedHddIcon,
   QuestionCircleIcon,
   ServiceIcon,
-  ThumbtackIcon,
-  TimesIcon,
   UsersIcon
 } from '@patternfly/react-icons';
 import {
-  Decorator,
-  DEFAULT_DECORATOR_PADDING,
-  DEFAULT_DECORATOR_RADIUS,
   DEFAULT_LAYER,
-  getDefaultShapeDecoratorCenter,
   Layer,
   Node,
   NodeModel,
@@ -33,19 +24,14 @@ import {
   WithSelectionProps
 } from '@patternfly/react-topology';
 import useDetailsLevel from '@patternfly/react-topology/dist/esm/hooks/useDetailsLevel';
-import { TFunction } from 'i18next';
-import { useTranslation } from 'react-i18next';
 import { Decorated, NodeData } from '../../../../model/topology';
 import BaseNode from '../components/node';
+import { NodeDecorators } from './styleDecorators';
 
-export const FILTER_EVENT = 'filter';
-export const STEP_INTO_EVENT = 'step_into';
 export enum DataTypes {
   Default
 }
 const ICON_PADDING = 20;
-const MEDIUM_DECORATOR_PADDING = 5;
-const LARGE_DECORATOR_PADDING = 6;
 
 type NodePeer = Node<NodeModel, Decorated<NodeData>>;
 
@@ -97,156 +83,30 @@ const renderIcon = (data: Decorated<NodeData>, element: NodePeer): React.ReactNo
   );
 };
 
-const renderClickableDecorator = (
-  t: TFunction,
-  element: NodePeer,
-  quadrant: TopologyQuadrant,
-  icon: React.ReactNode,
-  tooltip: string,
-  isActive: boolean,
-  onClick: (element: NodePeer) => void,
-  getShapeDecoratorCenter?: (
-    quadrant: TopologyQuadrant,
-    node: NodePeer,
-    radius?: number
-  ) => {
-    x: number;
-    y: number;
-  },
-  padding?: number
-): React.ReactNode => {
-  const { x, y } = getShapeDecoratorCenter
-    ? getShapeDecoratorCenter(quadrant, element)
-    : getDefaultShapeDecoratorCenter(quadrant, element);
-
-  return (
-    <Tooltip content={tooltip} position={TooltipPosition.right}>
-      <Decorator
-        x={x}
-        y={y}
-        radius={DEFAULT_DECORATOR_RADIUS}
-        padding={padding}
-        showBackground
-        icon={icon}
-        className={isActive ? 'selected-decorator' : ''}
-        onClick={() => onClick(element)}
-      />
-    </Tooltip>
-  );
-};
-
-const renderDecorators = (
-  t: TFunction,
-  element: NodePeer,
-  data: Decorated<NodeData>,
-  isPinned: boolean,
-  setPinned: (v: boolean) => void,
-  isFiltered: boolean,
-  setFiltered: (v: boolean) => void,
-  getShapeDecoratorCenter?: (
-    quadrant: TopologyQuadrant,
-    node: NodePeer,
-    radius?: number
-  ) => {
-    x: number;
-    y: number;
-  }
-): React.ReactNode => {
-  if (!data.showDecorators) {
-    return null;
-  }
-
-  const onPinClick = () => {
-    const updatedIsPinned = !isPinned;
-    data.point = element.getPosition();
-    data.isPinned = updatedIsPinned;
-    //override setPosition when pinned
-    if (updatedIsPinned) {
-      data.setPosition = element.setPosition;
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      element.setPosition = p => {
-        /*nothing to do there*/
-      };
-    } else {
-      element.setPosition = data.setPosition!;
-      data.setPosition = undefined;
-    }
-    element.setData(data);
-    setPinned(updatedIsPinned);
-  };
-
-  const onFilterClick = () => {
-    const updatedIsFiltered = !isFiltered;
-    element.getController().fireEvent(FILTER_EVENT, {
-      ...data,
-      id: element.getId(),
-      isFiltered: updatedIsFiltered
-    });
-    setFiltered(updatedIsFiltered);
-  };
-
-  const onStepIntoClick = () => {
-    element.getController().fireEvent(STEP_INTO_EVENT, {
-      ...data,
-      id: element.getId()
-    });
-  };
-
-  return (
-    <>
-      {data.canStepInto &&
-        renderClickableDecorator(
-          t,
-          element,
-          TopologyQuadrant.lowerRight,
-          <LevelDownAltIcon />,
-          t('Step into this {{name}}', { name: data.peer.resourceKind?.toLowerCase() }),
-          false,
-          onStepIntoClick,
-          getShapeDecoratorCenter,
-          MEDIUM_DECORATOR_PADDING
-        )}
-      {(data.peer.namespace || data.peer.resource || data.peer.owner || data.peer.addr || data.peer.hostName) &&
-        renderClickableDecorator(
-          t,
-          element,
-          TopologyQuadrant.lowerLeft,
-          isFiltered ? <TimesIcon /> : <FilterIcon />,
-          isFiltered
-            ? t('Remove {{name}} filter', { name: data.peer.resourceKind?.toLowerCase() })
-            : t('Add {{name}} filter', { name: data.peer.resourceKind?.toLowerCase() }),
-          isFiltered,
-          onFilterClick,
-          getShapeDecoratorCenter,
-          isFiltered ? DEFAULT_DECORATOR_PADDING : LARGE_DECORATOR_PADDING
-        )}
-      {renderClickableDecorator(
-        t,
-        element,
-        TopologyQuadrant.upperRight,
-        <ThumbtackIcon />,
-        isPinned ? t('Unpin this element') : t('Pin this element'),
-        isPinned,
-        onPinClick,
-        getShapeDecoratorCenter,
-        MEDIUM_DECORATOR_PADDING
-      )}
-    </>
-  );
-};
-
-const StyleNode: React.FC<StyleNodeProps> = ({ element, showLabel, dragging, regrouping, ...rest }) => {
-  const { t } = useTranslation('plugin__netobserv-plugin');
+const StyleNode: React.FC<StyleNodeProps> = ({
+  element,
+  showLabel,
+  dragging,
+  regrouping,
+  getShapeDecoratorCenter,
+  ...rest
+}) => {
   const data = element.getData() as Decorated<NodeData> | undefined;
   //TODO: check if we can have intelligent pin on view change
   const [isPinned, setPinned] = React.useState<boolean>(data?.isPinned === true);
-  const [isFiltered, setFiltered] = React.useState<boolean>(data?.isFiltered === true);
+  const [isSrcFiltered, setSrcFiltered] = React.useState<boolean>(data?.isSrcFiltered === true);
+  const [isDstFiltered, setDstFiltered] = React.useState<boolean>(data?.isDstFiltered === true);
   const detailsLevel = useDetailsLevel();
   const [hover, hoverRef] = useHover();
 
   const passedData = React.useMemo(() => {
     return _.omitBy(data, _.isUndefined) as Decorated<NodeData> | undefined;
   }, [data]);
+
+  React.useEffect(() => {
+    setSrcFiltered(data?.isSrcFiltered === true);
+    setDstFiltered(data?.isDstFiltered === true);
+  }, [data?.isSrcFiltered, data?.isDstFiltered]);
 
   if (!data || !passedData) {
     return null;
@@ -263,7 +123,7 @@ const StyleNode: React.FC<StyleNodeProps> = ({ element, showLabel, dragging, reg
   }
 
   return (
-    <Layer id={passedData.dragging || hover || passedData.hover || passedData.highlighted ? TOP_LAYER : DEFAULT_LAYER}>
+    <Layer id={passedData.dragging ? TOP_LAYER : DEFAULT_LAYER}>
       <g ref={hoverRef as never}>
         <BaseNode
           className="netobserv"
@@ -278,16 +138,18 @@ const StyleNode: React.FC<StyleNodeProps> = ({ element, showLabel, dragging, reg
           showStatusBackground={detailsLevel === ScaleDetailsLevel.low}
           showStatusDecorator={detailsLevel === ScaleDetailsLevel.high && passedData.showStatusDecorator}
           attachments={
-            (hover || detailsLevel === ScaleDetailsLevel.high) &&
-            renderDecorators(
-              t,
-              element,
-              data,
-              isPinned,
-              setPinned,
-              isFiltered,
-              setFiltered,
-              rest.getShapeDecoratorCenter
+            (hover || detailsLevel === ScaleDetailsLevel.high) && (
+              <NodeDecorators
+                element={element}
+                data={data}
+                isPinned={isPinned}
+                setPinned={setPinned}
+                isSrcFiltered={isSrcFiltered}
+                setSrcFiltered={setSrcFiltered}
+                isDstFiltered={isDstFiltered}
+                setDstFiltered={setDstFiltered}
+                getShapeDecoratorCenter={getShapeDecoratorCenter}
+              />
             )
           }
         >

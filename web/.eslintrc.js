@@ -4,7 +4,7 @@ module.exports = {
   plugins: ['@typescript-eslint', 'react-hooks'],
   extends: ['plugin:react/recommended', 'plugin:@typescript-eslint/recommended'],
   rules: {
-    'max-len': ['warn', { code: 120 }],
+    'max-len': ['warn', { code: 170 }],
     'react-hooks/rules-of-hooks': 'error',
     'react-hooks/exhaustive-deps': 'warn',
     'react/prop-types': 'off',

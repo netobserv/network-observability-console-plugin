@@ -117,10 +117,11 @@ describe('<ElementPanel />', () => {
   it('should filter <ElementPanelDetailsContent />', async () => {
     const wrapper = mount(<ElementPanelDetailsContent {...mocks} />);
     const ipFilters = wrapper.find(OptionsMenuToggle).last();
-    // Two buttons: first for pod filter, second for IP filter
+    // Two buttons: first for pod filter, second for IP filter => click on second
     ipFilters.last().simulate('click');
-    expect(wrapper.find('li').length).toBe(3);
-    wrapper.find('[id="any"]').at(0).simulate('click');
+    // Two items: source or destination
+    expect(wrapper.find('li').length).toBe(2);
+    wrapper.find('[id="src"]').at(0).simulate('click');
     expect(mocks.setFilters).toHaveBeenCalledWith([
       {
         def: expect.any(Object),

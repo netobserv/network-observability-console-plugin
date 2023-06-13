@@ -3,7 +3,7 @@ import { findFilter } from '../filter-definitions';
 const t = (k: string) => k;
 
 describe('Resource validation', () => {
-  const def = findFilter(t, 'resource')!;
+  const def = findFilter(t, 'src_resource')!;
 
   it('should empty be invalid', () => {
     const validated = def.validate('');
@@ -43,7 +43,7 @@ describe('Resource validation', () => {
 });
 
 describe('Resource checkCompletion', () => {
-  const def = findFilter(t, 'resource')!;
+  const def = findFilter(t, 'src_resource')!;
 
   it('should join selected kind', () => {
     const partial = def.checkCompletion!('', 'Pod');

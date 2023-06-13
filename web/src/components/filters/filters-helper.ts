@@ -1,6 +1,6 @@
 import { TFunction } from 'i18next';
-import { getFilterDefinitions } from '../../utils/filter-definitions';
-import { FilterCategory, FilterDefinition } from '../../model/filters';
+import { findFilter, getFilterDefinitions } from '../../utils/filter-definitions';
+import { Filter, FilterCategory, FilterDefinition, FilterId } from '../../model/filters';
 
 export type Indicator = 'default' | 'success' | 'warning' | 'error' | undefined;
 
@@ -13,16 +13,16 @@ export const buildGroups = (t: TFunction, allowConnectionFilter?: boolean, allow
   const defs = getFilterDefinitions(t, allowConnectionFilter, allowDNSFilter);
   return [
     {
-      title: t('Common'),
-      filters: defs.filter(def => def.category == FilterCategory.Common || def.category === FilterCategory.None)
-    },
-    {
       title: t('Source'),
       filters: defs.filter(def => def.category == FilterCategory.Source)
     },
     {
       title: t('Destination'),
       filters: defs.filter(def => def.category == FilterCategory.Destination)
+    },
+    {
+      title: t('Common'),
+      filters: defs.filter(def => def.category === FilterCategory.None)
     }
   ];
 };
@@ -33,9 +33,29 @@ export const getFilterFullName = (f: FilterDefinition, t: TFunction) => {
       return `${t('Source')} ${f.name}`;
     case FilterCategory.Destination:
       return `${t('Destination')} ${f.name}`;
-    case FilterCategory.Common:
-      return `${t('Common')} ${f.name}`;
     default:
       return f.name;
   }
+};
+
+export const canSwapFilters = (filters: Filter[]): boolean => {
+  return filters.some(f => f.def.id.startsWith('src_') || f.def.id.startsWith('dst_'));
+};
+
+export const swapFilters = (t: TFunction, filters: Filter[]): Filter[] => {
+  return filters.map(f => {
+    let swappedId: FilterId | undefined;
+    if (f.def.id.startsWith('src_')) {
+      swappedId = f.def.id.replace('src_', 'dst_') as FilterId;
+    } else if (f.def.id.startsWith('dst_')) {
+      swappedId = f.def.id.replace('dst_', 'src_') as FilterId;
+    }
+    if (swappedId) {
+      const def = findFilter(t, swappedId);
+      if (def) {
+        return { ...f, def };
+      }
+    }
+    return f;
+  });
 };

@@ -2,8 +2,8 @@ import { TFunction } from 'i18next';
 import { findFilter } from './filter-definitions';
 import { TimeRange } from './datetime';
 import { Match, MetricFunction, MetricType, PacketLoss, RecordType, Reporter } from '../model/flow-query';
-import { getURLParam, getURLParamAsNumber, removeURLParam, setURLParam, URLParam } from './url';
-import { createFilterValue, DisabledFilters, Filter, filterKey, fromFilterKey } from '../model/filters';
+import { getURLParam, getURLParamAsBool, getURLParamAsNumber, removeURLParam, setURLParam, URLParam } from './url';
+import { createFilterValue, DisabledFilters, Filter, filterKey, Filters, fromFilterKey } from '../model/filters';
 
 const filtersSeparator = ';';
 const filterKVSeparator = '=';
@@ -54,7 +54,7 @@ export const getPacketLossFromURL = (): PacketLoss => {
   return (getURLParam(URLParam.PacketLoss) as PacketLoss | null) || defaultPacketLoss;
 };
 
-export const getFiltersFromURL = (t: TFunction, disabledFilters: DisabledFilters): Promise<Filter[]> | undefined => {
+export const getFiltersFromURL = (t: TFunction, disabledFilters: DisabledFilters): Promise<Filters> | undefined => {
   const urlParam = getURLParam(URLParam.Filters);
   //skip filters only if url param is missing
   if (urlParam === null) {
@@ -88,16 +88,18 @@ export const getFiltersFromURL = (t: TFunction, disabledFilters: DisabledFilters
       }
     }
   });
-  return Promise.all(filterPromises);
+  const backAndForth = getURLParamAsBool(URLParam.BackAndForth) || false;
+  return Promise.all(filterPromises).then(list => ({ backAndForth, list }));
 };
 
-export const setURLFilters = (filters: Filter[], replace?: boolean) => {
-  const urlFilters = filters
+export const setURLFilters = (filters: Filters, replace?: boolean) => {
+  const urlFilters = filters.list
     .map(filter => {
       return filterKey(filter) + filterKVSeparator + filter.values.map(v => v.v).join(filterValuesSeparator);
     })
     .join(filtersSeparator);
   setURLParam(URLParam.Filters, urlFilters, replace);
+  setURLParam(URLParam.BackAndForth, filters.backAndForth ? 'true' : 'false', replace);
 };
 
 export const setURLRange = (range: number | TimeRange, replace?: boolean) => {

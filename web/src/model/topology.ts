@@ -14,7 +14,7 @@ import {
 } from '@patternfly/react-topology';
 import _ from 'lodash';
 import { MetricStats, TopologyMetricPeer, TopologyMetrics } from '../api/loki';
-import { Filter, FilterDefinition, findFromFilters } from '../model/filters';
+import { Filter, FilterDefinition, Filters, findFromFilters } from '../model/filters';
 import { defaultMetricFunction, defaultMetricType } from '../utils/router';
 import { findFilter } from '../utils/filter-definitions';
 import { TFunction } from 'i18next';
@@ -104,7 +104,8 @@ export type Decorated<T> = T & {
   hover?: boolean;
   dragging?: boolean;
   highlighted?: boolean;
-  isFiltered?: boolean;
+  isSrcFiltered?: boolean;
+  isDstFiltered?: boolean;
   isClearFilters?: boolean;
   isPinned?: boolean;
   showDecorators?: boolean;
@@ -115,27 +116,27 @@ export type Decorated<T> = T & {
 };
 export const decorated = <T>(t: T): Decorated<T> => t as Decorated<T>;
 
-export type FilterDir = 'src' | 'dst' | 'any';
+export type FilterDir = 'src' | 'dst';
 const getFilterDefValue = (nodeType: NodeType, fields: Partial<TopologyMetricPeer>, dir: FilterDir, t: TFunction) => {
   let def: FilterDefinition | undefined;
   let value: string | undefined;
   if (fields.resource && fields.namespace) {
-    def = findFilter(t, dir === 'src' ? 'src_resource' : dir === 'dst' ? 'dst_resource' : 'resource')!;
+    def = findFilter(t, `${dir}_resource`)!;
     value = `${fields.resource.type}.${fields.namespace}.${fields.resource.name}`;
   } else if (nodeType === 'host' && (fields.hostName || fields.resource)) {
-    def = findFilter(t, dir === 'src' ? 'src_host_name' : dir === 'dst' ? 'dst_host_name' : 'host_name')!;
+    def = findFilter(t, `${dir}_host_name`)!;
     value = `"${fields.hostName || fields.resource?.name}"`;
   } else if (nodeType === 'namespace' && (fields.namespace || fields.resource)) {
-    def = findFilter(t, dir === 'src' ? 'src_namespace' : dir === 'dst' ? 'dst_namespace' : 'namespace')!;
+    def = findFilter(t, `${dir}_namespace`)!;
     value = `"${fields.namespace || fields.resource?.name}"`;
   } else if (nodeType === 'resource' && fields.resource) {
-    def = findFilter(t, dir === 'src' ? 'src_name' : dir === 'dst' ? 'dst_name' : 'name')!;
+    def = findFilter(t, `${dir}_name`)!;
     value = `"${fields.resource.name}"`;
   } else if (nodeType === 'owner' && fields.owner) {
-    def = findFilter(t, dir === 'src' ? 'src_owner_name' : dir === 'dst' ? 'dst_owner_name' : 'owner_name')!;
+    def = findFilter(t, `${dir}_owner_name`)!;
     value = `"${fields.owner.name}"`;
   } else if (fields.addr) {
-    def = findFilter(t, dir === 'src' ? 'src_address' : dir === 'dst' ? 'dst_address' : 'address')!;
+    def = findFilter(t, `${dir}_address`)!;
     value = fields.addr!;
   }
   return def && value ? { def, value } : undefined;
@@ -177,15 +178,16 @@ export const toggleElementFilter = (
     result.push(filter);
   }
 
-  if (!isFiltered) {
-    //replace filter for kubeobject
-    if (defValue.def.id === 'resource') {
+  if (isFiltered) {
+    // Remove
+    filter!.values = filter!.values.filter(v => v.v !== defValue.value);
+  } else {
+    // Add, or Replace filter for kubeobject
+    if (defValue.def.id === 'src_resource' || defValue.def.id === 'dst_resource') {
       filter!.values = [{ v: defValue.value! }];
     } else {
       filter!.values.push({ v: defValue.value });
     }
-  } else {
-    filter!.values = filter!.values.filter(v => v.v !== defValue.value);
   }
   setFilters(result.filter(f => !_.isEmpty(f.values)));
 };
@@ -206,7 +208,7 @@ const generateNode = (
   options: TopologyOptions,
   searchValue: string,
   highlightedId: string,
-  filters: Filter[],
+  filters: Filters,
   t: TFunction,
   k8sModels: { [key: string]: K8sModel },
   isDark?: boolean
@@ -226,6 +228,9 @@ const generateNode = (
   const filtered = !_.isEmpty(searchValue) && !shadowed;
   const highlighted = !shadowed && !_.isEmpty(highlightedId) && highlightedId.includes(data.peer.id);
   const k8sModel = options.nodeBadges && resourceKind ? k8sModels[resourceKind] : undefined;
+  const isSrcFiltered = isElementFiltered(data.nodeType, data.peer, 'src', filters.list, t);
+  const isDstFiltered = isElementFiltered(data.nodeType, data.peer, 'dst', filters.list, t);
+
   return {
     id: data.peer.id,
     type: 'node',
@@ -241,7 +246,8 @@ const generateNode = (
       filtered,
       highlighted,
       isDark,
-      isFiltered: isElementFiltered(data.nodeType, data.peer, 'any', filters, t),
+      isSrcFiltered,
+      isDstFiltered,
       labelPosition: LabelPosition.bottom,
       badge: k8sModel?.abbr,
       badgeColor: k8sModel?.color ? k8sModel.color : '#2b9af3',
@@ -351,7 +357,7 @@ export const generateDataModel = (
   metricScope: FlowScope,
   searchValue: string,
   highlightedId: string,
-  filters: Filter[],
+  filters: Filters,
   t: TFunction,
   k8sModels: { [key: string]: K8sModel },
   isDark?: boolean

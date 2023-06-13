@@ -16,7 +16,8 @@ export enum URLParam {
   RecordType = 'recordType',
   Reporter = 'reporter',
   MetricFunction = 'function',
-  MetricType = 'type'
+  MetricType = 'type',
+  BackAndForth = 'bnf'
 }
 export type URLParams = { [k in URLParam]?: unknown };
 
@@ -36,6 +37,14 @@ export const getURLParamAsNumber = (arg: URLParam) => {
   const q = getURLParam(arg);
   if (q && !isNaN(Number(q))) {
     return Number(q);
+  }
+  return null;
+};
+
+export const getURLParamAsBool = (arg: URLParam) => {
+  const q = getURLParam(arg);
+  if (q) {
+    return q === 'true';
   }
   return null;
 };
