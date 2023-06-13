@@ -48,7 +48,7 @@ func TestStreamsMerge(t *testing.T) {
 	assert.Len(t, merged.(model.Streams)[0].Entries, 2)
 	assert.Len(t, merged.(model.Streams)[1].Entries, 1)
 
-	// Same labels in different order => no dedup
+	// Same labels in different order => 3 dedups
 	merged, err = merger.Add(qrData(model.Streams{{
 		Labels: map[string]string{
 			"foo2": "bar2",
@@ -72,6 +72,7 @@ func TestStreamsMerge(t *testing.T) {
 	assert.Len(t, merged, 2)
 	assert.Len(t, merged.(model.Streams)[0].Entries, 2)
 	assert.Len(t, merged.(model.Streams)[1].Entries, 1)
+	assert.Equal(t, 3, merger.duplicates)
 
 	// Different timestamp => no dedup
 	merged, err = merger.Add(qrData(model.Streams{{
@@ -118,6 +119,7 @@ func TestStreamsMerge(t *testing.T) {
 	assert.Len(t, merged, 2)
 	assert.Len(t, merged.(model.Streams)[0].Entries, 5)
 	assert.Len(t, merged.(model.Streams)[1].Entries, 1)
+	assert.Equal(t, 5, merger.duplicates)
 }
 
 func TestStreamsLimitReached(t *testing.T) {
@@ -183,4 +185,44 @@ func TestStreamsLimitReached(t *testing.T) {
 	}}))
 	require.NoError(t, err)
 	assert.True(t, merger.limitReached)
+}
+
+func TestStreamsMerge_SameStream(t *testing.T) {
+	now := time.Now()
+	merger := NewStreamMerger(100)
+	s1 := model.Stream{
+		Labels: map[string]string{
+			"foo": "bar",
+		},
+		Entries: []model.Entry{{
+			Timestamp: now,
+			Line:      "{key: value1}",
+		}, {
+			Timestamp: now.Add(10 * time.Microsecond),
+			Line:      "{key: value2}",
+		}},
+	}
+	s2 := model.Stream{
+		Labels: map[string]string{
+			"foo": "bar",
+		},
+		Entries: []model.Entry{{
+			Timestamp: now,
+			Line:      "{key: value3}",
+		}, {
+			Timestamp: now.Add(10 * time.Microsecond),
+			Line:      "{key: value4}",
+		}},
+	}
+	_, err := merger.Add(qrData(model.Streams{s1}))
+	require.NoError(t, err)
+	_, err = merger.Add(qrData(model.Streams{s2}))
+	require.NoError(t, err)
+	result := merger.Get()
+
+	assert.Len(t, result.Result, 1)
+	assert.Len(t, result.Result.(model.Streams)[0].Entries, 4)
+	assert.Equal(t, 4, result.Stats.TotalEntries)
+	assert.Equal(t, 0, result.Stats.Duplicates)
+	assert.Equal(t, 2, result.Stats.NumQueries)
 }
