@@ -3,9 +3,7 @@ import { useState } from 'react';
 import styles from '@patternfly/react-styles/css/components/Slider/slider';
 import { css } from '@patternfly/react-styles';
 import { SliderStep } from './SliderStep';
-import { InputGroup, InputGroupText } from '../InputGroup';
-import { TextInput } from '../TextInput';
-import { Tooltip } from '../Tooltip';
+import { InputGroup, InputGroupText, TextInput, Tooltip } from '@patternfly/react-core';
 
 /** Properties for creating custom steps in a slider. These properties should be passed in as
  * an object within an array to the slider component's customSteps property.
@@ -71,9 +69,9 @@ export interface SliderProps extends Omit<React.HTMLProps<HTMLDivElement>, 'onCh
   thumbAriaLabel?: string;
   /** Current value of the slider.  */
   value?: number;
+  /** Vertical display mode.  */
+  vertical?: boolean;
 }
-
-const getPercentage = (current: number, max: number) => (100 * current) / max;
 
 export const Slider: React.FunctionComponent<SliderProps> = ({
   className,
@@ -98,6 +96,7 @@ export const Slider: React.FunctionComponent<SliderProps> = ({
   showBoundaries = true,
   'aria-describedby': ariaDescribedby,
   'aria-labelledby': ariaLabelledby,
+  vertical,
   ...props
 }: SliderProps) => {
   const sliderRailRef = React.useRef<HTMLDivElement>();
@@ -122,6 +121,9 @@ export const Slider: React.FunctionComponent<SliderProps> = ({
   const style = { '--pf-c-slider--value': `${stylePercent}%` } as React.CSSProperties;
   const widthChars = React.useMemo(() => localInputValue.toString().length, [localInputValue]);
   const inputStyle = { '--pf-c-slider__value--c-form-control--width-chars': widthChars } as React.CSSProperties;
+  if (vertical) {
+    style['transform'] = 'rotate(270deg)';
+  }
 
   const onChangeHandler = (value: string) => {
     setLocalInputValue(Number(value));
@@ -141,7 +143,7 @@ export const Slider: React.FunctionComponent<SliderProps> = ({
   };
 
   const onThumbClick = () => {
-    thumbRef.current.focus();
+    thumbRef.current?.focus();
   };
 
   const onBlur = () => {
@@ -162,6 +164,14 @@ export const Slider: React.FunctionComponent<SliderProps> = ({
     return Number(Number(localValue).toFixed(2)).toString();
   };
 
+  // Position hooks
+  const mousePos = vertical ? (e: React.MouseEvent) => e.clientY : (e: React.MouseEvent) => e.clientX;
+  const touchPos = vertical
+    ? (e: React.TouchEvent) => e.touches[0].clientY
+    : (e: React.TouchEvent) => e.touches[0].clientX;
+  const minPos = vertical ? (r: DOMRect) => r.bottom : (r: DOMRect) => r.left;
+  const maxPos = vertical ? (r: DOMRect) => r.top : (r: DOMRect) => r.right;
+
   const handleThumbDragEnd = () => {
     document.removeEventListener('mousemove', callbackThumbMove);
     document.removeEventListener('mouseup', callbackThumbUp);
@@ -174,7 +184,7 @@ export const Slider: React.FunctionComponent<SliderProps> = ({
     e.stopPropagation();
     e.preventDefault();
 
-    diff = e.clientX - thumbRef.current.getBoundingClientRect().left;
+    diff = mousePos(e) - minPos(thumbRef.current!.getBoundingClientRect());
 
     document.addEventListener('mousemove', callbackThumbMove);
     document.addEventListener('mouseup', callbackThumbUp);
@@ -183,7 +193,7 @@ export const Slider: React.FunctionComponent<SliderProps> = ({
   const handleTouchStart = (e: React.TouchEvent) => {
     e.stopPropagation();
 
-    diff = e.touches[0].clientX - thumbRef.current.getBoundingClientRect().left;
+    diff = touchPos(e) - minPos(thumbRef.current!.getBoundingClientRect());
 
     document.addEventListener('touchmove', callbackThumbMove, { passive: false });
     document.addEventListener('touchend', callbackThumbUp);
@@ -193,7 +203,7 @@ export const Slider: React.FunctionComponent<SliderProps> = ({
   const onSliderRailClick = (e: any) => {
     handleThumbMove(e);
     if (snapValue && !areCustomStepsContinuous) {
-      thumbRef.current.style.setProperty('--pf-c-slider--value', `${snapValue}%`);
+      thumbRef.current!.style.setProperty('--pf-c-slider--value', `${snapValue}%`);
       setValue(snapValue);
       if (onChange) {
         onChange(snapValue);
@@ -207,51 +217,34 @@ export const Slider: React.FunctionComponent<SliderProps> = ({
       e.stopImmediatePropagation();
     }
 
-    const clientPosition = e.touches && e.touches.length ? e.touches[0].clientX : e.clientX;
+    const clientPosition = e.touches && e.touches.length ? touchPos(e) : mousePos(e);
+    const boundingRect = sliderRailRef.current!.getBoundingClientRect();
+    const refSize = maxPos(boundingRect) - minPos(boundingRect);
+    const relativePos = clientPosition - diff - minPos(boundingRect);
+    const ratio = Math.max(0, Math.min(1, relativePos / refSize));
 
-    let newPosition = clientPosition - diff - sliderRailRef.current.getBoundingClientRect().left;
-
-    const end = sliderRailRef.current.offsetWidth - thumbRef.current.offsetWidth;
-
-    const start = 0;
-
-    if (newPosition < start) {
-      newPosition = 0;
-    }
-
-    if (newPosition > end) {
-      newPosition = end;
-    }
-
-    const newPercentage = getPercentage(newPosition, end);
-
-    thumbRef.current.style.setProperty('--pf-c-slider--value', `${newPercentage}%`);
-    // convert percentage to value
-    const newValue = Math.round(((newPercentage * (max - min)) / 100 + min) * 100) / 100;
-    setValue(newValue);
+    thumbRef.current!.style.setProperty('--pf-c-slider--value', `${100 * ratio}%`);
+    const targetValue = ratio * (max - min) + min;
+    setValue(Math.round(targetValue));
 
     if (!customSteps) {
       // snap to new value if not custom steps
-      snapValue = Math.round((Math.round((newValue - min) / step) * step + min) * 100) / 100;
-      thumbRef.current.style.setProperty('--pf-c-slider--value', `${snapValue}%`);
+      snapValue = Math.round((Math.round((targetValue - min) / step) * step + min) * 100) / 100;
+      thumbRef.current!.style.setProperty('--pf-c-slider--value', `${snapValue}%`);
       setValue(snapValue);
     }
 
     /* If custom steps are discrete, snap to closest step value */
     if (!areCustomStepsContinuous && customSteps) {
-      let percentage = newPercentage;
-      if (customSteps[customSteps.length - 1].value !== 100) {
-        percentage = (newPercentage * (max - min)) / 100 + min;
-      }
-      const stepIndex = customSteps.findIndex(stepObj => stepObj.value >= percentage);
-      if (customSteps[stepIndex].value === percentage) {
-        snapValue = customSteps[stepIndex].value;
+      const nextStepIndex = customSteps.findIndex(stepObj => stepObj.value >= targetValue);
+      if (customSteps[nextStepIndex].value === targetValue) {
+        snapValue = customSteps[nextStepIndex].value;
       } else {
-        const midpoint = (customSteps[stepIndex].value + customSteps[stepIndex - 1].value) / 2;
-        if (midpoint > percentage) {
-          snapValue = customSteps[stepIndex - 1].value;
+        const midpoint = (customSteps[nextStepIndex].value + customSteps[nextStepIndex - 1].value) / 2;
+        if (midpoint > targetValue) {
+          snapValue = customSteps[nextStepIndex - 1].value;
         } else {
-          snapValue = customSteps[stepIndex].value;
+          snapValue = customSteps[nextStepIndex].value;
         }
       }
       setValue(snapValue);
@@ -262,7 +255,7 @@ export const Slider: React.FunctionComponent<SliderProps> = ({
       if (snapValue !== undefined) {
         onChange(snapValue);
       } else {
-        onChange(newValue);
+        onChange(targetValue);
       }
     }
   };
@@ -299,7 +292,7 @@ export const Slider: React.FunctionComponent<SliderProps> = ({
     }
 
     if (newValue !== localValue) {
-      thumbRef.current.style.setProperty('--pf-c-slider--value', `${newValue}%`);
+      thumbRef.current!.style.setProperty('--pf-c-slider--value', `${newValue}%`);
       setValue(newValue);
       if (onChange) {
         onChange(newValue);
@@ -366,7 +359,7 @@ export const Slider: React.FunctionComponent<SliderProps> = ({
   const thumbComponent = (
     <div
       className={css(styles.sliderThumb)}
-      ref={thumbRef}
+      ref={thumbRef as any}
       tabIndex={isDisabled ? -1 : 0}
       role="slider"
       aria-valuemin={customSteps ? customSteps[0].value : min}
@@ -377,10 +370,10 @@ export const Slider: React.FunctionComponent<SliderProps> = ({
       aria-disabled={isDisabled}
       aria-describedby={ariaDescribedby}
       aria-labelledby={ariaLabelledby}
-      onMouseDown={!isDisabled ? handleMouseDown : null}
-      onTouchStart={!isDisabled ? handleTouchStart : null}
-      onKeyDown={!isDisabled ? handleThumbKeys : null}
-      onClick={!isDisabled ? onThumbClick : null}
+      onMouseDown={!isDisabled ? handleMouseDown : undefined}
+      onTouchStart={!isDisabled ? handleTouchStart : undefined}
+      onKeyDown={!isDisabled ? handleThumbKeys : undefined}
+      onClick={!isDisabled ? onThumbClick : undefined}
     />
   );
 
@@ -392,7 +385,11 @@ export const Slider: React.FunctionComponent<SliderProps> = ({
     >
       {leftActions && <div className={css(styles.sliderActions)}>{leftActions}</div>}
       <div className={css(styles.sliderMain)}>
-        <div className={css(styles.sliderRail)} ref={sliderRailRef} onClick={!isDisabled ? onSliderRailClick : null}>
+        <div
+          className={css(styles.sliderRail)}
+          ref={sliderRailRef as any}
+          onClick={!isDisabled ? onSliderRailClick : undefined}
+        >
           <div className={css(styles.sliderRailTrack)} />
         </div>
         {customSteps && (
