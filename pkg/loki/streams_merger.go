@@ -15,6 +15,8 @@ type StreamMerger struct {
 	stats        []interface{}
 	numQueries   int
 	reqLimit     int
+	totalEntries int
+	duplicates   int
 	limitReached bool
 }
 
@@ -81,9 +83,12 @@ func (m *StreamMerger) Add(from model.QueryResponseData) (model.ResultValue, err
 				// Add entry to the existing stream, and mark it as existing in idxStream.entries
 				idxStream.entries[ekey] = nil
 				if streamExists {
-					idxStream.stream.Entries = append(m.index[lkey].stream.Entries, e)
+					idxStream.stream.Entries = append(idxStream.stream.Entries, e)
 				}
-			} // Else: entry found => ignore duplicate
+			} else {
+				// Else: entry found => ignore duplicate
+				m.duplicates++
+			}
 		}
 		// Add or overwrite index
 		m.index[lkey] = idxStream
@@ -97,6 +102,7 @@ func (m *StreamMerger) Add(from model.QueryResponseData) (model.ResultValue, err
 	if totalEntries >= m.reqLimit {
 		m.limitReached = true
 	}
+	m.totalEntries += totalEntries
 	return m.merged, nil
 }
 
@@ -107,6 +113,8 @@ func (m *StreamMerger) Get() *model.AggregatedQueryResponse {
 		Stats: model.AggregatedStats{
 			NumQueries:   m.numQueries,
 			LimitReached: m.limitReached,
+			TotalEntries: m.totalEntries,
+			Duplicates:   m.duplicates,
 			QueriesStats: m.stats,
 		},
 	}

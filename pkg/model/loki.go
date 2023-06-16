@@ -27,6 +27,8 @@ type AggregatedQueryResponse struct {
 // AggregatedStats represents the stats to one or more logQL queries
 type AggregatedStats struct {
 	NumQueries   int           `json:"numQueries"`
+	TotalEntries int           `json:"totalEntries"`
+	Duplicates   int           `json:"duplicates"`
 	LimitReached bool          `json:"limitReached"`
 	QueriesStats []interface{} `json:"queriesStats"`
 }
