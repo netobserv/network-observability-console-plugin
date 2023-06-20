@@ -40,7 +40,8 @@ func Dedup(s []string) []string {
 }
 
 func NonEmpty(s []string) []string {
-	var nonempty []string
+	// Initialize values explicitly to avoid null json when empty
+	nonempty := []string{}
 	for _, v := range s {
 		if len(v) > 0 {
 			nonempty = append(nonempty, v)
