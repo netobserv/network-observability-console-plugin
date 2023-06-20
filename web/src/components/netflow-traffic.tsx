@@ -515,6 +515,7 @@ export const NetflowTraffic: React.FC<{
                 stats.limitReached = stats.limitReached || results[5].stats.limitReached;
                 stats.numQueries += results[5].stats.numQueries;
               } else {
+                setDroppedMetrics([]);
                 setTotalDroppedMetric(undefined);
                 setDroppedStateMetrics(undefined);
                 setDroppedCauseMetrics(undefined);

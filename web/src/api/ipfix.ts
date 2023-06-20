@@ -90,11 +90,11 @@ export interface Fields {
   /** ICMP code */
   IcmpCode?: number;
   /** TCP state for drops */
-  TcpDropState?: string;
+  TcpDropLatestState?: string;
   /** TCP cause for drops */
-  TcpDropCause?: string;
+  TcpDropLatestDropCause?: string;
   /** TCP flags for drops */
-  TcpDropFlags?: number;
+  TcpDropLatestFlags?: number;
   /** Number of packets dropped in this flow */
   TcpDropPackets?: number;
   /** In conversation tracking, A to B packets dropped counter per conversation */

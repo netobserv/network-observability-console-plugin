@@ -257,16 +257,16 @@ func (q *FlowQueryBuilder) appendDeduplicateFilter(sb *strings.Builder) {
 }
 
 func (q *FlowQueryBuilder) appendTCPDropStateFilter(sb *strings.Builder) {
-	// !~`TcpDropState":0`
+	// !~`TcpDropLatestState":0`
 	sb.WriteString("!~`")
-	sb.WriteString(`TcpDropState":0`)
+	sb.WriteString(`TcpDropLatestState":0`)
 	sb.WriteString("`")
 }
 
 func (q *FlowQueryBuilder) appendTCPDropCauseFilter(sb *strings.Builder) {
-	// !~`TcpDropCause":0`
+	// !~`TcpDropLatestDropCause":0`
 	sb.WriteString("!~`")
-	sb.WriteString(`TcpDropCause":0`)
+	sb.WriteString(`TcpDropLatestDropCause":0`)
 	sb.WriteString("`")
 }
 

@@ -139,14 +139,14 @@ const parseMetric = (
   const stats = computeStats(normalized);
   if (scope === 'droppedState') {
     return {
-      name: raw.metric.TcpDropState,
+      name: raw.metric.TcpDropLatestState,
       values: normalized,
       stats: stats,
       scope: scope
     } as DroppedTopologyMetrics;
   } else if (scope === 'droppedCause') {
     return {
-      name: raw.metric.TcpDropCause,
+      name: raw.metric.TcpDropLatestDropCause,
       values: normalized,
       stats: stats,
       scope: scope

@@ -29,9 +29,9 @@ curl 'http://localhost:3100/loki/api/v1/query_range?query=topk(50,sum%20by(SrcK8
 echo 'Getting dropped metrics'
 curl 'http://localhost:3100/loki/api/v1/query_range?query=topk(5,sum%20by(app)%20(rate(\{app=%22netobserv-flowcollector%22,FlowDirection=%221%22\}|~`Duplicate%22:false`|json|unwrap%20TcpDropPackets|__error__=%22%22\[720s\])))&limit=5&step=360s'\
  | jq > ./loki/topology_dropped_app.json
-curl 'http://localhost:3100/loki/api/v1/query_range?query=topk(5,sum%20by(TcpDropState)%20(rate(\{app=%22netobserv-flowcollector%22,FlowDirection=%221%22\}|~`Duplicate%22:false`|json|unwrap%20TcpDropPackets|__error__=%22%22\[720s\])))&limit=5&step=360s'\
+curl 'http://localhost:3100/loki/api/v1/query_range?query=topk(5,sum%20by(TcpDropLatestState)%20(rate(\{app=%22netobserv-flowcollector%22,FlowDirection=%221%22\}|~`Duplicate%22:false`|json|unwrap%20TcpDropPackets|__error__=%22%22\[720s\])))&limit=5&step=360s'\
  | jq > ./loki/topology_dropped_state.json
-curl 'http://localhost:3100/loki/api/v1/query_range?query=topk(5,sum%20by(TcpDropCause)%20(rate(\{app=%22netobserv-flowcollector%22,FlowDirection=%221%22\}|~`Duplicate%22:false`|json|unwrap%20TcpDropPackets|__error__=%22%22\[720s\])))&limit=5&step=360s'\
+curl 'http://localhost:3100/loki/api/v1/query_range?query=topk(5,sum%20by(TcpDropLatestDropCause)%20(rate(\{app=%22netobserv-flowcollector%22,FlowDirection=%221%22\}|~`Duplicate%22:false`|json|unwrap%20TcpDropPackets|__error__=%22%22\[720s\])))&limit=5&step=360s'\
  | jq > ./loki/topology_dropped_cause.json
 curl 'http://localhost:3100/loki/api/v1/query_range?query=topk(50,sum%20by(SrcK8S_HostName,DstK8S_HostName)%20(rate(\{app=%22netobserv-flowcollector%22,FlowDirection=%221%22\}|~`Duplicate%22:false`|json|unwrap%20TcpDropPackets|__error__=%22%22\[720s\])))&limit=50&step=360s'\
  | jq > ./loki/topology_dropped_host.json
