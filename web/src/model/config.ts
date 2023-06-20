@@ -1,6 +1,8 @@
 import { RecordType } from './flow-query';
 import { RawQuickFilter } from './quick-filters';
 
+export type Feature = 'tcpDrop' | 'dnsTracking';
+
 export type Config = {
   recordTypes: RecordType[];
   portNaming: {
@@ -10,6 +12,7 @@ export type Config = {
   quickFilters: RawQuickFilter[];
   alertNamespaces: string[];
   sampling: number;
+  features: Feature[];
 };
 
 export const defaultConfig: Config = {
@@ -20,5 +23,6 @@ export const defaultConfig: Config = {
   },
   quickFilters: [],
   alertNamespaces: ['netobserv'],
-  sampling: 50
+  sampling: 50,
+  features: []
 };

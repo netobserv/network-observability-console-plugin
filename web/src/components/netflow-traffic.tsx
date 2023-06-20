@@ -399,7 +399,11 @@ export const NetflowTraffic: React.FC<{
     setLoading(true);
     setError(undefined);
     const fq = buildFlowQuery();
-    const droppedType = fq.type === 'bytes' ? 'droppedBytes' : 'droppedPackets';
+    const droppedType = config.features.includes('tcpDrop')
+      ? fq.type === 'bytes'
+        ? 'droppedBytes'
+        : 'droppedPackets'
+      : undefined;
 
     const promises: Promise<RecordsResult | TopologyResult>[] = [];
     switch (selectedViewId) {
@@ -413,7 +417,9 @@ export const NetflowTraffic: React.FC<{
         promises.push(getFlows(tableQuery));
         if (showHistogram) {
           promises.push(getTopology({ ...fq, scope: 'app' }, range));
-          promises.push(getTopology({ ...fq, scope: 'app', type: droppedType }, range));
+          if (droppedType) {
+            promises.push(getTopology({ ...fq, scope: 'app', type: droppedType }, range));
+          }
         }
         manageWarnings(
           Promise.all(promises)
@@ -429,13 +435,18 @@ export const NetflowTraffic: React.FC<{
                 setTotalMetric((results[1] as TopologyResult).metrics[0] as TopologyMetrics);
                 stats.limitReached = stats.limitReached || results[1].stats.limitReached;
                 stats.numQueries += results[1].stats.numQueries;
+              } else {
+                setTotalMetric(undefined);
+              }
+
+              if (results.length > 2) {
                 setTotalDroppedMetric((results[2] as TopologyResult).metrics[0] as TopologyMetrics);
                 stats.limitReached = stats.limitReached || results[2].stats.limitReached;
                 stats.numQueries += results[2].stats.numQueries;
               } else {
-                setTotalMetric(undefined);
                 setTotalDroppedMetric(undefined);
               }
+
               setStats(stats);
             })
             .catch(err => {
@@ -452,17 +463,19 @@ export const NetflowTraffic: React.FC<{
         );
         break;
       case 'overview':
-      case 'topology':
-        //TODO: manage each metrics separately
-        promises.push(getTopology(fq, range));
-        //get dropped bytes or packets
-        promises.push(getTopology({ ...fq, type: droppedType }, range));
-        if (selectedViewId === 'overview') {
-          //run same query on app scope for total flows
-          promises.push(getTopology({ ...fq, scope: 'app' }, range));
-          promises.push(getTopology({ ...fq, scope: 'app', type: droppedType }, range));
+        //TODO: manage each metrics separately to load panels as soon as available
 
-          //get dropped state and cause
+        //get bytes or packets
+        promises.push(getTopology(fq, range));
+
+        //run same query on app scope for total flows
+        promises.push(getTopology({ ...fq, scope: 'app' }, range));
+
+        if (droppedType) {
+          //run same queries for drops
+          promises.push(getTopology({ ...fq, type: droppedType }, range));
+          promises.push(getTopology({ ...fq, scope: 'app', type: droppedType }, range));
+          //get drop state & cause
           promises.push(getTopology({ ...fq, type: droppedType, scope: 'droppedState' }, range));
           promises.push(getTopology({ ...fq, type: droppedType, scope: 'droppedCause' }, range));
         }
@@ -476,31 +489,32 @@ export const NetflowTraffic: React.FC<{
               //set metrics
               setMetrics((results[0] as TopologyResult).metrics as TopologyMetrics[]);
 
-              //set dropped metrics
-              setDroppedMetrics((results[1] as TopologyResult).metrics as TopologyMetrics[]);
+              //set app metrics
+              setTotalMetric((results[1] as TopologyResult).metrics[0] as TopologyMetrics);
               stats.limitReached = stats.limitReached || results[1].stats.limitReached;
               stats.numQueries += results[1].stats.numQueries;
 
               if (results.length > 2) {
-                //set app metrics
-                setTotalMetric((results[2] as TopologyResult).metrics[0] as TopologyMetrics);
+                //set dropped metrics
+                setDroppedMetrics((results[2] as TopologyResult).metrics as TopologyMetrics[]);
                 stats.limitReached = stats.limitReached || results[2].stats.limitReached;
                 stats.numQueries += results[2].stats.numQueries;
 
+                //set app dropped metrics
                 setTotalDroppedMetric((results[3] as TopologyResult).metrics[0] as TopologyMetrics);
                 stats.limitReached = stats.limitReached || results[3].stats.limitReached;
                 stats.numQueries += results[3].stats.numQueries;
 
-                //set dropped state and cause
+                //set dropped state
                 setDroppedStateMetrics((results[4] as TopologyResult).metrics as DroppedTopologyMetrics[]);
                 stats.limitReached = stats.limitReached || results[4].stats.limitReached;
                 stats.numQueries += results[4].stats.numQueries;
 
+                //set dropped cause
                 setDroppedCauseMetrics((results[5] as TopologyResult).metrics as DroppedTopologyMetrics[]);
                 stats.limitReached = stats.limitReached || results[5].stats.limitReached;
                 stats.numQueries += results[5].stats.numQueries;
               } else {
-                setTotalMetric(undefined);
                 setTotalDroppedMetric(undefined);
                 setDroppedStateMetrics(undefined);
                 setDroppedCauseMetrics(undefined);
@@ -509,8 +523,53 @@ export const NetflowTraffic: React.FC<{
             })
             .catch(err => {
               setMetrics([]);
-              setDroppedMetrics([]);
               setTotalMetric(undefined);
+              setDroppedMetrics([]);
+              setTotalDroppedMetric(undefined);
+              setDroppedStateMetrics(undefined);
+              setDroppedCauseMetrics(undefined);
+              setError(getHTTPErrorDetails(err));
+              setWarningMessage(undefined);
+            })
+            .finally(() => {
+              //clear flows
+              setFlows([]);
+              setLoading(false);
+              setLastRefresh(new Date());
+            })
+        );
+        break;
+      case 'topology':
+        //get bytes or packets
+        promises.push(getTopology(fq, range));
+        if (droppedType) {
+          //run same for dropped bytes or packets
+          promises.push(getTopology({ ...fq, type: droppedType }, range));
+        }
+
+        manageWarnings(
+          Promise.all(promises)
+            .then(results => {
+              //get stats from first result
+              const stats = results[0].stats;
+
+              //set metrics
+              setMetrics((results[0] as TopologyResult).metrics as TopologyMetrics[]);
+
+              if (results.length > 1) {
+                //set dropped metrics
+                setDroppedMetrics((results[1] as TopologyResult).metrics as TopologyMetrics[]);
+                stats.limitReached = stats.limitReached || results[1].stats.limitReached;
+                stats.numQueries += results[1].stats.numQueries;
+              } else {
+                setDroppedMetrics([]);
+              }
+
+              setStats(stats);
+            })
+            .catch(err => {
+              setMetrics([]);
+              setDroppedMetrics([]);
               setError(getHTTPErrorDetails(err));
               setWarningMessage(undefined);
             })
@@ -527,7 +586,7 @@ export const NetflowTraffic: React.FC<{
         setLoading(false);
         break;
     }
-  }, [buildFlowQuery, histogramRange, manageWarnings, range, selectedViewId, showHistogram, initState]);
+  }, [buildFlowQuery, config.features, selectedViewId, histogramRange, showHistogram, manageWarnings, range]);
 
   usePoll(tick, interval);
 
@@ -538,6 +597,14 @@ export const NetflowTraffic: React.FC<{
   const isConnectionTracking = React.useCallback(() => {
     return config.recordTypes.some(rt => rt === 'newConnection' || rt === 'heartbeat' || rt === 'endConnection');
   }, [config.recordTypes]);
+
+  const isDNSTracking = React.useCallback(() => {
+    return config.features.includes('dnsTracking');
+  }, [config.features]);
+
+  const isTCPDrop = React.useCallback(() => {
+    return config.features.includes('tcpDrop');
+  }, [config.features]);
 
   React.useEffect(() => {
     if (initState.current.includes('configLoaded')) {
@@ -939,7 +1006,12 @@ export const NetflowTraffic: React.FC<{
           id="recordPanel"
           record={selectedRecord}
           columns={getDefaultColumns(t, false, false).filter(
-            col => isConnectionTracking() || ![ColumnsId.recordtype, ColumnsId.hashid].includes(col.id)
+            col =>
+              (isConnectionTracking() || ![ColumnsId.recordtype, ColumnsId.hashid].includes(col.id)) &&
+              (isDNSTracking() ||
+                ![ColumnsId.dnsid, ColumnsId.dnslatency, ColumnsId.dnsrequesttime, ColumnsId.dnsresponsetime].includes(
+                  col.id
+                ))
           )}
           filters={filters}
           range={range}
@@ -1008,7 +1080,7 @@ export const NetflowTraffic: React.FC<{
         content = (
           <NetflowOverview
             limit={limit}
-            panels={panels}
+            panels={panels.filter(panel => panel.isSelected && (isTCPDrop() || !panel.id.includes('dropped')))}
             recordType={recordType}
             metricType={metricType}
             metrics={metrics}
@@ -1036,7 +1108,15 @@ export const NetflowTraffic: React.FC<{
             onSelect={onRecordSelect}
             columns={columns.filter(
               col =>
-                col.isSelected && (isConnectionTracking() || ![ColumnsId.recordtype, ColumnsId.hashid].includes(col.id))
+                col.isSelected &&
+                (isConnectionTracking() || ![ColumnsId.recordtype, ColumnsId.hashid].includes(col.id)) &&
+                (isDNSTracking() ||
+                  ![
+                    ColumnsId.dnsid,
+                    ColumnsId.dnslatency,
+                    ColumnsId.dnsrequesttime,
+                    ColumnsId.dnsresponsetime
+                  ].includes(col.id))
             )}
             setColumns={(v: Column[]) => setColumns(v.concat(columns.filter(col => !col.isSelected)))}
             columnSizes={columnSizes}
@@ -1246,6 +1326,7 @@ export const NetflowTraffic: React.FC<{
           allowFlow: isFlow(),
           allowConnection: isConnectionTracking(),
           allowReporterBoth: selectedViewId === 'table',
+          allowTcpDrops: isTCPDrop(),
           useTopK: selectedViewId === 'overview'
         }}
         forcedFilters={forcedFilters}
@@ -1385,7 +1466,7 @@ export const NetflowTraffic: React.FC<{
         isModalOpen={isOverviewModalOpen}
         setModalOpen={setOverviewModalOpen}
         recordType={recordType}
-        panels={panels}
+        panels={panels.filter(panel => isTCPDrop() || !panel.id.includes('dropped'))}
         setPanels={setSelectedPanels}
       />
       <ColumnsModal
@@ -1393,7 +1474,12 @@ export const NetflowTraffic: React.FC<{
         isModalOpen={isColModalOpen}
         setModalOpen={setColModalOpen}
         columns={columns.filter(
-          col => isConnectionTracking() || ![ColumnsId.recordtype, ColumnsId.hashid].includes(col.id)
+          col =>
+            (isConnectionTracking() || ![ColumnsId.recordtype, ColumnsId.hashid].includes(col.id)) &&
+            (isDNSTracking() ||
+              ![ColumnsId.dnsid, ColumnsId.dnslatency, ColumnsId.dnsrequesttime, ColumnsId.dnsresponsetime].includes(
+                col.id
+              ))
         )}
         setColumns={setColumns}
         setColumnSizes={setColumnSizes}

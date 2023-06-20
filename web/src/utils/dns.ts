@@ -13,7 +13,7 @@ export const setRecordsDNSTimes = (records: Record[]): Record[] => {
       if (found) {
         if (r.fields.DnsResponseTimeMs && found.fields.DnsRequestTimeMs) {
           r.fields.DnsLatencyMs = r.fields.DnsResponseTimeMs - found.fields.DnsRequestTimeMs;
-        } else if(found.fields.DnsResponseTimeMs && r.fields.DnsRequestTimeMs) {
+        } else if (found.fields.DnsResponseTimeMs && r.fields.DnsRequestTimeMs) {
           r.fields.DnsLatencyMs = found.fields.DnsResponseTimeMs - r.fields.DnsRequestTimeMs;
         }
       }

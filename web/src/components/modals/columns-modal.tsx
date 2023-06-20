@@ -83,8 +83,8 @@ export const ColumnsModal: React.FC<{
 
   const onReset = React.useCallback(() => {
     setResetClicked(true);
-    setUpdatedColumns(getDefaultColumns(t));
-  }, [setResetClicked, setUpdatedColumns, t]);
+    setUpdatedColumns(getDefaultColumns(t).filter(c => columns.some(existing => existing.id === c.id)));
+  }, [columns, t]);
 
   const onSelectAll = React.useCallback(() => {
     const result = [...updatedColumns];
