@@ -108,7 +108,8 @@ export const getConfig = (): Promise<Config> => {
       },
       quickFilters: r.data.quickFilters,
       alertNamespaces: r.data.alertNamespaces,
-      sampling: r.data.sampling
+      sampling: r.data.sampling,
+      features: r.data.features || defaultConfig.features
     };
   });
 };

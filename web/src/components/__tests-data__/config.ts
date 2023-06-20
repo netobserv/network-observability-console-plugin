@@ -4,5 +4,7 @@ export const ConfigResultSample = {
     enable: true,
     portNames: new Map([['3100', 'loki']])
   },
-  quickFilters: []
+  quickFilters: [],
+  sampling: 1,
+  features: ['tcpDrop', 'dnsTracking']
 };

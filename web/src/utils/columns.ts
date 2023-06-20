@@ -797,7 +797,7 @@ export const getExtraColumns = (t: TFunction): Column[] => {
       tooltip: t('Time elapsed between DNS request and response.'),
       isSelected: false,
       // zero is valid value here
-      value: f => f.fields.DnsLatencyMs !== undefined ? f.fields.DnsLatencyMs : Number.NaN,
+      value: f => (f.fields.DnsLatencyMs !== undefined ? f.fields.DnsLatencyMs : Number.NaN),
       sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
       width: 5
     }

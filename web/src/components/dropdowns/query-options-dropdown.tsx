@@ -14,6 +14,7 @@ export interface QueryOptionsDropdownProps {
   allowFlow: boolean;
   allowConnection: boolean;
   allowReporterBoth: boolean;
+  allowTcpDrops: boolean;
   useTopK: boolean;
   limit: number;
   setLimit: (limit: number) => void;
@@ -40,6 +41,7 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
   allowFlow,
   allowConnection,
   allowReporterBoth,
+  allowTcpDrops,
   useTopK,
   limit,
   setLimit,
@@ -241,21 +243,37 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
             </>
           </div>
         </Tooltip>
-        {packetLossOptions.map(opt => (
-          <div key={`packet-loss-${opt.value}`}>
-            <label className="pf-c-select__menu-item">
-              <Radio
-                isChecked={opt.value === packetLoss}
-                name={`packet-loss-${opt.value}`}
-                onChange={() => setPacketLoss(opt.value)}
-                label={opt.label}
-                data-test={`packet-loss-${opt.value}`}
-                id={`packet-loss-${opt.value}`}
-                value={opt.value}
-              />
-            </label>
-          </div>
-        ))}
+        {packetLossOptions.map(opt => {
+          const disabled = !allowTcpDrops && opt.value !== 'all';
+          return (
+            <div key={`packet-loss-${opt.value}`}>
+              <label className="pf-c-select__menu-item">
+                <Tooltip
+                  trigger={disabled ? 'mouseenter focus' : ''}
+                  content={
+                    disabled
+                      ? t(
+                          // eslint-disable-next-line max-len
+                          'Only available using eBPF with FlowCollector.agent.ebpf.enableTCPDrop option equals "true"'
+                        )
+                      : undefined
+                  }
+                >
+                  <Radio
+                    isChecked={opt.value === packetLoss}
+                    isDisabled={disabled}
+                    name={`packet-loss-${opt.value}`}
+                    onChange={() => setPacketLoss(opt.value)}
+                    label={opt.label}
+                    data-test={`packet-loss-${opt.value}`}
+                    id={`packet-loss-${opt.value}`}
+                    value={opt.value}
+                  />
+                </Tooltip>
+              </label>
+            </div>
+          );
+        })}
       </div>
       <div className="pf-c-select__menu-group">
         <Tooltip

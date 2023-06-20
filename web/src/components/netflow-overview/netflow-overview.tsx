@@ -81,9 +81,17 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
     [kebabMap, setKebabMap]
   );
 
+  const emptyGraph = React.useCallback(() => {
+    return (
+      <div className="empty-metrics-content-div">
+        <span>{t('No results found')}</span>
+      </div>
+    );
+  }, [t]);
+
   if (error) {
     return <LokiError title={t('Unable to get overview')} error={error} />;
-  } else if (_.isEmpty(metrics) || _.isEmpty(droppedMetrics) || !totalMetric || !totalDroppedMetric) {
+  } else if (_.isEmpty(metrics) || !totalMetric) {
     //TODO: manage each metrics loading state separately
     if (loading) {
       return (
@@ -127,7 +135,9 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
     droppedCauseMetrics?.sort((a, b) => getStat(b.stats, 'sum') - getStat(a.stats, 'sum')) || [];
 
   const namedTotalMetric = toNamedMetric(t, totalMetric, truncateLength, false, false);
-  const namedTotalDroppedMetric = toNamedMetric(t, totalDroppedMetric, truncateLength, false, false);
+  const namedTotalDroppedMetric = totalDroppedMetric
+    ? toNamedMetric(t, totalDroppedMetric, truncateLength, false, false)
+    : undefined;
 
   const smallerTexts = truncateLength >= TruncateLength.M;
 
@@ -297,7 +307,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
         };
       case 'total_dropped_line':
         return {
-          element: (
+          element: namedTotalDroppedMetric ? (
             <MetricsContent
               id={id}
               title={title}
@@ -310,6 +320,8 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
               smallerTexts={smallerTexts}
               tooltipsTruncate={false}
             />
+          ) : (
+            emptyGraph()
           ),
           doubleWidth: false
         };
@@ -318,7 +330,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
           showOthers: true
         };
         return {
-          element: (
+          element: namedTotalDroppedMetric ? (
             <DroppedDonut
               id={id}
               limit={limit}
@@ -329,6 +341,8 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
               showOthers={options.showOthers!}
               smallerTexts={smallerTexts}
             />
+          ) : (
+            emptyGraph()
           ),
           kebab: <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} />,
           bodyClassSmall: true
@@ -339,7 +353,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
           showOthers: true
         };
         return {
-          element: (
+          element: namedTotalDroppedMetric ? (
             <DroppedDonut
               id={id}
               limit={limit}
@@ -350,6 +364,8 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
               showOthers={options.showOthers!}
               smallerTexts={smallerTexts}
             />
+          ) : (
+            emptyGraph()
           ),
           kebab: <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} />,
           bodyClassSmall: true
@@ -359,23 +375,31 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
         const options = kebabMap.get(id) || {
           showTotal: true,
           showInternal: true,
-          showOutOfScope: false,
-          compareToDropped: false
+          showOutOfScope: false
         };
+        if (namedTotalDroppedMetric) {
+          options['compareToDropped'] = false;
+        } else {
+          delete options.compareToDropped;
+        }
         return {
-          element: (
+          element: !_.isEmpty(topKDroppedMetrics) ? (
             <MetricsTotalContent
               id={id}
               title={title}
               metricType={metricType}
               topKMetrics={topKDroppedMetrics}
-              totalMetric={options.compareToDropped ? namedTotalDroppedMetric : namedTotalMetric}
+              totalMetric={
+                options.compareToDropped && namedTotalDroppedMetric ? namedTotalDroppedMetric : namedTotalMetric
+              }
               limit={limit}
               showTotal={options.showTotal!}
               showInternal={options.showInternal!}
               showOutOfScope={options.showOutOfScope!}
               smallerTexts={smallerTexts}
             />
+          ) : (
+            emptyGraph()
           ),
           kebab: <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} />,
           doubleWidth: true
@@ -388,30 +412,28 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
   return (
     <div id="overview-container" className={isDark ? 'dark' : 'light'}>
       <Flex id="overview-flex" justifyContent={{ default: 'justifyContentSpaceBetween' }}>
-        {panels
-          .filter(p => p.isSelected)
-          .map((panel, i) => {
-            const { title, tooltip } = getOverviewPanelInfo(
-              t,
-              panel.id,
-              limit,
-              recordType === 'flowLog' ? t('flow') : t('conversation')
-            );
-            const content = getPanelContent(panel.id, title);
-            return (
-              <NetflowOverviewPanel
-                id={panel.id}
-                key={i}
-                bodyClassSmall={!!content.bodyClassSmall}
-                doubleWidth={!!content.doubleWidth}
-                title={title}
-                titleTooltip={tooltip}
-                kebab={content.kebab}
-              >
-                {content.element}
-              </NetflowOverviewPanel>
-            );
-          })}
+        {panels.map((panel, i) => {
+          const { title, tooltip } = getOverviewPanelInfo(
+            t,
+            panel.id,
+            limit,
+            recordType === 'flowLog' ? t('flow') : t('conversation')
+          );
+          const content = getPanelContent(panel.id, title);
+          return (
+            <NetflowOverviewPanel
+              id={panel.id}
+              key={i}
+              bodyClassSmall={!!content.bodyClassSmall}
+              doubleWidth={!!content.doubleWidth}
+              title={title}
+              titleTooltip={tooltip}
+              kebab={content.kebab}
+            >
+              {content.element}
+            </NetflowOverviewPanel>
+          );
+        })}
       </Flex>
     </div>
   );

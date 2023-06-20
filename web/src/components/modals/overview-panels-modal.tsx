@@ -82,8 +82,8 @@ export const OverviewPanelsModal: React.FC<{
   );
 
   const onReset = React.useCallback(() => {
-    setUpdatedPanels(getDefaultOverviewPanels());
-  }, [setUpdatedPanels]);
+    setUpdatedPanels(getDefaultOverviewPanels().filter(p => panels.some(existing => existing.id === p.id)));
+  }, [panels]);
 
   const onSelectAll = React.useCallback(() => {
     const result = [...updatedPanels];

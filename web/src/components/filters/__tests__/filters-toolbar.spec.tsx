@@ -21,6 +21,7 @@ describe('<FiltersToolbar />', () => {
       allowFlow: true,
       allowConnection: true,
       allowReporterBoth: true,
+      allowTcpDrops: true,
       useTopK: false,
       match: 'all',
       packetLoss: 'all',
