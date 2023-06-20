@@ -344,8 +344,8 @@ export const RecordField: React.FC<{
               });
             }
 
-            if (flow.fields.TcpDropCause) {
-              droppedText = t('dropped by {{reason}}', { reason: flow.fields.TcpDropCause });
+            if (flow.fields.TcpDropLatestDropCause) {
+              droppedText = t('dropped by {{reason}}', { reason: flow.fields.TcpDropLatestDropCause });
             }
           }
           return doubleContainer(

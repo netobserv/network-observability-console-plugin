@@ -87,9 +87,9 @@ func getFields(scope, groups string) string {
 	case "app":
 		fields = []string{"app"}
 	case "droppedState":
-		fields = []string{"TcpDropState"}
+		fields = []string{"TcpDropLatestState"}
 	case "droppedCause":
-		fields = []string{"TcpDropCause"}
+		fields = []string{"TcpDropLatestDropCause"}
 	case "host":
 		fields = []string{"SrcK8S_HostName", "DstK8S_HostName"}
 	case "namespace":
