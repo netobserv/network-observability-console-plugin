@@ -333,20 +333,19 @@ export const RecordField: React.FC<{
         );
       case ColumnsId.packets:
       case ColumnsId.bytes:
-        if (Array.isArray(value) && value.length) {
-          let sentText = t('sent');
-          let droppedText = t('dropped');
-          if (c.id === ColumnsId.bytes) {
-            if (flow.fields.IcmpType) {
-              sentText = t('sent reporting {{type}} {{code}}', {
-                type: getType(flow.fields.IcmpType),
-                code: getCode(flow.fields.IcmpType, flow.fields.IcmpCode)
-              });
-            }
+        let sentText = t('sent');
+        if (c.id === ColumnsId.bytes && flow.fields.IcmpType) {
+          sentText = t('sent reporting {{type}} {{code}}', {
+            type: getType(flow.fields.IcmpType),
+            code: getCode(flow.fields.IcmpType, flow.fields.IcmpCode)
+          });
+        }
 
-            if (flow.fields.TcpDropLatestDropCause) {
-              droppedText = t('dropped by {{reason}}', { reason: flow.fields.TcpDropLatestDropCause });
-            }
+        //show both sent / dropped counts
+        if (Array.isArray(value) && value.length) {
+          let droppedText = t('dropped');
+          if (c.id === ColumnsId.bytes && flow.fields.TcpDropLatestDropCause) {
+            droppedText = t('dropped by {{reason}}', { reason: flow.fields.TcpDropLatestDropCause });
           }
           return doubleContainer(
             simpleTextWithTooltip(
@@ -363,7 +362,7 @@ export const RecordField: React.FC<{
         } else {
           return singleContainer(
             simpleTextWithTooltip(
-              detailed ? `${String(value)} ${c.name.toLowerCase()} ${t('sent')}` : String(value),
+              detailed ? `${String(value)} ${c.name.toLowerCase()} ${sentText}` : String(value),
               isDark ? '#3E8635' : '#1E4F18'
             )
           );
