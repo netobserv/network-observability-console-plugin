@@ -375,13 +375,9 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
         const options = kebabMap.get(id) || {
           showTotal: true,
           showInternal: true,
-          showOutOfScope: false
+          showOutOfScope: false,
+          compareToDropped: namedTotalDroppedMetric ? false : undefined,
         };
-        if (namedTotalDroppedMetric) {
-          options['compareToDropped'] = false;
-        } else {
-          delete options.compareToDropped;
-        }
         return {
           element: !_.isEmpty(topKDroppedMetrics) ? (
             <MetricsTotalContent
