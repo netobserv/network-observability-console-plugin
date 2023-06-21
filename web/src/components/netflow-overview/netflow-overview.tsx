@@ -376,7 +376,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
           showTotal: true,
           showInternal: true,
           showOutOfScope: false,
-          compareToDropped: namedTotalDroppedMetric ? false : undefined,
+          compareToDropped: namedTotalDroppedMetric ? false : undefined
         };
         return {
           element: !_.isEmpty(topKDroppedMetrics) ? (

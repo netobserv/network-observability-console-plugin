@@ -794,7 +794,10 @@ export const getExtraColumns = (t: TFunction): Column[] => {
     {
       id: ColumnsId.dnslatency,
       name: t('DNS Latency'),
-      tooltip: t('Time elapsed between DNS request and response.'),
+      tooltip: t(
+        // eslint-disable-next-line max-len
+        'Time elapsed between DNS request and response. Filter on a specific DNS Id and use Reporter "Both" to ensure having both request and response in your results.'
+      ),
       isSelected: false,
       // zero is valid value here
       value: f => (f.fields.DnsLatencyMs !== undefined ? f.fields.DnsLatencyMs : Number.NaN),
