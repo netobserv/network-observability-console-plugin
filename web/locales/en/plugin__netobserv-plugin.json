@@ -349,7 +349,7 @@
   "DNS Id": "DNS Id",
   "DNS request identifier.": "DNS request identifier.",
   "DNS Latency": "DNS Latency",
-  "Time elapsed between DNS request and response.": "Time elapsed between DNS request and response.",
+  "Time elapsed between DNS request and response. Filter on a specific DNS Id and use Reporter \"Both\" to ensure having both request and response in your results.": "Time elapsed between DNS request and response. Filter on a specific DNS Id and use Reporter \"Both\" to ensure having both request and response in your results.",
   "Start Time": "Start Time",
   "Time of the first packet observed. Unlike End Time, it is not used in queries to select records in an interval.": "Time of the first packet observed. Unlike End Time, it is not used in queries to select records in an interval.",
   "End Time": "End Time",
