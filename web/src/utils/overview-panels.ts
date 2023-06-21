@@ -40,7 +40,7 @@ export const getDefaultOverviewPanels = (): OverviewPanel[] => {
     { id: 'top_lines', isSelected: true },
     { id: 'top_dropped_bar', isSelected: false },
     { id: 'total_dropped_line', isSelected: false },
-    { id: 'top_dropped_state_donut', isSelected: false },
+    { id: 'top_dropped_state_donut', isSelected: true },
     { id: 'top_dropped_cause_donut', isSelected: true },
     { id: 'top_dropped_bar_total', isSelected: true }
   ]);
