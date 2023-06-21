@@ -368,6 +368,10 @@ export const RecordField: React.FC<{
             )
           );
         }
+      case ColumnsId.dnsid:
+        return singleContainer(
+          typeof value === 'number' && !isNaN(value) ? simpleTextWithTooltip(String(value)) : emptyText()
+        );
       default:
         if (Array.isArray(value) && value.length) {
           return doubleContainer(simpleTextWithTooltip(String(value[0])), simpleTextWithTooltip(String(value[1])));
