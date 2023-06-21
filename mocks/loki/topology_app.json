@@ -9,60 +9,36 @@
         },
         "values": [
           [
-            1683712800,
-            "60.583333333333336"
+            1687334400,
+            "58.394444444444446"
           ],
           [
-            1683713160,
-            "59.836111111111116"
+            1687334760,
+            "120.68055555555557"
           ],
           [
-            1683713520,
-            "62.69305555555556"
+            1687335120,
+            "133.55972222222226"
           ],
           [
-            1683713880,
-            "61.56111111111113"
+            1687335480,
+            "132.3513888888889"
           ],
           [
-            1683714240,
-            "60.21666666666667"
-          ],
-          [
-            1683714600,
-            "60.95972222222222"
-          ],
-          [
-            1683714960,
-            "60.96805555555556"
-          ],
-          [
-            1683715320,
-            "62.905555555555566"
-          ],
-          [
-            1683715680,
-            "61.654166666666654"
-          ],
-          [
-            1683716040,
-            "62.54444444444446"
-          ],
-          [
-            1683716400,
-            "62.18055555555555"
+            1687335840,
+            "128.73472222222225"
           ]
         ]
       }
     ],
     "stats": {
       "summary": {
-        "bytesProcessedPerSecond": 16837708,
-        "linesProcessedPerSecond": 19671,
-        "totalBytesProcessed": 63870163,
-        "totalLinesProcessed": 74619,
-        "execTime": 3.793281125,
-        "queueTime": 57.50998162,
+        "bytesProcessedPerSecond": 49597147,
+        "linesProcessedPerSecond": 52750,
+        "totalBytesProcessed": 225932457,
+        "totalLinesProcessed": 240299,
+        "execTime": 4.555351829,
+        "queueTime": 122.485516673,
         "subqueries": 5,
         "totalEntriesReturned": 1
       },
@@ -82,20 +58,20 @@
         }
       },
       "ingester": {
-        "totalReached": 16,
-        "totalChunksMatched": 431,
-        "totalBatches": 100,
-        "totalLinesSent": 46911,
+        "totalReached": 32,
+        "totalChunksMatched": 874,
+        "totalBatches": 399,
+        "totalLinesSent": 195724,
         "store": {
-          "totalChunksRef": 3,
-          "totalChunksDownloaded": 3,
-          "chunksDownloadTime": 1029366,
+          "totalChunksRef": 16,
+          "totalChunksDownloaded": 16,
+          "chunksDownloadTime": 7963991,
           "chunk": {
-            "headChunkBytes": 12223533,
-            "headChunkLines": 14540,
-            "decompressedBytes": 51646630,
-            "decompressedLines": 60079,
-            "compressedBytes": 11320798,
+            "headChunkBytes": 36076368,
+            "headChunkLines": 38639,
+            "decompressedBytes": 189856089,
+            "decompressedLines": 201660,
+            "compressedBytes": 43027934,
             "totalDuplicates": 0
           }
         }
