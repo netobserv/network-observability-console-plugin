@@ -52,7 +52,8 @@ export const SummaryPanelContent: React.FC<{
   limit: number;
   range: number | TimeRange;
   lastRefresh: Date | undefined;
-}> = ({ flows, metrics, appMetrics, type, metricType, stats, limit, range, lastRefresh }) => {
+  showDNSLatency?: boolean;
+}> = ({ flows, metrics, appMetrics, type, metricType, stats, limit, range, lastRefresh, showDNSLatency }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [expanded, setExpanded] = React.useState<string>('');
 
@@ -292,6 +293,20 @@ export const SummaryPanelContent: React.FC<{
     ) : undefined;
   };
 
+  const dnsLatency = (filteredFlows: Record[]) => {
+    const filteredDNSFlows = filteredFlows.filter(f => f.fields.DnsLatencyMs !== undefined);
+
+    const dnsLatency = filteredDNSFlows.length
+      ? filteredDNSFlows.map(f => f.fields.DnsLatencyMs!).reduce((a, b) => a + b, 0) / filteredDNSFlows.length
+      : NaN;
+
+    return (
+      <Text className="summary-config-item">{`${t('DNS latency')}: ${
+        isNaN(dnsLatency) ? t('n/a') : formatDurationAboveMillisecond(dnsLatency)
+      }`}</Text>
+    );
+  };
+
   const timeContent = () => {
     const filteredFlows = flows || [];
     const duration =
@@ -300,10 +315,7 @@ export const SummaryPanelContent: React.FC<{
     const collectionLatency =
       filteredFlows.map(f => f.fields.TimeReceived * 1000 - f.fields.TimeFlowEndMs).reduce((a, b) => a + b, 0) /
       filteredFlows.length;
-    const dnsLatency =
-      filteredFlows
-        .map(f => (f.fields.DnsResponseTimeMs || 0) - (f.fields.DnsRequestTimeMs || 0))
-        .reduce((a, b) => a + b, 0) / filteredFlows.length;
+
     return (
       <TextContent className="summary-text-container">
         <Text component={TextVariants.h3}>{`${t('Average time')}`}</Text>
@@ -311,9 +323,7 @@ export const SummaryPanelContent: React.FC<{
         <Text className="summary-config-item">{`${t('Collection latency')}: ${formatDurationAboveMillisecond(
           collectionLatency
         )}`}</Text>
-        <Text className="summary-config-item">{`${t('DNS latency')}: ${formatDurationAboveMillisecond(
-          dnsLatency
-        )}`}</Text>
+        {showDNSLatency ? dnsLatency(filteredFlows) : <></>}
       </TextContent>
     );
   };
@@ -376,8 +386,22 @@ export const SummaryPanel: React.FC<{
   limit: number;
   range: number | TimeRange;
   lastRefresh: Date | undefined;
+  showDNSLatency?: boolean;
   id?: string;
-}> = ({ flows, metrics, appMetrics, type, metricType, stats, limit, range, lastRefresh, id, onClose }) => {
+}> = ({
+  flows,
+  metrics,
+  appMetrics,
+  type,
+  metricType,
+  stats,
+  limit,
+  range,
+  lastRefresh,
+  showDNSLatency,
+  id,
+  onClose
+}) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   return (
@@ -406,6 +430,7 @@ export const SummaryPanel: React.FC<{
           limit={limit}
           range={range}
           lastRefresh={lastRefresh}
+          showDNSLatency={showDNSLatency}
         />
       </DrawerPanelBody>
     </DrawerPanelContent>

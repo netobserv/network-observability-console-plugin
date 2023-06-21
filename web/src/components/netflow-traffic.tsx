@@ -1043,6 +1043,7 @@ export const NetflowTraffic: React.FC<{
           limit={limit}
           lastRefresh={lastRefresh}
           range={range}
+          showDNSLatency={isDNSTracking()}
           onClose={() => setShowQuerySummary(false)}
         />
       );
