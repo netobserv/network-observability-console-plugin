@@ -154,7 +154,11 @@ const valid = (newValue: string) => ({ val: newValue });
 const invalid = (msg: string) => ({ err: msg });
 
 let filterDefinitions: FilterDefinition[] | undefined = undefined;
-export const getFilterDefinitions = (t: TFunction, allowConnectionFilter?: boolean): FilterDefinition[] => {
+export const getFilterDefinitions = (
+  t: TFunction,
+  allowConnectionFilter?: boolean,
+  allowDNSFilter?: boolean
+): FilterDefinition[] => {
   if (!filterDefinitions) {
     const rejectEmptyValue = (value: string) => {
       if (_.isEmpty(value)) {
@@ -471,12 +475,14 @@ export const getFilterDefinitions = (t: TFunction, allowConnectionFilter?: boole
     ];
   }
 
-  if (allowConnectionFilter) {
+  if (allowConnectionFilter && allowDNSFilter) {
     return filterDefinitions;
   } else {
-    return filterDefinitions.filter(fd => fd.id !== 'id');
+    return filterDefinitions.filter(
+      fd => (allowConnectionFilter || fd.id !== 'id') && (allowDNSFilter || fd.id !== 'dns_id')
+    );
   }
 };
-/* eslint-enable max-len */
 
-export const findFilter = (t: TFunction, id: FilterId) => getFilterDefinitions(t, true).find(def => def.id === id);
+export const findFilter = (t: TFunction, id: FilterId) =>
+  getFilterDefinitions(t, true, true).find(def => def.id === id);
