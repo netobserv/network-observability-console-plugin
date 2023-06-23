@@ -99,8 +99,8 @@ export const Slider: React.FunctionComponent<SliderProps> = ({
   vertical,
   ...props
 }: SliderProps) => {
-  const sliderRailRef = React.useRef<HTMLDivElement>();
-  const thumbRef = React.useRef<HTMLDivElement>();
+  const sliderRailRef = React.useRef<HTMLDivElement | null>(null);
+  const thumbRef = React.useRef<HTMLDivElement | null>(null);
 
   const [localValue, setValue] = useState(value);
   const [localInputValue, setLocalInputValue] = useState(inputValue);
@@ -114,7 +114,6 @@ export const Slider: React.FunctionComponent<SliderProps> = ({
   }, [inputValue]);
 
   let diff = 0;
-  let snapValue: number;
 
   // calculate style value percentage
   const stylePercent = ((localValue - min) * 100) / (max - min);
@@ -138,7 +137,7 @@ export const Slider: React.FunctionComponent<SliderProps> = ({
     }
   };
 
-  const onInputFocus = (e: any) => {
+  const onInputFocus = (e: React.SyntheticEvent) => {
     e.stopPropagation();
   };
 
@@ -165,12 +164,13 @@ export const Slider: React.FunctionComponent<SliderProps> = ({
   };
 
   // Position hooks
-  const mousePos = vertical ? (e: React.MouseEvent) => e.clientY : (e: React.MouseEvent) => e.clientX;
-  const touchPos = vertical
-    ? (e: React.TouchEvent) => e.touches[0].clientY
-    : (e: React.TouchEvent) => e.touches[0].clientX;
-  const minPos = vertical ? (r: DOMRect) => r.bottom : (r: DOMRect) => r.left;
-  const maxPos = vertical ? (r: DOMRect) => r.top : (r: DOMRect) => r.right;
+  const mousePos = React.useCallback((e: MouseEvent) => (vertical ? e.clientY : e.clientX), [vertical]);
+  const touchPos = React.useCallback(
+    (e: TouchEvent) => (vertical ? e.touches[0].clientY : e.touches[0].clientX),
+    [vertical]
+  );
+  const minPos = React.useCallback((r: DOMRect) => (vertical ? r.bottom : r.left), [vertical]);
+  const maxPos = React.useCallback((r: DOMRect) => (vertical ? r.top : r.right), [vertical]);
 
   const handleThumbDragEnd = () => {
     document.removeEventListener('mousemove', callbackThumbMove);
@@ -184,7 +184,7 @@ export const Slider: React.FunctionComponent<SliderProps> = ({
     e.stopPropagation();
     e.preventDefault();
 
-    diff = mousePos(e) - minPos(thumbRef.current!.getBoundingClientRect());
+    diff = mousePos(e.nativeEvent) - minPos(thumbRef.current!.getBoundingClientRect());
 
     document.addEventListener('mousemove', callbackThumbMove);
     document.addEventListener('mouseup', callbackThumbUp);
@@ -193,15 +193,15 @@ export const Slider: React.FunctionComponent<SliderProps> = ({
   const handleTouchStart = (e: React.TouchEvent) => {
     e.stopPropagation();
 
-    diff = touchPos(e) - minPos(thumbRef.current!.getBoundingClientRect());
+    diff = touchPos(e.nativeEvent) - minPos(thumbRef.current!.getBoundingClientRect());
 
     document.addEventListener('touchmove', callbackThumbMove, { passive: false });
     document.addEventListener('touchend', callbackThumbUp);
     document.addEventListener('touchcancel', callbackThumbUp);
   };
 
-  const onSliderRailClick = (e: any) => {
-    handleThumbMove(e);
+  const onSliderRailClick = (e: React.TouchEvent | React.MouseEvent) => {
+    const snapValue = handleThumbMove(e.nativeEvent);
     if (snapValue && !areCustomStepsContinuous) {
       thumbRef.current!.style.setProperty('--pf-c-slider--value', `${snapValue}%`);
       setValue(snapValue);
@@ -211,13 +211,14 @@ export const Slider: React.FunctionComponent<SliderProps> = ({
     }
   };
 
-  const handleThumbMove = (e: any) => {
+  const handleThumbMove = (e: TouchEvent | MouseEvent) => {
     if (e.type === 'touchmove') {
       e.preventDefault();
       e.stopImmediatePropagation();
     }
 
-    const clientPosition = e.touches && e.touches.length ? touchPos(e) : mousePos(e);
+    let snapValue: number | undefined = undefined;
+    const clientPosition = 'touches' in e && e.touches.length ? touchPos(e) : mousePos(e as MouseEvent);
     const boundingRect = sliderRailRef.current!.getBoundingClientRect();
     const refSize = maxPos(boundingRect) - minPos(boundingRect);
     const relativePos = clientPosition - diff - minPos(boundingRect);
@@ -258,10 +259,36 @@ export const Slider: React.FunctionComponent<SliderProps> = ({
         onChange(targetValue);
       }
     }
+    return snapValue;
   };
 
-  const callbackThumbMove = React.useCallback(handleThumbMove, [min, max, customSteps, onChange]);
-  const callbackThumbUp = React.useCallback(handleThumbDragEnd, [min, max, customSteps, onChange]);
+  const callbackThumbMove = React.useCallback(handleThumbMove, [
+    min,
+    max,
+    customSteps,
+    onChange,
+    areCustomStepsContinuous,
+    diff,
+    maxPos,
+    minPos,
+    mousePos,
+    step,
+    touchPos
+  ]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const callbackThumbUp = React.useCallback(handleThumbDragEnd, [
+    min,
+    max,
+    customSteps,
+    onChange,
+    areCustomStepsContinuous,
+    diff,
+    maxPos,
+    minPos,
+    mousePos,
+    step,
+    touchPos
+  ]);
 
   const handleThumbKeys = (e: React.KeyboardEvent) => {
     const key = e.key;
@@ -359,7 +386,7 @@ export const Slider: React.FunctionComponent<SliderProps> = ({
   const thumbComponent = (
     <div
       className={css(styles.sliderThumb)}
-      ref={thumbRef as any}
+      ref={thumbRef}
       tabIndex={isDisabled ? -1 : 0}
       role="slider"
       aria-valuemin={customSteps ? customSteps[0].value : min}
@@ -387,7 +414,7 @@ export const Slider: React.FunctionComponent<SliderProps> = ({
       <div className={css(styles.sliderMain)}>
         <div
           className={css(styles.sliderRail)}
-          ref={sliderRailRef as any}
+          ref={sliderRailRef}
           onClick={!isDisabled ? onSliderRailClick : undefined}
         >
           <div className={css(styles.sliderRailTrack)} />
