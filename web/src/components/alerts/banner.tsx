@@ -10,22 +10,22 @@ import {
 } from '@patternfly/react-core';
 import './banner.css';
 import { Rule } from '@openshift-console/dynamic-plugin-sdk';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom-v5-compat';
 
 export const AlertBanner: React.FC<{
   rule: Rule;
   onDelete: () => void;
 }> = ({ rule, onDelete }) => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { t } = useTranslation('plugin__netobserv-plugin');
   const routeAlert = () => {
     let path = `/monitoring/alerts/${rule.id}`;
     path += `?alertname=${rule.name}&app=${rule.labels.app}&severity=${rule.labels.severity}`;
-    history.push(path);
+    navigate(path);
   };
   const routeDashboard = () => {
     const path = `/monitoring/dashboards/grafana-dashboard-netobserv-health`;
-    history.push(path);
+    navigate(path);
   };
   return (
     <div className="netobserv-alert">

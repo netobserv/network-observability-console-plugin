@@ -1,8 +1,7 @@
 import * as React from 'react';
-import { clearURLParams } from '../utils/url';
 import { clearLocalStorage } from '../utils/local-storage-hook';
-import NetflowTraffic from './netflow-traffic';
 import AlertFetcher from './alerts/fetcher';
+import NetflowTraffic from './netflow-traffic';
 
 type Props = {};
 type State = {
@@ -27,9 +26,15 @@ class NetflowTrafficParent extends React.Component<Props, State> {
     this.setState({ error: error });
   }
 
+  reloadPage() {
+    const url = new URL(window.location.href);
+    console.info('clearing url parameters ' + url);
+    window.location.href = url.pathname;
+  }
+
   reset() {
     clearLocalStorage();
-    clearURLParams();
+    this.reloadPage();
   }
 
   render() {

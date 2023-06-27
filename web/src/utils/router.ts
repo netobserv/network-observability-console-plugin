@@ -4,6 +4,7 @@ import { TimeRange } from './datetime';
 import { Match, MetricFunction, MetricType, RecordType, Reporter } from '../model/flow-query';
 import { getURLParam, getURLParamAsNumber, removeURLParam, setURLParam, URLParam } from './url';
 import { createFilterValue, DisabledFilters, Filter, filterKey, fromFilterKey } from '../model/filters';
+import { NavigateFunction } from 'react-router-dom-v5-compat';
 
 const filtersSeparator = ';';
 const filterKVSeparator = '=';
@@ -86,55 +87,59 @@ export const getFiltersFromURL = (t: TFunction, disabledFilters: DisabledFilters
   return Promise.all(filterPromises);
 };
 
-export const setURLFilters = (filters: Filter[]) => {
+export const setURLFilters = (filters: Filter[], navigateFunc: NavigateFunction, replace?: boolean) => {
   const urlFilters = filters
     .map(filter => {
       return filterKey(filter) + filterKVSeparator + filter.values.map(v => v.v).join(filterValuesSeparator);
     })
     .join(filtersSeparator);
-  setURLParam(URLParam.Filters, urlFilters);
+  setURLParam(URLParam.Filters, urlFilters, navigateFunc);
 };
 
-export const setURLRange = (range: number | TimeRange) => {
+export const setURLRange = (range: number | TimeRange, navigateFunc: NavigateFunction, replace?: boolean) => {
   if (typeof range === 'number') {
-    setURLParam(URLParam.TimeRange, String(range));
-    removeURLParam(URLParam.StartTime);
-    removeURLParam(URLParam.EndTime);
+    setURLParam(URLParam.TimeRange, String(range), navigateFunc, replace);
+    removeURLParam(URLParam.StartTime, navigateFunc, true);
+    removeURLParam(URLParam.EndTime, navigateFunc, true);
   } else if (typeof range === 'object') {
-    setURLParam(URLParam.StartTime, String(range.from));
-    setURLParam(URLParam.EndTime, String(range.to));
-    removeURLParam(URLParam.TimeRange);
+    setURLParam(URLParam.StartTime, String(range.from), navigateFunc, replace);
+    setURLParam(URLParam.EndTime, String(range.to), navigateFunc, true);
+    removeURLParam(URLParam.TimeRange, navigateFunc, true);
   }
 };
 
-export const setURLRecortType = (recordType: RecordType) => {
-  setURLParam(URLParam.RecordType, recordType);
+export const setURLRecortType = (recordType: RecordType, navigateFunc: NavigateFunction, replace?: boolean) => {
+  setURLParam(URLParam.RecordType, recordType, navigateFunc, replace);
 };
 
-export const setURLReporter = (reporter: Reporter) => {
-  setURLParam(URLParam.Reporter, reporter);
+export const setURLReporter = (reporter: Reporter, navigateFunc: NavigateFunction, replace?: boolean) => {
+  setURLParam(URLParam.Reporter, reporter, navigateFunc, replace);
 };
 
-export const setURLLimit = (limit: number) => {
-  setURLParam(URLParam.Limit, String(limit));
+export const setURLLimit = (limit: number, navigateFunc: NavigateFunction, replace?: boolean) => {
+  setURLParam(URLParam.Limit, String(limit), navigateFunc, replace);
 };
 
-export const setURLMatch = (match: Match) => {
-  setURLParam(URLParam.Match, match);
+export const setURLMatch = (match: Match, navigateFunc: NavigateFunction, replace?: boolean) => {
+  setURLParam(URLParam.Match, match, navigateFunc, replace);
 };
 
-export const setURLMetricFunction = (metricFunction?: MetricFunction) => {
+export const setURLMetricFunction = (
+  metricFunction: MetricFunction,
+  navigateFunc: NavigateFunction,
+  replace?: boolean
+) => {
   if (metricFunction) {
-    setURLParam(URLParam.MetricFunction, metricFunction);
+    setURLParam(URLParam.MetricFunction, metricFunction, navigateFunc, replace);
   } else {
-    removeURLParam(URLParam.MetricFunction);
+    removeURLParam(URLParam.MetricFunction, navigateFunc, replace);
   }
 };
 
-export const setURLMetricType = (metricType?: MetricType) => {
+export const setURLMetricType = (metricType: MetricType, navigateFunc: NavigateFunction, replace?: boolean) => {
   if (metricType) {
-    setURLParam(URLParam.MetricType, metricType);
+    setURLParam(URLParam.MetricType, metricType, navigateFunc, replace);
   } else {
-    removeURLParam(URLParam.MetricType);
+    removeURLParam(URLParam.MetricType, navigateFunc, replace);
   }
 };

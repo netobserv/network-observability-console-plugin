@@ -1,5 +1,5 @@
-import { createBrowserHistory } from 'history';
 import _ from 'lodash';
+import { NavigateFunction } from 'react-router-dom-v5-compat';
 
 export const netflowTrafficPath = '/netflow-traffic';
 
@@ -18,8 +18,6 @@ export enum URLParam {
   MetricType = 'type'
 }
 export type URLParams = { [k in URLParam]?: unknown };
-
-export const history = createBrowserHistory();
 
 export const hasEmptyParams = () => {
   return _.isEmpty(window.location.search);
@@ -41,31 +39,25 @@ export const getURLParamAsNumber = (arg: URLParam) => {
   return null;
 };
 
-export const setURLParams = (params: string) => {
+export const replaceURLParams = (params: string, navigateFunc: NavigateFunction) => {
   const url = new URL(window.location.href);
-  history.push(`${url.pathname}?${params}${url.hash}`);
+  navigateFunc(`${url.pathname}?${params}${url.hash}`, { replace: true });
 };
 
-export const setURLParam = (param: URLParam, value: string) => {
+export const setURLParam = (param: URLParam, value: string, navigateFunc: NavigateFunction, replace?: boolean) => {
   const url = new URL(window.location.href);
   const params = new URLSearchParams(window.location.search);
   params.set(param, value);
-  history.push(`${url.pathname}?${params.toString()}${url.hash}`);
+  navigateFunc(`${url.pathname}?${params.toString()}${url.hash}`, { replace });
 };
 
-export const removeURLParam = (param: URLParam) => {
+export const removeURLParam = (param: URLParam, navigateFunc: NavigateFunction, replace?: boolean) => {
   const params = new URLSearchParams(window.location.search);
   if (params.has(param)) {
     params.delete(param);
     const url = new URL(window.location.href);
-    history.replace(`${url.pathname}?${params.toString()}${url.hash}`);
+    navigateFunc(`${url.pathname}?${params.toString()}${url.hash}`, { replace });
   }
-};
-
-export const clearURLParams = () => {
-  const url = new URL(window.location.href);
-  console.info('clearing url parameters ' + url);
-  history.push(url.pathname);
 };
 
 export const getPathWithParams = (pathName = '') => {

@@ -13,7 +13,7 @@ import {
   Radio
 } from '@patternfly/react-core';
 import React from 'react';
-import { BrowserRouter as Router, Link, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Link, Route, Routes } from 'react-router-dom-v5-compat';
 import NetflowTrafficParent from './components/netflow-traffic-parent';
 
 interface AppState {
@@ -61,14 +61,15 @@ export class App extends React.Component<{}, AppState> {
   };
 
   private getPages = () => (
-    <React.Fragment>
+    <Routes>
       {pages.map(page => (
         <Route
-          render={() => <PageSection style={{ zIndex: 2 }}>{this.getPageContent(page.id)}</PageSection>}
+          path={page.id}
+          element={<PageSection style={{ zIndex: 2 }}>{this.getPageContent(page.id)}</PageSection>}
           key={page.id}
         />
       ))}
-    </React.Fragment>
+    </Routes>
   );
 
   render() {

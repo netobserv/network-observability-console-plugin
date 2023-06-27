@@ -99,6 +99,16 @@ jest.mock('react-router-dom', () => ({
   }
 }));
 
+//Mock react-router-dom-v5-compat
+jest.mock('react-router-dom-v5-compat', () => ({
+  // navigate replace history in v6 & compat
+  // https://github.com/remix-run/react-router/discussions/8753
+  useNavigate: () => jest.fn(),
+  Link: () => {
+    return null;
+  }
+}));
+
 //Mock routes
 jest.mock('./src/api/routes', () => ({
   getPods: jest.fn(async () => ['ABCD']),

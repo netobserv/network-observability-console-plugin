@@ -29,7 +29,7 @@ import { ColumnsIcon, CompressIcon, EllipsisVIcon, ExpandIcon, ExportIcon, SyncA
 import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom-v5-compat';
 import { useTheme } from '../utils/theme-hook';
 import { Record } from '../api/ipfix';
 import { RecordsResult, Stats, TopologyMetrics, TopologyResult } from '../api/loki';
@@ -109,7 +109,7 @@ import {
   setURLRecortType,
   setURLReporter
 } from '../utils/router';
-import { getURLParams, hasEmptyParams, netflowTrafficPath, setURLParams } from '../utils/url';
+import { getURLParams, hasEmptyParams, netflowTrafficPath, replaceURLParams } from '../utils/url';
 import { OverviewDisplayDropdown } from './dropdowns/overview-display-dropdown';
 import { LIMIT_VALUES, TOP_VALUES } from './dropdowns/query-options-dropdown';
 import { RefreshDropdown } from './dropdowns/refresh-dropdown';
@@ -146,7 +146,7 @@ export const NetflowTraffic: React.FC<{
   forcedFilters?: Filter[] | null;
   isTab?: boolean;
 }> = ({ forcedFilters, isTab }) => {
-  const { push } = useHistory();
+  const navigate = useNavigate();
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [extensions] = useResolvedExtensions<ModelFeatureFlag>(isModelFeatureFlag);
   const k8sModels = useK8sModelsWithColors();
@@ -159,7 +159,7 @@ export const NetflowTraffic: React.FC<{
   const [disabledFilters, setDisabledFilters] = useLocalStorage<DisabledFilters>(LOCAL_STORAGE_DISABLED_FILTERS_KEY);
   // set url params from local storage saved items at startup if empty
   if (hasEmptyParams() && queryParams) {
-    setURLParams(queryParams);
+    replaceURLParams(queryParams, navigate);
   }
 
   const warningTimeOut = React.useRef<NodeJS.Timeout | undefined>();
@@ -532,31 +532,31 @@ export const NetflowTraffic: React.FC<{
   React.useEffect(() => {
     //with forced filters in url if specified
     if (forcedFilters) {
-      setURLFilters(forcedFilters!);
+      setURLFilters(forcedFilters!, navigate, !initState.current.includes('configLoaded'));
     } else if (!_.isEmpty(filters)) {
       //write filters in url if not empty
-      setURLFilters(filters);
+      setURLFilters(filters, navigate, !initState.current.includes('configLoaded'));
     }
-  }, [filters, forcedFilters]);
+  }, [filters, forcedFilters, navigate]);
   React.useEffect(() => {
-    setURLRange(range);
-  }, [range]);
+    setURLRange(range, navigate, !initState.current.includes('configLoaded'));
+  }, [navigate, range]);
   React.useEffect(() => {
-    setURLLimit(limit);
-  }, [limit]);
+    setURLLimit(limit, navigate, !initState.current.includes('configLoaded'));
+  }, [limit, navigate]);
   React.useEffect(() => {
-    setURLMatch(match);
-  }, [match]);
+    setURLMatch(match, navigate, !initState.current.includes('configLoaded'));
+  }, [match, navigate]);
   React.useEffect(() => {
-    setURLReporter(reporter);
-  }, [reporter]);
+    setURLReporter(reporter, navigate, !initState.current.includes('configLoaded'));
+  }, [navigate, reporter]);
   React.useEffect(() => {
-    setURLMetricFunction(metricFunction);
-    setURLMetricType(metricType);
-  }, [metricFunction, metricType]);
+    setURLMetricFunction(metricFunction, navigate, !initState.current.includes('configLoaded'));
+    setURLMetricType(metricType, navigate, !initState.current.includes('configLoaded'));
+  }, [metricFunction, metricType, navigate]);
   React.useEffect(() => {
-    setURLRecortType(recordType);
-  }, [recordType]);
+    setURLRecortType(recordType, navigate, !initState.current.includes('configLoaded'));
+  }, [navigate, recordType]);
 
   // update local storage saved query params
   React.useEffect(() => {
@@ -590,13 +590,13 @@ export const NetflowTraffic: React.FC<{
 
   const clearFilters = React.useCallback(() => {
     if (forcedFilters) {
-      push(netflowTrafficPath);
+      navigate(netflowTrafficPath);
     } else if (filters) {
       //set URL Param to empty value to be able to restore state coming from another page
-      setURLFilters([]);
+      setURLFilters([], navigate);
       updateTableFilters([]);
     }
-  }, [forcedFilters, push, filters, updateTableFilters]);
+  }, [forcedFilters, navigate, filters, updateTableFilters]);
 
   const viewTabs = () => {
     return (

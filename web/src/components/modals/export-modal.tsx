@@ -18,7 +18,7 @@ import Modal from './modal';
 import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router-dom-v5-compat';
 import { getExportFlowsURL } from '../../api/routes';
 import { FlowQuery } from '../../model/flow-query';
 import { Column, getFullColumnName } from '../../utils/columns';
