@@ -93,7 +93,7 @@ export const setURLFilters = (filters: Filter[], navigateFunc: NavigateFunction,
       return filterKey(filter) + filterKVSeparator + filter.values.map(v => v.v).join(filterValuesSeparator);
     })
     .join(filtersSeparator);
-  setURLParam(URLParam.Filters, urlFilters, navigateFunc);
+  setURLParam(URLParam.Filters, urlFilters, navigateFunc, replace);
 };
 
 export const setURLRange = (range: number | TimeRange, navigateFunc: NavigateFunction, replace?: boolean) => {
