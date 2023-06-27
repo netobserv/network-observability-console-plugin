@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import { RecordType } from '../model/flow-query';
 
 // Please keep this file documented: it is used in doc generation

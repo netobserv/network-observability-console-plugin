@@ -17,11 +17,10 @@ import { ExclamationCircleIcon, ExternalLinkSquareAltIcon } from '@patternfly/re
 import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom-v5-compat';
+import { useNavigate, Link } from 'react-router-dom-v5-compat';
 import { getBuildInfo, getLimits, getMetrics, getLokiReady } from '../../api/routes';
 import { getHTTPErrorDetails } from '../../utils/errors';
 import './loki-error.css';
-import { useNavigate } from 'react-router-dom-v5-compat';
 
 export type Size = 's' | 'm' | 'l';
 
@@ -164,12 +163,10 @@ export const LokiError: React.FC<Props> = ({ title, error }) => {
                   </Text>
                   {error.includes('too many outstanding requests') && (
                     <Text component={TextVariants.blockquote}>
-                      {
+                      {t(
                         // eslint-disable-next-line max-len
-                        t(
-                          'Ensure Loki config contains "parallelise_shardable_queries: true" and "max_outstanding_requests_per_tenant: 2048"'
-                        )
-                      }
+                        'Ensure Loki config contains "parallelise_shardable_queries: true" and "max_outstanding_requests_per_tenant: 2048"'
+                      )}
                     </Text>
                   )}
                 </>
