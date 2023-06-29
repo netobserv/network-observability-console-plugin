@@ -8,12 +8,11 @@ import {
   PageHeaderTools,
   PageHeaderToolsGroup,
   PageHeaderToolsItem,
-  PageSection,
   PageSidebar,
   Radio
 } from '@patternfly/react-core';
 import React from 'react';
-import { BrowserRouter as Router, Link, Route } from 'react-router-dom';
+import { BrowserRouter, Link, Route, Routes } from 'react-router-dom';
 import NetflowTrafficParent from './components/netflow-traffic-parent';
 
 interface AppState {
@@ -61,14 +60,11 @@ export class App extends React.Component<{}, AppState> {
   };
 
   private getPages = () => (
-    <React.Fragment>
+    <Routes>
       {pages.map(page => (
-        <Route
-          render={() => <PageSection style={{ zIndex: 2 }}>{this.getPageContent(page.id)}</PageSection>}
-          key={page.id}
-        />
+        <Route element={this.getPageContent(page.id)} path={page.id} key={page.id} />
       ))}
-    </React.Fragment>
+    </Routes>
   );
 
   render() {
@@ -130,13 +126,11 @@ export class App extends React.Component<{}, AppState> {
     const AppSidebar = <PageSidebar isNavOpen={isNavOpen} nav={nav} />;
 
     return (
-      <>
-        <Router>
-          <Page header={AppHeader} sidebar={AppSidebar} isManagedSidebar>
-            {this.getPages()}
-          </Page>
-        </Router>
-      </>
+      <BrowserRouter>
+        <Page header={AppHeader} sidebar={AppSidebar} isManagedSidebar>
+          {this.getPages()}
+        </Page>
+      </BrowserRouter>
     );
   }
 }
