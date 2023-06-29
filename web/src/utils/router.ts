@@ -86,55 +86,55 @@ export const getFiltersFromURL = (t: TFunction, disabledFilters: DisabledFilters
   return Promise.all(filterPromises);
 };
 
-export const setURLFilters = (filters: Filter[]) => {
+export const setURLFilters = (filters: Filter[], replace?: boolean) => {
   const urlFilters = filters
     .map(filter => {
       return filterKey(filter) + filterKVSeparator + filter.values.map(v => v.v).join(filterValuesSeparator);
     })
     .join(filtersSeparator);
-  setURLParam(URLParam.Filters, urlFilters);
+  setURLParam(URLParam.Filters, urlFilters, replace);
 };
 
-export const setURLRange = (range: number | TimeRange) => {
+export const setURLRange = (range: number | TimeRange, replace?: boolean) => {
   if (typeof range === 'number') {
-    setURLParam(URLParam.TimeRange, String(range));
-    removeURLParam(URLParam.StartTime);
-    removeURLParam(URLParam.EndTime);
+    setURLParam(URLParam.TimeRange, String(range), replace);
+    removeURLParam(URLParam.StartTime, true);
+    removeURLParam(URLParam.EndTime, true);
   } else if (typeof range === 'object') {
-    setURLParam(URLParam.StartTime, String(range.from));
-    setURLParam(URLParam.EndTime, String(range.to));
-    removeURLParam(URLParam.TimeRange);
+    setURLParam(URLParam.StartTime, String(range.from), replace);
+    setURLParam(URLParam.EndTime, String(range.to), true);
+    removeURLParam(URLParam.TimeRange, true);
   }
 };
 
-export const setURLRecortType = (recordType: RecordType) => {
-  setURLParam(URLParam.RecordType, recordType);
+export const setURLRecortType = (recordType: RecordType, replace?: boolean) => {
+  setURLParam(URLParam.RecordType, recordType, replace);
 };
 
-export const setURLReporter = (reporter: Reporter) => {
-  setURLParam(URLParam.Reporter, reporter);
+export const setURLReporter = (reporter: Reporter, replace?: boolean) => {
+  setURLParam(URLParam.Reporter, reporter, replace);
 };
 
-export const setURLLimit = (limit: number) => {
-  setURLParam(URLParam.Limit, String(limit));
+export const setURLLimit = (limit: number, replace?: boolean) => {
+  setURLParam(URLParam.Limit, String(limit), replace);
 };
 
-export const setURLMatch = (match: Match) => {
-  setURLParam(URLParam.Match, match);
+export const setURLMatch = (match: Match, replace?: boolean) => {
+  setURLParam(URLParam.Match, match, replace);
 };
 
-export const setURLMetricFunction = (metricFunction?: MetricFunction) => {
+export const setURLMetricFunction = (metricFunction?: MetricFunction, replace?: boolean) => {
   if (metricFunction) {
-    setURLParam(URLParam.MetricFunction, metricFunction);
+    setURLParam(URLParam.MetricFunction, metricFunction, replace);
   } else {
-    removeURLParam(URLParam.MetricFunction);
+    removeURLParam(URLParam.MetricFunction, replace);
   }
 };
 
-export const setURLMetricType = (metricType?: MetricType) => {
+export const setURLMetricType = (metricType?: MetricType, replace?: boolean) => {
   if (metricType) {
-    setURLParam(URLParam.MetricType, metricType);
+    setURLParam(URLParam.MetricType, metricType, replace);
   } else {
-    removeURLParam(URLParam.MetricType);
+    removeURLParam(URLParam.MetricType, replace);
   }
 };

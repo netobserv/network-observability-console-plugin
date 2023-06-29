@@ -21,7 +21,6 @@ import { Link } from 'react-router-dom';
 import { getBuildInfo, getLimits, getMetrics, getLokiReady } from '../../api/routes';
 import { getHTTPErrorDetails } from '../../utils/errors';
 import './loki-error.css';
-import { useHistory } from 'react-router-dom';
 
 export type Size = 's' | 'm' | 'l';
 
@@ -43,7 +42,6 @@ export const LokiError: React.FC<Props> = ({ title, error }) => {
   const [ready, setReady] = React.useState<string | undefined>();
   const [infoName, setInfoName] = React.useState<string | undefined>();
   const [info, setInfo] = React.useState<string | undefined>();
-  const history = useHistory();
 
   const updateInfo = React.useCallback(
     (type: LokiInfo) => {
@@ -164,12 +162,10 @@ export const LokiError: React.FC<Props> = ({ title, error }) => {
                   </Text>
                   {error.includes('too many outstanding requests') && (
                     <Text component={TextVariants.blockquote}>
-                      {
+                      {t(
                         // eslint-disable-next-line max-len
-                        t(
-                          'Ensure Loki config contains "parallelise_shardable_queries: true" and "max_outstanding_requests_per_tenant: 2048"'
-                        )
-                      }
+                        'Ensure Loki config contains "parallelise_shardable_queries: true" and "max_outstanding_requests_per_tenant: 2048"'
+                      )}
                     </Text>
                   )}
                 </>
@@ -208,8 +204,14 @@ export const LokiError: React.FC<Props> = ({ title, error }) => {
             {t('Show configuration limits')}
           </Button>
           <Button
-            onClick={() => history.push('/monitoring/dashboards/grafana-dashboard-netobserv-health')}
             variant="link"
+            component={(props: React.FunctionComponent) => (
+              <Link
+                {...props}
+                target="_blank"
+                to={{ pathname: '/monitoring/dashboards/grafana-dashboard-netobserv-health' }}
+              />
+            )}
           >
             {t('Show health dashboard')}
           </Button>

@@ -1,5 +1,5 @@
-import { createBrowserHistory } from 'history';
 import _ from 'lodash';
+import { navigate } from '../components/dynamic-loader/dynamic-loader';
 
 export const netflowTrafficPath = '/netflow-traffic';
 
@@ -18,8 +18,6 @@ export enum URLParam {
   MetricType = 'type'
 }
 export type URLParams = { [k in URLParam]?: unknown };
-
-export const history = createBrowserHistory();
 
 export const hasEmptyParams = () => {
   return _.isEmpty(window.location.search);
@@ -43,29 +41,29 @@ export const getURLParamAsNumber = (arg: URLParam) => {
 
 export const setURLParams = (params: string) => {
   const url = new URL(window.location.href);
-  history.push(`${url.pathname}?${params}${url.hash}`);
+  navigate(`${url.pathname}?${params}${url.hash}`);
 };
 
-export const setURLParam = (param: URLParam, value: string) => {
+export const setURLParam = (param: URLParam, value: string, replace?: boolean) => {
   const url = new URL(window.location.href);
   const params = new URLSearchParams(window.location.search);
   params.set(param, value);
-  history.push(`${url.pathname}?${params.toString()}${url.hash}`);
+  navigate(`${url.pathname}?${params.toString()}${url.hash}`, { replace });
 };
 
-export const removeURLParam = (param: URLParam) => {
+export const removeURLParam = (param: URLParam, replace?: boolean) => {
   const params = new URLSearchParams(window.location.search);
   if (params.has(param)) {
     params.delete(param);
     const url = new URL(window.location.href);
-    history.replace(`${url.pathname}?${params.toString()}${url.hash}`);
+    navigate(`${url.pathname}?${params.toString()}${url.hash}`, { replace });
   }
 };
 
 export const clearURLParams = () => {
   const url = new URL(window.location.href);
   console.info('clearing url parameters ' + url);
-  history.push(url.pathname);
+  navigate(url.pathname);
 };
 
 export const getPathWithParams = (pathName = '') => {

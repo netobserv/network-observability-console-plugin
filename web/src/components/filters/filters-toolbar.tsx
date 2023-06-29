@@ -18,7 +18,6 @@ import { TimesIcon, TimesCircleIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory } from 'react-router-dom';
 import {
   Filter,
   FilterComponent,
@@ -42,6 +41,7 @@ import { getFilterFullName, Indicator } from './filters-helper';
 import TextFilter from './text-filter';
 import { LOCAL_STORAGE_SHOW_FILTERS_KEY, useLocalStorage } from '../../utils/local-storage-hook';
 import './filters-toolbar.css';
+import { navigate } from '../dynamic-loader/dynamic-loader';
 
 export interface FiltersToolbarProps {
   id: string;
@@ -70,7 +70,6 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
   allowConnectionFilter,
   ...props
 }) => {
-  const { push } = useHistory();
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [indicator, setIndicator] = React.useState<Indicator>(ValidatedOptions.default);
   const [message, setMessage] = React.useState<string | undefined>();
@@ -222,7 +221,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
           <Button
             id="edit-filters-button"
             data-test="edit-filters-button"
-            onClick={() => push(getPathWithParams(netflowTrafficPath))}
+            onClick={() => navigate(getPathWithParams(netflowTrafficPath))}
           >
             {t('Edit filters')}
           </Button>
@@ -244,7 +243,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
         )}
       </ToolbarGroup>
     );
-  }, [clearFilters, filters, forcedFilters, defaultFilters, push, setFilters, resetFilters, t]);
+  }, [clearFilters, filters, forcedFilters, defaultFilters, setFilters, resetFilters, t]);
 
   const countActiveFilters = (forcedFilters || filters || []).reduce((prev, cur) => prev + cur.values.length, 0);
   let showHideText: string | undefined;
