@@ -107,6 +107,7 @@ export const PanelKebab: React.FC<PanelKebabProps> = ({ id, options, setOptions,
           content={
             <Text component={TextVariants.p}>
               {t(
+                // eslint-disable-next-line max-len
                 'Show scope-internal traffic, depending on the selected scope (e.g. node-internal traffic, namespace-internal traffic)'
               )}
             </Text>
