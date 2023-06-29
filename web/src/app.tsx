@@ -8,12 +8,12 @@ import {
   PageHeaderTools,
   PageHeaderToolsGroup,
   PageHeaderToolsItem,
-  PageSection,
   PageSidebar,
   Radio
 } from '@patternfly/react-core';
 import React from 'react';
-import { BrowserRouter as Router, Link, Route, Routes } from 'react-router-dom-v5-compat';
+import { BrowserRouter } from 'react-router-dom';
+import { CompatRoute, CompatRouter, Link } from 'react-router-dom-v5-compat';
 import NetflowTrafficParent from './components/netflow-traffic-parent';
 
 interface AppState {
@@ -56,20 +56,16 @@ export class App extends React.Component<{}, AppState> {
     switch (id) {
       case 'netflow-traffic-parent':
       default:
-        return <NetflowTrafficParent />;
+        return NetflowTrafficParent;
     }
   };
 
   private getPages = () => (
-    <Routes>
+    <>
       {pages.map(page => (
-        <Route
-          path={page.id}
-          element={<PageSection style={{ zIndex: 2 }}>{this.getPageContent(page.id)}</PageSection>}
-          key={page.id}
-        />
+        <CompatRoute path={page.id} component={this.getPageContent(page.id)} key={page.id} />
       ))}
-    </Routes>
+    </>
   );
 
   render() {
@@ -119,7 +115,7 @@ export class App extends React.Component<{}, AppState> {
         <NavList>
           {pages.map((page, index) => (
             <NavItem itemId={index} isActive={activeItem === index} key={page.id}>
-              <Link id={`${page.id}-nav-item-link`} to={`/${page.id}`}>
+              <Link id={`${page.id}-nav-item-link`} to={page.id}>
                 {page.name}
               </Link>
             </NavItem>
@@ -131,13 +127,13 @@ export class App extends React.Component<{}, AppState> {
     const AppSidebar = <PageSidebar isNavOpen={isNavOpen} nav={nav} />;
 
     return (
-      <>
-        <Router>
+      <BrowserRouter>
+        <CompatRouter>
           <Page header={AppHeader} sidebar={AppSidebar} isManagedSidebar>
             {this.getPages()}
           </Page>
-        </Router>
-      </>
+        </CompatRouter>
+      </BrowserRouter>
     );
   }
 }
