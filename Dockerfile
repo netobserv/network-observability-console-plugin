@@ -13,12 +13,16 @@ WORKDIR /opt/app-root
 COPY --chown=node Makefile Makefile
 COPY --chown=node web/package.json web/package.json
 COPY --chown=node web/package-lock.json web/package-lock.json
-RUN cd web && npm ci
+WORKDIR /opt/app-root/web
+RUN npm ci
 
+WORKDIR /opt/app-root
 COPY --chown=node web web
 COPY mocks mocks
-RUN cd web && npm run format-all
-RUN cd web && npm run build$BUILDSCRIPT
+
+WORKDIR /opt/app-root/web
+RUN npm run format-all
+RUN npm run build$BUILDSCRIPT
 
 FROM --platform=$BUILDPLATFORM docker.io/library/golang:1.19 as go-builder
 

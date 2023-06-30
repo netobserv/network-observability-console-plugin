@@ -31,10 +31,9 @@ IMAGE_TAG_BASE ?= quay.io/${IMAGE_ORG}/network-observability-console-plugin
 
 # Standalone `true` is used to build frontend outside of OCP Console environment
 STANDALONE ?= false
-BUILDSCRIPT = 
 
 ifeq (${STANDALONE}, true)
-	BUILDSCRIPT := :standalone
+	BUILDSCRIPT = :standalone
 	IMAGE_TAG_BASE := quay.io/${IMAGE_ORG}/network-observability-standalone-frontend
 endif
 
@@ -155,12 +154,12 @@ test-frontend: ## Test frontend using jest
 	@echo "### Testing frontend"
 	cd web && npm run test
 
+##@ Develop backend
+
 .PHONY: build-backend
 build-backend: fmt-backend ## Build backend
 	@echo "### Building backend"
 	GOARCH=${GOARCH} go build ${BUILD_FLAGS} -mod vendor -o plugin-backend cmd/plugin-backend.go
-
-##@ Develop backend
 
 .PHONY: fmt-backend
 fmt-backend: ## Run backend go fmt
@@ -184,7 +183,7 @@ cypress: ## Test frontend using cypress
 .PHONY: just-build-frontend
 just-build-frontend: ## Build frontend
 	@echo "### Building frontend"
-	cd web && npm run build
+	cd web && npm run build${BUILDSCRIPT}
 
 .PHONY: build-frontend-standalone
 build-frontend-standalone: install-frontend fmt-frontend ## Run npm install, format and build frontend as standalone
