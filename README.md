@@ -38,13 +38,13 @@ make frontend
 make backend
 ```
 
-For faster frontend builds, you can set the variable: `BUILDSCRIPT=:fast`. E.g:
+For faster frontend builds, you can set the variable: `BUILDSCRIPT=:dev`. E.g:
 
 ```bash
-BUILDSCRIPT=:fast make frontend
+BUILDSCRIPT=:dev make frontend
 ```
 
-It will skip some frontend compilation, hence could miss errors, but can save development time. Missed errors should be caught by the CI, which performs a full build.
+It will skip optimizations for production.
 
 
 ## Development environment
@@ -99,7 +99,7 @@ IMAGE_ORG=myuser VERSION=dev make images
 IMAGE=dockerhub.io/myuser/plugin:tag make images
 
 # faster builds with default image / tag
-BUILDSCRIPT=:fast make images
+BUILDSCRIPT=:dev make images
 ```
 
 ### Testing in OpenShift

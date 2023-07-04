@@ -49,15 +49,16 @@ OCI_BIN ?= $(shell basename ${OCI_BIN_PATH})
 GOLANGCI_LINT_VERSION = v1.50.1
 NPM_INSTALL ?= install
 CMDLINE_ARGS ?= --loglevel trace --loki-tenant-id netobserv --frontend-config config/sample-frontend-config.yaml --auth-check none
+LDFLAGS := -X 'main.buildVersion=${BUILD_VERSION}' -X 'main.buildDate=${BUILD_DATE}'
 # You can add GO Build flags like -gcflags=all="-N -l" here to remove optimizations for debugging
-BUILD_FLAGS ?= -ldflags "-X 'main.buildVersion=${BUILD_VERSION}' -X 'main.buildDate=${BUILD_DATE}'"
+BUILD_FLAGS ?= -ldflags "${LDFLAGS}"
 
 .DEFAULT_GOAL := help
 
 # build a single arch target provided as argument
 define build_target
 	echo 'building image for arch $(1)'; \
-	DOCKER_BUILDKIT=1 $(OCI_BIN) buildx build --load --build-arg BUILDSCRIPT=${BUILDSCRIPT} --build-arg TARGETPLATFORM=linux/$(1) --build-arg TARGETARCH=$(1) --build-arg BUILDPLATFORM=linux/amd64 ${OCI_BUILD_OPTS} -t ${IMAGE}-$(1) -f Dockerfile .;
+	DOCKER_BUILDKIT=1 $(OCI_BIN) buildx build --load --build-arg LDFLAGS="${LDFLAGS}" --build-arg BUILDSCRIPT=${BUILDSCRIPT} --build-arg TARGETPLATFORM=linux/$(1) --build-arg TARGETARCH=$(1) --build-arg BUILDPLATFORM=linux/amd64 ${OCI_BUILD_OPTS} -t ${IMAGE}-$(1) -f Dockerfile .;
 endef
 
 # push a single arch target image
