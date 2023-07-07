@@ -91,15 +91,15 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
 
   const packetLossOptions: PacketLossOption[] = [
     {
-      label: t('Dropped'),
+      label: t('Fully dropped'),
       value: 'dropped'
     },
     {
-      label: t('Contains drops'),
+      label: t('Containing drops'),
       value: 'hasDrops'
     },
     {
-      label: t('Sent'),
+      label: t('Without drops'),
       value: 'sent'
     },
     {
@@ -232,14 +232,21 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
       </div>
       <div className="pf-c-select__menu-group">
         <Tooltip
-          content={t(
-            // eslint-disable-next-line max-len
-            'Records to show from dropped, sent or mix of both.'
-          )}
+          content={
+            <div>
+              <div>{t('Flows drops to query')}:</div>
+              <div className="netobserv-align-start">- {t('Fully dropped shows the flows that are 100% dropped')}</div>
+              <div className="netobserv-align-start">
+                - {t('Containing drops shows the flows having at least one packet dropped')}
+              </div>
+              <div className="netobserv-align-start">- {t('Without drops show the flows having 0% dropped')}</div>
+              <div className="netobserv-align-start">- {t('All shows everything')}</div>
+            </div>
+          }
         >
           <div className="pf-c-select__menu-group-title">
             <>
-              {t('Packet loss')} <InfoAltIcon />
+              {t('Drops filter')} <InfoAltIcon />
             </>
           </div>
         </Tooltip>
