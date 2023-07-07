@@ -84,7 +84,6 @@ export interface TopologyMetricPeer {
 }
 
 export type DroppedTopologyMetrics = {
-  value: number;
   name: string;
   values: [number, number][];
   stats: MetricStats;
