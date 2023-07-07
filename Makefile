@@ -31,10 +31,9 @@ IMAGE_TAG_BASE ?= quay.io/${IMAGE_ORG}/network-observability-console-plugin
 
 # Standalone `true` is used to build frontend outside of OCP Console environment
 STANDALONE ?= false
-BUILDSCRIPT = 
 
 ifeq (${STANDALONE}, true)
-	BUILDSCRIPT := :standalone
+	BUILDSCRIPT = :standalone
 	IMAGE_TAG_BASE := quay.io/${IMAGE_ORG}/network-observability-standalone-frontend
 endif
 
@@ -50,15 +49,16 @@ OCI_BIN ?= $(shell basename ${OCI_BIN_PATH})
 GOLANGCI_LINT_VERSION = v1.50.1
 NPM_INSTALL ?= install
 CMDLINE_ARGS ?= --loglevel trace --loki-tenant-id netobserv --frontend-config config/sample-frontend-config.yaml --auth-check none
+LDFLAGS := -X 'main.buildVersion=${BUILD_VERSION}' -X 'main.buildDate=${BUILD_DATE}'
 # You can add GO Build flags like -gcflags=all="-N -l" here to remove optimizations for debugging
-BUILD_FLAGS ?= -ldflags "-X 'main.buildVersion=${BUILD_VERSION}' -X 'main.buildDate=${BUILD_DATE}'"
+BUILD_FLAGS ?= -ldflags "${LDFLAGS}"
 
 .DEFAULT_GOAL := help
 
 # build a single arch target provided as argument
 define build_target
 	echo 'building image for arch $(1)'; \
-	DOCKER_BUILDKIT=1 $(OCI_BIN) buildx build --load --build-arg BUILDSCRIPT=${BUILDSCRIPT} --build-arg TARGETPLATFORM=linux/$(1) --build-arg TARGETARCH=$(1) --build-arg BUILDPLATFORM=linux/amd64 ${OCI_BUILD_OPTS} -t ${IMAGE}-$(1) -f Dockerfile .;
+	DOCKER_BUILDKIT=1 $(OCI_BIN) buildx build --load --build-arg LDFLAGS="${LDFLAGS}" --build-arg BUILDSCRIPT=${BUILDSCRIPT} --build-arg TARGETPLATFORM=linux/$(1) --build-arg TARGETARCH=$(1) --build-arg BUILDPLATFORM=linux/amd64 ${OCI_BUILD_OPTS} -t ${IMAGE}-$(1) -f Dockerfile .;
 endef
 
 # push a single arch target image
@@ -155,12 +155,12 @@ test-frontend: ## Test frontend using jest
 	@echo "### Testing frontend"
 	cd web && npm run test
 
+##@ Develop backend
+
 .PHONY: build-backend
 build-backend: fmt-backend ## Build backend
 	@echo "### Building backend"
 	GOARCH=${GOARCH} go build ${BUILD_FLAGS} -mod vendor -o plugin-backend cmd/plugin-backend.go
-
-##@ Develop backend
 
 .PHONY: fmt-backend
 fmt-backend: ## Run backend go fmt
@@ -184,7 +184,7 @@ cypress: ## Test frontend using cypress
 .PHONY: just-build-frontend
 just-build-frontend: ## Build frontend
 	@echo "### Building frontend"
-	cd web && npm run build
+	cd web && npm run build${BUILDSCRIPT}
 
 .PHONY: build-frontend-standalone
 build-frontend-standalone: install-frontend fmt-frontend ## Run npm install, format and build frontend as standalone

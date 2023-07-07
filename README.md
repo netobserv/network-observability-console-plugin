@@ -38,6 +38,15 @@ make frontend
 make backend
 ```
 
+For faster frontend builds, you can set the variable: `BUILDSCRIPT=:dev`. E.g:
+
+```bash
+BUILDSCRIPT=:dev make frontend
+```
+
+It will skip optimizations for production.
+
+
 ## Development environment
 
 Plugin can be served locally using the following command:
@@ -88,6 +97,9 @@ IMAGE_ORG=myuser VERSION=dev make images
 
 # build and push on a different registry
 IMAGE=dockerhub.io/myuser/plugin:tag make images
+
+# faster builds with default image / tag
+BUILDSCRIPT=:dev make images
 ```
 
 ### Testing in OpenShift
