@@ -48,7 +48,7 @@ func (o *LokiClientMock) Get(url string) ([]byte, int, error) {
 				path += "_dropped.json"
 			} else if strings.Contains(url, "|~`\"TcpDropPackets\":[1-9][0-9]*[,}]") {
 				path += "_has_dropped.json"
-			} else if strings.Contains(url, "|~`\"Packets\":[1-9][0-9]*[,}]") {
+			} else if strings.Contains(url, "|~`\"TcpDropPackets\":0[,}]") {
 				path += "_sent.json"
 			} else {
 				path += ".json"

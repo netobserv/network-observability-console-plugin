@@ -77,9 +77,9 @@ func NewFlowQueryBuilder(cfg *Config, start, end, limit string, reporter constan
 			regexMatchLineFilter(fields.TCPDropPackets, true, "[1-9][0-9]*"),
 		)
 	} else if packetLoss == constants.PacketLossSent {
-		// match 1+ packets sent
+		// match 0 packets dropped
 		lineFilters = append(lineFilters,
-			regexMatchLineFilter(fields.Packets, true, "[1-9][0-9]*"),
+			numberMatchLineFilter(fields.TCPDropPackets, true, "0"),
 		)
 	}
 
