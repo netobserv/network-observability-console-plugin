@@ -23,6 +23,7 @@ const (
 	typeNumber valueType = iota
 	typeString
 	typeRegex
+	typeRegexContains
 	typeIP
 )
 
@@ -47,7 +48,7 @@ type lineMatch struct {
 	valueType valueType
 }
 
-func stringLabelFilter(labelKey string, value string) labelFilter {
+func stringEqualLabelFilter(labelKey string, value string) labelFilter {
 	return labelFilter{
 		key:       labelKey,
 		matcher:   labelEqual,
@@ -56,7 +57,7 @@ func stringLabelFilter(labelKey string, value string) labelFilter {
 	}
 }
 
-func regexLabelFilter(labelKey string, value string) labelFilter {
+func stringMatchLalbeFilter(labelKey string, value string) labelFilter {
 	return labelFilter{
 		key:       labelKey,
 		matcher:   labelMatches,
@@ -74,7 +75,7 @@ func notStringLabelFilter(labelKey string, value string) labelFilter {
 	}
 }
 
-func notRegexLabelFilter(labelKey string, value string) labelFilter {
+func stringNotMatchLabelFilter(labelKey string, value string) labelFilter {
 	return labelFilter{
 		key:       labelKey,
 		matcher:   labelNoMatches,
@@ -96,7 +97,7 @@ func (f *labelFilter) writeInto(sb *strings.Builder) {
 	sb.WriteString(f.key)
 	sb.WriteString(string(f.matcher))
 	switch f.valueType {
-	case typeNumber:
+	case typeNumber, typeRegex:
 		sb.WriteString(f.value)
 	case typeString:
 		sb.WriteByte('"')
@@ -106,7 +107,7 @@ func (f *labelFilter) writeInto(sb *strings.Builder) {
 		sb.WriteString(`ip("`)
 		sb.WriteString(f.value)
 		sb.WriteString(`")`)
-	case typeRegex:
+	case typeRegexContains:
 		sb.WriteString("`(?i).*")
 		sb.WriteString(f.value)
 		sb.WriteString(".*`")
@@ -125,7 +126,7 @@ func (f *lineFilter) asLabelFilters() []labelFilter {
 			valueType: v.valueType,
 			value:     v.value,
 		}
-		if v.valueType == typeRegex {
+		if v.valueType == typeRegex || v.valueType == typeRegexContains {
 			if f.not {
 				lf.matcher = labelNoMatches
 			} else {
@@ -141,6 +142,26 @@ func (f *lineFilter) asLabelFilters() []labelFilter {
 		lfs = append(lfs, lf)
 	}
 	return lfs
+}
+
+func numberMatchLineFilter(key string, value string) lineFilter {
+	return lineFilter{
+		key: key,
+		values: []lineMatch{{
+			valueType: typeNumber,
+			value:     value,
+		}},
+	}
+}
+
+func regexMatchLineFilter(key string, value string) lineFilter {
+	return lineFilter{
+		key: key,
+		values: []lineMatch{{
+			valueType: typeRegex,
+			value:     value,
+		}},
+	}
 }
 
 // writeInto transforms a lineFilter to its corresponding part of a LogQL query
@@ -167,9 +188,9 @@ func (f *lineFilter) writeInto(sb *strings.Builder) {
 		sb.WriteString(f.key)
 		sb.WriteString(`":`)
 		switch v.valueType {
-		case typeNumber:
+		case typeNumber, typeRegex:
 			sb.WriteString(v.value)
-			// a number can be followed by } if it's the last property of a JSON document
+			// a number or regex can be followed by } if it's the last property of a JSON document
 			sb.WriteString("[,}]")
 		case typeString, typeIP:
 			// exact matches are specified as just strings
@@ -177,7 +198,7 @@ func (f *lineFilter) writeInto(sb *strings.Builder) {
 			sb.WriteString(valueReplacer.Replace(v.value))
 			sb.WriteByte('"')
 		// contains-match are specified as regular expressions
-		case typeRegex:
+		case typeRegexContains:
 			sb.WriteString(`"(?i)[^"]*`)
 			sb.WriteString(valueReplacer.Replace(v.value))
 			sb.WriteString(`.*"`)
