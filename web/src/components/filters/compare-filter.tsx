@@ -8,11 +8,11 @@ export enum FilterCompare {
 }
 
 export interface CompareFilterProps {
-  state: FilterCompare;
-  setState: (newState: FilterCompare) => void;
+  value: FilterCompare;
+  setValue: (newState: FilterCompare) => void;
 }
 
-export const CompareFilter: React.FC<CompareFilterProps> = ({ state, setState }) => {
+export const CompareFilter: React.FC<CompareFilterProps> = ({ value, setValue }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [isOpen, setIsOpen] = React.useState(false);
 
@@ -21,7 +21,7 @@ export const CompareFilter: React.FC<CompareFilterProps> = ({ state, setState })
       {t('Equals')}
     </DropdownItem>,
     <DropdownItem key="not-equal" id="not-equal" component="button" onClick={() => onSelect(FilterCompare.NOT_EQUAL)}>
-      {t('Not Equals')}
+      {t('Not equals')}
     </DropdownItem>
   ];
 
@@ -30,15 +30,15 @@ export const CompareFilter: React.FC<CompareFilterProps> = ({ state, setState })
   };
 
   const onSelect = (v: FilterCompare) => {
-    setState(v);
+    setValue(v);
     setIsOpen(false);
   };
 
   const onSwitch = React.useCallback(() => {
     //TODO: implement new comparaisons and move to next item automatically
-    const next = state === FilterCompare.EQUAL ? FilterCompare.NOT_EQUAL : FilterCompare.EQUAL;
-    setState(next);
-  }, [state, setState]);
+    const next = value === FilterCompare.EQUAL ? FilterCompare.NOT_EQUAL : FilterCompare.EQUAL;
+    setValue(next);
+  }, [value, setValue]);
 
   return (
     <>
@@ -48,7 +48,7 @@ export const CompareFilter: React.FC<CompareFilterProps> = ({ state, setState })
             id="filter-compare-toggle-button"
             splitButtonItems={[
               <DropdownToggleAction key="action" id="filter-compare-switch-button" onClick={onSwitch}>
-                {state === FilterCompare.EQUAL ? '=' : '!='}
+                {value === FilterCompare.EQUAL ? '=' : '!='}
               </DropdownToggleAction>
             ]}
             toggleVariant="default"

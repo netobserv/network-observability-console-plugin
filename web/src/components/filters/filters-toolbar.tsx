@@ -286,7 +286,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
                     setSelectedFilter={setSelectedFilter}
                     allowConnectionFilter={allowConnectionFilter}
                   />
-                  <CompareFilter state={selectedCompare} setState={setSelectedCompare} />
+                  <CompareFilter value={selectedCompare} setValue={setSelectedCompare} />
                   {getFilterControl()}
                 </InputGroup>
                 <FilterHints def={selectedFilter} />

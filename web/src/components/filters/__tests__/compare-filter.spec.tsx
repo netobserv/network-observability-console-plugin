@@ -4,8 +4,8 @@ import CompareFilter, { CompareFilterProps, FilterCompare } from '../compare-fil
 
 describe('<CompareFilter />', () => {
   const props: CompareFilterProps = {
-    state: FilterCompare.EQUAL,
-    setState: jest.fn()
+    value: FilterCompare.EQUAL,
+    setValue: jest.fn()
   };
   it('should render component', async () => {
     const wrapper = shallow(<CompareFilter {...props} />);
@@ -20,26 +20,26 @@ describe('<CompareFilter />', () => {
     expect(dropdownToggleButton).toBeDefined();
 
     // No initial call
-    expect(props.setState).toHaveBeenCalledTimes(0);
+    expect(props.setValue).toHaveBeenCalledTimes(0);
 
     //open dropdown and select NOT EQUAL
     dropdownToggleButton.last().simulate('click');
     wrapper.find('[id="not-equal"]').last().simulate('click');
-    expect(props.setState).toHaveBeenCalledWith(FilterCompare.NOT_EQUAL);
+    expect(props.setValue).toHaveBeenCalledWith(FilterCompare.NOT_EQUAL);
     expect(wrapper.find('li').length).toBe(0);
 
     //open dropdown and select EQUAL
     dropdownToggleButton.last().simulate('click');
     wrapper.find('[id="equal"]').last().simulate('click');
-    expect(props.setState).toHaveBeenCalledWith(FilterCompare.EQUAL);
+    expect(props.setValue).toHaveBeenCalledWith(FilterCompare.EQUAL);
     expect(wrapper.find('li').length).toBe(0);
 
     //switch directly
     switchButton.last().simulate('click');
-    expect(props.setState).toHaveBeenCalledWith(FilterCompare.NOT_EQUAL);
+    expect(props.setValue).toHaveBeenCalledWith(FilterCompare.NOT_EQUAL);
     expect(wrapper.find('li').length).toBe(0);
 
     //setState should be called 3 times
-    expect(props.setState).toHaveBeenCalledTimes(3);
+    expect(props.setValue).toHaveBeenCalledTimes(3);
   });
 });
