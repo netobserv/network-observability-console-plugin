@@ -44,11 +44,11 @@ func (o *LokiClientMock) Get(url string) ([]byte, int, error) {
 			}
 		} else {
 			path = "mocks/loki/flows"
-			if strings.Contains(url, "|~`Packets\":0[,}]|~`TcpDropPackets\":[1-9]*[,}]") {
+			if strings.Contains(url, "|~`\"Packets\":0[,}]|~`\"TcpDropPackets\":[1-9][0-9]*[,}]") {
 				path += "_dropped.json"
-			} else if strings.Contains(url, "|~`TcpDropPackets\":[1-9]*[,}]") {
+			} else if strings.Contains(url, "|~`\"TcpDropPackets\":[1-9][0-9]*[,}]") {
 				path += "_has_dropped.json"
-			} else if strings.Contains(url, "|~`Packets\":[1-9]*[,}]") {
+			} else if strings.Contains(url, "|~`\"Packets\":[1-9][0-9]*[,}]") {
 				path += "_sent.json"
 			} else {
 				path += ".json"

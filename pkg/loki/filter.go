@@ -38,9 +38,10 @@ type labelFilter struct {
 
 // lineFilter represents a condition based on a JSON raw text match.
 type lineFilter struct {
-	key    string
-	values []lineMatch
-	not    bool
+	key       string
+	strictKey bool
+	values    []lineMatch
+	not       bool
 }
 
 type lineMatch struct {
@@ -144,9 +145,10 @@ func (f *lineFilter) asLabelFilters() []labelFilter {
 	return lfs
 }
 
-func numberMatchLineFilter(key string, value string) lineFilter {
+func numberMatchLineFilter(key string, strictKey bool, value string) lineFilter {
 	return lineFilter{
-		key: key,
+		key:       key,
+		strictKey: strictKey,
 		values: []lineMatch{{
 			valueType: typeNumber,
 			value:     value,
@@ -154,9 +156,10 @@ func numberMatchLineFilter(key string, value string) lineFilter {
 	}
 }
 
-func regexMatchLineFilter(key string, value string) lineFilter {
+func regexMatchLineFilter(key string, strictKey bool, value string) lineFilter {
 	return lineFilter{
-		key: key,
+		key:       key,
+		strictKey: strictKey,
 		values: []lineMatch{{
 			valueType: typeRegex,
 			value:     value,
@@ -176,7 +179,8 @@ func (f *lineFilter) writeInto(sb *strings.Builder) {
 		if i > 0 {
 			sb.WriteByte('|')
 		}
-		// match end of KEY + regex VALUE:
+
+		// match only the end of KEY + regex VALUE if not 'strictKey'
 		// if numeric, KEY":VALUE,
 		// if string KEY":"VALUE"
 		// ie 'Port' key will match both 'SrcPort":"XXX"' and 'DstPort":"XXX"
@@ -185,6 +189,9 @@ func (f *lineFilter) writeInto(sb *strings.Builder) {
 		// 	(the trick is to match for the ending coma; it works as long as the filtered field
 		// 	is not the last one (they're in alphabetic order); a less performant alternative
 		// 	but more future-proof/less hacky could be to move that to a json filter, if needed)
+		if f.strictKey {
+			sb.WriteByte('"')
+		}
 		sb.WriteString(f.key)
 		sb.WriteString(`":`)
 		switch v.valueType {
