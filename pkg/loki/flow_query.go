@@ -42,60 +42,54 @@ func NewFlowQueryBuilder(cfg *Config, start, end, limit string, reporter constan
 	// Always use following stream selectors
 	labelFilters := []labelFilter{
 		// app, which will apply whichever matching criteria (any or all)
-		stringLabelFilter(constants.AppLabel, constants.AppLabelValue),
+		stringEqualLabelFilter(constants.AppLabel, constants.AppLabelValue),
 	}
 
 	// only filter on _RecordType if available
 	if cfg.IsLabel(recordTypeField) {
 		if recordType == constants.RecordTypeAllConnections {
 			// connection _RecordType including newConnection, heartbeat or endConnection
-			labelFilters = append(labelFilters, regexLabelFilter(constants.RecordTypeLabel, strings.Join(constants.ConnectionTypes, "|")))
+			labelFilters = append(labelFilters, stringMatchLalbeFilter(constants.RecordTypeLabel, strings.Join(constants.ConnectionTypes, "|")))
 		} else if len(recordType) > 0 {
 			// specific _RecordType either newConnection, heartbeat, endConnection or flowLog
-			labelFilters = append(labelFilters, stringLabelFilter(constants.RecordTypeLabel, string(recordType)))
+			labelFilters = append(labelFilters, stringEqualLabelFilter(constants.RecordTypeLabel, string(recordType)))
 		}
 	}
 
 	if !utils.Contains(constants.ConnectionTypes, string(recordType)) {
 		if reporter == constants.ReporterSource {
-			labelFilters = append(labelFilters, stringLabelFilter(fields.FlowDirection, "1"))
+			labelFilters = append(labelFilters, stringEqualLabelFilter(fields.FlowDirection, "1"))
 		} else if reporter == constants.ReporterDestination {
-			labelFilters = append(labelFilters, stringLabelFilter(fields.FlowDirection, "0"))
+			labelFilters = append(labelFilters, stringEqualLabelFilter(fields.FlowDirection, "0"))
 		}
 	}
 
-	extraLineFilters := []string{}
-	if packetLoss != constants.PacketLossAll {
-		sb := strings.Builder{}
-		if packetLoss == constants.PacketLossDropped {
-			// match 0 packet sent and 1+ packets dropped
-			sb.WriteString("|~`")
-			sb.WriteString(`Packets":0[,}]`)
-			sb.WriteString("`")
-			sb.WriteString("|~`")
-			sb.WriteString(`TcpDropPackets":[1-9]*[,}]`)
-			sb.WriteString("`")
-		} else if packetLoss == constants.PacketLossHasDrop {
-			// match 1+ packets dropped
-			sb.WriteString("|~`")
-			sb.WriteString(`TcpDropPackets":[1-9]*[,}]`)
-			sb.WriteString("`")
-		} else if packetLoss == constants.PacketLossSent {
-			// match 1+ packets sent
-			sb.WriteString("|~`")
-			sb.WriteString(`Packets":[1-9]*[,}]`)
-			sb.WriteString("`")
-		}
-		extraLineFilters = append(extraLineFilters, sb.String())
+	lineFilters := []lineFilter{}
+	if packetLoss == constants.PacketLossDropped {
+		// match 0 packet sent and 1+ packets dropped
+		lineFilters = append(lineFilters,
+			numberMatchLineFilter(fields.Packets, "0"),
+			regexMatchLineFilter(fields.TCPDropPackets, "[1-9][0-9]*"),
+		)
+	} else if packetLoss == constants.PacketLossHasDrop {
+		// match 1+ packets dropped
+		lineFilters = append(lineFilters,
+			regexMatchLineFilter(fields.TCPDropPackets, "[1-9][0-9]*"),
+		)
+	} else if packetLoss == constants.PacketLossSent {
+		// match 1+ packets sent
+		lineFilters = append(lineFilters,
+			regexMatchLineFilter(fields.Packets, "[1-9][0-9]*"),
+		)
 	}
 
 	return &FlowQueryBuilder{
-		config:           cfg,
-		startTime:        start,
-		endTime:          end,
-		limit:            limit,
-		labelFilters:     labelFilters,
-		extraLineFilters: extraLineFilters,
+		config:       cfg,
+		startTime:    start,
+		endTime:      end,
+		limit:        limit,
+		labelFilters: labelFilters,
+		lineFilters:  lineFilters,
 	}
 }
 
@@ -125,7 +119,7 @@ func (q *FlowQueryBuilder) addFilter(filter filters.Match) error {
 			if filter.Not {
 				q.labelFilters = append(q.labelFilters, notStringLabelFilter(filter.Key, trimExactMatch(values[0])))
 			} else {
-				q.labelFilters = append(q.labelFilters, stringLabelFilter(filter.Key, trimExactMatch(values[0])))
+				q.labelFilters = append(q.labelFilters, stringEqualLabelFilter(filter.Key, trimExactMatch(values[0])))
 			}
 		} else {
 			q.addLabelRegex(filter.Key, values, filter.Not)
@@ -167,9 +161,9 @@ func (q *FlowQueryBuilder) addLabelRegex(key string, values []string, not bool) 
 
 	if regexStr.Len() > 0 {
 		if not {
-			q.labelFilters = append(q.labelFilters, notRegexLabelFilter(key, regexStr.String()))
+			q.labelFilters = append(q.labelFilters, stringNotMatchLabelFilter(key, regexStr.String()))
 		} else {
-			q.labelFilters = append(q.labelFilters, regexLabelFilter(key, regexStr.String()))
+			q.labelFilters = append(q.labelFilters, stringMatchLalbeFilter(key, regexStr.String()))
 		}
 	}
 }
@@ -193,7 +187,7 @@ func (q *FlowQueryBuilder) addLineFilters(key string, values []string, not bool)
 		case isNumeric:
 			lm = lineMatch{valueType: typeNumber, value: value}
 		default:
-			lm = lineMatch{valueType: typeRegex, value: value}
+			lm = lineMatch{valueType: typeRegexContains, value: value}
 		}
 		lf.values = append(lf.values, lm)
 	}
@@ -213,7 +207,7 @@ func (q *FlowQueryBuilder) addIPFilters(key string, values []string) {
 	for _, value := range values {
 		// empty exact matches should be treated as attribute filters looking for empty IP
 		if value == emptyMatch {
-			filtersPerKey = append(filtersPerKey, stringLabelFilter(key, ""))
+			filtersPerKey = append(filtersPerKey, stringEqualLabelFilter(key, ""))
 		} else {
 			filtersPerKey = append(filtersPerKey, ipLabelFilter(key, value))
 		}
