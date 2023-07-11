@@ -7,7 +7,7 @@ import {
   NameAndType,
   DroppedTopologyMetrics
 } from '../api/loki';
-import { MetricFunction, MetricScope, MetricType } from '../model/flow-query';
+import { MetricFunction, MetricType, AggregateBy } from '../model/flow-query';
 import { roundTwoDigits } from './count';
 import { computeStepInterval, rangeToSeconds, TimeRange } from './datetime';
 import { valueFormat } from './format';
@@ -30,7 +30,7 @@ const shortKindMap: { [k: string]: string } = {
 export const parseMetrics = (
   raw: RawTopologyMetrics[],
   range: number | TimeRange,
-  scope: MetricScope,
+  aggregateBy: AggregateBy,
   unixTimestamp: number,
   isMock?: boolean
 ): (TopologyMetrics | DroppedTopologyMetrics)[] => {
@@ -40,10 +40,10 @@ export const parseMetrics = (
     unixTimestamp,
     isMock
   );
-  const metrics = raw.map(r => parseMetric(r, start, end, step, scope));
+  const metrics = raw.map(r => parseMetric(r, start, end, step, aggregateBy));
 
   // Disambiguate display names with kind when necessary
-  if (scope === 'owner' || scope === 'resource') {
+  if (aggregateBy === 'owner' || aggregateBy === 'resource') {
     // Define some helpers
     const addKind = (p: TopologyMetricPeer) => {
       const name = p.getDisplayName(true, false);
@@ -133,23 +133,23 @@ const parseMetric = (
   start: number,
   end: number,
   step: number,
-  scope: MetricScope
+  aggregateBy: AggregateBy
 ): TopologyMetrics | DroppedTopologyMetrics => {
   const normalized = normalizeMetrics(raw.values, start, end, step);
   const stats = computeStats(normalized);
-  if (scope === 'droppedState') {
+  if (aggregateBy === 'droppedState') {
     return {
       name: raw.metric.TcpDropLatestState,
       values: normalized,
       stats: stats,
-      scope: scope
+      aggregateBy
     } as DroppedTopologyMetrics;
-  } else if (scope === 'droppedCause') {
+  } else if (aggregateBy === 'droppedCause') {
     return {
       name: raw.metric.TcpDropLatestDropCause,
       values: normalized,
       stats: stats,
-      scope: scope
+      aggregateBy
     } as DroppedTopologyMetrics;
   } else {
     const source = createPeer({
@@ -171,7 +171,7 @@ const parseMetric = (
       destination: destination,
       values: normalized,
       stats: stats,
-      scope: scope
+      scope: aggregateBy
     } as TopologyMetrics;
   }
 };

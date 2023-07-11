@@ -3,7 +3,7 @@ import { TFunction } from 'i18next';
 import * as React from 'react';
 import { getDateSInMiliseconds } from '../../utils/duration';
 import { NamedMetric, TopologyMetricPeer, TopologyMetrics } from '../../api/loki';
-import { MetricScope, MetricType } from '../../model/flow-query';
+import { FlowScope, MetricType } from '../../model/flow-query';
 import { NodeData } from '../../model/topology';
 import { getDateFromUnix, getFormattedDate, TimeRange } from '../../utils/datetime';
 import { getFormattedRateValue, isUnknownPeer, matchPeer } from '../../utils/metrics';
@@ -138,7 +138,7 @@ const truncateParts = (input: string, length: number) => {
 const getPeerName = (
   t: TFunction,
   peer: TopologyMetricPeer,
-  scope: MetricScope,
+  scope: FlowScope,
   truncateLength: TruncateLength,
   inclNamespace: boolean,
   disambiguate: boolean
@@ -146,9 +146,6 @@ const getPeerName = (
   const name = peer.getDisplayName(inclNamespace, disambiguate);
   if (name) {
     return truncateParts(name, truncateLength);
-  }
-  if (scope === 'droppedCause' || scope === 'droppedState') {
-    throw new Error("getPeerName can't be applied on tcp drop metrics");
   }
   if (scope === 'app') {
     // No peer distinction here

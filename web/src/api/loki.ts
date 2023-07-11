@@ -1,4 +1,4 @@
-import { MetricScope } from '../model/flow-query';
+import { AggregateBy, FlowScope } from '../model/flow-query';
 import { cyrb53 } from '../utils/hash';
 import { Fields, Labels, Record } from './ipfix';
 
@@ -87,7 +87,7 @@ export type DroppedTopologyMetrics = {
   name: string;
   values: [number, number][];
   stats: MetricStats;
-  scope: MetricScope;
+  aggregateBy: AggregateBy;
 };
 
 export type TopologyMetrics = {
@@ -95,7 +95,7 @@ export type TopologyMetrics = {
   destination: TopologyMetricPeer;
   values: [number, number][];
   stats: MetricStats;
-  scope: MetricScope;
+  scope: FlowScope;
 };
 
 export type NamedMetric = TopologyMetrics & {

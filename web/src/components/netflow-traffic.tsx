@@ -47,7 +47,7 @@ import {
   groupFiltersMatchAny,
   Match,
   MetricFunction,
-  MetricScope,
+  FlowScope,
   MetricType,
   PacketLoss,
   RecordType,
@@ -213,7 +213,7 @@ export const NetflowTraffic: React.FC<{
   const [lastTop, setLastTop] = useLocalStorage<number>(LOCAL_STORAGE_LAST_TOP_KEY, TOP_VALUES[0]);
   const [range, setRange] = React.useState<number | TimeRange>(getRangeFromURL());
   const [histogramRange, setHistogramRange] = React.useState<TimeRange>();
-  const [metricScope, setMetricScope] = useLocalStorage<MetricScope>(LOCAL_STORAGE_METRIC_SCOPE_KEY, 'namespace');
+  const [metricScope, setMetricScope] = useLocalStorage<FlowScope>(LOCAL_STORAGE_METRIC_SCOPE_KEY, 'namespace');
   const [metricFunction, setMetricFunction] = useLocalStorage<MetricFunction>(
     LOCAL_STORAGE_METRIC_FUNCTION_KEY,
     defaultMetricFunction
@@ -349,7 +349,7 @@ export const NetflowTraffic: React.FC<{
       query.type = 'count';
     } else {
       query.type = metricType;
-      query.scope = metricScope;
+      query.aggregateBy = metricScope;
       if (selectedViewId === 'topology') {
         query.groups = topologyOptions.groupTypes !== TopologyGroupTypes.NONE ? topologyOptions.groupTypes : undefined;
       } else if (selectedViewId === 'overview') {
@@ -418,9 +418,9 @@ export const NetflowTraffic: React.FC<{
         }
         promises.push(getFlows(tableQuery));
         if (showHistogram) {
-          promises.push(getTopology({ ...fq, scope: 'app' }, range));
+          promises.push(getTopology({ ...fq, aggregateBy: 'app' }, range));
           if (droppedType) {
-            promises.push(getTopology({ ...fq, scope: 'app', type: droppedType }, range));
+            promises.push(getTopology({ ...fq, aggregateBy: 'app', type: droppedType }, range));
           }
         }
         manageWarnings(
@@ -471,15 +471,15 @@ export const NetflowTraffic: React.FC<{
         promises.push(getTopology(fq, range));
 
         //run same query on app scope for total flows
-        promises.push(getTopology({ ...fq, scope: 'app' }, range));
+        promises.push(getTopology({ ...fq, aggregateBy: 'app' }, range));
 
         if (droppedType) {
           //run same queries for drops
           promises.push(getTopology({ ...fq, type: droppedType }, range));
-          promises.push(getTopology({ ...fq, scope: 'app', type: droppedType }, range));
+          promises.push(getTopology({ ...fq, aggregateBy: 'app', type: droppedType }, range));
           //get drop state & cause
-          promises.push(getTopology({ ...fq, type: droppedType, scope: 'droppedState' }, range));
-          promises.push(getTopology({ ...fq, type: droppedType, scope: 'droppedCause' }, range));
+          promises.push(getTopology({ ...fq, type: droppedType, aggregateBy: 'droppedState' }, range));
+          promises.push(getTopology({ ...fq, type: droppedType, aggregateBy: 'droppedCause' }, range));
         }
 
         manageWarnings(

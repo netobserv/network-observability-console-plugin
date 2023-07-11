@@ -2,7 +2,7 @@ import { FlexItem, Select, Tooltip } from '@patternfly/react-core';
 import { InfoAltIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { MetricScope, MetricType } from '../../model/flow-query';
+import { FlowScope, MetricType } from '../../model/flow-query';
 
 import MetricTypeDropdown from './metric-type-dropdown';
 import './overview-display-dropdown.css';
@@ -14,8 +14,8 @@ export type Size = 's' | 'm' | 'l';
 export const OverviewDisplayOptions: React.FC<{
   metricType: MetricType;
   setMetricType: (t: MetricType) => void;
-  metricScope: MetricScope;
-  setMetricScope: (s: MetricScope) => void;
+  metricScope: FlowScope;
+  setMetricScope: (s: FlowScope) => void;
   truncateLength: TruncateLength;
   setTruncateLength: (v: TruncateLength) => void;
 }> = ({ metricType, setMetricType, metricScope, setMetricScope, truncateLength, setTruncateLength }) => {
@@ -68,8 +68,8 @@ export const OverviewDisplayOptions: React.FC<{
 export const OverviewDisplayDropdown: React.FC<{
   metricType: MetricType;
   setMetricType: (t: MetricType) => void;
-  metricScope: MetricScope;
-  setMetricScope: (s: MetricScope) => void;
+  metricScope: FlowScope;
+  setMetricScope: (s: FlowScope) => void;
   truncateLength: TruncateLength;
   setTruncateLength: (v: TruncateLength) => void;
 }> = ({ metricType, setMetricType, metricScope, setMetricScope, truncateLength, setTruncateLength }) => {
