@@ -82,7 +82,7 @@ export const getTopology = (params: FlowQuery, range: number | TimeRange): Promi
     const metrics = parseMetrics(
       aggQR.result as RawTopologyMetrics[],
       range,
-      params.scope!,
+      params.aggregateBy!,
       aggQR.unixTimestamp,
       aggQR.isMock
     );

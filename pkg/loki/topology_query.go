@@ -30,13 +30,13 @@ type TopologyQueryBuilder struct {
 
 func NewTopologyQuery(cfg *Config, start, end, limit, rateInterval, step, metricType string,
 	recordType constants.RecordType, reporter constants.Reporter, packetLoss constants.PacketLoss,
-	scope, groups string) (*TopologyQueryBuilder, error) {
+	aggregate, groups string) (*TopologyQueryBuilder, error) {
 	l := limit
 	if len(l) == 0 {
 		l = topologyDefaultLimit
 	}
 
-	fields := getFields(scope, groups)
+	fields := getFields(aggregate, groups)
 	var f, t string
 	switch metricType {
 	case "count":
@@ -75,15 +75,15 @@ func NewTopologyQuery(cfg *Config, start, end, limit, rateInterval, step, metric
 			dataField:          t,
 			fields:             fields,
 			dedup:              d,
-			skipEmptyDropState: scope == "droppedState",
-			skipEmptyDropCause: scope == "droppedCause",
+			skipEmptyDropState: aggregate == "droppedState",
+			skipEmptyDropCause: aggregate == "droppedCause",
 		},
 	}, nil
 }
 
-func getFields(scope, groups string) string {
+func getFields(aggregate, groups string) string {
 	var fields []string
-	switch scope {
+	switch aggregate {
 	case "app":
 		fields = []string{"app"}
 	case "droppedState":

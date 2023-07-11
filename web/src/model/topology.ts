@@ -21,7 +21,7 @@ import { TFunction } from 'i18next';
 import { K8sModel } from '@openshift-console/dynamic-plugin-sdk';
 import { getTopologyEdgeId } from '../utils/ids';
 import { MetricScopeOptions } from './metrics';
-import { MetricFunction, MetricScope, MetricType, NodeType } from './flow-query';
+import { MetricFunction, FlowScope, MetricType, NodeType } from './flow-query';
 import { createPeer, getFormattedValue } from '../utils/metrics';
 import { TruncateLength } from '../components/dropdowns/truncate-dropdown';
 
@@ -202,7 +202,7 @@ export type NodeData = {
 
 const generateNode = (
   data: NodeData,
-  scope: MetricScope,
+  scope: FlowScope,
   options: TopologyOptions,
   searchValue: string,
   highlightedId: string,
@@ -348,7 +348,7 @@ export const generateDataModel = (
   metrics: TopologyMetrics[],
   droppedMetrics: TopologyMetrics[],
   options: TopologyOptions,
-  metricScope: MetricScope,
+  metricScope: FlowScope,
   searchValue: string,
   highlightedId: string,
   filters: Filter[],
@@ -362,7 +362,7 @@ export const generateDataModel = (
 
   const addGroup = (
     fields: Partial<TopologyMetricPeer>,
-    scope: MetricScope,
+    scope: FlowScope,
     parent?: NodeModel,
     secondaryLabelPadding = false
   ): NodeModel => {
@@ -413,7 +413,7 @@ export const generateDataModel = (
     return group;
   };
 
-  const addNode = (data: NodeData, scope: MetricScope): NodeModel => {
+  const addNode = (data: NodeData, scope: FlowScope): NodeModel => {
     const parent = data.nodeType !== 'unknown' ? addPossibleGroups(data.peer) : undefined;
     let node = nodes.find(n => n.type === 'node' && n.id === data.peer.id);
     if (!node) {
