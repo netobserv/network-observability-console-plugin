@@ -309,12 +309,14 @@ export const SummaryPanelContent: React.FC<{
 
   const timeContent = () => {
     const filteredFlows = flows || [];
-    const duration =
-      filteredFlows.map(f => f.fields.TimeFlowEndMs - f.fields.TimeFlowStartMs).reduce((a, b) => a + b, 0) /
-      filteredFlows.length;
-    const collectionLatency =
-      filteredFlows.map(f => f.fields.TimeReceived * 1000 - f.fields.TimeFlowEndMs).reduce((a, b) => a + b, 0) /
-      filteredFlows.length;
+    const duration = filteredFlows.length
+      ? filteredFlows.map(f => f.fields.TimeFlowEndMs - f.fields.TimeFlowStartMs).reduce((a, b) => a + b, 0) /
+        filteredFlows.length
+      : 0;
+    const collectionLatency = filteredFlows.length
+      ? filteredFlows.map(f => f.fields.TimeReceived * 1000 - f.fields.TimeFlowEndMs).reduce((a, b) => a + b, 0) /
+        filteredFlows.length
+      : 0;
 
     return (
       <TextContent className="summary-text-container">
