@@ -46,7 +46,7 @@ OCI_BUILD_OPTS ?=
 OCI_BIN_PATH = $(shell which docker 2>/dev/null || which podman)
 OCI_BIN ?= $(shell basename ${OCI_BIN_PATH})
 
-GOLANGCI_LINT_VERSION = v1.50.1
+GOLANGCI_LINT_VERSION = v1.53.3
 NPM_INSTALL ?= install
 CMDLINE_ARGS ?= --loglevel trace --loki-tenant-id netobserv --frontend-config config/sample-frontend-config.yaml --auth-check none
 LDFLAGS := -X 'main.buildVersion=${BUILD_VERSION}' -X 'main.buildDate=${BUILD_DATE}'
@@ -93,7 +93,7 @@ help: ## Display this help.
 .PHONY: prereqs
 prereqs: ## Test if prerequisites are met, and installing missing dependencies
 	@echo "### Test if prerequisites are met, and installing missing dependencies"
-	test -f $(go env GOPATH)/bin/golangci-lint || GOFLAGS="" go install github.com/golangci/golangci-lint/cmd/golangci-lint@${GOLANGCI_LINT_VERSION}
+	GOFLAGS="" go install github.com/golangci/golangci-lint/cmd/golangci-lint@${GOLANGCI_LINT_VERSION}
 
 .PHONY: vendors
 vendors: ## Check go vendors
