@@ -56,6 +56,7 @@ export interface FiltersToolbarProps {
   menuControl?: JSX.Element;
   quickFilters: QuickFilter[];
   allowConnectionFilter?: boolean;
+  allowDNSFilter?: boolean;
 }
 
 export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
@@ -68,6 +69,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
   resetFilters,
   quickFilters,
   allowConnectionFilter,
+  allowDNSFilter,
   ...props
 }) => {
   const { push } = useHistory();
@@ -282,6 +284,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
                     selectedFilter={selectedFilter}
                     setSelectedFilter={setSelectedFilter}
                     allowConnectionFilter={allowConnectionFilter}
+                    allowDNSFilter={allowDNSFilter}
                   />
                   {getFilterControl()}
                 </InputGroup>
