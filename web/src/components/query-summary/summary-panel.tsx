@@ -193,7 +193,14 @@ export const SummaryPanelContent: React.FC<{
         });
 
       addresses = Array.from(new Set(flows.map(f => f.fields.SrcAddr).concat(flows.map(f => f.fields.DstAddr))));
-      ports = Array.from(new Set(flows.map(f => f.fields.SrcPort).concat(flows.map(f => f.fields.DstPort))));
+      ports = Array.from(
+        new Set(
+          flows
+            .filter(f => f.fields.SrcPort)
+            .map(f => f.fields.SrcPort)
+            .concat(flows.filter(f => f.fields.DstPort).map(f => f.fields.DstPort)) as number[]
+        )
+      );
       protocols = Array.from(new Set(flows.map(f => f.fields.Proto)));
     } else if (metrics && metrics.length) {
       function manageTypeCardinality(hostName?: string, namespace?: string, type?: string, name?: string) {

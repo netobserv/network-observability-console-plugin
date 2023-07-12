@@ -1480,9 +1480,13 @@ export const NetflowTraffic: React.FC<{
           col =>
             (isConnectionTracking() || ![ColumnsId.recordtype, ColumnsId.hashid].includes(col.id)) &&
             (isDNSTracking() ||
-              ![ColumnsId.dnsid, ColumnsId.dnslatency, ColumnsId.dnsrequesttime, ColumnsId.dnsresponsetime].includes(
-                col.id
-              ))
+              ![
+                ColumnsId.dnsid,
+                ColumnsId.dnslatency,
+                ColumnsId.dnsresponsecode,
+                ColumnsId.dnsrequesttime,
+                ColumnsId.dnsresponsetime
+              ].includes(col.id))
         )}
         setColumns={setColumns}
         setColumnSizes={setColumnSizes}

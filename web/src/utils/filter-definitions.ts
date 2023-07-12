@@ -21,7 +21,8 @@ import {
   getProtocolOptions,
   getResourceOptions,
   noOption,
-  cap10
+  cap10,
+  getDnsResponseCodeOptions
 } from './filter-options';
 
 // Convenience string to filter by undefined field values
@@ -471,6 +472,19 @@ export const getFilterDefinitions = (
         validate: rejectEmptyValue,
         hint: t('Specify a single DNS Id.'),
         encoders: { simpleEncode: simpleFiltersEncoder('DnsId') }
+      },
+      {
+        id: 'dns_flag_response_code',
+        name: t('DNS Response Code'),
+        category: FilterCategory.None,
+        component: FilterComponent.Autocomplete,
+        getOptions: cap10(getDnsResponseCodeOptions),
+        validate: rejectEmptyValue,
+        hint: t('Specify a single DNS RCODE name.'),
+        examples: `${t('Specify a single DNS RCODE name like:')}
+        - ${t('A IANA RCODE like NoError, NXDomain, NotAuth')}
+        - ${t('Empty double quotes "" for undefined response code')}`,
+        encoders: { simpleEncode: simpleFiltersEncoder('DnsFlagsResponseCode') }
       }
     ];
   }
@@ -479,7 +493,7 @@ export const getFilterDefinitions = (
     return filterDefinitions;
   } else {
     return filterDefinitions.filter(
-      fd => (allowConnectionFilter || fd.id !== 'id') && (allowDNSFilter || fd.id !== 'dns_id')
+      fd => (allowConnectionFilter || fd.id !== 'id') && (allowDNSFilter || !fd.id.startsWith('dns_'))
     );
   }
 };

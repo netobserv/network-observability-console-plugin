@@ -167,6 +167,14 @@ func regexMatchLineFilter(key string, strictKey bool, value string) lineFilter {
 	}
 }
 
+func notContainsKeyLineFilter(key string) lineFilter {
+	return lineFilter{
+		key:       key,
+		strictKey: true,
+		not:       true,
+	}
+}
+
 // writeInto transforms a lineFilter to its corresponding part of a LogQL query
 // under construction (contained in the provided strings.Builder)
 func (f *lineFilter) writeInto(sb *strings.Builder) {
@@ -175,40 +183,51 @@ func (f *lineFilter) writeInto(sb *strings.Builder) {
 	} else {
 		sb.WriteString("|~`")
 	}
-	for i, v := range f.values {
-		if i > 0 {
-			sb.WriteByte('|')
-		}
 
-		// match only the end of KEY + regex VALUE if not 'strictKey'
-		// if numeric, KEY":VALUE,
-		// if string KEY":"VALUE"
-		// ie 'Port' key will match both 'SrcPort":"XXX"' and 'DstPort":"XXX"
-		// VALUE can be quoted for exact match or contains * to inject regex any
-		// For numeric values, exact match is implicit
-		// 	(the trick is to match for the ending coma; it works as long as the filtered field
-		// 	is not the last one (they're in alphabetic order); a less performant alternative
-		// 	but more future-proof/less hacky could be to move that to a json filter, if needed)
+	if len(f.values) == 0 {
+		// match only the end of KEY if not 'strictKey'
+		// no value will be provided here as we only check if key exists
 		if f.strictKey {
 			sb.WriteByte('"')
 		}
 		sb.WriteString(f.key)
-		sb.WriteString(`":`)
-		switch v.valueType {
-		case typeNumber, typeRegex:
-			sb.WriteString(v.value)
-			// a number or regex can be followed by } if it's the last property of a JSON document
-			sb.WriteString("[,}]")
-		case typeString, typeIP:
-			// exact matches are specified as just strings
-			sb.WriteByte('"')
-			sb.WriteString(valueReplacer.Replace(v.value))
-			sb.WriteByte('"')
-		// contains-match are specified as regular expressions
-		case typeRegexContains:
-			sb.WriteString(`"(?i)[^"]*`)
-			sb.WriteString(valueReplacer.Replace(v.value))
-			sb.WriteString(`.*"`)
+		sb.WriteString(`"`)
+	} else {
+		for i, v := range f.values {
+			if i > 0 {
+				sb.WriteByte('|')
+			}
+
+			// match only the end of KEY + regex VALUE if not 'strictKey'
+			// if numeric, KEY":VALUE,
+			// if string KEY":"VALUE"
+			// ie 'Port' key will match both 'SrcPort":"XXX"' and 'DstPort":"XXX"
+			// VALUE can be quoted for exact match or contains * to inject regex any
+			// For numeric values, exact match is implicit
+			// 	(the trick is to match for the ending coma; it works as long as the filtered field
+			// 	is not the last one (they're in alphabetic order); a less performant alternative
+			// 	but more future-proof/less hacky could be to move that to a json filter, if needed)
+			if f.strictKey {
+				sb.WriteByte('"')
+			}
+			sb.WriteString(f.key)
+			sb.WriteString(`":`)
+			switch v.valueType {
+			case typeNumber, typeRegex:
+				sb.WriteString(v.value)
+				// a number or regex can be followed by } if it's the last property of a JSON document
+				sb.WriteString("[,}]")
+			case typeString, typeIP:
+				// exact matches are specified as just strings
+				sb.WriteByte('"')
+				sb.WriteString(valueReplacer.Replace(v.value))
+				sb.WriteByte('"')
+			// contains-match are specified as regular expressions
+			case typeRegexContains:
+				sb.WriteString(`"(?i)[^"]*`)
+				sb.WriteString(valueReplacer.Replace(v.value))
+				sb.WriteString(`.*"`)
+			}
 		}
 	}
 	sb.WriteRune('`')

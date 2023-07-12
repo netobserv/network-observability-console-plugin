@@ -10,6 +10,7 @@ import { formatDurationAboveMillisecond } from '../../utils/duration';
 import { formatPort } from '../../utils/port';
 import { formatProtocol } from '../../utils/protocol';
 import { getCode, getType } from '../../utils/icmp';
+import { DNS_CODE_NAMES, getDNSRcodeDescription } from '../../utils/dns';
 import { Size } from '../dropdowns/table-display-dropdown';
 import './record-field.css';
 
@@ -120,9 +121,13 @@ export const RecordField: React.FC<{
 
   const ipPortContent = (ip: string, port: number, singleText = false) => {
     if (singleText) {
-      return singleContainer(simpleTextWithTooltip(port ? `${ip}:${String(port)}` : ip));
+      return singleContainer(simpleTextWithTooltip(port && !Number.isNaN(port) ? `${ip}:${String(port)}` : ip));
     } else {
-      return doubleContainer(simpleTextWithTooltip(ip), simpleTextWithTooltip(port ? String(port) : undefined), false);
+      return doubleContainer(
+        simpleTextWithTooltip(ip),
+        simpleTextWithTooltip(port && !Number.isNaN(port) ? String(port) : undefined),
+        false
+      );
     }
   };
 
@@ -215,25 +220,25 @@ export const RecordField: React.FC<{
         );
       case ColumnsId.addrport:
         return doubleContainer(
-          ipPortContent(flow.fields.SrcAddr, flow.fields.SrcPort),
-          ipPortContent(flow.fields.DstAddr, flow.fields.DstPort)
+          ipPortContent(flow.fields.SrcAddr, flow.fields.SrcPort || NaN),
+          ipPortContent(flow.fields.DstAddr, flow.fields.DstPort || NaN)
         );
       case ColumnsId.srcaddrport:
-        return singleContainer(ipPortContent(flow.fields.SrcAddr, flow.fields.SrcPort));
+        return singleContainer(ipPortContent(flow.fields.SrcAddr, flow.fields.SrcPort || NaN));
       case ColumnsId.dstaddrport:
-        return singleContainer(ipPortContent(flow.fields.DstAddr, flow.fields.DstPort));
+        return singleContainer(ipPortContent(flow.fields.DstAddr, flow.fields.DstPort || NaN));
       case ColumnsId.kubeobject:
         return doubleContainer(
           explicitKubeObjContent(
             flow.fields.SrcAddr,
-            flow.fields.SrcPort,
+            flow.fields.SrcPort || NaN,
             flow.fields.SrcK8S_Type,
             flow.labels.SrcK8S_Namespace,
             flow.fields.SrcK8S_Name
           ),
           explicitKubeObjContent(
             flow.fields.DstAddr,
-            flow.fields.DstPort,
+            flow.fields.DstPort || NaN,
             flow.fields.DstK8S_Type,
             flow.labels.DstK8S_Namespace,
             flow.fields.DstK8S_Name
@@ -243,7 +248,7 @@ export const RecordField: React.FC<{
         return singleContainer(
           explicitKubeObjContent(
             flow.fields.SrcAddr,
-            flow.fields.SrcPort,
+            flow.fields.SrcPort || NaN,
             flow.fields.SrcK8S_Type,
             flow.labels.SrcK8S_Namespace,
             flow.fields.SrcK8S_Name
@@ -253,7 +258,7 @@ export const RecordField: React.FC<{
         return singleContainer(
           explicitKubeObjContent(
             flow.fields.DstAddr,
-            flow.fields.DstPort,
+            flow.fields.DstPort || NaN,
             flow.fields.DstK8S_Type,
             flow.labels.DstK8S_Namespace,
             flow.fields.DstK8S_Name
@@ -263,14 +268,14 @@ export const RecordField: React.FC<{
         return doubleContainer(
           explicitKubeObjContent(
             flow.fields.SrcAddr,
-            flow.fields.SrcPort,
+            flow.fields.SrcPort || NaN,
             flow.fields.SrcK8S_OwnerType,
             flow.labels.SrcK8S_Namespace,
             flow.labels.SrcK8S_OwnerName
           ),
           explicitKubeObjContent(
             flow.fields.DstAddr,
-            flow.fields.DstPort,
+            flow.fields.DstPort || NaN,
             flow.fields.DstK8S_OwnerType,
             flow.labels.DstK8S_Namespace,
             flow.labels.DstK8S_OwnerName
@@ -280,7 +285,7 @@ export const RecordField: React.FC<{
         return singleContainer(
           explicitKubeObjContent(
             flow.fields.SrcAddr,
-            flow.fields.SrcPort,
+            flow.fields.SrcPort || NaN,
             flow.fields.SrcK8S_OwnerType,
             flow.labels.SrcK8S_Namespace,
             flow.labels.DstK8S_OwnerName
@@ -290,7 +295,7 @@ export const RecordField: React.FC<{
         return singleContainer(
           explicitKubeObjContent(
             flow.fields.DstAddr,
-            flow.fields.DstPort,
+            flow.fields.DstPort || NaN,
             flow.fields.DstK8S_OwnerType,
             flow.labels.DstK8S_Namespace,
             flow.labels.DstK8S_OwnerName
@@ -370,6 +375,12 @@ export const RecordField: React.FC<{
       case ColumnsId.dnsid:
         return singleContainer(
           typeof value === 'number' && !isNaN(value) ? simpleTextWithTooltip(String(value)) : emptyText()
+        );
+      case ColumnsId.dnsresponsecode:
+        return singleContainer(
+          typeof value === 'string' && value.length
+            ? simpleTextWithTooltip(detailed ? `${value}: ${getDNSRcodeDescription(value as DNS_CODE_NAMES)}` : value)
+            : emptyText()
         );
       default:
         if (Array.isArray(value) && value.length) {

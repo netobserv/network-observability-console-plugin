@@ -49,7 +49,8 @@ export type FilterId =
   | 'interface'
   | 'type'
   | 'id'
-  | 'dns_id';
+  | 'dns_id'
+  | 'dns_flag_response_code';
 
 export interface FilterDefinition {
   id: FilterId;
