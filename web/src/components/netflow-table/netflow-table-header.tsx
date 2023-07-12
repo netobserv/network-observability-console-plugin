@@ -201,7 +201,8 @@ export const NetflowTableHeader: React.FC<{
               ColumnsId.dnsresponsetime,
               ColumnsId.collectiontime,
               ColumnsId.collectionlatency,
-              ColumnsId.dnslatency
+              ColumnsId.dnslatency,
+              ColumnsId.dnsresponsecode
             ].includes(c.id) && c.tooltip
               ? { tooltip: c.tooltip }
               : undefined

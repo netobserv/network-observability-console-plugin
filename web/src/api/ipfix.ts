@@ -53,9 +53,9 @@ export interface Fields {
   /** Kind of the destination matched Kubernetes object, such as Pod name, Service name, etc. */
   DstK8S_Type?: string;
   /** Source port */
-  SrcPort: number;
+  SrcPort?: number;
   /** Destination port */
-  DstPort: number;
+  DstPort?: number;
   /** Kind of the source Kubernetes owner, such as Deployment, StatefulSet, etc. */
   SrcK8S_OwnerType?: string;
   /** Kind of the destination Kubernetes owner, such as Deployment, StatefulSet, etc. */
@@ -112,6 +112,8 @@ export interface Fields {
   DnsId?: number;
   /** TCP flags for DNS record */
   DnsFlags?: number;
+  /** Parsed DNS header RCODEs name */
+  DnsFlagsResponseCode?: string;
   /** Timestamp of DNS request, in milliseconds */
   DnsRequestTimeMs?: number;
   /** Timestamp of DNS response, in milliseconds */
