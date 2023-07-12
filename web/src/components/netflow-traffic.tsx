@@ -1338,6 +1338,7 @@ export const NetflowTraffic: React.FC<{
         menuContent={filtersExtraContent()}
         menuControl={filtersExtraControl()}
         allowConnectionFilter={isConnectionTracking()}
+        allowDNSFilter={isDNSTracking()}
       />
       {
         <Flex className="netflow-traffic-tabs-container">
