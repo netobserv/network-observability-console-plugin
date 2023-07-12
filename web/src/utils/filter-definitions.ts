@@ -482,7 +482,8 @@ export const getFilterDefinitions = (
         validate: rejectEmptyValue,
         hint: t('Specify a single DNS RCODE name.'),
         examples: `${t('Specify a single DNS RCODE name like:')}
-        - ${t('A IANA RCODE like NoError, NXDomain, NotAuth')}
+        - ${t('A IANA RCODE number like 0, 3, 9')}
+        - ${t('A IANA RCODE name like NoError, NXDomain, NotAuth')}
         - ${t('Empty double quotes "" for undefined response code')}`,
         encoders: { simpleEncode: simpleFiltersEncoder('DnsFlagsResponseCode') }
       }
