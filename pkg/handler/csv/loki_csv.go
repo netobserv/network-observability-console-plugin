@@ -63,7 +63,7 @@ func GetCSVData(qr *model.AggregatedQueryResponse, columns []string) ([][]string
 					data[0] = append(data[0], fields...)
 				}
 
-				data = append(data, getRowDatas(stream, entry, labels, fields, line, len(data[0])))
+				data = append(data, getRowDatas(stream, labels, fields, line, len(data[0])))
 			}
 		}
 		return data, nil
@@ -71,7 +71,7 @@ func GetCSVData(qr *model.AggregatedQueryResponse, columns []string) ([][]string
 	return nil, fmt.Errorf("loki returned an unexpected type: %T", qr.Result)
 }
 
-func getRowDatas(stream model.Stream, entry model.Entry, labels, fields []string,
+func getRowDatas(stream model.Stream, labels, fields []string,
 	line map[string]interface{}, size int) []string {
 	rowDatas := make([]string, 0, size)
 
