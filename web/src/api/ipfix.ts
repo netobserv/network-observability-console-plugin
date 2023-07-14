@@ -114,10 +114,6 @@ export interface Fields {
   DnsFlags?: number;
   /** Parsed DNS header RCODEs name */
   DnsFlagsResponseCode?: string;
-  /** Timestamp of DNS request, in milliseconds */
-  DnsRequestTimeMs?: number;
-  /** Timestamp of DNS response, in milliseconds */
-  DnsResponseTimeMs?: number;
   /** Calculated time between response and request, in milliseconds */
   DnsLatencyMs?: number;
   /** Start timestamp of this flow, in milliseconds */

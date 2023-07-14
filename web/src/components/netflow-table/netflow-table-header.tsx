@@ -197,8 +197,6 @@ export const NetflowTableHeader: React.FC<{
             [
               ColumnsId.starttime,
               ColumnsId.endtime,
-              ColumnsId.dnsrequesttime,
-              ColumnsId.dnsresponsetime,
               ColumnsId.collectiontime,
               ColumnsId.collectionlatency,
               ColumnsId.dnslatency,

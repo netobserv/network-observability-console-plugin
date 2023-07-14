@@ -185,8 +185,6 @@ export const RecordField: React.FC<{
       case ColumnsId.collectiontime:
       case ColumnsId.starttime:
       case ColumnsId.endtime:
-      case ColumnsId.dnsrequesttime:
-      case ColumnsId.dnsresponsetime:
         return dateTimeContent(typeof value === 'number' && !isNaN(value) ? new Date(value) : undefined);
       case ColumnsId.collectionlatency:
       case ColumnsId.dnslatency:

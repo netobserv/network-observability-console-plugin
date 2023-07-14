@@ -10,8 +10,6 @@ import { compareNumbers, compareStrings } from './base-compare';
 export enum ColumnsId {
   starttime = 'StartTime',
   endtime = 'EndTime',
-  dnsrequesttime = 'DNS_RequestTime',
-  dnsresponsetime = 'DNS_ResponseTime',
   type = 'K8S_Type',
   srctype = 'SrcK8S_Type',
   dsttype = 'DstK8S_Type',
@@ -799,13 +797,9 @@ export const getExtraColumns = (t: TFunction): Column[] => {
     {
       id: ColumnsId.dnslatency,
       name: t('DNS Latency'),
-      tooltip: t(
-        // eslint-disable-next-line max-len
-        'Time elapsed between DNS request and response. Filter on a specific DNS Id and use Reporter "Both" to ensure having both request and response in your results.'
-      ),
+      tooltip: t('Time elapsed between DNS request and response.'),
       isSelected: false,
-      // zero is valid value here
-      value: f => (f.fields.DnsLatencyMs !== undefined ? f.fields.DnsLatencyMs : Number.NaN),
+      value: f => f.fields.DnsLatencyMs || Number.NaN,
       sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
       width: 5
     },
@@ -853,26 +847,6 @@ export const getDefaultColumns = (t: TFunction, withCommonFields = true, withCon
       sort: (a, b, col) =>
         compareNumbers(col.value(a) as number, col.value(b) as number) ||
         compareStrings(b.labels._RecordType!, a.labels._RecordType!),
-      width: 15
-    },
-    {
-      id: ColumnsId.dnsrequesttime,
-      name: t('DNS Request Time'),
-      tooltip: t('Time of the DNS request.'),
-      fieldName: 'DnsRequestTimeMs',
-      isSelected: false,
-      value: f => f.fields.DnsRequestTimeMs || Number.NaN,
-      sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
-      width: 15
-    },
-    {
-      id: ColumnsId.dnsresponsetime,
-      name: t('DNS Response Time'),
-      tooltip: t('Time of the DNS response.'),
-      fieldName: 'DnsResponseTimeMs',
-      isSelected: false,
-      value: f => f.fields.DnsResponseTimeMs || Number.NaN,
-      sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
       width: 15
     }
   ];

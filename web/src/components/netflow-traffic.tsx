@@ -1011,10 +1011,7 @@ export const NetflowTraffic: React.FC<{
           columns={getDefaultColumns(t, false, false).filter(
             col =>
               (isConnectionTracking() || ![ColumnsId.recordtype, ColumnsId.hashid].includes(col.id)) &&
-              (isDNSTracking() ||
-                ![ColumnsId.dnsid, ColumnsId.dnslatency, ColumnsId.dnsrequesttime, ColumnsId.dnsresponsetime].includes(
-                  col.id
-                ))
+              (isDNSTracking() || ![ColumnsId.dnsid, ColumnsId.dnslatency].includes(col.id))
           )}
           filters={filters}
           range={range}
@@ -1114,13 +1111,7 @@ export const NetflowTraffic: React.FC<{
               col =>
                 col.isSelected &&
                 (isConnectionTracking() || ![ColumnsId.recordtype, ColumnsId.hashid].includes(col.id)) &&
-                (isDNSTracking() ||
-                  ![
-                    ColumnsId.dnsid,
-                    ColumnsId.dnslatency,
-                    ColumnsId.dnsrequesttime,
-                    ColumnsId.dnsresponsetime
-                  ].includes(col.id))
+                (isDNSTracking() || ![ColumnsId.dnsid, ColumnsId.dnslatency].includes(col.id))
             )}
             setColumns={(v: Column[]) => setColumns(v.concat(columns.filter(col => !col.isSelected)))}
             columnSizes={columnSizes}
@@ -1481,14 +1472,7 @@ export const NetflowTraffic: React.FC<{
         columns={columns.filter(
           col =>
             (isConnectionTracking() || ![ColumnsId.recordtype, ColumnsId.hashid].includes(col.id)) &&
-            (isDNSTracking() ||
-              ![
-                ColumnsId.dnsid,
-                ColumnsId.dnslatency,
-                ColumnsId.dnsresponsecode,
-                ColumnsId.dnsrequesttime,
-                ColumnsId.dnsresponsetime
-              ].includes(col.id))
+            (isDNSTracking() || ![ColumnsId.dnsid, ColumnsId.dnslatency, ColumnsId.dnsresponsecode].includes(col.id))
         )}
         setColumns={setColumns}
         setColumnSizes={setColumnSizes}

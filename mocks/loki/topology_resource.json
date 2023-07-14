@@ -6,388 +6,432 @@
       {
         "metric": {
           "DstAddr": "10.0.0.2",
-          "SrcAddr": "10.0.0.5",
-          "SrcK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-master-1",
-          "SrcK8S_Name": "ci-ln-97r45m2-72292-z5tdr-master-1",
-          "SrcK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-master-1",
+          "SrcAddr": "10.0.0.3",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-1",
+          "SrcK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-master-1",
+          "SrcK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-master-1",
           "SrcK8S_OwnerType": "Node",
           "SrcK8S_Type": "Node"
         },
         "values": [
           [
-            1687334400,
-            "0.3263888888888889"
+            1689357240,
+            "1.05"
           ],
           [
-            1687334760,
-            "0.6888888888888889"
+            1689357600,
+            "1.0069444444444444"
           ],
           [
-            1687335120,
-            "0.7194444444444444"
+            1689357960,
+            "0.9444444444444444"
           ],
           [
-            1687335480,
-            "0.7208333333333333"
+            1689358320,
+            "0.8430555555555556"
           ],
           [
-            1687335840,
-            "0.625"
+            1689358680,
+            "0.8472222222222222"
+          ],
+          [
+            1689359040,
+            "0.9388888888888889"
+          ],
+          [
+            1689359400,
+            "0.9736111111111111"
+          ],
+          [
+            1689359760,
+            "0.95"
+          ],
+          [
+            1689360120,
+            "0.925"
+          ],
+          [
+            1689360480,
+            "0.9027777777777778"
+          ],
+          [
+            1689360840,
+            "0.9333333333333333"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstAddr": "10.0.0.2",
+          "SrcAddr": "10.0.0.4",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
+          "SrcK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
+          "SrcK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
+          "SrcK8S_OwnerType": "Node",
+          "SrcK8S_Type": "Node"
+        },
+        "values": [
+          [
+            1689357240,
+            "0.5583333333333333"
+          ],
+          [
+            1689357600,
+            "0.5416666666666666"
+          ],
+          [
+            1689357960,
+            "0.5416666666666666"
+          ],
+          [
+            1689358320,
+            "0.5694444444444444"
+          ],
+          [
+            1689358680,
+            "0.5486111111111112"
+          ],
+          [
+            1689359040,
+            "0.49444444444444446"
+          ],
+          [
+            1689359400,
+            "0.4986111111111111"
+          ],
+          [
+            1689359760,
+            "0.5472222222222223"
+          ],
+          [
+            1689360120,
+            "0.5208333333333334"
+          ],
+          [
+            1689360480,
+            "0.5236111111111111"
+          ],
+          [
+            1689360840,
+            "0.5333333333333333"
           ]
         ]
       },
       {
         "metric": {
           "DstAddr": "10.0.0.3",
-          "DstK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-master-0",
-          "DstK8S_Name": "ci-ln-97r45m2-72292-z5tdr-master-0",
-          "DstK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-master-0",
+          "DstK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-1",
+          "DstK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-master-1",
+          "DstK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-master-1",
+          "DstK8S_OwnerType": "Node",
+          "DstK8S_Type": "Node",
+          "SrcAddr": "10.0.0.2"
+        },
+        "values": [
+          [
+            1689357240,
+            "0.9319444444444445"
+          ],
+          [
+            1689357600,
+            "0.9430555555555555"
+          ],
+          [
+            1689357960,
+            "0.9763888888888889"
+          ],
+          [
+            1689358320,
+            "0.9263888888888889"
+          ],
+          [
+            1689358680,
+            "0.8847222222222222"
+          ],
+          [
+            1689359040,
+            "0.9402777777777778"
+          ],
+          [
+            1689359400,
+            "0.9430555555555555"
+          ],
+          [
+            1689359760,
+            "1.0069444444444444"
+          ],
+          [
+            1689360120,
+            "1.0083333333333333"
+          ],
+          [
+            1689360480,
+            "0.9597222222222223"
+          ],
+          [
+            1689360840,
+            "0.9708333333333333"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstAddr": "10.0.0.3",
+          "DstK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-1",
+          "DstK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-master-1",
+          "DstK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-master-1",
           "DstK8S_OwnerType": "Node",
           "DstK8S_Type": "Node",
           "SrcAddr": "10.0.0.4",
-          "SrcK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-master-2",
-          "SrcK8S_Name": "ci-ln-97r45m2-72292-z5tdr-master-2",
-          "SrcK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-master-2",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
+          "SrcK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
+          "SrcK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
           "SrcK8S_OwnerType": "Node",
           "SrcK8S_Type": "Node"
         },
         "values": [
           [
-            1687334400,
-            "5.169444444444444"
+            1689357240,
+            "3.4763888888888888"
           ],
           [
-            1687334760,
-            "10.588888888888889"
+            1689357600,
+            "3.463888888888889"
           ],
           [
-            1687335120,
-            "11.969444444444445"
+            1689357960,
+            "3.5125"
           ],
           [
-            1687335480,
-            "12.044444444444444"
+            1689358320,
+            "3.4791666666666665"
           ],
           [
-            1687335840,
-            "11.223611111111111"
+            1689358680,
+            "3.466666666666667"
+          ],
+          [
+            1689359040,
+            "3.3930555555555557"
+          ],
+          [
+            1689359400,
+            "3.4930555555555554"
+          ],
+          [
+            1689359760,
+            "3.5"
+          ],
+          [
+            1689360120,
+            "3.1847222222222222"
+          ],
+          [
+            1689360480,
+            "3.3472222222222223"
+          ],
+          [
+            1689360840,
+            "3.4694444444444446"
           ]
         ]
       },
       {
         "metric": {
           "DstAddr": "10.0.0.3",
-          "DstK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-master-0",
-          "DstK8S_Name": "ci-ln-97r45m2-72292-z5tdr-master-0",
-          "DstK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-master-0",
+          "DstK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-1",
+          "DstK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-master-1",
+          "DstK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-master-1",
           "DstK8S_OwnerType": "Node",
           "DstK8S_Type": "Node",
           "SrcAddr": "10.0.0.5",
-          "SrcK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-master-1",
-          "SrcK8S_Name": "ci-ln-97r45m2-72292-z5tdr-master-1",
-          "SrcK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-master-1",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-0",
+          "SrcK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-master-0",
+          "SrcK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-master-0",
           "SrcK8S_OwnerType": "Node",
           "SrcK8S_Type": "Node"
         },
         "values": [
           [
-            1687334400,
-            "2.5541666666666667"
+            1689357240,
+            "10.006944444444445"
           ],
           [
-            1687334760,
-            "5.420833333333333"
+            1689357600,
+            "10.025"
           ],
           [
-            1687335120,
-            "6.429166666666666"
+            1689357960,
+            "10.130555555555556"
           ],
           [
-            1687335480,
-            "6.551388888888889"
+            1689358320,
+            "10.118055555555555"
           ],
           [
-            1687335840,
-            "6.698611111111111"
+            1689358680,
+            "9.972222222222221"
+          ],
+          [
+            1689359040,
+            "9.627777777777778"
+          ],
+          [
+            1689359400,
+            "9.734722222222222"
+          ],
+          [
+            1689359760,
+            "9.843055555555555"
+          ],
+          [
+            1689360120,
+            "9.497222222222222"
+          ],
+          [
+            1689360480,
+            "9.78888888888889"
+          ],
+          [
+            1689360840,
+            "10.022222222222222"
           ]
         ]
       },
       {
         "metric": {
           "DstAddr": "10.0.0.3",
-          "DstK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-master-0",
-          "DstK8S_Name": "ci-ln-97r45m2-72292-z5tdr-master-0",
-          "DstK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-master-0",
-          "DstK8S_OwnerType": "Node",
-          "DstK8S_Type": "Node",
-          "SrcAddr": "10.0.128.2",
-          "SrcK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-worker-a-gssv6",
-          "SrcK8S_Name": "ci-ln-97r45m2-72292-z5tdr-worker-a-gssv6",
-          "SrcK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-worker-a-gssv6",
-          "SrcK8S_OwnerType": "Node",
-          "SrcK8S_Type": "Node"
-        },
-        "values": [
-          [
-            1687334400,
-            "0.3416666666666667"
-          ],
-          [
-            1687334760,
-            "0.7194444444444444"
-          ],
-          [
-            1687335120,
-            "0.7305555555555555"
-          ],
-          [
-            1687335480,
-            "0.7347222222222223"
-          ],
-          [
-            1687335840,
-            "0.7375"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstAddr": "10.0.0.3",
-          "DstK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-master-0",
-          "DstK8S_Name": "ci-ln-97r45m2-72292-z5tdr-master-0",
-          "DstK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-master-0",
+          "DstK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-1",
+          "DstK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-master-1",
+          "DstK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-master-1",
           "DstK8S_OwnerType": "Node",
           "DstK8S_Type": "Node",
           "SrcAddr": "10.0.128.3",
-          "SrcK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-worker-b-m2f27",
-          "SrcK8S_Name": "ci-ln-97r45m2-72292-z5tdr-worker-b-m2f27",
-          "SrcK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-worker-b-m2f27",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-worker-b-4ngf7",
+          "SrcK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-worker-b-4ngf7",
+          "SrcK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-worker-b-4ngf7",
           "SrcK8S_OwnerType": "Node",
           "SrcK8S_Type": "Node"
         },
         "values": [
           [
-            1687334400,
-            "0.30277777777777776"
+            1689357240,
+            "0.7083333333333334"
           ],
           [
-            1687334760,
+            1689357600,
+            "0.6930555555555555"
+          ],
+          [
+            1689357960,
             "0.6611111111111111"
           ],
           [
-            1687335120,
-            "0.6583333333333333"
+            1689358320,
+            "0.6875"
           ],
           [
-            1687335480,
-            "0.6236111111111111"
+            1689358680,
+            "0.7347222222222223"
           ],
           [
-            1687335840,
-            "0.5944444444444444"
+            1689359040,
+            "0.7166666666666667"
+          ],
+          [
+            1689359400,
+            "0.6652777777777777"
+          ],
+          [
+            1689359760,
+            "0.6875"
+          ],
+          [
+            1689360120,
+            "0.7"
+          ],
+          [
+            1689360480,
+            "0.6388888888888888"
+          ],
+          [
+            1689360840,
+            "0.6430555555555556"
           ]
         ]
       },
       {
         "metric": {
-          "DstAddr": "10.0.0.4",
-          "DstK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-master-2",
-          "DstK8S_Name": "ci-ln-97r45m2-72292-z5tdr-master-2",
-          "DstK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-master-2",
-          "DstK8S_OwnerType": "Node",
-          "DstK8S_Type": "Node",
-          "SrcAddr": "10.0.0.3",
-          "SrcK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-master-0",
-          "SrcK8S_Name": "ci-ln-97r45m2-72292-z5tdr-master-0",
-          "SrcK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-master-0",
-          "SrcK8S_OwnerType": "Node",
-          "SrcK8S_Type": "Node"
-        },
-        "values": [
-          [
-            1687334400,
-            "5.788888888888889"
-          ],
-          [
-            1687334760,
-            "11.729166666666666"
-          ],
-          [
-            1687335120,
-            "12.597222222222221"
-          ],
-          [
-            1687335480,
-            "12.627777777777778"
-          ],
-          [
-            1687335840,
-            "11.234722222222222"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstAddr": "10.0.0.4",
-          "DstK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-master-2",
-          "DstK8S_Name": "ci-ln-97r45m2-72292-z5tdr-master-2",
-          "DstK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-master-2",
-          "DstK8S_OwnerType": "Node",
-          "DstK8S_Type": "Node",
-          "SrcAddr": "10.0.0.5",
-          "SrcK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-master-1",
-          "SrcK8S_Name": "ci-ln-97r45m2-72292-z5tdr-master-1",
-          "SrcK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-master-1",
-          "SrcK8S_OwnerType": "Node",
-          "SrcK8S_Type": "Node"
-        },
-        "values": [
-          [
-            1687334400,
-            "4.001388888888889"
-          ],
-          [
-            1687334760,
-            "8.408333333333333"
-          ],
-          [
-            1687335120,
-            "9.104166666666666"
-          ],
-          [
-            1687335480,
-            "9.16388888888889"
-          ],
-          [
-            1687335840,
-            "9.745833333333334"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstAddr": "10.0.0.4",
-          "DstK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-master-2",
-          "DstK8S_Name": "ci-ln-97r45m2-72292-z5tdr-master-2",
-          "DstK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-master-2",
-          "DstK8S_OwnerType": "Node",
-          "DstK8S_Type": "Node",
-          "SrcAddr": "10.0.128.2",
-          "SrcK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-worker-a-gssv6",
-          "SrcK8S_Name": "ci-ln-97r45m2-72292-z5tdr-worker-a-gssv6",
-          "SrcK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-worker-a-gssv6",
-          "SrcK8S_OwnerType": "Node",
-          "SrcK8S_Type": "Node"
-        },
-        "values": [
-          [
-            1687334400,
-            "0.6916666666666667"
-          ],
-          [
-            1687334760,
-            "1.3805555555555555"
-          ],
-          [
-            1687335120,
-            "1.4708333333333334"
-          ],
-          [
-            1687335480,
-            "1.3708333333333333"
-          ],
-          [
-            1687335840,
-            "1.1027777777777779"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstAddr": "10.0.0.4",
-          "DstK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-master-2",
-          "DstK8S_Name": "ci-ln-97r45m2-72292-z5tdr-master-2",
-          "DstK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-master-2",
-          "DstK8S_OwnerType": "Node",
-          "DstK8S_Type": "Node",
-          "SrcAddr": "10.0.128.3",
-          "SrcK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-worker-b-m2f27",
-          "SrcK8S_Name": "ci-ln-97r45m2-72292-z5tdr-worker-b-m2f27",
-          "SrcK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-worker-b-m2f27",
-          "SrcK8S_OwnerType": "Node",
-          "SrcK8S_Type": "Node"
-        },
-        "values": [
-          [
-            1687334400,
-            "0.42916666666666664"
-          ],
-          [
-            1687334760,
-            "0.8861111111111111"
-          ],
-          [
-            1687335120,
-            "0.8861111111111111"
-          ],
-          [
-            1687335480,
-            "0.8819444444444444"
-          ],
-          [
-            1687335840,
-            "0.9305555555555556"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstAddr": "10.0.0.4",
-          "DstK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-master-2",
-          "DstK8S_Name": "ci-ln-97r45m2-72292-z5tdr-master-2",
-          "DstK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-master-2",
+          "DstAddr": "10.0.0.3",
+          "DstK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-1",
+          "DstK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-master-1",
+          "DstK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-master-1",
           "DstK8S_OwnerType": "Node",
           "DstK8S_Type": "Node",
           "SrcAddr": "10.0.128.4",
-          "SrcK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-worker-c-5r9f4",
-          "SrcK8S_Name": "ci-ln-97r45m2-72292-z5tdr-worker-c-5r9f4",
-          "SrcK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-worker-c-5r9f4",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-worker-c-4xb6b",
+          "SrcK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-worker-c-4xb6b",
+          "SrcK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-worker-c-4xb6b",
           "SrcK8S_OwnerType": "Node",
           "SrcK8S_Type": "Node"
         },
         "values": [
           [
-            1687334400,
-            "0.23472222222222222"
+            1689357240,
+            "0.6902777777777778"
           ],
           [
-            1687334760,
-            "0.5041666666666667"
+            1689357600,
+            "0.6472222222222223"
           ],
           [
-            1687335120,
-            "0.7388888888888889"
+            1689357960,
+            "0.6736111111111112"
           ],
           [
-            1687335480,
-            "0.7125"
+            1689358320,
+            "0.7583333333333333"
           ],
           [
-            1687335840,
-            "0.7097222222222223"
+            1689358680,
+            "0.7472222222222222"
+          ],
+          [
+            1689359040,
+            "0.6972222222222222"
+          ],
+          [
+            1689359400,
+            "0.6819444444444445"
+          ],
+          [
+            1689359760,
+            "0.6611111111111111"
+          ],
+          [
+            1689360120,
+            "0.6930555555555555"
+          ],
+          [
+            1689360480,
+            "0.7208333333333333"
+          ],
+          [
+            1689360840,
+            "0.6694444444444444"
           ]
         ]
       },
       {
         "metric": {
-          "DstAddr": "10.0.0.4",
-          "DstK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-master-2",
-          "DstK8S_Name": "ci-ln-97r45m2-72292-z5tdr-master-2",
-          "DstK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-master-2",
+          "DstAddr": "10.0.0.3",
+          "DstK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-1",
+          "DstK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-master-1",
+          "DstK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-master-1",
           "DstK8S_OwnerType": "Node",
           "DstK8S_Type": "Node",
-          "SrcAddr": "10.129.2.13",
-          "SrcK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-worker-b-m2f27",
+          "SrcAddr": "10.128.2.16",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-worker-c-4xb6b",
           "SrcK8S_Name": "prometheus-k8s-1",
           "SrcK8S_Namespace": "openshift-monitoring",
           "SrcK8S_OwnerName": "prometheus-k8s",
@@ -396,37 +440,61 @@
         },
         "values": [
           [
-            1687334400,
-            "0.20972222222222223"
+            1689357240,
+            "0.34444444444444444"
           ],
           [
-            1687334760,
-            "0.45555555555555555"
+            1689357600,
+            "0.3277777777777778"
           ],
           [
-            1687335120,
-            "0.4888888888888889"
+            1689357960,
+            "0.3263888888888889"
           ],
           [
-            1687335480,
-            "0.4722222222222222"
+            1689358320,
+            "0.34444444444444444"
           ],
           [
-            1687335840,
-            "0.4583333333333333"
+            1689358680,
+            "0.3819444444444444"
+          ],
+          [
+            1689359040,
+            "0.3902777777777778"
+          ],
+          [
+            1689359400,
+            "0.34444444444444444"
+          ],
+          [
+            1689359760,
+            "0.3263888888888889"
+          ],
+          [
+            1689360120,
+            "0.33611111111111114"
+          ],
+          [
+            1689360480,
+            "0.32916666666666666"
+          ],
+          [
+            1689360840,
+            "0.3486111111111111"
           ]
         ]
       },
       {
         "metric": {
-          "DstAddr": "10.0.0.4",
-          "DstK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-master-2",
-          "DstK8S_Name": "ci-ln-97r45m2-72292-z5tdr-master-2",
-          "DstK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-master-2",
+          "DstAddr": "10.0.0.3",
+          "DstK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-1",
+          "DstK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-master-1",
+          "DstK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-master-1",
           "DstK8S_OwnerType": "Node",
           "DstK8S_Type": "Node",
-          "SrcAddr": "10.131.0.22",
-          "SrcK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-worker-a-gssv6",
+          "SrcAddr": "10.131.0.20",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-worker-b-4ngf7",
           "SrcK8S_Name": "prometheus-k8s-0",
           "SrcK8S_Namespace": "openshift-monitoring",
           "SrcK8S_OwnerName": "prometheus-k8s",
@@ -435,775 +503,2157 @@
         },
         "values": [
           [
-            1687334400,
-            "0.20833333333333334"
+            1689357240,
+            "0.33194444444444443"
           ],
           [
-            1687334760,
-            "0.44722222222222224"
+            1689357600,
+            "0.33611111111111114"
           ],
           [
-            1687335120,
-            "0.4861111111111111"
+            1689357960,
+            "0.3458333333333333"
           ],
           [
-            1687335480,
-            "0.4708333333333333"
+            1689358320,
+            "0.3597222222222222"
           ],
           [
-            1687335840,
-            "0.4361111111111111"
+            1689358680,
+            "0.34305555555555556"
+          ],
+          [
+            1689359040,
+            "0.3111111111111111"
+          ],
+          [
+            1689359400,
+            "0.33055555555555555"
+          ],
+          [
+            1689359760,
+            "0.36527777777777776"
+          ],
+          [
+            1689360120,
+            "0.37777777777777777"
+          ],
+          [
+            1689360480,
+            "0.37083333333333335"
+          ],
+          [
+            1689360840,
+            "0.3611111111111111"
           ]
         ]
       },
       {
         "metric": {
-          "DstAddr": "10.0.0.5",
-          "DstK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-master-1",
-          "DstK8S_Name": "ci-ln-97r45m2-72292-z5tdr-master-1",
-          "DstK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-master-1",
+          "DstAddr": "10.0.0.4",
+          "DstK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
+          "DstK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
+          "DstK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
           "DstK8S_OwnerType": "Node",
           "DstK8S_Type": "Node",
           "SrcAddr": "10.0.0.2"
         },
         "values": [
           [
-            1687334400,
-            "0.33055555555555555"
-          ],
-          [
-            1687334760,
-            "0.6458333333333334"
-          ],
-          [
-            1687335120,
-            "0.6680555555555555"
-          ],
-          [
-            1687335480,
-            "0.6708333333333333"
-          ],
-          [
-            1687335840,
-            "0.5625"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstAddr": "10.0.0.5",
-          "DstK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-master-1",
-          "DstK8S_Name": "ci-ln-97r45m2-72292-z5tdr-master-1",
-          "DstK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-master-1",
-          "DstK8S_OwnerType": "Node",
-          "DstK8S_Type": "Node",
-          "SrcAddr": "10.0.0.3",
-          "SrcK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-master-0",
-          "SrcK8S_Name": "ci-ln-97r45m2-72292-z5tdr-master-0",
-          "SrcK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-master-0",
-          "SrcK8S_OwnerType": "Node",
-          "SrcK8S_Type": "Node"
-        },
-        "values": [
-          [
-            1687334400,
-            "2.6444444444444444"
-          ],
-          [
-            1687334760,
-            "5.6194444444444445"
-          ],
-          [
-            1687335120,
-            "6.3902777777777775"
-          ],
-          [
-            1687335480,
-            "6.451388888888889"
-          ],
-          [
-            1687335840,
-            "6.0472222222222225"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstAddr": "10.0.0.5",
-          "DstK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-master-1",
-          "DstK8S_Name": "ci-ln-97r45m2-72292-z5tdr-master-1",
-          "DstK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-master-1",
-          "DstK8S_OwnerType": "Node",
-          "DstK8S_Type": "Node",
-          "SrcAddr": "10.0.0.4",
-          "SrcK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-master-2",
-          "SrcK8S_Name": "ci-ln-97r45m2-72292-z5tdr-master-2",
-          "SrcK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-master-2",
-          "SrcK8S_OwnerType": "Node",
-          "SrcK8S_Type": "Node"
-        },
-        "values": [
-          [
-            1687334400,
-            "3.936111111111111"
-          ],
-          [
-            1687334760,
-            "8.240277777777777"
-          ],
-          [
-            1687335120,
-            "8.855555555555556"
-          ],
-          [
-            1687335480,
-            "8.765277777777778"
-          ],
-          [
-            1687335840,
-            "9.504166666666666"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstAddr": "10.0.0.5",
-          "DstK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-master-1",
-          "DstK8S_Name": "ci-ln-97r45m2-72292-z5tdr-master-1",
-          "DstK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-master-1",
-          "DstK8S_OwnerType": "Node",
-          "DstK8S_Type": "Node",
-          "SrcAddr": "10.0.128.2",
-          "SrcK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-worker-a-gssv6",
-          "SrcK8S_Name": "ci-ln-97r45m2-72292-z5tdr-worker-a-gssv6",
-          "SrcK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-worker-a-gssv6",
-          "SrcK8S_OwnerType": "Node",
-          "SrcK8S_Type": "Node"
-        },
-        "values": [
-          [
-            1687334400,
-            "0.25416666666666665"
-          ],
-          [
-            1687334760,
-            "0.5319444444444444"
-          ],
-          [
-            1687335120,
-            "0.5513888888888889"
-          ],
-          [
-            1687335480,
+            1689357240,
             "0.5555555555555556"
           ],
           [
-            1687335840,
-            "0.5819444444444445"
+            1689357600,
+            "0.5416666666666666"
+          ],
+          [
+            1689357960,
+            "0.5666666666666667"
+          ],
+          [
+            1689358320,
+            "0.5569444444444445"
+          ],
+          [
+            1689358680,
+            "0.5430555555555555"
+          ],
+          [
+            1689359040,
+            "0.5875"
+          ],
+          [
+            1689359400,
+            "0.5347222222222222"
+          ],
+          [
+            1689359760,
+            "0.5458333333333333"
+          ],
+          [
+            1689360120,
+            "0.5555555555555556"
+          ],
+          [
+            1689360480,
+            "0.525"
+          ],
+          [
+            1689360840,
+            "0.5361111111111111"
           ]
         ]
       },
       {
         "metric": {
-          "DstAddr": "10.0.0.5",
-          "DstK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-master-1",
-          "DstK8S_Name": "ci-ln-97r45m2-72292-z5tdr-master-1",
-          "DstK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-master-1",
-          "DstK8S_OwnerType": "Node",
-          "DstK8S_Type": "Node",
-          "SrcAddr": "10.0.128.3",
-          "SrcK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-worker-b-m2f27",
-          "SrcK8S_Name": "ci-ln-97r45m2-72292-z5tdr-worker-b-m2f27",
-          "SrcK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-worker-b-m2f27",
-          "SrcK8S_OwnerType": "Node",
-          "SrcK8S_Type": "Node"
-        },
-        "values": [
-          [
-            1687334400,
-            "0.20416666666666666"
-          ],
-          [
-            1687334760,
-            "0.44305555555555554"
-          ],
-          [
-            1687335120,
-            "0.4666666666666667"
-          ],
-          [
-            1687335480,
-            "0.4708333333333333"
-          ],
-          [
-            1687335840,
-            "0.4861111111111111"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstAddr": "10.0.128.2",
-          "DstK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-worker-a-gssv6",
-          "DstK8S_Name": "ci-ln-97r45m2-72292-z5tdr-worker-a-gssv6",
-          "DstK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-worker-a-gssv6",
+          "DstAddr": "10.0.0.4",
+          "DstK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
+          "DstK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
+          "DstK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
           "DstK8S_OwnerType": "Node",
           "DstK8S_Type": "Node",
           "SrcAddr": "10.0.0.3",
-          "SrcK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-master-0",
-          "SrcK8S_Name": "ci-ln-97r45m2-72292-z5tdr-master-0",
-          "SrcK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-master-0",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-1",
+          "SrcK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-master-1",
+          "SrcK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-master-1",
           "SrcK8S_OwnerType": "Node",
           "SrcK8S_Type": "Node"
         },
         "values": [
           [
-            1687334400,
-            "0.35694444444444445"
+            1689357240,
+            "3.35"
           ],
           [
-            1687334760,
-            "0.7847222222222222"
+            1689357600,
+            "3.3958333333333335"
           ],
           [
-            1687335120,
-            "0.9388888888888889"
+            1689357960,
+            "3.452777777777778"
           ],
           [
-            1687335480,
-            "0.9458333333333333"
+            1689358320,
+            "3.2111111111111112"
           ],
           [
-            1687335840,
-            "0.8402777777777778"
+            1689358680,
+            "3.4319444444444445"
+          ],
+          [
+            1689359040,
+            "3.4472222222222224"
+          ],
+          [
+            1689359400,
+            "3.5027777777777778"
+          ],
+          [
+            1689359760,
+            "3.5319444444444446"
+          ],
+          [
+            1689360120,
+            "3.2069444444444444"
+          ],
+          [
+            1689360480,
+            "3.4194444444444443"
+          ],
+          [
+            1689360840,
+            "3.5083333333333333"
           ]
         ]
       },
       {
         "metric": {
-          "DstAddr": "10.0.128.2",
-          "DstK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-worker-a-gssv6",
-          "DstK8S_Name": "ci-ln-97r45m2-72292-z5tdr-worker-a-gssv6",
-          "DstK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-worker-a-gssv6",
-          "DstK8S_OwnerType": "Node",
-          "DstK8S_Type": "Node",
-          "SrcAddr": "10.0.0.4",
-          "SrcK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-master-2",
-          "SrcK8S_Name": "ci-ln-97r45m2-72292-z5tdr-master-2",
-          "SrcK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-master-2",
-          "SrcK8S_OwnerType": "Node",
-          "SrcK8S_Type": "Node"
-        },
-        "values": [
-          [
-            1687334400,
-            "0.7847222222222222"
-          ],
-          [
-            1687334760,
-            "1.6555555555555554"
-          ],
-          [
-            1687335120,
-            "2.0347222222222223"
-          ],
-          [
-            1687335480,
-            "1.7652777777777777"
-          ],
-          [
-            1687335840,
-            "1.1055555555555556"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstAddr": "10.0.128.2",
-          "DstK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-worker-a-gssv6",
-          "DstK8S_Name": "ci-ln-97r45m2-72292-z5tdr-worker-a-gssv6",
-          "DstK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-worker-a-gssv6",
+          "DstAddr": "10.0.0.4",
+          "DstK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
+          "DstK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
+          "DstK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
           "DstK8S_OwnerType": "Node",
           "DstK8S_Type": "Node",
           "SrcAddr": "10.0.0.5",
-          "SrcK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-master-1",
-          "SrcK8S_Name": "ci-ln-97r45m2-72292-z5tdr-master-1",
-          "SrcK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-master-1",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-0",
+          "SrcK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-master-0",
+          "SrcK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-master-0",
           "SrcK8S_OwnerType": "Node",
           "SrcK8S_Type": "Node"
         },
         "values": [
           [
-            1687334400,
-            "0.26666666666666666"
+            1689357240,
+            "10.655555555555555"
           ],
           [
-            1687334760,
-            "0.5833333333333334"
+            1689357600,
+            "10.668055555555556"
           ],
           [
-            1687335120,
-            "0.6861111111111111"
+            1689357960,
+            "11.044444444444444"
           ],
           [
-            1687335480,
-            "0.6305555555555555"
+            1689358320,
+            "10.9375"
           ],
           [
-            1687335840,
-            "0.5555555555555556"
+            1689358680,
+            "10.956944444444444"
+          ],
+          [
+            1689359040,
+            "10.958333333333334"
+          ],
+          [
+            1689359400,
+            "10.801388888888889"
+          ],
+          [
+            1689359760,
+            "11.015277777777778"
+          ],
+          [
+            1689360120,
+            "10.902777777777779"
+          ],
+          [
+            1689360480,
+            "10.933333333333334"
+          ],
+          [
+            1689360840,
+            "10.997222222222222"
           ]
         ]
       },
       {
         "metric": {
-          "DstAddr": "10.0.128.2",
-          "DstK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-worker-a-gssv6",
-          "DstK8S_Name": "ci-ln-97r45m2-72292-z5tdr-worker-a-gssv6",
-          "DstK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-worker-a-gssv6",
+          "DstAddr": "10.0.0.4",
+          "DstK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
+          "DstK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
+          "DstK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
+          "DstK8S_OwnerType": "Node",
+          "DstK8S_Type": "Node",
+          "SrcAddr": "10.0.128.2",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-worker-a-qfnz9",
+          "SrcK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-worker-a-qfnz9",
+          "SrcK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-worker-a-qfnz9",
+          "SrcK8S_OwnerType": "Node",
+          "SrcK8S_Type": "Node"
+        },
+        "values": [
+          [
+            1689357240,
+            "0.28055555555555556"
+          ],
+          [
+            1689358320,
+            "0.24305555555555555"
+          ],
+          [
+            1689360120,
+            "0.23472222222222222"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstAddr": "10.0.0.4",
+          "DstK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
+          "DstK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
+          "DstK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
           "DstK8S_OwnerType": "Node",
           "DstK8S_Type": "Node",
           "SrcAddr": "10.0.128.3",
-          "SrcK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-worker-b-m2f27",
-          "SrcK8S_Name": "ci-ln-97r45m2-72292-z5tdr-worker-b-m2f27",
-          "SrcK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-worker-b-m2f27",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-worker-b-4ngf7",
+          "SrcK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-worker-b-4ngf7",
+          "SrcK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-worker-b-4ngf7",
           "SrcK8S_OwnerType": "Node",
           "SrcK8S_Type": "Node"
         },
         "values": [
           [
-            1687334400,
-            "0.27361111111111114"
+            1689357240,
+            "0.7291666666666666"
           ],
           [
-            1687334760,
-            "0.6069444444444444"
+            1689357600,
+            "0.7694444444444445"
           ],
           [
-            1687335120,
-            "0.6888888888888889"
+            1689357960,
+            "0.7777777777777778"
           ],
           [
-            1687335480,
-            "0.6333333333333333"
+            1689358320,
+            "0.8125"
           ],
           [
-            1687335840,
-            "0.5916666666666667"
+            1689358680,
+            "0.8388888888888889"
+          ],
+          [
+            1689359040,
+            "0.8444444444444444"
+          ],
+          [
+            1689359400,
+            "0.8222222222222222"
+          ],
+          [
+            1689359760,
+            "0.7972222222222223"
+          ],
+          [
+            1689360120,
+            "0.7694444444444445"
+          ],
+          [
+            1689360480,
+            "0.7888888888888889"
+          ],
+          [
+            1689360840,
+            "0.8430555555555556"
           ]
         ]
       },
       {
         "metric": {
-          "DstAddr": "10.0.128.2",
-          "DstK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-worker-a-gssv6",
-          "DstK8S_Name": "ci-ln-97r45m2-72292-z5tdr-worker-a-gssv6",
-          "DstK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-worker-a-gssv6",
+          "DstAddr": "10.0.0.4",
+          "DstK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
+          "DstK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
+          "DstK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
           "DstK8S_OwnerType": "Node",
           "DstK8S_Type": "Node",
           "SrcAddr": "10.0.128.4",
-          "SrcK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-worker-c-5r9f4",
-          "SrcK8S_Name": "ci-ln-97r45m2-72292-z5tdr-worker-c-5r9f4",
-          "SrcK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-worker-c-5r9f4",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-worker-c-4xb6b",
+          "SrcK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-worker-c-4xb6b",
+          "SrcK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-worker-c-4xb6b",
           "SrcK8S_OwnerType": "Node",
           "SrcK8S_Type": "Node"
         },
         "values": [
           [
-            1687334400,
-            "0.34444444444444444"
+            1689357240,
+            "0.8319444444444445"
           ],
           [
-            1687334760,
-            "0.6805555555555556"
+            1689357600,
+            "0.8486111111111111"
           ],
           [
-            1687335120,
-            "0.7763888888888889"
+            1689357960,
+            "0.8180555555555555"
           ],
           [
-            1687335480,
-            "0.8111111111111111"
+            1689358320,
+            "0.8236111111111111"
           ],
           [
-            1687335840,
-            "0.7236111111111111"
+            1689358680,
+            "0.8541666666666666"
+          ],
+          [
+            1689359040,
+            "0.8569444444444444"
+          ],
+          [
+            1689359400,
+            "0.7736111111111111"
+          ],
+          [
+            1689359760,
+            "0.7208333333333333"
+          ],
+          [
+            1689360120,
+            "0.7291666666666666"
+          ],
+          [
+            1689360480,
+            "0.7319444444444444"
+          ],
+          [
+            1689360840,
+            "0.7513888888888889"
           ]
         ]
       },
       {
         "metric": {
-          "DstAddr": "10.0.128.3",
-          "DstK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-worker-b-m2f27",
-          "DstK8S_Name": "ci-ln-97r45m2-72292-z5tdr-worker-b-m2f27",
-          "DstK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-worker-b-m2f27",
+          "DstAddr": "10.0.0.4",
+          "DstK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
+          "DstK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
+          "DstK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
           "DstK8S_OwnerType": "Node",
           "DstK8S_Type": "Node",
-          "SrcAddr": "10.0.0.3",
-          "SrcK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-master-0",
-          "SrcK8S_Name": "ci-ln-97r45m2-72292-z5tdr-master-0",
-          "SrcK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-master-0",
-          "SrcK8S_OwnerType": "Node",
-          "SrcK8S_Type": "Node"
+          "SrcAddr": "10.128.2.16",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-worker-c-4xb6b",
+          "SrcK8S_Name": "prometheus-k8s-1",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "prometheus-k8s",
+          "SrcK8S_OwnerType": "StatefulSet",
+          "SrcK8S_Type": "Pod"
         },
         "values": [
           [
-            1687334400,
-            "0.31527777777777777"
+            1689357240,
+            "0.43333333333333335"
           ],
           [
-            1687334760,
-            "0.675"
+            1689357600,
+            "0.44722222222222224"
           ],
           [
-            1687335120,
-            "0.7486111111111111"
+            1689357960,
+            "0.4486111111111111"
           ],
           [
-            1687335480,
-            "0.7444444444444445"
-          ],
-          [
-            1687335840,
-            "0.6819444444444445"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstAddr": "10.0.128.3",
-          "DstK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-worker-b-m2f27",
-          "DstK8S_Name": "ci-ln-97r45m2-72292-z5tdr-worker-b-m2f27",
-          "DstK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-worker-b-m2f27",
-          "DstK8S_OwnerType": "Node",
-          "DstK8S_Type": "Node",
-          "SrcAddr": "10.0.0.4",
-          "SrcK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-master-2",
-          "SrcK8S_Name": "ci-ln-97r45m2-72292-z5tdr-master-2",
-          "SrcK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-master-2",
-          "SrcK8S_OwnerType": "Node",
-          "SrcK8S_Type": "Node"
-        },
-        "values": [
-          [
-            1687334400,
+            1689358320,
             "0.45555555555555555"
           ],
           [
-            1687334760,
-            "0.8875"
+            1689358680,
+            "0.43194444444444446"
           ],
           [
-            1687335120,
-            "0.8944444444444445"
+            1689359040,
+            "0.3888888888888889"
           ],
           [
-            1687335480,
-            "0.9069444444444444"
+            1689359400,
+            "0.4222222222222222"
           ],
           [
-            1687335840,
-            "0.9652777777777778"
+            1689359760,
+            "0.425"
+          ],
+          [
+            1689360120,
+            "0.39166666666666666"
+          ],
+          [
+            1689360480,
+            "0.425"
+          ],
+          [
+            1689360840,
+            "0.4444444444444444"
           ]
         ]
       },
       {
         "metric": {
-          "DstAddr": "10.0.128.3",
-          "DstK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-worker-b-m2f27",
-          "DstK8S_Name": "ci-ln-97r45m2-72292-z5tdr-worker-b-m2f27",
-          "DstK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-worker-b-m2f27",
+          "DstAddr": "10.0.0.4",
+          "DstK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
+          "DstK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
+          "DstK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
           "DstK8S_OwnerType": "Node",
           "DstK8S_Type": "Node",
-          "SrcAddr": "10.0.0.5",
-          "SrcK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-master-1",
-          "SrcK8S_Name": "ci-ln-97r45m2-72292-z5tdr-master-1",
-          "SrcK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-master-1",
+          "SrcAddr": "10.131.0.20",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-worker-b-4ngf7",
+          "SrcK8S_Name": "prometheus-k8s-0",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "prometheus-k8s",
+          "SrcK8S_OwnerType": "StatefulSet",
+          "SrcK8S_Type": "Pod"
+        },
+        "values": [
+          [
+            1689357240,
+            "0.3819444444444444"
+          ],
+          [
+            1689357600,
+            "0.39166666666666666"
+          ],
+          [
+            1689357960,
+            "0.44166666666666665"
+          ],
+          [
+            1689358320,
+            "0.4083333333333333"
+          ],
+          [
+            1689358680,
+            "0.40555555555555556"
+          ],
+          [
+            1689359040,
+            "0.42916666666666664"
+          ],
+          [
+            1689359400,
+            "0.4236111111111111"
+          ],
+          [
+            1689359760,
+            "0.4222222222222222"
+          ],
+          [
+            1689360120,
+            "0.42916666666666664"
+          ],
+          [
+            1689360480,
+            "0.4013888888888889"
+          ],
+          [
+            1689360840,
+            "0.38055555555555554"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstAddr": "10.0.0.5",
+          "DstK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-0",
+          "DstK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-master-0",
+          "DstK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-master-0",
+          "DstK8S_OwnerType": "Node",
+          "DstK8S_Type": "Node",
+          "SrcAddr": "10.0.0.3",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-1",
+          "SrcK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-master-1",
+          "SrcK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-master-1",
           "SrcK8S_OwnerType": "Node",
           "SrcK8S_Type": "Node"
         },
         "values": [
           [
-            1687334400,
-            "0.2222222222222222"
+            1689357240,
+            "9.948611111111111"
           ],
           [
-            1687334760,
-            "0.4597222222222222"
+            1689357600,
+            "10.034722222222221"
           ],
           [
-            1687335840,
-            "0.475"
+            1689357960,
+            "10.093055555555555"
+          ],
+          [
+            1689358320,
+            "9.997222222222222"
+          ],
+          [
+            1689358680,
+            "9.97638888888889"
+          ],
+          [
+            1689359040,
+            "9.823611111111111"
+          ],
+          [
+            1689359400,
+            "9.947222222222223"
+          ],
+          [
+            1689359760,
+            "10.1375"
+          ],
+          [
+            1689360120,
+            "9.809722222222222"
+          ],
+          [
+            1689360480,
+            "9.977777777777778"
+          ],
+          [
+            1689360840,
+            "9.96111111111111"
           ]
         ]
       },
       {
         "metric": {
-          "DstAddr": "10.0.128.3",
-          "DstK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-worker-b-m2f27",
-          "DstK8S_Name": "ci-ln-97r45m2-72292-z5tdr-worker-b-m2f27",
-          "DstK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-worker-b-m2f27",
-          "DstK8S_OwnerType": "Node",
-          "DstK8S_Type": "Node",
-          "SrcAddr": "10.0.128.2",
-          "SrcK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-worker-a-gssv6",
-          "SrcK8S_Name": "ci-ln-97r45m2-72292-z5tdr-worker-a-gssv6",
-          "SrcK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-worker-a-gssv6",
-          "SrcK8S_OwnerType": "Node",
-          "SrcK8S_Type": "Node"
-        },
-        "values": [
-          [
-            1687334400,
-            "0.29305555555555557"
-          ],
-          [
-            1687334760,
-            "0.5972222222222222"
-          ],
-          [
-            1687335120,
-            "0.6361111111111111"
-          ],
-          [
-            1687335480,
-            "0.6513888888888889"
-          ],
-          [
-            1687335840,
-            "0.6458333333333334"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstAddr": "10.0.128.3",
-          "DstK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-worker-b-m2f27",
-          "DstK8S_Name": "ci-ln-97r45m2-72292-z5tdr-worker-b-m2f27",
-          "DstK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-worker-b-m2f27",
-          "DstK8S_OwnerType": "Node",
-          "DstK8S_Type": "Node",
-          "SrcAddr": "10.0.128.4",
-          "SrcK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-worker-c-5r9f4",
-          "SrcK8S_Name": "ci-ln-97r45m2-72292-z5tdr-worker-c-5r9f4",
-          "SrcK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-worker-c-5r9f4",
-          "SrcK8S_OwnerType": "Node",
-          "SrcK8S_Type": "Node"
-        },
-        "values": [
-          [
-            1687334400,
-            "0.2569444444444444"
-          ],
-          [
-            1687334760,
-            "0.5"
-          ],
-          [
-            1687335120,
-            "0.4791666666666667"
-          ],
-          [
-            1687335480,
-            "0.5"
-          ],
-          [
-            1687335840,
-            "0.49722222222222223"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstAddr": "10.0.128.4",
-          "DstK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-worker-c-5r9f4",
-          "DstK8S_Name": "ci-ln-97r45m2-72292-z5tdr-worker-c-5r9f4",
-          "DstK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-worker-c-5r9f4",
+          "DstAddr": "10.0.0.5",
+          "DstK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-0",
+          "DstK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-master-0",
+          "DstK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-master-0",
           "DstK8S_OwnerType": "Node",
           "DstK8S_Type": "Node",
           "SrcAddr": "10.0.0.4",
-          "SrcK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-master-2",
-          "SrcK8S_Name": "ci-ln-97r45m2-72292-z5tdr-master-2",
-          "SrcK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-master-2",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
+          "SrcK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
+          "SrcK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
           "SrcK8S_OwnerType": "Node",
           "SrcK8S_Type": "Node"
         },
         "values": [
           [
-            1687334400,
-            "0.225"
+            1689357240,
+            "10.633333333333333"
           ],
           [
-            1687334760,
-            "0.5319444444444444"
+            1689357600,
+            "10.515277777777778"
           ],
           [
-            1687335120,
-            "0.775"
+            1689357960,
+            "10.659722222222221"
           ],
           [
-            1687335480,
-            "0.7638888888888888"
+            1689358320,
+            "10.71111111111111"
           ],
           [
-            1687335840,
-            "0.7791666666666667"
+            1689358680,
+            "10.809722222222222"
+          ],
+          [
+            1689359040,
+            "10.468055555555555"
+          ],
+          [
+            1689359400,
+            "10.319444444444445"
+          ],
+          [
+            1689359760,
+            "10.694444444444445"
+          ],
+          [
+            1689360120,
+            "10.676388888888889"
+          ],
+          [
+            1689360480,
+            "10.470833333333333"
+          ],
+          [
+            1689360840,
+            "10.290277777777778"
           ]
         ]
       },
       {
         "metric": {
-          "DstAddr": "10.0.128.4",
-          "DstK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-worker-c-5r9f4",
-          "DstK8S_Name": "ci-ln-97r45m2-72292-z5tdr-worker-c-5r9f4",
-          "DstK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-worker-c-5r9f4",
-          "DstK8S_OwnerType": "Node",
-          "DstK8S_Type": "Node",
-          "SrcAddr": "10.0.128.2",
-          "SrcK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-worker-a-gssv6",
-          "SrcK8S_Name": "ci-ln-97r45m2-72292-z5tdr-worker-a-gssv6",
-          "SrcK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-worker-a-gssv6",
-          "SrcK8S_OwnerType": "Node",
-          "SrcK8S_Type": "Node"
-        },
-        "values": [
-          [
-            1687334400,
-            "0.35138888888888886"
-          ],
-          [
-            1687334760,
-            "0.6722222222222223"
-          ],
-          [
-            1687335120,
-            "0.8069444444444445"
-          ],
-          [
-            1687335480,
-            "0.8"
-          ],
-          [
-            1687335840,
-            "0.6166666666666667"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstAddr": "10.0.128.4",
-          "DstK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-worker-c-5r9f4",
-          "DstK8S_Name": "ci-ln-97r45m2-72292-z5tdr-worker-c-5r9f4",
-          "DstK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-worker-c-5r9f4",
+          "DstAddr": "10.0.0.5",
+          "DstK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-0",
+          "DstK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-master-0",
+          "DstK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-master-0",
           "DstK8S_OwnerType": "Node",
           "DstK8S_Type": "Node",
           "SrcAddr": "10.0.128.3",
-          "SrcK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-worker-b-m2f27",
-          "SrcK8S_Name": "ci-ln-97r45m2-72292-z5tdr-worker-b-m2f27",
-          "SrcK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-worker-b-m2f27",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-worker-b-4ngf7",
+          "SrcK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-worker-b-4ngf7",
+          "SrcK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-worker-b-4ngf7",
           "SrcK8S_OwnerType": "Node",
           "SrcK8S_Type": "Node"
         },
         "values": [
           [
-            1687335480,
-            "0.44305555555555554"
+            1689357240,
+            "0.7125"
           ],
           [
-            1687335840,
-            "0.4222222222222222"
+            1689357600,
+            "0.7138888888888889"
+          ],
+          [
+            1689357960,
+            "0.7333333333333333"
+          ],
+          [
+            1689358320,
+            "0.7541666666666667"
+          ],
+          [
+            1689358680,
+            "0.8013888888888889"
+          ],
+          [
+            1689359040,
+            "0.7902777777777777"
+          ],
+          [
+            1689359400,
+            "0.7472222222222222"
+          ],
+          [
+            1689359760,
+            "0.7097222222222223"
+          ],
+          [
+            1689360120,
+            "0.6722222222222223"
+          ],
+          [
+            1689360480,
+            "0.7125"
+          ],
+          [
+            1689360840,
+            "0.7319444444444444"
           ]
         ]
       },
       {
         "metric": {
-          "DstAddr": "10.130.0.80",
-          "DstK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-master-2",
-          "DstK8S_Name": "console-c5d7c5bc9-5768d",
-          "DstK8S_Namespace": "openshift-console",
-          "DstK8S_OwnerName": "console",
-          "DstK8S_OwnerType": "Deployment",
-          "DstK8S_Type": "Pod",
-          "SrcAddr": "10.128.2.8",
-          "SrcK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-worker-c-5r9f4",
-          "SrcK8S_Name": "router-default-5df58f555-ps26c",
-          "SrcK8S_Namespace": "openshift-ingress",
-          "SrcK8S_OwnerName": "router-default",
-          "SrcK8S_OwnerType": "Deployment",
-          "SrcK8S_Type": "Pod"
+          "DstAddr": "10.0.0.5",
+          "DstK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-0",
+          "DstK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-master-0",
+          "DstK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-master-0",
+          "DstK8S_OwnerType": "Node",
+          "DstK8S_Type": "Node",
+          "SrcAddr": "10.0.128.4",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-worker-c-4xb6b",
+          "SrcK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-worker-c-4xb6b",
+          "SrcK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-worker-c-4xb6b",
+          "SrcK8S_OwnerType": "Node",
+          "SrcK8S_Type": "Node"
         },
         "values": [
           [
-            1687335840,
-            "0.4166666666666667"
+            1689357240,
+            "0.5944444444444444"
+          ],
+          [
+            1689357600,
+            "0.5486111111111112"
+          ],
+          [
+            1689357960,
+            "0.5583333333333333"
+          ],
+          [
+            1689358320,
+            "0.5819444444444445"
+          ],
+          [
+            1689358680,
+            "0.5666666666666667"
+          ],
+          [
+            1689359040,
+            "0.5763888888888888"
+          ],
+          [
+            1689359400,
+            "0.5611111111111111"
+          ],
+          [
+            1689359760,
+            "0.5791666666666667"
+          ],
+          [
+            1689360120,
+            "0.6083333333333333"
+          ],
+          [
+            1689360480,
+            "0.6"
+          ],
+          [
+            1689360840,
+            "0.6388888888888888"
           ]
         ]
       },
       {
         "metric": {
-          "DstAddr": "10.130.0.80",
-          "DstK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-master-2",
-          "DstK8S_Name": "console-c5d7c5bc9-5768d",
-          "DstK8S_Namespace": "openshift-console",
-          "DstK8S_OwnerName": "console",
-          "DstK8S_OwnerType": "Deployment",
-          "DstK8S_Type": "Pod",
-          "SrcAddr": "10.131.0.9",
-          "SrcK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-worker-a-gssv6",
-          "SrcK8S_Name": "router-default-5df58f555-68mfk",
-          "SrcK8S_Namespace": "openshift-ingress",
-          "SrcK8S_OwnerName": "router-default",
-          "SrcK8S_OwnerType": "Deployment",
+          "DstAddr": "10.0.0.5",
+          "DstK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-0",
+          "DstK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-master-0",
+          "DstK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-master-0",
+          "DstK8S_OwnerType": "Node",
+          "DstK8S_Type": "Node",
+          "SrcAddr": "10.128.2.16",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-worker-c-4xb6b",
+          "SrcK8S_Name": "prometheus-k8s-1",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "prometheus-k8s",
+          "SrcK8S_OwnerType": "StatefulSet",
           "SrcK8S_Type": "Pod"
         },
         "values": [
           [
-            1687334400,
-            "0.3527777777777778"
+            1689357240,
+            "0.3013888888888889"
           ],
           [
-            1687334760,
-            "0.6027777777777777"
+            1689357600,
+            "0.29583333333333334"
           ],
           [
-            1687335120,
-            "0.5291666666666667"
+            1689357960,
+            "0.3013888888888889"
+          ],
+          [
+            1689358320,
+            "0.2652777777777778"
+          ],
+          [
+            1689358680,
+            "0.2652777777777778"
+          ],
+          [
+            1689359040,
+            "0.29444444444444445"
+          ],
+          [
+            1689359400,
+            "0.2902777777777778"
+          ],
+          [
+            1689359760,
+            "0.29583333333333334"
+          ],
+          [
+            1689360120,
+            "0.26944444444444443"
+          ],
+          [
+            1689360480,
+            "0.26805555555555555"
+          ],
+          [
+            1689360840,
+            "0.27361111111111114"
           ]
         ]
       },
       {
         "metric": {
-          "DstAddr": "10.131.0.9",
-          "DstK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-worker-a-gssv6",
-          "DstK8S_Name": "router-default-5df58f555-68mfk",
-          "DstK8S_Namespace": "openshift-ingress",
-          "DstK8S_OwnerName": "router-default",
-          "DstK8S_OwnerType": "Deployment",
-          "DstK8S_Type": "Pod",
-          "SrcAddr": "10.130.0.80",
-          "SrcK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-master-2",
-          "SrcK8S_Name": "console-c5d7c5bc9-5768d",
-          "SrcK8S_Namespace": "openshift-console",
-          "SrcK8S_OwnerName": "console",
-          "SrcK8S_OwnerType": "Deployment",
+          "DstAddr": "10.0.0.5",
+          "DstK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-0",
+          "DstK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-master-0",
+          "DstK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-master-0",
+          "DstK8S_OwnerType": "Node",
+          "DstK8S_Type": "Node",
+          "SrcAddr": "10.131.0.20",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-worker-b-4ngf7",
+          "SrcK8S_Name": "prometheus-k8s-0",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "prometheus-k8s",
+          "SrcK8S_OwnerType": "StatefulSet",
           "SrcK8S_Type": "Pod"
         },
         "values": [
           [
-            1687334400,
-            "0.3333333333333333"
+            1689357240,
+            "0.2902777777777778"
           ],
           [
-            1687334760,
+            1689357600,
+            "0.2972222222222222"
+          ],
+          [
+            1689357960,
+            "0.2763888888888889"
+          ],
+          [
+            1689358320,
+            "0.2708333333333333"
+          ],
+          [
+            1689358680,
+            "0.2777777777777778"
+          ],
+          [
+            1689359040,
+            "0.2791666666666667"
+          ],
+          [
+            1689359400,
+            "0.30416666666666664"
+          ],
+          [
+            1689359760,
+            "0.3111111111111111"
+          ],
+          [
+            1689360120,
+            "0.30277777777777776"
+          ],
+          [
+            1689360480,
+            "0.29583333333333334"
+          ],
+          [
+            1689360840,
+            "0.30277777777777776"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstAddr": "10.0.128.2",
+          "DstK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-worker-a-qfnz9",
+          "DstK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-worker-a-qfnz9",
+          "DstK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-worker-a-qfnz9",
+          "DstK8S_OwnerType": "Node",
+          "DstK8S_Type": "Node",
+          "SrcAddr": "10.0.0.4",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
+          "SrcK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
+          "SrcK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
+          "SrcK8S_OwnerType": "Node",
+          "SrcK8S_Type": "Node"
+        },
+        "values": [
+          [
+            1689357240,
+            "0.2625"
+          ],
+          [
+            1689357600,
+            "0.2652777777777778"
+          ],
+          [
+            1689357960,
+            "0.2611111111111111"
+          ],
+          [
+            1689358320,
+            "0.26805555555555555"
+          ],
+          [
+            1689358680,
+            "0.26944444444444443"
+          ],
+          [
+            1689359040,
+            "0.27361111111111114"
+          ],
+          [
+            1689359400,
+            "0.2625"
+          ],
+          [
+            1689359760,
+            "0.2763888888888889"
+          ],
+          [
+            1689360120,
+            "0.2722222222222222"
+          ],
+          [
+            1689360480,
+            "0.2638888888888889"
+          ],
+          [
+            1689360840,
+            "0.28194444444444444"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstAddr": "10.0.128.2",
+          "DstK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-worker-a-qfnz9",
+          "DstK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-worker-a-qfnz9",
+          "DstK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-worker-a-qfnz9",
+          "DstK8S_OwnerType": "Node",
+          "DstK8S_Type": "Node",
+          "SrcAddr": "10.0.128.3",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-worker-b-4ngf7",
+          "SrcK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-worker-b-4ngf7",
+          "SrcK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-worker-b-4ngf7",
+          "SrcK8S_OwnerType": "Node",
+          "SrcK8S_Type": "Node"
+        },
+        "values": [
+          [
+            1689357240,
+            "0.24444444444444444"
+          ],
+          [
+            1689358320,
+            "0.24027777777777778"
+          ],
+          [
+            1689360120,
+            "0.25416666666666665"
+          ],
+          [
+            1689360480,
+            "0.2625"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstAddr": "10.0.128.2",
+          "DstK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-worker-a-qfnz9",
+          "DstK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-worker-a-qfnz9",
+          "DstK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-worker-a-qfnz9",
+          "DstK8S_OwnerType": "Node",
+          "DstK8S_Type": "Node",
+          "SrcAddr": "10.0.128.4",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-worker-c-4xb6b",
+          "SrcK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-worker-c-4xb6b",
+          "SrcK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-worker-c-4xb6b",
+          "SrcK8S_OwnerType": "Node",
+          "SrcK8S_Type": "Node"
+        },
+        "values": [
+          [
+            1689357240,
+            "0.2791666666666667"
+          ],
+          [
+            1689357600,
+            "0.2722222222222222"
+          ],
+          [
+            1689357960,
+            "0.2569444444444444"
+          ],
+          [
+            1689358320,
+            "0.2708333333333333"
+          ],
+          [
+            1689358680,
+            "0.2708333333333333"
+          ],
+          [
+            1689359040,
+            "0.2569444444444444"
+          ],
+          [
+            1689359400,
+            "0.2638888888888889"
+          ],
+          [
+            1689359760,
+            "0.2638888888888889"
+          ],
+          [
+            1689360120,
+            "0.28888888888888886"
+          ],
+          [
+            1689360480,
+            "0.2986111111111111"
+          ],
+          [
+            1689360840,
+            "0.28055555555555556"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstAddr": "10.0.128.3",
+          "DstK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-worker-b-4ngf7",
+          "DstK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-worker-b-4ngf7",
+          "DstK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-worker-b-4ngf7",
+          "DstK8S_OwnerType": "Node",
+          "DstK8S_Type": "Node",
+          "SrcAddr": "10.0.0.3",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-1",
+          "SrcK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-master-1",
+          "SrcK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-master-1",
+          "SrcK8S_OwnerType": "Node",
+          "SrcK8S_Type": "Node"
+        },
+        "values": [
+          [
+            1689357240,
+            "0.6944444444444444"
+          ],
+          [
+            1689357600,
+            "0.6930555555555555"
+          ],
+          [
+            1689357960,
+            "0.6277777777777778"
+          ],
+          [
+            1689358320,
+            "0.6277777777777778"
+          ],
+          [
+            1689358680,
+            "0.6638888888888889"
+          ],
+          [
+            1689359040,
+            "0.6638888888888889"
+          ],
+          [
+            1689359400,
+            "0.6652777777777777"
+          ],
+          [
+            1689359760,
+            "0.6986111111111111"
+          ],
+          [
+            1689360120,
+            "0.7111111111111111"
+          ],
+          [
+            1689360480,
+            "0.7194444444444444"
+          ],
+          [
+            1689360840,
+            "0.7027777777777777"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstAddr": "10.0.128.3",
+          "DstK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-worker-b-4ngf7",
+          "DstK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-worker-b-4ngf7",
+          "DstK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-worker-b-4ngf7",
+          "DstK8S_OwnerType": "Node",
+          "DstK8S_Type": "Node",
+          "SrcAddr": "10.0.0.4",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
+          "SrcK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
+          "SrcK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
+          "SrcK8S_OwnerType": "Node",
+          "SrcK8S_Type": "Node"
+        },
+        "values": [
+          [
+            1689357240,
+            "0.9277777777777778"
+          ],
+          [
+            1689357600,
+            "0.8847222222222222"
+          ],
+          [
+            1689357960,
+            "0.8527777777777777"
+          ],
+          [
+            1689358320,
+            "0.8444444444444444"
+          ],
+          [
+            1689358680,
+            "0.8472222222222222"
+          ],
+          [
+            1689359040,
+            "0.8972222222222223"
+          ],
+          [
+            1689359400,
+            "0.8375"
+          ],
+          [
+            1689359760,
+            "0.8138888888888889"
+          ],
+          [
+            1689360120,
+            "0.8652777777777778"
+          ],
+          [
+            1689360480,
+            "0.8666666666666667"
+          ],
+          [
+            1689360840,
+            "0.8263888888888888"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstAddr": "10.0.128.3",
+          "DstK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-worker-b-4ngf7",
+          "DstK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-worker-b-4ngf7",
+          "DstK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-worker-b-4ngf7",
+          "DstK8S_OwnerType": "Node",
+          "DstK8S_Type": "Node",
+          "SrcAddr": "10.0.0.5",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-0",
+          "SrcK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-master-0",
+          "SrcK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-master-0",
+          "SrcK8S_OwnerType": "Node",
+          "SrcK8S_Type": "Node"
+        },
+        "values": [
+          [
+            1689357240,
+            "0.8388888888888889"
+          ],
+          [
+            1689357600,
+            "0.8486111111111111"
+          ],
+          [
+            1689357960,
+            "0.8930555555555556"
+          ],
+          [
+            1689358320,
+            "0.8569444444444444"
+          ],
+          [
+            1689358680,
+            "0.9"
+          ],
+          [
+            1689359040,
+            "0.8625"
+          ],
+          [
+            1689359400,
+            "0.8111111111111111"
+          ],
+          [
+            1689359760,
+            "0.8527777777777777"
+          ],
+          [
+            1689360120,
+            "0.8305555555555556"
+          ],
+          [
+            1689360480,
+            "0.8388888888888889"
+          ],
+          [
+            1689360840,
+            "0.8694444444444445"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstAddr": "10.0.128.3",
+          "DstK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-worker-b-4ngf7",
+          "DstK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-worker-b-4ngf7",
+          "DstK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-worker-b-4ngf7",
+          "DstK8S_OwnerType": "Node",
+          "DstK8S_Type": "Node",
+          "SrcAddr": "10.0.128.2",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-worker-a-qfnz9",
+          "SrcK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-worker-a-qfnz9",
+          "SrcK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-worker-a-qfnz9",
+          "SrcK8S_OwnerType": "Node",
+          "SrcK8S_Type": "Node"
+        },
+        "values": [
+          [
+            1689357240,
+            "0.23333333333333334"
+          ],
+          [
+            1689358320,
+            "0.23472222222222222"
+          ],
+          [
+            1689358680,
+            "0.2875"
+          ],
+          [
+            1689359040,
+            "0.26805555555555555"
+          ],
+          [
+            1689359400,
+            "0.25555555555555554"
+          ],
+          [
+            1689359760,
+            "0.2722222222222222"
+          ],
+          [
+            1689360120,
+            "0.2625"
+          ],
+          [
+            1689360480,
+            "0.24861111111111112"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstAddr": "10.0.128.3",
+          "DstK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-worker-b-4ngf7",
+          "DstK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-worker-b-4ngf7",
+          "DstK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-worker-b-4ngf7",
+          "DstK8S_OwnerType": "Node",
+          "DstK8S_Type": "Node",
+          "SrcAddr": "10.0.128.4",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-worker-c-4xb6b",
+          "SrcK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-worker-c-4xb6b",
+          "SrcK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-worker-c-4xb6b",
+          "SrcK8S_OwnerType": "Node",
+          "SrcK8S_Type": "Node"
+        },
+        "values": [
+          [
+            1689357240,
+            "0.8736111111111111"
+          ],
+          [
+            1689357600,
+            "0.8680555555555556"
+          ],
+          [
+            1689357960,
+            "0.8402777777777778"
+          ],
+          [
+            1689358320,
+            "0.8472222222222222"
+          ],
+          [
+            1689358680,
+            "0.9180555555555555"
+          ],
+          [
+            1689359040,
+            "0.8875"
+          ],
+          [
+            1689359400,
+            "0.9055555555555556"
+          ],
+          [
+            1689359760,
+            "0.9416666666666667"
+          ],
+          [
+            1689360120,
+            "0.9319444444444445"
+          ],
+          [
+            1689360480,
+            "0.9"
+          ],
+          [
+            1689360840,
+            "0.8972222222222223"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstAddr": "10.0.128.4",
+          "DstK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-worker-c-4xb6b",
+          "DstK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-worker-c-4xb6b",
+          "DstK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-worker-c-4xb6b",
+          "DstK8S_OwnerType": "Node",
+          "DstK8S_Type": "Node",
+          "SrcAddr": "10.0.0.3",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-1",
+          "SrcK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-master-1",
+          "SrcK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-master-1",
+          "SrcK8S_OwnerType": "Node",
+          "SrcK8S_Type": "Node"
+        },
+        "values": [
+          [
+            1689357240,
+            "0.6819444444444445"
+          ],
+          [
+            1689357600,
+            "0.7027777777777777"
+          ],
+          [
+            1689357960,
+            "0.6777777777777778"
+          ],
+          [
+            1689358320,
+            "0.7027777777777777"
+          ],
+          [
+            1689358680,
+            "0.7069444444444445"
+          ],
+          [
+            1689359040,
+            "0.6944444444444444"
+          ],
+          [
+            1689359400,
+            "0.7277777777777777"
+          ],
+          [
+            1689359760,
+            "0.7597222222222222"
+          ],
+          [
+            1689360120,
+            "0.7583333333333333"
+          ],
+          [
+            1689360480,
+            "0.7361111111111112"
+          ],
+          [
+            1689360840,
+            "0.7305555555555555"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstAddr": "10.0.128.4",
+          "DstK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-worker-c-4xb6b",
+          "DstK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-worker-c-4xb6b",
+          "DstK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-worker-c-4xb6b",
+          "DstK8S_OwnerType": "Node",
+          "DstK8S_Type": "Node",
+          "SrcAddr": "10.0.0.4",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
+          "SrcK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
+          "SrcK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
+          "SrcK8S_OwnerType": "Node",
+          "SrcK8S_Type": "Node"
+        },
+        "values": [
+          [
+            1689357240,
+            "0.9194444444444444"
+          ],
+          [
+            1689357600,
+            "0.8888888888888888"
+          ],
+          [
+            1689357960,
+            "0.8569444444444444"
+          ],
+          [
+            1689358320,
+            "0.8791666666666667"
+          ],
+          [
+            1689358680,
+            "0.8861111111111111"
+          ],
+          [
+            1689359040,
+            "0.8652777777777778"
+          ],
+          [
+            1689359400,
+            "0.8416666666666667"
+          ],
+          [
+            1689359760,
+            "0.8319444444444445"
+          ],
+          [
+            1689360120,
+            "0.8513888888888889"
+          ],
+          [
+            1689360480,
+            "0.8652777777777778"
+          ],
+          [
+            1689360840,
+            "0.8597222222222223"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstAddr": "10.0.128.4",
+          "DstK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-worker-c-4xb6b",
+          "DstK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-worker-c-4xb6b",
+          "DstK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-worker-c-4xb6b",
+          "DstK8S_OwnerType": "Node",
+          "DstK8S_Type": "Node",
+          "SrcAddr": "10.0.0.5",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-0",
+          "SrcK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-master-0",
+          "SrcK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-master-0",
+          "SrcK8S_OwnerType": "Node",
+          "SrcK8S_Type": "Node"
+        },
+        "values": [
+          [
+            1689357240,
+            "0.6513888888888889"
+          ],
+          [
+            1689357600,
+            "0.65"
+          ],
+          [
+            1689357960,
+            "0.6611111111111111"
+          ],
+          [
+            1689358320,
             "0.6708333333333333"
           ],
           [
-            1687335120,
-            "0.7861111111111111"
+            1689358680,
+            "0.6458333333333334"
           ],
           [
-            1687335480,
-            "0.5875"
+            1689359040,
+            "0.6472222222222223"
+          ],
+          [
+            1689359400,
+            "0.675"
+          ],
+          [
+            1689359760,
+            "0.7083333333333334"
+          ],
+          [
+            1689360120,
+            "0.6625"
+          ],
+          [
+            1689360480,
+            "0.6194444444444445"
+          ],
+          [
+            1689360840,
+            "0.6472222222222223"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstAddr": "10.0.128.4",
+          "DstK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-worker-c-4xb6b",
+          "DstK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-worker-c-4xb6b",
+          "DstK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-worker-c-4xb6b",
+          "DstK8S_OwnerType": "Node",
+          "DstK8S_Type": "Node",
+          "SrcAddr": "10.0.128.2",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-worker-a-qfnz9",
+          "SrcK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-worker-a-qfnz9",
+          "SrcK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-worker-a-qfnz9",
+          "SrcK8S_OwnerType": "Node",
+          "SrcK8S_Type": "Node"
+        },
+        "values": [
+          [
+            1689357240,
+            "0.2638888888888889"
+          ],
+          [
+            1689357600,
+            "0.29305555555555557"
+          ],
+          [
+            1689357960,
+            "0.29444444444444445"
+          ],
+          [
+            1689358320,
+            "0.24583333333333332"
+          ],
+          [
+            1689359040,
+            "0.275"
+          ],
+          [
+            1689359400,
+            "0.28194444444444444"
+          ],
+          [
+            1689359760,
+            "0.30277777777777776"
+          ],
+          [
+            1689360120,
+            "0.29444444444444445"
+          ],
+          [
+            1689360480,
+            "0.2861111111111111"
+          ],
+          [
+            1689360840,
+            "0.29305555555555557"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstAddr": "10.0.128.4",
+          "DstK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-worker-c-4xb6b",
+          "DstK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-worker-c-4xb6b",
+          "DstK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-worker-c-4xb6b",
+          "DstK8S_OwnerType": "Node",
+          "DstK8S_Type": "Node",
+          "SrcAddr": "10.0.128.3",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-worker-b-4ngf7",
+          "SrcK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-worker-b-4ngf7",
+          "SrcK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-worker-b-4ngf7",
+          "SrcK8S_OwnerType": "Node",
+          "SrcK8S_Type": "Node"
+        },
+        "values": [
+          [
+            1689357240,
+            "0.9097222222222222"
+          ],
+          [
+            1689357600,
+            "0.8736111111111111"
+          ],
+          [
+            1689357960,
+            "0.8791666666666667"
+          ],
+          [
+            1689358320,
+            "0.8986111111111111"
+          ],
+          [
+            1689358680,
+            "0.8972222222222223"
+          ],
+          [
+            1689359040,
+            "0.8958333333333334"
+          ],
+          [
+            1689359400,
+            "0.8680555555555556"
+          ],
+          [
+            1689359760,
+            "0.8791666666666667"
+          ],
+          [
+            1689360120,
+            "0.8833333333333333"
+          ],
+          [
+            1689360480,
+            "0.9208333333333333"
+          ],
+          [
+            1689360840,
+            "0.9680555555555556"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstAddr": "10.128.0.10",
+          "DstK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-0",
+          "DstK8S_Name": "apiserver-85c7b5cdd6-96ngr",
+          "DstK8S_Namespace": "openshift-apiserver",
+          "DstK8S_OwnerName": "apiserver",
+          "DstK8S_OwnerType": "Deployment",
+          "DstK8S_Type": "Pod",
+          "SrcAddr": "10.0.0.5",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-0",
+          "SrcK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-master-0",
+          "SrcK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-master-0",
+          "SrcK8S_OwnerType": "Node",
+          "SrcK8S_Type": "Node"
+        },
+        "values": [
+          [
+            1689357240,
+            "0.2972222222222222"
+          ],
+          [
+            1689358320,
+            "0.2375"
+          ],
+          [
+            1689359040,
+            "0.25833333333333336"
+          ],
+          [
+            1689359400,
+            "0.2611111111111111"
+          ],
+          [
+            1689359760,
+            "0.23333333333333334"
+          ],
+          [
+            1689360120,
+            "0.2111111111111111"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstAddr": "10.128.0.10",
+          "DstK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-0",
+          "DstK8S_Name": "apiserver-85c7b5cdd6-96ngr",
+          "DstK8S_Namespace": "openshift-apiserver",
+          "DstK8S_OwnerName": "apiserver",
+          "DstK8S_OwnerType": "Deployment",
+          "DstK8S_Type": "Pod",
+          "SrcAddr": "10.128.0.2",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-0",
+          "SrcK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-master-0",
+          "SrcK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-master-0",
+          "SrcK8S_OwnerType": "Node",
+          "SrcK8S_Type": "Node"
+        },
+        "values": [
+          [
+            1689357240,
+            "0.26805555555555555"
+          ],
+          [
+            1689357960,
+            "0.2611111111111111"
+          ],
+          [
+            1689358320,
+            "0.2638888888888889"
+          ],
+          [
+            1689358680,
+            "0.2625"
+          ],
+          [
+            1689359040,
+            "0.2569444444444444"
+          ],
+          [
+            1689359400,
+            "0.25555555555555554"
+          ],
+          [
+            1689359760,
+            "0.25555555555555554"
+          ],
+          [
+            1689360120,
+            "0.25972222222222224"
+          ],
+          [
+            1689360480,
+            "0.2611111111111111"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstAddr": "10.128.0.13",
+          "DstK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-0",
+          "DstK8S_Name": "packageserver-79fc895b6-tpv44",
+          "DstK8S_Namespace": "openshift-operator-lifecycle-manager",
+          "DstK8S_OwnerName": "packageserver",
+          "DstK8S_OwnerType": "Deployment",
+          "DstK8S_Type": "Pod",
+          "SrcAddr": "10.129.0.15",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-1",
+          "SrcK8S_Name": "redhat-operators-gx25t",
+          "SrcK8S_Namespace": "openshift-marketplace",
+          "SrcK8S_OwnerName": "redhat-operators",
+          "SrcK8S_OwnerType": "CatalogSource",
+          "SrcK8S_Type": "Pod"
+        },
+        "values": [
+          [
+            1689357240,
+            "0.30416666666666664"
+          ],
+          [
+            1689357600,
+            "0.3416666666666667"
+          ],
+          [
+            1689357960,
+            "0.3125"
+          ],
+          [
+            1689359040,
+            "0.30972222222222223"
+          ],
+          [
+            1689359400,
+            "0.35"
+          ],
+          [
+            1689359760,
+            "0.3416666666666667"
+          ],
+          [
+            1689360840,
+            "0.31527777777777777"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstAddr": "10.128.0.13",
+          "DstK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-0",
+          "DstK8S_Name": "packageserver-79fc895b6-tpv44",
+          "DstK8S_Namespace": "openshift-operator-lifecycle-manager",
+          "DstK8S_OwnerName": "packageserver",
+          "DstK8S_OwnerType": "Deployment",
+          "DstK8S_Type": "Pod",
+          "SrcAddr": "10.129.0.36",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-1",
+          "SrcK8S_Name": "community-operators-p4g4q",
+          "SrcK8S_Namespace": "openshift-marketplace",
+          "SrcK8S_OwnerName": "community-operators",
+          "SrcK8S_OwnerType": "CatalogSource",
+          "SrcK8S_Type": "Pod"
+        },
+        "values": [
+          [
+            1689357600,
+            "0.32916666666666666"
+          ],
+          [
+            1689357960,
+            "0.34444444444444444"
+          ],
+          [
+            1689358320,
+            "0.23333333333333334"
+          ],
+          [
+            1689358680,
+            "0.3763888888888889"
+          ],
+          [
+            1689359040,
+            "0.5125"
+          ],
+          [
+            1689359400,
+            "0.47638888888888886"
+          ],
+          [
+            1689359760,
+            "0.3541666666666667"
+          ],
+          [
+            1689360120,
+            "0.25"
+          ],
+          [
+            1689360480,
+            "0.3458333333333333"
+          ],
+          [
+            1689360840,
+            "0.425"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstAddr": "10.129.0.15",
+          "DstK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-1",
+          "DstK8S_Name": "redhat-operators-gx25t",
+          "DstK8S_Namespace": "openshift-marketplace",
+          "DstK8S_OwnerName": "redhat-operators",
+          "DstK8S_OwnerType": "CatalogSource",
+          "DstK8S_Type": "Pod",
+          "SrcAddr": "10.128.0.13",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-0",
+          "SrcK8S_Name": "packageserver-79fc895b6-tpv44",
+          "SrcK8S_Namespace": "openshift-operator-lifecycle-manager",
+          "SrcK8S_OwnerName": "packageserver",
+          "SrcK8S_OwnerType": "Deployment",
+          "SrcK8S_Type": "Pod"
+        },
+        "values": [
+          [
+            1689358320,
+            "0.23194444444444445"
+          ],
+          [
+            1689358680,
+            "0.29305555555555557"
+          ],
+          [
+            1689359400,
+            "0.2972222222222222"
+          ],
+          [
+            1689359760,
+            "0.28888888888888886"
+          ],
+          [
+            1689360840,
+            "0.33194444444444443"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstAddr": "10.129.0.15",
+          "DstK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-1",
+          "DstK8S_Name": "redhat-operators-gx25t",
+          "DstK8S_Namespace": "openshift-marketplace",
+          "DstK8S_OwnerName": "redhat-operators",
+          "DstK8S_OwnerType": "CatalogSource",
+          "DstK8S_Type": "Pod",
+          "SrcAddr": "10.130.0.40",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
+          "SrcK8S_Name": "packageserver-79fc895b6-q8dtz",
+          "SrcK8S_Namespace": "openshift-operator-lifecycle-manager",
+          "SrcK8S_OwnerName": "packageserver",
+          "SrcK8S_OwnerType": "Deployment",
+          "SrcK8S_Type": "Pod"
+        },
+        "values": [
+          [
+            1689357600,
+            "0.26666666666666666"
+          ],
+          [
+            1689357960,
+            "0.2763888888888889"
+          ],
+          [
+            1689358320,
+            "0.2388888888888889"
+          ],
+          [
+            1689358680,
+            "0.3263888888888889"
+          ],
+          [
+            1689360480,
+            "0.2652777777777778"
+          ],
+          [
+            1689360840,
+            "0.32222222222222224"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstAddr": "10.129.0.36",
+          "DstK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-1",
+          "DstK8S_Name": "community-operators-p4g4q",
+          "DstK8S_Namespace": "openshift-marketplace",
+          "DstK8S_OwnerName": "community-operators",
+          "DstK8S_OwnerType": "CatalogSource",
+          "DstK8S_Type": "Pod",
+          "SrcAddr": "10.128.0.13",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-0",
+          "SrcK8S_Name": "packageserver-79fc895b6-tpv44",
+          "SrcK8S_Namespace": "openshift-operator-lifecycle-manager",
+          "SrcK8S_OwnerName": "packageserver",
+          "SrcK8S_OwnerType": "Deployment",
+          "SrcK8S_Type": "Pod"
+        },
+        "values": [
+          [
+            1689357600,
+            "0.2861111111111111"
+          ],
+          [
+            1689357960,
+            "0.29305555555555557"
+          ],
+          [
+            1689359040,
+            "0.26944444444444443"
+          ],
+          [
+            1689360840,
+            "0.2986111111111111"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstAddr": "10.130.0.16",
+          "DstK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
+          "DstK8S_Name": "etcd-operator-7c8f7b88c7-rtvpp",
+          "DstK8S_Namespace": "openshift-etcd-operator",
+          "DstK8S_OwnerName": "etcd-operator",
+          "DstK8S_OwnerType": "Deployment",
+          "DstK8S_Type": "Pod",
+          "SrcAddr": "10.0.0.4",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
+          "SrcK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
+          "SrcK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
+          "SrcK8S_OwnerType": "Node",
+          "SrcK8S_Type": "Node"
+        },
+        "values": [
+          [
+            1689357240,
+            "0.22083333333333333"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstAddr": "10.130.0.37",
+          "DstK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
+          "DstK8S_Name": "openshift-config-operator-576bcf557b-fgpqr",
+          "DstK8S_Namespace": "openshift-config-operator",
+          "DstK8S_OwnerName": "openshift-config-operator",
+          "DstK8S_OwnerType": "Deployment",
+          "DstK8S_Type": "Pod",
+          "SrcAddr": "10.130.0.2",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
+          "SrcK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
+          "SrcK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
+          "SrcK8S_OwnerType": "Node",
+          "SrcK8S_Type": "Node"
+        },
+        "values": [
+          [
+            1689357240,
+            "0.31666666666666665"
+          ],
+          [
+            1689357600,
+            "0.30694444444444446"
+          ],
+          [
+            1689357960,
+            "0.3125"
+          ],
+          [
+            1689358320,
+            "0.30416666666666664"
+          ],
+          [
+            1689358680,
+            "0.30416666666666664"
+          ],
+          [
+            1689359040,
+            "0.31666666666666665"
+          ],
+          [
+            1689359400,
+            "0.3375"
+          ],
+          [
+            1689359760,
+            "0.3277777777777778"
+          ],
+          [
+            1689360120,
+            "0.2916666666666667"
+          ],
+          [
+            1689360480,
+            "0.2972222222222222"
+          ],
+          [
+            1689360840,
+            "0.29305555555555557"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstAddr": "10.130.0.40",
+          "DstK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
+          "DstK8S_Name": "packageserver-79fc895b6-q8dtz",
+          "DstK8S_Namespace": "openshift-operator-lifecycle-manager",
+          "DstK8S_OwnerName": "packageserver",
+          "DstK8S_OwnerType": "Deployment",
+          "DstK8S_Type": "Pod",
+          "SrcAddr": "10.129.0.15",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-1",
+          "SrcK8S_Name": "redhat-operators-gx25t",
+          "SrcK8S_Namespace": "openshift-marketplace",
+          "SrcK8S_OwnerName": "redhat-operators",
+          "SrcK8S_OwnerType": "CatalogSource",
+          "SrcK8S_Type": "Pod"
+        },
+        "values": [
+          [
+            1689357600,
+            "0.3736111111111111"
+          ],
+          [
+            1689357960,
+            "0.30833333333333335"
+          ],
+          [
+            1689358680,
+            "0.2847222222222222"
+          ],
+          [
+            1689359040,
+            "0.2763888888888889"
+          ],
+          [
+            1689360480,
+            "0.2763888888888889"
+          ],
+          [
+            1689360840,
+            "0.35138888888888886"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstAddr": "10.130.0.40",
+          "DstK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
+          "DstK8S_Name": "packageserver-79fc895b6-q8dtz",
+          "DstK8S_Namespace": "openshift-operator-lifecycle-manager",
+          "DstK8S_OwnerName": "packageserver",
+          "DstK8S_OwnerType": "Deployment",
+          "DstK8S_Type": "Pod",
+          "SrcAddr": "10.129.0.36",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-1",
+          "SrcK8S_Name": "community-operators-p4g4q",
+          "SrcK8S_Namespace": "openshift-marketplace",
+          "SrcK8S_OwnerName": "community-operators",
+          "SrcK8S_OwnerType": "CatalogSource",
+          "SrcK8S_Type": "Pod"
+        },
+        "values": [
+          [
+            1689357600,
+            "0.2875"
+          ],
+          [
+            1689357960,
+            "0.3111111111111111"
+          ],
+          [
+            1689358680,
+            "0.27361111111111114"
+          ],
+          [
+            1689359040,
+            "0.3194444444444444"
+          ],
+          [
+            1689359400,
+            "0.4305555555555556"
+          ],
+          [
+            1689359760,
+            "0.4097222222222222"
+          ],
+          [
+            1689360120,
+            "0.20972222222222223"
+          ],
+          [
+            1689360480,
+            "0.3055555555555556"
+          ],
+          [
+            1689360840,
+            "0.3111111111111111"
           ]
         ]
       },
@@ -1211,32 +2661,56 @@
         "metric": {
           "DstAddr": "169.254.169.254",
           "SrcAddr": "10.0.0.3",
-          "SrcK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-master-0",
-          "SrcK8S_Name": "ci-ln-97r45m2-72292-z5tdr-master-0",
-          "SrcK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-master-0",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-1",
+          "SrcK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-master-1",
+          "SrcK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-master-1",
           "SrcK8S_OwnerType": "Node",
           "SrcK8S_Type": "Node"
         },
         "values": [
           [
-            1687334400,
-            "0.6041666666666666"
+            1689357240,
+            "0.3458333333333333"
           ],
           [
-            1687334760,
-            "1.261111111111111"
+            1689357600,
+            "0.3055555555555556"
           ],
           [
-            1687335120,
-            "1.1347222222222222"
+            1689357960,
+            "0.2916666666666667"
           ],
           [
-            1687335480,
-            "1.1041666666666667"
+            1689358320,
+            "0.2916666666666667"
           ],
           [
-            1687335840,
-            "1.1222222222222222"
+            1689358680,
+            "0.3236111111111111"
+          ],
+          [
+            1689359040,
+            "0.3472222222222222"
+          ],
+          [
+            1689359400,
+            "0.34305555555555556"
+          ],
+          [
+            1689359760,
+            "0.35694444444444445"
+          ],
+          [
+            1689360120,
+            "0.3347222222222222"
+          ],
+          [
+            1689360480,
+            "0.3375"
+          ],
+          [
+            1689360840,
+            "0.3472222222222222"
           ]
         ]
       },
@@ -1244,32 +2718,56 @@
         "metric": {
           "DstAddr": "169.254.169.254",
           "SrcAddr": "10.0.0.4",
-          "SrcK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-master-2",
-          "SrcK8S_Name": "ci-ln-97r45m2-72292-z5tdr-master-2",
-          "SrcK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-master-2",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
+          "SrcK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
+          "SrcK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
           "SrcK8S_OwnerType": "Node",
           "SrcK8S_Type": "Node"
         },
         "values": [
           [
-            1687334400,
-            "0.6208333333333333"
+            1689357240,
+            "0.3527777777777778"
           ],
           [
-            1687334760,
-            "1.2847222222222223"
+            1689357600,
+            "0.38055555555555554"
           ],
           [
-            1687335120,
-            "1.3305555555555555"
+            1689357960,
+            "0.35555555555555557"
           ],
           [
-            1687335480,
-            "1.3152777777777778"
+            1689358320,
+            "0.33055555555555555"
           ],
           [
-            1687335840,
-            "1.3333333333333333"
+            1689358680,
+            "0.3388888888888889"
+          ],
+          [
+            1689359040,
+            "0.3402777777777778"
+          ],
+          [
+            1689359400,
+            "0.3277777777777778"
+          ],
+          [
+            1689359760,
+            "0.32222222222222224"
+          ],
+          [
+            1689360120,
+            "0.3388888888888889"
+          ],
+          [
+            1689360480,
+            "0.3472222222222222"
+          ],
+          [
+            1689360840,
+            "0.3486111111111111"
           ]
         ]
       },
@@ -1277,60 +2775,160 @@
         "metric": {
           "DstAddr": "169.254.169.254",
           "SrcAddr": "10.0.0.5",
-          "SrcK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-master-1",
-          "SrcK8S_Name": "ci-ln-97r45m2-72292-z5tdr-master-1",
-          "SrcK8S_OwnerName": "ci-ln-97r45m2-72292-z5tdr-master-1",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-0",
+          "SrcK8S_Name": "ci-ln-y7s2fjt-72292-6ptxl-master-0",
+          "SrcK8S_OwnerName": "ci-ln-y7s2fjt-72292-6ptxl-master-0",
           "SrcK8S_OwnerType": "Node",
           "SrcK8S_Type": "Node"
         },
         "values": [
           [
-            1687334400,
-            "0.6041666666666666"
+            1689357240,
+            "0.3416666666666667"
           ],
           [
-            1687334760,
-            "1.2944444444444445"
+            1689357600,
+            "0.33055555555555555"
           ],
           [
-            1687335120,
-            "1.3111111111111111"
+            1689357960,
+            "0.33611111111111114"
           ],
           [
-            1687335480,
-            "1.3486111111111112"
+            1689358320,
+            "0.32916666666666666"
           ],
           [
-            1687335840,
-            "1.375"
+            1689358680,
+            "0.3458333333333333"
+          ],
+          [
+            1689359040,
+            "0.36527777777777776"
+          ],
+          [
+            1689359400,
+            "0.35"
+          ],
+          [
+            1689359760,
+            "0.3472222222222222"
+          ],
+          [
+            1689360120,
+            "0.3388888888888889"
+          ],
+          [
+            1689360480,
+            "0.32222222222222224"
+          ],
+          [
+            1689360840,
+            "0.33055555555555555"
           ]
         ]
       },
       {
         "metric": {
           "DstAddr": "169.254.169.254",
-          "SrcAddr": "35.239.128.186"
+          "SrcAddr": "104.154.65.68"
         },
         "values": [
           [
-            1687334400,
-            "0.33194444444444443"
+            1689357240,
+            "0.34305555555555556"
           ],
           [
-            1687334760,
-            "0.7069444444444445"
+            1689357600,
+            "0.30972222222222223"
           ],
           [
-            1687335120,
+            1689357960,
+            "0.31666666666666665"
+          ],
+          [
+            1689358320,
+            "0.3486111111111111"
+          ],
+          [
+            1689358680,
+            "0.3638888888888889"
+          ],
+          [
+            1689359040,
+            "0.3458333333333333"
+          ],
+          [
+            1689359400,
+            "0.35833333333333334"
+          ],
+          [
+            1689359760,
+            "0.35694444444444445"
+          ],
+          [
+            1689360120,
+            "0.32916666666666666"
+          ],
+          [
+            1689360480,
+            "0.3236111111111111"
+          ],
+          [
+            1689360840,
+            "0.31527777777777777"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstAddr": "169.254.169.254",
+          "SrcAddr": "35.239.88.198"
+        },
+        "values": [
+          [
+            1689357240,
+            "0.7152777777777778"
+          ],
+          [
+            1689357600,
             "0.7361111111111112"
           ],
           [
-            1687335480,
-            "0.7069444444444445"
+            1689357960,
+            "0.7194444444444444"
           ],
           [
-            1687335840,
-            "0.6791666666666667"
+            1689358320,
+            "0.7208333333333333"
+          ],
+          [
+            1689358680,
+            "0.6888888888888889"
+          ],
+          [
+            1689359040,
+            "0.6958333333333333"
+          ],
+          [
+            1689359400,
+            "0.6902777777777778"
+          ],
+          [
+            1689359760,
+            "0.6680555555555555"
+          ],
+          [
+            1689360120,
+            "0.6722222222222223"
+          ],
+          [
+            1689360480,
+            "0.6958333333333333"
+          ],
+          [
+            1689360840,
+            "0.6958333333333333"
           ]
         ]
       },
@@ -1342,619 +2940,326 @@
           "DstK8S_OwnerName": "kubernetes",
           "DstK8S_OwnerType": "Service",
           "DstK8S_Type": "Service",
-          "SrcAddr": "10.130.0.80",
-          "SrcK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-master-2",
-          "SrcK8S_Name": "console-c5d7c5bc9-5768d",
-          "SrcK8S_Namespace": "openshift-console",
-          "SrcK8S_OwnerName": "console",
-          "SrcK8S_OwnerType": "Deployment",
-          "SrcK8S_Type": "Pod"
-        },
-        "values": [
-          [
-            1687334400,
-            "0.3194444444444444"
-          ],
-          [
-            1687334760,
-            "0.5361111111111111"
-          ],
-          [
-            1687335120,
-            "0.6222222222222222"
-          ],
-          [
-            1687335480,
-            "0.6375"
-          ],
-          [
-            1687335840,
-            "0.5875"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstAddr": "172.30.0.10",
-          "DstK8S_Name": "dns-default",
-          "DstK8S_Namespace": "openshift-dns",
-          "DstK8S_OwnerName": "dns-default",
-          "DstK8S_OwnerType": "Service",
-          "DstK8S_Type": "Service",
-          "SrcAddr": "10.128.0.58",
-          "SrcK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-master-0",
-          "SrcK8S_Name": "flowlogs-pipeline-rpblj",
-          "SrcK8S_Namespace": "netobserv",
-          "SrcK8S_OwnerName": "flowlogs-pipeline",
-          "SrcK8S_OwnerType": "DaemonSet",
-          "SrcK8S_Type": "Pod"
-        },
-        "values": [
-          [
-            1687334400,
-            "0.55"
-          ],
-          [
-            1687334760,
-            "1.15"
-          ],
-          [
-            1687335120,
-            "1.2"
-          ],
-          [
-            1687335480,
-            "1.2"
-          ],
-          [
-            1687335840,
-            "1.1916666666666667"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstAddr": "172.30.0.10",
-          "DstK8S_Name": "dns-default",
-          "DstK8S_Namespace": "openshift-dns",
-          "DstK8S_OwnerName": "dns-default",
-          "DstK8S_OwnerType": "Service",
-          "DstK8S_Type": "Service",
-          "SrcAddr": "10.128.2.13",
-          "SrcK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-worker-c-5r9f4",
-          "SrcK8S_Name": "thanos-querier-6995446797-sqqqw",
+          "SrcAddr": "10.130.0.18",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
+          "SrcK8S_Name": "cluster-monitoring-operator-7f8d868679-gztwv",
           "SrcK8S_Namespace": "openshift-monitoring",
-          "SrcK8S_OwnerName": "thanos-querier",
+          "SrcK8S_OwnerName": "cluster-monitoring-operator",
           "SrcK8S_OwnerType": "Deployment",
           "SrcK8S_Type": "Pod"
         },
         "values": [
           [
-            1687334400,
-            "0.22916666666666666"
+            1689357600,
+            "0.29444444444444445"
           ],
           [
-            1687334760,
-            "0.4791666666666667"
+            1689358320,
+            "0.2972222222222222"
           ],
           [
-            1687335120,
-            "0.5"
+            1689358680,
+            "0.3402777777777778"
           ],
           [
-            1687335480,
-            "0.5"
+            1689359400,
+            "0.275"
           ],
           [
-            1687335840,
-            "0.5"
+            1689360120,
+            "0.2652777777777778"
+          ],
+          [
+            1689360480,
+            "0.3125"
           ]
         ]
       },
       {
         "metric": {
-          "DstAddr": "172.30.0.10",
-          "DstK8S_Name": "dns-default",
-          "DstK8S_Namespace": "openshift-dns",
-          "DstK8S_OwnerName": "dns-default",
-          "DstK8S_OwnerType": "Service",
-          "DstK8S_Type": "Service",
-          "SrcAddr": "10.128.2.24",
-          "SrcK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-worker-c-5r9f4",
-          "SrcK8S_Name": "netobserv-plugin-7594ff78b6-jmtnb",
-          "SrcK8S_Namespace": "netobserv",
-          "SrcK8S_OwnerName": "netobserv-plugin",
-          "SrcK8S_OwnerType": "Deployment",
-          "SrcK8S_Type": "Pod"
-        },
-        "values": [
-          [
-            1687335120,
-            "0.8333333333333334"
-          ],
-          [
-            1687335480,
-            "0.675"
-          ],
-          [
-            1687335840,
-            "0.5986111111111111"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstAddr": "172.30.0.10",
-          "DstK8S_Name": "dns-default",
-          "DstK8S_Namespace": "openshift-dns",
-          "DstK8S_OwnerName": "dns-default",
-          "DstK8S_OwnerType": "Service",
-          "DstK8S_Type": "Service",
-          "SrcAddr": "10.128.2.25",
-          "SrcK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-worker-c-5r9f4",
-          "SrcK8S_Name": "flowlogs-pipeline-cbzmz",
-          "SrcK8S_Namespace": "netobserv",
-          "SrcK8S_OwnerName": "flowlogs-pipeline",
-          "SrcK8S_OwnerType": "DaemonSet",
-          "SrcK8S_Type": "Pod"
-        },
-        "values": [
-          [
-            1687334400,
-            "0.5583333333333333"
-          ],
-          [
-            1687334760,
-            "1.1583333333333334"
-          ],
-          [
-            1687335120,
-            "1.2"
-          ],
-          [
-            1687335480,
-            "1.2"
-          ],
-          [
-            1687335840,
-            "1.2"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstAddr": "172.30.0.10",
-          "DstK8S_Name": "dns-default",
-          "DstK8S_Namespace": "openshift-dns",
-          "DstK8S_OwnerName": "dns-default",
-          "DstK8S_OwnerType": "Service",
-          "DstK8S_Type": "Service",
-          "SrcAddr": "10.129.0.16",
-          "SrcK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-master-1",
-          "SrcK8S_Name": "machine-api-controllers-575fb8447c-h2d8v",
-          "SrcK8S_Namespace": "openshift-machine-api",
-          "SrcK8S_OwnerName": "machine-api-controllers",
-          "SrcK8S_OwnerType": "Deployment",
-          "SrcK8S_Type": "Pod"
-        },
-        "values": [
-          [
-            1687334400,
-            "0.2152777777777778"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstAddr": "172.30.0.10",
-          "DstK8S_Name": "dns-default",
-          "DstK8S_Namespace": "openshift-dns",
-          "DstK8S_OwnerName": "dns-default",
-          "DstK8S_OwnerType": "Service",
-          "DstK8S_Type": "Service",
-          "SrcAddr": "10.129.0.75",
-          "SrcK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-master-1",
-          "SrcK8S_Name": "flowlogs-pipeline-5ktsr",
-          "SrcK8S_Namespace": "netobserv",
-          "SrcK8S_OwnerName": "flowlogs-pipeline",
-          "SrcK8S_OwnerType": "DaemonSet",
-          "SrcK8S_Type": "Pod"
-        },
-        "values": [
-          [
-            1687334400,
-            "0.55"
-          ],
-          [
-            1687334760,
-            "1.15"
-          ],
-          [
-            1687335120,
-            "1.2"
-          ],
-          [
-            1687335480,
-            "1.2"
-          ],
-          [
-            1687335840,
-            "1.2"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstAddr": "172.30.0.10",
-          "DstK8S_Name": "dns-default",
-          "DstK8S_Namespace": "openshift-dns",
-          "DstK8S_OwnerName": "dns-default",
-          "DstK8S_OwnerType": "Service",
-          "DstK8S_Type": "Service",
-          "SrcAddr": "10.129.2.15",
-          "SrcK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-worker-b-m2f27",
-          "SrcK8S_Name": "flowlogs-pipeline-gxpqg",
-          "SrcK8S_Namespace": "netobserv",
-          "SrcK8S_OwnerName": "flowlogs-pipeline",
-          "SrcK8S_OwnerType": "DaemonSet",
-          "SrcK8S_Type": "Pod"
-        },
-        "values": [
-          [
-            1687334400,
-            "0.5583333333333333"
-          ],
-          [
-            1687334760,
-            "1.1583333333333334"
-          ],
-          [
-            1687335120,
-            "1.2"
-          ],
-          [
-            1687335480,
-            "1.2"
-          ],
-          [
-            1687335840,
-            "1.2"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstAddr": "172.30.0.10",
-          "DstK8S_Name": "dns-default",
-          "DstK8S_Namespace": "openshift-dns",
-          "DstK8S_OwnerName": "dns-default",
+          "DstAddr": "172.30.0.1",
+          "DstK8S_Name": "kubernetes",
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
           "DstK8S_OwnerType": "Service",
           "DstK8S_Type": "Service",
           "SrcAddr": "10.130.0.30",
-          "SrcK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-master-2",
-          "SrcK8S_Name": "cluster-image-registry-operator-6687fbd44d-bg9n7",
-          "SrcK8S_Namespace": "openshift-image-registry",
-          "SrcK8S_OwnerName": "cluster-image-registry-operator",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
+          "SrcK8S_Name": "openshift-controller-manager-operator-5ccf997984-8q56x",
+          "SrcK8S_Namespace": "openshift-controller-manager-operator",
+          "SrcK8S_OwnerName": "openshift-controller-manager-operator",
           "SrcK8S_OwnerType": "Deployment",
           "SrcK8S_Type": "Pod"
         },
         "values": [
           [
-            1687334400,
-            "0.3333333333333333"
+            1689357240,
+            "0.2861111111111111"
           ],
           [
-            1687334760,
-            "0.6333333333333333"
+            1689358320,
+            "0.22777777777777777"
           ],
           [
-            1687335120,
-            "0.6333333333333333"
+            1689359040,
+            "0.25277777777777777"
           ],
           [
-            1687335480,
-            "0.7"
+            1689359760,
+            "0.2361111111111111"
           ],
           [
-            1687335840,
-            "0.8166666666666667"
+            1689360120,
+            "0.21805555555555556"
+          ],
+          [
+            1689360840,
+            "0.29305555555555557"
           ]
         ]
       },
       {
         "metric": {
-          "DstAddr": "172.30.0.10",
-          "DstK8S_Name": "dns-default",
-          "DstK8S_Namespace": "openshift-dns",
-          "DstK8S_OwnerName": "dns-default",
+          "DstAddr": "172.30.0.1",
+          "DstK8S_Name": "kubernetes",
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
           "DstK8S_OwnerType": "Service",
           "DstK8S_Type": "Service",
-          "SrcAddr": "10.130.0.35",
-          "SrcK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-master-2",
-          "SrcK8S_Name": "kube-apiserver-operator-854bf7c4d5-m9j2c",
-          "SrcK8S_Namespace": "openshift-kube-apiserver-operator",
-          "SrcK8S_OwnerName": "kube-apiserver-operator",
+          "SrcAddr": "10.130.0.9",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
+          "SrcK8S_Name": "openshift-apiserver-operator-6c8f76cb89-gqbnk",
+          "SrcK8S_Namespace": "openshift-apiserver-operator",
+          "SrcK8S_OwnerName": "openshift-apiserver-operator",
           "SrcK8S_OwnerType": "Deployment",
           "SrcK8S_Type": "Pod"
         },
         "values": [
           [
-            1687334400,
-            "0.3"
+            1689357240,
+            "0.31666666666666665"
           ],
           [
-            1687334760,
-            "1.3527777777777779"
+            1689357600,
+            "0.2861111111111111"
           ],
           [
-            1687335120,
-            "1.9513888888888888"
+            1689357960,
+            "0.31805555555555554"
           ],
           [
-            1687335480,
-            "1.4986111111111111"
+            1689358320,
+            "0.3111111111111111"
           ],
           [
-            1687335840,
-            "1.6902777777777778"
+            1689358680,
+            "0.2902777777777778"
+          ],
+          [
+            1689359040,
+            "0.2972222222222222"
+          ],
+          [
+            1689359760,
+            "0.30416666666666664"
+          ],
+          [
+            1689360120,
+            "0.30416666666666664"
+          ],
+          [
+            1689360480,
+            "0.24861111111111112"
+          ],
+          [
+            1689360840,
+            "0.2708333333333333"
           ]
         ]
       },
       {
         "metric": {
-          "DstAddr": "172.30.0.10",
-          "DstK8S_Name": "dns-default",
-          "DstK8S_Namespace": "openshift-dns",
-          "DstK8S_OwnerName": "dns-default",
+          "DstAddr": "172.30.27.230",
+          "DstK8S_Name": "redhat-operators",
+          "DstK8S_Namespace": "openshift-marketplace",
+          "DstK8S_OwnerName": "redhat-operators",
           "DstK8S_OwnerType": "Service",
           "DstK8S_Type": "Service",
-          "SrcAddr": "10.130.0.79",
-          "SrcK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-master-2",
-          "SrcK8S_Name": "flowlogs-pipeline-2fqk6",
-          "SrcK8S_Namespace": "netobserv",
-          "SrcK8S_OwnerName": "flowlogs-pipeline",
-          "SrcK8S_OwnerType": "DaemonSet",
+          "SrcAddr": "10.128.0.13",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-0",
+          "SrcK8S_Name": "packageserver-79fc895b6-tpv44",
+          "SrcK8S_Namespace": "openshift-operator-lifecycle-manager",
+          "SrcK8S_OwnerName": "packageserver",
+          "SrcK8S_OwnerType": "Deployment",
           "SrcK8S_Type": "Pod"
         },
         "values": [
           [
-            1687334400,
-            "0.5416666666666666"
-          ],
-          [
-            1687334760,
-            "1.1416666666666666"
-          ],
-          [
-            1687335120,
-            "1.2"
-          ],
-          [
-            1687335480,
-            "1.2"
-          ],
-          [
-            1687335840,
-            "1.2"
+            1689358680,
+            "0.3013888888888889"
           ]
         ]
       },
       {
         "metric": {
-          "DstAddr": "172.30.0.10",
-          "DstK8S_Name": "dns-default",
-          "DstK8S_Namespace": "openshift-dns",
-          "DstK8S_OwnerName": "dns-default",
+          "DstAddr": "172.30.27.230",
+          "DstK8S_Name": "redhat-operators",
+          "DstK8S_Namespace": "openshift-marketplace",
+          "DstK8S_OwnerName": "redhat-operators",
           "DstK8S_OwnerType": "Service",
           "DstK8S_Type": "Service",
-          "SrcAddr": "10.130.0.80",
-          "SrcK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-master-2",
-          "SrcK8S_Name": "console-c5d7c5bc9-5768d",
-          "SrcK8S_Namespace": "openshift-console",
-          "SrcK8S_OwnerName": "console",
+          "SrcAddr": "10.130.0.40",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
+          "SrcK8S_Name": "packageserver-79fc895b6-q8dtz",
+          "SrcK8S_Namespace": "openshift-operator-lifecycle-manager",
+          "SrcK8S_OwnerName": "packageserver",
           "SrcK8S_OwnerType": "Deployment",
           "SrcK8S_Type": "Pod"
         },
         "values": [
           [
-            1687334400,
-            "1.5916666666666666"
+            1689357240,
+            "0.23472222222222222"
           ],
           [
-            1687334760,
-            "2.561111111111111"
+            1689357600,
+            "0.3111111111111111"
           ],
           [
-            1687335120,
-            "2.9625"
+            1689357960,
+            "0.28888888888888886"
           ],
           [
-            1687335480,
-            "2.9569444444444444"
+            1689358680,
+            "0.3125"
           ],
           [
-            1687335840,
-            "2.727777777777778"
+            1689359400,
+            "0.29583333333333334"
+          ],
+          [
+            1689359760,
+            "0.3236111111111111"
+          ],
+          [
+            1689360840,
+            "0.34444444444444444"
           ]
         ]
       },
       {
         "metric": {
-          "DstAddr": "172.30.0.10",
-          "DstK8S_Name": "dns-default",
-          "DstK8S_Namespace": "openshift-dns",
-          "DstK8S_OwnerName": "dns-default",
+          "DstAddr": "172.30.74.246",
+          "DstK8S_Name": "community-operators",
+          "DstK8S_Namespace": "openshift-marketplace",
+          "DstK8S_OwnerName": "community-operators",
           "DstK8S_OwnerType": "Service",
           "DstK8S_Type": "Service",
-          "SrcAddr": "10.131.0.19",
-          "SrcK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-worker-a-gssv6",
-          "SrcK8S_Name": "thanos-querier-6995446797-9w8h9",
-          "SrcK8S_Namespace": "openshift-monitoring",
-          "SrcK8S_OwnerName": "thanos-querier",
+          "SrcAddr": "10.128.0.13",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-0",
+          "SrcK8S_Name": "packageserver-79fc895b6-tpv44",
+          "SrcK8S_Namespace": "openshift-operator-lifecycle-manager",
+          "SrcK8S_OwnerName": "packageserver",
           "SrcK8S_OwnerType": "Deployment",
           "SrcK8S_Type": "Pod"
         },
         "values": [
           [
-            1687334400,
-            "0.22916666666666666"
+            1689357600,
+            "0.28194444444444444"
           ],
           [
-            1687334760,
-            "0.4791666666666667"
+            1689357960,
+            "0.25416666666666665"
           ],
           [
-            1687335120,
-            "0.5"
+            1689358680,
+            "0.25833333333333336"
           ],
           [
-            1687335480,
-            "0.5"
+            1689359040,
+            "0.30277777777777776"
           ],
           [
-            1687335840,
-            "0.5"
+            1689359400,
+            "0.26666666666666666"
+          ],
+          [
+            1689360840,
+            "0.28194444444444444"
           ]
         ]
       },
       {
         "metric": {
-          "DstAddr": "172.30.0.10",
-          "DstK8S_Name": "dns-default",
-          "DstK8S_Namespace": "openshift-dns",
-          "DstK8S_OwnerName": "dns-default",
+          "DstAddr": "172.30.74.246",
+          "DstK8S_Name": "community-operators",
+          "DstK8S_Namespace": "openshift-marketplace",
+          "DstK8S_OwnerName": "community-operators",
           "DstK8S_OwnerType": "Service",
           "DstK8S_Type": "Service",
-          "SrcAddr": "10.131.0.25",
-          "SrcK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-worker-a-gssv6",
-          "SrcK8S_Name": "flowlogs-pipeline-9vdk2",
-          "SrcK8S_Namespace": "netobserv",
-          "SrcK8S_OwnerName": "flowlogs-pipeline",
-          "SrcK8S_OwnerType": "DaemonSet",
-          "SrcK8S_Type": "Pod"
-        },
-        "values": [
-          [
-            1687334400,
-            "0.55"
-          ],
-          [
-            1687334760,
-            "1.15"
-          ],
-          [
-            1687335120,
-            "1.2083333333333333"
-          ],
-          [
-            1687335480,
-            "1.2083333333333333"
-          ],
-          [
-            1687335840,
-            "1.2"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstAddr": "37.67.80.241",
-          "SrcAddr": "10.128.2.8",
-          "SrcK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-worker-c-5r9f4",
-          "SrcK8S_Name": "router-default-5df58f555-ps26c",
-          "SrcK8S_Namespace": "openshift-ingress",
-          "SrcK8S_OwnerName": "router-default",
+          "SrcAddr": "10.130.0.40",
+          "SrcK8S_HostName": "ci-ln-y7s2fjt-72292-6ptxl-master-2",
+          "SrcK8S_Name": "packageserver-79fc895b6-q8dtz",
+          "SrcK8S_Namespace": "openshift-operator-lifecycle-manager",
+          "SrcK8S_OwnerName": "packageserver",
           "SrcK8S_OwnerType": "Deployment",
           "SrcK8S_Type": "Pod"
         },
         "values": [
           [
-            1687334760,
-            "0.46111111111111114"
+            1689357240,
+            "0.25277777777777777"
           ],
           [
-            1687335120,
-            "0.8625"
+            1689357600,
+            "0.28055555555555556"
           ],
           [
-            1687335480,
-            "0.8013888888888889"
+            1689357960,
+            "0.2652777777777778"
           ],
           [
-            1687335840,
-            "0.6805555555555556"
+            1689359400,
+            "0.3277777777777778"
+          ],
+          [
+            1689359760,
+            "0.30972222222222223"
+          ],
+          [
+            1689360480,
+            "0.24583333333333332"
           ]
         ]
       },
       {
         "metric": {
-          "DstAddr": "37.67.80.241",
-          "SrcAddr": "10.131.0.9",
-          "SrcK8S_HostName": "ci-ln-97r45m2-72292-z5tdr-worker-a-gssv6",
-          "SrcK8S_Name": "router-default-5df58f555-68mfk",
-          "SrcK8S_Namespace": "openshift-ingress",
-          "SrcK8S_OwnerName": "router-default",
-          "SrcK8S_OwnerType": "Deployment",
-          "SrcK8S_Type": "Pod"
+          "DstAddr": "99.149.126.26",
+          "SrcAddr": "104.154.65.68"
         },
         "values": [
           [
-            1687334400,
-            "0.5180555555555556"
+            1689360120,
+            "0.2388888888888889"
           ],
           [
-            1687334760,
-            "0.7291666666666666"
-          ],
-          [
-            1687335120,
-            "0.49583333333333335"
-          ],
-          [
-            1687335480,
-            "0.4708333333333333"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstAddr": "37.67.80.241",
-          "SrcAddr": "34.72.23.111"
-        },
-        "values": [
-          [
-            1687334400,
-            "0.7013888888888888"
-          ],
-          [
-            1687334760,
-            "1.2069444444444444"
-          ],
-          [
-            1687335120,
-            "1.3777777777777778"
-          ],
-          [
-            1687335480,
-            "1.3194444444444444"
-          ],
-          [
-            1687335840,
-            "1.0638888888888889"
+            1689360480,
+            "0.24583333333333332"
           ]
         ]
       }
     ],
     "stats": {
       "summary": {
-        "bytesProcessedPerSecond": 164879687,
-        "linesProcessedPerSecond": 175357,
-        "totalBytesProcessed": 225945095,
-        "totalLinesProcessed": 240303,
-        "execTime": 1.370363434,
-        "queueTime": 15.591184204,
-        "subqueries": 5,
-        "totalEntriesReturned": 54
+        "bytesProcessedPerSecond": 129872329,
+        "linesProcessedPerSecond": 183800,
+        "totalBytesProcessed": 74698211,
+        "totalLinesProcessed": 105716,
+        "execTime": 0.575166482,
+        "queueTime": 1.602676512,
+        "subqueries": 6,
+        "totalEntriesReturned": 60
       },
       "querier": {
         "store": {
@@ -1972,21 +3277,21 @@
         }
       },
       "ingester": {
-        "totalReached": 32,
-        "totalChunksMatched": 874,
-        "totalBatches": 399,
-        "totalLinesSent": 195724,
+        "totalReached": 16,
+        "totalChunksMatched": 448,
+        "totalBatches": 139,
+        "totalLinesSent": 67356,
         "store": {
-          "totalChunksRef": 16,
-          "totalChunksDownloaded": 16,
-          "chunksDownloadTime": 32221931,
+          "totalChunksRef": 6,
+          "totalChunksDownloaded": 6,
+          "chunksDownloadTime": 4633078,
           "chunk": {
-            "headChunkBytes": 35659434,
-            "headChunkLines": 38202,
-            "decompressedBytes": 190285661,
-            "decompressedLines": 202101,
-            "compressedBytes": 43140165,
-            "totalDuplicates": 0
+            "headChunkBytes": 15316800,
+            "headChunkLines": 22003,
+            "decompressedBytes": 59381411,
+            "decompressedLines": 83713,
+            "compressedBytes": 12306027,
+            "totalDuplicates": 2793
           }
         }
       }
