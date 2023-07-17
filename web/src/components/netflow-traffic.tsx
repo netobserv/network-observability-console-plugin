@@ -29,7 +29,6 @@ import { ColumnsIcon, CompressIcon, EllipsisVIcon, ExpandIcon, ExportIcon, SyncA
 import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory } from 'react-router-dom';
 import { useTheme } from '../utils/theme-hook';
 import { Record } from '../api/ipfix';
 import { RecordsResult, Stats, TopologyMetrics, TopologyResult } from '../api/loki';
@@ -139,6 +138,7 @@ import { formatDuration, getDateMsInSeconds, getDateSInMiliseconds, parseDuratio
 import GuidedTourPopover, { GuidedTourHandle } from './guided-tour/guided-tour';
 
 import { exportToPng } from '../utils/export';
+import { navigate } from './dynamic-loader/dynamic-loader';
 
 export type ViewId = 'overview' | 'table' | 'topology';
 
@@ -146,7 +146,6 @@ export const NetflowTraffic: React.FC<{
   forcedFilters?: Filter[] | null;
   isTab?: boolean;
 }> = ({ forcedFilters, isTab }) => {
-  const { push } = useHistory();
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [extensions] = useResolvedExtensions<ModelFeatureFlag>(isModelFeatureFlag);
   const k8sModels = useK8sModelsWithColors();
@@ -535,30 +534,30 @@ export const NetflowTraffic: React.FC<{
   React.useEffect(() => {
     //with forced filters in url if specified
     if (forcedFilters) {
-      setURLFilters(forcedFilters!);
+      setURLFilters(forcedFilters!, true);
     } else if (!_.isEmpty(filters)) {
       //write filters in url if not empty
-      setURLFilters(filters);
+      setURLFilters(filters, !initState.current.includes('configLoaded'));
     }
   }, [filters, forcedFilters]);
   React.useEffect(() => {
-    setURLRange(range);
+    setURLRange(range, !initState.current.includes('configLoaded'));
   }, [range]);
   React.useEffect(() => {
-    setURLLimit(limit);
+    setURLLimit(limit, !initState.current.includes('configLoaded'));
   }, [limit]);
   React.useEffect(() => {
-    setURLMatch(match);
+    setURLMatch(match, !initState.current.includes('configLoaded'));
   }, [match]);
   React.useEffect(() => {
-    setURLReporter(reporter);
+    setURLReporter(reporter, !initState.current.includes('configLoaded'));
   }, [reporter]);
   React.useEffect(() => {
-    setURLMetricFunction(metricFunction);
-    setURLMetricType(metricType);
+    setURLMetricFunction(metricFunction, !initState.current.includes('configLoaded'));
+    setURLMetricType(metricType, !initState.current.includes('configLoaded'));
   }, [metricFunction, metricType]);
   React.useEffect(() => {
-    setURLRecortType(recordType);
+    setURLRecortType(recordType, !initState.current.includes('configLoaded'));
   }, [recordType]);
 
   // update local storage saved query params
@@ -593,13 +592,13 @@ export const NetflowTraffic: React.FC<{
 
   const clearFilters = React.useCallback(() => {
     if (forcedFilters) {
-      push(netflowTrafficPath);
+      navigate(netflowTrafficPath);
     } else if (filters) {
       //set URL Param to empty value to be able to restore state coming from another page
       setURLFilters([]);
       updateTableFilters([]);
     }
-  }, [forcedFilters, push, filters, updateTableFilters]);
+  }, [forcedFilters, filters, updateTableFilters]);
 
   const viewTabs = () => {
     return (

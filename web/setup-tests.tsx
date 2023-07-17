@@ -94,6 +94,8 @@ jest.mock('react-router-dom', () => ({
   useHistory: () => ({
     push: jest.fn(),
   }),
+  // navigate replace history in v6
+  useNavigate: () => jest.fn(),
   Link: () => {
     return null;
   }

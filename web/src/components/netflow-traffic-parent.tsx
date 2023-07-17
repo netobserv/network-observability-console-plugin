@@ -3,6 +3,7 @@ import { clearURLParams } from '../utils/url';
 import { clearLocalStorage } from '../utils/local-storage-hook';
 import NetflowTraffic from './netflow-traffic';
 import AlertFetcher from './alerts/fetcher';
+import DynamicLoader from './dynamic-loader/dynamic-loader';
 
 type Props = {};
 type State = {
@@ -52,9 +53,11 @@ class NetflowTrafficParent extends React.Component<Props, State> {
     // else render default NetworkTraffic
 
     return (
-      <AlertFetcher>
-        <NetflowTraffic forcedFilters={null} />
-      </AlertFetcher>
+      <DynamicLoader>
+        <AlertFetcher>
+          <NetflowTraffic forcedFilters={null} />
+        </AlertFetcher>
+      </DynamicLoader>
     );
   }
 }
