@@ -11,15 +11,7 @@ import { CompressIcon, ExpandIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  Filter,
-  FilterComponent,
-  FilterDefinition,
-  FilterValue,
-  findFromFilters,
-  hasEnabledFilterValues,
-  removeFromFilters
-} from '../../model/filters';
+import { Filter, FilterComponent, FilterDefinition, FilterValue, Filters, findFromFilters } from '../../model/filters';
 import { QuickFilter } from '../../model/quick-filters';
 import { findFilter } from '../../utils/filter-definitions';
 import { QueryOptionsDropdown, QueryOptionsDropdownProps } from '../dropdowns/query-options-dropdown';
@@ -31,7 +23,6 @@ import { Indicator } from './filters-helper';
 import TextFilter from './text-filter';
 import { LOCAL_STORAGE_SHOW_FILTERS_KEY, useLocalStorage } from '../../utils/local-storage-hook';
 import { FiltersChips } from './filters-chips';
-import { navigate } from '../dynamic-loader/dynamic-loader';
 import CompareFilter, { FilterCompare } from './compare-filter';
 import { LinksOverflow } from '../overflow/links-overflow';
 import './filters-toolbar.css';
@@ -176,7 +167,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
                       setSelectedFilter={setSelectedFilter}
                       allowConnectionFilter={allowConnectionFilter}
                       allowDNSFilter={allowDNSFilter}
-                  />
+                    />
                     <CompareFilter value={selectedCompare} setValue={setSelectedCompare} />
                     {getFilterControl()}
                   </InputGroup>

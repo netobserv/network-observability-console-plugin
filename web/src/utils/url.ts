@@ -61,6 +61,13 @@ export const setURLParam = (param: URLParam, value: string, replace?: boolean) =
   navigate(`${url.pathname}?${params.toString()}${url.hash}`, { replace });
 };
 
+export const setSomeURLParams = (params: Map<URLParam, string>, replace?: boolean) => {
+  const url = new URL(window.location.href);
+  const sp = new URLSearchParams(window.location.search);
+  params.forEach((v, k) => sp.set(k, v));
+  navigate(`${url.pathname}?${sp.toString()}${url.hash}`, { replace });
+};
+
 export const removeURLParam = (param: URLParam, replace?: boolean) => {
   const params = new URLSearchParams(window.location.search);
   if (params.has(param)) {

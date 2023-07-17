@@ -1020,6 +1020,9 @@ export const NetflowTraffic: React.FC<{
     }
   };
 
+  const resetText = t('Reset defaults');
+  const clearText = t('Clear all');
+
   const filterLinks = React.useCallback(() => {
     const defFilters = getDefaultFilters();
     return (
@@ -1028,20 +1031,20 @@ export const NetflowTraffic: React.FC<{
         items={[
           {
             id: 'reset-filters',
-            label: t('Reset defaults'),
+            label: resetText,
             onClick: resetDefaultFilters,
             enabled: defFilters.length > 0 && !_.isEqual(filters, defFilters)
           },
           {
             id: 'clear-all-filters',
-            label: t('Clear all'),
+            label: clearText,
             onClick: clearFilters,
             enabled: filters.list.length > 0
           }
         ]}
       />
     );
-  }, [getDefaultFilters, filters, clearFilters, resetDefaultFilters]);
+  }, [getDefaultFilters, filters, resetText, clearText, clearFilters, resetDefaultFilters]);
 
   const pageContent = () => {
     let content: JSX.Element | null = null;

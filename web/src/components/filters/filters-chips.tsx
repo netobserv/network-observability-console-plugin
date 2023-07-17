@@ -3,7 +3,7 @@ import { TimesIcon, TimesCircleIcon, LongArrowAltDownIcon, LongArrowAltUpIcon } 
 import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useHistory } from 'react-router-dom';
+import { navigate } from '../dynamic-loader/dynamic-loader';
 import { Filter, Filters, hasEnabledFilterValues, removeFromFilters } from '../../model/filters';
 import { QuickFilter } from '../../model/quick-filters';
 import { autoCompleteCache } from '../../utils/autocomplete-cache';
@@ -28,7 +28,6 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
   resetFilters,
   quickFilters
 }) => {
-  const { push } = useHistory();
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   const setFiltersList = React.useCallback(
@@ -138,7 +137,7 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
         <Button
           id="edit-filters-button"
           data-test="edit-filters-button"
-          onClick={() => push(getPathWithParams(netflowTrafficPath))}
+          onClick={() => navigate(getPathWithParams(netflowTrafficPath))}
         >
           {t('Edit filters')}
         </Button>
