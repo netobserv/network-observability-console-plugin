@@ -347,8 +347,8 @@ export const RecordField: React.FC<{
         //show both sent / dropped counts
         if (Array.isArray(value) && value.length) {
           let droppedText = t('dropped');
-          if (c.id === ColumnsId.bytes && flow.fields.TcpDropLatestDropCause) {
-            droppedText = t('dropped by {{reason}}', { reason: flow.fields.TcpDropLatestDropCause });
+          if (c.id === ColumnsId.bytes && flow.fields.PktDropLatestDropCause) {
+            droppedText = t('dropped by {{reason}}', { reason: flow.fields.PktDropLatestDropCause });
           }
           return doubleContainer(
             simpleTextWithTooltip(

@@ -6,5 +6,5 @@ export const ConfigResultSample = {
   },
   quickFilters: [],
   sampling: 1,
-  features: ['tcpDrop', 'dnsTracking']
+  features: ['pktDrop', 'dnsTracking']
 };

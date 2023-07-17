@@ -23,15 +23,15 @@ func (o *LokiClientMock) Get(url string) ([]byte, int, error) {
 		if strings.Contains(url, "query=topk") {
 			path = "mocks/loki/topology"
 
-			if strings.Contains(url, "|unwrap%20TcpDrop") {
+			if strings.Contains(url, "|unwrap%20PktDrop") {
 				path += "_dropped"
 			}
 
 			if strings.Contains(url, "by(app)") {
 				path += "_app.json"
-			} else if strings.Contains(url, "by(TcpDropLatestState)") {
+			} else if strings.Contains(url, "by(PktDropLatestState)") {
 				path += "_state.json"
-			} else if strings.Contains(url, "by(TcpDropLatestDropCause)") {
+			} else if strings.Contains(url, "by(PktDropLatestDropCause)") {
 				path += "_cause.json"
 			} else if strings.Contains(url, "by(SrcK8S_HostName,DstK8S_HostName)") {
 				path += "_host.json"
@@ -44,11 +44,11 @@ func (o *LokiClientMock) Get(url string) ([]byte, int, error) {
 			}
 		} else {
 			path = "mocks/loki/flows"
-			if strings.Contains(url, "|~`\"Packets\":0[,}]|~`\"TcpDropPackets\":[1-9][0-9]*[,}]") {
+			if strings.Contains(url, "|~`\"Packets\":0[,}]|~`\"PktDropPackets\":[1-9][0-9]*[,}]") {
 				path += "_dropped.json"
-			} else if strings.Contains(url, "|~`\"TcpDropPackets\":[1-9][0-9]*[,}]") {
+			} else if strings.Contains(url, "|~`\"PktDropPackets\":[1-9][0-9]*[,}]") {
 				path += "_has_dropped.json"
-			} else if strings.Contains(url, "|~`\"TcpDropPackets\":0[,}]") {
+			} else if strings.Contains(url, "|~`\"PktDropPackets\":0[,}]") {
 				path += "_sent.json"
 			} else {
 				path += ".json"

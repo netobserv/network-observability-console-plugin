@@ -401,7 +401,7 @@ export const NetflowTraffic: React.FC<{
     setLoading(true);
     setError(undefined);
     const fq = buildFlowQuery();
-    const droppedType = config.features.includes('tcpDrop')
+    const droppedType = config.features.includes('pktDrop')
       ? fq.type === 'bytes'
         ? 'droppedBytes'
         : 'droppedPackets'
@@ -605,8 +605,8 @@ export const NetflowTraffic: React.FC<{
     return config.features.includes('dnsTracking');
   }, [config.features]);
 
-  const isTCPDrop = React.useCallback(() => {
-    return config.features.includes('tcpDrop');
+  const isPktDrop = React.useCallback(() => {
+    return config.features.includes('pktDrop');
   }, [config.features]);
 
   React.useEffect(() => {
@@ -1081,7 +1081,7 @@ export const NetflowTraffic: React.FC<{
         content = (
           <NetflowOverview
             limit={limit}
-            panels={panels.filter(panel => panel.isSelected && (isTCPDrop() || !panel.id.includes('dropped')))}
+            panels={panels.filter(panel => panel.isSelected && (isPktDrop() || !panel.id.includes('dropped')))}
             recordType={recordType}
             metricType={metricType}
             metrics={metrics}
@@ -1321,7 +1321,7 @@ export const NetflowTraffic: React.FC<{
           allowFlow: isFlow(),
           allowConnection: isConnectionTracking(),
           allowReporterBoth: selectedViewId === 'table',
-          allowTcpDrops: isTCPDrop(),
+          allowPktDrops: isPktDrop(),
           useTopK: selectedViewId === 'overview'
         }}
         forcedFilters={forcedFilters}
@@ -1462,7 +1462,7 @@ export const NetflowTraffic: React.FC<{
         isModalOpen={isOverviewModalOpen}
         setModalOpen={setOverviewModalOpen}
         recordType={recordType}
-        panels={panels.filter(panel => isTCPDrop() || !panel.id.includes('dropped'))}
+        panels={panels.filter(panel => isPktDrop() || !panel.id.includes('dropped'))}
         setPanels={setSelectedPanels}
       />
       <ColumnsModal
