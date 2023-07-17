@@ -20,7 +20,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { TopologyMetrics } from '../../../api/loki';
 import { Filter } from '../../../model/filters';
-import { MetricFunction, MetricScope, MetricType } from '../../../model/flow-query';
+import { MetricFunction, FlowScope, MetricType } from '../../../model/flow-query';
 import { MetricScopeOptions } from '../../../model/metrics';
 import {
   Decorated,
@@ -53,9 +53,10 @@ export const TopologyContent: React.FC<{
   k8sModels: { [key: string]: K8sModel };
   metricFunction: MetricFunction;
   metricType: MetricType;
-  metricScope: MetricScope;
-  setMetricScope: (ms: MetricScope) => void;
+  metricScope: FlowScope;
+  setMetricScope: (ms: FlowScope) => void;
   metrics: TopologyMetrics[];
+  droppedMetrics: TopologyMetrics[];
   options: TopologyOptions;
   setOptions: (o: TopologyOptions) => void;
   filters: Filter[];
@@ -72,6 +73,7 @@ export const TopologyContent: React.FC<{
   metricScope,
   setMetricScope,
   metrics,
+  droppedMetrics,
   options,
   setOptions,
   filters,
@@ -307,6 +309,7 @@ export const TopologyContent: React.FC<{
 
     const updatedModel = generateDataModel(
       metrics,
+      droppedMetrics,
       getOptions(),
       metricScope,
       searchEvent?.searchValue || '',
@@ -345,6 +348,7 @@ export const TopologyContent: React.FC<{
     controller,
     prevMetrics,
     metrics,
+    droppedMetrics,
     hoveredId,
     selectedIds,
     getOptions,

@@ -1,10 +1,11 @@
 import * as _ from 'lodash';
 import protocols from 'protocol-numbers';
-import { getService, getPort } from './port';
-import { autoCompleteCache } from './autocomplete-cache';
-import { splitResource, SplitStage } from '../model/resource';
 import { getNamespaces, getResources } from '../api/routes';
 import { FilterOption } from '../model/filters';
+import { splitResource, SplitStage } from '../model/resource';
+import { autoCompleteCache } from './autocomplete-cache';
+import { DNS_RCODES } from './dns';
+import { getPort, getService } from './port';
 
 export const noOption: (value: string) => Promise<FilterOption[]> = () => Promise.resolve([]);
 
@@ -81,6 +82,14 @@ export const getPortOptions = (value: string): Promise<FilterOption[]> => {
     return Promise.resolve([{ name: value, value: foundPort }]);
   }
   return Promise.resolve([]);
+};
+
+export const getDnsResponseCodeOptions = (value: string): Promise<FilterOption[]> => {
+  return Promise.resolve(
+    DNS_RCODES.filter(
+      opt => String(opt.value).startsWith(value) || opt.name.toLowerCase().startsWith(value.toLowerCase())
+    ).map(v => ({ name: v.name, value: v.name })) // map only names here since codes are stringified in storage
+  );
 };
 
 export const findProtocolOption = (nameOrVal: string) => {

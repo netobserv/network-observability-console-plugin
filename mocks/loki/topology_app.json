@@ -1,1 +1,105 @@
-{"status":"success","data":{"resultType":"matrix","result":[{"metric":{"app":"netobserv-flowcollector"},"values":[[1667835240,"198.0712594007031"],[1667835255,"166397.4337099666"],[1667835270,"191495.12958610992"],[1667835285,"78639.41357971056"],[1667835300,"65217.3999710645"],[1667835315,"42264.24297451782"],[1667835330,"38787.97354376948"],[1667835345,"38390.60593892866"],[1667835360,"225207.26066852812"],[1667835375,"325021.0660155179"],[1667835390,"107786.04243344248"],[1667835405,"405876.57716574694"],[1667835420,"425972.7677463872"],[1667835435,"60627.76201690011"],[1667835450,"36025.30429681212"],[1667835465,"42146.07609019042"],[1667835480,"48279.516395224644"],[1667835495,"50006.35108892383"],[1667835510,"48981.883357347375"],[1667835525,"38750.07356896141"],[1667835540,"77452.61273185337"],[1667835555,"76837.54518151857"],[1667835570,"39889.30769636803"],[1667835585,"56304.32403319737"],[1667835600,"66838.20169032256"],[1667835615,"48078.382244957305"],[1667835630,"34645.46916960136"],[1667835645,"41622.1426005803"],[1667835660,"47633.44942873866"],[1667835675,"38179.90581174526"],[1667835690,"33626.30123040459"],[1667835705,"409898.78335795127"],[1667835720,"414053.38730543945"],[1667835735,"39229.93988297462"],[1667835750,"34732.33573674044"],[1667835765,"38967.139616972025"],[1667835780,"39250.80696785842"],[1667835795,"35414.40303640098"],[1667835810,"34819.73595168182"]]}],"stats":{"summary":{"bytesProcessedPerSecond":97453826,"linesProcessedPerSecond":194051,"totalBytesProcessed":30828924,"totalLinesProcessed":61387,"execTime":0.316343905,"queueTime":6.03145681,"subqueries":61},"querier":{"store":{"totalChunksRef":0,"totalChunksDownloaded":0,"chunksDownloadTime":0,"chunk":{"headChunkBytes":0,"headChunkLines":0,"decompressedBytes":0,"decompressedLines":0,"compressedBytes":0,"totalDuplicates":0}}},"ingester":{"totalReached":160,"totalChunksMatched":2943,"totalBatches":177,"totalLinesSent":43211,"store":{"totalChunksRef":0,"totalChunksDownloaded":0,"chunksDownloadTime":0,"chunk":{"headChunkBytes":13440444,"headChunkLines":25054,"decompressedBytes":17388480,"decompressedLines":36333,"compressedBytes":5309919,"totalDuplicates":0}}}}}}
+{
+  "status": "success",
+  "data": {
+    "resultType": "matrix",
+    "result": [
+      {
+        "metric": {
+          "app": "netobserv-flowcollector"
+        },
+        "values": [
+          [
+            1689357240,
+            "95.18611111111112"
+          ],
+          [
+            1689357600,
+            "95.86388888888888"
+          ],
+          [
+            1689357960,
+            "95.90277777777779"
+          ],
+          [
+            1689358320,
+            "94.43472222222222"
+          ],
+          [
+            1689358680,
+            "95.92777777777778"
+          ],
+          [
+            1689359040,
+            "95.40555555555557"
+          ],
+          [
+            1689359400,
+            "95.04722222222222"
+          ],
+          [
+            1689359760,
+            "95.82500000000002"
+          ],
+          [
+            1689360120,
+            "93.0513888888889"
+          ],
+          [
+            1689360480,
+            "94.64999999999999"
+          ],
+          [
+            1689360840,
+            "96.88194444444446"
+          ]
+        ]
+      }
+    ],
+    "stats": {
+      "summary": {
+        "bytesProcessedPerSecond": 17608526,
+        "linesProcessedPerSecond": 24920,
+        "totalBytesProcessed": 74698211,
+        "totalLinesProcessed": 105716,
+        "execTime": 4.242161489,
+        "queueTime": 63.642161992,
+        "subqueries": 6,
+        "totalEntriesReturned": 1
+      },
+      "querier": {
+        "store": {
+          "totalChunksRef": 0,
+          "totalChunksDownloaded": 0,
+          "chunksDownloadTime": 0,
+          "chunk": {
+            "headChunkBytes": 0,
+            "headChunkLines": 0,
+            "decompressedBytes": 0,
+            "decompressedLines": 0,
+            "compressedBytes": 0,
+            "totalDuplicates": 0
+          }
+        }
+      },
+      "ingester": {
+        "totalReached": 16,
+        "totalChunksMatched": 448,
+        "totalBatches": 139,
+        "totalLinesSent": 67356,
+        "store": {
+          "totalChunksRef": 6,
+          "totalChunksDownloaded": 6,
+          "chunksDownloadTime": 3711023,
+          "chunk": {
+            "headChunkBytes": 15316800,
+            "headChunkLines": 22003,
+            "decompressedBytes": 59381411,
+            "decompressedLines": 83713,
+            "compressedBytes": 12306027,
+            "totalDuplicates": 2793
+          }
+        }
+      }
+    }
+  }
+}

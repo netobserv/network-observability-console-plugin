@@ -2,6 +2,7 @@ package constants
 
 type Reporter string
 type RecordType string
+type PacketLoss string
 
 const (
 	AppLabel                            = "app"
@@ -15,6 +16,10 @@ const (
 	RecordTypeHeartbeat      RecordType = "heartbeat"
 	RecordTypeEndConnection  RecordType = "endConnection"
 	RecordTypeLog            RecordType = "flowLog"
+	PacketLossDropped        PacketLoss = "dropped"
+	PacketLossHasDrop        PacketLoss = "hasDrops"
+	PacketLossSent           PacketLoss = "sent"
+	PacketLossAll            PacketLoss = "all"
 )
 
 var AnyConnectionType = []string{

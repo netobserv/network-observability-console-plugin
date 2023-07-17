@@ -1,12 +1,12 @@
 import { Dropdown, DropdownItem, DropdownPosition, DropdownToggle } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { MetricScope } from '../../model/flow-query';
+import { FlowScope } from '../../model/flow-query';
 import { MetricScopeOptions } from '../../model/metrics';
 
 export const ScopeDropdown: React.FC<{
-  selected: MetricScope;
-  setScopeType: (v: MetricScope) => void;
+  selected: FlowScope;
+  setScopeType: (v: FlowScope) => void;
   id?: string;
 }> = ({ selected, setScopeType, id }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');

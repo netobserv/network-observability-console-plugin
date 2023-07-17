@@ -9,6 +9,8 @@ import { dateFormatter, getFormattedDate, timeMSFormatter, utcDateTimeFormatter 
 import { formatDurationAboveMillisecond } from '../../utils/duration';
 import { formatPort } from '../../utils/port';
 import { formatProtocol } from '../../utils/protocol';
+import { getCode, getType } from '../../utils/icmp';
+import { DNS_CODE_NAMES, getDNSRcodeDescription } from '../../utils/dns';
 import { Size } from '../dropdowns/table-display-dropdown';
 import './record-field.css';
 
@@ -24,7 +26,9 @@ export const RecordField: React.FC<{
   size?: Size;
   useLinks: boolean;
   filter?: RecordFieldFilter;
-}> = ({ flow, column, size, filter, useLinks }) => {
+  detailed?: boolean;
+  isDark?: boolean;
+}> = ({ flow, column, size, filter, useLinks, detailed, isDark }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   const onMouseOver = (event: React.MouseEvent<HTMLDivElement, MouseEvent>, className: string) => {
@@ -41,11 +45,11 @@ export const RecordField: React.FC<{
     return <div className="record-field-flex text-muted">{t('n/a')}</div>;
   };
 
-  const simpleTextWithTooltip = (text?: string) => {
+  const simpleTextWithTooltip = (text?: string, color?: string) => {
     if (text) {
       return (
         <div data-test={`field-text-${text}`}>
-          <span>{text}</span>
+          <span style={{ color }}>{text}</span>
           <div className="record-field-tooltip">{text}</div>
         </div>
       );
@@ -117,9 +121,13 @@ export const RecordField: React.FC<{
 
   const ipPortContent = (ip: string, port: number, singleText = false) => {
     if (singleText) {
-      return singleContainer(simpleTextWithTooltip(port ? `${ip}:${String(port)}` : ip));
+      return singleContainer(simpleTextWithTooltip(port && !Number.isNaN(port) ? `${ip}:${String(port)}` : ip));
     } else {
-      return doubleContainer(simpleTextWithTooltip(ip), simpleTextWithTooltip(port ? String(port) : undefined), false);
+      return doubleContainer(
+        simpleTextWithTooltip(ip),
+        simpleTextWithTooltip(port && !Number.isNaN(port) ? String(port) : undefined),
+        false
+      );
     }
   };
 
@@ -149,14 +157,14 @@ export const RecordField: React.FC<{
     );
   };
 
-  const doubleContainer = (child1?: JSX.Element, child2?: JSX.Element, asChild = true) => {
+  const doubleContainer = (child1?: JSX.Element, child2?: JSX.Element, asChild = true, childIcon = true) => {
     return (
       <div className={`record-field-flex-container ${asChild ? size : ''}`}>
         <div className="record-field-content-flex" onMouseOver={e => onMouseOver(e, 'record-field-content-flex')}>
           {child1 ? child1 : emptyText()}
         </div>
         <div className="record-field-content-flex" onMouseOver={e => onMouseOver(e, 'record-field-content-flex')}>
-          {asChild && <span className="child-arrow">{'↪'}</span>}
+          {asChild && childIcon && <span className="child-arrow">{'↪'}</span>}
           {child2 ? child2 : emptyText()}
         </div>
       </div>
@@ -179,9 +187,12 @@ export const RecordField: React.FC<{
       case ColumnsId.endtime:
         return dateTimeContent(typeof value === 'number' && !isNaN(value) ? new Date(value) : undefined);
       case ColumnsId.collectionlatency:
+      case ColumnsId.dnslatency:
       case ColumnsId.duration:
         return singleContainer(
-          simpleTextWithTooltip(value !== undefined ? formatDurationAboveMillisecond(value as number) : '')
+          typeof value === 'number' && !isNaN(value)
+            ? simpleTextWithTooltip(formatDurationAboveMillisecond(value as number))
+            : undefined
         );
       case ColumnsId.name:
         return doubleContainer(
@@ -207,25 +218,25 @@ export const RecordField: React.FC<{
         );
       case ColumnsId.addrport:
         return doubleContainer(
-          ipPortContent(flow.fields.SrcAddr, flow.fields.SrcPort),
-          ipPortContent(flow.fields.DstAddr, flow.fields.DstPort)
+          ipPortContent(flow.fields.SrcAddr, flow.fields.SrcPort || NaN),
+          ipPortContent(flow.fields.DstAddr, flow.fields.DstPort || NaN)
         );
       case ColumnsId.srcaddrport:
-        return singleContainer(ipPortContent(flow.fields.SrcAddr, flow.fields.SrcPort));
+        return singleContainer(ipPortContent(flow.fields.SrcAddr, flow.fields.SrcPort || NaN));
       case ColumnsId.dstaddrport:
-        return singleContainer(ipPortContent(flow.fields.DstAddr, flow.fields.DstPort));
+        return singleContainer(ipPortContent(flow.fields.DstAddr, flow.fields.DstPort || NaN));
       case ColumnsId.kubeobject:
         return doubleContainer(
           explicitKubeObjContent(
             flow.fields.SrcAddr,
-            flow.fields.SrcPort,
+            flow.fields.SrcPort || NaN,
             flow.fields.SrcK8S_Type,
             flow.labels.SrcK8S_Namespace,
             flow.fields.SrcK8S_Name
           ),
           explicitKubeObjContent(
             flow.fields.DstAddr,
-            flow.fields.DstPort,
+            flow.fields.DstPort || NaN,
             flow.fields.DstK8S_Type,
             flow.labels.DstK8S_Namespace,
             flow.fields.DstK8S_Name
@@ -235,7 +246,7 @@ export const RecordField: React.FC<{
         return singleContainer(
           explicitKubeObjContent(
             flow.fields.SrcAddr,
-            flow.fields.SrcPort,
+            flow.fields.SrcPort || NaN,
             flow.fields.SrcK8S_Type,
             flow.labels.SrcK8S_Namespace,
             flow.fields.SrcK8S_Name
@@ -245,7 +256,7 @@ export const RecordField: React.FC<{
         return singleContainer(
           explicitKubeObjContent(
             flow.fields.DstAddr,
-            flow.fields.DstPort,
+            flow.fields.DstPort || NaN,
             flow.fields.DstK8S_Type,
             flow.labels.DstK8S_Namespace,
             flow.fields.DstK8S_Name
@@ -255,14 +266,14 @@ export const RecordField: React.FC<{
         return doubleContainer(
           explicitKubeObjContent(
             flow.fields.SrcAddr,
-            flow.fields.SrcPort,
+            flow.fields.SrcPort || NaN,
             flow.fields.SrcK8S_OwnerType,
             flow.labels.SrcK8S_Namespace,
             flow.labels.SrcK8S_OwnerName
           ),
           explicitKubeObjContent(
             flow.fields.DstAddr,
-            flow.fields.DstPort,
+            flow.fields.DstPort || NaN,
             flow.fields.DstK8S_OwnerType,
             flow.labels.DstK8S_Namespace,
             flow.labels.DstK8S_OwnerName
@@ -272,7 +283,7 @@ export const RecordField: React.FC<{
         return singleContainer(
           explicitKubeObjContent(
             flow.fields.SrcAddr,
-            flow.fields.SrcPort,
+            flow.fields.SrcPort || NaN,
             flow.fields.SrcK8S_OwnerType,
             flow.labels.SrcK8S_Namespace,
             flow.labels.DstK8S_OwnerName
@@ -282,7 +293,7 @@ export const RecordField: React.FC<{
         return singleContainer(
           explicitKubeObjContent(
             flow.fields.DstAddr,
-            flow.fields.DstPort,
+            flow.fields.DstPort || NaN,
             flow.fields.DstK8S_OwnerType,
             flow.labels.DstK8S_Namespace,
             flow.labels.DstK8S_OwnerName
@@ -322,6 +333,52 @@ export const RecordField: React.FC<{
           simpleTextWithTooltip(
             value === FlowDirection.Ingress ? t('Ingress') : value === FlowDirection.Egress ? t('Egress') : t('n/a')
           )
+        );
+      case ColumnsId.packets:
+      case ColumnsId.bytes:
+        let sentText = t('sent');
+        if (c.id === ColumnsId.bytes && flow.fields.IcmpType) {
+          sentText = t('sent reporting {{type}} {{code}}', {
+            type: getType(flow.fields.IcmpType),
+            code: getCode(flow.fields.IcmpType, flow.fields.IcmpCode)
+          });
+        }
+
+        //show both sent / dropped counts
+        if (Array.isArray(value) && value.length) {
+          let droppedText = t('dropped');
+          if (c.id === ColumnsId.bytes && flow.fields.TcpDropLatestDropCause) {
+            droppedText = t('dropped by {{reason}}', { reason: flow.fields.TcpDropLatestDropCause });
+          }
+          return doubleContainer(
+            simpleTextWithTooltip(
+              detailed ? `${String(value[0])} ${c.name.toLowerCase()} ${sentText}` : String(value[0]),
+              isDark ? '#3E8635' : '#1E4F18'
+            ),
+            simpleTextWithTooltip(
+              detailed ? `${String(value[1])} ${c.name.toLowerCase()} ${droppedText}` : String(value[1]),
+              isDark ? '#C9190B' : '#A30000'
+            ),
+            true,
+            false
+          );
+        } else {
+          return singleContainer(
+            simpleTextWithTooltip(
+              detailed ? `${String(value)} ${c.name.toLowerCase()} ${sentText}` : String(value),
+              isDark ? '#3E8635' : '#1E4F18'
+            )
+          );
+        }
+      case ColumnsId.dnsid:
+        return singleContainer(
+          typeof value === 'number' && !isNaN(value) ? simpleTextWithTooltip(String(value)) : emptyText()
+        );
+      case ColumnsId.dnsresponsecode:
+        return singleContainer(
+          typeof value === 'string' && value.length
+            ? simpleTextWithTooltip(detailed ? `${value}: ${getDNSRcodeDescription(value as DNS_CODE_NAMES)}` : value)
+            : emptyText()
         );
       default:
         if (Array.isArray(value) && value.length) {

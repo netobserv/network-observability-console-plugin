@@ -12,12 +12,13 @@ import { SearchIcon } from '@patternfly/react-icons';
 import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { TopologyMetrics } from '../../api/loki';
+import { DroppedTopologyMetrics, TopologyMetrics } from '../../api/loki';
 import { MetricType, RecordType } from '../../model/flow-query';
 import { getStat } from '../../model/topology';
 import { getOverviewPanelInfo, OverviewPanel, OverviewPanelId } from '../../utils/overview-panels';
 import { TruncateLength } from '../dropdowns/truncate-dropdown';
 import LokiError from '../messages/loki-error';
+import { DroppedDonut } from '../metrics/dropped-donut';
 import { MetricsContent } from '../metrics/metrics-content';
 import { toNamedMetric } from '../metrics/metrics-helper';
 import { MetricsTotalContent } from '../metrics/metrics-total-content';
@@ -40,7 +41,11 @@ export type NetflowOverviewProps = {
   recordType: RecordType;
   metricType: MetricType;
   metrics: TopologyMetrics[];
+  droppedMetrics: TopologyMetrics[];
   totalMetric?: TopologyMetrics;
+  totalDroppedMetric?: TopologyMetrics;
+  droppedStateMetrics?: DroppedTopologyMetrics[];
+  droppedCauseMetrics?: DroppedTopologyMetrics[];
   loading?: boolean;
   error?: string;
   isDark?: boolean;
@@ -54,7 +59,11 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
   recordType,
   metricType,
   metrics,
+  droppedMetrics,
   totalMetric,
+  totalDroppedMetric,
+  droppedStateMetrics,
+  droppedCauseMetrics,
   loading,
   error,
   isDark,
@@ -72,9 +81,18 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
     [kebabMap, setKebabMap]
   );
 
+  const emptyGraph = React.useCallback(() => {
+    return (
+      <div className="empty-metrics-content-div">
+        <span>{t('No results found')}</span>
+      </div>
+    );
+  }, [t]);
+
   if (error) {
     return <LokiError title={t('Unable to get overview')} error={error} />;
   } else if (_.isEmpty(metrics) || !totalMetric) {
+    //TODO: manage each metrics loading state separately
     if (loading) {
       return (
         <Bullseye data-test="loading-contents">
@@ -103,8 +121,23 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
   const topKMetrics = metrics
     .sort((a, b) => getStat(b.stats, 'sum') - getStat(a.stats, 'sum'))
     .map(m => toNamedMetric(t, m, truncateLength, true, true));
-  const namedTotalMetric = toNamedMetric(t, totalMetric, truncateLength, false, false);
   const noInternalTopK = topKMetrics.filter(m => m.source.id !== m.destination.id);
+
+  const topKDroppedMetrics = droppedMetrics
+    .sort((a, b) => getStat(b.stats, 'sum') - getStat(a.stats, 'sum'))
+    .map(m => toNamedMetric(t, m, truncateLength, true, true));
+  const noInternalTopKDropped = topKDroppedMetrics.filter(m => m.source.id !== m.destination.id);
+
+  const topKDroppedStateMetrics =
+    droppedStateMetrics?.sort((a, b) => getStat(b.stats, 'sum') - getStat(a.stats, 'sum')) || [];
+
+  const topKDroppedCauseMetrics =
+    droppedCauseMetrics?.sort((a, b) => getStat(b.stats, 'sum') - getStat(a.stats, 'sum')) || [];
+
+  const namedTotalMetric = toNamedMetric(t, totalMetric, truncateLength, false, false);
+  const namedTotalDroppedMetric = totalDroppedMetric
+    ? toNamedMetric(t, totalDroppedMetric, truncateLength, false, false)
+    : undefined;
 
   const smallerTexts = truncateLength >= TruncateLength.M;
 
@@ -254,8 +287,119 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
       }
       case 'top_sankey':
         return { element: <>Sankey content</> };
-      case 'packets_dropped':
-        return { element: <>Packets dropped content</> };
+      case 'top_dropped_bar':
+        return {
+          element: (
+            <MetricsContent
+              id={id}
+              title={title}
+              metricType={metricType}
+              metrics={noInternalTopKDropped}
+              limit={limit}
+              showBar={true}
+              showArea={false}
+              showScatter={false}
+              smallerTexts={smallerTexts}
+              tooltipsTruncate={false}
+            />
+          ),
+          doubleWidth: false
+        };
+      case 'total_dropped_line':
+        return {
+          element: namedTotalDroppedMetric ? (
+            <MetricsContent
+              id={id}
+              title={title}
+              metricType={metricType}
+              metrics={[namedTotalDroppedMetric]}
+              limit={limit}
+              showBar={false}
+              showArea={true}
+              showScatter={true}
+              smallerTexts={smallerTexts}
+              tooltipsTruncate={false}
+            />
+          ) : (
+            emptyGraph()
+          ),
+          doubleWidth: false
+        };
+      case 'top_dropped_state_donut': {
+        const options = kebabMap.get(id) || {
+          showOthers: true
+        };
+        return {
+          element: namedTotalDroppedMetric ? (
+            <DroppedDonut
+              id={id}
+              limit={limit}
+              metricType={metricType}
+              stat="avg"
+              topKMetrics={topKDroppedStateMetrics}
+              totalMetric={namedTotalDroppedMetric}
+              showOthers={options.showOthers!}
+              smallerTexts={smallerTexts}
+            />
+          ) : (
+            emptyGraph()
+          ),
+          kebab: <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} />,
+          bodyClassSmall: true
+        };
+      }
+      case 'top_dropped_cause_donut': {
+        const options = kebabMap.get(id) || {
+          showOthers: true
+        };
+        return {
+          element: namedTotalDroppedMetric ? (
+            <DroppedDonut
+              id={id}
+              limit={limit}
+              metricType={metricType}
+              stat="avg"
+              topKMetrics={topKDroppedCauseMetrics}
+              totalMetric={namedTotalDroppedMetric}
+              showOthers={options.showOthers!}
+              smallerTexts={smallerTexts}
+            />
+          ) : (
+            emptyGraph()
+          ),
+          kebab: <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} />,
+          bodyClassSmall: true
+        };
+      }
+      case 'top_dropped_bar_total':
+        const options = kebabMap.get(id) || {
+          showTotal: true,
+          showInternal: true,
+          showOutOfScope: false,
+          compareToDropped: namedTotalDroppedMetric ? false : undefined
+        };
+        return {
+          element: !_.isEmpty(topKDroppedMetrics) ? (
+            <MetricsTotalContent
+              id={id}
+              title={title}
+              metricType={metricType}
+              topKMetrics={topKDroppedMetrics}
+              totalMetric={
+                options.compareToDropped && namedTotalDroppedMetric ? namedTotalDroppedMetric : namedTotalMetric
+              }
+              limit={limit}
+              showTotal={options.showTotal!}
+              showInternal={options.showInternal!}
+              showOutOfScope={options.showOutOfScope!}
+              smallerTexts={smallerTexts}
+            />
+          ) : (
+            emptyGraph()
+          ),
+          kebab: <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} />,
+          doubleWidth: true
+        };
       case 'inbound_region':
         return { element: <>Inbound flows by region content</> };
     }
@@ -264,30 +408,28 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
   return (
     <div id="overview-container" className={isDark ? 'dark' : 'light'}>
       <Flex id="overview-flex" justifyContent={{ default: 'justifyContentSpaceBetween' }}>
-        {panels
-          .filter(p => p.isSelected)
-          .map((panel, i) => {
-            const { title, tooltip } = getOverviewPanelInfo(
-              t,
-              panel.id,
-              limit,
-              recordType === 'flowLog' ? t('flow') : t('conversation')
-            );
-            const content = getPanelContent(panel.id, title);
-            return (
-              <NetflowOverviewPanel
-                id={panel.id}
-                key={i}
-                bodyClassSmall={!!content.bodyClassSmall}
-                doubleWidth={!!content.doubleWidth}
-                title={title}
-                titleTooltip={tooltip}
-                kebab={content.kebab}
-              >
-                {content.element}
-              </NetflowOverviewPanel>
-            );
-          })}
+        {panels.map((panel, i) => {
+          const { title, tooltip } = getOverviewPanelInfo(
+            t,
+            panel.id,
+            limit,
+            recordType === 'flowLog' ? t('flow') : t('conversation')
+          );
+          const content = getPanelContent(panel.id, title);
+          return (
+            <NetflowOverviewPanel
+              id={panel.id}
+              key={i}
+              bodyClassSmall={!!content.bodyClassSmall}
+              doubleWidth={!!content.doubleWidth}
+              title={title}
+              titleTooltip={tooltip}
+              kebab={content.kebab}
+            >
+              {content.element}
+            </NetflowOverviewPanel>
+          );
+        })}
       </Flex>
     </div>
   );

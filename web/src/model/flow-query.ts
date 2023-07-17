@@ -3,10 +3,12 @@ import { Filter } from './filters';
 export type Reporter = 'source' | 'destination' | 'both';
 export type RecordType = 'allConnections' | 'newConnection' | 'heartbeat' | 'endConnection' | 'flowLog';
 export type Match = 'all' | 'any';
+export type PacketLoss = 'dropped' | 'hasDrops' | 'sent' | 'all';
 export type MetricFunction = 'sum' | 'avg' | 'max' | 'last';
-export type MetricType = 'count' | 'bytes' | 'packets';
-export type MetricScope = 'app' | 'host' | 'namespace' | 'owner' | 'resource';
-export type NodeType = MetricScope | 'unknown';
+export type MetricType = 'count' | 'bytes' | 'packets' | 'droppedBytes' | 'droppedPackets';
+export type FlowScope = 'app' | 'host' | 'namespace' | 'owner' | 'resource';
+export type AggregateBy = FlowScope | 'droppedCause' | 'droppedState';
+export type NodeType = FlowScope | 'unknown';
 export type Groups = 'hosts' | 'hosts+namespaces' | 'hosts+owners' | 'namespaces' | 'namespaces+owners' | 'owners';
 export interface FlowQuery {
   timeRange?: number;
@@ -15,9 +17,10 @@ export interface FlowQuery {
   filters: string;
   reporter?: Reporter;
   recordType: RecordType;
+  packetLoss: PacketLoss;
   limit: number;
   type?: MetricType;
-  scope?: MetricScope;
+  aggregateBy?: AggregateBy;
   groups?: Groups;
   rateInterval?: string;
   step?: string;

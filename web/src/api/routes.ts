@@ -1,6 +1,11 @@
 import axios from 'axios';
+import { Config, defaultConfig } from '../model/config';
 import { buildExportQuery } from '../model/export-query';
 import { FlowQuery } from '../model/flow-query';
+import { ContextSingleton } from '../utils/context';
+import { TimeRange } from '../utils/datetime';
+import { parseMetrics } from '../utils/metrics';
+import { AlertsResult, SilencedAlert } from './alert';
 import {
   AggregatedQueryResponse,
   parseStream,
@@ -9,11 +14,6 @@ import {
   StreamResult,
   TopologyResult
 } from './loki';
-import { Config, defaultConfig } from '../model/config';
-import { TimeRange } from '../utils/datetime';
-import { ContextSingleton } from '../utils/context';
-import { parseMetrics } from '../utils/metrics';
-import { AlertsResult, SilencedAlert } from './alert';
 
 export const getFlows = (params: FlowQuery): Promise<RecordsResult> => {
   return axios.get(ContextSingleton.getHost() + '/api/loki/flows', { params }).then(r => {
@@ -81,7 +81,7 @@ export const getTopology = (params: FlowQuery, range: number | TimeRange): Promi
     const metrics = parseMetrics(
       aggQR.result as RawTopologyMetrics[],
       range,
-      params.scope!,
+      params.aggregateBy!,
       aggQR.unixTimestamp,
       aggQR.isMock
     );
@@ -107,7 +107,8 @@ export const getConfig = (): Promise<Config> => {
       },
       quickFilters: r.data.quickFilters,
       alertNamespaces: r.data.alertNamespaces,
-      sampling: r.data.sampling
+      sampling: r.data.sampling,
+      features: r.data.features || defaultConfig.features
     };
   });
 };

@@ -11,6 +11,7 @@ describe('<SummaryPanel />', () => {
     flows: FlowsSample,
     metrics: undefined,
     appMetrics: undefined,
+    appDroppedMetrics: undefined,
     type: 'flowLog' as RecordType,
     metricType: 'bytes' as MetricType,
     stats: {

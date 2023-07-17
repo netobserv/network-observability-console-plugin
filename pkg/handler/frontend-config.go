@@ -22,11 +22,14 @@ type frontendConfig struct {
 	QuickFilters    []QuickFilter `yaml:"quickFilters" json:"quickFilters"`
 	AlertNamespaces []string      `yaml:"alertNamespaces" json:"alertNamespaces"`
 	Sampling        int           `yaml:"sampling" json:"sampling"`
+	Features        []string      `yaml:"features" json:"features"`
 }
 
 func readConfigFile(filename string) (*frontendConfig, error) {
 	cfg := frontendConfig{
+		RecordTypes:  []string{"flowLog"},
 		QuickFilters: []QuickFilter{},
+		Features:     []string{},
 	}
 	if len(filename) == 0 {
 		return &cfg, nil

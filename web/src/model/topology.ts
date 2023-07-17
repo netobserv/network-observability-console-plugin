@@ -21,7 +21,7 @@ import { TFunction } from 'i18next';
 import { K8sModel } from '@openshift-console/dynamic-plugin-sdk';
 import { getTopologyEdgeId } from '../utils/ids';
 import { MetricScopeOptions } from './metrics';
-import { MetricFunction, MetricScope, MetricType, NodeType } from './flow-query';
+import { MetricFunction, FlowScope, MetricType, NodeType } from './flow-query';
 import { createPeer, getFormattedValue } from '../utils/metrics';
 import { TruncateLength } from '../components/dropdowns/truncate-dropdown';
 
@@ -202,7 +202,7 @@ export type NodeData = {
 
 const generateNode = (
   data: NodeData,
-  scope: MetricScope,
+  scope: FlowScope,
   options: TopologyOptions,
   searchValue: string,
   highlightedId: string,
@@ -306,6 +306,7 @@ const generateEdge = (
   sourceId: string,
   targetId: string,
   stat: number,
+  droppedStat: number,
   options: TopologyOptions,
   shadowed = false,
   filtered = false,
@@ -337,15 +338,17 @@ const generateEdge = (
       endTerminalStatus: NodeStatus.default,
       tag: getEdgeTag(stat, options, t),
       tagStatus: getTagStatus(stat, options.maxEdgeStat),
-      bps: stat
+      bps: stat,
+      drops: droppedStat
     }
   };
 };
 
 export const generateDataModel = (
   metrics: TopologyMetrics[],
+  droppedMetrics: TopologyMetrics[],
   options: TopologyOptions,
-  metricScope: MetricScope,
+  metricScope: FlowScope,
   searchValue: string,
   highlightedId: string,
   filters: Filter[],
@@ -359,7 +362,7 @@ export const generateDataModel = (
 
   const addGroup = (
     fields: Partial<TopologyMetricPeer>,
-    scope: MetricScope,
+    scope: FlowScope,
     parent?: NodeModel,
     secondaryLabelPadding = false
   ): NodeModel => {
@@ -410,7 +413,7 @@ export const generateDataModel = (
     return group;
   };
 
-  const addNode = (data: NodeData, scope: MetricScope): NodeModel => {
+  const addNode = (data: NodeData, scope: FlowScope): NodeModel => {
     const parent = data.nodeType !== 'unknown' ? addPossibleGroups(data.peer) : undefined;
     let node = nodes.find(n => n.type === 'node' && n.id === data.peer.id);
     if (!node) {
@@ -433,11 +436,13 @@ export const generateDataModel = (
     sourceId: string,
     targetId: string,
     stats: MetricStats,
+    droppedStats: MetricStats | undefined,
     shadowed = false,
     filtered = false,
     t: TFunction
   ): EdgeModel => {
     const stat = getStat(stats, options.metricFunction);
+    const droppedStat = droppedStats ? getStat(droppedStats, options.metricFunction) : 0;
     let edge = edges.find(
       e =>
         (e.data.sourceId === sourceId && e.data.targetId === targetId) ||
@@ -456,10 +461,11 @@ export const generateDataModel = (
         startTerminalType: edge.data.sourceId !== sourceId ? EdgeTerminalType.directional : edge.data.startTerminalType,
         tag: getEdgeTag(stat, options, t),
         tagStatus: getTagStatus(stat, options.maxEdgeStat),
-        bps: stat
+        bps: stat,
+        drops: droppedStat
       };
     } else {
-      edge = generateEdge(sourceId, targetId, stat, opts, shadowed, filtered, highlightedId, t, isDark);
+      edge = generateEdge(sourceId, targetId, stat, droppedStat, opts, shadowed, filtered, highlightedId, t, isDark);
       edges.push(edge);
     }
 
@@ -520,10 +526,12 @@ export const generateDataModel = (
     const dstNode = addNode(peerToNodeData(m.destination), metricScope);
 
     if (options.edges && srcNode && dstNode && srcNode.id !== dstNode.id) {
+      const drops = droppedMetrics.find(dm => dm.source.id === m.source.id && dm.destination.id === m.destination.id);
       addEdge(
         srcNode.id,
         dstNode.id,
         m.stats,
+        drops?.stats,
         srcNode.data.shadowed || dstNode.data.shadowed,
         srcNode.data.filtered || dstNode.data.filtered,
         t

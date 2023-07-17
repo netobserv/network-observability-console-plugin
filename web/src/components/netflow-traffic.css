@@ -14,6 +14,10 @@
     background: rgba(200, 200, 200, 0.33);
 }
 
+.netobserv-align-start {
+    text-align: start;
+}
+
 .actions {
     display: flex;
     flex-direction: row;

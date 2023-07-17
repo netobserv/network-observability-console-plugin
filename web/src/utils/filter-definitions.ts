@@ -21,7 +21,8 @@ import {
   getProtocolOptions,
   getResourceOptions,
   noOption,
-  cap10
+  cap10,
+  getDnsResponseCodeOptions
 } from './filter-options';
 
 // Convenience string to filter by undefined field values
@@ -154,7 +155,11 @@ const valid = (newValue: string) => ({ val: newValue });
 const invalid = (msg: string) => ({ err: msg });
 
 let filterDefinitions: FilterDefinition[] | undefined = undefined;
-export const getFilterDefinitions = (t: TFunction, allowConnectionFilter?: boolean): FilterDefinition[] => {
+export const getFilterDefinitions = (
+  t: TFunction,
+  allowConnectionFilter?: boolean,
+  allowDNSFilter?: boolean
+): FilterDefinition[] => {
   if (!filterDefinitions) {
     const rejectEmptyValue = (value: string) => {
       if (_.isEmpty(value)) {
@@ -439,6 +444,16 @@ export const getFilterDefinitions = (t: TFunction, allowConnectionFilter?: boole
         encoders: { simpleEncode: simpleFiltersEncoder('Proto') }
       },
       {
+        id: 'interface',
+        name: t('Network interface'),
+        category: FilterCategory.None,
+        component: FilterComponent.Text,
+        getOptions: noOption,
+        validate: rejectEmptyValue,
+        hint: t('Specify a network interface.'),
+        encoders: { simpleEncode: simpleFiltersEncoder('Interface') }
+      },
+      {
         id: 'id',
         name: t('Conversation Id'),
         category: FilterCategory.None,
@@ -447,16 +462,42 @@ export const getFilterDefinitions = (t: TFunction, allowConnectionFilter?: boole
         validate: rejectEmptyValue,
         hint: t('Specify a single conversation hash Id.'),
         encoders: { simpleEncode: simpleFiltersEncoder('_HashId') }
+      },
+      {
+        id: 'dns_id',
+        name: t('DNS Id'),
+        category: FilterCategory.None,
+        component: FilterComponent.Text,
+        getOptions: noOption,
+        validate: rejectEmptyValue,
+        hint: t('Specify a single DNS Id.'),
+        encoders: { simpleEncode: simpleFiltersEncoder('DnsId') }
+      },
+      {
+        id: 'dns_flag_response_code',
+        name: t('DNS Response Code'),
+        category: FilterCategory.None,
+        component: FilterComponent.Autocomplete,
+        getOptions: cap10(getDnsResponseCodeOptions),
+        validate: rejectEmptyValue,
+        hint: t('Specify a single DNS RCODE name.'),
+        examples: `${t('Specify a single DNS RCODE name like:')}
+        - ${t('A IANA RCODE number like 0, 3, 9')}
+        - ${t('A IANA RCODE name like NoError, NXDomain, NotAuth')}
+        - ${t('Empty double quotes "" for undefined response code')}`,
+        encoders: { simpleEncode: simpleFiltersEncoder('DnsFlagsResponseCode') }
       }
     ];
   }
 
-  if (allowConnectionFilter) {
+  if (allowConnectionFilter && allowDNSFilter) {
     return filterDefinitions;
   } else {
-    return filterDefinitions.filter(fd => fd.id !== 'id');
+    return filterDefinitions.filter(
+      fd => (allowConnectionFilter || fd.id !== 'id') && (allowDNSFilter || !fd.id.startsWith('dns_'))
+    );
   }
 };
-/* eslint-enable max-len */
 
-export const findFilter = (t: TFunction, id: FilterId) => getFilterDefinitions(t, true).find(def => def.id === id);
+export const findFilter = (t: TFunction, id: FilterId) =>
+  getFilterDefinitions(t, true, true).find(def => def.id === id);

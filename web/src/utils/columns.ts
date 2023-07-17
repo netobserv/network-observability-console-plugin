@@ -50,6 +50,9 @@ export enum ColumnsId {
   duration = 'FlowDuration',
   collectiontime = 'CollectionTime',
   collectionlatency = 'CollectionLatency',
+  dnsid = 'DNSId',
+  dnslatency = 'DNSLatency',
+  dnsresponsecode = 'DNSResponseCode',
   hostaddr = 'K8S_HostIP',
   srchostaddr = 'SrcK8S_HostIP',
   dsthostaddr = 'DstK8S_HostIP',
@@ -152,7 +155,8 @@ export const getSrcOrDstValue = (v1?: string | number, v2?: string | number): st
 };
 
 /* concatenate kind / namespace / pod or ip / port for display
- *  Kind Namespace & Pod field will fallback on ip port if kubernetes objects are not resolved
+ * if kubernetes objects Kind Namespace & Pod field are not resolved, will fallback on
+ * ip:port or ip only if port is not provided
  */
 export const getConcatenatedValue = (
   ip: string,
@@ -164,7 +168,10 @@ export const getConcatenatedValue = (
   if (kind && namespace && pod) {
     return `${kind}.${namespace}.${pod}`;
   }
-  return `${ip}:${String(port)}`;
+  if (!Number.isNaN(port)) {
+    return `${ip}:${String(port)}`;
+  }
+  return ip;
 };
 
 export const getCommonColumns = (t: TFunction, withConcatenatedFields = true): Column[] => {
@@ -265,14 +272,14 @@ export const getCommonColumns = (t: TFunction, withConcatenatedFields = true): C
         value: f => [
           ...getConcatenatedValue(
             f.fields.SrcAddr,
-            f.fields.SrcPort,
+            f.fields.SrcPort || NaN,
             f.fields.SrcK8S_Type,
             f.labels.SrcK8S_Namespace,
             f.fields.SrcK8S_Name
           ),
           ...getConcatenatedValue(
             f.fields.DstAddr,
-            f.fields.DstPort,
+            f.fields.DstPort || NaN,
             f.fields.DstK8S_Type,
             f.labels.DstK8S_Namespace,
             f.fields.DstK8S_Name
@@ -288,14 +295,14 @@ export const getCommonColumns = (t: TFunction, withConcatenatedFields = true): C
         value: f => [
           ...getConcatenatedValue(
             f.fields.SrcAddr,
-            f.fields.SrcPort,
+            f.fields.SrcPort || NaN,
             f.fields.SrcK8S_OwnerType,
             f.labels.SrcK8S_Namespace,
             f.labels.SrcK8S_OwnerName
           ),
           ...getConcatenatedValue(
             f.fields.DstAddr,
-            f.fields.DstPort,
+            f.fields.DstPort || NaN,
             f.fields.DstK8S_OwnerType,
             f.labels.DstK8S_Namespace,
             f.labels.DstK8S_OwnerName
@@ -309,8 +316,8 @@ export const getCommonColumns = (t: TFunction, withConcatenatedFields = true): C
         name: t('IPs & Ports'),
         isSelected: false,
         value: f => [
-          ...getConcatenatedValue(f.fields.SrcAddr, f.fields.SrcPort),
-          ...getConcatenatedValue(f.fields.DstAddr, f.fields.DstPort)
+          ...getConcatenatedValue(f.fields.SrcAddr, f.fields.SrcPort || NaN),
+          ...getConcatenatedValue(f.fields.DstAddr, f.fields.DstPort || NaN)
         ],
         sort: (a, b, col) => compareStrings((col.value(a) as string[]).join(''), (col.value(b) as string[]).join('')),
         width: 15
@@ -415,7 +422,7 @@ export const getSrcColumns = (t: TFunction): Column[] => {
       fieldName: 'SrcPort',
       quickFilter: 'src_port',
       isSelected: true,
-      value: f => f.fields.SrcPort,
+      value: f => f.fields.SrcPort || NaN,
       sort: (a, b, col) => comparePorts(col.value(a) as number, col.value(b) as number),
       width: 10
     },
@@ -555,7 +562,7 @@ export const getDstColumns = (t: TFunction): Column[] => {
       fieldName: 'DstPort',
       quickFilter: 'dst_port',
       isSelected: true,
-      value: f => f.fields.DstPort,
+      value: f => f.fields.DstPort || NaN,
       sort: (a, b, col) => comparePorts(col.value(a) as number, col.value(b) as number),
       width: 10
     },
@@ -613,7 +620,7 @@ export const getSrcDstColumns = (t: TFunction, withConcatenatedFields = true): C
         value: f =>
           getConcatenatedValue(
             f.fields.SrcAddr,
-            f.fields.SrcPort,
+            f.fields.SrcPort || NaN,
             f.fields.SrcK8S_Type,
             f.labels.SrcK8S_Namespace,
             f.fields.SrcK8S_Name
@@ -629,7 +636,7 @@ export const getSrcDstColumns = (t: TFunction, withConcatenatedFields = true): C
         value: f =>
           getConcatenatedValue(
             f.fields.SrcAddr,
-            f.fields.SrcPort,
+            f.fields.SrcPort || NaN,
             f.fields.SrcK8S_OwnerType,
             f.labels.SrcK8S_Namespace,
             f.labels.SrcK8S_OwnerName
@@ -642,7 +649,7 @@ export const getSrcDstColumns = (t: TFunction, withConcatenatedFields = true): C
         group: t('Source'),
         name: t('IP & Port'),
         isSelected: false,
-        value: f => getConcatenatedValue(f.fields.SrcAddr, f.fields.SrcPort),
+        value: f => getConcatenatedValue(f.fields.SrcAddr, f.fields.SrcPort || NaN),
         sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
         width: 15
       },
@@ -655,7 +662,7 @@ export const getSrcDstColumns = (t: TFunction, withConcatenatedFields = true): C
         value: f =>
           getConcatenatedValue(
             f.fields.DstAddr,
-            f.fields.DstPort,
+            f.fields.DstPort || NaN,
             f.fields.DstK8S_Type,
             f.labels.DstK8S_Namespace,
             f.fields.DstK8S_Name
@@ -671,7 +678,7 @@ export const getSrcDstColumns = (t: TFunction, withConcatenatedFields = true): C
         value: f =>
           getConcatenatedValue(
             f.fields.DstAddr,
-            f.fields.DstPort,
+            f.fields.DstPort || NaN,
             f.fields.DstK8S_OwnerType,
             f.labels.DstK8S_Namespace,
             f.labels.DstK8S_OwnerName
@@ -684,7 +691,7 @@ export const getSrcDstColumns = (t: TFunction, withConcatenatedFields = true): C
         group: t('Destination'),
         name: t('IP & Port'),
         isSelected: false,
-        value: f => getConcatenatedValue(f.fields.DstAddr, f.fields.DstPort),
+        value: f => getConcatenatedValue(f.fields.DstAddr, f.fields.DstPort || NaN),
         sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
         width: 15
       }
@@ -718,12 +725,23 @@ export const getExtraColumns = (t: TFunction): Column[] => {
       width: 10
     },
     {
+      id: ColumnsId.interface,
+      name: t('Interface'),
+      tooltip: t('The network interface of the Flow.'),
+      fieldName: 'Interface',
+      quickFilter: 'interface',
+      isSelected: false,
+      value: f => f.fields.Interface || '',
+      sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
+      width: 10
+    },
+    {
       id: ColumnsId.bytes,
       name: t('Bytes'),
       tooltip: t('The total aggregated number of bytes.'),
       fieldName: 'Bytes',
       isSelected: true,
-      value: f => f.fields.Bytes,
+      value: f => (f.fields.TcpDropBytes ? [f.fields.Bytes, f.fields.TcpDropBytes] : f.fields.Bytes),
       sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
       width: 5
     },
@@ -733,7 +751,7 @@ export const getExtraColumns = (t: TFunction): Column[] => {
       tooltip: t('The total aggregated number of packets.'),
       fieldName: 'Packets',
       isSelected: true,
-      value: f => f.fields.Packets,
+      value: f => (f.fields.TcpDropPackets ? [f.fields.Packets, f.fields.TcpDropPackets] : f.fields.Packets),
       sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
       width: 5
     },
@@ -762,6 +780,37 @@ export const getExtraColumns = (t: TFunction): Column[] => {
       tooltip: t('Time elapsed between End Time and Collection Time.'),
       isSelected: false,
       value: f => f.fields.TimeReceived * 1000 - f.fields.TimeFlowEndMs,
+      sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
+      width: 5
+    },
+    {
+      id: ColumnsId.dnsid,
+      name: t('DNS Id'),
+      tooltip: t('DNS request identifier.'),
+      fieldName: 'DnsId',
+      quickFilter: 'dns_id',
+      isSelected: false,
+      value: f => f.fields.DnsId || Number.NaN,
+      sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
+      width: 5
+    },
+    {
+      id: ColumnsId.dnslatency,
+      name: t('DNS Latency'),
+      tooltip: t('Time elapsed between DNS request and response.'),
+      isSelected: false,
+      value: f => f.fields.DnsLatencyMs || Number.NaN,
+      sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
+      width: 5
+    },
+    {
+      id: ColumnsId.dnsresponsecode,
+      name: t('DNS Response Code'),
+      tooltip: t('DNS RCODE name from response header.'),
+      fieldName: 'DnsFlagsResponseCode',
+      quickFilter: 'dns_flag_response_code',
+      isSelected: false,
+      value: f => f.fields.DnsFlagsResponseCode || '',
       sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
       width: 5
     }

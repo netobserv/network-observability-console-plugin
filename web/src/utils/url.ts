@@ -12,6 +12,7 @@ export enum URLParam {
   RefreshInterval = 'refresh',
   Limit = 'limit',
   Match = 'match',
+  PacketLoss = 'packetLoss',
   RecordType = 'recordType',
   Reporter = 'reporter',
   MetricFunction = 'function',

@@ -30,6 +30,7 @@ import './summary-panel.css';
 import { MetricType, RecordType } from '../../model/flow-query';
 import { MetricsQuerySummaryContent } from './metrics-query-summary';
 import { config } from '../../utils/config';
+import { formatDurationAboveMillisecond } from '../../utils/duration';
 
 type TypeCardinality = {
   type: string;
@@ -51,7 +52,8 @@ export const SummaryPanelContent: React.FC<{
   limit: number;
   range: number | TimeRange;
   lastRefresh: Date | undefined;
-}> = ({ flows, metrics, appMetrics, type, metricType, stats, limit, range, lastRefresh }) => {
+  showDNSLatency?: boolean;
+}> = ({ flows, metrics, appMetrics, type, metricType, stats, limit, range, lastRefresh, showDNSLatency }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [expanded, setExpanded] = React.useState<string>('');
 
@@ -191,7 +193,14 @@ export const SummaryPanelContent: React.FC<{
         });
 
       addresses = Array.from(new Set(flows.map(f => f.fields.SrcAddr).concat(flows.map(f => f.fields.DstAddr))));
-      ports = Array.from(new Set(flows.map(f => f.fields.SrcPort).concat(flows.map(f => f.fields.DstPort))));
+      ports = Array.from(
+        new Set(
+          flows
+            .filter(f => f.fields.SrcPort)
+            .map(f => f.fields.SrcPort)
+            .concat(flows.filter(f => f.fields.DstPort).map(f => f.fields.DstPort)) as number[]
+        )
+      );
       protocols = Array.from(new Set(flows.map(f => f.fields.Proto)));
     } else if (metrics && metrics.length) {
       function manageTypeCardinality(hostName?: string, namespace?: string, type?: string, name?: string) {
@@ -291,6 +300,43 @@ export const SummaryPanelContent: React.FC<{
     ) : undefined;
   };
 
+  const dnsLatency = (filteredFlows: Record[]) => {
+    const filteredDNSFlows = filteredFlows.filter(f => f.fields.DnsLatencyMs !== undefined);
+
+    const dnsLatency = filteredDNSFlows.length
+      ? filteredDNSFlows.map(f => f.fields.DnsLatencyMs!).reduce((a, b) => a + b, 0) / filteredDNSFlows.length
+      : NaN;
+
+    return (
+      <Text className="summary-config-item">{`${t('DNS latency')}: ${
+        isNaN(dnsLatency) ? t('n/a') : formatDurationAboveMillisecond(dnsLatency)
+      }`}</Text>
+    );
+  };
+
+  const timeContent = () => {
+    const filteredFlows = flows || [];
+    const duration = filteredFlows.length
+      ? filteredFlows.map(f => f.fields.TimeFlowEndMs - f.fields.TimeFlowStartMs).reduce((a, b) => a + b, 0) /
+        filteredFlows.length
+      : 0;
+    const collectionLatency = filteredFlows.length
+      ? filteredFlows.map(f => f.fields.TimeReceived * 1000 - f.fields.TimeFlowEndMs).reduce((a, b) => a + b, 0) /
+        filteredFlows.length
+      : 0;
+
+    return (
+      <TextContent className="summary-text-container">
+        <Text component={TextVariants.h3}>{`${t('Average time')}`}</Text>
+        <Text className="summary-config-item">{`${t('Duration')}: ${formatDurationAboveMillisecond(duration)}`}</Text>
+        <Text className="summary-config-item">{`${t('Collection latency')}: ${formatDurationAboveMillisecond(
+          collectionLatency
+        )}`}</Text>
+        {showDNSLatency ? dnsLatency(filteredFlows) : <></>}
+      </TextContent>
+    );
+  };
+
   return (
     <>
       <TextContent className="summary-text-container">
@@ -327,6 +373,8 @@ export const SummaryPanelContent: React.FC<{
         )}
       </TextContent>
 
+      {timeContent()}
+
       {cardinalityContent()}
       {/*TODO: NETOBSERV-225 for extra stats on query*/}
 
@@ -340,15 +388,29 @@ export const SummaryPanel: React.FC<{
   flows: Record[] | undefined;
   metrics: TopologyMetrics[] | undefined;
   appMetrics: TopologyMetrics | undefined;
+  appDroppedMetrics: TopologyMetrics | undefined;
   type: RecordType;
   metricType: MetricType;
   stats: Stats | undefined;
-  appStats: Stats | undefined;
   limit: number;
   range: number | TimeRange;
   lastRefresh: Date | undefined;
+  showDNSLatency?: boolean;
   id?: string;
-}> = ({ flows, metrics, appMetrics, type, metricType, stats, limit, range, lastRefresh, id, onClose }) => {
+}> = ({
+  flows,
+  metrics,
+  appMetrics,
+  type,
+  metricType,
+  stats,
+  limit,
+  range,
+  lastRefresh,
+  showDNSLatency,
+  id,
+  onClose
+}) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   return (
@@ -377,6 +439,7 @@ export const SummaryPanel: React.FC<{
           limit={limit}
           range={range}
           lastRefresh={lastRefresh}
+          showDNSLatency={showDNSLatency}
         />
       </DrawerPanelBody>
     </DrawerPanelContent>

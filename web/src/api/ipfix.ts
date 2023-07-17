@@ -3,6 +3,7 @@ import { RecordType } from '../model/flow-query';
 
 // Please keep this file documented: it is used in doc generation
 // To regenerate doc, run `make generate-doc` - and also check this page:
+// eslint-disable-next-line max-len
 // https://github.com/netobserv/network-observability-operator/blob/main/docs/GeneratingAsciidocAPI.md#generate-asciidoc-for-flows-json-format-reference
 
 export interface Record {
@@ -52,9 +53,9 @@ export interface Fields {
   /** Kind of the destination matched Kubernetes object, such as Pod name, Service name, etc. */
   DstK8S_Type?: string;
   /** Source port */
-  SrcPort: number;
+  SrcPort?: number;
   /** Destination port */
-  DstPort: number;
+  DstPort?: number;
   /** Kind of the source Kubernetes owner, such as Deployment, StatefulSet, etc. */
   SrcK8S_OwnerType?: string;
   /** Kind of the destination Kubernetes owner, such as Deployment, StatefulSet, etc. */
@@ -71,6 +72,8 @@ export interface Fields {
   Proto: number;
   /** Network interface */
   Interface?: string;
+  /** TCP flags */
+  Flags?: number;
   /** Number of packets in this flow */
   Packets: number;
   /** In conversation tracking, A to B packets counter per conversation */
@@ -83,6 +86,36 @@ export interface Fields {
   Bytes_AB?: number;
   /** In conversation tracking, B to A bytes counter per conversation */
   Bytes_BA?: number;
+  /** ICMP type */
+  IcmpType?: number;
+  /** ICMP code */
+  IcmpCode?: number;
+  /** TCP state for drops */
+  TcpDropLatestState?: string;
+  /** TCP cause for drops */
+  TcpDropLatestDropCause?: string;
+  /** TCP flags for drops */
+  TcpDropLatestFlags?: number;
+  /** Number of packets dropped in this flow */
+  TcpDropPackets?: number;
+  /** In conversation tracking, A to B packets dropped counter per conversation */
+  TcpDropPackets_AB?: number;
+  /** In conversation tracking, B to A packets dropped counter per conversation */
+  TcpDropPackets_BA?: number;
+  /** Number of bytes dropped in this flow */
+  TcpDropBytes?: number;
+  /** In conversation tracking, A to B bytes dropped counter per conversation */
+  TcpDropBytes_AB?: number;
+  /** In conversation tracking, B to A bytes dropped counter per conversation */
+  TcpDropBytes_BA?: number;
+  /** DNS record id */
+  DnsId?: number;
+  /** TCP flags for DNS record */
+  DnsFlags?: number;
+  /** Parsed DNS header RCODEs name */
+  DnsFlagsResponseCode?: string;
+  /** Calculated time between response and request, in milliseconds */
+  DnsLatencyMs?: number;
   /** Start timestamp of this flow, in milliseconds */
   TimeFlowStartMs: number;
   /** End timestamp of this flow, in milliseconds */

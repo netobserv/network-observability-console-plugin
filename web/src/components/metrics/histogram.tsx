@@ -430,6 +430,7 @@ export const HistogramContainer: React.FC<{
   id: string;
   loading: boolean;
   totalMetric: TopologyMetrics | undefined;
+  totalDroppedMetric: TopologyMetrics | undefined;
   limit: number;
   isDark: boolean;
   range?: TimeRange;

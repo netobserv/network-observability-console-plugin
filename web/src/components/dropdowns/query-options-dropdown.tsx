@@ -2,7 +2,7 @@ import { Radio, Select, Tooltip } from '@patternfly/react-core';
 import { InfoAltIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Match, RecordType, Reporter } from '../../model/flow-query';
+import { Match, PacketLoss, RecordType, Reporter } from '../../model/flow-query';
 
 export const TOP_VALUES = [5, 10, 15];
 export const LIMIT_VALUES = [50, 100, 500, 1000];
@@ -14,11 +14,14 @@ export interface QueryOptionsDropdownProps {
   allowFlow: boolean;
   allowConnection: boolean;
   allowReporterBoth: boolean;
+  allowTcpDrops: boolean;
   useTopK: boolean;
   limit: number;
   setLimit: (limit: number) => void;
   match: Match;
   setMatch: (match: Match) => void;
+  packetLoss: PacketLoss;
+  setPacketLoss: (pl: PacketLoss) => void;
 }
 
 type recordTypeOption = { label: string; value: RecordType };
@@ -26,6 +29,8 @@ type recordTypeOption = { label: string; value: RecordType };
 type ReporterOption = { label: string; value: Reporter };
 
 type MatchOption = { label: string; value: Match };
+
+type PacketLossOption = { label: string; value: PacketLoss };
 
 // Exported for tests
 export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
@@ -36,11 +41,14 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
   allowFlow,
   allowConnection,
   allowReporterBoth,
+  allowTcpDrops,
   useTopK,
   limit,
   setLimit,
   match,
-  setMatch
+  setMatch,
+  packetLoss,
+  setPacketLoss
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
@@ -78,6 +86,25 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
     {
       label: t('Match any'),
       value: 'any'
+    }
+  ];
+
+  const packetLossOptions: PacketLossOption[] = [
+    {
+      label: t('Fully dropped'),
+      value: 'dropped'
+    },
+    {
+      label: t('Containing drops'),
+      value: 'hasDrops'
+    },
+    {
+      label: t('Without drops'),
+      value: 'sent'
+    },
+    {
+      label: t('All'),
+      value: 'all'
     }
   ];
 
@@ -202,6 +229,58 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
             </label>
           </div>
         ))}
+      </div>
+      <div className="pf-c-select__menu-group">
+        <Tooltip
+          content={
+            <div>
+              <div>{t('Flows drops to query')}:</div>
+              <div className="netobserv-align-start">- {t('Fully dropped shows the flows that are 100% dropped')}</div>
+              <div className="netobserv-align-start">
+                - {t('Containing drops shows the flows having at least one packet dropped')}
+              </div>
+              <div className="netobserv-align-start">- {t('Without drops show the flows having 0% dropped')}</div>
+              <div className="netobserv-align-start">- {t('All shows everything')}</div>
+            </div>
+          }
+        >
+          <div className="pf-c-select__menu-group-title">
+            <>
+              {t('Drops filter')} <InfoAltIcon />
+            </>
+          </div>
+        </Tooltip>
+        {packetLossOptions.map(opt => {
+          const disabled = !allowTcpDrops && opt.value !== 'all';
+          return (
+            <div key={`packet-loss-${opt.value}`}>
+              <label className="pf-c-select__menu-item">
+                <Tooltip
+                  trigger={disabled ? 'mouseenter focus' : ''}
+                  content={
+                    disabled
+                      ? t(
+                          // eslint-disable-next-line max-len
+                          'Only available using eBPF with FlowCollector.agent.ebpf.enableTCPDrop option equals "true"'
+                        )
+                      : undefined
+                  }
+                >
+                  <Radio
+                    isChecked={opt.value === packetLoss}
+                    isDisabled={disabled}
+                    name={`packet-loss-${opt.value}`}
+                    onChange={() => setPacketLoss(opt.value)}
+                    label={opt.label}
+                    data-test={`packet-loss-${opt.value}`}
+                    id={`packet-loss-${opt.value}`}
+                    value={opt.value}
+                  />
+                </Tooltip>
+              </label>
+            </div>
+          );
+        })}
       </div>
       <div className="pf-c-select__menu-group">
         <Tooltip

@@ -113,7 +113,9 @@ export const MetricsQuerySummaryContent: React.FC<{
 
 export const MetricsQuerySummary: React.FC<{
   metrics: TopologyMetrics[];
+  droppedMetrics: TopologyMetrics[];
   appMetrics: TopologyMetrics | undefined;
+  appDroppedMetrics: TopologyMetrics | undefined;
   metricType: MetricType;
   lastRefresh: Date | undefined;
   isShowQuerySummary?: boolean;

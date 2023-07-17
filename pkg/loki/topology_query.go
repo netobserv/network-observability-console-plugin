@@ -12,13 +12,15 @@ const (
 )
 
 type Topology struct {
-	limit        string
-	rateInterval string
-	step         string
-	function     string
-	dataField    string
-	fields       string
-	dedup        bool
+	limit              string
+	rateInterval       string
+	step               string
+	function           string
+	dataField          string
+	fields             string
+	dedup              bool
+	skipEmptyDropState bool
+	skipEmptyDropCause bool
 }
 
 type TopologyQueryBuilder struct {
@@ -26,19 +28,28 @@ type TopologyQueryBuilder struct {
 	topology *Topology
 }
 
-func NewTopologyQuery(cfg *Config, start, end, limit, rateInterval, step, metricType string, recordType constants.RecordType, reporter constants.Reporter, scope, groups string) (*TopologyQueryBuilder, error) {
+func NewTopologyQuery(cfg *Config, start, end, limit, rateInterval, step, metricType string,
+	recordType constants.RecordType, reporter constants.Reporter, packetLoss constants.PacketLoss,
+	aggregate, groups string) (*TopologyQueryBuilder, error) {
 	l := limit
 	if len(l) == 0 {
 		l = topologyDefaultLimit
 	}
 
+	fields := getFields(aggregate, groups)
 	var f, t string
 	switch metricType {
 	case "count":
 		f = "count_over_time"
+	case "droppedPackets":
+		f = "rate"
+		t = "TcpDropPackets"
 	case "packets":
 		f = "rate"
 		t = "Packets"
+	case "droppedBytes":
+		f = "rate"
+		t = "TcpDropBytes"
 	default:
 		f = "rate"
 		t = "Bytes"
@@ -55,24 +66,30 @@ func NewTopologyQuery(cfg *Config, start, end, limit, rateInterval, step, metric
 	}
 
 	return &TopologyQueryBuilder{
-		FlowQueryBuilder: NewFlowQueryBuilder(cfg, start, end, limit, reporter, rt),
+		FlowQueryBuilder: NewFlowQueryBuilder(cfg, start, end, limit, reporter, rt, packetLoss),
 		topology: &Topology{
-			rateInterval: rateInterval,
-			step:         step,
-			limit:        l,
-			function:     f,
-			dataField:    t,
-			fields:       getFields(scope, groups),
-			dedup:        d,
+			rateInterval:       rateInterval,
+			step:               step,
+			limit:              l,
+			function:           f,
+			dataField:          t,
+			fields:             fields,
+			dedup:              d,
+			skipEmptyDropState: aggregate == "droppedState",
+			skipEmptyDropCause: aggregate == "droppedCause",
 		},
 	}, nil
 }
 
-func getFields(scope, groups string) string {
+func getFields(aggregate, groups string) string {
 	var fields []string
-	switch scope {
+	switch aggregate {
 	case "app":
 		fields = []string{"app"}
+	case "droppedState":
+		fields = []string{"TcpDropLatestState"}
+	case "droppedCause":
+		fields = []string{"TcpDropLatestDropCause"}
 	case "host":
 		fields = []string{"SrcK8S_HostName", "DstK8S_HostName"}
 	case "namespace":
@@ -131,6 +148,11 @@ func (q *TopologyQueryBuilder) Build() string {
 	q.appendLineFilters(sb)
 	if q.topology.dedup {
 		q.appendDeduplicateFilter(sb)
+	}
+	if q.topology.skipEmptyDropState {
+		q.appendTCPDropStateFilter(sb)
+	} else if q.topology.skipEmptyDropCause {
+		q.appendTCPDropCauseFilter(sb)
 	}
 	q.appendJSON(sb, true)
 	if len(q.topology.dataField) > 0 {

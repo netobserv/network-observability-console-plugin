@@ -11,11 +11,14 @@ describe('<QueryOptionsDropdown />', () => {
     allowFlow: true,
     allowConnection: true,
     allowReporterBoth: true,
+    allowTcpDrops: true,
     useTopK: false,
     limit: 100,
     match: 'all',
+    packetLoss: 'all',
     setLimit: jest.fn(),
     setMatch: jest.fn(),
+    setPacketLoss: jest.fn(),
     setReporter: jest.fn(),
     setRecordType: jest.fn()
   };
@@ -33,11 +36,14 @@ describe('<QueryOptionsPanel />', () => {
     allowFlow: true,
     allowConnection: true,
     allowReporterBoth: true,
+    allowTcpDrops: true,
     useTopK: false,
     limit: 100,
     match: 'all',
+    packetLoss: 'all',
     setLimit: jest.fn(),
     setMatch: jest.fn(),
+    setPacketLoss: jest.fn(),
     setReporter: jest.fn(),
     setRecordType: jest.fn()
   };
@@ -48,9 +54,9 @@ describe('<QueryOptionsPanel />', () => {
   });
   it('should render component', async () => {
     const wrapper = shallow(<QueryOptionsPanel {...props} />);
-    expect(wrapper.find('.pf-c-select__menu-group').length).toBe(4);
-    expect(wrapper.find('.pf-c-select__menu-group-title').length).toBe(4);
-    expect(wrapper.find(Radio)).toHaveLength(11);
+    expect(wrapper.find('.pf-c-select__menu-group').length).toBe(5);
+    expect(wrapper.find('.pf-c-select__menu-group-title').length).toBe(5);
+    expect(wrapper.find(Radio)).toHaveLength(15);
 
     //setOptions should not be called at startup, because it is supposed to be already initialized from URL
     expect(props.setLimit).toHaveBeenCalledTimes(0);

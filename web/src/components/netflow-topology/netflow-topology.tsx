@@ -6,7 +6,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { TopologyMetrics } from '../../api/loki';
 import { Filter } from '../../model/filters';
-import { MetricFunction, MetricScope, MetricType } from '../../model/flow-query';
+import { MetricFunction, FlowScope, MetricType } from '../../model/flow-query';
 import { GraphElementPeer, LayoutName, TopologyOptions } from '../../model/topology';
 import LokiError from '../messages/loki-error';
 import { SearchEvent, SearchHandle } from '../search/search';
@@ -22,9 +22,10 @@ export const NetflowTopology: React.FC<{
   error?: string;
   metricFunction: MetricFunction;
   metricType: MetricType;
-  metricScope: MetricScope;
-  setMetricScope: (ms: MetricScope) => void;
+  metricScope: FlowScope;
+  setMetricScope: (ms: FlowScope) => void;
   metrics: TopologyMetrics[];
+  droppedMetrics: TopologyMetrics[];
   options: TopologyOptions;
   setOptions: (o: TopologyOptions) => void;
   filters: Filter[];
@@ -43,6 +44,7 @@ export const NetflowTopology: React.FC<{
   metricScope,
   setMetricScope,
   metrics,
+  droppedMetrics,
   options,
   setOptions,
   filters,
@@ -104,6 +106,7 @@ export const NetflowTopology: React.FC<{
           metricScope={metricScope}
           setMetricScope={setMetricScope}
           metrics={metrics}
+          droppedMetrics={droppedMetrics}
           options={options}
           setOptions={setOptions}
           filters={filters}

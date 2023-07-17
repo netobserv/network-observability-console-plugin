@@ -1,4 +1,4 @@
-import { MetricScope } from '../model/flow-query';
+import { AggregateBy, FlowScope } from '../model/flow-query';
 import { cyrb53 } from '../utils/hash';
 import { Fields, Labels, Record } from './ipfix';
 
@@ -27,7 +27,7 @@ export class RecordsResult {
 }
 
 export class TopologyResult {
-  metrics: TopologyMetrics[];
+  metrics: (TopologyMetrics | DroppedTopologyMetrics)[];
   stats: Stats;
 }
 
@@ -57,6 +57,8 @@ export interface RawTopologyMetric {
   SrcK8S_OwnerType?: string;
   SrcK8S_Type?: string;
   SrcK8S_HostName?: string;
+  TcpDropLatestState?: string;
+  TcpDropLatestDropCause?: string;
 }
 
 export interface RawTopologyMetrics {
@@ -81,12 +83,19 @@ export interface TopologyMetricPeer {
   getDisplayName: (inclNamespace: boolean, disambiguate: boolean) => string | undefined;
 }
 
+export type DroppedTopologyMetrics = {
+  name: string;
+  values: [number, number][];
+  stats: MetricStats;
+  aggregateBy: AggregateBy;
+};
+
 export type TopologyMetrics = {
   source: TopologyMetricPeer;
   destination: TopologyMetricPeer;
   values: [number, number][];
   stats: MetricStats;
-  scope: MetricScope;
+  scope: FlowScope;
 };
 
 export type NamedMetric = TopologyMetrics & {

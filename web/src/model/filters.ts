@@ -46,8 +46,11 @@ export type FilterId =
   | 'src_host_name'
   | 'dst_host_name'
   | 'protocol'
+  | 'interface'
   | 'type'
-  | 'id';
+  | 'id'
+  | 'dns_id'
+  | 'dns_flag_response_code';
 
 export interface FilterDefinition {
   id: FilterId;

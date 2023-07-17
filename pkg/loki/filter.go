@@ -23,6 +23,7 @@ const (
 	typeNumber valueType = iota
 	typeString
 	typeRegex
+	typeRegexContains
 	typeIP
 )
 
@@ -37,9 +38,10 @@ type labelFilter struct {
 
 // lineFilter represents a condition based on a JSON raw text match.
 type lineFilter struct {
-	key    string
-	values []lineMatch
-	not    bool
+	key       string
+	strictKey bool
+	values    []lineMatch
+	not       bool
 }
 
 type lineMatch struct {
@@ -47,7 +49,7 @@ type lineMatch struct {
 	valueType valueType
 }
 
-func stringLabelFilter(labelKey string, value string) labelFilter {
+func stringEqualLabelFilter(labelKey string, value string) labelFilter {
 	return labelFilter{
 		key:       labelKey,
 		matcher:   labelEqual,
@@ -56,7 +58,7 @@ func stringLabelFilter(labelKey string, value string) labelFilter {
 	}
 }
 
-func regexLabelFilter(labelKey string, value string) labelFilter {
+func stringMatchLalbeFilter(labelKey string, value string) labelFilter {
 	return labelFilter{
 		key:       labelKey,
 		matcher:   labelMatches,
@@ -74,7 +76,7 @@ func notStringLabelFilter(labelKey string, value string) labelFilter {
 	}
 }
 
-func notRegexLabelFilter(labelKey string, value string) labelFilter {
+func stringNotMatchLabelFilter(labelKey string, value string) labelFilter {
 	return labelFilter{
 		key:       labelKey,
 		matcher:   labelNoMatches,
@@ -96,7 +98,7 @@ func (f *labelFilter) writeInto(sb *strings.Builder) {
 	sb.WriteString(f.key)
 	sb.WriteString(string(f.matcher))
 	switch f.valueType {
-	case typeNumber:
+	case typeNumber, typeRegex:
 		sb.WriteString(f.value)
 	case typeString:
 		sb.WriteByte('"')
@@ -106,7 +108,7 @@ func (f *labelFilter) writeInto(sb *strings.Builder) {
 		sb.WriteString(`ip("`)
 		sb.WriteString(f.value)
 		sb.WriteString(`")`)
-	case typeRegex:
+	case typeRegexContains:
 		sb.WriteString("`(?i).*")
 		sb.WriteString(f.value)
 		sb.WriteString(".*`")
@@ -125,7 +127,7 @@ func (f *lineFilter) asLabelFilters() []labelFilter {
 			valueType: v.valueType,
 			value:     v.value,
 		}
-		if v.valueType == typeRegex {
+		if v.valueType == typeRegex || v.valueType == typeRegexContains {
 			if f.not {
 				lf.matcher = labelNoMatches
 			} else {
@@ -143,6 +145,36 @@ func (f *lineFilter) asLabelFilters() []labelFilter {
 	return lfs
 }
 
+func numberMatchLineFilter(key string, strictKey bool, value string) lineFilter {
+	return lineFilter{
+		key:       key,
+		strictKey: strictKey,
+		values: []lineMatch{{
+			valueType: typeNumber,
+			value:     value,
+		}},
+	}
+}
+
+func regexMatchLineFilter(key string, strictKey bool, value string) lineFilter {
+	return lineFilter{
+		key:       key,
+		strictKey: strictKey,
+		values: []lineMatch{{
+			valueType: typeRegex,
+			value:     value,
+		}},
+	}
+}
+
+func notContainsKeyLineFilter(key string) lineFilter {
+	return lineFilter{
+		key:       key,
+		strictKey: true,
+		not:       true,
+	}
+}
+
 // writeInto transforms a lineFilter to its corresponding part of a LogQL query
 // under construction (contained in the provided strings.Builder)
 func (f *lineFilter) writeInto(sb *strings.Builder) {
@@ -151,36 +183,51 @@ func (f *lineFilter) writeInto(sb *strings.Builder) {
 	} else {
 		sb.WriteString("|~`")
 	}
-	for i, v := range f.values {
-		if i > 0 {
-			sb.WriteByte('|')
+
+	if len(f.values) == 0 {
+		// match only the end of KEY if not 'strictKey'
+		// no value will be provided here as we only check if key exists
+		if f.strictKey {
+			sb.WriteByte('"')
 		}
-		// match end of KEY + regex VALUE:
-		// if numeric, KEY":VALUE,
-		// if string KEY":"VALUE"
-		// ie 'Port' key will match both 'SrcPort":"XXX"' and 'DstPort":"XXX"
-		// VALUE can be quoted for exact match or contains * to inject regex any
-		// For numeric values, exact match is implicit
-		// 	(the trick is to match for the ending coma; it works as long as the filtered field
-		// 	is not the last one (they're in alphabetic order); a less performant alternative
-		// 	but more future-proof/less hacky could be to move that to a json filter, if needed)
 		sb.WriteString(f.key)
-		sb.WriteString(`":`)
-		switch v.valueType {
-		case typeNumber:
-			sb.WriteString(v.value)
-			// a number can be followed by } if it's the last property of a JSON document
-			sb.WriteString("[,}]")
-		case typeString, typeIP:
-			// exact matches are specified as just strings
-			sb.WriteByte('"')
-			sb.WriteString(valueReplacer.Replace(v.value))
-			sb.WriteByte('"')
-		// contains-match are specified as regular expressions
-		case typeRegex:
-			sb.WriteString(`"(?i)[^"]*`)
-			sb.WriteString(valueReplacer.Replace(v.value))
-			sb.WriteString(`.*"`)
+		sb.WriteString(`"`)
+	} else {
+		for i, v := range f.values {
+			if i > 0 {
+				sb.WriteByte('|')
+			}
+
+			// match only the end of KEY + regex VALUE if not 'strictKey'
+			// if numeric, KEY":VALUE,
+			// if string KEY":"VALUE"
+			// ie 'Port' key will match both 'SrcPort":"XXX"' and 'DstPort":"XXX"
+			// VALUE can be quoted for exact match or contains * to inject regex any
+			// For numeric values, exact match is implicit
+			// 	(the trick is to match for the ending coma; it works as long as the filtered field
+			// 	is not the last one (they're in alphabetic order); a less performant alternative
+			// 	but more future-proof/less hacky could be to move that to a json filter, if needed)
+			if f.strictKey {
+				sb.WriteByte('"')
+			}
+			sb.WriteString(f.key)
+			sb.WriteString(`":`)
+			switch v.valueType {
+			case typeNumber, typeRegex:
+				sb.WriteString(v.value)
+				// a number or regex can be followed by } if it's the last property of a JSON document
+				sb.WriteString("[,}]")
+			case typeString, typeIP:
+				// exact matches are specified as just strings
+				sb.WriteByte('"')
+				sb.WriteString(valueReplacer.Replace(v.value))
+				sb.WriteByte('"')
+			// contains-match are specified as regular expressions
+			case typeRegexContains:
+				sb.WriteString(`"(?i)[^"]*`)
+				sb.WriteString(valueReplacer.Replace(v.value))
+				sb.WriteString(`.*"`)
+			}
 		}
 	}
 	sb.WriteRune('`')
