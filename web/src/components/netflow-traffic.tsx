@@ -155,7 +155,10 @@ export const NetflowTraffic: React.FC<{
   const isDarkTheme = useTheme();
 
   const [queryParams, setQueryParams] = useLocalStorage<string>(LOCAL_STORAGE_QUERY_PARAMS_KEY);
-  const [disabledFilters, setDisabledFilters] = useLocalStorage<DisabledFilters>(LOCAL_STORAGE_DISABLED_FILTERS_KEY);
+  const [disabledFilters, setDisabledFilters] = useLocalStorage<DisabledFilters>(
+    LOCAL_STORAGE_DISABLED_FILTERS_KEY,
+    {}
+  );
   // set url params from local storage saved items at startup if empty
   if (hasEmptyParams() && queryParams) {
     setURLParams(queryParams);

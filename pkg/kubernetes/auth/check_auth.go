@@ -44,7 +44,7 @@ type NoopChecker struct {
 	Checker
 }
 
-func (b *NoopChecker) CheckAuth(ctx context.Context, header http.Header) error {
+func (b *NoopChecker) CheckAuth(_ context.Context, _ http.Header) error {
 	hlog.Debug("noop auth checker: ignore auth")
 	return nil
 }

@@ -579,9 +579,8 @@ func checkHTTPReady(httpClient *http.Client, url string) {
 		if r, err := httpClient.Get(url); err == nil {
 			r.Body.Close()
 			break
-		} else {
-			time.Sleep(time.Second)
 		}
+		time.Sleep(time.Second)
 	}
 }
 
