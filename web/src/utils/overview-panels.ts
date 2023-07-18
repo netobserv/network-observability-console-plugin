@@ -99,19 +99,19 @@ export const getOverviewPanelInfo = (
       return {
         title: t('Top {{limit}} dropped state', { limit }),
         chartType: t('donut'),
-        tooltip: t('The top dropped states over the selected interval')
+        tooltip: t('The top dropped states (dropped by the kernel) over the selected interval')
       };
     case 'top_dropped_cause_donut':
       return {
         title: t('Top {{limit}} dropped cause', { limit }),
         chartType: t('donut'),
-        tooltip: t('The top drop causes over the selected interval')
+        tooltip: t('The top drop causes (dropped by the kernel) over the selected interval')
       };
     case 'top_dropped_bar_total':
       return {
         title: t('Top {{limit}} {{type}} dropped rates stacked with total', { limit, type }),
         chartType: t('bars'),
-        tooltip: t('The top dropped rates as bar compared to total as line over the selected interval')
+        tooltip: t('The top dropped rates (dropped by the kernel) as bar compared to total as line over the selected interval')
       };
     case 'inbound_region':
       return { title: t('Inbound {{type}} by region', { type }) };
