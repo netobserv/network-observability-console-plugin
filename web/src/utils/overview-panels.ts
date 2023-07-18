@@ -111,7 +111,9 @@ export const getOverviewPanelInfo = (
       return {
         title: t('Top {{limit}} {{type}} dropped rates stacked with total', { limit, type }),
         chartType: t('bars'),
-        tooltip: t('The top dropped rates (dropped by the kernel) as bar compared to total as line over the selected interval')
+        tooltip: t(
+          'The top dropped rates (dropped by the kernel) as bar compared to total as line over the selected interval'
+        )
       };
     case 'inbound_region':
       return { title: t('Inbound {{type}} by region', { type }) };
