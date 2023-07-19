@@ -31,10 +31,10 @@ const (
 	SrcHostName    = Src + HostName
 	DstHostName    = Dst + HostName
 	Packets        = "Packets"
-	TCPDropPackets = "TcpDropPackets"
+	PktDropPackets = "PktDropPackets"
 	Proto          = "Proto"
 	Bytes          = "Bytes"
-	TCPDropBytes   = "TcpDropBytes"
+	PktDropBytes   = "PktDropBytes"
 	FlowDirection  = "FlowDirection"
 	DNSID          = "DnsId"
 )

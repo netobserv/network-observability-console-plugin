@@ -9,60 +9,44 @@
         },
         "values": [
           [
-            1689357240,
-            "95.18611111111112"
+            1689617160,
+            "8.827777777777778"
           ],
           [
-            1689357600,
-            "95.86388888888888"
+            1689617520,
+            "59.53194444444445"
           ],
           [
-            1689357960,
-            "95.90277777777779"
+            1689617880,
+            "99.40833333333333"
           ],
           [
-            1689358320,
-            "94.43472222222222"
+            1689618240,
+            "93.24583333333332"
           ],
           [
-            1689358680,
-            "95.92777777777778"
+            1689618600,
+            "91.00416666666668"
           ],
           [
-            1689359040,
-            "95.40555555555557"
+            1689618960,
+            "94.03194444444443"
           ],
           [
-            1689359400,
-            "95.04722222222222"
-          ],
-          [
-            1689359760,
-            "95.82500000000002"
-          ],
-          [
-            1689360120,
-            "93.0513888888889"
-          ],
-          [
-            1689360480,
-            "94.64999999999999"
-          ],
-          [
-            1689360840,
-            "96.88194444444446"
+            1689619320,
+            "94.5263888888889"
           ]
         ]
       }
     ],
     "stats": {
       "summary": {
-        "bytesProcessedPerSecond": 17608526,
-        "linesProcessedPerSecond": 24920,
-        "totalBytesProcessed": 74698211,
-        "totalLinesProcessed": 105716,
-        "execTime": 4.242161489,
-        "queueTime": 63.642161992,
+        "bytesProcessedPerSecond": 47999449,
+        "linesProcessedPerSecond": 67992,
+        "totalBytesProcessed": 130651593,
+        "totalLinesProcessed": 185072,
+        "execTime": 2.721939405,
+        "queueTime": 80.607792972,
         "subqueries": 6,
         "totalEntriesReturned": 1
       },
@@ -82,21 +66,21 @@
         }
       },
       "ingester": {
-        "totalReached": 16,
-        "totalChunksMatched": 448,
-        "totalBatches": 139,
-        "totalLinesSent": 67356,
+        "totalReached": 48,
+        "totalChunksMatched": 940,
+        "totalBatches": 281,
+        "totalLinesSent": 136138,
         "store": {
           "totalChunksRef": 6,
           "totalChunksDownloaded": 6,
-          "chunksDownloadTime": 3711023,
+          "chunksDownloadTime": 2791570,
           "chunk": {
-            "headChunkBytes": 15316800,
-            "headChunkLines": 22003,
-            "decompressedBytes": 59381411,
-            "decompressedLines": 83713,
-            "compressedBytes": 12306027,
-            "totalDuplicates": 2793
+            "headChunkBytes": 26920562,
+            "headChunkLines": 38616,
+            "decompressedBytes": 103731031,
+            "decompressedLines": 146456,
+            "compressedBytes": 22333756,
+            "totalDuplicates": 0
           }
         }
       }

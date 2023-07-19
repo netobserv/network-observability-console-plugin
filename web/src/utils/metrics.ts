@@ -139,14 +139,14 @@ const parseMetric = (
   const stats = computeStats(normalized);
   if (aggregateBy === 'droppedState') {
     return {
-      name: raw.metric.TcpDropLatestState,
+      name: raw.metric.PktDropLatestState,
       values: normalized,
       stats: stats,
       aggregateBy
     } as DroppedTopologyMetrics;
   } else if (aggregateBy === 'droppedCause') {
     return {
-      name: raw.metric.TcpDropLatestDropCause,
+      name: raw.metric.PktDropLatestDropCause,
       values: normalized,
       stats: stats,
       aggregateBy

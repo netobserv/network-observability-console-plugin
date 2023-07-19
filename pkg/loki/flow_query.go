@@ -69,18 +69,18 @@ func NewFlowQueryBuilder(cfg *Config, start, end, limit string, reporter constan
 		// match 0 packet sent and 1+ packets dropped
 		lineFilters = append(lineFilters,
 			numberMatchLineFilter(fields.Packets, true, "0"),
-			regexMatchLineFilter(fields.TCPDropPackets, true, "[1-9][0-9]*"),
+			regexMatchLineFilter(fields.PktDropPackets, true, "[1-9][0-9]*"),
 		)
 	} else if packetLoss == constants.PacketLossHasDrop {
 		// match 1+ packets dropped
 		lineFilters = append(lineFilters,
-			regexMatchLineFilter(fields.TCPDropPackets, true, "[1-9][0-9]*"),
+			regexMatchLineFilter(fields.PktDropPackets, true, "[1-9][0-9]*"),
 		)
 	} else if packetLoss == constants.PacketLossSent {
-		// match records that doesn't contains "TCPDropPackets" field
+		// match records that doesn't contains "PktDropPackets" field
 		// as FLP will ensure the filtering
 		lineFilters = append(lineFilters,
-			notContainsKeyLineFilter(fields.TCPDropPackets),
+			notContainsKeyLineFilter(fields.PktDropPackets),
 		)
 	}
 
@@ -251,17 +251,17 @@ func (q *FlowQueryBuilder) appendDeduplicateFilter(sb *strings.Builder) {
 	sb.WriteString("`")
 }
 
-func (q *FlowQueryBuilder) appendTCPDropStateFilter(sb *strings.Builder) {
-	// !~`TcpDropLatestState":0`
+func (q *FlowQueryBuilder) appendPktDropStateFilter(sb *strings.Builder) {
+	// !~`PktDropLatestState":0`
 	sb.WriteString("!~`")
-	sb.WriteString(`TcpDropLatestState":0`)
+	sb.WriteString(`PktDropLatestState":0`)
 	sb.WriteString("`")
 }
 
-func (q *FlowQueryBuilder) appendTCPDropCauseFilter(sb *strings.Builder) {
-	// !~`TcpDropLatestDropCause":0`
+func (q *FlowQueryBuilder) appendPktDropCauseFilter(sb *strings.Builder) {
+	// !~`PktDropLatestDropCause":0`
 	sb.WriteString("!~`")
-	sb.WriteString(`TcpDropLatestDropCause":0`)
+	sb.WriteString(`PktDropLatestDropCause":0`)
 	sb.WriteString("`")
 }
 

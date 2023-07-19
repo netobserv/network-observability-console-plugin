@@ -30,6 +30,7 @@
     "openshift-insights",
     "openshift-kube-apiserver",
     "openshift-kube-apiserver-operator",
+    "openshift-kube-controller-manager",
     "openshift-kube-controller-manager-operator",
     "openshift-kube-scheduler",
     "openshift-kube-scheduler-operator",

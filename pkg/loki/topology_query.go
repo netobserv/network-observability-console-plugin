@@ -43,13 +43,13 @@ func NewTopologyQuery(cfg *Config, start, end, limit, rateInterval, step, metric
 		f = "count_over_time"
 	case "droppedPackets":
 		f = "rate"
-		t = "TcpDropPackets"
+		t = "PktDropPackets"
 	case "packets":
 		f = "rate"
 		t = "Packets"
 	case "droppedBytes":
 		f = "rate"
-		t = "TcpDropBytes"
+		t = "PktDropBytes"
 	default:
 		f = "rate"
 		t = "Bytes"
@@ -87,9 +87,9 @@ func getFields(aggregate, groups string) string {
 	case "app":
 		fields = []string{"app"}
 	case "droppedState":
-		fields = []string{"TcpDropLatestState"}
+		fields = []string{"PktDropLatestState"}
 	case "droppedCause":
-		fields = []string{"TcpDropLatestDropCause"}
+		fields = []string{"PktDropLatestDropCause"}
 	case "host":
 		fields = []string{"SrcK8S_HostName", "DstK8S_HostName"}
 	case "namespace":
@@ -150,9 +150,9 @@ func (q *TopologyQueryBuilder) Build() string {
 		q.appendDeduplicateFilter(sb)
 	}
 	if q.topology.skipEmptyDropState {
-		q.appendTCPDropStateFilter(sb)
+		q.appendPktDropStateFilter(sb)
 	} else if q.topology.skipEmptyDropCause {
-		q.appendTCPDropCauseFilter(sb)
+		q.appendPktDropCauseFilter(sb)
 	}
 	q.appendJSON(sb, true)
 	if len(q.topology.dataField) > 0 {

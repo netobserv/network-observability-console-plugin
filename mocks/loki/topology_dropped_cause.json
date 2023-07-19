@@ -9,8 +9,8 @@
         "linesProcessedPerSecond": 0,
         "totalBytesProcessed": 0,
         "totalLinesProcessed": 0,
-        "execTime": 0.345117107,
-        "queueTime": 0.910854438,
+        "execTime": 0.349613188,
+        "queueTime": 4.8969361,
         "subqueries": 6,
         "totalEntriesReturned": 0
       },
@@ -30,7 +30,7 @@
         }
       },
       "ingester": {
-        "totalReached": 16,
+        "totalReached": 48,
         "totalChunksMatched": 0,
         "totalBatches": 0,
         "totalLinesSent": 0,

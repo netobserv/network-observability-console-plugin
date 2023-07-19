@@ -26,5 +26,5 @@ alertNamespaces:
   - netobserv
 sampling: 50
 features:
-  - tcpDrop
+  - pktDrop
   - dnsTracking

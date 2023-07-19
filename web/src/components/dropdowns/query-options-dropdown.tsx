@@ -14,7 +14,7 @@ export interface QueryOptionsDropdownProps {
   allowFlow: boolean;
   allowConnection: boolean;
   allowReporterBoth: boolean;
-  allowTcpDrops: boolean;
+  allowPktDrops: boolean;
   useTopK: boolean;
   limit: number;
   setLimit: (limit: number) => void;
@@ -41,7 +41,7 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
   allowFlow,
   allowConnection,
   allowReporterBoth,
-  allowTcpDrops,
+  allowPktDrops,
   useTopK,
   limit,
   setLimit,
@@ -251,7 +251,7 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
           </div>
         </Tooltip>
         {packetLossOptions.map(opt => {
-          const disabled = !allowTcpDrops && opt.value !== 'all';
+          const disabled = !allowPktDrops && opt.value !== 'all';
           return (
             <div key={`packet-loss-${opt.value}`}>
               <label className="pf-c-select__menu-item">
@@ -261,7 +261,7 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
                     disabled
                       ? t(
                           // eslint-disable-next-line max-len
-                          'Only available using eBPF with FlowCollector.agent.ebpf.enableTCPDrop option equals "true"'
+                          'Only available using eBPF with FlowCollector.agent.ebpf.enablePktDrop option equals "true"'
                         )
                       : undefined
                   }

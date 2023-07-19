@@ -90,27 +90,27 @@ export interface Fields {
   IcmpType?: number;
   /** ICMP code */
   IcmpCode?: number;
-  /** TCP state for drops */
-  TcpDropLatestState?: string;
-  /** TCP cause for drops */
-  TcpDropLatestDropCause?: string;
-  /** TCP flags for drops */
-  TcpDropLatestFlags?: number;
+  /** Pkt TCP state for drops */
+  PktDropLatestState?: string;
+  /** Pkt cause for drops */
+  PktDropLatestDropCause?: string;
+  /** Pkt TCP flags for drops */
+  PktDropLatestFlags?: number;
   /** Number of packets dropped in this flow */
-  TcpDropPackets?: number;
+  PktDropPackets?: number;
   /** In conversation tracking, A to B packets dropped counter per conversation */
-  TcpDropPackets_AB?: number;
+  PktDropPackets_AB?: number;
   /** In conversation tracking, B to A packets dropped counter per conversation */
-  TcpDropPackets_BA?: number;
+  PktDropPackets_BA?: number;
   /** Number of bytes dropped in this flow */
-  TcpDropBytes?: number;
+  PktDropBytes?: number;
   /** In conversation tracking, A to B bytes dropped counter per conversation */
-  TcpDropBytes_AB?: number;
+  PktDropBytes_AB?: number;
   /** In conversation tracking, B to A bytes dropped counter per conversation */
-  TcpDropBytes_BA?: number;
+  PktDropBytes_BA?: number;
   /** DNS record id */
   DnsId?: number;
-  /** TCP flags for DNS record */
+  /** DNS flags for DNS record */
   DnsFlags?: number;
   /** Parsed DNS header RCODEs name */
   DnsFlagsResponseCode?: string;
