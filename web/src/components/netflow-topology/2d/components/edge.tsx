@@ -137,7 +137,7 @@ const BaseEdge: React.FC<BaseEdgeProps> = ({
     .join('')}L${bgEndPoint[0]} ${bgEndPoint[1]}`;
 
   return (
-    <Layer id={dragging || hover ? TOP_LAYER : undefined}>
+    <Layer id={dragging ? TOP_LAYER : undefined}>
       <g
         ref={hoverRef as React.LegacyRef<SVGGElement> | undefined}
         data-test-id="edge-handler"

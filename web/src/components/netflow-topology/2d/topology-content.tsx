@@ -19,24 +19,25 @@ import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { TopologyMetrics } from '../../../api/loki';
-import { Filter } from '../../../model/filters';
+import { Filter, Filters } from '../../../model/filters';
 import { MetricFunction, FlowScope, MetricType } from '../../../model/flow-query';
 import { MetricScopeOptions } from '../../../model/metrics';
 import {
   Decorated,
   ElementData,
+  FilterDir,
   generateDataModel,
   getStat,
   GraphElementPeer,
-  isElementFiltered,
   LayoutName,
+  NodeData,
   toggleElementFilter,
   TopologyGroupTypes,
   TopologyOptions
 } from '../../../model/topology';
 import { usePrevious } from '../../../utils/previous-hook';
 import { SearchEvent, SearchHandle } from '../../search/search';
-import { FILTER_EVENT, STEP_INTO_EVENT } from './styles/styleNode';
+import { FILTER_EVENT, STEP_INTO_EVENT } from './styles/styleDecorators';
 import './topology-content.css';
 
 export const HOVER_EVENT = 'hover';
@@ -59,8 +60,8 @@ export const TopologyContent: React.FC<{
   droppedMetrics: TopologyMetrics[];
   options: TopologyOptions;
   setOptions: (o: TopologyOptions) => void;
-  filters: Filter[];
-  setFilters: (v: Filter[]) => void;
+  filters: Filters;
+  setFilters: (v: Filters) => void;
   selected: GraphElementPeer | undefined;
   onSelect: (e: GraphElementPeer | undefined) => void;
   searchHandle: SearchHandle | null;
@@ -160,19 +161,25 @@ export const TopologyContent: React.FC<{
     [controller, onSelectIds, searchHandle]
   );
 
+  const setFiltersList = React.useCallback(
+    (list: Filter[]) => {
+      setFilters({ ...filters, list: list });
+    },
+    [setFilters, filters]
+  );
+
   const onChangeSearch = () => {
     lastNodeIdsFound = [];
   };
 
   const onFilter = React.useCallback(
-    (data: Decorated<ElementData>) => {
+    (id: string, data: NodeData, dir: FilterDir, isFiltered: boolean) => {
       if (data.nodeType && data.peer) {
-        const isFiltered = isElementFiltered(data.nodeType, data.peer, 'any', filters, t);
-        toggleElementFilter(data.nodeType, data.peer, 'any', isFiltered, filters, setFilters, t);
-        setSelectedIds([data.id]);
+        toggleElementFilter(data.nodeType, data.peer, dir, isFiltered, filters.list, setFiltersList, t);
+        setSelectedIds([id]);
       }
     },
-    [filters, setFilters, t]
+    [filters, setFiltersList, t]
   );
 
   const onStepInto = React.useCallback(
@@ -192,22 +199,28 @@ export const TopologyContent: React.FC<{
           scope = MetricScopeOptions.RESOURCE;
           groupTypes = TopologyGroupTypes.OWNERS;
       }
-      setMetricScope(scope);
-      setOptions({
-        ...options,
-        groupTypes
-      });
-      onFilter({
-        ...data,
-        isFiltered: true,
-        isClearFilters: true
-      });
-      //clear search
-      onChangeSearch();
-      //clear selection
-      onSelect(undefined);
+      if (data.nodeType && data.peer) {
+        setMetricScope(scope);
+        setOptions({ ...options, groupTypes });
+        toggleElementFilter(
+          data.nodeType,
+          data.peer,
+          'src',
+          true,
+          filters.list,
+          list => {
+            setFilters({ list: list, backAndForth: true });
+          },
+          t
+        );
+        setSelectedIds([data.id]);
+        //clear search
+        onChangeSearch();
+        //clear selection
+        onSelect(undefined);
+      }
     },
-    [metricScope, onFilter, onSelect, options, setMetricScope, setOptions]
+    [metricScope, onSelect, options, setMetricScope, setOptions, setFilters, filters.list, t]
   );
 
   const onHover = React.useCallback((data: Decorated<ElementData>) => {

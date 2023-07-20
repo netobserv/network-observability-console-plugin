@@ -1,13 +1,11 @@
 import { Accordion, AccordionItem, Button, Dropdown, Toolbar, ToolbarItem } from '@patternfly/react-core';
 import { mount, shallow } from 'enzyme';
 import * as React from 'react';
-import { Filter } from '../../../model/filters';
 import FiltersToolbar, { FiltersToolbarProps } from '../../filters/filters-toolbar';
-import { FiltersSample } from '../../__tests-data__/filters';
 
 describe('<FiltersToolbar />', () => {
   const props: FiltersToolbarProps = {
-    filters: [] as Filter[],
+    filters: { backAndForth: false, list: [] },
     forcedFilters: undefined,
     skipTipsDelay: true,
     setFilters: jest.fn(),
@@ -31,7 +29,9 @@ describe('<FiltersToolbar />', () => {
       setReporter: jest.fn(),
       setRecordType: jest.fn()
     },
-    quickFilters: []
+    quickFilters: [],
+    isFullScreen: false,
+    setFullScreen: jest.fn()
   };
   beforeEach(() => {
     props.setFilters = jest.fn();
@@ -42,24 +42,9 @@ describe('<FiltersToolbar />', () => {
     const wrapper = shallow(<FiltersToolbar {...props} />);
     expect(wrapper.find(FiltersToolbar)).toBeTruthy();
     expect(wrapper.find(Toolbar)).toBeTruthy();
-    expect(wrapper.find(ToolbarItem)).toHaveLength(2);
+    expect(wrapper.find(ToolbarItem)).toHaveLength(3);
     expect(wrapper.find(Dropdown)).toBeTruthy();
     expect(wrapper.find(Button)).toBeTruthy();
-  });
-
-  it('should render filters', async () => {
-    const wrapper = shallow(<FiltersToolbar {...props} />);
-    expect(wrapper.find('.custom-chip-group')).toHaveLength(props.filters!.length);
-
-    //add a bunch of filters
-    props.filters = FiltersSample;
-    wrapper.setProps({ filters: props.filters });
-    expect(wrapper.find('.custom-chip-group')).toHaveLength(props.filters.length);
-
-    //update props to set a single filter
-    props.filters = [FiltersSample[0]];
-    wrapper.setProps({ filters: props.filters });
-    expect(wrapper.find('.custom-chip-group')).toHaveLength(props.filters.length);
   });
 
   it('should open and close', async () => {

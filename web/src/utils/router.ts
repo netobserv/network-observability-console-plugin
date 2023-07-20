@@ -2,8 +2,16 @@ import { TFunction } from 'i18next';
 import { findFilter } from './filter-definitions';
 import { TimeRange } from './datetime';
 import { Match, MetricFunction, MetricType, PacketLoss, RecordType, Reporter } from '../model/flow-query';
-import { getURLParam, getURLParamAsNumber, removeURLParam, setURLParam, URLParam } from './url';
-import { createFilterValue, DisabledFilters, Filter, filterKey, fromFilterKey } from '../model/filters';
+import {
+  getURLParam,
+  getURLParamAsBool,
+  getURLParamAsNumber,
+  removeURLParam,
+  setSomeURLParams,
+  setURLParam,
+  URLParam
+} from './url';
+import { createFilterValue, DisabledFilters, Filter, filterKey, Filters, fromFilterKey } from '../model/filters';
 
 const filtersSeparator = ';';
 const filterKVSeparator = '=';
@@ -54,7 +62,7 @@ export const getPacketLossFromURL = (): PacketLoss => {
   return (getURLParam(URLParam.PacketLoss) as PacketLoss | null) || defaultPacketLoss;
 };
 
-export const getFiltersFromURL = (t: TFunction, disabledFilters: DisabledFilters): Promise<Filter[]> | undefined => {
+export const getFiltersFromURL = (t: TFunction, disabledFilters: DisabledFilters): Promise<Filters> | undefined => {
   const urlParam = getURLParam(URLParam.Filters);
   //skip filters only if url param is missing
   if (urlParam === null) {
@@ -88,16 +96,23 @@ export const getFiltersFromURL = (t: TFunction, disabledFilters: DisabledFilters
       }
     }
   });
-  return Promise.all(filterPromises);
+  const backAndForth = getURLParamAsBool(URLParam.BackAndForth) || false;
+  return Promise.all(filterPromises).then(list => ({ backAndForth, list }));
 };
 
-export const setURLFilters = (filters: Filter[], replace?: boolean) => {
-  const urlFilters = filters
+export const setURLFilters = (filters: Filters, replace?: boolean) => {
+  const urlFilters = filters.list
     .map(filter => {
       return filterKey(filter) + filterKVSeparator + filter.values.map(v => v.v).join(filterValuesSeparator);
     })
     .join(filtersSeparator);
-  setURLParam(URLParam.Filters, urlFilters, replace);
+  setSomeURLParams(
+    new Map([
+      [URLParam.Filters, urlFilters],
+      [URLParam.BackAndForth, filters.backAndForth ? 'true' : 'false']
+    ]),
+    replace
+  );
 };
 
 export const setURLRange = (range: number | TimeRange, replace?: boolean) => {
@@ -106,8 +121,13 @@ export const setURLRange = (range: number | TimeRange, replace?: boolean) => {
     removeURLParam(URLParam.StartTime, true);
     removeURLParam(URLParam.EndTime, true);
   } else if (typeof range === 'object') {
-    setURLParam(URLParam.StartTime, String(range.from), replace);
-    setURLParam(URLParam.EndTime, String(range.to), true);
+    setSomeURLParams(
+      new Map([
+        [URLParam.StartTime, String(range.from)],
+        [URLParam.EndTime, String(range.to)]
+      ]),
+      replace
+    );
     removeURLParam(URLParam.TimeRange, true);
   }
 };

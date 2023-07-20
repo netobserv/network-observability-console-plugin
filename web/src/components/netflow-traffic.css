@@ -118,10 +118,9 @@ span.pf-c-button__icon.pf-m-start {
 #manage-columns-button,
 #display-dropdown,
 #export-button,
-#fullscreen-button,
 #view-options-button,
 #more-options-button,
-.overflow-button {
+.pf-c-overflow-menu .overflow-button {
     display: flex;
     align-items: center;
     margin-left: 0;

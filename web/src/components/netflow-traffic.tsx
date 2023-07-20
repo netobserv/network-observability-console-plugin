@@ -25,7 +25,7 @@ import {
   Toolbar,
   ToolbarItem
 } from '@patternfly/react-core';
-import { ColumnsIcon, CompressIcon, EllipsisVIcon, ExpandIcon, ExportIcon, SyncAltIcon } from '@patternfly/react-icons';
+import { ColumnsIcon, EllipsisVIcon, ExportIcon, SyncAltIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -36,6 +36,7 @@ import { getFlows, getTopology } from '../api/routes';
 import {
   DisabledFilters,
   Filter,
+  Filters,
   getDisabledFiltersRecord,
   getEnabledFilters,
   hasIndexFields,
@@ -43,8 +44,7 @@ import {
 } from '../model/filters';
 import {
   FlowQuery,
-  groupFiltersMatchAll,
-  groupFiltersMatchAny,
+  groupFilters,
   Match,
   MetricFunction,
   FlowScope,
@@ -129,7 +129,6 @@ import NetflowTable from './netflow-table/netflow-table';
 import ElementPanel from './netflow-topology/element-panel';
 import NetflowTopology from './netflow-topology/netflow-topology';
 import { Config, defaultConfig } from '../model/config';
-import { FilterActionLinks } from './filters/filter-action-links';
 import SummaryPanel from './query-summary/summary-panel';
 import MetricsQuerySummary from './query-summary/metrics-query-summary';
 import FlowsQuerySummary from './query-summary/flows-query-summary';
@@ -139,14 +138,14 @@ import { TruncateLength } from './dropdowns/truncate-dropdown';
 import HistogramContainer from './metrics/histogram';
 import { formatDuration, getDateMsInSeconds, getDateSInMiliseconds, parseDuration } from '../utils/duration';
 import GuidedTourPopover, { GuidedTourHandle } from './guided-tour/guided-tour';
-
 import { exportToPng } from '../utils/export';
 import { navigate } from './dynamic-loader/dynamic-loader';
+import { LinksOverflow } from './overflow/links-overflow';
 
 export type ViewId = 'overview' | 'table' | 'topology';
 
 export const NetflowTraffic: React.FC<{
-  forcedFilters?: Filter[] | null;
+  forcedFilters?: Filters | null;
   isTab?: boolean;
 }> = ({ forcedFilters, isTab }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
@@ -172,7 +171,6 @@ export const NetflowTraffic: React.FC<{
   const [warningMessage, setWarningMessage] = React.useState<string | undefined>();
   const [showViewOptions, setShowViewOptions] = useLocalStorage<boolean>(LOCAL_STORAGE_SHOW_OPTIONS_KEY, false);
   const [showHistogram, setShowHistogram] = useLocalStorage<boolean>(LOCAL_STORAGE_SHOW_HISTOGRAM_KEY, false);
-  const [isFilterOverflowMenuOpen, setFiltersOverflowMenuOpen] = React.useState(false);
   const [isViewOptionOverflowMenuOpen, setViewOptionOverflowMenuOpen] = React.useState(false);
   const [isFullScreen, setFullScreen] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
@@ -201,7 +199,7 @@ export const NetflowTraffic: React.FC<{
   const [isColModalOpen, setColModalOpen] = React.useState(false);
   const [isExportModalOpen, setExportModalOpen] = React.useState(false);
   const [selectedViewId, setSelectedViewId] = useLocalStorage<ViewId>(LOCAL_STORAGE_VIEW_ID_KEY, 'overview');
-  const [filters, setFilters] = React.useState<Filter[]>([]);
+  const [filters, setFilters] = React.useState<Filters>({ list: [], backAndForth: false });
   const [match, setMatch] = React.useState<Match>(getMatchFromURL());
   const [packetLoss, setPacketLoss] = React.useState<PacketLoss>(getPacketLossFromURL());
   const [recordType, setRecordType] = React.useState<RecordType>(getRecordTypeFromURL());
@@ -255,7 +253,7 @@ export const NetflowTraffic: React.FC<{
   // updates table filters and clears up the table for proper visualization of the
   // updating process
   const updateTableFilters = React.useCallback(
-    (f: Filter[]) => {
+    (f: Filters) => {
       setFilters(f);
       setFlows([]);
       setTotalMetric(undefined);
@@ -265,11 +263,13 @@ export const NetflowTraffic: React.FC<{
     [setFilters, setFlows, setWarningMessage]
   );
 
+  const backAndForth = filters.backAndForth;
   const resetDefaultFilters = React.useCallback(
     (c = config) => {
-      updateTableFilters(getDefaultFilters(c));
+      const def = getDefaultFilters(c);
+      updateTableFilters({ backAndForth, list: def });
     },
-    [config, getDefaultFilters, updateTableFilters]
+    [config, backAndForth, getDefaultFilters, updateTableFilters]
   );
 
   const clearSelections = () => {
@@ -324,8 +324,7 @@ export const NetflowTraffic: React.FC<{
 
   const buildFlowQuery = React.useCallback((): FlowQuery => {
     const enabledFilters = getEnabledFilters(forcedFilters || filters);
-    const groupedFilters =
-      match === 'any' ? groupFiltersMatchAny(enabledFilters) : groupFiltersMatchAll(enabledFilters);
+    const groupedFilters = groupFilters(enabledFilters, match === 'any');
     const query: FlowQuery = {
       filters: groupedFilters,
       limit: LIMIT_VALUES.includes(limit) ? limit : LIMIT_VALUES[0],
@@ -664,7 +663,7 @@ export const NetflowTraffic: React.FC<{
     //with forced filters in url if specified
     if (forcedFilters) {
       setURLFilters(forcedFilters!, true);
-    } else if (!_.isEmpty(filters)) {
+    } else if (!_.isEmpty(filters) && !_.isEmpty(filters.list)) {
       //write filters in url if not empty
       setURLFilters(filters, !initState.current.includes('configLoaded'));
     }
@@ -701,7 +700,7 @@ export const NetflowTraffic: React.FC<{
 
   // update local storage enabled filters
   React.useEffect(() => {
-    setDisabledFilters(getDisabledFiltersRecord(filters));
+    setDisabledFilters(getDisabledFiltersRecord(filters.list));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters]);
 
@@ -727,10 +726,18 @@ export const NetflowTraffic: React.FC<{
       navigate(netflowTrafficPath);
     } else if (filters) {
       //set URL Param to empty value to be able to restore state coming from another page
-      setURLFilters([]);
-      updateTableFilters([]);
+      const empty: Filters = { ...filters, list: [] };
+      setURLFilters(empty);
+      updateTableFilters(empty);
     }
   }, [forcedFilters, filters, updateTableFilters]);
+
+  const setFiltersList = React.useCallback(
+    (list: Filter[]) => {
+      setFilters({ ...filters, list: list });
+    },
+    [setFilters, filters]
+  );
 
   const viewTabs = () => {
     return (
@@ -953,55 +960,6 @@ export const NetflowTraffic: React.FC<{
     );
   };
 
-  const filtersExtraContent = () => {
-    const items: JSX.Element[] = [];
-    items.push(
-      <OverflowMenuItem key="fullscreen">
-        <Button
-          data-test="fullscreen-button"
-          id="fullscreen-button"
-          variant="link"
-          className="overflow-button"
-          icon={isFullScreen ? <CompressIcon /> : <ExpandIcon />}
-          onClick={() => setFullScreen(!isFullScreen)}
-        >
-          {isFullScreen ? t('Collapse') : t('Expand')}
-        </Button>
-      </OverflowMenuItem>
-    );
-    return items;
-  };
-
-  const filtersExtraControl = () => {
-    return (
-      <Dropdown
-        data-test="more-options-dropdown"
-        id="more-options-dropdown"
-        onSelect={() => setFiltersOverflowMenuOpen(false)}
-        toggle={
-          <Button
-            data-test="more-options-button"
-            id="more-options-button"
-            variant="link"
-            className="overflow-button"
-            icon={<EllipsisVIcon />}
-            onClick={() => setFiltersOverflowMenuOpen(!isFilterOverflowMenuOpen)}
-          >
-            {t('More options')}
-          </Button>
-        }
-        isOpen={isFilterOverflowMenuOpen}
-        dropdownItems={[
-          <DropdownGroup key="fullscreen-group" label={t('View')}>
-            <DropdownItem key="fullscreen" onClick={() => setFullScreen(!isFullScreen)}>
-              {isFullScreen ? t('Collapse') : t('Expand')}
-            </DropdownItem>
-          </DropdownGroup>
-        ]}
-      />
-    );
-  };
-
   const panelContent = () => {
     if (selectedRecord) {
       return (
@@ -1013,13 +971,13 @@ export const NetflowTraffic: React.FC<{
               (isConnectionTracking() || ![ColumnsId.recordtype, ColumnsId.hashid].includes(col.id)) &&
               (isDNSTracking() || ![ColumnsId.dnsid, ColumnsId.dnslatency].includes(col.id))
           )}
-          filters={filters}
+          filters={filters.list}
           range={range}
           reporter={reporter}
           type={recordType}
           isDark={isDarkTheme}
           canSwitchTypes={isFlow() && isConnectionTracking()}
-          setFilters={setFilters}
+          setFilters={setFiltersList}
           setRange={setRange}
           setReporter={setReporter}
           setType={setRecordType}
@@ -1052,8 +1010,8 @@ export const NetflowTraffic: React.FC<{
           metrics={metrics}
           metricType={metricType}
           truncateLength={topologyOptions.truncateLength}
-          filters={filters}
-          setFilters={setFilters}
+          filters={filters.list}
+          setFilters={setFiltersList}
           onClose={() => onElementSelect(undefined)}
         />
       );
@@ -1062,17 +1020,31 @@ export const NetflowTraffic: React.FC<{
     }
   };
 
+  const resetText = t('Reset defaults');
+  const clearText = t('Clear all');
+
   const filterLinks = React.useCallback(() => {
     const defFilters = getDefaultFilters();
     return (
-      <FilterActionLinks
-        showClear={filters.length > 0}
-        showReset={defFilters.length > 0 && !_.isEqual(filters, defFilters)}
-        clearFilters={clearFilters}
-        resetFilters={resetDefaultFilters}
+      <LinksOverflow
+        id={'filter-links-overflow'}
+        items={[
+          {
+            id: 'reset-filters',
+            label: resetText,
+            onClick: resetDefaultFilters,
+            enabled: defFilters.length > 0 && !_.isEqual(filters, defFilters)
+          },
+          {
+            id: 'clear-all-filters',
+            label: clearText,
+            onClick: clearFilters,
+            enabled: filters.list.length > 0
+          }
+        ]}
       />
     );
-  }, [getDefaultFilters, filters, clearFilters, resetDefaultFilters]);
+  }, [getDefaultFilters, filters, resetText, clearText, clearFilters, resetDefaultFilters]);
 
   const pageContent = () => {
     let content: JSX.Element | null = null;
@@ -1201,13 +1173,13 @@ export const NetflowTraffic: React.FC<{
   }, [isFullScreen]);
 
   const slownessReason = React.useCallback(() => {
-    if (match === 'any' && hasNonIndexFields(filters)) {
+    if (match === 'any' && hasNonIndexFields(filters.list)) {
       return t(
         // eslint-disable-next-line max-len
         'When in "Match any" mode, try using only Namespace, Owner or Resource filters (which use indexed fields), or decrease limit / range, to improve the query performance'
       );
     }
-    if (match === 'all' && !hasIndexFields(filters)) {
+    if (match === 'all' && !hasIndexFields(filters.list)) {
       return t(
         // eslint-disable-next-line max-len
         'Add Namespace, Owner or Resource filters (which use indexed fields), or decrease limit / range, to improve the query performance'
@@ -1326,8 +1298,8 @@ export const NetflowTraffic: React.FC<{
         }}
         forcedFilters={forcedFilters}
         quickFilters={getQuickFilters()}
-        menuContent={filtersExtraContent()}
-        menuControl={filtersExtraControl()}
+        isFullScreen={isFullScreen}
+        setFullScreen={setFullScreen}
         allowConnectionFilter={isConnectionTracking()}
         allowDNSFilter={isDNSTracking()}
       />
@@ -1484,7 +1456,7 @@ export const NetflowTraffic: React.FC<{
         flowQuery={buildFlowQuery()}
         columns={columns.filter(c => c.fieldName && !c.fieldName.startsWith('Time'))}
         range={range}
-        filters={forcedFilters ? forcedFilters : filters}
+        filters={(forcedFilters || filters).list}
       />
       {!_.isEmpty(warningMessage) && (
         <Alert

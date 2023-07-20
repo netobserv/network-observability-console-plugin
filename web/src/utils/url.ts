@@ -16,7 +16,8 @@ export enum URLParam {
   RecordType = 'recordType',
   Reporter = 'reporter',
   MetricFunction = 'function',
-  MetricType = 'type'
+  MetricType = 'type',
+  BackAndForth = 'bnf'
 }
 export type URLParams = { [k in URLParam]?: unknown };
 
@@ -40,6 +41,14 @@ export const getURLParamAsNumber = (arg: URLParam) => {
   return null;
 };
 
+export const getURLParamAsBool = (arg: URLParam) => {
+  const q = getURLParam(arg);
+  if (q) {
+    return q === 'true';
+  }
+  return null;
+};
+
 export const setURLParams = (params: string) => {
   const url = new URL(window.location.href);
   navigate(`${url.pathname}?${params}${url.hash}`);
@@ -50,6 +59,13 @@ export const setURLParam = (param: URLParam, value: string, replace?: boolean) =
   const params = new URLSearchParams(window.location.search);
   params.set(param, value);
   navigate(`${url.pathname}?${params.toString()}${url.hash}`, { replace });
+};
+
+export const setSomeURLParams = (params: Map<URLParam, string>, replace?: boolean) => {
+  const url = new URL(window.location.href);
+  const sp = new URLSearchParams(window.location.search);
+  params.forEach((v, k) => sp.set(k, v));
+  navigate(`${url.pathname}?${sp.toString()}${url.hash}`, { replace });
 };
 
 export const removeURLParam = (param: URLParam, replace?: boolean) => {

@@ -18,7 +18,6 @@ export interface SummaryFilterButtonProps {
 
 const srcFilter: FilterDir = 'src';
 const dstFilter: FilterDir = 'dst';
-const anyFilter: FilterDir = 'any';
 
 export const SummaryFilterButton: React.FC<SummaryFilterButtonProps> = ({
   id,
@@ -30,9 +29,7 @@ export const SummaryFilterButton: React.FC<SummaryFilterButtonProps> = ({
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [isOpen, setIsOpen] = React.useState(false);
 
-  const selected = [srcFilter, dstFilter, anyFilter].filter(dir =>
-    isElementFiltered(filterType, fields, dir, activeFilters, t)
-  );
+  const selected = [srcFilter, dstFilter].filter(dir => isElementFiltered(filterType, fields, dir, activeFilters, t));
 
   const onSelect = (dir: FilterDir, e: React.BaseSyntheticEvent) => {
     toggleElementFilter(filterType, fields, dir, selected.includes(dir), activeFilters, setFilters, t);
@@ -56,7 +53,7 @@ export const SummaryFilterButton: React.FC<SummaryFilterButtonProps> = ({
       className={'summary-filter-menu'}
       data-test={id}
       toggle={<OptionsMenuToggle toggleTemplate={<FilterIcon />} onToggle={setIsOpen} hideCaret />}
-      menuItems={[menuItem('src', t('Source')), menuItem('dst', t('Destination')), menuItem('any', t('Common'))]}
+      menuItems={[menuItem('src', t('Source')), menuItem('dst', t('Destination'))]}
       isOpen={isOpen}
       position={OptionsMenuPosition.right}
       isPlain

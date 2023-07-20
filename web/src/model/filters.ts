@@ -10,41 +10,24 @@ export enum FilterComponent {
 export enum FilterCategory {
   Source,
   Destination,
-  Common,
   None
 }
 
-export type FilterId =
+export type TargetedFilterId =
   | 'namespace'
-  | 'src_namespace'
-  | 'dst_namespace'
   | 'name'
-  | 'src_name'
-  | 'dst_name'
   | 'kind'
-  | 'src_kind'
-  | 'dst_kind'
   | 'owner_name'
-  | 'src_owner_name'
-  | 'dst_owner_name'
   | 'resource'
-  | 'src_resource'
-  | 'dst_resource'
   | 'address'
-  | 'src_address'
-  | 'dst_address'
   | 'mac'
-  | 'src_mac'
-  | 'dst_mac'
   | 'port'
-  | 'src_port'
-  | 'dst_port'
   | 'host_address'
-  | 'src_host_address'
-  | 'dst_host_address'
-  | 'host_name'
-  | 'src_host_name'
-  | 'dst_host_name'
+  | 'host_name';
+
+export type FilterId =
+  | `src_${TargetedFilterId}`
+  | `dst_${TargetedFilterId}`
   | 'protocol'
   | 'interface'
   | 'type'
@@ -64,7 +47,10 @@ export interface FilterDefinition {
   hint?: string;
   examples?: string;
   placeholder?: string;
-  encoders: { simpleEncode?: FiltersEncoder; common?: { srcEncode: FiltersEncoder; dstEncode: FiltersEncoder } };
+  encoder: FiltersEncoder;
+  // overlap tells if the type of entity referred to with this filter may have overlapping (duplicated)
+  // flows when querying for returned traffic (back and forth) - they result in slightly more complicated queries.
+  overlap: boolean;
 }
 
 export interface FilterValue {
@@ -77,6 +63,11 @@ export interface Filter {
   def: FilterDefinition;
   not?: boolean;
   values: FilterValue[];
+}
+
+export interface Filters {
+  list: Filter[];
+  backAndForth: boolean;
 }
 
 export interface FilterOption {
@@ -98,15 +89,18 @@ export const hasEnabledFilterValues = (filter: Filter) => {
   return false;
 };
 
-export const getEnabledFilters = (filters: Filter[]) => {
+export const getEnabledFilters = (filters: Filters): Filters => {
   //clone to avoid values updated in filters
-  const clonedFilters = _.cloneDeep(filters);
-  return clonedFilters
-    .map(f => {
-      f.values = f.values.filter(fv => fv.disabled !== true);
-      return f;
-    })
-    .filter(f => !_.isEmpty(f.values));
+  const clonedFilters = _.cloneDeep(filters.list);
+  return {
+    list: clonedFilters
+      .map(f => {
+        f.values = f.values.filter(fv => fv.disabled !== true);
+        return f;
+      })
+      .filter(f => !_.isEmpty(f.values)),
+    backAndForth: filters.backAndForth
+  };
 };
 
 export type DisabledFilters = Record<string, string>;

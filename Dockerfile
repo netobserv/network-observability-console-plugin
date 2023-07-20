@@ -11,7 +11,6 @@ ARG TARGETPLATFORM
 ARG TARGETARCH=amd64
 WORKDIR /opt/app-root
 
-COPY --chown=node Makefile Makefile
 COPY --chown=node web/package.json web/package.json
 COPY --chown=node web/package-lock.json web/package-lock.json
 WORKDIR /opt/app-root/web
