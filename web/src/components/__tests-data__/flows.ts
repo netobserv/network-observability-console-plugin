@@ -85,7 +85,9 @@ export const FlowsSample: Record[] = [
       DstMac: '0a:58:0a:80:00:17',
       TimeFlowEndMs: 1639058288000,
       TimeFlowStartMs: 1639058286000,
-      TimeReceived: 1639058291
+      TimeReceived: 1639058291,
+      DnsId: 123,
+      DnsLatencyMs: 0
     }
   }
 ];
