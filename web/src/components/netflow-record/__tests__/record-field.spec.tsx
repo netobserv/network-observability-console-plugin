@@ -5,6 +5,7 @@ import { DefaultColumns } from '../../__tests-data__/columns';
 import { FlowsSample } from '../../__tests-data__/flows';
 import RecordField, { RecordFieldFilter } from '../record-field';
 import { Size } from '../../dropdowns/table-display-dropdown';
+import { ColumnsId, getExtraColumns } from '../../../utils/columns';
 
 describe('<RecordField />', () => {
   const filterMock: RecordFieldFilter = {
@@ -33,5 +34,12 @@ describe('<RecordField />', () => {
     expect(button).toHaveLength(1);
     button.simulate('click');
     expect(filterMock.onClick).toHaveBeenCalledTimes(1);
+  });
+  it('should display <1ms DNS latency', async () => {
+    const dnsColumn = getExtraColumns((k: string) => k).find(c => c.id === ColumnsId.dnslatency)!;
+    const wrapper = shallow(<RecordField flow={FlowsSample[2]} column={dnsColumn} {...mocks} />);
+    expect(wrapper.find(RecordField)).toBeTruthy();
+    expect(wrapper.find('.record-field-content')).toHaveLength(1);
+    expect(wrapper.find('.record-field-content span').text()).toBe('< 1ms');
   });
 });

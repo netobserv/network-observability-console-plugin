@@ -790,7 +790,7 @@ export const getExtraColumns = (t: TFunction): Column[] => {
       fieldName: 'DnsId',
       quickFilter: 'dns_id',
       isSelected: false,
-      value: f => f.fields.DnsId || Number.NaN,
+      value: f => (f.fields.DnsId === undefined ? Number.NaN : f.fields.DnsId),
       sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
       width: 5
     },
@@ -799,7 +799,7 @@ export const getExtraColumns = (t: TFunction): Column[] => {
       name: t('DNS Latency'),
       tooltip: t('Time elapsed between DNS request and response.'),
       isSelected: false,
-      value: f => f.fields.DnsLatencyMs || Number.NaN,
+      value: f => (f.fields.DnsLatencyMs === undefined ? Number.NaN : f.fields.DnsLatencyMs),
       sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
       width: 5
     },
