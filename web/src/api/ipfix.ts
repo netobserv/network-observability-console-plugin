@@ -96,13 +96,13 @@ export interface Fields {
   PktDropLatestDropCause?: string;
   /** Pkt TCP flags for drops */
   PktDropLatestFlags?: number;
-  /** Number of packets dropped in this flow */
+  /** Number of packets dropped by the kernel in this flow */
   PktDropPackets?: number;
   /** In conversation tracking, A to B packets dropped counter per conversation */
   PktDropPackets_AB?: number;
   /** In conversation tracking, B to A packets dropped counter per conversation */
   PktDropPackets_BA?: number;
-  /** Number of bytes dropped in this flow */
+  /** Number of bytes dropped by the kernel in this flow */
   PktDropBytes?: number;
   /** In conversation tracking, A to B bytes dropped counter per conversation */
   PktDropBytes_AB?: number;

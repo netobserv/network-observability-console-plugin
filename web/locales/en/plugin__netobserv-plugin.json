@@ -51,7 +51,7 @@
   "Only available in Table view.": "Only available in Table view.",
   "Whether each query result has to match all the filters or just any of them": "Whether each query result has to match all the filters or just any of them",
   "Match filters": "Match filters",
-  "Flows drops to query": "Flows drops to query",
+  "Filter flows by their drop status. Only packets dropped by the kernel are monitored here.": "Filter flows by their drop status. Only packets dropped by the kernel are monitored here.",
   "Fully dropped shows the flows that are 100% dropped": "Fully dropped shows the flows that are 100% dropped",
   "Containing drops shows the flows having at least one packet dropped": "Containing drops shows the flows having at least one packet dropped",
   "Without drops show the flows having 0% dropped": "Without drops show the flows having 0% dropped",
@@ -455,10 +455,10 @@
   "Top {{limit}} {{type}} dropped rates stacked": "Top {{limit}} {{type}} dropped rates stacked",
   "Total dropped rate": "Total dropped rate",
   "Top {{limit}} dropped state": "Top {{limit}} dropped state",
-  "The top dropped states over the selected interval": "The top dropped states over the selected interval",
+  "The top dropped states (dropped by the kernel) over the selected interval": "The top dropped states (dropped by the kernel) over the selected interval",
   "Top {{limit}} dropped cause": "Top {{limit}} dropped cause",
-  "The top drop causes over the selected interval": "The top drop causes over the selected interval",
+  "The top drop causes (dropped by the kernel) over the selected interval": "The top drop causes (dropped by the kernel) over the selected interval",
   "Top {{limit}} {{type}} dropped rates stacked with total": "Top {{limit}} {{type}} dropped rates stacked with total",
-  "The top dropped rates as bar compared to total as line over the selected interval": "The top dropped rates as bar compared to total as line over the selected interval",
+  "The top dropped rates (dropped by the kernel) as bar compared to total as line over the selected interval": "The top dropped rates (dropped by the kernel) as bar compared to total as line over the selected interval",
   "Inbound {{type}} by region": "Inbound {{type}} by region"
 }
