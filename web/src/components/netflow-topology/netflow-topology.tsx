@@ -100,7 +100,7 @@ export const NetflowTopology: React.FC<{
   } else {
     return (
       <VisualizationProvider data-test="visualization-provider" controller={controller}>
-        <ScopeSlider metricScope={metricScope} setMetricScope={setMetricScope} />
+        <ScopeSlider scope={metricScope} setScope={setMetricScope} />
         <TopologyContent
           k8sModels={k8sModels}
           metricFunction={metricFunction}
