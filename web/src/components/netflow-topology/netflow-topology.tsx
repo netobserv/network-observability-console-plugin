@@ -15,6 +15,7 @@ import ThreeDTopologyContent from './3d/three-d-topology-content';
 import componentFactory from './2d/componentFactories/componentFactory';
 import stylesComponentFactory from './2d/componentFactories/stylesComponentFactory';
 import layoutFactory from './2d/layouts/layoutFactory';
+import { ScopeSlider } from '../scope-slider/scope-slider';
 
 export const NetflowTopology: React.FC<{
   loading?: boolean;
@@ -99,6 +100,7 @@ export const NetflowTopology: React.FC<{
   } else {
     return (
       <VisualizationProvider data-test="visualization-provider" controller={controller}>
+        <ScopeSlider scope={metricScope} setScope={setMetricScope} />
         <TopologyContent
           k8sModels={k8sModels}
           metricFunction={metricFunction}
