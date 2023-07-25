@@ -57,8 +57,10 @@ describe('<NetflowTraffic />', () => {
        * 2 queries for dropped metrics on current scope & app scope
        * dropped states
        * dropped causes
+       * 2 queries for dns latency on current scope & app scope
+       * 2 queries for dns response codes count & app count
        */
-      expect(getTopologyMock).toHaveBeenCalledTimes(6);
+      expect(getTopologyMock).toHaveBeenCalledTimes(10);
     });
     await act(async () => {
       wrapper.find('#refresh-button').at(0).simulate('click');
@@ -67,8 +69,8 @@ describe('<NetflowTraffic />', () => {
       //config is get only once
       expect(getConfigMock).toHaveBeenCalledTimes(1);
       expect(getFlowsMock).toHaveBeenCalledTimes(0);
-      //should have called getTopology 12 times after click (6 * 2)
-      expect(getTopologyMock).toHaveBeenCalledTimes(12);
+      //should have called getTopology 20 times after click (10 * 2)
+      expect(getTopologyMock).toHaveBeenCalledTimes(20);
     });
   });
 

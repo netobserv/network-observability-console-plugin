@@ -21,6 +21,8 @@ type Topology struct {
 	dedup              bool
 	skipEmptyDropState bool
 	skipEmptyDropCause bool
+	skipNonDns         bool
+	skipEmptyDnsRCode  bool
 }
 
 type TopologyQueryBuilder struct {
@@ -39,7 +41,7 @@ func NewTopologyQuery(cfg *Config, start, end, limit, rateInterval, step, metric
 	fields := getFields(aggregate, groups)
 	var f, t string
 	switch metricType {
-	case "count":
+	case "count", "countDns":
 		f = "count_over_time"
 	case "droppedPackets":
 		f = "rate"
@@ -50,6 +52,9 @@ func NewTopologyQuery(cfg *Config, start, end, limit, rateInterval, step, metric
 	case "droppedBytes":
 		f = "rate"
 		t = "PktDropBytes"
+	case "dnsLatencies":
+		f = "avg_over_time"
+		t = "DnsLatencyMs"
 	default:
 		f = "rate"
 		t = "Bytes"
@@ -77,6 +82,8 @@ func NewTopologyQuery(cfg *Config, start, end, limit, rateInterval, step, metric
 			dedup:              d,
 			skipEmptyDropState: aggregate == "droppedState",
 			skipEmptyDropCause: aggregate == "droppedCause",
+			skipNonDns:         metricType == "dnsLatencies" || metricType == "countDns",
+			skipEmptyDnsRCode:  aggregate == "dnsRCode",
 		},
 	}, nil
 }
@@ -90,6 +97,8 @@ func getFields(aggregate, groups string) string {
 		fields = []string{"PktDropLatestState"}
 	case "droppedCause":
 		fields = []string{"PktDropLatestDropCause"}
+	case "dnsRCode":
+		fields = []string{"DnsFlagsResponseCode"}
 	case "host":
 		fields = []string{"SrcK8S_HostName", "DstK8S_HostName"}
 	case "namespace":
@@ -128,7 +137,7 @@ func (q *TopologyQueryBuilder) Build() string {
 	// /<url path>?query=
 	//		topk(
 	// 			<k>,
-	//			sum by(<aggregations>) (
+	//			<sum | avg> by(<aggregations>) (
 	//				<function>(
 	//					{<label filters>}|<line filters>|json|<json filters>
 	//						|unwrap Bytes|__error__=""[<interval>]
@@ -139,21 +148,36 @@ func (q *TopologyQueryBuilder) Build() string {
 	sb := q.createStringBuilderURL()
 	sb.WriteString("topk(")
 	sb.WriteString(q.topology.limit)
-	sb.WriteString(",sum by(")
+	sb.WriteRune(',')
+	if q.topology.function == "avg_over_time" {
+		sb.WriteString("avg")
+	} else {
+		sb.WriteString("sum")
+	}
+	sb.WriteString(" by(")
 	sb.WriteString(q.topology.fields)
 	sb.WriteString(") (")
 	sb.WriteString(q.topology.function)
 	sb.WriteString("(")
 	q.appendLabels(sb)
 	q.appendLineFilters(sb)
+
 	if q.topology.dedup {
 		q.appendDeduplicateFilter(sb)
 	}
+
 	if q.topology.skipEmptyDropState {
 		q.appendPktDropStateFilter(sb)
 	} else if q.topology.skipEmptyDropCause {
 		q.appendPktDropCauseFilter(sb)
 	}
+
+	if q.topology.skipEmptyDnsRCode {
+		q.appendDnsRCodeFilter(sb)
+	} else if q.topology.skipNonDns {
+		q.appendDnsFilter(sb)
+	}
+
 	q.appendJSON(sb, true)
 	if len(q.topology.dataField) > 0 {
 		sb.WriteString("|unwrap ")
@@ -161,7 +185,7 @@ func (q *TopologyQueryBuilder) Build() string {
 		sb.WriteString(`|__error__=""`)
 	}
 	sb.WriteRune('[')
-	if q.topology.function == "count_over_time" {
+	if q.topology.function != "rate" {
 		sb.WriteString(q.topology.step)
 	} else {
 		sb.WriteString(q.topology.rateInterval)

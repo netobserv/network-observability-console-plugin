@@ -2,7 +2,7 @@ import { Spinner } from '@patternfly/react-core';
 import { TopologyView, VisualizationSurface } from '@patternfly/react-topology';
 import { shallow } from 'enzyme';
 import * as React from 'react';
-import { TopologyMetrics } from '../../../api/loki';
+import { PairTopologyMetrics } from '../../../api/loki';
 import { MetricFunction, FlowScope, MetricType } from '../../../model/flow-query';
 import { DefaultOptions, LayoutName } from '../../../model/topology';
 import { defaultTimeRange } from '../../../utils/router';
@@ -21,8 +21,8 @@ describe('<NetflowTopology />', () => {
     metricType: 'bytes' as MetricType,
     metricScope: 'host' as FlowScope,
     setMetricScope: jest.fn(),
-    metrics: [] as TopologyMetrics[],
-    droppedMetrics: [] as TopologyMetrics[],
+    metrics: [] as PairTopologyMetrics[],
+    droppedMetrics: [] as PairTopologyMetrics[],
     layout: LayoutName.Cola,
     options: DefaultOptions,
     setOptions: jest.fn(),

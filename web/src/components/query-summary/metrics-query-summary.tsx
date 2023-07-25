@@ -3,13 +3,13 @@ import _ from 'lodash';
 import { useTranslation } from 'react-i18next';
 import { Card, Flex, FlexItem, Text, TextVariants, Tooltip } from '@patternfly/react-core';
 import { valueFormat } from '../../utils/format';
-import { TopologyMetrics } from '../../api/loki';
+import { PairTopologyMetrics } from '../../api/loki';
 import { MetricType } from '../../model/flow-query';
 import './query-summary.css';
 
 export const MetricsQuerySummaryContent: React.FC<{
-  metrics: TopologyMetrics[];
-  appMetrics: TopologyMetrics | undefined;
+  metrics: PairTopologyMetrics[];
+  appMetrics: PairTopologyMetrics | undefined;
   metricType: MetricType;
   lastRefresh: Date | undefined;
   direction: 'row' | 'column';
@@ -112,10 +112,10 @@ export const MetricsQuerySummaryContent: React.FC<{
 };
 
 export const MetricsQuerySummary: React.FC<{
-  metrics: TopologyMetrics[];
-  droppedMetrics: TopologyMetrics[];
-  appMetrics: TopologyMetrics | undefined;
-  appDroppedMetrics: TopologyMetrics | undefined;
+  metrics: PairTopologyMetrics[];
+  droppedMetrics: PairTopologyMetrics[];
+  appMetrics: PairTopologyMetrics | undefined;
+  appDroppedMetrics: PairTopologyMetrics | undefined;
   metricType: MetricType;
   lastRefresh: Date | undefined;
   isShowQuerySummary?: boolean;

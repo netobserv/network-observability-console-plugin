@@ -24,7 +24,7 @@ import {
 } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { NamedMetric, TopologyMetrics } from '../../api/loki';
+import { NamedMetric, PairTopologyMetrics } from '../../api/loki';
 import { TimeRange } from '../../utils/datetime';
 import { getDateMsInSeconds } from '../../utils/duration';
 import { LOCAL_STORAGE_HISTOGRAM_GUIDED_TOUR_DONE_KEY, useLocalStorage } from '../../utils/local-storage-hook';
@@ -429,8 +429,8 @@ export const Histogram: React.FC<{
 export const HistogramContainer: React.FC<{
   id: string;
   loading: boolean;
-  totalMetric: TopologyMetrics | undefined;
-  totalDroppedMetric: TopologyMetrics | undefined;
+  totalMetric: PairTopologyMetrics | undefined;
+  totalDroppedMetric: PairTopologyMetrics | undefined;
   limit: number;
   isDark: boolean;
   range?: TimeRange;

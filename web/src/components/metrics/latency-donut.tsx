@@ -2,42 +2,44 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChartDonut, ChartLabel, ChartLegend, ChartThemeColor } from '@patternfly/react-charts';
 import { SingleTopologyMetrics, NamedMetric } from '../../api/loki';
-import { MetricType, MetricFunction } from '../../model/flow-query';
-import { getFormattedRateValue } from '../../utils/metrics';
+import { getFormattedValue } from '../../utils/metrics';
 import { getStat } from '../../model/topology';
+import { MetricType } from '../../model/flow-query';
 
 import './metrics-content.css';
 import { defaultDimensions, Dimensions, observe } from './metrics-helper';
 
-export type DroppedDonutProps = {
+export type LatencyDonutProps = {
   id: string;
-  stat: MetricFunction;
   limit: number;
   metricType: MetricType;
-  topKMetrics: SingleTopologyMetrics[];
+  topKMetrics: NamedMetric[] | SingleTopologyMetrics[];
   totalMetric: NamedMetric;
   showOthers: boolean;
+  othersName?: string;
   smallerTexts?: boolean;
+  subTitle: string;
 };
 
-export const DroppedDonut: React.FC<DroppedDonutProps> = ({
+export const LatencyDonut: React.FC<LatencyDonutProps> = ({
   id,
-  stat,
   limit,
   metricType,
   topKMetrics,
   totalMetric,
   showOthers,
-  smallerTexts
+  othersName,
+  smallerTexts,
+  subTitle
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
-  let total = getStat(totalMetric.stats, stat);
+  let total = getStat(totalMetric.stats, 'avg');
 
   const sliced = topKMetrics
     .map(m => ({
-      name: m.name,
-      value: getStat(m.stats, stat)
+      name: (m as NamedMetric).fullName || (m as SingleTopologyMetrics).name,
+      value: getStat(m.stats, 'avg')
     }))
     .sort((a, b) => b.value - a.value)
     .slice(0, limit);
@@ -45,7 +47,7 @@ export const DroppedDonut: React.FC<DroppedDonutProps> = ({
   const others = Math.max(0, total - sliced.reduce((prev, cur) => prev + cur.value, 0));
   if (showOthers) {
     if (others > 0) {
-      sliced.push({ name: t('Others'), value: others });
+      sliced.push({ name: othersName || t('Others'), value: others });
     }
   } else {
     total -= others;
@@ -84,15 +86,15 @@ export const DroppedDonut: React.FC<DroppedDonutProps> = ({
         //animate={true}
         width={dimensions.width}
         height={dimensions.height}
-        data={sliced.map(m => ({ x: `${m.name}: ${getFormattedRateValue(m.value, metricType, t)}`, y: m.value }))}
+        data={sliced.map(m => ({ x: `${m.name}: ${getFormattedValue(m.value, metricType, 'sum', t)}`, y: m.value }))}
         padding={{
           bottom: 20,
           left: 20,
           right: 400,
           top: 20
         }}
-        title={`${getFormattedRateValue(total, metricType, t)}`}
-        subTitle={t('Total dropped')}
+        title={`${getFormattedValue(total, metricType, 'sum', t)}`}
+        subTitle={subTitle}
       />
     </div>
   );

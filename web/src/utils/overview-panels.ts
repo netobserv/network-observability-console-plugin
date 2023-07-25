@@ -15,6 +15,9 @@ export type OverviewPanelId =
   | 'top_dropped_bar'
   | 'total_dropped_line'
   | 'top_dropped_bar_total'
+  | 'top_avg_dns_latency_donut'
+  | 'top_dns_rcode_donut'
+  | 'top_dns_rcode_bar_total'
   | 'inbound_region';
 
 export type OverviewPanel = {
@@ -42,7 +45,10 @@ export const getDefaultOverviewPanels = (): OverviewPanel[] => {
     { id: 'total_dropped_line', isSelected: false },
     { id: 'top_dropped_state_donut', isSelected: true },
     { id: 'top_dropped_cause_donut', isSelected: true },
-    { id: 'top_dropped_bar_total', isSelected: true }
+    { id: 'top_dropped_bar_total', isSelected: true },
+    { id: 'top_avg_dns_latency_donut', isSelected: false },
+    { id: 'top_dns_rcode_donut', isSelected: false },
+    { id: 'top_dns_rcode_bar_total', isSelected: false }
   ]);
   if (isAllowed(Feature.Overview)) {
     panels.unshift({ id: 'overview', isSelected: true });
@@ -114,6 +120,24 @@ export const getOverviewPanelInfo = (
         tooltip: t(
           'The top dropped rates (dropped by the kernel) as bar compared to total as line over the selected interval'
         )
+      };
+    case 'top_avg_dns_latency_donut':
+      return {
+        title: t('Top {{limit}} average DNS latencies', { limit }),
+        chartType: t('donut'),
+        tooltip: t('The average DNS latencies over the selected interval')
+      };
+    case 'top_dns_rcode_donut':
+      return {
+        title: t('Top {{limit}} DNS response code', { limit }),
+        chartType: t('donut'),
+        tooltip: t('The top DNS response code extracted from DNS response headers over the selected interval')
+      };
+    case 'top_dns_rcode_bar_total':
+      return {
+        title: t('Top {{limit}} DNS response code stacked with total', { limit, type }),
+        chartType: t('bars'),
+        tooltip: t('The top DNS response code as bar compared to total as line over the selected interval')
       };
     case 'inbound_region':
       return { title: t('Inbound {{type}} by region', { type }) };

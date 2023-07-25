@@ -5,7 +5,8 @@ export type FiltersEncoder = (values: FilterValue[], matchAny: boolean, not: boo
 
 export enum FilterComponent {
   Autocomplete,
-  Text
+  Text,
+  Number
 }
 
 export enum FilterCategory {
@@ -34,6 +35,7 @@ export type FilterId =
   | 'type'
   | 'id'
   | 'dns_id'
+  | 'dns_latency'
   | 'dns_flag_response_code';
 
 export interface FilterDefinition {

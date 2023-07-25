@@ -119,7 +119,13 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
     };
     switch (selectedFilter.component) {
       case FilterComponent.Text:
-        return <TextFilter {...commonProps} />;
+      case FilterComponent.Number:
+        return (
+          <TextFilter
+            {...commonProps}
+            regexp={selectedFilter.component === FilterComponent.Number ? /\D/g : undefined}
+          />
+        );
       case FilterComponent.Autocomplete:
         return <AutocompleteFilter {...commonProps} />;
     }

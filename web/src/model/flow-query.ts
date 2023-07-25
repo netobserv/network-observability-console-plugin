@@ -6,9 +6,16 @@ export type RecordType = 'allConnections' | 'newConnection' | 'heartbeat' | 'end
 export type Match = 'all' | 'any';
 export type PacketLoss = 'dropped' | 'hasDrops' | 'sent' | 'all';
 export type MetricFunction = 'sum' | 'avg' | 'max' | 'last';
-export type MetricType = 'count' | 'bytes' | 'packets' | 'droppedBytes' | 'droppedPackets';
+export type MetricType =
+  | 'count'
+  | 'countDns'
+  | 'bytes'
+  | 'packets'
+  | 'droppedBytes'
+  | 'droppedPackets'
+  | 'dnsLatencies';
 export type FlowScope = 'app' | 'host' | 'namespace' | 'owner' | 'resource';
-export type AggregateBy = FlowScope | 'droppedCause' | 'droppedState';
+export type AggregateBy = FlowScope | 'droppedCause' | 'droppedState' | 'dnsRCode';
 export type NodeType = FlowScope | 'unknown';
 export type Groups = 'hosts' | 'hosts+namespaces' | 'hosts+owners' | 'namespaces' | 'namespaces+owners' | 'owners';
 export interface FlowQuery {

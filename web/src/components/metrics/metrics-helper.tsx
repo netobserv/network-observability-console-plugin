@@ -2,7 +2,7 @@ import { ChartLegendTooltip, createContainer, getResizeObserver } from '@pattern
 import { TFunction } from 'i18next';
 import * as React from 'react';
 import { getDateSInMiliseconds } from '../../utils/duration';
-import { NamedMetric, TopologyMetricPeer, TopologyMetrics } from '../../api/loki';
+import { NamedMetric, TopologyMetricPeer, PairTopologyMetrics, SingleTopologyMetrics } from '../../api/loki';
 import { FlowScope, MetricType } from '../../model/flow-query';
 import { NodeData } from '../../model/topology';
 import { getDateFromUnix, getFormattedDate, TimeRange } from '../../utils/datetime';
@@ -29,9 +29,9 @@ export type ChartDataPoint = {
   y: number;
 };
 
-export const toDatapoints = (metric: NamedMetric): ChartDataPoint[] => {
+export const toDatapoints = (metric: NamedMetric | SingleTopologyMetrics): ChartDataPoint[] => {
   return metric.values.map(v => ({
-    name: metric.shortName,
+    name: (metric as NamedMetric).shortName || (metric as SingleTopologyMetrics).name,
     date: getFormattedDate(getDateFromUnix(v[0])),
     x: getDateFromUnix(v[0]),
     y: Number(v[1])
@@ -163,7 +163,7 @@ const getPeerName = (
 
 export const toNamedMetric = (
   t: TFunction,
-  m: TopologyMetrics,
+  m: PairTopologyMetrics,
   truncateLength: TruncateLength,
   inclNamespace: boolean,
   disambiguate: boolean,

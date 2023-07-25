@@ -452,11 +452,22 @@ export const getFilterDefinitions = (
         id: 'dns_id',
         name: t('DNS Id'),
         category: FilterCategory.None,
-        component: FilterComponent.Text,
+        component: FilterComponent.Number,
         getOptions: noOption,
         validate: rejectEmptyValue,
         hint: t('Specify a single DNS Id.'),
         encoder: simpleFiltersEncoder('DnsId'),
+        overlap: false
+      },
+      {
+        id: 'dns_latency',
+        name: t('DNS Latency'),
+        category: FilterCategory.None,
+        component: FilterComponent.Number,
+        getOptions: noOption,
+        validate: rejectEmptyValue,
+        hint: t('Specify a DNS Latency in miliseconds.'),
+        encoder: simpleFiltersEncoder('DnsLatencyMs'),
         overlap: false
       },
       {

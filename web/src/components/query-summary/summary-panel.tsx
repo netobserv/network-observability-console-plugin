@@ -25,7 +25,7 @@ import { FlowsQuerySummaryContent } from './flows-query-summary';
 import { comparePorts, formatPort } from '../../utils/port';
 import { formatProtocol } from '../../utils/protocol';
 import { compareIPs } from '../../utils/ip';
-import { Stats, TopologyMetrics } from '../../api/loki';
+import { Stats, PairTopologyMetrics } from '../../api/loki';
 import './summary-panel.css';
 import { MetricType, RecordType } from '../../model/flow-query';
 import { MetricsQuerySummaryContent } from './metrics-query-summary';
@@ -44,8 +44,8 @@ type K8SObjectCardinality = {
 
 export const SummaryPanelContent: React.FC<{
   flows: Record[] | undefined;
-  metrics: TopologyMetrics[] | undefined;
-  appMetrics: TopologyMetrics | undefined;
+  metrics: PairTopologyMetrics[] | undefined;
+  appMetrics: PairTopologyMetrics | undefined;
   type: RecordType;
   metricType: MetricType;
   stats: Stats | undefined;
@@ -386,9 +386,9 @@ export const SummaryPanelContent: React.FC<{
 export const SummaryPanel: React.FC<{
   onClose: () => void;
   flows: Record[] | undefined;
-  metrics: TopologyMetrics[] | undefined;
-  appMetrics: TopologyMetrics | undefined;
-  appDroppedMetrics: TopologyMetrics | undefined;
+  metrics: PairTopologyMetrics[] | undefined;
+  appMetrics: PairTopologyMetrics | undefined;
+  appDroppedMetrics: PairTopologyMetrics | undefined;
   type: RecordType;
   metricType: MetricType;
   stats: Stats | undefined;

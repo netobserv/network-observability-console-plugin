@@ -27,7 +27,7 @@ export class RecordsResult {
 }
 
 export class TopologyResult {
-  metrics: (TopologyMetrics | DroppedTopologyMetrics)[];
+  metrics: (PairTopologyMetrics | SingleTopologyMetrics)[];
   stats: Stats;
 }
 
@@ -59,6 +59,7 @@ export interface RawTopologyMetric {
   SrcK8S_HostName?: string;
   PktDropLatestState?: string;
   PktDropLatestDropCause?: string;
+  DnsFlagsResponseCode?: string;
 }
 
 export interface RawTopologyMetrics {
@@ -83,14 +84,14 @@ export interface TopologyMetricPeer {
   getDisplayName: (inclNamespace: boolean, disambiguate: boolean) => string | undefined;
 }
 
-export type DroppedTopologyMetrics = {
+export type SingleTopologyMetrics = {
   name: string;
   values: [number, number][];
   stats: MetricStats;
   aggregateBy: AggregateBy;
 };
 
-export type TopologyMetrics = {
+export type PairTopologyMetrics = {
   source: TopologyMetricPeer;
   destination: TopologyMetricPeer;
   values: [number, number][];
@@ -98,7 +99,7 @@ export type TopologyMetrics = {
   scope: FlowScope;
 };
 
-export type NamedMetric = TopologyMetrics & {
+export type NamedMetric = PairTopologyMetrics & {
   fullName: string;
   shortName: string;
   isInternal: boolean;

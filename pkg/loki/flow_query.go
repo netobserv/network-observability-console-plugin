@@ -245,23 +245,44 @@ func (q *FlowQueryBuilder) appendLineFilters(sb *strings.Builder) {
 }
 
 func (q *FlowQueryBuilder) appendDeduplicateFilter(sb *strings.Builder) {
-	// |~`Duplicate":false`
+	// |~`"Duplicate":false`
 	sb.WriteString("|~`")
-	sb.WriteString(`Duplicate":false`)
+	sb.WriteString(`"Duplicate":false`)
 	sb.WriteString("`")
 }
 
 func (q *FlowQueryBuilder) appendPktDropStateFilter(sb *strings.Builder) {
-	// !~`PktDropLatestState":0`
-	sb.WriteString("!~`")
-	sb.WriteString(`PktDropLatestState":0`)
+	// ensure PktDropLatestState is specified
+	// |~`"PktDropLatestState"`
+	sb.WriteString("|~`")
+	sb.WriteString(`"PktDropLatestState"`)
 	sb.WriteString("`")
 }
 
 func (q *FlowQueryBuilder) appendPktDropCauseFilter(sb *strings.Builder) {
-	// !~`PktDropLatestDropCause":0`
+	// ensure PktDropLatestDropCause is specified
+	// |~`"PktDropLatestDropCause"`
+	sb.WriteString("|~`")
+	sb.WriteString(`"PktDropLatestDropCause"`)
+	sb.WriteString("`")
+}
+
+func (q *FlowQueryBuilder) appendDnsFilter(sb *strings.Builder) {
+	// ensure at least one Dns field is specified
+	// |~`"Dns`
+	sb.WriteString("|~`")
+	sb.WriteString(`"Dns`)
+	sb.WriteString("`")
+}
+
+func (q *FlowQueryBuilder) appendDnsRCodeFilter(sb *strings.Builder) {
+	// ensure DnsFlagsResponseCode field is specified with valid error
+	// |~`"DnsFlagsResponseCode"`!~`"DnsFlagsResponseCode":"NoError"`
+	sb.WriteString("|~`")
+	sb.WriteString(`"DnsFlagsResponseCode"`)
+	sb.WriteString("`")
 	sb.WriteString("!~`")
-	sb.WriteString(`PktDropLatestDropCause":0`)
+	sb.WriteString(`"DnsFlagsResponseCode":"NoError"`)
 	sb.WriteString("`")
 }
 

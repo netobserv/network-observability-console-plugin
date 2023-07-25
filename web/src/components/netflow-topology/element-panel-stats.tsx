@@ -2,14 +2,14 @@ import { Flex, FlexItem, Text, TextVariants } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { MetricType } from '../../model/flow-query';
-import { TopologyMetrics } from '../../api/loki';
+import { PairTopologyMetrics } from '../../api/loki';
 import { getStat } from '../../model/topology';
 import { getFormattedValue } from '../../utils/metrics';
 
 export const ElementPanelStats: React.FC<{
-  metricsIn: TopologyMetrics[];
-  metricsOut: TopologyMetrics[];
-  metricsBoth: TopologyMetrics[];
+  metricsIn: PairTopologyMetrics[];
+  metricsOut: PairTopologyMetrics[];
+  metricsBoth: PairTopologyMetrics[];
   metricType: MetricType;
   isEdge: boolean;
 }> = ({ metricsIn, metricsOut, metricsBoth, metricType, isEdge }) => {
