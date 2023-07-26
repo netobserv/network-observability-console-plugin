@@ -26,7 +26,7 @@ import { useTranslation } from 'react-i18next';
 import { defaultSize, maxSize, minSize } from '../../utils/panel';
 import { defaultTimeRange, flowdirToReporter } from '../../utils/router';
 import { Record } from '../../api/ipfix';
-import { Column, ColumnGroup, ColumnsId, getColumnGroups } from '../../utils/columns';
+import { Column, ColumnGroup, ColumnsId, getColumnGroups, getShortColumnName } from '../../utils/columns';
 import { TimeRange } from '../../utils/datetime';
 import { doesIncludeFilter, Filter, findFromFilters, removeFromFilters } from '../../model/filters';
 import { findFilter } from '../../utils/filter-definitions';
@@ -310,7 +310,9 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
                             }
                           >
                             <Button variant="plain" className="record-field-title-popover-button">
-                              <Text component={TextVariants.h4}>{c.name}</Text>
+                              <Text component={TextVariants.h4}>
+                                {getShortColumnName(c)}
+                              </Text>
                             </Button>
                           </Popover>
                         ) : (

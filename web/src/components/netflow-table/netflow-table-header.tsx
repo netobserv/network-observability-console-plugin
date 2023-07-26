@@ -1,7 +1,7 @@
 import { SortByDirection, Th, Thead, Tr } from '@patternfly/react-table';
 import _ from 'lodash';
 import * as React from 'react';
-import { Column, ColumnGroup, ColumnsId, ColumnSizeMap, getColumnGroups, getFullColumnName } from '../../utils/columns';
+import { Column, ColumnGroup, ColumnsId, ColumnSizeMap, getColumnGroups, getFullColumnName, getShortColumnName } from '../../utils/columns';
 import './netflow-table-header.css';
 
 export type HeadersState = {
@@ -206,7 +206,7 @@ export const NetflowTableHeader: React.FC<{
               : undefined
           }
         >
-          {headersState.useNested ? c.name : getFullColumnName(c)}
+          {headersState.useNested ? getShortColumnName(c) : getFullColumnName(c)}
         </Th>
       );
     },

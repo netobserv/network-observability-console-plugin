@@ -361,6 +361,7 @@
   "Reception time of the record by the collector.": "Reception time of the record by the collector.",
   "Collection Latency": "Collection Latency",
   "Time elapsed between End Time and Collection Time.": "Time elapsed between End Time and Collection Time.",
+  "DNS": "DNS",
   "DNS Id": "DNS Id",
   "DNS request identifier.": "DNS request identifier.",
   "DNS Latency": "DNS Latency",
