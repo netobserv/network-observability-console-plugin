@@ -22,7 +22,9 @@ import {
   getResourceOptions,
   noOption,
   cap10,
-  getDnsResponseCodeOptions
+  getDnsResponseCodeOptions,
+  getDropStateOptions,
+  getDropCauseOptions
 } from './filter-options';
 
 // Convenience string to filter by undefined field values
@@ -340,8 +342,7 @@ export const getFilterDefinitions = (
           hint: t('Specify a single port number or name.'),
           examples: `${t('Specify a single port following one of these rules:')}
         - ${t('A port number like 80, 21')}
-        - ${t('A IANA name like HTTP, FTP')}
-        - ${t('Empty double quotes "" for undefined port')}`,
+        - ${t('A IANA name like HTTP, FTP')}`,
           encoder: simpleFiltersEncoder('SrcPort'),
           overlap: false
         },
@@ -453,6 +454,34 @@ export const getFilterDefinitions = (
         overlap: false
       },
       {
+        id: 'pkt_drop_state',
+        name: t('Packet drop TCP state'),
+        category: FilterCategory.None,
+        component: FilterComponent.Autocomplete,
+        getOptions: cap10(getDropStateOptions),
+        validate: rejectEmptyValue,
+        hint: t('Specify a single TCP state.'),
+        examples: `${t('Specify a single TCP state name like:')}
+        - ${t('A _LINUX_TCP_STATES_H number like 1, 2, 3')}
+        - ${t('A _LINUX_TCP_STATES_H TCP name like ESTABLISHED, SYN_SENT, SYN_RECV')}`,
+        encoder: simpleFiltersEncoder('PktDropLatestState'),
+        overlap: false
+      },
+      {
+        id: 'pkt_drop_cause',
+        name: t('Packet drop latest cause'),
+        category: FilterCategory.None,
+        component: FilterComponent.Autocomplete,
+        getOptions: cap10(getDropCauseOptions),
+        validate: rejectEmptyValue,
+        hint: t('Specify a single TCP drop cause.'),
+        examples: `${t('Specify a single TCP drop cause like:')}
+        - ${t('A _LINUX_DROPREASON_CORE_H number like 2, 3, 4')}
+        - ${t('A _LINUX_DROPREASON_CORE_H SKB_DROP_REASON name like NOT_SPECIFIED, NO_SOCKET, PKT_TOO_SMALL')}`,
+        encoder: simpleFiltersEncoder('PktDropLatestDropCause'),
+        overlap: false
+      },
+      {
         id: 'dns_id',
         name: t('DNS Id'),
         category: FilterCategory.None,
@@ -484,8 +513,7 @@ export const getFilterDefinitions = (
         hint: t('Specify a single DNS RCODE name.'),
         examples: `${t('Specify a single DNS RCODE name like:')}
         - ${t('A IANA RCODE number like 0, 3, 9')}
-        - ${t('A IANA RCODE name like NoError, NXDomain, NotAuth')}
-        - ${t('Empty double quotes "" for undefined response code')}`,
+        - ${t('A IANA RCODE name like NoError, NXDomain, NotAuth')}`,
         encoder: simpleFiltersEncoder('DnsFlagsResponseCode'),
         overlap: false
       }

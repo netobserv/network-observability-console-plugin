@@ -34,6 +34,8 @@ export type FilterId =
   | 'interface'
   | 'type'
   | 'id'
+  | 'pkt_drop_state'
+  | 'pkt_drop_cause'
   | 'dns_id'
   | 'dns_latency'
   | 'dns_flag_response_code';

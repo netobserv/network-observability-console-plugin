@@ -1,11 +1,7 @@
-export type DNSRcode = {
-  code: number;
-  name: string;
-  description: string;
-};
+import { ReadOnlyValues } from './values';
 
 // https://www.iana.org/assignments/dns-parameters/dns-parameters.xhtml#dns-parameters-6
-export const DNS_RCODES = [
+export const DNS_RCODES: ReadOnlyValues = [
   { value: 0, name: 'NoError', description: 'No Error' },
   { value: 1, name: 'FormErr', description: 'Format Error' },
   { value: 2, name: 'ServFail', description: 'Server Failure' },

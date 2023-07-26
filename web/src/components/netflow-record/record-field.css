@@ -99,3 +99,8 @@
   flex-shrink: 0;
   margin-right: 5px;
 }
+
+button.record-field-value-popover-button {
+  margin: 0 !important;
+  padding: 5px !important;
+}

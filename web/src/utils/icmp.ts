@@ -1,75 +1,100 @@
-/** TODO: remove this file, when replaced https://github.com/netobserv/flowlogs-pipeline/pull/429/files#r1219203830 */
+import { ReadOnlyValue, ReadOnlyValues } from './values';
 
 /** see https://elixir.bootlin.com/linux/latest/source/include/uapi/linux/icmp.h */
+export const ICMP_TYPES: ReadOnlyValues = [
+  { value: 0, name: 'ICMP_ECHOREPLY', description: 'Echo Reply' },
+  { value: 3, name: 'ICMP_DEST_UNREACH', description: 'Non-Existent Domain' },
+  { value: 4, name: 'ICMP_SOURCE_QUENCH', description: 'Source Quench' },
+  { value: 5, name: 'ICMP_REDIRECT', description: 'Redirect (change route)' },
+  { value: 8, name: 'ICMP_ECHO', description: 'Echo Request' },
+  { value: 11, name: 'ICMP_TIME_EXCEEDED', description: 'Time Exceeded' },
+  { value: 12, name: 'ICMP_PARAMETERPROB', description: 'Parameter Problem' },
+  { value: 13, name: 'ICMP_TIMESTAMP', description: 'Timestamp Request' },
+  { value: 14, name: 'ICMP_TIMESTAMPREPLY', description: 'Timestamp Reply' },
+  { value: 15, name: 'ICMP_INFO_REQUEST', description: 'Information Request' },
+  { value: 16, name: 'ICMP_INFO_REPLY', description: 'Information Reply' },
+  { value: 17, name: 'ICMP_ADDRESS', description: 'Address Mask Request' },
+  { value: 18, name: 'ICMP_ADDRESSREPLY', description: 'Address Mask Reply' }
+  //{ value: 18, name: 'NR_ICMP_TYPES' },
+] as const;
 
-enum ICMP_TYPES {
-  ICMP_ECHOREPLY = 0 /* Echo Reply			*/,
-  ICMP_DEST_UNREACH = 3 /* Destination Unreachable	*/,
-  ICMP_SOURCE_QUENCH = 4 /* Source Quench		*/,
-  ICMP_REDIRECT = 5 /* Redirect (change route)	*/,
-  ICMP_ECHO = 8 /* Echo Request			*/,
-  ICMP_TIME_EXCEEDED = 11 /* Time Exceeded		*/,
-  ICMP_PARAMETERPROB = 12 /* Parameter Problem		*/,
-  ICMP_TIMESTAMP = 13 /* Timestamp Request		*/,
-  ICMP_TIMESTAMPREPLY = 14 /* Timestamp Reply		*/,
-  ICMP_INFO_REQUEST = 15 /* Information Request		*/,
-  ICMP_INFO_REPLY = 16 /* Information Reply		*/,
-  ICMP_ADDRESS = 17 /* Address Mask Request		*/,
-  ICMP_ADDRESSREPLY = 18 /* Address Mask Reply		*/,
-  NR_ICMP_TYPES = 18
-}
+const icmpTypesValues = ICMP_TYPES.map(v => v.value);
+export type ICMP_TYPES_VALUES = typeof icmpTypesValues[number];
 
-enum ICMP_UNREACH_CODES {
-  ICMP_NET_UNREACH = 0 /* Network Unreachable		*/,
-  ICMP_HOST_UNREACH = 1 /* Host Unreachable		*/,
-  ICMP_PROT_UNREACH = 2 /* Protocol Unreachable		*/,
-  ICMP_PORT_UNREACH = 3 /* Port Unreachable		*/,
-  ICMP_FRAG_NEEDED = 4 /* Fragmentation Needed/DF set	*/,
-  ICMP_SR_FAILED = 5 /* Source Route failed		*/,
-  ICMP_NET_UNKNOWN = 6,
-  ICMP_HOST_UNKNOWN = 7,
-  ICMP_HOST_ISOLATED = 8,
-  ICMP_NET_ANO = 9,
-  ICMP_HOST_ANO = 10,
-  ICMP_NET_UNR_TOS = 11,
-  ICMP_HOST_UNR_TOS = 12,
-  ICMP_PKT_FILTERED = 13 /* Packet filtered */,
-  ICMP_PREC_VIOLATION = 14 /* Precedence violation */,
-  ICMP_PREC_CUTOFF = 15 /* Precedence cut off */,
-  NR_ICMP_UNREACH = 15 /* instead of hardcoding immediate value */
-}
+const icmpTypesNames = ICMP_TYPES.map(v => v.name);
+export type ICMP_TYPE_NAMES = typeof icmpTypesNames[number];
 
-enum ICMP_REDIRECT_CODES {
-  ICMP_REDIR_NET = 0 /* Redirect Net			*/,
-  ICMP_REDIR_HOST = 1 /* Redirect Host		*/,
-  ICMP_REDIR_NETTOS = 2 /* Redirect Net for TOS		*/,
-  ICMP_REDIR_HOSTTOS = 3 /* Redirect Host for TOS	*/
-}
-
-enum ICMP_TIME_EXCEEDED_CODES {
-  ICMP_EXC_TTL = 0 /* TTL count exceeded		*/,
-  ICMP_EXC_FRAGTIME = 1 /* Fragment Reass time exceeded	*/
-}
-
-export const getType = (v?: number): string => {
-  if (!v) {
-    return '';
-  }
-  return ICMP_TYPES[v];
+export const getICMPType = (v: ICMP_TYPES_VALUES): ReadOnlyValue | undefined => {
+  return ICMP_TYPES.find(t => t.value === v);
 };
 
-export const getCode = (t?: number, v?: number): string => {
-  if (!t || !v) {
-    return '';
+export const ICMP_UNREACH_CODES: ReadOnlyValues = [
+  { value: 0, name: 'ICMP_NET_UNREACH', description: 'Network Unreachable' },
+  { value: 1, name: 'ICMP_HOST_UNREACH', description: 'Host Unreachable' },
+  { value: 2, name: 'ICMP_PROT_UNREACH', description: 'Protocol Unreachable' },
+  { value: 3, name: 'ICMP_PORT_UNREACH', description: 'Port Unreachable' },
+  { value: 4, name: 'ICMP_FRAG_NEEDED', description: 'Fragmentation Needed/DF set' },
+  { value: 5, name: 'ICMP_SR_FAILED', description: 'Source Route failed' },
+  { value: 6, name: 'ICMP_NET_UNKNOWN' },
+  { value: 7, name: 'ICMP_HOST_UNKNOWN' },
+  { value: 8, name: 'ICMP_HOST_ISOLATED' },
+  { value: 9, name: 'ICMP_NET_ANO' },
+  { value: 10, name: 'ICMP_HOST_ANO' },
+  { value: 11, name: 'ICMP_NET_UNR_TOS' },
+  { value: 12, name: 'ICMP_HOST_UNR_TOS' },
+  { value: 13, name: 'ICMP_PKT_FILTERED', description: 'Packet filtered' },
+  { value: 14, name: 'ICMP_PREC_VIOLATION', description: 'Precedence violation' },
+  { value: 15, name: 'ICMP_PREC_CUTOFF', description: 'Precedence cut off' }
+  //{ value: 15, name: 'NR_ICMP_UNREACH', description: 'instead of hardcoding immediate value' },
+] as const;
+
+const icmpUnreachCodesValues = ICMP_UNREACH_CODES.map(v => v.value);
+export type ICMP_UNREACH_CODES_VALUES = typeof icmpUnreachCodesValues[number];
+
+const icmpUnreachCodesNames = ICMP_UNREACH_CODES.map(v => v.name);
+export type ICMP_UNREACH_CODES_NAMES = typeof icmpUnreachCodesNames[number];
+
+export const ICMP_REDIRECT_CODES: ReadOnlyValues = [
+  { value: 0, name: 'ICMP_REDIR_NET', description: 'Redirect Net' },
+  { value: 1, name: 'ICMP_REDIR_HOST', description: 'Redirect Host' },
+  { value: 2, name: 'ICMP_REDIR_NETTOS', description: 'Redirect Net for TOS' },
+  { value: 3, name: 'ICMP_REDIR_HOSTTOS', description: 'Redirect Host for TOS' }
+] as const;
+
+const icmpRedirectCodesValues = ICMP_REDIRECT_CODES.map(v => v.value);
+export type ICMP_REDIRECT_CODES_VALUES = typeof icmpRedirectCodesValues[number];
+
+const icmpRedirectCodesNames = ICMP_REDIRECT_CODES.map(v => v.name);
+export type ICMP_REDIRECT_CODES_NAMES = typeof icmpRedirectCodesNames[number];
+
+export const ICMP_TIME_EXCEEDED_CODES: ReadOnlyValues = [
+  { value: 0, name: 'ICMP_EXC_TTL', description: 'TTL count exceeded' },
+  { value: 1, name: 'ICMP_EXC_FRAGTIME', description: 'Fragment Reass time exceeded' }
+] as const;
+
+const icmpTimeExceededCodesValues = ICMP_TIME_EXCEEDED_CODES.map(v => v.value);
+export type ICMP_TIME_EXCEEDED_CODES_VALUES = typeof icmpTimeExceededCodesValues[number];
+
+const icmpTimeExceededCodesNames = ICMP_TIME_EXCEEDED_CODES.map(v => v.name);
+export type ICMP_TIME_EXCEEDED_CODES_NAMES = typeof icmpTimeExceededCodesNames[number];
+
+export type ICMP_CODES_VALUES =
+  | ICMP_UNREACH_CODES_VALUES
+  | ICMP_REDIRECT_CODES_VALUES
+  | ICMP_TIME_EXCEEDED_CODES_VALUES;
+
+export const getICMPCode = (t?: ICMP_TYPES_VALUES, c?: ICMP_CODES_VALUES): ReadOnlyValue | undefined => {
+  if (!t || !c) {
+    return undefined;
   }
   switch (t) {
-    case ICMP_TYPES.ICMP_DEST_UNREACH:
-      return ICMP_UNREACH_CODES[v];
-    case ICMP_TYPES.ICMP_REDIRECT:
-      return ICMP_REDIRECT_CODES[v];
-    case ICMP_TYPES.ICMP_TIME_EXCEEDED:
-      return ICMP_TIME_EXCEEDED_CODES[v];
+    case 3: // ICMP_DEST_UNREACH:
+      return ICMP_UNREACH_CODES.find(v => v.value === c);
+    case 5: // ICMP_REDIRECT:
+      return ICMP_REDIRECT_CODES.find(v => v.value === c);
+    case 11: // ICMP_TIME_EXCEEDED:
+      return ICMP_TIME_EXCEEDED_CODES.find(v => v.value === c);
     default:
-      return `Code: ${v}`;
+      return undefined;
   }
 };
