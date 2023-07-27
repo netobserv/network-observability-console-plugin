@@ -1,4 +1,4 @@
-import { Filter, Filters, filtersEqual } from './filters';
+import { Filter, Filters, filterKeyEqual } from './filters';
 import { swapFilters } from '../components/filters/filters-helper';
 
 export type Reporter = 'source' | 'destination' | 'both';
@@ -93,7 +93,7 @@ const determineOverlap = (orig: Filter[], swapped: Filter[]): { overlaps: Filter
   const overlaps: Filter[] = [];
   orig.forEach(o => {
     if (o.def.overlap) {
-      const valuesFromSwapped = swapped.find(s => filtersEqual(o, s))?.values.map(v => v.v);
+      const valuesFromSwapped = swapped.find(s => filterKeyEqual(o, s))?.values.map(v => v.v);
       const overlap: Filter = valuesFromSwapped
         ? {
             def: o.def,

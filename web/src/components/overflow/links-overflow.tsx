@@ -77,7 +77,7 @@ export const LinksOverflow: React.FC<LinksOverflowProps> = ({ id, items }) => {
           }
           isOpen={isOpen}
           dropdownItems={enabledItems.map(item => (
-            <DropdownItem key={item.id} onClick={item.onClick}>
+            <DropdownItem key={item.id} onClick={item.onClick} data-test={item.id + '-button'}>
               {item.label}
             </DropdownItem>
           ))}

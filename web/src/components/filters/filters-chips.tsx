@@ -4,7 +4,7 @@ import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { navigate } from '../dynamic-loader/dynamic-loader';
-import { Filter, Filters, hasEnabledFilterValues, removeFromFilters } from '../../model/filters';
+import { Filter, Filters, filtersEqual, hasEnabledFilterValues, removeFromFilters } from '../../model/filters';
 import { QuickFilter } from '../../model/quick-filters';
 import { autoCompleteCache } from '../../utils/autocomplete-cache';
 import { getPathWithParams, netflowTrafficPath } from '../../utils/url';
@@ -52,7 +52,7 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
   if (_.isEmpty(chipFilters) && _.isEmpty(defaultFilters)) {
     return null;
   }
-  const isDefaultFilters = _.isEqual(chipFilters, defaultFilters);
+  const isDefaultFilters = filtersEqual(chipFilters, defaultFilters);
   const canSwap = canSwapFilters(chipFilters!);
 
   return (

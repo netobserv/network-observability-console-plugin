@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { isEqual } from '../utils/base-compare';
 
 export type FiltersEncoder = (values: FilterValue[], matchAny: boolean, not: boolean) => string;
 
@@ -142,15 +143,32 @@ export const hasNonIndexFields = (filters: Filter[]) => {
 type FilterKey = Omit<Filter, 'values'>;
 
 export const findFromFilters = (activeFilters: Filter[], search: FilterKey): Filter | undefined => {
-  return activeFilters.find(f => filtersEqual(f, search));
+  return activeFilters.find(f => filterKeyEqual(f, search));
 };
 
 export const removeFromFilters = (activeFilters: Filter[], search: FilterKey): Filter[] => {
-  return activeFilters.filter(f => !filtersEqual(f, search));
+  return activeFilters.filter(f => !filterKeyEqual(f, search));
 };
 
-export const filtersEqual = (f1: FilterKey, f2: FilterKey): boolean => {
+export const filterKeyEqual = (f1: FilterKey, f2: FilterKey): boolean => {
   return f1.def.id === f2.def.id && f1.not == f2.not;
+};
+
+type ComparableFilter = { key: string; values: string[] };
+
+const comparableFilter = (f: Filter): ComparableFilter => {
+  return {
+    key: f.def.id + (f.not ? '!' : ''),
+    values: f.values.map(v => v.v).sort()
+  };
+};
+
+const comparableFilters = (f: Filter[]) => {
+  return f.map(comparableFilter).sort((f1, f2) => f1.key.localeCompare(f2.key));
+};
+
+export const filtersEqual = (f1: Filter[], f2: Filter[]): boolean => {
+  return isEqual(comparableFilters(f1), comparableFilters(f2));
 };
 
 export const doesIncludeFilter = (activeFilters: Filter[], search: FilterKey, values: FilterValue[]): boolean => {

@@ -37,6 +37,7 @@ import {
   DisabledFilters,
   Filter,
   Filters,
+  filtersEqual,
   getDisabledFiltersRecord,
   getEnabledFilters,
   hasIndexFields,
@@ -1033,7 +1034,7 @@ export const NetflowTraffic: React.FC<{
             id: 'reset-filters',
             label: resetText,
             onClick: resetDefaultFilters,
-            enabled: defFilters.length > 0 && !_.isEqual(filters, defFilters)
+            enabled: defFilters.length > 0 && !filtersEqual(filters.list, defFilters)
           },
           {
             id: 'clear-all-filters',
