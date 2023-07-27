@@ -256,21 +256,19 @@ func (f *lineFilter) writeInto(sb *strings.Builder) {
 							sb.WriteRune(']')
 						}
 					}
-					if len(v.value) > 0 {
-						intVal, _ := strconv.Atoi(v.value)
-						nextMatch := fmt.Sprintf("%d", (int((intVal/10)+1) * 10))
-						sb.WriteRune('|')
-						for _, r := range nextMatch {
-							sb.WriteRune('[')
-							sb.WriteRune(r)
-							if r != '9' {
-								sb.WriteString("-9]")
-							} else {
-								sb.WriteRune(']')
-							}
+					intVal, _ := strconv.Atoi(v.value)
+					nextMatch := fmt.Sprintf("%d", (int((intVal/10)+1) * 10))
+					sb.WriteRune('|')
+					for _, r := range nextMatch {
+						sb.WriteRune('[')
+						sb.WriteRune(r)
+						if r != '9' {
+							sb.WriteString("-9]")
+						} else {
+							sb.WriteRune(']')
 						}
-						sb.WriteString("+?)")
 					}
+					sb.WriteString("+?)")
 				} else {
 					sb.WriteString(v.value)
 				}
