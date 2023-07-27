@@ -464,6 +464,7 @@ export const getFilterDefinitions = (
         examples: `${t('Specify a single TCP state name like:')}
         - ${t('A _LINUX_TCP_STATES_H number like 1, 2, 3')}
         - ${t('A _LINUX_TCP_STATES_H TCP name like ESTABLISHED, SYN_SENT, SYN_RECV')}`,
+        docUrl: "https://github.com/torvalds/linux/blob/master/include/net/tcp_states.h",
         encoder: simpleFiltersEncoder('PktDropLatestState'),
         overlap: false
       },
@@ -478,6 +479,7 @@ export const getFilterDefinitions = (
         examples: `${t('Specify a single packet drop cause like:')}
         - ${t('A _LINUX_DROPREASON_CORE_H number like 2, 3, 4')}
         - ${t('A _LINUX_DROPREASON_CORE_H SKB_DROP_REASON name like NOT_SPECIFIED, NO_SOCKET, PKT_TOO_SMALL')}`,
+        docUrl: "https://github.com/torvalds/linux/blob/master/include/net/dropreason-core.h",
         encoder: simpleFiltersEncoder('PktDropLatestDropCause'),
         overlap: false
       },

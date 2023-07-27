@@ -51,6 +51,7 @@ export interface FilterDefinition {
   autoCompleteAddsQuotes?: boolean;
   hint?: string;
   examples?: string;
+  docUrl?: string;
   placeholder?: string;
   encoder: FiltersEncoder;
   // overlap tells if the type of entity referred to with this filter may have overlapping (duplicated)
