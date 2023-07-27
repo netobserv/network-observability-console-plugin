@@ -474,8 +474,8 @@ export const getFilterDefinitions = (
         component: FilterComponent.Autocomplete,
         getOptions: cap10(getDropCauseOptions),
         validate: rejectEmptyValue,
-        hint: t('Specify a single TCP drop cause.'),
-        examples: `${t('Specify a single TCP drop cause like:')}
+        hint: t('Specify a single packet drop cause.'),
+        examples: `${t('Specify a single packet drop cause like:')}
         - ${t('A _LINUX_DROPREASON_CORE_H number like 2, 3, 4')}
         - ${t('A _LINUX_DROPREASON_CORE_H SKB_DROP_REASON name like NOT_SPECIFIED, NO_SOCKET, PKT_TOO_SMALL')}`,
         encoder: simpleFiltersEncoder('PktDropLatestDropCause'),

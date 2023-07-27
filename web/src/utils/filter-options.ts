@@ -6,7 +6,7 @@ import { splitResource, SplitStage } from '../model/resource';
 import { autoCompleteCache } from './autocomplete-cache';
 import { DNS_RCODES } from './dns';
 import { getPort, getService } from './port';
-import { DROP_CAUSES, DROP_STATES } from './tcp-drop';
+import { DROP_CAUSES, DROP_STATES } from './pkt-drop';
 
 export const noOption: (value: string) => Promise<FilterOption[]> = () => Promise.resolve([]);
 

@@ -12,7 +12,7 @@ import { formatDurationAboveMillisecond } from '../../utils/duration';
 import { getICMPCode, getICMPType, ICMP_CODES_VALUES, ICMP_TYPES_VALUES } from '../../utils/icmp';
 import { formatPort } from '../../utils/port';
 import { formatProtocol } from '../../utils/protocol';
-import { DROP_CAUSES_NAMES, getDropCauseDescription } from '../../utils/tcp-drop';
+import { DROP_CAUSES_NAMES, getDropCauseDescription } from '../../utils/pkt-drop';
 import { Size } from '../dropdowns/table-display-dropdown';
 import './record-field.css';
 
