@@ -310,9 +310,7 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
                             }
                           >
                             <Button variant="plain" className="record-field-title-popover-button">
-                              <Text component={TextVariants.h4}>
-                                {getShortColumnName(c)}
-                              </Text>
+                              <Text component={TextVariants.h4}>{getShortColumnName(c)}</Text>
                             </Button>
                           </Popover>
                         ) : (

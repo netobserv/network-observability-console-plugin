@@ -155,7 +155,7 @@ export const getFullColumnName = (col?: Column): string => {
 export const getShortColumnName = (col?: Column): string => {
   if (col) {
     if (col.group && col.name.startsWith(col.group)) {
-      return col.name.replace(col.group, "");
+      return col.name.replace(col.group, '');
     }
     return col.name;
   }

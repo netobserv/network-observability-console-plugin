@@ -119,6 +119,8 @@ func (q *FlowQueryBuilder) addFilter(filter filters.Match) error {
 		if len(values) == 1 && isExactMatch(values[0]) {
 			if filter.Not {
 				q.labelFilters = append(q.labelFilters, notStringLabelFilter(filter.Key, trimExactMatch(values[0])))
+			} else if filter.MoreThanOrEqual {
+				q.labelFilters = append(q.labelFilters, moreThanNumberLabelFilter(filter.Key, trimExactMatch(values[0])))
 			} else {
 				q.labelFilters = append(q.labelFilters, stringEqualLabelFilter(filter.Key, trimExactMatch(values[0])))
 			}
@@ -131,7 +133,7 @@ func (q *FlowQueryBuilder) addFilter(filter filters.Match) error {
 		}
 		q.addIPFilters(filter.Key, values)
 	} else {
-		q.addLineFilters(filter.Key, values, filter.Not)
+		q.addLineFilters(filter.Key, values, filter.Not, filter.MoreThanOrEqual)
 	}
 
 	return nil
@@ -169,13 +171,14 @@ func (q *FlowQueryBuilder) addLabelRegex(key string, values []string, not bool) 
 	}
 }
 
-func (q *FlowQueryBuilder) addLineFilters(key string, values []string, not bool) {
+func (q *FlowQueryBuilder) addLineFilters(key string, values []string, not bool, moreThan bool) {
 	if len(values) == 0 {
 		return
 	}
 	lf := lineFilter{
-		key: key,
-		not: not,
+		key:      key,
+		not:      not,
+		moreThan: moreThan,
 	}
 	isNumeric := fields.IsNumeric(key)
 	emptyMatches := false

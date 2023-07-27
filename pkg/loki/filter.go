@@ -2,6 +2,7 @@ package loki
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 )
 
@@ -11,10 +12,11 @@ var valueReplacer = strings.NewReplacer(`*`, `.*`, `"`, "")
 type labelMatcher string
 
 const (
-	labelEqual     = labelMatcher("=")
-	labelMatches   = labelMatcher("=~")
-	labelNotEqual  = labelMatcher("!=")
-	labelNoMatches = labelMatcher("!~")
+	labelEqual           = labelMatcher("=")
+	labelMatches         = labelMatcher("=~")
+	labelNotEqual        = labelMatcher("!=")
+	labelMoreThanOrEqual = labelMatcher(">=")
+	labelNoMatches       = labelMatcher("!~")
 )
 
 type valueType int
@@ -42,6 +44,7 @@ type lineFilter struct {
 	strictKey bool
 	values    []lineMatch
 	not       bool
+	moreThan  bool
 }
 
 type lineMatch struct {
@@ -73,6 +76,15 @@ func notStringLabelFilter(labelKey string, value string) labelFilter {
 		matcher:   labelNotEqual,
 		value:     value,
 		valueType: typeString,
+	}
+}
+
+func moreThanNumberLabelFilter(labelKey string, value string) labelFilter {
+	return labelFilter{
+		key:       labelKey,
+		matcher:   labelMoreThanOrEqual,
+		value:     value,
+		valueType: typeNumber,
 	}
 }
 
@@ -136,6 +148,8 @@ func (f *lineFilter) asLabelFilters() []labelFilter {
 		} else {
 			if f.not {
 				lf.matcher = labelNotEqual
+			} else if f.moreThan {
+				lf.matcher = labelMoreThanOrEqual
 			} else {
 				lf.matcher = labelEqual
 			}
@@ -172,6 +186,7 @@ func notContainsKeyLineFilter(key string) lineFilter {
 		key:       key,
 		strictKey: true,
 		not:       true,
+		moreThan:  false,
 	}
 }
 
@@ -223,7 +238,42 @@ func (f *lineFilter) writeInto(sb *strings.Builder) {
 			sb.WriteString(`":`)
 			switch v.valueType {
 			case typeNumber, typeRegex:
-				sb.WriteString(v.value)
+				if f.moreThan {
+					// match each number greater than specified value using regex
+					// ie example for 23+ you should get:
+					// ([2-9][3-9] | [3-9][0-9]+?)
+					//       |            |
+					//       |            ↪ match numbers >= 30
+					//       |
+					//       ↪ match any number from 23 to 29
+					sb.WriteRune('(')
+					for _, r := range v.value {
+						sb.WriteRune('[')
+						sb.WriteRune(r)
+						if r != '9' {
+							sb.WriteString("-9]")
+						} else {
+							sb.WriteRune(']')
+						}
+					}
+					if len(v.value) > 0 {
+						intVal, _ := strconv.Atoi(v.value)
+						nextMatch := fmt.Sprintf("%d", (int((intVal/10)+1) * 10))
+						sb.WriteRune('|')
+						for _, r := range nextMatch {
+							sb.WriteRune('[')
+							sb.WriteRune(r)
+							if r != '9' {
+								sb.WriteString("-9]")
+							} else {
+								sb.WriteRune(']')
+							}
+						}
+						sb.WriteString("+?)")
+					}
+				} else {
+					sb.WriteString(v.value)
+				}
 				// a number or regex can be followed by } if it's the last property of a JSON document
 				sb.WriteString("[,}]")
 			case typeString, typeIP:

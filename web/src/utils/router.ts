@@ -73,7 +73,7 @@ export const getFiltersFromURL = (t: TFunction, disabledFilters: DisabledFilters
   filters.forEach(keyValue => {
     const pair = keyValue.split(filterKVSeparator);
     if (pair.length === 2) {
-      const { id, not } = fromFilterKey(pair[0]);
+      const { id, not, moreThan } = fromFilterKey(pair[0]);
       const def = findFilter(t, id);
       if (def) {
         const disabledValues = disabledFilters[pair[0]]?.split(',') || [];
@@ -88,6 +88,7 @@ export const getFiltersFromURL = (t: TFunction, disabledFilters: DisabledFilters
             const f: Filter = {
               def: def,
               not: not,
+              moreThan: moreThan,
               values: filterValues
             };
             return f;

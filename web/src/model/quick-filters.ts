@@ -18,7 +18,7 @@ export const parseQuickFilters = (t: TFunction, raw: RawQuickFilter[]): QuickFil
   const ret: QuickFilter[] = [];
   raw.forEach(qf => {
     const filters: (Filter | undefined)[] = Object.entries(qf.filter).map(([key, values]) => {
-      const { id, not } = fromFilterKey(key);
+      const { id, not, moreThan } = fromFilterKey(key);
       const def = findFilter(t, id);
       if (!def) {
         console.warn(`Configured quick filter "${qf.name}" contains unknown filter id ${id}.`);
@@ -27,6 +27,7 @@ export const parseQuickFilters = (t: TFunction, raw: RawQuickFilter[]): QuickFil
       const filter: Filter = {
         def: def,
         not: not,
+        moreThan: moreThan,
         values: values.split(',').map(v => ({ v: v }))
       };
       return filter;
