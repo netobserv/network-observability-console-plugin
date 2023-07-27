@@ -9,10 +9,10 @@ import { Column, ColumnsId, getFullColumnName } from '../../utils/columns';
 import { dateFormatter, getFormattedDate, timeMSFormatter, utcDateTimeFormatter } from '../../utils/datetime';
 import { DNS_CODE_NAMES, getDNSRcodeDescription } from '../../utils/dns';
 import { formatDurationAboveMillisecond } from '../../utils/duration';
-import { getICMPCode, getICMPType, ICMP_CODES_VALUES, ICMP_TYPES_VALUES } from '../../utils/icmp';
+import { getICMPCode, getICMPDocUrl, getICMPType, ICMP_ALL_CODES_VALUES, ICMP_ALL_TYPES_VALUES } from '../../utils/icmp';
+import { DROP_CAUSES_DOC_URL, DROP_CAUSES_NAMES, getDropCauseDescription } from '../../utils/pkt-drop';
 import { formatPort } from '../../utils/port';
 import { formatProtocol } from '../../utils/protocol';
-import { DROP_CAUSES_NAMES, getDropCauseDescription } from '../../utils/pkt-drop';
 import { Size } from '../dropdowns/table-display-dropdown';
 import './record-field.css';
 
@@ -359,32 +359,30 @@ export const RecordField: React.FC<{
         let child: JSX.Element | undefined = undefined;
 
         if (detailed && flow.fields.IcmpType !== undefined) {
-          const type = getICMPType(flow.fields.IcmpType as ICMP_TYPES_VALUES);
+          const type = getICMPType(flow.fields.Proto, flow.fields.IcmpType as ICMP_ALL_TYPES_VALUES);
           const code = getICMPCode(
-            flow.fields.IcmpType as ICMP_TYPES_VALUES,
-            flow.fields.IcmpCode as ICMP_CODES_VALUES
+            flow.fields.Proto,
+            flow.fields.IcmpType as ICMP_ALL_TYPES_VALUES,
+            flow.fields.IcmpCode as ICMP_ALL_CODES_VALUES
           );
-          child = (
+          const docUrl = getICMPDocUrl(flow.fields.Proto);
+          child = type ? (
             <>
-              {type ? (
-                clickableContent(
-                  type.name,
-                  type.description || '',
-                  'https://elixir.bootlin.com/linux/latest/source/include/uapi/linux/icmp.h#L26'
-                )
-              ) : (
-                <></>
+              {clickableContent(
+                type.name,
+                type.description || '',
+                docUrl
               )}
-              {code ? (
-                clickableContent(
-                  code.name,
-                  code.description || '',
-                  'https://elixir.bootlin.com/linux/latest/source/include/uapi/linux/icmp.h#L42'
-                )
-              ) : (
-                <></>
-              )}
+              {code ? clickableContent(
+                code.name,
+                code.description || '',
+                docUrl
+              ) : <></>}
             </>
+          ) : clickableContent(
+            `Type: ${flow.fields.IcmpType} Code: ${flow.fields.IcmpCode}`,
+            '',
+            docUrl
           );
         }
         return singleContainer(simpleTextWithTooltip(child ? `${text} ${t('reporting')}` : text, undefined, child));
@@ -405,7 +403,7 @@ export const RecordField: React.FC<{
             child = clickableContent(
               flow.fields.PktDropLatestDropCause,
               getDropCauseDescription(flow.fields.PktDropLatestDropCause as DROP_CAUSES_NAMES),
-              'https://elixir.bootlin.com/linux/latest/source/include/net/dropreason-core.h#L88'
+              DROP_CAUSES_DOC_URL
             );
           }
           return doubleContainer(

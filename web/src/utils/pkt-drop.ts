@@ -1,6 +1,6 @@
 import { ReadOnlyValues } from './values';
 
-// https://elixir.bootlin.com/linux/v6.3/source/include/net/tcp_states.h#L12
+// https://github.com/torvalds/linux/blob/master/include/net/tcp_states.h
 export const DROP_STATES: ReadOnlyValues = [
   { value: 0, name: 'TCP_INVALID_STATE' },
   { value: 1, name: 'TCP_ESTABLISHED' },
@@ -22,7 +22,7 @@ export type DROP_STATES_VALUES = typeof dropStatesValues[number];
 const dropStatesNames = DROP_STATES.map(v => v.name);
 export type DROP_STATES_NAMES = typeof dropStatesNames[number];
 
-// https://elixir.bootlin.com/linux/latest/source/include/net/dropreason-core.h#L88
+// https://github.com/torvalds/linux/blob/master/include/net/dropreason-core.h
 export const DROP_CAUSES: ReadOnlyValues = [
   { value: 2, name: 'SKB_DROP_REASON_NOT_SPECIFIED', description: 'drop reason is not specified' },
   { value: 3, name: 'SKB_DROP_REASON_NO_SOCKET', description: 'socket not found' },
@@ -218,6 +218,8 @@ export type DROP_CAUSES_VALUES = typeof dropCausesValues[number];
 
 const dropCausesNames = DROP_CAUSES.map(v => v.name);
 export type DROP_CAUSES_NAMES = typeof dropCausesNames[number];
+
+export const DROP_CAUSES_DOC_URL = "https://github.com/torvalds/linux/blob/master/include/net/dropreason-core.h";
 
 export const getDropCauseDescription = (name: DROP_CAUSES_NAMES): string => {
   return DROP_CAUSES.find(v => v.name === name)?.description || 'Unknown';
