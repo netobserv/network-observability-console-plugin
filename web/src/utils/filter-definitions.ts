@@ -343,6 +343,7 @@ export const getFilterDefinitions = (
           examples: `${t('Specify a single port following one of these rules:')}
         - ${t('A port number like 80, 21')}
         - ${t('A IANA name like HTTP, FTP')}`,
+          docUrl: "https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml",
           encoder: simpleFiltersEncoder('SrcPort'),
           overlap: false
         },
@@ -428,6 +429,7 @@ export const getFilterDefinitions = (
         - ${t('A protocol number like 6, 17')}
         - ${t('A IANA name like TCP, UDP')}
         - ${t('Empty double quotes "" for undefined protocol')}`,
+        docUrl: "https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml",
         encoder: simpleFiltersEncoder('Proto'),
         overlap: false
       },
@@ -516,6 +518,7 @@ export const getFilterDefinitions = (
         examples: `${t('Specify a single DNS RCODE name like:')}
         - ${t('A IANA RCODE number like 0, 3, 9')}
         - ${t('A IANA RCODE name like NoError, NXDomain, NotAuth')}`,
+        docUrl: "https://www.iana.org/assignments/dns-parameters/dns-parameters.xhtml#dns-parameters-6",
         encoder: simpleFiltersEncoder('DnsFlagsResponseCode'),
         overlap: false
       }
