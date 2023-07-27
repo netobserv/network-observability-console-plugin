@@ -166,13 +166,13 @@ export type ICMP_ALL_CODES_VALUES =
 export const getICMPDocUrl = (p: number): string | undefined => {
   switch (p) {
     case ICMP_PROTO:
-      return "https://github.com/torvalds/linux/blob/master/include/uapi/linux/icmp.h";
+      return 'https://github.com/torvalds/linux/blob/master/include/uapi/linux/icmp.h';
     case ICMP_V6_PROTO:
-      return "https://github.com/torvalds/linux/blob/master/include/uapi/linux/icmpv6.h";
+      return 'https://github.com/torvalds/linux/blob/master/include/uapi/linux/icmpv6.h';
     default:
       return undefined;
   }
-}
+};
 
 export const getICMPType = (p: number, v: ICMP_ALL_TYPES_VALUES): ReadOnlyValue | undefined => {
   if (!ICMP_PROTOS.includes(p)) {

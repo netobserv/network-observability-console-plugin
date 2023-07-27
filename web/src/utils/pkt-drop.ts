@@ -219,7 +219,7 @@ export type DROP_CAUSES_VALUES = typeof dropCausesValues[number];
 const dropCausesNames = DROP_CAUSES.map(v => v.name);
 export type DROP_CAUSES_NAMES = typeof dropCausesNames[number];
 
-export const DROP_CAUSES_DOC_URL = "https://github.com/torvalds/linux/blob/master/include/net/dropreason-core.h";
+export const DROP_CAUSES_DOC_URL = 'https://github.com/torvalds/linux/blob/master/include/net/dropreason-core.h';
 
 export const getDropCauseDescription = (name: DROP_CAUSES_NAMES): string => {
   return DROP_CAUSES.find(v => v.name === name)?.description || 'Unknown';

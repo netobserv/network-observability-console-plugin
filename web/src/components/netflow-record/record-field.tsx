@@ -9,7 +9,13 @@ import { Column, ColumnsId, getFullColumnName } from '../../utils/columns';
 import { dateFormatter, getFormattedDate, timeMSFormatter, utcDateTimeFormatter } from '../../utils/datetime';
 import { DNS_CODE_NAMES, getDNSRcodeDescription } from '../../utils/dns';
 import { formatDurationAboveMillisecond } from '../../utils/duration';
-import { getICMPCode, getICMPDocUrl, getICMPType, ICMP_ALL_CODES_VALUES, ICMP_ALL_TYPES_VALUES } from '../../utils/icmp';
+import {
+  getICMPCode,
+  getICMPDocUrl,
+  getICMPType,
+  ICMP_ALL_CODES_VALUES,
+  ICMP_ALL_TYPES_VALUES
+} from '../../utils/icmp';
 import { DROP_CAUSES_DOC_URL, DROP_CAUSES_NAMES, getDropCauseDescription } from '../../utils/pkt-drop';
 import { formatPort } from '../../utils/port';
 import { formatProtocol } from '../../utils/protocol';
@@ -368,21 +374,11 @@ export const RecordField: React.FC<{
           const docUrl = getICMPDocUrl(flow.fields.Proto);
           child = type ? (
             <>
-              {clickableContent(
-                type.name,
-                type.description || '',
-                docUrl
-              )}
-              {code ? clickableContent(
-                code.name,
-                code.description || '',
-                docUrl
-              ) : <></>}
+              {clickableContent(type.name, type.description || '', docUrl)}
+              {code ? clickableContent(code.name, code.description || '', docUrl) : <></>}
             </>
-          ) : clickableContent(
-            `Type: ${flow.fields.IcmpType} Code: ${flow.fields.IcmpCode}`,
-            '',
-            docUrl
+          ) : (
+            clickableContent(`Type: ${flow.fields.IcmpType} Code: ${flow.fields.IcmpCode}`, '', docUrl)
           );
         }
         return singleContainer(simpleTextWithTooltip(child ? `${text} ${t('reporting')}` : text, undefined, child));

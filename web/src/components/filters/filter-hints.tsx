@@ -20,19 +20,19 @@ export const FilterHints: React.FC<FilterHintsProps> = ({ def }) => {
         <Popover
           aria-label="Hint popover"
           headerContent={def.name}
-          footerContent={def.docUrl ? <Button
-            variant="link"
-            component={(props: React.FunctionComponent) => (
-              <Link {...props} target="_blank" to={{ pathname: def.docUrl }} />
-            )}
-          >
-            {t('Show related documentation')}
-          </Button> : undefined}
-          bodyContent={
-            <div className="text-left-pre">
-              {def.examples}
-            </div>
+          footerContent={
+            def.docUrl ? (
+              <Button
+                variant="link"
+                component={(props: React.FunctionComponent) => (
+                  <Link {...props} target="_blank" to={{ pathname: def.docUrl }} />
+                )}
+              >
+                {t('Show related documentation')}
+              </Button>
+            ) : undefined
           }
+          bodyContent={<div className="text-left-pre">{def.examples}</div>}
           hasAutoWidth={true}
           position={'bottom'}
         >
