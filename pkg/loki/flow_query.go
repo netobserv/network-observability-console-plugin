@@ -270,7 +270,7 @@ func (q *FlowQueryBuilder) appendPktDropCauseFilter(sb *strings.Builder) {
 	sb.WriteString("`")
 }
 
-func (q *FlowQueryBuilder) appendDnsFilter(sb *strings.Builder) {
+func (q *FlowQueryBuilder) appendDNSFilter(sb *strings.Builder) {
 	// ensure at least one Dns field is specified
 	// |~`"Dns`
 	sb.WriteString("|~`")
@@ -278,7 +278,7 @@ func (q *FlowQueryBuilder) appendDnsFilter(sb *strings.Builder) {
 	sb.WriteString("`")
 }
 
-func (q *FlowQueryBuilder) appendDnsRCodeFilter(sb *strings.Builder) {
+func (q *FlowQueryBuilder) appendDNSRCodeFilter(sb *strings.Builder) {
 	// ensure DnsFlagsResponseCode field is specified with valid error
 	// |~`"DnsFlagsResponseCode"`!~`"DnsFlagsResponseCode":"NoError"`
 	sb.WriteString("|~`")

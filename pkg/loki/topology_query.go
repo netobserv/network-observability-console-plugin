@@ -21,8 +21,8 @@ type Topology struct {
 	dedup              bool
 	skipEmptyDropState bool
 	skipEmptyDropCause bool
-	skipNonDns         bool
-	skipEmptyDnsRCode  bool
+	skipNonDNS         bool
+	skipEmptyDNSRCode  bool
 }
 
 type TopologyQueryBuilder struct {
@@ -82,8 +82,8 @@ func NewTopologyQuery(cfg *Config, start, end, limit, rateInterval, step, metric
 			dedup:              d,
 			skipEmptyDropState: aggregate == "droppedState",
 			skipEmptyDropCause: aggregate == "droppedCause",
-			skipNonDns:         metricType == "dnsLatencies" || metricType == "countDns",
-			skipEmptyDnsRCode:  aggregate == "dnsRCode",
+			skipNonDNS:         metricType == "dnsLatencies" || metricType == "countDns",
+			skipEmptyDNSRCode:  aggregate == "dnsRCode",
 		},
 	}, nil
 }
@@ -172,10 +172,10 @@ func (q *TopologyQueryBuilder) Build() string {
 		q.appendPktDropCauseFilter(sb)
 	}
 
-	if q.topology.skipEmptyDnsRCode {
-		q.appendDnsRCodeFilter(sb)
-	} else if q.topology.skipNonDns {
-		q.appendDnsFilter(sb)
+	if q.topology.skipEmptyDNSRCode {
+		q.appendDNSRCodeFilter(sb)
+	} else if q.topology.skipNonDNS {
+		q.appendDNSFilter(sb)
 	}
 
 	q.appendJSON(sb, true)
