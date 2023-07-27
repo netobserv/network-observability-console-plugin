@@ -1,3 +1,5 @@
+import _ from 'lodash';
+
 export const compareNumbers = (a: number, b: number) => {
   if (!isNaN(a) && !isNaN(b)) {
     return a - b;
@@ -15,3 +17,6 @@ export const compareStrings = (a: string, b: string) => {
   }
   return -1;
 };
+
+// isEqual with type assertion (lodash uses "any")
+export const isEqual = <T>(a: T, b: T) => _.isEqual(a, b);
