@@ -2,6 +2,7 @@ package loki
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 )
@@ -190,6 +191,65 @@ func notContainsKeyLineFilter(key string) lineFilter {
 	}
 }
 
+func moreThanRegex(sb *strings.Builder, value string) {
+	// match each number greater than specified value using regex
+	// example for 123:
+	// ^ ( 12[3-9] | 1[3-9][0-9]+ | [2-9][0-9]+ | [1-9][0-9]{3,} )
+	//       |            |              |             |
+	//       |            |              |              ↪ match number more than 1000
+	//       |            |              |
+	//       |            |               ↪ match number from 200 to 999
+	//       |            |
+	//       |             ↪ match numbers from 130 to 199
+	//       |
+	//        ↪ match any number from 123 to 129
+
+	sb.WriteString("^(")
+	for i, r := range value {
+		if i < len(value)-1 {
+			sb.WriteRune(r)
+		} else {
+			sb.WriteRune('[')
+			sb.WriteRune(r)
+			sb.WriteString("-9]")
+		}
+	}
+
+	intVal, _ := strconv.Atoi(value)
+	for i := 1; i < len(value); i++ {
+		nextMin := int((intVal / int(math.Pow10(i))) + 1)
+		nextMinStr := fmt.Sprintf("%d", nextMin)
+
+		sb.WriteRune('|')
+		if nextMin >= 10 {
+			sb.WriteString(nextMinStr[0 : len(nextMinStr)-1])
+		} else if i < len(value)-1 {
+			sb.WriteString(value[0 : len(value)-1-i])
+		}
+
+		nextMinRune := nextMinStr[len(nextMinStr)-1:]
+		if nextMin%9 != 0 {
+			sb.WriteRune('[')
+			sb.WriteString(nextMinRune)
+			sb.WriteString("-9]")
+		} else {
+			sb.WriteString(nextMinRune)
+		}
+
+		sb.WriteString("[0-9]")
+
+		if i > 1 {
+			sb.WriteString("{")
+			sb.WriteString(fmt.Sprintf("%d", i))
+			sb.WriteString(",}")
+		}
+	}
+
+	sb.WriteString("|[1-9][0-9]{")
+	sb.WriteString(fmt.Sprintf("%d", len(value)))
+	sb.WriteString(",})")
+}
+
 // writeInto transforms a lineFilter to its corresponding part of a LogQL query
 // under construction (contained in the provided strings.Builder)
 func (f *lineFilter) writeInto(sb *strings.Builder) {
@@ -239,36 +299,7 @@ func (f *lineFilter) writeInto(sb *strings.Builder) {
 			switch v.valueType {
 			case typeNumber, typeRegex:
 				if f.moreThan {
-					// match each number greater than specified value using regex
-					// ie example for 23+ you should get:
-					// ([2-9][3-9] | [3-9][0-9]+?)
-					//       |            |
-					//       |            ↪ match numbers >= 30
-					//       |
-					//       ↪ match any number from 23 to 29
-					sb.WriteRune('(')
-					for _, r := range v.value {
-						sb.WriteRune('[')
-						sb.WriteRune(r)
-						if r != '9' {
-							sb.WriteString("-9]")
-						} else {
-							sb.WriteRune(']')
-						}
-					}
-					intVal, _ := strconv.Atoi(v.value)
-					nextMatch := fmt.Sprintf("%d", (int((intVal/10)+1) * 10))
-					sb.WriteRune('|')
-					for _, r := range nextMatch {
-						sb.WriteRune('[')
-						sb.WriteRune(r)
-						if r != '9' {
-							sb.WriteString("-9]")
-						} else {
-							sb.WriteRune(']')
-						}
-					}
-					sb.WriteString("+?)")
+					moreThanRegex(sb, v.value)
 				} else {
 					sb.WriteString(v.value)
 				}
