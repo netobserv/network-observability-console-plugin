@@ -384,7 +384,7 @@ describe('parseTopologyMetrics', () => {
       }
     ];
 
-    const parsed = parseTopologyMetrics(metrics, 300, 'resource', 0, true) as TopologyMetrics[];
+    const parsed = parseTopologyMetrics(metrics, 300, 'bytes', 'resource', 0, true) as TopologyMetrics[];
 
     expect(parsed).toHaveLength(2);
     expect(parsed[0].source.getDisplayName(true, true)).toEqual('ns1.A');

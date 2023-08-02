@@ -6,6 +6,7 @@ import {
   ChartGroup,
   ChartLabel,
   ChartLegend,
+  ChartLine,
   ChartScatter,
   ChartStack,
   ChartThemeColor
@@ -34,6 +35,7 @@ export type MetricsContentProps = {
   limit: number;
   showBar?: boolean;
   showArea?: boolean;
+  showLine?: boolean;
   showScatter?: boolean;
   smallerTexts?: boolean;
   itemsPerRow?: number;
@@ -48,6 +50,7 @@ export const MetricsContent: React.FC<MetricsContentProps> = ({
   limit,
   showBar,
   showArea,
+  showLine,
   showScatter,
   smallerTexts,
   itemsPerRow,
@@ -55,7 +58,10 @@ export const MetricsContent: React.FC<MetricsContentProps> = ({
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
-  const filteredMetrics = metrics.slice(0, limit);
+  let filteredMetrics = metrics.slice(0, limit);
+  if (metricType === 'flowRtt') {
+    filteredMetrics = filteredMetrics.map(m => ({ ...m, values: m.values.filter(v => v[1] !== 0) }));
+  }
 
   const legendData: LegendDataItem[] = filteredMetrics.map((m, idx) => ({
     childName: `${showBar ? 'bar-' : 'area-'}${idx}`,
@@ -116,6 +122,13 @@ export const MetricsContent: React.FC<MetricsContentProps> = ({
           <ChartGroup>
             {topKDatapoints.map((datapoints, idx) => (
               <ChartArea name={`area-${idx}`} key={`area-${idx}`} data={datapoints} interpolation="monotoneX" />
+            ))}
+          </ChartGroup>
+        )}
+        {showLine && (
+          <ChartGroup>
+            {topKDatapoints.map((datapoints, idx) => (
+              <ChartLine name={`line-${idx}`} key={`line-${idx}`} data={datapoints} interpolation="monotoneX" />
             ))}
           </ChartGroup>
         )}

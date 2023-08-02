@@ -79,6 +79,7 @@ export const getTopologyMetrics = (params: FlowQuery, range: number | TimeRange)
     return parseTopologyMetrics(
       res.result as RawTopologyMetrics[],
       range,
+      params.type,
       params.aggregateBy as FlowScope,
       res.unixTimestamp,
       res.isMock

@@ -1,14 +1,14 @@
+import { Flex, FlexItem, Radio, Text, TextVariants } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Flex, FlexItem, Radio, Text, TextContent, TextVariants } from '@patternfly/react-core';
-import { MetricType } from '../../model/flow-query';
 import { TopologyMetrics } from '../../api/loki';
+import { MetricType } from '../../model/flow-query';
 import { decorated, getStat, NodeData } from '../../model/topology';
-import { MetricsContent } from '../metrics/metrics-content';
 import { matchPeer } from '../../utils/metrics';
+import { TruncateLength } from '../dropdowns/truncate-dropdown';
+import { MetricsContent } from '../metrics/metrics-content';
 import { toNamedMetric } from '../metrics/metrics-helper';
 import { ElementPanelStats } from './element-panel-stats';
-import { TruncateLength } from '../dropdowns/truncate-dropdown';
 
 type MetricsRadio = 'in' | 'out' | 'both';
 
@@ -23,8 +23,9 @@ export const ElementPanelMetrics: React.FC<{
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [metricsRadio, setMetricsRadio] = React.useState<MetricsRadio>('both');
 
+  const useArea = metricType !== 'flowRtt';
   const titleStats = t('Stats');
-  const titleChart = t('Top 5 rates');
+  const titleChart = metricType === 'flowRtt' ? t('Flow RTT') : t('Top 5 rates');
 
   let id = '';
   let metricsIn: TopologyMetrics[] = [];
@@ -55,7 +56,7 @@ export const ElementPanelMetrics: React.FC<{
 
   return (
     <div className="element-metrics-container">
-      <TextContent>
+      <FlexItem>
         <Text id="metrics-stats-title" component={TextVariants.h4}>
           {titleStats}
         </Text>
@@ -66,6 +67,8 @@ export const ElementPanelMetrics: React.FC<{
           metricsBoth={metricsBoth}
           isEdge={!!bData}
         />
+      </FlexItem>
+      <FlexItem>
         <Text id="metrics-chart-title" component={TextVariants.h4}>
           {titleChart}
         </Text>
@@ -98,14 +101,15 @@ export const ElementPanelMetrics: React.FC<{
             />
           </FlexItem>
         </Flex>
-      </TextContent>
+      </FlexItem>
       <MetricsContent
         id={id}
         title={titleChart}
         metricType={metricType}
         metrics={top5}
         limit={5}
-        showArea
+        showArea={useArea}
+        showLine={!useArea}
         showScatter
         tooltipsTruncate={true}
       />

@@ -22,6 +22,10 @@
   align-self: flex-start;
 }
 
+.overview-flex-item.center {
+  align-self: flex-start;
+}
+
 .overview-flex-item.full {
   width: 100%;
 }

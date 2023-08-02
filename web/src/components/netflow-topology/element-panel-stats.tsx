@@ -15,6 +15,7 @@ export const ElementPanelStats: React.FC<{
 }> = ({ metricsIn, metricsOut, metricsBoth, metricType, isEdge }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
+  const isFlowRtt = metricType === 'flowRtt';
   const latestIn = metricsIn.reduce((prev, cur) => prev + getStat(cur.stats, 'last'), 0);
   const averageIn = metricsIn.reduce((prev, cur) => prev + getStat(cur.stats, 'avg'), 0);
   const totalIn = metricsIn.reduce((prev, cur) => prev + getStat(cur.stats, 'sum'), 0);
@@ -35,24 +36,30 @@ export const ElementPanelStats: React.FC<{
         <FlexItem>
           <FlexItem>
             <Text className="element-stats-title" component={TextVariants.h4}>
-              {t('Average rate')}
+              {isFlowRtt ? t('Average RTT') : t('Average rate')}
             </Text>
           </FlexItem>
         </FlexItem>
-        <FlexItem>
-          <FlexItem>
-            <Text className="element-stats-title" component={TextVariants.h4}>
-              {t('Latest rate')}
-            </Text>
-          </FlexItem>
-        </FlexItem>
-        <FlexItem>
-          <FlexItem>
-            <Text className="element-stats-title" component={TextVariants.h4}>
-              {t('Total')}
-            </Text>
-          </FlexItem>
-        </FlexItem>
+        {!isFlowRtt ? (
+          <>
+            <FlexItem>
+              <FlexItem>
+                <Text className="element-stats-title" component={TextVariants.h4}>
+                  {t('Latest rate')}
+                </Text>
+              </FlexItem>
+            </FlexItem>
+            <FlexItem>
+              <FlexItem>
+                <Text className="element-stats-title" component={TextVariants.h4}>
+                  {t('Total')}
+                </Text>
+              </FlexItem>
+            </FlexItem>
+          </>
+        ) : (
+          <></>
+        )}
       </Flex>
       <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsNone' }}>
         <FlexItem>
@@ -61,12 +68,18 @@ export const ElementPanelStats: React.FC<{
         <FlexItem>
           <Text id="metrics-stats-avg-in">{getFormattedValue(averageIn, metricType, 'avg', t)}</Text>
         </FlexItem>
-        <FlexItem>
-          <Text id="metrics-stats-latest-in">{getFormattedValue(latestIn, metricType, 'last', t)}</Text>
-        </FlexItem>
-        <FlexItem>
-          <Text id="metrics-stats-total-in">{getFormattedValue(totalIn, metricType, 'sum', t)}</Text>
-        </FlexItem>
+        {!isFlowRtt ? (
+          <>
+            <FlexItem>
+              <Text id="metrics-stats-latest-in">{getFormattedValue(latestIn, metricType, 'last', t)}</Text>
+            </FlexItem>
+            <FlexItem>
+              <Text id="metrics-stats-total-in">{getFormattedValue(totalIn, metricType, 'sum', t)}</Text>
+            </FlexItem>
+          </>
+        ) : (
+          <></>
+        )}
       </Flex>
       <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsNone' }}>
         <FlexItem>
@@ -75,27 +88,40 @@ export const ElementPanelStats: React.FC<{
         <FlexItem>
           <Text id="metrics-stats-avg-out">{getFormattedValue(averageOut, metricType, 'avg', t)}</Text>
         </FlexItem>
-        <FlexItem>
-          <Text id="metrics-stats-latest-out">{getFormattedValue(latestOut, metricType, 'last', t)}</Text>
-        </FlexItem>
-        <FlexItem>
-          <Text id="metrics-stats-total-out">{getFormattedValue(totalOut, metricType, 'sum', t)}</Text>
-        </FlexItem>
+        {!isFlowRtt ? (
+          <>
+            <FlexItem>
+              <Text id="metrics-stats-latest-out">{getFormattedValue(latestOut, metricType, 'last', t)}</Text>
+            </FlexItem>
+            <FlexItem>
+              <Text id="metrics-stats-total-out">{getFormattedValue(totalOut, metricType, 'sum', t)}</Text>
+            </FlexItem>
+          </>
+        ) : (
+          <></>
+        )}
       </Flex>
-      <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsNone' }}>
-        <FlexItem>
-          <Text id="metrics-stats-both">{t('Both')}</Text>
-        </FlexItem>
-        <FlexItem>
-          <Text id="metrics-stats-avg-both">{getFormattedValue(averageBoth, metricType, 'avg', t)}</Text>
-        </FlexItem>
-        <FlexItem>
-          <Text id="metrics-stats-latest-both">{getFormattedValue(latestBoth, metricType, 'last', t)}</Text>
-        </FlexItem>
-        <FlexItem>
-          <Text id="metrics-stats-total-both">{getFormattedValue(totalBoth, metricType, 'sum', t)}</Text>
-        </FlexItem>
-      </Flex>
+      {!isFlowRtt ? (
+        <>
+          <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsNone' }}>
+            <FlexItem>
+              <Text id="metrics-stats-both">{t('Both')}</Text>
+            </FlexItem>
+
+            <FlexItem>
+              <Text id="metrics-stats-avg-both">{getFormattedValue(averageBoth, metricType, 'avg', t)}</Text>
+            </FlexItem>
+            <FlexItem>
+              <Text id="metrics-stats-latest-both">{getFormattedValue(latestBoth, metricType, 'last', t)}</Text>
+            </FlexItem>
+            <FlexItem>
+              <Text id="metrics-stats-total-both">{getFormattedValue(totalBoth, metricType, 'sum', t)}</Text>
+            </FlexItem>
+          </Flex>
+        </>
+      ) : (
+        <></>
+      )}
     </Flex>
   );
 };

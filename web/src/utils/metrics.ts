@@ -30,6 +30,7 @@ const shortKindMap: { [k: string]: string } = {
 export const parseTopologyMetrics = (
   raw: RawTopologyMetrics[],
   range: number | TimeRange,
+  type: MetricType | undefined,
   aggregateBy: FlowScope,
   unixTimestamp: number,
   isMock?: boolean
@@ -40,7 +41,7 @@ export const parseTopologyMetrics = (
     unixTimestamp,
     isMock
   );
-  const metrics = raw.map(r => parseTopologyMetric(r, start, end, step, aggregateBy));
+  const metrics = raw.map(r => parseTopologyMetric(r, start, end, step, type, aggregateBy));
 
   // Disambiguate display names with kind when necessary
   if (aggregateBy === 'owner' || aggregateBy === 'resource') {
@@ -149,10 +150,11 @@ const parseTopologyMetric = (
   start: number,
   end: number,
   step: number,
+  type: MetricType | undefined,
   aggregateBy: FlowScope
 ): TopologyMetrics => {
   const normalized = normalizeMetrics(raw.values, start, end, step);
-  const stats = computeStats(normalized);
+  const stats = computeStats(normalized, type && ['dnsLatencies', 'flowRtt'].includes(type));
   const source = createPeer({
     addr: raw.metric.SrcAddr,
     resource: nameAndType(raw.metric.SrcK8S_Name, raw.metric.SrcK8S_Type),
@@ -273,17 +275,18 @@ export const normalizeMetrics = (
 /**
  * computeStats computes avg, max and total. Input metric is always the bytes rate (Bps).
  */
-export const computeStats = (ts: [number, number][]): MetricStats => {
+export const computeStats = (ts: [number, number][], skipZeros?: boolean): MetricStats => {
   if (ts.length === 0) {
     return { latest: 0, avg: 0, max: 0, total: 0 };
   }
   const values = ts.map(dp => dp[1]);
+  const filteredValues = skipZeros ? values.filter(v => v !== 0) : values;
 
   // Compute stats
-  const sum = values.reduce((prev, cur) => prev + cur, 0);
-  const avg = sum / values.length;
-  const max = Math.max(...values);
-  const latest = values[values.length - 1];
+  const sum = filteredValues.reduce((prev, cur) => prev + cur, 0);
+  const avg = sum / filteredValues.length;
+  const max = Math.max(...filteredValues);
+  const latest = filteredValues[filteredValues.length - 1];
 
   return {
     latest: roundTwoDigits(latest),
@@ -296,6 +299,8 @@ export const computeStats = (ts: [number, number][]): MetricStats => {
 export const getFormattedValue = (v: number, mt: MetricType, mf: MetricFunction, t: TFunction): string => {
   if (mt === 'count' || mt === 'countDns') {
     return valueFormat(v);
+  } else if (mt === 'dnsLatencies' || mt === 'flowRtt') {
+    return valueFormat(v, 2, t('Ms'));
   } else if (mf === 'sum') {
     switch (mt) {
       case 'droppedBytes':
@@ -304,8 +309,6 @@ export const getFormattedValue = (v: number, mt: MetricType, mf: MetricFunction,
       case 'droppedPackets':
       case 'packets':
         return valueFormat(v, 1, t('P'));
-      case 'dnsLatencies':
-        return valueFormat(v, 1, t('Ms'));
     }
   } else {
     return getFormattedRateValue(v, mt, t);
@@ -315,6 +318,7 @@ export const getFormattedValue = (v: number, mt: MetricType, mf: MetricFunction,
 export const getFormattedRateValue = (v: number, mt: MetricType, t: TFunction): string => {
   switch (mt) {
     case 'dnsLatencies':
+    case 'flowRtt':
     case 'count':
     case 'countDns':
       return valueFormat(v);

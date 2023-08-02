@@ -1,10 +1,10 @@
-import * as React from 'react';
-import _ from 'lodash';
-import { useTranslation } from 'react-i18next';
 import { Card, Flex, FlexItem, Text, TextVariants, Tooltip } from '@patternfly/react-core';
-import { valueFormat } from '../../utils/format';
 import { TopologyMetrics } from '../../api/loki';
+import _ from 'lodash';
+import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import { MetricType } from '../../model/flow-query';
+import { valueFormat } from '../../utils/format';
 import './query-summary.css';
 
 export const MetricsQuerySummaryContent: React.FC<{
@@ -29,8 +29,9 @@ export const MetricsQuerySummaryContent: React.FC<{
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   const counters = React.useCallback(() => {
-    const rateSum = metrics.map(m => m.stats.avg).reduce((prev, cur) => prev + cur, 0);
+    const avgSum = metrics.map(m => m.stats.avg).reduce((prev, cur) => prev + cur, 0);
     const absSum = metrics.map(m => m.stats.total).reduce((prev, cur) => prev + cur, 0);
+
     if (metricType === 'bytes') {
       const textAbs = appMetrics ? t('Filtered sum of top-k bytes / filtered total bytes') : t('Filtered sum of bytes');
       const textRate = appMetrics ? t('Filtered top-k byte rate / filtered total byte rate') : t('Filtered byte rate');
@@ -38,8 +39,8 @@ export const MetricsQuerySummaryContent: React.FC<{
         ? valueFormat(absSum, 1, t('B')) + ' / ' + valueFormat(appMetrics.stats.total, 1, t('B'))
         : valueFormat(absSum, 1, t('B'));
       const valRate = appMetrics
-        ? valueFormat(rateSum, 2, t('Bps')) + ' / ' + valueFormat(appMetrics.stats.avg, 2, t('Bps'))
-        : valueFormat(rateSum, 2, t('Bps'));
+        ? valueFormat(avgSum, 2, t('Bps')) + ' / ' + valueFormat(appMetrics.stats.avg, 2, t('Bps'))
+        : valueFormat(avgSum, 2, t('Bps'));
       return (
         <>
           <FlexItem>
@@ -58,7 +59,7 @@ export const MetricsQuerySummaryContent: React.FC<{
           </FlexItem>
         </>
       );
-    } else {
+    } else if (metricType === 'packets') {
       const textAbs = appMetrics
         ? t('Filtered sum of top-k packets / filtered total packets')
         : t('Filtered sum of packets');
@@ -68,6 +69,24 @@ export const MetricsQuerySummaryContent: React.FC<{
           <Tooltip content={<Text component={TextVariants.p}>{textAbs}</Text>}>
             <Text id="packetsCount" component={TextVariants.p}>
               {valAbs}
+            </Text>
+          </Tooltip>
+        </FlexItem>
+      );
+    } else {
+      console.log('counters', avgSum, metrics);
+      const textAvg = appMetrics ? t('Filtered avg RTT / filtered total avg RTT') : t('Filtered avg RTT');
+      const valAvg =
+        (appMetrics
+          ? `${valueFormat(avgSum / metrics.length, 1)} / ${valueFormat(appMetrics.stats.avg, 1)}`
+          : String(valueFormat(avgSum / metrics.length, 1))) +
+        ' ' +
+        t('ms');
+      return (
+        <FlexItem>
+          <Tooltip content={<Text component={TextVariants.p}>{textAvg}</Text>}>
+            <Text id="rttAvg" component={TextVariants.p}>
+              {valAvg}
             </Text>
           </Tooltip>
         </FlexItem>

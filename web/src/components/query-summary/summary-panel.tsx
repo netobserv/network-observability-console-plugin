@@ -30,7 +30,7 @@ import './summary-panel.css';
 import { MetricType, RecordType } from '../../model/flow-query';
 import { MetricsQuerySummaryContent } from './metrics-query-summary';
 import { config } from '../../utils/config';
-import { formatDurationAboveMillisecond } from '../../utils/duration';
+import { formatDurationAboveMillisecond, formatDurationAboveNanosecond } from '../../utils/duration';
 
 type TypeCardinality = {
   type: string;
@@ -53,7 +53,20 @@ export const SummaryPanelContent: React.FC<{
   range: number | TimeRange;
   lastRefresh: Date | undefined;
   showDNSLatency?: boolean;
-}> = ({ flows, metrics, appMetrics, type, metricType, stats, limit, range, lastRefresh, showDNSLatency }) => {
+  showRTTLatency?: boolean;
+}> = ({
+  flows,
+  metrics,
+  appMetrics,
+  type,
+  metricType,
+  stats,
+  limit,
+  range,
+  lastRefresh,
+  showDNSLatency,
+  showRTTLatency
+}) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [expanded, setExpanded] = React.useState<string>('');
 
@@ -314,6 +327,20 @@ export const SummaryPanelContent: React.FC<{
     );
   };
 
+  const rttLatency = (filteredFlows: Record[]) => {
+    const filteredRTTFlows = filteredFlows.filter(f => f.fields.TimeFlowRttNs !== undefined);
+
+    const rtt = filteredRTTFlows.length
+      ? filteredRTTFlows.map(f => f.fields.TimeFlowRttNs!).reduce((a, b) => a + b, 0) / filteredRTTFlows.length
+      : NaN;
+
+    return (
+      <Text className="summary-config-item">{`${t('Flow RTT')}: ${
+        isNaN(rtt) ? t('n/a') : formatDurationAboveNanosecond(rtt)
+      }`}</Text>
+    );
+  };
+
   const timeContent = () => {
     const filteredFlows = flows || [];
     const duration = filteredFlows.length
@@ -325,15 +352,18 @@ export const SummaryPanelContent: React.FC<{
         filteredFlows.length
       : 0;
 
-    return (
+    return flows && flows.length ? (
       <TextContent className="summary-text-container">
         <Text component={TextVariants.h3}>{`${t('Average time')}`}</Text>
         <Text className="summary-config-item">{`${t('Duration')}: ${formatDurationAboveMillisecond(duration)}`}</Text>
+        {showRTTLatency ? rttLatency(filteredFlows) : <></>}
         <Text className="summary-config-item">{`${t('Collection latency')}: ${formatDurationAboveMillisecond(
           collectionLatency
         )}`}</Text>
         {showDNSLatency ? dnsLatency(filteredFlows) : <></>}
       </TextContent>
+    ) : (
+      <></>
     );
   };
 
@@ -396,6 +426,7 @@ export const SummaryPanel: React.FC<{
   range: number | TimeRange;
   lastRefresh: Date | undefined;
   showDNSLatency?: boolean;
+  showRTTLatency?: boolean;
   id?: string;
 }> = ({
   flows,
@@ -408,6 +439,7 @@ export const SummaryPanel: React.FC<{
   range,
   lastRefresh,
   showDNSLatency,
+  showRTTLatency,
   id,
   onClose
 }) => {
@@ -440,6 +472,7 @@ export const SummaryPanel: React.FC<{
           range={range}
           lastRefresh={lastRefresh}
           showDNSLatency={showDNSLatency}
+          showRTTLatency={showRTTLatency}
         />
       </DrawerPanelBody>
     </DrawerPanelContent>
