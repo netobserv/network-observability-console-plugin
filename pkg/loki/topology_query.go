@@ -1,6 +1,7 @@
 package loki
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/netobserv/network-observability-console-plugin/pkg/utils"
@@ -22,6 +23,8 @@ type Topology struct {
 	skipEmptyDropCause bool
 	skipNonDNS         bool
 	skipEmptyDNSRCode  bool
+	skipEmptyRTT       bool
+	factor             float64
 }
 
 type TopologyQueryBuilder struct {
@@ -39,6 +42,7 @@ func NewTopologyQuery(cfg *Config, start, end, limit, rateInterval, step string,
 
 	fields := getFields(aggregate, groups)
 	var f, t string
+	factor := 1.0
 	switch metricType {
 	case constants.MetricTypeCount, constants.MetricTypeCountDNS:
 		f = "count_over_time"
@@ -57,6 +61,10 @@ func NewTopologyQuery(cfg *Config, start, end, limit, rateInterval, step string,
 	case constants.MetricTypeBytes:
 		f = "rate"
 		t = "Bytes"
+	case constants.MetricTypeFlowRTT:
+		f = "avg_over_time"
+		t = "TimeFlowRttNs"
+		factor = 0.000001 // nanoseconds to miliseconds
 	}
 
 	var d bool
@@ -80,8 +88,10 @@ func NewTopologyQuery(cfg *Config, start, end, limit, rateInterval, step string,
 			fields:             fields,
 			skipEmptyDropState: aggregate == "droppedState",
 			skipEmptyDropCause: aggregate == "droppedCause",
-			skipNonDNS:         metricType == "dnsLatencies" || metricType == "countDns",
+			skipNonDNS:         metricType == constants.MetricTypeDNSLatencies || metricType == constants.MetricTypeCountDNS,
 			skipEmptyDNSRCode:  aggregate == "dnsRCode",
+			skipEmptyRTT:       metricType == constants.MetricTypeFlowRTT,
+			factor:             factor,
 		},
 	}, nil
 }
@@ -172,6 +182,10 @@ func (q *TopologyQueryBuilder) Build() string {
 		q.appendDNSFilter(sb)
 	}
 
+	if q.topology.skipEmptyRTT {
+		q.appendRTTFilter(sb)
+	}
+
 	q.appendJSON(sb, true)
 	if len(q.topology.dataField) > 0 {
 		sb.WriteString("|unwrap ")
@@ -184,7 +198,12 @@ func (q *TopologyQueryBuilder) Build() string {
 	} else {
 		sb.WriteString(q.topology.rateInterval)
 	}
-	sb.WriteString("])))")
+	sb.WriteString("])")
+	if q.topology.factor != 1 {
+		sb.WriteRune('*')
+		sb.WriteString(strings.Replace(fmt.Sprintf("%f", q.topology.factor), ",", ".", 1))
+	}
+	sb.WriteString("))")
 	q.appendQueryParams(sb)
 	sb.WriteString("&step=")
 	sb.WriteString(q.topology.step)

@@ -279,6 +279,14 @@ func (q *FlowQueryBuilder) appendDNSRCodeFilter(sb *strings.Builder) {
 	sb.WriteString("`")
 }
 
+func (q *FlowQueryBuilder) appendRTTFilter(sb *strings.Builder) {
+	// ensure at TimeFlowRttNs field is specified
+	// |~`"TimeFlowRttNs"`
+	sb.WriteString("|~`")
+	sb.WriteString(`"TimeFlowRttNs"`)
+	sb.WriteString("`")
+}
+
 func (q *FlowQueryBuilder) appendJSON(sb *strings.Builder, forceAppend bool) {
 	if forceAppend || len(q.jsonFilters) > 0 {
 		sb.WriteString("|json")

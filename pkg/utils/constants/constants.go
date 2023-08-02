@@ -12,6 +12,7 @@ const (
 	MetricTypePackets        MetricType = "packets"
 	MetricTypeCount          MetricType = "count"
 	MetricTypeCountDNS       MetricType = "countDns"
+	MetricTypeFlowRTT        MetricType = "flowRtt"
 	MetricTypeDNSLatencies   MetricType = "dnsLatencies"
 	MetricTypeDroppedBytes   MetricType = "droppedBytes"
 	MetricTypeDroppedPackets MetricType = "droppedPackets"
