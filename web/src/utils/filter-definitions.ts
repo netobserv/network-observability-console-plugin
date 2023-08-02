@@ -139,7 +139,8 @@ export const getFilterDefinitions = (
   t: TFunction,
   allowConnectionFilter?: boolean,
   allowDNSFilter?: boolean,
-  allowPktDrops?: boolean
+  allowPktDrops?: boolean,
+  allowRTTFilter?: boolean
 ): FilterDefinition[] => {
   if (!filterDefinitions) {
     const rejectEmptyValue = (value: string) => {
@@ -545,21 +546,33 @@ export const getFilterDefinitions = (
         docUrl: 'https://www.iana.org/assignments/dns-parameters/dns-parameters.xhtml#dns-parameters-6',
         encoder: simpleFiltersEncoder('DnsFlagsResponseCode'),
         overlap: false
+      },
+      {
+        id: 'time_flow_rtt',
+        name: t('Flow RTT'),
+        category: FilterCategory.None,
+        component: FilterComponent.Number,
+        getOptions: noOption,
+        validate: rejectEmptyValue,
+        hint: t('Specify a Flow Round Trip Time in nanoseconds.'),
+        encoder: simpleFiltersEncoder('TimeFlowRttNs'),
+        overlap: false
       }
     ];
   }
 
-  if (allowConnectionFilter && allowDNSFilter) {
+  if (allowConnectionFilter && allowDNSFilter && allowRTTFilter) {
     return filterDefinitions;
   } else {
     return filterDefinitions.filter(
       fd =>
         (allowConnectionFilter || fd.id !== 'id') &&
         (allowDNSFilter || !fd.id.startsWith('dns_')) &&
-        (allowPktDrops || !fd.id.startsWith('pkt_drop_'))
+        (allowPktDrops || !fd.id.startsWith('pkt_drop_')) &&
+        (allowRTTFilter || fd.id !== 'time_flow_rtt')
     );
   }
 };
 
 export const findFilter = (t: TFunction, id: FilterId) =>
-  getFilterDefinitions(t, true, true, true).find(def => def.id === id);
+  getFilterDefinitions(t, true, true, true, true).find(def => def.id === id);

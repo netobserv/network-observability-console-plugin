@@ -31,3 +31,4 @@ sampling: 50
 features:
   - pktDrop
   - dnsTracking
+  - flowRTT

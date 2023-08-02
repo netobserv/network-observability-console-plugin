@@ -624,6 +624,10 @@ export const NetflowTraffic: React.FC<{
     return config.features.includes('dnsTracking');
   }, [config.features]);
 
+  const isFlowRTT = React.useCallback(() => {
+    return config.features.includes('flowRTT');
+  }, [config.features]);
+
   const isPktDrop = React.useCallback(() => {
     return config.features.includes('pktDrop');
   }, [config.features]);
@@ -989,7 +993,9 @@ export const NetflowTraffic: React.FC<{
           columns={getDefaultColumns(t, false, false).filter(
             col =>
               (isConnectionTracking() || ![ColumnsId.recordtype, ColumnsId.hashid].includes(col.id)) &&
-              (isDNSTracking() || ![ColumnsId.dnsid, ColumnsId.dnslatency, ColumnsId.dnsresponsecode].includes(col.id))
+              (isDNSTracking() ||
+                ![ColumnsId.dnsid, ColumnsId.dnslatency, ColumnsId.dnsresponsecode].includes(col.id)) &&
+              (isFlowRTT() || ![ColumnsId.rttTime].includes(col.id))
           )}
           filters={filters.list}
           range={range}
@@ -1111,7 +1117,8 @@ export const NetflowTraffic: React.FC<{
                 col.isSelected &&
                 (isConnectionTracking() || ![ColumnsId.recordtype, ColumnsId.hashid].includes(col.id)) &&
                 (isDNSTracking() ||
-                  ![ColumnsId.dnsid, ColumnsId.dnslatency, ColumnsId.dnsresponsecode].includes(col.id))
+                  ![ColumnsId.dnsid, ColumnsId.dnslatency, ColumnsId.dnsresponsecode].includes(col.id)) &&
+                (isFlowRTT() || ![ColumnsId.rttTime].includes(col.id))
             )}
             setColumns={(v: Column[]) => setColumns(v.concat(columns.filter(col => !col.isSelected)))}
             columnSizes={columnSizes}
@@ -1475,7 +1482,9 @@ export const NetflowTraffic: React.FC<{
         columns={columns.filter(
           col =>
             (isConnectionTracking() || ![ColumnsId.recordtype, ColumnsId.hashid].includes(col.id)) &&
-            (isDNSTracking() || ![ColumnsId.dnsid, ColumnsId.dnslatency, ColumnsId.dnsresponsecode].includes(col.id))
+            (isDNSTracking() ||
+              (![ColumnsId.dnsid, ColumnsId.dnslatency, ColumnsId.dnsresponsecode].includes(col.id) &&
+                (isFlowRTT() || ![ColumnsId.rttTime].includes(col.id))))
         )}
         setColumns={setColumns}
         setColumnSizes={setColumnSizes}

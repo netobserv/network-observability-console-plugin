@@ -60,6 +60,7 @@ export enum ColumnsId {
   srchostname = 'SrcK8S_HostName',
   dsthostname = 'DstK8S_HostName',
   flowdir = 'FlowDirection',
+  rttTime = 'TimeFlowRttMs',
   hashid = '_HashId',
   interface = 'Interface',
   recordtype = 'RecordType',
@@ -781,6 +782,17 @@ export const getExtraColumns = (t: TFunction): Column[] => {
       tooltip: t('Time elapsed between Start Time and End Time.'),
       isSelected: false,
       value: f => f.fields.TimeFlowEndMs - f.fields.TimeFlowStartMs,
+      sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
+      width: 5
+    },
+    {
+      id: ColumnsId.rttTime,
+      name: t('Flow RTT'),
+      tooltip: t('Flow Round Trip Time'),
+      fieldName: 'TimeFlowRttNs',
+      quickFilter: 'time_flow_rtt',
+      isSelected: false,
+      value: f => f.fields.TimeFlowRttNs || '',
       sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
       width: 5
     },
