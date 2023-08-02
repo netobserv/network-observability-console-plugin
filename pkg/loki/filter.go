@@ -194,7 +194,7 @@ func notContainsKeyLineFilter(key string) lineFilter {
 func moreThanRegex(sb *strings.Builder, value string) {
 	// match each number greater than specified value using regex
 	// example for 123:
-	// ^ ( 12[3-9] | 1[3-9][0-9]+ | [2-9][0-9]+ | [1-9][0-9]{3,} )
+	// ( 12[3-9] | 1[3-9][0-9]+ | [2-9][0-9]+ | [1-9][0-9]{3,} )
 	//       |            |              |             |
 	//       |            |              |              ↪ match number more than 1000
 	//       |            |              |
@@ -204,7 +204,7 @@ func moreThanRegex(sb *strings.Builder, value string) {
 	//       |
 	//        ↪ match any number from 123 to 129
 
-	sb.WriteString("^(")
+	sb.WriteString("(")
 	for i, r := range value {
 		if i < len(value)-1 {
 			sb.WriteRune(r)
