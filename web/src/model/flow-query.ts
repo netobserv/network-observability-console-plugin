@@ -6,9 +6,16 @@ export type RecordType = 'allConnections' | 'newConnection' | 'heartbeat' | 'end
 export type Match = 'all' | 'any';
 export type PacketLoss = 'dropped' | 'hasDrops' | 'sent' | 'all';
 export type MetricFunction = 'sum' | 'avg' | 'max' | 'last';
-export type MetricType = 'count' | 'bytes' | 'packets' | 'droppedBytes' | 'droppedPackets';
+export type MetricType =
+  | 'count'
+  | 'countDns'
+  | 'bytes'
+  | 'packets'
+  | 'droppedBytes'
+  | 'droppedPackets'
+  | 'dnsLatencies';
 export type FlowScope = 'app' | 'host' | 'namespace' | 'owner' | 'resource';
-export type AggregateBy = FlowScope | 'droppedCause' | 'droppedState';
+export type AggregateBy = FlowScope | 'droppedCause' | 'droppedState' | 'dnsRCode';
 export type NodeType = FlowScope | 'unknown';
 export type Groups = 'hosts' | 'hosts+namespaces' | 'hosts+owners' | 'namespaces' | 'namespaces+owners' | 'owners';
 export interface FlowQuery {
@@ -44,7 +51,7 @@ export const groupFilters = (filters: Filters, matchAny: boolean): string => {
 const filtersToString = (filters: Filter[], matchAny: boolean): string => {
   const matches: string[] = [];
   filters.forEach(f => {
-    const str = f.def.encoder(f.values, matchAny, f.not || false);
+    const str = f.def.encoder(f.values, matchAny, f.not || false, f.moreThan || false);
     matches.push(str);
   });
   return matches.join(matchAny ? '|' : '&');
@@ -98,10 +105,11 @@ const determineOverlap = (orig: Filter[], swapped: Filter[]): { overlaps: Filter
         ? {
             def: o.def,
             not: o.not !== true,
+            moreThan: o.moreThan !== true,
             // only include non-symetric values
             values: o.values.filter(ov => !valuesFromSwapped.includes(ov.v))
           }
-        : { ...o, not: o.not !== true };
+        : { ...o, not: o.not !== true, moreThan: o.moreThan !== true };
       if (overlap.values.length > 0) {
         // if there's some overlap here, it's because we found at least one non-symetric value
         cancelSwap = false;

@@ -30,21 +30,23 @@ export const undefinedValue = '""';
 
 type Field = keyof Fields | keyof Labels;
 
-const matcher = (left: string, right: string[], not: boolean) => `${left}${not ? '!=' : '='}${right.join(',')}`;
+const matcher = (left: string, right: string[], not: boolean, moreThan: boolean) =>
+  `${left}${not ? '!=' : moreThan ? '>=' : '='}${right.join(',')}`;
 
 const simpleFiltersEncoder = (field: Field): FiltersEncoder => {
-  return (values: FilterValue[], matchAny: boolean, not: boolean) => {
+  return (values: FilterValue[], matchAny: boolean, not: boolean, moreThan: boolean) => {
     return matcher(
       field,
       values.map(v => v.v),
-      not
+      not,
+      moreThan || false
     );
   };
 };
 
 // As owner / non-owner kind filters are mixed, they are disambiguated via this function
 const kindFiltersEncoder = (base: Field, owner: Field): FiltersEncoder => {
-  return (values: FilterValue[], matchAny: boolean, not: boolean) => {
+  return (values: FilterValue[], matchAny: boolean, not: boolean, moreThan: boolean) => {
     const { baseValues, ownerValues } = _.groupBy(values, value => {
       return isOwnerKind(value.v) ? 'ownerValues' : 'baseValues';
     });
@@ -54,7 +56,8 @@ const kindFiltersEncoder = (base: Field, owner: Field): FiltersEncoder => {
         matcher(
           base,
           baseValues.map(value => value.v),
-          not
+          not,
+          moreThan || false
         )
       );
     }
@@ -63,7 +66,8 @@ const kindFiltersEncoder = (base: Field, owner: Field): FiltersEncoder => {
         matcher(
           owner,
           ownerValues.map(value => value.v),
-          not
+          not,
+          moreThan || false
         )
       );
     }
@@ -452,11 +456,22 @@ export const getFilterDefinitions = (
         id: 'dns_id',
         name: t('DNS Id'),
         category: FilterCategory.None,
-        component: FilterComponent.Text,
+        component: FilterComponent.Number,
         getOptions: noOption,
         validate: rejectEmptyValue,
         hint: t('Specify a single DNS Id.'),
         encoder: simpleFiltersEncoder('DnsId'),
+        overlap: false
+      },
+      {
+        id: 'dns_latency',
+        name: t('DNS Latency'),
+        category: FilterCategory.None,
+        component: FilterComponent.Number,
+        getOptions: noOption,
+        validate: rejectEmptyValue,
+        hint: t('Specify a DNS Latency in miliseconds.'),
+        encoder: simpleFiltersEncoder('DnsLatencyMs'),
         overlap: false
       },
       {

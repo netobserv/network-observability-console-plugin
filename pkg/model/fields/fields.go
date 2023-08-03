@@ -37,12 +37,14 @@ const (
 	PktDropBytes   = "PktDropBytes"
 	FlowDirection  = "FlowDirection"
 	DNSID          = "DnsId"
+	DNSLatency     = "DnsLatencyMs"
 )
 
 func IsNumeric(v string) bool {
 	switch v {
 	case
 		DNSID,
+		DNSLatency,
 		Port,
 		SrcPort,
 		DstPort,

@@ -69,6 +69,9 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
             if (chipFilter.not) {
               fullName = t('Not') + ' ' + fullName;
             }
+            if (chipFilter.moreThan) {
+              fullName = fullName + ' ' + t('more than');
+            }
             const someEnabled = hasEnabledFilterValues(chipFilter);
             return (
               <div key={cfIndex} className={`custom-chip-group ${someEnabled ? '' : 'disabled-group'}`}>

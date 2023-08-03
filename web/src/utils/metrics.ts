@@ -3,9 +3,9 @@ import {
   RawTopologyMetrics,
   MetricStats,
   TopologyMetricPeer,
-  TopologyMetrics,
+  PairTopologyMetrics,
   NameAndType,
-  DroppedTopologyMetrics
+  SingleTopologyMetrics
 } from '../api/loki';
 import { MetricFunction, MetricType, AggregateBy } from '../model/flow-query';
 import { roundTwoDigits } from './count';
@@ -33,7 +33,7 @@ export const parseMetrics = (
   aggregateBy: AggregateBy,
   unixTimestamp: number,
   isMock?: boolean
-): (TopologyMetrics | DroppedTopologyMetrics)[] => {
+): (PairTopologyMetrics | SingleTopologyMetrics)[] => {
   const { start, end, step } = calibrateRange(
     raw.map(r => r.values),
     range,
@@ -70,13 +70,13 @@ export const parseMetrics = (
 
     // First pass: extract all names+kind couples
     const nameKinds = new Map<string, Set<string>>();
-    metrics.forEach((m: TopologyMetrics) => {
+    metrics.forEach((m: PairTopologyMetrics) => {
       addKind(m.source);
       addKind(m.destination);
     });
 
     // Second pass: mark if ambiguous
-    metrics.forEach((m: TopologyMetrics) => {
+    metrics.forEach((m: PairTopologyMetrics) => {
       checkAmbiguous(m.source);
       checkAmbiguous(m.destination);
     });
@@ -134,23 +134,31 @@ const parseMetric = (
   end: number,
   step: number,
   aggregateBy: AggregateBy
-): TopologyMetrics | DroppedTopologyMetrics => {
+): PairTopologyMetrics | SingleTopologyMetrics => {
   const normalized = normalizeMetrics(raw.values, start, end, step);
   const stats = computeStats(normalized);
+
   if (aggregateBy === 'droppedState') {
     return {
       name: raw.metric.PktDropLatestState,
       values: normalized,
       stats: stats,
       aggregateBy
-    } as DroppedTopologyMetrics;
+    } as SingleTopologyMetrics;
   } else if (aggregateBy === 'droppedCause') {
     return {
       name: raw.metric.PktDropLatestDropCause,
       values: normalized,
       stats: stats,
       aggregateBy
-    } as DroppedTopologyMetrics;
+    } as SingleTopologyMetrics;
+  } else if (aggregateBy === 'dnsRCode') {
+    return {
+      name: raw.metric.DnsFlagsResponseCode,
+      values: normalized,
+      stats: stats,
+      aggregateBy
+    } as SingleTopologyMetrics;
   } else {
     const source = createPeer({
       addr: raw.metric.SrcAddr,
@@ -172,7 +180,7 @@ const parseMetric = (
       values: normalized,
       stats: stats,
       scope: aggregateBy
-    } as TopologyMetrics;
+    } as PairTopologyMetrics;
   }
 };
 
@@ -271,7 +279,7 @@ export const computeStats = (ts: [number, number][]): MetricStats => {
 };
 
 export const getFormattedValue = (v: number, mt: MetricType, mf: MetricFunction, t: TFunction): string => {
-  if (mt === 'count') {
+  if (mt === 'count' || mt === 'countDns') {
     return valueFormat(v);
   } else if (mf === 'sum') {
     switch (mt) {
@@ -281,6 +289,8 @@ export const getFormattedValue = (v: number, mt: MetricType, mf: MetricFunction,
       case 'droppedPackets':
       case 'packets':
         return valueFormat(v, 1, t('P'));
+      case 'dnsLatencies':
+        return valueFormat(v, 1, t('Ms'));
     }
   } else {
     return getFormattedRateValue(v, mt, t);
@@ -289,7 +299,9 @@ export const getFormattedValue = (v: number, mt: MetricType, mf: MetricFunction,
 
 export const getFormattedRateValue = (v: number, mt: MetricType, t: TFunction): string => {
   switch (mt) {
+    case 'dnsLatencies':
     case 'count':
+    case 'countDns':
       return valueFormat(v);
     case 'droppedBytes':
     case 'bytes':

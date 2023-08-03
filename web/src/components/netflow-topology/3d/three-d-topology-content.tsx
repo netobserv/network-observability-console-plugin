@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { K8sModel } from '@openshift-console/dynamic-plugin-sdk';
 import React from 'react';
-import { TopologyMetrics } from '../../../api/loki';
+import { PairTopologyMetrics } from '../../../api/loki';
 import { SearchHandle, SearchEvent } from '../../../components/search/search';
 import { Filter } from '../../../model/filters';
 import { MetricFunction, MetricType, FlowScope } from '../../../model/flow-query';
@@ -18,7 +18,7 @@ export const ThreeDTopologyContent: React.FC<{
   metricType: MetricType;
   metricScope: FlowScope;
   setMetricScope: (ms: FlowScope) => void;
-  metrics: TopologyMetrics[];
+  metrics: PairTopologyMetrics[];
   options: TopologyOptions;
   setOptions: (o: TopologyOptions) => void;
   filters: Filter[];

@@ -1,11 +1,12 @@
 import _ from 'lodash';
 import { isEqual } from '../utils/base-compare';
 
-export type FiltersEncoder = (values: FilterValue[], matchAny: boolean, not: boolean) => string;
+export type FiltersEncoder = (values: FilterValue[], matchAny: boolean, not: boolean, moreThan: boolean) => string;
 
 export enum FilterComponent {
   Autocomplete,
-  Text
+  Text,
+  Number
 }
 
 export enum FilterCategory {
@@ -34,6 +35,7 @@ export type FilterId =
   | 'type'
   | 'id'
   | 'dns_id'
+  | 'dns_latency'
   | 'dns_flag_response_code';
 
 export interface FilterDefinition {
@@ -63,6 +65,7 @@ export interface FilterValue {
 export interface Filter {
   def: FilterDefinition;
   not?: boolean;
+  moreThan?: boolean;
   values: FilterValue[];
 }
 
@@ -106,10 +109,13 @@ export const getEnabledFilters = (filters: Filters): Filters => {
 
 export type DisabledFilters = Record<string, string>;
 
-export const filterKey = (filter: Filter) => filter.def.id + (filter.not ? '!' : '');
+export const filterKey = (filter: Filter) => filter.def.id + (filter.not ? '!' : '') + (filter.moreThan ? '>' : '');
+
 export const fromFilterKey = (key: string) => {
   if (key.endsWith('!')) {
     return { id: key.substring(0, key.length - 1) as FilterId, not: true };
+  } else if (key.endsWith('>')) {
+    return { id: key.substring(0, key.length - 1) as FilterId, moreThan: true };
   }
   return { id: key as FilterId };
 };
@@ -151,7 +157,7 @@ export const removeFromFilters = (activeFilters: Filter[], search: FilterKey): F
 };
 
 export const filterKeyEqual = (f1: FilterKey, f2: FilterKey): boolean => {
-  return f1.def.id === f2.def.id && f1.not == f2.not;
+  return f1.def.id === f2.def.id && f1.not == f2.not && f1.moreThan == f2.moreThan;
 };
 
 type ComparableFilter = { key: string; values: string[] };

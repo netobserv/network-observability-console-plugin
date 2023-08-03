@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Flex, FlexItem, Radio, Text, TextContent, TextVariants } from '@patternfly/react-core';
 import { MetricType } from '../../model/flow-query';
-import { TopologyMetrics } from '../../api/loki';
+import { PairTopologyMetrics } from '../../api/loki';
 import { decorated, getStat, NodeData } from '../../model/topology';
 import { MetricsContent } from '../metrics/metrics-content';
 import { matchPeer } from '../../utils/metrics';
@@ -16,7 +16,7 @@ export const ElementPanelMetrics: React.FC<{
   aData: NodeData;
   bData?: NodeData;
   isGroup: boolean;
-  metrics: TopologyMetrics[];
+  metrics: PairTopologyMetrics[];
   metricType: MetricType;
   truncateLength: TruncateLength;
 }> = ({ aData, bData, isGroup, metrics, metricType, truncateLength }) => {
@@ -27,9 +27,9 @@ export const ElementPanelMetrics: React.FC<{
   const titleChart = t('Top 5 rates');
 
   let id = '';
-  let metricsIn: TopologyMetrics[] = [];
-  let metricsOut: TopologyMetrics[] = [];
-  let metricsBoth: TopologyMetrics[] = [];
+  let metricsIn: PairTopologyMetrics[] = [];
+  let metricsOut: PairTopologyMetrics[] = [];
+  let metricsBoth: PairTopologyMetrics[] = [];
 
   if (bData) {
     // Edge selected

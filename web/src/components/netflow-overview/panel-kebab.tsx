@@ -17,6 +17,7 @@ import { exportToPng } from '../../utils/export';
 export type PanelKebabOptions = {
   showTotal?: boolean;
   showOthers?: boolean;
+  showNoError?: boolean;
   showInternal?: boolean;
   showOutOfScope?: boolean;
   compareToDropped?: boolean;
@@ -43,6 +44,13 @@ export const PanelKebab: React.FC<PanelKebabProps> = ({ id, options, setOptions,
   const setShowOthers = React.useCallback(
     (checked: boolean) => {
       setOptions({ ...options, showOthers: checked });
+    },
+    [setOptions, options]
+  );
+
+  const setShowNoError = React.useCallback(
+    (checked: boolean) => {
+      setOptions({ ...options, showNoError: checked });
     },
     [setOptions, options]
   );
@@ -103,6 +111,23 @@ export const PanelKebab: React.FC<PanelKebabProps> = ({ id, options, setOptions,
             onChange={setShowOthers}
             label={t('Show others')}
             aria-label="Show others"
+          />
+        </Tooltip>
+      </DropdownItem>
+    );
+  }
+  if (options.showNoError !== undefined) {
+    items.push(
+      <DropdownItem key={`${id}-show-noerror`}>
+        <Tooltip
+          content={<Text component={TextVariants.p}>{t('Show NoError responses grouped in a separate series')}</Text>}
+        >
+          <Checkbox
+            id={`${id}-show-noerror`}
+            isChecked={options.showNoError}
+            onChange={setShowNoError}
+            label={t('Show NoError')}
+            aria-label="Show NoError"
           />
         </Tooltip>
       </DropdownItem>

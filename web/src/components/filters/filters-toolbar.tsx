@@ -90,8 +90,9 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
   const addFilter = React.useCallback(
     (filterValue: FilterValue) => {
       const newFilters = _.cloneDeep(filters?.list) || [];
-      const not = selectedCompare === FilterCompare.NOT_EQUAL ? true : false;
-      const found = findFromFilters(newFilters, { def: selectedFilter, not });
+      const not = selectedCompare === FilterCompare.NOT_EQUAL;
+      const moreThan = selectedCompare === FilterCompare.MORE_THAN_OR_EQUAL;
+      const found = findFromFilters(newFilters, { def: selectedFilter, not, moreThan });
       if (found) {
         if (found.values.map(value => value.v).includes(filterValue.v)) {
           setMessageWithDelay(t('Filter already exists'));
@@ -101,7 +102,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
           found.values.push(filterValue);
         }
       } else {
-        newFilters.push({ def: selectedFilter, not, values: [filterValue] });
+        newFilters.push({ def: selectedFilter, not, moreThan, values: [filterValue] });
       }
       setFiltersList(newFilters);
       return true;
@@ -119,7 +120,13 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
     };
     switch (selectedFilter.component) {
       case FilterComponent.Text:
-        return <TextFilter {...commonProps} />;
+      case FilterComponent.Number:
+        return (
+          <TextFilter
+            {...commonProps}
+            regexp={selectedFilter.component === FilterComponent.Number ? /\D/g : undefined}
+          />
+        );
       case FilterComponent.Autocomplete:
         return <AutocompleteFilter {...commonProps} />;
     }
@@ -168,7 +175,11 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
                       allowConnectionFilter={allowConnectionFilter}
                       allowDNSFilter={allowDNSFilter}
                     />
-                    <CompareFilter value={selectedCompare} setValue={setSelectedCompare} />
+                    <CompareFilter
+                      value={selectedCompare}
+                      setValue={setSelectedCompare}
+                      component={selectedFilter.component}
+                    />
                     {getFilterControl()}
                   </InputGroup>
                   <FilterHints def={selectedFilter} />

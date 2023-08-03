@@ -119,6 +119,8 @@ func (q *FlowQueryBuilder) addFilter(filter filters.Match) error {
 		if len(values) == 1 && isExactMatch(values[0]) {
 			if filter.Not {
 				q.labelFilters = append(q.labelFilters, notStringLabelFilter(filter.Key, trimExactMatch(values[0])))
+			} else if filter.MoreThanOrEqual {
+				q.labelFilters = append(q.labelFilters, moreThanNumberLabelFilter(filter.Key, trimExactMatch(values[0])))
 			} else {
 				q.labelFilters = append(q.labelFilters, stringEqualLabelFilter(filter.Key, trimExactMatch(values[0])))
 			}
@@ -131,7 +133,7 @@ func (q *FlowQueryBuilder) addFilter(filter filters.Match) error {
 		}
 		q.addIPFilters(filter.Key, values)
 	} else {
-		q.addLineFilters(filter.Key, values, filter.Not)
+		q.addLineFilters(filter.Key, values, filter.Not, filter.MoreThanOrEqual)
 	}
 
 	return nil
@@ -169,13 +171,14 @@ func (q *FlowQueryBuilder) addLabelRegex(key string, values []string, not bool) 
 	}
 }
 
-func (q *FlowQueryBuilder) addLineFilters(key string, values []string, not bool) {
+func (q *FlowQueryBuilder) addLineFilters(key string, values []string, not bool, moreThan bool) {
 	if len(values) == 0 {
 		return
 	}
 	lf := lineFilter{
-		key: key,
-		not: not,
+		key:      key,
+		not:      not,
+		moreThan: moreThan,
 	}
 	isNumeric := fields.IsNumeric(key)
 	emptyMatches := false
@@ -245,23 +248,44 @@ func (q *FlowQueryBuilder) appendLineFilters(sb *strings.Builder) {
 }
 
 func (q *FlowQueryBuilder) appendDeduplicateFilter(sb *strings.Builder) {
-	// |~`Duplicate":false`
+	// |~`"Duplicate":false`
 	sb.WriteString("|~`")
-	sb.WriteString(`Duplicate":false`)
+	sb.WriteString(`"Duplicate":false`)
 	sb.WriteString("`")
 }
 
 func (q *FlowQueryBuilder) appendPktDropStateFilter(sb *strings.Builder) {
-	// !~`PktDropLatestState":0`
-	sb.WriteString("!~`")
-	sb.WriteString(`PktDropLatestState":0`)
+	// ensure PktDropLatestState is specified
+	// |~`"PktDropLatestState"`
+	sb.WriteString("|~`")
+	sb.WriteString(`"PktDropLatestState"`)
 	sb.WriteString("`")
 }
 
 func (q *FlowQueryBuilder) appendPktDropCauseFilter(sb *strings.Builder) {
-	// !~`PktDropLatestDropCause":0`
+	// ensure PktDropLatestDropCause is specified
+	// |~`"PktDropLatestDropCause"`
+	sb.WriteString("|~`")
+	sb.WriteString(`"PktDropLatestDropCause"`)
+	sb.WriteString("`")
+}
+
+func (q *FlowQueryBuilder) appendDNSFilter(sb *strings.Builder) {
+	// ensure at least one Dns field is specified
+	// |~`"Dns`
+	sb.WriteString("|~`")
+	sb.WriteString(`"Dns`)
+	sb.WriteString("`")
+}
+
+func (q *FlowQueryBuilder) appendDNSRCodeFilter(sb *strings.Builder) {
+	// ensure DnsFlagsResponseCode field is specified with valid error
+	// |~`"DnsFlagsResponseCode"`!~`"DnsFlagsResponseCode":"NoError"`
+	sb.WriteString("|~`")
+	sb.WriteString(`"DnsFlagsResponseCode"`)
+	sb.WriteString("`")
 	sb.WriteString("!~`")
-	sb.WriteString(`PktDropLatestDropCause":0`)
+	sb.WriteString(`"DnsFlagsResponseCode":"NoError"`)
 	sb.WriteString("`")
 }
 

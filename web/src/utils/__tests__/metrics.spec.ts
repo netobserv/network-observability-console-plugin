@@ -1,4 +1,4 @@
-import { RawTopologyMetrics, TopologyMetricPeer, TopologyMetrics } from '../../api/loki';
+import { RawTopologyMetrics, TopologyMetricPeer, PairTopologyMetrics } from '../../api/loki';
 import { NodeData } from '../../model/topology';
 import {
   calibrateRange,
@@ -384,7 +384,7 @@ describe('parseMetrics', () => {
       }
     ];
 
-    const parsed = parseMetrics(metrics, 300, 'resource', 0, true) as TopologyMetrics[];
+    const parsed = parseMetrics(metrics, 300, 'resource', 0, true) as PairTopologyMetrics[];
 
     expect(parsed).toHaveLength(2);
     expect(parsed[0].source.getDisplayName(true, true)).toEqual('ns1.A');

@@ -12,16 +12,18 @@ import { SearchIcon } from '@patternfly/react-icons';
 import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { DroppedTopologyMetrics, TopologyMetrics } from '../../api/loki';
+import { PairTopologyMetrics, SingleTopologyMetrics } from '../../api/loki';
 import { MetricType, RecordType } from '../../model/flow-query';
 import { getStat } from '../../model/topology';
 import { getOverviewPanelInfo, OverviewPanel, OverviewPanelId } from '../../utils/overview-panels';
 import { TruncateLength } from '../dropdowns/truncate-dropdown';
 import LokiError from '../messages/loki-error';
 import { DroppedDonut } from '../metrics/dropped-donut';
+import { LatencyDonut } from '../metrics/latency-donut';
 import { MetricsContent } from '../metrics/metrics-content';
 import { toNamedMetric } from '../metrics/metrics-helper';
 import { MetricsTotalContent } from '../metrics/metrics-total-content';
+import { SingleMetricsTotalContent } from '../metrics/single-metrics-total-content';
 import { StatDonut } from '../metrics/stat-donut';
 import { NetflowOverviewPanel } from './netflow-overview-panel';
 
@@ -40,12 +42,16 @@ export type NetflowOverviewProps = {
   panels: OverviewPanel[];
   recordType: RecordType;
   metricType: MetricType;
-  metrics: TopologyMetrics[];
-  droppedMetrics: TopologyMetrics[];
-  totalMetric?: TopologyMetrics;
-  totalDroppedMetric?: TopologyMetrics;
-  droppedStateMetrics?: DroppedTopologyMetrics[];
-  droppedCauseMetrics?: DroppedTopologyMetrics[];
+  metrics: PairTopologyMetrics[];
+  droppedMetrics: PairTopologyMetrics[];
+  totalMetric?: PairTopologyMetrics;
+  totalDroppedMetric?: PairTopologyMetrics;
+  droppedStateMetrics?: SingleTopologyMetrics[];
+  droppedCauseMetrics?: SingleTopologyMetrics[];
+  dnsRCodeMetrics?: SingleTopologyMetrics[];
+  dnsLatencyMetrics: PairTopologyMetrics[];
+  totalDnsLatencyMetric?: PairTopologyMetrics;
+  totalDnsCountMetric?: PairTopologyMetrics;
   loading?: boolean;
   error?: string;
   isDark?: boolean;
@@ -64,6 +70,10 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
   totalDroppedMetric,
   droppedStateMetrics,
   droppedCauseMetrics,
+  dnsRCodeMetrics,
+  dnsLatencyMetrics,
+  totalDnsLatencyMetric,
+  totalDnsCountMetric,
   loading,
   error,
   isDark,
@@ -134,9 +144,22 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
   const topKDroppedCauseMetrics =
     droppedCauseMetrics?.sort((a, b) => getStat(b.stats, 'sum') - getStat(a.stats, 'sum')) || [];
 
+  const topKDnsRCodeMetrics = dnsRCodeMetrics?.sort((a, b) => getStat(b.stats, 'sum') - getStat(a.stats, 'sum')) || [];
+
+  const topKDnsLatencyMetrics =
+    dnsLatencyMetrics
+      ?.sort((a, b) => getStat(b.stats, 'sum') - getStat(a.stats, 'sum'))
+      .map(m => toNamedMetric(t, m, truncateLength, true, true)) || [];
+
   const namedTotalMetric = toNamedMetric(t, totalMetric, truncateLength, false, false);
   const namedTotalDroppedMetric = totalDroppedMetric
     ? toNamedMetric(t, totalDroppedMetric, truncateLength, false, false)
+    : undefined;
+  const namedDnsLatencyTotalMetric = totalDnsLatencyMetric
+    ? toNamedMetric(t, totalDnsLatencyMetric, truncateLength, false, false)
+    : undefined;
+  const namedDnsCountTotalMetric = totalDnsCountMetric
+    ? toNamedMetric(t, totalDnsCountMetric, truncateLength, false, false)
     : undefined;
 
   const smallerTexts = truncateLength >= TruncateLength.M;
@@ -400,6 +423,82 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
           kebab: <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} />,
           doubleWidth: true
         };
+      case 'top_avg_dns_latency_donut': {
+        const options = kebabMap.get(id) || {
+          showOthers: true
+        };
+        return {
+          element: namedDnsLatencyTotalMetric ? (
+            <LatencyDonut
+              id={id}
+              limit={limit}
+              metricType={'dnsLatencies'}
+              topKMetrics={topKDnsLatencyMetrics}
+              totalMetric={namedDnsLatencyTotalMetric}
+              showOthers={options.showOthers!}
+              smallerTexts={smallerTexts}
+              subTitle={t('Average latency')}
+            />
+          ) : (
+            emptyGraph()
+          ),
+          kebab: (
+            <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} isDark={isDark} />
+          ),
+          bodyClassSmall: true
+        };
+      }
+      case 'top_dns_rcode_donut': {
+        const options = kebabMap.get(id) || {
+          showNoError: true
+        };
+        return {
+          element: namedDnsCountTotalMetric ? (
+            <LatencyDonut
+              id={id}
+              limit={limit}
+              metricType={'countDns'}
+              topKMetrics={topKDnsRCodeMetrics}
+              totalMetric={namedDnsCountTotalMetric}
+              showOthers={options.showNoError!}
+              othersName={'NoError'}
+              smallerTexts={smallerTexts}
+              subTitle={t('Total flow count')}
+            />
+          ) : (
+            emptyGraph()
+          ),
+          kebab: <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} />,
+          bodyClassSmall: true
+        };
+      }
+      case 'top_dns_rcode_bar_total': {
+        const options = kebabMap.get(id) || {
+          showTotal: true,
+          showNoError: false
+        };
+        return {
+          element:
+            !_.isEmpty(topKDnsRCodeMetrics) && namedDnsCountTotalMetric ? (
+              <SingleMetricsTotalContent
+                id={id}
+                title={title}
+                metricType={metricType}
+                topKMetrics={topKDnsRCodeMetrics}
+                totalMetric={namedDnsCountTotalMetric}
+                limit={limit}
+                showTotal={options.showTotal!}
+                showOthers={options.showNoError!}
+                othersName={'NoError'}
+                smallerTexts={smallerTexts}
+              />
+            ) : (
+              emptyGraph()
+            ),
+          kebab: <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} />,
+          doubleWidth: true
+        };
+      }
       case 'inbound_region':
         return { element: <>Inbound flows by region content</> };
     }

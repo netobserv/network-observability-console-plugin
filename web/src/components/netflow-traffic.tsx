@@ -31,7 +31,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../utils/theme-hook';
 import { Record } from '../api/ipfix';
-import { DroppedTopologyMetrics, RecordsResult, Stats, TopologyMetrics, TopologyResult } from '../api/loki';
+import { SingleTopologyMetrics, RecordsResult, Stats, PairTopologyMetrics, TopologyResult } from '../api/loki';
 import { getFlows, getTopology } from '../api/routes';
 import {
   DisabledFilters,
@@ -185,12 +185,16 @@ export const NetflowTraffic: React.FC<{
     LOCAL_STORAGE_TOPOLOGY_OPTIONS_KEY,
     DefaultOptions
   );
-  const [metrics, setMetrics] = React.useState<TopologyMetrics[]>([]);
-  const [droppedMetrics, setDroppedMetrics] = React.useState<TopologyMetrics[]>([]);
-  const [totalMetric, setTotalMetric] = React.useState<TopologyMetrics | undefined>(undefined);
-  const [totalDroppedMetric, setTotalDroppedMetric] = React.useState<TopologyMetrics | undefined>(undefined);
-  const [droppedStateMetrics, setDroppedStateMetrics] = React.useState<DroppedTopologyMetrics[] | undefined>(undefined);
-  const [droppedCauseMetrics, setDroppedCauseMetrics] = React.useState<DroppedTopologyMetrics[] | undefined>(undefined);
+  const [metrics, setMetrics] = React.useState<PairTopologyMetrics[]>([]);
+  const [droppedMetrics, setDroppedMetrics] = React.useState<PairTopologyMetrics[]>([]);
+  const [dnsLatencyMetrics, setDnsLatencyMetrics] = React.useState<PairTopologyMetrics[]>([]);
+  const [totalMetric, setTotalMetric] = React.useState<PairTopologyMetrics | undefined>(undefined);
+  const [totalDroppedMetric, setTotalDroppedMetric] = React.useState<PairTopologyMetrics | undefined>(undefined);
+  const [totalDnsLatencyMetric, setTotalDnsLatencyMetric] = React.useState<PairTopologyMetrics | undefined>(undefined);
+  const [totalDnsCountMetric, setTotalDnsCountMetric] = React.useState<PairTopologyMetrics | undefined>(undefined);
+  const [droppedStateMetrics, setDroppedStateMetrics] = React.useState<SingleTopologyMetrics[] | undefined>(undefined);
+  const [droppedCauseMetrics, setDroppedCauseMetrics] = React.useState<SingleTopologyMetrics[] | undefined>(undefined);
+  const [dnsRCodeMetrics, setDnsRCodeMetrics] = React.useState<SingleTopologyMetrics[] | undefined>(undefined);
   const [isShowQuerySummary, setShowQuerySummary] = React.useState<boolean>(false);
   const [lastRefresh, setLastRefresh] = React.useState<Date | undefined>(undefined);
   const [error, setError] = React.useState<string | undefined>();
@@ -259,6 +263,8 @@ export const NetflowTraffic: React.FC<{
       setFlows([]);
       setTotalMetric(undefined);
       setTotalDroppedMetric(undefined);
+      setTotalDnsLatencyMetric(undefined);
+      setTotalDnsCountMetric(undefined);
       setWarningMessage(undefined);
     },
     [setFilters, setFlows, setWarningMessage]
@@ -434,7 +440,7 @@ export const NetflowTraffic: React.FC<{
 
               //set app metrics
               if (results.length > 1) {
-                setTotalMetric((results[1] as TopologyResult).metrics[0] as TopologyMetrics);
+                setTotalMetric((results[1] as TopologyResult).metrics[0] as PairTopologyMetrics);
                 stats.limitReached = stats.limitReached || results[1].stats.limitReached;
                 stats.numQueries += results[1].stats.numQueries;
               } else {
@@ -442,7 +448,7 @@ export const NetflowTraffic: React.FC<{
               }
 
               if (results.length > 2) {
-                setTotalDroppedMetric((results[2] as TopologyResult).metrics[0] as TopologyMetrics);
+                setTotalDroppedMetric((results[2] as TopologyResult).metrics[0] as PairTopologyMetrics);
                 stats.limitReached = stats.limitReached || results[2].stats.limitReached;
                 stats.numQueries += results[2].stats.numQueries;
               } else {
@@ -473,6 +479,7 @@ export const NetflowTraffic: React.FC<{
         //run same query on app scope for total flows
         promises.push(getTopology({ ...fq, aggregateBy: 'app' }, range));
 
+        const droppedIndex = promises.length;
         if (droppedType) {
           //run same queries for drops
           promises.push(getTopology({ ...fq, type: droppedType }, range));
@@ -482,46 +489,80 @@ export const NetflowTraffic: React.FC<{
           promises.push(getTopology({ ...fq, type: droppedType, aggregateBy: 'droppedCause' }, range));
         }
 
+        const dnsLatencyIndex = promises.length;
+        if (config.features.includes('dnsTracking')) {
+          //run same queries for dns latency
+          promises.push(getTopology({ ...fq, type: 'dnsLatencies' }, range));
+          promises.push(getTopology({ ...fq, aggregateBy: 'app', type: 'dnsLatencies' }, range));
+          //get dns response codes
+          promises.push(getTopology({ ...fq, type: 'countDns', aggregateBy: 'dnsRCode' }, range));
+          promises.push(getTopology({ ...fq, type: 'countDns', aggregateBy: 'app' }, range));
+        }
+
         manageWarnings(
           Promise.all(promises)
-            .then(results => {
+            .then((results: TopologyResult[]) => {
               //get stats from first result
-              const stats = results[0].stats;
+              const stats = { numQueries: 0, limitReached: false } as Stats;
+
+              function updateMetricsAndStats(
+                results: TopologyResult,
+                updateFunc: (value: React.SetStateAction<unknown>) => void
+              ) {
+                updateFunc(results.metrics);
+                updateStats(results.stats);
+              }
+
+              function updateTotalMetricAndStats(
+                results: TopologyResult,
+                updateFunc: (value: React.SetStateAction<PairTopologyMetrics | undefined>) => void
+              ) {
+                updateFunc(results.metrics[0] as PairTopologyMetrics);
+                updateStats(results.stats);
+              }
+
+              function updateStats(updatedStats: Stats) {
+                stats.limitReached = stats.limitReached || updatedStats.limitReached;
+                stats.numQueries += updatedStats.numQueries;
+              }
 
               //set metrics
-              setMetrics((results[0] as TopologyResult).metrics as TopologyMetrics[]);
-
+              updateMetricsAndStats(results[0], setMetrics);
               //set app metrics
-              setTotalMetric((results[1] as TopologyResult).metrics[0] as TopologyMetrics);
-              stats.limitReached = stats.limitReached || results[1].stats.limitReached;
-              stats.numQueries += results[1].stats.numQueries;
+              updateTotalMetricAndStats(results[1], setTotalMetric);
 
-              if (results.length > 2) {
+              if (droppedType) {
                 //set dropped metrics
-                setDroppedMetrics((results[2] as TopologyResult).metrics as TopologyMetrics[]);
-                stats.limitReached = stats.limitReached || results[2].stats.limitReached;
-                stats.numQueries += results[2].stats.numQueries;
-
+                updateMetricsAndStats(results[droppedIndex], setDroppedMetrics);
                 //set app dropped metrics
-                setTotalDroppedMetric((results[3] as TopologyResult).metrics[0] as TopologyMetrics);
-                stats.limitReached = stats.limitReached || results[3].stats.limitReached;
-                stats.numQueries += results[3].stats.numQueries;
-
+                updateTotalMetricAndStats(results[droppedIndex + 1], setTotalDroppedMetric);
                 //set dropped state
-                setDroppedStateMetrics((results[4] as TopologyResult).metrics as DroppedTopologyMetrics[]);
-                stats.limitReached = stats.limitReached || results[4].stats.limitReached;
-                stats.numQueries += results[4].stats.numQueries;
-
+                updateMetricsAndStats(results[droppedIndex + 2], setDroppedStateMetrics);
                 //set dropped cause
-                setDroppedCauseMetrics((results[5] as TopologyResult).metrics as DroppedTopologyMetrics[]);
-                stats.limitReached = stats.limitReached || results[5].stats.limitReached;
-                stats.numQueries += results[5].stats.numQueries;
+                updateMetricsAndStats(results[droppedIndex + 3], setDroppedCauseMetrics);
               } else {
                 setDroppedMetrics([]);
                 setTotalDroppedMetric(undefined);
                 setDroppedStateMetrics(undefined);
                 setDroppedCauseMetrics(undefined);
               }
+
+              if (config.features.includes('dnsTracking')) {
+                //set DNS latency metrics
+                updateMetricsAndStats(results[dnsLatencyIndex], setDnsLatencyMetrics);
+                //set app DNS latency metrics
+                updateTotalMetricAndStats(results[dnsLatencyIndex + 1], setTotalDnsLatencyMetric);
+                //set DNS response codes metrics
+                updateMetricsAndStats(results[dnsLatencyIndex + 2], setDnsRCodeMetrics);
+                //set app DNS count metrics
+                updateTotalMetricAndStats(results[dnsLatencyIndex + 3], setTotalDnsCountMetric);
+              } else {
+                setDnsLatencyMetrics([]);
+                setTotalDnsLatencyMetric(undefined);
+                setDnsRCodeMetrics(undefined);
+                setTotalDnsCountMetric(undefined);
+              }
+
               setStats(stats);
             })
             .catch(err => {
@@ -531,6 +572,10 @@ export const NetflowTraffic: React.FC<{
               setTotalDroppedMetric(undefined);
               setDroppedStateMetrics(undefined);
               setDroppedCauseMetrics(undefined);
+              setDnsLatencyMetrics([]);
+              setTotalDnsLatencyMetric(undefined);
+              setDnsRCodeMetrics(undefined);
+              setTotalDnsCountMetric(undefined);
               setError(getHTTPErrorDetails(err));
               setWarningMessage(undefined);
             })
@@ -557,11 +602,11 @@ export const NetflowTraffic: React.FC<{
               const stats = results[0].stats;
 
               //set metrics
-              setMetrics((results[0] as TopologyResult).metrics as TopologyMetrics[]);
+              setMetrics((results[0] as TopologyResult).metrics as PairTopologyMetrics[]);
 
               if (results.length > 1) {
                 //set dropped metrics
-                setDroppedMetrics((results[1] as TopologyResult).metrics as TopologyMetrics[]);
+                setDroppedMetrics((results[1] as TopologyResult).metrics as PairTopologyMetrics[]);
                 stats.limitReached = stats.limitReached || results[1].stats.limitReached;
                 stats.numQueries += results[1].stats.numQueries;
               } else {
@@ -1063,6 +1108,10 @@ export const NetflowTraffic: React.FC<{
             totalDroppedMetric={totalDroppedMetric}
             droppedStateMetrics={droppedStateMetrics}
             droppedCauseMetrics={droppedCauseMetrics}
+            dnsRCodeMetrics={dnsRCodeMetrics}
+            dnsLatencyMetrics={dnsLatencyMetrics}
+            totalDnsLatencyMetric={totalDnsLatencyMetric}
+            totalDnsCountMetric={totalDnsCountMetric}
             loading={loading}
             error={error}
             isDark={isDarkTheme}

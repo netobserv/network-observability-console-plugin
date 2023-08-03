@@ -108,6 +108,15 @@ start: build-backend install-frontend ## Run backend and frontend
 	bash -c "trap 'fuser -k 9002/tcp' EXIT; \
 					./plugin-backend -port 9002 -metrics-port 9003 $(CMDLINE_ARGS) & cd web && npm run start" 
 
+.PHONY: start-backend
+start-backend: build-backend
+	bash -c "trap 'fuser -k 9002/tcp' EXIT; \
+					./plugin-backend -port 9002 -metrics-port 9003 $(CMDLINE_ARGS)"
+
+.PHONY: start-frontend-standalone
+start-frontend-standalone: install-frontend ## Run frontend as standalone
+	cd web && npm run start:standalone
+
 .PHONY: start-standalone
 start-standalone: build-backend install-frontend ## Run backend and frontend as standalone
 	@echo "### Starting backend on http://localhost:9002"

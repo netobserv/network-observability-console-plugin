@@ -12,13 +12,19 @@ type MultiQueries = []SingleQuery
 type SingleQuery = []Match
 
 type Match struct {
-	Key    string
-	Values string
-	Not    bool
+	Key             string
+	Values          string
+	Not             bool
+	MoreThanOrEqual bool
 }
 
-func NewMatch(key, values string) Match    { return Match{Key: key, Values: values} }
-func NewNotMatch(key, values string) Match { return Match{Key: key, Values: values, Not: true} }
+func NewMatch(key, values string) Match { return Match{Key: key, Values: values} }
+func NewNotMatch(key, values string) Match {
+	return Match{Key: key, Values: values, Not: true, MoreThanOrEqual: false}
+}
+func NewMoreThanOrEqualMatch(key, values string) Match {
+	return Match{Key: key, Values: values, Not: false, MoreThanOrEqual: true}
+}
 
 // Example of raw filters (url-encoded):
 // foo=a,b&bar=c|baz=d
@@ -43,6 +49,8 @@ func Parse(raw string) (MultiQueries, error) {
 			if len(pair) == 2 {
 				if strings.HasSuffix(pair[0], "!") {
 					andFilters = append(andFilters, NewNotMatch(strings.TrimSuffix(pair[0], "!"), pair[1]))
+				} else if strings.HasSuffix(pair[0], ">") {
+					andFilters = append(andFilters, NewMoreThanOrEqualMatch(strings.TrimSuffix(pair[0], ">"), pair[1]))
 				} else {
 					andFilters = append(andFilters, NewMatch(pair[0], pair[1]))
 				}

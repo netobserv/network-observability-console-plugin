@@ -136,12 +136,30 @@ export const getColumnGroups = (columns: Column[], commonGroupName?: string, sor
   return groups;
 };
 
-export const getFullColumnName = (col?: Column) => {
+/* prefix group to column name if available
+ * and column name doesn't start with group
+ */
+export const getFullColumnName = (col?: Column): string => {
   if (col) {
-    return !col.group ? col.name : `${col.group} ${col.name}`;
-  } else {
-    return '';
+    if (col.group && !col.name.startsWith(col.group)) {
+      return `${col.group} ${col.name}`;
+    }
+    return col.name;
   }
+  return '';
+};
+
+/* remove group from column name if prefixed
+ * ie DNS Response Code -> Response Code
+ */
+export const getShortColumnName = (col?: Column): string => {
+  if (col) {
+    if (col.group && col.name.startsWith(col.group)) {
+      return col.name.replace(col.group, '');
+    }
+    return col.name;
+  }
+  return '';
 };
 
 export const getSrcOrDstValue = (v1?: string | number, v2?: string | number): string[] | number[] => {
@@ -785,6 +803,7 @@ export const getExtraColumns = (t: TFunction): Column[] => {
     },
     {
       id: ColumnsId.dnsid,
+      group: t('DNS'),
       name: t('DNS Id'),
       tooltip: t('DNS request identifier.'),
       fieldName: 'DnsId',
@@ -796,6 +815,7 @@ export const getExtraColumns = (t: TFunction): Column[] => {
     },
     {
       id: ColumnsId.dnslatency,
+      group: t('DNS'),
       name: t('DNS Latency'),
       tooltip: t('Time elapsed between DNS request and response.'),
       isSelected: false,
@@ -805,6 +825,7 @@ export const getExtraColumns = (t: TFunction): Column[] => {
     },
     {
       id: ColumnsId.dnsresponsecode,
+      group: t('DNS'),
       name: t('DNS Response Code'),
       tooltip: t('DNS RCODE name from response header.'),
       fieldName: 'DnsFlagsResponseCode',

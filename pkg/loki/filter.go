@@ -2,6 +2,8 @@ package loki
 
 import (
 	"fmt"
+	"math"
+	"strconv"
 	"strings"
 )
 
@@ -11,10 +13,11 @@ var valueReplacer = strings.NewReplacer(`*`, `.*`, `"`, "")
 type labelMatcher string
 
 const (
-	labelEqual     = labelMatcher("=")
-	labelMatches   = labelMatcher("=~")
-	labelNotEqual  = labelMatcher("!=")
-	labelNoMatches = labelMatcher("!~")
+	labelEqual           = labelMatcher("=")
+	labelMatches         = labelMatcher("=~")
+	labelNotEqual        = labelMatcher("!=")
+	labelMoreThanOrEqual = labelMatcher(">=")
+	labelNoMatches       = labelMatcher("!~")
 )
 
 type valueType int
@@ -42,6 +45,7 @@ type lineFilter struct {
 	strictKey bool
 	values    []lineMatch
 	not       bool
+	moreThan  bool
 }
 
 type lineMatch struct {
@@ -73,6 +77,15 @@ func notStringLabelFilter(labelKey string, value string) labelFilter {
 		matcher:   labelNotEqual,
 		value:     value,
 		valueType: typeString,
+	}
+}
+
+func moreThanNumberLabelFilter(labelKey string, value string) labelFilter {
+	return labelFilter{
+		key:       labelKey,
+		matcher:   labelMoreThanOrEqual,
+		value:     value,
+		valueType: typeNumber,
 	}
 }
 
@@ -136,6 +149,8 @@ func (f *lineFilter) asLabelFilters() []labelFilter {
 		} else {
 			if f.not {
 				lf.matcher = labelNotEqual
+			} else if f.moreThan {
+				lf.matcher = labelMoreThanOrEqual
 			} else {
 				lf.matcher = labelEqual
 			}
@@ -172,13 +187,82 @@ func notContainsKeyLineFilter(key string) lineFilter {
 		key:       key,
 		strictKey: true,
 		not:       true,
+		moreThan:  false,
 	}
+}
+
+func moreThanRegex(sb *strings.Builder, value string) {
+	// match each number greater than specified value using regex
+	// example for 123:
+	// ( 12[3-9] | 1[3-9][0-9]+ | [2-9][0-9]+ | [1-9][0-9]{3,} )
+	//       |            |              |             |
+	//       |            |              |              ↪ match number more than 1000
+	//       |            |              |
+	//       |            |               ↪ match number from 200 to 999
+	//       |            |
+	//       |             ↪ match numbers from 130 to 199
+	//       |
+	//        ↪ match any number from 123 to 129
+
+	sb.WriteString("(")
+	for i, r := range value {
+		if i < len(value)-1 {
+			sb.WriteRune(r)
+		} else {
+			sb.WriteRune('[')
+			sb.WriteRune(r)
+			sb.WriteString("-9]")
+		}
+	}
+
+	intVal, _ := strconv.Atoi(value)
+	for i := 1; i < len(value); i++ {
+		nextMin := int((intVal / int(math.Pow10(i))) + 1)
+		nextMinStr := fmt.Sprintf("%d", nextMin)
+
+		sb.WriteRune('|')
+		if nextMin >= 10 {
+			sb.WriteString(nextMinStr[0 : len(nextMinStr)-1])
+		} else if i < len(value)-1 {
+			sb.WriteString(value[0 : len(value)-1-i])
+		}
+
+		nextMinRune := nextMinStr[len(nextMinStr)-1:]
+		if nextMin%9 != 0 {
+			sb.WriteRune('[')
+			sb.WriteString(nextMinRune)
+			sb.WriteString("-9]")
+		} else {
+			sb.WriteString(nextMinRune)
+		}
+
+		sb.WriteString("[0-9]")
+
+		if i > 1 {
+			sb.WriteString("{")
+			sb.WriteString(fmt.Sprintf("%d", i))
+			sb.WriteString(",}")
+		}
+	}
+
+	sb.WriteString("|[1-9][0-9]{")
+	sb.WriteString(fmt.Sprintf("%d", len(value)))
+	sb.WriteString(",})")
 }
 
 // writeInto transforms a lineFilter to its corresponding part of a LogQL query
 // under construction (contained in the provided strings.Builder)
 func (f *lineFilter) writeInto(sb *strings.Builder) {
 	if f.not {
+		// the record must contains the field if values are specified
+		// since FLP skip empty fields / zeros values
+		if len(f.values) > 0 {
+			sb.WriteString("|~`\"")
+			sb.WriteString(f.key)
+			sb.WriteString("\"`")
+		}
+
+		// then we exclude match results
 		sb.WriteString("!~`")
 	} else {
 		sb.WriteString("|~`")
@@ -214,7 +298,11 @@ func (f *lineFilter) writeInto(sb *strings.Builder) {
 			sb.WriteString(`":`)
 			switch v.valueType {
 			case typeNumber, typeRegex:
-				sb.WriteString(v.value)
+				if f.moreThan {
+					moreThanRegex(sb, v.value)
+				} else {
+					sb.WriteString(v.value)
+				}
 				// a number or regex can be followed by } if it's the last property of a JSON document
 				sb.WriteString("[,}]")
 			case typeString, typeIP:

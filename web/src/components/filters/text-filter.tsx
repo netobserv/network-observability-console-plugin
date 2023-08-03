@@ -11,6 +11,7 @@ export interface TextFilterProps {
   setMessageWithDelay: (m: string | undefined) => void;
   indicator: Indicator;
   setIndicator: (ind: Indicator) => void;
+  regexp?: RegExp;
 }
 
 export const TextFilter: React.FC<TextFilterProps> = ({
@@ -18,7 +19,8 @@ export const TextFilter: React.FC<TextFilterProps> = ({
   addFilter,
   setMessageWithDelay,
   indicator,
-  setIndicator
+  setIndicator,
+  regexp
 }) => {
   const searchInputRef = React.useRef<HTMLInputElement | null>(null);
   const [currentValue, setCurrentValue] = React.useState<string>('');
@@ -32,6 +34,17 @@ export const TextFilter: React.FC<TextFilterProps> = ({
       setIndicator(ValidatedOptions.default);
     }
   }, [currentValue, filterDefinition, setIndicator]);
+
+  const updateValue = React.useCallback(
+    (v: string) => {
+      let filteredValue = v;
+      if (regexp) {
+        filteredValue = filteredValue.replace(regexp, '');
+      }
+      setCurrentValue(filteredValue);
+    },
+    [regexp]
+  );
 
   const resetFilterValue = React.useCallback(() => {
     setCurrentValue('');
@@ -62,7 +75,7 @@ export const TextFilter: React.FC<TextFilterProps> = ({
         aria-label="search"
         validated={indicator}
         placeholder={filterDefinition.placeholder}
-        onChange={setCurrentValue}
+        onChange={updateValue}
         onKeyPress={e => e.key === 'Enter' && onSelect()}
         value={currentValue}
         ref={searchInputRef}
