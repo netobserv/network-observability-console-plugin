@@ -31,8 +31,8 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../utils/theme-hook';
 import { Record } from '../api/ipfix';
-import { SingleTopologyMetrics, RecordsResult, Stats, PairTopologyMetrics, TopologyResult } from '../api/loki';
-import { getFlows, getTopology } from '../api/routes';
+import { GenericMetric, Stats, TopologyMetrics } from '../api/loki';
+import { getGenericMetrics, getFlows, getTopologyMetrics } from '../api/routes';
 import {
   DisabledFilters,
   Filter,
@@ -51,8 +51,7 @@ import {
   FlowScope,
   MetricType,
   PacketLoss,
-  RecordType,
-  Reporter
+  RecordType
 } from '../model/flow-query';
 import { MetricScopeOptions } from '../model/metrics';
 import { parseQuickFilters } from '../model/quick-filters';
@@ -101,7 +100,7 @@ import {
   getPacketLossFromURL,
   getRangeFromURL,
   getRecordTypeFromURL,
-  getReporterFromURL,
+  getShowDupFromURL,
   setURLFilters,
   setURLLimit,
   setURLMatch,
@@ -110,7 +109,7 @@ import {
   setURLPacketLoss,
   setURLRange,
   setURLRecortType,
-  setURLReporter
+  setURLShowDup
 } from '../utils/router';
 import { getURLParams, hasEmptyParams, netflowTrafficPath, setURLParams } from '../utils/url';
 import { OverviewDisplayDropdown } from './dropdowns/overview-display-dropdown';
@@ -142,6 +141,7 @@ import GuidedTourPopover, { GuidedTourHandle } from './guided-tour/guided-tour';
 import { exportToPng } from '../utils/export';
 import { navigate } from './dynamic-loader/dynamic-loader';
 import { LinksOverflow } from './overflow/links-overflow';
+import { mergeFlowReporters } from '../utils/flows';
 
 export type ViewId = 'overview' | 'table' | 'topology';
 
@@ -185,16 +185,16 @@ export const NetflowTraffic: React.FC<{
     LOCAL_STORAGE_TOPOLOGY_OPTIONS_KEY,
     DefaultOptions
   );
-  const [metrics, setMetrics] = React.useState<PairTopologyMetrics[]>([]);
-  const [droppedMetrics, setDroppedMetrics] = React.useState<PairTopologyMetrics[]>([]);
-  const [dnsLatencyMetrics, setDnsLatencyMetrics] = React.useState<PairTopologyMetrics[]>([]);
-  const [totalMetric, setTotalMetric] = React.useState<PairTopologyMetrics | undefined>(undefined);
-  const [totalDroppedMetric, setTotalDroppedMetric] = React.useState<PairTopologyMetrics | undefined>(undefined);
-  const [totalDnsLatencyMetric, setTotalDnsLatencyMetric] = React.useState<PairTopologyMetrics | undefined>(undefined);
-  const [totalDnsCountMetric, setTotalDnsCountMetric] = React.useState<PairTopologyMetrics | undefined>(undefined);
-  const [droppedStateMetrics, setDroppedStateMetrics] = React.useState<SingleTopologyMetrics[] | undefined>(undefined);
-  const [droppedCauseMetrics, setDroppedCauseMetrics] = React.useState<SingleTopologyMetrics[] | undefined>(undefined);
-  const [dnsRCodeMetrics, setDnsRCodeMetrics] = React.useState<SingleTopologyMetrics[] | undefined>(undefined);
+  const [metrics, setMetrics] = React.useState<TopologyMetrics[]>([]);
+  const [droppedMetrics, setDroppedMetrics] = React.useState<TopologyMetrics[]>([]);
+  const [dnsLatencyMetrics, setDnsLatencyMetrics] = React.useState<TopologyMetrics[]>([]);
+  const [totalMetric, setTotalMetric] = React.useState<TopologyMetrics | undefined>(undefined);
+  const [totalDroppedMetric, setTotalDroppedMetric] = React.useState<TopologyMetrics | undefined>(undefined);
+  const [totalDnsLatencyMetric, setTotalDnsLatencyMetric] = React.useState<TopologyMetrics | undefined>(undefined);
+  const [totalDnsCountMetric, setTotalDnsCountMetric] = React.useState<TopologyMetrics | undefined>(undefined);
+  const [droppedStateMetrics, setDroppedStateMetrics] = React.useState<GenericMetric[] | undefined>(undefined);
+  const [droppedCauseMetrics, setDroppedCauseMetrics] = React.useState<GenericMetric[] | undefined>(undefined);
+  const [dnsRCodeMetrics, setDnsRCodeMetrics] = React.useState<GenericMetric[] | undefined>(undefined);
   const [isShowQuerySummary, setShowQuerySummary] = React.useState<boolean>(false);
   const [lastRefresh, setLastRefresh] = React.useState<Date | undefined>(undefined);
   const [error, setError] = React.useState<string | undefined>();
@@ -208,7 +208,7 @@ export const NetflowTraffic: React.FC<{
   const [match, setMatch] = React.useState<Match>(getMatchFromURL());
   const [packetLoss, setPacketLoss] = React.useState<PacketLoss>(getPacketLossFromURL());
   const [recordType, setRecordType] = React.useState<RecordType>(getRecordTypeFromURL());
-  const [reporter, setReporter] = React.useState<Reporter>(getReporterFromURL());
+  const [showDuplicates, setShowDuplicates] = React.useState<boolean>(getShowDupFromURL());
   const [limit, setLimit] = React.useState<number>(
     getLimitFromURL(selectedViewId === 'table' ? LIMIT_VALUES[0] : TOP_VALUES[0])
   );
@@ -290,12 +290,6 @@ export const NetflowTraffic: React.FC<{
 
   const selectView = (view: ViewId) => {
     clearSelections();
-    if (view !== 'table') {
-      //reporter 'both' is only available in table view
-      if (reporter === 'both') {
-        setReporter('source');
-      }
-    }
     //save / restore top / limit parameter according to selected view
     if (view === 'overview' && selectedViewId !== 'overview') {
       setLastLimit(limit);
@@ -336,7 +330,7 @@ export const NetflowTraffic: React.FC<{
       filters: groupedFilters,
       limit: LIMIT_VALUES.includes(limit) ? limit : LIMIT_VALUES[0],
       recordType: recordType,
-      reporter: reporter,
+      dedup: !showDuplicates,
       packetLoss: packetLoss
     };
     if (range) {
@@ -370,7 +364,7 @@ export const NetflowTraffic: React.FC<{
     match,
     limit,
     recordType,
-    reporter,
+    showDuplicates,
     packetLoss,
     range,
     selectedViewId,
@@ -395,6 +389,167 @@ export const NetflowTraffic: React.FC<{
     []
   );
 
+  const mergeStats = (prev: Stats | undefined, current: Stats): Stats => {
+    if (!prev) {
+      return current;
+    }
+    return {
+      ...prev,
+      limitReached: prev.limitReached || current.limitReached,
+      numQueries: prev.numQueries + current.numQueries
+    };
+  };
+
+  const fetchTable = React.useCallback(
+    (fq: FlowQuery, droppedType: MetricType | undefined) => {
+      setMetrics([]);
+      // table query is based on histogram range if available
+      const tableQuery = { ...fq };
+      if (histogramRange) {
+        tableQuery.startTime = histogramRange.from.toString();
+        tableQuery.endTime = histogramRange.to.toString();
+      }
+      const promises: Promise<Stats>[] = [
+        getFlows(tableQuery).then(res => {
+          const flows = showDuplicates ? res.records : mergeFlowReporters(res.records);
+          setFlows(flows);
+          return res.stats;
+        })
+      ];
+      if (showHistogram) {
+        promises.push(
+          getTopologyMetrics({ ...fq, aggregateBy: 'app' }, range).then(res => {
+            setTotalMetric(res.metrics[0]);
+            return res.stats;
+          })
+        );
+      } else {
+        setTotalMetric(undefined);
+      }
+      if (droppedType) {
+        promises.push(
+          getTopologyMetrics({ ...fq, aggregateBy: 'app', type: droppedType }, range).then(res => {
+            setTotalDroppedMetric(res.metrics[0]);
+            return res.stats;
+          })
+        );
+      } else {
+        setTotalDroppedMetric(undefined);
+      }
+      return Promise.all(promises);
+    },
+    [histogramRange, range, showHistogram, showDuplicates]
+  );
+
+  const fetchOverview = React.useCallback(
+    (fq: FlowQuery, droppedType: MetricType | undefined) => {
+      setFlows([]);
+      const promises: Promise<Stats>[] = [
+        //get bytes or packets
+        getTopologyMetrics(fq, range).then(res => {
+          setMetrics(res.metrics);
+          return res.stats;
+        }),
+
+        //run same query on app scope for total flows
+        getTopologyMetrics({ ...fq, aggregateBy: 'app' }, range).then(res => {
+          setTotalMetric(res.metrics[0]);
+          return res.stats;
+        })
+      ];
+
+      if (droppedType) {
+        //run same queries for drops
+        promises.push(
+          ...[
+            getTopologyMetrics({ ...fq, type: droppedType }, range).then(res => {
+              setDroppedMetrics(res.metrics);
+              return res.stats;
+            }),
+            getTopologyMetrics({ ...fq, aggregateBy: 'app', type: droppedType }, range).then(res => {
+              setTotalDroppedMetric(res.metrics[0]);
+              return res.stats;
+            }),
+
+            //get drop state & cause
+            getGenericMetrics({ ...fq, type: droppedType, aggregateBy: 'droppedState' }, range).then(res => {
+              setDroppedStateMetrics(res.metrics);
+              return res.stats;
+            }),
+            getGenericMetrics({ ...fq, type: droppedType, aggregateBy: 'droppedCause' }, range).then(res => {
+              setDroppedCauseMetrics(res.metrics);
+              return res.stats;
+            })
+          ]
+        );
+      } else {
+        setDroppedMetrics([]);
+        setTotalDroppedMetric(undefined);
+        setDroppedStateMetrics(undefined);
+        setDroppedCauseMetrics(undefined);
+      }
+
+      if (config.features.includes('dnsTracking')) {
+        //run same queries for drops
+        promises.push(
+          ...[
+            getTopologyMetrics({ ...fq, type: 'dnsLatencies' }, range).then(res => {
+              setDnsLatencyMetrics(res.metrics);
+              return res.stats;
+            }),
+            getTopologyMetrics({ ...fq, aggregateBy: 'app', type: 'dnsLatencies' }, range).then(res => {
+              setTotalDnsLatencyMetric(res.metrics[0]);
+              return res.stats;
+            }),
+
+            //get dns response codes
+            getGenericMetrics({ ...fq, type: 'countDns', aggregateBy: 'dnsRCode' }, range).then(res => {
+              setDnsRCodeMetrics(res.metrics);
+              return res.stats;
+            }),
+            getTopologyMetrics({ ...fq, type: 'countDns', aggregateBy: 'app' }, range).then(res => {
+              setTotalDnsCountMetric(res.metrics[0]);
+              return res.stats;
+            })
+          ]
+        );
+      } else {
+        setDnsLatencyMetrics([]);
+        setDnsRCodeMetrics(undefined);
+        setTotalDnsLatencyMetric(undefined);
+        setTotalDnsCountMetric(undefined);
+      }
+      return Promise.all(promises);
+    },
+    [range, config.features]
+  );
+
+  const fetchTopology = React.useCallback(
+    (fq: FlowQuery, droppedType: MetricType | undefined) => {
+      setFlows([]);
+      const promises: Promise<Stats>[] = [
+        //get bytes or packets
+        getTopologyMetrics(fq, range).then(res => {
+          setMetrics(res.metrics);
+          return res.stats;
+        })
+      ];
+
+      if (droppedType) {
+        promises.push(
+          getTopologyMetrics({ ...fq, type: droppedType }, range).then(res => {
+            setDroppedMetrics(res.metrics);
+            return res.stats;
+          })
+        );
+      } else {
+        setDroppedMetrics([]);
+      }
+      return Promise.all(promises);
+    },
+    [range]
+  );
+
   const tick = React.useCallback(() => {
     // skip tick while forcedFilters & config are not loaded
     // this check ensure tick will not be called during init
@@ -413,228 +568,47 @@ export const NetflowTraffic: React.FC<{
         : 'droppedPackets'
       : undefined;
 
-    const promises: Promise<RecordsResult | TopologyResult>[] = [];
+    let promises: Promise<Stats[]> | undefined = undefined;
     switch (selectedViewId) {
       case 'table':
-        // table query is based on histogram range if available
-        const tableQuery = { ...fq };
-        if (histogramRange) {
-          tableQuery.startTime = histogramRange.from.toString();
-          tableQuery.endTime = histogramRange.to.toString();
-        }
-        promises.push(getFlows(tableQuery));
-        if (showHistogram) {
-          promises.push(getTopology({ ...fq, aggregateBy: 'app' }, range));
-          if (droppedType) {
-            promises.push(getTopology({ ...fq, aggregateBy: 'app', type: droppedType }, range));
-          }
-        }
-        manageWarnings(
-          Promise.all(promises)
-            .then(results => {
-              //get stats from first result
-              const stats = results[0].stats;
-
-              //set flows
-              setFlows((results[0] as RecordsResult).records);
-
-              //set app metrics
-              if (results.length > 1) {
-                setTotalMetric((results[1] as TopologyResult).metrics[0] as PairTopologyMetrics);
-                stats.limitReached = stats.limitReached || results[1].stats.limitReached;
-                stats.numQueries += results[1].stats.numQueries;
-              } else {
-                setTotalMetric(undefined);
-              }
-
-              if (results.length > 2) {
-                setTotalDroppedMetric((results[2] as TopologyResult).metrics[0] as PairTopologyMetrics);
-                stats.limitReached = stats.limitReached || results[2].stats.limitReached;
-                stats.numQueries += results[2].stats.numQueries;
-              } else {
-                setTotalDroppedMetric(undefined);
-              }
-
-              setStats(stats);
-            })
-            .catch(err => {
-              setFlows([]);
-              setError(getHTTPErrorDetails(err));
-              setWarningMessage(undefined);
-            })
-            .finally(() => {
-              //clear metrics
-              setMetrics([]);
-              setLoading(false);
-              setLastRefresh(new Date());
-            })
-        );
+        promises = fetchTable(fq, droppedType);
         break;
       case 'overview':
-        //TODO: manage each metrics separately to load panels as soon as available
-
-        //get bytes or packets
-        promises.push(getTopology(fq, range));
-
-        //run same query on app scope for total flows
-        promises.push(getTopology({ ...fq, aggregateBy: 'app' }, range));
-
-        const droppedIndex = promises.length;
-        if (droppedType) {
-          //run same queries for drops
-          promises.push(getTopology({ ...fq, type: droppedType }, range));
-          promises.push(getTopology({ ...fq, aggregateBy: 'app', type: droppedType }, range));
-          //get drop state & cause
-          promises.push(getTopology({ ...fq, type: droppedType, aggregateBy: 'droppedState' }, range));
-          promises.push(getTopology({ ...fq, type: droppedType, aggregateBy: 'droppedCause' }, range));
-        }
-
-        const dnsLatencyIndex = promises.length;
-        if (config.features.includes('dnsTracking')) {
-          //run same queries for dns latency
-          promises.push(getTopology({ ...fq, type: 'dnsLatencies' }, range));
-          promises.push(getTopology({ ...fq, aggregateBy: 'app', type: 'dnsLatencies' }, range));
-          //get dns response codes
-          promises.push(getTopology({ ...fq, type: 'countDns', aggregateBy: 'dnsRCode' }, range));
-          promises.push(getTopology({ ...fq, type: 'countDns', aggregateBy: 'app' }, range));
-        }
-
-        manageWarnings(
-          Promise.all(promises)
-            .then((results: TopologyResult[]) => {
-              //get stats from first result
-              const stats = { numQueries: 0, limitReached: false } as Stats;
-
-              function updateMetricsAndStats(
-                results: TopologyResult,
-                updateFunc: (value: React.SetStateAction<unknown>) => void
-              ) {
-                updateFunc(results.metrics);
-                updateStats(results.stats);
-              }
-
-              function updateTotalMetricAndStats(
-                results: TopologyResult,
-                updateFunc: (value: React.SetStateAction<PairTopologyMetrics | undefined>) => void
-              ) {
-                updateFunc(results.metrics[0] as PairTopologyMetrics);
-                updateStats(results.stats);
-              }
-
-              function updateStats(updatedStats: Stats) {
-                stats.limitReached = stats.limitReached || updatedStats.limitReached;
-                stats.numQueries += updatedStats.numQueries;
-              }
-
-              //set metrics
-              updateMetricsAndStats(results[0], setMetrics);
-              //set app metrics
-              updateTotalMetricAndStats(results[1], setTotalMetric);
-
-              if (droppedType) {
-                //set dropped metrics
-                updateMetricsAndStats(results[droppedIndex], setDroppedMetrics);
-                //set app dropped metrics
-                updateTotalMetricAndStats(results[droppedIndex + 1], setTotalDroppedMetric);
-                //set dropped state
-                updateMetricsAndStats(results[droppedIndex + 2], setDroppedStateMetrics);
-                //set dropped cause
-                updateMetricsAndStats(results[droppedIndex + 3], setDroppedCauseMetrics);
-              } else {
-                setDroppedMetrics([]);
-                setTotalDroppedMetric(undefined);
-                setDroppedStateMetrics(undefined);
-                setDroppedCauseMetrics(undefined);
-              }
-
-              if (config.features.includes('dnsTracking')) {
-                //set DNS latency metrics
-                updateMetricsAndStats(results[dnsLatencyIndex], setDnsLatencyMetrics);
-                //set app DNS latency metrics
-                updateTotalMetricAndStats(results[dnsLatencyIndex + 1], setTotalDnsLatencyMetric);
-                //set DNS response codes metrics
-                updateMetricsAndStats(results[dnsLatencyIndex + 2], setDnsRCodeMetrics);
-                //set app DNS count metrics
-                updateTotalMetricAndStats(results[dnsLatencyIndex + 3], setTotalDnsCountMetric);
-              } else {
-                setDnsLatencyMetrics([]);
-                setTotalDnsLatencyMetric(undefined);
-                setDnsRCodeMetrics(undefined);
-                setTotalDnsCountMetric(undefined);
-              }
-
-              setStats(stats);
-            })
-            .catch(err => {
-              setMetrics([]);
-              setTotalMetric(undefined);
-              setDroppedMetrics([]);
-              setTotalDroppedMetric(undefined);
-              setDroppedStateMetrics(undefined);
-              setDroppedCauseMetrics(undefined);
-              setDnsLatencyMetrics([]);
-              setTotalDnsLatencyMetric(undefined);
-              setDnsRCodeMetrics(undefined);
-              setTotalDnsCountMetric(undefined);
-              setError(getHTTPErrorDetails(err));
-              setWarningMessage(undefined);
-            })
-            .finally(() => {
-              //clear flows
-              setFlows([]);
-              setLoading(false);
-              setLastRefresh(new Date());
-            })
-        );
+        promises = fetchOverview(fq, droppedType);
         break;
       case 'topology':
-        //get bytes or packets
-        promises.push(getTopology(fq, range));
-        if (droppedType) {
-          //run same for dropped bytes or packets
-          promises.push(getTopology({ ...fq, type: droppedType }, range));
-        }
-
-        manageWarnings(
-          Promise.all(promises)
-            .then(results => {
-              //get stats from first result
-              const stats = results[0].stats;
-
-              //set metrics
-              setMetrics((results[0] as TopologyResult).metrics as PairTopologyMetrics[]);
-
-              if (results.length > 1) {
-                //set dropped metrics
-                setDroppedMetrics((results[1] as TopologyResult).metrics as PairTopologyMetrics[]);
-                stats.limitReached = stats.limitReached || results[1].stats.limitReached;
-                stats.numQueries += results[1].stats.numQueries;
-              } else {
-                setDroppedMetrics([]);
-              }
-
-              setStats(stats);
-            })
-            .catch(err => {
-              setMetrics([]);
-              setDroppedMetrics([]);
-              setError(getHTTPErrorDetails(err));
-              setWarningMessage(undefined);
-            })
-            .finally(() => {
-              //clear flows
-              setFlows([]);
-              setLoading(false);
-              setLastRefresh(new Date());
-            })
-        );
+        promises = fetchTopology(fq, droppedType);
         break;
       default:
         console.error('tick called on not implemented view Id', selectedViewId);
         setLoading(false);
         break;
     }
-  }, [buildFlowQuery, config.features, selectedViewId, histogramRange, showHistogram, manageWarnings, range]);
+    if (promises) {
+      manageWarnings(
+        promises
+          .then(allStats => {
+            const stats = allStats.reduce(mergeStats, undefined);
+            setStats(stats);
+          })
+          .catch(err => {
+            setFlows([]);
+            setMetrics([]);
+            setTotalMetric(undefined);
+            setDroppedMetrics([]);
+            setTotalDroppedMetric(undefined);
+            setDroppedStateMetrics(undefined);
+            setDroppedCauseMetrics(undefined);
+            setError(getHTTPErrorDetails(err));
+            setWarningMessage(undefined);
+          })
+          .finally(() => {
+            setLoading(false);
+            setLastRefresh(new Date());
+          })
+      );
+    }
+  }, [buildFlowQuery, config.features, selectedViewId, manageWarnings, fetchTable, fetchOverview, fetchTopology]);
 
   usePoll(tick, interval);
 
@@ -724,8 +698,8 @@ export const NetflowTraffic: React.FC<{
     setURLMatch(match, !initState.current.includes('configLoaded'));
   }, [match]);
   React.useEffect(() => {
-    setURLReporter(reporter, !initState.current.includes('configLoaded'));
-  }, [reporter]);
+    setURLShowDup(showDuplicates, !initState.current.includes('configLoaded'));
+  }, [showDuplicates]);
   React.useEffect(() => {
     setURLMetricFunction(metricFunction, !initState.current.includes('configLoaded'));
     setURLMetricType(metricType, !initState.current.includes('configLoaded'));
@@ -742,7 +716,7 @@ export const NetflowTraffic: React.FC<{
     if (!forcedFilters) {
       setQueryParams(getURLParams().toString());
     }
-  }, [filters, range, limit, match, reporter, metricFunction, metricType, setQueryParams, forcedFilters]);
+  }, [filters, range, limit, match, showDuplicates, metricFunction, metricType, setQueryParams, forcedFilters]);
 
   // update local storage enabled filters
   React.useEffect(() => {
@@ -1019,13 +993,11 @@ export const NetflowTraffic: React.FC<{
           )}
           filters={filters.list}
           range={range}
-          reporter={reporter}
           type={recordType}
           isDark={isDarkTheme}
           canSwitchTypes={isFlow() && isConnectionTracking()}
           setFilters={setFiltersList}
           setRange={setRange}
-          setReporter={setReporter}
           setType={setRecordType}
           onClose={() => onRecordSelect(undefined)}
         />
@@ -1338,11 +1310,11 @@ export const NetflowTraffic: React.FC<{
           setPacketLoss,
           recordType,
           setRecordType,
-          reporter,
-          setReporter,
+          showDuplicates,
+          setShowDuplicates,
           allowFlow: isFlow(),
           allowConnection: isConnectionTracking(),
-          allowReporterBoth: selectedViewId === 'table',
+          allowShowDuplicates: selectedViewId === 'table',
           allowPktDrops: isPktDrop(),
           useTopK: selectedViewId === 'overview'
         }}

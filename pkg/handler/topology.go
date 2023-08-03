@@ -60,18 +60,26 @@ func getTopologyFlows(cfg *loki.Config, client httpclient.Caller, params url.Val
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
-	rateInterval := params.Get(rateIntervalKey)
-	if rateInterval == "" {
-		rateInterval = defaultRateInterval
+	rateInterval, err := getRateInterval(params)
+	if err != nil {
+		return nil, http.StatusBadRequest, err
 	}
-	step := params.Get(stepKey)
-	if step == "" {
-		step = defaultStep
+	step, err := getStep(params)
+	if err != nil {
+		return nil, http.StatusBadRequest, err
 	}
-	metricType := params.Get(metricTypeKey)
-	reporter := constants.Reporter(params.Get(reporterKey))
-	recordType := constants.RecordType(params.Get(recordTypeKey))
-	packetLoss := constants.PacketLoss(params.Get(packetLossKey))
+	metricType, err := getMetricType(params)
+	if err != nil {
+		return nil, http.StatusBadRequest, err
+	}
+	recordType, err := getRecordType(params)
+	if err != nil {
+		return nil, http.StatusBadRequest, err
+	}
+	packetLoss, err := getPacketLoss(params)
+	if err != nil {
+		return nil, http.StatusBadRequest, err
+	}
 	aggregate := params.Get(aggregateByKey)
 	groups := params.Get(groupsKey)
 	rawFilters := params.Get(filtersKey)
@@ -79,13 +87,16 @@ func getTopologyFlows(cfg *loki.Config, client httpclient.Caller, params url.Val
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
+	if shouldMergeReporters(metricType) {
+		filterGroups = expandReportersMergeQueries(filterGroups)
+	}
 
 	merger := loki.NewMatrixMerger(reqLimit)
 	if len(filterGroups) > 1 {
 		// match any, and multiple filters => run in parallel then aggregate
 		var queries []string
 		for _, group := range filterGroups {
-			query, code, err := buildTopologyQuery(cfg, group, start, end, limit, rateInterval, step, metricType, recordType, reporter, packetLoss, aggregate, groups)
+			query, code, err := buildTopologyQuery(cfg, group, start, end, limit, rateInterval, step, metricType, recordType, packetLoss, aggregate, groups)
 			if err != nil {
 				return nil, code, errors.New("Can't build query: " + err.Error())
 			}
@@ -101,7 +112,7 @@ func getTopologyFlows(cfg *loki.Config, client httpclient.Caller, params url.Val
 		if len(filterGroups) > 0 {
 			filters = filterGroups[0]
 		}
-		query, code, err := buildTopologyQuery(cfg, filters, start, end, limit, rateInterval, step, metricType, recordType, reporter, packetLoss, aggregate, groups)
+		query, code, err := buildTopologyQuery(cfg, filters, start, end, limit, rateInterval, step, metricType, recordType, packetLoss, aggregate, groups)
 		if err != nil {
 			return nil, code, err
 		}
@@ -118,8 +129,27 @@ func getTopologyFlows(cfg *loki.Config, client httpclient.Caller, params url.Val
 	return qr, http.StatusOK, nil
 }
 
-func buildTopologyQuery(cfg *loki.Config, queryFilters filters.SingleQuery, start, end, limit, rateInterval, step, metricType string, recordType constants.RecordType, reporter constants.Reporter, packetLoss constants.PacketLoss, aggregate, groups string) (string, int, error) {
-	qb, err := loki.NewTopologyQuery(cfg, start, end, limit, rateInterval, step, metricType, recordType, reporter, packetLoss, aggregate, groups)
+func shouldMergeReporters(metricType constants.MetricType) bool {
+	return metricType == constants.MetricTypeBytes ||
+		metricType == constants.MetricTypePackets
+}
+
+func expandReportersMergeQueries(queries filters.MultiQueries) filters.MultiQueries {
+	var out filters.MultiQueries
+	for _, q := range queries {
+		q1, q2 := filters.SplitForReportersMerge(q)
+		if q1 != nil {
+			out = append(out, q1)
+		}
+		if q2 != nil {
+			out = append(out, q2)
+		}
+	}
+	return out
+}
+
+func buildTopologyQuery(cfg *loki.Config, queryFilters filters.SingleQuery, start, end, limit, rateInterval, step string, metricType constants.MetricType, recordType constants.RecordType, packetLoss constants.PacketLoss, aggregate, groups string) (string, int, error) {
+	qb, err := loki.NewTopologyQuery(cfg, start, end, limit, rateInterval, step, metricType, recordType, packetLoss, aggregate, groups)
 	if err != nil {
 		return "", http.StatusBadRequest, err
 	}

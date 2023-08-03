@@ -18,7 +18,6 @@ type Topology struct {
 	function           string
 	dataField          string
 	fields             string
-	dedup              bool
 	skipEmptyDropState bool
 	skipEmptyDropCause bool
 	skipNonDNS         bool
@@ -30,8 +29,8 @@ type TopologyQueryBuilder struct {
 	topology *Topology
 }
 
-func NewTopologyQuery(cfg *Config, start, end, limit, rateInterval, step, metricType string,
-	recordType constants.RecordType, reporter constants.Reporter, packetLoss constants.PacketLoss,
+func NewTopologyQuery(cfg *Config, start, end, limit, rateInterval, step string, metricType constants.MetricType,
+	recordType constants.RecordType, packetLoss constants.PacketLoss,
 	aggregate, groups string) (*TopologyQueryBuilder, error) {
 	l := limit
 	if len(l) == 0 {
@@ -41,21 +40,21 @@ func NewTopologyQuery(cfg *Config, start, end, limit, rateInterval, step, metric
 	fields := getFields(aggregate, groups)
 	var f, t string
 	switch metricType {
-	case "count", "countDns":
+	case constants.MetricTypeCount, constants.MetricTypeCountDNS:
 		f = "count_over_time"
-	case "droppedPackets":
+	case constants.MetricTypeDroppedPackets:
 		f = "rate"
 		t = "PktDropPackets"
-	case "packets":
+	case constants.MetricTypePackets:
 		f = "rate"
 		t = "Packets"
-	case "droppedBytes":
+	case constants.MetricTypeDroppedBytes:
 		f = "rate"
 		t = "PktDropBytes"
-	case "dnsLatencies":
+	case constants.MetricTypeDNSLatencies:
 		f = "avg_over_time"
 		t = "DnsLatencyMs"
-	default:
+	case constants.MetricTypeBytes:
 		f = "rate"
 		t = "Bytes"
 	}
@@ -71,7 +70,7 @@ func NewTopologyQuery(cfg *Config, start, end, limit, rateInterval, step, metric
 	}
 
 	return &TopologyQueryBuilder{
-		FlowQueryBuilder: NewFlowQueryBuilder(cfg, start, end, limit, reporter, rt, packetLoss),
+		FlowQueryBuilder: NewFlowQueryBuilder(cfg, start, end, limit, d, rt, packetLoss),
 		topology: &Topology{
 			rateInterval:       rateInterval,
 			step:               step,
@@ -79,7 +78,6 @@ func NewTopologyQuery(cfg *Config, start, end, limit, rateInterval, step, metric
 			function:           f,
 			dataField:          t,
 			fields:             fields,
-			dedup:              d,
 			skipEmptyDropState: aggregate == "droppedState",
 			skipEmptyDropCause: aggregate == "droppedCause",
 			skipNonDNS:         metricType == "dnsLatencies" || metricType == "countDns",
@@ -161,10 +159,6 @@ func (q *TopologyQueryBuilder) Build() string {
 	sb.WriteString("(")
 	q.appendLabels(sb)
 	q.appendLineFilters(sb)
-
-	if q.topology.dedup {
-		q.appendDeduplicateFilter(sb)
-	}
 
 	if q.topology.skipEmptyDropState {
 		q.appendPktDropStateFilter(sb)

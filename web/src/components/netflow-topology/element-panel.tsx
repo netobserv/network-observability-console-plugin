@@ -20,7 +20,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { defaultSize, maxSize, minSize } from '../../utils/panel';
 import { MetricType } from '../../model/flow-query';
-import { PairTopologyMetrics } from '../../api/loki';
+import { TopologyMetrics } from '../../api/loki';
 import { Filter } from '../../model/filters';
 import { GraphElementPeer, NodeData } from '../../model/topology';
 import { ElementPanelMetrics } from './element-panel-metrics';
@@ -112,7 +112,7 @@ export const ElementPanelDetailsContent: React.FC<{
 export const ElementPanel: React.FC<{
   onClose: () => void;
   element: GraphElementPeer;
-  metrics: PairTopologyMetrics[];
+  metrics: TopologyMetrics[];
   metricType: MetricType;
   filters: Filter[];
   setFilters: (filters: Filter[]) => void;

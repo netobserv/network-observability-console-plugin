@@ -38,6 +38,7 @@ const (
 	FlowDirection  = "FlowDirection"
 	DNSID          = "DnsId"
 	DNSLatency     = "DnsLatencyMs"
+	Duplicate      = "Duplicate"
 )
 
 func IsNumeric(v string) bool {

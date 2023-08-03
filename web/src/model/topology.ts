@@ -13,7 +13,7 @@ import {
   Point
 } from '@patternfly/react-topology';
 import _ from 'lodash';
-import { MetricStats, TopologyMetricPeer, PairTopologyMetrics } from '../api/loki';
+import { MetricStats, TopologyMetricPeer, TopologyMetrics } from '../api/loki';
 import { Filter, FilterDefinition, Filters, findFromFilters } from '../model/filters';
 import { defaultMetricFunction, defaultMetricType } from '../utils/router';
 import { findFilter } from '../utils/filter-definitions';
@@ -351,8 +351,8 @@ const generateEdge = (
 };
 
 export const generateDataModel = (
-  metrics: PairTopologyMetrics[],
-  droppedMetrics: PairTopologyMetrics[],
+  metrics: TopologyMetrics[],
+  droppedMetrics: TopologyMetrics[],
   options: TopologyOptions,
   metricScope: FlowScope,
   searchValue: string,

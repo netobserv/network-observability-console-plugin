@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChartDonut, ChartLabel, ChartLegend, ChartThemeColor } from '@patternfly/react-charts';
-import { SingleTopologyMetrics, NamedMetric } from '../../api/loki';
+import { GenericMetric, NamedMetric } from '../../api/loki';
 import { getFormattedValue } from '../../utils/metrics';
 import { getStat } from '../../model/topology';
 import { MetricType } from '../../model/flow-query';
@@ -13,7 +13,7 @@ export type LatencyDonutProps = {
   id: string;
   limit: number;
   metricType: MetricType;
-  topKMetrics: NamedMetric[] | SingleTopologyMetrics[];
+  topKMetrics: NamedMetric[] | GenericMetric[];
   totalMetric: NamedMetric;
   showOthers: boolean;
   othersName?: string;
@@ -38,7 +38,7 @@ export const LatencyDonut: React.FC<LatencyDonutProps> = ({
 
   const sliced = topKMetrics
     .map(m => ({
-      name: (m as NamedMetric).fullName || (m as SingleTopologyMetrics).name,
+      name: (m as NamedMetric).fullName || (m as GenericMetric).name,
       value: getStat(m.stats, 'avg')
     }))
     .sort((a, b) => b.value - a.value)

@@ -1,7 +1,6 @@
 import { Filter, Filters, filterKeyEqual } from './filters';
 import { swapFilters } from '../components/filters/filters-helper';
 
-export type Reporter = 'source' | 'destination' | 'both';
 export type RecordType = 'allConnections' | 'newConnection' | 'heartbeat' | 'endConnection' | 'flowLog';
 export type Match = 'all' | 'any';
 export type PacketLoss = 'dropped' | 'hasDrops' | 'sent' | 'all';
@@ -15,15 +14,17 @@ export type MetricType =
   | 'droppedPackets'
   | 'dnsLatencies';
 export type FlowScope = 'app' | 'host' | 'namespace' | 'owner' | 'resource';
-export type AggregateBy = FlowScope | 'droppedCause' | 'droppedState' | 'dnsRCode';
+export type GenericAggregation = 'droppedCause' | 'droppedState' | 'dnsRCode';
+export type AggregateBy = FlowScope | GenericAggregation;
 export type NodeType = FlowScope | 'unknown';
 export type Groups = 'hosts' | 'hosts+namespaces' | 'hosts+owners' | 'namespaces' | 'namespaces+owners' | 'owners';
+
 export interface FlowQuery {
   timeRange?: number;
   startTime?: string;
   endTime?: string;
   filters: string;
-  reporter?: Reporter;
+  dedup?: boolean;
   recordType: RecordType;
   packetLoss: PacketLoss;
   limit: number;

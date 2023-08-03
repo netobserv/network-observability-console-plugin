@@ -15,10 +15,10 @@ describe('<FiltersToolbar />', () => {
     queryOptionsProps: {
       limit: 100,
       recordType: 'allConnections',
-      reporter: 'destination',
+      showDuplicates: true,
       allowFlow: true,
       allowConnection: true,
-      allowReporterBoth: true,
+      allowShowDuplicates: true,
       allowPktDrops: true,
       useTopK: false,
       match: 'all',
@@ -26,7 +26,7 @@ describe('<FiltersToolbar />', () => {
       setLimit: jest.fn(),
       setMatch: jest.fn(),
       setPacketLoss: jest.fn(),
-      setReporter: jest.fn(),
+      setShowDuplicates: jest.fn(),
       setRecordType: jest.fn()
     },
     quickFilters: [],

@@ -3,6 +3,9 @@ package filters
 import (
 	"net/url"
 	"strings"
+
+	"github.com/netobserv/network-observability-console-plugin/pkg/model/fields"
+	"github.com/netobserv/network-observability-console-plugin/pkg/utils/constants"
 )
 
 // MultiQueries is an union group of singleQueries (OR'ed)
@@ -59,4 +62,30 @@ func Parse(raw string) (MultiQueries, error) {
 		parsed = append(parsed, andFilters)
 	}
 	return parsed, nil
+}
+
+func SplitForReportersMerge(q SingleQuery) (SingleQuery, SingleQuery) {
+	// If FlowDirection is enforced, skip merging both reporters
+	for _, m := range q {
+		if m.Key == fields.FlowDirection {
+			return q, nil
+		}
+	}
+	// The rationale here is that most traffic is duplicated from ingress and egress PoV, except cluster-external traffic.
+	// Merging is done by running a first query with FlowDirection=EGRESS and another with FlowDirection=INGRESS AND SrcOwnerName is empty,
+	// which stands for cluster-external.
+	// (Note that we use SrcOwnerName both as an optimization as it's a Loki index,
+	// and as convenience because looking for empty fields won't work if they aren't indexed)
+	q1 := SingleQuery{
+		NewMatch(fields.FlowDirection, `"`+constants.Egress+`"`),
+	}
+	q2 := SingleQuery{
+		NewMatch(fields.FlowDirection, `"`+constants.Ingress+`"`),
+		NewMatch(fields.SrcOwnerName, `""`),
+	}
+	for _, m := range q {
+		q1 = append(q1, m)
+		q2 = append(q2, m)
+	}
+	return q1, q2
 }

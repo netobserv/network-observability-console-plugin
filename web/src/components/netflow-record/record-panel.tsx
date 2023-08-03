@@ -24,14 +24,14 @@ import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { defaultSize, maxSize, minSize } from '../../utils/panel';
-import { defaultTimeRange, flowdirToReporter } from '../../utils/router';
+import { defaultTimeRange } from '../../utils/router';
 import { Record } from '../../api/ipfix';
 import { Column, ColumnGroup, ColumnsId, getColumnGroups, getShortColumnName } from '../../utils/columns';
 import { TimeRange } from '../../utils/datetime';
 import { doesIncludeFilter, Filter, findFromFilters, removeFromFilters } from '../../model/filters';
 import { findFilter } from '../../utils/filter-definitions';
 import RecordField, { RecordFieldFilter } from './record-field';
-import { RecordType, Reporter } from '../../model/flow-query';
+import { RecordType } from '../../model/flow-query';
 import './record-panel.css';
 
 export type RecordDrawerProps = {
@@ -39,13 +39,11 @@ export type RecordDrawerProps = {
   columns: Column[];
   filters: Filter[];
   range: number | TimeRange;
-  reporter: Reporter;
   type: RecordType;
   canSwitchTypes: boolean;
   isDark?: boolean;
   setFilters: (v: Filter[]) => void;
   setRange: (r: number | TimeRange) => void;
-  setReporter: (r: Reporter) => void;
   setType: (r: RecordType) => void;
   onClose: () => void;
   id?: string;
@@ -57,13 +55,11 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
   columns,
   filters,
   range,
-  reporter,
   type,
   canSwitchTypes,
   isDark,
   setFilters,
   setRange,
-  setReporter,
   setType,
   onClose
 }) => {
@@ -87,8 +83,6 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
       switch (col.id) {
         case ColumnsId.endtime:
           return getTimeRangeFilter(col, value);
-        case ColumnsId.flowdir:
-          return getFlowdirFilter(col, value);
         case ColumnsId.recordtype:
           return getRecordTypeFilter();
         default:
@@ -117,19 +111,6 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
       };
     },
     [range, setRange]
-  );
-
-  const getFlowdirFilter = React.useCallback(
-    (col: Column, value: unknown): RecordFieldFilter => {
-      const recReporter = flowdirToReporter[value as string];
-      const isDelete = reporter === recReporter;
-      return {
-        type: 'filter',
-        onClick: () => setReporter(isDelete ? 'both' : recReporter),
-        isDelete: isDelete
-      };
-    },
-    [reporter, setReporter]
   );
 
   const getRecordTypeFilter = React.useCallback((): RecordFieldFilter | undefined => {
