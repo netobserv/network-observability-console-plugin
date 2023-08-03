@@ -99,7 +99,9 @@ func getMetricType(params url.Values) (constants.MetricType, error) {
 		metricType == constants.MetricTypeCount ||
 		metricType == constants.MetricTypeDroppedBytes ||
 		metricType == constants.MetricTypeDroppedPackets ||
-		metricType == constants.MetricTypePackets {
+		metricType == constants.MetricTypePackets ||
+		metricType == constants.MetricTypeDNSLatencies ||
+		metricType == constants.MetricTypeCountDNS {
 		return metricType, nil
 	}
 	return "", fmt.Errorf("invalid metric type: %s", mt)
