@@ -61,7 +61,7 @@ describe('<NetflowTraffic />', () => {
        * 2 queries for dropped metrics on current scope & app scope
        * 2 queries for dns latency on current scope & app scope
        * 1 query for dns response codes count at app scope
-       * ... and 3 times getGenericMetricsMock: 
+       * ... and 3 times getGenericMetricsMock:
        * dropped states
        * dropped causes
        * dns response codes count
