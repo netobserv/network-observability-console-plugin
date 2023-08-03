@@ -1,7 +1,6 @@
 package loki
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/netobserv/network-observability-console-plugin/pkg/utils"
@@ -24,7 +23,7 @@ type Topology struct {
 	skipNonDNS         bool
 	skipEmptyDNSRCode  bool
 	skipEmptyRTT       bool
-	factor             float64
+	factor             string
 }
 
 type TopologyQueryBuilder struct {
@@ -42,7 +41,7 @@ func NewTopologyQuery(cfg *Config, start, end, limit, rateInterval, step string,
 
 	fields := getFields(aggregate, groups)
 	var f, t string
-	factor := 1.0
+	factor := ""
 	switch metricType {
 	case constants.MetricTypeCount, constants.MetricTypeCountDNS:
 		f = "count_over_time"
@@ -64,7 +63,7 @@ func NewTopologyQuery(cfg *Config, start, end, limit, rateInterval, step string,
 	case constants.MetricTypeFlowRTT:
 		f = "avg_over_time"
 		t = "TimeFlowRttNs"
-		factor = 0.000001 // nanoseconds to miliseconds
+		factor = "/1000000" // nanoseconds to miliseconds
 	}
 
 	var d bool
@@ -149,7 +148,7 @@ func (q *TopologyQueryBuilder) Build() string {
 	//				<function>(
 	//					{<label filters>}|<line filters>|json|<json filters>
 	//						|unwrap Bytes|__error__=""[<interval>]
-	//				)
+	//				) <factor>
 	//			)
 	//		)
 	//		&<query params>&step=<step>
@@ -199,9 +198,8 @@ func (q *TopologyQueryBuilder) Build() string {
 		sb.WriteString(q.topology.rateInterval)
 	}
 	sb.WriteString("])")
-	if q.topology.factor != 1 {
-		sb.WriteRune('*')
-		sb.WriteString(strings.Replace(fmt.Sprintf("%f", q.topology.factor), ",", ".", 1))
+	if len(q.topology.factor) > 0 {
+		sb.WriteString(q.topology.factor)
 	}
 	sb.WriteString("))")
 	q.appendQueryParams(sb)
