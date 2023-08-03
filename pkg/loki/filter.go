@@ -208,7 +208,7 @@ func moreThanRegex(sb *strings.Builder, value string) {
 	intVal, _ := strconv.Atoi(value)
 	for i := 1; i < len(value); i++ {
 		nextMin := int((intVal / int(math.Pow10(i))) + 1)
-		nextMinStr := fmt.Sprintf("%d", nextMin)
+		nextMinStr := strconv.Itoa(nextMin)
 
 		sb.WriteRune('|')
 		if nextMin >= 10 {
