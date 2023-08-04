@@ -19,6 +19,7 @@
 .overview-flex-item {
   margin: 0 !important;
   width: 50%;
+  align-self: flex-start;
 }
 
 .overview-flex-item.full {
