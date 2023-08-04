@@ -39,6 +39,7 @@ export interface FiltersToolbarProps {
   quickFilters: QuickFilter[];
   allowConnectionFilter?: boolean;
   allowDNSFilter?: boolean;
+  allowPktDrops?: boolean;
   isFullScreen: boolean;
   setFullScreen: (b: boolean) => void;
 }
@@ -54,6 +55,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
   quickFilters,
   allowConnectionFilter,
   allowDNSFilter,
+  allowPktDrops,
   isFullScreen,
   setFullScreen,
   ...props
@@ -174,6 +176,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
                       setSelectedFilter={setSelectedFilter}
                       allowConnectionFilter={allowConnectionFilter}
                       allowDNSFilter={allowDNSFilter}
+                      allowPktDrops={allowPktDrops}
                     />
                     <CompareFilter
                       value={selectedCompare}

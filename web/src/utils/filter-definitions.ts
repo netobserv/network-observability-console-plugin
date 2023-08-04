@@ -136,7 +136,8 @@ let filterDefinitions: FilterDefinition[] | undefined = undefined;
 export const getFilterDefinitions = (
   t: TFunction,
   allowConnectionFilter?: boolean,
-  allowDNSFilter?: boolean
+  allowDNSFilter?: boolean,
+  allowPktDrops?: boolean
 ): FilterDefinition[] => {
   if (!filterDefinitions) {
     const rejectEmptyValue = (value: string) => {
@@ -529,10 +530,13 @@ export const getFilterDefinitions = (
     return filterDefinitions;
   } else {
     return filterDefinitions.filter(
-      fd => (allowConnectionFilter || fd.id !== 'id') && (allowDNSFilter || !fd.id.startsWith('dns_'))
+      fd =>
+        (allowConnectionFilter || fd.id !== 'id') &&
+        (allowDNSFilter || !fd.id.startsWith('dns_')) &&
+        (allowPktDrops || !fd.id.startsWith('pkt_drop_'))
     );
   }
 };
 
 export const findFilter = (t: TFunction, id: FilterId) =>
-  getFilterDefinitions(t, true, true).find(def => def.id === id);
+  getFilterDefinitions(t, true, true, true).find(def => def.id === id);

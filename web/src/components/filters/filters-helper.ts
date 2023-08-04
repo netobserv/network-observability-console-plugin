@@ -9,8 +9,13 @@ export type FilterGroup = {
   filters: FilterDefinition[];
 };
 
-export const buildGroups = (t: TFunction, allowConnectionFilter?: boolean, allowDNSFilter?: boolean): FilterGroup[] => {
-  const defs = getFilterDefinitions(t, allowConnectionFilter, allowDNSFilter);
+export const buildGroups = (
+  t: TFunction,
+  allowConnectionFilter?: boolean,
+  allowDNSFilter?: boolean,
+  allowPktDrops?: boolean
+): FilterGroup[] => {
+  const defs = getFilterDefinitions(t, allowConnectionFilter, allowDNSFilter, allowPktDrops);
   return [
     {
       title: t('Source'),

@@ -1352,6 +1352,7 @@ export const NetflowTraffic: React.FC<{
         setFullScreen={setFullScreen}
         allowConnectionFilter={isConnectionTracking()}
         allowDNSFilter={isDNSTracking()}
+        allowPktDrops={isPktDrop()}
       />
       {
         <Flex className="netflow-traffic-tabs-container">
