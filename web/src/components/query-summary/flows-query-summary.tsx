@@ -39,8 +39,8 @@ export const FlowsQuerySummaryContent: React.FC<{
   const rangeInSeconds = rangeToSeconds(range);
 
   const counters = React.useCallback(() => {
-    const bytes = filteredFlows.map(f => f.fields.Bytes).reduce((a, b) => a + b, 0);
-    const packets = filteredFlows.map(f => f.fields.Packets).reduce((a, b) => a + b, 0);
+    const bytes = filteredFlows.map(f => f.fields.Bytes || 0).reduce((a, b) => a + b, 0);
+    const packets = filteredFlows.map(f => f.fields.Packets || 0).reduce((a, b) => a + b, 0);
 
     return (
       <>

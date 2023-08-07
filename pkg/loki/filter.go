@@ -160,17 +160,6 @@ func (f *lineFilter) asLabelFilters() []labelFilter {
 	return lfs
 }
 
-func numberMatchLineFilter(key string, strictKey bool, value string) lineFilter {
-	return lineFilter{
-		key:       key,
-		strictKey: strictKey,
-		values: []lineMatch{{
-			valueType: typeNumber,
-			value:     value,
-		}},
-	}
-}
-
 func regexMatchLineFilter(key string, strictKey bool, value string) lineFilter {
 	return lineFilter{
 		key:       key,
