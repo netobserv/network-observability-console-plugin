@@ -25,8 +25,8 @@ export type PanelKebabOptions = {
 
 export type PanelKebabProps = {
   id: OverviewPanelId;
-  options: PanelKebabOptions;
-  setOptions: (opts: PanelKebabOptions) => void;
+  options?: PanelKebabOptions;
+  setOptions?: (opts: PanelKebabOptions) => void;
   isDark?: boolean;
 };
 
@@ -36,42 +36,42 @@ export const PanelKebab: React.FC<PanelKebabProps> = ({ id, options, setOptions,
 
   const setShowTotal = React.useCallback(
     (checked: boolean) => {
-      setOptions({ ...options, showTotal: checked });
+      setOptions!({ ...options, showTotal: checked });
     },
     [setOptions, options]
   );
 
   const setShowOthers = React.useCallback(
     (checked: boolean) => {
-      setOptions({ ...options, showOthers: checked });
+      setOptions!({ ...options, showOthers: checked });
     },
     [setOptions, options]
   );
 
   const setShowNoError = React.useCallback(
     (checked: boolean) => {
-      setOptions({ ...options, showNoError: checked });
+      setOptions!({ ...options, showNoError: checked });
     },
     [setOptions, options]
   );
 
   const setShowInternal = React.useCallback(
     (checked: boolean) => {
-      setOptions({ ...options, showInternal: checked });
+      setOptions!({ ...options, showInternal: checked });
     },
     [setOptions, options]
   );
 
   const setShowOutOfScope = React.useCallback(
     (checked: boolean) => {
-      setOptions({ ...options, showOutOfScope: checked });
+      setOptions!({ ...options, showOutOfScope: checked });
     },
     [setOptions, options]
   );
 
   const setCompareToDropped = React.useCallback(
     (checked: boolean) => {
-      setOptions({ ...options, compareToDropped: checked });
+      setOptions!({ ...options, compareToDropped: checked });
     },
     [setOptions, options]
   );
@@ -84,7 +84,7 @@ export const PanelKebab: React.FC<PanelKebabProps> = ({ id, options, setOptions,
   }, [id, isDark]);
 
   const items = [];
-  if (options.showTotal !== undefined) {
+  if (options?.showTotal !== undefined) {
     items.push(
       <DropdownItem key={`${id}-show-total`}>
         <Tooltip content={<Text component={TextVariants.p}>{t('Show total traffic for the selected filters')}</Text>}>
@@ -99,7 +99,7 @@ export const PanelKebab: React.FC<PanelKebabProps> = ({ id, options, setOptions,
       </DropdownItem>
     );
   }
-  if (options.showOthers !== undefined) {
+  if (options?.showOthers !== undefined) {
     items.push(
       <DropdownItem key={`${id}-show-others`}>
         <Tooltip
@@ -116,7 +116,7 @@ export const PanelKebab: React.FC<PanelKebabProps> = ({ id, options, setOptions,
       </DropdownItem>
     );
   }
-  if (options.showNoError !== undefined) {
+  if (options?.showNoError !== undefined) {
     items.push(
       <DropdownItem key={`${id}-show-noerror`}>
         <Tooltip
@@ -133,7 +133,7 @@ export const PanelKebab: React.FC<PanelKebabProps> = ({ id, options, setOptions,
       </DropdownItem>
     );
   }
-  if (options.showInternal !== undefined) {
+  if (options?.showInternal !== undefined) {
     items.push(
       <DropdownItem key={`${id}-show-internal`}>
         <Tooltip
@@ -157,7 +157,7 @@ export const PanelKebab: React.FC<PanelKebabProps> = ({ id, options, setOptions,
       </DropdownItem>
     );
   }
-  if (options.showOutOfScope !== undefined) {
+  if (options?.showOutOfScope !== undefined) {
     items.push(
       <DropdownItem key={`${id}-show-out-of-scope`}>
         <Tooltip
@@ -178,7 +178,7 @@ export const PanelKebab: React.FC<PanelKebabProps> = ({ id, options, setOptions,
       </DropdownItem>
     );
   }
-  if (options.compareToDropped !== undefined) {
+  if (options?.compareToDropped !== undefined) {
     items.push(
       <DropdownItem key={`${id}-compare-to-dropped`}>
         <Tooltip

@@ -66,9 +66,10 @@ func NewFlowQueryBuilder(cfg *Config, start, end, limit string, dedup bool,
 	}
 
 	if packetLoss == constants.PacketLossDropped {
-		// match 0 packet sent and 1+ packets dropped
+		// match records that doesn't contains "Packets" field and 1+ packets dropped
+		// as FLP will ensure the filtering
 		lineFilters = append(lineFilters,
-			numberMatchLineFilter(fields.Packets, true, "0"),
+			notContainsKeyLineFilter(fields.Packets),
 			regexMatchLineFilter(fields.PktDropPackets, true, "[1-9][0-9]*"),
 		)
 	} else if packetLoss == constants.PacketLossHasDrop {

@@ -75,13 +75,13 @@ export interface Fields {
   /** TCP flags */
   Flags?: number;
   /** Number of packets in this flow */
-  Packets: number;
+  Packets?: number;
   /** In conversation tracking, A to B packets counter per conversation */
   Packets_AB?: number;
   /** In conversation tracking, B to A packets counter per conversation */
   Packets_BA?: number;
   /** Number of bytes in this flow */
-  Bytes: number;
+  Bytes?: number;
   /** In conversation tracking, A to B bytes counter per conversation */
   Bytes_AB?: number;
   /** In conversation tracking, B to A bytes counter per conversation */

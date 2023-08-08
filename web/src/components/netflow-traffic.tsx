@@ -989,7 +989,7 @@ export const NetflowTraffic: React.FC<{
           columns={getDefaultColumns(t, false, false).filter(
             col =>
               (isConnectionTracking() || ![ColumnsId.recordtype, ColumnsId.hashid].includes(col.id)) &&
-              (isDNSTracking() || ![ColumnsId.dnsid, ColumnsId.dnslatency].includes(col.id))
+              (isDNSTracking() || ![ColumnsId.dnsid, ColumnsId.dnslatency, ColumnsId.dnsresponsecode].includes(col.id))
           )}
           filters={filters.list}
           range={range}
@@ -1071,7 +1071,11 @@ export const NetflowTraffic: React.FC<{
         content = (
           <NetflowOverview
             limit={limit}
-            panels={panels.filter(panel => panel.isSelected && (isPktDrop() || !panel.id.includes('dropped')))}
+            panels={panels.filter(
+              panel =>
+                panel.isSelected &&
+                (isPktDrop() || (!panel.id.includes('dropped') && (isDNSTracking() || !panel.id.includes('dns'))))
+            )}
             recordType={recordType}
             metricType={metricType}
             metrics={metrics}
@@ -1105,7 +1109,8 @@ export const NetflowTraffic: React.FC<{
               col =>
                 col.isSelected &&
                 (isConnectionTracking() || ![ColumnsId.recordtype, ColumnsId.hashid].includes(col.id)) &&
-                (isDNSTracking() || ![ColumnsId.dnsid, ColumnsId.dnslatency].includes(col.id))
+                (isDNSTracking() ||
+                  ![ColumnsId.dnsid, ColumnsId.dnslatency, ColumnsId.dnsresponsecode].includes(col.id))
             )}
             setColumns={(v: Column[]) => setColumns(v.concat(columns.filter(col => !col.isSelected)))}
             columnSizes={columnSizes}
@@ -1324,6 +1329,7 @@ export const NetflowTraffic: React.FC<{
         setFullScreen={setFullScreen}
         allowConnectionFilter={isConnectionTracking()}
         allowDNSFilter={isDNSTracking()}
+        allowPktDrops={isPktDrop()}
       />
       {
         <Flex className="netflow-traffic-tabs-container">
@@ -1456,7 +1462,9 @@ export const NetflowTraffic: React.FC<{
         isModalOpen={isOverviewModalOpen}
         setModalOpen={setOverviewModalOpen}
         recordType={recordType}
-        panels={panels.filter(panel => isPktDrop() || !panel.id.includes('dropped'))}
+        panels={panels.filter(
+          panel => (isPktDrop() || !panel.id.includes('dropped')) && (isDNSTracking() || !panel.id.includes('dns'))
+        )}
         setPanels={setSelectedPanels}
       />
       <ColumnsModal

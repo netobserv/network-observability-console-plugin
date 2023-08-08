@@ -1,16 +1,24 @@
 import { ResourceIcon, ResourceLink } from '@openshift-console/dynamic-plugin-sdk';
-import { Button, Tooltip } from '@patternfly/react-core';
-import { FilterIcon, ToggleOnIcon, ToggleOffIcon, GlobeAmericasIcon, TimesIcon } from '@patternfly/react-icons';
+import { Button, Popover, Text, TextVariants, Tooltip } from '@patternfly/react-core';
+import { FilterIcon, GlobeAmericasIcon, TimesIcon, ToggleOffIcon, ToggleOnIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import { FlowDirection, Record } from '../../api/ipfix';
 import { Column, ColumnsId, getFullColumnName } from '../../utils/columns';
 import { dateFormatter, getFormattedDate, timeMSFormatter, utcDateTimeFormatter } from '../../utils/datetime';
+import { DNS_CODE_NAMES, getDNSRcodeDescription } from '../../utils/dns';
 import { formatDurationAboveMillisecond } from '../../utils/duration';
+import {
+  getICMPCode,
+  getICMPDocUrl,
+  getICMPType,
+  ICMP_ALL_CODES_VALUES,
+  ICMP_ALL_TYPES_VALUES
+} from '../../utils/icmp';
+import { DROP_CAUSES_DOC_URL, DROP_CAUSES_NAMES, getDropCauseDescription } from '../../utils/pkt-drop';
 import { formatPort } from '../../utils/port';
 import { formatProtocol } from '../../utils/protocol';
-import { getCode, getType } from '../../utils/icmp';
-import { DNS_CODE_NAMES, getDNSRcodeDescription } from '../../utils/dns';
 import { Size } from '../dropdowns/table-display-dropdown';
 import './record-field.css';
 
@@ -45,12 +53,13 @@ export const RecordField: React.FC<{
     return <div className="record-field-flex text-muted">{t('n/a')}</div>;
   };
 
-  const simpleTextWithTooltip = (text?: string, color?: string) => {
+  const simpleTextWithTooltip = (text?: string, color?: string, child?: JSX.Element) => {
     if (text) {
       return (
         <div data-test={`field-text-${text}`}>
           <span style={{ color }}>{text}</span>
           <div className="record-field-tooltip">{text}</div>
+          {child}
         </div>
       );
     }
@@ -176,6 +185,31 @@ export const RecordField: React.FC<{
       <div className={`record-field-content ${size}`} onMouseOver={e => onMouseOver(e, 'record-field-content')}>
         {child ? child : emptyText()}
       </div>
+    );
+  };
+
+  const clickableContent = (text: string, content: string, docUrl?: string) => {
+    return (
+      <Popover
+        headerContent={text}
+        bodyContent={content}
+        footerContent={
+          docUrl ? (
+            <Button
+              variant="link"
+              component={(props: React.FunctionComponent) => (
+                <Link {...props} target="_blank" to={{ pathname: docUrl }} />
+              )}
+            >
+              {t('Show related documentation')}
+            </Button>
+          ) : undefined
+        }
+      >
+        <Button variant="plain" className="record-field-value-popover-button">
+          <Text component={TextVariants.h4}>{text}</Text>
+        </Button>
+      </Popover>
     );
   };
 
@@ -327,7 +361,27 @@ export const RecordField: React.FC<{
         return singleContainer(simpleTextWithTooltip(value ? formatPort(value as number) : ''));
       }
       case ColumnsId.proto:
-        return singleContainer(simpleTextWithTooltip(value ? formatProtocol(value as number) : ''));
+        const text = value ? formatProtocol(value as number) : t('n/a');
+        let child: JSX.Element | undefined = undefined;
+
+        if (detailed && flow.fields.IcmpType !== undefined) {
+          const type = getICMPType(flow.fields.Proto, flow.fields.IcmpType as ICMP_ALL_TYPES_VALUES);
+          const code = getICMPCode(
+            flow.fields.Proto,
+            flow.fields.IcmpType as ICMP_ALL_TYPES_VALUES,
+            flow.fields.IcmpCode as ICMP_ALL_CODES_VALUES
+          );
+          const docUrl = getICMPDocUrl(flow.fields.Proto);
+          child = type ? (
+            <>
+              {clickableContent(type.name, type.description || '', docUrl)}
+              {code ? clickableContent(code.name, code.description || '', docUrl) : <></>}
+            </>
+          ) : (
+            clickableContent(`Type: ${flow.fields.IcmpType} Code: ${flow.fields.IcmpCode}`, '', docUrl)
+          );
+        }
+        return singleContainer(simpleTextWithTooltip(child ? `${text} ${t('reporting')}` : text, undefined, child));
       case ColumnsId.flowdir:
         return singleContainer(
           simpleTextWithTooltip(
@@ -336,38 +390,34 @@ export const RecordField: React.FC<{
         );
       case ColumnsId.packets:
       case ColumnsId.bytes:
-        let sentText = t('sent');
-        if (c.id === ColumnsId.bytes && flow.fields.IcmpType) {
-          sentText = t('sent reporting {{type}} {{code}}', {
-            type: getType(flow.fields.IcmpType),
-            code: getCode(flow.fields.IcmpType, flow.fields.IcmpCode)
-          });
-        }
-
         //show both sent / dropped counts
         if (Array.isArray(value) && value.length) {
           let droppedText = t('dropped');
-          if (c.id === ColumnsId.bytes && flow.fields.PktDropLatestDropCause) {
-            droppedText = t('dropped by {{reason}}', { reason: flow.fields.PktDropLatestDropCause });
+          let child: JSX.Element | undefined = undefined;
+          if (detailed && c.id === ColumnsId.packets && flow.fields.PktDropLatestDropCause) {
+            droppedText = t('dropped by');
+            child = clickableContent(
+              flow.fields.PktDropLatestDropCause,
+              getDropCauseDescription(flow.fields.PktDropLatestDropCause as DROP_CAUSES_NAMES),
+              DROP_CAUSES_DOC_URL
+            );
           }
           return doubleContainer(
             simpleTextWithTooltip(
-              detailed ? `${String(value[0])} ${c.name.toLowerCase()} ${sentText}` : String(value[0]),
+              detailed ? `${String(value[0])} ${c.name.toLowerCase()} ${t('sent')}` : String(value[0]),
               isDark ? '#3E8635' : '#1E4F18'
             ),
             simpleTextWithTooltip(
               detailed ? `${String(value[1])} ${c.name.toLowerCase()} ${droppedText}` : String(value[1]),
-              isDark ? '#C9190B' : '#A30000'
+              isDark ? '#C9190B' : '#A30000',
+              child
             ),
             true,
             false
           );
         } else {
           return singleContainer(
-            simpleTextWithTooltip(
-              detailed ? `${String(value)} ${c.name.toLowerCase()} ${sentText}` : String(value),
-              isDark ? '#3E8635' : '#1E4F18'
-            )
+            simpleTextWithTooltip(detailed ? `${String(value)} ${c.name.toLowerCase()} ${t('sent')}` : String(value))
           );
         }
       case ColumnsId.dnsid:

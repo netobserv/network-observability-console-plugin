@@ -188,6 +188,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
               tooltipsTruncate={false}
             />
           ),
+          kebab: <PanelKebab id={id} />,
           doubleWidth: false
         };
       case 'total_line':
@@ -206,6 +207,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
               tooltipsTruncate={false}
             />
           ),
+          kebab: <PanelKebab id={id} />,
           doubleWidth: false
         };
       case 'top_bar_total': {
@@ -326,6 +328,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
               tooltipsTruncate={false}
             />
           ),
+          kebab: <PanelKebab id={id} />,
           doubleWidth: false
         };
       case 'total_dropped_line':
@@ -346,6 +349,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
           ) : (
             emptyGraph()
           ),
+          kebab: <PanelKebab id={id} />,
           doubleWidth: false
         };
       case 'top_dropped_state_donut': {
@@ -358,7 +362,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
               id={id}
               limit={limit}
               metricType={metricType}
-              stat="avg"
+              stat="sum"
               topKMetrics={topKDroppedStateMetrics}
               totalMetric={namedTotalDroppedMetric}
               showOthers={options.showOthers!}
@@ -381,7 +385,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
               id={id}
               limit={limit}
               metricType={metricType}
-              stat="avg"
+              stat="sum"
               topKMetrics={topKDroppedCauseMetrics}
               totalMetric={namedTotalDroppedMetric}
               showOthers={options.showOthers!}
@@ -424,9 +428,6 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
           doubleWidth: true
         };
       case 'top_avg_dns_latency_donut': {
-        const options = kebabMap.get(id) || {
-          showOthers: true
-        };
         return {
           element: namedDnsLatencyTotalMetric ? (
             <LatencyDonut
@@ -435,16 +436,14 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
               metricType={'dnsLatencies'}
               topKMetrics={topKDnsLatencyMetrics}
               totalMetric={namedDnsLatencyTotalMetric}
-              showOthers={options.showOthers!}
+              showOthers={false}
               smallerTexts={smallerTexts}
               subTitle={t('Average latency')}
             />
           ) : (
             emptyGraph()
           ),
-          kebab: (
-            <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} isDark={isDark} />
-          ),
+          kebab: <PanelKebab id={id} />,
           bodyClassSmall: true
         };
       }

@@ -34,6 +34,8 @@ export type FilterId =
   | 'interface'
   | 'type'
   | 'id'
+  | 'pkt_drop_state'
+  | 'pkt_drop_cause'
   | 'dns_id'
   | 'dns_latency'
   | 'dns_flag_response_code';
@@ -49,6 +51,7 @@ export interface FilterDefinition {
   autoCompleteAddsQuotes?: boolean;
   hint?: string;
   examples?: string;
+  docUrl?: string;
   placeholder?: string;
   encoder: FiltersEncoder;
   // overlap tells if the type of entity referred to with this filter may have overlapping (duplicated)
