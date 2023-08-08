@@ -41,6 +41,7 @@ export type RecordDrawerProps = {
   range: number | TimeRange;
   type: RecordType;
   canSwitchTypes: boolean;
+  allowPktDrops: boolean;
   isDark?: boolean;
   setFilters: (v: Filter[]) => void;
   setRange: (r: number | TimeRange) => void;
@@ -57,6 +58,7 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
   range,
   type,
   canSwitchTypes,
+  allowPktDrops,
   isDark,
   setFilters,
   setRange,
@@ -85,6 +87,8 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
           return getTimeRangeFilter(col, value);
         case ColumnsId.recordtype:
           return getRecordTypeFilter();
+        case ColumnsId.packets:
+          return getPktDropFilter(col, record.fields.PktDropLatestDropCause);
         default:
           return getGenericFilter(col, value);
       }
@@ -158,6 +162,16 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
       };
     },
     [t, filters, setFilters]
+  );
+
+  const getPktDropFilter = React.useCallback(
+    (col: Column, cause?: string): RecordFieldFilter | undefined => {
+      if (!allowPktDrops || !cause) {
+        return undefined;
+      }
+      return getGenericFilter(col, cause);
+    },
+    [allowPktDrops, getGenericFilter]
   );
 
   const getGroup = React.useCallback(
