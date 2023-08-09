@@ -176,7 +176,7 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
               },
               {
                 id: 'back-and-forth',
-                label: filters?.backAndForth ? t('One way') : t('Back and forth'),
+                label: filters?.backAndForth ? t('Back and forth') : t('One way'),
                 onClick: toggleBackAndForth,
                 icon: filters?.backAndForth ? (
                   <LongArrowAltUpIcon />
