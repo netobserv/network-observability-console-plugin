@@ -91,14 +91,14 @@ func TestSplitForReportersMerge(t *testing.T) {
 
 	assert.Len(t, q1, 3)
 	assert.Equal(t, SingleQuery{
-		NewMatch("FlowDirection", `"1"`),
+		NewMatch("FlowDirection", `"0"`),
 		NewMatch("srcns", "a"),
 		NewMatch("dstns", "b"),
 	}, q1)
 	assert.Len(t, q2, 4)
 	assert.Equal(t, SingleQuery{
-		NewMatch("FlowDirection", `"0"`),
-		NewMatch("SrcK8S_OwnerName", `""`),
+		NewMatch("FlowDirection", `"1"`),
+		NewMatch("DstK8S_OwnerName", `""`),
 		NewMatch("srcns", "a"),
 		NewMatch("dstns", "b"),
 	}, q2)
