@@ -2,6 +2,7 @@
  *  Please keep them updated of any change
  */
 
+import { Record } from '../api/ipfix';
 import { TopologyMetricPeer } from '../api/loki';
 
 export const idUnknown = '-';
@@ -40,4 +41,10 @@ export const getPeerId = (fields: Partial<TopologyMetricPeer>): string => {
     parts.push('a=' + fields.addr);
   }
   return parts.length > 0 ? parts.join(',') : idUnknown;
+};
+
+export const get5Tuple = (r: Record): string => {
+  return `${r.fields.SrcAddr}:${r.fields.SrcPort || 'x'}→${r.fields.DstAddr}:${r.fields.DstPort || 'x'}@${
+    r.fields.Proto
+  }`;
 };
