@@ -160,7 +160,11 @@ export const removeFromFilters = (activeFilters: Filter[], search: FilterKey): F
 };
 
 export const filterKeyEqual = (f1: FilterKey, f2: FilterKey): boolean => {
-  return f1.def.id === f2.def.id && f1.not == f2.not && f1.moreThan == f2.moreThan;
+  return (
+    f1.def.id === f2.def.id &&
+    (f1.not === true) === (f2.not === true) &&
+    (f1.moreThan === true) === (f2.moreThan === true)
+  );
 };
 
 type ComparableFilter = { key: string; values: string[] };
