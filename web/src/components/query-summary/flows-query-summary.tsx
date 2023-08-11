@@ -57,7 +57,7 @@ export const FlowsQuerySummaryContent: React.FC<{
           <FlexItem>
             <Tooltip content={<Text component={TextVariants.p}>{t('Filtered sum of packets')}</Text>}>
               <Text id="packetsCount" component={TextVariants.p}>
-                {valueFormat(packets, 0, t('P'), limitReached)}
+                {valueFormat(packets, 0, t('Packets'), limitReached, true)}
               </Text>
             </Tooltip>
           </FlexItem>
@@ -106,8 +106,9 @@ export const FlowsQuerySummaryContent: React.FC<{
                   {valueFormat(
                     filteredFlows!.length,
                     0,
-                    type === 'flowLog' ? t('flows') : t('ended conversations'),
-                    limitReached
+                    type === 'flowLog' ? t('Flows') : t('Ended conversations'),
+                    limitReached,
+                    true
                   )}
                 </Text>
               </Tooltip>
