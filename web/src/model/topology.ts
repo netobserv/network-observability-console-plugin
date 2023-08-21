@@ -419,11 +419,11 @@ export const generateDataModel = (
     return group;
   };
 
-  const addNode = (data: NodeData, scope: FlowScope): NodeModel => {
+  const addNode = (data: NodeData): NodeModel => {
     const parent = data.nodeType !== 'unknown' ? addPossibleGroups(data.peer) : undefined;
     let node = nodes.find(n => n.type === 'node' && n.id === data.peer.id);
     if (!node) {
-      node = generateNode(data, scope, opts, searchValue, highlightedId, filters, t, k8sModels, isDark);
+      node = generateNode(data, metricScope, opts, searchValue, highlightedId, filters, t, k8sModels, isDark);
       nodes.push(node);
     }
 
@@ -527,9 +527,25 @@ export const generateDataModel = (
     }
   };
 
+  // link pods to nodes instead of external if possible as routing will duplicate flows as follow:
+  // - pod -> destination
+  // - node -> destination
+  // the output will be pod -> node -> destination if all the metrics are present
+  // else the original display will be kept
+  const manageRouting = (peer: TopologyMetricPeer, opposite: TopologyMetricPeer): TopologyMetricPeer => {
+    if (opposite.resource?.type === 'Pod' && peer.resource === undefined) {
+      const nodePeer =
+        metrics.find(m => m.source.resource?.name === opposite.hostName && m.destination.addr === peer.addr)?.source ||
+        metrics.find(m => m.destination.resource?.name === opposite.hostName && m.source.addr === peer.addr)
+          ?.destination;
+      return nodePeer || peer;
+    }
+    return peer;
+  };
+
   metrics.forEach(m => {
-    const srcNode = addNode(peerToNodeData(m.source), metricScope);
-    const dstNode = addNode(peerToNodeData(m.destination), metricScope);
+    const srcNode = addNode(peerToNodeData(manageRouting(m.source, m.destination)));
+    const dstNode = addNode(peerToNodeData(manageRouting(m.destination, m.source)));
 
     if (options.edges && srcNode && dstNode && srcNode.id !== dstNode.id) {
       const drops = droppedMetrics.find(dm => dm.source.id === m.source.id && dm.destination.id === m.destination.id);
