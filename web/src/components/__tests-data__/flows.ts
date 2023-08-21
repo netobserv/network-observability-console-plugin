@@ -92,6 +92,38 @@ export const FlowsSample: Record[] = [
   }
 ];
 
+export const getTestFlows = (count: number) => {
+  const flows: Record[] = [];
+  for (let i = 0; i < count; i++) {
+    flows.push({
+      labels: {
+        _RecordType: 'flowLog',
+        FlowDirection: FlowDirection.Egress,
+        SrcK8S_Namespace: 'default',
+        DstK8S_Namespace: 'default'
+      },
+      key: 1,
+      fields: {
+        SrcAddr: '10.244.0.1',
+        DstAddr: '10.244.0.2',
+        SrcK8S_Name: 'random-0',
+        DstK8S_Name: 'random-1',
+        SrcPort: 1234,
+        DstPort: 5678,
+        Packets: 1,
+        Proto: 6,
+        Bytes: i * 1500,
+        SrcMac: '00:00:00:00:00:00',
+        DstMac: '00:00:00:00:00:00',
+        TimeFlowEndMs: 1639058287000,
+        TimeFlowStartMs: 1639058286000,
+        TimeReceived: 1639058290
+      }
+    });
+  }
+  return flows;
+};
+
 export const FlowsResultSample: RecordsResult = {
   records: FlowsSample,
   stats: {

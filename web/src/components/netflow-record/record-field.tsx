@@ -16,7 +16,7 @@ import {
   ICMP_ALL_CODES_VALUES,
   ICMP_ALL_TYPES_VALUES
 } from '../../utils/icmp';
-import { DROP_CAUSES_DOC_URL, DROP_CAUSES_NAMES, getDropCauseDescription } from '../../utils/pkt-drop';
+import { DROP_CAUSES_NAMES, getDropCauseDescription, getDropCauseDocUrl } from '../../utils/pkt-drop';
 import { formatPort } from '../../utils/port';
 import { formatProtocol } from '../../utils/protocol';
 import { Size } from '../dropdowns/table-display-dropdown';
@@ -399,7 +399,7 @@ export const RecordField: React.FC<{
             child = clickableContent(
               flow.fields.PktDropLatestDropCause,
               getDropCauseDescription(flow.fields.PktDropLatestDropCause as DROP_CAUSES_NAMES),
-              DROP_CAUSES_DOC_URL
+              getDropCauseDocUrl(flow.fields.PktDropLatestDropCause as DROP_CAUSES_NAMES)
             );
           }
           return doubleContainer(

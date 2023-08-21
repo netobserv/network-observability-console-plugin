@@ -768,6 +768,7 @@ export const getExtraColumns = (t: TFunction): Column[] => {
       name: t('Packets'),
       tooltip: t('The total aggregated number of packets.'),
       fieldName: 'Packets',
+      quickFilter: 'pkt_drop_cause',
       isSelected: true,
       value: f => (f.fields.PktDropPackets ? [f.fields.Packets || 0, f.fields.PktDropPackets] : f.fields.Packets || 0),
       sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
