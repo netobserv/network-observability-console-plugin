@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import { Record } from '../api/ipfix';
+import { FlowDirection, Record } from '../api/ipfix';
 import { get5Tuple } from './ids';
 
 export const mergeFlowReporters = (flows: Record[]): Record[] => {
@@ -10,7 +10,8 @@ export const mergeFlowReporters = (flows: Record[]): Record[] => {
   const grouped = _.groupBy(flows, get5Tuple);
   const filtersIndex = _.mapValues(
     grouped,
-    (recs: Record[]) => (recs.find(r => r.labels.FlowDirection === '0') || recs[0]).labels.FlowDirection
+    (recs: Record[]) =>
+      (recs.find(r => r.labels.FlowDirection === FlowDirection.Ingress) || recs[0]).labels.FlowDirection
   );
   return flows.filter((r: Record) => r.labels.FlowDirection === filtersIndex[get5Tuple(r)]);
 };

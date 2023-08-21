@@ -1,12 +1,14 @@
 import * as _ from 'lodash';
 import protocols from 'protocol-numbers';
 import { getNamespaces, getResources } from '../api/routes';
+import { FlowDirection } from '../api/ipfix';
 import { FilterOption } from '../model/filters';
 import { splitResource, SplitStage } from '../model/resource';
 import { autoCompleteCache } from './autocomplete-cache';
 import { DNS_RCODES } from './dns';
 import { getPort, getService } from './port';
 import { DROP_CAUSES, DROP_STATES } from './pkt-drop';
+import { TFunction } from 'i18next';
 
 export const noOption: (value: string) => Promise<FilterOption[]> = () => Promise.resolve([]);
 
@@ -24,6 +26,19 @@ export const getProtocolOptions = (value: string): Promise<FilterOption[]> => {
     opt => opt.value.startsWith(value) || opt.name.toLowerCase().startsWith(value.toLowerCase())
   );
   return Promise.resolve(opts);
+};
+
+export const getDirectionOptions = (t: TFunction): FilterOption[] => {
+  return [
+    { name: t('Ingress'), value: String(FlowDirection.Ingress) },
+    { name: t('Egress'), value: String(FlowDirection.Egress) }
+  ];
+};
+
+export const getDirectionOptionsAsync = (value: string, t: TFunction): Promise<FilterOption[]> => {
+  return Promise.resolve(
+    getDirectionOptions(t).filter(o => o.value === value || o.name.toLowerCase().includes(value.toLowerCase()))
+  );
 };
 
 const matchOptions = (opts: FilterOption[], match: string): FilterOption[] => {
@@ -111,6 +126,10 @@ export const getDnsResponseCodeOptions = (value: string): Promise<FilterOption[]
 
 export const findProtocolOption = (nameOrVal: string) => {
   return protocolOptions.find(p => p.name.toLowerCase() === nameOrVal.toLowerCase() || p.value === nameOrVal);
+};
+
+export const findDirectionOption = (nameOrVal: string, t: TFunction) => {
+  return getDirectionOptions(t).find(o => o.name.toLowerCase() === nameOrVal.toLowerCase() || o.value === nameOrVal);
 };
 
 export const cap10 = (getOptions: (value: string) => Promise<FilterOption[]>) => {
