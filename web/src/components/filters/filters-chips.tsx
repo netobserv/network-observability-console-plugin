@@ -179,12 +179,12 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
                 label: filters?.backAndForth ? t('Back and forth') : t('One way'),
                 onClick: toggleBackAndForth,
                 icon: filters?.backAndForth ? (
-                  <LongArrowAltUpIcon />
-                ) : (
                   <>
                     <LongArrowAltUpIcon />
                     <LongArrowAltDownIcon />
                   </>
+                ) : (
+                  <LongArrowAltUpIcon />
                 ),
                 tooltip: filters?.backAndForth
                   ? t('Exclude return traffic')
