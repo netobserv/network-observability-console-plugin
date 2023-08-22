@@ -26,27 +26,26 @@ export interface TimeRangeModalProps {
   id?: string;
 }
 
-//keep displayed values separated. These will be set at startup to avoid TimePicker to loose value on every render
-let displayedFromTime: string | undefined;
-let displayedToTime: string | undefined;
-
 export const TimeRangeModal: React.FC<TimeRangeModalProps> = ({ id, isModalOpen, setModalOpen, range, setRange }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [error, setError] = React.useState<string | undefined>();
   const [fromDate, setFromDate] = React.useState<string | undefined>();
-  const [fromTime, setFromTime] = React.useState<string | undefined>();
+  const [fromTime, setFromTime] = React.useState<string>('');
   const [toDate, setToDate] = React.useState<string | undefined>();
-  const [toTime, setToTime] = React.useState<string | undefined>();
+  const [toTime, setToTime] = React.useState<string>('');
 
-  const dateValidator = (isFrom: boolean, date: Date): string => {
-    const d = new Date(isFrom ? Date.parse(`${toDate} ${toTime}`) : Date.parse(`${fromDate} ${fromTime}`));
-    if (isFrom && date > new Date()) {
-      return t('From date cannot be in the future');
-    }
-    return !isValidDate(d) || (!isFrom && date >= d) || (isFrom && date <= d)
-      ? ''
-      : t('To date must be after From date');
-  };
+  const dateValidator = React.useCallback(
+    (isFrom: boolean, date: Date): string => {
+      const d = new Date(isFrom ? Date.parse(`${toDate} ${toTime}`) : Date.parse(`${fromDate} ${fromTime}`));
+      if (isFrom && date > new Date()) {
+        return t('From date cannot be in the future');
+      }
+      return !isValidDate(d) || (!isFrom && date >= d) || (isFrom && date <= d)
+        ? ''
+        : t('To date must be after From date');
+    },
+    [fromDate, fromTime, t, toDate, toTime]
+  );
 
   //this is a hack to allow user to type into date / time inputs without having to delete previous content
   const onInput = (e: React.FormEvent<HTMLDivElement>, type: 'date' | 'time') => {
@@ -109,38 +108,106 @@ export const TimeRangeModal: React.FC<TimeRangeModalProps> = ({ id, isModalOpen,
     input.setSelectionRange(start, end);
   };
 
-  const resetInputs = React.useCallback(() => {
-    let from: Date;
-    let to: Date;
-    if (range && !Number.isNaN(range.from) && !Number.isNaN(range.to)) {
-      from = new Date(getDateSInMiliseconds(range.from));
-      to = new Date(getDateSInMiliseconds(range.to));
-    } else {
-      from = new Date();
-      to = new Date();
-      from.setHours(0, 0, 0, 0);
-      to.setHours(23, 59, 0, 0);
-    }
+  const reloadInputs = React.useCallback(
+    (reset = false) => {
+      let from: Date;
+      let to: Date;
+      if (!reset && range && !Number.isNaN(range.from) && !Number.isNaN(range.to)) {
+        from = new Date(getDateSInMiliseconds(range.from));
+        to = new Date(getDateSInMiliseconds(range.to));
+      } else {
+        from = new Date();
+        to = new Date();
+        from.setHours(0, 0, 0, 0);
+        to.setHours(23, 59, 0, 0);
+      }
 
-    setFromDate(toISODateString(from));
-    setFromTime(twentyFourHourTime(from, true));
-    setToDate(toISODateString(to));
-    setToTime(twentyFourHourTime(to, true));
-  }, [range]);
+      setFromDate(toISODateString(from));
+      setFromTime(twentyFourHourTime(from, true));
+      setToDate(toISODateString(to));
+      setToTime(twentyFourHourTime(to, true));
+    },
+    [range]
+  );
 
   const onCancel = React.useCallback(() => {
-    resetInputs();
+    reloadInputs();
     setModalOpen(false);
-  }, [resetInputs, setModalOpen]);
+  }, [reloadInputs, setModalOpen]);
 
   const onSave = React.useCallback(() => {
     //update time inputs
-    displayedFromTime = fromTime;
-    displayedToTime = toTime;
     const from = getDateMsInSeconds(Date.parse(`${fromDate} ${fromTime}`));
     const to = getDateMsInSeconds(Date.parse(`${toDate} ${toTime}`));
     setRange({ from, to });
   }, [fromDate, fromTime, setRange, toDate, toTime]);
+
+  const getDateTimePickers = React.useCallback(() => {
+    if (fromDate && fromTime && toDate && toTime) {
+      return (
+        <Flex direction={{ default: 'column' }}>
+          <FlexItem>
+            <Text component={TextVariants.h4}>{t('From')}</Text>
+            <Flex direction={{ default: 'row' }} className="time-range-row">
+              <FlexItem>
+                <DatePicker
+                  data-test="from-date-picker"
+                  validators={[date => dateValidator(true, date)]}
+                  //arguments positions are changing according to PF version
+                  onChange={(e: unknown, v: unknown) => setFromDate(typeof e === 'string' ? String(e) : String(v))}
+                  onInput={e => onInput(e, 'date')}
+                  value={fromDate}
+                />
+              </FlexItem>
+              <FlexItem>
+                <TimePicker
+                  data-test="from-time-picker"
+                  is24Hour
+                  includeSeconds
+                  placeholder="hh:mm:ss"
+                  delimiter=":"
+                  //arguments positions are changing according to PF version
+                  onChange={(e: unknown, t: unknown) => setFromTime(typeof e === 'string' ? String(e) : String(t))}
+                  onInput={e => onInput(e, 'time')}
+                  time={fromTime}
+                />
+              </FlexItem>
+            </Flex>
+          </FlexItem>
+          <FlexItem>
+            <Text component={TextVariants.h4}>{t('To')}</Text>
+            <Flex direction={{ default: 'row' }} className="time-range-row">
+              <FlexItem>
+                <DatePicker
+                  data-test="to-date-picker"
+                  validators={[date => dateValidator(false, date)]}
+                  rangeStart={fromDate ? new Date(Date.parse(fromDate)) : undefined}
+                  //arguments positions are changing according to PF version
+                  onChange={(e: unknown, v: unknown) => setToDate(typeof e === 'string' ? String(e) : String(v))}
+                  onInput={e => onInput(e, 'date')}
+                  value={toDate}
+                />
+              </FlexItem>
+              <FlexItem>
+                <TimePicker
+                  data-test="to-time-picker"
+                  is24Hour
+                  includeSeconds
+                  placeholder="hh:mm:ss"
+                  delimiter=":"
+                  //arguments positions are changing according to PF version
+                  onChange={(e: unknown, t: unknown) => setToTime(typeof e === 'string' ? String(e) : String(t))}
+                  onInput={e => onInput(e, 'time')}
+                  time={toTime}
+                />
+              </FlexItem>
+            </Flex>
+          </FlexItem>
+        </Flex>
+      );
+    }
+    return <></>;
+  }, [dateValidator, fromDate, fromTime, t, toDate, toTime]);
 
   React.useEffect(() => {
     const from = new Date(Date.parse(`${fromDate} ${fromTime}`));
@@ -156,20 +223,12 @@ export const TimeRangeModal: React.FC<TimeRangeModalProps> = ({ id, isModalOpen,
     }
   }, [fromDate, fromTime, t, toDate, toTime]);
 
-  //set date / time on range change
+  //set date / time at first start
   React.useEffect(() => {
-    resetInputs();
-  }, [range, resetInputs]);
-
-  //set display values
-  React.useEffect(() => {
-    if (!displayedFromTime) {
-      displayedFromTime = fromTime;
+    if (!fromDate || !fromTime || !toDate || !toTime) {
+      reloadInputs();
     }
-    if (!displayedToTime) {
-      displayedToTime = toTime;
-    }
-  }, [fromTime, toTime]);
+  }, [fromDate, fromTime, reloadInputs, toDate, toTime]);
 
   return (
     <Modal
@@ -181,6 +240,9 @@ export const TimeRangeModal: React.FC<TimeRangeModalProps> = ({ id, isModalOpen,
       onClose={() => onCancel()}
       footer={
         <div>
+          <Button data-test="time-range-reset" key="reset" variant="link" onClick={() => reloadInputs(true)}>
+            {t('Reset')}
+          </Button>
           <Button data-test="time-range-cancel" key="cancel" variant="link" onClick={() => onCancel()}>
             {t('Cancel')}
           </Button>
@@ -208,59 +270,7 @@ export const TimeRangeModal: React.FC<TimeRangeModalProps> = ({ id, isModalOpen,
           {t('Select a custom time range. Flows are selected based on their End Time value.')}
         </Text>
       </TextContent>
-      <Flex direction={{ default: 'column' }}>
-        <FlexItem>
-          <Text component={TextVariants.h4}>{t('From')}</Text>
-          <Flex direction={{ default: 'row' }} className="time-range-row">
-            <FlexItem>
-              <DatePicker
-                data-test="from-date-picker"
-                validators={[date => dateValidator(true, date)]}
-                onChange={(e, v) => setFromDate(v)}
-                onInput={e => onInput(e, 'date')}
-                value={fromDate}
-              />
-            </FlexItem>
-            <FlexItem>
-              <TimePicker
-                data-test="from-time-picker"
-                is24Hour
-                includeSeconds
-                placeholder="hh:mm:ss"
-                onChange={(e, v) => setFromTime(v)}
-                onInput={e => onInput(e, 'time')}
-                time={displayedFromTime}
-              />
-            </FlexItem>
-          </Flex>
-        </FlexItem>
-        <FlexItem>
-          <Text component={TextVariants.h4}>{t('To')}</Text>
-          <Flex direction={{ default: 'row' }} className="time-range-row">
-            <FlexItem>
-              <DatePicker
-                data-test="to-date-picker"
-                validators={[date => dateValidator(false, date)]}
-                rangeStart={fromDate ? new Date(Date.parse(fromDate)) : undefined}
-                onChange={(e, v) => setToDate(v)}
-                onInput={e => onInput(e, 'date')}
-                value={toDate}
-              />
-            </FlexItem>
-            <FlexItem>
-              <TimePicker
-                data-test="to-time-picker"
-                is24Hour
-                includeSeconds
-                placeholder="hh:mm:ss"
-                onChange={(e, v) => setToTime(v)}
-                onInput={e => onInput(e, 'time')}
-                time={displayedToTime}
-              />
-            </FlexItem>
-          </Flex>
-        </FlexItem>
-      </Flex>
+      {getDateTimePickers()}
     </Modal>
   );
 };

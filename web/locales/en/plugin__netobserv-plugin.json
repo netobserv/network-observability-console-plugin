@@ -201,6 +201,7 @@
   "To date must be after From date": "To date must be after From date",
   "Invalid date / time": "Invalid date / time",
   "Custom time range": "Custom time range",
+  "Reset": "Reset",
   "Select a custom time range. Flows are selected based on their End Time value.": "Select a custom time range. Flows are selected based on their End Time value.",
   "No results found": "No results found",
   "Unable to get overview": "Unable to get overview",
