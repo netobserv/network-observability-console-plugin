@@ -101,7 +101,12 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
 
   if (error) {
     return <LokiError title={t('Unable to get overview')} error={error} />;
-  } else if (_.isEmpty(metrics) || !totalMetric) {
+  } else if (
+    _.isEmpty(metrics) &&
+    _.isEmpty(droppedMetrics) &&
+    _.isEmpty(dnsLatencyMetrics) &&
+    _.isEmpty(dnsRCodeMetrics)
+  ) {
     //TODO: manage each metrics loading state separately
     if (loading) {
       return (
@@ -151,7 +156,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
       ?.sort((a, b) => getStat(b.stats, 'sum') - getStat(a.stats, 'sum'))
       .map(m => toNamedMetric(t, m, truncateLength, true, true)) || [];
 
-  const namedTotalMetric = toNamedMetric(t, totalMetric, truncateLength, false, false);
+  const namedTotalMetric = totalMetric ? toNamedMetric(t, totalMetric, truncateLength, false, false) : undefined;
   const namedTotalDroppedMetric = totalDroppedMetric
     ? toNamedMetric(t, totalDroppedMetric, truncateLength, false, false)
     : undefined;
@@ -193,7 +198,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
         };
       case 'total_line':
         return {
-          element: (
+          element: namedTotalMetric ? (
             <MetricsContent
               id={id}
               title={title}
@@ -206,6 +211,8 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
               smallerTexts={smallerTexts}
               tooltipsTruncate={false}
             />
+          ) : (
+            emptyGraph()
           ),
           kebab: <PanelKebab id={id} />,
           doubleWidth: false
@@ -217,7 +224,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
           showOutOfScope: false
         };
         return {
-          element: (
+          element: namedTotalMetric ? (
             <MetricsTotalContent
               id={id}
               title={title}
@@ -230,6 +237,8 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
               showOutOfScope={options.showOutOfScope!}
               smallerTexts={smallerTexts}
             />
+          ) : (
+            emptyGraph()
           ),
           kebab: (
             <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} isDark={isDark} />
@@ -263,7 +272,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
           showOutOfScope: false
         };
         return {
-          element: (
+          element: namedTotalMetric ? (
             <StatDonut
               id={id}
               limit={limit}
@@ -276,6 +285,8 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
               showOutOfScope={options.showOutOfScope!}
               smallerTexts={smallerTexts}
             />
+          ) : (
+            emptyGraph()
           ),
           kebab: (
             <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} isDark={isDark} />
@@ -290,7 +301,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
           showOutOfScope: false
         };
         return {
-          element: (
+          element: namedTotalMetric ? (
             <StatDonut
               id={id}
               limit={limit}
@@ -303,6 +314,8 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
               showOutOfScope={options.showOutOfScope!}
               smallerTexts={smallerTexts}
             />
+          ) : (
+            emptyGraph()
           ),
           kebab: (
             <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} isDark={isDark} />
@@ -405,25 +418,26 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
           showOutOfScope: false,
           compareToDropped: namedTotalDroppedMetric ? false : undefined
         };
+        const totalMetric =
+          options.compareToDropped && namedTotalDroppedMetric ? namedTotalDroppedMetric : namedTotalMetric;
         return {
-          element: !_.isEmpty(topKDroppedMetrics) ? (
-            <MetricsTotalContent
-              id={id}
-              title={title}
-              metricType={metricType}
-              topKMetrics={topKDroppedMetrics}
-              totalMetric={
-                options.compareToDropped && namedTotalDroppedMetric ? namedTotalDroppedMetric : namedTotalMetric
-              }
-              limit={limit}
-              showTotal={options.showTotal!}
-              showInternal={options.showInternal!}
-              showOutOfScope={options.showOutOfScope!}
-              smallerTexts={smallerTexts}
-            />
-          ) : (
-            emptyGraph()
-          ),
+          element:
+            !_.isEmpty(topKDroppedMetrics) && totalMetric ? (
+              <MetricsTotalContent
+                id={id}
+                title={title}
+                metricType={metricType}
+                topKMetrics={topKDroppedMetrics}
+                totalMetric={totalMetric}
+                limit={limit}
+                showTotal={options.showTotal!}
+                showInternal={options.showInternal!}
+                showOutOfScope={options.showOutOfScope!}
+                smallerTexts={smallerTexts}
+              />
+            ) : (
+              emptyGraph()
+            ),
           kebab: <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} />,
           doubleWidth: true
         };
