@@ -1320,7 +1320,7 @@ export const NetflowTraffic: React.FC<{
           setShowDuplicates,
           allowFlow: isFlow(),
           allowConnection: isConnectionTracking(),
-          allowShowDuplicates: selectedViewId === 'table',
+          allowShowDuplicates: selectedViewId === 'table' && recordType !== 'allConnections',
           allowPktDrops: isPktDrop(),
           useTopK: selectedViewId === 'overview'
         }}

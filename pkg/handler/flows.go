@@ -11,6 +11,8 @@ import (
 	"github.com/netobserv/network-observability-console-plugin/pkg/metrics"
 	"github.com/netobserv/network-observability-console-plugin/pkg/model"
 	"github.com/netobserv/network-observability-console-plugin/pkg/model/filters"
+	"github.com/netobserv/network-observability-console-plugin/pkg/utils"
+	"github.com/netobserv/network-observability-console-plugin/pkg/utils/constants"
 )
 
 const (
@@ -60,10 +62,13 @@ func getFlows(cfg *loki.Config, client httpclient.Caller, params url.Values) (*m
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
-	dedup := params.Get(dedupKey) == "true"
 	recordType, err := getRecordType(params)
 	if err != nil {
 		return nil, http.StatusBadRequest, err
+	}
+	dedup := params.Get(dedupKey) == "true"
+	if utils.Contains(constants.AnyConnectionType, string(recordType)) {
+		dedup = false
 	}
 	packetLoss, err := getPacketLoss(params)
 	if err != nil {

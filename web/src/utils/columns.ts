@@ -737,6 +737,7 @@ export const getExtraColumns = (t: TFunction): Column[] => {
       name: t('Direction'),
       tooltip: t('The direction of the Flow observed at the Observation Point.'),
       fieldName: 'FlowDirection',
+      quickFilter: 'direction',
       isSelected: false,
       value: f => f.labels.FlowDirection,
       sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),

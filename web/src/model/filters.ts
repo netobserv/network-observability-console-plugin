@@ -31,6 +31,7 @@ export type FilterId =
   | `src_${TargetedFilterId}`
   | `dst_${TargetedFilterId}`
   | 'protocol'
+  | 'direction'
   | 'interface'
   | 'type'
   | 'id'

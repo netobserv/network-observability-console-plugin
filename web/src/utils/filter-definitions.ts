@@ -24,7 +24,9 @@ import {
   cap10,
   getDnsResponseCodeOptions,
   getDropStateOptions,
-  getDropCauseOptions
+  getDropCauseOptions,
+  getDirectionOptionsAsync,
+  findDirectionOption
 } from './filter-options';
 
 // Convenience string to filter by undefined field values
@@ -432,6 +434,27 @@ export const getFilterDefinitions = (
         - ${t('Empty double quotes "" for undefined protocol')}`,
         docUrl: 'https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml',
         encoder: simpleFiltersEncoder('Proto'),
+        overlap: false
+      },
+      {
+        id: 'direction',
+        name: t('Direction'),
+        category: FilterCategory.None,
+        component: FilterComponent.Autocomplete,
+        getOptions: v => getDirectionOptionsAsync(v, t),
+        validate: (value: string) => {
+          if (_.isEmpty(value)) {
+            return invalid(t('Value is empty'));
+          }
+          //allow 0 / 1 or Ingress / Egress
+          const found = findDirectionOption(value, t);
+          if (found) {
+            return valid(found.name);
+          }
+          return invalid(t('Unknown direction'));
+        },
+        hint: t('Specify the direction of the Flow observed at the Observation Point.'),
+        encoder: simpleFiltersEncoder('FlowDirection'),
         overlap: false
       },
       {
