@@ -300,7 +300,7 @@ export const getFormattedValue = (v: number, mt: MetricType, mf: MetricFunction,
   if (mt === 'count' || mt === 'countDns') {
     return valueFormat(v);
   } else if (mt === 'dnsLatencies' || mt === 'flowRtt') {
-    return valueFormat(v, 2, t('Ms'));
+    return valueFormat(v, 2, t('ms'));
   } else if (mf === 'sum') {
     switch (mt) {
       case 'droppedBytes':
