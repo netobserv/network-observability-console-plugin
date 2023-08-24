@@ -59,6 +59,9 @@ export const NetflowTopology: React.FC<{
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [controller, setController] = React.useState<Visualization>();
 
+  //show fully dropped metrics if no metrics available
+  const displayedMetrics = _.isEmpty(metrics) ? droppedMetrics : metrics;
+
   //create controller on startup and register factories
   React.useEffect(() => {
     const c = new Visualization();
@@ -85,7 +88,7 @@ export const NetflowTopology: React.FC<{
         metricType={metricType}
         metricScope={metricScope}
         setMetricScope={setMetricScope}
-        metrics={metrics}
+        metrics={displayedMetrics}
         options={options}
         setOptions={setOptions}
         filters={filters.list}
@@ -107,7 +110,7 @@ export const NetflowTopology: React.FC<{
           metricType={metricType}
           metricScope={metricScope}
           setMetricScope={setMetricScope}
-          metrics={metrics}
+          metrics={displayedMetrics}
           droppedMetrics={droppedMetrics}
           options={options}
           setOptions={setOptions}
