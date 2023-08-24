@@ -149,7 +149,7 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
         <Tooltip
           content={t(
             // eslint-disable-next-line max-len
-            'A flow might be reported from several interfaces, and from both source and destination nodes, making it appear several times. By default, duplicates are hidden in favor of Ingress traffic. Showing duplicates is not possible in Overview and Topology tabs to avoid altering metric calculations. Use Direction filter to switch between Ingress / Egress traffic.'
+            'A flow might be reported from several interfaces, and from both source and destination nodes, making it appear several times. By default, duplicates are hidden. Showing duplicates is not possible in Overview and Topology tabs to avoid altering metric calculations. Use Direction filter to switch between ingress / egress traffic.'
           )}
         >
           <div className="pf-c-select__menu-group-title">
