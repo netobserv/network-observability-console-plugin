@@ -17,7 +17,7 @@ interface Item {
   id: string;
   icon?: JSX.Element;
   label: string;
-  tooltip?: string;
+  tooltip?: React.ReactNode;
   onClick: () => void;
   enabled?: boolean;
 }
