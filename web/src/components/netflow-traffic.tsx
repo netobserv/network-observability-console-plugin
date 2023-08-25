@@ -557,6 +557,10 @@ export const NetflowTraffic: React.FC<{
     if (!initState.current.includes('forcedFiltersLoaded') || !initState.current.includes('configLoaded')) {
       console.error('tick skipped', initState.current);
       return;
+    } else if (isTRModalOpen || isOverviewModalOpen || isColModalOpen || isExportModalOpen) {
+      // also skip tick if modal is open
+      console.debug('tick skipped since modal is open');
+      return;
     }
 
     setLoading(true);
@@ -608,7 +612,19 @@ export const NetflowTraffic: React.FC<{
           })
       );
     }
-  }, [buildFlowQuery, config.features, selectedViewId, manageWarnings, fetchTable, fetchOverview, fetchTopology]);
+  }, [
+    isTRModalOpen,
+    isOverviewModalOpen,
+    isColModalOpen,
+    isExportModalOpen,
+    buildFlowQuery,
+    config.features,
+    selectedViewId,
+    fetchTable,
+    fetchOverview,
+    fetchTopology,
+    manageWarnings
+  ]);
 
   usePoll(tick, interval);
 
