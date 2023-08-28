@@ -68,7 +68,7 @@ Cypress.Commands.add('showDisplayOptions', () => {
     })
 });
 
-Cypress.Commands.add('checkPanels', (panels = 4) => {
+Cypress.Commands.add('checkPanels', (panels = 7) => {
   cy.get('#overview-flex').find('.overview-card').its('length').should('eq', panels);
 });
 
@@ -109,6 +109,12 @@ Cypress.Commands.add('selectPopupItems', (id, names) => {
   }
 });
 
+Cypress.Commands.add('checkPopupItems', (id, ids) => {
+  for (let i = 0; i < ids.length; i++) {
+    cy.get(id).find('.modal-body').find(`#${ids[i]}`).check();
+  }
+});
+
 Cypress.Commands.add('sortColumn', (name) => {
   cy.get('thead').contains(name).click();
   cy.get('[aria-sort="ascending"]').should('have.length', 1);
@@ -132,7 +138,7 @@ Cypress.Commands.add('checkContent', (topology) => {
   }
 });
 
-Cypress.Commands.add('addCommonFilter', (filter, value, topology) => {
+Cypress.Commands.add('addFilter', (filter, value, topology) => {
   cy.get('#column-filter-toggle').click();
   cy.get('.pf-c-accordion__expanded-content-body').find(`#${filter}`).click();
   cy.get('.pf-c-accordion__expanded-content-body').should('not.exist');
@@ -182,10 +188,11 @@ declare global {
       checkColumns(groups?: number, cols?: number): Chainable<Element>
       openColumnsModal(): Chainable<Element>
       selectPopupItems(id: string, names: string[]): Chainable<Element>
+      checkPopupItems(id: string, ids: string[]): Chainable<Element>
       sortColumn(name: string): Chainable<Element>
       dropdownSelect(id: string, name: string): Chainable<Element>
       checkContent(topology?: boolean): Chainable<Element>
-      addCommonFilter(filter: string, value: string, topology?: boolean): Chainable<Element>
+      addFilter(filter: string, value: string, topology?: boolean): Chainable<Element>
       changeQueryOption(name: string, topology?: boolean): Chainable<Element>
       changeTimeRange(name: string, topology?: boolean): Chainable<Element>
       changeMetricFunction(name: string): Chainable<Element>
