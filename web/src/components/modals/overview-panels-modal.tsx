@@ -38,8 +38,10 @@ export const OverviewPanelsModal: React.FC<{
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   React.useEffect(() => {
-    setUpdatedPanels(_.cloneDeep(panels));
-  }, [panels]);
+    if (!isModalOpen) {
+      setUpdatedPanels(_.cloneDeep(panels));
+    }
+  }, [isModalOpen, panels]);
 
   React.useEffect(() => {
     let allSelected = true;
