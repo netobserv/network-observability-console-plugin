@@ -40,6 +40,12 @@ describe('netflow-table', () => {
     //Should not have nested columns and have 4 columns
     cy.checkColumns(0, 4);
 
+    //reload the page
+    cy.reload();
+
+    //Should have remembered the columns
+    cy.checkColumns(0, 4);
+
     //reopen modal
     cy.openColumnsModal();
 
