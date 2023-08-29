@@ -190,10 +190,10 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
                   <div>
                     <div>{`${t('Switch between one way / back and forth filtering')}:`}</div>
                     <div className="netobserv-align-start">{`- ${t(
-                      'One way will only show Source or Destination traffic according to your filters'
+                      'One way shows traffic strictly as defined per your filters'
                     )}`}</div>
                     <div className="netobserv-align-start">{`- ${t(
-                      'Back and forth will include return traffic to your existing Source or Destination filters'
+                      'Back and forth shows traffic according to your filters, plus the related return traffic'
                     )}`}</div>
                   </div>
                 ),
