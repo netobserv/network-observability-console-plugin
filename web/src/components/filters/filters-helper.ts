@@ -43,7 +43,7 @@ export const getFilterFullName = (f: FilterDefinition, t: TFunction) => {
   }
 };
 
-export const canSwapFilters = (filters: Filter[]): boolean => {
+export const hasSrcDstFilters = (filters: Filter[]): boolean => {
   return filters.some(f => f.def.id.startsWith('src_') || f.def.id.startsWith('dst_'));
 };
 

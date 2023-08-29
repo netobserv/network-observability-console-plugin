@@ -8,7 +8,7 @@ import { Filter, Filters, filtersEqual, hasEnabledFilterValues, removeFromFilter
 import { QuickFilter } from '../../model/quick-filters';
 import { autoCompleteCache } from '../../utils/autocomplete-cache';
 import { getPathWithParams, netflowTrafficPath } from '../../utils/url';
-import { canSwapFilters, getFilterFullName, swapFilters } from './filters-helper';
+import { hasSrcDstFilters, getFilterFullName, swapFilters } from './filters-helper';
 import { LinksOverflow } from '../overflow/links-overflow';
 
 export interface FiltersChipsProps {
@@ -53,7 +53,7 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
     return null;
   }
   const isDefaultFilters = filtersEqual(chipFilters, defaultFilters);
-  const canSwap = canSwapFilters(chipFilters!);
+  const isSrcDst = hasSrcDstFilters(chipFilters!);
 
   return (
     <ToolbarGroup
@@ -62,7 +62,7 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
       id={`${isForced ? 'forced-' : ''}filters`}
       variant="filter-group"
     >
-      <ToolbarItem className="flex-start">
+      <ToolbarItem className="flex-start flex">
         {chipFilters &&
           chipFilters.map((chipFilter, cfIndex) => {
             let fullName = getFilterFullName(chipFilter.def, t);
@@ -172,7 +172,7 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
                 label: t('Swap'),
                 tooltip: t('Swap source and destination filters'),
                 onClick: swapSrcDst,
-                enabled: canSwap
+                enabled: isSrcDst
               },
               {
                 id: 'back-and-forth',
@@ -186,10 +186,18 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
                 ) : (
                   <LongArrowAltUpIcon />
                 ),
-                tooltip: filters?.backAndForth
-                  ? t('Exclude return traffic')
-                  : t('Include return traffic, with swapped source and destination filters'),
-                enabled: !isForced && filters !== undefined
+                tooltip: (
+                  <div>
+                    <div>{`${t('Switch between one way / back and forth filtering')}:`}</div>
+                    <div className="netobserv-align-start">{`- ${t(
+                      'One way shows traffic strictly as defined per your filters'
+                    )}`}</div>
+                    <div className="netobserv-align-start">{`- ${t(
+                      'Back and forth shows traffic according to your filters, plus the related return traffic'
+                    )}`}</div>
+                  </div>
+                ),
+                enabled: isSrcDst
               }
             ]}
           />
