@@ -4,6 +4,8 @@ import { RawQuickFilter } from './quick-filters';
 export type Feature = 'pktDrop' | 'dnsTracking';
 
 export type Config = {
+  buildVersion: string;
+  buildDate: string;
   recordTypes: RecordType[];
   portNaming: {
     enable: boolean;
@@ -16,6 +18,8 @@ export type Config = {
 };
 
 export const defaultConfig: Config = {
+  buildVersion: 'Unknown',
+  buildDate: 'Unknown',
   recordTypes: ['flowLog'],
   portNaming: {
     enable: true,

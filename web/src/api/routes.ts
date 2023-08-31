@@ -119,7 +119,10 @@ export const getConfig = (): Promise<Config> => {
     if (!r.data) {
       return defaultConfig;
     }
+    console.debug('BuildVersion:', r.data.buildVersion, 'BuildDate:', r.data.buildDate);
     return <Config>{
+      buildVersion: r.data.buildVersion,
+      buildDate: r.data.buildDate,
       recordTypes: r.data.recordTypes,
       portNaming: {
         enable: r.data.portNaming.enable ?? defaultConfig.portNaming.enable,

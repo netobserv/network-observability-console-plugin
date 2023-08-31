@@ -132,6 +132,16 @@ export const SummaryPanelContent: React.FC<{
     );
   };
 
+  const versionContent = () => {
+    return (
+      <TextContent className="summary-text-container">
+        <Text component={TextVariants.h3}>{`${t('Version')}`}</Text>
+        <Text className="summary-config-item">{`${t('Number')}: ${config.buildVersion}`}</Text>
+        <Text className="summary-config-item">{`${t('Date')}: ${config.buildDate}`}</Text>
+      </TextContent>
+    );
+  };
+
   const cardinalityContent = () => {
     //regroup all k8s objects per type + namespace
     const namespaces: string[] = [];
@@ -379,6 +389,8 @@ export const SummaryPanelContent: React.FC<{
       {/*TODO: NETOBSERV-225 for extra stats on query*/}
 
       {configContent()}
+
+      {versionContent()}
     </>
   );
 };
