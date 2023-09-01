@@ -116,6 +116,8 @@ func main() {
 	})
 
 	server.Start(&server.Config{
+		BuildVersion:     buildVersion,
+		BuildDate:        buildDate,
 		Port:             *port,
 		CertFile:         *cert,
 		PrivateKeyFile:   *key,

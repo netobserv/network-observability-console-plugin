@@ -15,6 +15,8 @@ import (
 var slog = logrus.WithField("module", "server")
 
 type Config struct {
+	BuildVersion     string
+	BuildDate        string
 	Port             int
 	CertFile         string
 	PrivateKeyFile   string
