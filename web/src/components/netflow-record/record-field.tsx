@@ -385,7 +385,13 @@ export const RecordField: React.FC<{
       case ColumnsId.flowdir:
         return singleContainer(
           simpleTextWithTooltip(
-            value === FlowDirection.Ingress ? t('Ingress') : value === FlowDirection.Egress ? t('Egress') : t('n/a')
+            value === FlowDirection.Ingress
+            ? t('Ingress')
+            : value === FlowDirection.Egress
+            ? t('Egress')
+            : value === FlowDirection.Inner
+            ? t('Inner')
+            : t('n/a')
           )
         );
       case ColumnsId.packets:

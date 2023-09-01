@@ -226,6 +226,7 @@
   "reporting": "reporting",
   "Ingress": "Ingress",
   "Egress": "Egress",
+  "Inner": "Inner",
   "dropped": "dropped",
   "dropped by": "dropped by",
   "sent": "sent",

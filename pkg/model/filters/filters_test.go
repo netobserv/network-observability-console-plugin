@@ -78,12 +78,12 @@ func TestParseCommon(t *testing.T) {
 }
 
 func TestSplitForReportersMerge_NoSplit(t *testing.T) {
-	q1, q2 := SplitForReportersMerge(SingleQuery{NewMatch("srcns", "a"), NewMatch("FlowDirection", constants.Ingress)})
+	q1, q2 := SplitForReportersMerge(SingleQuery{NewMatch("srcns", "a"), NewMatch("FlowDirection", string(constants.Ingress))})
 	assert.Nil(t, q2)
 	assert.Len(t, q1, 2)
 	assert.Equal(t, SingleQuery{
 		NewMatch("srcns", "a"),
-		NewMatch("FlowDirection", constants.Ingress),
+		NewMatch("FlowDirection", string(constants.Ingress)),
 	}, q1)
 }
 
@@ -92,13 +92,13 @@ func TestSplitForReportersMerge(t *testing.T) {
 
 	assert.Len(t, q1, 3)
 	assert.Equal(t, SingleQuery{
-		NewMatch("FlowDirection", `"`+constants.Ingress+`"`),
+		NewMatch("FlowDirection", `"`+string(constants.Ingress)+`","`+string(constants.Inner)+`"`),
 		NewMatch("srcns", "a"),
 		NewMatch("dstns", "b"),
 	}, q1)
 	assert.Len(t, q2, 4)
 	assert.Equal(t, SingleQuery{
-		NewMatch("FlowDirection", `"`+constants.Egress+`"`),
+		NewMatch("FlowDirection", `"`+string(constants.Egress)+`"`),
 		NewMatch("DstK8S_OwnerName", `""`),
 		NewMatch("srcns", "a"),
 		NewMatch("dstns", "b"),

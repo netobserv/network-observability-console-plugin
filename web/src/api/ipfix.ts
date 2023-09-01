@@ -32,7 +32,9 @@ export enum FlowDirection {
   /** Incoming traffic, from node observation point */
   Ingress = '0',
   /** Outgoing traffic, from node observation point */
-  Egress = '1'
+  Egress = '1',
+  /** Inner traffic, ie. same source and destination node */
+  Inner = '2'
 }
 
 export interface Fields {
