@@ -386,12 +386,12 @@ export const RecordField: React.FC<{
         return singleContainer(
           simpleTextWithTooltip(
             value === FlowDirection.Ingress
-            ? t('Ingress')
-            : value === FlowDirection.Egress
-            ? t('Egress')
-            : value === FlowDirection.Inner
-            ? t('Inner')
-            : t('n/a')
+              ? t('Ingress')
+              : value === FlowDirection.Egress
+              ? t('Egress')
+              : value === FlowDirection.Inner
+              ? t('Inner')
+              : t('n/a')
           )
         );
       case ColumnsId.packets:

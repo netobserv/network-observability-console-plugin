@@ -10,7 +10,12 @@ export const mergeFlowReporters = (flows: Record[]): Record[] => {
   const filtersIndex = _.mapValues(
     grouped,
     (recs: Record[]) =>
-      (recs.find(r => r.fields.DnsId !== undefined || r.fields.PktDropBytes !== undefined || r.fields.PktDropPackets !== undefined) || recs[0]).labels.FlowDirection
+      (
+        recs.find(
+          r =>
+            r.fields.DnsId !== undefined || r.fields.PktDropBytes !== undefined || r.fields.PktDropPackets !== undefined
+        ) || recs[0]
+      ).labels.FlowDirection
   );
   return flows.filter((r: Record) => r.labels.FlowDirection === filtersIndex[get5Tuple(r)]);
 };
