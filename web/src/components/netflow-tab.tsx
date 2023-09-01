@@ -28,7 +28,7 @@ type HPAProps = K8sResourceCommon & {
 
 export const NetflowTab: React.FC<PageComponentProps> = ({ obj }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
-  const [forcedFilters, setForcedFilters] = React.useState<Filters | undefined>(undefined);
+  const [forcedFilters, setForcedFilters] = React.useState<Filters | null>(null);
   const previousObj = usePrevious(obj);
 
   React.useEffect(() => {

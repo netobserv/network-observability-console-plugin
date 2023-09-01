@@ -69,7 +69,8 @@ module.exports = {
         router: () => 'http://localhost:9002',
         logLevel: 'debug' /*optional*/
       }
-    }
+    },
+    historyApiFallback: true,
   },
   plugins: [
     new webpack.NormalModuleReplacementPlugin(
