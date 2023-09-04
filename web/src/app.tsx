@@ -8,11 +8,13 @@ import {
   PageHeaderTools,
   PageHeaderToolsGroup,
   PageHeaderToolsItem,
+  PageSection,
   PageSidebar,
   Radio
 } from '@patternfly/react-core';
 import React from 'react';
 import { BrowserRouter, Link, Route, Routes } from 'react-router-dom';
+import NetflowTab from './components/netflow-tab';
 import NetflowTrafficParent from './components/netflow-traffic-parent';
 
 interface AppState {
@@ -23,8 +25,20 @@ interface AppState {
 
 export const pages = [
   {
-    id: '/',
+    id: 'netflow-traffic',
     name: 'Netflow Traffic'
+  },
+  {
+    id: 'pod-tab',
+    name: 'Pod tab'
+  },
+  {
+    id: 'namespace-tab',
+    name: 'Namespace tab'
+  },
+  {
+    id: 'node-tab',
+    name: 'Node tab'
   }
 ];
 
@@ -36,10 +50,12 @@ export class App extends React.Component<{}, AppState> {
   };
 
   private onNavSelect = (selectedItem: { itemId: number | string }) => {
+    console.debug('onNavSelect', selectedItem);
     this.setState({ activeItem: selectedItem.itemId });
   };
 
   private onThemeSelect = (isDarkTheme: boolean) => {
+    console.debug('onThemeSelect', isDarkTheme);
     this.setState({ isDarkTheme });
     const htmlElement = document.getElementsByTagName('html')[0];
     if (htmlElement) {
@@ -52,17 +68,41 @@ export class App extends React.Component<{}, AppState> {
   };
 
   private getPageContent = (id: string) => {
+    console.debug('getPageContent', id);
     switch (id) {
-      case 'netflow-traffic-parent':
+      case 'pod-tab':
+        return <NetflowTab obj={{ kind: 'Pod', metadata: { name: 'test', namespace: 'default' } }} />;
+      case 'namespace-tab':
+        return <NetflowTab obj={{ kind: 'Namespace', metadata: { name: 'test' } }} />;
+      case 'node-tab':
+        return <NetflowTab obj={{ kind: 'Node', metadata: { name: 'test' } }} />;
       default:
         return <NetflowTrafficParent />;
+    }
+  };
+
+  private getPageContext = (id: string, name: string) => {
+    console.debug('getPageContext', id);
+    const content = this.getPageContent(id);
+    switch (id) {
+      case 'netflow-traffic':
+        return <>{content}</>;
+      default:
+        return (
+          <PageSection id="pageSection">
+            <div id="pageHeader">
+              <h1>{`${name} example`}</h1>
+            </div>
+            {content}
+          </PageSection>
+        );
     }
   };
 
   private getPages = () => (
     <Routes>
       {pages.map(page => (
-        <Route element={this.getPageContent(page.id)} path={page.id} key={page.id} />
+        <Route path={page.id} key={page.id} element={this.getPageContext(page.id, page.name)} />
       ))}
     </Routes>
   );
@@ -124,7 +164,6 @@ export class App extends React.Component<{}, AppState> {
     );
 
     const AppSidebar = <PageSidebar isNavOpen={isNavOpen} nav={nav} />;
-
     return (
       <BrowserRouter>
         <Page header={AppHeader} sidebar={AppSidebar} isManagedSidebar>

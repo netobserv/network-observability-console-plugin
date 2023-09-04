@@ -146,7 +146,7 @@ import { mergeFlowReporters } from '../utils/flows';
 export type ViewId = 'overview' | 'table' | 'topology';
 
 export const NetflowTraffic: React.FC<{
-  forcedFilters?: Filters | null;
+  forcedFilters: Filters | null;
   isTab?: boolean;
 }> = ({ forcedFilters, isTab }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
@@ -1290,7 +1290,7 @@ export const NetflowTraffic: React.FC<{
     <PageSection id="pageSection" className={isTab ? 'tab' : ''}>
       {
         //display title only if forced filters is not set
-        _.isEmpty(forcedFilters) && (
+        !forcedFilters && (
           <div id="pageHeader">
             <Flex direction={{ default: 'row' }}>
               <FlexItem flex={{ default: 'flex_1' }}>
