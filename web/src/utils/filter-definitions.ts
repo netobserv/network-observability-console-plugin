@@ -453,7 +453,7 @@ export const getFilterDefinitions = (
           }
           return invalid(t('Unknown direction'));
         },
-        hint: t('Specify the direction of the Flow observed at the Observation Point.'),
+        hint: t('Specify the direction of the Flow observed at the Node observation point.'),
         encoder: simpleFiltersEncoder('FlowDirection'),
         overlap: false
       },

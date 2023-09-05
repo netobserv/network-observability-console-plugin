@@ -3,7 +3,6 @@ import { RecordType } from '../model/flow-query';
 
 // Please keep this file documented: it is used in doc generation
 // To regenerate doc, run `make generate-doc` - and also check this page:
-// eslint-disable-next-line max-len
 // https://github.com/netobserv/network-observability-operator/blob/main/docs/GeneratingAsciidocAPI.md#generate-asciidoc-for-flows-json-format-reference
 
 export interface Record {
@@ -35,6 +34,13 @@ export enum FlowDirection {
   Egress = '1',
   /** Inner traffic, ie. same source and destination node */
   Inner = '2'
+}
+
+export enum InterfaceDirection {
+  /** Incoming traffic, from network interface observation point */
+  Ingress = '0',
+  /** Outgoing traffic, from network interface observation point */
+  Egress = '1',
 }
 
 export interface Fields {
@@ -74,6 +80,8 @@ export interface Fields {
   Proto: number;
   /** Network interface */
   Interface?: string;
+  /** Flow direction from the network interface observation point */
+  IfDirection?: InterfaceDirection;
   /** TCP flags */
   Flags?: number;
   /** Number of packets in this flow */

@@ -735,7 +735,7 @@ export const getExtraColumns = (t: TFunction): Column[] => {
     {
       id: ColumnsId.flowdir,
       name: t('Direction'),
-      tooltip: t('The direction of the Flow observed at the Observation Point.'),
+      tooltip: t('The direction of the Flow observed at the Node observation point.'),
       fieldName: 'FlowDirection',
       quickFilter: 'direction',
       isSelected: false,
