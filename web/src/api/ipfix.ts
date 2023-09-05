@@ -40,7 +40,7 @@ export enum InterfaceDirection {
   /** Incoming traffic, from network interface observation point */
   Ingress = '0',
   /** Outgoing traffic, from network interface observation point */
-  Egress = '1',
+  Egress = '1'
 }
 
 export interface Fields {
