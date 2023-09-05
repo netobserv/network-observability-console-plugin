@@ -38,9 +38,10 @@ export const OverviewPanelsModal: React.FC<{
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   React.useEffect(() => {
-    if (!isModalOpen) {
+    if (!isModalOpen || _.isEmpty(updatedPanels)) {
       setUpdatedPanels(_.cloneDeep(panels));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isModalOpen, panels]);
 
   React.useEffect(() => {
