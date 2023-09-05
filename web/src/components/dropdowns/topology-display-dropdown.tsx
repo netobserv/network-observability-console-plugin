@@ -76,12 +76,14 @@ export const TopologyDisplayOptions: React.FC<{
                 id="metricFunction"
                 selected={metricFunction}
                 setMetricFunction={setMetricFunction}
+                metricType={metricType}
               />
             </FlexItem>
             <FlexItem>
               <MetricTypeDropdown
                 data-test="metricType"
                 id="metricType"
+                isTopology
                 selected={metricType}
                 setMetricType={setMetricType}
               />

@@ -50,8 +50,10 @@ export type NetflowOverviewProps = {
   droppedCauseMetrics?: GenericMetric[];
   dnsRCodeMetrics?: GenericMetric[];
   dnsLatencyMetrics: TopologyMetrics[];
+  rttMetrics: TopologyMetrics[];
   totalDnsLatencyMetric?: TopologyMetrics;
   totalDnsCountMetric?: TopologyMetrics;
+  totalRttMetric?: TopologyMetrics;
   loading?: boolean;
   error?: string;
   isDark?: boolean;
@@ -72,7 +74,9 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
   droppedCauseMetrics,
   dnsRCodeMetrics,
   dnsLatencyMetrics,
+  rttMetrics,
   totalDnsLatencyMetric,
+  totalRttMetric,
   totalDnsCountMetric,
   loading,
   error,
@@ -156,13 +160,26 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
       ?.sort((a, b) => getStat(b.stats, 'sum') - getStat(a.stats, 'sum'))
       .map(m => toNamedMetric(t, m, truncateLength, true, true)) || [];
 
+  const topKRttMetrics =
+    rttMetrics
+      ?.sort((a, b) => getStat(b.stats, 'sum') - getStat(a.stats, 'sum'))
+      .map(m => toNamedMetric(t, m, truncateLength, true, true)) || [];
+  const noInternalTopKRtt = topKRttMetrics.filter(m => m.source.id !== m.destination.id);
+
   const namedTotalMetric = totalMetric ? toNamedMetric(t, totalMetric, truncateLength, false, false) : undefined;
+
   const namedTotalDroppedMetric = totalDroppedMetric
     ? toNamedMetric(t, totalDroppedMetric, truncateLength, false, false)
     : undefined;
+
   const namedDnsLatencyTotalMetric = totalDnsLatencyMetric
     ? toNamedMetric(t, totalDnsLatencyMetric, truncateLength, false, false)
     : undefined;
+
+  const namedRttTotalMetric = totalRttMetric
+    ? toNamedMetric(t, totalRttMetric, truncateLength, false, false)
+    : undefined;
+
   const namedDnsCountTotalMetric = totalDnsCountMetric
     ? toNamedMetric(t, totalDnsCountMetric, truncateLength, false, false)
     : undefined;
@@ -461,6 +478,50 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
           bodyClassSmall: true
         };
       }
+      case 'top_avg_rtt_donut': {
+        const options = kebabMap.get(id) || {
+          showOthers: true
+        };
+        return {
+          element: namedRttTotalMetric ? (
+            <LatencyDonut
+              id={id}
+              limit={limit}
+              metricType={'flowRtt'}
+              topKMetrics={topKRttMetrics}
+              totalMetric={namedRttTotalMetric}
+              showOthers={options.showOthers!}
+              smallerTexts={smallerTexts}
+              subTitle={t('Average RTT')}
+            />
+          ) : (
+            emptyGraph()
+          ),
+          kebab: (
+            <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} isDark={isDark} />
+          ),
+          bodyClassSmall: true
+        };
+      }
+      case 'top_avg_rtt_line':
+        return {
+          element: (
+            <MetricsContent
+              id={id}
+              title={title}
+              metricType={'flowRtt'}
+              metrics={noInternalTopKRtt}
+              limit={limit}
+              showBar={false}
+              showArea={false}
+              showLine={true}
+              showScatter={true}
+              smallerTexts={smallerTexts}
+              tooltipsTruncate={false}
+            />
+          ),
+          doubleWidth: false
+        };
       case 'top_dns_rcode_donut': {
         const options = kebabMap.get(id) || {
           showNoError: true

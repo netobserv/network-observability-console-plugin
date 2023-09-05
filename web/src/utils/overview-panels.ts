@@ -16,6 +16,8 @@ export type OverviewPanelId =
   | 'total_dropped_line'
   | 'top_dropped_bar_total'
   | 'top_avg_dns_latency_donut'
+  | 'top_avg_rtt_donut'
+  | 'top_avg_rtt_line'
   | 'top_dns_rcode_donut'
   | 'top_dns_rcode_bar_total'
   | 'inbound_region';
@@ -48,7 +50,9 @@ export const getDefaultOverviewPanels = (): OverviewPanel[] => {
     { id: 'top_dropped_bar_total', isSelected: true },
     { id: 'top_avg_dns_latency_donut', isSelected: false },
     { id: 'top_dns_rcode_donut', isSelected: false },
-    { id: 'top_dns_rcode_bar_total', isSelected: false }
+    { id: 'top_dns_rcode_bar_total', isSelected: false },
+    { id: 'top_avg_rtt_donut', isSelected: false },
+    { id: 'top_avg_rtt_line', isSelected: false }
   ]);
   if (isAllowed(Feature.Overview)) {
     panels.unshift({ id: 'overview', isSelected: true });
@@ -127,6 +131,14 @@ export const getOverviewPanelInfo = (
         chartType: t('donut'),
         tooltip: t('The average DNS latencies over the selected interval')
       };
+    case 'top_avg_rtt_donut':
+      return {
+        title: t('Top {{limit}} average flow RTT', { limit }),
+        chartType: t('donut'),
+        tooltip: t('The average flow Round Trip Time over the selected interval')
+      };
+    case 'top_avg_rtt_line':
+      return { title: t('Top {{limit}} average flow RTT', { limit, type }), chartType: t('lines') };
     case 'top_dns_rcode_donut':
       return {
         title: t('Top {{limit}} DNS response code', { limit }),

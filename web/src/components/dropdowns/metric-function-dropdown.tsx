@@ -1,32 +1,34 @@
-import { Dropdown, DropdownItem, DropdownPosition, DropdownToggle } from '@patternfly/react-core';
+import { Dropdown, DropdownItem, DropdownPosition, DropdownToggle, Tooltip } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { MetricFunction } from '../../model/flow-query';
+import { MetricFunction, MetricType } from '../../model/flow-query';
 
 const metricFunctionOptions: MetricFunction[] = ['last', 'avg', 'max', 'sum'];
 
 export const MetricFunctionDropdown: React.FC<{
   selected?: string;
   setMetricFunction: (v: MetricFunction) => void;
+  metricType?: MetricType;
   id?: string;
-}> = ({ selected, setMetricFunction, id }) => {
+}> = ({ selected, setMetricFunction, metricType, id }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [metricDropdownOpen, setMetricDropdownOpen] = React.useState(false);
 
   const getMetricDisplay = React.useCallback(
     (mf: MetricFunction): string => {
+      const suffix = metricType !== 'flowRtt' ? ' ' + t('rate') : '';
       switch (mf) {
         case 'sum':
           return t('Total');
         case 'last':
-          return t('Latest rate');
+          return `${t('Latest')}${suffix}`;
         case 'max':
-          return t('Max rate');
+          return `${t('Max')}${suffix}`;
         case 'avg':
-          return t('Average rate');
+          return `${t('Average')}${suffix}`;
       }
     },
-    [t]
+    [metricType, t]
   );
 
   return (
@@ -35,13 +37,20 @@ export const MetricFunctionDropdown: React.FC<{
       id={id}
       position={DropdownPosition.right}
       toggle={
-        <DropdownToggle
-          data-test={`${id}-dropdown`}
-          id={`${id}-dropdown`}
-          onToggle={() => setMetricDropdownOpen(!metricDropdownOpen)}
+        <Tooltip
+          trigger={metricType === 'flowRtt' ? 'mouseenter focus' : ''}
+          position="top"
+          content={t('Only average is available for RTT')}
         >
-          {getMetricDisplay(selected as MetricFunction)}
-        </DropdownToggle>
+          <DropdownToggle
+            data-test={`${id}-dropdown`}
+            id={`${id}-dropdown`}
+            isDisabled={metricType === 'flowRtt'}
+            onToggle={() => setMetricDropdownOpen(!metricDropdownOpen)}
+          >
+            {getMetricDisplay(selected as MetricFunction)}
+          </DropdownToggle>
+        </Tooltip>
       }
       isOpen={metricDropdownOpen}
       dropdownItems={metricFunctionOptions.map(v => (

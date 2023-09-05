@@ -12,7 +12,8 @@ export type MetricType =
   | 'packets'
   | 'droppedBytes'
   | 'droppedPackets'
-  | 'dnsLatencies';
+  | 'dnsLatencies'
+  | 'flowRtt';
 export type FlowScope = 'app' | 'host' | 'namespace' | 'owner' | 'resource';
 export type GenericAggregation = 'droppedCause' | 'droppedState' | 'dnsRCode';
 export type AggregateBy = FlowScope | GenericAggregation;

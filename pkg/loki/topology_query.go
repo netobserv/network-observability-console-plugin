@@ -22,6 +22,8 @@ type Topology struct {
 	skipEmptyDropCause bool
 	skipNonDNS         bool
 	skipEmptyDNSRCode  bool
+	skipEmptyRTT       bool
+	factor             string
 }
 
 type TopologyQueryBuilder struct {
@@ -39,6 +41,7 @@ func NewTopologyQuery(cfg *Config, start, end, limit, rateInterval, step string,
 
 	fields := getFields(aggregate, groups)
 	var f, t string
+	factor := ""
 	switch metricType {
 	case constants.MetricTypeCount, constants.MetricTypeCountDNS:
 		f = "count_over_time"
@@ -57,6 +60,10 @@ func NewTopologyQuery(cfg *Config, start, end, limit, rateInterval, step string,
 	case constants.MetricTypeBytes:
 		f = "rate"
 		t = "Bytes"
+	case constants.MetricTypeFlowRTT:
+		f = "avg_over_time"
+		t = "TimeFlowRttNs"
+		factor = "/1000000" // nanoseconds to miliseconds
 	}
 
 	var d bool
@@ -80,8 +87,10 @@ func NewTopologyQuery(cfg *Config, start, end, limit, rateInterval, step string,
 			fields:             fields,
 			skipEmptyDropState: aggregate == "droppedState",
 			skipEmptyDropCause: aggregate == "droppedCause",
-			skipNonDNS:         metricType == "dnsLatencies" || metricType == "countDns",
+			skipNonDNS:         metricType == constants.MetricTypeDNSLatencies || metricType == constants.MetricTypeCountDNS,
 			skipEmptyDNSRCode:  aggregate == "dnsRCode",
+			skipEmptyRTT:       metricType == constants.MetricTypeFlowRTT,
+			factor:             factor,
 		},
 	}, nil
 }
@@ -139,7 +148,7 @@ func (q *TopologyQueryBuilder) Build() string {
 	//				<function>(
 	//					{<label filters>}|<line filters>|json|<json filters>
 	//						|unwrap Bytes|__error__=""[<interval>]
-	//				)
+	//				) <factor>
 	//			)
 	//		)
 	//		&<query params>&step=<step>
@@ -172,6 +181,10 @@ func (q *TopologyQueryBuilder) Build() string {
 		q.appendDNSFilter(sb)
 	}
 
+	if q.topology.skipEmptyRTT {
+		q.appendRTTFilter(sb)
+	}
+
 	q.appendJSON(sb, true)
 	if len(q.topology.dataField) > 0 {
 		sb.WriteString("|unwrap ")
@@ -184,7 +197,11 @@ func (q *TopologyQueryBuilder) Build() string {
 	} else {
 		sb.WriteString(q.topology.rateInterval)
 	}
-	sb.WriteString("])))")
+	sb.WriteString("])")
+	if len(q.topology.factor) > 0 {
+		sb.WriteString(q.topology.factor)
+	}
+	sb.WriteString("))")
 	q.appendQueryParams(sb)
 	sb.WriteString("&step=")
 	sb.WriteString(q.topology.step)

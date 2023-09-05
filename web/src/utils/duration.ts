@@ -40,6 +40,18 @@ export const formatDuration = (ms: number): string => {
   return _.trim(str);
 };
 
+export const roundDuration = (value: number, decimalPlaces = 2): number => {
+  return Number(Math.round(parseFloat(value + 'e' + decimalPlaces)) + 'e-' + decimalPlaces);
+};
+
+export const formatDurationAboveNanosecond = (ns: number): string => {
+  if (ns < 1000000) {
+    return `${ns}ns`;
+  }
+  // convert to ms and format accordingly
+  return formatDurationAboveMillisecond(roundDuration(ns / 1000000));
+};
+
 export const formatDurationAboveMillisecond = (ms: number): string => {
   if (ms < 1) {
     // Sometimes ms is 0. Sometimes could even be negative (unsynced server time?)

@@ -22,6 +22,7 @@ describe('<NetflowOverview />', () => {
     metrics: [],
     droppedMetrics: [],
     dnsLatencyMetrics: [],
+    rttMetrics: [],
     totalMetric: undefined,
     filterActionLinks: <></>,
     truncateLength: TruncateLength.M

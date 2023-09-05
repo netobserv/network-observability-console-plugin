@@ -8,7 +8,6 @@ import { FlowDirection, Record } from '../../api/ipfix';
 import { Column, ColumnsId, getFullColumnName } from '../../utils/columns';
 import { dateFormatter, getFormattedDate, timeMSFormatter, utcDateTimeFormatter } from '../../utils/datetime';
 import { DNS_CODE_NAMES, getDNSRcodeDescription } from '../../utils/dns';
-import { formatDurationAboveMillisecond } from '../../utils/duration';
 import {
   getICMPCode,
   getICMPDocUrl,
@@ -17,6 +16,7 @@ import {
   ICMP_ALL_TYPES_VALUES
 } from '../../utils/icmp';
 import { DROP_CAUSES_NAMES, getDropCauseDescription, getDropCauseDocUrl } from '../../utils/pkt-drop';
+import { formatDurationAboveMillisecond, formatDurationAboveNanosecond } from '../../utils/duration';
 import { formatPort } from '../../utils/port';
 import { formatProtocol } from '../../utils/protocol';
 import { Size } from '../dropdowns/table-display-dropdown';
@@ -223,9 +223,14 @@ export const RecordField: React.FC<{
       case ColumnsId.collectionlatency:
       case ColumnsId.dnslatency:
       case ColumnsId.duration:
+      case ColumnsId.rttTime:
         return singleContainer(
           typeof value === 'number' && !isNaN(value)
-            ? simpleTextWithTooltip(formatDurationAboveMillisecond(value as number))
+            ? simpleTextWithTooltip(
+                c.id === ColumnsId.rttTime
+                  ? formatDurationAboveNanosecond(value as number)
+                  : formatDurationAboveMillisecond(value as number)
+              )
             : undefined
         );
       case ColumnsId.name:

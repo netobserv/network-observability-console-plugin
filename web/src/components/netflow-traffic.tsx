@@ -188,10 +188,12 @@ export const NetflowTraffic: React.FC<{
   const [metrics, setMetrics] = React.useState<TopologyMetrics[]>([]);
   const [droppedMetrics, setDroppedMetrics] = React.useState<TopologyMetrics[]>([]);
   const [dnsLatencyMetrics, setDnsLatencyMetrics] = React.useState<TopologyMetrics[]>([]);
+  const [rttMetrics, setRttMetrics] = React.useState<TopologyMetrics[]>([]);
   const [totalMetric, setTotalMetric] = React.useState<TopologyMetrics | undefined>(undefined);
   const [totalDroppedMetric, setTotalDroppedMetric] = React.useState<TopologyMetrics | undefined>(undefined);
   const [totalDnsLatencyMetric, setTotalDnsLatencyMetric] = React.useState<TopologyMetrics | undefined>(undefined);
   const [totalDnsCountMetric, setTotalDnsCountMetric] = React.useState<TopologyMetrics | undefined>(undefined);
+  const [totalRttMetric, setTotalRttMetric] = React.useState<TopologyMetrics | undefined>(undefined);
   const [droppedStateMetrics, setDroppedStateMetrics] = React.useState<GenericMetric[] | undefined>(undefined);
   const [droppedCauseMetrics, setDroppedCauseMetrics] = React.useState<GenericMetric[] | undefined>(undefined);
   const [dnsRCodeMetrics, setDnsRCodeMetrics] = React.useState<GenericMetric[] | undefined>(undefined);
@@ -245,6 +247,17 @@ export const NetflowTraffic: React.FC<{
   });
   const [columnSizes, setColumnSizes] = useLocalStorage<ColumnSizeMap>(LOCAL_STORAGE_COLS_SIZES_KEY, {});
 
+  const updateMetricType = React.useCallback(
+    (metricType: MetricType) => {
+      /* TODO : allow max / latest metric functions for DNS latency & RTT*/
+      if (metricType === 'flowRtt') {
+        setMetricFunction('avg');
+      }
+      setMetricType(metricType);
+    },
+    [setMetricFunction, setMetricType]
+  );
+
   const getQuickFilters = React.useCallback((c = config) => parseQuickFilters(t, c.quickFilters), [t, config]);
 
   const getDefaultFilters = React.useCallback(
@@ -264,6 +277,7 @@ export const NetflowTraffic: React.FC<{
       setTotalMetric(undefined);
       setTotalDroppedMetric(undefined);
       setTotalDnsLatencyMetric(undefined);
+      setTotalRttMetric(undefined);
       setTotalDnsCountMetric(undefined);
       setWarningMessage(undefined);
     },
@@ -519,6 +533,26 @@ export const NetflowTraffic: React.FC<{
         setTotalDnsLatencyMetric(undefined);
         setTotalDnsCountMetric(undefined);
       }
+
+      if (config.features.includes('flowRTT')) {
+        promises.push(
+          ...[
+            //set RTT metrics
+            getTopologyMetrics({ ...fq, type: 'flowRtt' }, range).then(res => {
+              setRttMetrics(res.metrics);
+              return res.stats;
+            }),
+            //set app RTT metrics
+            getTopologyMetrics({ ...fq, aggregateBy: 'app', type: 'flowRtt' }, range).then(res => {
+              setTotalRttMetric(res.metrics[0]);
+              return res.stats;
+            })
+          ]
+        );
+      } else {
+        setRttMetrics([]);
+        setTotalRttMetric(undefined);
+      }
       return Promise.all(promises);
     },
     [range, config.features]
@@ -565,7 +599,9 @@ export const NetflowTraffic: React.FC<{
     const droppedType = config.features.includes('pktDrop')
       ? fq.type === 'bytes'
         ? 'droppedBytes'
-        : 'droppedPackets'
+        : fq.type === 'packets'
+        ? 'droppedPackets'
+        : undefined
       : undefined;
 
     let promises: Promise<Stats[]> | undefined = undefined;
@@ -622,6 +658,10 @@ export const NetflowTraffic: React.FC<{
 
   const isDNSTracking = React.useCallback(() => {
     return config.features.includes('dnsTracking');
+  }, [config.features]);
+
+  const isFlowRTT = React.useCallback(() => {
+    return config.features.includes('flowRTT');
   }, [config.features]);
 
   const isPktDrop = React.useCallback(() => {
@@ -989,7 +1029,9 @@ export const NetflowTraffic: React.FC<{
           columns={getDefaultColumns(t, false, false).filter(
             col =>
               (isConnectionTracking() || ![ColumnsId.recordtype, ColumnsId.hashid].includes(col.id)) &&
-              (isDNSTracking() || ![ColumnsId.dnsid, ColumnsId.dnslatency, ColumnsId.dnsresponsecode].includes(col.id))
+              (isDNSTracking() ||
+                ![ColumnsId.dnsid, ColumnsId.dnslatency, ColumnsId.dnsresponsecode].includes(col.id)) &&
+              (isFlowRTT() || ![ColumnsId.rttTime].includes(col.id))
           )}
           filters={filters.list}
           range={range}
@@ -1018,6 +1060,7 @@ export const NetflowTraffic: React.FC<{
           lastRefresh={lastRefresh}
           range={range}
           showDNSLatency={isDNSTracking()}
+          showRTTLatency={isFlowRTT()}
           onClose={() => setShowQuerySummary(false)}
         />
       );
@@ -1087,7 +1130,9 @@ export const NetflowTraffic: React.FC<{
             droppedCauseMetrics={droppedCauseMetrics}
             dnsRCodeMetrics={dnsRCodeMetrics}
             dnsLatencyMetrics={dnsLatencyMetrics}
+            rttMetrics={rttMetrics}
             totalDnsLatencyMetric={totalDnsLatencyMetric}
+            totalRttMetric={totalRttMetric}
             totalDnsCountMetric={totalDnsCountMetric}
             loading={loading}
             error={error}
@@ -1111,7 +1156,8 @@ export const NetflowTraffic: React.FC<{
                 col.isSelected &&
                 (isConnectionTracking() || ![ColumnsId.recordtype, ColumnsId.hashid].includes(col.id)) &&
                 (isDNSTracking() ||
-                  ![ColumnsId.dnsid, ColumnsId.dnslatency, ColumnsId.dnsresponsecode].includes(col.id))
+                  ![ColumnsId.dnsid, ColumnsId.dnslatency, ColumnsId.dnsresponsecode].includes(col.id)) &&
+                (isFlowRTT() || ![ColumnsId.rttTime].includes(col.id))
             )}
             setColumns={(v: Column[]) => setColumns(v.concat(columns.filter(col => !col.isSelected)))}
             columnSizes={columnSizes}
@@ -1403,7 +1449,7 @@ export const NetflowTraffic: React.FC<{
               {selectedViewId === 'overview' && (
                 <OverviewDisplayDropdown
                   metricType={metricType}
-                  setMetricType={setMetricType}
+                  setMetricType={updateMetricType}
                   metricScope={metricScope}
                   setMetricScope={setMetricScope}
                   truncateLength={overviewTruncateLength}
@@ -1416,7 +1462,7 @@ export const NetflowTraffic: React.FC<{
                   metricFunction={metricFunction}
                   setMetricFunction={setMetricFunction}
                   metricType={metricType}
-                  setMetricType={setMetricType}
+                  setMetricType={updateMetricType}
                   metricScope={metricScope}
                   setMetricScope={setMetricScope}
                   topologyOptions={topologyOptions}
@@ -1475,7 +1521,9 @@ export const NetflowTraffic: React.FC<{
         columns={columns.filter(
           col =>
             (isConnectionTracking() || ![ColumnsId.recordtype, ColumnsId.hashid].includes(col.id)) &&
-            (isDNSTracking() || ![ColumnsId.dnsid, ColumnsId.dnslatency, ColumnsId.dnsresponsecode].includes(col.id))
+            (isDNSTracking() ||
+              (![ColumnsId.dnsid, ColumnsId.dnslatency, ColumnsId.dnsresponsecode].includes(col.id) &&
+                (isFlowRTT() || ![ColumnsId.rttTime].includes(col.id))))
         )}
         setColumns={setColumns}
         setColumnSizes={setColumnSizes}

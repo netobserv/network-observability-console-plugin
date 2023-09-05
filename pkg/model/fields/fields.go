@@ -39,6 +39,7 @@ const (
 	DNSID          = "DnsId"
 	DNSLatency     = "DnsLatencyMs"
 	Duplicate      = "Duplicate"
+	TimeFlowRTT    = "TimeFlowRttNs"
 )
 
 func IsNumeric(v string) bool {
@@ -46,6 +47,7 @@ func IsNumeric(v string) bool {
 	case
 		DNSID,
 		DNSLatency,
+		TimeFlowRTT,
 		Port,
 		SrcPort,
 		DstPort,
