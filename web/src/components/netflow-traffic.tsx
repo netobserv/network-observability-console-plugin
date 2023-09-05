@@ -32,7 +32,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '../utils/theme-hook';
 import { Record } from '../api/ipfix';
 import { GenericMetric, Stats, TopologyMetrics } from '../api/loki';
-import { getGenericMetrics, getFlows, getTopologyMetrics } from '../api/routes';
+import { getGenericMetrics } from '../api/routes';
 import {
   DisabledFilters,
   Filter,
@@ -45,13 +45,13 @@ import {
 } from '../model/filters';
 import {
   FlowQuery,
-  groupFilters,
   Match,
   MetricFunction,
   FlowScope,
   MetricType,
   PacketLoss,
-  RecordType
+  RecordType,
+  filtersToString
 } from '../model/flow-query';
 import { MetricScopeOptions } from '../model/metrics';
 import { parseQuickFilters } from '../model/quick-filters';
@@ -142,6 +142,8 @@ import { exportToPng } from '../utils/export';
 import { navigate } from './dynamic-loader/dynamic-loader';
 import { LinksOverflow } from './overflow/links-overflow';
 import { mergeFlowReporters } from '../utils/flows';
+import { getFetchFunctions as getBackAndForthFetch } from '../utils/back-and-forth';
+import { mergeStats } from '../utils/metrics';
 
 export type ViewId = 'overview' | 'table' | 'topology';
 
@@ -339,9 +341,8 @@ export const NetflowTraffic: React.FC<{
 
   const buildFlowQuery = React.useCallback((): FlowQuery => {
     const enabledFilters = getEnabledFilters(forcedFilters || filters);
-    const groupedFilters = groupFilters(enabledFilters, match === 'any');
     const query: FlowQuery = {
-      filters: groupedFilters,
+      filters: filtersToString(enabledFilters.list, match === 'any'),
       limit: LIMIT_VALUES.includes(limit) ? limit : LIMIT_VALUES[0],
       recordType: recordType,
       dedup: !showDuplicates,
@@ -387,6 +388,13 @@ export const NetflowTraffic: React.FC<{
     topologyOptions.groupTypes
   ]);
 
+  const getFetchFunctions = React.useCallback(() => {
+    // check back-and-forth
+    const enabledFilters = getEnabledFilters(forcedFilters || filters);
+    const matchAny = match === 'any';
+    return getBackAndForthFetch(enabledFilters, matchAny);
+  }, [forcedFilters, filters, match]);
+
   const manageWarnings = React.useCallback(
     (query: Promise<unknown>) => {
       Promise.race([query, new Promise((resolve, reject) => setTimeout(reject, 2000, 'slow'))]).then(
@@ -403,20 +411,12 @@ export const NetflowTraffic: React.FC<{
     []
   );
 
-  const mergeStats = (prev: Stats | undefined, current: Stats): Stats => {
-    if (!prev) {
-      return current;
-    }
-    return {
-      ...prev,
-      limitReached: prev.limitReached || current.limitReached,
-      numQueries: prev.numQueries + current.numQueries
-    };
-  };
-
   const fetchTable = React.useCallback(
     (fq: FlowQuery, droppedType: MetricType | undefined) => {
       setMetrics([]);
+
+      const { getFlows, getTopologyMetrics } = getFetchFunctions();
+
       // table query is based on histogram range if available
       const tableQuery = { ...fq };
       if (histogramRange) {
@@ -452,12 +452,15 @@ export const NetflowTraffic: React.FC<{
       }
       return Promise.all(promises);
     },
-    [histogramRange, range, showHistogram, showDuplicates]
+    [histogramRange, range, showHistogram, showDuplicates, getFetchFunctions]
   );
 
   const fetchOverview = React.useCallback(
     (fq: FlowQuery, droppedType: MetricType | undefined) => {
       setFlows([]);
+
+      const { getTopologyMetrics } = getFetchFunctions();
+
       const promises: Promise<Stats>[] = [
         //get bytes or packets
         getTopologyMetrics(fq, range).then(res => {
@@ -555,12 +558,15 @@ export const NetflowTraffic: React.FC<{
       }
       return Promise.all(promises);
     },
-    [range, config.features]
+    [range, config.features, getFetchFunctions]
   );
 
   const fetchTopology = React.useCallback(
     (fq: FlowQuery, droppedType: MetricType | undefined) => {
       setFlows([]);
+
+      const { getTopologyMetrics } = getFetchFunctions();
+
       const promises: Promise<Stats>[] = [
         //get bytes or packets
         getTopologyMetrics(fq, range).then(res => {
@@ -581,7 +587,7 @@ export const NetflowTraffic: React.FC<{
       }
       return Promise.all(promises);
     },
-    [range]
+    [range, getFetchFunctions]
   );
 
   const tick = React.useCallback(() => {

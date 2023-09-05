@@ -5,7 +5,8 @@ import {
   TopologyMetricPeer,
   TopologyMetrics,
   NameAndType,
-  GenericMetric
+  GenericMetric,
+  Stats
 } from '../api/loki';
 import { MetricFunction, MetricType, FlowScope, GenericAggregation } from '../model/flow-query';
 import { roundTwoDigits } from './count';
@@ -231,6 +232,15 @@ export const calibrateRange = (
     }
   }
 
+  // Extend normalization interval to latest timestamp if bigger than computed endWithTolerance
+  const allLasts = raw.filter(dp => dp.length > 0).map(dp => dp[dp.length - 1][0]);
+  if (allLasts.length > 0) {
+    const lastTimestamp = Math.max(...allLasts);
+    if (lastTimestamp > endWithTolerance) {
+      endWithTolerance = lastTimestamp;
+    }
+  }
+
   // End time needs to be overridden to avoid huge range since mock is outdated compared to current date
   if (isMock) {
     endWithTolerance = Math.max(...raw.filter(dp => dp.length > 0).map(dp => dp[dp.length - 1][0]));
@@ -262,14 +272,19 @@ export const normalizeMetrics = (
   });
 
   // Normalize by filling missing datapoints with zeros
-  const tolerance = step / 2;
   for (let current = start; current < end; current += step) {
-    if (!normalized.some(rv => rv[0] > current - tolerance && rv[0] < current + tolerance)) {
+    if (!getValueCloseTo(normalized, current, step)) {
       normalized.push([current, 0]);
     }
   }
 
   return normalized.sort((a, b) => a[0] - b[0]);
+};
+
+const getValueCloseTo = (values: [number, number][], timestamp: number, step: number): number | undefined => {
+  const tolerance = step / 2;
+  const datapoint = values.find(dp => dp[0] > timestamp - tolerance && dp[0] < timestamp + tolerance);
+  return datapoint ? datapoint[1] : undefined;
 };
 
 /**
@@ -341,3 +356,72 @@ export const matchPeer = (data: NodeData, peer: TopologyMetricPeer): boolean => 
 };
 
 export const isUnknownPeer = (peer: TopologyMetricPeer): boolean => peer.id === idUnknown;
+
+const combineValues = (
+  values1: [number, number][],
+  values2: [number, number][],
+  step: number,
+  op: (a: number, b: number) => number
+): [number, number][] => {
+  return values1.map(dp1 => {
+    const t = dp1[0];
+    const v1 = dp1[1];
+    const v2 = getValueCloseTo(values2, t, step);
+    if (v2 === undefined) {
+      // shouldn't happen in theory since metrics are normalized, except on end timerange boundary
+      return [t, op(v1, 0)];
+    }
+    return [t, op(v1, v2)];
+  });
+};
+
+const combineMetrics = (
+  metrics1: TopologyMetrics[],
+  metrics2: TopologyMetrics[],
+  step: number,
+  op: (a: number, b: number) => number,
+  ignoreAbsentMetric?: boolean
+): TopologyMetrics[] => {
+  const cache: Map<string, TopologyMetrics> = new Map();
+  const keyFunc = (m: TopologyMetrics) => `${m.source.id}@${m.destination.id}`;
+  metrics1.forEach(m => {
+    cache.set(keyFunc(m), m);
+  });
+  metrics2.forEach(m => {
+    const inCache = cache.get(keyFunc(m));
+    if (inCache) {
+      inCache.values = combineValues(inCache.values, m.values, step, op);
+      inCache.stats = computeStats(inCache.values);
+    } else if (!ignoreAbsentMetric) {
+      cache.set(keyFunc(m), m);
+    }
+  });
+  return Array.from(cache.values());
+};
+
+export const sumMetrics = (
+  metrics1: TopologyMetrics[],
+  metrics2: TopologyMetrics[],
+  step: number
+): TopologyMetrics[] => {
+  return combineMetrics(metrics1, metrics2, step, (a, b) => a + b);
+};
+
+export const substractMetrics = (
+  metrics1: TopologyMetrics[],
+  metrics2: TopologyMetrics[],
+  step: number
+): TopologyMetrics[] => {
+  return combineMetrics(metrics1, metrics2, step, (a, b) => a - b, true);
+};
+
+export const mergeStats = (prev: Stats | undefined, current: Stats): Stats => {
+  if (!prev) {
+    return current;
+  }
+  return {
+    ...prev,
+    limitReached: prev.limitReached || current.limitReached,
+    numQueries: prev.numQueries + current.numQueries
+  };
+};
