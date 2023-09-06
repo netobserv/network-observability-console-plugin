@@ -13,14 +13,13 @@ describe('netflow-table', () => {
 
   it('displays table and rows', () => {
     cy.get('#table-container').should('exist');
-    //expect 100 results without filters
-    cy.get('#table-container').find('tr').its('length').should('be.gte', 100);
-    cy.get('#flowsCount').contains('100+ flows');
+    //expect 50 results without filters
+    cy.get('#table-container').find('tr').its('length').should('be.gte', 50);
+    cy.get('#flowsCount').contains('50+ Flows');
 
-    cy.addCommonFilter('namespace', c.namespace);
-    cy.addCommonFilter('name', c.pod);
-    cy.changeQueryOption('Match all');
-    cy.changeQueryOption('Both');
+    cy.addFilter('src_namespace', c.namespace);
+    cy.addFilter('src_name', c.pod);
+    cy.changeQueryOption('Show duplicates');
     cy.changeQueryOption('1000');
     cy.changeTimeRange('Last 1 day');
   });
@@ -29,12 +28,33 @@ describe('netflow-table', () => {
     //first open modal
     cy.openColumnsModal();
 
+    //Unselect all columns
+    cy.get('#columns-modal').contains('Select all').click();
+    cy.get('#columns-modal').contains('Unselect all').click();
+
+    //Select column using checkboxes
+    cy.checkPopupItems('#columns-modal', ['StartTime', 'K8S_Object', 'AddrPort', 'Packets']);
+
+    //Save
+    cy.get('#columns-modal').contains('Save').click();
+    //Should not have nested columns and have 4 columns
+    cy.checkColumns(0, 4);
+
+    //reload the page
+    cy.reload();
+
+    //Should have remembered the columns
+    cy.checkColumns(0, 4);
+
+    //reopen modal
+    cy.openColumnsModal();
+
     //Select all columns
     cy.get('#columns-modal').contains('Select all').click();
 
     //Save
     cy.get('#columns-modal').contains('Save').click();
-    cy.checkColumns(24, 48);
+    cy.checkColumns(26, 52);
 
     //reopen modal
     cy.openColumnsModal();

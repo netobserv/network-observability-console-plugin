@@ -38,8 +38,11 @@ export const ColumnsModal: React.FC<{
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   React.useEffect(() => {
-    setUpdatedColumns(_.cloneDeep(columns));
-  }, [columns]);
+    if (!isModalOpen || _.isEmpty(updatedColumns)) {
+      setUpdatedColumns(_.cloneDeep(columns));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [columns, isModalOpen]);
 
   React.useEffect(() => {
     let allSelected = true;

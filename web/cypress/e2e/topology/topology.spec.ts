@@ -16,12 +16,10 @@ describe('netflow-topology', () => {
     //expect some namespaces & edges in the default layer
     cy.get('[data-layer-id="default"]').children().its('length').should('be.gte', 100);
 
-    cy.addCommonFilter('namespace', c.namespace, true);
-    cy.addCommonFilter('name', c.pod, true);
+    cy.addFilter('src_namespace', c.namespace, true);
+    cy.addFilter('src_name', c.pod, true);
     cy.changeMetricType('Packets');
     cy.changeMetricType('Bytes');
-    cy.changeQueryOption('Both', true);
-    cy.changeQueryOption('Match all', true);
     cy.changeTimeRange('Last 1 day', true);
   });
 
