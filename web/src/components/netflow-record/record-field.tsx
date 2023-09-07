@@ -235,13 +235,13 @@ export const RecordField: React.FC<{
         );
       case ColumnsId.name:
         return doubleContainer(
-          kubeObjContent(flow.fields.SrcK8S_Name, flow.fields.SrcK8S_Type, flow.labels.SrcK8S_Namespace),
-          kubeObjContent(flow.fields.DstK8S_Name, flow.fields.DstK8S_Type, flow.labels.DstK8S_Namespace)
+          kubeObjContent(flow.fields.SrcK8S_Name, flow.labels.SrcK8S_Type, flow.labels.SrcK8S_Namespace),
+          kubeObjContent(flow.fields.DstK8S_Name, flow.labels.DstK8S_Type, flow.labels.DstK8S_Namespace)
         );
       case ColumnsId.srcname:
-        return singleContainer(kubeObjContent(value as string, flow.fields.SrcK8S_Type, flow.labels.SrcK8S_Namespace));
+        return singleContainer(kubeObjContent(value as string, flow.labels.SrcK8S_Type, flow.labels.SrcK8S_Namespace));
       case ColumnsId.dstname:
-        return singleContainer(kubeObjContent(value as string, flow.fields.DstK8S_Type, flow.labels.DstK8S_Namespace));
+        return singleContainer(kubeObjContent(value as string, flow.labels.DstK8S_Type, flow.labels.DstK8S_Namespace));
       case ColumnsId.owner:
         return doubleContainer(
           kubeObjContent(flow.labels.SrcK8S_OwnerName, flow.fields.SrcK8S_OwnerType, flow.labels.SrcK8S_Namespace),
@@ -269,14 +269,14 @@ export const RecordField: React.FC<{
           explicitKubeObjContent(
             flow.fields.SrcAddr,
             flow.fields.SrcPort || NaN,
-            flow.fields.SrcK8S_Type,
+            flow.labels.SrcK8S_Type,
             flow.labels.SrcK8S_Namespace,
             flow.fields.SrcK8S_Name
           ),
           explicitKubeObjContent(
             flow.fields.DstAddr,
             flow.fields.DstPort || NaN,
-            flow.fields.DstK8S_Type,
+            flow.labels.DstK8S_Type,
             flow.labels.DstK8S_Namespace,
             flow.fields.DstK8S_Name
           )
@@ -286,7 +286,7 @@ export const RecordField: React.FC<{
           explicitKubeObjContent(
             flow.fields.SrcAddr,
             flow.fields.SrcPort || NaN,
-            flow.fields.SrcK8S_Type,
+            flow.labels.SrcK8S_Type,
             flow.labels.SrcK8S_Namespace,
             flow.fields.SrcK8S_Name
           )
@@ -296,7 +296,7 @@ export const RecordField: React.FC<{
           explicitKubeObjContent(
             flow.fields.DstAddr,
             flow.fields.DstPort || NaN,
-            flow.fields.DstK8S_Type,
+            flow.labels.DstK8S_Type,
             flow.labels.DstK8S_Namespace,
             flow.fields.DstK8S_Name
           )
