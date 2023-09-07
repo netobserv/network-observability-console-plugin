@@ -20,6 +20,10 @@ export interface Labels {
   SrcK8S_OwnerName?: string;
   /** Destination owner, such as Deployment, StatefulSet, etc. */
   DstK8S_OwnerName?: string;
+  /** Kind of the source matched Kubernetes object, such as Pod, Service, etc. */
+  SrcK8S_Type?: string;
+  /** Kind of the destination matched Kubernetes object, such as Pod name, Service name, etc. */
+  DstK8S_Type?: string;
   /** Flow direction from the node observation point */
   FlowDirection: FlowDirection;
   /** Type of record: 'flowLog' for regular flow logs, or 'allConnections',
@@ -56,10 +60,6 @@ export interface Fields {
   SrcK8S_Name?: string;
   /** Name of the destination matched Kubernetes object, such as Pod name, Service name, etc. */
   DstK8S_Name?: string;
-  /** Kind of the source matched Kubernetes object, such as Pod, Service, etc. */
-  SrcK8S_Type?: string;
-  /** Kind of the destination matched Kubernetes object, such as Pod name, Service name, etc. */
-  DstK8S_Type?: string;
   /** Source port */
   SrcPort?: number;
   /** Destination port */

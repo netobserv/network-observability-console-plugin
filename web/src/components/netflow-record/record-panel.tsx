@@ -231,7 +231,7 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
     columns.filter(
       c =>
         //remove empty / duplicates columns for Node
-        (record?.fields.SrcK8S_Type !== 'Node' ||
+        (record?.labels.SrcK8S_Type !== 'Node' ||
           ![
             ColumnsId.srcnamespace,
             ColumnsId.srcowner,
@@ -239,7 +239,7 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
             ColumnsId.srchostaddr,
             ColumnsId.srchostname
           ].includes(c.id)) &&
-        (record?.fields.DstK8S_Type !== 'Node' ||
+        (record?.labels.DstK8S_Type !== 'Node' ||
           ![
             ColumnsId.dstnamespace,
             ColumnsId.dstowner,

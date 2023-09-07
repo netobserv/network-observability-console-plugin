@@ -207,7 +207,7 @@ export const getCommonColumns = (t: TFunction, withConcatenatedFields = true): C
       id: ColumnsId.type,
       name: t('Kinds'),
       isSelected: false,
-      value: f => getSrcOrDstValue(f.fields.SrcK8S_Type, f.fields.DstK8S_Type),
+      value: f => getSrcOrDstValue(f.labels.SrcK8S_Type, f.labels.DstK8S_Type),
       sort: (a, b, col) => compareStrings((col.value(a) as string[]).join(''), (col.value(b) as string[]).join('')),
       width: 10
     },
@@ -292,14 +292,14 @@ export const getCommonColumns = (t: TFunction, withConcatenatedFields = true): C
           ...getConcatenatedValue(
             f.fields.SrcAddr,
             f.fields.SrcPort || NaN,
-            f.fields.SrcK8S_Type,
+            f.labels.SrcK8S_Type,
             f.labels.SrcK8S_Namespace,
             f.fields.SrcK8S_Name
           ),
           ...getConcatenatedValue(
             f.fields.DstAddr,
             f.fields.DstPort || NaN,
-            f.fields.DstK8S_Type,
+            f.labels.DstK8S_Type,
             f.labels.DstK8S_Namespace,
             f.fields.DstK8S_Name
           )
@@ -374,7 +374,7 @@ export const getSrcColumns = (t: TFunction): Column[] => {
       fieldName: 'SrcK8S_Type',
       quickFilter: 'src_kind',
       isSelected: false,
-      value: f => f.fields.SrcK8S_Type || '',
+      value: f => f.labels.SrcK8S_Type || '',
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
       width: 10
     },
@@ -514,7 +514,7 @@ export const getDstColumns = (t: TFunction): Column[] => {
       fieldName: 'DstK8S_Type',
       quickFilter: 'dst_kind',
       isSelected: false,
-      value: f => f.fields.DstK8S_Type || '',
+      value: f => f.labels.DstK8S_Type || '',
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
       width: 10
     },
@@ -640,7 +640,7 @@ export const getSrcDstColumns = (t: TFunction, withConcatenatedFields = true): C
           getConcatenatedValue(
             f.fields.SrcAddr,
             f.fields.SrcPort || NaN,
-            f.fields.SrcK8S_Type,
+            f.labels.SrcK8S_Type,
             f.labels.SrcK8S_Namespace,
             f.fields.SrcK8S_Name
           ),
@@ -682,7 +682,7 @@ export const getSrcDstColumns = (t: TFunction, withConcatenatedFields = true): C
           getConcatenatedValue(
             f.fields.DstAddr,
             f.fields.DstPort || NaN,
-            f.fields.DstK8S_Type,
+            f.labels.DstK8S_Type,
             f.labels.DstK8S_Namespace,
             f.fields.DstK8S_Name
           ),
