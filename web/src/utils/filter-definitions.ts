@@ -561,7 +561,7 @@ export const getFilterDefinitions = (
     ];
   }
 
-  if (allowConnectionFilter && allowDNSFilter && allowRTTFilter) {
+  if (allowConnectionFilter && allowDNSFilter && allowPktDrops && allowRTTFilter) {
     return filterDefinitions;
   } else {
     return filterDefinitions.filter(
