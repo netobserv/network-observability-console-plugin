@@ -1393,6 +1393,7 @@ export const NetflowTraffic: React.FC<{
         allowConnectionFilter={isConnectionTracking()}
         allowDNSFilter={isDNSTracking()}
         allowPktDrops={isPktDrop()}
+        allowRTTFilter={isFlowRTT()}
       />
       {
         <Flex className="netflow-traffic-tabs-container">
