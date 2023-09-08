@@ -284,7 +284,8 @@ export const DROP_CAUSES: ReadOnlyValues = [
   {
     value: ovsDropSubSystem + 1,
     name: 'OVS_DROP_LAST_ACTION',
-    description: 'OVS dropped because a flow was configured with an implicit drop action'
+    description:
+      'OVS dropped because a flow was configured with an implicit drop action, for example configuring network-policy'
   },
   {
     value: ovsDropSubSystem + 2,
