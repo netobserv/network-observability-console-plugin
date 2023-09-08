@@ -191,8 +191,7 @@ export const getFilterDefinitions = (
           validate: k8sNameValidation,
           hint: k8sNameHint,
           examples: k8sNameExamples,
-          encoder: simpleFiltersEncoder('SrcK8S_Namespace'),
-          overlap: true
+          encoder: simpleFiltersEncoder('SrcK8S_Namespace')
         },
         simpleFiltersEncoder('DstK8S_Namespace')
       ),
@@ -206,8 +205,7 @@ export const getFilterDefinitions = (
           validate: k8sNameValidation,
           hint: k8sNameHint,
           examples: k8sNameExamples,
-          encoder: simpleFiltersEncoder('SrcK8S_Name'),
-          overlap: false
+          encoder: simpleFiltersEncoder('SrcK8S_Name')
         },
         simpleFiltersEncoder('DstK8S_Name')
       ),
@@ -220,8 +218,7 @@ export const getFilterDefinitions = (
           category: FilterCategory.Source,
           getOptions: cap10(getKindOptions),
           validate: rejectEmptyValue,
-          encoder: kindFiltersEncoder('SrcK8S_Type', 'SrcK8S_OwnerType'),
-          overlap: false
+          encoder: kindFiltersEncoder('SrcK8S_Type', 'SrcK8S_OwnerType')
         },
         kindFiltersEncoder('DstK8S_Type', 'DstK8S_OwnerType')
       ),
@@ -235,8 +232,7 @@ export const getFilterDefinitions = (
           validate: k8sNameValidation,
           hint: k8sNameHint,
           examples: k8sNameExamples,
-          encoder: simpleFiltersEncoder('SrcK8S_OwnerName'),
-          overlap: true
+          encoder: simpleFiltersEncoder('SrcK8S_OwnerName')
         },
         simpleFiltersEncoder('DstK8S_OwnerName')
       ),
@@ -295,8 +291,7 @@ export const getFilterDefinitions = (
             'SrcK8S_Namespace',
             'SrcK8S_Name',
             'SrcK8S_OwnerName'
-          ),
-          overlap: false
+          )
         },
         k8sResourceFiltersEncoder(
           'DstK8S_Type',
@@ -321,8 +316,7 @@ export const getFilterDefinitions = (
           },
           hint: ipHint,
           examples: ipExamples,
-          encoder: simpleFiltersEncoder('SrcAddr'),
-          overlap: false
+          encoder: simpleFiltersEncoder('SrcAddr')
         },
         simpleFiltersEncoder('DstAddr')
       ),
@@ -348,8 +342,7 @@ export const getFilterDefinitions = (
         - ${t('A port number like 80, 21')}
         - ${t('A IANA name like HTTP, FTP')}`,
           docUrl: 'https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml',
-          encoder: simpleFiltersEncoder('SrcPort'),
-          overlap: false
+          encoder: simpleFiltersEncoder('SrcPort')
         },
         simpleFiltersEncoder('DstPort')
       ),
@@ -367,8 +360,7 @@ export const getFilterDefinitions = (
             return /^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})/.test(value) ? valid(value) : invalid(invalidMACMessage);
           },
           hint: t('Specify a single MAC address.'),
-          encoder: simpleFiltersEncoder('SrcMac'),
-          overlap: false
+          encoder: simpleFiltersEncoder('SrcMac')
         },
         simpleFiltersEncoder('DstMac')
       ),
@@ -387,8 +379,7 @@ export const getFilterDefinitions = (
           },
           hint: ipHint,
           examples: ipExamples,
-          encoder: simpleFiltersEncoder('SrcK8S_HostIP'),
-          overlap: true
+          encoder: simpleFiltersEncoder('SrcK8S_HostIP')
         },
         simpleFiltersEncoder('DstK8S_HostIP')
       ),
@@ -402,8 +393,7 @@ export const getFilterDefinitions = (
           validate: k8sNameValidation,
           hint: k8sNameHint,
           examples: k8sNameExamples,
-          encoder: simpleFiltersEncoder('SrcK8S_HostName'),
-          overlap: true
+          encoder: simpleFiltersEncoder('SrcK8S_HostName')
         },
         simpleFiltersEncoder('DstK8S_HostName')
       ),
@@ -434,8 +424,7 @@ export const getFilterDefinitions = (
         - ${t('A IANA name like TCP, UDP')}
         - ${t('Empty double quotes "" for undefined protocol')}`,
         docUrl: 'https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml',
-        encoder: simpleFiltersEncoder('Proto'),
-        overlap: false
+        encoder: simpleFiltersEncoder('Proto')
       },
       {
         id: 'direction',
@@ -455,8 +444,7 @@ export const getFilterDefinitions = (
           return invalid(t('Unknown direction'));
         },
         hint: t('Specify the direction of the Flow observed at the Node observation point.'),
-        encoder: simpleFiltersEncoder('FlowDirection'),
-        overlap: false
+        encoder: simpleFiltersEncoder('FlowDirection')
       },
       {
         id: 'interface',
@@ -466,8 +454,7 @@ export const getFilterDefinitions = (
         getOptions: noOption,
         validate: rejectEmptyValue,
         hint: t('Specify a network interface.'),
-        encoder: simpleFiltersEncoder('Interface'),
-        overlap: false
+        encoder: simpleFiltersEncoder('Interface')
       },
       {
         id: 'id',
@@ -477,8 +464,7 @@ export const getFilterDefinitions = (
         getOptions: noOption,
         validate: rejectEmptyValue,
         hint: t('Specify a single conversation hash Id.'),
-        encoder: simpleFiltersEncoder('_HashId'),
-        overlap: false
+        encoder: simpleFiltersEncoder('_HashId')
       },
       {
         id: 'pkt_drop_state',
@@ -492,8 +478,7 @@ export const getFilterDefinitions = (
         - ${t('A _LINUX_TCP_STATES_H number like 1, 2, 3')}
         - ${t('A _LINUX_TCP_STATES_H TCP name like ESTABLISHED, SYN_SENT, SYN_RECV')}`,
         docUrl: 'https://github.com/torvalds/linux/blob/master/include/net/tcp_states.h',
-        encoder: simpleFiltersEncoder('PktDropLatestState'),
-        overlap: false
+        encoder: simpleFiltersEncoder('PktDropLatestState')
       },
       {
         id: 'pkt_drop_cause',
@@ -507,8 +492,7 @@ export const getFilterDefinitions = (
         - ${t('A _LINUX_DROPREASON_CORE_H number like 2, 3, 4')}
         - ${t('A _LINUX_DROPREASON_CORE_H SKB_DROP_REASON name like NOT_SPECIFIED, NO_SOCKET, PKT_TOO_SMALL')}`,
         docUrl: 'https://github.com/torvalds/linux/blob/master/include/net/dropreason-core.h',
-        encoder: simpleFiltersEncoder('PktDropLatestDropCause'),
-        overlap: false
+        encoder: simpleFiltersEncoder('PktDropLatestDropCause')
       },
       {
         id: 'dns_id',
@@ -518,8 +502,7 @@ export const getFilterDefinitions = (
         getOptions: noOption,
         validate: rejectEmptyValue,
         hint: t('Specify a single DNS Id.'),
-        encoder: simpleFiltersEncoder('DnsId'),
-        overlap: false
+        encoder: simpleFiltersEncoder('DnsId')
       },
       {
         id: 'dns_latency',
@@ -529,8 +512,7 @@ export const getFilterDefinitions = (
         getOptions: noOption,
         validate: rejectEmptyValue,
         hint: t('Specify a DNS Latency in miliseconds.'),
-        encoder: simpleFiltersEncoder('DnsLatencyMs'),
-        overlap: false
+        encoder: simpleFiltersEncoder('DnsLatencyMs')
       },
       {
         id: 'dns_flag_response_code',
@@ -544,8 +526,7 @@ export const getFilterDefinitions = (
         - ${t('A IANA RCODE number like 0, 3, 9')}
         - ${t('A IANA RCODE name like NoError, NXDomain, NotAuth')}`,
         docUrl: 'https://www.iana.org/assignments/dns-parameters/dns-parameters.xhtml#dns-parameters-6',
-        encoder: simpleFiltersEncoder('DnsFlagsResponseCode'),
-        overlap: false
+        encoder: simpleFiltersEncoder('DnsFlagsResponseCode')
       },
       {
         id: 'time_flow_rtt',
@@ -555,8 +536,7 @@ export const getFilterDefinitions = (
         getOptions: noOption,
         validate: rejectEmptyValue,
         hint: t('Specify a Flow Round Trip Time in nanoseconds.'),
-        encoder: simpleFiltersEncoder('TimeFlowRttNs'),
-        overlap: false
+        encoder: simpleFiltersEncoder('TimeFlowRttNs')
       }
     ];
   }

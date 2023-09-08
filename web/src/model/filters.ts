@@ -56,9 +56,6 @@ export interface FilterDefinition {
   docUrl?: string;
   placeholder?: string;
   encoder: FiltersEncoder;
-  // overlap tells if the type of entity referred to with this filter may have overlapping (duplicated)
-  // flows when querying for returned traffic (back and forth) - they result in slightly more complicated queries.
-  overlap: boolean;
 }
 
 export interface FilterValue {

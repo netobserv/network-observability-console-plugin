@@ -28,9 +28,9 @@ describe('<MetricsQuerySummary />', () => {
 
   it('should show summary', async () => {
     const wrapper = mount(<MetricsQuerySummary {...mocks} />);
-    expect(wrapper.find('#bytesCount').last().text()).toBe('7 MB');
+    expect(wrapper.find('#bytesCount').last().text()).toBe('6.8 MB');
     expect(wrapper.find('#packetsCount')).toHaveLength(0);
-    expect(wrapper.find('#bpsCount').last().text()).toBe('23.2 kBps');
+    expect(wrapper.find('#bpsCount').last().text()).toBe('22.79 kBps');
     expect(wrapper.find('#lastRefresh').last().text()).toBe(now.toLocaleTimeString());
   });
 
