@@ -78,10 +78,10 @@ func SplitForReportersMerge(q SingleQuery) (SingleQuery, SingleQuery) {
 	// (Note that we use DstOwnerName both as an optimization as it's a Loki index,
 	// and as convenience because looking for empty fields won't work if they aren't indexed)
 	q1 := SingleQuery{
-		NewMatch(fields.FlowDirection, `"`+constants.Ingress+`"`),
+		NewMatch(fields.FlowDirection, `"`+string(constants.Ingress)+`","`+string(constants.Inner)+`"`),
 	}
 	q2 := SingleQuery{
-		NewMatch(fields.FlowDirection, `"`+constants.Egress+`"`),
+		NewMatch(fields.FlowDirection, `"`+string(constants.Egress)+`"`),
 		NewMatch(fields.DstOwnerName, `""`),
 	}
 	for _, m := range q {

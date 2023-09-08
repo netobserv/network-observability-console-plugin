@@ -31,7 +31,8 @@ export const getProtocolOptions = (value: string): Promise<FilterOption[]> => {
 export const getDirectionOptions = (t: TFunction): FilterOption[] => {
   return [
     { name: t('Ingress'), value: String(FlowDirection.Ingress) },
-    { name: t('Egress'), value: String(FlowDirection.Egress) }
+    { name: t('Egress'), value: String(FlowDirection.Egress) },
+    { name: t('Inner'), value: String(FlowDirection.Inner) }
   ];
 };
 

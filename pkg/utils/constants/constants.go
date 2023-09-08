@@ -3,6 +3,7 @@ package constants
 type MetricType string
 type RecordType string
 type PacketLoss string
+type Direction string
 
 const (
 	AppLabel                            = "app"
@@ -28,8 +29,9 @@ const (
 	PacketLossSent           PacketLoss = "sent"
 	PacketLossAll            PacketLoss = "all"
 	DefaultPacketLoss        PacketLoss = PacketLossAll
-	Ingress                             = "0"
-	Egress                              = "1"
+	Ingress                  Direction  = "0"
+	Egress                   Direction  = "1"
+	Inner                    Direction  = "2"
 )
 
 var AnyConnectionType = []string{
