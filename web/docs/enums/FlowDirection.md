@@ -15,3 +15,11 @@ ___
 • **Egress** = ``"1"``
 
 Outgoing traffic, from node observation point
+
+___
+
+### Inner
+
+• **Inner** = ``"2"``
+
+Inner traffic, ie. same source and destination node

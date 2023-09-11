@@ -68,7 +68,7 @@ ___
 
 ### SrcPort
 
-• **SrcPort**: `number`
+• `Optional` **SrcPort**: `number`
 
 Source port
 
@@ -76,7 +76,7 @@ ___
 
 ### DstPort
 
-• **DstPort**: `number`
+• `Optional` **DstPort**: `number`
 
 Destination port
 
@@ -146,9 +146,25 @@ Network interface
 
 ___
 
+### IfDirection
+
+• `Optional` **IfDirection**: [`InterfaceDirection`](../enums/InterfaceDirection.md)
+
+Flow direction from the network interface observation point
+
+___
+
+### Flags
+
+• `Optional` **Flags**: `number`
+
+TCP flags
+
+___
+
 ### Packets
 
-• **Packets**: `number`
+• `Optional` **Packets**: `number`
 
 Number of packets in this flow
 
@@ -172,7 +188,7 @@ ___
 
 ### Bytes
 
-• **Bytes**: `number`
+• `Optional` **Bytes**: `number`
 
 Number of bytes in this flow
 
@@ -191,6 +207,126 @@ ___
 • `Optional` **Bytes\_BA**: `number`
 
 In conversation tracking, B to A bytes counter per conversation
+
+___
+
+### IcmpType
+
+• `Optional` **IcmpType**: `number`
+
+ICMP type
+
+___
+
+### IcmpCode
+
+• `Optional` **IcmpCode**: `number`
+
+ICMP code
+
+___
+
+### PktDropLatestState
+
+• `Optional` **PktDropLatestState**: `string`
+
+Pkt TCP state for drops
+
+___
+
+### PktDropLatestDropCause
+
+• `Optional` **PktDropLatestDropCause**: `string`
+
+Pkt cause for drops
+
+___
+
+### PktDropLatestFlags
+
+• `Optional` **PktDropLatestFlags**: `number`
+
+Pkt TCP flags for drops
+
+___
+
+### PktDropPackets
+
+• `Optional` **PktDropPackets**: `number`
+
+Number of packets dropped by the kernel in this flow
+
+___
+
+### PktDropPackets\_AB
+
+• `Optional` **PktDropPackets\_AB**: `number`
+
+In conversation tracking, A to B packets dropped counter per conversation
+
+___
+
+### PktDropPackets\_BA
+
+• `Optional` **PktDropPackets\_BA**: `number`
+
+In conversation tracking, B to A packets dropped counter per conversation
+
+___
+
+### PktDropBytes
+
+• `Optional` **PktDropBytes**: `number`
+
+Number of bytes dropped by the kernel in this flow
+
+___
+
+### PktDropBytes\_AB
+
+• `Optional` **PktDropBytes\_AB**: `number`
+
+In conversation tracking, A to B bytes dropped counter per conversation
+
+___
+
+### PktDropBytes\_BA
+
+• `Optional` **PktDropBytes\_BA**: `number`
+
+In conversation tracking, B to A bytes dropped counter per conversation
+
+___
+
+### DnsId
+
+• `Optional` **DnsId**: `number`
+
+DNS record id
+
+___
+
+### DnsFlags
+
+• `Optional` **DnsFlags**: `number`
+
+DNS flags for DNS record
+
+___
+
+### DnsFlagsResponseCode
+
+• `Optional` **DnsFlagsResponseCode**: `string`
+
+Parsed DNS header RCODEs name
+
+___
+
+### DnsLatencyMs
+
+• `Optional` **DnsLatencyMs**: `number`
+
+Calculated time between response and request, in milliseconds
 
 ___
 
@@ -215,6 +351,14 @@ ___
 • **TimeReceived**: `number`
 
 Timestamp when this flow was received and processed by the flow collector, in seconds
+
+___
+
+### TimeFlowRttNs
+
+• `Optional` **TimeFlowRttNs**: `number`
+
+Flow Round Trip Time (RTT) in nanoseconds
 
 ___
 
