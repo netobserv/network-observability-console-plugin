@@ -6,7 +6,7 @@
 
 • **Ingress** = ``"0"``
 
-Incoming traffic, from network interface observation point
+Incoming traffic, from the network interface observation point
 
 ___
 
@@ -14,4 +14,4 @@ ___
 
 • **Egress** = ``"1"``
 
-Outgoing traffic, from network interface observation point
+Outgoing traffic, from the network interface observation point

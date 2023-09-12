@@ -28,18 +28,18 @@ export interface Labels {
 }
 
 export enum FlowDirection {
-  /** Incoming traffic, from node observation point */
+  /** Incoming traffic, from the node observation point */
   Ingress = '0',
-  /** Outgoing traffic, from node observation point */
+  /** Outgoing traffic, from the node observation point */
   Egress = '1',
-  /** Inner traffic, ie. same source and destination node */
+  /** Inner traffic, with same source and destination node */
   Inner = '2'
 }
 
 export enum InterfaceDirection {
-  /** Incoming traffic, from network interface observation point */
+  /** Incoming traffic, from the network interface observation point */
   Ingress = '0',
-  /** Outgoing traffic, from network interface observation point */
+  /** Outgoing traffic, from the network interface observation point */
   Egress = '1'
 }
 
@@ -84,13 +84,13 @@ export interface Fields {
   IfDirection?: InterfaceDirection;
   /** TCP flags */
   Flags?: number;
-  /** Number of packets in this flow */
+  /** Number of packets */
   Packets?: number;
   /** In conversation tracking, A to B packets counter per conversation */
   Packets_AB?: number;
   /** In conversation tracking, B to A packets counter per conversation */
   Packets_BA?: number;
-  /** Number of bytes in this flow */
+  /** Number of bytes */
   Bytes?: number;
   /** In conversation tracking, A to B bytes counter per conversation */
   Bytes_AB?: number;
@@ -106,13 +106,13 @@ export interface Fields {
   PktDropLatestDropCause?: string;
   /** Pkt TCP flags for drops */
   PktDropLatestFlags?: number;
-  /** Number of packets dropped by the kernel in this flow */
+  /** Number of packets dropped by the kernel */
   PktDropPackets?: number;
   /** In conversation tracking, A to B packets dropped counter per conversation */
   PktDropPackets_AB?: number;
   /** In conversation tracking, B to A packets dropped counter per conversation */
   PktDropPackets_BA?: number;
-  /** Number of bytes dropped by the kernel in this flow */
+  /** Number of bytes dropped by the kernel */
   PktDropBytes?: number;
   /** In conversation tracking, A to B bytes dropped counter per conversation */
   PktDropBytes_AB?: number;

@@ -166,7 +166,7 @@ ___
 
 • `Optional` **Packets**: `number`
 
-Number of packets in this flow
+Number of packets
 
 ___
 
@@ -190,7 +190,7 @@ ___
 
 • `Optional` **Bytes**: `number`
 
-Number of bytes in this flow
+Number of bytes
 
 ___
 
@@ -254,7 +254,7 @@ ___
 
 • `Optional` **PktDropPackets**: `number`
 
-Number of packets dropped by the kernel in this flow
+Number of packets dropped by the kernel
 
 ___
 
@@ -278,7 +278,7 @@ ___
 
 • `Optional` **PktDropBytes**: `number`
 
-Number of bytes dropped by the kernel in this flow
+Number of bytes dropped by the kernel
 
 ___
 
