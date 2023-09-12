@@ -22,4 +22,4 @@ ___
 
 • **Inner** = ``"2"``
 
-Inner traffic, with same source and destination node
+Inner traffic, with the same source and destination node
