@@ -1140,7 +1140,10 @@ export const NetflowTraffic: React.FC<{
             panels={panels.filter(
               panel =>
                 panel.isSelected &&
-                (isPktDrop() || (!panel.id.includes('dropped') && (isDNSTracking() || !panel.id.includes('dns'))))
+                (isPktDrop() ||
+                  (!panel.id.includes('dropped') &&
+                    (isDNSTracking() || !panel.id.includes('dns')) &&
+                    (isFlowRTT() || !panel.id.includes('rtt'))))
             )}
             recordType={recordType}
             metricType={metricType}
@@ -1490,6 +1493,8 @@ export const NetflowTraffic: React.FC<{
                   setMetricScope={setMetricScope}
                   topologyOptions={topologyOptions}
                   setTopologyOptions={setTopologyOptions}
+                  allowDNSMetric={isDNSTracking()}
+                  allowRTTMetric={isFlowRTT()}
                 />
               )}
             </OverflowMenuItem>
@@ -1533,7 +1538,10 @@ export const NetflowTraffic: React.FC<{
         setModalOpen={setOverviewModalOpen}
         recordType={recordType}
         panels={panels.filter(
-          panel => (isPktDrop() || !panel.id.includes('dropped')) && (isDNSTracking() || !panel.id.includes('dns'))
+          panel =>
+            (isPktDrop() || !panel.id.includes('dropped')) &&
+            (isDNSTracking() || !panel.id.includes('dns')) &&
+            (isFlowRTT() || !panel.id.includes('rtt'))
         )}
         setPanels={setSelectedPanels}
       />
@@ -1544,9 +1552,8 @@ export const NetflowTraffic: React.FC<{
         columns={columns.filter(
           col =>
             (isConnectionTracking() || ![ColumnsId.recordtype, ColumnsId.hashid].includes(col.id)) &&
-            (isDNSTracking() ||
-              (![ColumnsId.dnsid, ColumnsId.dnslatency, ColumnsId.dnsresponsecode].includes(col.id) &&
-                (isFlowRTT() || ![ColumnsId.rttTime].includes(col.id))))
+            (isDNSTracking() || ![ColumnsId.dnsid, ColumnsId.dnslatency, ColumnsId.dnsresponsecode].includes(col.id)) &&
+            (isFlowRTT() || ![ColumnsId.rttTime].includes(col.id))
         )}
         setColumns={setColumns}
         setColumnSizes={setColumnSizes}

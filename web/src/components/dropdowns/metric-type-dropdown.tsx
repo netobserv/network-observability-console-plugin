@@ -3,16 +3,29 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { MetricType } from '../../model/flow-query';
 
-const metricTypeOptions: MetricType[] = ['bytes', 'packets', 'dnsLatencies', 'flowRtt'];
-
 export const MetricTypeDropdown: React.FC<{
   selected?: string;
   setMetricType: (v: MetricType) => void;
   isTopology?: boolean;
+  allowDNSMetric?: boolean;
+  allowRTTMetric?: boolean;
   id?: string;
-}> = ({ selected, setMetricType, id, isTopology }) => {
+}> = ({ selected, setMetricType, id, isTopology, allowDNSMetric, allowRTTMetric }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [metricDropdownOpen, setMetricDropdownOpen] = React.useState(false);
+
+  const getMetricTypeOptions = React.useCallback(() => {
+    const options: MetricType[] = ['bytes', 'packets'];
+    if (isTopology) {
+      if (allowDNSMetric) {
+        options.push('dnsLatencies');
+      }
+      if (allowRTTMetric) {
+        options.push('flowRtt');
+      }
+    }
+    return options;
+  }, [allowDNSMetric, allowRTTMetric, isTopology]);
 
   const getMetricDisplay = React.useCallback(
     (metricType: MetricType): string => {
@@ -47,21 +60,19 @@ export const MetricTypeDropdown: React.FC<{
         </DropdownToggle>
       }
       isOpen={metricDropdownOpen}
-      dropdownItems={metricTypeOptions
-        .filter(v => isTopology || !['dnsLatencies', 'flowRtt'].includes(v))
-        .map(v => (
-          <DropdownItem
-            data-test={v}
-            id={v}
-            key={v}
-            onClick={() => {
-              setMetricDropdownOpen(false);
-              setMetricType(v);
-            }}
-          >
-            {getMetricDisplay(v)}
-          </DropdownItem>
-        ))}
+      dropdownItems={getMetricTypeOptions().map(v => (
+        <DropdownItem
+          data-test={v}
+          id={v}
+          key={v}
+          onClick={() => {
+            setMetricDropdownOpen(false);
+            setMetricType(v);
+          }}
+        >
+          {getMetricDisplay(v)}
+        </DropdownItem>
+      ))}
     />
   );
 };
