@@ -252,7 +252,7 @@ export const NetflowTraffic: React.FC<{
   const updateMetricType = React.useCallback(
     (metricType: MetricType) => {
       /* TODO : allow max / latest metric functions for DNS latency & RTT*/
-      if (metricType === 'flowRtt') {
+      if (['dnsLatencies', 'flowRtt'].includes(metricType)) {
         setMetricFunction('avg');
       }
       setMetricType(metricType);

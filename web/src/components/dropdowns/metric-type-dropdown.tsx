@@ -3,7 +3,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { MetricType } from '../../model/flow-query';
 
-const metricTypeOptions: MetricType[] = ['bytes', 'packets', 'flowRtt'];
+const metricTypeOptions: MetricType[] = ['bytes', 'packets', 'dnsLatencies', 'flowRtt'];
 
 export const MetricTypeDropdown: React.FC<{
   selected?: string;
@@ -21,6 +21,8 @@ export const MetricTypeDropdown: React.FC<{
           return t('Packets');
         case 'bytes':
           return t('Bytes');
+        case 'dnsLatencies':
+          return t('DNS latencies');
         case 'flowRtt':
           return t('RTT');
         default:
@@ -46,7 +48,7 @@ export const MetricTypeDropdown: React.FC<{
       }
       isOpen={metricDropdownOpen}
       dropdownItems={metricTypeOptions
-        .filter(v => isTopology || v !== 'flowRtt')
+        .filter(v => isTopology || !['dnsLatencies', 'flowRtt'].includes(v))
         .map(v => (
           <DropdownItem
             data-test={v}
