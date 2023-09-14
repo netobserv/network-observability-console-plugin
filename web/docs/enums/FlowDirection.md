@@ -6,7 +6,7 @@
 
 • **Ingress** = ``"0"``
 
-Incoming traffic, from node observation point
+Incoming traffic, from the node observation point
 
 ___
 
@@ -14,4 +14,12 @@ ___
 
 • **Egress** = ``"1"``
 
-Outgoing traffic, from node observation point
+Outgoing traffic, from the node observation point
+
+___
+
+### Inner
+
+• **Inner** = ``"2"``
+
+Inner traffic, with the same source and destination node

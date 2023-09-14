@@ -9,3 +9,4 @@
 ## Enumerations
 
 - [FlowDirection](enums/FlowDirection.md)
+- [InterfaceDirection](enums/InterfaceDirection.md)
