@@ -21,7 +21,7 @@ func (o *LokiClientMock) Get(url string) ([]byte, int, error) {
 		path = "mocks/loki/namespaces.json"
 	} else {
 		if strings.Contains(url, "query=topk") {
-			path = "mocks/loki/topology"
+			path = "mocks/loki/flow_metrics"
 
 			if strings.Contains(url, "|unwrap%20PktDrop") {
 				path += "_dropped"
@@ -43,7 +43,7 @@ func (o *LokiClientMock) Get(url string) ([]byte, int, error) {
 				path += "_resource.json"
 			}
 		} else {
-			path = "mocks/loki/flows"
+			path = "mocks/loki/flow_records"
 			if strings.Contains(url, "|~`\"Packets\":0[,}]|~`\"PktDropPackets\":[1-9][0-9]*[,}]") {
 				path += "_dropped.json"
 			} else if strings.Contains(url, "|~`\"PktDropPackets\":[1-9][0-9]*[,}]") {

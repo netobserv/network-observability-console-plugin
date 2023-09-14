@@ -14,8 +14,9 @@ import { TextContent } from '@patternfly/react-core';
 import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { NamedMetric, GenericMetric } from '../../api/loki';
+import { GenericMetric, NamedMetric } from '../../api/loki';
 import { MetricType } from '../../model/flow-query';
+import { LOCAL_STORAGE_OVERVIEW_METRICS_TOTAL_DIMENSION_KEY, useLocalStorage } from '../../utils/local-storage-hook';
 import { getFormattedRateValue } from '../../utils/metrics';
 import './metrics-content.css';
 import {
@@ -96,9 +97,13 @@ export const SingleMetricsTotalContent: React.FC<SingleMetricsTotalContentProps>
   );
 
   const containerRef = React.createRef<HTMLDivElement>();
-  const [dimensions, setDimensions] = React.useState<Dimensions>(defaultDimensions);
+  const [dimensions, setDimensions] = useLocalStorage<Dimensions>(
+    LOCAL_STORAGE_OVERVIEW_METRICS_TOTAL_DIMENSION_KEY,
+    defaultDimensions
+  );
   React.useEffect(() => {
     observe(containerRef, dimensions, setDimensions);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [containerRef, dimensions]);
 
   return (

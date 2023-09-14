@@ -7,19 +7,19 @@ import * as React from 'react';
 import NetflowTab from '../netflow-tab';
 import NetflowTraffic from '../netflow-traffic';
 import { PodTabParam, ServiceTabParam, UnknownTabParam } from '../__tests-data__/tabs';
-import { ConfigResultSample } from '../__tests-data__/config';
-import { GenericMetricsResult, TopologyMetricsResult } from '../../api/loki';
+import { FullConfigResultSample } from '../__tests-data__/config';
+import { GenericMetricsResult, FlowMetricsResult } from '../../api/loki';
 import { AlertsResult, SilencedAlert } from '../../api/alert';
 
 const useResolvedExtensionsMock = useResolvedExtensions as jest.Mock;
 
 jest.mock('../../api/routes', () => ({
-  getConfig: jest.fn(() => Promise.resolve(ConfigResultSample)),
-  getFlows: jest.fn(() => Promise.resolve([])),
-  getTopologyMetrics: jest.fn(() =>
-    Promise.resolve({ metrics: [], stats: { numQueries: 0, limitReached: false } } as TopologyMetricsResult)
+  getConfig: jest.fn(() => Promise.resolve(FullConfigResultSample)),
+  getFlowRecords: jest.fn(() => Promise.resolve([])),
+  getFlowMetrics: jest.fn(() =>
+    Promise.resolve({ metrics: [], stats: { numQueries: 0, limitReached: false } } as FlowMetricsResult)
   ),
-  getGenericMetrics: jest.fn(() =>
+  getFlowGenericMetrics: jest.fn(() =>
     Promise.resolve({ metrics: [], stats: { numQueries: 0, limitReached: false } } as GenericMetricsResult)
   ),
   getAlerts: jest.fn(() => Promise.resolve({ data: { groups: [] }, status: 'success' } as AlertsResult)),

@@ -39,10 +39,11 @@ describe('<NetflowOverview />', () => {
     wrapper.update();
     expect(wrapper.find(LokiError)).toHaveLength(1);
   });
-  it('should render empty state', async () => {
+  it('should render empty states', async () => {
     const wrapper = mount(<NetflowOverview {...props} />);
     const containerDiv = wrapper.find(EmptyState);
-    expect(containerDiv.length).toEqual(1);
+    // 12 panels are expected here according to getDefaultOverviewPanels isSelected items
+    expect(containerDiv.length).toEqual(12);
   });
   it('should render panels', async () => {
     const wrapper = mount(

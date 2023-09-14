@@ -32,7 +32,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '../utils/theme-hook';
 import { Record } from '../api/ipfix';
 import { GenericMetric, Stats, TopologyMetrics } from '../api/loki';
-import { getGenericMetrics } from '../api/routes';
+import { getFlowGenericMetrics } from '../api/routes';
 import {
   DisabledFilters,
   Filter,
@@ -88,7 +88,13 @@ import {
   LOCAL_STORAGE_VIEW_ID_KEY,
   useLocalStorage
 } from '../utils/local-storage-hook';
-import { getDefaultOverviewPanels, OverviewPanel } from '../utils/overview-panels';
+import {
+  DNS_ID_MATCHER,
+  DROPPED_ID_MATCHER,
+  getDefaultOverviewPanels,
+  OverviewPanel,
+  RTT_ID_MATCHER
+} from '../utils/overview-panels';
 import { usePoll } from '../utils/poll-hook';
 import {
   defaultMetricFunction,
@@ -248,6 +254,55 @@ export const NetflowTraffic: React.FC<{
     criteria: 'isSelected'
   });
   const [columnSizes, setColumnSizes] = useLocalStorage<ColumnSizeMap>(LOCAL_STORAGE_COLS_SIZES_KEY, {});
+
+  const isFlow = React.useCallback(() => {
+    return config.recordTypes.some(rt => rt === 'flowLog');
+  }, [config.recordTypes]);
+
+  const isConnectionTracking = React.useCallback(() => {
+    return config.recordTypes.some(rt => rt === 'newConnection' || rt === 'heartbeat' || rt === 'endConnection');
+  }, [config.recordTypes]);
+
+  const isDNSTracking = React.useCallback(() => {
+    return config.features.includes('dnsTracking');
+  }, [config.features]);
+
+  const isFlowRTT = React.useCallback(() => {
+    return config.features.includes('flowRTT');
+  }, [config.features]);
+
+  const isPktDrop = React.useCallback(() => {
+    return config.features.includes('pktDrop');
+  }, [config.features]);
+
+  const getAvailablePanels = React.useCallback(() => {
+    return panels.filter(
+      panel =>
+        (isPktDrop() || !panel.id.includes(DROPPED_ID_MATCHER)) &&
+        (isDNSTracking() || !panel.id.includes(DNS_ID_MATCHER)) &&
+        (isFlowRTT() || !panel.id.includes(RTT_ID_MATCHER))
+    );
+  }, [isDNSTracking, isFlowRTT, isPktDrop, panels]);
+
+  const getSelectedPanels = React.useCallback(() => {
+    return getAvailablePanels().filter(panel => panel.isSelected);
+  }, [getAvailablePanels]);
+
+  const getAvailableColumns = React.useCallback(
+    (isSidePanel = false) => {
+      return (isSidePanel ? getDefaultColumns(t, false, false) : columns).filter(
+        col =>
+          (isConnectionTracking() || ![ColumnsId.recordtype, ColumnsId.hashid].includes(col.id)) &&
+          (isDNSTracking() || ![ColumnsId.dnsid, ColumnsId.dnslatency, ColumnsId.dnsresponsecode].includes(col.id)) &&
+          (isFlowRTT() || ![ColumnsId.rttTime].includes(col.id))
+      );
+    },
+    [columns, isConnectionTracking, isDNSTracking, isFlowRTT, t]
+  );
+
+  const getSelectedColumns = React.useCallback(() => {
+    return getAvailableColumns().filter(column => column.isSelected);
+  }, [getAvailableColumns]);
 
   const updateMetricType = React.useCallback(
     (metricType: MetricType) => {
@@ -415,7 +470,7 @@ export const NetflowTraffic: React.FC<{
     (fq: FlowQuery, droppedType: MetricType | undefined) => {
       setMetrics([]);
 
-      const { getFlows, getTopologyMetrics } = getFetchFunctions();
+      const { getRecords, getMetrics } = getFetchFunctions();
 
       // table query is based on histogram range if available
       const tableQuery = { ...fq };
@@ -424,7 +479,7 @@ export const NetflowTraffic: React.FC<{
         tableQuery.endTime = histogramRange.to.toString();
       }
       const promises: Promise<Stats>[] = [
-        getFlows(tableQuery).then(res => {
+        getRecords(tableQuery).then(res => {
           const flows = showDuplicates ? res.records : mergeFlowReporters(res.records);
           setFlows(flows);
           return res.stats;
@@ -432,7 +487,7 @@ export const NetflowTraffic: React.FC<{
       ];
       if (showHistogram) {
         promises.push(
-          getTopologyMetrics({ ...fq, aggregateBy: 'app' }, range).then(res => {
+          getMetrics({ ...fq, aggregateBy: 'app' }, range).then(res => {
             setTotalMetric(res.metrics[0]);
             return res.stats;
           })
@@ -442,7 +497,7 @@ export const NetflowTraffic: React.FC<{
       }
       if (droppedType) {
         promises.push(
-          getTopologyMetrics({ ...fq, aggregateBy: 'app', type: droppedType }, range).then(res => {
+          getMetrics({ ...fq, aggregateBy: 'app', type: droppedType }, range).then(res => {
             setTotalDroppedMetric(res.metrics[0]);
             return res.stats;
           })
@@ -459,41 +514,50 @@ export const NetflowTraffic: React.FC<{
     (fq: FlowQuery, droppedType: MetricType | undefined) => {
       setFlows([]);
 
-      const { getTopologyMetrics } = getFetchFunctions();
+      const selectedPanels = getSelectedPanels();
+      const { getMetrics } = getFetchFunctions();
 
-      const promises: Promise<Stats>[] = [
-        //get bytes or packets
-        getTopologyMetrics(fq, range).then(res => {
-          setMetrics(res.metrics);
-          return res.stats;
-        }),
+      const promises: Promise<Stats>[] = [];
 
-        //run same query on app scope for total flows
-        getTopologyMetrics({ ...fq, aggregateBy: 'app' }, range).then(res => {
-          setTotalMetric(res.metrics[0]);
-          return res.stats;
-        })
-      ];
+      if (!selectedPanels.some(p => [DROPPED_ID_MATCHER, DNS_ID_MATCHER, RTT_ID_MATCHER].includes(p.id))) {
+        promises.push(
+          ...[
+            //get bytes or packets
+            getMetrics(fq, range).then(res => {
+              setMetrics(res.metrics);
+              return res.stats;
+            }),
+            //run same query on app scope for total flows
+            getMetrics({ ...fq, aggregateBy: 'app' }, range).then(res => {
+              setTotalMetric(res.metrics[0]);
+              return res.stats;
+            })
+          ]
+        );
+      } else {
+        setMetrics([]);
+        setTotalMetric(undefined);
+      }
 
-      if (droppedType) {
+      if (droppedType && selectedPanels.some(p => p.id.includes(DROPPED_ID_MATCHER))) {
         //run same queries for drops
         promises.push(
           ...[
-            getTopologyMetrics({ ...fq, type: droppedType }, range).then(res => {
+            getMetrics({ ...fq, type: droppedType }, range).then(res => {
               setDroppedMetrics(res.metrics);
               return res.stats;
             }),
-            getTopologyMetrics({ ...fq, aggregateBy: 'app', type: droppedType }, range).then(res => {
+            getMetrics({ ...fq, aggregateBy: 'app', type: droppedType }, range).then(res => {
               setTotalDroppedMetric(res.metrics[0]);
               return res.stats;
             }),
 
             //get drop state & cause
-            getGenericMetrics({ ...fq, type: droppedType, aggregateBy: 'droppedState' }, range).then(res => {
+            getFlowGenericMetrics({ ...fq, type: droppedType, aggregateBy: 'droppedState' }, range).then(res => {
               setDroppedStateMetrics(res.metrics);
               return res.stats;
             }),
-            getGenericMetrics({ ...fq, type: droppedType, aggregateBy: 'droppedCause' }, range).then(res => {
+            getFlowGenericMetrics({ ...fq, type: droppedType, aggregateBy: 'droppedCause' }, range).then(res => {
               setDroppedCauseMetrics(res.metrics);
               return res.stats;
             })
@@ -506,25 +570,25 @@ export const NetflowTraffic: React.FC<{
         setDroppedCauseMetrics(undefined);
       }
 
-      if (config.features.includes('dnsTracking')) {
+      if (config.features.includes('dnsTracking') && selectedPanels.some(p => p.id.includes(DNS_ID_MATCHER))) {
         //run same queries for drops
         promises.push(
           ...[
-            getTopologyMetrics({ ...fq, type: 'dnsLatencies' }, range).then(res => {
+            getMetrics({ ...fq, type: 'dnsLatencies' }, range).then(res => {
               setDnsLatencyMetrics(res.metrics);
               return res.stats;
             }),
-            getTopologyMetrics({ ...fq, aggregateBy: 'app', type: 'dnsLatencies' }, range).then(res => {
+            getMetrics({ ...fq, aggregateBy: 'app', type: 'dnsLatencies' }, range).then(res => {
               setTotalDnsLatencyMetric(res.metrics[0]);
               return res.stats;
             }),
 
             //get dns response codes
-            getGenericMetrics({ ...fq, type: 'countDns', aggregateBy: 'dnsRCode' }, range).then(res => {
+            getFlowGenericMetrics({ ...fq, type: 'countDns', aggregateBy: 'dnsRCode' }, range).then(res => {
               setDnsRCodeMetrics(res.metrics);
               return res.stats;
             }),
-            getTopologyMetrics({ ...fq, type: 'countDns', aggregateBy: 'app' }, range).then(res => {
+            getMetrics({ ...fq, type: 'countDns', aggregateBy: 'app' }, range).then(res => {
               setTotalDnsCountMetric(res.metrics[0]);
               return res.stats;
             })
@@ -537,16 +601,16 @@ export const NetflowTraffic: React.FC<{
         setTotalDnsCountMetric(undefined);
       }
 
-      if (config.features.includes('flowRTT')) {
+      if (config.features.includes('flowRTT') && selectedPanels.some(p => p.id.includes(RTT_ID_MATCHER))) {
         promises.push(
           ...[
             //set RTT metrics
-            getTopologyMetrics({ ...fq, type: 'flowRtt' }, range).then(res => {
+            getMetrics({ ...fq, type: 'flowRtt' }, range).then(res => {
               setRttMetrics(res.metrics);
               return res.stats;
             }),
             //set app RTT metrics
-            getTopologyMetrics({ ...fq, aggregateBy: 'app', type: 'flowRtt' }, range).then(res => {
+            getMetrics({ ...fq, aggregateBy: 'app', type: 'flowRtt' }, range).then(res => {
               setTotalRttMetric(res.metrics[0]);
               return res.stats;
             })
@@ -558,18 +622,18 @@ export const NetflowTraffic: React.FC<{
       }
       return Promise.all(promises);
     },
-    [range, config.features, getFetchFunctions]
+    [getSelectedPanels, getFetchFunctions, range, config.features]
   );
 
   const fetchTopology = React.useCallback(
     (fq: FlowQuery, droppedType: MetricType | undefined) => {
       setFlows([]);
 
-      const { getTopologyMetrics } = getFetchFunctions();
+      const { getMetrics } = getFetchFunctions();
 
       const promises: Promise<Stats>[] = [
         //get bytes or packets
-        getTopologyMetrics(fq, range).then(res => {
+        getMetrics(fq, range).then(res => {
           setMetrics(res.metrics);
           return res.stats;
         })
@@ -577,7 +641,7 @@ export const NetflowTraffic: React.FC<{
 
       if (droppedType) {
         promises.push(
-          getTopologyMetrics({ ...fq, type: droppedType }, range).then(res => {
+          getMetrics({ ...fq, type: droppedType }, range).then(res => {
             setDroppedMetrics(res.metrics);
             return res.stats;
           })
@@ -669,26 +733,6 @@ export const NetflowTraffic: React.FC<{
   ]);
 
   usePoll(tick, interval);
-
-  const isFlow = React.useCallback(() => {
-    return config.recordTypes.some(rt => rt === 'flowLog');
-  }, [config.recordTypes]);
-
-  const isConnectionTracking = React.useCallback(() => {
-    return config.recordTypes.some(rt => rt === 'newConnection' || rt === 'heartbeat' || rt === 'endConnection');
-  }, [config.recordTypes]);
-
-  const isDNSTracking = React.useCallback(() => {
-    return config.features.includes('dnsTracking');
-  }, [config.features]);
-
-  const isFlowRTT = React.useCallback(() => {
-    return config.features.includes('flowRTT');
-  }, [config.features]);
-
-  const isPktDrop = React.useCallback(() => {
-    return config.features.includes('pktDrop');
-  }, [config.features]);
 
   React.useEffect(() => {
     if (initState.current.includes('configLoaded')) {
@@ -1048,13 +1092,7 @@ export const NetflowTraffic: React.FC<{
         <RecordPanel
           id="recordPanel"
           record={selectedRecord}
-          columns={getDefaultColumns(t, false, false).filter(
-            col =>
-              (isConnectionTracking() || ![ColumnsId.recordtype, ColumnsId.hashid].includes(col.id)) &&
-              (isDNSTracking() ||
-                ![ColumnsId.dnsid, ColumnsId.dnslatency, ColumnsId.dnsresponsecode].includes(col.id)) &&
-              (isFlowRTT() || ![ColumnsId.rttTime].includes(col.id))
-          )}
+          columns={getAvailableColumns(true)}
           filters={filters.list}
           range={range}
           type={recordType}
@@ -1137,14 +1175,7 @@ export const NetflowTraffic: React.FC<{
         content = (
           <NetflowOverview
             limit={limit}
-            panels={panels.filter(
-              panel =>
-                panel.isSelected &&
-                (isPktDrop() ||
-                  (!panel.id.includes('dropped') &&
-                    (isDNSTracking() || !panel.id.includes('dns')) &&
-                    (isFlowRTT() || !panel.id.includes('rtt'))))
-            )}
+            panels={getSelectedPanels()}
             recordType={recordType}
             metricType={metricType}
             metrics={metrics}
@@ -1176,14 +1207,7 @@ export const NetflowTraffic: React.FC<{
             selectedRecord={selectedRecord}
             size={size}
             onSelect={onRecordSelect}
-            columns={columns.filter(
-              col =>
-                col.isSelected &&
-                (isConnectionTracking() || ![ColumnsId.recordtype, ColumnsId.hashid].includes(col.id)) &&
-                (isDNSTracking() ||
-                  ![ColumnsId.dnsid, ColumnsId.dnslatency, ColumnsId.dnsresponsecode].includes(col.id)) &&
-                (isFlowRTT() || ![ColumnsId.rttTime].includes(col.id))
-            )}
+            columns={getSelectedColumns()}
             setColumns={(v: Column[]) => setColumns(v.concat(columns.filter(col => !col.isSelected)))}
             columnSizes={columnSizes}
             setColumnSizes={setColumnSizes}
@@ -1228,6 +1252,7 @@ export const NetflowTraffic: React.FC<{
           {_.isEmpty(flows) ? (
             <MetricsQuerySummary
               metrics={metrics}
+              stats={stats}
               droppedMetrics={droppedMetrics}
               appMetrics={totalMetric}
               appDroppedMetrics={totalDroppedMetric}
@@ -1537,24 +1562,14 @@ export const NetflowTraffic: React.FC<{
         isModalOpen={isOverviewModalOpen}
         setModalOpen={setOverviewModalOpen}
         recordType={recordType}
-        panels={panels.filter(
-          panel =>
-            (isPktDrop() || !panel.id.includes('dropped')) &&
-            (isDNSTracking() || !panel.id.includes('dns')) &&
-            (isFlowRTT() || !panel.id.includes('rtt'))
-        )}
+        panels={getAvailablePanels()}
         setPanels={setSelectedPanels}
       />
       <ColumnsModal
         id="columns-modal"
         isModalOpen={isColModalOpen}
         setModalOpen={setColModalOpen}
-        columns={columns.filter(
-          col =>
-            (isConnectionTracking() || ![ColumnsId.recordtype, ColumnsId.hashid].includes(col.id)) &&
-            (isDNSTracking() || ![ColumnsId.dnsid, ColumnsId.dnslatency, ColumnsId.dnsresponsecode].includes(col.id)) &&
-            (isFlowRTT() || ![ColumnsId.rttTime].includes(col.id))
-        )}
+        columns={getAvailableColumns()}
         setColumns={setColumns}
         setColumnSizes={setColumnSizes}
       />

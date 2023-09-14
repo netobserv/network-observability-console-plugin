@@ -9,10 +9,12 @@ import { valueFormat } from '../../utils/format';
 import { Stats } from '../../api/loki';
 import { RecordType } from '../../model/flow-query';
 import _ from 'lodash';
+import StatsQuerySummary from './stats-query-summary';
 
 export const FlowsQuerySummaryContent: React.FC<{
   flows: Record[];
   type: RecordType;
+  numQueries?: number;
   limitReached: boolean;
   range: number | TimeRange;
   lastRefresh: Date | undefined;
@@ -23,6 +25,7 @@ export const FlowsQuerySummaryContent: React.FC<{
 }> = ({
   flows,
   type,
+  numQueries,
   limitReached,
   range,
   lastRefresh,
@@ -117,21 +120,9 @@ export const FlowsQuerySummaryContent: React.FC<{
         </FlexItem>
       )}
       {counters()}
-      <FlexItem>
-        <Tooltip
-          content={
-            <Text component={TextVariants.p}>
-              {t('Last refresh: {{time}}', {
-                time: lastRefresh ? lastRefresh.toLocaleString() : ''
-              })}
-            </Text>
-          }
-        >
-          <Text id="lastRefresh" component={TextVariants.p}>
-            {lastRefresh ? lastRefresh.toLocaleTimeString() : ''}
-          </Text>
-        </Tooltip>
-      </FlexItem>
+      {lastRefresh && (
+        <StatsQuerySummary lastRefresh={lastRefresh} numQueries={direction === 'column' ? numQueries : undefined} />
+      )}
       {direction === 'row' && toggleQuerySummary && (
         <FlexItem>
           <Text id="query-summary-toggle" component={TextVariants.a} onClick={toggleQuerySummary}>
@@ -159,6 +150,7 @@ export const FlowsQuerySummary: React.FC<{
           direction="row"
           flows={flows}
           type={type}
+          numQueries={stats.numQueries}
           limitReached={stats.limitReached}
           range={range}
           lastRefresh={lastRefresh}

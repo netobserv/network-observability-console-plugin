@@ -1,16 +1,18 @@
 import { Card, Flex, FlexItem, Text, TextVariants, Tooltip } from '@patternfly/react-core';
-import { TopologyMetrics } from '../../api/loki';
+import { Stats, TopologyMetrics } from '../../api/loki';
 import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { MetricType } from '../../model/flow-query';
 import { valueFormat } from '../../utils/format';
 import './query-summary.css';
+import StatsQuerySummary from './stats-query-summary';
 
 export const MetricsQuerySummaryContent: React.FC<{
   metrics: TopologyMetrics[];
   appMetrics: TopologyMetrics | undefined;
   metricType: MetricType;
+  numQueries?: number;
   lastRefresh: Date | undefined;
   direction: 'row' | 'column';
   className?: string;
@@ -20,6 +22,7 @@ export const MetricsQuerySummaryContent: React.FC<{
   metrics,
   appMetrics,
   metricType,
+  numQueries,
   lastRefresh,
   direction,
   className,
@@ -104,21 +107,9 @@ export const MetricsQuerySummaryContent: React.FC<{
         </FlexItem>
       )}
       {counters()}
-      <FlexItem>
-        <Tooltip
-          content={
-            <Text component={TextVariants.p}>
-              {t('Last refresh: {{time}}', {
-                time: lastRefresh ? lastRefresh.toLocaleString() : ''
-              })}
-            </Text>
-          }
-        >
-          <Text id="lastRefresh" component={TextVariants.p}>
-            {lastRefresh ? lastRefresh.toLocaleTimeString() : ''}
-          </Text>
-        </Tooltip>
-      </FlexItem>
+      {lastRefresh && (
+        <StatsQuerySummary lastRefresh={lastRefresh} numQueries={direction === 'column' ? numQueries : undefined} />
+      )}
       {direction === 'row' && toggleQuerySummary && (
         <FlexItem>
           <Text id="query-summary-toggle" component={TextVariants.a} onClick={toggleQuerySummary}>
@@ -132,6 +123,7 @@ export const MetricsQuerySummaryContent: React.FC<{
 
 export const MetricsQuerySummary: React.FC<{
   metrics: TopologyMetrics[];
+  stats: Stats | undefined;
   droppedMetrics: TopologyMetrics[];
   appMetrics: TopologyMetrics | undefined;
   appDroppedMetrics: TopologyMetrics | undefined;
@@ -139,7 +131,7 @@ export const MetricsQuerySummary: React.FC<{
   lastRefresh: Date | undefined;
   isShowQuerySummary?: boolean;
   toggleQuerySummary?: () => void;
-}> = ({ metrics, appMetrics, metricType, lastRefresh, isShowQuerySummary, toggleQuerySummary }) => {
+}> = ({ metrics, stats, appMetrics, metricType, lastRefresh, isShowQuerySummary, toggleQuerySummary }) => {
   if (!_.isEmpty(metrics)) {
     return (
       <Card id="query-summary" isFlat>
@@ -148,6 +140,7 @@ export const MetricsQuerySummary: React.FC<{
           metrics={metrics}
           appMetrics={appMetrics}
           metricType={metricType}
+          numQueries={stats?.numQueries}
           lastRefresh={lastRefresh}
           isShowQuerySummary={isShowQuerySummary}
           toggleQuerySummary={toggleQuerySummary}

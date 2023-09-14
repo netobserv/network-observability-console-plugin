@@ -17,3 +17,12 @@
 #query-summary-content>div {
   margin-right: 2.5em;
 }
+
+.stats-query-summary-date {
+  display: flex;
+  flex-direction: row;
+}
+
+#lastRefresh {
+  padding-left: 5px;
+}
