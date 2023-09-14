@@ -15,7 +15,7 @@ export const ElementPanelStats: React.FC<{
 }> = ({ metricsIn, metricsOut, metricsBoth, metricType, isEdge }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
-  const isFlowRtt = metricType === 'flowRtt';
+  const isTime = ['dnsLatencies', 'flowRtt'].includes(metricType);
   const latestIn = metricsIn.reduce((prev, cur) => prev + getStat(cur.stats, 'last'), 0);
   const averageIn = metricsIn.reduce((prev, cur) => prev + getStat(cur.stats, 'avg'), 0);
   const totalIn = metricsIn.reduce((prev, cur) => prev + getStat(cur.stats, 'sum'), 0);
@@ -36,11 +36,11 @@ export const ElementPanelStats: React.FC<{
         <FlexItem>
           <FlexItem>
             <Text className="element-stats-title" component={TextVariants.h4}>
-              {isFlowRtt ? t('Average RTT') : t('Average rate')}
+              {isTime ? t('Average time') : t('Average rate')}
             </Text>
           </FlexItem>
         </FlexItem>
-        {!isFlowRtt ? (
+        {!isTime ? (
           <>
             <FlexItem>
               <FlexItem>
@@ -68,7 +68,7 @@ export const ElementPanelStats: React.FC<{
         <FlexItem>
           <Text id="metrics-stats-avg-in">{getFormattedValue(averageIn, metricType, 'avg', t)}</Text>
         </FlexItem>
-        {!isFlowRtt ? (
+        {!isTime ? (
           <>
             <FlexItem>
               <Text id="metrics-stats-latest-in">{getFormattedValue(latestIn, metricType, 'last', t)}</Text>
@@ -88,7 +88,7 @@ export const ElementPanelStats: React.FC<{
         <FlexItem>
           <Text id="metrics-stats-avg-out">{getFormattedValue(averageOut, metricType, 'avg', t)}</Text>
         </FlexItem>
-        {!isFlowRtt ? (
+        {!isTime ? (
           <>
             <FlexItem>
               <Text id="metrics-stats-latest-out">{getFormattedValue(latestOut, metricType, 'last', t)}</Text>
@@ -101,7 +101,7 @@ export const ElementPanelStats: React.FC<{
           <></>
         )}
       </Flex>
-      {!isFlowRtt ? (
+      {!isTime ? (
         <>
           <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsNone' }}>
             <FlexItem>

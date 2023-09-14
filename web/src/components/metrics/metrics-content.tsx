@@ -59,7 +59,7 @@ export const MetricsContent: React.FC<MetricsContentProps> = ({
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   let filteredMetrics = metrics.slice(0, limit);
-  if (metricType === 'flowRtt') {
+  if (['dnsLatencies', 'flowRtt'].includes(metricType)) {
     filteredMetrics = filteredMetrics.map(m => ({ ...m, values: m.values.filter(v => v[1] !== 0) }));
   }
 

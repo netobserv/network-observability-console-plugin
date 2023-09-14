@@ -25,6 +25,8 @@ export const TopologyDisplayOptions: React.FC<{
   setMetricScope: (s: FlowScope) => void;
   topologyOptions: TopologyOptions;
   setTopologyOptions: (o: TopologyOptions) => void;
+  allowDNSMetric: boolean;
+  allowRTTMetric: boolean;
 }> = ({
   metricFunction,
   setMetricFunction,
@@ -33,7 +35,9 @@ export const TopologyDisplayOptions: React.FC<{
   metricScope,
   setMetricScope,
   topologyOptions,
-  setTopologyOptions
+  setTopologyOptions,
+  allowDNSMetric,
+  allowRTTMetric
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
@@ -86,6 +90,8 @@ export const TopologyDisplayOptions: React.FC<{
                 isTopology
                 selected={metricType}
                 setMetricType={setMetricType}
+                allowDNSMetric={allowDNSMetric}
+                allowRTTMetric={allowRTTMetric}
               />
             </FlexItem>
           </Flex>
@@ -225,6 +231,8 @@ export const TopologyDisplayDropdown: React.FC<{
   setMetricScope: (s: FlowScope) => void;
   topologyOptions: TopologyOptions;
   setTopologyOptions: (o: TopologyOptions) => void;
+  allowDNSMetric: boolean;
+  allowRTTMetric: boolean;
 }> = ({
   metricFunction,
   setMetricFunction,
@@ -233,7 +241,9 @@ export const TopologyDisplayDropdown: React.FC<{
   metricScope,
   setMetricScope,
   topologyOptions,
-  setTopologyOptions
+  setTopologyOptions,
+  allowDNSMetric,
+  allowRTTMetric
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [isOpen, setOpen] = React.useState<boolean>(false);
@@ -255,6 +265,8 @@ export const TopologyDisplayDropdown: React.FC<{
             setMetricScope={setMetricScope}
             topologyOptions={topologyOptions}
             setTopologyOptions={setTopologyOptions}
+            allowDNSMetric={allowDNSMetric}
+            allowRTTMetric={allowRTTMetric}
           />
         }
       />
