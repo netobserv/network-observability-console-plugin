@@ -23,7 +23,7 @@ export const ElementPanelMetrics: React.FC<{
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [metricsRadio, setMetricsRadio] = React.useState<MetricsRadio>('both');
 
-  const useArea = metricType !== 'flowRtt';
+  const useArea = !['dnsLatencies', 'flowRtt'].includes(metricType);
   const titleStats = t('Stats');
   const titleChart = metricType === 'flowRtt' ? t('Flow RTT') : t('Top 5 rates');
 

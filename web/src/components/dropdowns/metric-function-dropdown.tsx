@@ -16,7 +16,7 @@ export const MetricFunctionDropdown: React.FC<{
 
   const getMetricDisplay = React.useCallback(
     (mf: MetricFunction): string => {
-      const suffix = metricType !== 'flowRtt' ? ' ' + t('rate') : '';
+      const suffix = !['dnsLatencies', 'flowRtt'].includes(metricType || '') ? ' ' + t('rate') : '';
       switch (mf) {
         case 'sum':
           return t('Total');
@@ -38,14 +38,14 @@ export const MetricFunctionDropdown: React.FC<{
       position={DropdownPosition.right}
       toggle={
         <Tooltip
-          trigger={metricType === 'flowRtt' ? 'mouseenter focus' : ''}
+          trigger={['dnsLatencies', 'flowRtt'].includes(metricType || '') ? 'mouseenter focus' : ''}
           position="top"
-          content={t('Only average is available for RTT')}
+          content={t('Only average is available for durations')}
         >
           <DropdownToggle
             data-test={`${id}-dropdown`}
             id={`${id}-dropdown`}
-            isDisabled={metricType === 'flowRtt'}
+            isDisabled={['dnsLatencies', 'flowRtt'].includes(metricType || '')}
             onToggle={() => setMetricDropdownOpen(!metricDropdownOpen)}
           >
             {getMetricDisplay(selected as MetricFunction)}
