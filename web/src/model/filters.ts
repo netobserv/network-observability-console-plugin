@@ -40,7 +40,8 @@ export type FilterId =
   | 'dns_id'
   | 'dns_latency'
   | 'dns_flag_response_code'
-  | 'time_flow_rtt';
+  | 'time_flow_rtt'
+  | 'tcp_retransmit';
 
 export interface FilterDefinition {
   id: FilterId;

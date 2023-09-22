@@ -60,6 +60,7 @@ export enum ColumnsId {
   srchostname = 'SrcK8S_HostName',
   dsthostname = 'DstK8S_HostName',
   flowdir = 'FlowDirection',
+  tcpRetransmit = 'TcpRetransmit',
   rttTime = 'TimeFlowRttMs',
   hashid = '_HashId',
   interface = 'Interface',
@@ -782,6 +783,17 @@ export const getExtraColumns = (t: TFunction): Column[] => {
       tooltip: t('Time elapsed between Start Time and End Time.'),
       isSelected: false,
       value: f => f.fields.TimeFlowEndMs - f.fields.TimeFlowStartMs,
+      sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
+      width: 5
+    },
+    {
+      id: ColumnsId.tcpRetransmit,
+      name: t('TCP Retransmit'),
+      tooltip: t('Number of times the flow has been retransmitted'),
+      fieldName: 'TcpRetransmit',
+      quickFilter: 'tcp_retransmit',
+      isSelected: false,
+      value: f => f.fields.TcpRetransmit || '',
       sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
       width: 5
     },

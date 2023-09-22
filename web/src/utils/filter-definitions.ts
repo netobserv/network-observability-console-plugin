@@ -537,6 +537,16 @@ export const getFilterDefinitions = (
         validate: rejectEmptyValue,
         hint: t('Specify a Flow Round Trip Time in nanoseconds.'),
         encoder: simpleFiltersEncoder('TimeFlowRttNs')
+      },
+      {
+        id: 'tcp_retransmit',
+        name: t('TCP Retransmit'),
+        category: FilterCategory.None,
+        component: FilterComponent.Number,
+        getOptions: noOption,
+        validate: rejectEmptyValue,
+        hint: t('Specify the number of times the flow has been retransmitted.'),
+        encoder: simpleFiltersEncoder('TcpRetransmit')
       }
     ];
   }
