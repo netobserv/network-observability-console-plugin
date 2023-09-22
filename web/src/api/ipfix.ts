@@ -96,6 +96,8 @@ export interface Fields {
   Bytes_AB?: number;
   /** In conversation tracking, B to A bytes counter per conversation */
   Bytes_BA?: number;
+  /** Differentiated Services Code Point Value  */
+  Dscp?: number;
   /** ICMP type */
   IcmpType?: number;
   /** ICMP code */

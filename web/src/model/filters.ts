@@ -34,6 +34,7 @@ export type FilterId =
   | 'direction'
   | 'interface'
   | 'type'
+  | 'dscp'
   | 'id'
   | 'pkt_drop_state'
   | 'pkt_drop_cause'
