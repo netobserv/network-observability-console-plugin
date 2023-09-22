@@ -41,6 +41,7 @@ export interface FiltersToolbarProps {
   allowDNSFilter?: boolean;
   allowPktDrops?: boolean;
   allowRTTFilter?: boolean;
+  allowTCPRetrans?: boolean;
   isFullScreen: boolean;
   setFullScreen: (b: boolean) => void;
 }
@@ -58,6 +59,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
   allowDNSFilter,
   allowPktDrops,
   allowRTTFilter,
+  allowTCPRetrans,
   isFullScreen,
   setFullScreen,
   ...props
@@ -180,6 +182,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
                       allowDNSFilter={allowDNSFilter}
                       allowPktDrops={allowPktDrops}
                       allowRTTFilter={allowRTTFilter}
+                      allowTCPRetrans={allowTCPRetrans}
                     />
                     <CompareFilter
                       value={selectedCompare}

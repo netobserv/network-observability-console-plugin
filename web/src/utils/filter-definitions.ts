@@ -140,7 +140,8 @@ export const getFilterDefinitions = (
   allowConnectionFilter?: boolean,
   allowDNSFilter?: boolean,
   allowPktDrops?: boolean,
-  allowRTTFilter?: boolean
+  allowRTTFilter?: boolean,
+  allowTCPRetrans?: boolean
 ): FilterDefinition[] => {
   if (!filterDefinitions) {
     const rejectEmptyValue = (value: string) => {
@@ -551,7 +552,7 @@ export const getFilterDefinitions = (
     ];
   }
 
-  if (allowConnectionFilter && allowDNSFilter && allowPktDrops && allowRTTFilter) {
+  if (allowConnectionFilter && allowDNSFilter && allowPktDrops && allowRTTFilter && allowTCPRetrans) {
     return filterDefinitions;
   } else {
     return filterDefinitions.filter(
@@ -559,10 +560,11 @@ export const getFilterDefinitions = (
         (allowConnectionFilter || fd.id !== 'id') &&
         (allowDNSFilter || !fd.id.startsWith('dns_')) &&
         (allowPktDrops || !fd.id.startsWith('pkt_drop_')) &&
-        (allowRTTFilter || fd.id !== 'time_flow_rtt')
+        (allowRTTFilter || fd.id !== 'time_flow_rtt') &&
+        (allowTCPRetrans || fd.id !== 'tcp_retransmit')
     );
   }
 };
 
 export const findFilter = (t: TFunction, id: FilterId) =>
-  getFilterDefinitions(t, true, true, true, true).find(def => def.id === id);
+  getFilterDefinitions(t, true, true, true, true, true).find(def => def.id === id);

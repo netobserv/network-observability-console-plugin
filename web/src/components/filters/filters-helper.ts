@@ -14,9 +14,17 @@ export const buildGroups = (
   allowConnectionFilter?: boolean,
   allowDNSFilter?: boolean,
   allowPktDrops?: boolean,
-  allowRTTFilter?: boolean
+  allowRTTFilter?: boolean,
+  allowTCPRetrans?: boolean
 ): FilterGroup[] => {
-  const defs = getFilterDefinitions(t, allowConnectionFilter, allowDNSFilter, allowPktDrops, allowRTTFilter);
+  const defs = getFilterDefinitions(
+    t,
+    allowConnectionFilter,
+    allowDNSFilter,
+    allowPktDrops,
+    allowRTTFilter,
+    allowTCPRetrans
+  );
   return [
     {
       title: t('Source'),

@@ -1,7 +1,7 @@
 import { RecordType } from './flow-query';
 import { RawQuickFilter } from './quick-filters';
 
-export type Feature = 'pktDrop' | 'dnsTracking' | 'flowRTT';
+export type Feature = 'pktDrop' | 'dnsTracking' | 'flowRTT' | 'tcpRetrans';
 
 export type Config = {
   buildVersion: string;

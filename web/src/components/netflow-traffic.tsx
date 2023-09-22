@@ -690,6 +690,10 @@ export const NetflowTraffic: React.FC<{
     return config.features.includes('pktDrop');
   }, [config.features]);
 
+  const isTCPRetransmit = React.useCallback(() => {
+    return config.features.includes('tcpRetrans');
+  }, [config.features]);
+
   React.useEffect(() => {
     if (initState.current.includes('configLoaded')) {
       if (recordType === 'flowLog' && !isFlow() && isConnectionTracking()) {
@@ -1403,6 +1407,7 @@ export const NetflowTraffic: React.FC<{
         allowDNSFilter={isDNSTracking()}
         allowPktDrops={isPktDrop()}
         allowRTTFilter={isFlowRTT()}
+        allowTCPRetrans={isTCPRetransmit()}
       />
       {
         <Flex className="netflow-traffic-tabs-container">
@@ -1553,7 +1558,8 @@ export const NetflowTraffic: React.FC<{
           col =>
             (isConnectionTracking() || ![ColumnsId.recordtype, ColumnsId.hashid].includes(col.id)) &&
             (isDNSTracking() || ![ColumnsId.dnsid, ColumnsId.dnslatency, ColumnsId.dnsresponsecode].includes(col.id)) &&
-            (isFlowRTT() || ![ColumnsId.rttTime].includes(col.id))
+            (isFlowRTT() || ![ColumnsId.rttTime].includes(col.id)) &&
+            (isTCPRetransmit() || ![ColumnsId.tcpRetransmit].includes(col.id))
         )}
         setColumns={setColumns}
         setColumnSizes={setColumnSizes}
