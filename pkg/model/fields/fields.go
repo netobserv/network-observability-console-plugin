@@ -30,6 +30,7 @@ const (
 	HostName       = "K8S_HostName"
 	SrcHostName    = Src + HostName
 	DstHostName    = Dst + HostName
+	TCPRetrans     = "TcpRetrans"
 	Packets        = "Packets"
 	PktDropPackets = "PktDropPackets"
 	Proto          = "Proto"
@@ -51,6 +52,7 @@ func IsNumeric(v string) bool {
 		Port,
 		SrcPort,
 		DstPort,
+		TCPRetrans,
 		Packets,
 		Proto,
 		Bytes:
