@@ -358,7 +358,7 @@ ___
 
 • `Optional` **TimeFlowRttNs**: `number`
 
-Flow Round Trip Time (RTT) in nanoseconds
+TCP handshake Round Trip Time (RTT) in nanoseconds
 
 ___
 

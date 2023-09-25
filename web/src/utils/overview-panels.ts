@@ -135,7 +135,7 @@ export const getOverviewPanelInfo = (
       return {
         title: t('Top {{limit}} average flow RTT', { limit }),
         chartType: t('donut'),
-        tooltip: t('The average flow Round Trip Time over the selected interval')
+        tooltip: t('The average TCP handshake Round Trip Time over the selected interval')
       };
     case 'top_avg_rtt_line':
       return { title: t('Top {{limit}} average flow RTT', { limit, type }), chartType: t('lines') };

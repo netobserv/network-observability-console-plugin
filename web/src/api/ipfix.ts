@@ -132,7 +132,7 @@ export interface Fields {
   TimeFlowEndMs: number;
   /** Timestamp when this flow was received and processed by the flow collector, in seconds */
   TimeReceived: number;
-  /** Flow Round Trip Time (RTT) in nanoseconds */
+  /** TCP handshake Round Trip Time (RTT) in nanoseconds */
   TimeFlowRttNs?: number;
   /** In conversation tracking, the conversation identifier */
   _HashId?: string;

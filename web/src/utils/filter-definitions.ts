@@ -535,7 +535,7 @@ export const getFilterDefinitions = (
         component: FilterComponent.Number,
         getOptions: noOption,
         validate: rejectEmptyValue,
-        hint: t('Specify a Flow Round Trip Time in nanoseconds.'),
+        hint: t('Specify a TCP handshake Round Trip Time in nanoseconds.'),
         encoder: simpleFiltersEncoder('TimeFlowRttNs')
       }
     ];
