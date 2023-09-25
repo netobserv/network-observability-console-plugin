@@ -547,7 +547,7 @@ export const getFilterDefinitions = (
         getOptions: noOption,
         validate: rejectEmptyValue,
         hint: t('Specify the number of times the flow has been retransmitted.'),
-        encoder: simpleFiltersEncoder('TcpRetransmit')
+        encoder: simpleFiltersEncoder('TcpRetrans')
       }
     ];
   }

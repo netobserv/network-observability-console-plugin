@@ -85,7 +85,7 @@ export interface Fields {
   /** TCP flags */
   Flags?: number;
   /** TCP Retransmit count */
-  TcpRetransmit?: number;
+  TcpRetrans?: number;
   /** Number of packets */
   Packets?: number;
   /** In conversation tracking, A to B packets counter per conversation */

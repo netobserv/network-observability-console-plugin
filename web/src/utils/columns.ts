@@ -790,10 +790,10 @@ export const getExtraColumns = (t: TFunction): Column[] => {
       id: ColumnsId.tcpRetransmit,
       name: t('TCP Retransmit'),
       tooltip: t('Number of times the flow has been retransmitted'),
-      fieldName: 'TcpRetransmit',
+      fieldName: 'TcpRetrans',
       quickFilter: 'tcp_retransmit',
       isSelected: false,
-      value: f => f.fields.TcpRetransmit || '',
+      value: f => f.fields.TcpRetrans || '',
       sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
       width: 5
     },
