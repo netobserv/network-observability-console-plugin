@@ -10,11 +10,19 @@ export const NetflowOverviewPanel: React.FC<{
   title: string;
   titleTooltip?: string;
   kebab?: JSX.Element;
+  onClick?: () => void;
+  isSelected?: boolean;
   id?: string;
-}> = ({ id, doubleWidth, bodyClassSmall, title, titleTooltip, kebab, children }) => {
+}> = ({ id, doubleWidth, bodyClassSmall, title, titleTooltip, kebab, children, onClick, isSelected }) => {
   return (
     <FlexItem id={id} className={`overview-flex-item center ${doubleWidth ? 'full' : ''}`}>
-      <Card isFlat className="overview-card">
+      <Card
+        isFlat
+        isSelectable={onClick !== undefined}
+        className="overview-card"
+        isSelectableRaised={isSelected}
+        onClick={onClick}
+      >
         <Flex className="overview-card-content" direction={{ default: 'column' }}>
           <FlexItem>
             <Flex direction={{ default: 'row' }}>
@@ -28,7 +36,7 @@ export const NetflowOverviewPanel: React.FC<{
                   )}
                 </Text>
               </FlexItem>
-              <FlexItem>{kebab}</FlexItem>
+              {onClick === undefined && <FlexItem>{kebab}</FlexItem>}
             </Flex>
           </FlexItem>
           <FlexItem

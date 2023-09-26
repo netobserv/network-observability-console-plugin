@@ -39,6 +39,7 @@ export type SingleMetricsTotalContentProps = {
   showOthers: boolean;
   othersName?: string;
   smallerTexts?: boolean;
+  showLegend?: boolean;
 };
 
 export const SingleMetricsTotalContent: React.FC<SingleMetricsTotalContentProps> = ({
@@ -51,7 +52,8 @@ export const SingleMetricsTotalContent: React.FC<SingleMetricsTotalContentProps>
   showTotal,
   showOthers,
   othersName,
-  smallerTexts
+  smallerTexts,
+  showLegend
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
@@ -98,23 +100,27 @@ export const SingleMetricsTotalContent: React.FC<SingleMetricsTotalContentProps>
             themeColor={ChartThemeColor.multiUnordered}
             ariaTitle={title}
             containerComponent={chartVoronoi(legendData, metricType, t)}
-            legendData={legendData}
+            legendData={showLegend ? legendData : undefined}
             legendOrientation="horizontal"
             legendPosition="bottom-left"
             legendAllowWrap={true}
-            legendComponent={legentComponent}
+            legendComponent={showLegend ? legentComponent : undefined}
             //TODO: fix refresh on selection change to enable animation
             //animate={true}
             scale={{ x: 'time', y: 'linear' }}
             width={dimensions.width}
             height={dimensions.height}
             domainPadding={{ x: 0, y: 0 }}
-            padding={{
-              bottom: (legendData.length / 2) * 25 + 100,
-              left: 90,
-              right: 50,
-              top: 50
-            }}
+            padding={
+              showLegend
+                ? {
+                    bottom: (legendData.length / 2) * 25 + 100,
+                    left: 90,
+                    right: 50,
+                    top: 50
+                  }
+                : undefined
+            }
           >
             <ChartAxis fixLabelOverlap />
             <ChartAxis

@@ -34,3 +34,7 @@
   display: grid;
   min-height: 320px;
 }
+
+#top_avg_donut {
+  position: relative;
+}

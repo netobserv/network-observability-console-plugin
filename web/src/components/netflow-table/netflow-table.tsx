@@ -26,6 +26,7 @@ import {
   useLocalStorage
 } from '../../utils/local-storage-hook';
 import { LokiError } from '../messages/loki-error';
+import { convertRemToPixels } from '../../utils/panel';
 
 const NetflowTable: React.FC<{
   flows: Record[];
@@ -113,11 +114,6 @@ const NetflowTable: React.FC<{
   const getRowHeight = React.useCallback(() => {
     const doubleSizeColumnIds = columns.filter(c => c.isCommon).map(c => c.id);
     const containsDoubleLine = columns.find(c => doubleSizeColumnIds.includes(c.id)) !== undefined;
-
-    function convertRemToPixels(rem: number) {
-      //get fontSize from document or fallback to 16 for jest
-      return rem * (parseFloat(getComputedStyle(document.documentElement).fontSize) || 16);
-    }
 
     switch (size) {
       case 'l':

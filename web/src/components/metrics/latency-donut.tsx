@@ -19,6 +19,7 @@ export type LatencyDonutProps = {
   othersName?: string;
   smallerTexts?: boolean;
   subTitle: string;
+  showLegend?: boolean;
 };
 
 export const LatencyDonut: React.FC<LatencyDonutProps> = ({
@@ -30,7 +31,8 @@ export const LatencyDonut: React.FC<LatencyDonutProps> = ({
   showOthers,
   othersName,
   smallerTexts,
-  subTitle
+  subTitle,
+  showLegend
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
@@ -81,23 +83,27 @@ export const LatencyDonut: React.FC<LatencyDonutProps> = ({
       <ChartDonut
         themeColor={ChartThemeColor.multiUnordered}
         constrainToVisibleArea
-        legendData={legendData}
+        legendData={showLegend ? legendData : undefined}
         legendOrientation="vertical"
         legendPosition="right"
         legendAllowWrap={true}
-        legendComponent={legentComponent}
+        legendComponent={showLegend ? legentComponent : undefined}
         labels={({ datum }) => datum.x}
         //TODO: fix refresh on selection change to enable animation
         //animate={true}
         width={dimensions.width}
         height={dimensions.height}
         data={sliced.map(m => ({ x: `${m.name}: ${getFormattedValue(m.value, metricType, 'sum', t)}`, y: m.value }))}
-        padding={{
-          bottom: 20,
-          left: 20,
-          right: 400,
-          top: 20
-        }}
+        padding={
+          showLegend
+            ? {
+                bottom: 20,
+                left: 20,
+                right: 400,
+                top: 20
+              }
+            : undefined
+        }
         title={`${getFormattedValue(total, metricType, 'sum', t)}`}
         subTitle={subTitle}
       />

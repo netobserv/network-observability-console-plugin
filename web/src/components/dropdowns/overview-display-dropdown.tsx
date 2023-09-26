@@ -1,4 +1,4 @@
-import { FlexItem, Select, Tooltip } from '@patternfly/react-core';
+import { FlexItem, Select, Switch, Tooltip } from '@patternfly/react-core';
 import { InfoAltIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -18,7 +18,18 @@ export const OverviewDisplayOptions: React.FC<{
   setMetricScope: (s: FlowScope) => void;
   truncateLength: TruncateLength;
   setTruncateLength: (v: TruncateLength) => void;
-}> = ({ metricType, setMetricType, metricScope, setMetricScope, truncateLength, setTruncateLength }) => {
+  focus: boolean;
+  setFocus: (v: boolean) => void;
+}> = ({
+  metricType,
+  setMetricType,
+  metricScope,
+  setMetricScope,
+  truncateLength,
+  setTruncateLength,
+  focus,
+  setFocus
+}) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   return (
@@ -61,6 +72,15 @@ export const OverviewDisplayOptions: React.FC<{
           <TruncateDropdown id="truncate" selected={truncateLength} setTruncateLength={setTruncateLength} />
         </div>
       </div>
+      <div className="pf-c-select__menu-group">
+        <Switch
+          id="focus-switch"
+          className="display-dropdown-padding"
+          label={t('Single graph focus')}
+          isChecked={focus}
+          onChange={setFocus}
+        />
+      </div>
     </>
   );
 };
@@ -72,7 +92,18 @@ export const OverviewDisplayDropdown: React.FC<{
   setMetricScope: (s: FlowScope) => void;
   truncateLength: TruncateLength;
   setTruncateLength: (v: TruncateLength) => void;
-}> = ({ metricType, setMetricType, metricScope, setMetricScope, truncateLength, setTruncateLength }) => {
+  focus: boolean;
+  setFocus: (v: boolean) => void;
+}> = ({
+  metricType,
+  setMetricType,
+  metricScope,
+  setMetricScope,
+  truncateLength,
+  setTruncateLength,
+  focus,
+  setFocus
+}) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [isOpen, setOpen] = React.useState<boolean>(false);
 
@@ -91,6 +122,8 @@ export const OverviewDisplayDropdown: React.FC<{
             setMetricScope={setMetricScope}
             truncateLength={truncateLength}
             setTruncateLength={setTruncateLength}
+            focus={focus}
+            setFocus={setFocus}
           />
         }
       />

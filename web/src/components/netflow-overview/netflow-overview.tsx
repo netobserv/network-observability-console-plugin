@@ -5,6 +5,7 @@ import {
   EmptyStateIcon,
   EmptyStateVariant,
   Flex,
+  FlexItem,
   Spinner,
   Title
 } from '@patternfly/react-core';
@@ -12,6 +13,7 @@ import { SearchIcon } from '@patternfly/react-icons';
 import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
+import { convertRemToPixels } from '../../utils/panel';
 import { GenericMetric, TopologyMetrics } from '../../api/loki';
 import { MetricType, RecordType } from '../../model/flow-query';
 import { getStat } from '../../model/topology';
@@ -59,6 +61,7 @@ export type NetflowOverviewProps = {
   isDark?: boolean;
   filterActionLinks: JSX.Element;
   truncateLength: TruncateLength;
+  focus?: boolean;
 };
 
 export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
@@ -82,10 +85,14 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
   error,
   isDark,
   filterActionLinks,
-  truncateLength
+  truncateLength,
+  focus
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [kebabMap, setKebabMap] = React.useState(new Map<OverviewPanelId, PanelKebabOptions>());
+  const [selectedPanel, setSelectedPanel] = React.useState<OverviewPanel | undefined>(
+    panels.length ? panels[0] : undefined
+  );
 
   const setKebabOptions = React.useCallback(
     (id: OverviewPanelId, options: PanelKebabOptions) => {
@@ -174,7 +181,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
 
   const smallerTexts = truncateLength >= TruncateLength.M;
 
-  const getPanelContent = (id: OverviewPanelId, title: string): PanelContent => {
+  const getPanelContent = (id: OverviewPanelId, title: string, isFocus: boolean): PanelContent => {
     switch (id) {
       case 'overview':
         return {
@@ -196,6 +203,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
               showScatter={false}
               smallerTexts={smallerTexts}
               tooltipsTruncate={false}
+              showLegend={!isFocus}
             />
           ) : (
             emptyGraph()
@@ -217,6 +225,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
               showScatter={true}
               smallerTexts={smallerTexts}
               tooltipsTruncate={false}
+              showLegend={!isFocus}
             />
           ) : (
             emptyGraph()
@@ -244,6 +253,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
                 showInternal={options.showInternal!}
                 showOutOfScope={options.showOutOfScope!}
                 smallerTexts={smallerTexts}
+                showLegend={!isFocus}
               />
             ) : (
               emptyGraph()
@@ -269,6 +279,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
               itemsPerRow={2}
               smallerTexts={smallerTexts}
               tooltipsTruncate={false}
+              showLegend={!isFocus}
             />
           ) : (
             emptyGraph()
@@ -295,6 +306,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
                 showInternal={options.showInternal!}
                 showOutOfScope={options.showOutOfScope!}
                 smallerTexts={smallerTexts}
+                showLegend={!isFocus}
               />
             ) : (
               emptyGraph()
@@ -325,6 +337,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
                 showInternal={options.showInternal!}
                 showOutOfScope={options.showOutOfScope!}
                 smallerTexts={smallerTexts}
+                showLegend={!isFocus}
               />
             ) : (
               emptyGraph()
@@ -351,6 +364,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
               showScatter={false}
               smallerTexts={smallerTexts}
               tooltipsTruncate={false}
+              showLegend={!isFocus}
             />
           ) : (
             emptyGraph()
@@ -372,6 +386,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
               showScatter={true}
               smallerTexts={smallerTexts}
               tooltipsTruncate={false}
+              showLegend={!isFocus}
             />
           ) : (
             emptyGraph()
@@ -395,6 +410,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
                 totalMetric={namedTotalDroppedMetric}
                 showOthers={options.showOthers!}
                 smallerTexts={smallerTexts}
+                showLegend={!isFocus}
               />
             ) : (
               emptyGraph()
@@ -419,6 +435,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
                 totalMetric={namedTotalDroppedMetric}
                 showOthers={options.showOthers!}
                 smallerTexts={smallerTexts}
+                showLegend={!isFocus}
               />
             ) : (
               emptyGraph()
@@ -450,6 +467,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
                 showInternal={options.showInternal!}
                 showOutOfScope={options.showOutOfScope!}
                 smallerTexts={smallerTexts}
+                showLegend={!isFocus}
               />
             ) : (
               emptyGraph()
@@ -470,6 +488,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
                 showOthers={false}
                 smallerTexts={smallerTexts}
                 subTitle={t('Average latency')}
+                showLegend={!isFocus}
               />
             ) : (
               emptyGraph()
@@ -494,6 +513,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
                 showOthers={options.showOthers!}
                 smallerTexts={smallerTexts}
                 subTitle={t('Average RTT')}
+                showLegend={!isFocus}
               />
             ) : (
               emptyGraph()
@@ -519,6 +539,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
               showScatter={true}
               smallerTexts={smallerTexts}
               tooltipsTruncate={false}
+              showLegend={!isFocus}
             />
           ) : (
             emptyGraph()
@@ -542,6 +563,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
                 othersName={'NoError'}
                 smallerTexts={smallerTexts}
                 subTitle={t('Total flow count')}
+                showLegend={!isFocus}
               />
             ) : (
               emptyGraph()
@@ -569,6 +591,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
                 showOthers={options.showNoError!}
                 othersName={'NoError'}
                 smallerTexts={smallerTexts}
+                showLegend={!isFocus}
               />
             ) : (
               emptyGraph()
@@ -582,32 +605,63 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
     }
   };
 
+  const getPanelView = (panel: OverviewPanel, i?: number) => {
+    const { title, tooltip } = getOverviewPanelInfo(
+      t,
+      panel.id,
+      limit,
+      recordType === 'flowLog' ? t('flow') : t('conversation')
+    );
+    const isFocusListItem = i !== undefined && focus == true;
+    const content = getPanelContent(panel.id, title, isFocusListItem);
+    return (
+      <NetflowOverviewPanel
+        id={panel.id}
+        key={i}
+        bodyClassSmall={isFocusListItem || (!focus && !!content.bodyClassSmall && panels.length > 1)}
+        doubleWidth={focus || !!content.doubleWidth || panels.length === 1}
+        title={title}
+        titleTooltip={tooltip}
+        kebab={content.kebab}
+        onClick={isFocusListItem ? () => setSelectedPanel(panel) : undefined}
+        isSelected={isFocusListItem && selectedPanel?.id === panel.id}
+      >
+        {content.element}
+      </NetflowOverviewPanel>
+    );
+  };
+
+  const padding = convertRemToPixels(2);
+  const containerSize = document.getElementById('overview-container')?.getBoundingClientRect();
+
   return (
     <div id="overview-container" className={isDark ? 'dark' : 'light'}>
-      <Flex id="overview-flex" justifyContent={{ default: 'justifyContentSpaceBetween' }}>
-        {panels.map((panel, i) => {
-          const { title, tooltip } = getOverviewPanelInfo(
-            t,
-            panel.id,
-            limit,
-            recordType === 'flowLog' ? t('flow') : t('conversation')
-          );
-          const content = getPanelContent(panel.id, title);
-          return (
-            <NetflowOverviewPanel
-              id={panel.id}
-              key={i}
-              //adapt with / height according to each content; single panel will be maximized
-              bodyClassSmall={!!content.bodyClassSmall && panels.length > 1}
-              doubleWidth={!!content.doubleWidth || panels.length === 1}
-              title={title}
-              titleTooltip={tooltip}
-              kebab={content.kebab}
-            >
-              {content.element}
-            </NetflowOverviewPanel>
-          );
-        })}
+      <Flex direction={{ default: 'row' }}>
+        <FlexItem id="overview-graph-list" flex={{ default: 'flex_1' }}>
+          <Flex id="overview-flex" justifyContent={{ default: 'justifyContentSpaceBetween' }}>
+            {panels.map((panel, i) => getPanelView(panel, i))}
+          </Flex>
+        </FlexItem>
+        {focus && selectedPanel && (
+          <FlexItem id="overview-graph-focus" flex={{ default: 'flex_3' }}>
+            {containerSize && (
+              <div
+                id="overview-absolute-graph"
+                style={{
+                  position: 'absolute',
+                  top: containerSize.top,
+                  right: padding,
+                  height: containerSize.height,
+                  overflow: 'hidden',
+                  width: (containerSize.width * 3) / 4 - padding,
+                  padding: padding
+                }}
+              >
+                {getPanelView(selectedPanel)}
+              </div>
+            )}
+          </FlexItem>
+        )}
       </Flex>
     </div>
   );

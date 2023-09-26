@@ -112,6 +112,7 @@ export const ElementPanelMetrics: React.FC<{
         showLine={!useArea}
         showScatter
         tooltipsTruncate={true}
+        showLegend={true}
       />
     </div>
   );

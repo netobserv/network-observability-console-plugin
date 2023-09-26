@@ -34,6 +34,7 @@ export type MetricsContentProps = {
   metricType: MetricType;
   metrics: NamedMetric[];
   limit: number;
+  showLegend?: boolean;
   showBar?: boolean;
   showArea?: boolean;
   showLine?: boolean;
@@ -55,7 +56,8 @@ export const MetricsContent: React.FC<MetricsContentProps> = ({
   showScatter,
   smallerTexts,
   itemsPerRow,
-  tooltipsTruncate
+  tooltipsTruncate,
+  showLegend
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
@@ -96,23 +98,27 @@ export const MetricsContent: React.FC<MetricsContentProps> = ({
         themeColor={ChartThemeColor.multiUnordered}
         ariaTitle={title}
         containerComponent={chartVoronoi(legendData, metricType, t)}
-        legendData={legendData}
+        legendData={showLegend ? legendData : undefined}
         legendOrientation={'horizontal'}
         legendPosition="bottom-left"
         legendAllowWrap={true}
-        legendComponent={legentComponent}
+        legendComponent={showLegend ? legentComponent : undefined}
         //TODO: fix refresh on selection change to enable animation
         //animate={true}
         scale={{ x: 'time', y: showBar ? 'linear' : 'sqrt' }}
         width={dimensions.width}
         height={dimensions.height}
         domainPadding={{ x: 0, y: 0 }}
-        padding={{
-          bottom: (itemsPerRow && itemsPerRow > 1 ? legendData.length / 2 + 1 : legendData.length) * 25 + 75,
-          left: 90,
-          right: 50,
-          top: 50
-        }}
+        padding={
+          showLegend
+            ? {
+                bottom: (itemsPerRow && itemsPerRow > 1 ? legendData.length / 2 + 1 : legendData.length) * 25 + 75,
+                left: 90,
+                right: 50,
+                top: 50
+              }
+            : undefined
+        }
       >
         <ChartAxis fixLabelOverlap />
         <ChartAxis dependentAxis showGrid fixLabelOverlap tickFormat={y => getFormattedRateValue(y, metricType, t)} />
