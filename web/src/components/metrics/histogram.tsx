@@ -39,7 +39,7 @@ import {
   getDomainDisplayText,
   getDomainFromRange,
   getHistogramRangeFromLimit,
-  observe,
+  observeDimensions,
   toHistogramDatapoints,
   toNamedMetric
 } from './metrics-helper';
@@ -84,7 +84,7 @@ export const Histogram: React.FC<{
 
   const [dimensions, setDimensions] = React.useState<Dimensions>({ width: 3000, height: 150 });
   React.useEffect(() => {
-    observe(containerRef, dimensions, setDimensions);
+    observeDimensions(containerRef, dimensions, setDimensions);
   }, [containerRef, dimensions]);
 
   const moveHistogramRange = React.useCallback(

@@ -10,7 +10,6 @@ import {
   ChartStack,
   ChartThemeColor
 } from '@patternfly/react-charts';
-import { TextContent } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { GenericMetric, NamedMetric } from '../../api/loki';
@@ -24,13 +23,12 @@ import {
   defaultDimensions,
   Dimensions,
   LegendDataItem,
-  observe,
+  observeDimensions,
   toDatapoints
 } from './metrics-helper';
 
 export type SingleMetricsTotalContentProps = {
   id: string;
-  title: string;
   metricType: MetricType;
   topKMetrics: GenericMetric[];
   totalMetric: NamedMetric;
@@ -44,7 +42,6 @@ export type SingleMetricsTotalContentProps = {
 
 export const SingleMetricsTotalContent: React.FC<SingleMetricsTotalContentProps> = ({
   id,
-  title,
   metricType,
   topKMetrics,
   totalMetric,
@@ -84,74 +81,74 @@ export const SingleMetricsTotalContent: React.FC<SingleMetricsTotalContentProps>
 
   const containerRef = React.createRef<HTMLDivElement>();
   const [dimensions, setDimensions] = useLocalStorage<Dimensions>(
-    LOCAL_STORAGE_OVERVIEW_METRICS_TOTAL_DIMENSION_KEY,
+    `${LOCAL_STORAGE_OVERVIEW_METRICS_TOTAL_DIMENSION_KEY}${showLegend ? '-legend' : ''}`,
     defaultDimensions
   );
   React.useEffect(() => {
-    observe(containerRef, dimensions, setDimensions);
+    observeDimensions(containerRef, dimensions, setDimensions);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [containerRef, dimensions]);
 
   return (
-    <>
-      <TextContent id="metrics" className="metrics-content-div">
-        <div id={`chart-${id}`} className="metrics-content-div" ref={containerRef}>
-          <Chart
-            themeColor={ChartThemeColor.multiUnordered}
-            ariaTitle={title}
-            containerComponent={chartVoronoi(legendData, metricType, t)}
-            legendData={showLegend ? legendData : undefined}
-            legendOrientation="horizontal"
-            legendPosition="bottom-left"
-            legendAllowWrap={true}
-            legendComponent={showLegend ? legentComponent : undefined}
-            //TODO: fix refresh on selection change to enable animation
-            //animate={true}
-            scale={{ x: 'time', y: 'linear' }}
-            width={dimensions.width}
-            height={dimensions.height}
-            domainPadding={{ x: 0, y: 0 }}
-            padding={
-              showLegend
-                ? {
-                    bottom: (legendData.length / 2) * 25 + 100,
-                    left: 90,
-                    right: 50,
-                    top: 50
-                  }
-                : undefined
-            }
-          >
-            <ChartAxis fixLabelOverlap />
-            <ChartAxis
-              dependentAxis
-              showGrid
-              fixLabelOverlap
-              tickFormat={y => getFormattedRateValue(y, metricType, t)}
+    <div id={`chart-${id}`} className="metrics-content-div" ref={containerRef}>
+      <Chart
+        themeColor={ChartThemeColor.multiUnordered}
+        containerComponent={showLegend ? chartVoronoi(legendData, metricType, t) : undefined}
+        legendData={showLegend ? legendData : undefined}
+        legendOrientation="horizontal"
+        legendPosition="bottom-left"
+        legendAllowWrap={true}
+        legendComponent={showLegend ? legentComponent : undefined}
+        //TODO: fix refresh on selection change to enable animation
+        //animate={true}
+        scale={{ x: 'time', y: 'linear' }}
+        width={dimensions.width}
+        height={dimensions.height}
+        domainPadding={{ x: 0, y: 0 }}
+        padding={
+          showLegend
+            ? {
+                bottom: (legendData.length / 2) * 25 + 100,
+                left: 90,
+                right: 50,
+                top: 50
+              }
+            : {
+                bottom: 0,
+                left: 0,
+                right: 0,
+                top: 0
+              }
+        }
+      >
+        <ChartAxis fixLabelOverlap tickFormat={showLegend ? () => '' : undefined} />
+        <ChartAxis
+          dependentAxis
+          showGrid
+          fixLabelOverlap
+          tickFormat={y => (showLegend ? getFormattedRateValue(y, metricType, t) : '')}
+        />
+        <ChartStack>
+          {topKDatapoints.map((datapoints, idx) => (
+            <ChartBar name={`bar-${idx}`} key={`bar-${idx}`} data={datapoints} />
+          ))}
+        </ChartStack>
+        {showTotal && (
+          <ChartGroup>
+            <ChartArea
+              name={'area-total'}
+              style={{ data: { fill: '#8B8D8F' } }}
+              data={totalDatapoints}
+              interpolation="monotoneX"
             />
-            <ChartStack>
-              {topKDatapoints.map((datapoints, idx) => (
-                <ChartBar name={`bar-${idx}`} key={`bar-${idx}`} data={datapoints} />
-              ))}
-            </ChartStack>
-            {showTotal && (
-              <ChartGroup>
-                <ChartArea
-                  name={'area-total'}
-                  style={{ data: { fill: '#8B8D8F' } }}
-                  data={totalDatapoints}
-                  interpolation="monotoneX"
-                />
-              </ChartGroup>
-            )}
-            {showTotal && (
-              <ChartGroup>
-                <ChartScatter name={'scatter-total'} style={{ data: { fill: '#8B8D8F' } }} data={totalDatapoints} />
-              </ChartGroup>
-            )}
-          </Chart>
-        </div>
-      </TextContent>
-    </>
+          </ChartGroup>
+        )}
+        {showTotal && (
+          <ChartGroup>
+            <ChartScatter name={'scatter-total'} style={{ data: { fill: '#8B8D8F' } }} data={totalDatapoints} />
+          </ChartGroup>
+        )}
+      </Chart>
+    </div>
   );
 };

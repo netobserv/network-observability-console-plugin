@@ -104,7 +104,6 @@ export const ElementPanelMetrics: React.FC<{
       </FlexItem>
       <MetricsContent
         id={id}
-        title={titleChart}
         metricType={metricType}
         metrics={top5}
         limit={5}

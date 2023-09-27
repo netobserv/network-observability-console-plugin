@@ -1250,6 +1250,7 @@ export const NetflowTraffic: React.FC<{
             filterActionLinks={filterLinks()}
             truncateLength={overviewTruncateLength}
             focus={overviewFocus}
+            setFocus={setOverviewFocus}
           />
         );
         break;

@@ -6,7 +6,13 @@
   min-height: 320px;
 }
 
+.overview-panel-body-compact {
+  min-height: 200px;
+}
+
 .overview-card-content {
+  height: 100%;
+  flex-wrap: inherit;
   padding: 1em 2em 1em 2em;
 }
 
@@ -22,4 +28,14 @@
 
 .overview-card {
   margin: 0 1em 1em 0 !important;
+}
+
+.overview-expand-button-container {
+  align-self: center;
+}
+
+.overview-expand-button {
+  margin: 0;
+  padding: 0;
+  padding-bottom: 2px;
 }

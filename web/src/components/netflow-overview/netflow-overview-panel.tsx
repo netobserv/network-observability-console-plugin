@@ -1,23 +1,38 @@
 import * as React from 'react';
-import { Card, Flex, FlexItem, Text, TextVariants, Tooltip } from '@patternfly/react-core';
-import { InfoAltIcon } from '@patternfly/react-icons';
+import { Button, Card, Flex, FlexItem, Text, TextVariants, Tooltip } from '@patternfly/react-core';
+import { InfoAltIcon, ExpandIcon, CompressIcon } from '@patternfly/react-icons';
 
 import './netflow-overview-panel.css';
 
 export const NetflowOverviewPanel: React.FC<{
   doubleWidth: boolean;
-  bodyClassSmall: boolean;
+  bodyClassName: string;
   title: string;
   titleTooltip?: string;
   kebab?: JSX.Element;
   onClick?: () => void;
+  focusOn?: (id?: string) => void;
   isSelected?: boolean;
+  isFocus?: boolean;
   id?: string;
-}> = ({ id, doubleWidth, bodyClassSmall, title, titleTooltip, kebab, children, onClick, isSelected }) => {
+}> = ({
+  id,
+  doubleWidth,
+  bodyClassName,
+  title,
+  titleTooltip,
+  kebab,
+  children,
+  onClick,
+  focusOn,
+  isSelected,
+  isFocus
+}) => {
   return (
     <FlexItem id={id} className={`overview-flex-item center ${doubleWidth ? 'full' : ''}`}>
       <Card
         isFlat
+        isFullHeight
         isSelectable={onClick !== undefined}
         className="overview-card"
         isSelectableRaised={isSelected}
@@ -36,13 +51,20 @@ export const NetflowOverviewPanel: React.FC<{
                   )}
                 </Text>
               </FlexItem>
+              {focusOn !== undefined && (
+                <FlexItem className="overview-expand-button-container">
+                  <Button
+                    variant="plain"
+                    className="overview-expand-button"
+                    icon={isFocus ? <CompressIcon /> : <ExpandIcon />}
+                    onClick={() => focusOn(id)}
+                  />
+                </FlexItem>
+              )}
               {onClick === undefined && <FlexItem>{kebab}</FlexItem>}
             </Flex>
           </FlexItem>
-          <FlexItem
-            flex={{ default: 'flex_1' }}
-            className={bodyClassSmall ? 'overview-panel-body-small' : 'overview-panel-body'}
-          >
+          <FlexItem flex={{ default: 'flex_1' }} className={bodyClassName}>
             {children}
           </FlexItem>
         </Flex>

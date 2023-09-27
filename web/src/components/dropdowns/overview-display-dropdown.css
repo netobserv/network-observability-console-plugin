@@ -7,3 +7,7 @@
   top: 0;
   left: 100%;
 }
+
+#overview-display-dropdown {
+  min-width: 230px;
+}

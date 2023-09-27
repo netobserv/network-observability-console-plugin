@@ -24,13 +24,12 @@ import {
   defaultDimensions,
   Dimensions,
   LegendDataItem,
-  observe,
+  observeDimensions,
   toDatapoints
 } from './metrics-helper';
 
 export type MetricsContentProps = {
   id: string;
-  title: string;
   metricType: MetricType;
   metrics: NamedMetric[];
   limit: number;
@@ -46,7 +45,6 @@ export type MetricsContentProps = {
 
 export const MetricsContent: React.FC<MetricsContentProps> = ({
   id,
-  title,
   metricType,
   metrics,
   limit,
@@ -84,11 +82,11 @@ export const MetricsContent: React.FC<MetricsContentProps> = ({
 
   const containerRef = React.createRef<HTMLDivElement>();
   const [dimensions, setDimensions] = useLocalStorage<Dimensions>(
-    LOCAL_STORAGE_OVERVIEW_METRICS_DIMENSION_KEY,
+    `${LOCAL_STORAGE_OVERVIEW_METRICS_DIMENSION_KEY}${showLegend ? '-legend' : ''}`,
     defaultDimensions
   );
   React.useEffect(() => {
-    observe(containerRef, dimensions, setDimensions);
+    observeDimensions(containerRef, dimensions, setDimensions);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [containerRef, dimensions]);
 
@@ -96,8 +94,7 @@ export const MetricsContent: React.FC<MetricsContentProps> = ({
     <div id={`chart-${id}`} className="metrics-content-div" ref={containerRef} data-test-metrics={metrics.length}>
       <Chart
         themeColor={ChartThemeColor.multiUnordered}
-        ariaTitle={title}
-        containerComponent={chartVoronoi(legendData, metricType, t)}
+        containerComponent={showLegend ? chartVoronoi(legendData, metricType, t) : undefined}
         legendData={showLegend ? legendData : undefined}
         legendOrientation={'horizontal'}
         legendPosition="bottom-left"
@@ -117,11 +114,21 @@ export const MetricsContent: React.FC<MetricsContentProps> = ({
                 right: 50,
                 top: 50
               }
-            : undefined
+            : {
+                bottom: 0,
+                left: 0,
+                right: 0,
+                top: 0
+              }
         }
       >
-        <ChartAxis fixLabelOverlap />
-        <ChartAxis dependentAxis showGrid fixLabelOverlap tickFormat={y => getFormattedRateValue(y, metricType, t)} />
+        <ChartAxis fixLabelOverlap tickFormat={showLegend ? () => '' : undefined} />
+        <ChartAxis
+          dependentAxis
+          showGrid
+          fixLabelOverlap
+          tickFormat={y => (showLegend ? getFormattedRateValue(y, metricType, t) : '')}
+        />
         {showBar && (
           <ChartStack>
             {topKDatapoints.map((datapoints, idx) => (

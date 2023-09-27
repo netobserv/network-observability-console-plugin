@@ -225,7 +225,7 @@ export const defaultDimensions: Dimensions = {
   height: 500
 };
 
-export const observe = (
+export const observeDimensions = (
   containerRef: React.RefObject<HTMLDivElement>,
   dimensions: Dimensions,
   setDimensions: React.Dispatch<React.SetStateAction<Dimensions>>
@@ -245,6 +245,30 @@ export const observe = (
         Math.abs(newDimension.height - dimensions.height) > toleration
       ) {
         setDimensions(newDimension);
+      }
+    }
+  });
+};
+
+export const observeDOMRect = (
+  containerRef: React.RefObject<HTMLDivElement>,
+  rect: DOMRect | undefined,
+  setRect: React.Dispatch<React.SetStateAction<DOMRect>>
+) => {
+  getResizeObserver(containerRef.current!, () => {
+    const newRect = containerRef?.current?.getBoundingClientRect();
+    if (newRect?.width || newRect?.height || newRect?.left || newRect?.top) {
+      // in some cases, rect is increasing which result of infinite loop in the observer
+      // making graphs growing endlessly
+      const toleration = 10;
+      if (
+        !rect ||
+        Math.abs(newRect.width - rect.width) > toleration ||
+        Math.abs(newRect.height - rect.height) > toleration ||
+        Math.abs(newRect.left - rect.left) > toleration ||
+        Math.abs(newRect.top - rect.top) > toleration
+      ) {
+        setRect(newRect);
       }
     }
   });

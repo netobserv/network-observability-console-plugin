@@ -149,14 +149,17 @@ const NetflowTable: React.FC<{
   }, [getRowHeight, scrollPosition]);
 
   React.useEffect(() => {
+    handleScroll();
+    handleResize();
     const container = document.getElementById('table-container');
     if (container && container.getAttribute('listener') !== 'true') {
       container.addEventListener('scroll', handleScroll);
-      window.addEventListener('resize', handleResize);
     }
 
-    handleScroll();
-    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
   }, [handleResize, handleScroll, loading]);
 
   // sort function
