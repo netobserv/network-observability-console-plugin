@@ -165,13 +165,13 @@ export const SummaryPanelContent: React.FC<{
 
     if (flows && flows.length) {
       //list all types
-      const types = Array.from(new Set(flows.flatMap(f => [f.fields.SrcK8S_Type, f.fields.DstK8S_Type])));
+      const types = Array.from(new Set(flows.flatMap(f => [f.labels.SrcK8S_Type, f.labels.DstK8S_Type])));
       types
         .filter((t: string | undefined) => t !== undefined)
         .forEach((type: string) => {
           const tc: TypeCardinality = { type, objects: [] };
 
-          const typeFilteredFlows = flows.filter(f => [f.fields.SrcK8S_Type, f.fields.DstK8S_Type].includes(type));
+          const typeFilteredFlows = flows.filter(f => [f.labels.SrcK8S_Type, f.labels.DstK8S_Type].includes(type));
           //list all namespaces of this type
           const typeNamespaces = new Set(
             typeFilteredFlows.flatMap(f => [f.labels.SrcK8S_Namespace, f.labels.DstK8S_Namespace])
@@ -189,14 +189,14 @@ export const SummaryPanelContent: React.FC<{
             //add all names of this namespace of type
             namespaceFilteredFlows.forEach(record => {
               const srcName =
-                record.fields.SrcK8S_Type === type && record.labels.SrcK8S_Namespace === namespace
+                record.labels.SrcK8S_Type === type && record.labels.SrcK8S_Namespace === namespace
                   ? record.fields.SrcK8S_Name
                   : undefined;
               if (srcName && !nsObject.names.includes(srcName)) {
                 nsObject.names.push(srcName);
               }
               const dstName =
-                record.fields.DstK8S_Type === type && record.labels.DstK8S_Namespace === namespace
+                record.labels.DstK8S_Type === type && record.labels.DstK8S_Namespace === namespace
                   ? record.fields.DstK8S_Name
                   : undefined;
               if (dstName && !nsObject.names.includes(dstName)) {

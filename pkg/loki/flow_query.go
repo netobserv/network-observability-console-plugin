@@ -56,13 +56,17 @@ func NewFlowQueryBuilder(cfg *Config, start, end, limit string, dedup bool,
 
 	lineFilters := []lineFilter{}
 	if dedup {
-		lineFilters = append(lineFilters, lineFilter{
-			key: fields.Duplicate,
-			values: []lineMatch{{
-				valueType: typeBool,
-				value:     "false",
-			}},
-		})
+		if cfg.IsLabel(fields.Duplicate) {
+			labelFilters = append(labelFilters, stringEqualLabelFilter(fields.Duplicate, "false"))
+		} else {
+			lineFilters = append(lineFilters, lineFilter{
+				key: fields.Duplicate,
+				values: []lineMatch{{
+					valueType: typeBool,
+					value:     "false",
+				}},
+			})
+		}
 	}
 
 	if packetLoss == constants.PacketLossDropped {
