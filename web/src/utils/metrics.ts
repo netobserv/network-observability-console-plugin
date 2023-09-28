@@ -170,8 +170,7 @@ const parseTopologyMetric = (
     hostName: raw.metric.SrcK8S_HostName,
     // TODO: see if clustername will become directionnal
     clusterName: raw.metric.K8S_ClusterName,
-    //connectionToken: raw.metric.ConnectionToken
-    connectionToken: ['testTokenA', 'testTokenB', 'testTokenC'][Math.floor(Math.random() * 3)]
+    connectionToken: raw.metric.ConnectionToken
   });
   const destination = createPeer({
     addr: raw.metric.DstAddr,
