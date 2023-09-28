@@ -14,6 +14,8 @@ export const ScopeDropdown: React.FC<{
 
   const getScopeDisplay = (scopeType: MetricScopeOptions) => {
     switch (scopeType) {
+      case MetricScopeOptions.CLUSTER:
+        return t('Cluster');
       case MetricScopeOptions.HOST:
         return t('Node');
       case MetricScopeOptions.NAMESPACE:

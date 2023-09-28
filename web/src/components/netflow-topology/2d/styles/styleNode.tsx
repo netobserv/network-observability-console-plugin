@@ -4,6 +4,7 @@ import {
   CubeIcon,
   CubesIcon,
   OutlinedHddIcon,
+  ClusterIcon,
   QuestionCircleIcon,
   ServiceIcon,
   UsersIcon
@@ -57,6 +58,8 @@ const getTypeIcon = (resourceKind?: string): React.ComponentClass<any, any> => {
       return UsersIcon;
     case 'Node':
       return OutlinedHddIcon;
+    case 'Cluster':
+      return ClusterIcon;
     case 'CatalogSource':
     case 'DaemonSet':
     case 'Deployment':

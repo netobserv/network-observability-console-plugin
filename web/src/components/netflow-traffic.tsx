@@ -1097,6 +1097,8 @@ export const NetflowTraffic: React.FC<{
           filters={filters.list}
           setFilters={setFiltersList}
           onClose={() => onElementSelect(undefined)}
+          searchHandle={searchRef?.current}
+          searchEvent={searchEvent}
         />
       );
     } else {

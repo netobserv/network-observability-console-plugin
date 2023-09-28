@@ -427,6 +427,16 @@ export const getFilterDefinitions = (
         encoder: simpleFiltersEncoder('Proto')
       },
       {
+        id: 'cluster_name',
+        name: t('Cluster name'),
+        category: FilterCategory.None,
+        component: FilterComponent.Text,
+        getOptions: noOption,
+        validate: rejectEmptyValue,
+        hint: t('Specify a cluster name.'),
+        encoder: simpleFiltersEncoder('K8S_ClusterName')
+      },
+      {
         id: 'direction',
         name: t('Direction'),
         category: FilterCategory.None,
@@ -465,6 +475,16 @@ export const getFilterDefinitions = (
         validate: rejectEmptyValue,
         hint: t('Specify a single conversation hash Id.'),
         encoder: simpleFiltersEncoder('_HashId')
+      },
+      {
+        id: 'token',
+        name: t('Connection token'),
+        category: FilterCategory.None,
+        component: FilterComponent.Text,
+        getOptions: noOption,
+        validate: rejectEmptyValue,
+        hint: t('Specify a multi-cluster connection token.'),
+        encoder: simpleFiltersEncoder('ConnectionToken')
       },
       {
         id: 'pkt_drop_state',

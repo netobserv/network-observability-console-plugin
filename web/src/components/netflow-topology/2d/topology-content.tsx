@@ -31,7 +31,7 @@ import {
   GraphElementPeer,
   LayoutName,
   NodeData,
-  toggleElementFilter,
+  toggleDirElementFilter,
   TopologyGroupTypes,
   TopologyOptions
 } from '../../../model/topology';
@@ -104,7 +104,7 @@ export const TopologyContent: React.FC<{
     [controller, onSelect]
   );
 
-  //search element by label or secondaryLabel
+  //search element by label, secondaryLabel or connection token
   const onSearch = React.useCallback(
     (searchValue: string, next = true) => {
       if (!searchHandle || _.isEmpty(searchValue)) {
@@ -115,7 +115,10 @@ export const TopologyContent: React.FC<{
         const currentModel = controller.toModel();
         const matchingNodeModels =
           currentModel.nodes?.filter(
-            n => n.label?.includes(searchValue) || n.data?.secondaryLabel?.includes(searchValue)
+            n =>
+              n.label?.includes(searchValue) ||
+              n.data?.secondaryLabel?.includes(searchValue) ||
+              n.data?.peer?.connectionToken?.toLowerCase() === searchValue.toLowerCase()
           ) || [];
 
         if (next) {
@@ -175,7 +178,7 @@ export const TopologyContent: React.FC<{
   const onFilter = React.useCallback(
     (id: string, data: NodeData, dir: FilterDir, isFiltered: boolean) => {
       if (data.nodeType && data.peer) {
-        toggleElementFilter(data.nodeType, data.peer, dir, isFiltered, filters.list, setFiltersList, t);
+        toggleDirElementFilter(data.nodeType, data.peer, dir, isFiltered, filters.list, setFiltersList, t);
         setSelectedIds([id]);
       }
     },
@@ -187,6 +190,10 @@ export const TopologyContent: React.FC<{
       let scope: MetricScopeOptions;
       let groupTypes: TopologyGroupTypes;
       switch (metricScope) {
+        case MetricScopeOptions.CLUSTER:
+          scope = MetricScopeOptions.HOST;
+          groupTypes = TopologyGroupTypes.CLUSTERS;
+          break;
         case MetricScopeOptions.HOST:
           scope = MetricScopeOptions.NAMESPACE;
           groupTypes = TopologyGroupTypes.NONE;
@@ -202,7 +209,7 @@ export const TopologyContent: React.FC<{
       if (data.nodeType && data.peer) {
         setMetricScope(scope);
         setOptions({ ...options, groupTypes });
-        toggleElementFilter(
+        toggleDirElementFilter(
           data.nodeType,
           data.peer,
           'src',

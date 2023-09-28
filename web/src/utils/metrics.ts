@@ -109,7 +109,9 @@ export const createPeer = (fields: Partial<TopologyMetricPeer>): TopologyMetricP
     resource: fields.resource,
     namespace: fields.namespace,
     owner: fields.owner,
+    clusterName: fields.clusterName,
     hostName: fields.hostName,
+    connectionToken: fields.connectionToken,
     isAmbiguous: false,
     getDisplayName: () => undefined
   };
@@ -136,6 +138,10 @@ export const createPeer = (fields: Partial<TopologyMetricPeer>): TopologyMetricP
     // Since name isn't defined then it must be a host-kind aggregation
     newPeer.resourceKind = 'Node';
     newPeer.getDisplayName = () => fields.hostName;
+  } else if (fields.clusterName) {
+    // Since name isn't defined then it must be a cluster aggregation
+    newPeer.resourceKind = 'Cluster';
+    newPeer.getDisplayName = () => fields.clusterName;
   } else if (fields.addr) {
     newPeer.getDisplayName = () => fields.addr;
   }
@@ -161,14 +167,22 @@ const parseTopologyMetric = (
     resource: nameAndType(raw.metric.SrcK8S_Name, raw.metric.SrcK8S_Type),
     owner: nameAndType(raw.metric.SrcK8S_OwnerName, raw.metric.SrcK8S_OwnerType),
     namespace: raw.metric.SrcK8S_Namespace,
-    hostName: raw.metric.SrcK8S_HostName
+    hostName: raw.metric.SrcK8S_HostName,
+    // TODO: see if clustername will become directionnal
+    clusterName: raw.metric.K8S_ClusterName,
+    //connectionToken: raw.metric.ConnectionToken
+    connectionToken: ['testTokenA', 'testTokenB', 'testTokenC'][Math.floor(Math.random() * 3)]
   });
   const destination = createPeer({
     addr: raw.metric.DstAddr,
     resource: nameAndType(raw.metric.DstK8S_Name, raw.metric.DstK8S_Type),
     owner: nameAndType(raw.metric.DstK8S_OwnerName, raw.metric.DstK8S_OwnerType),
     namespace: raw.metric.DstK8S_Namespace,
-    hostName: raw.metric.DstK8S_HostName
+    hostName: raw.metric.DstK8S_HostName,
+    // TODO: see if clustername will become directionnal
+    clusterName: raw.metric.K8S_ClusterName,
+    // connection token must be the same for both source & destination
+    connectionToken: source.connectionToken
   });
   return {
     source: source,

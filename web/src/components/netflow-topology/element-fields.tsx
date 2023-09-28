@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { Text, TextContent, TextVariants } from '@patternfly/react-core';
 import { useTranslation } from 'react-i18next';
 import { Filter } from '../../model/filters';
 import { NodeData } from '../../model/topology';
@@ -92,19 +91,5 @@ export const ElementFields: React.FC<{
     );
   }
 
-  return (
-    <>
-      {fragments.length > 0 ? (
-        fragments
-      ) : (
-        <TextContent id={id + '-no-infos'} className="record-field-container">
-          {
-            <Text component={TextVariants.p}>
-              {t('No information available for this content. Change scope to get more details.')}
-            </Text>
-          }
-        </TextContent>
-      )}
-    </>
-  );
+  return <>{fragments.length > 0 ? fragments : <></>}</>;
 };

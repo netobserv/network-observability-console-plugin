@@ -39,6 +39,10 @@ export enum LayoutName {
 
 export enum TopologyGroupTypes {
   NONE = 'none',
+  CLUSTERS = 'clusters',
+  CLUSTERS_HOSTS = 'clusters+hosts',
+  CLUSTERS_NAMESPACES = 'clusters+namespaces',
+  CLUSTERS_OWNERS = 'clusters+owners',
   HOSTS = 'hosts',
   HOSTS_NAMESPACES = 'hosts+namespaces',
   HOSTS_OWNERS = 'hosts+owners',
@@ -49,15 +53,25 @@ export enum TopologyGroupTypes {
 
 export const getAvailableGroups = (scope: MetricScopeOptions) => {
   switch (scope) {
-    case MetricScopeOptions.HOST:
+    case MetricScopeOptions.CLUSTER:
       return [TopologyGroupTypes.NONE];
+    case MetricScopeOptions.HOST:
+      return [TopologyGroupTypes.NONE, TopologyGroupTypes.CLUSTERS];
     case MetricScopeOptions.NAMESPACE:
-      return [TopologyGroupTypes.NONE, TopologyGroupTypes.HOSTS];
+      return [
+        TopologyGroupTypes.NONE,
+        TopologyGroupTypes.CLUSTERS,
+        TopologyGroupTypes.HOSTS,
+        TopologyGroupTypes.CLUSTERS_HOSTS
+      ];
     case MetricScopeOptions.OWNER:
       return [
         TopologyGroupTypes.NONE,
+        TopologyGroupTypes.CLUSTERS,
         TopologyGroupTypes.HOSTS,
+        TopologyGroupTypes.CLUSTERS_HOSTS,
         TopologyGroupTypes.HOSTS_NAMESPACES,
+        TopologyGroupTypes.CLUSTERS_NAMESPACES,
         TopologyGroupTypes.NAMESPACES
       ];
     case MetricScopeOptions.RESOURCE:
@@ -117,12 +131,21 @@ export type Decorated<T> = T & {
 export const decorated = <T>(t: T): Decorated<T> => t as Decorated<T>;
 
 export type FilterDir = 'src' | 'dst';
-const getFilterDefValue = (nodeType: NodeType, fields: Partial<TopologyMetricPeer>, dir: FilterDir, t: TFunction) => {
+const getDirFilterDefValue = (
+  nodeType: NodeType,
+  fields: Partial<TopologyMetricPeer>,
+  dir: FilterDir,
+  t: TFunction
+) => {
   let def: FilterDefinition | undefined;
   let value: string | undefined;
   if (fields.resource && fields.namespace) {
     def = findFilter(t, `${dir}_resource`)!;
     value = `${fields.resource.type}.${fields.namespace}.${fields.resource.name}`;
+  } else if (nodeType === 'cluster' && (fields.clusterName || fields.resource)) {
+    // TODO: see if clustername will become directionnal
+    def = findFilter(t, `cluster_name`)!;
+    value = `"${fields.clusterName || fields.resource?.name}"`;
   } else if (nodeType === 'host' && (fields.hostName || fields.resource)) {
     def = findFilter(t, `${dir}_host_name`)!;
     value = `"${fields.hostName || fields.resource?.name}"`;
@@ -142,14 +165,14 @@ const getFilterDefValue = (nodeType: NodeType, fields: Partial<TopologyMetricPee
   return def && value ? { def, value } : undefined;
 };
 
-export const isElementFiltered = (
+export const isDirElementFiltered = (
   nodeType: NodeType,
   fields: Partial<TopologyMetricPeer>,
   dir: FilterDir,
   filters: Filter[],
   t: TFunction
 ) => {
-  const defValue = getFilterDefValue(nodeType, fields, dir, t);
+  const defValue = getDirFilterDefValue(nodeType, fields, dir, t);
   if (!defValue) {
     return false;
   }
@@ -157,21 +180,38 @@ export const isElementFiltered = (
   return filter !== undefined && filter.values.find(v => v.v === defValue.value) !== undefined;
 };
 
-export const toggleElementFilter = (
-  nodeType: NodeType,
-  fields: Partial<TopologyMetricPeer>,
-  dir: FilterDir,
-  isFiltered: boolean,
-  filters: Filter[],
-  setFilters: (filters: Filter[]) => void,
-  t: TFunction
-) => {
-  const result = _.cloneDeep(filters);
-  const defValue = getFilterDefValue(nodeType, fields, dir, t);
-  if (!defValue) {
-    console.error("can't find defValue for fields", fields);
-    return;
+const getFilterDefValue = (fields: Partial<TopologyMetricPeer>, t: TFunction) => {
+  let def: FilterDefinition | undefined;
+  let value: string | undefined;
+  if (fields.clusterName || fields.resource) {
+    // TODO: see if clustername will become directionnal
+    def = findFilter(t, `cluster_name`)!;
+    value = `"${fields.clusterName || fields.resource?.name}"`;
+  } else if (fields.connectionToken) {
+    def = findFilter(t, `token`)!;
+    value = `"${fields.connectionToken}"`;
   }
+  return def && value ? { def, value } : undefined;
+};
+
+export const isElementFiltered = (fields: Partial<TopologyMetricPeer>, filters: Filter[], t: TFunction) => {
+  const defValue = getFilterDefValue(fields, t);
+  if (!defValue) {
+    return false;
+  }
+  const filter = findFromFilters(filters, { def: defValue.def });
+  return filter !== undefined && filter.values.find(v => v.v === defValue.value) !== undefined;
+};
+
+const toggleFilter = (
+  result: Filter[],
+  defValue: {
+    def: FilterDefinition;
+    value: string;
+  },
+  isFiltered: boolean,
+  setFilters: (filters: Filter[]) => void
+) => {
   let filter = findFromFilters(result, { def: defValue.def });
   if (!filter) {
     filter = { def: defValue.def, values: [] };
@@ -190,6 +230,40 @@ export const toggleElementFilter = (
     }
   }
   setFilters(result.filter(f => !_.isEmpty(f.values)));
+};
+
+export const toggleDirElementFilter = (
+  nodeType: NodeType,
+  fields: Partial<TopologyMetricPeer>,
+  dir: FilterDir,
+  isFiltered: boolean,
+  filters: Filter[],
+  setFilters: (filters: Filter[]) => void,
+  t: TFunction
+) => {
+  const result = _.cloneDeep(filters);
+  const defValue = getDirFilterDefValue(nodeType, fields, dir, t);
+  if (!defValue) {
+    console.error("can't find defValue for fields", fields, dir);
+    return;
+  }
+  toggleFilter(result, defValue, isFiltered, setFilters);
+};
+
+export const toggleElementFilter = (
+  fields: Partial<TopologyMetricPeer>,
+  isFiltered: boolean,
+  filters: Filter[],
+  setFilters: (filters: Filter[]) => void,
+  t: TFunction
+) => {
+  const result = _.cloneDeep(filters);
+  const defValue = getFilterDefValue(fields, t);
+  if (!defValue) {
+    console.error("can't find defValue for fields", fields);
+    return;
+  }
+  toggleFilter(result, defValue, isFiltered, setFilters);
 };
 
 export const DEFAULT_NODE_TRUNCATE_LENGTH = 25;
@@ -213,7 +287,8 @@ const generateNode = (
   k8sModels: { [key: string]: K8sModel },
   isDark?: boolean
 ): NodeModel => {
-  const label = data.peer.getDisplayName(false, false) || (scope === 'host' ? t('External') : t('Unknown'))!;
+  const label =
+    data.peer.getDisplayName(false, false) || (['cluster', 'host'].includes(scope) ? t('External') : t('Unknown'))!;
   const resourceKind = data.peer.resourceKind;
   const secondaryLabel =
     data.nodeType !== 'namespace' &&
@@ -224,12 +299,18 @@ const generateNode = (
     ].includes(options.groupTypes)
       ? data.peer.namespace
       : undefined;
-  const shadowed = !_.isEmpty(searchValue) && !(label.includes(searchValue) || secondaryLabel?.includes(searchValue));
+  const shadowed =
+    !_.isEmpty(searchValue) &&
+    !(
+      label.includes(searchValue) ||
+      secondaryLabel?.includes(searchValue) ||
+      data.peer?.connectionToken?.toLowerCase() === searchValue.toLowerCase()
+    );
   const filtered = !_.isEmpty(searchValue) && !shadowed;
   const highlighted = !shadowed && !_.isEmpty(highlightedId) && highlightedId.includes(data.peer.id);
   const k8sModel = options.nodeBadges && resourceKind ? k8sModels[resourceKind] : undefined;
-  const isSrcFiltered = isElementFiltered(data.nodeType, data.peer, 'src', filters.list, t);
-  const isDstFiltered = isElementFiltered(data.nodeType, data.peer, 'dst', filters.list, t);
+  const isSrcFiltered = isDirElementFiltered(data.nodeType, data.peer, 'src', filters.list, t);
+  const isDstFiltered = isDirElementFiltered(data.nodeType, data.peer, 'dst', filters.list, t);
 
   return {
     id: data.peer.id,
@@ -480,14 +561,27 @@ export const generateDataModel = (
 
   // addPossibleGroups adds peer to one or more groups when relevant, and returns the smallest one
   const addPossibleGroups = (peer: TopologyMetricPeer): NodeModel | undefined => {
+    const clusterGroup =
+      [
+        TopologyGroupTypes.CLUSTERS_HOSTS,
+        TopologyGroupTypes.CLUSTERS_NAMESPACES,
+        TopologyGroupTypes.CLUSTERS_OWNERS,
+        TopologyGroupTypes.CLUSTERS
+      ].includes(options.groupTypes) && !_.isEmpty(peer.clusterName)
+        ? addGroup({ clusterName: peer.clusterName }, 'cluster', undefined, true)
+        : undefined;
     const hostGroup =
-      [TopologyGroupTypes.HOSTS_NAMESPACES, TopologyGroupTypes.HOSTS_OWNERS, TopologyGroupTypes.HOSTS].includes(
-        options.groupTypes
-      ) && !_.isEmpty(peer.hostName)
-        ? addGroup({ hostName: peer.hostName }, 'host', undefined, true)
+      [
+        TopologyGroupTypes.CLUSTERS_HOSTS,
+        TopologyGroupTypes.HOSTS_NAMESPACES,
+        TopologyGroupTypes.HOSTS_OWNERS,
+        TopologyGroupTypes.HOSTS
+      ].includes(options.groupTypes) && !_.isEmpty(peer.hostName)
+        ? addGroup({ hostName: peer.hostName }, 'host', clusterGroup, true)
         : undefined;
     const namespaceGroup =
       [
+        TopologyGroupTypes.CLUSTERS_NAMESPACES,
         TopologyGroupTypes.HOSTS_NAMESPACES,
         TopologyGroupTypes.NAMESPACES_OWNERS,
         TopologyGroupTypes.NAMESPACES
@@ -495,9 +589,12 @@ export const generateDataModel = (
         ? addGroup({ namespace: peer.namespace }, 'namespace', hostGroup)
         : undefined;
     const ownerGroup =
-      [TopologyGroupTypes.NAMESPACES_OWNERS, TopologyGroupTypes.HOSTS_OWNERS, TopologyGroupTypes.OWNERS].includes(
-        options.groupTypes
-      ) && peer.owner
+      [
+        TopologyGroupTypes.CLUSTERS_OWNERS,
+        TopologyGroupTypes.NAMESPACES_OWNERS,
+        TopologyGroupTypes.HOSTS_OWNERS,
+        TopologyGroupTypes.OWNERS
+      ].includes(options.groupTypes) && peer.owner
         ? addGroup(
             { namespace: peer.namespace, owner: peer.owner },
             'owner',
@@ -506,11 +603,15 @@ export const generateDataModel = (
           )
         : undefined;
 
-    return ownerGroup || namespaceGroup || hostGroup;
+    return ownerGroup || namespaceGroup || hostGroup || clusterGroup;
   };
 
   const peerToNodeData = (p: TopologyMetricPeer): NodeData => {
     switch (metricScope) {
+      case 'cluster':
+        return _.isEmpty(p.clusterName)
+          ? { peer: p, nodeType: 'unknown' }
+          : { peer: p, nodeType: 'cluster', canStepInto: true };
       case 'host':
         return _.isEmpty(p.hostName)
           ? { peer: p, nodeType: 'unknown' }
@@ -533,7 +634,7 @@ export const generateDataModel = (
   // the output will be pod -> node -> destination if all the metrics are present
   // else the original display will be kept
   const manageRouting = (peer: TopologyMetricPeer, opposite: TopologyMetricPeer): TopologyMetricPeer => {
-    if (opposite.resource?.type === 'Pod' && peer.resource === undefined) {
+    if (peer.clusterName === opposite.clusterName && opposite.resource?.type === 'Pod' && peer.resource === undefined) {
       const nodePeer =
         metrics.find(m => m.source.resource?.name === opposite.hostName && m.destination.addr === peer.addr)?.source ||
         metrics.find(m => m.destination.resource?.name === opposite.hostName && m.source.addr === peer.addr)

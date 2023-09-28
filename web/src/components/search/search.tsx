@@ -12,6 +12,7 @@ export type SearchEvent = {
 };
 
 export type SearchHandle = {
+  search: (v: string) => void;
   updateIndicators: (count: string, indicators: ValidatedOptions) => void;
 };
 
@@ -29,6 +30,7 @@ export const SearchComponent: React.FC<{
   const [searchResultCount, setSearchResultCount] = React.useState<string>('');
 
   React.useImperativeHandle(ref, () => ({
+    search: onChangeSearch,
     updateIndicators
   }));
 

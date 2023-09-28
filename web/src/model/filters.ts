@@ -30,11 +30,13 @@ export type TargetedFilterId =
 export type FilterId =
   | `src_${TargetedFilterId}`
   | `dst_${TargetedFilterId}`
+  | 'cluster_name'
   | 'protocol'
   | 'direction'
   | 'interface'
   | 'type'
   | 'id'
+  | 'token'
   | 'pkt_drop_state'
   | 'pkt_drop_cause'
   | 'dns_id'

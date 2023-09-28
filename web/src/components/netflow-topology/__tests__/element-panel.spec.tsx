@@ -41,6 +41,7 @@ describe('<ElementPanel />', () => {
     setFilters: jest.fn(),
     onClose: jest.fn(),
     truncateLength: TruncateLength.M,
+    searchHandle: null,
     id: 'element-panel-test'
   };
 

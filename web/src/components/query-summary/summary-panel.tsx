@@ -226,7 +226,13 @@ export const SummaryPanelContent: React.FC<{
       );
       protocols = Array.from(new Set(flows.map(f => f.fields.Proto)));
     } else if (metrics && metrics.length) {
-      function manageTypeCardinality(hostName?: string, namespace?: string, type?: string, name?: string) {
+      function manageTypeCardinality(
+        clusterName?: string,
+        hostName?: string,
+        namespace?: string,
+        type?: string,
+        name?: string
+      ) {
         if (namespace && !namespaces.includes(namespace)) {
           namespaces.push(namespace);
         }
@@ -249,14 +255,24 @@ export const SummaryPanelContent: React.FC<{
           }
         }
 
+        if (clusterName) {
+          manageTypeCardinality('', '', '', 'Cluster', clusterName);
+        }
         if (hostName) {
-          manageTypeCardinality('', '', 'Node', hostName);
+          manageTypeCardinality('', '', '', 'Node', hostName);
         }
       }
 
       metrics.forEach(m => {
-        manageTypeCardinality(m.source.hostName, m.source.namespace, m.source.resource?.type, m.source.resource?.name);
         manageTypeCardinality(
+          m.source.clusterName,
+          m.source.hostName,
+          m.source.namespace,
+          m.source.resource?.type,
+          m.source.resource?.name
+        );
+        manageTypeCardinality(
+          m.destination.clusterName,
           m.destination.hostName,
           m.destination.namespace,
           m.destination.resource?.type,

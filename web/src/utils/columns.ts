@@ -59,8 +59,10 @@ export enum ColumnsId {
   hostname = 'K8S_HostName',
   srchostname = 'SrcK8S_HostName',
   dsthostname = 'DstK8S_HostName',
+  clustername = 'K8S_ClusterName',
   flowdir = 'FlowDirection',
   rttTime = 'TimeFlowRttMs',
+  connectionToken = 'ConnectionToken',
   hashid = '_HashId',
   interface = 'Interface',
   recordtype = 'RecordType',
@@ -848,6 +850,17 @@ export const getExtraColumns = (t: TFunction): Column[] => {
       value: f => f.fields.DnsFlagsResponseCode || '',
       sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
       width: 5
+    },
+    {
+      id: ColumnsId.clustername,
+      name: t('Cluster Name'),
+      tooltip: t('The name of the cluster reporting the flow.'),
+      fieldName: 'K8S_ClusterName',
+      quickFilter: 'cluster_name',
+      isSelected: false,
+      value: f => f.fields.K8S_ClusterName || '',
+      sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
+      width: 15
     }
   ];
 };
@@ -916,6 +929,16 @@ export const getDefaultColumns = (t: TFunction, withCommonFields = true, withCon
       quickFilter: 'id',
       isSelected: true,
       value: f => f.fields._HashId || '',
+      sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
+      width: 15
+    },
+    {
+      id: ColumnsId.connectionToken,
+      name: t('Connection token'),
+      fieldName: 'ConnectionToken',
+      quickFilter: 'token',
+      isSelected: false,
+      value: f => f.fields.ConnectionToken || '',
       sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
       width: 15
     }

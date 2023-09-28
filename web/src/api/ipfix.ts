@@ -76,6 +76,8 @@ export interface Fields {
   SrcK8S_HostName?: string;
   /** Destination node name */
   DstK8S_HostName?: string;
+  /** Cluster name */
+  K8S_ClusterName?: string;
   /** L4 protocol */
   Proto: number;
   /** Network interface */
@@ -134,6 +136,8 @@ export interface Fields {
   TimeReceived: number;
   /** Flow Round Trip Time (RTT) in nanoseconds */
   TimeFlowRttNs?: number;
+  /** Multi-cluster connection identifier */
+  ConnectionToken?: string;
   /** In conversation tracking, the conversation identifier */
   _HashId?: string;
   /** In conversation tracking, a flag identifying the first flow */

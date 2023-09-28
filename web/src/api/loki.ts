@@ -62,6 +62,8 @@ export interface RawTopologyMetric {
   SrcK8S_OwnerType?: string;
   SrcK8S_Type?: string;
   SrcK8S_HostName?: string;
+  K8S_ClusterName?: string;
+  ConnectionToken?: string;
   PktDropLatestState?: string;
   PktDropLatestDropCause?: string;
   DnsFlagsResponseCode?: string;
@@ -83,7 +85,9 @@ export interface TopologyMetricPeer {
   namespace?: string;
   owner?: NameAndType;
   resource?: NameAndType;
+  clusterName?: string;
   hostName?: string;
+  connectionToken?: string;
   resourceKind?: string;
   isAmbiguous: boolean;
   getDisplayName: (inclNamespace: boolean, disambiguate: boolean) => string | undefined;

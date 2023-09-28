@@ -120,7 +120,7 @@ export const TopologyDisplayOptions: React.FC<{
         <div className="display-dropdown-padding">
           <GroupDropdown
             id="group"
-            disabled={metricScope === MetricScopeOptions.HOST}
+            disabled={metricScope === MetricScopeOptions.CLUSTER}
             scope={metricScope as MetricScopeOptions}
             selected={topologyOptions.groupTypes}
             setGroupType={setGroupType}

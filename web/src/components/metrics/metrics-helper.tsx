@@ -152,6 +152,7 @@ const getPeerName = (
     return t('Total');
   }
   switch (scope) {
+    case 'cluster':
     case 'host':
       return t('(non nodes)');
     case 'namespace':

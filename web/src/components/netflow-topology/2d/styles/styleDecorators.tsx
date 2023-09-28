@@ -75,7 +75,7 @@ export const NodeDecorators: React.FC<NodeDecoratorsProps> = ({
     setPinned(updatedIsPinned);
   }, [isPinned, setPinned, element, data]);
 
-  const onFilterClick = React.useCallback(
+  const onFilterDirClick = React.useCallback(
     (dir: FilterDir) => () => {
       const currentState = dir === 'src' ? isSrcFiltered : isDstFiltered;
       controller.fireEvent(FILTER_EVENT, eltId, data, dir, currentState);
@@ -83,6 +83,11 @@ export const NodeDecorators: React.FC<NodeDecoratorsProps> = ({
     },
     [eltId, controller, data, isSrcFiltered, isDstFiltered, setSrcFiltered, setDstFiltered]
   );
+
+  const onFilterClick = React.useCallback(() => {
+    controller.fireEvent(FILTER_EVENT, eltId, data, 'src', isSrcFiltered);
+    setSrcFiltered(!isSrcFiltered);
+  }, [controller, data, eltId, isSrcFiltered, setSrcFiltered]);
 
   const onStepIntoClick = React.useCallback(() => {
     controller.fireEvent(STEP_INTO_EVENT, { ...data, id: eltId });
@@ -98,20 +103,20 @@ export const NodeDecorators: React.FC<NodeDecoratorsProps> = ({
   );
 
   const filterMenu: React.ReactElement[] = [
-    <ContextMenuItem key={'src'} onClick={onFilterClick('src')}>
+    <ContextMenuItem key={'src'} onClick={onFilterDirClick('src')}>
       <Checkbox
         id={'context-src-checkbox'}
         label={t('Source')}
         isChecked={isSrcFiltered}
-        onChange={() => onFilterClick('src')}
+        onChange={() => onFilterDirClick('src')}
       />
     </ContextMenuItem>,
-    <ContextMenuItem key={'dst'} onClick={onFilterClick('dst')}>
+    <ContextMenuItem key={'dst'} onClick={onFilterDirClick('dst')}>
       <Checkbox
         id={'context-dst-checkbox'}
         label={t('Destination')}
         isChecked={isDstFiltered}
-        onChange={() => onFilterClick('dst')}
+        onChange={() => onFilterDirClick('dst')}
       />
     </ContextMenuItem>
   ];
@@ -140,6 +145,16 @@ export const NodeDecorators: React.FC<NodeDecoratorsProps> = ({
           isActive={isSrcFiltered || isDstFiltered}
           padding={isSrcFiltered || isDstFiltered ? DEFAULT_DECORATOR_PADDING : LARGE_DECORATOR_PADDING}
           menuItems={filterMenu}
+        />
+      )}
+      {data.peer.clusterName && (
+        <ClickableDecorator
+          pos={getPosition(TopologyQuadrant.lowerLeft)}
+          icon={<FilterIcon />}
+          tooltip={t('Filter by {{name}}', { name: data.peer.resourceKind?.toLowerCase() })}
+          isActive={isSrcFiltered || isDstFiltered}
+          onClick={onFilterClick}
+          padding={isSrcFiltered || isDstFiltered ? DEFAULT_DECORATOR_PADDING : LARGE_DECORATOR_PADDING}
         />
       )}
       {

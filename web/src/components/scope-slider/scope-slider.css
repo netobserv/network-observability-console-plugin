@@ -1,8 +1,8 @@
 #scope-slider {
   position: relative;
-  width: 300px;
+  width: 350px;
   height: 0;
-  top: 150px;
-  left: -100px;
+  top: 190px;
+  left: -140px;
   z-index: 2;
 }
