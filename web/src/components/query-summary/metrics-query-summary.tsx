@@ -98,7 +98,11 @@ export const MetricsQuerySummaryContent: React.FC<{
   }, [appMetrics, metricType, metrics, t]);
 
   return (
-    <Flex id="query-summary-content" className={className} direction={{ default: direction }}>
+    <Flex
+      id="query-summary-content"
+      className={`${className} ${direction === 'row' ? 'center' : ''}`}
+      direction={{ default: direction }}
+    >
       {direction === 'row' && (
         <FlexItem>
           <Text id="query-summary-title" component={TextVariants.h4}>

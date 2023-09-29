@@ -79,7 +79,11 @@ export const FlowsQuerySummaryContent: React.FC<{
   }, [filteredFlows, limitReached, rangeInSeconds, t]);
 
   return (
-    <Flex id="query-summary-content" className={className} direction={{ default: direction }}>
+    <Flex
+      id="query-summary-content"
+      className={`${className} ${direction === 'row' ? 'center' : ''}`}
+      direction={{ default: direction }}
+    >
       {direction === 'row' && (
         <FlexItem>
           <Text id="query-summary-title" component={TextVariants.h4}>
