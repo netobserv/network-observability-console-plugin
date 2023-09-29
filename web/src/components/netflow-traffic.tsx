@@ -519,7 +519,11 @@ export const NetflowTraffic: React.FC<{
 
       const promises: Promise<Stats>[] = [];
 
-      if (!selectedPanels.some(p => [DROPPED_ID_MATCHER, DNS_ID_MATCHER, RTT_ID_MATCHER].includes(p.id))) {
+      if (
+        selectedPanels.some(
+          p => !p.id.includes(DROPPED_ID_MATCHER) && !p.id.includes(DNS_ID_MATCHER) && !p.id.includes(RTT_ID_MATCHER)
+        )
+      ) {
         promises.push(
           ...[
             //get bytes or packets
