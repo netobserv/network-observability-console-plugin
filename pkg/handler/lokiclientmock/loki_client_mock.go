@@ -33,11 +33,13 @@ func (o *LokiClientMock) Get(url string) ([]byte, int, error) {
 				path += "_state.json"
 			} else if strings.Contains(url, "by(PktDropLatestDropCause)") {
 				path += "_cause.json"
-			} else if strings.Contains(url, "by(SrcK8S_HostName,DstK8S_HostName)") {
+			} else if strings.Contains(url, "by(ConnectionToken,K8S_ClusterName)") {
+				path += "_cluster.json"
+			} else if strings.Contains(url, "by(ConnectionToken,SrcK8S_HostName,DstK8S_HostName)") {
 				path += "_host.json"
-			} else if strings.Contains(url, "by(SrcK8S_Namespace,DstK8S_Namespace)") {
+			} else if strings.Contains(url, "by(ConnectionToken,SrcK8S_Namespace,DstK8S_Namespace)") {
 				path += "_namespace.json"
-			} else if strings.Contains(url, "by(SrcK8S_OwnerName,SrcK8S_OwnerType,DstK8S_OwnerName,DstK8S_OwnerType,SrcK8S_Namespace,DstK8S_Namespace)") {
+			} else if strings.Contains(url, "by(ConnectionToken,SrcK8S_OwnerName,SrcK8S_OwnerType,DstK8S_OwnerName,DstK8S_OwnerType,ConnectionToken,SrcK8S_Namespace,DstK8S_Namespace)") {
 				path += "_owner.json"
 			} else {
 				path += "_resource.json"
