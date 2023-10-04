@@ -48,11 +48,11 @@ export const getDefaultOverviewPanels = (): OverviewPanel[] => {
     { id: 'top_dropped_state_donut', isSelected: true },
     { id: 'top_dropped_cause_donut', isSelected: true },
     { id: 'top_dropped_bar_total', isSelected: true },
-    { id: 'top_avg_dns_latency_donut', isSelected: false },
-    { id: 'top_dns_rcode_donut', isSelected: false },
-    { id: 'top_dns_rcode_bar_total', isSelected: false },
-    { id: 'top_avg_rtt_donut', isSelected: false },
-    { id: 'top_avg_rtt_line', isSelected: false }
+    { id: 'top_avg_dns_latency_donut', isSelected: true },
+    { id: 'top_dns_rcode_donut', isSelected: true },
+    { id: 'top_dns_rcode_bar_total', isSelected: true },
+    { id: 'top_avg_rtt_donut', isSelected: true },
+    { id: 'top_avg_rtt_line', isSelected: true }
   ]);
   if (isAllowed(Feature.Overview)) {
     panels.unshift({ id: 'overview', isSelected: true });
