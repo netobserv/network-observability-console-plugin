@@ -31,7 +31,7 @@ var (
 	// todo: default value temporarily kept to make it work with older versions of the NOO. Remove default and force setup of loki url
 	lokiURL                = flag.String("loki", "http://localhost:3100", "URL of the loki querier host")
 	lokiStatusURL          = flag.String("loki-status", "", "URL for loki /ready /metrics /config endpoints. (default: loki flag value)")
-	lokiLabels             = flag.String("loki-labels", "SrcK8S_Namespace,SrcK8S_OwnerName,DstK8S_Namespace,DstK8S_OwnerName,FlowDirection", "Loki labels, comma separated")
+	lokiLabels             = flag.String("loki-labels", "SrcK8S_Namespace,SrcK8S_OwnerName,DstK8S_Namespace,DstK8S_OwnerName,FlowDirection,Duplicate,_RecordType", "Loki labels, comma separated")
 	lokiTimeout            = flag.Duration("loki-timeout", 30*time.Second, "Timeout of the Loki query to retrieve logs")
 	lokiTenantID           = flag.String("loki-tenant-id", "netobserv", "Tenant organization ID for multi-tenant-loki (submitted as the X-Scope-OrgID HTTP header)")
 	lokiTokenPath          = flag.String("loki-token-path", "", "Path to Bearer authorization header for loki gateway")
