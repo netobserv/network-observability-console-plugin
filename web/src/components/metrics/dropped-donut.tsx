@@ -1,13 +1,13 @@
+import { ChartDonut, ChartLabel, ChartLegend, ChartThemeColor } from '@patternfly/react-charts';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { ChartDonut, ChartLabel, ChartLegend, ChartThemeColor } from '@patternfly/react-charts';
 import { GenericMetric, NamedMetric } from '../../api/loki';
-import { MetricType, MetricFunction } from '../../model/flow-query';
-import { getFormattedRateValue } from '../../utils/metrics';
+import { MetricFunction, MetricType } from '../../model/flow-query';
 import { getStat } from '../../model/topology';
-import { defaultDimensions, Dimensions, observe } from './metrics-helper';
-
+import { LOCAL_STORAGE_OVERVIEW_DONUT_DIMENSION_KEY, useLocalStorage } from '../../utils/local-storage-hook';
+import { getFormattedRateValue } from '../../utils/metrics';
 import './metrics-content.css';
+import { defaultDimensions, Dimensions, observe } from './metrics-helper';
 
 export type DroppedDonutProps = {
   id: string;
@@ -64,9 +64,13 @@ export const DroppedDonut: React.FC<DroppedDonutProps> = ({
   );
 
   const containerRef = React.createRef<HTMLDivElement>();
-  const [dimensions, setDimensions] = React.useState<Dimensions>(defaultDimensions);
+  const [dimensions, setDimensions] = useLocalStorage<Dimensions>(
+    LOCAL_STORAGE_OVERVIEW_DONUT_DIMENSION_KEY,
+    defaultDimensions
+  );
   React.useEffect(() => {
     observe(containerRef, dimensions, setDimensions);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [containerRef, dimensions]);
 
   return (

@@ -141,7 +141,7 @@ func TestServerUnauthorized(t *testing.T) {
 	require.Error(t, err)
 	require.Equal(t, "missing Authorization header", msg)
 
-	msg, err = getRequestResults(t, httpClient, serverURL+"/api/loki/flows")
+	msg, err = getRequestResults(t, httpClient, serverURL+"/api/loki/flow/records")
 	require.Error(t, err)
 	require.Equal(t, "missing Authorization header", msg)
 }
@@ -274,7 +274,7 @@ func TestLokiConfiguration(t *testing.T) {
 	defer backendSvc.Close()
 
 	// WHEN the Loki flows endpoint is queried in the backend
-	resp, err := backendSvc.Client().Get(backendSvc.URL + "/api/loki/flows")
+	resp, err := backendSvc.Client().Get(backendSvc.URL + "/api/loki/flow/records")
 	require.NoError(t, err)
 
 	// THEN the query has been properly forwarded to Loki
@@ -317,7 +317,7 @@ func TestLokiConfigurationForTopology(t *testing.T) {
 	defer backendSvc.Close()
 
 	// WHEN the Loki flows endpoint is queried in the backend
-	resp, err := backendSvc.Client().Get(backendSvc.URL + "/api/loki/topology")
+	resp, err := backendSvc.Client().Get(backendSvc.URL + "/api/loki/flow/metrics")
 	require.NoError(t, err)
 
 	// THEN the query has been properly forwarded to Loki
@@ -373,7 +373,7 @@ func TestLokiConfigurationForTableHistogram(t *testing.T) {
 	defer backendSvc.Close()
 
 	// WHEN the Loki flows endpoint is queried in the backend using count type
-	resp, err := backendSvc.Client().Get(backendSvc.URL + "/api/loki/topology?type=count")
+	resp, err := backendSvc.Client().Get(backendSvc.URL + "/api/loki/flow/metrics?type=count")
 	require.NoError(t, err)
 
 	// THEN the query has been properly forwarded to Loki
@@ -441,7 +441,7 @@ func TestLokiConfiguration_MultiTenant(t *testing.T) {
 	defer backendSvc.Close()
 
 	// WHEN the Loki flows endpoint is queried in the backend
-	_, err = backendSvc.Client().Get(backendSvc.URL + "/api/loki/flows")
+	_, err = backendSvc.Client().Get(backendSvc.URL + "/api/loki/flow/records")
 	require.NoError(t, err)
 
 	// THEN the query has been properly forwarded to Loki with the tenant ID header
@@ -454,7 +454,7 @@ func TestLokiConfiguration_MultiTenant(t *testing.T) {
 	require.NoError(t, err)
 
 	// RUN another query
-	_, err = backendSvc.Client().Get(backendSvc.URL + "/api/loki/flows")
+	_, err = backendSvc.Client().Get(backendSvc.URL + "/api/loki/flow/records")
 	require.NoError(t, err)
 
 	// THEN Bearer token is correctly updated

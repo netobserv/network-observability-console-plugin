@@ -1,6 +1,10 @@
 import { TFunction } from 'i18next';
 import { Feature, isAllowed } from './features-gate';
 
+export const DNS_ID_MATCHER = 'dns';
+export const RTT_ID_MATCHER = 'rtt';
+export const DROPPED_ID_MATCHER = 'dropped';
+
 export type OverviewPanelId =
   | 'overview'
   | 'top_bar'
@@ -36,6 +40,10 @@ export type OverviewPanelInfo = {
 export const getDefaultOverviewPanels = (): OverviewPanel[] => {
   let panels: OverviewPanel[] = [];
 
+  /* list of panels and default selection behavior
+   *  isSelected can safely be used on feature related panels
+   *  as these will be filtered on top anyways
+   */
   panels = panels.concat([
     { id: 'top_avg_donut', isSelected: true },
     { id: 'top_latest_donut', isSelected: true },
@@ -45,18 +53,21 @@ export const getDefaultOverviewPanels = (): OverviewPanel[] => {
     { id: 'top_lines', isSelected: true },
     { id: 'top_dropped_bar', isSelected: false },
     { id: 'total_dropped_line', isSelected: false },
+    // pktDrop feature
     { id: 'top_dropped_state_donut', isSelected: true },
     { id: 'top_dropped_cause_donut', isSelected: true },
     { id: 'top_dropped_bar_total', isSelected: true },
+    // dnsTracking feature
     { id: 'top_avg_dns_latency_donut', isSelected: true },
     { id: 'top_dns_rcode_donut', isSelected: true },
     { id: 'top_dns_rcode_bar_total', isSelected: true },
+    // flowRTT feature
     { id: 'top_avg_rtt_donut', isSelected: true },
     { id: 'top_avg_rtt_line', isSelected: true }
   ]);
+
   if (isAllowed(Feature.Overview)) {
     panels.unshift({ id: 'overview', isSelected: true });
-
     panels = panels.concat([
       { id: 'top_sankey', isSelected: true },
       { id: 'inbound_region', isSelected: true }

@@ -1,17 +1,17 @@
 import { findFilter } from '../filter-definitions';
 import { Filter, FilterId, FilterValue, Filters } from '../../model/filters';
-import { getFlows, getTopologyMetrics } from '../../api/routes';
-import { getFetchFunctions, mergeTopologyMetricsBNF } from '../back-and-forth';
+import { getFlowRecords, getFlowMetrics } from '../../api/routes';
+import { getFetchFunctions, mergeMetricsBNF } from '../back-and-forth';
 import { filtersToString } from '../../model/flow-query';
-import { RawTopologyMetrics, TopologyMetricsResult } from '../../api/loki';
+import { RawTopologyMetrics, FlowMetricsResult } from '../../api/loki';
 import { parseTopologyMetrics } from '../metrics';
 
 jest.mock('../../api/routes', () => ({
-  getFlows: jest.fn(() => Promise.resolve({ records: [] })),
-  getTopologyMetrics: jest.fn(() => Promise.resolve({ metrics: [] }))
+  getFlowRecords: jest.fn(() => Promise.resolve({ records: [] })),
+  getFlowMetrics: jest.fn(() => Promise.resolve({ metrics: [] }))
 }));
-const getFlowsMock = getFlows as jest.Mock;
-const getTopologyMock = getTopologyMetrics as jest.Mock;
+const getFlowRecordsMock = getFlowRecords as jest.Mock;
+const getFlowMetricsMock = getFlowMetrics as jest.Mock;
 
 const filter = (id: FilterId, values: FilterValue[], not?: boolean): Filter => {
   return {
@@ -22,14 +22,14 @@ const filter = (id: FilterId, values: FilterValue[], not?: boolean): Filter => {
 };
 
 const getEncodedFilter = (filters: Filters, matchAny: boolean) => {
-  getFetchFunctions(filters, matchAny).getFlows({
+  getFetchFunctions(filters, matchAny).getRecords({
     filters: filtersToString(filters.list, matchAny),
     recordType: 'flowLog',
     limit: 5,
     packetLoss: 'all'
   });
-  expect(getFlowsMock).toHaveBeenCalledTimes(1);
-  return getFlowsMock.mock.calls[0][0].filters;
+  expect(getFlowRecordsMock).toHaveBeenCalledTimes(1);
+  return getFlowRecordsMock.mock.calls[0][0].filters;
 };
 
 const getDecodedFilter = (filters: Filters, matchAny: boolean) => {
@@ -38,7 +38,7 @@ const getDecodedFilter = (filters: Filters, matchAny: boolean) => {
 
 describe('Match all, flows', () => {
   beforeEach(() => {
-    getFlowsMock.mockClear();
+    getFlowRecordsMock.mockClear();
   });
 
   it('should encode', () => {
@@ -158,7 +158,7 @@ describe('Match all, flows', () => {
 
 describe('Match any, flows', () => {
   beforeEach(() => {
-    getFlowsMock.mockClear();
+    getFlowRecordsMock.mockClear();
   });
 
   it('should encode', () => {
@@ -268,7 +268,7 @@ describe('Match any, flows', () => {
 });
 
 const getTopoForFilter = (filters: Filters, matchAny: boolean) => {
-  getFetchFunctions(filters, matchAny).getTopologyMetrics(
+  getFetchFunctions(filters, matchAny).getMetrics(
     {
       filters: filtersToString(filters.list, matchAny),
       recordType: 'flowLog',
@@ -281,13 +281,13 @@ const getTopoForFilter = (filters: Filters, matchAny: boolean) => {
 
 describe('Match all, topology', () => {
   beforeEach(() => {
-    getTopologyMock.mockClear();
+    getFlowMetricsMock.mockClear();
   });
 
   it('should encode', () => {
     getTopoForFilter({ list: [filter('src_name', [{ v: 'test1' }, { v: 'test2' }])], backAndForth: false }, false);
-    expect(getTopologyMock).toHaveBeenCalledTimes(1);
-    expect(getTopologyMock.mock.calls[0][0].filters).toEqual('SrcK8S_Name%3Dtest1%2Ctest2');
+    expect(getFlowMetricsMock).toHaveBeenCalledTimes(1);
+    expect(getFlowMetricsMock.mock.calls[0][0].filters).toEqual('SrcK8S_Name%3Dtest1%2Ctest2');
   });
 
   it('should generate AND groups', () => {
@@ -298,8 +298,8 @@ describe('Match all, topology', () => {
       },
       false
     );
-    expect(getTopologyMock).toHaveBeenCalledTimes(1);
-    expect(decodeURIComponent(getTopologyMock.mock.calls[0][0].filters)).toEqual(
+    expect(getFlowMetricsMock).toHaveBeenCalledTimes(1);
+    expect(decodeURIComponent(getFlowMetricsMock.mock.calls[0][0].filters)).toEqual(
       'SrcK8S_Name=test1,test2&SrcK8S_Namespace=ns'
     );
   });
@@ -312,10 +312,14 @@ describe('Match all, topology', () => {
       },
       false
     );
-    expect(getTopologyMock).toHaveBeenCalledTimes(3);
-    expect(decodeURIComponent(getTopologyMock.mock.calls[0][0].filters)).toEqual('SrcK8S_Name=test1,test2&DstPort=443');
-    expect(decodeURIComponent(getTopologyMock.mock.calls[1][0].filters)).toEqual('DstK8S_Name=test1,test2&SrcPort=443');
-    expect(decodeURIComponent(getTopologyMock.mock.calls[2][0].filters)).toEqual(
+    expect(getFlowMetricsMock).toHaveBeenCalledTimes(3);
+    expect(decodeURIComponent(getFlowMetricsMock.mock.calls[0][0].filters)).toEqual(
+      'SrcK8S_Name=test1,test2&DstPort=443'
+    );
+    expect(decodeURIComponent(getFlowMetricsMock.mock.calls[1][0].filters)).toEqual(
+      'DstK8S_Name=test1,test2&SrcPort=443'
+    );
+    expect(decodeURIComponent(getFlowMetricsMock.mock.calls[2][0].filters)).toEqual(
       'SrcK8S_Name=test1,test2&DstPort=443&DstK8S_Name=test1,test2&SrcPort=443'
     );
   });
@@ -347,7 +351,7 @@ describe('Merge topology BNF', () => {
   };
 
   it('should merge without overlap', () => {
-    const rsOrig: TopologyMetricsResult = {
+    const rsOrig: FlowMetricsResult = {
       metrics: parseTopologyMetrics(
         [
           genNsMetric('foo', 'bar', 10, 20),
@@ -362,7 +366,7 @@ describe('Merge topology BNF', () => {
       ),
       stats: { limitReached: true, numQueries: 2 }
     };
-    const rsSwap: TopologyMetricsResult = {
+    const rsSwap: FlowMetricsResult = {
       metrics: parseTopologyMetrics(
         [genNsMetric('bar', 'foo', 1, 1), genNsMetric('foo', 'foo', 5, 5)],
         range,
@@ -374,7 +378,7 @@ describe('Merge topology BNF', () => {
       stats: { limitReached: false, numQueries: 1 }
     };
 
-    const merged = mergeTopologyMetricsBNF(range, rsOrig, rsSwap);
+    const merged = mergeMetricsBNF(range, rsOrig, rsSwap);
     expect(merged.metrics).toHaveLength(4);
     expect(merged.metrics[0].source.namespace).toEqual('foo');
     expect(merged.metrics[0].destination.namespace).toEqual('bar');
@@ -412,7 +416,7 @@ describe('Merge topology BNF', () => {
   });
 
   it('should merge with overlap', () => {
-    const rsOrig: TopologyMetricsResult = {
+    const rsOrig: FlowMetricsResult = {
       metrics: parseTopologyMetrics(
         [
           genNsMetric('foo', 'bar', 10, 20),
@@ -427,7 +431,7 @@ describe('Merge topology BNF', () => {
       ),
       stats: { limitReached: true, numQueries: 2 }
     };
-    const rsSwap: TopologyMetricsResult = {
+    const rsSwap: FlowMetricsResult = {
       metrics: parseTopologyMetrics(
         [genNsMetric('bar', 'foo', 1, 1), genNsMetric('foo', 'foo', 5, 5)],
         range,
@@ -438,12 +442,12 @@ describe('Merge topology BNF', () => {
       ),
       stats: { limitReached: false, numQueries: 1 }
     };
-    const rsOverlap: TopologyMetricsResult = {
+    const rsOverlap: FlowMetricsResult = {
       metrics: parseTopologyMetrics([genNsMetric('foo', 'foo', 3, 3)], range, 'bytes', 'namespace', 0, true),
       stats: { limitReached: false, numQueries: 1 }
     };
 
-    const merged = mergeTopologyMetricsBNF(range, rsOrig, rsSwap, rsOverlap);
+    const merged = mergeMetricsBNF(range, rsOrig, rsSwap, rsOverlap);
     expect(merged.metrics).toHaveLength(4);
     expect(merged.metrics[0].source.namespace).toEqual('foo');
     expect(merged.metrics[0].destination.namespace).toEqual('bar');

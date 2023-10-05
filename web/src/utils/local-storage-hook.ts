@@ -24,6 +24,9 @@ export const LOCAL_STORAGE_SHOW_OPTIONS_KEY = 'netflow-traffic-show-options';
 export const LOCAL_STORAGE_SHOW_HISTOGRAM_KEY = 'netflow-traffic-show-histogram';
 export const LOCAL_STORAGE_SHOW_FILTERS_KEY = 'netflow-traffic-show-filters';
 export const LOCAL_STORAGE_HISTOGRAM_GUIDED_TOUR_DONE_KEY = 'netflow-traffic-histogram-guided-tour-done';
+export const LOCAL_STORAGE_OVERVIEW_DONUT_DIMENSION_KEY = 'netflow-traffic-overview-donut-dimension';
+export const LOCAL_STORAGE_OVERVIEW_METRICS_DIMENSION_KEY = 'netflow-traffic-overview-metrics-dimension';
+export const LOCAL_STORAGE_OVERVIEW_METRICS_TOTAL_DIMENSION_KEY = 'netflow-traffic-overview-metrics-total-dimension';
 
 export interface ArraySelectionOptions {
   id: string;

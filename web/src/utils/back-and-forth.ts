@@ -1,5 +1,5 @@
-import { RecordsResult, TopologyMetricsResult } from '../api/loki';
-import { getFlows, getTopologyMetrics } from '../api/routes';
+import { RecordsResult, FlowMetricsResult } from '../api/loki';
+import { getFlowRecords, getFlowMetrics } from '../api/routes';
 import { swapFilters } from '../components/filters/filters-helper';
 import { Filter, Filters } from '../model/filters';
 import { FlowQuery, filtersToString } from '../model/flow-query';
@@ -12,18 +12,18 @@ export const getFetchFunctions = (filters: Filters, matchAny: boolean) => {
     const swapped = swap(filters.list, matchAny);
     if (swapped.length > 0) {
       return {
-        getFlows: (q: FlowQuery) => {
+        getRecords: (q: FlowQuery) => {
           return getFlowsBNF(q, filters.list, swapped, matchAny);
         },
-        getTopologyMetrics: (q: FlowQuery, range: number | TimeRange) => {
-          return getTopologyMetricsBNF(q, range, filters.list, swapped, matchAny);
+        getMetrics: (q: FlowQuery, range: number | TimeRange) => {
+          return getMetricsBNF(q, range, filters.list, swapped, matchAny);
         }
       };
     }
   }
   return {
-    getFlows: getFlows,
-    getTopologyMetrics: getTopologyMetrics
+    getRecords: getFlowRecords,
+    getMetrics: getFlowMetrics
   };
 };
 
@@ -36,25 +36,25 @@ const getFlowsBNF = (
 ): Promise<RecordsResult> => {
   // Combine original filters and swapped. Note that we leave any potential overlapping flows: they can be deduped with "showDuplicates: false".
   const newFilters = filtersToString(orig, matchAny) + encodedPipe + filtersToString(swapped, matchAny);
-  return getFlows({ ...initialQuery, filters: newFilters });
+  return getFlowRecords({ ...initialQuery, filters: newFilters });
 };
 
-const getTopologyMetricsBNF = (
+const getMetricsBNF = (
   initialQuery: FlowQuery,
   range: number | TimeRange,
   orig: Filter[],
   swapped: Filter[],
   matchAny: boolean
-): Promise<TopologyMetricsResult> => {
-  // When bnf is on, this replaces the usual getTopologyMetrics with a function with same arguments that runs 3 queries and merge their results
+): Promise<FlowMetricsResult> => {
+  // When bnf is on, this replaces the usual getMetrics with a function with same arguments that runs 3 queries and merge their results
   // in order to get the ORIGINAL + SWAPPED - OVERLAP
   // OVERLAP being ORIGINAL AND SWAPPED.
   // E.g: if ORIGINAL is "SrcNs=foo", SWAPPED is "DstNs=foo" and OVERLAP is "SrcNs=foo AND DstNs=foo"
   const overlapFilters = matchAny ? undefined : [...orig, ...swapped];
-  const promOrig = getTopologyMetrics(initialQuery, range);
-  const promSwapped = getTopologyMetrics({ ...initialQuery, filters: filtersToString(swapped, matchAny) }, range);
+  const promOrig = getFlowMetrics(initialQuery, range);
+  const promSwapped = getFlowMetrics({ ...initialQuery, filters: filtersToString(swapped, matchAny) }, range);
   const promOverlap = overlapFilters
-    ? getTopologyMetrics(
+    ? getFlowMetrics(
         {
           ...initialQuery,
           filters: filtersToString(overlapFilters, matchAny)
@@ -63,17 +63,17 @@ const getTopologyMetricsBNF = (
       )
     : Promise.resolve(undefined);
   return Promise.all([promOrig, promSwapped, promOverlap]).then(([rsOrig, rsSwapped, rsOverlap]) =>
-    mergeTopologyMetricsBNF(range, rsOrig, rsSwapped, rsOverlap)
+    mergeMetricsBNF(range, rsOrig, rsSwapped, rsOverlap)
   );
 };
 
 // exported for testing
-export const mergeTopologyMetricsBNF = (
+export const mergeMetricsBNF = (
   range: number | TimeRange,
-  rsOrig: TopologyMetricsResult,
-  rsSwapped: TopologyMetricsResult,
-  rsOverlap?: TopologyMetricsResult
-): TopologyMetricsResult => {
+  rsOrig: FlowMetricsResult,
+  rsSwapped: FlowMetricsResult,
+  rsOverlap?: FlowMetricsResult
+): FlowMetricsResult => {
   const { stepSeconds } = computeStepInterval(range);
   // Sum ORIGINAL + SWAPPED
   const metrics = sumMetrics(rsOrig.metrics, rsSwapped.metrics, stepSeconds);

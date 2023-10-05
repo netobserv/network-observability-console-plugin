@@ -12,20 +12,21 @@ import {
   ChartThemeColor
 } from '@patternfly/react-charts';
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import { NamedMetric } from '../../api/loki';
 import { MetricType } from '../../model/flow-query';
+import { LOCAL_STORAGE_OVERVIEW_METRICS_DIMENSION_KEY, useLocalStorage } from '../../utils/local-storage-hook';
 import { getFormattedRateValue } from '../../utils/metrics';
+import './metrics-content.css';
 import {
   ChartDataPoint,
   chartVoronoi,
-  Dimensions,
   defaultDimensions,
+  Dimensions,
+  LegendDataItem,
   observe,
-  toDatapoints,
-  LegendDataItem
+  toDatapoints
 } from './metrics-helper';
-import './metrics-content.css';
-import { useTranslation } from 'react-i18next';
 
 export type MetricsContentProps = {
   id: string;
@@ -80,9 +81,13 @@ export const MetricsContent: React.FC<MetricsContentProps> = ({
   );
 
   const containerRef = React.createRef<HTMLDivElement>();
-  const [dimensions, setDimensions] = React.useState<Dimensions>(defaultDimensions);
+  const [dimensions, setDimensions] = useLocalStorage<Dimensions>(
+    LOCAL_STORAGE_OVERVIEW_METRICS_DIMENSION_KEY,
+    defaultDimensions
+  );
   React.useEffect(() => {
     observe(containerRef, dimensions, setDimensions);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [containerRef, dimensions]);
 
   return (

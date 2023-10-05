@@ -241,7 +241,7 @@ func TestLokiFiltering(t *testing.T) {
 		t.Run(tc.inputPath, func(t *testing.T) {
 			// WHEN the Loki flows endpoint is queried in the backend
 			now := time.Now().Unix()
-			res, err := backendSvc.Client().Get(backendSvc.URL + "/api/loki/flows" + tc.inputPath)
+			res, err := backendSvc.Client().Get(backendSvc.URL + "/api/loki/flow/records" + tc.inputPath)
 			require.NoError(t, err)
 			body, err := io.ReadAll(res.Body)
 			require.NoError(t, err)

@@ -14,11 +14,11 @@ import {
   RecordsResult,
   Stats,
   StreamResult,
-  TopologyMetricsResult
+  FlowMetricsResult
 } from './loki';
 
-export const getFlows = (params: FlowQuery): Promise<RecordsResult> => {
-  return axios.get(ContextSingleton.getHost() + '/api/loki/flows', { params }).then(r => {
+export const getFlowRecords = (params: FlowQuery): Promise<RecordsResult> => {
+  return axios.get(ContextSingleton.getHost() + '/api/loki/flow/records', { params }).then(r => {
     if (r.status >= 400) {
       throw new Error(`${r.statusText} [code=${r.status}]`);
     }
@@ -74,8 +74,8 @@ export const getResources = (namespace: string, kind: string): Promise<string[]>
   });
 };
 
-export const getTopologyMetrics = (params: FlowQuery, range: number | TimeRange): Promise<TopologyMetricsResult> => {
-  return getMetricsGeneric(params, res => {
+export const getFlowMetrics = (params: FlowQuery, range: number | TimeRange): Promise<FlowMetricsResult> => {
+  return getFlowMetricsGeneric(params, res => {
     return parseTopologyMetrics(
       res.result as RawTopologyMetrics[],
       range,
@@ -87,8 +87,8 @@ export const getTopologyMetrics = (params: FlowQuery, range: number | TimeRange)
   });
 };
 
-export const getGenericMetrics = (params: FlowQuery, range: number | TimeRange): Promise<GenericMetricsResult> => {
-  return getMetricsGeneric(params, res => {
+export const getFlowGenericMetrics = (params: FlowQuery, range: number | TimeRange): Promise<GenericMetricsResult> => {
+  return getFlowMetricsGeneric(params, res => {
     return parseGenericMetrics(
       res.result as RawTopologyMetrics[],
       range,
@@ -99,11 +99,11 @@ export const getGenericMetrics = (params: FlowQuery, range: number | TimeRange):
   });
 };
 
-const getMetricsGeneric = <T>(
+const getFlowMetricsGeneric = <T>(
   params: FlowQuery,
   mapper: (raw: AggregatedQueryResponse) => T
 ): Promise<{ metrics: T; stats: Stats }> => {
-  return axios.get(ContextSingleton.getHost() + '/api/loki/topology', { params }).then(r => {
+  return axios.get(ContextSingleton.getHost() + '/api/loki/flow/metrics', { params }).then(r => {
     if (r.status >= 400) {
       throw new Error(`${r.statusText} [code=${r.status}]`);
     }
@@ -148,7 +148,7 @@ export const getLokiReady = (): Promise<string> => {
   });
 };
 
-export const getMetrics = (): Promise<string> => {
+export const getLokiMetrics = (): Promise<string> => {
   return axios.get(ContextSingleton.getHost() + '/api/loki/metrics').then(r => {
     if (r.status >= 400) {
       throw new Error(`${r.statusText} [code=${r.status}]`);

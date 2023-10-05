@@ -26,7 +26,7 @@ export class RecordsResult {
   stats: Stats;
 }
 
-export class TopologyMetricsResult {
+export class FlowMetricsResult {
   metrics: TopologyMetrics[];
   stats: Stats;
 }

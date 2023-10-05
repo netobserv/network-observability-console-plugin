@@ -12,10 +12,15 @@ describe('<MetricsQuerySummary />', () => {
     isShowQuerySummary: false,
     toggleQuerySummary: jest.fn(),
     metrics: metrics,
+    stats: {
+      limitReached: false,
+      numQueries: 1
+    },
     droppedMetrics: [] as TopologyMetrics[],
     appMetrics: undefined,
     appDroppedMetrics: undefined,
     metricType: 'bytes' as MetricType,
+
     range: 300,
     lastRefresh: now
   };

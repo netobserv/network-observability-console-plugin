@@ -396,6 +396,7 @@ export const SummaryPanelContent: React.FC<{
             className="summary-container-grouped"
             direction="column"
             metrics={metrics || []}
+            numQueries={stats?.numQueries}
             appMetrics={appMetrics}
             metricType={metricType}
             lastRefresh={lastRefresh}
@@ -406,6 +407,7 @@ export const SummaryPanelContent: React.FC<{
             direction="column"
             type={type}
             flows={flows!}
+            numQueries={stats?.numQueries}
             limitReached={stats?.limitReached || false}
             range={range}
             lastRefresh={lastRefresh}

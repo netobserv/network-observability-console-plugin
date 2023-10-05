@@ -29,3 +29,8 @@
 .overview-flex-item.full {
   width: 100%;
 }
+
+.emptygraph {
+  display: grid;
+  min-height: 320px;
+}

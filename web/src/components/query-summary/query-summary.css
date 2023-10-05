@@ -14,6 +14,22 @@
   margin: 0 5px 0 0;
 }
 
-#query-summary-content>div {
+#query-summary-content.center {
+  align-items: center;
+}
+
+#query-summary-content.center>* {
   margin-right: 2.5em;
+  display: flex;
+  align-items: center;
+}
+
+.stats-query-summary-date {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+#lastRefresh {
+  padding-left: 5px;
 }

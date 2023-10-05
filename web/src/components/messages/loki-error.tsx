@@ -18,7 +18,7 @@ import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { getBuildInfo, getLimits, getMetrics, getLokiReady } from '../../api/routes';
+import { getBuildInfo, getLimits, getLokiMetrics, getLokiReady } from '../../api/routes';
 import { getHTTPErrorDetails } from '../../utils/errors';
 import './loki-error.css';
 
@@ -72,7 +72,7 @@ export const LokiError: React.FC<Props> = ({ title, error }) => {
           break;
         case LokiInfo.Metrics:
           setInfoName(t('Metrics'));
-          getMetrics()
+          getLokiMetrics()
             .then(data => setInfo(data))
             .catch(err => {
               setInfo(getHTTPErrorDetails(err));

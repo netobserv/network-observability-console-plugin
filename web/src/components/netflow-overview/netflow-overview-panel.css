@@ -3,7 +3,7 @@
 }
 
 .overview-panel-body-small {
-  height: 320px;
+  min-height: 320px;
 }
 
 .overview-card-content {
