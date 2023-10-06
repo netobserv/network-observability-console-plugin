@@ -98,7 +98,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
   const cardPadding = convertRemToPixels(0.5);
 
   const containerRef = React.createRef<HTMLDivElement>();
-  const [containerSize, setContainerSize] = React.useState<DOMRect>();
+  const [containerSize, setContainerSize] = React.useState<DOMRect>({ width: 0, height: 0 } as DOMRect);
   const [sidePanelWidth, setSidePanelWidth] = React.useState<number>(0);
 
   const setKebabOptions = React.useCallback(
@@ -145,6 +145,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
 
   //allow focus only when prop is true and multiple panels selected
   const allowFocus = focus === true && panels.length > 1;
+  const wasAllowFocus = usePrevious(allowFocus);
 
   //skip metrics with sources equals to destinations
   //sort by top total item first
@@ -680,7 +681,11 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
         recordType === 'flowLog' ? t('flow') : t('conversation')
       );
       const isFocus = i === undefined;
-      const animate = isFocus && previousSelectedPanel !== undefined && previousSelectedPanel.id !== selectedPanel?.id;
+      const animate =
+        isFocus &&
+        wasAllowFocus === true &&
+        previousSelectedPanel !== undefined &&
+        previousSelectedPanel.id !== selectedPanel?.id;
       const isFocusable = (panels.length > 1 && allowFocus == false) || isFocus;
       const isFocusListItem = !isFocus && allowFocus == true;
       const content = getPanelContent(panel.id, isFocusListItem, animate);
@@ -715,7 +720,18 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
         </NetflowOverviewPanel>
       );
     },
-    [allowFocus, getPanelContent, limit, panels, recordType, selectedPanel?.id, setFocus, t, previousSelectedPanel]
+    [
+      t,
+      limit,
+      recordType,
+      wasAllowFocus,
+      previousSelectedPanel,
+      selectedPanel?.id,
+      panels,
+      allowFocus,
+      getPanelContent,
+      setFocus
+    ]
   );
 
   if (error) {
@@ -728,35 +744,31 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
         style={{ padding: `${containerPadding}px 0 ${containerPadding}px ${containerPadding}px` }}
         ref={containerRef}
       >
-        {containerSize && (
-          <>
-            <div
-              id="overview-graph-list"
-              style={{
-                width: allowFocus ? containerSize.width / 5 - containerPadding : undefined
-              }}
-            >
-              <Flex id="overview-flex" justifyContent={{ default: 'justifyContentSpaceBetween' }}>
-                {panels.map((panel, i) => getPanelView(panel, i))}
-              </Flex>
-            </div>
-            {allowFocus && selectedPanel && (
-              <div
-                id="overview-absolute-graph"
-                style={{
-                  position: 'absolute',
-                  top: containerSize.top,
-                  right: sidePanelWidth,
-                  height: containerSize.height,
-                  overflow: 'hidden',
-                  width: (containerSize.width * 4) / 5,
-                  padding: `${containerPadding}px ${containerPadding}px ${containerPadding}px ${cardPadding}px`
-                }}
-              >
-                {getPanelView(selectedPanel)}
-              </div>
-            )}
-          </>
+        <div
+          id="overview-graph-list"
+          style={{
+            width: allowFocus ? containerSize.width / 5 - containerPadding : undefined
+          }}
+        >
+          <Flex id="overview-flex" justifyContent={{ default: 'justifyContentSpaceBetween' }}>
+            {panels.map((panel, i) => getPanelView(panel, i))}
+          </Flex>
+        </div>
+        {allowFocus && selectedPanel && (
+          <div
+            id="overview-absolute-graph"
+            style={{
+              position: 'absolute',
+              top: containerSize.top,
+              right: sidePanelWidth,
+              height: containerSize.height,
+              overflow: 'hidden',
+              width: (containerSize.width * 4) / 5,
+              padding: `${containerPadding}px ${containerPadding}px ${containerPadding}px ${cardPadding}px`
+            }}
+          >
+            {getPanelView(selectedPanel)}
+          </div>
         )}
       </div>
     );
