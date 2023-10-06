@@ -21,6 +21,7 @@ export type StatDonutProps = {
   showOutOfScope: boolean;
   smallerTexts?: boolean;
   showLegend?: boolean;
+  animate?: boolean;
 };
 
 export const StatDonut: React.FC<StatDonutProps> = ({
@@ -34,7 +35,8 @@ export const StatDonut: React.FC<StatDonutProps> = ({
   showInternal,
   showOutOfScope,
   smallerTexts,
-  showLegend
+  showLegend,
+  animate
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
@@ -111,8 +113,9 @@ export const StatDonut: React.FC<StatDonutProps> = ({
         legendPosition="right"
         legendAllowWrap={true}
         legendComponent={showLegend ? legentComponent : undefined}
-        //TODO: fix refresh on selection change to enable animation
-        //animate={true}
+        animate={animate}
+        radius={showLegend ? dimensions.height / 3 : undefined}
+        innerRadius={showLegend ? dimensions.height / 4 : undefined}
         width={dimensions.width}
         height={dimensions.height}
         allowTooltip={showLegend}

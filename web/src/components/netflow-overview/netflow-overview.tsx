@@ -5,7 +5,6 @@ import {
   EmptyStateIcon,
   EmptyStateVariant,
   Flex,
-  FlexItem,
   Spinner,
   Title
 } from '@patternfly/react-core';
@@ -13,11 +12,12 @@ import { SearchIcon } from '@patternfly/react-icons';
 import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { convertRemToPixels } from '../../utils/panel';
 import { GenericMetric, NamedMetric, TopologyMetrics } from '../../api/loki';
 import { MetricType, RecordType } from '../../model/flow-query';
 import { getStat } from '../../model/topology';
 import { getOverviewPanelInfo, OverviewPanel, OverviewPanelId } from '../../utils/overview-panels';
+import { convertRemToPixels } from '../../utils/panel';
+import { usePrevious } from '../../utils/previous-hook';
 import { TruncateLength } from '../dropdowns/truncate-dropdown';
 import LokiError from '../messages/loki-error';
 import { DroppedDonut } from '../metrics/dropped-donut';
@@ -28,7 +28,6 @@ import { MetricsTotalContent } from '../metrics/metrics-total-content';
 import { SingleMetricsTotalContent } from '../metrics/single-metrics-total-content';
 import { StatDonut } from '../metrics/stat-donut';
 import { NetflowOverviewPanel } from './netflow-overview-panel';
-
 import './netflow-overview.css';
 import { PanelKebab, PanelKebabOptions } from './panel-kebab';
 
@@ -93,10 +92,14 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [kebabMap, setKebabMap] = React.useState(new Map<OverviewPanelId, PanelKebabOptions>());
   const [selectedPanel, setSelectedPanel] = React.useState<OverviewPanel | undefined>();
+  const previousSelectedPanel = usePrevious(selectedPanel);
 
-  const padding = convertRemToPixels(2);
+  const containerPadding = convertRemToPixels(2);
+  const cardPadding = convertRemToPixels(0.5);
+
   const containerRef = React.createRef<HTMLDivElement>();
   const [containerSize, setContainerSize] = React.useState<DOMRect>();
+  const [sidePanelWidth, setSidePanelWidth] = React.useState<number>(0);
 
   const setKebabOptions = React.useCallback(
     (id: OverviewPanelId, options: PanelKebabOptions) => {
@@ -131,6 +134,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
 
   React.useEffect(() => {
     observeDOMRect(containerRef, containerSize, setContainerSize);
+    setSidePanelWidth(document.getElementById('summaryPanel')?.clientWidth || 0);
   }, [containerRef, containerSize]);
 
   React.useEffect(() => {
@@ -210,7 +214,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
   const smallerTexts = truncateLength >= TruncateLength.M;
 
   const getPanelContent = React.useCallback(
-    (id: OverviewPanelId, isFocus: boolean): PanelContent => {
+    (id: OverviewPanelId, isFocus: boolean, animate: boolean): PanelContent => {
       switch (id) {
         case 'overview':
           return {
@@ -232,6 +236,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
                 smallerTexts={smallerTexts}
                 tooltipsTruncate={false}
                 showLegend={!isFocus}
+                animate={animate}
               />
             ) : (
               emptyGraph()
@@ -253,6 +258,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
                 smallerTexts={smallerTexts}
                 tooltipsTruncate={false}
                 showLegend={!isFocus}
+                animate={animate}
               />
             ) : (
               emptyGraph()
@@ -280,6 +286,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
                   showOutOfScope={options.showOutOfScope!}
                   smallerTexts={smallerTexts}
                   showLegend={!isFocus}
+                  animate={animate}
                 />
               ) : (
                 emptyGraph()
@@ -305,6 +312,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
                 smallerTexts={smallerTexts}
                 tooltipsTruncate={false}
                 showLegend={!isFocus}
+                animate={animate}
               />
             ) : (
               emptyGraph()
@@ -332,6 +340,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
                   showOutOfScope={options.showOutOfScope!}
                   smallerTexts={smallerTexts}
                   showLegend={!isFocus}
+                  animate={animate}
                 />
               ) : (
                 emptyGraph()
@@ -363,6 +372,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
                   showOutOfScope={options.showOutOfScope!}
                   smallerTexts={smallerTexts}
                   showLegend={!isFocus}
+                  animate={animate}
                 />
               ) : (
                 emptyGraph()
@@ -389,6 +399,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
                 smallerTexts={smallerTexts}
                 tooltipsTruncate={false}
                 showLegend={!isFocus}
+                animate={animate}
               />
             ) : (
               emptyGraph()
@@ -410,6 +421,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
                 smallerTexts={smallerTexts}
                 tooltipsTruncate={false}
                 showLegend={!isFocus}
+                animate={animate}
               />
             ) : (
               emptyGraph()
@@ -434,6 +446,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
                   showOthers={options.showOthers!}
                   smallerTexts={smallerTexts}
                   showLegend={!isFocus}
+                  animate={animate}
                 />
               ) : (
                 emptyGraph()
@@ -459,6 +472,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
                   showOthers={options.showOthers!}
                   smallerTexts={smallerTexts}
                   showLegend={!isFocus}
+                  animate={animate}
                 />
               ) : (
                 emptyGraph()
@@ -490,6 +504,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
                   showOutOfScope={options.showOutOfScope!}
                   smallerTexts={smallerTexts}
                   showLegend={!isFocus}
+                  animate={animate}
                 />
               ) : (
                 emptyGraph()
@@ -511,6 +526,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
                   smallerTexts={smallerTexts}
                   subTitle={t('Average latency')}
                   showLegend={!isFocus}
+                  animate={animate}
                 />
               ) : (
                 emptyGraph()
@@ -536,6 +552,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
                   smallerTexts={smallerTexts}
                   subTitle={t('Average RTT')}
                   showLegend={!isFocus}
+                  animate={animate}
                 />
               ) : (
                 emptyGraph()
@@ -561,6 +578,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
                 smallerTexts={smallerTexts}
                 tooltipsTruncate={false}
                 showLegend={!isFocus}
+                animate={animate}
               />
             ) : (
               emptyGraph()
@@ -585,6 +603,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
                   smallerTexts={smallerTexts}
                   subTitle={t('Total flow count')}
                   showLegend={!isFocus}
+                  animate={animate}
                 />
               ) : (
                 emptyGraph()
@@ -612,6 +631,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
                   othersName={'NoError'}
                   smallerTexts={smallerTexts}
                   showLegend={!isFocus}
+                  animate={animate}
                 />
               ) : (
                 emptyGraph()
@@ -660,9 +680,10 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
         recordType === 'flowLog' ? t('flow') : t('conversation')
       );
       const isFocus = i === undefined;
+      const animate = isFocus && previousSelectedPanel !== undefined && previousSelectedPanel.id !== selectedPanel?.id;
       const isFocusable = (panels.length > 1 && allowFocus == false) || isFocus;
       const isFocusListItem = !isFocus && allowFocus == true;
-      const content = getPanelContent(panel.id, isFocusListItem);
+      const content = getPanelContent(panel.id, isFocusListItem, animate);
       return (
         <NetflowOverviewPanel
           id={panel.id}
@@ -694,43 +715,49 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
         </NetflowOverviewPanel>
       );
     },
-    [allowFocus, getPanelContent, limit, panels, recordType, selectedPanel?.id, setFocus, t]
+    [allowFocus, getPanelContent, limit, panels, recordType, selectedPanel?.id, setFocus, t, previousSelectedPanel]
   );
 
   if (error) {
     return <LokiError title={t('Unable to get overview')} error={error} />;
   } else {
     return (
-      <div id="overview-container" className={isDark ? 'dark' : 'light'} ref={containerRef}>
-        <Flex direction={{ default: 'row' }}>
-          {
-            <FlexItem id="overview-graph-list" flex={{ default: 'flex_1' }}>
+      <div
+        id="overview-container"
+        className={isDark ? 'dark' : 'light'}
+        style={{ padding: `${containerPadding}px 0 ${containerPadding}px ${containerPadding}px` }}
+        ref={containerRef}
+      >
+        {containerSize && (
+          <>
+            <div
+              id="overview-graph-list"
+              style={{
+                width: allowFocus ? containerSize.width / 5 - containerPadding : undefined
+              }}
+            >
               <Flex id="overview-flex" justifyContent={{ default: 'justifyContentSpaceBetween' }}>
                 {panels.map((panel, i) => getPanelView(panel, i))}
               </Flex>
-            </FlexItem>
-          }
-          {allowFocus && (
-            <FlexItem id="overview-graph-focus" flex={{ default: 'flex_4' }}>
-              {selectedPanel && containerSize && (
-                <div
-                  id="overview-absolute-graph"
-                  style={{
-                    position: 'absolute',
-                    top: containerSize.top,
-                    right: padding,
-                    height: containerSize.height,
-                    overflow: 'hidden',
-                    width: (containerSize.width * 4) / 5 - padding,
-                    padding: `${padding}px 0 ${padding}px 0`
-                  }}
-                >
-                  {getPanelView(selectedPanel)}
-                </div>
-              )}
-            </FlexItem>
-          )}
-        </Flex>
+            </div>
+            {allowFocus && selectedPanel && (
+              <div
+                id="overview-absolute-graph"
+                style={{
+                  position: 'absolute',
+                  top: containerSize.top,
+                  right: sidePanelWidth,
+                  height: containerSize.height,
+                  overflow: 'hidden',
+                  width: (containerSize.width * 4) / 5,
+                  padding: `${containerPadding}px ${containerPadding}px ${containerPadding}px ${cardPadding}px`
+                }}
+              >
+                {getPanelView(selectedPanel)}
+              </div>
+            )}
+          </>
+        )}
       </div>
     );
   }

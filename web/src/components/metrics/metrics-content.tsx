@@ -41,6 +41,7 @@ export type MetricsContentProps = {
   smallerTexts?: boolean;
   itemsPerRow?: number;
   tooltipsTruncate: boolean;
+  animate?: boolean;
 };
 
 export const MetricsContent: React.FC<MetricsContentProps> = ({
@@ -55,7 +56,8 @@ export const MetricsContent: React.FC<MetricsContentProps> = ({
   smallerTexts,
   itemsPerRow,
   tooltipsTruncate,
-  showLegend
+  showLegend,
+  animate
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
@@ -100,8 +102,7 @@ export const MetricsContent: React.FC<MetricsContentProps> = ({
         legendPosition="bottom-left"
         legendAllowWrap={true}
         legendComponent={showLegend ? legentComponent : undefined}
-        //TODO: fix refresh on selection change to enable animation
-        //animate={true}
+        animate={animate}
         scale={{ x: 'time', y: showBar ? 'linear' : 'sqrt' }}
         width={dimensions.width}
         height={dimensions.height}

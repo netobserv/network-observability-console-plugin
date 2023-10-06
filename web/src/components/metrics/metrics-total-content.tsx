@@ -38,6 +38,7 @@ export type MetricsTotalContentProps = {
   showOutOfScope: boolean;
   smallerTexts?: boolean;
   showLegend?: boolean;
+  animate?: boolean;
 };
 
 export const MetricsTotalContent: React.FC<MetricsTotalContentProps> = ({
@@ -50,7 +51,8 @@ export const MetricsTotalContent: React.FC<MetricsTotalContentProps> = ({
   showInternal,
   showOutOfScope,
   smallerTexts,
-  showLegend
+  showLegend,
+  animate
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
@@ -106,8 +108,7 @@ export const MetricsTotalContent: React.FC<MetricsTotalContentProps> = ({
         legendPosition="bottom-left"
         legendAllowWrap={true}
         legendComponent={showLegend ? legentComponent : undefined}
-        //TODO: fix refresh on selection change to enable animation
-        //animate={true}
+        animate={animate}
         scale={{ x: 'time', y: 'linear' }}
         width={dimensions.width}
         height={dimensions.height}
