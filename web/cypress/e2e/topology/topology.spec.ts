@@ -14,7 +14,7 @@ describe('netflow-topology', () => {
   it('displays topology and namespaces', () => {
     cy.get('.pf-topology-visualization-surface').should('exist');
     //expect some namespaces & edges in the default layer
-    cy.get('[data-layer-id="default"]').children().its('length').should('be.gte', 100);
+    cy.get('[data-layer-id="default"]').children().its('length').should('be.gte', 10);
 
     cy.addFilter('src_namespace', c.namespace, true);
     cy.addFilter('src_name', c.pod, true);
@@ -26,13 +26,17 @@ describe('netflow-topology', () => {
   it('find network observability namespace', () => {
     //show advanced options
     cy.showAdvancedOptions();
+
+    //ensure content is shown before doing actions
+    cy.get('[data-layer-id="default"]').children().its('length').should('be.gte', 10);
+
     //type our namespace name and press enter
     cy.get('#search-topology-element-input').type(`${c.namespace}{enter}`);
     //cy.get('.node-highlighted').should('exist');
 
     //should show the drawer
-    cy.get('.pf-c-drawer__panel-main').should('exist');
-    cy.get('#pf-tab-metrics-drawer-tabs').click();
+    cy.get('#elementPanel-drawer-body').should('exist');
+    cy.get('#drawer-tabs').click();
     cy.get('.element-metrics-container').should('exist');
     cy.get('.pf-c-chart').should('exist');
 

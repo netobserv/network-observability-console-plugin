@@ -21,7 +21,7 @@ describe('netflow-overview', () => {
 
     //Save
     cy.get('#overview-panels-modal').contains('Save').click();
-    cy.checkPanels(14);
+    cy.checkPanels(16);
 
     //reopen modal
     cy.openPanelsModal();

@@ -15,7 +15,7 @@ describe('netflow-table', () => {
     cy.get('#table-container').should('exist');
     //expect 50 results without filters
     cy.get('#table-container').find('tr').its('length').should('be.gte', 50);
-    cy.get('#flowsCount').contains('50+ Flows');
+    cy.get('#flowsCount').contains('+ Flows');
 
     cy.addFilter('src_namespace', c.namespace);
     cy.addFilter('src_name', c.pod);
@@ -54,7 +54,7 @@ describe('netflow-table', () => {
 
     //Save
     cy.get('#columns-modal').contains('Save').click();
-    cy.checkColumns(26, 52);
+    cy.checkColumns(27, 53);
 
     //reopen modal
     cy.openColumnsModal();

@@ -44,6 +44,7 @@ Cypress.Commands.add('openNetflowTrafficPage', () => {
   //clear local storage to ensure to be in default view = overview
   cy.clearLocalStorage();
   cy.visit(c.url);
+  cy.get("#netflow-traffic-nav-item-link").click();
 });
 
 Cypress.Commands.add('showAdvancedOptions', () => {
@@ -68,7 +69,7 @@ Cypress.Commands.add('showDisplayOptions', () => {
     })
 });
 
-Cypress.Commands.add('checkPanels', (panels = 7) => {
+Cypress.Commands.add('checkPanels', (panels = 12) => {
   cy.get('#overview-flex').find('.overview-card').its('length').should('eq', panels);
 });
 

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as _ from 'lodash';
 import { css } from '@patternfly/react-styles';
-import styles from '@patternfly/react-styles/css/components/Topology/topology-components';
+import styles from '@patternfly/react-topology/src/css/topology-components';
 import {
   Edge,
   EdgeTerminalType,
