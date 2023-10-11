@@ -18,6 +18,7 @@ import {
 import { DROP_CAUSES_NAMES, getDropCauseDescription, getDropCauseDocUrl } from '../../utils/pkt-drop';
 import { formatDurationAboveMillisecond, formatDurationAboveNanosecond } from '../../utils/duration';
 import { formatPort } from '../../utils/port';
+import { getDSCPDocUrl, getDSCPServiceClassDescription, getDSCPServiceClassName } from '../../utils/dscp';
 import { formatProtocol } from '../../utils/protocol';
 import { Size } from '../dropdowns/table-display-dropdown';
 import './record-field.css';
@@ -367,26 +368,54 @@ export const RecordField: React.FC<{
       }
       case ColumnsId.proto:
         const text = value ? formatProtocol(value as number) : t('n/a');
-        let child: JSX.Element | undefined = undefined;
+        const children: JSX.Element[] = [];
 
-        if (detailed && flow.fields.IcmpType !== undefined) {
-          const type = getICMPType(flow.fields.Proto, flow.fields.IcmpType as ICMP_ALL_TYPES_VALUES);
-          const code = getICMPCode(
-            flow.fields.Proto,
-            flow.fields.IcmpType as ICMP_ALL_TYPES_VALUES,
-            flow.fields.IcmpCode as ICMP_ALL_CODES_VALUES
-          );
-          const docUrl = getICMPDocUrl(flow.fields.Proto);
-          child = type ? (
-            <>
-              {clickableContent(type.name, type.description || '', docUrl)}
-              {code ? clickableContent(code.name, code.description || '', docUrl) : <></>}
-            </>
-          ) : (
-            clickableContent(`Type: ${flow.fields.IcmpType} Code: ${flow.fields.IcmpCode}`, '', docUrl)
-          );
+        if (detailed) {
+          if (flow.fields.IcmpType !== undefined) {
+            const type = getICMPType(flow.fields.Proto, flow.fields.IcmpType as ICMP_ALL_TYPES_VALUES);
+            const code = getICMPCode(
+              flow.fields.Proto,
+              flow.fields.IcmpType as ICMP_ALL_TYPES_VALUES,
+              flow.fields.IcmpCode as ICMP_ALL_CODES_VALUES
+            );
+            const docUrl = getICMPDocUrl(flow.fields.Proto);
+            if (type) {
+              children.push(clickableContent(type.name, type.description || '', docUrl));
+              if (code) {
+                children.push(clickableContent(code.name, code.description || '', docUrl));
+              }
+            } else {
+              children.push(
+                clickableContent(
+                  `${t('Type')}: ${flow.fields.IcmpType} ${t('Code')}: ${flow.fields.IcmpCode}`,
+                  '',
+                  docUrl
+                )
+              );
+            }
+          }
+
+          if (flow.fields.Dscp !== undefined) {
+            const docUrl = getDSCPDocUrl();
+            const serviceClassName = getDSCPServiceClassName(flow.fields.Dscp);
+            if (serviceClassName) {
+              children.push(
+                clickableContent(
+                  `${t('DSCP Service Class Name')}: ${serviceClassName}`,
+                  `${t('Value')}: ${flow.fields.Dscp} ${t('Examples')}: ${getDSCPServiceClassDescription(
+                    serviceClassName
+                  )}`,
+                  docUrl
+                )
+              );
+            } else {
+              children.push(clickableContent(`${t('DSCP')}: ${flow.fields.Dscp}`, '', docUrl));
+            }
+          }
         }
-        return singleContainer(simpleTextWithTooltip(child ? `${text} ${t('reporting')}` : text, undefined, child));
+        return singleContainer(
+          simpleTextWithTooltip(children.length ? `${text} ${t('reporting')}` : text, undefined, <>{children}</>)
+        );
       case ColumnsId.flowdir:
         return singleContainer(
           simpleTextWithTooltip(

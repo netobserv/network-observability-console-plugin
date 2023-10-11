@@ -457,6 +457,16 @@ export const getFilterDefinitions = (
         encoder: simpleFiltersEncoder('Interface')
       },
       {
+        id: 'dscp',
+        name: t('DSCP value'),
+        category: FilterCategory.None,
+        component: FilterComponent.Number,
+        getOptions: noOption,
+        validate: rejectEmptyValue,
+        hint: t('Specify a Differentiated Services Code Point value as integer number.'),
+        encoder: simpleFiltersEncoder('Dscp')
+      },
+      {
         id: 'id',
         name: t('Conversation Id'),
         category: FilterCategory.None,

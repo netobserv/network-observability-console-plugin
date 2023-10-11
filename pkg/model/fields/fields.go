@@ -34,6 +34,7 @@ const (
 	PktDropPackets = "PktDropPackets"
 	Proto          = "Proto"
 	Bytes          = "Bytes"
+	DSCP           = "Dscp"
 	PktDropBytes   = "PktDropBytes"
 	FlowDirection  = "FlowDirection"
 	DNSID          = "DnsId"
@@ -53,7 +54,8 @@ func IsNumeric(v string) bool {
 		DstPort,
 		Packets,
 		Proto,
-		Bytes:
+		Bytes,
+		DSCP:
 		return true
 	default:
 		return false
