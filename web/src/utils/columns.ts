@@ -788,7 +788,7 @@ export const getExtraColumns = (t: TFunction): Column[] => {
     {
       id: ColumnsId.rttTime,
       name: t('Flow RTT'),
-      tooltip: t('Flow Round Trip Time'),
+      tooltip: t('TCP handshake Round Trip Time'),
       fieldName: 'TimeFlowRttNs',
       quickFilter: 'time_flow_rtt',
       isSelected: false,
