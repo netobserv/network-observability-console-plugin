@@ -791,7 +791,7 @@ export const getExtraColumns = (t: TFunction): Column[] => {
       tooltip: t('TCP handshake Round Trip Time'),
       fieldName: 'TimeFlowRttNs',
       quickFilter: 'time_flow_rtt',
-      isSelected: false,
+      isSelected: true,
       value: f => f.fields.TimeFlowRttNs || '',
       sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
       width: 5
