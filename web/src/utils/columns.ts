@@ -247,7 +247,7 @@ export const getDefaultColumns = (columnDefs: ColumnConfigDef[]): Column[] => {
       docURL: !_.isEmpty(d.docURL) ? d.docURL : undefined,
       quickFilter: !_.isEmpty(d.filter) ? (d.filter as FilterId) : undefined,
       isSelected: d.default === true,
-      isCommon: d.calculated?.startsWith('getSrcOrDstValue'),
+      isCommon: !_.isEmpty(d.calculated),
       value: (r: Record) => {
         if (!_.isEmpty(d.calculated)) {
           if (d.calculated!.startsWith('[') && d.calculated!.endsWith(']')) {
