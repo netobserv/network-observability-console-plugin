@@ -28,7 +28,7 @@ import { defaultTimeRange } from '../../utils/router';
 import { Record } from '../../api/ipfix';
 import { Column, ColumnGroup, ColumnsId, getColumnGroups, getShortColumnName } from '../../utils/columns';
 import { TimeRange } from '../../utils/datetime';
-import { doesIncludeFilter, Filter, findFromFilters, removeFromFilters } from '../../model/filters';
+import { doesIncludeFilter, Filter, FilterDefinition, findFromFilters, removeFromFilters } from '../../model/filters';
 import { findFilter } from '../../utils/filter-definitions';
 import RecordField, { RecordFieldFilter } from './record-field';
 import { RecordType } from '../../model/flow-query';
@@ -38,6 +38,7 @@ export type RecordDrawerProps = {
   record: Record;
   columns: Column[];
   filters: Filter[];
+  filterDefinitions: FilterDefinition[];
   range: number | TimeRange;
   type: RecordType;
   canSwitchTypes: boolean;
@@ -55,6 +56,7 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
   record,
   columns,
   filters,
+  filterDefinitions,
   range,
   type,
   canSwitchTypes,
@@ -139,7 +141,7 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
 
   const getGenericFilter = React.useCallback(
     (col: Column, value: unknown): RecordFieldFilter | undefined => {
-      const def = col.quickFilter ? findFilter(t, col.quickFilter) : undefined;
+      const def = col.quickFilter ? findFilter(filterDefinitions, col.quickFilter) : undefined;
       if (!def) {
         return undefined;
       }
@@ -172,7 +174,7 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
         isDelete: isDelete
       };
     },
-    [t, filters, setFilters]
+    [filterDefinitions, filters, setFilters]
   );
 
   const getPktDropFilter = React.useCallback(

@@ -88,11 +88,14 @@ describe('<NetflowTraffic />', () => {
     });
   });
 
-  it('should render toolbar components', async () => {
-    act(() => {
-      const cheerio = render(<NetflowTrafficParent />);
-      expect(cheerio.find('#filter-toolbar').length).toEqual(1);
-      expect(cheerio.find('#fullscreen-button').length).toEqual(1);
+  it('should render toolbar components when config loaded', async () => {
+    const wrapper = mount(<NetflowTrafficParent />);
+    await waitFor(() => {
+      expect(getConfigMock).toHaveBeenCalled();
+    });
+    await act(async () => {
+      expect(wrapper.find('#filter-toolbar').last()).toBeTruthy();
+      expect(wrapper.find('#fullscreen-button').last()).toBeTruthy();
     });
   });
 

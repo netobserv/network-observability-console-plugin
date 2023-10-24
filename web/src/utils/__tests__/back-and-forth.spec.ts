@@ -5,6 +5,7 @@ import { getFetchFunctions, mergeMetricsBNF } from '../back-and-forth';
 import { filtersToString } from '../../model/flow-query';
 import { RawTopologyMetrics, FlowMetricsResult } from '../../api/loki';
 import { parseTopologyMetrics } from '../metrics';
+import { FilterDefinitionSample } from '../../components/__tests-data__/filters';
 
 jest.mock('../../api/routes', () => ({
   getFlowRecords: jest.fn(() => Promise.resolve({ records: [] })),
@@ -15,14 +16,14 @@ const getFlowMetricsMock = getFlowMetrics as jest.Mock;
 
 const filter = (id: FilterId, values: FilterValue[], not?: boolean): Filter => {
   return {
-    def: findFilter((k: string) => k, id)!,
+    def: findFilter(FilterDefinitionSample, id)!,
     values: values,
     not: not
   };
 };
 
 const getEncodedFilter = (filters: Filters, matchAny: boolean) => {
-  getFetchFunctions(filters, matchAny).getRecords({
+  getFetchFunctions(FilterDefinitionSample, filters, matchAny).getRecords({
     filters: filtersToString(filters.list, matchAny),
     recordType: 'flowLog',
     limit: 5,
@@ -268,7 +269,7 @@ describe('Match any, flows', () => {
 });
 
 const getTopoForFilter = (filters: Filters, matchAny: boolean) => {
-  getFetchFunctions(filters, matchAny).getMetrics(
+  getFetchFunctions(FilterDefinitionSample, filters, matchAny).getMetrics(
     {
       filters: filtersToString(filters.list, matchAny),
       recordType: 'flowLog',

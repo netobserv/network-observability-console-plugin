@@ -11,6 +11,10 @@ export interface Record {
   fields: Fields;
 }
 
+export const getRecordValue = (record: Record, fieldOrLabel: string, defaultValue: string | number) => {
+  return record.fields[fieldOrLabel as keyof Fields] || record.labels[fieldOrLabel as keyof Labels] || defaultValue;
+};
+
 export interface Labels {
   /** Source namespace */
   SrcK8S_Namespace?: string;
@@ -145,3 +149,5 @@ export interface Fields {
   /** In conversation tracking, a counter of flow logs per conversation */
   numFlowLogs?: number;
 }
+
+export type Field = keyof Fields | keyof Labels;

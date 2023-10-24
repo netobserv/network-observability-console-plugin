@@ -2,7 +2,7 @@ import { SortByDirection, TableComposable, Tbody, Th, Thead, Tr } from '@pattern
 import { mount } from 'enzyme';
 import * as React from 'react';
 import { Column, ColumnsId, ColumnSizeMap } from '../../../utils/columns';
-import { AllSelectedColumns, DefaultColumns, filterOrderedColumnsByIds } from '../../__tests-data__/columns';
+import { AllSelectedColumnSample, DefaultColumnSample, filterOrderedColumnsByIds } from '../../__tests-data__/columns';
 import { NetflowTableHeader } from '../netflow-table-header';
 
 const NetflowTableHeaderWrapper: React.FC<{
@@ -42,10 +42,10 @@ describe('<NetflowTableHeader />', () => {
     setColumnSizes: jest.fn()
   };
   it('should render component', async () => {
-    const wrapper = mount(<NetflowTableHeaderWrapper {...mocks} columns={AllSelectedColumns} />);
+    const wrapper = mount(<NetflowTableHeaderWrapper {...mocks} columns={AllSelectedColumnSample} />);
     expect(wrapper.find(NetflowTableHeader)).toBeTruthy();
     expect(wrapper.find(Thead)).toHaveLength(1);
-    expect(wrapper.find(Th).length).toBeGreaterThanOrEqual(AllSelectedColumns.length);
+    expect(wrapper.find(Th).length).toBeGreaterThanOrEqual(AllSelectedColumnSample.length);
   });
   it('should render given columns', async () => {
     const wrapper = mount(
@@ -57,7 +57,7 @@ describe('<NetflowTableHeader />', () => {
     expect(wrapper.find(Th)).toHaveLength(1);
   });
   it('should call sort function on click', async () => {
-    const wrapper = mount(<NetflowTableHeaderWrapper {...mocks} columns={DefaultColumns} />);
+    const wrapper = mount(<NetflowTableHeaderWrapper {...mocks} columns={DefaultColumnSample} />);
     expect(wrapper.find(NetflowTableHeader)).toBeTruthy();
     wrapper.find('button').at(0).simulate('click');
     expect(mocks.onSort).toHaveBeenCalledWith('StartTime', 'asc');

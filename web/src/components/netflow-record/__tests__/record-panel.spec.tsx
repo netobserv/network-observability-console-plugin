@@ -1,7 +1,7 @@
 import { shallow } from 'enzyme';
 import * as React from 'react';
-import { FiltersSample } from '../../__tests-data__/filters';
-import { DefaultColumns } from '../../__tests-data__/columns';
+import { FilterDefinitionSample, FiltersSample } from '../../__tests-data__/filters';
+import { DefaultColumnSample } from '../../__tests-data__/columns';
 import { FlowsSample } from '../../__tests-data__/flows';
 import RecordPanel, { RecordDrawerProps } from '../record-panel';
 import { DrawerCloseButton } from '@patternfly/react-core';
@@ -9,8 +9,9 @@ import { DrawerCloseButton } from '@patternfly/react-core';
 describe('<RecordPanel />', () => {
   const mocks: RecordDrawerProps = {
     record: FlowsSample[0],
-    columns: DefaultColumns,
+    columns: DefaultColumnSample,
     filters: FiltersSample,
+    filterDefinitions: FilterDefinitionSample,
     range: 300,
     type: 'flowLog',
     canSwitchTypes: false,

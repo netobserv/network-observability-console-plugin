@@ -16,7 +16,7 @@ import * as _ from 'lodash';
 import { Record } from '../../api/ipfix';
 import { NetflowTableHeader } from './netflow-table-header';
 import NetflowTableRow from './netflow-table-row';
-import { Column, ColumnsId, ColumnSizeMap, getCommonColumns } from '../../utils/columns';
+import { Column, ColumnsId, ColumnSizeMap } from '../../utils/columns';
 import { Size } from '../dropdowns/table-display-dropdown';
 import { usePrevious } from '../../utils/previous-hook';
 import './netflow-table.css';
@@ -111,7 +111,7 @@ const NetflowTable: React.FC<{
 
   //get row height from display size
   const getRowHeight = React.useCallback(() => {
-    const doubleSizeColumnIds = getCommonColumns(t).map(c => c.id);
+    const doubleSizeColumnIds = columns.filter(c => c.isCommon).map(c => c.id);
     const containsDoubleLine = columns.find(c => doubleSizeColumnIds.includes(c.id)) !== undefined;
 
     function convertRemToPixels(rem: number) {

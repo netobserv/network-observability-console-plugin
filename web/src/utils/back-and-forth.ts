@@ -1,15 +1,15 @@
 import { RecordsResult, FlowMetricsResult } from '../api/loki';
 import { getFlowRecords, getFlowMetrics } from '../api/routes';
 import { swapFilters } from '../components/filters/filters-helper';
-import { Filter, Filters } from '../model/filters';
+import { Filter, FilterDefinition, Filters } from '../model/filters';
 import { FlowQuery, filtersToString } from '../model/flow-query';
 import { TimeRange, computeStepInterval } from './datetime';
 import { mergeStats, substractMetrics, sumMetrics } from './metrics';
 
-export const getFetchFunctions = (filters: Filters, matchAny: boolean) => {
+export const getFetchFunctions = (filterDefinitions: FilterDefinition[], filters: Filters, matchAny: boolean) => {
   // check back-and-forth
   if (filters.backAndForth) {
-    const swapped = swap(filters.list, matchAny);
+    const swapped = swap(filterDefinitions, filters.list, matchAny);
     if (swapped.length > 0) {
       return {
         getRecords: (q: FlowQuery) => {
@@ -88,9 +88,9 @@ export const mergeMetricsBNF = (
   return { metrics, stats };
 };
 
-const swap = (filters: Filter[], matchAny: boolean): Filter[] => {
+const swap = (filterDefinitions: FilterDefinition[], filters: Filter[], matchAny: boolean): Filter[] => {
   // include swapped traffic
-  const swapped = swapFilters((k: string) => k, filters);
+  const swapped = swapFilters(filterDefinitions, filters);
   if (matchAny) {
     // In match-any mode, remove non-swappable filters as they would result in duplicates
     return swapped.filter(f => f.def.id.startsWith('src_') || f.def.id.startsWith('dst_'));

@@ -1,6 +1,6 @@
 import { shallow } from 'enzyme';
 import * as React from 'react';
-import { FiltersSample } from '../../__tests-data__/filters';
+import { FilterDefinitionSample, FiltersSample } from '../../__tests-data__/filters';
 import { FiltersChips, FiltersChipsProps } from '../filters-chips';
 
 describe('<FiltersChips />', () => {
@@ -10,6 +10,7 @@ describe('<FiltersChips />', () => {
     clearFilters: jest.fn(),
     resetFilters: jest.fn(),
     quickFilters: [],
+    filterDefinitions: FilterDefinitionSample,
     isForced: false
   };
 

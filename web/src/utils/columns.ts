@@ -1,11 +1,10 @@
-import { TFunction } from 'i18next';
 import _ from 'lodash';
-import { Fields, Labels, Record } from '../api/ipfix';
+import { Field, getRecordValue, Record } from '../api/ipfix';
 import { FilterId } from '../model/filters';
-import { compareIPs } from '../utils/ip';
-import { comparePorts } from '../utils/port';
-import { compareProtocols } from '../utils/protocol';
 import { compareNumbers, compareStrings } from './base-compare';
+import { compareIPs } from './ip';
+import { comparePorts } from './port';
+import { compareProtocols } from './protocol';
 
 export enum ColumnsId {
   starttime = 'StartTime',
@@ -76,16 +75,29 @@ export enum ColumnsId {
   numflow = 'numFlowLogs'
 }
 
-export interface Column {
-  id: ColumnsId;
-  ids?: ColumnsId[];
+export interface ColumnConfigDef {
+  id: string;
   group?: string;
   name: string;
-  fieldName?: keyof Fields | keyof Labels;
+  field?: string;
+  calculated?: string;
+  tooltip?: string;
+  docURL?: string;
+  filter?: string;
+  default?: boolean;
+  width?: number;
+}
+
+export interface Column {
+  id: ColumnsId;
+  group?: string;
+  name: string;
+  fieldName?: Field;
   tooltip?: string;
   docURL?: string;
   quickFilter?: FilterId;
   isSelected: boolean;
+  isCommon?: boolean;
   value: (flow: Record) => string | number | string[] | number[];
   sort(a: Record, b: Record, col: Column): number;
   // width in "em"
@@ -197,795 +209,85 @@ export const getConcatenatedValue = (
   return ip;
 };
 
-export const getCommonColumns = (t: TFunction, withConcatenatedFields = true): Column[] => {
-  const commonColumns: Column[] = [
-    {
-      id: ColumnsId.name,
-      name: t('Names'),
-      isSelected: false,
-      value: f => getSrcOrDstValue(f.fields.SrcK8S_Name, f.fields.DstK8S_Name),
-      sort: (a, b, col) => compareStrings((col.value(a) as string[]).join(''), (col.value(b) as string[]).join('')),
-      width: 15
-    },
-    {
-      id: ColumnsId.type,
-      name: t('Kinds'),
-      isSelected: false,
-      value: f => getSrcOrDstValue(f.labels.SrcK8S_Type, f.labels.DstK8S_Type),
-      sort: (a, b, col) => compareStrings((col.value(a) as string[]).join(''), (col.value(b) as string[]).join('')),
-      width: 10
-    },
-    {
-      id: ColumnsId.owner,
-      name: t('Owners'),
-      isSelected: false,
-      value: f => getSrcOrDstValue(f.labels.SrcK8S_OwnerName, f.labels.DstK8S_OwnerName),
-      sort: (a, b, col) => compareStrings((col.value(a) as string[]).join(''), (col.value(b) as string[]).join('')),
-      width: 15
-    },
-    {
-      id: ColumnsId.ownertype,
-      name: t('Owner Kinds'),
-      isSelected: false,
-      value: f => getSrcOrDstValue(f.fields.SrcK8S_OwnerType, f.fields.DstK8S_OwnerType),
-      sort: (a, b, col) => compareStrings((col.value(a) as string[]).join(''), (col.value(b) as string[]).join('')),
-      width: 10
-    },
-    {
-      id: ColumnsId.namespace,
-      name: t('Namespaces'),
-      isSelected: false,
-      value: f => getSrcOrDstValue(f.labels.SrcK8S_Namespace, f.labels.DstK8S_Namespace),
-      sort: (a, b, col) => compareStrings((col.value(a) as string[]).join(''), (col.value(b) as string[]).join('')),
-      width: 15
-    },
-    {
-      id: ColumnsId.addr,
-      name: t('IP'),
-      isSelected: false,
-      value: f => getSrcOrDstValue(f.fields.SrcAddr, f.fields.DstAddr),
-      sort: (a, b, col) => compareIPs((col.value(a) as string[]).join(''), (col.value(b) as string[]).join('')),
-      width: 10
-    },
-    {
-      id: ColumnsId.port,
-      name: t('Ports'),
-      isSelected: false,
-      value: f => getSrcOrDstValue(f.fields.SrcPort, f.fields.DstPort),
-      sort: (a, b, col) =>
-        comparePorts(
-          (col.value(a) as number[]).reduce((a, b) => a + b, 0),
-          (col.value(b) as number[]).reduce((a, b) => a + b, 0)
-        ),
-      width: 10
-    },
-    {
-      id: ColumnsId.mac,
-      name: t('MAC'),
-      isSelected: false,
-      value: f => getSrcOrDstValue(f.fields.SrcMac, f.fields.DstMac),
-      sort: (a, b, col) => compareStrings((col.value(a) as string[]).join(''), (col.value(b) as string[]).join('')),
-      width: 10
-    },
-    {
-      id: ColumnsId.hostaddr,
-      name: t('Node IP'),
-      isSelected: false,
-      value: f => getSrcOrDstValue(f.fields.SrcK8S_HostIP, f.fields.DstK8S_HostIP),
-      sort: (a, b, col) => compareIPs((col.value(a) as string[]).join(''), (col.value(b) as string[]).join('')),
-      width: 10
-    },
-    {
-      id: ColumnsId.hostname,
-      name: t('Node Name'),
-      isSelected: false,
-      value: f => getSrcOrDstValue(f.fields.SrcK8S_HostName, f.fields.DstK8S_HostName),
-      sort: (a, b, col) => compareStrings((col.value(a) as string[]).join(''), (col.value(b) as string[]).join('')),
-      width: 15
-    }
-  ];
-
-  if (withConcatenatedFields) {
-    return [
-      ...commonColumns,
-      {
-        id: ColumnsId.kubeobject,
-        name: t('Kubernetes Objects'),
-        isSelected: false,
-        value: f => [
-          ...getConcatenatedValue(
-            f.fields.SrcAddr,
-            f.fields.SrcPort || NaN,
-            f.labels.SrcK8S_Type,
-            f.labels.SrcK8S_Namespace,
-            f.fields.SrcK8S_Name
-          ),
-          ...getConcatenatedValue(
-            f.fields.DstAddr,
-            f.fields.DstPort || NaN,
-            f.labels.DstK8S_Type,
-            f.labels.DstK8S_Namespace,
-            f.fields.DstK8S_Name
-          )
-        ],
-        sort: (a, b, col) => compareStrings((col.value(a) as string[]).join(''), (col.value(b) as string[]).join('')),
-        width: 15
-      },
-      {
-        id: ColumnsId.ownerkubeobject,
-        name: t('Owner Kubernetes Objects'),
-        isSelected: false,
-        value: f => [
-          ...getConcatenatedValue(
-            f.fields.SrcAddr,
-            f.fields.SrcPort || NaN,
-            f.fields.SrcK8S_OwnerType,
-            f.labels.SrcK8S_Namespace,
-            f.labels.SrcK8S_OwnerName
-          ),
-          ...getConcatenatedValue(
-            f.fields.DstAddr,
-            f.fields.DstPort || NaN,
-            f.fields.DstK8S_OwnerType,
-            f.labels.DstK8S_Namespace,
-            f.labels.DstK8S_OwnerName
-          )
-        ],
-        sort: (a, b, col) => compareStrings((col.value(a) as string[]).join(''), (col.value(b) as string[]).join('')),
-        width: 15
-      },
-      {
-        id: ColumnsId.addrport,
-        name: t('IPs & Ports'),
-        isSelected: false,
-        value: f => [
-          ...getConcatenatedValue(f.fields.SrcAddr, f.fields.SrcPort || NaN),
-          ...getConcatenatedValue(f.fields.DstAddr, f.fields.DstPort || NaN)
-        ],
-        sort: (a, b, col) => compareStrings((col.value(a) as string[]).join(''), (col.value(b) as string[]).join('')),
-        width: 15
+export const getDefaultColumns = (columnDefs: ColumnConfigDef[]): Column[] => {
+  function calculatedValue(record: Record, calculatedValue: string) {
+    if (calculatedValue.startsWith('getSrcOrDstValue')) {
+      const fields = calculatedValue.replaceAll(/getSrcOrDstValue|\(|\)/g, '').split(',');
+      if (fields.length !== 2) {
+        console.error('getDefaultColumns - invalid parameters for getSrcOrDstValue calculated value', calculatedValue);
+        return '';
       }
-    ];
-  } else {
-    return commonColumns;
-  }
-};
-
-export const getSrcColumns = (t: TFunction): Column[] => {
-  const group = t('Source');
-  return [
-    {
-      id: ColumnsId.srcname,
-      group,
-      name: t('Name'),
-      tooltip: t('The {{group}} name of the related kubernetes resource.', { group: group.toLowerCase() }),
-      docURL: 'http://kubernetes.io/docs/user-guide/identifiers#names',
-      fieldName: 'SrcK8S_Name',
-      quickFilter: 'src_name',
-      isSelected: true,
-      value: f => f.fields.SrcK8S_Name || '',
-      sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
-      width: 15
-    },
-    {
-      id: ColumnsId.srctype,
-      group,
-      name: t('Kind'),
-      tooltip: `${t('The {{group}} kind of the related kubernetes resource. Examples:')}
-      - ${t('Pod')}
-      - ${t('Service')}
-      - ${t('Node')}`,
-      fieldName: 'SrcK8S_Type',
-      quickFilter: 'src_kind',
-      isSelected: false,
-      value: f => f.labels.SrcK8S_Type || '',
-      sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
-      width: 10
-    },
-    {
-      id: ColumnsId.srcowner,
-      group,
-      name: t('Owner'),
-      tooltip: t('The {{group}} owner name of the related kubernetes resource.', { group: group.toLowerCase() }),
-      docURL: 'https://kubernetes.io/docs/concepts/overview/working-with-objects/owners-dependents/',
-      fieldName: 'SrcK8S_OwnerName',
-      quickFilter: 'src_owner_name',
-      isSelected: false,
-      value: f => f.labels.SrcK8S_OwnerName || '',
-      sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
-      width: 15
-    },
-    {
-      id: ColumnsId.srcownertype,
-      group,
-      name: t('Owner Kind'),
-      tooltip: `${t('The {{group}} owner kind of the related kubernetes resource. Examples:')}
-      - ${t('Deployment')}
-      - ${t('StatefulSet')}
-      - ${t('DaemonSet')}
-      - ${t('Job')}
-      - ${t('CronJob')}`,
-      fieldName: 'SrcK8S_OwnerType',
-      quickFilter: 'src_kind',
-      isSelected: false,
-      value: f => f.fields.SrcK8S_OwnerType || '',
-      sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
-      width: 10
-    },
-    {
-      id: ColumnsId.srcnamespace,
-      group,
-      name: t('Namespace'),
-      tooltip: t('The {{group}} namespace of the related kubernetes resource.', { group: group.toLowerCase() }),
-      docURL: 'http://kubernetes.io/docs/user-guide/identifiers#namespaces',
-      fieldName: 'SrcK8S_Namespace',
-      quickFilter: 'src_namespace',
-      isSelected: true,
-      value: f => f.labels.SrcK8S_Namespace || '',
-      sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
-      width: 15
-    },
-    {
-      id: ColumnsId.srcaddr,
-      group,
-      name: t('IP'),
-      tooltip: t('The {{group}} IP address. Can be either in IPv4 or IPv6 format.', { group: group.toLowerCase() }),
-      fieldName: 'SrcAddr',
-      quickFilter: 'src_address',
-      isSelected: false,
-      value: f => f.fields.SrcAddr,
-      sort: (a, b, col) => compareIPs(col.value(a) as string, col.value(b) as string),
-      width: 10
-    },
-    {
-      id: ColumnsId.srcport,
-      group,
-      name: t('Port'),
-      tooltip: t('The {{group}} port number.', { group: group.toLowerCase() }),
-      fieldName: 'SrcPort',
-      quickFilter: 'src_port',
-      isSelected: true,
-      value: f => f.fields.SrcPort || NaN,
-      sort: (a, b, col) => comparePorts(col.value(a) as number, col.value(b) as number),
-      width: 10
-    },
-    {
-      id: ColumnsId.srcmac,
-      group,
-      name: t('MAC'),
-      tooltip: t('The {{group}} MAC address.', { group: group.toLowerCase() }),
-      fieldName: 'SrcMac',
-      quickFilter: 'src_mac',
-      isSelected: false,
-      value: f => f.fields.SrcMac,
-      sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
-      width: 10
-    },
-    {
-      id: ColumnsId.srchostaddr,
-      group,
-      name: t('Node IP'),
-      tooltip: t('The {{group}} node IP address. Can be either in IPv4 or IPv6 format.', {
-        group: group.toLowerCase()
-      }),
-      fieldName: 'SrcK8S_HostIP',
-      quickFilter: 'src_host_address',
-      isSelected: false,
-      value: f => f.fields.SrcK8S_HostIP || '',
-      sort: (a, b, col) => compareIPs(col.value(a) as string, col.value(b) as string),
-      width: 10
-    },
-    {
-      id: ColumnsId.srchostname,
-      group,
-      name: t('Node Name'),
-      tooltip: t('The {{group}} name of the node running the workload.', { group: group.toLowerCase() }),
-      docURL: 'https://kubernetes.io/docs/concepts/architecture/nodes/',
-      fieldName: 'SrcK8S_HostName',
-      quickFilter: 'src_host_name',
-      isSelected: false,
-      value: f => f.fields.SrcK8S_HostName || '',
-      sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
-      width: 15
-    }
-  ];
-};
-
-export const getDstColumns = (t: TFunction): Column[] => {
-  const group = t('Destination');
-  return [
-    {
-      id: ColumnsId.dstname,
-      group,
-      name: t('Name'),
-      tooltip: t('The {{group}} name of the related kubernetes resource.', { group: group.toLowerCase() }),
-      docURL: 'http://kubernetes.io/docs/user-guide/identifiers#names',
-      fieldName: 'DstK8S_Name',
-      quickFilter: 'dst_name',
-      isSelected: true,
-      value: f => f.fields.DstK8S_Name || '',
-      sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
-      width: 15
-    },
-    {
-      id: ColumnsId.dsttype,
-      group,
-      name: t('Kind'),
-      tooltip: `${t('The {{group}} kind of the related kubernetes resource. Examples:')}
-      - ${t('Pod')}
-      - ${t('Service')}
-      - ${t('Node')}`,
-      fieldName: 'DstK8S_Type',
-      quickFilter: 'dst_kind',
-      isSelected: false,
-      value: f => f.labels.DstK8S_Type || '',
-      sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
-      width: 10
-    },
-    {
-      id: ColumnsId.dstowner,
-      group,
-      name: t('Owner'),
-      tooltip: t('The {{group}} owner name of the related kubernetes resource.', { group: group.toLowerCase() }),
-      docURL: 'https://kubernetes.io/docs/concepts/overview/working-with-objects/owners-dependents/',
-      fieldName: 'DstK8S_OwnerName',
-      quickFilter: 'dst_owner_name',
-      isSelected: false,
-      value: f => f.labels.DstK8S_OwnerName || '',
-      sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
-      width: 15
-    },
-    {
-      id: ColumnsId.dstownertype,
-      group,
-      name: t('Owner Kind'),
-      tooltip: `${t('The {{group}} owner kind of the related kubernetes resource. Examples:')}
-      - ${t('Deployment')}
-      - ${t('StatefulSet')}
-      - ${t('DaemonSet')}
-      - ${t('Job')}
-      - ${t('CronJob')}`,
-      fieldName: 'DstK8S_OwnerType',
-      quickFilter: 'dst_kind',
-      isSelected: false,
-      value: f => f.fields.DstK8S_OwnerType || '',
-      sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
-      width: 10
-    },
-    {
-      id: ColumnsId.dstnamespace,
-      group,
-      name: t('Namespace'),
-      tooltip: t('The {{group}} namespace of the related kubernetes resource.', { group: group.toLowerCase() }),
-      docURL: 'http://kubernetes.io/docs/user-guide/identifiers#namespaces',
-      fieldName: 'DstK8S_Namespace',
-      quickFilter: 'dst_namespace',
-      isSelected: true,
-      value: f => f.labels.DstK8S_Namespace || '',
-      sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
-      width: 15
-    },
-    {
-      id: ColumnsId.dstaddr,
-      group,
-      name: t('IP'),
-      tooltip: t('The {{group}} IP address. Can be either in IPv4 or IPv6 format.', { group: group.toLowerCase() }),
-      fieldName: 'DstAddr',
-      quickFilter: 'dst_address',
-      isSelected: false,
-      value: f => f.fields.DstAddr,
-      sort: (a, b, col) => compareIPs(col.value(a) as string, col.value(b) as string),
-      width: 10
-    },
-    {
-      id: ColumnsId.dstport,
-      group,
-      name: t('Port'),
-      tooltip: t('The {{group}} port number.', { group: group.toLowerCase() }),
-      fieldName: 'DstPort',
-      quickFilter: 'dst_port',
-      isSelected: true,
-      value: f => f.fields.DstPort || NaN,
-      sort: (a, b, col) => comparePorts(col.value(a) as number, col.value(b) as number),
-      width: 10
-    },
-    {
-      id: ColumnsId.dstmac,
-      group,
-      name: t('MAC'),
-      tooltip: t('The {{group}} MAC address.', { group: group.toLowerCase() }),
-      fieldName: 'DstMac',
-      quickFilter: 'dst_mac',
-      isSelected: false,
-      value: f => f.fields.DstMac,
-      sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
-      width: 10
-    },
-    {
-      id: ColumnsId.dsthostaddr,
-      group,
-      name: t('Node IP'),
-      tooltip: t('The {{group}} node IP address. Can be either in IPv4 or IPv6 format.', {
-        group: group.toLowerCase()
-      }),
-      fieldName: 'DstK8S_HostIP',
-      quickFilter: 'dst_host_address',
-      isSelected: false,
-      value: f => f.fields.DstK8S_HostIP || '',
-      sort: (a, b, col) => compareIPs(col.value(a) as string, col.value(b) as string),
-      width: 10
-    },
-    {
-      id: ColumnsId.dsthostname,
-      group,
-      name: t('Node Name'),
-      tooltip: t('The {{group}} name of the node running the workload.', { group: group.toLowerCase() }),
-      docURL: 'https://kubernetes.io/docs/concepts/architecture/nodes/',
-      fieldName: 'DstK8S_HostName',
-      quickFilter: 'dst_host_name',
-      isSelected: false,
-      value: f => f.fields.DstK8S_HostName || '',
-      sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
-      width: 15
-    }
-  ];
-};
-
-export const getSrcDstColumns = (t: TFunction, withConcatenatedFields = true): Column[] => {
-  if (withConcatenatedFields) {
-    return [
-      ...getSrcColumns(t),
-      {
-        id: ColumnsId.srckubeobject,
-        group: t('Source'),
-        name: t('Kubernetes Object'),
-        isSelected: false,
-        value: f =>
-          getConcatenatedValue(
-            f.fields.SrcAddr,
-            f.fields.SrcPort || NaN,
-            f.labels.SrcK8S_Type,
-            f.labels.SrcK8S_Namespace,
-            f.fields.SrcK8S_Name
-          ),
-        sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
-        width: 15
-      },
-      {
-        id: ColumnsId.srcownerkubeobject,
-        group: t('Source'),
-        name: t('Owner Kubernetes Object'),
-        isSelected: false,
-        value: f =>
-          getConcatenatedValue(
-            f.fields.SrcAddr,
-            f.fields.SrcPort || NaN,
-            f.fields.SrcK8S_OwnerType,
-            f.labels.SrcK8S_Namespace,
-            f.labels.SrcK8S_OwnerName
-          ),
-        sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
-        width: 15
-      },
-      {
-        id: ColumnsId.srcaddrport,
-        group: t('Source'),
-        name: t('IP & Port'),
-        isSelected: false,
-        value: f => getConcatenatedValue(f.fields.SrcAddr, f.fields.SrcPort || NaN),
-        sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
-        width: 15
-      },
-      ...getDstColumns(t),
-      {
-        id: ColumnsId.dstkubeobject,
-        group: t('Destination'),
-        name: t('Kubernetes Object'),
-        isSelected: false,
-        value: f =>
-          getConcatenatedValue(
-            f.fields.DstAddr,
-            f.fields.DstPort || NaN,
-            f.labels.DstK8S_Type,
-            f.labels.DstK8S_Namespace,
-            f.fields.DstK8S_Name
-          ),
-        sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
-        width: 15
-      },
-      {
-        id: ColumnsId.dstownerkubeobject,
-        group: t('Destination'),
-        name: t('Owner Kubernetes Object'),
-        isSelected: false,
-        value: f =>
-          getConcatenatedValue(
-            f.fields.DstAddr,
-            f.fields.DstPort || NaN,
-            f.fields.DstK8S_OwnerType,
-            f.labels.DstK8S_Namespace,
-            f.labels.DstK8S_OwnerName
-          ),
-        sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
-        width: 15
-      },
-      {
-        id: ColumnsId.dstaddrport,
-        group: t('Destination'),
-        name: t('IP & Port'),
-        isSelected: false,
-        value: f => getConcatenatedValue(f.fields.DstAddr, f.fields.DstPort || NaN),
-        sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
-        width: 15
+      return getSrcOrDstValue(...fields.map(f => getRecordValue(record, f, '')));
+    } else if (calculatedValue.startsWith('getConcatenatedValue')) {
+      const fields = calculatedValue.replaceAll(/getConcatenatedValue|\(|\)/g, '').split(',');
+      if (fields.length < 2) {
+        console.error(
+          'getDefaultColumns - invalid parameters for getConcatenatedValue calculated value',
+          calculatedValue
+        );
+        return '';
       }
-    ];
-  } else {
-    return [...getSrcColumns(t), ...getDstColumns(t)];
+      return getConcatenatedValue(
+        getRecordValue(record, fields[0], '') as string,
+        getRecordValue(record, fields[1], NaN) as number,
+        fields.length > 2 ? (getRecordValue(record, fields[2], '') as string) : undefined,
+        fields.length > 3 ? (getRecordValue(record, fields[3], '') as string) : undefined
+      );
+    }
+    return '';
   }
-};
 
-export const getExtraColumns = (t: TFunction): Column[] => {
-  return [
-    {
-      id: ColumnsId.proto,
-      group: t('L3 Layer'),
-      name: t('Protocol'),
-      tooltip: t('The value of the protocol number in the IP packet header'),
-      fieldName: 'Proto',
-      quickFilter: 'protocol',
-      isSelected: false,
-      value: f => f.fields.Proto,
-      sort: (a, b, col) => compareProtocols(col.value(a) as number, col.value(b) as number),
-      width: 10
-    },
-    {
-      id: ColumnsId.dscp,
-      group: t('L3 Layer'),
-      name: t('DSCP'),
-      tooltip: t('The value of the Differentiated Services Code Point'),
-      fieldName: 'Dscp',
-      quickFilter: 'dscp',
-      isSelected: false,
-      value: f => (f.fields.Dscp !== undefined ? f.fields.Dscp : NaN),
-      sort: (a, b, col) => compareProtocols(col.value(a) as number, col.value(b) as number),
-      width: 10
-    },
-    {
-      id: ColumnsId.icmptype,
-      group: t('ICMP'),
-      name: t('Type'),
-      tooltip: t('The type of the ICMP message'),
-      fieldName: 'IcmpType',
-      quickFilter: 'icmp_type',
-      isSelected: false,
-      value: f => (f.fields.IcmpType !== undefined ? [f.fields.Proto, f.fields.IcmpType] : NaN),
-      sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
-      width: 10
-    },
-    {
-      id: ColumnsId.icmpcode,
-      group: t('ICMP'),
-      name: t('Code'),
-      tooltip: t('The code of the ICMP message'),
-      fieldName: 'IcmpCode',
-      quickFilter: 'icmp_code',
-      isSelected: false,
-      value: f =>
-        f.fields.IcmpType !== undefined && f.fields.IcmpCode !== undefined
-          ? [f.fields.Proto, f.fields.IcmpType, f.fields.IcmpCode]
-          : NaN,
-      sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
-      width: 10
-    },
-    {
-      id: ColumnsId.flowdir,
-      name: t('Direction'),
-      tooltip: t('The direction of the Flow observed at the Node observation point.'),
-      fieldName: 'FlowDirection',
-      quickFilter: 'direction',
-      isSelected: false,
-      value: f => f.labels.FlowDirection,
-      sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
-      width: 10
-    },
-    {
-      id: ColumnsId.interface,
-      name: t('Interface'),
-      tooltip: t('The network interface of the Flow.'),
-      fieldName: 'Interface',
-      quickFilter: 'interface',
-      isSelected: false,
-      value: f => f.fields.Interface || '',
-      sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
-      width: 10
-    },
-    {
-      id: ColumnsId.bytes,
-      name: t('Bytes'),
-      tooltip: t('The total aggregated number of bytes.'),
-      fieldName: 'Bytes',
-      isSelected: true,
-      value: f => (f.fields.PktDropBytes ? [f.fields.Bytes || 0, f.fields.PktDropBytes] : f.fields.Bytes || 0),
-      sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
-      width: 5
-    },
-    {
-      id: ColumnsId.packets,
-      name: t('Packets'),
-      tooltip: t('The total aggregated number of packets.'),
-      fieldName: 'Packets',
-      quickFilter: 'pkt_drop_cause',
-      isSelected: true,
-      value: f => (f.fields.PktDropPackets ? [f.fields.Packets || 0, f.fields.PktDropPackets] : f.fields.Packets || 0),
-      sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
-      width: 5
-    },
-    {
-      id: ColumnsId.duration,
-      name: t('Duration'),
-      tooltip: t('Time elapsed between Start Time and End Time.'),
-      isSelected: false,
-      value: f => f.fields.TimeFlowEndMs - f.fields.TimeFlowStartMs,
-      sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
-      width: 5
-    },
-    {
-      id: ColumnsId.rttTime,
-      name: t('Flow RTT'),
-      tooltip: t('TCP handshake Round Trip Time'),
-      fieldName: 'TimeFlowRttNs',
-      quickFilter: 'time_flow_rtt',
-      isSelected: true,
-      value: f => f.fields.TimeFlowRttNs || '',
-      sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
-      width: 5
-    },
-    {
-      id: ColumnsId.collectiontime,
-      name: t('Collection Time'),
-      tooltip: t('Reception time of the record by the collector.'),
-      fieldName: 'TimeReceived',
-      isSelected: false,
-      value: f => f.fields.TimeReceived * 1000,
-      sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
-      width: 15
-    },
-    {
-      id: ColumnsId.collectionlatency,
-      name: t('Collection Latency'),
-      tooltip: t('Time elapsed between End Time and Collection Time.'),
-      isSelected: false,
-      value: f => f.fields.TimeReceived * 1000 - f.fields.TimeFlowEndMs,
-      sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
-      width: 5
-    },
-    {
-      id: ColumnsId.dnsid,
-      group: t('DNS'),
-      name: t('DNS Id'),
-      tooltip: t('DNS request identifier.'),
-      fieldName: 'DnsId',
-      quickFilter: 'dns_id',
-      isSelected: false,
-      value: f => f.fields.DnsId || NaN,
-      sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
-      width: 5
-    },
-    {
-      id: ColumnsId.dnslatency,
-      group: t('DNS'),
-      name: t('DNS Latency'),
-      tooltip: t('Time elapsed between DNS request and response.'),
-      isSelected: true,
-      value: f => f.fields.DnsLatencyMs || NaN,
-      sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
-      width: 5
-    },
-    {
-      id: ColumnsId.dnsresponsecode,
-      group: t('DNS'),
-      name: t('DNS Response Code'),
-      tooltip: t('DNS RCODE name from response header.'),
-      fieldName: 'DnsFlagsResponseCode',
-      quickFilter: 'dns_flag_response_code',
-      isSelected: true,
-      value: f => f.fields.DnsFlagsResponseCode || '',
-      sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
-      width: 5
-    },
-    {
-      id: ColumnsId.dnserrno,
-      group: t('DNS'),
-      name: t('DNS Error'),
-      tooltip: t('DNS error number returned from DNS tracker ebpf hook function.'),
-      fieldName: 'DnsErrno',
-      quickFilter: 'dns_errno',
-      isSelected: false,
-      value: f => (f.fields.DnsErrno === undefined ? Number.NaN : f.fields.DnsErrno),
-      sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
-      width: 5
-    }
-  ];
-};
-
-export const getDefaultColumns = (t: TFunction, withCommonFields = true, withConcatenatedFields = true): Column[] => {
-  const timeCols: Column[] = [
-    {
-      id: ColumnsId.starttime,
-      name: t('Start Time'),
-      tooltip: t(
-        // eslint-disable-next-line max-len
-        'Time of the first packet observed. Unlike End Time, it is not used in queries to select records in an interval.'
-      ),
-      fieldName: 'TimeFlowStartMs',
-      isSelected: false,
-      value: f => f.fields.TimeFlowStartMs,
-      sort: (a, b, col) =>
-        compareNumbers(col.value(a) as number, col.value(b) as number) ||
-        compareStrings(b.labels._RecordType!, a.labels._RecordType!),
-      width: 15
-    },
-    {
-      id: ColumnsId.endtime,
-      name: t('End Time'),
-      tooltip: t(
-        // eslint-disable-next-line max-len
-        'Time of the last packet observed. This is what is used in queries to select records in an interval.'
-      ),
-      fieldName: 'TimeFlowEndMs',
-      isSelected: true,
-      value: f => f.fields.TimeFlowEndMs,
-      sort: (a, b, col) =>
-        compareNumbers(col.value(a) as number, col.value(b) as number) ||
-        compareStrings(b.labels._RecordType!, a.labels._RecordType!),
-      width: 15
-    }
-  ];
-
-  const identifierCols: Column[] = [
-    {
-      id: ColumnsId.recordtype,
-      name: t('Event / Type'),
-      fieldName: '_RecordType',
-      quickFilter: 'type',
-      isSelected: true,
-      value: (f): string => {
-        switch (f.labels._RecordType) {
-          case 'newConnection':
-            return t('Conversation start');
-          case 'heartbeat':
-            return t('Conversation tick');
-          case 'endConnection':
-            return t('Conversation end');
-          case 'flowLog':
-          default:
-            return t('Flow');
+  return columnDefs.map(d => {
+    return {
+      id: d.id as ColumnsId,
+      group: !_.isEmpty(d.group) ? d.group : undefined,
+      name: d.name,
+      fieldName: !_.isEmpty(d.field) ? (d.field as Field) : undefined,
+      tooltip: !_.isEmpty(d.tooltip) ? d.tooltip : undefined,
+      docURL: !_.isEmpty(d.docURL) ? d.docURL : undefined,
+      quickFilter: !_.isEmpty(d.filter) ? (d.filter as FilterId) : undefined,
+      isSelected: d.default === true,
+      isCommon: d.calculated?.startsWith('getSrcOrDstValue'),
+      value: (r: Record) => {
+        if (!_.isEmpty(d.calculated)) {
+          if (d.calculated!.startsWith('[') && d.calculated!.endsWith(']')) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const result: any = [];
+            const values = d.calculated!.replaceAll(/\[|\]/g, '').split('),');
+            values.forEach(v => {
+              result.push(calculatedValue(r, `${v})`));
+            });
+            return result;
+          } else {
+            return calculatedValue(r, d.calculated!);
+          }
+        } else {
+          return getRecordValue(r, d.field!, '');
         }
       },
-      sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
-      width: 15
-    },
-    {
-      id: ColumnsId.hashid,
-      name: t('Conversation Id'),
-      fieldName: '_HashId',
-      quickFilter: 'id',
-      isSelected: true,
-      value: f => f.fields._HashId || '',
-      sort: (a, b, col) => compareStrings(col.value(a) as string, col.value(b) as string),
-      width: 15
-    }
-  ];
-
-  if (withCommonFields) {
-    return [
-      ...timeCols,
-      ...identifierCols,
-      ...getSrcDstColumns(t, withConcatenatedFields),
-      ...getCommonColumns(t, withConcatenatedFields),
-      ...getExtraColumns(t)
-    ];
-  } else {
-    return [...timeCols, ...identifierCols, ...getSrcDstColumns(t, withConcatenatedFields), ...getExtraColumns(t)];
-  }
+      sort: (a: Record, b: Record, col: Column) => {
+        if (d.calculated) {
+          return -1;
+        } else {
+          const valA = col.value(a);
+          const valB = col.value(b);
+          if (typeof valA === 'number' && typeof valB === 'number') {
+            if (col.id.includes('Port')) {
+              return comparePorts(valA, valB);
+            } else if (col.id.includes('Proto')) {
+              return compareProtocols(valA, valB);
+            }
+            return compareNumbers(valA, valB);
+          } else if (typeof valA === 'string' && typeof valB === 'string') {
+            if (col.id.includes('IP')) {
+              return compareIPs(valA, valB);
+            }
+            return compareStrings(valA, valB);
+          }
+          return 0;
+        }
+      },
+      width: d.width || 15
+    };
+  });
 };
