@@ -186,9 +186,9 @@ func TestSecureComm(t *testing.T) {
 
 	rnd.Seed(time.Now().UnixNano())
 	conf := &Config{
-		CertFile:       testServerCertFile,
-		PrivateKeyFile: testServerKeyFile,
-		Port:           testPort,
+		CertPath: testServerCertFile,
+		KeyPath:  testServerKeyFile,
+		Port:     testPort,
 		Loki: loki.Config{
 			URL: &url.URL{Scheme: "http", Host: "localhost:3100"},
 		},

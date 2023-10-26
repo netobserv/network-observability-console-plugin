@@ -18,14 +18,14 @@ type Config struct {
 	BuildVersion     string
 	BuildDate        string
 	Port             int
-	CertFile         string
-	PrivateKeyFile   string
+	CertPath         string
+	KeyPath          string
 	CORSAllowOrigin  string
 	CORSAllowMethods string
 	CORSAllowHeaders string
 	CORSMaxAge       string
 	Loki             loki.Config
-	FrontendConfig   string
+	ConfigPath       string
 }
 
 func Start(cfg *Config, authChecker auth.Checker) {
@@ -45,9 +45,9 @@ func Start(cfg *Config, authChecker auth.Checker) {
 		WriteTimeout: 30 * time.Second,
 	}
 
-	if cfg.CertFile != "" && cfg.PrivateKeyFile != "" {
+	if cfg.CertPath != "" && cfg.KeyPath != "" {
 		slog.Infof("listening on https://:%d", cfg.Port)
-		panic(httpServer.ListenAndServeTLS(cfg.CertFile, cfg.PrivateKeyFile))
+		panic(httpServer.ListenAndServeTLS(cfg.CertPath, cfg.KeyPath))
 	} else {
 		slog.Infof("listening on http://:%d", cfg.Port)
 		panic(httpServer.ListenAndServe())
