@@ -274,12 +274,9 @@ func (q *FlowQueryBuilder) appendDNSFilter(sb *strings.Builder) {
 
 func (q *FlowQueryBuilder) appendDNSRCodeFilter(sb *strings.Builder) {
 	// ensure DnsFlagsResponseCode field is specified with valid error
-	// |~`"DnsFlagsResponseCode"`!~`"DnsFlagsResponseCode":"NoError"`
+	// |~`"DnsFlagsResponseCode"`
 	sb.WriteString("|~`")
 	sb.WriteString(`"DnsFlagsResponseCode"`)
-	sb.WriteString("`")
-	sb.WriteString("!~`")
-	sb.WriteString(`"DnsFlagsResponseCode":"NoError"`)
 	sb.WriteString("`")
 }
 

@@ -41,6 +41,7 @@ export const LatencyDonut: React.FC<LatencyDonutProps> = ({
       name: (m as NamedMetric).fullName || (m as GenericMetric).name,
       value: getStat(m.stats, 'avg')
     }))
+    .filter(m => !othersName || m.name !== othersName)
     .sort((a, b) => b.value - a.value)
     .slice(0, limit);
 

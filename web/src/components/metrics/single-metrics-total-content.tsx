@@ -11,7 +11,6 @@ import {
   ChartThemeColor
 } from '@patternfly/react-charts';
 import { TextContent } from '@patternfly/react-core';
-import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { GenericMetric, NamedMetric } from '../../api/loki';
@@ -56,22 +55,7 @@ export const SingleMetricsTotalContent: React.FC<SingleMetricsTotalContentProps>
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
-  let filtered = [...topKMetrics];
-  if (showOthers) {
-    const others = {
-      name: othersName || t('Others'),
-      values: _.cloneDeep(totalMetric.values),
-      aggregateBy: 'dnsRCode',
-      stats: totalMetric.stats
-    } as GenericMetric;
-    filtered.forEach(m => {
-      for (let i = 0; i < m.values.length; i++) {
-        others.values[i][1] -= m.values[i][1];
-      }
-    });
-    filtered.push(others);
-  }
-  filtered = filtered.slice(0, limit);
+  const filtered = topKMetrics.filter(m => showOthers || (othersName && m.name !== othersName)).slice(0, limit);
 
   const legendData: LegendDataItem[] = filtered.map((m, idx) => ({
     childName: `bar-${idx}`,

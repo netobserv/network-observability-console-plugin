@@ -295,8 +295,10 @@ export const computeStats = (ts: [number, number][], skipZeros?: boolean): Metri
     return { latest: 0, avg: 0, max: 0, total: 0 };
   }
   const values = ts.map(dp => dp[1]);
-  const filteredValues = skipZeros ? values.filter(v => v !== 0) : values;
-
+  const filteredValues = skipZeros ? values.filter(v => v !== 0) : values.filter(v => !Number.isNaN(v));
+  if (!filteredValues.length) {
+    return { latest: 0, avg: 0, max: 0, total: 0 };
+  }
   // Compute stats
   const sum = filteredValues.reduce((prev, cur) => prev + cur, 0);
   const avg = sum / filteredValues.length;

@@ -553,7 +553,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
       case 'top_dns_rcode_bar_total': {
         const options = kebabMap.get(id) || {
           showTotal: true,
-          showNoError: false
+          showNoError: true
         };
         return {
           element:
