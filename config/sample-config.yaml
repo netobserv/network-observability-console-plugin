@@ -338,11 +338,36 @@ frontend:
       default: false
       width: 15
     - id: Proto
+      group: L3 Layer
       name: Protocol
       tooltip: The value of the protocol number in the IP packet header
       field: Proto
       filter: protocol
-      default: false
+      default: true
+      width: 10
+    - id: Dscp
+      group: L3 Layer
+      name: DSCP
+      tooltip: The value of the Differentiated Services Code Point
+      field: Dscp
+      filter: dscp
+      default: true
+      width: 10
+    - id: IcmpType
+      group: ICMP
+      name: Type
+      tooltip: The type of the ICMP message
+      field: IcmpType
+      filter: icmp_type
+      default: true
+      width: 10
+    - id: IcmpCode
+      group: ICMP
+      name: Code
+      tooltip: The code of the ICMP message
+      field: IcmpCode
+      quickFilter: icmp_code
+      default: true
       width: 10
     - id: FlowDirection
       name: Direction
@@ -381,7 +406,7 @@ frontend:
       tooltip: TCP handshake Round Trip Time
       field: TimeFlowRttNs
       filter: time_flow_rtt
-      default: false
+      default: true
       width: 5
     - id: CollectionTime
       name: Collection Time
@@ -556,7 +581,6 @@ frontend:
             - A single IPv4 or IPv6 address like 192.0.2.0, ::1
             - An IP address range like 192.168.0.1-192.189.10.12, 2001:db8::1-2001:db8::8
             - A CIDR specification like 192.51.100.0/24, 2001:db8::/32
-            - Empty double quotes "" for an empty IP
     - id: dst_address
       name: IP
       component: text
@@ -568,7 +592,6 @@ frontend:
             - A single IPv4 or IPv6 address like 192.0.2.0, ::1
             - An IP address range like 192.168.0.1-192.189.10.12, 2001:db8::1-2001:db8::8
             - A CIDR specification like 192.51.100.0/24, 2001:db8::/32
-            - Empty double quotes "" for an empty IP
     - id: src_port
       name: Port
       component: autocomplete
@@ -614,7 +637,6 @@ frontend:
             - A single IPv4 or IPv6 address like 192.0.2.0, ::1
             - An IP address range like 192.168.0.1-192.189.10.12, 2001:db8::1-2001:db8::8
             - A CIDR specification like 192.51.100.0/24, 2001:db8::/32
-            - Empty double quotes "" for an empty IP
     - id: dst_host_address
       name: Node IP
       component: text
@@ -626,7 +648,6 @@ frontend:
             - A single IPv4 or IPv6 address like 192.0.2.0, ::1
             - An IP address range like 192.168.0.1-192.189.10.12, 2001:db8::1-2001:db8::8
             - A CIDR specification like 192.51.100.0/24, 2001:db8::/32
-            - Empty double quotes "" for an empty IP
     - id: src_host_name
       name: Node Name
       component: text
@@ -666,8 +687,23 @@ frontend:
         Specify a single protocol following one of these rules:
                 - A protocol number like 6, 17
                 - A IANA name like TCP, UDP
-                - Empty double quotes "" for undefined protocol
       docUrl: https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
+    - id: dscp
+      name: DSCP
+      component: autocomplete
+      hint: Specify a Differentiated Services Code Point number or name.
+      examples: |-
+        Specify a Differentiated Services Code Point following one of these rules:
+                - A DSCP number like 8, 10
+                - A service class name like Low-Priority Data, High-Throughput Data
+    - id: icmp_type
+      name: ICMP type
+      component: number
+      hint: Specify an ICMP type value as integer number.
+    - id: icmp_code
+      name: ICMP code
+      component: number
+      hint: Specify an ICMP code value as integer number.
     - id: direction
       name: Direction
       component: autocomplete
