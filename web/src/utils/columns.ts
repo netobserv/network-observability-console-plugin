@@ -832,7 +832,7 @@ export const getExtraColumns = (t: TFunction): Column[] => {
       group: t('DNS'),
       name: t('DNS Latency'),
       tooltip: t('Time elapsed between DNS request and response.'),
-      isSelected: false,
+      isSelected: true,
       value: f => (f.fields.DnsLatencyMs === undefined ? Number.NaN : f.fields.DnsLatencyMs),
       sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
       width: 5
@@ -844,7 +844,7 @@ export const getExtraColumns = (t: TFunction): Column[] => {
       tooltip: t('DNS RCODE name from response header.'),
       fieldName: 'DnsFlagsResponseCode',
       quickFilter: 'dns_flag_response_code',
-      isSelected: false,
+      isSelected: true,
       value: f => f.fields.DnsFlagsResponseCode || '',
       sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
       width: 5
