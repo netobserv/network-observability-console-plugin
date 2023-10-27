@@ -69,6 +69,11 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
   const [hidden, setHidden] = React.useState<string[]>([]);
   const [activeTab, setActiveTab] = React.useState<string>('details');
 
+  // hide empty columns
+  const getVisibleColumns = React.useCallback(() => {
+    return columns.filter(c => c.value(record) !== '' && !Number.isNaN(c.value(record)));
+  }, [columns, record]);
+
   const toggle = React.useCallback(
     (id: string) => {
       const index = hidden.indexOf(id);
@@ -228,7 +233,7 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
   }, [record]);
 
   const groups = getColumnGroups(
-    columns.filter(
+    getVisibleColumns().filter(
       c =>
         //remove empty / duplicates columns for Node
         (record?.labels.SrcK8S_Type !== 'Node' ||
@@ -249,6 +254,7 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
           ].includes(c.id))
     )
   );
+
   return (
     <DrawerPanelContent
       data-test-id={id}

@@ -26,7 +26,8 @@ import {
   getDropStateOptions,
   getDropCauseOptions,
   getDirectionOptionsAsync,
-  findDirectionOption
+  findDirectionOption,
+  getDSCPOptions
 } from './filter-options';
 
 // Convenience string to filter by undefined field values
@@ -173,8 +174,7 @@ export const getFilterDefinitions = (
     const ipExamples = `${t('Specify IP following one of these rules:')}
     - ${t('A single IPv4 or IPv6 address like 192.0.2.0, ::1')}
     - ${t('An IP address range like 192.168.0.1-192.189.10.12, 2001:db8::1-2001:db8::8')}
-    - ${t('A CIDR specification like 192.51.100.0/24, 2001:db8::/32')}
-    - ${t('Empty double quotes "" for an empty IP')}`;
+    - ${t('A CIDR specification like 192.51.100.0/24, 2001:db8::/32')}`;
 
     const invalidIPMessage = t('Not a valid IPv4 or IPv6, nor a CIDR, nor an IP range separated by hyphen');
     const invalidMACMessage = t('Not a valid MAC address');
@@ -421,10 +421,42 @@ export const getFilterDefinitions = (
         hint: t('Specify a single protocol number or name.'),
         examples: `${t('Specify a single protocol following one of these rules:')}
         - ${t('A protocol number like 6, 17')}
-        - ${t('A IANA name like TCP, UDP')}
-        - ${t('Empty double quotes "" for undefined protocol')}`,
+        - ${t('A IANA name like TCP, UDP')}`,
         docUrl: 'https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml',
         encoder: simpleFiltersEncoder('Proto')
+      },
+      {
+        id: 'dscp',
+        name: t('DSCP'),
+        category: FilterCategory.None,
+        component: FilterComponent.Autocomplete,
+        getOptions: cap10(getDSCPOptions),
+        validate: rejectEmptyValue,
+        hint: t('Specify a Differentiated Services Code Point number or name.'),
+        examples: `${t('Specify a Differentiated Services Code Point following one of these rules:')}
+        - ${t('A DSCP number like 8, 10')}
+        - ${t('A service class name like Low-Priority Data, High-Throughput Data')}`,
+        encoder: simpleFiltersEncoder('Dscp')
+      },
+      {
+        id: 'icmp_type',
+        name: t('ICMP type'),
+        category: FilterCategory.None,
+        component: FilterComponent.Number,
+        getOptions: noOption,
+        validate: rejectEmptyValue,
+        hint: t('Specify an ICMP type value as integer number.'),
+        encoder: simpleFiltersEncoder('Dscp')
+      },
+      {
+        id: 'icmp_code',
+        name: t('ICMP code'),
+        category: FilterCategory.None,
+        component: FilterComponent.Number,
+        getOptions: noOption,
+        validate: rejectEmptyValue,
+        hint: t('Specify an ICMP code value as integer number.'),
+        encoder: simpleFiltersEncoder('Dscp')
       },
       {
         id: 'direction',
@@ -455,16 +487,6 @@ export const getFilterDefinitions = (
         validate: rejectEmptyValue,
         hint: t('Specify a network interface.'),
         encoder: simpleFiltersEncoder('Interface')
-      },
-      {
-        id: 'dscp',
-        name: t('DSCP value'),
-        category: FilterCategory.None,
-        component: FilterComponent.Number,
-        getOptions: noOption,
-        validate: rejectEmptyValue,
-        hint: t('Specify a Differentiated Services Code Point value as integer number.'),
-        encoder: simpleFiltersEncoder('Dscp')
       },
       {
         id: 'id',

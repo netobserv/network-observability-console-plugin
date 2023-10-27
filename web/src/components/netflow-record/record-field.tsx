@@ -19,7 +19,7 @@ import { DROP_CAUSES_NAMES, getDropCauseDescription, getDropCauseDocUrl } from '
 import { formatDurationAboveMillisecond, formatDurationAboveNanosecond } from '../../utils/duration';
 import { formatPort } from '../../utils/port';
 import { getDSCPDocUrl, getDSCPServiceClassDescription, getDSCPServiceClassName } from '../../utils/dscp';
-import { formatProtocol } from '../../utils/protocol';
+import { formatProtocol, getProtocolDocUrl } from '../../utils/protocol';
 import { Size } from '../dropdowns/table-display-dropdown';
 import './record-field.css';
 
@@ -366,56 +366,62 @@ export const RecordField: React.FC<{
       case ColumnsId.dstport: {
         return singleContainer(simpleTextWithTooltip(value ? formatPort(value as number) : ''));
       }
-      case ColumnsId.proto:
-        const text = value ? formatProtocol(value as number) : t('n/a');
-        const children: JSX.Element[] = [];
-
-        if (detailed) {
-          if (flow.fields.IcmpType !== undefined) {
-            const type = getICMPType(flow.fields.Proto, flow.fields.IcmpType as ICMP_ALL_TYPES_VALUES);
-            const code = getICMPCode(
-              flow.fields.Proto,
-              flow.fields.IcmpType as ICMP_ALL_TYPES_VALUES,
-              flow.fields.IcmpCode as ICMP_ALL_CODES_VALUES
+      case ColumnsId.proto: {
+        if (typeof value === 'number' && !isNaN(value)) {
+          const docUrl = getProtocolDocUrl();
+          const protocolName = formatProtocol(value as number);
+          return singleContainer(
+            detailed
+              ? clickableContent(protocolName, `${t('Value')}: ${value}`, docUrl)
+              : simpleTextWithTooltip(protocolName)
+          );
+        } else {
+          return singleContainer(emptyText());
+        }
+      }
+      case ColumnsId.dscp: {
+        let child = emptyText();
+        if (typeof value === 'number' && !isNaN(value)) {
+          const docUrl = getDSCPDocUrl();
+          const serviceClassName = getDSCPServiceClassName(value);
+          if (serviceClassName && detailed) {
+            child = clickableContent(
+              serviceClassName,
+              `${t('Value')}: ${value} ${t('Examples')}: ${getDSCPServiceClassDescription(value)}`,
+              docUrl
             );
-            const docUrl = getICMPDocUrl(flow.fields.Proto);
-            if (type) {
-              children.push(clickableContent(type.name, type.description || '', docUrl));
-              if (code) {
-                children.push(clickableContent(code.name, code.description || '', docUrl));
-              }
-            } else {
-              children.push(
-                clickableContent(
-                  `${t('Type')}: ${flow.fields.IcmpType} ${t('Code')}: ${flow.fields.IcmpCode}`,
-                  '',
-                  docUrl
-                )
-              );
-            }
-          }
-
-          if (flow.fields.Dscp !== undefined) {
-            const docUrl = getDSCPDocUrl();
-            const serviceClassName = getDSCPServiceClassName(flow.fields.Dscp);
-            if (serviceClassName) {
-              children.push(
-                clickableContent(
-                  `${t('DSCP Service Class Name')}: ${serviceClassName}`,
-                  `${t('Value')}: ${flow.fields.Dscp} ${t('Examples')}: ${getDSCPServiceClassDescription(
-                    serviceClassName
-                  )}`,
-                  docUrl
-                )
-              );
-            } else {
-              children.push(clickableContent(`${t('DSCP')}: ${flow.fields.Dscp}`, '', docUrl));
-            }
+          } else {
+            child = clickableContent(serviceClassName || String(value), '', docUrl);
           }
         }
-        return singleContainer(
-          simpleTextWithTooltip(children.length ? `${text} ${t('reporting')}` : text, undefined, <>{children}</>)
-        );
+        return singleContainer(child);
+      }
+      case ColumnsId.icmptype: {
+        let child = emptyText();
+        if (Array.isArray(value) && value.length) {
+          const docUrl = getICMPDocUrl(Number(value[0]));
+          const type = getICMPType(Number(value[0]), Number(value[1]) as ICMP_ALL_TYPES_VALUES);
+          if (type) {
+            child = clickableContent(type.name, type.description || '', docUrl);
+          }
+        }
+        return singleContainer(child);
+      }
+      case ColumnsId.icmpcode: {
+        let child = emptyText();
+        if (Array.isArray(value) && value.length) {
+          const docUrl = getICMPDocUrl(Number(value[0]));
+          const code = getICMPCode(
+            Number(value[0]),
+            Number(value[1]) as ICMP_ALL_TYPES_VALUES,
+            Number(2) as ICMP_ALL_CODES_VALUES
+          );
+          if (code) {
+            child = clickableContent(code.name, code.description || '', docUrl);
+          }
+        }
+        return singleContainer(child);
+      }
       case ColumnsId.flowdir:
         return singleContainer(
           simpleTextWithTooltip(

@@ -35,6 +35,8 @@ export type FilterId =
   | 'interface'
   | 'type'
   | 'dscp'
+  | 'icmp_type'
+  | 'icmp_code'
   | 'id'
   | 'pkt_drop_state'
   | 'pkt_drop_cause'

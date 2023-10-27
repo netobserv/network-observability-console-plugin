@@ -35,6 +35,9 @@ export enum ColumnsId {
   srcaddrport = 'SrcAddrPort',
   dstaddrport = 'DstAddrPort',
   proto = 'Proto',
+  icmptype = 'IcmpType',
+  icmpcode = 'IcmpCode',
+  dscp = 'Dscp',
   bytes = 'Bytes',
   packets = 'Packets',
   owner = 'K8S_OwnerName',
@@ -724,6 +727,7 @@ export const getExtraColumns = (t: TFunction): Column[] => {
   return [
     {
       id: ColumnsId.proto,
+      group: t('L3 Layer'),
       name: t('Protocol'),
       tooltip: t('The value of the protocol number in the IP packet header'),
       fieldName: 'Proto',
@@ -731,6 +735,43 @@ export const getExtraColumns = (t: TFunction): Column[] => {
       isSelected: false,
       value: f => f.fields.Proto,
       sort: (a, b, col) => compareProtocols(col.value(a) as number, col.value(b) as number),
+      width: 10
+    },
+    {
+      id: ColumnsId.dscp,
+      group: t('L3 Layer'),
+      name: t('DSCP'),
+      tooltip: t('The value of the Differentiated Services Code Point'),
+      fieldName: 'Dscp',
+      quickFilter: 'dscp',
+      isSelected: false,
+      value: f => f.fields.Dscp || NaN,
+      sort: (a, b, col) => compareProtocols(col.value(a) as number, col.value(b) as number),
+      width: 10
+    },
+    {
+      id: ColumnsId.icmptype,
+      group: t('ICMP'),
+      name: t('Type'),
+      tooltip: t('The type of the ICMP message'),
+      fieldName: 'IcmpType',
+      quickFilter: 'icmp_type',
+      isSelected: false,
+      value: f => (f.fields.IcmpType ? [f.fields.Proto, f.fields.IcmpType] : NaN),
+      sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
+      width: 10
+    },
+    {
+      id: ColumnsId.icmpcode,
+      group: t('ICMP'),
+      name: t('Code'),
+      tooltip: t('The code of the ICMP message'),
+      fieldName: 'IcmpCode',
+      quickFilter: 'icmp_code',
+      isSelected: false,
+      value: f =>
+        f.fields.IcmpType && f.fields.IcmpCode ? [f.fields.Proto, f.fields.IcmpType, f.fields.IcmpCode] : NaN,
+      sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
       width: 10
     },
     {
@@ -823,7 +864,7 @@ export const getExtraColumns = (t: TFunction): Column[] => {
       fieldName: 'DnsId',
       quickFilter: 'dns_id',
       isSelected: false,
-      value: f => (f.fields.DnsId === undefined ? Number.NaN : f.fields.DnsId),
+      value: f => f.fields.DnsId || NaN,
       sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
       width: 5
     },
@@ -833,7 +874,7 @@ export const getExtraColumns = (t: TFunction): Column[] => {
       name: t('DNS Latency'),
       tooltip: t('Time elapsed between DNS request and response.'),
       isSelected: true,
-      value: f => (f.fields.DnsLatencyMs === undefined ? Number.NaN : f.fields.DnsLatencyMs),
+      value: f => f.fields.DnsLatencyMs || NaN,
       sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
       width: 5
     },
