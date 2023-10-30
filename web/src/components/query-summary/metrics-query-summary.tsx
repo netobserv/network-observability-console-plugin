@@ -35,65 +35,75 @@ export const MetricsQuerySummaryContent: React.FC<{
     const avgSum = metrics.map(m => m.stats.avg).reduce((prev, cur) => prev + cur, 0);
     const absSum = metrics.map(m => m.stats.total).reduce((prev, cur) => prev + cur, 0);
 
-    if (metricType === 'bytes') {
-      const textAbs = appMetrics ? t('Filtered sum of top-k bytes / filtered total bytes') : t('Filtered sum of bytes');
-      const textRate = appMetrics ? t('Filtered top-k byte rate / filtered total byte rate') : t('Filtered byte rate');
-      const valAbs = appMetrics
-        ? valueFormat(absSum, 1, t('B')) + ' / ' + valueFormat(appMetrics.stats.total, 1, t('B'))
-        : valueFormat(absSum, 1, t('B'));
-      const valRate = appMetrics
-        ? valueFormat(avgSum, 2, t('Bps')) + ' / ' + valueFormat(appMetrics.stats.avg, 2, t('Bps'))
-        : valueFormat(avgSum, 2, t('Bps'));
-      return (
-        <>
+    switch (metricType) {
+      case 'bytes': {
+        const textAbs = appMetrics
+          ? t('Filtered sum of top-k bytes / filtered total bytes')
+          : t('Filtered sum of bytes');
+        const textRate = appMetrics
+          ? t('Filtered top-k byte rate / filtered total byte rate')
+          : t('Filtered byte rate');
+        const valAbs = appMetrics
+          ? valueFormat(absSum, 1, t('B')) + ' / ' + valueFormat(appMetrics.stats.total, 1, t('B'))
+          : valueFormat(absSum, 1, t('B'));
+        const valRate = appMetrics
+          ? valueFormat(avgSum, 2, t('Bps')) + ' / ' + valueFormat(appMetrics.stats.avg, 2, t('Bps'))
+          : valueFormat(avgSum, 2, t('Bps'));
+        return (
+          <>
+            <FlexItem>
+              <Tooltip content={<Text component={TextVariants.p}>{textAbs}</Text>}>
+                <Text id="bytesCount" component={TextVariants.p}>
+                  {valAbs}
+                </Text>
+              </Tooltip>
+            </FlexItem>
+            <FlexItem>
+              <Tooltip content={<Text component={TextVariants.p}>{textRate}</Text>}>
+                <Text id="bpsCount" component={TextVariants.p}>
+                  {valRate}
+                </Text>
+              </Tooltip>
+            </FlexItem>
+          </>
+        );
+      }
+      case 'packets': {
+        const textAbs = appMetrics
+          ? t('Filtered sum of top-k packets / filtered total packets')
+          : t('Filtered sum of packets');
+        const valAbs = (appMetrics ? `${absSum} / ${appMetrics.stats.total}` : String(absSum)) + ' ' + t('packets');
+        return (
           <FlexItem>
             <Tooltip content={<Text component={TextVariants.p}>{textAbs}</Text>}>
-              <Text id="bytesCount" component={TextVariants.p}>
+              <Text id="packetsCount" component={TextVariants.p}>
                 {valAbs}
               </Text>
             </Tooltip>
           </FlexItem>
+        );
+      }
+      case 'flowRtt': {
+        const textAvg = appMetrics ? t('Filtered avg RTT / filtered total avg RTT') : t('Filtered avg RTT');
+        const valAvg =
+          (appMetrics
+            ? `${valueFormat(avgSum / metrics.length, 1)} / ${valueFormat(appMetrics.stats.avg, 1)}`
+            : String(valueFormat(avgSum / metrics.length, 1))) +
+          ' ' +
+          t('ms');
+        return (
           <FlexItem>
-            <Tooltip content={<Text component={TextVariants.p}>{textRate}</Text>}>
-              <Text id="bpsCount" component={TextVariants.p}>
-                {valRate}
+            <Tooltip content={<Text component={TextVariants.p}>{textAvg}</Text>}>
+              <Text id="rttAvg" component={TextVariants.p}>
+                {valAvg}
               </Text>
             </Tooltip>
           </FlexItem>
-        </>
-      );
-    } else if (metricType === 'packets') {
-      const textAbs = appMetrics
-        ? t('Filtered sum of top-k packets / filtered total packets')
-        : t('Filtered sum of packets');
-      const valAbs = (appMetrics ? `${absSum} / ${appMetrics.stats.total}` : String(absSum)) + ' ' + t('packets');
-      return (
-        <FlexItem>
-          <Tooltip content={<Text component={TextVariants.p}>{textAbs}</Text>}>
-            <Text id="packetsCount" component={TextVariants.p}>
-              {valAbs}
-            </Text>
-          </Tooltip>
-        </FlexItem>
-      );
-    } else {
-      console.log('counters', avgSum, metrics);
-      const textAvg = appMetrics ? t('Filtered avg RTT / filtered total avg RTT') : t('Filtered avg RTT');
-      const valAvg =
-        (appMetrics
-          ? `${valueFormat(avgSum / metrics.length, 1)} / ${valueFormat(appMetrics.stats.avg, 1)}`
-          : String(valueFormat(avgSum / metrics.length, 1))) +
-        ' ' +
-        t('ms');
-      return (
-        <FlexItem>
-          <Tooltip content={<Text component={TextVariants.p}>{textAvg}</Text>}>
-            <Text id="rttAvg" component={TextVariants.p}>
-              {valAvg}
-            </Text>
-          </Tooltip>
-        </FlexItem>
-      );
+        );
+      }
+      default: {
+        return <></>;
+      }
     }
   }, [appMetrics, metricType, metrics, t]);
 

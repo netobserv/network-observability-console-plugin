@@ -365,9 +365,15 @@ export const NetflowTraffic: React.FC<{
     if (view === 'overview' && selectedViewId !== 'overview') {
       setLastLimit(limit);
       setLimit(lastTop);
+      if (!['bytes', 'packets'].includes(metricType)) {
+        setMetricType(defaultMetricType);
+      }
     } else if (view !== 'overview' && selectedViewId === 'overview') {
       setLastTop(limit);
       setLimit(lastLimit);
+      if (!['bytes', 'packets', 'dnsLatencies', 'flowRtt'].includes(metricType)) {
+        setMetricType(defaultMetricType);
+      }
     }
 
     if (view !== selectedViewId) {
