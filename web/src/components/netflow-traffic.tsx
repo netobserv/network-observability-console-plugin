@@ -293,7 +293,8 @@ export const NetflowTraffic: React.FC<{
       return (isSidePanel ? getDefaultColumns(t, false, false) : columns).filter(
         col =>
           (isConnectionTracking() || ![ColumnsId.recordtype, ColumnsId.hashid].includes(col.id)) &&
-          (isDNSTracking() || ![ColumnsId.dnsid, ColumnsId.dnslatency, ColumnsId.dnsresponsecode].includes(col.id)) &&
+          (isDNSTracking() ||
+            ![ColumnsId.dnsid, ColumnsId.dnslatency, ColumnsId.dnsresponsecode, ColumnsId.dnserrno].includes(col.id)) &&
           (isFlowRTT() || ![ColumnsId.rttTime].includes(col.id))
       );
     },

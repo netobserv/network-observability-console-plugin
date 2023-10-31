@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom';
 import { FlowDirection, Record } from '../../api/ipfix';
 import { Column, ColumnsId, getFullColumnName } from '../../utils/columns';
 import { dateFormatter, getFormattedDate, timeMSFormatter, utcDateTimeFormatter } from '../../utils/datetime';
-import { DNS_CODE_NAMES, getDNSRcodeDescription } from '../../utils/dns';
+import { DNS_CODE_NAMES, DNS_ERRORS_VALUES, getDNSErrorDescription, getDNSRcodeDescription } from '../../utils/dns';
 import {
   getICMPCode,
   getICMPDocUrl,
@@ -508,6 +508,14 @@ export const RecordField: React.FC<{
         return singleContainer(
           typeof value === 'string' && value.length
             ? simpleTextWithTooltip(detailed ? `${value}: ${getDNSRcodeDescription(value as DNS_CODE_NAMES)}` : value)
+            : emptyText()
+        );
+      case ColumnsId.dnserrno:
+        return singleContainer(
+          typeof value === 'number' && !isNaN(value)
+            ? simpleTextWithTooltip(
+                detailed ? `${value}: ${getDNSErrorDescription(value as DNS_ERRORS_VALUES)}` : String(value)
+              )
             : emptyText()
         );
       default:

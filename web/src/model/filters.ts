@@ -43,6 +43,7 @@ export type FilterId =
   | 'dns_id'
   | 'dns_latency'
   | 'dns_flag_response_code'
+  | 'dns_errno'
   | 'time_flow_rtt';
 
 export interface FilterDefinition {
