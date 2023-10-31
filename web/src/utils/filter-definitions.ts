@@ -28,7 +28,7 @@ import {
   getDirectionOptionsAsync,
   findDirectionOption,
   getDSCPOptions,
-  getDnsErrorCodeOptions,
+  getDnsErrorCodeOptions
 } from './filter-options';
 
 // Convenience string to filter by undefined field values

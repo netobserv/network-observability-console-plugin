@@ -69,8 +69,21 @@ export const RecordField: React.FC<{
     );
   };
 
-  const emptyText = () => {
+  const emptyText = (errorText?: string) => {
+    if (errorText) {
+      return errorTextValue(t('n/a'), errorText);
+    }
     return <div className="record-field-flex text-muted">{t('n/a')}</div>;
+  };
+
+  const emptyDnsErrorText = () => {
+    return emptyText(
+      flow.fields.DnsErrno
+        ? `${t('DNS Error')} ${flow.fields.DnsErrno}: ${getDNSErrorDescription(
+            flow.fields.DnsErrno as DNS_ERRORS_VALUES
+          )}`
+        : undefined
+    );
   };
 
   const simpleTextWithTooltip = (text?: string, color?: string, child?: JSX.Element) => {
@@ -241,7 +254,6 @@ export const RecordField: React.FC<{
       case ColumnsId.endtime:
         return dateTimeContent(typeof value === 'number' && !isNaN(value) ? new Date(value) : undefined);
       case ColumnsId.collectionlatency:
-      case ColumnsId.dnslatency:
       case ColumnsId.duration:
       case ColumnsId.rttTime:
         return singleContainer(
@@ -500,17 +512,26 @@ export const RecordField: React.FC<{
             simpleTextWithTooltip(detailed ? `${String(value)} ${c.name.toLowerCase()} ${t('sent')}` : String(value))
           );
         }
-      case ColumnsId.dnsid:
+      case ColumnsId.dnsid: {
         return singleContainer(
-          typeof value === 'number' && !isNaN(value) ? simpleTextWithTooltip(String(value)) : emptyText()
+          typeof value === 'number' && !isNaN(value) ? simpleTextWithTooltip(String(value)) : emptyDnsErrorText()
         );
-      case ColumnsId.dnsresponsecode:
+      }
+      case ColumnsId.dnslatency: {
+        return singleContainer(
+          typeof value === 'number' && !isNaN(value)
+            ? simpleTextWithTooltip(formatDurationAboveMillisecond(value as number))
+            : emptyDnsErrorText()
+        );
+      }
+      case ColumnsId.dnsresponsecode: {
         return singleContainer(
           typeof value === 'string' && value.length
             ? simpleTextWithTooltip(detailed ? `${value}: ${getDNSRcodeDescription(value as DNS_CODE_NAMES)}` : value)
-            : emptyText()
+            : emptyDnsErrorText()
         );
-      case ColumnsId.dnserrno:
+      }
+      case ColumnsId.dnserrno: {
         return singleContainer(
           typeof value === 'number' && !isNaN(value)
             ? simpleTextWithTooltip(
@@ -518,6 +539,7 @@ export const RecordField: React.FC<{
               )
             : emptyText()
         );
+      }
       default:
         if (Array.isArray(value) && value.length) {
           return doubleContainer(simpleTextWithTooltip(String(value[0])), simpleTextWithTooltip(String(value[1])));
