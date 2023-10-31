@@ -39,7 +39,7 @@ const (
 	FlowDirection  = "FlowDirection"
 	DNSID          = "DnsId"
 	DNSLatency     = "DnsLatencyMs"
-	DNSErrNo       = "DNSErrNo"
+	DNSErrNo       = "DnsErrno"
 	Duplicate      = "Duplicate"
 	TimeFlowRTT    = "TimeFlowRttNs"
 )
