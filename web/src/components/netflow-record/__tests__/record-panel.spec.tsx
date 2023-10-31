@@ -25,8 +25,8 @@ describe('<RecordPanel />', () => {
     const wrapper = shallow(<RecordPanel {...mocks} />);
     expect(wrapper.find(RecordPanel)).toBeTruthy();
     expect(wrapper.find('#record-panel-test')).toHaveLength(1);
-    //all columns + JSON field
-    expect(wrapper.find('.record-field-container')).toHaveLength(DefaultColumns.length + 1);
+    //all columns with data + JSON field
+    expect(wrapper.find('.record-field-container')).toHaveLength(40);
   });
   it('should close on click', async () => {
     const wrapper = shallow(<RecordPanel {...mocks} />);
