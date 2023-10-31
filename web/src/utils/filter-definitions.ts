@@ -28,7 +28,8 @@ import {
   getDropStateOptions,
   getDropCauseOptions,
   getDirectionOptionsAsync,
-  findDirectionOption
+  findDirectionOption,
+  getDnsErrorCodeOptions
 } from './filter-options';
 import { ColumnConfigDef } from './columns';
 
@@ -287,6 +288,8 @@ export const getFilterDefinitions = (
       getOptions = cap10(getDropCauseOptions);
     } else if (d.id.includes('dns_flag_response_code')) {
       getOptions = cap10(getDnsResponseCodeOptions);
+    } else if (d.id.includes('dns_errno')) {
+      getOptions = cap10(getDnsErrorCodeOptions);
     }
     return { getOptions, validate, encoder, checkCompletion };
   };

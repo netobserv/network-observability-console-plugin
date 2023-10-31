@@ -126,6 +126,14 @@ export const getDnsResponseCodeOptions = (value: string): Promise<FilterOption[]
   );
 };
 
+export const getDnsErrorCodeOptions = (value: string): Promise<FilterOption[]> => {
+  return Promise.resolve(
+    DNS_ERRORS.filter(
+      opt => String(opt.value).includes(value) || opt.name.toLowerCase().includes(value.toLowerCase())
+    ).map(v => ({ name: v.name, value: String(v.value) }))
+  );
+};
+
 export const getDSCPOptions = (value: string): Promise<FilterOption[]> => {
   return Promise.resolve(
     DSCP_VALUES.filter(
