@@ -37,7 +37,6 @@ i18n
     keySeparator: false,
     react: {
       useSuspense: true,
-      wait: true,
       transSupportBasicHtmlNodes: true // allow <br/> and simple html elements in translations
     },
     saveMissing: true,
