@@ -174,8 +174,12 @@ export const getICMPDocUrl = (p: number): string | undefined => {
   }
 };
 
+export const isValidICMPProto = (p: number) => {
+  return ICMP_PROTOS.includes(p);
+};
+
 export const getICMPType = (p: number, v: ICMP_ALL_TYPES_VALUES): ReadOnlyValue | undefined => {
-  if (!ICMP_PROTOS.includes(p)) {
+  if (!isValidICMPProto(p)) {
     return undefined;
   }
   if (p === ICMP_PROTO) {
@@ -189,7 +193,7 @@ export const getICMPCode = (
   t?: ICMP_ALL_TYPES_VALUES,
   c?: ICMP_ALL_CODES_VALUES
 ): ReadOnlyValue | undefined => {
-  if (!ICMP_PROTOS.includes(p) || !t || !c) {
+  if (!isValidICMPProto(p) || !t || !c) {
     return undefined;
   }
 

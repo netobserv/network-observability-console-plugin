@@ -230,6 +230,8 @@
   "n/a": "n/a",
   "Value": "Value",
   "Examples": "Examples",
+  "ICMP type provided but protocol is {{proto}}": "ICMP type provided but protocol is {{proto}}",
+  "ICMP code provided but protocol is {{proto}}": "ICMP code provided but protocol is {{proto}}",
   "Ingress": "Ingress",
   "Egress": "Egress",
   "Inner": "Inner",

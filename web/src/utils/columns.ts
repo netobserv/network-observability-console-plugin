@@ -745,7 +745,7 @@ export const getExtraColumns = (t: TFunction): Column[] => {
       fieldName: 'Dscp',
       quickFilter: 'dscp',
       isSelected: false,
-      value: f => f.fields.Dscp !== undefined ? f.fields.Dscp : NaN,
+      value: f => (f.fields.Dscp !== undefined ? f.fields.Dscp : NaN),
       sort: (a, b, col) => compareProtocols(col.value(a) as number, col.value(b) as number),
       width: 10
     },
@@ -770,7 +770,9 @@ export const getExtraColumns = (t: TFunction): Column[] => {
       quickFilter: 'icmp_code',
       isSelected: false,
       value: f =>
-        f.fields.IcmpType !== undefined && f.fields.IcmpCode !== undefined ? [f.fields.Proto, f.fields.IcmpType, f.fields.IcmpCode] : NaN,
+        f.fields.IcmpType !== undefined && f.fields.IcmpCode !== undefined
+          ? [f.fields.Proto, f.fields.IcmpType, f.fields.IcmpCode]
+          : NaN,
       sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
       width: 10
     },

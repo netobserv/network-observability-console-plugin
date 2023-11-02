@@ -13,7 +13,8 @@ import {
   getICMPDocUrl,
   getICMPType,
   ICMP_ALL_CODES_VALUES,
-  ICMP_ALL_TYPES_VALUES
+  ICMP_ALL_TYPES_VALUES,
+  isValidICMPProto
 } from '../../utils/icmp';
 import { DROP_CAUSES_NAMES, getDropCauseDescription, getDropCauseDocUrl } from '../../utils/pkt-drop';
 import { formatDurationAboveMillisecond, formatDurationAboveNanosecond } from '../../utils/duration';
@@ -48,6 +49,24 @@ export const RecordField: React.FC<{
         event.currentTarget.children[0].className === 'force-truncate';
       event.currentTarget.className = isTruncated ? `${className} truncated ${size}` : `${className} ${size}`;
     }
+  };
+
+  const errorTextValue = (value: string, text: string) => {
+    return (
+      <div className="record-field-flex">
+        <Tooltip
+          content={[
+            <span className="co-nowrap" key="co-error-text">
+              {text}
+            </span>
+          ]}
+        >
+          <div style={{ color: isDark ? '#C9190B' : '#A30000' }} className="record-field-flex">
+            {value}
+          </div>
+        </Tooltip>
+      </div>
+    );
   };
 
   const emptyText = () => {
@@ -382,16 +401,15 @@ export const RecordField: React.FC<{
       case ColumnsId.dscp: {
         let child = emptyText();
         if (typeof value === 'number' && !isNaN(value)) {
-          const docUrl = getDSCPDocUrl();
           const serviceClassName = getDSCPServiceClassName(value);
           if (serviceClassName && detailed) {
             child = clickableContent(
               serviceClassName,
               `${t('Value')}: ${value} ${t('Examples')}: ${getDSCPServiceClassDescription(value)}`,
-              docUrl
+              getDSCPDocUrl()
             );
           } else {
-            child = clickableContent(serviceClassName || String(value), '', docUrl);
+            child = simpleTextWithTooltip(serviceClassName || String(value))!;
           }
         }
         return singleContainer(child);
@@ -399,10 +417,18 @@ export const RecordField: React.FC<{
       case ColumnsId.icmptype: {
         let child = emptyText();
         if (Array.isArray(value) && value.length) {
-          const docUrl = getICMPDocUrl(Number(value[0]));
-          const type = getICMPType(Number(value[0]), Number(value[1]) as ICMP_ALL_TYPES_VALUES);
-          if (type) {
-            child = clickableContent(type.name, type.description || '', docUrl);
+          if (isValidICMPProto(Number(value[0]))) {
+            const type = getICMPType(Number(value[0]), Number(value[1]) as ICMP_ALL_TYPES_VALUES);
+            if (type && detailed) {
+              child = clickableContent(type.name, type.description || '', getICMPDocUrl(Number(value[0])));
+            } else {
+              child = simpleTextWithTooltip(type?.name || String(value[1]))!;
+            }
+          } else {
+            child = errorTextValue(
+              String(value[1]),
+              t('ICMP type provided but protocol is {{proto}}', { proto: formatProtocol(value[0] as number) })
+            );
           }
         }
         return singleContainer(child);
@@ -410,14 +436,22 @@ export const RecordField: React.FC<{
       case ColumnsId.icmpcode: {
         let child = emptyText();
         if (Array.isArray(value) && value.length) {
-          const docUrl = getICMPDocUrl(Number(value[0]));
-          const code = getICMPCode(
-            Number(value[0]),
-            Number(value[1]) as ICMP_ALL_TYPES_VALUES,
-            Number(2) as ICMP_ALL_CODES_VALUES
-          );
-          if (code) {
-            child = clickableContent(code.name, code.description || '', docUrl);
+          if (isValidICMPProto(Number(value[0]))) {
+            const code = getICMPCode(
+              Number(value[0]),
+              Number(value[1]) as ICMP_ALL_TYPES_VALUES,
+              Number(value[2]) as ICMP_ALL_CODES_VALUES
+            );
+            if (code && detailed) {
+              child = clickableContent(code.name, code.description || '', getICMPDocUrl(Number(value[0])));
+            } else {
+              child = simpleTextWithTooltip(code?.name || String(value[2]))!;
+            }
+          } else {
+            child = errorTextValue(
+              String(value[1]),
+              t('ICMP code provided but protocol is {{proto}}', { proto: formatProtocol(value[0] as number) })
+            );
           }
         }
         return singleContainer(child);
