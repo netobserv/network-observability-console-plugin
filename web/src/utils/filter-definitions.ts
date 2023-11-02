@@ -446,7 +446,7 @@ export const getFilterDefinitions = (
         getOptions: noOption,
         validate: rejectEmptyValue,
         hint: t('Specify an ICMP type value as integer number.'),
-        encoder: simpleFiltersEncoder('Dscp')
+        encoder: simpleFiltersEncoder('IcmpType')
       },
       {
         id: 'icmp_code',
@@ -456,7 +456,7 @@ export const getFilterDefinitions = (
         getOptions: noOption,
         validate: rejectEmptyValue,
         hint: t('Specify an ICMP code value as integer number.'),
-        encoder: simpleFiltersEncoder('Dscp')
+        encoder: simpleFiltersEncoder('IcmpCode')
       },
       {
         id: 'direction',
