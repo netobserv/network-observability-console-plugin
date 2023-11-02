@@ -897,7 +897,7 @@ export const getExtraColumns = (t: TFunction): Column[] => {
       id: ColumnsId.dnserrno,
       group: t('DNS'),
       name: t('DNS Error'),
-      tooltip: t('DNS error number returned by bpf_skb_load_bytes function.'),
+      tooltip: t('DNS error number returned from DNS tracker ebpf hook function.'),
       fieldName: 'DnsErrno',
       quickFilter: 'dns_errno',
       isSelected: false,
