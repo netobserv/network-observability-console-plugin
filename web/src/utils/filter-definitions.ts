@@ -29,7 +29,8 @@ import {
   getDropCauseOptions,
   getDirectionOptionsAsync,
   findDirectionOption,
-  getDnsErrorCodeOptions
+  getDnsErrorCodeOptions,
+  getDSCPOptions
 } from './filter-options';
 import { ColumnConfigDef } from './columns';
 
@@ -290,6 +291,8 @@ export const getFilterDefinitions = (
       getOptions = cap10(getDnsResponseCodeOptions);
     } else if (d.id.includes('dns_errno')) {
       getOptions = cap10(getDnsErrorCodeOptions);
+    } else if (d.id.includes('dscp')) {
+      getOptions = cap10(getDSCPOptions);
     }
     return { getOptions, validate, encoder, checkCompletion };
   };
