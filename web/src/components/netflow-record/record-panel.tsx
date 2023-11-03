@@ -69,6 +69,11 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
   const [hidden, setHidden] = React.useState<string[]>([]);
   const [activeTab, setActiveTab] = React.useState<string>('details');
 
+  // hide empty columns
+  const getVisibleColumns = React.useCallback(() => {
+    return columns.filter(c => c.value(record) !== '' && !Number.isNaN(c.value(record)));
+  }, [columns, record]);
+
   const toggle = React.useCallback(
     (id: string) => {
       const index = hidden.indexOf(id);
@@ -89,6 +94,10 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
           return getRecordTypeFilter();
         case ColumnsId.packets:
           return getPktDropFilter(col, record.fields.PktDropLatestDropCause);
+        case ColumnsId.icmptype:
+          return getGenericFilter(col, (value as number[])[1]);
+        case ColumnsId.icmpcode:
+          return getGenericFilter(col, (value as number[])[2]);
         default:
           return getGenericFilter(col, value);
       }
@@ -135,16 +144,18 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
         return undefined;
       }
       const filterKey = { def: def };
-      const isDelete = doesIncludeFilter(filters, filterKey, [{ v: String(value) }]);
+      const valueStr = String(value);
+      const isDelete = doesIncludeFilter(filters, filterKey, [{ v: valueStr }]);
       return {
         type: 'filter',
-        onClick: () => {
+        onClick: async () => {
           if (isDelete) {
             setFilters(removeFromFilters(filters, filterKey));
           } else {
             const values = [
               {
-                v: Array.isArray(value) ? value.join(value.length == 2 ? '.' : ':') : String(value)
+                v: Array.isArray(value) ? value.join(value.length == 2 ? '.' : ':') : valueStr,
+                display: (await def.getOptions(valueStr)).find(o => o.value === valueStr)?.name
               }
             ];
             // TODO: is it relevant to show composed columns?
@@ -228,7 +239,7 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
   }, [record]);
 
   const groups = getColumnGroups(
-    columns.filter(
+    getVisibleColumns().filter(
       c =>
         //remove empty / duplicates columns for Node
         (record?.labels.SrcK8S_Type !== 'Node' ||
@@ -249,6 +260,7 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
           ].includes(c.id))
     )
   );
+
   return (
     <DrawerPanelContent
       data-test-id={id}

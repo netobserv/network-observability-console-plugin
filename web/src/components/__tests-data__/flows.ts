@@ -87,7 +87,7 @@ export const FlowsSample: Record[] = [
       TimeFlowStartMs: 1639058286000,
       TimeReceived: 1639058291,
       DnsId: 123,
-      DnsLatencyMs: 0
+      DnsLatencyMs: 0.9
     }
   }
 ];

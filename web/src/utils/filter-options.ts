@@ -9,6 +9,7 @@ import { DNS_RCODES } from './dns';
 import { getPort, getService } from './port';
 import { DROP_CAUSES, DROP_STATES } from './pkt-drop';
 import { TFunction } from 'i18next';
+import { DSCP_VALUES } from './dscp';
 
 export const noOption: (value: string) => Promise<FilterOption[]> = () => Promise.resolve([]);
 
@@ -122,6 +123,14 @@ export const getDnsResponseCodeOptions = (value: string): Promise<FilterOption[]
     DNS_RCODES.filter(
       opt => String(opt.value).includes(value) || opt.name.toLowerCase().includes(value.toLowerCase())
     ).map(v => ({ name: v.name, value: v.name })) // map only names here since codes are stringified in storage
+  );
+};
+
+export const getDSCPOptions = (value: string): Promise<FilterOption[]> => {
+  return Promise.resolve(
+    DSCP_VALUES.filter(
+      opt => String(opt.value).includes(value) || opt.name.toLowerCase().includes(value.toLowerCase())
+    ).map(v => ({ name: v.name, value: String(v.value) }))
   );
 };
 

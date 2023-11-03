@@ -1,6 +1,10 @@
 import protocols from 'protocol-numbers';
 import { compareStrings } from './base-compare';
 
+export const getProtocolDocUrl = () => {
+  return 'https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml';
+};
+
 export const formatProtocol = (p: number) => {
   if (p !== undefined && protocols[p]) {
     return protocols[p].name;
