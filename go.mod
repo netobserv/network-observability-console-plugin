@@ -3,7 +3,7 @@ module github.com/netobserv/network-observability-console-plugin
 go 1.19
 
 require (
-	github.com/gorilla/mux v1.8.0
+	github.com/gorilla/mux v1.8.1
 	github.com/json-iterator/go v1.1.12
 	github.com/prometheus/client_golang v1.17.0
 	github.com/prometheus/common v0.44.0
