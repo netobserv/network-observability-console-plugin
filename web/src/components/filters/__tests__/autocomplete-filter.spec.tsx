@@ -2,10 +2,9 @@ import { TextInput, ValidatedOptions } from '@patternfly/react-core';
 import { mount } from 'enzyme';
 import * as React from 'react';
 import { act } from 'react-dom/test-utils';
+import { FilterDefinitionSample } from '../../../components/__tests-data__/filters';
 import { findFilter } from '../../../utils/filter-definitions';
 import AutocompleteFilter, { AutocompleteFilterProps } from '../autocomplete-filter';
-
-const t = (k: string) => k;
 
 const waitForComponentToPaint = async (): Promise<void> => {
   await act(async () => {
@@ -15,7 +14,7 @@ const waitForComponentToPaint = async (): Promise<void> => {
 
 describe('<AutocompleteFilter />', () => {
   const props: AutocompleteFilterProps = {
-    filterDefinition: findFilter(t, 'src_name')!,
+    filterDefinition: findFilter(FilterDefinitionSample, 'src_name')!,
     indicator: ValidatedOptions.default,
     addFilter: jest.fn(),
     setMessageWithDelay: jest.fn(),
@@ -27,7 +26,9 @@ describe('<AutocompleteFilter />', () => {
   });
 
   it('should filter valid port by name', async () => {
-    const wrapper = mount(<AutocompleteFilter {...props} filterDefinition={findFilter(t, 'src_port')!} />);
+    const wrapper = mount(
+      <AutocompleteFilter {...props} filterDefinition={findFilter(FilterDefinitionSample, 'src_port')!} />
+    );
     const textInput = wrapper.find(TextInput).at(0);
     const searchButton = wrapper.find('#search-button').at(0);
 
@@ -51,7 +52,9 @@ describe('<AutocompleteFilter />', () => {
   });
 
   it('should reject invalid port by name', async () => {
-    const wrapper = mount(<AutocompleteFilter {...props} filterDefinition={findFilter(t, 'dst_port')!} />);
+    const wrapper = mount(
+      <AutocompleteFilter {...props} filterDefinition={findFilter(FilterDefinitionSample, 'dst_port')!} />
+    );
     const textInput = wrapper.find(TextInput).at(0);
     const searchButton = wrapper.find('#search-button').at(0);
 

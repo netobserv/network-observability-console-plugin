@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Text, TextContent, TextVariants } from '@patternfly/react-core';
 import { useTranslation } from 'react-i18next';
-import { Filter } from '../../model/filters';
+import { Filter, FilterDefinition } from '../../model/filters';
 import { NodeData } from '../../model/topology';
 import { ElementField } from './element-field';
 import { createPeer } from '../../utils/metrics';
@@ -12,7 +12,8 @@ export const ElementFields: React.FC<{
   forceFirstAsText?: boolean;
   activeFilters: Filter[];
   setFilters: (filters: Filter[]) => void;
-}> = ({ id, data, forceFirstAsText, activeFilters, setFilters }) => {
+  filterDefinitions: FilterDefinition[];
+}> = ({ id, data, forceFirstAsText, activeFilters, setFilters, filterDefinitions }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   const fragments = [];
@@ -29,6 +30,7 @@ export const ElementFields: React.FC<{
         filterType={'resource'}
         peer={data.peer}
         setFilters={setFilters}
+        filterDefinitions={filterDefinitions}
       />
     );
     forceLabel = forceAsText = undefined;
@@ -44,6 +46,7 @@ export const ElementFields: React.FC<{
         filterType={'owner'}
         peer={createPeer({ owner: data.peer.owner, namespace: data.peer.namespace })}
         setFilters={setFilters}
+        filterDefinitions={filterDefinitions}
       />
     );
     forceLabel = forceAsText = undefined;
@@ -59,6 +62,7 @@ export const ElementFields: React.FC<{
         filterType={'namespace'}
         peer={createPeer({ namespace: data.peer.namespace })}
         setFilters={setFilters}
+        filterDefinitions={filterDefinitions}
       />
     );
     forceLabel = forceAsText = undefined;
@@ -74,6 +78,7 @@ export const ElementFields: React.FC<{
         filterType={'host'}
         peer={createPeer({ hostName: data.peer.hostName })}
         setFilters={setFilters}
+        filterDefinitions={filterDefinitions}
       />
     );
     forceLabel = forceAsText = undefined;
@@ -88,6 +93,7 @@ export const ElementFields: React.FC<{
         filterType={'resource'}
         peer={createPeer({ addr: data.peer.addr })}
         setFilters={setFilters}
+        filterDefinitions={filterDefinitions}
       />
     );
   }

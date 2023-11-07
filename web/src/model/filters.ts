@@ -3,17 +3,9 @@ import { isEqual } from '../utils/base-compare';
 
 export type FiltersEncoder = (values: FilterValue[], matchAny: boolean, not: boolean, moreThan: boolean) => string;
 
-export enum FilterComponent {
-  Autocomplete,
-  Text,
-  Number
-}
+export type FilterComponent = 'autocomplete' | 'text' | 'number';
 
-export enum FilterCategory {
-  Source,
-  Destination,
-  None
-}
+export type FilterCategory = 'source' | 'destination';
 
 export type TargetedFilterId =
   | 'namespace'
@@ -46,11 +38,23 @@ export type FilterId =
   | 'dns_errno'
   | 'time_flow_rtt';
 
+export interface FilterConfigDef {
+  id: string;
+  name: string;
+  component: string;
+  category?: string;
+  autoCompleteAddsQuotes?: boolean;
+  hint?: string;
+  examples?: string;
+  docUrl?: string;
+  placeholder?: string;
+}
+
 export interface FilterDefinition {
   id: FilterId;
   name: string;
   component: FilterComponent;
-  category: FilterCategory;
+  category?: FilterCategory;
   getOptions: (value: string) => Promise<FilterOption[]>;
   validate: (value: string) => { val?: string; err?: string };
   checkCompletion?: (value: string, selected: string) => { completed: boolean; option: FilterOption };

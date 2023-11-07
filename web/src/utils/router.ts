@@ -1,4 +1,3 @@
-import { TFunction } from 'i18next';
 import { findFilter } from './filter-definitions';
 import { TimeRange } from './datetime';
 import { Match, MetricFunction, MetricType, PacketLoss, RecordType } from '../model/flow-query';
@@ -11,7 +10,15 @@ import {
   setURLParam,
   URLParam
 } from './url';
-import { createFilterValue, DisabledFilters, Filter, filterKey, Filters, fromFilterKey } from '../model/filters';
+import {
+  createFilterValue,
+  DisabledFilters,
+  Filter,
+  FilterDefinition,
+  filterKey,
+  Filters,
+  fromFilterKey
+} from '../model/filters';
 
 const filtersSeparator = ';';
 const filterKVSeparator = '=';
@@ -56,7 +63,10 @@ export const getPacketLossFromURL = (): PacketLoss => {
   return (getURLParam(URLParam.PacketLoss) as PacketLoss | null) || defaultPacketLoss;
 };
 
-export const getFiltersFromURL = (t: TFunction, disabledFilters: DisabledFilters): Promise<Filters> | undefined => {
+export const getFiltersFromURL = (
+  filterDefinitions: FilterDefinition[],
+  disabledFilters: DisabledFilters
+): Promise<Filters> | undefined => {
   const urlParam = getURLParam(URLParam.Filters);
   //skip filters only if url param is missing
   if (urlParam === null) {
@@ -68,7 +78,7 @@ export const getFiltersFromURL = (t: TFunction, disabledFilters: DisabledFilters
     const pair = keyValue.split(filterKVSeparator);
     if (pair.length === 2) {
       const { id, not, moreThan } = fromFilterKey(pair[0]);
-      const def = findFilter(t, id);
+      const def = findFilter(filterDefinitions, id);
       if (def) {
         const disabledValues = disabledFilters[pair[0]]?.split(',') || [];
         const values = pair[1].split(filterValuesSeparator);

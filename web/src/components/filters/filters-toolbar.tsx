@@ -11,7 +11,7 @@ import { CompressIcon, ExpandIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Filter, FilterComponent, FilterDefinition, FilterValue, Filters, findFromFilters } from '../../model/filters';
+import { Filter, FilterDefinition, FilterValue, Filters, findFromFilters } from '../../model/filters';
 import { QuickFilter } from '../../model/quick-filters';
 import { findFilter } from '../../utils/filter-definitions';
 import { QueryOptionsDropdown, QueryOptionsDropdownProps } from '../dropdowns/query-options-dropdown';
@@ -37,10 +37,7 @@ export interface FiltersToolbarProps {
   resetFilters: () => void;
   queryOptionsProps: QueryOptionsDropdownProps;
   quickFilters: QuickFilter[];
-  allowConnectionFilter?: boolean;
-  allowDNSFilter?: boolean;
-  allowPktDrops?: boolean;
-  allowRTTFilter?: boolean;
+  filterDefinitions: FilterDefinition[];
   isFullScreen: boolean;
   setFullScreen: (b: boolean) => void;
 }
@@ -54,10 +51,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
   clearFilters,
   resetFilters,
   quickFilters,
-  allowConnectionFilter,
-  allowDNSFilter,
-  allowPktDrops,
-  allowRTTFilter,
+  filterDefinitions,
   isFullScreen,
   setFullScreen,
   ...props
@@ -65,7 +59,9 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [indicator, setIndicator] = React.useState<Indicator>(ValidatedOptions.default);
   const [message, setMessage] = React.useState<string | undefined>();
-  const [selectedFilter, setSelectedFilter] = React.useState<FilterDefinition>(findFilter(t, 'src_namespace')!);
+  const [selectedFilter, setSelectedFilter] = React.useState<FilterDefinition>(
+    findFilter(filterDefinitions, 'src_namespace')!
+  );
   const [selectedCompare, setSelectedCompare] = React.useState<FilterCompare>(FilterCompare.EQUAL);
   const [showFilters, setShowFilters] = useLocalStorage<boolean>(LOCAL_STORAGE_SHOW_FILTERS_KEY, true);
 
@@ -123,15 +119,10 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
       setIndicator: setIndicator
     };
     switch (selectedFilter.component) {
-      case FilterComponent.Text:
-      case FilterComponent.Number:
-        return (
-          <TextFilter
-            {...commonProps}
-            regexp={selectedFilter.component === FilterComponent.Number ? /\D/g : undefined}
-          />
-        );
-      case FilterComponent.Autocomplete:
+      case 'text':
+      case 'number':
+        return <TextFilter {...commonProps} regexp={selectedFilter.component === 'number' ? /\D/g : undefined} />;
+      case 'autocomplete':
         return <AutocompleteFilter {...commonProps} />;
     }
   }, [selectedFilter, addFilter, indicator, setIndicator, setMessageWithDelay]);
@@ -174,12 +165,9 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
                 <div>
                   <InputGroup>
                     <FiltersDropdown
+                      filterDefinitions={filterDefinitions}
                       selectedFilter={selectedFilter}
                       setSelectedFilter={setSelectedFilter}
-                      allowConnectionFilter={allowConnectionFilter}
-                      allowDNSFilter={allowDNSFilter}
-                      allowPktDrops={allowPktDrops}
-                      allowRTTFilter={allowRTTFilter}
                     />
                     <CompareFilter
                       value={selectedCompare}
@@ -228,6 +216,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
             clearFilters={clearFilters}
             resetFilters={resetFilters}
             quickFilters={quickFilters}
+            filterDefinitions={filterDefinitions}
           />
         )}
       </ToolbarContent>

@@ -48,7 +48,7 @@ OCI_BIN ?= $(shell basename ${OCI_BIN_PATH})
 
 GOLANGCI_LINT_VERSION = v1.53.3
 NPM_INSTALL ?= install
-CMDLINE_ARGS ?= --loglevel trace --loki-tenant-id netobserv --frontend-config config/sample-frontend-config.yaml --auth-check none
+CMDLINE_ARGS ?= --loglevel trace --config config/config.yaml
 LDFLAGS := -X 'main.buildVersion=${BUILD_VERSION}' -X 'main.buildDate=${BUILD_DATE}'
 # You can add GO Build flags like -gcflags=all="-N -l" here to remove optimizations for debugging
 BUILD_FLAGS ?= -ldflags "${LDFLAGS}"
@@ -100,18 +100,34 @@ vendors: ## Check go vendors
 	@echo "### Checking vendors"
 	go mod tidy && go mod vendor
 
+.PHONY: yq
+YQ = ./bin/yq
+YQ: ## Download yq locally if necessary.
+ifeq (,$(shell which $(YQ) 2>/dev/null))
+	@{ \
+	echo "### Downloading yq"; \
+	set -e ;\
+	mkdir -p $(dir $(YQ)) ;\
+	OS=$(shell go env GOOS) && ARCH=$(shell go env GOARCH) && \
+	curl -sSLo $(YQ) https://github.com/mikefarah/yq/releases/download/v4.35.2/yq_$${OS}_$${ARCH} ;\
+	chmod +x $(YQ) ;\
+	}
+endif
+
 ##@ Develop
 
 .PHONY: start
-start: build-backend install-frontend ## Run backend and frontend
+start: YQ build-backend install-frontend ## Run backend and frontend
+	$(YQ) '.server.port |= 9002 | .server.metricsPort |= 9003 | .loki.useMocks |= false' ./config/sample-config.yaml > ./config/config.yaml
 	@echo "### Starting backend on http://localhost:9002"
 	bash -c "trap 'fuser -k 9002/tcp' EXIT; \
-					./plugin-backend -port 9002 -metrics-port 9003 $(CMDLINE_ARGS) & cd web && npm run start" 
+					./plugin-backend $(CMDLINE_ARGS) & cd web && npm run start" 
 
 .PHONY: start-backend
-start-backend: build-backend
+start-backend: YQ build-backend
+	$(YQ) '.server.port |= 9002 | .server.metricsPort |= 9003 | .loki.useMocks |= false' ./config/sample-config.yaml > ./config/config.yaml
 	bash -c "trap 'fuser -k 9002/tcp' EXIT; \
-					./plugin-backend -port 9002 -metrics-port 9003 $(CMDLINE_ARGS)"
+					./plugin-backend $(CMDLINE_ARGS)"
 
 .PHONY: start-frontend-standalone
 start-frontend-standalone: install-frontend ## Run frontend as standalone
@@ -124,10 +140,11 @@ start-standalone: build-backend install-frontend ## Run backend and frontend as 
 					./plugin-backend -port 9002 -metrics-port 9003 $(CMDLINE_ARGS) & cd web && npm run start:standalone"
 
 .PHONY: start-standalone-mock
-start-standalone-mock: build-backend install-frontend ## Run backend using mocks and frontend as standalone
+start-standalone-mock: YQ build-backend install-frontend ## Run backend using mocks and frontend as standalone
+	$(YQ) '.server.port |= 9002 | .server.metricsPort |= 9003 | .loki.useMocks |= true' ./config/sample-config.yaml > ./config/config.yaml
 	@echo "### Starting backend on http://localhost:9002 using mock"
 	bash -c "trap 'fuser -k 9002/tcp' EXIT; \
-					./plugin-backend -port 9002 -metrics-port 9003 --loki-mock $(CMDLINE_ARGS) & cd web && npm run start:standalone"
+					./plugin-backend $(CMDLINE_ARGS) & cd web && npm run start:standalone"
 
 .PHONY: bridge
 bridge: ## Bridge OCP console
@@ -201,12 +218,14 @@ build-frontend-standalone: install-frontend fmt-frontend ## Run npm install, for
 	cd web && npm run build:standalone
 
 .PHONY: serve
-serve: ## Run backend
+serve: YQ ## Run backend
+	$(YQ) '.server.port |= 9001 | .server.metricsPort |= 9002 | .loki.useMocks |= false' ./config/sample-config.yaml
 	./plugin-backend $(CMDLINE_ARGS)
 
 .PHONY: serve-mock
-serve-mock: ## Run backend using mocks
-	./plugin-backend --loki-mock $(CMDLINE_ARGS)
+serve-mock: YQ ## Run backend using mocks
+	$(YQ) '.server.port |= 9001 | .server.metricsPort |= 9002 | .loki.useMocks |= true' ./config/sample-config.yaml
+	./plugin-backend $(CMDLINE_ARGS)
 
 ##@ Images
 

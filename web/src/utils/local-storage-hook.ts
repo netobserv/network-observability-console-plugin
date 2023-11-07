@@ -38,30 +38,7 @@ export function useLocalStorage<T>(
   initialValue?: T,
   opts?: ArraySelectionOptions
 ): [T, React.Dispatch<React.SetStateAction<T>>] {
-  const [storedValue, setStoredValue] = React.useState<T>(() => {
-    // Get localStorage item if available, else fallback on initialValue
-    try {
-      const item = window.localStorage.getItem(LOCAL_STORAGE_PLUGIN_KEY);
-      const param = item ? JSON.parse(item)[key] : undefined;
-
-      // Manage array selection by ids if opts is set
-      if (opts && Array.isArray(initialValue) && Array.isArray(param)) {
-        return !_.isEmpty(param)
-          ? initialValue.map(item => {
-              item[opts.criteria] = param.includes(item[opts.id]);
-              return item;
-            })
-          : initialValue;
-      } else {
-        // Return parsed item if available
-        return param ? param : initialValue;
-      }
-    } catch (error) {
-      console.error(error);
-      clearLocalStorage();
-      return initialValue;
-    }
-  });
+  const [storedValue, setStoredValue] = React.useState<T>(() => getLocalStorage<T>(key, initialValue, opts));
 
   // Return a wrapped version of useState's setter function that persists the new value to localStorage
   const setValue = (value: T) => {
@@ -95,6 +72,30 @@ export function useLocalStorage<T>(
     }
   };
   return [storedValue, setValue];
+}
+
+export function getLocalStorage<T>(key: string, initialValue?: T, opts?: ArraySelectionOptions) {
+  try {
+    const item = window.localStorage.getItem(LOCAL_STORAGE_PLUGIN_KEY);
+    const param = item ? JSON.parse(item)[key] : undefined;
+
+    // Manage array selection by ids if opts is set
+    if (opts && Array.isArray(initialValue) && Array.isArray(param)) {
+      return !_.isEmpty(param)
+        ? initialValue.map(item => {
+            item[opts.criteria] = param.includes(item[opts.id]);
+            return item;
+          })
+        : initialValue;
+    } else {
+      // Return parsed item if available
+      return param ? param : initialValue;
+    }
+  } catch (error) {
+    console.error(error);
+    clearLocalStorage();
+    return initialValue;
+  }
 }
 
 export function clearLocalStorage() {

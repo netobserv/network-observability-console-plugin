@@ -12,6 +12,24 @@ export const FlowsResultMock: RecordsResult = {
   }
 };
 
+export const UnknownFlow: Record = {
+  labels: {
+    _RecordType: 'flowLog',
+    FlowDirection: FlowDirection.Inner
+  },
+  key: 1,
+  fields: {
+    SrcAddr: '10.0.0.1',
+    DstAddr: '10.0.0.2',
+    Proto: NaN,
+    SrcMac: '',
+    DstMac: '',
+    TimeFlowEndMs: NaN,
+    TimeFlowStartMs: NaN,
+    TimeReceived: NaN
+  }
+};
+
 export const FlowsSample: Record[] = [
   {
     labels: {

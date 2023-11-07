@@ -1,9 +1,10 @@
+import { FilterDefinitionSample } from '../../components/__tests-data__/filters';
 import { findFilter } from '../../utils/filter-definitions';
 import { doesIncludeFilter, Filter, filtersEqual } from '../filters';
 
 describe('doesIncludeFilter', () => {
-  const srcNameFilter = findFilter((a: string) => a, 'src_name')!;
-  const notDstNameFilter = findFilter((a: string) => a, 'dst_name')!;
+  const srcNameFilter = findFilter(FilterDefinitionSample, 'src_name')!;
+  const notDstNameFilter = findFilter(FilterDefinitionSample, 'dst_name')!;
   const activeFilters: Filter[] = [
     {
       def: srcNameFilter,
@@ -18,7 +19,7 @@ describe('doesIncludeFilter', () => {
   ];
 
   it('should not include filter due to different key', () => {
-    const isIncluded = doesIncludeFilter(activeFilters, { def: findFilter((a: string) => a, 'protocol')! }, [
+    const isIncluded = doesIncludeFilter(activeFilters, { def: findFilter(FilterDefinitionSample, 'protocol')! }, [
       { v: 'abc' },
       { v: 'def' }
     ]);
@@ -65,8 +66,8 @@ describe('doesIncludeFilter', () => {
 });
 
 describe('filtersEqual', () => {
-  const f1 = findFilter((a: string) => a, 'src_name')!;
-  const f2 = findFilter((a: string) => a, 'dst_name')!;
+  const f1 = findFilter(FilterDefinitionSample, 'src_name')!;
+  const f2 = findFilter(FilterDefinitionSample, 'dst_name')!;
   const values1 = [{ v: 'abc' }, { v: 'def' }];
   const values2 = [{ v: 'def' }, { v: 'abc' }];
   const values3 = [{ v: 'abc' }, { v: 'def', display: 'def' }];

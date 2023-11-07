@@ -21,7 +21,7 @@ import { useTranslation } from 'react-i18next';
 import { defaultSize, maxSize, minSize } from '../../utils/panel';
 import { MetricType } from '../../model/flow-query';
 import { TopologyMetrics } from '../../api/loki';
-import { Filter } from '../../model/filters';
+import { Filter, FilterDefinition } from '../../model/filters';
 import { GraphElementPeer, NodeData } from '../../model/topology';
 import { ElementPanelMetrics } from './element-panel-metrics';
 import { TruncateLength } from '../dropdowns/truncate-dropdown';
@@ -33,7 +33,8 @@ export const ElementPanelDetailsContent: React.FC<{
   element: GraphElementPeer;
   filters: Filter[];
   setFilters: (filters: Filter[]) => void;
-}> = ({ element, filters, setFilters }) => {
+  filterDefinitions: FilterDefinition[];
+}> = ({ element, filters, setFilters, filterDefinitions }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [hidden, setHidden] = React.useState<string[]>([]);
   const data = element.getData();
@@ -56,6 +57,7 @@ export const ElementPanelDetailsContent: React.FC<{
         forceFirstAsText={true}
         activeFilters={filters}
         setFilters={setFilters}
+        filterDefinitions={filterDefinitions}
       />
     );
   } else if (element instanceof BaseEdge) {
@@ -77,7 +79,13 @@ export const ElementPanelDetailsContent: React.FC<{
               </AccordionToggle>
             }
             <AccordionContent className="borderless-accordion" id="source-content" isHidden={hidden.includes('source')}>
-              <ElementFields id="source-info" data={aData} activeFilters={filters} setFilters={setFilters} />
+              <ElementFields
+                id="source-info"
+                data={aData}
+                activeFilters={filters}
+                setFilters={setFilters}
+                filterDefinitions={filterDefinitions}
+              />
             </AccordionContent>
           </AccordionItem>
         </div>
@@ -99,7 +107,13 @@ export const ElementPanelDetailsContent: React.FC<{
               id="destination-content"
               isHidden={hidden.includes('destination')}
             >
-              <ElementFields id="destination-info" data={bData} activeFilters={filters} setFilters={setFilters} />
+              <ElementFields
+                id="destination-info"
+                data={bData}
+                activeFilters={filters}
+                setFilters={setFilters}
+                filterDefinitions={filterDefinitions}
+              />
             </AccordionContent>
           </AccordionItem>
         </div>
@@ -115,10 +129,11 @@ export const ElementPanel: React.FC<{
   metrics: TopologyMetrics[];
   metricType: MetricType;
   filters: Filter[];
+  filterDefinitions: FilterDefinition[];
   setFilters: (filters: Filter[]) => void;
   truncateLength: TruncateLength;
   id?: string;
-}> = ({ id, element, metrics, metricType, filters, setFilters, onClose, truncateLength }) => {
+}> = ({ id, element, metrics, metricType, filters, filterDefinitions, setFilters, onClose, truncateLength }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [activeTab, setActiveTab] = React.useState<string>('details');
 
@@ -167,7 +182,12 @@ export const ElementPanel: React.FC<{
           role="region"
         >
           <Tab className="drawer-tab" eventKey={'details'} title={<TabTitleText>{t('Details')}</TabTitleText>}>
-            <ElementPanelDetailsContent element={element} filters={filters} setFilters={setFilters} />
+            <ElementPanelDetailsContent
+              element={element}
+              filters={filters}
+              setFilters={setFilters}
+              filterDefinitions={filterDefinitions}
+            />
           </Tab>
           <Tab className="drawer-tab" eventKey={'metrics'} title={<TabTitleText>{t('Metrics')}</TabTitleText>}>
             <ElementPanelMetrics

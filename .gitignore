@@ -10,3 +10,5 @@
 /cover.out
 tmp.Dockerfile
 /web/cypress/videos
+/bin
+/config/config.yaml

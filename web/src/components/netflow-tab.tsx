@@ -1,10 +1,21 @@
 import { K8sResourceCommon, PageComponentProps } from '@openshift-console/dynamic-plugin-sdk';
-import { EmptyState, EmptyStateBody, EmptyStateVariant, PageSection, Title } from '@patternfly/react-core';
+import {
+  Bullseye,
+  EmptyState,
+  EmptyStateBody,
+  EmptyStateVariant,
+  PageSection,
+  Spinner,
+  Title
+} from '@patternfly/react-core';
+import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { usePrevious } from '../utils/previous-hook';
+import { Config, defaultConfig } from '../model/config';
 import { Filters } from '../model/filters';
-import { findFilter } from '../utils/filter-definitions';
+import { loadConfig } from '../utils/config';
+import { findFilter, getFilterDefinitions } from '../utils/filter-definitions';
+import { usePrevious } from '../utils/previous-hook';
 import NetflowTraffic from './netflow-traffic';
 import NetflowTrafficParent from './netflow-traffic-parent';
 
@@ -28,18 +39,44 @@ type HPAProps = K8sResourceCommon & {
 
 export const NetflowTab: React.FC<PageComponentProps> = ({ obj }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
+  const [loading, setLoading] = React.useState(true);
+  const initState = React.useRef<Array<'initDone' | 'configLoading' | 'configLoaded' | 'forcedFiltersLoaded'>>([]);
+  const [config, setConfig] = React.useState<Config>(defaultConfig);
   const [forcedFilters, setForcedFilters] = React.useState<Filters | null>(null);
-  const previousObj = usePrevious(obj);
+  const previous = usePrevious({ obj, state: initState.current });
 
   React.useEffect(() => {
+    // init function will be triggered only once
+    if (!initState.current.includes('initDone')) {
+      initState.current.push('initDone');
+
+      // load config only once and track its state
+      if (!initState.current.includes('configLoading')) {
+        initState.current.push('configLoading');
+        loadConfig().then(v => {
+          setConfig(v);
+          setLoading(false);
+          initState.current.push('configLoaded');
+        });
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  React.useEffect(() => {
+    const filterDefinitions = getFilterDefinitions(config.filters, config.columns, t);
+
     if (
-      obj?.kind === previousObj?.kind &&
-      obj?.metadata?.name === previousObj?.metadata?.name &&
-      obj?.metadata?.namespace === previousObj?.metadata?.namespace
+      _.isEmpty(filterDefinitions) ||
+      (previous?.state.includes('configLoaded') &&
+        obj?.kind === previous?.obj?.kind &&
+        obj?.metadata?.name === previous?.obj?.metadata?.name &&
+        obj?.metadata?.namespace === previous?.obj?.metadata?.namespace)
     ) {
       return;
     }
 
+    initState.current.push('forcedFiltersLoaded');
     switch (obj?.kind) {
       case 'Pod':
       case 'Deployment':
@@ -50,7 +87,7 @@ export const NetflowTab: React.FC<PageComponentProps> = ({ obj }) => {
         setForcedFilters({
           list: [
             {
-              def: findFilter(t, 'src_resource')!,
+              def: findFilter(filterDefinitions, 'src_resource')!,
               values: [{ v: `${obj.kind}.${obj.metadata!.namespace}.${obj.metadata!.name}` }]
             }
           ],
@@ -62,7 +99,7 @@ export const NetflowTab: React.FC<PageComponentProps> = ({ obj }) => {
         setForcedFilters({
           list: [
             {
-              def: findFilter(t, 'dst_resource')!,
+              def: findFilter(filterDefinitions, 'dst_resource')!,
               values: [{ v: `${obj.kind}.${obj.metadata!.namespace}.${obj.metadata!.name}` }]
             }
           ],
@@ -74,7 +111,7 @@ export const NetflowTab: React.FC<PageComponentProps> = ({ obj }) => {
         setForcedFilters({
           list: [
             {
-              def: findFilter(t, 'dst_resource')!,
+              def: findFilter(filterDefinitions, 'dst_resource')!,
               values: [{ v: `${route.spec.to!.kind}.${route.metadata!.namespace}.${route.spec.to!.name}` }]
             }
           ],
@@ -85,7 +122,7 @@ export const NetflowTab: React.FC<PageComponentProps> = ({ obj }) => {
         setForcedFilters({
           list: [
             {
-              def: findFilter(t, 'src_namespace')!,
+              def: findFilter(filterDefinitions, 'src_namespace')!,
               values: [{ v: obj!.metadata!.name as string }]
             }
           ],
@@ -96,7 +133,7 @@ export const NetflowTab: React.FC<PageComponentProps> = ({ obj }) => {
         setForcedFilters({
           list: [
             {
-              def: findFilter(t, 'src_host_name')!,
+              def: findFilter(filterDefinitions, 'src_host_name')!,
               values: [{ v: obj!.metadata!.name as string }]
             }
           ],
@@ -107,7 +144,7 @@ export const NetflowTab: React.FC<PageComponentProps> = ({ obj }) => {
         setForcedFilters({
           list: [
             {
-              def: findFilter(t, 'src_resource')!,
+              def: findFilter(filterDefinitions, 'src_resource')!,
               values: obj.metadata!.ownerReferences!.map(ownerRef => {
                 return { v: `${ownerRef.kind}.${obj.metadata!.namespace}.${ownerRef.name}` };
               })
@@ -121,7 +158,7 @@ export const NetflowTab: React.FC<PageComponentProps> = ({ obj }) => {
         setForcedFilters({
           list: [
             {
-              def: findFilter(t, 'src_resource')!,
+              def: findFilter(filterDefinitions, 'src_resource')!,
               values: [
                 { v: `${hpa.spec.scaleTargetRef.kind}.${hpa.metadata!.namespace}.${hpa.spec.scaleTargetRef.name}` }
               ]
@@ -131,20 +168,26 @@ export const NetflowTab: React.FC<PageComponentProps> = ({ obj }) => {
         });
         break;
     }
-  }, [obj, previousObj, t]);
+  }, [config, obj, previous, t]);
 
   return forcedFilters ? (
     <NetflowTrafficParent>
-      <NetflowTraffic forcedFilters={forcedFilters} isTab />
+      <NetflowTraffic forcedFilters={forcedFilters} isTab parentConfig={config} />
     </NetflowTrafficParent>
   ) : (
-    <PageSection id="pageSection">
-      <EmptyState data-test="error-state" variant={EmptyStateVariant.small}>
-        <Title headingLevel="h2" size="lg">
-          {t('Kind not managed')}
-        </Title>
-        <EmptyStateBody>{obj?.kind}</EmptyStateBody>
-      </EmptyState>
+    <PageSection id="pageSection" data-test="tab-page-section">
+      {loading ? (
+        <Bullseye data-test="loading-tab">
+          <Spinner size="xl" />
+        </Bullseye>
+      ) : (
+        <EmptyState data-test="error-state" variant={EmptyStateVariant.small}>
+          <Title headingLevel="h2" size="lg">
+            {t('Kind not managed')}
+          </Title>
+          <EmptyStateBody>{obj?.kind}</EmptyStateBody>
+        </EmptyState>
+      )}
     </PageSection>
   );
 };

@@ -12,9 +12,9 @@ import (
 var mlog = logrus.WithField("module", "metrics-server")
 
 type MetricsConfig struct {
-	Port           int
-	CertFile       string
-	PrivateKeyFile string
+	Port     int
+	CertPath string
+	KeyPath  string
 }
 
 func StartMetrics(cfg *MetricsConfig) {
@@ -30,9 +30,9 @@ func StartMetrics(cfg *MetricsConfig) {
 	// via an HTTP server. "/metrics" is the usual endpoint for that.
 	http.Handle("/metrics", promhttp.Handler())
 
-	if cfg.CertFile != "" && cfg.PrivateKeyFile != "" {
+	if cfg.CertPath != "" && cfg.KeyPath != "" {
 		mlog.Infof("listening on https://:%d", cfg.Port)
-		panic(promServer.ListenAndServeTLS(cfg.CertFile, cfg.PrivateKeyFile))
+		panic(promServer.ListenAndServeTLS(cfg.CertPath, cfg.KeyPath))
 	} else {
 		mlog.Infof("listening on http://:%d", cfg.Port)
 		panic(promServer.ListenAndServe())
