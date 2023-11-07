@@ -56,6 +56,7 @@ export enum ColumnsId {
   dnsid = 'DNSId',
   dnslatency = 'DNSLatency',
   dnsresponsecode = 'DNSResponseCode',
+  dnserrno = 'DNSErrNo',
   hostaddr = 'K8S_HostIP',
   srchostaddr = 'SrcK8S_HostIP',
   dsthostaddr = 'DstK8S_HostIP',
@@ -889,6 +890,18 @@ export const getExtraColumns = (t: TFunction): Column[] => {
       quickFilter: 'dns_flag_response_code',
       isSelected: true,
       value: f => f.fields.DnsFlagsResponseCode || '',
+      sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
+      width: 5
+    },
+    {
+      id: ColumnsId.dnserrno,
+      group: t('DNS'),
+      name: t('DNS Error'),
+      tooltip: t('DNS error number returned from DNS tracker ebpf hook function.'),
+      fieldName: 'DnsErrno',
+      quickFilter: 'dns_errno',
+      isSelected: false,
+      value: f => (f.fields.DnsErrno === undefined ? Number.NaN : f.fields.DnsErrno),
       sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
       width: 5
     }

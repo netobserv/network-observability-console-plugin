@@ -5,7 +5,7 @@ import { FlowDirection } from '../api/ipfix';
 import { FilterOption } from '../model/filters';
 import { splitResource, SplitStage } from '../model/resource';
 import { autoCompleteCache } from './autocomplete-cache';
-import { DNS_RCODES } from './dns';
+import { DNS_ERRORS, DNS_RCODES } from './dns';
 import { getPort, getService } from './port';
 import { DROP_CAUSES, DROP_STATES } from './pkt-drop';
 import { TFunction } from 'i18next';
@@ -129,6 +129,14 @@ export const getDnsResponseCodeOptions = (value: string): Promise<FilterOption[]
 export const getDSCPOptions = (value: string): Promise<FilterOption[]> => {
   return Promise.resolve(
     DSCP_VALUES.filter(
+      opt => String(opt.value).includes(value) || opt.name.toLowerCase().includes(value.toLowerCase())
+    ).map(v => ({ name: v.name, value: String(v.value) }))
+  );
+};
+
+export const getDnsErrorCodeOptions = (value: string): Promise<FilterOption[]> => {
+  return Promise.resolve(
+    DNS_ERRORS.filter(
       opt => String(opt.value).includes(value) || opt.name.toLowerCase().includes(value.toLowerCase())
     ).map(v => ({ name: v.name, value: String(v.value) }))
   );

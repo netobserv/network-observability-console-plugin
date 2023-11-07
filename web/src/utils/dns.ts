@@ -35,3 +35,51 @@ export type DNS_CODE_NAMES = typeof dnsRcodesNames[number];
 export const getDNSRcodeDescription = (name: DNS_CODE_NAMES): string => {
   return DNS_RCODES.find(v => v.name === name)?.description || 'Unassigned';
 };
+
+// https://elixir.bootlin.com/linux/v4.7/source/include/uapi/asm-generic/errno-base.h
+export const DNS_ERRORS: ReadOnlyValues = [
+  { value: 1, name: 'EPERM', description: 'Operation not permitted' },
+  { value: 2, name: 'ENOENT', description: 'No such file or directory' },
+  { value: 3, name: 'ESRCH', description: 'No such process' },
+  { value: 4, name: 'EINTR', description: 'Interrupted system call' },
+  { value: 5, name: 'EIO', description: 'I/O error' },
+  { value: 6, name: 'ENXIO', description: 'No such device or address' },
+  { value: 7, name: 'E2BIG', description: 'Argument list too long' },
+  { value: 8, name: 'ENOEXEC', description: 'Exec format error' },
+  { value: 9, name: 'EBADF', description: 'Bad file number' },
+  { value: 10, name: 'ECHILD', description: 'No child processes' },
+  { value: 11, name: 'EAGAIN', description: 'Try again' },
+  { value: 12, name: 'ENOMEM', description: 'Out of memory' },
+  { value: 13, name: 'EACCES', description: 'Permission denied' },
+  { value: 14, name: 'EFAULT', description: 'Bad address' },
+  { value: 15, name: 'ENOTBLK', description: 'Block device required' },
+  { value: 16, name: 'EBUSY', description: 'Device or resource busy' },
+  { value: 17, name: 'EEXIST', description: 'File exists' },
+  { value: 18, name: 'EXDEV', description: 'Cross-device link' },
+  { value: 19, name: 'ENODEV', description: 'No such device' },
+  { value: 20, name: 'ENOTDIR', description: 'Not a directory' },
+  { value: 21, name: 'EISDIR', description: 'Is a directory' },
+  { value: 22, name: 'EINVAL', description: 'Invalid argument' },
+  { value: 23, name: 'ENFILE', description: 'File table overflow' },
+  { value: 24, name: 'EMFILE', description: 'Too many open files' },
+  { value: 25, name: 'ENOTTY', description: 'Not a typewriter' },
+  { value: 26, name: 'ETXBSY', description: 'Text file busy' },
+  { value: 27, name: 'EFBIG', description: 'File too large' },
+  { value: 28, name: 'ENOSPC', description: 'No space left on device' },
+  { value: 29, name: 'ESPIPE', description: 'Illegal seek' },
+  { value: 30, name: 'EROFS', description: 'Read-only file system' },
+  { value: 31, name: 'EMLINK', description: 'Too many links' },
+  { value: 32, name: 'EPIPE', description: 'Broken pipe' },
+  { value: 33, name: 'EDOM', description: 'Math argument out of domain of func' },
+  { value: 34, name: 'ERANGE', description: 'Math result not representable' }
+] as const;
+
+const dnsErrorsValues = DNS_ERRORS.map(v => v.value);
+export type DNS_ERRORS_VALUES = typeof dnsErrorsValues[number];
+
+const dnsErrorsNames = DNS_ERRORS.map(v => v.name);
+export type DNS_ERRORS_NAMES = typeof dnsErrorsNames[number];
+
+export const getDNSErrorDescription = (value: DNS_ERRORS_VALUES): string => {
+  return DNS_ERRORS.find(v => v.value === value)?.description || '';
+};

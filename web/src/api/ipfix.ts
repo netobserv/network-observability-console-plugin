@@ -128,6 +128,8 @@ export interface Fields {
   DnsFlagsResponseCode?: string;
   /** Calculated time between response and request, in milliseconds */
   DnsLatencyMs?: number;
+  /** Error number returned from DNS tracker ebpf hook function */
+  DnsErrno?: number;
   /** Start timestamp of this flow, in milliseconds */
   TimeFlowStartMs: number;
   /** End timestamp of this flow, in milliseconds */

@@ -12,18 +12,19 @@ const (
 )
 
 type Topology struct {
-	limit              string
-	rateInterval       string
-	step               string
-	function           string
-	dataField          string
-	fields             string
-	skipEmptyDropState bool
-	skipEmptyDropCause bool
-	skipNonDNS         bool
-	skipEmptyDNSRCode  bool
-	skipEmptyRTT       bool
-	factor             string
+	limit               string
+	rateInterval        string
+	step                string
+	function            string
+	dataField           string
+	fields              string
+	skipEmptyDropState  bool
+	skipEmptyDropCause  bool
+	skipNonDNS          bool
+	skipEmptyDNSLatency bool
+	skipEmptyDNSRCode   bool
+	skipEmptyRTT        bool
+	factor              string
 }
 
 type TopologyQueryBuilder struct {
@@ -79,18 +80,19 @@ func NewTopologyQuery(cfg *Config, start, end, limit, rateInterval, step string,
 	return &TopologyQueryBuilder{
 		FlowQueryBuilder: NewFlowQueryBuilder(cfg, start, end, limit, d, rt, packetLoss),
 		topology: &Topology{
-			rateInterval:       rateInterval,
-			step:               step,
-			limit:              l,
-			function:           f,
-			dataField:          t,
-			fields:             fields,
-			skipEmptyDropState: aggregate == "droppedState",
-			skipEmptyDropCause: aggregate == "droppedCause",
-			skipNonDNS:         metricType == constants.MetricTypeDNSLatencies || metricType == constants.MetricTypeCountDNS,
-			skipEmptyDNSRCode:  aggregate == "dnsRCode",
-			skipEmptyRTT:       metricType == constants.MetricTypeFlowRTT,
-			factor:             factor,
+			rateInterval:        rateInterval,
+			step:                step,
+			limit:               l,
+			function:            f,
+			dataField:           t,
+			fields:              fields,
+			skipEmptyDropState:  aggregate == "droppedState",
+			skipEmptyDropCause:  aggregate == "droppedCause",
+			skipNonDNS:          metricType == constants.MetricTypeCountDNS,
+			skipEmptyDNSLatency: metricType == constants.MetricTypeDNSLatencies,
+			skipEmptyDNSRCode:   aggregate == "dnsRCode",
+			skipEmptyRTT:        metricType == constants.MetricTypeFlowRTT,
+			factor:              factor,
 		},
 	}, nil
 }
@@ -177,6 +179,8 @@ func (q *TopologyQueryBuilder) Build() string {
 
 	if q.topology.skipEmptyDNSRCode {
 		q.appendDNSRCodeFilter(sb)
+	} else if q.topology.skipEmptyDNSLatency {
+		q.appendDNSLatencyFilter(sb)
 	} else if q.topology.skipNonDNS {
 		q.appendDNSFilter(sb)
 	}

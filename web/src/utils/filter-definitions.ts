@@ -27,7 +27,8 @@ import {
   getDropCauseOptions,
   getDirectionOptionsAsync,
   findDirectionOption,
-  getDSCPOptions
+  getDSCPOptions,
+  getDnsErrorCodeOptions
 } from './filter-options';
 
 // Convenience string to filter by undefined field values
@@ -559,6 +560,16 @@ export const getFilterDefinitions = (
         - ${t('A IANA RCODE name like NoError, NXDomain, NotAuth')}`,
         docUrl: 'https://www.iana.org/assignments/dns-parameters/dns-parameters.xhtml#dns-parameters-6',
         encoder: simpleFiltersEncoder('DnsFlagsResponseCode')
+      },
+      {
+        id: 'dns_errno',
+        name: t('DNS Error'),
+        category: FilterCategory.None,
+        component: FilterComponent.Autocomplete,
+        getOptions: cap10(getDnsErrorCodeOptions),
+        validate: rejectEmptyValue,
+        hint: t('Specify a single DNS error number.'),
+        encoder: simpleFiltersEncoder('DnsErrno')
       },
       {
         id: 'time_flow_rtt',
