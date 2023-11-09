@@ -406,24 +406,20 @@ frontend:
     - id: FlowDuration
       name: Duration
       tooltip: Time elapsed between Start Time and End Time.
+      calculated: substract(TimeFlowEndMs,TimeFlowStartMs)
       default: false
-      width: 5
-    - id: TimeFlowRttMs
-      name: Flow RTT
-      tooltip: TCP handshake Round Trip Time
-      field: TimeFlowRttNs
-      filter: time_flow_rtt
-      default: true
       width: 5
     - id: CollectionTime
       name: Collection Time
       tooltip: Reception time of the record by the collector.
+      calculated: multiply(TimeReceived,1000),
       field: TimeReceived
       default: false
       width: 15
     - id: CollectionLatency
       name: Collection Latency
       tooltip: Time elapsed between End Time and Collection Time.
+      calculated: substract(column.CollectionTime,TimeFlowEndMs)
       default: false
       width: 5
     - id: DNSId
@@ -457,6 +453,13 @@ frontend:
       field: DnsErrno
       filter: dns_errno
       default: false
+      width: 5
+    - id: TimeFlowRttMs
+      name: Flow RTT
+      tooltip: TCP handshake Round Trip Time
+      field: TimeFlowRttNs
+      filter: time_flow_rtt
+      default: true
       width: 5
   filters:
     - id: src_namespace

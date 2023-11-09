@@ -210,17 +210,31 @@ export const getConcatenatedValue = (
 };
 
 export const getDefaultColumns = (columnDefs: ColumnConfigDef[]): Column[] => {
+  const columns: Column[] = [];
+
+  function getColumnOrRecordValue(record: Record, arg: string, defaultValue: string | number) {
+    if (arg.startsWith('column.')) {
+      const colId = arg.replace('column.', '');
+      const found = columns.find(c => c.id === colId);
+      if (found) {
+        return found.value(record);
+      }
+      return defaultValue;
+    }
+    return getRecordValue(record, arg, defaultValue);
+  }
+
   function calculatedValue(record: Record, calculatedValue: string) {
     if (calculatedValue.startsWith('getSrcOrDstValue')) {
-      const fields = calculatedValue.replaceAll(/getSrcOrDstValue|\(|\)/g, '').split(',');
-      if (fields.length !== 2) {
+      const args = calculatedValue.replaceAll(/getSrcOrDstValue|\(|\)/g, '').split(',');
+      if (args.length !== 2) {
         console.error('getDefaultColumns - invalid parameters for getSrcOrDstValue calculated value', calculatedValue);
         return '';
       }
-      return getSrcOrDstValue(...fields.map(f => getRecordValue(record, f, '')));
+      return getSrcOrDstValue(...args.flatMap(f => getColumnOrRecordValue(record, f, '')));
     } else if (calculatedValue.startsWith('getConcatenatedValue')) {
-      const fields = calculatedValue.replaceAll(/getConcatenatedValue|\(|\)/g, '').split(',');
-      if (fields.length < 2) {
+      const args = calculatedValue.replaceAll(/getConcatenatedValue|\(|\)/g, '').split(',');
+      if (args.length < 2) {
         console.error(
           'getDefaultColumns - invalid parameters for getConcatenatedValue calculated value',
           calculatedValue
@@ -228,17 +242,34 @@ export const getDefaultColumns = (columnDefs: ColumnConfigDef[]): Column[] => {
         return '';
       }
       return getConcatenatedValue(
-        getRecordValue(record, fields[0], '') as string,
-        getRecordValue(record, fields[1], NaN) as number,
-        fields.length > 2 ? (getRecordValue(record, fields[2], '') as string) : undefined,
-        fields.length > 3 ? (getRecordValue(record, fields[3], '') as string) : undefined
+        getColumnOrRecordValue(record, args[0], '') as string,
+        getColumnOrRecordValue(record, args[1], NaN) as number,
+        args.length > 2 ? (getColumnOrRecordValue(record, args[2], '') as string) : undefined,
+        args.length > 3 ? (getColumnOrRecordValue(record, args[3], '') as string) : undefined
       );
+    } else if (calculatedValue.startsWith('substract')) {
+      const args = calculatedValue.replaceAll(/substract|\(|\)/g, '').split(',');
+      if (args.length < 2) {
+        console.error('getDefaultColumns - invalid parameters for substract calculated value', calculatedValue);
+        return '';
+      }
+      return (
+        (getColumnOrRecordValue(record, args[0], 0) as number) - (getColumnOrRecordValue(record, args[1], 0) as number)
+      );
+    } else if (calculatedValue.startsWith('multiply')) {
+      const args = calculatedValue.replaceAll(/multiply|\(|\)/g, '').split(',');
+      if (args.length < 2) {
+        console.error('getDefaultColumns - invalid parameters for multiply calculated value', calculatedValue);
+        return '';
+      }
+      return (getColumnOrRecordValue(record, args[0], 0) as number) * Number(args[1]);
     }
     return '';
   }
 
-  return columnDefs.map(d => {
-    return {
+  // add a column for each definition
+  columnDefs.forEach(d => {
+    columns.push({
       id: d.id as ColumnsId,
       group: !_.isEmpty(d.group) ? d.group : undefined,
       name: d.name,
@@ -288,6 +319,7 @@ export const getDefaultColumns = (columnDefs: ColumnConfigDef[]): Column[] => {
         }
       },
       width: d.width || 15
-    };
+    });
   });
+  return columns;
 };
