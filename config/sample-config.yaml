@@ -331,17 +331,17 @@ frontend:
       width: 15
     - id: K8S_Object
       name: Kubernetes Objects
-      calculated: '[getConcatenatedValue(SrcAddr,SrcPort,SrcK8S_Type,SrcK8S_Namespace,SrcK8S_Name),getConcatenatedValue(DstAddr,DstPort,DstK8S_Type,DstK8S_Namespace,DstK8S_Name)]'
+      calculated: '[column.SrcK8S_Object,column.DstK8S_Object]'
       default: false
       width: 15
     - id: K8S_OwnerObject
       name: Owner Kubernetes Objects
-      calculated: '[getConcatenatedValue(SrcAddr,SrcPort,SrcK8S_OwnerType,SrcK8S_Namespace,SrcK8S_OwnerName),getConcatenatedValue(DstAddr,DstPort,DstK8S_OwnerType,DstK8S_Namespace,DstK8S_OwnerName)]'
+      calculated: '[column.SrcK8S_OwnerObject,column.DstK8S_OwnerObject]'
       default: false
       width: 15
     - id: AddrPort
       name: IPs & Ports
-      calculated: '[getConcatenatedValue(SrcAddr,SrcPort),getConcatenatedValue(DstAddr,DstPort)]'
+      calculated: '[column.SrcAddrPort,column.DstAddrPort]'
       default: false
       width: 15
     - id: Proto

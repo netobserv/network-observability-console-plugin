@@ -284,10 +284,19 @@ export const getDefaultColumns = (columnDefs: ColumnConfigDef[]): Column[] => {
           if (d.calculated!.startsWith('[') && d.calculated!.endsWith(']')) {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const result: any = [];
-            const values = d.calculated!.replaceAll(/\[|\]/g, '').split('),');
-            values.forEach(v => {
-              result.push(calculatedValue(r, `${v})`));
-            });
+            if (d.calculated?.includes('column')) {
+              // consider all items as columns or fields
+              const values = d.calculated!.replaceAll(/\[|\]/g, '').split(',');
+              values.forEach(v => {
+                result.push(getColumnOrRecordValue(r, v, ''));
+              });
+            } else {
+              // consider all items as functions
+              const values = d.calculated!.replaceAll(/\[|\]/g, '').split('),');
+              values.forEach(v => {
+                result.push(calculatedValue(r, `${v})`));
+              });
+            }
             return result;
           } else {
             return calculatedValue(r, d.calculated!);
