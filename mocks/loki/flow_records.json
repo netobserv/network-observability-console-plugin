@@ -308,7 +308,7 @@
         "values": [
           [
             "1689619351079000064",
-            "{\"SrcMac\":\"42:01:0A:00:00:01\",\"DstPort\":6443,\"SrcPort\":54082,\"Etype\":2048,\"SrcK8S_Type\":\"Node\",\"AgentIP\":\"10.0.0.5\",\"Bytes\":66,\"Packets\":1,\"SrcK8S_HostIP\":\"10.0.0.4\",\"SrcK8S_HostName\":\"ci-ln-hnd9rjk-72292-hnd5v-master-1\",\"SrcK8S_OwnerType\":\"Node\",\"Proto\":6,\"Flags\":16,\"SrcAddr\":\"10.0.0.4\",\"SrcK8S_Name\":\"ci-ln-hnd9rjk-72292-hnd5v-master-1\",\"DstMac\":\"42:01:0A:00:00:05\",\"TimeFlowStartMs\":1689619351079,\"Duplicate\":false,\"IfDirection\":0,\"TimeFlowEndMs\":1689619351079,\"TimeFlowRttNs\":1234,\"TimeReceived\":1689619351,\"DstAddr\":\"10.0.0.2\",\"Interface\":\"br-ex\"}"
+            "{\"SrcMac\":\"42:01:0A:00:00:01\",\"DstPort\":6443,\"SrcPort\":54082,\"Etype\":2048,\"SrcK8S_Type\":\"Node\",\"AgentIP\":\"10.0.0.5\",\"Bytes\":66,\"Packets\":1,\"SrcK8S_HostIP\":\"10.0.0.4\",\"SrcK8S_HostName\":\"ci-ln-hnd9rjk-72292-hnd5v-master-1\",\"SrcK8S_OwnerType\":\"Node\",\"Proto\":6,\"Flags\":16,\"SrcAddr\":\"10.0.0.4\",\"SrcK8S_Name\":\"ci-ln-hnd9rjk-72292-hnd5v-master-1\",\"DstMac\":\"42:01:0A:00:00:05\",\"TimeFlowStartMs\":1689619351079,\"Duplicate\":false,\"IfDirection\":0,\"TimeFlowEndMs\":1689619351079,\"TimeFlowRttNs\":1234,\"TimeReceived\":1689619351,\"DstAddr\":\"10.0.0.2\",\"Interface\":\"br-ex\",\"Dscp\":0,\"DnsLatencyMs\":10,\"DnsErrno\":0}"
           ],
           [
             "1689619350793999872",

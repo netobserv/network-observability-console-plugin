@@ -535,7 +535,7 @@ export const RecordField: React.FC<{
         return singleContainer(
           typeof value === 'number' && !isNaN(value)
             ? simpleTextWithTooltip(
-                detailed ? `${value}: ${getDNSErrorDescription(value as DNS_ERRORS_VALUES)}` : String(value)
+                detailed && value ? `${value}: ${getDNSErrorDescription(value as DNS_ERRORS_VALUES)}` : String(value)
               )
             : emptyText()
         );

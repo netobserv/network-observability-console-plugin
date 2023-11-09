@@ -322,7 +322,13 @@ export const NetflowTraffic: React.FC<{
   );
 
   const getFilterDefs = React.useCallback(() => {
-    return getFilterDefinitions(config.filters, config.columns, t);
+    return getFilterDefinitions(config.filters, config.columns, t).filter(
+      fd =>
+        (isConnectionTracking() || fd.id !== 'id') &&
+        (isDNSTracking() || !fd.id.startsWith('dns_')) &&
+        (isPktDrop() || !fd.id.startsWith('pkt_drop_')) &&
+        (isFlowRTT() || fd.id !== 'time_flow_rtt')
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [config.columns, config.filters]);
 

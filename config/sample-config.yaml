@@ -10,13 +10,20 @@ loki:
     - DstK8S_OwnerName
     - FlowDirection
     - Duplicate
-    - _RecordType
+#    - _RecordType
   tenantID: netobserv
   authCheck: none
   useMocks: false
 frontend: 
   recordTypes:
     - flowLog
+#    - newConnection
+#    - heartbeat
+#    - endConnection
+  features:
+#    - pktDrop
+#    - dnsTracking
+#    - flowRTT
   portNaming:
     enable: true
     portNames:
@@ -359,15 +366,15 @@ frontend:
       tooltip: The type of the ICMP message
       field: IcmpType
       filter: icmp_type
-      default: true
+      default: false
       width: 10
     - id: IcmpCode
       group: ICMP
       name: Code
       tooltip: The code of the ICMP message
       field: IcmpCode
-      quickFilter: icmp_code
-      default: true
+      filter: icmp_code
+      default: false
       width: 10
     - id: FlowDirection
       name: Direction
@@ -431,6 +438,8 @@ frontend:
       group: DNS
       name: DNS Latency
       tooltip: Time elapsed between DNS request and response.
+      field: DnsLatencyMs
+      filter: dns_latency
       default: true
       width: 5
     - id: DNSResponseCode
@@ -722,10 +731,6 @@ frontend:
       component: text
       placeholder: 'E.g: br-ex, ovn-k8s-mp0'
       hint: Specify a network interface.
-    - id: dscp
-      name: DSCP value
-      component: number
-      hint: Specify a Differentiated Services Code Point value as integer number.
     - id: id
       name: Conversation Id
       component: text
@@ -800,7 +805,3 @@ frontend:
   alertNamespaces:
     - netobserv
   sampling: 50
-  features:
-    - pktDrop
-    - dnsTracking
-    - flowRTT
