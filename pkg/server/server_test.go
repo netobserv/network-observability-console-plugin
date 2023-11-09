@@ -250,6 +250,58 @@ func TestSecureComm(t *testing.T) {
 	}
 }
 
+func TestServerHeaderLimits(t *testing.T) {
+	testPort, err := getFreePort(testHostname)
+	if err != nil {
+		t.Fatalf("Cannot get a free port to run tests on host [%v]", testHostname)
+	} else {
+		t.Logf("Will use free port [%v] on host [%v] for tests", testPort, testHostname)
+	}
+
+	testServerHostPort := fmt.Sprintf("%v:%v", testHostname, testPort)
+	serverURL := fmt.Sprintf("http://%s", testServerHostPort)
+
+	// Prepare directory to serve web files
+	tmpDir := prepareServerAssets(t)
+	defer os.RemoveAll(tmpDir)
+
+	authM := authMock{}
+	authM.MockGranted()
+
+	go func() {
+		Start(&Config{
+			Loki: loki.Config{
+				URL: &url.URL{Scheme: "http", Host: "localhost:3100"},
+			},
+			Port: testPort,
+		}, &authM)
+	}()
+
+	t.Logf("Started test http server: %v", serverURL)
+
+	httpConfig := httpClientConfig{}
+	httpClient, err := httpConfig.buildHTTPClient()
+	if err != nil {
+		t.Fatalf("Failed to create http client")
+	}
+
+	// wait for our test http server to come up
+	checkHTTPReady(httpClient, serverURL)
+
+	r, err := http.NewRequest("GET", serverURL, nil)
+	require.NoError(t, err)
+	// Set many headers
+	oneKBString := strings.Repeat(".", 1024)
+	for i := 0; i < 1025; i++ {
+		r.Header.Set(fmt.Sprintf("test-header-%d", i), oneKBString)
+	}
+
+	resp, err := httpClient.Do(r)
+	require.NoError(t, err)
+	defer resp.Body.Close()
+	assert.Equal(t, http.StatusRequestHeaderFieldsTooLarge, resp.StatusCode)
+}
+
 func TestLokiConfiguration(t *testing.T) {
 	// GIVEN a Loki service
 	lokiMock := httpMock{}
