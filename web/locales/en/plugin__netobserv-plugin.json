@@ -209,6 +209,8 @@
   "Custom time range": "Custom time range",
   "Reset": "Reset",
   "Select a custom time range. Flows are selected based on their End Time value.": "Select a custom time range. Flows are selected based on their End Time value.",
+  "Show all graphs": "Show all graphs",
+  "Focus on this graph": "Focus on this graph",
   "No results found": "No results found",
   "Clear or reset filters and try again.": "Clear or reset filters and try again.",
   "Average latency": "Average latency",

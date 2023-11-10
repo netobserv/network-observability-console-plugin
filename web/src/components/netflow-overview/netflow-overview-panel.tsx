@@ -3,6 +3,7 @@ import { Button, Card, Flex, FlexItem, Text, TextVariants, Tooltip } from '@patt
 import { InfoAltIcon, ExpandIcon, CompressIcon } from '@patternfly/react-icons';
 
 import './netflow-overview-panel.css';
+import { useTranslation } from 'react-i18next';
 
 export const NetflowOverviewPanel: React.FC<{
   doubleWidth: boolean;
@@ -28,6 +29,8 @@ export const NetflowOverviewPanel: React.FC<{
   isSelected,
   isFocus
 }) => {
+  const { t } = useTranslation('plugin__netobserv-plugin');
+
   return (
     <FlexItem id={id} className={`overview-flex-item center ${doubleWidth ? 'full' : ''}`}>
       <Card
@@ -53,12 +56,20 @@ export const NetflowOverviewPanel: React.FC<{
               </FlexItem>
               {focusOn !== undefined && (
                 <FlexItem className="overview-expand-button-container">
-                  <Button
-                    variant="plain"
-                    className="overview-expand-button"
-                    icon={isFocus ? <CompressIcon /> : <ExpandIcon />}
-                    onClick={() => focusOn(id)}
-                  />
+                  <Tooltip
+                    content={
+                      <Text component={TextVariants.p}>
+                        {isFocus ? t('Show all graphs') : t('Focus on this graph')}
+                      </Text>
+                    }
+                  >
+                    <Button
+                      variant="plain"
+                      className="overview-expand-button"
+                      icon={isFocus ? <CompressIcon /> : <ExpandIcon />}
+                      onClick={() => focusOn(id)}
+                    />
+                  </Tooltip>
                 </FlexItem>
               )}
               {onClick === undefined && <FlexItem>{kebab}</FlexItem>}
