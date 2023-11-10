@@ -257,6 +257,8 @@ const NetflowTable: React.FC<{
     <div id="table-container">
       <TableComposable
         data-test="table-composable"
+        data-test-cols-count={columns.length}
+        data-test-rows-count={flows.length}
         aria-label="Netflow table"
         variant="compact"
         style={{ minWidth: `${width}em` }}
