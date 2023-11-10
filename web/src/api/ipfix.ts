@@ -12,7 +12,16 @@ export interface Record {
 }
 
 export const getRecordValue = (record: Record, fieldOrLabel: string, defaultValue: string | number) => {
-  return record.fields[fieldOrLabel as keyof Fields] || record.labels[fieldOrLabel as keyof Labels] || defaultValue;
+  // check if label exists
+  if (record.labels[fieldOrLabel as keyof Labels] !== undefined) {
+    return record.labels[fieldOrLabel as keyof Labels];
+  }
+  // check if field exists
+  if (record.fields[fieldOrLabel as keyof Fields] !== undefined) {
+    return record.fields[fieldOrLabel as keyof Fields];
+  }
+  // fallback on default
+  return defaultValue;
 };
 
 export interface Labels {
