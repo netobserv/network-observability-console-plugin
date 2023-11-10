@@ -50,6 +50,8 @@ const NetflowTableRow: React.FC<{
           columns.map(c => (
             <Td
               data-test={`td-${flow.key}`}
+              data-test-td-column-id={c.id}
+              data-test-td-value={c.value(flow)}
               key={c.id}
               style={{ height: '100%', width: `${Math.floor((100 * c.width) / tableWidth)}%` }}
             >
