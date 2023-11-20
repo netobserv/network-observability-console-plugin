@@ -12,7 +12,7 @@
 
 .overview-card-content {
   height: 100%;
-  flex-wrap: nowrap;
+  flex-wrap: nowrap !important;
   padding: 1em 2em 1em 2em;
 }
 

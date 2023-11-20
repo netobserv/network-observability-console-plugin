@@ -744,32 +744,37 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
         style={{ padding: `${containerPadding}px 0 ${containerPadding}px ${containerPadding}px` }}
         ref={containerRef}
       >
-        <div
-          id="overview-graph-list"
-          style={{
-            width: allowFocus ? containerSize.width / 5 - containerPadding : undefined
-          }}
-        >
-          <Flex id="overview-flex" justifyContent={{ default: 'justifyContentSpaceBetween' }}>
-            {panels.map((panel, i) => getPanelView(panel, i))}
-          </Flex>
-        </div>
         {allowFocus && selectedPanel && (
           <div
             id="overview-absolute-graph"
             style={{
               position: 'absolute',
               top: containerSize.top,
-              right: sidePanelWidth,
+              right: containerSize.width / 5 + sidePanelWidth,
               height: containerSize.height,
               overflow: 'hidden',
               width: (containerSize.width * 4) / 5,
-              padding: `${containerPadding}px ${containerPadding}px ${containerPadding}px ${cardPadding}px`
+              padding: `${containerPadding}px ${cardPadding}px ${containerPadding}px ${containerPadding}px`
             }}
           >
             {getPanelView(selectedPanel)}
           </div>
         )}
+        <div
+          id="overview-graph-list"
+          style={
+            allowFocus
+              ? {
+                  width: containerSize.width / 5 - containerPadding,
+                  marginLeft: (containerSize.width * 4) / 5 - containerPadding
+                }
+              : undefined
+          }
+        >
+          <Flex id="overview-flex" justifyContent={{ default: 'justifyContentSpaceBetween' }}>
+            {panels.map((panel, i) => getPanelView(panel, i))}
+          </Flex>
+        </div>
       </div>
     );
   }
