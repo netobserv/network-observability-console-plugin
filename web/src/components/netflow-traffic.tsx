@@ -87,7 +87,8 @@ import {
   LOCAL_STORAGE_TOPOLOGY_OPTIONS_KEY,
   LOCAL_STORAGE_VIEW_ID_KEY,
   useLocalStorage,
-  getLocalStorage
+  getLocalStorage,
+  LOCAL_STORAGE_OVERVIEW_FOCUS_KEY
 } from '../utils/local-storage-hook';
 import {
   DNS_ID_MATCHER,
@@ -192,6 +193,7 @@ export const NetflowTraffic: React.FC<{
     LOCAL_STORAGE_OVERVIEW_TRUNCATE_KEY,
     TruncateLength.M
   );
+  const [overviewFocus, setOverviewFocus] = useLocalStorage<boolean>(LOCAL_STORAGE_OVERVIEW_FOCUS_KEY, false);
   const [topologyOptions, setTopologyOptions] = useLocalStorage<TopologyOptions>(
     LOCAL_STORAGE_TOPOLOGY_OPTIONS_KEY,
     DefaultOptions
@@ -1253,6 +1255,8 @@ export const NetflowTraffic: React.FC<{
             isDark={isDarkTheme}
             filterActionLinks={filterLinks()}
             truncateLength={overviewTruncateLength}
+            focus={overviewFocus}
+            setFocus={setOverviewFocus}
           />
         );
         break;
@@ -1563,6 +1567,8 @@ export const NetflowTraffic: React.FC<{
                   setMetricScope={setMetricScope}
                   truncateLength={overviewTruncateLength}
                   setTruncateLength={setOverviewTruncateLength}
+                  focus={overviewFocus}
+                  setFocus={setOverviewFocus}
                 />
               )}
               {selectedViewId === 'table' && <TableDisplayDropdown size={size} setSize={setSize} />}

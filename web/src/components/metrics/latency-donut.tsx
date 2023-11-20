@@ -7,7 +7,7 @@ import { getStat } from '../../model/topology';
 import { LOCAL_STORAGE_OVERVIEW_DONUT_DIMENSION_KEY, useLocalStorage } from '../../utils/local-storage-hook';
 import { getFormattedValue } from '../../utils/metrics';
 import './metrics-content.css';
-import { defaultDimensions, Dimensions, observe } from './metrics-helper';
+import { defaultDimensions, Dimensions, observeDimensions } from './metrics-helper';
 
 export type LatencyDonutProps = {
   id: string;
@@ -19,6 +19,8 @@ export type LatencyDonutProps = {
   othersName?: string;
   smallerTexts?: boolean;
   subTitle: string;
+  showLegend?: boolean;
+  animate?: boolean;
 };
 
 export const LatencyDonut: React.FC<LatencyDonutProps> = ({
@@ -30,7 +32,9 @@ export const LatencyDonut: React.FC<LatencyDonutProps> = ({
   showOthers,
   othersName,
   smallerTexts,
-  subTitle
+  subTitle,
+  showLegend,
+  animate
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
@@ -68,11 +72,11 @@ export const LatencyDonut: React.FC<LatencyDonutProps> = ({
 
   const containerRef = React.createRef<HTMLDivElement>();
   const [dimensions, setDimensions] = useLocalStorage<Dimensions>(
-    LOCAL_STORAGE_OVERVIEW_DONUT_DIMENSION_KEY,
+    `${LOCAL_STORAGE_OVERVIEW_DONUT_DIMENSION_KEY}${showLegend ? '-legend' : ''}`,
     defaultDimensions
   );
   React.useEffect(() => {
-    observe(containerRef, dimensions, setDimensions);
+    observeDimensions(containerRef, dimensions, setDimensions);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [containerRef, dimensions]);
 
@@ -81,23 +85,36 @@ export const LatencyDonut: React.FC<LatencyDonutProps> = ({
       <ChartDonut
         themeColor={ChartThemeColor.multiUnordered}
         constrainToVisibleArea
-        legendData={legendData}
+        legendData={showLegend ? legendData : undefined}
         legendOrientation="vertical"
         legendPosition="right"
         legendAllowWrap={true}
-        legendComponent={legentComponent}
-        labels={({ datum }) => datum.x}
-        //TODO: fix refresh on selection change to enable animation
-        //animate={true}
+        legendComponent={showLegend ? legentComponent : undefined}
+        animate={animate}
+        radius={showLegend ? dimensions.height / 3 : undefined}
+        innerRadius={showLegend ? dimensions.height / 4 : undefined}
         width={dimensions.width}
         height={dimensions.height}
-        data={sliced.map(m => ({ x: `${m.name}: ${getFormattedValue(m.value, metricType, 'sum', t)}`, y: m.value }))}
-        padding={{
-          bottom: 20,
-          left: 20,
-          right: 400,
-          top: 20
-        }}
+        allowTooltip={showLegend}
+        data={sliced.map(m => ({
+          x: showLegend ? `${m.name}: ${getFormattedValue(m.value, metricType, 'sum', t)}` : ' ',
+          y: m.value
+        }))}
+        padding={
+          showLegend
+            ? {
+                bottom: 20,
+                left: 20,
+                right: 400,
+                top: 20
+              }
+            : {
+                bottom: 0,
+                left: 0,
+                right: 0,
+                top: 0
+              }
+        }
         title={`${getFormattedValue(total, metricType, 'sum', t)}`}
         subTitle={subTitle}
       />

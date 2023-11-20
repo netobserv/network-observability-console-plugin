@@ -12,13 +12,12 @@ import { MetricsContent, MetricsContentProps } from '../../metrics/metrics-conte
 describe('<NetflowOverviewPanel />', () => {
   const panelProps = {
     doubleWidth: false,
-    bodyClassSmall: false,
+    bodyClassName: 'overview-panel-body',
     title: 'title',
     kebabItems: []
   };
   const contentProps: MetricsContentProps = {
     id: SamplePanel.id,
-    title: 'title',
     metricType: 'bytes' as MetricType,
     metrics: metrics.map(m => ({ ...m, shortName: 'whatever', fullName: 'whatever', isInternal: false })),
     limit: 5,
