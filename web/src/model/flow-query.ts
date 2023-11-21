@@ -3,7 +3,7 @@ import { Filter } from './filters';
 export type RecordType = 'allConnections' | 'newConnection' | 'heartbeat' | 'endConnection' | 'flowLog';
 export type Match = 'all' | 'any';
 export type PacketLoss = 'dropped' | 'hasDrops' | 'sent' | 'all';
-export type MetricFunction = 'sum' | 'avg' | 'max' | 'last';
+export type MetricFunction = 'sum' | 'avg' | 'min' | 'max' | 'last' | 'p90' | 'p99';
 export type MetricType =
   | 'count'
   | 'countDns'
@@ -28,7 +28,9 @@ export interface FlowQuery {
   recordType: RecordType;
   packetLoss: PacketLoss;
   limit: number;
+  percentile?: number;
   type?: MetricType;
+  function?: MetricFunction;
   aggregateBy?: AggregateBy;
   groups?: Groups;
   rateInterval?: string;

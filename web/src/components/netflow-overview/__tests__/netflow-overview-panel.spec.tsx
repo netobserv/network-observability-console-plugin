@@ -7,7 +7,7 @@ import { metrics } from '../../__tests-data__/metrics';
 import { SamplePanel } from '../../__tests-data__/panels';
 import { NetflowOverview } from '../netflow-overview';
 import { NetflowOverviewPanel } from '../netflow-overview-panel';
-import { MetricsContent, MetricsContentProps } from '../../metrics/metrics-content';
+import { MetricsGraph, MetricsGraphProps } from '../../metrics/metrics-graph';
 
 describe('<NetflowOverviewPanel />', () => {
   const panelProps = {
@@ -16,9 +16,10 @@ describe('<NetflowOverviewPanel />', () => {
     title: 'title',
     kebabItems: []
   };
-  const contentProps: MetricsContentProps = {
+  const contentProps: MetricsGraphProps = {
     id: SamplePanel.id,
     metricType: 'bytes' as MetricType,
+    metricFunction: 'avg',
     metrics: metrics.map(m => ({ ...m, shortName: 'whatever', fullName: 'whatever', isInternal: false })),
     limit: 5,
     tooltipsTruncate: true
@@ -30,7 +31,7 @@ describe('<NetflowOverviewPanel />', () => {
   it('should render content', async () => {
     const wrapper = mount(
       <NetflowOverviewPanel {...panelProps}>
-        <MetricsContent {...contentProps} />
+        <MetricsGraph {...contentProps} />
       </NetflowOverviewPanel>
     );
     expect(wrapper.find(Card)).toHaveLength(1);

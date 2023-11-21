@@ -15,6 +15,7 @@ import { valueFormat } from './format';
 import { NodeData } from '../model/topology';
 import { getPeerId, idUnknown } from './ids';
 import { TFunction } from 'i18next';
+import percentile from 'percentile';
 
 // Tolerance, in seconds, to assume presence/emptiness of the last datapoint fetched, when it is
 // close to "now", to accomodate with potential collection latency.
@@ -28,10 +29,11 @@ const shortKindMap: { [k: string]: string } = {
   StatefulSet: 'sts'
 };
 
+export const PERCENTILE_VALUES = [90, 99];
+
 export const parseTopologyMetrics = (
   raw: RawTopologyMetrics[],
   range: number | TimeRange,
-  type: MetricType | undefined,
   aggregateBy: FlowScope,
   unixTimestamp: number,
   isMock?: boolean
@@ -42,7 +44,7 @@ export const parseTopologyMetrics = (
     unixTimestamp,
     isMock
   );
-  const metrics = raw.map(r => parseTopologyMetric(r, start, end, step, type, aggregateBy));
+  const metrics = raw.map(r => parseTopologyMetric(r, start, end, step, aggregateBy));
 
   // Disambiguate display names with kind when necessary
   if (aggregateBy === 'owner' || aggregateBy === 'resource') {
@@ -151,11 +153,10 @@ const parseTopologyMetric = (
   start: number,
   end: number,
   step: number,
-  type: MetricType | undefined,
   aggregateBy: FlowScope
 ): TopologyMetrics => {
   const normalized = normalizeMetrics(raw.values, start, end, step);
-  const stats = computeStats(normalized, type && ['dnsLatencies', 'flowRtt'].includes(type));
+  const stats = computeStats(normalized);
   const source = createPeer({
     addr: raw.metric.SrcAddr,
     resource: nameAndType(raw.metric.SrcK8S_Name, raw.metric.SrcK8S_Type),
@@ -260,12 +261,13 @@ export const normalizeMetrics = (
   values: [number, unknown][],
   start: number,
   end: number,
-  step: number
+  step: number,
+  forceZeros?: boolean
 ): [number, number][] => {
   // Normalize by counting all NaN as zeros
   const normalized: [number, number][] = values.map(dp => {
     let val = Number(dp[1]);
-    if (_.isNaN(val)) {
+    if (forceZeros && _.isNaN(val)) {
       val = 0;
     }
     return [dp[0], val];
@@ -292,23 +294,30 @@ const getValueCloseTo = (values: [number, number][], timestamp: number, step: nu
  */
 export const computeStats = (ts: [number, number][], skipZeros?: boolean): MetricStats => {
   if (ts.length === 0) {
-    return { latest: 0, avg: 0, max: 0, total: 0 };
+    return { sum: 0, latest: 0, avg: 0, min: 0, max: 0, percentiles: PERCENTILE_VALUES.map(() => 0), total: 0 };
   }
+
   const values = ts.map(dp => dp[1]);
   const filteredValues = skipZeros ? values.filter(v => v !== 0) : values.filter(v => !Number.isNaN(v));
   if (!filteredValues.length) {
-    return { latest: 0, avg: 0, max: 0, total: 0 };
+    return { sum: 0, latest: 0, avg: 0, min: 0, max: 0, percentiles: PERCENTILE_VALUES.map(() => 0), total: 0 };
   }
+
   // Compute stats
   const sum = filteredValues.reduce((prev, cur) => prev + cur, 0);
   const avg = sum / filteredValues.length;
+  const min = Math.min(...filteredValues);
   const max = Math.max(...filteredValues);
+  const percentiles = percentile(PERCENTILE_VALUES, filteredValues) as number[];
   const latest = filteredValues[filteredValues.length - 1];
 
   return {
+    sum,
     latest: roundTwoDigits(latest),
     avg: roundTwoDigits(avg),
+    min: roundTwoDigits(min),
     max: roundTwoDigits(max),
+    percentiles: percentiles.map(p => roundTwoDigits(p)),
     total: Math.floor(avg * (ts[ts.length - 1][0] - ts[0][0]))
   };
 };
@@ -338,7 +347,7 @@ export const getFormattedRateValue = (v: number, mt: MetricType, t: TFunction): 
     case 'flowRtt':
     case 'count':
     case 'countDns':
-      return valueFormat(v);
+      return valueFormat(v, 1);
     case 'droppedBytes':
     case 'bytes':
       return valueFormat(v, 1, t('Bps'));

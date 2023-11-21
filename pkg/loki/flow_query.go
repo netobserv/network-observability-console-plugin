@@ -265,11 +265,13 @@ func (q *FlowQueryBuilder) appendPktDropCauseFilter(sb *strings.Builder) {
 }
 
 func (q *FlowQueryBuilder) appendDNSFilter(sb *strings.Builder) {
-	// ensure at least one Dns field is specified
-	// |~`"Dns`
+	// ensure at least one Dns field is specified except DnsErrno
+	// |~`"DnsId`|~`"DnsLatencyMs`|~`"DnsFlagsResponseCode"`
 	sb.WriteString("|~`")
-	sb.WriteString(`"Dns`)
+	sb.WriteString(`"DnsId`)
 	sb.WriteString("`")
+	q.appendDNSLatencyFilter(sb)
+	q.appendDNSRCodeFilter(sb)
 }
 
 func (q *FlowQueryBuilder) appendDNSLatencyFilter(sb *strings.Builder) {

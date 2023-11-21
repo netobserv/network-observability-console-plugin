@@ -360,7 +360,6 @@ describe('Merge topology BNF', () => {
           genNsMetric('foo', undefined, 5, undefined)
         ],
         range,
-        'bytes',
         'namespace',
         0,
         true
@@ -371,7 +370,6 @@ describe('Merge topology BNF', () => {
       metrics: parseTopologyMetrics(
         [genNsMetric('bar', 'foo', 1, 1), genNsMetric('foo', 'foo', 5, 5)],
         range,
-        'bytes',
         'namespace',
         0,
         true
@@ -386,32 +384,44 @@ describe('Merge topology BNF', () => {
     expect(merged.metrics[0].stats).toEqual({
       avg: 15,
       max: 20,
+      sum: 300,
       total: 4275,
-      latest: 20
+      latest: 20,
+      min: 10,
+      percentiles: [20, 20]
     });
     expect(merged.metrics[1].source.namespace).toEqual('foo');
     expect(merged.metrics[1].destination.namespace).toEqual('foo');
     expect(merged.metrics[1].stats).toEqual({
       avg: 12.5,
       max: 15,
+      sum: 250,
       total: 3562,
-      latest: 10
+      latest: 10,
+      min: 10,
+      percentiles: [15, 15]
     });
     expect(merged.metrics[2].source.namespace).toEqual('foo');
     expect(merged.metrics[2].destination.namespace).toBeUndefined();
     expect(merged.metrics[2].stats).toEqual({
       avg: 2.63,
       max: 5,
+      sum: 50,
       total: 710,
-      latest: 0
+      latest: 0,
+      min: 0,
+      percentiles: [5, 5]
     });
     expect(merged.metrics[3].source.namespace).toEqual('bar');
     expect(merged.metrics[3].destination.namespace).toEqual('foo');
     expect(merged.metrics[3].stats).toEqual({
       avg: 1,
       max: 1,
+      sum: 20,
       total: 285,
-      latest: 1
+      latest: 1,
+      min: 1,
+      percentiles: [1, 1]
     });
     expect(merged.stats).toEqual({ limitReached: true, numQueries: 3 });
   });
@@ -425,7 +435,6 @@ describe('Merge topology BNF', () => {
           genNsMetric('foo', undefined, 5, undefined)
         ],
         range,
-        'bytes',
         'namespace',
         0,
         true
@@ -436,7 +445,6 @@ describe('Merge topology BNF', () => {
       metrics: parseTopologyMetrics(
         [genNsMetric('bar', 'foo', 1, 1), genNsMetric('foo', 'foo', 5, 5)],
         range,
-        'bytes',
         'namespace',
         0,
         true
@@ -444,7 +452,7 @@ describe('Merge topology BNF', () => {
       stats: { limitReached: false, numQueries: 1 }
     };
     const rsOverlap: FlowMetricsResult = {
-      metrics: parseTopologyMetrics([genNsMetric('foo', 'foo', 3, 3)], range, 'bytes', 'namespace', 0, true),
+      metrics: parseTopologyMetrics([genNsMetric('foo', 'foo', 3, 3)], range, 'namespace', 0, true),
       stats: { limitReached: false, numQueries: 1 }
     };
 
@@ -455,32 +463,44 @@ describe('Merge topology BNF', () => {
     expect(merged.metrics[0].stats).toEqual({
       avg: 15,
       max: 20,
+      sum: 300,
       total: 4275,
-      latest: 20
+      latest: 20,
+      min: 10,
+      percentiles: [20, 20]
     });
     expect(merged.metrics[1].source.namespace).toEqual('foo');
     expect(merged.metrics[1].destination.namespace).toEqual('foo');
     expect(merged.metrics[1].stats).toEqual({
       avg: 9.5,
       max: 12,
+      sum: 190,
       total: 2707,
-      latest: 7
+      latest: 7,
+      min: 7,
+      percentiles: [12, 12]
     });
     expect(merged.metrics[2].source.namespace).toEqual('foo');
     expect(merged.metrics[2].destination.namespace).toBeUndefined();
     expect(merged.metrics[2].stats).toEqual({
       avg: 2.63,
       max: 5,
+      sum: 50,
       total: 710,
-      latest: 0
+      latest: 0,
+      min: 0,
+      percentiles: [5, 5]
     });
     expect(merged.metrics[3].source.namespace).toEqual('bar');
     expect(merged.metrics[3].destination.namespace).toEqual('foo');
     expect(merged.metrics[3].stats).toEqual({
       avg: 1,
       max: 1,
+      sum: 20,
       total: 285,
-      latest: 1
+      latest: 1,
+      min: 1,
+      percentiles: [1, 1]
     });
     expect(merged.stats).toEqual({ limitReached: true, numQueries: 4 });
   });

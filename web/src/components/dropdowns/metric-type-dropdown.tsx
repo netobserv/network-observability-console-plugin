@@ -7,16 +7,20 @@ export const MetricTypeDropdown: React.FC<{
   selected?: string;
   setMetricType: (v: MetricType) => void;
   isTopology?: boolean;
+  allowPktDrop?: boolean;
   allowDNSMetric?: boolean;
   allowRTTMetric?: boolean;
   id?: string;
-}> = ({ selected, setMetricType, id, isTopology, allowDNSMetric, allowRTTMetric }) => {
+}> = ({ selected, setMetricType, id, isTopology, allowPktDrop, allowDNSMetric, allowRTTMetric }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [metricDropdownOpen, setMetricDropdownOpen] = React.useState(false);
 
   const getMetricTypeOptions = React.useCallback(() => {
-    const options: MetricType[] = ['bytes', 'packets'];
+    let options: MetricType[] = ['bytes', 'packets'];
     if (isTopology) {
+      if (allowPktDrop) {
+        options = options.concat('droppedBytes', 'droppedPackets');
+      }
       if (allowDNSMetric) {
         options.push('dnsLatencies');
       }
@@ -25,15 +29,19 @@ export const MetricTypeDropdown: React.FC<{
       }
     }
     return options;
-  }, [allowDNSMetric, allowRTTMetric, isTopology]);
+  }, [allowDNSMetric, allowPktDrop, allowRTTMetric, isTopology]);
 
   const getMetricDisplay = React.useCallback(
     (metricType: MetricType): string => {
       switch (metricType) {
-        case 'packets':
-          return t('Packets');
         case 'bytes':
           return t('Bytes');
+        case 'droppedBytes':
+          return t('Dropped bytes');
+        case 'packets':
+          return t('Packets');
+        case 'droppedPackets':
+          return t('Dropped packets');
         case 'dnsLatencies':
           return t('DNS latencies');
         case 'flowRtt':

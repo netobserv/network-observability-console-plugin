@@ -13,10 +13,10 @@ import {
 } from '@patternfly/react-charts';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { NamedMetric } from '../../api/loki';
-import { MetricType } from '../../model/flow-query';
+import { GenericMetric, NamedMetric } from '../../api/loki';
+import { MetricFunction, MetricType } from '../../model/flow-query';
 import { LOCAL_STORAGE_OVERVIEW_METRICS_DIMENSION_KEY, useLocalStorage } from '../../utils/local-storage-hook';
-import { getFormattedRateValue } from '../../utils/metrics';
+import { getFormattedValue } from '../../utils/metrics';
 import './metrics-content.css';
 import {
   ChartDataPoint,
@@ -28,12 +28,12 @@ import {
   toDatapoints
 } from './metrics-helper';
 
-export type MetricsContentProps = {
+export type MetricsGraphProps = {
   id: string;
   metricType: MetricType;
-  metrics: NamedMetric[];
+  metricFunction: MetricFunction;
+  metrics: GenericMetric[] | NamedMetric[];
   limit: number;
-  showLegend?: boolean;
   showBar?: boolean;
   showArea?: boolean;
   showLine?: boolean;
@@ -41,12 +41,14 @@ export type MetricsContentProps = {
   smallerTexts?: boolean;
   itemsPerRow?: number;
   tooltipsTruncate: boolean;
+  showLegend?: boolean;
   animate?: boolean;
 };
 
-export const MetricsContent: React.FC<MetricsContentProps> = ({
+export const MetricsGraph: React.FC<MetricsGraphProps> = ({
   id,
   metricType,
+  metricFunction,
   metrics,
   limit,
   showBar,
@@ -61,15 +63,13 @@ export const MetricsContent: React.FC<MetricsContentProps> = ({
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
-  let filteredMetrics = metrics.slice(0, limit);
-  if (['dnsLatencies', 'flowRtt'].includes(metricType)) {
-    filteredMetrics = filteredMetrics.map(m => ({ ...m, values: m.values.filter(v => v[1] !== 0) }));
-  }
+  const filteredMetrics = metrics.slice(0, limit);
 
   const legendData: LegendDataItem[] = filteredMetrics.map((m, idx) => ({
     childName: `${showBar ? 'bar-' : 'area-'}${idx}`,
-    name: m.shortName,
-    tooltipName: tooltipsTruncate ? m.shortName : m.fullName
+    name: (m as NamedMetric).shortName || (m as GenericMetric).name,
+    tooltipName:
+      (tooltipsTruncate ? (m as NamedMetric).shortName : (m as NamedMetric).fullName) || (m as GenericMetric).name
   }));
 
   const topKDatapoints: ChartDataPoint[][] = filteredMetrics.map(toDatapoints);
@@ -87,6 +87,7 @@ export const MetricsContent: React.FC<MetricsContentProps> = ({
     `${LOCAL_STORAGE_OVERVIEW_METRICS_DIMENSION_KEY}${showLegend ? '-legend' : ''}`,
     defaultDimensions
   );
+
   React.useEffect(() => {
     observeDimensions(containerRef, dimensions, setDimensions);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -96,17 +97,21 @@ export const MetricsContent: React.FC<MetricsContentProps> = ({
     <div id={`chart-${id}`} className="metrics-content-div" ref={containerRef} data-test-metrics={metrics.length}>
       <Chart
         themeColor={ChartThemeColor.multiUnordered}
-        containerComponent={showLegend ? chartVoronoi(legendData, metricType, t) : undefined}
+        containerComponent={
+          showLegend
+            ? chartVoronoi(legendData, (v: number) => getFormattedValue(v, metricType, metricFunction, t))
+            : undefined
+        }
         legendData={showLegend ? legendData : undefined}
         legendOrientation={'horizontal'}
         legendPosition="bottom-left"
         legendAllowWrap={true}
         legendComponent={showLegend ? legentComponent : undefined}
-        animate={animate}
         scale={{ x: 'time', y: showBar ? 'linear' : 'sqrt' }}
         width={dimensions.width}
         height={dimensions.height}
         domainPadding={{ x: 0, y: 0 }}
+        animate={animate}
         padding={
           showLegend
             ? {
@@ -123,12 +128,12 @@ export const MetricsContent: React.FC<MetricsContentProps> = ({
               }
         }
       >
-        <ChartAxis fixLabelOverlap tickFormat={showLegend ? () => '' : undefined} />
+        <ChartAxis fixLabelOverlap />
         <ChartAxis
           dependentAxis
           showGrid
           fixLabelOverlap
-          tickFormat={y => (showLegend ? getFormattedRateValue(y, metricType, t) : '')}
+          tickFormat={y => (showLegend ? getFormattedValue(y, metricType, metricFunction, t) : '')}
         />
         {showBar && (
           <ChartStack>
@@ -163,4 +168,4 @@ export const MetricsContent: React.FC<MetricsContentProps> = ({
   );
 };
 
-export default MetricsContent;
+export default MetricsGraph;

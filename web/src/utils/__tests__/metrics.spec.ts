@@ -67,6 +67,7 @@ describe('normalize and computeStats', () => {
     const stats = computeStats(norm);
 
     expect(stats.latest).toEqual(8);
+    expect(stats.min).toEqual(5);
     expect(stats.max).toEqual(10);
     expect(stats.avg).toEqual(7.67 /* 161/21 */);
     expect(stats.total).toEqual(2300 /* 7.67*300 */);
@@ -128,6 +129,7 @@ describe('normalize and computeStats', () => {
     const stats = computeStats(norm);
 
     expect(stats.latest).toEqual(8);
+    expect(stats.min).toEqual(5);
     expect(stats.max).toEqual(10);
     expect(stats.avg).toEqual(7.65 /* 153/20 */);
     expect(stats.total).toEqual(2180 /* 7.65*285 */);
@@ -181,6 +183,7 @@ describe('normalize and computeStats', () => {
     const stats = computeStats(norm);
 
     expect(stats.latest).toEqual(8);
+    expect(stats.min).toEqual(0);
     expect(stats.max).toEqual(8);
     expect(stats.avg).toEqual(4.33 /* 91/21 */);
     expect(stats.total).toEqual(1300 /* 4.33*300 */);
@@ -384,7 +387,7 @@ describe('parseTopologyMetrics', () => {
       }
     ];
 
-    const parsed = parseTopologyMetrics(metrics, 300, 'bytes', 'resource', 0, true) as TopologyMetrics[];
+    const parsed = parseTopologyMetrics(metrics, 300, 'resource', 0, true) as TopologyMetrics[];
 
     expect(parsed).toHaveLength(2);
     expect(parsed[0].source.getDisplayName(true, true)).toEqual('ns1.A');

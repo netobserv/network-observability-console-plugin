@@ -55,6 +55,10 @@ export const getLimitFromURL = (fallback: number): number => {
   return getURLParamAsNumber(URLParam.Limit) || fallback;
 };
 
+export const getPercentileFromURL = (fallback: number): number => {
+  return getURLParamAsNumber(URLParam.Percentile) || fallback;
+};
+
 export const getMatchFromURL = (): Match => {
   return (getURLParam(URLParam.Match) as Match | null) || defaultMatch;
 };
@@ -143,6 +147,10 @@ export const setURLRecortType = (recordType: RecordType, replace?: boolean) => {
 
 export const setURLLimit = (limit: number, replace?: boolean) => {
   setURLParam(URLParam.Limit, String(limit), replace);
+};
+
+export const setURLPercentile = (percentile: number, replace?: boolean) => {
+  setURLParam(URLParam.Percentile, String(percentile), replace);
 };
 
 export const setURLShowDup = (show: boolean, replace?: boolean) => {

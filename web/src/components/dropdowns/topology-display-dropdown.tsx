@@ -25,6 +25,7 @@ export const TopologyDisplayOptions: React.FC<{
   setMetricScope: (s: FlowScope) => void;
   topologyOptions: TopologyOptions;
   setTopologyOptions: (o: TopologyOptions) => void;
+  allowPktDrop: boolean;
   allowDNSMetric: boolean;
   allowRTTMetric: boolean;
 }> = ({
@@ -36,6 +37,7 @@ export const TopologyDisplayOptions: React.FC<{
   setMetricScope,
   topologyOptions,
   setTopologyOptions,
+  allowPktDrop,
   allowDNSMetric,
   allowRTTMetric
 }) => {
@@ -90,6 +92,7 @@ export const TopologyDisplayOptions: React.FC<{
                 isTopology
                 selected={metricType}
                 setMetricType={setMetricType}
+                allowPktDrop={allowPktDrop}
                 allowDNSMetric={allowDNSMetric}
                 allowRTTMetric={allowRTTMetric}
               />
@@ -231,6 +234,7 @@ export const TopologyDisplayDropdown: React.FC<{
   setMetricScope: (s: FlowScope) => void;
   topologyOptions: TopologyOptions;
   setTopologyOptions: (o: TopologyOptions) => void;
+  allowPktDrop: boolean;
   allowDNSMetric: boolean;
   allowRTTMetric: boolean;
 }> = ({
@@ -242,6 +246,7 @@ export const TopologyDisplayDropdown: React.FC<{
   setMetricScope,
   topologyOptions,
   setTopologyOptions,
+  allowPktDrop,
   allowDNSMetric,
   allowRTTMetric
 }) => {
@@ -265,6 +270,7 @@ export const TopologyDisplayDropdown: React.FC<{
             setMetricScope={setMetricScope}
             topologyOptions={topologyOptions}
             setTopologyOptions={setTopologyOptions}
+            allowPktDrop={allowPktDrop}
             allowDNSMetric={allowDNSMetric}
             allowRTTMetric={allowRTTMetric}
           />

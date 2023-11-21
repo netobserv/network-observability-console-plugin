@@ -21,13 +21,12 @@ import { useTranslation } from 'react-i18next';
 import { TopologyMetrics } from '../../../api/loki';
 import { Filter, FilterDefinition, Filters } from '../../../model/filters';
 import { MetricFunction, FlowScope, MetricType } from '../../../model/flow-query';
-import { MetricScopeOptions } from '../../../model/metrics';
+import { MetricScopeOptions, getStat } from '../../../model/metrics';
 import {
   Decorated,
   ElementData,
   FilterDir,
   generateDataModel,
-  getStat,
   GraphElementPeer,
   LayoutName,
   NodeData,

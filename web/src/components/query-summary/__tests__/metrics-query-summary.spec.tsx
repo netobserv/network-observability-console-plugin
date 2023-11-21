@@ -1,7 +1,6 @@
 import { mount, shallow } from 'enzyme';
 import * as React from 'react';
-import { TopologyMetrics } from '../../../api/loki';
-import { MetricType } from '../../../model/flow-query';
+import { NetflowMetrics } from '../../../api/loki';
 import { metrics } from '../../__tests-data__/metrics';
 import { MetricsQuerySummary, MetricsQuerySummaryContent } from '../metrics-query-summary';
 
@@ -9,19 +8,12 @@ describe('<MetricsQuerySummary />', () => {
   const now = new Date();
 
   const mocks = {
-    isShowQuerySummary: false,
     toggleQuerySummary: jest.fn(),
-    metrics: metrics,
+    metrics: { rateMetrics: { bytes: metrics } } as NetflowMetrics,
     stats: {
       limitReached: false,
       numQueries: 1
     },
-    droppedMetrics: [] as TopologyMetrics[],
-    appMetrics: undefined,
-    appDroppedMetrics: undefined,
-    metricType: 'bytes' as MetricType,
-
-    range: 300,
     lastRefresh: now
   };
 

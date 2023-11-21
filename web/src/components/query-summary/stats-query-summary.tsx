@@ -22,7 +22,7 @@ export const StatsQuerySummary: React.FC<{
           </Text>
         }
       >
-        <div className="stats-query-summary-date">
+        <div className="stats-query-summary-container-with-icon">
           <GlobeAmericasIcon />
           <Text id="lastRefresh" component={TextVariants.p}>
             {lastRefresh.toLocaleTimeString()}
