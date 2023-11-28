@@ -1,11 +1,12 @@
 import { Button } from '@patternfly/react-core';
 import { shallow } from 'enzyme';
 import * as React from 'react';
-import { DefaultColumns } from '../../__tests-data__/columns';
+import { DefaultColumnSample } from '../../__tests-data__/columns';
 import { FlowsSample } from '../../__tests-data__/flows';
 import RecordField, { RecordFieldFilter } from '../record-field';
 import { Size } from '../../dropdowns/table-display-dropdown';
-import { ColumnsId, getExtraColumns } from '../../../utils/columns';
+import { ColumnsId } from '../../../utils/columns';
+import { compareNumbers } from '../../../utils/base-compare';
 
 describe('<RecordField />', () => {
   const filterMock: RecordFieldFilter = {
@@ -19,13 +20,13 @@ describe('<RecordField />', () => {
   };
   it('should render single field', async () => {
     //datetime column will produce a single field
-    const wrapper = shallow(<RecordField flow={FlowsSample[0]} column={DefaultColumns[0]} {...mocks} />);
+    const wrapper = shallow(<RecordField flow={FlowsSample[0]} column={DefaultColumnSample[0]} {...mocks} />);
     expect(wrapper.find(RecordField)).toBeTruthy();
     expect(wrapper.find('.record-field-content.m')).toHaveLength(1);
   });
   it('should filter', async () => {
     const wrapper = shallow(
-      <RecordField flow={FlowsSample[0]} column={DefaultColumns[0]} filter={filterMock} {...mocks} />
+      <RecordField flow={FlowsSample[0]} column={DefaultColumnSample[0]} filter={filterMock} {...mocks} />
     );
     expect(wrapper.find(RecordField)).toBeTruthy();
     expect(wrapper.find('.record-field-flex-container')).toHaveLength(1);
@@ -36,8 +37,21 @@ describe('<RecordField />', () => {
     expect(filterMock.onClick).toHaveBeenCalledTimes(1);
   });
   it('should display <1ms DNS latency', async () => {
-    const dnsColumn = getExtraColumns((k: string) => k).find(c => c.id === ColumnsId.dnslatency)!;
-    const wrapper = shallow(<RecordField flow={FlowsSample[2]} column={dnsColumn} {...mocks} />);
+    const wrapper = shallow(
+      <RecordField
+        flow={FlowsSample[2]}
+        column={{
+          id: ColumnsId.dnslatency,
+          group: 'DNS',
+          name: 'DNS Latency',
+          isSelected: true,
+          value: f => (f.fields.DnsLatencyMs === undefined ? Number.NaN : f.fields.DnsLatencyMs),
+          sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
+          width: 5
+        }}
+        {...mocks}
+      />
+    );
     expect(wrapper.find(RecordField)).toBeTruthy();
     expect(wrapper.find('.record-field-content')).toHaveLength(1);
     expect(wrapper.find('.record-field-content span').text()).toBe('< 1ms');

@@ -24,16 +24,16 @@ import {
   defaultDimensions,
   Dimensions,
   LegendDataItem,
-  observe,
+  observeDimensions,
   toDatapoints
 } from './metrics-helper';
 
 export type MetricsContentProps = {
   id: string;
-  title: string;
   metricType: MetricType;
   metrics: NamedMetric[];
   limit: number;
+  showLegend?: boolean;
   showBar?: boolean;
   showArea?: boolean;
   showLine?: boolean;
@@ -41,11 +41,11 @@ export type MetricsContentProps = {
   smallerTexts?: boolean;
   itemsPerRow?: number;
   tooltipsTruncate: boolean;
+  animate?: boolean;
 };
 
 export const MetricsContent: React.FC<MetricsContentProps> = ({
   id,
-  title,
   metricType,
   metrics,
   limit,
@@ -55,7 +55,9 @@ export const MetricsContent: React.FC<MetricsContentProps> = ({
   showScatter,
   smallerTexts,
   itemsPerRow,
-  tooltipsTruncate
+  tooltipsTruncate,
+  showLegend,
+  animate
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
@@ -82,11 +84,11 @@ export const MetricsContent: React.FC<MetricsContentProps> = ({
 
   const containerRef = React.createRef<HTMLDivElement>();
   const [dimensions, setDimensions] = useLocalStorage<Dimensions>(
-    LOCAL_STORAGE_OVERVIEW_METRICS_DIMENSION_KEY,
+    `${LOCAL_STORAGE_OVERVIEW_METRICS_DIMENSION_KEY}${showLegend ? '-legend' : ''}`,
     defaultDimensions
   );
   React.useEffect(() => {
-    observe(containerRef, dimensions, setDimensions);
+    observeDimensions(containerRef, dimensions, setDimensions);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [containerRef, dimensions]);
 
@@ -94,28 +96,40 @@ export const MetricsContent: React.FC<MetricsContentProps> = ({
     <div id={`chart-${id}`} className="metrics-content-div" ref={containerRef} data-test-metrics={metrics.length}>
       <Chart
         themeColor={ChartThemeColor.multiUnordered}
-        ariaTitle={title}
-        containerComponent={chartVoronoi(legendData, metricType, t)}
-        legendData={legendData}
+        containerComponent={showLegend ? chartVoronoi(legendData, metricType, t) : undefined}
+        legendData={showLegend ? legendData : undefined}
         legendOrientation={'horizontal'}
         legendPosition="bottom-left"
         legendAllowWrap={true}
-        legendComponent={legentComponent}
-        //TODO: fix refresh on selection change to enable animation
-        //animate={true}
+        legendComponent={showLegend ? legentComponent : undefined}
+        animate={animate}
         scale={{ x: 'time', y: showBar ? 'linear' : 'sqrt' }}
         width={dimensions.width}
         height={dimensions.height}
         domainPadding={{ x: 0, y: 0 }}
-        padding={{
-          bottom: (itemsPerRow && itemsPerRow > 1 ? legendData.length / 2 + 1 : legendData.length) * 25 + 75,
-          left: 90,
-          right: 50,
-          top: 50
-        }}
+        padding={
+          showLegend
+            ? {
+                bottom: (itemsPerRow && itemsPerRow > 1 ? legendData.length / 2 + 1 : legendData.length) * 25 + 75,
+                left: 90,
+                right: 50,
+                top: 50
+              }
+            : {
+                bottom: 0,
+                left: 0,
+                right: 0,
+                top: 0
+              }
+        }
       >
-        <ChartAxis fixLabelOverlap />
-        <ChartAxis dependentAxis showGrid fixLabelOverlap tickFormat={y => getFormattedRateValue(y, metricType, t)} />
+        <ChartAxis fixLabelOverlap tickFormat={showLegend ? () => '' : undefined} />
+        <ChartAxis
+          dependentAxis
+          showGrid
+          fixLabelOverlap
+          tickFormat={y => (showLegend ? getFormattedRateValue(y, metricType, t) : '')}
+        />
         {showBar && (
           <ChartStack>
             {topKDatapoints.map((datapoints, idx) => (

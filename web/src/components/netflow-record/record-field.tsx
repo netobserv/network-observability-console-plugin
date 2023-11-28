@@ -7,19 +7,20 @@ import { Link } from 'react-router-dom';
 import { FlowDirection, Record } from '../../api/ipfix';
 import { Column, ColumnsId, getFullColumnName } from '../../utils/columns';
 import { dateFormatter, getFormattedDate, timeMSFormatter, utcDateTimeFormatter } from '../../utils/datetime';
-import { DNS_CODE_NAMES, getDNSRcodeDescription } from '../../utils/dns';
+import { DNS_CODE_NAMES, DNS_ERRORS_VALUES, getDNSErrorDescription, getDNSRcodeDescription } from '../../utils/dns';
 import {
   getICMPCode,
   getICMPDocUrl,
   getICMPType,
   ICMP_ALL_CODES_VALUES,
-  ICMP_ALL_TYPES_VALUES
+  ICMP_ALL_TYPES_VALUES,
+  isValidICMPProto
 } from '../../utils/icmp';
 import { DROP_CAUSES_NAMES, getDropCauseDescription, getDropCauseDocUrl } from '../../utils/pkt-drop';
 import { formatDurationAboveMillisecond, formatDurationAboveNanosecond } from '../../utils/duration';
 import { formatPort } from '../../utils/port';
 import { getDSCPDocUrl, getDSCPServiceClassDescription, getDSCPServiceClassName } from '../../utils/dscp';
-import { formatProtocol } from '../../utils/protocol';
+import { formatProtocol, getProtocolDocUrl } from '../../utils/protocol';
 import { Size } from '../dropdowns/table-display-dropdown';
 import './record-field.css';
 
@@ -50,8 +51,39 @@ export const RecordField: React.FC<{
     }
   };
 
-  const emptyText = () => {
+  const errorTextValue = (value: string, text: string) => {
+    return (
+      <div className="record-field-flex">
+        <Tooltip
+          content={[
+            <span className="co-nowrap" key="co-error-text">
+              {text}
+            </span>
+          ]}
+        >
+          <div style={{ color: isDark ? '#C9190B' : '#A30000' }} className="record-field-flex">
+            {value}
+          </div>
+        </Tooltip>
+      </div>
+    );
+  };
+
+  const emptyText = (errorText?: string) => {
+    if (errorText) {
+      return errorTextValue(t('n/a'), errorText);
+    }
     return <div className="record-field-flex text-muted">{t('n/a')}</div>;
+  };
+
+  const emptyDnsErrorText = () => {
+    return emptyText(
+      flow.fields.DnsErrno
+        ? `${t('DNS Error')} ${flow.fields.DnsErrno}: ${getDNSErrorDescription(
+            flow.fields.DnsErrno as DNS_ERRORS_VALUES
+          )}`
+        : undefined
+    );
   };
 
   const simpleTextWithTooltip = (text?: string, color?: string, child?: JSX.Element) => {
@@ -222,7 +254,6 @@ export const RecordField: React.FC<{
       case ColumnsId.endtime:
         return dateTimeContent(typeof value === 'number' && !isNaN(value) ? new Date(value) : undefined);
       case ColumnsId.collectionlatency:
-      case ColumnsId.dnslatency:
       case ColumnsId.duration:
       case ColumnsId.rttTime:
         return singleContainer(
@@ -366,56 +397,77 @@ export const RecordField: React.FC<{
       case ColumnsId.dstport: {
         return singleContainer(simpleTextWithTooltip(value ? formatPort(value as number) : ''));
       }
-      case ColumnsId.proto:
-        const text = value ? formatProtocol(value as number) : t('n/a');
-        const children: JSX.Element[] = [];
-
-        if (detailed) {
-          if (flow.fields.IcmpType !== undefined) {
-            const type = getICMPType(flow.fields.Proto, flow.fields.IcmpType as ICMP_ALL_TYPES_VALUES);
-            const code = getICMPCode(
-              flow.fields.Proto,
-              flow.fields.IcmpType as ICMP_ALL_TYPES_VALUES,
-              flow.fields.IcmpCode as ICMP_ALL_CODES_VALUES
+      case ColumnsId.proto: {
+        if (typeof value === 'number' && !isNaN(value)) {
+          const docUrl = getProtocolDocUrl();
+          const protocolName = formatProtocol(value as number);
+          return singleContainer(
+            detailed
+              ? clickableContent(protocolName, `${t('Value')}: ${value}`, docUrl)
+              : simpleTextWithTooltip(protocolName)
+          );
+        } else {
+          return singleContainer(emptyText());
+        }
+      }
+      case ColumnsId.dscp: {
+        let child = emptyText();
+        if (typeof value === 'number' && !isNaN(value)) {
+          const serviceClassName = getDSCPServiceClassName(value);
+          if (serviceClassName && detailed) {
+            child = clickableContent(
+              serviceClassName,
+              `${t('Value')}: ${value} ${t('Examples')}: ${getDSCPServiceClassDescription(value)}`,
+              getDSCPDocUrl()
             );
-            const docUrl = getICMPDocUrl(flow.fields.Proto);
-            if (type) {
-              children.push(clickableContent(type.name, type.description || '', docUrl));
-              if (code) {
-                children.push(clickableContent(code.name, code.description || '', docUrl));
-              }
-            } else {
-              children.push(
-                clickableContent(
-                  `${t('Type')}: ${flow.fields.IcmpType} ${t('Code')}: ${flow.fields.IcmpCode}`,
-                  '',
-                  docUrl
-                )
-              );
-            }
-          }
-
-          if (flow.fields.Dscp !== undefined) {
-            const docUrl = getDSCPDocUrl();
-            const serviceClassName = getDSCPServiceClassName(flow.fields.Dscp);
-            if (serviceClassName) {
-              children.push(
-                clickableContent(
-                  `${t('DSCP Service Class Name')}: ${serviceClassName}`,
-                  `${t('Value')}: ${flow.fields.Dscp} ${t('Examples')}: ${getDSCPServiceClassDescription(
-                    serviceClassName
-                  )}`,
-                  docUrl
-                )
-              );
-            } else {
-              children.push(clickableContent(`${t('DSCP')}: ${flow.fields.Dscp}`, '', docUrl));
-            }
+          } else {
+            child = simpleTextWithTooltip(serviceClassName || String(value))!;
           }
         }
-        return singleContainer(
-          simpleTextWithTooltip(children.length ? `${text} ${t('reporting')}` : text, undefined, <>{children}</>)
-        );
+        return singleContainer(child);
+      }
+      case ColumnsId.icmptype: {
+        let child = emptyText();
+        if (Array.isArray(value) && value.length) {
+          if (isValidICMPProto(Number(value[0]))) {
+            const type = getICMPType(Number(value[0]), Number(value[1]) as ICMP_ALL_TYPES_VALUES);
+            if (type && detailed) {
+              child = clickableContent(type.name, type.description || '', getICMPDocUrl(Number(value[0])));
+            } else {
+              child = simpleTextWithTooltip(type?.name || String(value[1]))!;
+            }
+          } else {
+            child = errorTextValue(
+              String(value[1]),
+              t('ICMP type provided but protocol is {{proto}}', { proto: formatProtocol(value[0] as number) })
+            );
+          }
+        }
+        return singleContainer(child);
+      }
+      case ColumnsId.icmpcode: {
+        let child = emptyText();
+        if (Array.isArray(value) && value.length) {
+          if (isValidICMPProto(Number(value[0]))) {
+            const code = getICMPCode(
+              Number(value[0]),
+              Number(value[1]) as ICMP_ALL_TYPES_VALUES,
+              Number(value[2]) as ICMP_ALL_CODES_VALUES
+            );
+            if (code && detailed) {
+              child = clickableContent(code.name, code.description || '', getICMPDocUrl(Number(value[0])));
+            } else {
+              child = simpleTextWithTooltip(code?.name || String(value[2]))!;
+            }
+          } else {
+            child = errorTextValue(
+              String(value[1]),
+              t('ICMP code provided but protocol is {{proto}}', { proto: formatProtocol(value[0] as number) })
+            );
+          }
+        }
+        return singleContainer(child);
+      }
       case ColumnsId.flowdir:
         return singleContainer(
           simpleTextWithTooltip(
@@ -460,16 +512,34 @@ export const RecordField: React.FC<{
             simpleTextWithTooltip(detailed ? `${String(value)} ${c.name.toLowerCase()} ${t('sent')}` : String(value))
           );
         }
-      case ColumnsId.dnsid:
+      case ColumnsId.dnsid: {
         return singleContainer(
-          typeof value === 'number' && !isNaN(value) ? simpleTextWithTooltip(String(value)) : emptyText()
+          typeof value === 'number' && !isNaN(value) ? simpleTextWithTooltip(String(value)) : emptyDnsErrorText()
         );
-      case ColumnsId.dnsresponsecode:
+      }
+      case ColumnsId.dnslatency: {
+        return singleContainer(
+          typeof value === 'number' && !isNaN(value)
+            ? simpleTextWithTooltip(formatDurationAboveMillisecond(value as number))
+            : emptyDnsErrorText()
+        );
+      }
+      case ColumnsId.dnsresponsecode: {
         return singleContainer(
           typeof value === 'string' && value.length
             ? simpleTextWithTooltip(detailed ? `${value}: ${getDNSRcodeDescription(value as DNS_CODE_NAMES)}` : value)
+            : emptyDnsErrorText()
+        );
+      }
+      case ColumnsId.dnserrno: {
+        return singleContainer(
+          typeof value === 'number' && !isNaN(value)
+            ? simpleTextWithTooltip(
+                detailed && value ? `${value}: ${getDNSErrorDescription(value as DNS_ERRORS_VALUES)}` : String(value)
+              )
             : emptyText()
         );
+      }
       default:
         if (Array.isArray(value) && value.length) {
           return doubleContainer(simpleTextWithTooltip(String(value[0])), simpleTextWithTooltip(String(value[1])));

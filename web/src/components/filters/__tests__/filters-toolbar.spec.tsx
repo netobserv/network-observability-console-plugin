@@ -1,11 +1,13 @@
 import { Accordion, AccordionItem, Button, Dropdown, Toolbar, ToolbarItem } from '@patternfly/react-core';
 import { mount, shallow } from 'enzyme';
 import * as React from 'react';
+import { FilterDefinitionSample } from '../../../components/__tests-data__/filters';
 import FiltersToolbar, { FiltersToolbarProps } from '../../filters/filters-toolbar';
 
 describe('<FiltersToolbar />', () => {
   const props: FiltersToolbarProps = {
     filters: { backAndForth: false, list: [] },
+    filterDefinitions: FilterDefinitionSample,
     forcedFilters: undefined,
     skipTipsDelay: true,
     setFilters: jest.fn(),

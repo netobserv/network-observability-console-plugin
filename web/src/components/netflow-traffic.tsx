@@ -86,7 +86,9 @@ import {
   LOCAL_STORAGE_SIZE_KEY,
   LOCAL_STORAGE_TOPOLOGY_OPTIONS_KEY,
   LOCAL_STORAGE_VIEW_ID_KEY,
-  useLocalStorage
+  useLocalStorage,
+  getLocalStorage,
+  LOCAL_STORAGE_OVERVIEW_FOCUS_KEY
 } from '../utils/local-storage-hook';
 import {
   DNS_ID_MATCHER,
@@ -150,13 +152,15 @@ import { LinksOverflow } from './overflow/links-overflow';
 import { mergeFlowReporters } from '../utils/flows';
 import { getFetchFunctions as getBackAndForthFetch } from '../utils/back-and-forth';
 import { mergeStats } from '../utils/metrics';
+import { getFilterDefinitions } from '../utils/filter-definitions';
 
 export type ViewId = 'overview' | 'table' | 'topology';
 
 export const NetflowTraffic: React.FC<{
   forcedFilters: Filters | null;
   isTab?: boolean;
-}> = ({ forcedFilters, isTab }) => {
+  parentConfig?: Config;
+}> = ({ forcedFilters, isTab, parentConfig }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [extensions] = useResolvedExtensions<ModelFeatureFlag>(isModelFeatureFlag);
   const k8sModels = useK8sModelsWithColors();
@@ -189,6 +193,7 @@ export const NetflowTraffic: React.FC<{
     LOCAL_STORAGE_OVERVIEW_TRUNCATE_KEY,
     TruncateLength.M
   );
+  const [overviewFocus, setOverviewFocus] = useLocalStorage<boolean>(LOCAL_STORAGE_OVERVIEW_FOCUS_KEY, false);
   const [topologyOptions, setTopologyOptions] = useLocalStorage<TopologyOptions>(
     LOCAL_STORAGE_TOPOLOGY_OPTIONS_KEY,
     DefaultOptions
@@ -249,7 +254,8 @@ export const NetflowTraffic: React.FC<{
       criteria: 'isSelected'
     }
   );
-  const [columns, setColumns] = useLocalStorage<Column[]>(LOCAL_STORAGE_COLS_KEY, getDefaultColumns(t), {
+
+  const [columns, setColumns] = useLocalStorage<Column[]>(LOCAL_STORAGE_COLS_KEY, [], {
     id: 'id',
     criteria: 'isSelected'
   });
@@ -290,14 +296,16 @@ export const NetflowTraffic: React.FC<{
 
   const getAvailableColumns = React.useCallback(
     (isSidePanel = false) => {
-      return (isSidePanel ? getDefaultColumns(t, false, false) : columns).filter(
+      return columns.filter(
         col =>
+          (!isSidePanel || !col.isCommon) &&
           (isConnectionTracking() || ![ColumnsId.recordtype, ColumnsId.hashid].includes(col.id)) &&
-          (isDNSTracking() || ![ColumnsId.dnsid, ColumnsId.dnslatency, ColumnsId.dnsresponsecode].includes(col.id)) &&
+          (isDNSTracking() ||
+            ![ColumnsId.dnsid, ColumnsId.dnslatency, ColumnsId.dnsresponsecode, ColumnsId.dnserrno].includes(col.id)) &&
           (isFlowRTT() || ![ColumnsId.rttTime].includes(col.id))
       );
     },
-    [columns, isConnectionTracking, isDNSTracking, isFlowRTT, t]
+    [columns, isConnectionTracking, isDNSTracking, isFlowRTT]
   );
 
   const getSelectedColumns = React.useCallback(() => {
@@ -315,7 +323,23 @@ export const NetflowTraffic: React.FC<{
     [setMetricFunction, setMetricType]
   );
 
-  const getQuickFilters = React.useCallback((c = config) => parseQuickFilters(t, c.quickFilters), [t, config]);
+  const getFilterDefs = React.useCallback(() => {
+    return getFilterDefinitions(config.filters, config.columns, t).filter(
+      fd =>
+        (isConnectionTracking() || fd.id !== 'id') &&
+        (isDNSTracking() || !fd.id.startsWith('dns_')) &&
+        (isPktDrop() || !fd.id.startsWith('pkt_drop_')) &&
+        (isFlowRTT() || fd.id !== 'time_flow_rtt')
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [config.columns, config.filters]);
+
+  const getQuickFilters = React.useCallback(
+    (c = config) => {
+      return parseQuickFilters(getFilterDefs(), c.quickFilters);
+    },
+    [config, getFilterDefs]
+  );
 
   const getDefaultFilters = React.useCallback(
     (c = config) => {
@@ -348,6 +372,21 @@ export const NetflowTraffic: React.FC<{
       updateTableFilters({ backAndForth, list: def });
     },
     [config, backAndForth, getDefaultFilters, updateTableFilters]
+  );
+
+  const setFiltersFromURL = React.useCallback(
+    (config: Config) => {
+      if (forcedFilters === null) {
+        //set filters from url or freshly loaded quick filters defaults
+        const filtersPromise = getFiltersFromURL(getFilterDefs(), disabledFilters);
+        if (filtersPromise) {
+          filtersPromise.then(updateTableFilters);
+        } else {
+          resetDefaultFilters(config);
+        }
+      }
+    },
+    [disabledFilters, forcedFilters, getFilterDefs, resetDefaultFilters, updateTableFilters]
   );
 
   const clearSelections = () => {
@@ -453,8 +492,8 @@ export const NetflowTraffic: React.FC<{
     // check back-and-forth
     const enabledFilters = getEnabledFilters(forcedFilters || filters);
     const matchAny = match === 'any';
-    return getBackAndForthFetch(enabledFilters, matchAny);
-  }, [forcedFilters, filters, match]);
+    return getBackAndForthFetch(getFilterDefs(), enabledFilters, matchAny);
+  }, [forcedFilters, filters, match, getFilterDefs]);
 
   const manageWarnings = React.useCallback(
     (query: Promise<unknown>) => {
@@ -754,28 +793,37 @@ export const NetflowTraffic: React.FC<{
     }
   }, [config.recordTypes, isConnectionTracking, isFlow, recordType]);
 
+  React.useEffect(() => {
+    if (initState.current.includes('configLoaded')) {
+      setColumns(
+        getLocalStorage(LOCAL_STORAGE_COLS_KEY, getDefaultColumns(config.columns), {
+          id: 'id',
+          criteria: 'isSelected'
+        })
+      );
+      setFiltersFromURL(config);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [config]);
+
   // tick on state change
   React.useEffect(() => {
     // init function will be triggered only once
     if (!initState.current.includes('initDone')) {
       initState.current.push('initDone');
 
-      // load config only once and track its state
-      if (!initState.current.includes('configLoading')) {
-        initState.current.push('configLoading');
-        loadConfig().then(v => {
-          initState.current.push('configLoaded');
-          setConfig(v);
-          if (forcedFilters === null) {
-            //set filters from url or freshly loaded quick filters defaults
-            const filtersPromise = getFiltersFromURL(t, disabledFilters);
-            if (filtersPromise) {
-              filtersPromise.then(updateTableFilters);
-            } else {
-              resetDefaultFilters(v);
-            }
-          }
-        });
+      if (parentConfig) {
+        initState.current.push('configLoaded');
+        setConfig(parentConfig);
+      } else {
+        // load config only once and track its state
+        if (!initState.current.includes('configLoading')) {
+          initState.current.push('configLoading');
+          loadConfig().then(v => {
+            initState.current.push('configLoaded');
+            setConfig(v);
+          });
+        }
       }
 
       // init will trigger this useEffect update loop as soon as config is loaded
@@ -1104,6 +1152,7 @@ export const NetflowTraffic: React.FC<{
           record={selectedRecord}
           columns={getAvailableColumns(true)}
           filters={filters.list}
+          filterDefinitions={getFilterDefs()}
           range={range}
           type={recordType}
           isDark={isDarkTheme}
@@ -1143,6 +1192,7 @@ export const NetflowTraffic: React.FC<{
           metricType={metricType}
           truncateLength={topologyOptions.truncateLength}
           filters={filters.list}
+          filterDefinitions={getFilterDefs()}
           setFilters={setFiltersList}
           onClose={() => onElementSelect(undefined)}
         />
@@ -1205,6 +1255,8 @@ export const NetflowTraffic: React.FC<{
             isDark={isDarkTheme}
             filterActionLinks={filterLinks()}
             truncateLength={overviewTruncateLength}
+            focus={overviewFocus}
+            setFocus={setOverviewFocus}
           />
         );
         break;
@@ -1241,6 +1293,7 @@ export const NetflowTraffic: React.FC<{
             options={topologyOptions}
             setOptions={setTopologyOptions}
             filters={filters}
+            filterDefinitions={getFilterDefs()}
             setFilters={setFilters}
             selected={selectedElement}
             onSelect={onElementSelect}
@@ -1407,38 +1460,37 @@ export const NetflowTraffic: React.FC<{
           </div>
         )
       }
-      <FiltersToolbar
-        id="filter-toolbar"
-        filters={filters}
-        setFilters={updateTableFilters}
-        clearFilters={clearFilters}
-        resetFilters={resetDefaultFilters}
-        queryOptionsProps={{
-          limit,
-          setLimit,
-          match,
-          setMatch,
-          packetLoss,
-          setPacketLoss,
-          recordType,
-          setRecordType,
-          showDuplicates,
-          setShowDuplicates,
-          allowFlow: isFlow(),
-          allowConnection: isConnectionTracking(),
-          allowShowDuplicates: selectedViewId === 'table' && recordType !== 'allConnections',
-          allowPktDrops: isPktDrop(),
-          useTopK: selectedViewId === 'overview'
-        }}
-        forcedFilters={forcedFilters}
-        quickFilters={getQuickFilters()}
-        isFullScreen={isFullScreen}
-        setFullScreen={setFullScreen}
-        allowConnectionFilter={isConnectionTracking()}
-        allowDNSFilter={isDNSTracking()}
-        allowPktDrops={isPktDrop()}
-        allowRTTFilter={isFlowRTT()}
-      />
+      {!_.isEmpty(getFilterDefs()) && (
+        <FiltersToolbar
+          id="filter-toolbar"
+          filters={filters}
+          setFilters={updateTableFilters}
+          clearFilters={clearFilters}
+          resetFilters={resetDefaultFilters}
+          queryOptionsProps={{
+            limit,
+            setLimit,
+            match,
+            setMatch,
+            packetLoss,
+            setPacketLoss,
+            recordType,
+            setRecordType,
+            showDuplicates,
+            setShowDuplicates,
+            allowFlow: isFlow(),
+            allowConnection: isConnectionTracking(),
+            allowShowDuplicates: selectedViewId === 'table' && recordType !== 'allConnections',
+            allowPktDrops: isPktDrop(),
+            useTopK: selectedViewId === 'overview'
+          }}
+          forcedFilters={forcedFilters}
+          quickFilters={getQuickFilters()}
+          filterDefinitions={getFilterDefs()}
+          isFullScreen={isFullScreen}
+          setFullScreen={setFullScreen}
+        />
+      )}
       {
         <Flex className="netflow-traffic-tabs-container">
           <FlexItem id="tabs-container" flex={{ default: 'flex_1' }}>
@@ -1515,6 +1567,8 @@ export const NetflowTraffic: React.FC<{
                   setMetricScope={setMetricScope}
                   truncateLength={overviewTruncateLength}
                   setTruncateLength={setOverviewTruncateLength}
+                  focus={overviewFocus}
+                  setFocus={setOverviewFocus}
                 />
               )}
               {selectedViewId === 'table' && <TableDisplayDropdown size={size} setSize={setSize} />}
@@ -1560,38 +1614,43 @@ export const NetflowTraffic: React.FC<{
           <DrawerContentBody id="drawerBody">{pageContent()}</DrawerContentBody>
         </DrawerContent>
       </Drawer>
-      <TimeRangeModal
-        id="time-range-modal"
-        isModalOpen={isTRModalOpen}
-        setModalOpen={setTRModalOpen}
-        range={typeof range === 'object' ? range : undefined}
-        setRange={setRange}
-      />
-      <OverviewPanelsModal
-        id="overview-panels-modal"
-        isModalOpen={isOverviewModalOpen}
-        setModalOpen={setOverviewModalOpen}
-        recordType={recordType}
-        panels={getAvailablePanels()}
-        setPanels={setSelectedPanels}
-      />
-      <ColumnsModal
-        id="columns-modal"
-        isModalOpen={isColModalOpen}
-        setModalOpen={setColModalOpen}
-        columns={getAvailableColumns()}
-        setColumns={setColumns}
-        setColumnSizes={setColumnSizes}
-      />
-      <ExportModal
-        id="export-modal"
-        isModalOpen={isExportModalOpen}
-        setModalOpen={setExportModalOpen}
-        flowQuery={buildFlowQuery()}
-        columns={columns.filter(c => c.fieldName && !c.fieldName.startsWith('Time'))}
-        range={range}
-        filters={(forcedFilters || filters).list}
-      />
+      {initState.current.includes('initDone') && (
+        <>
+          <TimeRangeModal
+            id="time-range-modal"
+            isModalOpen={isTRModalOpen}
+            setModalOpen={setTRModalOpen}
+            range={typeof range === 'object' ? range : undefined}
+            setRange={setRange}
+          />
+          <OverviewPanelsModal
+            id="overview-panels-modal"
+            isModalOpen={isOverviewModalOpen}
+            setModalOpen={setOverviewModalOpen}
+            recordType={recordType}
+            panels={getAvailablePanels()}
+            setPanels={setSelectedPanels}
+          />
+          <ColumnsModal
+            id="columns-modal"
+            isModalOpen={isColModalOpen}
+            setModalOpen={setColModalOpen}
+            config={config}
+            columns={getAvailableColumns()}
+            setColumns={setColumns}
+            setColumnSizes={setColumnSizes}
+          />
+          <ExportModal
+            id="export-modal"
+            isModalOpen={isExportModalOpen}
+            setModalOpen={setExportModalOpen}
+            flowQuery={buildFlowQuery()}
+            columns={columns.filter(c => c.fieldName && !c.fieldName.startsWith('Time'))}
+            range={range}
+            filters={(forcedFilters || filters).list}
+          />
+        </>
+      )}
       {!_.isEmpty(warningMessage) && (
         <Alert
           id="netflow-warning"

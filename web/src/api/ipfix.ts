@@ -11,6 +11,19 @@ export interface Record {
   fields: Fields;
 }
 
+export const getRecordValue = (record: Record, fieldOrLabel: string, defaultValue: string | number) => {
+  // check if label exists
+  if (record.labels[fieldOrLabel as keyof Labels] !== undefined) {
+    return record.labels[fieldOrLabel as keyof Labels];
+  }
+  // check if field exists
+  if (record.fields[fieldOrLabel as keyof Fields] !== undefined) {
+    return record.fields[fieldOrLabel as keyof Fields];
+  }
+  // fallback on default
+  return defaultValue;
+};
+
 export interface Labels {
   /** Source namespace */
   SrcK8S_Namespace?: string;
@@ -128,6 +141,8 @@ export interface Fields {
   DnsFlagsResponseCode?: string;
   /** Calculated time between response and request, in milliseconds */
   DnsLatencyMs?: number;
+  /** Error number returned from DNS tracker ebpf hook function */
+  DnsErrno?: number;
   /** Start timestamp of this flow, in milliseconds */
   TimeFlowStartMs: number;
   /** End timestamp of this flow, in milliseconds */
@@ -143,3 +158,5 @@ export interface Fields {
   /** In conversation tracking, a counter of flow logs per conversation */
   numFlowLogs?: number;
 }
+
+export type Field = keyof Fields | keyof Labels;

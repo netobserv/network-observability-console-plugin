@@ -16,7 +16,7 @@ import * as _ from 'lodash';
 import { Record } from '../../api/ipfix';
 import { NetflowTableHeader } from './netflow-table-header';
 import NetflowTableRow from './netflow-table-row';
-import { Column, ColumnsId, ColumnSizeMap, getCommonColumns } from '../../utils/columns';
+import { Column, ColumnsId, ColumnSizeMap } from '../../utils/columns';
 import { Size } from '../dropdowns/table-display-dropdown';
 import { usePrevious } from '../../utils/previous-hook';
 import './netflow-table.css';
@@ -26,6 +26,7 @@ import {
   useLocalStorage
 } from '../../utils/local-storage-hook';
 import { LokiError } from '../messages/loki-error';
+import { convertRemToPixels } from '../../utils/panel';
 
 const NetflowTable: React.FC<{
   flows: Record[];
@@ -111,13 +112,8 @@ const NetflowTable: React.FC<{
 
   //get row height from display size
   const getRowHeight = React.useCallback(() => {
-    const doubleSizeColumnIds = getCommonColumns(t).map(c => c.id);
+    const doubleSizeColumnIds = columns.filter(c => c.isCommon).map(c => c.id);
     const containsDoubleLine = columns.find(c => doubleSizeColumnIds.includes(c.id)) !== undefined;
-
-    function convertRemToPixels(rem: number) {
-      //get fontSize from document or fallback to 16 for jest
-      return rem * (parseFloat(getComputedStyle(document.documentElement).fontSize) || 16);
-    }
 
     switch (size) {
       case 'l':
@@ -153,14 +149,17 @@ const NetflowTable: React.FC<{
   }, [getRowHeight, scrollPosition]);
 
   React.useEffect(() => {
+    handleScroll();
+    handleResize();
     const container = document.getElementById('table-container');
     if (container && container.getAttribute('listener') !== 'true') {
       container.addEventListener('scroll', handleScroll);
-      window.addEventListener('resize', handleResize);
     }
 
-    handleScroll();
-    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
   }, [handleResize, handleScroll, loading]);
 
   // sort function
@@ -257,6 +256,8 @@ const NetflowTable: React.FC<{
     <div id="table-container">
       <TableComposable
         data-test="table-composable"
+        data-test-cols-count={columns.length}
+        data-test-rows-count={flows.length}
         aria-label="Netflow table"
         variant="compact"
         style={{ minWidth: `${width}em` }}

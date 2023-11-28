@@ -1,13 +1,12 @@
 import { mount, shallow } from 'enzyme';
 import * as React from 'react';
-import { FilterComponent } from '../../../model/filters';
 import CompareFilter, { CompareFilterProps, FilterCompare } from '../compare-filter';
 
 describe('<CompareFilter />', () => {
   const props: CompareFilterProps = {
     value: FilterCompare.EQUAL,
     setValue: jest.fn(),
-    component: FilterComponent.Text
+    component: 'text'
   };
   it('should render component', async () => {
     const wrapper = shallow(<CompareFilter {...props} />);
@@ -51,7 +50,7 @@ describe('<CompareFilter />', () => {
   });
 
   it('number should have more than', async () => {
-    const wrapper = mount(<CompareFilter {...props} component={FilterComponent.Number} />);
+    const wrapper = mount(<CompareFilter {...props} component={'number'} />);
     const switchButton = wrapper.find('#filter-compare-switch-button').last();
     const dropdownToggleButton = wrapper.find('#filter-compare-toggle-button').last();
 

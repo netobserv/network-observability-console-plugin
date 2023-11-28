@@ -2,14 +2,13 @@ import { TextInput, ValidatedOptions } from '@patternfly/react-core';
 import { mount } from 'enzyme';
 import * as React from 'react';
 import { act } from 'react-dom/test-utils';
+import { FilterDefinitionSample } from '../../../components/__tests-data__/filters';
 import { findFilter } from '../../../utils/filter-definitions';
 import TextFilter, { TextFilterProps } from '../text-filter';
 
-const t = (k: string) => k;
-
 describe('<TextFilter />', () => {
   const props: TextFilterProps = {
-    filterDefinition: findFilter(t, 'src_name')!,
+    filterDefinition: findFilter(FilterDefinitionSample, 'src_name')!,
     indicator: ValidatedOptions.default,
     addFilter: jest.fn(),
     setMessageWithDelay: jest.fn(),
@@ -20,7 +19,7 @@ describe('<TextFilter />', () => {
     props.setIndicator = jest.fn();
   });
   it('should filter name', done => {
-    const wrapper = mount(<TextFilter {...props} filterDefinition={findFilter(t, 'src_name')!} />);
+    const wrapper = mount(<TextFilter {...props} filterDefinition={findFilter(FilterDefinitionSample, 'src_name')!} />);
     const textInput = wrapper.find(TextInput).at(0);
     const searchButton = wrapper.find('#search-button').at(0);
 
@@ -54,7 +53,9 @@ describe('<TextFilter />', () => {
   });
 
   it('should filter valid IP', done => {
-    const wrapper = mount(<TextFilter {...props} filterDefinition={findFilter(t, 'src_address')!} />);
+    const wrapper = mount(
+      <TextFilter {...props} filterDefinition={findFilter(FilterDefinitionSample, 'src_address')!} />
+    );
     const textInput = wrapper.find(TextInput).at(0);
     const searchButton = wrapper.find('#search-button').at(0);
 
@@ -83,7 +84,9 @@ describe('<TextFilter />', () => {
   });
 
   it('should not filter invalid IP', done => {
-    const wrapper = mount(<TextFilter {...props} filterDefinition={findFilter(t, 'dst_host_address')!} />);
+    const wrapper = mount(
+      <TextFilter {...props} filterDefinition={findFilter(FilterDefinitionSample, 'dst_host_address')!} />
+    );
     const textInput = wrapper.find(TextInput).at(0);
     const searchButton = wrapper.find('#search-button').at(0);
 

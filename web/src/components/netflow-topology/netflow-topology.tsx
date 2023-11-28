@@ -5,7 +5,7 @@ import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { TopologyMetrics } from '../../api/loki';
-import { Filter, Filters } from '../../model/filters';
+import { Filter, FilterDefinition, Filters } from '../../model/filters';
 import { MetricFunction, FlowScope, MetricType } from '../../model/flow-query';
 import { GraphElementPeer, LayoutName, TopologyOptions } from '../../model/topology';
 import LokiError from '../messages/loki-error';
@@ -30,6 +30,7 @@ export const NetflowTopology: React.FC<{
   options: TopologyOptions;
   setOptions: (o: TopologyOptions) => void;
   filters: Filters;
+  filterDefinitions: FilterDefinition[];
   setFilters: (v: Filters) => void;
   selected: GraphElementPeer | undefined;
   onSelect: (e: GraphElementPeer | undefined) => void;
@@ -49,6 +50,7 @@ export const NetflowTopology: React.FC<{
   options,
   setOptions,
   filters,
+  filterDefinitions,
   setFilters,
   selected,
   onSelect,
@@ -115,6 +117,7 @@ export const NetflowTopology: React.FC<{
           options={options}
           setOptions={setOptions}
           filters={filters}
+          filterDefinitions={filterDefinitions}
           setFilters={setFilters}
           selected={selected}
           onSelect={onSelect}

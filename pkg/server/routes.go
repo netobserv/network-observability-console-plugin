@@ -39,7 +39,7 @@ func setupRoutes(cfg *Config, authChecker auth.Checker) *mux.Router {
 	api.HandleFunc("/resources/namespaces", handler.GetNamespaces(&cfg.Loki))
 	api.HandleFunc("/resources/namespace/{namespace}/kind/{kind}/names", handler.GetNames(&cfg.Loki))
 	api.HandleFunc("/resources/kind/{kind}/names", handler.GetNames(&cfg.Loki))
-	api.HandleFunc("/frontend-config", handler.GetConfig(cfg.BuildVersion, cfg.BuildDate, cfg.FrontendConfig))
+	api.HandleFunc("/frontend-config", handler.GetFrontendConfig(cfg.BuildVersion, cfg.BuildDate, cfg.ConfigPath))
 
 	r.PathPrefix("/").Handler(http.FileServer(http.Dir("./web/dist/")))
 	return r
