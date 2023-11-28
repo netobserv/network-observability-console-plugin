@@ -4,14 +4,16 @@ import { getPort } from '../utils/port';
 import { validateK8SName, validateStrictK8SName } from './label';
 import { joinResource, SplitResource, splitResource, SplitStage } from '../model/resource';
 import { validateIPFilter } from './ip';
-import { Fields, Labels } from '../api/ipfix';
+import { Field } from '../api/ipfix';
 import {
   FilterId,
   FilterValue,
   FilterDefinition,
-  FilterCategory,
+  FiltersEncoder,
+  FilterConfigDef,
   FilterComponent,
-  FiltersEncoder
+  FilterCategory,
+  FilterOption
 } from '../model/filters';
 import {
   findProtocolOption,
@@ -26,13 +28,14 @@ import {
   getDropStateOptions,
   getDropCauseOptions,
   getDirectionOptionsAsync,
-  findDirectionOption
+  findDirectionOption,
+  getDnsErrorCodeOptions,
+  getDSCPOptions
 } from './filter-options';
+import { ColumnConfigDef } from './columns';
 
 // Convenience string to filter by undefined field values
 export const undefinedValue = '""';
-
-type Field = keyof Fields | keyof Labels;
 
 const matcher = (left: string, right: string[], not: boolean, moreThan: boolean) =>
   `${left}${not ? '!=' : moreThan ? '>=' : '='}${right.join(',')}`;
@@ -107,18 +110,6 @@ const k8sSingleResourceEncode = (kind: Field, namespace: Field, name: Field, res
   return `${kind}="${res.kind}"&${namespace}="${res.namespace}"&${name}="${res.name}"`;
 };
 
-const withDest = (src: FilterDefinition, dstEncoder: FiltersEncoder): FilterDefinition[] => {
-  return [
-    src,
-    {
-      ...src,
-      id: src.id.replace('src_', 'dst_') as FilterId,
-      category: FilterCategory.Destination,
-      encoder: dstEncoder
-    }
-  ];
-};
-
 const isOwnerKind = (kind: string) => {
   const lower = kind.toLowerCase();
   return (
@@ -134,435 +125,194 @@ const isOwnerKind = (kind: string) => {
 const valid = (newValue: string) => ({ val: newValue });
 const invalid = (msg: string) => ({ err: msg });
 
-let filterDefinitions: FilterDefinition[] | undefined = undefined;
 export const getFilterDefinitions = (
-  t: TFunction,
-  allowConnectionFilter?: boolean,
-  allowDNSFilter?: boolean,
-  allowPktDrops?: boolean,
-  allowRTTFilter?: boolean
+  filterDefs: FilterConfigDef[],
+  columnsDefs: ColumnConfigDef[],
+  t: TFunction
 ): FilterDefinition[] => {
-  if (!filterDefinitions) {
-    const rejectEmptyValue = (value: string) => {
-      if (_.isEmpty(value)) {
-        return invalid(t('Value is empty'));
+  const rejectEmptyValue = (value: string) => {
+    if (_.isEmpty(value)) {
+      return invalid(t('Value is empty'));
+    }
+    return valid(value);
+  };
+
+  const k8sNameValidation = (value: string) => {
+    if (_.isEmpty(value)) {
+      // Replace with exact match
+      return valid('""');
+    }
+    return value === '""' || validateK8SName(value) ? valid(value) : invalid(t('Not a valid Kubernetes name'));
+  };
+
+  const k8sResourceValidation = (value: string) => {
+    const resource = splitResource(value);
+    if (resource.stage !== SplitStage.Completed) {
+      return invalid(t('Incomplete resource name, either kind, namespace or name is missing.'));
+    }
+    if (resource.kind === '') {
+      return invalid(t('Kind is empty'));
+    }
+    if (resource.namespace && !validateStrictK8SName(resource.namespace)) {
+      return invalid(t('Namespace: not a valid Kubernetes name'));
+    }
+    if (!validateStrictK8SName(resource.name)) {
+      return invalid(t('Name: not a valid Kubernetes name'));
+    }
+    // Make sure kind first letter is capital, rest is lower case
+    resource.kind = resource.kind.charAt(0).toUpperCase() + resource.kind.slice(1).toLowerCase();
+    return valid(joinResource(resource));
+  };
+
+  const k8sResourceCompletion = (value: string, selected: string) => {
+    const parts = splitResource(value);
+    switch (parts.stage) {
+      case SplitStage.PartialKind: {
+        const joined = `${selected}.`;
+        return { completed: false, option: { name: joined, value: joined } };
       }
+      case SplitStage.PartialNamespace: {
+        const joined = `${parts.kind}.${selected}.`;
+        return { completed: false, option: { name: joined, value: joined } };
+      }
+      case SplitStage.Completed: {
+        const joined = joinResource({ ...parts, name: selected });
+        return { completed: true, option: { name: joined, value: joined } };
+      }
+    }
+  };
+
+  const addressValidation = (value: string) => {
+    if (_.isEmpty(value)) {
+      return invalid(t('Value is empty'));
+    }
+    return validateIPFilter(value)
+      ? valid(value)
+      : invalid(t('Not a valid IPv4 or IPv6, nor a CIDR, nor an IP range separated by hyphen'));
+  };
+
+  const portValidation = (value: string) => {
+    if (_.isEmpty(value)) {
+      return invalid(t('Value is empty'));
+    }
+    //allow any port number or valid name / value
+    if (value == undefinedValue || !isNaN(Number(value)) || getPort(value)) {
       return valid(value);
-    };
-    const k8sNameValidation = (value: string) => {
-      if (_.isEmpty(value)) {
-        // Replace with exact match
-        return valid('""');
+    }
+    return invalid(t('Unknown port'));
+  };
+
+  const macValidation = (value: string) => {
+    if (_.isEmpty(value)) {
+      return invalid(t('Value is empty'));
+    }
+    return /^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})/.test(value)
+      ? valid(value)
+      : invalid(t('Not a valid MAC address'));
+  };
+
+  const protoValidation = (value: string) => {
+    if (_.isEmpty(value)) {
+      return invalid(t('Value is empty'));
+    }
+    //allow any protocol number or valid name / value
+    if (value == undefinedValue || !isNaN(Number(value))) {
+      return valid(value);
+    } else {
+      const proto = findProtocolOption(value);
+      if (proto) {
+        return valid(proto.name);
       }
-      return value === '""' || validateK8SName(value) ? valid(value) : invalid(t('Not a valid Kubernetes name'));
+      return invalid(t('Unknown protocol'));
+    }
+  };
+
+  const dirValidation = (value: string) => {
+    if (_.isEmpty(value)) {
+      return invalid(t('Value is empty'));
+    }
+    //allow 0 / 1 or Ingress / Egress
+    const found = findDirectionOption(value, t);
+    if (found) {
+      return valid(found.name);
+    }
+    return invalid(t('Unknown direction'));
+  };
+
+  const getFuncs = (d: FilterConfigDef) => {
+    const isSrc = d.id.includes('src');
+    const colConfig = columnsDefs.find(c => c.filter === d.id);
+
+    let getOptions: (value: string) => Promise<FilterOption[]> = noOption;
+    let validate: (value: string) => { val?: string; err?: string } = rejectEmptyValue;
+    let encoder: FiltersEncoder = simpleFiltersEncoder(colConfig?.field as Field);
+    let checkCompletion:
+      | ((value: string, selected: string) => { completed: boolean; option: FilterOption })
+      | undefined = undefined;
+
+    if (d.id.includes('namespace')) {
+      getOptions = cap10(getNamespaceOptions);
+      validate = k8sNameValidation;
+    } else if (d.id.includes('name')) {
+      validate = k8sNameValidation;
+    } else if (d.id.includes('kind')) {
+      getOptions = cap10(getKindOptions);
+      validate = rejectEmptyValue;
+      encoder = kindFiltersEncoder(`${isSrc ? 'Src' : 'Dst'}K8S_Type`, `${isSrc ? 'Src' : 'Dst'}K8S_OwnerType`);
+    } else if (d.id.includes('resource')) {
+      getOptions = cap10(getResourceOptions);
+      validate = k8sResourceValidation;
+      checkCompletion = k8sResourceCompletion;
+      encoder = k8sResourceFiltersEncoder(
+        `${isSrc ? 'Src' : 'Dst'}K8S_Type`,
+        `${isSrc ? 'Src' : 'Dst'}K8S_OwnerType`,
+        `${isSrc ? 'Src' : 'Dst'}K8S_Namespace`,
+        `${isSrc ? 'Src' : 'Dst'}K8S_Name`,
+        `${isSrc ? 'Src' : 'Dst'}K8S_OwnerName`
+      );
+    } else if (d.id.includes('address')) {
+      validate = addressValidation;
+    } else if (d.id.includes('port')) {
+      getOptions = cap10(getPortOptions);
+      validate = portValidation;
+    } else if (d.id.includes('mac')) {
+      validate = macValidation;
+    } else if (d.id.includes('proto')) {
+      getOptions = cap10(getProtocolOptions);
+      validate = protoValidation;
+    } else if (d.id.includes('direction')) {
+      getOptions = v => getDirectionOptionsAsync(v, t);
+      validate = dirValidation;
+    } else if (d.id.includes('drop_state')) {
+      getOptions = cap10(getDropStateOptions);
+    } else if (d.id.includes('drop_cause')) {
+      getOptions = cap10(getDropCauseOptions);
+    } else if (d.id.includes('dns_flag_response_code')) {
+      getOptions = cap10(getDnsResponseCodeOptions);
+    } else if (d.id.includes('dns_errno')) {
+      getOptions = cap10(getDnsErrorCodeOptions);
+    } else if (d.id.includes('dscp')) {
+      getOptions = cap10(getDSCPOptions);
+    }
+    return { getOptions, validate, encoder, checkCompletion };
+  };
+
+  return filterDefs.map(d => {
+    return {
+      id: d.id as FilterId,
+      name: d.name,
+      component: d.component as FilterComponent,
+      category: !_.isEmpty(d.category) ? (d.category as FilterCategory) : undefined,
+      autoCompleteAddsQuotes: d.autoCompleteAddsQuotes === true,
+      hint: !_.isEmpty(d.hint) ? d.hint : undefined,
+      examples: !_.isEmpty(d.examples) ? d.examples : undefined,
+      docUrl: !_.isEmpty(d.docUrl) ? d.docUrl : undefined,
+      placeholder: !_.isEmpty(d.placeholder) ? d.placeholder : undefined,
+      ...getFuncs(d)
     };
-
-    // Many texts here, temporary disabled rule
-    /* eslint-disable max-len */
-    const k8sNameHint = t('Specify a single kubernetes name.');
-    const k8sNameExamples = `${t('Specify a single kubernetes name following these rules:')}
-    - ${t('Containing any alphanumeric, hyphen, underscrore or dot character')}
-    - ${t('Partial text like cluster, cluster-image, image-registry')}
-    - ${t('Exact match using quotes like "cluster-image-registry"')}
-    - ${t('Case sensitive match using quotes like "Deployment"')}
-    - ${t('Starting text like cluster, "cluster-*"')}
-    - ${t('Ending text like "*-registry"')}
-    - ${t('Pattern like "cluster-*-registry", "c*-*-r*y", -i*e-')}`;
-
-    const ipHint = t('Specify a single IP or range.');
-    const ipExamples = `${t('Specify IP following one of these rules:')}
-    - ${t('A single IPv4 or IPv6 address like 192.0.2.0, ::1')}
-    - ${t('An IP address range like 192.168.0.1-192.189.10.12, 2001:db8::1-2001:db8::8')}
-    - ${t('A CIDR specification like 192.51.100.0/24, 2001:db8::/32')}
-    - ${t('Empty double quotes "" for an empty IP')}`;
-
-    const invalidIPMessage = t('Not a valid IPv4 or IPv6, nor a CIDR, nor an IP range separated by hyphen');
-    const invalidMACMessage = t('Not a valid MAC address');
-
-    filterDefinitions = [
-      ...withDest(
-        {
-          id: 'src_namespace',
-          name: t('Namespace'),
-          component: FilterComponent.Autocomplete,
-          autoCompleteAddsQuotes: true,
-          category: FilterCategory.Source,
-          getOptions: cap10(getNamespaceOptions),
-          validate: k8sNameValidation,
-          hint: k8sNameHint,
-          examples: k8sNameExamples,
-          encoder: simpleFiltersEncoder('SrcK8S_Namespace')
-        },
-        simpleFiltersEncoder('DstK8S_Namespace')
-      ),
-      ...withDest(
-        {
-          id: 'src_name',
-          name: t('Name'),
-          component: FilterComponent.Text,
-          category: FilterCategory.Source,
-          getOptions: noOption,
-          validate: k8sNameValidation,
-          hint: k8sNameHint,
-          examples: k8sNameExamples,
-          encoder: simpleFiltersEncoder('SrcK8S_Name')
-        },
-        simpleFiltersEncoder('DstK8S_Name')
-      ),
-      ...withDest(
-        {
-          id: 'src_kind',
-          name: t('Kind'),
-          component: FilterComponent.Autocomplete,
-          autoCompleteAddsQuotes: true,
-          category: FilterCategory.Source,
-          getOptions: cap10(getKindOptions),
-          validate: rejectEmptyValue,
-          encoder: kindFiltersEncoder('SrcK8S_Type', 'SrcK8S_OwnerType')
-        },
-        kindFiltersEncoder('DstK8S_Type', 'DstK8S_OwnerType')
-      ),
-      ...withDest(
-        {
-          id: 'src_owner_name',
-          name: t('Owner Name'),
-          component: FilterComponent.Text,
-          category: FilterCategory.Source,
-          getOptions: noOption,
-          validate: k8sNameValidation,
-          hint: k8sNameHint,
-          examples: k8sNameExamples,
-          encoder: simpleFiltersEncoder('SrcK8S_OwnerName')
-        },
-        simpleFiltersEncoder('DstK8S_OwnerName')
-      ),
-      ...withDest(
-        {
-          id: 'src_resource',
-          name: t('Resource'),
-          component: FilterComponent.Autocomplete,
-          category: FilterCategory.Source,
-          getOptions: cap10(getResourceOptions),
-          validate: (value: string) => {
-            const resource = splitResource(value);
-            if (resource.stage !== SplitStage.Completed) {
-              return invalid(t('Incomplete resource name, either kind, namespace or name is missing.'));
-            }
-            if (resource.kind === '') {
-              return invalid(t('Kind is empty'));
-            }
-            if (resource.namespace && !validateStrictK8SName(resource.namespace)) {
-              return invalid(t('Namespace: not a valid Kubernetes name'));
-            }
-            if (!validateStrictK8SName(resource.name)) {
-              return invalid(t('Name: not a valid Kubernetes name'));
-            }
-            // Make sure kind first letter is capital, rest is lower case
-            resource.kind = resource.kind.charAt(0).toUpperCase() + resource.kind.slice(1).toLowerCase();
-            return valid(joinResource(resource));
-          },
-          checkCompletion: (value: string, selected: string) => {
-            const parts = splitResource(value);
-            switch (parts.stage) {
-              case SplitStage.PartialKind: {
-                const joined = `${selected}.`;
-                return { completed: false, option: { name: joined, value: joined } };
-              }
-              case SplitStage.PartialNamespace: {
-                const joined = `${parts.kind}.${selected}.`;
-                return { completed: false, option: { name: joined, value: joined } };
-              }
-              case SplitStage.Completed: {
-                const joined = joinResource({ ...parts, name: selected });
-                return { completed: true, option: { name: joined, value: joined } };
-              }
-            }
-          },
-          placeholder: 'E.g: Pod.default.my-pod',
-          hint: t('Specify an existing resource from its kind, namespace and name.'),
-          examples: `${t('Specify a kind, namespace and name from existing:')}
-        - ${t('Select kind first from suggestions')}
-        - ${t('Then Select namespace from suggestions')}
-        - ${t('Finally select name from suggestions')}
-        ${t('You can also directly specify a kind, namespace and name like pod.openshift.apiserver')}`,
-          encoder: k8sResourceFiltersEncoder(
-            'SrcK8S_Type',
-            'SrcK8S_OwnerType',
-            'SrcK8S_Namespace',
-            'SrcK8S_Name',
-            'SrcK8S_OwnerName'
-          )
-        },
-        k8sResourceFiltersEncoder(
-          'DstK8S_Type',
-          'DstK8S_OwnerType',
-          'DstK8S_Namespace',
-          'DstK8S_Name',
-          'DstK8S_OwnerName'
-        )
-      ),
-      ...withDest(
-        {
-          id: 'src_address',
-          name: t('IP'),
-          component: FilterComponent.Text,
-          category: FilterCategory.Source,
-          getOptions: noOption,
-          validate: (value: string) => {
-            if (_.isEmpty(value)) {
-              return invalid(t('Value is empty'));
-            }
-            return validateIPFilter(value) ? valid(value) : invalid(invalidIPMessage);
-          },
-          hint: ipHint,
-          examples: ipExamples,
-          encoder: simpleFiltersEncoder('SrcAddr')
-        },
-        simpleFiltersEncoder('DstAddr')
-      ),
-      ...withDest(
-        {
-          id: 'src_port',
-          name: t('Port'),
-          component: FilterComponent.Autocomplete,
-          category: FilterCategory.Source,
-          getOptions: cap10(getPortOptions),
-          validate: (value: string) => {
-            if (_.isEmpty(value)) {
-              return invalid(t('Value is empty'));
-            }
-            //allow any port number or valid name / value
-            if (value == undefinedValue || !isNaN(Number(value)) || getPort(value)) {
-              return valid(value);
-            }
-            return invalid(t('Unknown port'));
-          },
-          hint: t('Specify a single port number or name.'),
-          examples: `${t('Specify a single port following one of these rules:')}
-        - ${t('A port number like 80, 21')}
-        - ${t('A IANA name like HTTP, FTP')}`,
-          docUrl: 'https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml',
-          encoder: simpleFiltersEncoder('SrcPort')
-        },
-        simpleFiltersEncoder('DstPort')
-      ),
-      ...withDest(
-        {
-          id: 'src_mac',
-          name: t('MAC'),
-          component: FilterComponent.Text,
-          category: FilterCategory.Source,
-          getOptions: noOption,
-          validate: (value: string) => {
-            if (_.isEmpty(value)) {
-              return invalid(t('Value is empty'));
-            }
-            return /^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})/.test(value) ? valid(value) : invalid(invalidMACMessage);
-          },
-          hint: t('Specify a single MAC address.'),
-          encoder: simpleFiltersEncoder('SrcMac')
-        },
-        simpleFiltersEncoder('DstMac')
-      ),
-      ...withDest(
-        {
-          id: 'src_host_address',
-          name: t('Node IP'),
-          component: FilterComponent.Text,
-          category: FilterCategory.Source,
-          getOptions: noOption,
-          validate: (value: string) => {
-            if (_.isEmpty(value)) {
-              return invalid(t('Value is empty'));
-            }
-            return validateIPFilter(value) ? valid(value) : invalid(invalidIPMessage);
-          },
-          hint: ipHint,
-          examples: ipExamples,
-          encoder: simpleFiltersEncoder('SrcK8S_HostIP')
-        },
-        simpleFiltersEncoder('DstK8S_HostIP')
-      ),
-      ...withDest(
-        {
-          id: 'src_host_name',
-          name: t('Node Name'),
-          component: FilterComponent.Text,
-          category: FilterCategory.Source,
-          getOptions: noOption,
-          validate: k8sNameValidation,
-          hint: k8sNameHint,
-          examples: k8sNameExamples,
-          encoder: simpleFiltersEncoder('SrcK8S_HostName')
-        },
-        simpleFiltersEncoder('DstK8S_HostName')
-      ),
-      {
-        id: 'protocol',
-        name: t('Protocol'),
-        category: FilterCategory.None,
-        component: FilterComponent.Autocomplete,
-        getOptions: cap10(getProtocolOptions),
-        validate: (value: string) => {
-          if (_.isEmpty(value)) {
-            return invalid(t('Value is empty'));
-          }
-          //allow any protocol number or valid name / value
-          if (value == undefinedValue || !isNaN(Number(value))) {
-            return valid(value);
-          } else {
-            const proto = findProtocolOption(value);
-            if (proto) {
-              return valid(proto.name);
-            }
-            return invalid(t('Unknown protocol'));
-          }
-        },
-        hint: t('Specify a single protocol number or name.'),
-        examples: `${t('Specify a single protocol following one of these rules:')}
-        - ${t('A protocol number like 6, 17')}
-        - ${t('A IANA name like TCP, UDP')}
-        - ${t('Empty double quotes "" for undefined protocol')}`,
-        docUrl: 'https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml',
-        encoder: simpleFiltersEncoder('Proto')
-      },
-      {
-        id: 'direction',
-        name: t('Direction'),
-        category: FilterCategory.None,
-        component: FilterComponent.Autocomplete,
-        getOptions: v => getDirectionOptionsAsync(v, t),
-        validate: (value: string) => {
-          if (_.isEmpty(value)) {
-            return invalid(t('Value is empty'));
-          }
-          //allow 0 / 1 or Ingress / Egress
-          const found = findDirectionOption(value, t);
-          if (found) {
-            return valid(found.name);
-          }
-          return invalid(t('Unknown direction'));
-        },
-        hint: t('Specify the direction of the Flow observed at the Node observation point.'),
-        encoder: simpleFiltersEncoder('FlowDirection')
-      },
-      {
-        id: 'interface',
-        name: t('Network interface'),
-        category: FilterCategory.None,
-        component: FilterComponent.Text,
-        getOptions: noOption,
-        validate: rejectEmptyValue,
-        hint: t('Specify a network interface.'),
-        encoder: simpleFiltersEncoder('Interface')
-      },
-      {
-        id: 'dscp',
-        name: t('DSCP value'),
-        category: FilterCategory.None,
-        component: FilterComponent.Number,
-        getOptions: noOption,
-        validate: rejectEmptyValue,
-        hint: t('Specify a Differentiated Services Code Point value as integer number.'),
-        encoder: simpleFiltersEncoder('Dscp')
-      },
-      {
-        id: 'id',
-        name: t('Conversation Id'),
-        category: FilterCategory.None,
-        component: FilterComponent.Text,
-        getOptions: noOption,
-        validate: rejectEmptyValue,
-        hint: t('Specify a single conversation hash Id.'),
-        encoder: simpleFiltersEncoder('_HashId')
-      },
-      {
-        id: 'pkt_drop_state',
-        name: t('Packet drop TCP state'),
-        category: FilterCategory.None,
-        component: FilterComponent.Autocomplete,
-        getOptions: cap10(getDropStateOptions),
-        validate: rejectEmptyValue,
-        hint: t('Specify a single TCP state.'),
-        examples: `${t('Specify a single TCP state name like:')}
-        - ${t('A _LINUX_TCP_STATES_H number like 1, 2, 3')}
-        - ${t('A _LINUX_TCP_STATES_H TCP name like ESTABLISHED, SYN_SENT, SYN_RECV')}`,
-        docUrl: 'https://github.com/torvalds/linux/blob/master/include/net/tcp_states.h',
-        encoder: simpleFiltersEncoder('PktDropLatestState')
-      },
-      {
-        id: 'pkt_drop_cause',
-        name: t('Packet drop latest cause'),
-        category: FilterCategory.None,
-        component: FilterComponent.Autocomplete,
-        getOptions: cap10(getDropCauseOptions),
-        validate: rejectEmptyValue,
-        hint: t('Specify a single packet drop cause.'),
-        examples: `${t('Specify a single packet drop cause like:')}
-        - ${t('A _LINUX_DROPREASON_CORE_H number like 2, 3, 4')}
-        - ${t('A _LINUX_DROPREASON_CORE_H SKB_DROP_REASON name like NOT_SPECIFIED, NO_SOCKET, PKT_TOO_SMALL')}`,
-        docUrl: 'https://github.com/torvalds/linux/blob/master/include/net/dropreason-core.h',
-        encoder: simpleFiltersEncoder('PktDropLatestDropCause')
-      },
-      {
-        id: 'dns_id',
-        name: t('DNS Id'),
-        category: FilterCategory.None,
-        component: FilterComponent.Number,
-        getOptions: noOption,
-        validate: rejectEmptyValue,
-        hint: t('Specify a single DNS Id.'),
-        encoder: simpleFiltersEncoder('DnsId')
-      },
-      {
-        id: 'dns_latency',
-        name: t('DNS Latency'),
-        category: FilterCategory.None,
-        component: FilterComponent.Number,
-        getOptions: noOption,
-        validate: rejectEmptyValue,
-        hint: t('Specify a DNS Latency in miliseconds.'),
-        encoder: simpleFiltersEncoder('DnsLatencyMs')
-      },
-      {
-        id: 'dns_flag_response_code',
-        name: t('DNS Response Code'),
-        category: FilterCategory.None,
-        component: FilterComponent.Autocomplete,
-        getOptions: cap10(getDnsResponseCodeOptions),
-        validate: rejectEmptyValue,
-        hint: t('Specify a single DNS RCODE name.'),
-        examples: `${t('Specify a single DNS RCODE name like:')}
-        - ${t('A IANA RCODE number like 0, 3, 9')}
-        - ${t('A IANA RCODE name like NoError, NXDomain, NotAuth')}`,
-        docUrl: 'https://www.iana.org/assignments/dns-parameters/dns-parameters.xhtml#dns-parameters-6',
-        encoder: simpleFiltersEncoder('DnsFlagsResponseCode')
-      },
-      {
-        id: 'time_flow_rtt',
-        name: t('Flow RTT'),
-        category: FilterCategory.None,
-        component: FilterComponent.Number,
-        getOptions: noOption,
-        validate: rejectEmptyValue,
-        hint: t('Specify a TCP handshake Round Trip Time in nanoseconds.'),
-        encoder: simpleFiltersEncoder('TimeFlowRttNs')
-      }
-    ];
-  }
-
-  if (allowConnectionFilter && allowDNSFilter && allowPktDrops && allowRTTFilter) {
-    return filterDefinitions;
-  } else {
-    return filterDefinitions.filter(
-      fd =>
-        (allowConnectionFilter || fd.id !== 'id') &&
-        (allowDNSFilter || !fd.id.startsWith('dns_')) &&
-        (allowPktDrops || !fd.id.startsWith('pkt_drop_')) &&
-        (allowRTTFilter || fd.id !== 'time_flow_rtt')
-    );
-  }
+  });
 };
 
-export const findFilter = (t: TFunction, id: FilterId) =>
-  getFilterDefinitions(t, true, true, true, true).find(def => def.id === id);
+export const findFilter = (filterDefinitions: FilterDefinition[], id: FilterId) => {
+  return filterDefinitions.find(def => def.id === id);
+};

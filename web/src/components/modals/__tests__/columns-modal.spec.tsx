@@ -2,13 +2,15 @@ import * as React from 'react';
 import { mount, shallow } from 'enzyme';
 
 import ColumnsModal from '../columns-modal';
-import { ShuffledDefaultColumns } from '../../__tests-data__/columns';
+import { ColumnConfigSampleDefs, ShuffledColumnSample } from '../../__tests-data__/columns';
+import { Config, defaultConfig } from '../../../model/config';
 
 describe('<ColumnsModal />', () => {
   const props = {
     isModalOpen: true,
     setModalOpen: jest.fn(),
-    columns: ShuffledDefaultColumns,
+    config: { ...defaultConfig, columns: ColumnConfigSampleDefs } as Config,
+    columns: ShuffledColumnSample,
     setColumns: jest.fn(),
     setColumnSizes: jest.fn(),
     id: 'columns-modal'

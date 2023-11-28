@@ -125,12 +125,14 @@ export const getConfig = (): Promise<Config> => {
       buildVersion: r.data.buildVersion,
       buildDate: r.data.buildDate,
       recordTypes: r.data.recordTypes,
+      columns: r.data.columns,
       portNaming: {
         enable: r.data.portNaming.enable ?? defaultConfig.portNaming.enable,
         portNames: r.data.portNaming.portNames
           ? new Map(Object.entries(r.data.portNaming.portNames))
           : defaultConfig.portNaming.portNames
       },
+      filters: r.data.filters,
       quickFilters: r.data.quickFilters,
       alertNamespaces: r.data.alertNamespaces,
       sampling: r.data.sampling,

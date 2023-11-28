@@ -117,26 +117,31 @@ export type Decorated<T> = T & {
 export const decorated = <T>(t: T): Decorated<T> => t as Decorated<T>;
 
 export type FilterDir = 'src' | 'dst';
-const getFilterDefValue = (nodeType: NodeType, fields: Partial<TopologyMetricPeer>, dir: FilterDir, t: TFunction) => {
+const getFilterDefValue = (
+  nodeType: NodeType,
+  fields: Partial<TopologyMetricPeer>,
+  dir: FilterDir,
+  filterDefinitions: FilterDefinition[]
+) => {
   let def: FilterDefinition | undefined;
   let value: string | undefined;
   if (fields.resource && fields.namespace) {
-    def = findFilter(t, `${dir}_resource`)!;
+    def = findFilter(filterDefinitions, `${dir}_resource`)!;
     value = `${fields.resource.type}.${fields.namespace}.${fields.resource.name}`;
   } else if (nodeType === 'host' && (fields.hostName || fields.resource)) {
-    def = findFilter(t, `${dir}_host_name`)!;
+    def = findFilter(filterDefinitions, `${dir}_host_name`)!;
     value = `"${fields.hostName || fields.resource?.name}"`;
   } else if (nodeType === 'namespace' && (fields.namespace || fields.resource)) {
-    def = findFilter(t, `${dir}_namespace`)!;
+    def = findFilter(filterDefinitions, `${dir}_namespace`)!;
     value = `"${fields.namespace || fields.resource?.name}"`;
   } else if (nodeType === 'resource' && fields.resource) {
-    def = findFilter(t, `${dir}_name`)!;
+    def = findFilter(filterDefinitions, `${dir}_name`)!;
     value = `"${fields.resource.name}"`;
   } else if (nodeType === 'owner' && fields.owner) {
-    def = findFilter(t, `${dir}_owner_name`)!;
+    def = findFilter(filterDefinitions, `${dir}_owner_name`)!;
     value = `"${fields.owner.name}"`;
   } else if (fields.addr) {
-    def = findFilter(t, `${dir}_address`)!;
+    def = findFilter(filterDefinitions, `${dir}_address`)!;
     value = fields.addr!;
   }
   return def && value ? { def, value } : undefined;
@@ -147,9 +152,9 @@ export const isElementFiltered = (
   fields: Partial<TopologyMetricPeer>,
   dir: FilterDir,
   filters: Filter[],
-  t: TFunction
+  filterDefinitions: FilterDefinition[]
 ) => {
-  const defValue = getFilterDefValue(nodeType, fields, dir, t);
+  const defValue = getFilterDefValue(nodeType, fields, dir, filterDefinitions);
   if (!defValue) {
     return false;
   }
@@ -164,10 +169,10 @@ export const toggleElementFilter = (
   isFiltered: boolean,
   filters: Filter[],
   setFilters: (filters: Filter[]) => void,
-  t: TFunction
+  filterDefinitions: FilterDefinition[]
 ) => {
   const result = _.cloneDeep(filters);
-  const defValue = getFilterDefValue(nodeType, fields, dir, t);
+  const defValue = getFilterDefValue(nodeType, fields, dir, filterDefinitions);
   if (!defValue) {
     console.error("can't find defValue for fields", fields);
     return;
@@ -210,6 +215,7 @@ const generateNode = (
   highlightedId: string,
   filters: Filters,
   t: TFunction,
+  filterDefinitions: FilterDefinition[],
   k8sModels: { [key: string]: K8sModel },
   isDark?: boolean
 ): NodeModel => {
@@ -228,8 +234,8 @@ const generateNode = (
   const filtered = !_.isEmpty(searchValue) && !shadowed;
   const highlighted = !shadowed && !_.isEmpty(highlightedId) && highlightedId.includes(data.peer.id);
   const k8sModel = options.nodeBadges && resourceKind ? k8sModels[resourceKind] : undefined;
-  const isSrcFiltered = isElementFiltered(data.nodeType, data.peer, 'src', filters.list, t);
-  const isDstFiltered = isElementFiltered(data.nodeType, data.peer, 'dst', filters.list, t);
+  const isSrcFiltered = isElementFiltered(data.nodeType, data.peer, 'src', filters.list, filterDefinitions);
+  const isDstFiltered = isElementFiltered(data.nodeType, data.peer, 'dst', filters.list, filterDefinitions);
 
   return {
     id: data.peer.id,
@@ -359,6 +365,7 @@ export const generateDataModel = (
   highlightedId: string,
   filters: Filters,
   t: TFunction,
+  filterDefinitions: FilterDefinition[],
   k8sModels: { [key: string]: K8sModel },
   isDark?: boolean
 ): Model => {
@@ -423,7 +430,18 @@ export const generateDataModel = (
     const parent = data.nodeType !== 'unknown' ? addPossibleGroups(data.peer) : undefined;
     let node = nodes.find(n => n.type === 'node' && n.id === data.peer.id);
     if (!node) {
-      node = generateNode(data, metricScope, opts, searchValue, highlightedId, filters, t, k8sModels, isDark);
+      node = generateNode(
+        data,
+        metricScope,
+        opts,
+        searchValue,
+        highlightedId,
+        filters,
+        t,
+        filterDefinitions,
+        k8sModels,
+        isDark
+      );
       nodes.push(node);
     }
 

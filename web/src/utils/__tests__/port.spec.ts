@@ -1,8 +1,6 @@
 import { formatPort, comparePorts } from '../port';
 import { config } from '../config';
-import { getFilterDefinitions } from '../filter-definitions';
-
-const t = (k: string) => k;
+import { FilterDefinitionSample } from '../../components/__tests-data__/filters';
 
 describe('formatport', () => {
   beforeEach(() => {
@@ -52,7 +50,7 @@ describe('comparePort', () => {
 
 describe('validatePort', () => {
   it('should accept empty double quotes for empty/undefined ports', () => {
-    const portFilter = getFilterDefinitions(t).find(f => f.id == 'src_port')!;
+    const portFilter = FilterDefinitionSample.find(f => f.id == 'src_port')!;
     expect(portFilter.validate(`""`)).toEqual({ val: '""' });
   });
 });

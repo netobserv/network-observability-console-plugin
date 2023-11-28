@@ -1,7 +1,5 @@
 import { compareProtocols, formatProtocol } from '../protocol';
-import { getFilterDefinitions } from '../filter-definitions';
-
-const t = (k: string) => k;
+import { FilterDefinitionSample } from '../../components/__tests-data__/filters';
 
 describe('formatProtocol', () => {
   it('should format protocol', () => {
@@ -21,7 +19,7 @@ describe('compareProtocol', () => {
 
 describe('validateProtocol', () => {
   it('should accept empty double quotes for empty/undefined protocols', () => {
-    const protocolFilter = getFilterDefinitions(t).find(f => f.id == 'protocol')!;
+    const protocolFilter = FilterDefinitionSample.find(f => f.id == 'protocol')!;
     expect(protocolFilter.validate(`""`)).toEqual({ val: '""' });
   });
 });

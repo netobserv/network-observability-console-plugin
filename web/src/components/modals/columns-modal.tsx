@@ -19,6 +19,7 @@ import {
 import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
+import { Config } from '../../model/config';
 import { Column, ColumnSizeMap, getDefaultColumns, getFullColumnName } from '../../utils/columns';
 import './columns-modal.css';
 import Modal from './modal';
@@ -29,8 +30,9 @@ export const ColumnsModal: React.FC<{
   columns: Column[];
   setColumns: (v: Column[]) => void;
   setColumnSizes: (v: ColumnSizeMap) => void;
+  config: Config;
   id?: string;
-}> = ({ id, isModalOpen, setModalOpen, columns, setColumns, setColumnSizes }) => {
+}> = ({ id, config, isModalOpen, setModalOpen, columns, setColumns, setColumnSizes }) => {
   const [resetClicked, setResetClicked] = React.useState<boolean>(false);
   const [updatedColumns, setUpdatedColumns] = React.useState<Column[]>([]);
   const [isSaveDisabled, setSaveDisabled] = React.useState<boolean>(true);
@@ -86,8 +88,8 @@ export const ColumnsModal: React.FC<{
 
   const onReset = React.useCallback(() => {
     setResetClicked(true);
-    setUpdatedColumns(getDefaultColumns(t).filter(c => columns.some(existing => existing.id === c.id)));
-  }, [columns, t]);
+    setUpdatedColumns(getDefaultColumns(config.columns).filter(c => columns.some(existing => existing.id === c.id)));
+  }, [columns, config.columns]);
 
   const onSelectAll = React.useCallback(() => {
     const result = [...updatedColumns];

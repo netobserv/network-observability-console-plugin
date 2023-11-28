@@ -10,6 +10,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 
+	"github.com/netobserv/network-observability-console-plugin/pkg/handler"
 	"github.com/netobserv/network-observability-console-plugin/pkg/kubernetes/auth"
 	"github.com/netobserv/network-observability-console-plugin/pkg/kubernetes/client"
 	"github.com/netobserv/network-observability-console-plugin/pkg/loki"
@@ -20,34 +21,10 @@ var (
 	buildVersion = "unknown"
 	buildDate    = "unknown"
 	app          = "netobserv-console-plugin"
-	port         = flag.Int("port", 9001, "server port to listen on (default: 9001)")
-	metricsPort  = flag.Int("metrics-port", 9002, "Metrics (prometheus) server port to listen on (default: 9002)")
-	cert         = flag.String("cert", "", "cert file path to enable TLS (disabled by default)")
-	key          = flag.String("key", "", "private key file path to enable TLS (disabled by default)")
-	corsOrigin   = flag.String("cors-origin", "*", "CORS allowed origin (default: *)")
-	corsMethods  = flag.String("cors-methods", "", "CORS allowed methods (default: unset)")
-	corsHeaders  = flag.String("cors-headers", "Origin, X-Requested-With, Content-Type, Accept", "CORS allowed headers (default: Origin, X-Requested-With, Content-Type, Accept)")
-	corsMaxAge   = flag.String("cors-max-age", "", "CORS allowed max age (default: unset)")
-	// todo: default value temporarily kept to make it work with older versions of the NOO. Remove default and force setup of loki url
-	lokiURL                = flag.String("loki", "http://localhost:3100", "URL of the loki querier host")
-	lokiStatusURL          = flag.String("loki-status", "", "URL for loki /ready /metrics /config endpoints. (default: loki flag value)")
-	lokiLabels             = flag.String("loki-labels", "SrcK8S_Namespace,SrcK8S_OwnerName,DstK8S_Namespace,DstK8S_OwnerName,FlowDirection,Duplicate,_RecordType", "Loki labels, comma separated")
-	lokiTimeout            = flag.Duration("loki-timeout", 30*time.Second, "Timeout of the Loki query to retrieve logs")
-	lokiTenantID           = flag.String("loki-tenant-id", "netobserv", "Tenant organization ID for multi-tenant-loki (submitted as the X-Scope-OrgID HTTP header)")
-	lokiTokenPath          = flag.String("loki-token-path", "", "Path to Bearer authorization header for loki gateway")
-	lokiForwardUserToken   = flag.Bool("loki-forward-user-token", false, "Forward the user Bearer authorization header for loki gateway, this override loki-token-path option")
-	lokiCAPath             = flag.String("loki-ca-path", "", "Path to loki CA certificate")
-	lokiSkipTLS            = flag.Bool("loki-skip-tls", false, "Skip TLS checks for loki HTTPS connection")
-	lokiStatusCAPath       = flag.String("loki-status-ca-path", "", "Path to loki status CA certificate")
-	lokiStatusUserCertPath = flag.String("loki-status-user-cert-path", "", "Path to loki status user cert for mTLS")
-	lokiStatusUserKeyPath  = flag.String("loki-status-user-key-path", "", "Path to loki status user key for mTLS")
-	lokiStatusSkipTLS      = flag.Bool("loki-status-skip-tls", false, "Skip TLS checks for loki status HTTPS connection")
-	lokiMock               = flag.Bool("loki-mock", false, "Fake loki results using saved mocks")
-	logLevel               = flag.String("loglevel", "info", "log level (default: info)")
-	frontendConfig         = flag.String("frontend-config", "", "path to the console plugin config file")
-	authCheck              = flag.String("auth-check", "auto", "type of authentication check: authenticated, admin, auto or none (default is auto, based on loki auth mode)")
-	versionFlag            = flag.Bool("v", false, "print version")
-	log                    = logrus.WithField("module", "main")
+	logLevel     = flag.String("loglevel", "info", "log level (default: info)")
+	configPath   = flag.String("config", "", "path to the console plugin config file")
+	versionFlag  = flag.Bool("v", false, "print version")
+	log          = logrus.WithField("module", "main")
 )
 
 func main() {
@@ -68,29 +45,46 @@ func main() {
 	logrus.SetLevel(lvl)
 	log.Infof("Starting %s at log level %s", appVersion, *logLevel)
 
-	lURL, err := url.Parse(*lokiURL)
+	config, err := handler.ReadConfigFile(buildVersion, buildDate, *configPath)
 	if err != nil {
-		log.WithError(err).Fatal("wrong Loki URL")
+		log.WithError(err).Fatal("error reading config file")
 	}
 
-	var lStatusURL *url.URL
-	if *lokiStatusURL != "" {
-		lStatusURL, err = url.Parse(*lokiStatusURL)
+	// check config required fields
+	var configErrors []string
+	if len(config.Loki.Labels) == 0 {
+		configErrors = append(configErrors, "labels cannot be empty")
+	}
+
+	// parse config urls
+	var lURL, lStatusURL *url.URL
+	if len(config.Loki.URL) == 0 {
+		configErrors = append(configErrors, "url cannot be empty")
+	} else {
+		lURL, err = url.Parse(config.Loki.URL)
 		if err != nil {
-			log.WithError(err).Fatal("wrong Loki status URL")
+			configErrors = append(configErrors, "wrong Loki URL")
+		}
+	}
+	if len(config.Loki.StatusURL) > 0 {
+		lStatusURL, err = url.Parse(config.Loki.StatusURL)
+		if err != nil {
+			configErrors = append(configErrors, "wrong Loki status URL")
 		}
 	} else {
 		lStatusURL = lURL
 	}
 
-	lLabels := *lokiLabels
-	if len(lLabels) == 0 {
-		log.Fatal("labels cannot be empty")
+	// parse config timeout
+	ltimeout, err := time.ParseDuration(config.Loki.Timeout)
+	if err != nil {
+		configErrors = append(configErrors, "wrong Loki timeout")
 	}
 
+	// parse config auth
 	var checkType auth.CheckType
-	if *authCheck == "auto" {
-		if *lokiForwardUserToken {
+	if config.Loki.AuthCheck == "auto" {
+		if config.Loki.ForwardUserToken {
 			// FORWARD lokiAuth mode
 			checkType = auth.CheckAuthenticated
 		} else {
@@ -99,33 +93,53 @@ func main() {
 		}
 		log.Info(fmt.Sprintf("auth-check 'auto' resolved to '%s'", checkType))
 	} else {
-		checkType = auth.CheckType(*authCheck)
+		checkType = auth.CheckType(config.Loki.AuthCheck)
 	}
 	if checkType == auth.CheckNone {
 		log.Warn("INSECURE: auth checker is disabled")
 	}
 	checker, err := auth.NewChecker(checkType, client.NewInCluster)
 	if err != nil {
-		log.WithError(err).Fatal("auth checker error")
+		configErrors = append(configErrors, "auth checker error")
+	}
+
+	// crash on config errors
+	if len(configErrors) > 0 {
+		configErrors = append([]string{fmt.Sprintf("Config file has %d errors:\n", len(configErrors))}, configErrors...)
+		log.Fatal(strings.Join(configErrors, "\n - "))
 	}
 
 	go server.StartMetrics(&server.MetricsConfig{
-		Port:           *metricsPort,
-		CertFile:       *cert,
-		PrivateKeyFile: *key,
+		Port:     config.Server.MetricsPort,
+		CertPath: config.Server.CertPath,
+		KeyPath:  config.Server.KeyPath,
 	})
 
 	server.Start(&server.Config{
 		BuildVersion:     buildVersion,
 		BuildDate:        buildDate,
-		Port:             *port,
-		CertFile:         *cert,
-		PrivateKeyFile:   *key,
-		CORSAllowOrigin:  *corsOrigin,
-		CORSAllowMethods: *corsMethods,
-		CORSAllowHeaders: *corsHeaders,
-		CORSMaxAge:       *corsMaxAge,
-		Loki:             loki.NewConfig(lURL, lStatusURL, *lokiTimeout, *lokiTenantID, *lokiTokenPath, *lokiForwardUserToken, *lokiSkipTLS, *lokiCAPath, *lokiStatusSkipTLS, *lokiStatusCAPath, *lokiStatusUserCertPath, *lokiStatusUserKeyPath, *lokiMock, strings.Split(lLabels, ",")),
-		FrontendConfig:   *frontendConfig,
+		Port:             config.Server.Port,
+		CertPath:         config.Server.CertPath,
+		KeyPath:          config.Server.KeyPath,
+		CORSAllowOrigin:  config.Server.CORSOrigin,
+		CORSAllowMethods: config.Server.CORSMethods,
+		CORSAllowHeaders: config.Server.CORSHeaders,
+		CORSMaxAge:       config.Server.CORSMaxAge,
+		ConfigPath:       *configPath,
+		Loki: loki.NewConfig(
+			lURL,
+			lStatusURL,
+			ltimeout,
+			config.Loki.TenantID,
+			config.Loki.TokenPath,
+			config.Loki.ForwardUserToken,
+			config.Loki.SkipTLS,
+			config.Loki.CAPath,
+			config.Loki.StatusSkipTLS,
+			config.Loki.CAPath,
+			config.Loki.StatusUserCertPath,
+			config.Loki.StatusUserKeyPath,
+			config.Loki.UseMocks,
+			config.Loki.Labels),
 	}, checker)
 }

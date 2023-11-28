@@ -29,7 +29,7 @@ export const CompareFilter: React.FC<CompareFilterProps> = ({ value, setValue, c
     </DropdownItem>
   ];
 
-  if (component === FilterComponent.Number) {
+  if (component === 'number') {
     dropdownItems.push(
       <DropdownItem
         key="more-than"
@@ -53,7 +53,7 @@ export const CompareFilter: React.FC<CompareFilterProps> = ({ value, setValue, c
 
   const onSwitch = React.useCallback(() => {
     const filterCompareValues = [FilterCompare.EQUAL, FilterCompare.NOT_EQUAL];
-    if (component === FilterComponent.Number) {
+    if (component === 'number') {
       filterCompareValues.push(FilterCompare.MORE_THAN_OR_EQUAL);
     }
 

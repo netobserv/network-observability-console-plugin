@@ -4,7 +4,14 @@ import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { navigate } from '../dynamic-loader/dynamic-loader';
-import { Filter, Filters, filtersEqual, hasEnabledFilterValues, removeFromFilters } from '../../model/filters';
+import {
+  Filter,
+  FilterDefinition,
+  Filters,
+  filtersEqual,
+  hasEnabledFilterValues,
+  removeFromFilters
+} from '../../model/filters';
 import { QuickFilter } from '../../model/quick-filters';
 import { autoCompleteCache } from '../../utils/autocomplete-cache';
 import { getPathWithParams, netflowTrafficPath } from '../../utils/url';
@@ -18,6 +25,7 @@ export interface FiltersChipsProps {
   clearFilters: () => void;
   resetFilters: () => void;
   quickFilters: QuickFilter[];
+  filterDefinitions: FilterDefinition[];
 }
 
 export const FiltersChips: React.FC<FiltersChipsProps> = ({
@@ -26,7 +34,8 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
   setFilters,
   clearFilters,
   resetFilters,
-  quickFilters
+  quickFilters,
+  filterDefinitions
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
@@ -40,9 +49,9 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
   const defaultFilters = quickFilters.filter(qf => qf.default).flatMap(qf => qf.filters);
 
   const swapSrcDst = React.useCallback(() => {
-    const swapped = swapFilters(t, filters!.list);
+    const swapped = swapFilters(filterDefinitions, filters!.list);
     setFilters({ ...filters!, list: swapped });
-  }, [t, setFilters, filters]);
+  }, [filterDefinitions, filters, setFilters]);
 
   const toggleBackAndForth = React.useCallback(() => {
     setFilters({ ...filters!, backAndForth: !filters!.backAndForth });

@@ -1,7 +1,6 @@
 #overview-container {
   overflow: inherit;
   height: 100%;
-  padding: 0 0 0 1.5rem;
 }
 
 #overview-container.dark {
@@ -12,12 +11,9 @@
   background: #f0f0f0;
 }
 
-#overview-flex {
-  margin: 2rem 5px 5px 5px;
-}
-
 .overview-flex-item {
   margin: 0 !important;
+  height: 100%;
   width: 50%;
   align-self: flex-start;
 }
@@ -31,6 +27,11 @@
 }
 
 .emptygraph {
-  display: grid;
-  min-height: 320px;
+  display: block;
+  height: 100%;
+  align-self: center;
+}
+
+#top_avg_donut {
+  position: relative;
 }

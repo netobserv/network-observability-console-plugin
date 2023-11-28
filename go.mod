@@ -3,16 +3,16 @@ module github.com/netobserv/network-observability-console-plugin
 go 1.19
 
 require (
-	github.com/gorilla/mux v1.8.0
+	github.com/gorilla/mux v1.8.1
 	github.com/json-iterator/go v1.1.12
 	github.com/prometheus/client_golang v1.17.0
 	github.com/prometheus/common v0.45.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.8.4
 	gopkg.in/yaml.v3 v3.0.1
-	k8s.io/api v0.28.2
-	k8s.io/apimachinery v0.28.2
-	k8s.io/client-go v0.28.2
+	k8s.io/api v0.28.4
+	k8s.io/apimachinery v0.28.4
+	k8s.io/client-go v0.28.4
 )
 
 require (

@@ -13,24 +13,18 @@ import { FilterDefinition } from '../../model/filters';
 import { buildGroups, getFilterFullName } from './filters-helper';
 
 interface FiltersDropdownProps {
+  filterDefinitions: FilterDefinition[];
   selectedFilter: FilterDefinition;
   setSelectedFilter: (f: FilterDefinition) => void;
-  allowConnectionFilter?: boolean;
-  allowDNSFilter?: boolean;
-  allowPktDrops?: boolean;
-  allowRTTFilter?: boolean;
 }
 
 export const FiltersDropdown: React.FC<FiltersDropdownProps> = ({
+  filterDefinitions,
   selectedFilter,
-  setSelectedFilter,
-  allowConnectionFilter,
-  allowDNSFilter,
-  allowPktDrops,
-  allowRTTFilter
+  setSelectedFilter
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
-  const groups = buildGroups(t, allowConnectionFilter, allowDNSFilter, allowPktDrops, allowRTTFilter);
+  const groups = buildGroups(filterDefinitions, t);
   const [isSearchFiltersOpen, setSearchFiltersOpen] = React.useState<boolean>(false);
   const [expandedGroup, setExpandedGroup] = React.useState(0);
 

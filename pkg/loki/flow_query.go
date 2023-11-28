@@ -272,6 +272,14 @@ func (q *FlowQueryBuilder) appendDNSFilter(sb *strings.Builder) {
 	sb.WriteString("`")
 }
 
+func (q *FlowQueryBuilder) appendDNSLatencyFilter(sb *strings.Builder) {
+	// ensure DnsLatencyMs field is specified
+	// |~`"DnsLatencyMs`
+	sb.WriteString("|~`")
+	sb.WriteString(`"DnsLatencyMs`)
+	sb.WriteString("`")
+}
+
 func (q *FlowQueryBuilder) appendDNSRCodeFilter(sb *strings.Builder) {
 	// ensure DnsFlagsResponseCode field is specified with valid error
 	// |~`"DnsFlagsResponseCode"`

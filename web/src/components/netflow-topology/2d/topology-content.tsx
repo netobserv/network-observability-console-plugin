@@ -19,7 +19,7 @@ import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { TopologyMetrics } from '../../../api/loki';
-import { Filter, Filters } from '../../../model/filters';
+import { Filter, FilterDefinition, Filters } from '../../../model/filters';
 import { MetricFunction, FlowScope, MetricType } from '../../../model/flow-query';
 import { MetricScopeOptions } from '../../../model/metrics';
 import {
@@ -61,6 +61,7 @@ export const TopologyContent: React.FC<{
   options: TopologyOptions;
   setOptions: (o: TopologyOptions) => void;
   filters: Filters;
+  filterDefinitions: FilterDefinition[];
   setFilters: (v: Filters) => void;
   selected: GraphElementPeer | undefined;
   onSelect: (e: GraphElementPeer | undefined) => void;
@@ -78,6 +79,7 @@ export const TopologyContent: React.FC<{
   options,
   setOptions,
   filters,
+  filterDefinitions,
   setFilters,
   selected,
   onSelect,
@@ -175,11 +177,11 @@ export const TopologyContent: React.FC<{
   const onFilter = React.useCallback(
     (id: string, data: NodeData, dir: FilterDir, isFiltered: boolean) => {
       if (data.nodeType && data.peer) {
-        toggleElementFilter(data.nodeType, data.peer, dir, isFiltered, filters.list, setFiltersList, t);
+        toggleElementFilter(data.nodeType, data.peer, dir, isFiltered, filters.list, setFiltersList, filterDefinitions);
         setSelectedIds([id]);
       }
     },
-    [filters, setFiltersList, t]
+    [filterDefinitions, filters.list, setFiltersList]
   );
 
   const onStepInto = React.useCallback(
@@ -211,7 +213,7 @@ export const TopologyContent: React.FC<{
           list => {
             setFilters({ list: list, backAndForth: true });
           },
-          t
+          filterDefinitions
         );
         setSelectedIds([data.id]);
         //clear search
@@ -220,7 +222,7 @@ export const TopologyContent: React.FC<{
         onSelect(undefined);
       }
     },
-    [metricScope, onSelect, options, setMetricScope, setOptions, setFilters, filters.list, t]
+    [metricScope, setMetricScope, setOptions, options, filters.list, filterDefinitions, onSelect, setFilters]
   );
 
   const onHover = React.useCallback((data: Decorated<ElementData>) => {
@@ -329,6 +331,7 @@ export const TopologyContent: React.FC<{
       highlightedId,
       filters,
       t,
+      filterDefinitions,
       k8sModels,
       isDark
     );
@@ -369,6 +372,7 @@ export const TopologyContent: React.FC<{
     searchEvent?.searchValue,
     filters,
     t,
+    filterDefinitions,
     k8sModels,
     isDark
   ]);

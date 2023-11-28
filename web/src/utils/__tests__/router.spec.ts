@@ -2,8 +2,8 @@ import { findFilter } from '../filter-definitions';
 import { Filters } from '../../model/filters';
 import { getFiltersFromURL, setURLFilters } from '../router';
 import { setNavFunction } from '../../components/dynamic-loader/dynamic-loader';
+import { FilterDefinitionSample } from '../../components/__tests-data__/filters';
 
-const t = (k: string) => k;
 const nav = jest.fn();
 setNavFunction(nav);
 
@@ -13,11 +13,11 @@ describe('Filters URL', () => {
       backAndForth: true,
       list: [
         {
-          def: findFilter(t, 'src_namespace')!,
+          def: findFilter(FilterDefinitionSample, 'src_namespace')!,
           values: [{ v: 'test' }]
         },
         {
-          def: findFilter(t, 'dst_name')!,
+          def: findFilter(FilterDefinitionSample, 'dst_name')!,
           values: [{ v: 'test' }],
           not: true
         }
@@ -40,7 +40,7 @@ describe('Filters URL', () => {
       value: location
     });
 
-    const prom = getFiltersFromURL(t, {});
+    const prom = getFiltersFromURL(FilterDefinitionSample, {});
     expect(prom).toBeDefined();
     return prom!.then(filters => {
       expect(filters.backAndForth).toBe(true);

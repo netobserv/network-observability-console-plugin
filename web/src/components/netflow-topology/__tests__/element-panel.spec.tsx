@@ -11,6 +11,7 @@ import { NodeData } from '../../../model/topology';
 import { ElementPanelMetrics } from '../element-panel-metrics';
 import { createPeer } from '../../../utils/metrics';
 import { TruncateLength } from '../../../components/dropdowns/truncate-dropdown';
+import { FilterDefinitionSample } from '../../../components/__tests-data__/filters';
 
 describe('<ElementPanel />', () => {
   const getNode = (kind: string, name: string, addr: string) => {
@@ -38,6 +39,7 @@ describe('<ElementPanel />', () => {
     metricType: 'bytes' as MetricType,
     metricScope: 'resource' as FlowScope,
     filters: [] as Filter[],
+    filterDefinitions: FilterDefinitionSample,
     setFilters: jest.fn(),
     onClose: jest.fn(),
     truncateLength: TruncateLength.M,

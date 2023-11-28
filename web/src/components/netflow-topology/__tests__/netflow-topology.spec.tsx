@@ -10,6 +10,7 @@ import { NetflowTopology } from '../netflow-topology';
 import { TopologyContent } from '../2d/topology-content';
 import { dataSample } from '../__tests-data__/metrics';
 import { LokiError } from '../../messages/loki-error';
+import { FilterDefinitionSample } from '../../../components/__tests-data__/filters';
 
 describe('<NetflowTopology />', () => {
   const mocks = {
@@ -29,6 +30,7 @@ describe('<NetflowTopology />', () => {
     lowScale: 0.3,
     medScale: 0.5,
     filters: { backAndForth: false, list: [] },
+    filterDefinitions: FilterDefinitionSample,
     setFilters: jest.fn(),
     toggleTopologyOptions: jest.fn(),
     selected: undefined,

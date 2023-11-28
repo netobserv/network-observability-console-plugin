@@ -1,6 +1,5 @@
-import { TFunction } from 'i18next';
 import { findFilter } from '../utils/filter-definitions';
-import { Filter, fromFilterKey } from './filters';
+import { Filter, FilterDefinition, fromFilterKey } from './filters';
 
 export type RawQuickFilter = {
   name: string;
@@ -14,12 +13,12 @@ export type QuickFilter = {
   filters: Filter[];
 };
 
-export const parseQuickFilters = (t: TFunction, raw: RawQuickFilter[]): QuickFilter[] => {
+export const parseQuickFilters = (filterDefinitions: FilterDefinition[], raw: RawQuickFilter[]): QuickFilter[] => {
   const ret: QuickFilter[] = [];
   raw.forEach(qf => {
     const filters: (Filter | undefined)[] = Object.entries(qf.filter).map(([key, values]) => {
       const { id, not, moreThan } = fromFilterKey(key);
-      const def = findFilter(t, id);
+      const def = findFilter(filterDefinitions, id);
       if (!def) {
         console.warn(`Configured quick filter "${qf.name}" contains unknown filter id ${id}.`);
         return undefined;

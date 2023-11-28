@@ -1,3 +1,5 @@
+import { ColumnConfigDef } from '../utils/columns';
+import { FilterConfigDef } from './filters';
 import { RecordType } from './flow-query';
 import { RawQuickFilter } from './quick-filters';
 
@@ -11,7 +13,9 @@ export type Config = {
     enable: boolean;
     portNames: Map<string, string>;
   };
+  columns: ColumnConfigDef[];
   quickFilters: RawQuickFilter[];
+  filters: FilterConfigDef[];
   alertNamespaces: string[];
   sampling: number;
   features: Feature[];
@@ -25,7 +29,9 @@ export const defaultConfig: Config = {
     enable: true,
     portNames: new Map()
   },
+  columns: [],
   quickFilters: [],
+  filters: [],
   alertNamespaces: ['netobserv'],
   sampling: 50,
   features: []

@@ -8,7 +8,6 @@ import { MetricsContent, MetricsContentProps } from '../metrics-content';
 describe('<MetricsContent />', () => {
   const props: MetricsContentProps = {
     id: 'chart-test',
-    title: 'chart-test',
     metricType: 'bytes',
     metrics: metrics.map(m => ({ ...m, fullName: 'whatever', shortName: 'whatever', isInternal: false })),
     smallerTexts: false,
@@ -18,7 +17,6 @@ describe('<MetricsContent />', () => {
   it('should render component', async () => {
     const wrapper = mount(<MetricsContent {...props} />);
     expect(wrapper.find(MetricsContent)).toBeTruthy();
-    expect(wrapper.find(Chart).last().props().ariaTitle).toBe('chart-test');
   });
   it('should render bar', async () => {
     const wrapper = mount(<MetricsContent {...props} showBar={true} />);
