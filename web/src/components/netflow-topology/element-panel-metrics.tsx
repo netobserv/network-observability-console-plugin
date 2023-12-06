@@ -2,7 +2,7 @@ import { Flex, FlexItem, Radio, Text, TextVariants } from '@patternfly/react-cor
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { TopologyMetrics } from '../../api/loki';
-import { MetricType } from '../../model/flow-query';
+import { MetricType, isTimeMetric } from '../../model/flow-query';
 import { getStat } from '../../model/metrics';
 import { decorated, NodeData } from '../../model/topology';
 import { matchPeer } from '../../utils/metrics';
@@ -24,7 +24,7 @@ export const ElementPanelMetrics: React.FC<{
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [metricsRadio, setMetricsRadio] = React.useState<MetricsRadio>('both');
 
-  const useArea = !['dnsLatencies', 'flowRtt'].includes(metricType);
+  const useArea = !isTimeMetric(metricType);
   const titleStats = t('Stats');
 
   let id = '';
@@ -116,7 +116,7 @@ export const ElementPanelMetrics: React.FC<{
       <MetricsGraph
         id={id}
         metricType={metricType}
-        metricFunction={['dnsLatencies', 'flowRtt'].includes(metricType) ? 'sum' : 'avg'}
+        metricFunction={isTimeMetric(metricType) ? 'sum' : 'avg'}
         metrics={top5}
         limit={5}
         showArea={useArea}

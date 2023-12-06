@@ -58,6 +58,7 @@ import {
   filtersToString,
   FlowQuery,
   FlowScope,
+  isTimeMetric,
   Match,
   MetricFunction,
   MetricType,
@@ -319,7 +320,7 @@ export const NetflowTraffic: React.FC<{
 
   const updateTopologyMetricType = React.useCallback(
     (metricType: MetricType) => {
-      if (['dnsLatencies', 'flowRtt'].includes(metricType)) {
+      if (isTimeMetric(metricType)) {
         // fallback on average if current function not available for time queries
         if (!TIME_METRIC_FUNCTIONS.includes(topologyMetricFunction)) {
           setTopologyMetricFunction('avg');
@@ -790,7 +791,7 @@ export const NetflowTraffic: React.FC<{
         getMetrics(
           {
             ...fq,
-            function: ['dnsLatencies', 'flowRtt'].includes(topologyMetricType) ? topologyMetricFunction : undefined
+            function: isTimeMetric(topologyMetricType) ? topologyMetricFunction : undefined
           },
           range
         ).then(res => {

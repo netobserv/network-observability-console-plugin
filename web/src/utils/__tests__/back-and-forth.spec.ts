@@ -404,10 +404,10 @@ describe('Merge topology BNF', () => {
     expect(merged.metrics[2].source.namespace).toEqual('foo');
     expect(merged.metrics[2].destination.namespace).toBeUndefined();
     expect(merged.metrics[2].stats).toEqual({
-      avg: 2.63,
+      avg: 2.5,
       max: 5,
       sum: 50,
-      total: 710,
+      total: 712,
       latest: 0,
       min: 0,
       percentiles: [5, 5]
@@ -483,10 +483,10 @@ describe('Merge topology BNF', () => {
     expect(merged.metrics[2].source.namespace).toEqual('foo');
     expect(merged.metrics[2].destination.namespace).toBeUndefined();
     expect(merged.metrics[2].stats).toEqual({
-      avg: 2.63,
+      avg: 2.5,
       max: 5,
       sum: 50,
-      total: 710,
+      total: 712,
       latest: 0,
       min: 0,
       percentiles: [5, 5]

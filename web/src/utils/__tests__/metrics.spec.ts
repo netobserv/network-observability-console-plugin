@@ -39,7 +39,7 @@ describe('normalize and computeStats', () => {
     ];
 
     const { start, end, step } = calibrateRange([values], { from: 1664372000, to: 1664372300 }, 1664372300, true);
-    const norm = normalizeMetrics(values, start, end, step);
+    const norm = normalizeMetrics(values, start, end, step, true);
     expect(norm).toEqual([
       [1664372000, 5],
       [1664372015, 5],
@@ -102,7 +102,7 @@ describe('normalize and computeStats', () => {
     ];
 
     const { start, end, step } = calibrateRange([values], 300, now, true);
-    const norm = normalizeMetrics(values, start, end, step);
+    const norm = normalizeMetrics(values, start, end, step, true);
     expect(norm).toEqual([
       [first, 5],
       [first + 15, 5],
@@ -155,7 +155,7 @@ describe('normalize and computeStats', () => {
     ];
 
     const { start, end, step } = calibrateRange([values], { from: 1664372000, to: 1664372300 }, 1664372300, true);
-    const norm = normalizeMetrics(values, start, end, step);
+    const norm = normalizeMetrics(values, start, end, step, true);
     expect(norm).toEqual([
       [1664372000, 5],
       [1664372015, 5],

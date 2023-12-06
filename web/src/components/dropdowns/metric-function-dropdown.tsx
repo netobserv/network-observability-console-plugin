@@ -1,7 +1,7 @@
 import { Dropdown, DropdownItem, DropdownPosition, DropdownToggle } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { MetricFunction, MetricType } from '../../model/flow-query';
+import { MetricFunction, MetricType, isTimeMetric } from '../../model/flow-query';
 
 export const TIME_METRIC_FUNCTIONS: MetricFunction[] = ['avg', 'min', 'max', 'p90', 'p99'];
 export const RATE_METRIC_FUNCTIONS: MetricFunction[] = ['last', 'avg', 'min', 'max', 'sum'];
@@ -27,7 +27,7 @@ export const MetricFunctionDropdown: React.FC<{
 
   const getMetricDisplay = React.useCallback(
     (mf: MetricFunction): string => {
-      const suffix = !['dnsLatencies', 'flowRtt'].includes(metricType || '') ? ' ' + t('rate') : '';
+      const suffix = !isTimeMetric(metricType) ? ' ' + t('rate') : '';
       switch (mf) {
         case 'sum':
           return t('Total');

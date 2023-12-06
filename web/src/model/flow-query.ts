@@ -49,3 +49,7 @@ export const filtersToString = (filters: Filter[], matchAny: boolean): string =>
 export const filterByHashId = (hashId: string): string => {
   return encodeURIComponent(`_HashId="${hashId}"`);
 };
+
+export const isTimeMetric = (metricType: MetricType | undefined) => {
+  return ['dnsLatencies', 'flowRtt'].includes(metricType || '');
+};

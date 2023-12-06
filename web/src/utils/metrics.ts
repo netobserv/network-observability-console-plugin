@@ -36,6 +36,7 @@ export const parseTopologyMetrics = (
   range: number | TimeRange,
   aggregateBy: FlowScope,
   unixTimestamp: number,
+  forceZeros: boolean,
   isMock?: boolean
 ): TopologyMetrics[] => {
   const { start, end, step } = calibrateRange(
@@ -44,7 +45,7 @@ export const parseTopologyMetrics = (
     unixTimestamp,
     isMock
   );
-  const metrics = raw.map(r => parseTopologyMetric(r, start, end, step, aggregateBy));
+  const metrics = raw.map(r => parseTopologyMetric(r, start, end, step, aggregateBy, forceZeros));
 
   // Disambiguate display names with kind when necessary
   if (aggregateBy === 'owner' || aggregateBy === 'resource') {
@@ -93,6 +94,7 @@ export const parseGenericMetrics = (
   range: number | TimeRange,
   aggregateBy: GenericAggregation,
   unixTimestamp: number,
+  forceZeros: boolean,
   isMock?: boolean
 ): GenericMetric[] => {
   const { start, end, step } = calibrateRange(
@@ -101,7 +103,7 @@ export const parseGenericMetrics = (
     unixTimestamp,
     isMock
   );
-  return raw.map(r => parseGenericMetric(r, start, end, step, aggregateBy));
+  return raw.map(r => parseGenericMetric(r, start, end, step, aggregateBy, forceZeros));
 };
 
 export const createPeer = (fields: Partial<TopologyMetricPeer>): TopologyMetricPeer => {
@@ -153,9 +155,10 @@ const parseTopologyMetric = (
   start: number,
   end: number,
   step: number,
-  aggregateBy: FlowScope
+  aggregateBy: FlowScope,
+  forceZeros: boolean
 ): TopologyMetrics => {
-  const normalized = normalizeMetrics(raw.values, start, end, step);
+  const normalized = normalizeMetrics(raw.values, start, end, step, forceZeros);
   const stats = computeStats(normalized);
   const source = createPeer({
     addr: raw.metric.SrcAddr,
@@ -185,9 +188,10 @@ const parseGenericMetric = (
   start: number,
   end: number,
   step: number,
-  aggregateBy: GenericAggregation
+  aggregateBy: GenericAggregation,
+  forceZeros: boolean
 ): GenericMetric => {
-  const normalized = normalizeMetrics(raw.values, start, end, step);
+  const normalized = normalizeMetrics(raw.values, start, end, step, forceZeros);
   const stats = computeStats(normalized);
   const name =
     aggregateBy === 'droppedState'
@@ -262,22 +266,32 @@ export const normalizeMetrics = (
   start: number,
   end: number,
   step: number,
-  forceZeros?: boolean
+  forceZeros: boolean
 ): [number, number][] => {
-  // Normalize by counting all NaN as zeros
-  const normalized: [number, number][] = values.map(dp => {
-    let val = Number(dp[1]);
-    if (forceZeros && _.isNaN(val)) {
-      val = 0;
-    }
-    return [dp[0], val];
-  });
+  let normalized: [number, number][];
+  if (forceZeros) {
+    // Normalize by counting all NaN as zeros
+    normalized = values.map(dp => {
+      let val = Number(dp[1]);
+      if (_.isNaN(val)) {
+        val = 0;
+      }
+      return [dp[0], val];
+    });
 
-  // Normalize by filling missing datapoints with zeros
-  for (let current = start; current < end; current += step) {
-    if (!getValueCloseTo(normalized, current, step)) {
-      normalized.push([current, 0]);
+    // Normalize by filling missing datapoints with zeros
+    for (let current = start; current < end; current += step) {
+      if (!getValueCloseTo(normalized, current, step)) {
+        normalized.push([current, 0]);
+      }
     }
+  } else {
+    // skipping NaN
+    normalized = values
+      .filter(dp => !_.isNaN(Number(dp[1])))
+      .map(dp => {
+        return [dp[0], Number(dp[1])];
+      });
   }
 
   return normalized.sort((a, b) => a[0] - b[0]);
@@ -292,13 +306,13 @@ const getValueCloseTo = (values: [number, number][], timestamp: number, step: nu
 /**
  * computeStats computes avg, max and total. Input metric is always the bytes rate (Bps).
  */
-export const computeStats = (ts: [number, number][], skipZeros?: boolean): MetricStats => {
+export const computeStats = (ts: [number, number][]): MetricStats => {
   if (ts.length === 0) {
     return { sum: 0, latest: 0, avg: 0, min: 0, max: 0, percentiles: PERCENTILE_VALUES.map(() => 0), total: 0 };
   }
 
   const values = ts.map(dp => dp[1]);
-  const filteredValues = skipZeros ? values.filter(v => v !== 0) : values.filter(v => !Number.isNaN(v));
+  const filteredValues = values.filter(v => !Number.isNaN(v));
   if (!filteredValues.length) {
     return { sum: 0, latest: 0, avg: 0, min: 0, max: 0, percentiles: PERCENTILE_VALUES.map(() => 0), total: 0 };
   }
@@ -326,7 +340,11 @@ export const getFormattedValue = (v: number, mt: MetricType, mf: MetricFunction,
   if (mt === 'count' || mt === 'countDns') {
     return valueFormat(v);
   } else if (mt === 'dnsLatencies' || mt === 'flowRtt') {
-    return valueFormat(v, 2, t('ms'));
+    if (v) {
+      return valueFormat(v, 2, t('ms'));
+    } else {
+      return t('n/a');
+    }
   } else if (mf === 'sum') {
     switch (mt) {
       case 'droppedBytes':

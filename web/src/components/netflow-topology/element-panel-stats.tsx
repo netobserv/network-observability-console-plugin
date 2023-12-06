@@ -1,7 +1,7 @@
 import { Flex, FlexItem, Text, TextVariants } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { MetricType } from '../../model/flow-query';
+import { MetricType, isTimeMetric } from '../../model/flow-query';
 import { TopologyMetrics } from '../../api/loki';
 import { getStat } from '../../model/metrics';
 import { getFormattedValue } from '../../utils/metrics';
@@ -15,7 +15,7 @@ export const ElementPanelStats: React.FC<{
 }> = ({ metricsIn, metricsOut, metricsBoth, metricType, isEdge }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
-  const isTime = ['dnsLatencies', 'flowRtt'].includes(metricType);
+  const isTime = isTimeMetric(metricType);
   const latestIn = metricsIn.reduce((prev, cur) => prev + getStat(cur.stats, 'last'), 0);
   const averageIn = metricsIn.reduce((prev, cur) => prev + getStat(cur.stats, 'avg'), 0);
   const totalIn = metricsIn.reduce((prev, cur) => prev + getStat(cur.stats, 'sum'), 0);
@@ -25,8 +25,8 @@ export const ElementPanelStats: React.FC<{
   let latestBoth = metricsBoth.reduce((prev, cur) => prev + getStat(cur.stats, 'last'), 0);
   let averageBoth = metricsBoth.reduce((prev, cur) => prev + getStat(cur.stats, 'avg'), 0);
   if (isTime) {
-    latestBoth = latestBoth / 2;
-    averageBoth = averageBoth / 2;
+    latestBoth = latestIn && latestOut ? latestBoth / 2 : 0;
+    averageBoth = averageIn && averageOut ? averageBoth / 2 : 0;
   }
   const totalBoth = metricsBoth.reduce((prev, cur) => prev + getStat(cur.stats, 'sum'), 0);
   return (

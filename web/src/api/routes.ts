@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { Config, defaultConfig } from '../model/config';
 import { buildExportQuery } from '../model/export-query';
-import { FlowQuery, FlowScope, GenericAggregation } from '../model/flow-query';
+import { FlowQuery, FlowScope, GenericAggregation, isTimeMetric } from '../model/flow-query';
 import { ContextSingleton } from '../utils/context';
 import { TimeRange } from '../utils/datetime';
 import { parseTopologyMetrics, parseGenericMetrics } from '../utils/metrics';
@@ -81,6 +81,7 @@ export const getFlowMetrics = (params: FlowQuery, range: number | TimeRange): Pr
       range,
       params.aggregateBy as FlowScope,
       res.unixTimestamp,
+      !isTimeMetric(params.type),
       res.isMock
     );
   });
@@ -93,6 +94,7 @@ export const getFlowGenericMetrics = (params: FlowQuery, range: number | TimeRan
       range,
       params.aggregateBy as GenericAggregation,
       res.unixTimestamp,
+      !isTimeMetric(params.type),
       res.isMock
     );
   });

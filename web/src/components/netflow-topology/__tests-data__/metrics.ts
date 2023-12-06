@@ -283,5 +283,6 @@ export const dataSample = parseTopologyMetrics(
   responseSample.data.result as RawTopologyMetrics[],
   { from: 1647965100, to: 1647965400 },
   'resource',
-  0
+  0,
+  true
 ) as TopologyMetrics[];
