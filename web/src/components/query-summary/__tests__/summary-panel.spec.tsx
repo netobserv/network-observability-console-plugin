@@ -7,6 +7,8 @@ import SummaryPanel, { SummaryPanelContent } from '../summary-panel';
 import { NetflowMetrics } from 'src/api/loki';
 
 describe('<SummaryPanel />', () => {
+  const now = new Date();
+
   const mocks = {
     onClose: jest.fn(),
     flows: FlowsSample,
@@ -19,7 +21,7 @@ describe('<SummaryPanel />', () => {
     appStats: undefined,
     limit: 5,
     range: 300,
-    lastRefresh: new Date(),
+    lastRefresh: now,
     id: 'summary-panel'
   };
 

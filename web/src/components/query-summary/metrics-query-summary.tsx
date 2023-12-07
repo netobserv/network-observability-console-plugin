@@ -14,13 +14,30 @@ const EXPOSED_METRICS: MetricType[] = ['bytes', 'packets', 'droppedBytes', 'drop
 export const MetricsQuerySummaryContent: React.FC<{
   metrics: NetflowMetrics;
   numQueries?: number;
-  lastRefresh: Date | undefined;
+  loading?: boolean;
+  lastRefresh?: Date;
+  lastDuration?: number;
+  warningMessage?: string;
+  slownessReason?: string;
   direction: 'row' | 'column';
   className?: string;
   isShowQuerySummary?: boolean;
   toggleQuerySummary?: () => void;
   isDark?: boolean;
-}> = ({ metrics, numQueries, lastRefresh, direction, className, isShowQuerySummary, toggleQuerySummary, isDark }) => {
+}> = ({
+  metrics,
+  numQueries,
+  loading,
+  lastRefresh,
+  lastDuration,
+  warningMessage,
+  slownessReason,
+  direction,
+  className,
+  isShowQuerySummary,
+  toggleQuerySummary,
+  isDark
+}) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   const getMetrics = React.useCallback(
@@ -203,12 +220,18 @@ export const MetricsQuerySummaryContent: React.FC<{
           </Text>
         </FlexItem>
       )}
+      <FlexItem key="stats">
+        <StatsQuerySummary
+          detailed={direction === 'column'}
+          loading={loading}
+          lastRefresh={lastRefresh}
+          lastDuration={lastDuration}
+          numQueries={numQueries}
+          warningMessage={warningMessage}
+          slownessReason={slownessReason}
+        />
+      </FlexItem>
       {metricsToShow()}
-      {lastRefresh && (
-        <FlexItem key="stats">
-          <StatsQuerySummary lastRefresh={lastRefresh} numQueries={direction === 'column' ? numQueries : undefined} />
-        </FlexItem>
-      )}
       {direction === 'row' && toggleQuerySummary && (
         <FlexItem key="toggle">
           <Text id="query-summary-toggle" component={TextVariants.a} onClick={toggleQuerySummary}>
@@ -221,20 +244,39 @@ export const MetricsQuerySummaryContent: React.FC<{
 };
 
 export const MetricsQuerySummary: React.FC<{
-  stats: Stats | undefined;
+  stats?: Stats;
   metrics: NetflowMetrics;
-  lastRefresh: Date | undefined;
+  loading?: boolean;
+  lastRefresh?: Date;
+  lastDuration?: number;
+  warningMessage?: string;
+  slownessReason?: string;
   isShowQuerySummary?: boolean;
   toggleQuerySummary?: () => void;
   isDark?: boolean;
-}> = ({ metrics, stats, lastRefresh, isShowQuerySummary, toggleQuerySummary, isDark }) => {
+}> = ({
+  metrics,
+  stats,
+  loading,
+  lastRefresh,
+  lastDuration,
+  warningMessage,
+  slownessReason,
+  isShowQuerySummary,
+  toggleQuerySummary,
+  isDark
+}) => {
   return (
     <Card id="query-summary" isFlat>
       <MetricsQuerySummaryContent
         direction="row"
         metrics={metrics}
         numQueries={stats?.numQueries}
+        loading={loading}
         lastRefresh={lastRefresh}
+        lastDuration={lastDuration}
+        warningMessage={warningMessage}
+        slownessReason={slownessReason}
         isShowQuerySummary={isShowQuerySummary}
         toggleQuerySummary={toggleQuerySummary}
         isDark={isDark}

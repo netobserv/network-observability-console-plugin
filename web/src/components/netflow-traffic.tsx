@@ -1,7 +1,5 @@
 import { isModelFeatureFlag, ModelFeatureFlag, useResolvedExtensions } from '@openshift-console/dynamic-plugin-sdk';
 import {
-  Alert,
-  AlertActionCloseButton,
   Button,
   Drawer,
   DrawerContent,
@@ -192,7 +190,6 @@ export const NetflowTraffic: React.FC<{
     setURLParams(queryParams);
   }
 
-  const warningTimeOut = React.useRef<NodeJS.Timeout | undefined>();
   const [config, setConfig] = React.useState<Config>(defaultConfig);
   const [warningMessage, setWarningMessage] = React.useState<string | undefined>();
   const [showViewOptions, setShowViewOptions] = useLocalStorage<boolean>(LOCAL_STORAGE_SHOW_OPTIONS_KEY, false);
@@ -215,6 +212,7 @@ export const NetflowTraffic: React.FC<{
   const metricsRef = React.useRef(metrics);
   const [isShowQuerySummary, setShowQuerySummary] = React.useState<boolean>(false);
   const [lastRefresh, setLastRefresh] = React.useState<Date | undefined>(undefined);
+  const [lastDuration, setLastDuration] = React.useState<number | undefined>(undefined);
   const [error, setError] = React.useState<string | undefined>();
   const [size, setSize] = useLocalStorage<Size>(LOCAL_STORAGE_SIZE_KEY, 'm');
   const [isTRModalOpen, setTRModalOpen] = React.useState(false);
@@ -395,9 +393,8 @@ export const NetflowTraffic: React.FC<{
       setFilters(f);
       setFlows([]);
       setMetrics({});
-      setWarningMessage(undefined);
     },
-    [setFilters, setFlows, setWarningMessage]
+    [setFilters, setFlows]
   );
 
   const backAndForth = filters.backAndForth;
@@ -524,7 +521,10 @@ export const NetflowTraffic: React.FC<{
 
   const manageWarnings = React.useCallback(
     (query: Promise<unknown>) => {
-      Promise.race([query, new Promise((resolve, reject) => setTimeout(reject, 2000, 'slow'))]).then(
+      setLastRefresh(undefined);
+      setLastDuration(undefined);
+      setWarningMessage(undefined);
+      Promise.race([query, new Promise((resolve, reject) => setTimeout(reject, 4000, 'slow'))]).then(
         null,
         (reason: string) => {
           if (reason === 'slow') {
@@ -873,6 +873,8 @@ export const NetflowTraffic: React.FC<{
         break;
     }
     if (promises) {
+      const startDate = new Date();
+      setStats(undefined);
       manageWarnings(
         promises
           .then(allStats => {
@@ -886,8 +888,10 @@ export const NetflowTraffic: React.FC<{
             setWarningMessage(undefined);
           })
           .finally(() => {
+            const endDate = new Date();
             setLoading(false);
-            setLastRefresh(new Date());
+            setLastRefresh(endDate);
+            setLastDuration(endDate.getTime() - startDate.getTime());
           })
       );
     }
@@ -1026,15 +1030,6 @@ export const NetflowTraffic: React.FC<{
     setDisabledFilters(getDisabledFiltersRecord(filters.list));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters]);
-
-  //clear warning message after 10s
-  React.useEffect(() => {
-    if (warningTimeOut.current) {
-      clearTimeout(warningTimeOut.current);
-    }
-
-    warningTimeOut.current = setTimeout(() => setWarningMessage(undefined), 10000);
-  }, [warningMessage]);
 
   //invalidate groups if necessary, when metrics scope changed
   React.useEffect(() => {
@@ -1313,6 +1308,9 @@ export const NetflowTraffic: React.FC<{
           stats={stats}
           limit={limit}
           lastRefresh={lastRefresh}
+          lastDuration={lastDuration}
+          warningMessage={warningMessage}
+          slownessReason={slownessReason()}
           range={range}
           showDNSLatency={isDNSTracking()}
           showRTTLatency={isFlowRTT()}
@@ -1442,7 +1440,11 @@ export const NetflowTraffic: React.FC<{
             <MetricsQuerySummary
               metrics={metrics}
               stats={stats}
+              loading={loading}
               lastRefresh={lastRefresh}
+              lastDuration={lastDuration}
+              warningMessage={warningMessage}
+              slownessReason={slownessReason()}
               isShowQuerySummary={isShowQuerySummary}
               toggleQuerySummary={() => onToggleQuerySummary(!isShowQuerySummary)}
               isDark={isDarkTheme}
@@ -1451,7 +1453,11 @@ export const NetflowTraffic: React.FC<{
             <FlowsQuerySummary
               flows={flows}
               stats={stats}
+              loading={loading}
               lastRefresh={lastRefresh}
+              lastDuration={lastDuration}
+              warningMessage={warningMessage}
+              slownessReason={slownessReason()}
               range={range}
               type={recordType}
               isShowQuerySummary={isShowQuerySummary}
@@ -1482,7 +1488,7 @@ export const NetflowTraffic: React.FC<{
     });
   }, [isFullScreen]);
 
-  const slownessReason = React.useCallback(() => {
+  const slownessReason = React.useCallback((): string => {
     if (match === 'any' && hasNonIndexFields(filters.list)) {
       return t(
         // eslint-disable-next-line max-len
@@ -1771,16 +1777,6 @@ export const NetflowTraffic: React.FC<{
             filters={(forcedFilters || filters).list}
           />
         </>
-      )}
-      {!_.isEmpty(warningMessage) && (
-        <Alert
-          id="netflow-warning"
-          title={warningMessage}
-          variant="warning"
-          actionClose={<AlertActionCloseButton onClose={() => setWarningMessage(undefined)} />}
-        >
-          {slownessReason()}
-        </Alert>
       )}
       <GuidedTourPopover id="netobserv" ref={guidedTourRef} isDark={isDarkTheme} />
     </PageSection>
