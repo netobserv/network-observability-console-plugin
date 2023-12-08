@@ -634,7 +634,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
               ? 'overview-panel-body-small'
               : 'overview-panel-body'
           }
-          doubleWidth={allowFocus || !!content.doubleWidth || panels.length === 1}
+          doubleWidth={allowFocus || !!content.doubleWidth}
           title={content.calculatedTitle || info.title}
           titleTooltip={info.tooltip}
           kebab={content.kebab}

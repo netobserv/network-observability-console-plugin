@@ -14,7 +14,8 @@
 .overview-flex-item {
   margin: 0 !important;
   height: 100%;
-  width: 50%;
+  min-width: 50%;
+  flex: 1;
   align-self: flex-start;
 }
 
@@ -23,6 +24,7 @@
 }
 
 .overview-flex-item.full {
+  flex: auto;
   width: 100%;
 }
 
