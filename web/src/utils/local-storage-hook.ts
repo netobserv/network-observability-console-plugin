@@ -28,6 +28,7 @@ export const LOCAL_STORAGE_HISTOGRAM_GUIDED_TOUR_DONE_KEY = 'netflow-traffic-his
 export const LOCAL_STORAGE_OVERVIEW_DONUT_DIMENSION_KEY = 'netflow-traffic-overview-donut-dimension';
 export const LOCAL_STORAGE_OVERVIEW_METRICS_DIMENSION_KEY = 'netflow-traffic-overview-metrics-dimension';
 export const LOCAL_STORAGE_OVERVIEW_METRICS_TOTAL_DIMENSION_KEY = 'netflow-traffic-overview-metrics-total-dimension';
+export const LOCAL_STORAGE_OVERVIEW_KEBAB_KEY = 'netflow-traffic-overview-kebab-map';
 
 export interface ArraySelectionOptions {
   id: string;
@@ -45,24 +46,27 @@ export function useLocalStorage<T>(
   const setValue = (value: T) => {
     try {
       // Allow value to be a function so we have same API as useState
-      const valueToStore = value instanceof Function ? value(storedValue) : value;
+      const stateValue = value instanceof Function ? value(storedValue) : value;
 
       // Save state and then localStorage
-      setStoredValue(valueToStore);
+      setStoredValue(stateValue);
 
       // Reload from localStorage
       const item = window.localStorage.getItem(LOCAL_STORAGE_PLUGIN_KEY);
       const parsedItem = item ? JSON.parse(item) : {};
 
+      // Stora maps as object
+      const storeValue = value instanceof Map ? Object.fromEntries(value.entries()) : stateValue;
+
       // Set key values
       if (opts) {
-        parsedItem[key] = valueToStore
+        parsedItem[key] = storeValue
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           .filter((item: any) => item[opts.criteria])
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           .map((item: any) => item[opts.id]);
       } else {
-        parsedItem[key] = valueToStore;
+        parsedItem[key] = storeValue;
       }
 
       // Save to localStorage
@@ -88,6 +92,8 @@ export function getLocalStorage<T>(key: string, initialValue?: T, opts?: ArraySe
             return item;
           })
         : initialValue;
+    } else if (initialValue instanceof Map) {
+      return param ? new Map(Object.entries(param)) : initialValue;
     } else {
       // Return parsed item if available
       return param ? param : initialValue;

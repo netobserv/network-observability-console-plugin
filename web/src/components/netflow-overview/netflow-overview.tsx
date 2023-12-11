@@ -12,26 +12,32 @@ import { SearchIcon } from '@patternfly/react-icons';
 import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { GenericMetric, NamedMetric, TopologyMetrics } from '../../api/loki';
-import { MetricType, RecordType } from '../../model/flow-query';
-import { getStat } from '../../model/topology';
-import { getOverviewPanelInfo, OverviewPanel, OverviewPanelId } from '../../utils/overview-panels';
-import { convertRemToPixels } from '../../utils/panel';
-import { usePrevious } from '../../utils/previous-hook';
+import { LOCAL_STORAGE_OVERVIEW_KEBAB_KEY, useLocalStorage } from '../../utils/local-storage-hook';
+import { NetflowMetrics } from '../../api/loki';
+import { RecordType } from '../../model/flow-query';
+import { getStat } from '../../model/metrics';
+import {
+  getFunctionFromId,
+  getOverviewPanelInfo,
+  getRateFunctionFromId,
+  OverviewPanel,
+  OverviewPanelId,
+  OverviewPanelInfo
+} from '../../utils/overview-panels';
 import { TruncateLength } from '../dropdowns/truncate-dropdown';
 import LokiError from '../messages/loki-error';
-import { DroppedDonut } from '../metrics/dropped-donut';
-import { LatencyDonut } from '../metrics/latency-donut';
-import { MetricsContent } from '../metrics/metrics-content';
+import { MetricsGraph } from '../metrics/metrics-graph';
 import { observeDOMRect, toNamedMetric } from '../metrics/metrics-helper';
-import { MetricsTotalContent } from '../metrics/metrics-total-content';
-import { SingleMetricsTotalContent } from '../metrics/single-metrics-total-content';
-import { StatDonut } from '../metrics/stat-donut';
+import { MetricsGraphWithTotal } from '../metrics/metrics-graph-total';
+import { MetricsDonut } from '../metrics/metrics-donut';
 import { NetflowOverviewPanel } from './netflow-overview-panel';
 import './netflow-overview.css';
 import { PanelKebab, PanelKebabOptions } from './panel-kebab';
+import { usePrevious } from '../../utils/previous-hook';
+import { convertRemToPixels } from '../../utils/panel';
 
 type PanelContent = {
+  calculatedTitle?: string;
   element: JSX.Element;
   kebab?: JSX.Element;
   bodyClassSmall?: boolean;
@@ -42,19 +48,7 @@ export type NetflowOverviewProps = {
   limit: number;
   panels: OverviewPanel[];
   recordType: RecordType;
-  metricType: MetricType;
-  metrics: TopologyMetrics[];
-  droppedMetrics: TopologyMetrics[];
-  totalMetric?: TopologyMetrics;
-  totalDroppedMetric?: TopologyMetrics;
-  droppedStateMetrics?: GenericMetric[];
-  droppedCauseMetrics?: GenericMetric[];
-  dnsRCodeMetrics?: GenericMetric[];
-  dnsLatencyMetrics: TopologyMetrics[];
-  rttMetrics: TopologyMetrics[];
-  totalDnsLatencyMetric?: TopologyMetrics;
-  totalDnsCountMetric?: TopologyMetrics;
-  totalRttMetric?: TopologyMetrics;
+  metrics: NetflowMetrics;
   loading?: boolean;
   error?: string;
   isDark?: boolean;
@@ -68,19 +62,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
   limit,
   panels,
   recordType,
-  metricType,
   metrics,
-  droppedMetrics,
-  totalMetric,
-  totalDroppedMetric,
-  droppedStateMetrics,
-  droppedCauseMetrics,
-  dnsRCodeMetrics,
-  dnsLatencyMetrics,
-  rttMetrics,
-  totalDnsLatencyMetric,
-  totalRttMetric,
-  totalDnsCountMetric,
   loading,
   error,
   isDark,
@@ -90,7 +72,10 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
   setFocus
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
-  const [kebabMap, setKebabMap] = React.useState(new Map<OverviewPanelId, PanelKebabOptions>());
+  const [kebabMap, setKebabMap] = useLocalStorage<Map<OverviewPanelId, PanelKebabOptions>>(
+    LOCAL_STORAGE_OVERVIEW_KEBAB_KEY,
+    new Map<OverviewPanelId, PanelKebabOptions>()
+  );
   const [selectedPanel, setSelectedPanel] = React.useState<OverviewPanel | undefined>();
   const previousSelectedPanel = usePrevious(selectedPanel);
 
@@ -107,6 +92,23 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
       setKebabMap(new Map(kebabMap));
     },
     [kebabMap, setKebabMap]
+  );
+
+  const getKebabOptions = React.useCallback(
+    (id: OverviewPanelId, defaultValue: PanelKebabOptions) => {
+      const found = kebabMap.get(id);
+      if (found) {
+        // ensure localstorage doesn't contains extra fields than default value in case an option has been removed
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const value: any = {};
+        (Object.keys(defaultValue) as (keyof typeof defaultValue)[]).forEach(k => {
+          value[k] = found[k];
+        });
+        return value as PanelKebabOptions;
+      }
+      return defaultValue;
+    },
+    [kebabMap]
   );
 
   const emptyGraph = React.useCallback(() => {
@@ -147,75 +149,117 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
   const allowFocus = focus === true && panels.length > 1;
   const wasAllowFocus = usePrevious(allowFocus);
 
+  const getRateMetric = React.useCallback(
+    (id: OverviewPanelId) => {
+      if (id.includes('dropped')) {
+        return metrics.droppedRateMetrics;
+      } else {
+        return metrics.rateMetrics;
+      }
+    },
+    [metrics.droppedRateMetrics, metrics.rateMetrics]
+  );
+
+  const getTotalRateMetric = React.useCallback(
+    (id: OverviewPanelId) => {
+      if (id.includes('dropped')) {
+        return metrics.totalDroppedRateMetric;
+      } else {
+        return metrics.totalRateMetric;
+      }
+    },
+    [metrics.totalDroppedRateMetric, metrics.totalRateMetric]
+  );
+
   //skip metrics with sources equals to destinations
   //sort by top total item first
   //limit to top X since multiple queries can run in parallel
-  const topKMetrics = metrics
-    .sort((a, b) => getStat(b.stats, 'sum') - getStat(a.stats, 'sum'))
-    .map(m => toNamedMetric(t, m, truncateLength, true, true));
-  const noInternalTopK = topKMetrics.filter(m => m.source.id !== m.destination.id);
-
-  const topKDroppedMetrics = droppedMetrics
-    .sort((a, b) => getStat(b.stats, 'sum') - getStat(a.stats, 'sum'))
-    .map(m => toNamedMetric(t, m, truncateLength, true, true));
-  const noInternalTopKDropped = topKDroppedMetrics.filter(m => m.source.id !== m.destination.id);
-
-  const topKDroppedStateMetrics = React.useMemo<GenericMetric[]>(
-    () => droppedStateMetrics?.sort((a, b) => getStat(b.stats, 'sum') - getStat(a.stats, 'sum')) || [],
-    [droppedStateMetrics]
+  const getTopKRateMetrics = React.useCallback(
+    (id: OverviewPanelId) => {
+      return (
+        getRateMetric(id)
+          ?.[getRateFunctionFromId(id)]?.sort((a, b) => getStat(b.stats, 'sum') - getStat(a.stats, 'sum'))
+          .map(m => toNamedMetric(t, m, truncateLength, true, true)) || []
+      );
+    },
+    [getRateMetric, t, truncateLength]
   );
 
-  const topKDroppedCauseMetrics = React.useMemo<GenericMetric[]>(
-    () => droppedCauseMetrics?.sort((a, b) => getStat(b.stats, 'sum') - getStat(a.stats, 'sum')) || [],
-    [droppedCauseMetrics]
+  const getNoInternalTopKRateMetrics = React.useCallback(
+    (id: OverviewPanelId) => {
+      return getTopKRateMetrics(id).filter(m => m.source.id !== m.destination.id);
+    },
+    [getTopKRateMetrics]
   );
 
-  const topKDnsRCodeMetrics = React.useMemo<GenericMetric[]>(
-    () => dnsRCodeMetrics?.sort((a, b) => getStat(b.stats, 'sum') - getStat(a.stats, 'sum')) || [],
-    [dnsRCodeMetrics]
+  const getNamedTotalRateMetric = React.useCallback(
+    (id: OverviewPanelId) => {
+      const metric = getTotalRateMetric(id)?.[getRateFunctionFromId(id)];
+      return metric ? toNamedMetric(t, metric, truncateLength, false, false) : undefined;
+    },
+    [getTotalRateMetric, t, truncateLength]
   );
 
-  const topKDnsLatencyMetrics = React.useMemo<NamedMetric[]>(
-    () =>
-      dnsLatencyMetrics
-        ?.sort((a, b) => getStat(b.stats, 'sum') - getStat(a.stats, 'sum'))
-        .map(m => toNamedMetric(t, m, truncateLength, true, true)) || [],
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [dnsLatencyMetrics]
+  const getTopKDroppedStateMetrics = React.useCallback(() => {
+    return metrics.droppedStateMetrics?.sort((a, b) => getStat(b.stats, 'sum') - getStat(a.stats, 'sum')) || [];
+  }, [metrics.droppedStateMetrics]);
+
+  const getTopKDroppedCauseMetrics = React.useCallback(() => {
+    return metrics.droppedCauseMetrics?.sort((a, b) => getStat(b.stats, 'sum') - getStat(a.stats, 'sum')) || [];
+  }, [metrics.droppedCauseMetrics]);
+
+  const getTopKDnsRCodeMetrics = React.useCallback(() => {
+    return metrics.dnsRCodeMetrics?.sort((a, b) => getStat(b.stats, 'sum') - getStat(a.stats, 'sum')) || [];
+  }, [metrics.dnsRCodeMetrics]);
+
+  const getNamedDnsCountTotalMetric = React.useCallback(() => {
+    const metric = metrics.totalDnsCountMetric;
+    return metric ? toNamedMetric(t, metric, truncateLength, false, false) : undefined;
+  }, [metrics.totalDnsCountMetric, t, truncateLength]);
+
+  const getTopKMetrics = React.useCallback(
+    (id: OverviewPanelId) => {
+      let m = undefined;
+      if (id.endsWith('dns_latency')) {
+        m = metrics.dnsLatencyMetrics;
+      } else if (id.endsWith('rtt')) {
+        m = metrics.rttMetrics;
+      }
+
+      return (
+        m?.[getFunctionFromId(id)]
+          ?.sort((a, b) => getStat(b.stats, 'sum') - getStat(a.stats, 'sum'))
+          .map(m => toNamedMetric(t, m, truncateLength, true, true)) || []
+      );
+    },
+    [metrics.dnsLatencyMetrics, metrics.rttMetrics, t, truncateLength]
   );
 
-  const topKRttMetrics = React.useMemo<NamedMetric[]>(
-    () =>
-      rttMetrics
-        ?.sort((a, b) => getStat(b.stats, 'sum') - getStat(a.stats, 'sum'))
-        .map(m => toNamedMetric(t, m, truncateLength, true, true)) || [],
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [rttMetrics]
+  const getTotalMetric = React.useCallback(
+    (id: OverviewPanelId) => {
+      let metric = undefined;
+      if (id.endsWith('dns_latency')) {
+        metric = metrics.totalDnsLatencyMetric;
+      } else if (id.endsWith('rtt')) {
+        metric = metrics.totalRttMetric;
+      }
+
+      return metric?.[getFunctionFromId(id)];
+    },
+    [metrics.totalDnsLatencyMetric, metrics.totalRttMetric]
   );
-  const noInternalTopKRtt = topKRttMetrics.filter(m => m.source.id !== m.destination.id);
 
-  const namedTotalMetric = totalMetric ? toNamedMetric(t, totalMetric, truncateLength, false, false) : undefined;
-
-  const namedTotalDroppedMetric = totalDroppedMetric
-    ? toNamedMetric(t, totalDroppedMetric, truncateLength, false, false)
-    : undefined;
-
-  const namedDnsLatencyTotalMetric = totalDnsLatencyMetric
-    ? toNamedMetric(t, totalDnsLatencyMetric, truncateLength, false, false)
-    : undefined;
-
-  const namedRttTotalMetric = totalRttMetric
-    ? toNamedMetric(t, totalRttMetric, truncateLength, false, false)
-    : undefined;
-
-  const namedDnsCountTotalMetric = totalDnsCountMetric
-    ? toNamedMetric(t, totalDnsCountMetric, truncateLength, false, false)
-    : undefined;
+  const getNamedTotalMetric = React.useCallback(
+    (id: OverviewPanelId) => {
+      const metric = getTotalMetric(id);
+      return metric ? toNamedMetric(t, metric, truncateLength, false, false) : undefined;
+    },
+    [getTotalMetric, t, truncateLength]
+  );
 
   const smallerTexts = truncateLength >= TruncateLength.M;
-
   const getPanelContent = React.useCallback(
-    (id: OverviewPanelId, isFocus: boolean, animate: boolean): PanelContent => {
+    (id: OverviewPanelId, info: OverviewPanelInfo, isFocus: boolean, animate: boolean): PanelContent => {
       switch (id) {
         case 'overview':
           return {
@@ -223,66 +267,38 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
             doubleWidth: true,
             bodyClassSmall: true
           };
-        case 'top_bar':
-          return {
-            element: !_.isEmpty(noInternalTopK) ? (
-              <MetricsContent
-                id={id}
-                metricType={metricType}
-                metrics={noInternalTopK}
-                limit={limit}
-                showBar={true}
-                showArea={false}
-                showScatter={false}
-                smallerTexts={smallerTexts}
-                tooltipsTruncate={false}
-                showLegend={!isFocus}
-                animate={animate}
-              />
-            ) : (
-              emptyGraph()
-            ),
-            kebab: <PanelKebab id={id} />,
-            doubleWidth: false
-          };
-        case 'total_line':
-          return {
-            element: namedTotalMetric ? (
-              <MetricsContent
-                id={id}
-                metricType={metricType}
-                metrics={[namedTotalMetric]}
-                limit={limit}
-                showBar={false}
-                showArea={true}
-                showScatter={true}
-                smallerTexts={smallerTexts}
-                tooltipsTruncate={false}
-                showLegend={!isFocus}
-                animate={animate}
-              />
-            ) : (
-              emptyGraph()
-            ),
-            kebab: <PanelKebab id={id} />,
-            doubleWidth: false
-          };
-        case 'top_bar_total': {
-          const options = kebabMap.get(id) || {
-            showTotal: true,
+        case 'top_sankey':
+          return { element: <>Sankey content</> };
+        case 'inbound_region':
+          return { element: <>Inbound flows by region content</> };
+        case 'top_avg_byte_rates':
+        case 'top_avg_dropped_byte_rates':
+        case 'top_avg_packet_rates':
+        case 'top_avg_dropped_packet_rates': {
+          const options = getKebabOptions(id, {
+            showOthers: true,
             showInternal: true,
-            showOutOfScope: false
-          };
+            showOutOfScope: false,
+            showLast: false,
+            graph: {
+              type: 'donut'
+            }
+          });
+          const metricType = id.endsWith('byte_rates') ? 'bytes' : 'packets';
+          const metrics = getTopKRateMetrics(id);
+          const namedTotalMetric = getNamedTotalRateMetric(id);
           return {
             element:
-              !_.isEmpty(topKMetrics) && namedTotalMetric ? (
-                <MetricsTotalContent
+              !_.isEmpty(metrics) && namedTotalMetric ? (
+                <MetricsDonut
                   id={id}
-                  metricType={metricType}
-                  topKMetrics={topKMetrics}
-                  totalMetric={namedTotalMetric}
+                  subTitle={info.subtitle}
                   limit={limit}
-                  showTotal={options.showTotal!}
+                  metricType={metricType}
+                  metricFunction={options.showLast! ? 'last' : getFunctionFromId(id)}
+                  topKMetrics={metrics}
+                  totalMetric={namedTotalMetric}
+                  showOthers={options.showOthers!}
                   showInternal={options.showInternal!}
                   showOutOfScope={options.showOutOfScope!}
                   smallerTexts={smallerTexts}
@@ -295,19 +311,40 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
             kebab: (
               <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} isDark={isDark} />
             ),
-            doubleWidth: true
+            bodyClassSmall: true,
+            doubleWidth: false
           };
         }
-        case 'top_lines':
+        case 'byte_rates':
+        case 'dropped_byte_rates':
+        case 'packet_rates':
+        case 'dropped_packet_rates': {
+          const isDrop = id.startsWith('dropped');
+          const options = getKebabOptions(id, {
+            showOutOfScope: false,
+            showTop: true,
+            showApp: { text: t('Show total'), value: !isDrop },
+            showAppDrop: isDrop ? { text: t('Show total dropped'), value: true } : undefined,
+            graph: { type: 'bar' }
+          });
+          const showTopOnly = options.showTop && !options.showApp?.value && !options.showAppDrop?.value;
+          const showTotalOnly = !options.showTop && options.showApp!.value;
+          const metricType = id.endsWith('byte_rates') ? 'bytes' : 'packets';
+          const topKMetrics = getNoInternalTopKRateMetrics(id);
+          const namedTotalMetric = getNamedTotalRateMetric(id.replace('dropped_', '') as OverviewPanelId);
+          const namedTotalDroppedMetric = getNamedTotalRateMetric(id);
           return {
-            element: !_.isEmpty(noInternalTopK) ? (
-              <MetricsContent
+            calculatedTitle: showTopOnly ? info.topTitle : showTotalOnly ? info.totalTitle : undefined,
+            element: showTopOnly ? (
+              <MetricsGraph
                 id={id}
                 metricType={metricType}
-                metrics={noInternalTopK}
+                metrics={topKMetrics}
+                metricFunction="avg"
                 limit={limit}
                 showBar={false}
                 showArea={true}
+                showLine={true}
                 showScatter={true}
                 itemsPerRow={2}
                 smallerTexts={smallerTexts}
@@ -315,294 +352,96 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
                 showLegend={!isFocus}
                 animate={animate}
               />
-            ) : (
-              emptyGraph()
-            ),
-            doubleWidth: true
-          };
-        case 'top_avg_donut': {
-          const options = kebabMap.get(id) || {
-            showOthers: true,
-            showInternal: true,
-            showOutOfScope: false
-          };
-          return {
-            element:
-              !_.isEmpty(topKMetrics) && namedTotalMetric ? (
-                <StatDonut
-                  id={id}
-                  limit={limit}
-                  metricType={metricType}
-                  stat="avg"
-                  topKMetrics={topKMetrics}
-                  totalMetric={namedTotalMetric}
-                  showOthers={options.showOthers!}
-                  showInternal={options.showInternal!}
-                  showOutOfScope={options.showOutOfScope!}
-                  smallerTexts={smallerTexts}
-                  showLegend={!isFocus}
-                  animate={animate}
-                />
-              ) : (
-                emptyGraph()
-              ),
-            kebab: (
-              <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} isDark={isDark} />
-            ),
-            bodyClassSmall: true
-          };
-        }
-        case 'top_latest_donut': {
-          const options = kebabMap.get(id) || {
-            showOthers: true,
-            showInternal: true,
-            showOutOfScope: false
-          };
-          return {
-            element:
-              !_.isEmpty(topKMetrics) && namedTotalMetric ? (
-                <StatDonut
-                  id={id}
-                  limit={limit}
-                  metricType={metricType}
-                  stat="last"
-                  topKMetrics={topKMetrics}
-                  totalMetric={namedTotalMetric}
-                  showOthers={options.showOthers!}
-                  showInternal={options.showInternal!}
-                  showOutOfScope={options.showOutOfScope!}
-                  smallerTexts={smallerTexts}
-                  showLegend={!isFocus}
-                  animate={animate}
-                />
-              ) : (
-                emptyGraph()
-              ),
-            kebab: (
-              <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} isDark={isDark} />
-            ),
-            bodyClassSmall: true
-          };
-        }
-        case 'top_sankey':
-          return { element: <>Sankey content</> };
-        case 'top_dropped_bar':
-          return {
-            element: !_.isEmpty(noInternalTopKDropped) ? (
-              <MetricsContent
+            ) : !_.isEmpty(topKMetrics) || namedTotalMetric || namedTotalDroppedMetric ? (
+              <MetricsGraphWithTotal
                 id={id}
                 metricType={metricType}
-                metrics={noInternalTopKDropped}
+                metricFunction="avg"
+                topKMetrics={topKMetrics}
+                totalMetric={namedTotalMetric}
+                totalDropMetric={namedTotalDroppedMetric}
                 limit={limit}
-                showBar={true}
-                showArea={false}
-                showScatter={false}
+                topAsBars={true}
+                showTop={options.showTop!}
+                showTotal={options.showApp?.value || false}
+                showTotalDrop={options.showAppDrop?.value || false}
+                showOutOfScope={options.showOutOfScope!}
                 smallerTexts={smallerTexts}
-                tooltipsTruncate={false}
+                showOthers={false}
                 showLegend={!isFocus}
                 animate={animate}
               />
             ) : (
               emptyGraph()
             ),
-            kebab: <PanelKebab id={id} />,
-            doubleWidth: false
-          };
-        case 'total_dropped_line':
-          return {
-            element: namedTotalDroppedMetric ? (
-              <MetricsContent
-                id={id}
-                metricType={metricType}
-                metrics={[namedTotalDroppedMetric]}
-                limit={limit}
-                showBar={false}
-                showArea={true}
-                showScatter={true}
-                smallerTexts={smallerTexts}
-                tooltipsTruncate={false}
-                showLegend={!isFocus}
-                animate={animate}
-              />
-            ) : (
-              emptyGraph()
-            ),
-            kebab: <PanelKebab id={id} />,
-            doubleWidth: false
-          };
-        case 'top_dropped_state_donut': {
-          const options = kebabMap.get(id) || {
-            showOthers: true
-          };
-          return {
-            element:
-              !_.isEmpty(topKDroppedStateMetrics) && namedTotalDroppedMetric ? (
-                <DroppedDonut
-                  id={id}
-                  limit={limit}
-                  metricType={metricType}
-                  stat="sum"
-                  topKMetrics={topKDroppedStateMetrics}
-                  totalMetric={namedTotalDroppedMetric}
-                  showOthers={options.showOthers!}
-                  smallerTexts={smallerTexts}
-                  showLegend={!isFocus}
-                  animate={animate}
-                />
-              ) : (
-                emptyGraph()
-              ),
             kebab: <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} />,
-            bodyClassSmall: true
-          };
-        }
-        case 'top_dropped_cause_donut': {
-          const options = kebabMap.get(id) || {
-            showOthers: true
-          };
-          return {
-            element:
-              !_.isEmpty(topKDroppedCauseMetrics) && namedTotalDroppedMetric ? (
-                <DroppedDonut
-                  id={id}
-                  limit={limit}
-                  metricType={metricType}
-                  stat="sum"
-                  topKMetrics={topKDroppedCauseMetrics}
-                  totalMetric={namedTotalDroppedMetric}
-                  showOthers={options.showOthers!}
-                  smallerTexts={smallerTexts}
-                  showLegend={!isFocus}
-                  animate={animate}
-                />
-              ) : (
-                emptyGraph()
-              ),
-            kebab: <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} />,
-            bodyClassSmall: true
-          };
-        }
-        case 'top_dropped_bar_total':
-          const options = kebabMap.get(id) || {
-            showTotal: true,
-            showInternal: true,
-            showOutOfScope: false,
-            compareToDropped: namedTotalDroppedMetric ? false : undefined
-          };
-          const totalMetric =
-            options.compareToDropped && namedTotalDroppedMetric ? namedTotalDroppedMetric : namedTotalMetric;
-          return {
-            element:
-              !_.isEmpty(topKDroppedMetrics) && totalMetric ? (
-                <MetricsTotalContent
-                  id={id}
-                  metricType={metricType}
-                  topKMetrics={topKDroppedMetrics}
-                  totalMetric={totalMetric}
-                  limit={limit}
-                  showTotal={options.showTotal!}
-                  showInternal={options.showInternal!}
-                  showOutOfScope={options.showOutOfScope!}
-                  smallerTexts={smallerTexts}
-                  showLegend={!isFocus}
-                  animate={animate}
-                />
-              ) : (
-                emptyGraph()
-              ),
-            kebab: <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} />,
+            bodyClassSmall: false,
             doubleWidth: true
           };
-        case 'top_avg_dns_latency_donut': {
+        }
+        case 'state_dropped_packet_rates':
+        case 'cause_dropped_packet_rates': {
+          const isState = id === 'state_dropped_packet_rates';
+          const metricType = 'packets'; // TODO: consider adding bytes graphs here
+          const topKMetrics = isState ? getTopKDroppedStateMetrics() : getTopKDroppedCauseMetrics();
+          const namedTotalMetric = getNamedTotalRateMetric(id);
+          const options = getKebabOptions(id, {
+            showOthers: true,
+            showTop: true,
+            showApp: { text: t('Show total'), value: true },
+            graph: { options: ['bar_line', 'donut'], type: 'bar_line' }
+          });
+          const isDonut = options!.graph!.type === 'donut';
+          const showTopOnly = isDonut || (options.showTop && !options.showApp!.value);
+          const showTotalOnly = !options.showTop && options.showApp!.value;
           return {
+            calculatedTitle: showTopOnly ? info.topTitle : showTotalOnly ? info.totalTitle : undefined,
             element:
-              !_.isEmpty(topKDnsLatencyMetrics) && namedDnsLatencyTotalMetric ? (
-                <LatencyDonut
+              isDonut && !_.isEmpty(topKMetrics) && namedTotalMetric ? (
+                <MetricsDonut
                   id={id}
+                  subTitle={info.subtitle}
                   limit={limit}
-                  metricType={'dnsLatencies'}
-                  topKMetrics={topKDnsLatencyMetrics}
-                  totalMetric={namedDnsLatencyTotalMetric}
+                  metricType={metricType}
+                  metricFunction="avg"
+                  topKMetrics={topKMetrics}
+                  totalMetric={namedTotalMetric}
+                  showOthers={options.showOthers!}
+                  smallerTexts={smallerTexts}
+                  showLegend={!isFocus}
+                  animate={animate}
+                />
+              ) : showTopOnly ? (
+                <MetricsGraph
+                  id={id}
+                  metricType={metricType}
+                  metricFunction="avg"
+                  metrics={topKMetrics}
+                  limit={limit}
+                  showBar={false}
+                  showArea={true}
+                  showLine={true}
+                  showScatter={true}
+                  itemsPerRow={2}
+                  smallerTexts={smallerTexts}
+                  tooltipsTruncate={false}
+                  showLegend={!isFocus}
+                  animate={animate}
+                />
+              ) : namedTotalMetric ? (
+                <MetricsGraphWithTotal
+                  id={id}
+                  metricType={metricType}
+                  metricFunction="avg"
+                  topKMetrics={topKMetrics}
+                  totalMetric={namedTotalMetric}
+                  limit={limit}
+                  topAsBars={true}
+                  showTop={options.showTop!}
+                  showTotal={options.showApp!.value}
+                  smallerTexts={smallerTexts}
+                  showTotalDrop={false}
                   showOthers={false}
-                  smallerTexts={smallerTexts}
-                  subTitle={t('Average latency')}
-                  showLegend={!isFocus}
-                  animate={animate}
-                />
-              ) : (
-                emptyGraph()
-              ),
-            kebab: <PanelKebab id={id} />,
-            bodyClassSmall: true
-          };
-        }
-        case 'top_avg_rtt_donut': {
-          const options = kebabMap.get(id) || {
-            showOthers: true
-          };
-          return {
-            element:
-              !_.isEmpty(topKRttMetrics) && namedRttTotalMetric ? (
-                <LatencyDonut
-                  id={id}
-                  limit={limit}
-                  metricType={'flowRtt'}
-                  topKMetrics={topKRttMetrics}
-                  totalMetric={namedRttTotalMetric}
-                  showOthers={options.showOthers!}
-                  smallerTexts={smallerTexts}
-                  subTitle={t('Average RTT')}
-                  showLegend={!isFocus}
-                  animate={animate}
-                />
-              ) : (
-                emptyGraph()
-              ),
-            kebab: (
-              <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} isDark={isDark} />
-            ),
-            bodyClassSmall: true
-          };
-        }
-        case 'top_avg_rtt_line':
-          return {
-            element: !_.isEmpty(noInternalTopKRtt) ? (
-              <MetricsContent
-                id={id}
-                metricType={'flowRtt'}
-                metrics={noInternalTopKRtt}
-                limit={limit}
-                showBar={false}
-                showArea={false}
-                showLine={true}
-                showScatter={true}
-                smallerTexts={smallerTexts}
-                tooltipsTruncate={false}
-                showLegend={!isFocus}
-                animate={animate}
-              />
-            ) : (
-              emptyGraph()
-            ),
-            doubleWidth: false
-          };
-        case 'top_dns_rcode_donut': {
-          const options = kebabMap.get(id) || {
-            showNoError: true
-          };
-          return {
-            element:
-              !_.isEmpty(topKDnsRCodeMetrics) && namedDnsCountTotalMetric ? (
-                <LatencyDonut
-                  id={id}
-                  limit={limit}
-                  metricType={'countDns'}
-                  topKMetrics={topKDnsRCodeMetrics}
-                  totalMetric={namedDnsCountTotalMetric}
-                  showOthers={options.showNoError!}
-                  othersName={'NoError'}
-                  smallerTexts={smallerTexts}
-                  subTitle={t('Total flow count')}
                   showLegend={!isFocus}
                   animate={animate}
                 />
@@ -610,76 +449,171 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
                 emptyGraph()
               ),
             kebab: <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} />,
-            bodyClassSmall: true
+            bodyClassSmall: options.graph!.type === 'donut',
+            doubleWidth: options.graph!.type !== 'donut'
           };
         }
-        case 'top_dns_rcode_bar_total': {
-          const options = kebabMap.get(id) || {
-            showTotal: true,
-            showNoError: true
-          };
+        case 'top_avg_dns_latency':
+        case 'top_max_dns_latency':
+        case 'top_p90_dns_latency':
+        case 'top_p99_dns_latency':
+        case 'bottom_min_dns_latency':
+        case 'top_avg_rtt':
+        case 'top_max_rtt':
+        case 'top_p90_rtt':
+        case 'top_p99_rtt':
+        case 'bottom_min_rtt': {
+          const isAvg = id.includes('_avg_');
+          const metricType = id.endsWith('bytes')
+            ? 'bytes'
+            : id.endsWith('packets')
+            ? 'packets'
+            : id.endsWith('dns_latency')
+            ? 'dnsLatencies'
+            : 'flowRtt';
+          const metrics = getTopKMetrics(id);
+          const namedTotalMetric = getNamedTotalMetric(id);
+          const options = getKebabOptions(id, {
+            showTop: true,
+            showApp: { text: t('Show overall'), value: true },
+            graph: {
+              options: ['donut', 'line'],
+              type: isAvg ? 'line' : 'donut'
+            }
+          });
+          const isDonut = options!.graph!.type === 'donut';
+          const showTopOnly = isDonut || (options.showTop && !options.showApp!.value);
+          const showTotalOnly = !options.showTop && options.showApp!.value;
           return {
+            calculatedTitle: showTopOnly ? info.topTitle : showTotalOnly ? info.totalTitle : undefined,
             element:
-              !_.isEmpty(topKDnsRCodeMetrics) && namedDnsCountTotalMetric ? (
-                <SingleMetricsTotalContent
-                  id={id}
-                  metricType={metricType}
-                  topKMetrics={topKDnsRCodeMetrics}
-                  totalMetric={namedDnsCountTotalMetric}
-                  limit={limit}
-                  showTotal={options.showTotal!}
-                  showOthers={options.showNoError!}
-                  othersName={'NoError'}
-                  smallerTexts={smallerTexts}
-                  showLegend={!isFocus}
-                  animate={animate}
-                />
+              !_.isEmpty(metrics) && namedTotalMetric ? (
+                options!.graph!.type === 'donut' ? (
+                  <MetricsDonut
+                    id={id}
+                    subTitle={info.subtitle}
+                    limit={limit}
+                    metricType={metricType}
+                    metricFunction={getFunctionFromId(id)}
+                    topKMetrics={metrics}
+                    totalMetric={namedTotalMetric}
+                    showOthers={false}
+                    smallerTexts={smallerTexts}
+                    showLegend={!isFocus}
+                    animate={animate}
+                  />
+                ) : (
+                  <MetricsGraphWithTotal
+                    id={id}
+                    metricType={metricType}
+                    metricFunction={getFunctionFromId(id)}
+                    topKMetrics={metrics}
+                    totalMetric={namedTotalMetric}
+                    limit={limit}
+                    topAsBars={false}
+                    showTop={options.showTop!}
+                    showTotal={options.showApp!.value}
+                    showInternal={false}
+                    showOutOfScope={false}
+                    smallerTexts={smallerTexts}
+                    showTotalDrop={false}
+                    showOthers={false}
+                    showLegend={!isFocus}
+                    animate={animate}
+                  />
+                )
               ) : (
                 emptyGraph()
               ),
             kebab: <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} />,
-            doubleWidth: true
+            bodyClassSmall: options.graph!.type === 'donut',
+            doubleWidth: options.graph!.type !== 'donut'
           };
         }
-        case 'inbound_region':
-          return { element: <>Inbound flows by region content</> };
+        case 'rcode_dns_latency_flows': {
+          const metricType = 'countDns'; // TODO: consider adding packets graphs here
+          const topKMetrics = getTopKDnsRCodeMetrics();
+          const namedTotalMetric = getNamedDnsCountTotalMetric();
+          const options = getKebabOptions(id, {
+            showNoError: true,
+            showTop: true,
+            showApp: { text: t('Show total'), value: true },
+            graph: { options: ['bar_line', 'donut'], type: 'donut' }
+          });
+          const isDonut = options!.graph!.type === 'donut';
+          const showTopOnly = isDonut || (options.showTop && !options.showApp!.value);
+          const showTotalOnly = !options.showTop && options.showApp!.value;
+          return {
+            calculatedTitle: showTopOnly ? info.topTitle : showTotalOnly ? info.totalTitle : undefined,
+            element:
+              !_.isEmpty(topKMetrics) && namedTotalMetric ? (
+                isDonut ? (
+                  <MetricsDonut
+                    id={id}
+                    subTitle={info.subtitle}
+                    limit={limit}
+                    metricType={metricType}
+                    metricFunction="sum"
+                    topKMetrics={topKMetrics}
+                    totalMetric={namedTotalMetric}
+                    showOthers={options.showNoError!}
+                    othersName={'NoError'}
+                    smallerTexts={smallerTexts}
+                    showLegend={!isFocus}
+                    animate={animate}
+                  />
+                ) : (
+                  <MetricsGraphWithTotal
+                    id={id}
+                    metricType={metricType}
+                    metricFunction="sum"
+                    topKMetrics={topKMetrics}
+                    totalMetric={namedTotalMetric}
+                    limit={limit}
+                    topAsBars={true}
+                    showTop={options.showTop!}
+                    showTotal={options.showApp!.value}
+                    showOthers={options.showNoError!}
+                    othersName={'NoError'}
+                    smallerTexts={smallerTexts}
+                    showTotalDrop={false}
+                    showLegend={!isFocus}
+                    animate={animate}
+                  />
+                )
+              ) : (
+                emptyGraph()
+              ),
+            kebab: <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} />,
+            bodyClassSmall: options.graph!.type === 'donut',
+            doubleWidth: options.graph!.type !== 'donut'
+          };
+        }
       }
     },
     [
       emptyGraph,
+      getKebabOptions,
+      getNamedDnsCountTotalMetric,
+      getNamedTotalMetric,
+      getNamedTotalRateMetric,
+      getNoInternalTopKRateMetrics,
+      getTopKDnsRCodeMetrics,
+      getTopKDroppedCauseMetrics,
+      getTopKDroppedStateMetrics,
+      getTopKMetrics,
+      getTopKRateMetrics,
       isDark,
-      kebabMap,
       limit,
-      metricType,
-      namedDnsCountTotalMetric,
-      namedDnsLatencyTotalMetric,
-      namedRttTotalMetric,
-      namedTotalDroppedMetric,
-      namedTotalMetric,
-      noInternalTopK,
-      noInternalTopKDropped,
-      noInternalTopKRtt,
       setKebabOptions,
       smallerTexts,
-      t,
-      topKDnsLatencyMetrics,
-      topKDnsRCodeMetrics,
-      topKDroppedCauseMetrics,
-      topKDroppedMetrics,
-      topKDroppedStateMetrics,
-      topKMetrics,
-      topKRttMetrics
+      t
     ]
   );
 
   const getPanelView = React.useCallback(
     (panel: OverviewPanel, i?: number) => {
-      const { title, tooltip } = getOverviewPanelInfo(
-        t,
-        panel.id,
-        limit,
-        recordType === 'flowLog' ? t('flow') : t('conversation')
-      );
+      const info = getOverviewPanelInfo(t, panel.id, limit, recordType === 'flowLog' ? t('flow') : t('conversation'));
       const isFocus = i === undefined;
       const animate =
         isFocus &&
@@ -688,7 +622,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
         previousSelectedPanel.id !== selectedPanel?.id;
       const isFocusable = (panels.length > 1 && allowFocus == false) || isFocus;
       const isFocusListItem = !isFocus && allowFocus == true;
-      const content = getPanelContent(panel.id, isFocusListItem, animate);
+      const content = getPanelContent(panel.id, info, isFocusListItem, animate);
       return (
         <NetflowOverviewPanel
           id={panel.id}
@@ -700,9 +634,9 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
               ? 'overview-panel-body-small'
               : 'overview-panel-body'
           }
-          doubleWidth={allowFocus || !!content.doubleWidth || panels.length === 1}
-          title={title}
-          titleTooltip={tooltip}
+          doubleWidth={allowFocus || !!content.doubleWidth}
+          title={content.calculatedTitle || info.title}
+          titleTooltip={info.tooltip}
           kebab={content.kebab}
           onClick={isFocusListItem ? () => setSelectedPanel(panel) : undefined}
           focusOn={

@@ -29,10 +29,21 @@ import { ColumnsIcon, EllipsisVIcon, ExportIcon, SyncAltIcon } from '@patternfly
 import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useTheme } from '../utils/theme-hook';
 import { Record } from '../api/ipfix';
-import { GenericMetric, Stats, TopologyMetrics } from '../api/loki';
+import {
+  getFunctionMetricKey,
+  getRateMetricKey,
+  initFunctionMetricKeys,
+  initRateMetricKeys,
+  FunctionMetrics,
+  RateMetrics,
+  Stats,
+  TotalFunctionMetrics,
+  TotalRateMetrics,
+  NetflowMetrics
+} from '../api/loki';
 import { getFlowGenericMetrics } from '../api/routes';
+import { Config, defaultConfig } from '../model/config';
 import {
   DisabledFilters,
   Filter,
@@ -44,14 +55,15 @@ import {
   hasNonIndexFields
 } from '../model/filters';
 import {
+  filtersToString,
   FlowQuery,
+  FlowScope,
+  isTimeMetric,
   Match,
   MetricFunction,
-  FlowScope,
   MetricType,
   PacketLoss,
-  RecordType,
-  filtersToString
+  RecordType
 } from '../model/flow-query';
 import { MetricScopeOptions } from '../model/metrics';
 import { parseQuickFilters } from '../model/quick-filters';
@@ -62,11 +74,15 @@ import {
   TopologyGroupTypes,
   TopologyOptions
 } from '../model/topology';
+import { getFetchFunctions as getBackAndForthFetch } from '../utils/back-and-forth';
 import { Column, ColumnsId, ColumnSizeMap, getDefaultColumns } from '../utils/columns';
 import { loadConfig } from '../utils/config';
 import { ContextSingleton } from '../utils/context';
 import { computeStepInterval, getTimeRangeOptions, TimeRange } from '../utils/datetime';
+import { formatDuration, getDateMsInSeconds, getDateSInMiliseconds, parseDuration } from '../utils/duration';
 import { getHTTPErrorDetails } from '../utils/errors';
+import { exportToPng } from '../utils/export';
+import { mergeFlowReporters } from '../utils/flows';
 import { useK8sModelsWithColors } from '../utils/k8s-models-hook';
 import {
   LOCAL_STORAGE_COLS_KEY,
@@ -81,8 +97,8 @@ import {
   LOCAL_STORAGE_OVERVIEW_TRUNCATE_KEY,
   LOCAL_STORAGE_QUERY_PARAMS_KEY,
   LOCAL_STORAGE_REFRESH_KEY,
-  LOCAL_STORAGE_SHOW_OPTIONS_KEY,
   LOCAL_STORAGE_SHOW_HISTOGRAM_KEY,
+  LOCAL_STORAGE_SHOW_OPTIONS_KEY,
   LOCAL_STORAGE_SIZE_KEY,
   LOCAL_STORAGE_TOPOLOGY_OPTIONS_KEY,
   LOCAL_STORAGE_VIEW_ID_KEY,
@@ -90,6 +106,7 @@ import {
   getLocalStorage,
   LOCAL_STORAGE_OVERVIEW_FOCUS_KEY
 } from '../utils/local-storage-hook';
+import { mergeStats } from '../utils/metrics';
 import {
   DNS_ID_MATCHER,
   DROPPED_ID_MATCHER,
@@ -119,14 +136,20 @@ import {
   setURLRecortType,
   setURLShowDup
 } from '../utils/router';
+import { useTheme } from '../utils/theme-hook';
 import { getURLParams, hasEmptyParams, netflowTrafficPath, setURLParams } from '../utils/url';
+import { RATE_METRIC_FUNCTIONS, TIME_METRIC_FUNCTIONS } from './dropdowns/metric-function-dropdown';
 import { OverviewDisplayDropdown } from './dropdowns/overview-display-dropdown';
 import { LIMIT_VALUES, TOP_VALUES } from './dropdowns/query-options-dropdown';
 import { RefreshDropdown } from './dropdowns/refresh-dropdown';
-import { TableDisplayDropdown, Size } from './dropdowns/table-display-dropdown';
+import { Size, TableDisplayDropdown } from './dropdowns/table-display-dropdown';
 import TimeRangeDropdown from './dropdowns/time-range-dropdown';
 import { TopologyDisplayDropdown } from './dropdowns/topology-display-dropdown';
+import { TruncateLength } from './dropdowns/truncate-dropdown';
+import { navigate } from './dynamic-loader/dynamic-loader';
 import { FiltersToolbar } from './filters/filters-toolbar';
+import GuidedTourPopover, { GuidedTourHandle } from './guided-tour/guided-tour';
+import HistogramContainer from './metrics/histogram';
 import { ColumnsModal } from './modals/columns-modal';
 import { ExportModal } from './modals/export-modal';
 import OverviewPanelsModal from './modals/overview-panels-modal';
@@ -136,23 +159,13 @@ import { RecordPanel } from './netflow-record/record-panel';
 import NetflowTable from './netflow-table/netflow-table';
 import ElementPanel from './netflow-topology/element-panel';
 import NetflowTopology from './netflow-topology/netflow-topology';
-import { Config, defaultConfig } from '../model/config';
-import SummaryPanel from './query-summary/summary-panel';
-import MetricsQuerySummary from './query-summary/metrics-query-summary';
-import FlowsQuerySummary from './query-summary/flows-query-summary';
-import { SearchComponent, SearchEvent, SearchHandle } from './search/search';
 import './netflow-traffic.css';
-import { TruncateLength } from './dropdowns/truncate-dropdown';
-import HistogramContainer from './metrics/histogram';
-import { formatDuration, getDateMsInSeconds, getDateSInMiliseconds, parseDuration } from '../utils/duration';
-import GuidedTourPopover, { GuidedTourHandle } from './guided-tour/guided-tour';
-import { exportToPng } from '../utils/export';
-import { navigate } from './dynamic-loader/dynamic-loader';
 import { LinksOverflow } from './overflow/links-overflow';
-import { mergeFlowReporters } from '../utils/flows';
-import { getFetchFunctions as getBackAndForthFetch } from '../utils/back-and-forth';
-import { mergeStats } from '../utils/metrics';
 import { getFilterDefinitions } from '../utils/filter-definitions';
+import FlowsQuerySummary from './query-summary/flows-query-summary';
+import MetricsQuerySummary from './query-summary/metrics-query-summary';
+import SummaryPanel from './query-summary/summary-panel';
+import { SearchComponent, SearchEvent, SearchHandle } from './search/search';
 
 export type ViewId = 'overview' | 'table' | 'topology';
 
@@ -198,18 +211,8 @@ export const NetflowTraffic: React.FC<{
     LOCAL_STORAGE_TOPOLOGY_OPTIONS_KEY,
     DefaultOptions
   );
-  const [metrics, setMetrics] = React.useState<TopologyMetrics[]>([]);
-  const [droppedMetrics, setDroppedMetrics] = React.useState<TopologyMetrics[]>([]);
-  const [dnsLatencyMetrics, setDnsLatencyMetrics] = React.useState<TopologyMetrics[]>([]);
-  const [rttMetrics, setRttMetrics] = React.useState<TopologyMetrics[]>([]);
-  const [totalMetric, setTotalMetric] = React.useState<TopologyMetrics | undefined>(undefined);
-  const [totalDroppedMetric, setTotalDroppedMetric] = React.useState<TopologyMetrics | undefined>(undefined);
-  const [totalDnsLatencyMetric, setTotalDnsLatencyMetric] = React.useState<TopologyMetrics | undefined>(undefined);
-  const [totalDnsCountMetric, setTotalDnsCountMetric] = React.useState<TopologyMetrics | undefined>(undefined);
-  const [totalRttMetric, setTotalRttMetric] = React.useState<TopologyMetrics | undefined>(undefined);
-  const [droppedStateMetrics, setDroppedStateMetrics] = React.useState<GenericMetric[] | undefined>(undefined);
-  const [droppedCauseMetrics, setDroppedCauseMetrics] = React.useState<GenericMetric[] | undefined>(undefined);
-  const [dnsRCodeMetrics, setDnsRCodeMetrics] = React.useState<GenericMetric[] | undefined>(undefined);
+  const [metrics, setMetrics] = React.useState<NetflowMetrics>({});
+  const metricsRef = React.useRef(metrics);
   const [isShowQuerySummary, setShowQuerySummary] = React.useState<boolean>(false);
   const [lastRefresh, setLastRefresh] = React.useState<Date | undefined>(undefined);
   const [error, setError] = React.useState<string | undefined>();
@@ -232,11 +235,14 @@ export const NetflowTraffic: React.FC<{
   const [range, setRange] = React.useState<number | TimeRange>(getRangeFromURL());
   const [histogramRange, setHistogramRange] = React.useState<TimeRange>();
   const [metricScope, setMetricScope] = useLocalStorage<FlowScope>(LOCAL_STORAGE_METRIC_SCOPE_KEY, 'namespace');
-  const [metricFunction, setMetricFunction] = useLocalStorage<MetricFunction>(
+  const [topologyMetricFunction, setTopologyMetricFunction] = useLocalStorage<MetricFunction>(
     LOCAL_STORAGE_METRIC_FUNCTION_KEY,
     defaultMetricFunction
   );
-  const [metricType, setMetricType] = useLocalStorage<MetricType>(LOCAL_STORAGE_METRIC_TYPE_KEY, defaultMetricType);
+  const [topologyMetricType, setTopologyMetricType] = useLocalStorage<MetricType>(
+    LOCAL_STORAGE_METRIC_TYPE_KEY,
+    defaultMetricType
+  );
   const [interval, setInterval] = useLocalStorage<number | undefined>(LOCAL_STORAGE_REFRESH_KEY);
   const [selectedRecord, setSelectedRecord] = React.useState<Record | undefined>(undefined);
   const [selectedElement, setSelectedElement] = React.useState<GraphElementPeer | undefined>(undefined);
@@ -312,15 +318,22 @@ export const NetflowTraffic: React.FC<{
     return getAvailableColumns().filter(column => column.isSelected);
   }, [getAvailableColumns]);
 
-  const updateMetricType = React.useCallback(
+  const updateTopologyMetricType = React.useCallback(
     (metricType: MetricType) => {
-      /* TODO : allow max / latest metric functions for DNS latency & RTT*/
-      if (['dnsLatencies', 'flowRtt'].includes(metricType)) {
-        setMetricFunction('avg');
+      if (isTimeMetric(metricType)) {
+        // fallback on average if current function not available for time queries
+        if (!TIME_METRIC_FUNCTIONS.includes(topologyMetricFunction)) {
+          setTopologyMetricFunction('avg');
+        }
+      } else {
+        // fallback on average if current function not available for rate queries
+        if (!RATE_METRIC_FUNCTIONS.includes(topologyMetricFunction)) {
+          setTopologyMetricFunction('avg');
+        }
       }
-      setMetricType(metricType);
+      setTopologyMetricType(metricType);
     },
-    [setMetricFunction, setMetricType]
+    [topologyMetricFunction, setTopologyMetricFunction, setTopologyMetricType]
   );
 
   const getFilterDefs = React.useCallback(() => {
@@ -349,17 +362,39 @@ export const NetflowTraffic: React.FC<{
     [config, getQuickFilters]
   );
 
+  const getTopologyMetrics = React.useCallback(() => {
+    switch (topologyMetricType) {
+      case 'bytes':
+      case 'packets':
+        return metrics.rateMetrics?.[getRateMetricKey(topologyMetricType)];
+      case 'dnsLatencies':
+        return metrics.dnsLatencyMetrics?.[getFunctionMetricKey(topologyMetricFunction)];
+      case 'flowRtt':
+        return metrics.rttMetrics?.[getFunctionMetricKey(topologyMetricFunction)];
+      default:
+        return undefined;
+    }
+  }, [metrics.dnsLatencyMetrics, topologyMetricFunction, topologyMetricType, metrics.rateMetrics, metrics.rttMetrics]);
+
+  const getTopologyDroppedMetrics = React.useCallback(() => {
+    switch (topologyMetricType) {
+      case 'bytes':
+      case 'packets':
+      case 'droppedBytes':
+      case 'droppedPackets':
+        return metrics.droppedRateMetrics?.[getRateMetricKey(topologyMetricType)];
+      default:
+        return undefined;
+    }
+  }, [metrics.droppedRateMetrics, topologyMetricType]);
+
   // updates table filters and clears up the table for proper visualization of the
   // updating process
   const updateTableFilters = React.useCallback(
     (f: Filters) => {
       setFilters(f);
       setFlows([]);
-      setTotalMetric(undefined);
-      setTotalDroppedMetric(undefined);
-      setTotalDnsLatencyMetric(undefined);
-      setTotalRttMetric(undefined);
-      setTotalDnsCountMetric(undefined);
+      setMetrics({});
       setWarningMessage(undefined);
     },
     [setFilters, setFlows, setWarningMessage]
@@ -404,22 +439,14 @@ export const NetflowTraffic: React.FC<{
     if (view === 'overview' && selectedViewId !== 'overview') {
       setLastLimit(limit);
       setLimit(lastTop);
-      if (!['bytes', 'packets'].includes(metricType)) {
-        setMetricType(defaultMetricType);
-      }
     } else if (view !== 'overview' && selectedViewId === 'overview') {
       setLastTop(limit);
       setLimit(lastLimit);
-      if (!['bytes', 'packets', 'dnsLatencies', 'flowRtt'].includes(metricType)) {
-        setMetricType(defaultMetricType);
-      }
     }
 
     if (view !== selectedViewId) {
       setFlows([]);
-      setMetrics([]);
-      setTotalMetric(undefined);
-      setTotalDroppedMetric(undefined);
+      setMetrics({});
     }
     setSelectedViewId(view);
   };
@@ -463,9 +490,9 @@ export const NetflowTraffic: React.FC<{
     if (selectedViewId === 'table') {
       query.type = 'count';
     } else {
-      query.type = metricType;
       query.aggregateBy = metricScope;
       if (selectedViewId === 'topology') {
+        query.type = topologyMetricType;
         query.groups = topologyOptions.groupTypes !== TopologyGroupTypes.NONE ? topologyOptions.groupTypes : undefined;
       } else if (selectedViewId === 'overview') {
         query.limit = TOP_VALUES.includes(limit) ? limit : TOP_VALUES[0];
@@ -483,7 +510,7 @@ export const NetflowTraffic: React.FC<{
     packetLoss,
     range,
     selectedViewId,
-    metricType,
+    topologyMetricType,
     metricScope,
     topologyOptions.groupTypes
   ]);
@@ -512,9 +539,10 @@ export const NetflowTraffic: React.FC<{
   );
 
   const fetchTable = React.useCallback(
-    (fq: FlowQuery, droppedType: MetricType | undefined) => {
-      setMetrics([]);
+    (fq: FlowQuery) => {
+      setMetrics({});
 
+      let currentMetrics = metricsRef.current;
       const { getRecords, getMetrics } = getFetchFunctions();
 
       // table query is based on histogram range if available
@@ -533,157 +561,261 @@ export const NetflowTraffic: React.FC<{
       if (showHistogram) {
         promises.push(
           getMetrics({ ...fq, aggregateBy: 'app' }, range).then(res => {
-            setTotalMetric(res.metrics[0]);
+            const totalFlowCountMetric = res.metrics[0];
+            currentMetrics = { ...currentMetrics, totalFlowCountMetric };
+            setMetrics(currentMetrics);
             return res.stats;
           })
         );
       } else {
-        setTotalMetric(undefined);
-      }
-      if (droppedType) {
-        promises.push(
-          getMetrics({ ...fq, aggregateBy: 'app', type: droppedType }, range).then(res => {
-            setTotalDroppedMetric(res.metrics[0]);
-            return res.stats;
-          })
-        );
-      } else {
-        setTotalDroppedMetric(undefined);
+        currentMetrics = { ...currentMetrics, totalRateMetric: undefined };
+        setMetrics(currentMetrics);
       }
       return Promise.all(promises);
     },
-    [histogramRange, range, showHistogram, showDuplicates, getFetchFunctions]
+    [getFetchFunctions, histogramRange, showHistogram, showDuplicates, range]
   );
 
   const fetchOverview = React.useCallback(
-    (fq: FlowQuery, droppedType: MetricType | undefined) => {
+    (fq: FlowQuery) => {
       setFlows([]);
 
+      let currentMetrics = metricsRef.current;
       const selectedPanels = getSelectedPanels();
       const { getMetrics } = getFetchFunctions();
 
       const promises: Promise<Stats>[] = [];
 
-      if (
-        selectedPanels.some(
-          p => !p.id.includes(DROPPED_ID_MATCHER) && !p.id.includes(DNS_ID_MATCHER) && !p.id.includes(RTT_ID_MATCHER)
-        )
-      ) {
-        promises.push(
-          ...[
-            //get bytes or packets
-            getMetrics(fq, range).then(res => {
-              setMetrics(res.metrics);
-              return res.stats;
-            }),
-            //run same query on app scope for total flows
-            getMetrics({ ...fq, aggregateBy: 'app' }, range).then(res => {
-              setTotalMetric(res.metrics[0]);
+      const ratePanels = selectedPanels.filter(p => p.id.endsWith('_rates'));
+      const totalDroppedPanels = selectedPanels.filter(p => p.id.startsWith('dropped_'));
+      if (!_.isEmpty(ratePanels) || !_.isEmpty(totalDroppedPanels)) {
+        if (!_.isEmpty(ratePanels)) {
+          //run queries for bytes / packets rates
+          const rateMetrics = initRateMetricKeys(ratePanels.map(p => p.id)) as RateMetrics;
+          (Object.keys(rateMetrics) as (keyof typeof rateMetrics)[]).map(type => {
+            promises.push(
+              getMetrics({ ...fq, type: type === 'bytes' ? 'bytes' : 'packets' }, range).then(res => {
+                //set matching value and apply changes on the entire object to trigger refresh
+                rateMetrics[type] = res.metrics;
+                currentMetrics = { ...currentMetrics, rateMetrics };
+                setMetrics(currentMetrics);
+                return res.stats;
+              })
+            );
+          });
+        }
+        //run queries for total bytes / packets rates
+        const totalRateMetric = initRateMetricKeys(
+          [...ratePanels, ...totalDroppedPanels].map(p => p.id)
+        ) as TotalRateMetrics;
+        (Object.keys(totalRateMetric) as (keyof typeof totalRateMetric)[]).map(type => {
+          promises.push(
+            getMetrics({ ...fq, aggregateBy: 'app', type: type === 'bytes' ? 'bytes' : 'packets' }, range).then(res => {
+              //set matching value and apply changes on the entire object to trigger refresh
+              totalRateMetric[type] = res.metrics[0];
+              currentMetrics = { ...currentMetrics, totalRateMetric };
+              setMetrics(currentMetrics);
               return res.stats;
             })
-          ]
-        );
+          );
+        });
       } else {
-        setMetrics([]);
-        setTotalMetric(undefined);
+        currentMetrics = { ...currentMetrics, rateMetrics: undefined, totalRateMetric: undefined };
+        setMetrics(currentMetrics);
       }
 
-      if (droppedType && selectedPanels.some(p => p.id.includes(DROPPED_ID_MATCHER))) {
+      const droppedPanels = selectedPanels.filter(p => p.id.includes(DROPPED_ID_MATCHER));
+      if (!_.isEmpty(droppedPanels)) {
         //run same queries for drops
+        const droppedRateMetrics = initRateMetricKeys(droppedPanels.map(p => p.id)) as RateMetrics;
+        (Object.keys(droppedRateMetrics) as (keyof typeof droppedRateMetrics)[]).map(type => {
+          promises.push(
+            getMetrics({ ...fq, type: type === 'bytes' ? 'droppedBytes' : 'droppedPackets' }, range).then(res => {
+              //set matching value and apply changes on the entire object to trigger refresh
+              droppedRateMetrics[type] = res.metrics;
+              currentMetrics = { ...currentMetrics, droppedRateMetrics };
+              setMetrics(currentMetrics);
+              return res.stats;
+            })
+          );
+        });
+
+        const totalDroppedRateMetric = initRateMetricKeys(droppedPanels.map(p => p.id)) as TotalRateMetrics;
+        (Object.keys(totalDroppedRateMetric) as (keyof typeof totalDroppedRateMetric)[]).map(type => {
+          promises.push(
+            getMetrics(
+              { ...fq, aggregateBy: 'app', type: type === 'bytes' ? 'droppedBytes' : 'droppedPackets' },
+              range
+            ).then(res => {
+              //set matching value and apply changes on the entire object to trigger refresh
+              totalDroppedRateMetric[type] = res.metrics[0];
+              currentMetrics = { ...currentMetrics, totalDroppedRateMetric };
+              setMetrics(currentMetrics);
+              return res.stats;
+            })
+          );
+        });
+
+        //get drop state & cause
         promises.push(
           ...[
-            getMetrics({ ...fq, type: droppedType }, range).then(res => {
-              setDroppedMetrics(res.metrics);
+            getFlowGenericMetrics({ ...fq, type: 'droppedPackets', aggregateBy: 'droppedState' }, range).then(res => {
+              currentMetrics = { ...currentMetrics, droppedStateMetrics: res.metrics };
+              setMetrics(currentMetrics);
               return res.stats;
             }),
-            getMetrics({ ...fq, aggregateBy: 'app', type: droppedType }, range).then(res => {
-              setTotalDroppedMetric(res.metrics[0]);
-              return res.stats;
-            }),
-
-            //get drop state & cause
-            getFlowGenericMetrics({ ...fq, type: droppedType, aggregateBy: 'droppedState' }, range).then(res => {
-              setDroppedStateMetrics(res.metrics);
-              return res.stats;
-            }),
-            getFlowGenericMetrics({ ...fq, type: droppedType, aggregateBy: 'droppedCause' }, range).then(res => {
-              setDroppedCauseMetrics(res.metrics);
+            getFlowGenericMetrics({ ...fq, type: 'droppedPackets', aggregateBy: 'droppedCause' }, range).then(res => {
+              currentMetrics = { ...currentMetrics, droppedCauseMetrics: res.metrics };
+              setMetrics(currentMetrics);
               return res.stats;
             })
           ]
         );
       } else {
-        setDroppedMetrics([]);
-        setTotalDroppedMetric(undefined);
-        setDroppedStateMetrics(undefined);
-        setDroppedCauseMetrics(undefined);
+        setMetrics({
+          ...currentMetrics,
+          droppedRateMetrics: undefined,
+          totalDroppedRateMetric: undefined,
+          droppedStateMetrics: undefined,
+          droppedCauseMetrics: undefined
+        });
       }
 
-      if (config.features.includes('dnsTracking') && selectedPanels.some(p => p.id.includes(DNS_ID_MATCHER))) {
-        //run same queries for drops
-        promises.push(
-          ...[
-            getMetrics({ ...fq, type: 'dnsLatencies' }, range).then(res => {
-              setDnsLatencyMetrics(res.metrics);
-              return res.stats;
-            }),
-            getMetrics({ ...fq, aggregateBy: 'app', type: 'dnsLatencies' }, range).then(res => {
-              setTotalDnsLatencyMetric(res.metrics[0]);
-              return res.stats;
-            }),
-
-            //get dns response codes
-            getFlowGenericMetrics({ ...fq, type: 'countDns', aggregateBy: 'dnsRCode' }, range).then(res => {
-              setDnsRCodeMetrics(res.metrics);
-              return res.stats;
-            }),
-            getMetrics({ ...fq, type: 'countDns', aggregateBy: 'app' }, range).then(res => {
-              setTotalDnsCountMetric(res.metrics[0]);
+      const dnsPanels = selectedPanels.filter(p => p.id.includes(DNS_ID_MATCHER));
+      if (config.features.includes('dnsTracking') && !_.isEmpty(dnsPanels)) {
+        //set dns metrics
+        const dnsLatencyMetrics = initFunctionMetricKeys(dnsPanels.map(p => p.id)) as FunctionMetrics;
+        (Object.keys(dnsLatencyMetrics) as (keyof typeof dnsLatencyMetrics)[]).map(fn => {
+          promises.push(
+            getMetrics({ ...fq, function: fn, type: 'dnsLatencies' }, range).then(res => {
+              //set matching value and apply changes on the entire object to trigger refresh
+              dnsLatencyMetrics[fn] = res.metrics;
+              currentMetrics = { ...currentMetrics, dnsLatencyMetrics };
+              setMetrics(currentMetrics);
               return res.stats;
             })
-          ]
-        );
+          );
+        });
+
+        const totalDnsLatencyMetric = initFunctionMetricKeys(dnsPanels.map(p => p.id)) as TotalFunctionMetrics;
+        (Object.keys(totalDnsLatencyMetric) as (keyof typeof totalDnsLatencyMetric)[]).map(fn => {
+          promises.push(
+            getMetrics({ ...fq, function: fn, aggregateBy: 'app', type: 'dnsLatencies' }, range).then(res => {
+              //set matching value and apply changes on the entire object to trigger refresh
+              totalDnsLatencyMetric[fn] = res.metrics[0];
+              currentMetrics = { ...currentMetrics, totalDnsLatencyMetric };
+              setMetrics(currentMetrics);
+              return res.stats;
+            })
+          );
+        });
+
+        //set rcode metrics
+        if (dnsPanels.some(p => p.id.includes('rcode_dns_latency_flows'))) {
+          promises.push(
+            ...[
+              //get dns response codes
+              getFlowGenericMetrics({ ...fq, type: 'countDns', aggregateBy: 'dnsRCode' }, range).then(res => {
+                currentMetrics = { ...currentMetrics, dnsRCodeMetrics: res.metrics };
+                setMetrics(currentMetrics);
+                return res.stats;
+              }),
+              getMetrics({ ...fq, type: 'countDns', aggregateBy: 'app' }, range).then(res => {
+                currentMetrics = { ...currentMetrics, totalDnsCountMetric: res.metrics[0] };
+                setMetrics(currentMetrics);
+                return res.stats;
+              })
+            ]
+          );
+        }
       } else {
-        setDnsLatencyMetrics([]);
-        setDnsRCodeMetrics(undefined);
-        setTotalDnsLatencyMetric(undefined);
-        setTotalDnsCountMetric(undefined);
+        setMetrics({
+          dnsLatencyMetrics: undefined,
+          dnsRCodeMetrics: undefined,
+          totalDnsLatencyMetric: undefined,
+          totalDnsCountMetric: undefined
+        });
       }
 
-      if (config.features.includes('flowRTT') && selectedPanels.some(p => p.id.includes(RTT_ID_MATCHER))) {
-        promises.push(
-          ...[
-            //set RTT metrics
-            getMetrics({ ...fq, type: 'flowRtt' }, range).then(res => {
-              setRttMetrics(res.metrics);
-              return res.stats;
-            }),
-            //set app RTT metrics
-            getMetrics({ ...fq, aggregateBy: 'app', type: 'flowRtt' }, range).then(res => {
-              setTotalRttMetric(res.metrics[0]);
+      const rttPanels = selectedPanels.filter(p => p.id.includes(RTT_ID_MATCHER));
+      if (config.features.includes('flowRTT') && !_.isEmpty(rttPanels)) {
+        //set RTT metrics
+        const rttMetrics = initFunctionMetricKeys(rttPanels.map(p => p.id)) as FunctionMetrics;
+        (Object.keys(rttMetrics) as (keyof typeof rttMetrics)[]).map(fn => {
+          promises.push(
+            getMetrics({ ...fq, function: fn, type: 'flowRtt' }, range).then(res => {
+              //set matching value and apply changes on the entire object to trigger refresh
+              rttMetrics[fn] = res.metrics;
+              currentMetrics = { ...currentMetrics, rttMetrics };
+              setMetrics(currentMetrics);
               return res.stats;
             })
-          ]
-        );
+          );
+        });
+
+        const totalRttMetric = initFunctionMetricKeys(rttPanels.map(p => p.id)) as TotalFunctionMetrics;
+        (Object.keys(totalRttMetric) as (keyof typeof totalRttMetric)[]).map(fn => {
+          promises.push(
+            getMetrics({ ...fq, function: fn, aggregateBy: 'app', type: 'flowRtt' }, range).then(res => {
+              //set matching value and apply changes on the entire object to trigger refresh
+              totalRttMetric[fn] = res.metrics[0];
+              currentMetrics = { ...currentMetrics, totalRttMetric };
+              setMetrics(currentMetrics);
+              return res.stats;
+            })
+          );
+        });
       } else {
-        setRttMetrics([]);
-        setTotalRttMetric(undefined);
+        setMetrics({ ...currentMetrics, rttMetrics: undefined, totalRttMetric: undefined });
       }
       return Promise.all(promises);
     },
-    [getSelectedPanels, getFetchFunctions, range, config.features]
+    [getSelectedPanels, getFetchFunctions, config.features, range]
   );
 
   const fetchTopology = React.useCallback(
-    (fq: FlowQuery, droppedType: MetricType | undefined) => {
+    (fq: FlowQuery) => {
       setFlows([]);
 
+      const droppedType = config.features.includes('pktDrop')
+        ? fq.type === 'bytes'
+          ? 'droppedBytes'
+          : fq.type === 'packets'
+          ? 'droppedPackets'
+          : undefined
+        : undefined;
+      let currentMetrics = metricsRef.current;
       const { getMetrics } = getFetchFunctions();
 
       const promises: Promise<Stats>[] = [
-        //get bytes or packets
-        getMetrics(fq, range).then(res => {
-          setMetrics(res.metrics);
+        getMetrics(
+          {
+            ...fq,
+            function: isTimeMetric(topologyMetricType) ? topologyMetricFunction : undefined
+          },
+          range
+        ).then(res => {
+          if (['bytes', 'packets'].includes(topologyMetricType)) {
+            const rateMetrics = {} as RateMetrics;
+            rateMetrics[getRateMetricKey(topologyMetricType)] = res.metrics;
+            currentMetrics = { ...currentMetrics, rateMetrics, dnsLatencyMetrics: undefined, rttMetrics: undefined };
+            setMetrics(currentMetrics);
+          } else if (['droppedBytes', 'droppedPackets'].includes(topologyMetricType)) {
+            const droppedRateMetrics = {} as RateMetrics;
+            droppedRateMetrics[getRateMetricKey(topologyMetricType)] = res.metrics;
+            currentMetrics = { ...currentMetrics, droppedRateMetrics };
+            setMetrics(currentMetrics);
+          } else if (['dnsLatencies'].includes(topologyMetricType)) {
+            const dnsLatencyMetrics = {} as FunctionMetrics;
+            dnsLatencyMetrics[getFunctionMetricKey(topologyMetricFunction)] = res.metrics;
+            currentMetrics = { ...currentMetrics, rateMetrics: undefined, dnsLatencyMetrics, rttMetrics: undefined };
+            setMetrics(currentMetrics);
+          } else if (['flowRtt'].includes(topologyMetricType)) {
+            const rttMetrics = {} as FunctionMetrics;
+            rttMetrics[getFunctionMetricKey(topologyMetricFunction)] = res.metrics;
+            currentMetrics = { ...currentMetrics, rateMetrics: undefined, dnsLatencyMetrics: undefined, rttMetrics };
+            setMetrics(currentMetrics);
+          }
           return res.stats;
         })
       ];
@@ -691,16 +823,20 @@ export const NetflowTraffic: React.FC<{
       if (droppedType) {
         promises.push(
           getMetrics({ ...fq, type: droppedType }, range).then(res => {
-            setDroppedMetrics(res.metrics);
+            const droppedRateMetrics = {} as RateMetrics;
+            droppedRateMetrics[getRateMetricKey(topologyMetricType)] = res.metrics;
+            currentMetrics = { ...currentMetrics, droppedRateMetrics };
+            setMetrics(currentMetrics);
             return res.stats;
           })
         );
-      } else {
-        setDroppedMetrics([]);
+      } else if (!['droppedBytes', 'droppedPackets'].includes(topologyMetricType)) {
+        currentMetrics = { ...currentMetrics, droppedRateMetrics: undefined };
+        setMetrics(currentMetrics);
       }
       return Promise.all(promises);
     },
-    [range, getFetchFunctions]
+    [config.features, getFetchFunctions, topologyMetricType, topologyMetricFunction, range]
   );
 
   const tick = React.useCallback(() => {
@@ -719,24 +855,17 @@ export const NetflowTraffic: React.FC<{
     setLoading(true);
     setError(undefined);
     const fq = buildFlowQuery();
-    const droppedType = config.features.includes('pktDrop')
-      ? fq.type === 'bytes'
-        ? 'droppedBytes'
-        : fq.type === 'packets'
-        ? 'droppedPackets'
-        : undefined
-      : undefined;
 
     let promises: Promise<Stats[]> | undefined = undefined;
     switch (selectedViewId) {
       case 'table':
-        promises = fetchTable(fq, droppedType);
+        promises = fetchTable(fq);
         break;
       case 'overview':
-        promises = fetchOverview(fq, droppedType);
+        promises = fetchOverview(fq);
         break;
       case 'topology':
-        promises = fetchTopology(fq, droppedType);
+        promises = fetchTopology(fq);
         break;
       default:
         console.error('tick called on not implemented view Id', selectedViewId);
@@ -752,12 +881,7 @@ export const NetflowTraffic: React.FC<{
           })
           .catch(err => {
             setFlows([]);
-            setMetrics([]);
-            setTotalMetric(undefined);
-            setDroppedMetrics([]);
-            setTotalDroppedMetric(undefined);
-            setDroppedStateMetrics(undefined);
-            setDroppedCauseMetrics(undefined);
+            setMetrics({});
             setError(getHTTPErrorDetails(err));
             setWarningMessage(undefined);
           })
@@ -773,7 +897,6 @@ export const NetflowTraffic: React.FC<{
     isColModalOpen,
     isExportModalOpen,
     buildFlowQuery,
-    config.features,
     selectedViewId,
     fetchTable,
     fetchOverview,
@@ -865,9 +988,15 @@ export const NetflowTraffic: React.FC<{
     setURLShowDup(showDuplicates, !initState.current.includes('configLoaded'));
   }, [showDuplicates]);
   React.useEffect(() => {
-    setURLMetricFunction(metricFunction, !initState.current.includes('configLoaded'));
-    setURLMetricType(metricType, !initState.current.includes('configLoaded'));
-  }, [metricFunction, metricType]);
+    setURLMetricFunction(
+      selectedViewId === 'topology' ? topologyMetricFunction : undefined,
+      !initState.current.includes('configLoaded')
+    );
+    setURLMetricType(
+      selectedViewId === 'topology' ? topologyMetricType : undefined,
+      !initState.current.includes('configLoaded')
+    );
+  }, [topologyMetricFunction, selectedViewId, topologyMetricType]);
   React.useEffect(() => {
     setURLPacketLoss(packetLoss);
   }, [packetLoss]);
@@ -880,7 +1009,17 @@ export const NetflowTraffic: React.FC<{
     if (!forcedFilters) {
       setQueryParams(getURLParams().toString());
     }
-  }, [filters, range, limit, match, showDuplicates, metricFunction, metricType, setQueryParams, forcedFilters]);
+  }, [
+    filters,
+    range,
+    limit,
+    match,
+    showDuplicates,
+    topologyMetricFunction,
+    topologyMetricType,
+    setQueryParams,
+    forcedFilters
+  ]);
 
   // update local storage enabled filters
   React.useEffect(() => {
@@ -1170,10 +1309,7 @@ export const NetflowTraffic: React.FC<{
           id="summaryPanel"
           flows={flows}
           metrics={metrics}
-          appMetrics={totalMetric}
-          appDroppedMetrics={totalDroppedMetric}
           type={recordType}
-          metricType={metricType}
           stats={stats}
           limit={limit}
           lastRefresh={lastRefresh}
@@ -1188,8 +1324,9 @@ export const NetflowTraffic: React.FC<{
         <ElementPanel
           id="elementPanel"
           element={selectedElement}
-          metrics={metrics}
-          metricType={metricType}
+          metrics={getTopologyMetrics() || []}
+          droppedMetrics={getTopologyDroppedMetrics() || []}
+          metricType={topologyMetricType}
           truncateLength={topologyOptions.truncateLength}
           filters={filters.list}
           filterDefinitions={getFilterDefs()}
@@ -1237,19 +1374,7 @@ export const NetflowTraffic: React.FC<{
             limit={limit}
             panels={getSelectedPanels()}
             recordType={recordType}
-            metricType={metricType}
             metrics={metrics}
-            droppedMetrics={droppedMetrics}
-            totalMetric={totalMetric}
-            totalDroppedMetric={totalDroppedMetric}
-            droppedStateMetrics={droppedStateMetrics}
-            droppedCauseMetrics={droppedCauseMetrics}
-            dnsRCodeMetrics={dnsRCodeMetrics}
-            dnsLatencyMetrics={dnsLatencyMetrics}
-            rttMetrics={rttMetrics}
-            totalDnsLatencyMetric={totalDnsLatencyMetric}
-            totalRttMetric={totalRttMetric}
-            totalDnsCountMetric={totalDnsCountMetric}
             loading={loading}
             error={error}
             isDark={isDarkTheme}
@@ -1284,12 +1409,12 @@ export const NetflowTraffic: React.FC<{
             loading={loading}
             k8sModels={k8sModels}
             error={error}
-            metricFunction={metricFunction}
-            metricType={metricType}
+            metricFunction={topologyMetricFunction}
+            metricType={topologyMetricType}
             metricScope={metricScope}
             setMetricScope={setMetricScope}
-            metrics={metrics}
-            droppedMetrics={droppedMetrics}
+            metrics={getTopologyMetrics() || []}
+            droppedMetrics={getTopologyDroppedMetrics() || []}
             options={topologyOptions}
             setOptions={setTopologyOptions}
             filters={filters}
@@ -1316,13 +1441,10 @@ export const NetflowTraffic: React.FC<{
             <MetricsQuerySummary
               metrics={metrics}
               stats={stats}
-              droppedMetrics={droppedMetrics}
-              appMetrics={totalMetric}
-              appDroppedMetrics={totalDroppedMetric}
-              metricType={metricType}
               lastRefresh={lastRefresh}
               isShowQuerySummary={isShowQuerySummary}
               toggleQuerySummary={() => onToggleQuerySummary(!isShowQuerySummary)}
+              isDark={isDarkTheme}
             />
           ) : (
             <FlowsQuerySummary
@@ -1541,8 +1663,7 @@ export const NetflowTraffic: React.FC<{
             <HistogramContainer
               id={'histogram'}
               loading={loading}
-              totalMetric={totalMetric}
-              totalDroppedMetric={totalDroppedMetric}
+              totalMetric={metrics.totalFlowCountMetric}
               limit={limit}
               isDark={isDarkTheme}
               range={histogramRange}
@@ -1561,8 +1682,6 @@ export const NetflowTraffic: React.FC<{
             <OverflowMenuItem key="display">
               {selectedViewId === 'overview' && (
                 <OverviewDisplayDropdown
-                  metricType={metricType}
-                  setMetricType={updateMetricType}
                   metricScope={metricScope}
                   setMetricScope={setMetricScope}
                   truncateLength={overviewTruncateLength}
@@ -1574,14 +1693,15 @@ export const NetflowTraffic: React.FC<{
               {selectedViewId === 'table' && <TableDisplayDropdown size={size} setSize={setSize} />}
               {selectedViewId === 'topology' && (
                 <TopologyDisplayDropdown
-                  metricFunction={metricFunction}
-                  setMetricFunction={setMetricFunction}
-                  metricType={metricType}
-                  setMetricType={updateMetricType}
+                  metricFunction={topologyMetricFunction}
+                  setMetricFunction={setTopologyMetricFunction}
+                  metricType={topologyMetricType}
+                  setMetricType={updateTopologyMetricType}
                   metricScope={metricScope}
                   setMetricScope={setMetricScope}
                   topologyOptions={topologyOptions}
                   setTopologyOptions={setTopologyOptions}
+                  allowPktDrop={isPktDrop()}
                   allowDNSMetric={isDNSTracking()}
                   allowRTTMetric={isFlowRTT()}
                 />

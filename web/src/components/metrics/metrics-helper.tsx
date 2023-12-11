@@ -3,10 +3,10 @@ import { TFunction } from 'i18next';
 import * as React from 'react';
 import { getDateSInMiliseconds } from '../../utils/duration';
 import { NamedMetric, TopologyMetricPeer, TopologyMetrics, GenericMetric } from '../../api/loki';
-import { FlowScope, MetricType } from '../../model/flow-query';
+import { FlowScope } from '../../model/flow-query';
 import { NodeData } from '../../model/topology';
 import { getDateFromUnix, getFormattedDate, TimeRange } from '../../utils/datetime';
-import { getFormattedRateValue, isUnknownPeer, matchPeer } from '../../utils/metrics';
+import { isUnknownPeer, matchPeer } from '../../utils/metrics';
 import { TruncateLength } from '../dropdowns/truncate-dropdown';
 
 export type LegendDataItem = {
@@ -51,14 +51,14 @@ export const toHistogramDatapoints = (metric: NamedMetric): ChartDataPoint[] => 
   return result;
 };
 
-export const chartVoronoi = (legendData: LegendDataItem[], metricType: MetricType, t: TFunction) => {
+export const chartVoronoi = (legendData: LegendDataItem[], f: (v: number) => string) => {
   const CursorVoronoiContainer = createContainer('voronoi', 'cursor');
-  const tooltipData = legendData.map(item => ({ ...item, name: item.tooltipName }));
+  const tooltipData = legendData.map(item => ({ ...item, name: item.tooltipName || item.name }));
   return (
     <CursorVoronoiContainer
       cursorDimension="x"
       labels={(dp: { datum: ChartDataPoint }) => {
-        return dp.datum.y || dp.datum.y === 0 ? getFormattedRateValue(dp.datum.y, metricType, t) : 'n/a';
+        return dp.datum.y || dp.datum.y === 0 ? f(dp.datum.y) : 'n/a';
       }}
       labelComponent={<ChartLegendTooltip legendData={tooltipData} title={(datum: ChartDataPoint) => datum.date} />}
       mouseFollowTooltips

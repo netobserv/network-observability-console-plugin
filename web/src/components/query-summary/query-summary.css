@@ -24,12 +24,17 @@
   align-items: center;
 }
 
-.stats-query-summary-date {
+.stats-query-summary-container,
+.stats-query-summary-container-with-icon {
+  width: fit-content;
+}
+
+.stats-query-summary-container-with-icon {
   display: flex;
   flex-direction: row;
   align-items: center;
 }
 
-#lastRefresh {
+.stats-query-summary-container-with-icon>p {
   padding-left: 5px;
 }

@@ -28,6 +28,7 @@ import { TruncateLength } from '../dropdowns/truncate-dropdown';
 import { ElementFields } from './element-fields';
 import { PeerResourceLink } from './peer-resource-link';
 import './element-panel.css';
+import _ from 'lodash';
 
 export const ElementPanelDetailsContent: React.FC<{
   element: GraphElementPeer;
@@ -127,13 +128,25 @@ export const ElementPanel: React.FC<{
   onClose: () => void;
   element: GraphElementPeer;
   metrics: TopologyMetrics[];
+  droppedMetrics: TopologyMetrics[];
   metricType: MetricType;
   filters: Filter[];
   filterDefinitions: FilterDefinition[];
   setFilters: (filters: Filter[]) => void;
   truncateLength: TruncateLength;
   id?: string;
-}> = ({ id, element, metrics, metricType, filters, filterDefinitions, setFilters, onClose, truncateLength }) => {
+}> = ({
+  id,
+  element,
+  metrics,
+  droppedMetrics,
+  metricType,
+  filters,
+  filterDefinitions,
+  setFilters,
+  onClose,
+  truncateLength
+}) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [activeTab, setActiveTab] = React.useState<string>('details');
 
@@ -155,6 +168,12 @@ export const ElementPanel: React.FC<{
       return <>{data && <PeerResourceLink peer={data.peer} />}</>;
     }
   }, [element, t]);
+
+  React.useEffect(() => {
+    if ((activeTab === 'metrics' && _.isEmpty(metrics)) || (activeTab === 'dropped' && _.isEmpty(droppedMetrics))) {
+      setActiveTab('details');
+    }
+  }, [metrics, droppedMetrics, activeTab]);
 
   return (
     <DrawerPanelContent
@@ -189,16 +208,30 @@ export const ElementPanel: React.FC<{
               filterDefinitions={filterDefinitions}
             />
           </Tab>
-          <Tab className="drawer-tab" eventKey={'metrics'} title={<TabTitleText>{t('Metrics')}</TabTitleText>}>
-            <ElementPanelMetrics
-              aData={aData}
-              bData={bData}
-              isGroup={element.getType() === 'group'}
-              metrics={metrics}
-              metricType={metricType}
-              truncateLength={truncateLength}
-            />
-          </Tab>
+          {!_.isEmpty(metrics) && (
+            <Tab className="drawer-tab" eventKey={'metrics'} title={<TabTitleText>{t('Metrics')}</TabTitleText>}>
+              <ElementPanelMetrics
+                aData={aData}
+                bData={bData}
+                isGroup={element.getType() === 'group'}
+                metrics={metrics}
+                metricType={metricType}
+                truncateLength={truncateLength}
+              />
+            </Tab>
+          )}
+          {!_.isEmpty(droppedMetrics) && (
+            <Tab className="drawer-tab" eventKey={'dropped'} title={<TabTitleText>{t('Drops')}</TabTitleText>}>
+              <ElementPanelMetrics
+                aData={aData}
+                bData={bData}
+                isGroup={element.getType() === 'group'}
+                metrics={droppedMetrics}
+                metricType={metricType}
+                truncateLength={truncateLength}
+              />
+            </Tab>
+          )}
         </Tabs>
       </DrawerPanelBody>
     </DrawerPanelContent>

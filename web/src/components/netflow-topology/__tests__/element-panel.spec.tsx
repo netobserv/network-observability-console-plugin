@@ -36,6 +36,7 @@ describe('<ElementPanel />', () => {
   const mocks = {
     element: getNode('Pod', 'loki-distributor-loki-76598c8449-csmh2', '10.129.0.15'),
     metrics: dataSample as TopologyMetrics[],
+    droppedMetrics: [],
     metricType: 'bytes' as MetricType,
     metricScope: 'resource' as FlowScope,
     filters: [] as Filter[],

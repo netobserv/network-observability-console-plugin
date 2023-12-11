@@ -23,7 +23,8 @@
 }
 
 #pf-tab-section-details-drawer-tabs,
-#pf-tab-section-metrics-drawer-tabs {
+#pf-tab-section-metrics-drawer-tabs,
+#pf-tab-section-dropped-drawer-tabs {
   padding: var(--pf-c-drawer--child--PaddingTop) var(--pf-c-drawer--child--PaddingRight) var(--pf-c-drawer--child--PaddingBottom) var(--pf-c-drawer--child--PaddingLeft);
 }
 

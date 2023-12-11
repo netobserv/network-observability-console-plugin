@@ -1,37 +1,41 @@
 import { ChartDonut, ChartLabel, ChartLegend, ChartThemeColor } from '@patternfly/react-charts';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { NamedMetric } from '../../api/loki';
+import { GenericMetric, MetricStats, NamedMetric } from '../../api/loki';
 import { MetricFunction, MetricType } from '../../model/flow-query';
-import { getStat } from '../../model/topology';
+import { getStat } from '../../model/metrics';
 import { LOCAL_STORAGE_OVERVIEW_DONUT_DIMENSION_KEY, useLocalStorage } from '../../utils/local-storage-hook';
-import { getFormattedRateValue, isUnknownPeer } from '../../utils/metrics';
+import { getFormattedValue, isUnknownPeer } from '../../utils/metrics';
 import './metrics-content.css';
 import { defaultDimensions, Dimensions, observeDimensions } from './metrics-helper';
 
-export type StatDonutProps = {
+export type MetricsDonutProps = {
   id: string;
-  stat: MetricFunction;
+  subTitle?: string;
   limit: number;
   metricType: MetricType;
-  topKMetrics: NamedMetric[];
+  metricFunction: MetricFunction;
+  topKMetrics: GenericMetric[] | NamedMetric[];
   totalMetric: NamedMetric;
   showOthers: boolean;
-  showInternal: boolean;
-  showOutOfScope: boolean;
+  othersName?: string;
+  showInternal?: boolean;
+  showOutOfScope?: boolean;
   smallerTexts?: boolean;
   showLegend?: boolean;
   animate?: boolean;
 };
 
-export const StatDonut: React.FC<StatDonutProps> = ({
+export const MetricsDonut: React.FC<MetricsDonutProps> = ({
   id,
-  stat,
+  subTitle,
+  metricFunction,
   limit,
   metricType,
   topKMetrics,
   totalMetric,
   showOthers,
+  othersName,
   showInternal,
   showOutOfScope,
   smallerTexts,
@@ -40,50 +44,71 @@ export const StatDonut: React.FC<StatDonutProps> = ({
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
-  let total = getStat(totalMetric.stats, stat);
+  const getStats = React.useCallback(
+    (s: MetricStats) => {
+      return metricType.startsWith('count') ? s.sum : getStat(s, metricFunction);
+    },
+    [metricFunction, metricType]
+  );
+
+  let total = getStats(totalMetric.stats);
   let filtered = topKMetrics;
-  if (!showOutOfScope) {
-    filtered = filtered.filter(m => {
+  if (showOutOfScope === false) {
+    filtered = (filtered as NamedMetric[]).filter(m => {
       if (isUnknownPeer(m.source) && isUnknownPeer(m.destination)) {
         // This is full out-of-scope traffic. If it's hidden, remove it also from total
-        total -= getStat(m.stats, stat);
+        total -= getStats(m.stats);
         return false;
       }
       return true;
     });
   }
-  if (!showInternal) {
-    filtered = filtered.filter(m => {
+  if (showInternal === false) {
+    filtered = (filtered as NamedMetric[]).filter(m => {
       if (m.isInternal) {
         // This is internal traffic. If it's hidden, remove it also from total
-        total -= getStat(m.stats, stat);
+        total -= getStats(m.stats);
         return false;
       }
       return true;
     });
   }
+  if (showOthers === false && othersName) {
+    // remove others from generic metrics (DNS rcode NoError)
+    filtered = (filtered as GenericMetric[]).filter(m => !othersName || m.name !== othersName);
+  }
 
-  const sliced = filtered
+  let sliced = filtered
     .map(m => ({
-      shortName: m.shortName,
-      fullName: m.fullName,
-      value: getStat(m.stats, stat)
+      name: (m as NamedMetric).fullName || (m as GenericMetric).name,
+      shortName: (m as NamedMetric).shortName || (m as GenericMetric).name,
+      fullName: (m as NamedMetric).fullName || (m as GenericMetric).name,
+      value: getStats(m.stats)
     }))
     .sort((a, b) => b.value - a.value)
     .slice(0, limit);
 
   const others = Math.max(0, total - sliced.reduce((prev, cur) => prev + cur.value, 0));
   if (showOthers) {
-    if (others > 0) {
-      sliced.push({ fullName: t('Others'), shortName: t('Others'), value: others });
+    if (others > 0 && !othersName) {
+      sliced = [
+        ...sliced,
+        {
+          name: t('Others'),
+          fullName: t('Others'),
+          shortName: t('Others'),
+          value: others
+        }
+      ];
     }
   } else {
     total -= others;
+    sliced = sliced.filter(m => m.name !== (othersName || t('Others')));
   }
 
   const legendData = sliced.map((m, idx) => ({
     childName: `${'area-'}${idx}`,
-    name: m.shortName
+    name: m.name
   }));
 
   const legentComponent = (
@@ -113,16 +138,16 @@ export const StatDonut: React.FC<StatDonutProps> = ({
         legendPosition="right"
         legendAllowWrap={true}
         legendComponent={showLegend ? legentComponent : undefined}
-        animate={animate}
         radius={showLegend ? dimensions.height / 3 : undefined}
         innerRadius={showLegend ? dimensions.height / 4 : undefined}
         width={dimensions.width}
         height={dimensions.height}
-        allowTooltip={showLegend}
         data={sliced.map(m => ({
-          x: showLegend ? `${m.fullName}: ${getFormattedRateValue(m.value, metricType, t)}` : ' ',
+          x: showLegend ? `${m.name}: ${getFormattedValue(m.value, metricType, metricFunction, t)}` : ' ',
           y: m.value
         }))}
+        allowTooltip={showLegend}
+        animate={animate}
         padding={
           showLegend
             ? {
@@ -138,8 +163,8 @@ export const StatDonut: React.FC<StatDonutProps> = ({
                 top: 0
               }
         }
-        title={`${getFormattedRateValue(total, metricType, t)}`}
-        subTitle={t('Total')}
+        title={`${getFormattedValue(total, metricType, metricFunction, t)}`}
+        subTitle={subTitle ? subTitle : t('Total')}
       />
     </div>
   );

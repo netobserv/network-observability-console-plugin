@@ -15,6 +15,7 @@ import { valueFormat } from './format';
 import { NodeData } from '../model/topology';
 import { getPeerId, idUnknown } from './ids';
 import { TFunction } from 'i18next';
+import percentile from 'percentile';
 
 // Tolerance, in seconds, to assume presence/emptiness of the last datapoint fetched, when it is
 // close to "now", to accomodate with potential collection latency.
@@ -28,12 +29,14 @@ const shortKindMap: { [k: string]: string } = {
   StatefulSet: 'sts'
 };
 
+export const PERCENTILE_VALUES = [90, 99];
+
 export const parseTopologyMetrics = (
   raw: RawTopologyMetrics[],
   range: number | TimeRange,
-  type: MetricType | undefined,
   aggregateBy: FlowScope,
   unixTimestamp: number,
+  forceZeros: boolean,
   isMock?: boolean
 ): TopologyMetrics[] => {
   const { start, end, step } = calibrateRange(
@@ -42,7 +45,7 @@ export const parseTopologyMetrics = (
     unixTimestamp,
     isMock
   );
-  const metrics = raw.map(r => parseTopologyMetric(r, start, end, step, type, aggregateBy));
+  const metrics = raw.map(r => parseTopologyMetric(r, start, end, step, aggregateBy, forceZeros));
 
   // Disambiguate display names with kind when necessary
   if (aggregateBy === 'owner' || aggregateBy === 'resource') {
@@ -91,6 +94,7 @@ export const parseGenericMetrics = (
   range: number | TimeRange,
   aggregateBy: GenericAggregation,
   unixTimestamp: number,
+  forceZeros: boolean,
   isMock?: boolean
 ): GenericMetric[] => {
   const { start, end, step } = calibrateRange(
@@ -99,7 +103,7 @@ export const parseGenericMetrics = (
     unixTimestamp,
     isMock
   );
-  return raw.map(r => parseGenericMetric(r, start, end, step, aggregateBy));
+  return raw.map(r => parseGenericMetric(r, start, end, step, aggregateBy, forceZeros));
 };
 
 export const createPeer = (fields: Partial<TopologyMetricPeer>): TopologyMetricPeer => {
@@ -151,11 +155,11 @@ const parseTopologyMetric = (
   start: number,
   end: number,
   step: number,
-  type: MetricType | undefined,
-  aggregateBy: FlowScope
+  aggregateBy: FlowScope,
+  forceZeros: boolean
 ): TopologyMetrics => {
-  const normalized = normalizeMetrics(raw.values, start, end, step);
-  const stats = computeStats(normalized, type && ['dnsLatencies', 'flowRtt'].includes(type));
+  const normalized = normalizeMetrics(raw.values, start, end, step, forceZeros);
+  const stats = computeStats(normalized);
   const source = createPeer({
     addr: raw.metric.SrcAddr,
     resource: nameAndType(raw.metric.SrcK8S_Name, raw.metric.SrcK8S_Type),
@@ -184,9 +188,10 @@ const parseGenericMetric = (
   start: number,
   end: number,
   step: number,
-  aggregateBy: GenericAggregation
+  aggregateBy: GenericAggregation,
+  forceZeros: boolean
 ): GenericMetric => {
-  const normalized = normalizeMetrics(raw.values, start, end, step);
+  const normalized = normalizeMetrics(raw.values, start, end, step, forceZeros);
   const stats = computeStats(normalized);
   const name =
     aggregateBy === 'droppedState'
@@ -260,22 +265,33 @@ export const normalizeMetrics = (
   values: [number, unknown][],
   start: number,
   end: number,
-  step: number
+  step: number,
+  forceZeros: boolean
 ): [number, number][] => {
-  // Normalize by counting all NaN as zeros
-  const normalized: [number, number][] = values.map(dp => {
-    let val = Number(dp[1]);
-    if (_.isNaN(val)) {
-      val = 0;
-    }
-    return [dp[0], val];
-  });
+  let normalized: [number, number][];
+  if (forceZeros) {
+    // Normalize by counting all NaN as zeros
+    normalized = values.map(dp => {
+      let val = Number(dp[1]);
+      if (_.isNaN(val)) {
+        val = 0;
+      }
+      return [dp[0], val];
+    });
 
-  // Normalize by filling missing datapoints with zeros
-  for (let current = start; current < end; current += step) {
-    if (!getValueCloseTo(normalized, current, step)) {
-      normalized.push([current, 0]);
+    // Normalize by filling missing datapoints with zeros
+    for (let current = start; current < end; current += step) {
+      if (!getValueCloseTo(normalized, current, step)) {
+        normalized.push([current, 0]);
+      }
     }
+  } else {
+    // skipping NaN
+    normalized = values
+      .filter(dp => !_.isNaN(Number(dp[1])))
+      .map(dp => {
+        return [dp[0], Number(dp[1])];
+      });
   }
 
   return normalized.sort((a, b) => a[0] - b[0]);
@@ -290,25 +306,32 @@ const getValueCloseTo = (values: [number, number][], timestamp: number, step: nu
 /**
  * computeStats computes avg, max and total. Input metric is always the bytes rate (Bps).
  */
-export const computeStats = (ts: [number, number][], skipZeros?: boolean): MetricStats => {
+export const computeStats = (ts: [number, number][]): MetricStats => {
   if (ts.length === 0) {
-    return { latest: 0, avg: 0, max: 0, total: 0 };
+    return { sum: 0, latest: 0, avg: 0, min: 0, max: 0, percentiles: PERCENTILE_VALUES.map(() => 0), total: 0 };
   }
+
   const values = ts.map(dp => dp[1]);
-  const filteredValues = skipZeros ? values.filter(v => v !== 0) : values.filter(v => !Number.isNaN(v));
+  const filteredValues = values.filter(v => !Number.isNaN(v));
   if (!filteredValues.length) {
-    return { latest: 0, avg: 0, max: 0, total: 0 };
+    return { sum: 0, latest: 0, avg: 0, min: 0, max: 0, percentiles: PERCENTILE_VALUES.map(() => 0), total: 0 };
   }
+
   // Compute stats
   const sum = filteredValues.reduce((prev, cur) => prev + cur, 0);
   const avg = sum / filteredValues.length;
+  const min = Math.min(...filteredValues);
   const max = Math.max(...filteredValues);
+  const percentiles = percentile(PERCENTILE_VALUES, filteredValues) as number[];
   const latest = filteredValues[filteredValues.length - 1];
 
   return {
+    sum,
     latest: roundTwoDigits(latest),
     avg: roundTwoDigits(avg),
+    min: roundTwoDigits(min),
     max: roundTwoDigits(max),
+    percentiles: percentiles.map(p => roundTwoDigits(p)),
     total: Math.floor(avg * (ts[ts.length - 1][0] - ts[0][0]))
   };
 };
@@ -317,7 +340,11 @@ export const getFormattedValue = (v: number, mt: MetricType, mf: MetricFunction,
   if (mt === 'count' || mt === 'countDns') {
     return valueFormat(v);
   } else if (mt === 'dnsLatencies' || mt === 'flowRtt') {
-    return valueFormat(v, 2, t('ms'));
+    if (v) {
+      return valueFormat(v, 2, t('ms'));
+    } else {
+      return t('n/a');
+    }
   } else if (mf === 'sum') {
     switch (mt) {
       case 'droppedBytes':
@@ -338,7 +365,7 @@ export const getFormattedRateValue = (v: number, mt: MetricType, t: TFunction): 
     case 'flowRtt':
     case 'count':
     case 'countDns':
-      return valueFormat(v);
+      return valueFormat(v, 1);
     case 'droppedBytes':
     case 'bytes':
       return valueFormat(v, 1, t('Bps'));

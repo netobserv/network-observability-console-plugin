@@ -11,6 +11,7 @@ import NetflowTrafficParent from '../netflow-traffic-parent';
 import { GenericMetricsResult, FlowMetricsResult } from '../../api/loki';
 import { AlertsResult, SilencedAlert } from '../../api/alert';
 import { FullConfigResultSample, SimpleConfigResultSample } from '../__tests-data__/config';
+import { FlowQuery } from '../../model/flow-query';
 
 const useResolvedExtensionsMock = useResolvedExtensions as jest.Mock;
 
@@ -27,10 +28,24 @@ jest.mock('../../api/routes', () => ({
   getAlerts: jest.fn(() => Promise.resolve({ data: { groups: [] }, status: 'success' } as AlertsResult)),
   getSilencedAlerts: jest.fn(() => Promise.resolve([] as SilencedAlert[]))
 }));
+
 const getConfigMock = getConfig as jest.Mock;
 const getFlowsMock = getFlowRecords as jest.Mock;
 const getMetricsMock = getFlowMetrics as jest.Mock;
 const getGenericMetricsMock = getFlowGenericMetrics as jest.Mock;
+
+const defaultQuery = {
+  aggregateBy: 'namespace',
+  dedup: true,
+  filters: '',
+  groups: undefined,
+  limit: 5,
+  packetLoss: 'all',
+  rateInterval: '30s',
+  recordType: 'flowLog',
+  step: '15s',
+  timeRange: 300
+} as FlowQuery;
 
 describe('<NetflowTraffic />', () => {
   beforeAll(() => {
@@ -55,25 +70,49 @@ describe('<NetflowTraffic />', () => {
     });
   });
 
-  it('should load all metrics on button click', async () => {
+  it('should load default metrics on button click', async () => {
     const wrapper = mount(<NetflowTrafficParent />);
+    //should have called getMetricsMock & getGenericMetricsMock multiple times on render:
+    const expectedMetricsQueries: FlowQuery[] = [
+      // 4 queries for bytes & packets rate on current scope & app scope
+      { ...defaultQuery, type: 'bytes' },
+      { ...defaultQuery, type: 'packets' },
+      { ...defaultQuery, aggregateBy: 'app', type: 'bytes' },
+      { ...defaultQuery, aggregateBy: 'app', type: 'packets' },
+      // 2 queries for dropped packets rate on current scope & app scope
+      { ...defaultQuery, type: 'droppedPackets' },
+      { ...defaultQuery, aggregateBy: 'app', type: 'droppedPackets' },
+      // 4 queries for dns latency avg & p90 on current scope & app scope
+      { ...defaultQuery, function: 'avg', type: 'dnsLatencies' },
+      { ...defaultQuery, function: 'p90', type: 'dnsLatencies' },
+      { ...defaultQuery, function: 'avg', aggregateBy: 'app', type: 'dnsLatencies' },
+      { ...defaultQuery, function: 'p90', aggregateBy: 'app', type: 'dnsLatencies' },
+      // 1 query for dns response codes count at app scope
+      { ...defaultQuery, type: 'countDns', aggregateBy: 'app' },
+      // 6 queries for avg, min & p90 RTT on current scope & app scope
+      { ...defaultQuery, function: 'avg', type: 'flowRtt' },
+      { ...defaultQuery, function: 'min', type: 'flowRtt' },
+      { ...defaultQuery, function: 'p90', type: 'flowRtt' },
+      { ...defaultQuery, function: 'avg', aggregateBy: 'app', type: 'flowRtt' },
+      { ...defaultQuery, function: 'min', aggregateBy: 'app', type: 'flowRtt' },
+      { ...defaultQuery, function: 'p90', aggregateBy: 'app', type: 'flowRtt' }
+    ];
+    const expectedGenericMetricsQueries: FlowQuery[] = [
+      // 2 queries for packet dropped states & causes
+      { ...defaultQuery, type: 'droppedPackets', aggregateBy: 'droppedState' },
+      { ...defaultQuery, type: 'droppedPackets', aggregateBy: 'droppedCause' },
+      // 1 query for dns response codes
+      { ...defaultQuery, type: 'countDns', aggregateBy: 'dnsRCode' }
+    ];
     await waitFor(() => {
       //config is get only once
       expect(getConfigMock).toHaveBeenCalledTimes(1);
       expect(getFlowsMock).toHaveBeenCalledTimes(0);
-      /** should have called getMetricsMock 9 times on render:
-       * 2 queries for metrics on current scope & app scope
-       * 2 queries for dropped metrics on current scope & app scope
-       * 2 queries for dns latency on current scope & app scope
-       * 1 query for dns response codes count at app scope
-       * 2 queries for RTT on current scope & app scope
-       * ... and 3 times getGenericMetricsMock:
-       * dropped states
-       * dropped causes
-       * dns response codes count
-       */
-      expect(getMetricsMock).toHaveBeenCalledTimes(9);
-      expect(getGenericMetricsMock).toHaveBeenCalledTimes(3);
+      expect(getMetricsMock).toHaveBeenCalledTimes(expectedMetricsQueries.length);
+      expectedMetricsQueries.forEach((q, i) =>
+        expect(getMetricsMock).toHaveBeenNthCalledWith(i + 1, q, defaultQuery.timeRange)
+      );
+      expect(getGenericMetricsMock).toHaveBeenCalledTimes(expectedGenericMetricsQueries.length);
     });
     await act(async () => {
       wrapper.find('#refresh-button').at(0).simulate('click');
@@ -82,9 +121,9 @@ describe('<NetflowTraffic />', () => {
       //config is get only once
       expect(getConfigMock).toHaveBeenCalledTimes(1);
       expect(getFlowsMock).toHaveBeenCalledTimes(0);
-      //should have called getMetricsMock 14 times after click (9 * 2)
-      expect(getMetricsMock).toHaveBeenCalledTimes(18);
-      expect(getGenericMetricsMock).toHaveBeenCalledTimes(6);
+      //should have called getMetricsMock & getGenericMetricsMock original count twice
+      expect(getMetricsMock).toHaveBeenCalledTimes(expectedMetricsQueries.length * 2);
+      expect(getGenericMetricsMock).toHaveBeenCalledTimes(expectedGenericMetricsQueries.length * 2);
     });
   });
 
@@ -108,7 +147,7 @@ describe('<NetflowTraffic />', () => {
       //config is get only once
       expect(getConfigMock).toHaveBeenCalledTimes(1);
       expect(getFlowsMock).toHaveBeenCalledTimes(0);
-      /** should have called getMetricsMock 9 times on render:
+      /** should have called getMetricsMock 2 times on render:
        * 2 queries for metrics on current scope & app scope
        */
       expect(getMetricsMock).toHaveBeenCalledTimes(2);
