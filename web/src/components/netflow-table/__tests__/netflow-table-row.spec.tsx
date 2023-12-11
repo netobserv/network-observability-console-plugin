@@ -11,6 +11,7 @@ import { Size } from '../../dropdowns/table-display-dropdown';
 describe('<NetflowTableRow />', () => {
   let flows: Record[] = [];
   const mocks = {
+    allowPktDrops: true,
     size: 'm' as Size,
     onSelect: jest.fn(),
     tableWidth: 100,

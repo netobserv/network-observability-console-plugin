@@ -19,6 +19,7 @@ const noResultsFoundQuery = `Bullseye[data-test="no-results-found"]`;
 
 describe('<NetflowTable />', () => {
   const mocks = {
+    allowPktDrops: true,
     size: 'm' as Size,
     onSelect: jest.fn(),
     filterActionLinks: <></>,

@@ -15,6 +15,7 @@ describe('<RecordField />', () => {
     isDelete: false
   };
   const mocks = {
+    allowPktDrops: true,
     size: 'm' as Size,
     useLinks: true
   };

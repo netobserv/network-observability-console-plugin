@@ -31,6 +31,7 @@ export type RecordFieldFilter = {
 };
 
 export const RecordField: React.FC<{
+  allowPktDrops: boolean;
   flow: Record;
   column: Column;
   size?: Size;
@@ -38,7 +39,7 @@ export const RecordField: React.FC<{
   filter?: RecordFieldFilter;
   detailed?: boolean;
   isDark?: boolean;
-}> = ({ flow, column, size, filter, useLinks, detailed, isDark }) => {
+}> = ({ allowPktDrops, flow, column, size, filter, useLinks, detailed, isDark }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   const onMouseOver = (event: React.MouseEvent<HTMLDivElement, MouseEvent>, className: string) => {
@@ -483,7 +484,7 @@ export const RecordField: React.FC<{
       case ColumnsId.packets:
       case ColumnsId.bytes:
         //show both sent / dropped counts
-        if (Array.isArray(value) && value.length) {
+        if (Array.isArray(value)) {
           let droppedText = t('dropped');
           let child: JSX.Element | undefined = undefined;
           if (detailed && c.id === ColumnsId.packets && flow.fields.PktDropLatestDropCause) {
@@ -494,15 +495,22 @@ export const RecordField: React.FC<{
               getDropCauseDocUrl(flow.fields.PktDropLatestDropCause as DROP_CAUSES_NAMES)
             );
           }
+
+          const sentCount = value.length >= 1 && value[0] ? String(value[0]) : String(0);
+          const droppedCount = allowPktDrops && value.length >= 2 && value[1] ? String(value[1]) : undefined;
           return doubleContainer(
             simpleTextWithTooltip(
-              detailed ? `${String(value[0])} ${c.name.toLowerCase()} ${t('sent')}` : String(value[0]),
-              isDark ? '#3E8635' : '#1E4F18'
+              detailed ? `${sentCount} ${c.name.toLowerCase()} ${t('sent')}` : sentCount,
+              allowPktDrops ? (isDark ? '#3E8635' : '#1E4F18') : undefined
             ),
-            simpleTextWithTooltip(
-              detailed ? `${String(value[1])} ${c.name.toLowerCase()} ${droppedText}` : String(value[1]),
-              isDark ? '#C9190B' : '#A30000',
-              child
+            droppedCount ? (
+              simpleTextWithTooltip(
+                detailed ? `${droppedCount} ${c.name.toLowerCase()} ${droppedText}` : droppedCount,
+                isDark ? '#C9190B' : '#A30000',
+                child
+              )
+            ) : (
+              <></>
             ),
             true,
             false

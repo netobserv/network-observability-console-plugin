@@ -1390,6 +1390,7 @@ export const NetflowTraffic: React.FC<{
           <NetflowTable
             loading={loading}
             error={error}
+            allowPktDrops={isPktDrop()}
             flows={flows}
             selectedRecord={selectedRecord}
             size={size}
