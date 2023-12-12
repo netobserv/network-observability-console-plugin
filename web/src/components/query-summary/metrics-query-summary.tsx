@@ -91,20 +91,20 @@ export const MetricsQuerySummaryContent: React.FC<{
             ? valueFormat(avgSum, 2, t('Bps')) + ' / ' + valueFormat(appMetrics.stats.avg, 2, t('Bps'))
             : valueFormat(avgSum, 2, t('Bps'));
           return [
-            <FlexItem key="bytesCount">
+            <FlexItem key={`${metricType}Count`}>
               <Tooltip content={<Text component={TextVariants.p}>{textAbs}</Text>}>
                 <div className="stats-query-summary-container">
-                  <Text id="bytesCount" component={TextVariants.p} style={{ color: textColor }}>
+                  <Text id={`${metricType}Count`} component={TextVariants.p} style={{ color: textColor }}>
                     {valAbs}
                   </Text>
                 </div>
               </Tooltip>
             </FlexItem>,
-            <FlexItem key="bpsCount">
+            <FlexItem key={`${metricType}PerSecondsCount`}>
               <Tooltip content={<Text component={TextVariants.p}>{textRate}</Text>}>
                 <div className="stats-query-summary-container-with-icon">
                   <TachometerAltIcon />
-                  <Text id="bpsCount" component={TextVariants.p} style={{ color: textColor }}>
+                  <Text id={`${metricType}PerSecondsCount`} component={TextVariants.p} style={{ color: textColor }}>
                     {valRate}
                   </Text>
                 </div>
@@ -122,10 +122,10 @@ export const MetricsQuerySummaryContent: React.FC<{
           const valAbs =
             (appMetrics ? `${absTotal} / ${appMetrics.stats.total}` : String(absTotal)) + ' ' + t('packets');
           return [
-            <FlexItem key="packetsCount">
+            <FlexItem key={`${metricType}Count`}>
               <Tooltip content={<Text component={TextVariants.p}>{textAbs}</Text>}>
                 <div className="stats-query-summary-container">
-                  <Text id="packetsCount" component={TextVariants.p} style={{ color: textColor }}>
+                  <Text id={`${metricType}Count`} component={TextVariants.p} style={{ color: textColor }}>
                     {valAbs}
                   </Text>
                 </div>

@@ -68,7 +68,7 @@ export const FlowsQuerySummaryContent: React.FC<{
         {bytes > 0 && (
           <FlexItem>
             <Tooltip content={<Text component={TextVariants.p}>{t('Filtered average speed')}</Text>}>
-              <Text id="bpsCount" component={TextVariants.p}>
+              <Text id="bytesPerSecondsCount" component={TextVariants.p}>
                 {valueFormat(bytes / rangeInSeconds, 2, t('Bps'), limitReached)}
               </Text>
             </Tooltip>
