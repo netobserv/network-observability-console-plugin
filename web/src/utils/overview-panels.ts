@@ -152,10 +152,9 @@ export const getOverviewPanelInfo = (
       return { title: t('Inbound {{type}} by region', { type }) };
     case 'top_avg_byte_rates':
     case 'top_avg_packet_rates': {
-      const topOrBottom = id.startsWith('top_') ? t('Top') : t('Bottom');
-      const bytesOrPackets = id.endsWith('_byte_rates') ? t('bytes rates') : t('packets rates');
+      const bytesOrPackets = id === 'top_avg_byte_rates' ? t('bytes rates') : t('packets rates');
       return {
-        title: `${topOrBottom} ${limit} ${metricFunction} ${bytesOrPackets}`,
+        title: `${t('Top')} ${limit} ${metricFunction} ${bytesOrPackets}`,
         subtitle: `${metricFunctionCaptitalized} ${t('rate')}`,
         chartType: t('donut'),
         tooltip: t('The {{function}} {{metric}} over the selected interval', {
@@ -181,10 +180,10 @@ export const getOverviewPanelInfo = (
       };
     case 'top_avg_dropped_byte_rates':
     case 'top_avg_dropped_packet_rates': {
-      const topOrBottom = id.startsWith('top_') ? t('Top') : t('Bottom');
-      const bytesOrPackets = id.endsWith('_dropped_bytes') ? t('dropped bytes rates') : t('dropped packets rates');
+      const bytesOrPackets =
+        id === 'top_avg_dropped_byte_rates' ? t('dropped bytes rates') : t('dropped packets rates');
       return {
-        title: `${topOrBottom} ${limit} ${metricFunction} ${bytesOrPackets}`,
+        title: `${t('Top')} ${limit} ${metricFunction} ${bytesOrPackets}`,
         subtitle: `${metricFunctionCaptitalized} ${t('rate')}`,
         chartType: t('donut'),
         tooltip: t('The {{function}} {{metric}} (dropped by the kernel) over the selected interval', {
@@ -235,20 +234,8 @@ export const getOverviewPanelInfo = (
     case 'top_p99_rtt':
     case 'bottom_min_rtt': {
       const topOrBottom = id.startsWith('top_') ? t('Top') : t('Bottom');
-      const metric = id.endsWith('_bytes')
-        ? t('bytes transfered')
-        : id.endsWith('_packets')
-        ? t('packets transfered')
-        : id.endsWith('_dns_latency')
-        ? t('DNS latencies')
-        : t('TCP handshake Round Trip Time');
-      const shortMetric = id.endsWith('_bytes')
-        ? t('bytes')
-        : id.endsWith('_packets')
-        ? t('packets')
-        : id.endsWith('_dns_latency')
-        ? t('latency')
-        : t('RTT');
+      const metric = id.endsWith('_dns_latency') ? t('DNS latencies') : t('TCP handshake Round Trip Time');
+      const shortMetric = id.endsWith('_dns_latency') ? t('latency') : t('RTT');
       return {
         title: `${topOrBottom} ${limit} ${metricFunction} ${metric} ${t('with overall')}`,
         topTitle: `${topOrBottom} ${limit} ${metricFunction} ${metric}`,
