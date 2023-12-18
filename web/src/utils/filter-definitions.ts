@@ -285,8 +285,10 @@ export const getFilterDefinitions = (
       validate = dirValidation;
     } else if (d.id.includes('drop_state')) {
       getOptions = cap10(getDropStateOptions);
+      encoder = simpleFiltersEncoder('PktDropLatestState');
     } else if (d.id.includes('drop_cause')) {
       getOptions = cap10(getDropCauseOptions);
+      encoder = simpleFiltersEncoder('PktDropLatestDropCause');
     } else if (d.id.includes('dns_flag_response_code')) {
       getOptions = cap10(getDnsResponseCodeOptions);
     } else if (d.id.includes('dns_errno')) {
