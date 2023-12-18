@@ -75,34 +75,33 @@ describe('<NetflowTraffic />', () => {
     //should have called getMetricsMock & getGenericMetricsMock multiple times on render:
     const expectedMetricsQueries: FlowQuery[] = [
       // 4 queries for bytes & packets rate on current scope & app scope
-      { ...defaultQuery, type: 'bytes' },
-      { ...defaultQuery, type: 'packets' },
-      { ...defaultQuery, aggregateBy: 'app', type: 'bytes' },
-      { ...defaultQuery, aggregateBy: 'app', type: 'packets' },
+      { ...defaultQuery, function: 'rate', type: 'Bytes' },
+      { ...defaultQuery, function: 'rate', type: 'Packets' },
+      { ...defaultQuery, function: 'rate', aggregateBy: 'app', type: 'Bytes' },
+      { ...defaultQuery, function: 'rate', aggregateBy: 'app', type: 'Packets' },
       // 2 queries for dropped packets rate on current scope & app scope
-      { ...defaultQuery, type: 'droppedPackets' },
-      { ...defaultQuery, aggregateBy: 'app', type: 'droppedPackets' },
+      { ...defaultQuery, function: 'rate', type: 'PktDropPackets' },
+      { ...defaultQuery, function: 'rate', aggregateBy: 'app', type: 'PktDropPackets' },
       // 4 queries for dns latency avg & p90 on current scope & app scope
-      { ...defaultQuery, function: 'avg', type: 'dnsLatencies' },
-      { ...defaultQuery, function: 'p90', type: 'dnsLatencies' },
-      { ...defaultQuery, function: 'avg', aggregateBy: 'app', type: 'dnsLatencies' },
-      { ...defaultQuery, function: 'p90', aggregateBy: 'app', type: 'dnsLatencies' },
-      // 1 query for dns response codes count at app scope
-      { ...defaultQuery, type: 'countDns', aggregateBy: 'app' },
+      { ...defaultQuery, function: 'avg', type: 'DnsLatencyMs' },
+      { ...defaultQuery, function: 'p90', type: 'DnsLatencyMs' },
+      { ...defaultQuery, function: 'avg', aggregateBy: 'app', type: 'DnsLatencyMs' },
+      { ...defaultQuery, function: 'p90', aggregateBy: 'app', type: 'DnsLatencyMs' },
       // 6 queries for avg, min & p90 RTT on current scope & app scope
-      { ...defaultQuery, function: 'avg', type: 'flowRtt' },
-      { ...defaultQuery, function: 'min', type: 'flowRtt' },
-      { ...defaultQuery, function: 'p90', type: 'flowRtt' },
-      { ...defaultQuery, function: 'avg', aggregateBy: 'app', type: 'flowRtt' },
-      { ...defaultQuery, function: 'min', aggregateBy: 'app', type: 'flowRtt' },
-      { ...defaultQuery, function: 'p90', aggregateBy: 'app', type: 'flowRtt' }
+      { ...defaultQuery, function: 'avg', type: 'TimeFlowRttNs' },
+      { ...defaultQuery, function: 'min', type: 'TimeFlowRttNs' },
+      { ...defaultQuery, function: 'p90', type: 'TimeFlowRttNs' },
+      { ...defaultQuery, function: 'avg', aggregateBy: 'app', type: 'TimeFlowRttNs' },
+      { ...defaultQuery, function: 'min', aggregateBy: 'app', type: 'TimeFlowRttNs' },
+      { ...defaultQuery, function: 'p90', aggregateBy: 'app', type: 'TimeFlowRttNs' }
     ];
     const expectedGenericMetricsQueries: FlowQuery[] = [
       // 2 queries for packet dropped states & causes
-      { ...defaultQuery, type: 'droppedPackets', aggregateBy: 'droppedState' },
-      { ...defaultQuery, type: 'droppedPackets', aggregateBy: 'droppedCause' },
-      // 1 query for dns response codes
-      { ...defaultQuery, type: 'countDns', aggregateBy: 'dnsRCode' }
+      { ...defaultQuery, function: 'rate', type: 'PktDropPackets', aggregateBy: 'PktDropLatestState' },
+      { ...defaultQuery, function: 'rate', type: 'PktDropPackets', aggregateBy: 'PktDropLatestDropCause' },
+      // 2 queries for dns response codes count
+      { ...defaultQuery, function: 'count', type: 'DnsFlows', aggregateBy: 'DnsFlagsResponseCode' },
+      { ...defaultQuery, function: 'count', type: 'DnsFlows', aggregateBy: 'app' }
     ];
     await waitFor(() => {
       //config is get only once

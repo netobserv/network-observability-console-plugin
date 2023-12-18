@@ -254,20 +254,12 @@ func (q *FlowQueryBuilder) appendLineFilters(sb *strings.Builder) {
 	}
 }
 
-func (q *FlowQueryBuilder) appendPktDropStateFilter(sb *strings.Builder) {
-	// ensure PktDropLatestState is specified
-	// |~`"PktDropLatestState"`
-	sb.WriteString("|~`")
-	sb.WriteString(`"PktDropLatestState"`)
-	sb.WriteString("`")
-}
-
-func (q *FlowQueryBuilder) appendPktDropCauseFilter(sb *strings.Builder) {
-	// ensure PktDropLatestDropCause is specified
-	// |~`"PktDropLatestDropCause"`
-	sb.WriteString("|~`")
-	sb.WriteString(`"PktDropLatestDropCause"`)
-	sb.WriteString("`")
+func (q *FlowQueryBuilder) appendFilter(sb *strings.Builder, field string) {
+	// ensure field is specified
+	// |~`"{{field}}"`
+	sb.WriteString("|~`\"")
+	sb.WriteString(field)
+	sb.WriteString("\"`")
 }
 
 func (q *FlowQueryBuilder) appendDNSFilter(sb *strings.Builder) {
@@ -292,14 +284,6 @@ func (q *FlowQueryBuilder) appendDNSLatencyFilter(sb *strings.Builder) {
 	sb.WriteString("`")
 	sb.WriteString("!~`")
 	sb.WriteString(`"DnsLatencyMs":0[,}]`)
-	sb.WriteString("`")
-}
-
-func (q *FlowQueryBuilder) appendDNSRCodeFilter(sb *strings.Builder) {
-	// ensure DnsFlagsResponseCode field is specified with valid error
-	// |~`"DnsFlagsResponseCode"`
-	sb.WriteString("|~`")
-	sb.WriteString(`"DnsFlagsResponseCode"`)
 	sb.WriteString("`")
 }
 

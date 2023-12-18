@@ -1,21 +1,14 @@
+import { Field } from '../api/ipfix';
 import { Filter } from './filters';
 
 export type RecordType = 'allConnections' | 'newConnection' | 'heartbeat' | 'endConnection' | 'flowLog';
 export type Match = 'all' | 'any';
 export type PacketLoss = 'dropped' | 'hasDrops' | 'sent' | 'all';
-export type MetricFunction = 'sum' | 'avg' | 'min' | 'max' | 'last' | 'p90' | 'p99';
-export type MetricType =
-  | 'count'
-  | 'countDns'
-  | 'bytes'
-  | 'packets'
-  | 'droppedBytes'
-  | 'droppedPackets'
-  | 'dnsLatencies'
-  | 'flowRtt';
+export type MetricFunction = 'count' | 'sum' | 'avg' | 'min' | 'max' | 'p90' | 'p99' | 'rate';
+export type StatFunction = MetricFunction | 'last';
+export type MetricType = 'Flows' | 'DnsFlows' | Field;
 export type FlowScope = 'app' | 'cluster' | 'zone' | 'host' | 'namespace' | 'owner' | 'resource';
-export type GenericAggregation = 'droppedCause' | 'droppedState' | 'dnsRCode';
-export type AggregateBy = FlowScope | GenericAggregation;
+export type AggregateBy = FlowScope | Field;
 export type NodeType = FlowScope | 'unknown';
 export type Groups =
   | 'clusters'

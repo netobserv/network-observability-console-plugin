@@ -20,7 +20,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { TopologyMetrics } from '../../../api/loki';
 import { Filter, FilterDefinition, Filters } from '../../../model/filters';
-import { MetricFunction, FlowScope, MetricType } from '../../../model/flow-query';
+import { StatFunction, FlowScope, MetricType } from '../../../model/flow-query';
 import { MetricScopeOptions, getStat } from '../../../model/metrics';
 import {
   Decorated,
@@ -51,7 +51,7 @@ const FIT_PADDING = 80;
 
 export const TopologyContent: React.FC<{
   k8sModels: { [key: string]: K8sModel };
-  metricFunction: MetricFunction;
+  metricFunction: StatFunction;
   metricType: MetricType;
   metricScope: FlowScope;
   setMetricScope: (ms: FlowScope) => void;

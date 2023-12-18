@@ -12,6 +12,7 @@ describe('<OverviewPanelsModal />', () => {
     recordType: 'flowLog' as RecordType,
     panels: ShuffledDefaultPanels,
     setPanels: jest.fn(),
+    customIds: [],
     id: 'panels-modal'
   };
   it('should render component', async () => {

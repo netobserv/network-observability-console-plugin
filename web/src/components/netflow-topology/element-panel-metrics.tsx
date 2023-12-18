@@ -57,9 +57,9 @@ export const ElementPanelMetrics: React.FC<{
 
   const getChartTitle = React.useCallback(() => {
     switch (metricType) {
-      case 'dnsLatencies':
+      case 'DnsLatencyMs':
         return t('Top 5 DNS latency');
-      case 'flowRtt':
+      case 'TimeFlowRttNs':
         return t('Top 5 flow RTT');
       default:
         return t('Top 5 rates');

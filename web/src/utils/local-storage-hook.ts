@@ -35,6 +35,11 @@ export interface ArraySelectionOptions {
   criteria: string;
 }
 
+export const DEFAULT_ARRAY_SELECTION_OPTIONS = {
+  id: 'id',
+  criteria: 'isSelected'
+};
+
 export function useLocalStorage<T>(
   key: string,
   initialValue?: T,

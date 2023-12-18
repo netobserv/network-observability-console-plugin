@@ -1,11 +1,12 @@
 import axios from 'axios';
 import { Config, defaultConfig } from '../model/config';
 import { buildExportQuery } from '../model/export-query';
-import { FlowQuery, FlowScope, GenericAggregation, isTimeMetric } from '../model/flow-query';
+import { FlowQuery, FlowScope, isTimeMetric } from '../model/flow-query';
 import { ContextSingleton } from '../utils/context';
 import { TimeRange } from '../utils/datetime';
 import { parseTopologyMetrics, parseGenericMetrics } from '../utils/metrics';
 import { AlertsResult, SilencedAlert } from './alert';
+import { Field } from './ipfix';
 import {
   AggregatedQueryResponse,
   GenericMetricsResult,
@@ -110,7 +111,7 @@ export const getFlowGenericMetrics = (params: FlowQuery, range: number | TimeRan
     return parseGenericMetrics(
       res.result as RawTopologyMetrics[],
       range,
-      params.aggregateBy as GenericAggregation,
+      params.aggregateBy as Field,
       res.unixTimestamp,
       !isTimeMetric(params.type),
       res.isMock
@@ -144,6 +145,7 @@ export const getConfig = (): Promise<Config> => {
       buildVersion: r.data.buildVersion,
       buildDate: r.data.buildDate,
       recordTypes: r.data.recordTypes,
+      panels: r.data.panels,
       columns: r.data.columns,
       portNaming: {
         enable: r.data.portNaming.enable ?? defaultConfig.portNaming.enable,

@@ -77,24 +77,14 @@ func TestGetRecordType(t *testing.T) {
 func TestGetMetricType(t *testing.T) {
 	// Valid
 	params := url.Values{
-		metricTypeKey: []string{"packets"},
+		metricTypeKey: []string{"Packets"},
 	}
-	m, err := getMetricType(params)
-	assert.NoError(t, err)
+	m := getMetricType(params)
 	assert.Equal(t, constants.MetricTypePackets, m)
-
-	// Invalid
-	params = url.Values{
-		metricTypeKey: []string{"invalid"},
-	}
-	_, err = getMetricType(params)
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "invalid metric type")
 
 	// Default
 	params = url.Values{}
-	m, err = getMetricType(params)
-	assert.NoError(t, err)
+	m = getMetricType(params)
 	assert.Equal(t, constants.DefaultMetricType, m)
 }
 

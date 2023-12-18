@@ -306,24 +306,24 @@ export const RecordField: React.FC<{
         );
       case ColumnsId.addrport:
         return doubleContainer(
-          ipPortContent(flow.fields.SrcAddr, flow.fields.SrcPort || NaN),
-          ipPortContent(flow.fields.DstAddr, flow.fields.DstPort || NaN)
+          ipPortContent(flow.fields.SrcAddr || '', flow.fields.SrcPort || NaN),
+          ipPortContent(flow.fields.DstAddr || '', flow.fields.DstPort || NaN)
         );
       case ColumnsId.srcaddrport:
-        return singleContainer(ipPortContent(flow.fields.SrcAddr, flow.fields.SrcPort || NaN));
+        return singleContainer(ipPortContent(flow.fields.SrcAddr || '', flow.fields.SrcPort || NaN));
       case ColumnsId.dstaddrport:
-        return singleContainer(ipPortContent(flow.fields.DstAddr, flow.fields.DstPort || NaN));
+        return singleContainer(ipPortContent(flow.fields.DstAddr || '', flow.fields.DstPort || NaN));
       case ColumnsId.kubeobject:
         return doubleContainer(
           explicitKubeObjContent(
-            flow.fields.SrcAddr,
+            flow.fields.SrcAddr || '',
             flow.fields.SrcPort || NaN,
             flow.labels.SrcK8S_Type,
             flow.labels.SrcK8S_Namespace,
             flow.fields.SrcK8S_Name
           ),
           explicitKubeObjContent(
-            flow.fields.DstAddr,
+            flow.fields.DstAddr || '',
             flow.fields.DstPort || NaN,
             flow.labels.DstK8S_Type,
             flow.labels.DstK8S_Namespace,
@@ -333,7 +333,7 @@ export const RecordField: React.FC<{
       case ColumnsId.srckubeobject:
         return singleContainer(
           explicitKubeObjContent(
-            flow.fields.SrcAddr,
+            flow.fields.SrcAddr || '',
             flow.fields.SrcPort || NaN,
             flow.labels.SrcK8S_Type,
             flow.labels.SrcK8S_Namespace,
@@ -343,7 +343,7 @@ export const RecordField: React.FC<{
       case ColumnsId.dstkubeobject:
         return singleContainer(
           explicitKubeObjContent(
-            flow.fields.DstAddr,
+            flow.fields.DstAddr || '',
             flow.fields.DstPort || NaN,
             flow.labels.DstK8S_Type,
             flow.labels.DstK8S_Namespace,
@@ -353,14 +353,14 @@ export const RecordField: React.FC<{
       case ColumnsId.ownerkubeobject:
         return doubleContainer(
           explicitKubeObjContent(
-            flow.fields.SrcAddr,
+            flow.fields.SrcAddr || '',
             flow.fields.SrcPort || NaN,
             flow.fields.SrcK8S_OwnerType,
             flow.labels.SrcK8S_Namespace,
             flow.labels.SrcK8S_OwnerName
           ),
           explicitKubeObjContent(
-            flow.fields.DstAddr,
+            flow.fields.DstAddr || '',
             flow.fields.DstPort || NaN,
             flow.fields.DstK8S_OwnerType,
             flow.labels.DstK8S_Namespace,
@@ -370,7 +370,7 @@ export const RecordField: React.FC<{
       case ColumnsId.srcownerkubeobject:
         return singleContainer(
           explicitKubeObjContent(
-            flow.fields.SrcAddr,
+            flow.fields.SrcAddr || '',
             flow.fields.SrcPort || NaN,
             flow.fields.SrcK8S_OwnerType,
             flow.labels.SrcK8S_Namespace,
@@ -380,7 +380,7 @@ export const RecordField: React.FC<{
       case ColumnsId.dstownerkubeobject:
         return singleContainer(
           explicitKubeObjContent(
-            flow.fields.DstAddr,
+            flow.fields.DstAddr || '',
             flow.fields.DstPort || NaN,
             flow.fields.DstK8S_OwnerType,
             flow.labels.DstK8S_Namespace,
@@ -417,7 +417,7 @@ export const RecordField: React.FC<{
       case ColumnsId.proto: {
         if (typeof value === 'number' && !isNaN(value)) {
           const docUrl = getProtocolDocUrl();
-          const protocolName = formatProtocol(value as number);
+          const protocolName = formatProtocol(value as number, t);
           return singleContainer(
             detailed
               ? clickableContent(protocolName, `${t('Value')}: ${value}`, docUrl)
@@ -456,7 +456,7 @@ export const RecordField: React.FC<{
           } else {
             child = errorTextValue(
               String(value[1]),
-              t('ICMP type provided but protocol is {{proto}}', { proto: formatProtocol(value[0] as number) })
+              t('ICMP type provided but protocol is {{proto}}', { proto: formatProtocol(value[0] as number, t) })
             );
           }
         }
@@ -479,7 +479,7 @@ export const RecordField: React.FC<{
           } else {
             child = errorTextValue(
               String(value[1]),
-              t('ICMP code provided but protocol is {{proto}}', { proto: formatProtocol(value[0] as number) })
+              t('ICMP code provided but protocol is {{proto}}', { proto: formatProtocol(value[0] as number, t) })
             );
           }
         }

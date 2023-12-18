@@ -15,7 +15,7 @@ import { TextContent } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { GenericMetric, NamedMetric } from '../../api/loki';
-import { MetricFunction, MetricType } from '../../model/flow-query';
+import { MetricType, MetricFunction } from '../../model/flow-query';
 import { LOCAL_STORAGE_OVERVIEW_METRICS_TOTAL_DIMENSION_KEY, useLocalStorage } from '../../utils/local-storage-hook';
 import { getFormattedValue, isUnknownPeer } from '../../utils/metrics';
 import './metrics-content.css';
@@ -34,7 +34,7 @@ export type MetricsGraphWithTotalProps = {
   metricType: MetricType;
   metricFunction: MetricFunction;
   topKMetrics: GenericMetric[] | NamedMetric[];
-  totalMetric?: NamedMetric;
+  totalMetric?: GenericMetric | NamedMetric;
   totalDropMetric?: NamedMetric;
   limit: number;
   showTop: boolean;

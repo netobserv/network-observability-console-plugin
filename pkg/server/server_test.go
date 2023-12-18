@@ -365,7 +365,7 @@ func TestLokiConfigurationForTopology(t *testing.T) {
 	defer backendSvc.Close()
 
 	// WHEN the Loki flows endpoint is queried in the backend
-	resp, err := backendSvc.Client().Get(backendSvc.URL + "/api/loki/flow/metrics")
+	resp, err := backendSvc.Client().Get(backendSvc.URL + "/api/loki/flow/metrics?aggregateBy=resource")
 	require.NoError(t, err)
 
 	// THEN the query has been properly forwarded to Loki
@@ -424,12 +424,12 @@ func TestLokiConfigurationForTableHistogram(t *testing.T) {
 	backendSvc := httptest.NewServer(backendRoutes)
 	defer backendSvc.Close()
 
-	// WHEN the Loki flows endpoint is queried in the backend using count type
-	resp, err := backendSvc.Client().Get(backendSvc.URL + "/api/loki/flow/metrics?type=count")
+	// WHEN the Loki flows endpoint is queried in the backend using flow count type
+	resp, err := backendSvc.Client().Get(backendSvc.URL + "/api/loki/flow/metrics?type=Flows&function=count&aggregateBy=resource")
 	require.NoError(t, err)
 
 	// THEN the query has been properly forwarded to Loki
-	// Single query: no dedup for "count"
+	// Single query: no dedup for flow count
 	assert.Len(t, lokiMock.Calls, 1)
 	req1 := lokiMock.Calls[0].Arguments[1].(*http.Request)
 	query := req1.URL.Query().Get("query")

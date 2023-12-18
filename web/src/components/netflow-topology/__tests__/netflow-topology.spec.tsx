@@ -3,7 +3,7 @@ import { TopologyView, VisualizationSurface } from '@patternfly/react-topology';
 import { shallow } from 'enzyme';
 import * as React from 'react';
 import { TopologyMetrics } from '../../../api/loki';
-import { MetricFunction, FlowScope, MetricType } from '../../../model/flow-query';
+import { StatFunction, FlowScope, MetricType } from '../../../model/flow-query';
 import { DefaultOptions, LayoutName } from '../../../model/topology';
 import { defaultTimeRange } from '../../../utils/router';
 import { NetflowTopology } from '../netflow-topology';
@@ -18,8 +18,8 @@ describe('<NetflowTopology />', () => {
     loading: false,
     k8sModels: {},
     range: defaultTimeRange,
-    metricFunction: 'sum' as MetricFunction,
-    metricType: 'bytes' as MetricType,
+    metricFunction: 'sum' as StatFunction,
+    metricType: 'Bytes' as MetricType,
     metricScope: 'host' as FlowScope,
     setMetricScope: jest.fn(),
     metrics: [] as TopologyMetrics[],

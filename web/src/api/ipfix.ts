@@ -76,13 +76,13 @@ export enum IfDirection {
 
 export interface Fields {
   /** Source IP address (ipv4 or ipv6) */
-  SrcAddr: string;
+  SrcAddr?: string;
   /** Destination IP address (ipv4 or ipv6) */
-  DstAddr: string;
+  DstAddr?: string;
   /** Source MAC address */
-  SrcMac: string;
+  SrcMac?: string;
   /** Destination MAC address */
-  DstMac: string;
+  DstMac?: string;
   /** Name of the source matched Kubernetes object, such as Pod name, Service name, etc. */
   SrcK8S_Name?: string;
   /** Name of the destination matched Kubernetes object, such as Pod name, Service name, etc. */
@@ -110,7 +110,7 @@ export interface Fields {
   /** Cluster name */
   K8S_ClusterName?: string;
   /** L4 protocol */
-  Proto: number;
+  Proto?: number;
   /** Network interface array */
   Interfaces?: string[];
   /** Flow direction array from the network interface observation point */
@@ -164,11 +164,11 @@ export interface Fields {
   /** Error number returned from DNS tracker ebpf hook function */
   DnsErrno?: number;
   /** Start timestamp of this flow, in milliseconds */
-  TimeFlowStartMs: number;
+  TimeFlowStartMs?: number;
   /** End timestamp of this flow, in milliseconds */
-  TimeFlowEndMs: number;
+  TimeFlowEndMs?: number;
   /** Timestamp when this flow was received and processed by the flow collector, in seconds */
-  TimeReceived: number;
+  TimeReceived?: number;
   /** TCP handshake Round Trip Time (RTT) in nanoseconds */
   TimeFlowRttNs?: number;
   /** In conversation tracking, the conversation identifier */

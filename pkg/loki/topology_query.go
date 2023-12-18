@@ -19,11 +19,9 @@ type Topology struct {
 	function            string
 	dataField           string
 	labels              string
-	skipEmptyDropState  bool
-	skipEmptyDropCause  bool
+	filter              string
 	skipNonDNS          bool
 	skipEmptyDNSLatency bool
-	skipEmptyDNSRCode   bool
 	skipEmptyRTT        bool
 	scalar              string
 	factor              string
@@ -34,7 +32,7 @@ type TopologyQueryBuilder struct {
 	topology *Topology
 }
 
-func NewTopologyQuery(cfg *Config, start, end, limit, rateInterval, step string, metricType constants.MetricType,
+func NewTopologyQuery(cfg *Config, start, end, limit, rateInterval, step string, metricType string,
 	metricFunction constants.MetricFunction, recordType constants.RecordType, packetLoss constants.PacketLoss,
 	aggregate, groups string) (*TopologyQueryBuilder, error) {
 	l := limit
@@ -42,9 +40,13 @@ func NewTopologyQuery(cfg *Config, start, end, limit, rateInterval, step string,
 		l = topologyDefaultLimit
 	}
 
-	labels := getLabels(aggregate, groups)
-	field, factor := getFieldsAndFactor(metricType)
-	f, scalar := getFunctionWithScalar(metricType, metricFunction)
+	labels, filter := getLabelsAndFilter(aggregate, groups)
+	if cfg.IsLabel(filter) {
+		filter = ""
+	}
+	field := getField(metricType)
+	factor := getFactor(metricType)
+	function, scalar := getFunctionWithScalar(metricFunction)
 
 	var dedup bool
 	var rt constants.RecordType
@@ -62,15 +64,13 @@ func NewTopologyQuery(cfg *Config, start, end, limit, rateInterval, step string,
 			rateInterval:        rateInterval,
 			step:                step,
 			limit:               l,
-			function:            f,
+			function:            function,
 			dataField:           field,
 			factor:              factor,
 			labels:              labels,
-			skipEmptyDropState:  aggregate == "droppedState",
-			skipEmptyDropCause:  aggregate == "droppedCause",
-			skipNonDNS:          metricType == constants.MetricTypeCountDNS,
-			skipEmptyDNSLatency: metricType == constants.MetricTypeDNSLatencies,
-			skipEmptyDNSRCode:   aggregate == "dnsRCode",
+			filter:              filter,
+			skipNonDNS:          metricType == constants.MetricTypeDNSFlows,
+			skipEmptyDNSLatency: metricType == constants.MetricTypeDNSLatency,
 			skipEmptyRTT:        metricType == constants.MetricTypeFlowRTT,
 			scalar:              scalar,
 		},
@@ -112,8 +112,9 @@ func manageGroupLabels(fields []string, groups string) []string {
 	return fields
 }
 
-func getLabels(aggregate, groups string) string {
+func getLabelsAndFilter(aggregate, groups string) (string, string) {
 	var fields []string
+	var filter string
 	switch aggregate {
 	case "app":
 		fields = []string{"app"}
@@ -133,36 +134,40 @@ func getLabels(aggregate, groups string) string {
 		fields = []string{"SrcK8S_Namespace", "DstK8S_Namespace"}
 	case "owner":
 		fields = []string{"SrcK8S_OwnerName", "SrcK8S_OwnerType", "DstK8S_OwnerName", "DstK8S_OwnerType", "SrcK8S_Namespace", "DstK8S_Namespace"}
-	default:
+	case "resource":
 		fields = []string{"SrcK8S_Name", "SrcK8S_Type", "SrcK8S_OwnerName", "SrcK8S_OwnerType", "SrcK8S_Namespace", "SrcAddr", "SrcK8S_HostName", "DstK8S_Name", "DstK8S_Type", "DstK8S_OwnerName", "DstK8S_OwnerType", "DstK8S_Namespace", "DstAddr", "DstK8S_HostName"}
+	default:
+		fields = []string{aggregate}
+		filter = aggregate
 	}
 	fields = manageGroupLabels(fields, groups)
-	return strings.Join(fields[:], ",")
+	return strings.Join(fields[:], ","), filter
 }
 
-func getFieldsAndFactor(metricType constants.MetricType) (string, string) {
+func getField(metricType string) string {
 	switch metricType {
-	case constants.MetricTypeDroppedPackets:
-		return "PktDropPackets", ""
-	case constants.MetricTypePackets:
-		return "Packets", ""
-	case constants.MetricTypeDroppedBytes:
-		return "PktDropBytes", ""
-	case constants.MetricTypeBytes:
-		return "Bytes", ""
-	case constants.MetricTypeDNSLatencies:
-		return "DnsLatencyMs", ""
-	case constants.MetricTypeFlowRTT:
-		return "TimeFlowRttNs", "/1000000" // nanoseconds to miliseconds
-	case constants.MetricTypeCount, constants.MetricTypeCountDNS:
-		return "", ""
+	case constants.MetricTypeFlows, constants.MetricTypeDNSFlows:
+		return ""
 	default:
-		panic(fmt.Sprint("wrong metricType for fields and factor provided", metricType))
+		return metricType
 	}
 }
 
-func getFunctionWithScalar(metricType constants.MetricType, metricFunction constants.MetricFunction) (string, string) {
+func getFactor(metricType string) string {
+	switch metricType {
+	case constants.MetricTypeFlowRTT:
+		return "/1000000" // nanoseconds to miliseconds
+	default:
+		return ""
+	}
+}
+
+func getFunctionWithScalar(metricFunction constants.MetricFunction) (string, string) {
 	switch metricFunction {
+	case constants.MetricFunctionCount:
+		return "count_over_time", ""
+	case constants.MetricFunctionSum:
+		return "sum_over_time", ""
 	case constants.MetricFunctionMax:
 		return "max_over_time", ""
 	case constants.MetricFunctionMin:
@@ -173,23 +178,15 @@ func getFunctionWithScalar(metricType constants.MetricType, metricFunction const
 		return "quantile_over_time", "0.9"
 	case constants.MetricFunctionP99:
 		return "quantile_over_time", "0.99"
+	case constants.MetricFunctionRate:
+		return "rate", ""
 	default:
-		switch metricType {
-		case constants.MetricTypeBytes,
-			constants.MetricTypePackets,
-			constants.MetricTypeDroppedBytes,
-			constants.MetricTypeDroppedPackets:
-			return "rate", ""
-		case constants.MetricTypeCount, constants.MetricTypeCountDNS, constants.MetricTypeFlowRTT, constants.MetricTypeDNSLatencies:
-			return "count_over_time", ""
-		default:
-			panic(fmt.Sprint("wrong metricType for function with scalar provided", metricType))
-		}
+		panic(fmt.Sprint("wrong function provided:", metricFunction))
 	}
 }
 
 func (q *TopologyQueryBuilder) Build() string {
-	sumBy := q.topology.function == "rate" || q.topology.function == "count_over_time"
+	sumBy := q.topology.function == "rate" || q.topology.function == "count_over_time" || q.topology.function == "sum_over_time"
 
 	// Build topology query like:
 	// /<url path>?query=
@@ -229,21 +226,15 @@ func (q *TopologyQueryBuilder) Build() string {
 	q.appendLabels(sb)
 	q.appendLineFilters(sb)
 
-	if q.topology.skipEmptyDropState {
-		q.appendPktDropStateFilter(sb)
-	} else if q.topology.skipEmptyDropCause {
-		q.appendPktDropCauseFilter(sb)
+	if len(q.topology.filter) > 0 {
+		q.appendFilter(sb, q.topology.filter)
 	}
 
-	if q.topology.skipEmptyDNSRCode {
-		q.appendDNSRCodeFilter(sb)
-	} else if q.topology.skipEmptyDNSLatency {
+	if q.topology.skipEmptyDNSLatency {
 		q.appendDNSLatencyFilter(sb)
 	} else if q.topology.skipNonDNS {
 		q.appendDNSFilter(sb)
-	}
-
-	if q.topology.skipEmptyRTT {
+	} else if q.topology.skipEmptyRTT {
 		q.appendRTTFilter(sb)
 	}
 
