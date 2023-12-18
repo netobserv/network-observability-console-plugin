@@ -1,7 +1,6 @@
 import { mount, shallow } from 'enzyme';
 import * as React from 'react';
-import { TopologyMetrics } from '../../../api/loki';
-import { MetricType } from '../../../model/flow-query';
+import { NetflowMetrics } from '../../../api/loki';
 import { metrics } from '../../__tests-data__/metrics';
 import { MetricsQuerySummary, MetricsQuerySummaryContent } from '../metrics-query-summary';
 
@@ -9,19 +8,12 @@ describe('<MetricsQuerySummary />', () => {
   const now = new Date();
 
   const mocks = {
-    isShowQuerySummary: false,
     toggleQuerySummary: jest.fn(),
-    metrics: metrics,
+    metrics: { rateMetrics: { bytes: metrics } } as NetflowMetrics,
     stats: {
       limitReached: false,
       numQueries: 1
     },
-    droppedMetrics: [] as TopologyMetrics[],
-    appMetrics: undefined,
-    appDroppedMetrics: undefined,
-    metricType: 'bytes' as MetricType,
-
-    range: 300,
     lastRefresh: now
   };
 
@@ -35,7 +27,7 @@ describe('<MetricsQuerySummary />', () => {
     const wrapper = mount(<MetricsQuerySummary {...mocks} />);
     expect(wrapper.find('#bytesCount').last().text()).toBe('6.8 MB');
     expect(wrapper.find('#packetsCount')).toHaveLength(0);
-    expect(wrapper.find('#bpsCount').last().text()).toBe('22.79 kBps');
+    expect(wrapper.find('#bytesPerSecondsCount').last().text()).toBe('22.79 kBps');
     expect(wrapper.find('#lastRefresh').last().text()).toBe(now.toLocaleTimeString());
   });
 

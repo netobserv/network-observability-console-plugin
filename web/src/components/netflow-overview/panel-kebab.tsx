@@ -1,9 +1,12 @@
 import {
   Checkbox,
+  Divider,
   Dropdown,
+  DropdownGroup,
   DropdownItem,
   DropdownPosition,
   KebabToggle,
+  Radio,
   Text,
   TextVariants,
   Tooltip
@@ -14,13 +17,22 @@ import { OverviewPanelId } from '../../utils/overview-panels';
 import './panel-kebab.css';
 import { exportToPng } from '../../utils/export';
 
+export type GraphOptipn = {
+  type: GraphType;
+  options?: GraphType[];
+};
+export type GraphType = 'donut' | 'bar' | 'line' | 'bar_line';
+
 export type PanelKebabOptions = {
-  showTotal?: boolean;
+  showTop?: boolean;
+  showApp?: { text: string; value: boolean };
+  showAppDrop?: { text: string; value: boolean };
   showOthers?: boolean;
   showNoError?: boolean;
   showInternal?: boolean;
   showOutOfScope?: boolean;
-  compareToDropped?: boolean;
+  showLast?: boolean;
+  graph?: GraphOptipn;
 };
 
 export type PanelKebabProps = {
@@ -34,9 +46,23 @@ export const PanelKebab: React.FC<PanelKebabProps> = ({ id, options, setOptions,
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [showOptions, setShowOptions] = React.useState(false);
 
-  const setShowTotal = React.useCallback(
+  const setShowTop = React.useCallback(
     (checked: boolean) => {
-      setOptions!({ ...options, showTotal: checked });
+      setOptions!({ ...options, showTop: checked });
+    },
+    [setOptions, options]
+  );
+
+  const setShowApp = React.useCallback(
+    (checked: boolean) => {
+      setOptions!({ ...options, showApp: { ...options!.showApp!, value: checked } });
+    },
+    [setOptions, options]
+  );
+
+  const setShowAppDrop = React.useCallback(
+    (checked: boolean) => {
+      setOptions!({ ...options, showAppDrop: { ...options!.showAppDrop!, value: checked } });
     },
     [setOptions, options]
   );
@@ -69,9 +95,16 @@ export const PanelKebab: React.FC<PanelKebabProps> = ({ id, options, setOptions,
     [setOptions, options]
   );
 
-  const setCompareToDropped = React.useCallback(
+  const setShowLast = React.useCallback(
     (checked: boolean) => {
-      setOptions!({ ...options, compareToDropped: checked });
+      setOptions!({ ...options, showLast: checked });
+    },
+    [setOptions, options]
+  );
+
+  const setGraph = React.useCallback(
+    (type: GraphType) => {
+      setOptions!({ ...options, graph: { ...options!.graph!, type } });
     },
     [setOptions, options]
   );
@@ -83,56 +116,71 @@ export const PanelKebab: React.FC<PanelKebabProps> = ({ id, options, setOptions,
     exportToPng('overview_panel', overview_flex as HTMLElement, isDark, id);
   }, [id, isDark]);
 
+  const getGraphTypes = React.useCallback(() => {
+    if (!options?.graph || !options.graph.options || !options?.graph?.options?.length) {
+      return <></>;
+    }
+
+    return (
+      <div key={`${id}-graph-type`}>
+        <DropdownGroup label={t('Graph type')}>
+          {options!.graph!.options.includes('donut') && (
+            <DropdownItem>
+              {
+                <Radio
+                  isChecked={!options.graph || options.graph.type === 'donut'}
+                  name="graph-donut"
+                  onChange={() => setGraph('donut')}
+                  label={t('Donut')}
+                  id="graph-donut"
+                />
+              }
+            </DropdownItem>
+          )}
+          {options!.graph!.options.includes('bar') && (
+            <DropdownItem>
+              <Radio
+                isChecked={options.graph.type === 'bar'}
+                name="graph-bar"
+                onChange={() => setGraph('bar')}
+                label={t('Bars')}
+                id="graph-bar"
+              />
+            </DropdownItem>
+          )}
+          {options!.graph!.options.includes('line') && (
+            <DropdownItem>
+              <Radio
+                isChecked={options.graph.type === 'line'}
+                name="graph-line"
+                onChange={() => setGraph('line')}
+                label={t('Lines')}
+                id="graph-line"
+              />
+            </DropdownItem>
+          )}
+          {options!.graph!.options.includes('bar_line') && (
+            <DropdownItem>
+              <Radio
+                isChecked={options.graph.type === 'bar_line'}
+                name="graph-bar-line"
+                onChange={() => setGraph('bar_line')}
+                label={t('Bars and lines')}
+                id="graph-bar-line"
+              />
+            </DropdownItem>
+          )}
+        </DropdownGroup>
+        <Divider key="first-divider" component="li" />
+      </div>
+    );
+  }, [id, options, setGraph, t]);
+
   const items = [];
-  if (options?.showTotal !== undefined) {
-    items.push(
-      <DropdownItem key={`${id}-show-total`}>
-        <Tooltip content={<Text component={TextVariants.p}>{t('Show total traffic for the selected filters')}</Text>}>
-          <Checkbox
-            id={`${id}-show-total`}
-            isChecked={options.showTotal}
-            onChange={setShowTotal}
-            label={t('Show total')}
-            aria-label="Show total"
-          />
-        </Tooltip>
-      </DropdownItem>
-    );
+  if (options?.graph?.options?.length) {
+    items.push(getGraphTypes());
   }
-  if (options?.showOthers !== undefined) {
-    items.push(
-      <DropdownItem key={`${id}-show-others`}>
-        <Tooltip
-          content={<Text component={TextVariants.p}>{t('Show other traffic grouped in a separate series')}</Text>}
-        >
-          <Checkbox
-            id={`${id}-show-others`}
-            isChecked={options.showOthers}
-            onChange={setShowOthers}
-            label={t('Show others')}
-            aria-label="Show others"
-          />
-        </Tooltip>
-      </DropdownItem>
-    );
-  }
-  if (options?.showNoError !== undefined) {
-    items.push(
-      <DropdownItem key={`${id}-show-noerror`}>
-        <Tooltip
-          content={<Text component={TextVariants.p}>{t('Show NoError responses grouped in a separate series')}</Text>}
-        >
-          <Checkbox
-            id={`${id}-show-noerror`}
-            isChecked={options.showNoError}
-            onChange={setShowNoError}
-            label={t('Show NoError')}
-            aria-label="Show NoError"
-          />
-        </Tooltip>
-      </DropdownItem>
-    );
-  }
+
   if (options?.showInternal !== undefined) {
     items.push(
       <DropdownItem key={`${id}-show-internal`}>
@@ -157,6 +205,7 @@ export const PanelKebab: React.FC<PanelKebabProps> = ({ id, options, setOptions,
       </DropdownItem>
     );
   }
+
   if (options?.showOutOfScope !== undefined) {
     items.push(
       <DropdownItem key={`${id}-show-out-of-scope`}>
@@ -178,24 +227,123 @@ export const PanelKebab: React.FC<PanelKebabProps> = ({ id, options, setOptions,
       </DropdownItem>
     );
   }
-  if (options?.compareToDropped !== undefined) {
+
+  // graph specific options
+  switch (options?.graph?.type) {
+    case 'donut':
+      if (options?.showOthers !== undefined) {
+        items.push(
+          <DropdownItem key={`${id}-show-others`}>
+            <Tooltip
+              content={<Text component={TextVariants.p}>{t('Show other traffic grouped in a separate series')}</Text>}
+            >
+              <Checkbox
+                id={`${id}-show-others`}
+                isChecked={options.showOthers}
+                onChange={setShowOthers}
+                label={t('Show others')}
+                aria-label="Show others"
+              />
+            </Tooltip>
+          </DropdownItem>
+        );
+      }
+
+      if (options?.showLast !== undefined) {
+        items.push(
+          <DropdownItem key={`${id}-last`}>
+            <Tooltip
+              content={<Text component={TextVariants.p}>{t('Show latest metrics of the selected timerange.')}</Text>}
+            >
+              <Checkbox
+                id={`${id}-last`}
+                isChecked={options.showLast}
+                onChange={setShowLast}
+                label={t('Show latest')}
+                aria-label="Show latest"
+              />
+            </Tooltip>
+          </DropdownItem>
+        );
+      }
+      break;
+    case 'bar':
+    case 'line':
+    case 'bar_line':
+      if (options?.showTop !== undefined) {
+        items.push(
+          <DropdownItem key={`${id}-show-top`}>
+            <Tooltip content={<Text component={TextVariants.p}>{t('Show top traffic for the selected filters')}</Text>}>
+              <Checkbox
+                id={`${id}-show-top`}
+                isChecked={options.showTop}
+                onChange={setShowTop}
+                label={t('Show top')}
+                aria-label="Show top"
+              />
+            </Tooltip>
+          </DropdownItem>
+        );
+      }
+
+      if (options?.showApp !== undefined) {
+        items.push(
+          <DropdownItem key={`${id}-show-app`}>
+            <Tooltip content={<Text component={TextVariants.p}>{t('Show overall for the selected filters')}</Text>}>
+              <Checkbox
+                id={`${id}-show-app`}
+                isChecked={options.showApp.value}
+                onChange={setShowApp}
+                label={options.showApp.text}
+                aria-label="Show overall"
+              />
+            </Tooltip>
+          </DropdownItem>
+        );
+
+        if (options?.showAppDrop !== undefined) {
+          items.push(
+            <DropdownItem key={`${id}-show-app-drop`}>
+              <Tooltip
+                content={<Text component={TextVariants.p}>{t('Show overall dropped for the selected filters')}</Text>}
+              >
+                <Checkbox
+                  id={`${id}-show-app-drop`}
+                  isChecked={options.showAppDrop!.value}
+                  onChange={setShowAppDrop}
+                  label={options.showAppDrop.text}
+                  aria-label="Show overall dropped"
+                />
+              </Tooltip>
+            </DropdownItem>
+          );
+        }
+      }
+      break;
+  }
+
+  if (options?.showNoError !== undefined) {
     items.push(
-      <DropdownItem key={`${id}-compare-to-dropped`}>
+      <DropdownItem key={`${id}-show-noerror`}>
         <Tooltip
-          content={<Text component={TextVariants.p}>{t('Compare to total dropped instead of total sent.')}</Text>}
+          content={<Text component={TextVariants.p}>{t('Show NoError responses grouped in a separate series')}</Text>}
         >
           <Checkbox
-            id={`${id}-compare-to-dropped`}
-            isChecked={options.compareToDropped}
-            onChange={setCompareToDropped}
-            label={t('Compare to total dropped')}
-            aria-label="SCompare to total dropped"
+            id={`${id}-show-noerror`}
+            isChecked={options.showNoError}
+            isDisabled={options.graph?.type !== 'donut' && options.showTop === false}
+            onChange={setShowNoError}
+            label={t('Show NoError')}
+            aria-label="Show NoError"
           />
         </Tooltip>
       </DropdownItem>
     );
   }
 
+  if (items.length > 1) {
+    items.push(<Divider key="last-divider" component="li" />);
+  }
   items.push(
     <DropdownItem key={`${id}-export`} onClick={onOverviewExport}>
       {t('Export panel')}

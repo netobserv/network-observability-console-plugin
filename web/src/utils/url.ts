@@ -11,6 +11,7 @@ export enum URLParam {
   Filters = 'filters',
   RefreshInterval = 'refresh',
   Limit = 'limit',
+  Percentile = 'percentile',
   Match = 'match',
   PacketLoss = 'packetLoss',
   RecordType = 'recordType',

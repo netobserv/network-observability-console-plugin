@@ -20,7 +20,7 @@ import { findFilter } from '../utils/filter-definitions';
 import { TFunction } from 'i18next';
 import { K8sModel } from '@openshift-console/dynamic-plugin-sdk';
 import { getTopologyEdgeId } from '../utils/ids';
-import { MetricScopeOptions } from './metrics';
+import { getStat, MetricScopeOptions } from './metrics';
 import { MetricFunction, FlowScope, MetricType, NodeType } from './flow-query';
 import { createPeer, getFormattedValue } from '../utils/metrics';
 import { TruncateLength } from '../components/dropdowns/truncate-dropdown';
@@ -301,10 +301,6 @@ const getTagStatus = (n: number, total: number) => {
 
 const getEdgeStyle = (count: number) => {
   return count ? EdgeStyle.dashed : EdgeStyle.dotted;
-};
-
-export const getStat = (stats: MetricStats, mf: MetricFunction): number => {
-  return mf === 'avg' ? stats.avg : mf === 'max' ? stats.max : mf === 'last' ? stats.latest : stats.total;
 };
 
 const getEdgeTag = (value: number, options: TopologyOptions, t: TFunction) => {

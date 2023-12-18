@@ -250,6 +250,58 @@ func TestSecureComm(t *testing.T) {
 	}
 }
 
+func TestServerHeaderLimits(t *testing.T) {
+	testPort, err := getFreePort(testHostname)
+	if err != nil {
+		t.Fatalf("Cannot get a free port to run tests on host [%v]", testHostname)
+	} else {
+		t.Logf("Will use free port [%v] on host [%v] for tests", testPort, testHostname)
+	}
+
+	testServerHostPort := fmt.Sprintf("%v:%v", testHostname, testPort)
+	serverURL := fmt.Sprintf("http://%s", testServerHostPort)
+
+	// Prepare directory to serve web files
+	tmpDir := prepareServerAssets(t)
+	defer os.RemoveAll(tmpDir)
+
+	authM := authMock{}
+	authM.MockGranted()
+
+	go func() {
+		Start(&Config{
+			Loki: loki.Config{
+				URL: &url.URL{Scheme: "http", Host: "localhost:3100"},
+			},
+			Port: testPort,
+		}, &authM)
+	}()
+
+	t.Logf("Started test http server: %v", serverURL)
+
+	httpConfig := httpClientConfig{}
+	httpClient, err := httpConfig.buildHTTPClient()
+	if err != nil {
+		t.Fatalf("Failed to create http client")
+	}
+
+	// wait for our test http server to come up
+	checkHTTPReady(httpClient, serverURL)
+
+	r, err := http.NewRequest("GET", serverURL, nil)
+	require.NoError(t, err)
+	// Set many headers
+	oneKBString := strings.Repeat(".", 1024)
+	for i := 0; i < 1025; i++ {
+		r.Header.Set(fmt.Sprintf("test-header-%d", i), oneKBString)
+	}
+
+	resp, err := httpClient.Do(r)
+	require.NoError(t, err)
+	defer resp.Body.Close()
+	assert.Equal(t, http.StatusRequestHeaderFieldsTooLarge, resp.StatusCode)
+}
+
 func TestLokiConfiguration(t *testing.T) {
 	// GIVEN a Loki service
 	lokiMock := httpMock{}
@@ -327,8 +379,8 @@ func TestLokiConfigurationForTopology(t *testing.T) {
 	req2 := lokiMock.Calls[1].Arguments[1].(*http.Request)
 	queries := []string{req1.URL.Query().Get("query"), req2.URL.Query().Get("query")}
 	expected := []string{
-		`topk(100,sum by(SrcK8S_Name,SrcK8S_Type,SrcK8S_OwnerName,SrcK8S_OwnerType,SrcK8S_Namespace,SrcAddr,SrcK8S_HostName,DstK8S_Name,DstK8S_Type,DstK8S_OwnerName,DstK8S_OwnerType,DstK8S_Namespace,DstAddr,DstK8S_HostName) (rate({app="netobserv-flowcollector",FlowDirection=~"^0$|^2$"}|~` + "`" + `Duplicate":false` + "`" + `|json|unwrap Bytes|__error__=""[1m])))`,
-		`topk(100,sum by(SrcK8S_Name,SrcK8S_Type,SrcK8S_OwnerName,SrcK8S_OwnerType,SrcK8S_Namespace,SrcAddr,SrcK8S_HostName,DstK8S_Name,DstK8S_Type,DstK8S_OwnerName,DstK8S_OwnerType,DstK8S_Namespace,DstAddr,DstK8S_HostName) (rate({app="netobserv-flowcollector",FlowDirection="1",DstK8S_OwnerName=""}|~` + "`" + `Duplicate":false` + "`" + `|json|unwrap Bytes|__error__=""[1m])))`,
+		`topk(100,sum by(SrcK8S_Name,SrcK8S_Type,SrcK8S_OwnerName,SrcK8S_OwnerType,SrcK8S_Namespace,SrcAddr,SrcK8S_HostName,DstK8S_Name,DstK8S_Type,DstK8S_OwnerName,DstK8S_OwnerType,DstK8S_Namespace,DstAddr,DstK8S_HostName)(rate({app="netobserv-flowcollector",FlowDirection=~"^0$|^2$"}|~` + "`" + `Duplicate":false` + "`" + `|json|unwrap Bytes|__error__=""[1m])))`,
+		`topk(100,sum by(SrcK8S_Name,SrcK8S_Type,SrcK8S_OwnerName,SrcK8S_OwnerType,SrcK8S_Namespace,SrcAddr,SrcK8S_HostName,DstK8S_Name,DstK8S_Type,DstK8S_OwnerName,DstK8S_OwnerType,DstK8S_Namespace,DstAddr,DstK8S_HostName)(rate({app="netobserv-flowcollector",FlowDirection="1",DstK8S_OwnerName=""}|~` + "`" + `Duplicate":false` + "`" + `|json|unwrap Bytes|__error__=""[1m])))`,
 	}
 	// We don't predict the order so sort both actual and expected
 	sort.Strings(queries)
@@ -382,7 +434,7 @@ func TestLokiConfigurationForTableHistogram(t *testing.T) {
 	req1 := lokiMock.Calls[0].Arguments[1].(*http.Request)
 	query := req1.URL.Query().Get("query")
 	expected :=
-		`topk(100,sum by(SrcK8S_Name,SrcK8S_Type,SrcK8S_OwnerName,SrcK8S_OwnerType,SrcK8S_Namespace,SrcAddr,SrcK8S_HostName,DstK8S_Name,DstK8S_Type,DstK8S_OwnerName,DstK8S_OwnerType,DstK8S_Namespace,DstAddr,DstK8S_HostName) (count_over_time({app="netobserv-flowcollector"}|~` + "`" + `Duplicate":false` + "`" + `|json[30s])))`
+		`topk(100,sum by(SrcK8S_Name,SrcK8S_Type,SrcK8S_OwnerName,SrcK8S_OwnerType,SrcK8S_Namespace,SrcAddr,SrcK8S_HostName,DstK8S_Name,DstK8S_Type,DstK8S_OwnerName,DstK8S_OwnerType,DstK8S_Namespace,DstAddr,DstK8S_HostName)(count_over_time({app="netobserv-flowcollector"}|~` + "`" + `Duplicate":false` + "`" + `|json[30s])))`
 	assert.Equal(t, expected, query)
 
 	// without any multi-tenancy header

@@ -265,18 +265,27 @@ func (q *FlowQueryBuilder) appendPktDropCauseFilter(sb *strings.Builder) {
 }
 
 func (q *FlowQueryBuilder) appendDNSFilter(sb *strings.Builder) {
-	// ensure at least one Dns field is specified
-	// |~`"Dns`
+	// ensure at least one Dns field is specified except DnsErrno
+	// |~`"DnsId`|~`"DnsLatencyMs`|~`"DnsFlagsResponseCode"`
 	sb.WriteString("|~`")
-	sb.WriteString(`"Dns`)
+	sb.WriteString(`"DnsId`)
+	sb.WriteString("`")
+	sb.WriteString("|~`")
+	sb.WriteString(`"DnsLatencyMs`)
+	sb.WriteString("`")
+	sb.WriteString("|~`")
+	sb.WriteString(`"DnsFlagsResponseCode"`)
 	sb.WriteString("`")
 }
 
 func (q *FlowQueryBuilder) appendDNSLatencyFilter(sb *strings.Builder) {
-	// ensure DnsLatencyMs field is specified
-	// |~`"DnsLatencyMs`
+	// ensure DnsLatencyMs field is specified and value is not zero
+	// |~`"DnsLatencyMs`!~`DnsLatencyMs%22:0[,}]`
 	sb.WriteString("|~`")
 	sb.WriteString(`"DnsLatencyMs`)
+	sb.WriteString("`")
+	sb.WriteString("!~`")
+	sb.WriteString(`"DnsLatencyMs":0[,}]`)
 	sb.WriteString("`")
 }
 

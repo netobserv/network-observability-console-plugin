@@ -32,7 +32,7 @@ describe('<FlowsQuerySummary />', () => {
     expect(wrapper.find('#flowsCount').last().text()).toBe('3 Flows');
     expect(wrapper.find('#bytesCount').last().text()).toBe('161 kB');
     expect(wrapper.find('#packetsCount').last().text()).toBe('1k Packets');
-    expect(wrapper.find('#bpsCount').last().text()).toBe('538 Bps');
+    expect(wrapper.find('#bytesPerSecondsCount').last().text()).toBe('538 Bps');
     expect(wrapper.find('#lastRefresh').last().text()).toBe(now.toLocaleTimeString());
   });
 
@@ -43,7 +43,7 @@ describe('<FlowsQuerySummary />', () => {
     expect(wrapper.find('#flowsCount').last().text()).toBe('1k+ Flows');
     expect(wrapper.find('#bytesCount').last().text()).toBe('757+ MB');
     expect(wrapper.find('#packetsCount').last().text()).toBe('1k+ Packets');
-    expect(wrapper.find('#bpsCount').last().text()).toBe('2.52+ MBps');
+    expect(wrapper.find('#bytesPerSecondsCount').last().text()).toBe('2.52+ MBps');
     expect(wrapper.find('#lastRefresh').last().text()).toBe(now.toLocaleTimeString());
   });
 

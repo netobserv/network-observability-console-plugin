@@ -80,6 +80,7 @@ export interface ColumnConfigDef {
   group?: string;
   name: string;
   field?: string;
+  fields?: string[];
   calculated?: string;
   tooltip?: string;
   docURL?: string;
@@ -301,6 +302,12 @@ export const getDefaultColumns = (columnDefs: ColumnConfigDef[]): Column[] => {
           } else {
             return calculatedValue(r, d.calculated!);
           }
+        } else if (d.fields) {
+          const arr: (string | number | undefined)[] = [];
+          d.fields.forEach(f => {
+            arr.push(getRecordValue(r, f, undefined) as number);
+          });
+          return arr;
         } else {
           return getRecordValue(r, d.field!, '');
         }

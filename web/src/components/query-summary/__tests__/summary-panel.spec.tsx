@@ -1,19 +1,17 @@
 import { Accordion, AccordionItem, DrawerCloseButton } from '@patternfly/react-core';
 import { mount, shallow } from 'enzyme';
 import * as React from 'react';
-import { MetricType, RecordType } from '../../../model/flow-query';
+import { RecordType } from '../../../model/flow-query';
 import { FlowsSample } from '../../../components/__tests-data__/flows';
 import SummaryPanel, { SummaryPanelContent } from '../summary-panel';
+import { NetflowMetrics } from 'src/api/loki';
 
 describe('<SummaryPanel />', () => {
   const mocks = {
     onClose: jest.fn(),
     flows: FlowsSample,
-    metrics: undefined,
-    appMetrics: undefined,
-    appDroppedMetrics: undefined,
+    metrics: {} as NetflowMetrics,
     type: 'flowLog' as RecordType,
-    metricType: 'bytes' as MetricType,
     stats: {
       limitReached: false,
       numQueries: 1

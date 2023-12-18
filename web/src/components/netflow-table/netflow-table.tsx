@@ -29,6 +29,7 @@ import { LokiError } from '../messages/loki-error';
 import { convertRemToPixels } from '../../utils/panel';
 
 const NetflowTable: React.FC<{
+  allowPktDrops: boolean;
   flows: Record[];
   selectedRecord?: Record;
   columns: Column[];
@@ -42,6 +43,7 @@ const NetflowTable: React.FC<{
   filterActionLinks: JSX.Element;
   isDark?: boolean;
 }> = ({
+  allowPktDrops,
   flows,
   selectedRecord,
   columns,
@@ -186,6 +188,7 @@ const NetflowTable: React.FC<{
     return getSortedFlows().map((f, i) => (
       <NetflowTableRow
         key={f.key}
+        allowPktDrops={allowPktDrops}
         flow={f}
         lastRender={lastRender}
         columns={columns}
@@ -206,6 +209,7 @@ const NetflowTable: React.FC<{
       />
     ));
   }, [
+    allowPktDrops,
     lastRender,
     activeSortDirection,
     activeSortId,

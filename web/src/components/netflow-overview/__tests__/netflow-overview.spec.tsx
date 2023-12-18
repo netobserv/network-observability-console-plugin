@@ -5,7 +5,7 @@ import { EmptyState } from '@patternfly/react-core';
 import LokiError from '../../../components/messages/loki-error';
 import { metrics, droppedMetrics } from '../../../components/__tests-data__/metrics';
 
-import { MetricType, RecordType } from '../../../model/flow-query';
+import { RecordType } from '../../../model/flow-query';
 import { SamplePanel, ShuffledDefaultPanels } from '../../__tests-data__/panels';
 import { NetflowOverview, NetflowOverviewProps } from '../netflow-overview';
 import { NetflowOverviewPanel } from '../netflow-overview-panel';
@@ -18,12 +18,7 @@ describe('<NetflowOverview />', () => {
     error: undefined as string | undefined,
     loading: false,
     recordType: 'flowLog' as RecordType,
-    metricType: 'bytes' as MetricType,
-    metrics: [],
-    droppedMetrics: [],
-    dnsLatencyMetrics: [],
-    rttMetrics: [],
-    totalMetric: undefined,
+    metrics: {},
     filterActionLinks: <></>,
     truncateLength: TruncateLength.M
   };
@@ -49,10 +44,13 @@ describe('<NetflowOverview />', () => {
     const wrapper = mount(
       <NetflowOverview
         {...props}
-        metrics={metrics}
-        droppedMetrics={droppedMetrics}
-        totalMetric={metrics[0]}
-        totalDroppedMetric={droppedMetrics[0]}
+        metrics={{
+          ...props.metrics,
+          rateMetrics: { bytes: metrics },
+          droppedRateMetrics: { bytes: droppedMetrics },
+          totalRateMetric: { bytes: metrics[0] },
+          totalDroppedRateMetric: { bytes: droppedMetrics[0] }
+        }}
       />
     );
     expect(wrapper.find(NetflowOverviewPanel)).toHaveLength(props.panels.length);

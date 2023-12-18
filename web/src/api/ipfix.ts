@@ -11,7 +11,7 @@ export interface Record {
   fields: Fields;
 }
 
-export const getRecordValue = (record: Record, fieldOrLabel: string, defaultValue: string | number) => {
+export const getRecordValue = (record: Record, fieldOrLabel: string, defaultValue?: string | number) => {
   // check if label exists
   if (record.labels[fieldOrLabel as keyof Labels] !== undefined) {
     return record.labels[fieldOrLabel as keyof Labels];

@@ -1,7 +1,6 @@
 package server
 
 import (
-	"crypto/tls"
 	"fmt"
 	"net/http"
 	"time"
@@ -32,18 +31,11 @@ func Start(cfg *Config, authChecker auth.Checker) {
 	router := setupRoutes(cfg, authChecker)
 	router.Use(corsHeader(cfg))
 
-	// Clients must use TLS 1.2 or higher
-	tlsConfig := &tls.Config{
-		MinVersion: tls.VersionTLS12,
-	}
-
-	httpServer := &http.Server{
+	httpServer := defaultServer(&http.Server{
 		Handler:      router,
 		Addr:         fmt.Sprintf(":%d", cfg.Port),
-		TLSConfig:    tlsConfig,
-		ReadTimeout:  30 * time.Second,
 		WriteTimeout: 30 * time.Second,
-	}
+	})
 
 	if cfg.CertPath != "" && cfg.KeyPath != "" {
 		slog.Infof("listening on https://:%d", cfg.Port)

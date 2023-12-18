@@ -2,11 +2,12 @@ import { Flex, FlexItem, Radio, Text, TextVariants } from '@patternfly/react-cor
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { TopologyMetrics } from '../../api/loki';
-import { MetricType } from '../../model/flow-query';
-import { decorated, getStat, NodeData } from '../../model/topology';
+import { MetricType, isTimeMetric } from '../../model/flow-query';
+import { getStat } from '../../model/metrics';
+import { decorated, NodeData } from '../../model/topology';
 import { matchPeer } from '../../utils/metrics';
 import { TruncateLength } from '../dropdowns/truncate-dropdown';
-import { MetricsContent } from '../metrics/metrics-content';
+import { MetricsGraph } from '../metrics/metrics-graph';
 import { toNamedMetric } from '../metrics/metrics-helper';
 import { ElementPanelStats } from './element-panel-stats';
 
@@ -23,9 +24,8 @@ export const ElementPanelMetrics: React.FC<{
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [metricsRadio, setMetricsRadio] = React.useState<MetricsRadio>('both');
 
-  const useArea = !['dnsLatencies', 'flowRtt'].includes(metricType);
+  const useArea = !isTimeMetric(metricType);
   const titleStats = t('Stats');
-  const titleChart = metricType === 'flowRtt' ? t('Flow RTT') : t('Top 5 rates');
 
   let id = '';
   let metricsIn: TopologyMetrics[] = [];
@@ -54,6 +54,17 @@ export const ElementPanelMetrics: React.FC<{
     .map(m => toNamedMetric(t, m, truncateLength, false, false, isGroup ? undefined : focusNode))
     .sort((a, b) => getStat(b.stats, 'sum') - getStat(a.stats, 'sum'));
 
+  const getChartTitle = React.useCallback(() => {
+    switch (metricType) {
+      case 'dnsLatencies':
+        return t('Top 5 DNS latency');
+      case 'flowRtt':
+        return t('Top 5 flow RTT');
+      default:
+        return t('Top 5 rates');
+    }
+  }, [metricType, t]);
+
   return (
     <div className="element-metrics-container">
       <FlexItem>
@@ -70,7 +81,7 @@ export const ElementPanelMetrics: React.FC<{
       </FlexItem>
       <FlexItem>
         <Text id="metrics-chart-title" component={TextVariants.h4}>
-          {titleChart}
+          {getChartTitle()}
         </Text>
         <Flex className="metrics-justify-content">
           <FlexItem>
@@ -102,9 +113,10 @@ export const ElementPanelMetrics: React.FC<{
           </FlexItem>
         </Flex>
       </FlexItem>
-      <MetricsContent
+      <MetricsGraph
         id={id}
         metricType={metricType}
+        metricFunction={isTimeMetric(metricType) ? 'sum' : 'avg'}
         metrics={top5}
         limit={5}
         showArea={useArea}

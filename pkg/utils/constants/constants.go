@@ -1,14 +1,17 @@
 package constants
 
 type MetricType string
+type MetricFunction string
+
 type RecordType string
 type PacketLoss string
 type Direction string
 
 const (
-	AppLabel                            = "app"
-	AppLabelValue                       = "netobserv-flowcollector"
-	RecordTypeLabel                     = "_RecordType"
+	AppLabel        = "app"
+	AppLabelValue   = "netobserv-flowcollector"
+	RecordTypeLabel = "_RecordType"
+
 	MetricTypeBytes          MetricType = "bytes"
 	MetricTypePackets        MetricType = "packets"
 	MetricTypeCount          MetricType = "count"
@@ -18,20 +21,30 @@ const (
 	MetricTypeDroppedBytes   MetricType = "droppedBytes"
 	MetricTypeDroppedPackets MetricType = "droppedPackets"
 	DefaultMetricType        MetricType = MetricTypeBytes
+
+	MetricFunctionAvg     MetricFunction = "avg"
+	MetricFunctionMin     MetricFunction = "min"
+	MetricFunctionMax     MetricFunction = "max"
+	MetricFunctionP90     MetricFunction = "p90"
+	MetricFunctionP99     MetricFunction = "p99"
+	DefaultMetricFunction MetricFunction = MetricFunctionAvg
+
 	RecordTypeAllConnections RecordType = "allConnections"
 	RecordTypeNewConnection  RecordType = "newConnection"
 	RecordTypeHeartbeat      RecordType = "heartbeat"
 	RecordTypeEndConnection  RecordType = "endConnection"
 	RecordTypeLog            RecordType = "flowLog"
 	DefaultRecordType        RecordType = RecordTypeLog
-	PacketLossDropped        PacketLoss = "dropped"
-	PacketLossHasDrop        PacketLoss = "hasDrops"
-	PacketLossSent           PacketLoss = "sent"
-	PacketLossAll            PacketLoss = "all"
-	DefaultPacketLoss        PacketLoss = PacketLossAll
-	Ingress                  Direction  = "0"
-	Egress                   Direction  = "1"
-	Inner                    Direction  = "2"
+
+	PacketLossDropped PacketLoss = "dropped"
+	PacketLossHasDrop PacketLoss = "hasDrops"
+	PacketLossSent    PacketLoss = "sent"
+	PacketLossAll     PacketLoss = "all"
+	DefaultPacketLoss PacketLoss = PacketLossAll
+
+	Ingress Direction = "0"
+	Egress  Direction = "1"
+	Inner   Direction = "2"
 )
 
 var AnyConnectionType = []string{

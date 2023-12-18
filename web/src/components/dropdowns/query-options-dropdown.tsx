@@ -6,6 +6,7 @@ import { Match, PacketLoss, RecordType } from '../../model/flow-query';
 
 export const TOP_VALUES = [5, 10, 15];
 export const LIMIT_VALUES = [50, 100, 500, 1000];
+
 export interface QueryOptionsDropdownProps {
   recordType: RecordType;
   setRecordType: (recordType: RecordType) => void;
@@ -266,7 +267,7 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
         >
           <div className="pf-c-select__menu-group-title">
             <>
-              {useTopK ? t('Top') : t('Limit')} <InfoAltIcon />
+              {useTopK ? t('Top / Bottom') : t('Limit')} <InfoAltIcon />
             </>
           </div>
         </Tooltip>

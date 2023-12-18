@@ -8,6 +8,7 @@ import './netflow-table-row.css';
 import CSSTransition from 'react-transition-group/CSSTransition';
 
 const NetflowTableRow: React.FC<{
+  allowPktDrops: boolean;
   lastRender?: string;
   flow: Record;
   selectedRecord?: Record;
@@ -20,6 +21,7 @@ const NetflowTableRow: React.FC<{
   tableWidth: number;
   isDark?: boolean;
 }> = ({
+  allowPktDrops,
   lastRender,
   flow,
   selectedRecord,
@@ -55,7 +57,16 @@ const NetflowTableRow: React.FC<{
               key={c.id}
               style={{ height: '100%', width: `${Math.floor((100 * c.width) / tableWidth)}%` }}
             >
-              {<RecordField flow={flow} column={c} size={size} useLinks={false} isDark={isDark} />}
+              {
+                <RecordField
+                  allowPktDrops={allowPktDrops}
+                  flow={flow}
+                  column={c}
+                  size={size}
+                  useLinks={false}
+                  isDark={isDark}
+                />
+              }
             </Td>
           ))}
       </Tr>

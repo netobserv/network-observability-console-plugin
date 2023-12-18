@@ -1,4 +1,5 @@
-import { GenericAggregation, FlowScope } from '../model/flow-query';
+import { getFunctionFromId, getRateFunctionFromId } from '../utils/overview-panels';
+import { GenericAggregation, FlowScope, MetricType, MetricFunction } from '../model/flow-query';
 import { cyrb53 } from '../utils/hash';
 import { Fields, Labels, Record } from './ipfix';
 
@@ -96,6 +97,80 @@ export type GenericMetric = {
   aggregateBy: GenericAggregation;
 };
 
+export type FunctionMetrics = {
+  avg?: TopologyMetrics[];
+  min?: TopologyMetrics[];
+  max?: TopologyMetrics[];
+  p90?: TopologyMetrics[];
+  p99?: TopologyMetrics[];
+};
+
+export type TotalFunctionMetrics = {
+  avg?: TopologyMetrics;
+  min?: TopologyMetrics;
+  max?: TopologyMetrics;
+  p90?: TopologyMetrics;
+  p99?: TopologyMetrics;
+};
+
+export const initFunctionMetricKeys = (ids: string[]) => {
+  const obj: FunctionMetrics | TotalFunctionMetrics = {};
+  ids.forEach(id => {
+    obj[getFunctionFromId(id)] = undefined;
+  });
+  return obj;
+};
+
+export const getFunctionMetricKey = (metricFunction: MetricFunction) => {
+  switch (metricFunction) {
+    case 'min':
+    case 'max':
+    case 'p90':
+    case 'p99':
+      return metricFunction;
+    default:
+      return 'avg';
+  }
+};
+
+export type RateMetrics = {
+  bytes?: TopologyMetrics[];
+  packets?: TopologyMetrics[];
+};
+
+export type TotalRateMetrics = {
+  bytes?: TopologyMetrics;
+  packets?: TopologyMetrics;
+};
+
+export type NetflowMetrics = {
+  rateMetrics?: RateMetrics;
+  droppedRateMetrics?: RateMetrics;
+  totalRateMetric?: TotalRateMetrics;
+  totalDroppedRateMetric?: TotalRateMetrics;
+  droppedStateMetrics?: GenericMetric[];
+  droppedCauseMetrics?: GenericMetric[];
+  dnsRCodeMetrics?: GenericMetric[];
+  dnsLatencyMetrics?: FunctionMetrics;
+  rttMetrics?: FunctionMetrics;
+  totalFlowCountMetric?: TopologyMetrics;
+  totalDnsLatencyMetric?: TotalFunctionMetrics;
+  totalDnsCountMetric?: TopologyMetrics;
+  totalRttMetric?: TotalFunctionMetrics;
+};
+
+export const initRateMetricKeys = (ids: string[]) => {
+  const obj: RateMetrics | TotalRateMetrics = {};
+  ids.forEach(id => {
+    obj[getRateFunctionFromId(id)] = undefined;
+  });
+  return obj;
+};
+
+export const getRateMetricKey = (metricType: MetricType) => {
+  return metricType === 'bytes' ? 'bytes' : 'packets';
+};
+
 export type TopologyMetrics = {
   source: TopologyMetricPeer;
   destination: TopologyMetricPeer;
@@ -111,8 +186,11 @@ export type NamedMetric = TopologyMetrics & {
 };
 
 export interface MetricStats {
+  sum: number;
   latest: number;
   avg: number;
+  min: number;
   max: number;
+  percentiles: number[];
   total: number;
 }

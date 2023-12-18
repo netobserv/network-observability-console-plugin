@@ -25,9 +25,9 @@ import { FlowsQuerySummaryContent } from './flows-query-summary';
 import { comparePorts, formatPort } from '../../utils/port';
 import { formatProtocol } from '../../utils/protocol';
 import { compareIPs } from '../../utils/ip';
-import { Stats, TopologyMetrics } from '../../api/loki';
+import { NetflowMetrics, Stats } from '../../api/loki';
 import './summary-panel.css';
-import { MetricType, RecordType } from '../../model/flow-query';
+import { RecordType } from '../../model/flow-query';
 import { MetricsQuerySummaryContent } from './metrics-query-summary';
 import { config } from '../../utils/config';
 import { formatDurationAboveMillisecond, formatDurationAboveNanosecond } from '../../utils/duration';
@@ -44,29 +44,15 @@ type K8SObjectCardinality = {
 
 export const SummaryPanelContent: React.FC<{
   flows: Record[] | undefined;
-  metrics: TopologyMetrics[] | undefined;
-  appMetrics: TopologyMetrics | undefined;
+  metrics: NetflowMetrics;
   type: RecordType;
-  metricType: MetricType;
   stats: Stats | undefined;
   limit: number;
   range: number | TimeRange;
   lastRefresh: Date | undefined;
   showDNSLatency?: boolean;
   showRTTLatency?: boolean;
-}> = ({
-  flows,
-  metrics,
-  appMetrics,
-  type,
-  metricType,
-  stats,
-  limit,
-  range,
-  lastRefresh,
-  showDNSLatency,
-  showRTTLatency
-}) => {
+}> = ({ flows, metrics, type, stats, limit, range, lastRefresh, showDNSLatency, showRTTLatency }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [expanded, setExpanded] = React.useState<string>('');
 
@@ -156,6 +142,12 @@ export const SummaryPanelContent: React.FC<{
   };
 
   const cardinalityContent = () => {
+    const rateMetrics = !_.isEmpty(metrics.rateMetrics?.bytes)
+      ? metrics.rateMetrics!.bytes!
+      : !_.isEmpty(metrics.rateMetrics?.packets)
+      ? metrics.rateMetrics!.packets!
+      : [];
+
     //regroup all k8s objects per type + namespace
     const namespaces: string[] = [];
     const typesCardinality: TypeCardinality[] = [];
@@ -225,7 +217,7 @@ export const SummaryPanelContent: React.FC<{
         )
       );
       protocols = Array.from(new Set(flows.map(f => f.fields.Proto)));
-    } else if (metrics && metrics.length) {
+    } else if (rateMetrics) {
       function manageTypeCardinality(hostName?: string, namespace?: string, type?: string, name?: string) {
         if (namespace && !namespaces.includes(namespace)) {
           namespaces.push(namespace);
@@ -254,7 +246,7 @@ export const SummaryPanelContent: React.FC<{
         }
       }
 
-      metrics.forEach(m => {
+      rateMetrics.forEach(m => {
         manageTypeCardinality(m.source.hostName, m.source.namespace, m.source.resource?.type, m.source.resource?.name);
         manageTypeCardinality(
           m.destination.hostName,
@@ -265,7 +257,7 @@ export const SummaryPanelContent: React.FC<{
       });
 
       addresses = Array.from(
-        new Set(metrics.map(m => m.source.addr).concat(metrics.map(m => m.destination.addr)))
+        new Set(rateMetrics.map(m => m.source.addr).concat(rateMetrics.map(m => m.destination.addr)))
       ).filter(v => !_.isEmpty(v)) as string[];
     }
 
@@ -279,7 +271,7 @@ export const SummaryPanelContent: React.FC<{
     return addresses.length || typesCardinality.length || ports.length || protocols.length ? (
       <TextContent className="summary-text-container">
         <Text component={TextVariants.h3}>{`${t('Cardinality')} ${
-          !_.isEmpty(metrics) ? t('(top {{count}} metrics)', { count: limit }) : ''
+          !_.isEmpty(rateMetrics) ? t('(top {{count}} metrics)', { count: limit }) : ''
         }`}</Text>
         <Accordion id="cardinality-accordion">
           {addresses.length
@@ -389,16 +381,14 @@ export const SummaryPanelContent: React.FC<{
           </Text>
         )}
         <Text component={TextVariants.h3}>{`${t('Results')} ${
-          !_.isEmpty(metrics) && _.isEmpty(appMetrics) ? t('(top {{count}} metrics)', { count: limit }) : ''
+          _.isEmpty(flows) ? t('(top {{count}} metrics)', { count: limit }) : ''
         }`}</Text>
         {_.isEmpty(flows) ? (
           <MetricsQuerySummaryContent
             className="summary-container-grouped"
             direction="column"
-            metrics={metrics || []}
+            metrics={metrics}
             numQueries={stats?.numQueries}
-            appMetrics={appMetrics}
-            metricType={metricType}
             lastRefresh={lastRefresh}
           />
         ) : (
@@ -430,11 +420,8 @@ export const SummaryPanelContent: React.FC<{
 export const SummaryPanel: React.FC<{
   onClose: () => void;
   flows: Record[] | undefined;
-  metrics: TopologyMetrics[] | undefined;
-  appMetrics: TopologyMetrics | undefined;
-  appDroppedMetrics: TopologyMetrics | undefined;
+  metrics: NetflowMetrics;
   type: RecordType;
-  metricType: MetricType;
   stats: Stats | undefined;
   limit: number;
   range: number | TimeRange;
@@ -442,21 +429,7 @@ export const SummaryPanel: React.FC<{
   showDNSLatency?: boolean;
   showRTTLatency?: boolean;
   id?: string;
-}> = ({
-  flows,
-  metrics,
-  appMetrics,
-  type,
-  metricType,
-  stats,
-  limit,
-  range,
-  lastRefresh,
-  showDNSLatency,
-  showRTTLatency,
-  id,
-  onClose
-}) => {
+}> = ({ flows, metrics, type, stats, limit, range, lastRefresh, showDNSLatency, showRTTLatency, id, onClose }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   return (
@@ -478,9 +451,7 @@ export const SummaryPanel: React.FC<{
         <SummaryPanelContent
           flows={flows}
           metrics={metrics}
-          appMetrics={appMetrics}
           type={type}
-          metricType={metricType}
           stats={stats}
           limit={limit}
           range={range}

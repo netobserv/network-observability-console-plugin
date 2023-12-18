@@ -108,15 +108,15 @@ export const metric4: RawTopologyMetrics = {
 export const metrics = parseTopologyMetrics(
   [metric1, metric2, metric3],
   { from: 1653989800, to: 1653990100 },
-  'bytes',
   'resource',
-  0
+  0,
+  true
 ) as TopologyMetrics[];
 
 export const droppedMetrics = parseTopologyMetrics(
   [metric4],
   { from: 1653989800, to: 1653990100 },
-  'bytes',
   'resource',
-  0
+  0,
+  true
 ) as TopologyMetrics[];

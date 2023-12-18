@@ -328,6 +328,7 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
                           </Text>
                         )}
                         <RecordField
+                          allowPktDrops={allowPktDrops}
                           flow={record}
                           column={c}
                           filter={getFilter(c)}

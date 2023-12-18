@@ -108,6 +108,22 @@ func getMetricType(params url.Values) (constants.MetricType, error) {
 	return "", fmt.Errorf("invalid metric type: %s", mt)
 }
 
+func getMetricFunction(params url.Values) (constants.MetricFunction, error) {
+	mf := params.Get(metricFunctionKey)
+	if mf == "" {
+		return "", nil
+	}
+	metricFunction := constants.MetricFunction(mf)
+	if metricFunction == constants.MetricFunctionAvg ||
+		metricFunction == constants.MetricFunctionMin ||
+		metricFunction == constants.MetricFunctionMax ||
+		metricFunction == constants.MetricFunctionP90 ||
+		metricFunction == constants.MetricFunctionP99 {
+		return metricFunction, nil
+	}
+	return "", fmt.Errorf("invalid metric function: %s", mf)
+}
+
 func getRateInterval(params url.Values) (string, error) {
 	rateInterval := params.Get(rateIntervalKey)
 	if rateInterval == "" {
