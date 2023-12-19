@@ -43,7 +43,7 @@ export const NetflowTab: React.FC<PageComponentProps> = ({ obj }) => {
   const initState = React.useRef<Array<'initDone' | 'configLoading' | 'configLoaded' | 'forcedFiltersLoaded'>>([]);
   const [config, setConfig] = React.useState<Config>(defaultConfig);
   const [forcedFilters, setForcedFilters] = React.useState<Filters | null>(null);
-  const previous = usePrevious({ obj, state: initState.current });
+  const previous = usePrevious({ obj });
 
   React.useEffect(() => {
     // init function will be triggered only once
@@ -67,8 +67,9 @@ export const NetflowTab: React.FC<PageComponentProps> = ({ obj }) => {
     const filterDefinitions = getFilterDefinitions(config.filters, config.columns, t);
 
     if (
+      !initState.current.includes('configLoaded') ||
       _.isEmpty(filterDefinitions) ||
-      (previous?.state.includes('configLoaded') &&
+      (initState.current.includes('forcedFiltersLoaded') &&
         obj?.kind === previous?.obj?.kind &&
         obj?.metadata?.name === previous?.obj?.metadata?.name &&
         obj?.metadata?.namespace === previous?.obj?.metadata?.namespace)
