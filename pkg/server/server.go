@@ -31,10 +31,15 @@ func Start(cfg *Config, authChecker auth.Checker) {
 	router := setupRoutes(cfg, authChecker)
 	router.Use(corsHeader(cfg))
 
+	writeTimeout := 30 * time.Second
+	if cfg.Loki.Timeout.Seconds() > writeTimeout.Seconds() {
+		writeTimeout = cfg.Loki.Timeout
+	}
+
 	httpServer := defaultServer(&http.Server{
 		Handler:      router,
 		Addr:         fmt.Sprintf(":%d", cfg.Port),
-		WriteTimeout: 30 * time.Second,
+		WriteTimeout: writeTimeout,
 	})
 
 	if cfg.CertPath != "" && cfg.KeyPath != "" {
