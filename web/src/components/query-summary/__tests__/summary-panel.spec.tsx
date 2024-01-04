@@ -14,6 +14,7 @@ describe('<SummaryPanel />', () => {
     flows: FlowsSample,
     metrics: {} as NetflowMetrics,
     type: 'flowLog' as RecordType,
+    maxChunkAge: NaN,
     stats: {
       limitReached: false,
       numQueries: 1

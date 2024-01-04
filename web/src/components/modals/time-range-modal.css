@@ -8,3 +8,7 @@
 .time-range-row {
   height: 33px;
 }
+
+.date-time-pickers-container {
+  margin: 1rem 0 2rem 0;
+}

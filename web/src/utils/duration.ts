@@ -1,4 +1,5 @@
 import * as _ from 'lodash';
+import parse from 'parse-duration';
 
 // Conversions between units and milliseconds
 const s = 1000;
@@ -7,20 +8,11 @@ const h = m * 60;
 const d = h * 24;
 const w = d * 7;
 const units = { w, d, h, m, s };
-type KeyOfUnits = keyof typeof units;
-
-// precompile regexp
-const wordsRegexp = /\s+/;
-const durationRegexp = /^(\d+)([wdhms])$/;
 
 // Converts a duration like "1h 10m 23s" to milliseconds or throws an error if the duration could not be
 // parsed
 export const parseDuration = (duration: string): number => {
-  const parts = duration
-    .trim()
-    .split(wordsRegexp)
-    .map(p => p.match(durationRegexp));
-  return _.sumBy(parts, p => parseInt(p![1], 10) * units[p![2] as KeyOfUnits]);
+  return parse(duration, 'ms')!;
 };
 
 // Formats a duration in milliseconds like "1h 10m"

@@ -15,10 +15,11 @@ import {
   TextContent
 } from '@patternfly/react-core';
 import { TimeRange, toISODateString, twentyFourHourTime } from '../../utils/datetime';
-import { getDateMsInSeconds, getDateSInMiliseconds } from '../../utils/duration';
+import { formatDuration, getDateMsInSeconds, getDateSInMiliseconds } from '../../utils/duration';
 import './time-range-modal.css';
 
 export interface TimeRangeModalProps {
+  maxChunkAge: number;
   isModalOpen: boolean;
   setModalOpen: (v: boolean) => void;
   range?: TimeRange;
@@ -26,7 +27,14 @@ export interface TimeRangeModalProps {
   id?: string;
 }
 
-export const TimeRangeModal: React.FC<TimeRangeModalProps> = ({ id, isModalOpen, setModalOpen, range, setRange }) => {
+export const TimeRangeModal: React.FC<TimeRangeModalProps> = ({
+  id,
+  isModalOpen,
+  setModalOpen,
+  range,
+  setRange,
+  maxChunkAge
+}) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [error, setError] = React.useState<string | undefined>();
   const [fromDate, setFromDate] = React.useState<string | undefined>();
@@ -145,7 +153,7 @@ export const TimeRangeModal: React.FC<TimeRangeModalProps> = ({ id, isModalOpen,
   const getDateTimePickers = React.useCallback(() => {
     if (fromDate && fromTime && toDate && toTime) {
       return (
-        <Flex direction={{ default: 'column' }}>
+        <Flex className="date-time-pickers-container" direction={{ default: 'column' }}>
           <FlexItem>
             <Text component={TextVariants.h4}>{t('From')}</Text>
             <Flex direction={{ default: 'row' }} className="time-range-row">
@@ -271,6 +279,16 @@ export const TimeRangeModal: React.FC<TimeRangeModalProps> = ({ id, isModalOpen,
         </Text>
       </TextContent>
       {getDateTimePickers()}
+      {!Number.isNaN(maxChunkAge) && (
+        <TextContent>
+          <Text component={TextVariants.blockquote}>
+            {t(
+              'Collection latency could be up to {{maxChunkAge}} corresponding to the current Loki "max_chunk_age" ingester configuration.',
+              { maxChunkAge: formatDuration(maxChunkAge) }
+            )}
+          </Text>
+        </TextContent>
+      )}
     </Modal>
   );
 };
