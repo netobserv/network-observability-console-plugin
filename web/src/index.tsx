@@ -1,9 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-
 import i18n from 'i18next';
 import httpBackend from 'i18next-http-backend';
 import { initReactI18next } from 'react-i18next';
+import { configure } from 'mobx';
 
 import '@patternfly/patternfly/patternfly-charts-theme-dark.css';
 import '@patternfly/patternfly/patternfly-theme-dark.css';
@@ -12,6 +12,8 @@ import '@patternfly/react-core/dist/styles/base.css';
 import App from './app';
 import { getLanguage } from './utils/language';
 import './index.css';
+
+configure({ isolateGlobalState: true });
 
 //init standalone i18n translations
 i18n
