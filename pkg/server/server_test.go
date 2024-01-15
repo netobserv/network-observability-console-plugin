@@ -12,7 +12,6 @@ import (
 	"fmt"
 	"io"
 	"math/big"
-	rnd "math/rand"
 	"net"
 	"net/http"
 	"net/http/httptest"
@@ -48,9 +47,6 @@ func TestServerRunning(t *testing.T) {
 	}
 
 	testServerHostPort := fmt.Sprintf("%v:%v", testHostname, testPort)
-
-	rnd.Seed(time.Now().UnixNano())
-
 	serverURL := fmt.Sprintf("http://%s", testServerHostPort)
 
 	// Prepare directory to serve web files
@@ -103,9 +99,6 @@ func TestServerUnauthorized(t *testing.T) {
 	}
 
 	testServerHostPort := fmt.Sprintf("%v:%v", testHostname, testPort)
-
-	rnd.Seed(time.Now().UnixNano())
-
 	serverURL := fmt.Sprintf("http://%s", testServerHostPort)
 
 	// Prepare directory to serve web files
@@ -184,7 +177,6 @@ func TestSecureComm(t *testing.T) {
 	defer os.Remove(testClientCertFile)
 	defer os.Remove(testClientKeyFile)
 
-	rnd.Seed(time.Now().UnixNano())
 	conf := &Config{
 		CertPath: testServerCertFile,
 		KeyPath:  testServerKeyFile,
