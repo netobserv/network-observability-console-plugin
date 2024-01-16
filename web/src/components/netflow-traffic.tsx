@@ -1434,7 +1434,13 @@ export const NetflowTraffic: React.FC<{
 
     return (
       <Flex id="page-content-flex" direction={{ default: 'column' }}>
-        <FlexItem flex={{ default: 'flex_1' }}>{content}</FlexItem>
+        <FlexItem
+          id={`${selectedViewId}-container`}
+          flex={{ default: 'flex_1' }}
+          className={isDarkTheme ? 'dark' : 'light'}
+        >
+          {content}
+        </FlexItem>
         <FlexItem>
           {_.isEmpty(flows) ? (
             <MetricsQuerySummary

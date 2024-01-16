@@ -140,7 +140,7 @@ const NetflowTable: React.FC<{
   const handleScroll = React.useCallback(() => {
     const rowHeight = getRowHeight();
     const container = document.getElementById('table-container');
-    const header = container?.children[0].children[0];
+    const header = container?.children[0]?.children[0];
     if (container && header) {
       const position = container.scrollTop - header.clientHeight;
       //updates only when position moved more than one row height
@@ -257,33 +257,31 @@ const NetflowTable: React.FC<{
   }
 
   return (
-    <div id="table-container">
-      <TableComposable
-        data-test="table-composable"
-        data-test-cols-count={columns.length}
-        data-test-rows-count={flows.length}
-        aria-label="Netflow table"
-        variant="compact"
-        style={{ minWidth: `${width}em` }}
-        isStickyHeader
-      >
-        <NetflowTableHeader
-          data-test="table-header"
-          onSort={onSort}
-          sortDirection={activeSortDirection}
-          sortId={activeSortId}
-          columns={columns}
-          setColumns={setColumns}
-          columnSizes={columnSizes}
-          setColumnSizes={setColumnSizes}
-          tableWidth={width}
-          isDark={isDark}
-        />
-        <Tbody id="table-body" data-test="table-body">
-          {getBody()}
-        </Tbody>
-      </TableComposable>
-    </div>
+    <TableComposable
+      data-test="table-composable"
+      data-test-cols-count={columns.length}
+      data-test-rows-count={flows.length}
+      aria-label="Netflow table"
+      variant="compact"
+      style={{ minWidth: `${width}em` }}
+      isStickyHeader
+    >
+      <NetflowTableHeader
+        data-test="table-header"
+        onSort={onSort}
+        sortDirection={activeSortDirection}
+        sortId={activeSortId}
+        columns={columns}
+        setColumns={setColumns}
+        columnSizes={columnSizes}
+        setColumnSizes={setColumnSizes}
+        tableWidth={width}
+        isDark={isDark}
+      />
+      <Tbody id="table-body" data-test="table-body">
+        {getBody()}
+      </Tbody>
+    </TableComposable>
   );
 };
 
