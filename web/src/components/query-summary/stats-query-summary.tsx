@@ -17,6 +17,7 @@ export const StatsQuerySummary: React.FC<{
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   const dateText = lastRefresh ? lastRefresh.toLocaleTimeString() : t('Loading...');
+  const durationText = lastDuration ? formatDuration(lastDuration) : '';
 
   return (
     <FlexItem>
@@ -31,9 +32,7 @@ export const StatsQuerySummary: React.FC<{
                 : dateText}
             </Text>
             {numQueries && <Text>{t('Query count: {{count}}', { count: numQueries })}</Text>}
-            {lastDuration && lastDuration > 0 && (
-              <Text>{t('Duration: {{duration}}', { duration: formatDuration(lastDuration) })}</Text>
-            )}
+            {durationText !== '' && <Text>{t('Duration: {{duration}}', { duration: durationText })}</Text>}
             {warningMessage !== undefined && (
               <>
                 <br />
@@ -49,7 +48,7 @@ export const StatsQuerySummary: React.FC<{
           <Text id="lastRefresh" component={TextVariants.p}>
             {dateText}
             {detailed && numQueries && ` ${t('running')} ${numQueries} ${numQueries > 1 ? t('queries') : t('query')}`}
-            {detailed && lastDuration && lastDuration > 0 && ` ${t('in')} ${formatDuration(lastDuration)}`}
+            {detailed && durationText !== '' && ` ${t('in')} ${durationText}`}
           </Text>
         </div>
       </Tooltip>
