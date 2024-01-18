@@ -1,4 +1,5 @@
 /* eslint-disable max-len */
+import { TFunction } from 'i18next';
 import { RecordType } from '../model/flow-query';
 
 // Please keep this file documented: it is used in doc generation
@@ -53,6 +54,16 @@ export enum FlowDirection {
   Inner = '2'
 }
 
+export const getFlowDirectionDisplayString = (value: FlowDirection, t: TFunction) => {
+  return value === FlowDirection.Ingress
+    ? t('Ingress')
+    : value === FlowDirection.Egress
+    ? t('Egress')
+    : value === FlowDirection.Inner
+    ? t('Inner')
+    : t('n/a');
+};
+
 export enum InterfaceDirection {
   /** Incoming traffic, from the network interface observation point */
   Ingress = '0',
@@ -91,8 +102,12 @@ export interface Fields {
   DstK8S_HostName?: string;
   /** L4 protocol */
   Proto: number;
+  /** Flow direction array, only when using eBPF deduper 'merge' mode */
+  FlowDirections?: number[];
   /** Network interface */
   Interface?: string;
+  /** Network interface array, only when using eBPF deduper 'merge' mode */
+  Interfaces?: string[];
   /** Flow direction from the network interface observation point */
   IfDirection?: InterfaceDirection;
   /** Logical OR combination of unique TCP flags comprised in the flow, as per RFC-9293, with additional custom flags to represent the following per-packet combinations: SYN+ACK (0x100), FIN+ACK (0x200) and RST+ACK (0x400). */

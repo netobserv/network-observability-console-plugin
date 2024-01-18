@@ -27,8 +27,13 @@ const (
 	defaultStep         = "30s"
 )
 
-func GetTopology(cfg *loki.Config) func(w http.ResponseWriter, r *http.Request) {
+func GetTopology(cfg *loki.Config, version, date, filename string) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
+		config, err := ReadConfigFile(version, date, filename)
+		if err != nil {
+			hlog.Errorf("Could not read frontend-config file: %v", err)
+		}
+
 		lokiClient := newLokiClient(cfg, r.Header, false)
 		var code int
 		startTime := time.Now()
@@ -36,7 +41,7 @@ func GetTopology(cfg *loki.Config) func(w http.ResponseWriter, r *http.Request) 
 			metrics.ObserveHTTPCall("GetTopology", code, startTime)
 		}()
 
-		flows, code, err := getTopologyFlows(cfg, lokiClient, r.URL.Query())
+		flows, code, err := getTopologyFlows(cfg, lokiClient, r.URL.Query(), &config.Frontend)
 		if err != nil {
 			writeError(w, code, err.Error())
 			return
@@ -47,7 +52,7 @@ func GetTopology(cfg *loki.Config) func(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
-func getTopologyFlows(cfg *loki.Config, client httpclient.Caller, params url.Values) (*model.AggregatedQueryResponse, int, error) {
+func getTopologyFlows(cfg *loki.Config, client httpclient.Caller, params url.Values, frontendConfig *Frontend) (*model.AggregatedQueryResponse, int, error) {
 	hlog.Debugf("GetTopology query params: %s", params)
 
 	start, err := getStartTime(params)
@@ -93,7 +98,7 @@ func getTopologyFlows(cfg *loki.Config, client httpclient.Caller, params url.Val
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
-	if shouldMergeReporters(metricType) {
+	if shouldMergeReporters(metricType, frontendConfig.Deduper.Merge) {
 		filterGroups = expandReportersMergeQueries(filterGroups)
 	}
 
@@ -135,9 +140,9 @@ func getTopologyFlows(cfg *loki.Config, client httpclient.Caller, params url.Val
 	return qr, http.StatusOK, nil
 }
 
-func shouldMergeReporters(metricType constants.MetricType) bool {
-	return metricType == constants.MetricTypeBytes ||
-		metricType == constants.MetricTypePackets
+func shouldMergeReporters(metricType constants.MetricType, deduperMerge bool) bool {
+	return !deduperMerge && (metricType == constants.MetricTypeBytes ||
+		metricType == constants.MetricTypePackets)
 }
 
 func expandReportersMergeQueries(queries filters.MultiQueries) filters.MultiQueries {

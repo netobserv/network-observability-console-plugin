@@ -137,7 +137,7 @@ import {
   setURLShowDup
 } from '../utils/router';
 import { useTheme } from '../utils/theme-hook';
-import { getURLParams, hasEmptyParams, netflowTrafficPath, setURLParams } from '../utils/url';
+import { getURLParams, hasEmptyParams, netflowTrafficPath, removeURLParam, setURLParams, URLParam } from '../utils/url';
 import { RATE_METRIC_FUNCTIONS, TIME_METRIC_FUNCTIONS } from './dropdowns/metric-function-dropdown';
 import { OverviewDisplayDropdown } from './dropdowns/overview-display-dropdown';
 import { LIMIT_VALUES, TOP_VALUES } from './dropdowns/query-options-dropdown';
@@ -472,7 +472,8 @@ export const NetflowTraffic: React.FC<{
       filters: filtersToString(enabledFilters.list, match === 'any'),
       limit: LIMIT_VALUES.includes(limit) ? limit : LIMIT_VALUES[0],
       recordType: recordType,
-      dedup: !showDuplicates,
+      //only manage duplicates when mark is enabled
+      dedup: config.deduper.mark && !showDuplicates,
       packetLoss: packetLoss
     };
     if (range) {
@@ -506,6 +507,7 @@ export const NetflowTraffic: React.FC<{
     match,
     limit,
     recordType,
+    config.deduper.mark,
     showDuplicates,
     packetLoss,
     range,
@@ -985,8 +987,12 @@ export const NetflowTraffic: React.FC<{
     setURLMatch(match, !initState.current.includes('configLoaded'));
   }, [match]);
   React.useEffect(() => {
-    setURLShowDup(showDuplicates, !initState.current.includes('configLoaded'));
-  }, [showDuplicates]);
+    if (config.deduper.mark) {
+      setURLShowDup(showDuplicates, !initState.current.includes('configLoaded'));
+    } else {
+      removeURLParam(URLParam.ShowDuplicates);
+    }
+  }, [config.deduper.mark, showDuplicates]);
   React.useEffect(() => {
     setURLMetricFunction(
       selectedViewId === 'topology' ? topologyMetricFunction : undefined,
@@ -1295,6 +1301,7 @@ export const NetflowTraffic: React.FC<{
           range={range}
           type={recordType}
           isDark={isDarkTheme}
+          deduperMerge={config.deduper.merge}
           canSwitchTypes={isFlow() && isConnectionTracking()}
           allowPktDrops={isPktDrop()}
           setFilters={setFiltersList}
@@ -1604,6 +1611,7 @@ export const NetflowTraffic: React.FC<{
             allowFlow: isFlow(),
             allowConnection: isConnectionTracking(),
             allowShowDuplicates: selectedViewId === 'table' && recordType !== 'allConnections',
+            deduperMark: config.deduper.mark,
             allowPktDrops: isPktDrop(),
             useTopK: selectedViewId === 'overview'
           }}

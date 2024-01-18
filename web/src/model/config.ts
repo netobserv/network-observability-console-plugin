@@ -5,6 +5,11 @@ import { RawQuickFilter } from './quick-filters';
 
 export type Feature = 'pktDrop' | 'dnsTracking' | 'flowRTT';
 
+export type Deduper = {
+  mark: boolean;
+  merge: boolean;
+};
+
 export type Config = {
   buildVersion: string;
   buildDate: string;
@@ -19,6 +24,7 @@ export type Config = {
   alertNamespaces: string[];
   sampling: number;
   features: Feature[];
+  deduper: Deduper;
 };
 
 export const defaultConfig: Config = {
@@ -34,5 +40,9 @@ export const defaultConfig: Config = {
   filters: [],
   alertNamespaces: ['netobserv'],
   sampling: 50,
-  features: []
+  features: [],
+  deduper: {
+    mark: true,
+    merge: false
+  }
 };

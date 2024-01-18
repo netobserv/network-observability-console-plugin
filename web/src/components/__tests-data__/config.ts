@@ -1,7 +1,9 @@
+import { defaultConfig } from '../../model/config';
 import { ColumnConfigSampleDefs } from './columns';
 import { FilterDefinitionSample } from './filters';
 
 export const FullConfigResultSample = {
+  ...defaultConfig,
   recordTypes: ['flowLog', 'newConnection', 'heartbeat', 'endConnection'],
   portNaming: {
     enable: true,
@@ -9,20 +11,11 @@ export const FullConfigResultSample = {
   },
   columns: ColumnConfigSampleDefs,
   filters: FilterDefinitionSample,
-  quickFilters: [],
   sampling: 1,
   features: ['pktDrop', 'dnsTracking', 'flowRTT']
 };
 
 export const SimpleConfigResultSample = {
-  recordTypes: ['flowLog'],
-  portNaming: {
-    enable: true,
-    portNames: new Map([])
-  },
-  columns: [],
-  filters: [],
-  quickFilters: [],
-  sampling: 50,
-  features: []
+  ...defaultConfig,
+  recordTypes: ['flowLog']
 };
