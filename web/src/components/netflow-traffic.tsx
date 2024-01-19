@@ -169,11 +169,13 @@ import { SearchComponent, SearchEvent, SearchHandle } from './search/search';
 
 export type ViewId = 'overview' | 'table' | 'topology';
 
-export const NetflowTraffic: React.FC<{
-  forcedFilters: Filters | null;
+export type NetflowTrafficProps = {
+  forcedFilters?: Filters | null;
   isTab?: boolean;
   parentConfig?: Config;
-}> = ({ forcedFilters, isTab, parentConfig }) => {
+};
+
+export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, isTab, parentConfig }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [extensions] = useResolvedExtensions<ModelFeatureFlag>(isModelFeatureFlag);
   const k8sModels = useK8sModelsWithColors();

@@ -16,7 +16,6 @@ import { Filters } from '../model/filters';
 import { loadConfig } from '../utils/config';
 import { findFilter, getFilterDefinitions } from '../utils/filter-definitions';
 import { usePrevious } from '../utils/previous-hook';
-import NetflowTraffic from './netflow-traffic';
 import NetflowTrafficParent from './netflow-traffic-parent';
 
 type RouteProps = K8sResourceCommon & {
@@ -39,10 +38,9 @@ type HPAProps = K8sResourceCommon & {
 
 export const NetflowTab: React.FC<PageComponentProps> = ({ obj }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
-  const [loading, setLoading] = React.useState(true);
   const initState = React.useRef<Array<'initDone' | 'configLoading' | 'configLoaded' | 'forcedFiltersLoaded'>>([]);
   const [config, setConfig] = React.useState<Config>(defaultConfig);
-  const [forcedFilters, setForcedFilters] = React.useState<Filters | null>(null);
+  const [forcedFilters, setForcedFilters] = React.useState<Filters>();
   const previous = usePrevious({ obj });
 
   React.useEffect(() => {
@@ -55,7 +53,6 @@ export const NetflowTab: React.FC<PageComponentProps> = ({ obj }) => {
         initState.current.push('configLoading');
         loadConfig().then(v => {
           setConfig(v);
-          setLoading(false);
           initState.current.push('configLoaded');
         });
       }
@@ -171,26 +168,26 @@ export const NetflowTab: React.FC<PageComponentProps> = ({ obj }) => {
     }
   }, [config, obj, previous, t]);
 
-  return forcedFilters ? (
-    <NetflowTrafficParent>
-      <NetflowTraffic forcedFilters={forcedFilters} isTab parentConfig={config} />
-    </NetflowTrafficParent>
-  ) : (
-    <PageSection id="pageSection" data-test="tab-page-section">
-      {loading ? (
-        <Bullseye data-test="loading-tab">
-          <Spinner size="xl" />
-        </Bullseye>
-      ) : (
+  if (!initState.current.includes('forcedFiltersLoaded')) {
+    return (
+      <Bullseye data-test="loading-tab">
+        <Spinner size="xl" />
+      </Bullseye>
+    );
+  } else if (forcedFilters) {
+    return <NetflowTrafficParent forcedFilters={forcedFilters} isTab={true} parentConfig={config} />;
+  } else {
+    return (
+      <PageSection id="pageSection" data-test="tab-page-section">
         <EmptyState data-test="error-state" variant={EmptyStateVariant.small}>
           <Title headingLevel="h2" size="lg">
             {t('Kind not managed')}
           </Title>
           <EmptyStateBody>{obj?.kind}</EmptyStateBody>
         </EmptyState>
-      )}
-    </PageSection>
-  );
+      </PageSection>
+    );
+  }
 };
 
 export default NetflowTab;
