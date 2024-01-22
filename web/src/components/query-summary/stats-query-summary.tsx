@@ -3,7 +3,7 @@ import { ExclamationTriangleIcon, GlobeAmericasIcon } from '@patternfly/react-ic
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import './query-summary.css';
-import { formatDuration } from '../../utils/duration';
+import { formatDurationAboveMillisecond } from '../../utils/duration';
 
 export const StatsQuerySummary: React.FC<{
   detailed?: boolean;
@@ -17,7 +17,7 @@ export const StatsQuerySummary: React.FC<{
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   const dateText = lastRefresh ? lastRefresh.toLocaleTimeString() : t('Loading...');
-  const durationText = lastDuration ? formatDuration(lastDuration) : '';
+  const durationText = lastDuration ? formatDurationAboveMillisecond(lastDuration) : '';
 
   return (
     <FlexItem>
