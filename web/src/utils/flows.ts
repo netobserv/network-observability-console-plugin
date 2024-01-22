@@ -15,7 +15,7 @@ export const mergeFlowReporters = (flows: Record[]): Record[] => {
           r =>
             r.fields.DnsId !== undefined || r.fields.PktDropBytes !== undefined || r.fields.PktDropPackets !== undefined
         ) || recs[0]
-      ).labels.FlowDirection
+      ).labels.FlowDirection!
   );
-  return flows.filter((r: Record) => r.labels.FlowDirection === filtersIndex[get5Tuple(r)]);
+  return flows.filter((r: Record) => r.labels.FlowDirection! === filtersIndex[get5Tuple(r)]);
 };

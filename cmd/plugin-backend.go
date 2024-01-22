@@ -140,6 +140,9 @@ func main() {
 			config.Loki.StatusUserCertPath,
 			config.Loki.StatusUserKeyPath,
 			config.Loki.UseMocks,
-			config.Loki.Labels),
+			config.Loki.Labels,
+			config.Frontend.Deduper.Mark,
+			config.Frontend.Deduper.Merge,
+		),
 	}, checker)
 }

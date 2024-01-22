@@ -38,8 +38,8 @@ export interface Labels {
   SrcK8S_Type?: string;
   /** Kind of the destination matched Kubernetes object, such as Pod name, Service name, etc. */
   DstK8S_Type?: string;
-  /** Flow direction from the node observation point */
-  FlowDirection: FlowDirection;
+  /** Flow direction from the node observation point, only when using eBPF deduper "JustMark" */
+  FlowDirection?: FlowDirection;
   /** Type of record: 'flowLog' for regular flow logs, or 'allConnections',
    * 'newConnection', 'heartbeat', 'endConnection' for conversation tracking */
   _RecordType?: RecordType;
@@ -62,6 +62,10 @@ export const getFlowDirectionDisplayString = (value: FlowDirection, t: TFunction
     : value === FlowDirection.Inner
     ? t('Inner')
     : t('n/a');
+};
+
+export const getFlowDirection = (flow: Record): FlowDirection => {
+  return flow.labels.FlowDirection || flow.fields.FlowDirection!;
 };
 
 export enum InterfaceDirection {
@@ -102,6 +106,8 @@ export interface Fields {
   DstK8S_HostName?: string;
   /** L4 protocol */
   Proto: number;
+  /** Flow direction of the first flow captured, only when using eBPF deduper 'merge' mode */
+  FlowDirection?: FlowDirection;
   /** Flow direction array, only when using eBPF deduper 'merge' mode */
   FlowDirections?: number[];
   /** Network interface */

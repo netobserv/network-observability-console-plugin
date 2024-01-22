@@ -28,6 +28,7 @@ const (
 	typeString
 	typeRegex
 	typeRegexContains
+	typeRegexArrayContains
 	typeIP
 )
 
@@ -122,7 +123,7 @@ func (f *labelFilter) writeInto(sb *strings.Builder) {
 		sb.WriteString(`ip("`)
 		sb.WriteString(f.value)
 		sb.WriteString(`")`)
-	case typeRegexContains:
+	case typeRegexContains, typeRegexArrayContains:
 		sb.WriteString("`(?i).*")
 		sb.WriteString(f.value)
 		sb.WriteString(".*`")
@@ -141,7 +142,7 @@ func (f *lineFilter) asLabelFilters() []labelFilter {
 			valueType: v.valueType,
 			value:     v.value,
 		}
-		if v.valueType == typeRegex || v.valueType == typeRegexContains {
+		if v.valueType == typeRegex || v.valueType == typeRegexContains || v.valueType == typeRegexArrayContains {
 			if f.not {
 				lf.matcher = labelNoMatches
 			} else {
@@ -307,6 +308,11 @@ func (f *lineFilter) writeInto(sb *strings.Builder) {
 				sb.WriteString(`"(?i)[^"]*`)
 				sb.WriteString(valueReplacer.Replace(v.value))
 				sb.WriteString(`.*"`)
+			// for array, we ensure it starts by [ and ends by ]
+			case typeRegexArrayContains:
+				sb.WriteString(`\[(?i).*`)
+				sb.WriteString(valueReplacer.Replace(v.value))
+				sb.WriteString(`.*]`)
 			}
 		}
 	}

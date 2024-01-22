@@ -180,6 +180,18 @@ func (q *FlowQueryBuilder) addLineFilters(key string, values []string, not bool,
 	if len(values) == 0 {
 		return
 	}
+
+	var isArray bool
+	if q.config.Deduper.Merge {
+		switch key {
+		case "FlowDirection", "Interface":
+			key = fmt.Sprintf("%ss", key)
+			isArray = true
+		default:
+			isArray = false
+		}
+	}
+
 	lf := lineFilter{
 		key:      key,
 		not:      not,
@@ -190,6 +202,8 @@ func (q *FlowQueryBuilder) addLineFilters(key string, values []string, not bool,
 	for _, value := range values {
 		lm := lineMatch{}
 		switch {
+		case isArray:
+			lm = lineMatch{valueType: typeRegexArrayContains, value: value}
 		case isExactMatch(value):
 			lm = lineMatch{valueType: typeString, value: trimExactMatch(value)}
 			emptyMatches = emptyMatches || len(lm.value) == 0

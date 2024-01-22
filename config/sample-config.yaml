@@ -383,12 +383,6 @@ frontend:
       filter: direction
       default: false
       width: 10
-    - id: FlowDirections
-      name: Directions
-      tooltip: All the direction of the Flow observed at the Node observation point.
-      field: FlowDirections
-      default: false
-      width: 15
     - id: Interface
       name: Interface
       tooltip: The network interface of the Flow.
@@ -825,5 +819,5 @@ frontend:
     - netobserv
   sampling: 50
   deduper:
-    mark: true
-    merge: false
+    mark: false
+    merge: true

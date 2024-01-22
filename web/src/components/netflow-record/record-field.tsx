@@ -4,7 +4,7 @@ import { FilterIcon, GlobeAmericasIcon, TimesIcon, ToggleOffIcon, ToggleOnIcon }
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { FlowDirection, getFlowDirectionDisplayString, Record } from '../../api/ipfix';
+import { FlowDirection, getFlowDirection, getFlowDirectionDisplayString, Record } from '../../api/ipfix';
 import { Column, ColumnsId, getFullColumnName } from '../../utils/columns';
 import { dateFormatter, getFormattedDate, timeMSFormatter, utcDateTimeFormatter } from '../../utils/datetime';
 import { DNS_CODE_NAMES, DNS_ERRORS_VALUES, getDNSErrorDescription, getDNSRcodeDescription } from '../../utils/dns';
@@ -486,7 +486,7 @@ export const RecordField: React.FC<{
         return singleContainer(child);
       }
       case ColumnsId.flowdir: {
-        return singleContainer(simpleTextWithTooltip(getFlowDirectionDisplayString(value as FlowDirection, t)));
+        return singleContainer(simpleTextWithTooltip(getFlowDirectionDisplayString(String(value) as FlowDirection, t)));
       }
       case ColumnsId.flowdirints: {
         if (
@@ -511,7 +511,7 @@ export const RecordField: React.FC<{
           return singleContainer(
             sideBySideContainer(
               simpleTextWithTooltip(flow.fields.Interface),
-              simpleTextWithTooltip(getFlowDirectionDisplayString(flow.labels.FlowDirection, t))
+              simpleTextWithTooltip(getFlowDirectionDisplayString(getFlowDirection(flow), t))
             )
           );
         }
