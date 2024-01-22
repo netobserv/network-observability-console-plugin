@@ -65,7 +65,7 @@ export const getFlowDirectionDisplayString = (value: FlowDirection, t: TFunction
 };
 
 export const getFlowDirection = (flow: Record): FlowDirection => {
-  return flow.labels.FlowDirection || flow.fields.FlowDirection!;
+  return String(flow.labels.FlowDirection || flow.fields.FlowDirection!) as FlowDirection;
 };
 
 export enum InterfaceDirection {
