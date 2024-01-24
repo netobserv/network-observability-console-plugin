@@ -55,6 +55,10 @@ type lineMatch struct {
 	valueType valueType
 }
 
+func isRegex(v valueType) bool {
+	return v == typeRegex || v == typeRegexContains || v == typeRegexArrayContains
+}
+
 func stringEqualLabelFilter(labelKey string, value string) labelFilter {
 	return labelFilter{
 		key:       labelKey,
@@ -142,19 +146,17 @@ func (f *lineFilter) asLabelFilters() []labelFilter {
 			valueType: v.valueType,
 			value:     v.value,
 		}
-		if v.valueType == typeRegex || v.valueType == typeRegexContains || v.valueType == typeRegexArrayContains {
+		if isRegex(v.valueType) {
+			lf.matcher = labelMatches
 			if f.not {
 				lf.matcher = labelNoMatches
-			} else {
-				lf.matcher = labelMatches
 			}
 		} else {
+			lf.matcher = labelEqual
 			if f.not {
 				lf.matcher = labelNotEqual
 			} else if f.moreThan {
 				lf.matcher = labelMoreThanOrEqual
-			} else {
-				lf.matcher = labelEqual
 			}
 		}
 		lfs = append(lfs, lf)

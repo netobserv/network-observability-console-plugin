@@ -128,6 +128,7 @@ func ReadConfigFile(version, date, filename string) (*Config, error) {
 			Filters:      []Filter{},
 			QuickFilters: []QuickFilter{},
 			Features:     []string{},
+			// TODO: update these defaults when operator will move to merge mode
 			Deduper: Deduper{
 				Mark:  true,
 				Merge: false,

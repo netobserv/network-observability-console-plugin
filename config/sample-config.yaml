@@ -819,5 +819,5 @@ frontend:
     - netobserv
   sampling: 50
   deduper:
-    mark: false
-    merge: true
+    mark: true
+    merge: false
