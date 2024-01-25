@@ -77,6 +77,11 @@ type QuickFilter struct {
 	Default bool `yaml:"default,omitempty" json:"default,omitempty"`
 }
 
+type Deduper struct {
+	Mark  bool `yaml:"mark" json:"mark"`
+	Merge bool `yaml:"merge" json:"merge"`
+}
+
 type Frontend struct {
 	BuildVersion    string        `yaml:"buildVersion" json:"buildVersion"`
 	BuildDate       string        `yaml:"buildDate" json:"buildDate"`
@@ -88,6 +93,7 @@ type Frontend struct {
 	AlertNamespaces []string      `yaml:"alertNamespaces" json:"alertNamespaces"`
 	Sampling        int           `yaml:"sampling" json:"sampling"`
 	Features        []string      `yaml:"features" json:"features"`
+	Deduper         Deduper       `yaml:"deduper" json:"deduper"`
 }
 
 type Config struct {
@@ -122,6 +128,11 @@ func ReadConfigFile(version, date, filename string) (*Config, error) {
 			Filters:      []Filter{},
 			QuickFilters: []QuickFilter{},
 			Features:     []string{},
+			// TODO: update these defaults when operator will move to merge mode
+			Deduper: Deduper{
+				Mark:  true,
+				Merge: false,
+			},
 		},
 	}
 	if len(filename) == 0 {

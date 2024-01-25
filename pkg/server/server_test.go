@@ -355,6 +355,10 @@ func TestLokiConfigurationForTopology(t *testing.T) {
 			URL:     lokiURL,
 			Timeout: time.Second,
 			Labels:  utils.GetMapInterface([]string{fields.SrcNamespace, fields.DstNamespace, fields.SrcOwnerName, fields.DstOwnerName, fields.FlowDirection}),
+			Deduper: loki.Deduper{
+				Mark:  true,
+				Merge: false,
+			},
 		},
 	}, authM)
 	backendSvc := httptest.NewServer(backendRoutes)
@@ -392,6 +396,60 @@ func TestLokiConfigurationForTopology(t *testing.T) {
 	assert.NotNil(t, qr.Result)
 }
 
+func TestLokiConfigurationForDeduperMerge(t *testing.T) {
+	// GIVEN a Loki service
+	lokiMock := httpMock{}
+	lokiMock.On("ServeHTTP", mock.Anything, mock.Anything).Run(func(args mock.Arguments) {
+		_, _ = args.Get(0).(http.ResponseWriter).Write([]byte(`{"status":"","data":{"resultType":"matrix","result":[]}}`))
+	})
+	lokiSvc := httptest.NewServer(&lokiMock)
+	defer lokiSvc.Close()
+	authM := &authMock{}
+	authM.MockGranted()
+	lokiURL, err := url.Parse(lokiSvc.URL)
+	require.NoError(t, err)
+
+	// THAT is accessed behind the NOO console plugin backend
+	backendRoutes := setupRoutes(&Config{
+		Loki: loki.Config{
+			URL:     lokiURL,
+			Timeout: time.Second,
+			Labels:  utils.GetMapInterface([]string{fields.SrcNamespace, fields.DstNamespace, fields.SrcOwnerName, fields.DstOwnerName}),
+			Deduper: loki.Deduper{
+				Mark:  false,
+				Merge: true,
+			},
+		},
+	}, authM)
+	backendSvc := httptest.NewServer(backendRoutes)
+	defer backendSvc.Close()
+
+	// WHEN the Loki flows endpoint is queried in the backend
+	resp, err := backendSvc.Client().Get(backendSvc.URL + "/api/loki/flow/metrics")
+	require.NoError(t, err)
+
+	// THEN the query has been properly forwarded to Loki
+	// Two queries for dedup
+	assert.Len(t, lokiMock.Calls, 1)
+	req1 := lokiMock.Calls[0].Arguments[1].(*http.Request)
+	queries := []string{req1.URL.Query().Get("query")}
+	expected := []string{
+		`topk(100,sum by(SrcK8S_Name,SrcK8S_Type,SrcK8S_OwnerName,SrcK8S_OwnerType,SrcK8S_Namespace,SrcAddr,SrcK8S_HostName,DstK8S_Name,DstK8S_Type,DstK8S_OwnerName,DstK8S_OwnerType,DstK8S_Namespace,DstAddr,DstK8S_HostName)(rate({app="netobserv-flowcollector"}|json|unwrap Bytes|__error__=""[1m])))`,
+	}
+	assert.Equal(t, expected, queries)
+
+	// without any multi-tenancy header
+	assert.Empty(t, req1.Header.Get("X-Scope-OrgID"))
+
+	// AND the response is sent back to the client
+	body, err := io.ReadAll(resp.Body)
+	require.NoError(t, err)
+	var qr model.AggregatedQueryResponse
+	err = json.Unmarshal(body, &qr)
+	require.NoError(t, err)
+	assert.NotNil(t, qr.Result)
+}
+
 func TestLokiConfigurationForTableHistogram(t *testing.T) {
 	// GIVEN a Loki service
 	lokiMock := httpMock{}
@@ -411,6 +469,10 @@ func TestLokiConfigurationForTableHistogram(t *testing.T) {
 			URL:     lokiURL,
 			Timeout: time.Second,
 			Labels:  utils.GetMapInterface([]string{fields.SrcNamespace, fields.DstNamespace, fields.SrcOwnerName, fields.DstOwnerName, fields.FlowDirection}),
+			Deduper: loki.Deduper{
+				Mark:  true,
+				Merge: false,
+			},
 		},
 	}, authM)
 	backendSvc := httptest.NewServer(backendRoutes)

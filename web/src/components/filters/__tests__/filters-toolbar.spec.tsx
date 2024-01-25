@@ -22,6 +22,7 @@ describe('<FiltersToolbar />', () => {
       allowConnection: true,
       allowShowDuplicates: true,
       allowPktDrops: true,
+      deduperMark: true,
       useTopK: false,
       match: 'all',
       packetLoss: 'all',

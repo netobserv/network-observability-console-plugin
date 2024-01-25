@@ -7,6 +7,11 @@ import (
 	"github.com/netobserv/network-observability-console-plugin/pkg/utils"
 )
 
+type Deduper struct {
+	Mark  bool
+	Merge bool
+}
+
 type Config struct {
 	URL                *url.URL
 	StatusURL          *url.URL
@@ -23,9 +28,10 @@ type Config struct {
 	UseMocks         bool
 	ForwardUserToken bool
 	Labels           map[string]struct{}
+	Deduper          Deduper
 }
 
-func NewConfig(url *url.URL, statusURL *url.URL, timeout time.Duration, tenantID string, tokenPath string, forwardUserToken bool, skipTLS bool, capath string, statusSkipTLS bool, statusCapath string, statusUserCertPath string, statusUserKeyPath string, useMocks bool, labels []string) Config {
+func NewConfig(url *url.URL, statusURL *url.URL, timeout time.Duration, tenantID string, tokenPath string, forwardUserToken bool, skipTLS bool, capath string, statusSkipTLS bool, statusCapath string, statusUserCertPath string, statusUserKeyPath string, useMocks bool, labels []string, deduperMark bool, deduperMerge bool) Config {
 	return Config{
 		URL:                url,
 		StatusURL:          statusURL,
@@ -41,6 +47,10 @@ func NewConfig(url *url.URL, statusURL *url.URL, timeout time.Duration, tenantID
 		UseMocks:           useMocks,
 		ForwardUserToken:   forwardUserToken,
 		Labels:             utils.GetMapInterface(labels),
+		Deduper: Deduper{
+			Mark:  deduperMark,
+			Merge: deduperMerge,
+		},
 	}
 }
 

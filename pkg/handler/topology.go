@@ -93,7 +93,7 @@ func getTopologyFlows(cfg *loki.Config, client httpclient.Caller, params url.Val
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
-	if shouldMergeReporters(metricType) {
+	if shouldMergeReporters(metricType, cfg.Deduper) {
 		filterGroups = expandReportersMergeQueries(filterGroups)
 	}
 
@@ -135,9 +135,9 @@ func getTopologyFlows(cfg *loki.Config, client httpclient.Caller, params url.Val
 	return qr, http.StatusOK, nil
 }
 
-func shouldMergeReporters(metricType constants.MetricType) bool {
-	return metricType == constants.MetricTypeBytes ||
-		metricType == constants.MetricTypePackets
+func shouldMergeReporters(metricType constants.MetricType, deduper loki.Deduper) bool {
+	return !deduper.Merge && deduper.Mark && (metricType == constants.MetricTypeBytes ||
+		metricType == constants.MetricTypePackets)
 }
 
 func expandReportersMergeQueries(queries filters.MultiQueries) filters.MultiQueries {

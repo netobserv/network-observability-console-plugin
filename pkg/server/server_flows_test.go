@@ -230,6 +230,8 @@ func TestLokiFiltering(t *testing.T) {
 			"",
 			false,
 			[]string{"SrcK8S_Namespace", "SrcK8S_OwnerName", "DstK8S_Namespace", "DstK8S_OwnerName", "FlowDirection"},
+			true,
+			false,
 		),
 	}, &authM)
 	backendSvc := httptest.NewServer(backendRoutes)

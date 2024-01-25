@@ -207,6 +207,7 @@ export const NetflowTableHeader: React.FC<{
               ColumnsId.endtime,
               ColumnsId.collectiontime,
               ColumnsId.collectionlatency,
+              ColumnsId.flowdirints,
               ColumnsId.dnslatency,
               ColumnsId.dnsresponsecode
             ].includes(c.id) && c.tooltip

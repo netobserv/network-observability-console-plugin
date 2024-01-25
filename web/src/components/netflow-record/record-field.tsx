@@ -1,10 +1,10 @@
 import { ResourceIcon, ResourceLink } from '@openshift-console/dynamic-plugin-sdk';
-import { Button, Popover, Text, TextVariants, Tooltip } from '@patternfly/react-core';
+import { Button, Flex, FlexItem, Popover, Text, TextVariants, Tooltip } from '@patternfly/react-core';
 import { FilterIcon, GlobeAmericasIcon, TimesIcon, ToggleOffIcon, ToggleOnIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { FlowDirection, Record } from '../../api/ipfix';
+import { FlowDirection, getFlowDirection, getFlowDirectionDisplayString, Record } from '../../api/ipfix';
 import { Column, ColumnsId, getFullColumnName } from '../../utils/columns';
 import { dateFormatter, getFormattedDate, timeMSFormatter, utcDateTimeFormatter } from '../../utils/datetime';
 import { DNS_CODE_NAMES, DNS_ERRORS_VALUES, getDNSErrorDescription, getDNSRcodeDescription } from '../../utils/dns';
@@ -200,17 +200,33 @@ export const RecordField: React.FC<{
     );
   };
 
-  const doubleContainer = (child1?: JSX.Element, child2?: JSX.Element, asChild = true, childIcon = true) => {
+  const nthContainer = (children: (JSX.Element | undefined)[], asChild = true, childIcon = true, flex = true) => {
     return (
       <div className={`record-field-flex-container ${asChild ? size : ''}`}>
-        <div className="record-field-content-flex" onMouseOver={e => onMouseOver(e, 'record-field-content-flex')}>
-          {child1 ? child1 : emptyText()}
-        </div>
-        <div className="record-field-content-flex" onMouseOver={e => onMouseOver(e, 'record-field-content-flex')}>
-          {asChild && childIcon && <span className="child-arrow">{'↪'}</span>}
-          {child2 ? child2 : emptyText()}
-        </div>
+        {children.map((c, i) => (
+          <div
+            key={i}
+            className={`record-field-content${flex ? '-flex' : ''}`}
+            onMouseOver={e => onMouseOver(e, `record-field-content${flex ? '-flex' : ''}`)}
+          >
+            {i > 0 && asChild && childIcon && <span className="child-arrow">{'↪'}</span>}
+            {c ? c : emptyText()}
+          </div>
+        ))}
       </div>
+    );
+  };
+
+  const doubleContainer = (child1?: JSX.Element, child2?: JSX.Element, asChild = true, childIcon = true) => {
+    return nthContainer([child1, child2], asChild, childIcon);
+  };
+
+  const sideBySideContainer = (leftElement?: JSX.Element, rightElement?: JSX.Element) => {
+    return (
+      <Flex direction={{ default: 'row' }} flex={{ default: 'flex_1' }}>
+        <FlexItem flex={{ default: 'flex_1' }}>{leftElement || emptyText()}</FlexItem>
+        <FlexItem flex={{ default: 'flex_1' }}>{rightElement || emptyText()}</FlexItem>
+      </Flex>
     );
   };
 
@@ -469,18 +485,37 @@ export const RecordField: React.FC<{
         }
         return singleContainer(child);
       }
-      case ColumnsId.flowdir:
-        return singleContainer(
-          simpleTextWithTooltip(
-            value === FlowDirection.Ingress
-              ? t('Ingress')
-              : value === FlowDirection.Egress
-              ? t('Egress')
-              : value === FlowDirection.Inner
-              ? t('Inner')
-              : t('n/a')
-          )
-        );
+      case ColumnsId.flowdir: {
+        return singleContainer(simpleTextWithTooltip(getFlowDirectionDisplayString(String(value) as FlowDirection, t)));
+      }
+      case ColumnsId.flowdirints: {
+        if (
+          flow.fields.Interfaces &&
+          flow.fields.FlowDirections &&
+          flow.fields.Interfaces.length === flow.fields.FlowDirections.length
+        ) {
+          return nthContainer(
+            flow.fields.Interfaces.map((iName, i) =>
+              sideBySideContainer(
+                simpleTextWithTooltip(iName),
+                simpleTextWithTooltip(
+                  getFlowDirectionDisplayString(String(flow.fields.FlowDirections![i]) as FlowDirection, t)
+                )
+              )
+            ),
+            true,
+            false,
+            false
+          );
+        } else {
+          return singleContainer(
+            sideBySideContainer(
+              simpleTextWithTooltip(flow.fields.Interface),
+              simpleTextWithTooltip(getFlowDirectionDisplayString(getFlowDirection(flow), t))
+            )
+          );
+        }
+      }
       case ColumnsId.packets:
       case ColumnsId.bytes:
         //show both sent / dropped counts
@@ -550,7 +585,12 @@ export const RecordField: React.FC<{
       }
       default:
         if (Array.isArray(value) && value.length) {
-          return doubleContainer(simpleTextWithTooltip(String(value[0])), simpleTextWithTooltip(String(value[1])));
+          // we can only show two values properly with containers
+          if (value.length === 2) {
+            return doubleContainer(simpleTextWithTooltip(String(value[0])), simpleTextWithTooltip(String(value[1])));
+          }
+          // else we will show values as single joigned string
+          return singleContainer(simpleTextWithTooltip(value.map(v => String(v)).join(', ')));
         } else {
           return singleContainer(simpleTextWithTooltip(String(value)));
         }

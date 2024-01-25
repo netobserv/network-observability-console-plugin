@@ -67,7 +67,7 @@ func getFlows(cfg *loki.Config, client httpclient.Caller, params url.Values) (*m
 		return nil, http.StatusBadRequest, err
 	}
 	dedup := params.Get(dedupKey) == "true"
-	if utils.Contains(constants.AnyConnectionType, string(recordType)) {
+	if !cfg.Deduper.Mark || utils.Contains(constants.AnyConnectionType, string(recordType)) {
 		dedup = false
 	}
 	packetLoss, err := getPacketLoss(params)

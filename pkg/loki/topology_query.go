@@ -52,7 +52,7 @@ func NewTopologyQuery(cfg *Config, start, end, limit, rateInterval, step string,
 		dedup = false
 		rt = "endConnection"
 	} else {
-		dedup = true
+		dedup = cfg.Deduper.Mark
 		rt = "flowLog"
 	}
 
