@@ -233,7 +233,7 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
                     disabled
                       ? t(
                           // eslint-disable-next-line max-len
-                          'Only available using eBPF with FlowCollector.agent.ebpf.enablePktDrop option equals "true"'
+                          'Only available using eBPF with FlowCollector.agent.ebpf.features containing "PacketDrop"'
                         )
                       : undefined
                   }

@@ -24,7 +24,7 @@ WORKDIR /opt/app-root/web
 RUN npm run format-all
 RUN npm run build$BUILDSCRIPT
 
-FROM --platform=$BUILDPLATFORM docker.io/library/golang:1.20 as go-builder
+FROM --platform=$BUILDPLATFORM docker.io/library/golang:1.21 as go-builder
 
 ARG TARGETPLATFORM
 ARG TARGETARCH=amd64
@@ -40,7 +40,7 @@ COPY pkg/ pkg/
 
 RUN CGO_ENABLED=0 GOARCH=$TARGETARCH go build -ldflags "$LDFLAGS" -mod vendor -o plugin-backend cmd/plugin-backend.go
 
-FROM  --platform=$TARGETPLATFORM registry.access.redhat.com/ubi9/ubi-minimal:9.2
+FROM  --platform=$TARGETPLATFORM registry.access.redhat.com/ubi9/ubi-minimal:9.3
 
 COPY --from=web-builder /opt/app-root/web/dist ./web/dist
 COPY --from=go-builder /opt/app-root/plugin-backend ./

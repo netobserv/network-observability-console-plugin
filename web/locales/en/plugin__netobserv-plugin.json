@@ -61,7 +61,7 @@
   "Without drops show the flows having 0% dropped": "Without drops show the flows having 0% dropped",
   "All shows everything": "All shows everything",
   "Drops filter": "Drops filter",
-  "Only available using eBPF with FlowCollector.agent.ebpf.enablePktDrop option equals \"true\"": "Only available using eBPF with FlowCollector.agent.ebpf.enablePktDrop option equals \"true\"",
+  "Only available using eBPF with FlowCollector.agent.ebpf.features containing \"PacketDrop\"": "Only available using eBPF with FlowCollector.agent.ebpf.features containing \"PacketDrop\"",
   "Top items for internal backend queries.": "Top items for internal backend queries.",
   "Limit for internal backend queries.": "Limit for internal backend queries.",
   "Depending on the matching and filter settings, several queries can be performed under the cover, each with this parameter set, resulting in more results after aggregation.": "Depending on the matching and filter settings, several queries can be performed under the cover, each with this parameter set, resulting in more results after aggregation.",

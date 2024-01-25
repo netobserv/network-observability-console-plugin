@@ -1,11 +1,12 @@
 import * as React from 'react';
 import { clearURLParams } from '../utils/url';
 import { clearLocalStorage } from '../utils/local-storage-hook';
-import NetflowTraffic from './netflow-traffic';
+import NetflowTraffic, { NetflowTrafficProps } from './netflow-traffic';
 import AlertFetcher from './alerts/fetcher';
 import DynamicLoader from './dynamic-loader/dynamic-loader';
 
-type Props = {};
+type Props = NetflowTrafficProps & {};
+
 type State = {
   error?: Error;
 };
@@ -47,15 +48,14 @@ class NetflowTrafficParent extends React.Component<Props, State> {
         </div>
       );
     }
-    if (this.props.children) {
-      return this.props.children;
-    }
-    // else render default NetworkTraffic
-
     return (
       <DynamicLoader>
         <AlertFetcher>
-          <NetflowTraffic forcedFilters={null} />
+          <NetflowTraffic
+            isTab={this.props.isTab}
+            forcedFilters={this.props.isTab ? this.props.forcedFilters : null}
+            parentConfig={this.props.parentConfig}
+          />
         </AlertFetcher>
       </DynamicLoader>
     );
