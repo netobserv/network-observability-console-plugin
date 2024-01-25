@@ -17,7 +17,11 @@ export const FlowsQuerySummaryContent: React.FC<{
   numQueries?: number;
   limitReached: boolean;
   range: number | TimeRange;
-  lastRefresh: Date | undefined;
+  loading?: boolean;
+  lastRefresh?: Date;
+  lastDuration?: number;
+  warningMessage?: string;
+  slownessReason?: string;
   direction: 'row' | 'column';
   className?: string;
   isShowQuerySummary?: boolean;
@@ -28,7 +32,11 @@ export const FlowsQuerySummaryContent: React.FC<{
   numQueries,
   limitReached,
   range,
+  loading,
   lastRefresh,
+  lastDuration,
+  warningMessage,
+  slownessReason,
   direction,
   className,
   isShowQuerySummary,
@@ -91,6 +99,15 @@ export const FlowsQuerySummaryContent: React.FC<{
           </Text>
         </FlexItem>
       )}
+      <StatsQuerySummary
+        detailed={direction === 'column'}
+        loading={loading}
+        lastRefresh={lastRefresh}
+        lastDuration={lastDuration}
+        numQueries={numQueries}
+        warningMessage={warningMessage}
+        slownessReason={slownessReason}
+      />
       {!_.isEmpty(flows) && (
         <FlexItem>
           <Flex direction={{ default: 'row' }}>
@@ -124,9 +141,6 @@ export const FlowsQuerySummaryContent: React.FC<{
         </FlexItem>
       )}
       {counters()}
-      {lastRefresh && (
-        <StatsQuerySummary lastRefresh={lastRefresh} numQueries={direction === 'column' ? numQueries : undefined} />
-      )}
       {direction === 'row' && toggleQuerySummary && (
         <FlexItem>
           <Text id="query-summary-toggle" component={TextVariants.a} onClick={toggleQuerySummary}>
@@ -140,13 +154,29 @@ export const FlowsQuerySummaryContent: React.FC<{
 
 export const FlowsQuerySummary: React.FC<{
   flows: Record[];
-  stats: Stats | undefined;
+  stats?: Stats;
   type: RecordType;
   range: number | TimeRange;
-  lastRefresh: Date | undefined;
+  loading?: boolean;
+  lastRefresh?: Date;
+  lastDuration?: number;
+  warningMessage?: string;
+  slownessReason?: string;
   isShowQuerySummary?: boolean;
   toggleQuerySummary?: () => void;
-}> = ({ flows, stats, type, range, lastRefresh, isShowQuerySummary, toggleQuerySummary }) => {
+}> = ({
+  flows,
+  stats,
+  type,
+  range,
+  loading,
+  lastRefresh,
+  lastDuration,
+  warningMessage,
+  slownessReason,
+  isShowQuerySummary,
+  toggleQuerySummary
+}) => {
   if (!_.isEmpty(flows) && stats) {
     return (
       <Card id="query-summary" isFlat>
@@ -157,7 +187,11 @@ export const FlowsQuerySummary: React.FC<{
           numQueries={stats.numQueries}
           limitReached={stats.limitReached}
           range={range}
+          loading={loading}
           lastRefresh={lastRefresh}
+          lastDuration={lastDuration}
+          warningMessage={warningMessage}
+          slownessReason={slownessReason}
           isShowQuerySummary={isShowQuerySummary}
           toggleQuerySummary={toggleQuerySummary}
         />

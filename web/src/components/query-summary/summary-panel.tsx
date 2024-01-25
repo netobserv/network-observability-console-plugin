@@ -43,16 +43,32 @@ type K8SObjectCardinality = {
 };
 
 export const SummaryPanelContent: React.FC<{
-  flows: Record[] | undefined;
+  flows?: Record[];
   metrics: NetflowMetrics;
   type: RecordType;
-  stats: Stats | undefined;
+  stats?: Stats;
   limit: number;
   range: number | TimeRange;
-  lastRefresh: Date | undefined;
+  lastRefresh?: Date;
+  lastDuration?: number;
+  warningMessage?: string;
+  slownessReason?: string;
   showDNSLatency?: boolean;
   showRTTLatency?: boolean;
-}> = ({ flows, metrics, type, stats, limit, range, lastRefresh, showDNSLatency, showRTTLatency }) => {
+}> = ({
+  flows,
+  metrics,
+  type,
+  stats,
+  limit,
+  range,
+  lastRefresh,
+  lastDuration,
+  warningMessage,
+  slownessReason,
+  showDNSLatency,
+  showRTTLatency
+}) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [expanded, setExpanded] = React.useState<string>('');
 
@@ -390,6 +406,9 @@ export const SummaryPanelContent: React.FC<{
             metrics={metrics}
             numQueries={stats?.numQueries}
             lastRefresh={lastRefresh}
+            lastDuration={lastDuration}
+            slownessReason={slownessReason}
+            warningMessage={warningMessage}
           />
         ) : (
           <FlowsQuerySummaryContent
@@ -401,6 +420,9 @@ export const SummaryPanelContent: React.FC<{
             limitReached={stats?.limitReached || false}
             range={range}
             lastRefresh={lastRefresh}
+            lastDuration={lastDuration}
+            slownessReason={slownessReason}
+            warningMessage={warningMessage}
           />
         )}
       </TextContent>
@@ -419,17 +441,35 @@ export const SummaryPanelContent: React.FC<{
 
 export const SummaryPanel: React.FC<{
   onClose: () => void;
-  flows: Record[] | undefined;
+  flows?: Record[];
   metrics: NetflowMetrics;
   type: RecordType;
-  stats: Stats | undefined;
+  stats?: Stats;
   limit: number;
   range: number | TimeRange;
-  lastRefresh: Date | undefined;
+  lastRefresh?: Date;
+  lastDuration?: number;
+  warningMessage?: string;
+  slownessReason?: string;
   showDNSLatency?: boolean;
   showRTTLatency?: boolean;
   id?: string;
-}> = ({ flows, metrics, type, stats, limit, range, lastRefresh, showDNSLatency, showRTTLatency, id, onClose }) => {
+}> = ({
+  flows,
+  metrics,
+  type,
+  stats,
+  limit,
+  range,
+  lastRefresh,
+  lastDuration,
+  warningMessage,
+  slownessReason,
+  showDNSLatency,
+  showRTTLatency,
+  id,
+  onClose
+}) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   return (
@@ -456,6 +496,9 @@ export const SummaryPanel: React.FC<{
           limit={limit}
           range={range}
           lastRefresh={lastRefresh}
+          lastDuration={lastDuration}
+          warningMessage={warningMessage}
+          slownessReason={slownessReason}
           showDNSLatency={showDNSLatency}
           showRTTLatency={showRTTLatency}
         />

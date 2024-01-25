@@ -673,8 +673,6 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
   } else {
     return (
       <div
-        id="overview-container"
-        className={isDark ? 'dark' : 'light'}
         style={{ padding: `${containerPadding}px 0 ${containerPadding}px ${containerPadding}px` }}
         ref={containerRef}
       >

@@ -38,3 +38,13 @@
 .stats-query-summary-container-with-icon>p {
   padding-left: 5px;
 }
+
+.stats-loading-blink {
+  animation: blinker 2s linear infinite;
+}
+
+@keyframes blinker {
+  50% {
+    opacity: 0;
+  }
+}
