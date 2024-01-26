@@ -30,7 +30,7 @@ import './summary-panel.css';
 import { RecordType } from '../../model/flow-query';
 import { MetricsQuerySummaryContent } from './metrics-query-summary';
 import { config } from '../../utils/config';
-import { formatDurationAboveMillisecond, formatDurationAboveNanosecond } from '../../utils/duration';
+import { formatDuration, formatDurationAboveMillisecond, formatDurationAboveNanosecond } from '../../utils/duration';
 
 type TypeCardinality = {
   type: string;
@@ -47,6 +47,7 @@ export const SummaryPanelContent: React.FC<{
   metrics: NetflowMetrics;
   type: RecordType;
   stats?: Stats;
+  maxChunkAge: number;
   limit: number;
   range: number | TimeRange;
   lastRefresh?: Date;
@@ -60,6 +61,7 @@ export const SummaryPanelContent: React.FC<{
   metrics,
   type,
   stats,
+  maxChunkAge,
   limit,
   range,
   lastRefresh,
@@ -143,6 +145,9 @@ export const SummaryPanelContent: React.FC<{
       <TextContent className="summary-text-container">
         <Text component={TextVariants.h3}>{`${t('Configuration')}`}</Text>
         <Text className="summary-config-item">{`${t('Sampling')}: ${config.sampling}`}</Text>
+        {!Number.isNaN(maxChunkAge) && (
+          <Text className="summary-config-item">{`${t('Max chunk age')}: ${formatDuration(maxChunkAge)}`}</Text>
+        )}
       </TextContent>
     );
   };
@@ -445,6 +450,7 @@ export const SummaryPanel: React.FC<{
   metrics: NetflowMetrics;
   type: RecordType;
   stats?: Stats;
+  maxChunkAge: number;
   limit: number;
   range: number | TimeRange;
   lastRefresh?: Date;
@@ -458,6 +464,7 @@ export const SummaryPanel: React.FC<{
   flows,
   metrics,
   type,
+  maxChunkAge,
   stats,
   limit,
   range,
@@ -492,6 +499,7 @@ export const SummaryPanel: React.FC<{
           flows={flows}
           metrics={metrics}
           type={type}
+          maxChunkAge={maxChunkAge}
           stats={stats}
           limit={limit}
           range={range}

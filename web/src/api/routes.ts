@@ -181,3 +181,12 @@ export const getLimits = (): Promise<unknown> => {
     return r.data;
   });
 };
+
+export const getIngesterMaxChunkAge = (): Promise<string> => {
+  return axios.get(ContextSingleton.getHost() + '/api/loki/config/ingester/max_chunk_age').then(r => {
+    if (r.status >= 400) {
+      throw new Error(`${r.statusText} [code=${r.status}]`);
+    }
+    return r.data;
+  });
+};

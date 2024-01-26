@@ -272,3 +272,36 @@ func LokiConfig(cfg *loki.Config, param string) func(w http.ResponseWriter, r *h
 		writeJSON(w, code, cfg[param])
 	}
 }
+
+func IngesterMaxChunkAge(cfg *loki.Config) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		lokiClient := newLokiClient(cfg, r.Header, true)
+		baseURL := strings.TrimRight(cfg.StatusURL.String(), "/")
+
+		resp, code, err := executeLokiQuery(fmt.Sprintf("%s/%s", baseURL, "config"), lokiClient)
+		if err != nil {
+			writeError(w, code, err.Error())
+			return
+		}
+
+		cfg := make(map[string]interface{})
+		err = yaml.Unmarshal(resp, &cfg)
+		if err != nil {
+			hlog.WithError(err).Errorf("cannot unmarshal, response was: %v", string(resp))
+			writeError(w, code, err.Error())
+			return
+		}
+
+		// default max chunk age is 2h
+		// see https://grafana.com/docs/loki/latest/configure/#ingester
+		var maxChunkAge interface{} = "2h"
+		if cfg["ingester"] != nil {
+			ingester := cfg["ingester"].(map[string]interface{})
+			if ingester["max_chunk_age"] != nil {
+				maxChunkAge = ingester["max_chunk_age"]
+			}
+		}
+
+		writeJSON(w, code, maxChunkAge)
+	}
+}

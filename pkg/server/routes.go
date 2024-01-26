@@ -33,6 +33,7 @@ func setupRoutes(cfg *Config, authChecker auth.Checker) *mux.Router {
 	api.HandleFunc("/loki/metrics", handler.LokiMetrics(&cfg.Loki))
 	api.HandleFunc("/loki/buildinfo", handler.LokiBuildInfos(&cfg.Loki))
 	api.HandleFunc("/loki/config/limits", handler.LokiConfig(&cfg.Loki, "limits_config"))
+	api.HandleFunc("/loki/config/ingester/max_chunk_age", handler.IngesterMaxChunkAge(&cfg.Loki))
 	api.HandleFunc("/loki/flow/records", handler.GetFlows(&cfg.Loki))
 	api.HandleFunc("/loki/flow/metrics", handler.GetTopology(&cfg.Loki))
 	api.HandleFunc("/loki/export", handler.ExportFlows(&cfg.Loki))
