@@ -149,11 +149,3 @@ export const findProtocolOption = (nameOrVal: string) => {
 export const findDirectionOption = (nameOrVal: string, t: TFunction) => {
   return getDirectionOptions(t).find(o => o.name.toLowerCase() === nameOrVal.toLowerCase() || o.value === nameOrVal);
 };
-
-export const cap10 = (getOptions: (value: string) => Promise<FilterOption[]>) => {
-  return (value: string) => {
-    return getOptions(value).then(opts => {
-      return opts.length <= 10 ? opts : opts.slice(0, 10);
-    });
-  };
-};

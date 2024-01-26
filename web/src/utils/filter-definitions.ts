@@ -23,7 +23,6 @@ import {
   getProtocolOptions,
   getResourceOptions,
   noOption,
-  cap10,
   getDnsResponseCodeOptions,
   getDropStateOptions,
   getDropCauseOptions,
@@ -251,16 +250,16 @@ export const getFilterDefinitions = (
       | undefined = undefined;
 
     if (d.id.includes('namespace')) {
-      getOptions = cap10(getNamespaceOptions);
+      getOptions = getNamespaceOptions;
       validate = k8sNameValidation;
     } else if (d.id.includes('name')) {
       validate = k8sNameValidation;
     } else if (d.id.includes('kind')) {
-      getOptions = cap10(getKindOptions);
+      getOptions = getKindOptions;
       validate = rejectEmptyValue;
       encoder = kindFiltersEncoder(`${isSrc ? 'Src' : 'Dst'}K8S_Type`, `${isSrc ? 'Src' : 'Dst'}K8S_OwnerType`);
     } else if (d.id.includes('resource')) {
-      getOptions = cap10(getResourceOptions);
+      getOptions = getResourceOptions;
       validate = k8sResourceValidation;
       checkCompletion = k8sResourceCompletion;
       encoder = k8sResourceFiltersEncoder(
@@ -273,28 +272,28 @@ export const getFilterDefinitions = (
     } else if (d.id.includes('address')) {
       validate = addressValidation;
     } else if (d.id.includes('port')) {
-      getOptions = cap10(getPortOptions);
+      getOptions = getPortOptions;
       validate = portValidation;
     } else if (d.id.includes('mac')) {
       validate = macValidation;
     } else if (d.id.includes('proto')) {
-      getOptions = cap10(getProtocolOptions);
+      getOptions = getProtocolOptions;
       validate = protoValidation;
     } else if (d.id.includes('direction')) {
       getOptions = v => getDirectionOptionsAsync(v, t);
       validate = dirValidation;
     } else if (d.id.includes('drop_state')) {
-      getOptions = cap10(getDropStateOptions);
+      getOptions = getDropStateOptions;
       encoder = simpleFiltersEncoder('PktDropLatestState');
     } else if (d.id.includes('drop_cause')) {
-      getOptions = cap10(getDropCauseOptions);
+      getOptions = getDropCauseOptions;
       encoder = simpleFiltersEncoder('PktDropLatestDropCause');
     } else if (d.id.includes('dns_flag_response_code')) {
-      getOptions = cap10(getDnsResponseCodeOptions);
+      getOptions = getDnsResponseCodeOptions;
     } else if (d.id.includes('dns_errno')) {
-      getOptions = cap10(getDnsErrorCodeOptions);
+      getOptions = getDnsErrorCodeOptions;
     } else if (d.id.includes('dscp')) {
-      getOptions = cap10(getDSCPOptions);
+      getOptions = getDSCPOptions;
     }
     return { getOptions, validate, encoder, checkCompletion };
   };

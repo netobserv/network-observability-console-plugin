@@ -10,12 +10,13 @@ import {
   TextInput,
   ValidatedOptions
 } from '@patternfly/react-core';
-import { SearchIcon } from '@patternfly/react-icons';
+import { SearchIcon, CaretDownIcon } from '@patternfly/react-icons';
 import { createFilterValue, FilterDefinition, FilterOption, FilterValue } from '../../model/filters';
 import { getHTTPErrorDetails } from '../../utils/errors';
 import { autoCompleteCache } from '../../utils/autocomplete-cache';
 import { Indicator } from './filters-helper';
 import { usePrevious } from '../../utils/previous-hook';
+import './autocomplete-filter.css';
 
 const optionsMenuID = 'options-menu-list';
 const isMenuOption = (elt?: Element) => {
@@ -40,8 +41,7 @@ export const AutocompleteFilter: React.FC<AutocompleteFilterProps> = ({
   const autocompleteContainerRef = React.useRef<HTMLDivElement | null>(null);
   const searchInputRef = React.useRef<HTMLInputElement | null>(null);
   const optionsRef = React.useRef<HTMLDivElement | null>(null);
-  const [autocompleteOptions, setAutocompleteOptions] = React.useState<FilterOption[]>([]);
-  const [isPopperVisible, setPopperVisible] = React.useState(false);
+  const [options, setOptions] = React.useState<FilterOption[]>([]);
   const [currentValue, setCurrentValue] = React.useState<string>('');
   const previousFilterDefinition = usePrevious(filterDefinition);
 
@@ -49,7 +49,8 @@ export const AutocompleteFilter: React.FC<AutocompleteFilterProps> = ({
     if (filterDefinition !== previousFilterDefinition) {
       //reset filter value if definition has changed
       resetFilterValue();
-      searchInputRef?.current?.focus();
+      searchInputRef.current?.focus();
+      searchInputRef.current?.setAttribute('autocomplete', 'off');
       autoCompleteCache.clear();
     } else if (_.isEmpty(currentValue)) {
       setIndicator(ValidatedOptions.default);
@@ -61,17 +62,12 @@ export const AutocompleteFilter: React.FC<AutocompleteFilterProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentValue, filterDefinition, setIndicator]);
 
-  React.useEffect(() => {
-    // The menu is hidden if there are no options
-    setPopperVisible(autocompleteOptions.length > 0);
-  }, [autocompleteOptions]);
-
   const resetFilterValue = React.useCallback(() => {
     setCurrentValue('');
-    setAutocompleteOptions([]);
+    setOptions([]);
     setMessageWithDelay(undefined);
     setIndicator(ValidatedOptions.default);
-  }, [setCurrentValue, setAutocompleteOptions, setMessageWithDelay, setIndicator]);
+  }, [setCurrentValue, setMessageWithDelay, setIndicator, setOptions]);
 
   const addFilter = React.useCallback(
     (option: FilterOption) => {
@@ -90,14 +86,16 @@ export const AutocompleteFilter: React.FC<AutocompleteFilterProps> = ({
       setCurrentValue(newValue);
       filterDefinition
         .getOptions(newValue)
-        .then(setAutocompleteOptions)
+        .then(opts => {
+          setOptions(opts);
+        })
         .catch(err => {
           const errorMessage = getHTTPErrorDetails(err);
           setMessageWithDelay(errorMessage);
-          setAutocompleteOptions([]);
+          setOptions([]);
         });
     },
-    [setCurrentValue, filterDefinition, setAutocompleteOptions, setMessageWithDelay]
+    [setOptions, setCurrentValue, filterDefinition, setMessageWithDelay]
   );
 
   const onAutoCompleteOptionSelected = React.useCallback(
@@ -111,28 +109,28 @@ export const AutocompleteFilter: React.FC<AutocompleteFilterProps> = ({
         }
       } else {
         addFilter(option);
-        setAutocompleteOptions([]);
+        setOptions([]);
       }
     },
-    [addFilter, onAutoCompleteChange, filterDefinition, currentValue]
+    [addFilter, onAutoCompleteChange, filterDefinition, currentValue, setOptions]
   );
 
   const onAutoCompleteSelect = React.useCallback(
     (e: React.MouseEvent<Element, MouseEvent> | undefined, itemId: string) => {
       e?.stopPropagation();
-      const option = autocompleteOptions.find(opt => opt.value === itemId);
+      const option = options.find(opt => opt.value === itemId);
       if (!option) {
         return;
       }
       onAutoCompleteOptionSelected(option);
     },
-    [autocompleteOptions, onAutoCompleteOptionSelected]
+    [options, onAutoCompleteOptionSelected]
   );
 
   const onEnter = React.useCallback(() => {
     // Only one choice is present, consider this is what is desired
-    if (autocompleteOptions.length === 1) {
-      onAutoCompleteOptionSelected(autocompleteOptions[0]);
+    if (options.length === 1) {
+      onAutoCompleteOptionSelected(options[0]);
       return;
     }
 
@@ -150,7 +148,7 @@ export const AutocompleteFilter: React.FC<AutocompleteFilterProps> = ({
       }
     });
   }, [
-    autocompleteOptions,
+    options,
     filterDefinition,
     currentValue,
     onAutoCompleteOptionSelected,
@@ -166,7 +164,7 @@ export const AutocompleteFilter: React.FC<AutocompleteFilterProps> = ({
     // We need to skip a couple of render frames to get the new focused element
     setTimeout(() => {
       if (!isMenuOption(document.activeElement || undefined)) {
-        setAutocompleteOptions([]);
+        setOptions([]);
       }
     }, 50);
   }, []);
@@ -191,10 +189,10 @@ export const AutocompleteFilter: React.FC<AutocompleteFilterProps> = ({
             />
           }
           popper={
-            <Menu ref={optionsRef} onSelect={onAutoCompleteSelect}>
+            <Menu ref={optionsRef} onSelect={onAutoCompleteSelect} isScrollable={options.length > 8}>
               <MenuContent>
                 <MenuList id={optionsMenuID}>
-                  {autocompleteOptions.map(option => (
+                  {options.map(option => (
                     <MenuItem data-test={option.value} itemId={option.value} key={option.name} onBlur={onBlur}>
                       {option.name}
                     </MenuItem>
@@ -203,11 +201,28 @@ export const AutocompleteFilter: React.FC<AutocompleteFilterProps> = ({
               </MenuContent>
             </Menu>
           }
-          isVisible={isPopperVisible}
+          isVisible={!_.isEmpty(options)}
           enableFlip={false}
           appendTo={autocompleteContainerRef.current!}
         />
       </div>
+      <Button
+        data-test="autocomplete-menu-button"
+        id="autocomplete-menu-button"
+        variant="control"
+        aria-label="show values"
+        onClick={() =>
+          setTimeout(() => {
+            if (_.isEmpty(options)) {
+              onAutoCompleteChange(currentValue);
+            } else {
+              setOptions([]);
+            }
+          }, 100)
+        }
+      >
+        <CaretDownIcon />
+      </Button>
       <Button
         data-test="search-button"
         id="search-button"
