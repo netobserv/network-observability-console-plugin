@@ -189,3 +189,31 @@ div#filter-toolbar-search-filters {
 #clear-all-filters-button {
   padding: 0;
 }
+
+.custom-chip.buttonless>p {
+  margin-right: 1rem;
+}
+
+.custom-chip.selected,
+.custom-chip.selected>button,
+.custom-chip.selected>*,
+.pf-theme-dark .custom-chip.selected,
+.pf-theme-dark .custom-chip.selected>button,
+.pf-theme-dark .custom-chip.selected>* {
+  color: #fff;
+  background-color: #06c;
+}
+
+.custom-chip.unselected,
+.custom-chip.unselected>button,
+.custom-chip.unselected>* {
+  color: #000;
+  background-color: #fff;
+}
+
+.pf-theme-dark .custom-chip.unselected,
+.pf-theme-dark .custom-chip.unselected>button,
+.pf-theme-dark .custom-chip.unselected>* {
+  color: #000;
+  background-color: #D2D2D2;
+}

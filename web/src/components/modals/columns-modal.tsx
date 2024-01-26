@@ -11,6 +11,8 @@ import {
   DragDrop,
   Draggable,
   Droppable,
+  Flex,
+  FlexItem,
   Text,
   TextContent,
   TextVariants,
@@ -24,6 +26,8 @@ import { Column, ColumnSizeMap, getDefaultColumns, getFullColumnName } from '../
 import './columns-modal.css';
 import Modal from './modal';
 
+export const COLUMN_FILTER_KEYS = ['source', 'destination', 'time', 'host', 'namespace', 'owner', 'ip', 'dns'];
+
 export const ColumnsModal: React.FC<{
   isModalOpen: boolean;
   setModalOpen: (v: boolean) => void;
@@ -35,9 +39,14 @@ export const ColumnsModal: React.FC<{
 }> = ({ id, config, isModalOpen, setModalOpen, columns, setColumns, setColumnSizes }) => {
   const [resetClicked, setResetClicked] = React.useState<boolean>(false);
   const [updatedColumns, setUpdatedColumns] = React.useState<Column[]>([]);
-  const [isSaveDisabled, setSaveDisabled] = React.useState<boolean>(true);
-  const [isAllSelected, setAllSelected] = React.useState<boolean>(false);
+  const [filterKeys, setFilterKeys] = React.useState<string[]>([]);
   const { t } = useTranslation('plugin__netobserv-plugin');
+
+  React.useEffect(() => {
+    if (isModalOpen) {
+      setFilterKeys([]);
+    }
+  }, [isModalOpen]);
 
   React.useEffect(() => {
     if (!isModalOpen || _.isEmpty(updatedColumns)) {
@@ -45,18 +54,6 @@ export const ColumnsModal: React.FC<{
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [columns, isModalOpen]);
-
-  React.useEffect(() => {
-    let allSelected = true;
-    _.forEach(updatedColumns, (col: Column) => {
-      if (!col.isSelected) {
-        allSelected = false;
-        return false;
-      }
-    });
-    setAllSelected(allSelected);
-    setSaveDisabled(_.isEmpty(updatedColumns.filter(col => col.isSelected)));
-  }, [updatedColumns]);
 
   const onDrop = React.useCallback(
     (source, dest) => {
@@ -91,13 +88,49 @@ export const ColumnsModal: React.FC<{
     setUpdatedColumns(getDefaultColumns(config.columns).filter(c => columns.some(existing => existing.id === c.id)));
   }, [columns, config.columns]);
 
+  const isSaveDisabled = React.useCallback(() => {
+    return _.isEmpty(updatedColumns.filter(c => c.isSelected));
+  }, [updatedColumns]);
+
+  const isFilteredColumn = React.useCallback((c: Column, fks: string[]) => {
+    return (
+      _.isEmpty(fks) ||
+      _.reduce(
+        fks,
+        (acc, fk) =>
+          (acc =
+            acc &&
+            (c.id.toLowerCase().includes(fk) ||
+              c.name.toLowerCase().includes(fk) ||
+              c.group?.toLowerCase().includes(fk) ||
+              false)),
+        true
+      )
+    );
+  }, []);
+
+  const getColumnFilterKeys = React.useCallback(() => {
+    return COLUMN_FILTER_KEYS.filter(fk => columns.some(c => isFilteredColumn(c, [fk])));
+  }, [columns, isFilteredColumn]);
+
+  const filteredColumns = React.useCallback(() => {
+    return updatedColumns.filter(c => isFilteredColumn(c, filterKeys));
+  }, [filterKeys, isFilteredColumn, updatedColumns]);
+
+  const isAllSelected = React.useCallback(() => {
+    return _.reduce(filteredColumns(), (acc, c) => (acc = acc && c.isSelected), true);
+  }, [filteredColumns]);
+
   const onSelectAll = React.useCallback(() => {
+    const allSelected = isAllSelected();
     const result = [...updatedColumns];
-    _.forEach(result, (col: Column) => {
-      col.isSelected = !isAllSelected;
+    _.forEach(result, (c: Column) => {
+      if (isFilteredColumn(c, filterKeys)) {
+        c.isSelected = !allSelected;
+      }
     });
     setUpdatedColumns(result);
-  }, [updatedColumns, setUpdatedColumns, isAllSelected]);
+  }, [isAllSelected, updatedColumns, isFilteredColumn, filterKeys]);
 
   const onClose = React.useCallback(() => {
     setResetClicked(false);
@@ -113,7 +146,18 @@ export const ColumnsModal: React.FC<{
     onClose();
   }, [resetClicked, setColumns, updatedColumns, onClose, setColumnSizes]);
 
-  const draggableItems = updatedColumns.map((column, i) => (
+  const toggleChip = React.useCallback(
+    (key: string) => {
+      if (filterKeys.includes(key)) {
+        setFilterKeys(filterKeys.filter(k => k !== key));
+      } else {
+        setFilterKeys(COLUMN_FILTER_KEYS.filter(f => f === key || filterKeys.includes(f)));
+      }
+    },
+    [filterKeys]
+  );
+
+  const draggableItems = filteredColumns().map((column, i) => (
     <Draggable key={i} hasNoWrapper>
       <DataListItem
         key={'data-list-item-' + i}
@@ -153,15 +197,46 @@ export const ColumnsModal: React.FC<{
       scrollable={true}
       onClose={onClose}
       description={
-        <TextContent>
-          <Text component={TextVariants.p}>
-            {t('Selected columns will appear in the table.')}&nbsp;
-            {t('Click and drag the items to reorder the columns in the table.')}
-          </Text>
-          <Button isInline onClick={onSelectAll} variant="link">
-            {isAllSelected ? t('Unselect all') : t('Select all')}
-          </Button>
-        </TextContent>
+        <>
+          <TextContent>
+            <Text component={TextVariants.p}>
+              {t('Selected columns will appear in the table.')}&nbsp;
+              {t('Click and drag the items to reorder the columns in the table.')}
+            </Text>
+          </TextContent>
+          <Flex className="popup-header-margin">
+            <FlexItem flex={{ default: 'flex_4' }}>
+              <Flex className="flex-gap">
+                {getColumnFilterKeys().map(key => {
+                  return (
+                    <FlexItem
+                      key={key}
+                      onClick={() => toggleChip(key)}
+                      className={`custom-chip ${
+                        filterKeys.includes(key) ? 'selected' : 'unselected'
+                      } buttonless gap pointer`}
+                    >
+                      <Text component={TextVariants.p}>{key}</Text>
+                    </FlexItem>
+                  );
+                })}
+              </Flex>
+            </FlexItem>
+            <FlexItem flex={{ default: 'flex_1' }} className="flex-center">
+              {_.isEmpty(filteredColumns()) ? (
+                <Button isInline onClick={() => setFilterKeys([])} variant="link">
+                  {t('Clear filters')}
+                </Button>
+              ) : (
+                <Button isInline onClick={onSelectAll} variant="link">
+                  {`${isAllSelected() ? t('Unselect all') : t('Select all')}${
+                    !_.isEmpty(filterKeys) ? ' ' + filterKeys.join(',') : ''
+                  }`}
+                </Button>
+              )}
+            </FlexItem>
+          </Flex>
+        </>
       }
       footer={
         <div className="footer">
@@ -171,10 +246,10 @@ export const ColumnsModal: React.FC<{
           <Button data-test="columns-cancel-button" key="cancel" variant="link" onClick={() => onClose()}>
             {t('Cancel')}
           </Button>
-          <Tooltip content={t('At least one column must be selected')} trigger="" isVisible={isSaveDisabled}>
+          <Tooltip content={t('At least one column must be selected')} trigger="" isVisible={isSaveDisabled()}>
             <Button
               data-test="columns-save-button"
-              isDisabled={isSaveDisabled}
+              isDisabled={isSaveDisabled()}
               key="confirm"
               variant="primary"
               onClick={() => onSave()}

@@ -11,6 +11,8 @@ import {
   DragDrop,
   Draggable,
   Droppable,
+  Flex,
+  FlexItem,
   Text,
   TextContent,
   TextVariants,
@@ -24,6 +26,8 @@ import { getDefaultOverviewPanels, getOverviewPanelInfo, OverviewPanel } from '.
 import Modal from './modal';
 import './overview-panels-modal.css';
 
+export const PANEL_FILTER_KEYS = ['top', 'total', 'dns', 'dropped', 'bar', 'donut', 'line'];
+
 export const OverviewPanelsModal: React.FC<{
   isModalOpen: boolean;
   setModalOpen: (v: boolean) => void;
@@ -33,9 +37,14 @@ export const OverviewPanelsModal: React.FC<{
   id?: string;
 }> = ({ id, isModalOpen, setModalOpen, recordType, panels, setPanels }) => {
   const [updatedPanels, setUpdatedPanels] = React.useState<OverviewPanel[]>([]);
-  const [isSaveDisabled, setSaveDisabled] = React.useState<boolean>(true);
-  const [isAllSelected, setAllSelected] = React.useState<boolean>(false);
+  const [filterKeys, setFilterKeys] = React.useState<string[]>([]);
   const { t } = useTranslation('plugin__netobserv-plugin');
+
+  React.useEffect(() => {
+    if (isModalOpen) {
+      setFilterKeys([]);
+    }
+  }, [isModalOpen]);
 
   React.useEffect(() => {
     if (!isModalOpen || _.isEmpty(updatedPanels)) {
@@ -43,18 +52,6 @@ export const OverviewPanelsModal: React.FC<{
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isModalOpen, panels]);
-
-  React.useEffect(() => {
-    let allSelected = true;
-    _.forEach(updatedPanels, (p: OverviewPanel) => {
-      if (!p.isSelected) {
-        allSelected = false;
-        return false;
-      }
-    });
-    setAllSelected(allSelected);
-    setSaveDisabled(_.isEmpty(updatedPanels.filter(col => col.isSelected)));
-  }, [updatedPanels]);
 
   const onDrop = React.useCallback(
     (source, dest) => {
@@ -88,13 +85,35 @@ export const OverviewPanelsModal: React.FC<{
     setUpdatedPanels(getDefaultOverviewPanels().filter(p => panels.some(existing => existing.id === p.id)));
   }, [panels]);
 
+  const isSaveDisabled = React.useCallback(() => {
+    return _.isEmpty(updatedPanels.filter(p => p.isSelected));
+  }, [updatedPanels]);
+
+  const isFilteredPanel = React.useCallback(
+    (p: OverviewPanel) => {
+      return _.isEmpty(filterKeys) || _.reduce(filterKeys, (acc, fk) => (acc = acc && p.id.includes(fk)), true);
+    },
+    [filterKeys]
+  );
+
+  const filteredPanels = React.useCallback(() => {
+    return updatedPanels.filter(p => isFilteredPanel(p));
+  }, [isFilteredPanel, updatedPanels]);
+
+  const isAllSelected = React.useCallback(() => {
+    return _.reduce(filteredPanels(), (acc, p) => (acc = acc && p.isSelected), true);
+  }, [filteredPanels]);
+
   const onSelectAll = React.useCallback(() => {
+    const allSelected = isAllSelected();
     const result = [...updatedPanels];
     _.forEach(result, (p: OverviewPanel) => {
-      p.isSelected = !isAllSelected;
+      if (isFilteredPanel(p)) {
+        p.isSelected = !allSelected;
+      }
     });
     setUpdatedPanels(result);
-  }, [updatedPanels, setUpdatedPanels, isAllSelected]);
+  }, [isAllSelected, updatedPanels, isFilteredPanel]);
 
   const onClose = React.useCallback(() => {
     setUpdatedPanels(_.cloneDeep(panels));
@@ -106,7 +125,18 @@ export const OverviewPanelsModal: React.FC<{
     onClose();
   }, [setPanels, updatedPanels, onClose]);
 
-  const draggableItems = updatedPanels.map((panel, i) => {
+  const toggleChip = React.useCallback(
+    (key: string) => {
+      if (filterKeys.includes(key)) {
+        setFilterKeys(filterKeys.filter(k => k !== key));
+      } else {
+        setFilterKeys(PANEL_FILTER_KEYS.filter(f => f === key || filterKeys.includes(f)));
+      }
+    },
+    [filterKeys]
+  );
+
+  const draggableItems = filteredPanels().map((panel, i) => {
     const info = getOverviewPanelInfo(t, panel.id, undefined, recordType === 'flowLog' ? t('flow') : t('conversation'));
     return (
       <Draggable key={i} hasNoWrapper>
@@ -152,15 +182,45 @@ export const OverviewPanelsModal: React.FC<{
       scrollable={true}
       onClose={() => onClose()}
       description={
-        <TextContent>
-          <Text component={TextVariants.p}>
-            {t('Selected panels will appear in the overview tab.')}&nbsp;
-            {t('Click and drag the items to reorder the panels in the overview tab.')}
-          </Text>
-          <Button isInline onClick={onSelectAll} variant="link">
-            {isAllSelected ? t('Unselect all') : t('Select all')}
-          </Button>
-        </TextContent>
+        <>
+          <TextContent>
+            <Text component={TextVariants.p}>
+              {t('Selected panels will appear in the overview tab.')}&nbsp;
+              {t('Click and drag the items to reorder the panels in the overview tab.')}
+            </Text>
+          </TextContent>
+          <Flex className="popup-header-margin">
+            <FlexItem flex={{ default: 'flex_4' }}>
+              <Flex className="flex-gap">
+                {PANEL_FILTER_KEYS.map(key => {
+                  return (
+                    <FlexItem
+                      key={key}
+                      className={`custom-chip ${filterKeys.includes(key) ? 'selected' : 'unselected'} buttonless gap`}
+                    >
+                      <Text component={TextVariants.p} onClick={() => toggleChip(key)}>
+                        {key}
+                      </Text>
+                    </FlexItem>
+                  );
+                })}
+              </Flex>
+            </FlexItem>
+            <FlexItem flex={{ default: 'flex_1' }} className="flex-center">
+              {_.isEmpty(filteredPanels()) ? (
+                <Button isInline onClick={() => setFilterKeys([])} variant="link">
+                  {t('Clear filters')}
+                </Button>
+              ) : (
+                <Button isInline onClick={onSelectAll} variant="link">
+                  {`${isAllSelected() ? t('Unselect all') : t('Select all')}${
+                    !_.isEmpty(filterKeys) ? ' ' + filterKeys.join(',') : ''
+                  }`}
+                </Button>
+              )}
+            </FlexItem>
+          </Flex>
+        </>
       }
       footer={
         <div className="footer">
@@ -170,10 +230,10 @@ export const OverviewPanelsModal: React.FC<{
           <Button data-test="panels-cancel-button" key="cancel" variant="link" onClick={() => onClose()}>
             {t('Cancel')}
           </Button>
-          <Tooltip content={t('At least one panel must be selected')} isVisible={isSaveDisabled}>
+          <Tooltip content={t('At least one panel must be selected')} isVisible={isSaveDisabled()}>
             <Button
               data-test="panels-save-button"
-              isDisabled={isSaveDisabled}
+              isDisabled={isSaveDisabled()}
               key="confirm"
               variant="primary"
               onClick={() => onSave()}
