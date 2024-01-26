@@ -25,3 +25,19 @@ label {
     margin-bottom: auto;
     padding: inherit;
 }
+
+.popup-header-margin {
+    margin-top: 1rem;
+}
+
+.flex-center {
+    align-self: center;
+}
+
+.flex-gap {
+    gap: 0.5rem;
+}
+
+.custom-chip.pointer {
+    cursor: pointer;
+}
