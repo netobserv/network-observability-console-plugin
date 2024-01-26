@@ -118,22 +118,7 @@ export const LokiError: React.FC<Props> = ({ title, error }) => {
           </Text>
           {
             <TextContent className="error-text-content">
-              {!_.isEmpty(ready) && (
-                <>
-                  <Text component={TextVariants.p}>{t(`Loki '/ready' endpoint returned the following error`)}</Text>
-                  <Text className="loki-error-message" component={TextVariants.p}>
-                    {ready}
-                  </Text>
-                </>
-              )}
-              <Text component={TextVariants.p}>
-                {t('You may consider the following query changes to avoid this error')}
-              </Text>
-              {!_.isEmpty(ready) && (
-                <Text component={TextVariants.blockquote}>
-                  {t(`Check if Loki is running correctly. '/ready' endpoint should respond "ready"`)}
-                </Text>
-              )}
+              <Text component={TextVariants.p}>{t('You may consider the following changes to avoid this error:')}</Text>
               {error.includes('max entries limit') && (
                 <>
                   <Text component={TextVariants.blockquote}>
@@ -179,6 +164,44 @@ export const LokiError: React.FC<Props> = ({ title, error }) => {
                     {t('Increase Loki "max_query_length" entry in configuration file')}
                   </Text>
                 </>
+              )}
+              {error.includes('input size too long') && (
+                <>
+                  <Text component={TextVariants.blockquote}>
+                    {t('This error is generally seen when cluster admin groups are not properly configured.')}{' '}
+                    {t('Click the link below for more help.')}
+                  </Text>
+                  <Button
+                    variant="link"
+                    icon={<ExternalLinkSquareAltIcon />}
+                    iconPosition="right"
+                    component={(props: React.FunctionComponent) => (
+                      <Link
+                        {...props}
+                        target="_blank"
+                        to={{
+                          pathname:
+                            'https://github.com/netobserv/documents/blob/main/loki_operator.md#loki-input-size-too-long-error'
+                        }}
+                      />
+                    )}
+                  >
+                    {t('More information')}
+                  </Button>
+                </>
+              )}
+              {!_.isEmpty(ready) && (
+                <>
+                  <Text component={TextVariants.p}>{t(`Loki '/ready' endpoint returned the following error`)}</Text>
+                  <Text className="loki-error-message" component={TextVariants.p}>
+                    {ready}
+                  </Text>
+                </>
+              )}
+              {!_.isEmpty(ready) && (
+                <Text component={TextVariants.blockquote}>
+                  {t(`Check if Loki is running correctly. '/ready' endpoint should respond "ready"`)}
+                </Text>
               )}
             </TextContent>
           }
