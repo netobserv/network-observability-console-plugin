@@ -69,6 +69,15 @@ span.pf-c-button__icon.pf-m-start {
     padding: 0;
 }
 
+/* fix page section color for PF4 compat in OCP 4.15+ */
+#pageSection.light {
+    background: #fff;
+}
+
+#pageSection.dark {
+    background: #1b1d21;
+}
+
 #filter-toolbar {
     padding: 0 1.5rem 0 1.5rem;
 }

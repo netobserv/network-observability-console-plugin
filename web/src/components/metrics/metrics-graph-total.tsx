@@ -48,6 +48,7 @@ export type MetricsGraphWithTotalProps = {
   topAsBars?: boolean;
   showLegend?: boolean;
   animate?: boolean;
+  isDark?: boolean;
 };
 
 export const MetricsGraphWithTotal: React.FC<MetricsGraphWithTotalProps> = ({
@@ -68,7 +69,8 @@ export const MetricsGraphWithTotal: React.FC<MetricsGraphWithTotalProps> = ({
   smallerTexts,
   topAsBars,
   showLegend,
-  animate
+  animate,
+  isDark
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
@@ -135,7 +137,7 @@ export const MetricsGraphWithTotal: React.FC<MetricsGraphWithTotalProps> = ({
   return (
     <>
       <TextContent id="metrics" className="metrics-content-div">
-        <div id={`chart-${id}`} className="metrics-content-div" ref={containerRef}>
+        <div id={`chart-${id}`} className={`metrics-content-div ${isDark ? 'dark' : 'light'}`} ref={containerRef}>
           <Chart
             themeColor={ChartThemeColor.multiUnordered}
             containerComponent={

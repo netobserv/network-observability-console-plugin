@@ -43,6 +43,7 @@ export type MetricsGraphProps = {
   tooltipsTruncate: boolean;
   showLegend?: boolean;
   animate?: boolean;
+  isDark?: boolean;
 };
 
 export const MetricsGraph: React.FC<MetricsGraphProps> = ({
@@ -59,7 +60,8 @@ export const MetricsGraph: React.FC<MetricsGraphProps> = ({
   itemsPerRow,
   tooltipsTruncate,
   showLegend,
-  animate
+  animate,
+  isDark
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
@@ -94,7 +96,12 @@ export const MetricsGraph: React.FC<MetricsGraphProps> = ({
   }, [containerRef, dimensions]);
 
   return (
-    <div id={`chart-${id}`} className="metrics-content-div" ref={containerRef} data-test-metrics={metrics.length}>
+    <div
+      id={`chart-${id}`}
+      className={`metrics-content-div ${isDark ? 'dark' : 'light'}`}
+      ref={containerRef}
+      data-test-metrics={metrics.length}
+    >
       <Chart
         themeColor={ChartThemeColor.multiUnordered}
         containerComponent={

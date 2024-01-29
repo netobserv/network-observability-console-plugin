@@ -135,6 +135,7 @@ export const ElementPanel: React.FC<{
   setFilters: (filters: Filter[]) => void;
   truncateLength: TruncateLength;
   id?: string;
+  isDark?: boolean;
 }> = ({
   id,
   element,
@@ -145,7 +146,8 @@ export const ElementPanel: React.FC<{
   filterDefinitions,
   setFilters,
   onClose,
-  truncateLength
+  truncateLength,
+  isDark
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [activeTab, setActiveTab] = React.useState<string>('details');
@@ -217,6 +219,7 @@ export const ElementPanel: React.FC<{
                 metrics={metrics}
                 metricType={metricType}
                 truncateLength={truncateLength}
+                isDark={isDark}
               />
             </Tab>
           )}
@@ -229,6 +232,7 @@ export const ElementPanel: React.FC<{
                 metrics={droppedMetrics}
                 metricType={metricType}
                 truncateLength={truncateLength}
+                isDark={isDark}
               />
             </Tab>
           )}

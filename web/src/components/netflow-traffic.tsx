@@ -1084,7 +1084,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
   const viewTabs = () => {
     return (
       <Tabs
-        className="netflow-traffic-tabs"
+        className={`netflow-traffic-tabs ${isDarkTheme ? 'dark' : 'light'}`}
         usePageInsets
         activeKey={selectedViewId}
         onSelect={(event, eventkey) => selectView(eventkey as ViewId)}
@@ -1103,8 +1103,14 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
   };
 
   const onOverviewExport = () => {
-    const overview_flex = document.getElementById('overview-flex');
-    exportToPng('overview_page', overview_flex as HTMLElement, isDarkTheme);
+    const prevFocusState = overviewFocus;
+    setOverviewFocus(false);
+    setTimeout(() => {
+      const overview_flex = document.getElementById('overview-flex');
+      exportToPng('overview_page', overview_flex as HTMLElement, isDarkTheme, undefined, () =>
+        setOverviewFocus(prevFocusState)
+      );
+    }, 500);
   };
 
   const viewOptionsContent = () => {
@@ -1356,6 +1362,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
           filterDefinitions={getFilterDefs()}
           setFilters={setFiltersList}
           onClose={() => onElementSelect(undefined)}
+          isDark={isDarkTheme}
         />
       );
     } else {
@@ -1607,7 +1614,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
   const isShowViewOptions = selectedViewId === 'table' ? showViewOptions && !showHistogram : showViewOptions;
 
   return !_.isEmpty(extensions) ? (
-    <PageSection id="pageSection" className={isTab ? 'tab' : ''}>
+    <PageSection id="pageSection" className={`${isDarkTheme ? 'dark' : 'light'} ${isTab ? 'tab' : ''}`}>
       {
         //display title only if forced filters is not set
         !forcedFilters && (
