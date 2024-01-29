@@ -3,7 +3,7 @@ import { FilterConfigDef } from './filters';
 import { RecordType } from './flow-query';
 import { RawQuickFilter } from './quick-filters';
 
-export type Feature = 'pktDrop' | 'dnsTracking' | 'flowRTT';
+export type Feature = 'multiCluster' | 'zones' | 'pktDrop' | 'dnsTracking' | 'flowRTT';
 
 export type Deduper = {
   mark: boolean;

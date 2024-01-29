@@ -104,6 +104,12 @@ export interface Fields {
   SrcK8S_HostName?: string;
   /** Destination node name */
   DstK8S_HostName?: string;
+  /** Source zone */
+  SrcK8S_Zone?: string;
+  /** Destination zone */
+  DstK8S_Zone?: string;
+  /** Cluster name */
+  K8S_ClusterName?: string;
   /** L4 protocol */
   Proto: number;
   /** Flow direction of the first flow captured, only when using eBPF deduper 'merge' mode */

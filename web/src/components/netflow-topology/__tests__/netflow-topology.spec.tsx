@@ -36,7 +36,9 @@ describe('<NetflowTopology />', () => {
     selected: undefined,
     onSelect: jest.fn(),
     searchHandle: null,
-    searchEvent: undefined
+    searchEvent: undefined,
+    allowMultiCluster: false,
+    allowZone: false
   };
 
   it('should render component', async () => {

@@ -30,7 +30,7 @@ import {
   GraphElementPeer,
   LayoutName,
   NodeData,
-  toggleElementFilter,
+  toggleDirElementFilter as toggleDirElementFilter,
   TopologyGroupTypes,
   TopologyOptions
 } from '../../../model/topology';
@@ -176,7 +176,15 @@ export const TopologyContent: React.FC<{
   const onFilter = React.useCallback(
     (id: string, data: NodeData, dir: FilterDir, isFiltered: boolean) => {
       if (data.nodeType && data.peer) {
-        toggleElementFilter(data.nodeType, data.peer, dir, isFiltered, filters.list, setFiltersList, filterDefinitions);
+        toggleDirElementFilter(
+          data.nodeType,
+          data.peer,
+          dir,
+          isFiltered,
+          filters.list,
+          setFiltersList,
+          filterDefinitions
+        );
         setSelectedIds([id]);
       }
     },
@@ -188,6 +196,14 @@ export const TopologyContent: React.FC<{
       let scope: MetricScopeOptions;
       let groupTypes: TopologyGroupTypes;
       switch (metricScope) {
+        case MetricScopeOptions.CLUSTER:
+          scope = MetricScopeOptions.ZONE;
+          groupTypes = TopologyGroupTypes.CLUSTERS;
+          break;
+        case MetricScopeOptions.ZONE:
+          scope = MetricScopeOptions.HOST;
+          groupTypes = TopologyGroupTypes.ZONES;
+          break;
         case MetricScopeOptions.HOST:
           scope = MetricScopeOptions.NAMESPACE;
           groupTypes = TopologyGroupTypes.NONE;
@@ -203,7 +219,7 @@ export const TopologyContent: React.FC<{
       if (data.nodeType && data.peer) {
         setMetricScope(scope);
         setOptions({ ...options, groupTypes });
-        toggleElementFilter(
+        toggleDirElementFilter(
           data.nodeType,
           data.peer,
           'src',

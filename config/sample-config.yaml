@@ -14,16 +14,20 @@ loki:
   tenantID: netobserv
   authCheck: none
   useMocks: false
-frontend: 
+frontend:
   recordTypes:
     - flowLog
 #    - newConnection
 #    - heartbeat
 #    - endConnection
   features:
+# eBPF agent features
 #    - pktDrop
 #    - dnsTracking
 #    - flowRTT
+# processor features
+#    - multiCluster
+#    - zones
   portNaming:
     enable: true
     portNames:
@@ -54,6 +58,13 @@ frontend:
       field: _HashId
       filter: id
       default: true
+      width: 15
+    - id: ClusterName
+      name: Cluster
+      tooltip: The cluster ID or Name.
+      field: K8S_ClusterName
+      filter: cluster_name
+      default: false
       width: 15
     - id: SrcK8S_Name
       group: Source
@@ -165,6 +176,13 @@ frontend:
       group: Source
       name: IP & Port
       calculated: getConcatenatedValue(SrcAddr,SrcPort)
+      default: false
+      width: 15
+    - id: SrcZone
+      group: Source
+      name: Zone
+      field: SrcK8S_Zone
+      filter: src_zone
       default: false
       width: 15
     - id: DstK8S_Name
@@ -279,6 +297,13 @@ frontend:
       calculated: getConcatenatedValue(DstAddr,DstPort)
       default: false
       width: 15
+    - id: DstZone
+      group: Destination
+      name: Zone
+      field: DstK8S_Zone
+      filter: dst_zone
+      default: false
+      width: 15
     - id: K8S_Name
       name: Names
       calculated: getSrcOrDstValue(SrcK8S_Name,DstK8S_Name)
@@ -337,6 +362,12 @@ frontend:
     - id: K8S_OwnerObject
       name: Owner Kubernetes Objects
       calculated: '[column.SrcK8S_OwnerObject,column.DstK8S_OwnerObject]'
+      default: false
+      width: 15
+    - id: K8S_FlowLayer
+      name: Flow layer
+      field: K8S_FlowLayer
+      filter: flow_layer
       default: false
       width: 15
     - id: AddrPort
@@ -472,6 +503,10 @@ frontend:
       default: true
       width: 5
   filters:
+    - id: cluster_name
+      name: Cluster
+      component: autocomplete
+      hint: Specify a cluster ID or name.
     - id: src_namespace
       name: Namespace
       component: autocomplete
@@ -576,6 +611,16 @@ frontend:
             - Starting text like cluster, "cluster-*"
             - Ending text like "*-registry"
             - Pattern like "cluster-*-registry", "c*-*-r*y", -i*e-
+    - id: src_zone
+      name: Zone
+      component: autocomplete
+      category: source
+      hint: Specify a single zone.
+    - id: dst_zone
+      name: Zone
+      component: autocomplete
+      category: destination
+      hint: Specify a single zone.
     - id: src_resource
       name: Resource
       component: autocomplete
@@ -739,6 +784,11 @@ frontend:
       component: autocomplete
       placeholder: 'E.g: Ingress, Egress, Inner'
       hint: Specify the direction of the Flow observed at the Node observation point.
+    - id: flow_layer
+      name: Flow layer
+      component: text
+      placeholder: 'Either infra or app'
+      hint: Specify the layer of Flow.
     - id: interface
       name: Network interface
       component: text
