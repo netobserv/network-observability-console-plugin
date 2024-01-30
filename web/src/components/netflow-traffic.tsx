@@ -318,15 +318,11 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
       return columns.filter(
         col =>
           (!isSidePanel || !col.isCommon) &&
-          (isMultiCluster() || ![ColumnsId.clustername].includes(col.id)) &&
-          (isZones() || ![ColumnsId.srczone, ColumnsId.dstzone].includes(col.id)) &&
           (isConnectionTracking() || ![ColumnsId.recordtype, ColumnsId.hashid].includes(col.id)) &&
-          (isDNSTracking() ||
-            ![ColumnsId.dnsid, ColumnsId.dnslatency, ColumnsId.dnsresponsecode, ColumnsId.dnserrno].includes(col.id)) &&
-          (isFlowRTT() || ![ColumnsId.rttTime].includes(col.id))
+          (!col.feature || config.features.includes(col.feature))
       );
     },
-    [columns, isConnectionTracking, isDNSTracking, isFlowRTT, isMultiCluster, isZones]
+    [columns, config.features, isConnectionTracking]
   );
 
   const getSelectedColumns = React.useCallback(() => {

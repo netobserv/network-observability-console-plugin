@@ -5,6 +5,7 @@ import { compareNumbers, compareStrings } from './base-compare';
 import { compareIPs } from './ip';
 import { comparePorts } from './port';
 import { compareProtocols } from './protocol';
+import { Feature } from '../model/config';
 
 export enum ColumnsId {
   starttime = 'StartTime',
@@ -92,6 +93,7 @@ export interface ColumnConfigDef {
   filter?: string;
   default?: boolean;
   width?: number;
+  feature?: Feature;
 }
 
 export interface Column {
@@ -108,6 +110,7 @@ export interface Column {
   sort(a: Record, b: Record, col: Column): number;
   // width in "em"
   width: number;
+  feature?: Feature;
 }
 
 export type ColumnSizeMap = {
@@ -339,7 +342,8 @@ export const getDefaultColumns = (columnDefs: ColumnConfigDef[]): Column[] => {
           return 0;
         }
       },
-      width: d.width || 15
+      width: d.width || 15,
+      feature: d.feature
     });
   });
   return columns;
