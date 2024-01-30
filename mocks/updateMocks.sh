@@ -17,6 +17,10 @@ curl 'http://localhost:3100/loki/api/v1/query_range?query=\{app=%22netobserv-flo
 echo 'Getting metrics'
 curl 'http://localhost:3100/loki/api/v1/query_range?query=topk(5,sum%20by(app)%20(rate(\{app=%22netobserv-flowcollector%22,FlowDirection=%221%22\}|~`Duplicate%22:false`|json|unwrap%20Packets|__error__=%22%22\[720s\])))&limit=5&step=360s'\
  | jq > ./loki/flow_metrics_app.json
+curl 'http://localhost:3100/loki/api/v1/query_range?query=topk(50,sum%20by(K8S_ClusterName)%20(rate(\{app=%22netobserv-flowcollector%22,FlowDirection=%221%22\}|~`Duplicate%22:false`|json|unwrap%20Packets|__error__=%22%22\[720s\])))&limit=50&step=360s'\
+ | jq > ./loki/flow_metrics_cluster.json
+ curl 'http://localhost:3100/loki/api/v1/query_range?query=topk(50,sum%20by(SrcK8S_Zone,DstK8S_Zone)%20(rate(\{app=%22netobserv-flowcollector%22,FlowDirection=%221%22\}|~`Duplicate%22:false`|json|unwrap%20Packets|__error__=%22%22\[720s\])))&limit=50&step=360s'\
+ | jq > ./loki/flow_metrics_zone.json
 curl 'http://localhost:3100/loki/api/v1/query_range?query=topk(50,sum%20by(SrcK8S_HostName,DstK8S_HostName)%20(rate(\{app=%22netobserv-flowcollector%22,FlowDirection=%221%22\}|~`Duplicate%22:false`|json|unwrap%20Packets|__error__=%22%22\[720s\])))&limit=50&step=360s'\
  | jq > ./loki/flow_metrics_host.json
 curl 'http://localhost:3100/loki/api/v1/query_range?query=topk(50,sum%20by(SrcK8S_Namespace,DstK8S_Namespace)%20(rate(\{app=%22netobserv-flowcollector%22,FlowDirection=%221%22\}|~`Duplicate%22:false`|json|unwrap%20Packets|__error__=%22%22\[720s\])))&limit=50&step=360s'\

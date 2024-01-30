@@ -316,7 +316,8 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
             ColumnsId.srcowner,
             ColumnsId.srcownertype,
             ColumnsId.srchostaddr,
-            ColumnsId.srchostname
+            ColumnsId.srchostname,
+            ColumnsId.srczone
           ].includes(c.id)) &&
         (record?.labels.DstK8S_Type !== 'Node' ||
           ![
@@ -324,7 +325,8 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
             ColumnsId.dstowner,
             ColumnsId.dstownertype,
             ColumnsId.dsthostaddr,
-            ColumnsId.dsthostname
+            ColumnsId.dsthostname,
+            ColumnsId.dstzone
           ].includes(c.id))
     )
   );

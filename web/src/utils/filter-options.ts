@@ -1,6 +1,6 @@
 import * as _ from 'lodash';
 import protocols from 'protocol-numbers';
-import { getNamespaces, getResources } from '../api/routes';
+import { getClusters, getNamespaces, getResources, getZones } from '../api/routes';
 import { FlowDirection } from '../api/ipfix';
 import { FilterOption } from '../model/filters';
 import { splitResource, SplitStage } from '../model/resource';
@@ -59,6 +59,28 @@ export const getNamespaceOptions = (value: string): Promise<FilterOption[]> => {
   return getNamespaces().then(ns => {
     autoCompleteCache.setNamespaces(ns);
     return matchOptions(ns.map(toFilterOption), value);
+  });
+};
+
+export const getClusterOptions = (value: string): Promise<FilterOption[]> => {
+  const clusters = autoCompleteCache.getClusters();
+  if (clusters) {
+    return Promise.resolve(matchOptions(clusters.map(toFilterOption), value));
+  }
+  return getClusters().then(cs => {
+    autoCompleteCache.setClusters(cs);
+    return matchOptions(cs.map(toFilterOption), value);
+  });
+};
+
+export const getZoneOptions = (value: string): Promise<FilterOption[]> => {
+  const zones = autoCompleteCache.getZones();
+  if (zones) {
+    return Promise.resolve(matchOptions(zones.map(toFilterOption), value));
+  }
+  return getZones().then(zs => {
+    autoCompleteCache.setZones(zs);
+    return matchOptions(zs.map(toFilterOption), value);
   });
 };
 

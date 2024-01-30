@@ -114,6 +114,8 @@ export const createPeer = (fields: Partial<TopologyMetricPeer>): TopologyMetricP
     namespace: fields.namespace,
     owner: fields.owner,
     hostName: fields.hostName,
+    zone: fields.zone,
+    clusterName: fields.clusterName,
     isAmbiguous: false,
     getDisplayName: () => undefined
   };
@@ -137,9 +139,17 @@ export const createPeer = (fields: Partial<TopologyMetricPeer>): TopologyMetricP
     newPeer.resourceKind = 'Namespace';
     newPeer.getDisplayName = () => fields.namespace;
   } else if (fields.hostName) {
-    // Since name isn't defined then it must be a host-kind aggregation
+    // Fallback on host-kind aggregation if available
     newPeer.resourceKind = 'Node';
     newPeer.getDisplayName = () => fields.hostName;
+  } else if (fields.zone) {
+    // Fallback on zone aggregation if available
+    newPeer.resourceKind = 'Zone';
+    newPeer.getDisplayName = () => fields.zone;
+  } else if (fields.clusterName) {
+    // Fallback on cluster aggregation if available
+    newPeer.resourceKind = 'Cluster';
+    newPeer.getDisplayName = () => fields.clusterName;
   } else if (fields.addr) {
     newPeer.getDisplayName = () => fields.addr;
   }
@@ -165,14 +175,20 @@ const parseTopologyMetric = (
     resource: nameAndType(raw.metric.SrcK8S_Name, raw.metric.SrcK8S_Type),
     owner: nameAndType(raw.metric.SrcK8S_OwnerName, raw.metric.SrcK8S_OwnerType),
     namespace: raw.metric.SrcK8S_Namespace,
-    hostName: raw.metric.SrcK8S_HostName
+    hostName: raw.metric.SrcK8S_HostName,
+    zone: raw.metric.SrcK8S_Zone,
+    // TODO: see if clustername will become directionnal
+    clusterName: raw.metric.K8S_ClusterName
   });
   const destination = createPeer({
     addr: raw.metric.DstAddr,
     resource: nameAndType(raw.metric.DstK8S_Name, raw.metric.DstK8S_Type),
     owner: nameAndType(raw.metric.DstK8S_OwnerName, raw.metric.DstK8S_OwnerType),
     namespace: raw.metric.DstK8S_Namespace,
-    hostName: raw.metric.DstK8S_HostName
+    hostName: raw.metric.DstK8S_HostName,
+    zone: raw.metric.DstK8S_Zone,
+    // TODO: see if clustername will become directionnal
+    clusterName: raw.metric.K8S_ClusterName
   });
   return {
     source: source,

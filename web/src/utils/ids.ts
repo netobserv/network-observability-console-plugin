@@ -25,6 +25,12 @@ export const getTopologyEdgeId = (sourceId: string, targetId: string) => {
  */
 export const getPeerId = (fields: Partial<TopologyMetricPeer>): string => {
   const parts = [];
+  if (fields.clusterName) {
+    parts.push('c=' + fields.clusterName);
+  }
+  if (fields.zone) {
+    parts.push('z=' + fields.zone);
+  }
   if (fields.hostName) {
     parts.push('h=' + fields.hostName);
   }

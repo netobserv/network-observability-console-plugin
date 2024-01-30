@@ -292,6 +292,14 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
     return config.features.includes('pktDrop');
   }, [config.features]);
 
+  const isMultiCluster = React.useCallback(() => {
+    return config.features.includes('multiCluster');
+  }, [config.features]);
+
+  const isZones = React.useCallback(() => {
+    return config.features.includes('zones');
+  }, [config.features]);
+
   const getAvailablePanels = React.useCallback(() => {
     return panels.filter(
       panel =>
@@ -311,12 +319,10 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
         col =>
           (!isSidePanel || !col.isCommon) &&
           (isConnectionTracking() || ![ColumnsId.recordtype, ColumnsId.hashid].includes(col.id)) &&
-          (isDNSTracking() ||
-            ![ColumnsId.dnsid, ColumnsId.dnslatency, ColumnsId.dnsresponsecode, ColumnsId.dnserrno].includes(col.id)) &&
-          (isFlowRTT() || ![ColumnsId.rttTime].includes(col.id))
+          (!col.feature || config.features.includes(col.feature))
       );
     },
-    [columns, isConnectionTracking, isDNSTracking, isFlowRTT]
+    [columns, config.features, isConnectionTracking]
   );
 
   const getSelectedColumns = React.useCallback(() => {
@@ -344,6 +350,8 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
   const getFilterDefs = React.useCallback(() => {
     return getFilterDefinitions(config.filters, config.columns, t).filter(
       fd =>
+        (isMultiCluster() || fd.id !== 'cluster_name') &&
+        (isZones() || !fd.id.endsWith('_zone')) &&
         (isConnectionTracking() || fd.id !== 'id') &&
         (isDNSTracking() || !fd.id.startsWith('dns_')) &&
         (isPktDrop() || !fd.id.startsWith('pkt_drop_')) &&
@@ -1450,6 +1458,8 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
             searchHandle={searchRef?.current}
             searchEvent={searchEvent}
             isDark={isDarkTheme}
+            allowMultiCluster={isMultiCluster()}
+            allowZone={isZones()}
           />
         );
         break;
@@ -1728,6 +1738,8 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
                   setTruncateLength={setOverviewTruncateLength}
                   focus={overviewFocus}
                   setFocus={setOverviewFocus}
+                  allowMultiCluster={isMultiCluster()}
+                  allowZone={isZones()}
                 />
               )}
               {selectedViewId === 'table' && <TableDisplayDropdown size={size} setSize={setSize} />}
@@ -1744,6 +1756,8 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
                   allowPktDrop={isPktDrop()}
                   allowDNSMetric={isDNSTracking()}
                   allowRTTMetric={isFlowRTT()}
+                  allowMultiCluster={isMultiCluster()}
+                  allowZone={isZones()}
                 />
               )}
             </OverflowMenuItem>
