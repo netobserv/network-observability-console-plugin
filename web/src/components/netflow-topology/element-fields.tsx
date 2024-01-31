@@ -83,6 +83,38 @@ export const ElementFields: React.FC<{
     );
     forceLabel = forceAsText = undefined;
   }
+  if (data.peer.zone) {
+    fragments.push(
+      <ElementField
+        id={id + '-zone'}
+        key={id + '-zone'}
+        label={forceLabel || t('Zone')}
+        forcedText={forceAsText ? data.peer.zone : undefined}
+        activeFilters={activeFilters}
+        filterType={'zone'}
+        peer={createPeer({ zone: data.peer.zone })}
+        setFilters={setFilters}
+        filterDefinitions={filterDefinitions}
+      />
+    );
+    forceLabel = forceAsText = undefined;
+  }
+  if (data.peer.clusterName) {
+    fragments.push(
+      <ElementField
+        id={id + '-cluster'}
+        key={id + '-cluster'}
+        label={forceLabel || t('Cluster')}
+        forcedText={forceAsText ? data.peer.clusterName : undefined}
+        activeFilters={activeFilters}
+        filterType={'cluster'}
+        peer={createPeer({ clusterName: data.peer.clusterName })}
+        setFilters={setFilters}
+        filterDefinitions={filterDefinitions}
+      />
+    );
+    forceLabel = forceAsText = undefined;
+  }
   if (data.peer.addr) {
     fragments.push(
       <ElementField

@@ -10,7 +10,9 @@ describe('<GroupDropdown />', () => {
     scope: MetricScopeOptions.RESOURCE,
     selected: TopologyGroupTypes.HOSTS,
     setGroupType: jest.fn(),
-    id: 'group'
+    id: 'group',
+    allowMultiCluster: false,
+    allowZone: false
   };
   it('should render component', async () => {
     const wrapper = shallow(<GroupDropdown {...props} />);

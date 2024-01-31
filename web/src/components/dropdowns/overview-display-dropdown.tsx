@@ -17,7 +17,18 @@ export const OverviewDisplayOptions: React.FC<{
   setTruncateLength: (v: TruncateLength) => void;
   focus: boolean;
   setFocus: (v: boolean) => void;
-}> = ({ metricScope, setMetricScope, truncateLength, setTruncateLength, focus, setFocus }) => {
+  allowMultiCluster: boolean;
+  allowZone: boolean;
+}> = ({
+  metricScope,
+  setMetricScope,
+  truncateLength,
+  setTruncateLength,
+  focus,
+  setFocus,
+  allowMultiCluster,
+  allowZone
+}) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   return (
@@ -31,7 +42,14 @@ export const OverviewDisplayOptions: React.FC<{
           </div>
         </Tooltip>
         <div className="display-dropdown-padding">
-          <ScopeDropdown data-test="scope" id="scope" selected={metricScope} setScopeType={setMetricScope} />
+          <ScopeDropdown
+            data-test="scope"
+            id="scope"
+            selected={metricScope}
+            setScopeType={setMetricScope}
+            allowMultiCluster={allowMultiCluster}
+            allowZone={allowZone}
+          />
         </div>
       </div>
       <div className="pf-c-select__menu-group">
@@ -66,7 +84,18 @@ export const OverviewDisplayDropdown: React.FC<{
   setTruncateLength: (v: TruncateLength) => void;
   focus: boolean;
   setFocus: (v: boolean) => void;
-}> = ({ metricScope, setMetricScope, truncateLength, setTruncateLength, focus, setFocus }) => {
+  allowMultiCluster: boolean;
+  allowZone: boolean;
+}> = ({
+  metricScope,
+  setMetricScope,
+  truncateLength,
+  setTruncateLength,
+  focus,
+  setFocus,
+  allowMultiCluster,
+  allowZone
+}) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [isOpen, setOpen] = React.useState<boolean>(false);
 
@@ -85,6 +114,8 @@ export const OverviewDisplayDropdown: React.FC<{
             setTruncateLength={setTruncateLength}
             focus={focus}
             setFocus={setFocus}
+            allowMultiCluster={allowMultiCluster}
+            allowZone={allowZone}
           />
         }
       />

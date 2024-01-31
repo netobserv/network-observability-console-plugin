@@ -37,6 +37,8 @@ export const NetflowTopology: React.FC<{
   searchHandle: SearchHandle | null;
   searchEvent?: SearchEvent;
   isDark?: boolean;
+  allowMultiCluster: boolean;
+  allowZone: boolean;
 }> = ({
   loading,
   k8sModels,
@@ -56,7 +58,9 @@ export const NetflowTopology: React.FC<{
   onSelect,
   searchHandle,
   searchEvent,
-  isDark
+  isDark,
+  allowMultiCluster,
+  allowZone
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [controller, setController] = React.useState<Visualization>();
@@ -105,7 +109,12 @@ export const NetflowTopology: React.FC<{
   } else {
     return (
       <VisualizationProvider data-test="visualization-provider" controller={controller}>
-        <ScopeSlider scope={metricScope} setScope={setMetricScope} />
+        <ScopeSlider
+          scope={metricScope}
+          setScope={setMetricScope}
+          allowMultiCluster={allowMultiCluster}
+          allowZone={allowZone}
+        />
         <TopologyContent
           k8sModels={k8sModels}
           metricFunction={metricFunction}

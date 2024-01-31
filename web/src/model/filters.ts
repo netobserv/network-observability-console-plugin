@@ -8,6 +8,7 @@ export type FilterComponent = 'autocomplete' | 'text' | 'number';
 export type FilterCategory = 'source' | 'destination';
 
 export type TargetedFilterId =
+  | 'zone'
   | 'namespace'
   | 'name'
   | 'kind'
@@ -20,6 +21,7 @@ export type TargetedFilterId =
   | 'host_name';
 
 export type FilterId =
+  | 'cluster_name'
   | `src_${TargetedFilterId}`
   | `dst_${TargetedFilterId}`
   | 'protocol'

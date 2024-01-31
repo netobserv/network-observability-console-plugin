@@ -8,12 +8,18 @@ export const ScopeDropdown: React.FC<{
   selected: FlowScope;
   setScopeType: (v: FlowScope) => void;
   id?: string;
-}> = ({ selected, setScopeType, id }) => {
+  allowMultiCluster: boolean;
+  allowZone: boolean;
+}> = ({ selected, setScopeType, id, allowMultiCluster, allowZone }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [scopeDropdownOpen, setScopeDropdownOpen] = React.useState(false);
 
   const getScopeDisplay = (scopeType: MetricScopeOptions) => {
     switch (scopeType) {
+      case MetricScopeOptions.CLUSTER:
+        return t('Cluster');
+      case MetricScopeOptions.ZONE:
+        return t('Zone');
       case MetricScopeOptions.HOST:
         return t('Node');
       case MetricScopeOptions.NAMESPACE:
@@ -40,19 +46,24 @@ export const ScopeDropdown: React.FC<{
         </DropdownToggle>
       }
       isOpen={scopeDropdownOpen}
-      dropdownItems={Object.values(MetricScopeOptions).map(v => (
-        <DropdownItem
-          data-test={v}
-          id={v}
-          key={v}
-          onClick={() => {
-            setScopeDropdownOpen(false);
-            setScopeType(v);
-          }}
-        >
-          {getScopeDisplay(v)}
-        </DropdownItem>
-      ))}
+      dropdownItems={Object.values(MetricScopeOptions)
+        .filter(
+          ms =>
+            (allowMultiCluster || ms !== MetricScopeOptions.CLUSTER) && (allowZone || ms !== MetricScopeOptions.ZONE)
+        )
+        .map(v => (
+          <DropdownItem
+            data-test={v}
+            id={v}
+            key={v}
+            onClick={() => {
+              setScopeDropdownOpen(false);
+              setScopeType(v);
+            }}
+          >
+            {getScopeDisplay(v)}
+          </DropdownItem>
+        ))}
     />
   );
 };

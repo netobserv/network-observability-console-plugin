@@ -28,6 +28,8 @@ export const TopologyDisplayOptions: React.FC<{
   allowPktDrop: boolean;
   allowDNSMetric: boolean;
   allowRTTMetric: boolean;
+  allowMultiCluster: boolean;
+  allowZone: boolean;
 }> = ({
   metricFunction,
   setMetricFunction,
@@ -39,7 +41,9 @@ export const TopologyDisplayOptions: React.FC<{
   setTopologyOptions,
   allowPktDrop,
   allowDNSMetric,
-  allowRTTMetric
+  allowRTTMetric,
+  allowMultiCluster,
+  allowZone
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
@@ -109,7 +113,14 @@ export const TopologyDisplayOptions: React.FC<{
           </div>
         </Tooltip>
         <div className="display-dropdown-padding">
-          <ScopeDropdown data-test="scope" id="scope" selected={metricScope} setScopeType={setMetricScope} />
+          <ScopeDropdown
+            data-test="scope"
+            id="scope"
+            selected={metricScope}
+            setScopeType={setMetricScope}
+            allowMultiCluster={allowMultiCluster}
+            allowZone={allowZone}
+          />
         </div>
       </div>
       <div className="pf-c-select__menu-group">
@@ -123,10 +134,12 @@ export const TopologyDisplayOptions: React.FC<{
         <div className="display-dropdown-padding">
           <GroupDropdown
             id="group"
-            disabled={metricScope === MetricScopeOptions.HOST}
+            disabled={metricScope === MetricScopeOptions.CLUSTER}
             scope={metricScope as MetricScopeOptions}
             selected={topologyOptions.groupTypes}
             setGroupType={setGroupType}
+            allowMultiCluster={allowMultiCluster}
+            allowZone={allowZone}
           />
         </div>
       </div>
@@ -237,6 +250,8 @@ export const TopologyDisplayDropdown: React.FC<{
   allowPktDrop: boolean;
   allowDNSMetric: boolean;
   allowRTTMetric: boolean;
+  allowMultiCluster: boolean;
+  allowZone: boolean;
 }> = ({
   metricFunction,
   setMetricFunction,
@@ -248,7 +263,9 @@ export const TopologyDisplayDropdown: React.FC<{
   setTopologyOptions,
   allowPktDrop,
   allowDNSMetric,
-  allowRTTMetric
+  allowRTTMetric,
+  allowMultiCluster,
+  allowZone
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [isOpen, setOpen] = React.useState<boolean>(false);
@@ -273,6 +290,8 @@ export const TopologyDisplayDropdown: React.FC<{
             allowPktDrop={allowPktDrop}
             allowDNSMetric={allowDNSMetric}
             allowRTTMetric={allowRTTMetric}
+            allowMultiCluster={allowMultiCluster}
+            allowZone={allowZone}
           />
         }
       />

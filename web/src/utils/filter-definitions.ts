@@ -29,7 +29,9 @@ import {
   getDirectionOptionsAsync,
   findDirectionOption,
   getDnsErrorCodeOptions,
-  getDSCPOptions
+  getDSCPOptions,
+  getZoneOptions,
+  getClusterOptions
 } from './filter-options';
 import { ColumnConfigDef } from './columns';
 
@@ -252,11 +254,14 @@ export const getFilterDefinitions = (
     if (d.id.includes('namespace')) {
       getOptions = getNamespaceOptions;
       validate = k8sNameValidation;
+    } else if (d.id.includes('cluster')) {
+      getOptions = getClusterOptions;
+    } else if (d.id.includes('zone')) {
+      getOptions = getZoneOptions;
     } else if (d.id.includes('name')) {
       validate = k8sNameValidation;
     } else if (d.id.includes('kind')) {
       getOptions = getKindOptions;
-      validate = rejectEmptyValue;
       encoder = kindFiltersEncoder(`${isSrc ? 'Src' : 'Dst'}K8S_Type`, `${isSrc ? 'Src' : 'Dst'}K8S_OwnerType`);
     } else if (d.id.includes('resource')) {
       getOptions = getResourceOptions;
