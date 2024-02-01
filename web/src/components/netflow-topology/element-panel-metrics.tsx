@@ -20,7 +20,8 @@ export const ElementPanelMetrics: React.FC<{
   metrics: TopologyMetrics[];
   metricType: MetricType;
   truncateLength: TruncateLength;
-}> = ({ aData, bData, isGroup, metrics, metricType, truncateLength }) => {
+  isDark?: boolean;
+}> = ({ aData, bData, isGroup, metrics, metricType, truncateLength, isDark }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [metricsRadio, setMetricsRadio] = React.useState<MetricsRadio>('both');
 
@@ -124,6 +125,7 @@ export const ElementPanelMetrics: React.FC<{
         showScatter
         tooltipsTruncate={true}
         showLegend={true}
+        isDark={isDark}
       />
     </div>
   );

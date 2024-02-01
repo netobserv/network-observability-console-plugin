@@ -24,3 +24,7 @@
 .small-chart-label>tspan {
   font-size: 11px !important;
 }
+
+.metrics-content-div.dark tspan {
+  fill: #fff !important;
+}

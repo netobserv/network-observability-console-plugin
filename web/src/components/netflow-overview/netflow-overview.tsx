@@ -304,6 +304,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
                   smallerTexts={smallerTexts}
                   showLegend={!isFocus}
                   animate={animate}
+                  isDark={isDark}
                 />
               ) : (
                 emptyGraph()
@@ -351,6 +352,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
                 tooltipsTruncate={false}
                 showLegend={!isFocus}
                 animate={animate}
+                isDark={isDark}
               />
             ) : !_.isEmpty(topKMetrics) || namedTotalMetric || namedTotalDroppedMetric ? (
               <MetricsGraphWithTotal
@@ -370,6 +372,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
                 showOthers={false}
                 showLegend={!isFocus}
                 animate={animate}
+                isDark={isDark}
               />
             ) : (
               emptyGraph()
@@ -410,6 +413,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
                   smallerTexts={smallerTexts}
                   showLegend={!isFocus}
                   animate={animate}
+                  isDark={isDark}
                 />
               ) : showTopOnly ? (
                 <MetricsGraph
@@ -427,6 +431,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
                   tooltipsTruncate={false}
                   showLegend={!isFocus}
                   animate={animate}
+                  isDark={isDark}
                 />
               ) : namedTotalMetric ? (
                 <MetricsGraphWithTotal
@@ -444,6 +449,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
                   showOthers={false}
                   showLegend={!isFocus}
                   animate={animate}
+                  isDark={isDark}
                 />
               ) : (
                 emptyGraph()
@@ -501,6 +507,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
                     smallerTexts={smallerTexts}
                     showLegend={!isFocus}
                     animate={animate}
+                    isDark={isDark}
                   />
                 ) : (
                   <MetricsGraphWithTotal
@@ -520,6 +527,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
                     showOthers={false}
                     showLegend={!isFocus}
                     animate={animate}
+                    isDark={isDark}
                   />
                 )
               ) : (
@@ -561,6 +569,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
                     smallerTexts={smallerTexts}
                     showLegend={!isFocus}
                     animate={animate}
+                    isDark={isDark}
                   />
                 ) : (
                   <MetricsGraphWithTotal
@@ -579,6 +588,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
                     showTotalDrop={false}
                     showLegend={!isFocus}
                     animate={animate}
+                    isDark={isDark}
                   />
                 )
               ) : (
