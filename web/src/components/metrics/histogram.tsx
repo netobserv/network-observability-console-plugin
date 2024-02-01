@@ -235,7 +235,7 @@ export const Histogram: React.FC<{
   return (
     <div
       id={`chart-${id}`}
-      className={`metrics-content-div ${loading ? 'loading' : ''}`}
+      className={`metrics-content-div ${loading ? 'loading' : ''} ${isDark ? 'dark' : 'light'}`}
       ref={containerRef}
       tabIndex={0}
       onKeyDown={e => onKeyDown(e.key)}

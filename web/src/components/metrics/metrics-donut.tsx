@@ -24,6 +24,7 @@ export type MetricsDonutProps = {
   smallerTexts?: boolean;
   showLegend?: boolean;
   animate?: boolean;
+  isDark?: boolean;
 };
 
 export const MetricsDonut: React.FC<MetricsDonutProps> = ({
@@ -40,7 +41,8 @@ export const MetricsDonut: React.FC<MetricsDonutProps> = ({
   showOutOfScope,
   smallerTexts,
   showLegend,
-  animate
+  animate,
+  isDark
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
@@ -129,7 +131,12 @@ export const MetricsDonut: React.FC<MetricsDonutProps> = ({
   }, [containerRef, dimensions]);
 
   return (
-    <div id={id} className="metrics-content-div" ref={containerRef} data-test-metrics={topKMetrics.length}>
+    <div
+      id={id}
+      className={`metrics-content-div ${isDark ? 'dark' : 'light'}`}
+      ref={containerRef}
+      data-test-metrics={topKMetrics.length}
+    >
       <ChartDonut
         themeColor={ChartThemeColor.multiUnordered}
         constrainToVisibleArea
