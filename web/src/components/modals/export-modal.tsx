@@ -124,15 +124,17 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   }, [isExportAll, selectedColumns]);
 
   React.useEffect(() => {
-    // reload selected columns when config is loaded
-    setSelectedColumns(
-      getLocalStorage(LOCAL_STORAGE_EXPORT_COLS_KEY, columns, {
-        id: 'id',
-        criteria: 'isSelected'
-      })
-    );
+    // reload selected columns when config is loaded and popup closed
+    if (!isModalOpen) {
+      setSelectedColumns(
+        getLocalStorage(LOCAL_STORAGE_EXPORT_COLS_KEY, _.cloneDeep(columns), {
+          id: 'id',
+          criteria: 'isSelected'
+        })
+      );
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [columns]);
+  }, [isModalOpen, columns]);
 
   return (
     <Modal
