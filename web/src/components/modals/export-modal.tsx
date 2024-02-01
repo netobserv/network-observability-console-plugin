@@ -27,7 +27,7 @@ import { formatDuration, getDateSInMiliseconds } from '../../utils/duration';
 import { Filter } from '../../model/filters';
 import { getFilterFullName } from '../filters/filters-helper';
 import './export-modal.css';
-import { LOCAL_STORAGE_EXPORT_COLS_KEY, useLocalStorage } from '../../utils/local-storage-hook';
+import { LOCAL_STORAGE_EXPORT_COLS_KEY, getLocalStorage, useLocalStorage } from '../../utils/local-storage-hook';
 
 export interface ExportModalProps {
   isModalOpen: boolean;
@@ -122,6 +122,17 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   React.useEffect(() => {
     setSaveDisabled(!isExportAll && _.isEmpty(selectedColumns.filter(col => col.isSelected)));
   }, [isExportAll, selectedColumns]);
+
+  React.useEffect(() => {
+    // reload selected columns when config is loaded
+    setSelectedColumns(
+      getLocalStorage(LOCAL_STORAGE_EXPORT_COLS_KEY, columns, {
+        id: 'id',
+        criteria: 'isSelected'
+      })
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [columns]);
 
   return (
     <Modal
