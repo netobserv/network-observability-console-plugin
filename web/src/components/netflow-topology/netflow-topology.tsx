@@ -16,6 +16,7 @@ import componentFactory from './2d/componentFactories/componentFactory';
 import stylesComponentFactory from './2d/componentFactories/stylesComponentFactory';
 import layoutFactory from './2d/layouts/layoutFactory';
 import { ScopeSlider } from '../scope-slider/scope-slider';
+import { observeDOMRect } from '../metrics/metrics-helper';
 
 export const NetflowTopology: React.FC<{
   loading?: boolean;
@@ -63,10 +64,101 @@ export const NetflowTopology: React.FC<{
   allowZone
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
+  const containerRef = React.createRef<HTMLDivElement>();
+  const [containerSize, setContainerSize] = React.useState<DOMRect>({ width: 0, height: 0 } as DOMRect);
   const [controller, setController] = React.useState<Visualization>();
 
   //show fully dropped metrics if no metrics available
   const displayedMetrics = _.isEmpty(metrics) ? droppedMetrics : metrics;
+
+  const getContent = React.useCallback(() => {
+    if (error) {
+      return <LokiError title={t('Unable to get topology')} error={error} />;
+    } else if (!controller || (_.isEmpty(metrics) && loading)) {
+      return (
+        <Bullseye data-test="loading-contents">
+          <Spinner size="xl" />
+        </Bullseye>
+      );
+    } else if (options.layout === LayoutName.ThreeD) {
+      return (
+        <ThreeDTopologyContent
+          k8sModels={k8sModels}
+          metricFunction={metricFunction}
+          metricType={metricType}
+          metricScope={metricScope}
+          setMetricScope={setMetricScope}
+          metrics={displayedMetrics}
+          options={options}
+          setOptions={setOptions}
+          filters={filters.list}
+          setFilters={(l: Filter[]) => setFilters({ ...filters, list: l })}
+          selected={selected}
+          onSelect={onSelect}
+          searchHandle={searchHandle}
+          searchEvent={searchEvent}
+          isDark={isDark}
+        />
+      );
+    } else {
+      return (
+        <VisualizationProvider data-test="visualization-provider" controller={controller}>
+          <ScopeSlider
+            allowMultiCluster={allowMultiCluster}
+            allowZone={allowZone}
+            sizePx={containerSize?.height || 300}
+            scope={metricScope}
+            setScope={setMetricScope}
+          />
+          <TopologyContent
+            k8sModels={k8sModels}
+            metricFunction={metricFunction}
+            metricType={metricType}
+            metricScope={metricScope}
+            setMetricScope={setMetricScope}
+            metrics={displayedMetrics}
+            droppedMetrics={droppedMetrics}
+            options={options}
+            setOptions={setOptions}
+            filters={filters}
+            filterDefinitions={filterDefinitions}
+            setFilters={setFilters}
+            selected={selected}
+            onSelect={onSelect}
+            searchHandle={searchHandle}
+            searchEvent={searchEvent}
+            isDark={isDark}
+          />
+        </VisualizationProvider>
+      );
+    }
+  }, [
+    allowMultiCluster,
+    allowZone,
+    containerSize?.height,
+    controller,
+    displayedMetrics,
+    droppedMetrics,
+    error,
+    filterDefinitions,
+    filters,
+    isDark,
+    k8sModels,
+    loading,
+    metricFunction,
+    metricScope,
+    metricType,
+    metrics,
+    onSelect,
+    options,
+    searchEvent,
+    searchHandle,
+    selected,
+    setFilters,
+    setMetricScope,
+    setOptions,
+    t
+  ]);
 
   //create controller on startup and register factories
   React.useEffect(() => {
@@ -78,65 +170,15 @@ export const NetflowTopology: React.FC<{
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (error) {
-    return <LokiError title={t('Unable to get topology')} error={error} />;
-  } else if (!controller || (_.isEmpty(metrics) && loading)) {
-    return (
-      <Bullseye data-test="loading-contents">
-        <Spinner size="xl" />
-      </Bullseye>
-    );
-  } else if (options.layout === LayoutName.ThreeD) {
-    return (
-      <ThreeDTopologyContent
-        k8sModels={k8sModels}
-        metricFunction={metricFunction}
-        metricType={metricType}
-        metricScope={metricScope}
-        setMetricScope={setMetricScope}
-        metrics={displayedMetrics}
-        options={options}
-        setOptions={setOptions}
-        filters={filters.list}
-        setFilters={(l: Filter[]) => setFilters({ ...filters, list: l })}
-        selected={selected}
-        onSelect={onSelect}
-        searchHandle={searchHandle}
-        searchEvent={searchEvent}
-        isDark={isDark}
-      />
-    );
-  } else {
-    return (
-      <VisualizationProvider data-test="visualization-provider" controller={controller}>
-        <ScopeSlider
-          scope={metricScope}
-          setScope={setMetricScope}
-          allowMultiCluster={allowMultiCluster}
-          allowZone={allowZone}
-        />
-        <TopologyContent
-          k8sModels={k8sModels}
-          metricFunction={metricFunction}
-          metricType={metricType}
-          metricScope={metricScope}
-          setMetricScope={setMetricScope}
-          metrics={displayedMetrics}
-          droppedMetrics={droppedMetrics}
-          options={options}
-          setOptions={setOptions}
-          filters={filters}
-          filterDefinitions={filterDefinitions}
-          setFilters={setFilters}
-          selected={selected}
-          onSelect={onSelect}
-          searchHandle={searchHandle}
-          searchEvent={searchEvent}
-          isDark={isDark}
-        />
-      </VisualizationProvider>
-    );
-  }
+  React.useEffect(() => {
+    observeDOMRect(containerRef, containerSize, setContainerSize);
+  }, [containerRef, containerSize]);
+
+  return (
+    <div style={{ width: '100%', height: '100%' }} ref={containerRef}>
+      {getContent()}
+    </div>
+  );
 };
 
 export default NetflowTopology;
