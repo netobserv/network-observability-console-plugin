@@ -3,32 +3,38 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionToggle,
+  Button,
   Divider,
   DrawerActions,
   DrawerCloseButton,
   DrawerHead,
   DrawerPanelBody,
   DrawerPanelContent,
+  Flex,
+  FlexItem,
   Tab,
   Tabs,
   TabTitleText,
   Text,
+  TextContent,
   TextVariants
 } from '@patternfly/react-core';
 import { BaseEdge, BaseNode } from '@patternfly/react-topology';
+import { TimesIcon, FilterIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { defaultSize, maxSize, minSize } from '../../utils/panel';
 import { MetricType } from '../../model/flow-query';
 import { TopologyMetrics } from '../../api/loki';
 import { Filter, FilterDefinition } from '../../model/filters';
-import { GraphElementPeer, NodeData } from '../../model/topology';
+import { GraphElementPeer, isElementFiltered, NodeData, toggleElementFilter } from '../../model/topology';
 import { ElementPanelMetrics } from './element-panel-metrics';
 import { TruncateLength } from '../dropdowns/truncate-dropdown';
 import { ElementFields } from './element-fields';
 import { PeerResourceLink } from './peer-resource-link';
 import './element-panel.css';
 import _ from 'lodash';
+import { createPeer } from '../../utils/metrics';
 
 export const ElementPanelDetailsContent: React.FC<{
   element: GraphElementPeer;
@@ -50,16 +56,47 @@ export const ElementPanelDetailsContent: React.FC<{
     [hidden]
   );
 
+  const clusterName = React.useCallback(
+    (d: NodeData) => {
+      if (!d.peer.clusterName) {
+        return <></>;
+      }
+      const fields = createPeer({ clusterName: d.peer.clusterName });
+      const isFiltered = isElementFiltered(fields, filters, filterDefinitions);
+      return (
+        <TextContent id="clusterName" className="record-field-container">
+          <Text component={TextVariants.h4}>{t('Cluster name')}</Text>
+          <Flex>
+            <FlexItem flex={{ default: 'flex_1' }}>{d.peer.clusterName}</FlexItem>
+            <FlexItem>
+              <Button
+                id={'clustername-filter'}
+                variant="plain"
+                className="overflow-button"
+                icon={isFiltered ? <TimesIcon /> : <FilterIcon />}
+                onClick={() => toggleElementFilter(fields, isFiltered, filters, setFilters, filterDefinitions)}
+              />
+            </FlexItem>
+          </Flex>
+        </TextContent>
+      );
+    },
+    [filterDefinitions, filters, setFilters, t]
+  );
+
   if (element instanceof BaseNode && data) {
     return (
-      <ElementFields
-        id="node-info"
-        data={data}
-        forceFirstAsText={true}
-        activeFilters={filters}
-        setFilters={setFilters}
-        filterDefinitions={filterDefinitions}
-      />
+      <>
+        {clusterName(data)}
+        <ElementFields
+          id="node-info"
+          data={data}
+          forceFirstAsText={true}
+          activeFilters={filters}
+          setFilters={setFilters}
+          filterDefinitions={filterDefinitions}
+        />
+      </>
     );
   } else if (element instanceof BaseEdge) {
     // Edge A to B (prefering neutral naming here as there is no assumption about what is source, what is destination

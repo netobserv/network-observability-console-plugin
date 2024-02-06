@@ -3,6 +3,8 @@ import { MetricFunction } from './flow-query';
 import { PERCENTILE_VALUES } from '../utils/metrics';
 
 export enum MetricScopeOptions {
+  CLUSTER = 'cluster',
+  ZONE = 'zone',
   HOST = 'host',
   NAMESPACE = 'namespace',
   OWNER = 'owner',

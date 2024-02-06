@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Checkbox, OptionsMenu, OptionsMenuItem, OptionsMenuPosition, OptionsMenuToggle } from '@patternfly/react-core';
 import { FilterIcon } from '@patternfly/react-icons';
 import { Filter, FilterDefinition } from '../../model/filters';
-import { FilterDir, isElementFiltered, toggleElementFilter } from '../../model/topology';
+import { FilterDir, isDirElementFiltered, toggleDirElementFilter } from '../../model/topology';
 import { TopologyMetricPeer } from '../../api/loki';
 import { NodeType } from '../../model/flow-query';
 import './summary-filter-button.css';
@@ -32,11 +32,19 @@ export const SummaryFilterButton: React.FC<SummaryFilterButtonProps> = ({
   const [isOpen, setIsOpen] = React.useState(false);
 
   const selected = [srcFilter, dstFilter].filter(dir =>
-    isElementFiltered(filterType, fields, dir, activeFilters, filterDefinitions)
+    isDirElementFiltered(filterType, fields, dir, activeFilters, filterDefinitions)
   );
 
   const onSelect = (dir: FilterDir, e: React.BaseSyntheticEvent) => {
-    toggleElementFilter(filterType, fields, dir, selected.includes(dir), activeFilters, setFilters, filterDefinitions);
+    toggleDirElementFilter(
+      filterType,
+      fields,
+      dir,
+      selected.includes(dir),
+      activeFilters,
+      setFilters,
+      filterDefinitions
+    );
     e.preventDefault();
   };
 

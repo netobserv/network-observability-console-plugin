@@ -30,6 +30,10 @@ const (
 	HostName       = "K8S_HostName"
 	SrcHostName    = Src + HostName
 	DstHostName    = Dst + HostName
+	Zone           = "K8S_Zone"
+	SrcZone        = Src + Zone
+	DstZone        = Dst + Zone
+	Cluster        = "K8S_ClusterName"
 	Packets        = "Packets"
 	PktDropPackets = "PktDropPackets"
 	Proto          = "Proto"

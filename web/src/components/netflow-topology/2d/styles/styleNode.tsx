@@ -6,7 +6,9 @@ import {
   OutlinedHddIcon,
   QuestionCircleIcon,
   ServiceIcon,
-  UsersIcon
+  UsersIcon,
+  ClusterIcon,
+  ZoneIcon
 } from '@patternfly/react-icons';
 import {
   DEFAULT_LAYER,
@@ -57,6 +59,10 @@ const getTypeIcon = (resourceKind?: string): React.ComponentClass<any, any> => {
       return UsersIcon;
     case 'Node':
       return OutlinedHddIcon;
+    case 'Cluster':
+      return ClusterIcon;
+    case 'Zone':
+      return ZoneIcon;
     case 'CatalogSource':
     case 'DaemonSet':
     case 'Deployment':

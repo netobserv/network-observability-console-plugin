@@ -8,17 +8,22 @@ import './scope-slider.css';
 export interface ScopeSliderProps {
   scope: FlowScope;
   setScope: (ms: FlowScope) => void;
+  allowMultiCluster: boolean;
+  allowZone: boolean;
 }
 
-export const ScopeSlider: React.FC<ScopeSliderProps> = ({ scope, setScope }) => {
+export const ScopeSlider: React.FC<ScopeSliderProps> = ({ scope, setScope, allowMultiCluster, allowZone }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   const scopes: [FlowScope, string][] = [
     ['resource', t('Resource')],
     ['owner', t('Owner')],
     ['namespace', t('Namespace')],
-    ['host', t('Node')]
-  ];
+    ['host', t('Node')],
+    ['zone', t('Zone')],
+    ['cluster', t('Cluster')]
+  ].filter(s => (allowMultiCluster || s[0] !== 'cluster') && (allowZone || s[0] !== 'zone')) as [FlowScope, string][];
+
   const index = scopes.findIndex(s => s[0] === scope);
 
   return (
@@ -26,7 +31,7 @@ export const ScopeSlider: React.FC<ScopeSliderProps> = ({ scope, setScope }) => 
       <Slider
         value={index < 0 ? 2 : index}
         showTicks
-        max={3}
+        max={scopes.length - 1}
         customSteps={scopes.map((s, idx) => ({ value: idx, label: s[1] }))}
         onChange={(value: number) => setScope(scopes[value][0])}
         vertical

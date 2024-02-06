@@ -37,6 +37,8 @@ func setupRoutes(cfg *Config, authChecker auth.Checker) *mux.Router {
 	api.HandleFunc("/loki/flow/records", handler.GetFlows(&cfg.Loki))
 	api.HandleFunc("/loki/flow/metrics", handler.GetTopology(&cfg.Loki))
 	api.HandleFunc("/loki/export", handler.ExportFlows(&cfg.Loki))
+	api.HandleFunc("/resources/clusters", handler.GetClusters(&cfg.Loki))
+	api.HandleFunc("/resources/zones", handler.GetZones(&cfg.Loki))
 	api.HandleFunc("/resources/namespaces", handler.GetNamespaces(&cfg.Loki))
 	api.HandleFunc("/resources/namespace/{namespace}/kind/{kind}/names", handler.GetNames(&cfg.Loki))
 	api.HandleFunc("/resources/kind/{kind}/names", handler.GetNames(&cfg.Loki))

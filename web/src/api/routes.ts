@@ -53,6 +53,24 @@ export const getExportFlowsURL = (params: FlowQuery, columns?: string[]): string
   return `${ContextSingleton.getHost()}/api/loki/export?${exportQuery}`;
 };
 
+export const getClusters = (): Promise<string[]> => {
+  return axios.get(ContextSingleton.getHost() + '/api/resources/clusters').then(r => {
+    if (r.status >= 400) {
+      throw new Error(`${r.statusText} [code=${r.status}]`);
+    }
+    return r.data;
+  });
+};
+
+export const getZones = (): Promise<string[]> => {
+  return axios.get(ContextSingleton.getHost() + '/api/resources/zones').then(r => {
+    if (r.status >= 400) {
+      throw new Error(`${r.statusText} [code=${r.status}]`);
+    }
+    return r.data;
+  });
+};
+
 export const getNamespaces = (): Promise<string[]> => {
   return axios.get(ContextSingleton.getHost() + '/api/resources/namespaces').then(r => {
     if (r.status >= 400) {

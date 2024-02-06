@@ -19,6 +19,59 @@ import (
 	"github.com/netobserv/network-observability-console-plugin/pkg/utils"
 )
 
+func GetClusters(cfg *loki.Config) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		lokiClient := newLokiClient(cfg, r.Header, false)
+		var code int
+		startTime := time.Now()
+		defer func() {
+			metrics.ObserveHTTPCall("GetClusters", code, startTime)
+		}()
+
+		// Fetch and merge values for K8S_ClusterName
+		values, code, err := getLabelValues(cfg, lokiClient, fields.Cluster)
+		if err != nil {
+			writeError(w, code, "Error while fetching label cluster values from Loki: "+err.Error())
+			return
+		}
+
+		code = http.StatusOK
+		writeJSON(w, code, utils.NonEmpty(utils.Dedup(values)))
+	}
+}
+
+func GetZones(cfg *loki.Config) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		lokiClient := newLokiClient(cfg, r.Header, false)
+		var code int
+		startTime := time.Now()
+		defer func() {
+			metrics.ObserveHTTPCall("GetZones", code, startTime)
+		}()
+
+		// Initialize values explicitly to avoid null json when empty
+		values := []string{}
+
+		// Fetch and merge values for SrcK8S_Zone and DstK8S_Zone
+		values1, code, err := getLabelValues(cfg, lokiClient, fields.SrcZone)
+		if err != nil {
+			writeError(w, code, "Error while fetching label source zone values from Loki: "+err.Error())
+			return
+		}
+		values = append(values, values1...)
+
+		values2, code, err := getLabelValues(cfg, lokiClient, fields.DstZone)
+		if err != nil {
+			writeError(w, code, "Error while fetching label destination zone values from Loki: "+err.Error())
+			return
+		}
+		values = append(values, values2...)
+
+		code = http.StatusOK
+		writeJSON(w, code, utils.NonEmpty(utils.Dedup(values)))
+	}
+}
+
 func GetNamespaces(cfg *loki.Config) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		lokiClient := newLokiClient(cfg, r.Header, false)

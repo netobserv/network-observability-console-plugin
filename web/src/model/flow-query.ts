@@ -13,11 +13,26 @@ export type MetricType =
   | 'droppedPackets'
   | 'dnsLatencies'
   | 'flowRtt';
-export type FlowScope = 'app' | 'host' | 'namespace' | 'owner' | 'resource';
+export type FlowScope = 'app' | 'cluster' | 'zone' | 'host' | 'namespace' | 'owner' | 'resource';
 export type GenericAggregation = 'droppedCause' | 'droppedState' | 'dnsRCode';
 export type AggregateBy = FlowScope | GenericAggregation;
 export type NodeType = FlowScope | 'unknown';
-export type Groups = 'hosts' | 'hosts+namespaces' | 'hosts+owners' | 'namespaces' | 'namespaces+owners' | 'owners';
+export type Groups =
+  | 'clusters'
+  | 'clusters+zones'
+  | 'clusters+hosts'
+  | 'clusters+namespaces'
+  | 'clusters+owners'
+  | 'zones'
+  | 'zones+hosts'
+  | 'zones+namespaces'
+  | 'zones+owners'
+  | 'hosts'
+  | 'hosts+namespaces'
+  | 'hosts+owners'
+  | 'namespaces'
+  | 'namespaces+owners'
+  | 'owners';
 
 export interface FlowQuery {
   timeRange?: number;

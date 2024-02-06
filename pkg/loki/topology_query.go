@@ -77,28 +77,20 @@ func NewTopologyQuery(cfg *Config, start, end, limit, rateInterval, step string,
 	}, nil
 }
 
-func getLabels(aggregate, groups string) string {
-	var fields []string
-	switch aggregate {
-	case "app":
-		fields = []string{"app"}
-	case "droppedState":
-		fields = []string{"PktDropLatestState"}
-	case "droppedCause":
-		fields = []string{"PktDropLatestDropCause"}
-	case "dnsRCode":
-		fields = []string{"DnsFlagsResponseCode"}
-	case "host":
-		fields = []string{"SrcK8S_HostName", "DstK8S_HostName"}
-	case "namespace":
-		fields = []string{"SrcK8S_Namespace", "DstK8S_Namespace"}
-	case "owner":
-		fields = []string{"SrcK8S_OwnerName", "SrcK8S_OwnerType", "DstK8S_OwnerName", "DstK8S_OwnerType", "SrcK8S_Namespace", "DstK8S_Namespace"}
-	default:
-		fields = []string{"SrcK8S_Name", "SrcK8S_Type", "SrcK8S_OwnerName", "SrcK8S_OwnerType", "SrcK8S_Namespace", "SrcAddr", "SrcK8S_HostName", "DstK8S_Name", "DstK8S_Type", "DstK8S_OwnerName", "DstK8S_OwnerType", "DstK8S_Namespace", "DstAddr", "DstK8S_HostName"}
-	}
-
+func manageGroupLabels(fields []string, groups string) []string {
 	if len(groups) > 0 {
+		if strings.Contains(groups, "clusters") {
+			if !utils.Contains(fields, "K8S_ClusterName") {
+				fields = append(fields, "K8S_ClusterName")
+			}
+		}
+
+		if strings.Contains(groups, "zones") {
+			if !utils.Contains(fields, "SrcK8S_Zone") {
+				fields = append(fields, "SrcK8S_Zone", "DstK8S_Zone")
+			}
+		}
+
 		if strings.Contains(groups, "hosts") {
 			if !utils.Contains(fields, "SrcK8S_HostName") {
 				fields = append(fields, "SrcK8S_HostName", "DstK8S_HostName")
@@ -117,7 +109,34 @@ func getLabels(aggregate, groups string) string {
 			}
 		}
 	}
+	return fields
+}
 
+func getLabels(aggregate, groups string) string {
+	var fields []string
+	switch aggregate {
+	case "app":
+		fields = []string{"app"}
+	case "droppedState":
+		fields = []string{"PktDropLatestState"}
+	case "droppedCause":
+		fields = []string{"PktDropLatestDropCause"}
+	case "dnsRCode":
+		fields = []string{"DnsFlagsResponseCode"}
+	case "cluster":
+		fields = []string{"K8S_ClusterName"}
+	case "zone":
+		fields = []string{"SrcK8S_Zone", "DstK8S_Zone"}
+	case "host":
+		fields = []string{"SrcK8S_HostName", "DstK8S_HostName"}
+	case "namespace":
+		fields = []string{"SrcK8S_Namespace", "DstK8S_Namespace"}
+	case "owner":
+		fields = []string{"SrcK8S_OwnerName", "SrcK8S_OwnerType", "DstK8S_OwnerName", "DstK8S_OwnerType", "SrcK8S_Namespace", "DstK8S_Namespace"}
+	default:
+		fields = []string{"SrcK8S_Name", "SrcK8S_Type", "SrcK8S_OwnerName", "SrcK8S_OwnerType", "SrcK8S_Namespace", "SrcAddr", "SrcK8S_HostName", "DstK8S_Name", "DstK8S_Type", "DstK8S_OwnerName", "DstK8S_OwnerType", "DstK8S_Namespace", "DstAddr", "DstK8S_HostName"}
+	}
+	fields = manageGroupLabels(fields, groups)
 	return strings.Join(fields[:], ",")
 }
 
