@@ -17,6 +17,7 @@
   min-width: 50%;
   flex: 1;
   align-self: flex-start;
+  overflow: hidden;
 }
 
 .overview-flex-item.center {
