@@ -66,6 +66,11 @@ func corsHeader(cfg *Config) func(next http.Handler) http.Handler {
 			}
 			if cfg.CORSMaxAge != "" {
 				headers.Set("Access-Control-Max-Age", cfg.CORSMaxAge)
+			} else {
+				// disable cache to avoid issues between updates / plugin-manifest not parsed correctly by the console
+				headers.Set("Cache-Control", "no-cache, no-store, must-revalidate, proxy-revalidate, max-age=0")
+				headers.Set("Pragma", "no-cache")
+				headers.Set("Expires", "0")
 			}
 			next.ServeHTTP(w, r)
 		})
