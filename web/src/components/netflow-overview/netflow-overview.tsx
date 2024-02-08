@@ -85,6 +85,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
   const containerRef = React.createRef<HTMLDivElement>();
   const [containerSize, setContainerSize] = React.useState<DOMRect>({ width: 0, height: 0 } as DOMRect);
   const [sidePanelWidth, setSidePanelWidth] = React.useState<number>(0);
+  const [offsetTop, setOffsetTop] = React.useState<number>(0);
 
   const setKebabOptions = React.useCallback(
     (id: OverviewPanelId, options: PanelKebabOptions) => {
@@ -137,6 +138,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
   React.useEffect(() => {
     observeDOMRect(containerRef, containerSize, setContainerSize);
     setSidePanelWidth(document.getElementById('summaryPanel')?.clientWidth || 0);
+    setOffsetTop(containerRef.current?.offsetTop || 0);
   }, [containerRef, containerSize]);
 
   React.useEffect(() => {
@@ -683,7 +685,11 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
   } else {
     return (
       <div
-        style={{ padding: `${containerPadding}px 0 ${containerPadding}px ${containerPadding}px` }}
+        style={{
+          width: '100%',
+          height: '100%',
+          padding: `${containerPadding}px 0 ${containerPadding}px ${containerPadding}px`
+        }}
         ref={containerRef}
       >
         {allowFocus && selectedPanel && (
@@ -691,7 +697,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
             id="overview-absolute-graph"
             style={{
               position: 'absolute',
-              top: containerSize.top,
+              top: offsetTop,
               right: containerSize.width / 5 + sidePanelWidth,
               height: containerSize.height,
               overflow: 'hidden',
