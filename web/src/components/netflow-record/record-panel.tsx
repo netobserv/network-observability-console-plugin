@@ -302,7 +302,7 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
   }, [record.labels._RecordType, t]);
 
   const getSortedJSON = React.useCallback(() => {
-    const flat = { ...record.fields, ...record.labels };
+    const flat = { ...record.labels, ...record.fields };
     return JSON.stringify(flat, Object.keys(flat).sort(), 2);
   }, [record]);
 
