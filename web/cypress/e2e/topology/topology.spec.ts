@@ -61,11 +61,8 @@ describe('netflow-topology', () => {
     cy.dropdownSelect('layout-dropdown', 'Grid');
     cy.wait(c.waitTime);
 
-
     //select some scopes / groups
     cy.dropdownSelect('scope-dropdown', 'host');
-    cy.get('#group-dropdown').should('be.disabled');
-
     cy.wait(c.waitTime);
     cy.dropdownSelect('scope-dropdown', 'namespace');
     cy.wait(c.waitTime);

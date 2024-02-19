@@ -2,17 +2,181 @@
   "status": "success",
   "data": {
     "resultType": "matrix",
-    "result": [],
+    "result": [
+      {
+        "metric": {
+          "SrcK8S_Namespace": "netobserv"
+        },
+        "values": [
+          [
+            1708011360,
+            "0.004166666666666667"
+          ],
+          [
+            1708011720,
+            "0.004166666666666667"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_Namespace": "openshift-console"
+        },
+        "values": [
+          [
+            1708011360,
+            "0.034722222222222224"
+          ],
+          [
+            1708011720,
+            "0.5402777777777777"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_Namespace": "openshift-console-operator"
+        },
+        "values": [
+          [
+            1708011360,
+            "0.006944444444444444"
+          ],
+          [
+            1708011720,
+            "0.0763888888888889"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_Namespace": "openshift-insights"
+        },
+        "values": [
+          [
+            1708011360,
+            "0.005555555555555556"
+          ],
+          [
+            1708011720,
+            "0.09861111111111111"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_Namespace": "openshift-kube-storage-version-migrator-operator"
+        },
+        "values": [
+          [
+            1708011360,
+            "0.004166666666666667"
+          ],
+          [
+            1708011720,
+            "0.09583333333333334"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_Namespace": "openshift-monitoring"
+        },
+        "values": [
+          [
+            1708011360,
+            "0.001388888888888889"
+          ],
+          [
+            1708011720,
+            "0.022222222222222223"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_Namespace": "openshift-multus"
+        },
+        "values": [
+          [
+            1708011720,
+            "0.004166666666666667"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_Namespace": "openshift-network-diagnostics"
+        },
+        "values": [
+          [
+            1708011360,
+            "0.006944444444444444"
+          ],
+          [
+            1708011720,
+            "0.09444444444444444"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_Namespace": "openshift-service-ca"
+        },
+        "values": [
+          [
+            1708011360,
+            "0.006944444444444444"
+          ],
+          [
+            1708011720,
+            "0.08611111111111111"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_Namespace": "openshift-service-ca-operator"
+        },
+        "values": [
+          [
+            1708011360,
+            "0.005555555555555556"
+          ],
+          [
+            1708011720,
+            "0.09166666666666666"
+          ]
+        ]
+      },
+      {
+        "metric": {},
+        "values": [
+          [
+            1708011360,
+            "0.001388888888888889"
+          ],
+          [
+            1708011720,
+            "0.001388888888888889"
+          ]
+        ]
+      }
+    ],
     "stats": {
       "summary": {
-        "bytesProcessedPerSecond": 0,
-        "linesProcessedPerSecond": 0,
-        "totalBytesProcessed": 0,
-        "totalLinesProcessed": 0,
-        "execTime": 0.328461359,
-        "queueTime": 5.65109149,
-        "subqueries": 6,
-        "totalEntriesReturned": 0
+        "bytesProcessedPerSecond": 430616240,
+        "linesProcessedPerSecond": 655680,
+        "totalBytesProcessed": 221936446,
+        "totalLinesProcessed": 337933,
+        "execTime": 0.515392652,
+        "queueTime": 5.278643997,
+        "subqueries": 0,
+        "totalEntriesReturned": 11,
+        "splits": 6,
+        "shards": 48,
+        "totalPostFilterLines": 810,
+        "totalStructuredMetadataBytesProcessed": 0
       },
       "querier": {
         "store": {
@@ -25,27 +189,71 @@
             "decompressedBytes": 0,
             "decompressedLines": 0,
             "compressedBytes": 0,
-            "totalDuplicates": 0
+            "totalDuplicates": 0,
+            "postFilterLines": 0,
+            "headChunkStructuredMetadataBytes": 0,
+            "decompressedStructuredMetadataBytes": 0
           }
         }
       },
       "ingester": {
         "totalReached": 48,
-        "totalChunksMatched": 0,
-        "totalBatches": 0,
-        "totalLinesSent": 0,
+        "totalChunksMatched": 375,
+        "totalBatches": 56,
+        "totalLinesSent": 802,
         "store": {
-          "totalChunksRef": 0,
-          "totalChunksDownloaded": 0,
-          "chunksDownloadTime": 0,
+          "totalChunksRef": 16,
+          "totalChunksDownloaded": 16,
+          "chunksDownloadTime": 7559215,
           "chunk": {
-            "headChunkBytes": 0,
-            "headChunkLines": 0,
-            "decompressedBytes": 0,
-            "decompressedLines": 0,
-            "compressedBytes": 0,
-            "totalDuplicates": 0
+            "headChunkBytes": 18755808,
+            "headChunkLines": 28594,
+            "decompressedBytes": 203180638,
+            "decompressedLines": 309339,
+            "compressedBytes": 43253118,
+            "totalDuplicates": 0,
+            "postFilterLines": 810,
+            "headChunkStructuredMetadataBytes": 0,
+            "decompressedStructuredMetadataBytes": 0
           }
+        }
+      },
+      "cache": {
+        "chunk": {
+          "entriesFound": 0,
+          "entriesRequested": 0,
+          "entriesStored": 0,
+          "bytesReceived": 0,
+          "bytesSent": 0,
+          "requests": 0,
+          "downloadTime": 0
+        },
+        "index": {
+          "entriesFound": 0,
+          "entriesRequested": 0,
+          "entriesStored": 0,
+          "bytesReceived": 0,
+          "bytesSent": 0,
+          "requests": 0,
+          "downloadTime": 0
+        },
+        "result": {
+          "entriesFound": 4,
+          "entriesRequested": 6,
+          "entriesStored": 3,
+          "bytesReceived": 1380,
+          "bytesSent": 0,
+          "requests": 9,
+          "downloadTime": 62463
+        },
+        "statsResult": {
+          "entriesFound": 0,
+          "entriesRequested": 0,
+          "entriesStored": 0,
+          "bytesReceived": 0,
+          "bytesSent": 0,
+          "requests": 0,
+          "downloadTime": 0
         }
       }
     }

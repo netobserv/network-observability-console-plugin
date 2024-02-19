@@ -9,105 +9,37 @@
           "DstK8S_OwnerName": "kubernetes",
           "DstK8S_OwnerType": "Service",
           "SrcK8S_Namespace": "netobserv",
-          "SrcK8S_OwnerName": "flowlogs-pipeline",
-          "SrcK8S_OwnerType": "DaemonSet"
-        },
-        "values": [
-          [
-            1689617160,
-            "0.04722222222222222"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstK8S_Namespace": "default",
-          "DstK8S_OwnerName": "kubernetes",
-          "DstK8S_OwnerType": "Service",
-          "SrcK8S_Namespace": "netobserv",
           "SrcK8S_OwnerName": "netobserv-controller-manager",
           "SrcK8S_OwnerType": "Deployment"
         },
         "values": [
           [
-            1689617160,
-            "0.08055555555555556"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstK8S_Namespace": "default",
-          "DstK8S_OwnerName": "kubernetes",
-          "DstK8S_OwnerType": "Service",
-          "SrcK8S_Namespace": "openshift-apiserver",
-          "SrcK8S_OwnerName": "apiserver",
-          "SrcK8S_OwnerType": "Deployment"
-        },
-        "values": [
-          [
-            1689617160,
-            "0.03611111111111111"
+            1708009560,
+            "1.0972222222222223"
           ],
           [
-            1689617520,
-            "0.20972222222222223"
+            1708009920,
+            "2.4972222222222222"
           ],
           [
-            1689617880,
-            "0.3388888888888889"
+            1708010280,
+            "2.826388888888889"
           ],
           [
-            1689618240,
-            "0.30972222222222223"
+            1708010640,
+            "2.823611111111111"
           ],
           [
-            1689618600,
-            "0.26666666666666666"
+            1708011000,
+            "2.8375"
           ],
           [
-            1689618960,
-            "0.2902777777777778"
+            1708011360,
+            "3.0555555555555554"
           ],
           [
-            1689619320,
-            "0.32916666666666666"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstK8S_Namespace": "default",
-          "DstK8S_OwnerName": "kubernetes",
-          "DstK8S_OwnerType": "Service",
-          "SrcK8S_Namespace": "openshift-apiserver-operator",
-          "SrcK8S_OwnerName": "openshift-apiserver-operator",
-          "SrcK8S_OwnerType": "Deployment"
-        },
-        "values": [
-          [
-            1689617520,
-            "0.20833333333333334"
-          ],
-          [
-            1689617880,
-            "0.34444444444444444"
-          ],
-          [
-            1689618240,
-            "0.30277777777777776"
-          ],
-          [
-            1689618600,
-            "0.29305555555555557"
-          ],
-          [
-            1689618960,
-            "0.3111111111111111"
-          ],
-          [
-            1689619320,
-            "0.32222222222222224"
+            1708011720,
+            "3.0388888888888888"
           ]
         ]
       },
@@ -122,8 +54,32 @@
         },
         "values": [
           [
-            1689617160,
-            "0.05416666666666667"
+            1708009560,
+            "0.8402777777777778"
+          ],
+          [
+            1708009920,
+            "1.825"
+          ],
+          [
+            1708010280,
+            "4.169444444444444"
+          ],
+          [
+            1708010640,
+            "6.2972222222222225"
+          ],
+          [
+            1708011000,
+            "4.091666666666667"
+          ],
+          [
+            1708011360,
+            "7.348611111111111"
+          ],
+          [
+            1708011720,
+            "7.279166666666667"
           ]
         ]
       },
@@ -138,8 +94,244 @@
         },
         "values": [
           [
-            1689617160,
-            "0.0375"
+            1708009560,
+            "1.5791666666666666"
+          ],
+          [
+            1708009920,
+            "5.373611111111111"
+          ],
+          [
+            1708010280,
+            "6.926388888888889"
+          ],
+          [
+            1708010640,
+            "6.65"
+          ],
+          [
+            1708011000,
+            "6.708333333333333"
+          ],
+          [
+            1708011360,
+            "6.875"
+          ],
+          [
+            1708011720,
+            "7.529166666666667"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-deployment-validation-operator",
+          "SrcK8S_OwnerName": "deployment-validation-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1708009560,
+            "4.519444444444445"
+          ],
+          [
+            1708009920,
+            "12.66388888888889"
+          ],
+          [
+            1708010280,
+            "16.290277777777778"
+          ],
+          [
+            1708010640,
+            "16.333333333333332"
+          ],
+          [
+            1708011000,
+            "16.42222222222222"
+          ],
+          [
+            1708011360,
+            "16.122222222222224"
+          ],
+          [
+            1708011720,
+            "16.108333333333334"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-insights",
+          "SrcK8S_OwnerName": "insights-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1708009920,
+            "1.3486111111111112"
+          ],
+          [
+            1708010280,
+            "1.4097222222222223"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "cluster-monitoring-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1708009560,
+            "6.518055555555556"
+          ],
+          [
+            1708009920,
+            "6.736111111111111"
+          ],
+          [
+            1708010640,
+            "6.809722222222222"
+          ],
+          [
+            1708011000,
+            "6.798611111111111"
+          ],
+          [
+            1708011360,
+            "6.851388888888889"
+          ],
+          [
+            1708011720,
+            "6.844444444444444"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "kube-state-metrics",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1708009560,
+            "1.261111111111111"
+          ],
+          [
+            1708009920,
+            "3.098611111111111"
+          ],
+          [
+            1708010280,
+            "3.745833333333333"
+          ],
+          [
+            1708010640,
+            "3.7777777777777777"
+          ],
+          [
+            1708011000,
+            "3.7555555555555555"
+          ],
+          [
+            1708011360,
+            "3.863888888888889"
+          ],
+          [
+            1708011720,
+            "3.8847222222222224"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "prometheus-k8s",
+          "SrcK8S_OwnerType": "StatefulSet"
+        },
+        "values": [
+          [
+            1708009920,
+            "1.4527777777777777"
+          ],
+          [
+            1708010280,
+            "2.4027777777777777"
+          ],
+          [
+            1708010640,
+            "2.3222222222222224"
+          ],
+          [
+            1708011000,
+            "2.245833333333333"
+          ],
+          [
+            1708011360,
+            "2.613888888888889"
+          ],
+          [
+            1708011720,
+            "2.8513888888888888"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "default",
+          "DstK8S_OwnerName": "kubernetes",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-route-monitor-operator",
+          "SrcK8S_OwnerName": "route-monitor-operator-controller-manager",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1708009560,
+            "0.7041666666666667"
+          ],
+          [
+            1708009920,
+            "1.961111111111111"
+          ],
+          [
+            1708010280,
+            "2.5319444444444446"
+          ],
+          [
+            1708010640,
+            "2.533333333333333"
+          ],
+          [
+            1708011000,
+            "2.5194444444444444"
+          ],
+          [
+            1708011360,
+            "2.5125"
+          ],
+          [
+            1708011720,
+            "2.529166666666667"
           ]
         ]
       },
@@ -154,202 +346,112 @@
         },
         "values": [
           [
-            1689617880,
-            "0.3416666666666667"
+            1708009560,
+            "1.0277777777777777"
           ],
           [
-            1689618240,
-            "0.35833333333333334"
+            1708009920,
+            "2.7888888888888888"
           ],
           [
-            1689618600,
-            "0.31666666666666665"
+            1708010280,
+            "3.6041666666666665"
           ],
           [
-            1689618960,
-            "0.30972222222222223"
+            1708010640,
+            "3.6791666666666667"
           ],
           [
-            1689619320,
-            "0.34444444444444444"
+            1708011000,
+            "3.602777777777778"
+          ],
+          [
+            1708011360,
+            "3.5791666666666666"
+          ],
+          [
+            1708011720,
+            "3.638888888888889"
           ]
         ]
       },
       {
         "metric": {
-          "DstK8S_Namespace": "openshift-apiserver",
-          "DstK8S_OwnerName": "apiserver",
-          "DstK8S_OwnerType": "Deployment",
-          "SrcK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-master-0",
-          "SrcK8S_OwnerType": "Node"
+          "DstK8S_Namespace": "netobserv",
+          "DstK8S_OwnerName": "loki",
+          "DstK8S_OwnerType": "Pod",
+          "SrcK8S_Namespace": "netobserv",
+          "SrcK8S_OwnerName": "flowlogs-pipeline",
+          "SrcK8S_OwnerType": "DaemonSet"
         },
         "values": [
           [
-            1689617160,
-            "0.030555555555555555"
+            1708009560,
+            "0.8805555555555555"
           ],
           [
-            1689617520,
-            "0.26944444444444443"
+            1708009920,
+            "2.3222222222222224"
           ],
           [
-            1689617880,
-            "0.4597222222222222"
+            1708010280,
+            "2.925"
           ],
           [
-            1689618240,
-            "0.45694444444444443"
+            1708010640,
+            "2.933333333333333"
           ],
           [
-            1689618600,
-            "0.4722222222222222"
+            1708011000,
+            "2.8958333333333335"
           ],
           [
-            1689618960,
-            "0.48194444444444445"
+            1708011360,
+            "2.9569444444444444"
           ],
           [
-            1689619320,
-            "0.4708333333333333"
+            1708011720,
+            "2.9875"
           ]
         ]
       },
       {
         "metric": {
-          "DstK8S_Namespace": "openshift-apiserver",
-          "DstK8S_OwnerName": "apiserver",
-          "DstK8S_OwnerType": "Deployment",
-          "SrcK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-master-1",
-          "SrcK8S_OwnerType": "Node"
+          "DstK8S_Namespace": "netobserv",
+          "DstK8S_OwnerName": "loki",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "netobserv",
+          "SrcK8S_OwnerName": "flowlogs-pipeline",
+          "SrcK8S_OwnerType": "DaemonSet"
         },
         "values": [
           [
-            1689617880,
-            "0.35"
+            1708009560,
+            "1.6666666666666667"
           ],
           [
-            1689618240,
-            "0.3375"
+            1708009920,
+            "4.581944444444445"
           ],
           [
-            1689618600,
-            "0.3138888888888889"
+            1708010280,
+            "5.847222222222222"
           ],
           [
-            1689618960,
-            "0.36944444444444446"
+            1708010640,
+            "5.823611111111111"
           ],
           [
-            1689619320,
-            "0.4041666666666667"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstK8S_Namespace": "openshift-apiserver",
-          "DstK8S_OwnerName": "apiserver",
-          "DstK8S_OwnerType": "Deployment",
-          "SrcK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-master-2",
-          "SrcK8S_OwnerType": "Node"
-        },
-        "values": [
-          [
-            1689617160,
-            "0.07222222222222222"
+            1708011000,
+            "5.783333333333333"
           ],
           [
-            1689617520,
-            "0.39444444444444443"
+            1708011360,
+            "5.813888888888889"
           ],
           [
-            1689617880,
-            "0.6291666666666667"
-          ],
-          [
-            1689618240,
-            "0.6194444444444445"
-          ],
-          [
-            1689618600,
-            "0.5972222222222222"
-          ],
-          [
-            1689618960,
-            "0.6208333333333333"
-          ],
-          [
-            1689619320,
-            "0.6180555555555556"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstK8S_Namespace": "openshift-apiserver-operator",
-          "DstK8S_OwnerName": "openshift-apiserver-operator",
-          "DstK8S_OwnerType": "Deployment",
-          "SrcK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-master-2",
-          "SrcK8S_OwnerType": "Node"
-        },
-        "values": [
-          [
-            1689617520,
-            "0.24444444444444444"
-          ],
-          [
-            1689617880,
-            "0.40555555555555556"
-          ],
-          [
-            1689618240,
-            "0.3458333333333333"
-          ],
-          [
-            1689618600,
-            "0.33194444444444443"
-          ],
-          [
-            1689618960,
-            "0.3194444444444444"
-          ],
-          [
-            1689619320,
-            "0.3638888888888889"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstK8S_Namespace": "openshift-authentication-operator",
-          "DstK8S_OwnerName": "authentication-operator",
-          "DstK8S_OwnerType": "Deployment",
-          "SrcK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-master-2",
-          "SrcK8S_OwnerType": "Node"
-        },
-        "values": [
-          [
-            1689618240,
-            "0.28055555555555556"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstK8S_Namespace": "openshift-config-operator",
-          "DstK8S_OwnerName": "openshift-config-operator",
-          "DstK8S_OwnerType": "Deployment",
-          "SrcK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-master-2",
-          "SrcK8S_OwnerType": "Node"
-        },
-        "values": [
-          [
-            1689618960,
-            "0.2833333333333333"
-          ],
-          [
-            1689619320,
-            "0.28888888888888886"
+            1708011720,
+            "5.891666666666667"
           ]
         ]
       },
@@ -364,35 +466,112 @@
         },
         "values": [
           [
-            1689617160,
-            "0.07083333333333333"
+            1708009560,
+            "1.1180555555555556"
           ],
           [
-            1689617520,
-            "0.3111111111111111"
+            1708009920,
+            "3.401388888888889"
           ],
           [
-            1689617880,
-            "0.4236111111111111"
+            1708010280,
+            "4.886111111111111"
           ],
           [
-            1689618240,
-            "0.3013888888888889"
+            1708010640,
+            "5.177777777777778"
+          ],
+          [
+            1708011000,
+            "4.7444444444444445"
+          ],
+          [
+            1708011360,
+            "6.802777777777778"
+          ],
+          [
+            1708011720,
+            "7.161111111111111"
           ]
         ]
       },
       {
         "metric": {
-          "DstK8S_Namespace": "openshift-etcd-operator",
-          "DstK8S_OwnerName": "etcd-operator",
-          "DstK8S_OwnerType": "Deployment",
-          "SrcK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-master-2",
-          "SrcK8S_OwnerType": "Node"
+          "DstK8S_Namespace": "openshift-dns",
+          "DstK8S_OwnerName": "dns-default",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "netobserv",
+          "SrcK8S_OwnerName": "flowlogs-pipeline",
+          "SrcK8S_OwnerType": "DaemonSet"
         },
         "values": [
           [
-            1689617160,
-            "0.030555555555555555"
+            1708009560,
+            "0.6722222222222223"
+          ],
+          [
+            1708009920,
+            "1.8722222222222222"
+          ],
+          [
+            1708010280,
+            "2.4"
+          ],
+          [
+            1708010640,
+            "2.4"
+          ],
+          [
+            1708011000,
+            "2.4"
+          ],
+          [
+            1708011360,
+            "2.35"
+          ],
+          [
+            1708011720,
+            "2.35"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-dns",
+          "DstK8S_OwnerName": "dns-default",
+          "DstK8S_OwnerType": "Service",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "thanos-querier",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1708009560,
+            "0.7861111111111111"
+          ],
+          [
+            1708009920,
+            "2.1194444444444445"
+          ],
+          [
+            1708010280,
+            "2.6666666666666665"
+          ],
+          [
+            1708010640,
+            "2.6666666666666665"
+          ],
+          [
+            1708011000,
+            "2.6666666666666665"
+          ],
+          [
+            1708011360,
+            "2.6666666666666665"
+          ],
+          [
+            1708011720,
+            "2.6666666666666665"
           ]
         ]
       },
@@ -407,179 +586,192 @@
         },
         "values": [
           [
-            1689617160,
-            "0.06944444444444445"
+            1708009560,
+            "0.95"
           ],
           [
-            1689617520,
-            "0.275"
+            1708009920,
+            "2.7569444444444446"
           ],
           [
-            1689617880,
-            "0.37916666666666665"
+            1708010280,
+            "4.009722222222222"
           ],
           [
-            1689618240,
-            "0.28194444444444444"
+            1708010640,
+            "4.365277777777778"
+          ],
+          [
+            1708011000,
+            "3.890277777777778"
+          ],
+          [
+            1708011360,
+            "6.426388888888889"
+          ],
+          [
+            1708011720,
+            "6.697222222222222"
           ]
         ]
       },
       {
         "metric": {
-          "DstK8S_Namespace": "openshift-kube-controller-manager",
-          "DstK8S_OwnerName": "revision-status-4",
-          "DstK8S_OwnerType": "ConfigMap",
-          "SrcK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-master-2",
-          "SrcK8S_OwnerType": "Node"
+          "DstK8S_Namespace": "openshift-ingress",
+          "DstK8S_OwnerName": "router-default",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "prometheus-k8s",
+          "SrcK8S_OwnerType": "StatefulSet"
         },
         "values": [
           [
-            1689617160,
-            "0.029166666666666667"
+            1708009560,
+            "0.7916666666666666"
+          ],
+          [
+            1708009920,
+            "2.158333333333333"
+          ],
+          [
+            1708010280,
+            "2.7333333333333334"
+          ],
+          [
+            1708010640,
+            "2.7333333333333334"
+          ],
+          [
+            1708011000,
+            "2.7319444444444443"
+          ],
+          [
+            1708011360,
+            "2.709722222222222"
+          ],
+          [
+            1708011720,
+            "2.7111111111111112"
           ]
         ]
       },
       {
         "metric": {
-          "DstK8S_Namespace": "openshift-marketplace",
-          "DstK8S_OwnerName": "community-operators",
-          "DstK8S_OwnerType": "CatalogSource",
-          "SrcK8S_Namespace": "openshift-operator-lifecycle-manager",
-          "SrcK8S_OwnerName": "packageserver",
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "alertmanager-main",
+          "DstK8S_OwnerType": "StatefulSet",
+          "SrcK8S_Namespace": "openshift-ingress",
+          "SrcK8S_OwnerName": "router-default",
           "SrcK8S_OwnerType": "Deployment"
         },
         "values": [
           [
-            1689617520,
-            "0.39166666666666666"
-          ],
-          [
-            1689617880,
-            "0.5569444444444445"
-          ],
-          [
-            1689618240,
-            "0.39166666666666666"
-          ],
-          [
-            1689618600,
-            "0.41388888888888886"
-          ],
-          [
-            1689618960,
-            "0.4361111111111111"
-          ],
-          [
-            1689619320,
+            1708009560,
             "0.4583333333333333"
+          ],
+          [
+            1708009920,
+            "1.2583333333333333"
+          ],
+          [
+            1708010280,
+            "1.6"
+          ],
+          [
+            1708010640,
+            "1.6"
+          ],
+          [
+            1708011000,
+            "1.6"
+          ],
+          [
+            1708011360,
+            "1.5888888888888888"
+          ],
+          [
+            1708011720,
+            "1.5888888888888888"
           ]
         ]
       },
       {
         "metric": {
-          "DstK8S_Namespace": "openshift-marketplace",
-          "DstK8S_OwnerName": "community-operators",
-          "DstK8S_OwnerType": "Service",
-          "SrcK8S_Namespace": "openshift-operator-lifecycle-manager",
-          "SrcK8S_OwnerName": "packageserver",
-          "SrcK8S_OwnerType": "Deployment"
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "alertmanager-main",
+          "DstK8S_OwnerType": "StatefulSet",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "alertmanager-main",
+          "SrcK8S_OwnerType": "StatefulSet"
         },
         "values": [
           [
-            1689617520,
-            "0.5013888888888889"
+            1708009560,
+            "0.7486111111111111"
           ],
           [
-            1689617880,
-            "0.6361111111111111"
+            1708009920,
+            "2.061111111111111"
           ],
           [
-            1689618240,
-            "0.38333333333333336"
+            1708010280,
+            "2.6222222222222222"
           ],
           [
-            1689618600,
-            "0.4263888888888889"
+            1708010640,
+            "2.6305555555555555"
           ],
           [
-            1689618960,
-            "0.3958333333333333"
+            1708011000,
+            "2.636111111111111"
           ],
           [
-            1689619320,
-            "0.4583333333333333"
+            1708011360,
+            "2.598611111111111"
+          ],
+          [
+            1708011720,
+            "2.575"
           ]
         ]
       },
       {
         "metric": {
-          "DstK8S_Namespace": "openshift-marketplace",
-          "DstK8S_OwnerName": "redhat-operators",
-          "DstK8S_OwnerType": "CatalogSource",
-          "SrcK8S_Namespace": "openshift-operator-lifecycle-manager",
-          "SrcK8S_OwnerName": "packageserver",
-          "SrcK8S_OwnerType": "Deployment"
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "kube-state-metrics",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "prometheus-k8s",
+          "SrcK8S_OwnerType": "StatefulSet"
         },
         "values": [
           [
-            1689617520,
-            "0.6388888888888888"
+            1708009560,
+            "0.5666666666666667"
           ],
           [
-            1689617880,
-            "0.9333333333333333"
+            1708009920,
+            "1.761111111111111"
           ],
           [
-            1689618240,
-            "0.4125"
+            1708010280,
+            "2.3430555555555554"
           ],
           [
-            1689618600,
-            "0.4513888888888889"
+            1708010640,
+            "2.352777777777778"
           ],
           [
-            1689618960,
-            "0.4888888888888889"
+            1708011000,
+            "2.313888888888889"
           ],
           [
-            1689619320,
-            "0.5180555555555556"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstK8S_Namespace": "openshift-marketplace",
-          "DstK8S_OwnerName": "redhat-operators",
-          "DstK8S_OwnerType": "Service",
-          "SrcK8S_Namespace": "openshift-operator-lifecycle-manager",
-          "SrcK8S_OwnerName": "packageserver",
-          "SrcK8S_OwnerType": "Deployment"
-        },
-        "values": [
-          [
-            1689617520,
-            "0.6319444444444444"
+            1708011360,
+            "2"
           ],
           [
-            1689617880,
-            "0.9819444444444444"
-          ],
-          [
-            1689618240,
-            "0.4513888888888889"
-          ],
-          [
-            1689618600,
-            "0.525"
-          ],
-          [
-            1689618960,
-            "0.5777777777777777"
-          ],
-          [
-            1689619320,
-            "0.5055555555555555"
+            1708011720,
+            "2.0708333333333333"
           ]
         ]
       },
@@ -594,16 +786,112 @@
         },
         "values": [
           [
-            1689618600,
-            "0.2875"
+            1708009560,
+            "0.9986111111111111"
           ],
           [
-            1689618960,
-            "0.3111111111111111"
+            1708009920,
+            "2.7305555555555556"
           ],
           [
-            1689619320,
-            "0.30277777777777776"
+            1708010280,
+            "3.463888888888889"
+          ],
+          [
+            1708010640,
+            "3.4652777777777777"
+          ],
+          [
+            1708011000,
+            "3.466666666666667"
+          ],
+          [
+            1708011360,
+            "3.4305555555555554"
+          ],
+          [
+            1708011720,
+            "3.4305555555555554"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "prometheus-k8s",
+          "DstK8S_OwnerType": "StatefulSet",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "kube-state-metrics",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1708009560,
+            "0.5722222222222222"
+          ],
+          [
+            1708009920,
+            "1.6916666666666667"
+          ],
+          [
+            1708010280,
+            "2.2583333333333333"
+          ],
+          [
+            1708010640,
+            "2.323611111111111"
+          ],
+          [
+            1708011000,
+            "2.2958333333333334"
+          ],
+          [
+            1708011360,
+            "2.0444444444444443"
+          ],
+          [
+            1708011720,
+            "2.0972222222222223"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "prometheus-k8s",
+          "DstK8S_OwnerType": "StatefulSet",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "prometheus-k8s",
+          "SrcK8S_OwnerType": "StatefulSet"
+        },
+        "values": [
+          [
+            1708009560,
+            "0.6722222222222223"
+          ],
+          [
+            1708009920,
+            "1.7777777777777777"
+          ],
+          [
+            1708010280,
+            "2.2055555555555557"
+          ],
+          [
+            1708010640,
+            "2.198611111111111"
+          ],
+          [
+            1708011000,
+            "2.191666666666667"
+          ],
+          [
+            1708011360,
+            "2.151388888888889"
+          ],
+          [
+            1708011720,
+            "2.154166666666667"
           ]
         ]
       },
@@ -618,1299 +906,735 @@
         },
         "values": [
           [
-            1689617160,
-            "0.0375"
+            1708009560,
+            "1.1611111111111112"
+          ],
+          [
+            1708009920,
+            "3.1305555555555555"
+          ],
+          [
+            1708010280,
+            "3.9166666666666665"
+          ],
+          [
+            1708010640,
+            "3.9027777777777777"
+          ],
+          [
+            1708011000,
+            "3.915277777777778"
+          ],
+          [
+            1708011360,
+            "3.9291666666666667"
+          ],
+          [
+            1708011720,
+            "3.901388888888889"
           ]
         ]
       },
       {
         "metric": {
-          "DstK8S_Namespace": "openshift-oauth-apiserver",
-          "DstK8S_OwnerName": "apiserver",
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "thanos-querier",
           "DstK8S_OwnerType": "Deployment",
-          "SrcK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-master-0",
-          "SrcK8S_OwnerType": "Node"
-        },
-        "values": [
-          [
-            1689618240,
-            "0.3236111111111111"
-          ],
-          [
-            1689618600,
-            "0.3277777777777778"
-          ],
-          [
-            1689618960,
-            "0.3347222222222222"
-          ],
-          [
-            1689619320,
-            "0.3277777777777778"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstK8S_Namespace": "openshift-operator-lifecycle-manager",
-          "DstK8S_OwnerName": "packageserver",
-          "DstK8S_OwnerType": "Deployment",
-          "SrcK8S_Namespace": "openshift-marketplace",
-          "SrcK8S_OwnerName": "community-operators",
-          "SrcK8S_OwnerType": "CatalogSource"
-        },
-        "values": [
-          [
-            1689617520,
-            "0.26666666666666666"
-          ],
-          [
-            1689617880,
-            "0.3736111111111111"
-          ],
-          [
-            1689618600,
-            "0.35"
-          ],
-          [
-            1689618960,
-            "0.4375"
-          ],
-          [
-            1689619320,
-            "0.32083333333333336"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstK8S_Namespace": "openshift-operator-lifecycle-manager",
-          "DstK8S_OwnerName": "packageserver",
-          "DstK8S_OwnerType": "Deployment",
-          "SrcK8S_Namespace": "openshift-marketplace",
-          "SrcK8S_OwnerName": "redhat-operators",
-          "SrcK8S_OwnerType": "CatalogSource"
-        },
-        "values": [
-          [
-            1689617520,
-            "0.3527777777777778"
-          ],
-          [
-            1689617880,
-            "0.5430555555555555"
-          ],
-          [
-            1689618600,
-            "0.33055555555555555"
-          ],
-          [
-            1689618960,
-            "0.3541666666666667"
-          ],
-          [
-            1689619320,
-            "0.2875"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-master-0",
-          "DstK8S_OwnerType": "Node",
-          "SrcK8S_Namespace": "openshift-apiserver",
-          "SrcK8S_OwnerName": "apiserver",
+          "SrcK8S_Namespace": "openshift-ingress",
+          "SrcK8S_OwnerName": "router-default",
           "SrcK8S_OwnerType": "Deployment"
         },
         "values": [
           [
-            1689617520,
-            "0.19305555555555556"
+            1708009560,
+            "0.4652777777777778"
           ],
           [
-            1689617880,
-            "0.31527777777777777"
+            1708009920,
+            "1.2652777777777777"
           ],
           [
-            1689618240,
-            "0.29444444444444445"
+            1708010280,
+            "1.6"
           ],
           [
-            1689618600,
-            "0.3194444444444444"
+            1708010640,
+            "1.6"
           ],
           [
-            1689618960,
-            "0.33055555555555555"
+            1708011000,
+            "1.6"
           ],
           [
-            1689619320,
-            "0.3111111111111111"
+            1708011360,
+            "1.5833333333333333"
+          ],
+          [
+            1708011720,
+            "1.5833333333333333"
           ]
         ]
       },
       {
         "metric": {
-          "DstK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-master-0",
-          "DstK8S_OwnerType": "Node",
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "thanos-querier",
+          "DstK8S_OwnerType": "Deployment",
           "SrcK8S_Namespace": "openshift-monitoring",
           "SrcK8S_OwnerName": "prometheus-k8s",
           "SrcK8S_OwnerType": "StatefulSet"
         },
         "values": [
           [
-            1689617160,
-            "0.06527777777777778"
+            1708009560,
+            "1.0652777777777778"
           ],
           [
-            1689617520,
-            "0.40555555555555556"
+            1708009920,
+            "2.8694444444444445"
           ],
           [
-            1689617880,
-            "0.6583333333333333"
+            1708010280,
+            "3.623611111111111"
           ],
           [
-            1689618240,
-            "0.6583333333333333"
+            1708010640,
+            "3.6555555555555554"
           ],
           [
-            1689618600,
-            "0.6597222222222222"
+            1708011000,
+            "3.6277777777777778"
           ],
           [
-            1689618960,
-            "0.6458333333333334"
+            1708011360,
+            "3.6791666666666667"
           ],
           [
-            1689619320,
-            "0.6819444444444445"
+            1708011720,
+            "3.6930555555555555"
           ]
         ]
       },
       {
         "metric": {
-          "DstK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-master-0",
-          "DstK8S_OwnerType": "Node",
-          "SrcK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-master-1",
-          "SrcK8S_OwnerType": "Node"
-        },
-        "values": [
-          [
-            1689617160,
-            "0.44166666666666665"
-          ],
-          [
-            1689617520,
-            "4.5055555555555555"
-          ],
-          [
-            1689617880,
-            "8.276388888888889"
-          ],
-          [
-            1689618240,
-            "7.947222222222222"
-          ],
-          [
-            1689618600,
-            "7.530555555555556"
-          ],
-          [
-            1689618960,
-            "7.940277777777778"
-          ],
-          [
-            1689619320,
-            "8.073611111111111"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-master-0",
-          "DstK8S_OwnerType": "Node",
-          "SrcK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-master-2",
-          "SrcK8S_OwnerType": "Node"
-        },
-        "values": [
-          [
-            1689617160,
-            "1.0041666666666667"
-          ],
-          [
-            1689617520,
-            "6.4847222222222225"
-          ],
-          [
-            1689617880,
-            "11.295833333333333"
-          ],
-          [
-            1689618240,
-            "11.016666666666667"
-          ],
-          [
-            1689618600,
-            "10.290277777777778"
-          ],
-          [
-            1689618960,
-            "10.901388888888889"
-          ],
-          [
-            1689619320,
-            "11.175"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-master-0",
-          "DstK8S_OwnerType": "Node",
-          "SrcK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-worker-a-mk4rg",
-          "SrcK8S_OwnerType": "Node"
-        },
-        "values": [
-          [
-            1689617160,
-            "0.08333333333333333"
-          ],
-          [
-            1689617520,
-            "0.44166666666666665"
-          ],
-          [
-            1689617880,
-            "0.7319444444444444"
-          ],
-          [
-            1689618240,
-            "0.6861111111111111"
-          ],
-          [
-            1689618600,
-            "0.6444444444444445"
-          ],
-          [
-            1689618960,
-            "0.6638888888888889"
-          ],
-          [
-            1689619320,
-            "0.65"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-master-0",
-          "DstK8S_OwnerType": "Node",
-          "SrcK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-worker-b-m8lsx",
-          "SrcK8S_OwnerType": "Node"
-        },
-        "values": [
-          [
-            1689617160,
-            "0.058333333333333334"
-          ],
-          [
-            1689617520,
-            "0.22361111111111112"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-master-0",
-          "DstK8S_OwnerType": "Node",
-          "SrcK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-worker-c-95vwn",
-          "SrcK8S_OwnerType": "Node"
-        },
-        "values": [
-          [
-            1689617160,
-            "0.05138888888888889"
-          ],
-          [
-            1689617520,
-            "0.2833333333333333"
-          ],
-          [
-            1689617880,
-            "0.46805555555555556"
-          ],
-          [
-            1689618240,
-            "0.48055555555555557"
-          ],
-          [
-            1689618600,
-            "0.5097222222222222"
-          ],
-          [
-            1689618960,
-            "0.5111111111111111"
-          ],
-          [
-            1689619320,
-            "0.5041666666666667"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-master-1",
-          "DstK8S_OwnerType": "Node",
-          "SrcK8S_Namespace": "openshift-monitoring",
-          "SrcK8S_OwnerName": "prometheus-k8s",
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "thanos-querier",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-user-workload-monitoring",
+          "SrcK8S_OwnerName": "prometheus-user-workload",
           "SrcK8S_OwnerType": "StatefulSet"
         },
         "values": [
           [
-            1689617160,
-            "0.0375"
+            1708009560,
+            "0.39861111111111114"
           ],
           [
-            1689617520,
-            "0.37083333333333335"
+            1708010280,
+            "1.3"
           ],
           [
-            1689617880,
-            "0.6847222222222222"
+            1708010640,
+            "1.2986111111111112"
           ],
           [
-            1689618240,
-            "0.6972222222222222"
+            1708011000,
+            "1.2875"
           ],
           [
-            1689618600,
-            "0.6652777777777777"
+            1708011360,
+            "1.2458333333333333"
           ],
           [
-            1689618960,
-            "0.6708333333333333"
-          ],
-          [
-            1689619320,
-            "0.6944444444444444"
+            1708011720,
+            "1.3083333333333333"
           ]
         ]
       },
       {
         "metric": {
-          "DstK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-master-1",
-          "DstK8S_OwnerType": "Node",
-          "SrcK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-master-0",
-          "SrcK8S_OwnerType": "Node"
+          "DstK8S_Namespace": "openshift-monitoring",
+          "DstK8S_OwnerName": "thanos-querier",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "openshift-user-workload-monitoring",
+          "SrcK8S_OwnerName": "thanos-ruler-user-workload",
+          "SrcK8S_OwnerType": "StatefulSet"
         },
         "values": [
           [
-            1689617160,
-            "0.3888888888888889"
+            1708009560,
+            "0.44305555555555554"
           ],
           [
-            1689617520,
-            "4.477777777777778"
+            1708009920,
+            "1.1847222222222222"
           ],
           [
-            1689617880,
-            "8.25"
+            1708010280,
+            "1.4958333333333333"
           ],
           [
-            1689618240,
-            "7.883333333333334"
+            1708010640,
+            "1.5305555555555554"
           ],
           [
-            1689618600,
-            "7.613888888888889"
+            1708011000,
+            "1.5458333333333334"
           ],
           [
-            1689618960,
-            "8.084722222222222"
+            1708011360,
+            "1.5416666666666667"
           ],
           [
-            1689619320,
-            "8.222222222222221"
+            1708011720,
+            "1.5138888888888888"
           ]
         ]
       },
       {
         "metric": {
-          "DstK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-master-1",
-          "DstK8S_OwnerType": "Node",
-          "SrcK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-master-2",
-          "SrcK8S_OwnerType": "Node"
-        },
-        "values": [
-          [
-            1689617160,
-            "0.6291666666666667"
-          ],
-          [
-            1689617520,
-            "3.245833333333333"
-          ],
-          [
-            1689617880,
-            "4.854166666666667"
-          ],
-          [
-            1689618240,
-            "4.4"
-          ],
-          [
-            1689618600,
-            "4.593055555555556"
-          ],
-          [
-            1689618960,
-            "4.665277777777778"
-          ],
-          [
-            1689619320,
-            "4.480555555555555"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-master-1",
-          "DstK8S_OwnerType": "Node",
-          "SrcK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-worker-a-mk4rg",
-          "SrcK8S_OwnerType": "Node"
-        },
-        "values": [
-          [
-            1689617160,
-            "0.10555555555555556"
-          ],
-          [
-            1689617520,
-            "0.4513888888888889"
-          ],
-          [
-            1689617880,
-            "0.6930555555555555"
-          ],
-          [
-            1689618240,
-            "0.6666666666666666"
-          ],
-          [
-            1689618600,
-            "0.6555555555555556"
-          ],
-          [
-            1689618960,
-            "0.6680555555555555"
-          ],
-          [
-            1689619320,
-            "0.6513888888888889"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-master-1",
-          "DstK8S_OwnerType": "Node",
-          "SrcK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-worker-c-95vwn",
-          "SrcK8S_OwnerType": "Node"
-        },
-        "values": [
-          [
-            1689617160,
-            "0.029166666666666667"
-          ],
-          [
-            1689617520,
-            "0.2708333333333333"
-          ],
-          [
-            1689617880,
-            "0.4930555555555556"
-          ],
-          [
-            1689618240,
-            "0.48333333333333334"
-          ],
-          [
-            1689618600,
-            "0.4625"
-          ],
-          [
-            1689618960,
-            "0.48055555555555557"
-          ],
-          [
-            1689619320,
-            "0.48055555555555557"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-master-1",
-          "DstK8S_OwnerType": "Node"
-        },
-        "values": [
-          [
-            1689617160,
-            "0.12916666666666668"
-          ],
-          [
-            1689617520,
-            "0.8180555555555555"
-          ],
-          [
-            1689617880,
-            "1.3416666666666666"
-          ],
-          [
-            1689618240,
-            "1.386111111111111"
-          ],
-          [
-            1689618600,
-            "1.4305555555555556"
-          ],
-          [
-            1689618960,
-            "1.3375"
-          ],
-          [
-            1689619320,
-            "1.3444444444444446"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-master-2",
-          "DstK8S_OwnerType": "Node",
-          "SrcK8S_Namespace": "openshift-apiserver",
-          "SrcK8S_OwnerName": "apiserver",
+          "DstK8S_Namespace": "openshift-user-workload-monitoring",
+          "DstK8S_OwnerName": "prometheus-user-workload",
+          "DstK8S_OwnerType": "StatefulSet",
+          "SrcK8S_Namespace": "openshift-ingress",
+          "SrcK8S_OwnerName": "router-default",
           "SrcK8S_OwnerType": "Deployment"
         },
         "values": [
           [
-            1689617160,
-            "0.05"
-          ],
-          [
-            1689617520,
-            "0.20833333333333334"
-          ],
-          [
-            1689617880,
-            "0.31527777777777777"
-          ],
-          [
-            1689618240,
-            "0.33194444444444443"
-          ],
-          [
-            1689618600,
-            "0.35833333333333334"
-          ],
-          [
-            1689618960,
-            "0.3527777777777778"
-          ],
-          [
-            1689619320,
-            "0.34444444444444444"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-master-2",
-          "DstK8S_OwnerType": "Node",
-          "SrcK8S_Namespace": "openshift-monitoring",
-          "SrcK8S_OwnerName": "prometheus-k8s",
-          "SrcK8S_OwnerType": "StatefulSet"
-        },
-        "values": [
-          [
-            1689617160,
-            "0.06527777777777778"
-          ],
-          [
-            1689617520,
-            "0.49583333333333335"
-          ],
-          [
-            1689617880,
-            "0.8569444444444444"
-          ],
-          [
-            1689618240,
-            "0.8819444444444444"
-          ],
-          [
-            1689618600,
-            "0.9277777777777778"
-          ],
-          [
-            1689618960,
-            "0.9305555555555556"
-          ],
-          [
-            1689619320,
-            "0.9375"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-master-2",
-          "DstK8S_OwnerType": "Node",
-          "SrcK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-master-0",
-          "SrcK8S_OwnerType": "Node"
-        },
-        "values": [
-          [
-            1689617160,
-            "1.2569444444444444"
-          ],
-          [
-            1689617520,
-            "6.666666666666667"
-          ],
-          [
-            1689617880,
-            "10.894444444444444"
-          ],
-          [
-            1689618240,
-            "10.420833333333333"
-          ],
-          [
-            1689618600,
-            "9.947222222222223"
-          ],
-          [
-            1689618960,
-            "10.534722222222221"
-          ],
-          [
-            1689619320,
-            "10.769444444444444"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-master-2",
-          "DstK8S_OwnerType": "Node",
-          "SrcK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-master-1",
-          "SrcK8S_OwnerType": "Node"
-        },
-        "values": [
-          [
-            1689617160,
-            "0.6180555555555556"
-          ],
-          [
-            1689617520,
-            "3.1819444444444445"
-          ],
-          [
-            1689617880,
-            "4.743055555555555"
-          ],
-          [
-            1689618240,
-            "4.259722222222222"
-          ],
-          [
-            1689618600,
-            "4.497222222222222"
-          ],
-          [
-            1689618960,
-            "4.551388888888889"
-          ],
-          [
-            1689619320,
-            "4.151388888888889"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-master-2",
-          "DstK8S_OwnerType": "Node",
-          "SrcK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-worker-a-mk4rg",
-          "SrcK8S_OwnerType": "Node"
-        },
-        "values": [
-          [
-            1689617160,
-            "0.06666666666666667"
-          ],
-          [
-            1689617520,
-            "0.5361111111111111"
-          ],
-          [
-            1689617880,
-            "0.9597222222222223"
-          ],
-          [
-            1689618240,
-            "0.9680555555555556"
-          ],
-          [
-            1689618600,
-            "0.9222222222222223"
-          ],
-          [
-            1689618960,
-            "0.9319444444444445"
-          ],
-          [
-            1689619320,
-            "0.9722222222222222"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-master-2",
-          "DstK8S_OwnerType": "Node",
-          "SrcK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-worker-c-95vwn",
-          "SrcK8S_OwnerType": "Node"
-        },
-        "values": [
-          [
-            1689617160,
-            "0.1"
-          ],
-          [
-            1689617520,
-            "0.6180555555555556"
-          ],
-          [
-            1689617880,
-            "1.0458333333333334"
-          ],
-          [
-            1689618240,
-            "1.0527777777777778"
-          ],
-          [
-            1689618600,
-            "1.0305555555555554"
-          ],
-          [
-            1689618960,
-            "0.9597222222222223"
-          ],
-          [
-            1689619320,
-            "1.0097222222222222"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-worker-a-mk4rg",
-          "DstK8S_OwnerType": "Node",
-          "SrcK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-master-0",
-          "SrcK8S_OwnerType": "Node"
-        },
-        "values": [
-          [
-            1689617160,
-            "0.0875"
-          ],
-          [
-            1689617520,
-            "0.4791666666666667"
-          ],
-          [
-            1689617880,
-            "0.7541666666666667"
-          ],
-          [
-            1689618240,
-            "0.6930555555555555"
-          ],
-          [
-            1689618600,
-            "0.6805555555555556"
-          ],
-          [
-            1689618960,
-            "0.6916666666666667"
-          ],
-          [
-            1689619320,
-            "0.6944444444444444"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-worker-a-mk4rg",
-          "DstK8S_OwnerType": "Node",
-          "SrcK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-master-1",
-          "SrcK8S_OwnerType": "Node"
-        },
-        "values": [
-          [
-            1689617160,
-            "0.0875"
-          ],
-          [
-            1689617520,
-            "0.4041666666666667"
-          ],
-          [
-            1689617880,
-            "0.6569444444444444"
-          ],
-          [
-            1689618240,
-            "0.6986111111111111"
-          ],
-          [
-            1689618600,
-            "0.6847222222222222"
-          ],
-          [
-            1689618960,
-            "0.7097222222222223"
-          ],
-          [
-            1689619320,
-            "0.7527777777777778"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-worker-a-mk4rg",
-          "DstK8S_OwnerType": "Node",
-          "SrcK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-master-2",
-          "SrcK8S_OwnerType": "Node"
-        },
-        "values": [
-          [
-            1689617160,
-            "0.06805555555555555"
-          ],
-          [
-            1689617520,
-            "0.5569444444444445"
-          ],
-          [
-            1689617880,
-            "0.9569444444444445"
-          ],
-          [
-            1689618240,
-            "0.9611111111111111"
-          ],
-          [
-            1689618600,
-            "0.9833333333333333"
-          ],
-          [
-            1689618960,
-            "0.9597222222222223"
-          ],
-          [
-            1689619320,
-            "0.9486111111111111"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-worker-a-mk4rg",
-          "DstK8S_OwnerType": "Node",
-          "SrcK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-worker-b-m8lsx",
-          "SrcK8S_OwnerType": "Node"
-        },
-        "values": [
-          [
-            1689617160,
-            "0.03194444444444444"
-          ],
-          [
-            1689617520,
-            "0.25972222222222224"
-          ],
-          [
-            1689617880,
-            "0.4361111111111111"
-          ],
-          [
-            1689618240,
-            "0.4013888888888889"
-          ],
-          [
-            1689618600,
-            "0.43333333333333335"
-          ],
-          [
-            1689618960,
-            "0.5027777777777778"
-          ],
-          [
-            1689619320,
-            "0.5138888888888888"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-worker-a-mk4rg",
-          "DstK8S_OwnerType": "Node",
-          "SrcK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-worker-c-95vwn",
-          "SrcK8S_OwnerType": "Node"
-        },
-        "values": [
-          [
-            1689617160,
-            "0.04722222222222222"
-          ],
-          [
-            1689617520,
-            "0.45416666666666666"
-          ],
-          [
-            1689617880,
-            "0.7736111111111111"
-          ],
-          [
-            1689618240,
-            "0.6986111111111111"
-          ],
-          [
-            1689618600,
-            "0.7180555555555556"
-          ],
-          [
-            1689618960,
-            "0.7625"
-          ],
-          [
-            1689619320,
-            "0.7361111111111112"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-worker-b-m8lsx",
-          "DstK8S_OwnerType": "Node",
-          "SrcK8S_Namespace": "openshift-monitoring",
-          "SrcK8S_OwnerName": "prometheus-k8s",
-          "SrcK8S_OwnerType": "StatefulSet"
-        },
-        "values": [
-          [
-            1689618600,
-            "0.28194444444444444"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-worker-b-m8lsx",
-          "DstK8S_OwnerType": "Node",
-          "SrcK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-master-0",
-          "SrcK8S_OwnerType": "Node"
-        },
-        "values": [
-          [
-            1689617160,
-            "0.08055555555555556"
-          ],
-          [
-            1689617520,
-            "0.25"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-worker-b-m8lsx",
-          "DstK8S_OwnerType": "Node",
-          "SrcK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-master-2",
-          "SrcK8S_OwnerType": "Node"
-        },
-        "values": [
-          [
-            1689617160,
-            "0.03333333333333333"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-worker-b-m8lsx",
-          "DstK8S_OwnerType": "Node",
-          "SrcK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-worker-a-mk4rg",
-          "SrcK8S_OwnerType": "Node"
-        },
-        "values": [
-          [
-            1689617160,
-            "0.034722222222222224"
-          ],
-          [
-            1689617520,
-            "0.2388888888888889"
-          ],
-          [
-            1689617880,
-            "0.4041666666666667"
-          ],
-          [
-            1689618240,
-            "0.39305555555555555"
-          ],
-          [
-            1689618600,
-            "0.36666666666666664"
-          ],
-          [
-            1689618960,
-            "0.38472222222222224"
-          ],
-          [
-            1689619320,
-            "0.39444444444444443"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-worker-b-m8lsx",
-          "DstK8S_OwnerType": "Node",
-          "SrcK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-worker-c-95vwn",
-          "SrcK8S_OwnerType": "Node"
-        },
-        "values": [
-          [
-            1689617520,
-            "0.22361111111111112"
-          ],
-          [
-            1689617880,
-            "0.36944444444444446"
-          ],
-          [
-            1689618240,
-            "0.3277777777777778"
-          ],
-          [
-            1689618600,
-            "0.3416666666666667"
-          ],
-          [
-            1689618960,
-            "0.3472222222222222"
-          ],
-          [
-            1689619320,
-            "0.3375"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-worker-c-95vwn",
-          "DstK8S_OwnerType": "Node",
-          "SrcK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-master-0",
-          "SrcK8S_OwnerType": "Node"
-        },
-        "values": [
-          [
-            1689617160,
-            "0.03333333333333333"
-          ],
-          [
-            1689617520,
-            "0.3111111111111111"
-          ],
-          [
-            1689617880,
-            "0.5305555555555556"
-          ],
-          [
-            1689618240,
-            "0.5458333333333333"
-          ],
-          [
-            1689618600,
-            "0.5986111111111111"
-          ],
-          [
-            1689618960,
-            "0.5652777777777778"
-          ],
-          [
-            1689619320,
-            "0.5125"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-worker-c-95vwn",
-          "DstK8S_OwnerType": "Node",
-          "SrcK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-master-1",
-          "SrcK8S_OwnerType": "Node"
-        },
-        "values": [
-          [
-            1689617160,
-            "0.03333333333333333"
-          ],
-          [
-            1689617520,
-            "0.2972222222222222"
-          ],
-          [
-            1689617880,
-            "0.5"
-          ],
-          [
-            1689618240,
-            "0.5041666666666667"
-          ],
-          [
-            1689618600,
-            "0.5194444444444445"
-          ],
-          [
-            1689618960,
-            "0.48333333333333334"
-          ],
-          [
-            1689619320,
-            "0.46944444444444444"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-worker-c-95vwn",
-          "DstK8S_OwnerType": "Node",
-          "SrcK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-master-2",
-          "SrcK8S_OwnerType": "Node"
-        },
-        "values": [
-          [
-            1689617160,
-            "0.09722222222222222"
-          ],
-          [
-            1689617520,
-            "0.6027777777777777"
-          ],
-          [
-            1689617880,
-            "1.0611111111111111"
-          ],
-          [
-            1689618240,
-            "1.1152777777777778"
-          ],
-          [
-            1689618600,
-            "1.125"
-          ],
-          [
-            1689618960,
-            "1.1291666666666667"
-          ],
-          [
-            1689619320,
-            "1.101388888888889"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-worker-c-95vwn",
-          "DstK8S_OwnerType": "Node",
-          "SrcK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-worker-a-mk4rg",
-          "SrcK8S_OwnerType": "Node"
-        },
-        "values": [
-          [
-            1689617160,
-            "0.05555555555555555"
-          ],
-          [
-            1689617520,
-            "0.45"
-          ],
-          [
-            1689617880,
-            "0.7694444444444445"
-          ],
-          [
-            1689618240,
-            "0.7180555555555556"
-          ],
-          [
-            1689618600,
-            "0.7305555555555555"
-          ],
-          [
-            1689618960,
-            "0.7652777777777777"
-          ],
-          [
-            1689619320,
-            "0.7555555555555555"
-          ]
-        ]
-      },
-      {
-        "metric": {
-          "DstK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-worker-c-95vwn",
-          "DstK8S_OwnerType": "Node",
-          "SrcK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-worker-b-m8lsx",
-          "SrcK8S_OwnerType": "Node"
-        },
-        "values": [
-          [
-            1689617160,
-            "0.04027777777777778"
-          ],
-          [
-            1689617520,
-            "0.2902777777777778"
-          ],
-          [
-            1689617880,
-            "0.4861111111111111"
-          ],
-          [
-            1689618240,
+            1708009560,
             "0.48194444444444445"
           ],
           [
-            1689618600,
-            "0.4986111111111111"
+            1708009920,
+            "1.2930555555555556"
           ],
           [
-            1689618960,
-            "0.475"
+            1708010280,
+            "1.6222222222222222"
           ],
           [
-            1689619320,
-            "0.4722222222222222"
+            1708010640,
+            "1.6222222222222222"
+          ],
+          [
+            1708011000,
+            "1.625"
+          ],
+          [
+            1708011360,
+            "1.6111111111111112"
+          ],
+          [
+            1708011720,
+            "1.601388888888889"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-user-workload-monitoring",
+          "DstK8S_OwnerName": "prometheus-user-workload",
+          "DstK8S_OwnerType": "StatefulSet",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "thanos-querier",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1708009560,
+            "0.6666666666666666"
+          ],
+          [
+            1708009920,
+            "1.8194444444444444"
+          ],
+          [
+            1708010280,
+            "2.286111111111111"
+          ],
+          [
+            1708010640,
+            "2.279166666666667"
+          ],
+          [
+            1708011000,
+            "2.275"
+          ],
+          [
+            1708011360,
+            "2.25"
+          ],
+          [
+            1708011720,
+            "2.2694444444444444"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-user-workload-monitoring",
+          "DstK8S_OwnerName": "thanos-ruler-user-workload",
+          "DstK8S_OwnerType": "StatefulSet",
+          "SrcK8S_Namespace": "openshift-ingress",
+          "SrcK8S_OwnerName": "router-default",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1708009560,
+            "0.46944444444444444"
+          ],
+          [
+            1708009920,
+            "1.2694444444444444"
+          ],
+          [
+            1708010280,
+            "1.6"
+          ],
+          [
+            1708010640,
+            "1.6"
+          ],
+          [
+            1708011000,
+            "1.5944444444444446"
+          ],
+          [
+            1708011360,
+            "1.5722222222222222"
+          ],
+          [
+            1708011720,
+            "1.5777777777777777"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "openshift-user-workload-monitoring",
+          "DstK8S_OwnerName": "thanos-ruler-user-workload",
+          "DstK8S_OwnerType": "StatefulSet",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "thanos-querier",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1708009560,
+            "0.6305555555555555"
+          ],
+          [
+            1708009920,
+            "1.6847222222222222"
+          ],
+          [
+            1708010280,
+            "2.126388888888889"
+          ],
+          [
+            1708010640,
+            "2.158333333333333"
+          ],
+          [
+            1708011000,
+            "2.1666666666666665"
+          ],
+          [
+            1708011360,
+            "2.1569444444444446"
+          ],
+          [
+            1708011720,
+            "2.1305555555555555"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_OwnerName": "ip-10-0-1-137.ec2.internal",
+          "DstK8S_OwnerType": "Node",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "prometheus-k8s",
+          "SrcK8S_OwnerType": "StatefulSet"
+        },
+        "values": [
+          [
+            1708009560,
+            "2.5708333333333333"
+          ],
+          [
+            1708009920,
+            "6.972222222222222"
+          ],
+          [
+            1708010280,
+            "8.808333333333334"
+          ],
+          [
+            1708010640,
+            "8.793055555555556"
+          ],
+          [
+            1708011000,
+            "8.791666666666666"
+          ],
+          [
+            1708011360,
+            "8.795833333333333"
+          ],
+          [
+            1708011720,
+            "8.786111111111111"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_OwnerName": "ip-10-0-1-137.ec2.internal",
+          "DstK8S_OwnerType": "Node",
+          "SrcK8S_OwnerName": "ip-10-0-1-7.ec2.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1708009560,
+            "16.558333333333334"
+          ],
+          [
+            1708009920,
+            "45.81388888888889"
+          ],
+          [
+            1708010280,
+            "58.670833333333334"
+          ],
+          [
+            1708010640,
+            "58.93194444444445"
+          ],
+          [
+            1708011000,
+            "58.525"
+          ],
+          [
+            1708011360,
+            "59.87361111111111"
+          ],
+          [
+            1708011720,
+            "60.53333333333333"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_OwnerName": "ip-10-0-1-7.ec2.internal",
+          "DstK8S_OwnerType": "Node",
+          "SrcK8S_Namespace": "netobserv",
+          "SrcK8S_OwnerName": "netobserv-controller-manager",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1708009560,
+            "0.4013888888888889"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_OwnerName": "ip-10-0-1-7.ec2.internal",
+          "DstK8S_OwnerType": "Node",
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "prometheus-k8s",
+          "SrcK8S_OwnerType": "StatefulSet"
+        },
+        "values": [
+          [
+            1708009560,
+            "2.725"
+          ],
+          [
+            1708009920,
+            "7.35"
+          ],
+          [
+            1708010280,
+            "9.265277777777778"
+          ],
+          [
+            1708010640,
+            "9.280555555555555"
+          ],
+          [
+            1708011000,
+            "9.265277777777778"
+          ],
+          [
+            1708011360,
+            "9.213888888888889"
+          ],
+          [
+            1708011720,
+            "9.222222222222221"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_OwnerName": "ip-10-0-1-7.ec2.internal",
+          "DstK8S_OwnerType": "Node",
+          "SrcK8S_OwnerName": "ip-10-0-1-137.ec2.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1708009560,
+            "17.21527777777778"
+          ],
+          [
+            1708009920,
+            "45.67777777777778"
+          ],
+          [
+            1708010280,
+            "57.30416666666667"
+          ],
+          [
+            1708010640,
+            "57.665277777777774"
+          ],
+          [
+            1708011000,
+            "57.168055555555554"
+          ],
+          [
+            1708011360,
+            "60.03333333333333"
+          ],
+          [
+            1708011720,
+            "60.547222222222224"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_Namespace": "netobserv",
+          "SrcK8S_OwnerName": "netobserv-controller-manager",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1708009560,
+            "1.0680555555555555"
+          ],
+          [
+            1708009920,
+            "2.4680555555555554"
+          ],
+          [
+            1708010280,
+            "2.826388888888889"
+          ],
+          [
+            1708010640,
+            "2.823611111111111"
+          ],
+          [
+            1708011000,
+            "2.8375"
+          ],
+          [
+            1708011360,
+            "3.0569444444444445"
+          ],
+          [
+            1708011720,
+            "3.040277777777778"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_Namespace": "openshift-console",
+          "SrcK8S_OwnerName": "console",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1708009560,
+            "0.95"
+          ],
+          [
+            1708009920,
+            "2.0861111111111112"
+          ],
+          [
+            1708010280,
+            "4.466666666666667"
+          ],
+          [
+            1708010640,
+            "6.586111111111111"
+          ],
+          [
+            1708011000,
+            "4.391666666666667"
+          ],
+          [
+            1708011360,
+            "7.698611111111111"
+          ],
+          [
+            1708011720,
+            "7.622222222222222"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_Namespace": "openshift-console-operator",
+          "SrcK8S_OwnerName": "console-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1708009560,
+            "1.6861111111111111"
+          ],
+          [
+            1708009920,
+            "5.6930555555555555"
+          ],
+          [
+            1708010280,
+            "7.331944444444445"
+          ],
+          [
+            1708010640,
+            "7.048611111111111"
+          ],
+          [
+            1708011000,
+            "7.108333333333333"
+          ],
+          [
+            1708011360,
+            "7.277777777777778"
+          ],
+          [
+            1708011720,
+            "7.951388888888889"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_Namespace": "openshift-deployment-validation-operator",
+          "SrcK8S_OwnerName": "deployment-validation-operator",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1708009560,
+            "4.5055555555555555"
+          ],
+          [
+            1708009920,
+            "12.65"
+          ],
+          [
+            1708010280,
+            "16.290277777777778"
+          ],
+          [
+            1708010640,
+            "16.333333333333332"
+          ],
+          [
+            1708011000,
+            "16.42222222222222"
+          ],
+          [
+            1708011360,
+            "16.122222222222224"
+          ],
+          [
+            1708011720,
+            "16.108333333333334"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_Namespace": "openshift-dns",
+          "SrcK8S_OwnerName": "dns-default",
+          "SrcK8S_OwnerType": "DaemonSet"
+        },
+        "values": [
+          [
+            1708009560,
+            "0.4361111111111111"
+          ],
+          [
+            1708010280,
+            "1.4638888888888888"
+          ],
+          [
+            1708010640,
+            "1.4277777777777778"
+          ],
+          [
+            1708011000,
+            "1.4375"
+          ],
+          [
+            1708011360,
+            "1.45"
+          ],
+          [
+            1708011720,
+            "1.4097222222222223"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_Namespace": "openshift-image-registry",
+          "SrcK8S_OwnerName": "image-registry",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1708009560,
+            "1.1680555555555556"
+          ],
+          [
+            1708009920,
+            "3.272222222222222"
+          ],
+          [
+            1708010280,
+            "4.1819444444444445"
+          ],
+          [
+            1708010640,
+            "4.161111111111111"
+          ],
+          [
+            1708011000,
+            "4.126388888888889"
+          ],
+          [
+            1708011360,
+            "4.170833333333333"
+          ],
+          [
+            1708011720,
+            "4.261111111111111"
           ]
         ]
       },
@@ -1922,152 +1646,302 @@
         },
         "values": [
           [
-            1689617160,
-            "0.09444444444444444"
+            1708009560,
+            "2.040277777777778"
           ],
           [
-            1689617520,
-            "0.3416666666666667"
+            1708009920,
+            "4.911111111111111"
           ],
           [
-            1689617880,
-            "0.4513888888888889"
+            1708010280,
+            "7.051388888888889"
           ],
           [
-            1689618240,
-            "0.2916666666666667"
+            1708010640,
+            "8.5625"
+          ],
+          [
+            1708011000,
+            "7.2027777777777775"
+          ],
+          [
+            1708011360,
+            "15.820833333333333"
+          ],
+          [
+            1708011720,
+            "15.915277777777778"
           ]
         ]
       },
       {
         "metric": {
-          "SrcK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-master-0",
-          "SrcK8S_OwnerType": "Node"
+          "SrcK8S_Namespace": "openshift-insights",
+          "SrcK8S_OwnerName": "insights-operator",
+          "SrcK8S_OwnerType": "Deployment"
         },
         "values": [
           [
-            1689617160,
-            "0.03888888888888889"
+            1708009920,
+            "1.4541666666666666"
           ],
           [
-            1689617520,
-            "0.2638888888888889"
-          ],
-          [
-            1689617880,
-            "0.4486111111111111"
-          ],
-          [
-            1689618240,
-            "0.43194444444444446"
-          ],
-          [
-            1689618600,
-            "0.42777777777777776"
-          ],
-          [
-            1689618960,
-            "0.4527777777777778"
-          ],
-          [
-            1689619320,
-            "0.475"
+            1708010280,
+            "1.5152777777777777"
           ]
         ]
       },
       {
         "metric": {
-          "SrcK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-master-1",
-          "SrcK8S_OwnerType": "Node"
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "cluster-monitoring-operator",
+          "SrcK8S_OwnerType": "Deployment"
         },
         "values": [
           [
-            1689617160,
-            "0.14027777777777778"
+            1708009560,
+            "6.5152777777777775"
           ],
           [
-            1689617520,
-            "1.0833333333333333"
+            1708009920,
+            "6.733333333333333"
           ],
           [
-            1689617880,
-            "1.823611111111111"
+            1708010640,
+            "6.809722222222222"
           ],
           [
-            1689618240,
-            "1.7208333333333334"
+            1708011000,
+            "6.798611111111111"
           ],
           [
-            1689618600,
-            "1.6416666666666666"
+            1708011360,
+            "6.851388888888889"
           ],
           [
-            1689618960,
-            "1.6680555555555556"
-          ],
-          [
-            1689619320,
-            "1.7375"
+            1708011720,
+            "6.844444444444444"
           ]
         ]
       },
       {
         "metric": {
-          "SrcK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-master-2",
-          "SrcK8S_OwnerType": "Node"
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "kube-state-metrics",
+          "SrcK8S_OwnerType": "Deployment"
         },
         "values": [
           [
-            1689617160,
-            "0.030555555555555555"
+            1708009560,
+            "1.2416666666666667"
           ],
           [
-            1689617520,
-            "0.25416666666666665"
+            1708009920,
+            "3.0791666666666666"
           ],
           [
-            1689617880,
-            "0.44583333333333336"
+            1708010280,
+            "3.745833333333333"
           ],
           [
-            1689618240,
-            "0.4125"
+            1708010640,
+            "3.7777777777777777"
           ],
           [
-            1689618600,
-            "0.36944444444444446"
+            1708011000,
+            "3.7555555555555555"
           ],
           [
-            1689618960,
-            "0.3958333333333333"
+            1708011360,
+            "3.863888888888889"
           ],
           [
-            1689619320,
-            "0.40694444444444444"
+            1708011720,
+            "3.886111111111111"
           ]
         ]
       },
       {
         "metric": {
-          "SrcK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-worker-a-mk4rg",
-          "SrcK8S_OwnerType": "Node"
+          "SrcK8S_Namespace": "openshift-monitoring",
+          "SrcK8S_OwnerName": "prometheus-k8s",
+          "SrcK8S_OwnerType": "StatefulSet"
         },
         "values": [
           [
-            1689617160,
-            "0.034722222222222224"
+            1708009560,
+            "3.063888888888889"
+          ],
+          [
+            1708009920,
+            "9.051388888888889"
+          ],
+          [
+            1708010280,
+            "11.955555555555556"
+          ],
+          [
+            1708010640,
+            "11.877777777777778"
+          ],
+          [
+            1708011000,
+            "11.816666666666666"
+          ],
+          [
+            1708011360,
+            "12.1875"
+          ],
+          [
+            1708011720,
+            "12.431944444444444"
           ]
         ]
       },
       {
         "metric": {
-          "SrcK8S_OwnerName": "ci-ln-hnd9rjk-72292-hnd5v-worker-c-95vwn",
+          "SrcK8S_Namespace": "openshift-route-monitor-operator",
+          "SrcK8S_OwnerName": "blackbox-exporter",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1708009560,
+            "0.4583333333333333"
+          ],
+          [
+            1708009920,
+            "1.2458333333333333"
+          ],
+          [
+            1708010280,
+            "1.575"
+          ],
+          [
+            1708010640,
+            "1.5791666666666666"
+          ],
+          [
+            1708011000,
+            "1.5888888888888888"
+          ],
+          [
+            1708011360,
+            "1.601388888888889"
+          ],
+          [
+            1708011720,
+            "1.5944444444444446"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_Namespace": "openshift-route-monitor-operator",
+          "SrcK8S_OwnerName": "route-monitor-operator-controller-manager",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1708009560,
+            "0.6972222222222222"
+          ],
+          [
+            1708009920,
+            "1.9555555555555555"
+          ],
+          [
+            1708010280,
+            "2.5347222222222223"
+          ],
+          [
+            1708010640,
+            "2.5347222222222223"
+          ],
+          [
+            1708011000,
+            "2.5208333333333335"
+          ],
+          [
+            1708011360,
+            "2.515277777777778"
+          ],
+          [
+            1708011720,
+            "2.5305555555555554"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_OwnerName": "ip-10-0-1-137.ec2.internal",
           "SrcK8S_OwnerType": "Node"
         },
         "values": [
           [
-            1689617160,
-            "0.04583333333333333"
+            1708009560,
+            "12.91388888888889"
+          ],
+          [
+            1708009920,
+            "30.997222222222224"
+          ],
+          [
+            1708010280,
+            "38.78472222222222"
+          ],
+          [
+            1708010640,
+            "41.68055555555556"
+          ],
+          [
+            1708011000,
+            "38.80416666666667"
+          ],
+          [
+            1708011360,
+            "47.01111111111111"
+          ],
+          [
+            1708011720,
+            "47.97222222222222"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_OwnerName": "ip-10-0-1-7.ec2.internal",
+          "SrcK8S_OwnerType": "Node"
+        },
+        "values": [
+          [
+            1708009560,
+            "22.755555555555556"
+          ],
+          [
+            1708009920,
+            "54.102777777777774"
+          ],
+          [
+            1708010280,
+            "61.2"
+          ],
+          [
+            1708010640,
+            "66.49027777777778"
+          ],
+          [
+            1708011000,
+            "65.89444444444445"
+          ],
+          [
+            1708011360,
+            "72.83888888888889"
+          ],
+          [
+            1708011720,
+            "74.14166666666667"
           ]
         ]
       },
@@ -2075,46 +1949,50 @@
         "metric": {},
         "values": [
           [
-            1689617160,
-            "0.26944444444444443"
+            1708009560,
+            "0.6319444444444444"
           ],
           [
-            1689617520,
-            "1.6597222222222223"
+            1708009920,
+            "1.7416666666666667"
           ],
           [
-            1689617880,
-            "2.7736111111111112"
+            1708010280,
+            "2.2333333333333334"
           ],
           [
-            1689618240,
-            "2.626388888888889"
+            1708010640,
+            "2.2"
           ],
           [
-            1689618600,
-            "2.573611111111111"
+            1708011000,
+            "2.2222222222222223"
           ],
           [
-            1689618960,
-            "2.683333333333333"
+            1708011360,
+            "2.261111111111111"
           ],
           [
-            1689619320,
-            "2.6166666666666667"
+            1708011720,
+            "2.2222222222222223"
           ]
         ]
       }
     ],
     "stats": {
       "summary": {
-        "bytesProcessedPerSecond": 284861241,
-        "linesProcessedPerSecond": 403499,
-        "totalBytesProcessed": 130657958,
-        "totalLinesProcessed": 185074,
-        "execTime": 0.45867229,
-        "queueTime": 8.929125423,
-        "subqueries": 6,
-        "totalEntriesReturned": 67
+        "bytesProcessedPerSecond": 271431036,
+        "linesProcessedPerSecond": 413077,
+        "totalBytesProcessed": 211370848,
+        "totalLinesProcessed": 321675,
+        "execTime": 0.77872763,
+        "queueTime": 13.016442995,
+        "subqueries": 0,
+        "totalEntriesReturned": 53,
+        "splits": 6,
+        "shards": 48,
+        "totalPostFilterLines": 199944,
+        "totalStructuredMetadataBytesProcessed": 0
       },
       "querier": {
         "store": {
@@ -2127,27 +2005,71 @@
             "decompressedBytes": 0,
             "decompressedLines": 0,
             "compressedBytes": 0,
-            "totalDuplicates": 0
+            "totalDuplicates": 0,
+            "postFilterLines": 0,
+            "headChunkStructuredMetadataBytes": 0,
+            "decompressedStructuredMetadataBytes": 0
           }
         }
       },
       "ingester": {
         "totalReached": 48,
-        "totalChunksMatched": 940,
-        "totalBatches": 281,
-        "totalLinesSent": 136138,
+        "totalChunksMatched": 375,
+        "totalBatches": 394,
+        "totalLinesSent": 168379,
         "store": {
-          "totalChunksRef": 6,
-          "totalChunksDownloaded": 6,
-          "chunksDownloadTime": 3100730,
+          "totalChunksRef": 16,
+          "totalChunksDownloaded": 16,
+          "chunksDownloadTime": 31495351,
           "chunk": {
-            "headChunkBytes": 26746387,
-            "headChunkLines": 38371,
-            "decompressedBytes": 103911571,
-            "decompressedLines": 146703,
-            "compressedBytes": 22387879,
-            "totalDuplicates": 0
+            "headChunkBytes": 18864260,
+            "headChunkLines": 28785,
+            "decompressedBytes": 192506588,
+            "decompressedLines": 292890,
+            "compressedBytes": 43190086,
+            "totalDuplicates": 0,
+            "postFilterLines": 199944,
+            "headChunkStructuredMetadataBytes": 0,
+            "decompressedStructuredMetadataBytes": 0
           }
+        }
+      },
+      "cache": {
+        "chunk": {
+          "entriesFound": 0,
+          "entriesRequested": 0,
+          "entriesStored": 0,
+          "bytesReceived": 0,
+          "bytesSent": 0,
+          "requests": 0,
+          "downloadTime": 0
+        },
+        "index": {
+          "entriesFound": 0,
+          "entriesRequested": 0,
+          "entriesStored": 0,
+          "bytesReceived": 0,
+          "bytesSent": 0,
+          "requests": 0,
+          "downloadTime": 0
+        },
+        "result": {
+          "entriesFound": 4,
+          "entriesRequested": 6,
+          "entriesStored": 3,
+          "bytesReceived": 32903,
+          "bytesSent": 0,
+          "requests": 9,
+          "downloadTime": 64186
+        },
+        "statsResult": {
+          "entriesFound": 0,
+          "entriesRequested": 0,
+          "entriesStored": 0,
+          "bytesReceived": 0,
+          "bytesSent": 0,
+          "requests": 0,
+          "downloadTime": 0
         }
       }
     }

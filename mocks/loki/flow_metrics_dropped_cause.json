@@ -2,17 +2,74 @@
   "status": "success",
   "data": {
     "resultType": "matrix",
-    "result": [],
+    "result": [
+      {
+        "metric": {
+          "PktDropLatestDropCause": "SKB_DROP_REASON_NO_SOCKET"
+        },
+        "values": [
+          [
+            1708011360,
+            "0.001388888888888889"
+          ],
+          [
+            1708011720,
+            "0.001388888888888889"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "PktDropLatestDropCause": "SKB_DROP_REASON_TCP_CLOSE"
+        },
+        "values": [
+          [
+            1708011720,
+            "0.001388888888888889"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "PktDropLatestDropCause": "SKB_DROP_REASON_TCP_INVALID_SEQUENCE"
+        },
+        "values": [
+          [
+            1708011360,
+            "0.0763888888888889"
+          ],
+          [
+            1708011720,
+            "1.1111111111111112"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "PktDropLatestDropCause": "SKB_DROP_REASON_TCP_RESET"
+        },
+        "values": [
+          [
+            1708011720,
+            "0.001388888888888889"
+          ]
+        ]
+      }
+    ],
     "stats": {
       "summary": {
-        "bytesProcessedPerSecond": 0,
-        "linesProcessedPerSecond": 0,
-        "totalBytesProcessed": 0,
-        "totalLinesProcessed": 0,
-        "execTime": 0.349613188,
-        "queueTime": 4.8969361,
-        "subqueries": 6,
-        "totalEntriesReturned": 0
+        "bytesProcessedPerSecond": 475774246,
+        "linesProcessedPerSecond": 724440,
+        "totalBytesProcessed": 221936446,
+        "totalLinesProcessed": 337933,
+        "execTime": 0.466474274,
+        "queueTime": 7.376568998,
+        "subqueries": 0,
+        "totalEntriesReturned": 4,
+        "splits": 6,
+        "shards": 48,
+        "totalPostFilterLines": 810,
+        "totalStructuredMetadataBytesProcessed": 0
       },
       "querier": {
         "store": {
@@ -25,27 +82,71 @@
             "decompressedBytes": 0,
             "decompressedLines": 0,
             "compressedBytes": 0,
-            "totalDuplicates": 0
+            "totalDuplicates": 0,
+            "postFilterLines": 0,
+            "headChunkStructuredMetadataBytes": 0,
+            "decompressedStructuredMetadataBytes": 0
           }
         }
       },
       "ingester": {
         "totalReached": 48,
-        "totalChunksMatched": 0,
-        "totalBatches": 0,
-        "totalLinesSent": 0,
+        "totalChunksMatched": 375,
+        "totalBatches": 56,
+        "totalLinesSent": 802,
         "store": {
-          "totalChunksRef": 0,
-          "totalChunksDownloaded": 0,
-          "chunksDownloadTime": 0,
+          "totalChunksRef": 16,
+          "totalChunksDownloaded": 16,
+          "chunksDownloadTime": 23293962,
           "chunk": {
-            "headChunkBytes": 0,
-            "headChunkLines": 0,
-            "decompressedBytes": 0,
-            "decompressedLines": 0,
-            "compressedBytes": 0,
-            "totalDuplicates": 0
+            "headChunkBytes": 18755808,
+            "headChunkLines": 28594,
+            "decompressedBytes": 203180638,
+            "decompressedLines": 309339,
+            "compressedBytes": 43253118,
+            "totalDuplicates": 0,
+            "postFilterLines": 810,
+            "headChunkStructuredMetadataBytes": 0,
+            "decompressedStructuredMetadataBytes": 0
           }
+        }
+      },
+      "cache": {
+        "chunk": {
+          "entriesFound": 0,
+          "entriesRequested": 0,
+          "entriesStored": 0,
+          "bytesReceived": 0,
+          "bytesSent": 0,
+          "requests": 0,
+          "downloadTime": 0
+        },
+        "index": {
+          "entriesFound": 0,
+          "entriesRequested": 0,
+          "entriesStored": 0,
+          "bytesReceived": 0,
+          "bytesSent": 0,
+          "requests": 0,
+          "downloadTime": 0
+        },
+        "result": {
+          "entriesFound": 4,
+          "entriesRequested": 6,
+          "entriesStored": 3,
+          "bytesReceived": 1332,
+          "bytesSent": 0,
+          "requests": 9,
+          "downloadTime": 61490
+        },
+        "statsResult": {
+          "entriesFound": 0,
+          "entriesRequested": 0,
+          "entriesStored": 0,
+          "bytesReceived": 0,
+          "bytesSent": 0,
+          "requests": 0,
+          "downloadTime": 0
         }
       }
     }

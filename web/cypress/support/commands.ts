@@ -69,17 +69,18 @@ Cypress.Commands.add('showDisplayOptions', () => {
     })
 });
 
-Cypress.Commands.add('checkPanels', (panels = 12) => {
-  cy.get('#overview-flex').find('.overview-card').its('length').should('eq', panels);
+Cypress.Commands.add('checkPanels', (panels = c.defaultPanelsCount) => {
+  cy.get('#overview-flex').children().its('length').should('eq', panels);
 });
 
 Cypress.Commands.add('openPanelsModal', () => {
   cy.showAdvancedOptions();
   cy.get('#manage-overview-panels-button').click();
   cy.get('#overview-panels-modal').should('exist');
+  cy.get('#overview-panels-modal').find('.pf-c-data-list__item-content').should('have.length', c.availablePanelsCount);
 });
 
-Cypress.Commands.add('checkColumns', (groups = 5, cols = 9) => {
+Cypress.Commands.add('checkColumns', (groups = c.defaultColumnGroupCount, cols = c.defaultColumnCount) => {
   if (groups === 0) {
     //Should not have nested columns
     cy.get('thead>tr').should('have.length', 1);
@@ -101,6 +102,7 @@ Cypress.Commands.add('openColumnsModal', () => {
   cy.showAdvancedOptions();
   cy.get('#manage-columns-button').click();
   cy.get('#columns-modal').should('exist');
+  cy.get('#columns-modal').find('.pf-c-data-list__item-content').should('have.length', c.availableColumnCount);
 });
 
 Cypress.Commands.add('selectPopupItems', (id, names) => {

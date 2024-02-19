@@ -2,17 +2,52 @@
   "status": "success",
   "data": {
     "resultType": "matrix",
-    "result": [],
+    "result": [
+      {
+        "metric": {
+          "SrcK8S_HostName": "ip-10-0-1-137.ec2.internal"
+        },
+        "values": [
+          [
+            1708011360,
+            "0.041666666666666664"
+          ],
+          [
+            1708011720,
+            "0.6236111111111111"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "SrcK8S_HostName": "ip-10-0-1-7.ec2.internal"
+        },
+        "values": [
+          [
+            1708011360,
+            "0.036111111111111115"
+          ],
+          [
+            1708011720,
+            "0.49166666666666664"
+          ]
+        ]
+      }
+    ],
     "stats": {
       "summary": {
-        "bytesProcessedPerSecond": 0,
-        "linesProcessedPerSecond": 0,
-        "totalBytesProcessed": 0,
-        "totalLinesProcessed": 0,
-        "execTime": 0.542858375,
-        "queueTime": 10.541185816,
-        "subqueries": 6,
-        "totalEntriesReturned": 0
+        "bytesProcessedPerSecond": 379050316,
+        "linesProcessedPerSecond": 577163,
+        "totalBytesProcessed": 221936446,
+        "totalLinesProcessed": 337933,
+        "execTime": 0.585506558,
+        "queueTime": 5.295528995,
+        "subqueries": 0,
+        "totalEntriesReturned": 2,
+        "splits": 6,
+        "shards": 48,
+        "totalPostFilterLines": 810,
+        "totalStructuredMetadataBytesProcessed": 0
       },
       "querier": {
         "store": {
@@ -25,27 +60,71 @@
             "decompressedBytes": 0,
             "decompressedLines": 0,
             "compressedBytes": 0,
-            "totalDuplicates": 0
+            "totalDuplicates": 0,
+            "postFilterLines": 0,
+            "headChunkStructuredMetadataBytes": 0,
+            "decompressedStructuredMetadataBytes": 0
           }
         }
       },
       "ingester": {
-        "totalReached": 96,
-        "totalChunksMatched": 0,
-        "totalBatches": 0,
-        "totalLinesSent": 0,
+        "totalReached": 48,
+        "totalChunksMatched": 375,
+        "totalBatches": 56,
+        "totalLinesSent": 802,
         "store": {
-          "totalChunksRef": 0,
-          "totalChunksDownloaded": 0,
-          "chunksDownloadTime": 0,
+          "totalChunksRef": 16,
+          "totalChunksDownloaded": 16,
+          "chunksDownloadTime": 7855086,
           "chunk": {
-            "headChunkBytes": 0,
-            "headChunkLines": 0,
-            "decompressedBytes": 0,
-            "decompressedLines": 0,
-            "compressedBytes": 0,
-            "totalDuplicates": 0
+            "headChunkBytes": 18755808,
+            "headChunkLines": 28594,
+            "decompressedBytes": 203180638,
+            "decompressedLines": 309339,
+            "compressedBytes": 43253118,
+            "totalDuplicates": 0,
+            "postFilterLines": 810,
+            "headChunkStructuredMetadataBytes": 0,
+            "decompressedStructuredMetadataBytes": 0
           }
+        }
+      },
+      "cache": {
+        "chunk": {
+          "entriesFound": 0,
+          "entriesRequested": 0,
+          "entriesStored": 0,
+          "bytesReceived": 0,
+          "bytesSent": 0,
+          "requests": 0,
+          "downloadTime": 0
+        },
+        "index": {
+          "entriesFound": 0,
+          "entriesRequested": 0,
+          "entriesStored": 0,
+          "bytesReceived": 0,
+          "bytesSent": 0,
+          "requests": 0,
+          "downloadTime": 0
+        },
+        "result": {
+          "entriesFound": 4,
+          "entriesRequested": 6,
+          "entriesStored": 3,
+          "bytesReceived": 1372,
+          "bytesSent": 0,
+          "requests": 9,
+          "downloadTime": 63334
+        },
+        "statsResult": {
+          "entriesFound": 0,
+          "entriesRequested": 0,
+          "entriesStored": 0,
+          "bytesReceived": 0,
+          "bytesSent": 0,
+          "requests": 0,
+          "downloadTime": 0
         }
       }
     }
