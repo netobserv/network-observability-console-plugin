@@ -70,7 +70,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
     if (isExportAll) {
       return undefined;
     }
-    return selectedColumns.filter(c => c.isSelected && c.fieldName != undefined).map(c => c.fieldName) as
+    return selectedColumns.filter(c => c.isSelected && c.field != undefined).map(c => c.field!.name) as
       | string[]
       | undefined;
   }, [isExportAll, selectedColumns]);

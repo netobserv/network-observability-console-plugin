@@ -159,7 +159,8 @@ export const getConfig = (): Promise<Config> => {
       deduper: {
         mark: r.data.deduper.mark ?? defaultConfig.deduper.mark,
         merge: r.data.deduper.merge ?? defaultConfig.deduper.merge
-      }
+      },
+      fields: r.data.fields
     };
   });
 };

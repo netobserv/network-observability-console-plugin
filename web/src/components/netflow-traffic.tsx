@@ -942,7 +942,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
   React.useEffect(() => {
     if (initState.current.includes('configLoaded')) {
       setColumns(
-        getLocalStorage(LOCAL_STORAGE_COLS_KEY, getDefaultColumns(config.columns), {
+        getLocalStorage(LOCAL_STORAGE_COLS_KEY, getDefaultColumns(config.columns, config.fields), {
           id: 'id',
           criteria: 'isSelected'
         })
@@ -1827,7 +1827,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
             isModalOpen={isExportModalOpen}
             setModalOpen={setExportModalOpen}
             flowQuery={buildFlowQuery()}
-            columns={columns.filter(c => c.fieldName && !c.fieldName.startsWith('Time'))}
+            columns={columns.filter(c => c.field && !c.field.name.startsWith('Time'))}
             range={range}
             filters={(forcedFilters || filters).list}
           />

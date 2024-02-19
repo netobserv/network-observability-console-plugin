@@ -1,5 +1,5 @@
 import { defaultConfig } from '../../model/config';
-import { ColumnConfigSampleDefs } from './columns';
+import { ColumnConfigSampleDefs, FieldConfigSample } from './columns';
 import { FilterDefinitionSample } from './filters';
 
 export const FullConfigResultSample = {
@@ -12,7 +12,8 @@ export const FullConfigResultSample = {
   columns: ColumnConfigSampleDefs,
   filters: FilterDefinitionSample,
   sampling: 1,
-  features: ['pktDrop', 'dnsTracking', 'flowRTT']
+  features: ['pktDrop', 'dnsTracking', 'flowRTT'],
+  fields: FieldConfigSample
 };
 
 export const SimpleConfigResultSample = {

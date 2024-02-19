@@ -76,9 +76,10 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
   // hide empty columns
   const getVisibleColumns = React.useCallback(() => {
     const forbiddenColumns = deduperMerge ? [ColumnsId.flowdir, ColumnsId.interface] : [ColumnsId.flowdirints];
-    return columns.filter(
-      c => !forbiddenColumns.includes(c.id) && c.value(record) !== '' && !Number.isNaN(c.value(record))
-    );
+    return columns.filter((c: Column) => {
+      const value = c.value(record);
+      return !forbiddenColumns.includes(c.id) && value !== null && value !== '' && !Number.isNaN(value);
+    });
   }, [columns, deduperMerge, record]);
 
   const toggle = React.useCallback(
@@ -302,7 +303,7 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
   }, [record.labels._RecordType, t]);
 
   const getSortedJSON = React.useCallback(() => {
-    const flat = { ...record.fields, ...record.labels };
+    const flat = { ...record.labels, ...record.fields };
     return JSON.stringify(flat, Object.keys(flat).sort(), 2);
   }, [record]);
 

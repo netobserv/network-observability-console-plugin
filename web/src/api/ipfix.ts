@@ -13,13 +13,16 @@ export interface Record {
 }
 
 export const getRecordValue = (record: Record, fieldOrLabel: string, defaultValue?: string | number) => {
+  /* TODO: fix following behavior:
+   * Check if field exists first since /flow endpoint return fields as labels when using filters
+   * This is mandatory to ensure fields types
+   */
+  if (record.fields[fieldOrLabel as keyof Fields] !== undefined) {
+    return record.fields[fieldOrLabel as keyof Fields];
+  }
   // check if label exists
   if (record.labels[fieldOrLabel as keyof Labels] !== undefined) {
     return record.labels[fieldOrLabel as keyof Labels];
-  }
-  // check if field exists
-  if (record.fields[fieldOrLabel as keyof Fields] !== undefined) {
-    return record.fields[fieldOrLabel as keyof Fields];
   }
   // fallback on default
   return defaultValue;
