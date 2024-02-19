@@ -82,9 +82,8 @@ type FieldConfig struct {
 	Name        string `yaml:"name" json:"name"`
 	Type        string `yaml:"type" json:"type"`
 	Description string `yaml:"description" json:"description"`
-	// This flag is for documentation only. Use loki.labels instead
-	LokiLabel bool   `yaml:"lokiLabel,omitempty" json:"lokiLabel,omitempty"`
-	Filter    string `yaml:"filter,omitempty" json:"filter,omitempty"`
+	// lokiLabel flag is for documentation only. Use loki.labels instead
+	Filter string `yaml:"filter,omitempty" json:"filter,omitempty"`
 }
 
 type Deduper struct {
