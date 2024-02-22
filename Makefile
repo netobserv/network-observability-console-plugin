@@ -220,12 +220,12 @@ build-frontend-standalone: install-frontend fmt-frontend ## Run npm install, for
 
 .PHONY: serve
 serve: YQ ## Run backend
-	$(YQ) '.server.port |= 9001 | .server.metricsPort |= 9002 | .loki.useMocks |= false' ./config/sample-config.yaml
+	$(YQ) '.server.port |= 9001 | .server.metricsPort |= 9002 | .loki.useMocks |= false' ./config/sample-config.yaml > ./config/config.yaml
 	./plugin-backend $(CMDLINE_ARGS)
 
 .PHONY: serve-mock
 serve-mock: YQ ## Run backend using mocks
-	$(YQ) '.server.port |= 9001 | .server.metricsPort |= 9002 | .loki.useMocks |= true' ./config/sample-config.yaml
+	$(YQ) '.server.port |= 9001 | .server.metricsPort |= 9002 | .loki.useMocks |= true' ./config/sample-config.yaml > ./config/config.yaml
 	./plugin-backend $(CMDLINE_ARGS)
 
 ##@ Images
