@@ -54,7 +54,7 @@ describe('netflow-table', () => {
 
     //Save
     cy.get('#columns-modal').contains('Save').click();
-    cy.checkColumns(27, 53);
+    cy.checkColumns(c.availableColumnGroupCount, c.availableColumnCount);
 
     //reopen modal
     cy.openColumnsModal();

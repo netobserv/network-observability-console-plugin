@@ -1,5 +1,7 @@
 /// <reference types="cypress" />
 
+import * as c from '../../support/const';
+
 describe('netflow-overview', () => {
   beforeEach(() => {
     cy.openNetflowTrafficPage();
@@ -21,7 +23,7 @@ describe('netflow-overview', () => {
 
     //Save
     cy.get('#overview-panels-modal').contains('Save').click();
-    cy.checkPanels(16);
+    cy.checkPanels(c.availablePanelsCount);
 
     //reopen modal
     cy.openPanelsModal();
@@ -33,7 +35,7 @@ describe('netflow-overview', () => {
     cy.get('#overview-panels-modal').contains('Save').should('be.disabled');
 
     //Select some panels
-    cy.selectPopupItems('#overview-panels-modal', ['Total rate (line)']);
+    cy.selectPopupItems('#overview-panels-modal', ['Top X average packets rates (donut)']);
 
     //Save new panels
     cy.get('#overview-panels-modal').contains('Save').click();
