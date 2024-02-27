@@ -30,6 +30,7 @@ IMAGE_ORG ?= $(USER)
 IMAGE_TAG_BASE ?= quay.io/${IMAGE_ORG}/network-observability-console-plugin
 
 # Standalone `true` is used to build frontend outside of OCP Console environment
+# see .mk/standalone.mk
 STANDALONE ?= false
 
 ifeq (${STANDALONE}, true)
@@ -129,24 +130,6 @@ start-backend: YQ build-backend
 	bash -c "trap 'fuser -k 9002/tcp' EXIT; \
 					./plugin-backend $(CMDLINE_ARGS)"
 
-.PHONY: start-frontend-standalone
-start-frontend-standalone: install-frontend ## Run frontend as standalone
-	cd web && npm run start:standalone
-
-.PHONY: start-standalone
-start-standalone: YQ build-backend install-frontend ## Run backend and frontend as standalone
-	$(YQ) '.server.port |= 9002 | .server.metricsPort |= 9003 | .loki.useMocks |= false' ./config/sample-config.yaml > ./config/config.yaml
-	@echo "### Starting backend on http://localhost:9002"
-	bash -c "trap 'fuser -k 9002/tcp' EXIT; \
-					./plugin-backend $(CMDLINE_ARGS) & cd web && npm run start:standalone"
-
-.PHONY: start-standalone-mock
-start-standalone-mock: YQ build-backend install-frontend ## Run backend using mocks and frontend as standalone
-	$(YQ) '.server.port |= 9002 | .server.metricsPort |= 9003 | .loki.useMocks |= true' ./config/sample-config.yaml > ./config/config.yaml
-	@echo "### Starting backend on http://localhost:9002 using mock"
-	bash -c "trap 'fuser -k 9002/tcp' EXIT; \
-					./plugin-backend $(CMDLINE_ARGS) & cd web && npm run start:standalone"
-
 .PHONY: bridge
 bridge: ## Bridge OCP console
 ifeq (,${CONSOLE})
@@ -203,21 +186,6 @@ test-backend: ## Test backend using go test
 	@echo "### Testing backend"
 	go test ./... -coverpkg=./... -coverprofile cover.out
 
-.PHONY: cypress
-cypress: ## Test frontend using cypress
-	@echo "### Opening cypress"
-	cd web && npm run cypress:open
-
-.PHONY: just-build-frontend
-just-build-frontend: ## Build frontend
-	@echo "### Building frontend"
-	cd web && npm run build${BUILDSCRIPT}
-
-.PHONY: build-frontend-standalone
-build-frontend-standalone: install-frontend fmt-frontend ## Run npm install, format and build frontend as standalone
-	@echo "### Building frontend standalone"
-	cd web && npm run build:standalone
-
 .PHONY: serve
 serve: YQ ## Run backend
 	$(YQ) '.server.port |= 9001 | .server.metricsPort |= 9002 | .loki.useMocks |= false' ./config/sample-config.yaml > ./config/config.yaml
@@ -256,4 +224,6 @@ else
 	DOCKER_BUILDKIT=1 $(OCI_BIN) manifest push ${IMAGE} docker://${IMAGE};
 endif
 
+include .mk/cypress.mk
 include .mk/shortcuts.mk
+include .mk/standalone.mk
