@@ -2,6 +2,7 @@ import { Button, Text, TextContent, TextVariants } from '@patternfly/react-core'
 import { CloseIcon } from '@patternfly/react-icons';
 import React from 'react';
 import Modal from 'react-modal';
+import { useTheme } from '../../utils/theme-hook';
 import './modal.css';
 
 /* This Modal component replace patternfly one that has issues with overflows
@@ -18,6 +19,8 @@ const CustomModal: React.FC<{
   scrollable: boolean;
   id?: string;
 }> = ({ id, scrollable, isOpen, onClose, title, description, children, footer }) => {
+  const isDarkTheme = useTheme();
+
   return isOpen ? (
     <Modal
       data-test={id}
@@ -28,7 +31,7 @@ const CustomModal: React.FC<{
       onRequestClose={() => (onClose ? onClose() : console.error('modal called onClose but is undefined'))}
       overlayClassName="co-overlay"
     >
-      <div className="modal-content modal-content--no-inner-scroll">
+      <div className={`modal-content modal-content--no-inner-scroll ${isDarkTheme ? 'dark' : 'light'}`}>
         <div data-test={`${id}-header`} className="modal-header">
           <TextContent>
             <Text component={TextVariants.h1}>

@@ -1,4 +1,4 @@
-import { Select, Tooltip, Switch } from '@patternfly/react-core';
+import { Select, Tooltip, Switch, MenuToggleElement, MenuToggle } from '@patternfly/react-core';
 import { InfoAltIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -70,7 +70,7 @@ export const OverviewDisplayOptions: React.FC<{
           className="display-dropdown-padding"
           label={t('Single graph focus')}
           isChecked={focus}
-          onChange={setFocus}
+          onChange={(event, value) => setFocus(value)}
         />
       </div>
     </>
@@ -103,22 +103,24 @@ export const OverviewDisplayDropdown: React.FC<{
     <div id="display-dropdown-container" data-test="display-dropdown-container">
       <Select
         id="overview-display-dropdown"
-        placeholderText={<span>{t('Display options')}</span>}
         isOpen={isOpen}
-        onToggle={() => setOpen(!isOpen)}
-        customContent={
-          <OverviewDisplayOptions
-            metricScope={metricScope}
-            setMetricScope={setMetricScope}
-            truncateLength={truncateLength}
-            setTruncateLength={setTruncateLength}
-            focus={focus}
-            setFocus={setFocus}
-            allowMultiCluster={allowMultiCluster}
-            allowZone={allowZone}
-          />
-        }
-      />
+        toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+          <MenuToggle ref={toggleRef} onClick={() => setOpen(!isOpen)} isExpanded={isOpen}>
+            {t('Display options')}
+          </MenuToggle>
+        )}
+      >
+        <OverviewDisplayOptions
+          metricScope={metricScope}
+          setMetricScope={setMetricScope}
+          truncateLength={truncateLength}
+          setTruncateLength={setTruncateLength}
+          focus={focus}
+          setFocus={setFocus}
+          allowMultiCluster={allowMultiCluster}
+          allowZone={allowZone}
+        />
+      </Select>
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import { Radio, Select, Tooltip } from '@patternfly/react-core';
+import { MenuToggle, MenuToggleElement, Radio, Select, Tooltip } from '@patternfly/react-core';
 import { InfoAltIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -62,11 +62,15 @@ export const TableDisplayDropdown: React.FC<{
     <div id="display-dropdown-container" data-test="display-dropdown-container">
       <Select
         id="table-display-dropdown"
-        placeholderText={<span>{t('Display options')}</span>}
         isOpen={isOpen}
-        onToggle={() => setOpen(!isOpen)}
-        customContent={<TableDisplayOptions size={size} setSize={setSize} />}
-      />
+        toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+          <MenuToggle ref={toggleRef} onClick={() => setOpen(!isOpen)} isExpanded={isOpen}>
+            {t('Display options')}
+          </MenuToggle>
+        )}
+      >
+        <TableDisplayOptions size={size} setSize={setSize} />
+      </Select>
     </div>
   );
 };

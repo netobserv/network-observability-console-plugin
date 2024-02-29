@@ -1,4 +1,13 @@
-import { Checkbox, Flex, FlexItem, Select, Switch, Tooltip } from '@patternfly/react-core';
+import {
+  Checkbox,
+  Flex,
+  FlexItem,
+  MenuToggle,
+  MenuToggleElement,
+  Select,
+  Switch,
+  Tooltip
+} from '@patternfly/react-core';
 import { InfoAltIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -274,27 +283,29 @@ export const TopologyDisplayDropdown: React.FC<{
     <div id="display-dropdown-container" data-test="display-dropdown-container">
       <Select
         id="topology-display-dropdown"
-        placeholderText={<span>{t('Display options')}</span>}
         isOpen={isOpen}
-        onToggle={() => setOpen(!isOpen)}
-        customContent={
-          <TopologyDisplayOptions
-            metricFunction={metricFunction}
-            setMetricFunction={setMetricFunction}
-            metricType={metricType}
-            setMetricType={setMetricType}
-            metricScope={metricScope}
-            setMetricScope={setMetricScope}
-            topologyOptions={topologyOptions}
-            setTopologyOptions={setTopologyOptions}
-            allowPktDrop={allowPktDrop}
-            allowDNSMetric={allowDNSMetric}
-            allowRTTMetric={allowRTTMetric}
-            allowMultiCluster={allowMultiCluster}
-            allowZone={allowZone}
-          />
-        }
-      />
+        toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+          <MenuToggle ref={toggleRef} onClick={() => setOpen(!isOpen)} isExpanded={isOpen}>
+            {t('Display options')}
+          </MenuToggle>
+        )}
+      >
+        <TopologyDisplayOptions
+          metricFunction={metricFunction}
+          setMetricFunction={setMetricFunction}
+          metricType={metricType}
+          setMetricType={setMetricType}
+          metricScope={metricScope}
+          setMetricScope={setMetricScope}
+          topologyOptions={topologyOptions}
+          setTopologyOptions={setTopologyOptions}
+          allowPktDrop={allowPktDrop}
+          allowDNSMetric={allowDNSMetric}
+          allowRTTMetric={allowRTTMetric}
+          allowMultiCluster={allowMultiCluster}
+          allowZone={allowZone}
+        />
+      </Select>
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import { SortByDirection, TableComposable, Tbody, Th, Thead, Tr } from '@patternfly/react-table';
+import { SortByDirection, Table, Tbody, Th, Thead, Tr } from '@patternfly/react-table';
 import { mount } from 'enzyme';
 import * as React from 'react';
 import { Column, ColumnsId, ColumnSizeMap } from '../../../utils/columns';
@@ -15,7 +15,7 @@ const NetflowTableHeaderWrapper: React.FC<{
   setColumnSizes: (v: ColumnSizeMap) => void;
 }> = ({ onSort, sortId, sortDirection, columns, setColumns, columnSizes, setColumnSizes }) => {
   return (
-    <TableComposable aria-label="Misc table" variant="compact">
+    <Table aria-label="Misc table" variant="compact">
       <NetflowTableHeader
         onSort={onSort}
         sortDirection={sortDirection}
@@ -27,7 +27,7 @@ const NetflowTableHeaderWrapper: React.FC<{
         tableWidth={100}
       />
       <Tbody></Tbody>
-    </TableComposable>
+    </Table>
   );
 };
 

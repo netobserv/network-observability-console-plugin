@@ -2,8 +2,8 @@
   padding: 0 1em 1em 1em !important;
 }
 
-#type>.pf-c-dropdown__menu,
-#scope>.pf-c-dropdown__menu {
+#type>.pf-v5-c-dropdown__menu,
+#scope>.pf-v5-c-dropdown__menu {
   top: 0;
   left: 100%;
 }

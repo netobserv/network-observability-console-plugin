@@ -1,4 +1,4 @@
-import { Checkbox, Radio, Select, Tooltip } from '@patternfly/react-core';
+import { Checkbox, MenuToggle, MenuToggleElement, Radio, Select, Tooltip } from '@patternfly/react-core';
 import { InfoAltIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -303,11 +303,15 @@ export const QueryOptionsDropdown: React.FC<QueryOptionsDropdownProps> = props =
       <Select
         data-test="query-options-dropdown"
         id="query-options-dropdown"
-        placeholderText={<span>{t('Query options')}</span>}
         isOpen={isOpen}
-        onToggle={() => setOpen(!isOpen)}
-        customContent={<QueryOptionsPanel {...props} />}
-      />
+        toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+          <MenuToggle ref={toggleRef} onClick={() => setOpen(!isOpen)} isExpanded={isOpen}>
+            {t('Query options')}
+          </MenuToggle>
+        )}
+      >
+        <QueryOptionsPanel {...props} />
+      </Select>
     </div>
   );
 };

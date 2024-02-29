@@ -23,7 +23,7 @@ describe('<ColumnsModal />', () => {
   });
   it('should save once', async () => {
     const wrapper = mount(<TimeRangeModal {...props} />);
-    const confirmButton = wrapper.find('.pf-c-button.pf-m-primary');
+    const confirmButton = wrapper.find('.pf-v5-c-button.pf-m-primary');
     expect(confirmButton.length).toEqual(1);
 
     confirmButton.at(0).simulate('click');
@@ -48,7 +48,7 @@ describe('<ColumnsModal />', () => {
     });
     nowRange.from = new Date('2021-12-01').setHours(10, 15, 30, 0) / 1000;
 
-    wrapper.find('.pf-c-button.pf-m-primary').at(0).simulate('click');
+    wrapper.find('.pf-v5-c-button.pf-m-primary').at(0).simulate('click');
     expect(props.setRange).toHaveBeenNthCalledWith(2, nowRange);
 
     //set end date & time and press button
@@ -59,7 +59,7 @@ describe('<ColumnsModal />', () => {
     });
     nowRange.to = new Date('2021-12-15').setHours(23, 0, 0, 0) / 1000;
 
-    wrapper.find('.pf-c-button.pf-m-primary').at(0).simulate('click');
+    wrapper.find('.pf-v5-c-button.pf-m-primary').at(0).simulate('click');
     expect(props.setRange).toHaveBeenNthCalledWith(3, nowRange);
   });
 });

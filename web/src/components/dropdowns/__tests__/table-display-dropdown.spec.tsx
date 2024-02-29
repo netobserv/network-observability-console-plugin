@@ -19,14 +19,14 @@ describe('<DisplayDropdown />', () => {
 
     //select compact
     act(() => {
-      wrapper.find('#size-s').find(Radio).props().onChange!(true, {} as React.FormEvent<HTMLInputElement>);
+      wrapper.find('#size-s').find(Radio).props().onChange!({} as React.FormEvent<HTMLInputElement>, true);
     });
     expect(props.setSize).toHaveBeenCalledWith('s');
     expect(wrapper.find('li').length).toBe(0);
 
     //select large
     act(() => {
-      wrapper.find('#size-l').find(Radio).props().onChange!(true, {} as React.FormEvent<HTMLInputElement>);
+      wrapper.find('#size-l').find(Radio).props().onChange!({} as React.FormEvent<HTMLInputElement>, true);
     });
     expect(props.setSize).toHaveBeenCalledWith('l');
 

@@ -3,6 +3,8 @@ import {
   Button,
   Dropdown,
   DropdownItem,
+  MenuToggle,
+  MenuToggleElement,
   OverflowMenu,
   OverflowMenuContent,
   OverflowMenuControl,
@@ -63,25 +65,29 @@ export const LinksOverflow: React.FC<LinksOverflowProps> = ({ id, items }) => {
           data-test={id + '-dropdown'}
           id={id + '-dropdown'}
           onSelect={() => setOpen(false)}
-          toggle={
-            <Button
+          toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+            <MenuToggle
+              ref={toggleRef}
               data-test={id + '-button'}
               id={id + '-button'}
-              variant="link"
+              variant="plain"
               className="overflow-button"
-              icon={<EllipsisVIcon />}
               onClick={() => setOpen(!isOpen)}
+              isExpanded={isOpen}
             >
-              {t('More options')}
-            </Button>
-          }
+              <>
+                <EllipsisVIcon /> {t('More options')}
+              </>
+            </MenuToggle>
+          )}
           isOpen={isOpen}
-          dropdownItems={enabledItems.map(item => (
+        >
+          {enabledItems.map(item => (
             <DropdownItem key={item.id} onClick={item.onClick} data-test={item.id + '-button'}>
               {item.label}
             </DropdownItem>
           ))}
-        />
+        </Dropdown>
       </OverflowMenuControl>
     </OverflowMenu>
   );

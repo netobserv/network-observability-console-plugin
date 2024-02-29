@@ -413,20 +413,17 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
             </Accordion>
           </Tab>
           <Tab className="drawer-tab" eventKey={'raw'} title={<TabTitleText>{t('Raw')}</TabTitleText>}>
-            <TextContent className="record-field-container" data-test-id="drawer-json-container">
-              <Text component={TextVariants.h4}>{t('JSON')}</Text>
-              <ClipboardCopy
-                data-test-id="drawer-json-copy"
-                isCode
-                isReadOnly
-                isExpanded
-                hoverTip={t('Copy')}
-                clickTip={t('Copied')}
-                variant={ClipboardCopyVariant.expansion}
-              >
-                {getSortedJSON()}
-              </ClipboardCopy>
-            </TextContent>
+            <ClipboardCopy
+              data-test-id="drawer-json-copy"
+              isCode
+              isReadOnly
+              isExpanded
+              hoverTip={t('Copy')}
+              clickTip={t('Copied')}
+              variant={ClipboardCopyVariant.expansion}
+            >
+              {getSortedJSON()}
+            </ClipboardCopy>
           </Tab>
         </Tabs>
       </DrawerPanelBody>

@@ -4,8 +4,8 @@ import {
   Dropdown,
   DropdownGroup,
   DropdownItem,
-  DropdownPosition,
-  KebabToggle,
+  MenuToggle,
+  MenuToggleElement,
   Radio,
   Text,
   TextVariants,
@@ -16,6 +16,7 @@ import { useTranslation } from 'react-i18next';
 import { OverviewPanelId } from '../../utils/overview-panels';
 import './panel-kebab.css';
 import { exportToPng } from '../../utils/export';
+import { EllipsisVIcon } from '@patternfly/react-icons';
 
 export type GraphOptipn = {
   type: GraphType;
@@ -47,56 +48,56 @@ export const PanelKebab: React.FC<PanelKebabProps> = ({ id, options, setOptions,
   const [showOptions, setShowOptions] = React.useState(false);
 
   const setShowTop = React.useCallback(
-    (checked: boolean) => {
+    (event: React.FormEvent<HTMLInputElement>, checked: boolean) => {
       setOptions!({ ...options, showTop: checked });
     },
     [setOptions, options]
   );
 
   const setShowApp = React.useCallback(
-    (checked: boolean) => {
+    (event: React.FormEvent<HTMLInputElement>, checked: boolean) => {
       setOptions!({ ...options, showApp: { ...options!.showApp!, value: checked } });
     },
     [setOptions, options]
   );
 
   const setShowAppDrop = React.useCallback(
-    (checked: boolean) => {
+    (event: React.FormEvent<HTMLInputElement>, checked: boolean) => {
       setOptions!({ ...options, showAppDrop: { ...options!.showAppDrop!, value: checked } });
     },
     [setOptions, options]
   );
 
   const setShowOthers = React.useCallback(
-    (checked: boolean) => {
+    (event: React.FormEvent<HTMLInputElement>, checked: boolean) => {
       setOptions!({ ...options, showOthers: checked });
     },
     [setOptions, options]
   );
 
   const setShowNoError = React.useCallback(
-    (checked: boolean) => {
+    (event: React.FormEvent<HTMLInputElement>, checked: boolean) => {
       setOptions!({ ...options, showNoError: checked });
     },
     [setOptions, options]
   );
 
   const setShowInternal = React.useCallback(
-    (checked: boolean) => {
+    (event: React.FormEvent<HTMLInputElement>, checked: boolean) => {
       setOptions!({ ...options, showInternal: checked });
     },
     [setOptions, options]
   );
 
   const setShowOutOfScope = React.useCallback(
-    (checked: boolean) => {
+    (event: React.FormEvent<HTMLInputElement>, checked: boolean) => {
       setOptions!({ ...options, showOutOfScope: checked });
     },
     [setOptions, options]
   );
 
   const setShowLast = React.useCallback(
-    (checked: boolean) => {
+    (event: React.FormEvent<HTMLInputElement>, checked: boolean) => {
       setOptions!({ ...options, showLast: checked });
     },
     [setOptions, options]
@@ -353,11 +354,24 @@ export const PanelKebab: React.FC<PanelKebabProps> = ({ id, options, setOptions,
   return (
     <Dropdown
       className="panel-kebab"
-      toggle={<KebabToggle onToggle={() => setShowOptions(!showOptions)} />}
-      dropdownItems={items}
+      toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+        <MenuToggle
+          ref={toggleRef}
+          aria-label="kebab dropdown toggle"
+          variant="plain"
+          onClick={() => setShowOptions(!showOptions)}
+          isExpanded={showOptions}
+        >
+          <EllipsisVIcon />
+        </MenuToggle>
+      )}
       isPlain={true}
       isOpen={showOptions}
-      position={DropdownPosition.right}
-    />
+      popperProps={{
+        position: 'right'
+      }}
+    >
+      {items}
+    </Dropdown>
   );
 };

@@ -2,9 +2,10 @@ import { ResourceLink } from '@openshift-console/dynamic-plugin-sdk';
 import {
   Accordion,
   AccordionContent,
-  AccordionExpandedContentBody,
+  AccordionExpandableContentBody,
   AccordionItem,
   AccordionToggle,
+  Divider,
   DrawerActions,
   DrawerCloseButton,
   DrawerHead,
@@ -103,7 +104,7 @@ export const SummaryPanelContent: React.FC<{
         {tc.objects
           .sort((a, b) => compareStrings(a.namespace ? a.namespace : '', b.namespace ? b.namespace : ''))
           .flatMap(o => (
-            <AccordionExpandedContentBody>
+            <AccordionExpandableContentBody>
               {o.namespace && <ResourceLink key={`${tc.type}-${o.namespace}`} kind={'Namespace'} name={o.namespace} />}
               {o.names
                 .sort((a, b) => compareStrings(a, b))
@@ -116,7 +117,7 @@ export const SummaryPanelContent: React.FC<{
                     namespace={o.namespace}
                   />
                 ))}
-            </AccordionExpandedContentBody>
+            </AccordionExpandableContentBody>
           ))}
       </>
     );
@@ -132,9 +133,9 @@ export const SummaryPanelContent: React.FC<{
     return (
       <>
         {sortedStrings.map((v: string) => (
-          <AccordionExpandedContentBody key={v}>
+          <AccordionExpandableContentBody key={v}>
             <Text>{v}</Text>
-          </AccordionExpandedContentBody>
+          </AccordionExpandableContentBody>
         ))}
       </>
     );
@@ -391,7 +392,7 @@ export const SummaryPanelContent: React.FC<{
   };
 
   return (
-    <>
+    <div className="scrollable-panel">
       <TextContent className="summary-text-container">
         {!_.isEmpty(flows) && stats?.limitReached && (
           <Text component={TextVariants.p}>
@@ -440,7 +441,7 @@ export const SummaryPanelContent: React.FC<{
       {configContent()}
 
       {versionContent()}
-    </>
+    </div>
   );
 };
 
@@ -481,20 +482,24 @@ export const SummaryPanel: React.FC<{
 
   return (
     <DrawerPanelContent
-      data-test={id}
+      data-test-id={id}
       id={id}
+      className="drawer-panel-content"
       isResizable
       defaultSize={defaultSize}
       minSize={minSize}
       maxSize={maxSize}
     >
-      <DrawerHead>
-        <Text component={TextVariants.h2}>{t('Query summary')}</Text>
+      <DrawerHead id={`${id}-drawer-head`} data-test-id="drawer-head" className="drawer-head">
+        <Text data-test-id="drawer-head-text" component={TextVariants.h2}>
+          {t('Query summary')}
+        </Text>
         <DrawerActions>
           <DrawerCloseButton id={`${id ? id : 'summary-panel'}-close-button`} onClick={onClose} />
         </DrawerActions>
       </DrawerHead>
-      <DrawerPanelBody>
+      <Divider />
+      <DrawerPanelBody id={`${id}-drawer-body`} className="drawer-body scrollable" data-test-id="drawer-body">
         <SummaryPanelContent
           flows={flows}
           metrics={metrics}

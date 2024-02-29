@@ -121,7 +121,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
           </Bullseye>
         ) : (
           <Bullseye data-test="no-results-found">
-            <EmptyState variant={EmptyStateVariant.small}>
+            <EmptyState variant={EmptyStateVariant.sm}>
               <EmptyStateIcon icon={SearchIcon} />
               <Title headingLevel="h2" size="lg">
                 {t('No results found')}

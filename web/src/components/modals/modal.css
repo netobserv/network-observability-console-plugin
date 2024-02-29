@@ -10,6 +10,14 @@
   height: fit-content !important;
 }
 
+.modal-content.dark {
+  background: #26292d;
+}
+
+.modal-content.light {
+  background: #fff;
+}
+
 .modal-description {
   padding-top: 0.5em;
 }

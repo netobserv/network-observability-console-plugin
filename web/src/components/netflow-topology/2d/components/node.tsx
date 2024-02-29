@@ -1,9 +1,7 @@
 import * as React from 'react';
 import { css } from '@patternfly/react-styles';
 import { Tooltip, TooltipPosition } from '@patternfly/react-core';
-import CheckCircleIcon from '@patternfly/react-icons/dist/esm/icons/check-circle-icon';
-import ExclamationCircleIcon from '@patternfly/react-icons/dist/esm/icons/exclamation-circle-icon';
-import ExclamationTriangleIcon from '@patternfly/react-icons/dist/esm/icons/exclamation-triangle-icon';
+import { CheckCircleIcon, ExclamationCircleIcon, ExclamationTriangleIcon } from '@patternfly/react-icons';
 import styles from '@patternfly/react-topology/src/css/topology-components';
 import {
   BadgeLocation,

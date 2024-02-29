@@ -7,21 +7,37 @@ div#app {
 }
 
 /* fix page background color & spacing*/
-.pf-c-page__main-section,
+.pf-v5-c-page__main-section,
 section#pageSection {
   background: transparent !important;
   padding: 10px;
 }
 
-body>#app>.pf-c-page {
+section#pageSection.dark {
+  background: #0f1214 !important;
+}
+
+section#pageSection.light {
+  background: #fff !important;
+}
+
+#consolePageSection {
+  display: contents;
+}
+
+#consolePageSection>section {
+  flex: 1;
+}
+
+body>#app>.pf-v5-c-page {
   background: #fff;
 }
 
-.pf-theme-dark>body>#app>.pf-c-page {
+.pf-v5-theme-dark>body>#app>.pf-v5-c-page {
   background: var(--pf-c-page__main-section--BackgroundColor);
 }
 
-.pf-c-page__main-section {
+.pf-v5-c-page__main-section {
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -29,7 +45,7 @@ body>#app>.pf-c-page {
 }
 
 /* TODO: fix select. For now it only reduce size but doesn't match with console style */
-label.pf-c-select__menu-item {
+label.pf-v5-c-select__menu-item {
   position: relative;
   left: 16px;
   padding: 0;
@@ -82,7 +98,7 @@ input,
 optgroup,
 select,
 textarea,
-.pf-c-badge {
+.pf-v5-c-badge {
   font-family: var(--pf-global--FontFamily--sans-serif);
 }
 
@@ -110,9 +126,6 @@ textarea,
   outline: 0;
   position: relative;
   width: 100%;
-
-  --os-modal-dialog--BackgroundColor: var(--pf-global--BackgroundColor--100);
-  background: var(--os-modal-dialog--BackgroundColor);
 }
 
 .modal-content {
@@ -179,32 +192,32 @@ textarea,
 }
 
 /* fix selector color*/
-.pf-theme-dark .pf-c-toggle-group__button.pf-m-selected {
+.pf-v5-theme-dark .pf-v5-c-toggle-group__button.pf-m-selected {
   --pf-c-toggle-group__button--BackgroundColor: #06c;
   --pf-c-toggle-group__button--ZIndex: 100;
   --pf-c-toggle-group__button--before--BorderColor: #1fa7f8;
 }
 
 /* fix primary button color*/
-.pf-theme-dark .pf-m-primary {
+.pf-v5-theme-dark .pf-m-primary {
   color: #fff;
   background-color: #06c;
 }
 
 /* fix chip background colors */
-.pf-theme-dark .pf-c-chip {
+.pf-v5-theme-dark .pf-v5-c-chip {
   --pf-c-chip--BackgroundColor: var(--pf-global--BackgroundColor--100);
   --pf-c-chip--before--BorderColor: var(--pf-global--BorderColor--100);
   --pf-c-chip--m-draggable--BackgroundColor: var(--pf-global--palette--black-600);
 }
 
 /* hide options texts */
-.pf-u-screen-reader {
+.pf-v5-u-screen-reader {
   display: none;
 }
 
 /* fix search input*/
-.pf-theme-dark .pf-c-input-group {
+.pf-v5-theme-dark .pf-v5-c-input-group {
   --pf-c-input-group--BackgroundColor: transparent;
   --pf-c-input-group__text--BorderTopColor: transparent;
   --pf-c-input-group__text--BorderRightColor: transparent;

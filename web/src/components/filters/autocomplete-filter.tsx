@@ -181,7 +181,7 @@ export const AutocompleteFilter: React.FC<AutocompleteFilterProps> = ({
               placeholder={filterDefinition.placeholder}
               value={currentValue}
               onKeyPress={e => e.key === 'Enter' && onEnter()}
-              onChange={onAutoCompleteChange}
+              onChange={(event, value) => onAutoCompleteChange(value)}
               onBlur={onBlur}
               ref={searchInputRef}
               data-test="autocomplete-search"

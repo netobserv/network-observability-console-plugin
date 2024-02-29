@@ -9,6 +9,8 @@ import {
   DropdownItem,
   Flex,
   FlexItem,
+  MenuToggle,
+  MenuToggleElement,
   OverflowMenu,
   OverflowMenuContent,
   OverflowMenuControl,
@@ -20,6 +22,7 @@ import {
   TabTitleText,
   Text,
   TextVariants,
+  Title,
   Toolbar,
   ToolbarItem
 } from '@patternfly/react-core';
@@ -1249,21 +1252,24 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
         data-test="view-options-dropdown"
         id="view-options-dropdown"
         onSelect={() => setViewOptionOverflowMenuOpen(false)}
-        toggle={
-          <Button
+        isOpen={isViewOptionOverflowMenuOpen}
+        toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+          <MenuToggle
+            ref={toggleRef}
             data-test="view-options-button"
             id="view-options-button"
-            variant="link"
+            variant="plain"
             className="overflow-button"
-            icon={<EllipsisVIcon />}
             onClick={() => setViewOptionOverflowMenuOpen(!isViewOptionOverflowMenuOpen)}
           >
-            {t('More options')}
-          </Button>
-        }
-        isOpen={isViewOptionOverflowMenuOpen}
-        dropdownItems={dropdownItems}
-      />
+            <>
+              <EllipsisVIcon /> {t('More options')}
+            </>
+          </MenuToggle>
+        )}
+      >
+        {dropdownItems}
+      </Dropdown>
     );
   };
 
@@ -1631,7 +1637,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
           <div id="pageHeader">
             <Flex direction={{ default: 'row' }}>
               <FlexItem flex={{ default: 'flex_1' }}>
-                <Text component={TextVariants.h1}>{t('Network Traffic')}</Text>
+                <Title headingLevel={TextVariants.h1}>{t('Network Traffic')}</Title>
               </FlexItem>
               <FlexItem>{actions()}</FlexItem>
             </Flex>
@@ -1774,7 +1780,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
               <SearchComponent ref={searchRef} setSearchEvent={setSearchEvent} isDark={isDarkTheme} />
             </ToolbarItem>
           )}
-          <ToolbarItem className="flex-start view-options-last" alignment={{ default: 'alignRight' }}>
+          <ToolbarItem className="flex-start view-options-last" align={{ default: 'alignRight' }}>
             <OverflowMenu breakpoint="2xl">
               <OverflowMenuContent isPersistent>
                 <OverflowMenuGroup groupType="button" isPersistent className="flex-start">

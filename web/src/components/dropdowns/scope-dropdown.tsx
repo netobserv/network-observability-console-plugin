@@ -1,4 +1,4 @@
-import { Dropdown, DropdownItem, DropdownPosition, DropdownToggle } from '@patternfly/react-core';
+import { Dropdown, DropdownItem, MenuToggle, MenuToggleElement } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { FlowScope } from '../../model/flow-query';
@@ -12,7 +12,7 @@ export const ScopeDropdown: React.FC<{
   allowZone: boolean;
 }> = ({ selected, setScopeType, id, allowMultiCluster, allowZone }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
-  const [scopeDropdownOpen, setScopeDropdownOpen] = React.useState(false);
+  const [isOpen, setOpen] = React.useState(false);
 
   const getScopeDisplay = (scopeType: MetricScopeOptions) => {
     switch (scopeType) {
@@ -35,18 +35,23 @@ export const ScopeDropdown: React.FC<{
     <Dropdown
       data-test={id}
       id={id}
-      position={DropdownPosition.right}
-      toggle={
-        <DropdownToggle
+      popperProps={{
+        position: 'right'
+      }}
+      isOpen={isOpen}
+      toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+        <MenuToggle
+          ref={toggleRef}
           data-test={`${id}-dropdown`}
           id={`${id}-dropdown`}
-          onToggle={() => setScopeDropdownOpen(!scopeDropdownOpen)}
+          onClick={() => setOpen(!isOpen)}
+          isExpanded={isOpen}
         >
           {getScopeDisplay(selected as MetricScopeOptions)}
-        </DropdownToggle>
-      }
-      isOpen={scopeDropdownOpen}
-      dropdownItems={Object.values(MetricScopeOptions)
+        </MenuToggle>
+      )}
+    >
+      {Object.values(MetricScopeOptions)
         .filter(
           ms =>
             (allowMultiCluster || ms !== MetricScopeOptions.CLUSTER) && (allowZone || ms !== MetricScopeOptions.ZONE)
@@ -57,14 +62,14 @@ export const ScopeDropdown: React.FC<{
             id={v}
             key={v}
             onClick={() => {
-              setScopeDropdownOpen(false);
+              setOpen(false);
               setScopeType(v);
             }}
           >
             {getScopeDisplay(v)}
           </DropdownItem>
         ))}
-    />
+    </Dropdown>
   );
 };
 

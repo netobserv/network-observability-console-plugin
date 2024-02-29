@@ -77,7 +77,7 @@ Cypress.Commands.add('openPanelsModal', () => {
   cy.showAdvancedOptions();
   cy.get('#manage-overview-panels-button').click();
   cy.get('#overview-panels-modal').should('exist');
-  cy.get('#overview-panels-modal').find('.pf-c-data-list__item-content').should('have.length', c.availablePanelsCount);
+  cy.get('#overview-panels-modal').find('.pf-v5-c-data-list__item-content').should('have.length', c.availablePanelsCount);
 });
 
 Cypress.Commands.add('checkColumns', (groups = c.defaultColumnGroupCount, cols = c.defaultColumnCount) => {
@@ -102,13 +102,13 @@ Cypress.Commands.add('openColumnsModal', () => {
   cy.showAdvancedOptions();
   cy.get('#manage-columns-button').click();
   cy.get('#columns-modal').should('exist');
-  cy.get('#columns-modal').find('.pf-c-data-list__item-content').should('have.length', c.availableColumnCount);
+  cy.get('#columns-modal').find('.pf-v5-c-data-list__item-content').should('have.length', c.availableColumnCount);
 });
 
 Cypress.Commands.add('selectPopupItems', (id, names) => {
   for (let i = 0; i < names.length; i++) {
     cy.get(id).get('.modal-body').contains(names[i])
-      .closest('.pf-c-data-list__item-row').find('.pf-c-data-list__check').click();
+      .closest('.pf-v5-c-data-list__item-row').find('.pf-v5-c-data-list__check').click();
   }
 });
 
@@ -129,8 +129,8 @@ Cypress.Commands.add('sortColumn', (name) => {
 
 Cypress.Commands.add('dropdownSelect', (id, name) => {
   cy.get(`#${id}`).click();
-  cy.get('.pf-c-dropdown__menu').should('exist');
-  cy.get('.pf-c-dropdown__menu').find(`#${name}`).click();
+  cy.get('.pf-v5-c-dropdown__menu').should('exist');
+  cy.get('.pf-v5-c-dropdown__menu').find(`#${name}`).click();
 });
 
 Cypress.Commands.add('checkContent', (topology) => {
@@ -143,8 +143,8 @@ Cypress.Commands.add('checkContent', (topology) => {
 
 Cypress.Commands.add('addFilter', (filter, value, topology) => {
   cy.get('#column-filter-toggle').click();
-  cy.get('.pf-c-accordion__expanded-content-body').find(`#${filter}`).click();
-  cy.get('.pf-c-accordion__expanded-content-body').should('not.exist');
+  cy.get('.pf-v5-c-accordion__expanded-content-body').find(`#${filter}`).click();
+  cy.get('.pf-v5-c-accordion__expanded-content-body').should('not.exist');
   cy.get('#column-filter-dropdown').parent().children().eq(1).type(`${value}{enter}`);
   cy.checkContent(topology);
 });
@@ -158,7 +158,7 @@ Cypress.Commands.add('changeQueryOption', (name, topology) => {
 
 Cypress.Commands.add('changeTimeRange', (name, topology) => {
   cy.get('#time-range-dropdown-dropdown').click();
-  cy.get('.pf-c-dropdown__menu').contains(name).click();
+  cy.get('.pf-v5-c-dropdown__menu').contains(name).click();
   cy.checkContent(topology);
 });
 
@@ -167,7 +167,7 @@ Cypress.Commands.add('changeMetricFunction', (name) => {
   cy.showDisplayOptions();
 
   cy.get('#metricFunction-dropdown').click();
-  cy.get('.pf-c-dropdown__menu').contains(name).click();
+  cy.get('.pf-v5-c-dropdown__menu').contains(name).click();
   cy.get('[data-layer-id="default"]').children().its('length').should('be.gte', 5);
 });
 
@@ -176,7 +176,7 @@ Cypress.Commands.add('changeMetricType', (name) => {
   cy.showDisplayOptions();
 
   cy.get('#metricType-dropdown').click();
-  cy.get('.pf-c-dropdown__menu').contains(name).click();
+  cy.get('.pf-v5-c-dropdown__menu').contains(name).click();
   cy.get('[data-layer-id="default"]').children().its('length').should('be.gte', 5);
 });
 

@@ -1,4 +1,4 @@
-import { Dropdown, DropdownItem, DropdownToggle } from '@patternfly/react-core';
+import { Dropdown, DropdownItem, MenuToggle, MenuToggleElement } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { MetricScopeOptions } from '../../model/metrics';
@@ -14,7 +14,7 @@ export const GroupDropdown: React.FC<{
   allowZone: boolean;
 }> = ({ disabled, scope, selected, setGroupType, id, allowMultiCluster, allowZone }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
-  const [groupDropdownOpen, setGroupDropdownOpen] = React.useState(false);
+  const [isOpen, setOpen] = React.useState(false);
 
   const getGroupDisplay = (groupType: TopologyGroupTypes) => {
     switch (groupType) {
@@ -62,18 +62,21 @@ export const GroupDropdown: React.FC<{
     <Dropdown
       data-test={id}
       id={id}
-      toggle={
-        <DropdownToggle
+      isOpen={isOpen}
+      toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+        <MenuToggle
+          ref={toggleRef}
           data-test={`${id}-dropdown`}
           id={`${id}-dropdown`}
           isDisabled={disabled}
-          onToggle={() => setGroupDropdownOpen(!groupDropdownOpen)}
+          isExpanded={isOpen}
+          onClick={() => setOpen(!isOpen)}
         >
           {getGroupDisplay(selected)}
-        </DropdownToggle>
-      }
-      isOpen={groupDropdownOpen}
-      dropdownItems={getAvailableGroups(scope)
+        </MenuToggle>
+      )}
+    >
+      {getAvailableGroups(scope)
         .filter(
           g =>
             (allowMultiCluster ||
@@ -99,14 +102,14 @@ export const GroupDropdown: React.FC<{
             id={v}
             key={v}
             onClick={() => {
-              setGroupDropdownOpen(false);
+              setOpen(false);
               setGroupType(v);
             }}
           >
             {getGroupDisplay(v)}
           </DropdownItem>
         ))}
-    />
+    </Dropdown>
   );
 };
 

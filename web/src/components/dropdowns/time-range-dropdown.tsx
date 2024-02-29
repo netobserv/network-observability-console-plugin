@@ -1,4 +1,4 @@
-import { Dropdown, DropdownItem, DropdownToggle, Tooltip } from '@patternfly/react-core';
+import { Dropdown, DropdownItem, MenuToggle, MenuToggleElement, Tooltip } from '@patternfly/react-core';
 import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -67,30 +67,36 @@ export const TimeRangeDropdown: React.FC<TimeRangeDropdownProps> = ({ id, range,
   };
 
   return (
-    <Dropdown
-      data-test={id}
-      id={id}
-      dropdownItems={_.map(timeRangeOptions, (name, key) => (
-        <DropdownItem data-test={key} id={key} component="button" key={key} onClick={() => onChange(key)}>
-          {name}
-        </DropdownItem>
-      ))}
-      isOpen={isOpen}
-      onSelect={() => setIsOpen(false)}
-      toggle={
-        <Tooltip
-          trigger={selectedKey === CUSTOM_TIME_RANGE_KEY ? 'mouseenter focus' : ''}
-          position="top"
-          content={textContent()}
-        >
-          <DropdownToggle data-test={`${id}-dropdown`} id={`${id}-dropdown`} onToggle={() => setIsOpen(!isOpen)}>
+    <Tooltip
+      trigger={selectedKey === CUSTOM_TIME_RANGE_KEY ? 'mouseenter focus' : ''}
+      position="top"
+      content={textContent()}
+    >
+      <Dropdown
+        data-test={id}
+        id={id}
+        isOpen={isOpen}
+        onSelect={() => setIsOpen(false)}
+        toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+          <MenuToggle
+            ref={toggleRef}
+            data-test={`${id}-dropdown`}
+            id={`${id}-dropdown`}
+            onClick={() => setIsOpen(!isOpen)}
+          >
             {selectedKey === CUSTOM_TIME_RANGE_KEY
               ? textContent(false)
               : timeRangeOptions[selectedKey as keyof typeof timeRangeOptions]}
-          </DropdownToggle>
-        </Tooltip>
-      }
-    />
+          </MenuToggle>
+        )}
+      >
+        {_.map(timeRangeOptions, (name, key) => (
+          <DropdownItem data-test={key} id={key} component="button" key={key} onClick={() => onChange(key)}>
+            {name}
+          </DropdownItem>
+        ))}
+      </Dropdown>
+    </Tooltip>
   );
 };
 

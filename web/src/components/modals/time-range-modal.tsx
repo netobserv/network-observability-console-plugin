@@ -247,7 +247,7 @@ export const TimeRangeModal: React.FC<TimeRangeModalProps> = ({
       scrollable={false}
       onClose={() => onCancel()}
       footer={
-        <div>
+        <div className="footer">
           <Button data-test="time-range-reset" key="reset" variant="link" onClick={() => reloadInputs(true)}>
             {t('Reset')}
           </Button>

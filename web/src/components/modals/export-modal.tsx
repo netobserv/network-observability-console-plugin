@@ -201,7 +201,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           data-test="export-all"
           id="export-all"
           isChecked={isExportAll}
-          onChange={checked => setExportAll(checked)}
+          onChange={(event, checked) => setExportAll(checked)}
           label={t('Export all datas')}
           aria-label="Export all"
           description={
@@ -217,7 +217,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                 <Button isInline onClick={onSelectAll} variant="link">
                   {isAllSelected ? t('Unselect all') : t('Select all')}
                 </Button>
-                <DataList aria-label="Exported fields" id="exported-fields" isCompact>
+                <DataList aria-label="Exported fields" id="exported-fields" className="centered-list" isCompact>
                   {selectedColumns.map((column, i) => (
                     <DataListItem
                       key={'data-list-item-' + i}
@@ -238,7 +238,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                         </DataListControl>
                         <DataListItemCells
                           dataListCells={[
-                            <DataListCell key={'data-list-cell-' + i}>
+                            <DataListCell key={'data-list-cell-' + i} className="center">
                               <label htmlFor={column.id}>{getFullColumnName(column)}</label>
                             </DataListCell>
                           ]}

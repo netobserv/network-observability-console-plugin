@@ -21,7 +21,7 @@ describe('<ColumnsModal />', () => {
   });
   it('should save once', async () => {
     const wrapper = mount(<ColumnsModal {...props} />);
-    const confirmButton = wrapper.find('.pf-c-button.pf-m-primary');
+    const confirmButton = wrapper.find('.pf-v5-c-button.pf-m-primary');
     expect(confirmButton.length).toEqual(1);
 
     confirmButton.at(0).simulate('click');
@@ -42,7 +42,7 @@ describe('<ColumnsModal />', () => {
       .find('[aria-labelledby="table-column-management-item-1"]')
       .last()
       .simulate('change', { target: { id: updatedColumns[1].id } });
-    wrapper.find('.pf-c-button.pf-m-primary').at(0).simulate('click');
+    wrapper.find('.pf-v5-c-button.pf-m-primary').at(0).simulate('click');
     expect(props.setColumns).toHaveBeenNthCalledWith(2, updatedColumns);
   });
 });
