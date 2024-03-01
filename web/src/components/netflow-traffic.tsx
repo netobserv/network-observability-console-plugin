@@ -572,7 +572,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
       }
       const promises: Promise<Stats>[] = [
         getRecords(tableQuery).then(res => {
-          const flows = showDuplicates ? res.records : mergeFlowReporters(res.records);
+          const flows = (showDuplicates || !config.deduper.mark) ? res.records : mergeFlowReporters(res.records);
           setFlows(flows);
           return res.stats;
         })
