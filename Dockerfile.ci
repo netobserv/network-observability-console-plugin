@@ -1,0 +1,13 @@
+FROM docker.io/library/golang:1.21
+
+RUN apt-get update && apt-get install -y \
+    nodejs \
+    npm
+
+WORKDIR /opt/app-root
+
+COPY . .
+
+RUN make build
+
+ENTRYPOINT ["make", "test", "lint"]

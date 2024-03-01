@@ -3,12 +3,16 @@
 import * as c from '../../support/const'
 
 describe('netflow-table', () => {
-  beforeEach(() => {
-    cy.openNetflowTrafficPage();
+  function reload(clearCache = true) {
+    cy.openNetflowTrafficPage(clearCache);
     //move to table view
     cy.get('.tableTabButton').click();
     //clear default app filters
     cy.get('#clear-all-filters-button').click();
+  }
+
+  beforeEach(() => {
+    reload();
   });
 
   it('displays table and rows', () => {
@@ -40,8 +44,8 @@ describe('netflow-table', () => {
     //Should not have nested columns and have 4 columns
     cy.checkColumns(0, 4);
 
-    //reload the page
-    cy.reload();
+    //reload the page without clearing cache
+    reload(false);
 
     //Should have remembered the columns
     cy.checkColumns(0, 4);

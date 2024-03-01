@@ -1,0 +1,15 @@
+# syntax = edrevo/dockerfile-plus
+INCLUDE+ Dockerfile
+
+FROM cypress/included:13.6.5
+
+WORKDIR /opt/app-root
+COPY --from=web-builder /opt/app-root/web/ ./web
+COPY --from=go-builder /opt/app-root/plugin-backend ./
+COPY mocks mocks
+COPY config/sample-config.yaml ./config/config.yaml
+RUN sed -i -e 's/useMocks: false/useMocks: true/g' ./config/config.yaml
+COPY scripts/cypress.sh .
+RUN chmod 775 -R ./cypress.sh
+
+ENTRYPOINT ["./cypress.sh"]

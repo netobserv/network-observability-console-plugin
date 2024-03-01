@@ -1,4 +1,4 @@
-##@ shortcuts helpers
+##@ Shortcuts helpers
 .PHONY: fmt
 fmt: fmt-backend fmt-frontend ## Fmt all
 

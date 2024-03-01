@@ -40,9 +40,11 @@
 
 import * as c from './const';
 
-Cypress.Commands.add('openNetflowTrafficPage', () => {
-  //clear local storage to ensure to be in default view = overview
-  cy.clearLocalStorage();
+Cypress.Commands.add('openNetflowTrafficPage', (clearCache = true) => {
+  if (clearCache) {
+    //clear local storage to ensure to be in default view = overview
+    cy.clearLocalStorage();
+  }
   cy.visit(c.url);
   cy.get("#netflow-traffic-nav-item-link").click();
 });
@@ -183,7 +185,7 @@ Cypress.Commands.add('changeMetricType', (name) => {
 declare global {
   namespace Cypress {
     interface Chainable {
-      openNetflowTrafficPage(): Chainable<void>
+      openNetflowTrafficPage(clearCache?: boolean): Chainable<void>
       showAdvancedOptions(): Chainable<Element>
       showDisplayOptions(): Chainable<Element>
       checkPanels(panels?: number): Chainable<Element>
