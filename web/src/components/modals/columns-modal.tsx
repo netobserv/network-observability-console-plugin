@@ -85,8 +85,10 @@ export const ColumnsModal: React.FC<{
 
   const onReset = React.useCallback(() => {
     setResetClicked(true);
-    setUpdatedColumns(getDefaultColumns(config.columns).filter(c => columns.some(existing => existing.id === c.id)));
-  }, [columns, config.columns]);
+    setUpdatedColumns(
+      getDefaultColumns(config.columns, config.fields).filter(c => columns.some(existing => existing.id === c.id))
+    );
+  }, [columns, config.columns, config.fields]);
 
   const isSaveDisabled = React.useCallback(() => {
     return _.isEmpty(updatedColumns.filter(c => c.isSelected));

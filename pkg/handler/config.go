@@ -78,6 +78,14 @@ type QuickFilter struct {
 	Default bool `yaml:"default,omitempty" json:"default,omitempty"`
 }
 
+type FieldConfig struct {
+	Name        string `yaml:"name" json:"name"`
+	Type        string `yaml:"type" json:"type"`
+	Description string `yaml:"description" json:"description"`
+	// lokiLabel flag is for documentation only. Use loki.labels instead
+	Filter string `yaml:"filter,omitempty" json:"filter,omitempty"`
+}
+
 type Deduper struct {
 	Mark  bool `yaml:"mark" json:"mark"`
 	Merge bool `yaml:"merge" json:"merge"`
@@ -95,6 +103,7 @@ type Frontend struct {
 	Sampling        int           `yaml:"sampling" json:"sampling"`
 	Features        []string      `yaml:"features" json:"features"`
 	Deduper         Deduper       `yaml:"deduper" json:"deduper"`
+	Fields          []FieldConfig `yaml:"fields" json:"fields"`
 }
 
 type Config struct {
@@ -133,6 +142,11 @@ func ReadConfigFile(version, date, filename string) (*Config, error) {
 			Deduper: Deduper{
 				Mark:  true,
 				Merge: false,
+			},
+			Fields: []FieldConfig{
+				{Name: "TimeFlowEndMs", Type: "number"},
+				{Name: "SrcAddr", Type: "string"},
+				{Name: "DstAddr", Type: "string"},
 			},
 		},
 	}

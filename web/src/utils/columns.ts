@@ -1,11 +1,12 @@
 import _ from 'lodash';
-import { Field, getRecordValue, Record } from '../api/ipfix';
+import { getRecordValue, Record } from '../api/ipfix';
 import { FilterId } from '../model/filters';
 import { compareNumbers, compareStrings } from './base-compare';
 import { compareIPs } from './ip';
 import { comparePorts } from './port';
 import { compareProtocols } from './protocol';
 import { Feature } from '../model/config';
+import { FieldConfig, FieldType } from './fields';
 
 export enum ColumnsId {
   starttime = 'StartTime',
@@ -100,7 +101,7 @@ export interface Column {
   id: ColumnsId;
   group?: string;
   name: string;
-  fieldName?: Field;
+  field?: FieldConfig;
   tooltip?: string;
   docURL?: string;
   quickFilter?: FilterId;
@@ -218,7 +219,7 @@ export const getConcatenatedValue = (
   return ip;
 };
 
-export const getDefaultColumns = (columnDefs: ColumnConfigDef[]): Column[] => {
+export const getDefaultColumns = (columnDefs: ColumnConfigDef[], fieldConfigs: FieldConfig[]): Column[] => {
   const columns: Column[] = [];
 
   function getColumnOrRecordValue(record: Record, arg: string, defaultValue: string | number) {
@@ -276,13 +277,46 @@ export const getDefaultColumns = (columnDefs: ColumnConfigDef[]): Column[] => {
     return '';
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  function forceType(id: ColumnsId, value: any, type?: FieldType) {
+    if (!type) {
+      console.error('Column ' + id + " doesn't specify type");
+    }
+    // check if value type match and convert it if needed
+    if (value && value !== '' && typeof value !== type) {
+      switch (type) {
+        case 'number':
+          return Number(value);
+        case 'string':
+          return String(value);
+        default:
+          throw new Error('forceType error: type ' + type + ' is not managed');
+      }
+    } else {
+      // else return value directly
+      return value;
+    }
+  }
+
   // add a column for each definition
   columnDefs.forEach(d => {
+    const id = d.id as ColumnsId;
+
+    const field = !_.isEmpty(d.field) ? fieldConfigs.find(f => f.name === d.field) : undefined;
+    if (!_.isEmpty(d.field) && field === undefined) {
+      throw new Error('Invalid config provided. Field ' + d.field + ' of column ' + d.name + " doesn't exists.");
+    }
+
+    const fields = !_.isEmpty(d.fields) ? fieldConfigs.filter(f => d.fields!.includes(f.name)) : undefined;
+    if (!_.isEmpty(d.fields) && (fields === undefined || fields!.length !== d.fields!.length)) {
+      throw new Error('Invalid config provided. Fields ' + d.fields + ' of column ' + d.name + " doesn't match.");
+    }
+
     columns.push({
-      id: d.id as ColumnsId,
+      id,
       group: !_.isEmpty(d.group) ? d.group : undefined,
       name: d.name,
-      fieldName: !_.isEmpty(d.field) ? (d.field as Field) : undefined,
+      field,
       tooltip: !_.isEmpty(d.tooltip) ? d.tooltip : undefined,
       docURL: !_.isEmpty(d.docURL) ? d.docURL : undefined,
       quickFilter: !_.isEmpty(d.filter) ? (d.filter as FilterId) : undefined,
@@ -310,14 +344,19 @@ export const getDefaultColumns = (columnDefs: ColumnConfigDef[]): Column[] => {
           } else {
             return calculatedValue(r, d.calculated!);
           }
-        } else if (d.fields) {
+        } else if (fields) {
           const arr: (string | number | undefined)[] = [];
-          d.fields.forEach(f => {
-            arr.push(getRecordValue(r, f, undefined) as number);
+          fields.forEach(fc => {
+            const value = getRecordValue(r, fc.name, undefined);
+            arr.push(forceType(id, value, fc.type));
           });
           return arr;
+        } else if (field) {
+          const value = getRecordValue(r, field!.name, '');
+          return forceType(id, value, field!.type);
         } else {
-          return getRecordValue(r, d.field!, '');
+          console.warn('column.value called on ' + id + ' but not configured');
+          return null;
         }
       },
       sort: (a: Record, b: Record, col: Column) => {

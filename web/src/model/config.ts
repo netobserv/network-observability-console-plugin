@@ -1,3 +1,4 @@
+import { FieldConfig } from '../utils/fields';
 import { ColumnConfigDef } from '../utils/columns';
 import { FilterConfigDef } from './filters';
 import { RecordType } from './flow-query';
@@ -25,6 +26,7 @@ export type Config = {
   sampling: number;
   features: Feature[];
   deduper: Deduper;
+  fields: FieldConfig[];
 };
 
 export const defaultConfig: Config = {
@@ -44,5 +46,6 @@ export const defaultConfig: Config = {
   deduper: {
     mark: true,
     merge: false
-  }
+  },
+  fields: []
 };
