@@ -127,10 +127,16 @@ func (f *labelFilter) writeInto(sb *strings.Builder) {
 		sb.WriteString(`ip("`)
 		sb.WriteString(f.value)
 		sb.WriteString(`")`)
-	case typeRegexContains, typeRegexArrayContains:
+	case typeRegexContains:
+		// match any case
 		sb.WriteString("`(?i).*")
 		sb.WriteString(f.value)
 		sb.WriteString(".*`")
+	case typeRegexArrayContains:
+		// match any case and ensure we stay inside the array
+		sb.WriteString("`(?i)[^]]*")
+		sb.WriteString(f.value)
+		sb.WriteString("[^]]*`")
 	default:
 		panic(fmt.Sprint("wrong filter value type", int(f.valueType)))
 	}
@@ -312,9 +318,9 @@ func (f *lineFilter) writeInto(sb *strings.Builder) {
 				sb.WriteString(`.*"`)
 			// for array, we ensure it starts by [ and ends by ]
 			case typeRegexArrayContains:
-				sb.WriteString(`\[(?i).*`)
+				sb.WriteString(`\[(?i)[^]]*`)
 				sb.WriteString(valueReplacer.Replace(v.value))
-				sb.WriteString(`.*]`)
+				sb.WriteString(`[^]]*]`)
 			}
 		}
 	}

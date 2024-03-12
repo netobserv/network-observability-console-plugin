@@ -264,6 +264,7 @@
   "Examples": "Examples",
   "ICMP type provided but protocol is {{proto}}": "ICMP type provided but protocol is {{proto}}",
   "ICMP code provided but protocol is {{proto}}": "ICMP code provided but protocol is {{proto}}",
+  "Invalid data provided. Check JSON for details.": "Invalid data provided. Check JSON for details.",
   "dropped": "dropped",
   "dropped by": "dropped by",
   "sent": "sent",

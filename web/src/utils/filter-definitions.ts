@@ -285,7 +285,7 @@ export const getFilterDefinitions = (
       getOptions = getProtocolOptions;
       validate = protoValidation;
     } else if (d.id.includes('direction')) {
-      getOptions = v => getDirectionOptionsAsync(v, t);
+      getOptions = v => getDirectionOptionsAsync(v, t, d.id === 'nodedirection');
       validate = dirValidation;
     } else if (d.id.includes('drop_state')) {
       getOptions = getDropStateOptions;

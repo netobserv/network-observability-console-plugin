@@ -41,6 +41,8 @@ const (
 	DSCP           = "Dscp"
 	PktDropBytes   = "PktDropBytes"
 	FlowDirection  = "FlowDirection"
+	Interfaces     = "Interfaces"
+	IfDirections   = "IfDirections"
 	DNSID          = "DnsId"
 	DNSLatency     = "DnsLatencyMs"
 	DNSErrNo       = "DnsErrno"
@@ -75,6 +77,17 @@ func IsIP(f string) bool {
 		SrcAddr,
 		DstHostIP,
 		SrcHostIP:
+		return true
+	default:
+		return false
+	}
+}
+
+func IsArray(v string) bool {
+	switch v {
+	case
+		IfDirections,
+		Interfaces:
 		return true
 	default:
 		return false

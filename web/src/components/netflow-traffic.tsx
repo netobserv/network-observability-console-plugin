@@ -1328,7 +1328,6 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
           range={range}
           type={recordType}
           isDark={isDarkTheme}
-          deduperMerge={config.deduper.merge}
           canSwitchTypes={isFlow() && isConnectionTracking()}
           allowPktDrops={isPktDrop()}
           setFilters={setFiltersList}

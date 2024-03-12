@@ -16,7 +16,6 @@ describe('<RecordPanel />', () => {
     type: 'flowLog',
     canSwitchTypes: false,
     allowPktDrops: false,
-    deduperMerge: false,
     setFilters: jest.fn(),
     setRange: jest.fn(),
     setType: jest.fn(),
