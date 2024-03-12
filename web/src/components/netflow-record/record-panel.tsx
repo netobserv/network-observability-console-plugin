@@ -25,7 +25,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { defaultSize, maxSize, minSize } from '../../utils/panel';
 import { defaultTimeRange } from '../../utils/router';
-import { FlowDirection, getFlowDirectionDisplayString, Record } from '../../api/ipfix';
+import { FlowDirection, getDirectionDisplayString, Record } from '../../api/ipfix';
 import { Column, ColumnGroup, ColumnsId, getColumnGroups, getShortColumnName } from '../../utils/columns';
 import { TimeRange } from '../../utils/datetime';
 import { doesIncludeFilter, Filter, FilterDefinition, findFromFilters, removeFromFilters } from '../../model/filters';
@@ -44,7 +44,6 @@ export type RecordDrawerProps = {
   canSwitchTypes: boolean;
   allowPktDrops: boolean;
   isDark?: boolean;
-  deduperMerge: boolean;
   setFilters: (v: Filter[]) => void;
   setRange: (r: number | TimeRange) => void;
   setType: (r: RecordType) => void;
@@ -63,7 +62,6 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
   canSwitchTypes,
   allowPktDrops,
   isDark,
-  deduperMerge,
   setFilters,
   setRange,
   setType,
@@ -75,12 +73,12 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
 
   // hide empty columns
   const getVisibleColumns = React.useCallback(() => {
-    const forbiddenColumns = deduperMerge ? [ColumnsId.flowdir, ColumnsId.interface] : [ColumnsId.flowdirints];
+    const forbiddenColumns = [ColumnsId.ifdirs, ColumnsId.interfaces];
     return columns.filter((c: Column) => {
       const value = c.value(record);
       return !forbiddenColumns.includes(c.id) && value !== null && value !== '' && !Number.isNaN(value);
     });
-  }, [columns, deduperMerge, record]);
+  }, [columns, record]);
 
   const toggle = React.useCallback(
     (id: string) => {
@@ -148,22 +146,26 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
   }, [canSwitchTypes, setType, type]);
 
   const getDirIntsFilter = React.useCallback((): RecordFieldFilter | undefined => {
-    if (!deduperMerge) {
+    //get interface filter and values
+    const interfaceCol = columns.find(c => c.id === ColumnsId.interfaces);
+    if (!interfaceCol) {
+      console.error("getDirIntsFilter can't find interfaceCol");
       return undefined;
     }
-
-    //get interface filter and values
-    const interfaceCol = columns.find(c => c.id === ColumnsId.interface);
     const interfaceFilterKey = { def: findFilter(filterDefinitions, interfaceCol!.quickFilter!)! };
     const interfaceFilterValues = _.uniq(record.fields.Interfaces)!.map(v => ({ v, display: v }));
     const isDeleteInterface = doesIncludeFilter(filters, interfaceFilterKey, interfaceFilterValues);
 
     //get direction filter and values
-    const directionCol = columns.find(c => c.id === ColumnsId.flowdir);
+    const directionCol = columns.find(c => c.id === ColumnsId.ifdirs);
+    if (!directionCol) {
+      console.error("getDirIntsFilter can't find directionCol");
+      return undefined;
+    }
     const directionFilterKey = { def: findFilter(filterDefinitions, directionCol!.quickFilter!)! };
-    const directionFilterValues = _.uniq(record.fields.FlowDirections)!.map(v => ({
+    const directionFilterValues = _.uniq(record.fields.IfDirections)!.map(v => ({
       v: String(v),
-      display: getFlowDirectionDisplayString(String(v) as FlowDirection, t)
+      display: getDirectionDisplayString(String(v) as FlowDirection, t)
     }));
     const isDeleteDirection = doesIncludeFilter(filters, directionFilterKey, directionFilterValues);
 
@@ -195,16 +197,7 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
       },
       isDelete
     };
-  }, [
-    columns,
-    deduperMerge,
-    filterDefinitions,
-    filters,
-    record.fields.FlowDirections,
-    record.fields.Interfaces,
-    setFilters,
-    t
-  ]);
+  }, [columns, filterDefinitions, filters, record.fields.IfDirections, record.fields.Interfaces, setFilters, t]);
 
   const getGenericFilter = React.useCallback(
     (col: Column, value: unknown): RecordFieldFilter | undefined => {

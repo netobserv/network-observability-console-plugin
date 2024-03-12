@@ -4,7 +4,7 @@ import { FilterIcon, GlobeAmericasIcon, TimesIcon, ToggleOffIcon, ToggleOnIcon }
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { FlowDirection, getFlowDirection, getFlowDirectionDisplayString, Record } from '../../api/ipfix';
+import { FlowDirection, getDirectionDisplayString, Record } from '../../api/ipfix';
 import { Column, ColumnsId, getFullColumnName } from '../../utils/columns';
 import { dateFormatter, getFormattedDate, timeMSFormatter, utcDateTimeFormatter } from '../../utils/datetime';
 import { DNS_CODE_NAMES, DNS_ERRORS_VALUES, getDNSErrorDescription, getDNSRcodeDescription } from '../../utils/dns';
@@ -485,21 +485,43 @@ export const RecordField: React.FC<{
         }
         return singleContainer(child);
       }
-      case ColumnsId.flowdir: {
-        return singleContainer(simpleTextWithTooltip(getFlowDirectionDisplayString(String(value) as FlowDirection, t)));
+      case ColumnsId.nodedir:
+      case ColumnsId.ifdirs: {
+        if (Array.isArray(value)) {
+          return nthContainer(
+            value.map(dir => simpleTextWithTooltip(getDirectionDisplayString(String(dir) as FlowDirection, t))),
+            true,
+            false,
+            false
+          );
+        }
+        return singleContainer(simpleTextWithTooltip(getDirectionDisplayString(String(value) as FlowDirection, t)));
+      }
+      case ColumnsId.interfaces: {
+        if (Array.isArray(value)) {
+          return nthContainer(
+            value.map(iName => simpleTextWithTooltip(String(iName))),
+            true,
+            false,
+            false
+          );
+        }
+        return singleContainer(simpleTextWithTooltip(String(value)));
       }
       case ColumnsId.flowdirints: {
         if (
           flow.fields.Interfaces &&
-          flow.fields.FlowDirections &&
-          flow.fields.Interfaces.length === flow.fields.FlowDirections.length
+          flow.fields.IfDirections &&
+          Array.isArray(flow.fields.Interfaces) &&
+          Array.isArray(flow.fields.IfDirections) &&
+          flow.fields.Interfaces.length === flow.fields.IfDirections.length
         ) {
           return nthContainer(
             flow.fields.Interfaces.map((iName, i) =>
               sideBySideContainer(
                 simpleTextWithTooltip(iName),
                 simpleTextWithTooltip(
-                  getFlowDirectionDisplayString(String(flow.fields.FlowDirections![i]) as FlowDirection, t)
+                  getDirectionDisplayString(String(flow.fields.IfDirections![i]) as FlowDirection, t)
                 )
               )
             ),
@@ -508,12 +530,7 @@ export const RecordField: React.FC<{
             false
           );
         } else {
-          return singleContainer(
-            sideBySideContainer(
-              simpleTextWithTooltip(flow.fields.Interface),
-              simpleTextWithTooltip(getFlowDirectionDisplayString(getFlowDirection(flow), t))
-            )
-          );
+          return singleContainer(emptyText(t('Invalid data provided. Check JSON for details.')));
         }
       }
       case ColumnsId.packets:

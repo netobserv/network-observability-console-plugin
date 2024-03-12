@@ -181,22 +181,12 @@ func (q *FlowQueryBuilder) addLineFilters(key string, values []string, not bool,
 		return
 	}
 
-	var isArray bool
-	if q.config.Deduper.Merge {
-		switch key {
-		case "FlowDirection", "Interface":
-			key = fmt.Sprintf("%ss", key)
-			isArray = true
-		default:
-			isArray = false
-		}
-	}
-
 	lf := lineFilter{
 		key:      key,
 		not:      not,
 		moreThan: moreThan,
 	}
+	isArray := fields.IsArray(key)
 	isNumeric := fields.IsNumeric(key)
 	emptyMatches := false
 	for _, value := range values {

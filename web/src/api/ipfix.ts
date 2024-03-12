@@ -41,7 +41,7 @@ export interface Labels {
   SrcK8S_Type?: string;
   /** Kind of the destination matched Kubernetes object, such as Pod name, Service name, etc. */
   DstK8S_Type?: string;
-  /** Flow direction from the node observation point, only when using eBPF deduper "JustMark" */
+  /** Flow direction from the node observation point*/
   FlowDirection?: FlowDirection;
   /** Type of record: 'flowLog' for regular flow logs, or 'allConnections',
    * 'newConnection', 'heartbeat', 'endConnection' for conversation tracking */
@@ -57,7 +57,7 @@ export enum FlowDirection {
   Inner = '2'
 }
 
-export const getFlowDirectionDisplayString = (value: FlowDirection, t: TFunction) => {
+export const getDirectionDisplayString = (value: FlowDirection, t: TFunction) => {
   return value === FlowDirection.Ingress
     ? t('Ingress')
     : value === FlowDirection.Egress
@@ -67,11 +67,7 @@ export const getFlowDirectionDisplayString = (value: FlowDirection, t: TFunction
     : t('n/a');
 };
 
-export const getFlowDirection = (flow: Record): FlowDirection => {
-  return String(flow.labels.FlowDirection || flow.fields.FlowDirection!) as FlowDirection;
-};
-
-export enum InterfaceDirection {
+export enum IfDirection {
   /** Incoming traffic, from the network interface observation point */
   Ingress = '0',
   /** Outgoing traffic, from the network interface observation point */
@@ -115,16 +111,10 @@ export interface Fields {
   K8S_ClusterName?: string;
   /** L4 protocol */
   Proto: number;
-  /** Flow direction of the first flow captured, only when using eBPF deduper 'merge' mode */
-  FlowDirection?: FlowDirection;
-  /** Flow direction array, only when using eBPF deduper 'merge' mode */
-  FlowDirections?: number[];
-  /** Network interface */
-  Interface?: string;
-  /** Network interface array, only when using eBPF deduper 'merge' mode */
+  /** Network interface array */
   Interfaces?: string[];
-  /** Flow direction from the network interface observation point */
-  IfDirection?: InterfaceDirection;
+  /** Flow direction array from the network interface observation point */
+  IfDirections?: IfDirection[];
   /** Logical OR combination of unique TCP flags comprised in the flow, as per RFC-9293, with additional custom flags to represent the following per-packet combinations: SYN+ACK (0x100), FIN+ACK (0x200) and RST+ACK (0x400). */
   Flags?: number;
   /** Number of packets */

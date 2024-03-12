@@ -29,17 +29,22 @@ export const getProtocolOptions = (value: string): Promise<FilterOption[]> => {
   return Promise.resolve(opts);
 };
 
-export const getDirectionOptions = (t: TFunction): FilterOption[] => {
-  return [
+export const getDirectionOptions = (t: TFunction, allowInner: boolean): FilterOption[] => {
+  const directions = [
     { name: t('Ingress'), value: String(FlowDirection.Ingress) },
-    { name: t('Egress'), value: String(FlowDirection.Egress) },
-    { name: t('Inner'), value: String(FlowDirection.Inner) }
+    { name: t('Egress'), value: String(FlowDirection.Egress) }
   ];
+  if (allowInner) {
+    return directions.concat({ name: t('Inner'), value: String(FlowDirection.Inner) });
+  }
+  return directions;
 };
 
-export const getDirectionOptionsAsync = (value: string, t: TFunction): Promise<FilterOption[]> => {
+export const getDirectionOptionsAsync = (value: string, t: TFunction, allowInner: boolean): Promise<FilterOption[]> => {
   return Promise.resolve(
-    getDirectionOptions(t).filter(o => o.value === value || o.name.toLowerCase().includes(value.toLowerCase()))
+    getDirectionOptions(t, allowInner).filter(
+      o => o.value === value || o.name.toLowerCase().includes(value.toLowerCase())
+    )
   );
 };
 
@@ -169,5 +174,7 @@ export const findProtocolOption = (nameOrVal: string) => {
 };
 
 export const findDirectionOption = (nameOrVal: string, t: TFunction) => {
-  return getDirectionOptions(t).find(o => o.name.toLowerCase() === nameOrVal.toLowerCase() || o.value === nameOrVal);
+  return getDirectionOptions(t, true).find(
+    o => o.name.toLowerCase() === nameOrVal.toLowerCase() || o.value === nameOrVal
+  );
 };
