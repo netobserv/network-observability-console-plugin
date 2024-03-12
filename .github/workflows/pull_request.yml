@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        go: ['1.20','1.21']
+        go: ['1.21','1.22']
 
     steps:
     - name: install make
@@ -24,6 +24,7 @@ jobs:
     - name: build, lint, test
       run: make backend && git diff --exit-code
     - name: Report coverage
+      if: ${{ matrix.go == '1.21' }}
       uses: codecov/codecov-action@v2.1.0
       with:
         files: ./cover.out

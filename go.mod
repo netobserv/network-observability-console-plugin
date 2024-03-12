@@ -1,6 +1,8 @@
 module github.com/netobserv/network-observability-console-plugin
 
-go 1.20
+go 1.21
+
+toolchain go1.21.7
 
 require (
 	github.com/gorilla/mux v1.8.1
