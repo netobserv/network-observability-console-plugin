@@ -13,3 +13,4 @@
 /plugin-backend
 /cover.out
 tmp.Dockerfile
+tmp/

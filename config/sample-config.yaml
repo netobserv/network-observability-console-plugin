@@ -1,9 +1,9 @@
 server:
   port: 9001
   metricsPort: 9002
-loki: 
+loki:
   url: http://localhost:3100
-  labels: 
+  labels:
     - SrcK8S_Namespace
     - SrcK8S_OwnerName
     - SrcK8S_Type
@@ -12,28 +12,28 @@ loki:
     - DstK8S_Type
     - K8S_FlowLayer
     - FlowDirection
-#    - Duplicate
-#    - _RecordType
-#    - K8S_ClusterName
-#    - SrcK8S_Zone
-#    - DstK8S_Zone
+    #    - Duplicate
+    #    - _RecordType
+    #    - K8S_ClusterName
+    #    - SrcK8S_Zone
+    #    - DstK8S_Zone
   tenantID: netobserv
   authCheck: none
   useMocks: false
 frontend:
   recordTypes:
     - flowLog
-#    - newConnection
-#    - heartbeat
-#    - endConnection
+    #    - newConnection
+    #    - heartbeat
+    #    - endConnection
   features:
-# eBPF agent features
-#    - pktDrop
-#    - dnsTracking
-#    - flowRTT
-# processor features
-#    - multiCluster
-#    - zones
+  # eBPF agent features
+  #    - pktDrop
+  #    - dnsTracking
+  #    - flowRTT
+  # processor features
+  #    - multiCluster
+  #    - zones
   portNaming:
     enable: true
     portNames:
@@ -63,20 +63,18 @@ frontend:
   deduper:
     mark: true
     merge: false
-# The following configuration is taken from Network Observability Operator
-# see https://github.com/netobserv/network-observability-operator/blob/main/controllers/consoleplugin/config/static-frontend-config.yaml
+    # The following configuration is taken from Network Observability Operator
+    # see https://github.com/netobserv/network-observability-operator/blob/main/controllers/consoleplugin/config/static-frontend-config.yaml
   columns:
     - id: StartTime
       name: Start Time
-      tooltip: Time of the first packet observed. Unlike End Time, it is not used in queries
-        to select records in an interval.
+      tooltip: Time of the first packet observed. Unlike End Time, it is not used in queries to select records in an interval.
       field: TimeFlowStartMs
       default: false
       width: 15
     - id: EndTime
       name: End Time
-      tooltip: Time of the last packet observed. This is what is used in queries to select
-        records in an interval.
+      tooltip: Time of the last packet observed. This is what is used in queries to select records in an interval.
       field: TimeFlowEndMs
       default: true
       width: 15
@@ -447,7 +445,7 @@ frontend:
       name: Node Direction
       tooltip: The interpreted direction of the flow observed at the Node observation point.
       field: FlowDirection
-      filter: flowDirection
+      filter: node_direction
       default: false
       width: 10
     - id: Interfaces
@@ -827,7 +825,7 @@ frontend:
       name: ICMP code
       component: number
       hint: Specify an ICMP code value as integer number.
-    - id: flowDirection
+    - id: node_direction
       name: Node Direction
       component: autocomplete
       placeholder: 'E.g: Ingress, Egress, Inner'
@@ -1003,20 +1001,20 @@ frontend:
     - name: FlowDirection
       type: number
       description: |
-        Flow direction from the node observation point. Can be one of: +
+        Flow interpreted direction from the node observation point. Can be one of: +
         - 0: Ingress (incoming traffic, from the node observation point) +
         - 1: Egress (outgoing traffic, from the node observation point) +
         - 2: Inner (with the same source and destination node)
       lokiLabel: true
-    - name: IfDirection
+    - name: IfDirections
       type: number
       description: |
-        Flow direction from the network interface observation point. Can be one of: +
+        Flow directions from the network interface observation point. Can be one of: +
         - 0: Ingress (interface incoming traffic) +
         - 1: Egress (interface outgoing traffic)
-    - name: Interface
+    - name: Interfaces
       type: string
-      description: Network interface
+      description: Network interfaces
     - name: Flags
       type: number
       description: |
