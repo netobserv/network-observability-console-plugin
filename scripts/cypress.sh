@@ -12,6 +12,6 @@ npm run cypress:run
 cypress=$?
 
 kill $backend
-wait $backend || true
+wait $backend
 
 exit $cypress
