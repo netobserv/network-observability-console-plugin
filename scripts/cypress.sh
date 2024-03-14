@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -eux
+set -ux
 
 echo "Starting backend..."
 ./plugin-backend --loglevel info --config ./config/config.yaml &
@@ -12,6 +12,6 @@ npm run cypress:run
 cypress=$?
 
 kill $backend
-wait $backend || true
+wait $backend
 
 exit $cypress
