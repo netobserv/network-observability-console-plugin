@@ -43,11 +43,12 @@ type labelFilter struct {
 
 // lineFilter represents a condition based on a JSON raw text match.
 type lineFilter struct {
-	key       string
-	strictKey bool
-	values    []lineMatch
-	not       bool
-	moreThan  bool
+	key        string
+	strictKey  bool
+	values     []lineMatch
+	not        bool
+	allowEmpty bool
+	moreThan   bool
 }
 
 type lineMatch struct {
@@ -253,14 +254,15 @@ func moreThanRegex(sb *strings.Builder, value string) {
 // under construction (contained in the provided strings.Builder)
 func (f *lineFilter) writeInto(sb *strings.Builder) {
 	if f.not {
-		// the record must contains the field if values are specified
-		// since FLP skip empty fields / zeros values
-		if len(f.values) > 0 {
-			sb.WriteString("|~`\"")
-			sb.WriteString(f.key)
-			sb.WriteString("\"`")
+		if !f.allowEmpty {
+			// the record must contains the field if values are specified
+			// since FLP skip empty fields / zeros values
+			if len(f.values) > 0 {
+				sb.WriteString("|~`\"")
+				sb.WriteString(f.key)
+				sb.WriteString("\"`")
+			}
 		}
-
 		// then we exclude match results
 		sb.WriteString("!~`")
 	} else {
