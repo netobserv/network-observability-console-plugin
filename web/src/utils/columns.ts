@@ -283,7 +283,7 @@ export const getDefaultColumns = (columnDefs: ColumnConfigDef[], fieldConfigs: F
       console.error('Column ' + id + " doesn't specify type");
     }
     // check if value type match and convert it if needed
-    if (value && value !== '' && typeof value !== type) {
+    if (value && value !== '' && typeof value !== type && !Array.isArray(value)) {
       switch (type) {
         case 'number':
           return Number(value);

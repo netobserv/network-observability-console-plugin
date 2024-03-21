@@ -1,4 +1,4 @@
-import { Fields, Record, FlowDirection } from '../../api/ipfix';
+import { Fields, Record, FlowDirection, IfDirection } from '../../api/ipfix';
 import { mergeFlowReporters } from '../flows';
 
 describe('mergeFlowReporters', () => {
@@ -66,5 +66,42 @@ describe('mergeFlowReporters', () => {
     const merged = mergeFlowReporters(flows);
     expect(merged).toHaveLength(7);
     expect(merged.map(r => r.key)).toEqual([1, 3, 5, 7, 8, 9, 10]);
+  });
+
+  it('should merge dups interfaces', () => {
+    const flows: Record[] = [
+      {
+        key: 1,
+        fields: {
+          SrcAddr: '10.0.0.1',
+          DstAddr: '10.0.0.2',
+          IfDirections: [IfDirection.Ingress, IfDirection.Egress],
+          Interfaces: ['eth0', 'abcd']
+        } as Fields,
+        labels: { FlowDirection: FlowDirection.Ingress }
+      },
+      {
+        key: 2,
+        fields: {
+          SrcAddr: '10.0.0.1',
+          DstAddr: '10.0.0.2',
+          IfDirections: [IfDirection.Ingress],
+          Interfaces: ['genev']
+        } as Fields,
+        labels: { FlowDirection: FlowDirection.Egress }
+      }
+    ];
+    const merged = mergeFlowReporters(flows);
+    expect(merged).toHaveLength(1);
+    expect(merged[0]).toEqual({
+      key: 1,
+      fields: {
+        SrcAddr: '10.0.0.1',
+        DstAddr: '10.0.0.2',
+        IfDirections: [IfDirection.Ingress, IfDirection.Egress, IfDirection.Ingress],
+        Interfaces: ['eth0', 'abcd', 'genev']
+      } as Fields,
+      labels: { FlowDirection: FlowDirection.Ingress }
+    });
   });
 });
