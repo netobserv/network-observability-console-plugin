@@ -3,7 +3,13 @@ ARG BUILDSCRIPT=
 ARG LDFLAGS=
 ARG TARGETPLATFORM=linux/amd64
 ARG BUILDPLATFORM=linux/amd64
-FROM --platform=$BUILDPLATFORM docker.io/library/node:16-alpine as web-builder
+FROM --platform=$BUILDPLATFORM docker.io/library/node:18-alpine as web-builder
+
+# npm cache stuff below help get rid of an error "EMFILE, too many open files"
+RUN npm cache clean --force
+RUN npm install -g npm@10.2.4
+RUN npm cache verify
+
 USER node
 
 ARG BUILDSCRIPT
