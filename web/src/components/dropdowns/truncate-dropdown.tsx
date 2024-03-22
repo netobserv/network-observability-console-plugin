@@ -1,4 +1,4 @@
-import { Dropdown, DropdownItem, DropdownToggle } from '@patternfly/react-core';
+import { Dropdown, DropdownItem, MenuToggle, MenuToggleElement } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -17,7 +17,7 @@ export const TruncateDropdown: React.FC<{
   id?: string;
 }> = ({ selected, setTruncateLength, id }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
-  const [truncateDropdownOpen, setTruncateDropdownOpen] = React.useState(false);
+  const [isOpen, setOpen] = React.useState(false);
 
   const getTruncateDisplay = (v: TruncateLength) => {
     switch (v) {
@@ -40,17 +40,20 @@ export const TruncateDropdown: React.FC<{
     <Dropdown
       data-test={id}
       id={id}
-      toggle={
-        <DropdownToggle
+      isOpen={isOpen}
+      toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+        <MenuToggle
+          ref={toggleRef}
           data-test={`${id}-dropdown`}
           id={`${id}-dropdown`}
-          onToggle={() => setTruncateDropdownOpen(!truncateDropdownOpen)}
+          onClick={() => setOpen(!isOpen)}
+          isExpanded={isOpen}
         >
           {getTruncateDisplay(selected)}
-        </DropdownToggle>
-      }
-      isOpen={truncateDropdownOpen}
-      dropdownItems={[
+        </MenuToggle>
+      )}
+    >
+      {[
         TruncateLength.OFF,
         TruncateLength.XS,
         TruncateLength.S,
@@ -63,14 +66,14 @@ export const TruncateDropdown: React.FC<{
           id={String(v)}
           key={v}
           onClick={() => {
-            setTruncateDropdownOpen(false);
+            setOpen(false);
             setTruncateLength(v);
           }}
         >
           {getTruncateDisplay(v)}
         </DropdownItem>
       ))}
-    />
+    </Dropdown>
   );
 };
 

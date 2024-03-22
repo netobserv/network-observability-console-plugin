@@ -179,7 +179,7 @@ export const NetflowTab: React.FC<PageComponentProps> = ({ obj }) => {
   } else {
     return (
       <PageSection id="pageSection" data-test="tab-page-section">
-        <EmptyState data-test="error-state" variant={EmptyStateVariant.small}>
+        <EmptyState data-test="error-state" variant={EmptyStateVariant.sm}>
           <Title headingLevel="h2" size="lg">
             {t('Kind not managed')}
           </Title>

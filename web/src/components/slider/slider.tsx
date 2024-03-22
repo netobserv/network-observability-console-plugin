@@ -2,8 +2,17 @@ import * as React from 'react';
 import { useState } from 'react';
 import styles from '@patternfly/react-styles/css/components/Slider/slider';
 import { css } from '@patternfly/react-styles';
-import { SliderStep } from './SliderStep';
-import { InputGroup, InputGroupText, TextInput, Tooltip } from '@patternfly/react-core';
+import { SliderStep } from './slider-step';
+import {
+  InputGroup,
+  InputGroupItem,
+  InputGroupText,
+  TextInput,
+  Tooltip,
+  getLanguageDirection
+} from '@patternfly/react-core';
+import cssSliderValue from '@patternfly/react-tokens/dist/esm/c_slider_value';
+import cssFormControlWidthChars from '@patternfly/react-tokens/dist/esm/c_slider__value_c_form_control_width_chars';
 
 /** Properties for creating custom steps in a slider. These properties should be passed in as
  * an object within an array to the slider component's customSteps property.
@@ -16,6 +25,15 @@ export interface SliderStepObject {
   /** Value of the step. This value is a percentage of the slider where the tick is drawn. */
   value: number;
 }
+
+export type SliderOnChangeEvent =
+  | TouchEvent
+  | MouseEvent
+  | React.MouseEvent
+  | React.KeyboardEvent
+  | React.FormEvent<HTMLInputElement>
+  | React.TouchEvent
+  | React.FocusEvent<HTMLInputElement>;
 
 /** The main slider component. */
 export interface SliderProps extends Omit<React.HTMLProps<HTMLDivElement>, 'onChange'> {
@@ -37,28 +55,33 @@ export interface SliderProps extends Omit<React.HTMLProps<HTMLDivElement>, 'onCh
   inputAriaLabel?: string;
   /** Text label that is place after the input field. */
   inputLabel?: string | number;
-  /** Position of the input. */
-  inputPosition?: 'aboveThumb' | 'right';
+  /** Position of the input. Note "right" is deprecated. Use "end" instead*/
+  inputPosition?: 'aboveThumb' | 'right' | 'end';
   /** Value displayed in the input field. */
   inputValue?: number;
   /** Adds disabled styling, and disables the slider and the input component if present. */
   isDisabled?: boolean;
   /** Flag to show value input field. */
   isInputVisible?: boolean;
-  /** Actions placed to the left of the slider. */
+  /** @deprecated Use startActions instead. Actions placed at the start of the slider. */
   leftActions?: React.ReactNode;
+  /** Actions placed at the start of the slider. */
+  startActions?: React.ReactNode;
   /** The maximum permitted value. */
   max?: number;
   /** The minimum permitted value. */
   min?: number;
   /** Value change callback. This is called when the slider value changes. */
   onChange?: (
+    event: SliderOnChangeEvent,
     value: number,
     inputValue?: number,
     setLocalInputValue?: React.Dispatch<React.SetStateAction<number>>
   ) => void;
-  /** Actions placed to the right of the slider. */
+  /** @deprecated Use endActions instead. Actions placed to the right of the slider. */
   rightActions?: React.ReactNode;
+  /** Actions placed at the end of the slider. */
+  endActions?: React.ReactNode;
   /** Flag to indicate if boundaries should be shown for slider that does not have custom steps. */
   showBoundaries?: boolean;
   /** Flag to indicate if ticks should be shown for slider that does not have custom steps. */
@@ -85,10 +108,12 @@ export const Slider: React.FunctionComponent<SliderProps> = ({
   inputAriaLabel = 'Slider value input',
   thumbAriaLabel = 'Value',
   hasTooltipOverThumb = false,
-  inputPosition = 'right',
+  inputPosition = 'end',
   onChange,
   leftActions,
+  startActions,
   rightActions,
+  endActions,
   step = 1,
   min = 0,
   max = 100,
@@ -105,6 +130,8 @@ export const Slider: React.FunctionComponent<SliderProps> = ({
   const [localValue, setValue] = useState(value);
   const [localInputValue, setLocalInputValue] = useState(inputValue);
 
+  const isRTL = sliderRailRef.current !== null && getLanguageDirection(sliderRailRef.current) === 'rtl';
+
   React.useEffect(() => {
     setValue(value);
   }, [value]);
@@ -114,17 +141,18 @@ export const Slider: React.FunctionComponent<SliderProps> = ({
   }, [inputValue]);
 
   let diff = 0;
+  let snapValue: number;
 
   // calculate style value percentage
   const stylePercent = ((localValue - min) * 100) / (max - min);
-  const style = { '--pf-c-slider--value': `${stylePercent}%` } as React.CSSProperties;
+  const style = { [cssSliderValue.name]: `${stylePercent}%` } as React.CSSProperties;
   const widthChars = React.useMemo(() => localInputValue.toString().length, [localInputValue]);
-  const inputStyle = { '--pf-c-slider__value--c-form-control--width-chars': widthChars } as React.CSSProperties;
+  const inputStyle = { [cssFormControlWidthChars.name]: widthChars } as React.CSSProperties;
   if (vertical) {
     style['transform'] = 'rotate(270deg)';
   }
 
-  const onChangeHandler = (value: string) => {
+  const onChangeHandler = (_event: React.FormEvent<HTMLInputElement>, value: string) => {
     setLocalInputValue(Number(value));
   };
 
@@ -132,7 +160,7 @@ export const Slider: React.FunctionComponent<SliderProps> = ({
     if (event.key === 'Enter') {
       event.preventDefault();
       if (onChange) {
-        onChange(localValue, localInputValue, setLocalInputValue);
+        onChange(event, localValue, localInputValue, setLocalInputValue);
       }
     }
   };
@@ -145,9 +173,9 @@ export const Slider: React.FunctionComponent<SliderProps> = ({
     thumbRef.current?.focus();
   };
 
-  const onBlur = () => {
+  const onBlur = (event: React.FocusEvent<HTMLInputElement>) => {
     if (onChange) {
-      onChange(localValue, localInputValue, setLocalInputValue);
+      onChange(event, localValue, localInputValue, setLocalInputValue);
     }
   };
 
@@ -184,7 +212,15 @@ export const Slider: React.FunctionComponent<SliderProps> = ({
     e.stopPropagation();
     e.preventDefault();
 
-    diff = mousePos(e.nativeEvent) - minPos(thumbRef.current!.getBoundingClientRect());
+    if (!thumbRef.current) {
+      return;
+    }
+
+    if (isRTL) {
+      diff = maxPos(thumbRef.current!.getBoundingClientRect()) - mousePos(e.nativeEvent);
+    } else {
+      diff = mousePos(e.nativeEvent) - minPos(thumbRef.current!.getBoundingClientRect());
+    }
 
     document.addEventListener('mousemove', callbackThumbMove);
     document.addEventListener('mouseup', callbackThumbUp);
@@ -193,7 +229,15 @@ export const Slider: React.FunctionComponent<SliderProps> = ({
   const handleTouchStart = (e: React.TouchEvent) => {
     e.stopPropagation();
 
-    diff = touchPos(e.nativeEvent) - minPos(thumbRef.current!.getBoundingClientRect());
+    if (!thumbRef.current) {
+      return;
+    }
+
+    if (isRTL) {
+      diff = maxPos(thumbRef.current!.getBoundingClientRect()) - touchPos(e.nativeEvent);
+    } else {
+      diff = touchPos(e.nativeEvent) - minPos(thumbRef.current!.getBoundingClientRect());
+    }
 
     document.addEventListener('touchmove', callbackThumbMove, { passive: false });
     document.addEventListener('touchend', callbackThumbUp);
@@ -201,12 +245,12 @@ export const Slider: React.FunctionComponent<SliderProps> = ({
   };
 
   const onSliderRailClick = (e: React.TouchEvent | React.MouseEvent) => {
-    const snapValue = handleThumbMove(e.nativeEvent);
+    handleThumbMove(e.nativeEvent);
     if (snapValue && !areCustomStepsContinuous) {
-      thumbRef.current!.style.setProperty('--pf-c-slider--value', `${snapValue}%`);
+      thumbRef.current?.style.setProperty(cssSliderValue.name, `${snapValue}%`);
       setValue(snapValue);
       if (onChange) {
-        onChange(snapValue);
+        onChange(e, snapValue);
       }
     }
   };
@@ -217,7 +261,10 @@ export const Slider: React.FunctionComponent<SliderProps> = ({
       e.stopImmediatePropagation();
     }
 
-    let snapValue: number | undefined = undefined;
+    if (!thumbRef.current || !sliderRailRef.current) {
+      return;
+    }
+
     const clientPosition = 'touches' in e && e.touches.length ? touchPos(e) : mousePos(e as MouseEvent);
     const boundingRect = sliderRailRef.current!.getBoundingClientRect();
     const refSize = maxPos(boundingRect) - minPos(boundingRect);
@@ -230,6 +277,7 @@ export const Slider: React.FunctionComponent<SliderProps> = ({
 
     if (!customSteps) {
       // snap to new value if not custom steps
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       snapValue = Math.round((Math.round((targetValue - min) / step) * step + min) * 100) / 100;
       thumbRef.current!.style.setProperty('--pf-c-slider--value', `${snapValue}%`);
       setValue(snapValue);
@@ -254,41 +302,16 @@ export const Slider: React.FunctionComponent<SliderProps> = ({
     // Call onchange callback
     if (onChange) {
       if (snapValue !== undefined) {
-        onChange(snapValue);
+        onChange(e, snapValue);
       } else {
-        onChange(targetValue);
+        onChange(e, targetValue);
       }
     }
-    return snapValue;
   };
 
-  const callbackThumbMove = React.useCallback(handleThumbMove, [
-    min,
-    max,
-    customSteps,
-    onChange,
-    areCustomStepsContinuous,
-    diff,
-    maxPos,
-    minPos,
-    mousePos,
-    step,
-    touchPos
-  ]);
+  const callbackThumbMove = React.useCallback(handleThumbMove, [min, max, customSteps, onChange]);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const callbackThumbUp = React.useCallback(handleThumbDragEnd, [
-    min,
-    max,
-    customSteps,
-    onChange,
-    areCustomStepsContinuous,
-    diff,
-    maxPos,
-    minPos,
-    mousePos,
-    step,
-    touchPos
-  ]);
+  const callbackThumbUp = React.useCallback(handleThumbDragEnd, [min, max, customSteps, onChange]);
 
   const handleThumbKeys = (e: React.KeyboardEvent) => {
     const key = e.key;
@@ -300,29 +323,51 @@ export const Slider: React.FunctionComponent<SliderProps> = ({
     if (!areCustomStepsContinuous && customSteps) {
       const stepIndex = customSteps.findIndex(stepObj => stepObj.value === localValue);
       if (key === 'ArrowRight') {
-        if (stepIndex + 1 < customSteps.length) {
-          {
-            newValue = customSteps[stepIndex + 1].value;
+        if (isRTL) {
+          if (stepIndex - 1 >= 0) {
+            newValue = customSteps[stepIndex - 1].value;
+          }
+        } else {
+          if (stepIndex + 1 < customSteps.length) {
+            {
+              newValue = customSteps[stepIndex + 1].value;
+            }
           }
         }
       } else if (key === 'ArrowLeft') {
-        if (stepIndex - 1 >= 0) {
-          newValue = customSteps[stepIndex - 1].value;
+        if (isRTL) {
+          if (stepIndex + 1 < customSteps.length) {
+            {
+              newValue = customSteps[stepIndex + 1].value;
+            }
+          }
+        } else {
+          if (stepIndex - 1 >= 0) {
+            newValue = customSteps[stepIndex - 1].value;
+          }
         }
       }
     } else {
       if (key === 'ArrowRight') {
-        newValue = localValue + step <= max ? localValue + step : max;
+        if (isRTL) {
+          newValue = localValue - step >= min ? localValue - step : min;
+        } else {
+          newValue = localValue + step <= max ? localValue + step : max;
+        }
       } else if (key === 'ArrowLeft') {
-        newValue = localValue - step >= min ? localValue - step : min;
+        if (isRTL) {
+          newValue = localValue + step <= max ? localValue + step : max;
+        } else {
+          newValue = localValue - step >= min ? localValue - step : min;
+        }
       }
     }
 
     if (newValue !== localValue) {
-      thumbRef.current!.style.setProperty('--pf-c-slider--value', `${newValue}%`);
+      thumbRef.current?.style.setProperty(cssSliderValue.name, `${newValue}%`);
       setValue(newValue);
       if (onChange) {
-        onChange(newValue);
+        onChange(e, newValue);
       }
     }
   };
@@ -330,7 +375,6 @@ export const Slider: React.FunctionComponent<SliderProps> = ({
   const displayInput = () => {
     const textInput = (
       <TextInput
-        className={css(styles.formControl)}
         isDisabled={isDisabled}
         type="number"
         value={localInputValue}
@@ -345,11 +389,8 @@ export const Slider: React.FunctionComponent<SliderProps> = ({
     if (inputLabel) {
       return (
         <InputGroup>
-          {textInput}
-          <InputGroupText {...(isDisabled && { className: css(styles.modifiers.disabled) })}>
-            {' '}
-            {inputLabel}
-          </InputGroupText>
+          <InputGroupItem isFill>{textInput}</InputGroupItem>
+          <InputGroupText isDisabled={isDisabled}>{inputLabel}</InputGroupText>
         </InputGroup>
       );
     } else {
@@ -363,8 +404,8 @@ export const Slider: React.FunctionComponent<SliderProps> = ({
     for (let i = min; i <= max; i = i + step) {
       const stepValue = getStepValue(i, min, max);
 
-      // If we boundaries but not ticks just generate the needed steps
-      // so that we don't pullute them DOM with empty divs
+      // If boundaries but not ticks just generate the needed steps
+      // so that we don't pollute them DOM with empty divs
       if (!showTicks && showBoundaries && i !== min && i !== max) {
         continue;
       }
@@ -410,7 +451,7 @@ export const Slider: React.FunctionComponent<SliderProps> = ({
       style={{ ...style, ...inputStyle }}
       {...props}
     >
-      {leftActions && <div className={css(styles.sliderActions)}>{leftActions}</div>}
+      {(leftActions || startActions) && <div className={css(styles.sliderActions)}>{leftActions || startActions}</div>}
       <div className={css(styles.sliderMain)}>
         <div
           className={css(styles.sliderRail)}
@@ -444,7 +485,7 @@ export const Slider: React.FunctionComponent<SliderProps> = ({
           </div>
         )}
         {hasTooltipOverThumb ? (
-          <Tooltip entryDelay={0} content={findAriaTextValue()}>
+          <Tooltip triggerRef={thumbRef} entryDelay={0} content={findAriaTextValue()}>
             {thumbComponent}
           </Tooltip>
         ) : (
@@ -454,8 +495,10 @@ export const Slider: React.FunctionComponent<SliderProps> = ({
           <div className={css(styles.sliderValue, styles.modifiers.floating)}>{displayInput()}</div>
         )}
       </div>
-      {isInputVisible && inputPosition === 'right' && <div className={css(styles.sliderValue)}>{displayInput()}</div>}
-      {rightActions && <div className={css(styles.sliderActions)}>{rightActions}</div>}
+      {isInputVisible && (inputPosition === 'right' || inputPosition === 'end') && (
+        <div className={css(styles.sliderValue)}>{displayInput()}</div>
+      )}
+      {(rightActions || endActions) && <div className={css(styles.sliderActions)}>{rightActions || endActions}</div>}
     </div>
   );
 };

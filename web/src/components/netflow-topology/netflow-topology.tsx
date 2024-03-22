@@ -103,13 +103,6 @@ export const NetflowTopology: React.FC<{
     } else {
       return (
         <VisualizationProvider data-test="visualization-provider" controller={controller}>
-          <ScopeSlider
-            allowMultiCluster={allowMultiCluster}
-            allowZone={allowZone}
-            sizePx={containerSize?.height || 300}
-            scope={metricScope}
-            setScope={setMetricScope}
-          />
           <TopologyContent
             k8sModels={k8sModels}
             metricFunction={metricFunction}
@@ -133,9 +126,6 @@ export const NetflowTopology: React.FC<{
       );
     }
   }, [
-    allowMultiCluster,
-    allowZone,
-    containerSize?.height,
     controller,
     displayedMetrics,
     droppedMetrics,
@@ -176,6 +166,13 @@ export const NetflowTopology: React.FC<{
 
   return (
     <div style={{ width: '100%', height: '100%' }} ref={containerRef}>
+      <ScopeSlider
+        allowMultiCluster={allowMultiCluster}
+        allowZone={allowZone}
+        sizePx={containerSize?.height || 300}
+        scope={metricScope}
+        setScope={setMetricScope}
+      />
       {getContent()}
     </div>
   );

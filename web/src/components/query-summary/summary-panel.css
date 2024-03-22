@@ -1,4 +1,4 @@
-.pf-c-content.summary-text-container {
+.pf-v5-c-content.summary-text-container {
   margin-bottom: 10px;
 }
 
@@ -16,4 +16,9 @@
   display: flex;
   flex-direction: column;
   gap: 0;
+}
+
+.scrollable-panel {
+  overflow-y: scroll;
+  padding: 1.5rem;
 }

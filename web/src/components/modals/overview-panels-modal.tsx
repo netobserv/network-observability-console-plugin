@@ -147,7 +147,7 @@ export const OverviewPanelsModal: React.FC<{
           data-test={'data-' + i}
           id={'data-' + i}
         >
-          <DataListItemRow key={'data-list-item-row-' + i}>
+          <DataListItemRow key={'data-list-item-row-' + i} className="center">
             <DataListControl>
               <DataListDragButton aria-label="Reorder" aria-labelledby={'overview-panel-management-item' + i} />
               <DataListCheck
@@ -251,6 +251,7 @@ export const OverviewPanelsModal: React.FC<{
               aria-label="Overview panel management"
               data-test="overview-panel-management"
               id="overview-panel-management"
+              className="centered-list"
               isCompact
             >
               {draggableItems}

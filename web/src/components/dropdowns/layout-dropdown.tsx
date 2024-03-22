@@ -1,4 +1,4 @@
-import { Dropdown, DropdownItem, DropdownToggle } from '@patternfly/react-core';
+import { Dropdown, DropdownItem, MenuToggle, MenuToggleElement } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Feature, isAllowed } from '../../utils/features-gate';
@@ -10,7 +10,7 @@ export const LayoutDropdown: React.FC<{
   id?: string;
 }> = ({ selected, setLayout, id }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
-  const [layoutDropdownOpen, setLayoutDropdownOpen] = React.useState(false);
+  const [isOpen, setOpen] = React.useState(false);
 
   const getLayoutDisplay = (layoutName: LayoutName) => {
     switch (layoutName) {
@@ -41,17 +41,20 @@ export const LayoutDropdown: React.FC<{
     <Dropdown
       data-test={id}
       id={id}
-      toggle={
-        <DropdownToggle
+      isOpen={isOpen}
+      toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+        <MenuToggle
+          ref={toggleRef}
           data-test={`${id}-dropdown`}
           id={`${id}-dropdown`}
-          onToggle={() => setLayoutDropdownOpen(!layoutDropdownOpen)}
+          isExpanded={isOpen}
+          onClick={() => setOpen(!isOpen)}
         >
           {getLayoutDisplay(selected)}
-        </DropdownToggle>
-      }
-      isOpen={layoutDropdownOpen}
-      dropdownItems={Object.values(LayoutName)
+        </MenuToggle>
+      )}
+    >
+      {Object.values(LayoutName)
         .filter(v => v != LayoutName.ThreeD || isAllowed(Feature.ThreeD))
         .map(v => (
           <DropdownItem
@@ -59,14 +62,14 @@ export const LayoutDropdown: React.FC<{
             id={v}
             key={v}
             onClick={() => {
-              setLayoutDropdownOpen(false);
+              setOpen(false);
               setLayout(v);
             }}
           >
             {getLayoutDisplay(v)}
           </DropdownItem>
         ))}
-    />
+    </Dropdown>
   );
 };
 

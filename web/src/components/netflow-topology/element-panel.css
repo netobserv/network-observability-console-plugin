@@ -1,5 +1,5 @@
-#source-content>.pf-c-accordion__expanded-content-body,
-#destination-content>.pf-c-accordion__expanded-content-body {
+#source-content>.pf-v5-c-accordion__expanded-content-body,
+#destination-content>.pf-v5-c-accordion__expanded-content-body {
   padding-left: 2.2em !important;
   margin-bottom: 15px;
 }
@@ -18,14 +18,15 @@
   height: 400px;
 }
 
-.element-metrics-container .pf-c-radio {
+.element-metrics-container .pf-v5-c-radio {
   grid-gap: 0;
 }
 
 #pf-tab-section-details-drawer-tabs,
 #pf-tab-section-metrics-drawer-tabs,
 #pf-tab-section-dropped-drawer-tabs {
-  padding: var(--pf-c-drawer--child--PaddingTop) var(--pf-c-drawer--child--PaddingRight) var(--pf-c-drawer--child--PaddingBottom) var(--pf-c-drawer--child--PaddingLeft);
+  overflow-y: auto;
+  padding: 1.5rem !important;
 }
 
 .metrics-justify-content {

@@ -6,10 +6,10 @@
   padding: 0 1em 1em 1em !important;
 }
 
-#scope>.pf-c-dropdown__menu,
-#layout>.pf-c-dropdown__menu,
-#group>.pf-c-dropdown__menu,
-#truncate>.pf-c-dropdown__menu {
+#scope>.pf-v5-c-dropdown__menu,
+#layout>.pf-v5-c-dropdown__menu,
+#group>.pf-v5-c-dropdown__menu,
+#truncate>.pf-v5-c-dropdown__menu {
   top: 0;
   left: 100%;
 }

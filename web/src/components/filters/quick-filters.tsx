@@ -1,6 +1,6 @@
 import * as React from 'react';
 import _ from 'lodash';
-import { Select, SelectOption, SelectVariant } from '@patternfly/react-core';
+import { Badge, MenuToggle, MenuToggleElement, Select, SelectOption } from '@patternfly/react-core';
 import { FilterIcon } from '@patternfly/react-icons';
 import { QuickFilter } from '../../model/quick-filters';
 import { doesIncludeFilter, Filter, findFromFilters, removeFromFilters } from '../../model/filters';
@@ -63,20 +63,21 @@ export const QuickFilters: React.FC<QuickFiltersProps> = ({ quickFilters, active
     <Select
       data-test="quick-filters-dropdown"
       id="quick-filters-dropdown"
-      variant={SelectVariant.checkbox}
-      onToggle={setIsOpen}
-      onSelect={onSelect}
-      placeholderText={
-        <>
-          <FilterIcon /> {t('Quick filters')}
-        </>
-      }
-      selections={selectedList}
       isOpen={isOpen}
+      onSelect={onSelect}
+      toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+        <MenuToggle ref={toggleRef} onClick={() => setIsOpen(!isOpen)} isExpanded={isOpen}>
+          <>
+            <FilterIcon /> {t('Quick filters')}
+            {selectedList.length > 0 && <Badge isRead>{selectedList.length}</Badge>}
+          </>
+        </MenuToggle>
+      )}
+      selected={selectedList}
     >
       {quickFilters.map(qf => {
         return (
-          <SelectOption key={qf.name} value={qf.name}>
+          <SelectOption hasCheckbox isSelected={selectedList.includes(qf.name)} key={qf.name} value={qf.name}>
             {qf.name}
           </SelectOption>
         );

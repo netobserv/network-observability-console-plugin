@@ -43,7 +43,7 @@ describe('<AutocompleteFilter />', () => {
 
     // Filter for source name
     await act(() => {
-      textInput.props().onChange!('ftp', null!);
+      textInput.props().onChange!(null!, 'ftp');
       return waitForComponentToPaint();
     });
     textInput.simulate('keypress', { key: 'Enter' });
@@ -69,7 +69,7 @@ describe('<AutocompleteFilter />', () => {
 
     // Filter for source name
     await act(() => {
-      textInput.props().onChange!('no match', null!);
+      textInput.props().onChange!(null!, 'no match');
       return waitForComponentToPaint();
     });
     wrapper.update();

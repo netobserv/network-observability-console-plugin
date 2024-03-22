@@ -24,6 +24,10 @@ WORKDIR /opt/app-root/web
 RUN npm run format-all
 RUN npm run build$BUILDSCRIPT
 
+WORKDIR /opt/app-root
+COPY scripts scripts
+RUN /bin/sh ./scripts/pf-v4-hack.sh
+
 FROM --platform=$BUILDPLATFORM docker.io/library/golang:1.21 as go-builder
 
 ARG TARGETPLATFORM

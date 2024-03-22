@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { SortByDirection, TableComposable, Tbody } from '@patternfly/react-table';
+import { SortByDirection, Table, Tbody } from '@patternfly/react-table';
 import {
   Bullseye,
   EmptyState,
@@ -140,7 +140,7 @@ const NetflowTable: React.FC<{
   const handleScroll = React.useCallback(() => {
     const rowHeight = getRowHeight();
     const container = document.getElementById('table-container');
-    const header = container?.children[0]?.children[0];
+    const header = container?.children[0]?.children[0]?.children[0];
     if (container && header) {
       const position = container.scrollTop - header.clientHeight;
       //updates only when position moved more than one row height
@@ -243,7 +243,7 @@ const NetflowTable: React.FC<{
     } else {
       return (
         <Bullseye data-test="no-results-found">
-          <EmptyState variant={EmptyStateVariant.small}>
+          <EmptyState variant={EmptyStateVariant.sm}>
             <EmptyStateIcon icon={SearchIcon} />
             <Title headingLevel="h2" size="lg">
               {t('No results found')}
@@ -257,31 +257,33 @@ const NetflowTable: React.FC<{
   }
 
   return (
-    <TableComposable
-      data-test="table-composable"
-      data-test-cols-count={columns.length}
-      data-test-rows-count={flows.length}
-      aria-label="Netflow table"
-      variant="compact"
-      style={{ minWidth: `${width}em` }}
-      isStickyHeader
-    >
-      <NetflowTableHeader
-        data-test="table-header"
-        onSort={onSort}
-        sortDirection={activeSortDirection}
-        sortId={activeSortId}
-        columns={columns}
-        setColumns={setColumns}
-        columnSizes={columnSizes}
-        setColumnSizes={setColumnSizes}
-        tableWidth={width}
-        isDark={isDark}
-      />
-      <Tbody id="table-body" data-test="table-body">
-        {getBody()}
-      </Tbody>
-    </TableComposable>
+    <div id="table-container">
+      <Table
+        data-test="table-composable"
+        data-test-cols-count={columns.length}
+        data-test-rows-count={flows.length}
+        aria-label="Netflow table"
+        variant="compact"
+        style={{ minWidth: `${width}em` }}
+        isStickyHeader
+      >
+        <NetflowTableHeader
+          data-test="table-header"
+          onSort={onSort}
+          sortDirection={activeSortDirection}
+          sortId={activeSortId}
+          columns={columns}
+          setColumns={setColumns}
+          columnSizes={columnSizes}
+          setColumnSizes={setColumnSizes}
+          tableWidth={width}
+          isDark={isDark}
+        />
+        <Tbody id="table-body" data-test="table-body">
+          {getBody()}
+        </Tbody>
+      </Table>
+    </div>
   );
 };
 

@@ -1,4 +1,4 @@
-import { Dropdown, DropdownItem, DropdownPosition, DropdownToggle } from '@patternfly/react-core';
+import { Dropdown, DropdownItem, MenuToggle, MenuToggleElement } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { MetricType } from '../../model/flow-query';
@@ -13,7 +13,7 @@ export const MetricTypeDropdown: React.FC<{
   id?: string;
 }> = ({ selected, setMetricType, id, isTopology, allowPktDrop, allowDNSMetric, allowRTTMetric }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
-  const [metricDropdownOpen, setMetricDropdownOpen] = React.useState(false);
+  const [isOpen, setOpen] = React.useState(false);
 
   const getMetricTypeOptions = React.useCallback(() => {
     let options: MetricType[] = ['bytes', 'packets'];
@@ -57,31 +57,36 @@ export const MetricTypeDropdown: React.FC<{
     <Dropdown
       data-test={id}
       id={id}
-      position={DropdownPosition.right}
-      toggle={
-        <DropdownToggle
+      isOpen={isOpen}
+      popperProps={{
+        position: 'right'
+      }}
+      toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+        <MenuToggle
+          ref={toggleRef}
           data-test={`${id}-dropdown`}
           id={`${id}-dropdown`}
-          onToggle={() => setMetricDropdownOpen(!metricDropdownOpen)}
+          isExpanded={isOpen}
+          onClick={() => setOpen(!isOpen)}
         >
           {getMetricDisplay(selected as MetricType)}
-        </DropdownToggle>
-      }
-      isOpen={metricDropdownOpen}
-      dropdownItems={getMetricTypeOptions().map(v => (
+        </MenuToggle>
+      )}
+    >
+      {getMetricTypeOptions().map(v => (
         <DropdownItem
           data-test={v}
           id={v}
           key={v}
           onClick={() => {
-            setMetricDropdownOpen(false);
+            setOpen(false);
             setMetricType(v);
           }}
         >
           {getMetricDisplay(v)}
         </DropdownItem>
       ))}
-    />
+    </Dropdown>
   );
 };
 

@@ -4,9 +4,9 @@ import {
   ClipboardCopy,
   ClipboardCopyVariant,
   EmptyState,
+  EmptyStateActions,
   EmptyStateBody,
   EmptyStateIcon,
-  EmptyStateSecondaryActions,
   Spinner,
   Text,
   TextContent,
@@ -216,7 +216,7 @@ export const LokiError: React.FC<Props> = ({ title, error }) => {
         >
           {t('Configuring Grafana Loki')}
         </Button>
-        <EmptyStateSecondaryActions>
+        <EmptyStateActions>
           <Button onClick={() => updateInfo(LokiInfo.Metrics)} variant="link">
             {t('Show metrics')}
           </Button>
@@ -238,7 +238,7 @@ export const LokiError: React.FC<Props> = ({ title, error }) => {
           >
             {t('Show health dashboard')}
           </Button>
-        </EmptyStateSecondaryActions>
+        </EmptyStateActions>
       </EmptyState>
       {loading ? (
         <Bullseye data-test="loading-errors">

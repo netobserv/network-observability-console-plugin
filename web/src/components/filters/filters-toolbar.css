@@ -1,6 +1,6 @@
 /* hide all date pickers error messages */
 
-.pf-c-date-picker__helper-text.pf-m-error {
+.pf-v5-c-date-picker__helper-text.pf-m-error {
   display: none;
 }
 
@@ -19,7 +19,7 @@
 
 /* hide empty button - fix for clear all filters keep showing */
 
-button.pf-c-button.pf-m-link.pf-m-inline:empty {
+button.pf-v5-c-button.pf-m-link.pf-m-inline:empty {
   display: none;
 }
 
@@ -72,7 +72,7 @@ div#filter-toolbar-search-filters {
   padding: 0;
 }
 
-.pf-c-toolbar__item.pf-m-align-right {
+.pf-v5-c-toolbar__item.pf-m-align-right {
   margin-right: 0;
 }
 
@@ -123,30 +123,30 @@ div#filter-toolbar-search-filters {
   background-color: #6A6E73;
 }
 
-.pf-theme-dark .custom-chip-group,
-.pf-theme-dark .custom-chip-group>button,
-.pf-theme-dark .custom-chip-group>* {
+.pf-v5-theme-dark .custom-chip-group,
+.pf-v5-theme-dark .custom-chip-group>button,
+.pf-v5-theme-dark .custom-chip-group>* {
   color: #fff;
   background-color: #004080;
 }
 
-.pf-theme-dark .custom-chip,
-.pf-theme-dark .custom-chip>button,
-.pf-theme-dark .custom-chip>* {
+.pf-v5-theme-dark .custom-chip,
+.pf-v5-theme-dark .custom-chip>button,
+.pf-v5-theme-dark .custom-chip>* {
   color: #fff;
   background-color: #06c;
 }
 
-.pf-theme-dark .custom-chip-group.disabled-group,
-.pf-theme-dark .custom-chip-group.disabled-group>button,
-.pf-theme-dark .custom-chip-group.disabled-group>* {
+.pf-v5-theme-dark .custom-chip-group.disabled-group,
+.pf-v5-theme-dark .custom-chip-group.disabled-group>button,
+.pf-v5-theme-dark .custom-chip-group.disabled-group>* {
   color: #fff;
   background-color: #6A6E73;
 }
 
-.pf-theme-dark .custom-chip.disabled-value,
-.pf-theme-dark .custom-chip.disabled-value>button,
-.pf-theme-dark .custom-chip.disabled-value>* {
+.pf-v5-theme-dark .custom-chip.disabled-value,
+.pf-v5-theme-dark .custom-chip.disabled-value>button,
+.pf-v5-theme-dark .custom-chip.disabled-value>* {
   color: #000;
   background-color: #D2D2D2;
 }

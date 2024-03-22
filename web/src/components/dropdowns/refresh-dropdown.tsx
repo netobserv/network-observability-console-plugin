@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Dropdown, DropdownToggle, DropdownItem } from '@patternfly/react-core';
+import { Dropdown, DropdownItem, MenuToggleElement, MenuToggle } from '@patternfly/react-core';
 import * as _ from 'lodash';
 import { parseDuration, formatDuration } from '../../utils/duration';
 
@@ -48,24 +48,27 @@ export const RefreshDropdown: React.FC<RefreshDropdownProps> = ({ disabled, id, 
     <Dropdown
       data-test={id}
       id={id}
-      dropdownItems={_.map(refreshOptions, (name, key) => (
+      isOpen={isOpen}
+      onSelect={() => setIsOpen(false)}
+      toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+        <MenuToggle
+          ref={toggleRef}
+          data-test={`${id}-dropdown`}
+          id={`${id}-dropdown`}
+          isDisabled={disabled}
+          onClick={() => setIsOpen(!isOpen)}
+          isExpanded={isOpen}
+        >
+          {refreshOptions[selectedKey as keyof typeof refreshOptions]}
+        </MenuToggle>
+      )}
+    >
+      {_.map(refreshOptions, (name, key) => (
         <DropdownItem data-test={key} id={key} component="button" key={key} onClick={() => onChange(key)}>
           {name}
         </DropdownItem>
       ))}
-      isOpen={isOpen}
-      onSelect={() => setIsOpen(false)}
-      toggle={
-        <DropdownToggle
-          data-test={`${id}-dropdown`}
-          id={`${id}-dropdown`}
-          isDisabled={disabled}
-          onToggle={() => setIsOpen(!isOpen)}
-        >
-          {refreshOptions[selectedKey as keyof typeof refreshOptions]}
-        </DropdownToggle>
-      }
-    />
+    </Dropdown>
   );
 };
 

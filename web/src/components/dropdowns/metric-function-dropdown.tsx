@@ -1,4 +1,4 @@
-import { Dropdown, DropdownItem, DropdownPosition, DropdownToggle } from '@patternfly/react-core';
+import { Dropdown, DropdownItem, MenuToggle, MenuToggleElement } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { MetricFunction, MetricType, isTimeMetric } from '../../model/flow-query';
@@ -13,7 +13,7 @@ export const MetricFunctionDropdown: React.FC<{
   id?: string;
 }> = ({ selected, setMetricFunction, metricType, id }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
-  const [metricDropdownOpen, setMetricDropdownOpen] = React.useState(false);
+  const [isOpen, setOpen] = React.useState(false);
 
   const getAvailableFunctions = React.useCallback((): MetricFunction[] => {
     switch (metricType) {
@@ -52,31 +52,36 @@ export const MetricFunctionDropdown: React.FC<{
     <Dropdown
       data-test={id}
       id={id}
-      position={DropdownPosition.right}
-      toggle={
-        <DropdownToggle
+      isOpen={isOpen}
+      popperProps={{
+        position: 'right'
+      }}
+      toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+        <MenuToggle
+          ref={toggleRef}
           data-test={`${id}-dropdown`}
           id={`${id}-dropdown`}
-          onToggle={() => setMetricDropdownOpen(!metricDropdownOpen)}
+          isExpanded={isOpen}
+          onClick={() => setOpen(!isOpen)}
         >
           {getMetricDisplay(selected as MetricFunction)}
-        </DropdownToggle>
-      }
-      isOpen={metricDropdownOpen}
-      dropdownItems={getAvailableFunctions().map(v => (
+        </MenuToggle>
+      )}
+    >
+      {getAvailableFunctions().map(v => (
         <DropdownItem
           data-test={v}
           id={v}
           key={v}
           onClick={() => {
-            setMetricDropdownOpen(false);
+            setOpen(false);
             setMetricFunction(v);
           }}
         >
           {getMetricDisplay(v)}
         </DropdownItem>
       ))}
-    />
+    </Dropdown>
   );
 };
 

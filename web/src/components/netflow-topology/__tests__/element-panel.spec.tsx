@@ -1,4 +1,4 @@
-import { DrawerCloseButton, OptionsMenuToggle } from '@patternfly/react-core';
+import { DrawerCloseButton, MenuToggle } from '@patternfly/react-core';
 import { BaseEdge, BaseNode, NodeModel } from '@patternfly/react-topology';
 import { mount, shallow } from 'enzyme';
 import * as React from 'react';
@@ -119,7 +119,7 @@ describe('<ElementPanel />', () => {
 
   it('should filter <ElementPanelDetailsContent />', async () => {
     const wrapper = mount(<ElementPanelDetailsContent {...mocks} />);
-    const ipFilters = wrapper.find(OptionsMenuToggle).last();
+    const ipFilters = wrapper.find(MenuToggle).last();
     // Two buttons: first for pod filter, second for IP filter => click on second
     ipFilters.last().simulate('click');
     // Two items: source or destination

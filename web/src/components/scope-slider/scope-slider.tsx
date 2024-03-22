@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { FlowScope } from '../../model/flow-query';
-import { Slider } from '../slider/Slider';
+import { Slider, SliderOnChangeEvent } from '../slider/slider';
 
 import './scope-slider.css';
 
@@ -48,7 +48,7 @@ export const ScopeSlider: React.FC<ScopeSliderProps> = ({ scope, setScope, allow
           showTicks
           max={scopes.length - 1}
           customSteps={scopes.map((s, idx) => ({ value: idx, label: s[1] }))}
-          onChange={(value: number) => setScope(scopes[value][0])}
+          onChange={(event: SliderOnChangeEvent, value: number) => setScope(scopes[value][0])}
           vertical
         />
       )}

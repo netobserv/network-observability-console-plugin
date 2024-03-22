@@ -75,7 +75,7 @@ export const TextFilter: React.FC<TextFilterProps> = ({
         aria-label="search"
         validated={indicator}
         placeholder={filterDefinition.placeholder}
-        onChange={updateValue}
+        onChange={(event, value) => updateValue(value)}
         onKeyPress={e => e.key === 'Enter' && onSelect()}
         value={currentValue}
         ref={searchInputRef}

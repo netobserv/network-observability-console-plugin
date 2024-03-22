@@ -180,7 +180,7 @@ export const ColumnsModal: React.FC<{
           </DataListControl>
           <DataListItemCells
             dataListCells={[
-              <DataListCell key={'data-list-cell-' + i}>
+              <DataListCell key={'data-list-cell-' + i} className="center">
                 <label htmlFor={column.id}>{getFullColumnName(column)}</label>
               </DataListCell>
             ]}
@@ -269,6 +269,7 @@ export const ColumnsModal: React.FC<{
               aria-label="Table column management"
               data-test="table-column-management"
               id="table-column-management"
+              className="centered-list"
               isCompact
             >
               {draggableItems}

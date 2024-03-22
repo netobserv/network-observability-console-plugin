@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Checkbox, OptionsMenu, OptionsMenuItem, OptionsMenuPosition, OptionsMenuToggle } from '@patternfly/react-core';
+import { Select, MenuToggle, SelectList, SelectOption } from '@patternfly/react-core';
 import { FilterIcon } from '@patternfly/react-icons';
 import { Filter, FilterDefinition } from '../../model/filters';
 import { FilterDir, isDirElementFiltered, toggleDirElementFilter } from '../../model/topology';
@@ -35,7 +35,7 @@ export const SummaryFilterButton: React.FC<SummaryFilterButtonProps> = ({
     isDirElementFiltered(filterType, fields, dir, activeFilters, filterDefinitions)
   );
 
-  const onSelect = (dir: FilterDir, e: React.BaseSyntheticEvent) => {
+  const onSelect = (dir: FilterDir, e?: React.BaseSyntheticEvent) => {
     toggleDirElementFilter(
       filterType,
       fields,
@@ -45,30 +45,34 @@ export const SummaryFilterButton: React.FC<SummaryFilterButtonProps> = ({
       setFilters,
       filterDefinitions
     );
-    e.preventDefault();
+    e?.preventDefault();
   };
 
   const menuItem = (id: FilterDir, label: string) => (
-    <OptionsMenuItem id={id} key={id} onSelect={e => onSelect(id, e!)}>
-      <Checkbox
-        id={id + '-checkbox'}
-        label={label}
-        isChecked={selected.includes(id)}
-        onChange={(_, e) => onSelect(id, e)}
-      />
-    </OptionsMenuItem>
+    <SelectOption id={id} key={id} value={id} hasCheckbox isSelected={selected.includes(id)}>
+      {label}
+    </SelectOption>
   );
 
   return (
-    <OptionsMenu
-      id={id}
-      className={'summary-filter-menu'}
-      data-test={id}
-      toggle={<OptionsMenuToggle toggleTemplate={<FilterIcon />} onToggle={setIsOpen} hideCaret />}
-      menuItems={[menuItem('src', t('Source')), menuItem('dst', t('Destination'))]}
+    <Select
       isOpen={isOpen}
-      position={OptionsMenuPosition.right}
-      isPlain
-    />
+      toggle={toggleRef => (
+        <MenuToggle ref={toggleRef} onClick={() => setIsOpen(!isOpen)} isExpanded={isOpen} variant="plain">
+          <FilterIcon />
+        </MenuToggle>
+      )}
+      popperProps={{
+        position: 'right'
+      }}
+      id={id}
+      selected={selected}
+      onSelect={(event, value) => value && onSelect(value as FilterDir, event)}
+    >
+      <SelectList>
+        {menuItem('src', t('Source'))}
+        {menuItem('dst', t('Destination'))}
+      </SelectList>
+    </Select>
   );
 };
