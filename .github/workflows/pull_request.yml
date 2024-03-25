@@ -40,7 +40,7 @@ jobs:
     - name: set up node.js
       uses: actions/setup-node@v3
       with:
-        node-version: 16
+        node-version: 18
     - name: checkout
       uses: actions/checkout@v3
     - name: build and test

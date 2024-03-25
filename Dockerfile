@@ -3,7 +3,8 @@ ARG BUILDSCRIPT=
 ARG LDFLAGS=
 ARG TARGETPLATFORM=linux/amd64
 ARG BUILDPLATFORM=linux/amd64
-FROM --platform=$BUILDPLATFORM docker.io/library/node:16-alpine as web-builder
+FROM --platform=$BUILDPLATFORM docker.io/library/node:18-alpine as web-builder
+
 USER node
 
 ARG BUILDSCRIPT
