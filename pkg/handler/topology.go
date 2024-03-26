@@ -70,10 +70,7 @@ func getTopologyFlows(cfg *loki.Config, client httpclient.Caller, params url.Val
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
-	metricType, err := getMetricType(params)
-	if err != nil {
-		return nil, http.StatusBadRequest, err
-	}
+	metricType := getMetricType(params)
 	metricFunction, err := getMetricFunction(params)
 	if err != nil {
 		return nil, http.StatusBadRequest, err
@@ -86,7 +83,10 @@ func getTopologyFlows(cfg *loki.Config, client httpclient.Caller, params url.Val
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
-	aggregate := params.Get(aggregateByKey)
+	aggregate, err := getAggregate(params)
+	if err != nil {
+		return nil, http.StatusBadRequest, err
+	}
 	groups := params.Get(groupsKey)
 	rawFilters := params.Get(filtersKey)
 	filterGroups, err := filters.Parse(rawFilters)
@@ -135,7 +135,7 @@ func getTopologyFlows(cfg *loki.Config, client httpclient.Caller, params url.Val
 	return qr, http.StatusOK, nil
 }
 
-func shouldMergeReporters(metricType constants.MetricType) bool {
+func shouldMergeReporters(metricType string) bool {
 	return metricType == constants.MetricTypeBytes || metricType == constants.MetricTypePackets
 }
 
@@ -153,7 +153,7 @@ func expandReportersMergeQueries(queries filters.MultiQueries) filters.MultiQuer
 	return out
 }
 
-func buildTopologyQuery(cfg *loki.Config, queryFilters filters.SingleQuery, start, end, limit, rateInterval, step string, metricType constants.MetricType, metricFunction constants.MetricFunction, recordType constants.RecordType, packetLoss constants.PacketLoss, aggregate, groups string) (string, int, error) {
+func buildTopologyQuery(cfg *loki.Config, queryFilters filters.SingleQuery, start, end, limit, rateInterval, step string, metricType string, metricFunction constants.MetricFunction, recordType constants.RecordType, packetLoss constants.PacketLoss, aggregate, groups string) (string, int, error) {
 	qb, err := loki.NewTopologyQuery(cfg, start, end, limit, rateInterval, step, metricType, metricFunction, recordType, packetLoss, aggregate, groups)
 	if err != nil {
 		return "", http.StatusBadRequest, err

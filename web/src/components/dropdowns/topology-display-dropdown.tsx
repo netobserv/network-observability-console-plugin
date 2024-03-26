@@ -2,7 +2,7 @@ import { Checkbox, Flex, FlexItem, Select, Switch, Tooltip } from '@patternfly/r
 import { InfoAltIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { MetricFunction, FlowScope, MetricType } from '../../model/flow-query';
+import { StatFunction, FlowScope, MetricType } from '../../model/flow-query';
 import { MetricScopeOptions } from '../../model/metrics';
 import { LayoutName, TopologyGroupTypes, TopologyOptions } from '../../model/topology';
 import GroupDropdown from './group-dropdown';
@@ -17,8 +17,8 @@ import ScopeDropdown from './scope-dropdown';
 export type Size = 's' | 'm' | 'l';
 
 export const TopologyDisplayOptions: React.FC<{
-  metricFunction: MetricFunction;
-  setMetricFunction: (f: MetricFunction) => void;
+  metricFunction: StatFunction;
+  setMetricFunction: (f: StatFunction) => void;
   metricType: MetricType;
   setMetricType: (t: MetricType) => void;
   metricScope: FlowScope;
@@ -239,8 +239,8 @@ export const TopologyDisplayOptions: React.FC<{
 };
 
 export const TopologyDisplayDropdown: React.FC<{
-  metricFunction: MetricFunction;
-  setMetricFunction: (f: MetricFunction) => void;
+  metricFunction: StatFunction;
+  setMetricFunction: (f: StatFunction) => void;
   metricType: MetricType;
   setMetricType: (t: MetricType) => void;
   metricScope: FlowScope;

@@ -8,7 +8,7 @@ import { MetricsGraph, MetricsGraphProps } from '../metrics-graph';
 describe('<MetricsContent />', () => {
   const props: MetricsGraphProps = {
     id: 'chart-test',
-    metricType: 'bytes',
+    metricType: 'Bytes',
     metricFunction: 'avg',
     metrics: metrics.map(m => ({ ...m, fullName: 'whatever', shortName: 'whatever', isInternal: false })),
     smallerTexts: false,

@@ -6,7 +6,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { TopologyMetrics } from '../../api/loki';
 import { Filter, FilterDefinition, Filters } from '../../model/filters';
-import { MetricFunction, FlowScope, MetricType } from '../../model/flow-query';
+import { StatFunction, FlowScope, MetricType } from '../../model/flow-query';
 import { GraphElementPeer, LayoutName, TopologyOptions } from '../../model/topology';
 import LokiError from '../messages/loki-error';
 import { SearchEvent, SearchHandle } from '../search/search';
@@ -22,7 +22,7 @@ export const NetflowTopology: React.FC<{
   loading?: boolean;
   k8sModels: { [key: string]: K8sModel };
   error?: string;
-  metricFunction: MetricFunction;
+  metricFunction: StatFunction;
   metricType: MetricType;
   metricScope: FlowScope;
   setMetricScope: (ms: FlowScope) => void;

@@ -1,6 +1,6 @@
 import { findFilter } from './filter-definitions';
 import { TimeRange } from './datetime';
-import { Match, MetricFunction, MetricType, PacketLoss, RecordType } from '../model/flow-query';
+import { Match, StatFunction, MetricType, PacketLoss, RecordType } from '../model/flow-query';
 import {
   getURLParam,
   getURLParamAsBool,
@@ -27,8 +27,8 @@ export const defaultTimeRange = 300;
 export const defaultRecordType: RecordType = 'flowLog';
 export const defaultMatch: Match = 'all';
 export const defaultPacketLoss: PacketLoss = 'all';
-export const defaultMetricFunction: MetricFunction = 'last';
-export const defaultMetricType: MetricType = 'bytes';
+export const defaultMetricFunction: StatFunction = 'last';
+export const defaultMetricType: MetricType = 'Bytes';
 const defaultShowDuplicates = false;
 
 export const getRangeFromURL = (): number | TimeRange => {
@@ -165,7 +165,7 @@ export const setURLPacketLoss = (pl: PacketLoss, replace?: boolean) => {
   setURLParam(URLParam.PacketLoss, pl), replace;
 };
 
-export const setURLMetricFunction = (metricFunction?: MetricFunction, replace?: boolean) => {
+export const setURLMetricFunction = (metricFunction?: StatFunction, replace?: boolean) => {
   if (metricFunction) {
     setURLParam(URLParam.MetricFunction, metricFunction, replace);
   } else {

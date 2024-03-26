@@ -399,26 +399,26 @@ describe('parseTopologyMetrics', () => {
 
 describe('getFormattedValue', () => {
   it('should format BPS', () => {
-    expect(getFormattedValue(500, 'bytes', 'last', t)).toBe('500 Bps');
-    expect(getFormattedValue(1300, 'bytes', 'avg', t)).toBe('1.3 kBps');
-    expect(getFormattedValue(10500, 'bytes', 'max', t)).toBe('10.5 kBps');
-    expect(getFormattedValue(1500000, 'bytes', 'avg', t)).toBe('1.5 MBps');
+    expect(getFormattedValue(500, 'Bytes', 'rate', t)).toBe('500 Bps');
+    expect(getFormattedValue(1300, 'Bytes', 'rate', t)).toBe('1.3 kBps');
+    expect(getFormattedValue(10500, 'Bytes', 'rate', t)).toBe('10.5 kBps');
+    expect(getFormattedValue(1500000, 'Bytes', 'rate', t)).toBe('1.5 MBps');
   });
 
   it('should format absolute bytes', () => {
-    expect(getFormattedValue(500, 'bytes', 'sum', t)).toBe('500 B');
-    expect(getFormattedValue(10500, 'bytes', 'sum', t)).toBe('10.5 kB');
+    expect(getFormattedValue(500, 'Bytes', 'sum', t)).toBe('500 B');
+    expect(getFormattedValue(10500, 'Bytes', 'sum', t)).toBe('10.5 kB');
   });
 
   it('should format packets rate', () => {
-    expect(getFormattedValue(500, 'packets', 'last', t)).toBe('500 Pps');
-    expect(getFormattedValue(1300, 'packets', 'avg', t)).toBe('1.3 kPps');
-    expect(getFormattedValue(10500, 'packets', 'max', t)).toBe('10.5 kPps');
-    expect(getFormattedValue(1500000, 'packets', 'avg', t)).toBe('1.5 MPps');
+    expect(getFormattedValue(500, 'Packets', 'rate', t)).toBe('500 Pps');
+    expect(getFormattedValue(1300, 'Packets', 'rate', t)).toBe('1.3 kPps');
+    expect(getFormattedValue(10500, 'Packets', 'rate', t)).toBe('10.5 kPps');
+    expect(getFormattedValue(1500000, 'Packets', 'rate', t)).toBe('1.5 MPps');
   });
 
   it('should format absolute packets', () => {
-    expect(getFormattedValue(500, 'packets', 'sum', t)).toBe('500 P');
-    expect(getFormattedValue(10500, 'packets', 'sum', t)).toBe('10.5 kP');
+    expect(getFormattedValue(500, 'Packets', 'sum', t)).toBe('500 P');
+    expect(getFormattedValue(10500, 'Packets', 'sum', t)).toBe('10.5 kP');
   });
 });

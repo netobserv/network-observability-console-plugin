@@ -1,10 +1,9 @@
 package constants
 
-type MetricType string
 type MetricFunction string
-
 type RecordType string
 type PacketLoss string
+type Discriminator string
 type Direction string
 
 const (
@@ -12,22 +11,25 @@ const (
 	AppLabelValue   = "netobserv-flowcollector"
 	RecordTypeLabel = "_RecordType"
 
-	MetricTypeBytes          MetricType = "bytes"
-	MetricTypePackets        MetricType = "packets"
-	MetricTypeCount          MetricType = "count"
-	MetricTypeCountDNS       MetricType = "countDns"
-	MetricTypeFlowRTT        MetricType = "flowRtt"
-	MetricTypeDNSLatencies   MetricType = "dnsLatencies"
-	MetricTypeDroppedBytes   MetricType = "droppedBytes"
-	MetricTypeDroppedPackets MetricType = "droppedPackets"
-	DefaultMetricType        MetricType = MetricTypeBytes
+	MetricTypeFlows          = "Flows"
+	MetricTypeBytes          = "Bytes"
+	MetricTypePackets        = "Packets"
+	MetricTypeDroppedBytes   = "PktDropBytes"
+	MetricTypeDroppedPackets = "PktDropPackets"
+	MetricTypeDNSLatency     = "DnsLatencyMs"
+	MetricTypeDNSFlows       = "DnsFlows"
+	MetricTypeFlowRTT        = "TimeFlowRttNs"
+	DefaultMetricType        = MetricTypeBytes
 
+	MetricFunctionCount   MetricFunction = "count"
+	MetricFunctionSum     MetricFunction = "sum"
 	MetricFunctionAvg     MetricFunction = "avg"
 	MetricFunctionMin     MetricFunction = "min"
 	MetricFunctionMax     MetricFunction = "max"
 	MetricFunctionP90     MetricFunction = "p90"
 	MetricFunctionP99     MetricFunction = "p99"
-	DefaultMetricFunction MetricFunction = MetricFunctionAvg
+	MetricFunctionRate    MetricFunction = "rate"
+	DefaultMetricFunction MetricFunction = MetricFunctionRate
 
 	RecordTypeAllConnections RecordType = "allConnections"
 	RecordTypeNewConnection  RecordType = "newConnection"

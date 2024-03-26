@@ -4,7 +4,7 @@ import React from 'react';
 import { TopologyMetrics } from '../../../api/loki';
 import { SearchHandle, SearchEvent } from '../../../components/search/search';
 import { Filter } from '../../../model/filters';
-import { MetricFunction, MetricType, FlowScope } from '../../../model/flow-query';
+import { StatFunction, MetricType, FlowScope } from '../../../model/flow-query';
 import { TopologyOptions, GraphElementPeer, NodeData } from '../../../model/topology';
 import * as RTTopology from '@jpinsonneau/react-three-topology';
 import _ from 'lodash';
@@ -14,7 +14,7 @@ import { createPeer } from '../../../utils/metrics';
 
 export const ThreeDTopologyContent: React.FC<{
   k8sModels: { [key: string]: K8sModel };
-  metricFunction: MetricFunction;
+  metricFunction: StatFunction;
   metricType: MetricType;
   metricScope: FlowScope;
   setMetricScope: (ms: FlowScope) => void;

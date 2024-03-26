@@ -1,21 +1,22 @@
+import { TFunction } from 'i18next';
 import _ from 'lodash';
+import percentile from 'percentile';
+import { Field } from '../api/ipfix';
 import {
-  RawTopologyMetrics,
-  MetricStats,
-  TopologyMetricPeer,
-  TopologyMetrics,
-  NameAndType,
   GenericMetric,
-  Stats
+  MetricStats,
+  NameAndType,
+  RawTopologyMetrics,
+  Stats,
+  TopologyMetricPeer,
+  TopologyMetrics
 } from '../api/loki';
-import { MetricFunction, MetricType, FlowScope, GenericAggregation } from '../model/flow-query';
+import { FlowScope, MetricFunction, MetricType } from '../model/flow-query';
+import { NodeData } from '../model/topology';
 import { roundTwoDigits } from './count';
 import { computeStepInterval, rangeToSeconds, TimeRange } from './datetime';
 import { valueFormat } from './format';
-import { NodeData } from '../model/topology';
 import { getPeerId, idUnknown } from './ids';
-import { TFunction } from 'i18next';
-import percentile from 'percentile';
 
 // Tolerance, in seconds, to assume presence/emptiness of the last datapoint fetched, when it is
 // close to "now", to accomodate with potential collection latency.
@@ -92,7 +93,7 @@ export const parseTopologyMetrics = (
 export const parseGenericMetrics = (
   raw: RawTopologyMetrics[],
   range: number | TimeRange,
-  aggregateBy: GenericAggregation,
+  aggregateBy: Field,
   unixTimestamp: number,
   forceZeros: boolean,
   isMock?: boolean
@@ -204,21 +205,15 @@ const parseGenericMetric = (
   start: number,
   end: number,
   step: number,
-  aggregateBy: GenericAggregation,
+  aggregateBy: Field,
   forceZeros: boolean
 ): GenericMetric => {
-  const normalized = normalizeMetrics(raw.values, start, end, step, forceZeros);
-  const stats = computeStats(normalized);
-  const name =
-    aggregateBy === 'droppedState'
-      ? raw.metric.PktDropLatestState
-      : aggregateBy === 'droppedCause'
-      ? raw.metric.PktDropLatestDropCause
-      : raw.metric.DnsFlagsResponseCode;
+  const values = normalizeMetrics(raw.values, start, end, step, forceZeros);
+  const stats = computeStats(values);
   return {
-    name: name || '',
-    values: normalized,
-    stats: stats,
+    name: String(raw.metric[aggregateBy] || ''),
+    values,
+    stats,
     aggregateBy
   };
 };
@@ -353,41 +348,25 @@ export const computeStats = (ts: [number, number][]): MetricStats => {
 };
 
 export const getFormattedValue = (v: number, mt: MetricType, mf: MetricFunction, t: TFunction): string => {
-  if (mt === 'count' || mt === 'countDns') {
-    return valueFormat(v);
-  } else if (mt === 'dnsLatencies' || mt === 'flowRtt') {
-    if (v) {
-      return valueFormat(v, 2, t('ms'));
-    } else {
-      return t('n/a');
-    }
-  } else if (mf === 'sum') {
-    switch (mt) {
-      case 'droppedBytes':
-      case 'bytes':
-        return valueFormat(v, 1, t('B'));
-      case 'droppedPackets':
-      case 'packets':
-        return valueFormat(v, 1, t('P'));
-    }
+  if (mt === 'DnsLatencyMs' || mt === 'TimeFlowRttNs') {
+    return valueFormat(v, 2, t('ms'));
   } else {
-    return getFormattedRateValue(v, mt, t);
-  }
-};
-
-export const getFormattedRateValue = (v: number, mt: MetricType, t: TFunction): string => {
-  switch (mt) {
-    case 'dnsLatencies':
-    case 'flowRtt':
-    case 'count':
-    case 'countDns':
-      return valueFormat(v, 1);
-    case 'droppedBytes':
-    case 'bytes':
-      return valueFormat(v, 1, t('Bps'));
-    case 'droppedPackets':
-    case 'packets':
-      return valueFormat(v, 1, t('Pps'));
+    switch (mt) {
+      case 'PktDropBytes':
+      case 'Bytes':
+        if (mf !== 'rate') {
+          return valueFormat(v, 1, t('B'));
+        }
+        return valueFormat(v, 1, t('Bps'));
+      case 'PktDropPackets':
+      case 'Packets':
+        if (mf !== 'rate') {
+          return valueFormat(v, 1, t('P'));
+        }
+        return valueFormat(v, 1, t('Pps'));
+      default:
+        return valueFormat(v, 1);
+    }
   }
 };
 

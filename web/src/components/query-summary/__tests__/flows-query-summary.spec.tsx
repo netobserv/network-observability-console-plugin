@@ -12,7 +12,7 @@ describe('<FlowsQuerySummary />', () => {
     toggleQuerySummary: jest.fn(),
     flows: FlowsSample,
     type: 'flowLog' as RecordType,
-    metricType: 'bytes' as MetricType,
+    metricType: 'Bytes' as MetricType,
     stats: {
       limitReached: false,
       numQueries: 1

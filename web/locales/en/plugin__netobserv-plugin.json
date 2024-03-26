@@ -33,10 +33,10 @@
   "Invalid": "Invalid",
   "rate": "rate",
   "Total": "Total",
+  "Average": "Average",
   "Latest": "Latest",
   "Min": "Min",
   "Max": "Max",
-  "Average": "Average",
   "P90": "P90",
   "P99": "P99",
   "Bytes": "Bytes",
@@ -346,7 +346,6 @@
   "Filtered total byte rate": "Filtered total byte rate",
   "Filtered sum of top-k packets": "Filtered sum of top-k packets",
   "Filtered total packets": "Filtered total packets",
-  "packets": "packets",
   "Filtered avg DNS Latency": "Filtered avg DNS Latency",
   "Filtered overall avg DNS Latency": "Filtered overall avg DNS Latency",
   "ms": "ms",
@@ -411,7 +410,6 @@
   "Unknown direction": "Unknown direction",
   "P": "P",
   "Pps": "Pps",
-  "total": "total",
   "minimum": "minimum",
   "maximum": "maximum",
   "90th percentile": "90th percentile",
@@ -455,5 +453,8 @@
   "Top {{limit}} DNS response code": "Top {{limit}} DNS response code",
   "Total DNS response code": "Total DNS response code",
   "Total DNS flow count": "Total DNS flow count",
-  "The top DNS response code extracted from DNS response headers compared to total over the selected interval": "The top DNS response code extracted from DNS response headers compared to total over the selected interval"
+  "The top DNS response code extracted from DNS response headers compared to total over the selected interval": "The top DNS response code extracted from DNS response headers compared to total over the selected interval",
+  "rates": "rates",
+  "with total": "with total",
+  "Invalid custom panel id": "Invalid custom panel id"
 }

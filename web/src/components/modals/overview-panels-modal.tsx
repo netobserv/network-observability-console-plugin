@@ -34,8 +34,9 @@ export const OverviewPanelsModal: React.FC<{
   recordType: RecordType;
   panels: OverviewPanel[];
   setPanels: (v: OverviewPanel[]) => void;
+  customIds?: string[];
   id?: string;
-}> = ({ id, isModalOpen, setModalOpen, recordType, panels, setPanels }) => {
+}> = ({ id, isModalOpen, setModalOpen, recordType, panels, setPanels, customIds }) => {
   const [updatedPanels, setUpdatedPanels] = React.useState<OverviewPanel[]>([]);
   const [filterKeys, setFilterKeys] = React.useState<string[]>([]);
   const { t } = useTranslation('plugin__netobserv-plugin');
@@ -82,8 +83,8 @@ export const OverviewPanelsModal: React.FC<{
   );
 
   const onReset = React.useCallback(() => {
-    setUpdatedPanels(getDefaultOverviewPanels().filter(p => panels.some(existing => existing.id === p.id)));
-  }, [panels]);
+    setUpdatedPanels(getDefaultOverviewPanels(customIds).filter(p => panels.some(existing => existing.id === p.id)));
+  }, [customIds, panels]);
 
   const isSaveDisabled = React.useCallback(() => {
     return _.isEmpty(updatedPanels.filter(p => p.isSelected));

@@ -19,6 +19,7 @@ export type Config = {
     enable: boolean;
     portNames: Map<string, string>;
   };
+  panels: string[];
   columns: ColumnConfigDef[];
   quickFilters: RawQuickFilter[];
   filters: FilterConfigDef[];
@@ -37,6 +38,7 @@ export const defaultConfig: Config = {
     enable: true,
     portNames: new Map()
   },
+  panels: [],
   columns: [],
   quickFilters: [],
   filters: [],

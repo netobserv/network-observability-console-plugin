@@ -18,7 +18,7 @@ describe('<NetflowOverviewPanel />', () => {
   };
   const contentProps: MetricsGraphProps = {
     id: SamplePanel.id,
-    metricType: 'bytes' as MetricType,
+    metricType: 'Bytes' as MetricType,
     metricFunction: 'avg',
     metrics: metrics.map(m => ({ ...m, shortName: 'whatever', fullName: 'whatever', isInternal: false })),
     limit: 5,

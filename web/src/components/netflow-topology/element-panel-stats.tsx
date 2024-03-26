@@ -68,10 +68,12 @@ export const ElementPanelStats: React.FC<{
           <Text id="metrics-stats-in">{isEdge ? t('A -> B') : t('In')}</Text>
         </FlexItem>
         <FlexItem>
-          <Text id="metrics-stats-avg-in">{getFormattedValue(averageIn, metricType, 'avg', t)}</Text>
+          <Text id="metrics-stats-avg-in">{getFormattedValue(averageIn, metricType, isTime ? 'avg' : 'rate', t)}</Text>
         </FlexItem>
         <FlexItem>
-          <Text id="metrics-stats-latest-in">{getFormattedValue(latestIn, metricType, 'last', t)}</Text>
+          <Text id="metrics-stats-latest-in">
+            {getFormattedValue(latestIn, metricType, isTime ? 'avg' : 'rate', t)}
+          </Text>
         </FlexItem>
         {!isTime ? (
           <FlexItem>
@@ -86,10 +88,14 @@ export const ElementPanelStats: React.FC<{
           <Text id="metrics-stats-out">{isEdge ? t('B -> A') : t('Out')}</Text>
         </FlexItem>
         <FlexItem>
-          <Text id="metrics-stats-avg-out">{getFormattedValue(averageOut, metricType, 'avg', t)}</Text>
+          <Text id="metrics-stats-avg-out">
+            {getFormattedValue(averageOut, metricType, isTime ? 'avg' : 'rate', t)}
+          </Text>
         </FlexItem>
         <FlexItem>
-          <Text id="metrics-stats-latest-out">{getFormattedValue(latestOut, metricType, 'last', t)}</Text>
+          <Text id="metrics-stats-latest-out">
+            {getFormattedValue(latestOut, metricType, isTime ? 'avg' : 'rate', t)}
+          </Text>
         </FlexItem>
         {!isTime ? (
           <FlexItem>
@@ -105,10 +111,14 @@ export const ElementPanelStats: React.FC<{
         </FlexItem>
 
         <FlexItem>
-          <Text id="metrics-stats-avg-both">{getFormattedValue(averageBoth, metricType, 'avg', t)}</Text>
+          <Text id="metrics-stats-avg-both">
+            {getFormattedValue(averageBoth, metricType, isTime ? 'avg' : 'rate', t)}
+          </Text>
         </FlexItem>
         <FlexItem>
-          <Text id="metrics-stats-latest-both">{getFormattedValue(latestBoth, metricType, 'last', t)}</Text>
+          <Text id="metrics-stats-latest-both">
+            {getFormattedValue(latestBoth, metricType, isTime ? 'avg' : 'rate', t)}
+          </Text>
         </FlexItem>
         {!isTime ? (
           <FlexItem>

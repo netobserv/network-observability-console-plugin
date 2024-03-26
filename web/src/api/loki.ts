@@ -1,7 +1,7 @@
 import { getFunctionFromId, getRateFunctionFromId } from '../utils/overview-panels';
-import { GenericAggregation, FlowScope, MetricType, MetricFunction } from '../model/flow-query';
+import { FlowScope, MetricType, StatFunction } from '../model/flow-query';
 import { cyrb53 } from '../utils/hash';
-import { Fields, Labels, Record } from './ipfix';
+import { Field, Fields, Labels, Record } from './ipfix';
 
 export interface AggregatedQueryResponse {
   resultType: string;
@@ -48,28 +48,7 @@ export const parseStream = (raw: StreamResult): Record[] => {
   });
 };
 
-export interface RawTopologyMetric {
-  DstAddr?: string;
-  DstK8S_Name?: string;
-  DstK8S_Namespace?: string;
-  DstK8S_OwnerName?: string;
-  DstK8S_OwnerType?: string;
-  DstK8S_Type?: string;
-  DstK8S_Zone?: string;
-  DstK8S_HostName?: string;
-  SrcAddr?: string;
-  SrcK8S_Name?: string;
-  SrcK8S_Namespace?: string;
-  SrcK8S_OwnerName?: string;
-  SrcK8S_OwnerType?: string;
-  SrcK8S_Type?: string;
-  SrcK8S_Zone?: string;
-  SrcK8S_HostName?: string;
-  K8S_ClusterName?: string;
-  PktDropLatestState?: string;
-  PktDropLatestDropCause?: string;
-  DnsFlagsResponseCode?: string;
-}
+export interface RawTopologyMetric extends Fields, Labels {}
 
 export interface RawTopologyMetrics {
   metric: RawTopologyMetric;
@@ -99,7 +78,7 @@ export type GenericMetric = {
   name: string;
   values: [number, number][];
   stats: MetricStats;
-  aggregateBy: GenericAggregation;
+  aggregateBy: Field;
 };
 
 export type FunctionMetrics = {
@@ -126,7 +105,7 @@ export const initFunctionMetricKeys = (ids: string[]) => {
   return obj;
 };
 
-export const getFunctionMetricKey = (metricFunction: MetricFunction) => {
+export const getFunctionMetricKey = (metricFunction: StatFunction) => {
   switch (metricFunction) {
     case 'min':
     case 'max':
@@ -160,8 +139,15 @@ export type NetflowMetrics = {
   rttMetrics?: FunctionMetrics;
   totalFlowCountMetric?: TopologyMetrics;
   totalDnsLatencyMetric?: TotalFunctionMetrics;
-  totalDnsCountMetric?: TopologyMetrics;
+  totalDnsCountMetric?: GenericMetric;
   totalRttMetric?: TotalFunctionMetrics;
+  customMetrics: Map<string, TopologyMetrics[] | GenericMetric[]>;
+  totalCustomMetrics: Map<string, TopologyMetrics | GenericMetric>;
+};
+
+export const defaultNetflowMetrics = {
+  customMetrics: new Map(),
+  totalCustomMetrics: new Map()
 };
 
 export const initRateMetricKeys = (ids: string[]) => {
@@ -173,7 +159,7 @@ export const initRateMetricKeys = (ids: string[]) => {
 };
 
 export const getRateMetricKey = (metricType: MetricType) => {
-  return metricType === 'bytes' ? 'bytes' : 'packets';
+  return metricType === 'Bytes' ? 'bytes' : 'packets';
 };
 
 export type TopologyMetrics = {
@@ -199,3 +185,15 @@ export interface MetricStats {
   percentiles: number[];
   total: number;
 }
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const isValidTopologyMetrics = (metric: any): metric is TopologyMetrics => {
+  return (
+    metric &&
+    typeof metric.source === 'object' &&
+    typeof metric.destination === 'object' &&
+    Array.isArray(metric.values) &&
+    typeof metric.stats === 'object' &&
+    typeof metric.scope === 'string'
+  );
+};

@@ -38,7 +38,8 @@ import {
   Stats,
   TotalFunctionMetrics,
   TotalRateMetrics,
-  NetflowMetrics
+  NetflowMetrics,
+  defaultNetflowMetrics
 } from '../api/loki';
 import { getFlowGenericMetrics } from '../api/routes';
 import { Config, defaultConfig } from '../model/config';
@@ -58,10 +59,11 @@ import {
   FlowScope,
   isTimeMetric,
   Match,
-  MetricFunction,
+  StatFunction,
   MetricType,
   PacketLoss,
-  RecordType
+  RecordType,
+  MetricFunction
 } from '../model/flow-query';
 import { MetricScopeOptions } from '../model/metrics';
 import { parseQuickFilters } from '../model/quick-filters';
@@ -102,14 +104,17 @@ import {
   LOCAL_STORAGE_VIEW_ID_KEY,
   useLocalStorage,
   getLocalStorage,
-  LOCAL_STORAGE_OVERVIEW_FOCUS_KEY
+  LOCAL_STORAGE_OVERVIEW_FOCUS_KEY,
+  DEFAULT_ARRAY_SELECTION_OPTIONS
 } from '../utils/local-storage-hook';
 import { mergeStats } from '../utils/metrics';
 import {
+  CUSTOM_PANEL_MATCHER,
   DNS_ID_MATCHER,
   DROPPED_ID_MATCHER,
   getDefaultOverviewPanels,
   OverviewPanel,
+  parseCustomMetricId,
   RTT_ID_MATCHER
 } from '../utils/overview-panels';
 import { usePoll } from '../utils/poll-hook';
@@ -211,7 +216,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
     LOCAL_STORAGE_TOPOLOGY_OPTIONS_KEY,
     DefaultOptions
   );
-  const [metrics, setMetrics] = React.useState<NetflowMetrics>({});
+  const [metrics, setMetrics] = React.useState<NetflowMetrics>(defaultNetflowMetrics);
   const metricsRef = React.useRef(metrics);
   const [isShowQuerySummary, setShowQuerySummary] = React.useState<boolean>(false);
   const [lastRefresh, setLastRefresh] = React.useState<Date | undefined>(undefined);
@@ -236,7 +241,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
   const [range, setRange] = React.useState<number | TimeRange>(getRangeFromURL());
   const [histogramRange, setHistogramRange] = React.useState<TimeRange>();
   const [metricScope, setMetricScope] = useLocalStorage<FlowScope>(LOCAL_STORAGE_METRIC_SCOPE_KEY, 'namespace');
-  const [topologyMetricFunction, setTopologyMetricFunction] = useLocalStorage<MetricFunction>(
+  const [topologyMetricFunction, setTopologyMetricFunction] = useLocalStorage<StatFunction>(
     LOCAL_STORAGE_METRIC_FUNCTION_KEY,
     defaultMetricFunction
   );
@@ -257,19 +262,13 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
       'initDone' | 'configLoading' | 'configLoaded' | 'maxChunkAgeLoading' | 'maxChunkAgeLoaded' | 'forcedFiltersLoaded'
     >
   >([]);
-  const [panels, setSelectedPanels] = useLocalStorage<OverviewPanel[]>(
+  const [panels, setPanels] = useLocalStorage<OverviewPanel[]>(
     LOCAL_STORAGE_OVERVIEW_IDS_KEY,
-    getDefaultOverviewPanels(),
-    {
-      id: 'id',
-      criteria: 'isSelected'
-    }
+    [],
+    DEFAULT_ARRAY_SELECTION_OPTIONS
   );
 
-  const [columns, setColumns] = useLocalStorage<Column[]>(LOCAL_STORAGE_COLS_KEY, [], {
-    id: 'id',
-    criteria: 'isSelected'
-  });
+  const [columns, setColumns] = useLocalStorage<Column[]>(LOCAL_STORAGE_COLS_KEY, [], DEFAULT_ARRAY_SELECTION_OPTIONS);
   const [columnSizes, setColumnSizes] = useLocalStorage<ColumnSizeMap>(LOCAL_STORAGE_COLS_SIZES_KEY, {});
 
   const isFlow = React.useCallback(() => {
@@ -377,12 +376,12 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
 
   const getTopologyMetrics = React.useCallback(() => {
     switch (topologyMetricType) {
-      case 'bytes':
-      case 'packets':
+      case 'Bytes':
+      case 'Packets':
         return metrics.rateMetrics?.[getRateMetricKey(topologyMetricType)];
-      case 'dnsLatencies':
+      case 'DnsLatencyMs':
         return metrics.dnsLatencyMetrics?.[getFunctionMetricKey(topologyMetricFunction)];
-      case 'flowRtt':
+      case 'TimeFlowRttNs':
         return metrics.rttMetrics?.[getFunctionMetricKey(topologyMetricFunction)];
       default:
         return undefined;
@@ -391,10 +390,10 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
 
   const getTopologyDroppedMetrics = React.useCallback(() => {
     switch (topologyMetricType) {
-      case 'bytes':
-      case 'packets':
-      case 'droppedBytes':
-      case 'droppedPackets':
+      case 'Bytes':
+      case 'Packets':
+      case 'PktDropBytes':
+      case 'PktDropPackets':
         return metrics.droppedRateMetrics?.[getRateMetricKey(topologyMetricType)];
       default:
         return undefined;
@@ -407,7 +406,8 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
     (f: Filters) => {
       setFilters(f);
       setFlows([]);
-      setMetrics({});
+      setMetrics(defaultNetflowMetrics);
+      setWarningMessage(undefined);
     },
     [setFilters, setFlows]
   );
@@ -458,25 +458,25 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
 
     if (view !== selectedViewId) {
       setFlows([]);
-      setMetrics({});
+      setMetrics(defaultNetflowMetrics);
     }
     setSelectedViewId(view);
   };
 
-  const onRecordSelect = (record?: Record) => {
+  const onRecordSelect = React.useCallback((record?: Record) => {
     clearSelections();
     setSelectedRecord(record);
-  };
+  }, []);
 
-  const onElementSelect = (element?: GraphElementPeer) => {
+  const onElementSelect = React.useCallback((element?: GraphElementPeer) => {
     clearSelections();
     setSelectedElement(element);
-  };
+  }, []);
 
-  const onToggleQuerySummary = (v: boolean) => {
+  const onToggleQuerySummary = React.useCallback((v: boolean) => {
     clearSelections();
     setShowQuerySummary(v);
-  };
+  }, []);
 
   const buildFlowQuery = React.useCallback((): FlowQuery => {
     const enabledFilters = getEnabledFilters(forcedFilters || filters);
@@ -501,7 +501,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
       query.step = `${info.stepSeconds}s`;
     }
     if (selectedViewId === 'table') {
-      query.type = 'count';
+      query.type = 'Flows';
     } else {
       query.aggregateBy = metricScope;
       if (selectedViewId === 'topology') {
@@ -558,7 +558,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
   const fetchTable = React.useCallback(
     (fq: FlowQuery) => {
       if (!showHistogram) {
-        setMetrics({});
+        setMetrics(defaultNetflowMetrics);
       }
 
       let currentMetrics = metricsRef.current;
@@ -579,7 +579,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
       ];
       if (showHistogram) {
         promises.push(
-          getMetrics({ ...fq, aggregateBy: 'app' }, range).then(res => {
+          getMetrics({ ...fq, function: 'count', aggregateBy: 'app', type: 'Flows' }, range).then(res => {
             const totalFlowCountMetric = res.metrics[0];
             currentMetrics = { ...currentMetrics, totalFlowCountMetric };
             setMetrics(currentMetrics);
@@ -611,11 +611,11 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
         if (!_.isEmpty(ratePanels)) {
           //run queries for bytes / packets rates
           const rateMetrics = initRateMetricKeys(ratePanels.map(p => p.id)) as RateMetrics;
-          (Object.keys(rateMetrics) as (keyof typeof rateMetrics)[]).map(type => {
+          (Object.keys(rateMetrics) as (keyof typeof rateMetrics)[]).map(key => {
             promises.push(
-              getMetrics({ ...fq, type: type === 'bytes' ? 'bytes' : 'packets' }, range).then(res => {
+              getMetrics({ ...fq, function: 'rate', type: key === 'bytes' ? 'Bytes' : 'Packets' }, range).then(res => {
                 //set matching value and apply changes on the entire object to trigger refresh
-                rateMetrics[type] = res.metrics;
+                rateMetrics[key] = res.metrics;
                 currentMetrics = { ...currentMetrics, rateMetrics };
                 setMetrics(currentMetrics);
                 return res.stats;
@@ -627,11 +627,14 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
         const totalRateMetric = initRateMetricKeys(
           [...ratePanels, ...totalDroppedPanels].map(p => p.id)
         ) as TotalRateMetrics;
-        (Object.keys(totalRateMetric) as (keyof typeof totalRateMetric)[]).map(type => {
+        (Object.keys(totalRateMetric) as (keyof typeof totalRateMetric)[]).map(key => {
           promises.push(
-            getMetrics({ ...fq, aggregateBy: 'app', type: type === 'bytes' ? 'bytes' : 'packets' }, range).then(res => {
+            getMetrics(
+              { ...fq, function: 'rate', aggregateBy: 'app', type: key === 'bytes' ? 'Bytes' : 'Packets' },
+              range
+            ).then(res => {
               //set matching value and apply changes on the entire object to trigger refresh
-              totalRateMetric[type] = res.metrics[0];
+              totalRateMetric[key] = res.metrics[0];
               currentMetrics = { ...currentMetrics, totalRateMetric };
               setMetrics(currentMetrics);
               return res.stats;
@@ -647,11 +650,14 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
       if (!_.isEmpty(droppedPanels)) {
         //run same queries for drops
         const droppedRateMetrics = initRateMetricKeys(droppedPanels.map(p => p.id)) as RateMetrics;
-        (Object.keys(droppedRateMetrics) as (keyof typeof droppedRateMetrics)[]).map(type => {
+        (Object.keys(droppedRateMetrics) as (keyof typeof droppedRateMetrics)[]).map(key => {
           promises.push(
-            getMetrics({ ...fq, type: type === 'bytes' ? 'droppedBytes' : 'droppedPackets' }, range).then(res => {
+            getMetrics(
+              { ...fq, function: 'rate', type: key === 'bytes' ? 'PktDropBytes' : 'PktDropPackets' },
+              range
+            ).then(res => {
               //set matching value and apply changes on the entire object to trigger refresh
-              droppedRateMetrics[type] = res.metrics;
+              droppedRateMetrics[key] = res.metrics;
               currentMetrics = { ...currentMetrics, droppedRateMetrics };
               setMetrics(currentMetrics);
               return res.stats;
@@ -660,14 +666,19 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
         });
 
         const totalDroppedRateMetric = initRateMetricKeys(droppedPanels.map(p => p.id)) as TotalRateMetrics;
-        (Object.keys(totalDroppedRateMetric) as (keyof typeof totalDroppedRateMetric)[]).map(type => {
+        (Object.keys(totalDroppedRateMetric) as (keyof typeof totalDroppedRateMetric)[]).map(key => {
           promises.push(
             getMetrics(
-              { ...fq, aggregateBy: 'app', type: type === 'bytes' ? 'droppedBytes' : 'droppedPackets' },
+              {
+                ...fq,
+                function: 'rate',
+                aggregateBy: 'app',
+                type: key === 'bytes' ? 'PktDropBytes' : 'PktDropPackets'
+              },
               range
             ).then(res => {
               //set matching value and apply changes on the entire object to trigger refresh
-              totalDroppedRateMetric[type] = res.metrics[0];
+              totalDroppedRateMetric[key] = res.metrics[0];
               currentMetrics = { ...currentMetrics, totalDroppedRateMetric };
               setMetrics(currentMetrics);
               return res.stats;
@@ -678,12 +689,18 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
         //get drop state & cause
         promises.push(
           ...[
-            getFlowGenericMetrics({ ...fq, type: 'droppedPackets', aggregateBy: 'droppedState' }, range).then(res => {
+            getFlowGenericMetrics(
+              { ...fq, function: 'rate', type: 'PktDropPackets', aggregateBy: 'PktDropLatestState' },
+              range
+            ).then(res => {
               currentMetrics = { ...currentMetrics, droppedStateMetrics: res.metrics };
               setMetrics(currentMetrics);
               return res.stats;
             }),
-            getFlowGenericMetrics({ ...fq, type: 'droppedPackets', aggregateBy: 'droppedCause' }, range).then(res => {
+            getFlowGenericMetrics(
+              { ...fq, function: 'rate', type: 'PktDropPackets', aggregateBy: 'PktDropLatestDropCause' },
+              range
+            ).then(res => {
               currentMetrics = { ...currentMetrics, droppedCauseMetrics: res.metrics };
               setMetrics(currentMetrics);
               return res.stats;
@@ -706,7 +723,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
         const dnsLatencyMetrics = initFunctionMetricKeys(dnsPanels.map(p => p.id)) as FunctionMetrics;
         (Object.keys(dnsLatencyMetrics) as (keyof typeof dnsLatencyMetrics)[]).map(fn => {
           promises.push(
-            getMetrics({ ...fq, function: fn, type: 'dnsLatencies' }, range).then(res => {
+            getMetrics({ ...fq, function: fn, type: 'DnsLatencyMs' }, range).then(res => {
               //set matching value and apply changes on the entire object to trigger refresh
               dnsLatencyMetrics[fn] = res.metrics;
               currentMetrics = { ...currentMetrics, dnsLatencyMetrics };
@@ -719,7 +736,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
         const totalDnsLatencyMetric = initFunctionMetricKeys(dnsPanels.map(p => p.id)) as TotalFunctionMetrics;
         (Object.keys(totalDnsLatencyMetric) as (keyof typeof totalDnsLatencyMetric)[]).map(fn => {
           promises.push(
-            getMetrics({ ...fq, function: fn, aggregateBy: 'app', type: 'dnsLatencies' }, range).then(res => {
+            getMetrics({ ...fq, function: fn, aggregateBy: 'app', type: 'DnsLatencyMs' }, range).then(res => {
               //set matching value and apply changes on the entire object to trigger refresh
               totalDnsLatencyMetric[fn] = res.metrics[0];
               currentMetrics = { ...currentMetrics, totalDnsLatencyMetric };
@@ -734,21 +751,27 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
           promises.push(
             ...[
               //get dns response codes
-              getFlowGenericMetrics({ ...fq, type: 'countDns', aggregateBy: 'dnsRCode' }, range).then(res => {
+              getFlowGenericMetrics(
+                { ...fq, aggregateBy: 'DnsFlagsResponseCode', function: 'count', type: 'DnsFlows' },
+                range
+              ).then(res => {
                 currentMetrics = { ...currentMetrics, dnsRCodeMetrics: res.metrics };
                 setMetrics(currentMetrics);
                 return res.stats;
               }),
-              getMetrics({ ...fq, type: 'countDns', aggregateBy: 'app' }, range).then(res => {
-                currentMetrics = { ...currentMetrics, totalDnsCountMetric: res.metrics[0] };
-                setMetrics(currentMetrics);
-                return res.stats;
-              })
+              getFlowGenericMetrics({ ...fq, aggregateBy: 'app', function: 'count', type: 'DnsFlows' }, range).then(
+                res => {
+                  currentMetrics = { ...currentMetrics, totalDnsCountMetric: res.metrics[0] };
+                  setMetrics(currentMetrics);
+                  return res.stats;
+                }
+              )
             ]
           );
         }
       } else {
         setMetrics({
+          ...currentMetrics,
           dnsLatencyMetrics: undefined,
           dnsRCodeMetrics: undefined,
           totalDnsLatencyMetric: undefined,
@@ -762,7 +785,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
         const rttMetrics = initFunctionMetricKeys(rttPanels.map(p => p.id)) as FunctionMetrics;
         (Object.keys(rttMetrics) as (keyof typeof rttMetrics)[]).map(fn => {
           promises.push(
-            getMetrics({ ...fq, function: fn, type: 'flowRtt' }, range).then(res => {
+            getMetrics({ ...fq, function: fn, type: 'TimeFlowRttNs' }, range).then(res => {
               //set matching value and apply changes on the entire object to trigger refresh
               rttMetrics[fn] = res.metrics;
               currentMetrics = { ...currentMetrics, rttMetrics };
@@ -775,7 +798,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
         const totalRttMetric = initFunctionMetricKeys(rttPanels.map(p => p.id)) as TotalFunctionMetrics;
         (Object.keys(totalRttMetric) as (keyof typeof totalRttMetric)[]).map(fn => {
           promises.push(
-            getMetrics({ ...fq, function: fn, aggregateBy: 'app', type: 'flowRtt' }, range).then(res => {
+            getMetrics({ ...fq, function: fn, aggregateBy: 'app', type: 'TimeFlowRttNs' }, range).then(res => {
               //set matching value and apply changes on the entire object to trigger refresh
               totalRttMetric[fn] = res.metrics[0];
               currentMetrics = { ...currentMetrics, totalRttMetric };
@@ -787,9 +810,62 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
       } else {
         setMetrics({ ...currentMetrics, rttMetrics: undefined, totalRttMetric: undefined });
       }
+
+      const customPanels = selectedPanels.filter(p => p.id.startsWith(CUSTOM_PANEL_MATCHER));
+      if (!_.isEmpty(customPanels)) {
+        //set custom metrics
+        customPanels
+          .map(p => p.id)
+          .forEach(id => {
+            const parsedId = parseCustomMetricId(id);
+            const key = id.replaceAll(CUSTOM_PANEL_MATCHER + '_', '');
+            const getMetricFunc = parsedId.aggregateBy ? getFlowGenericMetrics : getMetrics;
+            if (parsedId.isValid) {
+              promises.push(
+                ...[
+                  getMetricFunc(
+                    {
+                      ...fq,
+                      type: parsedId.type,
+                      function: parsedId.fn,
+                      aggregateBy: parsedId.aggregateBy || metricScope
+                    },
+                    range
+                  ).then(res => {
+                    //set matching value and apply changes on the entire object to trigger refresh
+                    currentMetrics = {
+                      ...currentMetrics,
+                      customMetrics: currentMetrics.customMetrics.set(key, res.metrics)
+                    };
+                    setMetrics(currentMetrics);
+                    return res.stats;
+                  }),
+                  getMetricFunc(
+                    {
+                      ...fq,
+                      type: parsedId.type,
+                      function: parsedId.fn,
+                      aggregateBy: 'app'
+                    },
+                    range
+                  ).then(res => {
+                    //set matching value and apply changes on the entire object to trigger refresh
+                    currentMetrics = {
+                      ...currentMetrics,
+                      totalCustomMetrics: currentMetrics.totalCustomMetrics.set(key, res.metrics[0])
+                    };
+                    setMetrics(currentMetrics);
+                    return res.stats;
+                  })
+                ]
+              );
+            }
+          });
+      }
+
       return Promise.all(promises);
     },
-    [getSelectedPanels, getFetchFunctions, config.features, range]
+    [getSelectedPanels, getFetchFunctions, config.features, range, metricScope]
   );
 
   const fetchTopology = React.useCallback(
@@ -797,10 +873,10 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
       setFlows([]);
 
       const droppedType = config.features.includes('pktDrop')
-        ? fq.type === 'bytes'
-          ? 'droppedBytes'
-          : fq.type === 'packets'
-          ? 'droppedPackets'
+        ? fq.type === 'Bytes'
+          ? 'PktDropBytes'
+          : fq.type === 'Packets'
+          ? 'PktDropPackets'
           : undefined
         : undefined;
       let currentMetrics = metricsRef.current;
@@ -810,26 +886,26 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
         getMetrics(
           {
             ...fq,
-            function: isTimeMetric(topologyMetricType) ? topologyMetricFunction : undefined
+            function: isTimeMetric(topologyMetricType) ? (topologyMetricFunction as MetricFunction) : 'rate'
           },
           range
         ).then(res => {
-          if (['bytes', 'packets'].includes(topologyMetricType)) {
+          if (['Bytes', 'Packets'].includes(topologyMetricType)) {
             const rateMetrics = {} as RateMetrics;
             rateMetrics[getRateMetricKey(topologyMetricType)] = res.metrics;
             currentMetrics = { ...currentMetrics, rateMetrics, dnsLatencyMetrics: undefined, rttMetrics: undefined };
             setMetrics(currentMetrics);
-          } else if (['droppedBytes', 'droppedPackets'].includes(topologyMetricType)) {
+          } else if (['PktDropBytes', 'PktDropPackets'].includes(topologyMetricType)) {
             const droppedRateMetrics = {} as RateMetrics;
             droppedRateMetrics[getRateMetricKey(topologyMetricType)] = res.metrics;
             currentMetrics = { ...currentMetrics, droppedRateMetrics };
             setMetrics(currentMetrics);
-          } else if (['dnsLatencies'].includes(topologyMetricType)) {
+          } else if (['DnsLatencyMs'].includes(topologyMetricType)) {
             const dnsLatencyMetrics = {} as FunctionMetrics;
             dnsLatencyMetrics[getFunctionMetricKey(topologyMetricFunction)] = res.metrics;
             currentMetrics = { ...currentMetrics, rateMetrics: undefined, dnsLatencyMetrics, rttMetrics: undefined };
             setMetrics(currentMetrics);
-          } else if (['flowRtt'].includes(topologyMetricType)) {
+          } else if (['TimeFlowRttNs'].includes(topologyMetricType)) {
             const rttMetrics = {} as FunctionMetrics;
             rttMetrics[getFunctionMetricKey(topologyMetricFunction)] = res.metrics;
             currentMetrics = { ...currentMetrics, rateMetrics: undefined, dnsLatencyMetrics: undefined, rttMetrics };
@@ -849,7 +925,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
             return res.stats;
           })
         );
-      } else if (!['droppedBytes', 'droppedPackets'].includes(topologyMetricType)) {
+      } else if (!['PktDropBytes', 'PktDropPackets'].includes(topologyMetricType)) {
         currentMetrics = { ...currentMetrics, droppedRateMetrics: undefined };
         setMetrics(currentMetrics);
       }
@@ -902,7 +978,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
           })
           .catch(err => {
             setFlows([]);
-            setMetrics({});
+            setMetrics(defaultNetflowMetrics);
             setError(getHTTPErrorDetails(err));
             setWarningMessage(undefined);
           })
@@ -942,10 +1018,18 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
   React.useEffect(() => {
     if (initState.current.includes('configLoaded')) {
       setColumns(
-        getLocalStorage(LOCAL_STORAGE_COLS_KEY, getDefaultColumns(config.columns, config.fields), {
-          id: 'id',
-          criteria: 'isSelected'
-        })
+        getLocalStorage(
+          LOCAL_STORAGE_COLS_KEY,
+          getDefaultColumns(config.columns, config.fields),
+          DEFAULT_ARRAY_SELECTION_OPTIONS
+        )
+      );
+      setPanels(
+        getLocalStorage(
+          LOCAL_STORAGE_OVERVIEW_IDS_KEY,
+          getDefaultOverviewPanels(config.panels),
+          DEFAULT_ARRAY_SELECTION_OPTIONS
+        )
       );
       setFiltersFromURL(config);
     }
@@ -1377,9 +1461,6 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
     }
   };
 
-  const resetText = t('Reset defaults');
-  const clearText = t('Clear all');
-
   const filterLinks = React.useCallback(() => {
     const defFilters = getDefaultFilters();
     return (
@@ -1388,22 +1469,22 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
         items={[
           {
             id: 'reset-filters',
-            label: resetText,
+            label: t('Reset defaults'),
             onClick: resetDefaultFilters,
             enabled: defFilters.length > 0 && !filtersEqual(filters.list, defFilters)
           },
           {
             id: 'clear-all-filters',
-            label: clearText,
+            label: t('Clear all'),
             onClick: clearFilters,
             enabled: filters.list.length > 0
           }
         ]}
       />
     );
-  }, [getDefaultFilters, filters, resetText, clearText, clearFilters, resetDefaultFilters]);
+  }, [getDefaultFilters, t, resetDefaultFilters, filters.list, clearFilters]);
 
-  const pageContent = () => {
+  const pageContent = React.useCallback(() => {
     let content: JSX.Element | null = null;
     switch (selectedViewId) {
       case 'overview':
@@ -1515,7 +1596,49 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
         </FlexItem>
       </Flex>
     );
-  };
+  }, [
+    columnSizes,
+    columns,
+    error,
+    filterLinks,
+    filters,
+    flows,
+    getFilterDefs,
+    getSelectedColumns,
+    getSelectedPanels,
+    getTopologyDroppedMetrics,
+    getTopologyMetrics,
+    isDarkTheme,
+    isPktDrop,
+    isShowQuerySummary,
+    k8sModels,
+    lastRefresh,
+    limit,
+    loading,
+    metricScope,
+    metrics,
+    onElementSelect,
+    onRecordSelect,
+    onToggleQuerySummary,
+    overviewFocus,
+    overviewTruncateLength,
+    range,
+    recordType,
+    searchEvent,
+    selectedElement,
+    selectedRecord,
+    selectedViewId,
+    setColumnSizes,
+    setColumns,
+    setMetricScope,
+    setOverviewFocus,
+    setTopologyOptions,
+    size,
+    stats,
+    topologyMetricFunction,
+    topologyMetricType,
+    topologyOptions
+  ]);
 
   //update data on filters changes
   React.useEffect(() => {
@@ -1810,7 +1933,8 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
             setModalOpen={setOverviewModalOpen}
             recordType={recordType}
             panels={getAvailablePanels()}
-            setPanels={setSelectedPanels}
+            setPanels={setPanels}
+            customIds={config.panels}
           />
           <ColumnsModal
             id="columns-modal"

@@ -28,7 +28,7 @@ import { NamedMetric, TopologyMetrics } from '../../api/loki';
 import { TimeRange } from '../../utils/datetime';
 import { getDateMsInSeconds } from '../../utils/duration';
 import { LOCAL_STORAGE_HISTOGRAM_GUIDED_TOUR_DONE_KEY, useLocalStorage } from '../../utils/local-storage-hook';
-import { getFormattedRateValue } from '../../utils/metrics';
+import { getFormattedValue } from '../../utils/metrics';
 import { TruncateLength } from '../dropdowns/truncate-dropdown';
 import { GuidedTourHandle } from '../guided-tour/guided-tour';
 import BrushHandleComponent from './brush-handle';
@@ -409,7 +409,7 @@ export const Histogram: React.FC<{
           dependentAxis
           showGrid
           fixLabelOverlap
-          tickFormat={y => getFormattedRateValue(y, 'count', t)}
+          tickFormat={y => getFormattedValue(y, 'Flows', 'sum', t)}
         />
         <ChartStack>
           <ChartBar

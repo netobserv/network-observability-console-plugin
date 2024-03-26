@@ -10,8 +10,8 @@ describe('<StatDonut />', () => {
   const props: MetricsDonutProps = {
     id: 'donut-test',
     limit: 5,
-    metricType: 'bytes',
-    metricFunction: 'avg',
+    metricType: 'Bytes',
+    metricFunction: 'rate',
     topKMetrics: metrics.map(m => ({ ...m, fullName: 'whatever', shortName: 'whatever', isInternal: false })),
     totalMetric: { stats: { avg: 500 } } as NamedMetric,
     showInternal: true,

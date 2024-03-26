@@ -228,7 +228,9 @@ export const SummaryPanelContent: React.FC<{
           typesCardinality.push(tc);
         });
 
-      addresses = Array.from(new Set(flows.map(f => f.fields.SrcAddr).concat(flows.map(f => f.fields.DstAddr))));
+      addresses = Array.from(
+        new Set(flows.map(f => f.fields.SrcAddr || '').concat(flows.map(f => f.fields.DstAddr || '')))
+      );
       ports = Array.from(
         new Set(
           flows
@@ -237,7 +239,7 @@ export const SummaryPanelContent: React.FC<{
             .concat(flows.filter(f => f.fields.DstPort).map(f => f.fields.DstPort)) as number[]
         )
       );
-      protocols = Array.from(new Set(flows.map(f => f.fields.Proto)));
+      protocols = Array.from(new Set(flows.map(f => f.fields.Proto || NaN)));
     } else if (rateMetrics) {
       function manageTypeCardinality(hostName?: string, namespace?: string, type?: string, name?: string) {
         if (namespace && !namespaces.includes(namespace)) {
@@ -326,7 +328,7 @@ export const SummaryPanelContent: React.FC<{
                 'protocols',
                 t('{{count}} Protocol(s)', { count: protocols.length }),
                 listCardinalityContent(
-                  protocols.map(p => formatProtocol(p)),
+                  protocols.map(p => formatProtocol(p, t)),
                   compareStrings
                 )
               )
@@ -367,12 +369,14 @@ export const SummaryPanelContent: React.FC<{
   const timeContent = () => {
     const filteredFlows = flows || [];
     const duration = filteredFlows.length
-      ? filteredFlows.map(f => f.fields.TimeFlowEndMs - f.fields.TimeFlowStartMs).reduce((a, b) => a + b, 0) /
-        filteredFlows.length
+      ? filteredFlows
+          .map(f => (f.fields.TimeFlowEndMs || 0) - (f.fields.TimeFlowStartMs || 0))
+          .reduce((a, b) => a + b, 0) / filteredFlows.length
       : 0;
     const collectionLatency = filteredFlows.length
-      ? filteredFlows.map(f => f.fields.TimeReceived * 1000 - f.fields.TimeFlowEndMs).reduce((a, b) => a + b, 0) /
-        filteredFlows.length
+      ? filteredFlows
+          .map(f => (f.fields.TimeReceived || 0) * 1000 - (f.fields.TimeFlowEndMs || 0))
+          .reduce((a, b) => a + b, 0) / filteredFlows.length
       : 0;
 
     return flows && flows.length ? (
