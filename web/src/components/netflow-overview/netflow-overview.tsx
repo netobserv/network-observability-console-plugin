@@ -13,16 +13,18 @@ import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { LOCAL_STORAGE_OVERVIEW_KEBAB_KEY, useLocalStorage } from '../../utils/local-storage-hook';
-import { NetflowMetrics } from '../../api/loki';
+import { GenericMetric, isValidTopologyMetrics, NamedMetric, NetflowMetrics, TopologyMetrics } from '../../api/loki';
 import { RecordType } from '../../model/flow-query';
 import { getStat } from '../../model/metrics';
 import {
+  CUSTOM_PANEL_MATCHER,
   getFunctionFromId,
   getOverviewPanelInfo,
   getRateFunctionFromId,
   OverviewPanel,
   OverviewPanelId,
-  OverviewPanelInfo
+  OverviewPanelInfo,
+  parseCustomMetricId
 } from '../../utils/overview-panels';
 import { TruncateLength } from '../dropdowns/truncate-dropdown';
 import LokiError from '../messages/loki-error';
@@ -35,6 +37,11 @@ import './netflow-overview.css';
 import { PanelKebab, PanelKebabOptions } from './panel-kebab';
 import { usePrevious } from '../../utils/previous-hook';
 import { convertRemToPixels } from '../../utils/panel';
+import { Field, FlowDirection, getDirectionDisplayString } from '../../api/ipfix';
+import { formatPort } from '../../utils/port';
+import { formatProtocol } from '../../utils/protocol';
+import { getDSCPServiceClassName } from '../../utils/dscp';
+import { getDNSRcodeDescription, getDNSErrorDescription } from '../../utils/dns';
 
 type PanelContent = {
   calculatedTitle?: string;
@@ -214,10 +221,9 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
     return metrics.dnsRCodeMetrics?.sort((a, b) => getStat(b.stats, 'sum') - getStat(a.stats, 'sum')) || [];
   }, [metrics.dnsRCodeMetrics]);
 
-  const getNamedDnsCountTotalMetric = React.useCallback(() => {
-    const metric = metrics.totalDnsCountMetric;
-    return metric ? toNamedMetric(t, metric, truncateLength, false, false) : undefined;
-  }, [metrics.totalDnsCountMetric, t, truncateLength]);
+  const getDnsCountTotalMetric = React.useCallback(() => {
+    return metrics.totalDnsCountMetric;
+  }, [metrics.totalDnsCountMetric]);
 
   const getTopKMetrics = React.useCallback(
     (id: OverviewPanelId) => {
@@ -259,6 +265,70 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
     [getTotalMetric, t, truncateLength]
   );
 
+  const getGenericMetricName = React.useCallback(
+    (field: Field, value: string) => {
+      switch (field) {
+        case 'SrcPort':
+        case 'DstPort':
+          return formatPort(Number(value));
+        case 'Proto':
+          return formatProtocol(Number(value), t);
+        case 'Dscp':
+          return getDSCPServiceClassName(Number(value)) || value;
+        case 'FlowDirection':
+          return getDirectionDisplayString(value as FlowDirection, t);
+        case 'DnsFlagsResponseCode':
+          return getDNSRcodeDescription(value);
+        case 'DnsErrno':
+          const err = getDNSErrorDescription(Number(value));
+          return err !== '' ? err : t('n/a');
+        default:
+          return value !== '' ? value : t('n/a');
+      }
+    },
+    [t]
+  );
+
+  const getTopKCustomMetrics = React.useCallback(
+    (id: string) => {
+      return metrics.customMetrics.get(id.replaceAll(CUSTOM_PANEL_MATCHER + '_', '')) || [];
+    },
+    [metrics.customMetrics]
+  );
+
+  const getNamedTopKCustomMetrics = React.useCallback(
+    (id: string) => {
+      const metrics = getTopKCustomMetrics(id);
+      return (metrics
+        .sort((a, b) => getStat(b.stats, 'sum') - getStat(a.stats, 'sum'))
+        .map(metric => {
+          if (isValidTopologyMetrics(metric)) {
+            return toNamedMetric(t, metric, truncateLength, true, true);
+          }
+          return { ...metric, name: getGenericMetricName(metric.aggregateBy, metric.name) };
+        }) || []) as NamedMetric[] | GenericMetric[];
+    },
+    [getGenericMetricName, getTopKCustomMetrics, t, truncateLength]
+  );
+
+  const getTotalCustomMetrics = React.useCallback(
+    (id: string) => {
+      return metrics.totalCustomMetrics.get(id.replaceAll(CUSTOM_PANEL_MATCHER + '_', ''));
+    },
+    [metrics.totalCustomMetrics]
+  );
+
+  const getNamedTotalCustomMetric = React.useCallback(
+    (id: OverviewPanelId) => {
+      const metric = getTotalCustomMetrics(id);
+      if (isValidTopologyMetrics(metric)) {
+        return metric ? toNamedMetric(t, metric as TopologyMetrics, truncateLength, false, false) : undefined;
+      }
+      return metric;
+    },
+    [getTotalCustomMetrics, t, truncateLength]
+  );
+
   const smallerTexts = truncateLength >= TruncateLength.M;
   const getPanelContent = React.useCallback(
     (id: OverviewPanelId, info: OverviewPanelInfo, isFocus: boolean, animate: boolean): PanelContent => {
@@ -286,7 +356,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
               type: 'donut'
             }
           });
-          const metricType = id.endsWith('byte_rates') ? 'bytes' : 'packets';
+          const metricType = id.endsWith('byte_rates') ? 'Bytes' : 'Packets';
           const metrics = getTopKRateMetrics(id);
           const namedTotalMetric = getNamedTotalRateMetric(id);
           return {
@@ -297,10 +367,11 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
                   subTitle={info.subtitle}
                   limit={limit}
                   metricType={metricType}
-                  metricFunction={options.showLast! ? 'last' : getFunctionFromId(id)}
+                  metricFunction={'rate'}
                   topKMetrics={metrics}
                   totalMetric={namedTotalMetric}
                   showOthers={options.showOthers!}
+                  showLast={options.showLast}
                   showInternal={options.showInternal!}
                   showOutOfScope={options.showOutOfScope!}
                   smallerTexts={smallerTexts}
@@ -332,7 +403,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
           });
           const showTopOnly = options.showTop && !options.showApp?.value && !options.showAppDrop?.value;
           const showTotalOnly = !options.showTop && options.showApp!.value;
-          const metricType = id.endsWith('byte_rates') ? 'bytes' : 'packets';
+          const metricType = id.endsWith('byte_rates') ? 'Bytes' : 'Packets';
           const topKMetrics = getNoInternalTopKRateMetrics(id);
           const namedTotalMetric = getNamedTotalRateMetric(id.replace('dropped_', '') as OverviewPanelId);
           const namedTotalDroppedMetric = getNamedTotalRateMetric(id);
@@ -343,7 +414,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
                 id={id}
                 metricType={metricType}
                 metrics={topKMetrics}
-                metricFunction="avg"
+                metricFunction="rate"
                 limit={limit}
                 showBar={false}
                 showArea={true}
@@ -360,7 +431,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
               <MetricsGraphWithTotal
                 id={id}
                 metricType={metricType}
-                metricFunction="avg"
+                metricFunction="rate"
                 topKMetrics={topKMetrics}
                 totalMetric={namedTotalMetric}
                 totalDropMetric={namedTotalDroppedMetric}
@@ -387,7 +458,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
         case 'state_dropped_packet_rates':
         case 'cause_dropped_packet_rates': {
           const isState = id === 'state_dropped_packet_rates';
-          const metricType = 'packets'; // TODO: consider adding bytes graphs here
+          const metricType = 'Packets'; // TODO: consider adding bytes graphs here
           const topKMetrics = isState ? getTopKDroppedStateMetrics() : getTopKDroppedCauseMetrics();
           const namedTotalMetric = getNamedTotalRateMetric(id);
           const options = getKebabOptions(id, {
@@ -408,7 +479,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
                   subTitle={info.subtitle}
                   limit={limit}
                   metricType={metricType}
-                  metricFunction="avg"
+                  metricFunction="rate"
                   topKMetrics={topKMetrics}
                   totalMetric={namedTotalMetric}
                   showOthers={options.showOthers!}
@@ -421,7 +492,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
                 <MetricsGraph
                   id={id}
                   metricType={metricType}
-                  metricFunction="avg"
+                  metricFunction="rate"
                   metrics={topKMetrics}
                   limit={limit}
                   showBar={false}
@@ -439,7 +510,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
                 <MetricsGraphWithTotal
                   id={id}
                   metricType={metricType}
-                  metricFunction="avg"
+                  metricFunction="rate"
                   topKMetrics={topKMetrics}
                   totalMetric={namedTotalMetric}
                   limit={limit}
@@ -472,13 +543,13 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
         case 'top_p99_rtt':
         case 'bottom_min_rtt': {
           const isAvg = id.includes('_avg_');
-          const metricType = id.endsWith('bytes')
-            ? 'bytes'
-            : id.endsWith('packets')
-            ? 'packets'
+          const metricType = id.endsWith('Bytes')
+            ? 'Bytes'
+            : id.endsWith('Packets')
+            ? 'Packets'
             : id.endsWith('dns_latency')
-            ? 'dnsLatencies'
-            : 'flowRtt';
+            ? 'DnsLatencyMs'
+            : 'TimeFlowRttNs';
           const metrics = getTopKMetrics(id);
           const namedTotalMetric = getNamedTotalMetric(id);
           const options = getKebabOptions(id, {
@@ -541,9 +612,9 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
           };
         }
         case 'rcode_dns_latency_flows': {
-          const metricType = 'countDns'; // TODO: consider adding packets graphs here
+          const metricType = 'DnsFlows'; // TODO: consider adding packets graphs here
           const topKMetrics = getTopKDnsRCodeMetrics();
-          const namedTotalMetric = getNamedDnsCountTotalMetric();
+          const namedTotalMetric = getDnsCountTotalMetric();
           const options = getKebabOptions(id, {
             showNoError: true,
             showTop: true,
@@ -601,12 +672,78 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
             doubleWidth: options.graph!.type !== 'donut'
           };
         }
+        default: {
+          const parsedId = parseCustomMetricId(id);
+          if (parsedId.isValid) {
+            const metricType = parsedId.type!;
+            const metricFunction = parsedId.fn || 'avg';
+            const topKMetrics = getNamedTopKCustomMetrics(id);
+            const namedTotalMetric = getNamedTotalCustomMetric(id);
+            const options = getKebabOptions(id, {
+              showTop: true,
+              showApp: { text: t('Show total'), value: true },
+              graph: { options: ['bar_line', 'donut'], type: 'donut' }
+            });
+            const isDonut = options!.graph!.type === 'donut';
+            const showTopOnly = isDonut || (options.showTop && !options.showApp!.value);
+            const showTotalOnly = !options.showTop && options.showApp!.value;
+            return {
+              calculatedTitle: showTopOnly ? info.topTitle : showTotalOnly ? info.totalTitle : undefined,
+              element:
+                !_.isEmpty(topKMetrics) && namedTotalMetric ? (
+                  isDonut ? (
+                    <MetricsDonut
+                      id={id}
+                      subTitle={info.subtitle}
+                      limit={limit}
+                      metricType={metricType}
+                      metricFunction={metricFunction}
+                      topKMetrics={topKMetrics}
+                      totalMetric={namedTotalMetric}
+                      showOthers={false}
+                      smallerTexts={smallerTexts}
+                      showLegend={!isFocus}
+                      animate={animate}
+                      isDark={isDark}
+                    />
+                  ) : (
+                    <MetricsGraphWithTotal
+                      id={id}
+                      metricType={metricType}
+                      metricFunction={metricFunction}
+                      topKMetrics={topKMetrics}
+                      totalMetric={namedTotalMetric}
+                      limit={limit}
+                      topAsBars={true}
+                      showTop={options.showTop!}
+                      showTotal={options.showApp!.value}
+                      showOthers={false}
+                      smallerTexts={smallerTexts}
+                      showTotalDrop={false}
+                      showLegend={!isFocus}
+                      animate={animate}
+                      isDark={isDark}
+                    />
+                  )
+                ) : (
+                  emptyGraph()
+                ),
+              kebab: <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} />,
+              bodyClassSmall: options.graph!.type === 'donut',
+              doubleWidth: options.graph!.type !== 'donut'
+            };
+          } else {
+            return {
+              element: <></>
+            };
+          }
+        }
       }
     },
     [
       emptyGraph,
       getKebabOptions,
-      getNamedDnsCountTotalMetric,
+      getDnsCountTotalMetric,
       getNamedTotalMetric,
       getNamedTotalRateMetric,
       getNoInternalTopKRateMetrics,
@@ -615,6 +752,8 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
       getTopKDroppedStateMetrics,
       getTopKMetrics,
       getTopKRateMetrics,
+      getNamedTopKCustomMetrics,
+      getNamedTotalCustomMetric,
       isDark,
       limit,
       setKebabOptions,
@@ -672,7 +811,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
       recordType,
       wasAllowFocus,
       previousSelectedPanel,
-      selectedPanel?.id,
+      selectedPanel,
       panels,
       allowFocus,
       getPanelContent,

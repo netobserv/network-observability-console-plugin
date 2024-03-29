@@ -2,7 +2,7 @@ import { ChartDonut, ChartLabel, ChartLegend, ChartThemeColor } from '@patternfl
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { GenericMetric, MetricStats, NamedMetric } from '../../api/loki';
-import { MetricFunction, MetricType } from '../../model/flow-query';
+import { MetricType, MetricFunction } from '../../model/flow-query';
 import { getStat } from '../../model/metrics';
 import { LOCAL_STORAGE_OVERVIEW_DONUT_DIMENSION_KEY, useLocalStorage } from '../../utils/local-storage-hook';
 import { getFormattedValue, isUnknownPeer } from '../../utils/metrics';
@@ -16,9 +16,10 @@ export type MetricsDonutProps = {
   metricType: MetricType;
   metricFunction: MetricFunction;
   topKMetrics: GenericMetric[] | NamedMetric[];
-  totalMetric: NamedMetric;
+  totalMetric: GenericMetric | NamedMetric;
   showOthers: boolean;
   othersName?: string;
+  showLast?: boolean;
   showInternal?: boolean;
   showOutOfScope?: boolean;
   smallerTexts?: boolean;
@@ -37,6 +38,7 @@ export const MetricsDonut: React.FC<MetricsDonutProps> = ({
   totalMetric,
   showOthers,
   othersName,
+  showLast,
   showInternal,
   showOutOfScope,
   smallerTexts,
@@ -47,10 +49,10 @@ export const MetricsDonut: React.FC<MetricsDonutProps> = ({
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   const getStats = React.useCallback(
-    (s: MetricStats) => {
-      return metricType.startsWith('count') ? s.sum : getStat(s, metricFunction);
+    (stats: MetricStats) => {
+      return getStat(stats, showLast ? 'last' : metricFunction);
     },
-    [metricFunction, metricType]
+    [metricFunction, showLast]
   );
 
   let total = getStats(totalMetric.stats);

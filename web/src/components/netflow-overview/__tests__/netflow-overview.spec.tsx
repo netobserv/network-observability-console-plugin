@@ -18,7 +18,10 @@ describe('<NetflowOverview />', () => {
     error: undefined as string | undefined,
     loading: false,
     recordType: 'flowLog' as RecordType,
-    metrics: {},
+    metrics: {
+      customMetrics: new Map(),
+      totalCustomMetrics: new Map()
+    },
     filterActionLinks: <></>,
     truncateLength: TruncateLength.M
   };

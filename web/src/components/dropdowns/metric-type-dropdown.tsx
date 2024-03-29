@@ -16,16 +16,16 @@ export const MetricTypeDropdown: React.FC<{
   const [metricDropdownOpen, setMetricDropdownOpen] = React.useState(false);
 
   const getMetricTypeOptions = React.useCallback(() => {
-    let options: MetricType[] = ['bytes', 'packets'];
+    let options: MetricType[] = ['Bytes', 'Packets'];
     if (isTopology) {
       if (allowPktDrop) {
-        options = options.concat('droppedBytes', 'droppedPackets');
+        options = options.concat('PktDropBytes', 'PktDropPackets');
       }
       if (allowDNSMetric) {
-        options.push('dnsLatencies');
+        options.push('DnsLatencyMs');
       }
       if (allowRTTMetric) {
-        options.push('flowRtt');
+        options.push('TimeFlowRttNs');
       }
     }
     return options;
@@ -34,17 +34,17 @@ export const MetricTypeDropdown: React.FC<{
   const getMetricDisplay = React.useCallback(
     (metricType: MetricType): string => {
       switch (metricType) {
-        case 'bytes':
+        case 'Bytes':
           return t('Bytes');
-        case 'droppedBytes':
+        case 'PktDropBytes':
           return t('Dropped bytes');
-        case 'packets':
+        case 'Packets':
           return t('Packets');
-        case 'droppedPackets':
+        case 'PktDropPackets':
           return t('Dropped packets');
-        case 'dnsLatencies':
+        case 'DnsLatencyMs':
           return t('DNS latencies');
-        case 'flowRtt':
+        case 'TimeFlowRttNs':
           return t('RTT');
         default:
           throw new Error('getMetricDisplay called with invalid metricType: ' + metricType);

@@ -3,9 +3,9 @@ import { FilterDefinitionSample } from '../../components/__tests-data__/filters'
 
 describe('formatProtocol', () => {
   it('should format protocol', () => {
-    expect(formatProtocol(6)).toEqual('TCP');
-    expect(formatProtocol(17)).toEqual('UDP');
-    expect(formatProtocol(0)).toEqual('HOPOPT');
+    expect(formatProtocol(6, v => v)).toEqual('TCP');
+    expect(formatProtocol(17, v => v)).toEqual('UDP');
+    expect(formatProtocol(0, v => v)).toEqual('HOPOPT');
   });
 });
 

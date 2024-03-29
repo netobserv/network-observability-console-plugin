@@ -96,6 +96,7 @@ type Frontend struct {
 	BuildDate       string        `yaml:"buildDate" json:"buildDate"`
 	RecordTypes     []string      `yaml:"recordTypes" json:"recordTypes"`
 	PortNaming      PortNaming    `yaml:"portNaming" json:"portNaming"`
+	Panels          []string      `yaml:"panels" json:"panels"`
 	Columns         []Column      `yaml:"columns" json:"columns"`
 	Filters         []Filter      `yaml:"filters" json:"filters"`
 	QuickFilters    []QuickFilter `yaml:"quickFilters" json:"quickFilters"`
@@ -130,6 +131,7 @@ func ReadConfigFile(version, date, filename string) (*Config, error) {
 			BuildVersion: version,
 			BuildDate:    date,
 			RecordTypes:  []string{"flowLog"},
+			Panels:       []string{},
 			Columns: []Column{
 				{ID: "EndTime", Name: "End Time", Field: "TimeFlowEndMs", Default: true, Width: 15},
 				{ID: "SrcAddr", Name: "IP", Group: "Source", Field: "SrcAddr", Default: true, Width: 15},

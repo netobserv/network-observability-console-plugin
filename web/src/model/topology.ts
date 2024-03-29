@@ -21,7 +21,7 @@ import { TFunction } from 'i18next';
 import { K8sModel } from '@openshift-console/dynamic-plugin-sdk';
 import { getTopologyEdgeId } from '../utils/ids';
 import { getStat, MetricScopeOptions } from './metrics';
-import { MetricFunction, FlowScope, MetricType, NodeType } from './flow-query';
+import { StatFunction, FlowScope, MetricType, NodeType, MetricFunction } from './flow-query';
 import { createPeer, getFormattedValue } from '../utils/metrics';
 import { TruncateLength } from '../components/dropdowns/truncate-dropdown';
 
@@ -103,7 +103,7 @@ export interface TopologyOptions {
   groupTypes: TopologyGroupTypes;
   lowScale: number;
   medScale: number;
-  metricFunction: MetricFunction;
+  metricFunction: StatFunction;
   metricType: MetricType;
 }
 
@@ -389,7 +389,14 @@ const getEdgeStyle = (count: number) => {
 
 const getEdgeTag = (value: number, options: TopologyOptions, t: TFunction) => {
   if (options.edgeTags && value) {
-    return getFormattedValue(value, options.metricType, options.metricFunction, t);
+    let metricFunction = options.metricFunction as MetricFunction;
+    if (
+      options.metricFunction !== 'sum' &&
+      ['Bytes', 'Packets', 'PktDropBytes', 'PktDropPackets'].includes(options.metricType)
+    ) {
+      metricFunction = 'rate';
+    }
+    return getFormattedValue(value, options.metricType, metricFunction, t);
   }
   return undefined;
 };

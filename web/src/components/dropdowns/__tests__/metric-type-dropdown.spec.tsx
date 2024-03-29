@@ -5,7 +5,7 @@ import MetricTypeDropdown from '../metric-type-dropdown';
 
 describe('<MetricDropdown />', () => {
   const props = {
-    selected: 'bytes',
+    selected: 'Bytes',
     setMetricType: jest.fn(),
     id: 'metric'
   };
@@ -35,14 +35,14 @@ describe('<MetricDropdown />', () => {
     const dropdown = wrapper.find('#metric-dropdown');
     //open dropdown and select PACKETS
     dropdown.at(0).simulate('click');
-    wrapper.find('[id="packets"]').at(0).simulate('click');
-    expect(props.setMetricType).toHaveBeenCalledWith('packets');
+    wrapper.find('[id="Packets"]').at(0).simulate('click');
+    expect(props.setMetricType).toHaveBeenCalledWith('Packets');
     expect(wrapper.find('li').length).toBe(0);
 
     //open dropdown and select BYTES
     dropdown.at(0).simulate('click');
-    wrapper.find('[id="bytes"]').at(0).simulate('click');
-    expect(props.setMetricType).toHaveBeenCalledWith('bytes');
+    wrapper.find('[id="Bytes"]').at(0).simulate('click');
+    expect(props.setMetricType).toHaveBeenCalledWith('Bytes');
     expect(wrapper.find('li').length).toBe(0);
 
     //setMetricType should be called twice

@@ -9,7 +9,14 @@ import { valueFormat } from '../../utils/format';
 import './query-summary.css';
 import StatsQuerySummary from './stats-query-summary';
 
-const EXPOSED_METRICS: MetricType[] = ['bytes', 'packets', 'droppedBytes', 'droppedPackets', 'dnsLatencies', 'flowRtt'];
+const EXPOSED_METRICS: MetricType[] = [
+  'Bytes',
+  'Packets',
+  'PktDropBytes',
+  'PktDropPackets',
+  'DnsLatencyMs',
+  'TimeFlowRttNs'
+];
 
 export const MetricsQuerySummaryContent: React.FC<{
   metrics: NetflowMetrics;
@@ -43,15 +50,15 @@ export const MetricsQuerySummaryContent: React.FC<{
   const getMetrics = React.useCallback(
     (metricType: MetricType) => {
       switch (metricType) {
-        case 'bytes':
-        case 'packets':
+        case 'Bytes':
+        case 'Packets':
           return metrics.rateMetrics?.[getRateMetricKey(metricType)];
-        case 'droppedBytes':
-        case 'droppedPackets':
+        case 'PktDropBytes':
+        case 'PktDropPackets':
           return metrics.droppedRateMetrics?.[getRateMetricKey(metricType)];
-        case 'dnsLatencies':
+        case 'DnsLatencyMs':
           return metrics.dnsLatencyMetrics?.avg;
-        case 'flowRtt':
+        case 'TimeFlowRttNs':
           return metrics.rttMetrics?.avg;
         default:
           return undefined;
@@ -63,15 +70,15 @@ export const MetricsQuerySummaryContent: React.FC<{
   const getAppMetrics = React.useCallback(
     (metricType: MetricType) => {
       switch (metricType) {
-        case 'bytes':
-        case 'packets':
+        case 'Bytes':
+        case 'Packets':
           return metrics.totalRateMetric?.[getRateMetricKey(metricType)];
-        case 'droppedBytes':
-        case 'droppedPackets':
+        case 'PktDropBytes':
+        case 'PktDropPackets':
           return metrics.totalDroppedRateMetric?.[getRateMetricKey(metricType)];
-        case 'dnsLatencies':
+        case 'DnsLatencyMs':
           return metrics.totalDnsLatencyMetric?.avg;
-        case 'flowRtt':
+        case 'TimeFlowRttNs':
           return metrics.totalRttMetric?.avg;
         default:
           return undefined;
@@ -91,10 +98,10 @@ export const MetricsQuerySummaryContent: React.FC<{
       const absTotal = metrics.map(m => m.stats.total).reduce((prev, cur) => prev + cur, 0);
 
       switch (metricType) {
-        case 'bytes':
-        case 'droppedBytes': {
-          const textColor = metricType === 'droppedBytes' ? (isDark ? '#C9190B' : '#A30000') : undefined;
-          const droppedText = metricType === 'droppedBytes' ? ' ' + t('dropped') : '';
+        case 'Bytes':
+        case 'PktDropBytes': {
+          const textColor = metricType === 'PktDropBytes' ? (isDark ? '#C9190B' : '#A30000') : undefined;
+          const droppedText = metricType === 'PktDropBytes' ? ' ' + t('dropped') : '';
           const textAbs = appMetrics
             ? `${t('Filtered sum of top-k bytes')}${droppedText} / ${t('Filtered total bytes')}${droppedText}`
             : `${t('Filtered sum of top-k bytes')}${droppedText}`;
@@ -111,7 +118,7 @@ export const MetricsQuerySummaryContent: React.FC<{
             <FlexItem key={`${metricType}Count`}>
               <Tooltip content={<Text component={TextVariants.p}>{textAbs}</Text>}>
                 <div className="stats-query-summary-container">
-                  <Text id={`${metricType}Count`} component={TextVariants.p} style={{ color: textColor }}>
+                  <Text id={`${_.lowerFirst(metricType)}Count`} component={TextVariants.p} style={{ color: textColor }}>
                     {valAbs}
                   </Text>
                 </div>
@@ -121,7 +128,11 @@ export const MetricsQuerySummaryContent: React.FC<{
               <Tooltip content={<Text component={TextVariants.p}>{textRate}</Text>}>
                 <div className="stats-query-summary-container-with-icon">
                   <TachometerAltIcon />
-                  <Text id={`${metricType}PerSecondsCount`} component={TextVariants.p} style={{ color: textColor }}>
+                  <Text
+                    id={`${_.lowerFirst(metricType)}PerSecondsCount`}
+                    component={TextVariants.p}
+                    style={{ color: textColor }}
+                  >
                     {valRate}
                   </Text>
                 </div>
@@ -129,20 +140,20 @@ export const MetricsQuerySummaryContent: React.FC<{
             </FlexItem>
           ];
         }
-        case 'packets':
-        case 'droppedPackets': {
-          const textColor = metricType === 'droppedPackets' ? (isDark ? '#C9190B' : '#A30000') : undefined;
-          const droppedText = metricType === 'droppedPackets' ? ' ' + t('dropped') : '';
+        case 'Packets':
+        case 'PktDropPackets': {
+          const textColor = metricType === 'PktDropPackets' ? (isDark ? '#C9190B' : '#A30000') : undefined;
+          const droppedText = metricType === 'PktDropPackets' ? ' ' + t('dropped') : '';
           const textAbs = appMetrics
             ? `${t('Filtered sum of top-k packets')}${droppedText} / ${t('Filtered total packets')}${droppedText}`
             : `${t('Filtered sum of top-k packets')}${droppedText}`;
           const valAbs =
-            (appMetrics ? `${absTotal} / ${appMetrics.stats.total}` : String(absTotal)) + ' ' + t('packets');
+            (appMetrics ? `${absTotal} / ${appMetrics.stats.total}` : String(absTotal)) + ' ' + t('Packets');
           return [
             <FlexItem key={`${metricType}Count`}>
               <Tooltip content={<Text component={TextVariants.p}>{textAbs}</Text>}>
                 <div className="stats-query-summary-container">
-                  <Text id={`${metricType}Count`} component={TextVariants.p} style={{ color: textColor }}>
+                  <Text id={`${_.lowerFirst(metricType)}Count`} component={TextVariants.p} style={{ color: textColor }}>
                     {valAbs}
                   </Text>
                 </div>
@@ -150,7 +161,7 @@ export const MetricsQuerySummaryContent: React.FC<{
             </FlexItem>
           ];
         }
-        case 'dnsLatencies': {
+        case 'DnsLatencyMs': {
           const textAvg = appMetrics
             ? `${t('Filtered avg DNS Latency')} | ${t('Filtered overall avg DNS Latency')}`
             : t('Filtered avg DNS Latency');
@@ -170,7 +181,7 @@ export const MetricsQuerySummaryContent: React.FC<{
             </FlexItem>
           ];
         }
-        case 'flowRtt': {
+        case 'TimeFlowRttNs': {
           const textAvg = appMetrics ? `${t('Filtered avg RTT')} | ${t('Overall avg RTT')}` : t('Filtered avg RTT');
           const valAvg = appMetrics
             ? `${valueFormat(avgSum / metrics.length, 2, t('ms'))} | ${valueFormat(appMetrics.stats.avg, 2, t('ms'))}`

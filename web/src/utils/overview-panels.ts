@@ -1,9 +1,11 @@
 import { TFunction } from 'i18next';
+import { AggregateBy, StatFunction, MetricType, MetricFunction } from '../model/flow-query';
 import { Feature, isAllowed } from './features-gate';
 
 export const DNS_ID_MATCHER = 'dns_latency';
 export const RTT_ID_MATCHER = 'rtt';
 export const DROPPED_ID_MATCHER = 'dropped';
+export const CUSTOM_PANEL_MATCHER = 'custom';
 
 export const getRateFunctionFromId = (id: string) => {
   return id.endsWith('byte_rates') ? 'bytes' : 'packets';
@@ -38,7 +40,10 @@ export type OverviewPanelId =
   | `${OverviewPanelRateMetric}`
   | `state_dropped_packet_rates`
   | `cause_dropped_packet_rates`
-  | 'rcode_dns_latency_flows';
+  | 'rcode_dns_latency_flows'
+  | `custom_${StatFunction}_${AggregateBy}_${MetricType}`
+  | `custom_${AggregateBy}_${MetricType}`
+  | `custom_${MetricType}`;
 
 export type OverviewPanel = {
   id: OverviewPanelId;
@@ -72,7 +77,7 @@ export const DEFAULT_PANEL_IDS: OverviewPanelId[] = [
   'top_p90_rtt'
 ];
 
-export const getDefaultOverviewPanels = (): OverviewPanel[] => {
+export const getDefaultOverviewPanels = (customIds?: string[]): OverviewPanel[] => {
   let ids: OverviewPanelId[] = [];
 
   /* list of panels and default selection behavior
@@ -118,9 +123,61 @@ export const getDefaultOverviewPanels = (): OverviewPanel[] => {
       });
   });
 
+  if (customIds) {
+    ids = ids.concat(customIds.map(id => `${CUSTOM_PANEL_MATCHER}_${id}` as OverviewPanelId));
+  }
+
   return ids.map(id => {
     return { id, isSelected: DEFAULT_PANEL_IDS.includes(id) };
   });
+};
+
+export const parseCustomMetricId = (id: string) => {
+  const idParts = id.split('_');
+  if (idParts.length === 0 || idParts[0] !== CUSTOM_PANEL_MATCHER) {
+    console.error('parseCustomMetricId called on non custom metric', id);
+  }
+
+  let isValid = true;
+  let fn: MetricFunction | undefined = undefined;
+  let aggregateBy: AggregateBy | undefined = undefined;
+  let type: MetricType | undefined = undefined;
+
+  if (idParts.length === 4) {
+    fn = idParts[1] as MetricFunction;
+    aggregateBy = idParts[2] as AggregateBy;
+    type = idParts[3] as MetricType;
+  } else if (idParts.length === 3) {
+    aggregateBy = idParts[1] as AggregateBy;
+    type = idParts[2] as MetricType;
+  } else if (idParts.length === 2) {
+    type = idParts[1] as MetricType;
+  } else {
+    isValid = false;
+    console.error('invalid custom panel id', id);
+  }
+
+  if (!fn) {
+    switch (type) {
+      case 'Flows':
+      case 'DnsFlows':
+        fn = 'count';
+        break;
+      case 'Bytes':
+      case 'Packets':
+      case 'PktDropBytes':
+      case 'PktDropPackets':
+        fn = 'rate';
+        break;
+    }
+  }
+
+  return {
+    isValid,
+    fn,
+    aggregateBy,
+    type
+  };
 };
 
 export const getOverviewPanelInfo = (
@@ -129,15 +186,13 @@ export const getOverviewPanelInfo = (
   limit: string | number = 'X',
   type: string
 ): OverviewPanelInfo => {
-  const metricFunction = id.startsWith('total_')
-    ? t('total')
-    : id.includes('_min_')
+  const metricFunction = id.includes('min_')
     ? t('minimum')
-    : id.includes('_max_')
+    : id.includes('max_')
     ? t('maximum')
-    : id.includes('_p90_')
+    : id.includes('p90_')
     ? t('90th percentile')
-    : id.includes('_p99_')
+    : id.includes('p99_')
     ? t('99th percentile')
     : t('average');
 
@@ -259,5 +314,23 @@ export const getOverviewPanelInfo = (
           'The top DNS response code extracted from DNS response headers compared to total over the selected interval'
         )
       };
+    default:
+      const parsedId = parseCustomMetricId(id);
+      if (parsedId.isValid) {
+        const topOrBottom = parsedId.fn !== 'min' ? t('Top') : t('Bottom');
+        const functionName = parsedId.fn && parsedId.fn !== 'sum' ? ' ' + metricFunction : '';
+        const typeName = `${parsedId.type}${parsedId.fn === 'rate' ? ' ' + t('rates') : ''}`;
+        const metricName = parsedId.aggregateBy ? `${parsedId.aggregateBy} (${typeName})` : typeName;
+        return {
+          title: `${topOrBottom} ${limit}${functionName} ${metricName} ${t('with total')}`,
+          topTitle: `${topOrBottom} ${limit}${functionName} ${metricName}`,
+          totalTitle: `${t('Total')} ${parsedId.type}`,
+          chartType: t('donut or bars and lines')
+        };
+      } else {
+        return {
+          title: `${t('Invalid custom panel id')}: ${id}`
+        };
+      }
   }
 };
