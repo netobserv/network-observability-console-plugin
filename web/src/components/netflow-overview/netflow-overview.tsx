@@ -704,6 +704,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
                       smallerTexts={smallerTexts}
                       showLegend={!isFocus}
                       animate={animate}
+                      isDark={isDark}
                     />
                   ) : (
                     <MetricsGraphWithTotal
@@ -721,6 +722,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
                       showTotalDrop={false}
                       showLegend={!isFocus}
                       animate={animate}
+                      isDark={isDark}
                     />
                   )
                 ) : (
