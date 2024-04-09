@@ -1,24 +1,17 @@
 package handler
 
 import (
-	"net/url"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 
+	"github.com/netobserv/network-observability-console-plugin/pkg/config"
 	"github.com/netobserv/network-observability-console-plugin/pkg/httpclient/httpclienttest"
-	"github.com/netobserv/network-observability-console-plugin/pkg/loki"
 )
 
-var testLokiConfig = loki.Config{
-	URL: &url.URL{Scheme: "http", Host: "loki"},
-	Labels: map[string]struct{}{
-		"_RecordType":      {},
-		"SrcK8S_Namespace": {},
-		"DstK8S_Namespace": {},
-		"SrcK8S_OwnerName": {},
-		"DstK8S_OwnerName": {},
-	},
+var testLokiConfig = config.Loki{
+	URL:    "http://loki",
+	Labels: []string{"_RecordType", "SrcK8S_Namespace", "DstK8S_Namespace", "SrcK8S_OwnerName", "DstK8S_OwnerName"},
 }
 
 const testLokiBaseURL = "http://loki/loki/api/v1/"

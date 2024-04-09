@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/netobserv/network-observability-console-plugin/pkg/config"
 	"github.com/netobserv/network-observability-console-plugin/pkg/httpclient"
 	"github.com/netobserv/network-observability-console-plugin/pkg/loki"
 	"github.com/netobserv/network-observability-console-plugin/pkg/metrics"
@@ -27,9 +28,9 @@ const (
 	defaultStep         = "30s"
 )
 
-func GetTopology(cfg *loki.Config) func(w http.ResponseWriter, r *http.Request) {
+func GetTopology(cfg *config.Config) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		lokiClient := newLokiClient(cfg, r.Header, false)
+		lokiClient := newLokiClient(&cfg.Loki, r.Header, false)
 		var code int
 		startTime := time.Now()
 		defer func() {
@@ -47,7 +48,7 @@ func GetTopology(cfg *loki.Config) func(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
-func getTopologyFlows(cfg *loki.Config, client httpclient.Caller, params url.Values) (*model.AggregatedQueryResponse, int, error) {
+func getTopologyFlows(cfg *config.Config, client httpclient.Caller, params url.Values) (*model.AggregatedQueryResponse, int, error) {
 	hlog.Debugf("GetTopology query params: %s", params)
 
 	start, err := getStartTime(params)
@@ -129,7 +130,7 @@ func getTopologyFlows(cfg *loki.Config, client httpclient.Caller, params url.Val
 	}
 
 	qr := merger.Get()
-	qr.IsMock = cfg.UseMocks
+	qr.IsMock = cfg.Loki.UseMocks
 	qr.UnixTimestamp = time.Now().Unix()
 	hlog.Tracef("GetTopology response: %v", qr)
 	return qr, http.StatusOK, nil
@@ -153,8 +154,8 @@ func expandReportersMergeQueries(queries filters.MultiQueries) filters.MultiQuer
 	return out
 }
 
-func buildTopologyQuery(cfg *loki.Config, queryFilters filters.SingleQuery, start, end, limit, rateInterval, step string, metricType string, metricFunction constants.MetricFunction, recordType constants.RecordType, packetLoss constants.PacketLoss, aggregate, groups string) (string, int, error) {
-	qb, err := loki.NewTopologyQuery(cfg, start, end, limit, rateInterval, step, metricType, metricFunction, recordType, packetLoss, aggregate, groups)
+func buildTopologyQuery(cfg *config.Config, queryFilters filters.SingleQuery, start, end, limit, rateInterval, step string, metricType string, metricFunction constants.MetricFunction, recordType constants.RecordType, packetLoss constants.PacketLoss, aggregate, groups string) (string, int, error) {
+	qb, err := loki.NewTopologyQuery(&cfg.Loki, start, end, limit, rateInterval, step, metricType, metricFunction, recordType, packetLoss, aggregate, groups, cfg.Frontend.Deduper.Mark)
 	if err != nil {
 		return "", http.StatusBadRequest, err
 	}

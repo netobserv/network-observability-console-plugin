@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/netobserv/network-observability-console-plugin/pkg/loki"
+	"github.com/netobserv/network-observability-console-plugin/pkg/config"
 	"github.com/netobserv/network-observability-console-plugin/pkg/metrics"
 )
 
@@ -16,9 +16,9 @@ const (
 	exportcolumnsKey = "columns"
 )
 
-func ExportFlows(cfg *loki.Config) func(w http.ResponseWriter, r *http.Request) {
+func ExportFlows(cfg *config.Config) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		lokiClient := newLokiClient(cfg, r.Header, false)
+		lokiClient := newLokiClient(&cfg.Loki, r.Header, false)
 		var code int
 		startTime := time.Now()
 		defer func() {

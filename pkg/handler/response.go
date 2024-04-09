@@ -45,14 +45,14 @@ func writeCSV(w http.ResponseWriter, code int, qr *model.AggregatedQueryResponse
 	hlog.Tracef("CSV data: %v", data)
 
 	t := time.Now()
-	//output file would be 'export-stdLongYear-stdZeroMonth-stdZeroDay-stdHour-stdZeroMinute.csv'
+	// output file would be 'export-stdLongYear-stdZeroMonth-stdZeroDay-stdHour-stdZeroMinute.csv'
 	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=export-%s.csv", t.Format("2006-01-02-15-04")))
 	w.Header().Set("Content-Type", "text/csv")
 	w.Header().Set("Transfer-Encoding", "chunked")
 	w.WriteHeader(code)
 	writer := csv.NewWriter(w)
 	for _, row := range data {
-		//write csv row
+		// write csv row
 		err := writer.Write(row)
 		if err != nil {
 			writeError(w, http.StatusInternalServerError, fmt.Sprintf("Cannot write row %s", row))
