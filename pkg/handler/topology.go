@@ -1,18 +1,23 @@
 package handler
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"net/url"
+	"slices"
 	"time"
 
 	"github.com/netobserv/network-observability-console-plugin/pkg/config"
-	"github.com/netobserv/network-observability-console-plugin/pkg/httpclient"
 	"github.com/netobserv/network-observability-console-plugin/pkg/loki"
 	"github.com/netobserv/network-observability-console-plugin/pkg/metrics"
 	"github.com/netobserv/network-observability-console-plugin/pkg/model"
+	"github.com/netobserv/network-observability-console-plugin/pkg/model/fields"
 	"github.com/netobserv/network-observability-console-plugin/pkg/model/filters"
+	"github.com/netobserv/network-observability-console-plugin/pkg/prometheus"
 	"github.com/netobserv/network-observability-console-plugin/pkg/utils/constants"
+
+	v1 "github.com/prometheus/client_golang/api/prometheus/v1"
 )
 
 const (
@@ -26,18 +31,24 @@ const (
 
 	defaultRateInterval = "1m"
 	defaultStep         = "30s"
+	defaultStepDuration = time.Second * 30
 )
 
-func GetTopology(cfg *config.Config) func(w http.ResponseWriter, r *http.Request) {
+func GetTopology(ctx context.Context, cfg *config.Config, promInventory *prometheus.Inventory) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		lokiClient := newLokiClient(&cfg.Loki, r.Header, false)
+		clients, err := newClients(cfg, r.Header, false)
+		if err != nil {
+			writeError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+
 		var code int
 		startTime := time.Now()
 		defer func() {
 			metrics.ObserveHTTPCall("GetTopology", code, startTime)
 		}()
 
-		flows, code, err := getTopologyFlows(cfg, lokiClient, r.URL.Query())
+		flows, code, err := getTopologyFlows(ctx, cfg, promInventory, clients, r.URL.Query())
 		if err != nil {
 			writeError(w, code, err.Error())
 			return
@@ -48,68 +59,83 @@ func GetTopology(cfg *config.Config) func(w http.ResponseWriter, r *http.Request
 	}
 }
 
-func getTopologyFlows(cfg *config.Config, client httpclient.Caller, params url.Values) (*model.AggregatedQueryResponse, int, error) {
+func getTopologyFlows(ctx context.Context, cfg *config.Config, promInventory *prometheus.Inventory, cl clients, params url.Values) (*model.AggregatedQueryResponse, int, error) {
 	hlog.Debugf("GetTopology query params: %s", params)
+	in := loki.TopologyInput{DedupMark: cfg.Frontend.Deduper.Mark}
+	var err error
+	qr := v1.Range{}
 
-	start, err := getStartTime(params)
+	in.Start, qr.Start, err = getStartTime(params)
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
-	end, err := getEndTime(params)
+	in.End, qr.End, err = getEndTime(params)
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
-	limit, reqLimit, err := getLimit(params)
+	var reqLimit int
+	in.Top, reqLimit, err = getLimit(params)
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
-	rateInterval, err := getRateInterval(params)
+	in.RateInterval, err = getRateInterval(params)
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
-	step, err := getStep(params)
+	in.Step, qr.Step, err = getStep(params)
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
-	metricType := getMetricType(params)
-	metricFunction, err := getMetricFunction(params)
+	in.DataField = getMetricType(params)
+	in.MetricFunction, err = getMetricFunction(params)
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
-	recordType, err := getRecordType(params)
+	in.RecordType, err = getRecordType(params)
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
-	packetLoss, err := getPacketLoss(params)
+	in.PacketLoss, err = getPacketLoss(params)
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
-	aggregate, err := getAggregate(params)
+	in.Aggregate, err = getAggregate(params)
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
-	groups := params.Get(groupsKey)
+	in.Groups = params.Get(groupsKey)
 	rawFilters := params.Get(filtersKey)
 	filterGroups, err := filters.Parse(rawFilters)
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
-	if shouldMergeReporters(metricType) {
-		filterGroups = expandReportersMergeQueries(filterGroups)
+
+	if shouldMergeReporters(in.DataField) {
+		filterGroups = expandReportersMergeQueries(
+			filterGroups,
+			func(filters filters.SingleQuery) bool {
+				return getEligiblePromMetric(promInventory, filters, &in) != ""
+			},
+		)
 	}
 
 	merger := loki.NewMatrixMerger(reqLimit)
 	if len(filterGroups) > 1 {
 		// match any, and multiple filters => run in parallel then aggregate
-		var queries []string
-		for _, group := range filterGroups {
-			query, code, err := buildTopologyQuery(cfg, group, start, end, limit, rateInterval, step, metricType, metricFunction, recordType, packetLoss, aggregate, groups)
+		var lokiQ []string
+		var promQ []*prometheus.Query
+		for _, filters := range filterGroups {
+			lq, pq, code, err := buildTopologyQuery(cfg, promInventory, filters, &in, &qr)
 			if err != nil {
 				return nil, code, errors.New("Can't build query: " + err.Error())
 			}
-			queries = append(queries, query)
+			if pq != nil {
+				promQ = append(promQ, pq)
+			} else {
+				lokiQ = append(lokiQ, lq)
+			}
 		}
-		code, err := fetchParallel(client, queries, merger)
+		code, err := cl.fetchParallel(ctx, lokiQ, promQ, merger)
 		if err != nil {
 			return nil, code, err
 		}
@@ -119,30 +145,35 @@ func getTopologyFlows(cfg *config.Config, client httpclient.Caller, params url.V
 		if len(filterGroups) > 0 {
 			filters = filterGroups[0]
 		}
-		query, code, err := buildTopologyQuery(cfg, filters, start, end, limit, rateInterval, step, metricType, metricFunction, recordType, packetLoss, aggregate, groups)
+		lokiQ, promQ, code, err := buildTopologyQuery(cfg, promInventory, filters, &in, &qr)
 		if err != nil {
 			return nil, code, err
 		}
-		code, err = fetchSingle(client, query, merger)
+		code, err = cl.fetchSingle(ctx, lokiQ, promQ, merger)
 		if err != nil {
 			return nil, code, err
 		}
 	}
 
-	qr := merger.Get()
-	qr.IsMock = cfg.Loki.UseMocks
-	qr.UnixTimestamp = time.Now().Unix()
-	hlog.Tracef("GetTopology response: %v", qr)
-	return qr, http.StatusOK, nil
+	qresp := merger.Get()
+	qresp.IsMock = cfg.Loki.UseMocks
+	qresp.UnixTimestamp = time.Now().Unix()
+	hlog.Tracef("GetTopology response: %v", qresp)
+	return qresp, http.StatusOK, nil
 }
 
 func shouldMergeReporters(metricType string) bool {
 	return metricType == constants.MetricTypeBytes || metricType == constants.MetricTypePackets
 }
 
-func expandReportersMergeQueries(queries filters.MultiQueries) filters.MultiQueries {
+func expandReportersMergeQueries(queries filters.MultiQueries, isForProm func(filters filters.SingleQuery) bool) filters.MultiQueries {
 	var out filters.MultiQueries
 	for _, q := range queries {
+		// Do not expand if this is managed from prometheus
+		if isForProm(q) {
+			out = append(out, q)
+			continue
+		}
 		q1, q2 := filters.SplitForReportersMerge(q)
 		if q1 != nil {
 			out = append(out, q1)
@@ -154,14 +185,59 @@ func expandReportersMergeQueries(queries filters.MultiQueries) filters.MultiQuer
 	return out
 }
 
-func buildTopologyQuery(cfg *config.Config, queryFilters filters.SingleQuery, start, end, limit, rateInterval, step string, metricType string, metricFunction constants.MetricFunction, recordType constants.RecordType, packetLoss constants.PacketLoss, aggregate, groups string) (string, int, error) {
-	qb, err := loki.NewTopologyQuery(&cfg.Loki, start, end, limit, rateInterval, step, metricType, metricFunction, recordType, packetLoss, aggregate, groups, cfg.Frontend.Deduper.Mark)
-	if err != nil {
-		return "", http.StatusBadRequest, err
+func buildTopologyQuery(
+	cfg *config.Config,
+	promInventory *prometheus.Inventory,
+	filters filters.SingleQuery,
+	in *loki.TopologyInput,
+	qr *v1.Range,
+) (string, *prometheus.Query, int, error) {
+
+	if metric := getEligiblePromMetric(promInventory, filters, in); metric != "" {
+		qb := prometheus.NewQuery(in, qr, filters, metric)
+		q := qb.Build()
+		return "", &q, http.StatusOK, nil
 	}
-	err = qb.Filters(queryFilters)
+
+	qb, err := loki.NewTopologyQuery(&cfg.Loki, in)
 	if err != nil {
-		return "", http.StatusBadRequest, err
+		return "", nil, http.StatusBadRequest, err
 	}
-	return EncodeQuery(qb.Build()), http.StatusOK, nil
+	err = qb.Filters(filters)
+	if err != nil {
+		return "", nil, http.StatusBadRequest, err
+	}
+	return EncodeQuery(qb.Build()), nil, http.StatusOK, nil
+}
+
+func getEligiblePromMetric(promInventory *prometheus.Inventory, filters filters.SingleQuery, in *loki.TopologyInput) string {
+	if promInventory == nil {
+		return ""
+	}
+	if in.RecordType != "" && in.RecordType != constants.RecordTypeLog {
+		return ""
+	}
+	// TODO: packetLoss, how can we handle that?
+
+	var labelsNeeded []string
+	if in.Aggregate != "app" { // ignore app: it's a noop aggregation needed for Loki, not relevant in promQL
+		labelsNeeded, _ = loki.GetLabelsAndFilter(in.Aggregate, in.Groups)
+	}
+
+	for _, m := range filters {
+		if m.MoreThanOrEqual {
+			// Not relevant/supported in promQL
+			return ""
+		}
+		if m.Key == fields.FlowDirection {
+			// TODO ??
+			continue
+		}
+		if !slices.Contains(labelsNeeded, m.Key) {
+			labelsNeeded = append(labelsNeeded, m.Key)
+		}
+	}
+
+	// Check if that desired metric exists
+	return promInventory.FindMetricName(labelsNeeded, in.DataField, "??")
 }

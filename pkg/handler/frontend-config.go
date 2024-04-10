@@ -11,7 +11,7 @@ func GetFrontendConfig(version, date, filename string) func(w http.ResponseWrite
 	if err != nil {
 		hlog.Errorf("Could not read config file: %v", err)
 	}
-	return func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, _ *http.Request) {
 		if err != nil {
 			cfg, err = config.ReadFile(version, date, filename)
 			if err != nil {

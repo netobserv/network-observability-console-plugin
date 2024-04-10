@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"strings"
@@ -16,9 +17,9 @@ const (
 	exportcolumnsKey = "columns"
 )
 
-func ExportFlows(cfg *config.Config) func(w http.ResponseWriter, r *http.Request) {
+func ExportFlows(ctx context.Context, cfg *config.Config) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		lokiClient := newLokiClient(&cfg.Loki, r.Header, false)
+		cl := clients{loki: newLokiClient(&cfg.Loki, r.Header, false)}
 		var code int
 		startTime := time.Now()
 		defer func() {
@@ -28,7 +29,7 @@ func ExportFlows(cfg *config.Config) func(w http.ResponseWriter, r *http.Request
 		params := r.URL.Query()
 		hlog.Debugf("ExportFlows query params: %s", params)
 
-		flows, code, err := getFlows(cfg, lokiClient, params)
+		flows, code, err := getFlows(ctx, cfg, cl, params)
 		if err != nil {
 			writeError(w, code, err.Error())
 			return

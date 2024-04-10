@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"net/url"
 	"os"
@@ -26,6 +27,17 @@ type Server struct {
 	CORSMethods string `yaml:"corsMethods,omitempty" json:"corsMethods,omitempty"`
 	CORSHeaders string `yaml:"corsHeaders,omitempty" json:"corsHeaders,omitempty"`
 	CORSMaxAge  string `yaml:"corsMaxAge,omitempty" json:"corsMaxAge,omitempty"`
+	AuthCheck   string `yaml:"authCheck,omitempty" json:"authCheck,omitempty"`
+}
+
+type Prometheus struct {
+	URL                   string   `yaml:"url" json:"url"`
+	Timeout               Duration `yaml:"timeout,omitempty" json:"timeout,omitempty"`
+	TokenPath             string   `yaml:"tokenPath,omitempty" json:"tokenPath,omitempty"`
+	SkipTLS               bool     `yaml:"skipTls,omitempty" json:"skipTls,omitempty"`
+	CAPath                string   `yaml:"caPath,omitempty" json:"caPath,omitempty"`
+	ForwardUserToken      bool     `yaml:"forwardUserToken,omitempty" json:"forwardUserToken,omitempty"`
+	InventoryPollInterval Duration `yaml:"inventoryPollInterval,omitempty" json:"inventoryPollInterval,omitempty"`
 }
 
 type PortNaming struct {
@@ -99,10 +111,11 @@ type Frontend struct {
 }
 
 type Config struct {
-	Loki     Loki     `yaml:"loki" json:"loki"`
-	Frontend Frontend `yaml:"frontend" json:"frontend"`
-	Server   Server   `yaml:"server,omitempty" json:"server,omitempty"`
-	Path     string   `yaml:"-" json:"-"`
+	Loki       Loki       `yaml:"loki" json:"loki"`
+	Prometheus Prometheus `yaml:"prometheus" json:"prometheus"`
+	Frontend   Frontend   `yaml:"frontend" json:"frontend"`
+	Server     Server     `yaml:"server,omitempty" json:"server,omitempty"`
+	Path       string     `yaml:"-" json:"-"`
 }
 
 func ReadFile(version, date, filename string) (*Config, error) {
@@ -114,10 +127,13 @@ func ReadFile(version, date, filename string) (*Config, error) {
 			MetricsPort: 9002,
 			CORSOrigin:  "*",
 			CORSHeaders: "Origin, X-Requested-With, Content-Type, Accept",
+			AuthCheck:   "auto",
 		},
 		Loki: Loki{
-			Timeout:   Duration{Duration: 30 * time.Second},
-			AuthCheck: "auto",
+			Timeout: Duration{Duration: 30 * time.Second},
+		},
+		Prometheus: Prometheus{
+			Timeout: Duration{Duration: 30 * time.Second},
 		},
 		Frontend: Frontend{
 			BuildVersion: version,
@@ -155,56 +171,81 @@ func ReadFile(version, date, filename string) (*Config, error) {
 		return nil, err
 	}
 
-	cfg.Validate()
-
-	return &cfg, nil
+	return &cfg, err
 }
 
-func (c *Config) Validate() {
-	var configErrors []string
+func (c *Config) IsLokiEnabled() bool {
+	return c.Loki.URL != ""
+}
 
-	// check config required fields
-	if len(c.Loki.Labels) == 0 {
-		configErrors = append(configErrors, "labels cannot be empty")
+func (c *Config) IsPromEnabled() bool {
+	return c.Prometheus.URL != ""
+}
+
+func (c *Config) Validate() error {
+	if c.Loki.URL == "" && c.Prometheus.URL == "" {
+		return errors.New("neither Loki nor Prometheus is configured; at least one of them should have a defined URL")
 	}
 
-	// parse config urls
-	if len(c.Loki.URL) == 0 {
-		configErrors = append(configErrors, "url cannot be empty")
-	} else {
+	var configErrors []string
+
+	if c.Loki.URL != "" {
+		log.Infof("Loki is enabled (%s)", c.Loki.URL)
+		// check config required fields
+		if len(c.Loki.Labels) == 0 {
+			configErrors = append(configErrors, "labels cannot be empty")
+		}
+
+		// parse config urls
 		_, err := url.Parse(c.Loki.URL)
 		if err != nil {
 			configErrors = append(configErrors, "wrong Loki URL")
 		}
-	}
-	if len(c.Loki.StatusURL) > 0 {
-		_, err := url.Parse(c.Loki.StatusURL)
-		if err != nil {
-			configErrors = append(configErrors, "wrong Loki status URL")
+		if len(c.Loki.StatusURL) > 0 {
+			_, err := url.Parse(c.Loki.StatusURL)
+			if err != nil {
+				configErrors = append(configErrors, "wrong Loki status URL")
+			}
 		}
+	} else {
+		log.Info("Loki is disabled")
 	}
 
-	// crash on config errors
+	if c.Prometheus.URL != "" {
+		log.Infof("Prometheus is enabled (%s)", c.Prometheus.URL)
+		// parse config urls
+		_, err := url.Parse(c.Prometheus.URL)
+		if err != nil {
+			configErrors = append(configErrors, "wrong Prometheus URL")
+		}
+	} else {
+		log.Info("Prometheus is disabled")
+	}
+
 	if len(configErrors) > 0 {
 		configErrors = append([]string{fmt.Sprintf("Config file has %d errors:\n", len(configErrors))}, configErrors...)
-		log.Fatal(strings.Join(configErrors, "\n - "))
+		return errors.New(strings.Join(configErrors, "\n - "))
 	}
+
+	return nil
 }
 
 func (c *Config) GetAuthChecker() (auth.Checker, error) {
 	// parse config auth
 	var checkType auth.CheckType
-	if c.Loki.AuthCheck == "auto" {
-		if c.Loki.ForwardUserToken {
-			// FORWARD lokiAuth mode
-			checkType = auth.CheckAuthenticated
-		} else {
-			// HOST or DISABLED lokiAuth mode
+	if c.Server.AuthCheck == "auto" {
+		// FORWARD mode
+		checkType = auth.CheckAuthenticated
+		if c.IsLokiEnabled() && !c.Loki.ForwardUserToken {
+			// HOST or DISABLED mode
+			checkType = auth.CheckAdmin
+		} else if c.IsPromEnabled() && !c.Prometheus.ForwardUserToken {
+			// HOST or DISABLED mode
 			checkType = auth.CheckAdmin
 		}
 		log.Info(fmt.Sprintf("auth-check 'auto' resolved to '%s'", checkType))
 	} else {
-		checkType = auth.CheckType(c.Loki.AuthCheck)
+		checkType = auth.CheckType(c.Server.AuthCheck)
 	}
 	if checkType == auth.CheckNone {
 		log.Warn("INSECURE: auth checker is disabled")

@@ -24,7 +24,16 @@ type httpClient struct {
 
 var slog = logrus.WithField("module", "server")
 
-func NewHTTPClient(timeout time.Duration, overrideHeaders map[string][]string, skipTLS bool, capath string, userCertPath string, userKeyPath string) Caller {
+func NewClientWrapper(timeout time.Duration, overrideHeaders map[string][]string, skipTLS bool, capath string, userCertPath string, userKeyPath string) Caller {
+	// TODO: use same prom RoundTripper helper insead of this client wrapper for Loki
+	tr := NewTransport(timeout, skipTLS, capath, userCertPath, userKeyPath)
+	return &httpClient{
+		client:  http.Client{Transport: tr, Timeout: timeout},
+		headers: overrideHeaders,
+	}
+}
+
+func NewTransport(timeout time.Duration, skipTLS bool, capath string, userCertPath string, userKeyPath string) *http.Transport {
 	transport := &http.Transport{
 		DialContext:     (&net.Dialer{Timeout: timeout}).DialContext,
 		IdleConnTimeout: timeout,
@@ -57,10 +66,7 @@ func NewHTTPClient(timeout time.Duration, overrideHeaders map[string][]string, s
 		}
 	}
 
-	return &httpClient{
-		client:  http.Client{Transport: transport, Timeout: timeout},
-		headers: overrideHeaders,
-	}
+	return transport
 }
 
 func (hc *httpClient) Get(url string) ([]byte, int, error) {

@@ -1,4 +1,4 @@
-package loki
+package filters
 
 import (
 	"fmt"

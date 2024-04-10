@@ -10,15 +10,16 @@ import (
 	"github.com/netobserv/network-observability-console-plugin/pkg/config"
 	"github.com/netobserv/network-observability-console-plugin/pkg/handler"
 	"github.com/netobserv/network-observability-console-plugin/pkg/kubernetes/auth"
+	"github.com/netobserv/network-observability-console-plugin/pkg/prometheus"
 )
 
-func setupRoutes(cfg *config.Config, authChecker auth.Checker) *mux.Router {
+func setupRoutes(ctx context.Context, cfg *config.Config, authChecker auth.Checker, promInventory *prometheus.Inventory) *mux.Router {
 	r := mux.NewRouter()
 
 	api := r.PathPrefix("/api").Subrouter()
 	api.Use(func(orig http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if err := authChecker.CheckAuth(context.TODO(), r.Header); err != nil {
+			if err := authChecker.CheckAuth(ctx, r.Header); err != nil {
 				w.WriteHeader(http.StatusUnauthorized)
 				_, err2 := w.Write([]byte(err.Error()))
 				if err2 != nil {
@@ -35,9 +36,9 @@ func setupRoutes(cfg *config.Config, authChecker auth.Checker) *mux.Router {
 	api.HandleFunc("/loki/buildinfo", handler.LokiBuildInfos(&cfg.Loki))
 	api.HandleFunc("/loki/config/limits", handler.LokiConfig(&cfg.Loki, "limits_config"))
 	api.HandleFunc("/loki/config/ingester/max_chunk_age", handler.IngesterMaxChunkAge(&cfg.Loki))
-	api.HandleFunc("/loki/flow/records", handler.GetFlows(cfg))
-	api.HandleFunc("/loki/flow/metrics", handler.GetTopology(cfg))
-	api.HandleFunc("/loki/export", handler.ExportFlows(cfg))
+	api.HandleFunc("/loki/flow/records", handler.GetFlows(ctx, cfg))
+	api.HandleFunc("/loki/flow/metrics", handler.GetTopology(ctx, cfg, promInventory))
+	api.HandleFunc("/loki/export", handler.ExportFlows(ctx, cfg))
 	api.HandleFunc("/resources/clusters", handler.GetClusters(&cfg.Loki))
 	api.HandleFunc("/resources/zones", handler.GetZones(&cfg.Loki))
 	api.HandleFunc("/resources/namespaces", handler.GetNamespaces(&cfg.Loki))

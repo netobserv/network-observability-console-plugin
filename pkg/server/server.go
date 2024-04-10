@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"time"
@@ -9,12 +10,18 @@ import (
 
 	"github.com/netobserv/network-observability-console-plugin/pkg/config"
 	"github.com/netobserv/network-observability-console-plugin/pkg/kubernetes/auth"
+	"github.com/netobserv/network-observability-console-plugin/pkg/prometheus"
 )
 
 var slog = logrus.WithField("module", "server")
 
-func Start(cfg *config.Config, authChecker auth.Checker) {
-	router := setupRoutes(cfg, authChecker)
+func Start(ctx context.Context, cfg *config.Config, authChecker auth.Checker) {
+	var promInventory *prometheus.Inventory
+	if cfg.IsPromEnabled() {
+		promInventory = prometheus.NewInventory(ctx, &cfg.Prometheus)
+	}
+
+	router := setupRoutes(ctx, cfg, authChecker, promInventory)
 	router.Use(corsHeader(cfg))
 
 	writeTimeout := 30 * time.Second

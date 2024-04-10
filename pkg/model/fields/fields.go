@@ -34,6 +34,7 @@ const (
 	SrcZone        = Src + Zone
 	DstZone        = Dst + Zone
 	Cluster        = "K8S_ClusterName"
+	Layer          = "K8S_FlowLayer"
 	Packets        = "Packets"
 	PktDropPackets = "PktDropPackets"
 	Proto          = "Proto"

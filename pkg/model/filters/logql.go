@@ -1,4 +1,4 @@
-package loki
+package filters
 
 import (
 	"fmt"
@@ -32,17 +32,17 @@ const (
 	typeIP
 )
 
-// labelFilter represents a condition based on a label name, value and matching operator. It
+// LabelFilter represents a condition based on a label name, value and matching operator. It
 // applies to LogQL stream selectors and attribute filtering
-type labelFilter struct {
+type LabelFilter struct {
 	key       string
 	matcher   labelMatcher
 	value     string
 	valueType valueType
 }
 
-// lineFilter represents a condition based on a JSON raw text match.
-type lineFilter struct {
+// LineFilter represents a condition based on a JSON raw text match.
+type LineFilter struct {
 	key        string
 	strictKey  bool
 	values     []lineMatch
@@ -60,8 +60,8 @@ func isRegex(v valueType) bool {
 	return v == typeRegex || v == typeRegexContains || v == typeRegexArrayContains
 }
 
-func stringEqualLabelFilter(labelKey string, value string) labelFilter {
-	return labelFilter{
+func StringEqualLabelFilter(labelKey string, value string) LabelFilter {
+	return LabelFilter{
 		key:       labelKey,
 		matcher:   labelEqual,
 		value:     value,
@@ -69,8 +69,8 @@ func stringEqualLabelFilter(labelKey string, value string) labelFilter {
 	}
 }
 
-func stringMatchLalbeFilter(labelKey string, value string) labelFilter {
-	return labelFilter{
+func StringMatchLabelFilter(labelKey string, value string) LabelFilter {
+	return LabelFilter{
 		key:       labelKey,
 		matcher:   labelMatches,
 		value:     value,
@@ -78,8 +78,8 @@ func stringMatchLalbeFilter(labelKey string, value string) labelFilter {
 	}
 }
 
-func notStringLabelFilter(labelKey string, value string) labelFilter {
-	return labelFilter{
+func NotStringLabelFilter(labelKey string, value string) LabelFilter {
+	return LabelFilter{
 		key:       labelKey,
 		matcher:   labelNotEqual,
 		value:     value,
@@ -87,8 +87,8 @@ func notStringLabelFilter(labelKey string, value string) labelFilter {
 	}
 }
 
-func moreThanNumberLabelFilter(labelKey string, value string) labelFilter {
-	return labelFilter{
+func MoreThanNumberLabelFilter(labelKey string, value string) LabelFilter {
+	return LabelFilter{
 		key:       labelKey,
 		matcher:   labelMoreThanOrEqual,
 		value:     value,
@@ -96,8 +96,8 @@ func moreThanNumberLabelFilter(labelKey string, value string) labelFilter {
 	}
 }
 
-func stringNotMatchLabelFilter(labelKey string, value string) labelFilter {
-	return labelFilter{
+func StringNotMatchLabelFilter(labelKey string, value string) LabelFilter {
+	return LabelFilter{
 		key:       labelKey,
 		matcher:   labelNoMatches,
 		value:     value,
@@ -105,8 +105,8 @@ func stringNotMatchLabelFilter(labelKey string, value string) labelFilter {
 	}
 }
 
-func ipLabelFilter(labelKey, cidr string) labelFilter {
-	return labelFilter{
+func IPLabelFilter(labelKey, cidr string) LabelFilter {
+	return LabelFilter{
 		key:       labelKey,
 		matcher:   labelEqual,
 		value:     cidr,
@@ -114,7 +114,39 @@ func ipLabelFilter(labelKey, cidr string) labelFilter {
 	}
 }
 
-func (f *labelFilter) writeInto(sb *strings.Builder) {
+func MultiValuesRegexFilter(labelKey string, values []string, not bool) (LabelFilter, bool) {
+	regexStr := strings.Builder{}
+	for i, value := range values {
+		if i > 0 {
+			regexStr.WriteByte('|')
+		}
+		// match the begining of string if quoted without a star
+		// and case insensitive if no quotes
+		if !strings.HasPrefix(value, `"`) {
+			regexStr.WriteString("(?i).*")
+		} else if !strings.HasPrefix(value, `"*`) {
+			regexStr.WriteString("^")
+		}
+		// inject value with regex
+		regexStr.WriteString(valueReplacer.Replace(value))
+		// match the end of string if quoted without a star
+		if !strings.HasSuffix(value, `"`) {
+			regexStr.WriteString(".*")
+		} else if !strings.HasSuffix(value, `*"`) {
+			regexStr.WriteString("$")
+		}
+	}
+
+	if regexStr.Len() > 0 {
+		if not {
+			return StringNotMatchLabelFilter(labelKey, regexStr.String()), true
+		}
+		return StringMatchLabelFilter(labelKey, regexStr.String()), true
+	}
+	return LabelFilter{}, false
+}
+
+func (f *LabelFilter) WriteInto(sb *strings.Builder) {
 	sb.WriteString(f.key)
 	sb.WriteString(string(f.matcher))
 	switch f.valueType {
@@ -143,12 +175,12 @@ func (f *labelFilter) writeInto(sb *strings.Builder) {
 	}
 }
 
-// asLabelFilters transforms a lineFilter (raw text match) into a group of
+// AsLabelFilters transforms a LineFilter (raw text match) into a group of
 // labelFilters (attributes match)
-func (f *lineFilter) asLabelFilters() []labelFilter {
-	lfs := make([]labelFilter, 0, len(f.values))
+func (f *LineFilter) AsLabelFilters() []LabelFilter {
+	lfs := make([]LabelFilter, 0, len(f.values))
 	for _, v := range f.values {
-		lf := labelFilter{
+		lf := LabelFilter{
 			key:       f.key,
 			valueType: v.valueType,
 			value:     v.value,
@@ -171,8 +203,17 @@ func (f *lineFilter) asLabelFilters() []labelFilter {
 	return lfs
 }
 
-func regexMatchLineFilter(key string, strictKey bool, value string) lineFilter {
-	return lineFilter{
+func NewEmptyLineFilter(key string, not, moreThan, allowEmpty bool) LineFilter {
+	return LineFilter{
+		key:        key,
+		not:        not,
+		moreThan:   moreThan,
+		allowEmpty: allowEmpty,
+	}
+}
+
+func RegexMatchLineFilter(key string, strictKey bool, value string) LineFilter {
+	return LineFilter{
 		key:       key,
 		strictKey: strictKey,
 		values: []lineMatch{{
@@ -182,13 +223,62 @@ func regexMatchLineFilter(key string, strictKey bool, value string) lineFilter {
 	}
 }
 
-func notContainsKeyLineFilter(key string) lineFilter {
-	return lineFilter{
+func NotContainsKeyLineFilter(key string) LineFilter {
+	return LineFilter{
 		key:       key,
 		strictKey: true,
 		not:       true,
 		moreThan:  false,
 	}
+}
+
+func NumericLineFilter(key string, values []string, not, moreThan bool) (LineFilter, bool) {
+	return checkExact(
+		LineFilter{
+			key:      key,
+			not:      not,
+			moreThan: moreThan,
+		},
+		values,
+		typeNumber)
+}
+
+func ArrayLineFilter(key string, values []string, not bool) LineFilter {
+	lf := LineFilter{key: key, not: not}
+	for _, value := range values {
+		lf.values = append(lf.values, lineMatch{valueType: typeRegexArrayContains, value: value})
+	}
+	return lf
+}
+
+func StringLineFilterCheckExact(key string, values []string, not bool) (LineFilter, bool) {
+	return checkExact(LineFilter{key: key, not: not}, values, typeRegexContains)
+}
+
+func checkExact(lf LineFilter, values []string, defaultMatchType valueType) (LineFilter, bool) {
+	hasEmptyMatch := false
+	for _, value := range values {
+		if isExactMatch(value) {
+			trimmed := trimExactMatch(value)
+			if trimmed == "" {
+				hasEmptyMatch = true
+			}
+			lf.values = append(lf.values, lineMatch{valueType: typeString, value: trimmed})
+		} else {
+			lf.values = append(lf.values, lineMatch{valueType: defaultMatchType, value: value})
+		}
+	}
+	return lf, hasEmptyMatch
+}
+
+func (f LineFilter) MatchTrue() LineFilter {
+	f.values = []lineMatch{{valueType: typeBool, value: "true"}}
+	return f
+}
+
+func (f LineFilter) MatchFalse() LineFilter {
+	f.values = []lineMatch{{valueType: typeBool, value: "false"}}
+	return f
 }
 
 func moreThanRegex(sb *strings.Builder, value string) {
@@ -250,9 +340,9 @@ func moreThanRegex(sb *strings.Builder, value string) {
 	sb.WriteString(",})")
 }
 
-// writeInto transforms a lineFilter to its corresponding part of a LogQL query
+// WriteInto transforms a LineFilter to its corresponding part of a LogQL query
 // under construction (contained in the provided strings.Builder)
-func (f *lineFilter) writeInto(sb *strings.Builder) {
+func (f *LineFilter) WriteInto(sb *strings.Builder) {
 	if f.not {
 		if !f.allowEmpty {
 			// the record must contains the field if values are specified

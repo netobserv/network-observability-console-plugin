@@ -2,10 +2,10 @@ package loki
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/netobserv/network-observability-console-plugin/pkg/config"
-	"github.com/netobserv/network-observability-console-plugin/pkg/utils"
 	"github.com/netobserv/network-observability-console-plugin/pkg/utils/constants"
 )
 
@@ -13,136 +13,85 @@ const (
 	topologyDefaultLimit = "100"
 )
 
-type Topology struct {
-	limit               string
-	rateInterval        string
-	step                string
-	function            string
-	dataField           string
-	labels              string
-	filter              string
-	skipNonDNS          bool
-	skipEmptyDNSLatency bool
-	skipEmptyRTT        bool
-	scalar              string
-	factor              string
+var (
+	aggregateKeyLabels = map[string][]string{
+		"app":          {"app"},
+		"droppedState": {"PktDropLatestState"},
+		"droppedCause": {"PktDropLatestDropCause"},
+		"dnsRCode":     {"DnsFlagsResponseCode"},
+		"cluster":      {"K8S_ClusterName"},
+		"zone":         {"SrcK8S_Zone", "DstK8S_Zone"},
+		"host":         {"SrcK8S_HostName", "DstK8S_HostName"},
+		"namespace":    {"SrcK8S_Namespace", "DstK8S_Namespace"},
+		"owner":        {"SrcK8S_OwnerName", "SrcK8S_OwnerType", "DstK8S_OwnerName", "DstK8S_OwnerType", "SrcK8S_Namespace", "DstK8S_Namespace"},
+		"resource":     {"SrcK8S_Name", "SrcK8S_Type", "SrcK8S_OwnerName", "SrcK8S_OwnerType", "SrcK8S_Namespace", "SrcAddr", "SrcK8S_HostName", "DstK8S_Name", "DstK8S_Type", "DstK8S_OwnerName", "DstK8S_OwnerType", "DstK8S_Namespace", "DstAddr", "DstK8S_HostName"},
+	}
+	groupKeyLabels = map[string][]string{
+		"clusters":   {"K8S_ClusterName"},
+		"zones":      {"SrcK8S_Zone", "DstK8S_Zone"},
+		"hosts":      {"SrcK8S_HostName", "DstK8S_HostName"},
+		"namespaces": {"SrcK8S_Namespace", "DstK8S_Namespace"},
+		"owners":     {"SrcK8S_OwnerName", "SrcK8S_OwnerType", "DstK8S_OwnerName", "DstK8S_OwnerType"},
+	}
+)
+
+type TopologyInput struct {
+	Start          string
+	End            string
+	Top            string
+	RateInterval   string
+	Step           string
+	DataField      string
+	MetricFunction constants.MetricFunction
+	RecordType     constants.RecordType
+	PacketLoss     constants.PacketLoss
+	Aggregate      string
+	Groups         string
+	DedupMark      bool
 }
 
 type TopologyQueryBuilder struct {
 	*FlowQueryBuilder
-	topology *Topology
+	topology *TopologyInput
 }
 
-func NewTopologyQuery(cfg *config.Loki, start, end, limit, rateInterval, step, metricType string,
-	metricFunction constants.MetricFunction, recordType constants.RecordType, packetLoss constants.PacketLoss,
-	aggregate, groups string, dedupMark bool) (*TopologyQueryBuilder, error) {
-	l := limit
-	if len(l) == 0 {
-		l = topologyDefaultLimit
-	}
-
-	labels, filter := getLabelsAndFilter(aggregate, groups)
-	if cfg.IsLabel(filter) {
-		filter = ""
-	}
-	field := getField(metricType)
-	factor := getFactor(metricType)
-	function, scalar := getFunctionWithScalar(metricFunction)
-
+func NewTopologyQuery(cfg *config.Loki, in *TopologyInput) (*TopologyQueryBuilder, error) {
 	var dedup bool
 	var rt constants.RecordType
-	if utils.Contains(constants.AnyConnectionType, string(recordType)) {
+	if slices.Contains(constants.AnyConnectionType, string(in.RecordType)) {
 		dedup = false
 		rt = "endConnection"
 	} else {
-		dedup = dedupMark
+		dedup = in.DedupMark
 		rt = "flowLog"
 	}
 
+	fqb := NewFlowQueryBuilder(cfg, in.Start, in.End, in.Top, dedup, rt, in.PacketLoss)
 	return &TopologyQueryBuilder{
-		FlowQueryBuilder: NewFlowQueryBuilder(cfg, start, end, limit, dedup, rt, packetLoss),
-		topology: &Topology{
-			rateInterval:        rateInterval,
-			step:                step,
-			limit:               l,
-			function:            function,
-			dataField:           field,
-			factor:              factor,
-			labels:              labels,
-			filter:              filter,
-			skipNonDNS:          metricType == constants.MetricTypeDNSFlows,
-			skipEmptyDNSLatency: metricType == constants.MetricTypeDNSLatency,
-			skipEmptyRTT:        metricType == constants.MetricTypeFlowRTT,
-			scalar:              scalar,
-		},
+		FlowQueryBuilder: fqb,
+		topology:         in,
 	}, nil
 }
 
-func manageGroupLabels(fields []string, groups string) []string {
-	if len(groups) > 0 {
-		if strings.Contains(groups, "clusters") {
-			if !utils.Contains(fields, "K8S_ClusterName") {
-				fields = append(fields, "K8S_ClusterName")
-			}
-		}
-
-		if strings.Contains(groups, "zones") {
-			if !utils.Contains(fields, "SrcK8S_Zone") {
-				fields = append(fields, "SrcK8S_Zone", "DstK8S_Zone")
-			}
-		}
-
-		if strings.Contains(groups, "hosts") {
-			if !utils.Contains(fields, "SrcK8S_HostName") {
-				fields = append(fields, "SrcK8S_HostName", "DstK8S_HostName")
-			}
-		}
-
-		if strings.Contains(groups, "namespaces") {
-			if !utils.Contains(fields, "SrcK8S_Namespace") {
-				fields = append(fields, "SrcK8S_Namespace", "DstK8S_Namespace")
-			}
-		}
-
-		if strings.Contains(groups, "owners") {
-			if !utils.Contains(fields, "SrcK8S_OwnerName") {
-				fields = append(fields, "SrcK8S_OwnerName", "SrcK8S_OwnerType", "DstK8S_OwnerName", "DstK8S_OwnerType")
-			}
-		}
-	}
-	return fields
-}
-
-func getLabelsAndFilter(aggregate, groups string) (string, string) {
+func GetLabelsAndFilter(aggregate, groups string) ([]string, string) {
 	var fields []string
 	var filter string
-	switch aggregate {
-	case "app":
-		fields = []string{"app"}
-	case "droppedState":
-		fields = []string{"PktDropLatestState"}
-	case "droppedCause":
-		fields = []string{"PktDropLatestDropCause"}
-	case "dnsRCode":
-		fields = []string{"DnsFlagsResponseCode"}
-	case "cluster":
-		fields = []string{"K8S_ClusterName"}
-	case "zone":
-		fields = []string{"SrcK8S_Zone", "DstK8S_Zone"}
-	case "host":
-		fields = []string{"SrcK8S_HostName", "DstK8S_HostName"}
-	case "namespace":
-		fields = []string{"SrcK8S_Namespace", "DstK8S_Namespace"}
-	case "owner":
-		fields = []string{"SrcK8S_OwnerName", "SrcK8S_OwnerType", "DstK8S_OwnerName", "DstK8S_OwnerType", "SrcK8S_Namespace", "DstK8S_Namespace"}
-	case "resource":
-		fields = []string{"SrcK8S_Name", "SrcK8S_Type", "SrcK8S_OwnerName", "SrcK8S_OwnerType", "SrcK8S_Namespace", "SrcAddr", "SrcK8S_HostName", "DstK8S_Name", "DstK8S_Type", "DstK8S_OwnerName", "DstK8S_OwnerType", "DstK8S_Namespace", "DstAddr", "DstK8S_HostName"}
-	default:
+	if fields = aggregateKeyLabels[aggregate]; fields == nil {
 		fields = []string{aggregate}
 		filter = aggregate
 	}
-	fields = manageGroupLabels(fields, groups)
-	return strings.Join(fields[:], ","), filter
+	if groups != "" {
+		for gr, labels := range groupKeyLabels {
+			if strings.Contains(groups, gr) {
+				for _, label := range labels {
+					if !slices.Contains(fields, label) {
+						fields = append(fields, label)
+					}
+				}
+			}
+		}
+	}
+	return fields, filter
 }
 
 func getField(metricType string) string {
@@ -157,13 +106,13 @@ func getField(metricType string) string {
 func getFactor(metricType string) string {
 	switch metricType {
 	case constants.MetricTypeFlowRTT:
-		return "/1000000" // nanoseconds to miliseconds
+		return "/1000000" // nanoseconds to milliseconds
 	default:
 		return ""
 	}
 }
 
-func getFunctionWithScalar(metricFunction constants.MetricFunction) (string, string) {
+func GetFunctionWithQuantile(metricFunction constants.MetricFunction) (string, string) {
 	switch metricFunction {
 	case constants.MetricFunctionCount:
 		return "count_over_time", ""
@@ -187,8 +136,22 @@ func getFunctionWithScalar(metricFunction constants.MetricFunction) (string, str
 }
 
 func (q *TopologyQueryBuilder) Build() string {
-	sumBy := q.topology.function == "rate" || q.topology.function == "count_over_time" || q.topology.function == "sum_over_time"
+	top := q.topology.Top
+	if top == "" {
+		top = topologyDefaultLimit
+	}
 
+	labels, extraFilter := GetLabelsAndFilter(q.topology.Aggregate, q.topology.Groups)
+	if q.config.IsLabel(extraFilter) {
+		extraFilter = ""
+	}
+	strLabels := strings.Join(labels, ",")
+
+	dataField := getField(q.topology.DataField)
+	factor := getFactor(q.topology.DataField)
+	function, quantile := GetFunctionWithQuantile(q.topology.MetricFunction)
+
+	sumBy := function == "rate" || function == "count_over_time" || function == "sum_over_time"
 	// Build topology query like:
 	// /<url path>?query=
 	//		topk | bottomk(
@@ -202,72 +165,72 @@ func (q *TopologyQueryBuilder) Build() string {
 	//		)
 	//		&<query params>&step=<step>
 	sb := q.createStringBuilderURL()
-	if q.topology.function == "min_over_time" {
+	if function == "min_over_time" {
 		sb.WriteString("bottomk")
 	} else {
 		sb.WriteString("topk")
 	}
 	sb.WriteRune('(')
-	sb.WriteString(q.topology.limit)
+	sb.WriteString(top)
 	sb.WriteRune(',')
 
 	if sumBy {
 		sb.WriteString("sum by(")
-		sb.WriteString(q.topology.labels)
+		sb.WriteString(strLabels)
 		sb.WriteRune(')')
 	}
 
 	sb.WriteRune('(')
-	sb.WriteString(q.topology.function)
+	sb.WriteString(function)
 	sb.WriteString("(")
-	if len(q.topology.scalar) > 0 {
-		sb.WriteString(q.topology.scalar)
+	if len(quantile) > 0 {
+		sb.WriteString(quantile)
 		sb.WriteRune(',')
 	}
 	q.appendLabels(sb)
 	q.appendLineFilters(sb)
 
-	if len(q.topology.filter) > 0 {
-		q.appendFilter(sb, q.topology.filter)
+	if len(extraFilter) > 0 {
+		q.appendFilter(sb, extraFilter)
 	}
 
-	if q.topology.skipEmptyDNSLatency {
+	if dataField == constants.MetricTypeDNSLatency {
 		q.appendDNSLatencyFilter(sb)
-	} else if q.topology.skipNonDNS {
+	} else if dataField == constants.MetricTypeDNSFlows {
 		q.appendDNSFilter(sb)
-	} else if q.topology.skipEmptyRTT {
+	} else if dataField == constants.MetricTypeFlowRTT {
 		q.appendRTTFilter(sb)
 	}
 
 	q.appendJSON(sb, true)
-	if len(q.topology.dataField) > 0 {
+	if len(dataField) > 0 {
 		sb.WriteString("|unwrap ")
-		sb.WriteString(q.topology.dataField)
+		sb.WriteString(dataField)
 		sb.WriteString(`|__error__=""`)
 	}
 	sb.WriteRune('[')
-	if q.topology.function != "rate" {
-		sb.WriteString(q.topology.step)
+	if function != "rate" {
+		sb.WriteString(q.topology.Step)
 	} else {
-		sb.WriteString(q.topology.rateInterval)
+		sb.WriteString(q.topology.RateInterval)
 	}
 	sb.WriteString("])")
 
 	if !sumBy {
 		sb.WriteString(" by(")
-		sb.WriteString(q.topology.labels)
+		sb.WriteString(strLabels)
 		sb.WriteRune(')')
 	}
 	sb.WriteRune(')')
 
-	if len(q.topology.factor) > 0 {
-		sb.WriteString(q.topology.factor)
+	if len(factor) > 0 {
+		sb.WriteString(factor)
 	}
 	sb.WriteRune(')')
 
 	q.appendQueryParams(sb)
 	sb.WriteString("&step=")
-	sb.WriteString(q.topology.step)
+	sb.WriteString(q.topology.Step)
 
 	return sb.String()
 }

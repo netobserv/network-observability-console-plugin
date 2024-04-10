@@ -31,44 +31,36 @@ type FlowQueryBuilder struct {
 	startTime    string
 	endTime      string
 	limit        string
-	labelFilters []labelFilter
-	lineFilters  []lineFilter
-	jsonFilters  [][]labelFilter
+	labelFilters []filters.LabelFilter
+	lineFilters  []filters.LineFilter
+	jsonFilters  [][]filters.LabelFilter
 }
 
 func NewFlowQueryBuilder(cfg *config.Loki, start, end, limit string, dedup bool,
 	recordType constants.RecordType, packetLoss constants.PacketLoss) *FlowQueryBuilder {
 	// Always use following stream selectors
-	labelFilters := []labelFilter{
+	labelFilters := []filters.LabelFilter{
 		// app, which will apply whichever matching criteria (any or all)
-		stringEqualLabelFilter(constants.AppLabel, constants.AppLabelValue),
+		filters.StringEqualLabelFilter(constants.AppLabel, constants.AppLabelValue),
 	}
 
 	// only filter on _RecordType if available
 	if cfg.IsLabel(recordTypeField) {
 		if recordType == constants.RecordTypeAllConnections {
 			// connection _RecordType including newConnection, heartbeat or endConnection
-			labelFilters = append(labelFilters, stringMatchLalbeFilter(constants.RecordTypeLabel, strings.Join(constants.ConnectionTypes, "|")))
+			labelFilters = append(labelFilters, filters.StringMatchLabelFilter(constants.RecordTypeLabel, strings.Join(constants.ConnectionTypes, "|")))
 		} else if len(recordType) > 0 {
 			// specific _RecordType either newConnection, heartbeat, endConnection or flowLog
-			labelFilters = append(labelFilters, stringEqualLabelFilter(constants.RecordTypeLabel, string(recordType)))
+			labelFilters = append(labelFilters, filters.StringEqualLabelFilter(constants.RecordTypeLabel, string(recordType)))
 		}
 	}
 
-	lineFilters := []lineFilter{}
+	lineFilters := []filters.LineFilter{}
 	if dedup {
 		if cfg.IsLabel(fields.Duplicate) {
-			labelFilters = append(labelFilters, notStringLabelFilter(fields.Duplicate, "true"))
+			labelFilters = append(labelFilters, filters.NotStringLabelFilter(fields.Duplicate, "true"))
 		} else {
-			lineFilters = append(lineFilters, lineFilter{
-				key:        fields.Duplicate,
-				not:        true,
-				allowEmpty: true,
-				values: []lineMatch{{
-					valueType: typeBool,
-					value:     "true",
-				}},
-			})
+			lineFilters = append(lineFilters, filters.NewEmptyLineFilter(fields.Duplicate, true, false, true).MatchTrue())
 		}
 	}
 
@@ -76,19 +68,19 @@ func NewFlowQueryBuilder(cfg *config.Loki, start, end, limit string, dedup bool,
 		// match records that doesn't contains "Packets" field and 1+ packets dropped
 		// as FLP will ensure the filtering
 		lineFilters = append(lineFilters,
-			notContainsKeyLineFilter(fields.Packets),
-			regexMatchLineFilter(fields.PktDropPackets, true, "[1-9][0-9]*"),
+			filters.NotContainsKeyLineFilter(fields.Packets),
+			filters.RegexMatchLineFilter(fields.PktDropPackets, true, "[1-9][0-9]*"),
 		)
 	} else if packetLoss == constants.PacketLossHasDrop {
 		// match 1+ packets dropped
 		lineFilters = append(lineFilters,
-			regexMatchLineFilter(fields.PktDropPackets, true, "[1-9][0-9]*"),
+			filters.RegexMatchLineFilter(fields.PktDropPackets, true, "[1-9][0-9]*"),
 		)
 	} else if packetLoss == constants.PacketLossSent {
 		// match records that doesn't contains "PktDropPackets" field
 		// as FLP will ensure the filtering
 		lineFilters = append(lineFilters,
-			notContainsKeyLineFilter(fields.PktDropPackets),
+			filters.NotContainsKeyLineFilter(fields.PktDropPackets),
 		)
 	}
 
@@ -124,16 +116,8 @@ func (q *FlowQueryBuilder) addFilter(filter filters.Match) error {
 
 	// Stream selector labels
 	if q.config.IsLabel(filter.Key) {
-		if len(values) == 1 && isExactMatch(values[0]) {
-			if filter.Not {
-				q.labelFilters = append(q.labelFilters, notStringLabelFilter(filter.Key, trimExactMatch(values[0])))
-			} else if filter.MoreThanOrEqual {
-				q.labelFilters = append(q.labelFilters, moreThanNumberLabelFilter(filter.Key, trimExactMatch(values[0])))
-			} else {
-				q.labelFilters = append(q.labelFilters, stringEqualLabelFilter(filter.Key, trimExactMatch(values[0])))
-			}
-		} else {
-			q.addLabelRegex(filter.Key, values, filter.Not)
+		if lf, ok := filter.ToLabelFilter(); ok {
+			q.labelFilters = append(q.labelFilters, lf)
 		}
 	} else if fields.IsIP(filter.Key) {
 		if filter.Not {
@@ -147,85 +131,41 @@ func (q *FlowQueryBuilder) addFilter(filter filters.Match) error {
 	return nil
 }
 
-func (q *FlowQueryBuilder) addLabelRegex(key string, values []string, not bool) {
-	regexStr := strings.Builder{}
-	for i, value := range values {
-		if i > 0 {
-			regexStr.WriteByte('|')
-		}
-		//match the beginning of string if quoted without a star
-		//and case insensitive if no quotes
-		if !strings.HasPrefix(value, `"`) {
-			regexStr.WriteString("(?i).*")
-		} else if !strings.HasPrefix(value, `"*`) {
-			regexStr.WriteString("^")
-		}
-		//inject value with regex
-		regexStr.WriteString(valueReplacer.Replace(value))
-		//match the end  of string if quoted without a star
-		if !strings.HasSuffix(value, `"`) {
-			regexStr.WriteString(".*")
-		} else if !strings.HasSuffix(value, `*"`) {
-			regexStr.WriteString("$")
-		}
-	}
-
-	if regexStr.Len() > 0 {
-		if not {
-			q.labelFilters = append(q.labelFilters, stringNotMatchLabelFilter(key, regexStr.String()))
-		} else {
-			q.labelFilters = append(q.labelFilters, stringMatchLalbeFilter(key, regexStr.String()))
-		}
-	}
-}
-
 func (q *FlowQueryBuilder) addLineFilters(key string, values []string, not bool, moreThan bool) {
 	if len(values) == 0 {
 		return
 	}
 
-	lf := lineFilter{
-		key:      key,
-		not:      not,
-		moreThan: moreThan,
-	}
-	isArray := fields.IsArray(key)
-	isNumeric := fields.IsNumeric(key)
-	emptyMatches := false
-	for _, value := range values {
-		lm := lineMatch{}
-		switch {
-		case isArray:
-			lm = lineMatch{valueType: typeRegexArrayContains, value: value}
-		case isExactMatch(value):
-			lm = lineMatch{valueType: typeString, value: trimExactMatch(value)}
-			emptyMatches = emptyMatches || len(lm.value) == 0
-		case isNumeric:
-			lm = lineMatch{valueType: typeNumber, value: value}
-		default:
-			lm = lineMatch{valueType: typeRegexContains, value: value}
-		}
-		lf.values = append(lf.values, lm)
-	}
-	// if there is at least an empty exact match, there is no uniform/safe way to filter by text,
-	// so we should use JSON label matchers instead of text line matchers
-	if emptyMatches {
-		q.jsonFilters = append(q.jsonFilters, lf.asLabelFilters())
+	if fields.IsArray(key) {
+		q.lineFilters = append(q.lineFilters, filters.ArrayLineFilter(key, values, not))
 	} else {
-		q.lineFilters = append(q.lineFilters, lf)
+		var lf filters.LineFilter
+		var hasEmptyMatch bool
+		if fields.IsNumeric(key) {
+			lf, hasEmptyMatch = filters.NumericLineFilter(key, values, not, moreThan)
+		} else {
+			lf, hasEmptyMatch = filters.StringLineFilterCheckExact(key, values, not)
+		}
+		// if there is at least an empty exact match, there is no uniform/safe way to filter by text,
+		// so we should use JSON label matchers instead of text line matchers
+		if hasEmptyMatch {
+			q.jsonFilters = append(q.jsonFilters, lf.AsLabelFilters())
+		} else {
+			q.lineFilters = append(q.lineFilters, lf)
+		}
 	}
 }
 
 // addIPFilters assumes that we are searching for that IP addresses as part
 // of the log line (not in the stream selector labels)
 func (q *FlowQueryBuilder) addIPFilters(key string, values []string) {
-	filtersPerKey := make([]labelFilter, 0, len(values))
+	filtersPerKey := make([]filters.LabelFilter, 0, len(values))
 	for _, value := range values {
 		// empty exact matches should be treated as attribute filters looking for empty IP
 		if value == emptyMatch {
-			filtersPerKey = append(filtersPerKey, stringEqualLabelFilter(key, ""))
+			filtersPerKey = append(filtersPerKey, filters.StringEqualLabelFilter(key, ""))
 		} else {
-			filtersPerKey = append(filtersPerKey, ipLabelFilter(key, value))
+			filtersPerKey = append(filtersPerKey, filters.IPLabelFilter(key, value))
 		}
 	}
 	q.jsonFilters = append(q.jsonFilters, filtersPerKey)
@@ -244,14 +184,14 @@ func (q *FlowQueryBuilder) appendLabels(sb *strings.Builder) {
 		if i > 0 {
 			sb.WriteByte(',')
 		}
-		ss.writeInto(sb)
+		ss.WriteInto(sb)
 	}
 	sb.WriteByte('}')
 }
 
 func (q *FlowQueryBuilder) appendLineFilters(sb *strings.Builder) {
 	for _, lf := range q.lineFilters {
-		lf.writeInto(sb)
+		lf.WriteInto(sb)
 	}
 }
 
@@ -305,7 +245,7 @@ func (q *FlowQueryBuilder) appendJSON(sb *strings.Builder, forceAppend bool) {
 				if i > 0 {
 					sb.WriteString(jsonOrJoiner)
 				}
-				lf.writeInto(sb)
+				lf.WriteInto(sb)
 			}
 		}
 	}
@@ -337,12 +277,4 @@ func appendQueryParam(sb *strings.Builder, key, value string) {
 	sb.WriteString(key)
 	sb.WriteByte('=')
 	sb.WriteString(value)
-}
-
-func isExactMatch(value string) bool {
-	return strings.HasPrefix(value, `"`) && strings.HasSuffix(value, `"`)
-}
-
-func trimExactMatch(value string) string {
-	return strings.TrimPrefix(strings.TrimSuffix(value, `"`), `"`)
 }

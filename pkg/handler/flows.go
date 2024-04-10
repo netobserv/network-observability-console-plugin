@@ -1,18 +1,18 @@
 package handler
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"net/url"
+	"slices"
 	"time"
 
 	"github.com/netobserv/network-observability-console-plugin/pkg/config"
-	"github.com/netobserv/network-observability-console-plugin/pkg/httpclient"
 	"github.com/netobserv/network-observability-console-plugin/pkg/loki"
 	"github.com/netobserv/network-observability-console-plugin/pkg/metrics"
 	"github.com/netobserv/network-observability-console-plugin/pkg/model"
 	"github.com/netobserv/network-observability-console-plugin/pkg/model/filters"
-	"github.com/netobserv/network-observability-console-plugin/pkg/utils"
 	"github.com/netobserv/network-observability-console-plugin/pkg/utils/constants"
 )
 
@@ -27,9 +27,14 @@ const (
 	packetLossKey = "packetLoss"
 )
 
-func GetFlows(cfg *config.Config) func(w http.ResponseWriter, r *http.Request) {
+func GetFlows(ctx context.Context, cfg *config.Config) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		lokiClient := newLokiClient(&cfg.Loki, r.Header, false)
+		if !cfg.IsLokiEnabled() {
+			writeError(w, http.StatusBadRequest, "Cannot perform flows query with disabled Loki")
+			return
+		}
+
+		cl := clients{loki: newLokiClient(&cfg.Loki, r.Header, false)}
 		var code int
 		startTime := time.Now()
 		defer func() {
@@ -39,7 +44,7 @@ func GetFlows(cfg *config.Config) func(w http.ResponseWriter, r *http.Request) {
 		params := r.URL.Query()
 		hlog.Debugf("GetFlows query params: %s", params)
 
-		flows, code, err := getFlows(cfg, lokiClient, params)
+		flows, code, err := getFlows(ctx, cfg, cl, params)
 		if err != nil {
 			writeError(w, code, err.Error())
 			return
@@ -50,12 +55,12 @@ func GetFlows(cfg *config.Config) func(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getFlows(cfg *config.Config, client httpclient.Caller, params url.Values) (*model.AggregatedQueryResponse, int, error) {
-	start, err := getStartTime(params)
+func getFlows(ctx context.Context, cfg *config.Config, cl clients, params url.Values) (*model.AggregatedQueryResponse, int, error) {
+	start, _, err := getStartTime(params)
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
-	end, err := getEndTime(params)
+	end, _, err := getEndTime(params)
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
@@ -68,7 +73,7 @@ func getFlows(cfg *config.Config, client httpclient.Caller, params url.Values) (
 		return nil, http.StatusBadRequest, err
 	}
 	dedup := params.Get(dedupKey) == "true"
-	if !cfg.Frontend.Deduper.Mark || utils.Contains(constants.AnyConnectionType, string(recordType)) {
+	if !cfg.Frontend.Deduper.Mark || slices.Contains(constants.AnyConnectionType, string(recordType)) {
 		dedup = false
 	}
 	packetLoss, err := getPacketLoss(params)
@@ -93,7 +98,7 @@ func getFlows(cfg *config.Config, client httpclient.Caller, params url.Values) (
 			}
 			queries = append(queries, qb.Build())
 		}
-		code, err := fetchParallel(client, queries, merger)
+		code, err := cl.fetchParallel(ctx, queries, nil, merger)
 		if err != nil {
 			return nil, code, err
 		}
@@ -107,7 +112,7 @@ func getFlows(cfg *config.Config, client httpclient.Caller, params url.Values) (
 			}
 		}
 		query := qb.Build()
-		code, err := fetchSingle(client, query, merger)
+		code, err := cl.fetchSingle(ctx, query, nil, merger)
 		if err != nil {
 			return nil, code, err
 		}

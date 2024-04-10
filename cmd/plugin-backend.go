@@ -1,9 +1,12 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/sirupsen/logrus"
 
@@ -20,6 +23,19 @@ var (
 	versionFlag  = flag.Bool("v", false, "print version")
 	log          = logrus.WithField("module", "main")
 )
+
+func getContext() (ctx context.Context) {
+	logrus.Infof("push CTRL+C or send SIGTERM to interrupt execution")
+	ctx, canceler := context.WithCancel(context.Background())
+	// Subscribe to signals for terminating the program.
+	go func() {
+		stopper := make(chan os.Signal, 1)
+		signal.Notify(stopper, os.Interrupt, syscall.SIGTERM)
+		<-stopper
+		canceler()
+	}()
+	return ctx
+}
 
 func main() {
 	flag.Parse()
@@ -43,6 +59,12 @@ func main() {
 	if err != nil {
 		log.WithError(err).Fatal("error reading config file")
 	}
+	err = cfg.Validate()
+	if err != nil {
+		log.WithError(err).Fatal("invalid config")
+	}
+
+	ctx := getContext()
 
 	checker, err := cfg.GetAuthChecker()
 	if err != nil {
@@ -55,5 +77,5 @@ func main() {
 		KeyPath:  cfg.Server.KeyPath,
 	})
 
-	server.Start(cfg, checker)
+	server.Start(ctx, cfg, checker)
 }

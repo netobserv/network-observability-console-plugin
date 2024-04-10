@@ -27,6 +27,7 @@ func (o *LokiClientMock) Get(url string) ([]byte, int, error) {
 				path += "_dropped"
 			}
 
+			//nolint:gocritic // if-else is ok
 			if strings.Contains(url, "by(app)") {
 				path += "_app.json"
 			} else if strings.Contains(url, "by(PktDropLatestState)") {
@@ -48,6 +49,7 @@ func (o *LokiClientMock) Get(url string) ([]byte, int, error) {
 			}
 		} else {
 			path = "mocks/loki/flow_records"
+			//nolint:gocritic // if-else is ok
 			if strings.Contains(url, "|~`\"Packets\":0[,}]|~`\"PktDropPackets\":[1-9][0-9]*[,}]") {
 				path += "_dropped.json"
 			} else if strings.Contains(url, "|~`\"PktDropPackets\":[1-9][0-9]*[,}]") {
