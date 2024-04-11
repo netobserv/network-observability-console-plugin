@@ -128,3 +128,22 @@ func TestBuildQuery_PromQLHistogramP99(t *testing.T) {
 		result.PromQL,
 	)
 }
+
+func TestBuildQuery_PromQLByDNSResponseCode(t *testing.T) {
+	in := loki.TopologyInput{
+		Top:            "5",
+		RateInterval:   "1m",
+		DataField:      "DnsFlows",
+		MetricFunction: constants.MetricFunctionCount,
+		RecordType:     constants.RecordTypeLog,
+		Aggregate:      "DnsFlagsResponseCode",
+	}
+	f := filters.SingleQuery{}
+	q := NewQuery(&in, &qr, f, "netobserv_namespace_dns_latency_seconds_count")
+	result := q.Build()
+	assert.Equal(
+		t,
+		`topk(5,sum by(DnsFlagsResponseCode)(rate(netobserv_namespace_dns_latency_seconds_count{DnsFlagsResponseCode!=""}[1m])))`,
+		result.PromQL,
+	)
+}

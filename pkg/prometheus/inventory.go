@@ -9,6 +9,7 @@ import (
 
 	"github.com/netobserv/network-observability-console-plugin/pkg/config"
 	"github.com/netobserv/network-observability-console-plugin/pkg/model/fields"
+	"github.com/netobserv/network-observability-console-plugin/pkg/utils/constants"
 	"github.com/prometheus/common/model"
 	"github.com/sirupsen/logrus"
 )
@@ -29,6 +30,10 @@ type metricInfo struct {
 	valueField string
 	direction  string
 }
+
+// TODO: remove all this inventory stuff and replace with a more explicit configuration of enabled metrics (provided by operator)
+// It removes the need for plugin's CRB of metric
+// Explicit knowledge of query-to-metrics mapping will also allow to better guide the user: "this chart cannot be displayed, you need to enable metric X to have it"
 
 func NewInventory(ctx context.Context, cfg *config.Prometheus) *Inventory {
 	d := cfg.InventoryPollInterval.Duration
@@ -86,6 +91,17 @@ func (i *Inventory) fetchMetricsInventory(ctx context.Context) {
 }
 
 func checkMetric(name string) *metricInfo {
+	var labels []string
+	if strings.Contains(name, "_workload_") {
+		labels = []string{fields.SrcNamespace, fields.DstNamespace, fields.Layer, fields.SrcOwnerName, fields.DstOwnerName, fields.SrcOwnerType, fields.DstOwnerType, fields.SrcType, fields.DstType}
+	} else if strings.Contains(name, "_namespace_") {
+		labels = []string{fields.SrcNamespace, fields.DstNamespace, fields.Layer}
+	} else if strings.Contains(name, "_node_") {
+		labels = []string{fields.SrcHostName, fields.DstHostName}
+	} else {
+		return nil
+	}
+
 	var valueField string
 	if strings.Contains(name, "_drop_bytes_total") {
 		valueField = fields.PktDropBytes
@@ -99,6 +115,9 @@ func checkMetric(name string) *metricInfo {
 		valueField = fields.TimeFlowRTT
 	} else if strings.Contains(name, "_dns_latency_seconds_bucket") {
 		valueField = fields.DNSLatency
+	} else if strings.Contains(name, "_dns_latency_seconds_count") {
+		valueField = constants.MetricTypeDNSFlows
+		labels = append(labels, fields.DNSCode)
 	}
 
 	if valueField == "" {
@@ -111,17 +130,6 @@ func checkMetric(name string) *metricInfo {
 	} else if strings.Contains(name, "_ingress_") {
 		dir = "??" // TODO: fixme
 	} // TODO: else assume any direction?
-
-	var labels []string
-	if strings.Contains(name, "_workload_") {
-		labels = []string{fields.SrcNamespace, fields.DstNamespace, fields.Layer, fields.SrcOwnerName, fields.DstOwnerName, fields.SrcOwnerType, fields.DstOwnerType, fields.SrcType, fields.DstType}
-	} else if strings.Contains(name, "_namespace_") {
-		labels = []string{fields.SrcNamespace, fields.DstNamespace, fields.Layer}
-	} else if strings.Contains(name, "_node_") {
-		labels = []string{fields.SrcHostName, fields.DstHostName}
-	} else {
-		return nil
-	}
 
 	return &metricInfo{
 		name:       name,

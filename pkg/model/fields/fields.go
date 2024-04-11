@@ -47,6 +47,7 @@ const (
 	DNSID          = "DnsId"
 	DNSLatency     = "DnsLatencyMs"
 	DNSErrNo       = "DnsErrno"
+	DNSCode        = "DnsFlagsResponseCode"
 	Duplicate      = "Duplicate"
 	TimeFlowRTT    = "TimeFlowRttNs"
 )
