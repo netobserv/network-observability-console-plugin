@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 	"slices"
+	"strings"
 	"time"
 
 	"github.com/netobserv/network-observability-console-plugin/pkg/config"
@@ -114,7 +115,8 @@ func getTopologyFlows(ctx context.Context, cfg *config.Config, promInventory *pr
 		filterGroups = expandReportersMergeQueries(
 			filterGroups,
 			func(filters filters.SingleQuery) bool {
-				return getEligiblePromMetric(promInventory, filters, &in) != ""
+				m, _ := getEligiblePromMetric(promInventory, filters, &in)
+				return m != ""
 			},
 		)
 	}
@@ -192,11 +194,22 @@ func buildTopologyQuery(
 	in *loki.TopologyInput,
 	qr *v1.Range,
 ) (string, *prometheus.Query, int, error) {
-
-	if metric := getEligiblePromMetric(promInventory, filters, in); metric != "" {
+	metric, candidates := getEligiblePromMetric(promInventory, filters, in)
+	if metric != "" {
 		qb := prometheus.NewQuery(in, qr, filters, metric)
 		q := qb.Build()
 		return "", &q, http.StatusOK, nil
+	}
+
+	if !cfg.IsLokiEnabled() {
+		if len(candidates) > 0 {
+			// Some candidate metrics exist but they are disabled; tell the user
+			return "", nil, http.StatusBadRequest, errors.New(
+				"this request requires any of the following metric(s) to be enabled: " + strings.Join(candidates, ", ") +
+					". Metrics can be configured in the FlowCollector resource via 'spec.processor.metrics.includeList'" +
+					" Alternatively, you may also install and enable Loki.")
+		}
+		return "", nil, http.StatusBadRequest, errors.New("this request could not be performed with Prometheus metrics: it requires installing and enabling Loki")
 	}
 
 	qb, err := loki.NewTopologyQuery(&cfg.Loki, in)
@@ -210,12 +223,12 @@ func buildTopologyQuery(
 	return EncodeQuery(qb.Build()), nil, http.StatusOK, nil
 }
 
-func getEligiblePromMetric(promInventory *prometheus.Inventory, filters filters.SingleQuery, in *loki.TopologyInput) string {
+func getEligiblePromMetric(promInventory *prometheus.Inventory, filters filters.SingleQuery, in *loki.TopologyInput) (string, []string) {
 	if promInventory == nil {
-		return ""
+		return "", nil
 	}
 	if in.RecordType != "" && in.RecordType != constants.RecordTypeLog {
-		return ""
+		return "", nil
 	}
 	// TODO: packetLoss, how can we handle that?
 
@@ -227,7 +240,7 @@ func getEligiblePromMetric(promInventory *prometheus.Inventory, filters filters.
 	for _, m := range filters {
 		if m.MoreThanOrEqual {
 			// Not relevant/supported in promQL
-			return ""
+			return "", nil
 		}
 		if m.Key == fields.FlowDirection {
 			// TODO ??
@@ -239,5 +252,9 @@ func getEligiblePromMetric(promInventory *prometheus.Inventory, filters filters.
 	}
 
 	// Check if that desired metric exists
-	return promInventory.FindMetricName(labelsNeeded, in.DataField, "??")
+	if m := promInventory.FindMetricName(labelsNeeded, in.DataField, "??"); m != "" {
+		return m, nil
+	}
+	// Prometheus is enabled but no metric matched; check if potential disabled metrics could have matched
+	return "", promInventory.FindDisabledCandidates(labelsNeeded, in.DataField, "??")
 }

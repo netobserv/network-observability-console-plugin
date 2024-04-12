@@ -31,13 +31,21 @@ type Server struct {
 }
 
 type Prometheus struct {
-	URL                   string   `yaml:"url" json:"url"`
-	Timeout               Duration `yaml:"timeout,omitempty" json:"timeout,omitempty"`
-	TokenPath             string   `yaml:"tokenPath,omitempty" json:"tokenPath,omitempty"`
-	SkipTLS               bool     `yaml:"skipTls,omitempty" json:"skipTls,omitempty"`
-	CAPath                string   `yaml:"caPath,omitempty" json:"caPath,omitempty"`
-	ForwardUserToken      bool     `yaml:"forwardUserToken,omitempty" json:"forwardUserToken,omitempty"`
-	InventoryPollInterval Duration `yaml:"inventoryPollInterval,omitempty" json:"inventoryPollInterval,omitempty"`
+	URL              string       `yaml:"url" json:"url"`
+	Timeout          Duration     `yaml:"timeout,omitempty" json:"timeout,omitempty"`
+	TokenPath        string       `yaml:"tokenPath,omitempty" json:"tokenPath,omitempty"`
+	SkipTLS          bool         `yaml:"skipTls,omitempty" json:"skipTls,omitempty"`
+	CAPath           string       `yaml:"caPath,omitempty" json:"caPath,omitempty"`
+	ForwardUserToken bool         `yaml:"forwardUserToken,omitempty" json:"forwardUserToken,omitempty"`
+	Metrics          []MetricInfo `yaml:"metrics,omitempty" json:"metrics,omitempty"`
+}
+
+type MetricInfo struct {
+	Enabled    bool     `yaml:"enabled" json:"enabled"`
+	Name       string   `yaml:"name,omitempty" json:"name,omitempty"`
+	Type       string   `yaml:"type,omitempty" json:"type,omitempty"`
+	ValueField string   `yaml:"valueField,omitempty" json:"valueField,omitempty"`
+	Labels     []string `yaml:"labels,omitempty" json:"labels,omitempty"`
 }
 
 type PortNaming struct {

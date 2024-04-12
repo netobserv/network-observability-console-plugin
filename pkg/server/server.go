@@ -18,7 +18,7 @@ var slog = logrus.WithField("module", "server")
 func Start(ctx context.Context, cfg *config.Config, authChecker auth.Checker) {
 	var promInventory *prometheus.Inventory
 	if cfg.IsPromEnabled() {
-		promInventory = prometheus.NewInventory(ctx, &cfg.Prometheus)
+		promInventory = prometheus.NewInventory(&cfg.Prometheus)
 	}
 
 	router := setupRoutes(ctx, cfg, authChecker, promInventory)
