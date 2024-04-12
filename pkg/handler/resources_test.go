@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -9,10 +10,10 @@ import (
 	"github.com/netobserv/network-observability-console-plugin/pkg/httpclient/httpclienttest"
 )
 
-var testLokiConfig = config.Loki{
+var h = Handlers{Cfg: &config.Config{Loki: config.Loki{
 	URL:    "http://loki",
 	Labels: []string{"_RecordType", "SrcK8S_Namespace", "DstK8S_Namespace", "SrcK8S_OwnerName", "DstK8S_OwnerName"},
-}
+}}}
 
 const testLokiBaseURL = "http://loki/loki/api/v1/"
 
@@ -25,7 +26,8 @@ func TestGetSourceOwnerNames(t *testing.T) {
 			url,
 		)
 	})
-	_, _, _ = getNamesForPrefix(&testLokiConfig, lokiClientMock, "Src", "Deployment", "default")
+	cl := clients{loki: lokiClientMock}
+	_, _, _ = h.getNamesForPrefix(context.Background(), cl, "Src", "Deployment", "default")
 
 	lokiClientMock.AssertNumberOfCalls(t, "Get", 1)
 }
@@ -39,7 +41,8 @@ func TestGetDestPodNames(t *testing.T) {
 			url,
 		)
 	})
-	_, _, _ = getNamesForPrefix(&testLokiConfig, lokiClientMock, "Dst", "Pod", "default")
+	cl := clients{loki: lokiClientMock}
+	_, _, _ = h.getNamesForPrefix(context.Background(), cl, "Dst", "Pod", "default")
 
 	lokiClientMock.AssertNumberOfCalls(t, "Get", 1)
 }
@@ -53,7 +56,8 @@ func TestGetSourceNodeNames(t *testing.T) {
 			url,
 		)
 	})
-	_, _, _ = getNamesForPrefix(&testLokiConfig, lokiClientMock, "Src", "Node", "")
+	cl := clients{loki: lokiClientMock}
+	_, _, _ = h.getNamesForPrefix(context.Background(), cl, "Src", "Node", "")
 
 	lokiClientMock.AssertNumberOfCalls(t, "Get", 1)
 }
@@ -67,7 +71,8 @@ func TestGetLabelValues(t *testing.T) {
 			url,
 		)
 	})
-	_, _, _ = getLabelValues(&testLokiConfig, lokiClientMock, "DstK8S_Namespace")
+	cl := clients{loki: lokiClientMock}
+	_, _, _ = h.getLabelValues(context.Background(), cl, "DstK8S_Namespace")
 
 	lokiClientMock.AssertNumberOfCalls(t, "Get", 1)
 }

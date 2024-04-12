@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -15,8 +16,12 @@ import (
 	"github.com/netobserv/network-observability-console-plugin/pkg/handler/lokiclientmock"
 	"github.com/netobserv/network-observability-console-plugin/pkg/httpclient"
 	"github.com/netobserv/network-observability-console-plugin/pkg/kubernetes/auth"
+	"github.com/netobserv/network-observability-console-plugin/pkg/loki"
 	"github.com/netobserv/network-observability-console-plugin/pkg/metrics"
 	"github.com/netobserv/network-observability-console-plugin/pkg/model"
+	"github.com/netobserv/network-observability-console-plugin/pkg/model/fields"
+	"github.com/netobserv/network-observability-console-plugin/pkg/model/filters"
+	"github.com/netobserv/network-observability-console-plugin/pkg/utils"
 )
 
 type LokiError struct {
@@ -136,10 +141,78 @@ func executeLokiQuery(flowsURL string, lokiClient httpclient.Caller) ([]byte, in
 	return resp, http.StatusOK, nil
 }
 
-func LokiReady(cfg *config.Loki) func(w http.ResponseWriter, r *http.Request) {
+func getLokiLabelValues(baseURL string, lokiClient httpclient.Caller, label string) ([]string, int, error) {
+	baseURL = strings.TrimRight(baseURL, "/")
+	url := fmt.Sprintf("%s/loki/api/v1/label/%s/values", baseURL, label)
+	hlog.Debugf("getLokiLabelValues URL: %s", url)
+
+	resp, code, err := lokiClient.Get(url)
+	if err != nil {
+		return nil, http.StatusServiceUnavailable, err
+	}
+	if code != http.StatusOK {
+		newCode, msg := getLokiError(resp, code)
+		return nil, newCode, errors.New(msg)
+	}
+	hlog.Tracef("getLokiLabelValues raw response: %s", resp)
+	var lvr model.LabelValuesResponse
+	err = json.Unmarshal(resp, &lvr)
+	if err != nil {
+		return nil, http.StatusInternalServerError, err
+	}
+	return lvr.Data, http.StatusOK, nil
+}
+
+func getLokiNamesForPrefix(cfg *config.Loki, lokiClient httpclient.Caller, prefix, kind, namespace string) ([]string, int, error) {
+	lokiParams := filters.SingleQuery{}
+	if namespace != "" {
+		lokiParams = append(lokiParams, filters.NewMatch(prefix+fields.Namespace, exact(namespace)))
+	}
+	var fieldToExtract string
+	if utils.IsOwnerKind(kind) {
+		lokiParams = append(lokiParams, filters.NewMatch(prefix+fields.OwnerType, exact(kind)))
+		fieldToExtract = prefix + fields.OwnerName
+	} else {
+		lokiParams = append(lokiParams, filters.NewMatch(prefix+fields.Type, exact(kind)))
+		fieldToExtract = prefix + fields.Name
+	}
+
+	queryBuilder := loki.NewFlowQueryBuilderWithDefaults(cfg)
+	if err := queryBuilder.Filters(lokiParams); err != nil {
+		return nil, http.StatusBadRequest, err
+	}
+
+	query := queryBuilder.Build()
+	resp, code, err := executeLokiQuery(query, lokiClient)
+	if err != nil {
+		return nil, code, errors.New("Loki query failed: " + err.Error())
+	}
+	hlog.Tracef("GetNames raw response: %s", resp)
+
+	var qr model.QueryResponse
+	err = json.Unmarshal(resp, &qr)
+	if err != nil {
+		hlog.WithError(err).Errorf("cannot unmarshal, response was: %v", string(resp))
+		return nil, http.StatusInternalServerError, errors.New("Failed to unmarshal Loki response: " + err.Error())
+	}
+
+	streams, ok := qr.Data.Result.(model.Streams)
+	if !ok {
+		return nil, http.StatusInternalServerError, errors.New("Loki returned unexpected type: " + string(qr.Data.ResultType))
+	}
+
+	values := extractDistinctValues(fieldToExtract, streams)
+	return values, http.StatusOK, nil
+}
+
+func (h *Handlers) LokiReady() func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		lokiClient := newLokiClient(cfg, r.Header, true)
-		baseURL := strings.TrimRight(cfg.GetStatusURL(), "/")
+		if !h.Cfg.IsLokiEnabled() {
+			writeError(w, http.StatusBadRequest, "Loki is disabled")
+			return
+		}
+		lokiClient := newLokiClient(&h.Cfg.Loki, r.Header, true)
+		baseURL := strings.TrimRight(h.Cfg.Loki.GetStatusURL(), "/")
 
 		resp, code, err := executeLokiQuery(fmt.Sprintf("%s/%s", baseURL, "ready"), lokiClient)
 		if err != nil {
@@ -158,10 +231,14 @@ func LokiReady(cfg *config.Loki) func(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func LokiMetrics(cfg *config.Loki) func(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) LokiMetrics() func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		lokiClient := newLokiClient(cfg, r.Header, true)
-		baseURL := strings.TrimRight(cfg.GetStatusURL(), "/")
+		if !h.Cfg.IsLokiEnabled() {
+			writeError(w, http.StatusBadRequest, "Loki is disabled")
+			return
+		}
+		lokiClient := newLokiClient(&h.Cfg.Loki, r.Header, true)
+		baseURL := strings.TrimRight(h.Cfg.Loki.GetStatusURL(), "/")
 
 		resp, code, err := executeLokiQuery(fmt.Sprintf("%s/%s", baseURL, "metrics"), lokiClient)
 		if err != nil {
@@ -173,10 +250,14 @@ func LokiMetrics(cfg *config.Loki) func(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
-func LokiBuildInfos(cfg *config.Loki) func(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) LokiBuildInfos() func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		lokiClient := newLokiClient(cfg, r.Header, true)
-		baseURL := strings.TrimRight(cfg.GetStatusURL(), "/")
+		if !h.Cfg.IsLokiEnabled() {
+			writeError(w, http.StatusBadRequest, "Loki is disabled")
+			return
+		}
+		lokiClient := newLokiClient(&h.Cfg.Loki, r.Header, true)
+		baseURL := strings.TrimRight(h.Cfg.Loki.GetStatusURL(), "/")
 
 		resp, code, err := executeLokiQuery(fmt.Sprintf("%s/%s", baseURL, "loki/api/v1/status/buildinfo"), lokiClient)
 		if err != nil {
@@ -188,10 +269,14 @@ func LokiBuildInfos(cfg *config.Loki) func(w http.ResponseWriter, r *http.Reques
 	}
 }
 
-func LokiConfig(cfg *config.Loki, param string) func(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) LokiConfig(param string) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		lokiClient := newLokiClient(cfg, r.Header, true)
-		baseURL := strings.TrimRight(cfg.GetStatusURL(), "/")
+		if !h.Cfg.IsLokiEnabled() {
+			writeError(w, http.StatusBadRequest, "Loki is disabled")
+			return
+		}
+		lokiClient := newLokiClient(&h.Cfg.Loki, r.Header, true)
+		baseURL := strings.TrimRight(h.Cfg.Loki.GetStatusURL(), "/")
 
 		resp, code, err := executeLokiQuery(fmt.Sprintf("%s/%s", baseURL, "config"), lokiClient)
 		if err != nil {
@@ -210,10 +295,14 @@ func LokiConfig(cfg *config.Loki, param string) func(w http.ResponseWriter, r *h
 	}
 }
 
-func IngesterMaxChunkAge(cfg *config.Loki) func(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) IngesterMaxChunkAge() func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		lokiClient := newLokiClient(cfg, r.Header, true)
-		baseURL := strings.TrimRight(cfg.GetStatusURL(), "/")
+		if !h.Cfg.IsLokiEnabled() {
+			writeError(w, http.StatusBadRequest, "Loki is disabled")
+			return
+		}
+		lokiClient := newLokiClient(&h.Cfg.Loki, r.Header, true)
+		baseURL := strings.TrimRight(h.Cfg.Loki.GetStatusURL(), "/")
 
 		resp, code, err := executeLokiQuery(fmt.Sprintf("%s/%s", baseURL, "config"), lokiClient)
 		if err != nil {

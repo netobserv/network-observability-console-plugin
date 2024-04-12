@@ -35,9 +35,9 @@ const (
 	defaultStepDuration = time.Second * 30
 )
 
-func GetTopology(ctx context.Context, cfg *config.Config, promInventory *prometheus.Inventory) func(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) GetTopology(ctx context.Context) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		clients, err := newClients(cfg, r.Header, false)
+		clients, err := newClients(h.Cfg, r.Header, false)
 		if err != nil {
 			writeError(w, http.StatusInternalServerError, err.Error())
 			return
@@ -49,7 +49,7 @@ func GetTopology(ctx context.Context, cfg *config.Config, promInventory *prometh
 			metrics.ObserveHTTPCall("GetTopology", code, startTime)
 		}()
 
-		flows, code, err := getTopologyFlows(ctx, cfg, promInventory, clients, r.URL.Query())
+		flows, code, err := h.getTopologyFlows(ctx, clients, r.URL.Query())
 		if err != nil {
 			writeError(w, code, err.Error())
 			return
@@ -60,9 +60,9 @@ func GetTopology(ctx context.Context, cfg *config.Config, promInventory *prometh
 	}
 }
 
-func getTopologyFlows(ctx context.Context, cfg *config.Config, promInventory *prometheus.Inventory, cl clients, params url.Values) (*model.AggregatedQueryResponse, int, error) {
+func (h *Handlers) getTopologyFlows(ctx context.Context, cl clients, params url.Values) (*model.AggregatedQueryResponse, int, error) {
 	hlog.Debugf("GetTopology query params: %s", params)
-	in := loki.TopologyInput{DedupMark: cfg.Frontend.Deduper.Mark}
+	in := loki.TopologyInput{DedupMark: h.Cfg.Frontend.Deduper.Mark}
 	var err error
 	qr := v1.Range{}
 
@@ -115,7 +115,7 @@ func getTopologyFlows(ctx context.Context, cfg *config.Config, promInventory *pr
 		filterGroups = expandReportersMergeQueries(
 			filterGroups,
 			func(filters filters.SingleQuery) bool {
-				m, _ := getEligiblePromMetric(promInventory, filters, &in)
+				m, _ := getEligiblePromMetric(h.PromInventory, filters, &in)
 				return m != ""
 			},
 		)
@@ -127,7 +127,7 @@ func getTopologyFlows(ctx context.Context, cfg *config.Config, promInventory *pr
 		var lokiQ []string
 		var promQ []*prometheus.Query
 		for _, filters := range filterGroups {
-			lq, pq, code, err := buildTopologyQuery(cfg, promInventory, filters, &in, &qr)
+			lq, pq, code, err := buildTopologyQuery(h.Cfg, h.PromInventory, filters, &in, &qr)
 			if err != nil {
 				return nil, code, errors.New("Can't build query: " + err.Error())
 			}
@@ -147,7 +147,7 @@ func getTopologyFlows(ctx context.Context, cfg *config.Config, promInventory *pr
 		if len(filterGroups) > 0 {
 			filters = filterGroups[0]
 		}
-		lokiQ, promQ, code, err := buildTopologyQuery(cfg, promInventory, filters, &in, &qr)
+		lokiQ, promQ, code, err := buildTopologyQuery(h.Cfg, h.PromInventory, filters, &in, &qr)
 		if err != nil {
 			return nil, code, err
 		}
@@ -158,7 +158,7 @@ func getTopologyFlows(ctx context.Context, cfg *config.Config, promInventory *pr
 	}
 
 	qresp := merger.Get()
-	qresp.IsMock = cfg.Loki.UseMocks
+	qresp.IsMock = h.Cfg.Loki.UseMocks
 	qresp.UnixTimestamp = time.Now().Unix()
 	hlog.Tracef("GetTopology response: %v", qresp)
 	return qresp, http.StatusOK, nil

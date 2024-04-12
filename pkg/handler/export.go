@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/netobserv/network-observability-console-plugin/pkg/config"
 	"github.com/netobserv/network-observability-console-plugin/pkg/metrics"
 )
 
@@ -17,9 +16,13 @@ const (
 	exportcolumnsKey = "columns"
 )
 
-func ExportFlows(ctx context.Context, cfg *config.Config) func(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) ExportFlows(ctx context.Context) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		cl := clients{loki: newLokiClient(&cfg.Loki, r.Header, false)}
+		if !h.Cfg.IsLokiEnabled() {
+			writeError(w, http.StatusBadRequest, "Cannot perform flows query with disabled Loki")
+			return
+		}
+		cl := newLokiClient(&h.Cfg.Loki, r.Header, false)
 		var code int
 		startTime := time.Now()
 		defer func() {
@@ -29,7 +32,7 @@ func ExportFlows(ctx context.Context, cfg *config.Config) func(w http.ResponseWr
 		params := r.URL.Query()
 		hlog.Debugf("ExportFlows query params: %s", params)
 
-		flows, code, err := getFlows(ctx, cfg, cl, params)
+		flows, code, err := h.getFlows(ctx, cl, params)
 		if err != nil {
 			writeError(w, code, err.Error())
 			return

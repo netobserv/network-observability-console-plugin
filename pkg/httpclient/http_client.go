@@ -70,8 +70,6 @@ func NewTransport(timeout time.Duration, skipTLS bool, capath string, userCertPa
 }
 
 func (hc *httpClient) Get(url string) ([]byte, int, error) {
-	// TODO: manage authentication / TLS
-
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, 0, err

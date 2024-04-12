@@ -100,3 +100,21 @@ func QueryMatrix(ctx context.Context, cl api.Client, q *Query) (model.QueryRespo
 	}
 	return qr, code, nil
 }
+
+func GetLabelValues(ctx context.Context, cl api.Client, label string) ([]string, int, error) {
+	log.Debugf("GetLabelValues: %s", label)
+	v1api := v1.NewAPI(cl)
+	result, warnings, err := v1api.LabelValues(ctx, label, nil, time.Now().Add(-3*time.Hour), time.Now())
+	if err != nil {
+		return nil, http.StatusServiceUnavailable, err
+	}
+	if len(warnings) > 0 {
+		log.Infof("GetLabelValues warnings: %v", warnings)
+	}
+	log.Tracef("Result:\n%v", result)
+	var asStrings []string
+	for _, s := range result {
+		asStrings = append(asStrings, string(s))
+	}
+	return asStrings, http.StatusOK, nil
+}

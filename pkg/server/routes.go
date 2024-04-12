@@ -15,6 +15,7 @@ import (
 
 func setupRoutes(ctx context.Context, cfg *config.Config, authChecker auth.Checker, promInventory *prometheus.Inventory) *mux.Router {
 	r := mux.NewRouter()
+	h := handler.Handlers{Cfg: cfg, PromInventory: promInventory}
 
 	api := r.PathPrefix("/api").Subrouter()
 	api.Use(func(orig http.Handler) http.Handler {
@@ -31,20 +32,20 @@ func setupRoutes(ctx context.Context, cfg *config.Config, authChecker auth.Check
 		})
 	})
 	api.HandleFunc("/status", handler.Status)
-	api.HandleFunc("/loki/ready", handler.LokiReady(&cfg.Loki))
-	api.HandleFunc("/loki/metrics", handler.LokiMetrics(&cfg.Loki))
-	api.HandleFunc("/loki/buildinfo", handler.LokiBuildInfos(&cfg.Loki))
-	api.HandleFunc("/loki/config/limits", handler.LokiConfig(&cfg.Loki, "limits_config"))
-	api.HandleFunc("/loki/config/ingester/max_chunk_age", handler.IngesterMaxChunkAge(&cfg.Loki))
-	api.HandleFunc("/loki/flow/records", handler.GetFlows(ctx, cfg))
-	api.HandleFunc("/loki/flow/metrics", handler.GetTopology(ctx, cfg, promInventory))
-	api.HandleFunc("/loki/export", handler.ExportFlows(ctx, cfg))
-	api.HandleFunc("/resources/clusters", handler.GetClusters(&cfg.Loki))
-	api.HandleFunc("/resources/zones", handler.GetZones(&cfg.Loki))
-	api.HandleFunc("/resources/namespaces", handler.GetNamespaces(&cfg.Loki))
-	api.HandleFunc("/resources/namespace/{namespace}/kind/{kind}/names", handler.GetNames(&cfg.Loki))
-	api.HandleFunc("/resources/kind/{kind}/names", handler.GetNames(&cfg.Loki))
-	api.HandleFunc("/frontend-config", handler.GetFrontendConfig(cfg.Frontend.BuildVersion, cfg.Frontend.BuildDate, cfg.Path))
+	api.HandleFunc("/loki/ready", h.LokiReady())
+	api.HandleFunc("/loki/metrics", h.LokiMetrics())
+	api.HandleFunc("/loki/buildinfo", h.LokiBuildInfos())
+	api.HandleFunc("/loki/config/limits", h.LokiConfig("limits_config"))
+	api.HandleFunc("/loki/config/ingester/max_chunk_age", h.IngesterMaxChunkAge())
+	api.HandleFunc("/loki/flow/records", h.GetFlows(ctx))
+	api.HandleFunc("/loki/flow/metrics", h.GetTopology(ctx))
+	api.HandleFunc("/loki/export", h.ExportFlows(ctx))
+	api.HandleFunc("/resources/clusters", h.GetClusters(ctx))
+	api.HandleFunc("/resources/zones", h.GetZones(ctx))
+	api.HandleFunc("/resources/namespaces", h.GetNamespaces(ctx))
+	api.HandleFunc("/resources/namespace/{namespace}/kind/{kind}/names", h.GetNames(ctx))
+	api.HandleFunc("/resources/kind/{kind}/names", h.GetNames(ctx))
+	api.HandleFunc("/frontend-config", h.GetFrontendConfig())
 
 	r.PathPrefix("/").Handler(http.FileServer(http.Dir("./web/dist/")))
 	return r
