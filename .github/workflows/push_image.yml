@@ -60,10 +60,13 @@ jobs:
       run: make test-backend
     - name: Report coverage
       uses: codecov/codecov-action@v4
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
       with:
         files: ./cover.out
         flags: unittests
-        fail_ci_if_error: false
+        fail_ci_if_error: true
+        verbose: true
 
   codecov-front:
     name: Codecov frontend upload
@@ -81,7 +84,10 @@ jobs:
       run: make install-frontend test-frontend
     - name: Report coverage
       uses: codecov/codecov-action@v4
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
       with:
         files: ./web/coverage/cobertura-coverage.xml
         flags: uitests
-        fail_ci_if_error: false
+        fail_ci_if_error: true
+        verbose: true
