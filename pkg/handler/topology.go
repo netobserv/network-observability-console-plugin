@@ -66,6 +66,11 @@ func (h *Handlers) getTopologyFlows(ctx context.Context, cl clients, params url.
 	var err error
 	qr := v1.Range{}
 
+	dataSources := make(map[string]bool)
+	if h.Cfg.Loki.UseMocks {
+		dataSources["mock"] = true
+	}
+
 	in.Start, qr.Start, err = getStartTime(params)
 	if err != nil {
 		return nil, http.StatusBadRequest, err
@@ -133,8 +138,10 @@ func (h *Handlers) getTopologyFlows(ctx context.Context, cl clients, params url.
 			}
 			if pq != nil {
 				promQ = append(promQ, pq)
+				dataSources["prom"] = true
 			} else {
 				lokiQ = append(lokiQ, lq)
+				dataSources["loki"] = true
 			}
 		}
 		code, err := cl.fetchParallel(ctx, lokiQ, promQ, merger)
@@ -151,6 +158,12 @@ func (h *Handlers) getTopologyFlows(ctx context.Context, cl clients, params url.
 		if err != nil {
 			return nil, code, err
 		}
+		if len(lokiQ) > 0 {
+			dataSources["loki"] = true
+		}
+		if promQ != nil {
+			dataSources["prom"] = true
+		}
 		code, err = cl.fetchSingle(ctx, lokiQ, promQ, merger)
 		if err != nil {
 			return nil, code, err
@@ -158,7 +171,10 @@ func (h *Handlers) getTopologyFlows(ctx context.Context, cl clients, params url.
 	}
 
 	qresp := merger.Get()
-	qresp.IsMock = h.Cfg.Loki.UseMocks
+	qresp.DataSources = []string{}
+	for str := range dataSources {
+		qresp.DataSources = append(qresp.DataSources, str)
+	}
 	qresp.UnixTimestamp = time.Now().Unix()
 	hlog.Tracef("GetTopology response: %v", qresp)
 	return qresp, http.StatusOK, nil

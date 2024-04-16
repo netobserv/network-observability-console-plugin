@@ -101,7 +101,7 @@ export const getFlowMetrics = (params: FlowQuery, range: number | TimeRange): Pr
       params.aggregateBy as FlowScope,
       res.unixTimestamp,
       !isTimeMetric(params.type),
-      res.isMock
+      res.dataSources.includes('mock')
     );
   });
 };
@@ -114,7 +114,7 @@ export const getFlowGenericMetrics = (params: FlowQuery, range: number | TimeRan
       params.aggregateBy as Field,
       res.unixTimestamp,
       !isTimeMetric(params.type),
-      res.isMock
+      res.dataSources.includes('mock')
     );
   });
 };

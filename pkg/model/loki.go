@@ -20,7 +20,7 @@ type AggregatedQueryResponse struct {
 	ResultType    ResultType      `json:"resultType"`
 	Result        ResultValue     `json:"result"`
 	Stats         AggregatedStats `json:"stats"`
-	IsMock        bool            `json:"isMock"`
+	DataSources   []string        `json:"dataSources"`
 	UnixTimestamp int64           `json:"unixTimestamp"`
 }
 

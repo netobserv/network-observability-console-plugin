@@ -7,7 +7,7 @@ export interface AggregatedQueryResponse {
   resultType: string;
   result: StreamResult[] | RawTopologyMetrics[];
   stats: Stats;
-  isMock: boolean;
+  dataSources: string[];
   unixTimestamp: number;
 }
 
