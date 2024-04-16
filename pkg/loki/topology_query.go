@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/netobserv/network-observability-console-plugin/pkg/config"
 	"github.com/netobserv/network-observability-console-plugin/pkg/utils"
 	"github.com/netobserv/network-observability-console-plugin/pkg/utils/constants"
 )
@@ -32,9 +33,9 @@ type TopologyQueryBuilder struct {
 	topology *Topology
 }
 
-func NewTopologyQuery(cfg *Config, start, end, limit, rateInterval, step string, metricType string,
+func NewTopologyQuery(cfg *config.Loki, start, end, limit, rateInterval, step, metricType string,
 	metricFunction constants.MetricFunction, recordType constants.RecordType, packetLoss constants.PacketLoss,
-	aggregate, groups string) (*TopologyQueryBuilder, error) {
+	aggregate, groups string, dedupMark bool) (*TopologyQueryBuilder, error) {
 	l := limit
 	if len(l) == 0 {
 		l = topologyDefaultLimit
@@ -54,7 +55,7 @@ func NewTopologyQuery(cfg *Config, start, end, limit, rateInterval, step string,
 		dedup = false
 		rt = "endConnection"
 	} else {
-		dedup = cfg.Deduper.Mark
+		dedup = dedupMark
 		rt = "flowLog"
 	}
 

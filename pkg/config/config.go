@@ -1,10 +1,20 @@
-package handler
+package config
 
 import (
-	"net/http"
+	"fmt"
+	"net/url"
 	"os"
+	"strings"
+	"time"
 
+	"github.com/netobserv/network-observability-console-plugin/pkg/kubernetes/auth"
+	"github.com/netobserv/network-observability-console-plugin/pkg/kubernetes/client"
+	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
+)
+
+var (
+	log = logrus.WithField("module", "config")
 )
 
 type Server struct {
@@ -16,25 +26,6 @@ type Server struct {
 	CORSMethods string `yaml:"corsMethods,omitempty" json:"corsMethods,omitempty"`
 	CORSHeaders string `yaml:"corsHeaders,omitempty" json:"corsHeaders,omitempty"`
 	CORSMaxAge  string `yaml:"corsMaxAge,omitempty" json:"corsMaxAge,omitempty"`
-}
-
-type Loki struct {
-	URL    string   `yaml:"url" json:"url"`
-	Labels []string `yaml:"labels" json:"labels"`
-
-	StatusURL          string `yaml:"statusUrl,omitempty" json:"statusUrl,omitempty"`
-	Timeout            string `yaml:"timeout,omitempty" json:"timeout,omitempty"`
-	TenantID           string `yaml:"tenantID,omitempty" json:"tenantID,omitempty"`
-	TokenPath          string `yaml:"tokenPath,omitempty" json:"tokenPath,omitempty"`
-	SkipTLS            bool   `yaml:"skipTls,omitempty" json:"skipTls,omitempty"`
-	CAPath             string `yaml:"caPath,omitempty" json:"caPath,omitempty"`
-	StatusSkipTLS      bool   `yaml:"statusSkipTls,omitempty" json:"statusSkipTls,omitempty"`
-	StatusCAPath       string `yaml:"statusCaPath,omitempty" json:"statusCaPath,omitempty"`
-	StatusUserCertPath string `yaml:"statusUserCertPath,omitempty" json:"statusUserCertPath,omitempty"`
-	StatusUserKeyPath  string `yaml:"statusUserKeyPath,omitempty" json:"statusUserKeyPath,omitempty"`
-	UseMocks           bool   `yaml:"useMocks,omitempty" json:"useMocks,omitempty"`
-	ForwardUserToken   bool   `yaml:"forwardUserToken,omitempty" json:"forwardUserToken,omitempty"`
-	AuthCheck          string `yaml:"authCheck,omitempty" json:"authCheck,omitempty"`
 }
 
 type PortNaming struct {
@@ -110,13 +101,14 @@ type Frontend struct {
 type Config struct {
 	Loki     Loki     `yaml:"loki" json:"loki"`
 	Frontend Frontend `yaml:"frontend" json:"frontend"`
-
-	Server Server `yaml:"server,omitempty" json:"server,omitempty"`
+	Server   Server   `yaml:"server,omitempty" json:"server,omitempty"`
+	Path     string   `yaml:"-" json:"-"`
 }
 
-func ReadConfigFile(version, date, filename string) (*Config, error) {
-	//set default vales
+func ReadFile(version, date, filename string) (*Config, error) {
+	// set default values
 	cfg := Config{
+		Path: filename,
 		Server: Server{
 			Port:        9001,
 			MetricsPort: 9002,
@@ -124,7 +116,7 @@ func ReadConfigFile(version, date, filename string) (*Config, error) {
 			CORSHeaders: "Origin, X-Requested-With, Content-Type, Accept",
 		},
 		Loki: Loki{
-			Timeout:   "30s",
+			Timeout:   Duration{Duration: 30 * time.Second},
 			AuthCheck: "auto",
 		},
 		Frontend: Frontend{
@@ -140,10 +132,9 @@ func ReadConfigFile(version, date, filename string) (*Config, error) {
 			Filters:      []Filter{},
 			QuickFilters: []QuickFilter{},
 			Features:     []string{},
-			// TODO: update these defaults when operator will move to merge mode
 			Deduper: Deduper{
-				Mark:  true,
-				Merge: false,
+				Mark:  false,
+				Merge: true,
 			},
 			Fields: []FieldConfig{
 				{Name: "TimeFlowEndMs", Type: "number"},
@@ -160,24 +151,63 @@ func ReadConfigFile(version, date, filename string) (*Config, error) {
 		return nil, err
 	}
 	err = yaml.Unmarshal(yamlFile, &cfg)
-	return &cfg, err
+	if err != nil {
+		return nil, err
+	}
+
+	cfg.Validate()
+
+	return &cfg, nil
 }
 
-func GetFrontendConfig(version, date, filename string) func(w http.ResponseWriter, r *http.Request) {
-	config, err := ReadConfigFile(version, date, filename)
-	if err != nil {
-		hlog.Errorf("Could not read config file: %v", err)
+func (c *Config) Validate() {
+	var configErrors []string
+
+	// check config required fields
+	if len(c.Loki.Labels) == 0 {
+		configErrors = append(configErrors, "labels cannot be empty")
 	}
-	return func(w http.ResponseWriter, r *http.Request) {
+
+	// parse config urls
+	if len(c.Loki.URL) == 0 {
+		configErrors = append(configErrors, "url cannot be empty")
+	} else {
+		_, err := url.Parse(c.Loki.URL)
 		if err != nil {
-			config, err = ReadConfigFile(version, date, filename)
-			if err != nil {
-				writeError(w, http.StatusInternalServerError, err.Error())
-			} else {
-				writeJSON(w, http.StatusOK, config.Frontend)
-			}
-		} else {
-			writeJSON(w, http.StatusOK, config.Frontend)
+			configErrors = append(configErrors, "wrong Loki URL")
 		}
 	}
+	if len(c.Loki.StatusURL) > 0 {
+		_, err := url.Parse(c.Loki.StatusURL)
+		if err != nil {
+			configErrors = append(configErrors, "wrong Loki status URL")
+		}
+	}
+
+	// crash on config errors
+	if len(configErrors) > 0 {
+		configErrors = append([]string{fmt.Sprintf("Config file has %d errors:\n", len(configErrors))}, configErrors...)
+		log.Fatal(strings.Join(configErrors, "\n - "))
+	}
+}
+
+func (c *Config) GetAuthChecker() (auth.Checker, error) {
+	// parse config auth
+	var checkType auth.CheckType
+	if c.Loki.AuthCheck == "auto" {
+		if c.Loki.ForwardUserToken {
+			// FORWARD lokiAuth mode
+			checkType = auth.CheckAuthenticated
+		} else {
+			// HOST or DISABLED lokiAuth mode
+			checkType = auth.CheckAdmin
+		}
+		log.Info(fmt.Sprintf("auth-check 'auto' resolved to '%s'", checkType))
+	} else {
+		checkType = auth.CheckType(c.Loki.AuthCheck)
+	}
+	if checkType == auth.CheckNone {
+		log.Warn("INSECURE: auth checker is disabled")
+	}
+	return auth.NewChecker(checkType, client.NewInCluster)
 }

@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/netobserv/network-observability-console-plugin/pkg/config"
 	"github.com/netobserv/network-observability-console-plugin/pkg/model/fields"
 	"github.com/netobserv/network-observability-console-plugin/pkg/model/filters"
 	"github.com/netobserv/network-observability-console-plugin/pkg/utils/constants"
@@ -26,7 +27,7 @@ var filterRegexpValidation = regexp.MustCompile(`^[\w-_.,\"*:/]*$`)
 
 // FlowQueryBuilder stores a state to build a LogQL query
 type FlowQueryBuilder struct {
-	config       *Config
+	config       *config.Loki
 	startTime    string
 	endTime      string
 	limit        string
@@ -35,7 +36,7 @@ type FlowQueryBuilder struct {
 	jsonFilters  [][]labelFilter
 }
 
-func NewFlowQueryBuilder(cfg *Config, start, end, limit string, dedup bool,
+func NewFlowQueryBuilder(cfg *config.Loki, start, end, limit string, dedup bool,
 	recordType constants.RecordType, packetLoss constants.PacketLoss) *FlowQueryBuilder {
 	// Always use following stream selectors
 	labelFilters := []labelFilter{
@@ -101,7 +102,7 @@ func NewFlowQueryBuilder(cfg *Config, start, end, limit string, dedup bool,
 	}
 }
 
-func NewFlowQueryBuilderWithDefaults(cfg *Config) *FlowQueryBuilder {
+func NewFlowQueryBuilderWithDefaults(cfg *config.Loki) *FlowQueryBuilder {
 	return NewFlowQueryBuilder(cfg, "", "", "", false, constants.RecordTypeLog, constants.PacketLossAll)
 }
 
@@ -232,7 +233,7 @@ func (q *FlowQueryBuilder) addIPFilters(key string, values []string) {
 
 func (q *FlowQueryBuilder) createStringBuilderURL() *strings.Builder {
 	sb := strings.Builder{}
-	sb.WriteString(strings.TrimRight(q.config.URL.String(), "/"))
+	sb.WriteString(strings.TrimRight(q.config.URL, "/"))
 	sb.WriteString(queryRangePath)
 	return &sb
 }

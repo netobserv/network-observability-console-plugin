@@ -28,8 +28,7 @@ func StartMetrics(cfg *MetricsConfig) {
 	if cfg.CertPath != "" && cfg.KeyPath != "" {
 		mlog.Infof("listening on https://:%d", cfg.Port)
 		panic(promServer.ListenAndServeTLS(cfg.CertPath, cfg.KeyPath))
-	} else {
-		mlog.Infof("listening on http://:%d", cfg.Port)
-		panic(promServer.ListenAndServe())
 	}
+	mlog.Infof("listening on http://:%d", cfg.Port)
+	panic(promServer.ListenAndServe())
 }

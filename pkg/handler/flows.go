@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/netobserv/network-observability-console-plugin/pkg/config"
 	"github.com/netobserv/network-observability-console-plugin/pkg/httpclient"
 	"github.com/netobserv/network-observability-console-plugin/pkg/loki"
 	"github.com/netobserv/network-observability-console-plugin/pkg/metrics"
@@ -26,9 +27,9 @@ const (
 	packetLossKey = "packetLoss"
 )
 
-func GetFlows(cfg *loki.Config) func(w http.ResponseWriter, r *http.Request) {
+func GetFlows(cfg *config.Config) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		lokiClient := newLokiClient(cfg, r.Header, false)
+		lokiClient := newLokiClient(&cfg.Loki, r.Header, false)
 		var code int
 		startTime := time.Now()
 		defer func() {
@@ -49,7 +50,7 @@ func GetFlows(cfg *loki.Config) func(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getFlows(cfg *loki.Config, client httpclient.Caller, params url.Values) (*model.AggregatedQueryResponse, int, error) {
+func getFlows(cfg *config.Config, client httpclient.Caller, params url.Values) (*model.AggregatedQueryResponse, int, error) {
 	start, err := getStartTime(params)
 	if err != nil {
 		return nil, http.StatusBadRequest, err
@@ -67,7 +68,7 @@ func getFlows(cfg *loki.Config, client httpclient.Caller, params url.Values) (*m
 		return nil, http.StatusBadRequest, err
 	}
 	dedup := params.Get(dedupKey) == "true"
-	if !cfg.Deduper.Mark || utils.Contains(constants.AnyConnectionType, string(recordType)) {
+	if !cfg.Frontend.Deduper.Mark || utils.Contains(constants.AnyConnectionType, string(recordType)) {
 		dedup = false
 	}
 	packetLoss, err := getPacketLoss(params)
@@ -85,7 +86,7 @@ func getFlows(cfg *loki.Config, client httpclient.Caller, params url.Values) (*m
 		// match any, and multiple filters => run in parallel then aggregate
 		var queries []string
 		for _, group := range filterGroups {
-			qb := loki.NewFlowQueryBuilder(cfg, start, end, limit, dedup, recordType, packetLoss)
+			qb := loki.NewFlowQueryBuilder(&cfg.Loki, start, end, limit, dedup, recordType, packetLoss)
 			err := qb.Filters(group)
 			if err != nil {
 				return nil, http.StatusBadRequest, errors.New("Can't build query: " + err.Error())
@@ -98,7 +99,7 @@ func getFlows(cfg *loki.Config, client httpclient.Caller, params url.Values) (*m
 		}
 	} else {
 		// else, run all at once
-		qb := loki.NewFlowQueryBuilder(cfg, start, end, limit, dedup, recordType, packetLoss)
+		qb := loki.NewFlowQueryBuilder(&cfg.Loki, start, end, limit, dedup, recordType, packetLoss)
 		if len(filterGroups) > 0 {
 			err := qb.Filters(filterGroups[0])
 			if err != nil {

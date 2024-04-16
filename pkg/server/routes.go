@@ -7,11 +7,12 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 
+	"github.com/netobserv/network-observability-console-plugin/pkg/config"
 	"github.com/netobserv/network-observability-console-plugin/pkg/handler"
 	"github.com/netobserv/network-observability-console-plugin/pkg/kubernetes/auth"
 )
 
-func setupRoutes(cfg *Config, authChecker auth.Checker) *mux.Router {
+func setupRoutes(cfg *config.Config, authChecker auth.Checker) *mux.Router {
 	r := mux.NewRouter()
 
 	api := r.PathPrefix("/api").Subrouter()
@@ -34,15 +35,15 @@ func setupRoutes(cfg *Config, authChecker auth.Checker) *mux.Router {
 	api.HandleFunc("/loki/buildinfo", handler.LokiBuildInfos(&cfg.Loki))
 	api.HandleFunc("/loki/config/limits", handler.LokiConfig(&cfg.Loki, "limits_config"))
 	api.HandleFunc("/loki/config/ingester/max_chunk_age", handler.IngesterMaxChunkAge(&cfg.Loki))
-	api.HandleFunc("/loki/flow/records", handler.GetFlows(&cfg.Loki))
-	api.HandleFunc("/loki/flow/metrics", handler.GetTopology(&cfg.Loki))
-	api.HandleFunc("/loki/export", handler.ExportFlows(&cfg.Loki))
+	api.HandleFunc("/loki/flow/records", handler.GetFlows(cfg))
+	api.HandleFunc("/loki/flow/metrics", handler.GetTopology(cfg))
+	api.HandleFunc("/loki/export", handler.ExportFlows(cfg))
 	api.HandleFunc("/resources/clusters", handler.GetClusters(&cfg.Loki))
 	api.HandleFunc("/resources/zones", handler.GetZones(&cfg.Loki))
 	api.HandleFunc("/resources/namespaces", handler.GetNamespaces(&cfg.Loki))
 	api.HandleFunc("/resources/namespace/{namespace}/kind/{kind}/names", handler.GetNames(&cfg.Loki))
 	api.HandleFunc("/resources/kind/{kind}/names", handler.GetNames(&cfg.Loki))
-	api.HandleFunc("/frontend-config", handler.GetFrontendConfig(cfg.BuildVersion, cfg.BuildDate, cfg.ConfigPath))
+	api.HandleFunc("/frontend-config", handler.GetFrontendConfig(cfg.Frontend.BuildVersion, cfg.Frontend.BuildDate, cfg.Path))
 
 	r.PathPrefix("/").Handler(http.FileServer(http.Dir("./web/dist/")))
 	return r

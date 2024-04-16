@@ -10,6 +10,7 @@ import (
 
 	"github.com/gorilla/mux"
 
+	"github.com/netobserv/network-observability-console-plugin/pkg/config"
 	"github.com/netobserv/network-observability-console-plugin/pkg/httpclient"
 	"github.com/netobserv/network-observability-console-plugin/pkg/loki"
 	"github.com/netobserv/network-observability-console-plugin/pkg/metrics"
@@ -19,7 +20,7 @@ import (
 	"github.com/netobserv/network-observability-console-plugin/pkg/utils"
 )
 
-func GetClusters(cfg *loki.Config) func(w http.ResponseWriter, r *http.Request) {
+func GetClusters(cfg *config.Loki) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		lokiClient := newLokiClient(cfg, r.Header, false)
 		var code int
@@ -40,7 +41,7 @@ func GetClusters(cfg *loki.Config) func(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
-func GetZones(cfg *loki.Config) func(w http.ResponseWriter, r *http.Request) {
+func GetZones(cfg *config.Loki) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		lokiClient := newLokiClient(cfg, r.Header, false)
 		var code int
@@ -72,7 +73,7 @@ func GetZones(cfg *loki.Config) func(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func GetNamespaces(cfg *loki.Config) func(w http.ResponseWriter, r *http.Request) {
+func GetNamespaces(cfg *config.Loki) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		lokiClient := newLokiClient(cfg, r.Header, false)
 		var code int
@@ -104,8 +105,8 @@ func GetNamespaces(cfg *loki.Config) func(w http.ResponseWriter, r *http.Request
 	}
 }
 
-func getLabelValues(cfg *loki.Config, lokiClient httpclient.Caller, label string) ([]string, int, error) {
-	baseURL := strings.TrimRight(cfg.URL.String(), "/")
+func getLabelValues(cfg *config.Loki, lokiClient httpclient.Caller, label string) ([]string, int, error) {
+	baseURL := strings.TrimRight(cfg.URL, "/")
 	url := fmt.Sprintf("%s/loki/api/v1/label/%s/values", baseURL, label)
 	hlog.Debugf("getLabelValues URL: %s", url)
 
@@ -126,7 +127,7 @@ func getLabelValues(cfg *loki.Config, lokiClient httpclient.Caller, label string
 	return lvr.Data, http.StatusOK, nil
 }
 
-func GetNames(cfg *loki.Config) func(w http.ResponseWriter, r *http.Request) {
+func GetNames(cfg *config.Loki) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		lokiClient := newLokiClient(cfg, r.Header, false)
 		var code int
@@ -161,7 +162,7 @@ func GetNames(cfg *loki.Config) func(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getNamesForPrefix(cfg *loki.Config, lokiClient httpclient.Caller, prefix, kind, namespace string) ([]string, int, error) {
+func getNamesForPrefix(cfg *config.Loki, lokiClient httpclient.Caller, prefix, kind, namespace string) ([]string, int, error) {
 	lokiParams := filters.SingleQuery{}
 	if namespace != "" {
 		lokiParams = append(lokiParams, filters.NewMatch(prefix+fields.Namespace, exact(namespace)))

@@ -15,7 +15,6 @@ import (
 	"net"
 	"net/http"
 	"net/http/httptest"
-	"net/url"
 	"os"
 	"path/filepath"
 	"sort"
@@ -27,11 +26,10 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
+	"github.com/netobserv/network-observability-console-plugin/pkg/config"
 	"github.com/netobserv/network-observability-console-plugin/pkg/kubernetes/auth"
-	"github.com/netobserv/network-observability-console-plugin/pkg/loki"
 	"github.com/netobserv/network-observability-console-plugin/pkg/model"
 	"github.com/netobserv/network-observability-console-plugin/pkg/model/fields"
-	"github.com/netobserv/network-observability-console-plugin/pkg/utils"
 )
 
 const (
@@ -57,11 +55,9 @@ func TestServerRunning(t *testing.T) {
 	authM.MockGranted()
 
 	go func() {
-		Start(&Config{
-			Loki: loki.Config{
-				URL: &url.URL{Scheme: "http", Host: "localhost:3100"},
-			},
-			Port: testPort,
+		Start(&config.Config{
+			Loki:   config.Loki{URL: "http://localhost:3100"},
+			Server: config.Server{Port: testPort},
 		}, &authM)
 	}()
 
@@ -106,11 +102,9 @@ func TestServerUnauthorized(t *testing.T) {
 	defer os.RemoveAll(tmpDir)
 
 	go func() {
-		Start(&Config{
-			Loki: loki.Config{
-				URL: &url.URL{Scheme: "http", Host: "localhost:3100"},
-			},
-			Port: testPort,
+		Start(&config.Config{
+			Loki:   config.Loki{URL: "http://localhost:3100"},
+			Server: config.Server{Port: testPort},
 		}, &auth.BearerTokenChecker{})
 	}()
 
@@ -177,12 +171,12 @@ func TestSecureComm(t *testing.T) {
 	defer os.Remove(testClientCertFile)
 	defer os.Remove(testClientKeyFile)
 
-	conf := &Config{
-		CertPath: testServerCertFile,
-		KeyPath:  testServerKeyFile,
-		Port:     testPort,
-		Loki: loki.Config{
-			URL: &url.URL{Scheme: "http", Host: "localhost:3100"},
+	conf := &config.Config{
+		Loki: config.Loki{URL: "http://localhost:3100"},
+		Server: config.Server{
+			Port:     testPort,
+			CertPath: testServerCertFile,
+			KeyPath:  testServerKeyFile,
 		},
 	}
 
@@ -261,11 +255,9 @@ func TestServerHeaderLimits(t *testing.T) {
 	authM.MockGranted()
 
 	go func() {
-		Start(&Config{
-			Loki: loki.Config{
-				URL: &url.URL{Scheme: "http", Host: "localhost:3100"},
-			},
-			Port: testPort,
+		Start(&config.Config{
+			Loki:   config.Loki{URL: "http://localhost:3100"},
+			Server: config.Server{Port: testPort},
 		}, &authM)
 	}()
 
@@ -304,15 +296,10 @@ func TestLokiConfiguration(t *testing.T) {
 	defer lokiSvc.Close()
 	authM := &authMock{}
 	authM.MockGranted()
-	lokiURL, err := url.Parse(lokiSvc.URL)
-	require.NoError(t, err)
 
 	// THAT is accessed behind the NOO console plugin backend
-	backendRoutes := setupRoutes(&Config{
-		Loki: loki.Config{
-			URL:     lokiURL,
-			Timeout: time.Second,
-		},
+	backendRoutes := setupRoutes(&config.Config{
+		Loki: config.Loki{URL: lokiSvc.URL, Timeout: config.Duration{Duration: time.Second}},
 	}, authM)
 	backendSvc := httptest.NewServer(backendRoutes)
 	defer backendSvc.Close()
@@ -346,20 +333,18 @@ func TestLokiConfigurationForTopology(t *testing.T) {
 	defer lokiSvc.Close()
 	authM := &authMock{}
 	authM.MockGranted()
-	lokiURL, err := url.Parse(lokiSvc.URL)
-	require.NoError(t, err)
 
 	// THAT is accessed behind the NOO console plugin backend
-	backendRoutes := setupRoutes(&Config{
-		Loki: loki.Config{
-			URL:     lokiURL,
-			Timeout: time.Second,
-			Labels:  utils.GetMapInterface([]string{fields.SrcNamespace, fields.DstNamespace, fields.SrcOwnerName, fields.DstOwnerName, fields.FlowDirection}),
-			Deduper: loki.Deduper{
-				Mark:  true,
-				Merge: false,
-			},
+	backendRoutes := setupRoutes(&config.Config{
+		Loki: config.Loki{
+			URL:     lokiSvc.URL,
+			Timeout: config.Duration{Duration: time.Second},
+			Labels:  []string{fields.SrcNamespace, fields.DstNamespace, fields.SrcOwnerName, fields.DstOwnerName, fields.FlowDirection},
 		},
+		Frontend: config.Frontend{Deduper: config.Deduper{
+			Mark:  true,
+			Merge: false,
+		}},
 	}, authM)
 	backendSvc := httptest.NewServer(backendRoutes)
 	defer backendSvc.Close()
@@ -406,20 +391,18 @@ func TestLokiConfigurationForTableHistogram(t *testing.T) {
 	defer lokiSvc.Close()
 	authM := &authMock{}
 	authM.MockGranted()
-	lokiURL, err := url.Parse(lokiSvc.URL)
-	require.NoError(t, err)
 
 	// THAT is accessed behind the NOO console plugin backend
-	backendRoutes := setupRoutes(&Config{
-		Loki: loki.Config{
-			URL:     lokiURL,
-			Timeout: time.Second,
-			Labels:  utils.GetMapInterface([]string{fields.SrcNamespace, fields.DstNamespace, fields.SrcOwnerName, fields.DstOwnerName, fields.FlowDirection}),
-			Deduper: loki.Deduper{
-				Mark:  true,
-				Merge: false,
-			},
+	backendRoutes := setupRoutes(&config.Config{
+		Loki: config.Loki{
+			URL:     lokiSvc.URL,
+			Timeout: config.Duration{Duration: time.Second},
+			Labels:  []string{fields.SrcNamespace, fields.DstNamespace, fields.SrcOwnerName, fields.DstOwnerName, fields.FlowDirection},
 		},
+		Frontend: config.Frontend{Deduper: config.Deduper{
+			Mark:  true,
+			Merge: false,
+		}},
 	}, authM)
 	backendSvc := httptest.NewServer(backendRoutes)
 	defer backendSvc.Close()
@@ -477,14 +460,12 @@ func TestLokiConfiguration_MultiTenant(t *testing.T) {
 	authM.MockGranted()
 	lokiSvc := httptest.NewServer(&lokiMock)
 	defer lokiSvc.Close()
-	lokiURL, err := url.Parse(lokiSvc.URL)
-	require.NoError(t, err)
 
 	// GIVEN a NOO console plugin backend configured for HOST Multi tenant mode
-	backendRoutes := setupRoutes(&Config{
-		Loki: loki.Config{
-			URL:       lokiURL,
-			Timeout:   time.Second,
+	backendRoutes := setupRoutes(&config.Config{
+		Loki: config.Loki{
+			URL:       lokiSvc.URL,
+			Timeout:   config.Duration{Duration: time.Second},
 			TenantID:  "my-organisation",
 			TokenPath: tmpDir + "/var/run/secrets/tokens/netobserv-plugin",
 		},
@@ -493,7 +474,7 @@ func TestLokiConfiguration_MultiTenant(t *testing.T) {
 	defer backendSvc.Close()
 
 	// WHEN the Loki flows endpoint is queried in the backend
-	_, err = backendSvc.Client().Get(backendSvc.URL + "/api/loki/flow/records")
+	_, err := backendSvc.Client().Get(backendSvc.URL + "/api/loki/flow/records")
 	require.NoError(t, err)
 
 	// THEN the query has been properly forwarded to Loki with the tenant ID header
