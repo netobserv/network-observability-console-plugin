@@ -21,6 +21,7 @@ func TestBuildQuery_PromQLSimpleRateNoFilter(t *testing.T) {
 		DataField:      "Bytes",
 		MetricFunction: constants.MetricFunctionRate,
 		RecordType:     constants.RecordTypeLog,
+		DataSource:     constants.DataSourceAuto,
 		Aggregate:      "namespace",
 	}
 	f := filters.SingleQuery{}
@@ -40,6 +41,7 @@ func TestBuildQuery_PromQLSimpleRateAndFilter(t *testing.T) {
 		DataField:      "Bytes",
 		MetricFunction: constants.MetricFunctionRate,
 		RecordType:     constants.RecordTypeLog,
+		DataSource:     constants.DataSourceAuto,
 		Aggregate:      "namespace",
 	}
 	f := filters.SingleQuery{
@@ -64,6 +66,7 @@ func TestBuildQuery_PromQLRateMultiFilter(t *testing.T) {
 		DataField:      "Bytes",
 		MetricFunction: constants.MetricFunctionRate,
 		RecordType:     constants.RecordTypeLog,
+		DataSource:     constants.DataSourceAuto,
 		Aggregate:      "namespace",
 	}
 	f := filters.SingleQuery{
@@ -88,6 +91,7 @@ func TestBuildQuery_PromQLHistogramAverage(t *testing.T) {
 		DataField:      "TimeFlowRttNs",
 		MetricFunction: constants.MetricFunctionRate,
 		RecordType:     constants.RecordTypeLog,
+		DataSource:     constants.DataSourceAuto,
 		Aggregate:      "namespace",
 	}
 	f := filters.SingleQuery{
@@ -112,6 +116,7 @@ func TestBuildQuery_PromQLHistogramP99(t *testing.T) {
 		DataField:      "TimeFlowRttNs",
 		MetricFunction: constants.MetricFunctionP99,
 		RecordType:     constants.RecordTypeLog,
+		DataSource:     constants.DataSourceAuto,
 		Aggregate:      "namespace",
 	}
 	f := filters.SingleQuery{
@@ -136,6 +141,7 @@ func TestBuildQuery_PromQLByDNSResponseCode(t *testing.T) {
 		DataField:      "DnsFlows",
 		MetricFunction: constants.MetricFunctionCount,
 		RecordType:     constants.RecordTypeLog,
+		DataSource:     constants.DataSourceAuto,
 		Aggregate:      "DnsFlagsResponseCode",
 	}
 	f := filters.SingleQuery{}

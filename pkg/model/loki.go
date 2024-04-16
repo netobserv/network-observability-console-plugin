@@ -6,6 +6,7 @@ import (
 	"time"
 
 	json "github.com/json-iterator/go"
+	"github.com/netobserv/network-observability-console-plugin/pkg/utils/constants"
 	"github.com/prometheus/common/model"
 )
 
@@ -17,11 +18,11 @@ type QueryResponse struct {
 
 // AggregatedQueryResponse represents the modified json response to one or more logQL queries
 type AggregatedQueryResponse struct {
-	ResultType    ResultType      `json:"resultType"`
-	Result        ResultValue     `json:"result"`
-	Stats         AggregatedStats `json:"stats"`
-	DataSources   []string        `json:"dataSources"`
-	UnixTimestamp int64           `json:"unixTimestamp"`
+	ResultType    ResultType             `json:"resultType"`
+	Result        ResultValue            `json:"result"`
+	Stats         AggregatedStats        `json:"stats"`
+	DataSources   []constants.DataSource `json:"dataSources"`
+	UnixTimestamp int64                  `json:"unixTimestamp"`
 }
 
 // AggregatedStats represents the stats to one or more logQL queries

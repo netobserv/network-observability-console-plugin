@@ -79,6 +79,20 @@ func getRecordType(params url.Values) (constants.RecordType, error) {
 	return "", fmt.Errorf("invalid record type: %s", rt)
 }
 
+func getDatasource(params url.Values) (constants.DataSource, error) {
+	ds := params.Get(dataSourceKey)
+	if ds == "" {
+		return constants.DefaultDataSource, nil
+	}
+	dataSource := constants.DataSource(ds)
+	if dataSource == constants.DataSourceAuto ||
+		dataSource == constants.DataSourceLoki ||
+		dataSource == constants.DataSourceProm {
+		return dataSource, nil
+	}
+	return "", fmt.Errorf("invalid data source: %s", ds)
+}
+
 func getPacketLoss(params url.Values) (constants.PacketLoss, error) {
 	pl := params.Get(packetLossKey)
 	if pl == "" {

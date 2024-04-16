@@ -44,6 +44,7 @@ type TopologyInput struct {
 	DataField      string
 	MetricFunction constants.MetricFunction
 	RecordType     constants.RecordType
+	DataSource     constants.DataSource
 	PacketLoss     constants.PacketLoss
 	Aggregate      string
 	Groups         string

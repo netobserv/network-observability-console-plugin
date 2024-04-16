@@ -24,6 +24,7 @@ func TestBuildTopologyQuery_SimpleAggregate(t *testing.T) {
 		DataField:      "Bytes",
 		MetricFunction: constants.MetricFunctionRate,
 		RecordType:     constants.RecordTypeLog,
+		DataSource:     constants.DataSourceAuto,
 		Aggregate:      "namespace",
 		DedupMark:      true,
 	}
@@ -48,6 +49,7 @@ func TestBuildTopologyQuery_GroupsAndAggregate(t *testing.T) {
 		DataField:      "Bytes",
 		MetricFunction: constants.MetricFunctionRate,
 		RecordType:     constants.RecordTypeLog,
+		DataSource:     constants.DataSourceAuto,
 		Aggregate:      "namespace",
 		Groups:         "hosts",
 		DedupMark:      true,
@@ -73,6 +75,7 @@ func TestBuildTopologyQuery_CustomAggregate(t *testing.T) {
 		DataField:      "Bytes",
 		MetricFunction: constants.MetricFunctionRate,
 		RecordType:     constants.RecordTypeLog,
+		DataSource:     constants.DataSourceAuto,
 		Aggregate:      "SomeField",
 		DedupMark:      true,
 	}
@@ -97,6 +100,7 @@ func TestBuildTopologyQuery_CustomLabelAggregate(t *testing.T) {
 		DataField:      "Bytes",
 		MetricFunction: constants.MetricFunctionRate,
 		RecordType:     constants.RecordTypeLog,
+		DataSource:     constants.DataSourceAuto,
 		Aggregate:      "FlowDirection",
 		DedupMark:      true,
 	}

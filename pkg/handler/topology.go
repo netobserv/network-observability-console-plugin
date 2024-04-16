@@ -66,7 +66,7 @@ func (h *Handlers) getTopologyFlows(ctx context.Context, cl clients, params url.
 	var err error
 	qr := v1.Range{}
 
-	dataSources := make(map[string]bool)
+	dataSources := make(map[constants.DataSource]bool)
 	if h.Cfg.Loki.UseMocks {
 		dataSources["mock"] = true
 	}
@@ -98,6 +98,10 @@ func (h *Handlers) getTopologyFlows(ctx context.Context, cl clients, params url.
 		return nil, http.StatusBadRequest, err
 	}
 	in.RecordType, err = getRecordType(params)
+	if err != nil {
+		return nil, http.StatusBadRequest, err
+	}
+	in.DataSource, err = getDatasource(params)
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
@@ -138,10 +142,10 @@ func (h *Handlers) getTopologyFlows(ctx context.Context, cl clients, params url.
 			}
 			if pq != nil {
 				promQ = append(promQ, pq)
-				dataSources["prom"] = true
+				dataSources[constants.DataSourceProm] = true
 			} else {
 				lokiQ = append(lokiQ, lq)
-				dataSources["loki"] = true
+				dataSources[constants.DataSourceLoki] = true
 			}
 		}
 		code, err := cl.fetchParallel(ctx, lokiQ, promQ, merger)
@@ -159,10 +163,10 @@ func (h *Handlers) getTopologyFlows(ctx context.Context, cl clients, params url.
 			return nil, code, err
 		}
 		if len(lokiQ) > 0 {
-			dataSources["loki"] = true
+			dataSources[constants.DataSourceLoki] = true
 		}
 		if promQ != nil {
-			dataSources["prom"] = true
+			dataSources[constants.DataSourceProm] = true
 		}
 		code, err = cl.fetchSingle(ctx, lokiQ, promQ, merger)
 		if err != nil {
@@ -171,9 +175,11 @@ func (h *Handlers) getTopologyFlows(ctx context.Context, cl clients, params url.
 	}
 
 	qresp := merger.Get()
-	qresp.DataSources = []string{}
-	for str := range dataSources {
-		qresp.DataSources = append(qresp.DataSources, str)
+	qresp.DataSources = []constants.DataSource{}
+	for str, ok := range dataSources {
+		if ok {
+			qresp.DataSources = append(qresp.DataSources, str)
+		}
 	}
 	qresp.UnixTimestamp = time.Now().Unix()
 	hlog.Tracef("GetTopology response: %v", qresp)
@@ -217,7 +223,7 @@ func buildTopologyQuery(
 		return "", &q, http.StatusOK, nil
 	}
 
-	if !cfg.IsLokiEnabled() {
+	if !cfg.IsLokiEnabled() || in.DataSource == constants.DataSourceProm {
 		if len(candidates) > 0 {
 			// Some candidate metrics exist but they are disabled; tell the user
 			return "", nil, http.StatusBadRequest, errors.New(
@@ -240,6 +246,9 @@ func buildTopologyQuery(
 }
 
 func getEligiblePromMetric(promInventory *prometheus.Inventory, filters filters.SingleQuery, in *loki.TopologyInput) (string, []string) {
+	if in.DataSource != constants.DataSourceAuto && in.DataSource != constants.DataSourceProm {
+		return "", nil
+	}
 	if promInventory == nil {
 		return "", nil
 	}

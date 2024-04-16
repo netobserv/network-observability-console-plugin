@@ -23,6 +23,7 @@ const (
 	limitKey      = "limit"
 	dedupKey      = "dedup"
 	recordTypeKey = "recordType"
+	dataSourceKey = "dataSource"
 	filtersKey    = "filters"
 	packetLossKey = "packetLoss"
 )
