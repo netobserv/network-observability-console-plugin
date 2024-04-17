@@ -39,18 +39,18 @@ func TestAggregatedQueryResponseMarshal(t *testing.T) {
 		ResultType: ResultTypeStream,
 		Result:     Streams{},
 		Stats: AggregatedStats{
-			NumQueries: 1,
+			NumQueries:  1,
+			DataSources: []constants.DataSource{constants.DataSourceAuto},
 		},
-		DataSources: []constants.DataSource{constants.DataSourceAuto},
 	}
 
 	js, err := json.Marshal(qr)
 	require.NoError(t, err)
-	assert.Equal(t, `{"resultType":"streams","result":[],"stats":{"numQueries":1,"totalEntries":0,"duplicates":0,"limitReached":false,"queriesStats":null},"dataSources":["auto"],"unixTimestamp":0}`, string(js))
+	assert.Equal(t, `{"resultType":"streams","result":[],"stats":{"numQueries":1,"totalEntries":0,"duplicates":0,"limitReached":false,"queriesStats":null,"dataSources":["auto"]},"unixTimestamp":0}`, string(js))
 }
 
 func TestAggregatedQueryResponseUnmarshal(t *testing.T) {
-	js := `{"resultType":"streams","result":[],"stats":{"numQueries":1,"totalEntries":0,"duplicates":0,"limitReached":false,"queriesStats":null},"dataSources":["auto"],"unixTimestamp":0}`
+	js := `{"resultType":"streams","result":[],"stats":{"numQueries":1,"totalEntries":0,"duplicates":0,"limitReached":false,"queriesStats":null,"dataSources":["auto"]},"unixTimestamp":0}`
 	var qr AggregatedQueryResponse
 	err := json.Unmarshal([]byte(js), &qr)
 	require.NoError(t, err)
@@ -91,18 +91,18 @@ func TestAggregatedQueryResponseMatrixMarshal(t *testing.T) {
 		ResultType: ResultTypeMatrix,
 		Result:     Matrix{},
 		Stats: AggregatedStats{
-			NumQueries: 1,
+			NumQueries:  1,
+			DataSources: []constants.DataSource{constants.DataSourceAuto},
 		},
-		DataSources: []constants.DataSource{constants.DataSourceAuto},
 	}
 
 	js, err := json.Marshal(qr)
 	require.NoError(t, err)
-	assert.Equal(t, `{"resultType":"matrix","result":[],"stats":{"numQueries":1,"totalEntries":0,"duplicates":0,"limitReached":false,"queriesStats":null},"dataSources":["auto"],"unixTimestamp":0}`, string(js))
+	assert.Equal(t, `{"resultType":"matrix","result":[],"stats":{"numQueries":1,"totalEntries":0,"duplicates":0,"limitReached":false,"queriesStats":null,"dataSources":["auto"]},"unixTimestamp":0}`, string(js))
 }
 
 func TestAggregatedQueryResponseMatrixUnmarshal(t *testing.T) {
-	js := `{"resultType":"matrix","result":[],"stats":{"numQueries":1,"totalEntries":0,"duplicates":0,"limitReached":false,"queriesStats":null},"dataSources":["auto"],"unixTimestamp":0}`
+	js := `{"resultType":"matrix","result":[],"stats":{"numQueries":1,"totalEntries":0,"duplicates":0,"limitReached":false,"queriesStats":null,"dataSources":["auto"]},"unixTimestamp":0}`
 	var qr AggregatedQueryResponse
 	err := json.Unmarshal([]byte(js), &qr)
 	require.NoError(t, err)
@@ -125,10 +125,10 @@ func TestReencodeStats(t *testing.T) {
 			NumQueries:   1,
 			LimitReached: false,
 			QueriesStats: []interface{}{qr.Data.Stats},
+			DataSources:  []constants.DataSource{constants.DataSourceAuto},
 		},
-		DataSources: []constants.DataSource{constants.DataSourceAuto},
 	}
 	reencoded, err := json.Marshal(agg)
 	require.NoError(t, err)
-	assert.Equal(t, `{"resultType":"streams","result":[],"stats":{"numQueries":1,"totalEntries":0,"duplicates":0,"limitReached":false,"queriesStats":[{"ingester":{"foo":"bar"}}]},"dataSources":["auto"],"unixTimestamp":0}`, string(reencoded))
+	assert.Equal(t, `{"resultType":"streams","result":[],"stats":{"numQueries":1,"totalEntries":0,"duplicates":0,"limitReached":false,"queriesStats":[{"ingester":{"foo":"bar"}}],"dataSources":["auto"]},"unixTimestamp":0}`, string(reencoded))
 }

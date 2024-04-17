@@ -8,7 +8,8 @@ export const FlowsResultMock: RecordsResult = {
   records: FlowsMock,
   stats: {
     limitReached: FlowsMock.length >= 100,
-    numQueries: 1
+    numQueries: 1,
+    dataSources: ['loki']
   }
 };
 
@@ -146,6 +147,7 @@ export const FlowsResultSample: RecordsResult = {
   records: FlowsSample,
   stats: {
     limitReached: false,
-    numQueries: 1
+    numQueries: 1,
+    dataSources: ['loki']
   }
 };

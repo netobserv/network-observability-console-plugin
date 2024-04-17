@@ -12,7 +12,8 @@ describe('<MetricsQuerySummary />', () => {
     metrics: { rateMetrics: { bytes: metrics } } as NetflowMetrics,
     stats: {
       limitReached: false,
-      numQueries: 1
+      numQueries: 1,
+      dataSources: ['loki']
     },
     lastRefresh: now
   };

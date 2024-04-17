@@ -21,7 +21,8 @@ import {
   Text,
   TextVariants,
   Toolbar,
-  ToolbarItem
+  ToolbarItem,
+  Tooltip
 } from '@patternfly/react-core';
 import { ColumnsIcon, EllipsisVIcon, ExportIcon, SyncAltIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
@@ -63,7 +64,8 @@ import {
   MetricType,
   PacketLoss,
   RecordType,
-  MetricFunction
+  MetricFunction,
+  DataSource
 } from '../model/flow-query';
 import { MetricScopeOptions } from '../model/metrics';
 import { parseQuickFilters } from '../model/quick-filters';
@@ -122,6 +124,7 @@ import {
   defaultMetricFunction,
   defaultMetricType,
   defaultTimeRange,
+  getDataSourceFromURL,
   getFiltersFromURL,
   getLimitFromURL,
   getMatchFromURL,
@@ -232,6 +235,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
   const [match, setMatch] = React.useState<Match>(getMatchFromURL());
   const [packetLoss, setPacketLoss] = React.useState<PacketLoss>(getPacketLossFromURL());
   const [recordType, setRecordType] = React.useState<RecordType>(getRecordTypeFromURL());
+  const [dataSource, setDataSource] = React.useState<DataSource>(getDataSourceFromURL());
   const [showDuplicates, setShowDuplicates] = React.useState<boolean>(getShowDupFromURL());
   const [limit, setLimit] = React.useState<number>(
     getLimitFromURL(selectedViewId === 'table' ? LIMIT_VALUES[0] : TOP_VALUES[0])
@@ -270,6 +274,14 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
 
   const [columns, setColumns] = useLocalStorage<Column[]>(LOCAL_STORAGE_COLS_KEY, [], DEFAULT_ARRAY_SELECTION_OPTIONS);
   const [columnSizes, setColumnSizes] = useLocalStorage<ColumnSizeMap>(LOCAL_STORAGE_COLS_SIZES_KEY, {});
+
+  const allowLoki = React.useCallback(() => {
+    return config.dataSources.some(ds => ds === 'loki');
+  }, [config.dataSources]);
+
+  const allowProm = React.useCallback(() => {
+    return config.dataSources.some(ds => ds === 'prom') && selectedViewId !== 'table';
+  }, [config.dataSources, selectedViewId]);
 
   const isFlow = React.useCallback(() => {
     return config.recordTypes.some(rt => rt === 'flowLog');
@@ -484,6 +496,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
       filters: filtersToString(enabledFilters.list, match === 'any'),
       limit: LIMIT_VALUES.includes(limit) ? limit : LIMIT_VALUES[0],
       recordType: recordType,
+      dataSource: dataSource,
       //only manage duplicates when mark is enabled
       dedup: config.deduper.mark && !showDuplicates,
       packetLoss: packetLoss
@@ -519,6 +532,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
     match,
     limit,
     recordType,
+    dataSource,
     config.deduper.mark,
     showDuplicates,
     packetLoss,
@@ -954,7 +968,11 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
     let promises: Promise<Stats[]> | undefined = undefined;
     switch (selectedViewId) {
       case 'table':
-        promises = fetchTable(fq);
+        if (allowLoki()) {
+          promises = fetchTable(fq);
+        } else {
+          setError(t('Only available when FlowCollector.loki.enable is true'));
+        }
         break;
       case 'overview':
         promises = fetchOverview(fq);
@@ -990,6 +1008,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
           })
       );
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     isTRModalOpen,
     isOverviewModalOpen,
@@ -1000,7 +1019,8 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
     fetchTable,
     fetchOverview,
     fetchTopology,
-    manageWarnings
+    manageWarnings,
+    allowLoki
   ]);
 
   usePoll(tick, interval);
@@ -1014,6 +1034,15 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
       }
     }
   }, [config.recordTypes, isConnectionTracking, isFlow, recordType]);
+
+  React.useEffect(() => {
+    if (
+      initState.current.includes('configLoaded') &&
+      ((dataSource === 'loki' && !allowLoki() && allowProm()) || (dataSource === 'prom' && allowLoki() && !allowProm()))
+    ) {
+      setDataSource('auto');
+    }
+  }, [allowLoki, allowProm, dataSource]);
 
   React.useEffect(() => {
     if (initState.current.includes('configLoaded')) {
@@ -1183,7 +1212,15 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
         role="region"
       >
         <Tab className="overviewTabButton" eventKey={'overview'} title={<TabTitleText>{t('Overview')}</TabTitleText>} />
-        <Tab className="tableTabButton" eventKey={'table'} title={<TabTitleText>{t('Traffic flows')}</TabTitleText>} />
+        <Tab
+          className="tableTabButton"
+          eventKey={'table'}
+          disabled={!allowLoki()}
+          tooltip={
+            !allowLoki() ? <Tooltip content={t('Only available when FlowCollector.loki.enable is true')} /> : undefined
+          }
+          title={<TabTitleText>{t('Traffic flows')}</TabTitleText>}
+        />
         <Tab className="topologyTabButton" eventKey={'topology'} title={<TabTitleText>{t('Topology')}</TabTitleText>} />
       </Tabs>
     );
@@ -1484,6 +1521,23 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
     );
   }, [getDefaultFilters, t, resetDefaultFilters, filters.list, clearFilters]);
 
+  const slownessReason = React.useCallback((): string => {
+    if (match === 'any' && hasNonIndexFields(filters.list)) {
+      return t(
+        // eslint-disable-next-line max-len
+        'When in "Match any" mode, try using only Namespace, Owner or Resource filters (which use indexed fields), or decrease limit / range, to improve the query performance'
+      );
+    }
+    if (match === 'all' && !hasIndexFields(filters.list)) {
+      return t(
+        // eslint-disable-next-line max-len
+        'Add Namespace, Owner or Resource filters (which use indexed fields), or decrease limit / range, to improve the query performance'
+      );
+    }
+    return t('Add more filters or decrease limit / range to improve the query performance');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [match, filters]);
+
   const pageContent = React.useCallback(() => {
     let content: JSX.Element | null = null;
     switch (selectedViewId) {
@@ -1609,9 +1663,12 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
     getTopologyDroppedMetrics,
     getTopologyMetrics,
     isDarkTheme,
+    isMultiCluster,
     isPktDrop,
     isShowQuerySummary,
+    isZones,
     k8sModels,
+    lastDuration,
     lastRefresh,
     limit,
     loading,
@@ -1634,10 +1691,12 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
     setOverviewFocus,
     setTopologyOptions,
     size,
+    slownessReason,
     stats,
     topologyMetricFunction,
     topologyMetricType,
-    topologyOptions
+    topologyOptions,
+    warningMessage
   ]);
 
   //update data on filters changes
@@ -1658,23 +1717,6 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
       }
     });
   }, [isFullScreen]);
-
-  const slownessReason = React.useCallback((): string => {
-    if (match === 'any' && hasNonIndexFields(filters.list)) {
-      return t(
-        // eslint-disable-next-line max-len
-        'When in "Match any" mode, try using only Namespace, Owner or Resource filters (which use indexed fields), or decrease limit / range, to improve the query performance'
-      );
-    }
-    if (match === 'all' && !hasIndexFields(filters.list)) {
-      return t(
-        // eslint-disable-next-line max-len
-        'Add Namespace, Owner or Resource filters (which use indexed fields), or decrease limit / range, to improve the query performance'
-      );
-    }
-    return t('Add more filters or decrease limit / range to improve the query performance');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [match, filters]);
 
   const moveRange = React.useCallback(
     (next: boolean) => {
@@ -1776,8 +1818,12 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
             setPacketLoss,
             recordType,
             setRecordType,
+            dataSource,
+            setDataSource,
             showDuplicates,
             setShowDuplicates,
+            allowLoki: allowLoki(),
+            allowProm: allowProm(),
             allowFlow: isFlow(),
             allowConnection: isConnectionTracking(),
             allowShowDuplicates: selectedViewId === 'table' && recordType !== 'allConnections',

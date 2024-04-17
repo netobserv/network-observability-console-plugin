@@ -10,6 +10,7 @@ import (
 
 	"github.com/netobserv/network-observability-console-plugin/pkg/kubernetes/auth"
 	"github.com/netobserv/network-observability-console-plugin/pkg/kubernetes/client"
+	"github.com/netobserv/network-observability-console-plugin/pkg/utils/constants"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
 )
@@ -116,6 +117,7 @@ type Frontend struct {
 	Features        []string      `yaml:"features" json:"features"`
 	Deduper         Deduper       `yaml:"deduper" json:"deduper"`
 	Fields          []FieldConfig `yaml:"fields" json:"fields"`
+	DataSources     []string      `yaml:"dataSources" json:"dataSources"`
 }
 
 type Config struct {
@@ -165,6 +167,7 @@ func ReadFile(version, date, filename string) (*Config, error) {
 				{Name: "SrcAddr", Type: "string"},
 				{Name: "DstAddr", Type: "string"},
 			},
+			DataSources: []string{},
 		},
 	}
 	if len(filename) == 0 {
@@ -177,6 +180,14 @@ func ReadFile(version, date, filename string) (*Config, error) {
 	err = yaml.Unmarshal(yamlFile, &cfg)
 	if err != nil {
 		return nil, err
+	}
+
+	if cfg.IsLokiEnabled() {
+		cfg.Frontend.DataSources = append(cfg.Frontend.DataSources, string(constants.DataSourceLoki))
+	}
+
+	if cfg.IsPromEnabled() {
+		cfg.Frontend.DataSources = append(cfg.Frontend.DataSources, string(constants.DataSourceProm))
 	}
 
 	return &cfg, err

@@ -175,10 +175,10 @@ func (h *Handlers) getTopologyFlows(ctx context.Context, cl clients, params url.
 	}
 
 	qresp := merger.Get()
-	qresp.DataSources = []constants.DataSource{}
+	qresp.Stats.DataSources = []constants.DataSource{}
 	for str, ok := range dataSources {
 		if ok {
-			qresp.DataSources = append(qresp.DataSources, str)
+			qresp.Stats.DataSources = append(qresp.Stats.DataSources, str)
 		}
 	}
 	qresp.UnixTimestamp = time.Now().Unix()

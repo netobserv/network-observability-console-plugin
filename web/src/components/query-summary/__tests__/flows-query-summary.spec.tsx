@@ -15,7 +15,8 @@ describe('<FlowsQuerySummary />', () => {
     metricType: 'Bytes' as MetricType,
     stats: {
       limitReached: false,
-      numQueries: 1
+      numQueries: 1,
+      dataSources: ['loki']
     },
     range: 300,
     lastRefresh: now
@@ -38,7 +39,11 @@ describe('<FlowsQuerySummary />', () => {
 
   it('should format summary', async () => {
     const wrapper = mount(
-      <FlowsQuerySummary {...mocks} flows={getTestFlows(1005)} stats={{ limitReached: true, numQueries: 1 }} />
+      <FlowsQuerySummary
+        {...mocks}
+        flows={getTestFlows(1005)}
+        stats={{ limitReached: true, numQueries: 1, dataSources: ['loki'] }}
+      />
     );
     expect(wrapper.find('#flowsCount').last().text()).toBe('1k+ Flows');
     expect(wrapper.find('#bytesCount').last().text()).toBe('757+ MB');

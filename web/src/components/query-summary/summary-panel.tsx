@@ -414,6 +414,7 @@ export const SummaryPanelContent: React.FC<{
             direction="column"
             metrics={metrics}
             numQueries={stats?.numQueries}
+            dataSources={stats?.dataSources}
             lastRefresh={lastRefresh}
             lastDuration={lastDuration}
             slownessReason={slownessReason}

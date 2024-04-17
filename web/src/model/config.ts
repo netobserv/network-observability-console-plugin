@@ -28,6 +28,7 @@ export type Config = {
   features: Feature[];
   deduper: Deduper;
   fields: FieldConfig[];
+  dataSources: string[];
 };
 
 export const defaultConfig: Config = {
@@ -49,5 +50,6 @@ export const defaultConfig: Config = {
     mark: true,
     merge: false
   },
-  fields: []
+  fields: [],
+  dataSources: []
 };

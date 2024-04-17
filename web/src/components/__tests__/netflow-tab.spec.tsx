@@ -18,10 +18,16 @@ jest.mock('../../api/routes', () => ({
   getConfig: jest.fn(() => Promise.resolve(FullConfigResultSample)),
   getFlowRecords: jest.fn(() => Promise.resolve([])),
   getFlowMetrics: jest.fn(() =>
-    Promise.resolve({ metrics: [], stats: { numQueries: 0, limitReached: false } } as FlowMetricsResult)
+    Promise.resolve({
+      metrics: [],
+      stats: { numQueries: 0, limitReached: false, dataSources: ['loki'] }
+    } as FlowMetricsResult)
   ),
   getFlowGenericMetrics: jest.fn(() =>
-    Promise.resolve({ metrics: [], stats: { numQueries: 0, limitReached: false } } as GenericMetricsResult)
+    Promise.resolve({
+      metrics: [],
+      stats: { numQueries: 0, limitReached: false, dataSources: ['loki'] }
+    } as GenericMetricsResult)
   ),
   getAlerts: jest.fn(() => Promise.resolve({ data: { groups: [] }, status: 'success' } as AlertsResult)),
   getSilencedAlerts: jest.fn(() => Promise.resolve([] as SilencedAlert[]))

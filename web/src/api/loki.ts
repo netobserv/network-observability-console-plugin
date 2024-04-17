@@ -7,13 +7,13 @@ export interface AggregatedQueryResponse {
   resultType: string;
   result: StreamResult[] | RawTopologyMetrics[];
   stats: Stats;
-  dataSources: string[];
   unixTimestamp: number;
 }
 
 export interface Stats {
   numQueries: number;
   limitReached: boolean;
+  dataSources: string[];
   // Here, more (raw) stats available in queriesStats array
 }
 

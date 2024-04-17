@@ -18,20 +18,20 @@ type QueryResponse struct {
 
 // AggregatedQueryResponse represents the modified json response to one or more logQL queries
 type AggregatedQueryResponse struct {
-	ResultType    ResultType             `json:"resultType"`
-	Result        ResultValue            `json:"result"`
-	Stats         AggregatedStats        `json:"stats"`
-	DataSources   []constants.DataSource `json:"dataSources"`
-	UnixTimestamp int64                  `json:"unixTimestamp"`
+	ResultType    ResultType      `json:"resultType"`
+	Result        ResultValue     `json:"result"`
+	Stats         AggregatedStats `json:"stats"`
+	UnixTimestamp int64           `json:"unixTimestamp"`
 }
 
 // AggregatedStats represents the stats to one or more logQL queries
 type AggregatedStats struct {
-	NumQueries   int           `json:"numQueries"`
-	TotalEntries int           `json:"totalEntries"`
-	Duplicates   int           `json:"duplicates"`
-	LimitReached bool          `json:"limitReached"`
-	QueriesStats []interface{} `json:"queriesStats"`
+	NumQueries   int                    `json:"numQueries"`
+	TotalEntries int                    `json:"totalEntries"`
+	Duplicates   int                    `json:"duplicates"`
+	LimitReached bool                   `json:"limitReached"`
+	QueriesStats []interface{}          `json:"queriesStats"`
+	DataSources  []constants.DataSource `json:"dataSources"`
 }
 
 // ResultType holds the type of the result

@@ -17,9 +17,12 @@ describe('<FiltersToolbar />', () => {
     queryOptionsProps: {
       limit: 100,
       recordType: 'allConnections',
+      dataSource: 'auto',
       showDuplicates: true,
       allowFlow: true,
       allowConnection: true,
+      allowProm: true,
+      allowLoki: true,
       allowShowDuplicates: true,
       allowPktDrops: true,
       deduperMark: true,
@@ -30,7 +33,8 @@ describe('<FiltersToolbar />', () => {
       setMatch: jest.fn(),
       setPacketLoss: jest.fn(),
       setShowDuplicates: jest.fn(),
-      setRecordType: jest.fn()
+      setRecordType: jest.fn(),
+      setDataSource: jest.fn()
     },
     quickFilters: [],
     isFullScreen: false,
