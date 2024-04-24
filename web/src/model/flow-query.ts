@@ -59,5 +59,5 @@ export const filterByHashId = (hashId: string): string => {
 };
 
 export const isTimeMetric = (metricType: MetricType | undefined) => {
-  return ['dnsLatencies', 'flowRtt'].includes(metricType || '');
+  return ['DnsLatencyMs', 'TimeFlowRttNs'].includes(metricType || '');
 };
