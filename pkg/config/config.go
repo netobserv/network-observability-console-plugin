@@ -71,10 +71,10 @@ type Column struct {
 }
 
 type Filter struct {
-	ID        string `yaml:"id" json:"id"`
-	Name      string `yaml:"name" json:"name"`
-	Component string `yaml:"component" json:"component"`
-
+	ID                     string `yaml:"id" json:"id"`
+	Name                   string `yaml:"name" json:"name"`
+	Component              string `yaml:"component" json:"component"`
+	Field                  string `yaml:"field,omitempty" json:"field,omitempty"`
 	Category               string `yaml:"category,omitempty" json:"category,omitempty"`
 	AutoCompleteAddsQuotes bool   `yaml:"autoCompleteAddsQuotes,omitempty" json:"autoCompleteAddsQuotes,omitempty"`
 	Hint                   string `yaml:"hint,omitempty" json:"hint,omitempty"`
@@ -104,20 +104,21 @@ type Deduper struct {
 }
 
 type Frontend struct {
-	BuildVersion    string        `yaml:"buildVersion" json:"buildVersion"`
-	BuildDate       string        `yaml:"buildDate" json:"buildDate"`
-	RecordTypes     []string      `yaml:"recordTypes" json:"recordTypes"`
-	PortNaming      PortNaming    `yaml:"portNaming" json:"portNaming"`
-	Panels          []string      `yaml:"panels" json:"panels"`
-	Columns         []Column      `yaml:"columns" json:"columns"`
-	Filters         []Filter      `yaml:"filters" json:"filters"`
-	QuickFilters    []QuickFilter `yaml:"quickFilters" json:"quickFilters"`
-	AlertNamespaces []string      `yaml:"alertNamespaces" json:"alertNamespaces"`
-	Sampling        int           `yaml:"sampling" json:"sampling"`
-	Features        []string      `yaml:"features" json:"features"`
-	Deduper         Deduper       `yaml:"deduper" json:"deduper"`
-	Fields          []FieldConfig `yaml:"fields" json:"fields"`
-	DataSources     []string      `yaml:"dataSources" json:"dataSources"`
+	BuildVersion    string          `yaml:"buildVersion" json:"buildVersion"`
+	BuildDate       string          `yaml:"buildDate" json:"buildDate"`
+	RecordTypes     []string        `yaml:"recordTypes" json:"recordTypes"`
+	PortNaming      PortNaming      `yaml:"portNaming" json:"portNaming"`
+	Panels          []string        `yaml:"panels" json:"panels"`
+	Columns         []Column        `yaml:"columns" json:"columns"`
+	Filters         []Filter        `yaml:"filters" json:"filters"`
+	QuickFilters    []QuickFilter   `yaml:"quickFilters" json:"quickFilters"`
+	AlertNamespaces []string        `yaml:"alertNamespaces" json:"alertNamespaces"`
+	Sampling        int             `yaml:"sampling" json:"sampling"`
+	Features        []string        `yaml:"features" json:"features"`
+	Deduper         Deduper         `yaml:"deduper" json:"deduper"`
+	Fields          []FieldConfig   `yaml:"fields" json:"fields"`
+	DataSources     []string        `yaml:"dataSources" json:"dataSources"`
+	PromLabels      map[string]bool `yaml:"promLabels" json:"promLabels"`
 }
 
 type Config struct {
@@ -168,6 +169,7 @@ func ReadFile(version, date, filename string) (*Config, error) {
 				{Name: "DstAddr", Type: "string"},
 			},
 			DataSources: []string{},
+			PromLabels:  make(map[string]bool),
 		},
 	}
 	if len(filename) == 0 {
@@ -188,6 +190,11 @@ func ReadFile(version, date, filename string) (*Config, error) {
 
 	if cfg.IsPromEnabled() {
 		cfg.Frontend.DataSources = append(cfg.Frontend.DataSources, string(constants.DataSourceProm))
+		for _, m := range cfg.Prometheus.Metrics {
+			for _, l := range m.Labels {
+				cfg.Frontend.PromLabels[l] = m.Enabled || cfg.Frontend.PromLabels[l]
+			}
+		}
 	}
 
 	return &cfg, err

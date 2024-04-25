@@ -1,6 +1,7 @@
 server:
   port: 9001
   metricsPort: 9002
+  authCheck: none
 loki:
   url: http://localhost:3100
   labels:
@@ -18,8 +19,25 @@ loki:
     #    - SrcK8S_Zone
     #    - DstK8S_Zone
   tenantID: netobserv
-  authCheck: none
   useMocks: false
+prometheus:
+  url: http://prometheus:9090
+  timeout: 30s
+  metrics:
+  - enabled: false
+    name: netobserv_node_egress_bytes_total
+    type: counter
+    valueField: Bytes
+    labels:
+    - SrcK8S_HostName
+    - DstK8S_HostName
+  - enabled: true
+    name: netobserv_node_ingress_bytes_total
+    type: counter
+    valueField: Bytes
+    labels:
+    - SrcK8S_HostName
+    - DstK8S_HostName
 frontend:
   recordTypes:
     - flowLog
@@ -622,10 +640,12 @@ frontend:
     - id: cluster_name
       name: Cluster
       component: autocomplete
+      field: K8S_ClusterName
       hint: Specify a cluster ID or name.
     - id: src_namespace
       name: Namespace
       component: autocomplete
+      field: SrcK8S_Namespace
       autoCompleteAddsQuotes: true
       category: source
       placeholder: 'E.g: netobserv'
@@ -642,6 +662,7 @@ frontend:
     - id: dst_namespace
       name: Namespace
       component: autocomplete
+      field: DstK8S_Namespace
       autoCompleteAddsQuotes: true
       category: destination
       placeholder: 'E.g: netobserv'
@@ -658,6 +679,7 @@ frontend:
     - id: src_name
       name: Name
       component: text
+      field: SrcK8S_Name
       category: source
       placeholder: 'E.g: my-pod'
       hint: Specify a single kubernetes name.
@@ -673,6 +695,7 @@ frontend:
     - id: dst_name
       name: Name
       component: text
+      field: DstK8S_Name
       category: destination
       placeholder: 'E.g: my-pod'
       hint: Specify a single kubernetes name.
@@ -688,18 +711,21 @@ frontend:
     - id: src_kind
       name: Kind
       component: autocomplete
+      field: SrcK8S_Type
       autoCompleteAddsQuotes: true
       category: source
       placeholder: 'E.g: Pod, Service'
     - id: dst_kind
       name: Kind
       component: autocomplete
+      field: DstK8S_Type
       autoCompleteAddsQuotes: true
       category: destination
       placeholder: 'E.g: Pod, Service'
     - id: src_owner_name
       name: Owner Name
       component: text
+      field: SrcK8S_OwnerName
       category: source
       placeholder: 'E.g: my-deployment'
       hint: Specify a single kubernetes name.
@@ -715,6 +741,7 @@ frontend:
     - id: dst_owner_name
       name: Owner Name
       component: text
+      field: DstK8S_OwnerName
       category: destination
       placeholder: 'E.g: my-deployment'
       hint: Specify a single kubernetes name.
@@ -730,11 +757,13 @@ frontend:
     - id: src_zone
       name: Zone
       component: autocomplete
+      field: SrcK8S_Zone
       category: source
       hint: Specify a single zone.
     - id: dst_zone
       name: Zone
       component: autocomplete
+      field: DstK8S_Zone
       category: destination
       hint: Specify a single zone.
     - id: src_resource
@@ -764,6 +793,7 @@ frontend:
     - id: src_address
       name: IP
       component: text
+      field: SrcAddr
       category: source
       hint: Specify a single IP or range.
       placeholder: 'E.g: 192.0.2.0'
@@ -775,6 +805,7 @@ frontend:
     - id: dst_address
       name: IP
       component: text
+      field: DstAddr
       category: destination
       hint: Specify a single IP or range.
       placeholder: 'E.g: 192.0.2.0'
@@ -786,6 +817,7 @@ frontend:
     - id: src_port
       name: Port
       component: autocomplete
+      field: SrcPort
       category: source
       hint: Specify a single port number or name.
       placeholder: 'E.g: 80'
@@ -797,6 +829,7 @@ frontend:
     - id: dst_port
       name: Port
       component: autocomplete
+      field: DstPort
       category: destination
       hint: Specify a single port number or name.
       placeholder: 'E.g: 80'
@@ -808,18 +841,21 @@ frontend:
     - id: src_mac
       name: MAC
       component: text
+      field: SrcMac
       category: source
       placeholder: 'E.g: 42:01:0A:00:00:01'
       hint: Specify a single MAC address.
     - id: dst_mac
       name: MAC
       component: text
+      field: DstMac
       category: destination
       placeholder: 'E.g: 42:01:0A:00:00:01'
       hint: Specify a single MAC address.
     - id: src_host_address
       name: Node IP
       component: text
+      field: SrcK8S_HostIP
       category: source
       placeholder: 'E.g: 10.0.0.1'
       hint: Specify a single IP or range.
@@ -831,6 +867,7 @@ frontend:
     - id: dst_host_address
       name: Node IP
       component: text
+      field: DstK8S_HostIP
       category: destination
       placeholder: 'E.g: 10.0.0.1'
       hint: Specify a single IP or range.
@@ -842,6 +879,7 @@ frontend:
     - id: src_host_name
       name: Node Name
       component: text
+      field: SrcK8S_HostName
       category: source
       placeholder: 'E.g: my-node'
       hint: Specify a single kubernetes name.
@@ -857,6 +895,7 @@ frontend:
     - id: dst_host_name
       name: Node Name
       component: text
+      field: DstK8S_HostName
       category: destination
       placeholder: 'E.g: my-node'
       hint: Specify a single kubernetes name.
@@ -872,6 +911,7 @@ frontend:
     - id: protocol
       name: Protocol
       component: autocomplete
+      field: Proto
       placeholder: 'E.g: TCP, UDP'
       hint: Specify a single protocol number or name.
       examples: |-
@@ -882,6 +922,7 @@ frontend:
     - id: dscp
       name: DSCP
       component: autocomplete
+      field: Dscp
       hint: Specify a Differentiated Services Code Point number or name.
       examples: |-
         Specify a Differentiated Services Code Point following one of these rules:
@@ -890,38 +931,46 @@ frontend:
     - id: icmp_type
       name: ICMP type
       component: number
+      field: IcmpType
       hint: Specify an ICMP type value as integer number.
     - id: icmp_code
       name: ICMP code
       component: number
+      field: IcmpCode
       hint: Specify an ICMP code value as integer number.
     - id: node_direction
       name: Node Direction
       component: autocomplete
+      field: FlowDirection
       placeholder: 'E.g: Ingress, Egress, Inner'
       hint: Specify the interpreted direction of the Flow observed at the Node observation point.
     - id: flow_layer
       name: Flow layer
       component: text
+      field: K8S_FlowLayer
       placeholder: 'Either infra or app'
       hint: Specify the layer of Flow.
     - id: interfaces
       name: Network interfaces
       component: text
+      field: Interfaces
       placeholder: 'E.g: br-ex, ovn-k8s-mp0'
       hint: Specify a network interface.
     - id: ifdirections
       name: Interface Directions
       component: autocomplete
+      field: IfDirections
       placeholder: 'E.g: Ingress, Egress'
       hint: Specify the direction of the Flow observed at the network interface observation point.
     - id: id
       name: Conversation Id
       component: text
+      field: _HashId
       hint: Specify a single conversation hash Id.
     - id: pkt_drop_state
       name: Packet drop TCP state
       component: autocomplete
+      field: PktDropLatestState
       placeholder: 'E.g: ESTABLISHED, SYN_SENT, SYN_RECV'
       hint: Specify a single TCP state.
       examples: |-
@@ -932,6 +981,7 @@ frontend:
     - id: pkt_drop_cause
       name: Packet drop latest cause
       component: autocomplete
+      field: PktDropLatestDropCause
       placeholder: 'E.g: NO_SOCKET, PKT_TOO_SMALL'
       hint: Specify a single packet drop cause.
       examples: |-
@@ -942,14 +992,17 @@ frontend:
     - id: dns_id
       name: DNS Id
       component: number
+      field: DnsId
       hint: Specify a single DNS Id.
     - id: dns_latency
       name: DNS Latency
       component: number
+      field: DnsLatencyMs
       hint: Specify a DNS Latency in miliseconds.
     - id: dns_flag_response_code
       name: DNS Response Code
       component: autocomplete
+      field: DnsFlagsResponseCode
       hint: Specify a single DNS RCODE name.
       placeholder: 'E.g: NoError, NXDomain, NotAuth'
       examples: |-
@@ -960,10 +1013,12 @@ frontend:
     - id: dns_errno
       name: DNS Error
       component: autocomplete
+      field: DnsErrno
       hint: Specify a single DNS error number.
     - id: time_flow_rtt
       name: Flow RTT
       component: number
+      field: TimeFlowRttNs
       hint: Specify a TCP handshake Round Trip Time in nanoseconds.
   fields:
     - name: TimeFlowStartMs

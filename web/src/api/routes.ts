@@ -163,7 +163,8 @@ export const getConfig = (): Promise<Config> => {
         merge: r.data.deduper.merge ?? defaultConfig.deduper.merge
       },
       fields: r.data.fields || defaultConfig.fields,
-      dataSources: r.data.dataSources || defaultConfig.dataSources
+      dataSources: r.data.dataSources || defaultConfig.dataSources,
+      promLabels: r.data.promLabels || defaultConfig.promLabels
     };
   });
 };

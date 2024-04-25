@@ -61,7 +61,7 @@ export const NetflowTab: React.FC<PageComponentProps> = ({ obj }) => {
   }, []);
 
   React.useEffect(() => {
-    const filterDefinitions = getFilterDefinitions(config.filters, config.columns, t);
+    const filterDefinitions = getFilterDefinitions(config.filters, config.columns, config.fields, t);
 
     if (
       !initState.current.includes('configLoaded') ||

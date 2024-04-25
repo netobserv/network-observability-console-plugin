@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import { isEqual } from '../utils/base-compare';
+import { FieldConfig } from '../utils/fields';
 
 export type FiltersEncoder = (values: FilterValue[], matchAny: boolean, not: boolean, moreThan: boolean) => string;
 
@@ -45,6 +46,7 @@ export interface FilterConfigDef {
   name: string;
   component: string;
   category?: string;
+  field?: string;
   autoCompleteAddsQuotes?: boolean;
   hint?: string;
   examples?: string;
@@ -57,6 +59,7 @@ export interface FilterDefinition {
   name: string;
   component: FilterComponent;
   category?: FilterCategory;
+  field?: FieldConfig;
   getOptions: (value: string) => Promise<FilterOption[]>;
   validate: (value: string) => { val?: string; err?: string };
   checkCompletion?: (value: string, selected: string) => { completed: boolean; option: FilterOption };

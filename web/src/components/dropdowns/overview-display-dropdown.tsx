@@ -19,6 +19,10 @@ export const OverviewDisplayOptions: React.FC<{
   setFocus: (v: boolean) => void;
   allowMultiCluster: boolean;
   allowZone: boolean;
+  allowHost: boolean;
+  allowNamespace: boolean;
+  allowOwner: boolean;
+  allowResource: boolean;
 }> = ({
   metricScope,
   setMetricScope,
@@ -27,7 +31,11 @@ export const OverviewDisplayOptions: React.FC<{
   focus,
   setFocus,
   allowMultiCluster,
-  allowZone
+  allowZone,
+  allowHost,
+  allowNamespace,
+  allowOwner,
+  allowResource
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
@@ -49,6 +57,10 @@ export const OverviewDisplayOptions: React.FC<{
             setScopeType={setMetricScope}
             allowMultiCluster={allowMultiCluster}
             allowZone={allowZone}
+            allowHost={allowHost}
+            allowNamespace={allowNamespace}
+            allowOwner={allowOwner}
+            allowResource={allowResource}
           />
         </div>
       </div>
@@ -86,6 +98,10 @@ export const OverviewDisplayDropdown: React.FC<{
   setFocus: (v: boolean) => void;
   allowMultiCluster: boolean;
   allowZone: boolean;
+  allowHost: boolean;
+  allowNamespace: boolean;
+  allowOwner: boolean;
+  allowResource: boolean;
 }> = ({
   metricScope,
   setMetricScope,
@@ -94,7 +110,11 @@ export const OverviewDisplayDropdown: React.FC<{
   focus,
   setFocus,
   allowMultiCluster,
-  allowZone
+  allowZone,
+  allowHost,
+  allowNamespace,
+  allowOwner,
+  allowResource
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [isOpen, setOpen] = React.useState<boolean>(false);
@@ -116,6 +136,10 @@ export const OverviewDisplayDropdown: React.FC<{
             setFocus={setFocus}
             allowMultiCluster={allowMultiCluster}
             allowZone={allowZone}
+            allowHost={allowHost}
+            allowNamespace={allowNamespace}
+            allowOwner={allowOwner}
+            allowResource={allowResource}
           />
         }
       />

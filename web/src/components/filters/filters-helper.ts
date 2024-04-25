@@ -23,7 +23,7 @@ export const buildGroups = (filterDefinitions: FilterDefinition[], t: TFunction)
       title: t('Common'),
       filters: filterDefinitions.filter(def => !def.category)
     }
-  ];
+  ].filter(g => g.filters.length);
 };
 
 export const getFilterFullName = (f: FilterDefinition, t: TFunction) => {

@@ -40,6 +40,10 @@ export const NetflowTopology: React.FC<{
   isDark?: boolean;
   allowMultiCluster: boolean;
   allowZone: boolean;
+  allowHost: boolean;
+  allowNamespace: boolean;
+  allowOwner: boolean;
+  allowResource: boolean;
 }> = ({
   loading,
   k8sModels,
@@ -61,7 +65,11 @@ export const NetflowTopology: React.FC<{
   searchEvent,
   isDark,
   allowMultiCluster,
-  allowZone
+  allowZone,
+  allowHost,
+  allowNamespace,
+  allowOwner,
+  allowResource
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const containerRef = React.createRef<HTMLDivElement>();
@@ -109,6 +117,10 @@ export const NetflowTopology: React.FC<{
             sizePx={containerSize?.height || 300}
             scope={metricScope}
             setScope={setMetricScope}
+            allowHost={allowHost}
+            allowNamespace={allowNamespace}
+            allowOwner={allowOwner}
+            allowResource={allowResource}
           />
           <TopologyContent
             k8sModels={k8sModels}

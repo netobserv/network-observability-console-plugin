@@ -38,7 +38,11 @@ describe('<NetflowTopology />', () => {
     searchHandle: null,
     searchEvent: undefined,
     allowMultiCluster: false,
-    allowZone: false
+    allowZone: false,
+    allowHost: true,
+    allowNamespace: true,
+    allowOwner: true,
+    allowResource: true
   };
 
   it('should render component', async () => {

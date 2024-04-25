@@ -30,6 +30,10 @@ export const TopologyDisplayOptions: React.FC<{
   allowRTTMetric: boolean;
   allowMultiCluster: boolean;
   allowZone: boolean;
+  allowHost: boolean;
+  allowNamespace: boolean;
+  allowOwner: boolean;
+  allowResource: boolean;
 }> = ({
   metricFunction,
   setMetricFunction,
@@ -43,7 +47,11 @@ export const TopologyDisplayOptions: React.FC<{
   allowDNSMetric,
   allowRTTMetric,
   allowMultiCluster,
-  allowZone
+  allowZone,
+  allowHost,
+  allowNamespace,
+  allowOwner,
+  allowResource
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
@@ -120,6 +128,10 @@ export const TopologyDisplayOptions: React.FC<{
             setScopeType={setMetricScope}
             allowMultiCluster={allowMultiCluster}
             allowZone={allowZone}
+            allowHost={allowHost}
+            allowNamespace={allowNamespace}
+            allowOwner={allowOwner}
+            allowResource={allowResource}
           />
         </div>
       </div>
@@ -252,6 +264,10 @@ export const TopologyDisplayDropdown: React.FC<{
   allowRTTMetric: boolean;
   allowMultiCluster: boolean;
   allowZone: boolean;
+  allowHost: boolean;
+  allowNamespace: boolean;
+  allowOwner: boolean;
+  allowResource: boolean;
 }> = ({
   metricFunction,
   setMetricFunction,
@@ -265,7 +281,11 @@ export const TopologyDisplayDropdown: React.FC<{
   allowDNSMetric,
   allowRTTMetric,
   allowMultiCluster,
-  allowZone
+  allowZone,
+  allowHost,
+  allowNamespace,
+  allowOwner,
+  allowResource
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [isOpen, setOpen] = React.useState<boolean>(false);
@@ -292,6 +312,10 @@ export const TopologyDisplayDropdown: React.FC<{
             allowRTTMetric={allowRTTMetric}
             allowMultiCluster={allowMultiCluster}
             allowZone={allowZone}
+            allowHost={allowHost}
+            allowNamespace={allowNamespace}
+            allowOwner={allowOwner}
+            allowResource={allowResource}
           />
         }
       />
