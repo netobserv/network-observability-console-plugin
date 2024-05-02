@@ -14,13 +14,12 @@ import {
   Title
 } from '@patternfly/react-core';
 import { ExclamationCircleIcon, ExternalLinkSquareAltIcon } from '@patternfly/react-icons';
-import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { getBuildInfo, getLimits, getLokiMetrics, getLokiReady } from '../../api/routes';
-import { getHTTPErrorDetails } from '../../utils/errors';
-import './loki-error.css';
+import { getHTTPErrorDetails, getPromUnsupportedError, isPromUnsupportedError } from '../../utils/errors';
+import './error.css';
 
 export type Size = 's' | 'm' | 'l';
 
@@ -34,12 +33,13 @@ enum LokiInfo {
 type Props = {
   title: string;
   error: string;
+  isLokiRelated: boolean;
 };
 
-export const LokiError: React.FC<Props> = ({ title, error }) => {
+export const Error: React.FC<Props> = ({ title, error, isLokiRelated }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
-  const [loading, setLoading] = React.useState(true);
-  const [ready, setReady] = React.useState<string | undefined>();
+  const [loading, setLoading] = React.useState(isLokiRelated);
+  const [ready, setReady] = React.useState<boolean | undefined>();
   const [infoName, setInfoName] = React.useState<string | undefined>();
   const [info, setInfo] = React.useState<string | undefined>();
 
@@ -92,33 +92,48 @@ export const LokiError: React.FC<Props> = ({ title, error }) => {
     [t]
   );
 
+  const getDisplayError = React.useCallback(() => {
+    return isPromUnsupportedError(error) ? getPromUnsupportedError(error) : error;
+  }, [error]);
+
   React.useEffect(() => {
-    getLokiReady()
-      .then(() => {
-        setReady('');
-      })
-      .catch(err => {
-        setReady(getHTTPErrorDetails(err));
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, []);
+    if (isLokiRelated) {
+      getLokiReady()
+        .then(() => {
+          setReady(true);
+        })
+        .catch(err => {
+          console.error(getHTTPErrorDetails(err));
+          setReady(false);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    }
+  }, [isLokiRelated]);
 
   return (
-    <div id="loki-error-container">
+    <div id="netobserv-error-container">
       <EmptyState data-test="error-state">
-        <EmptyStateIcon className="loki-error-icon" icon={ExclamationCircleIcon} />
+        <EmptyStateIcon className="netobserv-error-icon" icon={ExclamationCircleIcon} />
         <Title headingLevel="h2" size="lg">
           {title}
         </Title>
         <EmptyStateBody className="error-body">
-          <Text className="loki-error-message" component={TextVariants.p}>
-            {error}
+          <Text className="netobserv-error-message" component={TextVariants.p}>
+            {getDisplayError()}
           </Text>
           {
             <TextContent className="error-text-content">
               <Text component={TextVariants.p}>{t('You may consider the following changes to avoid this error:')}</Text>
+              {error.includes('promUnsupported') && (
+                <>
+                  <Text component={TextVariants.blockquote}>
+                    {t('Add missing metrics to prometheus using FlowMetric API')}
+                  </Text>
+                  <Text component={TextVariants.blockquote}>{t('Enable Loki in FlowCollector API')}</Text>
+                </>
+              )}
               {error.includes('max entries limit') && (
                 <>
                   <Text component={TextVariants.blockquote}>
@@ -190,55 +205,75 @@ export const LokiError: React.FC<Props> = ({ title, error }) => {
                   </Button>
                 </>
               )}
-              {!_.isEmpty(ready) && (
+              {ready === false && (
                 <>
-                  <Text component={TextVariants.p}>{t(`Loki '/ready' endpoint returned the following error`)}</Text>
-                  <Text className="loki-error-message" component={TextVariants.p}>
-                    {ready}
+                  <Text component={TextVariants.blockquote}>
+                    {t(`Check if Loki is running correctly. '/ready' endpoint should respond "ready"`)}
                   </Text>
                 </>
               )}
-              {!_.isEmpty(ready) && (
+              {error.includes('Network Error') && (
                 <Text component={TextVariants.blockquote}>
-                  {t(`Check if Loki is running correctly. '/ready' endpoint should respond "ready"`)}
+                  {t(`Check your connectivity with cluster / console plugin pod`)}
                 </Text>
+              )}
+              {error.includes('status code 401') && (
+                <>
+                  <Text component={TextVariants.blockquote}>{t(`Check current user permissions`)}</Text>
+                  <Text component={TextVariants.blockquote}>
+                    {t(
+                      `For LokiStack, your user must be in 'cluster-admin' group or LokiStack spec.tenants.openshift.adminGroups must be configured`
+                    )}
+                  </Text>
+                  <Text component={TextVariants.blockquote}>
+                    {t(`For other configurations, refer to FlowCollector spec.loki.manual.authToken`)}
+                  </Text>
+                </>
               )}
             </TextContent>
           }
         </EmptyStateBody>
-        <Button
-          variant="link"
-          icon={<ExternalLinkSquareAltIcon />}
-          iconPosition="right"
-          component={(props: React.FunctionComponent) => (
-            <Link {...props} target="_blank" to={{ pathname: 'https://grafana.com/docs/loki/latest/configuration/' }} />
-          )}
-        >
-          {t('Configuring Grafana Loki')}
-        </Button>
-        <EmptyStateSecondaryActions>
-          <Button onClick={() => updateInfo(LokiInfo.Metrics)} variant="link">
-            {t('Show metrics')}
-          </Button>
-          <Button onClick={() => updateInfo(LokiInfo.Build)} variant="link">
-            {t('Show build info')}
-          </Button>
-          <Button onClick={() => updateInfo(LokiInfo.Limits)} variant="link">
-            {t('Show configuration limits')}
-          </Button>
+        {isLokiRelated && (
           <Button
             variant="link"
+            icon={<ExternalLinkSquareAltIcon />}
+            iconPosition="right"
             component={(props: React.FunctionComponent) => (
               <Link
                 {...props}
                 target="_blank"
-                to={{ pathname: '/monitoring/dashboards/grafana-dashboard-netobserv-health' }}
+                to={{ pathname: 'https://grafana.com/docs/loki/latest/configuration/' }}
               />
             )}
           >
-            {t('Show health dashboard')}
+            {t('Configuring Grafana Loki')}
           </Button>
-        </EmptyStateSecondaryActions>
+        )}
+        {isLokiRelated && (
+          <EmptyStateSecondaryActions>
+            <Button onClick={() => updateInfo(LokiInfo.Metrics)} variant="link">
+              {t('Show metrics')}
+            </Button>
+            <Button onClick={() => updateInfo(LokiInfo.Build)} variant="link">
+              {t('Show build info')}
+            </Button>
+            <Button onClick={() => updateInfo(LokiInfo.Limits)} variant="link">
+              {t('Show configuration limits')}
+            </Button>
+            <Button
+              variant="link"
+              component={(props: React.FunctionComponent) => (
+                <Link
+                  {...props}
+                  target="_blank"
+                  to={{ pathname: '/monitoring/dashboards/grafana-dashboard-netobserv-health' }}
+                />
+              )}
+            >
+              {t('Show health dashboard')}
+            </Button>
+          </EmptyStateSecondaryActions>
+        )}
       </EmptyState>
       {loading ? (
         <Bullseye data-test="loading-errors">
@@ -264,4 +299,4 @@ export const LokiError: React.FC<Props> = ({ title, error }) => {
   );
 };
 
-export default LokiError;
+export default Error;

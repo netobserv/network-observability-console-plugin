@@ -21,6 +21,7 @@ const (
 	AuthHeader                   = "Authorization"
 	CheckAuthenticated CheckType = "authenticated"
 	CheckAdmin         CheckType = "admin"
+	CheckDenyAll       CheckType = "denyAll"
 	CheckNone          CheckType = "none"
 )
 
@@ -36,6 +37,9 @@ func NewChecker(typez CheckType, apiProvider client.APIProvider) (Checker, error
 		return &BearerTokenChecker{apiProvider: apiProvider, predicates: []authPredicate{mustBeAuthenticated}}, nil
 	case CheckAdmin:
 		return &BearerTokenChecker{apiProvider: apiProvider, predicates: []authPredicate{mustBeAuthenticated, mustBeClusterAdmin}}, nil
+	case CheckDenyAll:
+		return &DenyAllChecker{}, nil
+
 	}
 	return nil, fmt.Errorf("auth checker type unknown: %s. Must be one of %s, %s, %s", typez, CheckAdmin, CheckAuthenticated, CheckNone)
 }
@@ -47,6 +51,15 @@ type NoopChecker struct {
 func (b *NoopChecker) CheckAuth(_ context.Context, _ http.Header) error {
 	hlog.Debug("noop auth checker: ignore auth")
 	return nil
+}
+
+type DenyAllChecker struct {
+	Checker
+}
+
+func (b *DenyAllChecker) CheckAuth(_ context.Context, _ http.Header) error {
+	hlog.Debug("deny all auth checker: deny auth")
+	return errors.New("deny all auth mode selected")
 }
 
 func getUserToken(header http.Header) (string, error) {

@@ -17,6 +17,7 @@ import { loadConfig } from '../utils/config';
 import { findFilter, getFilterDefinitions } from '../utils/filter-definitions';
 import { usePrevious } from '../utils/previous-hook';
 import NetflowTrafficParent from './netflow-traffic-parent';
+import Error from './messages/error';
 
 type RouteProps = K8sResourceCommon & {
   spec: {
@@ -38,8 +39,11 @@ type HPAProps = K8sResourceCommon & {
 
 export const NetflowTab: React.FC<PageComponentProps> = ({ obj }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
-  const initState = React.useRef<Array<'initDone' | 'configLoading' | 'configLoaded' | 'forcedFiltersLoaded'>>([]);
+  const initState = React.useRef<
+    Array<'initDone' | 'configLoading' | 'configLoaded' | 'configLoadError' | 'forcedFiltersLoaded'>
+  >([]);
   const [config, setConfig] = React.useState<Config>(defaultConfig);
+  const [error, setError] = React.useState<string | undefined>();
   const [forcedFilters, setForcedFilters] = React.useState<Filters>();
   const previous = usePrevious({ obj });
 
@@ -52,8 +56,12 @@ export const NetflowTab: React.FC<PageComponentProps> = ({ obj }) => {
       if (!initState.current.includes('configLoading')) {
         initState.current.push('configLoading');
         loadConfig().then(v => {
-          setConfig(v);
+          setConfig(v.config);
           initState.current.push('configLoaded');
+          if (v.error) {
+            initState.current.push('configLoadError');
+            setError(v.error);
+          }
         });
       }
     }
@@ -168,7 +176,9 @@ export const NetflowTab: React.FC<PageComponentProps> = ({ obj }) => {
     }
   }, [config, obj, previous, t]);
 
-  if (!initState.current.includes('forcedFiltersLoaded')) {
+  if (error) {
+    return <Error title={t('Unable to get {{item}}', { item: t('config') })} error={error} isLokiRelated={false} />;
+  } else if (!initState.current.includes('forcedFiltersLoaded')) {
     return (
       <Bullseye data-test="loading-tab">
         <Spinner size="xl" />

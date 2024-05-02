@@ -25,7 +25,6 @@ import {
   LOCAL_STORAGE_SORT_ID_KEY,
   useLocalStorage
 } from '../../utils/local-storage-hook';
-import { LokiError } from '../messages/loki-error';
 import { convertRemToPixels } from '../../utils/panel';
 
 const NetflowTable: React.FC<{
@@ -39,7 +38,6 @@ const NetflowTable: React.FC<{
   size: Size;
   onSelect: (record?: Record) => void;
   loading?: boolean;
-  error?: string;
   filterActionLinks: JSX.Element;
   isDark?: boolean;
 }> = ({
@@ -50,7 +48,6 @@ const NetflowTable: React.FC<{
   setColumns,
   columnSizes,
   setColumnSizes,
-  error,
   loading,
   size,
   onSelect,
@@ -177,10 +174,13 @@ const NetflowTable: React.FC<{
   }, [activeSortDirection, activeSortId, columns, flows]);
 
   // sort handler
-  const onSort = (columnId: ColumnsId, direction: SortByDirection) => {
-    setActiveSortId(columnId);
-    setActiveSortDirection(direction);
-  };
+  const onSort = React.useCallback(
+    (columnId: ColumnsId, direction: SortByDirection) => {
+      setActiveSortId(columnId);
+      setActiveSortDirection(direction);
+    },
+    [setActiveSortDirection, setActiveSortId]
+  );
 
   const getBody = React.useCallback(() => {
     const rowHeight = getRowHeight();
@@ -231,8 +231,6 @@ const NetflowTable: React.FC<{
 
   if (width === 0) {
     return null;
-  } else if (error) {
-    return <LokiError title={t('Unable to get flows')} error={error} />;
   } else if (_.isEmpty(flows)) {
     if (loading) {
       return (

@@ -1,3 +1,11 @@
 #table-container>.pf-c-table tbody>tr>* {
   vertical-align: top;
 }
+
+#table-container.dark {
+  background: #0f1214;
+}
+
+#table-container.light {
+  background: #f0f0f0;
+}

@@ -82,7 +82,7 @@ import { loadConfig, loadMaxChunkAge } from '../utils/config';
 import { ContextSingleton } from '../utils/context';
 import { computeStepInterval, getTimeRangeOptions, TimeRange } from '../utils/datetime';
 import { formatDuration, getDateMsInSeconds, getDateSInMiliseconds, parseDuration } from '../utils/duration';
-import { getHTTPErrorDetails } from '../utils/errors';
+import { getHTTPErrorDetails, isPromUnsupportedError } from '../utils/errors';
 import { exportToPng } from '../utils/export';
 import { mergeFlowReporters } from '../utils/flows';
 import { useK8sModelsWithColors } from '../utils/k8s-models-hook';
@@ -172,6 +172,7 @@ import FlowsQuerySummary from './query-summary/flows-query-summary';
 import MetricsQuerySummary from './query-summary/metrics-query-summary';
 import SummaryPanel from './query-summary/summary-panel';
 import { SearchComponent, SearchEvent, SearchHandle } from './search/search';
+import Error from './messages/error';
 
 export type ViewId = 'overview' | 'table' | 'topology';
 
@@ -266,6 +267,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
       | 'initDone'
       | 'configLoading'
       | 'configLoaded'
+      | 'configLoadError'
       | 'maxChunkAgeLoading'
       | 'maxChunkAgeLoaded'
       | 'forcedFiltersLoaded'
@@ -522,6 +524,9 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
     if (view !== selectedViewId) {
       setFlows([]);
       setMetrics(defaultNetflowMetrics);
+      if (!initState.current.includes('configLoadError') && !initState.current.includes('maxChunkAgeLoadError')) {
+        setError(undefined);
+      }
     }
     setSelectedViewId(view);
   };
@@ -619,6 +624,23 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
+
+  const slownessReason = React.useCallback((): string => {
+    if (match === 'any' && hasNonIndexFields(filters.list)) {
+      return t(
+        // eslint-disable-next-line max-len
+        'When in "Match any" mode, try using only Namespace, Owner or Resource filters (which use indexed fields), or decrease limit / range, to improve the query performance'
+      );
+    }
+    if (match === 'all' && !hasIndexFields(filters.list)) {
+      return t(
+        // eslint-disable-next-line max-len
+        'Add Namespace, Owner or Resource filters (which use indexed fields), or decrease limit / range, to improve the query performance'
+      );
+    }
+    return t('Add more filters or decrease limit / range to improve the query performance');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [match, filters]);
 
   const fetchTable = React.useCallback(
     (fq: FlowQuery) => {
@@ -1003,7 +1025,11 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
     // skip tick while forcedFilters & config are not loaded
     // this check ensure tick will not be called during init
     // as it's difficult to manage react state changes
-    if (!initState.current.includes('forcedFiltersLoaded') || !initState.current.includes('configLoaded')) {
+    if (
+      !initState.current.includes('forcedFiltersLoaded') ||
+      !initState.current.includes('configLoaded') ||
+      initState.current.includes('configLoadError')
+    ) {
       console.error('tick skipped', initState.current);
       return;
     } else if (isTRModalOpen || isOverviewModalOpen || isColModalOpen || isExportModalOpen) {
@@ -1131,7 +1157,11 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
           initState.current.push('configLoading');
           loadConfig().then(v => {
             initState.current.push('configLoaded');
-            setConfig(v);
+            setConfig(v.config);
+            if (v.error) {
+              initState.current.push('configLoadError');
+              setError(v.error);
+            }
           });
         }
       }
@@ -1141,7 +1171,11 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
         initState.current.push('maxChunkAgeLoading');
         loadMaxChunkAge().then(v => {
           initState.current.push('maxChunkAgeLoaded');
-          setMaxChunkAge(v);
+          setMaxChunkAge(v.duration);
+          if (v.error && !error) {
+            initState.current.push('maxChunkAgeLoadError');
+            setError(v.error);
+          }
         });
       }
 
@@ -1574,91 +1608,84 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
     );
   }, [getDefaultFilters, t, resetDefaultFilters, filters.list, clearFilters]);
 
-  const slownessReason = React.useCallback((): string => {
-    if (match === 'any' && hasNonIndexFields(filters.list)) {
-      return t(
-        // eslint-disable-next-line max-len
-        'When in "Match any" mode, try using only Namespace, Owner or Resource filters (which use indexed fields), or decrease limit / range, to improve the query performance'
-      );
-    }
-    if (match === 'all' && !hasIndexFields(filters.list)) {
-      return t(
-        // eslint-disable-next-line max-len
-        'Add Namespace, Owner or Resource filters (which use indexed fields), or decrease limit / range, to improve the query performance'
-      );
-    }
-    return t('Add more filters or decrease limit / range to improve the query performance');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [match, filters]);
-
   const pageContent = React.useCallback(() => {
     let content: JSX.Element | null = null;
-    switch (selectedViewId) {
-      case 'overview':
-        content = (
-          <NetflowOverview
-            limit={limit}
-            panels={getSelectedPanels()}
-            recordType={recordType}
-            metrics={metrics}
-            loading={loading}
-            error={error}
-            isDark={isDarkTheme}
-            filterActionLinks={filterLinks()}
-            truncateLength={overviewTruncateLength}
-            focus={overviewFocus}
-            setFocus={setOverviewFocus}
-          />
-        );
-        break;
-      case 'table':
-        content = (
-          <NetflowTable
-            loading={loading}
-            error={error}
-            allowPktDrops={isPktDrop()}
-            flows={flows}
-            selectedRecord={selectedRecord}
-            size={size}
-            onSelect={onRecordSelect}
-            columns={getSelectedColumns()}
-            setColumns={(v: Column[]) => setColumns(v.concat(columns.filter(col => !col.isSelected)))}
-            columnSizes={columnSizes}
-            setColumnSizes={setColumnSizes}
-            filterActionLinks={filterLinks()}
-            isDark={isDarkTheme}
-          />
-        );
-        break;
-      case 'topology':
-        content = (
-          <NetflowTopology
-            loading={loading}
-            k8sModels={k8sModels}
-            error={error}
-            metricFunction={topologyMetricFunction}
-            metricType={topologyMetricType}
-            metricScope={metricScope}
-            setMetricScope={setMetricScope}
-            metrics={getTopologyMetrics() || []}
-            droppedMetrics={getTopologyDroppedMetrics() || []}
-            options={topologyOptions}
-            setOptions={setTopologyOptions}
-            filters={filters}
-            filterDefinitions={getFilterDefs()}
-            setFilters={setFilters}
-            selected={selectedElement}
-            onSelect={onElementSelect}
-            searchHandle={searchRef?.current}
-            searchEvent={searchEvent}
-            isDark={isDarkTheme}
-            allowedScopes={getAllowedScopes()}
-          />
-        );
-        break;
-      default:
-        content = null;
-        break;
+
+    if (error) {
+      content = (
+        <Error
+          title={t('Unable to get {{item}}', {
+            item: initState.current.includes('configLoadError') ? t('config') : selectedViewId
+          })}
+          error={error}
+          isLokiRelated={!initState.current.includes('configLoadError') && !isPromUnsupportedError(error)}
+        />
+      );
+    } else {
+      switch (selectedViewId) {
+        case 'overview':
+          content = (
+            <NetflowOverview
+              limit={limit}
+              panels={getSelectedPanels()}
+              recordType={recordType}
+              metrics={metrics}
+              loading={loading}
+              isDark={isDarkTheme}
+              filterActionLinks={filterLinks()}
+              truncateLength={overviewTruncateLength}
+              focus={overviewFocus}
+              setFocus={setOverviewFocus}
+            />
+          );
+          break;
+        case 'table':
+          content = (
+            <NetflowTable
+              loading={loading}
+              allowPktDrops={isPktDrop()}
+              flows={flows}
+              selectedRecord={selectedRecord}
+              size={size}
+              onSelect={onRecordSelect}
+              columns={getSelectedColumns()}
+              setColumns={(v: Column[]) => setColumns(v.concat(columns.filter(col => !col.isSelected)))}
+              columnSizes={columnSizes}
+              setColumnSizes={setColumnSizes}
+              filterActionLinks={filterLinks()}
+              isDark={isDarkTheme}
+            />
+          );
+          break;
+        case 'topology':
+          content = (
+            <NetflowTopology
+              loading={loading}
+              k8sModels={k8sModels}
+              metricFunction={topologyMetricFunction}
+              metricType={topologyMetricType}
+              metricScope={metricScope}
+              setMetricScope={setMetricScope}
+              metrics={getTopologyMetrics() || []}
+              droppedMetrics={getTopologyDroppedMetrics() || []}
+              options={topologyOptions}
+              setOptions={setTopologyOptions}
+              filters={filters}
+              filterDefinitions={getFilterDefs()}
+              setFilters={setFilters}
+              selected={selectedElement}
+              onSelect={onElementSelect}
+              searchHandle={searchRef?.current}
+              searchEvent={searchEvent}
+              isDark={isDarkTheme}
+              allowedScopes={getAllowedScopes()}
+            />
+          );
+          break;
+        default:
+          content = null;
+          break;
+      }
     }
 
     return (
@@ -1744,6 +1771,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
     size,
     slownessReason,
     stats,
+    t,
     topologyMetricFunction,
     topologyMetricType,
     topologyOptions,

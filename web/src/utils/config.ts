@@ -6,20 +6,25 @@ import { parseDuration } from './duration';
 export let config = defaultConfig;
 
 export const loadConfig = async () => {
+  let error = null;
   try {
     config = await getConfig();
   } catch (err) {
-    console.log(getHTTPErrorDetails(err));
+    error = getHTTPErrorDetails(err);
+    console.log(error);
   }
-  return config;
+  return { config, error };
 };
 
 export const loadMaxChunkAge = async () => {
+  let duration = NaN;
+  let error = null;
   try {
     const maxChunkAgeStr = await getIngesterMaxChunkAge();
-    return parseDuration(maxChunkAgeStr);
+    duration = parseDuration(maxChunkAgeStr);
   } catch (err) {
-    console.log(getHTTPErrorDetails(err));
+    error = getHTTPErrorDetails(err);
+    console.log(error);
   }
-  return NaN;
+  return { duration, error };
 };
