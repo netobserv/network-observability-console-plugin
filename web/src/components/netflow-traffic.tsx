@@ -331,7 +331,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
   }, [config.features, dataSourceHasLabels, isPromOnly]);
 
   const getAllowedScopes = React.useCallback(() => {
-    let scopes: FlowScope[] = [];
+    const scopes: FlowScope[] = [];
     if (isMultiCluster()) {
       scopes.push('cluster');
     }
@@ -1705,10 +1705,9 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
     getTopologyDroppedMetrics,
     getTopologyMetrics,
     isDarkTheme,
-    isMultiCluster,
+    getAllowedScopes,
     isPktDrop,
     isShowQuerySummary,
-    isZones,
     k8sModels,
     lastDuration,
     lastRefresh,
@@ -1738,8 +1737,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
     topologyMetricFunction,
     topologyMetricType,
     topologyOptions,
-    warningMessage,
-    dataSourceHasLabels
+    warningMessage
   ]);
 
   //update data on filters changes
