@@ -38,12 +38,7 @@ export const NetflowTopology: React.FC<{
   searchHandle: SearchHandle | null;
   searchEvent?: SearchEvent;
   isDark?: boolean;
-  allowMultiCluster: boolean;
-  allowZone: boolean;
-  allowHost: boolean;
-  allowNamespace: boolean;
-  allowOwner: boolean;
-  allowResource: boolean;
+  allowedScopes: FlowScope[];
 }> = ({
   loading,
   k8sModels,
@@ -64,12 +59,7 @@ export const NetflowTopology: React.FC<{
   searchHandle,
   searchEvent,
   isDark,
-  allowMultiCluster,
-  allowZone,
-  allowHost,
-  allowNamespace,
-  allowOwner,
-  allowResource
+  allowedScopes
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const containerRef = React.createRef<HTMLDivElement>();
@@ -112,15 +102,10 @@ export const NetflowTopology: React.FC<{
       return (
         <VisualizationProvider data-test="visualization-provider" controller={controller}>
           <ScopeSlider
-            allowMultiCluster={allowMultiCluster}
-            allowZone={allowZone}
             sizePx={containerSize?.height || 300}
             scope={metricScope}
             setScope={setMetricScope}
-            allowHost={allowHost}
-            allowNamespace={allowNamespace}
-            allowOwner={allowOwner}
-            allowResource={allowResource}
+            allowedScopes={allowedScopes}
           />
           <TopologyContent
             k8sModels={k8sModels}
@@ -145,8 +130,7 @@ export const NetflowTopology: React.FC<{
       );
     }
   }, [
-    allowMultiCluster,
-    allowZone,
+    allowedScopes,
     containerSize?.height,
     controller,
     displayedMetrics,

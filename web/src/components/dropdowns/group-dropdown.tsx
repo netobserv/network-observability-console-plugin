@@ -2,7 +2,8 @@ import { Dropdown, DropdownItem, DropdownToggle } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { MetricScopeOptions } from '../../model/metrics';
-import { getAvailableGroups, TopologyGroupTypes } from '../../model/topology';
+import { getGroupsForScope, TopologyGroupTypes } from '../../model/topology';
+import { FlowScope } from '../../model/flow-query';
 
 export const GroupDropdown: React.FC<{
   disabled?: boolean;
@@ -10,9 +11,8 @@ export const GroupDropdown: React.FC<{
   selected: TopologyGroupTypes;
   setGroupType: (v: TopologyGroupTypes) => void;
   id?: string;
-  allowMultiCluster: boolean;
-  allowZone: boolean;
-}> = ({ disabled, scope, selected, setGroupType, id, allowMultiCluster, allowZone }) => {
+  allowedScopes: FlowScope[];
+}> = ({ disabled, scope, selected, setGroupType, id, allowedScopes }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [groupDropdownOpen, setGroupDropdownOpen] = React.useState(false);
 
@@ -73,26 +73,19 @@ export const GroupDropdown: React.FC<{
         </DropdownToggle>
       }
       isOpen={groupDropdownOpen}
-      dropdownItems={getAvailableGroups(scope)
-        .filter(
-          g =>
-            (allowMultiCluster ||
-              ![
-                TopologyGroupTypes.CLUSTERS,
-                TopologyGroupTypes.CLUSTERS_HOSTS,
-                TopologyGroupTypes.CLUSTERS_NAMESPACES,
-                TopologyGroupTypes.CLUSTERS_OWNERS,
-                TopologyGroupTypes.CLUSTERS_ZONES
-              ].includes(g)) &&
-            (allowZone ||
-              ![
-                TopologyGroupTypes.ZONES,
-                TopologyGroupTypes.ZONES_HOSTS,
-                TopologyGroupTypes.ZONES_NAMESPACES,
-                TopologyGroupTypes.ZONES_OWNERS,
-                TopologyGroupTypes.CLUSTERS_ZONES
-              ].includes(g))
-        )
+      dropdownItems={getGroupsForScope(scope)
+        .filter(g => {
+          if (
+            (!allowedScopes.includes('cluster') && g.includes(TopologyGroupTypes.CLUSTERS)) ||
+            (!allowedScopes.includes('zone') && g.includes(TopologyGroupTypes.ZONES)) ||
+            (!allowedScopes.includes('host') && g.includes(TopologyGroupTypes.HOSTS)) ||
+            (!allowedScopes.includes('namespace') && g.includes(TopologyGroupTypes.NAMESPACES)) ||
+            (!allowedScopes.includes('owner') && g.includes(TopologyGroupTypes.OWNERS))
+          ) {
+            return false;
+          }
+          return true;
+        })
         .map(v => (
           <DropdownItem
             data-test={v}

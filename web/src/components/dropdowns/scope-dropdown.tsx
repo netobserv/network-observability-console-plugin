@@ -8,23 +8,8 @@ export const ScopeDropdown: React.FC<{
   selected: FlowScope;
   setScopeType: (v: FlowScope) => void;
   id?: string;
-  allowMultiCluster: boolean;
-  allowZone: boolean;
-  allowHost: boolean;
-  allowNamespace: boolean;
-  allowOwner: boolean;
-  allowResource: boolean;
-}> = ({
-  selected,
-  setScopeType,
-  id,
-  allowMultiCluster,
-  allowZone,
-  allowHost,
-  allowNamespace,
-  allowOwner,
-  allowResource
-}) => {
+  allowedScopes: FlowScope[];
+}> = ({ selected, setScopeType, id, allowedScopes }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [scopeDropdownOpen, setScopeDropdownOpen] = React.useState(false);
 
@@ -61,15 +46,7 @@ export const ScopeDropdown: React.FC<{
       }
       isOpen={scopeDropdownOpen}
       dropdownItems={Object.values(MetricScopeOptions)
-        .filter(
-          ms =>
-            (allowMultiCluster || ms !== MetricScopeOptions.CLUSTER) &&
-            (allowZone || ms !== MetricScopeOptions.ZONE) &&
-            (allowHost || ms !== MetricScopeOptions.HOST) &&
-            (allowNamespace || ms !== MetricScopeOptions.NAMESPACE) &&
-            (allowOwner || ms !== MetricScopeOptions.OWNER) &&
-            (allowResource || ms !== MetricScopeOptions.RESOURCE)
-        )
+        .filter(ms => allowedScopes.includes(ms as FlowScope))
         .map(v => (
           <DropdownItem
             data-test={v}

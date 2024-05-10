@@ -8,44 +8,22 @@ import './scope-slider.css';
 export interface ScopeSliderProps {
   scope: FlowScope;
   setScope: (ms: FlowScope) => void;
-  allowMultiCluster: boolean;
-  allowZone: boolean;
-  allowHost: boolean;
-  allowNamespace: boolean;
-  allowOwner: boolean;
-  allowResource: boolean;
+  allowedScopes: FlowScope[];
   sizePx: number;
 }
 
-export const ScopeSlider: React.FC<ScopeSliderProps> = ({
-  scope,
-  setScope,
-  allowMultiCluster,
-  allowZone,
-  allowHost,
-  allowNamespace,
-  allowOwner,
-  allowResource,
-  sizePx
-}) => {
+export const ScopeSlider: React.FC<ScopeSliderProps> = ({ scope, setScope, allowedScopes, sizePx }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
-  const scopes: [FlowScope, string][] = [
+  let scopes: [FlowScope, string][] = [
     ['resource', t('Resource')],
     ['owner', t('Owner')],
     ['namespace', t('Namespace')],
     ['host', t('Node')],
     ['zone', t('Zone')],
     ['cluster', t('Cluster')]
-  ].filter(
-    s =>
-      (allowMultiCluster || s[0] !== 'cluster') &&
-      (allowZone || s[0] !== 'zone') &&
-      (allowHost || s[0] !== 'host') &&
-      (allowNamespace || s[0] !== 'namespace') &&
-      (allowOwner || s[0] !== 'owner') &&
-      (allowResource || s[0] !== 'resource')
-  ) as [FlowScope, string][];
+  ];
+  scopes = scopes.filter(s => allowedScopes.includes(s[0]));
 
   const index = scopes.findIndex(s => s[0] === scope);
   /* TODO: refactor vertical slider

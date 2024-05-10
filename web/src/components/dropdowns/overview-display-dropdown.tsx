@@ -17,26 +17,8 @@ export const OverviewDisplayOptions: React.FC<{
   setTruncateLength: (v: TruncateLength) => void;
   focus: boolean;
   setFocus: (v: boolean) => void;
-  allowMultiCluster: boolean;
-  allowZone: boolean;
-  allowHost: boolean;
-  allowNamespace: boolean;
-  allowOwner: boolean;
-  allowResource: boolean;
-}> = ({
-  metricScope,
-  setMetricScope,
-  truncateLength,
-  setTruncateLength,
-  focus,
-  setFocus,
-  allowMultiCluster,
-  allowZone,
-  allowHost,
-  allowNamespace,
-  allowOwner,
-  allowResource
-}) => {
+  allowedScopes: FlowScope[];
+}> = ({ metricScope, setMetricScope, truncateLength, setTruncateLength, focus, setFocus, allowedScopes }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   return (
@@ -55,12 +37,7 @@ export const OverviewDisplayOptions: React.FC<{
             id="scope"
             selected={metricScope}
             setScopeType={setMetricScope}
-            allowMultiCluster={allowMultiCluster}
-            allowZone={allowZone}
-            allowHost={allowHost}
-            allowNamespace={allowNamespace}
-            allowOwner={allowOwner}
-            allowResource={allowResource}
+            allowedScopes={allowedScopes}
           />
         </div>
       </div>
@@ -96,26 +73,8 @@ export const OverviewDisplayDropdown: React.FC<{
   setTruncateLength: (v: TruncateLength) => void;
   focus: boolean;
   setFocus: (v: boolean) => void;
-  allowMultiCluster: boolean;
-  allowZone: boolean;
-  allowHost: boolean;
-  allowNamespace: boolean;
-  allowOwner: boolean;
-  allowResource: boolean;
-}> = ({
-  metricScope,
-  setMetricScope,
-  truncateLength,
-  setTruncateLength,
-  focus,
-  setFocus,
-  allowMultiCluster,
-  allowZone,
-  allowHost,
-  allowNamespace,
-  allowOwner,
-  allowResource
-}) => {
+  allowedScopes: FlowScope[];
+}> = ({ metricScope, setMetricScope, truncateLength, setTruncateLength, focus, setFocus, allowedScopes }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [isOpen, setOpen] = React.useState<boolean>(false);
 
@@ -134,12 +93,7 @@ export const OverviewDisplayDropdown: React.FC<{
             setTruncateLength={setTruncateLength}
             focus={focus}
             setFocus={setFocus}
-            allowMultiCluster={allowMultiCluster}
-            allowZone={allowZone}
-            allowHost={allowHost}
-            allowNamespace={allowNamespace}
-            allowOwner={allowOwner}
-            allowResource={allowResource}
+            allowedScopes={allowedScopes}
           />
         }
       />

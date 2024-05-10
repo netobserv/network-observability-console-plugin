@@ -71,7 +71,7 @@ import { MetricScopeOptions } from '../model/metrics';
 import { parseQuickFilters } from '../model/quick-filters';
 import {
   DefaultOptions,
-  getAvailableGroups,
+  getGroupsForScope,
   GraphElementPeer,
   TopologyGroupTypes,
   TopologyOptions
@@ -329,6 +329,29 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
   const isZones = React.useCallback(() => {
     return isPromOnly() ? dataSourceHasLabels(['SrcK8S_Zone', 'DstK8S_Zone']) : config.features.includes('zones');
   }, [config.features, dataSourceHasLabels, isPromOnly]);
+
+  const getAllowedScopes = React.useCallback(() => {
+    let scopes: FlowScope[] = [];
+    if (isMultiCluster()) {
+      scopes.push('cluster');
+    }
+    if (isZones()) {
+      scopes.push('zone');
+    }
+    if (dataSourceHasLabels(['SrcK8S_HostName', 'DstK8S_HostName'])) {
+      scopes.push('host');
+    }
+    if (dataSourceHasLabels(['SrcK8S_Namespace', 'DstK8S_Namespace'])) {
+      scopes.push('namespace');
+    }
+    if (dataSourceHasLabels(['SrcK8S_OwnerName', 'DstK8S_OwnerName'])) {
+      scopes.push('owner');
+    }
+    if (dataSourceHasLabels(['SrcK8S_Name', 'DstK8S_Name'])) {
+      scopes.push('resource');
+    }
+    return scopes;
+  }, [isMultiCluster, isZones, dataSourceHasLabels]);
 
   const getAvailablePanels = React.useCallback(() => {
     return panels.filter(
@@ -1198,7 +1221,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
 
   //invalidate groups if necessary, when metrics scope changed
   React.useEffect(() => {
-    const groups = getAvailableGroups(metricScope as MetricScopeOptions);
+    const groups = getGroupsForScope(metricScope as MetricScopeOptions);
     if (!groups.includes(topologyOptions.groupTypes)) {
       setTopologyOptions({ ...topologyOptions, groupTypes: TopologyGroupTypes.NONE });
     }
@@ -1619,12 +1642,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
             searchHandle={searchRef?.current}
             searchEvent={searchEvent}
             isDark={isDarkTheme}
-            allowMultiCluster={isMultiCluster()}
-            allowZone={isZones()}
-            allowHost={dataSourceHasLabels(['SrcK8S_HostName', 'DstK8S_HostName'])}
-            allowNamespace={dataSourceHasLabels(['SrcK8S_Namespace', 'DstK8S_Namespace'])}
-            allowOwner={dataSourceHasLabels(['SrcK8S_OwnerName', 'DstK8S_OwnerName'])}
-            allowResource={dataSourceHasLabels(['SrcK8S_Name', 'DstK8S_Name'])}
+            allowedScopes={getAllowedScopes()}
           />
         );
         break;
@@ -1938,12 +1956,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
                   setTruncateLength={setOverviewTruncateLength}
                   focus={overviewFocus}
                   setFocus={setOverviewFocus}
-                  allowMultiCluster={isMultiCluster()}
-                  allowZone={isZones()}
-                  allowHost={dataSourceHasLabels(['SrcK8S_HostName', 'DstK8S_HostName'])}
-                  allowNamespace={dataSourceHasLabels(['SrcK8S_Namespace', 'DstK8S_Namespace'])}
-                  allowOwner={dataSourceHasLabels(['SrcK8S_OwnerName', 'DstK8S_OwnerName'])}
-                  allowResource={dataSourceHasLabels(['SrcK8S_Name', 'DstK8S_Name'])}
+                  allowedScopes={getAllowedScopes()}
                 />
               )}
               {selectedViewId === 'table' && <TableDisplayDropdown size={size} setSize={setSize} />}
@@ -1960,12 +1973,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
                   allowPktDrop={isPktDrop()}
                   allowDNSMetric={isDNSTracking()}
                   allowRTTMetric={isFlowRTT()}
-                  allowMultiCluster={isMultiCluster()}
-                  allowZone={isZones()}
-                  allowHost={dataSourceHasLabels(['SrcK8S_HostName', 'DstK8S_HostName'])}
-                  allowNamespace={dataSourceHasLabels(['SrcK8S_Namespace', 'DstK8S_Namespace'])}
-                  allowOwner={dataSourceHasLabels(['SrcK8S_OwnerName', 'DstK8S_OwnerName'])}
-                  allowResource={dataSourceHasLabels(['SrcK8S_Name', 'DstK8S_Name'])}
+                  allowedScopes={getAllowedScopes()}
                 />
               )}
             </OverflowMenuItem>

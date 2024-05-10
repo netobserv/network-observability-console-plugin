@@ -56,7 +56,7 @@ export enum TopologyGroupTypes {
   OWNERS = 'owners'
 }
 
-export const getAvailableGroups = (scope: MetricScopeOptions) => {
+export const getGroupsForScope = (scope: MetricScopeOptions) => {
   switch (scope) {
     case MetricScopeOptions.CLUSTER:
       return [TopologyGroupTypes.NONE];
