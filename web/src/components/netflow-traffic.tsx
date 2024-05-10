@@ -1258,7 +1258,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
         <Tab
           className="tableTabButton"
           eventKey={'table'}
-          disabled={!allowLoki()}
+          isAriaDisabled={!allowLoki()} // required instead of 'disabled' when used with a tooltip
           tooltip={
             !allowLoki() ? <Tooltip content={t('Only available when FlowCollector.loki.enable is true')} /> : undefined
           }
