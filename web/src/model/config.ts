@@ -29,7 +29,7 @@ export type Config = {
   deduper: Deduper;
   fields: FieldConfig[];
   dataSources: string[];
-  promLabels: Record<string, boolean>;
+  promLabels: string[];
 };
 
 export const defaultConfig: Config = {
@@ -53,5 +53,5 @@ export const defaultConfig: Config = {
   },
   fields: [],
   dataSources: [],
-  promLabels: {}
+  promLabels: []
 };

@@ -34,7 +34,6 @@ import {
   getClusterOptions
 } from './filter-options';
 import { ColumnConfigDef } from './columns';
-import { FieldConfig } from './fields';
 
 // Convenience string to filter by undefined field values
 export const undefinedValue = '""';
@@ -130,7 +129,6 @@ const invalid = (msg: string) => ({ err: msg });
 export const getFilterDefinitions = (
   filterDefs: FilterConfigDef[],
   columnsDefs: ColumnConfigDef[],
-  fieldConfigs: FieldConfig[],
   t: TFunction
 ): FilterDefinition[] => {
   const rejectEmptyValue = (value: string) => {
@@ -306,17 +304,11 @@ export const getFilterDefinitions = (
   };
 
   return filterDefs.map(d => {
-    const field = !_.isEmpty(d.field) ? fieldConfigs.find(f => f.name === d.field) : undefined;
-    if (!_.isEmpty(d.field) && field === undefined) {
-      throw new Error('Invalid config provided. Field ' + d.field + ' of filter ' + d.name + " doesn't exists.");
-    }
-
     return {
       id: d.id as FilterId,
       name: d.name,
       component: d.component as FilterComponent,
       category: !_.isEmpty(d.category) ? (d.category as FilterCategory) : undefined,
-      field,
       autoCompleteAddsQuotes: d.autoCompleteAddsQuotes === true,
       hint: !_.isEmpty(d.hint) ? d.hint : undefined,
       examples: !_.isEmpty(d.examples) ? d.examples : undefined,
@@ -329,4 +321,16 @@ export const getFilterDefinitions = (
 
 export const findFilter = (filterDefinitions: FilterDefinition[], id: FilterId) => {
   return filterDefinitions.find(def => def.id === id);
+};
+
+export const checkFilterAvailable = (fd: FilterDefinition, labels: string[]) => {
+  const q = fd.encoder([{ v: 'any' }], false, false, false);
+  const parts = q.split('&');
+  for (let i = 0; i < parts.length; i++) {
+    const kv = parts[i].split('=');
+    if (kv.length === 0 || !labels.includes(kv[0])) {
+      return false;
+    }
+  }
+  return true;
 };

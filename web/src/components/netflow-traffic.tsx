@@ -167,7 +167,7 @@ import ElementPanel from './netflow-topology/element-panel';
 import NetflowTopology from './netflow-topology/netflow-topology';
 import './netflow-traffic.css';
 import { LinksOverflow } from './overflow/links-overflow';
-import { getFilterDefinitions } from '../utils/filter-definitions';
+import { checkFilterAvailable, getFilterDefinitions } from '../utils/filter-definitions';
 import FlowsQuerySummary from './query-summary/flows-query-summary';
 import MetricsQuerySummary from './query-summary/metrics-query-summary';
 import SummaryPanel from './query-summary/summary-panel';
@@ -313,7 +313,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
         return true;
       }
       for (let i = 0; i < labels.length; i++) {
-        if (!Object.keys(config.promLabels).includes(labels[i]) || !config.promLabels[labels[i]]) {
+        if (!config.promLabels.includes(labels[i])) {
           return false;
         }
       }
@@ -378,7 +378,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
   );
 
   const getFilterDefs = React.useCallback(() => {
-    return getFilterDefinitions(config.filters, config.columns, config.fields, t).filter(
+    return getFilterDefinitions(config.filters, config.columns, t).filter(
       fd =>
         (isMultiCluster() || fd.id !== 'cluster_name') &&
         (isZones() || !fd.id.endsWith('_zone')) &&
@@ -386,10 +386,10 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
         (isDNSTracking() || !fd.id.startsWith('dns_')) &&
         (isPktDrop() || !fd.id.startsWith('pkt_drop_')) &&
         (isFlowRTT() || fd.id !== 'time_flow_rtt') &&
-        (!isPromOnly() || (fd.field && Object.keys(config.promLabels).includes(fd.field.name)))
+        (!isPromOnly() || checkFilterAvailable(fd, config.promLabels))
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dataSource, config.columns, config.filters]);
+  }, [config.columns, config.filters, config.promLabels, isPromOnly]);
 
   const getQuickFilters = React.useCallback(
     (c = config) => {

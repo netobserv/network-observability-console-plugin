@@ -425,7 +425,7 @@ describe('Merge topology BNF', () => {
       min: 1,
       percentiles: [1, 1]
     });
-    expect(merged.stats).toEqual({ dataSources: ["loki"], limitReached: true, numQueries: 3 });
+    expect(merged.stats).toEqual({ dataSources: ['loki'], limitReached: true, numQueries: 3 });
   });
 
   it('should merge with overlap', () => {
@@ -504,6 +504,6 @@ describe('Merge topology BNF', () => {
       min: 1,
       percentiles: [1, 1]
     });
-    expect(merged.stats).toEqual({ dataSources: ["loki"], limitReached: true, numQueries: 4 });
+    expect(merged.stats).toEqual({ dataSources: ['loki'], limitReached: true, numQueries: 4 });
   });
 });
