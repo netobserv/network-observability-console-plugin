@@ -12,7 +12,7 @@ describe('<GroupDropdown />', () => {
     selected: TopologyGroupTypes.HOSTS,
     setGroupType: jest.fn(),
     id: 'group',
-    allowedScopes: ['host', 'namespace', 'owner'] as FlowScope[],
+    allowedScopes: ['host', 'namespace', 'owner'] as FlowScope[]
   };
   it('should render component', async () => {
     const wrapper = shallow(<GroupDropdown {...props} />);
