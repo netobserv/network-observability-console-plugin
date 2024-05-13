@@ -17,6 +17,8 @@ import stylesComponentFactory from './2d/componentFactories/stylesComponentFacto
 import layoutFactory from './2d/layouts/layoutFactory';
 import { ScopeSlider } from '../scope-slider/scope-slider';
 import { observeDOMRect } from '../metrics/metrics-helper';
+import { getPromUnsupportedError, isPromUnsupportedError } from '../../utils/errors';
+import { PrometheusUnsupported } from '../messages/prometheus-unsupported';
 
 export const NetflowTopology: React.FC<{
   loading?: boolean;
@@ -71,7 +73,11 @@ export const NetflowTopology: React.FC<{
 
   const getContent = React.useCallback(() => {
     if (error) {
-      return <LokiError title={t('Unable to get topology')} error={error} />;
+      if (isPromUnsupportedError(error)) {
+        return <PrometheusUnsupported title={t('Unable to get topology')} error={getPromUnsupportedError(error)} />;
+      } else {
+        return <LokiError title={t('Unable to get topology')} error={error} />;
+      }
     } else if (!controller || (_.isEmpty(metrics) && loading)) {
       return (
         <Bullseye data-test="loading-contents">

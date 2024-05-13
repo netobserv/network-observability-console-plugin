@@ -1040,7 +1040,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
           .catch(err => {
             setFlows([]);
             setMetrics(defaultNetflowMetrics);
-            setError(getHTTPErrorDetails(err));
+            setError(getHTTPErrorDetails(err, true));
             setWarningMessage(undefined);
           })
           .finally(() => {

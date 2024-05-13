@@ -42,6 +42,8 @@ import { formatPort } from '../../utils/port';
 import { formatProtocol } from '../../utils/protocol';
 import { getDSCPServiceClassName } from '../../utils/dscp';
 import { getDNSRcodeDescription, getDNSErrorDescription } from '../../utils/dns';
+import { getPromUnsupportedError, isPromUnsupportedError } from '../../utils/errors';
+import { PrometheusUnsupported } from '../messages/prometheus-unsupported';
 
 type PanelContent = {
   calculatedTitle?: string;
@@ -820,7 +822,11 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
   );
 
   if (error) {
-    return <LokiError title={t('Unable to get overview')} error={error} />;
+    if (isPromUnsupportedError(error)) {
+      return <PrometheusUnsupported title={t('Unable to get overview')} error={getPromUnsupportedError(error)} />;
+    } else {
+      return <LokiError title={t('Unable to get overview')} error={error} />;
+    }
   } else {
     return (
       <div
