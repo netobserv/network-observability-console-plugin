@@ -10,10 +10,10 @@ import (
 )
 
 type QueryBuilder struct {
-	in      *loki.TopologyInput
-	filters filters.SingleQuery
-	metric  string
-	qRange  v1.Range
+	in        *loki.TopologyInput
+	filters   filters.SingleQuery
+	orMetrics []string
+	qRange    v1.Range
 }
 
 type Query struct {
@@ -21,12 +21,12 @@ type Query struct {
 	PromQL string
 }
 
-func NewQuery(in *loki.TopologyInput, qr *v1.Range, filters filters.SingleQuery, metric string) *QueryBuilder {
+func NewQuery(in *loki.TopologyInput, qr *v1.Range, filters filters.SingleQuery, orMetrics []string) *QueryBuilder {
 	return &QueryBuilder{
-		in:      in,
-		filters: filters,
-		metric:  metric,
-		qRange:  *qr,
+		in:        in,
+		filters:   filters,
+		orMetrics: orMetrics,
+		qRange:    *qr,
 	}
 }
 
@@ -75,39 +75,45 @@ func (q *QueryBuilder) Build() Query {
 		sb.WriteRune(',')
 	}
 
-	if isHisto && quantile != "" {
-		// use histogram_quantile
-		sb.WriteString("histogram_quantile(")
-		sb.WriteString(quantile)
-		sb.WriteRune(',')
-		if groupBy == "" {
-			groupBy = "le"
-		} else {
-			groupBy += ",le"
+	for orIdx, metric := range q.orMetrics {
+		if orIdx > 0 {
+			sb.WriteString(" or ")
 		}
-	}
 
-	sb.WriteString("sum by(")
-	sb.WriteString(groupBy)
-	sb.WriteRune(')')
+		if isHisto && quantile != "" {
+			// use histogram_quantile
+			sb.WriteString("histogram_quantile(")
+			sb.WriteString(quantile)
+			sb.WriteRune(',')
+			if groupBy == "" {
+				groupBy = "le"
+			} else {
+				groupBy += ",le"
+			}
+		}
 
-	sb.WriteRune('(')
-	if isHisto && quantile == "" {
-		// histogram average: sum / count
-		baseMetric := strings.TrimSuffix(q.metric, "_bucket")
-		appendRate(&sb, baseMetric+"_sum", q.filters, q.in.RateInterval)
-		sb.WriteRune('/')
-		appendRate(&sb, baseMetric+"_count", q.filters, q.in.RateInterval)
-	} else {
-		appendRate(&sb, q.metric, q.filters, q.in.RateInterval)
-	}
-	sb.WriteRune(')')
-	if isHisto && quantile != "" {
+		sb.WriteString("sum by(")
+		sb.WriteString(groupBy)
 		sb.WriteRune(')')
-	}
 
-	if len(factor) > 0 {
-		sb.WriteString(factor)
+		sb.WriteRune('(')
+		if isHisto && quantile == "" {
+			// histogram average: sum / count
+			baseMetric := strings.TrimSuffix(metric, "_bucket")
+			appendRate(&sb, baseMetric+"_sum", q.filters, q.in.RateInterval)
+			sb.WriteRune('/')
+			appendRate(&sb, baseMetric+"_count", q.filters, q.in.RateInterval)
+		} else {
+			appendRate(&sb, metric, q.filters, q.in.RateInterval)
+		}
+		sb.WriteRune(')')
+		if isHisto && quantile != "" {
+			sb.WriteRune(')')
+		}
+
+		if len(factor) > 0 {
+			sb.WriteString(factor)
+		}
 	}
 
 	if q.in.Top != "" {
@@ -122,6 +128,13 @@ func (q *QueryBuilder) Build() Query {
 
 func appendRate(sb *strings.Builder, metric string, filters filters.SingleQuery, interval string) {
 	sb.WriteString("rate(")
+	appendFilteredMetric(sb, metric, filters)
+	sb.WriteRune('[')
+	sb.WriteString(interval)
+	sb.WriteString("])")
+}
+
+func appendFilteredMetric(sb *strings.Builder, metric string, filters filters.SingleQuery) {
 	sb.WriteString(metric)
 	sb.WriteRune('{')
 	first := true
@@ -135,7 +148,10 @@ func appendRate(sb *strings.Builder, metric string, filters filters.SingleQuery,
 		}
 	}
 	sb.WriteRune('}')
-	sb.WriteRune('[')
-	sb.WriteString(interval)
-	sb.WriteString("])")
+}
+
+func QueryFilters(metric string, filters filters.SingleQuery) string {
+	sb := strings.Builder{}
+	appendFilteredMetric(&sb, metric, filters)
+	return sb.String()
 }

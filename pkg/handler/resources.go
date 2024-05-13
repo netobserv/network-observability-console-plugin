@@ -11,6 +11,7 @@ import (
 	"github.com/netobserv/network-observability-console-plugin/pkg/metrics"
 	"github.com/netobserv/network-observability-console-plugin/pkg/model"
 	"github.com/netobserv/network-observability-console-plugin/pkg/model/fields"
+	"github.com/netobserv/network-observability-console-plugin/pkg/model/filters"
 	"github.com/netobserv/network-observability-console-plugin/pkg/prometheus"
 	"github.com/netobserv/network-observability-console-plugin/pkg/utils"
 )
@@ -114,7 +115,7 @@ func (h *Handlers) GetNamespaces(ctx context.Context) func(w http.ResponseWriter
 
 func (h *Handlers) getLabelValues(ctx context.Context, cl clients, label string) ([]string, int, error) {
 	if h.Cfg.IsPromEnabled() {
-		return prometheus.GetLabelValues(ctx, cl.prom, label)
+		return prometheus.GetLabelValues(ctx, cl.prom, label, nil)
 	}
 	return getLokiLabelValues(h.Cfg.Loki.URL, cl.loki, label)
 }
@@ -159,11 +160,25 @@ func (h *Handlers) GetNames(ctx context.Context) func(w http.ResponseWriter, r *
 }
 
 func (h *Handlers) getNamesForPrefix(ctx context.Context, cl clients, prefix, kind, namespace string) ([]string, int, error) {
-	if h.Cfg.IsPromEnabled() {
-		// TODO: implement for prom
-		return []string{}, http.StatusOK, nil
+	filts := filters.SingleQuery{}
+	if namespace != "" {
+		filts = append(filts, filters.NewMatch(prefix+fields.Namespace, exact(namespace)))
 	}
-	return getLokiNamesForPrefix(&h.Cfg.Loki, cl.loki, prefix, kind, namespace)
+	var searchField string
+	if utils.IsOwnerKind(kind) {
+		filts = append(filts, filters.NewMatch(prefix+fields.OwnerType, exact(kind)))
+		searchField = prefix + fields.OwnerName
+	} else {
+		filts = append(filts, filters.NewMatch(prefix+fields.Type, exact(kind)))
+		searchField = prefix + fields.Name
+	}
+
+	if h.Cfg.IsPromEnabled() {
+		// Label match query (any metric)
+		q := prometheus.QueryFilters("", filts)
+		return prometheus.GetLabelValues(ctx, cl.prom, searchField, []string{q})
+	}
+	return getLokiNamesForPrefix(&h.Cfg.Loki, cl.loki, filts, searchField)
 }
 
 func exact(str string) string {

@@ -47,20 +47,6 @@ func NewClient(cfg *config.Prometheus, requestHeader http.Header) (api.Client, e
 	})
 }
 
-func executeQuery(ctx context.Context, cl api.Client, promQL string) (pmod.Value, error) {
-	log.Debugf("executeQuery: promQL=%s", promQL)
-	v1api := v1.NewAPI(cl)
-	result, warnings, err := v1api.Query(ctx, promQL, time.Now())
-	if err != nil {
-		return nil, err
-	}
-	if len(warnings) > 0 {
-		log.Infof("executeQuery warnings: %v", warnings)
-	}
-	log.Tracef("Result:\n%v", result)
-	return result, nil
-}
-
 func executeQueryRange(ctx context.Context, cl api.Client, q *Query) (pmod.Value, int, error) {
 	log.Debugf("executeQueryRange: %v; promQL=%s", q.Range, q.PromQL)
 	v1api := v1.NewAPI(cl)
@@ -101,10 +87,10 @@ func QueryMatrix(ctx context.Context, cl api.Client, q *Query) (model.QueryRespo
 	return qr, code, nil
 }
 
-func GetLabelValues(ctx context.Context, cl api.Client, label string) ([]string, int, error) {
+func GetLabelValues(ctx context.Context, cl api.Client, label string, match []string) ([]string, int, error) {
 	log.Debugf("GetLabelValues: %s", label)
 	v1api := v1.NewAPI(cl)
-	result, warnings, err := v1api.LabelValues(ctx, label, nil, time.Now().Add(-3*time.Hour), time.Now())
+	result, warnings, err := v1api.LabelValues(ctx, label, match, time.Now().Add(-3*time.Hour), time.Now())
 	if err != nil {
 		return nil, http.StatusServiceUnavailable, err
 	}

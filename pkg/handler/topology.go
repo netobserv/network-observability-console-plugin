@@ -3,17 +3,15 @@ package handler
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/url"
-	"slices"
-	"strings"
 	"time"
 
 	"github.com/netobserv/network-observability-console-plugin/pkg/config"
 	"github.com/netobserv/network-observability-console-plugin/pkg/loki"
 	"github.com/netobserv/network-observability-console-plugin/pkg/metrics"
 	"github.com/netobserv/network-observability-console-plugin/pkg/model"
-	"github.com/netobserv/network-observability-console-plugin/pkg/model/fields"
 	"github.com/netobserv/network-observability-console-plugin/pkg/model/filters"
 	"github.com/netobserv/network-observability-console-plugin/pkg/prometheus"
 	"github.com/netobserv/network-observability-console-plugin/pkg/utils/constants"
@@ -60,74 +58,85 @@ func (h *Handlers) GetTopology(ctx context.Context) func(w http.ResponseWriter, 
 	}
 }
 
-func (h *Handlers) getTopologyFlows(ctx context.Context, cl clients, params url.Values) (*model.AggregatedQueryResponse, int, error) {
-	hlog.Debugf("GetTopology query params: %s", params)
+func (h *Handlers) extractTopologyQueryParams(params url.Values) (*loki.TopologyInput, filters.MultiQueries, v1.Range, int, error) {
 	in := loki.TopologyInput{DedupMark: h.Cfg.Frontend.Deduper.Mark}
-	var err error
 	qr := v1.Range{}
-
-	dataSources := make(map[constants.DataSource]bool)
-	if h.Cfg.Loki.UseMocks {
-		dataSources["mock"] = true
-	}
+	var reqLimit int
+	var err error
 
 	in.Start, qr.Start, err = getStartTime(params)
 	if err != nil {
-		return nil, http.StatusBadRequest, err
+		return nil, nil, qr, reqLimit, err
 	}
 	in.End, qr.End, err = getEndTime(params)
 	if err != nil {
-		return nil, http.StatusBadRequest, err
+		return nil, nil, qr, reqLimit, err
 	}
-	var reqLimit int
 	in.Top, reqLimit, err = getLimit(params)
 	if err != nil {
-		return nil, http.StatusBadRequest, err
+		return nil, nil, qr, reqLimit, err
 	}
 	in.RateInterval, err = getRateInterval(params)
 	if err != nil {
-		return nil, http.StatusBadRequest, err
+		return nil, nil, qr, reqLimit, err
 	}
 	in.Step, qr.Step, err = getStep(params)
 	if err != nil {
-		return nil, http.StatusBadRequest, err
+		return nil, nil, qr, reqLimit, err
 	}
 	in.DataField = getMetricType(params)
 	in.MetricFunction, err = getMetricFunction(params)
 	if err != nil {
-		return nil, http.StatusBadRequest, err
+		return nil, nil, qr, reqLimit, err
 	}
 	in.RecordType, err = getRecordType(params)
 	if err != nil {
-		return nil, http.StatusBadRequest, err
+		return nil, nil, qr, reqLimit, err
 	}
 	in.DataSource, err = getDatasource(params)
 	if err != nil {
-		return nil, http.StatusBadRequest, err
+		return nil, nil, qr, reqLimit, err
 	}
 	in.PacketLoss, err = getPacketLoss(params)
 	if err != nil {
-		return nil, http.StatusBadRequest, err
+		return nil, nil, qr, reqLimit, err
 	}
 	in.Aggregate, err = getAggregate(params)
 	if err != nil {
-		return nil, http.StatusBadRequest, err
+		return nil, nil, qr, reqLimit, err
 	}
 	in.Groups = params.Get(groupsKey)
 	rawFilters := params.Get(filtersKey)
 	filterGroups, err := filters.Parse(rawFilters)
 	if err != nil {
-		return nil, http.StatusBadRequest, err
+		return nil, nil, qr, reqLimit, err
 	}
 
 	if shouldMergeReporters(in.DataField) {
 		filterGroups = expandReportersMergeQueries(
 			filterGroups,
 			func(filters filters.SingleQuery) bool {
-				m, _ := getEligiblePromMetric(h.PromInventory, filters, &in)
-				return m != ""
+				// Do not expand if this is managed from prometheus
+				sr, _ := getEligiblePromMetric(h.PromInventory, filters, &in)
+				return sr != nil && len(sr.Found) > 0
 			},
 		)
+	}
+
+	return &in, filterGroups, qr, reqLimit, err
+}
+
+func (h *Handlers) getTopologyFlows(ctx context.Context, cl clients, params url.Values) (*model.AggregatedQueryResponse, int, error) {
+	hlog.Debugf("GetTopology query params: %s", params)
+
+	dataSources := make(map[constants.DataSource]bool)
+	if h.Cfg.Loki.UseMocks {
+		dataSources["mock"] = true
+	}
+
+	in, filterGroups, qr, reqLimit, err := h.extractTopologyQueryParams(params)
+	if err != nil {
+		return nil, http.StatusBadRequest, err
 	}
 
 	merger := loki.NewMatrixMerger(reqLimit)
@@ -136,7 +145,7 @@ func (h *Handlers) getTopologyFlows(ctx context.Context, cl clients, params url.
 		var lokiQ []string
 		var promQ []*prometheus.Query
 		for _, filters := range filterGroups {
-			lq, pq, code, err := buildTopologyQuery(h.Cfg, h.PromInventory, filters, &in, &qr)
+			lq, pq, code, err := buildTopologyQuery(h.Cfg, h.PromInventory, filters, in, &qr)
 			if err != nil {
 				return nil, code, errors.New("Can't build query: " + err.Error())
 			}
@@ -158,7 +167,7 @@ func (h *Handlers) getTopologyFlows(ctx context.Context, cl clients, params url.
 		if len(filterGroups) > 0 {
 			filters = filterGroups[0]
 		}
-		lokiQ, promQ, code, err := buildTopologyQuery(h.Cfg, h.PromInventory, filters, &in, &qr)
+		lokiQ, promQ, code, err := buildTopologyQuery(h.Cfg, h.PromInventory, filters, in, &qr)
 		if err != nil {
 			return nil, code, err
 		}
@@ -216,22 +225,40 @@ func buildTopologyQuery(
 	in *loki.TopologyInput,
 	qr *v1.Range,
 ) (string, *prometheus.Query, int, error) {
-	metric, candidates := getEligiblePromMetric(promInventory, filters, in)
-	if metric != "" {
-		qb := prometheus.NewQuery(in, qr, filters, metric)
-		q := qb.Build()
-		return "", &q, http.StatusOK, nil
+	search, unsupportedReason := getEligiblePromMetric(promInventory, filters, in)
+	if search != nil {
+		if len(search.Found) > 0 {
+			// Success, we can use Prometheus
+			qb := prometheus.NewQuery(in, qr, filters, search.Found)
+			q := qb.Build()
+			return "", &q, http.StatusOK, nil
+		}
+	} else if unsupportedReason != "" {
+		hlog.Debugf("Unsupported Prometheus query; reason: %s.", unsupportedReason)
 	}
 
 	if !cfg.IsLokiEnabled() || in.DataSource == constants.DataSourceProm {
-		if len(candidates) > 0 {
-			// Some candidate metrics exist but they are disabled; tell the user
-			return "", nil, http.StatusBadRequest, errors.New(
-				"this request requires any of the following metric(s) to be enabled: " + strings.Join(candidates, ", ") +
-					". Metrics can be configured in the FlowCollector resource via 'spec.processor.metrics.includeList'" +
-					" Alternatively, you may also install and enable Loki.")
+		// No Loki => return an error
+		if search != nil {
+			if len(search.Candidates) > 0 {
+				// Some candidate metrics exist but they are disabled; tell the user
+				return "", nil, http.StatusBadRequest, fmt.Errorf(
+					"this request requires any of the following metric(s) to be enabled: %s."+
+						" Metrics can be configured in the FlowCollector resource via 'spec.processor.metrics.includeList'."+
+						" Alternatively, you may also install and enable Loki", search.FormatCandidates())
+			} else if len(search.MissingLabels) > 0 {
+				return "", nil, http.StatusBadRequest, fmt.Errorf(
+					"this request could not be performed with Prometheus metrics, as they are missing some of the required labels."+
+						" Try using different filters and/or aggregations. For example, try removing these dependencies from your query: %s."+
+						" Alternatively, you may also install and enable Loki", search.FormatMissingLabels())
+			}
 		}
-		return "", nil, http.StatusBadRequest, errors.New("this request could not be performed with Prometheus metrics: it requires installing and enabling Loki")
+		var reason string
+		if unsupportedReason != "" {
+			reason = fmt.Sprintf(" (reason: %s)", unsupportedReason)
+		}
+		return "", nil, http.StatusBadRequest, fmt.Errorf(
+			"this request could not be performed with Prometheus metrics%s: it requires installing and enabling Loki", reason)
 	}
 
 	qb, err := loki.NewTopologyQuery(&cfg.Loki, in)
@@ -245,15 +272,15 @@ func buildTopologyQuery(
 	return EncodeQuery(qb.Build()), nil, http.StatusOK, nil
 }
 
-func getEligiblePromMetric(promInventory *prometheus.Inventory, filters filters.SingleQuery, in *loki.TopologyInput) (string, []string) {
+func getEligiblePromMetric(promInventory *prometheus.Inventory, filters filters.SingleQuery, in *loki.TopologyInput) (*prometheus.SearchResult, string) {
 	if in.DataSource != constants.DataSourceAuto && in.DataSource != constants.DataSourceProm {
-		return "", nil
+		return nil, ""
 	}
 	if promInventory == nil {
-		return "", nil
+		return nil, ""
 	}
 	if in.RecordType != "" && in.RecordType != constants.RecordTypeLog {
-		return "", nil
+		return nil, fmt.Sprintf("RecordType not managed: %s", in.RecordType)
 	}
 	// TODO: packetLoss, how can we handle that?
 
@@ -261,25 +288,13 @@ func getEligiblePromMetric(promInventory *prometheus.Inventory, filters filters.
 	if in.Aggregate != "app" { // ignore app: it's a noop aggregation needed for Loki, not relevant in promQL
 		labelsNeeded, _ = loki.GetLabelsAndFilter(in.Aggregate, in.Groups)
 	}
-
-	for _, m := range filters {
-		if m.MoreThanOrEqual {
-			// Not relevant/supported in promQL
-			return "", nil
-		}
-		if m.Key == fields.FlowDirection {
-			// TODO ??
-			continue
-		}
-		if !slices.Contains(labelsNeeded, m.Key) {
-			labelsNeeded = append(labelsNeeded, m.Key)
-		}
+	fromFilters, unsupportedReason := prometheus.FiltersToLabels(filters)
+	if unsupportedReason != "" {
+		return nil, unsupportedReason
 	}
+	labelsNeeded = append(labelsNeeded, fromFilters...)
 
-	// Check if that desired metric exists
-	if m := promInventory.FindMetricName(labelsNeeded, in.DataField, "??"); m != "" {
-		return m, nil
-	}
-	// Prometheus is enabled but no metric matched; check if potential disabled metrics could have matched
-	return "", promInventory.FindDisabledCandidates(labelsNeeded, in.DataField, "??")
+	// Search for such metric
+	r := promInventory.Search(labelsNeeded, in.DataField)
+	return &r, ""
 }

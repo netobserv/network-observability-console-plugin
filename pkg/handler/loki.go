@@ -19,9 +19,7 @@ import (
 	"github.com/netobserv/network-observability-console-plugin/pkg/loki"
 	"github.com/netobserv/network-observability-console-plugin/pkg/metrics"
 	"github.com/netobserv/network-observability-console-plugin/pkg/model"
-	"github.com/netobserv/network-observability-console-plugin/pkg/model/fields"
 	"github.com/netobserv/network-observability-console-plugin/pkg/model/filters"
-	"github.com/netobserv/network-observability-console-plugin/pkg/utils"
 )
 
 type LokiError struct {
@@ -163,22 +161,9 @@ func getLokiLabelValues(baseURL string, lokiClient httpclient.Caller, label stri
 	return lvr.Data, http.StatusOK, nil
 }
 
-func getLokiNamesForPrefix(cfg *config.Loki, lokiClient httpclient.Caller, prefix, kind, namespace string) ([]string, int, error) {
-	lokiParams := filters.SingleQuery{}
-	if namespace != "" {
-		lokiParams = append(lokiParams, filters.NewMatch(prefix+fields.Namespace, exact(namespace)))
-	}
-	var fieldToExtract string
-	if utils.IsOwnerKind(kind) {
-		lokiParams = append(lokiParams, filters.NewMatch(prefix+fields.OwnerType, exact(kind)))
-		fieldToExtract = prefix + fields.OwnerName
-	} else {
-		lokiParams = append(lokiParams, filters.NewMatch(prefix+fields.Type, exact(kind)))
-		fieldToExtract = prefix + fields.Name
-	}
-
+func getLokiNamesForPrefix(cfg *config.Loki, lokiClient httpclient.Caller, filts filters.SingleQuery, searchField string) ([]string, int, error) {
 	queryBuilder := loki.NewFlowQueryBuilderWithDefaults(cfg)
-	if err := queryBuilder.Filters(lokiParams); err != nil {
+	if err := queryBuilder.Filters(filts); err != nil {
 		return nil, http.StatusBadRequest, err
 	}
 
@@ -201,7 +186,7 @@ func getLokiNamesForPrefix(cfg *config.Loki, lokiClient httpclient.Caller, prefi
 		return nil, http.StatusInternalServerError, errors.New("Loki returned unexpected type: " + string(qr.Data.ResultType))
 	}
 
-	values := extractDistinctValues(fieldToExtract, streams)
+	values := extractDistinctValues(searchField, streams)
 	return values, http.StatusOK, nil
 }
 

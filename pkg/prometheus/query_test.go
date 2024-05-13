@@ -25,7 +25,7 @@ func TestBuildQuery_PromQLSimpleRateNoFilter(t *testing.T) {
 		Aggregate:      "namespace",
 	}
 	f := filters.SingleQuery{}
-	q := NewQuery(&in, &qr, f, "my_metric")
+	q := NewQuery(&in, &qr, f, []string{"my_metric"})
 	result := q.Build()
 	assert.Equal(
 		t,
@@ -50,7 +50,7 @@ func TestBuildQuery_PromQLSimpleRateAndFilter(t *testing.T) {
 			Values: `"a"`,
 		},
 	}
-	q := NewQuery(&in, &qr, f, "my_metric")
+	q := NewQuery(&in, &qr, f, []string{"my_metric"})
 	result := q.Build()
 	assert.Equal(
 		t,
@@ -75,7 +75,7 @@ func TestBuildQuery_PromQLRateMultiFilter(t *testing.T) {
 			Values: `"a","b"`,
 		},
 	}
-	q := NewQuery(&in, &qr, f, "my_metric")
+	q := NewQuery(&in, &qr, f, []string{"my_metric"})
 	result := q.Build()
 	assert.Equal(
 		t,
@@ -100,7 +100,7 @@ func TestBuildQuery_PromQLHistogramAverage(t *testing.T) {
 			Values: `"a"`,
 		},
 	}
-	q := NewQuery(&in, &qr, f, "my_metric_bucket")
+	q := NewQuery(&in, &qr, f, []string{"my_metric_bucket"})
 	result := q.Build()
 	assert.Equal(
 		t,
@@ -125,7 +125,7 @@ func TestBuildQuery_PromQLHistogramP99(t *testing.T) {
 			Values: `"a"`,
 		},
 	}
-	q := NewQuery(&in, &qr, f, "my_metric_bucket")
+	q := NewQuery(&in, &qr, f, []string{"my_metric_bucket"})
 	result := q.Build()
 	assert.Equal(
 		t,
@@ -145,11 +145,37 @@ func TestBuildQuery_PromQLByDNSResponseCode(t *testing.T) {
 		Aggregate:      "DnsFlagsResponseCode",
 	}
 	f := filters.SingleQuery{}
-	q := NewQuery(&in, &qr, f, "netobserv_namespace_dns_latency_seconds_count")
+	q := NewQuery(&in, &qr, f, []string{"netobserv_namespace_dns_latency_seconds_count"})
 	result := q.Build()
 	assert.Equal(
 		t,
 		`topk(5,sum by(DnsFlagsResponseCode)(rate(netobserv_namespace_dns_latency_seconds_count{DnsFlagsResponseCode!=""}[1m])))`,
+		result.PromQL,
+	)
+}
+
+func TestBuildQuery_PromQLORMetrics(t *testing.T) {
+	in := loki.TopologyInput{
+		Top:            "50",
+		RateInterval:   "2m",
+		DataField:      "Bytes",
+		MetricFunction: constants.MetricFunctionRate,
+		RecordType:     constants.RecordTypeLog,
+		DataSource:     constants.DataSourceAuto,
+		Aggregate:      "namespace",
+	}
+	f := filters.SingleQuery{
+		{
+			Key:    fields.SrcNamespace,
+			Values: `"a"`,
+		},
+	}
+	q := NewQuery(&in, &qr, f, []string{"ingress_metric", "egress_metric"})
+	result := q.Build()
+	assert.Equal(
+		t,
+		`topk(50,sum by(SrcK8S_Namespace,DstK8S_Namespace)(rate(ingress_metric{SrcK8S_Namespace="a"}[2m]))`+
+			` or sum by(SrcK8S_Namespace,DstK8S_Namespace)(rate(egress_metric{SrcK8S_Namespace="a"}[2m])))`,
 		result.PromQL,
 	)
 }

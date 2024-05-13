@@ -41,12 +41,21 @@ type Prometheus struct {
 	Metrics          []MetricInfo `yaml:"metrics,omitempty" json:"metrics,omitempty"`
 }
 
+type FlowDirection string
+
+const (
+	Egress       FlowDirection = "Egress"
+	Ingress      FlowDirection = "Ingress"
+	AnyDirection FlowDirection = "Any"
+)
+
 type MetricInfo struct {
-	Enabled    bool     `yaml:"enabled" json:"enabled"`
-	Name       string   `yaml:"name,omitempty" json:"name,omitempty"`
-	Type       string   `yaml:"type,omitempty" json:"type,omitempty"`
-	ValueField string   `yaml:"valueField,omitempty" json:"valueField,omitempty"`
-	Labels     []string `yaml:"labels,omitempty" json:"labels,omitempty"`
+	Enabled    bool          `yaml:"enabled" json:"enabled"`
+	Name       string        `yaml:"name,omitempty" json:"name,omitempty"`
+	Type       string        `yaml:"type,omitempty" json:"type,omitempty"`
+	ValueField string        `yaml:"valueField,omitempty" json:"valueField,omitempty"`
+	Direction  FlowDirection `yaml:"direction,omitempty" json:"direction,omitempty"`
+	Labels     []string      `yaml:"labels,omitempty" json:"labels,omitempty"`
 }
 
 type PortNaming struct {
