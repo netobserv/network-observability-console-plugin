@@ -14,6 +14,26 @@ import (
 
 var qr = v1.Range{Start: time.Now().Add(-15 * time.Minute), End: time.Now(), Step: 30 * time.Second}
 
+func TestBuildQuery_PromQLSimpleRateIgnoreApp(t *testing.T) {
+	in := loki.TopologyInput{
+		Top:            "50",
+		RateInterval:   "2m",
+		DataField:      "Bytes",
+		MetricFunction: constants.MetricFunctionRate,
+		RecordType:     constants.RecordTypeLog,
+		DataSource:     constants.DataSourceAuto,
+		Aggregate:      "app",
+	}
+	f := filters.SingleQuery{}
+	q := NewQuery(&in, &qr, f, []string{"my_metric"})
+	result := q.Build()
+	assert.Equal(
+		t,
+		"topk(50,sum(rate(my_metric{}[2m])))",
+		result.PromQL,
+	)
+}
+
 func TestBuildQuery_PromQLSimpleRateNoFilter(t *testing.T) {
 	in := loki.TopologyInput{
 		Top:            "50",

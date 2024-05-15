@@ -300,7 +300,7 @@ func TestLokiConfiguration(t *testing.T) {
 	// THAT is accessed behind the NOO console plugin backend
 	backendRoutes := setupRoutes(context.TODO(), &config.Config{
 		Loki: config.Loki{URL: lokiSvc.URL, Timeout: config.Duration{Duration: time.Second}},
-	}, authM, nil)
+	}, authM)
 	backendSvc := httptest.NewServer(backendRoutes)
 	defer backendSvc.Close()
 
@@ -345,7 +345,7 @@ func TestLokiConfigurationForTopology(t *testing.T) {
 			Mark:  true,
 			Merge: false,
 		}},
-	}, authM, nil)
+	}, authM)
 	backendSvc := httptest.NewServer(backendRoutes)
 	defer backendSvc.Close()
 
@@ -403,7 +403,7 @@ func TestLokiConfigurationForTableHistogram(t *testing.T) {
 			Mark:  true,
 			Merge: false,
 		}},
-	}, authM, nil)
+	}, authM)
 	backendSvc := httptest.NewServer(backendRoutes)
 	defer backendSvc.Close()
 
@@ -469,7 +469,7 @@ func TestLokiConfiguration_MultiTenant(t *testing.T) {
 			TenantID:  "my-organisation",
 			TokenPath: tmpDir + "/var/run/secrets/tokens/netobserv-plugin",
 		},
-	}, authM, nil)
+	}, authM)
 	backendSvc := httptest.NewServer(backendRoutes)
 	defer backendSvc.Close()
 

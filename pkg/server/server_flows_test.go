@@ -249,7 +249,7 @@ func TestLokiFiltering(t *testing.T) {
 			Labels: []string{"SrcK8S_Namespace", "SrcK8S_OwnerName", "DstK8S_Namespace", "DstK8S_OwnerName", "FlowDirection"},
 		},
 		Frontend: config.Frontend{Deduper: config.Deduper{Mark: true}},
-	}, &authM, nil)
+	}, &authM)
 	backendSvc := httptest.NewServer(backendRoutes)
 	defer backendSvc.Close()
 

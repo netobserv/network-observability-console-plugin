@@ -22,6 +22,10 @@ type Inventory struct {
 func NewInventory(cfg *config.Prometheus) *Inventory {
 	var toAppend []config.MetricInfo
 	for i := range cfg.Metrics {
+		// Set default direction to Any if unset
+		if cfg.Metrics[i].Direction == "" {
+			cfg.Metrics[i].Direction = config.AnyDirection
+		}
 		// Add DNS counter(s)
 		if strings.Contains(cfg.Metrics[i].Name, "_dns_latency_seconds") {
 			cpy := cfg.Metrics[i]
@@ -65,6 +69,7 @@ func (i *Inventory) Search(neededLabels []string, valueField string) SearchResul
 		// Merge with r1 and return r1
 		r1.Found = append(r1.Found, r2.Found...)
 	}
+	r1.Candidates = append(r1.Candidates, r0.Candidates...)
 	r1.Candidates = append(r1.Candidates, r2.Candidates...)
 	return r1
 }
@@ -109,6 +114,15 @@ func checkMatch(metric *config.MetricInfo, neededLabels []string, valueField str
 		return false, missingLabels
 	}
 	return true, nil
+}
+
+func (i *Inventory) LabelExists(label string) bool {
+	for _, m := range i.metrics {
+		if slices.Contains(m.Labels, label) {
+			return true
+		}
+	}
+	return false
 }
 
 // FiltersToLabels converts filters to labels (extracting keys) and direction, checking for any unsupported filters. If unsupported, returns a reason as the second value

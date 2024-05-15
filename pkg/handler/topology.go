@@ -226,15 +226,13 @@ func buildTopologyQuery(
 	qr *v1.Range,
 ) (string, *prometheus.Query, int, error) {
 	search, unsupportedReason := getEligiblePromMetric(promInventory, filters, in)
-	if search != nil {
-		if len(search.Found) > 0 {
-			// Success, we can use Prometheus
-			qb := prometheus.NewQuery(in, qr, filters, search.Found)
-			q := qb.Build()
-			return "", &q, http.StatusOK, nil
-		}
-	} else if unsupportedReason != "" {
+	if unsupportedReason != "" {
 		hlog.Debugf("Unsupported Prometheus query; reason: %s.", unsupportedReason)
+	} else if search != nil && len(search.Found) > 0 {
+		// Success, we can use Prometheus
+		qb := prometheus.NewQuery(in, qr, filters, search.Found)
+		q := qb.Build()
+		return "", &q, http.StatusOK, nil
 	}
 
 	if !cfg.IsLokiEnabled() || in.DataSource == constants.DataSourceProm {
@@ -284,10 +282,7 @@ func getEligiblePromMetric(promInventory *prometheus.Inventory, filters filters.
 	}
 	// TODO: packetLoss, how can we handle that?
 
-	var labelsNeeded []string
-	if in.Aggregate != "app" { // ignore app: it's a noop aggregation needed for Loki, not relevant in promQL
-		labelsNeeded, _ = loki.GetLabelsAndFilter(in.Aggregate, in.Groups)
-	}
+	labelsNeeded, _ := prometheus.GetLabelsAndFilter(in.Aggregate, in.Groups)
 	fromFilters, unsupportedReason := prometheus.FiltersToLabels(filters)
 	if unsupportedReason != "" {
 		return nil, unsupportedReason

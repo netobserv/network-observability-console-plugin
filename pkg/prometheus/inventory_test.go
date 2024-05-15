@@ -40,6 +40,25 @@ var configuredMetrics = []config.MetricInfo{
 		Direction:  config.AnyDirection,
 		Labels:     []string{"SrcK8S_Namespace", "DstK8S_Namespace", "SrcK8S_HostName", "DstK8S_HostName"},
 	},
+	{
+		Enabled:    false,
+		Name:       "netobserv_workload_rtt_seconds",
+		Type:       "Histogram",
+		ValueField: "TimeFlowRttNs",
+		Labels: []string{
+			"SrcK8S_Namespace",
+			"DstK8S_Namespace",
+			"K8S_FlowLayer",
+			"SrcSubnetLabel",
+			"DstSubnetLabel",
+			"SrcK8S_OwnerName",
+			"DstK8S_OwnerName",
+			"SrcK8S_OwnerType",
+			"DstK8S_OwnerType",
+			"SrcK8S_Type",
+			"DstK8S_Type",
+		},
+	},
 }
 
 func TestInventory_Search(t *testing.T) {
@@ -71,4 +90,11 @@ func TestInventory_Search(t *testing.T) {
 	search = inv.Search([]string{"SrcK8S_HostName", "DstK8S_HostName"}, "")
 	assert.Equal(t, []string{"netobserv_metric_3"}, search.Found)
 	assert.Empty(t, search.Candidates)
+}
+
+func TestInventory_Search_RTT_Candidate(t *testing.T) {
+	inv := NewInventory(&config.Prometheus{Metrics: configuredMetrics})
+	// Search bytes metrics
+	search := inv.Search([]string{"SrcK8S_Namespace", "DstK8S_Namespace", "K8S_FlowLayer", "DstK8S_Type", "SrcK8S_Type"}, "TimeFlowRttNs")
+	assert.Equal(t, []string{"netobserv_workload_rtt_seconds"}, search.Candidates)
 }

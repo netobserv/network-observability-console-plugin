@@ -21,8 +21,7 @@ export const StatsQuerySummary: React.FC<{
   const durationText = lastDuration ? formatDurationAboveMillisecond(lastDuration) : '';
 
   const formatDatasources = React.useCallback(() => {
-    return dataSources?.map(ds => (ds === 'prom' ? t('Prometheus') : ds === 'loki' ? t('Loki') : ds)).join(',') || '';
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    return dataSources?.map(ds => (ds === 'prom' ? 'Prometheus' : ds === 'loki' ? 'Loki' : ds)).join(', ') || '';
   }, [dataSources]);
 
   return (

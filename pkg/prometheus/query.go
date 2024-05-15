@@ -31,7 +31,7 @@ func NewQuery(in *loki.TopologyInput, qr *v1.Range, filters filters.SingleQuery,
 }
 
 func (q *QueryBuilder) Build() Query {
-	labels, extraFilter := loki.GetLabelsAndFilter(q.in.Aggregate, q.in.Groups)
+	labels, extraFilter := GetLabelsAndFilter(q.in.Aggregate, q.in.Groups)
 	if extraFilter != "" {
 		q.filters = append(q.filters, filters.NewNotMatch(extraFilter, `""`))
 	}
@@ -92,9 +92,12 @@ func (q *QueryBuilder) Build() Query {
 			}
 		}
 
-		sb.WriteString("sum by(")
-		sb.WriteString(groupBy)
-		sb.WriteRune(')')
+		sb.WriteString("sum")
+		if groupBy != "" {
+			sb.WriteString(" by(")
+			sb.WriteString(groupBy)
+			sb.WriteRune(')')
+		}
 
 		sb.WriteRune('(')
 		if isHisto && quantile == "" {
@@ -148,6 +151,14 @@ func appendFilteredMetric(sb *strings.Builder, metric string, filters filters.Si
 		}
 	}
 	sb.WriteRune('}')
+}
+
+func GetLabelsAndFilter(aggregate, groups string) ([]string, string) {
+	if aggregate == "app" {
+		// ignore app: it's a noop aggregation needed for Loki, not relevant in promQL
+		return nil, ""
+	}
+	return loki.GetLabelsAndFilter(aggregate, groups)
 }
 
 func QueryFilters(metric string, filters filters.SingleQuery) string {

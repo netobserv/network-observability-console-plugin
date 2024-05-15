@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -114,10 +115,14 @@ func (h *Handlers) GetNamespaces(ctx context.Context) func(w http.ResponseWriter
 }
 
 func (h *Handlers) getLabelValues(ctx context.Context, cl clients, label string) ([]string, int, error) {
-	if h.Cfg.IsPromEnabled() {
+	if h.PromInventory != nil && h.PromInventory.LabelExists(label) {
 		return prometheus.GetLabelValues(ctx, cl.prom, label, nil)
 	}
-	return getLokiLabelValues(h.Cfg.Loki.URL, cl.loki, label)
+	if h.Cfg.IsLokiEnabled() {
+		return getLokiLabelValues(h.Cfg.Loki.URL, cl.loki, label)
+	}
+	// Loki disabled AND label not managed in metrics => send an error
+	return nil, http.StatusBadRequest, fmt.Errorf("label %s not found in Prometheus metrics", label)
 }
 
 func (h *Handlers) GetNames(ctx context.Context) func(w http.ResponseWriter, r *http.Request) {

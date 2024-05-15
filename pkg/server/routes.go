@@ -13,7 +13,12 @@ import (
 	"github.com/netobserv/network-observability-console-plugin/pkg/prometheus"
 )
 
-func setupRoutes(ctx context.Context, cfg *config.Config, authChecker auth.Checker, promInventory *prometheus.Inventory) *mux.Router {
+func setupRoutes(ctx context.Context, cfg *config.Config, authChecker auth.Checker) *mux.Router {
+	var promInventory *prometheus.Inventory
+	if cfg.IsPromEnabled() {
+		promInventory = prometheus.NewInventory(&cfg.Prometheus)
+	}
+
 	r := mux.NewRouter()
 	h := handler.Handlers{Cfg: cfg, PromInventory: promInventory}
 

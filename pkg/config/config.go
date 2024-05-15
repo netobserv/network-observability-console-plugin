@@ -223,13 +223,13 @@ func (c *Config) IsPromEnabled() bool {
 }
 
 func (c *Config) Validate() error {
-	if c.Loki.URL == "" && c.Prometheus.URL == "" {
-		return errors.New("neither Loki nor Prometheus is configured; at least one of them should have a defined URL")
+	if !c.IsLokiEnabled() && !c.IsPromEnabled() {
+		return errors.New("neither Loki nor Prometheus is configured; at least one of them should have a URL defined")
 	}
 
 	var configErrors []string
 
-	if c.Loki.URL != "" {
+	if c.IsLokiEnabled() {
 		log.Infof("Loki is enabled (%s)", c.Loki.URL)
 		// check config required fields
 		if len(c.Loki.Labels) == 0 {
@@ -251,7 +251,7 @@ func (c *Config) Validate() error {
 		log.Info("Loki is disabled")
 	}
 
-	if c.Prometheus.URL != "" {
+	if c.IsPromEnabled() {
 		log.Infof("Prometheus is enabled (%s)", c.Prometheus.URL)
 		// parse config urls
 		_, err := url.Parse(c.Prometheus.URL)
@@ -276,10 +276,8 @@ func (c *Config) GetAuthChecker() (auth.Checker, error) {
 	if c.Server.AuthCheck == "auto" {
 		// FORWARD mode
 		checkType = auth.CheckAuthenticated
-		if c.IsLokiEnabled() && !c.Loki.ForwardUserToken {
-			// HOST or DISABLED mode
-			checkType = auth.CheckAdmin
-		} else if c.IsPromEnabled() && !c.Prometheus.ForwardUserToken {
+		if (c.IsLokiEnabled() && !c.Loki.ForwardUserToken) ||
+			(c.IsPromEnabled() && !c.Prometheus.ForwardUserToken) {
 			// HOST or DISABLED mode
 			checkType = auth.CheckAdmin
 		}
