@@ -258,7 +258,7 @@ export const FilterConfigSampleDefs = [
     id: 'time_flow_rtt',
     name: 'Flow RTT',
     component: 'number',
-    hint: 'Specify a TCP handshake Round Trip Time in nanoseconds.'
+    hint: 'Specify a TCP smoothed Round Trip Time in nanoseconds.'
   }
 ];
 

@@ -289,7 +289,7 @@ export const getOverviewPanelInfo = (
     case 'top_p99_rtt':
     case 'bottom_min_rtt': {
       const topOrBottom = id.startsWith('top_') ? t('Top') : t('Bottom');
-      const metric = id.endsWith('_dns_latency') ? t('DNS latencies') : t('TCP handshake Round Trip Time');
+      const metric = id.endsWith('_dns_latency') ? t('DNS latencies') : t('TCP smoothed Round Trip Time');
       const shortMetric = id.endsWith('_dns_latency') ? t('latency') : t('RTT');
       return {
         title: `${topOrBottom} ${limit} ${metricFunction} ${metric} ${t('with overall')}`,

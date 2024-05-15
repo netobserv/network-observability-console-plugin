@@ -443,7 +443,7 @@
   "donut or bars and lines": "donut or bars and lines",
   "The top packet dropped {{types}} (dropped by the kernel) compared total over the selected interval": "The top packet dropped {{types}} (dropped by the kernel) compared total over the selected interval",
   "Bottom": "Bottom",
-  "TCP handshake Round Trip Time": "TCP handshake Round Trip Time",
+  "TCP smoothed Round Trip Time": "TCP smoothed Round Trip Time",
   "latency": "latency",
   "with overall": "with overall",
   "Overall": "Overall",
