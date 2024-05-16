@@ -421,7 +421,7 @@ export const ColumnConfigSampleDefs = [
   {
     id: 'TimeFlowRttMs',
     name: 'Flow RTT',
-    tooltip: 'TCP handshake Round Trip Time',
+    tooltip: 'TCP smoothed Round Trip Time',
     field: 'TimeFlowRttNs',
     filter: 'time_flow_rtt',
     default: false,
