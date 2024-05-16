@@ -11,6 +11,7 @@ import (
 	"github.com/netobserv/network-observability-console-plugin/pkg/config"
 	"github.com/netobserv/network-observability-console-plugin/pkg/httpclient"
 	"github.com/netobserv/network-observability-console-plugin/pkg/kubernetes/auth"
+	"github.com/netobserv/network-observability-console-plugin/pkg/metrics"
 	"github.com/netobserv/network-observability-console-plugin/pkg/model"
 
 	"github.com/prometheus/client_golang/api"
@@ -48,17 +49,25 @@ func NewClient(cfg *config.Prometheus, requestHeader http.Header) (api.Client, e
 }
 
 func executeQueryRange(ctx context.Context, cl api.Client, q *Query) (pmod.Value, int, error) {
+	var code int
+	startTime := time.Now()
+	defer func() {
+		metrics.ObservePromCall(code, startTime)
+	}()
+
 	log.Debugf("executeQueryRange: %v; promQL=%s", q.Range, q.PromQL)
 	v1api := v1.NewAPI(cl)
 	result, warnings, err := v1api.QueryRange(ctx, q.PromQL, q.Range)
 	if err != nil {
-		return nil, http.StatusServiceUnavailable, err
+		code = http.StatusServiceUnavailable
+		return nil, code, err
 	}
 	if len(warnings) > 0 {
 		log.Infof("executeQueryRange warnings: %v", warnings)
 	}
 	log.Tracef("Result:\n%v", result)
-	return result, http.StatusOK, nil
+	code = http.StatusOK
+	return result, code, nil
 }
 
 func QueryMatrix(ctx context.Context, cl api.Client, q *Query) (model.QueryResponse, int, error) {
