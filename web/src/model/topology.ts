@@ -92,6 +92,16 @@ export const getGroupsForScope = (scope: MetricScopeOptions) => {
   }
 };
 
+export const isGroupEnabled = (group: TopologyGroupTypes, enabledScopes: FlowScope[]): boolean => {
+  return (
+    (enabledScopes.includes('cluster') || !group.includes(TopologyGroupTypes.CLUSTERS)) &&
+    (enabledScopes.includes('zone') || !group.includes(TopologyGroupTypes.ZONES)) &&
+    (enabledScopes.includes('host') || !group.includes(TopologyGroupTypes.HOSTS)) &&
+    (enabledScopes.includes('namespace') || !group.includes(TopologyGroupTypes.NAMESPACES)) &&
+    (enabledScopes.includes('owner') || !group.includes(TopologyGroupTypes.OWNERS))
+  );
+};
+
 export interface TopologyOptions {
   maxEdgeStat: number;
   nodeBadges?: boolean;

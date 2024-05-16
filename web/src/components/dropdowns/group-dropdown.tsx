@@ -2,7 +2,7 @@ import { Dropdown, DropdownItem, DropdownToggle } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { MetricScopeOptions } from '../../model/metrics';
-import { getGroupsForScope, TopologyGroupTypes } from '../../model/topology';
+import { getGroupsForScope, isGroupEnabled, TopologyGroupTypes } from '../../model/topology';
 import { FlowScope } from '../../model/flow-query';
 
 export const GroupDropdown: React.FC<{
@@ -74,18 +74,7 @@ export const GroupDropdown: React.FC<{
       }
       isOpen={groupDropdownOpen}
       dropdownItems={getGroupsForScope(scope)
-        .filter(g => {
-          if (
-            (!allowedScopes.includes('cluster') && g.includes(TopologyGroupTypes.CLUSTERS)) ||
-            (!allowedScopes.includes('zone') && g.includes(TopologyGroupTypes.ZONES)) ||
-            (!allowedScopes.includes('host') && g.includes(TopologyGroupTypes.HOSTS)) ||
-            (!allowedScopes.includes('namespace') && g.includes(TopologyGroupTypes.NAMESPACES)) ||
-            (!allowedScopes.includes('owner') && g.includes(TopologyGroupTypes.OWNERS))
-          ) {
-            return false;
-          }
-          return true;
-        })
+        .filter(g => isGroupEnabled(g, allowedScopes))
         .map(v => (
           <DropdownItem
             data-test={v}
