@@ -22,5 +22,10 @@
 }
 
 .error-text-content>blockquote {
-  width: 50%;
+  width: 60%;
+}
+
+.error-text-content ul {
+  margin-top: 0.5em;
+  text-align: initial;
 }

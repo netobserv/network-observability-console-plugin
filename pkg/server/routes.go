@@ -36,12 +36,13 @@ func setupRoutes(ctx context.Context, cfg *config.Config, authChecker auth.Check
 			orig.ServeHTTP(w, r)
 		})
 	})
+
 	api.HandleFunc("/status", handler.Status)
 	api.HandleFunc("/loki/ready", h.LokiReady())
-	api.HandleFunc("/loki/metrics", h.LokiMetrics())
-	api.HandleFunc("/loki/buildinfo", h.LokiBuildInfos())
-	api.HandleFunc("/loki/config/limits", h.LokiConfig("limits_config"))
-	api.HandleFunc("/loki/config/ingester/max_chunk_age", h.IngesterMaxChunkAge())
+	api.HandleFunc("/loki/metrics", forceCheckAdmin(authChecker, h.LokiMetrics()))
+	api.HandleFunc("/loki/buildinfo", forceCheckAdmin(authChecker, h.LokiBuildInfos()))
+	api.HandleFunc("/loki/config/limits", forceCheckAdmin(authChecker, h.LokiConfig("limits_config")))
+	api.HandleFunc("/loki/config/ingester/max_chunk_age", forceCheckAdmin(authChecker, h.IngesterMaxChunkAge()))
 	api.HandleFunc("/loki/flow/records", h.GetFlows(ctx))
 	api.HandleFunc("/loki/flow/metrics", h.GetTopology(ctx))
 	api.HandleFunc("/loki/export", h.ExportFlows(ctx))
@@ -54,4 +55,18 @@ func setupRoutes(ctx context.Context, cfg *config.Config, authChecker auth.Check
 
 	r.PathPrefix("/").Handler(http.FileServer(http.Dir("./web/dist/")))
 	return r
+}
+
+func forceCheckAdmin(authChecker auth.Checker, handle func(http.ResponseWriter, *http.Request)) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if err := authChecker.CheckAdmin(context.TODO(), r.Header); err != nil {
+			w.WriteHeader(http.StatusUnauthorized)
+			_, err2 := w.Write([]byte(err.Error()))
+			if err2 != nil {
+				logrus.Errorf("Error while responding an error: %v (initial was: %v)", err2, err)
+			}
+			return
+		}
+		handle(w, r)
+	}
 }

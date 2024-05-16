@@ -10,6 +10,8 @@ import {
   Spinner,
   Text,
   TextContent,
+  TextList,
+  TextListItem,
   TextVariants,
   Title
 } from '@patternfly/react-core';
@@ -217,13 +219,24 @@ export const Error: React.FC<Props> = ({ title, error, isLokiRelated }) => {
                   {t(`Check your connectivity with cluster / console plugin pod`)}
                 </Text>
               )}
-              {error.includes('status code 401') && (
+              {(error.includes('status code 401') || error.includes('status code 403')) && (
                 <>
                   <Text component={TextVariants.blockquote}>{t(`Check current user permissions`)}</Text>
                   <Text component={TextVariants.blockquote}>
-                    {t(
-                      `For LokiStack, your user must be in 'cluster-admin' group or LokiStack spec.tenants.openshift.adminGroups must be configured`
-                    )}
+                    {t(`For LokiStack, your user must either:`)}
+                    <TextList>
+                      <TextListItem>
+                        {t(`have the 'netobserv-reader' cluster role, which allows multi-tenancy`)}
+                      </TextListItem>
+                      <TextListItem>
+                        {t(`or be in the 'cluster-admin' group (not the same as the 'cluster-admin' role)`)}
+                      </TextListItem>
+                      <TextListItem>
+                        {t(
+                          `or LokiStack spec.tenants.openshift.adminGroups must be configured with a group this user belongs to`
+                        )}
+                      </TextListItem>
+                    </TextList>
                   </Text>
                   <Text component={TextVariants.blockquote}>
                     {t(`For other configurations, refer to FlowCollector spec.loki.manual.authToken`)}
@@ -234,20 +247,39 @@ export const Error: React.FC<Props> = ({ title, error, isLokiRelated }) => {
           }
         </EmptyStateBody>
         {isLokiRelated && (
-          <Button
-            variant="link"
-            icon={<ExternalLinkSquareAltIcon />}
-            iconPosition="right"
-            component={(props: React.FunctionComponent) => (
-              <Link
-                {...props}
-                target="_blank"
-                to={{ pathname: 'https://grafana.com/docs/loki/latest/configuration/' }}
-              />
-            )}
-          >
-            {t('Configuring Grafana Loki')}
-          </Button>
+          <>
+            <Button
+              variant="link"
+              icon={<ExternalLinkSquareAltIcon />}
+              iconPosition="right"
+              component={(props: React.FunctionComponent) => (
+                <Link
+                  {...props}
+                  target="_blank"
+                  to={{
+                    pathname:
+                      'https://docs.openshift.com/container-platform/latest/observability/network_observability/installing-operators.html#network-observability-loki-installation_network_observability'
+                  }}
+                />
+              )}
+            >
+              {t('Configuring the Loki Operator')}
+            </Button>
+            <Button
+              variant="link"
+              icon={<ExternalLinkSquareAltIcon />}
+              iconPosition="right"
+              component={(props: React.FunctionComponent) => (
+                <Link
+                  {...props}
+                  target="_blank"
+                  to={{ pathname: 'https://grafana.com/docs/loki/latest/configuration/' }}
+                />
+              )}
+            >
+              {t('Configuring Grafana Loki (community)')}
+            </Button>
+          </>
         )}
         {isLokiRelated && (
           <EmptyStateSecondaryActions>
