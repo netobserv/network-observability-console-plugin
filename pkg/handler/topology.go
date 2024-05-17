@@ -47,7 +47,27 @@ func (h *Handlers) GetTopology(ctx context.Context) func(w http.ResponseWriter, 
 			metrics.ObserveHTTPCall("GetTopology", code, startTime)
 		}()
 
-		flows, code, err := h.getTopologyFlows(ctx, clients, r.URL.Query())
+		params := r.URL.Query()
+		ds, err := getDatasource(params)
+		if err != nil {
+			writeError(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		flows, code, err := h.getTopologyFlows(ctx, clients, params, ds)
+		var dsErr *datasourceError
+		if err != nil &&
+			ds == constants.DataSourceAuto &&
+			h.Cfg.IsLokiEnabled() &&
+			(code == http.StatusForbidden || code == http.StatusUnauthorized) &&
+			errors.As(err, &dsErr) &&
+			dsErr.datasource == constants.DataSourceProm {
+			// In case this was a prometheus 401 / 403 error, the query is repeated with Loki
+			// This is because multi-tenancy is currently not managed for prom datasource, hence such queries have to go with Loki
+			// Unfortunately we don't know a safe and generic way to pre-flight check if the user will be authorized
+			hlog.Info("Retrying with Loki...")
+			flows, code, err = h.getTopologyFlows(ctx, clients, params, constants.DataSourceLoki)
+		}
 		if err != nil {
 			writeError(w, code, err.Error())
 			return
@@ -58,8 +78,8 @@ func (h *Handlers) GetTopology(ctx context.Context) func(w http.ResponseWriter, 
 	}
 }
 
-func (h *Handlers) extractTopologyQueryParams(params url.Values) (*loki.TopologyInput, filters.MultiQueries, v1.Range, int, error) {
-	in := loki.TopologyInput{DedupMark: h.Cfg.Frontend.Deduper.Mark}
+func (h *Handlers) extractTopologyQueryParams(params url.Values, ds constants.DataSource) (*loki.TopologyInput, filters.MultiQueries, v1.Range, int, error) {
+	in := loki.TopologyInput{DedupMark: h.Cfg.Frontend.Deduper.Mark, DataSource: ds}
 	qr := v1.Range{}
 	var reqLimit int
 	var err error
@@ -93,10 +113,6 @@ func (h *Handlers) extractTopologyQueryParams(params url.Values) (*loki.Topology
 	if err != nil {
 		return nil, nil, qr, reqLimit, err
 	}
-	in.DataSource, err = getDatasource(params)
-	if err != nil {
-		return nil, nil, qr, reqLimit, err
-	}
 	in.PacketLoss, err = getPacketLoss(params)
 	if err != nil {
 		return nil, nil, qr, reqLimit, err
@@ -126,7 +142,7 @@ func (h *Handlers) extractTopologyQueryParams(params url.Values) (*loki.Topology
 	return &in, filterGroups, qr, reqLimit, err
 }
 
-func (h *Handlers) getTopologyFlows(ctx context.Context, cl clients, params url.Values) (*model.AggregatedQueryResponse, int, error) {
+func (h *Handlers) getTopologyFlows(ctx context.Context, cl clients, params url.Values, ds constants.DataSource) (*model.AggregatedQueryResponse, int, error) {
 	hlog.Debugf("GetTopology query params: %s", params)
 
 	dataSources := make(map[constants.DataSource]bool)
@@ -134,7 +150,7 @@ func (h *Handlers) getTopologyFlows(ctx context.Context, cl clients, params url.
 		dataSources["mock"] = true
 	}
 
-	in, filterGroups, qr, reqLimit, err := h.extractTopologyQueryParams(params)
+	in, filterGroups, qr, reqLimit, err := h.extractTopologyQueryParams(params, ds)
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}

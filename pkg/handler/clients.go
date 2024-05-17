@@ -12,6 +12,7 @@ import (
 	"github.com/netobserv/network-observability-console-plugin/pkg/loki"
 	"github.com/netobserv/network-observability-console-plugin/pkg/model"
 	"github.com/netobserv/network-observability-console-plugin/pkg/prometheus"
+	"github.com/netobserv/network-observability-console-plugin/pkg/utils/constants"
 	"github.com/prometheus/client_golang/api"
 )
 
@@ -33,13 +34,22 @@ func newClients(cfg *config.Config, requestHeader http.Header, useLokiStatus boo
 	return clients{loki: lokiClient, prom: promClient}, err
 }
 
+type datasourceError struct {
+	datasource constants.DataSource
+	nested     error
+}
+
+func (e *datasourceError) Error() string {
+	return e.nested.Error()
+}
+
 func (c *clients) fetchLokiSingle(logQL string, merger loki.Merger) (int, error) {
 	qr, code, err := fetchLogQL(logQL, c.loki)
 	if err != nil {
-		return code, err
+		return code, &datasourceError{datasource: constants.DataSourceLoki, nested: err}
 	}
 	if _, err := merger.Add(qr.Data); err != nil {
-		return http.StatusInternalServerError, err
+		return http.StatusInternalServerError, &datasourceError{datasource: constants.DataSourceLoki, nested: err}
 	}
 	return code, nil
 }
@@ -47,10 +57,10 @@ func (c *clients) fetchLokiSingle(logQL string, merger loki.Merger) (int, error)
 func (c *clients) fetchPrometheusSingle(ctx context.Context, promQL *prometheus.Query, merger loki.Merger) (int, error) {
 	qr, code, err := prometheus.QueryMatrix(ctx, c.prom, promQL)
 	if err != nil {
-		return code, err
+		return code, &datasourceError{datasource: constants.DataSourceProm, nested: err}
 	}
 	if _, err := merger.Add(qr.Data); err != nil {
-		return http.StatusInternalServerError, err
+		return http.StatusInternalServerError, &datasourceError{datasource: constants.DataSourceProm, nested: err}
 	}
 	return code, nil
 }
@@ -95,7 +105,7 @@ func (c *clients) fetchParallel(ctx context.Context, logQL []string, promQL []*p
 			defer wg.Done()
 			qr, code, err := fetchLogQL(query, c.loki)
 			if err != nil {
-				errChan <- errorWithCode{err: err, code: code}
+				errChan <- errorWithCode{err: &datasourceError{datasource: constants.DataSourceLoki, nested: err}, code: code}
 			} else {
 				resChan <- qr
 			}
@@ -107,7 +117,7 @@ func (c *clients) fetchParallel(ctx context.Context, logQL []string, promQL []*p
 			defer wg.Done()
 			qr, code, err := prometheus.QueryMatrix(ctx, c.prom, query)
 			if err != nil {
-				errChan <- errorWithCode{err: err, code: code}
+				errChan <- errorWithCode{err: &datasourceError{datasource: constants.DataSourceProm, nested: err}, code: code}
 			} else {
 				resChan <- qr
 			}

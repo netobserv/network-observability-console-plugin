@@ -2,6 +2,7 @@ package prometheus
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -60,7 +61,15 @@ func executeQueryRange(ctx context.Context, cl api.Client, q *Query) (pmod.Value
 	result, warnings, err := v1api.QueryRange(ctx, q.PromQL, q.Range)
 	if err != nil {
 		code = http.StatusServiceUnavailable
-		return nil, code, err
+		var promError *v1.Error
+		if errors.As(err, &promError) {
+			if promError.Type == v1.ErrClient && strings.Contains(promError.Msg, "401") {
+				code = http.StatusUnauthorized
+			} else if promError.Type == v1.ErrClient && strings.Contains(promError.Msg, "403") {
+				code = http.StatusForbidden
+			}
+		}
+		return nil, code, fmt.Errorf("error from Prometheus query: %w", err)
 	}
 	if len(warnings) > 0 {
 		log.Infof("executeQueryRange warnings: %v", warnings)
@@ -73,7 +82,7 @@ func executeQueryRange(ctx context.Context, cl api.Client, q *Query) (pmod.Value
 func QueryMatrix(ctx context.Context, cl api.Client, q *Query) (model.QueryResponse, int, error) {
 	resp, code, err := executeQueryRange(ctx, cl, q)
 	if err != nil {
-		log.WithError(err).Error("Error in executeQueryRange")
+		log.WithError(err).Error("Error in QueryMatrix")
 		return model.QueryResponse{}, code, err
 	}
 	// Transform response
