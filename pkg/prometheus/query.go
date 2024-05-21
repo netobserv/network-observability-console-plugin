@@ -100,18 +100,21 @@ func (q *QueryBuilder) Build() Query {
 		}
 
 		sb.WriteRune('(')
-		if isHisto && quantile == "" {
-			// histogram average: sum / count
-			baseMetric := strings.TrimSuffix(metric, "_bucket")
-			appendRate(&sb, baseMetric+"_sum", q.filters, q.in.RateInterval)
-			sb.WriteRune('/')
-			appendRate(&sb, baseMetric+"_count", q.filters, q.in.RateInterval)
+		if isHisto {
+			if quantile == "" {
+				// histogram average: sum / count
+				appendRate(&sb, metric+"_sum", q.filters, q.in.RateInterval)
+				sb.WriteRune('/')
+				appendRate(&sb, metric+"_count", q.filters, q.in.RateInterval)
+			} else {
+				appendRate(&sb, metric+"_bucket", q.filters, q.in.RateInterval)
+			}
 		} else {
 			appendRate(&sb, metric, q.filters, q.in.RateInterval)
 		}
-		sb.WriteRune(')')
+		sb.WriteRune(')') // closes sum(...
 		if isHisto && quantile != "" {
-			sb.WriteRune(')')
+			sb.WriteRune(')') // closes histogram_quantile(...
 		}
 
 		if len(factor) > 0 {
@@ -120,7 +123,7 @@ func (q *QueryBuilder) Build() Query {
 	}
 
 	if q.in.Top != "" {
-		sb.WriteRune(')')
+		sb.WriteRune(')') // closes topk(...
 	}
 
 	return Query{

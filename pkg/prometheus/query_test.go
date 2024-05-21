@@ -120,7 +120,7 @@ func TestBuildQuery_PromQLHistogramAverage(t *testing.T) {
 			Values: `"a"`,
 		},
 	}
-	q := NewQuery(&in, &qr, f, []string{"my_metric_bucket"})
+	q := NewQuery(&in, &qr, f, []string{"my_metric"})
 	result := q.Build()
 	assert.Equal(
 		t,
@@ -145,7 +145,7 @@ func TestBuildQuery_PromQLHistogramP99(t *testing.T) {
 			Values: `"a"`,
 		},
 	}
-	q := NewQuery(&in, &qr, f, []string{"my_metric_bucket"})
+	q := NewQuery(&in, &qr, f, []string{"my_metric"})
 	result := q.Build()
 	assert.Equal(
 		t,
