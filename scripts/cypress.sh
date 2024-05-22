@@ -8,7 +8,7 @@ backend=$!
 
 echo "Running tests..."
 cd web
-npm run cypress:run
+NO_COLOR=1 npm run cypress:run
 cypress=$?
 
 kill $backend
