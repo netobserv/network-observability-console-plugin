@@ -37,8 +37,7 @@ describe('<NetflowTopology />', () => {
     onSelect: jest.fn(),
     searchHandle: null,
     searchEvent: undefined,
-    allowMultiCluster: false,
-    allowZone: false
+    allowedScopes: ['host', 'namespace', 'owner', 'resource'] as FlowScope[]
   };
 
   it('should render component', async () => {

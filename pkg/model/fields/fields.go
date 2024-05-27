@@ -34,6 +34,7 @@ const (
 	SrcZone        = Src + Zone
 	DstZone        = Dst + Zone
 	Cluster        = "K8S_ClusterName"
+	Layer          = "K8S_FlowLayer"
 	Packets        = "Packets"
 	PktDropPackets = "PktDropPackets"
 	Proto          = "Proto"
@@ -46,6 +47,7 @@ const (
 	DNSID          = "DnsId"
 	DNSLatency     = "DnsLatencyMs"
 	DNSErrNo       = "DnsErrno"
+	DNSCode        = "DnsFlagsResponseCode"
 	Duplicate      = "Duplicate"
 	TimeFlowRTT    = "TimeFlowRttNs"
 )

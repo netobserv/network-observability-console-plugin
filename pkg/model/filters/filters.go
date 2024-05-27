@@ -90,3 +90,24 @@ func SplitForReportersMerge(q SingleQuery) (SingleQuery, SingleQuery) {
 	}
 	return q1, q2
 }
+
+func (m *Match) ToLabelFilter() (LabelFilter, bool) {
+	values := strings.Split(m.Values, ",")
+	if len(values) == 1 && isExactMatch(values[0]) {
+		if m.Not {
+			return NotStringLabelFilter(m.Key, trimExactMatch(values[0])), true
+		} else if m.MoreThanOrEqual {
+			return MoreThanNumberLabelFilter(m.Key, trimExactMatch(values[0])), true
+		}
+		return StringEqualLabelFilter(m.Key, trimExactMatch(values[0])), true
+	}
+	return MultiValuesRegexFilter(m.Key, values, m.Not)
+}
+
+func isExactMatch(value string) bool {
+	return strings.HasPrefix(value, `"`) && strings.HasSuffix(value, `"`)
+}
+
+func trimExactMatch(value string) string {
+	return strings.TrimPrefix(strings.TrimSuffix(value, `"`), `"`)
+}

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"os"
@@ -43,6 +44,10 @@ func main() {
 	if err != nil {
 		log.WithError(err).Fatal("error reading config file")
 	}
+	err = cfg.Validate()
+	if err != nil {
+		log.WithError(err).Fatal("invalid config")
+	}
 
 	checker, err := cfg.GetAuthChecker()
 	if err != nil {
@@ -55,5 +60,5 @@ func main() {
 		KeyPath:  cfg.Server.KeyPath,
 	})
 
-	server.Start(cfg, checker)
+	server.Start(context.Background(), cfg, checker)
 }

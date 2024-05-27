@@ -2,11 +2,11 @@ package handler
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -19,6 +19,7 @@ import (
 	"github.com/netobserv/network-observability-console-plugin/pkg/loki"
 	"github.com/netobserv/network-observability-console-plugin/pkg/metrics"
 	"github.com/netobserv/network-observability-console-plugin/pkg/model"
+	"github.com/netobserv/network-observability-console-plugin/pkg/model/filters"
 )
 
 type LokiError struct {
@@ -74,7 +75,7 @@ func newLokiClient(cfg *config.Loki, requestHeader http.Header, useStatusConfig 
 		userKeyPath = cfg.StatusUserKeyPath
 	}
 
-	return httpclient.NewHTTPClient(cfg.Timeout.Duration, headers, skipTLS, caPath, userCertPath, userKeyPath)
+	return httpclient.NewClientWrapper(cfg.Timeout.Duration, headers, skipTLS, caPath, userCertPath, userKeyPath)
 }
 
 /* loki query will fail if spaces or quotes are not encoded
@@ -106,12 +107,25 @@ func getLokiError(resp []byte, code int) (int, string) {
 	return http.StatusBadRequest, fmt.Sprintf("Loki message: %s", message)
 }
 
+func fetchLogQL(logQL string, lokiClient httpclient.Caller) (model.QueryResponse, int, error) {
+	var qr model.QueryResponse
+	resp, code, err := executeLokiQuery(logQL, lokiClient)
+	if err != nil {
+		return qr, code, err
+	}
+	if err := json.Unmarshal(resp, &qr); err != nil {
+		hlog.WithError(err).Errorf("cannot unmarshal, response was: %v", string(resp))
+		return qr, http.StatusInternalServerError, err
+	}
+	return qr, code, nil
+}
+
 func executeLokiQuery(flowsURL string, lokiClient httpclient.Caller) ([]byte, int, error) {
 	hlog.Debugf("executeLokiQuery URL: %s", flowsURL)
 	var code int
 	startTime := time.Now()
 	defer func() {
-		metrics.ObserveLokiUnitCall(code, startTime)
+		metrics.ObserveLokiCall(code, startTime)
 	}()
 
 	resp, code, err := lokiClient.Get(flowsURL)
@@ -125,84 +139,65 @@ func executeLokiQuery(flowsURL string, lokiClient httpclient.Caller) ([]byte, in
 	return resp, http.StatusOK, nil
 }
 
-func fetchSingle(lokiClient httpclient.Caller, flowsURL string, merger loki.Merger) (int, error) {
-	var code int
-	startTime := time.Now()
-	defer func() {
-		metrics.ObserveLokiParallelCall(fmt.Sprintf("%T", merger), code, 1, startTime)
-	}()
+func getLokiLabelValues(baseURL string, lokiClient httpclient.Caller, label string) ([]string, int, error) {
+	baseURL = strings.TrimRight(baseURL, "/")
+	url := fmt.Sprintf("%s/loki/api/v1/label/%s/values", baseURL, label)
+	hlog.Debugf("getLokiLabelValues URL: %s", url)
 
-	resp, code, err := executeLokiQuery(flowsURL, lokiClient)
+	resp, code, err := lokiClient.Get(url)
 	if err != nil {
-		return code, err
+		return nil, http.StatusServiceUnavailable, err
 	}
+	if code != http.StatusOK {
+		newCode, msg := getLokiError(resp, code)
+		return nil, newCode, errors.New(msg)
+	}
+	hlog.Tracef("getLokiLabelValues raw response: %s", resp)
+	var lvr model.LabelValuesResponse
+	err = json.Unmarshal(resp, &lvr)
+	if err != nil {
+		return nil, http.StatusInternalServerError, err
+	}
+	return lvr.Data, http.StatusOK, nil
+}
+
+func getLokiNamesForPrefix(cfg *config.Loki, lokiClient httpclient.Caller, filts filters.SingleQuery, searchField string) ([]string, int, error) {
+	queryBuilder := loki.NewFlowQueryBuilderWithDefaults(cfg)
+	if err := queryBuilder.Filters(filts); err != nil {
+		return nil, http.StatusBadRequest, err
+	}
+
+	query := queryBuilder.Build()
+	resp, code, err := executeLokiQuery(query, lokiClient)
+	if err != nil {
+		return nil, code, errors.New("Loki query failed: " + err.Error())
+	}
+	hlog.Tracef("GetNames raw response: %s", resp)
+
 	var qr model.QueryResponse
-	if err := json.Unmarshal(resp, &qr); err != nil {
+	err = json.Unmarshal(resp, &qr)
+	if err != nil {
 		hlog.WithError(err).Errorf("cannot unmarshal, response was: %v", string(resp))
-		return http.StatusInternalServerError, err
+		return nil, http.StatusInternalServerError, errors.New("Failed to unmarshal Loki response: " + err.Error())
 	}
-	if _, err := merger.Add(qr.Data); err != nil {
-		return http.StatusInternalServerError, err
+
+	streams, ok := qr.Data.Result.(model.Streams)
+	if !ok {
+		return nil, http.StatusInternalServerError, errors.New("Loki returned unexpected type: " + string(qr.Data.ResultType))
 	}
-	return code, nil
+
+	values := extractDistinctValues(searchField, streams)
+	return values, http.StatusOK, nil
 }
 
-func fetchParallel(lokiClient httpclient.Caller, queries []string, merger loki.Merger) (int, error) {
-	var codeOut int
-	startTime := time.Now()
-	defer func() {
-		metrics.ObserveLokiParallelCall(fmt.Sprintf("%T", merger), codeOut, len(queries), startTime)
-	}()
-
-	// Run queries in parallel, then aggregate them
-	resChan := make(chan model.QueryResponse, len(queries))
-	errChan := make(chan errorWithCode, len(queries))
-	var wg sync.WaitGroup
-	wg.Add(len(queries))
-
-	for _, q := range queries {
-		go func(query string) {
-			defer wg.Done()
-			resp, code, err := executeLokiQuery(query, lokiClient)
-			if err != nil {
-				errChan <- errorWithCode{err: err, code: code}
-			} else {
-				var qr model.QueryResponse
-				err := json.Unmarshal(resp, &qr)
-				if err != nil {
-					hlog.WithError(err).Errorf("cannot unmarshal, response was: %v", string(resp))
-					errChan <- errorWithCode{err: err, code: http.StatusInternalServerError}
-				} else {
-					resChan <- qr
-				}
-			}
-		}(q)
-	}
-
-	wg.Wait()
-	close(resChan)
-	close(errChan)
-
-	for errWithCode := range errChan {
-		codeOut = errWithCode.code
-		return errWithCode.code, errWithCode.err
-	}
-
-	// Aggregate results
-	for r := range resChan {
-		if _, err := merger.Add(r.Data); err != nil {
-			codeOut = http.StatusInternalServerError
-			return codeOut, err
-		}
-	}
-	codeOut = http.StatusOK
-	return codeOut, nil
-}
-
-func LokiReady(cfg *config.Loki) func(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) LokiReady() func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		lokiClient := newLokiClient(cfg, r.Header, true)
-		baseURL := strings.TrimRight(cfg.GetStatusURL(), "/")
+		if !h.Cfg.IsLokiEnabled() {
+			writeError(w, http.StatusBadRequest, "Loki is disabled")
+			return
+		}
+		lokiClient := newLokiClient(&h.Cfg.Loki, r.Header, true)
+		baseURL := strings.TrimRight(h.Cfg.Loki.GetStatusURL(), "/")
 
 		resp, code, err := executeLokiQuery(fmt.Sprintf("%s/%s", baseURL, "ready"), lokiClient)
 		if err != nil {
@@ -221,10 +216,14 @@ func LokiReady(cfg *config.Loki) func(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func LokiMetrics(cfg *config.Loki) func(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) LokiMetrics() func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		lokiClient := newLokiClient(cfg, r.Header, true)
-		baseURL := strings.TrimRight(cfg.GetStatusURL(), "/")
+		if !h.Cfg.IsLokiEnabled() {
+			writeError(w, http.StatusBadRequest, "Loki is disabled")
+			return
+		}
+		lokiClient := newLokiClient(&h.Cfg.Loki, r.Header, true)
+		baseURL := strings.TrimRight(h.Cfg.Loki.GetStatusURL(), "/")
 
 		resp, code, err := executeLokiQuery(fmt.Sprintf("%s/%s", baseURL, "metrics"), lokiClient)
 		if err != nil {
@@ -236,10 +235,14 @@ func LokiMetrics(cfg *config.Loki) func(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
-func LokiBuildInfos(cfg *config.Loki) func(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) LokiBuildInfos() func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		lokiClient := newLokiClient(cfg, r.Header, true)
-		baseURL := strings.TrimRight(cfg.GetStatusURL(), "/")
+		if !h.Cfg.IsLokiEnabled() {
+			writeError(w, http.StatusBadRequest, "Loki is disabled")
+			return
+		}
+		lokiClient := newLokiClient(&h.Cfg.Loki, r.Header, true)
+		baseURL := strings.TrimRight(h.Cfg.Loki.GetStatusURL(), "/")
 
 		resp, code, err := executeLokiQuery(fmt.Sprintf("%s/%s", baseURL, "loki/api/v1/status/buildinfo"), lokiClient)
 		if err != nil {
@@ -251,10 +254,14 @@ func LokiBuildInfos(cfg *config.Loki) func(w http.ResponseWriter, r *http.Reques
 	}
 }
 
-func LokiConfig(cfg *config.Loki, param string) func(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) LokiConfig(param string) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		lokiClient := newLokiClient(cfg, r.Header, true)
-		baseURL := strings.TrimRight(cfg.GetStatusURL(), "/")
+		if !h.Cfg.IsLokiEnabled() {
+			writeError(w, http.StatusBadRequest, "Loki is disabled")
+			return
+		}
+		lokiClient := newLokiClient(&h.Cfg.Loki, r.Header, true)
+		baseURL := strings.TrimRight(h.Cfg.Loki.GetStatusURL(), "/")
 
 		resp, code, err := executeLokiQuery(fmt.Sprintf("%s/%s", baseURL, "config"), lokiClient)
 		if err != nil {
@@ -273,10 +280,14 @@ func LokiConfig(cfg *config.Loki, param string) func(w http.ResponseWriter, r *h
 	}
 }
 
-func IngesterMaxChunkAge(cfg *config.Loki) func(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) IngesterMaxChunkAge() func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		lokiClient := newLokiClient(cfg, r.Header, true)
-		baseURL := strings.TrimRight(cfg.GetStatusURL(), "/")
+		if !h.Cfg.IsLokiEnabled() {
+			writeError(w, http.StatusBadRequest, "Loki is disabled")
+			return
+		}
+		lokiClient := newLokiClient(&h.Cfg.Loki, r.Header, true)
+		baseURL := strings.TrimRight(h.Cfg.Loki.GetStatusURL(), "/")
 
 		resp, code, err := executeLokiQuery(fmt.Sprintf("%s/%s", baseURL, "config"), lokiClient)
 		if err != nil {

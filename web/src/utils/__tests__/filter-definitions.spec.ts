@@ -1,5 +1,5 @@
 import { FilterDefinitionSample } from '../../components/__tests-data__/filters';
-import { findFilter } from '../filter-definitions';
+import { checkFilterAvailable, findFilter } from '../filter-definitions';
 
 describe('Resource validation', () => {
   const def = findFilter(FilterDefinitionSample, 'src_resource')!;
@@ -96,5 +96,38 @@ describe('Resource checkCompletion', () => {
     const partial = def.checkCompletion!('Node.a', 'abcd');
     expect(partial.completed).toBe(true);
     expect(partial.option).toEqual({ name: 'Node.abcd', value: 'Node.abcd' });
+  });
+});
+
+describe('Check availability', () => {
+  const simpleFilter = findFilter(FilterDefinitionSample, 'src_name')!;
+  const k8sFilter = findFilter(FilterDefinitionSample, 'src_resource')!;
+
+  it('should be available', () => {
+    let available = checkFilterAvailable(simpleFilter, ['SrcK8S_Name', 'DstK8S_Name']);
+    expect(available).toBe(true);
+
+    available = checkFilterAvailable(k8sFilter, [
+      'SrcK8S_OwnerName',
+      'SrcK8S_OwnerType',
+      'SrcK8S_Namespace',
+      'DstK8S_OwnerName',
+      'DstK8S_OwnerType',
+      'DstK8S_Namespace'
+    ]);
+    expect(available).toBe(true);
+  });
+
+  it('should not be available', () => {
+    let available = checkFilterAvailable(simpleFilter, ['SrcK8S_OwnerName', 'DstK8S_OwnerName']);
+    expect(available).toBe(false);
+
+    available = checkFilterAvailable(k8sFilter, [
+      'SrcK8S_OwnerName',
+      'SrcK8S_Namespace',
+      'DstK8S_OwnerName',
+      'DstK8S_Namespace'
+    ]);
+    expect(available).toBe(false);
   });
 });

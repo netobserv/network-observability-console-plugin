@@ -2,6 +2,7 @@ package constants
 
 type MetricFunction string
 type RecordType string
+type DataSource string
 type PacketLoss string
 type Discriminator string
 type Direction string
@@ -37,6 +38,11 @@ const (
 	RecordTypeEndConnection  RecordType = "endConnection"
 	RecordTypeLog            RecordType = "flowLog"
 	DefaultRecordType        RecordType = RecordTypeLog
+
+	DataSourceAuto    DataSource = "auto"
+	DataSourceProm    DataSource = "prom"
+	DataSourceLoki    DataSource = "loki"
+	DefaultDataSource DataSource = DataSourceAuto
 
 	PacketLossDropped PacketLoss = "dropped"
 	PacketLossHasDrop PacketLoss = "hasDrops"

@@ -4,6 +4,7 @@ import { mount, shallow } from 'enzyme';
 import GroupDropdown from '../group-dropdown';
 import { TopologyGroupTypes } from '../../../model/topology';
 import { MetricScopeOptions } from '../../../model/metrics';
+import { FlowScope } from '../../../model/flow-query';
 
 describe('<GroupDropdown />', () => {
   const props = {
@@ -11,8 +12,7 @@ describe('<GroupDropdown />', () => {
     selected: TopologyGroupTypes.HOSTS,
     setGroupType: jest.fn(),
     id: 'group',
-    allowMultiCluster: false,
-    allowZone: false
+    allowedScopes: ['host', 'namespace', 'owner'] as FlowScope[]
   };
   it('should render component', async () => {
     const wrapper = shallow(<GroupDropdown {...props} />);

@@ -322,3 +322,15 @@ export const getFilterDefinitions = (
 export const findFilter = (filterDefinitions: FilterDefinition[], id: FilterId) => {
   return filterDefinitions.find(def => def.id === id);
 };
+
+export const checkFilterAvailable = (fd: FilterDefinition, labels: string[]) => {
+  const q = fd.encoder([{ v: 'any' }], false, false, false);
+  const parts = q.split('&');
+  for (let i = 0; i < parts.length; i++) {
+    const kv = parts[i].split('=');
+    if (kv.length === 0 || !labels.includes(kv[0])) {
+      return false;
+    }
+  }
+  return true;
+};

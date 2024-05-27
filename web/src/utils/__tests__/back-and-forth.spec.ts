@@ -26,6 +26,7 @@ const getEncodedFilter = (filters: Filters, matchAny: boolean) => {
   getFetchFunctions(FilterDefinitionSample, filters, matchAny).getRecords({
     filters: filtersToString(filters.list, matchAny),
     recordType: 'flowLog',
+    dataSource: 'auto',
     limit: 5,
     packetLoss: 'all'
   });
@@ -273,6 +274,7 @@ const getTopoForFilter = (filters: Filters, matchAny: boolean) => {
     {
       filters: filtersToString(filters.list, matchAny),
       recordType: 'flowLog',
+      dataSource: 'auto',
       limit: 5,
       packetLoss: 'all'
     },
@@ -364,7 +366,7 @@ describe('Merge topology BNF', () => {
         0,
         true
       ),
-      stats: { limitReached: true, numQueries: 2 }
+      stats: { limitReached: true, numQueries: 2, dataSources: ['loki'] }
     };
     const rsSwap: FlowMetricsResult = {
       metrics: parseTopologyMetrics(
@@ -374,7 +376,7 @@ describe('Merge topology BNF', () => {
         0,
         true
       ),
-      stats: { limitReached: false, numQueries: 1 }
+      stats: { limitReached: false, numQueries: 1, dataSources: ['loki'] }
     };
 
     const merged = mergeMetricsBNF(range, rsOrig, rsSwap);
@@ -423,7 +425,7 @@ describe('Merge topology BNF', () => {
       min: 1,
       percentiles: [1, 1]
     });
-    expect(merged.stats).toEqual({ limitReached: true, numQueries: 3 });
+    expect(merged.stats).toEqual({ dataSources: ['loki'], limitReached: true, numQueries: 3 });
   });
 
   it('should merge with overlap', () => {
@@ -439,7 +441,7 @@ describe('Merge topology BNF', () => {
         0,
         true
       ),
-      stats: { limitReached: true, numQueries: 2 }
+      stats: { limitReached: true, numQueries: 2, dataSources: ['loki'] }
     };
     const rsSwap: FlowMetricsResult = {
       metrics: parseTopologyMetrics(
@@ -449,11 +451,11 @@ describe('Merge topology BNF', () => {
         0,
         true
       ),
-      stats: { limitReached: false, numQueries: 1 }
+      stats: { limitReached: false, numQueries: 1, dataSources: ['loki'] }
     };
     const rsOverlap: FlowMetricsResult = {
       metrics: parseTopologyMetrics([genNsMetric('foo', 'foo', 3, 3)], range, 'namespace', 0, true),
-      stats: { limitReached: false, numQueries: 1 }
+      stats: { limitReached: false, numQueries: 1, dataSources: ['loki'] }
     };
 
     const merged = mergeMetricsBNF(range, rsOrig, rsSwap, rsOverlap);
@@ -502,6 +504,6 @@ describe('Merge topology BNF', () => {
       min: 1,
       percentiles: [1, 1]
     });
-    expect(merged.stats).toEqual({ limitReached: true, numQueries: 4 });
+    expect(merged.stats).toEqual({ dataSources: ['loki'], limitReached: true, numQueries: 4 });
   });
 });

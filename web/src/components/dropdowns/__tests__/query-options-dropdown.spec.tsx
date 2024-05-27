@@ -7,7 +7,10 @@ import QueryOptionsDropdown, { QueryOptionsDropdownProps, QueryOptionsPanel } fr
 describe('<QueryOptionsDropdown />', () => {
   const props: QueryOptionsDropdownProps = {
     recordType: 'allConnections',
+    dataSource: 'auto',
     showDuplicates: true,
+    allowProm: true,
+    allowLoki: true,
     allowFlow: true,
     allowConnection: true,
     allowShowDuplicates: true,
@@ -21,7 +24,8 @@ describe('<QueryOptionsDropdown />', () => {
     setMatch: jest.fn(),
     setPacketLoss: jest.fn(),
     setShowDuplicates: jest.fn(),
-    setRecordType: jest.fn()
+    setRecordType: jest.fn(),
+    setDataSource: jest.fn()
   };
   it('should render component', async () => {
     const wrapper = shallow(<QueryOptionsDropdown {...props} />);
@@ -33,7 +37,10 @@ describe('<QueryOptionsDropdown />', () => {
 describe('<QueryOptionsPanel />', () => {
   const props: QueryOptionsDropdownProps = {
     recordType: 'allConnections',
+    dataSource: 'auto',
     showDuplicates: true,
+    allowProm: true,
+    allowLoki: true,
     allowFlow: true,
     allowConnection: true,
     allowShowDuplicates: true,
@@ -47,7 +54,8 @@ describe('<QueryOptionsPanel />', () => {
     setMatch: jest.fn(),
     setPacketLoss: jest.fn(),
     setShowDuplicates: jest.fn(),
-    setRecordType: jest.fn()
+    setRecordType: jest.fn(),
+    setDataSource: jest.fn()
   };
   beforeEach(() => {
     props.setLimit = jest.fn();
@@ -56,9 +64,9 @@ describe('<QueryOptionsPanel />', () => {
   });
   it('should render component', async () => {
     const wrapper = shallow(<QueryOptionsPanel {...props} />);
-    expect(wrapper.find('.pf-c-select__menu-group').length).toBe(5);
-    expect(wrapper.find('.pf-c-select__menu-group-title').length).toBe(5);
-    expect(wrapper.find(Radio)).toHaveLength(12);
+    expect(wrapper.find('.pf-c-select__menu-group').length).toBe(6);
+    expect(wrapper.find('.pf-c-select__menu-group-title').length).toBe(6);
+    expect(wrapper.find(Radio)).toHaveLength(15);
 
     //setOptions should not be called at startup, because it is supposed to be already initialized from URL
     expect(props.setLimit).toHaveBeenCalledTimes(0);

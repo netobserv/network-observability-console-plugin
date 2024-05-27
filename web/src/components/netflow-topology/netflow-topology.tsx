@@ -17,6 +17,8 @@ import stylesComponentFactory from './2d/componentFactories/stylesComponentFacto
 import layoutFactory from './2d/layouts/layoutFactory';
 import { ScopeSlider } from '../scope-slider/scope-slider';
 import { observeDOMRect } from '../metrics/metrics-helper';
+import { getPromUnsupportedError, isPromUnsupportedError } from '../../utils/errors';
+import { PrometheusUnsupported } from '../messages/prometheus-unsupported';
 
 export const NetflowTopology: React.FC<{
   loading?: boolean;
@@ -38,8 +40,7 @@ export const NetflowTopology: React.FC<{
   searchHandle: SearchHandle | null;
   searchEvent?: SearchEvent;
   isDark?: boolean;
-  allowMultiCluster: boolean;
-  allowZone: boolean;
+  allowedScopes: FlowScope[];
 }> = ({
   loading,
   k8sModels,
@@ -60,8 +61,7 @@ export const NetflowTopology: React.FC<{
   searchHandle,
   searchEvent,
   isDark,
-  allowMultiCluster,
-  allowZone
+  allowedScopes
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const containerRef = React.createRef<HTMLDivElement>();
@@ -73,7 +73,11 @@ export const NetflowTopology: React.FC<{
 
   const getContent = React.useCallback(() => {
     if (error) {
-      return <LokiError title={t('Unable to get topology')} error={error} />;
+      if (isPromUnsupportedError(error)) {
+        return <PrometheusUnsupported title={t('Unable to get topology')} error={getPromUnsupportedError(error)} />;
+      } else {
+        return <LokiError title={t('Unable to get topology')} error={error} />;
+      }
     } else if (!controller || (_.isEmpty(metrics) && loading)) {
       return (
         <Bullseye data-test="loading-contents">
@@ -104,11 +108,10 @@ export const NetflowTopology: React.FC<{
       return (
         <VisualizationProvider data-test="visualization-provider" controller={controller}>
           <ScopeSlider
-            allowMultiCluster={allowMultiCluster}
-            allowZone={allowZone}
             sizePx={containerSize?.height || 300}
             scope={metricScope}
             setScope={setMetricScope}
+            allowedScopes={allowedScopes}
           />
           <TopologyContent
             k8sModels={k8sModels}
@@ -133,8 +136,7 @@ export const NetflowTopology: React.FC<{
       );
     }
   }, [
-    allowMultiCluster,
-    allowZone,
+    allowedScopes,
     containerSize?.height,
     controller,
     displayedMetrics,

@@ -17,18 +17,8 @@ export const OverviewDisplayOptions: React.FC<{
   setTruncateLength: (v: TruncateLength) => void;
   focus: boolean;
   setFocus: (v: boolean) => void;
-  allowMultiCluster: boolean;
-  allowZone: boolean;
-}> = ({
-  metricScope,
-  setMetricScope,
-  truncateLength,
-  setTruncateLength,
-  focus,
-  setFocus,
-  allowMultiCluster,
-  allowZone
-}) => {
+  allowedScopes: FlowScope[];
+}> = ({ metricScope, setMetricScope, truncateLength, setTruncateLength, focus, setFocus, allowedScopes }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   return (
@@ -47,8 +37,7 @@ export const OverviewDisplayOptions: React.FC<{
             id="scope"
             selected={metricScope}
             setScopeType={setMetricScope}
-            allowMultiCluster={allowMultiCluster}
-            allowZone={allowZone}
+            allowedScopes={allowedScopes}
           />
         </div>
       </div>
@@ -84,18 +73,8 @@ export const OverviewDisplayDropdown: React.FC<{
   setTruncateLength: (v: TruncateLength) => void;
   focus: boolean;
   setFocus: (v: boolean) => void;
-  allowMultiCluster: boolean;
-  allowZone: boolean;
-}> = ({
-  metricScope,
-  setMetricScope,
-  truncateLength,
-  setTruncateLength,
-  focus,
-  setFocus,
-  allowMultiCluster,
-  allowZone
-}) => {
+  allowedScopes: FlowScope[];
+}> = ({ metricScope, setMetricScope, truncateLength, setTruncateLength, focus, setFocus, allowedScopes }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [isOpen, setOpen] = React.useState<boolean>(false);
 
@@ -114,8 +93,7 @@ export const OverviewDisplayDropdown: React.FC<{
             setTruncateLength={setTruncateLength}
             focus={focus}
             setFocus={setFocus}
-            allowMultiCluster={allowMultiCluster}
-            allowZone={allowZone}
+            allowedScopes={allowedScopes}
           />
         }
       />

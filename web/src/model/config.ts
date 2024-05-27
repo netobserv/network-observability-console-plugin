@@ -28,6 +28,8 @@ export type Config = {
   features: Feature[];
   deduper: Deduper;
   fields: FieldConfig[];
+  dataSources: string[];
+  promLabels: string[];
 };
 
 export const defaultConfig: Config = {
@@ -49,5 +51,7 @@ export const defaultConfig: Config = {
     mark: true,
     merge: false
   },
-  fields: []
+  fields: [],
+  dataSources: [],
+  promLabels: []
 };

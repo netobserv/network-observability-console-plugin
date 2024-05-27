@@ -16,32 +16,26 @@ var (
 		Help:    "Time measurements of HTTP API calls",
 		Buckets: prometheus.DefBuckets,
 	}, []string{"handler", "code"})
-	lokiUnitCallsDurationHisto = promauto.NewHistogramVec(prometheus.HistogramOpts{
-		Name:    prefix + "_loki_unit_calls_duration",
-		Help:    "Time measurements of unit calls to Loki",
+	lokiCallsDurationHisto = promauto.NewHistogramVec(prometheus.HistogramOpts{
+		Name:    prefix + "_loki_calls_duration",
+		Help:    "Time measurements of calls to Loki",
 		Buckets: prometheus.DefBuckets,
 	}, []string{"code"})
-	lokiParallelCallsDurationHisto = promauto.NewHistogramVec(prometheus.HistogramOpts{
-		Name:    prefix + "_loki_parallel_calls_duration",
-		Help:    "Time measurements of parallel calls to Loki",
+	promCallsDurationHisto = promauto.NewHistogramVec(prometheus.HistogramOpts{
+		Name:    prefix + "_prom_calls_duration",
+		Help:    "Time measurements of calls to Prometheus",
 		Buckets: prometheus.DefBuckets,
-	}, []string{"type", "code"})
-	lokiParallelCallsNbQueriesHisto = promauto.NewHistogramVec(prometheus.HistogramOpts{
-		Name:    prefix + "_loki_parallel_calls_number",
-		Help:    "Number of parallel calls to Loki",
-		Buckets: prometheus.DefBuckets,
-	}, []string{"type", "code"})
+	}, []string{"code"})
 )
 
 func ObserveHTTPCall(handler string, code int, startTime time.Time) {
 	httpCallsDurationHisto.WithLabelValues(handler, strconv.Itoa(code)).Observe(time.Since(startTime).Seconds())
 }
 
-func ObserveLokiUnitCall(code int, startTime time.Time) {
-	lokiUnitCallsDurationHisto.WithLabelValues(strconv.Itoa(code)).Observe(time.Since(startTime).Seconds())
+func ObserveLokiCall(code int, startTime time.Time) {
+	lokiCallsDurationHisto.WithLabelValues(strconv.Itoa(code)).Observe(time.Since(startTime).Seconds())
 }
 
-func ObserveLokiParallelCall(queryType string, code, nbQueries int, startTime time.Time) {
-	lokiParallelCallsDurationHisto.WithLabelValues(queryType, strconv.Itoa(code)).Observe(time.Since(startTime).Seconds())
-	lokiParallelCallsNbQueriesHisto.WithLabelValues(queryType, strconv.Itoa(code)).Observe(float64(nbQueries))
+func ObservePromCall(code int, startTime time.Time) {
+	promCallsDurationHisto.WithLabelValues(strconv.Itoa(code)).Observe(time.Since(startTime).Seconds())
 }

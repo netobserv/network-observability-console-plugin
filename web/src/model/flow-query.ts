@@ -2,6 +2,7 @@ import { Field } from '../api/ipfix';
 import { Filter } from './filters';
 
 export type RecordType = 'allConnections' | 'newConnection' | 'heartbeat' | 'endConnection' | 'flowLog';
+export type DataSource = 'auto' | 'loki' | 'prom';
 export type Match = 'all' | 'any';
 export type PacketLoss = 'dropped' | 'hasDrops' | 'sent' | 'all';
 export type MetricFunction = 'count' | 'sum' | 'avg' | 'min' | 'max' | 'p90' | 'p99' | 'rate';
@@ -34,6 +35,7 @@ export interface FlowQuery {
   filters: string;
   dedup?: boolean;
   recordType: RecordType;
+  dataSource: DataSource;
   packetLoss: PacketLoss;
   limit: number;
   percentile?: number;

@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"time"
@@ -13,8 +14,8 @@ import (
 
 var slog = logrus.WithField("module", "server")
 
-func Start(cfg *config.Config, authChecker auth.Checker) {
-	router := setupRoutes(cfg, authChecker)
+func Start(ctx context.Context, cfg *config.Config, authChecker auth.Checker) {
+	router := setupRoutes(ctx, cfg, authChecker)
 	router.Use(corsHeader(cfg))
 
 	writeTimeout := 30 * time.Second

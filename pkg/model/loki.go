@@ -6,6 +6,7 @@ import (
 	"time"
 
 	json "github.com/json-iterator/go"
+	"github.com/netobserv/network-observability-console-plugin/pkg/utils/constants"
 	"github.com/prometheus/common/model"
 )
 
@@ -20,17 +21,17 @@ type AggregatedQueryResponse struct {
 	ResultType    ResultType      `json:"resultType"`
 	Result        ResultValue     `json:"result"`
 	Stats         AggregatedStats `json:"stats"`
-	IsMock        bool            `json:"isMock"`
 	UnixTimestamp int64           `json:"unixTimestamp"`
 }
 
 // AggregatedStats represents the stats to one or more logQL queries
 type AggregatedStats struct {
-	NumQueries   int           `json:"numQueries"`
-	TotalEntries int           `json:"totalEntries"`
-	Duplicates   int           `json:"duplicates"`
-	LimitReached bool          `json:"limitReached"`
-	QueriesStats []interface{} `json:"queriesStats"`
+	NumQueries   int                    `json:"numQueries"`
+	TotalEntries int                    `json:"totalEntries"`
+	Duplicates   int                    `json:"duplicates"`
+	LimitReached bool                   `json:"limitReached"`
+	QueriesStats []interface{}          `json:"queriesStats"`
+	DataSources  []constants.DataSource `json:"dataSources"`
 }
 
 // ResultType holds the type of the result

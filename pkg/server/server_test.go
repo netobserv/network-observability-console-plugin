@@ -55,7 +55,7 @@ func TestServerRunning(t *testing.T) {
 	authM.MockGranted()
 
 	go func() {
-		Start(&config.Config{
+		Start(context.TODO(), &config.Config{
 			Loki:   config.Loki{URL: "http://localhost:3100"},
 			Server: config.Server{Port: testPort},
 		}, &authM)
@@ -102,7 +102,7 @@ func TestServerUnauthorized(t *testing.T) {
 	defer os.RemoveAll(tmpDir)
 
 	go func() {
-		Start(&config.Config{
+		Start(context.TODO(), &config.Config{
 			Loki:   config.Loki{URL: "http://localhost:3100"},
 			Server: config.Server{Port: testPort},
 		}, &auth.BearerTokenChecker{})
@@ -190,7 +190,7 @@ func TestSecureComm(t *testing.T) {
 	authM.MockGranted()
 
 	go func() {
-		Start(conf, &authM)
+		Start(context.TODO(), conf, &authM)
 	}()
 	t.Logf("Started test http server: %v", serverURL)
 
@@ -255,7 +255,7 @@ func TestServerHeaderLimits(t *testing.T) {
 	authM.MockGranted()
 
 	go func() {
-		Start(&config.Config{
+		Start(context.TODO(), &config.Config{
 			Loki:   config.Loki{URL: "http://localhost:3100"},
 			Server: config.Server{Port: testPort},
 		}, &authM)
@@ -298,7 +298,7 @@ func TestLokiConfiguration(t *testing.T) {
 	authM.MockGranted()
 
 	// THAT is accessed behind the NOO console plugin backend
-	backendRoutes := setupRoutes(&config.Config{
+	backendRoutes := setupRoutes(context.TODO(), &config.Config{
 		Loki: config.Loki{URL: lokiSvc.URL, Timeout: config.Duration{Duration: time.Second}},
 	}, authM)
 	backendSvc := httptest.NewServer(backendRoutes)
@@ -335,7 +335,7 @@ func TestLokiConfigurationForTopology(t *testing.T) {
 	authM.MockGranted()
 
 	// THAT is accessed behind the NOO console plugin backend
-	backendRoutes := setupRoutes(&config.Config{
+	backendRoutes := setupRoutes(context.TODO(), &config.Config{
 		Loki: config.Loki{
 			URL:     lokiSvc.URL,
 			Timeout: config.Duration{Duration: time.Second},
@@ -393,7 +393,7 @@ func TestLokiConfigurationForTableHistogram(t *testing.T) {
 	authM.MockGranted()
 
 	// THAT is accessed behind the NOO console plugin backend
-	backendRoutes := setupRoutes(&config.Config{
+	backendRoutes := setupRoutes(context.TODO(), &config.Config{
 		Loki: config.Loki{
 			URL:     lokiSvc.URL,
 			Timeout: config.Duration{Duration: time.Second},
@@ -462,7 +462,7 @@ func TestLokiConfiguration_MultiTenant(t *testing.T) {
 	defer lokiSvc.Close()
 
 	// GIVEN a NOO console plugin backend configured for HOST Multi tenant mode
-	backendRoutes := setupRoutes(&config.Config{
+	backendRoutes := setupRoutes(context.TODO(), &config.Config{
 		Loki: config.Loki{
 			URL:       lokiSvc.URL,
 			Timeout:   config.Duration{Duration: time.Second},

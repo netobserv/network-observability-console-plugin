@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -242,7 +243,7 @@ func TestLokiFiltering(t *testing.T) {
 	defer lokiSvc.Close()
 
 	// THAT is accessed behind the NOO console plugin backend
-	backendRoutes := setupRoutes(&config.Config{
+	backendRoutes := setupRoutes(context.TODO(), &config.Config{
 		Loki: config.Loki{
 			URL:    lokiSvc.URL,
 			Labels: []string{"SrcK8S_Namespace", "SrcK8S_OwnerName", "DstK8S_Namespace", "DstK8S_OwnerName", "FlowDirection"},

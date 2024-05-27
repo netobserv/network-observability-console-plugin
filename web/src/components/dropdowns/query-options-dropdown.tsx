@@ -2,7 +2,7 @@ import { Checkbox, Radio, Select, Tooltip } from '@patternfly/react-core';
 import { InfoAltIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Match, PacketLoss, RecordType } from '../../model/flow-query';
+import { DataSource, Match, PacketLoss, RecordType } from '../../model/flow-query';
 
 export const TOP_VALUES = [5, 10, 15];
 export const LIMIT_VALUES = [50, 100, 500, 1000];
@@ -10,8 +10,12 @@ export const LIMIT_VALUES = [50, 100, 500, 1000];
 export interface QueryOptionsDropdownProps {
   recordType: RecordType;
   setRecordType: (recordType: RecordType) => void;
+  dataSource: DataSource;
+  setDataSource: (dataSource: DataSource) => void;
   showDuplicates: boolean;
   setShowDuplicates: (showDuplicates: boolean) => void;
+  allowLoki: boolean;
+  allowProm: boolean;
   allowFlow: boolean;
   allowConnection: boolean;
   allowShowDuplicates: boolean;
@@ -27,6 +31,7 @@ export interface QueryOptionsDropdownProps {
 }
 
 type RecordTypeOption = { label: string; value: RecordType };
+type DataSourceOption = { label: string; value: DataSource };
 type MatchOption = { label: string; value: Match };
 
 type PacketLossOption = { label: string; value: PacketLoss };
@@ -35,8 +40,12 @@ type PacketLossOption = { label: string; value: PacketLoss };
 export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
   recordType,
   setRecordType,
+  dataSource,
+  setDataSource,
   showDuplicates,
   setShowDuplicates,
+  allowLoki,
+  allowProm,
   allowFlow,
   allowConnection,
   allowShowDuplicates,
@@ -60,6 +69,21 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
     {
       label: t('Flow'),
       value: 'flowLog'
+    }
+  ];
+
+  const dataSourceOptions: DataSourceOption[] = [
+    {
+      label: t('Loki'),
+      value: 'loki'
+    },
+    {
+      label: t('Prometheus'),
+      value: 'prom'
+    },
+    {
+      label: t('Auto'),
+      value: 'auto'
     }
   ];
 
@@ -140,6 +164,58 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
                     label={opt.label}
                     data-test={`recordType-${opt.value}`}
                     id={`recordType-${opt.value}`}
+                    value={opt.value}
+                  />
+                </Tooltip>
+              </label>
+            </div>
+          );
+        })}
+      </div>
+      <div className="pf-c-select__menu-group">
+        <Tooltip
+          content={t(
+            // eslint-disable-next-line max-len
+            'Which datasource to query from console plugin pod. Prometheus holds a subset of metrics compared to Loki with better performances. Select "Auto" to pick the best datasource automatically.'
+          )}
+        >
+          <div className="pf-c-select__menu-group-title">
+            <>
+              {t('Datasource')} <InfoAltIcon />
+            </>
+          </div>
+        </Tooltip>
+        {dataSourceOptions.map(opt => {
+          const disabled = (!allowProm && opt.value === 'prom') || (!allowLoki && opt.value === 'loki');
+          return (
+            <div key={`dataSource-${opt.value}`}>
+              <label className="pf-c-select__menu-item">
+                <Tooltip
+                  trigger={disabled ? 'mouseenter focus' : ''}
+                  content={
+                    disabled
+                      ? opt.value === 'prom'
+                        ? t(
+                            // eslint-disable-next-line max-len
+                            'Only available when FlowCollector.prometheus.enable is true for Overview and Topology tabs'
+                          )
+                        : opt.value === 'loki'
+                        ? t(
+                            // eslint-disable-next-line max-len
+                            'Only available when FlowCollector.loki.enable is true'
+                          )
+                        : undefined
+                      : undefined
+                  }
+                >
+                  <Radio
+                    isChecked={opt.value === dataSource}
+                    isDisabled={disabled}
+                    name={`dataSource-${opt.value}`}
+                    onChange={() => setDataSource(opt.value)}
+                    label={opt.label}
+                    data-test={`dataSource-${opt.value}`}
+                    id={`dataSource-${opt.value}`}
                     value={opt.value}
                   />
                 </Tooltip>

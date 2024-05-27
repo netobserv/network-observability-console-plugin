@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"net/url"
 	"os"
@@ -9,6 +10,7 @@ import (
 
 	"github.com/netobserv/network-observability-console-plugin/pkg/kubernetes/auth"
 	"github.com/netobserv/network-observability-console-plugin/pkg/kubernetes/client"
+	"github.com/netobserv/network-observability-console-plugin/pkg/utils/constants"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
 )
@@ -26,6 +28,34 @@ type Server struct {
 	CORSMethods string `yaml:"corsMethods,omitempty" json:"corsMethods,omitempty"`
 	CORSHeaders string `yaml:"corsHeaders,omitempty" json:"corsHeaders,omitempty"`
 	CORSMaxAge  string `yaml:"corsMaxAge,omitempty" json:"corsMaxAge,omitempty"`
+	AuthCheck   string `yaml:"authCheck,omitempty" json:"authCheck,omitempty"`
+}
+
+type Prometheus struct {
+	URL              string       `yaml:"url" json:"url"`
+	Timeout          Duration     `yaml:"timeout,omitempty" json:"timeout,omitempty"`
+	TokenPath        string       `yaml:"tokenPath,omitempty" json:"tokenPath,omitempty"`
+	SkipTLS          bool         `yaml:"skipTls,omitempty" json:"skipTls,omitempty"`
+	CAPath           string       `yaml:"caPath,omitempty" json:"caPath,omitempty"`
+	ForwardUserToken bool         `yaml:"forwardUserToken,omitempty" json:"forwardUserToken,omitempty"`
+	Metrics          []MetricInfo `yaml:"metrics,omitempty" json:"metrics,omitempty"`
+}
+
+type FlowDirection string
+
+const (
+	Egress       FlowDirection = "Egress"
+	Ingress      FlowDirection = "Ingress"
+	AnyDirection FlowDirection = "Any"
+)
+
+type MetricInfo struct {
+	Enabled    bool          `yaml:"enabled" json:"enabled"`
+	Name       string        `yaml:"name,omitempty" json:"name,omitempty"`
+	Type       string        `yaml:"type,omitempty" json:"type,omitempty"`
+	ValueField string        `yaml:"valueField,omitempty" json:"valueField,omitempty"`
+	Direction  FlowDirection `yaml:"direction,omitempty" json:"direction,omitempty"`
+	Labels     []string      `yaml:"labels,omitempty" json:"labels,omitempty"`
 }
 
 type PortNaming struct {
@@ -50,10 +80,9 @@ type Column struct {
 }
 
 type Filter struct {
-	ID        string `yaml:"id" json:"id"`
-	Name      string `yaml:"name" json:"name"`
-	Component string `yaml:"component" json:"component"`
-
+	ID                     string `yaml:"id" json:"id"`
+	Name                   string `yaml:"name" json:"name"`
+	Component              string `yaml:"component" json:"component"`
 	Category               string `yaml:"category,omitempty" json:"category,omitempty"`
 	AutoCompleteAddsQuotes bool   `yaml:"autoCompleteAddsQuotes,omitempty" json:"autoCompleteAddsQuotes,omitempty"`
 	Hint                   string `yaml:"hint,omitempty" json:"hint,omitempty"`
@@ -96,13 +125,16 @@ type Frontend struct {
 	Features        []string      `yaml:"features" json:"features"`
 	Deduper         Deduper       `yaml:"deduper" json:"deduper"`
 	Fields          []FieldConfig `yaml:"fields" json:"fields"`
+	DataSources     []string      `yaml:"dataSources" json:"dataSources"`
+	PromLabels      []string      `yaml:"promLabels" json:"promLabels"`
 }
 
 type Config struct {
-	Loki     Loki     `yaml:"loki" json:"loki"`
-	Frontend Frontend `yaml:"frontend" json:"frontend"`
-	Server   Server   `yaml:"server,omitempty" json:"server,omitempty"`
-	Path     string   `yaml:"-" json:"-"`
+	Loki       Loki       `yaml:"loki" json:"loki"`
+	Prometheus Prometheus `yaml:"prometheus" json:"prometheus"`
+	Frontend   Frontend   `yaml:"frontend" json:"frontend"`
+	Server     Server     `yaml:"server,omitempty" json:"server,omitempty"`
+	Path       string     `yaml:"-" json:"-"`
 }
 
 func ReadFile(version, date, filename string) (*Config, error) {
@@ -114,10 +146,13 @@ func ReadFile(version, date, filename string) (*Config, error) {
 			MetricsPort: 9002,
 			CORSOrigin:  "*",
 			CORSHeaders: "Origin, X-Requested-With, Content-Type, Accept",
+			AuthCheck:   "auto",
 		},
 		Loki: Loki{
-			Timeout:   Duration{Duration: 30 * time.Second},
-			AuthCheck: "auto",
+			Timeout: Duration{Duration: 30 * time.Second},
+		},
+		Prometheus: Prometheus{
+			Timeout: Duration{Duration: 30 * time.Second},
 		},
 		Frontend: Frontend{
 			BuildVersion: version,
@@ -141,6 +176,8 @@ func ReadFile(version, date, filename string) (*Config, error) {
 				{Name: "SrcAddr", Type: "string"},
 				{Name: "DstAddr", Type: "string"},
 			},
+			DataSources: []string{},
+			PromLabels:  []string{},
 		},
 	}
 	if len(filename) == 0 {
@@ -155,56 +192,98 @@ func ReadFile(version, date, filename string) (*Config, error) {
 		return nil, err
 	}
 
-	cfg.Validate()
-
-	return &cfg, nil
-}
-
-func (c *Config) Validate() {
-	var configErrors []string
-
-	// check config required fields
-	if len(c.Loki.Labels) == 0 {
-		configErrors = append(configErrors, "labels cannot be empty")
+	if cfg.IsLokiEnabled() {
+		cfg.Frontend.DataSources = append(cfg.Frontend.DataSources, string(constants.DataSourceLoki))
 	}
 
-	// parse config urls
-	if len(c.Loki.URL) == 0 {
-		configErrors = append(configErrors, "url cannot be empty")
-	} else {
+	if cfg.IsPromEnabled() {
+		cfg.Frontend.DataSources = append(cfg.Frontend.DataSources, string(constants.DataSourceProm))
+		labels := make(map[string]any)
+		for _, m := range cfg.Prometheus.Metrics {
+			if m.Enabled {
+				for _, l := range m.Labels {
+					labels[l] = true
+				}
+			}
+		}
+		for k := range labels {
+			cfg.Frontend.PromLabels = append(cfg.Frontend.PromLabels, k)
+		}
+	}
+
+	return &cfg, err
+}
+
+func (c *Config) IsLokiEnabled() bool {
+	return c.Loki.URL != ""
+}
+
+func (c *Config) IsPromEnabled() bool {
+	return c.Prometheus.URL != ""
+}
+
+func (c *Config) Validate() error {
+	if !c.IsLokiEnabled() && !c.IsPromEnabled() {
+		return errors.New("neither Loki nor Prometheus is configured; at least one of them should have a URL defined")
+	}
+
+	var configErrors []string
+
+	if c.IsLokiEnabled() {
+		log.Infof("Loki is enabled (%s)", c.Loki.URL)
+		// check config required fields
+		if len(c.Loki.Labels) == 0 {
+			configErrors = append(configErrors, "labels cannot be empty")
+		}
+
+		// parse config urls
 		_, err := url.Parse(c.Loki.URL)
 		if err != nil {
 			configErrors = append(configErrors, "wrong Loki URL")
 		}
-	}
-	if len(c.Loki.StatusURL) > 0 {
-		_, err := url.Parse(c.Loki.StatusURL)
-		if err != nil {
-			configErrors = append(configErrors, "wrong Loki status URL")
+		if len(c.Loki.StatusURL) > 0 {
+			_, err := url.Parse(c.Loki.StatusURL)
+			if err != nil {
+				configErrors = append(configErrors, "wrong Loki status URL")
+			}
 		}
+	} else {
+		log.Info("Loki is disabled")
 	}
 
-	// crash on config errors
+	if c.IsPromEnabled() {
+		log.Infof("Prometheus is enabled (%s)", c.Prometheus.URL)
+		// parse config urls
+		_, err := url.Parse(c.Prometheus.URL)
+		if err != nil {
+			configErrors = append(configErrors, "wrong Prometheus URL")
+		}
+	} else {
+		log.Info("Prometheus is disabled")
+	}
+
 	if len(configErrors) > 0 {
 		configErrors = append([]string{fmt.Sprintf("Config file has %d errors:\n", len(configErrors))}, configErrors...)
-		log.Fatal(strings.Join(configErrors, "\n - "))
+		return errors.New(strings.Join(configErrors, "\n - "))
 	}
+
+	return nil
 }
 
 func (c *Config) GetAuthChecker() (auth.Checker, error) {
 	// parse config auth
 	var checkType auth.CheckType
-	if c.Loki.AuthCheck == "auto" {
-		if c.Loki.ForwardUserToken {
-			// FORWARD lokiAuth mode
-			checkType = auth.CheckAuthenticated
-		} else {
-			// HOST or DISABLED lokiAuth mode
+	if c.Server.AuthCheck == "auto" {
+		// FORWARD mode
+		checkType = auth.CheckAuthenticated
+		if (c.IsLokiEnabled() && !c.Loki.ForwardUserToken) ||
+			(c.IsPromEnabled() && !c.Prometheus.ForwardUserToken) {
+			// HOST or DISABLED mode
 			checkType = auth.CheckAdmin
 		}
 		log.Info(fmt.Sprintf("auth-check 'auto' resolved to '%s'", checkType))
 	} else {
-		checkType = auth.CheckType(c.Loki.AuthCheck)
+		checkType = auth.CheckType(c.Server.AuthCheck)
 	}
 	if checkType == auth.CheckNone {
 		log.Warn("INSECURE: auth checker is disabled")

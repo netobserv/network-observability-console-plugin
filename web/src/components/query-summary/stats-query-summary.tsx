@@ -13,11 +13,16 @@ export const StatsQuerySummary: React.FC<{
   warningMessage?: string;
   slownessReason?: string;
   numQueries?: number;
-}> = ({ detailed, numQueries, lastRefresh, lastDuration, loading, warningMessage, slownessReason }) => {
+  dataSources?: string[];
+}> = ({ detailed, numQueries, dataSources, lastRefresh, lastDuration, loading, warningMessage, slownessReason }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   const dateText = lastRefresh ? lastRefresh.toLocaleTimeString() : t('Loading...');
   const durationText = lastDuration ? formatDurationAboveMillisecond(lastDuration) : '';
+
+  const formatDatasources = React.useCallback(() => {
+    return dataSources?.map(ds => (ds === 'prom' ? 'Prometheus' : ds === 'loki' ? 'Loki' : ds)).join(', ') || '';
+  }, [dataSources]);
 
   return (
     <FlexItem>
@@ -31,6 +36,7 @@ export const StatsQuerySummary: React.FC<{
                   })
                 : dateText}
             </Text>
+            {dataSources?.length && <Text>{t('Datasource(s): {{sources}}', { sources: formatDatasources() })}</Text>}
             {numQueries && <Text>{t('Query count: {{count}}', { count: numQueries })}</Text>}
             {durationText !== '' && <Text>{t('Duration: {{duration}}', { duration: durationText })}</Text>}
             {warningMessage !== undefined && (
@@ -48,6 +54,7 @@ export const StatsQuerySummary: React.FC<{
           <Text id="lastRefresh" component={TextVariants.p}>
             {dateText}
             {detailed && numQueries && ` ${t('running')} ${numQueries} ${numQueries > 1 ? t('queries') : t('query')}`}
+            {detailed && dataSources?.length && ` ${t('from')} ${formatDatasources()}`}
             {detailed && durationText !== '' && ` ${t('in')} ${durationText}`}
           </Text>
         </div>

@@ -10,38 +10,43 @@ import (
 	"github.com/netobserv/network-observability-console-plugin/pkg/utils/constants"
 )
 
-func getStartTime(params url.Values) (string, error) {
+func getStartTime(params url.Values) (string, time.Time, error) {
 	start := params.Get(startTimeKey)
+	var sTime time.Time
 	if len(start) == 0 {
 		tr := params.Get(timeRangeKey)
 		if len(tr) > 0 {
 			r, err := strconv.ParseInt(tr, 10, 64)
 			if err != nil {
-				return "", errors.New("Could not parse time range: " + err.Error())
+				return "", sTime, errors.New("Could not parse time range: " + err.Error())
 			}
-			start = strconv.FormatInt(time.Now().Unix()-r, 10)
+			sTime = time.Now().Add(-time.Second * time.Duration(r))
+			start = strconv.FormatInt(sTime.Unix(), 10)
 		}
 	} else {
 		// Make sure it is a valid int
-		_, err := strconv.ParseInt(start, 10, 64)
+		s, err := strconv.ParseInt(start, 10, 64)
 		if err != nil {
-			return "", errors.New("Could not parse start time: " + err.Error())
+			return "", sTime, errors.New("Could not parse start time: " + err.Error())
 		}
+		sTime = time.Unix(s, 0)
 	}
-	return start, nil
+	return start, sTime, nil
 }
 
 // getEndTime will parse end time and ceil it to the next second
-func getEndTime(params url.Values) (string, error) {
+func getEndTime(params url.Values) (string, time.Time, error) {
 	end := params.Get(endTimeKey)
+	eTime := time.Now()
 	if len(end) > 0 {
 		r, err := strconv.ParseInt(end, 10, 64)
 		if err != nil {
-			return "", errors.New("Could not parse end time: " + err.Error())
+			return "", eTime, errors.New("Could not parse end time: " + err.Error())
 		}
+		eTime = time.Unix(r+1, 0)
 		end = strconv.Itoa(int(r) + 1)
 	}
-	return end, nil
+	return end, eTime, nil
 }
 
 // getLimit returns limit as string (used for logQL) and as int (used to check if reached)
@@ -72,6 +77,20 @@ func getRecordType(params url.Values) (constants.RecordType, error) {
 		return recordType, nil
 	}
 	return "", fmt.Errorf("invalid record type: %s", rt)
+}
+
+func getDatasource(params url.Values) (constants.DataSource, error) {
+	ds := params.Get(dataSourceKey)
+	if ds == "" {
+		return constants.DefaultDataSource, nil
+	}
+	dataSource := constants.DataSource(ds)
+	if dataSource == constants.DataSourceAuto ||
+		dataSource == constants.DataSourceLoki ||
+		dataSource == constants.DataSourceProm {
+		return dataSource, nil
+	}
+	return "", fmt.Errorf("invalid data source: %s", ds)
 }
 
 func getPacketLoss(params url.Values) (constants.PacketLoss, error) {
@@ -135,13 +154,14 @@ func getRateInterval(params url.Values) (string, error) {
 	return rateInterval, nil
 }
 
-func getStep(params url.Values) (string, error) {
+func getStep(params url.Values) (string, time.Duration, error) {
 	step := params.Get(stepKey)
 	if step == "" {
-		return defaultStep, nil
+		return defaultStep, defaultStepDuration, nil
 	}
-	if _, err := time.ParseDuration(step); err != nil {
-		return "", fmt.Errorf("invalid step %s: %w", step, err)
+	d, err := time.ParseDuration(step)
+	if err != nil {
+		return "", 0, fmt.Errorf("invalid step %s: %w", step, err)
 	}
-	return step, nil
+	return step, d, nil
 }

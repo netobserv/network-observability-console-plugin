@@ -446,6 +446,7 @@ export const mergeStats = (prev: Stats | undefined, current: Stats): Stats => {
   return {
     ...prev,
     limitReached: prev.limitReached || current.limitReached,
-    numQueries: prev.numQueries + current.numQueries
+    numQueries: prev.numQueries + current.numQueries,
+    dataSources: _.union(prev.dataSources, current.dataSources)
   };
 };

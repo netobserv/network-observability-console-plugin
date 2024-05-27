@@ -11,6 +11,8 @@ import (
 	"github.com/netobserv/network-observability-console-plugin/pkg/model"
 )
 
+const codePrometheusUnsupported = 901 // code to use internally to notify a Bad Request, unsupported for prometheus queries
+
 func writeText(w http.ResponseWriter, code int, bytes []byte) {
 	w.Header().Set("Content-Type", "text/plain")
 	w.WriteHeader(code)
@@ -62,10 +64,20 @@ func writeCSV(w http.ResponseWriter, code int, qr *model.AggregatedQueryResponse
 	writer.Flush()
 }
 
-type errorResponse struct{ Message string }
+type errorResponse struct {
+	Message         string `json:"message,omitempty"`
+	PromUnsupported string `json:"promUnsupported,omitempty"`
+}
 
 func writeError(w http.ResponseWriter, code int, message string) {
-	response, err := json.Marshal(errorResponse{Message: message})
+	var resp errorResponse
+	if code == codePrometheusUnsupported {
+		code = http.StatusBadRequest
+		resp = errorResponse{PromUnsupported: message}
+	} else {
+		resp = errorResponse{Message: message}
+	}
+	response, err := json.Marshal(resp)
 	if err != nil {
 		hlog.Errorf("Marshalling error while responding an error: %v (message was: %s)", err, message)
 		code = http.StatusInternalServerError

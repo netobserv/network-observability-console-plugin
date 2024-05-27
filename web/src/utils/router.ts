@@ -1,6 +1,6 @@
 import { findFilter } from './filter-definitions';
 import { TimeRange } from './datetime';
-import { Match, StatFunction, MetricType, PacketLoss, RecordType } from '../model/flow-query';
+import { Match, StatFunction, MetricType, PacketLoss, RecordType, DataSource } from '../model/flow-query';
 import {
   getURLParam,
   getURLParamAsBool,
@@ -25,6 +25,7 @@ const filterKVSeparator = '=';
 const filterValuesSeparator = ',';
 export const defaultTimeRange = 300;
 export const defaultRecordType: RecordType = 'flowLog';
+export const defaultDataSource: DataSource = 'auto';
 export const defaultMatch: Match = 'all';
 export const defaultPacketLoss: PacketLoss = 'all';
 export const defaultMetricFunction: StatFunction = 'last';
@@ -45,6 +46,10 @@ export const getRangeFromURL = (): number | TimeRange => {
 
 export const getRecordTypeFromURL = (): RecordType => {
   return (getURLParam(URLParam.RecordType) as RecordType | null) || defaultRecordType;
+};
+
+export const getDataSourceFromURL = (): DataSource => {
+  return (getURLParam(URLParam.DataSource) as DataSource | null) || defaultDataSource;
 };
 
 export const getShowDupFromURL = (): boolean => {

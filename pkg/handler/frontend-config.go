@@ -6,14 +6,14 @@ import (
 	"github.com/netobserv/network-observability-console-plugin/pkg/config"
 )
 
-func GetFrontendConfig(version, date, filename string) func(w http.ResponseWriter, r *http.Request) {
-	cfg, err := config.ReadFile(version, date, filename)
+func (h *Handlers) GetFrontendConfig() func(w http.ResponseWriter, r *http.Request) {
+	cfg, err := config.ReadFile(h.Cfg.Frontend.BuildVersion, h.Cfg.Frontend.BuildDate, h.Cfg.Path)
 	if err != nil {
 		hlog.Errorf("Could not read config file: %v", err)
 	}
-	return func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, _ *http.Request) {
 		if err != nil {
-			cfg, err = config.ReadFile(version, date, filename)
+			cfg, err = config.ReadFile(h.Cfg.Frontend.BuildVersion, h.Cfg.Frontend.BuildDate, h.Cfg.Path)
 			if err != nil {
 				writeError(w, http.StatusInternalServerError, err.Error())
 			} else {

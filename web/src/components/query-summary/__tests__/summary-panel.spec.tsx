@@ -17,7 +17,8 @@ describe('<SummaryPanel />', () => {
     maxChunkAge: NaN,
     stats: {
       limitReached: false,
-      numQueries: 1
+      numQueries: 1,
+      dataSources: ['loki']
     },
     appStats: undefined,
     limit: 5,

@@ -101,7 +101,7 @@ export const getFlowMetrics = (params: FlowQuery, range: number | TimeRange): Pr
       params.aggregateBy as FlowScope,
       res.unixTimestamp,
       !isTimeMetric(params.type),
-      res.isMock
+      res.stats.dataSources.includes('mock')
     );
   });
 };
@@ -114,7 +114,7 @@ export const getFlowGenericMetrics = (params: FlowQuery, range: number | TimeRan
       params.aggregateBy as Field,
       res.unixTimestamp,
       !isTimeMetric(params.type),
-      res.isMock
+      res.stats.dataSources.includes('mock')
     );
   });
 };
@@ -162,7 +162,9 @@ export const getConfig = (): Promise<Config> => {
         mark: r.data.deduper.mark ?? defaultConfig.deduper.mark,
         merge: r.data.deduper.merge ?? defaultConfig.deduper.merge
       },
-      fields: r.data.fields
+      fields: r.data.fields || defaultConfig.fields,
+      dataSources: r.data.dataSources || defaultConfig.dataSources,
+      promLabels: r.data.promLabels || defaultConfig.promLabels
     };
   });
 };

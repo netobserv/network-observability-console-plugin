@@ -21,6 +21,7 @@ const EXPOSED_METRICS: MetricType[] = [
 export const MetricsQuerySummaryContent: React.FC<{
   metrics: NetflowMetrics;
   numQueries?: number;
+  dataSources?: string[];
   loading?: boolean;
   lastRefresh?: Date;
   lastDuration?: number;
@@ -34,6 +35,7 @@ export const MetricsQuerySummaryContent: React.FC<{
 }> = ({
   metrics,
   numQueries,
+  dataSources,
   loading,
   lastRefresh,
   lastDuration,
@@ -238,6 +240,7 @@ export const MetricsQuerySummaryContent: React.FC<{
           lastRefresh={lastRefresh}
           lastDuration={lastDuration}
           numQueries={numQueries}
+          dataSources={dataSources}
           warningMessage={warningMessage}
           slownessReason={slownessReason}
         />
@@ -283,6 +286,7 @@ export const MetricsQuerySummary: React.FC<{
         direction="row"
         metrics={metrics}
         numQueries={stats?.numQueries}
+        dataSources={stats?.dataSources}
         loading={loading}
         lastRefresh={lastRefresh}
         lastDuration={lastDuration}
