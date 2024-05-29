@@ -99,7 +99,8 @@ export const Error: React.FC<Props> = ({ title, error, isLokiRelated }) => {
   }, [error]);
 
   React.useEffect(() => {
-    if (isLokiRelated) {
+    //jest crashing on getLokiReady not defined so we need to ensure the function is defined here
+    if (getLokiReady && isLokiRelated) {
       getLokiReady()
         .then(() => {
           setReady(true);
