@@ -115,6 +115,8 @@ export interface Fields {
   Interfaces?: string[];
   /** Flow direction array from the network interface observation point */
   IfDirections?: IfDirection[];
+  /** OVS monitoring metadatas */
+  OvsMonitorMDs?: string[];
   /** Logical OR combination of unique TCP flags comprised in the flow, as per RFC-9293, with additional custom flags to represent the following per-packet combinations: SYN+ACK (0x100), FIN+ACK (0x200) and RST+ACK (0x400). */
   Flags?: number;
   /** Number of packets */
