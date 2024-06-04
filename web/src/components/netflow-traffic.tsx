@@ -263,7 +263,13 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
   //use this ref to list any props / content loading state & events to skip tick function
   const initState = React.useRef<
     Array<
-      'initDone' | 'configLoading' | 'configLoaded' | 'maxChunkAgeLoading' | 'maxChunkAgeLoaded' | 'forcedFiltersLoaded'
+      | 'initDone'
+      | 'configLoading'
+      | 'configLoaded'
+      | 'maxChunkAgeLoading'
+      | 'maxChunkAgeLoaded'
+      | 'forcedFiltersLoaded'
+      | 'urlFiltersPending'
     >
   >([]);
   const [panels, setPanels] = useLocalStorage<OverviewPanel[]>(
@@ -459,6 +465,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
   // updating process
   const updateTableFilters = React.useCallback(
     (f: Filters) => {
+      initState.current = initState.current.filter(s => s !== 'urlFiltersPending');
       setFilters(f);
       setFlows([]);
       setMetrics(defaultNetflowMetrics);
@@ -482,6 +489,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
         //set filters from url or freshly loaded quick filters defaults
         const filtersPromise = getFiltersFromURL(getFilterDefs(), disabledFilters);
         if (filtersPromise) {
+          initState.current.push('urlFiltersPending');
           filtersPromise.then(updateTableFilters);
         } else {
           resetDefaultFilters(config);
@@ -1149,9 +1157,11 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
       }
     }
 
-    tick();
+    if (!initState.current.includes('urlFiltersPending')) {
+      tick();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [forcedFilters, config, tick, setConfig]);
+  }, [filters, forcedFilters, config, tick, setConfig]);
 
   // Rewrite URL params on state change
   React.useEffect(() => {
