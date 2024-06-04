@@ -114,6 +114,15 @@ func IPLabelFilter(labelKey, cidr string) LabelFilter {
 	}
 }
 
+func NotIPLabelFilter(labelKey, cidr string) LabelFilter {
+	return LabelFilter{
+		key:       labelKey,
+		matcher:   labelNotEqual,
+		value:     cidr,
+		valueType: typeIP,
+	}
+}
+
 func MultiValuesRegexFilter(labelKey string, values []string, not bool) (LabelFilter, bool) {
 	regexStr := strings.Builder{}
 	for i, value := range values {

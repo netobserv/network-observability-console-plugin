@@ -120,10 +120,7 @@ func (q *FlowQueryBuilder) addFilter(filter filters.Match) error {
 			q.labelFilters = append(q.labelFilters, lf)
 		}
 	} else if fields.IsIP(filter.Key) {
-		if filter.Not {
-			return fmt.Errorf("'not' operation not allowed in IP filters")
-		}
-		q.addIPFilters(filter.Key, values)
+		q.addIPFilters(filter.Key, values, filter.Not)
 	} else {
 		q.addLineFilters(filter.Key, values, filter.Not, filter.MoreThanOrEqual)
 	}
@@ -158,14 +155,22 @@ func (q *FlowQueryBuilder) addLineFilters(key string, values []string, not bool,
 
 // addIPFilters assumes that we are searching for that IP addresses as part
 // of the log line (not in the stream selector labels)
-func (q *FlowQueryBuilder) addIPFilters(key string, values []string) {
+func (q *FlowQueryBuilder) addIPFilters(key string, values []string, not bool) {
 	filtersPerKey := make([]filters.LabelFilter, 0, len(values))
 	for _, value := range values {
 		// empty exact matches should be treated as attribute filters looking for empty IP
 		if value == emptyMatch {
-			filtersPerKey = append(filtersPerKey, filters.StringEqualLabelFilter(key, ""))
+			if not {
+				filtersPerKey = append(filtersPerKey, filters.NotStringLabelFilter(key, ""))
+			} else {
+				filtersPerKey = append(filtersPerKey, filters.StringEqualLabelFilter(key, ""))
+			}
 		} else {
-			filtersPerKey = append(filtersPerKey, filters.IPLabelFilter(key, value))
+			if not {
+				filtersPerKey = append(filtersPerKey, filters.NotIPLabelFilter(key, value))
+			} else {
+				filtersPerKey = append(filtersPerKey, filters.IPLabelFilter(key, value))
+			}
 		}
 	}
 	q.jsonFilters = append(q.jsonFilters, filtersPerKey)
