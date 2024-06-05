@@ -1,4 +1,4 @@
-#loki-error-container {
+#netobserv-error-container {
   overflow: auto;
   height: 100%;
 }
@@ -10,8 +10,8 @@
   justify-content: center;
 }
 
-.loki-error-icon,
-.loki-error-message {
+.netobserv-error-icon,
+.netobserv-error-message {
   color: #A30000 !important;
   margin-bottom: 1em;
 }
@@ -22,5 +22,10 @@
 }
 
 .error-text-content>blockquote {
-  width: 50%;
+  width: 60%;
+}
+
+.error-text-content ul {
+  margin-top: 0.5em;
+  text-align: initial;
 }

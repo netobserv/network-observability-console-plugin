@@ -21,11 +21,13 @@ const (
 	AuthHeader                   = "Authorization"
 	CheckAuthenticated CheckType = "authenticated"
 	CheckAdmin         CheckType = "admin"
+	CheckDenyAll       CheckType = "denyAll"
 	CheckNone          CheckType = "none"
 )
 
 type Checker interface {
 	CheckAuth(ctx context.Context, header http.Header) error
+	CheckAdmin(ctx context.Context, header http.Header) error
 }
 
 func NewChecker(typez CheckType, apiProvider client.APIProvider) (Checker, error) {
@@ -36,6 +38,9 @@ func NewChecker(typez CheckType, apiProvider client.APIProvider) (Checker, error
 		return &BearerTokenChecker{apiProvider: apiProvider, predicates: []authPredicate{mustBeAuthenticated}}, nil
 	case CheckAdmin:
 		return &BearerTokenChecker{apiProvider: apiProvider, predicates: []authPredicate{mustBeAuthenticated, mustBeClusterAdmin}}, nil
+	case CheckDenyAll:
+		return &DenyAllChecker{}, nil
+
 	}
 	return nil, fmt.Errorf("auth checker type unknown: %s. Must be one of %s, %s, %s", typez, CheckAdmin, CheckAuthenticated, CheckNone)
 }
@@ -47,6 +52,25 @@ type NoopChecker struct {
 func (b *NoopChecker) CheckAuth(_ context.Context, _ http.Header) error {
 	hlog.Debug("noop auth checker: ignore auth")
 	return nil
+}
+
+func (b *NoopChecker) CheckAdmin(_ context.Context, _ http.Header) error {
+	hlog.Debug("noop auth checker: ignore auth")
+	return nil
+}
+
+type DenyAllChecker struct {
+	Checker
+}
+
+func (b *DenyAllChecker) CheckAuth(_ context.Context, _ http.Header) error {
+	hlog.Debug("deny all auth checker: deny auth")
+	return errors.New("deny all auth mode selected")
+}
+
+func (b *DenyAllChecker) CheckAdmin(_ context.Context, _ http.Header) error {
+	hlog.Debug("deny all auth checker: deny auth")
+	return errors.New("deny all auth mode selected")
 }
 
 func getUserToken(header http.Header) (string, error) {
@@ -116,5 +140,24 @@ func (c *BearerTokenChecker) CheckAuth(ctx context.Context, header http.Header) 
 	}
 
 	hlog.Debug("Checking auth: passed")
+	return nil
+}
+
+func (c *BearerTokenChecker) CheckAdmin(ctx context.Context, header http.Header) error {
+	hlog.Debug("Checking admin user")
+	token, err := getUserToken(header)
+	if err != nil {
+		return err
+	}
+	hlog.Debug("Checking admin: token found")
+	client, err := c.apiProvider()
+	if err != nil {
+		return err
+	}
+	if err = mustBeClusterAdmin(ctx, client, token); err != nil {
+		return err
+	}
+
+	hlog.Debug("Checking admin: passed")
 	return nil
 }

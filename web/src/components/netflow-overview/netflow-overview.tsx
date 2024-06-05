@@ -12,38 +12,35 @@ import { SearchIcon } from '@patternfly/react-icons';
 import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { LOCAL_STORAGE_OVERVIEW_KEBAB_KEY, useLocalStorage } from '../../utils/local-storage-hook';
-import { GenericMetric, isValidTopologyMetrics, NamedMetric, NetflowMetrics, TopologyMetrics } from '../../api/loki';
+import { Field, FlowDirection, getDirectionDisplayString } from '../../api/ipfix';
+import { GenericMetric, NamedMetric, NetflowMetrics, TopologyMetrics, isValidTopologyMetrics } from '../../api/loki';
 import { RecordType } from '../../model/flow-query';
 import { getStat } from '../../model/metrics';
+import { getDNSErrorDescription, getDNSRcodeDescription } from '../../utils/dns';
+import { getDSCPServiceClassName } from '../../utils/dscp';
+import { LOCAL_STORAGE_OVERVIEW_KEBAB_KEY, useLocalStorage } from '../../utils/local-storage-hook';
 import {
   CUSTOM_PANEL_MATCHER,
-  getFunctionFromId,
-  getOverviewPanelInfo,
-  getRateFunctionFromId,
   OverviewPanel,
   OverviewPanelId,
   OverviewPanelInfo,
+  getFunctionFromId,
+  getOverviewPanelInfo,
+  getRateFunctionFromId,
   parseCustomMetricId
 } from '../../utils/overview-panels';
+import { convertRemToPixels } from '../../utils/panel';
+import { formatPort } from '../../utils/port';
+import { usePrevious } from '../../utils/previous-hook';
+import { formatProtocol } from '../../utils/protocol';
 import { TruncateLength } from '../dropdowns/truncate-dropdown';
-import LokiError from '../messages/loki-error';
-import { MetricsGraph } from '../metrics/metrics-graph';
-import { observeDOMRect, toNamedMetric } from '../metrics/metrics-helper';
-import { MetricsGraphWithTotal } from '../metrics/metrics-graph-total';
 import { MetricsDonut } from '../metrics/metrics-donut';
+import { MetricsGraph } from '../metrics/metrics-graph';
+import { MetricsGraphWithTotal } from '../metrics/metrics-graph-total';
+import { observeDOMRect, toNamedMetric } from '../metrics/metrics-helper';
 import { NetflowOverviewPanel } from './netflow-overview-panel';
 import './netflow-overview.css';
 import { PanelKebab, PanelKebabOptions } from './panel-kebab';
-import { usePrevious } from '../../utils/previous-hook';
-import { convertRemToPixels } from '../../utils/panel';
-import { Field, FlowDirection, getDirectionDisplayString } from '../../api/ipfix';
-import { formatPort } from '../../utils/port';
-import { formatProtocol } from '../../utils/protocol';
-import { getDSCPServiceClassName } from '../../utils/dscp';
-import { getDNSRcodeDescription, getDNSErrorDescription } from '../../utils/dns';
-import { getPromUnsupportedError, isPromUnsupportedError } from '../../utils/errors';
-import { PrometheusUnsupported } from '../messages/prometheus-unsupported';
 
 type PanelContent = {
   calculatedTitle?: string;
@@ -59,7 +56,6 @@ export type NetflowOverviewProps = {
   recordType: RecordType;
   metrics: NetflowMetrics;
   loading?: boolean;
-  error?: string;
   isDark?: boolean;
   filterActionLinks: JSX.Element;
   truncateLength: TruncateLength;
@@ -73,7 +69,6 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
   recordType,
   metrics,
   loading,
-  error,
   isDark,
   filterActionLinks,
   truncateLength,
@@ -821,56 +816,48 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
     ]
   );
 
-  if (error) {
-    if (isPromUnsupportedError(error)) {
-      return <PrometheusUnsupported title={t('Unable to get overview')} error={getPromUnsupportedError(error)} />;
-    } else {
-      return <LokiError title={t('Unable to get overview')} error={error} />;
-    }
-  } else {
-    return (
-      <div
-        style={{
-          width: '100%',
-          height: '100%',
-          padding: `${containerPadding}px 0 ${containerPadding}px ${containerPadding}px`
-        }}
-        ref={containerRef}
-      >
-        {allowFocus && selectedPanel && (
-          <div
-            id="overview-absolute-graph"
-            style={{
-              position: 'absolute',
-              top: offsetTop,
-              right: containerSize.width / 5 + sidePanelWidth,
-              height: containerSize.height,
-              overflow: 'hidden',
-              width: (containerSize.width * 4) / 5,
-              padding: `${containerPadding}px ${cardPadding}px ${containerPadding}px ${containerPadding}px`
-            }}
-          >
-            {getPanelView(selectedPanel)}
-          </div>
-        )}
+  return (
+    <div
+      style={{
+        width: '100%',
+        height: '100%',
+        padding: `${containerPadding}px 0 ${containerPadding}px ${containerPadding}px`
+      }}
+      ref={containerRef}
+    >
+      {allowFocus && selectedPanel && (
         <div
-          id="overview-graph-list"
-          style={
-            allowFocus
-              ? {
-                  width: containerSize.width / 5 - containerPadding,
-                  marginLeft: (containerSize.width * 4) / 5 - containerPadding
-                }
-              : undefined
-          }
+          id="overview-absolute-graph"
+          style={{
+            position: 'absolute',
+            top: offsetTop,
+            right: containerSize.width / 5 + sidePanelWidth,
+            height: containerSize.height,
+            overflow: 'hidden',
+            width: (containerSize.width * 4) / 5,
+            padding: `${containerPadding}px ${cardPadding}px ${containerPadding}px ${containerPadding}px`
+          }}
         >
-          <Flex id="overview-flex" justifyContent={{ default: 'justifyContentSpaceBetween' }}>
-            {panels.map((panel, i) => getPanelView(panel, i))}
-          </Flex>
+          {getPanelView(selectedPanel)}
         </div>
+      )}
+      <div
+        id="overview-graph-list"
+        style={
+          allowFocus
+            ? {
+                width: containerSize.width / 5 - containerPadding,
+                marginLeft: (containerSize.width * 4) / 5 - containerPadding
+              }
+            : undefined
+        }
+      >
+        <Flex id="overview-flex" justifyContent={{ default: 'justifyContentSpaceBetween' }}>
+          {panels.map((panel, i) => getPanelView(panel, i))}
+        </Flex>
       </div>
-    );
-  }
+    </div>
+  );
 };
 
 export default NetflowOverview;
