@@ -270,6 +270,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
       | 'configLoadError'
       | 'maxChunkAgeLoading'
       | 'maxChunkAgeLoaded'
+      | 'maxChunkAgeLoadError'
       | 'forcedFiltersLoaded'
       | 'urlFiltersPending'
     >
