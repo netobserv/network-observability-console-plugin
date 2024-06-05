@@ -52,6 +52,6 @@ export const defaultConfig: Config = {
     merge: false
   },
   fields: [],
-  dataSources: [],
+  dataSources: ['loki', 'prom'],
   promLabels: []
 };
