@@ -21,7 +21,6 @@ loki:
   tenantID: netobserv
   useMocks: false
 prometheus:
-  url: http://prometheus:9090
   timeout: 30s
   metrics:
   - enabled: false

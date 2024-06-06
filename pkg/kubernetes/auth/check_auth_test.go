@@ -52,6 +52,14 @@ func TestCheckAuth_NoAuth(t *testing.T) {
 	// No header => success
 	err = checkerNoop.CheckAuth(context.TODO(), http.Header{})
 	require.NoError(t, err)
+
+	// Deny All mode
+	checkerDenyAll := DenyAllChecker{}
+
+	// No header => fail
+	err = checkerDenyAll.CheckAuth(context.TODO(), http.Header{})
+	require.Error(t, err)
+	require.Equal(t, "deny all auth mode selected", err.Error())
 }
 
 func TestCheckAuth_NormalUser(t *testing.T) {
