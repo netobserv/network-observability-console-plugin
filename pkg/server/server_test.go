@@ -513,8 +513,14 @@ func (a *authMock) CheckAuth(ctx context.Context, header http.Header) error {
 	return args.Error(0)
 }
 
+func (a *authMock) CheckAdmin(ctx context.Context, header http.Header) error {
+	args := a.Called(ctx, header)
+	return args.Error(0)
+}
+
 func (a *authMock) MockGranted() {
 	a.On("CheckAuth", mock.Anything, mock.Anything).Return(nil)
+	a.On("CheckAdmin", mock.Anything, mock.Anything).Return(nil)
 }
 
 func prepareServerAssets(t *testing.T) string {

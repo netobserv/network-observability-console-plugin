@@ -3,27 +3,23 @@ import { Bullseye, Spinner } from '@patternfly/react-core';
 import { Visualization, VisualizationProvider } from '@patternfly/react-topology';
 import _ from 'lodash';
 import * as React from 'react';
-import { useTranslation } from 'react-i18next';
 import { TopologyMetrics } from '../../api/loki';
 import { Filter, FilterDefinition, Filters } from '../../model/filters';
-import { StatFunction, FlowScope, MetricType } from '../../model/flow-query';
+import { FlowScope, MetricType, StatFunction } from '../../model/flow-query';
 import { GraphElementPeer, LayoutName, TopologyOptions } from '../../model/topology';
-import LokiError from '../messages/loki-error';
+import { observeDOMRect } from '../metrics/metrics-helper';
+import { ScopeSlider } from '../scope-slider/scope-slider';
 import { SearchEvent, SearchHandle } from '../search/search';
-import { TopologyContent } from './2d/topology-content';
-import ThreeDTopologyContent from './3d/three-d-topology-content';
 import componentFactory from './2d/componentFactories/componentFactory';
 import stylesComponentFactory from './2d/componentFactories/stylesComponentFactory';
 import layoutFactory from './2d/layouts/layoutFactory';
-import { ScopeSlider } from '../scope-slider/scope-slider';
-import { observeDOMRect } from '../metrics/metrics-helper';
-import { getPromUnsupportedError, isPromUnsupportedError } from '../../utils/errors';
-import { PrometheusUnsupported } from '../messages/prometheus-unsupported';
+import { TopologyContent } from './2d/topology-content';
+import ThreeDTopologyContent from './3d/three-d-topology-content';
+import './netflow-topology.css';
 
 export const NetflowTopology: React.FC<{
   loading?: boolean;
   k8sModels: { [key: string]: K8sModel };
-  error?: string;
   metricFunction: StatFunction;
   metricType: MetricType;
   metricScope: FlowScope;
@@ -44,7 +40,6 @@ export const NetflowTopology: React.FC<{
 }> = ({
   loading,
   k8sModels,
-  error,
   metricFunction,
   metricType,
   metricScope,
@@ -63,7 +58,6 @@ export const NetflowTopology: React.FC<{
   isDark,
   allowedScopes
 }) => {
-  const { t } = useTranslation('plugin__netobserv-plugin');
   const containerRef = React.createRef<HTMLDivElement>();
   const [containerSize, setContainerSize] = React.useState<DOMRect>({ width: 0, height: 0 } as DOMRect);
   const [controller, setController] = React.useState<Visualization>();
@@ -72,13 +66,7 @@ export const NetflowTopology: React.FC<{
   const displayedMetrics = _.isEmpty(metrics) ? droppedMetrics : metrics;
 
   const getContent = React.useCallback(() => {
-    if (error) {
-      if (isPromUnsupportedError(error)) {
-        return <PrometheusUnsupported title={t('Unable to get topology')} error={getPromUnsupportedError(error)} />;
-      } else {
-        return <LokiError title={t('Unable to get topology')} error={error} />;
-      }
-    } else if (!controller || (_.isEmpty(metrics) && loading)) {
+    if (!controller || (_.isEmpty(metrics) && loading)) {
       return (
         <Bullseye data-test="loading-contents">
           <Spinner size="xl" />
@@ -141,7 +129,6 @@ export const NetflowTopology: React.FC<{
     controller,
     displayedMetrics,
     droppedMetrics,
-    error,
     filterDefinitions,
     filters,
     isDark,
@@ -158,8 +145,7 @@ export const NetflowTopology: React.FC<{
     selected,
     setFilters,
     setMetricScope,
-    setOptions,
-    t
+    setOptions
   ]);
 
   //create controller on startup and register factories

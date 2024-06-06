@@ -9,7 +9,6 @@ import { defaultTimeRange } from '../../../utils/router';
 import { NetflowTopology } from '../netflow-topology';
 import { TopologyContent } from '../2d/topology-content';
 import { dataSample } from '../__tests-data__/metrics';
-import { LokiError } from '../../messages/loki-error';
 import { FilterDefinitionSample } from '../../../components/__tests-data__/filters';
 
 describe('<NetflowTopology />', () => {
@@ -55,11 +54,5 @@ describe('<NetflowTopology />', () => {
     mocks.loading = true;
     const wrapper = shallow(<NetflowTopology {...mocks} />);
     expect(wrapper.find(Spinner)).toHaveLength(1);
-  });
-
-  it('should render error', async () => {
-    mocks.error = 'test error message';
-    const wrapper = shallow(<NetflowTopology {...mocks} />);
-    expect(wrapper.find(LokiError)).toHaveLength(1);
   });
 });

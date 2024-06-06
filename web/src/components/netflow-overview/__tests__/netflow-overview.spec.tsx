@@ -2,7 +2,6 @@ import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 
 import { EmptyState } from '@patternfly/react-core';
-import LokiError from '../../../components/messages/loki-error';
 import { metrics, droppedMetrics } from '../../../components/__tests-data__/metrics';
 
 import { RecordType } from '../../../model/flow-query';
@@ -15,7 +14,6 @@ describe('<NetflowOverview />', () => {
   const props: NetflowOverviewProps = {
     limit: 5,
     panels: ShuffledDefaultPanels,
-    error: undefined as string | undefined,
     loading: false,
     recordType: 'flowLog' as RecordType,
     metrics: {
@@ -28,14 +26,6 @@ describe('<NetflowOverview />', () => {
   it('should render component', async () => {
     const wrapper = shallow(<NetflowOverview {...props} />);
     expect(wrapper.find(NetflowOverview)).toBeTruthy();
-  });
-  it('should render error', async () => {
-    const wrapper = shallow(<NetflowOverview {...props} />);
-    wrapper.setProps({
-      error: 'couic!'
-    });
-    wrapper.update();
-    expect(wrapper.find(LokiError)).toHaveLength(1);
   });
   it('should render empty states', async () => {
     const wrapper = mount(<NetflowOverview {...props} />);
