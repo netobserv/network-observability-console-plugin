@@ -1,11 +1,11 @@
-import * as React from 'react';
-import { useTranslation } from 'react-i18next';
 import { Checkbox, OptionsMenu, OptionsMenuItem, OptionsMenuPosition, OptionsMenuToggle } from '@patternfly/react-core';
 import { FilterIcon } from '@patternfly/react-icons';
-import { Filter, FilterDefinition } from '../../model/filters';
-import { FilterDir, isDirElementFiltered, toggleDirElementFilter } from '../../model/topology';
+import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import { TopologyMetricPeer } from '../../api/loki';
+import { Filter, FilterDefinition } from '../../model/filters';
 import { NodeType } from '../../model/flow-query';
+import { FilterDir, isDirElementFiltered, toggleDirElementFilter } from '../../model/topology';
 import './summary-filter-button.css';
 
 export interface SummaryFilterButtonProps {

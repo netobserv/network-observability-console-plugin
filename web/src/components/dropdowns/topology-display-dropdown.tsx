@@ -2,17 +2,17 @@ import { Checkbox, Flex, FlexItem, Select, Switch, Tooltip } from '@patternfly/r
 import { InfoAltIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { StatFunction, FlowScope, MetricType } from '../../model/flow-query';
+import { FlowScope, MetricType, StatFunction } from '../../model/flow-query';
 import { MetricScopeOptions } from '../../model/metrics';
 import { LayoutName, TopologyGroupTypes, TopologyOptions } from '../../model/topology';
 import GroupDropdown from './group-dropdown';
 import LayoutDropdown from './layout-dropdown';
 import TruncateDropdown, { TruncateLength } from './truncate-dropdown';
 
-import './topology-display-dropdown.css';
 import MetricFunctionDropdown from './metric-function-dropdown';
 import MetricTypeDropdown from './metric-type-dropdown';
 import ScopeDropdown from './scope-dropdown';
+import './topology-display-dropdown.css';
 
 export type Size = 's' | 'm' | 'l';
 
@@ -218,8 +218,8 @@ export const TopologyDisplayOptions: React.FC<{
           <Switch
             id="group-collapsed-switch"
             label={t('Collapse groups')}
-            isDisabled={topologyOptions.groupTypes === TopologyGroupTypes.NONE}
-            isChecked={topologyOptions.groupTypes !== TopologyGroupTypes.NONE && !topologyOptions.startCollapsed}
+            isDisabled={topologyOptions.groupTypes === TopologyGroupTypes.none}
+            isChecked={topologyOptions.groupTypes !== TopologyGroupTypes.none && !topologyOptions.startCollapsed}
             onChange={() =>
               setTopologyOptions({
                 ...topologyOptions,

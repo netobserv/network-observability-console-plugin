@@ -2,7 +2,7 @@ import { Flex, FlexItem, Radio, Text, TextVariants } from '@patternfly/react-cor
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { TopologyMetrics } from '../../api/loki';
-import { MetricType, isTimeMetric } from '../../model/flow-query';
+import { isTimeMetric, MetricType } from '../../model/flow-query';
 import { getStat } from '../../model/metrics';
 import { decorated, NodeData } from '../../model/topology';
 import { matchPeer } from '../../utils/metrics';

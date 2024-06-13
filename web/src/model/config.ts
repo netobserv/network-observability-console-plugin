@@ -1,5 +1,5 @@
-import { FieldConfig } from '../utils/fields';
 import { ColumnConfigDef } from '../utils/columns';
+import { FieldConfig } from '../utils/fields';
 import { FilterConfigDef } from './filters';
 import { RecordType } from './flow-query';
 import { RawQuickFilter } from './quick-filters';

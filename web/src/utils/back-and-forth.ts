@@ -1,9 +1,9 @@
-import { RecordsResult, FlowMetricsResult } from '../api/loki';
-import { getFlowRecords, getFlowMetrics } from '../api/routes';
+import { FlowMetricsResult, RecordsResult } from '../api/loki';
+import { getFlowMetrics, getFlowRecords } from '../api/routes';
 import { swapFilters } from '../components/filters/filters-helper';
 import { Filter, FilterDefinition, Filters } from '../model/filters';
-import { FlowQuery, filtersToString } from '../model/flow-query';
-import { TimeRange, computeStepInterval } from './datetime';
+import { filtersToString, FlowQuery } from '../model/flow-query';
+import { computeStepInterval, TimeRange } from './datetime';
 import { mergeStats, substractMetrics, sumMetrics } from './metrics';
 
 export const getFetchFunctions = (filterDefinitions: FilterDefinition[], filters: Filters, matchAny: boolean) => {

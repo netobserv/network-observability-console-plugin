@@ -26,7 +26,7 @@ import { getDefaultOverviewPanels, getOverviewPanelInfo, OverviewPanel } from '.
 import Modal from './modal';
 import './overview-panels-modal.css';
 
-export const PANEL_FILTER_KEYS = ['top', 'total', 'dns', 'dropped', 'bar', 'donut', 'line'];
+export const panelFilterKeys = ['top', 'total', 'dns', 'dropped', 'bar', 'donut', 'line'];
 
 export const OverviewPanelsModal: React.FC<{
   isModalOpen: boolean;
@@ -131,7 +131,7 @@ export const OverviewPanelsModal: React.FC<{
       if (filterKeys.includes(key)) {
         setFilterKeys(filterKeys.filter(k => k !== key));
       } else {
-        setFilterKeys(PANEL_FILTER_KEYS.filter(f => f === key || filterKeys.includes(f)));
+        setFilterKeys(panelFilterKeys.filter(f => f === key || filterKeys.includes(f)));
       }
     },
     [filterKeys]
@@ -193,7 +193,7 @@ export const OverviewPanelsModal: React.FC<{
           <Flex className="popup-header-margin">
             <FlexItem flex={{ default: 'flex_4' }}>
               <Flex className="flex-gap">
-                {PANEL_FILTER_KEYS.map(key => {
+                {panelFilterKeys.map(key => {
                   return (
                     <FlexItem
                       key={key}

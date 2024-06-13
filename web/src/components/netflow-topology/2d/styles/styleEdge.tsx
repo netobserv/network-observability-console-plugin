@@ -1,7 +1,7 @@
 import { Edge, observer, ScaleDetailsLevel, WithSelectionProps } from '@patternfly/react-topology';
-import BaseEdge from '../components/edge';
 import useDetailsLevel from '@patternfly/react-topology/dist/esm/hooks/useDetailsLevel';
 import * as React from 'react';
+import BaseEdge from '../components/edge';
 
 type StyleEdgeProps = {
   element: Edge;

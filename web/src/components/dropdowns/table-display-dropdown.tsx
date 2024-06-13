@@ -1,8 +1,8 @@
 import { Radio, Select, Tooltip } from '@patternfly/react-core';
 import { InfoAltIcon } from '@patternfly/react-icons';
+import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import * as _ from 'lodash';
 import './table-display-dropdown.css';
 
 export type Size = 's' | 'm' | 'l';

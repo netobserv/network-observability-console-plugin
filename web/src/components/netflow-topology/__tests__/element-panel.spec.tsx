@@ -2,16 +2,16 @@ import { DrawerCloseButton, OptionsMenuToggle } from '@patternfly/react-core';
 import { BaseEdge, BaseNode, NodeModel } from '@patternfly/react-topology';
 import { mount, shallow } from 'enzyme';
 import * as React from 'react';
-import { Filter } from '../../../model/filters';
 import { TopologyMetrics } from '../../../api/loki';
-import { FlowScope, MetricType } from '../../../model/flow-query';
-import { ElementPanel, ElementPanelDetailsContent } from '../element-panel';
-import { dataSample } from '../__tests-data__/metrics';
-import { NodeData } from '../../../model/topology';
-import { ElementPanelMetrics } from '../element-panel-metrics';
-import { createPeer } from '../../../utils/metrics';
 import { TruncateLength } from '../../../components/dropdowns/truncate-dropdown';
 import { FilterDefinitionSample } from '../../../components/__tests-data__/filters';
+import { Filter } from '../../../model/filters';
+import { FlowScope, MetricType } from '../../../model/flow-query';
+import { NodeData } from '../../../model/topology';
+import { createPeer } from '../../../utils/metrics';
+import { ElementPanel, ElementPanelDetailsContent } from '../element-panel';
+import { ElementPanelMetrics } from '../element-panel-metrics';
+import { dataSample } from '../__tests-data__/metrics';
 
 describe('<ElementPanel />', () => {
   const getNode = (kind: string, name: string, addr: string) => {

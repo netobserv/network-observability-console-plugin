@@ -1,9 +1,9 @@
-import * as React from 'react';
 import { Button, Card, Flex, FlexItem, Text, TextVariants, Tooltip } from '@patternfly/react-core';
-import { InfoAltIcon, ExpandIcon, CompressIcon } from '@patternfly/react-icons';
+import { CompressIcon, ExpandIcon, InfoAltIcon } from '@patternfly/react-icons';
+import * as React from 'react';
 
-import './netflow-overview-panel.css';
 import { useTranslation } from 'react-i18next';
+import './netflow-overview-panel.css';
 
 export const NetflowOverviewPanel: React.FC<{
   doubleWidth: boolean;

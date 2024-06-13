@@ -4,7 +4,7 @@ import CompareFilter, { CompareFilterProps, FilterCompare } from '../compare-fil
 
 describe('<CompareFilter />', () => {
   const props: CompareFilterProps = {
-    value: FilterCompare.EQUAL,
+    value: FilterCompare.equal,
     setValue: jest.fn(),
     component: 'text'
   };
@@ -23,27 +23,27 @@ describe('<CompareFilter />', () => {
     // No initial call
     expect(props.setValue).toHaveBeenCalledTimes(0);
 
-    //open dropdown and select NOT EQUAL
+    //open dropdown and select not equal
     dropdownToggleButton.last().simulate('click');
     wrapper.find('[id="not-equal"]').last().simulate('click');
-    expect(props.setValue).toHaveBeenCalledWith(FilterCompare.NOT_EQUAL);
+    expect(props.setValue).toHaveBeenCalledWith(FilterCompare.notEqual);
     expect(wrapper.find('li').length).toBe(0);
 
     //open dropdown and select EQUAL
     dropdownToggleButton.last().simulate('click');
     wrapper.find('[id="equal"]').last().simulate('click');
-    expect(props.setValue).toHaveBeenCalledWith(FilterCompare.EQUAL);
+    expect(props.setValue).toHaveBeenCalledWith(FilterCompare.equal);
     expect(wrapper.find('li').length).toBe(0);
 
-    //open dropdown and check for MORE_THAN_OR_EQUAL
+    //open dropdown and check for more than or equal
     dropdownToggleButton.last().simulate('click');
     expect(wrapper.find('[id="more-than"]').length).toBe(0);
 
     //switch directly
     switchButton.last().simulate('click');
-    expect(props.setValue).toHaveBeenCalledWith(FilterCompare.NOT_EQUAL);
+    expect(props.setValue).toHaveBeenCalledWith(FilterCompare.notEqual);
     switchButton.last().simulate('click');
-    expect(props.setValue).toHaveBeenCalledWith(FilterCompare.EQUAL);
+    expect(props.setValue).toHaveBeenCalledWith(FilterCompare.equal);
 
     //setState should be called 3 times
     expect(props.setValue).toHaveBeenCalledTimes(4);
@@ -54,18 +54,18 @@ describe('<CompareFilter />', () => {
     const switchButton = wrapper.find('#filter-compare-switch-button').last();
     const dropdownToggleButton = wrapper.find('#filter-compare-toggle-button').last();
 
-    //open dropdown and select MORE_THAN_OR_EQUAL
+    //open dropdown and select more than or equal
     dropdownToggleButton.last().simulate('click');
     wrapper.find('[id="more-than"]').last().simulate('click');
-    expect(props.setValue).toHaveBeenCalledWith(FilterCompare.MORE_THAN_OR_EQUAL);
+    expect(props.setValue).toHaveBeenCalledWith(FilterCompare.moreThanOrEqual);
     expect(wrapper.find('li').length).toBe(0);
 
     //switch directly
     switchButton.last().simulate('click');
-    expect(props.setValue).toHaveBeenCalledWith(FilterCompare.NOT_EQUAL);
+    expect(props.setValue).toHaveBeenCalledWith(FilterCompare.notEqual);
     switchButton.last().simulate('click');
-    expect(props.setValue).toHaveBeenCalledWith(FilterCompare.MORE_THAN_OR_EQUAL);
+    expect(props.setValue).toHaveBeenCalledWith(FilterCompare.moreThanOrEqual);
     switchButton.last().simulate('click');
-    expect(props.setValue).toHaveBeenCalledWith(FilterCompare.EQUAL);
+    expect(props.setValue).toHaveBeenCalledWith(FilterCompare.equal);
   });
 });

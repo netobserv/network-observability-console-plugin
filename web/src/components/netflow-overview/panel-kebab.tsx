@@ -13,9 +13,9 @@ import {
 } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
+import { exportToPng } from '../../utils/export';
 import { OverviewPanelId } from '../../utils/overview-panels';
 import './panel-kebab.css';
-import { exportToPng } from '../../utils/export';
 
 export type GraphOptipn = {
   type: GraphType;

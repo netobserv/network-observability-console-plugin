@@ -27,7 +27,7 @@ import { useTranslation } from 'react-i18next';
 import { NamedMetric, TopologyMetrics } from '../../api/loki';
 import { TimeRange } from '../../utils/datetime';
 import { getDateMsInSeconds } from '../../utils/duration';
-import { LOCAL_STORAGE_HISTOGRAM_GUIDED_TOUR_DONE_KEY, useLocalStorage } from '../../utils/local-storage-hook';
+import { localStorageHistogramGuidedTourDoneKey, useLocalStorage } from '../../utils/local-storage-hook';
 import { getFormattedValue } from '../../utils/metrics';
 import { TruncateLength } from '../dropdowns/truncate-dropdown';
 import { GuidedTourHandle } from '../guided-tour/guided-tour';
@@ -170,7 +170,7 @@ export const Histogram: React.FC<{
     );
   }, [t]);
 
-  const [guidedTourDone, setGuidedTourDone] = useLocalStorage<boolean>(LOCAL_STORAGE_HISTOGRAM_GUIDED_TOUR_DONE_KEY);
+  const [guidedTourDone, setGuidedTourDone] = useLocalStorage<boolean>(localStorageHistogramGuidedTourDoneKey);
   React.useEffect(() => {
     if (!guidedTourHandle) {
       return;

@@ -1,17 +1,17 @@
 import { useResolvedExtensions } from '@openshift-console/dynamic-plugin-sdk';
+import { waitFor } from '@testing-library/react';
 import { mount, render, shallow } from 'enzyme';
 import * as React from 'react';
-import { waitFor } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
-import { getConfig, getFlowGenericMetrics, getFlowRecords, getFlowMetrics } from '../../api/routes';
+import { AlertsResult, SilencedAlert } from '../../api/alert';
+import { FlowMetricsResult, GenericMetricsResult } from '../../api/loki';
+import { getConfig, getFlowGenericMetrics, getFlowMetrics, getFlowRecords } from '../../api/routes';
+import { FlowQuery } from '../../model/flow-query';
 import NetflowTraffic from '../netflow-traffic';
+import NetflowTrafficParent from '../netflow-traffic-parent';
+import { FullConfigResultSample, SimpleConfigResultSample } from '../__tests-data__/config';
 import { extensionsMock } from '../__tests-data__/extensions';
 import { FlowsResultSample } from '../__tests-data__/flows';
-import NetflowTrafficParent from '../netflow-traffic-parent';
-import { GenericMetricsResult, FlowMetricsResult } from '../../api/loki';
-import { AlertsResult, SilencedAlert } from '../../api/alert';
-import { FullConfigResultSample, SimpleConfigResultSample } from '../__tests-data__/config';
-import { FlowQuery } from '../../model/flow-query';
 
 const useResolvedExtensionsMock = useResolvedExtensions as jest.Mock;
 

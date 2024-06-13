@@ -1,10 +1,10 @@
-import * as React from 'react';
 import { Text, TextContent, TextVariants } from '@patternfly/react-core';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Filter, FilterDefinition } from '../../model/filters';
 import { NodeData } from '../../model/topology';
-import { ElementField } from './element-field';
 import { createPeer } from '../../utils/metrics';
+import { ElementField } from './element-field';
 
 export const ElementFields: React.FC<{
   id: string;

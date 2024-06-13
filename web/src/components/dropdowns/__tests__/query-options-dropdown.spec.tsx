@@ -1,6 +1,6 @@
-import * as React from 'react';
 import { Checkbox, Radio, Select } from '@patternfly/react-core';
 import { shallow } from 'enzyme';
+import * as React from 'react';
 import { act } from 'react-dom/test-utils';
 import QueryOptionsDropdown, { QueryOptionsDropdownProps, QueryOptionsPanel } from '../query-options-dropdown';
 

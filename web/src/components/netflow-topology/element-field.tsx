@@ -1,8 +1,8 @@
 import { Flex, FlexItem, Text, TextContent, TextVariants } from '@patternfly/react-core';
 import * as React from 'react';
-import { NodeType } from '../../model/flow-query';
 import { TopologyMetricPeer } from '../../api/loki';
 import { Filter, FilterDefinition } from '../../model/filters';
+import { NodeType } from '../../model/flow-query';
 import { SummaryFilterButton } from '../filters/summary-filter-button';
 import { PeerResourceLink } from './peer-resource-link';
 

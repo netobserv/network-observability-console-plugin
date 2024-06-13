@@ -3,7 +3,7 @@ import { ReadOnlyValues } from './values';
 const coreDropSubSystem = 0 << 16;
 const ovsDropSubSystem = 3 << 16;
 // https://github.com/torvalds/linux/blob/master/include/net/tcp_states.h
-export const DROP_STATES: ReadOnlyValues = [
+export const dropStates: ReadOnlyValues = [
   { value: 0, name: 'TCP_INVALID_STATE' },
   { value: 1, name: 'TCP_ESTABLISHED' },
   { value: 2, name: 'TCP_SYN_SENT' },
@@ -18,13 +18,13 @@ export const DROP_STATES: ReadOnlyValues = [
   { value: 11, name: 'TCP_NEW_SYN_RECV' }
 ] as const;
 
-const dropStatesValues = DROP_STATES.map(v => v.value);
-export type DROP_STATES_VALUES = typeof dropStatesValues[number];
+const dropStatesValues = dropStates.map(v => v.value);
+export type dropStatesValues = typeof dropStatesValues[number];
 
-const dropStatesNames = DROP_STATES.map(v => v.name);
-export type DROP_STATES_NAMES = typeof dropStatesNames[number];
+const dropStatesNames = dropStates.map(v => v.name);
+export type dropStatesNames = typeof dropStatesNames[number];
 // https://github.com/torvalds/linux/blob/master/include/net/dropreason-core.h
-export const DROP_CAUSES: ReadOnlyValues = [
+export const dropCauses: ReadOnlyValues = [
   { value: coreDropSubSystem + 2, name: 'SKB_DROP_REASON_NOT_SPECIFIED', description: 'drop reason is not specified' },
   { value: coreDropSubSystem + 3, name: 'SKB_DROP_REASON_NO_SOCKET', description: 'socket not found' },
   { value: coreDropSubSystem + 4, name: 'SKB_DROP_REASON_PKT_TOO_SMALL', description: 'packet size is too small' },
@@ -340,24 +340,24 @@ export const DROP_CAUSES: ReadOnlyValues = [
   }
 ] as const;
 
-const dropCausesValues = DROP_CAUSES.map(v => v.value);
-export type DROP_CAUSES_VALUES = typeof dropCausesValues[number];
+const dropCausesValues = dropCauses.map(v => v.value);
+export type dropCausesValues = typeof dropCausesValues[number];
 
-const dropCausesNames = DROP_CAUSES.map(v => v.name);
-export type DROP_CAUSES_NAMES = typeof dropCausesNames[number];
+const dropCausesNames = dropCauses.map(v => v.name);
+export type dropCausesNames = typeof dropCausesNames[number];
 
-export const CORE_DROP_CAUSES_DOC_URL = 'https://github.com/torvalds/linux/blob/master/include/net/dropreason-core.h';
-export const OVS_DROP_CAUSES_DOC_URL =
+export const coreDropCausesDocUrl = 'https://github.com/torvalds/linux/blob/master/include/net/dropreason-core.h';
+export const ovsDropCausesDocUrl =
   'https://git.kernel.org/pub/scm/linux/kernel/git/netdev/net-next.git/tree/net/openvswitch/drop.h';
 
-export const getDropCauseDescription = (name: DROP_CAUSES_NAMES): string => {
-  return DROP_CAUSES.find(v => v.name === name)?.description || 'Unknown';
+export const getDropCauseDescription = (name: dropCausesNames): string => {
+  return dropCauses.find(v => v.name === name)?.description || 'Unknown';
 };
 
-export const getDropCauseDocUrl = (name: DROP_CAUSES_NAMES): string => {
+export const getDropCauseDocUrl = (name: dropCausesNames): string => {
   if (name.startsWith('OVS_')) {
-    return OVS_DROP_CAUSES_DOC_URL;
+    return ovsDropCausesDocUrl;
   }
 
-  return CORE_DROP_CAUSES_DOC_URL;
+  return coreDropCausesDocUrl;
 };

@@ -1,6 +1,6 @@
-import * as React from 'react';
 import { Tooltip, TooltipPosition } from '@patternfly/react-core';
-import { ContextMenu, Decorator, DEFAULT_DECORATOR_RADIUS } from '@patternfly/react-topology';
+import { ContextMenu, Decorator, DEFAULT_DECORATOR_RADIUS as defaultDecoratorRadius } from '@patternfly/react-topology';
+import * as React from 'react';
 
 type Reference = React.ComponentProps<typeof ContextMenu>['reference'];
 
@@ -26,7 +26,7 @@ export const ClickableDecorator: React.FC<ClickableDecoratorProps> = ({
       <Decorator
         x={pos.x}
         y={pos.y}
-        radius={DEFAULT_DECORATOR_RADIUS}
+        radius={defaultDecoratorRadius}
         padding={padding}
         showBackground
         icon={icon}

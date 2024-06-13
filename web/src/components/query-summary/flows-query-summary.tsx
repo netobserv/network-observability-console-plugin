@@ -1,14 +1,14 @@
 import { Card, Flex, FlexItem, Text, TextVariants, Tooltip } from '@patternfly/react-core';
+import { InfoCircleIcon } from '@patternfly/react-icons';
+import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { rangeToSeconds, TimeRange } from '../../utils/datetime';
 import { Record } from '../../api/ipfix';
-import { InfoCircleIcon } from '@patternfly/react-icons';
-import './query-summary.css';
-import { valueFormat } from '../../utils/format';
 import { Stats } from '../../api/loki';
 import { RecordType } from '../../model/flow-query';
-import _ from 'lodash';
+import { rangeToSeconds, TimeRange } from '../../utils/datetime';
+import { valueFormat } from '../../utils/format';
+import './query-summary.css';
 import StatsQuerySummary from './stats-query-summary';
 
 export const FlowsQuerySummaryContent: React.FC<{

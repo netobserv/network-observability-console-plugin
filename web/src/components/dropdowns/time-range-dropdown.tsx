@@ -18,7 +18,7 @@ export type TimeRangeDropdownProps = {
   id?: string;
 };
 
-export const CUSTOM_TIME_RANGE_KEY = 'CUSTOM_TIME_RANGE_KEY';
+export const customTimeRangeKey = 'CUSTOM_TIME_RANGE_KEY';
 
 export const TimeRangeDropdown: React.FC<TimeRangeDropdownProps> = ({ id, range, setRange, openCustomModal }) => {
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
@@ -26,7 +26,7 @@ export const TimeRangeDropdown: React.FC<TimeRangeDropdownProps> = ({ id, range,
 
   const onChange = React.useCallback(
     (v: string) => {
-      if (v === CUSTOM_TIME_RANGE_KEY) {
+      if (v === customTimeRangeKey) {
         openCustomModal();
       } else {
         setRange(getDateMsInSeconds(parseDuration(v)));
@@ -36,10 +36,10 @@ export const TimeRangeDropdown: React.FC<TimeRangeDropdownProps> = ({ id, range,
   );
 
   const timeRangeOptions = getTimeRangeOptions(t);
-  const selectedKey = typeof range !== 'number' ? CUSTOM_TIME_RANGE_KEY : formatDuration(getDateSInMiliseconds(range));
+  const selectedKey = typeof range !== 'number' ? customTimeRangeKey : formatDuration(getDateSInMiliseconds(range));
 
   const textContent = (prettyPrint = true) => {
-    if (selectedKey === CUSTOM_TIME_RANGE_KEY) {
+    if (selectedKey === customTimeRangeKey) {
       const timeRange = range as TimeRange;
       const from = getDateFromSecondsString(timeRange.from?.toString());
       const fromText = getFormattedDate(from);
@@ -79,12 +79,12 @@ export const TimeRangeDropdown: React.FC<TimeRangeDropdownProps> = ({ id, range,
       onSelect={() => setIsOpen(false)}
       toggle={
         <Tooltip
-          trigger={selectedKey === CUSTOM_TIME_RANGE_KEY ? 'mouseenter focus' : ''}
+          trigger={selectedKey === customTimeRangeKey ? 'mouseenter focus' : ''}
           position="top"
           content={textContent()}
         >
           <DropdownToggle data-test={`${id}-dropdown`} id={`${id}-dropdown`} onToggle={() => setIsOpen(!isOpen)}>
-            {selectedKey === CUSTOM_TIME_RANGE_KEY
+            {selectedKey === customTimeRangeKey
               ? textContent(false)
               : timeRangeOptions[selectedKey as keyof typeof timeRangeOptions]}
           </DropdownToggle>

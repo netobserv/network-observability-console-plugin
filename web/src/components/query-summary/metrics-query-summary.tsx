@@ -1,15 +1,15 @@
 import { Card, Flex, FlexItem, Text, TextVariants, Tooltip } from '@patternfly/react-core';
-import { DomainIcon, TachometerAltIcon, OutlinedClockIcon } from '@patternfly/react-icons';
-import { getRateMetricKey, NetflowMetrics, Stats } from '../../api/loki';
+import { DomainIcon, OutlinedClockIcon, TachometerAltIcon } from '@patternfly/react-icons';
 import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
+import { getRateMetricKey, NetflowMetrics, Stats } from '../../api/loki';
 import { MetricType } from '../../model/flow-query';
 import { valueFormat } from '../../utils/format';
 import './query-summary.css';
 import StatsQuerySummary from './stats-query-summary';
 
-const EXPOSED_METRICS: MetricType[] = [
+const exposedMetrics: MetricType[] = [
   'Bytes',
   'Packets',
   'PktDropBytes',
@@ -210,9 +210,9 @@ export const MetricsQuerySummaryContent: React.FC<{
   );
 
   const metricsToShow = React.useCallback(() => {
-    const filtered = EXPOSED_METRICS.filter(mt => getMetrics(mt) !== undefined).flatMap((mt: MetricType) =>
-      counters(mt)
-    );
+    const filtered = exposedMetrics
+      .filter(mt => getMetrics(mt) !== undefined)
+      .flatMap((mt: MetricType) => counters(mt));
     // limit the number of metrics to show horizontally since we don't have enough room
     if (direction === 'row') {
       return filtered.slice(0, 5);

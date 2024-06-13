@@ -13,20 +13,20 @@ import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Field, FlowDirection, getDirectionDisplayString } from '../../api/ipfix';
-import { GenericMetric, NamedMetric, NetflowMetrics, TopologyMetrics, isValidTopologyMetrics } from '../../api/loki';
+import { GenericMetric, isValidTopologyMetrics, NamedMetric, NetflowMetrics, TopologyMetrics } from '../../api/loki';
 import { RecordType } from '../../model/flow-query';
 import { getStat } from '../../model/metrics';
 import { getDNSErrorDescription, getDNSRcodeDescription } from '../../utils/dns';
 import { getDSCPServiceClassName } from '../../utils/dscp';
-import { LOCAL_STORAGE_OVERVIEW_KEBAB_KEY, useLocalStorage } from '../../utils/local-storage-hook';
+import { localStorageOverviewKebabKey, useLocalStorage } from '../../utils/local-storage-hook';
 import {
-  CUSTOM_PANEL_MATCHER,
-  OverviewPanel,
-  OverviewPanelId,
-  OverviewPanelInfo,
+  customPanelMatcher,
   getFunctionFromId,
   getOverviewPanelInfo,
   getRateFunctionFromId,
+  OverviewPanel,
+  OverviewPanelId,
+  OverviewPanelInfo,
   parseCustomMetricId
 } from '../../utils/overview-panels';
 import { convertRemToPixels } from '../../utils/panel';
@@ -77,7 +77,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [kebabMap, setKebabMap] = useLocalStorage<Map<OverviewPanelId, PanelKebabOptions>>(
-    LOCAL_STORAGE_OVERVIEW_KEBAB_KEY,
+    localStorageOverviewKebabKey,
     new Map<OverviewPanelId, PanelKebabOptions>()
   );
   const [selectedPanel, setSelectedPanel] = React.useState<OverviewPanel | undefined>();
@@ -288,7 +288,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
 
   const getTopKCustomMetrics = React.useCallback(
     (id: string) => {
-      return metrics.customMetrics.get(id.replaceAll(CUSTOM_PANEL_MATCHER + '_', '')) || [];
+      return metrics.customMetrics.get(id.replaceAll(customPanelMatcher + '_', '')) || [];
     },
     [metrics.customMetrics]
   );
@@ -310,7 +310,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
 
   const getTotalCustomMetrics = React.useCallback(
     (id: string) => {
-      return metrics.totalCustomMetrics.get(id.replaceAll(CUSTOM_PANEL_MATCHER + '_', ''));
+      return metrics.totalCustomMetrics.get(id.replaceAll(customPanelMatcher + '_', ''));
     },
     [metrics.totalCustomMetrics]
   );

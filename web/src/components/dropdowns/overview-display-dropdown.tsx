@@ -1,4 +1,4 @@
-import { Select, Tooltip, Switch } from '@patternfly/react-core';
+import { Select, Switch, Tooltip } from '@patternfly/react-core';
 import { InfoAltIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';

@@ -14,23 +14,23 @@ import {
   TextContent,
   TextVariants
 } from '@patternfly/react-core';
+import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import _ from 'lodash';
-import { defaultSize, maxSize, minSize } from '../../utils/panel';
-import { compareStrings } from '../../utils/base-compare';
 import { Record } from '../../api/ipfix';
+import { NetflowMetrics, Stats } from '../../api/loki';
+import { RecordType } from '../../model/flow-query';
+import { compareStrings } from '../../utils/base-compare';
+import { config } from '../../utils/config';
 import { TimeRange } from '../../utils/datetime';
-import { FlowsQuerySummaryContent } from './flows-query-summary';
+import { formatDuration, formatDurationAboveMillisecond, formatDurationAboveNanosecond } from '../../utils/duration';
+import { compareIPs } from '../../utils/ip';
+import { defaultSize, maxSize, minSize } from '../../utils/panel';
 import { comparePorts, formatPort } from '../../utils/port';
 import { formatProtocol } from '../../utils/protocol';
-import { compareIPs } from '../../utils/ip';
-import { NetflowMetrics, Stats } from '../../api/loki';
-import './summary-panel.css';
-import { RecordType } from '../../model/flow-query';
+import { FlowsQuerySummaryContent } from './flows-query-summary';
 import { MetricsQuerySummaryContent } from './metrics-query-summary';
-import { config } from '../../utils/config';
-import { formatDuration, formatDurationAboveMillisecond, formatDurationAboveNanosecond } from '../../utils/duration';
+import './summary-panel.css';
 
 type TypeCardinality = {
   type: string;

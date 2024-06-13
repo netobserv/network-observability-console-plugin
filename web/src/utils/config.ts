@@ -1,7 +1,7 @@
-import { defaultConfig } from '../model/config';
 import { getConfig, getIngesterMaxChunkAge } from '../api/routes';
-import { getHTTPErrorDetails } from './errors';
+import { defaultConfig } from '../model/config';
 import { parseDuration } from './duration';
+import { getHTTPErrorDetails } from './errors';
 
 export let config = defaultConfig;
 

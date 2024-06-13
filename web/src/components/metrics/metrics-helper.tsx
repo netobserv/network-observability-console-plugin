@@ -1,11 +1,11 @@
 import { ChartLegendTooltip, createContainer, getResizeObserver } from '@patternfly/react-charts';
 import { TFunction } from 'i18next';
 import * as React from 'react';
-import { getDateSInMiliseconds } from '../../utils/duration';
-import { NamedMetric, TopologyMetricPeer, TopologyMetrics, GenericMetric } from '../../api/loki';
+import { GenericMetric, NamedMetric, TopologyMetricPeer, TopologyMetrics } from '../../api/loki';
 import { FlowScope } from '../../model/flow-query';
 import { NodeData } from '../../model/topology';
 import { getDateFromUnix, getFormattedDate, TimeRange } from '../../utils/datetime';
+import { getDateSInMiliseconds } from '../../utils/duration';
 import { isUnknownPeer, matchPeer } from '../../utils/metrics';
 import { TruncateLength } from '../dropdowns/truncate-dropdown';
 

@@ -19,22 +19,22 @@ import {
   TextContent,
   TextVariants
 } from '@patternfly/react-core';
+import { FilterIcon, TimesIcon } from '@patternfly/react-icons';
 import { BaseEdge, BaseNode } from '@patternfly/react-topology';
-import { TimesIcon, FilterIcon } from '@patternfly/react-icons';
+import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { defaultSize, maxSize, minSize } from '../../utils/panel';
-import { MetricType } from '../../model/flow-query';
 import { TopologyMetrics } from '../../api/loki';
 import { Filter, FilterDefinition } from '../../model/filters';
+import { MetricType } from '../../model/flow-query';
 import { GraphElementPeer, isElementFiltered, NodeData, toggleElementFilter } from '../../model/topology';
-import { ElementPanelMetrics } from './element-panel-metrics';
+import { createPeer } from '../../utils/metrics';
+import { defaultSize, maxSize, minSize } from '../../utils/panel';
 import { TruncateLength } from '../dropdowns/truncate-dropdown';
 import { ElementFields } from './element-fields';
-import { PeerResourceLink } from './peer-resource-link';
+import { ElementPanelMetrics } from './element-panel-metrics';
 import './element-panel.css';
-import _ from 'lodash';
-import { createPeer } from '../../utils/metrics';
+import { PeerResourceLink } from './peer-resource-link';
 
 export const ElementPanelDetailsContent: React.FC<{
   element: GraphElementPeer;

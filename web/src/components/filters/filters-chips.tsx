@@ -1,9 +1,8 @@
 import { Button, Text, TextVariants, ToolbarGroup, ToolbarItem, Tooltip } from '@patternfly/react-core';
-import { TimesIcon, TimesCircleIcon, LongArrowAltDownIcon, LongArrowAltUpIcon } from '@patternfly/react-icons';
+import { LongArrowAltDownIcon, LongArrowAltUpIcon, TimesCircleIcon, TimesIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { navigate } from '../dynamic-loader/dynamic-loader';
 import {
   Filter,
   FilterDefinition,
@@ -15,8 +14,9 @@ import {
 import { QuickFilter } from '../../model/quick-filters';
 import { autoCompleteCache } from '../../utils/autocomplete-cache';
 import { getPathWithParams, netflowTrafficPath } from '../../utils/url';
-import { hasSrcDstFilters, getFilterFullName, swapFilters } from './filters-helper';
+import { navigate } from '../dynamic-loader/dynamic-loader';
 import { LinksOverflow } from '../overflow/links-overflow';
+import { getFilterFullName, hasSrcDstFilters, swapFilters } from './filters-helper';
 
 export interface FiltersChipsProps {
   isForced: boolean;

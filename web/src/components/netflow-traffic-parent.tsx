@@ -1,9 +1,9 @@
 import * as React from 'react';
-import { clearURLParams } from '../utils/url';
 import { clearLocalStorage } from '../utils/local-storage-hook';
-import NetflowTraffic, { NetflowTrafficProps } from './netflow-traffic';
+import { clearURLParams } from '../utils/url';
 import AlertFetcher from './alerts/fetcher';
 import DynamicLoader from './dynamic-loader/dynamic-loader';
+import NetflowTraffic, { NetflowTrafficProps } from './netflow-traffic';
 
 type Props = NetflowTrafficProps & {};
 

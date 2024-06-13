@@ -1,15 +1,15 @@
-import * as React from 'react';
 import { mount, shallow } from 'enzyme';
+import * as React from 'react';
 
-import GroupDropdown from '../group-dropdown';
-import { TopologyGroupTypes } from '../../../model/topology';
-import { MetricScopeOptions } from '../../../model/metrics';
 import { FlowScope } from '../../../model/flow-query';
+import { MetricScopeOptions } from '../../../model/metrics';
+import { TopologyGroupTypes } from '../../../model/topology';
+import GroupDropdown from '../group-dropdown';
 
 describe('<GroupDropdown />', () => {
   const props = {
     scope: MetricScopeOptions.RESOURCE,
-    selected: TopologyGroupTypes.HOSTS,
+    selected: TopologyGroupTypes.hosts,
     setGroupType: jest.fn(),
     id: 'group',
     allowedScopes: ['host', 'namespace', 'owner'] as FlowScope[]
@@ -41,13 +41,13 @@ describe('<GroupDropdown />', () => {
     //open dropdown and select NONE
     dropdown.at(0).simulate('click');
     wrapper.find('[id="none"]').at(0).simulate('click');
-    expect(props.setGroupType).toHaveBeenCalledWith(TopologyGroupTypes.NONE);
+    expect(props.setGroupType).toHaveBeenCalledWith(TopologyGroupTypes.none);
     expect(wrapper.find('li').length).toBe(0);
 
     //open dropdown and select OWNERS
     dropdown.at(0).simulate('click');
     wrapper.find('[id="owners"]').at(0).simulate('click');
-    expect(props.setGroupType).toHaveBeenCalledWith(TopologyGroupTypes.OWNERS);
+    expect(props.setGroupType).toHaveBeenCalledWith(TopologyGroupTypes.owners);
     expect(wrapper.find('li').length).toBe(0);
 
     //setGroupType should be called twice

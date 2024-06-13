@@ -4,8 +4,8 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { DataSource, Match, PacketLoss, RecordType } from '../../model/flow-query';
 
-export const TOP_VALUES = [5, 10, 15];
-export const LIMIT_VALUES = [50, 100, 500, 1000];
+export const topValues = [5, 10, 15];
+export const limitValues = [50, 100, 500, 1000];
 
 export interface QueryOptionsDropdownProps {
   recordType: RecordType;
@@ -117,7 +117,7 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
     }
   ];
 
-  const limitValues = useTopK ? TOP_VALUES : LIMIT_VALUES;
+  const values = useTopK ? topValues : limitValues;
 
   return (
     <>
@@ -351,7 +351,7 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
             </>
           </div>
         </Tooltip>
-        {limitValues.map(l => (
+        {values.map(l => (
           <div key={'limit-' + l}>
             <label className="pf-c-select__menu-item">
               <Radio

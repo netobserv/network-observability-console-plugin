@@ -1,9 +1,9 @@
 import { Dropdown, DropdownItem, DropdownToggle } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
+import { FlowScope } from '../../model/flow-query';
 import { MetricScopeOptions } from '../../model/metrics';
 import { getGroupsForScope, isGroupEnabled, TopologyGroupTypes } from '../../model/topology';
-import { FlowScope } from '../../model/flow-query';
 
 export const GroupDropdown: React.FC<{
   disabled?: boolean;
@@ -19,39 +19,39 @@ export const GroupDropdown: React.FC<{
   const getGroupDisplay = (groupType: TopologyGroupTypes) => {
     switch (groupType) {
       /** Clusters aggregation and groups */
-      case TopologyGroupTypes.CLUSTERS:
+      case TopologyGroupTypes.clusters:
         return t('Clusters');
-      case TopologyGroupTypes.CLUSTERS_HOSTS:
+      case TopologyGroupTypes.clustersHosts:
         return t('Clusters + Nodes');
-      case TopologyGroupTypes.CLUSTERS_ZONES:
+      case TopologyGroupTypes.clustersZones:
         return t('Clusters + Zones');
-      case TopologyGroupTypes.CLUSTERS_NAMESPACES:
+      case TopologyGroupTypes.clustersNamespaces:
         return t('Clusters + Namespaces');
-      case TopologyGroupTypes.CLUSTERS_OWNERS:
+      case TopologyGroupTypes.clustersOwners:
         return t('Clusters + Owners');
       /** Zones aggregation and groups */
-      case TopologyGroupTypes.ZONES:
+      case TopologyGroupTypes.zones:
         return t('Zones');
-      case TopologyGroupTypes.ZONES_HOSTS:
+      case TopologyGroupTypes.zonesHosts:
         return t('Zones + Nodes');
-      case TopologyGroupTypes.ZONES_NAMESPACES:
+      case TopologyGroupTypes.zonesNamespaces:
         return t('Zones + Namespaces');
-      case TopologyGroupTypes.ZONES_OWNERS:
+      case TopologyGroupTypes.zonesOwners:
         return t('Zones + Owners');
       /** Hosts aggregation and groups */
-      case TopologyGroupTypes.HOSTS:
+      case TopologyGroupTypes.hosts:
         return t('Nodes');
-      case TopologyGroupTypes.HOSTS_NAMESPACES:
+      case TopologyGroupTypes.hostsNamespaces:
         return t('Nodes + Namespaces');
-      case TopologyGroupTypes.HOSTS_OWNERS:
+      case TopologyGroupTypes.hostsOwners:
         return t('Nodes + Owners');
       /** Namespaces aggregation and groups */
-      case TopologyGroupTypes.NAMESPACES:
+      case TopologyGroupTypes.namespaces:
         return t('Namespaces');
-      case TopologyGroupTypes.NAMESPACES_OWNERS:
+      case TopologyGroupTypes.namespacesOwners:
         return t('Namespaces + Owners');
       /** Owner aggregation */
-      case TopologyGroupTypes.OWNERS:
+      case TopologyGroupTypes.owners:
         return t('Owners');
       default:
         return t('None');

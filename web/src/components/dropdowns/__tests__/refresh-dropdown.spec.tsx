@@ -1,5 +1,5 @@
-import * as React from 'react';
 import { mount, shallow } from 'enzyme';
+import * as React from 'react';
 
 import RefreshDropdown, { RefreshDropdownProps } from '../refresh-dropdown';
 

@@ -1,6 +1,6 @@
-import { formatPort, comparePorts } from '../port';
-import { config } from '../config';
 import { FilterDefinitionSample } from '../../components/__tests-data__/filters';
+import { config } from '../config';
+import { comparePorts, formatPort } from '../port';
 
 describe('formatport', () => {
   beforeEach(() => {

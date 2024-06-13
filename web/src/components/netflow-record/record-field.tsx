@@ -7,19 +7,19 @@ import { Link } from 'react-router-dom';
 import { FlowDirection, getDirectionDisplayString, Record } from '../../api/ipfix';
 import { Column, ColumnsId, getFullColumnName } from '../../utils/columns';
 import { dateFormatter, getFormattedDate, timeMSFormatter, utcDateTimeFormatter } from '../../utils/datetime';
-import { DNS_CODE_NAMES, DNS_ERRORS_VALUES, getDNSErrorDescription, getDNSRcodeDescription } from '../../utils/dns';
+import { dnsCodesNames, dnsErrorsValues, getDNSErrorDescription, getDNSRcodeDescription } from '../../utils/dns';
+import { getDSCPDocUrl, getDSCPServiceClassDescription, getDSCPServiceClassName } from '../../utils/dscp';
+import { formatDurationAboveMillisecond, formatDurationAboveNanosecond } from '../../utils/duration';
 import {
   getICMPCode,
   getICMPDocUrl,
   getICMPType,
-  ICMP_ALL_CODES_VALUES,
-  ICMP_ALL_TYPES_VALUES,
+  icmpAllCodesValues,
+  icmpAllTypesValues,
   isValidICMPProto
 } from '../../utils/icmp';
-import { DROP_CAUSES_NAMES, getDropCauseDescription, getDropCauseDocUrl } from '../../utils/pkt-drop';
-import { formatDurationAboveMillisecond, formatDurationAboveNanosecond } from '../../utils/duration';
+import { dropCausesNames, getDropCauseDescription, getDropCauseDocUrl } from '../../utils/pkt-drop';
 import { formatPort } from '../../utils/port';
-import { getDSCPDocUrl, getDSCPServiceClassDescription, getDSCPServiceClassName } from '../../utils/dscp';
 import { formatProtocol, getProtocolDocUrl } from '../../utils/protocol';
 import { Size } from '../dropdowns/table-display-dropdown';
 import './record-field.css';
@@ -81,7 +81,7 @@ export const RecordField: React.FC<{
     return emptyText(
       flow.fields.DnsErrno
         ? `${t('DNS Error')} ${flow.fields.DnsErrno}: ${getDNSErrorDescription(
-            flow.fields.DnsErrno as DNS_ERRORS_VALUES
+            flow.fields.DnsErrno as dnsErrorsValues
           )}`
         : undefined
     );
@@ -447,7 +447,7 @@ export const RecordField: React.FC<{
         let child = emptyText();
         if (Array.isArray(value) && value.length) {
           if (isValidICMPProto(Number(value[0]))) {
-            const type = getICMPType(Number(value[0]), Number(value[1]) as ICMP_ALL_TYPES_VALUES);
+            const type = getICMPType(Number(value[0]), Number(value[1]) as icmpAllTypesValues);
             if (type && detailed) {
               child = clickableContent(type.name, type.description || '', getICMPDocUrl(Number(value[0])));
             } else {
@@ -468,8 +468,8 @@ export const RecordField: React.FC<{
           if (isValidICMPProto(Number(value[0]))) {
             const code = getICMPCode(
               Number(value[0]),
-              Number(value[1]) as ICMP_ALL_TYPES_VALUES,
-              Number(value[2]) as ICMP_ALL_CODES_VALUES
+              Number(value[1]) as icmpAllTypesValues,
+              Number(value[2]) as icmpAllCodesValues
             );
             if (code && detailed) {
               child = clickableContent(code.name, code.description || '', getICMPDocUrl(Number(value[0])));
@@ -543,8 +543,8 @@ export const RecordField: React.FC<{
             droppedText = t('dropped by');
             child = clickableContent(
               flow.fields.PktDropLatestDropCause,
-              getDropCauseDescription(flow.fields.PktDropLatestDropCause as DROP_CAUSES_NAMES),
-              getDropCauseDocUrl(flow.fields.PktDropLatestDropCause as DROP_CAUSES_NAMES)
+              getDropCauseDescription(flow.fields.PktDropLatestDropCause as dropCausesNames),
+              getDropCauseDocUrl(flow.fields.PktDropLatestDropCause as dropCausesNames)
             );
           }
 
@@ -587,7 +587,7 @@ export const RecordField: React.FC<{
       case ColumnsId.dnsresponsecode: {
         return singleContainer(
           typeof value === 'string' && value.length
-            ? simpleTextWithTooltip(detailed ? `${value}: ${getDNSRcodeDescription(value as DNS_CODE_NAMES)}` : value)
+            ? simpleTextWithTooltip(detailed ? `${value}: ${getDNSRcodeDescription(value as dnsCodesNames)}` : value)
             : emptyDnsErrorText()
         );
       }
@@ -595,7 +595,7 @@ export const RecordField: React.FC<{
         return singleContainer(
           typeof value === 'number' && !isNaN(value)
             ? simpleTextWithTooltip(
-                detailed && value ? `${value}: ${getDNSErrorDescription(value as DNS_ERRORS_VALUES)}` : String(value)
+                detailed && value ? `${value}: ${getDNSErrorDescription(value as dnsErrorsValues)}` : String(value)
               )
             : emptyText()
         );

@@ -2,8 +2,8 @@ import { FlexItem, Text, TextVariants, Tooltip } from '@patternfly/react-core';
 import { ExclamationTriangleIcon, GlobeAmericasIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import './query-summary.css';
 import { formatDurationAboveMillisecond } from '../../utils/duration';
+import './query-summary.css';
 
 export const StatsQuerySummary: React.FC<{
   detailed?: boolean;

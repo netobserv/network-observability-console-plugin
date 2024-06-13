@@ -1,8 +1,8 @@
+import { Button, Popover, Text, TextVariants } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, Popover, Text, TextVariants } from '@patternfly/react-core';
-import { FilterDefinition } from '../../model/filters';
 import { Link } from 'react-router-dom';
+import { FilterDefinition } from '../../model/filters';
 
 interface FilterHintsProps {
   def: FilterDefinition;

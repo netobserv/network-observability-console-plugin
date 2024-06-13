@@ -15,8 +15,8 @@ import { TextContent } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { GenericMetric, NamedMetric } from '../../api/loki';
-import { MetricType, MetricFunction } from '../../model/flow-query';
-import { LOCAL_STORAGE_OVERVIEW_METRICS_TOTAL_DIMENSION_KEY, useLocalStorage } from '../../utils/local-storage-hook';
+import { MetricFunction, MetricType } from '../../model/flow-query';
+import { localStorageOverviewMetricsTotalDimensionKey, useLocalStorage } from '../../utils/local-storage-hook';
 import { getFormattedValue, isUnknownPeer } from '../../utils/metrics';
 import './metrics-content.css';
 import {
@@ -125,7 +125,7 @@ export const MetricsGraphWithTotal: React.FC<MetricsGraphWithTotalProps> = ({
 
   const containerRef = React.createRef<HTMLDivElement>();
   const [dimensions, setDimensions] = useLocalStorage<Dimensions>(
-    `${LOCAL_STORAGE_OVERVIEW_METRICS_TOTAL_DIMENSION_KEY}${showLegend ? '-legend' : ''}`,
+    `${localStorageOverviewMetricsTotalDimensionKey}${showLegend ? '-legend' : ''}`,
     defaultDimensions
   );
 

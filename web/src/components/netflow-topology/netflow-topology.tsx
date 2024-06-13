@@ -72,7 +72,7 @@ export const NetflowTopology: React.FC<{
           <Spinner size="xl" />
         </Bullseye>
       );
-    } else if (options.layout === LayoutName.ThreeD) {
+    } else if (options.layout === LayoutName.threeD) {
       return (
         <ThreeDTopologyContent
           k8sModels={k8sModels}

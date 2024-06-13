@@ -1,6 +1,6 @@
-import * as React from 'react';
 import { ResourceLink } from '@openshift-console/dynamic-plugin-sdk';
 import { Text } from '@patternfly/react-core';
+import * as React from 'react';
 import { TopologyMetricPeer } from '../../api/loki';
 
 export const PeerResourceLink: React.FC<{ peer: TopologyMetricPeer }> = ({ peer }) => {
