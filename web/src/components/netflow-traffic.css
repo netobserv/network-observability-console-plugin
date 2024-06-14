@@ -18,12 +18,6 @@
     text-align: start;
 }
 
-.actions {
-    display: flex;
-    flex-direction: row;
-    align-items: baseline;
-}
-
 /*hack to keep refresh button size while loading*/
 
 .co-action-refresh-button {

@@ -81,8 +81,8 @@ export const RecordField: React.FC<{
     return emptyText(
       flow.fields.DnsErrno
         ? `${t('DNS Error')} ${flow.fields.DnsErrno}: ${getDNSErrorDescription(
-            flow.fields.DnsErrno as dnsErrorsValues
-          )}`
+          flow.fields.DnsErrno as dnsErrorsValues
+        )}`
         : undefined
     );
   };
@@ -183,37 +183,40 @@ export const RecordField: React.FC<{
     const dateText = getFormattedDate(date, dateFormatter) + ',';
     const timeText = getFormattedDate(date, timeMSFormatter);
     return singleContainer(
-      <div data-test={`field-date-${dateText}-${timeText}`} className="record-field-date">
-        <GlobeAmericasIcon className="record-field-date-icon" />
-        <Tooltip
-          content={[
-            <span className="co-nowrap" key="co-timestamp">
-              {fullDateText}
-            </span>
-          ]}
-        >
-          <div className={`datetime ${size}`}>
-            <span>{dateText}</span> <span className="text-muted">{timeText}</span>
-          </div>
-        </Tooltip>
-      </div>
+      <Flex data-test={`field-date-${dateText}-${timeText}`} className="record-field-date">
+        <FlexItem><GlobeAmericasIcon className="record-field-date-icon" /></FlexItem>
+        <FlexItem>
+          <Tooltip
+            content={[
+              <span className="co-nowrap" key="co-timestamp">
+                {fullDateText}
+              </span>
+            ]}
+          >
+            <div className={`datetime ${size}`}>
+              <span>{dateText}</span> <span className="text-muted">{timeText}</span>
+            </div>
+          </Tooltip>
+        </FlexItem>
+      </Flex>
     );
   };
 
-  const nthContainer = (children: (JSX.Element | undefined)[], asChild = true, childIcon = true, flex = true) => {
+  const nthContainer = (children: (JSX.Element | undefined)[], asChild = true, childIcon = true) => {
     return (
-      <div className={`record-field-flex-container ${asChild ? size : ''}`}>
+      <Flex className={`record-field-flex-container ${asChild ? size : ''}`} flex={{ default: "flex_1" }}>
         {children.map((c, i) => (
-          <div
+          <FlexItem
             key={i}
-            className={`record-field-content${flex ? '-flex' : ''}`}
-            onMouseOver={e => onMouseOver(e, `record-field-content${flex ? '-flex' : ''}`)}
+            className={`record-field-content`}
+            onMouseOver={e => onMouseOver(e, `record-field-content`)}
+            flex={{ default: "flex_1" }}
           >
             {i > 0 && asChild && childIcon && <span className="child-arrow">{'↪'}</span>}
             {c ? c : emptyText()}
-          </div>
+          </FlexItem>
         ))}
-      </div>
+      </Flex>
     );
   };
 
@@ -276,10 +279,10 @@ export const RecordField: React.FC<{
         return singleContainer(
           typeof value === 'number' && !isNaN(value)
             ? simpleTextWithTooltip(
-                c.id === ColumnsId.rttTime
-                  ? formatDurationAboveNanosecond(value as number)
-                  : formatDurationAboveMillisecond(value as number)
-              )
+              c.id === ColumnsId.rttTime
+                ? formatDurationAboveNanosecond(value as number)
+                : formatDurationAboveMillisecond(value as number)
+            )
             : undefined
         );
       case ColumnsId.name:
@@ -491,7 +494,6 @@ export const RecordField: React.FC<{
           return nthContainer(
             value.map(dir => simpleTextWithTooltip(getDirectionDisplayString(String(dir) as FlowDirection, t))),
             true,
-            false,
             false
           );
         }
@@ -502,7 +504,6 @@ export const RecordField: React.FC<{
           return nthContainer(
             value.map(iName => simpleTextWithTooltip(String(iName))),
             true,
-            false,
             false
           );
         }
@@ -526,7 +527,6 @@ export const RecordField: React.FC<{
               )
             ),
             true,
-            false,
             false
           );
         } else {
@@ -595,8 +595,8 @@ export const RecordField: React.FC<{
         return singleContainer(
           typeof value === 'number' && !isNaN(value)
             ? simpleTextWithTooltip(
-                detailed && value ? `${value}: ${getDNSErrorDescription(value as dnsErrorsValues)}` : String(value)
-              )
+              detailed && value ? `${value}: ${getDNSErrorDescription(value as dnsErrorsValues)}` : String(value)
+            )
             : emptyText()
         );
       }
@@ -614,32 +614,34 @@ export const RecordField: React.FC<{
     }
   };
   return filter ? (
-    <div className={`record-field-flex-container`}>
-      <div className={'record-field-flex'}>{content(column)}</div>
-      <Tooltip
-        content={
-          filter.type === 'filter'
-            ? filter.isDelete
-              ? t('Remove {{name}} filter', { name: getFullColumnName(column) })
-              : t('Filter on {{name}}', { name: getFullColumnName(column) })
-            : t('Switch {{name}} option', { name: getFullColumnName(column) })
-        }
-      >
-        <Button variant="link" aria-label="Filter" onClick={filter.onClick}>
-          {filter.type === 'filter' ? (
-            filter.isDelete ? (
-              <TimesIcon />
+    <Flex className={`record-field-flex-container`} flex={{ default: "flex_1" }}>
+      <FlexItem className={'record-field-flex'} flex={{ default: "flex_1" }}>{content(column)}</FlexItem>
+      <FlexItem>
+        <Tooltip
+          content={
+            filter.type === 'filter'
+              ? filter.isDelete
+                ? t('Remove {{name}} filter', { name: getFullColumnName(column) })
+                : t('Filter on {{name}}', { name: getFullColumnName(column) })
+              : t('Switch {{name}} option', { name: getFullColumnName(column) })
+          }
+        >
+          <Button variant="link" aria-label="Filter" onClick={filter.onClick}>
+            {filter.type === 'filter' ? (
+              filter.isDelete ? (
+                <TimesIcon />
+              ) : (
+                <FilterIcon />
+              )
+            ) : filter.isDelete ? (
+              <ToggleOffIcon />
             ) : (
-              <FilterIcon />
-            )
-          ) : filter.isDelete ? (
-            <ToggleOffIcon />
-          ) : (
-            <ToggleOnIcon />
-          )}
-        </Button>
-      </Tooltip>
-    </div>
+              <ToggleOnIcon />
+            )}
+          </Button>
+        </Tooltip>
+      </FlexItem>
+    </Flex>
   ) : (
     content(column)
   );
