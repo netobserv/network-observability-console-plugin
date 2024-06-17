@@ -54,7 +54,7 @@ describe('<RecordField />', () => {
       />
     );
     expect(wrapper.find(RecordField)).toBeTruthy();
-    expect(wrapper.find('.record-field-content')).toHaveLength(1);
-    expect(wrapper.find('.record-field-content span').text()).toBe('< 1ms');
+    expect(wrapper.find('.record-field-value')).toHaveLength(1);
+    expect(wrapper.find('.record-field-value').childAt(0).text()).toBe('< 1ms');
   });
 });

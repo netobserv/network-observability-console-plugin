@@ -16,7 +16,7 @@ import { QuickFilter } from '../../model/quick-filters';
 import { findFilter } from '../../utils/filter-definitions';
 import { Indicator } from '../../utils/filters-helper';
 import { localStorageShowFiltersKey, useLocalStorage } from '../../utils/local-storage-hook';
-import { QueryOptionsDropdown, QueryOptionsDropdownProps } from '../dropdowns/query-options-dropdown';
+import { QueryOptionsDropdown, QueryOptionsProps } from '../dropdowns/query-options-dropdown';
 import { LinksOverflow } from '../overflow/links-overflow';
 import AutocompleteFilter from './autocomplete-filter';
 import CompareFilter, { FilterCompare } from './compare-filter';
@@ -35,7 +35,7 @@ export interface FiltersToolbarProps {
   setFilters: (v: Filters) => void;
   clearFilters: () => void;
   resetFilters: () => void;
-  queryOptionsProps: QueryOptionsDropdownProps;
+  queryOptionsProps: QueryOptionsProps;
   quickFilters: QuickFilter[];
   filterDefinitions: FilterDefinition[];
   isFullScreen: boolean;

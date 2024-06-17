@@ -68,7 +68,7 @@ export const RecordField: React.FC<RecordFieldProps> = ({
       <div className="record-field-flex">
         <Tooltip
           content={[
-            <Text component={TextVariants.p} className="co-nowrap" key="co-error-text">
+            <Text component={TextVariants.p} className="record-field-value co-nowrap" key="co-error-text">
               {text}
             </Text>
           ]}
@@ -89,7 +89,7 @@ export const RecordField: React.FC<RecordFieldProps> = ({
     if (errorText) {
       return errorTextValue(t('n/a'), errorText);
     }
-    return <Text className="record-field-flex text-muted">{t('n/a')}</Text>;
+    return <Text className="record-field-flex text-muted record-field-value">{t('n/a')}</Text>;
   };
 
   const emptyDnsErrorText = () => {
@@ -106,7 +106,7 @@ export const RecordField: React.FC<RecordFieldProps> = ({
     if (text) {
       return (
         <TextContent className="netobserv-no-child-margin" data-test={`field-text-${text}`}>
-          <Text component={TextVariants.p} style={{ color }}>
+          <Text className="record-field-value" component={TextVariants.p} style={{ color }}>
             {text}
           </Text>
           <Text component={TextVariants.p} className="record-field-tooltip">
