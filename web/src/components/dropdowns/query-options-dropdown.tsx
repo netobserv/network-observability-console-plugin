@@ -1,4 +1,4 @@
-import { Checkbox, Radio, Select, Tooltip } from '@patternfly/react-core';
+import { Checkbox, Radio, Select, Text, TextContent, TextVariants, Tooltip } from '@patternfly/react-core';
 import { InfoAltIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -129,9 +129,9 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
           )}
         >
           <div className="pf-c-select__menu-group-title">
-            <>
+            <Text component={TextVariants.p}>
               {t('Log type')} <InfoAltIcon />
-            </>
+            </Text>
           </div>
         </Tooltip>
         {recordTypeOptions.map(opt => {
@@ -180,9 +180,9 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
           )}
         >
           <div className="pf-c-select__menu-group-title">
-            <>
+            <Text component={TextVariants.p}>
               {t('Datasource')} <InfoAltIcon />
-            </>
+            </Text>
           </div>
         </Tooltip>
         {dataSourceOptions.map(opt => {
@@ -233,9 +233,9 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
             )}
           >
             <div className="pf-c-select__menu-group-title">
-              <>
+              <Text component={TextVariants.p}>
                 {t('Duplicated flows')} <InfoAltIcon />
-              </>
+              </Text>
             </div>
           </Tooltip>
           <label className="pf-c-select__menu-item">
@@ -259,9 +259,9 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
           )}
         >
           <div className="pf-c-select__menu-group-title">
-            <>
+            <Text component={TextVariants.p}>
               {t('Match filters')} <InfoAltIcon />
-            </>
+            </Text>
           </div>
         </Tooltip>
         {matchOptions.map(opt => (
@@ -283,23 +283,29 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
       <div className="pf-c-select__menu-group">
         <Tooltip
           content={
-            <div>
-              <div>
+            <TextContent className="netobserv-tooltip-text">
+              <Text component={TextVariants.p}>
                 {t('Filter flows by their drop status. Only packets dropped by the kernel are monitored here.')}
-              </div>
-              <div className="netobserv-align-start">- {t('Fully dropped shows the flows that are 100% dropped')}</div>
-              <div className="netobserv-align-start">
+              </Text>
+              <Text component={TextVariants.p} className="netobserv-align-start">
+                - {t('Fully dropped shows the flows that are 100% dropped')}
+              </Text>
+              <Text component={TextVariants.p} className="netobserv-align-start">
                 - {t('Containing drops shows the flows having at least one packet dropped')}
-              </div>
-              <div className="netobserv-align-start">- {t('Without drops show the flows having 0% dropped')}</div>
-              <div className="netobserv-align-start">- {t('All shows everything')}</div>
-            </div>
+              </Text>
+              <Text component={TextVariants.p} className="netobserv-align-start">
+                - {t('Without drops show the flows having 0% dropped')}
+              </Text>
+              <Text component={TextVariants.p} className="netobserv-align-start">
+                - {t('All shows everything')}
+              </Text>
+            </TextContent>
           }
         >
           <div className="pf-c-select__menu-group-title">
-            <>
+            <Text component={TextVariants.p}>
               {t('Drops filter')} <InfoAltIcon />
-            </>
+            </Text>
           </div>
         </Tooltip>
         {packetLossOptions.map(opt => {
@@ -346,9 +352,9 @@ export const QueryOptionsPanel: React.FC<QueryOptionsDropdownProps> = ({
           }
         >
           <div className="pf-c-select__menu-group-title">
-            <>
+            <Text component={TextVariants.p}>
               {useTopK ? t('Top / Bottom') : t('Limit')} <InfoAltIcon />
-            </>
+            </Text>
           </div>
         </Tooltip>
         {values.map(l => (
@@ -379,7 +385,7 @@ export const QueryOptionsDropdown: React.FC<QueryOptionsDropdownProps> = props =
       <Select
         data-test="query-options-dropdown"
         id="query-options-dropdown"
-        placeholderText={<span>{t('Query options')}</span>}
+        placeholderText={<Text component={TextVariants.p}>{t('Query options')}</Text>}
         isOpen={isOpen}
         onToggle={() => setOpen(!isOpen)}
         customContent={<QueryOptionsPanel {...props} />}

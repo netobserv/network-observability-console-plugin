@@ -3,6 +3,10 @@
   white-space: nowrap
 }
 
+.co-resource-item {
+  display: flex;
+}
+
 /* max content lines to show */
 .co-resource-item.s>.co-resource-item__resource-name,
 .co-resource-item.m>.co-resource-item__resource-name,
@@ -63,10 +67,6 @@
   width: max-content;
   transform: translateX(-50%);
   left: 50%;
-}
-
-.record-field-tooltip-margin{
-  margin-top: 0.5em;
 }
 
 /* show tooltip on content hover */

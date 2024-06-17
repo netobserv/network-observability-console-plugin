@@ -205,11 +205,12 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           label={t('Export all datas')}
           aria-label="Export all"
           description={
-            <>
-              {t('Use this option to export every fields and labels from flows.')}
-              <br />
-              {t('Else pick from available columns.')}
-            </>
+            <TextContent className="netobserv-no-child-margin">
+              <Text component={TextVariants.p}>
+                {t('Use this option to export every fields and labels from flows.')}
+              </Text>
+              <Text component={TextVariants.p}>{t('Else pick from available columns.')}</Text>
+            </TextContent>
           }
           body={
             !isExportAll && (

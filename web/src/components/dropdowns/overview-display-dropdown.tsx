@@ -1,4 +1,4 @@
-import { Select, Switch, Tooltip } from '@patternfly/react-core';
+import { Select, Switch, Text, TextVariants, Tooltip } from '@patternfly/react-core';
 import { InfoAltIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -26,9 +26,9 @@ export const OverviewDisplayOptions: React.FC<{
       <div className="pf-c-select__menu-group">
         <Tooltip content={t('The level of details represented.')}>
           <div className="pf-c-select__menu-group-title">
-            <>
+            <Text component={TextVariants.p}>
               {t('Scope')} <InfoAltIcon />
-            </>
+            </Text>
           </div>
         </Tooltip>
         <div className="display-dropdown-padding">
@@ -44,9 +44,9 @@ export const OverviewDisplayOptions: React.FC<{
       <div className="pf-c-select__menu-group">
         <Tooltip content={t('Long labels can reduce visibility.')}>
           <div className="pf-c-select__menu-group-title">
-            <>
+            <Text component={TextVariants.p}>
               {t('Truncate labels')} <InfoAltIcon />
-            </>
+            </Text>
           </div>
         </Tooltip>
         <div className="display-dropdown-padding">
@@ -82,7 +82,7 @@ export const OverviewDisplayDropdown: React.FC<{
     <div id="display-dropdown-container" data-test="display-dropdown-container">
       <Select
         id="overview-display-dropdown"
-        placeholderText={<span>{t('Display options')}</span>}
+        placeholderText={<Text component={TextVariants.p}>{t('Display options')}</Text>}
         isOpen={isOpen}
         onToggle={() => setOpen(!isOpen)}
         customContent={

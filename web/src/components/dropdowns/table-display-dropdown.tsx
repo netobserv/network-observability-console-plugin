@@ -1,4 +1,4 @@
-import { Radio, Select, Tooltip } from '@patternfly/react-core';
+import { Radio, Select, Text, TextVariants, Tooltip } from '@patternfly/react-core';
 import { InfoAltIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
 import * as React from 'react';
@@ -24,9 +24,9 @@ export const TableDisplayOptions: React.FC<{
       <div className="pf-c-select__menu-group">
         <Tooltip content={t('Force table rows to specific sizing.')}>
           <div className="pf-c-select__menu-group-title">
-            <>
+            <Text component={TextVariants.p}>
               {t('Row size')} <InfoAltIcon />
-            </>
+            </Text>
           </div>
         </Tooltip>
         {_.map(sizeOptions, (name, key) => {
@@ -62,7 +62,7 @@ export const TableDisplayDropdown: React.FC<{
     <div id="display-dropdown-container" data-test="display-dropdown-container">
       <Select
         id="table-display-dropdown"
-        placeholderText={<span>{t('Display options')}</span>}
+        placeholderText={<Text component={TextVariants.p}>{t('Display options')}</Text>}
         isOpen={isOpen}
         onToggle={() => setOpen(!isOpen)}
         customContent={<TableDisplayOptions size={size} setSize={setSize} />}

@@ -1,4 +1,4 @@
-import { Button, Text, TextVariants, ToolbarGroup, ToolbarItem, Tooltip } from '@patternfly/react-core';
+import { Button, Text, TextContent, TextVariants, ToolbarGroup, ToolbarItem, Tooltip } from '@patternfly/react-core';
 import { LongArrowAltDownIcon, LongArrowAltUpIcon, TimesCircleIcon, TimesIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
 import * as React from 'react';
@@ -196,15 +196,15 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
                   <LongArrowAltUpIcon />
                 ),
                 tooltip: (
-                  <div>
-                    <div>{`${t('Switch between one way / back and forth filtering')}:`}</div>
-                    <div className="netobserv-align-start">{`- ${t(
-                      'One way shows traffic strictly as defined per your filters'
-                    )}`}</div>
-                    <div className="netobserv-align-start">{`- ${t(
-                      'Back and forth shows traffic according to your filters, plus the related return traffic'
-                    )}`}</div>
-                  </div>
+                  <TextContent className="netobserv-tooltip-text">
+                    <Text component={TextVariants.p}>{t('Switch between one way / back and forth filtering')}</Text>
+                    <Text component={TextVariants.p} className="netobserv-align-start">
+                      - {t('One way shows traffic strictly as defined per your filters')}
+                    </Text>
+                    <Text component={TextVariants.p} className="netobserv-align-start">
+                      - {t('Back and forth shows traffic according to your filters, plus the related return traffic')}
+                    </Text>
+                  </TextContent>
                 ),
                 enabled: isSrcDst
               }

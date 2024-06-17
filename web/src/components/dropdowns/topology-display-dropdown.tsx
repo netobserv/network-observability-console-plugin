@@ -1,4 +1,4 @@
-import { Checkbox, Flex, FlexItem, Select, Switch, Tooltip } from '@patternfly/react-core';
+import { Checkbox, Flex, FlexItem, Select, Switch, Text, TextVariants, Tooltip } from '@patternfly/react-core';
 import { InfoAltIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -71,9 +71,9 @@ export const TopologyDisplayOptions: React.FC<{
       <div className="pf-c-select__menu-group">
         <Tooltip content={t('Measurement to show as edge labels.')}>
           <div className="pf-c-select__menu-group-title">
-            <>
+            <Text component={TextVariants.p}>
               {t('Edge labels')} <InfoAltIcon />
-            </>
+            </Text>
           </div>
         </Tooltip>
         <div className="display-dropdown-padding">
@@ -105,9 +105,9 @@ export const TopologyDisplayOptions: React.FC<{
       <div className="pf-c-select__menu-group">
         <Tooltip content={t('The level of details represented.')}>
           <div className="pf-c-select__menu-group-title">
-            <>
+            <Text component={TextVariants.p}>
               {t('Scope')} <InfoAltIcon />
-            </>
+            </Text>
           </div>
         </Tooltip>
         <div className="display-dropdown-padding">
@@ -123,9 +123,9 @@ export const TopologyDisplayOptions: React.FC<{
       <div className="pf-c-select__menu-group">
         <Tooltip content={t('Grouping items helps to better understand ownership.')}>
           <div className="pf-c-select__menu-group-title">
-            <>
+            <Text component={TextVariants.p}>
               {t('Groups')} <InfoAltIcon />
-            </>
+            </Text>
           </div>
         </Tooltip>
         <div className="display-dropdown-padding">
@@ -142,9 +142,9 @@ export const TopologyDisplayOptions: React.FC<{
       <div className="pf-c-select__menu-group">
         <Tooltip content={t('The way in which topology items are arranged.')}>
           <div className="pf-c-select__menu-group-title">
-            <>
+            <Text component={TextVariants.p}>
               {t('Layout')} <InfoAltIcon />
-            </>
+            </Text>
           </div>
         </Tooltip>
         <div className="display-dropdown-padding">
@@ -154,9 +154,9 @@ export const TopologyDisplayOptions: React.FC<{
       <div className="pf-c-select__menu-group">
         <Tooltip content={t('Various options to show / hide view details.')}>
           <div className="pf-c-select__menu-group-title">
-            <>
+            <Text component={TextVariants.p}>
               {t('Show')} <InfoAltIcon />
-            </>
+            </Text>
           </div>
         </Tooltip>
         <Checkbox
@@ -200,9 +200,9 @@ export const TopologyDisplayOptions: React.FC<{
       <div className="pf-c-select__menu-group">
         <Tooltip content={t('Long labels can reduce visibility.')}>
           <div className="pf-c-select__menu-group-title">
-            <>
+            <Text component={TextVariants.p}>
               {t('Truncate labels')} <InfoAltIcon />
-            </>
+            </Text>
           </div>
         </Tooltip>
         <div className="display-dropdown-padding">
@@ -268,7 +268,7 @@ export const TopologyDisplayDropdown: React.FC<{
     <div id="display-dropdown-container" data-test="display-dropdown-container">
       <Select
         id="topology-display-dropdown"
-        placeholderText={<span>{t('Display options')}</span>}
+        placeholderText={<Text component={TextVariants.p}>{t('Display options')}</Text>}
         isOpen={isOpen}
         onToggle={() => setOpen(!isOpen)}
         customContent={

@@ -1,4 +1,12 @@
-import { Dropdown, DropdownItem, DropdownToggle, Tooltip } from '@patternfly/react-core';
+import {
+  Dropdown,
+  DropdownItem,
+  DropdownToggle,
+  Text,
+  TextContent,
+  TextVariants,
+  Tooltip
+} from '@patternfly/react-core';
 import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -48,11 +56,10 @@ export const TimeRangeDropdown: React.FC<TimeRangeDropdownProps> = ({ id, range,
       let toText = getFormattedDate(to);
       if (prettyPrint) {
         return (
-          <>
-            {`${t('From')} ${fromText}`}
-            <br />
-            {`${t('To')} ${toText}`}
-          </>
+          <TextContent className="netobserv-tooltip-text">
+            <Text component={TextVariants.p}>{`${t('From')} ${fromText}`}</Text>
+            <Text component={TextVariants.p}>{`${t('To')} ${toText}`}</Text>
+          </TextContent>
         );
       } else {
         //remove common part of date if possible
