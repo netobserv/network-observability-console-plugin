@@ -13,10 +13,10 @@ import {
 } from '../../model/filters';
 import { QuickFilter } from '../../model/quick-filters';
 import { autoCompleteCache } from '../../utils/autocomplete-cache';
+import { getFilterFullName, hasSrcDstFilters, swapFilters } from '../../utils/filters-helper';
 import { getPathWithParams, netflowTrafficPath } from '../../utils/url';
 import { navigate } from '../dynamic-loader/dynamic-loader';
 import { LinksOverflow } from '../overflow/links-overflow';
-import { getFilterFullName, hasSrcDstFilters, swapFilters } from './filters-helper';
 
 export interface FiltersChipsProps {
   isForced: boolean;

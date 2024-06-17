@@ -29,10 +29,6 @@ import { TimeRange } from '../../utils/datetime';
 import { getDateMsInSeconds } from '../../utils/duration';
 import { localStorageHistogramGuidedTourDoneKey, useLocalStorage } from '../../utils/local-storage-hook';
 import { getFormattedValue } from '../../utils/metrics';
-import { TruncateLength } from '../dropdowns/truncate-dropdown';
-import { GuidedTourHandle } from '../guided-tour/guided-tour';
-import BrushHandleComponent from './brush-handle';
-import './histogram.css';
 import {
   ChartDataPoint,
   Dimensions,
@@ -42,7 +38,11 @@ import {
   observeDimensions,
   toHistogramDatapoints,
   toNamedMetric
-} from './metrics-helper';
+} from '../../utils/metrics-helper';
+import { TruncateLength } from '../dropdowns/truncate-dropdown';
+import { GuidedTourHandle } from '../guided-tour/guided-tour';
+import BrushHandleComponent from './brush-handle';
+import './histogram.css';
 
 export const VoronoiContainer = createContainer('voronoi', 'brush');
 

@@ -6,8 +6,8 @@ import { MetricFunction, MetricType } from '../../model/flow-query';
 import { getStat } from '../../model/metrics';
 import { localStorageOverviewDonutDimensionKey, useLocalStorage } from '../../utils/local-storage-hook';
 import { getFormattedValue, isUnknownPeer } from '../../utils/metrics';
+import { defaultDimensions, Dimensions, observeDimensions } from '../../utils/metrics-helper';
 import './metrics-content.css';
-import { defaultDimensions, Dimensions, observeDimensions } from './metrics-helper';
 
 export interface MetricsDonutProps {
   id: string;

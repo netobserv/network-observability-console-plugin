@@ -19,6 +19,7 @@ import { getStat } from '../../model/metrics';
 import { getDNSErrorDescription, getDNSRcodeDescription } from '../../utils/dns';
 import { getDSCPServiceClassName } from '../../utils/dscp';
 import { localStorageOverviewKebabKey, useLocalStorage } from '../../utils/local-storage-hook';
+import { observeDOMRect, toNamedMetric } from '../../utils/metrics-helper';
 import {
   customPanelMatcher,
   getFunctionFromId,
@@ -37,7 +38,6 @@ import { TruncateLength } from '../dropdowns/truncate-dropdown';
 import { MetricsDonut } from '../metrics/metrics-donut';
 import { MetricsGraph } from '../metrics/metrics-graph';
 import { MetricsGraphWithTotal } from '../metrics/metrics-graph-total';
-import { observeDOMRect, toNamedMetric } from '../metrics/metrics-helper';
 import { NetflowOverviewPanel } from './netflow-overview-panel';
 import './netflow-overview.css';
 import { PanelKebab, PanelKebabOptions } from './panel-kebab';

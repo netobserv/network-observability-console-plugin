@@ -3,7 +3,7 @@ import { SearchIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
 import * as React from 'react';
 import { createFilterValue, FilterDefinition, FilterValue } from '../../model/filters';
-import { Indicator } from './filters-helper';
+import { Indicator } from '../../utils/filters-helper';
 
 export interface TextFilterProps {
   filterDefinition: FilterDefinition;

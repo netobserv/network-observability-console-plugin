@@ -6,9 +6,9 @@ import { isTimeMetric, MetricType } from '../../model/flow-query';
 import { getStat } from '../../model/metrics';
 import { decorated, NodeData } from '../../model/topology';
 import { matchPeer } from '../../utils/metrics';
+import { toNamedMetric } from '../../utils/metrics-helper';
 import { TruncateLength } from '../dropdowns/truncate-dropdown';
 import { MetricsGraph } from '../metrics/metrics-graph';
-import { toNamedMetric } from '../metrics/metrics-helper';
 import { ElementPanelStats } from './element-panel-stats';
 
 type MetricsRadio = 'in' | 'out' | 'both';

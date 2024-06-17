@@ -10,7 +10,7 @@ import {
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { FilterDefinition } from '../../model/filters';
-import { buildGroups, getFilterFullName } from './filters-helper';
+import { buildGroups, getFilterFullName } from '../../utils/filters-helper';
 
 export interface FiltersDropdownProps {
   filterDefinitions: FilterDefinition[];

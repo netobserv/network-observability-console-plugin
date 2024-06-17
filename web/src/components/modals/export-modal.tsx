@@ -24,8 +24,8 @@ import { FlowQuery } from '../../model/flow-query';
 import { Column, getFullColumnName } from '../../utils/columns';
 import { getTimeRangeOptions, TimeRange } from '../../utils/datetime';
 import { formatDuration, getDateSInMiliseconds } from '../../utils/duration';
+import { getFilterFullName } from '../../utils/filters-helper';
 import { getLocalStorage, localStorageExportColsKey, useLocalStorage } from '../../utils/local-storage-hook';
-import { getFilterFullName } from '../filters/filters-helper';
 import './export-modal.css';
 import Modal from './modal';
 

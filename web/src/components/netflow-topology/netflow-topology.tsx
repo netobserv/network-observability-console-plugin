@@ -7,7 +7,7 @@ import { TopologyMetrics } from '../../api/loki';
 import { Filter, FilterDefinition, Filters } from '../../model/filters';
 import { FlowScope, MetricType, StatFunction } from '../../model/flow-query';
 import { GraphElementPeer, LayoutName, TopologyOptions } from '../../model/topology';
-import { observeDOMRect } from '../metrics/metrics-helper';
+import { observeDOMRect } from '../../utils/metrics-helper';
 import { ScopeSlider } from '../scope-slider/scope-slider';
 import { SearchEvent, SearchHandle } from '../search/search';
 import componentFactory from './2d/componentFactories/componentFactory';

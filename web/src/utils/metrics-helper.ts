@@ -1,13 +1,13 @@
-import { ChartLegendTooltip, createContainer, getResizeObserver } from '@patternfly/react-charts';
+import { getResizeObserver } from '@patternfly/react-charts';
 import { TFunction } from 'i18next';
 import * as React from 'react';
-import { GenericMetric, NamedMetric, TopologyMetricPeer, TopologyMetrics } from '../../api/loki';
-import { FlowScope } from '../../model/flow-query';
-import { NodeData } from '../../model/topology';
-import { getDateFromUnix, getFormattedDate, TimeRange } from '../../utils/datetime';
-import { getDateSInMiliseconds } from '../../utils/duration';
-import { isUnknownPeer, matchPeer } from '../../utils/metrics';
-import { TruncateLength } from '../dropdowns/truncate-dropdown';
+import { GenericMetric, NamedMetric, TopologyMetricPeer, TopologyMetrics } from '../api/loki';
+import { TruncateLength } from '../components/dropdowns/truncate-dropdown';
+import { FlowScope } from '../model/flow-query';
+import { NodeData } from '../model/topology';
+import { getDateFromUnix, getFormattedDate, TimeRange } from './datetime';
+import { getDateSInMiliseconds } from './duration';
+import { isUnknownPeer, matchPeer } from './metrics';
 
 export type LegendDataItem = {
   childName?: string;
@@ -49,23 +49,6 @@ export const toHistogramDatapoints = (metric: NamedMetric): ChartDataPoint[] => 
     });
   }
   return result;
-};
-
-export const chartVoronoi = (legendData: LegendDataItem[], f: (v: number) => string) => {
-  const CursorVoronoiContainer = createContainer('voronoi', 'cursor');
-  const tooltipData = legendData.map(item => ({ ...item, name: item.tooltipName || item.name }));
-  return (
-    <CursorVoronoiContainer
-      cursorDimension="x"
-      labels={(dp: { datum: ChartDataPoint }) => {
-        return dp.datum.y || dp.datum.y === 0 ? f(dp.datum.y) : 'n/a';
-      }}
-      labelComponent={<ChartLegendTooltip legendData={tooltipData} title={(datum: ChartDataPoint) => datum.date} />}
-      mouseFollowTooltips
-      voronoiDimension="x"
-      voronoiPadding={50}
-    />
-  );
 };
 
 export const getHistogramRangeFromLimit = (totalMetric: NamedMetric, limit: number, start?: number): TimeRange => {

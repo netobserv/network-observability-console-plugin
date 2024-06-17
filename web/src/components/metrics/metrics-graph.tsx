@@ -17,16 +17,16 @@ import { GenericMetric, NamedMetric } from '../../api/loki';
 import { MetricFunction, MetricType } from '../../model/flow-query';
 import { localStorageOverviewMetricsDimensionKey, useLocalStorage } from '../../utils/local-storage-hook';
 import { getFormattedValue } from '../../utils/metrics';
-import './metrics-content.css';
 import {
   ChartDataPoint,
-  chartVoronoi,
   defaultDimensions,
   Dimensions,
   LegendDataItem,
   observeDimensions,
   toDatapoints
-} from './metrics-helper';
+} from '../../utils/metrics-helper';
+import { ChartVoronoi } from './chart-voronoi';
+import './metrics-content.css';
 
 export interface MetricsGraphProps {
   id: string;
@@ -105,9 +105,9 @@ export const MetricsGraph: React.FC<MetricsGraphProps> = ({
       <Chart
         themeColor={ChartThemeColor.multiUnordered}
         containerComponent={
-          showLegend
-            ? chartVoronoi(legendData, (v: number) => getFormattedValue(v, metricType, metricFunction, t))
-            : undefined
+          showLegend ? (
+            <ChartVoronoi legendData={legendData} f={v => getFormattedValue(v, metricType, metricFunction, t)} />
+          ) : undefined
         }
         legendData={showLegend ? legendData : undefined}
         legendOrientation={'horizontal'}

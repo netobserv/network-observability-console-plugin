@@ -1,6 +1,6 @@
 import { TFunction } from 'i18next';
-import { Filter, FilterDefinition, FilterId } from '../../model/filters';
-import { findFilter } from '../../utils/filter-definitions';
+import { Filter, FilterDefinition, FilterId } from '../model/filters';
+import { findFilter } from './filter-definitions';
 
 export type Indicator = 'default' | 'success' | 'warning' | 'error' | undefined;
 

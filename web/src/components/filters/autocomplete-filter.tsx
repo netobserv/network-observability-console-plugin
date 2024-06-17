@@ -14,9 +14,9 @@ import * as React from 'react';
 import { createFilterValue, FilterDefinition, FilterOption, FilterValue } from '../../model/filters';
 import { autoCompleteCache } from '../../utils/autocomplete-cache';
 import { getHTTPErrorDetails } from '../../utils/errors';
+import { Indicator } from '../../utils/filters-helper';
 import { usePrevious } from '../../utils/previous-hook';
 import './autocomplete-filter.css';
-import { Indicator } from './filters-helper';
 
 const optionsMenuID = 'options-menu-list';
 const isMenuOption = (elt?: Element) => {
