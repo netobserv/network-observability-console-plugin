@@ -259,6 +259,7 @@ export const Error: React.FC<Props> = ({ title, error, isLokiRelated }) => {
                   target="_blank"
                   to={{
                     pathname:
+                      // eslint-disable-next-line max-len
                       'https://docs.openshift.com/container-platform/latest/observability/network_observability/installing-operators.html#network-observability-loki-installation_network_observability'
                   }}
                 />
