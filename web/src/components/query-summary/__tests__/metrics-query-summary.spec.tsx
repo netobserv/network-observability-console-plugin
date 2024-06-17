@@ -2,7 +2,8 @@ import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 import { NetflowMetrics } from '../../../api/loki';
 import { metrics } from '../../__tests-data__/metrics';
-import { MetricsQuerySummary, MetricsQuerySummaryContent } from '../metrics-query-summary';
+import { MetricsQuerySummary } from '../metrics-query-summary';
+import { MetricsQuerySummaryContent } from '../metrics-query-summary-content';
 
 describe('<MetricsQuerySummary />', () => {
   const now = new Date();

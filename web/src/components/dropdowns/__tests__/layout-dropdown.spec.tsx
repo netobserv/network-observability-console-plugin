@@ -2,7 +2,7 @@ import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 
 import { LayoutName } from '../../../model/topology';
-import LayoutDropdown from '../layout-dropdown';
+import { LayoutDropdown } from '../layout-dropdown';
 
 describe('<LayoutDropdown />', () => {
   const props = {

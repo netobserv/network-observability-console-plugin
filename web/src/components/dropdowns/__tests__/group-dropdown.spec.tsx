@@ -4,7 +4,7 @@ import * as React from 'react';
 import { FlowScope } from '../../../model/flow-query';
 import { MetricScopeOptions } from '../../../model/metrics';
 import { TopologyGroupTypes } from '../../../model/topology';
-import GroupDropdown from '../group-dropdown';
+import { GroupDropdown } from '../group-dropdown';
 
 describe('<GroupDropdown />', () => {
   const props = {

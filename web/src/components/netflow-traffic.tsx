@@ -147,7 +147,7 @@ import { useTheme } from '../utils/theme-hook';
 import { getURLParams, hasEmptyParams, netflowTrafficPath, removeURLParam, setURLParams, URLParam } from '../utils/url';
 import { rateMetricFunctions, timeMetricFunctions } from './dropdowns/metric-function-dropdown';
 import { OverviewDisplayDropdown } from './dropdowns/overview-display-dropdown';
-import { limitValues, topValues } from './dropdowns/query-options-dropdown';
+import { limitValues, topValues } from './dropdowns/query-options-panel';
 import { RefreshDropdown } from './dropdowns/refresh-dropdown';
 import { Size, TableDisplayDropdown } from './dropdowns/table-display-dropdown';
 import TimeRangeDropdown from './dropdowns/time-range-dropdown';

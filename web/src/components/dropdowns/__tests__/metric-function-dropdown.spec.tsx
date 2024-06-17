@@ -1,7 +1,7 @@
 import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 
-import MetricFunctionDropdown from '../metric-function-dropdown';
+import { MetricFunctionDropdown } from '../metric-function-dropdown';
 
 describe('<MetricDropdown />', () => {
   const props = {

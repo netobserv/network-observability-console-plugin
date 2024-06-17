@@ -4,7 +4,8 @@ import * as React from 'react';
 import { NetflowMetrics } from 'src/api/loki';
 import { FlowsSample } from '../../../components/__tests-data__/flows';
 import { RecordType } from '../../../model/flow-query';
-import SummaryPanel, { SummaryPanelContent } from '../summary-panel';
+import { SummaryPanel } from '../summary-panel';
+import { SummaryPanelContent } from '../summary-panel-content';
 
 describe('<SummaryPanel />', () => {
   const now = new Date();

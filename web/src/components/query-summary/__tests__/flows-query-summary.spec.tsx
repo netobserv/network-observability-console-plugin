@@ -2,7 +2,8 @@ import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 import { MetricType, RecordType } from '../../../model/flow-query';
 import { FlowsSample, getTestFlows } from '../../__tests-data__/flows';
-import { FlowsQuerySummary, FlowsQuerySummaryContent } from '../flows-query-summary';
+import { FlowsQuerySummary } from '../flows-query-summary';
+import { FlowsQuerySummaryContent } from '../flows-query-summary-content';
 
 describe('<FlowsQuerySummary />', () => {
   const now = new Date();

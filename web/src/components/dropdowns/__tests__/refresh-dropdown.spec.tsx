@@ -1,7 +1,7 @@
 import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 
-import RefreshDropdown, { RefreshDropdownProps } from '../refresh-dropdown';
+import { RefreshDropdown, RefreshDropdownProps } from '../refresh-dropdown';
 
 describe('<RefreshDropdown />', () => {
   const props: RefreshDropdownProps = {

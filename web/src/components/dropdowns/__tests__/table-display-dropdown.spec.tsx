@@ -3,7 +3,8 @@ import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 
 import { act } from 'react-dom/test-utils';
-import { Size, TableDisplayDropdown, TableDisplayOptions } from '../table-display-dropdown';
+import { Size, TableDisplayDropdown } from '../table-display-dropdown';
+import { TableDisplayOptions } from '../table-display-options';
 
 describe('<DisplayDropdown />', () => {
   const props = {

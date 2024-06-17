@@ -1,62 +1,17 @@
-import { Radio, Select, Text, TextVariants, Tooltip } from '@patternfly/react-core';
-import { InfoAltIcon } from '@patternfly/react-icons';
-import * as _ from 'lodash';
+import { Select, Text, TextVariants } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import './table-display-dropdown.css';
+import { TableDisplayOptions } from './table-display-options';
 
 export type Size = 's' | 'm' | 'l';
 
-export interface TableDisplayOptionsProps {
+export interface TableDisplayDropdownProps {
   size: Size;
   setSize: (v: Size) => void;
 }
 
-export const TableDisplayOptions: React.FC<TableDisplayOptionsProps> = ({ size, setSize }) => {
-  const { t } = useTranslation('plugin__netobserv-plugin');
-
-  const sizeOptions = {
-    s: t('Compact'),
-    m: t('Normal'),
-    l: t('Large')
-  };
-
-  return (
-    <>
-      <div className="pf-c-select__menu-group">
-        <Tooltip content={t('Force table rows to specific sizing.')}>
-          <div className="pf-c-select__menu-group-title">
-            <Text component={TextVariants.p}>
-              {t('Row size')} <InfoAltIcon />
-            </Text>
-          </div>
-        </Tooltip>
-        {_.map(sizeOptions, (name, key) => {
-          return (
-            <div key={`size-${key}`}>
-              <label className="pf-c-select__menu-item">
-                <Radio
-                  isChecked={key === size}
-                  name={`size-${key}`}
-                  onChange={() => setSize(key as Size)}
-                  label={name}
-                  data-test={`size-${key}`}
-                  id={`size-${key}`}
-                  value={key}
-                />
-              </label>
-            </div>
-          );
-        })}
-      </div>
-    </>
-  );
-};
-
-export const TableDisplayDropdown: React.FC<{
-  size: Size;
-  setSize: (v: Size) => void;
-}> = ({ size, setSize }) => {
+export const TableDisplayDropdown: React.FC<TableDisplayDropdownProps> = ({ size, setSize }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [isOpen, setOpen] = React.useState<boolean>(false);
 
