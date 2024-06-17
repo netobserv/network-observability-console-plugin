@@ -7,10 +7,12 @@ import './table-display-dropdown.css';
 
 export type Size = 's' | 'm' | 'l';
 
-export const TableDisplayOptions: React.FC<{
+export interface TableDisplayOptionsProps {
   size: Size;
   setSize: (v: Size) => void;
-}> = ({ size, setSize }) => {
+}
+
+export const TableDisplayOptions: React.FC<TableDisplayOptionsProps> = ({ size, setSize }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   const sizeOptions = {

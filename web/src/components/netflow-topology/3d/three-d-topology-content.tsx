@@ -12,7 +12,7 @@ import { GraphElementPeer, NodeData, TopologyOptions } from '../../../model/topo
 import { createPeer } from '../../../utils/metrics';
 import './three-d-topology-content.css';
 
-export const ThreeDTopologyContent: React.FC<{
+export interface ThreeDTopologyContentProps {
   k8sModels: { [key: string]: K8sModel };
   metricFunction: StatFunction;
   metricType: MetricType;
@@ -28,7 +28,9 @@ export const ThreeDTopologyContent: React.FC<{
   searchHandle: SearchHandle | null;
   searchEvent?: SearchEvent;
   isDark?: boolean;
-}> = ({
+}
+
+export const ThreeDTopologyContent: React.FC<ThreeDTopologyContentProps> = ({
   k8sModels,
   metricFunction,
   metricType,

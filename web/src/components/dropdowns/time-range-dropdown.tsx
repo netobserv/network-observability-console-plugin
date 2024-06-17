@@ -19,12 +19,12 @@ import {
   parseDuration
 } from '../../utils/duration';
 
-export type TimeRangeDropdownProps = {
+export interface TimeRangeDropdownProps {
   range: number | TimeRange;
   setRange: (v: number) => void;
   openCustomModal: () => void;
   id?: string;
-};
+}
 
 export const customTimeRangeKey = 'CUSTOM_TIME_RANGE_KEY';
 

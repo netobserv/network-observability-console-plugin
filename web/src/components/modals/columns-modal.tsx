@@ -28,7 +28,7 @@ import Modal from './modal';
 
 export const columnFilterKeys = ['source', 'destination', 'time', 'host', 'namespace', 'owner', 'ip', 'dns'];
 
-export const ColumnsModal: React.FC<{
+export interface ColumnsModalProps {
   isModalOpen: boolean;
   setModalOpen: (v: boolean) => void;
   columns: Column[];
@@ -36,7 +36,17 @@ export const ColumnsModal: React.FC<{
   setColumnSizes: (v: ColumnSizeMap) => void;
   config: Config;
   id?: string;
-}> = ({ id, config, isModalOpen, setModalOpen, columns, setColumns, setColumnSizes }) => {
+}
+
+export const ColumnsModal: React.FC<ColumnsModalProps> = ({
+  id,
+  config,
+  isModalOpen,
+  setModalOpen,
+  columns,
+  setColumns,
+  setColumnSizes
+}) => {
   const [resetClicked, setResetClicked] = React.useState<boolean>(false);
   const [updatedColumns, setUpdatedColumns] = React.useState<Column[]>([]);
   const [filterKeys, setFilterKeys] = React.useState<string[]>([]);

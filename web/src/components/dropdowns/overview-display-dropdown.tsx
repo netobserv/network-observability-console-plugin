@@ -10,7 +10,7 @@ import TruncateDropdown, { TruncateLength } from './truncate-dropdown';
 
 export type Size = 's' | 'm' | 'l';
 
-export const OverviewDisplayOptions: React.FC<{
+export interface OverviewDisplayOptionsProps {
   metricScope: FlowScope;
   setMetricScope: (s: FlowScope) => void;
   truncateLength: TruncateLength;
@@ -18,7 +18,17 @@ export const OverviewDisplayOptions: React.FC<{
   focus: boolean;
   setFocus: (v: boolean) => void;
   allowedScopes: FlowScope[];
-}> = ({ metricScope, setMetricScope, truncateLength, setTruncateLength, focus, setFocus, allowedScopes }) => {
+}
+
+export const OverviewDisplayOptions: React.FC<OverviewDisplayOptionsProps> = ({
+  metricScope,
+  setMetricScope,
+  truncateLength,
+  setTruncateLength,
+  focus,
+  setFocus,
+  allowedScopes
+}) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   return (

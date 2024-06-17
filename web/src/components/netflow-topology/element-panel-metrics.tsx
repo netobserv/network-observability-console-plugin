@@ -13,7 +13,7 @@ import { ElementPanelStats } from './element-panel-stats';
 
 type MetricsRadio = 'in' | 'out' | 'both';
 
-export const ElementPanelMetrics: React.FC<{
+export interface ElementPanelMetricsProps {
   aData: NodeData;
   bData?: NodeData;
   isGroup: boolean;
@@ -21,7 +21,17 @@ export const ElementPanelMetrics: React.FC<{
   metricType: MetricType;
   truncateLength: TruncateLength;
   isDark?: boolean;
-}> = ({ aData, bData, isGroup, metrics, metricType, truncateLength, isDark }) => {
+}
+
+export const ElementPanelMetrics: React.FC<ElementPanelMetricsProps> = ({
+  aData,
+  bData,
+  isGroup,
+  metrics,
+  metricType,
+  truncateLength,
+  isDark
+}) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [metricsRadio, setMetricsRadio] = React.useState<MetricsRadio>('both');
 

@@ -30,7 +30,7 @@ export type RecordFieldFilter = {
   isDelete: boolean;
 };
 
-export const RecordField: React.FC<{
+export interface RecordFieldProps {
   allowPktDrops: boolean;
   flow: Record;
   column: Column;
@@ -39,7 +39,18 @@ export const RecordField: React.FC<{
   filter?: RecordFieldFilter;
   detailed?: boolean;
   isDark?: boolean;
-}> = ({ allowPktDrops, flow, column, size, filter, useLinks, detailed, isDark }) => {
+}
+
+export const RecordField: React.FC<RecordFieldProps> = ({
+  allowPktDrops,
+  flow,
+  column,
+  size,
+  filter,
+  useLinks,
+  detailed,
+  isDark
+}) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   const onMouseOver = (event: React.MouseEvent<HTMLDivElement, MouseEvent>, className: string) => {

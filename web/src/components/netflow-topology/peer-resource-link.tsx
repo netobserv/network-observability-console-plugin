@@ -3,7 +3,11 @@ import { Text } from '@patternfly/react-core';
 import * as React from 'react';
 import { TopologyMetricPeer } from '../../api/loki';
 
-export const PeerResourceLink: React.FC<{ peer: TopologyMetricPeer }> = ({ peer }) => {
+export interface PeerResourceLinkProps {
+  peer: TopologyMetricPeer;
+}
+
+export const PeerResourceLink: React.FC<PeerResourceLinkProps> = ({ peer }) => {
   const name = peer.getDisplayName(false, false);
   if (name) {
     if (peer.resourceKind) {

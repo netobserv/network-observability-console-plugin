@@ -18,7 +18,7 @@ const exposedMetrics: MetricType[] = [
   'TimeFlowRttNs'
 ];
 
-export const MetricsQuerySummaryContent: React.FC<{
+export interface MetricsQuerySummaryContentProps {
   metrics: NetflowMetrics;
   numQueries?: number;
   dataSources?: string[];
@@ -32,7 +32,9 @@ export const MetricsQuerySummaryContent: React.FC<{
   isShowQuerySummary?: boolean;
   toggleQuerySummary?: () => void;
   isDark?: boolean;
-}> = ({
+}
+
+export const MetricsQuerySummaryContent: React.FC<MetricsQuerySummaryContentProps> = ({
   metrics,
   numQueries,
   dataSources,
@@ -257,7 +259,7 @@ export const MetricsQuerySummaryContent: React.FC<{
   );
 };
 
-export const MetricsQuerySummary: React.FC<{
+export interface MetricsQuerySummaryProps {
   stats?: Stats;
   metrics: NetflowMetrics;
   loading?: boolean;
@@ -268,7 +270,9 @@ export const MetricsQuerySummary: React.FC<{
   isShowQuerySummary?: boolean;
   toggleQuerySummary?: () => void;
   isDark?: boolean;
-}> = ({
+}
+
+export const MetricsQuerySummary: React.FC<MetricsQuerySummaryProps> = ({
   metrics,
   stats,
   loading,

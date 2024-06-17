@@ -1,12 +1,14 @@
 import * as React from 'react';
 
-export const BrushHandleComponent: React.FC<{
+export interface BrushHandleComponentProps {
   x?: number;
   y?: number;
   width?: number;
   height?: number;
   isDark?: boolean;
-}> = ({ x, y, width, height, isDark }) => {
+}
+
+export const BrushHandleComponent: React.FC<BrushHandleComponentProps> = ({ x, y, width, height, isDark }) => {
   if (x === undefined || y === undefined || width === undefined || height === undefined) {
     return null;
   }

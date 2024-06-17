@@ -36,12 +36,19 @@ import { ElementPanelMetrics } from './element-panel-metrics';
 import './element-panel.css';
 import { PeerResourceLink } from './peer-resource-link';
 
-export const ElementPanelDetailsContent: React.FC<{
+export interface ElementPanelDetailsContentProps {
   element: GraphElementPeer;
   filters: Filter[];
   setFilters: (filters: Filter[]) => void;
   filterDefinitions: FilterDefinition[];
-}> = ({ element, filters, setFilters, filterDefinitions }) => {
+}
+
+export const ElementPanelDetailsContent: React.FC<ElementPanelDetailsContentProps> = ({
+  element,
+  filters,
+  setFilters,
+  filterDefinitions
+}) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [hidden, setHidden] = React.useState<string[]>([]);
   const data = element.getData();
@@ -161,7 +168,7 @@ export const ElementPanelDetailsContent: React.FC<{
   return <></>;
 };
 
-export const ElementPanel: React.FC<{
+export interface ElementPanelProps {
   onClose: () => void;
   element: GraphElementPeer;
   metrics: TopologyMetrics[];
@@ -173,7 +180,9 @@ export const ElementPanel: React.FC<{
   truncateLength: TruncateLength;
   id?: string;
   isDark?: boolean;
-}> = ({
+}
+
+export const ElementPanel: React.FC<ElementPanelProps> = ({
   id,
   element,
   metrics,

@@ -17,7 +17,7 @@ import { TopologyContent } from './2d/topology-content';
 import ThreeDTopologyContent from './3d/three-d-topology-content';
 import './netflow-topology.css';
 
-export const NetflowTopology: React.FC<{
+export interface NetflowTopologyProps {
   loading?: boolean;
   k8sModels: { [key: string]: K8sModel };
   metricFunction: StatFunction;
@@ -37,7 +37,9 @@ export const NetflowTopology: React.FC<{
   searchEvent?: SearchEvent;
   isDark?: boolean;
   allowedScopes: FlowScope[];
-}> = ({
+}
+
+export const NetflowTopology: React.FC<NetflowTopologyProps> = ({
   loading,
   k8sModels,
   metricFunction,

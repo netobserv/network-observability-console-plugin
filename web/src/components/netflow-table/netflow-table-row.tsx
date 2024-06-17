@@ -7,7 +7,7 @@ import { Size } from '../dropdowns/table-display-dropdown';
 import { RecordField } from '../netflow-record/record-field';
 import './netflow-table-row.css';
 
-const NetflowTableRow: React.FC<{
+export interface NetflowTableRowProps {
   allowPktDrops: boolean;
   lastRender?: string;
   flow: Record;
@@ -20,7 +20,9 @@ const NetflowTableRow: React.FC<{
   showContent?: boolean;
   tableWidth: number;
   isDark?: boolean;
-}> = ({
+}
+
+export const NetflowTableRow: React.FC<NetflowTableRowProps> = ({
   allowPktDrops,
   lastRender,
   flow,

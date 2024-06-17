@@ -5,7 +5,7 @@ import AlertBanner from './banner';
 
 import { murmur3 } from 'murmurhash-js';
 
-type AlertFetcherProps = {};
+export interface AlertFetcherProps {}
 
 export const AlertFetcher: React.FC<AlertFetcherProps> = ({ children }) => {
   const [alerts, setAlerts] = React.useState<Rule[]>([]);

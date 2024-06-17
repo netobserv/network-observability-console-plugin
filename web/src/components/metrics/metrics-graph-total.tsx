@@ -29,7 +29,7 @@ import {
   toDatapoints
 } from './metrics-helper';
 
-export type MetricsGraphWithTotalProps = {
+export interface MetricsGraphWithTotalProps {
   id: string;
   metricType: MetricType;
   metricFunction: MetricFunction;
@@ -49,7 +49,7 @@ export type MetricsGraphWithTotalProps = {
   showLegend?: boolean;
   animate?: boolean;
   isDark?: boolean;
-};
+}
 
 export const MetricsGraphWithTotal: React.FC<MetricsGraphWithTotalProps> = ({
   id,

@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { FilterDefinition } from '../../model/filters';
 import { buildGroups, getFilterFullName } from './filters-helper';
 
-interface FiltersDropdownProps {
+export interface FiltersDropdownProps {
   filterDefinitions: FilterDefinition[];
   selectedFilter: FilterDefinition;
   setSelectedFilter: (f: FilterDefinition) => void;

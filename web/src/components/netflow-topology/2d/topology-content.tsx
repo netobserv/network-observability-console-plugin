@@ -49,7 +49,7 @@ const zoomIn = 4 / 3;
 const zoomOut = 3 / 4;
 const fitPadding = 80;
 
-export const TopologyContent: React.FC<{
+export interface TopologyContentProps {
   k8sModels: { [key: string]: K8sModel };
   metricFunction: StatFunction;
   metricType: MetricType;
@@ -67,7 +67,9 @@ export const TopologyContent: React.FC<{
   searchHandle: SearchHandle | null;
   searchEvent?: SearchEvent;
   isDark?: boolean;
-}> = ({
+}
+
+export const TopologyContent: React.FC<TopologyContentProps> = ({
   k8sModels,
   metricFunction,
   metricType,

@@ -42,7 +42,7 @@ type K8SObjectCardinality = {
   names: string[];
 };
 
-export const SummaryPanelContent: React.FC<{
+export interface SummaryPanelContentProps {
   flows?: Record[];
   metrics: NetflowMetrics;
   type: RecordType;
@@ -56,7 +56,9 @@ export const SummaryPanelContent: React.FC<{
   slownessReason?: string;
   showDNSLatency?: boolean;
   showRTTLatency?: boolean;
-}> = ({
+}
+
+export const SummaryPanelContent: React.FC<SummaryPanelContentProps> = ({
   flows,
   metrics,
   type,
@@ -449,7 +451,7 @@ export const SummaryPanelContent: React.FC<{
   );
 };
 
-export const SummaryPanel: React.FC<{
+export interface SummaryPanelProps {
   onClose: () => void;
   flows?: Record[];
   metrics: NetflowMetrics;
@@ -465,7 +467,9 @@ export const SummaryPanel: React.FC<{
   showDNSLatency?: boolean;
   showRTTLatency?: boolean;
   id?: string;
-}> = ({
+}
+
+export const SummaryPanel: React.FC<SummaryPanelProps> = ({
   flows,
   metrics,
   type,

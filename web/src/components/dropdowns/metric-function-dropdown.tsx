@@ -6,12 +6,19 @@ import { isTimeMetric, MetricType, StatFunction } from '../../model/flow-query';
 export const timeMetricFunctions: StatFunction[] = ['avg', 'min', 'max', 'p90', 'p99'];
 export const rateMetricFunctions: StatFunction[] = ['last', 'avg', 'min', 'max', 'sum'];
 
-export const MetricFunctionDropdown: React.FC<{
+export interface MetricFunctionDropdownProps {
   selected?: string;
   setMetricFunction: (v: StatFunction) => void;
   metricType?: MetricType;
   id?: string;
-}> = ({ selected, setMetricFunction, metricType, id }) => {
+}
+
+export const MetricFunctionDropdown: React.FC<MetricFunctionDropdownProps> = ({
+  selected,
+  setMetricFunction,
+  metricType,
+  id
+}) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [metricDropdownOpen, setMetricDropdownOpen] = React.useState(false);
 

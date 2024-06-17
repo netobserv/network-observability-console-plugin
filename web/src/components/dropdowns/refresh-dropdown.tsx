@@ -4,12 +4,12 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { formatDuration, parseDuration } from '../../utils/duration';
 
-export type RefreshDropdownProps = {
+export interface RefreshDropdownProps {
   disabled?: boolean;
   interval?: number;
   setInterval: (v?: number) => void;
   id?: string;
-};
+}
 
 const offKey = 'OFF_KEY';
 

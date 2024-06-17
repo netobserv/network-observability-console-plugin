@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { FilterDefinition } from '../../model/filters';
 
-interface FilterHintsProps {
+export interface FilterHintsProps {
   def: FilterDefinition;
 }
 

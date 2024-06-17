@@ -4,11 +4,13 @@ import { useTranslation } from 'react-i18next';
 import { LayoutName } from '../../model/topology';
 import { Feature, isAllowed } from '../../utils/features-gate';
 
-export const LayoutDropdown: React.FC<{
+export interface LayoutDropdownProps {
   selected: LayoutName;
   setLayout: (l: LayoutName) => void;
   id?: string;
-}> = ({ selected, setLayout, id }) => {
+}
+
+export const LayoutDropdown: React.FC<LayoutDropdownProps> = ({ selected, setLayout, id }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [layoutDropdownOpen, setLayoutDropdownOpen] = React.useState(false);
 

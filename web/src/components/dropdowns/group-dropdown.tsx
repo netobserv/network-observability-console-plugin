@@ -5,14 +5,23 @@ import { FlowScope } from '../../model/flow-query';
 import { MetricScopeOptions } from '../../model/metrics';
 import { getGroupsForScope, isGroupEnabled, TopologyGroupTypes } from '../../model/topology';
 
-export const GroupDropdown: React.FC<{
+export interface GroupDropdownProps {
   disabled?: boolean;
   scope: MetricScopeOptions;
   selected: TopologyGroupTypes;
   setGroupType: (v: TopologyGroupTypes) => void;
   id?: string;
   allowedScopes: FlowScope[];
-}> = ({ disabled, scope, selected, setGroupType, id, allowedScopes }) => {
+}
+
+export const GroupDropdown: React.FC<GroupDropdownProps> = ({
+  disabled,
+  scope,
+  selected,
+  setGroupType,
+  id,
+  allowedScopes
+}) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [groupDropdownOpen, setGroupDropdownOpen] = React.useState(false);
 

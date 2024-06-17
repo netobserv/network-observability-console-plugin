@@ -6,13 +6,21 @@ import { isTimeMetric, MetricType } from '../../model/flow-query';
 import { getStat } from '../../model/metrics';
 import { getFormattedValue } from '../../utils/metrics';
 
-export const ElementPanelStats: React.FC<{
+export interface ElementPanelStatsProps {
   metricsIn: TopologyMetrics[];
   metricsOut: TopologyMetrics[];
   metricsBoth: TopologyMetrics[];
   metricType: MetricType;
   isEdge: boolean;
-}> = ({ metricsIn, metricsOut, metricsBoth, metricType, isEdge }) => {
+}
+
+export const ElementPanelStats: React.FC<ElementPanelStatsProps> = ({
+  metricsIn,
+  metricsOut,
+  metricsBoth,
+  metricType,
+  isEdge
+}) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   const isTime = isTimeMetric(metricType);

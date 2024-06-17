@@ -176,11 +176,11 @@ import { SearchComponent, SearchEvent, SearchHandle } from './search/search';
 
 export type ViewId = 'overview' | 'table' | 'topology';
 
-export type NetflowTrafficProps = {
+export interface NetflowTrafficProps {
   forcedFilters?: Filters | null;
   isTab?: boolean;
   parentConfig?: Config;
-};
+}
 
 export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, isTab, parentConfig }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');

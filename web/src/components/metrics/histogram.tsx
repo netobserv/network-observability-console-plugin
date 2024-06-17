@@ -46,7 +46,7 @@ import {
 
 export const VoronoiContainer = createContainer('voronoi', 'brush');
 
-export const Histogram: React.FC<{
+export interface HistogramProps {
   id: string;
   loading: boolean;
   totalMetric: NamedMetric;
@@ -57,7 +57,20 @@ export const Histogram: React.FC<{
   setRange: (tr: TimeRange) => void;
   moveRange: (next: boolean) => void;
   zoomRange: (zoom: boolean) => void;
-}> = ({ id, loading, totalMetric, limit, isDark, range, guidedTourHandle, setRange, moveRange, zoomRange }) => {
+}
+
+export const Histogram: React.FC<HistogramProps> = ({
+  id,
+  loading,
+  totalMetric,
+  limit,
+  isDark,
+  range,
+  guidedTourHandle,
+  setRange,
+  moveRange,
+  zoomRange
+}) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   const datapoints: ChartDataPoint[] = toHistogramDatapoints(totalMetric);

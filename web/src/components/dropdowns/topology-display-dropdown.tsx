@@ -16,7 +16,7 @@ import './topology-display-dropdown.css';
 
 export type Size = 's' | 'm' | 'l';
 
-export const TopologyDisplayOptions: React.FC<{
+export interface TopologyDisplayOptionsProps {
   metricFunction: StatFunction;
   setMetricFunction: (f: StatFunction) => void;
   metricType: MetricType;
@@ -29,7 +29,9 @@ export const TopologyDisplayOptions: React.FC<{
   allowDNSMetric: boolean;
   allowRTTMetric: boolean;
   allowedScopes: FlowScope[];
-}> = ({
+}
+
+export const TopologyDisplayOptions: React.FC<TopologyDisplayOptionsProps> = ({
   metricFunction,
   setMetricFunction,
   metricType,

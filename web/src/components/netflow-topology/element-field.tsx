@@ -6,7 +6,7 @@ import { NodeType } from '../../model/flow-query';
 import { SummaryFilterButton } from '../filters/summary-filter-button';
 import { PeerResourceLink } from './peer-resource-link';
 
-export const ElementField: React.FC<{
+export interface ElementFieldProps {
   id: string;
   label: string;
   filterType: NodeType;
@@ -15,7 +15,18 @@ export const ElementField: React.FC<{
   activeFilters: Filter[];
   setFilters: (filters: Filter[]) => void;
   filterDefinitions: FilterDefinition[];
-}> = ({ id, label, filterType, forcedText, peer, activeFilters, setFilters, filterDefinitions }) => {
+}
+
+export const ElementField: React.FC<ElementFieldProps> = ({
+  id,
+  label,
+  filterType,
+  forcedText,
+  peer,
+  activeFilters,
+  setFilters,
+  filterDefinitions
+}) => {
   return (
     <TextContent id={id} className="record-field-container">
       <Text component={TextVariants.h4}>{label}</Text>

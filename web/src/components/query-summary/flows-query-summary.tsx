@@ -11,7 +11,7 @@ import { valueFormat } from '../../utils/format';
 import './query-summary.css';
 import StatsQuerySummary from './stats-query-summary';
 
-export const FlowsQuerySummaryContent: React.FC<{
+export interface FlowsQuerySummaryContentProps {
   flows: Record[];
   type: RecordType;
   numQueries?: number;
@@ -26,7 +26,9 @@ export const FlowsQuerySummaryContent: React.FC<{
   className?: string;
   isShowQuerySummary?: boolean;
   toggleQuerySummary?: () => void;
-}> = ({
+}
+
+export const FlowsQuerySummaryContent: React.FC<FlowsQuerySummaryContentProps> = ({
   flows,
   type,
   numQueries,
@@ -152,7 +154,7 @@ export const FlowsQuerySummaryContent: React.FC<{
   );
 };
 
-export const FlowsQuerySummary: React.FC<{
+export interface FlowQuerySummaryProps {
   flows: Record[];
   stats?: Stats;
   type: RecordType;
@@ -164,7 +166,9 @@ export const FlowsQuerySummary: React.FC<{
   slownessReason?: string;
   isShowQuerySummary?: boolean;
   toggleQuerySummary?: () => void;
-}> = ({
+}
+
+export const FlowsQuerySummary: React.FC<FlowQuerySummaryProps> = ({
   flows,
   stats,
   type,

@@ -5,7 +5,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import './netflow-overview-panel.css';
 
-export const NetflowOverviewPanel: React.FC<{
+export interface NetflowOverviewPanelProps {
   doubleWidth: boolean;
   bodyClassName: string;
   title: string;
@@ -16,7 +16,9 @@ export const NetflowOverviewPanel: React.FC<{
   isSelected?: boolean;
   isFocus?: boolean;
   id?: string;
-}> = ({
+}
+
+export const NetflowOverviewPanel: React.FC<NetflowOverviewPanelProps> = ({
   id,
   doubleWidth,
   bodyClassName,

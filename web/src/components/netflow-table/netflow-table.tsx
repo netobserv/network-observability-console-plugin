@@ -23,7 +23,7 @@ import { NetflowTableHeader } from './netflow-table-header';
 import NetflowTableRow from './netflow-table-row';
 import './netflow-table.css';
 
-const NetflowTable: React.FC<{
+export interface NetflowTableProps {
   allowPktDrops: boolean;
   flows: Record[];
   selectedRecord?: Record;
@@ -36,7 +36,9 @@ const NetflowTable: React.FC<{
   loading?: boolean;
   filterActionLinks: JSX.Element;
   isDark?: boolean;
-}> = ({
+}
+
+export const NetflowTable: React.FC<NetflowTableProps> = ({
   allowPktDrops,
   flows,
   selectedRecord,

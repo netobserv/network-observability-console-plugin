@@ -28,7 +28,7 @@ import {
   toDatapoints
 } from './metrics-helper';
 
-export type MetricsGraphProps = {
+export interface MetricsGraphProps {
   id: string;
   metricType: MetricType;
   metricFunction: MetricFunction;
@@ -44,7 +44,7 @@ export type MetricsGraphProps = {
   showLegend?: boolean;
   animate?: boolean;
   isDark?: boolean;
-};
+}
 
 export const MetricsGraph: React.FC<MetricsGraphProps> = ({
   id,

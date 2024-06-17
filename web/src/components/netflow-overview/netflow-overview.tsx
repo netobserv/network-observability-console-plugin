@@ -50,7 +50,7 @@ type PanelContent = {
   doubleWidth?: boolean;
 };
 
-export type NetflowOverviewProps = {
+export interface NetflowOverviewProps {
   limit: number;
   panels: OverviewPanel[];
   recordType: RecordType;
@@ -61,7 +61,7 @@ export type NetflowOverviewProps = {
   truncateLength: TruncateLength;
   focus?: boolean;
   setFocus?: (v: boolean) => void;
-};
+}
 
 export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
   limit,

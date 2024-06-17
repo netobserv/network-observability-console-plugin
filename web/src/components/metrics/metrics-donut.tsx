@@ -9,7 +9,7 @@ import { getFormattedValue, isUnknownPeer } from '../../utils/metrics';
 import './metrics-content.css';
 import { defaultDimensions, Dimensions, observeDimensions } from './metrics-helper';
 
-export type MetricsDonutProps = {
+export interface MetricsDonutProps {
   id: string;
   subTitle?: string;
   limit: number;
@@ -26,7 +26,7 @@ export type MetricsDonutProps = {
   showLegend?: boolean;
   animate?: boolean;
   isDark?: boolean;
-};
+}
 
 export const MetricsDonut: React.FC<MetricsDonutProps> = ({
   id,

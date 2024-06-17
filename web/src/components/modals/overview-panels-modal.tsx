@@ -28,7 +28,7 @@ import './overview-panels-modal.css';
 
 export const panelFilterKeys = ['top', 'total', 'dns', 'dropped', 'bar', 'donut', 'line'];
 
-export const OverviewPanelsModal: React.FC<{
+export interface OverviewPanelsModalProps {
   isModalOpen: boolean;
   setModalOpen: (v: boolean) => void;
   recordType: RecordType;
@@ -36,7 +36,17 @@ export const OverviewPanelsModal: React.FC<{
   setPanels: (v: OverviewPanel[]) => void;
   customIds?: string[];
   id?: string;
-}> = ({ id, isModalOpen, setModalOpen, recordType, panels, setPanels, customIds }) => {
+}
+
+export const OverviewPanelsModal: React.FC<OverviewPanelsModalProps> = ({
+  id,
+  isModalOpen,
+  setModalOpen,
+  recordType,
+  panels,
+  setPanels,
+  customIds
+}) => {
   const [updatedPanels, setUpdatedPanels] = React.useState<OverviewPanel[]>([]);
   const [filterKeys, setFilterKeys] = React.useState<string[]>([]);
   const { t } = useTranslation('plugin__netobserv-plugin');
