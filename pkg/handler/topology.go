@@ -296,7 +296,6 @@ func getEligiblePromMetric(promInventory *prometheus.Inventory, filters filters.
 	if in.RecordType != "" && in.RecordType != constants.RecordTypeLog {
 		return nil, fmt.Sprintf("RecordType not managed: %s", in.RecordType)
 	}
-	// TODO: packetLoss, how can we handle that?
 
 	labelsNeeded, _ := prometheus.GetLabelsAndFilter(in.Aggregate, in.Groups)
 	fromFilters, unsupportedReason := prometheus.FiltersToLabels(filters)
