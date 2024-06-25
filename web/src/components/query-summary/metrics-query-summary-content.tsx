@@ -5,9 +5,9 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { getRateMetricKey, NetflowMetrics } from '../../api/loki';
 import { MetricType } from '../../model/flow-query';
+import { Warning } from '../../model/warnings';
 import { valueFormat } from '../../utils/format';
 import StatsQuerySummary from './stats-query-summary';
-import { Warning } from '../../model/warnings';
 
 const exposedMetrics: MetricType[] = [
   'Bytes',

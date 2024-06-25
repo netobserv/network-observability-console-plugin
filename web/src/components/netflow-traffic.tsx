@@ -76,6 +76,7 @@ import {
   TopologyGroupTypes,
   TopologyOptions
 } from '../model/topology';
+import { Warning } from '../model/warnings';
 import { getFetchFunctions as getBackAndForthFetch } from '../utils/back-and-forth';
 import { Column, ColumnsId, ColumnSizeMap, getDefaultColumns } from '../utils/columns';
 import { loadConfig } from '../utils/config';
@@ -173,7 +174,6 @@ import FlowsQuerySummary from './query-summary/flows-query-summary';
 import MetricsQuerySummary from './query-summary/metrics-query-summary';
 import SummaryPanel from './query-summary/summary-panel';
 import { SearchComponent, SearchEvent, SearchHandle } from './search/search';
-import { Warning } from '../model/warnings';
 
 export type ViewId = 'overview' | 'table' | 'topology';
 

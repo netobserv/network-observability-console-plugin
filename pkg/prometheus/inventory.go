@@ -94,12 +94,12 @@ func (i *Inventory) searchWithDir(neededLabels []string, valueField string, dir 
 				return sr
 			}
 			sr.Candidates = append(sr.Candidates, m.Name)
-		} else if m.Enabled && (sr.MissingLabels == nil || len(missingLabels) < len(sr.MissingLabels)) {
+		} else if m.Enabled && len(missingLabels) > 0 && (sr.MissingLabels == nil || len(missingLabels) < len(sr.MissingLabels)) {
 			// Keep smaller possible set of missing labels
 			sr.MissingLabels = missingLabels
 		}
 	}
-	log.Debugf("No metric match for %v / %s (/ %s)", neededLabels, valueField, dir)
+	log.Debugf("No metric match for %v / %s / %s", neededLabels, valueField, dir)
 	return sr
 }
 

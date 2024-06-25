@@ -5,10 +5,10 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Record } from '../../api/ipfix';
 import { RecordType } from '../../model/flow-query';
+import { Warning } from '../../model/warnings';
 import { rangeToSeconds, TimeRange } from '../../utils/datetime';
 import { valueFormat } from '../../utils/format';
 import StatsQuerySummary from './stats-query-summary';
-import { Warning } from '../../model/warnings';
 
 export interface FlowsQuerySummaryContentProps {
   flows: Record[];

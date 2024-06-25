@@ -1,6 +1,7 @@
 import { Card } from '@patternfly/react-core';
 import * as React from 'react';
 import { NetflowMetrics, Stats } from '../../api/loki';
+import { Warning } from '../../model/warnings';
 import { MetricsQuerySummaryContent } from './metrics-query-summary-content';
 import './query-summary.css';
 
