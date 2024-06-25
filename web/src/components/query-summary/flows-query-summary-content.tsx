@@ -8,6 +8,7 @@ import { RecordType } from '../../model/flow-query';
 import { rangeToSeconds, TimeRange } from '../../utils/datetime';
 import { valueFormat } from '../../utils/format';
 import StatsQuerySummary from './stats-query-summary';
+import { Warning } from '../../model/warnings';
 
 export interface FlowsQuerySummaryContentProps {
   flows: Record[];
@@ -18,8 +19,7 @@ export interface FlowsQuerySummaryContentProps {
   loading?: boolean;
   lastRefresh?: Date;
   lastDuration?: number;
-  warningMessage?: string;
-  slownessReason?: string;
+  warning?: Warning;
   direction: 'row' | 'column';
   className?: string;
   isShowQuerySummary?: boolean;
@@ -35,8 +35,7 @@ export const FlowsQuerySummaryContent: React.FC<FlowsQuerySummaryContentProps> =
   loading,
   lastRefresh,
   lastDuration,
-  warningMessage,
-  slownessReason,
+  warning,
   direction,
   className,
   isShowQuerySummary,
@@ -105,8 +104,7 @@ export const FlowsQuerySummaryContent: React.FC<FlowsQuerySummaryContentProps> =
         lastRefresh={lastRefresh}
         lastDuration={lastDuration}
         numQueries={numQueries}
-        warningMessage={warningMessage}
-        slownessReason={slownessReason}
+        warning={warning}
       />
       {!_.isEmpty(flows) && (
         <FlexItem>

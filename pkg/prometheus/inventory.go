@@ -76,6 +76,16 @@ func (i *Inventory) Search(neededLabels []string, valueField string) SearchResul
 
 func (i *Inventory) searchWithDir(neededLabels []string, valueField string, dir config.FlowDirection) SearchResult {
 	sr := SearchResult{}
+	// Special case, when the query has a filter to PktDropState/Cause and value field is bytes/packets,
+	// we must consider value field is actually PktDropBytes/Packets
+	if slices.Contains(neededLabels, fields.PktDropLatestDropCause) || slices.Contains(neededLabels, fields.PktDropLatestState) {
+		switch valueField {
+		case fields.Bytes:
+			valueField = fields.PktDropBytes
+		case fields.Packets:
+			valueField = fields.PktDropPackets
+		}
+	}
 	for _, m := range i.metrics {
 		match, missingLabels := checkMatch(&m, neededLabels, valueField, dir)
 		if match {

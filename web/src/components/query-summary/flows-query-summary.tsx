@@ -16,8 +16,7 @@ export interface FlowQuerySummaryProps {
   loading?: boolean;
   lastRefresh?: Date;
   lastDuration?: number;
-  warningMessage?: string;
-  slownessReason?: string;
+  warning?: Warning;
   isShowQuerySummary?: boolean;
   toggleQuerySummary?: () => void;
 }
@@ -30,8 +29,7 @@ export const FlowsQuerySummary: React.FC<FlowQuerySummaryProps> = ({
   loading,
   lastRefresh,
   lastDuration,
-  warningMessage,
-  slownessReason,
+  warning,
   isShowQuerySummary,
   toggleQuerySummary
 }) => {
@@ -48,8 +46,7 @@ export const FlowsQuerySummary: React.FC<FlowQuerySummaryProps> = ({
           loading={loading}
           lastRefresh={lastRefresh}
           lastDuration={lastDuration}
-          warningMessage={warningMessage}
-          slownessReason={slownessReason}
+          warning={warning}
           isShowQuerySummary={isShowQuerySummary}
           toggleQuerySummary={toggleQuerySummary}
         />

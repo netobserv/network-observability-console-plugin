@@ -28,8 +28,7 @@ export interface SummaryPanelProps {
   range: number | TimeRange;
   lastRefresh?: Date;
   lastDuration?: number;
-  warningMessage?: string;
-  slownessReason?: string;
+  warning?: Warning;
   showDNSLatency?: boolean;
   showRTTLatency?: boolean;
   id?: string;
@@ -45,8 +44,7 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
   range,
   lastRefresh,
   lastDuration,
-  warningMessage,
-  slownessReason,
+  warning,
   showDNSLatency,
   showRTTLatency,
   id,
@@ -80,8 +78,7 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
           range={range}
           lastRefresh={lastRefresh}
           lastDuration={lastDuration}
-          warningMessage={warningMessage}
-          slownessReason={slownessReason}
+          warning={warning}
           showDNSLatency={showDNSLatency}
           showRTTLatency={showRTTLatency}
         />
