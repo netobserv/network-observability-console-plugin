@@ -2,12 +2,7 @@ import { ChartLegendTooltip, createContainer } from '@patternfly/react-charts';
 import React from 'react';
 import { ChartDataPoint, LegendDataItem } from '../../utils/metrics-helper';
 
-export interface ChartVoronoiProps {
-  legendData: LegendDataItem[];
-  f: (v: number) => string;
-}
-
-export const ChartVoronoi: React.FC<ChartVoronoiProps> = ({ legendData, f }) => {
+export const chartVoronoi = (legendData: LegendDataItem[], f: (v: number) => string) => {
   const CursorVoronoiContainer = createContainer('voronoi', 'cursor');
   const tooltipData = legendData.map(item => ({ ...item, name: item.tooltipName || item.name }));
   return (
@@ -23,5 +18,3 @@ export const ChartVoronoi: React.FC<ChartVoronoiProps> = ({ legendData, f }) => 
     />
   );
 };
-
-export default ChartVoronoi;

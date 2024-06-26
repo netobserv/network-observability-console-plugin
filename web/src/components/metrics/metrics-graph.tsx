@@ -25,7 +25,7 @@ import {
   observeDimensions,
   toDatapoints
 } from '../../utils/metrics-helper';
-import { ChartVoronoi } from './chart-voronoi';
+import { chartVoronoi } from './chart-voronoi';
 import './metrics-content.css';
 
 export interface MetricsGraphProps {
@@ -105,9 +105,9 @@ export const MetricsGraph: React.FC<MetricsGraphProps> = ({
       <Chart
         themeColor={ChartThemeColor.multiUnordered}
         containerComponent={
-          showLegend ? (
-            <ChartVoronoi legendData={legendData} f={v => getFormattedValue(v, metricType, metricFunction, t)} />
-          ) : undefined
+          showLegend
+            ? chartVoronoi(legendData, (v: number) => getFormattedValue(v, metricType, metricFunction, t))
+            : undefined
         }
         legendData={showLegend ? legendData : undefined}
         legendOrientation={'horizontal'}
