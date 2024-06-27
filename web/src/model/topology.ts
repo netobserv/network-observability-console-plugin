@@ -102,6 +102,31 @@ export const isGroupEnabled = (group: TopologyGroupTypes, enabledScopes: FlowSco
   );
 };
 
+export const getStepIntoNext = (current: FlowScope, allowedScopes: FlowScope[]): FlowScope | undefined => {
+  let next: FlowScope | undefined = undefined;
+  switch (current) {
+    case 'cluster':
+      next = 'zone';
+      break;
+    case 'zone':
+      next = 'host';
+      break;
+    case 'host':
+      next = 'resource';
+      break;
+    case 'namespace':
+      next = 'owner';
+      break;
+    case 'owner':
+      next = 'resource';
+      break;
+  }
+  if (!next || allowedScopes.includes(next)) {
+    return next;
+  }
+  return getStepIntoNext(next, allowedScopes);
+};
+
 export interface TopologyOptions {
   maxEdgeStat: number;
   nodeBadges?: boolean;
@@ -456,6 +481,7 @@ export const generateDataModel = (
   droppedMetrics: TopologyMetrics[],
   options: TopologyOptions,
   metricScope: FlowScope,
+  allowedScopes: FlowScope[],
   searchValue: string,
   highlightedId: string,
   filters: Filters,
@@ -656,23 +682,22 @@ export const generateDataModel = (
   };
 
   const peerToNodeData = (p: TopologyMetricPeer): NodeData => {
+    const canStepInto = getStepIntoNext(metricScope, allowedScopes) !== undefined;
     switch (metricScope) {
       case 'cluster':
         return _.isEmpty(p.clusterName)
           ? { peer: p, nodeType: 'unknown' }
-          : { peer: p, nodeType: 'cluster', canStepInto: true };
+          : { peer: p, nodeType: 'cluster', canStepInto };
       case 'zone':
-        return _.isEmpty(p.zone) ? { peer: p, nodeType: 'unknown' } : { peer: p, nodeType: 'zone', canStepInto: true };
+        return _.isEmpty(p.zone) ? { peer: p, nodeType: 'unknown' } : { peer: p, nodeType: 'zone', canStepInto };
       case 'host':
-        return _.isEmpty(p.hostName)
-          ? { peer: p, nodeType: 'unknown' }
-          : { peer: p, nodeType: 'host', canStepInto: true };
+        return _.isEmpty(p.hostName) ? { peer: p, nodeType: 'unknown' } : { peer: p, nodeType: 'host', canStepInto };
       case 'namespace':
         return _.isEmpty(p.namespace)
           ? { peer: p, nodeType: 'unknown' }
-          : { peer: p, nodeType: 'namespace', canStepInto: true };
+          : { peer: p, nodeType: 'namespace', canStepInto };
       case 'owner':
-        return p.owner ? { peer: p, nodeType: 'owner', canStepInto: true } : { peer: p, nodeType: 'unknown' };
+        return p.owner ? { peer: p, nodeType: 'owner', canStepInto } : { peer: p, nodeType: 'unknown' };
       case 'resource':
       default:
         return { peer: p, nodeType: 'resource' };
