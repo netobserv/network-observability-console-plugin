@@ -45,9 +45,9 @@ export interface NetflowTrafficDrawerProps {
   recordType: RecordType;
   metrics: NetflowMetrics;
   loading?: boolean;
-  truncateLength: TruncateLength;
-  focus: boolean;
-  setFocus: (v: boolean) => void;
+  overviewTruncateLength: TruncateLength;
+  overviewFocus: boolean;
+  setOverviewFocus: (v: boolean) => void;
   flows: Record[];
   selectedRecord?: Record;
   availableColumns: Column[];
@@ -62,12 +62,12 @@ export interface NetflowTrafficDrawerProps {
   clearFilters: () => void;
   filters: Filters;
   k8sModels: { [key: string]: K8sModel };
-  metricFunction: StatFunction;
-  metricType: MetricType;
+  topologyMetricFunction: StatFunction;
+  topologyMetricType: MetricType;
   metricScope: FlowScope;
   setMetricScope: (ms: FlowScope) => void;
-  options: TopologyOptions;
-  setOptions: (o: TopologyOptions) => void;
+  topologyOptions: TopologyOptions;
+  setTopologyOptions: (o: TopologyOptions) => void;
   filterDefinitions: FilterDefinition[];
   setFilters: (v: Filters) => void;
   selectedElement: GraphElementPeer | undefined;
@@ -142,36 +142,36 @@ export const NetflowTrafficDrawer: React.FC<NetflowTrafficDrawerProps> = props =
   }, [props.defaultFilters, t, props.resetDefaultFilters, props.filters.list, props.clearFilters]);
 
   const getTopologyMetrics = React.useCallback(() => {
-    switch (props.metricType) {
+    switch (props.topologyMetricType) {
       case 'Bytes':
       case 'Packets':
-        return props.metrics.rateMetrics?.[getRateMetricKey(props.metricType)];
+        return props.metrics.rateMetrics?.[getRateMetricKey(props.topologyMetricType)];
       case 'DnsLatencyMs':
-        return props.metrics.dnsLatencyMetrics?.[getFunctionMetricKey(props.metricFunction)];
+        return props.metrics.dnsLatencyMetrics?.[getFunctionMetricKey(props.topologyMetricFunction)];
       case 'TimeFlowRttNs':
-        return props.metrics.rttMetrics?.[getFunctionMetricKey(props.metricFunction)];
+        return props.metrics.rttMetrics?.[getFunctionMetricKey(props.topologyMetricFunction)];
       default:
         return undefined;
     }
   }, [
     props.metrics.dnsLatencyMetrics,
-    props.metricFunction,
-    props.metricType,
+    props.topologyMetricFunction,
+    props.topologyMetricType,
     props.metrics.rateMetrics,
     props.metrics.rttMetrics
   ]);
 
   const getTopologyDroppedMetrics = React.useCallback(() => {
-    switch (props.metricType) {
+    switch (props.topologyMetricType) {
       case 'Bytes':
       case 'Packets':
       case 'PktDropBytes':
       case 'PktDropPackets':
-        return props.metrics.droppedRateMetrics?.[getRateMetricKey(props.metricType)];
+        return props.metrics.droppedRateMetrics?.[getRateMetricKey(props.topologyMetricType)];
       default:
         return undefined;
     }
-  }, [props.metrics.droppedRateMetrics, props.metricType]);
+  }, [props.metrics.droppedRateMetrics, props.topologyMetricType]);
 
   const checkSlownessReason = React.useCallback(
     (w: Warning | undefined): Warning | undefined => {
@@ -222,9 +222,9 @@ export const NetflowTrafficDrawer: React.FC<NetflowTrafficDrawerProps> = props =
               loading={props.loading}
               isDark={props.isDarkTheme}
               filterActionLinks={filterLinks()}
-              truncateLength={props.truncateLength}
-              focus={props.focus}
-              setFocus={props.setFocus}
+              truncateLength={props.overviewTruncateLength}
+              focus={props.overviewFocus}
+              setFocus={props.setOverviewFocus}
             />
           );
           break;
@@ -253,14 +253,14 @@ export const NetflowTrafficDrawer: React.FC<NetflowTrafficDrawerProps> = props =
             <NetflowTopology
               loading={props.loading}
               k8sModels={props.k8sModels}
-              metricFunction={props.metricFunction}
-              metricType={props.metricType}
+              metricFunction={props.topologyMetricFunction}
+              metricType={props.topologyMetricType}
               metricScope={props.metricScope}
               setMetricScope={props.setMetricScope}
               metrics={getTopologyMetrics() || []}
               droppedMetrics={getTopologyDroppedMetrics() || []}
-              options={props.options}
-              setOptions={props.setOptions}
+              options={props.topologyOptions}
+              setOptions={props.setTopologyOptions}
               filters={props.filters}
               filterDefinitions={props.filterDefinitions}
               setFilters={props.setFilters}
@@ -327,8 +327,8 @@ export const NetflowTrafficDrawer: React.FC<NetflowTrafficDrawerProps> = props =
           element={props.selectedElement}
           metrics={getTopologyMetrics() || []}
           droppedMetrics={getTopologyDroppedMetrics() || []}
-          metricType={props.metricType}
-          truncateLength={props.options.truncateLength}
+          metricType={props.topologyMetricType}
+          truncateLength={props.topologyOptions.truncateLength}
           filters={props.filters.list}
           filterDefinitions={props.filterDefinitions}
           setFilters={setFiltersList}

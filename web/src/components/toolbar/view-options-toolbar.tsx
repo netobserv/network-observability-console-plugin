@@ -36,11 +36,11 @@ export interface ViewOptionsToolbarProps {
   setViewOptionOverflowMenuOpen: (v: boolean) => void;
   metricScope: FlowScope;
   setMetricScope: (s: FlowScope) => void;
-  truncateLength: TruncateLength;
-  setTruncateLength: (v: TruncateLength) => void;
-  metricFunction: StatFunction;
-  setMetricFunction: (f: StatFunction) => void;
-  metricType: MetricType;
+  overviewTruncateLength: TruncateLength;
+  setOverviewTruncateLength: (v: TruncateLength) => void;
+  topologyMetricFunction: StatFunction;
+  setTopologyMetricFunction: (f: StatFunction) => void;
+  topologyMetricType: MetricType;
   setMetricType: (t: MetricType) => void;
   topologyOptions: TopologyOptions;
   setTopologyOptions: (o: TopologyOptions) => void;
@@ -229,8 +229,8 @@ export const ViewOptionsToolbar: React.FC<ViewOptionsToolbarProps> = props => {
             <OverviewDisplayDropdown
               metricScope={props.metricScope}
               setMetricScope={props.setMetricScope}
-              truncateLength={props.truncateLength}
-              setTruncateLength={props.setTruncateLength}
+              truncateLength={props.overviewTruncateLength}
+              setTruncateLength={props.setOverviewTruncateLength}
               focus={props.overviewFocus}
               setFocus={props.setOverviewFocus}
               allowedScopes={props.allowedScopes}
@@ -239,9 +239,9 @@ export const ViewOptionsToolbar: React.FC<ViewOptionsToolbarProps> = props => {
           {props.selectedViewId === 'table' && <TableDisplayDropdown size={props.size} setSize={props.setSize} />}
           {props.selectedViewId === 'topology' && (
             <TopologyDisplayDropdown
-              metricFunction={props.metricFunction}
-              setMetricFunction={props.setMetricFunction}
-              metricType={props.metricType}
+              metricFunction={props.topologyMetricFunction}
+              setMetricFunction={props.setTopologyMetricFunction}
+              metricType={props.topologyMetricType}
               setMetricType={props.setMetricType}
               metricScope={props.metricScope}
               setMetricScope={props.setMetricScope}

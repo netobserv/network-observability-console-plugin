@@ -1090,7 +1090,6 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
   };
 
   // Views
-
   const pageHeader = () => {
     return (
       <div id="pageHeader">
@@ -1160,24 +1159,13 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
       }
       {!_.isEmpty(getFilterDefs()) && (
         <FiltersToolbar
+          {...model}
           id="filter-toolbar"
-          filters={model.filters}
           setFilters={updateTableFilters}
           clearFilters={clearFilters}
           resetFilters={resetDefaultFilters}
           queryOptionsProps={{
-            limit: model.limit,
-            setLimit: model.setLimit,
-            match: model.match,
-            setMatch: model.setMatch,
-            packetLoss: model.packetLoss,
-            setPacketLoss: model.setPacketLoss,
-            recordType: model.recordType,
-            setRecordType: model.setRecordType,
-            dataSource: model.dataSource,
-            setDataSource: model.setDataSource,
-            showDuplicates: model.showDuplicates,
-            setShowDuplicates: model.setShowDuplicates,
+            ...model,
             allowLoki: allowLoki(),
             allowProm: allowProm(),
             allowFlow: isFlow(),
@@ -1190,144 +1178,69 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
           forcedFilters={forcedFilters}
           quickFilters={getQuickFilters()}
           filterDefinitions={getFilterDefs()}
-          isFullScreen={model.isFullScreen}
-          setFullScreen={model.setFullScreen}
         />
       )}
       {
         <TabsContainer
+          {...model}
           isDarkTheme={isDarkTheme}
-          selectedViewId={model.selectedViewId}
           selectView={selectView}
           isAllowLoki={allowLoki()}
-          showHistogram={model.showHistogram}
-          setShowViewOptions={model.setShowViewOptions}
-          setShowHistogram={model.setShowHistogram}
-          setHistogramRange={model.setHistogramRange}
           isShowViewOptions={isShowViewOptions}
         />
       }
       {model.selectedViewId === 'table' && model.showHistogram && (
         <HistogramToolbar
+          {...model}
           isDarkTheme={isDarkTheme}
-          loading={model.loading}
           totalMetric={model.metrics.totalFlowCountMetric}
-          limit={model.limit}
           guidedTourHandle={guidedTourRef.current}
-          range={model.range}
-          setRange={model.setRange}
-          histogramRange={model.histogramRange}
-          setHistogramRange={model.setHistogramRange}
           resetRange={() => model.setRange(defaultTimeRange)}
-          lastRefresh={model.lastRefresh}
           tick={tick}
         />
       )}
       {isShowViewOptions && (
         <ViewOptionsToolbar
+          {...model}
           isDarkTheme={isDarkTheme}
-          overviewFocus={model.overviewFocus}
-          setOverviewFocus={model.setOverviewFocus}
-          selectedViewId={model.selectedViewId}
-          setOverviewModalOpen={model.setOverviewModalOpen}
-          setColModalOpen={model.setColModalOpen}
-          setExportModalOpen={model.setExportModalOpen}
-          isViewOptionOverflowMenuOpen={model.isViewOptionOverflowMenuOpen}
-          setViewOptionOverflowMenuOpen={model.setViewOptionOverflowMenuOpen}
-          metricScope={model.metricScope}
-          setMetricScope={setMetricScope}
-          truncateLength={model.overviewTruncateLength}
-          setTruncateLength={model.setOverviewTruncateLength}
-          metricFunction={model.topologyMetricFunction}
-          setMetricFunction={model.setTopologyMetricFunction}
-          metricType={model.topologyMetricType}
           setMetricType={updateTopologyMetricType}
-          topologyOptions={model.topologyOptions}
-          setTopologyOptions={model.setTopologyOptions}
           allowPktDrop={isPktDrop()}
           allowDNSMetric={isDNSTracking()}
           allowRTTMetric={isFlowRTT()}
           allowedScopes={getAllowedScopes()}
-          size={model.size}
-          setSize={model.setSize}
-          setSearchEvent={model.setSearchEvent}
+          setMetricScope={setMetricScope}
         />
       )}
       {
         <NetflowTrafficDrawer
+          {...model}
           isDarkTheme={isDarkTheme}
           defaultFilters={getDefaultFilters()}
-          error={model.error}
           currentState={initState.current}
-          selectedViewId={model.selectedViewId}
-          limit={model.limit}
           panels={getSelectedPanels()}
-          recordType={model.recordType}
-          metrics={model.metrics}
-          truncateLength={model.overviewTruncateLength}
-          columnSizes={model.columnSizes}
-          setColumnSizes={model.setColumnSizes}
-          size={model.size}
           allowPktDrop={isPktDrop()}
           allowDNSMetric={isDNSTracking()}
           allowRTTMetric={isFlowRTT()}
+          setMetricScope={setMetricScope}
           resetDefaultFilters={resetDefaultFilters}
           clearFilters={clearFilters}
-          filters={model.filters}
-          k8sModels={model.k8sModels}
-          metricFunction={model.topologyMetricFunction}
-          metricType={model.topologyMetricType}
-          metricScope={model.metricScope}
-          setMetricScope={setMetricScope}
-          options={model.topologyOptions}
-          setOptions={model.setTopologyOptions}
           filterDefinitions={getFilterDefs()}
-          setFilters={model.setFilters}
           searchHandle={searchRef.current}
           allowedScopes={getAllowedScopes()}
-          isShowQuerySummary={model.isShowQuerySummary}
-          lastRefresh={model.lastRefresh}
-          range={model.range}
           canSwitchTypes={isFlow() && isConnectionTracking()}
-          setRange={model.setRange}
-          setRecordType={model.setRecordType}
-          maxChunkAge={model.config.maxChunkAgeMs}
-          match={model.match}
-          setShowQuerySummary={model.setShowQuerySummary}
           clearSelections={clearSelections}
-          selectedRecord={model.selectedRecord}
-          setSelectedRecord={model.setSelectedRecord}
-          selectedElement={model.selectedElement}
-          setSelectedElement={model.setSelectedElement}
-          flows={model.flows}
           availableColumns={getAvailableColumns(true)}
-          setColumns={model.setColumns}
-          focus={model.overviewFocus}
-          setFocus={model.setOverviewFocus}
+          maxChunkAge={model.config.maxChunkAgeMs}
         />
       }
       {initState.current.includes('initDone') && (
         <Modals
-          isTRModalOpen={model.isTRModalOpen}
-          setTRModalOpen={model.setTRModalOpen}
-          range={model.range}
-          setRange={model.setRange}
-          maxChunkAge={model.config.maxChunkAgeMs}
-          isOverviewModalOpen={model.isOverviewModalOpen}
-          setOverviewModalOpen={model.setOverviewModalOpen}
-          recordType={model.recordType}
+          {...model}
           panels={getAvailablePanels()}
-          setPanels={model.setPanels}
-          isColModalOpen={model.isColModalOpen}
-          setColModalOpen={model.setColModalOpen}
           availableColumns={getAvailableColumns()}
-          setColumns={model.setColumns}
-          setColumnSizes={model.setColumnSizes}
-          config={model.config}
-          isExportModalOpen={model.isExportModalOpen}
-          setExportModalOpen={model.setExportModalOpen}
           flowQuery={buildFlowQuery()}
           filters={(forcedFilters || model.filters).list}
+          maxChunkAge={model.config.maxChunkAgeMs}
         />
       )}
       <GuidedTourPopover id="netobserv" ref={guidedTourRef} isDark={isDarkTheme} />
