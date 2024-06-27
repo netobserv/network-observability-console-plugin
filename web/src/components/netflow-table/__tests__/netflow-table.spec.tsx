@@ -1,16 +1,16 @@
+import { Tbody, Td } from '@patternfly/react-table';
+import { mount, shallow } from 'enzyme';
 import * as React from 'react';
-import { shallow, mount } from 'enzyme';
-import { Td, Tbody } from '@patternfly/react-table';
 
 import NetflowTable from '../netflow-table';
-import NetflowTableRow from '../netflow-table-row';
 import { NetflowTableHeader } from '../netflow-table-header';
+import NetflowTableRow from '../netflow-table-row';
 
-import { ShuffledColumnSample } from '../../__tests-data__/columns';
-import { FlowsMock, FlowsSample } from '../../__tests-data__/flows';
-import { Size } from '../../dropdowns/table-display-dropdown';
 import { ColumnsId } from '../../../utils/columns';
 import { dateTimeMSFormatter, getFormattedDate } from '../../../utils/datetime';
+import { Size } from '../../dropdowns/table-display-dropdown';
+import { ShuffledColumnSample } from '../../__tests-data__/columns';
+import { FlowsMock, FlowsSample } from '../../__tests-data__/flows';
 
 const errorStateQuery = `EmptyState[data-test="error-state"]`;
 const loadingContentsQuery = `Bullseye[data-test="loading-contents"]`;

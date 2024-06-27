@@ -1,5 +1,5 @@
-import { parseTopologyMetrics } from '../../utils/metrics';
 import { RawTopologyMetrics, TopologyMetrics } from '../../api/loki';
+import { parseTopologyMetrics } from '../../utils/metrics';
 
 export const metric1: RawTopologyMetrics = {
   metric: {

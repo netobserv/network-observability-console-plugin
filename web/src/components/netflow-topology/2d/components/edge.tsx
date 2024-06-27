@@ -1,29 +1,29 @@
-import * as React from 'react';
-import * as _ from 'lodash';
 import { css } from '@patternfly/react-styles';
-import styles from '@patternfly/react-topology/src/css/topology-components';
 import {
+  DefaultConnectorTerminal,
   Edge,
   EdgeTerminalType,
-  NodeStatus,
-  WithRemoveConnectorProps,
-  WithSourceDragProps,
-  WithTargetDragProps,
-  WithSelectionProps,
-  WithContextMenuProps,
-  useHover,
   getEdgeAnimationDuration,
   getEdgeStyleClassModifier,
-  Point,
   Layer,
-  TOP_LAYER,
-  DefaultConnectorTerminal,
-  observer
+  NodeStatus,
+  observer,
+  Point,
+  TOP_LAYER as topLayer,
+  useHover,
+  WithContextMenuProps,
+  WithRemoveConnectorProps,
+  WithSelectionProps,
+  WithSourceDragProps,
+  WithTargetDragProps
 } from '@patternfly/react-topology';
 import DefaultConnectorTag from '@patternfly/react-topology/dist/esm/components/edges/DefaultConnectorTag';
 import { getConnectorStartPoint } from '@patternfly/react-topology/dist/esm/components/edges/terminals/terminalUtils';
+import styles from '@patternfly/react-topology/src/css/topology-components';
+import * as _ from 'lodash';
+import * as React from 'react';
 
-import { HOVER_EVENT } from '../topology-content';
+import { hoverEvent } from '../topology-content';
 
 type BaseEdgeProps = {
   children?: React.ReactNode;
@@ -94,7 +94,7 @@ const BaseEdge: React.FC<BaseEdgeProps> = ({
     } else {
       onHideRemoveConnector && onHideRemoveConnector();
     }
-    element.getController().fireEvent(HOVER_EVENT, {
+    element.getController().fireEvent(hoverEvent, {
       ...element.getData(),
       id: element.getId(),
       isHovered: hover
@@ -137,7 +137,7 @@ const BaseEdge: React.FC<BaseEdgeProps> = ({
     .join('')}L${bgEndPoint[0]} ${bgEndPoint[1]}`;
 
   return (
-    <Layer id={dragging ? TOP_LAYER : undefined}>
+    <Layer id={dragging ? topLayer : undefined}>
       <g
         ref={hoverRef as React.LegacyRef<SVGGElement> | undefined}
         data-test-id="edge-handler"

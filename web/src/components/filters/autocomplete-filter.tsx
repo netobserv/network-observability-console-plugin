@@ -1,5 +1,3 @@
-import * as React from 'react';
-import * as _ from 'lodash';
 import {
   Button,
   Menu,
@@ -10,11 +8,13 @@ import {
   TextInput,
   ValidatedOptions
 } from '@patternfly/react-core';
-import { SearchIcon, CaretDownIcon } from '@patternfly/react-icons';
+import { CaretDownIcon, SearchIcon } from '@patternfly/react-icons';
+import * as _ from 'lodash';
+import * as React from 'react';
 import { createFilterValue, FilterDefinition, FilterOption, FilterValue } from '../../model/filters';
-import { getHTTPErrorDetails } from '../../utils/errors';
 import { autoCompleteCache } from '../../utils/autocomplete-cache';
-import { Indicator } from './filters-helper';
+import { getHTTPErrorDetails } from '../../utils/errors';
+import { Indicator } from '../../utils/filters-helper';
 import { usePrevious } from '../../utils/previous-hook';
 import './autocomplete-filter.css';
 

@@ -1,12 +1,12 @@
 import _ from 'lodash';
 import { getRecordValue, Record } from '../api/ipfix';
+import { Feature } from '../model/config';
 import { FilterId } from '../model/filters';
 import { compareNumbers, compareStrings } from './base-compare';
+import { FieldConfig, FieldType } from './fields';
 import { compareIPs } from './ip';
 import { comparePorts } from './port';
 import { compareProtocols } from './protocol';
-import { Feature } from '../model/config';
-import { FieldConfig, FieldType } from './fields';
 
 export enum ColumnsId {
   starttime = 'StartTime',

@@ -14,20 +14,20 @@ import {
   TextContent,
   TextVariants
 } from '@patternfly/react-core';
-import Modal from './modal';
 import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { getExportFlowsURL } from '../../api/routes';
+import { Filter } from '../../model/filters';
 import { FlowQuery } from '../../model/flow-query';
 import { Column, getFullColumnName } from '../../utils/columns';
 import { getTimeRangeOptions, TimeRange } from '../../utils/datetime';
 import { formatDuration, getDateSInMiliseconds } from '../../utils/duration';
-import { Filter } from '../../model/filters';
-import { getFilterFullName } from '../filters/filters-helper';
+import { getFilterFullName } from '../../utils/filters-helper';
+import { getLocalStorage, localStorageExportColsKey, useLocalStorage } from '../../utils/local-storage-hook';
 import './export-modal.css';
-import { LOCAL_STORAGE_EXPORT_COLS_KEY, getLocalStorage, useLocalStorage } from '../../utils/local-storage-hook';
+import Modal from './modal';
 
 export interface ExportModalProps {
   isModalOpen: boolean;
@@ -50,7 +50,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [selectedColumns, setSelectedColumns] = useLocalStorage<Column[]>(
-    LOCAL_STORAGE_EXPORT_COLS_KEY,
+    localStorageExportColsKey,
     //select all columns by default
     columns.map(c => ({ ...c, isSelected: true })),
     {
@@ -127,7 +127,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
     // reload selected columns when config is loaded and popup closed
     if (!isModalOpen) {
       setSelectedColumns(
-        getLocalStorage(LOCAL_STORAGE_EXPORT_COLS_KEY, _.cloneDeep(columns), {
+        getLocalStorage(localStorageExportColsKey, _.cloneDeep(columns), {
           id: 'id',
           criteria: 'isSelected'
         })
@@ -205,11 +205,12 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           label={t('Export all datas')}
           aria-label="Export all"
           description={
-            <>
-              {t('Use this option to export every fields and labels from flows.')}
-              <br />
-              {t('Else pick from available columns.')}
-            </>
+            <TextContent className="netobserv-no-child-margin">
+              <Text component={TextVariants.p}>
+                {t('Use this option to export every fields and labels from flows.')}
+              </Text>
+              <Text component={TextVariants.p}>{t('Else pick from available columns.')}</Text>
+            </TextContent>
           }
           body={
             !isExportAll && (

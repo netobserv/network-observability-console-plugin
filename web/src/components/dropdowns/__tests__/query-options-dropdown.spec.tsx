@@ -1,11 +1,12 @@
-import * as React from 'react';
 import { Checkbox, Radio, Select } from '@patternfly/react-core';
 import { shallow } from 'enzyme';
+import * as React from 'react';
 import { act } from 'react-dom/test-utils';
-import QueryOptionsDropdown, { QueryOptionsDropdownProps, QueryOptionsPanel } from '../query-options-dropdown';
+import { QueryOptionsDropdown, QueryOptionsProps } from '../query-options-dropdown';
+import { QueryOptionsPanel } from '../query-options-panel';
 
 describe('<QueryOptionsDropdown />', () => {
-  const props: QueryOptionsDropdownProps = {
+  const props: QueryOptionsProps = {
     recordType: 'allConnections',
     dataSource: 'auto',
     showDuplicates: true,
@@ -35,7 +36,7 @@ describe('<QueryOptionsDropdown />', () => {
 });
 
 describe('<QueryOptionsPanel />', () => {
-  const props: QueryOptionsDropdownProps = {
+  const props: QueryOptionsProps = {
     recordType: 'allConnections',
     dataSource: 'auto',
     showDuplicates: true,

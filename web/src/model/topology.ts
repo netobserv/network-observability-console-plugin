@@ -1,3 +1,4 @@
+import { K8sModel } from '@openshift-console/dynamic-plugin-sdk';
 import {
   EdgeAnimationSpeed,
   EdgeModel,
@@ -12,79 +13,78 @@ import {
   NodeStatus,
   Point
 } from '@patternfly/react-topology';
+import { TFunction } from 'i18next';
 import _ from 'lodash';
 import { MetricStats, TopologyMetricPeer, TopologyMetrics } from '../api/loki';
-import { Filter, FilterDefinition, Filters, findFromFilters } from '../model/filters';
-import { defaultMetricFunction, defaultMetricType } from '../utils/router';
-import { findFilter } from '../utils/filter-definitions';
-import { TFunction } from 'i18next';
-import { K8sModel } from '@openshift-console/dynamic-plugin-sdk';
-import { getTopologyEdgeId } from '../utils/ids';
-import { getStat, MetricScopeOptions } from './metrics';
-import { StatFunction, FlowScope, MetricType, NodeType, MetricFunction } from './flow-query';
-import { createPeer, getFormattedValue } from '../utils/metrics';
 import { TruncateLength } from '../components/dropdowns/truncate-dropdown';
+import { Filter, FilterDefinition, Filters, findFromFilters } from '../model/filters';
+import { findFilter } from '../utils/filter-definitions';
+import { getTopologyEdgeId } from '../utils/ids';
+import { createPeer, getFormattedValue } from '../utils/metrics';
+import { defaultMetricFunction, defaultMetricType } from '../utils/router';
+import { FlowScope, MetricFunction, MetricType, NodeType, StatFunction } from './flow-query';
+import { getStat, MetricScopeOptions } from './metrics';
 
 export enum LayoutName {
-  ThreeD = '3d',
-  BreadthFirst = 'BreadthFirst',
-  Cola = 'Cola',
-  ColaNoForce = 'ColaNoForce',
-  Concentric = 'Concentric',
-  Dagre = 'Dagre',
-  Force = 'Force',
-  Grid = 'Grid',
-  ColaGroups = 'ColaGroups'
+  threeD = '3d',
+  breadthFirst = 'BreadthFirst',
+  cola = 'Cola',
+  colaNoForce = 'ColaNoForce',
+  concentric = 'Concentric',
+  dagre = 'Dagre',
+  force = 'Force',
+  grid = 'Grid',
+  colaGroups = 'ColaGroups'
 }
 
 export enum TopologyGroupTypes {
-  NONE = 'none',
-  CLUSTERS = 'clusters',
-  CLUSTERS_ZONES = 'clusters+zones',
-  CLUSTERS_HOSTS = 'clusters+hosts',
-  CLUSTERS_NAMESPACES = 'clusters+namespaces',
-  CLUSTERS_OWNERS = 'clusters+owners',
-  ZONES = 'zones',
-  ZONES_HOSTS = 'zones+hosts',
-  ZONES_NAMESPACES = 'zones+namespaces',
-  ZONES_OWNERS = 'zones+owners',
-  HOSTS = 'hosts',
-  HOSTS_NAMESPACES = 'hosts+namespaces',
-  HOSTS_OWNERS = 'hosts+owners',
-  NAMESPACES = 'namespaces',
-  NAMESPACES_OWNERS = 'namespaces+owners',
-  OWNERS = 'owners'
+  none = 'none',
+  clusters = 'clusters',
+  clustersZones = 'clusters+zones',
+  clustersHosts = 'clusters+hosts',
+  clustersNamespaces = 'clusters+namespaces',
+  clustersOwners = 'clusters+owners',
+  zones = 'zones',
+  zonesHosts = 'zones+hosts',
+  zonesNamespaces = 'zones+namespaces',
+  zonesOwners = 'zones+owners',
+  hosts = 'hosts',
+  hostsNamespaces = 'hosts+namespaces',
+  hostsOwners = 'hosts+owners',
+  namespaces = 'namespaces',
+  namespacesOwners = 'namespaces+owners',
+  owners = 'owners'
 }
 
 export const getGroupsForScope = (scope: MetricScopeOptions) => {
   switch (scope) {
     case MetricScopeOptions.CLUSTER:
-      return [TopologyGroupTypes.NONE];
+      return [TopologyGroupTypes.none];
     case MetricScopeOptions.ZONE:
-      return [TopologyGroupTypes.NONE, TopologyGroupTypes.CLUSTERS];
+      return [TopologyGroupTypes.none, TopologyGroupTypes.clusters];
     case MetricScopeOptions.HOST:
-      return [TopologyGroupTypes.NONE, TopologyGroupTypes.CLUSTERS, TopologyGroupTypes.ZONES];
+      return [TopologyGroupTypes.none, TopologyGroupTypes.clusters, TopologyGroupTypes.zones];
     case MetricScopeOptions.NAMESPACE:
       return [
-        TopologyGroupTypes.NONE,
-        TopologyGroupTypes.CLUSTERS,
-        TopologyGroupTypes.CLUSTERS_HOSTS,
-        TopologyGroupTypes.ZONES,
-        TopologyGroupTypes.ZONES_HOSTS,
-        TopologyGroupTypes.HOSTS
+        TopologyGroupTypes.none,
+        TopologyGroupTypes.clusters,
+        TopologyGroupTypes.clustersHosts,
+        TopologyGroupTypes.zones,
+        TopologyGroupTypes.zonesHosts,
+        TopologyGroupTypes.hosts
       ];
     case MetricScopeOptions.OWNER:
       return [
-        TopologyGroupTypes.NONE,
-        TopologyGroupTypes.CLUSTERS,
-        TopologyGroupTypes.CLUSTERS_ZONES,
-        TopologyGroupTypes.ZONES,
-        TopologyGroupTypes.ZONES_HOSTS,
-        TopologyGroupTypes.ZONES_NAMESPACES,
-        TopologyGroupTypes.ZONES_OWNERS,
-        TopologyGroupTypes.HOSTS,
-        TopologyGroupTypes.HOSTS_NAMESPACES,
-        TopologyGroupTypes.NAMESPACES
+        TopologyGroupTypes.none,
+        TopologyGroupTypes.clusters,
+        TopologyGroupTypes.clustersZones,
+        TopologyGroupTypes.zones,
+        TopologyGroupTypes.zonesHosts,
+        TopologyGroupTypes.zonesNamespaces,
+        TopologyGroupTypes.zonesOwners,
+        TopologyGroupTypes.hosts,
+        TopologyGroupTypes.hostsNamespaces,
+        TopologyGroupTypes.namespaces
       ];
     case MetricScopeOptions.RESOURCE:
     default:
@@ -94,11 +94,11 @@ export const getGroupsForScope = (scope: MetricScopeOptions) => {
 
 export const isGroupEnabled = (group: TopologyGroupTypes, enabledScopes: FlowScope[]): boolean => {
   return (
-    (enabledScopes.includes('cluster') || !group.includes(TopologyGroupTypes.CLUSTERS)) &&
-    (enabledScopes.includes('zone') || !group.includes(TopologyGroupTypes.ZONES)) &&
-    (enabledScopes.includes('host') || !group.includes(TopologyGroupTypes.HOSTS)) &&
-    (enabledScopes.includes('namespace') || !group.includes(TopologyGroupTypes.NAMESPACES)) &&
-    (enabledScopes.includes('owner') || !group.includes(TopologyGroupTypes.OWNERS))
+    (enabledScopes.includes('cluster') || !group.includes(TopologyGroupTypes.clusters)) &&
+    (enabledScopes.includes('zone') || !group.includes(TopologyGroupTypes.zones)) &&
+    (enabledScopes.includes('host') || !group.includes(TopologyGroupTypes.hosts)) &&
+    (enabledScopes.includes('namespace') || !group.includes(TopologyGroupTypes.namespaces)) &&
+    (enabledScopes.includes('owner') || !group.includes(TopologyGroupTypes.owners))
   );
 };
 
@@ -124,8 +124,8 @@ export const DefaultOptions: TopologyOptions = {
   maxEdgeStat: 0,
   startCollapsed: false,
   truncateLength: TruncateLength.M,
-  layout: LayoutName.ColaNoForce,
-  groupTypes: TopologyGroupTypes.NONE,
+  layout: LayoutName.colaNoForce,
+  groupTypes: TopologyGroupTypes.none,
   lowScale: 0.3,
   medScale: 0.5,
   metricFunction: defaultMetricFunction,
@@ -317,11 +317,9 @@ const generateNode = (
   const resourceKind = data.peer.resourceKind;
   const secondaryLabel =
     data.nodeType !== 'namespace' &&
-    ![
-      TopologyGroupTypes.NAMESPACES,
-      TopologyGroupTypes.NAMESPACES_OWNERS,
-      TopologyGroupTypes.HOSTS_NAMESPACES
-    ].includes(options.groupTypes)
+    ![TopologyGroupTypes.namespaces, TopologyGroupTypes.namespacesOwners, TopologyGroupTypes.hostsNamespaces].includes(
+      options.groupTypes
+    )
       ? data.peer.namespace
       : undefined;
   const shadowed = !_.isEmpty(searchValue) && !(label.includes(searchValue) || secondaryLabel?.includes(searchValue));
@@ -597,54 +595,54 @@ export const generateDataModel = (
   const addPossibleGroups = (peer: TopologyMetricPeer): NodeModel | undefined => {
     const clusterGroup =
       [
-        TopologyGroupTypes.CLUSTERS_HOSTS,
-        TopologyGroupTypes.CLUSTERS_ZONES,
-        TopologyGroupTypes.CLUSTERS_NAMESPACES,
-        TopologyGroupTypes.CLUSTERS_OWNERS,
-        TopologyGroupTypes.CLUSTERS
+        TopologyGroupTypes.clustersHosts,
+        TopologyGroupTypes.clustersZones,
+        TopologyGroupTypes.clustersNamespaces,
+        TopologyGroupTypes.clustersOwners,
+        TopologyGroupTypes.clusters
       ].includes(options.groupTypes) && !_.isEmpty(peer.clusterName)
         ? addGroup({ clusterName: peer.clusterName }, 'cluster', undefined, true)
         : undefined;
     const zoneGroup =
       [
-        TopologyGroupTypes.CLUSTERS_ZONES,
-        TopologyGroupTypes.ZONES_HOSTS,
-        TopologyGroupTypes.ZONES_NAMESPACES,
-        TopologyGroupTypes.ZONES_OWNERS,
-        TopologyGroupTypes.ZONES
+        TopologyGroupTypes.clustersZones,
+        TopologyGroupTypes.zonesHosts,
+        TopologyGroupTypes.zonesNamespaces,
+        TopologyGroupTypes.zonesOwners,
+        TopologyGroupTypes.zones
       ].includes(options.groupTypes) && !_.isEmpty(peer.zone)
         ? addGroup({ zone: peer.zone }, 'cluster', clusterGroup, true)
         : undefined;
     const hostGroup =
       [
-        TopologyGroupTypes.CLUSTERS_HOSTS,
-        TopologyGroupTypes.ZONES_HOSTS,
-        TopologyGroupTypes.CLUSTERS_HOSTS,
-        TopologyGroupTypes.HOSTS_NAMESPACES,
-        TopologyGroupTypes.HOSTS_OWNERS,
-        TopologyGroupTypes.HOSTS
+        TopologyGroupTypes.clustersHosts,
+        TopologyGroupTypes.zonesHosts,
+        TopologyGroupTypes.clustersHosts,
+        TopologyGroupTypes.hostsNamespaces,
+        TopologyGroupTypes.hostsOwners,
+        TopologyGroupTypes.hosts
       ].includes(options.groupTypes) && !_.isEmpty(peer.hostName)
         ? addGroup({ hostName: peer.hostName }, 'host', zoneGroup || clusterGroup, true)
         : undefined;
     const namespaceGroup =
       [
-        TopologyGroupTypes.ZONES_NAMESPACES,
-        TopologyGroupTypes.CLUSTERS_NAMESPACES,
-        TopologyGroupTypes.CLUSTERS_NAMESPACES,
-        TopologyGroupTypes.HOSTS_NAMESPACES,
-        TopologyGroupTypes.NAMESPACES_OWNERS,
-        TopologyGroupTypes.NAMESPACES
+        TopologyGroupTypes.zonesNamespaces,
+        TopologyGroupTypes.clustersNamespaces,
+        TopologyGroupTypes.clustersNamespaces,
+        TopologyGroupTypes.hostsNamespaces,
+        TopologyGroupTypes.namespacesOwners,
+        TopologyGroupTypes.namespaces
       ].includes(options.groupTypes) && !_.isEmpty(peer.namespace)
         ? addGroup({ namespace: peer.namespace }, 'namespace', hostGroup || zoneGroup || clusterGroup)
         : undefined;
     const ownerGroup =
       [
-        TopologyGroupTypes.CLUSTERS_OWNERS,
-        TopologyGroupTypes.ZONES_OWNERS,
-        TopologyGroupTypes.CLUSTERS_OWNERS,
-        TopologyGroupTypes.NAMESPACES_OWNERS,
-        TopologyGroupTypes.HOSTS_OWNERS,
-        TopologyGroupTypes.OWNERS
+        TopologyGroupTypes.clustersOwners,
+        TopologyGroupTypes.zonesOwners,
+        TopologyGroupTypes.clustersOwners,
+        TopologyGroupTypes.namespacesOwners,
+        TopologyGroupTypes.hostsOwners,
+        TopologyGroupTypes.owners
       ].includes(options.groupTypes) && peer.owner
         ? addGroup(
             { namespace: peer.namespace, owner: peer.owner },

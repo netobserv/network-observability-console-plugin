@@ -5,7 +5,7 @@ import {
   groupDropTargetSpec,
   ModelKind,
   nodeDragSourceSpec,
-  NODE_DRAG_TYPE,
+  NODE_DRAG_TYPE as nodeDragType,
   withDndDrop,
   withDragNode,
   withPanZoom,
@@ -24,7 +24,7 @@ export const stylesComponentFactory: ComponentFactory = (
   type: string
 ): React.ComponentType<{ element: GraphElementPeer }> | undefined => {
   if (kind === ModelKind.graph) {
-    return withDndDrop(graphDropTargetSpec([NODE_DRAG_TYPE]))(withPanZoom()(GraphComponent));
+    return withDndDrop(graphDropTargetSpec([nodeDragType]))(withPanZoom()(GraphComponent));
   }
   switch (type) {
     case 'node':

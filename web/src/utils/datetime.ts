@@ -1,5 +1,5 @@
 import { TFunction } from 'i18next';
-import { CUSTOM_TIME_RANGE_KEY } from '../components/dropdowns/time-range-dropdown';
+import { customTimeRangeKey } from '../components/dropdowns/time-range-dropdown';
 import { getLanguage } from './language';
 
 const zeroPad = (number: number) => (number < 10 ? `0${number}` : number);
@@ -41,7 +41,7 @@ export const getTimeRangeOptions = (t: TFunction, includeCustom = true) => {
 
   if (includeCustom) {
     return {
-      [CUSTOM_TIME_RANGE_KEY]: t('Custom time range'),
+      [customTimeRangeKey]: t('Custom time range'),
       ...timeOptions
     };
   } else {

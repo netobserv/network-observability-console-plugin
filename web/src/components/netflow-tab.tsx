@@ -16,8 +16,8 @@ import { Filters } from '../model/filters';
 import { loadConfig } from '../utils/config';
 import { findFilter, getFilterDefinitions } from '../utils/filter-definitions';
 import { usePrevious } from '../utils/previous-hook';
-import NetflowTrafficParent from './netflow-traffic-parent';
 import Error from './messages/error';
+import NetflowTrafficParent from './netflow-traffic-parent';
 
 type RouteProps = K8sResourceCommon & {
   spec: {

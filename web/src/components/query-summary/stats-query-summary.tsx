@@ -2,10 +2,10 @@ import { FlexItem, Text, TextVariants, Tooltip } from '@patternfly/react-core';
 import { ExclamationTriangleIcon, GlobeAmericasIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import './query-summary.css';
 import { formatDurationAboveMillisecond } from '../../utils/duration';
+import './query-summary.css';
 
-export const StatsQuerySummary: React.FC<{
+export interface StatsQuerySummaryProps {
   detailed?: boolean;
   loading?: boolean;
   lastRefresh?: Date;
@@ -14,7 +14,18 @@ export const StatsQuerySummary: React.FC<{
   slownessReason?: string;
   numQueries?: number;
   dataSources?: string[];
-}> = ({ detailed, numQueries, dataSources, lastRefresh, lastDuration, loading, warningMessage, slownessReason }) => {
+}
+
+export const StatsQuerySummary: React.FC<StatsQuerySummaryProps> = ({
+  detailed,
+  numQueries,
+  dataSources,
+  lastRefresh,
+  lastDuration,
+  loading,
+  warningMessage,
+  slownessReason
+}) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   const dateText = lastRefresh ? lastRefresh.toLocaleTimeString() : t('Loading...');

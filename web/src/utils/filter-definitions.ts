@@ -1,39 +1,39 @@
-import * as _ from 'lodash';
 import { TFunction } from 'i18next';
-import { getPort } from '../utils/port';
-import { validateK8SName, validateStrictK8SName } from './label';
-import { joinResource, SplitResource, splitResource, SplitStage } from '../model/resource';
-import { validateIPFilter } from './ip';
+import * as _ from 'lodash';
 import { Field } from '../api/ipfix';
 import {
-  FilterId,
-  FilterValue,
-  FilterDefinition,
-  FiltersEncoder,
-  FilterConfigDef,
-  FilterComponent,
   FilterCategory,
-  FilterOption
+  FilterComponent,
+  FilterConfigDef,
+  FilterDefinition,
+  FilterId,
+  FilterOption,
+  FiltersEncoder,
+  FilterValue
 } from '../model/filters';
+import { joinResource, SplitResource, splitResource, SplitStage } from '../model/resource';
+import { getPort } from '../utils/port';
+import { ColumnConfigDef } from './columns';
 import {
+  findDirectionOption,
   findProtocolOption,
+  getClusterOptions,
+  getDirectionOptionsAsync,
+  getDnsErrorCodeOptions,
+  getDnsResponseCodeOptions,
+  getDropCauseOptions,
+  getDropStateOptions,
+  getDSCPOptions,
   getKindOptions,
   getNamespaceOptions,
   getPortOptions,
   getProtocolOptions,
   getResourceOptions,
-  noOption,
-  getDnsResponseCodeOptions,
-  getDropStateOptions,
-  getDropCauseOptions,
-  getDirectionOptionsAsync,
-  findDirectionOption,
-  getDnsErrorCodeOptions,
-  getDSCPOptions,
   getZoneOptions,
-  getClusterOptions
+  noOption
 } from './filter-options';
-import { ColumnConfigDef } from './columns';
+import { validateIPFilter } from './ip';
+import { validateK8SName, validateStrictK8SName } from './label';
 
 // Convenience string to filter by undefined field values
 export const undefinedValue = '""';

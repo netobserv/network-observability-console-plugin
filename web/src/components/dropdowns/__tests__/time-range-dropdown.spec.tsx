@@ -1,7 +1,7 @@
-import * as React from 'react';
 import { mount, shallow } from 'enzyme';
+import * as React from 'react';
 
-import TimeRangeDropdown, { TimeRangeDropdownProps } from '../time-range-dropdown';
+import { TimeRangeDropdown, TimeRangeDropdownProps } from '../time-range-dropdown';
 
 describe('<TimeRangeDropdown />', () => {
   const props: TimeRangeDropdownProps = {

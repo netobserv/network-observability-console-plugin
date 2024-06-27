@@ -1,18 +1,18 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import * as RTTopology from '@jpinsonneau/react-three-topology';
 import { K8sModel } from '@openshift-console/dynamic-plugin-sdk';
+import { BaseNode } from '@patternfly/react-topology';
+import _ from 'lodash';
 import React from 'react';
 import { TopologyMetrics } from '../../../api/loki';
-import { SearchHandle, SearchEvent } from '../../../components/search/search';
+import { SearchEvent, SearchHandle } from '../../../components/search/search';
 import { Filter } from '../../../model/filters';
-import { StatFunction, MetricType, FlowScope } from '../../../model/flow-query';
-import { TopologyOptions, GraphElementPeer, NodeData } from '../../../model/topology';
-import * as RTTopology from '@jpinsonneau/react-three-topology';
-import _ from 'lodash';
-import './three-d-topology-content.css';
-import { BaseNode } from '@patternfly/react-topology';
+import { FlowScope, MetricType, StatFunction } from '../../../model/flow-query';
+import { GraphElementPeer, NodeData, TopologyOptions } from '../../../model/topology';
 import { createPeer } from '../../../utils/metrics';
+import './three-d-topology-content.css';
 
-export const ThreeDTopologyContent: React.FC<{
+export interface ThreeDTopologyContentProps {
   k8sModels: { [key: string]: K8sModel };
   metricFunction: StatFunction;
   metricType: MetricType;
@@ -28,7 +28,9 @@ export const ThreeDTopologyContent: React.FC<{
   searchHandle: SearchHandle | null;
   searchEvent?: SearchEvent;
   isDark?: boolean;
-}> = ({
+}
+
+export const ThreeDTopologyContent: React.FC<ThreeDTopologyContentProps> = ({
   k8sModels,
   metricFunction,
   metricType,

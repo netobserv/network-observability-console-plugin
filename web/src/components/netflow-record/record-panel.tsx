@@ -23,15 +23,15 @@ import {
 import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { defaultSize, maxSize, minSize } from '../../utils/panel';
-import { defaultTimeRange } from '../../utils/router';
 import { FlowDirection, getDirectionDisplayString, Record } from '../../api/ipfix';
+import { doesIncludeFilter, Filter, FilterDefinition, findFromFilters, removeFromFilters } from '../../model/filters';
+import { RecordType } from '../../model/flow-query';
 import { Column, ColumnGroup, ColumnsId, getColumnGroups, getShortColumnName } from '../../utils/columns';
 import { TimeRange } from '../../utils/datetime';
-import { doesIncludeFilter, Filter, FilterDefinition, findFromFilters, removeFromFilters } from '../../model/filters';
 import { findFilter } from '../../utils/filter-definitions';
+import { defaultSize, maxSize, minSize } from '../../utils/panel';
+import { defaultTimeRange } from '../../utils/router';
 import RecordField, { RecordFieldFilter } from './record-field';
-import { RecordType } from '../../model/flow-query';
 import './record-panel.css';
 
 export type RecordDrawerProps = {

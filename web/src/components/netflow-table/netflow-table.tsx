@@ -1,6 +1,3 @@
-import * as React from 'react';
-import { useTranslation } from 'react-i18next';
-import { SortByDirection, TableComposable, Tbody } from '@patternfly/react-table';
 import {
   Bullseye,
   EmptyState,
@@ -11,23 +8,22 @@ import {
   Title
 } from '@patternfly/react-core';
 import { SearchIcon } from '@patternfly/react-icons';
+import { SortByDirection, TableComposable, Tbody } from '@patternfly/react-table';
 import * as _ from 'lodash';
+import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { Record } from '../../api/ipfix';
+import { Column, ColumnsId, ColumnSizeMap } from '../../utils/columns';
+import { localStorageSortDirectionKey, localStorageSortIdKey, useLocalStorage } from '../../utils/local-storage-hook';
+import { convertRemToPixels } from '../../utils/panel';
+import { usePrevious } from '../../utils/previous-hook';
+import { Size } from '../dropdowns/table-display-dropdown';
 import { NetflowTableHeader } from './netflow-table-header';
 import NetflowTableRow from './netflow-table-row';
-import { Column, ColumnsId, ColumnSizeMap } from '../../utils/columns';
-import { Size } from '../dropdowns/table-display-dropdown';
-import { usePrevious } from '../../utils/previous-hook';
 import './netflow-table.css';
-import {
-  LOCAL_STORAGE_SORT_DIRECTION_KEY,
-  LOCAL_STORAGE_SORT_ID_KEY,
-  useLocalStorage
-} from '../../utils/local-storage-hook';
-import { convertRemToPixels } from '../../utils/panel';
 
-const NetflowTable: React.FC<{
+export interface NetflowTableProps {
   allowPktDrops: boolean;
   flows: Record[];
   selectedRecord?: Record;
@@ -40,7 +36,9 @@ const NetflowTable: React.FC<{
   loading?: boolean;
   filterActionLinks: JSX.Element;
   isDark?: boolean;
-}> = ({
+}
+
+export const NetflowTable: React.FC<NetflowTableProps> = ({
   allowPktDrops,
   flows,
   selectedRecord,
@@ -63,11 +61,11 @@ const NetflowTable: React.FC<{
   const previousScrollPosition = usePrevious(scrollPosition);
   const [lastRender, setLastRender] = React.useState<string>('');
   // index of the currently active column
-  const [activeSortId, setActiveSortId] = useLocalStorage<ColumnsId>(LOCAL_STORAGE_SORT_ID_KEY, ColumnsId.endtime);
+  const [activeSortId, setActiveSortId] = useLocalStorage<ColumnsId>(localStorageSortIdKey, ColumnsId.endtime);
   const previousActiveSortIndex = usePrevious(activeSortId);
   // sort direction of the currently active column
   const [activeSortDirection, setActiveSortDirection] = useLocalStorage<SortByDirection>(
-    LOCAL_STORAGE_SORT_DIRECTION_KEY,
+    localStorageSortDirectionKey,
     SortByDirection.asc
   );
   const previousActiveSortDirection = usePrevious(activeSortDirection);

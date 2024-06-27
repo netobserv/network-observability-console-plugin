@@ -1,10 +1,10 @@
-import * as React from 'react';
-import _ from 'lodash';
 import { Select, SelectOption, SelectVariant } from '@patternfly/react-core';
 import { FilterIcon } from '@patternfly/react-icons';
-import { QuickFilter } from '../../model/quick-filters';
-import { doesIncludeFilter, Filter, findFromFilters, removeFromFilters } from '../../model/filters';
+import _ from 'lodash';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
+import { doesIncludeFilter, Filter, findFromFilters, removeFromFilters } from '../../model/filters';
+import { QuickFilter } from '../../model/quick-filters';
 
 export interface QuickFiltersProps {
   quickFilters: QuickFilter[];

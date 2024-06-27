@@ -1,11 +1,11 @@
-import * as React from 'react';
 import { Button, Card, Flex, FlexItem, Text, TextVariants, Tooltip } from '@patternfly/react-core';
-import { InfoAltIcon, ExpandIcon, CompressIcon } from '@patternfly/react-icons';
+import { CompressIcon, ExpandIcon, InfoAltIcon } from '@patternfly/react-icons';
+import * as React from 'react';
 
-import './netflow-overview-panel.css';
 import { useTranslation } from 'react-i18next';
+import './netflow-overview-panel.css';
 
-export const NetflowOverviewPanel: React.FC<{
+export interface NetflowOverviewPanelProps {
   doubleWidth: boolean;
   bodyClassName: string;
   title: string;
@@ -16,7 +16,9 @@ export const NetflowOverviewPanel: React.FC<{
   isSelected?: boolean;
   isFocus?: boolean;
   id?: string;
-}> = ({
+}
+
+export const NetflowOverviewPanel: React.FC<NetflowOverviewPanelProps> = ({
   id,
   doubleWidth,
   bodyClassName,

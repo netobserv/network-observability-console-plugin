@@ -1,12 +1,12 @@
-import * as React from 'react';
 import { mount, shallow } from 'enzyme';
+import * as React from 'react';
 
-import LayoutDropdown from '../layout-dropdown';
 import { LayoutName } from '../../../model/topology';
+import { LayoutDropdown } from '../layout-dropdown';
 
 describe('<LayoutDropdown />', () => {
   const props = {
-    selected: LayoutName.Cola,
+    selected: LayoutName.cola,
     setLayout: jest.fn(),
     id: 'layout'
   };
@@ -37,13 +37,13 @@ describe('<LayoutDropdown />', () => {
     //open dropdown and select Dagre
     dropdown.at(0).simulate('click');
     wrapper.find('[id="Dagre"]').at(0).simulate('click');
-    expect(props.setLayout).toHaveBeenCalledWith(LayoutName.Dagre);
+    expect(props.setLayout).toHaveBeenCalledWith(LayoutName.dagre);
     expect(wrapper.find('li').length).toBe(0);
 
     //open dropdown and select Force
     dropdown.at(0).simulate('click');
     wrapper.find('[id="Force"]').at(0).simulate('click');
-    expect(props.setLayout).toHaveBeenCalledWith(LayoutName.Force);
+    expect(props.setLayout).toHaveBeenCalledWith(LayoutName.force);
     expect(wrapper.find('li').length).toBe(0);
 
     //setLayout should be called twice

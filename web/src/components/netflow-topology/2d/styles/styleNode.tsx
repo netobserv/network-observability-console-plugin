@@ -1,17 +1,15 @@
-import * as React from 'react';
-import * as _ from 'lodash';
 import {
+  ClusterIcon,
   CubeIcon,
   CubesIcon,
   OutlinedHddIcon,
   QuestionCircleIcon,
   ServiceIcon,
   UsersIcon,
-  ClusterIcon,
   ZoneIcon
 } from '@patternfly/react-icons';
 import {
-  DEFAULT_LAYER,
+  DEFAULT_LAYER as defaultLayer,
   Layer,
   Node,
   NodeModel,
@@ -20,12 +18,14 @@ import {
   ScaleDetailsLevel,
   ShapeProps,
   TopologyQuadrant,
-  TOP_LAYER,
+  TOP_LAYER as topLayer,
   useHover,
   WithDragNodeProps,
   WithSelectionProps
 } from '@patternfly/react-topology';
 import useDetailsLevel from '@patternfly/react-topology/dist/esm/hooks/useDetailsLevel';
+import * as _ from 'lodash';
+import * as React from 'react';
 import { Decorated, NodeData } from '../../../../model/topology';
 import BaseNode from '../components/node';
 import { NodeDecorators } from './styleDecorators';
@@ -33,7 +33,7 @@ import { NodeDecorators } from './styleDecorators';
 export enum DataTypes {
   Default
 }
-const ICON_PADDING = 20;
+const iconPadding = 20;
 
 type NodePeer = Node<NodeModel, Decorated<NodeData>>;
 
@@ -79,7 +79,7 @@ const renderIcon = (data: Decorated<NodeData>, element: NodePeer): React.ReactNo
   const shape = element.getNodeShape();
   const iconSize =
     (shape === NodeShape.trapezoid ? width : Math.min(width, height)) -
-    (shape === NodeShape.stadium ? 5 : ICON_PADDING) * 2;
+    (shape === NodeShape.stadium ? 5 : iconPadding) * 2;
   const Component = getTypeIcon(data.peer.resourceKind);
 
   return (
@@ -129,7 +129,7 @@ const StyleNode: React.FC<StyleNodeProps> = ({
   }
 
   return (
-    <Layer id={passedData.dragging ? TOP_LAYER : DEFAULT_LAYER}>
+    <Layer id={passedData.dragging ? topLayer : defaultLayer}>
       <g ref={hoverRef as never}>
         <BaseNode
           className="netobserv"

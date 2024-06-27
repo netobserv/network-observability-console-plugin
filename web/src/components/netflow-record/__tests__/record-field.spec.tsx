@@ -1,12 +1,12 @@
 import { Button } from '@patternfly/react-core';
 import { shallow } from 'enzyme';
 import * as React from 'react';
+import { compareNumbers } from '../../../utils/base-compare';
+import { ColumnsId } from '../../../utils/columns';
+import { Size } from '../../dropdowns/table-display-dropdown';
 import { DefaultColumnSample } from '../../__tests-data__/columns';
 import { FlowsSample } from '../../__tests-data__/flows';
 import RecordField, { RecordFieldFilter } from '../record-field';
-import { Size } from '../../dropdowns/table-display-dropdown';
-import { ColumnsId } from '../../../utils/columns';
-import { compareNumbers } from '../../../utils/base-compare';
 
 describe('<RecordField />', () => {
   const filterMock: RecordFieldFilter = {
@@ -54,7 +54,7 @@ describe('<RecordField />', () => {
       />
     );
     expect(wrapper.find(RecordField)).toBeTruthy();
-    expect(wrapper.find('.record-field-content')).toHaveLength(1);
-    expect(wrapper.find('.record-field-content span').text()).toBe('< 1ms');
+    expect(wrapper.find('.record-field-value')).toHaveLength(1);
+    expect(wrapper.find('.record-field-value').childAt(0).text()).toBe('< 1ms');
   });
 });

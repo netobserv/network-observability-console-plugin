@@ -2,13 +2,13 @@ import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 
 import { EmptyState } from '@patternfly/react-core';
-import { metrics, droppedMetrics } from '../../../components/__tests-data__/metrics';
+import { droppedMetrics, metrics } from '../../../components/__tests-data__/metrics';
 
+import { TruncateLength } from '../../../components/dropdowns/truncate-dropdown';
 import { RecordType } from '../../../model/flow-query';
 import { SamplePanel, ShuffledDefaultPanels } from '../../__tests-data__/panels';
 import { NetflowOverview, NetflowOverviewProps } from '../netflow-overview';
 import { NetflowOverviewPanel } from '../netflow-overview-panel';
-import { TruncateLength } from '../../../components/dropdowns/truncate-dropdown';
 
 describe('<NetflowOverview />', () => {
   const props: NetflowOverviewProps = {

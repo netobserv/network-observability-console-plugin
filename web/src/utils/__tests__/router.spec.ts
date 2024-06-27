@@ -1,8 +1,8 @@
-import { findFilter } from '../filter-definitions';
-import { Filters } from '../../model/filters';
-import { getFiltersFromURL, setURLFilters } from '../router';
 import { setNavFunction } from '../../components/dynamic-loader/dynamic-loader';
 import { FilterDefinitionSample } from '../../components/__tests-data__/filters';
+import { Filters } from '../../model/filters';
+import { findFilter } from '../filter-definitions';
+import { getFiltersFromURL, setURLFilters } from '../router';
 
 const nav = jest.fn();
 setNavFunction(nav);

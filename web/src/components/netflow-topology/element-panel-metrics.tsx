@@ -2,18 +2,18 @@ import { Flex, FlexItem, Radio, Text, TextVariants } from '@patternfly/react-cor
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { TopologyMetrics } from '../../api/loki';
-import { MetricType, isTimeMetric } from '../../model/flow-query';
+import { isTimeMetric, MetricType } from '../../model/flow-query';
 import { getStat } from '../../model/metrics';
 import { decorated, NodeData } from '../../model/topology';
 import { matchPeer } from '../../utils/metrics';
+import { toNamedMetric } from '../../utils/metrics-helper';
 import { TruncateLength } from '../dropdowns/truncate-dropdown';
 import { MetricsGraph } from '../metrics/metrics-graph';
-import { toNamedMetric } from '../metrics/metrics-helper';
 import { ElementPanelStats } from './element-panel-stats';
 
 type MetricsRadio = 'in' | 'out' | 'both';
 
-export const ElementPanelMetrics: React.FC<{
+export interface ElementPanelMetricsProps {
   aData: NodeData;
   bData?: NodeData;
   isGroup: boolean;
@@ -21,7 +21,17 @@ export const ElementPanelMetrics: React.FC<{
   metricType: MetricType;
   truncateLength: TruncateLength;
   isDark?: boolean;
-}> = ({ aData, bData, isGroup, metrics, metricType, truncateLength, isDark }) => {
+}
+
+export const ElementPanelMetrics: React.FC<ElementPanelMetricsProps> = ({
+  aData,
+  bData,
+  isGroup,
+  metrics,
+  metricType,
+  truncateLength,
+  isDark
+}) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [metricsRadio, setMetricsRadio] = React.useState<MetricsRadio>('both');
 

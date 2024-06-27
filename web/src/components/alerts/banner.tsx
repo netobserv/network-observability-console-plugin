@@ -1,21 +1,23 @@
-import { useTranslation } from 'react-i18next';
-import * as React from 'react';
+import { Rule } from '@openshift-console/dynamic-plugin-sdk';
 import {
   Alert,
-  AlertActionLink,
   AlertActionCloseButton,
-  TextContent,
+  AlertActionLink,
   Text,
+  TextContent,
   TextVariants
 } from '@patternfly/react-core';
-import './banner.css';
-import { Rule } from '@openshift-console/dynamic-plugin-sdk';
+import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import { navigate } from '../dynamic-loader/dynamic-loader';
+import './banner.css';
 
-export const AlertBanner: React.FC<{
+export interface AlertBannerProps {
   rule: Rule;
   onDelete: () => void;
-}> = ({ rule, onDelete }) => {
+}
+
+export const AlertBanner: React.FC<AlertBannerProps> = ({ rule, onDelete }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const routeAlert = () => {
     let path = `/monitoring/alerts/${rule.id}`;

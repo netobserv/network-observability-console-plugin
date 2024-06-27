@@ -1,7 +1,7 @@
 import { ReadOnlyValues } from './values';
 
 // https://www.iana.org/assignments/dns-parameters/dns-parameters.xhtml#dns-parameters-6
-export const DNS_RCODES: ReadOnlyValues = [
+export const dnsRCodes: ReadOnlyValues = [
   { value: 0, name: 'NoError', description: 'No Error' },
   { value: 1, name: 'FormErr', description: 'Format Error' },
   { value: 2, name: 'ServFail', description: 'Server Failure' },
@@ -26,18 +26,18 @@ export const DNS_RCODES: ReadOnlyValues = [
   { value: 23, name: 'BADCOOKIE', description: 'Bad/missing Server Cookie' }
 ] as const;
 
-const dnsRcodesValues = DNS_RCODES.map(v => v.value);
-export type DNS_RCODES_VALUES = typeof dnsRcodesValues[number];
+const dnsRcodesValues = dnsRCodes.map(v => v.value);
+export type dnsRCodesValues = typeof dnsRcodesValues[number];
 
-const dnsRcodesNames = DNS_RCODES.map(v => v.name);
-export type DNS_CODE_NAMES = typeof dnsRcodesNames[number];
+const dnsRcodesNames = dnsRCodes.map(v => v.name);
+export type dnsCodesNames = typeof dnsRcodesNames[number];
 
-export const getDNSRcodeDescription = (name: DNS_CODE_NAMES): string => {
-  return DNS_RCODES.find(v => v.name === name)?.description || 'Unassigned';
+export const getDNSRcodeDescription = (name: dnsCodesNames): string => {
+  return dnsRCodes.find(v => v.name === name)?.description || 'Unassigned';
 };
 
 // https://elixir.bootlin.com/linux/v4.7/source/include/uapi/asm-generic/errno-base.h
-export const DNS_ERRORS: ReadOnlyValues = [
+export const dnsErrors: ReadOnlyValues = [
   { value: 1, name: 'EPERM', description: 'Operation not permitted' },
   { value: 2, name: 'ENOENT', description: 'No such file or directory' },
   { value: 3, name: 'ESRCH', description: 'No such process' },
@@ -74,12 +74,12 @@ export const DNS_ERRORS: ReadOnlyValues = [
   { value: 34, name: 'ERANGE', description: 'Math result not representable' }
 ] as const;
 
-const dnsErrorsValues = DNS_ERRORS.map(v => v.value);
-export type DNS_ERRORS_VALUES = typeof dnsErrorsValues[number];
+const dnsErrorsValues = dnsErrors.map(v => v.value);
+export type dnsErrorsValues = typeof dnsErrorsValues[number];
 
-const dnsErrorsNames = DNS_ERRORS.map(v => v.name);
-export type DNS_ERRORS_NAMES = typeof dnsErrorsNames[number];
+const dnsErrorsNames = dnsErrors.map(v => v.name);
+export type dnsErrorsNames = typeof dnsErrorsNames[number];
 
-export const getDNSErrorDescription = (value: DNS_ERRORS_VALUES): string => {
-  return DNS_ERRORS.find(v => v.value === value)?.description || '';
+export const getDNSErrorDescription = (value: dnsErrorsValues): string => {
+  return dnsErrors.find(v => v.value === value)?.description || '';
 };

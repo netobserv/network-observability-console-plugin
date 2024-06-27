@@ -1,23 +1,23 @@
-import * as React from 'react';
+import { Checkbox } from '@patternfly/react-core';
 import { FilterIcon, LevelDownAltIcon, ThumbtackIcon } from '@patternfly/react-icons';
 import {
-  DEFAULT_DECORATOR_PADDING,
+  ContextMenuItem,
+  DEFAULT_DECORATOR_PADDING as defaultDecoratorPadding,
+  getDefaultShapeDecoratorCenter,
   Node,
   NodeModel,
-  TopologyQuadrant,
-  ContextMenuItem,
-  getDefaultShapeDecoratorCenter
+  TopologyQuadrant
 } from '@patternfly/react-topology';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Decorated, FilterDir, NodeData } from '../../../../model/topology';
 import { ClickableDecorator, ContextMenuDecorator } from './styleDecorator';
-import { Checkbox } from '@patternfly/react-core';
 
-export const FILTER_EVENT = 'filter';
-export const STEP_INTO_EVENT = 'step_into';
+export const filterEvent = 'filter';
+export const stepIntoEvent = 'step_into';
 
-const MEDIUM_DECORATOR_PADDING = 5;
-const LARGE_DECORATOR_PADDING = 6;
+const mediumDecoratorPadding = 5;
+const largeDecoratorPadding = 6;
 
 type NodePeer = Node<NodeModel, Decorated<NodeData>>;
 
@@ -78,19 +78,19 @@ export const NodeDecorators: React.FC<NodeDecoratorsProps> = ({
   const onFilterDirClick = React.useCallback(
     (dir: FilterDir) => () => {
       const currentState = dir === 'src' ? isSrcFiltered : isDstFiltered;
-      controller.fireEvent(FILTER_EVENT, eltId, data, dir, currentState);
+      controller.fireEvent(filterEvent, eltId, data, dir, currentState);
       dir === 'src' ? setSrcFiltered(!currentState) : setDstFiltered(!currentState);
     },
     [eltId, controller, data, isSrcFiltered, isDstFiltered, setSrcFiltered, setDstFiltered]
   );
 
   const onFilterClick = React.useCallback(() => {
-    controller.fireEvent(FILTER_EVENT, eltId, data, 'src', isSrcFiltered);
+    controller.fireEvent(filterEvent, eltId, data, 'src', isSrcFiltered);
     setSrcFiltered(!isSrcFiltered);
   }, [controller, data, eltId, isSrcFiltered, setSrcFiltered]);
 
   const onStepIntoClick = React.useCallback(() => {
-    controller.fireEvent(STEP_INTO_EVENT, { ...data, id: eltId });
+    controller.fireEvent(stepIntoEvent, { ...data, id: eltId });
   }, [eltId, controller, data]);
 
   const getPosition = React.useCallback(
@@ -134,7 +134,7 @@ export const NodeDecorators: React.FC<NodeDecoratorsProps> = ({
           tooltip={t('Step into this {{name}}', { name: data.peer.resourceKind?.toLowerCase() })}
           isActive={false}
           onClick={onStepIntoClick}
-          padding={MEDIUM_DECORATOR_PADDING}
+          padding={mediumDecoratorPadding}
         />
       )}
       {(data.peer.namespace ||
@@ -148,7 +148,7 @@ export const NodeDecorators: React.FC<NodeDecoratorsProps> = ({
           icon={<FilterIcon />}
           tooltip={t('Filter by source or destination {{name}}', { name: data.peer.resourceKind?.toLowerCase() })}
           isActive={isSrcFiltered || isDstFiltered}
-          padding={isSrcFiltered || isDstFiltered ? DEFAULT_DECORATOR_PADDING : LARGE_DECORATOR_PADDING}
+          padding={isSrcFiltered || isDstFiltered ? defaultDecoratorPadding : largeDecoratorPadding}
           menuItems={filterMenu}
         />
       )}
@@ -159,7 +159,7 @@ export const NodeDecorators: React.FC<NodeDecoratorsProps> = ({
           tooltip={t('Filter by {{name}}', { name: data.peer.resourceKind?.toLowerCase() })}
           isActive={isSrcFiltered || isDstFiltered}
           onClick={onFilterClick}
-          padding={isSrcFiltered || isDstFiltered ? DEFAULT_DECORATOR_PADDING : LARGE_DECORATOR_PADDING}
+          padding={isSrcFiltered || isDstFiltered ? defaultDecoratorPadding : largeDecoratorPadding}
         />
       )}
       {
@@ -169,7 +169,7 @@ export const NodeDecorators: React.FC<NodeDecoratorsProps> = ({
           tooltip={isPinned ? t('Unpin this element') : t('Pin this element')}
           isActive={isPinned}
           onClick={onPinClick}
-          padding={MEDIUM_DECORATOR_PADDING}
+          padding={mediumDecoratorPadding}
         />
       }
     </>

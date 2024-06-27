@@ -1,15 +1,15 @@
+import { TFunction } from 'i18next';
 import * as _ from 'lodash';
 import protocols from 'protocol-numbers';
-import { getClusters, getNamespaces, getResources, getZones } from '../api/routes';
 import { FlowDirection } from '../api/ipfix';
+import { getClusters, getNamespaces, getResources, getZones } from '../api/routes';
 import { FilterOption } from '../model/filters';
 import { splitResource, SplitStage } from '../model/resource';
 import { autoCompleteCache } from './autocomplete-cache';
-import { DNS_ERRORS, DNS_RCODES } from './dns';
-import { getPort, getService } from './port';
-import { DROP_CAUSES, DROP_STATES } from './pkt-drop';
-import { TFunction } from 'i18next';
+import { dnsErrors, dnsRCodes } from './dns';
 import { DSCP_VALUES } from './dscp';
+import { dropCauses, dropStates } from './pkt-drop';
+import { getPort, getService } from './port';
 
 export const noOption: (value: string) => Promise<FilterOption[]> = () => Promise.resolve([]);
 
@@ -131,33 +131,33 @@ export const getPortOptions = (value: string): Promise<FilterOption[]> => {
 
 export const getDropStateOptions = (value: string): Promise<FilterOption[]> => {
   return Promise.resolve(
-    DROP_STATES.filter(
-      opt => String(opt.value).includes(value) || opt.name.toLowerCase().includes(value.toLowerCase())
-    ).map(v => ({ name: v.name.replace('TCP_', ''), value: v.name })) // map only names here since codes are stringified in storage
+    dropStates
+      .filter(opt => String(opt.value).includes(value) || opt.name.toLowerCase().includes(value.toLowerCase()))
+      .map(v => ({ name: v.name.replace('TCP_', ''), value: v.name })) // map only names here since codes are stringified in storage
   );
 };
 
 export const getDropCauseOptions = (value: string): Promise<FilterOption[]> => {
   return Promise.resolve(
-    DROP_CAUSES.filter(
-      opt => String(opt.value).includes(value) || opt.name.toLowerCase().includes(value.toLowerCase())
-    ).map(v => ({ name: v.name.replace('SKB_DROP_REASON_', ''), value: v.name })) // map only names here since codes are stringified in storage
+    dropCauses
+      .filter(opt => String(opt.value).includes(value) || opt.name.toLowerCase().includes(value.toLowerCase()))
+      .map(v => ({ name: v.name.replace('SKB_DROP_REASON_', ''), value: v.name })) // map only names here since codes are stringified in storage
   );
 };
 
 export const getDnsResponseCodeOptions = (value: string): Promise<FilterOption[]> => {
   return Promise.resolve(
-    DNS_RCODES.filter(
-      opt => String(opt.value).includes(value) || opt.name.toLowerCase().includes(value.toLowerCase())
-    ).map(v => ({ name: v.name, value: v.name })) // map only names here since codes are stringified in storage
+    dnsRCodes
+      .filter(opt => String(opt.value).includes(value) || opt.name.toLowerCase().includes(value.toLowerCase()))
+      .map(v => ({ name: v.name, value: v.name })) // map only names here since codes are stringified in storage
   );
 };
 
 export const getDnsErrorCodeOptions = (value: string): Promise<FilterOption[]> => {
   return Promise.resolve(
-    DNS_ERRORS.filter(
-      opt => String(opt.value).includes(value) || opt.name.toLowerCase().includes(value.toLowerCase())
-    ).map(v => ({ name: v.name, value: String(v.value) }))
+    dnsErrors
+      .filter(opt => String(opt.value).includes(value) || opt.name.toLowerCase().includes(value.toLowerCase()))
+      .map(v => ({ name: v.name, value: String(v.value) }))
   );
 };
 

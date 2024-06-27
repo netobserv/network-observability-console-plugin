@@ -1,5 +1,5 @@
+import { ComponentFactory, DefaultNode, ModelKind } from '@patternfly/react-topology';
 import { ComponentType } from 'react';
-import { ComponentFactory, ModelKind, DefaultNode } from '@patternfly/react-topology';
 import { GraphElementPeer } from '../../../../model/topology';
 
 export const shapesComponentFactory: ComponentFactory = (
