@@ -58,13 +58,12 @@ export const ViewOptionsToolbar: React.FC<ViewOptionsToolbarProps> = React.forwa
   (props, ref: React.Ref<SearchHandle>) => {
     const { t } = useTranslation('plugin__netobserv-plugin');
 
-    const onTopologyExport = () =>
-      React.useCallback(() => {
-        const topology_flex = document.getElementsByClassName('pf-topology-visualization-surface__svg')[0];
-        exportToPng('topology', topology_flex as HTMLElement, props.isDarkTheme);
-      }, [props.isDarkTheme]);
+    const onTopologyExport = React.useCallback(() => {
+      const topology_flex = document.getElementsByClassName('pf-topology-visualization-surface__svg')[0];
+      exportToPng('topology', topology_flex as HTMLElement, props.isDarkTheme);
+    }, [props.isDarkTheme]);
 
-    const onOverviewExport = () => {
+    const onOverviewExport = React.useCallback(() => {
       const prevFocusState = props.overviewFocus;
       props.setOverviewFocus(false);
       setTimeout(() => {
@@ -73,7 +72,7 @@ export const ViewOptionsToolbar: React.FC<ViewOptionsToolbarProps> = React.forwa
           props.setOverviewFocus(prevFocusState)
         );
       }, 500);
-    };
+    }, [props.isDarkTheme]);
 
     const viewOptionsContent = () => {
       const items: JSX.Element[] = [];
