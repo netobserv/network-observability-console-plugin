@@ -1,7 +1,7 @@
 import { mount } from 'enzyme';
 import * as React from 'react';
 
-import { Chart, ChartDonut, ChartBar, ChartArea, ChartScatter, ChartGroup } from '@patternfly/react-charts';
+import { Chart, ChartArea, ChartBar, ChartDonut, ChartGroup, ChartScatter } from '@patternfly/react-charts';
 import { metrics } from '../../__tests-data__/metrics';
 import { MetricsGraph, MetricsGraphProps } from '../metrics-graph';
 

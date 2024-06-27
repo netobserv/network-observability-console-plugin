@@ -1,10 +1,10 @@
+import { DrawerCloseButton } from '@patternfly/react-core';
 import { shallow } from 'enzyme';
 import * as React from 'react';
-import { FilterDefinitionSample, FiltersSample } from '../../__tests-data__/filters';
 import { DefaultColumnSample } from '../../__tests-data__/columns';
+import { FilterDefinitionSample, FiltersSample } from '../../__tests-data__/filters';
 import { FlowsSample, UnknownFlow } from '../../__tests-data__/flows';
 import RecordPanel, { RecordDrawerProps } from '../record-panel';
-import { DrawerCloseButton } from '@patternfly/react-core';
 
 describe('<RecordPanel />', () => {
   const mocks: RecordDrawerProps = {

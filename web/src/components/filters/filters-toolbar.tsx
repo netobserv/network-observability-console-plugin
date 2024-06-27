@@ -11,21 +11,21 @@ import { CompressIcon, ExpandIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Filter, FilterDefinition, FilterValue, Filters, findFromFilters } from '../../model/filters';
+import { Filter, FilterDefinition, Filters, FilterValue, findFromFilters } from '../../model/filters';
 import { QuickFilter } from '../../model/quick-filters';
 import { findFilter } from '../../utils/filter-definitions';
-import { QueryOptionsDropdown, QueryOptionsDropdownProps } from '../dropdowns/query-options-dropdown';
-import { QuickFilters } from './quick-filters';
-import AutocompleteFilter from './autocomplete-filter';
-import { FilterHints } from './filter-hints';
-import FiltersDropdown from './filters-dropdown';
-import { Indicator } from './filters-helper';
-import TextFilter from './text-filter';
-import { LOCAL_STORAGE_SHOW_FILTERS_KEY, useLocalStorage } from '../../utils/local-storage-hook';
-import { FiltersChips } from './filters-chips';
-import CompareFilter, { FilterCompare } from './compare-filter';
+import { Indicator } from '../../utils/filters-helper';
+import { localStorageShowFiltersKey, useLocalStorage } from '../../utils/local-storage-hook';
+import { QueryOptionsDropdown, QueryOptionsProps } from '../dropdowns/query-options-dropdown';
 import { LinksOverflow } from '../overflow/links-overflow';
+import AutocompleteFilter from './autocomplete-filter';
+import CompareFilter, { FilterCompare } from './compare-filter';
+import { FilterHints } from './filter-hints';
+import { FiltersChips } from './filters-chips';
+import FiltersDropdown from './filters-dropdown';
 import './filters-toolbar.css';
+import { QuickFilters } from './quick-filters';
+import TextFilter from './text-filter';
 
 export interface FiltersToolbarProps {
   id: string;
@@ -35,7 +35,7 @@ export interface FiltersToolbarProps {
   setFilters: (v: Filters) => void;
   clearFilters: () => void;
   resetFilters: () => void;
-  queryOptionsProps: QueryOptionsDropdownProps;
+  queryOptionsProps: QueryOptionsProps;
   quickFilters: QuickFilter[];
   filterDefinitions: FilterDefinition[];
   isFullScreen: boolean;
@@ -62,8 +62,8 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
   const [selectedFilter, setSelectedFilter] = React.useState<FilterDefinition>(
     findFilter(filterDefinitions, 'src_namespace')!
   );
-  const [selectedCompare, setSelectedCompare] = React.useState<FilterCompare>(FilterCompare.EQUAL);
-  const [showFilters, setShowFilters] = useLocalStorage<boolean>(LOCAL_STORAGE_SHOW_FILTERS_KEY, true);
+  const [selectedCompare, setSelectedCompare] = React.useState<FilterCompare>(FilterCompare.equal);
+  const [showFilters, setShowFilters] = useLocalStorage<boolean>(localStorageShowFiltersKey, true);
 
   // reset and delay message state to trigger tooltip properly
   const setMessageWithDelay = React.useCallback(
@@ -90,8 +90,8 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
   const addFilter = React.useCallback(
     (filterValue: FilterValue) => {
       const newFilters = _.cloneDeep(filters?.list) || [];
-      const not = selectedCompare === FilterCompare.NOT_EQUAL;
-      const moreThan = selectedCompare === FilterCompare.MORE_THAN_OR_EQUAL;
+      const not = selectedCompare === FilterCompare.notEqual;
+      const moreThan = selectedCompare === FilterCompare.moreThanOrEqual;
       const found = findFromFilters(newFilters, { def: selectedFilter, not, moreThan });
       if (found) {
         if (found.values.map(value => value.v).includes(filterValue.v)) {

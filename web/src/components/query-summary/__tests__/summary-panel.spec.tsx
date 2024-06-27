@@ -1,10 +1,11 @@
 import { Accordion, AccordionItem, DrawerCloseButton } from '@patternfly/react-core';
 import { mount, shallow } from 'enzyme';
 import * as React from 'react';
-import { RecordType } from '../../../model/flow-query';
-import { FlowsSample } from '../../../components/__tests-data__/flows';
-import SummaryPanel, { SummaryPanelContent } from '../summary-panel';
 import { NetflowMetrics } from 'src/api/loki';
+import { FlowsSample } from '../../../components/__tests-data__/flows';
+import { RecordType } from '../../../model/flow-query';
+import { SummaryPanel } from '../summary-panel';
+import { SummaryPanelContent } from '../summary-panel-content';
 
 describe('<SummaryPanel />', () => {
   const now = new Date();

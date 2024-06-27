@@ -7,7 +7,7 @@ import { TopologyMetrics } from '../../api/loki';
 import { Filter, FilterDefinition, Filters } from '../../model/filters';
 import { FlowScope, MetricType, StatFunction } from '../../model/flow-query';
 import { GraphElementPeer, LayoutName, TopologyOptions } from '../../model/topology';
-import { observeDOMRect } from '../metrics/metrics-helper';
+import { observeDOMRect } from '../../utils/metrics-helper';
 import { ScopeSlider } from '../scope-slider/scope-slider';
 import { SearchEvent, SearchHandle } from '../search/search';
 import componentFactory from './2d/componentFactories/componentFactory';
@@ -17,7 +17,7 @@ import { TopologyContent } from './2d/topology-content';
 import ThreeDTopologyContent from './3d/three-d-topology-content';
 import './netflow-topology.css';
 
-export const NetflowTopology: React.FC<{
+export interface NetflowTopologyProps {
   loading?: boolean;
   k8sModels: { [key: string]: K8sModel };
   metricFunction: StatFunction;
@@ -37,7 +37,9 @@ export const NetflowTopology: React.FC<{
   searchEvent?: SearchEvent;
   isDark?: boolean;
   allowedScopes: FlowScope[];
-}> = ({
+}
+
+export const NetflowTopology: React.FC<NetflowTopologyProps> = ({
   loading,
   k8sModels,
   metricFunction,
@@ -72,7 +74,7 @@ export const NetflowTopology: React.FC<{
           <Spinner size="xl" />
         </Bullseye>
       );
-    } else if (options.layout === LayoutName.ThreeD) {
+    } else if (options.layout === LayoutName.threeD) {
       return (
         <ThreeDTopologyContent
           k8sModels={k8sModels}

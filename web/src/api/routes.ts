@@ -4,18 +4,18 @@ import { buildExportQuery } from '../model/export-query';
 import { FlowQuery, FlowScope, isTimeMetric } from '../model/flow-query';
 import { ContextSingleton } from '../utils/context';
 import { TimeRange } from '../utils/datetime';
-import { parseTopologyMetrics, parseGenericMetrics } from '../utils/metrics';
+import { parseGenericMetrics, parseTopologyMetrics } from '../utils/metrics';
 import { AlertsResult, SilencedAlert } from './alert';
 import { Field } from './ipfix';
 import {
   AggregatedQueryResponse,
+  FlowMetricsResult,
   GenericMetricsResult,
   parseStream,
   RawTopologyMetrics,
   RecordsResult,
   Stats,
-  StreamResult,
-  FlowMetricsResult
+  StreamResult
 } from './loki';
 
 export const getFlowRecords = (params: FlowQuery): Promise<RecordsResult> => {

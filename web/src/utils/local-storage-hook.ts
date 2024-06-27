@@ -1,41 +1,41 @@
 import _ from 'lodash';
 import * as React from 'react';
 
-export const LOCAL_STORAGE_PLUGIN_KEY = 'netobserv-plugin-settings';
-export const LOCAL_STORAGE_COLS_KEY = 'netflow-traffic-columns';
-export const LOCAL_STORAGE_COLS_SIZES_KEY = 'netflow-traffic-column-sizes';
-export const LOCAL_STORAGE_EXPORT_COLS_KEY = 'netflow-traffic-export-columns';
-export const LOCAL_STORAGE_REFRESH_KEY = 'netflow-traffic-refresh';
-export const LOCAL_STORAGE_SIZE_KEY = 'netflow-traffic-size-size';
-export const LOCAL_STORAGE_VIEW_ID_KEY = 'netflow-traffic-view-id';
-export const LOCAL_STORAGE_OVERVIEW_TRUNCATE_KEY = 'netflow-traffic-overview-truncate';
-export const LOCAL_STORAGE_OVERVIEW_FOCUS_KEY = 'netflow-traffic-overview-focus';
-export const LOCAL_STORAGE_TOPOLOGY_OPTIONS_KEY = 'netflow-traffic-topology-options';
-export const LOCAL_STORAGE_QUERY_PARAMS_KEY = 'netflow-traffic-query-params';
-export const LOCAL_STORAGE_DISABLED_FILTERS_KEY = 'netflow-traffic-disabled-filters';
-export const LOCAL_STORAGE_SORT_ID_KEY = 'netflow-traffic-sort-id';
-export const LOCAL_STORAGE_SORT_DIRECTION_KEY = 'netflow-traffic-sort-direction';
-export const LOCAL_STORAGE_OVERVIEW_IDS_KEY = 'netflows-traffic-overview-ids';
-export const LOCAL_STORAGE_LAST_LIMIT_KEY = 'netflow-traffic-limit';
-export const LOCAL_STORAGE_LAST_TOP_KEY = 'netflow-traffic-top';
-export const LOCAL_STORAGE_METRIC_SCOPE_KEY = 'netflow-traffic-metric-scope';
-export const LOCAL_STORAGE_METRIC_FUNCTION_KEY = 'netflow-traffic-metric-function';
-export const LOCAL_STORAGE_METRIC_TYPE_KEY = 'netflow-traffic-metric-type';
-export const LOCAL_STORAGE_SHOW_OPTIONS_KEY = 'netflow-traffic-show-options';
-export const LOCAL_STORAGE_SHOW_HISTOGRAM_KEY = 'netflow-traffic-show-histogram';
-export const LOCAL_STORAGE_SHOW_FILTERS_KEY = 'netflow-traffic-show-filters';
-export const LOCAL_STORAGE_HISTOGRAM_GUIDED_TOUR_DONE_KEY = 'netflow-traffic-histogram-guided-tour-done';
-export const LOCAL_STORAGE_OVERVIEW_DONUT_DIMENSION_KEY = 'netflow-traffic-overview-donut-dimension';
-export const LOCAL_STORAGE_OVERVIEW_METRICS_DIMENSION_KEY = 'netflow-traffic-overview-metrics-dimension';
-export const LOCAL_STORAGE_OVERVIEW_METRICS_TOTAL_DIMENSION_KEY = 'netflow-traffic-overview-metrics-total-dimension';
-export const LOCAL_STORAGE_OVERVIEW_KEBAB_KEY = 'netflow-traffic-overview-kebab-map';
+export const localStoragePluginKey = 'netobserv-plugin-settings';
+export const localStorageColsKey = 'netflow-traffic-columns';
+export const localStorageColsSizesKey = 'netflow-traffic-column-sizes';
+export const localStorageExportColsKey = 'netflow-traffic-export-columns';
+export const localStorageRefreshKey = 'netflow-traffic-refresh';
+export const localStorageSizeKey = 'netflow-traffic-size-size';
+export const localStorageViewIdKey = 'netflow-traffic-view-id';
+export const localStorageOverviewTruncateKey = 'netflow-traffic-overview-truncate';
+export const localStorageOverviewFocusKey = 'netflow-traffic-overview-focus';
+export const localStorageTopologyOptionsKey = 'netflow-traffic-topology-options';
+export const localStorageQueryParamsKey = 'netflow-traffic-query-params';
+export const localStorageDisabledFiltersKey = 'netflow-traffic-disabled-filters';
+export const localStorageSortIdKey = 'netflow-traffic-sort-id';
+export const localStorageSortDirectionKey = 'netflow-traffic-sort-direction';
+export const localStorageOverviewIdsKey = 'netflows-traffic-overview-ids';
+export const localStorageLastLimitKey = 'netflow-traffic-limit';
+export const localStorageLastTopKey = 'netflow-traffic-top';
+export const localStorageMetricScopeKey = 'netflow-traffic-metric-scope';
+export const localStorageMetricFunctionKey = 'netflow-traffic-metric-function';
+export const localStorageMetricTypeKey = 'netflow-traffic-metric-type';
+export const localStorageShowOptionsKey = 'netflow-traffic-show-options';
+export const localStorageShowHistogramKey = 'netflow-traffic-show-histogram';
+export const localStorageShowFiltersKey = 'netflow-traffic-show-filters';
+export const localStorageHistogramGuidedTourDoneKey = 'netflow-traffic-histogram-guided-tour-done';
+export const localStorageOverviewDonutDimensionKey = 'netflow-traffic-overview-donut-dimension';
+export const localStorageOverviewMetricsDimensionKey = 'netflow-traffic-overview-metrics-dimension';
+export const localStorageOverviewMetricsTotalDimensionKey = 'netflow-traffic-overview-metrics-total-dimension';
+export const localStorageOverviewKebabKey = 'netflow-traffic-overview-kebab-map';
 
 export interface ArraySelectionOptions {
   id: string;
   criteria: string;
 }
 
-export const DEFAULT_ARRAY_SELECTION_OPTIONS = {
+export const defaultArraySelectionOptions = {
   id: 'id',
   criteria: 'isSelected'
 };
@@ -57,7 +57,7 @@ export function useLocalStorage<T>(
       setStoredValue(stateValue);
 
       // Reload from localStorage
-      const item = window.localStorage.getItem(LOCAL_STORAGE_PLUGIN_KEY);
+      const item = window.localStorage.getItem(localStoragePluginKey);
       const parsedItem = item ? JSON.parse(item) : {};
 
       // Stora maps as object
@@ -75,7 +75,7 @@ export function useLocalStorage<T>(
       }
 
       // Save to localStorage
-      window.localStorage.setItem(LOCAL_STORAGE_PLUGIN_KEY, JSON.stringify(parsedItem));
+      window.localStorage.setItem(localStoragePluginKey, JSON.stringify(parsedItem));
     } catch (error) {
       console.error(error);
       clearLocalStorage();
@@ -86,7 +86,7 @@ export function useLocalStorage<T>(
 
 export function getLocalStorage<T>(key: string, initialValue?: T, opts?: ArraySelectionOptions) {
   try {
-    const item = window.localStorage.getItem(LOCAL_STORAGE_PLUGIN_KEY);
+    const item = window.localStorage.getItem(localStoragePluginKey);
     const param = item ? JSON.parse(item)[key] : undefined;
 
     // Manage array selection by ids if opts is set
@@ -112,8 +112,8 @@ export function getLocalStorage<T>(key: string, initialValue?: T, opts?: ArraySe
 
 export function clearLocalStorage() {
   try {
-    console.info('clearing local storage ' + LOCAL_STORAGE_PLUGIN_KEY);
-    window.localStorage.removeItem(LOCAL_STORAGE_PLUGIN_KEY);
+    console.info('clearing local storage ' + localStoragePluginKey);
+    window.localStorage.removeItem(localStoragePluginKey);
   } catch (error) {
     console.error(error);
   }

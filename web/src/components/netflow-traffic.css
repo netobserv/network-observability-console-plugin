@@ -18,12 +18,6 @@
     text-align: start;
 }
 
-.actions {
-    display: flex;
-    flex-direction: row;
-    align-items: baseline;
-}
-
 /*hack to keep refresh button size while loading*/
 
 .co-action-refresh-button {
@@ -235,4 +229,16 @@ span.pf-c-button__icon.pf-m-start {
     -webkit-box-shadow: inset 0 -1px 0 0 #444548;
     -moz-box-shadow: inset 0 -1px 0 0 #444548;
     box-shadow: inset 0 -1px 0 0 #444548;
+}
+
+.query-option-tooltip-text {
+    color: #fff;
+}
+
+.netobserv-tooltip-text {
+    color: #fff;
+}
+
+.netobserv-no-child-margin>* {
+    margin: 0 !important;
 }

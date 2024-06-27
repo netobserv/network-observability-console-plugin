@@ -26,9 +26,9 @@ import { Column, ColumnSizeMap, getDefaultColumns, getFullColumnName } from '../
 import './columns-modal.css';
 import Modal from './modal';
 
-export const COLUMN_FILTER_KEYS = ['source', 'destination', 'time', 'host', 'namespace', 'owner', 'ip', 'dns'];
+export const columnFilterKeys = ['source', 'destination', 'time', 'host', 'namespace', 'owner', 'ip', 'dns'];
 
-export const ColumnsModal: React.FC<{
+export interface ColumnsModalProps {
   isModalOpen: boolean;
   setModalOpen: (v: boolean) => void;
   columns: Column[];
@@ -36,7 +36,17 @@ export const ColumnsModal: React.FC<{
   setColumnSizes: (v: ColumnSizeMap) => void;
   config: Config;
   id?: string;
-}> = ({ id, config, isModalOpen, setModalOpen, columns, setColumns, setColumnSizes }) => {
+}
+
+export const ColumnsModal: React.FC<ColumnsModalProps> = ({
+  id,
+  config,
+  isModalOpen,
+  setModalOpen,
+  columns,
+  setColumns,
+  setColumnSizes
+}) => {
   const [resetClicked, setResetClicked] = React.useState<boolean>(false);
   const [updatedColumns, setUpdatedColumns] = React.useState<Column[]>([]);
   const [filterKeys, setFilterKeys] = React.useState<string[]>([]);
@@ -112,7 +122,7 @@ export const ColumnsModal: React.FC<{
   }, []);
 
   const getColumnFilterKeys = React.useCallback(() => {
-    return COLUMN_FILTER_KEYS.filter(fk => columns.some(c => isFilteredColumn(c, [fk])));
+    return columnFilterKeys.filter(fk => columns.some(c => isFilteredColumn(c, [fk])));
   }, [columns, isFilteredColumn]);
 
   const filteredColumns = React.useCallback(() => {
@@ -153,7 +163,7 @@ export const ColumnsModal: React.FC<{
       if (filterKeys.includes(key)) {
         setFilterKeys(filterKeys.filter(k => k !== key));
       } else {
-        setFilterKeys(COLUMN_FILTER_KEYS.filter(f => f === key || filterKeys.includes(f)));
+        setFilterKeys(columnFilterKeys.filter(f => f === key || filterKeys.includes(f)));
       }
     },
     [filterKeys]

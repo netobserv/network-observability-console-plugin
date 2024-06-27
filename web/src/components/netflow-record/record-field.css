@@ -3,6 +3,10 @@
   white-space: nowrap
 }
 
+.co-resource-item {
+  display: flex;
+}
+
 /* max content lines to show */
 .co-resource-item.s>.co-resource-item__resource-name,
 .co-resource-item.m>.co-resource-item__resource-name,
@@ -16,21 +20,15 @@
 
 .record-field-flex-container {
   height: 100%;
-  flex: 1;
-  display: flex;
   gap: .3rem;
 }
 
 .record-field-flex {
-  flex: 1;
   align-self: center;
 }
 
-.record-field-content-flex {
-  display: flex;
-  flex-direction: row;
-  flex: 1;
-  flex-basis: 0;
+.record-field-content {
+  width: 100%;
 }
 
 .co-resource-item.s>.co-resource-item__resource-name {
@@ -71,10 +69,6 @@
   left: 50%;
 }
 
-.record-field-tooltip-margin{
-  margin-top: 0.5em;
-}
-
 /* show tooltip on content hover */
 .record-field-content-flex.truncated:hover .record-field-tooltip,
 .record-field-content.truncated:hover .record-field-tooltip {
@@ -91,13 +85,12 @@
 }
 
 .record-field-date {
-  display: flex;
   align-items: baseline;
+  flex-wrap: nowrap;
 }
 
 .record-field-date-icon {
   flex-shrink: 0;
-  margin-right: 5px;
 }
 
 button.record-field-value-popover-button {

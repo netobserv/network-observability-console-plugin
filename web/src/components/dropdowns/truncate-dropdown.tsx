@@ -11,11 +11,13 @@ export enum TruncateLength {
   XL = 40
 }
 
-export const TruncateDropdown: React.FC<{
+export interface TruncateDropdownProps {
   selected: TruncateLength;
   setTruncateLength: (v: TruncateLength) => void;
   id?: string;
-}> = ({ selected, setTruncateLength, id }) => {
+}
+
+export const TruncateDropdown: React.FC<TruncateDropdownProps> = ({ selected, setTruncateLength, id }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [truncateDropdownOpen, setTruncateDropdownOpen] = React.useState(false);
 

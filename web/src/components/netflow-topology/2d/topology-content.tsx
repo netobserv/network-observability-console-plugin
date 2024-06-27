@@ -3,12 +3,12 @@ import { ValidatedOptions } from '@patternfly/react-core';
 import {
   createTopologyControlButtons,
   defaultControlButtonsOptions,
-  GRAPH_LAYOUT_END_EVENT,
-  GRAPH_POSITION_CHANGE_EVENT,
+  GRAPH_LAYOUT_END_EVENT as graphLayoutEndEvent,
+  GRAPH_POSITION_CHANGE_EVENT as graphPositionChangeEvent,
   Model,
   Node,
   SelectionEventListener,
-  SELECTION_EVENT,
+  SELECTION_EVENT as selectionEvent,
   TopologyControlBar,
   TopologyView,
   useEventListener,
@@ -20,8 +20,8 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { TopologyMetrics } from '../../../api/loki';
 import { Filter, FilterDefinition, Filters } from '../../../model/filters';
-import { StatFunction, FlowScope, MetricType } from '../../../model/flow-query';
-import { MetricScopeOptions, getStat } from '../../../model/metrics';
+import { FlowScope, MetricType, StatFunction } from '../../../model/flow-query';
+import { getStat, MetricScopeOptions } from '../../../model/metrics';
 import {
   Decorated,
   ElementData,
@@ -30,26 +30,26 @@ import {
   GraphElementPeer,
   LayoutName,
   NodeData,
-  toggleDirElementFilter as toggleDirElementFilter,
+  toggleDirElementFilter,
   TopologyGroupTypes,
   TopologyOptions
 } from '../../../model/topology';
 import { usePrevious } from '../../../utils/previous-hook';
 import { SearchEvent, SearchHandle } from '../../search/search';
-import { FILTER_EVENT, STEP_INTO_EVENT } from './styles/styleDecorators';
+import { filterEvent, stepIntoEvent } from './styles/styleDecorators';
 import './topology-content.css';
 
-export const HOVER_EVENT = 'hover';
+export const hoverEvent = 'hover';
 
 let requestFit = false;
 let waitForMetrics = false;
 let lastNodeIdsFound: string[] = [];
 
-const ZOOM_IN = 4 / 3;
-const ZOOM_OUT = 3 / 4;
-const FIT_PADDING = 80;
+const zoomIn = 4 / 3;
+const zoomOut = 3 / 4;
+const fitPadding = 80;
 
-export const TopologyContent: React.FC<{
+export interface TopologyContentProps {
   k8sModels: { [key: string]: K8sModel };
   metricFunction: StatFunction;
   metricType: MetricType;
@@ -67,7 +67,9 @@ export const TopologyContent: React.FC<{
   searchHandle: SearchHandle | null;
   searchEvent?: SearchEvent;
   isDark?: boolean;
-}> = ({
+}
+
+export const TopologyContent: React.FC<TopologyContentProps> = ({
   k8sModels,
   metricFunction,
   metricType,
@@ -198,23 +200,23 @@ export const TopologyContent: React.FC<{
       switch (metricScope) {
         case MetricScopeOptions.CLUSTER:
           scope = MetricScopeOptions.ZONE;
-          groupTypes = TopologyGroupTypes.CLUSTERS;
+          groupTypes = TopologyGroupTypes.clusters;
           break;
         case MetricScopeOptions.ZONE:
           scope = MetricScopeOptions.HOST;
-          groupTypes = TopologyGroupTypes.ZONES;
+          groupTypes = TopologyGroupTypes.zones;
           break;
         case MetricScopeOptions.HOST:
           scope = MetricScopeOptions.NAMESPACE;
-          groupTypes = TopologyGroupTypes.NONE;
+          groupTypes = TopologyGroupTypes.none;
           break;
         case MetricScopeOptions.NAMESPACE:
           scope = MetricScopeOptions.OWNER;
-          groupTypes = TopologyGroupTypes.NAMESPACES;
+          groupTypes = TopologyGroupTypes.namespaces;
           break;
         default:
           scope = MetricScopeOptions.RESOURCE;
-          groupTypes = TopologyGroupTypes.OWNERS;
+          groupTypes = TopologyGroupTypes.owners;
       }
       if (data.nodeType && data.peer) {
         setMetricScope(scope);
@@ -247,7 +249,7 @@ export const TopologyContent: React.FC<{
   //fit view to elements
   const fitView = React.useCallback(() => {
     if (controller && controller.hasGraph()) {
-      controller.getGraph().fit(FIT_PADDING);
+      controller.getGraph().fit(fitPadding);
     } else {
       console.error('fitView called before controller graph');
     }
@@ -257,7 +259,7 @@ export const TopologyContent: React.FC<{
     //fit view to new loaded elements
     if (requestFit) {
       requestFit = false;
-      if ([LayoutName.Concentric, LayoutName.Dagre, LayoutName.Grid].includes(options.layout)) {
+      if ([LayoutName.concentric, LayoutName.dagre, LayoutName.grid].includes(options.layout)) {
         fitView();
       } else {
         //TODO: find a smoother way to fit while elements are still moving
@@ -462,12 +464,12 @@ export const TopologyContent: React.FC<{
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchEvent]);
 
-  useEventListener<SelectionEventListener>(SELECTION_EVENT, onSelectIds);
-  useEventListener(FILTER_EVENT, onFilter);
-  useEventListener(STEP_INTO_EVENT, onStepInto);
-  useEventListener(HOVER_EVENT, onHover);
-  useEventListener(GRAPH_LAYOUT_END_EVENT, onLayoutEnd);
-  useEventListener(GRAPH_POSITION_CHANGE_EVENT, onLayoutPositionChange);
+  useEventListener<SelectionEventListener>(selectionEvent, onSelectIds);
+  useEventListener(filterEvent, onFilter);
+  useEventListener(stepIntoEvent, onStepInto);
+  useEventListener(hoverEvent, onHover);
+  useEventListener(graphLayoutEndEvent, onLayoutEnd);
+  useEventListener(graphPositionChangeEvent, onLayoutPositionChange);
 
   return (
     <TopologyView
@@ -480,10 +482,10 @@ export const TopologyContent: React.FC<{
             ...defaultControlButtonsOptions,
             fitToScreen: false,
             zoomInCallback: () => {
-              controller && controller.getGraph().scaleBy(ZOOM_IN);
+              controller && controller.getGraph().scaleBy(zoomIn);
             },
             zoomOutCallback: () => {
-              controller && controller.getGraph().scaleBy(ZOOM_OUT);
+              controller && controller.getGraph().scaleBy(zoomOut);
             },
             resetViewCallback: () => {
               if (controller) {

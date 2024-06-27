@@ -4,12 +4,14 @@ import { useTranslation } from 'react-i18next';
 import { FlowScope } from '../../model/flow-query';
 import { MetricScopeOptions } from '../../model/metrics';
 
-export const ScopeDropdown: React.FC<{
+export interface ScopeDropdownProps {
   selected: FlowScope;
   setScopeType: (v: FlowScope) => void;
   id?: string;
   allowedScopes: FlowScope[];
-}> = ({ selected, setScopeType, id, allowedScopes }) => {
+}
+
+export const ScopeDropdown: React.FC<ScopeDropdownProps> = ({ selected, setScopeType, id, allowedScopes }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [scopeDropdownOpen, setScopeDropdownOpen] = React.useState(false);
 

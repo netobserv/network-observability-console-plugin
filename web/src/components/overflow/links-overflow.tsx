@@ -1,4 +1,3 @@
-import * as React from 'react';
 import {
   Button,
   Dropdown,
@@ -10,6 +9,7 @@ import {
   OverflowMenuItem
 } from '@patternfly/react-core';
 import { EllipsisVIcon } from '@patternfly/react-icons';
+import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { MaybeTooltip } from '../tooltip/maybe-tooltip';
 

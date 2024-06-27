@@ -1,14 +1,14 @@
 import {
-  Graph,
-  Layout,
-  LayoutFactory,
-  ForceLayout,
-  ColaLayout,
-  DagreLayout,
-  GridLayout,
-  ConcentricLayout,
   BreadthFirstLayout,
-  ColaGroupsLayout
+  ColaGroupsLayout,
+  ColaLayout,
+  ConcentricLayout,
+  DagreLayout,
+  ForceLayout,
+  Graph,
+  GridLayout,
+  Layout,
+  LayoutFactory
 } from '@patternfly/react-topology';
 import { LayoutName } from '../../../../model/topology';
 

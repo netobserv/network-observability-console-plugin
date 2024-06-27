@@ -3,7 +3,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { MetricType } from '../../model/flow-query';
 
-export const MetricTypeDropdown: React.FC<{
+export interface MetricTypeDropdownProps {
   selected?: string;
   setMetricType: (v: MetricType) => void;
   isTopology?: boolean;
@@ -11,7 +11,17 @@ export const MetricTypeDropdown: React.FC<{
   allowDNSMetric?: boolean;
   allowRTTMetric?: boolean;
   id?: string;
-}> = ({ selected, setMetricType, id, isTopology, allowPktDrop, allowDNSMetric, allowRTTMetric }) => {
+}
+
+export const MetricTypeDropdown: React.FC<MetricTypeDropdownProps> = ({
+  selected,
+  setMetricType,
+  id,
+  isTopology,
+  allowPktDrop,
+  allowDNSMetric,
+  allowRTTMetric
+}) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [metricDropdownOpen, setMetricDropdownOpen] = React.useState(false);
 

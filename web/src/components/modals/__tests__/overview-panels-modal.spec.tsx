@@ -1,9 +1,9 @@
-import * as React from 'react';
 import { mount, shallow } from 'enzyme';
+import * as React from 'react';
 
-import OverviewPanelsModal from '../overview-panels-modal';
-import { ShuffledDefaultPanels } from '../../__tests-data__/panels';
 import { RecordType } from '../../../model/flow-query';
+import { ShuffledDefaultPanels } from '../../__tests-data__/panels';
+import OverviewPanelsModal from '../overview-panels-modal';
 
 describe('<OverviewPanelsModal />', () => {
   const props = {

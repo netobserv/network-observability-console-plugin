@@ -1,5 +1,5 @@
-import { compareProtocols, formatProtocol } from '../protocol';
 import { FilterDefinitionSample } from '../../components/__tests-data__/filters';
+import { compareProtocols, formatProtocol } from '../protocol';
 
 describe('formatProtocol', () => {
   it('should format protocol', () => {

@@ -27,12 +27,8 @@ import { useTranslation } from 'react-i18next';
 import { NamedMetric, TopologyMetrics } from '../../api/loki';
 import { TimeRange } from '../../utils/datetime';
 import { getDateMsInSeconds } from '../../utils/duration';
-import { LOCAL_STORAGE_HISTOGRAM_GUIDED_TOUR_DONE_KEY, useLocalStorage } from '../../utils/local-storage-hook';
+import { localStorageHistogramGuidedTourDoneKey, useLocalStorage } from '../../utils/local-storage-hook';
 import { getFormattedValue } from '../../utils/metrics';
-import { TruncateLength } from '../dropdowns/truncate-dropdown';
-import { GuidedTourHandle } from '../guided-tour/guided-tour';
-import BrushHandleComponent from './brush-handle';
-import './histogram.css';
 import {
   ChartDataPoint,
   Dimensions,
@@ -42,11 +38,15 @@ import {
   observeDimensions,
   toHistogramDatapoints,
   toNamedMetric
-} from './metrics-helper';
+} from '../../utils/metrics-helper';
+import { TruncateLength } from '../dropdowns/truncate-dropdown';
+import { GuidedTourHandle } from '../guided-tour/guided-tour';
+import BrushHandleComponent from './brush-handle';
+import './histogram.css';
 
 export const VoronoiContainer = createContainer('voronoi', 'brush');
 
-export const Histogram: React.FC<{
+export interface HistogramProps {
   id: string;
   loading: boolean;
   totalMetric: NamedMetric;
@@ -57,7 +57,20 @@ export const Histogram: React.FC<{
   setRange: (tr: TimeRange) => void;
   moveRange: (next: boolean) => void;
   zoomRange: (zoom: boolean) => void;
-}> = ({ id, loading, totalMetric, limit, isDark, range, guidedTourHandle, setRange, moveRange, zoomRange }) => {
+}
+
+export const Histogram: React.FC<HistogramProps> = ({
+  id,
+  loading,
+  totalMetric,
+  limit,
+  isDark,
+  range,
+  guidedTourHandle,
+  setRange,
+  moveRange,
+  zoomRange
+}) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   const datapoints: ChartDataPoint[] = toHistogramDatapoints(totalMetric);
@@ -170,7 +183,7 @@ export const Histogram: React.FC<{
     );
   }, [t]);
 
-  const [guidedTourDone, setGuidedTourDone] = useLocalStorage<boolean>(LOCAL_STORAGE_HISTOGRAM_GUIDED_TOUR_DONE_KEY);
+  const [guidedTourDone, setGuidedTourDone] = useLocalStorage<boolean>(localStorageHistogramGuidedTourDoneKey);
   React.useEffect(() => {
     if (!guidedTourHandle) {
       return;

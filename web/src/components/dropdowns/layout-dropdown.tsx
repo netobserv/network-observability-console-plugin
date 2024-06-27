@@ -1,36 +1,38 @@
 import { Dropdown, DropdownItem, DropdownToggle } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Feature, isAllowed } from '../../utils/features-gate';
 import { LayoutName } from '../../model/topology';
+import { Feature, isAllowed } from '../../utils/features-gate';
 
-export const LayoutDropdown: React.FC<{
+export interface LayoutDropdownProps {
   selected: LayoutName;
   setLayout: (l: LayoutName) => void;
   id?: string;
-}> = ({ selected, setLayout, id }) => {
+}
+
+export const LayoutDropdown: React.FC<LayoutDropdownProps> = ({ selected, setLayout, id }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [layoutDropdownOpen, setLayoutDropdownOpen] = React.useState(false);
 
   const getLayoutDisplay = (layoutName: LayoutName) => {
     switch (layoutName) {
-      case LayoutName.ThreeD:
+      case LayoutName.threeD:
         return t('3D');
-      case LayoutName.BreadthFirst:
+      case LayoutName.breadthFirst:
         return t('BreadthFirst');
-      case LayoutName.Cola:
+      case LayoutName.cola:
         return t('Cola');
-      case LayoutName.ColaNoForce:
+      case LayoutName.colaNoForce:
         return t('ColaNoForce');
-      case LayoutName.Concentric:
+      case LayoutName.concentric:
         return t('Concentric');
-      case LayoutName.Dagre:
+      case LayoutName.dagre:
         return t('Dagre');
-      case LayoutName.Force:
+      case LayoutName.force:
         return t('Force');
-      case LayoutName.Grid:
+      case LayoutName.grid:
         return t('Grid');
-      case LayoutName.ColaGroups:
+      case LayoutName.colaGroups:
         return t('ColaGroups');
       default:
         return t('Invalid');
@@ -52,7 +54,7 @@ export const LayoutDropdown: React.FC<{
       }
       isOpen={layoutDropdownOpen}
       dropdownItems={Object.values(LayoutName)
-        .filter(v => v != LayoutName.ThreeD || isAllowed(Feature.ThreeD))
+        .filter(v => v != LayoutName.threeD || isAllowed(Feature.ThreeD))
         .map(v => (
           <DropdownItem
             data-test={v}

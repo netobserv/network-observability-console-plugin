@@ -1,11 +1,11 @@
-import { findFilter } from '../filter-definitions';
-import { Filter, FilterId, FilterValue, Filters } from '../../model/filters';
-import { getFlowRecords, getFlowMetrics } from '../../api/routes';
-import { getFetchFunctions, mergeMetricsBNF } from '../back-and-forth';
-import { filtersToString } from '../../model/flow-query';
-import { RawTopologyMetrics, FlowMetricsResult } from '../../api/loki';
-import { parseTopologyMetrics } from '../metrics';
+import { FlowMetricsResult, RawTopologyMetrics } from '../../api/loki';
+import { getFlowMetrics, getFlowRecords } from '../../api/routes';
 import { FilterDefinitionSample } from '../../components/__tests-data__/filters';
+import { Filter, FilterId, Filters, FilterValue } from '../../model/filters';
+import { filtersToString } from '../../model/flow-query';
+import { getFetchFunctions, mergeMetricsBNF } from '../back-and-forth';
+import { findFilter } from '../filter-definitions';
+import { parseTopologyMetrics } from '../metrics';
 
 jest.mock('../../api/routes', () => ({
   getFlowRecords: jest.fn(() => Promise.resolve({ records: [] })),

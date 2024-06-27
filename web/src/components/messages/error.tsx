@@ -32,13 +32,13 @@ enum LokiInfo {
   Limits
 }
 
-type Props = {
+export interface ErrorProps {
   title: string;
   error: string;
   isLokiRelated: boolean;
-};
+}
 
-export const Error: React.FC<Props> = ({ title, error, isLokiRelated }) => {
+export const Error: React.FC<ErrorProps> = ({ title, error, isLokiRelated }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [loading, setLoading] = React.useState(isLokiRelated);
   const [ready, setReady] = React.useState<boolean | undefined>();

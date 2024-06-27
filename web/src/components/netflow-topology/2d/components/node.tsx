@@ -1,15 +1,13 @@
-import * as React from 'react';
-import { css } from '@patternfly/react-styles';
 import { Tooltip, TooltipPosition } from '@patternfly/react-core';
 import CheckCircleIcon from '@patternfly/react-icons/dist/esm/icons/check-circle-icon';
 import ExclamationCircleIcon from '@patternfly/react-icons/dist/esm/icons/exclamation-circle-icon';
 import ExclamationTriangleIcon from '@patternfly/react-icons/dist/esm/icons/exclamation-triangle-icon';
-import styles from '@patternfly/react-topology/src/css/topology-components';
+import { css } from '@patternfly/react-styles';
 import {
   BadgeLocation,
   createSvgIdUrl,
   Decorator,
-  DEFAULT_DECORATOR_RADIUS,
+  DEFAULT_DECORATOR_RADIUS as defaultDecoratorRadius,
   getDefaultShapeDecoratorCenter,
   getShapeComponent,
   LabelPosition,
@@ -30,11 +28,13 @@ import {
   WithSelectionProps
 } from '@patternfly/react-topology';
 import {
-  NODE_SHADOW_FILTER_ID_DANGER,
-  NODE_SHADOW_FILTER_ID_HOVER
+  NODE_SHADOW_FILTER_ID_DANGER as nodeShadowFilterIdDanger,
+  NODE_SHADOW_FILTER_ID_HOVER as nodeShadowFilterIdHover
 } from '@patternfly/react-topology/dist/esm/components/nodes/NodeShadows';
-import { HOVER_EVENT } from '../topology-content';
+import styles from '@patternfly/react-topology/src/css/topology-components';
+import * as React from 'react';
 import { GraphElementPeer } from '../../../../model/topology';
+import { hoverEvent } from '../topology-content';
 
 const StatusQuadrant = TopologyQuadrant.upperLeft;
 
@@ -100,7 +100,7 @@ type BaseNodeProps = {
     WithContextMenuProps
 >;
 
-const SCALE_UP_TIME = 200;
+const scaleUpTime = 200;
 
 // BaseNode: slightly modified from @patternfly/react-topology/src/components/nodes/DefaultNode.tsx
 // to support shadow / hover behaviors
@@ -176,7 +176,7 @@ const BaseNode: React.FunctionComponent<BaseNodeProps> = ({
       <Decorator
         x={x}
         y={y}
-        radius={DEFAULT_DECORATOR_RADIUS}
+        radius={defaultDecoratorRadius}
         showBackground={false}
         onClick={e => onStatusDecoratorClick && onStatusDecoratorClick(e, element)}
         icon={<g className={css(styles.topologyNodeDecoratorStatus)}>{icon}</g>}
@@ -200,7 +200,7 @@ const BaseNode: React.FunctionComponent<BaseNodeProps> = ({
     } else {
       onHideCreateConnector && onHideCreateConnector();
     }
-    element.getController().fireEvent(HOVER_EVENT, {
+    element.getController().fireEvent(hoverEvent, {
       ...element.getData(),
       id: element.getId(),
       isHovered: isHover
@@ -233,9 +233,9 @@ const BaseNode: React.FunctionComponent<BaseNodeProps> = ({
 
   let filter;
   if (status === 'danger') {
-    filter = createSvgIdUrl(NODE_SHADOW_FILTER_ID_DANGER);
+    filter = createSvgIdUrl(nodeShadowFilterIdDanger);
   } else if (isHover || dragging || edgeDragging || dropTarget) {
-    filter = createSvgIdUrl(NODE_SHADOW_FILTER_ID_HOVER);
+    filter = createSvgIdUrl(nodeShadowFilterIdHover);
   }
 
   const nodeLabelPosition = labelPosition || element.getLabelPosition();
@@ -259,7 +259,7 @@ const BaseNode: React.FunctionComponent<BaseNodeProps> = ({
       const initTime = performance.now();
 
       const bumpScale = (bumpTime: number) => {
-        const scalePercent = (bumpTime - initTime) / SCALE_UP_TIME;
+        const scalePercent = (bumpTime - initTime) / scaleUpTime;
         const nextScale = Math.min(scale + scaleDelta * scalePercent, scaleGoal.current);
         setNodeScale(nextScale);
         if (nextScale < scaleGoal.current) {

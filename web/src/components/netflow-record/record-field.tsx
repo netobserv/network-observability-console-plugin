@@ -1,5 +1,5 @@
 import { ResourceIcon, ResourceLink } from '@openshift-console/dynamic-plugin-sdk';
-import { Button, Flex, FlexItem, Popover, Text, TextVariants, Tooltip } from '@patternfly/react-core';
+import { Button, Flex, FlexItem, Popover, Text, TextContent, TextVariants, Tooltip } from '@patternfly/react-core';
 import { FilterIcon, GlobeAmericasIcon, TimesIcon, ToggleOffIcon, ToggleOnIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -7,19 +7,19 @@ import { Link } from 'react-router-dom';
 import { FlowDirection, getDirectionDisplayString, Record } from '../../api/ipfix';
 import { Column, ColumnsId, getFullColumnName } from '../../utils/columns';
 import { dateFormatter, getFormattedDate, timeMSFormatter, utcDateTimeFormatter } from '../../utils/datetime';
-import { DNS_CODE_NAMES, DNS_ERRORS_VALUES, getDNSErrorDescription, getDNSRcodeDescription } from '../../utils/dns';
+import { dnsCodesNames, dnsErrorsValues, getDNSErrorDescription, getDNSRcodeDescription } from '../../utils/dns';
+import { getDSCPDocUrl, getDSCPServiceClassDescription, getDSCPServiceClassName } from '../../utils/dscp';
+import { formatDurationAboveMillisecond, formatDurationAboveNanosecond } from '../../utils/duration';
 import {
   getICMPCode,
   getICMPDocUrl,
   getICMPType,
-  ICMP_ALL_CODES_VALUES,
-  ICMP_ALL_TYPES_VALUES,
+  icmpAllCodesValues,
+  icmpAllTypesValues,
   isValidICMPProto
 } from '../../utils/icmp';
-import { DROP_CAUSES_NAMES, getDropCauseDescription, getDropCauseDocUrl } from '../../utils/pkt-drop';
-import { formatDurationAboveMillisecond, formatDurationAboveNanosecond } from '../../utils/duration';
+import { dropCausesNames, getDropCauseDescription, getDropCauseDocUrl } from '../../utils/pkt-drop';
 import { formatPort } from '../../utils/port';
-import { getDSCPDocUrl, getDSCPServiceClassDescription, getDSCPServiceClassName } from '../../utils/dscp';
 import { formatProtocol, getProtocolDocUrl } from '../../utils/protocol';
 import { Size } from '../dropdowns/table-display-dropdown';
 import './record-field.css';
@@ -30,7 +30,7 @@ export type RecordFieldFilter = {
   isDelete: boolean;
 };
 
-export const RecordField: React.FC<{
+export interface RecordFieldProps {
   allowPktDrops: boolean;
   flow: Record;
   column: Column;
@@ -39,7 +39,18 @@ export const RecordField: React.FC<{
   filter?: RecordFieldFilter;
   detailed?: boolean;
   isDark?: boolean;
-}> = ({ allowPktDrops, flow, column, size, filter, useLinks, detailed, isDark }) => {
+}
+
+export const RecordField: React.FC<RecordFieldProps> = ({
+  allowPktDrops,
+  flow,
+  column,
+  size,
+  filter,
+  useLinks,
+  detailed,
+  isDark
+}) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   const onMouseOver = (event: React.MouseEvent<HTMLDivElement, MouseEvent>, className: string) => {
@@ -57,14 +68,18 @@ export const RecordField: React.FC<{
       <div className="record-field-flex">
         <Tooltip
           content={[
-            <span className="co-nowrap" key="co-error-text">
+            <Text component={TextVariants.p} className="record-field-value co-nowrap" key="co-error-text">
               {text}
-            </span>
+            </Text>
           ]}
         >
-          <div style={{ color: isDark ? '#C9190B' : '#A30000' }} className="record-field-flex">
+          <Text
+            component={TextVariants.p}
+            style={{ color: isDark ? '#C9190B' : '#A30000' }}
+            className="record-field-flex"
+          >
             {value}
-          </div>
+          </Text>
         </Tooltip>
       </div>
     );
@@ -74,14 +89,14 @@ export const RecordField: React.FC<{
     if (errorText) {
       return errorTextValue(t('n/a'), errorText);
     }
-    return <div className="record-field-flex text-muted">{t('n/a')}</div>;
+    return <Text className="record-field-flex text-muted record-field-value">{t('n/a')}</Text>;
   };
 
   const emptyDnsErrorText = () => {
     return emptyText(
       flow.fields.DnsErrno
         ? `${t('DNS Error')} ${flow.fields.DnsErrno}: ${getDNSErrorDescription(
-            flow.fields.DnsErrno as DNS_ERRORS_VALUES
+            flow.fields.DnsErrno as dnsErrorsValues
           )}`
         : undefined
     );
@@ -90,11 +105,15 @@ export const RecordField: React.FC<{
   const simpleTextWithTooltip = (text?: string, color?: string, child?: JSX.Element) => {
     if (text) {
       return (
-        <div data-test={`field-text-${text}`}>
-          <span style={{ color }}>{text}</span>
-          <div className="record-field-tooltip">{text}</div>
+        <TextContent className="netobserv-no-child-margin" data-test={`field-text-${text}`}>
+          <Text className="record-field-value" component={TextVariants.p} style={{ color }}>
+            {text}
+          </Text>
+          <Text component={TextVariants.p} className="record-field-tooltip">
+            {text}
+          </Text>
           {child}
-        </div>
+        </TextContent>
       );
     }
     return undefined;
@@ -106,12 +125,12 @@ export const RecordField: React.FC<{
       !ResourceIcon || useLinks ? (
         <ResourceLink className={size} inline={true} kind={kind} name={value} namespace={ns} />
       ) : (
-        <span className={`co-resource-item ${size}`}>
+        <TextContent className={`co-resource-item ${size} netobserv-no-child-margin`}>
           <ResourceIcon kind={kind} />
-          <span className="co-resource-item__resource-name" data-test-id={value}>
+          <Text component={TextVariants.p} className="co-resource-item__resource-name" data-test-id={value}>
             {value}
-          </span>
-        </span>
+          </Text>
+        </TextContent>
       )
     );
   };
@@ -122,16 +141,16 @@ export const RecordField: React.FC<{
       return (
         <div data-test={`field-resource-${kind}.${ns}.${value}`} className="force-truncate">
           {resourceIconText(value, kind, ns)}
-          <div className="record-field-tooltip">
+          <TextContent className="record-field-tooltip netobserv-no-child-margin">
             {ns && (
               <>
-                <h4>{t('Namespace')}</h4>
-                <span>{ns}</span>
+                <Text component={TextVariants.h4}>{t('Namespace')}</Text>
+                <Text component={TextVariants.p}>{ns}</Text>
               </>
             )}
-            <h4 className="record-field-tooltip-margin">{kind}</h4>
-            <span>{value}</span>
-          </div>
+            <Text component={TextVariants.h4}>{kind}</Text>
+            <Text component={TextVariants.p}>{value}</Text>
+          </TextContent>
         </div>
       );
     }
@@ -152,10 +171,10 @@ export const RecordField: React.FC<{
       return (
         <div data-test={`field-kind-${kind}.${value}`} className="force-truncate">
           {resourceIconText(value, kind)}
-          <div className="record-field-tooltip">
-            <h4>{t(kind)}</h4>
-            <span>{value}</span>
-          </div>
+          <TextContent className="record-field-tooltip netobserv-no-child-margin">
+            <Text component={TextVariants.h4}>{t(kind)}</Text>
+            <Text component={TextVariants.p}>{value}</Text>
+          </TextContent>
         </div>
       );
     }
@@ -183,37 +202,45 @@ export const RecordField: React.FC<{
     const dateText = getFormattedDate(date, dateFormatter) + ',';
     const timeText = getFormattedDate(date, timeMSFormatter);
     return singleContainer(
-      <div data-test={`field-date-${dateText}-${timeText}`} className="record-field-date">
-        <GlobeAmericasIcon className="record-field-date-icon" />
-        <Tooltip
-          content={[
-            <span className="co-nowrap" key="co-timestamp">
-              {fullDateText}
-            </span>
-          ]}
-        >
-          <div className={`datetime ${size}`}>
-            <span>{dateText}</span> <span className="text-muted">{timeText}</span>
-          </div>
-        </Tooltip>
-      </div>
+      <Flex data-test={`field-date-${dateText}-${timeText}`} className="record-field-date">
+        <FlexItem>
+          <GlobeAmericasIcon className="record-field-date-icon" />
+        </FlexItem>
+        <FlexItem>
+          <Tooltip
+            content={[
+              <Text component={TextVariants.p} className="co-nowrap" key="co-timestamp">
+                {fullDateText}
+              </Text>
+            ]}
+          >
+            <TextContent className={`datetime ${size} netobserv-no-child-margin`}>
+              <Text component={TextVariants.p}>{dateText}</Text>{' '}
+              <Text component={TextVariants.p} className="text-muted">
+                {timeText}
+              </Text>
+            </TextContent>
+          </Tooltip>
+        </FlexItem>
+      </Flex>
     );
   };
 
-  const nthContainer = (children: (JSX.Element | undefined)[], asChild = true, childIcon = true, flex = true) => {
+  const nthContainer = (children: (JSX.Element | undefined)[], asChild = true, childIcon = true) => {
     return (
-      <div className={`record-field-flex-container ${asChild ? size : ''}`}>
+      <Flex className={`record-field-flex-container ${asChild ? size : ''}`} flex={{ default: 'flex_1' }}>
         {children.map((c, i) => (
-          <div
+          <FlexItem
             key={i}
-            className={`record-field-content${flex ? '-flex' : ''}`}
-            onMouseOver={e => onMouseOver(e, `record-field-content${flex ? '-flex' : ''}`)}
+            className={`record-field-content`}
+            onMouseOver={e => onMouseOver(e, `record-field-content`)}
+            flex={{ default: 'flex_1' }}
           >
             {i > 0 && asChild && childIcon && <span className="child-arrow">{'↪'}</span>}
             {c ? c : emptyText()}
-          </div>
+          </FlexItem>
         ))}
-      </div>
+      </Flex>
     );
   };
 
@@ -447,7 +474,7 @@ export const RecordField: React.FC<{
         let child = emptyText();
         if (Array.isArray(value) && value.length) {
           if (isValidICMPProto(Number(value[0]))) {
-            const type = getICMPType(Number(value[0]), Number(value[1]) as ICMP_ALL_TYPES_VALUES);
+            const type = getICMPType(Number(value[0]), Number(value[1]) as icmpAllTypesValues);
             if (type && detailed) {
               child = clickableContent(type.name, type.description || '', getICMPDocUrl(Number(value[0])));
             } else {
@@ -468,8 +495,8 @@ export const RecordField: React.FC<{
           if (isValidICMPProto(Number(value[0]))) {
             const code = getICMPCode(
               Number(value[0]),
-              Number(value[1]) as ICMP_ALL_TYPES_VALUES,
-              Number(value[2]) as ICMP_ALL_CODES_VALUES
+              Number(value[1]) as icmpAllTypesValues,
+              Number(value[2]) as icmpAllCodesValues
             );
             if (code && detailed) {
               child = clickableContent(code.name, code.description || '', getICMPDocUrl(Number(value[0])));
@@ -491,7 +518,6 @@ export const RecordField: React.FC<{
           return nthContainer(
             value.map(dir => simpleTextWithTooltip(getDirectionDisplayString(String(dir) as FlowDirection, t))),
             true,
-            false,
             false
           );
         }
@@ -502,7 +528,6 @@ export const RecordField: React.FC<{
           return nthContainer(
             value.map(iName => simpleTextWithTooltip(String(iName))),
             true,
-            false,
             false
           );
         }
@@ -526,7 +551,6 @@ export const RecordField: React.FC<{
               )
             ),
             true,
-            false,
             false
           );
         } else {
@@ -543,8 +567,8 @@ export const RecordField: React.FC<{
             droppedText = t('dropped by');
             child = clickableContent(
               flow.fields.PktDropLatestDropCause,
-              getDropCauseDescription(flow.fields.PktDropLatestDropCause as DROP_CAUSES_NAMES),
-              getDropCauseDocUrl(flow.fields.PktDropLatestDropCause as DROP_CAUSES_NAMES)
+              getDropCauseDescription(flow.fields.PktDropLatestDropCause as dropCausesNames),
+              getDropCauseDocUrl(flow.fields.PktDropLatestDropCause as dropCausesNames)
             );
           }
 
@@ -587,7 +611,7 @@ export const RecordField: React.FC<{
       case ColumnsId.dnsresponsecode: {
         return singleContainer(
           typeof value === 'string' && value.length
-            ? simpleTextWithTooltip(detailed ? `${value}: ${getDNSRcodeDescription(value as DNS_CODE_NAMES)}` : value)
+            ? simpleTextWithTooltip(detailed ? `${value}: ${getDNSRcodeDescription(value as dnsCodesNames)}` : value)
             : emptyDnsErrorText()
         );
       }
@@ -595,7 +619,7 @@ export const RecordField: React.FC<{
         return singleContainer(
           typeof value === 'number' && !isNaN(value)
             ? simpleTextWithTooltip(
-                detailed && value ? `${value}: ${getDNSErrorDescription(value as DNS_ERRORS_VALUES)}` : String(value)
+                detailed && value ? `${value}: ${getDNSErrorDescription(value as dnsErrorsValues)}` : String(value)
               )
             : emptyText()
         );
@@ -614,32 +638,36 @@ export const RecordField: React.FC<{
     }
   };
   return filter ? (
-    <div className={`record-field-flex-container`}>
-      <div className={'record-field-flex'}>{content(column)}</div>
-      <Tooltip
-        content={
-          filter.type === 'filter'
-            ? filter.isDelete
-              ? t('Remove {{name}} filter', { name: getFullColumnName(column) })
-              : t('Filter on {{name}}', { name: getFullColumnName(column) })
-            : t('Switch {{name}} option', { name: getFullColumnName(column) })
-        }
-      >
-        <Button variant="link" aria-label="Filter" onClick={filter.onClick}>
-          {filter.type === 'filter' ? (
-            filter.isDelete ? (
-              <TimesIcon />
+    <Flex className={`record-field-flex-container`} flex={{ default: 'flex_1' }}>
+      <FlexItem className={'record-field-flex'} flex={{ default: 'flex_1' }}>
+        {content(column)}
+      </FlexItem>
+      <FlexItem>
+        <Tooltip
+          content={
+            filter.type === 'filter'
+              ? filter.isDelete
+                ? t('Remove {{name}} filter', { name: getFullColumnName(column) })
+                : t('Filter on {{name}}', { name: getFullColumnName(column) })
+              : t('Switch {{name}} option', { name: getFullColumnName(column) })
+          }
+        >
+          <Button variant="link" aria-label="Filter" onClick={filter.onClick}>
+            {filter.type === 'filter' ? (
+              filter.isDelete ? (
+                <TimesIcon />
+              ) : (
+                <FilterIcon />
+              )
+            ) : filter.isDelete ? (
+              <ToggleOffIcon />
             ) : (
-              <FilterIcon />
-            )
-          ) : filter.isDelete ? (
-            <ToggleOffIcon />
-          ) : (
-            <ToggleOnIcon />
-          )}
-        </Button>
-      </Tooltip>
-    </div>
+              <ToggleOnIcon />
+            )}
+          </Button>
+        </Tooltip>
+      </FlexItem>
+    </Flex>
   ) : (
     content(column)
   );
