@@ -109,6 +109,7 @@ export const NetflowTopology: React.FC<NetflowTopologyProps> = ({
             metricType={metricType}
             metricScope={metricScope}
             setMetricScope={setMetricScope}
+            allowedScopes={allowedScopes}
             metrics={displayedMetrics}
             droppedMetrics={droppedMetrics}
             options={options}

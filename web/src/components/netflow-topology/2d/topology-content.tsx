@@ -27,7 +27,9 @@ import {
   ElementData,
   FilterDir,
   generateDataModel,
+  getStepIntoNext,
   GraphElementPeer,
+  isDirElementFiltered,
   LayoutName,
   NodeData,
   toggleDirElementFilter,
@@ -55,6 +57,7 @@ export interface TopologyContentProps {
   metricType: MetricType;
   metricScope: FlowScope;
   setMetricScope: (ms: FlowScope) => void;
+  allowedScopes: FlowScope[];
   metrics: TopologyMetrics[];
   droppedMetrics: TopologyMetrics[];
   options: TopologyOptions;
@@ -75,6 +78,7 @@ export const TopologyContent: React.FC<TopologyContentProps> = ({
   metricType,
   metricScope,
   setMetricScope,
+  allowedScopes,
   metrics,
   droppedMetrics,
   options,
@@ -195,43 +199,40 @@ export const TopologyContent: React.FC<TopologyContentProps> = ({
 
   const onStepInto = React.useCallback(
     (data: Decorated<ElementData>) => {
-      let scope: MetricScopeOptions;
       let groupTypes: TopologyGroupTypes;
       switch (metricScope) {
         case MetricScopeOptions.CLUSTER:
-          scope = MetricScopeOptions.ZONE;
           groupTypes = TopologyGroupTypes.clusters;
           break;
         case MetricScopeOptions.ZONE:
-          scope = MetricScopeOptions.HOST;
           groupTypes = TopologyGroupTypes.zones;
           break;
         case MetricScopeOptions.HOST:
-          scope = MetricScopeOptions.NAMESPACE;
-          groupTypes = TopologyGroupTypes.none;
+          groupTypes = TopologyGroupTypes.hosts;
           break;
         case MetricScopeOptions.NAMESPACE:
-          scope = MetricScopeOptions.OWNER;
           groupTypes = TopologyGroupTypes.namespaces;
           break;
         default:
-          scope = MetricScopeOptions.RESOURCE;
           groupTypes = TopologyGroupTypes.owners;
       }
-      if (data.nodeType && data.peer) {
+      const scope = getStepIntoNext(metricScope, allowedScopes);
+      if (data.nodeType && data.peer && scope) {
         setMetricScope(scope);
         setOptions({ ...options, groupTypes });
-        toggleDirElementFilter(
-          data.nodeType,
-          data.peer,
-          'src',
-          true,
-          filters.list,
-          list => {
-            setFilters({ list: list, backAndForth: true });
-          },
-          filterDefinitions
-        );
+        if (!isDirElementFiltered(data.nodeType, data.peer, 'src', filters.list, filterDefinitions)) {
+          toggleDirElementFilter(
+            data.nodeType,
+            data.peer,
+            'src',
+            false,
+            filters.list,
+            list => {
+              setFilters({ list: list, backAndForth: true });
+            },
+            filterDefinitions
+          );
+        }
         setSelectedIds([data.id]);
         //clear search
         onChangeSearch();
@@ -239,7 +240,17 @@ export const TopologyContent: React.FC<TopologyContentProps> = ({
         onSelect(undefined);
       }
     },
-    [metricScope, setMetricScope, setOptions, options, filters.list, filterDefinitions, onSelect, setFilters]
+    [
+      metricScope,
+      setMetricScope,
+      allowedScopes,
+      setOptions,
+      options,
+      filters.list,
+      filterDefinitions,
+      onSelect,
+      setFilters
+    ]
   );
 
   const onHover = React.useCallback((data: Decorated<ElementData>) => {
@@ -344,6 +355,7 @@ export const TopologyContent: React.FC<TopologyContentProps> = ({
       droppedMetrics,
       getOptions(),
       metricScope,
+      allowedScopes,
       searchEvent?.searchValue || '',
       highlightedId,
       filters,
@@ -386,6 +398,7 @@ export const TopologyContent: React.FC<TopologyContentProps> = ({
     selectedIds,
     getOptions,
     metricScope,
+    allowedScopes,
     searchEvent?.searchValue,
     filters,
     t,

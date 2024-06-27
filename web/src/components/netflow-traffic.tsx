@@ -242,7 +242,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
   const [lastTop, setLastTop] = useLocalStorage<number>(localStorageLastTopKey, topValues[0]);
   const [range, setRange] = React.useState<number | TimeRange>(getRangeFromURL());
   const [histogramRange, setHistogramRange] = React.useState<TimeRange>();
-  const [metricScope, setMetricScope] = useLocalStorage<FlowScope>(localStorageMetricScopeKey, 'namespace');
+  const [metricScope, _setMetricScope] = useLocalStorage<FlowScope>(localStorageMetricScopeKey, 'namespace');
   const [topologyMetricFunction, setTopologyMetricFunction] = useLocalStorage<StatFunction>(
     localStorageMetricFunctionKey,
     defaultMetricFunction
@@ -433,6 +433,18 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
       return quickFilters.filter(qf => qf.default).flatMap(qf => qf.filters);
     },
     [config, getQuickFilters]
+  );
+
+  const setMetricScope = React.useCallback(
+    (scope: FlowScope) => {
+      _setMetricScope(scope);
+      // Invalidate groups if necessary, when metrics scope changed
+      const groups = getGroupsForScope(scope as MetricScopeOptions);
+      if (!groups.includes(topologyOptions.groupTypes)) {
+        setTopologyOptions({ ...topologyOptions, groupTypes: TopologyGroupTypes.none });
+      }
+    },
+    [_setMetricScope, topologyOptions, setTopologyOptions]
   );
 
   const getTopologyMetrics = React.useCallback(() => {
@@ -1260,14 +1272,6 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
     setDisabledFilters(getDisabledFiltersRecord(filters.list));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters]);
-
-  //invalidate groups if necessary, when metrics scope changed
-  React.useEffect(() => {
-    const groups = getGroupsForScope(metricScope as MetricScopeOptions);
-    if (!groups.includes(topologyOptions.groupTypes)) {
-      setTopologyOptions({ ...topologyOptions, groupTypes: TopologyGroupTypes.none });
-    }
-  }, [metricScope, topologyOptions, setTopologyOptions]);
 
   const clearFilters = React.useCallback(() => {
     if (forcedFilters) {
