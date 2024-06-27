@@ -1,9 +1,9 @@
+import { InputGroup, InputGroupText, TextInput, Tooltip } from '@patternfly/react-core';
+import { css } from '@patternfly/react-styles';
+import styles from '@patternfly/react-styles/css/components/Slider/slider';
 import * as React from 'react';
 import { useState } from 'react';
-import styles from '@patternfly/react-styles/css/components/Slider/slider';
-import { css } from '@patternfly/react-styles';
 import { SliderStep } from './SliderStep';
-import { InputGroup, InputGroupText, TextInput, Tooltip } from '@patternfly/react-core';
 
 /** Properties for creating custom steps in a slider. These properties should be passed in as
  * an object within an array to the slider component's customSteps property.

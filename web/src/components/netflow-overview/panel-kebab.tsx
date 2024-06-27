@@ -13,9 +13,9 @@ import {
 } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
+import { exportToPng } from '../../utils/export';
 import { OverviewPanelId } from '../../utils/overview-panels';
 import './panel-kebab.css';
-import { exportToPng } from '../../utils/export';
 
 export type GraphOptipn = {
   type: GraphType;
@@ -35,12 +35,12 @@ export type PanelKebabOptions = {
   graph?: GraphOptipn;
 };
 
-export type PanelKebabProps = {
+export interface PanelKebabProps {
   id: OverviewPanelId;
   options?: PanelKebabOptions;
   setOptions?: (opts: PanelKebabOptions) => void;
   isDark?: boolean;
-};
+}
 
 export const PanelKebab: React.FC<PanelKebabProps> = ({ id, options, setOptions, isDark }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');

@@ -15,20 +15,20 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { GenericMetric, NamedMetric } from '../../api/loki';
 import { MetricFunction, MetricType } from '../../model/flow-query';
-import { LOCAL_STORAGE_OVERVIEW_METRICS_DIMENSION_KEY, useLocalStorage } from '../../utils/local-storage-hook';
+import { localStorageOverviewMetricsDimensionKey, useLocalStorage } from '../../utils/local-storage-hook';
 import { getFormattedValue } from '../../utils/metrics';
-import './metrics-content.css';
 import {
   ChartDataPoint,
-  chartVoronoi,
   defaultDimensions,
   Dimensions,
   LegendDataItem,
   observeDimensions,
   toDatapoints
-} from './metrics-helper';
+} from '../../utils/metrics-helper';
+import { chartVoronoi } from './chart-voronoi';
+import './metrics-content.css';
 
-export type MetricsGraphProps = {
+export interface MetricsGraphProps {
   id: string;
   metricType: MetricType;
   metricFunction: MetricFunction;
@@ -44,7 +44,7 @@ export type MetricsGraphProps = {
   showLegend?: boolean;
   animate?: boolean;
   isDark?: boolean;
-};
+}
 
 export const MetricsGraph: React.FC<MetricsGraphProps> = ({
   id,
@@ -86,7 +86,7 @@ export const MetricsGraph: React.FC<MetricsGraphProps> = ({
 
   const containerRef = React.createRef<HTMLDivElement>();
   const [dimensions, setDimensions] = useLocalStorage<Dimensions>(
-    `${LOCAL_STORAGE_OVERVIEW_METRICS_DIMENSION_KEY}${showLegend ? '-legend' : ''}`,
+    `${localStorageOverviewMetricsDimensionKey}${showLegend ? '-legend' : ''}`,
     defaultDimensions
   );
 

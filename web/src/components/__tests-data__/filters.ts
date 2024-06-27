@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
-import { findFilter, getFilterDefinitions } from '../../utils/filter-definitions';
 import { Filter, FilterId, FilterValue } from '../../model/filters';
+import { findFilter, getFilterDefinitions } from '../../utils/filter-definitions';
 import { ColumnConfigSampleDefs } from './columns';
 
 export const FilterConfigSampleDefs = [

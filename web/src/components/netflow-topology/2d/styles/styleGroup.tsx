@@ -11,7 +11,7 @@ import {
 import useDetailsLevel from '@patternfly/react-topology/dist/esm/hooks/useDetailsLevel';
 import * as React from 'react';
 
-const ICON_PADDING = 20;
+const iconPadding = 20;
 
 export enum DataTypes {
   Default,
@@ -39,7 +39,7 @@ const StyleGroup: React.FunctionComponent<StyleGroupProps> = ({
   const detailsLevel = useDetailsLevel();
 
   const renderIcon = (): React.ReactNode => {
-    const iconSize = Math.min(collapsedWidth, collapsedHeight) - ICON_PADDING * 2;
+    const iconSize = Math.min(collapsedWidth, collapsedHeight) - iconPadding * 2;
 
     return (
       <g transform={`translate(${(collapsedWidth - iconSize) / 2}, ${(collapsedHeight - iconSize) / 2})`}>

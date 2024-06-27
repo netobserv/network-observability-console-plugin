@@ -14,16 +14,6 @@
   margin: 0 5px 0 0;
 }
 
-#query-summary-content.center {
-  align-items: center;
-}
-
-#query-summary-content.center>* {
-  margin-right: 2.5em;
-  display: flex;
-  align-items: center;
-}
-
 .stats-query-summary-container,
 .stats-query-summary-container-with-icon {
   width: fit-content;

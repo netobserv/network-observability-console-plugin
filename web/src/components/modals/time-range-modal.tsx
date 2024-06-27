@@ -1,21 +1,21 @@
-import * as React from 'react';
-import * as _ from 'lodash';
-import { useTranslation } from 'react-i18next';
-import Modal from './modal';
 import {
-  Text,
   Button,
   DatePicker,
   Flex,
   FlexItem,
   isValidDate,
-  TimePicker,
-  Tooltip,
+  Text,
+  TextContent,
   TextVariants,
-  TextContent
+  TimePicker,
+  Tooltip
 } from '@patternfly/react-core';
+import * as _ from 'lodash';
+import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import { TimeRange, toISODateString, twentyFourHourTime } from '../../utils/datetime';
 import { formatDuration, getDateMsInSeconds, getDateSInMiliseconds } from '../../utils/duration';
+import Modal from './modal';
 import './time-range-modal.css';
 
 export interface TimeRangeModalProps {

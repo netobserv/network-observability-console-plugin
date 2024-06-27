@@ -1,4 +1,4 @@
-import { Fields, Record, FlowDirection, IfDirection } from '../../api/ipfix';
+import { Fields, FlowDirection, IfDirection, Record } from '../../api/ipfix';
 import { mergeFlowReporters } from '../flows';
 
 describe('mergeFlowReporters', () => {

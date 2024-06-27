@@ -1,13 +1,13 @@
 import { Dropdown, DropdownItem, DropdownToggle, DropdownToggleAction } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { usePrevious } from '../../utils/previous-hook';
 import { FilterComponent } from '../../model/filters';
+import { usePrevious } from '../../utils/previous-hook';
 
 export enum FilterCompare {
-  EQUAL = 1,
-  NOT_EQUAL,
-  MORE_THAN_OR_EQUAL
+  equal = 1,
+  notEqual,
+  moreThanOrEqual
 }
 export interface CompareFilterProps {
   value: FilterCompare;
@@ -21,10 +21,10 @@ export const CompareFilter: React.FC<CompareFilterProps> = ({ value, setValue, c
   const prevComponent = usePrevious(component);
 
   const dropdownItems = [
-    <DropdownItem key="equal" id="equal" component="button" onClick={() => onSelect(FilterCompare.EQUAL)}>
+    <DropdownItem key="equal" id="equal" component="button" onClick={() => onSelect(FilterCompare.equal)}>
       {t('Equals')}
     </DropdownItem>,
-    <DropdownItem key="not-equal" id="not-equal" component="button" onClick={() => onSelect(FilterCompare.NOT_EQUAL)}>
+    <DropdownItem key="not-equal" id="not-equal" component="button" onClick={() => onSelect(FilterCompare.notEqual)}>
       {t('Not equals')}
     </DropdownItem>
   ];
@@ -35,7 +35,7 @@ export const CompareFilter: React.FC<CompareFilterProps> = ({ value, setValue, c
         key="more-than"
         id="more-than"
         component="button"
-        onClick={() => onSelect(FilterCompare.MORE_THAN_OR_EQUAL)}
+        onClick={() => onSelect(FilterCompare.moreThanOrEqual)}
       >
         {t('More than')}
       </DropdownItem>
@@ -52,9 +52,9 @@ export const CompareFilter: React.FC<CompareFilterProps> = ({ value, setValue, c
   };
 
   const onSwitch = React.useCallback(() => {
-    const filterCompareValues = [FilterCompare.EQUAL, FilterCompare.NOT_EQUAL];
+    const filterCompareValues = [FilterCompare.equal, FilterCompare.notEqual];
     if (component === 'number') {
-      filterCompareValues.push(FilterCompare.MORE_THAN_OR_EQUAL);
+      filterCompareValues.push(FilterCompare.moreThanOrEqual);
     }
 
     const nextIndex = filterCompareValues.indexOf(value) + 1;
@@ -67,11 +67,11 @@ export const CompareFilter: React.FC<CompareFilterProps> = ({ value, setValue, c
 
   const getSymbol = React.useCallback(() => {
     switch (value) {
-      case FilterCompare.NOT_EQUAL:
+      case FilterCompare.notEqual:
         return '!=';
-      case FilterCompare.MORE_THAN_OR_EQUAL:
+      case FilterCompare.moreThanOrEqual:
         return '>=';
-      case FilterCompare.EQUAL:
+      case FilterCompare.equal:
       default:
         return '=';
     }
@@ -80,7 +80,7 @@ export const CompareFilter: React.FC<CompareFilterProps> = ({ value, setValue, c
   React.useEffect(() => {
     // reset to equal when component change
     if (prevComponent !== undefined && prevComponent !== component) {
-      setValue(FilterCompare.EQUAL);
+      setValue(FilterCompare.equal);
     }
   }, [component, prevComponent, setValue]);
 

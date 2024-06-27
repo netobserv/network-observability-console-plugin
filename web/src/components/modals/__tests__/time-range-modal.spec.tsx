@@ -1,10 +1,10 @@
-import * as React from 'react';
 import { mount, shallow } from 'enzyme';
+import * as React from 'react';
 
-import TimeRangeModal, { TimeRangeModalProps } from '../time-range-modal';
-import { TimeRange } from '../../../utils/datetime';
 import { DatePicker, TimePicker } from '@patternfly/react-core';
 import { act } from 'react-dom/test-utils';
+import { TimeRange } from '../../../utils/datetime';
+import TimeRangeModal, { TimeRangeModalProps } from '../time-range-modal';
 
 describe('<ColumnsModal />', () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

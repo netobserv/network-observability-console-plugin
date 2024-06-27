@@ -3,11 +3,11 @@ import * as React from 'react';
 
 import { Card } from '@patternfly/react-core';
 import { MetricType } from '../../../model/flow-query';
+import { MetricsGraph, MetricsGraphProps } from '../../metrics/metrics-graph';
 import { metrics } from '../../__tests-data__/metrics';
 import { SamplePanel } from '../../__tests-data__/panels';
 import { NetflowOverview } from '../netflow-overview';
 import { NetflowOverviewPanel } from '../netflow-overview-panel';
-import { MetricsGraph, MetricsGraphProps } from '../../metrics/metrics-graph';
 
 describe('<NetflowOverviewPanel />', () => {
   const panelProps = {

@@ -1,15 +1,3 @@
-import { findFilter } from './filter-definitions';
-import { TimeRange } from './datetime';
-import { Match, StatFunction, MetricType, PacketLoss, RecordType, DataSource } from '../model/flow-query';
-import {
-  getURLParam,
-  getURLParamAsBool,
-  getURLParamAsNumber,
-  removeURLParam,
-  setSomeURLParams,
-  setURLParam,
-  URLParam
-} from './url';
 import {
   createFilterValue,
   DisabledFilters,
@@ -19,6 +7,18 @@ import {
   Filters,
   fromFilterKey
 } from '../model/filters';
+import { DataSource, Match, MetricType, PacketLoss, RecordType, StatFunction } from '../model/flow-query';
+import { TimeRange } from './datetime';
+import { findFilter } from './filter-definitions';
+import {
+  getURLParam,
+  getURLParamAsBool,
+  getURLParamAsNumber,
+  removeURLParam,
+  setSomeURLParams,
+  setURLParam,
+  URLParam
+} from './url';
 
 const filtersSeparator = ';';
 const filterKVSeparator = '=';

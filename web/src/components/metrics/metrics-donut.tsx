@@ -2,14 +2,14 @@ import { ChartDonut, ChartLabel, ChartLegend, ChartThemeColor } from '@patternfl
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { GenericMetric, MetricStats, NamedMetric } from '../../api/loki';
-import { MetricType, MetricFunction } from '../../model/flow-query';
+import { MetricFunction, MetricType } from '../../model/flow-query';
 import { getStat } from '../../model/metrics';
-import { LOCAL_STORAGE_OVERVIEW_DONUT_DIMENSION_KEY, useLocalStorage } from '../../utils/local-storage-hook';
+import { localStorageOverviewDonutDimensionKey, useLocalStorage } from '../../utils/local-storage-hook';
 import { getFormattedValue, isUnknownPeer } from '../../utils/metrics';
+import { defaultDimensions, Dimensions, observeDimensions } from '../../utils/metrics-helper';
 import './metrics-content.css';
-import { defaultDimensions, Dimensions, observeDimensions } from './metrics-helper';
 
-export type MetricsDonutProps = {
+export interface MetricsDonutProps {
   id: string;
   subTitle?: string;
   limit: number;
@@ -26,7 +26,7 @@ export type MetricsDonutProps = {
   showLegend?: boolean;
   animate?: boolean;
   isDark?: boolean;
-};
+}
 
 export const MetricsDonut: React.FC<MetricsDonutProps> = ({
   id,
@@ -124,7 +124,7 @@ export const MetricsDonut: React.FC<MetricsDonutProps> = ({
 
   const containerRef = React.createRef<HTMLDivElement>();
   const [dimensions, setDimensions] = useLocalStorage<Dimensions>(
-    `${LOCAL_STORAGE_OVERVIEW_DONUT_DIMENSION_KEY}${showLegend ? '-legend' : ''}`,
+    `${localStorageOverviewDonutDimensionKey}${showLegend ? '-legend' : ''}`,
     defaultDimensions
   );
   React.useEffect(() => {

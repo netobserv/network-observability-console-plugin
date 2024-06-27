@@ -1,17 +1,24 @@
 import { Dropdown, DropdownItem, DropdownPosition, DropdownToggle } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { StatFunction, MetricType, isTimeMetric } from '../../model/flow-query';
+import { isTimeMetric, MetricType, StatFunction } from '../../model/flow-query';
 
-export const TIME_METRIC_FUNCTIONS: StatFunction[] = ['avg', 'min', 'max', 'p90', 'p99'];
-export const RATE_METRIC_FUNCTIONS: StatFunction[] = ['last', 'avg', 'min', 'max', 'sum'];
+export const timeMetricFunctions: StatFunction[] = ['avg', 'min', 'max', 'p90', 'p99'];
+export const rateMetricFunctions: StatFunction[] = ['last', 'avg', 'min', 'max', 'sum'];
 
-export const MetricFunctionDropdown: React.FC<{
+export interface MetricFunctionDropdownProps {
   selected?: string;
   setMetricFunction: (v: StatFunction) => void;
   metricType?: MetricType;
   id?: string;
-}> = ({ selected, setMetricFunction, metricType, id }) => {
+}
+
+export const MetricFunctionDropdown: React.FC<MetricFunctionDropdownProps> = ({
+  selected,
+  setMetricFunction,
+  metricType,
+  id
+}) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [metricDropdownOpen, setMetricDropdownOpen] = React.useState(false);
 
@@ -19,9 +26,9 @@ export const MetricFunctionDropdown: React.FC<{
     switch (metricType) {
       case 'DnsLatencyMs':
       case 'TimeFlowRttNs':
-        return TIME_METRIC_FUNCTIONS;
+        return timeMetricFunctions;
       default:
-        return RATE_METRIC_FUNCTIONS;
+        return rateMetricFunctions;
     }
   }, [metricType]);
 

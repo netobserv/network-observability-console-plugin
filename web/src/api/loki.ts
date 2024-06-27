@@ -1,6 +1,6 @@
-import { getFunctionFromId, getRateFunctionFromId } from '../utils/overview-panels';
 import { FlowScope, MetricType, StatFunction } from '../model/flow-query';
 import { cyrb53 } from '../utils/hash';
+import { getFunctionFromId, getRateFunctionFromId } from '../utils/overview-panels';
 import { Field, Fields, Labels, Record } from './ipfix';
 
 export interface AggregatedQueryResponse {

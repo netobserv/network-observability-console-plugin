@@ -1,24 +1,24 @@
+import { Dropdown, DropdownItem, DropdownToggle } from '@patternfly/react-core';
+import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Dropdown, DropdownToggle, DropdownItem } from '@patternfly/react-core';
-import * as _ from 'lodash';
-import { parseDuration, formatDuration } from '../../utils/duration';
+import { formatDuration, parseDuration } from '../../utils/duration';
 
-export type RefreshDropdownProps = {
+export interface RefreshDropdownProps {
   disabled?: boolean;
   interval?: number;
   setInterval: (v?: number) => void;
   id?: string;
-};
+}
 
-const OFF_KEY = 'OFF_KEY';
+const offKey = 'OFF_KEY';
 
 export const RefreshDropdown: React.FC<RefreshDropdownProps> = ({ disabled, id, interval, setInterval }) => {
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   const onChange = React.useCallback(
-    (v: string) => setInterval(v === OFF_KEY ? undefined : parseDuration(v)),
+    (v: string) => setInterval(v === offKey ? undefined : parseDuration(v)),
     [setInterval]
   );
 
@@ -35,7 +35,7 @@ export const RefreshDropdown: React.FC<RefreshDropdownProps> = ({ disabled, id, 
     '1d': t('1 day')
   };
 
-  const selectedKey = interval === undefined ? OFF_KEY : formatDuration(interval);
+  const selectedKey = interval === undefined ? offKey : formatDuration(interval);
 
   //unselect interval when dropdown is disabled
   React.useEffect(() => {

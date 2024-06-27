@@ -1,9 +1,9 @@
-import * as React from 'react';
 import { mount, shallow } from 'enzyme';
+import * as React from 'react';
 
-import ColumnsModal from '../columns-modal';
-import { ColumnConfigSampleDefs, ShuffledColumnSample } from '../../__tests-data__/columns';
 import { Config, defaultConfig } from '../../../model/config';
+import { ColumnConfigSampleDefs, ShuffledColumnSample } from '../../__tests-data__/columns';
+import ColumnsModal from '../columns-modal';
 
 describe('<ColumnsModal />', () => {
   const props = {

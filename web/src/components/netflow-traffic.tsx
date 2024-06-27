@@ -30,17 +30,17 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Record } from '../api/ipfix';
 import {
+  defaultNetflowMetrics,
+  FunctionMetrics,
   getFunctionMetricKey,
   getRateMetricKey,
   initFunctionMetricKeys,
   initRateMetricKeys,
-  FunctionMetrics,
+  NetflowMetrics,
   RateMetrics,
   Stats,
   TotalFunctionMetrics,
-  TotalRateMetrics,
-  NetflowMetrics,
-  defaultNetflowMetrics
+  TotalRateMetrics
 } from '../api/loki';
 import { getFlowGenericMetrics } from '../api/routes';
 import { Config, defaultConfig } from '../model/config';
@@ -55,17 +55,17 @@ import {
   hasNonIndexFields
 } from '../model/filters';
 import {
+  DataSource,
   filtersToString,
   FlowQuery,
   FlowScope,
   isTimeMetric,
   Match,
-  StatFunction,
+  MetricFunction,
   MetricType,
   PacketLoss,
   RecordType,
-  MetricFunction,
-  DataSource
+  StatFunction
 } from '../model/flow-query';
 import { MetricScopeOptions } from '../model/metrics';
 import { parseQuickFilters } from '../model/quick-filters';
@@ -84,40 +84,41 @@ import { computeStepInterval, getTimeRangeOptions, TimeRange } from '../utils/da
 import { formatDuration, getDateMsInSeconds, getDateSInMiliseconds, parseDuration } from '../utils/duration';
 import { getHTTPErrorDetails, isPromUnsupportedError } from '../utils/errors';
 import { exportToPng } from '../utils/export';
+import { checkFilterAvailable, getFilterDefinitions } from '../utils/filter-definitions';
 import { mergeFlowReporters } from '../utils/flows';
 import { useK8sModelsWithColors } from '../utils/k8s-models-hook';
 import {
-  LOCAL_STORAGE_COLS_KEY,
-  LOCAL_STORAGE_COLS_SIZES_KEY,
-  LOCAL_STORAGE_DISABLED_FILTERS_KEY,
-  LOCAL_STORAGE_LAST_LIMIT_KEY,
-  LOCAL_STORAGE_LAST_TOP_KEY,
-  LOCAL_STORAGE_METRIC_FUNCTION_KEY,
-  LOCAL_STORAGE_METRIC_SCOPE_KEY,
-  LOCAL_STORAGE_METRIC_TYPE_KEY,
-  LOCAL_STORAGE_OVERVIEW_IDS_KEY,
-  LOCAL_STORAGE_OVERVIEW_TRUNCATE_KEY,
-  LOCAL_STORAGE_QUERY_PARAMS_KEY,
-  LOCAL_STORAGE_REFRESH_KEY,
-  LOCAL_STORAGE_SHOW_HISTOGRAM_KEY,
-  LOCAL_STORAGE_SHOW_OPTIONS_KEY,
-  LOCAL_STORAGE_SIZE_KEY,
-  LOCAL_STORAGE_TOPOLOGY_OPTIONS_KEY,
-  LOCAL_STORAGE_VIEW_ID_KEY,
-  useLocalStorage,
+  defaultArraySelectionOptions,
   getLocalStorage,
-  LOCAL_STORAGE_OVERVIEW_FOCUS_KEY,
-  DEFAULT_ARRAY_SELECTION_OPTIONS
+  localStorageColsKey,
+  localStorageColsSizesKey,
+  localStorageDisabledFiltersKey,
+  localStorageLastLimitKey,
+  localStorageLastTopKey,
+  localStorageMetricFunctionKey,
+  localStorageMetricScopeKey,
+  localStorageMetricTypeKey,
+  localStorageOverviewFocusKey,
+  localStorageOverviewIdsKey,
+  localStorageOverviewTruncateKey,
+  localStorageQueryParamsKey,
+  localStorageRefreshKey,
+  localStorageShowHistogramKey,
+  localStorageShowOptionsKey,
+  localStorageSizeKey,
+  localStorageTopologyOptionsKey,
+  localStorageViewIdKey,
+  useLocalStorage
 } from '../utils/local-storage-hook';
 import { mergeStats } from '../utils/metrics';
 import {
-  CUSTOM_PANEL_MATCHER,
-  DNS_ID_MATCHER,
-  DROPPED_ID_MATCHER,
+  customPanelMatcher,
+  dnsIdMatcher,
+  droppedIdMatcher,
   getDefaultOverviewPanels,
   OverviewPanel,
   parseCustomMetricId,
-  RTT_ID_MATCHER
+  rttIdMatcher
 } from '../utils/overview-panels';
 import { usePoll } from '../utils/poll-hook';
 import {
@@ -144,9 +145,9 @@ import {
 } from '../utils/router';
 import { useTheme } from '../utils/theme-hook';
 import { getURLParams, hasEmptyParams, netflowTrafficPath, removeURLParam, setURLParams, URLParam } from '../utils/url';
-import { RATE_METRIC_FUNCTIONS, TIME_METRIC_FUNCTIONS } from './dropdowns/metric-function-dropdown';
+import { rateMetricFunctions, timeMetricFunctions } from './dropdowns/metric-function-dropdown';
 import { OverviewDisplayDropdown } from './dropdowns/overview-display-dropdown';
-import { LIMIT_VALUES, TOP_VALUES } from './dropdowns/query-options-dropdown';
+import { limitValues, topValues } from './dropdowns/query-options-panel';
 import { RefreshDropdown } from './dropdowns/refresh-dropdown';
 import { Size, TableDisplayDropdown } from './dropdowns/table-display-dropdown';
 import TimeRangeDropdown from './dropdowns/time-range-dropdown';
@@ -155,6 +156,7 @@ import { TruncateLength } from './dropdowns/truncate-dropdown';
 import { navigate } from './dynamic-loader/dynamic-loader';
 import { FiltersToolbar } from './filters/filters-toolbar';
 import GuidedTourPopover, { GuidedTourHandle } from './guided-tour/guided-tour';
+import Error from './messages/error';
 import HistogramContainer from './metrics/histogram';
 import { ColumnsModal } from './modals/columns-modal';
 import { ExportModal } from './modals/export-modal';
@@ -167,20 +169,18 @@ import ElementPanel from './netflow-topology/element-panel';
 import NetflowTopology from './netflow-topology/netflow-topology';
 import './netflow-traffic.css';
 import { LinksOverflow } from './overflow/links-overflow';
-import { checkFilterAvailable, getFilterDefinitions } from '../utils/filter-definitions';
 import FlowsQuerySummary from './query-summary/flows-query-summary';
 import MetricsQuerySummary from './query-summary/metrics-query-summary';
 import SummaryPanel from './query-summary/summary-panel';
 import { SearchComponent, SearchEvent, SearchHandle } from './search/search';
-import Error from './messages/error';
 
 export type ViewId = 'overview' | 'table' | 'topology';
 
-export type NetflowTrafficProps = {
+export interface NetflowTrafficProps {
   forcedFilters?: Filters | null;
   isTab?: boolean;
   parentConfig?: Config;
-};
+}
 
 export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, isTab, parentConfig }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
@@ -191,11 +191,8 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
   //observe html class list
   const isDarkTheme = useTheme();
 
-  const [queryParams, setQueryParams] = useLocalStorage<string>(LOCAL_STORAGE_QUERY_PARAMS_KEY);
-  const [disabledFilters, setDisabledFilters] = useLocalStorage<DisabledFilters>(
-    LOCAL_STORAGE_DISABLED_FILTERS_KEY,
-    {}
-  );
+  const [queryParams, setQueryParams] = useLocalStorage<string>(localStorageQueryParamsKey);
+  const [disabledFilters, setDisabledFilters] = useLocalStorage<DisabledFilters>(localStorageDisabledFiltersKey, {});
   // set url params from local storage saved items at startup if empty
   if (hasEmptyParams() && queryParams) {
     setURLParams(queryParams);
@@ -204,20 +201,20 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
   const [config, setConfig] = React.useState<Config>(defaultConfig);
   const [maxChunkAge, setMaxChunkAge] = React.useState<number>(NaN);
   const [warningMessage, setWarningMessage] = React.useState<string | undefined>();
-  const [showViewOptions, setShowViewOptions] = useLocalStorage<boolean>(LOCAL_STORAGE_SHOW_OPTIONS_KEY, false);
-  const [showHistogram, setShowHistogram] = useLocalStorage<boolean>(LOCAL_STORAGE_SHOW_HISTOGRAM_KEY, false);
+  const [showViewOptions, setShowViewOptions] = useLocalStorage<boolean>(localStorageShowOptionsKey, false);
+  const [showHistogram, setShowHistogram] = useLocalStorage<boolean>(localStorageShowHistogramKey, false);
   const [isViewOptionOverflowMenuOpen, setViewOptionOverflowMenuOpen] = React.useState(false);
   const [isFullScreen, setFullScreen] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
   const [flows, setFlows] = React.useState<Record[]>([]);
   const [stats, setStats] = React.useState<Stats | undefined>(undefined);
   const [overviewTruncateLength, setOverviewTruncateLength] = useLocalStorage<TruncateLength>(
-    LOCAL_STORAGE_OVERVIEW_TRUNCATE_KEY,
+    localStorageOverviewTruncateKey,
     TruncateLength.M
   );
-  const [overviewFocus, setOverviewFocus] = useLocalStorage<boolean>(LOCAL_STORAGE_OVERVIEW_FOCUS_KEY, false);
+  const [overviewFocus, setOverviewFocus] = useLocalStorage<boolean>(localStorageOverviewFocusKey, false);
   const [topologyOptions, setTopologyOptions] = useLocalStorage<TopologyOptions>(
-    LOCAL_STORAGE_TOPOLOGY_OPTIONS_KEY,
+    localStorageTopologyOptionsKey,
     DefaultOptions
   );
   const [metrics, setMetrics] = React.useState<NetflowMetrics>(defaultNetflowMetrics);
@@ -226,12 +223,12 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
   const [lastRefresh, setLastRefresh] = React.useState<Date | undefined>(undefined);
   const [lastDuration, setLastDuration] = React.useState<number | undefined>(undefined);
   const [error, setError] = React.useState<string | undefined>();
-  const [size, setSize] = useLocalStorage<Size>(LOCAL_STORAGE_SIZE_KEY, 'm');
+  const [size, setSize] = useLocalStorage<Size>(localStorageSizeKey, 'm');
   const [isTRModalOpen, setTRModalOpen] = React.useState(false);
   const [isOverviewModalOpen, setOverviewModalOpen] = React.useState(false);
   const [isColModalOpen, setColModalOpen] = React.useState(false);
   const [isExportModalOpen, setExportModalOpen] = React.useState(false);
-  const [selectedViewId, setSelectedViewId] = useLocalStorage<ViewId>(LOCAL_STORAGE_VIEW_ID_KEY, 'overview');
+  const [selectedViewId, setSelectedViewId] = useLocalStorage<ViewId>(localStorageViewIdKey, 'overview');
   const [filters, setFilters] = React.useState<Filters>({ list: [], backAndForth: false });
   const [match, setMatch] = React.useState<Match>(getMatchFromURL());
   const [packetLoss, setPacketLoss] = React.useState<PacketLoss>(getPacketLossFromURL());
@@ -239,22 +236,22 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
   const [dataSource, setDataSource] = React.useState<DataSource>(getDataSourceFromURL());
   const [showDuplicates, setShowDuplicates] = React.useState<boolean>(getShowDupFromURL());
   const [limit, setLimit] = React.useState<number>(
-    getLimitFromURL(selectedViewId === 'table' ? LIMIT_VALUES[0] : TOP_VALUES[0])
+    getLimitFromURL(selectedViewId === 'table' ? limitValues[0] : topValues[0])
   );
-  const [lastLimit, setLastLimit] = useLocalStorage<number>(LOCAL_STORAGE_LAST_LIMIT_KEY, LIMIT_VALUES[0]);
-  const [lastTop, setLastTop] = useLocalStorage<number>(LOCAL_STORAGE_LAST_TOP_KEY, TOP_VALUES[0]);
+  const [lastLimit, setLastLimit] = useLocalStorage<number>(localStorageLastLimitKey, limitValues[0]);
+  const [lastTop, setLastTop] = useLocalStorage<number>(localStorageLastTopKey, topValues[0]);
   const [range, setRange] = React.useState<number | TimeRange>(getRangeFromURL());
   const [histogramRange, setHistogramRange] = React.useState<TimeRange>();
-  const [metricScope, setMetricScope] = useLocalStorage<FlowScope>(LOCAL_STORAGE_METRIC_SCOPE_KEY, 'namespace');
+  const [metricScope, setMetricScope] = useLocalStorage<FlowScope>(localStorageMetricScopeKey, 'namespace');
   const [topologyMetricFunction, setTopologyMetricFunction] = useLocalStorage<StatFunction>(
-    LOCAL_STORAGE_METRIC_FUNCTION_KEY,
+    localStorageMetricFunctionKey,
     defaultMetricFunction
   );
   const [topologyMetricType, setTopologyMetricType] = useLocalStorage<MetricType>(
-    LOCAL_STORAGE_METRIC_TYPE_KEY,
+    localStorageMetricTypeKey,
     defaultMetricType
   );
-  const [interval, setInterval] = useLocalStorage<number | undefined>(LOCAL_STORAGE_REFRESH_KEY);
+  const [interval, setInterval] = useLocalStorage<number | undefined>(localStorageRefreshKey);
   const [selectedRecord, setSelectedRecord] = React.useState<Record | undefined>(undefined);
   const [selectedElement, setSelectedElement] = React.useState<GraphElementPeer | undefined>(undefined);
   const searchRef = React.useRef<SearchHandle>(null);
@@ -276,13 +273,13 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
     >
   >([]);
   const [panels, setPanels] = useLocalStorage<OverviewPanel[]>(
-    LOCAL_STORAGE_OVERVIEW_IDS_KEY,
+    localStorageOverviewIdsKey,
     [],
-    DEFAULT_ARRAY_SELECTION_OPTIONS
+    defaultArraySelectionOptions
   );
 
-  const [columns, setColumns] = useLocalStorage<Column[]>(LOCAL_STORAGE_COLS_KEY, [], DEFAULT_ARRAY_SELECTION_OPTIONS);
-  const [columnSizes, setColumnSizes] = useLocalStorage<ColumnSizeMap>(LOCAL_STORAGE_COLS_SIZES_KEY, {});
+  const [columns, setColumns] = useLocalStorage<Column[]>(localStorageColsKey, [], defaultArraySelectionOptions);
+  const [columnSizes, setColumnSizes] = useLocalStorage<ColumnSizeMap>(localStorageColsSizesKey, {});
 
   const allowLoki = React.useCallback(() => {
     return config.dataSources.some(ds => ds === 'loki');
@@ -365,9 +362,9 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
   const getAvailablePanels = React.useCallback(() => {
     return panels.filter(
       panel =>
-        (isPktDrop() || !panel.id.includes(DROPPED_ID_MATCHER)) &&
-        (isDNSTracking() || !panel.id.includes(DNS_ID_MATCHER)) &&
-        (isFlowRTT() || !panel.id.includes(RTT_ID_MATCHER))
+        (isPktDrop() || !panel.id.includes(droppedIdMatcher)) &&
+        (isDNSTracking() || !panel.id.includes(dnsIdMatcher)) &&
+        (isFlowRTT() || !panel.id.includes(rttIdMatcher))
     );
   }, [isDNSTracking, isFlowRTT, isPktDrop, panels]);
 
@@ -395,12 +392,12 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
     (metricType: MetricType) => {
       if (isTimeMetric(metricType)) {
         // fallback on average if current function not available for time queries
-        if (!TIME_METRIC_FUNCTIONS.includes(topologyMetricFunction)) {
+        if (!timeMetricFunctions.includes(topologyMetricFunction)) {
           setTopologyMetricFunction('avg');
         }
       } else {
         // fallback on average if current function not available for rate queries
-        if (!RATE_METRIC_FUNCTIONS.includes(topologyMetricFunction)) {
+        if (!rateMetricFunctions.includes(topologyMetricFunction)) {
           setTopologyMetricFunction('avg');
         }
       }
@@ -551,7 +548,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
     const enabledFilters = getEnabledFilters(forcedFilters || filters);
     const query: FlowQuery = {
       filters: filtersToString(enabledFilters.list, match === 'any'),
-      limit: LIMIT_VALUES.includes(limit) ? limit : LIMIT_VALUES[0],
+      limit: limitValues.includes(limit) ? limit : limitValues[0],
       recordType: recordType,
       dataSource: dataSource,
       //only manage duplicates when mark is enabled
@@ -576,9 +573,9 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
       query.aggregateBy = metricScope;
       if (selectedViewId === 'topology') {
         query.type = topologyMetricType;
-        query.groups = topologyOptions.groupTypes !== TopologyGroupTypes.NONE ? topologyOptions.groupTypes : undefined;
+        query.groups = topologyOptions.groupTypes !== TopologyGroupTypes.none ? topologyOptions.groupTypes : undefined;
       } else if (selectedViewId === 'overview') {
-        query.limit = TOP_VALUES.includes(limit) ? limit : TOP_VALUES[0];
+        query.limit = topValues.includes(limit) ? limit : topValues[0];
         query.groups = undefined;
       }
     }
@@ -734,7 +731,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
         setMetrics(currentMetrics);
       }
 
-      const droppedPanels = selectedPanels.filter(p => p.id.includes(DROPPED_ID_MATCHER));
+      const droppedPanels = selectedPanels.filter(p => p.id.includes(droppedIdMatcher));
       if (!_.isEmpty(droppedPanels)) {
         //run same queries for drops
         const droppedRateMetrics = initRateMetricKeys(droppedPanels.map(p => p.id)) as RateMetrics;
@@ -805,7 +802,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
         });
       }
 
-      const dnsPanels = selectedPanels.filter(p => p.id.includes(DNS_ID_MATCHER));
+      const dnsPanels = selectedPanels.filter(p => p.id.includes(dnsIdMatcher));
       if (config.features.includes('dnsTracking') && !_.isEmpty(dnsPanels)) {
         //set dns metrics
         const dnsLatencyMetrics = initFunctionMetricKeys(dnsPanels.map(p => p.id)) as FunctionMetrics;
@@ -867,7 +864,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
         });
       }
 
-      const rttPanels = selectedPanels.filter(p => p.id.includes(RTT_ID_MATCHER));
+      const rttPanels = selectedPanels.filter(p => p.id.includes(rttIdMatcher));
       if (config.features.includes('flowRTT') && !_.isEmpty(rttPanels)) {
         //set RTT metrics
         const rttMetrics = initFunctionMetricKeys(rttPanels.map(p => p.id)) as FunctionMetrics;
@@ -899,14 +896,14 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
         setMetrics({ ...currentMetrics, rttMetrics: undefined, totalRttMetric: undefined });
       }
 
-      const customPanels = selectedPanels.filter(p => p.id.startsWith(CUSTOM_PANEL_MATCHER));
+      const customPanels = selectedPanels.filter(p => p.id.startsWith(customPanelMatcher));
       if (!_.isEmpty(customPanels)) {
         //set custom metrics
         customPanels
           .map(p => p.id)
           .forEach(id => {
             const parsedId = parseCustomMetricId(id);
-            const key = id.replaceAll(CUSTOM_PANEL_MATCHER + '_', '');
+            const key = id.replaceAll(customPanelMatcher + '_', '');
             const getMetricFunc = parsedId.aggregateBy ? getFlowGenericMetrics : getMetrics;
             if (parsedId.isValid) {
               promises.push(
@@ -1126,16 +1123,16 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
     if (initState.current.includes('configLoaded')) {
       setColumns(
         getLocalStorage(
-          LOCAL_STORAGE_COLS_KEY,
+          localStorageColsKey,
           getDefaultColumns(config.columns, config.fields),
-          DEFAULT_ARRAY_SELECTION_OPTIONS
+          defaultArraySelectionOptions
         )
       );
       setPanels(
         getLocalStorage(
-          LOCAL_STORAGE_OVERVIEW_IDS_KEY,
+          localStorageOverviewIdsKey,
           getDefaultOverviewPanels(config.panels),
-          DEFAULT_ARRAY_SELECTION_OPTIONS
+          defaultArraySelectionOptions
         )
       );
       setFiltersFromURL(config);
@@ -1268,7 +1265,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
   React.useEffect(() => {
     const groups = getGroupsForScope(metricScope as MetricScopeOptions);
     if (!groups.includes(topologyOptions.groupTypes)) {
-      setTopologyOptions({ ...topologyOptions, groupTypes: TopologyGroupTypes.NONE });
+      setTopologyOptions({ ...topologyOptions, groupTypes: TopologyGroupTypes.none });
     }
   }, [metricScope, topologyOptions, setTopologyOptions]);
 

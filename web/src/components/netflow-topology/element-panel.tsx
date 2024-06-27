@@ -1,167 +1,32 @@
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionToggle,
-  Button,
   Divider,
   DrawerActions,
   DrawerCloseButton,
   DrawerHead,
   DrawerPanelBody,
   DrawerPanelContent,
-  Flex,
-  FlexItem,
   Tab,
   Tabs,
   TabTitleText,
   Text,
-  TextContent,
   TextVariants
 } from '@patternfly/react-core';
-import { BaseEdge, BaseNode } from '@patternfly/react-topology';
-import { TimesIcon, FilterIcon } from '@patternfly/react-icons';
+import { BaseEdge } from '@patternfly/react-topology';
+import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { defaultSize, maxSize, minSize } from '../../utils/panel';
-import { MetricType } from '../../model/flow-query';
 import { TopologyMetrics } from '../../api/loki';
 import { Filter, FilterDefinition } from '../../model/filters';
-import { GraphElementPeer, isElementFiltered, NodeData, toggleElementFilter } from '../../model/topology';
-import { ElementPanelMetrics } from './element-panel-metrics';
+import { MetricType } from '../../model/flow-query';
+import { GraphElementPeer, NodeData } from '../../model/topology';
+import { defaultSize, maxSize, minSize } from '../../utils/panel';
 import { TruncateLength } from '../dropdowns/truncate-dropdown';
-import { ElementFields } from './element-fields';
-import { PeerResourceLink } from './peer-resource-link';
+import { ElementPanelContent } from './element-panel-content';
+import { ElementPanelMetrics } from './element-panel-metrics';
 import './element-panel.css';
-import _ from 'lodash';
-import { createPeer } from '../../utils/metrics';
+import { PeerResourceLink } from './peer-resource-link';
 
-export const ElementPanelDetailsContent: React.FC<{
-  element: GraphElementPeer;
-  filters: Filter[];
-  setFilters: (filters: Filter[]) => void;
-  filterDefinitions: FilterDefinition[];
-}> = ({ element, filters, setFilters, filterDefinitions }) => {
-  const { t } = useTranslation('plugin__netobserv-plugin');
-  const [hidden, setHidden] = React.useState<string[]>([]);
-  const data = element.getData();
-
-  const toggle = React.useCallback(
-    (id: string) => {
-      const index = hidden.indexOf(id);
-      const newExpanded: string[] =
-        index >= 0 ? [...hidden.slice(0, index), ...hidden.slice(index + 1, hidden.length)] : [...hidden, id];
-      setHidden(newExpanded);
-    },
-    [hidden]
-  );
-
-  const clusterName = React.useCallback(
-    (d: NodeData) => {
-      if (!d.peer.clusterName) {
-        return <></>;
-      }
-      const fields = createPeer({ clusterName: d.peer.clusterName });
-      const isFiltered = isElementFiltered(fields, filters, filterDefinitions);
-      return (
-        <TextContent id="clusterName" className="record-field-container">
-          <Text component={TextVariants.h4}>{t('Cluster name')}</Text>
-          <Flex>
-            <FlexItem flex={{ default: 'flex_1' }}>{d.peer.clusterName}</FlexItem>
-            <FlexItem>
-              <Button
-                id={'clustername-filter'}
-                variant="plain"
-                className="overflow-button"
-                icon={isFiltered ? <TimesIcon /> : <FilterIcon />}
-                onClick={() => toggleElementFilter(fields, isFiltered, filters, setFilters, filterDefinitions)}
-              />
-            </FlexItem>
-          </Flex>
-        </TextContent>
-      );
-    },
-    [filterDefinitions, filters, setFilters, t]
-  );
-
-  if (element instanceof BaseNode && data) {
-    return (
-      <>
-        {clusterName(data)}
-        <ElementFields
-          id="node-info"
-          data={data}
-          forceFirstAsText={true}
-          activeFilters={filters}
-          setFilters={setFilters}
-          filterDefinitions={filterDefinitions}
-        />
-      </>
-    );
-  } else if (element instanceof BaseEdge) {
-    // Edge A to B (prefering neutral naming here as there is no assumption about what is source, what is destination
-    const aData: NodeData = element.getSource().getData();
-    const bData: NodeData = element.getTarget().getData();
-    return (
-      <Accordion asDefinitionList={false}>
-        <div className="record-group-container" key={'source'} data-test-id={'source'}>
-          <AccordionItem data-test-id={'source'}>
-            {
-              <AccordionToggle
-                className="borderless-accordion"
-                onClick={() => toggle('source')}
-                isExpanded={!hidden.includes('source')}
-                id={'source'}
-              >
-                {t('Source')}
-              </AccordionToggle>
-            }
-            <AccordionContent className="borderless-accordion" id="source-content" isHidden={hidden.includes('source')}>
-              <ElementFields
-                id="source-info"
-                data={aData}
-                activeFilters={filters}
-                setFilters={setFilters}
-                filterDefinitions={filterDefinitions}
-              />
-            </AccordionContent>
-          </AccordionItem>
-        </div>
-        <div className="record-group-container" key={'destination'} data-test-id={'destination'}>
-          <Divider />
-          <AccordionItem data-test-id={'destination'}>
-            {
-              <AccordionToggle
-                className="borderless-accordion"
-                onClick={() => toggle('destination')}
-                isExpanded={!hidden.includes('destination')}
-                id={'destination'}
-              >
-                {t('Destination')}
-              </AccordionToggle>
-            }
-            <AccordionContent
-              className="borderless-accordion"
-              id="destination-content"
-              isHidden={hidden.includes('destination')}
-            >
-              <ElementFields
-                id="destination-info"
-                data={bData}
-                activeFilters={filters}
-                setFilters={setFilters}
-                filterDefinitions={filterDefinitions}
-              />
-            </AccordionContent>
-          </AccordionItem>
-        </div>
-      </Accordion>
-    );
-  }
-  return <></>;
-};
-
-export const ElementPanel: React.FC<{
+export interface ElementPanelProps {
   onClose: () => void;
   element: GraphElementPeer;
   metrics: TopologyMetrics[];
@@ -173,7 +38,9 @@ export const ElementPanel: React.FC<{
   truncateLength: TruncateLength;
   id?: string;
   isDark?: boolean;
-}> = ({
+}
+
+export const ElementPanel: React.FC<ElementPanelProps> = ({
   id,
   element,
   metrics,
@@ -240,7 +107,7 @@ export const ElementPanel: React.FC<{
           role="region"
         >
           <Tab className="drawer-tab" eventKey={'details'} title={<TabTitleText>{t('Details')}</TabTitleText>}>
-            <ElementPanelDetailsContent
+            <ElementPanelContent
               element={element}
               filters={filters}
               setFilters={setFilters}

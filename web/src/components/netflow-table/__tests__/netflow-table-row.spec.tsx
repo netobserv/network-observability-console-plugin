@@ -1,12 +1,12 @@
-import * as React from 'react';
+import { Td, Tr } from '@patternfly/react-table';
 import { shallow } from 'enzyme';
-import { Tr, Td } from '@patternfly/react-table';
+import * as React from 'react';
 
-import NetflowTableRow from '../netflow-table-row';
 import { Record } from '../../../api/ipfix';
+import { Size } from '../../dropdowns/table-display-dropdown';
 import { DefaultColumnSample } from '../../__tests-data__/columns';
 import { FlowsSample } from '../../__tests-data__/flows';
-import { Size } from '../../dropdowns/table-display-dropdown';
+import NetflowTableRow from '../netflow-table-row';
 
 describe('<NetflowTableRow />', () => {
   let flows: Record[] = [];

@@ -1,11 +1,11 @@
 import { TFunction } from 'i18next';
-import { AggregateBy, StatFunction, MetricType, MetricFunction } from '../model/flow-query';
+import { AggregateBy, MetricFunction, MetricType, StatFunction } from '../model/flow-query';
 import { Feature, isAllowed } from './features-gate';
 
-export const DNS_ID_MATCHER = 'dns_latency';
-export const RTT_ID_MATCHER = 'rtt';
-export const DROPPED_ID_MATCHER = 'dropped';
-export const CUSTOM_PANEL_MATCHER = 'custom';
+export const dnsIdMatcher = 'dns_latency';
+export const rttIdMatcher = 'rtt';
+export const droppedIdMatcher = 'dropped';
+export const customPanelMatcher = 'custom';
 
 export const getRateFunctionFromId = (id: string) => {
   return id.endsWith('byte_rates') ? 'bytes' : 'packets';
@@ -124,7 +124,7 @@ export const getDefaultOverviewPanels = (customIds?: string[]): OverviewPanel[] 
   });
 
   if (customIds) {
-    ids = ids.concat(customIds.map(id => `${CUSTOM_PANEL_MATCHER}_${id}` as OverviewPanelId));
+    ids = ids.concat(customIds.map(id => `${customPanelMatcher}_${id}` as OverviewPanelId));
   }
 
   return ids.map(id => {
@@ -134,7 +134,7 @@ export const getDefaultOverviewPanels = (customIds?: string[]): OverviewPanel[] 
 
 export const parseCustomMetricId = (id: string) => {
   const idParts = id.split('_');
-  if (idParts.length === 0 || idParts[0] !== CUSTOM_PANEL_MATCHER) {
+  if (idParts.length === 0 || idParts[0] !== customPanelMatcher) {
     console.error('parseCustomMetricId called on non custom metric', id);
   }
 

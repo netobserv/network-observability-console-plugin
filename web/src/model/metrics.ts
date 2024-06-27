@@ -1,6 +1,6 @@
 import { MetricStats } from '../api/loki';
-import { StatFunction } from './flow-query';
 import { PERCENTILE_VALUES } from '../utils/metrics';
+import { StatFunction } from './flow-query';
 
 export enum MetricScopeOptions {
   CLUSTER = 'cluster',

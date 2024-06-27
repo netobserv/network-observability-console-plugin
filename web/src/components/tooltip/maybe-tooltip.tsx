@@ -1,5 +1,5 @@
-import * as React from 'react';
 import { Tooltip, TooltipProps } from '@patternfly/react-core';
+import * as React from 'react';
 
 export type MaybeTooltipProps = Omit<TooltipProps, 'content'> & { content?: React.ReactNode };
 

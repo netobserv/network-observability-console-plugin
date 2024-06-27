@@ -24,7 +24,7 @@ export type ResizedElement = {
   startClentWidth: number;
 };
 
-export const NetflowTableHeader: React.FC<{
+export interface NetflowTableHeaderProps {
   onSort: (id: ColumnsId, direction: SortByDirection) => void;
   sortId: ColumnsId;
   sortDirection: SortByDirection;
@@ -34,7 +34,19 @@ export const NetflowTableHeader: React.FC<{
   setColumnSizes: (v: ColumnSizeMap) => void;
   tableWidth: number;
   isDark?: boolean;
-}> = ({ onSort, sortId, sortDirection, columns, setColumns, columnSizes, setColumnSizes, tableWidth, isDark }) => {
+}
+
+export const NetflowTableHeader: React.FC<NetflowTableHeaderProps> = ({
+  onSort,
+  sortId,
+  sortDirection,
+  columns,
+  setColumns,
+  columnSizes,
+  setColumnSizes,
+  tableWidth,
+  isDark
+}) => {
   const resizedElement = React.useRef<ResizedElement>();
   const draggedElement = React.useRef<HTMLElement>();
 
