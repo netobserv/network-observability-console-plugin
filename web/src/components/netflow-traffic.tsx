@@ -647,8 +647,8 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
         return { ...w, details: reason };
       }
       return w;
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [match, filters]
   );
 
@@ -1039,6 +1039,8 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
       }
       return Promise.all(promises);
     },
+    // "t" dependency kills jest
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [config.features, getFetchFunctions, topologyMetricType, topologyMetricFunction, range, setWarning]
   );
 
