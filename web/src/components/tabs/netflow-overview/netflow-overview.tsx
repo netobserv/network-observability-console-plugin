@@ -61,6 +61,7 @@ export interface NetflowOverviewProps {
   truncateLength: TruncateLength;
   focus?: boolean;
   setFocus?: (v: boolean) => void;
+  forcedSize?: DOMRect;
 }
 
 export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
@@ -73,7 +74,8 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
   filterActionLinks,
   truncateLength,
   focus,
-  setFocus
+  setFocus,
+  forcedSize
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [kebabMap, setKebabMap] = useLocalStorage<Map<OverviewPanelId, PanelKebabOptions>>(
@@ -87,7 +89,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
   const cardPadding = convertRemToPixels(0.5);
 
   const containerRef = React.createRef<HTMLDivElement>();
-  const [containerSize, setContainerSize] = React.useState<DOMRect>({ width: 0, height: 0 } as DOMRect);
+  const [containerSize, setContainerSize] = React.useState<DOMRect>(forcedSize || ({ width: 0, height: 0 } as DOMRect));
   const [sidePanelWidth, setSidePanelWidth] = React.useState<number>(0);
   const [offsetTop, setOffsetTop] = React.useState<number>(0);
 

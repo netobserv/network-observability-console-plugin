@@ -21,7 +21,8 @@ describe('<NetflowOverview />', () => {
       totalCustomMetrics: new Map()
     },
     filterActionLinks: <></>,
-    truncateLength: TruncateLength.M
+    truncateLength: TruncateLength.M,
+    forcedSize: { width: 800, height: 800 } as DOMRect
   };
   it('should render component', async () => {
     const wrapper = shallow(<NetflowOverview {...props} />);
