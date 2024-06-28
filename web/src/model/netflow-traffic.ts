@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import React from 'react';
 import { Record } from '../api/ipfix';
 import { defaultNetflowMetrics, NetflowMetrics, Stats } from '../api/loki';

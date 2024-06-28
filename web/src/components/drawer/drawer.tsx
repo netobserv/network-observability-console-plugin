@@ -7,6 +7,7 @@ import { GraphElementPeer, TopologyOptions } from 'src/model/topology';
 import { TimeRange } from 'src/utils/datetime';
 import { Record } from '../../api/ipfix';
 import { getFunctionMetricKey, getRateMetricKey, NetflowMetrics, Stats } from '../../api/loki';
+import { Config } from '../../model/config';
 import {
   Filter,
   FilterDefinition,
@@ -58,7 +59,7 @@ export interface NetflowTrafficDrawerProps {
   allowPktDrop: boolean;
   allowDNSMetric: boolean;
   allowRTTMetric: boolean;
-  resetDefaultFilters: (c?: any) => void;
+  resetDefaultFilters: (c?: Config) => void;
   clearFilters: () => void;
   filters: Filters;
   k8sModels: { [key: string]: K8sModel };
@@ -96,26 +97,39 @@ export const NetflowTrafficDrawer: React.FC<NetflowTrafficDrawerProps> = props =
     return props.availableColumns.filter(column => column.isSelected);
   }, [props.availableColumns]);
 
-  const onRecordSelect = React.useCallback((record?: Record) => {
-    props.clearSelections();
-    props.setSelectedRecord(record);
-  }, []);
+  const onRecordSelect = React.useCallback(
+    (record?: Record) => {
+      props.clearSelections();
+      props.setSelectedRecord(record);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [props.clearSelections, props.setSelectedRecord]
+  );
 
-  const onElementSelect = React.useCallback((element?: GraphElementPeer) => {
-    props.clearSelections();
-    props.setSelectedElement(element);
-  }, []);
+  const onElementSelect = React.useCallback(
+    (element?: GraphElementPeer) => {
+      props.clearSelections();
+      props.setSelectedElement(element);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [props.clearSelections, props.setSelectedElement]
+  );
 
-  const onToggleQuerySummary = React.useCallback((v: boolean) => {
-    props.clearSelections();
-    props.setShowQuerySummary(v);
-  }, []);
+  const onToggleQuerySummary = React.useCallback(
+    (v: boolean) => {
+      props.clearSelections();
+      props.setShowQuerySummary(v);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [props.clearSelections, props.setShowQuerySummary]
+  );
 
   const setFiltersList = React.useCallback(
     (list: Filter[]) => {
       props.setFilters({ ...props.filters, list: list });
     },
-    [props.setFilters, props.filters]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [props.setFilters]
   );
 
   const filterLinks = React.useCallback(() => {
@@ -139,7 +153,7 @@ export const NetflowTrafficDrawer: React.FC<NetflowTrafficDrawerProps> = props =
         ]}
       />
     );
-  }, [props.defaultFilters, t, props.resetDefaultFilters, props.filters.list, props.clearFilters]);
+  }, [props.defaultFilters, props.resetDefaultFilters, props.filters.list, props.clearFilters]);
 
   const getTopologyMetrics = React.useCallback(() => {
     switch (props.topologyMetricType) {

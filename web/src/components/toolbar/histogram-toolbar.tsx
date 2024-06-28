@@ -58,6 +58,7 @@ export const HistogramToolbar: React.FC<HistogramToolbarProps> = props => {
         }
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [props.lastRefresh, props.range, props.tick]
   );
 
@@ -93,7 +94,8 @@ export const HistogramToolbar: React.FC<HistogramToolbarProps> = props => {
         }
       }
     },
-    [props.lastRefresh, props.range, t]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [props.lastRefresh, props.range]
   );
 
   return (

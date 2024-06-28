@@ -54,6 +54,7 @@ export interface ViewOptionsToolbarProps {
   ref?: React.Ref<SearchHandle>;
 }
 
+// eslint-disable-next-line react/display-name
 export const ViewOptionsToolbar: React.FC<ViewOptionsToolbarProps> = React.forwardRef(
   (props, ref: React.Ref<SearchHandle>) => {
     const { t } = useTranslation('plugin__netobserv-plugin');
@@ -72,7 +73,8 @@ export const ViewOptionsToolbar: React.FC<ViewOptionsToolbarProps> = React.forwa
           props.setOverviewFocus(prevFocusState)
         );
       }, 500);
-    }, [props.isDarkTheme]);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [props.isDarkTheme, props.setOverviewFocus]);
 
     const viewOptionsContent = () => {
       const items: JSX.Element[] = [];

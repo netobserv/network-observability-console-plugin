@@ -861,7 +861,17 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
         </div>
       </>
     );
-  }, [containerSize, allowFocus, selectedPanel, panels, getPanelView]);
+  }, [
+    containerSize,
+    allowFocus,
+    selectedPanel,
+    offsetTop,
+    sidePanelWidth,
+    containerPadding,
+    cardPadding,
+    getPanelView,
+    panels
+  ]);
 
   return (
     <div
