@@ -2,6 +2,7 @@ import { FlexItem, Text, TextVariants, Tooltip } from '@patternfly/react-core';
 import { ExclamationTriangleIcon, GlobeAmericasIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
+import { Warning } from '../../model/warnings';
 import { formatDurationAboveMillisecond } from '../../utils/duration';
 import './query-summary.css';
 
@@ -10,8 +11,7 @@ export interface StatsQuerySummaryProps {
   loading?: boolean;
   lastRefresh?: Date;
   lastDuration?: number;
-  warningMessage?: string;
-  slownessReason?: string;
+  warning?: Warning;
   numQueries?: number;
   dataSources?: string[];
 }
@@ -23,8 +23,7 @@ export const StatsQuerySummary: React.FC<StatsQuerySummaryProps> = ({
   lastRefresh,
   lastDuration,
   loading,
-  warningMessage,
-  slownessReason
+  warning
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
@@ -50,18 +49,18 @@ export const StatsQuerySummary: React.FC<StatsQuerySummaryProps> = ({
             {dataSources?.length && <Text>{t('Datasource(s): {{sources}}', { sources: formatDatasources() })}</Text>}
             {numQueries && <Text>{t('Query count: {{count}}', { count: numQueries })}</Text>}
             {durationText !== '' && <Text>{t('Duration: {{duration}}', { duration: durationText })}</Text>}
-            {warningMessage !== undefined && (
+            {warning !== undefined && (
               <>
                 <br />
-                <Text>{warningMessage}</Text>
-                <Text>{slownessReason}</Text>
+                <Text>{warning.summary}</Text>
+                <Text>{warning.details}</Text>
               </>
             )}
           </>
         }
       >
         <div className={`stats-query-summary-container-with-icon ${loading ? 'stats-loading-blink' : ''}`}>
-          {warningMessage !== undefined ? <ExclamationTriangleIcon /> : <GlobeAmericasIcon />}
+          {warning !== undefined ? <ExclamationTriangleIcon /> : <GlobeAmericasIcon />}
           <Text id="lastRefresh" component={TextVariants.p}>
             {dateText}
             {detailed && numQueries && ` ${t('running')} ${numQueries} ${numQueries > 1 ? t('queries') : t('query')}`}

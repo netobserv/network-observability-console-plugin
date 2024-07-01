@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next';
 import { Record } from '../../api/ipfix';
 import { NetflowMetrics, Stats } from '../../api/loki';
 import { RecordType } from '../../model/flow-query';
+import { Warning } from '../../model/warnings';
 import { compareStrings } from '../../utils/base-compare';
 import { config } from '../../utils/config';
 import { TimeRange } from '../../utils/datetime';
@@ -45,8 +46,7 @@ export interface SummaryPanelContentProps {
   range: number | TimeRange;
   lastRefresh?: Date;
   lastDuration?: number;
-  warningMessage?: string;
-  slownessReason?: string;
+  warning?: Warning;
   showDNSLatency?: boolean;
   showRTTLatency?: boolean;
 }
@@ -61,8 +61,7 @@ export const SummaryPanelContent: React.FC<SummaryPanelContentProps> = ({
   range,
   lastRefresh,
   lastDuration,
-  warningMessage,
-  slownessReason,
+  warning,
   showDNSLatency,
   showRTTLatency
 }) => {
@@ -412,8 +411,7 @@ export const SummaryPanelContent: React.FC<SummaryPanelContentProps> = ({
             dataSources={stats?.dataSources}
             lastRefresh={lastRefresh}
             lastDuration={lastDuration}
-            slownessReason={slownessReason}
-            warningMessage={warningMessage}
+            warning={warning}
           />
         ) : (
           <FlowsQuerySummaryContent
@@ -426,8 +424,7 @@ export const SummaryPanelContent: React.FC<SummaryPanelContentProps> = ({
             range={range}
             lastRefresh={lastRefresh}
             lastDuration={lastDuration}
-            slownessReason={slownessReason}
-            warningMessage={warningMessage}
+            warning={warning}
           />
         )}
       </TextContent>

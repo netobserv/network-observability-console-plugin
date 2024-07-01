@@ -76,6 +76,16 @@ func (i *Inventory) Search(neededLabels []string, valueField string) SearchResul
 
 func (i *Inventory) searchWithDir(neededLabels []string, valueField string, dir config.FlowDirection) SearchResult {
 	sr := SearchResult{}
+	// Special case, when the query has a filter to PktDropState/Cause and value field is bytes/packets,
+	// we must consider value field is actually PktDropBytes/Packets
+	if slices.Contains(neededLabels, fields.PktDropLatestDropCause) || slices.Contains(neededLabels, fields.PktDropLatestState) {
+		switch valueField {
+		case fields.Bytes:
+			valueField = fields.PktDropBytes
+		case fields.Packets:
+			valueField = fields.PktDropPackets
+		}
+	}
 	for _, m := range i.metrics {
 		match, missingLabels := checkMatch(&m, neededLabels, valueField, dir)
 		if match {
@@ -84,12 +94,12 @@ func (i *Inventory) searchWithDir(neededLabels []string, valueField string, dir 
 				return sr
 			}
 			sr.Candidates = append(sr.Candidates, m.Name)
-		} else if m.Enabled && (sr.MissingLabels == nil || len(missingLabels) < len(sr.MissingLabels)) {
+		} else if m.Enabled && len(missingLabels) > 0 && (sr.MissingLabels == nil || len(missingLabels) < len(sr.MissingLabels)) {
 			// Keep smaller possible set of missing labels
 			sr.MissingLabels = missingLabels
 		}
 	}
-	log.Debugf("No metric match for %v / %s (/ %s)", neededLabels, valueField, dir)
+	log.Debugf("No metric match for %v / %s / %s", neededLabels, valueField, dir)
 	return sr
 }
 
