@@ -23,7 +23,7 @@ export interface SummaryPanelProps {
   metrics: NetflowMetrics;
   type: RecordType;
   stats?: Stats;
-  maxChunkAge: number;
+  maxChunkAge?: number;
   limit: number;
   range: number | TimeRange;
   lastRefresh?: Date;

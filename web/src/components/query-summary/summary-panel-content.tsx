@@ -40,7 +40,7 @@ export interface SummaryPanelContentProps {
   metrics: NetflowMetrics;
   type: RecordType;
   stats?: Stats;
-  maxChunkAge: number;
+  maxChunkAge?: number;
   limit: number;
   range: number | TimeRange;
   lastRefresh?: Date;
@@ -140,7 +140,7 @@ export const SummaryPanelContent: React.FC<SummaryPanelContentProps> = ({
       <TextContent className="summary-text-container">
         <Text component={TextVariants.h3}>{`${t('Configuration')}`}</Text>
         <Text className="summary-config-item">{`${t('Sampling')}: ${config.sampling}`}</Text>
-        {!Number.isNaN(maxChunkAge) && (
+        {maxChunkAge && (
           <Text className="summary-config-item">{`${t('Max chunk age')}: ${formatDuration(maxChunkAge)}`}</Text>
         )}
       </TextContent>

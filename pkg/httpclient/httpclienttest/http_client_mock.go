@@ -14,10 +14,7 @@ func (o *HTTPClientMock) Get(url string) ([]byte, int, error) {
 }
 
 func (o *HTTPClientMock) SpyURL(fn func(url string)) {
-	o.On(
-		"Get",
-		mock.AnythingOfType("string"),
-	).Run(func(args mock.Arguments) {
-		fn(args[0].(string))
-	}).Return([]byte{}, 0, nil)
+	o.On("Get", mock.AnythingOfType("string")).
+		Run(func(args mock.Arguments) { fn(args[0].(string)) }).
+		Return([]byte{}, 0, nil)
 }
