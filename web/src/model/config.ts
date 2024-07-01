@@ -30,6 +30,7 @@ export type Config = {
   fields: FieldConfig[];
   dataSources: string[];
   promLabels: string[];
+  maxChunkAgeMs?: number;
 };
 
 export const defaultConfig: Config = {
@@ -53,5 +54,6 @@ export const defaultConfig: Config = {
   },
   fields: [],
   dataSources: ['loki', 'prom'],
-  promLabels: []
+  promLabels: [],
+  maxChunkAgeMs: undefined
 };

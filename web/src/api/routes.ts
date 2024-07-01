@@ -164,7 +164,8 @@ export const getConfig = (): Promise<Config> => {
       },
       fields: r.data.fields || defaultConfig.fields,
       dataSources: r.data.dataSources || defaultConfig.dataSources,
-      promLabels: r.data.promLabels || defaultConfig.promLabels
+      promLabels: r.data.promLabels || defaultConfig.promLabels,
+      maxChunkAgeMs: r.data.maxChunkAgeMs
     };
   });
 };
@@ -198,15 +199,6 @@ export const getBuildInfo = (): Promise<unknown> => {
 
 export const getLimits = (): Promise<unknown> => {
   return axios.get(ContextSingleton.getHost() + '/api/loki/config/limits').then(r => {
-    if (r.status >= 400) {
-      throw new Error(`${r.statusText} [code=${r.status}]`);
-    }
-    return r.data;
-  });
-};
-
-export const getIngesterMaxChunkAge = (): Promise<string> => {
-  return axios.get(ContextSingleton.getHost() + '/api/loki/config/ingester/max_chunk_age').then(r => {
     if (r.status >= 400) {
       throw new Error(`${r.statusText} [code=${r.status}]`);
     }

@@ -127,6 +127,7 @@ type Frontend struct {
 	Fields          []FieldConfig `yaml:"fields" json:"fields"`
 	DataSources     []string      `yaml:"dataSources" json:"dataSources"`
 	PromLabels      []string      `yaml:"promLabels" json:"promLabels"`
+	MaxChunkAgeMs   int           `yaml:"maxChunkAgeMs,omitempty" json:"maxChunkAgeMs,omitempty"` // populated at query time
 }
 
 type Config struct {

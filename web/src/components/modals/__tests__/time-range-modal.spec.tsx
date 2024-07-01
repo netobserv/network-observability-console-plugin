@@ -10,7 +10,6 @@ describe('<ColumnsModal />', () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const fakeEvent: any = {};
   const props: TimeRangeModalProps = {
-    maxChunkAge: NaN,
     isModalOpen: true,
     setModalOpen: jest.fn(),
     range: undefined,
