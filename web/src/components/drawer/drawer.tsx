@@ -52,6 +52,7 @@ export interface NetflowTrafficDrawerProps {
   flows: Record[];
   selectedRecord?: Record;
   availableColumns: Column[];
+  selectedColumns: Column[];
   setColumns: (v: Column[]) => void;
   columnSizes: ColumnSizeMap;
   setColumnSizes: (v: ColumnSizeMap) => void;
@@ -93,10 +94,6 @@ export interface NetflowTrafficDrawerProps {
 }
 
 export const NetflowTrafficDrawer: React.FC<NetflowTrafficDrawerProps> = props => {
-  const getSelectedColumns = React.useCallback(() => {
-    return props.availableColumns.filter(column => column.isSelected);
-  }, [props.availableColumns]);
-
   const onRecordSelect = React.useCallback(
     (record?: Record) => {
       props.clearSelections();
@@ -251,7 +248,7 @@ export const NetflowTrafficDrawer: React.FC<NetflowTrafficDrawerProps> = props =
               selectedRecord={props.selectedRecord}
               size={props.size}
               onSelect={onRecordSelect}
-              columns={getSelectedColumns()}
+              columns={props.selectedColumns}
               setColumns={(v: Column[]) =>
                 props.setColumns(v.concat(props.availableColumns.filter(col => !col.isSelected)))
               }
