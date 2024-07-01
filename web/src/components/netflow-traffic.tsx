@@ -76,13 +76,14 @@ import {
   TopologyGroupTypes,
   TopologyOptions
 } from '../model/topology';
+import { Warning } from '../model/warnings';
 import { getFetchFunctions as getBackAndForthFetch } from '../utils/back-and-forth';
 import { Column, ColumnsId, ColumnSizeMap, getDefaultColumns } from '../utils/columns';
 import { loadConfig } from '../utils/config';
 import { ContextSingleton } from '../utils/context';
 import { computeStepInterval, getTimeRangeOptions, TimeRange } from '../utils/datetime';
 import { formatDuration, getDateMsInSeconds, getDateSInMiliseconds, parseDuration } from '../utils/duration';
-import { getHTTPErrorDetails, isPromUnsupportedError } from '../utils/errors';
+import { getHTTPErrorDetails, getPromUnsupportedError, isPromUnsupportedError } from '../utils/errors';
 import { exportToPng } from '../utils/export';
 import { checkFilterAvailable, getFilterDefinitions } from '../utils/filter-definitions';
 import { mergeFlowReporters } from '../utils/flows';
@@ -199,7 +200,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
   }
 
   const [config, setConfig] = React.useState<Config>(defaultConfig);
-  const [warningMessage, setWarningMessage] = React.useState<string | undefined>();
+  const [warning, setWarning] = React.useState<Warning | undefined>();
   const [showViewOptions, setShowViewOptions] = useLocalStorage<boolean>(localStorageShowOptionsKey, false);
   const [showHistogram, setShowHistogram] = useLocalStorage<boolean>(localStorageShowHistogramKey, false);
   const [isViewOptionOverflowMenuOpen, setViewOptionOverflowMenuOpen] = React.useState(false);
@@ -472,7 +473,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
       setFilters(f);
       setFlows([]);
       setMetrics(defaultNetflowMetrics);
-      setWarningMessage(undefined);
+      setWarning(undefined);
     },
     [setFilters, setFlows]
   );
@@ -611,12 +612,12 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
     (query: Promise<unknown>) => {
       setLastRefresh(undefined);
       setLastDuration(undefined);
-      setWarningMessage(undefined);
+      setWarning(undefined);
       Promise.race([query, new Promise((resolve, reject) => setTimeout(reject, 4000, 'slow'))]).then(
         null,
         (reason: string) => {
           if (reason === 'slow') {
-            setWarningMessage(`${t('Query is slow')}`);
+            setWarning({ type: 'slow', summary: `${t('Query is slow')}` });
           }
         }
       );
@@ -626,22 +627,30 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
     []
   );
 
-  const slownessReason = React.useCallback((): string => {
-    if (match === 'any' && hasNonIndexFields(filters.list)) {
-      return t(
-        // eslint-disable-next-line max-len
-        'When in "Match any" mode, try using only Namespace, Owner or Resource filters (which use indexed fields), or decrease limit / range, to improve the query performance'
-      );
-    }
-    if (match === 'all' && !hasIndexFields(filters.list)) {
-      return t(
-        // eslint-disable-next-line max-len
-        'Add Namespace, Owner or Resource filters (which use indexed fields), or decrease limit / range, to improve the query performance'
-      );
-    }
-    return t('Add more filters or decrease limit / range to improve the query performance');
+  const checkSlownessReason = React.useCallback(
+    (w: Warning | undefined): Warning | undefined => {
+      if (w?.type == 'slow') {
+        let reason = '';
+        if (match === 'any' && hasNonIndexFields(filters.list)) {
+          reason = t(
+            // eslint-disable-next-line max-len
+            'When in "Match any" mode, try using only Namespace, Owner or Resource filters (which use indexed fields), or decrease limit / range, to improve the query performance'
+          );
+        } else if (match === 'all' && !hasIndexFields(filters.list)) {
+          reason = t(
+            // eslint-disable-next-line max-len
+            'Add Namespace, Owner or Resource filters (which use indexed fields), or decrease limit / range, to improve the query performance'
+          );
+        } else {
+          reason = t('Add more filters or decrease limit / range to improve the query performance');
+        }
+        return { ...w, details: reason };
+      }
+      return w;
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [match, filters]);
+    [match, filters]
+  );
 
   const fetchTable = React.useCallback(
     (fq: FlowQuery) => {
@@ -1005,13 +1014,24 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
 
       if (droppedType) {
         promises.push(
-          getMetrics({ ...fq, type: droppedType }, range).then(res => {
-            const droppedRateMetrics = {} as RateMetrics;
-            droppedRateMetrics[getRateMetricKey(topologyMetricType)] = res.metrics;
-            currentMetrics = { ...currentMetrics, droppedRateMetrics };
-            setMetrics(currentMetrics);
-            return res.stats;
-          })
+          getMetrics({ ...fq, type: droppedType }, range)
+            .then(res => {
+              const droppedRateMetrics = {} as RateMetrics;
+              droppedRateMetrics[getRateMetricKey(topologyMetricType)] = res.metrics;
+              currentMetrics = { ...currentMetrics, droppedRateMetrics };
+              setMetrics(currentMetrics);
+              return res.stats;
+            })
+            .catch(err => {
+              // Error might occur for instance when fetching node-based topology with drop feature enabled, and Loki disabled
+              // We don't want to break the whole topology due to missing drops enrichement
+              let strErr = getHTTPErrorDetails(err, true);
+              if (isPromUnsupportedError(strErr)) {
+                strErr = getPromUnsupportedError(strErr);
+              }
+              setWarning({ type: 'cantfetchdrops', summary: t('Could not fetch drop information'), details: strErr });
+              return { numQueries: 0, dataSources: [], limitReached: false };
+            })
         );
       } else if (!['PktDropBytes', 'PktDropPackets'].includes(topologyMetricType)) {
         currentMetrics = { ...currentMetrics, droppedRateMetrics: undefined };
@@ -1019,7 +1039,9 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
       }
       return Promise.all(promises);
     },
-    [config.features, getFetchFunctions, topologyMetricType, topologyMetricFunction, range]
+    // "t" dependency kills jest
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [config.features, getFetchFunctions, topologyMetricType, topologyMetricFunction, range, setWarning]
   );
 
   const tick = React.useCallback(() => {
@@ -1076,7 +1098,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
             setFlows([]);
             setMetrics(defaultNetflowMetrics);
             setError(getHTTPErrorDetails(err, true));
-            setWarningMessage(undefined);
+            setWarning(undefined);
           })
           .finally(() => {
             const endDate = new Date();
@@ -1536,8 +1558,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
           limit={limit}
           lastRefresh={lastRefresh}
           lastDuration={lastDuration}
-          warningMessage={warningMessage}
-          slownessReason={slownessReason()}
+          warning={checkSlownessReason(warning)}
           range={range}
           showDNSLatency={isDNSTracking()}
           showRTTLatency={isFlowRTT()}
@@ -1685,8 +1706,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
               loading={loading}
               lastRefresh={lastRefresh}
               lastDuration={lastDuration}
-              warningMessage={warningMessage}
-              slownessReason={slownessReason()}
+              warning={checkSlownessReason(warning)}
               isShowQuerySummary={isShowQuerySummary}
               toggleQuerySummary={() => onToggleQuerySummary(!isShowQuerySummary)}
               isDark={isDarkTheme}
@@ -1698,8 +1718,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
               loading={loading}
               lastRefresh={lastRefresh}
               lastDuration={lastDuration}
-              warningMessage={warningMessage}
-              slownessReason={slownessReason()}
+              warning={checkSlownessReason(warning)}
               range={range}
               type={recordType}
               isShowQuerySummary={isShowQuerySummary}
@@ -1749,13 +1768,13 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
     setOverviewFocus,
     setTopologyOptions,
     size,
-    slownessReason,
+    checkSlownessReason,
     stats,
     t,
     topologyMetricFunction,
     topologyMetricType,
     topologyOptions,
-    warningMessage
+    warning
   ]);
 
   //update data on filters changes

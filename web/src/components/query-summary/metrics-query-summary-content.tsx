@@ -5,6 +5,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { getRateMetricKey, NetflowMetrics } from '../../api/loki';
 import { MetricType } from '../../model/flow-query';
+import { Warning } from '../../model/warnings';
 import { valueFormat } from '../../utils/format';
 import StatsQuerySummary from './stats-query-summary';
 
@@ -24,8 +25,7 @@ export interface MetricsQuerySummaryContentProps {
   loading?: boolean;
   lastRefresh?: Date;
   lastDuration?: number;
-  warningMessage?: string;
-  slownessReason?: string;
+  warning?: Warning;
   direction: 'row' | 'column';
   className?: string;
   isShowQuerySummary?: boolean;
@@ -40,8 +40,7 @@ export const MetricsQuerySummaryContent: React.FC<MetricsQuerySummaryContentProp
   loading,
   lastRefresh,
   lastDuration,
-  warningMessage,
-  slownessReason,
+  warning,
   direction,
   className,
   isShowQuerySummary,
@@ -242,8 +241,7 @@ export const MetricsQuerySummaryContent: React.FC<MetricsQuerySummaryContentProp
           lastDuration={lastDuration}
           numQueries={numQueries}
           dataSources={dataSources}
-          warningMessage={warningMessage}
-          slownessReason={slownessReason}
+          warning={warning}
         />
       </FlexItem>
       {metricsToShow()}

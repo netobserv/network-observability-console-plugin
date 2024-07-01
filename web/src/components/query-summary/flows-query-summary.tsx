@@ -4,6 +4,7 @@ import * as React from 'react';
 import { Record } from '../../api/ipfix';
 import { Stats } from '../../api/loki';
 import { RecordType } from '../../model/flow-query';
+import { Warning } from '../../model/warnings';
 import { TimeRange } from '../../utils/datetime';
 import { FlowsQuerySummaryContent } from './flows-query-summary-content';
 import './query-summary.css';
@@ -16,8 +17,7 @@ export interface FlowQuerySummaryProps {
   loading?: boolean;
   lastRefresh?: Date;
   lastDuration?: number;
-  warningMessage?: string;
-  slownessReason?: string;
+  warning?: Warning;
   isShowQuerySummary?: boolean;
   toggleQuerySummary?: () => void;
 }
@@ -30,8 +30,7 @@ export const FlowsQuerySummary: React.FC<FlowQuerySummaryProps> = ({
   loading,
   lastRefresh,
   lastDuration,
-  warningMessage,
-  slownessReason,
+  warning,
   isShowQuerySummary,
   toggleQuerySummary
 }) => {
@@ -48,8 +47,7 @@ export const FlowsQuerySummary: React.FC<FlowQuerySummaryProps> = ({
           loading={loading}
           lastRefresh={lastRefresh}
           lastDuration={lastDuration}
-          warningMessage={warningMessage}
-          slownessReason={slownessReason}
+          warning={warning}
           isShowQuerySummary={isShowQuerySummary}
           toggleQuerySummary={toggleQuerySummary}
         />
