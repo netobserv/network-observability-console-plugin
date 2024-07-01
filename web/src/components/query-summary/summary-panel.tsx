@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { Record } from '../../api/ipfix';
 import { NetflowMetrics, Stats } from '../../api/loki';
 import { RecordType } from '../../model/flow-query';
+import { Warning } from '../../model/warnings';
 import { TimeRange } from '../../utils/datetime';
 import { defaultSize, maxSize, minSize } from '../../utils/panel';
 import { SummaryPanelContent } from './summary-panel-content';
@@ -28,8 +29,7 @@ export interface SummaryPanelProps {
   range: number | TimeRange;
   lastRefresh?: Date;
   lastDuration?: number;
-  warningMessage?: string;
-  slownessReason?: string;
+  warning?: Warning;
   showDNSLatency?: boolean;
   showRTTLatency?: boolean;
   id?: string;
@@ -45,8 +45,7 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
   range,
   lastRefresh,
   lastDuration,
-  warningMessage,
-  slownessReason,
+  warning,
   showDNSLatency,
   showRTTLatency,
   id,
@@ -80,8 +79,7 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
           range={range}
           lastRefresh={lastRefresh}
           lastDuration={lastDuration}
-          warningMessage={warningMessage}
-          slownessReason={slownessReason}
+          warning={warning}
           showDNSLatency={showDNSLatency}
           showRTTLatency={showRTTLatency}
         />

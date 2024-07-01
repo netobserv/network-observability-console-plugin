@@ -98,3 +98,9 @@ func TestInventory_Search_RTT_Candidate(t *testing.T) {
 	search := inv.Search([]string{"SrcK8S_Namespace", "DstK8S_Namespace", "K8S_FlowLayer", "DstK8S_Type", "SrcK8S_Type"}, "TimeFlowRttNs")
 	assert.Equal(t, []string{"netobserv_workload_rtt_seconds"}, search.Candidates)
 }
+
+func TestInventory_Search_MissingLabels(t *testing.T) {
+	inv := NewInventory(&config.Prometheus{Metrics: configuredMetrics})
+	search := inv.Search([]string{"SrcK8S_Namespace", "DstK8S_Namespace", "SrcK8S_HostName"}, "Bytes")
+	assert.Equal(t, []string{"SrcK8S_HostName"}, search.MissingLabels)
+}

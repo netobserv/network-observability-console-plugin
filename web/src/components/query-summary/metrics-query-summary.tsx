@@ -1,6 +1,7 @@
 import { Card } from '@patternfly/react-core';
 import * as React from 'react';
 import { NetflowMetrics, Stats } from '../../api/loki';
+import { Warning } from '../../model/warnings';
 import { MetricsQuerySummaryContent } from './metrics-query-summary-content';
 import './query-summary.css';
 
@@ -10,8 +11,7 @@ export interface MetricsQuerySummaryProps {
   loading?: boolean;
   lastRefresh?: Date;
   lastDuration?: number;
-  warningMessage?: string;
-  slownessReason?: string;
+  warning?: Warning;
   isShowQuerySummary?: boolean;
   toggleQuerySummary?: () => void;
   isDark?: boolean;
@@ -23,8 +23,7 @@ export const MetricsQuerySummary: React.FC<MetricsQuerySummaryProps> = ({
   loading,
   lastRefresh,
   lastDuration,
-  warningMessage,
-  slownessReason,
+  warning,
   isShowQuerySummary,
   toggleQuerySummary,
   isDark
@@ -39,8 +38,7 @@ export const MetricsQuerySummary: React.FC<MetricsQuerySummaryProps> = ({
         loading={loading}
         lastRefresh={lastRefresh}
         lastDuration={lastDuration}
-        warningMessage={warningMessage}
-        slownessReason={slownessReason}
+        warning={warning}
         isShowQuerySummary={isShowQuerySummary}
         toggleQuerySummary={toggleQuerySummary}
         isDark={isDark}

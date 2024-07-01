@@ -132,9 +132,11 @@ export const Error: React.FC<ErrorProps> = ({ title, error, isLokiRelated }) => 
               {error.includes('promUnsupported') && (
                 <>
                   <Text component={TextVariants.blockquote}>
-                    {t('Add missing metrics to prometheus using FlowMetric API')}
+                    {t('Add missing metrics to prometheus in the FlowCollector API (processor.metrics.includeList)')}
                   </Text>
-                  <Text component={TextVariants.blockquote}>{t('Enable Loki in FlowCollector API')}</Text>
+                  <Text component={TextVariants.blockquote}>
+                    {t('Enable Loki in the FlowCollector API (loki.enable)')}
+                  </Text>
                 </>
               )}
               {error.includes('max entries limit') && (
