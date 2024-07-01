@@ -19,7 +19,7 @@ import Modal from './modal';
 import './time-range-modal.css';
 
 export interface TimeRangeModalProps {
-  maxChunkAge: number;
+  maxChunkAge?: number;
   isModalOpen: boolean;
   setModalOpen: (v: boolean) => void;
   range?: TimeRange;
@@ -279,7 +279,7 @@ export const TimeRangeModal: React.FC<TimeRangeModalProps> = ({
         </Text>
       </TextContent>
       {getDateTimePickers()}
-      {!Number.isNaN(maxChunkAge) && (
+      {maxChunkAge && (
         <TextContent>
           <Text component={TextVariants.blockquote}>
             {t(

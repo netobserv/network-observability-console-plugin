@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/mitchellh/mapstructure"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
 
@@ -254,65 +255,79 @@ func (h *Handlers) LokiBuildInfos() func(w http.ResponseWriter, r *http.Request)
 	}
 }
 
-func (h *Handlers) LokiConfig(param string) func(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) fetchLokiConfig(cl httpclient.Caller, output any) error {
+	baseURL := strings.TrimRight(h.Cfg.Loki.GetStatusURL(), "/")
+
+	resp, _, err := executeLokiQuery(fmt.Sprintf("%s/%s", baseURL, "config"), cl)
+	if err != nil {
+		return err
+	}
+
+	cfg := make(map[string]interface{})
+	err = yaml.Unmarshal(resp, &cfg)
+	if err != nil {
+		hlog.WithError(err).Errorf("cannot unmarshal Loki config, response was: %v", string(resp))
+		return err
+	}
+
+	err = mapstructure.Decode(cfg, output)
+	if err != nil {
+		hlog.WithError(err).Errorf("cannot decode Loki config, response was: %v", cfg)
+		return err
+	}
+
+	return nil
+}
+
+func (h *Handlers) LokiLimits() func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if !h.Cfg.IsLokiEnabled() {
-			writeError(w, http.StatusBadRequest, "Loki is disabled")
+			writeJSON(w, http.StatusNoContent, "Loki is disabled")
 			return
 		}
 		lokiClient := newLokiClient(&h.Cfg.Loki, r.Header, true)
-		baseURL := strings.TrimRight(h.Cfg.Loki.GetStatusURL(), "/")
-
-		resp, code, err := executeLokiQuery(fmt.Sprintf("%s/%s", baseURL, "config"), lokiClient)
+		limits, err := h.fetchLokiLimits(lokiClient)
 		if err != nil {
-			writeError(w, code, err.Error())
+			hlog.WithError(err).Error("cannot fetch Loki limits")
+			writeError(w, http.StatusInternalServerError, err.Error())
 			return
 		}
-
-		cfg := make(map[string]interface{})
-		err = yaml.Unmarshal(resp, &cfg)
-		if err != nil {
-			hlog.WithError(err).Errorf("cannot unmarshal, response was: %v", string(resp))
-			writeError(w, code, err.Error())
-			return
-		}
-		writeJSON(w, code, cfg[param])
+		writeJSON(w, http.StatusOK, limits)
 	}
 }
 
-func (h *Handlers) IngesterMaxChunkAge() func(w http.ResponseWriter, r *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if !h.Cfg.IsLokiEnabled() {
-			writeError(w, http.StatusBadRequest, "Loki is disabled")
-			return
-		}
-		lokiClient := newLokiClient(&h.Cfg.Loki, r.Header, true)
-		baseURL := strings.TrimRight(h.Cfg.Loki.GetStatusURL(), "/")
+func (h *Handlers) fetchLokiLimits(cl httpclient.Caller) (map[string]any, error) {
+	type LimitsConfig struct {
+		Limits map[string]any `mapstructure:"limits_config"`
+	}
+	limitsCfg := LimitsConfig{}
+	if err := h.fetchLokiConfig(cl, &limitsCfg); err != nil {
+		return nil, fmt.Errorf("Error when fetching Loki limits: %w", err)
+	}
+	return limitsCfg.Limits, nil
+}
 
-		resp, code, err := executeLokiQuery(fmt.Sprintf("%s/%s", baseURL, "config"), lokiClient)
-		if err != nil {
-			writeError(w, code, err.Error())
-			return
-		}
+func (h *Handlers) fetchIngesterMaxChunkAge(cl httpclient.Caller) (time.Duration, error) {
+	type ChunkAgeConfig struct {
+		Ingester struct {
+			MaxChunkAge string `mapstructure:"max_chunk_age"`
+		} `mapstructure:"ingester"`
+	}
+	ageCfg := ChunkAgeConfig{}
+	if err := h.fetchLokiConfig(cl, &ageCfg); err != nil {
+		return 0, fmt.Errorf("error when fetching Loki ingester max chunk age: %w", err)
+	}
 
-		cfg := make(map[string]interface{})
-		err = yaml.Unmarshal(resp, &cfg)
-		if err != nil {
-			hlog.WithError(err).Errorf("cannot unmarshal, response was: %v", string(resp))
-			writeError(w, code, err.Error())
-			return
-		}
-
+	if ageCfg.Ingester.MaxChunkAge == "" {
 		// default max chunk age is 2h
 		// see https://grafana.com/docs/loki/latest/configure/#ingester
-		var maxChunkAge interface{} = "2h"
-		if cfg["ingester"] != nil {
-			ingester := cfg["ingester"].(map[string]interface{})
-			if ingester["max_chunk_age"] != nil {
-				maxChunkAge = ingester["max_chunk_age"]
-			}
-		}
-
-		writeJSON(w, code, maxChunkAge)
+		return 2 * time.Hour, nil
 	}
+
+	parsed, err := time.ParseDuration(ageCfg.Ingester.MaxChunkAge)
+	if err != nil {
+		return 0, fmt.Errorf("cannot parse max chunk age: %w", err)
+	}
+
+	return parsed, nil
 }

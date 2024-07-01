@@ -78,7 +78,7 @@ import {
 } from '../model/topology';
 import { getFetchFunctions as getBackAndForthFetch } from '../utils/back-and-forth';
 import { Column, ColumnsId, ColumnSizeMap, getDefaultColumns } from '../utils/columns';
-import { loadConfig, loadMaxChunkAge } from '../utils/config';
+import { loadConfig } from '../utils/config';
 import { ContextSingleton } from '../utils/context';
 import { computeStepInterval, getTimeRangeOptions, TimeRange } from '../utils/datetime';
 import { formatDuration, getDateMsInSeconds, getDateSInMiliseconds, parseDuration } from '../utils/duration';
@@ -199,7 +199,6 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
   }
 
   const [config, setConfig] = React.useState<Config>(defaultConfig);
-  const [maxChunkAge, setMaxChunkAge] = React.useState<number>(NaN);
   const [warningMessage, setWarningMessage] = React.useState<string | undefined>();
   const [showViewOptions, setShowViewOptions] = useLocalStorage<boolean>(localStorageShowOptionsKey, false);
   const [showHistogram, setShowHistogram] = useLocalStorage<boolean>(localStorageShowHistogramKey, false);
@@ -261,15 +260,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
   //use this ref to list any props / content loading state & events to skip tick function
   const initState = React.useRef<
     Array<
-      | 'initDone'
-      | 'configLoading'
-      | 'configLoaded'
-      | 'configLoadError'
-      | 'maxChunkAgeLoading'
-      | 'maxChunkAgeLoaded'
-      | 'maxChunkAgeLoadError'
-      | 'forcedFiltersLoaded'
-      | 'urlFiltersPending'
+      'initDone' | 'configLoading' | 'configLoaded' | 'configLoadError' | 'forcedFiltersLoaded' | 'urlFiltersPending'
     >
   >([]);
   const [panels, setPanels] = useLocalStorage<OverviewPanel[]>(
@@ -534,7 +525,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
     if (view !== selectedViewId) {
       setFlows([]);
       setMetrics(defaultNetflowMetrics);
-      if (!initState.current.includes('configLoadError') && !initState.current.includes('maxChunkAgeLoadError')) {
+      if (!initState.current.includes('configLoadError')) {
         setError(undefined);
       }
     }
@@ -1176,19 +1167,6 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
         }
       }
 
-      // load max chunk age separately since it's a specific loki config
-      if (!initState.current.includes('maxChunkAgeLoading')) {
-        initState.current.push('maxChunkAgeLoading');
-        loadMaxChunkAge().then(v => {
-          initState.current.push('maxChunkAgeLoaded');
-          setMaxChunkAge(v.duration);
-          if (v.error && !error) {
-            initState.current.push('maxChunkAgeLoadError');
-            setError(v.error);
-          }
-        });
-      }
-
       // init will trigger this useEffect update loop as soon as config is loaded
       return;
     }
@@ -1553,7 +1531,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
           flows={flows}
           metrics={metrics}
           type={recordType}
-          maxChunkAge={maxChunkAge}
+          maxChunkAge={config.maxChunkAgeMs}
           stats={stats}
           limit={limit}
           lastRefresh={lastRefresh}
@@ -2050,7 +2028,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
             setModalOpen={setTRModalOpen}
             range={typeof range === 'object' ? range : undefined}
             setRange={setRange}
-            maxChunkAge={maxChunkAge}
+            maxChunkAge={config.maxChunkAgeMs}
           />
           <OverviewPanelsModal
             id="overview-panels-modal"
