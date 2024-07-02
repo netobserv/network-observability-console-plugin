@@ -32,6 +32,7 @@ export interface FlowQuery {
   timeRange?: number;
   startTime?: string;
   endTime?: string;
+  namespace?: string;
   filters: string;
   dedup?: boolean;
   recordType: RecordType;

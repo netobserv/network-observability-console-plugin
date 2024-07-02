@@ -242,3 +242,7 @@ span.pf-c-button__icon.pf-m-start {
 .netobserv-no-child-margin>* {
     margin: 0 !important;
 }
+
+.netobserv-tab-container {
+    margin-top: 1.5rem;
+}

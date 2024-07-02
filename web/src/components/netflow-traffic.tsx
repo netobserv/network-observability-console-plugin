@@ -178,12 +178,18 @@ import { SearchComponent, SearchEvent, SearchHandle } from './search/search';
 export type ViewId = 'overview' | 'table' | 'topology';
 
 export interface NetflowTrafficProps {
+  forcedNamespace?: string;
   forcedFilters?: Filters | null;
   isTab?: boolean;
   parentConfig?: Config;
 }
 
-export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, isTab, parentConfig }) => {
+export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
+  forcedNamespace,
+  forcedFilters,
+  isTab,
+  parentConfig
+}) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [extensions] = useResolvedExtensions<ModelFeatureFlag>(isModelFeatureFlag);
   const k8sModels = useK8sModelsWithColors();
@@ -551,6 +557,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
   const buildFlowQuery = React.useCallback((): FlowQuery => {
     const enabledFilters = getEnabledFilters(forcedFilters || filters);
     const query: FlowQuery = {
+      namespace: forcedNamespace,
       filters: filtersToString(enabledFilters.list, match === 'any'),
       limit: limitValues.includes(limit) ? limit : limitValues[0],
       recordType: recordType,
@@ -585,6 +592,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
     }
     return query;
   }, [
+    forcedNamespace,
     forcedFilters,
     filters,
     match,
@@ -1868,8 +1876,8 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
   return !_.isEmpty(extensions) ? (
     <PageSection id="pageSection" className={`${isDarkTheme ? 'dark' : 'light'} ${isTab ? 'tab' : ''}`}>
       {
-        //display title only if forced filters is not set
-        !forcedFilters && (
+        //display title only if forced filters / namespace are not set
+        !forcedFilters && !forcedNamespace && (
           <div id="pageHeader">
             <Flex direction={{ default: 'row' }}>
               <FlexItem flex={{ default: 'flex_1' }}>
@@ -1881,40 +1889,48 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
         )
       }
       {!_.isEmpty(getFilterDefs()) && (
-        <FiltersToolbar
-          id="filter-toolbar"
-          filters={filters}
-          setFilters={updateTableFilters}
-          clearFilters={clearFilters}
-          resetFilters={resetDefaultFilters}
-          queryOptionsProps={{
-            limit,
-            setLimit,
-            match,
-            setMatch,
-            packetLoss,
-            setPacketLoss,
-            recordType,
-            setRecordType,
-            dataSource,
-            setDataSource,
-            showDuplicates,
-            setShowDuplicates,
-            allowLoki: allowLoki(),
-            allowProm: allowProm(),
-            allowFlow: isFlow(),
-            allowConnection: isConnectionTracking(),
-            allowShowDuplicates: selectedViewId === 'table' && recordType !== 'allConnections',
-            deduperMark: config.deduper.mark,
-            allowPktDrops: isPktDrop(),
-            useTopK: selectedViewId === 'overview'
-          }}
-          forcedFilters={forcedFilters}
-          quickFilters={getQuickFilters()}
-          filterDefinitions={getFilterDefs()}
-          isFullScreen={isFullScreen}
-          setFullScreen={setFullScreen}
-        />
+        <Flex direction={{ default: 'row' }}>
+          <FlexItem
+            style={{ paddingTop: forcedFilters || forcedNamespace ? '1.8rem' : undefined }}
+            flex={{ default: 'flex_1' }}
+          >
+            <FiltersToolbar
+              id="filter-toolbar"
+              filters={filters}
+              setFilters={updateTableFilters}
+              clearFilters={clearFilters}
+              resetFilters={resetDefaultFilters}
+              queryOptionsProps={{
+                limit,
+                setLimit,
+                match,
+                setMatch,
+                packetLoss,
+                setPacketLoss,
+                recordType,
+                setRecordType,
+                dataSource,
+                setDataSource,
+                showDuplicates,
+                setShowDuplicates,
+                allowLoki: allowLoki(),
+                allowProm: allowProm(),
+                allowFlow: isFlow(),
+                allowConnection: isConnectionTracking(),
+                allowShowDuplicates: selectedViewId === 'table' && recordType !== 'allConnections',
+                deduperMark: config.deduper.mark,
+                allowPktDrops: isPktDrop(),
+                useTopK: selectedViewId === 'overview'
+              }}
+              forcedFilters={forcedFilters}
+              quickFilters={getQuickFilters()}
+              filterDefinitions={getFilterDefs()}
+              isFullScreen={isFullScreen}
+              setFullScreen={setFullScreen}
+            />
+          </FlexItem>
+          {(forcedFilters || forcedNamespace) && <FlexItem style={{ alignSelf: 'flex-start' }}>{actions()}</FlexItem>}
+        </Flex>
       )}
       {
         <Flex className="netflow-traffic-tabs-container">
