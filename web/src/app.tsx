@@ -14,8 +14,8 @@ import {
 } from '@patternfly/react-core';
 import React from 'react';
 import { BrowserRouter, Link, Route, Routes } from 'react-router-dom';
-import NetflowTab from './components/netflow-tab';
 import NetflowTrafficParent from './components/netflow-traffic-parent';
+import NetflowTrafficTab from './components/netflow-traffic-tab';
 
 interface AppState {
   activeItem: number | string;
@@ -71,11 +71,11 @@ export class App extends React.Component<{}, AppState> {
     console.debug('getPageContent', id);
     switch (id) {
       case 'pod-tab':
-        return <NetflowTab obj={{ kind: 'Pod', metadata: { name: 'test', namespace: 'default' } }} />;
+        return <NetflowTrafficTab obj={{ kind: 'Pod', metadata: { name: 'test', namespace: 'default' } }} />;
       case 'namespace-tab':
-        return <NetflowTab obj={{ kind: 'Namespace', metadata: { name: 'test' } }} />;
+        return <NetflowTrafficTab obj={{ kind: 'Namespace', metadata: { name: 'test' } }} />;
       case 'node-tab':
-        return <NetflowTab obj={{ kind: 'Node', metadata: { name: 'test' } }} />;
+        return <NetflowTrafficTab obj={{ kind: 'Node', metadata: { name: 'test' } }} />;
       default:
         return <NetflowTrafficParent />;
     }
