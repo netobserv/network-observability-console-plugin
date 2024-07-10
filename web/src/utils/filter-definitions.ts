@@ -29,6 +29,7 @@ import {
   getPortOptions,
   getProtocolOptions,
   getResourceOptions,
+  getTCPFlagsOptions,
   getZoneOptions,
   noOption
 } from './filter-options';
@@ -299,7 +300,10 @@ export const getFilterDefinitions = (
       getOptions = getDnsErrorCodeOptions;
     } else if (d.id.includes('dscp')) {
       getOptions = getDSCPOptions;
+    } else if (d.id.includes('flags')) {
+      getOptions = getTCPFlagsOptions;
     }
+
     return { getOptions, validate, encoder, checkCompletion };
   };
 

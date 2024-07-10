@@ -52,6 +52,7 @@ const (
 	DNSCode                = "DnsFlagsResponseCode"
 	Duplicate              = "Duplicate"
 	TimeFlowRTT            = "TimeFlowRttNs"
+	TCPFlags               = "Flags"
 )
 
 func IsNumeric(v string) bool {
@@ -67,7 +68,8 @@ func IsNumeric(v string) bool {
 		Packets,
 		Proto,
 		Bytes,
-		DSCP:
+		DSCP,
+		TCPFlags:
 		return true
 	default:
 		return false
