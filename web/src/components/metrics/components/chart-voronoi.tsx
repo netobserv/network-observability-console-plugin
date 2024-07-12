@@ -1,6 +1,6 @@
 import { ChartLegendTooltip, createContainer } from '@patternfly/react-charts';
 import React from 'react';
-import { ChartDataPoint, LegendDataItem } from '../../utils/metrics-helper';
+import { ChartDataPoint, LegendDataItem } from '../../../utils/metrics-helper';
 
 export const chartVoronoi = (legendData: LegendDataItem[], f: (v: number) => string) => {
   const CursorVoronoiContainer = createContainer('voronoi', 'cursor');

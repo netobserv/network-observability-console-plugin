@@ -20,7 +20,14 @@ describe('<NetflowOverviewPanel />', () => {
     id: SamplePanel.id,
     metricType: 'Bytes' as MetricType,
     metricFunction: 'avg',
-    metrics: metrics.map(m => ({ ...m, shortName: 'whatever', fullName: 'whatever', isInternal: false })),
+    metrics: metrics.map(m => ({
+      ...m,
+      srcName: 'whatever',
+      dstName: 'whatever',
+      shortName: 'whatever',
+      fullName: 'whatever',
+      isInternal: false
+    })),
     limit: 5,
     tooltipsTruncate: true
   };

@@ -10,7 +10,14 @@ describe('<MetricsContent />', () => {
     id: 'chart-test',
     metricType: 'Bytes',
     metricFunction: 'avg',
-    metrics: metrics.map(m => ({ ...m, fullName: 'whatever', shortName: 'whatever', isInternal: false })),
+    metrics: metrics.map(m => ({
+      ...m,
+      srcName: 'whatever',
+      dstName: 'whatever',
+      fullName: 'whatever',
+      shortName: 'whatever',
+      isInternal: false
+    })),
     smallerTexts: false,
     limit: 5,
     tooltipsTruncate: true

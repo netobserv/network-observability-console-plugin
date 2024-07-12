@@ -38,6 +38,7 @@ import { TruncateLength } from '../../dropdowns/truncate-dropdown';
 import { MetricsDonut } from '../../metrics/metrics-donut';
 import { MetricsGraph } from '../../metrics/metrics-graph';
 import { MetricsGraphWithTotal } from '../../metrics/metrics-graph-total';
+import { SankeyChart } from '../../metrics/sankey-chart';
 import { NetflowOverviewPanel } from './netflow-overview-panel';
 import './netflow-overview.css';
 import { PanelKebab, PanelKebabOptions } from './panel-kebab';
@@ -338,8 +339,35 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = ({
             doubleWidth: true,
             bodyClassSmall: true
           };
-        case 'top_sankey':
-          return { element: <>Sankey content</> };
+        case 'top_sankey_avg_byte_rates':
+        case 'top_sankey_avg_packet_rates':
+        case 'top_sankey_avg_dropped_byte_rates':
+        case 'top_sankey_avg_dropped_packet_rates': {
+          const metrics = getTopKRateMetrics(id);
+          const options = getKebabOptions(id, {
+            showLast: false
+          });
+
+          return {
+            element: !_.isEmpty(metrics) ? (
+              <SankeyChart
+                id={id}
+                isDark={isDark}
+                showLast={options.showLast}
+                metrics={metrics}
+                limit={limit}
+                showLegend={!isFocus}
+              />
+            ) : (
+              emptyGraph()
+            ),
+            kebab: (
+              <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} isDark={isDark} />
+            ),
+            bodyClassSmall: true,
+            doubleWidth: false
+          };
+        }
         case 'inbound_region':
           return { element: <>Inbound flows by region content</> };
         case 'top_avg_byte_rates':

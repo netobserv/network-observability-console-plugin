@@ -32,7 +32,7 @@ export type OverviewPanelMetric = OverviewPanelRateMetric | OverviewPanelLatency
 
 export type OverviewPanelId =
   | 'overview'
-  | 'top_sankey'
+  | `top_sankey_avg_${OverviewPanelRateMetric}`
   | 'inbound_region'
   | `top_avg_${OverviewPanelRateMetric}`
   | `top_${OverviewPanelTopLatencyFunction}_${OverviewPanelLatencyMetric}`
@@ -61,7 +61,10 @@ export type OverviewPanelInfo = {
 
 export const DEFAULT_PANEL_IDS: OverviewPanelId[] = [
   'overview',
-  'top_sankey',
+  'top_sankey_avg_byte_rates',
+  'top_sankey_avg_packet_rates',
+  'top_sankey_avg_dropped_byte_rates',
+  'top_sankey_avg_dropped_packet_rates',
   'inbound_region',
   'top_avg_byte_rates',
   'byte_rates',
@@ -85,7 +88,7 @@ export const getDefaultOverviewPanels = (customIds?: string[]): OverviewPanel[] 
    *  as these will be filtered on top anyways
    */
   if (isAllowed(Feature.Overview)) {
-    ids = ids.concat(['overview', 'top_sankey', 'inbound_region']);
+    ids = ids.concat(['overview', 'inbound_region']);
   }
 
   const metrics: OverviewPanelMetric[] = [
@@ -110,6 +113,7 @@ export const getDefaultOverviewPanels = (customIds?: string[]): OverviewPanel[] 
 
     if (['byte_rates', 'packet_rates', 'dropped_byte_rates', 'dropped_packet_rates'].includes(m)) {
       // rates
+      ids.push(`top_sankey_avg_${m as OverviewPanelRateMetric}`);
       ids.push(`top_avg_${m as OverviewPanelRateMetric}`);
       ids.push(m as OverviewPanelRateMetric);
     } else if (['dns_latency', 'rtt'].includes(m))
@@ -201,8 +205,33 @@ export const getOverviewPanelInfo = (
   switch (id) {
     case 'overview':
       return { title: t('Network overview') };
-    case 'top_sankey':
-      return { title: t('Top {{limit}} {{type}} distribution', { limit, type }) };
+    case 'top_sankey_avg_byte_rates':
+    case 'top_sankey_avg_packet_rates': {
+      const bytesOrPackets = id === 'top_sankey_avg_byte_rates' ? t('bytes rates') : t('packets rates');
+      return {
+        title: `${t('Top')} ${limit} ${metricFunction} ${bytesOrPackets} distribution`,
+        subtitle: `${metricFunctionCaptitalized} ${t('rate')}`,
+        chartType: t('sankey'),
+        tooltip: t('The {{function}} {{metric}} distribution over the selected interval', {
+          function: metricFunction,
+          metric: bytesOrPackets
+        })
+      };
+    }
+    case 'top_sankey_avg_dropped_byte_rates':
+    case 'top_sankey_avg_dropped_packet_rates': {
+      const bytesOrPackets =
+        id === 'top_sankey_avg_dropped_byte_rates' ? t('dropped bytes rates') : t('dropped packets rates');
+      return {
+        title: `${t('Top')} ${limit} ${metricFunction} ${bytesOrPackets} distribution`,
+        subtitle: `${metricFunctionCaptitalized} ${t('rate')}`,
+        chartType: t('sankey'),
+        tooltip: t('The {{function}} {{metric}} (dropped by the kernel) distribution over the selected interval', {
+          function: metricFunction,
+          metric: bytesOrPackets
+        })
+      };
+    }
     case 'inbound_region':
       return { title: t('Inbound {{type}} by region', { type }) };
     case 'top_avg_byte_rates':

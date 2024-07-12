@@ -28,6 +28,7 @@ export const localStorageHistogramGuidedTourDoneKey = 'netflow-traffic-histogram
 export const localStorageOverviewDonutDimensionKey = 'netflow-traffic-overview-donut-dimension';
 export const localStorageOverviewMetricsDimensionKey = 'netflow-traffic-overview-metrics-dimension';
 export const localStorageOverviewMetricsTotalDimensionKey = 'netflow-traffic-overview-metrics-total-dimension';
+export const localStorageOverviewSankeyDimensionKey = 'netflow-traffic-overview-sankey-dimension';
 export const localStorageOverviewKebabKey = 'netflow-traffic-overview-kebab-map';
 
 export interface ArraySelectionOptions {
