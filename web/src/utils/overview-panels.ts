@@ -61,10 +61,6 @@ export type OverviewPanelInfo = {
 
 export const DEFAULT_PANEL_IDS: OverviewPanelId[] = [
   'overview',
-  'top_sankey_avg_byte_rates',
-  'top_sankey_avg_packet_rates',
-  'top_sankey_avg_dropped_byte_rates',
-  'top_sankey_avg_dropped_packet_rates',
   'inbound_region',
   'top_avg_byte_rates',
   'byte_rates',

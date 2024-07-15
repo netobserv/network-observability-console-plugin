@@ -101,6 +101,14 @@ jest.mock('react-router-dom', () => ({
   }
 }));
 
+//Mock d3-sankey
+jest.mock('d3-shape', () => ({
+  linkHorizontal: () => ({
+    source: jest.fn(),
+    target: jest.fn()
+  })
+}));
+
 //Mock routes
 jest.mock('./src/api/routes', () => ({
   getPods: jest.fn(async () => ['ABCD']),
@@ -114,7 +122,7 @@ global.console = {
   log: jest.fn(),
   warn: jest.fn(),
   info: jest.fn(),
-  
+
   // Keep native behaviour for error, and allow logging for debugging
   debug: console.log,
   error: console.error,
