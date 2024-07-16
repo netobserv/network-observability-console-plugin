@@ -171,6 +171,8 @@ export type TopologyMetrics = {
 };
 
 export type NamedMetric = TopologyMetrics & {
+  srcName: string;
+  dstName: string;
   fullName: string;
   shortName: string;
   isInternal: boolean;

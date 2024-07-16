@@ -5,9 +5,9 @@ import * as React from 'react';
 import { AlertsResult, SilencedAlert } from '../../api/alert';
 import { FlowMetricsResult, GenericMetricsResult } from '../../api/loki';
 import { getConfig } from '../../api/routes';
-import NetflowTab from '../netflow-tab';
 import NetflowTraffic from '../netflow-traffic';
 import NetflowTrafficParent from '../netflow-traffic-parent';
+import NetflowTrafficTab from '../netflow-traffic-tab';
 import { FullConfigResultSample } from '../__tests-data__/config';
 import { extensionsMock } from '../__tests-data__/extensions';
 import { PodTabParam, ServiceTabParam, UnknownTabParam } from '../__tests-data__/tabs';
@@ -35,7 +35,7 @@ jest.mock('../../api/routes', () => ({
 
 const getConfigMock = getConfig as jest.Mock;
 
-describe('<NetflowTab />', () => {
+describe('<NetflowTrafficTab />', () => {
   beforeAll(() => {
     useResolvedExtensionsMock.mockReturnValue(extensionsMock);
   });
@@ -45,31 +45,31 @@ describe('<NetflowTab />', () => {
   });
 
   it('should mount component for Pod', async () => {
-    const wrapper = mount(<NetflowTab obj={PodTabParam} />);
+    const wrapper = mount(<NetflowTrafficTab obj={PodTabParam} />);
     await waitFor(() => {
       expect(getConfigMock).toHaveBeenCalled();
 
-      expect(wrapper.find(NetflowTab).last()).toBeTruthy();
+      expect(wrapper.find(NetflowTrafficTab).last()).toBeTruthy();
       expect(wrapper.find(NetflowTrafficParent).last()).toBeTruthy();
       expect(wrapper.find(NetflowTraffic).last()).toBeTruthy();
     });
   });
   it('should mount component for Service', async () => {
-    const wrapper = mount(<NetflowTab obj={ServiceTabParam} />);
+    const wrapper = mount(<NetflowTrafficTab obj={ServiceTabParam} />);
     await waitFor(() => {
       expect(getConfigMock).toHaveBeenCalled();
 
-      expect(wrapper.find(NetflowTab).last()).toBeTruthy();
+      expect(wrapper.find(NetflowTrafficTab).last()).toBeTruthy();
       expect(wrapper.find(NetflowTrafficParent).last()).toBeTruthy();
       expect(wrapper.find(NetflowTraffic).last()).toBeTruthy();
     });
   });
   it('should mount empty state', async () => {
-    const wrapper = mount(<NetflowTab obj={UnknownTabParam} />);
+    const wrapper = mount(<NetflowTrafficTab obj={UnknownTabParam} />);
     await waitFor(() => {
       expect(getConfigMock).toHaveBeenCalled();
 
-      expect(wrapper.find(NetflowTab).last()).toBeTruthy();
+      expect(wrapper.find(NetflowTrafficTab).last()).toBeTruthy();
       expect(wrapper.find('EmptyState[data-test="error-state"]').last()).toBeTruthy();
     });
   });

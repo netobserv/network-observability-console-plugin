@@ -163,6 +163,8 @@ export const toNamedMetric = (
       // E.g: namespace "netobserv" to "netobserv"
       return {
         ...m,
+        srcName,
+        dstName,
         shortName: `${srcName} (${t('internal')})`,
         fullName: `${srcFullName} (${t('internal')})`,
         isInternal: true
@@ -171,6 +173,8 @@ export const toNamedMetric = (
       // E.g: host-network traffic while scope is "namespaces"
       return {
         ...m,
+        srcName,
+        dstName,
         shortName: srcName,
         fullName: srcFullName,
         isInternal: false
@@ -180,6 +184,8 @@ export const toNamedMetric = (
   if (data && matchPeer(data, m.source)) {
     return {
       ...m,
+      srcName,
+      dstName,
       shortName: `${t('To')} ${dstName}`,
       fullName: `${t('To')} ${dstFullName}`,
       isInternal: false
@@ -187,6 +193,8 @@ export const toNamedMetric = (
   } else if (data && matchPeer(data, m.destination)) {
     return {
       ...m,
+      srcName,
+      dstName,
       shortName: `${t('From')} ${srcName}`,
       fullName: `${t('From')} ${srcFullName}`,
       isInternal: false
@@ -194,6 +202,8 @@ export const toNamedMetric = (
   }
   return {
     ...m,
+    srcName,
+    dstName,
     shortName: `${srcName} -> ${dstName}`,
     fullName: `${srcFullName} -> ${dstFullName}`,
     isInternal: false

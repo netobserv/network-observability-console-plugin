@@ -25,7 +25,7 @@ import {
   observeDimensions,
   toDatapoints
 } from '../../utils/metrics-helper';
-import { chartVoronoi } from './chart-voronoi';
+import { chartVoronoi } from './components/chart-voronoi';
 import './metrics-content.css';
 
 export interface MetricsGraphProps {

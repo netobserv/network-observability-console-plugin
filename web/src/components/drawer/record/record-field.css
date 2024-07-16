@@ -1,0 +1,100 @@
+/* force datetime to be singleline on small size*/
+.datetime.s {
+  display: flex;
+  white-space: nowrap
+}
+
+.co-resource-item {
+  display: flex;
+}
+
+/* max content lines to show */
+.co-resource-item.s>.co-resource-item__resource-name,
+.co-resource-item.m>.co-resource-item__resource-name,
+.co-resource-item.l>.co-resource-item__resource-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.record-field-flex-container {
+  height: 100%;
+  gap: .3rem;
+}
+
+.record-field-flex {
+  align-self: center;
+}
+
+.record-field-content {
+  width: 100%;
+}
+
+.co-resource-item.s>.co-resource-item__resource-name {
+  -webkit-line-clamp: 1;
+}
+
+.co-resource-item.m>.co-resource-item__resource-name {
+  -webkit-line-clamp: 2;
+}
+
+.co-resource-item.l>.co-resource-item__resource-name {
+  -webkit-line-clamp: 3;
+}
+
+.record-field-flex-container.s,
+.record-field-flex-container.m,
+.record-field-flex-container.l {
+  flex-direction: column;
+}
+
+/* table tooltips - check pf-c-tooltip__content for values */
+.record-field-tooltip {
+  display: flex;
+  flex-direction: column;
+  visibility: hidden;
+  transition-property: visibility;
+  transition-delay: 0.5s;
+  background-color: #151515;
+  padding: .5rem;
+  color: #fff;
+  text-align: center;
+  word-break: break-word;
+  font-size: 13px;
+  position: absolute;
+  z-index: 1;
+  width: max-content;
+  transform: translateX(-50%);
+  left: 50%;
+}
+
+/* show tooltip on content hover */
+.record-field-content-flex.truncated:hover .record-field-tooltip,
+.record-field-content.truncated:hover .record-field-tooltip {
+  visibility: visible;
+}
+
+/* hide tooltip if hovering it */
+.record-field-tooltip:hover {
+  display: none !important;
+}
+
+.child-arrow {
+  margin: 0 5px 0 5px;
+}
+
+.record-field-date {
+  align-items: baseline;
+  flex-wrap: nowrap;
+}
+
+.record-field-date-icon {
+  flex-shrink: 0;
+}
+
+button.record-field-value-popover-button {
+  margin: 0 !important;
+  padding: 5px !important;
+}
