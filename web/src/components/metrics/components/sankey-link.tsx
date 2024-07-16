@@ -1,6 +1,9 @@
-import type { SankeyLink } from 'd3-sankey';
-import { linkHorizontal } from 'd3-shape';
+import { DefaultLinkObject, linkHorizontal } from 'd3-shape';
 import React, { useState } from 'react';
+import { CustomSankeyLink, CustomSankeyNode } from '../sankey-chart';
+
+export const DEFAULT_OPACITY = 0.3;
+export const HOVER_OPACITY = 0.8;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function horizontalSourceO(d: any): [number, number] {
@@ -33,35 +36,29 @@ function sankeyLinkHorizontalO() {
 }
 
 export type SankeyLinkProps = {
-  link: SankeyLink<{}, {}>;
+  link: CustomSankeyLink;
   color: string;
   maxWidth?: number;
 };
 
 export const SankeyLinkComponent: React.FC<SankeyLinkProps> = ({ link, color, maxWidth }) => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const source = link.source as any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const target = link.target as any;
-
-  const linkWidth = maxWidth ? (link.value / source.value) * maxWidth : link.width;
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const path: string = maxWidth ? (sankeyLinkHorizontalO() as any)(link) : (sankeyLinkHorizontal() as any)(link);
-
-  const [opacity, setOpacity] = useState(0.3);
-
+  const source = link.source as CustomSankeyNode;
+  const target = link.target as CustomSankeyNode;
+  const linkWidth = maxWidth && source.value ? (link.value / source.value) * maxWidth : link.width;
+  const defaultLink = link as unknown as DefaultLinkObject;
+  const path = maxWidth ? sankeyLinkHorizontalO()(defaultLink) : sankeyLinkHorizontal()(defaultLink);
+  const [opacity, setOpacity] = useState(DEFAULT_OPACITY);
   return (
     <path
-      d={path}
+      d={path!}
       style={{
         fill: 'none',
         strokeOpacity: opacity,
         stroke: color,
         strokeWidth: linkWidth && !isNaN(linkWidth) ? linkWidth : 0
       }}
-      onMouseEnter={() => setOpacity(0.8)}
-      onMouseLeave={() => setOpacity(0.3)}
+      onMouseEnter={() => setOpacity(HOVER_OPACITY)}
+      onMouseLeave={() => setOpacity(DEFAULT_OPACITY)}
     >
       <title>
         {source.name} -&gt; {target.name}: {link.value}

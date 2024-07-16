@@ -1,7 +1,7 @@
 import chroma from 'chroma-js';
 import * as d3 from 'd3';
 import type { SankeyGraph, SankeyLink, SankeyNode } from 'd3-sankey';
-import { sankey as d3sankey } from 'd3-sankey';
+import { sankey, sankeyCenter } from 'd3-sankey';
 import React from 'react';
 import { MetricStats, NamedMetric } from '../../api/loki';
 import { getStat } from '../../model/metrics';
@@ -71,9 +71,10 @@ export const SankeyChart: React.FC<SankeyChartProps> = ({ id, isDark, showLast, 
       });
 
       const margin = dimensions.width / 20;
-      const graph = d3sankey<CustomSankeyNode, CustomSankeyLink>()
+      const graph = sankey<CustomSankeyNode, CustomSankeyLink>()
         .nodeWidth(dimensions.width / 3)
         .nodePadding(dimensions.width / 10)
+        .nodeAlign(sankeyCenter)
         .extent([
           [margin, margin],
           [dimensions.width - margin, dimensions.height - margin]
@@ -87,8 +88,7 @@ export const SankeyChart: React.FC<SankeyChartProps> = ({ id, isDark, showLast, 
               <SankeyLinkComponent
                 key={`sankey-link-${i}`}
                 link={link}
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                color={color(colorScale((link.source as any).index)).hex()}
+                color={color(colorScale((link.source as CustomSankeyNode).index!)).hex()}
                 maxWidth={dimensions.width / 50}
               />
             ))}
