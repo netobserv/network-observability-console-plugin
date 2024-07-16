@@ -135,6 +135,8 @@ const getPeerName = (
     return t('Total');
   }
   switch (scope) {
+    case 'location':
+      return t('internal');
     case 'cluster':
     case 'zone':
     case 'host':

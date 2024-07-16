@@ -78,7 +78,7 @@ import { FiltersToolbar } from './toolbar/filters-toolbar';
 import HistogramToolbar from './toolbar/histogram-toolbar';
 import ViewOptionsToolbar from './toolbar/view-options-toolbar';
 
-export type ViewId = 'overview' | 'table' | 'topology';
+export type ViewId = 'overview' | 'table' | 'topology' | 'map';
 
 export interface NetflowTrafficProps {
   forcedFilters?: Filters | null;
@@ -329,6 +329,9 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
     }
     if (model.selectedViewId === 'table') {
       query.type = 'Flows';
+    } else if (model.selectedViewId === 'map') {
+      query.type = model.topologyMetricType;
+      query.aggregateBy = 'location';
     } else {
       query.aggregateBy = model.metricScope;
       if (model.selectedViewId === 'topology') {
@@ -447,7 +450,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
                 res => {
                   //set matching value and apply changes on the entire object to trigger refresh
                   rateMetrics[key] = res.metrics;
-                  currentMetrics = { ...currentMetrics, rateMetrics };
+                  currentMetrics = { ...currentMetrics, rateMetrics, locationMetrics: undefined };
                   model.setMetrics(currentMetrics);
                   return res.stats;
                 }
@@ -727,7 +730,13 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
           if (['Bytes', 'Packets'].includes(model.topologyMetricType)) {
             const rateMetrics = {} as RateMetrics;
             rateMetrics[getRateMetricKey(model.topologyMetricType)] = res.metrics;
-            currentMetrics = { ...currentMetrics, rateMetrics, dnsLatencyMetrics: undefined, rttMetrics: undefined };
+            currentMetrics = {
+              ...currentMetrics,
+              rateMetrics,
+              dnsLatencyMetrics: undefined,
+              rttMetrics: undefined,
+              locationMetrics: undefined
+            };
             model.setMetrics(currentMetrics);
           } else if (['PktDropBytes', 'PktDropPackets'].includes(model.topologyMetricType)) {
             const droppedRateMetrics = {} as RateMetrics;
@@ -791,6 +800,40 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
     ]
   );
 
+  const fetchMap = React.useCallback(
+    (fq: FlowQuery) => {
+      model.setFlows([]);
+
+      let currentMetrics = metricsRef.current;
+      const { getMetrics } = getFetchFunctions();
+
+      const promises: Promise<Stats>[] = [
+        getMetrics(
+          {
+            ...fq,
+            function: 'rate'
+          },
+          model.range
+        ).then(res => {
+          const locationMetrics = {} as RateMetrics;
+          locationMetrics[getRateMetricKey(model.topologyMetricType)] = res.metrics;
+          currentMetrics = {
+            ...currentMetrics,
+            locationMetrics,
+            rateMetrics: undefined,
+            dnsLatencyMetrics: undefined,
+            rttMetrics: undefined
+          };
+          model.setMetrics(currentMetrics);
+          return res.stats;
+        })
+      ];
+      return Promise.all(promises);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [model.config.features, getFetchFunctions, model.topologyMetricType, model.range, model.setWarning]
+  );
+
   const tick = React.useCallback(() => {
     // skip tick while forcedFilters & config are not loaded
     // this check ensure tick will not be called during init
@@ -827,6 +870,8 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
       case 'topology':
         promises = fetchTopology(fq);
         break;
+      case 'map':
+        promises = fetchMap(fq);
       default:
         console.error('tick called on not implemented view Id', model.selectedViewId);
         model.setLoading(false);

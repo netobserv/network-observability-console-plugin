@@ -111,6 +111,7 @@ export const createPeer = (fields: Partial<TopologyMetricPeer>): TopologyMetricP
   const newPeer: TopologyMetricPeer = {
     id: getPeerId(fields),
     addr: fields.addr,
+    location: fields.location,
     resource: fields.resource,
     namespace: fields.namespace,
     owner: fields.owner,
@@ -151,6 +152,9 @@ export const createPeer = (fields: Partial<TopologyMetricPeer>): TopologyMetricP
     // Fallback on cluster aggregation if available
     newPeer.resourceKind = 'Cluster';
     newPeer.getDisplayName = () => fields.clusterName;
+  } else if (fields.location) {
+    newPeer.getDisplayName = () =>
+      `${fields.location!.regionName} ${fields.location!.countryName} ${fields.location!.cityName}`;
   } else if (fields.addr) {
     newPeer.getDisplayName = () => fields.addr;
   }
@@ -173,6 +177,18 @@ const parseTopologyMetric = (
   const stats = computeStats(normalized);
   const source = createPeer({
     addr: raw.metric.SrcAddr,
+    location:
+      raw.metric.SrcLoc_CountryName && raw.metric.SrcLoc_CountryName !== '-'
+        ? {
+            addr: raw.metric.SrcAddr,
+            cityName: raw.metric.SrcLoc_CityName,
+            countryName: raw.metric.SrcLoc_CountryName,
+            countryLongName: raw.metric.SrcLoc_CountryLongName,
+            regionName: raw.metric.SrcLoc_RegionName,
+            latitude: Number(raw.metric.SrcLoc_Latitude),
+            longitude: Number(raw.metric.SrcLoc_Longitude)
+          }
+        : undefined,
     resource: nameAndType(raw.metric.SrcK8S_Name, raw.metric.SrcK8S_Type),
     owner: nameAndType(raw.metric.SrcK8S_OwnerName, raw.metric.SrcK8S_OwnerType),
     namespace: raw.metric.SrcK8S_Namespace,
@@ -183,6 +199,18 @@ const parseTopologyMetric = (
   });
   const destination = createPeer({
     addr: raw.metric.DstAddr,
+    location:
+      raw.metric.DstLoc_CountryName && raw.metric.DstLoc_CountryName !== '-'
+        ? {
+            addr: raw.metric.DstAddr,
+            cityName: raw.metric.DstLoc_CityName,
+            countryName: raw.metric.DstLoc_CountryName,
+            countryLongName: raw.metric.DstLoc_CountryLongName,
+            regionName: raw.metric.DstLoc_RegionName,
+            latitude: Number(raw.metric.DstLoc_Latitude),
+            longitude: Number(raw.metric.DstLoc_Longitude)
+          }
+        : undefined,
     resource: nameAndType(raw.metric.DstK8S_Name, raw.metric.DstK8S_Type),
     owner: nameAndType(raw.metric.DstK8S_OwnerName, raw.metric.DstK8S_OwnerType),
     namespace: raw.metric.DstK8S_Namespace,

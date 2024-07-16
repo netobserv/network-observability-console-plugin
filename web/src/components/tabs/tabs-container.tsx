@@ -50,6 +50,7 @@ export const TabsContainer: React.FC<TabsContainerProps> = props => {
             eventKey={'topology'}
             title={<TabTitleText>{t('Topology')}</TabTitleText>}
           />
+          <Tab className="mapTabButton" eventKey={'map'} title={<TabTitleText>{t('External traffic')}</TabTitleText>} />
         </Tabs>
       </FlexItem>
       {props.selectedViewId === 'table' && (

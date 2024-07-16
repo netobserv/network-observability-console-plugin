@@ -107,6 +107,30 @@ export interface Fields {
   SrcK8S_Zone?: string;
   /** Destination zone */
   DstK8S_Zone?: string;
+  /** Source country short name */
+  SrcLoc_CountryName?: string;
+  /** Source country long name */
+  SrcLoc_CountryLongName?: string;
+  /** Source region */
+  SrcLoc_RegionName?: string;
+  /** Source city name */
+  SrcLoc_CityName?: string;
+  /** Source latitude */
+  SrcLoc_Latitude?: number;
+  /** Source longitude */
+  SrcLoc_Longitude?: number;
+  /** Destination country short name */
+  DstLoc_CountryName?: string;
+  /** Destination country long name */
+  DstLoc_CountryLongName?: string;
+  /** Destination region */
+  DstLoc_RegionName?: string;
+  /** Destination city name */
+  DstLoc_CityName?: string;
+  /** Destination latitude */
+  DstLoc_Latitude?: number;
+  /** Destination longitude */
+  DstLoc_Longitude?: number;
   /** Cluster name */
   K8S_ClusterName?: string;
   /** L4 protocol */

@@ -60,9 +60,19 @@ export interface NameAndType {
   type: string;
 }
 
+export interface Location {
+  addr?: string;
+  countryName?: string;
+  countryLongName?: string;
+  regionName?: string;
+  cityName?: string;
+  latitude: number;
+  longitude: number;
+}
 export interface TopologyMetricPeer {
   id: string;
   addr?: string;
+  location?: Location;
   namespace?: string;
   owner?: NameAndType;
   resource?: NameAndType;
@@ -143,6 +153,7 @@ export type NetflowMetrics = {
   totalRttMetric?: TotalFunctionMetrics;
   customMetrics: Map<string, TopologyMetrics[] | GenericMetric[]>;
   totalCustomMetrics: Map<string, TopologyMetrics | GenericMetric>;
+  locationMetrics?: RateMetrics;
 };
 
 export const defaultNetflowMetrics = {

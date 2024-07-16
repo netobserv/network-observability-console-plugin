@@ -16,6 +16,7 @@ const (
 var (
 	aggregateKeyLabels = map[string][]string{
 		"app":          {"app"},
+		"location":     {"SrcAddr", "SrcLoc_CountryName", "SrcLoc_CountryLongName", "SrcLoc_RegionName", "SrcLoc_CityName", "SrcLoc_Latitude", "SrcLoc_Longitude", "DstAddr", "DstLoc_CountryName", "DstLoc_CountryLongName", "DstLoc_RegionName", "DstLoc_CityName", "DstLoc_Latitude", "DstLoc_Longitude"},
 		"droppedState": {"PktDropLatestState"},
 		"droppedCause": {"PktDropLatestDropCause"},
 		"dnsRCode":     {"DnsFlagsResponseCode"},

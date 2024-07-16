@@ -28,6 +28,7 @@ import FlowsQuerySummary from '../query-summary/flows-query-summary';
 import MetricsQuerySummary from '../query-summary/metrics-query-summary';
 import SummaryPanel from '../query-summary/summary-panel';
 import { SearchEvent, SearchHandle } from '../search/search';
+import NetflowMap from '../tabs/netflow-map/netflow-map';
 import NetflowOverview from '../tabs/netflow-overview/netflow-overview';
 import NetflowTable from '../tabs/netflow-table/netflow-table';
 import NetflowTopology from '../tabs/netflow-topology/netflow-topology';
@@ -151,6 +152,16 @@ export const NetflowTrafficDrawer: React.FC<NetflowTrafficDrawerProps> = props =
       />
     );
   }, [props.defaultFilters, props.resetDefaultFilters, props.filters.list, props.clearFilters]);
+
+  const getLocationMetrics = React.useCallback(() => {
+    switch (props.topologyMetricType) {
+      case 'Bytes':
+      case 'Packets':
+        return props.metrics.locationMetrics?.[getRateMetricKey(props.topologyMetricType)];
+      default:
+        return undefined;
+    }
+  }, [props.topologyMetricType, props.metrics.locationMetrics]);
 
   const getTopologyMetrics = React.useCallback(() => {
     switch (props.topologyMetricType) {
@@ -283,6 +294,9 @@ export const NetflowTrafficDrawer: React.FC<NetflowTrafficDrawerProps> = props =
               allowedScopes={props.allowedScopes}
             />
           );
+          break;
+        case 'map':
+          content = <NetflowMap loading={props.loading} metrics={getLocationMetrics()} />;
           break;
         default:
           content = null;

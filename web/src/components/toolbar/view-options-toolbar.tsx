@@ -59,6 +59,11 @@ export const ViewOptionsToolbar: React.FC<ViewOptionsToolbarProps> = React.forwa
   (props, ref: React.Ref<SearchHandle>) => {
     const { t } = useTranslation('plugin__netobserv-plugin');
 
+    const onMapExport = React.useCallback(() => {
+      const map_flex = document.getElementById('map-content');
+      exportToPng('map_page', map_flex as HTMLElement, props.isDarkTheme);
+    }, [props.isDarkTheme]);
+
     const onTopologyExport = React.useCallback(() => {
       const topology_flex = document.getElementsByClassName('pf-topology-visualization-surface__svg')[0];
       exportToPng('topology', topology_flex as HTMLElement, props.isDarkTheme);
@@ -149,6 +154,21 @@ export const ViewOptionsToolbar: React.FC<ViewOptionsToolbarProps> = React.forwa
               onClick={() => onTopologyExport()}
             >
               {t('Export topology view')}
+            </Button>
+          </OverflowMenuItem>
+        );
+      } else if (props.selectedViewId === 'map') {
+        items.push(
+          <OverflowMenuItem key="export">
+            <Button
+              data-test="export-button"
+              id="export-button"
+              variant="link"
+              className="overflow-button"
+              icon={<ExportIcon />}
+              onClick={() => onMapExport()}
+            >
+              {t('Export map view')}
             </Button>
           </OverflowMenuItem>
         );
