@@ -101,6 +101,12 @@ jest.mock('react-router-dom', () => ({
   }
 }));
 
+jest.mock('maplibre-gl', () => ({
+  Popup: (props: any) => {
+    return null;
+  },
+}));
+
 //Mock routes
 jest.mock('./src/api/routes', () => ({
   getPods: jest.fn(async () => ['ABCD']),
