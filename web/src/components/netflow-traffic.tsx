@@ -63,7 +63,7 @@ import {
 } from '../utils/router';
 import { useTheme } from '../utils/theme-hook';
 import { getURLParams, hasEmptyParams, netflowTrafficPath, removeURLParam, setURLParams, URLParam } from '../utils/url';
-import NetflowTrafficDrawer from './drawer/drawer';
+import NetflowTrafficDrawer from './drawer/netflow-traffic-drawer';
 import { rateMetricFunctions, timeMetricFunctions } from './dropdowns/metric-function-dropdown';
 import { limitValues, topValues } from './dropdowns/query-options-panel';
 import { RefreshDropdown } from './dropdowns/refresh-dropdown';
