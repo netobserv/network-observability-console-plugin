@@ -1,34 +1,9 @@
 import { isModelFeatureFlag, ModelFeatureFlag, useResolvedExtensions } from '@openshift-console/dynamic-plugin-sdk';
-import {
-  Button,
-  Drawer,
-  DrawerContent,
-  DrawerContentBody,
-  Dropdown,
-  DropdownGroup,
-  DropdownItem,
-  Flex,
-  FlexItem,
-  OverflowMenu,
-  OverflowMenuContent,
-  OverflowMenuControl,
-  OverflowMenuGroup,
-  OverflowMenuItem,
-  PageSection,
-  Tab,
-  Tabs,
-  TabTitleText,
-  Text,
-  TextVariants,
-  Toolbar,
-  ToolbarItem,
-  Tooltip
-} from '@patternfly/react-core';
-import { ColumnsIcon, EllipsisVIcon, ExportIcon, SyncAltIcon } from '@patternfly/react-icons';
+import { Button, Flex, FlexItem, PageSection, Text, TextVariants } from '@patternfly/react-core';
+import { SyncAltIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Record } from '../api/ipfix';
 import {
   defaultNetflowMetrics,
   FunctionMetrics,
@@ -36,80 +11,32 @@ import {
   getRateMetricKey,
   initFunctionMetricKeys,
   initRateMetricKeys,
-  NetflowMetrics,
   RateMetrics,
   Stats,
   TotalFunctionMetrics,
   TotalRateMetrics
 } from '../api/loki';
 import { getFlowGenericMetrics } from '../api/routes';
-import { Config, defaultConfig } from '../model/config';
-import {
-  DisabledFilters,
-  Filter,
-  Filters,
-  filtersEqual,
-  getDisabledFiltersRecord,
-  getEnabledFilters,
-  hasIndexFields,
-  hasNonIndexFields
-} from '../model/filters';
-import {
-  DataSource,
-  filtersToString,
-  FlowQuery,
-  FlowScope,
-  isTimeMetric,
-  Match,
-  MetricFunction,
-  MetricType,
-  PacketLoss,
-  RecordType,
-  StatFunction
-} from '../model/flow-query';
+import { Config } from '../model/config';
+import { Filters, getDisabledFiltersRecord, getEnabledFilters } from '../model/filters';
+import { filtersToString, FlowQuery, FlowScope, isTimeMetric, MetricFunction, MetricType } from '../model/flow-query';
 import { MetricScopeOptions } from '../model/metrics';
+import { netflowTrafficModel } from '../model/netflow-traffic';
 import { parseQuickFilters } from '../model/quick-filters';
-import {
-  DefaultOptions,
-  getGroupsForScope,
-  GraphElementPeer,
-  TopologyGroupTypes,
-  TopologyOptions
-} from '../model/topology';
-import { Warning } from '../model/warnings';
+import { getGroupsForScope, TopologyGroupTypes } from '../model/topology';
 import { getFetchFunctions as getBackAndForthFetch } from '../utils/back-and-forth';
-import { Column, ColumnsId, ColumnSizeMap, getDefaultColumns } from '../utils/columns';
+import { ColumnsId, getDefaultColumns } from '../utils/columns';
 import { loadConfig } from '../utils/config';
 import { ContextSingleton } from '../utils/context';
-import { computeStepInterval, getTimeRangeOptions, TimeRange } from '../utils/datetime';
-import { formatDuration, getDateMsInSeconds, getDateSInMiliseconds, parseDuration } from '../utils/duration';
+import { computeStepInterval } from '../utils/datetime';
 import { getHTTPErrorDetails, getPromUnsupportedError, isPromUnsupportedError } from '../utils/errors';
-import { exportToPng } from '../utils/export';
 import { checkFilterAvailable, getFilterDefinitions } from '../utils/filter-definitions';
 import { mergeFlowReporters } from '../utils/flows';
-import { useK8sModelsWithColors } from '../utils/k8s-models-hook';
 import {
   defaultArraySelectionOptions,
   getLocalStorage,
   localStorageColsKey,
-  localStorageColsSizesKey,
-  localStorageDisabledFiltersKey,
-  localStorageLastLimitKey,
-  localStorageLastTopKey,
-  localStorageMetricFunctionKey,
-  localStorageMetricScopeKey,
-  localStorageMetricTypeKey,
-  localStorageOverviewFocusKey,
-  localStorageOverviewIdsKey,
-  localStorageOverviewTruncateKey,
-  localStorageQueryParamsKey,
-  localStorageRefreshKey,
-  localStorageShowHistogramKey,
-  localStorageShowOptionsKey,
-  localStorageSizeKey,
-  localStorageTopologyOptionsKey,
-  localStorageViewIdKey,
-  useLocalStorage
+  localStorageOverviewIdsKey
 } from '../utils/local-storage-hook';
 import { mergeStats } from '../utils/metrics';
 import {
@@ -117,23 +44,13 @@ import {
   dnsIdMatcher,
   droppedIdMatcher,
   getDefaultOverviewPanels,
-  OverviewPanel,
   parseCustomMetricId,
   rttIdMatcher
 } from '../utils/overview-panels';
 import { usePoll } from '../utils/poll-hook';
 import {
-  defaultMetricFunction,
-  defaultMetricType,
   defaultTimeRange,
-  getDataSourceFromURL,
   getFiltersFromURL,
-  getLimitFromURL,
-  getMatchFromURL,
-  getPacketLossFromURL,
-  getRangeFromURL,
-  getRecordTypeFromURL,
-  getShowDupFromURL,
   setURLFilters,
   setURLLimit,
   setURLMatch,
@@ -146,34 +63,20 @@ import {
 } from '../utils/router';
 import { useTheme } from '../utils/theme-hook';
 import { getURLParams, hasEmptyParams, netflowTrafficPath, removeURLParam, setURLParams, URLParam } from '../utils/url';
+import NetflowTrafficDrawer from './drawer/netflow-traffic-drawer';
 import { rateMetricFunctions, timeMetricFunctions } from './dropdowns/metric-function-dropdown';
-import { OverviewDisplayDropdown } from './dropdowns/overview-display-dropdown';
 import { limitValues, topValues } from './dropdowns/query-options-panel';
 import { RefreshDropdown } from './dropdowns/refresh-dropdown';
-import { Size, TableDisplayDropdown } from './dropdowns/table-display-dropdown';
 import TimeRangeDropdown from './dropdowns/time-range-dropdown';
-import { TopologyDisplayDropdown } from './dropdowns/topology-display-dropdown';
-import { TruncateLength } from './dropdowns/truncate-dropdown';
 import { navigate } from './dynamic-loader/dynamic-loader';
-import { FiltersToolbar } from './filters/filters-toolbar';
 import GuidedTourPopover, { GuidedTourHandle } from './guided-tour/guided-tour';
-import Error from './messages/error';
-import HistogramContainer from './metrics/histogram';
-import { ColumnsModal } from './modals/columns-modal';
-import { ExportModal } from './modals/export-modal';
-import OverviewPanelsModal from './modals/overview-panels-modal';
-import TimeRangeModal from './modals/time-range-modal';
-import NetflowOverview from './netflow-overview/netflow-overview';
-import { RecordPanel } from './netflow-record/record-panel';
-import NetflowTable from './netflow-table/netflow-table';
-import ElementPanel from './netflow-topology/element-panel';
-import NetflowTopology from './netflow-topology/netflow-topology';
+import Modals from './modals/modals';
 import './netflow-traffic.css';
-import { LinksOverflow } from './overflow/links-overflow';
-import FlowsQuerySummary from './query-summary/flows-query-summary';
-import MetricsQuerySummary from './query-summary/metrics-query-summary';
-import SummaryPanel from './query-summary/summary-panel';
-import { SearchComponent, SearchEvent, SearchHandle } from './search/search';
+import { SearchHandle } from './search/search';
+import TabsContainer from './tabs/tabs-container';
+import { FiltersToolbar } from './toolbar/filters-toolbar';
+import HistogramToolbar from './toolbar/histogram-toolbar';
+import ViewOptionsToolbar from './toolbar/view-options-toolbar';
 
 export type ViewId = 'overview' | 'table' | 'topology';
 
@@ -185,125 +88,60 @@ export interface NetflowTrafficProps {
 
 export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, isTab, parentConfig }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
-  const [extensions] = useResolvedExtensions<ModelFeatureFlag>(isModelFeatureFlag);
-  const k8sModels = useK8sModelsWithColors();
-  //set context from extensions. Standalone will return a "dummy" flag
-  ContextSingleton.setContext(extensions);
-  //observe html class list
   const isDarkTheme = useTheme();
+  const [extensions] = useResolvedExtensions<ModelFeatureFlag>(isModelFeatureFlag);
+  ContextSingleton.setContext(extensions);
 
-  const [queryParams, setQueryParams] = useLocalStorage<string>(localStorageQueryParamsKey);
-  const [disabledFilters, setDisabledFilters] = useLocalStorage<DisabledFilters>(localStorageDisabledFiltersKey, {});
+  const model = netflowTrafficModel();
+
   // set url params from local storage saved items at startup if empty
-  if (hasEmptyParams() && queryParams) {
-    setURLParams(queryParams);
+  if (hasEmptyParams() && model.queryParams) {
+    setURLParams(model.queryParams);
   }
 
-  const [config, setConfig] = React.useState<Config>(defaultConfig);
-  const [warning, setWarning] = React.useState<Warning | undefined>();
-  const [showViewOptions, setShowViewOptions] = useLocalStorage<boolean>(localStorageShowOptionsKey, false);
-  const [showHistogram, setShowHistogram] = useLocalStorage<boolean>(localStorageShowHistogramKey, false);
-  const [isViewOptionOverflowMenuOpen, setViewOptionOverflowMenuOpen] = React.useState(false);
-  const [isFullScreen, setFullScreen] = React.useState(false);
-  const [loading, setLoading] = React.useState(true);
-  const [flows, setFlows] = React.useState<Record[]>([]);
-  const [stats, setStats] = React.useState<Stats | undefined>(undefined);
-  const [overviewTruncateLength, setOverviewTruncateLength] = useLocalStorage<TruncateLength>(
-    localStorageOverviewTruncateKey,
-    TruncateLength.M
-  );
-  const [overviewFocus, setOverviewFocus] = useLocalStorage<boolean>(localStorageOverviewFocusKey, false);
-  const [topologyOptions, setTopologyOptions] = useLocalStorage<TopologyOptions>(
-    localStorageTopologyOptionsKey,
-    DefaultOptions
-  );
-  const [metrics, setMetrics] = React.useState<NetflowMetrics>(defaultNetflowMetrics);
-  const metricsRef = React.useRef(metrics);
-  const [isShowQuerySummary, setShowQuerySummary] = React.useState<boolean>(false);
-  const [lastRefresh, setLastRefresh] = React.useState<Date | undefined>(undefined);
-  const [lastDuration, setLastDuration] = React.useState<number | undefined>(undefined);
-  const [error, setError] = React.useState<string | undefined>();
-  const [size, setSize] = useLocalStorage<Size>(localStorageSizeKey, 'm');
-  const [isTRModalOpen, setTRModalOpen] = React.useState(false);
-  const [isOverviewModalOpen, setOverviewModalOpen] = React.useState(false);
-  const [isColModalOpen, setColModalOpen] = React.useState(false);
-  const [isExportModalOpen, setExportModalOpen] = React.useState(false);
-  const [selectedViewId, setSelectedViewId] = useLocalStorage<ViewId>(localStorageViewIdKey, 'overview');
-  const [filters, setFilters] = React.useState<Filters>({ list: [], backAndForth: false });
-  const [match, setMatch] = React.useState<Match>(getMatchFromURL());
-  const [packetLoss, setPacketLoss] = React.useState<PacketLoss>(getPacketLossFromURL());
-  const [recordType, setRecordType] = React.useState<RecordType>(getRecordTypeFromURL());
-  const [dataSource, setDataSource] = React.useState<DataSource>(getDataSourceFromURL());
-  const [showDuplicates, setShowDuplicates] = React.useState<boolean>(getShowDupFromURL());
-  const [limit, setLimit] = React.useState<number>(
-    getLimitFromURL(selectedViewId === 'table' ? limitValues[0] : topValues[0])
-  );
-  const [lastLimit, setLastLimit] = useLocalStorage<number>(localStorageLastLimitKey, limitValues[0]);
-  const [lastTop, setLastTop] = useLocalStorage<number>(localStorageLastTopKey, topValues[0]);
-  const [range, setRange] = React.useState<number | TimeRange>(getRangeFromURL());
-  const [histogramRange, setHistogramRange] = React.useState<TimeRange>();
-  const [metricScope, _setMetricScope] = useLocalStorage<FlowScope>(localStorageMetricScopeKey, 'namespace');
-  const [topologyMetricFunction, setTopologyMetricFunction] = useLocalStorage<StatFunction>(
-    localStorageMetricFunctionKey,
-    defaultMetricFunction
-  );
-  const [topologyMetricType, setTopologyMetricType] = useLocalStorage<MetricType>(
-    localStorageMetricTypeKey,
-    defaultMetricType
-  );
-  const [interval, setInterval] = useLocalStorage<number | undefined>(localStorageRefreshKey);
-  const [selectedRecord, setSelectedRecord] = React.useState<Record | undefined>(undefined);
-  const [selectedElement, setSelectedElement] = React.useState<GraphElementPeer | undefined>(undefined);
+  // Refs
+  const metricsRef = React.useRef(model.metrics);
   const searchRef = React.useRef<SearchHandle>(null);
-  const [searchEvent, setSearchEvent] = React.useState<SearchEvent | undefined>(undefined);
   const guidedTourRef = React.useRef<GuidedTourHandle>(null);
-
-  //use this ref to list any props / content loading state & events to skip tick function
+  // use this ref to list any props / content loading state & events to skip tick function
   const initState = React.useRef<
     Array<
       'initDone' | 'configLoading' | 'configLoaded' | 'configLoadError' | 'forcedFiltersLoaded' | 'urlFiltersPending'
     >
   >([]);
-  const [panels, setPanels] = useLocalStorage<OverviewPanel[]>(
-    localStorageOverviewIdsKey,
-    [],
-    defaultArraySelectionOptions
-  );
 
-  const [columns, setColumns] = useLocalStorage<Column[]>(localStorageColsKey, [], defaultArraySelectionOptions);
-  const [columnSizes, setColumnSizes] = useLocalStorage<ColumnSizeMap>(localStorageColsSizesKey, {});
-
+  // Callbacks
   const allowLoki = React.useCallback(() => {
-    return config.dataSources.some(ds => ds === 'loki');
-  }, [config.dataSources]);
+    return model.config.dataSources.some(ds => ds === 'loki');
+  }, [model.config.dataSources]);
 
   const allowProm = React.useCallback(() => {
-    return config.dataSources.some(ds => ds === 'prom') && selectedViewId !== 'table';
-  }, [config.dataSources, selectedViewId]);
+    return model.config.dataSources.some(ds => ds === 'prom') && model.selectedViewId !== 'table';
+  }, [model.config.dataSources, model.selectedViewId]);
 
   const isFlow = React.useCallback(() => {
-    return config.recordTypes.some(rt => rt === 'flowLog');
-  }, [config.recordTypes]);
+    return model.config.recordTypes.some(rt => rt === 'flowLog');
+  }, [model.config.recordTypes]);
 
   const isConnectionTracking = React.useCallback(() => {
-    return config.recordTypes.some(rt => rt === 'newConnection' || rt === 'heartbeat' || rt === 'endConnection');
-  }, [config.recordTypes]);
+    return model.config.recordTypes.some(rt => rt === 'newConnection' || rt === 'heartbeat' || rt === 'endConnection');
+  }, [model.config.recordTypes]);
 
   const isDNSTracking = React.useCallback(() => {
-    return config.features.includes('dnsTracking');
-  }, [config.features]);
+    return model.config.features.includes('dnsTracking');
+  }, [model.config.features]);
 
   const isFlowRTT = React.useCallback(() => {
-    return config.features.includes('flowRTT');
-  }, [config.features]);
+    return model.config.features.includes('flowRTT');
+  }, [model.config.features]);
 
   const isPktDrop = React.useCallback(() => {
-    return config.features.includes('pktDrop');
-  }, [config.features]);
+    return model.config.features.includes('pktDrop');
+  }, [model.config.features]);
 
   const isPromOnly = React.useCallback(() => {
-    return !allowLoki() || dataSource === 'prom';
-  }, [allowLoki, dataSource]);
+    return !allowLoki() || model.dataSource === 'prom';
+  }, [allowLoki, model.dataSource]);
 
   const dataSourceHasLabels = React.useCallback(
     (labels: string[]) => {
@@ -311,22 +149,22 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
         return true;
       }
       for (let i = 0; i < labels.length; i++) {
-        if (!config.promLabels.includes(labels[i])) {
+        if (!model.config.promLabels.includes(labels[i])) {
           return false;
         }
       }
       return true;
     },
-    [config.promLabels, isPromOnly]
+    [model.config.promLabels, isPromOnly]
   );
 
   const isMultiCluster = React.useCallback(() => {
-    return isPromOnly() ? dataSourceHasLabels(['K8S_ClusterName']) : config.features.includes('multiCluster');
-  }, [config.features, dataSourceHasLabels, isPromOnly]);
+    return isPromOnly() ? dataSourceHasLabels(['K8S_ClusterName']) : model.config.features.includes('multiCluster');
+  }, [model.config.features, dataSourceHasLabels, isPromOnly]);
 
   const isZones = React.useCallback(() => {
-    return isPromOnly() ? dataSourceHasLabels(['SrcK8S_Zone', 'DstK8S_Zone']) : config.features.includes('zones');
-  }, [config.features, dataSourceHasLabels, isPromOnly]);
+    return isPromOnly() ? dataSourceHasLabels(['SrcK8S_Zone', 'DstK8S_Zone']) : model.config.features.includes('zones');
+  }, [model.config.features, dataSourceHasLabels, isPromOnly]);
 
   const getAllowedScopes = React.useCallback(() => {
     const scopes: FlowScope[] = [];
@@ -352,13 +190,13 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
   }, [isMultiCluster, isZones, dataSourceHasLabels]);
 
   const getAvailablePanels = React.useCallback(() => {
-    return panels.filter(
+    return model.panels.filter(
       panel =>
         (isPktDrop() || !panel.id.includes(droppedIdMatcher)) &&
         (isDNSTracking() || !panel.id.includes(dnsIdMatcher)) &&
         (isFlowRTT() || !panel.id.includes(rttIdMatcher))
     );
-  }, [isDNSTracking, isFlowRTT, isPktDrop, panels]);
+  }, [isDNSTracking, isFlowRTT, isPktDrop, model.panels]);
 
   const getSelectedPanels = React.useCallback(() => {
     return getAvailablePanels().filter(panel => panel.isSelected);
@@ -366,14 +204,14 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
 
   const getAvailableColumns = React.useCallback(
     (isSidePanel = false) => {
-      return columns.filter(
+      return model.columns.filter(
         col =>
           (!isSidePanel || !col.isCommon) &&
           (isConnectionTracking() || ![ColumnsId.recordtype, ColumnsId.hashid].includes(col.id)) &&
-          (!col.feature || config.features.includes(col.feature))
+          (!col.feature || model.config.features.includes(col.feature))
       );
     },
-    [columns, config.features, isConnectionTracking]
+    [model.columns, model.config.features, isConnectionTracking]
   );
 
   const getSelectedColumns = React.useCallback(() => {
@@ -384,22 +222,23 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
     (metricType: MetricType) => {
       if (isTimeMetric(metricType)) {
         // fallback on average if current function not available for time queries
-        if (!timeMetricFunctions.includes(topologyMetricFunction)) {
-          setTopologyMetricFunction('avg');
+        if (!timeMetricFunctions.includes(model.topologyMetricFunction)) {
+          model.setTopologyMetricFunction('avg');
         }
       } else {
         // fallback on average if current function not available for rate queries
-        if (!rateMetricFunctions.includes(topologyMetricFunction)) {
-          setTopologyMetricFunction('avg');
+        if (!rateMetricFunctions.includes(model.topologyMetricFunction)) {
+          model.setTopologyMetricFunction('avg');
         }
       }
-      setTopologyMetricType(metricType);
+      model.setTopologyMetricType(metricType);
     },
-    [topologyMetricFunction, setTopologyMetricFunction, setTopologyMetricType]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [model.topologyMetricFunction, model.setTopologyMetricFunction, model.setTopologyMetricType]
   );
 
   const getFilterDefs = React.useCallback(() => {
-    return getFilterDefinitions(config.filters, config.columns, t).filter(
+    return getFilterDefinitions(model.config.filters, model.config.columns, t).filter(
       fd =>
         (isMultiCluster() || fd.id !== 'cluster_name') &&
         (isZones() || !fd.id.endsWith('_zone')) &&
@@ -407,91 +246,53 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
         (isDNSTracking() || !fd.id.startsWith('dns_')) &&
         (isPktDrop() || !fd.id.startsWith('pkt_drop_')) &&
         (isFlowRTT() || fd.id !== 'time_flow_rtt') &&
-        (!isPromOnly() || checkFilterAvailable(fd, config.promLabels))
+        (!isPromOnly() || checkFilterAvailable(fd, model.config.promLabels))
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [config.columns, config.filters, config.promLabels, isPromOnly]);
+  }, [model.config.columns, model.config.filters, model.config.promLabels, isPromOnly]);
 
   const getQuickFilters = React.useCallback(
-    (c = config) => {
+    (c: Config = model.config) => {
       return parseQuickFilters(getFilterDefs(), c.quickFilters);
     },
-    [config, getFilterDefs]
+    [model.config, getFilterDefs]
   );
 
   const getDefaultFilters = React.useCallback(
-    (c = config) => {
+    (c: Config = model.config) => {
       const quickFilters = getQuickFilters(c);
       return quickFilters.filter(qf => qf.default).flatMap(qf => qf.filters);
     },
-    [config, getQuickFilters]
+    [model.config, getQuickFilters]
   );
-
-  const setMetricScope = React.useCallback(
-    (scope: FlowScope) => {
-      _setMetricScope(scope);
-      // Invalidate groups if necessary, when metrics scope changed
-      const groups = getGroupsForScope(scope as MetricScopeOptions);
-      if (!groups.includes(topologyOptions.groupTypes)) {
-        setTopologyOptions({ ...topologyOptions, groupTypes: TopologyGroupTypes.none });
-      }
-    },
-    [_setMetricScope, topologyOptions, setTopologyOptions]
-  );
-
-  const getTopologyMetrics = React.useCallback(() => {
-    switch (topologyMetricType) {
-      case 'Bytes':
-      case 'Packets':
-        return metrics.rateMetrics?.[getRateMetricKey(topologyMetricType)];
-      case 'DnsLatencyMs':
-        return metrics.dnsLatencyMetrics?.[getFunctionMetricKey(topologyMetricFunction)];
-      case 'TimeFlowRttNs':
-        return metrics.rttMetrics?.[getFunctionMetricKey(topologyMetricFunction)];
-      default:
-        return undefined;
-    }
-  }, [metrics.dnsLatencyMetrics, topologyMetricFunction, topologyMetricType, metrics.rateMetrics, metrics.rttMetrics]);
-
-  const getTopologyDroppedMetrics = React.useCallback(() => {
-    switch (topologyMetricType) {
-      case 'Bytes':
-      case 'Packets':
-      case 'PktDropBytes':
-      case 'PktDropPackets':
-        return metrics.droppedRateMetrics?.[getRateMetricKey(topologyMetricType)];
-      default:
-        return undefined;
-    }
-  }, [metrics.droppedRateMetrics, topologyMetricType]);
 
   // updates table filters and clears up the table for proper visualization of the
   // updating process
   const updateTableFilters = React.useCallback(
     (f: Filters) => {
       initState.current = initState.current.filter(s => s !== 'urlFiltersPending');
-      setFilters(f);
-      setFlows([]);
-      setMetrics(defaultNetflowMetrics);
-      setWarning(undefined);
+      model.setFilters(f);
+      model.setFlows([]);
+      model.setMetrics(defaultNetflowMetrics);
+      model.setWarning(undefined);
     },
-    [setFilters, setFlows]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [model.setFilters, model.setFlows, model.setMetrics, model.setWarning]
   );
 
-  const backAndForth = filters.backAndForth;
   const resetDefaultFilters = React.useCallback(
-    (c = config) => {
+    (c = model.config) => {
       const def = getDefaultFilters(c);
-      updateTableFilters({ backAndForth, list: def });
+      updateTableFilters({ backAndForth: model.filters.backAndForth, list: def });
     },
-    [config, backAndForth, getDefaultFilters, updateTableFilters]
+    [model.config, model.filters.backAndForth, getDefaultFilters, updateTableFilters]
   );
 
   const setFiltersFromURL = React.useCallback(
     (config: Config) => {
       if (forcedFilters === null) {
         //set filters from url or freshly loaded quick filters defaults
-        const filtersPromise = getFiltersFromURL(getFilterDefs(), disabledFilters);
+        const filtersPromise = getFiltersFromURL(getFilterDefs(), model.disabledFilters);
         if (filtersPromise) {
           initState.current.push('urlFiltersPending');
           filtersPromise.then(updateTableFilters);
@@ -500,124 +301,80 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
         }
       }
     },
-    [disabledFilters, forcedFilters, getFilterDefs, resetDefaultFilters, updateTableFilters]
+    [model.disabledFilters, forcedFilters, getFilterDefs, resetDefaultFilters, updateTableFilters]
   );
 
-  const clearSelections = () => {
-    setTRModalOpen(false);
-    setOverviewModalOpen(false);
-    setColModalOpen(false);
-    setSelectedRecord(undefined);
-    setShowQuerySummary(false);
-    setSelectedElement(undefined);
-  };
-
-  const selectView = (view: ViewId) => {
-    clearSelections();
-    //save / restore top / limit parameter according to selected view
-    if (view === 'overview' && selectedViewId !== 'overview') {
-      setLastLimit(limit);
-      setLimit(lastTop);
-    } else if (view !== 'overview' && selectedViewId === 'overview') {
-      setLastTop(limit);
-      setLimit(lastLimit);
-    }
-
-    if (view !== selectedViewId) {
-      setFlows([]);
-      setMetrics(defaultNetflowMetrics);
-      if (!initState.current.includes('configLoadError')) {
-        setError(undefined);
-      }
-    }
-    setSelectedViewId(view);
-  };
-
-  const onRecordSelect = React.useCallback((record?: Record) => {
-    clearSelections();
-    setSelectedRecord(record);
-  }, []);
-
-  const onElementSelect = React.useCallback((element?: GraphElementPeer) => {
-    clearSelections();
-    setSelectedElement(element);
-  }, []);
-
-  const onToggleQuerySummary = React.useCallback((v: boolean) => {
-    clearSelections();
-    setShowQuerySummary(v);
-  }, []);
-
   const buildFlowQuery = React.useCallback((): FlowQuery => {
-    const enabledFilters = getEnabledFilters(forcedFilters || filters);
+    const enabledFilters = getEnabledFilters(forcedFilters || model.filters);
     const query: FlowQuery = {
-      filters: filtersToString(enabledFilters.list, match === 'any'),
-      limit: limitValues.includes(limit) ? limit : limitValues[0],
-      recordType: recordType,
-      dataSource: dataSource,
+      filters: filtersToString(enabledFilters.list, model.match === 'any'),
+      limit: limitValues.includes(model.limit) ? model.limit : limitValues[0],
+      recordType: model.recordType,
+      dataSource: model.dataSource,
       //only manage duplicates when mark is enabled
-      dedup: config.deduper.mark && !showDuplicates,
-      packetLoss: packetLoss
+      dedup: model.config.deduper.mark && !model.showDuplicates,
+      packetLoss: model.packetLoss
     };
-    if (range) {
-      if (typeof range === 'number') {
-        query.timeRange = range;
-      } else if (typeof range === 'object') {
-        query.startTime = range.from.toString();
-        query.endTime = range.to.toString();
+    if (model.range) {
+      if (typeof model.range === 'number') {
+        query.timeRange = model.range;
+      } else if (typeof model.range === 'object') {
+        query.startTime = model.range.from.toString();
+        query.endTime = model.range.to.toString();
       }
 
-      const info = computeStepInterval(range);
+      const info = computeStepInterval(model.range);
       query.rateInterval = `${info.rateIntervalSeconds}s`;
       query.step = `${info.stepSeconds}s`;
     }
-    if (selectedViewId === 'table') {
+    if (model.selectedViewId === 'table') {
       query.type = 'Flows';
     } else {
-      query.aggregateBy = metricScope;
-      if (selectedViewId === 'topology') {
-        query.type = topologyMetricType;
-        query.groups = topologyOptions.groupTypes !== TopologyGroupTypes.none ? topologyOptions.groupTypes : undefined;
-      } else if (selectedViewId === 'overview') {
-        query.limit = topValues.includes(limit) ? limit : topValues[0];
+      query.aggregateBy = model.metricScope;
+      if (model.selectedViewId === 'topology') {
+        query.type = model.topologyMetricType;
+        query.groups =
+          model.topologyOptions.groupTypes !== TopologyGroupTypes.none ? model.topologyOptions.groupTypes : undefined;
+      } else if (model.selectedViewId === 'overview') {
+        query.limit = topValues.includes(model.limit) ? model.limit : topValues[0];
         query.groups = undefined;
       }
     }
     return query;
   }, [
     forcedFilters,
-    filters,
-    match,
-    limit,
-    recordType,
-    dataSource,
-    config.deduper.mark,
-    showDuplicates,
-    packetLoss,
-    range,
-    selectedViewId,
-    topologyMetricType,
-    metricScope,
-    topologyOptions.groupTypes
+    model.filters,
+    model.match,
+    model.limit,
+    model.recordType,
+    model.dataSource,
+    model.config.deduper.mark,
+    model.showDuplicates,
+    model.packetLoss,
+    model.range,
+    model.selectedViewId,
+    model.topologyMetricType,
+    model.metricScope,
+    model.topologyOptions.groupTypes
   ]);
 
   const getFetchFunctions = React.useCallback(() => {
     // check back-and-forth
-    const enabledFilters = getEnabledFilters(forcedFilters || filters);
-    const matchAny = match === 'any';
+    const enabledFilters = getEnabledFilters(forcedFilters || model.filters);
+    const matchAny = model.match === 'any';
     return getBackAndForthFetch(getFilterDefs(), enabledFilters, matchAny);
-  }, [forcedFilters, filters, match, getFilterDefs]);
+  }, [forcedFilters, model.filters, model.match, getFilterDefs]);
 
   const manageWarnings = React.useCallback(
     (query: Promise<unknown>) => {
-      setLastRefresh(undefined);
-      setLastDuration(undefined);
-      setWarning(undefined);
+      model.setLastRefresh(undefined);
+      model.setLastDuration(undefined);
+      model.setWarning(undefined);
       Promise.race([query, new Promise((resolve, reject) => setTimeout(reject, 4000, 'slow'))]).then(
         null,
         (reason: string) => {
           if (reason === 'slow') {
-            setWarning({ type: 'slow', summary: `${t('Query is slow')}` });
+            model.setWarning({ type: 'slow', summary: `${t('Query is slow')}` });
           }
         }
       );
@@ -627,35 +384,10 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
     []
   );
 
-  const checkSlownessReason = React.useCallback(
-    (w: Warning | undefined): Warning | undefined => {
-      if (w?.type == 'slow') {
-        let reason = '';
-        if (match === 'any' && hasNonIndexFields(filters.list)) {
-          reason = t(
-            // eslint-disable-next-line max-len
-            'When in "Match any" mode, try using only Namespace, Owner or Resource filters (which use indexed fields), or decrease limit / range, to improve the query performance'
-          );
-        } else if (match === 'all' && !hasIndexFields(filters.list)) {
-          reason = t(
-            // eslint-disable-next-line max-len
-            'Add Namespace, Owner or Resource filters (which use indexed fields), or decrease limit / range, to improve the query performance'
-          );
-        } else {
-          reason = t('Add more filters or decrease limit / range to improve the query performance');
-        }
-        return { ...w, details: reason };
-      }
-      return w;
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [match, filters]
-  );
-
   const fetchTable = React.useCallback(
     (fq: FlowQuery) => {
-      if (!showHistogram) {
-        setMetrics(defaultNetflowMetrics);
+      if (!model.showHistogram) {
+        model.setMetrics(defaultNetflowMetrics);
       }
 
       let currentMetrics = metricsRef.current;
@@ -663,38 +395,39 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
 
       // table query is based on histogram range if available
       const tableQuery = { ...fq };
-      if (histogramRange) {
-        tableQuery.startTime = histogramRange.from.toString();
-        tableQuery.endTime = histogramRange.to.toString();
+      if (model.histogramRange) {
+        tableQuery.startTime = model.histogramRange.from.toString();
+        tableQuery.endTime = model.histogramRange.to.toString();
       }
       const promises: Promise<Stats>[] = [
         getRecords(tableQuery).then(res => {
-          const flows = showDuplicates ? res.records : mergeFlowReporters(res.records);
-          setFlows(flows);
+          const flows = model.showDuplicates ? res.records : mergeFlowReporters(res.records);
+          model.setFlows(flows);
           return res.stats;
         })
       ];
-      if (showHistogram) {
+      if (model.showHistogram) {
         promises.push(
-          getMetrics({ ...fq, function: 'count', aggregateBy: 'app', type: 'Flows' }, range).then(res => {
+          getMetrics({ ...fq, function: 'count', aggregateBy: 'app', type: 'Flows' }, model.range).then(res => {
             const totalFlowCountMetric = res.metrics[0];
             currentMetrics = { ...currentMetrics, totalFlowCountMetric };
-            setMetrics(currentMetrics);
+            model.setMetrics(currentMetrics);
             return res.stats;
           })
         );
       } else {
         currentMetrics = { ...currentMetrics, totalRateMetric: undefined };
-        setMetrics(currentMetrics);
+        model.setMetrics(currentMetrics);
       }
       return Promise.all(promises);
     },
-    [getFetchFunctions, histogramRange, showHistogram, showDuplicates, range]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [getFetchFunctions, model.histogramRange, model.showHistogram, model.showDuplicates, model.range]
   );
 
   const fetchOverview = React.useCallback(
     (fq: FlowQuery) => {
-      setFlows([]);
+      model.setFlows([]);
 
       let currentMetrics = metricsRef.current;
       const selectedPanels = getSelectedPanels();
@@ -710,13 +443,15 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
           const rateMetrics = initRateMetricKeys(ratePanels.map(p => p.id)) as RateMetrics;
           (Object.keys(rateMetrics) as (keyof typeof rateMetrics)[]).map(key => {
             promises.push(
-              getMetrics({ ...fq, function: 'rate', type: key === 'bytes' ? 'Bytes' : 'Packets' }, range).then(res => {
-                //set matching value and apply changes on the entire object to trigger refresh
-                rateMetrics[key] = res.metrics;
-                currentMetrics = { ...currentMetrics, rateMetrics };
-                setMetrics(currentMetrics);
-                return res.stats;
-              })
+              getMetrics({ ...fq, function: 'rate', type: key === 'bytes' ? 'Bytes' : 'Packets' }, model.range).then(
+                res => {
+                  //set matching value and apply changes on the entire object to trigger refresh
+                  rateMetrics[key] = res.metrics;
+                  currentMetrics = { ...currentMetrics, rateMetrics };
+                  model.setMetrics(currentMetrics);
+                  return res.stats;
+                }
+              )
             );
           });
         }
@@ -728,19 +463,19 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
           promises.push(
             getMetrics(
               { ...fq, function: 'rate', aggregateBy: 'app', type: key === 'bytes' ? 'Bytes' : 'Packets' },
-              range
+              model.range
             ).then(res => {
               //set matching value and apply changes on the entire object to trigger refresh
               totalRateMetric[key] = res.metrics[0];
               currentMetrics = { ...currentMetrics, totalRateMetric };
-              setMetrics(currentMetrics);
+              model.setMetrics(currentMetrics);
               return res.stats;
             })
           );
         });
       } else {
         currentMetrics = { ...currentMetrics, rateMetrics: undefined, totalRateMetric: undefined };
-        setMetrics(currentMetrics);
+        model.setMetrics(currentMetrics);
       }
 
       const droppedPanels = selectedPanels.filter(p => p.id.includes(droppedIdMatcher));
@@ -751,12 +486,12 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
           promises.push(
             getMetrics(
               { ...fq, function: 'rate', type: key === 'bytes' ? 'PktDropBytes' : 'PktDropPackets' },
-              range
+              model.range
             ).then(res => {
               //set matching value and apply changes on the entire object to trigger refresh
               droppedRateMetrics[key] = res.metrics;
               currentMetrics = { ...currentMetrics, droppedRateMetrics };
-              setMetrics(currentMetrics);
+              model.setMetrics(currentMetrics);
               return res.stats;
             })
           );
@@ -772,12 +507,12 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
                 aggregateBy: 'app',
                 type: key === 'bytes' ? 'PktDropBytes' : 'PktDropPackets'
               },
-              range
+              model.range
             ).then(res => {
               //set matching value and apply changes on the entire object to trigger refresh
               totalDroppedRateMetric[key] = res.metrics[0];
               currentMetrics = { ...currentMetrics, totalDroppedRateMetric };
-              setMetrics(currentMetrics);
+              model.setMetrics(currentMetrics);
               return res.stats;
             })
           );
@@ -788,24 +523,24 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
           ...[
             getFlowGenericMetrics(
               { ...fq, function: 'rate', type: 'PktDropPackets', aggregateBy: 'PktDropLatestState' },
-              range
+              model.range
             ).then(res => {
               currentMetrics = { ...currentMetrics, droppedStateMetrics: res.metrics };
-              setMetrics(currentMetrics);
+              model.setMetrics(currentMetrics);
               return res.stats;
             }),
             getFlowGenericMetrics(
               { ...fq, function: 'rate', type: 'PktDropPackets', aggregateBy: 'PktDropLatestDropCause' },
-              range
+              model.range
             ).then(res => {
               currentMetrics = { ...currentMetrics, droppedCauseMetrics: res.metrics };
-              setMetrics(currentMetrics);
+              model.setMetrics(currentMetrics);
               return res.stats;
             })
           ]
         );
       } else {
-        setMetrics({
+        model.setMetrics({
           ...currentMetrics,
           droppedRateMetrics: undefined,
           totalDroppedRateMetric: undefined,
@@ -815,16 +550,16 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
       }
 
       const dnsPanels = selectedPanels.filter(p => p.id.includes(dnsIdMatcher));
-      if (config.features.includes('dnsTracking') && !_.isEmpty(dnsPanels)) {
+      if (model.config.features.includes('dnsTracking') && !_.isEmpty(dnsPanels)) {
         //set dns metrics
         const dnsLatencyMetrics = initFunctionMetricKeys(dnsPanels.map(p => p.id)) as FunctionMetrics;
         (Object.keys(dnsLatencyMetrics) as (keyof typeof dnsLatencyMetrics)[]).map(fn => {
           promises.push(
-            getMetrics({ ...fq, function: fn, type: 'DnsLatencyMs' }, range).then(res => {
+            getMetrics({ ...fq, function: fn, type: 'DnsLatencyMs' }, model.range).then(res => {
               //set matching value and apply changes on the entire object to trigger refresh
               dnsLatencyMetrics[fn] = res.metrics;
               currentMetrics = { ...currentMetrics, dnsLatencyMetrics };
-              setMetrics(currentMetrics);
+              model.setMetrics(currentMetrics);
               return res.stats;
             })
           );
@@ -833,11 +568,11 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
         const totalDnsLatencyMetric = initFunctionMetricKeys(dnsPanels.map(p => p.id)) as TotalFunctionMetrics;
         (Object.keys(totalDnsLatencyMetric) as (keyof typeof totalDnsLatencyMetric)[]).map(fn => {
           promises.push(
-            getMetrics({ ...fq, function: fn, aggregateBy: 'app', type: 'DnsLatencyMs' }, range).then(res => {
+            getMetrics({ ...fq, function: fn, aggregateBy: 'app', type: 'DnsLatencyMs' }, model.range).then(res => {
               //set matching value and apply changes on the entire object to trigger refresh
               totalDnsLatencyMetric[fn] = res.metrics[0];
               currentMetrics = { ...currentMetrics, totalDnsLatencyMetric };
-              setMetrics(currentMetrics);
+              model.setMetrics(currentMetrics);
               return res.stats;
             })
           );
@@ -850,24 +585,25 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
               //get dns response codes
               getFlowGenericMetrics(
                 { ...fq, aggregateBy: 'DnsFlagsResponseCode', function: 'count', type: 'DnsFlows' },
-                range
+                model.range
               ).then(res => {
                 currentMetrics = { ...currentMetrics, dnsRCodeMetrics: res.metrics };
-                setMetrics(currentMetrics);
+                model.setMetrics(currentMetrics);
                 return res.stats;
               }),
-              getFlowGenericMetrics({ ...fq, aggregateBy: 'app', function: 'count', type: 'DnsFlows' }, range).then(
-                res => {
-                  currentMetrics = { ...currentMetrics, totalDnsCountMetric: res.metrics[0] };
-                  setMetrics(currentMetrics);
-                  return res.stats;
-                }
-              )
+              getFlowGenericMetrics(
+                { ...fq, aggregateBy: 'app', function: 'count', type: 'DnsFlows' },
+                model.range
+              ).then(res => {
+                currentMetrics = { ...currentMetrics, totalDnsCountMetric: res.metrics[0] };
+                model.setMetrics(currentMetrics);
+                return res.stats;
+              })
             ]
           );
         }
       } else {
-        setMetrics({
+        model.setMetrics({
           ...currentMetrics,
           dnsLatencyMetrics: undefined,
           dnsRCodeMetrics: undefined,
@@ -877,16 +613,16 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
       }
 
       const rttPanels = selectedPanels.filter(p => p.id.includes(rttIdMatcher));
-      if (config.features.includes('flowRTT') && !_.isEmpty(rttPanels)) {
+      if (model.config.features.includes('flowRTT') && !_.isEmpty(rttPanels)) {
         //set RTT metrics
         const rttMetrics = initFunctionMetricKeys(rttPanels.map(p => p.id)) as FunctionMetrics;
         (Object.keys(rttMetrics) as (keyof typeof rttMetrics)[]).map(fn => {
           promises.push(
-            getMetrics({ ...fq, function: fn, type: 'TimeFlowRttNs' }, range).then(res => {
+            getMetrics({ ...fq, function: fn, type: 'TimeFlowRttNs' }, model.range).then(res => {
               //set matching value and apply changes on the entire object to trigger refresh
               rttMetrics[fn] = res.metrics;
               currentMetrics = { ...currentMetrics, rttMetrics };
-              setMetrics(currentMetrics);
+              model.setMetrics(currentMetrics);
               return res.stats;
             })
           );
@@ -895,17 +631,17 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
         const totalRttMetric = initFunctionMetricKeys(rttPanels.map(p => p.id)) as TotalFunctionMetrics;
         (Object.keys(totalRttMetric) as (keyof typeof totalRttMetric)[]).map(fn => {
           promises.push(
-            getMetrics({ ...fq, function: fn, aggregateBy: 'app', type: 'TimeFlowRttNs' }, range).then(res => {
+            getMetrics({ ...fq, function: fn, aggregateBy: 'app', type: 'TimeFlowRttNs' }, model.range).then(res => {
               //set matching value and apply changes on the entire object to trigger refresh
               totalRttMetric[fn] = res.metrics[0];
               currentMetrics = { ...currentMetrics, totalRttMetric };
-              setMetrics(currentMetrics);
+              model.setMetrics(currentMetrics);
               return res.stats;
             })
           );
         });
       } else {
-        setMetrics({ ...currentMetrics, rttMetrics: undefined, totalRttMetric: undefined });
+        model.setMetrics({ ...currentMetrics, rttMetrics: undefined, totalRttMetric: undefined });
       }
 
       const customPanels = selectedPanels.filter(p => p.id.startsWith(customPanelMatcher));
@@ -925,16 +661,16 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
                       ...fq,
                       type: parsedId.type,
                       function: parsedId.fn,
-                      aggregateBy: parsedId.aggregateBy || metricScope
+                      aggregateBy: parsedId.aggregateBy || model.metricScope
                     },
-                    range
+                    model.range
                   ).then(res => {
                     //set matching value and apply changes on the entire object to trigger refresh
                     currentMetrics = {
                       ...currentMetrics,
                       customMetrics: currentMetrics.customMetrics.set(key, res.metrics)
                     };
-                    setMetrics(currentMetrics);
+                    model.setMetrics(currentMetrics);
                     return res.stats;
                   }),
                   getMetricFunc(
@@ -944,14 +680,14 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
                       function: parsedId.fn,
                       aggregateBy: 'app'
                     },
-                    range
+                    model.range
                   ).then(res => {
                     //set matching value and apply changes on the entire object to trigger refresh
                     currentMetrics = {
                       ...currentMetrics,
                       totalCustomMetrics: currentMetrics.totalCustomMetrics.set(key, res.metrics[0])
                     };
-                    setMetrics(currentMetrics);
+                    model.setMetrics(currentMetrics);
                     return res.stats;
                   })
                 ]
@@ -962,14 +698,15 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
 
       return Promise.all(promises);
     },
-    [getSelectedPanels, getFetchFunctions, config.features, range, metricScope]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [getSelectedPanels, getFetchFunctions, model.config.features, model.range, model.metricScope]
   );
 
   const fetchTopology = React.useCallback(
     (fq: FlowQuery) => {
-      setFlows([]);
+      model.setFlows([]);
 
-      const droppedType = config.features.includes('pktDrop')
+      const droppedType = model.config.features.includes('pktDrop')
         ? fq.type === 'Bytes'
           ? 'PktDropBytes'
           : fq.type === 'Packets'
@@ -983,30 +720,30 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
         getMetrics(
           {
             ...fq,
-            function: isTimeMetric(topologyMetricType) ? (topologyMetricFunction as MetricFunction) : 'rate'
+            function: isTimeMetric(model.topologyMetricType) ? (model.topologyMetricFunction as MetricFunction) : 'rate'
           },
-          range
+          model.range
         ).then(res => {
-          if (['Bytes', 'Packets'].includes(topologyMetricType)) {
+          if (['Bytes', 'Packets'].includes(model.topologyMetricType)) {
             const rateMetrics = {} as RateMetrics;
-            rateMetrics[getRateMetricKey(topologyMetricType)] = res.metrics;
+            rateMetrics[getRateMetricKey(model.topologyMetricType)] = res.metrics;
             currentMetrics = { ...currentMetrics, rateMetrics, dnsLatencyMetrics: undefined, rttMetrics: undefined };
-            setMetrics(currentMetrics);
-          } else if (['PktDropBytes', 'PktDropPackets'].includes(topologyMetricType)) {
+            model.setMetrics(currentMetrics);
+          } else if (['PktDropBytes', 'PktDropPackets'].includes(model.topologyMetricType)) {
             const droppedRateMetrics = {} as RateMetrics;
-            droppedRateMetrics[getRateMetricKey(topologyMetricType)] = res.metrics;
+            droppedRateMetrics[getRateMetricKey(model.topologyMetricType)] = res.metrics;
             currentMetrics = { ...currentMetrics, droppedRateMetrics };
-            setMetrics(currentMetrics);
-          } else if (['DnsLatencyMs'].includes(topologyMetricType)) {
+            model.setMetrics(currentMetrics);
+          } else if (['DnsLatencyMs'].includes(model.topologyMetricType)) {
             const dnsLatencyMetrics = {} as FunctionMetrics;
-            dnsLatencyMetrics[getFunctionMetricKey(topologyMetricFunction)] = res.metrics;
+            dnsLatencyMetrics[getFunctionMetricKey(model.topologyMetricFunction)] = res.metrics;
             currentMetrics = { ...currentMetrics, rateMetrics: undefined, dnsLatencyMetrics, rttMetrics: undefined };
-            setMetrics(currentMetrics);
-          } else if (['TimeFlowRttNs'].includes(topologyMetricType)) {
+            model.setMetrics(currentMetrics);
+          } else if (['TimeFlowRttNs'].includes(model.topologyMetricType)) {
             const rttMetrics = {} as FunctionMetrics;
-            rttMetrics[getFunctionMetricKey(topologyMetricFunction)] = res.metrics;
+            rttMetrics[getFunctionMetricKey(model.topologyMetricFunction)] = res.metrics;
             currentMetrics = { ...currentMetrics, rateMetrics: undefined, dnsLatencyMetrics: undefined, rttMetrics };
-            setMetrics(currentMetrics);
+            model.setMetrics(currentMetrics);
           }
           return res.stats;
         })
@@ -1014,12 +751,12 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
 
       if (droppedType) {
         promises.push(
-          getMetrics({ ...fq, type: droppedType }, range)
+          getMetrics({ ...fq, type: droppedType }, model.range)
             .then(res => {
               const droppedRateMetrics = {} as RateMetrics;
-              droppedRateMetrics[getRateMetricKey(topologyMetricType)] = res.metrics;
+              droppedRateMetrics[getRateMetricKey(model.topologyMetricType)] = res.metrics;
               currentMetrics = { ...currentMetrics, droppedRateMetrics };
-              setMetrics(currentMetrics);
+              model.setMetrics(currentMetrics);
               return res.stats;
             })
             .catch(err => {
@@ -1029,19 +766,29 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
               if (isPromUnsupportedError(strErr)) {
                 strErr = getPromUnsupportedError(strErr);
               }
-              setWarning({ type: 'cantfetchdrops', summary: t('Could not fetch drop information'), details: strErr });
+              model.setWarning({
+                type: 'cantfetchdrops',
+                summary: t('Could not fetch drop information'),
+                details: strErr
+              });
               return { numQueries: 0, dataSources: [], limitReached: false };
             })
         );
-      } else if (!['PktDropBytes', 'PktDropPackets'].includes(topologyMetricType)) {
+      } else if (!['PktDropBytes', 'PktDropPackets'].includes(model.topologyMetricType)) {
         currentMetrics = { ...currentMetrics, droppedRateMetrics: undefined };
-        setMetrics(currentMetrics);
+        model.setMetrics(currentMetrics);
       }
       return Promise.all(promises);
     },
-    // "t" dependency kills jest
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [config.features, getFetchFunctions, topologyMetricType, topologyMetricFunction, range, setWarning]
+    [
+      model.config.features,
+      getFetchFunctions,
+      model.topologyMetricType,
+      model.topologyMetricFunction,
+      model.range,
+      model.setWarning
+    ]
   );
 
   const tick = React.useCallback(() => {
@@ -1055,23 +802,23 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
     ) {
       console.error('tick skipped', initState.current);
       return;
-    } else if (isTRModalOpen || isOverviewModalOpen || isColModalOpen || isExportModalOpen) {
+    } else if (model.isTRModalOpen || model.isOverviewModalOpen || model.isColModalOpen || model.isExportModalOpen) {
       // also skip tick if modal is open
       console.debug('tick skipped since modal is open');
       return;
     }
 
-    setLoading(true);
-    setError(undefined);
+    model.setLoading(true);
+    model.setError(undefined);
     const fq = buildFlowQuery();
 
     let promises: Promise<Stats[]> | undefined = undefined;
-    switch (selectedViewId) {
+    switch (model.selectedViewId) {
       case 'table':
         if (allowLoki()) {
           promises = fetchTable(fq);
         } else {
-          setError(t('Only available when FlowCollector.loki.enable is true'));
+          model.setError(t('Only available when FlowCollector.loki.enable is true'));
         }
         break;
       case 'overview':
@@ -1081,89 +828,116 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
         promises = fetchTopology(fq);
         break;
       default:
-        console.error('tick called on not implemented view Id', selectedViewId);
-        setLoading(false);
+        console.error('tick called on not implemented view Id', model.selectedViewId);
+        model.setLoading(false);
         break;
     }
     if (promises) {
       const startDate = new Date();
-      setStats(undefined);
+      model.setStats(undefined);
       manageWarnings(
         promises
           .then(allStats => {
             const stats = allStats.reduce(mergeStats, undefined);
-            setStats(stats);
+            model.setStats(stats);
           })
           .catch(err => {
-            setFlows([]);
-            setMetrics(defaultNetflowMetrics);
-            setError(getHTTPErrorDetails(err, true));
-            setWarning(undefined);
+            model.setFlows([]);
+            model.setMetrics(defaultNetflowMetrics);
+            model.setError(getHTTPErrorDetails(err, true));
+            model.setWarning(undefined);
           })
           .finally(() => {
             const endDate = new Date();
-            setLoading(false);
-            setLastRefresh(endDate);
-            setLastDuration(endDate.getTime() - startDate.getTime());
+            model.setLoading(false);
+            model.setLastRefresh(endDate);
+            model.setLastDuration(endDate.getTime() - startDate.getTime());
           })
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    isTRModalOpen,
-    isOverviewModalOpen,
-    isColModalOpen,
-    isExportModalOpen,
+    model.isTRModalOpen,
+    model.isOverviewModalOpen,
+    model.isColModalOpen,
+    model.isExportModalOpen,
     buildFlowQuery,
-    selectedViewId,
+    model.selectedViewId,
     fetchTable,
     fetchOverview,
     fetchTopology,
     manageWarnings,
     allowLoki
   ]);
+  usePoll(tick, model.interval);
 
-  usePoll(tick, interval);
+  const setMetricScope = React.useCallback(
+    (scope: FlowScope) => {
+      model.setMetricScope(scope);
+      // Invalidate groups if necessary, when metrics scope changed
+      const groups = getGroupsForScope(scope as MetricScopeOptions);
+      if (!groups.includes(model.topologyOptions.groupTypes)) {
+        model.setTopologyOptions({ ...model.topologyOptions, groupTypes: TopologyGroupTypes.none });
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [model.setMetricScope, model.topologyOptions, model.setTopologyOptions]
+  );
 
+  const clearFilters = React.useCallback(() => {
+    if (forcedFilters) {
+      navigate(netflowTrafficPath);
+    } else if (model.filters) {
+      //set URL Param to empty value to be able to restore state coming from another page
+      const empty: Filters = { ...model.filters, list: [] };
+      setURLFilters(empty);
+      updateTableFilters(empty);
+    }
+  }, [forcedFilters, model.filters, updateTableFilters]);
+
+  // Effects
   React.useEffect(() => {
     if (initState.current.includes('configLoaded')) {
-      if (recordType === 'flowLog' && !isFlow() && isConnectionTracking()) {
-        setRecordType('allConnections');
-      } else if (recordType === 'allConnections' && isFlow() && !isConnectionTracking()) {
-        setRecordType('flowLog');
+      if (model.recordType === 'flowLog' && !isFlow() && isConnectionTracking()) {
+        model.setRecordType('allConnections');
+      } else if (model.recordType === 'allConnections' && isFlow() && !isConnectionTracking()) {
+        model.setRecordType('flowLog');
       }
     }
-  }, [config.recordTypes, isConnectionTracking, isFlow, recordType]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [model.config.recordTypes, isConnectionTracking, isFlow, model.recordType]);
 
   React.useEffect(() => {
     if (
       initState.current.includes('configLoaded') &&
-      ((dataSource === 'loki' && !allowLoki() && allowProm()) || (dataSource === 'prom' && allowLoki() && !allowProm()))
+      ((model.dataSource === 'loki' && !allowLoki() && allowProm()) ||
+        (model.dataSource === 'prom' && allowLoki() && !allowProm()))
     ) {
-      setDataSource('auto');
+      model.setDataSource('auto');
     }
-  }, [allowLoki, allowProm, dataSource]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allowLoki, allowProm, model.dataSource]);
 
   React.useEffect(() => {
     if (initState.current.includes('configLoaded')) {
-      setColumns(
+      model.setColumns(
         getLocalStorage(
           localStorageColsKey,
-          getDefaultColumns(config.columns, config.fields),
+          getDefaultColumns(model.config.columns, model.config.fields),
           defaultArraySelectionOptions
         )
       );
-      setPanels(
+      model.setPanels(
         getLocalStorage(
           localStorageOverviewIdsKey,
-          getDefaultOverviewPanels(config.panels),
+          getDefaultOverviewPanels(model.config.panels),
           defaultArraySelectionOptions
         )
       );
-      setFiltersFromURL(config);
+      setFiltersFromURL(model.config);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [config]);
+  }, [model.config]);
 
   // tick on state change
   React.useEffect(() => {
@@ -1173,17 +947,17 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
 
       if (parentConfig) {
         initState.current.push('configLoaded');
-        setConfig(parentConfig);
+        model.setConfig(parentConfig);
       } else {
         // load config only once and track its state
         if (!initState.current.includes('configLoading')) {
           initState.current.push('configLoading');
           loadConfig().then(v => {
             initState.current.push('configLoaded');
-            setConfig(v.config);
+            model.setConfig(v.config);
             if (v.error) {
               initState.current.push('configLoadError');
-              setError(v.error);
+              model.setError(v.error);
             }
           });
         }
@@ -1205,582 +979,83 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
       tick();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters, forcedFilters, config, tick, setConfig]);
+  }, [model.filters, forcedFilters, model.config, tick, model.setConfig]);
 
   // Rewrite URL params on state change
   React.useEffect(() => {
     //with forced filters in url if specified
     if (forcedFilters) {
       setURLFilters(forcedFilters!, true);
-    } else if (!_.isEmpty(filters) && !_.isEmpty(filters.list)) {
+    } else if (!_.isEmpty(model.filters) && !_.isEmpty(model.filters.list)) {
       //write filters in url if not empty
-      setURLFilters(filters, !initState.current.includes('configLoaded'));
+      setURLFilters(model.filters, !initState.current.includes('configLoaded'));
     }
-  }, [filters, forcedFilters]);
+  }, [model.filters, forcedFilters]);
+
   React.useEffect(() => {
-    setURLRange(range, !initState.current.includes('configLoaded'));
-  }, [range]);
+    model.setTRModalOpen(false);
+    setURLRange(model.range, !initState.current.includes('configLoaded'));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [model.range]);
+
   React.useEffect(() => {
-    setURLLimit(limit, !initState.current.includes('configLoaded'));
-  }, [limit]);
+    setURLLimit(model.limit, !initState.current.includes('configLoaded'));
+  }, [model.limit]);
+
   React.useEffect(() => {
-    setURLMatch(match, !initState.current.includes('configLoaded'));
-  }, [match]);
+    setURLMatch(model.match, !initState.current.includes('configLoaded'));
+  }, [model.match]);
+
   React.useEffect(() => {
-    if (config.deduper.mark) {
-      setURLShowDup(showDuplicates, !initState.current.includes('configLoaded'));
+    if (model.config.deduper.mark) {
+      setURLShowDup(model.showDuplicates, !initState.current.includes('configLoaded'));
     } else {
       removeURLParam(URLParam.ShowDuplicates);
     }
-  }, [config.deduper.mark, showDuplicates]);
+  }, [model.config.deduper.mark, model.showDuplicates]);
+
   React.useEffect(() => {
     setURLMetricFunction(
-      selectedViewId === 'topology' ? topologyMetricFunction : undefined,
+      model.selectedViewId === 'topology' ? model.topologyMetricFunction : undefined,
       !initState.current.includes('configLoaded')
     );
     setURLMetricType(
-      selectedViewId === 'topology' ? topologyMetricType : undefined,
+      model.selectedViewId === 'topology' ? model.topologyMetricType : undefined,
       !initState.current.includes('configLoaded')
     );
-  }, [topologyMetricFunction, selectedViewId, topologyMetricType]);
+  }, [model.topologyMetricFunction, model.selectedViewId, model.topologyMetricType]);
+
   React.useEffect(() => {
-    setURLPacketLoss(packetLoss);
-  }, [packetLoss]);
+    setURLPacketLoss(model.packetLoss);
+  }, [model.packetLoss]);
+
   React.useEffect(() => {
-    setURLRecortType(recordType, !initState.current.includes('configLoaded'));
-  }, [recordType]);
+    setURLRecortType(model.recordType, !initState.current.includes('configLoaded'));
+  }, [model.recordType]);
 
   // update local storage saved query params
   React.useEffect(() => {
     if (!forcedFilters) {
-      setQueryParams(getURLParams().toString());
+      model.setQueryParams(getURLParams().toString());
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    filters,
-    range,
-    limit,
-    match,
-    showDuplicates,
-    topologyMetricFunction,
-    topologyMetricType,
-    setQueryParams,
+    model.filters,
+    model.range,
+    model.limit,
+    model.match,
+    model.showDuplicates,
+    model.topologyMetricFunction,
+    model.topologyMetricType,
+    model.setQueryParams,
     forcedFilters
   ]);
 
   // update local storage enabled filters
   React.useEffect(() => {
-    setDisabledFilters(getDisabledFiltersRecord(filters.list));
+    model.setDisabledFilters(getDisabledFiltersRecord(model.filters.list));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters]);
-
-  const clearFilters = React.useCallback(() => {
-    if (forcedFilters) {
-      navigate(netflowTrafficPath);
-    } else if (filters) {
-      //set URL Param to empty value to be able to restore state coming from another page
-      const empty: Filters = { ...filters, list: [] };
-      setURLFilters(empty);
-      updateTableFilters(empty);
-    }
-  }, [forcedFilters, filters, updateTableFilters]);
-
-  const setFiltersList = React.useCallback(
-    (list: Filter[]) => {
-      setFilters({ ...filters, list: list });
-    },
-    [setFilters, filters]
-  );
-
-  const viewTabs = () => {
-    return (
-      <Tabs
-        className={`netflow-traffic-tabs ${isDarkTheme ? 'dark' : 'light'}`}
-        usePageInsets
-        activeKey={selectedViewId}
-        onSelect={(event, eventkey) => selectView(eventkey as ViewId)}
-        role="region"
-      >
-        <Tab className="overviewTabButton" eventKey={'overview'} title={<TabTitleText>{t('Overview')}</TabTitleText>} />
-        <Tab
-          className="tableTabButton"
-          eventKey={'table'}
-          isAriaDisabled={!allowLoki()} // required instead of 'disabled' when used with a tooltip
-          tooltip={
-            !allowLoki() ? <Tooltip content={t('Only available when FlowCollector.loki.enable is true')} /> : undefined
-          }
-          title={<TabTitleText>{t('Traffic flows')}</TabTitleText>}
-        />
-        <Tab className="topologyTabButton" eventKey={'topology'} title={<TabTitleText>{t('Topology')}</TabTitleText>} />
-      </Tabs>
-    );
-  };
-
-  const onTopologyExport = () => {
-    const topology_flex = document.getElementsByClassName('pf-topology-visualization-surface__svg')[0];
-    exportToPng('topology', topology_flex as HTMLElement, isDarkTheme);
-  };
-
-  const onOverviewExport = () => {
-    const prevFocusState = overviewFocus;
-    setOverviewFocus(false);
-    setTimeout(() => {
-      const overview_flex = document.getElementById('overview-flex');
-      exportToPng('overview_page', overview_flex as HTMLElement, isDarkTheme, undefined, () =>
-        setOverviewFocus(prevFocusState)
-      );
-    }, 500);
-  };
-
-  const viewOptionsContent = () => {
-    const items: JSX.Element[] = [];
-
-    if (selectedViewId === 'overview') {
-      items.push(
-        <OverflowMenuItem key="panels">
-          <Button
-            data-test="manage-overview-panels-button"
-            id="manage-overview-panels-button"
-            variant="link"
-            className="overflow-button"
-            icon={<ColumnsIcon />}
-            onClick={() => setOverviewModalOpen(true)}
-          >
-            {t('Manage panels')}
-          </Button>
-        </OverflowMenuItem>
-      );
-      items.push(
-        <OverflowMenuItem key="export">
-          <Button
-            data-test="export-button"
-            id="export-button"
-            variant="link"
-            className="overflow-button"
-            icon={<ExportIcon />}
-            onClick={() => onOverviewExport()}
-          >
-            {t('Export overview')}
-          </Button>
-        </OverflowMenuItem>
-      );
-    } else if (selectedViewId === 'table') {
-      items.push(
-        <OverflowMenuItem key="columns">
-          <Button
-            data-test="manage-columns-button"
-            id="manage-columns-button"
-            variant="link"
-            className="overflow-button"
-            icon={<ColumnsIcon />}
-            onClick={() => setColModalOpen(true)}
-          >
-            {t('Manage columns')}
-          </Button>
-        </OverflowMenuItem>
-      );
-      items.push(
-        <OverflowMenuItem key="export">
-          <Button
-            data-test="export-button"
-            id="export-button"
-            variant="link"
-            className="overflow-button"
-            icon={<ExportIcon />}
-            onClick={() => setExportModalOpen(true)}
-          >
-            {t('Export data')}
-          </Button>
-        </OverflowMenuItem>
-      );
-    } else if (selectedViewId === 'topology') {
-      items.push(
-        <OverflowMenuItem key="export">
-          <Button
-            data-test="export-button"
-            id="export-button"
-            variant="link"
-            className="overflow-button"
-            icon={<ExportIcon />}
-            onClick={() => onTopologyExport()}
-          >
-            {t('Export topology view')}
-          </Button>
-        </OverflowMenuItem>
-      );
-    }
-    return items;
-  };
-
-  const viewOptionsControl = () => {
-    const dropdownItems: JSX.Element[] = [];
-
-    if (selectedViewId === 'overview') {
-      dropdownItems.push(
-        <DropdownGroup key="panels" label={t('Manage')}>
-          <DropdownItem key="export" onClick={() => setOverviewModalOpen(true)}>
-            {t('Panels')}
-          </DropdownItem>
-        </DropdownGroup>
-      );
-      dropdownItems.push(
-        <DropdownGroup key="export-group" label={t('Actions')}>
-          <DropdownItem key="export" onClick={() => onOverviewExport()}>
-            {t('Export overview')}
-          </DropdownItem>
-        </DropdownGroup>
-      );
-    } else if (selectedViewId === 'table') {
-      dropdownItems.push(
-        <DropdownGroup key="columns" label={t('Manage')}>
-          <DropdownItem key="export" onClick={() => setColModalOpen(true)}>
-            {t('Columns')}
-          </DropdownItem>
-        </DropdownGroup>
-      );
-      dropdownItems.push(
-        <DropdownGroup key="export-group" label={t('Actions')}>
-          <DropdownItem key="export" onClick={() => setExportModalOpen(true)}>
-            {t('Export')}
-          </DropdownItem>
-        </DropdownGroup>
-      );
-    } else if (selectedViewId === 'topology') {
-      dropdownItems.push(
-        <DropdownGroup key="export-group" label={t('Actions')}>
-          <DropdownItem key="export" onClick={() => onTopologyExport()}>
-            {t('Export view')}
-          </DropdownItem>
-        </DropdownGroup>
-      );
-    }
-
-    return (
-      <Dropdown
-        data-test="view-options-dropdown"
-        id="view-options-dropdown"
-        onSelect={() => setViewOptionOverflowMenuOpen(false)}
-        toggle={
-          <Button
-            data-test="view-options-button"
-            id="view-options-button"
-            variant="link"
-            className="overflow-button"
-            icon={<EllipsisVIcon />}
-            onClick={() => setViewOptionOverflowMenuOpen(!isViewOptionOverflowMenuOpen)}
-          >
-            {t('More options')}
-          </Button>
-        }
-        isOpen={isViewOptionOverflowMenuOpen}
-        dropdownItems={dropdownItems}
-      />
-    );
-  };
-
-  const actions = () => {
-    return (
-      <Flex direction={{ default: 'row' }}>
-        <FlexItem>
-          <Flex direction={{ default: 'column' }}>
-            <FlexItem className="netobserv-action-title">
-              <Text component={TextVariants.h4}>{t('Time range')}</Text>
-            </FlexItem>
-            <FlexItem flex={{ default: 'flex_1' }}>
-              <TimeRangeDropdown
-                data-test="time-range-dropdown"
-                id="time-range-dropdown"
-                range={range}
-                setRange={setRange}
-                openCustomModal={() => setTRModalOpen(true)}
-              />
-            </FlexItem>
-          </Flex>
-        </FlexItem>
-        <FlexItem className="netobserv-refresh-interval-container">
-          <Flex direction={{ default: 'column' }}>
-            <FlexItem className="netobserv-action-title">
-              <Text component={TextVariants.h4}>{t('Refresh interval')}</Text>
-            </FlexItem>
-            <FlexItem flex={{ default: 'flex_1' }}>
-              <RefreshDropdown
-                data-test="refresh-dropdown"
-                id="refresh-dropdown"
-                disabled={showHistogram || typeof range !== 'number'}
-                interval={interval}
-                setInterval={setInterval}
-              />
-            </FlexItem>
-          </Flex>
-        </FlexItem>
-        <FlexItem className="netobserv-refresh-container">
-          <Button
-            data-test="refresh-button"
-            id="refresh-button"
-            className="co-action-refresh-button"
-            variant="primary"
-            onClick={() => tick()}
-            icon={<SyncAltIcon style={{ animation: `spin ${loading ? 1 : 0}s linear infinite` }} />}
-          />
-        </FlexItem>
-      </Flex>
-    );
-  };
-
-  const panelContent = () => {
-    if (selectedRecord) {
-      return (
-        <RecordPanel
-          id="recordPanel"
-          record={selectedRecord}
-          columns={getAvailableColumns(true)}
-          filters={filters.list}
-          filterDefinitions={getFilterDefs()}
-          range={range}
-          type={recordType}
-          isDark={isDarkTheme}
-          canSwitchTypes={isFlow() && isConnectionTracking()}
-          allowPktDrops={isPktDrop()}
-          setFilters={setFiltersList}
-          setRange={setRange}
-          setType={setRecordType}
-          onClose={() => onRecordSelect(undefined)}
-        />
-      );
-    } else if (isShowQuerySummary) {
-      return (
-        <SummaryPanel
-          id="summaryPanel"
-          flows={flows}
-          metrics={metrics}
-          type={recordType}
-          maxChunkAge={config.maxChunkAgeMs}
-          stats={stats}
-          limit={limit}
-          lastRefresh={lastRefresh}
-          lastDuration={lastDuration}
-          warning={checkSlownessReason(warning)}
-          range={range}
-          showDNSLatency={isDNSTracking()}
-          showRTTLatency={isFlowRTT()}
-          onClose={() => setShowQuerySummary(false)}
-        />
-      );
-    } else if (selectedElement) {
-      return (
-        <ElementPanel
-          id="elementPanel"
-          element={selectedElement}
-          metrics={getTopologyMetrics() || []}
-          droppedMetrics={getTopologyDroppedMetrics() || []}
-          metricType={topologyMetricType}
-          truncateLength={topologyOptions.truncateLength}
-          filters={filters.list}
-          filterDefinitions={getFilterDefs()}
-          setFilters={setFiltersList}
-          onClose={() => onElementSelect(undefined)}
-          isDark={isDarkTheme}
-        />
-      );
-    } else {
-      return null;
-    }
-  };
-
-  const filterLinks = React.useCallback(() => {
-    const defFilters = getDefaultFilters();
-    return (
-      <LinksOverflow
-        id={'filter-links-overflow'}
-        items={[
-          {
-            id: 'reset-filters',
-            label: t('Reset defaults'),
-            onClick: resetDefaultFilters,
-            enabled: defFilters.length > 0 && !filtersEqual(filters.list, defFilters)
-          },
-          {
-            id: 'clear-all-filters',
-            label: t('Clear all'),
-            onClick: clearFilters,
-            enabled: filters.list.length > 0
-          }
-        ]}
-      />
-    );
-  }, [getDefaultFilters, t, resetDefaultFilters, filters.list, clearFilters]);
-
-  const pageContent = React.useCallback(() => {
-    let content: JSX.Element | null = null;
-
-    if (error) {
-      content = (
-        <Error
-          title={t('Unable to get {{item}}', {
-            item: initState.current.includes('configLoadError') ? t('config') : selectedViewId
-          })}
-          error={error}
-          isLokiRelated={!initState.current.includes('configLoadError') && !isPromUnsupportedError(error)}
-        />
-      );
-    } else {
-      switch (selectedViewId) {
-        case 'overview':
-          content = (
-            <NetflowOverview
-              limit={limit}
-              panels={getSelectedPanels()}
-              recordType={recordType}
-              metrics={metrics}
-              loading={loading}
-              isDark={isDarkTheme}
-              filterActionLinks={filterLinks()}
-              truncateLength={overviewTruncateLength}
-              focus={overviewFocus}
-              setFocus={setOverviewFocus}
-            />
-          );
-          break;
-        case 'table':
-          content = (
-            <NetflowTable
-              loading={loading}
-              allowPktDrops={isPktDrop()}
-              flows={flows}
-              selectedRecord={selectedRecord}
-              size={size}
-              onSelect={onRecordSelect}
-              columns={getSelectedColumns()}
-              setColumns={(v: Column[]) => setColumns(v.concat(columns.filter(col => !col.isSelected)))}
-              columnSizes={columnSizes}
-              setColumnSizes={setColumnSizes}
-              filterActionLinks={filterLinks()}
-              isDark={isDarkTheme}
-            />
-          );
-          break;
-        case 'topology':
-          content = (
-            <NetflowTopology
-              loading={loading}
-              k8sModels={k8sModels}
-              metricFunction={topologyMetricFunction}
-              metricType={topologyMetricType}
-              metricScope={metricScope}
-              setMetricScope={setMetricScope}
-              metrics={getTopologyMetrics() || []}
-              droppedMetrics={getTopologyDroppedMetrics() || []}
-              options={topologyOptions}
-              setOptions={setTopologyOptions}
-              filters={filters}
-              filterDefinitions={getFilterDefs()}
-              setFilters={setFilters}
-              selected={selectedElement}
-              onSelect={onElementSelect}
-              searchHandle={searchRef?.current}
-              searchEvent={searchEvent}
-              isDark={isDarkTheme}
-              allowedScopes={getAllowedScopes()}
-            />
-          );
-          break;
-        default:
-          content = null;
-          break;
-      }
-    }
-
-    return (
-      <Flex id="page-content-flex" direction={{ default: 'column' }}>
-        <FlexItem
-          id={`${selectedViewId}-container`}
-          flex={{ default: 'flex_1' }}
-          className={isDarkTheme ? 'dark' : 'light'}
-        >
-          {content}
-        </FlexItem>
-        <FlexItem>
-          {_.isEmpty(flows) ? (
-            <MetricsQuerySummary
-              metrics={metrics}
-              stats={stats}
-              loading={loading}
-              lastRefresh={lastRefresh}
-              lastDuration={lastDuration}
-              warning={checkSlownessReason(warning)}
-              isShowQuerySummary={isShowQuerySummary}
-              toggleQuerySummary={() => onToggleQuerySummary(!isShowQuerySummary)}
-              isDark={isDarkTheme}
-            />
-          ) : (
-            <FlowsQuerySummary
-              flows={flows}
-              stats={stats}
-              loading={loading}
-              lastRefresh={lastRefresh}
-              lastDuration={lastDuration}
-              warning={checkSlownessReason(warning)}
-              range={range}
-              type={recordType}
-              isShowQuerySummary={isShowQuerySummary}
-              toggleQuerySummary={() => onToggleQuerySummary(!isShowQuerySummary)}
-            />
-          )}
-        </FlexItem>
-      </Flex>
-    );
-  }, [
-    columnSizes,
-    columns,
-    error,
-    filterLinks,
-    filters,
-    flows,
-    getFilterDefs,
-    getSelectedColumns,
-    getSelectedPanels,
-    getTopologyDroppedMetrics,
-    getTopologyMetrics,
-    isDarkTheme,
-    getAllowedScopes,
-    isPktDrop,
-    isShowQuerySummary,
-    k8sModels,
-    lastDuration,
-    lastRefresh,
-    limit,
-    loading,
-    metricScope,
-    metrics,
-    onElementSelect,
-    onRecordSelect,
-    onToggleQuerySummary,
-    overviewFocus,
-    overviewTruncateLength,
-    range,
-    recordType,
-    searchEvent,
-    selectedElement,
-    selectedRecord,
-    selectedViewId,
-    setColumnSizes,
-    setColumns,
-    setMetricScope,
-    setOverviewFocus,
-    setTopologyOptions,
-    size,
-    checkSlownessReason,
-    stats,
-    t,
-    topologyMetricFunction,
-    topologyMetricType,
-    topologyOptions,
-    warning
-  ]);
-
-  //update data on filters changes
-  React.useEffect(() => {
-    setTRModalOpen(false);
-  }, [range]);
+  }, [model.filters]);
 
   //update page on full screen change
   React.useEffect(() => {
@@ -1788,295 +1063,200 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
     const sideBar = document.getElementById('page-sidebar');
     const notification = document.getElementsByClassName('co-global-notifications');
     [header, sideBar, ...notification].forEach(e => {
-      if (isFullScreen) {
+      if (model.isFullScreen) {
         e?.classList.add('hidden');
       } else {
         e?.classList.remove('hidden');
       }
     });
-  }, [isFullScreen]);
+  }, [model.isFullScreen]);
 
-  const moveRange = React.useCallback(
-    (next: boolean) => {
-      const now = lastRefresh ? lastRefresh.getTime() : new Date().getTime();
+  // Functions
+  const clearSelections = () => {
+    model.setTRModalOpen(false);
+    model.setOverviewModalOpen(false);
+    model.setColModalOpen(false);
+    model.setSelectedRecord(undefined);
+    model.setShowQuerySummary(false);
+    model.setSelectedElement(undefined);
+  };
 
-      if (typeof range === 'number') {
-        if (next) {
-          //call refresh as we can't move in the future
-          tick();
-        } else {
-          setRange({ from: getDateMsInSeconds(now) - 2 * range, to: getDateMsInSeconds(now) - range });
-        }
-      } else {
-        const updatedRange = { ...range };
-        const factor = (next ? 1 : -1) * (range.to - range.from);
+  const selectView = (view: ViewId) => {
+    clearSelections();
+    //save / restore top / limit parameter according to selected view
+    if (view === 'overview' && model.selectedViewId !== 'overview') {
+      model.setLastLimit(model.limit);
+      model.setLimit(model.lastTop);
+    } else if (view !== 'overview' && model.selectedViewId === 'overview') {
+      model.setLastTop(model.limit);
+      model.setLimit(model.lastLimit);
+    }
 
-        updatedRange.from += factor;
-        updatedRange.to += factor;
-
-        if (getDateSInMiliseconds(updatedRange.to) > now) {
-          updatedRange.to = getDateMsInSeconds(now);
-        }
-
-        if (updatedRange.to - updatedRange.from < defaultTimeRange) {
-          setRange(defaultTimeRange);
-        } else {
-          setRange(updatedRange);
-        }
+    if (view !== model.selectedViewId) {
+      model.setFlows([]);
+      model.setMetrics(defaultNetflowMetrics);
+      if (!initState.current.includes('configLoadError')) {
+        model.setError(undefined);
       }
-    },
-    [lastRefresh, range, tick]
-  );
+    }
+    model.setSelectedViewId(view);
+  };
 
-  const zoomRange = React.useCallback(
-    (zoomIn: boolean) => {
-      const timeRangeOptions = getTimeRangeOptions(t, false);
-      const keys = Object.keys(timeRangeOptions);
+  // Views
+  const pageHeader = () => {
+    return (
+      <div id="pageHeader">
+        <Flex direction={{ default: 'row' }}>
+          <FlexItem flex={{ default: 'flex_1' }}>
+            <Text component={TextVariants.h1}>{t('Network Traffic')}</Text>
+          </FlexItem>
+          <FlexItem>
+            <Flex direction={{ default: 'row' }}>
+              <FlexItem>
+                <Flex direction={{ default: 'column' }}>
+                  <FlexItem className="netobserv-action-title">
+                    <Text component={TextVariants.h4}>{t('Time range')}</Text>
+                  </FlexItem>
+                  <FlexItem flex={{ default: 'flex_1' }}>
+                    <TimeRangeDropdown
+                      data-test="time-range-dropdown"
+                      id="time-range-dropdown"
+                      range={model.range}
+                      setRange={model.setRange}
+                      openCustomModal={() => model.setTRModalOpen(true)}
+                    />
+                  </FlexItem>
+                </Flex>
+              </FlexItem>
+              <FlexItem className="netobserv-refresh-interval-container">
+                <Flex direction={{ default: 'column' }}>
+                  <FlexItem className="netobserv-action-title">
+                    <Text component={TextVariants.h4}>{t('Refresh interval')}</Text>
+                  </FlexItem>
+                  <FlexItem flex={{ default: 'flex_1' }}>
+                    <RefreshDropdown
+                      data-test="refresh-dropdown"
+                      id="refresh-dropdown"
+                      disabled={model.showHistogram || typeof model.range !== 'number'}
+                      interval={model.interval}
+                      setInterval={model.setInterval}
+                    />
+                  </FlexItem>
+                </Flex>
+              </FlexItem>
+              <FlexItem className="netobserv-refresh-container">
+                <Button
+                  data-test="refresh-button"
+                  id="refresh-button"
+                  className="co-action-refresh-button"
+                  variant="primary"
+                  onClick={() => tick()}
+                  icon={<SyncAltIcon style={{ animation: `spin ${model.loading ? 1 : 0}s linear infinite` }} />}
+                />
+              </FlexItem>
+            </Flex>
+          </FlexItem>
+        </Flex>
+      </div>
+    );
+  };
 
-      if (typeof range === 'number') {
-        const selectedKey = formatDuration(getDateSInMiliseconds(range as number));
-        let index = keys.indexOf(selectedKey);
-        if (zoomIn && index > 0) {
-          index--;
-        } else if (!zoomIn && index < keys.length) {
-          index++;
-        }
-
-        setRange(getDateMsInSeconds(parseDuration(keys[index])));
-      } else {
-        const updatedRange = { ...range };
-        const factor = Math.floor(((zoomIn ? -1 : 1) * (range.to - range.from)) / (zoomIn ? 4 : 2));
-
-        updatedRange.from -= factor;
-        updatedRange.to += factor;
-
-        if (updatedRange.to - updatedRange.from >= getDateMsInSeconds(parseDuration(keys[0]))) {
-          const now = lastRefresh ? lastRefresh.getTime() : new Date().getTime();
-          if (getDateSInMiliseconds(updatedRange.to) > now) {
-            updatedRange.to = getDateMsInSeconds(now);
-          }
-
-          setRange(updatedRange);
-        }
-      }
-    },
-    [lastRefresh, range, t]
-  );
-
-  const isShowViewOptions = selectedViewId === 'table' ? showViewOptions && !showHistogram : showViewOptions;
+  const isShowViewOptions =
+    model.selectedViewId === 'table' ? model.showViewOptions && !model.showHistogram : model.showViewOptions;
 
   return !_.isEmpty(extensions) ? (
     <PageSection id="pageSection" className={`${isDarkTheme ? 'dark' : 'light'} ${isTab ? 'tab' : ''}`}>
       {
         //display title only if forced filters is not set
-        !forcedFilters && (
-          <div id="pageHeader">
-            <Flex direction={{ default: 'row' }}>
-              <FlexItem flex={{ default: 'flex_1' }}>
-                <Text component={TextVariants.h1}>{t('Network Traffic')}</Text>
-              </FlexItem>
-              <FlexItem>{actions()}</FlexItem>
-            </Flex>
-          </div>
-        )
+        !forcedFilters && pageHeader()
       }
       {!_.isEmpty(getFilterDefs()) && (
         <FiltersToolbar
+          {...model}
           id="filter-toolbar"
-          filters={filters}
           setFilters={updateTableFilters}
           clearFilters={clearFilters}
           resetFilters={resetDefaultFilters}
           queryOptionsProps={{
-            limit,
-            setLimit,
-            match,
-            setMatch,
-            packetLoss,
-            setPacketLoss,
-            recordType,
-            setRecordType,
-            dataSource,
-            setDataSource,
-            showDuplicates,
-            setShowDuplicates,
+            ...model,
             allowLoki: allowLoki(),
             allowProm: allowProm(),
             allowFlow: isFlow(),
             allowConnection: isConnectionTracking(),
-            allowShowDuplicates: selectedViewId === 'table' && recordType !== 'allConnections',
-            deduperMark: config.deduper.mark,
+            allowShowDuplicates: model.selectedViewId === 'table' && model.recordType !== 'allConnections',
+            deduperMark: model.config.deduper.mark,
             allowPktDrops: isPktDrop(),
-            useTopK: selectedViewId === 'overview'
+            useTopK: model.selectedViewId === 'overview'
           }}
           forcedFilters={forcedFilters}
           quickFilters={getQuickFilters()}
           filterDefinitions={getFilterDefs()}
-          isFullScreen={isFullScreen}
-          setFullScreen={setFullScreen}
         />
       )}
       {
-        <Flex className="netflow-traffic-tabs-container">
-          <FlexItem id="tabs-container" flex={{ default: 'flex_1' }}>
-            {viewTabs()}
-          </FlexItem>
-          {selectedViewId === 'table' && (
-            <FlexItem className={`${isDarkTheme ? 'dark' : 'light'}-bottom-border`}>
-              <Button
-                data-test="show-histogram-button"
-                id="show-histogram-button"
-                variant="link"
-                className="overflow-button"
-                onClick={() => {
-                  setShowViewOptions(false);
-                  setShowHistogram(!showHistogram);
-                  setHistogramRange(undefined);
-                }}
-              >
-                {showHistogram ? t('Hide histogram') : t('Show histogram')}
-              </Button>
-            </FlexItem>
-          )}
-          <FlexItem className={`${isDarkTheme ? 'dark' : 'light'}-bottom-border`}>
-            <Button
-              data-test="show-view-options-button"
-              id="show-view-options-button"
-              variant="link"
-              className="overflow-button"
-              onClick={() => {
-                setShowViewOptions(!isShowViewOptions);
-                setShowHistogram(false);
-                setHistogramRange(undefined);
-              }}
-            >
-              {isShowViewOptions ? t('Hide advanced options') : t('Show advanced options')}
-            </Button>
-          </FlexItem>
-        </Flex>
+        <TabsContainer
+          {...model}
+          isDarkTheme={isDarkTheme}
+          selectView={selectView}
+          isAllowLoki={allowLoki()}
+          isShowViewOptions={isShowViewOptions}
+        />
       }
-      {selectedViewId === 'table' && showHistogram && (
-        <Toolbar
-          data-test-id="histogram-toolbar"
-          id="histogram-toolbar"
-          isFullHeight
-          className={isDarkTheme ? 'dark' : ''}
-        >
-          <ToolbarItem className="histogram" widths={{ default: '100%' }}>
-            <HistogramContainer
-              id={'histogram'}
-              loading={loading}
-              totalMetric={metrics.totalFlowCountMetric}
-              limit={limit}
-              isDark={isDarkTheme}
-              range={histogramRange}
-              guidedTourHandle={guidedTourRef.current}
-              setRange={setHistogramRange}
-              moveRange={moveRange}
-              zoomRange={zoomRange}
-              resetRange={() => setRange(defaultTimeRange)}
-            />
-          </ToolbarItem>
-        </Toolbar>
+      {model.selectedViewId === 'table' && model.showHistogram && (
+        <HistogramToolbar
+          {...model}
+          isDarkTheme={isDarkTheme}
+          totalMetric={model.metrics.totalFlowCountMetric}
+          guidedTourHandle={guidedTourRef.current}
+          resetRange={() => model.setRange(defaultTimeRange)}
+          tick={tick}
+        />
       )}
       {isShowViewOptions && (
-        <Toolbar data-test-id="view-options-toolbar" id="view-options-toolbar" className={isDarkTheme ? 'dark' : ''}>
-          <ToolbarItem className="flex-start view-options-first">
-            <OverflowMenuItem key="display">
-              {selectedViewId === 'overview' && (
-                <OverviewDisplayDropdown
-                  metricScope={metricScope}
-                  setMetricScope={setMetricScope}
-                  truncateLength={overviewTruncateLength}
-                  setTruncateLength={setOverviewTruncateLength}
-                  focus={overviewFocus}
-                  setFocus={setOverviewFocus}
-                  allowedScopes={getAllowedScopes()}
-                />
-              )}
-              {selectedViewId === 'table' && <TableDisplayDropdown size={size} setSize={setSize} />}
-              {selectedViewId === 'topology' && (
-                <TopologyDisplayDropdown
-                  metricFunction={topologyMetricFunction}
-                  setMetricFunction={setTopologyMetricFunction}
-                  metricType={topologyMetricType}
-                  setMetricType={updateTopologyMetricType}
-                  metricScope={metricScope}
-                  setMetricScope={setMetricScope}
-                  topologyOptions={topologyOptions}
-                  setTopologyOptions={setTopologyOptions}
-                  allowPktDrop={isPktDrop()}
-                  allowDNSMetric={isDNSTracking()}
-                  allowRTTMetric={isFlowRTT()}
-                  allowedScopes={getAllowedScopes()}
-                />
-              )}
-            </OverflowMenuItem>
-          </ToolbarItem>
-          {selectedViewId === 'topology' && (
-            <ToolbarItem className="flex-start" id="search-container" data-test="search-container">
-              <SearchComponent ref={searchRef} setSearchEvent={setSearchEvent} isDark={isDarkTheme} />
-            </ToolbarItem>
-          )}
-          <ToolbarItem className="flex-start view-options-last" alignment={{ default: 'alignRight' }}>
-            <OverflowMenu breakpoint="2xl">
-              <OverflowMenuContent isPersistent>
-                <OverflowMenuGroup groupType="button" isPersistent className="flex-start">
-                  {viewOptionsContent()}
-                </OverflowMenuGroup>
-              </OverflowMenuContent>
-              <OverflowMenuControl className="flex-start">{viewOptionsControl()}</OverflowMenuControl>
-            </OverflowMenu>
-          </ToolbarItem>
-        </Toolbar>
+        <ViewOptionsToolbar
+          {...model}
+          isDarkTheme={isDarkTheme}
+          setMetricType={updateTopologyMetricType}
+          allowPktDrop={isPktDrop()}
+          allowDNSMetric={isDNSTracking()}
+          allowRTTMetric={isFlowRTT()}
+          allowedScopes={getAllowedScopes()}
+          setMetricScope={setMetricScope}
+          ref={searchRef}
+        />
       )}
-      <Drawer
-        id="drawer"
-        isInline
-        isExpanded={selectedRecord !== undefined || selectedElement !== undefined || isShowQuerySummary}
-      >
-        <DrawerContent id="drawerContent" panelContent={panelContent()}>
-          <DrawerContentBody id="drawerBody">{pageContent()}</DrawerContentBody>
-        </DrawerContent>
-      </Drawer>
+      {
+        <NetflowTrafficDrawer
+          {...model}
+          isDarkTheme={isDarkTheme}
+          defaultFilters={getDefaultFilters()}
+          currentState={initState.current}
+          panels={getSelectedPanels()}
+          allowPktDrop={isPktDrop()}
+          allowDNSMetric={isDNSTracking()}
+          allowRTTMetric={isFlowRTT()}
+          setMetricScope={setMetricScope}
+          resetDefaultFilters={resetDefaultFilters}
+          clearFilters={clearFilters}
+          filterDefinitions={getFilterDefs()}
+          searchHandle={searchRef.current}
+          allowedScopes={getAllowedScopes()}
+          canSwitchTypes={isFlow() && isConnectionTracking()}
+          clearSelections={clearSelections}
+          availableColumns={getAvailableColumns(true)}
+          maxChunkAge={model.config.maxChunkAgeMs}
+          selectedColumns={getSelectedColumns()}
+        />
+      }
       {initState.current.includes('initDone') && (
-        <>
-          <TimeRangeModal
-            id="time-range-modal"
-            isModalOpen={isTRModalOpen}
-            setModalOpen={setTRModalOpen}
-            range={typeof range === 'object' ? range : undefined}
-            setRange={setRange}
-            maxChunkAge={config.maxChunkAgeMs}
-          />
-          <OverviewPanelsModal
-            id="overview-panels-modal"
-            isModalOpen={isOverviewModalOpen}
-            setModalOpen={setOverviewModalOpen}
-            recordType={recordType}
-            panels={getAvailablePanels()}
-            setPanels={setPanels}
-            customIds={config.panels}
-          />
-          <ColumnsModal
-            id="columns-modal"
-            isModalOpen={isColModalOpen}
-            setModalOpen={setColModalOpen}
-            config={config}
-            columns={getAvailableColumns()}
-            setColumns={setColumns}
-            setColumnSizes={setColumnSizes}
-          />
-          <ExportModal
-            id="export-modal"
-            isModalOpen={isExportModalOpen}
-            setModalOpen={setExportModalOpen}
-            flowQuery={buildFlowQuery()}
-            columns={columns.filter(c => c.field && !c.field.name.startsWith('Time'))}
-            range={range}
-            filters={(forcedFilters || filters).list}
-          />
-        </>
+        <Modals
+          {...model}
+          panels={getAvailablePanels()}
+          availableColumns={getAvailableColumns()}
+          flowQuery={buildFlowQuery()}
+          filters={(forcedFilters || model.filters).list}
+          maxChunkAge={model.config.maxChunkAgeMs}
+        />
       )}
       <GuidedTourPopover id="netobserv" ref={guidedTourRef} isDark={isDarkTheme} />
     </PageSection>
