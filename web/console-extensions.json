@@ -242,5 +242,16 @@
         "href": "netflow"
       }
     }
+  },
+  {
+    "type": "console.tab",
+    "properties": {
+      "contextId": "dev-console-observe",
+      "name": "%plugin__netobserv-plugin~Network Traffic%",
+      "href": "netflow-traffic",
+      "component": {
+        "$codeRef": "netflowDevTab.default"
+      }
+    }
   }
 ]

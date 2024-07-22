@@ -81,12 +81,18 @@ import ViewOptionsToolbar from './toolbar/view-options-toolbar';
 export type ViewId = 'overview' | 'table' | 'topology';
 
 export interface NetflowTrafficProps {
+  forcedNamespace?: string;
   forcedFilters?: Filters | null;
   isTab?: boolean;
   parentConfig?: Config;
 }
 
-export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, isTab, parentConfig }) => {
+export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
+  forcedNamespace,
+  forcedFilters,
+  isTab,
+  parentConfig
+}) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const isDarkTheme = useTheme();
   const [extensions] = useResolvedExtensions<ModelFeatureFlag>(isModelFeatureFlag);
@@ -307,6 +313,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
   const buildFlowQuery = React.useCallback((): FlowQuery => {
     const enabledFilters = getEnabledFilters(forcedFilters || model.filters);
     const query: FlowQuery = {
+      namespace: forcedNamespace,
       filters: filtersToString(enabledFilters.list, model.match === 'any'),
       limit: limitValues.includes(model.limit) ? model.limit : limitValues[0],
       recordType: model.recordType,
@@ -342,6 +349,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
     }
     return query;
   }, [
+    forcedNamespace,
     forcedFilters,
     model.filters,
     model.match,
@@ -1103,6 +1111,55 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
   };
 
   // Views
+  const actions = () => {
+    return (
+      <Flex direction={{ default: 'row' }}>
+        <FlexItem>
+          <Flex direction={{ default: 'column' }}>
+            <FlexItem className="netobserv-action-title">
+              <Text component={TextVariants.h4}>{t('Time range')}</Text>
+            </FlexItem>
+            <FlexItem flex={{ default: 'flex_1' }}>
+              <TimeRangeDropdown
+                data-test="time-range-dropdown"
+                id="time-range-dropdown"
+                range={model.range}
+                setRange={model.setRange}
+                openCustomModal={() => model.setTRModalOpen(true)}
+              />
+            </FlexItem>
+          </Flex>
+        </FlexItem>
+        <FlexItem className="netobserv-refresh-interval-container">
+          <Flex direction={{ default: 'column' }}>
+            <FlexItem className="netobserv-action-title">
+              <Text component={TextVariants.h4}>{t('Refresh interval')}</Text>
+            </FlexItem>
+            <FlexItem flex={{ default: 'flex_1' }}>
+              <RefreshDropdown
+                data-test="refresh-dropdown"
+                id="refresh-dropdown"
+                disabled={model.showHistogram || typeof model.range !== 'number'}
+                interval={model.interval}
+                setInterval={model.setInterval}
+              />
+            </FlexItem>
+          </Flex>
+        </FlexItem>
+        <FlexItem className="netobserv-refresh-container">
+          <Button
+            data-test="refresh-button"
+            id="refresh-button"
+            className="co-action-refresh-button"
+            variant="primary"
+            onClick={() => tick()}
+            icon={<SyncAltIcon style={{ animation: `spin ${model.loading ? 1 : 0}s linear infinite` }} />}
+          />
+        </FlexItem>
+      </Flex>
+    );
+  };
+
   const pageHeader = () => {
     return (
       <div id="pageHeader">
@@ -1110,52 +1167,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
           <FlexItem flex={{ default: 'flex_1' }}>
             <Text component={TextVariants.h1}>{t('Network Traffic')}</Text>
           </FlexItem>
-          <FlexItem>
-            <Flex direction={{ default: 'row' }}>
-              <FlexItem>
-                <Flex direction={{ default: 'column' }}>
-                  <FlexItem className="netobserv-action-title">
-                    <Text component={TextVariants.h4}>{t('Time range')}</Text>
-                  </FlexItem>
-                  <FlexItem flex={{ default: 'flex_1' }}>
-                    <TimeRangeDropdown
-                      data-test="time-range-dropdown"
-                      id="time-range-dropdown"
-                      range={model.range}
-                      setRange={model.setRange}
-                      openCustomModal={() => model.setTRModalOpen(true)}
-                    />
-                  </FlexItem>
-                </Flex>
-              </FlexItem>
-              <FlexItem className="netobserv-refresh-interval-container">
-                <Flex direction={{ default: 'column' }}>
-                  <FlexItem className="netobserv-action-title">
-                    <Text component={TextVariants.h4}>{t('Refresh interval')}</Text>
-                  </FlexItem>
-                  <FlexItem flex={{ default: 'flex_1' }}>
-                    <RefreshDropdown
-                      data-test="refresh-dropdown"
-                      id="refresh-dropdown"
-                      disabled={model.showHistogram || typeof model.range !== 'number'}
-                      interval={model.interval}
-                      setInterval={model.setInterval}
-                    />
-                  </FlexItem>
-                </Flex>
-              </FlexItem>
-              <FlexItem className="netobserv-refresh-container">
-                <Button
-                  data-test="refresh-button"
-                  id="refresh-button"
-                  className="co-action-refresh-button"
-                  variant="primary"
-                  onClick={() => tick()}
-                  icon={<SyncAltIcon style={{ animation: `spin ${model.loading ? 1 : 0}s linear infinite` }} />}
-                />
-              </FlexItem>
-            </Flex>
-          </FlexItem>
+          <FlexItem>{actions()}</FlexItem>
         </Flex>
       </div>
     );
@@ -1168,30 +1180,38 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
     <PageSection id="pageSection" className={`${isDarkTheme ? 'dark' : 'light'} ${isTab ? 'tab' : ''}`}>
       {
         //display title only if forced filters is not set
-        !forcedFilters && pageHeader()
+        !forcedFilters && !forcedNamespace && pageHeader()
       }
       {!_.isEmpty(getFilterDefs()) && (
-        <FiltersToolbar
-          {...model}
-          id="filter-toolbar"
-          setFilters={updateTableFilters}
-          clearFilters={clearFilters}
-          resetFilters={resetDefaultFilters}
-          queryOptionsProps={{
-            ...model,
-            allowLoki: allowLoki(),
-            allowProm: allowProm(),
-            allowFlow: isFlow(),
-            allowConnection: isConnectionTracking(),
-            allowShowDuplicates: model.selectedViewId === 'table' && model.recordType !== 'allConnections',
-            deduperMark: model.config.deduper.mark,
-            allowPktDrops: isPktDrop(),
-            useTopK: model.selectedViewId === 'overview'
-          }}
-          forcedFilters={forcedFilters}
-          quickFilters={getQuickFilters()}
-          filterDefinitions={getFilterDefs()}
-        />
+        <Flex direction={{ default: 'row' }}>
+          <FlexItem
+            style={{ paddingTop: forcedFilters || forcedNamespace ? '1.8rem' : undefined }}
+            flex={{ default: 'flex_1' }}
+          >
+            <FiltersToolbar
+              {...model}
+              id="filter-toolbar"
+              setFilters={updateTableFilters}
+              clearFilters={clearFilters}
+              resetFilters={resetDefaultFilters}
+              queryOptionsProps={{
+                ...model,
+                allowLoki: allowLoki(),
+                allowProm: allowProm(),
+                allowFlow: isFlow(),
+                allowConnection: isConnectionTracking(),
+                allowShowDuplicates: model.selectedViewId === 'table' && model.recordType !== 'allConnections',
+                deduperMark: model.config.deduper.mark,
+                allowPktDrops: isPktDrop(),
+                useTopK: model.selectedViewId === 'overview'
+              }}
+              forcedFilters={forcedFilters}
+              quickFilters={getQuickFilters()}
+              filterDefinitions={getFilterDefs()}
+            />
+          </FlexItem>
+          {(forcedFilters || forcedNamespace) && <FlexItem style={{ alignSelf: 'flex-start' }}>{actions()}</FlexItem>}
+        </Flex>
       )}
       {
         <TabsContainer

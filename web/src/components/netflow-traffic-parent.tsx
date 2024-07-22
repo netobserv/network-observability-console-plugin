@@ -54,6 +54,7 @@ class NetflowTrafficParent extends React.Component<Props, State> {
           <NetflowTraffic
             isTab={this.props.isTab}
             forcedFilters={this.props.isTab ? this.props.forcedFilters : null}
+            forcedNamespace={this.props.forcedNamespace}
             parentConfig={this.props.parentConfig}
           />
         </AlertFetcher>

@@ -14,6 +14,7 @@ import {
 } from '@patternfly/react-core';
 import React from 'react';
 import { BrowserRouter, Link, Route, Routes } from 'react-router-dom';
+import NetflowTrafficDevTab from './components/netflow-traffic-dev-tab';
 import NetflowTrafficParent from './components/netflow-traffic-parent';
 import NetflowTrafficTab from './components/netflow-traffic-tab';
 
@@ -39,6 +40,10 @@ export const pages = [
   {
     id: 'node-tab',
     name: 'Node tab'
+  },
+  {
+    id: 'dev-tab',
+    name: 'Dev tab'
   }
 ];
 
@@ -76,6 +81,19 @@ export class App extends React.Component<{}, AppState> {
         return <NetflowTrafficTab obj={{ kind: 'Namespace', metadata: { name: 'test' } }} />;
       case 'node-tab':
         return <NetflowTrafficTab obj={{ kind: 'Node', metadata: { name: 'test' } }} />;
+      case 'dev-tab':
+        return (
+          <NetflowTrafficDevTab
+            match={{
+              path: '/dev-monitoring/ns/:ns',
+              url: '/dev-monitoring/ns/netobserv',
+              isExact: false,
+              params: {
+                ns: 'netobserv'
+              }
+            }}
+          />
+        );
       default:
         return <NetflowTrafficParent />;
     }
@@ -166,7 +184,7 @@ export class App extends React.Component<{}, AppState> {
     const AppSidebar = <PageSidebar isNavOpen={isNavOpen} nav={nav} />;
     return (
       <BrowserRouter>
-        <Page header={AppHeader} sidebar={AppSidebar} isManagedSidebar>
+        <Page id="content-scrollable" header={AppHeader} sidebar={AppSidebar} isManagedSidebar>
           {this.getPages()}
         </Page>
       </BrowserRouter>
