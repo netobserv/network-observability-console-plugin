@@ -26,6 +26,7 @@ const (
 	dataSourceKey = "dataSource"
 	filtersKey    = "filters"
 	packetLossKey = "packetLoss"
+	namespaceKey  = "namespace"
 )
 
 func (h *Handlers) GetFlows(ctx context.Context) func(w http.ResponseWriter, r *http.Request) {
@@ -81,8 +82,9 @@ func (h *Handlers) getFlows(ctx context.Context, lokiClient httpclient.Caller, p
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
+	namespace := params.Get(namespaceKey)
 	rawFilters := params.Get(filtersKey)
-	filterGroups, err := filters.Parse(rawFilters)
+	filterGroups, err := filters.Parse(rawFilters, namespace)
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
