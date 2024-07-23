@@ -53,6 +53,7 @@ export const Modals: React.FC<ModalsProps> = props => {
         panels={props.panels}
         setPanels={props.setPanels}
         customIds={props.config.panels}
+        features={props.config.features}
       />
       <ColumnsModal
         id="columns-modal"
