@@ -53,7 +53,8 @@ export const getURLParamAsBool = (arg: URLParam) => {
 
 export const setURLParams = (params: string) => {
   const url = new URL(window.location.href);
-  navigate(`${url.pathname}?${params}${url.hash}`);
+  const sp = new URLSearchParams(params);
+  navigate(`${url.pathname}?${sp.toString()}${url.hash}`);
 };
 
 export const setURLParam = (param: URLParam, value: string, replace?: boolean) => {
