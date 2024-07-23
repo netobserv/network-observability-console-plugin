@@ -21,6 +21,11 @@ import {
 import { dropCausesNames, getDropCauseDescription, getDropCauseDocUrl } from '../../../utils/pkt-drop';
 import { formatPort } from '../../../utils/port';
 import { formatProtocol, getProtocolDocUrl } from '../../../utils/protocol';
+import {
+  getTCPFlagsDocUrl,
+  gettcpFlagsServiceClassDescription,
+  gettcpFlagsServiceClassName
+} from '../../../utils/tcp_flags';
 import { Size } from '../../dropdowns/table-display-dropdown';
 import './record-field.css';
 
@@ -463,6 +468,22 @@ export const RecordField: React.FC<RecordFieldProps> = ({
               serviceClassName,
               `${t('Value')}: ${value} ${t('Examples')}: ${getDSCPServiceClassDescription(value)}`,
               getDSCPDocUrl()
+            );
+          } else {
+            child = simpleTextWithTooltip(serviceClassName || String(value))!;
+          }
+        }
+        return singleContainer(child);
+      }
+      case ColumnsId.tcpflags: {
+        let child = emptyText();
+        if (typeof value === 'number' && !isNaN(value)) {
+          const serviceClassName = gettcpFlagsServiceClassName(value);
+          if (serviceClassName && detailed) {
+            child = clickableContent(
+              serviceClassName,
+              `${t('Value')}: ${value} ${t('Examples')}: ${gettcpFlagsServiceClassDescription(value)}`,
+              getTCPFlagsDocUrl()
             );
           } else {
             child = simpleTextWithTooltip(serviceClassName || String(value))!;

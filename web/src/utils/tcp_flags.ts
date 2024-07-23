@@ -7,7 +7,11 @@ export const getTCPFlagsDocUrl = () => {
 export const TCPFlags_VALUES: ReadOnlyValues = [
   { value: 1, name: 'FIN', description: 'No more data from sender' },
   { value: 2, name: 'SYN', description: 'Synchronize sequence numbers' },
+  { value: 3, name: 'FIN_SYN', description: 'Custom flag indicating both FIN and SYN flags are set' },
   { value: 4, name: 'RST', description: 'Reset the connection' },
+  { value: 5, name: 'FIN_RST', description: 'Custom flag indicating both FIN and RST flags are set' },
+  { value: 6, name: 'SYN_RST', description: 'Custom flag indicating both SYN and RST flags are set' },
+  { value: 7, name: 'FIN_SYN_RST', description: 'Custom flag indicating FIN, SYN and RST flags are set' },
   { value: 8, name: 'PSH', description: 'Push function' },
   { value: 16, name: 'ACK', description: 'Acknowledgement field is significant' },
   { value: 32, name: 'URG', description: 'Urgent pointer field is significant' },
