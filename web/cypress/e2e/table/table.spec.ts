@@ -8,7 +8,9 @@ describe('netflow-table', () => {
     //move to table view
     cy.get('.tableTabButton').click();
     //clear default app filters
-    cy.get('#clear-all-filters-button').click();
+    if (clearCache === true) {
+      cy.get('#clear-all-filters-button').click();
+    }
   }
 
   beforeEach(() => {
