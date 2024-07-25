@@ -94,11 +94,6 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
 
   const model = netflowTrafficModel();
 
-  // set url params from local storage saved items at startup if empty
-  if (hasEmptyParams() && model.queryParams) {
-    setURLParams(model.queryParams);
-  }
-
   // Refs
   const metricsRef = React.useRef(model.metrics);
   const searchRef = React.useRef<SearchHandle>(null);
@@ -945,6 +940,11 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
     if (!initState.current.includes('initDone')) {
       initState.current.push('initDone');
 
+      // set url params from local storage saved items at startup if empty
+      if (hasEmptyParams() && model.queryParams) {
+        setURLParams(model.queryParams);
+      }
+
       if (parentConfig) {
         initState.current.push('configLoaded');
         model.setConfig(parentConfig);
@@ -986,8 +986,8 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
     //with forced filters in url if specified
     if (forcedFilters) {
       setURLFilters(forcedFilters!, true);
-    } else if (!_.isEmpty(model.filters) && !_.isEmpty(model.filters.list)) {
-      //write filters in url if not empty
+    } else if (initState.current.includes('configLoaded')) {
+      //write filters in url
       setURLFilters(model.filters, !initState.current.includes('configLoaded'));
     }
   }, [model.filters, forcedFilters]);
