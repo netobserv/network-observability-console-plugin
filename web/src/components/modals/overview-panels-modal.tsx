@@ -21,12 +21,11 @@ import {
 import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
+import { Feature } from '../../model/config';
 import { RecordType } from '../../model/flow-query';
 import { getDefaultOverviewPanels, getOverviewPanelInfo, OverviewPanel } from '../../utils/overview-panels';
 import Modal from './modal';
 import './overview-panels-modal.css';
-
-export const panelFilterKeys = ['top', 'total', 'dns', 'dropped', 'bar', 'donut', 'line'];
 
 export interface OverviewPanelsModalProps {
   isModalOpen: boolean;
@@ -35,6 +34,7 @@ export interface OverviewPanelsModalProps {
   panels: OverviewPanel[];
   setPanels: (v: OverviewPanel[]) => void;
   customIds?: string[];
+  features: Feature[];
   id?: string;
 }
 
@@ -45,7 +45,8 @@ export const OverviewPanelsModal: React.FC<OverviewPanelsModalProps> = ({
   recordType,
   panels,
   setPanels,
-  customIds
+  customIds,
+  features
 }) => {
   const [updatedPanels, setUpdatedPanels] = React.useState<OverviewPanel[]>([]);
   const [filterKeys, setFilterKeys] = React.useState<string[]>([]);
@@ -63,6 +64,26 @@ export const OverviewPanelsModal: React.FC<OverviewPanelsModalProps> = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isModalOpen, panels]);
+
+  const getFilterKeys = React.useCallback(() => {
+    let panelFilterKeys = ['total', 'bar', 'donut', 'line'];
+
+    if (features.includes('pktDrop')) {
+      panelFilterKeys.push('dropped');
+    }
+
+    if (features.includes('dnsTracking') || features.includes('flowRTT')) {
+      panelFilterKeys = panelFilterKeys.concat(['rate', 'top', 'bottom', 'min', 'avg', 'max', 'p90', 'p99']);
+      if (features.includes('dnsTracking')) {
+        panelFilterKeys.push('dns');
+      }
+      if (features.includes('flowRTT')) {
+        panelFilterKeys.push('rtt');
+      }
+    }
+
+    return panelFilterKeys;
+  }, [features]);
 
   const onDrop = React.useCallback(
     (source, dest) => {
@@ -102,9 +123,25 @@ export const OverviewPanelsModal: React.FC<OverviewPanelsModalProps> = ({
 
   const isFilteredPanel = React.useCallback(
     (p: OverviewPanel) => {
-      return _.isEmpty(filterKeys) || _.reduce(filterKeys, (acc, fk) => (acc = acc && p.id.includes(fk)), true);
+      return (
+        _.isEmpty(filterKeys) ||
+        _.reduce(
+          filterKeys,
+          (acc, fk) => {
+            const panelInfo = getOverviewPanelInfo(
+              t,
+              p.id,
+              undefined,
+              recordType === 'flowLog' ? t('flow') : t('conversation')
+            );
+            const str = `${p.id}: ${panelInfo.title} - ${panelInfo.chartType}`;
+            return (acc = acc && str.toLowerCase().includes(fk));
+          },
+          true
+        )
+      );
     },
-    [filterKeys]
+    [filterKeys, recordType, t]
   );
 
   const filteredPanels = React.useCallback(() => {
@@ -141,10 +178,10 @@ export const OverviewPanelsModal: React.FC<OverviewPanelsModalProps> = ({
       if (filterKeys.includes(key)) {
         setFilterKeys(filterKeys.filter(k => k !== key));
       } else {
-        setFilterKeys(panelFilterKeys.filter(f => f === key || filterKeys.includes(f)));
+        setFilterKeys(getFilterKeys().filter(f => f === key || filterKeys.includes(f)));
       }
     },
-    [filterKeys]
+    [filterKeys, getFilterKeys]
   );
 
   const draggableItems = filteredPanels().map((panel, i) => {
@@ -203,15 +240,16 @@ export const OverviewPanelsModal: React.FC<OverviewPanelsModalProps> = ({
           <Flex className="popup-header-margin">
             <FlexItem flex={{ default: 'flex_4' }}>
               <Flex className="flex-gap">
-                {panelFilterKeys.map(key => {
+                {getFilterKeys().map(key => {
                   return (
                     <FlexItem
                       key={key}
-                      className={`custom-chip ${filterKeys.includes(key) ? 'selected' : 'unselected'} buttonless gap`}
+                      onClick={() => toggleChip(key)}
+                      className={`custom-chip ${
+                        filterKeys.includes(key) ? 'selected' : 'unselected'
+                      } buttonless gap pointer`}
                     >
-                      <Text component={TextVariants.p} onClick={() => toggleChip(key)}>
-                        {key}
-                      </Text>
+                      <Text component={TextVariants.p}>{key}</Text>
                     </FlexItem>
                   );
                 })}

@@ -13,6 +13,7 @@ describe('<OverviewPanelsModal />', () => {
     panels: ShuffledDefaultPanels,
     setPanels: jest.fn(),
     customIds: [],
+    features: [],
     id: 'panels-modal'
   };
   it('should render component', async () => {
