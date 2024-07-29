@@ -482,8 +482,16 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({ forcedFilters, i
     model.isOverviewModalOpen,
     model.isColModalOpen,
     model.isExportModalOpen,
-    buildFlowQuery,
+    model.showHistogram,
+    model.range,
+    model.histogramRange,
+    model.showDuplicates,
+    model.metricScope,
+    model.config.features,
+    model.topologyMetricType,
+    model.topologyMetricFunction,
     model.selectedViewId,
+    buildFlowQuery,
     manageWarnings,
     allowLoki
   ]);
