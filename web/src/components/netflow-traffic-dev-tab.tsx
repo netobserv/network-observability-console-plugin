@@ -1,4 +1,4 @@
-import { Bullseye, Spinner } from '@patternfly/react-core';
+import { Bullseye, PageSection, Spinner } from '@patternfly/react-core';
 import * as React from 'react';
 import NetflowTrafficParent from './netflow-traffic-parent';
 
@@ -15,7 +15,9 @@ interface NetflowTrafficDevTabProps {
     url?: string;
   };
   obj?: unknown;
-  params?: unknown;
+  params?: {
+    ns?: string;
+  };
   staticContext?: unknown;
 }
 
@@ -30,21 +32,19 @@ export const NetflowTrafficDevTab: React.FC<NetflowTrafficDevTabProps> = props =
     }
   }, []);
 
-  if (!props.match?.params?.ns) {
+  const namespace = props.params?.ns || props.match?.params?.ns;
+  if (!namespace) {
     return (
-      <Bullseye data-test="loading-tab">
-        <Spinner size="xl" />
-      </Bullseye>
+      <PageSection id="pageSection">
+        <Bullseye data-test="loading-tab">
+          <Spinner size="xl" />
+        </Bullseye>
+      </PageSection>
     );
   }
   return (
     <div className="netobserv-tab-container" style={{ height: containerHeight - 200 }}>
-      <NetflowTrafficParent
-        forcedFilters={null}
-        isTab={true}
-        parentConfig={undefined}
-        forcedNamespace={props.match!.params!.ns}
-      />
+      <NetflowTrafficParent forcedFilters={null} isTab={true} parentConfig={undefined} forcedNamespace={namespace} />
     </div>
   );
 };
