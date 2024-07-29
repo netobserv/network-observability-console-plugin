@@ -244,11 +244,12 @@ export const OverviewPanelsModal: React.FC<OverviewPanelsModalProps> = ({
                   return (
                     <FlexItem
                       key={key}
-                      className={`custom-chip ${filterKeys.includes(key) ? 'selected' : 'unselected'} buttonless gap`}
+                      onClick={() => toggleChip(key)}
+                      className={`custom-chip ${
+                        filterKeys.includes(key) ? 'selected' : 'unselected'
+                      } buttonless gap pointer`}
                     >
-                      <Text component={TextVariants.p} onClick={() => toggleChip(key)}>
-                        {key}
-                      </Text>
+                      <Text component={TextVariants.p}>{key}</Text>
                     </FlexItem>
                   );
                 })}
