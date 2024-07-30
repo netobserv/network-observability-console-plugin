@@ -37,7 +37,7 @@ func NewMoreThanOrEqualMatch(key, values string) Match {
 // | | '--- Per-label OR:  "foo" must have value "a" OR "b"
 // | '----- In-group AND:  "foo" must be "a" or "b" AND "bar" must be "c"
 // '------- All groups OR: "foo" must be "a" or "b" AND "bar" must be "c", OR "baz" must be "d"
-func Parse(raw string) (MultiQueries, error) {
+func Parse(raw string, namespace string) (MultiQueries, error) {
 	var parsed []SingleQuery
 	decoded, err := url.QueryUnescape(raw)
 	if err != nil {
@@ -58,6 +58,10 @@ func Parse(raw string) (MultiQueries, error) {
 					andFilters = append(andFilters, NewMatch(pair[0], pair[1]))
 				}
 			}
+		}
+		// force filtering on source namespace for developer view
+		if namespace != "" {
+			andFilters = append(andFilters, NewMatch("SrcK8S_Namespace", namespace))
 		}
 		parsed = append(parsed, andFilters)
 	}
