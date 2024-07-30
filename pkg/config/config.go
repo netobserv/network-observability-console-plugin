@@ -33,6 +33,7 @@ type Server struct {
 
 type Prometheus struct {
 	URL              string       `yaml:"url" json:"url"`
+	DevURL           string       `yaml:"devUrl,omitempty" json:"devUrl,omitempty"`
 	Timeout          Duration     `yaml:"timeout,omitempty" json:"timeout,omitempty"`
 	TokenPath        string       `yaml:"tokenPath,omitempty" json:"tokenPath,omitempty"`
 	SkipTLS          bool         `yaml:"skipTls,omitempty" json:"skipTls,omitempty"`
@@ -220,7 +221,7 @@ func (c *Config) IsLokiEnabled() bool {
 }
 
 func (c *Config) IsPromEnabled() bool {
-	return c.Prometheus.URL != ""
+	return c.Prometheus.URL != "" || c.Prometheus.DevURL != ""
 }
 
 func (c *Config) Validate() error {
@@ -253,11 +254,18 @@ func (c *Config) Validate() error {
 	}
 
 	if c.IsPromEnabled() {
-		log.Infof("Prometheus is enabled (%s)", c.Prometheus.URL)
+		log.Infof("Prometheus is enabled:\n - admin: %s\n - dev: %s\n", c.Prometheus.URL, c.Prometheus.DevURL)
 		// parse config urls
 		_, err := url.Parse(c.Prometheus.URL)
 		if err != nil {
 			configErrors = append(configErrors, "wrong Prometheus URL")
+		}
+
+		if c.Prometheus.DevURL != "" {
+			_, err := url.Parse(c.Prometheus.DevURL)
+			if err != nil {
+				configErrors = append(configErrors, "wrong Prometheus dev URL")
+			}
 		}
 	} else {
 		log.Info("Prometheus is disabled")

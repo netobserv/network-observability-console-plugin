@@ -35,7 +35,10 @@ const (
 
 func (h *Handlers) GetTopology(ctx context.Context) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		clients, err := newClients(h.Cfg, r.Header, false)
+		params := r.URL.Query()
+		namespace := params.Get(namespaceKey)
+
+		clients, err := newClients(h.Cfg, r.Header, false, namespace)
 		if err != nil {
 			writeError(w, http.StatusInternalServerError, err.Error())
 			return
@@ -47,7 +50,6 @@ func (h *Handlers) GetTopology(ctx context.Context) func(w http.ResponseWriter, 
 			metrics.ObserveHTTPCall("GetTopology", code, startTime)
 		}()
 
-		params := r.URL.Query()
 		ds, err := getDatasource(params)
 		if err != nil {
 			writeError(w, http.StatusBadRequest, err.Error())
@@ -122,9 +124,8 @@ func (h *Handlers) extractTopologyQueryParams(params url.Values, ds constants.Da
 		return nil, nil, qr, reqLimit, err
 	}
 	in.Groups = params.Get(groupsKey)
-	namespace := params.Get(namespaceKey)
 	rawFilters := params.Get(filtersKey)
-	filterGroups, err := filters.Parse(rawFilters, namespace)
+	filterGroups, err := filters.Parse(rawFilters)
 	if err != nil {
 		return nil, nil, qr, reqLimit, err
 	}
@@ -155,7 +156,7 @@ func (h *Handlers) getTopologyFlows(ctx context.Context, cl clients, params url.
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
-
+	isDev := params.Get(namespaceKey) != ""
 	merger := loki.NewMatrixMerger(reqLimit)
 	if len(filterGroups) > 1 {
 		// match any, and multiple filters => run in parallel then aggregate
@@ -174,7 +175,7 @@ func (h *Handlers) getTopologyFlows(ctx context.Context, cl clients, params url.
 				dataSources[constants.DataSourceLoki] = true
 			}
 		}
-		code, err := cl.fetchParallel(ctx, lokiQ, promQ, merger)
+		code, err := cl.fetchParallel(ctx, lokiQ, promQ, merger, isDev)
 		if err != nil {
 			return nil, code, err
 		}
@@ -194,7 +195,7 @@ func (h *Handlers) getTopologyFlows(ctx context.Context, cl clients, params url.
 		if promQ != nil {
 			dataSources[constants.DataSourceProm] = true
 		}
-		code, err = cl.fetchSingle(ctx, lokiQ, promQ, merger)
+		code, err = cl.fetchSingle(ctx, lokiQ, promQ, merger, isDev)
 		if err != nil {
 			return nil, code, err
 		}
