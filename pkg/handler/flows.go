@@ -85,7 +85,7 @@ func (h *Handlers) getFlows(ctx context.Context, lokiClient httpclient.Caller, p
 	namespace := params.Get(namespaceKey)
 	isDev := namespace != ""
 	rawFilters := params.Get(filtersKey)
-	filterGroups, err := filters.Parse(rawFilters)
+	filterGroups, err := filters.Parse(rawFilters, namespace)
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}

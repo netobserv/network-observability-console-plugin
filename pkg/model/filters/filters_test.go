@@ -11,7 +11,7 @@ import (
 
 func TestParseFilters(t *testing.T) {
 	// 2 groups
-	groups, err := Parse(url.QueryEscape("foo=a,b&bar=c|baz=d"))
+	groups, err := Parse(url.QueryEscape("foo=a,b&bar=c|baz=d"), "")
 	require.NoError(t, err)
 
 	assert.Len(t, groups, 2)
@@ -24,7 +24,7 @@ func TestParseFilters(t *testing.T) {
 	}, groups[1])
 
 	// Resource path + port, match all
-	groups, err = Parse(url.QueryEscape(`SrcK8S_Type="Pod"&SrcK8S_Namespace="default"&SrcK8S_Name="test"&SrcPort=8080`))
+	groups, err = Parse(url.QueryEscape(`SrcK8S_Type="Pod"&SrcK8S_Namespace="default"&SrcK8S_Name="test"&SrcPort=8080`), "")
 	require.NoError(t, err)
 
 	assert.Len(t, groups, 1)
@@ -36,7 +36,7 @@ func TestParseFilters(t *testing.T) {
 	}, groups[0])
 
 	// Resource path + port, match any
-	groups, err = Parse(url.QueryEscape(`SrcK8S_Type="Pod"&SrcK8S_Namespace="default"&SrcK8S_Name="test"|SrcPort=8080`))
+	groups, err = Parse(url.QueryEscape(`SrcK8S_Type="Pod"&SrcK8S_Namespace="default"&SrcK8S_Name="test"|SrcPort=8080`), "")
 	require.NoError(t, err)
 
 	assert.Len(t, groups, 2)
@@ -51,7 +51,7 @@ func TestParseFilters(t *testing.T) {
 	}, groups[1])
 
 	// Resource path + name, match all
-	groups, err = Parse(url.QueryEscape(`SrcK8S_Type="Pod"&SrcK8S_Namespace="default"&SrcK8S_Name="test"&SrcK8S_Name="nomatch"`))
+	groups, err = Parse(url.QueryEscape(`SrcK8S_Type="Pod"&SrcK8S_Namespace="default"&SrcK8S_Name="test"&SrcK8S_Name="nomatch"`), "")
 	require.NoError(t, err)
 
 	assert.Len(t, groups, 1)
@@ -64,7 +64,7 @@ func TestParseFilters(t *testing.T) {
 }
 
 func TestParseCommon(t *testing.T) {
-	groups, err := Parse(url.QueryEscape("srcns=a|srcns!=a&dstns=a"))
+	groups, err := Parse(url.QueryEscape("srcns=a|srcns!=a&dstns=a"), "")
 	require.NoError(t, err)
 
 	assert.Len(t, groups, 2)
@@ -103,4 +103,18 @@ func TestSplitForReportersMerge(t *testing.T) {
 		NewMatch("srcns", "a"),
 		NewMatch("dstns", "b"),
 	}, q2)
+}
+
+func TestForcedNamespaceMerge(t *testing.T) {
+	groups, err := Parse(url.QueryEscape(`SrcK8S_Type="Pod"&SrcK8S_Namespace="default"&SrcK8S_Name="test"&SrcPort=8080`), "netobserv")
+	require.NoError(t, err)
+
+	assert.Len(t, groups, 1)
+	assert.Equal(t, SingleQuery{
+		NewMatch("SrcK8S_Type", `"Pod"`),
+		NewMatch("SrcK8S_Namespace", `"default"`),
+		NewMatch("SrcK8S_Name", `"test"`),
+		NewMatch("SrcPort", "8080"),
+		NewMatch("namespace", `"netobserv"`),
+	}, groups[0])
 }

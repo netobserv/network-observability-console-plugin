@@ -116,6 +116,11 @@ func checkMatch(metric *config.MetricInfo, neededLabels []string, valueField str
 
 	var missingLabels []string
 	for _, neededLabel := range neededLabels {
+		// workaround to get namespaced metrics only for developer view
+		if neededLabel == "namespace" {
+			neededLabel = "SrcK8S_Namespace"
+		}
+
 		if !slices.Contains(metric.Labels, neededLabel) {
 			missingLabels = append(missingLabels, neededLabel)
 		}

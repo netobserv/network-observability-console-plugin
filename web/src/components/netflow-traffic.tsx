@@ -242,10 +242,14 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
 
   const getDefaultFilters = React.useCallback(
     (c: Config = model.config) => {
+      // skip default quick filters until https://issues.redhat.com/browse/NETOBSERV-1690
+      if (forcedNamespace) {
+        return [];
+      }
       const quickFilters = getQuickFilters(c);
       return quickFilters.filter(qf => qf.default).flatMap(qf => qf.filters);
     },
-    [model.config, getQuickFilters]
+    [model.config, forcedNamespace, getQuickFilters]
   );
 
   // updates table filters and clears up the table for proper visualization of the

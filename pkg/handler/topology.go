@@ -124,8 +124,9 @@ func (h *Handlers) extractTopologyQueryParams(params url.Values, ds constants.Da
 		return nil, nil, qr, reqLimit, err
 	}
 	in.Groups = params.Get(groupsKey)
+	namespace := params.Get(namespaceKey)
 	rawFilters := params.Get(filtersKey)
-	filterGroups, err := filters.Parse(rawFilters)
+	filterGroups, err := filters.Parse(rawFilters, namespace)
 	if err != nil {
 		return nil, nil, qr, reqLimit, err
 	}

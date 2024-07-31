@@ -1,6 +1,7 @@
 package filters
 
 import (
+	"fmt"
 	"net/url"
 	"strings"
 
@@ -37,7 +38,7 @@ func NewMoreThanOrEqualMatch(key, values string) Match {
 // | | '--- Per-label OR:  "foo" must have value "a" OR "b"
 // | '----- In-group AND:  "foo" must be "a" or "b" AND "bar" must be "c"
 // '------- All groups OR: "foo" must be "a" or "b" AND "bar" must be "c", OR "baz" must be "d"
-func Parse(raw string) (MultiQueries, error) {
+func Parse(raw string, namespace string) (MultiQueries, error) {
 	var parsed []SingleQuery
 	decoded, err := url.QueryUnescape(raw)
 	if err != nil {
@@ -58,6 +59,10 @@ func Parse(raw string) (MultiQueries, error) {
 					andFilters = append(andFilters, NewMatch(pair[0], pair[1]))
 				}
 			}
+		}
+		// append namespace filter for developer view to retreive compatible metrics
+		if namespace != "" {
+			andFilters = append(andFilters, NewMatch("namespace", fmt.Sprintf(`"%s"`, namespace)))
 		}
 		parsed = append(parsed, andFilters)
 	}
@@ -94,7 +99,10 @@ func SplitForReportersMerge(q SingleQuery) (SingleQuery, SingleQuery) {
 func (m *Match) ToLabelFilter() (LabelFilter, bool) {
 	values := strings.Split(m.Values, ",")
 	if len(values) == 1 && isExactMatch(values[0]) {
-		if m.Not {
+		// namespace must be exact match
+		if m.Key == "namespace" {
+			return StringMatchLabelFilter(m.Key, trimExactMatch(values[0])), true
+		} else if m.Not {
 			return NotStringLabelFilter(m.Key, trimExactMatch(values[0])), true
 		} else if m.MoreThanOrEqual {
 			return MoreThanNumberLabelFilter(m.Key, trimExactMatch(values[0])), true
