@@ -805,6 +805,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
 
   const isShowViewOptions =
     model.selectedViewId === 'table' ? model.showViewOptions && !model.showHistogram : model.showViewOptions;
+  const isForced = forcedFilters || forcedNamespace;
 
   return !_.isEmpty(extensions) ? (
     <PageSection id="pageSection" className={`${isDarkTheme ? 'dark' : 'light'} ${isTab ? 'tab' : ''}`}>
@@ -813,11 +814,8 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
         !forcedFilters && !forcedNamespace && pageHeader()
       }
       {!_.isEmpty(getFilterDefs()) && (
-        <Flex direction={{ default: 'row' }}>
-          <FlexItem
-            style={{ paddingTop: forcedFilters || forcedNamespace ? '1.8rem' : undefined }}
-            flex={{ default: 'flex_1' }}
-          >
+        <Flex direction={{ default: 'row' }} style={{ paddingRight: isForced ? '1.5rem' : undefined }}>
+          <FlexItem style={{ paddingTop: isForced ? '1.8rem' : undefined }} flex={{ default: 'flex_1' }}>
             <FiltersToolbar
               {...model}
               id="filter-toolbar"
@@ -840,7 +838,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
               filterDefinitions={getFilterDefs()}
             />
           </FlexItem>
-          {(forcedFilters || forcedNamespace) && <FlexItem style={{ alignSelf: 'flex-start' }}>{actions()}</FlexItem>}
+          {isForced && <FlexItem style={{ alignSelf: 'flex-start' }}>{actions()}</FlexItem>}
         </Flex>
       )}
       {
@@ -850,6 +848,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
           selectView={selectView}
           isAllowLoki={allowLoki()}
           isShowViewOptions={isShowViewOptions}
+          style={{ paddingRight: isForced ? '1.5rem' : undefined }}
         />
       }
       {model.selectedViewId === 'table' && model.showHistogram && (
