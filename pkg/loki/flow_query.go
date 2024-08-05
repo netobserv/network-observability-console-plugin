@@ -108,7 +108,10 @@ func (q *FlowQueryBuilder) Filters(queryFilters filters.SingleQuery) error {
 }
 
 func (q *FlowQueryBuilder) addFilter(filter filters.Match) error {
-	if !filterRegexpValidation.MatchString(filter.Values) {
+	// namespace filtering is managed by loki gateway so we can simply skip it
+	if filter.Key == "namespace" {
+		return nil
+	} else if !filterRegexpValidation.MatchString(filter.Values) {
 		return fmt.Errorf("unauthorized sign in flows request: %s", filter.Values)
 	}
 
