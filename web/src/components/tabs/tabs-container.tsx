@@ -1,5 +1,5 @@
 import { Button, Flex, FlexItem, Tab, Tabs, TabTitleText, Tooltip } from '@patternfly/react-core';
-import React from 'react';
+import React, { CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TimeRange } from '../../utils/datetime';
 import { ViewId } from '../netflow-traffic';
@@ -14,13 +14,14 @@ export interface TabsContainerProps {
   setShowHistogram: (v: boolean) => void;
   setHistogramRange: (v: TimeRange | undefined) => void;
   isShowViewOptions: boolean;
+  style?: CSSProperties;
 }
 
 export const TabsContainer: React.FC<TabsContainerProps> = props => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   return (
-    <Flex className="netflow-traffic-tabs-container">
+    <Flex className="netflow-traffic-tabs-container" style={props.style}>
       <FlexItem id="tabs-container" flex={{ default: 'flex_1' }}>
         <Tabs
           className={`netflow-traffic-tabs ${props.isDarkTheme ? 'dark' : 'light'}`}

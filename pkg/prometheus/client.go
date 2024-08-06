@@ -21,11 +21,25 @@ import (
 	pmod "github.com/prometheus/common/model"
 )
 
-func NewClient(cfg *config.Prometheus, requestHeader http.Header) (api.Client, error) {
-	maybeTLS := httpclient.NewTransport(cfg.Timeout.Duration, cfg.SkipTLS, cfg.CAPath, "", "")
+func NewAdminClient(cfg *config.Prometheus, requestHeader http.Header) (api.Client, error) {
+	return newClient(cfg.Timeout.Duration, cfg.SkipTLS, cfg.CAPath, cfg.ForwardUserToken, cfg.TokenPath, cfg.URL, requestHeader)
+}
+
+func NewDevClient(cfg *config.Prometheus, requestHeader http.Header, namespace string) (api.Client, error) {
+	var url string
+	if cfg.DevURL == "" {
+		url = cfg.URL
+	} else {
+		url = fmt.Sprintf("%s?namespace=%s", cfg.DevURL, namespace)
+	}
+	return newClient(cfg.Timeout.Duration, cfg.SkipTLS, cfg.CAPath, cfg.ForwardUserToken, cfg.TokenPath, url, requestHeader)
+}
+
+func newClient(timeout time.Duration, skipTLS bool, caPath string, forwardUserToken bool, tokenPath string, url string, requestHeader http.Header) (api.Client, error) {
+	maybeTLS := httpclient.NewTransport(timeout, skipTLS, caPath, "", "")
 
 	var roundTripper http.RoundTripper
-	if cfg.ForwardUserToken && requestHeader != nil {
+	if forwardUserToken && requestHeader != nil {
 		h := requestHeader.Get(auth.AuthHeader)
 		if h != "" && strings.HasPrefix(h, "Bearer ") {
 			token := strings.TrimPrefix(h, "Bearer ")
@@ -33,10 +47,10 @@ func NewClient(cfg *config.Prometheus, requestHeader http.Header) (api.Client, e
 		} else {
 			log.Debug("Missing Authorization token in user request")
 		}
-	} else if cfg.TokenPath != "" {
-		bytes, err := os.ReadFile(cfg.TokenPath)
+	} else if tokenPath != "" {
+		bytes, err := os.ReadFile(tokenPath)
 		if err != nil {
-			return nil, fmt.Errorf("failed to parse authorization path '%s': %w", cfg.TokenPath, err)
+			return nil, fmt.Errorf("failed to parse authorization path '%s': %w", tokenPath, err)
 		}
 		roundTripper = pconf.NewAuthorizationCredentialsRoundTripper("Bearer", pconf.Secret(string(bytes)), maybeTLS)
 	} else {
@@ -44,7 +58,7 @@ func NewClient(cfg *config.Prometheus, requestHeader http.Header) (api.Client, e
 	}
 
 	return api.NewClient(api.Config{
-		Address:      cfg.URL,
+		Address:      url,
 		RoundTripper: roundTripper,
 	})
 }
@@ -59,7 +73,12 @@ func executeQueryRange(ctx context.Context, cl api.Client, q *Query) (pmod.Value
 	log.Debugf("executeQueryRange: %v; promQL=%s", q.Range, q.PromQL)
 	v1api := v1.NewAPI(cl)
 	result, warnings, err := v1api.QueryRange(ctx, q.PromQL, q.Range)
+	log.Tracef("Result:\n%v", result)
+	if len(warnings) > 0 {
+		log.Infof("executeQueryRange warnings: %v", warnings)
+	}
 	if err != nil {
+		log.Tracef("Error:\n%v", err)
 		code = http.StatusServiceUnavailable
 		var promError *v1.Error
 		if errors.As(err, &promError) {
@@ -71,10 +90,7 @@ func executeQueryRange(ctx context.Context, cl api.Client, q *Query) (pmod.Value
 		}
 		return nil, code, fmt.Errorf("error from Prometheus query: %w", err)
 	}
-	if len(warnings) > 0 {
-		log.Infof("executeQueryRange warnings: %v", warnings)
-	}
-	log.Tracef("Result:\n%v", result)
+
 	code = http.StatusOK
 	return result, code, nil
 }

@@ -26,6 +26,7 @@ const (
 	dataSourceKey = "dataSource"
 	filtersKey    = "filters"
 	packetLossKey = "packetLoss"
+	namespaceKey  = "namespace"
 )
 
 func (h *Handlers) GetFlows(ctx context.Context) func(w http.ResponseWriter, r *http.Request) {
@@ -81,8 +82,10 @@ func (h *Handlers) getFlows(ctx context.Context, lokiClient httpclient.Caller, p
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
+	namespace := params.Get(namespaceKey)
+	isDev := namespace != ""
 	rawFilters := params.Get(filtersKey)
-	filterGroups, err := filters.Parse(rawFilters)
+	filterGroups, err := filters.Parse(rawFilters, namespace)
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
@@ -100,7 +103,7 @@ func (h *Handlers) getFlows(ctx context.Context, lokiClient httpclient.Caller, p
 			}
 			queries = append(queries, qb.Build())
 		}
-		code, err := cl.fetchParallel(ctx, queries, nil, merger)
+		code, err := cl.fetchParallel(ctx, queries, nil, merger, isDev)
 		if err != nil {
 			return nil, code, err
 		}
@@ -114,7 +117,7 @@ func (h *Handlers) getFlows(ctx context.Context, lokiClient httpclient.Caller, p
 			}
 		}
 		query := qb.Build()
-		code, err := cl.fetchSingle(ctx, query, nil, merger)
+		code, err := cl.fetchSingle(ctx, query, nil, merger, isDev)
 		if err != nil {
 			return nil, code, err
 		}

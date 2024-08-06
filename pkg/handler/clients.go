@@ -17,21 +17,31 @@ import (
 )
 
 type clients struct {
-	loki httpclient.Caller
-	prom api.Client
+	loki      httpclient.Caller
+	promAdmin api.Client
+	promDev   api.Client
 }
 
-func newClients(cfg *config.Config, requestHeader http.Header, useLokiStatus bool) (clients, error) {
+func newClients(cfg *config.Config, requestHeader http.Header, useLokiStatus bool, namespace string) (clients, error) {
 	var lokiClient httpclient.Caller
-	var promClient api.Client
+	var promAdminClient api.Client
+	var promDevClient api.Client
 	var err error
+
 	if cfg.IsLokiEnabled() {
 		lokiClient = newLokiClient(&cfg.Loki, requestHeader, useLokiStatus)
 	}
 	if cfg.IsPromEnabled() {
-		promClient, err = prometheus.NewClient(&cfg.Prometheus, requestHeader)
+		promAdminClient, err = prometheus.NewAdminClient(&cfg.Prometheus, requestHeader)
+		if err != nil {
+			return clients{}, err
+		}
+		promDevClient, err = prometheus.NewDevClient(&cfg.Prometheus, requestHeader, namespace)
+		if err != nil {
+			return clients{}, err
+		}
 	}
-	return clients{loki: lokiClient, prom: promClient}, err
+	return clients{loki: lokiClient, promAdmin: promAdminClient, promDev: promDevClient}, err
 }
 
 type datasourceError struct {
@@ -54,8 +64,15 @@ func (c *clients) fetchLokiSingle(logQL string, merger loki.Merger) (int, error)
 	return code, nil
 }
 
-func (c *clients) fetchPrometheusSingle(ctx context.Context, promQL *prometheus.Query, merger loki.Merger) (int, error) {
-	qr, code, err := prometheus.QueryMatrix(ctx, c.prom, promQL)
+func (c *clients) getPromClient(isDev bool) api.Client {
+	if isDev {
+		return c.promDev
+	}
+	return c.promAdmin
+}
+
+func (c *clients) fetchPrometheusSingle(ctx context.Context, promQL *prometheus.Query, merger loki.Merger, client api.Client) (int, error) {
+	qr, code, err := prometheus.QueryMatrix(ctx, client, promQL)
 	if err != nil {
 		return code, &datasourceError{datasource: constants.DataSourceProm, nested: err}
 	}
@@ -65,12 +82,13 @@ func (c *clients) fetchPrometheusSingle(ctx context.Context, promQL *prometheus.
 	return code, nil
 }
 
-func (c *clients) fetchSingle(ctx context.Context, logQL string, promQL *prometheus.Query, merger loki.Merger) (int, error) {
+func (c *clients) fetchSingle(ctx context.Context, logQL string, promQL *prometheus.Query, merger loki.Merger, isDev bool) (int, error) {
 	if promQL != nil {
-		if c.prom == nil {
+		client := c.getPromClient(isDev)
+		if client == nil {
 			return http.StatusBadRequest, fmt.Errorf("cannot execute the following Prometheus query: Prometheus is disabled: %v", promQL.PromQL)
 		}
-		return c.fetchPrometheusSingle(ctx, promQL, merger)
+		return c.fetchPrometheusSingle(ctx, promQL, merger, client)
 	}
 	if c.loki == nil {
 		return http.StatusBadRequest, fmt.Errorf("cannot execute the following Loki query: Loki is disabled: %v", logQL)
@@ -78,13 +96,14 @@ func (c *clients) fetchSingle(ctx context.Context, logQL string, promQL *prometh
 	return c.fetchLokiSingle(logQL, merger)
 }
 
-func (c *clients) fetchParallel(ctx context.Context, logQL []string, promQL []*prometheus.Query, merger loki.Merger) (int, error) {
+func (c *clients) fetchParallel(ctx context.Context, logQL []string, promQL []*prometheus.Query, merger loki.Merger, isDev bool) (int, error) {
 	if c.loki == nil && len(logQL) > 0 {
 		hlog.Errorf("Cannot execute the following Loki queries: Loki is disabled: %v", logQL)
 		logQL = nil
 	}
 
-	if c.prom == nil && len(promQL) > 0 {
+	promClient := c.getPromClient(isDev)
+	if promClient == nil && len(promQL) > 0 {
 		hlog.Errorf("Cannot execute the following Prometheus queries: Prometheus is disabled: %v", promQL[0].PromQL)
 		promQL = nil
 	}
@@ -115,7 +134,7 @@ func (c *clients) fetchParallel(ctx context.Context, logQL []string, promQL []*p
 	for _, q := range promQL {
 		go func(query *prometheus.Query) {
 			defer wg.Done()
-			qr, code, err := prometheus.QueryMatrix(ctx, c.prom, query)
+			qr, code, err := prometheus.QueryMatrix(ctx, promClient, query)
 			if err != nil {
 				errChan <- errorWithCode{err: &datasourceError{datasource: constants.DataSourceProm, nested: err}, code: code}
 			} else {

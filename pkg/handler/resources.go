@@ -7,8 +7,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gorilla/mux"
-
 	"github.com/netobserv/network-observability-console-plugin/pkg/metrics"
 	"github.com/netobserv/network-observability-console-plugin/pkg/model"
 	"github.com/netobserv/network-observability-console-plugin/pkg/model/fields"
@@ -19,7 +17,10 @@ import (
 
 func (h *Handlers) GetClusters(ctx context.Context) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		clients, err := newClients(h.Cfg, r.Header, false)
+		params := r.URL.Query()
+		namespace := params.Get(namespaceKey)
+
+		clients, err := newClients(h.Cfg, r.Header, false, namespace)
 		if err != nil {
 			writeError(w, http.StatusInternalServerError, err.Error())
 			return
@@ -44,7 +45,10 @@ func (h *Handlers) GetClusters(ctx context.Context) func(w http.ResponseWriter, 
 
 func (h *Handlers) GetZones(ctx context.Context) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		clients, err := newClients(h.Cfg, r.Header, false)
+		params := r.URL.Query()
+		namespace := params.Get(namespaceKey)
+
+		clients, err := newClients(h.Cfg, r.Header, false, namespace)
 		if err != nil {
 			writeError(w, http.StatusInternalServerError, err.Error())
 			return
@@ -80,7 +84,10 @@ func (h *Handlers) GetZones(ctx context.Context) func(w http.ResponseWriter, r *
 
 func (h *Handlers) GetNamespaces(ctx context.Context) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		clients, err := newClients(h.Cfg, r.Header, false)
+		params := r.URL.Query()
+		namespace := params.Get(namespaceKey)
+
+		clients, err := newClients(h.Cfg, r.Header, false, namespace)
 		if err != nil {
 			writeError(w, http.StatusInternalServerError, err.Error())
 			return
@@ -116,7 +123,7 @@ func (h *Handlers) GetNamespaces(ctx context.Context) func(w http.ResponseWriter
 
 func (h *Handlers) getLabelValues(ctx context.Context, cl clients, label string) ([]string, int, error) {
 	if h.PromInventory != nil && h.PromInventory.LabelExists(label) {
-		return prometheus.GetLabelValues(ctx, cl.prom, label, nil)
+		return prometheus.GetLabelValues(ctx, cl.promAdmin, label, nil)
 	}
 	if h.Cfg.IsLokiEnabled() {
 		return getLokiLabelValues(h.Cfg.Loki.URL, cl.loki, label)
@@ -127,7 +134,11 @@ func (h *Handlers) getLabelValues(ctx context.Context, cl clients, label string)
 
 func (h *Handlers) GetNames(ctx context.Context) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		clients, err := newClients(h.Cfg, r.Header, false)
+		params := r.URL.Query()
+		namespace := params.Get(namespaceKey)
+		kind := params.Get("kind")
+
+		clients, err := newClients(h.Cfg, r.Header, false, namespace)
 		if err != nil {
 			writeError(w, http.StatusInternalServerError, err.Error())
 			return
@@ -137,9 +148,6 @@ func (h *Handlers) GetNames(ctx context.Context) func(w http.ResponseWriter, r *
 		defer func() {
 			metrics.ObserveHTTPCall("GetNames", code, startTime)
 		}()
-		params := mux.Vars(r)
-		namespace := params["namespace"]
-		kind := params["kind"]
 
 		// Initialize names explicitly to avoid null json when empty
 		names := []string{}
@@ -181,7 +189,7 @@ func (h *Handlers) getNamesForPrefix(ctx context.Context, cl clients, prefix, ki
 	if h.Cfg.IsPromEnabled() {
 		// Label match query (any metric)
 		q := prometheus.QueryFilters("", filts)
-		return prometheus.GetLabelValues(ctx, cl.prom, searchField, []string{q})
+		return prometheus.GetLabelValues(ctx, cl.promAdmin, searchField, []string{q})
 	}
 	return getLokiNamesForPrefix(&h.Cfg.Loki, cl.loki, filts, searchField)
 }
