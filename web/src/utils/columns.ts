@@ -42,6 +42,7 @@ export enum ColumnsId {
   icmptype = 'IcmpType',
   icmpcode = 'IcmpCode',
   dscp = 'Dscp',
+  tcpflags = 'TCPFlags',
   bytes = 'Bytes',
   packets = 'Packets',
   owner = 'K8S_OwnerName',
