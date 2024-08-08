@@ -46,7 +46,7 @@ const (
 	FlowDirection          = "FlowDirection"
 	Interfaces             = "Interfaces"
 	IfDirections           = "IfDirections"
-	OvsMonitorMDs          = "OvsMonitorMDs"
+	NetworkEvents          = "NetworkEvents"
 	DNSID                  = "DnsId"
 	DNSLatency             = "DnsLatencyMs"
 	DNSErrNo               = "DnsErrno"
@@ -93,7 +93,7 @@ func IsArray(v string) bool {
 	case
 		IfDirections,
 		Interfaces,
-		OvsMonitorMDs:
+		NetworkEvents:
 		return true
 	default:
 		return false
