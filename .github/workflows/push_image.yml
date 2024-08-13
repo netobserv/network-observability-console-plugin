@@ -40,6 +40,9 @@ jobs:
           if [[ "main" == "$WF_VERSION" ]]; then
             MULTIARCH_TARGETS="${{ env.WF_MULTIARCH_TARGETS }}" IMAGE_ORG=${{ env.WF_ORG }} VERSION=latest make images
           fi
+      - name: build and push manifest with images for standalone build
+        run: |
+          MULTIARCH_TARGETS="${{ env.WF_MULTIARCH_TARGETS }}" IMAGE_ORG=${{ env.WF_ORG }} VERSION=${{ env.WF_VERSION }} STANDALONE=true make images
 
   codecov-back:
     name: Codecov backend upload
