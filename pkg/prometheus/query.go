@@ -145,10 +145,6 @@ func appendFilteredMetric(sb *strings.Builder, metric string, filters filters.Si
 	sb.WriteRune('{')
 	first := true
 	for _, filter := range filters {
-		// namespace filtering is managed by prom label proxy so we can simply skip it
-		if filter.Key == "namespace" {
-			continue
-		}
 		if lf, ok := filter.ToLabelFilter(); ok {
 			if !first {
 				sb.WriteRune(',')

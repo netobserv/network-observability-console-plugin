@@ -84,7 +84,6 @@ func (m MultiQueries) Distribute(toDistribute []SingleQuery, ignorePred func(Sin
 func (m *Match) ToLabelFilter() (LabelFilter, bool) {
 	values := strings.Split(m.Values, ",")
 	if len(values) == 1 && isExactMatch(values[0]) {
-		// namespace must be exact match
 		if m.Not {
 			return NotStringLabelFilter(m.Key, trimExactMatch(values[0])), true
 		} else if m.MoreThanOrEqual {
