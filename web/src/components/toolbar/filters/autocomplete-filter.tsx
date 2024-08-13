@@ -86,9 +86,7 @@ export const AutocompleteFilter: React.FC<AutocompleteFilterProps> = ({
       setCurrentValue(newValue);
       filterDefinition
         .getOptions(newValue)
-        .then(opts => {
-          setOptions(opts);
-        })
+        .then(setOptions)
         .catch(err => {
           const errorMessage = getHTTPErrorDetails(err);
           setMessageWithDelay(errorMessage);
