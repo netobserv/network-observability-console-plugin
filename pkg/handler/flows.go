@@ -12,6 +12,7 @@ import (
 	"github.com/netobserv/network-observability-console-plugin/pkg/loki"
 	"github.com/netobserv/network-observability-console-plugin/pkg/metrics"
 	"github.com/netobserv/network-observability-console-plugin/pkg/model"
+	"github.com/netobserv/network-observability-console-plugin/pkg/model/fields"
 	"github.com/netobserv/network-observability-console-plugin/pkg/model/filters"
 	"github.com/netobserv/network-observability-console-plugin/pkg/utils/constants"
 )
@@ -85,9 +86,19 @@ func (h *Handlers) getFlows(ctx context.Context, lokiClient httpclient.Caller, p
 	namespace := params.Get(namespaceKey)
 	isDev := namespace != ""
 	rawFilters := params.Get(filtersKey)
-	filterGroups, err := filters.Parse(rawFilters, namespace)
+	filterGroups, err := filters.Parse(rawFilters)
 	if err != nil {
 		return nil, http.StatusBadRequest, err
+	}
+	if namespace != "" {
+		// TODO: this should actually be managed from the loki gateway, with "namespace" query param
+		filterGroups = filterGroups.Distribute(
+			[]filters.SingleQuery{
+				{filters.NewMatch(fields.SrcNamespace, `"`+namespace+`"`)},
+				{filters.NewMatch(fields.DstNamespace, `"`+namespace+`"`)},
+			},
+			func(sq filters.SingleQuery) bool { return false },
+		)
 	}
 
 	cl := clients{loki: lokiClient}
