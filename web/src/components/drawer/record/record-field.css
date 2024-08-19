@@ -57,12 +57,12 @@
   visibility: hidden;
   transition-property: visibility;
   transition-delay: 0.5s;
-  background-color: #151515;
-  padding: .5rem;
-  color: #fff;
+  background-color: #151515 !important;
+  padding: .5rem !important;
+  color: #fff !important;
   text-align: center;
   word-break: break-word;
-  font-size: 13px;
+  font-size: 13px !important;
   position: absolute;
   z-index: 1;
   width: max-content;
