@@ -12,6 +12,7 @@ import (
 	"github.com/netobserv/network-observability-console-plugin/pkg/loki"
 	"github.com/netobserv/network-observability-console-plugin/pkg/metrics"
 	"github.com/netobserv/network-observability-console-plugin/pkg/model"
+	"github.com/netobserv/network-observability-console-plugin/pkg/model/fields"
 	"github.com/netobserv/network-observability-console-plugin/pkg/model/filters"
 	"github.com/netobserv/network-observability-console-plugin/pkg/prometheus"
 	"github.com/netobserv/network-observability-console-plugin/pkg/utils/constants"
@@ -35,7 +36,10 @@ const (
 
 func (h *Handlers) GetTopology(ctx context.Context) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		clients, err := newClients(h.Cfg, r.Header, false)
+		params := r.URL.Query()
+		namespace := params.Get(namespaceKey)
+
+		clients, err := newClients(h.Cfg, r.Header, false, namespace)
 		if err != nil {
 			writeError(w, http.StatusInternalServerError, err.Error())
 			return
@@ -47,7 +51,6 @@ func (h *Handlers) GetTopology(ctx context.Context) func(w http.ResponseWriter, 
 			metrics.ObserveHTTPCall("GetTopology", code, startTime)
 		}()
 
-		params := r.URL.Query()
 		ds, err := getDatasource(params)
 		if err != nil {
 			writeError(w, http.StatusBadRequest, err.Error())
@@ -122,6 +125,7 @@ func (h *Handlers) extractTopologyQueryParams(params url.Values, ds constants.Da
 		return nil, nil, qr, reqLimit, err
 	}
 	in.Groups = params.Get(groupsKey)
+	namespace := params.Get(namespaceKey)
 	rawFilters := params.Get(filtersKey)
 	filterGroups, err := filters.Parse(rawFilters)
 	if err != nil {
@@ -129,11 +133,12 @@ func (h *Handlers) extractTopologyQueryParams(params url.Values, ds constants.Da
 	}
 
 	if shouldMergeReporters(in.DataField) {
-		filterGroups = expandReportersMergeQueries(
+		filterGroups = expandQueries(
 			filterGroups,
+			namespace,
 			func(filters filters.SingleQuery) bool {
 				// Do not expand if this is managed from prometheus
-				sr, _ := getEligiblePromMetric(h.PromInventory, filters, &in)
+				sr, _ := getEligiblePromMetric(h.PromInventory, filters, &in, namespace != "")
 				return sr != nil && len(sr.Found) > 0
 			},
 		)
@@ -154,14 +159,14 @@ func (h *Handlers) getTopologyFlows(ctx context.Context, cl clients, params url.
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
-
+	isDev := params.Get(namespaceKey) != ""
 	merger := loki.NewMatrixMerger(reqLimit)
 	if len(filterGroups) > 1 {
 		// match any, and multiple filters => run in parallel then aggregate
 		var lokiQ []string
 		var promQ []*prometheus.Query
 		for _, filters := range filterGroups {
-			lq, pq, code, err := buildTopologyQuery(h.Cfg, h.PromInventory, filters, in, &qr)
+			lq, pq, code, err := buildTopologyQuery(h.Cfg, h.PromInventory, filters, in, &qr, isDev)
 			if err != nil {
 				return nil, code, errors.New("Can't build query: " + err.Error())
 			}
@@ -173,7 +178,7 @@ func (h *Handlers) getTopologyFlows(ctx context.Context, cl clients, params url.
 				dataSources[constants.DataSourceLoki] = true
 			}
 		}
-		code, err := cl.fetchParallel(ctx, lokiQ, promQ, merger)
+		code, err := cl.fetchParallel(ctx, lokiQ, promQ, merger, isDev)
 		if err != nil {
 			return nil, code, err
 		}
@@ -183,7 +188,7 @@ func (h *Handlers) getTopologyFlows(ctx context.Context, cl clients, params url.
 		if len(filterGroups) > 0 {
 			filters = filterGroups[0]
 		}
-		lokiQ, promQ, code, err := buildTopologyQuery(h.Cfg, h.PromInventory, filters, in, &qr)
+		lokiQ, promQ, code, err := buildTopologyQuery(h.Cfg, h.PromInventory, filters, in, &qr, isDev)
 		if err != nil {
 			return nil, code, err
 		}
@@ -193,7 +198,7 @@ func (h *Handlers) getTopologyFlows(ctx context.Context, cl clients, params url.
 		if promQ != nil {
 			dataSources[constants.DataSourceProm] = true
 		}
-		code, err = cl.fetchSingle(ctx, lokiQ, promQ, merger)
+		code, err = cl.fetchSingle(ctx, lokiQ, promQ, merger, isDev)
 		if err != nil {
 			return nil, code, err
 		}
@@ -215,23 +220,51 @@ func shouldMergeReporters(metricType string) bool {
 	return metricType == constants.MetricTypeBytes || metricType == constants.MetricTypePackets
 }
 
-func expandReportersMergeQueries(queries filters.MultiQueries, isForProm func(filters filters.SingleQuery) bool) filters.MultiQueries {
-	var out filters.MultiQueries
-	for _, q := range queries {
-		// Do not expand if this is managed from prometheus
-		if isForProm(q) {
-			out = append(out, q)
-			continue
-		}
-		q1, q2 := filters.SplitForReportersMerge(q)
-		if q1 != nil {
-			out = append(out, q1)
-		}
-		if q2 != nil {
-			out = append(out, q2)
-		}
+func expandQueries(queries filters.MultiQueries, namespace string, isForProm func(filters filters.SingleQuery) bool) filters.MultiQueries {
+	// First, expand for reporter merge:
+
+	// The rationale here is that most traffic is duplicated from ingress and egress PoV, except cluster-external traffic.
+	// Ingress traffic will also contains pktDrop and DNS responses.
+	// Merging is done by running a first query with FlowDirection=INGRESS and another with FlowDirection=EGRESS AND DstOwnerName is empty,
+	// which stands for cluster-external.
+	// (Note that we use DstOwnerName both as an optimization as it's a Loki index,
+	// and as convenience because looking for empty fields won't work if they aren't indexed)
+	q1 := filters.SingleQuery{
+		filters.NewMatch(fields.FlowDirection, `"`+string(constants.Ingress)+`","`+string(constants.Inner)+`"`),
 	}
-	return out
+	q2 := filters.SingleQuery{
+		filters.NewMatch(fields.FlowDirection, `"`+string(constants.Egress)+`"`),
+		filters.NewMatch(fields.DstOwnerName, `""`),
+	}
+
+	shouldSkip := func(q filters.SingleQuery) bool {
+		if isForProm(q) {
+			return true
+		}
+		// If FlowDirection is enforced, skip merging both reporters
+		for _, m := range q {
+			if m.Key == fields.FlowDirection {
+				return true
+			}
+		}
+		return false
+	}
+
+	expanded := queries.Distribute([]filters.SingleQuery{q1, q2}, shouldSkip)
+
+	// Then, expand for namespace
+	if namespace != "" {
+		// TODO: this should actually be managed from the loki gateway, with "namespace" query param
+		expanded = expanded.Distribute(
+			[]filters.SingleQuery{
+				{filters.NewMatch(fields.SrcNamespace, `"`+namespace+`"`)},
+				{filters.NewMatch(fields.DstNamespace, `"`+namespace+`"`)},
+			},
+			isForProm,
+		)
+	}
+
+	return expanded
 }
 
 func buildTopologyQuery(
@@ -240,8 +273,9 @@ func buildTopologyQuery(
 	filters filters.SingleQuery,
 	in *loki.TopologyInput,
 	qr *v1.Range,
+	isDev bool,
 ) (string, *prometheus.Query, int, error) {
-	search, unsupportedReason := getEligiblePromMetric(promInventory, filters, in)
+	search, unsupportedReason := getEligiblePromMetric(promInventory, filters, in, isDev)
 	if unsupportedReason != "" {
 		hlog.Debugf("Unsupported Prometheus query; reason: %s.", unsupportedReason)
 	} else if search != nil && len(search.Found) > 0 {
@@ -286,7 +320,7 @@ func buildTopologyQuery(
 	return EncodeQuery(qb.Build()), nil, http.StatusOK, nil
 }
 
-func getEligiblePromMetric(promInventory *prometheus.Inventory, filters filters.SingleQuery, in *loki.TopologyInput) (*prometheus.SearchResult, string) {
+func getEligiblePromMetric(promInventory *prometheus.Inventory, filters filters.SingleQuery, in *loki.TopologyInput, isDev bool) (*prometheus.SearchResult, string) {
 	if in.DataSource != constants.DataSourceAuto && in.DataSource != constants.DataSourceProm {
 		return nil, ""
 	}
@@ -303,6 +337,9 @@ func getEligiblePromMetric(promInventory *prometheus.Inventory, filters filters.
 		return nil, unsupportedReason
 	}
 	labelsNeeded = append(labelsNeeded, fromFilters...)
+	if isDev {
+		labelsNeeded = append(labelsNeeded, fields.SrcNamespace)
+	}
 
 	// Search for such metric
 	r := promInventory.Search(labelsNeeded, in.DataField)

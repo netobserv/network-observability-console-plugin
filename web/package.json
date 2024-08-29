@@ -95,7 +95,8 @@
     "description": "This plugin adds network observability functionality to Openshift console",
     "exposedModules": {
       "netflowParent": "./components/netflow-traffic-parent.tsx",
-      "netflowTab": "./components/netflow-traffic-tab.tsx"
+      "netflowTab": "./components/netflow-traffic-tab.tsx",
+      "netflowDevTab": "./components/netflow-traffic-dev-tab.tsx"
     },
     "dependencies": {
       "@console/pluginAPI": "*"

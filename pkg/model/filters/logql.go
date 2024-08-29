@@ -221,6 +221,17 @@ func NewEmptyLineFilter(key string, not, moreThan, allowEmpty bool) LineFilter {
 	}
 }
 
+func ExactMatchLineFilter(key string, value string) LineFilter {
+	return LineFilter{
+		key:       key,
+		strictKey: true,
+		values: []lineMatch{{
+			valueType: typeString,
+			value:     value,
+		}},
+	}
+}
+
 func RegexMatchLineFilter(key string, strictKey bool, value string) LineFilter {
 	return LineFilter{
 		key:       key,

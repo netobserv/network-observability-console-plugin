@@ -3,13 +3,10 @@ package filters
 import (
 	"net/url"
 	"strings"
-
-	"github.com/netobserv/network-observability-console-plugin/pkg/model/fields"
-	"github.com/netobserv/network-observability-console-plugin/pkg/utils/constants"
 )
 
 // MultiQueries is an union group of singleQueries (OR'ed)
-type MultiQueries = []SingleQuery
+type MultiQueries []SingleQuery
 
 // singleQuery is an intersect group of matches (AND'ed)
 type SingleQuery = []Match
@@ -64,31 +61,24 @@ func Parse(raw string) (MultiQueries, error) {
 	return parsed, nil
 }
 
-func SplitForReportersMerge(q SingleQuery) (SingleQuery, SingleQuery) {
-	// If FlowDirection is enforced, skip merging both reporters
-	for _, m := range q {
-		if m.Key == fields.FlowDirection {
-			return q, nil
+// Distribute allows to inject and "expand" queries with new filters.
+// For example, say we have an initial query `q` with just "{{src-name=foo}}" and we want to enforce source OR dest namespace being "my-namespace". We'd write:
+// `q.Distribute({{src-namespace="my-namespace"}, {dst-namespace="my-namespace"}})`
+// Which results in: "{{src-namespace="my-namespace", src-name=foo}, {dst-namespace="my-namespace", src-name=foo}}"
+func (m MultiQueries) Distribute(toDistribute []SingleQuery, ignorePred func(SingleQuery) bool) MultiQueries {
+	result := MultiQueries{}
+	for _, qOrig := range m {
+		if ignorePred(qOrig) {
+			result = append(result, qOrig)
+			continue
+		}
+		for _, qToDistribute := range toDistribute {
+			qDistributed := qToDistribute
+			qDistributed = append(qDistributed, qOrig...)
+			result = append(result, qDistributed)
 		}
 	}
-	// The rationale here is that most traffic is duplicated from ingress and egress PoV, except cluster-external traffic.
-	// Ingress traffic will also contains pktDrop and DNS responses.
-	// Merging is done by running a first query with FlowDirection=INGRESS and another with FlowDirection=EGRESS AND DstOwnerName is empty,
-	// which stands for cluster-external.
-	// (Note that we use DstOwnerName both as an optimization as it's a Loki index,
-	// and as convenience because looking for empty fields won't work if they aren't indexed)
-	q1 := SingleQuery{
-		NewMatch(fields.FlowDirection, `"`+string(constants.Ingress)+`","`+string(constants.Inner)+`"`),
-	}
-	q2 := SingleQuery{
-		NewMatch(fields.FlowDirection, `"`+string(constants.Egress)+`"`),
-		NewMatch(fields.DstOwnerName, `""`),
-	}
-	for _, m := range q {
-		q1 = append(q1, m)
-		q2 = append(q2, m)
-	}
-	return q1, q2
+	return result
 }
 
 func (m *Match) ToLabelFilter() (LabelFilter, bool) {

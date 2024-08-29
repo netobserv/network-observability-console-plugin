@@ -4,7 +4,6 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/netobserv/network-observability-console-plugin/pkg/utils/constants"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -77,30 +76,37 @@ func TestParseCommon(t *testing.T) {
 	}, groups[1])
 }
 
-func TestSplitForReportersMerge_NoSplit(t *testing.T) {
-	q1, q2 := SplitForReportersMerge(SingleQuery{NewMatch("srcns", "a"), NewMatch("FlowDirection", string(constants.Ingress))})
-	assert.Nil(t, q2)
-	assert.Len(t, q1, 2)
-	assert.Equal(t, SingleQuery{
-		NewMatch("srcns", "a"),
-		NewMatch("FlowDirection", string(constants.Ingress)),
-	}, q1)
-}
+func TestDistribute(t *testing.T) {
+	mq := MultiQueries{
+		SingleQuery{NewMatch("key1", "a"), NewMatch("key2", "b")},
+		SingleQuery{NewMatch("key1", "AA"), NewMatch("key3", "CC")},
+		SingleQuery{NewMatch("key-ignore", "ZZ")},
+	}
+	toDistribute := []SingleQuery{{NewMatch("key10", "XX")}, {NewMatch("key11", "YY")}}
+	res := mq.Distribute(toDistribute, func(q SingleQuery) bool { return q[0].Key == "key-ignore" })
 
-func TestSplitForReportersMerge(t *testing.T) {
-	q1, q2 := SplitForReportersMerge(SingleQuery{NewMatch("srcns", "a"), NewMatch("dstns", "b")})
-
-	assert.Len(t, q1, 3)
+	assert.Len(t, res, 5)
 	assert.Equal(t, SingleQuery{
-		NewMatch("FlowDirection", `"`+string(constants.Ingress)+`","`+string(constants.Inner)+`"`),
-		NewMatch("srcns", "a"),
-		NewMatch("dstns", "b"),
-	}, q1)
-	assert.Len(t, q2, 4)
+		NewMatch("key10", "XX"),
+		NewMatch("key1", "a"),
+		NewMatch("key2", "b"),
+	}, res[0])
 	assert.Equal(t, SingleQuery{
-		NewMatch("FlowDirection", `"`+string(constants.Egress)+`"`),
-		NewMatch("DstK8S_OwnerName", `""`),
-		NewMatch("srcns", "a"),
-		NewMatch("dstns", "b"),
-	}, q2)
+		NewMatch("key11", "YY"),
+		NewMatch("key1", "a"),
+		NewMatch("key2", "b"),
+	}, res[1])
+	assert.Equal(t, SingleQuery{
+		NewMatch("key10", "XX"),
+		NewMatch("key1", "AA"),
+		NewMatch("key3", "CC"),
+	}, res[2])
+	assert.Equal(t, SingleQuery{
+		NewMatch("key11", "YY"),
+		NewMatch("key1", "AA"),
+		NewMatch("key3", "CC"),
+	}, res[3])
+	assert.Equal(t, SingleQuery{
+		NewMatch("key-ignore", "ZZ"),
+	}, res[4])
 }
