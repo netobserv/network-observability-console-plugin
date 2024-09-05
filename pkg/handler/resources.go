@@ -19,6 +19,7 @@ func (h *Handlers) GetClusters(ctx context.Context) func(w http.ResponseWriter, 
 	return func(w http.ResponseWriter, r *http.Request) {
 		params := r.URL.Query()
 		namespace := params.Get(namespaceKey)
+		isDev := namespace != ""
 
 		clients, err := newClients(h.Cfg, r.Header, false, namespace)
 		if err != nil {
@@ -32,9 +33,9 @@ func (h *Handlers) GetClusters(ctx context.Context) func(w http.ResponseWriter, 
 		}()
 
 		// Fetch and merge values for K8S_ClusterName
-		values, code, err := h.getLabelValues(ctx, clients, fields.Cluster)
+		values, code, err := h.getLabelValues(ctx, clients, fields.Cluster, isDev)
 		if err != nil {
-			writeError(w, code, "Error while fetching label cluster values from Loki: "+err.Error())
+			writeError(w, code, "Error while fetching label cluster values: "+err.Error())
 			return
 		}
 
@@ -47,6 +48,7 @@ func (h *Handlers) GetZones(ctx context.Context) func(w http.ResponseWriter, r *
 	return func(w http.ResponseWriter, r *http.Request) {
 		params := r.URL.Query()
 		namespace := params.Get(namespaceKey)
+		isDev := namespace != ""
 
 		clients, err := newClients(h.Cfg, r.Header, false, namespace)
 		if err != nil {
@@ -63,16 +65,16 @@ func (h *Handlers) GetZones(ctx context.Context) func(w http.ResponseWriter, r *
 		values := []string{}
 
 		// Fetch and merge values for SrcK8S_Zone and DstK8S_Zone
-		values1, code, err := h.getLabelValues(ctx, clients, fields.SrcZone)
+		values1, code, err := h.getLabelValues(ctx, clients, fields.SrcZone, isDev)
 		if err != nil {
-			writeError(w, code, "Error while fetching label source zone values from Loki: "+err.Error())
+			writeError(w, code, "Error while fetching label source zone values: "+err.Error())
 			return
 		}
 		values = append(values, values1...)
 
-		values2, code, err := h.getLabelValues(ctx, clients, fields.DstZone)
+		values2, code, err := h.getLabelValues(ctx, clients, fields.DstZone, isDev)
 		if err != nil {
-			writeError(w, code, "Error while fetching label destination zone values from Loki: "+err.Error())
+			writeError(w, code, "Error while fetching label destination zone values: "+err.Error())
 			return
 		}
 		values = append(values, values2...)
@@ -82,10 +84,31 @@ func (h *Handlers) GetZones(ctx context.Context) func(w http.ResponseWriter, r *
 	}
 }
 
+func (h *Handlers) getNamespacesValues(ctx context.Context, clients clients, isDev bool) ([]string, int, error) {
+	// Initialize values explicitly to avoid null json when empty
+	values := []string{}
+
+	// Fetch and merge values for SrcK8S_Namespace and DstK8S_Namespace
+	values1, code, err := h.getLabelValues(ctx, clients, fields.SrcNamespace, isDev)
+	if err != nil {
+		return []string{}, code, err
+	}
+	values = append(values, values1...)
+
+	values2, code, err := h.getLabelValues(ctx, clients, fields.DstNamespace, isDev)
+	if err != nil {
+		return []string{}, code, err
+	}
+	values = append(values, values2...)
+
+	return values, http.StatusOK, nil
+}
+
 func (h *Handlers) GetNamespaces(ctx context.Context) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		params := r.URL.Query()
 		namespace := params.Get(namespaceKey)
+		isDev := namespace != ""
 
 		clients, err := newClients(h.Cfg, r.Header, false, namespace)
 		if err != nil {
@@ -98,34 +121,23 @@ func (h *Handlers) GetNamespaces(ctx context.Context) func(w http.ResponseWriter
 			metrics.ObserveHTTPCall("GetNamespaces", code, startTime)
 		}()
 
-		// Initialize values explicitly to avoid null json when empty
-		values := []string{}
-
-		// Fetch and merge values for SrcK8S_Namespace and DstK8S_Namespace
-		values1, code, err := h.getLabelValues(ctx, clients, fields.SrcNamespace)
+		values, code, err := h.getNamespacesValues(ctx, clients, isDev)
 		if err != nil {
-			writeError(w, code, "Error while fetching label source namespace values from Loki: "+err.Error())
+			writeError(w, code, "Error while fetching label namespace values: "+err.Error())
 			return
 		}
-		values = append(values, values1...)
-
-		values2, code, err := h.getLabelValues(ctx, clients, fields.DstNamespace)
-		if err != nil {
-			writeError(w, code, "Error while fetching label destination namespace values from Loki: "+err.Error())
-			return
-		}
-		values = append(values, values2...)
-
-		code = http.StatusOK
 		writeJSON(w, code, utils.NonEmpty(utils.Dedup(values)))
 	}
 }
 
-func (h *Handlers) getLabelValues(ctx context.Context, cl clients, label string) ([]string, int, error) {
+func (h *Handlers) getLabelValues(ctx context.Context, cl clients, label string, isDev bool) ([]string, int, error) {
 	if h.PromInventory != nil && h.PromInventory.LabelExists(label) {
-		return prometheus.GetLabelValues(ctx, cl.promAdmin, label, nil)
+		client := cl.getPromClient(isDev)
+		if client != nil {
+			return prometheus.GetLabelValues(ctx, client, label, nil)
+		}
 	}
-	if h.Cfg.IsLokiEnabled() {
+	if cl.loki != nil {
 		return getLokiLabelValues(h.Cfg.Loki.URL, cl.loki, label)
 	}
 	// Loki disabled AND label not managed in metrics => send an error

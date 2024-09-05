@@ -6,7 +6,6 @@ import {
   EmptyState,
   EmptyStateBody,
   EmptyStateIcon,
-  EmptyStateSecondaryActions,
   Spinner,
   Text,
   TextContent,
@@ -19,9 +18,13 @@ import { ExclamationCircleIcon, ExternalLinkSquareAltIcon } from '@patternfly/re
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { getBuildInfo, getLimits, getLokiMetrics, getLokiReady } from '../../api/routes';
+import { Status } from '../../api/loki';
+import { getBuildInfo, getLimits, getLokiMetrics, getStatus } from '../../api/routes';
+import { ContextSingleton } from '../../utils/context';
 import { getHTTPErrorDetails, getPromUnsupportedError, isPromUnsupportedError } from '../../utils/errors';
 import './error.css';
+import { SecondaryAction } from './secondary-action';
+import { StatusTexts } from './status-texts';
 
 export type Size = 's' | 'm' | 'l';
 
@@ -40,14 +43,16 @@ export interface ErrorProps {
 
 export const Error: React.FC<ErrorProps> = ({ title, error, isLokiRelated }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
-  const [loading, setLoading] = React.useState(isLokiRelated);
-  const [ready, setReady] = React.useState<boolean | undefined>();
+  const [lokiLoading, setLokiLoading] = React.useState(isLokiRelated);
+  const [statusLoading, setStatusLoading] = React.useState(true);
+  const [status, setStatus] = React.useState<Status | undefined>();
+  const [statusError, setStatusError] = React.useState<string | undefined>();
   const [infoName, setInfoName] = React.useState<string | undefined>();
   const [info, setInfo] = React.useState<string | undefined>();
 
   const updateInfo = React.useCallback(
     (type: LokiInfo) => {
-      setLoading(true);
+      setLokiLoading(true);
 
       switch (type) {
         case LokiInfo.Build:
@@ -58,7 +63,7 @@ export const Error: React.FC<ErrorProps> = ({ title, error, isLokiRelated }) => 
               setInfo(getHTTPErrorDetails(err));
             })
             .finally(() => {
-              setLoading(false);
+              setLokiLoading(false);
             });
           break;
         case LokiInfo.Limits:
@@ -69,7 +74,7 @@ export const Error: React.FC<ErrorProps> = ({ title, error, isLokiRelated }) => 
               setInfo(getHTTPErrorDetails(err));
             })
             .finally(() => {
-              setLoading(false);
+              setLokiLoading(false);
             });
           break;
         case LokiInfo.Metrics:
@@ -80,14 +85,14 @@ export const Error: React.FC<ErrorProps> = ({ title, error, isLokiRelated }) => 
               setInfo(getHTTPErrorDetails(err));
             })
             .finally(() => {
-              setLoading(false);
+              setLokiLoading(false);
             });
           break;
         case LokiInfo.Hidden:
         default:
           setInfoName(undefined);
           setInfo(undefined);
-          setLoading(false);
+          setLokiLoading(false);
           break;
       }
     },
@@ -99,21 +104,27 @@ export const Error: React.FC<ErrorProps> = ({ title, error, isLokiRelated }) => 
   }, [error]);
 
   React.useEffect(() => {
-    //jest crashing on getLokiReady not defined so we need to ensure the function is defined here
-    if (getLokiReady && isLokiRelated) {
-      getLokiReady()
-        .then(() => {
-          setReady(true);
-        })
-        .catch(err => {
-          console.error(getHTTPErrorDetails(err));
-          setReady(false);
-        })
-        .finally(() => {
-          setLoading(false);
-        });
+    //jest crashing on getStatus not defined so we need to ensure the function is defined here
+    if (!getStatus) {
+      return;
     }
-  }, [isLokiRelated]);
+
+    getStatus(ContextSingleton.getForcedNamespace())
+      .then(status => {
+        console.info('status result', status);
+        setStatus(status);
+        setStatusError(undefined);
+      })
+      .catch(err => {
+        const errorMessage = getHTTPErrorDetails(err);
+        console.error(errorMessage);
+        setStatusError(errorMessage);
+        setStatus(undefined);
+      })
+      .finally(() => {
+        setStatusLoading(false);
+      });
+  }, []);
 
   return (
     <div id="netobserv-error-container">
@@ -200,21 +211,14 @@ export const Error: React.FC<ErrorProps> = ({ title, error, isLokiRelated }) => 
                         {...props}
                         target="_blank"
                         to={{
-                          pathname:
-                            'https://github.com/netobserv/documents/blob/main/loki_operator.md#loki-input-size-too-long-error'
+                          pathname: 'https://github.com/netobserv/documents/blob/main/loki_operator.md',
+                          hash: 'loki-input-size-too-long-error'
                         }}
                       />
                     )}
                   >
                     {t('More information')}
                   </Button>
-                </>
-              )}
-              {ready === false && (
-                <>
-                  <Text component={TextVariants.blockquote}>
-                    {t(`Check if Loki is running correctly. '/ready' endpoint should respond "ready"`)}
-                  </Text>
                 </>
               )}
               {error.includes('Network Error') && (
@@ -225,26 +229,38 @@ export const Error: React.FC<ErrorProps> = ({ title, error, isLokiRelated }) => 
               {(error.includes('status code 401') || error.includes('status code 403')) && (
                 <>
                   <Text component={TextVariants.blockquote}>{t(`Check current user permissions`)}</Text>
-                  <Text component={TextVariants.blockquote}>
-                    {t(`For LokiStack, your user must either:`)}
-                    <TextList>
-                      <TextListItem>
-                        {t(`have the 'netobserv-reader' cluster role, which allows multi-tenancy`)}
-                      </TextListItem>
-                      <TextListItem>
-                        {t(`or be in the 'cluster-admin' group (not the same as the 'cluster-admin' role)`)}
-                      </TextListItem>
-                      <TextListItem>
-                        {t(
-                          `or LokiStack spec.tenants.openshift.adminGroups must be configured with a group this user belongs to`
-                        )}
-                      </TextListItem>
-                    </TextList>
-                  </Text>
-                  <Text component={TextVariants.blockquote}>
-                    {t(`For other configurations, refer to FlowCollector spec.loki.manual.authToken`)}
-                  </Text>
+                  {isLokiRelated && (
+                    <>
+                      <Text component={TextVariants.blockquote}>
+                        {t(`For LokiStack, your user must either:`)}
+                        <TextList>
+                          <TextListItem>
+                            {t(`have the 'netobserv-reader' cluster role, which allows multi-tenancy`)}
+                          </TextListItem>
+                          <TextListItem>
+                            {t(`or be in the 'cluster-admin' group (not the same as the 'cluster-admin' role)`)}
+                          </TextListItem>
+                          <TextListItem>
+                            {t(
+                              `or LokiStack spec.tenants.openshift.adminGroups must be configured with a group this user belongs to`
+                            )}
+                          </TextListItem>
+                        </TextList>
+                      </Text>
+                      <Text component={TextVariants.blockquote}>
+                        {t(`For other configurations, refer to FlowCollector spec.loki.manual.authToken`)}
+                      </Text>
+                    </>
+                  )}
                 </>
+              )}
+              {status && <StatusTexts status={status} />}
+              {statusError && (
+                <Text component={TextVariants.blockquote}>
+                  {t('Check for errors in health dashboard. Status endpoint is returning: {{statusError}}', {
+                    statusError
+                  })}
+                </Text>
               )}
             </TextContent>
           }
@@ -262,7 +278,8 @@ export const Error: React.FC<ErrorProps> = ({ title, error, isLokiRelated }) => 
                   to={{
                     pathname:
                       // eslint-disable-next-line max-len
-                      'https://docs.openshift.com/container-platform/latest/observability/network_observability/installing-operators.html#network-observability-loki-installation_network_observability'
+                      'https://docs.openshift.com/container-platform/latest/observability/network_observability/installing-operators.html',
+                    hash: 'network-observability-loki-installation_network_observability'
                   }}
                 />
               )}
@@ -285,33 +302,13 @@ export const Error: React.FC<ErrorProps> = ({ title, error, isLokiRelated }) => 
             </Button>
           </>
         )}
-        {isLokiRelated && (
-          <EmptyStateSecondaryActions>
-            <Button onClick={() => updateInfo(LokiInfo.Metrics)} variant="link">
-              {t('Show metrics')}
-            </Button>
-            <Button onClick={() => updateInfo(LokiInfo.Build)} variant="link">
-              {t('Show build info')}
-            </Button>
-            <Button onClick={() => updateInfo(LokiInfo.Limits)} variant="link">
-              {t('Show configuration limits')}
-            </Button>
-            <Button
-              variant="link"
-              component={(props: React.FunctionComponent) => (
-                <Link
-                  {...props}
-                  target="_blank"
-                  to={{ pathname: '/monitoring/dashboards/grafana-dashboard-netobserv-health' }}
-                />
-              )}
-            >
-              {t('Show health dashboard')}
-            </Button>
-          </EmptyStateSecondaryActions>
-        )}
+        <SecondaryAction
+          showMetrics={() => updateInfo(LokiInfo.Metrics)}
+          showBuildInfo={() => updateInfo(LokiInfo.Build)}
+          showConfigLimits={() => updateInfo(LokiInfo.Limits)}
+        />
       </EmptyState>
-      {loading ? (
+      {lokiLoading || statusLoading ? (
         <Bullseye data-test="loading-errors">
           <Spinner size="xl" />
         </Bullseye>

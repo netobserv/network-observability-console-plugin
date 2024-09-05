@@ -56,8 +56,9 @@ func TestServerRunning(t *testing.T) {
 
 	go func() {
 		Start(context.TODO(), &config.Config{
-			Loki:   config.Loki{URL: "http://localhost:3100"},
-			Server: config.Server{Port: testPort},
+			Loki:       config.Loki{URL: ""},
+			Prometheus: config.Prometheus{URL: ""},
+			Server:     config.Server{Port: testPort},
 		}, &authM)
 	}()
 
@@ -172,7 +173,8 @@ func TestSecureComm(t *testing.T) {
 	defer os.Remove(testClientKeyFile)
 
 	conf := &config.Config{
-		Loki: config.Loki{URL: "http://localhost:3100"},
+		Loki:       config.Loki{URL: ""},
+		Prometheus: config.Prometheus{URL: ""},
 		Server: config.Server{
 			Port:     testPort,
 			CertPath: testServerCertFile,
@@ -349,8 +351,8 @@ func TestLokiConfigurationForTopology(t *testing.T) {
 	backendSvc := httptest.NewServer(backendRoutes)
 	defer backendSvc.Close()
 
-	// WHEN the Loki flows endpoint is queried in the backend
-	resp, err := backendSvc.Client().Get(backendSvc.URL + "/api/loki/flow/metrics?aggregateBy=resource")
+	// WHEN the flows endpoint is queried in the backend
+	resp, err := backendSvc.Client().Get(backendSvc.URL + "/api/flow/metrics?aggregateBy=resource")
 	require.NoError(t, err)
 
 	// THEN the query has been properly forwarded to Loki
@@ -408,7 +410,7 @@ func TestLokiConfigurationForTableHistogram(t *testing.T) {
 	defer backendSvc.Close()
 
 	// WHEN the Loki flows endpoint is queried in the backend using flow count type
-	resp, err := backendSvc.Client().Get(backendSvc.URL + "/api/loki/flow/metrics?type=Flows&function=count&aggregateBy=resource")
+	resp, err := backendSvc.Client().Get(backendSvc.URL + "/api/flow/metrics?type=Flows&function=count&aggregateBy=resource")
 	require.NoError(t, err)
 
 	// THEN the query has been properly forwarded to Loki

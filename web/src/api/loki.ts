@@ -197,3 +197,12 @@ export const isValidTopologyMetrics = (metric: any): metric is TopologyMetrics =
     typeof metric.scope === 'string'
   );
 };
+
+export interface Status {
+  isAllowProm: boolean;
+  promNamespacesCount: number;
+  isAllowLoki: boolean;
+  lokiNamespacesCount: number;
+  isLokiReady: boolean;
+  isConsistent: boolean;
+}

@@ -31,7 +31,6 @@ import { SearchEvent, SearchHandle } from '../search/search';
 import { NetflowOverview, NetflowOverviewHandle } from '../tabs/netflow-overview/netflow-overview';
 import { NetflowTable, NetflowTableHandle } from '../tabs/netflow-table/netflow-table';
 import { NetflowTopology, NetflowTopologyHandle } from '../tabs/netflow-topology/netflow-topology';
-import { LinksOverflow } from '../toolbar/links-overflow';
 import ElementPanel from './element/element-panel';
 import RecordPanel from './record/record-panel';
 
@@ -148,28 +147,21 @@ export const NetflowTrafficDrawer: React.FC<NetflowTrafficDrawerProps> = React.f
       [props.setFilters]
     );
 
-    const filterLinks = React.useCallback(() => {
-      const defFilters = props.defaultFilters;
-      return (
-        <LinksOverflow
-          id={'filter-links-overflow'}
-          items={[
-            {
-              id: 'reset-filters',
-              label: t('Reset defaults'),
-              onClick: props.resetDefaultFilters,
-              enabled: defFilters.length > 0 && !filtersEqual(props.filters.list, defFilters)
-            },
-            {
-              id: 'clear-all-filters',
-              label: t('Clear all'),
-              onClick: props.clearFilters,
-              enabled: props.filters.list.length > 0
-            }
-          ]}
-        />
-      );
-    }, [props.defaultFilters, props.resetDefaultFilters, props.filters.list, props.clearFilters]);
+    const getResetDefaultFiltersProp = React.useCallback(() => {
+      if (props.defaultFilters.length > 0 && !filtersEqual(props.filters.list, props.defaultFilters)) {
+        return props.resetDefaultFilters;
+      }
+      return undefined;
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [props.defaultFilters, props.resetDefaultFilters, props.filters.list]);
+
+    const getClearFiltersProp = React.useCallback(() => {
+      if (props.filters.list.length > 0) {
+        return props.clearFilters;
+      }
+      return undefined;
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [props.filters.list, props.clearFilters]);
 
     const getTopologyMetrics = React.useCallback(() => {
       switch (props.topologyMetricType) {
@@ -252,7 +244,8 @@ export const NetflowTrafficDrawer: React.FC<NetflowTrafficDrawerProps> = React.f
                 metrics={props.metrics}
                 loading={props.loading}
                 isDark={props.isDarkTheme}
-                filterActionLinks={filterLinks()}
+                resetDefaultFilters={getResetDefaultFiltersProp()}
+                clearFilters={getClearFiltersProp()}
                 truncateLength={props.overviewTruncateLength}
                 focus={props.overviewFocus}
                 setFocus={props.setOverviewFocus}
@@ -275,7 +268,8 @@ export const NetflowTrafficDrawer: React.FC<NetflowTrafficDrawerProps> = React.f
                 }
                 columnSizes={props.columnSizes}
                 setColumnSizes={props.setColumnSizes}
-                filterActionLinks={filterLinks()}
+                resetDefaultFilters={getResetDefaultFiltersProp()}
+                clearFilters={getClearFiltersProp()}
                 isDark={props.isDarkTheme}
               />
             );
@@ -303,6 +297,8 @@ export const NetflowTrafficDrawer: React.FC<NetflowTrafficDrawerProps> = React.f
                 searchEvent={props.searchEvent}
                 isDark={props.isDarkTheme}
                 allowedScopes={props.allowedScopes}
+                resetDefaultFilters={getResetDefaultFiltersProp()}
+                clearFilters={getClearFiltersProp()}
               />
             );
             break;

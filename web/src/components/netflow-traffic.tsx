@@ -76,7 +76,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
   const { t } = useTranslation('plugin__netobserv-plugin');
   const isDarkTheme = useTheme();
   const [extensions] = useResolvedExtensions<ModelFeatureFlag>(isModelFeatureFlag);
-  ContextSingleton.setContext(extensions);
+  ContextSingleton.setContext(extensions, forcedNamespace);
 
   const model = netflowTrafficModel();
 

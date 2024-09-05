@@ -1,5 +1,5 @@
 import { K8sModel } from '@openshift-console/dynamic-plugin-sdk';
-import { ValidatedOptions } from '@patternfly/react-core';
+import { Bullseye, ValidatedOptions } from '@patternfly/react-core';
 import {
   createTopologyControlButtons,
   defaultControlButtonsOptions,
@@ -19,6 +19,7 @@ import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { TopologyMetrics } from '../../../../api/loki';
+import { Config } from '../../../../model/config';
 import { Filter, FilterDefinition, Filters } from '../../../../model/filters';
 import { FlowScope, MetricType, StatFunction } from '../../../../model/flow-query';
 import { getStat, MetricScopeOptions } from '../../../../model/metrics';
@@ -37,6 +38,7 @@ import {
   TopologyOptions
 } from '../../../../model/topology';
 import { usePrevious } from '../../../../utils/previous-hook';
+import { Empty } from '../../../messages/empty';
 import { SearchEvent, SearchHandle } from '../../../search/search';
 import { filterEvent, stepIntoEvent } from './styles/styleDecorators';
 import './topology-content.css';
@@ -70,6 +72,8 @@ export interface TopologyContentProps {
   searchHandle: SearchHandle | null;
   searchEvent?: SearchEvent;
   isDark?: boolean;
+  resetDefaultFilters?: (c?: Config) => void;
+  clearFilters?: () => void;
 }
 
 export const TopologyContent: React.FC<TopologyContentProps> = ({
@@ -90,7 +94,9 @@ export const TopologyContent: React.FC<TopologyContentProps> = ({
   onSelect,
   searchHandle,
   searchEvent,
-  isDark
+  isDark,
+  resetDefaultFilters,
+  clearFilters
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const controller = useVisualizationController();
@@ -483,6 +489,14 @@ export const TopologyContent: React.FC<TopologyContentProps> = ({
   useEventListener(hoverEvent, onHover);
   useEventListener(graphLayoutEndEvent, onLayoutEnd);
   useEventListener(graphPositionChangeEvent, onLayoutPositionChange);
+
+  if (_.isEmpty(metrics) && _.isEmpty(droppedMetrics)) {
+    return (
+      <Bullseye data-test="no-results-found">
+        <Empty showDetails={true} resetDefaultFilters={resetDefaultFilters} clearFilters={clearFilters} />
+      </Bullseye>
+    );
+  }
 
   return (
     <TopologyView

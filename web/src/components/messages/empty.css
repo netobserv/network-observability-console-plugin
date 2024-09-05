@@ -1,0 +1,24 @@
+.empty-text-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.netobserv-empty-icon,
+.netobserv-empty-message {
+  margin-bottom: 1em;
+}
+
+.empty-text-content>p {
+  margin-top: 1em !important;
+}
+
+.empty-text-content>blockquote {
+  width: 80%;
+}
+
+.empty-text-content ul {
+  margin-top: 0.5em;
+  text-align: initial;
+}

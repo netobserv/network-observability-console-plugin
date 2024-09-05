@@ -31,7 +31,7 @@ export const ScopeSlider: React.FC<ScopeSliderProps> = ({ scope, setScope, allow
    * Non supported dimensions simply hide the slider from the view
    * since we can manage scopes from advanced view
    */
-  const canDisplay = sizePx > 350 && sizePx < 2000;
+  const canDisplay = sizePx > 450 && sizePx < 2000;
   const isBig = sizePx > 700;
   return (
     <div

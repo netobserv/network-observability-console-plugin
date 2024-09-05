@@ -20,7 +20,6 @@ describe('<NetflowOverview />', () => {
       customMetrics: new Map(),
       totalCustomMetrics: new Map()
     },
-    filterActionLinks: <></>,
     truncateLength: TruncateLength.M,
     forcedSize: { width: 800, height: 800 } as DOMRect
   };

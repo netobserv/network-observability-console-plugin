@@ -21,7 +21,6 @@ describe('<NetflowTable />', () => {
     allowPktDrops: true,
     size: 'm' as Size,
     onSelect: jest.fn(),
-    filterActionLinks: <></>,
     setColumns: jest.fn(),
     columnSizes: {},
     setColumnSizes: jest.fn()

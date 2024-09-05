@@ -1,4 +1,9 @@
-import { ExtensionK8sModel, ModelFeatureFlag, ResolvedExtension } from '@openshift-console/dynamic-plugin-sdk';
+import {
+  ExtensionK8sModel,
+  K8sModel,
+  ModelFeatureFlag,
+  ResolvedExtension
+} from '@openshift-console/dynamic-plugin-sdk';
 import _ from 'lodash';
 
 export const DEFAULT_HOST = '/api/proxy/plugin/netobserv-plugin/backend';
@@ -6,6 +11,8 @@ export class ContextSingleton {
   private static instance: ContextSingleton;
   private isStandalone: boolean;
   private host: string;
+  private forcedNamespace?: string;
+  private flowCollectorK8SModel?: K8sModel;
 
   private constructor() {
     this.host = DEFAULT_HOST;
@@ -26,9 +33,10 @@ export class ContextSingleton {
         flag: string;
         model: ExtensionK8sModel;
       }
-    >[]
+    >[],
+    forcedNamespace?: string
   ) {
-    const isStandalone = !_.isEmpty(extensions) && extensions[0]?.flags === 'dummy';
+    const isStandalone = (!_.isEmpty(extensions) && extensions[0]?.flags?.required?.includes('dummy')) || false;
     const instance = ContextSingleton.getInstance();
     instance.isStandalone = isStandalone;
     if (isStandalone) {
@@ -36,6 +44,12 @@ export class ContextSingleton {
     } else {
       instance.host = DEFAULT_HOST;
     }
+    instance.forcedNamespace = forcedNamespace;
+  }
+
+  public static setFlowCollectorK8SModel(model?: K8sModel) {
+    const instance = ContextSingleton.getInstance();
+    instance.flowCollectorK8SModel = model;
   }
 
   public static isStandalone() {
@@ -44,5 +58,13 @@ export class ContextSingleton {
 
   public static getHost() {
     return ContextSingleton.getInstance().host;
+  }
+
+  public static getForcedNamespace() {
+    return ContextSingleton.getInstance().forcedNamespace;
+  }
+
+  public static getFlowCollectorK8SModel() {
+    return ContextSingleton.getInstance().flowCollectorK8SModel;
   }
 }

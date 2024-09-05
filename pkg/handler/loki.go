@@ -191,21 +191,23 @@ func getLokiNamesForPrefix(cfg *config.Loki, lokiClient httpclient.Caller, filts
 	return values, http.StatusOK, nil
 }
 
+func (h *Handlers) getLokiStatus(r *http.Request) ([]byte, int, error) {
+	lokiClient := newLokiClient(&h.Cfg.Loki, r.Header, true)
+	baseURL := strings.TrimRight(h.Cfg.Loki.GetStatusURL(), "/")
+	return executeLokiQuery(fmt.Sprintf("%s/%s", baseURL, "ready"), lokiClient)
+}
+
 func (h *Handlers) LokiReady() func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if !h.Cfg.IsLokiEnabled() {
 			writeError(w, http.StatusBadRequest, "Loki is disabled")
 			return
 		}
-		lokiClient := newLokiClient(&h.Cfg.Loki, r.Header, true)
-		baseURL := strings.TrimRight(h.Cfg.Loki.GetStatusURL(), "/")
-
-		resp, code, err := executeLokiQuery(fmt.Sprintf("%s/%s", baseURL, "ready"), lokiClient)
+		resp, code, err := h.getLokiStatus(r)
 		if err != nil {
 			writeError(w, code, err.Error())
 			return
 		}
-
 		status := string(resp)
 		if strings.Contains(status, "ready") {
 			code = http.StatusOK

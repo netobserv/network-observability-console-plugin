@@ -1,4 +1,4 @@
-import { K8sResourceCommon, PageComponentProps } from '@openshift-console/dynamic-plugin-sdk';
+import { K8sResourceCommon } from '@openshift-console/dynamic-plugin-sdk';
 import {
   Bullseye,
   EmptyState,
@@ -19,6 +19,18 @@ import { usePrevious } from '../utils/previous-hook';
 import Error from './messages/error';
 import NetflowTrafficParent from './netflow-traffic-parent';
 
+type NetflowTrafficTabProps<R extends K8sResourceCommon = K8sResourceCommon> = {
+  match?: {
+    params?: {
+      ns?: string;
+    };
+  };
+  obj?: R;
+  params?: {
+    ns?: string;
+  };
+};
+
 type RouteProps = K8sResourceCommon & {
   spec: {
     to: {
@@ -37,7 +49,7 @@ type HPAProps = K8sResourceCommon & {
   };
 };
 
-export const NetflowTrafficTab: React.FC<PageComponentProps> = ({ obj }) => {
+export const NetflowTrafficTab: React.FC<NetflowTrafficTabProps> = ({ match, obj, params }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   //default to 800 to allow content to be rendered in tests
@@ -195,7 +207,12 @@ export const NetflowTrafficTab: React.FC<PageComponentProps> = ({ obj }) => {
   } else if (forcedFilters) {
     return (
       <div className="netobserv-tab-container" style={{ height: containerHeight - 190 }}>
-        <NetflowTrafficParent forcedFilters={forcedFilters} isTab={true} parentConfig={config} />
+        <NetflowTrafficParent
+          forcedNamespace={params?.ns || match?.params?.ns}
+          forcedFilters={forcedFilters}
+          isTab={true}
+          parentConfig={config}
+        />
       </div>
     );
   } else {

@@ -6,6 +6,7 @@ import { getClusters, getNamespaces, getResources, getZones } from '../api/route
 import { FilterOption } from '../model/filters';
 import { splitResource, SplitStage } from '../model/resource';
 import { autoCompleteCache } from './autocomplete-cache';
+import { ContextSingleton } from './context';
 import { dnsErrors, dnsRCodes } from './dns';
 import { DSCP_VALUES } from './dscp';
 import { dropCauses, dropStates } from './pkt-drop';
@@ -57,23 +58,12 @@ const matchOptions = (opts: FilterOption[], match: string): FilterOption[] => {
   }
 };
 
-export const getNamespaceOptions = (value: string): Promise<FilterOption[]> => {
-  const namespaces = autoCompleteCache.getNamespaces();
-  if (namespaces) {
-    return Promise.resolve(matchOptions(namespaces.map(toFilterOption), value));
-  }
-  return getNamespaces().then(ns => {
-    autoCompleteCache.setNamespaces(ns);
-    return matchOptions(ns.map(toFilterOption), value);
-  });
-};
-
 export const getClusterOptions = (value: string): Promise<FilterOption[]> => {
   const clusters = autoCompleteCache.getClusters();
   if (clusters) {
     return Promise.resolve(matchOptions(clusters.map(toFilterOption), value));
   }
-  return getClusters().then(cs => {
+  return getClusters(ContextSingleton.getForcedNamespace()).then(cs => {
     autoCompleteCache.setClusters(cs);
     return matchOptions(cs.map(toFilterOption), value);
   });
@@ -84,9 +74,20 @@ export const getZoneOptions = (value: string): Promise<FilterOption[]> => {
   if (zones) {
     return Promise.resolve(matchOptions(zones.map(toFilterOption), value));
   }
-  return getZones().then(zs => {
+  return getZones(ContextSingleton.getForcedNamespace()).then(zs => {
     autoCompleteCache.setZones(zs);
     return matchOptions(zs.map(toFilterOption), value);
+  });
+};
+
+export const getNamespaceOptions = (value: string): Promise<FilterOption[]> => {
+  const namespaces = autoCompleteCache.getNamespaces();
+  if (namespaces) {
+    return Promise.resolve(matchOptions(namespaces.map(toFilterOption), value));
+  }
+  return getNamespaces(ContextSingleton.getForcedNamespace()).then(ns => {
+    autoCompleteCache.setNamespaces(ns);
+    return matchOptions(ns.map(toFilterOption), value);
   });
 };
 
@@ -95,7 +96,7 @@ export const getNameOptions = (kind: string, namespace: string, name: string): P
     const options = (autoCompleteCache.getNames(kind, namespace) || []).map(toFilterOption);
     return Promise.resolve(matchOptions(options, name));
   }
-  return getResources(namespace, kind).then(values => {
+  return getResources(namespace, kind, ContextSingleton.getForcedNamespace()).then(values => {
     autoCompleteCache.setNames(kind, namespace, values);
     return matchOptions(values.map(toFilterOption), name);
   });
