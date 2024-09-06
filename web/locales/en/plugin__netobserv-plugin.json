@@ -43,6 +43,7 @@
   "Show related documentation": "Show related documentation",
   "Value": "Value",
   "Examples": "Examples",
+  "The flow contains packets with various flags: ": "The flow contains packets with various flags: ",
   "ICMP type provided but protocol is {{proto}}": "ICMP type provided but protocol is {{proto}}",
   "ICMP code provided but protocol is {{proto}}": "ICMP code provided but protocol is {{proto}}",
   "Invalid data provided. Check JSON for details.": "Invalid data provided. Check JSON for details.",

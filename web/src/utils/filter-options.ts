@@ -10,7 +10,7 @@ import { dnsErrors, dnsRCodes } from './dns';
 import { DSCP_VALUES } from './dscp';
 import { dropCauses, dropStates } from './pkt-drop';
 import { getPort, getService } from './port';
-import { TCPFlags_VALUES } from './tcp_flags';
+import { tcpFlagsList } from './tcp-flags';
 
 export const noOption: (value: string) => Promise<FilterOption[]> = () => Promise.resolve([]);
 
@@ -172,9 +172,9 @@ export const getDSCPOptions = (value: string): Promise<FilterOption[]> => {
 
 export const getTCPFlagsOptions = (value: string): Promise<FilterOption[]> => {
   return Promise.resolve(
-    TCPFlags_VALUES.filter(
-      opt => String(opt.value).includes(value) || opt.name.toLowerCase().includes(value.toLowerCase())
-    ).map(v => ({ name: v.name, value: String(v.value) }))
+    tcpFlagsList
+      .filter(opt => String(opt.value).includes(value) || opt.name.toLowerCase().includes(value.toLowerCase()))
+      .map(v => ({ name: v.name, value: String(v.value) }))
   );
 };
 
