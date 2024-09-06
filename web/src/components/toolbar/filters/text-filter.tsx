@@ -3,6 +3,7 @@ import { SearchIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
 import * as React from 'react';
 import { createFilterValue, FilterDefinition, FilterValue } from '../../../model/filters';
+import { doubleQuoteValue, undefinedValue } from '../../../utils/filter-definitions';
 import { Indicator } from '../../../utils/filters-helper';
 
 export interface TextFilterProps {
@@ -38,7 +39,7 @@ export const TextFilter: React.FC<TextFilterProps> = ({
   const updateValue = React.useCallback(
     (v: string) => {
       let filteredValue = v;
-      if (regexp) {
+      if (![doubleQuoteValue, undefinedValue].includes(filteredValue) && regexp) {
         filteredValue = filteredValue.replace(regexp, '');
       }
       setCurrentValue(filteredValue);
