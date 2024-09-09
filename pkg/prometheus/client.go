@@ -43,7 +43,7 @@ func newClient(timeout time.Duration, skipTLS bool, caPath string, forwardUserTo
 		h := requestHeader.Get(auth.AuthHeader)
 		if h != "" && strings.HasPrefix(h, "Bearer ") {
 			token := strings.TrimPrefix(h, "Bearer ")
-			roundTripper = pconf.NewAuthorizationCredentialsRoundTripper("Bearer", pconf.Secret(token), maybeTLS)
+			roundTripper = pconf.NewAuthorizationCredentialsRoundTripper("Bearer", pconf.NewInlineSecret(token), maybeTLS)
 		} else {
 			log.Debug("Missing Authorization token in user request")
 		}
@@ -52,7 +52,7 @@ func newClient(timeout time.Duration, skipTLS bool, caPath string, forwardUserTo
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse authorization path '%s': %w", tokenPath, err)
 		}
-		roundTripper = pconf.NewAuthorizationCredentialsRoundTripper("Bearer", pconf.Secret(string(bytes)), maybeTLS)
+		roundTripper = pconf.NewAuthorizationCredentialsRoundTripper("Bearer", pconf.NewInlineSecret(string(bytes)), maybeTLS)
 	} else {
 		roundTripper = maybeTLS
 	}
