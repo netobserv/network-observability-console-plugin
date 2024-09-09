@@ -54,7 +54,13 @@ export const TextFilter: React.FC<TextFilterProps> = ({
   }, [setCurrentValue, setMessageWithDelay, setIndicator]);
 
   const onSelect = React.useCallback(() => {
-    const validation = filterDefinition.validate(String(currentValue));
+    // override empty value by undefined value
+    let v = currentValue;
+    if (currentValue.length === 0) {
+      v = undefinedValue;
+    }
+
+    const validation = filterDefinition.validate(String(v));
     //show tooltip and icon when user try to validate filter
     if (!_.isEmpty(validation.err)) {
       setMessageWithDelay(validation.err);

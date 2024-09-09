@@ -14,6 +14,7 @@ import * as React from 'react';
 import { createFilterValue, FilterDefinition, FilterOption, FilterValue } from '../../../model/filters';
 import { autoCompleteCache } from '../../../utils/autocomplete-cache';
 import { getHTTPErrorDetails } from '../../../utils/errors';
+import { undefinedValue } from '../../../utils/filter-definitions';
 import { Indicator } from '../../../utils/filters-helper';
 import { usePrevious } from '../../../utils/previous-hook';
 import './autocomplete-filter.css';
@@ -128,13 +129,19 @@ export const AutocompleteFilter: React.FC<AutocompleteFilterProps> = ({
   );
 
   const onEnter = React.useCallback(() => {
+    // override empty value by undefined value
+    let v = currentValue;
+    if (currentValue.length === 0) {
+      v = undefinedValue;
+    }
+
     // Only one choice is present, consider this is what is desired
     if (options.length === 1) {
       onAutoCompleteOptionSelected(options[0]);
       return;
     }
 
-    const validation = filterDefinition.validate(currentValue);
+    const validation = filterDefinition.validate(v);
     //show tooltip and icon when user try to validate filter
     if (!_.isEmpty(validation.err)) {
       setMessageWithDelay(validation.err);
