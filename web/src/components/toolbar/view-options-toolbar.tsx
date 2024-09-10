@@ -41,12 +41,10 @@ export interface ViewOptionsToolbarProps {
   topologyMetricFunction: StatFunction;
   setTopologyMetricFunction: (f: StatFunction) => void;
   topologyMetricType: MetricType;
-  setMetricType: (t: MetricType) => void;
+  setTopologyMetricType: (t: MetricType) => void;
   topologyOptions: TopologyOptions;
   setTopologyOptions: (o: TopologyOptions) => void;
-  allowPktDrop: boolean;
-  allowDNSMetric: boolean;
-  allowRTTMetric: boolean;
+  allowedTypes: MetricType[];
   allowedScopes: FlowScope[];
   size: Size;
   setSize: (v: Size) => void;
@@ -247,14 +245,12 @@ export const ViewOptionsToolbar: React.FC<ViewOptionsToolbarProps> = React.forwa
                 metricFunction={props.topologyMetricFunction}
                 setMetricFunction={props.setTopologyMetricFunction}
                 metricType={props.topologyMetricType}
-                setMetricType={props.setMetricType}
+                setMetricType={props.setTopologyMetricType}
                 metricScope={props.metricScope}
                 setMetricScope={props.setMetricScope}
                 topologyOptions={props.topologyOptions}
                 setTopologyOptions={props.setTopologyOptions}
-                allowPktDrop={props.allowPktDrop}
-                allowDNSMetric={props.allowDNSMetric}
-                allowRTTMetric={props.allowRTTMetric}
+                allowedTypes={props.allowedTypes}
                 allowedScopes={props.allowedScopes}
               />
             )}
