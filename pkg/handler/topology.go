@@ -234,7 +234,7 @@ func expandQueries(queries filters.MultiQueries, namespace string, isForProm fun
 	}
 	q2 := filters.SingleQuery{
 		filters.NewMatch(fields.FlowDirection, `"`+string(constants.Egress)+`"`),
-		filters.NewMatch(fields.DstOwnerName, `""`),
+		filters.NewMatch(fields.DstType, `"","Service"`),
 	}
 
 	shouldSkip := func(q filters.SingleQuery) bool {
