@@ -339,7 +339,7 @@ func TestLokiConfigurationForTopology(t *testing.T) {
 		Loki: config.Loki{
 			URL:     lokiSvc.URL,
 			Timeout: config.Duration{Duration: time.Second},
-			Labels:  []string{fields.SrcNamespace, fields.DstNamespace, fields.SrcOwnerName, fields.DstOwnerName, fields.SrcOwnerType, fields.DstOwnerType, fields.FlowDirection},
+			Labels:  []string{fields.SrcNamespace, fields.DstNamespace, fields.SrcOwnerName, fields.DstOwnerName, fields.SrcType, fields.DstType, fields.FlowDirection},
 		},
 		Frontend: config.Frontend{Deduper: config.Deduper{
 			Mark:  true,
@@ -361,7 +361,7 @@ func TestLokiConfigurationForTopology(t *testing.T) {
 	queries := []string{req1.URL.Query().Get("query"), req2.URL.Query().Get("query")}
 	expected := []string{
 		`topk(100,sum by(SrcK8S_Name,SrcK8S_Type,SrcK8S_OwnerName,SrcK8S_OwnerType,SrcK8S_Namespace,SrcAddr,SrcK8S_HostName,DstK8S_Name,DstK8S_Type,DstK8S_OwnerName,DstK8S_OwnerType,DstK8S_Namespace,DstAddr,DstK8S_HostName)(rate({app="netobserv-flowcollector",FlowDirection=~"^0$|^2$"}!~` + "`" + `Duplicate":true` + "`" + `|json|unwrap Bytes|__error__=""[1m])))`,
-		`topk(100,sum by(SrcK8S_Name,SrcK8S_Type,SrcK8S_OwnerName,SrcK8S_OwnerType,SrcK8S_Namespace,SrcAddr,SrcK8S_HostName,DstK8S_Name,DstK8S_Type,DstK8S_OwnerName,DstK8S_OwnerType,DstK8S_Namespace,DstAddr,DstK8S_HostName)(rate({app="netobserv-flowcollector",FlowDirection="1",DstK8S_OwnerType=~"^$|^Service$"}!~` + "`" + `Duplicate":true` + "`" + `|json|unwrap Bytes|__error__=""[1m])))`,
+		`topk(100,sum by(SrcK8S_Name,SrcK8S_Type,SrcK8S_OwnerName,SrcK8S_OwnerType,SrcK8S_Namespace,SrcAddr,SrcK8S_HostName,DstK8S_Name,DstK8S_Type,DstK8S_OwnerName,DstK8S_OwnerType,DstK8S_Namespace,DstAddr,DstK8S_HostName)(rate({app="netobserv-flowcollector",FlowDirection="1",DstK8S_Type=~"^$|^Service$"}!~` + "`" + `Duplicate":true` + "`" + `|json|unwrap Bytes|__error__=""[1m])))`,
 	}
 	// We don't predict the order so sort both actual and expected
 	sort.Strings(queries)
@@ -397,7 +397,7 @@ func TestLokiConfigurationForTableHistogram(t *testing.T) {
 		Loki: config.Loki{
 			URL:     lokiSvc.URL,
 			Timeout: config.Duration{Duration: time.Second},
-			Labels:  []string{fields.SrcNamespace, fields.DstNamespace, fields.SrcOwnerName, fields.DstOwnerName, fields.SrcOwnerType, fields.DstOwnerType, fields.FlowDirection},
+			Labels:  []string{fields.SrcNamespace, fields.DstNamespace, fields.SrcOwnerName, fields.DstOwnerName, fields.SrcType, fields.DstType, fields.FlowDirection},
 		},
 		Frontend: config.Frontend{Deduper: config.Deduper{
 			Mark:  true,

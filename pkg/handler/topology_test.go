@@ -30,7 +30,7 @@ func TestSplitForReportersMerge(t *testing.T) {
 	}, res[0])
 	assert.Equal(t, filters.SingleQuery{
 		filters.NewMatch("FlowDirection", `"`+string(constants.Egress)+`"`),
-		filters.NewMatch("DstK8S_OwnerType", `"","Service"`),
+		filters.NewMatch("DstK8S_Type", `"","Service"`),
 		filters.NewMatch("srcns", "a"),
 		filters.NewMatch("dstns", "b"),
 	}, res[1])
@@ -73,14 +73,14 @@ func TestExpand_ComplexQuery(t *testing.T) {
 	assert.Equal(t, filters.SingleQuery{
 		filters.NewMatch("SrcK8S_Namespace", `"my-namespace"`),
 		filters.NewMatch("FlowDirection", `"`+string(constants.Egress)+`"`),
-		filters.NewMatch("DstK8S_OwnerType", `"","Service"`),
+		filters.NewMatch("DstK8S_Type", `"","Service"`),
 		filters.NewMatch("key1", "a"),
 		filters.NewMatch("key2", "b"),
 	}, res[4])
 	assert.Equal(t, filters.SingleQuery{
 		filters.NewMatch("DstK8S_Namespace", `"my-namespace"`),
 		filters.NewMatch("FlowDirection", `"`+string(constants.Egress)+`"`),
-		filters.NewMatch("DstK8S_OwnerType", `"","Service"`),
+		filters.NewMatch("DstK8S_Type", `"","Service"`),
 		filters.NewMatch("key1", "a"),
 		filters.NewMatch("key2", "b"),
 	}, res[5])
@@ -104,14 +104,14 @@ func TestExpand_ComplexQuery(t *testing.T) {
 	assert.Equal(t, filters.SingleQuery{
 		filters.NewMatch("SrcK8S_Namespace", `"my-namespace"`),
 		filters.NewMatch("FlowDirection", `"`+string(constants.Egress)+`"`),
-		filters.NewMatch("DstK8S_OwnerType", `"","Service"`),
+		filters.NewMatch("DstK8S_Type", `"","Service"`),
 		filters.NewMatch("key1", "c"),
 		filters.NewMatch("key2", "d"),
 	}, res[9])
 	assert.Equal(t, filters.SingleQuery{
 		filters.NewMatch("DstK8S_Namespace", `"my-namespace"`),
 		filters.NewMatch("FlowDirection", `"`+string(constants.Egress)+`"`),
-		filters.NewMatch("DstK8S_OwnerType", `"","Service"`),
+		filters.NewMatch("DstK8S_Type", `"","Service"`),
 		filters.NewMatch("key1", "c"),
 		filters.NewMatch("key2", "d"),
 	}, res[10])
