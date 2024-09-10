@@ -12,6 +12,7 @@ export interface TextFilterProps {
   setMessageWithDelay: (m: string | undefined) => void;
   indicator: Indicator;
   setIndicator: (ind: Indicator) => void;
+  allowEmpty?: boolean;
   regexp?: RegExp;
 }
 
@@ -21,6 +22,7 @@ export const TextFilter: React.FC<TextFilterProps> = ({
   setMessageWithDelay,
   indicator,
   setIndicator,
+  allowEmpty,
   regexp
 }) => {
   const searchInputRef = React.useRef<HTMLInputElement | null>(null);
@@ -56,8 +58,12 @@ export const TextFilter: React.FC<TextFilterProps> = ({
   const onSelect = React.useCallback(() => {
     // override empty value by undefined value
     let v = currentValue;
-    if (currentValue.length === 0) {
-      v = undefinedValue;
+    if (allowEmpty) {
+      if (currentValue.length === 0) {
+        v = undefinedValue;
+      }
+    } else if (v === undefinedValue) {
+      v = '';
     }
 
     const validation = filterDefinition.validate(String(v));
@@ -73,7 +79,7 @@ export const TextFilter: React.FC<TextFilterProps> = ({
         resetFilterValue();
       }
     });
-  }, [filterDefinition, currentValue, setMessageWithDelay, setIndicator, addFilter, resetFilterValue]);
+  }, [currentValue, allowEmpty, filterDefinition, setMessageWithDelay, setIndicator, addFilter, resetFilterValue]);
 
   return (
     <>

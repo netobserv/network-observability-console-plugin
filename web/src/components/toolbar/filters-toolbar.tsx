@@ -121,11 +121,17 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
     switch (selectedFilter.component) {
       case 'text':
       case 'number':
-        return <TextFilter {...commonProps} regexp={selectedFilter.component === 'number' ? /\D/g : undefined} />;
+        return (
+          <TextFilter
+            {...commonProps}
+            allowEmpty={selectedCompare !== FilterCompare.moreThanOrEqual}
+            regexp={selectedFilter.component === 'number' ? /\D/g : undefined}
+          />
+        );
       case 'autocomplete':
         return <AutocompleteFilter {...commonProps} />;
     }
-  }, [selectedFilter, addFilter, indicator, setIndicator, setMessageWithDelay]);
+  }, [selectedFilter, addFilter, setMessageWithDelay, indicator, selectedCompare]);
 
   const isForced = !_.isEmpty(forcedFilters);
   const filtersOrForced = isForced ? forcedFilters : filters;
