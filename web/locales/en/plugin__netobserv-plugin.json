@@ -411,6 +411,7 @@
   "Last 1 week": "Last 1 week",
   "Last 2 weeks": "Last 2 weeks",
   "Value is empty": "Value is empty",
+  "Value is malformed": "Value is malformed",
   "Not a valid Kubernetes name": "Not a valid Kubernetes name",
   "Incomplete resource name, either kind, namespace or name is missing.": "Incomplete resource name, either kind, namespace or name is missing.",
   "Kind is empty": "Kind is empty",

@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import { isEqual } from '../utils/base-compare';
+import { undefinedValue } from '../utils/filter-definitions';
 
 export type FiltersEncoder = (values: FilterValue[], matchAny: boolean, not: boolean, moreThan: boolean) => string;
 
@@ -94,7 +95,9 @@ export interface FilterOption {
 export const createFilterValue = (def: FilterDefinition, value: string): Promise<FilterValue> => {
   return def.getOptions(value).then(opts => {
     const option = opts.find(opt => opt.name === value || opt.value === value);
-    return option ? { v: option.value, display: option.name } : { v: value };
+    return option
+      ? { v: option.value, display: option.name }
+      : { v: value, display: value === undefinedValue ? 'n/a' : undefined };
   });
 };
 

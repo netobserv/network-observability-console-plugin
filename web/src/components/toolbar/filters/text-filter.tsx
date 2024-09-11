@@ -3,6 +3,7 @@ import { SearchIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
 import * as React from 'react';
 import { createFilterValue, FilterDefinition, FilterValue } from '../../../model/filters';
+import { doubleQuoteValue, undefinedValue } from '../../../utils/filter-definitions';
 import { Indicator } from '../../../utils/filters-helper';
 
 export interface TextFilterProps {
@@ -11,6 +12,7 @@ export interface TextFilterProps {
   setMessageWithDelay: (m: string | undefined) => void;
   indicator: Indicator;
   setIndicator: (ind: Indicator) => void;
+  allowEmpty?: boolean;
   regexp?: RegExp;
 }
 
@@ -20,6 +22,7 @@ export const TextFilter: React.FC<TextFilterProps> = ({
   setMessageWithDelay,
   indicator,
   setIndicator,
+  allowEmpty,
   regexp
 }) => {
   const searchInputRef = React.useRef<HTMLInputElement | null>(null);
@@ -38,7 +41,7 @@ export const TextFilter: React.FC<TextFilterProps> = ({
   const updateValue = React.useCallback(
     (v: string) => {
       let filteredValue = v;
-      if (regexp) {
+      if (![doubleQuoteValue, undefinedValue].includes(filteredValue) && regexp) {
         filteredValue = filteredValue.replace(regexp, '');
       }
       setCurrentValue(filteredValue);
@@ -53,7 +56,17 @@ export const TextFilter: React.FC<TextFilterProps> = ({
   }, [setCurrentValue, setMessageWithDelay, setIndicator]);
 
   const onSelect = React.useCallback(() => {
-    const validation = filterDefinition.validate(String(currentValue));
+    // override empty value by undefined value
+    let v = currentValue;
+    if (allowEmpty) {
+      if (currentValue.length === 0) {
+        v = undefinedValue;
+      }
+    } else if (v === undefinedValue) {
+      v = '';
+    }
+
+    const validation = filterDefinition.validate(String(v));
     //show tooltip and icon when user try to validate filter
     if (!_.isEmpty(validation.err)) {
       setMessageWithDelay(validation.err);
@@ -66,7 +79,7 @@ export const TextFilter: React.FC<TextFilterProps> = ({
         resetFilterValue();
       }
     });
-  }, [filterDefinition, currentValue, setMessageWithDelay, setIndicator, addFilter, resetFilterValue]);
+  }, [currentValue, allowEmpty, filterDefinition, setMessageWithDelay, setIndicator, addFilter, resetFilterValue]);
 
   return (
     <>
