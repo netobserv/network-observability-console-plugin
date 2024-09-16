@@ -93,12 +93,18 @@ export interface FilterOption {
 }
 
 export const createFilterValue = (def: FilterDefinition, value: string): Promise<FilterValue> => {
-  return def.getOptions(value).then(opts => {
-    const option = opts.find(opt => opt.name === value || opt.value === value);
-    return option
+  return def
+    .getOptions(value)
+    .then(opts => {
+      const option = opts.find(opt => opt.name === value || opt.value === value);
+      return option
         ? { v: option.value, display: option.name }
         : { v: value, display: value === undefinedValue ? 'n/a' : undefined };
-  });
+    })
+    .catch(_ => {
+      // In case of error, still create the minimal possible FilterValue
+      return { v: value };
+    });
 };
 
 export const hasEnabledFilterValues = (filter: Filter) => {

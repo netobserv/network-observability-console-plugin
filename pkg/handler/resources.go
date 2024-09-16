@@ -35,7 +35,7 @@ func (h *Handlers) GetClusters(ctx context.Context) func(w http.ResponseWriter, 
 		// Fetch and merge values for K8S_ClusterName
 		values, code, err := h.getLabelValues(ctx, clients, fields.Cluster, isDev)
 		if err != nil {
-			writeError(w, code, "Error while fetching label cluster values: "+err.Error())
+			writeError(w, code, err.Error())
 			return
 		}
 
@@ -67,14 +67,14 @@ func (h *Handlers) GetZones(ctx context.Context) func(w http.ResponseWriter, r *
 		// Fetch and merge values for SrcK8S_Zone and DstK8S_Zone
 		values1, code, err := h.getLabelValues(ctx, clients, fields.SrcZone, isDev)
 		if err != nil {
-			writeError(w, code, "Error while fetching label source zone values: "+err.Error())
+			writeError(w, code, err.Error())
 			return
 		}
 		values = append(values, values1...)
 
 		values2, code, err := h.getLabelValues(ctx, clients, fields.DstZone, isDev)
 		if err != nil {
-			writeError(w, code, "Error while fetching label destination zone values: "+err.Error())
+			writeError(w, code, err.Error())
 			return
 		}
 		values = append(values, values2...)
@@ -123,7 +123,7 @@ func (h *Handlers) GetNamespaces(ctx context.Context) func(w http.ResponseWriter
 
 		values, code, err := h.getNamespacesValues(ctx, clients, isDev)
 		if err != nil {
-			writeError(w, code, "Error while fetching label namespace values: "+err.Error())
+			writeError(w, code, err.Error())
 			return
 		}
 		writeJSON(w, code, utils.NonEmpty(utils.Dedup(values)))
@@ -134,11 +134,28 @@ func (h *Handlers) getLabelValues(ctx context.Context, cl clients, label string,
 	if h.PromInventory != nil && h.PromInventory.LabelExists(label) {
 		client := cl.getPromClient(isDev)
 		if client != nil {
-			return prometheus.GetLabelValues(ctx, client, label, nil)
+			resp, code, err := prometheus.GetLabelValues(ctx, client, label, nil)
+			if err != nil {
+				if code == http.StatusUnauthorized || code == http.StatusForbidden {
+					// In case this was a prometheus 401 / 403 error, the query is repeated with Loki
+					// This is because multi-tenancy is currently not managed for prom datasource, hence such queries have to go with Loki
+					// Unfortunately we don't know a safe and generic way to pre-flight check if the user will be authorized
+					hlog.Info("Retrying with Loki...")
+					// continuing with loki below
+				} else {
+					return nil, code, fmt.Errorf("error while fetching label %s values from Prometheus: %w", label, err)
+				}
+			} else {
+				return resp, code, nil
+			}
 		}
 	}
 	if cl.loki != nil {
-		return getLokiLabelValues(h.Cfg.Loki.URL, cl.loki, label)
+		resp, code, err := getLokiLabelValues(h.Cfg.Loki.URL, cl.loki, label)
+		if err != nil {
+			return nil, code, fmt.Errorf("error while fetching label %s values from Loki: %w", label, err)
+		}
+		return resp, code, nil
 	}
 	// Loki disabled AND label not managed in metrics => send an error
 	return nil, http.StatusBadRequest, fmt.Errorf("label %s not found in Prometheus metrics", label)
@@ -198,7 +215,7 @@ func (h *Handlers) getNamesForPrefix(ctx context.Context, cl clients, prefix, ki
 		searchField = prefix + fields.Name
 	}
 
-	if h.Cfg.IsPromEnabled() {
+	if h.Cfg.IsPromEnabled() && h.PromInventory.LabelExists(searchField) {
 		// Label match query (any metric)
 		q := prometheus.QueryFilters("", filts)
 		return prometheus.GetLabelValues(ctx, cl.promAdmin, searchField, []string{q})
