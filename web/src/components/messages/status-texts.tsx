@@ -12,7 +12,7 @@ export const StatusTexts: React.FC<StatusProps> = ({ status }) => {
 
   return (
     <>
-      {status && status.isLokiReady === false && (
+      {status && status.isAllowLoki && status.isLokiReady === false && (
         <Text component={TextVariants.blockquote}>
           {t(`Check if Loki is running correctly. '/ready' endpoint should respond "ready"`)}
         </Text>
