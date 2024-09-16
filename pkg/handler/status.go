@@ -7,12 +7,16 @@ import (
 )
 
 type Status struct {
-	IsAllowProm         bool `yaml:"isAllowProm" json:"isAllowProm"`
-	PromNamespacesCount int  `yaml:"promNamespacesCount" json:"promNamespacesCount"`
-	IsAllowLoki         bool `yaml:"isAllowLoki" json:"isAllowLoki"`
-	LokiNamespacesCount int  `yaml:"lokiNamespacesCount" json:"lokiNamespacesCount"`
-	IsLokiReady         bool `yaml:"isLokiReady" json:"isLokiReady"`
-	IsConsistent        bool `yaml:"isConsistent" json:"isConsistent"`
+	Loki       DatasourceStatus `yaml:"loki" json:"loki"`
+	Prometheus DatasourceStatus `yaml:"prometheus" json:"prometheus"`
+}
+
+type DatasourceStatus struct {
+	IsEnabled       bool   `yaml:"isEnabled" json:"isEnabled"`
+	NamespacesCount int    `yaml:"namespacesCount" json:"namespacesCount"`
+	IsReady         bool   `yaml:"isReady" json:"isReady"`
+	Error           string `yaml:"error" json:"error"`
+	ErrorCode       int    `yaml:"errorCode" json:"errorCode"`
 }
 
 func (h *Handlers) Status(ctx context.Context) func(w http.ResponseWriter, r *http.Request) {
@@ -22,52 +26,47 @@ func (h *Handlers) Status(ctx context.Context) func(w http.ResponseWriter, r *ht
 		isDev := namespace != ""
 
 		status := Status{
-			IsAllowProm: h.Cfg.IsPromEnabled(),
-			IsAllowLoki: h.Cfg.IsLokiEnabled(),
+			Prometheus: DatasourceStatus{IsEnabled: h.Cfg.IsPromEnabled()},
+			Loki:       DatasourceStatus{IsEnabled: h.Cfg.IsLokiEnabled()},
 		}
 
-		if status.IsAllowProm {
+		if status.Prometheus.IsEnabled {
 			promClients, err := newPromClients(h.Cfg, r.Header, namespace)
 			if err != nil {
-				writeError(w, http.StatusInternalServerError, err.Error())
-				return
+				status.Prometheus.Error = err.Error()
+				status.Prometheus.ErrorCode = http.StatusInternalServerError
+			} else {
+				// Get namespaces using Prom
+				promNamespaces, code, err := h.getNamespacesValues(ctx, promClients, isDev)
+				if err != nil {
+					status.Prometheus.Error = "Error while fetching label namespace values from Prometheus: " + err.Error()
+					status.Prometheus.ErrorCode = code
+				} else {
+					status.Prometheus.IsReady = true
+					status.Prometheus.NamespacesCount = len(promNamespaces)
+				}
 			}
-			// get namespaces using Prom
-			promNamespaces, code, err := h.getNamespacesValues(ctx, promClients, isDev)
-			if err != nil {
-				writeError(w, code, "Error while fetching label namespace values from Prometheus: "+err.Error())
-				return
-			}
-			status.PromNamespacesCount = len(promNamespaces)
 		}
 
-		if status.IsAllowLoki {
+		if status.Loki.IsEnabled {
 			resp, code, err := h.getLokiStatus(r)
 			if err != nil {
-				writeError(w, code, err.Error())
-				return
-			}
-			lokiStatus := string(resp)
-			if strings.Contains(lokiStatus, "ready") {
-				status.IsLokiReady = true
+				status.Loki.Error = err.Error()
+				status.Loki.ErrorCode = code
 			} else {
-				status.IsLokiReady = false
-			}
+				lokiStatus := string(resp)
+				status.Loki.IsReady = strings.Contains(lokiStatus, "ready")
 
-			lokiClients := newLokiClients(h.Cfg, r.Header, false)
-			// get namespaces using Loki
-			lokiNamespaces, code, err := h.getNamespacesValues(ctx, lokiClients, isDev)
-			if err != nil {
-				writeError(w, code, "Error while fetching label namespace values from Loki: "+err.Error())
-				return
+				lokiClients := newLokiClients(h.Cfg, r.Header, false)
+				// get namespaces using Loki
+				lokiNamespaces, code, err := h.getNamespacesValues(ctx, lokiClients, isDev)
+				if err != nil {
+					status.Loki.Error = "Error while fetching label namespace values from Loki: " + err.Error()
+					status.Loki.ErrorCode = code
+				} else {
+					status.Loki.NamespacesCount = len(lokiNamespaces)
+				}
 			}
-			status.LokiNamespacesCount = len(lokiNamespaces)
-		}
-		// consistent if both datasources are enabled and counts are equal
-		if status.IsAllowLoki && status.IsAllowProm {
-			status.IsConsistent = status.PromNamespacesCount == status.LokiNamespacesCount
-		} else {
-			status.IsConsistent = true
 		}
 		writeJSON(w, http.StatusOK, status)
 	}

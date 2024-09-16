@@ -38,6 +38,8 @@ enum LokiInfo {
 export interface ErrorProps {
   title: string;
   error: string;
+  // TODO: (NETOBSERV-1877) refactor error type handling.
+  // "isLokiRelated" actually means here: "is neither prom-unsupported nor config loading error". But could actually be other than Loki related.
   isLokiRelated: boolean;
 }
 
@@ -226,34 +228,59 @@ export const Error: React.FC<ErrorProps> = ({ title, error, isLokiRelated }) => 
                   {t(`Check your connectivity with cluster / console plugin pod`)}
                 </Text>
               )}
+
               {(error.includes('status code 401') || error.includes('status code 403')) && (
                 <>
                   <Text component={TextVariants.blockquote}>{t(`Check current user permissions`)}</Text>
-                  {isLokiRelated && (
+                  {error.includes('user not an admin') ? (
+                    <Text component={TextVariants.blockquote}>
+                      {t(
+                        `This deployment mode does not support non-admin users. Check FlowCollector spec.loki.manual.authToken`
+                      )}
+                    </Text>
+                  ) : (
                     <>
-                      <Text component={TextVariants.blockquote}>
-                        {t(`For LokiStack, your user must either:`)}
-                        <TextList>
-                          <TextListItem>
-                            {t(`have the 'netobserv-reader' cluster role, which allows multi-tenancy`)}
-                          </TextListItem>
-                          <TextListItem>
-                            {t(`or be in the 'cluster-admin' group (not the same as the 'cluster-admin' role)`)}
-                          </TextListItem>
-                          <TextListItem>
-                            {t(
-                              `or LokiStack spec.tenants.openshift.adminGroups must be configured with a group this user belongs to`
-                            )}
-                          </TextListItem>
-                        </TextList>
-                      </Text>
-                      <Text component={TextVariants.blockquote}>
-                        {t(`For other configurations, refer to FlowCollector spec.loki.manual.authToken`)}
-                      </Text>
+                      {error.includes('from Loki') && (
+                        <>
+                          <Text component={TextVariants.blockquote}>
+                            {t(`For LokiStack, your user must either:`)}
+                            <TextList>
+                              <TextListItem>
+                                {t(`have the 'netobserv-reader' cluster role, which allows multi-tenancy`)}
+                              </TextListItem>
+                              <TextListItem>
+                                {t(`or be in the 'cluster-admin' group (not the same as the 'cluster-admin' role)`)}
+                              </TextListItem>
+                              <TextListItem>
+                                {t(
+                                  `or LokiStack spec.tenants.openshift.adminGroups must be configured with a group this user belongs to`
+                                )}
+                              </TextListItem>
+                            </TextList>
+                          </Text>
+                          <Text component={TextVariants.blockquote}>
+                            {t(`For other configurations, refer to FlowCollector spec.loki.manual.authToken`)}
+                          </Text>
+                        </>
+                      )}
                     </>
+                  )}
+                  {error.includes('from Prometheus') && (
+                    <Text component={TextVariants.blockquote}>
+                      {t(`For metrics access, your user must either:`)}
+                      <TextList>
+                        <TextListItem>
+                          {t(`have the 'netobserv-metrics-reader' namespace-scoped role`)}
+                        </TextListItem>
+                        <TextListItem>
+                          {t(`or for cluster-wide access, have the 'cluster-monitoring-view' cluster role`)}
+                        </TextListItem>
+                      </TextList>
+                    </Text>
                   )}
                 </>
               )}
+
               {status && <StatusTexts status={status} />}
               {statusError && (
                 <Text component={TextVariants.blockquote}>

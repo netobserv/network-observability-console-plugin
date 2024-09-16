@@ -135,7 +135,7 @@ func executeLokiQuery(flowsURL string, lokiClient httpclient.Caller) ([]byte, in
 	}
 	if code != http.StatusOK {
 		newCode, msg := getLokiError(resp, code)
-		return nil, newCode, fmt.Errorf("[%d] %s", code, msg)
+		return nil, newCode, fmt.Errorf("Error from Loki query: [%d] %s", code, msg)
 	}
 	return resp, http.StatusOK, nil
 }

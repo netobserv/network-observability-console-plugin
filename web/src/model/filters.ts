@@ -96,8 +96,8 @@ export const createFilterValue = (def: FilterDefinition, value: string): Promise
   return def.getOptions(value).then(opts => {
     const option = opts.find(opt => opt.name === value || opt.value === value);
     return option
-      ? { v: option.value, display: option.name }
-      : { v: value, display: value === undefinedValue ? 'n/a' : undefined };
+        ? { v: option.value, display: option.name }
+        : { v: value, display: value === undefinedValue ? 'n/a' : undefined };
   });
 };
 

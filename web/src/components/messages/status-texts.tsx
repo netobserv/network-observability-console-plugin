@@ -12,22 +12,47 @@ export const StatusTexts: React.FC<StatusProps> = ({ status }) => {
 
   return (
     <>
-      {status && status.isAllowLoki && status.isLokiReady === false && (
-        <Text component={TextVariants.blockquote}>
-          {t(`Check if Loki is running correctly. '/ready' endpoint should respond "ready"`)}
-        </Text>
+      {status.loki.isEnabled && (
+        <>
+          {status.loki.isReady === false && (
+            <Text component={TextVariants.blockquote}>
+              {t(`Check if Loki is running correctly. '/ready' endpoint should respond "ready"`)}
+            </Text>
+          )}
+          {status.loki.error && (
+            <Text component={TextVariants.blockquote}>
+              {t('Loki status check error: [{{code}}] {{err}}', {
+                err: status.loki.error,
+                code: status.loki.errorCode
+              })}
+            </Text>
+          )}
+        </>
       )}
-      {status && status.isAllowLoki && status.lokiNamespacesCount === 0 && (
+      {status.prometheus.isEnabled && (
+        <>
+          {status.prometheus.error && (
+            <Text component={TextVariants.blockquote}>
+              {t('Prometheus status check error: [{{code}}] {{err}}', {
+                err: status.prometheus.error,
+                code: status.prometheus.errorCode
+              })}
+            </Text>
+          )}
+        </>
+      )}
+
+      {status.loki.isEnabled && !status.loki.error && status.loki.namespacesCount === 0 && (
         <Text component={TextVariants.blockquote}>{t(`Can't find any namespace label in your Loki storage.`)}</Text>
       )}
-      {status && status.isAllowProm && status.promNamespacesCount === 0 && (
+      {status.prometheus.isEnabled && !status.prometheus.error && status.prometheus.namespacesCount === 0 && (
         <Text component={TextVariants.blockquote}>
           {t(`Can't find any namespace label in your Prometheus storage.`)}
         </Text>
       )}
       {status &&
-        ((status.isAllowLoki && status.lokiNamespacesCount === 0) ||
-          (status.isAllowProm && status.promNamespacesCount === 0)) && (
+        ((status.loki.isEnabled && !status.loki.error && status.loki.namespacesCount === 0) ||
+          (status.prometheus.isEnabled && !status.prometheus.error && status.prometheus.namespacesCount === 0)) && (
           <Text component={TextVariants.blockquote}>
             {t(
               // eslint-disable-next-line max-len
@@ -36,12 +61,15 @@ export const StatusTexts: React.FC<StatusProps> = ({ status }) => {
           </Text>
         )}
       {status &&
-        status.isAllowLoki &&
-        status.isLokiReady &&
-        status.isAllowProm &&
-        status.lokiNamespacesCount !== status.promNamespacesCount && (
+        status.loki.isEnabled &&
+        status.loki.isReady &&
+        !status.loki.error &&
+        status.prometheus.isEnabled &&
+        status.prometheus.isReady &&
+        !status.prometheus.error &&
+        status.loki.namespacesCount !== status.prometheus.namespacesCount && (
           <Text component={TextVariants.blockquote}>
-            {t(`Loki and Prom storages are not consistent. Check health dashboard for errors.`)}
+            {t(`Loki and Prometheus storages are not consistent. Check health dashboard for errors.`)}
           </Text>
         )}
     </>

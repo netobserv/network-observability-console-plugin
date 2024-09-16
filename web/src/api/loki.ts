@@ -199,10 +199,14 @@ export const isValidTopologyMetrics = (metric: any): metric is TopologyMetrics =
 };
 
 export interface Status {
-  isAllowProm: boolean;
-  promNamespacesCount: number;
-  isAllowLoki: boolean;
-  lokiNamespacesCount: number;
-  isLokiReady: boolean;
-  isConsistent: boolean;
+  loki: DatasourceStatus;
+  prometheus: DatasourceStatus;
+}
+
+export interface DatasourceStatus {
+  isEnabled: boolean;
+  namespacesCount: number;
+  isReady: boolean;
+  error: string;
+  errorCode: number;
 }
