@@ -106,6 +106,22 @@ export const NetflowTrafficDrawer: React.FC<NetflowTrafficDrawerProps> = React.f
     const tableRef = React.useRef<NetflowTableHandle>(null);
     const topologyRef = React.useRef<NetflowTopologyHandle>(null);
 
+    const {
+      defaultFilters,
+      metrics,
+      resetDefaultFilters,
+      clearFilters,
+      filters,
+      topologyMetricFunction,
+      topologyMetricType,
+      setFilters,
+      match,
+      setShowQuerySummary,
+      clearSelections,
+      setSelectedRecord,
+      setSelectedElement
+    } = props;
+
     React.useImperativeHandle(ref, () => ({
       getOverviewHandle: () => overviewRef.current,
       getTableHandle: () => tableRef.current,
@@ -114,97 +130,91 @@ export const NetflowTrafficDrawer: React.FC<NetflowTrafficDrawerProps> = React.f
 
     const onRecordSelect = React.useCallback(
       (record?: Record) => {
-        props.clearSelections();
-        props.setSelectedRecord(record);
+        clearSelections();
+        setSelectedRecord(record);
       },
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [props.clearSelections, props.setSelectedRecord]
+      [clearSelections, setSelectedRecord]
     );
 
     const onElementSelect = React.useCallback(
       (element?: GraphElementPeer) => {
-        props.clearSelections();
-        props.setSelectedElement(element);
+        clearSelections();
+        setSelectedElement(element);
       },
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [props.clearSelections, props.setSelectedElement]
+      [clearSelections, setSelectedElement]
     );
 
     const onToggleQuerySummary = React.useCallback(
       (v: boolean) => {
-        props.clearSelections();
-        props.setShowQuerySummary(v);
+        clearSelections();
+        setShowQuerySummary(v);
       },
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [props.clearSelections, props.setShowQuerySummary]
+      [clearSelections, setShowQuerySummary]
     );
 
     const setFiltersList = React.useCallback(
       (list: Filter[]) => {
-        props.setFilters({ ...props.filters, list: list });
+        setFilters({ ...filters, list: list });
       },
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [props.setFilters]
+      [filters, setFilters]
     );
 
     const getResetDefaultFiltersProp = React.useCallback(() => {
-      if (props.defaultFilters.length > 0 && !filtersEqual(props.filters.list, props.defaultFilters)) {
-        return props.resetDefaultFilters;
+      if (defaultFilters.length > 0 && !filtersEqual(filters.list, defaultFilters)) {
+        return resetDefaultFilters;
       }
       return undefined;
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [props.defaultFilters, props.resetDefaultFilters, props.filters.list]);
+    }, [defaultFilters, resetDefaultFilters, filters.list]);
 
     const getClearFiltersProp = React.useCallback(() => {
-      if (props.filters.list.length > 0) {
-        return props.clearFilters;
+      if (filters.list.length > 0) {
+        return clearFilters;
       }
       return undefined;
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [props.filters.list, props.clearFilters]);
+    }, [filters.list, clearFilters]);
 
     const getTopologyMetrics = React.useCallback(() => {
-      switch (props.topologyMetricType) {
+      switch (topologyMetricType) {
         case 'Bytes':
         case 'Packets':
-          return props.metrics.rateMetrics?.[getRateMetricKey(props.topologyMetricType)];
+          return metrics.rateMetrics?.[getRateMetricKey(topologyMetricType)];
         case 'DnsLatencyMs':
-          return props.metrics.dnsLatencyMetrics?.[getFunctionMetricKey(props.topologyMetricFunction)];
+          return metrics.dnsLatencyMetrics?.[getFunctionMetricKey(topologyMetricFunction)];
         case 'TimeFlowRttNs':
-          return props.metrics.rttMetrics?.[getFunctionMetricKey(props.topologyMetricFunction)];
+          return metrics.rttMetrics?.[getFunctionMetricKey(topologyMetricFunction)];
         default:
           return undefined;
       }
     }, [
-      props.metrics.dnsLatencyMetrics,
-      props.topologyMetricFunction,
-      props.topologyMetricType,
-      props.metrics.rateMetrics,
-      props.metrics.rttMetrics
+      metrics.dnsLatencyMetrics,
+      topologyMetricFunction,
+      topologyMetricType,
+      metrics.rateMetrics,
+      metrics.rttMetrics
     ]);
 
     const getTopologyDroppedMetrics = React.useCallback(() => {
-      switch (props.topologyMetricType) {
+      switch (topologyMetricType) {
         case 'Bytes':
         case 'Packets':
         case 'PktDropBytes':
         case 'PktDropPackets':
-          return props.metrics.droppedRateMetrics?.[getRateMetricKey(props.topologyMetricType)];
+          return metrics.droppedRateMetrics?.[getRateMetricKey(topologyMetricType)];
         default:
           return undefined;
       }
-    }, [props.metrics.droppedRateMetrics, props.topologyMetricType]);
+    }, [metrics.droppedRateMetrics, topologyMetricType]);
 
     const checkSlownessReason = React.useCallback(
       (w: Warning | undefined): Warning | undefined => {
         if (w?.type == 'slow') {
           let reason = '';
-          if (props.match === 'any' && hasNonIndexFields(props.filters.list)) {
+          if (match === 'any' && hasNonIndexFields(filters.list)) {
             reason = t(
               // eslint-disable-next-line max-len
               'When in "Match any" mode, try using only Namespace, Owner or Resource filters (which use indexed fields), or decrease limit / range, to improve the query performance'
             );
-          } else if (props.match === 'all' && !hasIndexFields(props.filters.list)) {
+          } else if (match === 'all' && !hasIndexFields(filters.list)) {
             reason = t(
               // eslint-disable-next-line max-len
               'Add Namespace, Owner or Resource filters (which use indexed fields), or decrease limit / range, to improve the query performance'
@@ -216,8 +226,7 @@ export const NetflowTrafficDrawer: React.FC<NetflowTrafficDrawerProps> = React.f
         }
         return w;
       },
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [props.match, props.filters]
+      [match, filters]
     );
 
     const mainContent = () => {
