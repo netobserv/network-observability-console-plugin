@@ -252,6 +252,7 @@ export const NetflowTable: React.FC<NetflowTableProps> = React.forwardRef(
 
       return getSortedFlows().map((f, i) => (
         <NetflowTableRow
+          rowNumber={i}
           key={f.key}
           allowPktDrops={props.allowPktDrops}
           flow={f}
