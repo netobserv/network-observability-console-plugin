@@ -1,21 +1,18 @@
 /// <reference types="cypress" />
 
 import * as c from '../../support/const';
-
-let useMocks = false
+import data from './../../../../mocks/loki/flow_records.json';
 
 describe('netflow-table', () => {
   function reload(clearCache = true) {
-    cy.intercept({
-      method: 'GET',
-      url: c.url + '/api/frontend-config',
-    }).as('frontend-config')
+    // this test bench only work with mocks
+    cy.intercept('GET', c.url + '/api/loki/flow/records?*', (req) => {
+      req.continue((res) => {
+        res.body = data;
+      })
+    });
 
     cy.openNetflowTrafficPage(clearCache);
-
-    cy.wait('@frontend-config').then((interception) => {
-      useMocks = interception?.response.body.lokiMocks || false;
-    })
 
     //move to table view
     cy.get('.tableTabButton').click();
@@ -30,11 +27,6 @@ describe('netflow-table', () => {
   });
 
   it('display content correctly', () => {
-    if (!useMocks) {
-      it.skip("Skipping test since not using mocks");
-      return
-    }
-
     // select first row
     cy.get('#netflow-table-row-0').click()
     // check for side panel content
