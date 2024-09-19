@@ -127,6 +127,7 @@ type Frontend struct {
 	Deduper         Deduper       `yaml:"deduper" json:"deduper"`
 	Fields          []FieldConfig `yaml:"fields" json:"fields"`
 	DataSources     []string      `yaml:"dataSources" json:"dataSources"`
+	LokiMocks       bool          `yaml:"lokiMocks,omitempty" json:"lokiMocks,omitempty"`
 	PromLabels      []string      `yaml:"promLabels" json:"promLabels"`
 	MaxChunkAgeMs   int           `yaml:"maxChunkAgeMs,omitempty" json:"maxChunkAgeMs,omitempty"` // populated at query time
 }
@@ -196,6 +197,7 @@ func ReadFile(version, date, filename string) (*Config, error) {
 
 	if cfg.IsLokiEnabled() {
 		cfg.Frontend.DataSources = append(cfg.Frontend.DataSources, string(constants.DataSourceLoki))
+		cfg.Frontend.LokiMocks = cfg.Loki.UseMocks
 	}
 
 	if cfg.IsPromEnabled() {
