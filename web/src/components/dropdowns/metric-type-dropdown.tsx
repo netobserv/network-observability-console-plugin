@@ -6,10 +6,7 @@ import { MetricType } from '../../model/flow-query';
 export interface MetricTypeDropdownProps {
   selected?: string;
   setMetricType: (v: MetricType) => void;
-  isTopology?: boolean;
-  allowPktDrop?: boolean;
-  allowDNSMetric?: boolean;
-  allowRTTMetric?: boolean;
+  allowedTypes: MetricType[];
   id?: string;
 }
 
@@ -17,29 +14,10 @@ export const MetricTypeDropdown: React.FC<MetricTypeDropdownProps> = ({
   selected,
   setMetricType,
   id,
-  isTopology,
-  allowPktDrop,
-  allowDNSMetric,
-  allowRTTMetric
+  allowedTypes
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [metricDropdownOpen, setMetricDropdownOpen] = React.useState(false);
-
-  const getMetricTypeOptions = React.useCallback(() => {
-    let options: MetricType[] = ['Bytes', 'Packets'];
-    if (isTopology) {
-      if (allowPktDrop) {
-        options = options.concat('PktDropBytes', 'PktDropPackets');
-      }
-      if (allowDNSMetric) {
-        options.push('DnsLatencyMs');
-      }
-      if (allowRTTMetric) {
-        options.push('TimeFlowRttNs');
-      }
-    }
-    return options;
-  }, [allowDNSMetric, allowPktDrop, allowRTTMetric, isTopology]);
 
   const getMetricDisplay = React.useCallback(
     (metricType: MetricType): string => {
@@ -78,7 +56,7 @@ export const MetricTypeDropdown: React.FC<MetricTypeDropdownProps> = ({
         </DropdownToggle>
       }
       isOpen={metricDropdownOpen}
-      dropdownItems={getMetricTypeOptions().map(v => (
+      dropdownItems={allowedTypes.map(v => (
         <DropdownItem
           data-test={v}
           id={v}

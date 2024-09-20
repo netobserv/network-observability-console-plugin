@@ -15,9 +15,7 @@ export const TopologyDisplayDropdown: React.FC<{
   setMetricScope: (s: FlowScope) => void;
   topologyOptions: TopologyOptions;
   setTopologyOptions: (o: TopologyOptions) => void;
-  allowPktDrop: boolean;
-  allowDNSMetric: boolean;
-  allowRTTMetric: boolean;
+  allowedTypes: MetricType[];
   allowedScopes: FlowScope[];
 }> = ({
   metricFunction,
@@ -28,9 +26,7 @@ export const TopologyDisplayDropdown: React.FC<{
   setMetricScope,
   topologyOptions,
   setTopologyOptions,
-  allowPktDrop,
-  allowDNSMetric,
-  allowRTTMetric,
+  allowedTypes,
   allowedScopes
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
@@ -53,9 +49,7 @@ export const TopologyDisplayDropdown: React.FC<{
             setMetricScope={setMetricScope}
             topologyOptions={topologyOptions}
             setTopologyOptions={setTopologyOptions}
-            allowPktDrop={allowPktDrop}
-            allowDNSMetric={allowDNSMetric}
-            allowRTTMetric={allowRTTMetric}
+            allowedTypes={allowedTypes}
             allowedScopes={allowedScopes}
           />
         }

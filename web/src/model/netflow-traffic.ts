@@ -2,6 +2,7 @@
 import React from 'react';
 import { Record } from '../api/ipfix';
 import { defaultNetflowMetrics, NetflowMetrics, Stats } from '../api/loki';
+import { rateMetricFunctions, timeMetricFunctions } from '../components/dropdowns/metric-function-dropdown';
 import { limitValues, topValues } from '../components/dropdowns/query-options-panel';
 import { TruncateLength } from '../components/dropdowns/truncate-dropdown';
 import { Size } from '../components/messages/error';
@@ -37,6 +38,7 @@ import {
 import { OverviewPanel } from '../utils/overview-panels';
 import {
   defaultMetricFunction,
+  defaultMetricScope,
   defaultMetricType,
   getDataSourceFromURL,
   getLimitFromURL,
@@ -48,8 +50,18 @@ import {
 } from '../utils/router';
 import { Config, defaultConfig } from './config';
 import { DisabledFilters, Filters } from './filters';
-import { DataSource, FlowScope, Match, MetricType, PacketLoss, RecordType, StatFunction } from './flow-query';
-import { DefaultOptions, GraphElementPeer, TopologyOptions } from './topology';
+import {
+  DataSource,
+  FlowScope,
+  isTimeMetric,
+  Match,
+  MetricType,
+  PacketLoss,
+  RecordType,
+  StatFunction
+} from './flow-query';
+import { MetricScopeOptions } from './metrics';
+import { DefaultOptions, getGroupsForScope, GraphElementPeer, TopologyGroupTypes, TopologyOptions } from './topology';
 
 // NetflowTraffic model holding current states and localStorages
 export function netflowTrafficModel() {
@@ -70,7 +82,7 @@ export function netflowTrafficModel() {
   const [selectedViewId, setSelectedViewId] = useLocalStorage<ViewId>(localStorageViewIdKey, 'overview');
   const [lastLimit, setLastLimit] = useLocalStorage<number>(localStorageLastLimitKey, limitValues[0]);
   const [lastTop, setLastTop] = useLocalStorage<number>(localStorageLastTopKey, topValues[0]);
-  const [metricScope, setMetricScope] = useLocalStorage<FlowScope>(localStorageMetricScopeKey, 'namespace');
+  const [metricScope, setMetricScope] = useLocalStorage<FlowScope>(localStorageMetricScopeKey, defaultMetricScope);
   const [topologyMetricFunction, setTopologyMetricFunction] = useLocalStorage<StatFunction>(
     localStorageMetricFunctionKey,
     defaultMetricFunction
@@ -130,6 +142,38 @@ export function netflowTrafficModel() {
   const [selectedElement, setSelectedElement] = React.useState<GraphElementPeer | undefined>(undefined);
   const [searchEvent, setSearchEvent] = React.useState<SearchEvent | undefined>(undefined);
 
+  const updateMetricScope = React.useCallback(
+    (scope: FlowScope) => {
+      setMetricScope(scope);
+      // Invalidate groups if necessary, when metrics scope changed
+      const groups = getGroupsForScope(scope as MetricScopeOptions);
+      if (!groups.includes(topologyOptions.groupTypes)) {
+        setTopologyOptions({ ...topologyOptions, groupTypes: TopologyGroupTypes.none });
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [setMetricScope, topologyOptions, setTopologyOptions]
+  );
+
+  const updateTopologyMetricType = React.useCallback(
+    (metricType: MetricType) => {
+      if (isTimeMetric(metricType)) {
+        // fallback on average if current function not available for time queries
+        if (!timeMetricFunctions.includes(topologyMetricFunction)) {
+          setTopologyMetricFunction('avg');
+        }
+      } else {
+        // fallback on average if current function not available for rate queries
+        if (!rateMetricFunctions.includes(topologyMetricFunction)) {
+          setTopologyMetricFunction('avg');
+        }
+      }
+      setTopologyMetricType(metricType);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [topologyMetricFunction, setTopologyMetricFunction, setTopologyMetricType]
+  );
+
   return {
     config,
     setConfig,
@@ -147,11 +191,11 @@ export function netflowTrafficModel() {
     lastTop,
     setLastTop,
     metricScope,
-    setMetricScope,
+    setMetricScope: updateMetricScope,
     topologyMetricFunction,
     setTopologyMetricFunction,
     topologyMetricType,
-    setTopologyMetricType,
+    setTopologyMetricType: updateTopologyMetricType,
     interval,
     setInterval,
     showViewOptions,

@@ -24,9 +24,7 @@ export interface TopologyDisplayOptionsProps {
   setMetricScope: (s: FlowScope) => void;
   topologyOptions: TopologyOptions;
   setTopologyOptions: (o: TopologyOptions) => void;
-  allowPktDrop: boolean;
-  allowDNSMetric: boolean;
-  allowRTTMetric: boolean;
+  allowedTypes: MetricType[];
   allowedScopes: FlowScope[];
 }
 
@@ -39,9 +37,7 @@ export const TopologyDisplayOptions: React.FC<TopologyDisplayOptionsProps> = ({
   setMetricScope,
   topologyOptions,
   setTopologyOptions,
-  allowPktDrop,
-  allowDNSMetric,
-  allowRTTMetric,
+  allowedTypes,
   allowedScopes
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
@@ -92,12 +88,9 @@ export const TopologyDisplayOptions: React.FC<TopologyDisplayOptionsProps> = ({
               <MetricTypeDropdown
                 data-test="metricType"
                 id="metricType"
-                isTopology
                 selected={metricType}
                 setMetricType={setMetricType}
-                allowPktDrop={allowPktDrop}
-                allowDNSMetric={allowDNSMetric}
-                allowRTTMetric={allowRTTMetric}
+                allowedTypes={allowedTypes}
               />
             </FlexItem>
           </Flex>
