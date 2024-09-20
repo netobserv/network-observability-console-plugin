@@ -21,11 +21,7 @@ import {
 import { dropCausesNames, getDropCauseDescription, getDropCauseDocUrl } from '../../../utils/pkt-drop';
 import { formatPort } from '../../../utils/port';
 import { formatProtocol, getProtocolDocUrl } from '../../../utils/protocol';
-import {
-  getTCPFlagsDocUrl,
-  gettcpFlagsServiceClassDescription,
-  gettcpFlagsServiceClassName
-} from '../../../utils/tcp_flags';
+import { decomposeTCPFlagsBitfield, getTCPFlagsDocUrl } from '../../../utils/tcp-flags';
 import { Size } from '../../dropdowns/table-display-dropdown';
 import './record-field.css';
 
@@ -478,15 +474,21 @@ export const RecordField: React.FC<RecordFieldProps> = ({
       case ColumnsId.tcpflags: {
         let child = emptyText();
         if (typeof value === 'number' && !isNaN(value)) {
-          const serviceClassName = gettcpFlagsServiceClassName(value);
-          if (serviceClassName && detailed) {
-            child = clickableContent(
-              serviceClassName,
-              `${t('Value')}: ${value} ${t('Examples')}: ${gettcpFlagsServiceClassDescription(value)}`,
-              getTCPFlagsDocUrl()
-            );
+          const flags = decomposeTCPFlagsBitfield(value);
+          const name = flags.length > 0 ? flags.map(f => f.name).join(', ') : String(value);
+          if (detailed) {
+            let description = `${t('Value')}: ${value}`;
+            if (flags.length === 1) {
+              description += '. ' + flags[0].description;
+            } else if (flags.length > 1) {
+              description +=
+                '. ' +
+                t('The flow contains packets with various flags: ') +
+                flags.map(f => f.name + ' (' + f.description + ')').join('; ');
+            }
+            child = clickableContent(name, description, getTCPFlagsDocUrl());
           } else {
-            child = simpleTextWithTooltip(serviceClassName || String(value))!;
+            child = simpleTextWithTooltip(name)!;
           }
         }
         return singleContainer(child);
