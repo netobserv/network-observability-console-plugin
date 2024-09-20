@@ -9,6 +9,7 @@ import { ViewId } from '../components/netflow-traffic';
 import { SearchEvent } from '../components/search/search';
 import { Warning } from '../model/warnings';
 import { Column, ColumnSizeMap } from '../utils/columns';
+import { ContextSingleton } from '../utils/context';
 import { TimeRange } from '../utils/datetime';
 import { useK8sModelsWithColors } from '../utils/k8s-models-hook';
 import {
@@ -55,6 +56,12 @@ export function netflowTrafficModel() {
   // Config state
   const [config, setConfig] = React.useState<Config>(defaultConfig);
   const k8sModels = useK8sModelsWithColors();
+
+  // Find FlowCollector in supported kinds to be able to refer it
+  const flowCollectorModelKey = Object.keys(k8sModels).find(k => k.includes('FlowCollector'));
+  if (flowCollectorModelKey) {
+    ContextSingleton.setFlowCollectorK8SModel(k8sModels[flowCollectorModelKey]);
+  }
 
   // Local storage
   const [queryParams, setQueryParams] = useLocalStorage<string>(localStorageQueryParamsKey);

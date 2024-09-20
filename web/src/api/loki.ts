@@ -197,3 +197,16 @@ export const isValidTopologyMetrics = (metric: any): metric is TopologyMetrics =
     typeof metric.scope === 'string'
   );
 };
+
+export interface Status {
+  loki: DatasourceStatus;
+  prometheus: DatasourceStatus;
+}
+
+export interface DatasourceStatus {
+  isEnabled: boolean;
+  namespacesCount: number;
+  isReady: boolean;
+  error: string;
+  errorCode: number;
+}

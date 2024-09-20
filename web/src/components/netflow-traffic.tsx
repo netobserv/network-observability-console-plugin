@@ -76,7 +76,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
   const { t } = useTranslation('plugin__netobserv-plugin');
   const isDarkTheme = useTheme();
   const [extensions] = useResolvedExtensions<ModelFeatureFlag>(isModelFeatureFlag);
-  ContextSingleton.setContext(extensions);
+  ContextSingleton.setContext(extensions, forcedNamespace);
 
   const model = netflowTrafficModel();
 
@@ -691,7 +691,9 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
 
   // update local storage enabled filters
   React.useEffect(() => {
-    model.setDisabledFilters(getDisabledFiltersRecord(model.filters.list));
+    if (initState.current.includes('configLoaded')) {
+      model.setDisabledFilters(getDisabledFiltersRecord(model.filters.list));
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [model.filters]);
 

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"slices"
 	"time"
 
 	"github.com/netobserv/network-observability-console-plugin/pkg/config"
@@ -338,7 +339,13 @@ func getEligiblePromMetric(promInventory *prometheus.Inventory, filters filters.
 	}
 	labelsNeeded = append(labelsNeeded, fromFilters...)
 	if isDev {
-		labelsNeeded = append(labelsNeeded, fields.SrcNamespace)
+		if !slices.Contains(labelsNeeded, fields.SrcNamespace) {
+			labelsNeeded = append(labelsNeeded, fields.SrcNamespace)
+		}
+
+		if !slices.Contains(labelsNeeded, fields.DstNamespace) {
+			labelsNeeded = append(labelsNeeded, fields.DstNamespace)
+		}
 	}
 
 	// Search for such metric

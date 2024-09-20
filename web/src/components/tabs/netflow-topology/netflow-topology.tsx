@@ -14,7 +14,7 @@ import {
   Stats,
   TopologyMetrics
 } from '../../../api/loki';
-import { Feature } from '../../../model/config';
+import { Config, Feature } from '../../../model/config';
 import { Filter, FilterDefinition, Filters } from '../../../model/filters';
 import {
   FlowQuery,
@@ -74,6 +74,8 @@ export interface NetflowTopologyProps {
   searchEvent?: SearchEvent;
   isDark?: boolean;
   allowedScopes: FlowScope[];
+  resetDefaultFilters?: (c?: Config) => void;
+  clearFilters?: () => void;
 }
 
 // eslint-disable-next-line react/display-name
@@ -238,6 +240,8 @@ export const NetflowTopology: React.FC<NetflowTopologyProps> = React.forwardRef(
               searchHandle={props.searchHandle}
               searchEvent={props.searchEvent}
               isDark={props.isDark}
+              resetDefaultFilters={props.resetDefaultFilters}
+              clearFilters={props.clearFilters}
             />
           </VisualizationProvider>
         );

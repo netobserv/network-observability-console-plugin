@@ -23,14 +23,16 @@ type clients struct {
 }
 
 func newClients(cfg *config.Config, requestHeader http.Header, useLokiStatus bool, namespace string) (clients, error) {
-	var lokiClient httpclient.Caller
+	lokiClients := newLokiClients(cfg, requestHeader, useLokiStatus)
+	promClients, err := newPromClients(cfg, requestHeader, namespace)
+	return clients{loki: lokiClients.loki, promAdmin: promClients.promAdmin, promDev: promClients.promDev}, err
+}
+
+func newPromClients(cfg *config.Config, requestHeader http.Header, namespace string) (clients, error) {
 	var promAdminClient api.Client
 	var promDevClient api.Client
 	var err error
 
-	if cfg.IsLokiEnabled() {
-		lokiClient = newLokiClient(&cfg.Loki, requestHeader, useLokiStatus)
-	}
 	if cfg.IsPromEnabled() {
 		promAdminClient, err = prometheus.NewAdminClient(&cfg.Prometheus, requestHeader)
 		if err != nil {
@@ -41,7 +43,15 @@ func newClients(cfg *config.Config, requestHeader http.Header, useLokiStatus boo
 			return clients{}, err
 		}
 	}
-	return clients{loki: lokiClient, promAdmin: promAdminClient, promDev: promDevClient}, err
+	return clients{promAdmin: promAdminClient, promDev: promDevClient}, err
+}
+
+func newLokiClients(cfg *config.Config, requestHeader http.Header, useLokiStatus bool) clients {
+	var lokiClient httpclient.Caller
+	if cfg.IsLokiEnabled() {
+		lokiClient = newLokiClient(&cfg.Loki, requestHeader, useLokiStatus)
+	}
+	return clients{loki: lokiClient}
 }
 
 type datasourceError struct {
