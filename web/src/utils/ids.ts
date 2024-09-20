@@ -40,10 +40,11 @@ export const getPeerId = (fields: Partial<TopologyMetricPeer>): string => {
   if (fields.owner) {
     parts.push('o=' + fields.owner.type + '.' + fields.owner.name);
   }
+  // add either resource info or address but not both
+  // as some items can have multiple IPs
   if (fields.resource) {
     parts.push('r=' + fields.resource.type + '.' + fields.resource.name);
-  }
-  if (fields.addr) {
+  } else if (fields.addr) {
     parts.push('a=' + fields.addr);
   }
   return parts.length > 0 ? parts.join(',') : idUnknown;
