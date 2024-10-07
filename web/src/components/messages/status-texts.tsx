@@ -61,15 +61,22 @@ export const StatusTexts: React.FC<StatusProps> = ({ status }) => {
           </Text>
         )}
       {status &&
+        // Loki is operationnal and not returning error
         status.loki.isEnabled &&
         status.loki.isReady &&
         !status.loki.error &&
+        // Prometheus is operationnal and not returning error
         status.prometheus.isEnabled &&
         status.prometheus.isReady &&
         !status.prometheus.error &&
-        status.loki.namespacesCount !== status.prometheus.namespacesCount && (
+        // One of the storage is empty when the other is not
+        // This ensure the message is not displayed because of retention config
+        ((status.loki.namespacesCount > 0 && status.prometheus.namespacesCount === 0) ||
+          (status.loki.namespacesCount === 0 && status.prometheus.namespacesCount > 0)) && (
           <Text component={TextVariants.blockquote}>
-            {t(`Loki and Prometheus storages are not consistent. Check health dashboard for errors.`)}
+            {t(
+              `Loki and Prometheus storages are diverging. The number of captured namespaces does't match. Check health dashboard for errors.`
+            )}
           </Text>
         )}
     </>
