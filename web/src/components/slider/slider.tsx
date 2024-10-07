@@ -429,7 +429,7 @@ export const Slider: React.FunctionComponent<SliderProps> = ({
 
               if (stepObj.tooltip) {
                 return (
-                  <Tooltip content={stepObj.tooltip}>
+                  <Tooltip content={stepObj.tooltip} className="slider-tooltip">
                     <SliderStep
                       key={stepObj.value}
                       value={stepValue}
