@@ -385,6 +385,10 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
       // also skip tick if modal is open
       console.debug('tick skipped since modal is open');
       return;
+    } else if (drawerRef.current == null) {
+      console.debug('tick called before drawer rendering. Retrying after render');
+      setTimeout(tick);
+      return;
     }
 
     model.setLoading(true);
