@@ -182,6 +182,15 @@ Cypress.Commands.add('changeMetricType', (name) => {
   cy.get('[data-layer-id="default"]').children().its('length').should('be.gte', 5);
 });
 
+Cypress.Commands.add('checkRecordField', (field, name, values) => {
+  cy.get(`[data-test-id="drawer-field-${field}"]`).contains(name);
+  values.forEach(v => {
+    cy.get(`[data-test-id="drawer-field-${field}"]`)
+      .children('.record-field-content,.record-field-flex-container')
+      .should('contain', v);
+  });
+});
+
 declare global {
   namespace Cypress {
     interface Chainable {
@@ -202,6 +211,7 @@ declare global {
       changeTimeRange(name: string, topology?: boolean): Chainable<Element>
       changeMetricFunction(name: string): Chainable<Element>
       changeMetricType(name: string): Chainable<Element>
+      checkRecordField(field: string, name: string, values: string[])
     }
   }
 }

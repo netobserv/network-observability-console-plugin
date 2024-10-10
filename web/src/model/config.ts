@@ -29,6 +29,7 @@ export type Config = {
   deduper: Deduper;
   fields: FieldConfig[];
   dataSources: string[];
+  lokiMocks: boolean;
   promLabels: string[];
   maxChunkAgeMs?: number;
 };
@@ -54,6 +55,7 @@ export const defaultConfig: Config = {
   },
   fields: [],
   dataSources: ['loki', 'prom'],
+  lokiMocks: false,
   promLabels: [],
   maxChunkAgeMs: undefined
 };
