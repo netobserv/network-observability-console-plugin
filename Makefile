@@ -59,7 +59,7 @@ BUILD_FLAGS ?= -ldflags "${LDFLAGS}"
 # build a single arch target provided as argument
 define build_target
 	echo 'building image for arch $(1)'; \
-	DOCKER_BUILDKIT=1 $(OCI_BIN) buildx build --ulimit nofile=20480:20480 --load --build-arg LDFLAGS="${LDFLAGS}" --build-arg BUILDSCRIPT=${BUILDSCRIPT} --build-arg TARGETPLATFORM=linux/$(1) --build-arg TARGETARCH=$(1) --build-arg BUILDPLATFORM=linux/amd64 ${OCI_BUILD_OPTS} -t ${IMAGE}-$(1) -f Dockerfile .;
+	DOCKER_BUILDKIT=1 $(OCI_BIN) buildx build --ulimit nofile=20480:20480 --load --build-arg LDFLAGS="${LDFLAGS}" --build-arg BUILDSCRIPT=${BUILDSCRIPT} --build-arg TARGETARCH=$(1) ${OCI_BUILD_OPTS} -t ${IMAGE}-$(1) -f Dockerfile .;
 endef
 
 # push a single arch target image
@@ -122,7 +122,7 @@ start: YQ build-backend install-frontend ## Run backend and frontend
 	$(YQ) '.server.port |= 9002 | .server.metricsPort |= 9003 | .loki.useMocks |= false' ./config/sample-config.yaml > ./config/config.yaml
 	@echo "### Starting backend on http://localhost:9002"
 	bash -c "trap 'fuser -k 9002/tcp' EXIT; \
-					./plugin-backend $(CMDLINE_ARGS) & cd web && npm run start" 
+					./plugin-backend $(CMDLINE_ARGS) & cd web && npm run start"
 
 .PHONY: start-backend
 start-backend: YQ build-backend
@@ -159,7 +159,7 @@ fmt-frontend: i18n ## Run frontend i18n and fmt
 lint-frontend: ## Lint frontend code
 	@echo "### Linting frontend code"
 	cd web && npm run lint
-	
+
 .PHONY: test-frontend
 test-frontend: ## Test frontend using jest
 	@echo "### Testing frontend"
