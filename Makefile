@@ -4,17 +4,6 @@
 # - use the VERSION as arg of the bundle target (e.g make bundle VERSION=0.0.2)
 # - use environment variables to overwrite this value (e.g export VERSION=0.0.2)
 VERSION ?= main
-BUILD_DATE := $(shell date +%Y-%m-%d\ %H:%M)
-TAG_COMMIT := $(shell git rev-list --abbrev-commit --tags --max-count=1)
-TAG := $(shell git describe --abbrev=0 --tags ${TAG_COMMIT} 2>/dev/null || true)
-BUILD_SHA := $(shell git rev-parse --short HEAD)
-BUILD_VERSION := $(TAG:v%=%)
-ifneq ($(COMMIT), $(TAG_COMMIT))
-	BUILD_VERSION := $(BUILD_VERSION)-$(BUILD_SHA)
-endif
-ifneq ($(shell git status --porcelain),)
-	BUILD_VERSION := $(BUILD_VERSION)-dirty
-endif
 
 # Go architecture and targets images to build
 GOARCH ?= amd64
@@ -41,18 +30,20 @@ endif
 # Image URL to use all building/pushing image targets
 IMAGE ?= ${IMAGE_TAG_BASE}:${VERSION}
 
-OCI_BUILD_OPTS ?=
-
 # Image building tool (docker / podman) - docker is preferred in CI
 OCI_BIN_PATH = $(shell which docker 2>/dev/null || which podman)
 OCI_BIN ?= $(shell basename ${OCI_BIN_PATH})
+OCI_BUILD_OPTS ?=
+
+ifneq ($(CLEAN_BUILD),)
+	BUILD_DATE := $(shell date +%Y-%m-%d\ %H:%M)
+	BUILD_SHA := $(shell git rev-parse --short HEAD)
+	LDFLAGS ?= -X 'main.buildVersion=${VERSION}-${BUILD_SHA}' -X 'main.buildDate=${BUILD_DATE}'
+endif
 
 GOLANGCI_LINT_VERSION = v1.53.3
 NPM_INSTALL ?= install
 CMDLINE_ARGS ?= --loglevel trace --config config/config.yaml
-LDFLAGS := -X 'main.buildVersion=${BUILD_VERSION}' -X 'main.buildDate=${BUILD_DATE}'
-# You can add GO Build flags like -gcflags=all="-N -l" here to remove optimizations for debugging
-BUILD_FLAGS ?= -ldflags "${LDFLAGS}"
 
 .DEFAULT_GOAL := help
 
