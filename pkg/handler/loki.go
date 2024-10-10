@@ -101,9 +101,13 @@ func getLokiError(resp []byte, code int) (int, string) {
 		hlog.WithError(err).Errorf("cannot unmarshal, response was: %v", string(resp))
 		return http.StatusBadRequest, fmt.Sprintf("Unknown error from Loki\ncannot unmarshal\n%s", resp)
 	}
-	message, ok := f["message"]
+	message, ok := f["error"]
 	if !ok {
-		return http.StatusBadRequest, "Unknown error from Loki\nno message found"
+		message, ok = f["message"]
+		if !ok {
+			hlog.WithError(err).Errorf("unknown Loki error: %v", f)
+			return http.StatusBadRequest, "Unknown error from Loki"
+		}
 	}
 	return http.StatusBadRequest, fmt.Sprintf("Loki message: %s", message)
 }
@@ -135,6 +139,7 @@ func executeLokiQuery(flowsURL string, lokiClient httpclient.Caller) ([]byte, in
 	}
 	if code != http.StatusOK {
 		newCode, msg := getLokiError(resp, code)
+		hlog.Debugf("executeLokiQuery error: [%d] %s", code, msg)
 		return nil, newCode, fmt.Errorf("Error from Loki query: [%d] %s", code, msg)
 	}
 	return resp, http.StatusOK, nil
@@ -151,6 +156,7 @@ func getLokiLabelValues(baseURL string, lokiClient httpclient.Caller, label stri
 	}
 	if code != http.StatusOK {
 		newCode, msg := getLokiError(resp, code)
+		hlog.Debugf("getLokiLabelValues error: [%d] %s", code, msg)
 		return nil, newCode, errors.New(msg)
 	}
 	hlog.Tracef("getLokiLabelValues raw response: %s", resp)
