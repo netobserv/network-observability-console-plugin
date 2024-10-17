@@ -23,20 +23,20 @@ loki:
 prometheus:
   timeout: 30s
   metrics:
-  - enabled: false
-    name: netobserv_node_egress_bytes_total
-    type: counter
-    valueField: Bytes
-    labels:
-    - SrcK8S_HostName
-    - DstK8S_HostName
-  - enabled: true
-    name: netobserv_node_ingress_bytes_total
-    type: counter
-    valueField: Bytes
-    labels:
-    - SrcK8S_HostName
-    - DstK8S_HostName
+    - enabled: false
+      name: netobserv_node_egress_bytes_total
+      type: counter
+      valueField: Bytes
+      labels:
+        - SrcK8S_HostName
+        - DstK8S_HostName
+    - enabled: true
+      name: netobserv_node_ingress_bytes_total
+      type: counter
+      valueField: Bytes
+      labels:
+        - SrcK8S_HostName
+        - DstK8S_HostName
 frontend:
   recordTypes:
     - flowLog
@@ -82,76 +82,76 @@ frontend:
     merge: false
     # The following configuration is taken from Network Observability Operator
     # see https://github.com/netobserv/network-observability-operator/blob/main/controllers/consoleplugin/config/static-frontend-config.yaml
-    panels: 
-    # Protocol
-    - Proto_Bytes
-    - sum_Proto_Bytes
-    - avg_Proto_Bytes
-    - Proto_Packets
-    - sum_Proto_Packets
-    - avg_Proto_Packets
-    - Proto_Flows
-    # DSCP
-    - Dscp_Bytes
-    - Dscp_Packets
-    - min_Dscp_TimeFlowRttNs
-    - max_Dscp_TimeFlowRttNs
-    - avg_Dscp_TimeFlowRttNs
-    - p90_Dscp_TimeFlowRttNs
-    - p99_Dscp_TimeFlowRttNs
-    - min_Dscp_DnsLatencyMs
-    - max_Dscp_DnsLatencyMs
-    - avg_Dscp_DnsLatencyMs
-    - p90_Dscp_DnsLatencyMs
-    - p99_Dscp_DnsLatencyMs
-    - Dscp_Flows
-    # Port numbers
-    - SrcPort_Bytes
-    - sum_SrcPort_Bytes
-    - SrcPort_Packets
-    - sum_SrcPort_Packets
-    - SrcPort_TimeFlowRttNs
-    - min_SrcPort_TimeFlowRttNs
-    - max_SrcPort_TimeFlowRttNs
-    - avg_SrcPort_TimeFlowRttNs
-    - p90_SrcPort_TimeFlowRttNs
-    - p99_SrcPort_TimeFlowRttNs
-    - DstPort_Bytes
-    - sum_DstPort_Bytes
-    - DstPort_Packets
-    - sum_DstPort_Packets
-    - min_DstPort_TimeFlowRttNs
-    - max_DstPort_TimeFlowRttNs
-    - avg_DstPort_TimeFlowRttNs
-    - p90_DstPort_TimeFlowRttNs
-    - p99_DstPort_TimeFlowRttNs
-    # Node Directions
-    - FlowDirection_Bytes
-    - FlowDirection_Packets
-    - FlowDirection_Flows
-    # TODO: implement a way to manage plurals for interfaces
-    # Interfaces Directions
-    #- IfDirections_Bytes
-    #- IfDirections_Packets
-    #- IfDirections_Flows
-    # Interfaces names
-    #- Interfaces_Bytes
-    #- sum_Interfaces_Bytes
-    #- avg_Interfaces_Bytes
-    #- Interfaces_Packets
-    #- sum_Interfaces_Packets
-    #- avg_Interfaces_Packets
-    #- Interfaces_Flows
-    # DNS capture errors
-    - DnsErrno_Flows
-    # Connection tracking flow count
-    - numFlowLogs_Flows
-    # Bytes / Packets rates on current scope
-    - Bytes
-    - Packets
-    # flow on current scope
-    - Flows
-    - DnsFlows
+    panels:
+      # Protocol
+      - Proto_Bytes
+      - sum_Proto_Bytes
+      - avg_Proto_Bytes
+      - Proto_Packets
+      - sum_Proto_Packets
+      - avg_Proto_Packets
+      - Proto_Flows
+      # DSCP
+      - Dscp_Bytes
+      - Dscp_Packets
+      - min_Dscp_TimeFlowRttNs
+      - max_Dscp_TimeFlowRttNs
+      - avg_Dscp_TimeFlowRttNs
+      - p90_Dscp_TimeFlowRttNs
+      - p99_Dscp_TimeFlowRttNs
+      - min_Dscp_DnsLatencyMs
+      - max_Dscp_DnsLatencyMs
+      - avg_Dscp_DnsLatencyMs
+      - p90_Dscp_DnsLatencyMs
+      - p99_Dscp_DnsLatencyMs
+      - Dscp_Flows
+      # Port numbers
+      - SrcPort_Bytes
+      - sum_SrcPort_Bytes
+      - SrcPort_Packets
+      - sum_SrcPort_Packets
+      - SrcPort_TimeFlowRttNs
+      - min_SrcPort_TimeFlowRttNs
+      - max_SrcPort_TimeFlowRttNs
+      - avg_SrcPort_TimeFlowRttNs
+      - p90_SrcPort_TimeFlowRttNs
+      - p99_SrcPort_TimeFlowRttNs
+      - DstPort_Bytes
+      - sum_DstPort_Bytes
+      - DstPort_Packets
+      - sum_DstPort_Packets
+      - min_DstPort_TimeFlowRttNs
+      - max_DstPort_TimeFlowRttNs
+      - avg_DstPort_TimeFlowRttNs
+      - p90_DstPort_TimeFlowRttNs
+      - p99_DstPort_TimeFlowRttNs
+      # Node Directions
+      - FlowDirection_Bytes
+      - FlowDirection_Packets
+      - FlowDirection_Flows
+      # TODO: implement a way to manage plurals for interfaces
+      # Interfaces Directions
+      #- IfDirections_Bytes
+      #- IfDirections_Packets
+      #- IfDirections_Flows
+      # Interfaces names
+      #- Interfaces_Bytes
+      #- sum_Interfaces_Bytes
+      #- avg_Interfaces_Bytes
+      #- Interfaces_Packets
+      #- sum_Interfaces_Packets
+      #- avg_Interfaces_Packets
+      #- Interfaces_Flows
+      # DNS capture errors
+      - DnsErrno_Flows
+      # Connection tracking flow count
+      - numFlowLogs_Flows
+      # Bytes / Packets rates on current scope
+      - Bytes
+      - Packets
+      # flow on current scope
+      - Flows
+      - DnsFlows
   columns:
     - id: StartTime
       name: Start Time
@@ -305,6 +305,14 @@ frontend:
       default: false
       width: 15
       feature: zones
+    - id: SrcSubnetLabel
+      group: Source
+      name: Subnet Label
+      field: SrcSubnetLabel
+      filter: src_subnet_label
+      default: false
+      width: 10
+      feature: subnetLabels
     - id: DstK8S_Name
       group: Destination
       name: Name
@@ -425,6 +433,14 @@ frontend:
       default: false
       width: 15
       feature: zones
+    - id: DstSubnetLabel
+      group: Destination
+      name: Subnet Label
+      field: DstSubnetLabel
+      filter: dst_subnet_label
+      default: false
+      width: 10
+      feature: subnetLabels
     - id: K8S_Name
       name: Names
       calculated: getSrcOrDstValue(SrcK8S_Name,DstK8S_Name)
@@ -517,6 +533,9 @@ frontend:
       name: Type
       tooltip: The type of the ICMP message
       field: IcmpType
+      fields:
+        - Proto
+        - IcmpType
       filter: icmp_type
       default: false
       width: 10
@@ -525,7 +544,18 @@ frontend:
       name: Code
       tooltip: The code of the ICMP message
       field: IcmpCode
+      fields:
+        - Proto
+        - IcmpType
+        - IcmpCode
       filter: icmp_code
+      default: false
+      width: 10
+    - id: TCPFlags
+      name: TCP Flags
+      tooltip: Logical OR combination of unique TCP flags comprised in the flow, as per RFC-9293, with additional custom values.
+      field: Flags
+      filter: tcp_flags
       default: false
       width: 10
     - id: FlowDirection
@@ -635,6 +665,14 @@ frontend:
       default: true
       width: 5
       feature: flowRTT
+    - id: NetworkEvents
+      name: Network Events
+      tooltip: Network events flow monitor
+      field: NetworkEvents
+      filter: network_events
+      default: true
+      width: 15
+      feature: networkEvents
   filters:
     - id: cluster_name
       name: Cluster
@@ -754,6 +792,16 @@ frontend:
       component: autocomplete
       category: destination
       hint: Specify a single zone.
+    - id: src_subnet_label
+      name: Subnet Label
+      component: autocomplete
+      category: source
+      hint: Specify a subnet label, or an empty string to get unmatched sources.
+    - id: dst_subnet_label
+      name: Subnet Label
+      component: autocomplete
+      category: destination
+      hint: Specify a subnet label, or an empty string to get unmatched destinations.
     - id: src_resource
       name: Resource
       component: autocomplete
@@ -912,6 +960,24 @@ frontend:
       name: ICMP code
       component: number
       hint: Specify an ICMP code value as integer number.
+    - id: tcp_flags
+      name: TCP flags
+      component: autocomplete
+      hint: Specify a TCP flags value as integer number.
+      examples: |-
+        Logical OR combination of unique TCP flags comprised in the flow, as per RFC-9293, with additional custom flags
+        users can specify either numeric value or string representation of the flags as follows :
+        - FIN or 1,
+        - SYN or 2,
+        - RST or 4,
+        - PSH or 8,
+        - ACK or 16,
+        - URG or 32,
+        - ECE or 64,
+        - CWR or 128,
+        - SYN_ACK or 256,
+        - FIN_ACK or 512,
+        - RST_ACK or 1024,
     - id: node_direction
       name: Node Direction
       component: autocomplete
@@ -982,6 +1048,10 @@ frontend:
       name: Flow RTT
       component: number
       hint: Specify a TCP smoothed Round Trip Time in nanoseconds.
+    - id: network_events
+      name: Network events flow monitoring
+      component: text
+      hint: Specify a single network event.
   fields:
     - name: TimeFlowStartMs
       type: number
@@ -998,18 +1068,15 @@ frontend:
     - name: SrcK8S_Type
       type: string
       description: Kind of the source Kubernetes object, such as Pod, Service or Node.
-      lokiLabel: true
     - name: SrcK8S_OwnerName
       type: string
       description: Name of the source owner, such as Deployment name, StatefulSet name, etc.
-      lokiLabel: true
     - name: SrcK8S_OwnerType
       type: string
       description: Kind of the source owner, such as Deployment, StatefulSet, etc.
     - name: SrcK8S_Namespace
       type: string
       description: Source namespace
-      lokiLabel: true
     - name: SrcAddr
       type: string
       description: Source IP address (ipv4 or ipv6)
@@ -1028,25 +1095,24 @@ frontend:
     - name: SrcK8S_Zone
       type: string
       description: Source availability zone
-      lokiLabel: true
+    - name: SrcSubnetLabel
+      type: string
+      description: Source subnet label
     - name: DstK8S_Name
       type: string
       description: Name of the destination Kubernetes object, such as Pod name, Service name or Node name.
     - name: DstK8S_Type
       type: string
       description: Kind of the destination Kubernetes object, such as Pod, Service or Node.
-      lokiLabel: true
     - name: DstK8S_OwnerName
       type: string
       description: Name of the destination owner, such as Deployment name, StatefulSet name, etc.
-      lokiLabel: true
     - name: DstK8S_OwnerType
       type: string
       description: Kind of the destination owner, such as Deployment, StatefulSet, etc.
     - name: DstK8S_Namespace
       type: string
       description: Destination namespace
-      lokiLabel: true
     - name: DstAddr
       type: string
       description: Destination IP address (ipv4 or ipv6)
@@ -1065,7 +1131,9 @@ frontend:
     - name: DstK8S_Zone
       type: string
       description: Destination availability zone
-      lokiLabel: true
+    - name: DstSubnetLabel
+      type: string
+      description: Destination subnet label
     - name: K8S_FlowLayer
       type: string
       description: "Flow layer: 'app' or 'infra'"
@@ -1084,7 +1152,6 @@ frontend:
     - name: Duplicate
       type: boolean
       description: Indicates if this flow was also captured from another interface on the same host
-      lokiLabel: true
     - name: FlowDirection
       type: number
       description: |
@@ -1092,7 +1159,6 @@ frontend:
         - 0: Ingress (incoming traffic, from the node observation point) +
         - 1: Egress (outgoing traffic, from the node observation point) +
         - 2: Inner (with the same source and destination node)
-      lokiLabel: true
     - name: IfDirections
       type: number
       description: |
@@ -1150,14 +1216,15 @@ frontend:
     - name: TimeFlowRttNs
       type: number
       description: TCP Smoothed Round Trip Time (SRTT), in nanoseconds
+    - name: NetworkEvents
+      type: string
+      description: Network events flow monitoring
     - name: K8S_ClusterName
       type: string
       description: Cluster name or identifier
-      lokiLabel: true
     - name: _RecordType
       type: string
       description: "Type of record: 'flowLog' for regular flow logs, or 'newConnection', 'heartbeat', 'endConnection' for conversation tracking"
-      lokiLabel: true
     - name: _HashId
       type: string
       description: In conversation tracking, the conversation identifier
