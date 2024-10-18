@@ -45,12 +45,12 @@ frontend:
     #    - endConnection
   features:
   # eBPF agent features
-  #    - pktDrop
-  #    - dnsTracking
-  #    - flowRTT
+     - pktDrop
+     - dnsTracking
+     - flowRTT
   # processor features
-  #    - multiCluster
-  #    - zones
+     - multiCluster
+     - zones
   portNaming:
     enable: true
     portNames:
@@ -588,6 +588,7 @@ frontend:
     - id: Bytes
       name: Bytes
       tooltip: The total aggregated number of bytes.
+      field: Bytes
       fields:
         - Bytes
         - PktDropBytes
@@ -596,6 +597,7 @@ frontend:
     - id: Packets
       name: Packets
       tooltip: The total aggregated number of packets.
+      field: Packets
       fields:
         - Packets
         - PktDropPackets
@@ -621,6 +623,41 @@ frontend:
       calculated: substract(column.CollectionTime,TimeFlowEndMs)
       default: false
       width: 5
+    - id: PktDropBytes
+      name: Dropped Bytes
+      tooltip: The total aggregated number of bytes dropped.
+      field: PktDropBytes
+      default: false
+      width: 5
+      feature: pktDrop
+    - id: PktDropPackets
+      name: Dropped Packets
+      tooltip: The total aggregated number of packets dropped.
+      field: PktDropPackets
+      default: false
+      width: 5
+      feature: pktDrop
+    - id: PktDropLatestState
+      name: Drop State
+      tooltip: TCP state on last dropped packet.
+      field: PktDropLatestState
+      default: false
+      width: 10
+      feature: pktDrop
+    - id: PktDropLatestDropCause
+      name: Drop Cause
+      tooltip: TCP state on last dropped packet.
+      field: PktDropLatestDropCause
+      default: false
+      width: 10
+      feature: pktDrop
+    - id: PktDropLatestFlags
+      name: Drop Flags
+      tooltip: TCP flags on last dropped packet.
+      field: PktDropLatestFlags
+      default: false
+      width: 10
+      feature: pktDrop
     - id: DNSId
       group: DNS
       name: DNS Id

@@ -471,7 +471,8 @@ export const RecordField: React.FC<RecordFieldProps> = ({
         }
         return singleContainer(child);
       }
-      case ColumnsId.tcpflags: {
+      case ColumnsId.tcpflags:
+      case ColumnsId.dropflags: {
         let child = emptyText();
         if (typeof value === 'number' && !isNaN(value)) {
           const flags = decomposeTCPFlagsBitfield(value);
@@ -619,6 +620,16 @@ export const RecordField: React.FC<RecordFieldProps> = ({
             simpleTextWithTooltip(detailed ? `${String(value)} ${c.name.toLowerCase()} ${t('sent')}` : String(value))
           );
         }
+      case ColumnsId.dropbytes:
+      case ColumnsId.droppackets:
+        const droppedText = t('dropped');
+        const droppedCount = String(value);
+        return singleContainer(
+          simpleTextWithTooltip(
+            detailed ? `${droppedCount} ${c.name.toLowerCase()} ${droppedText}` : droppedCount,
+            isDark ? '#C9190B' : '#A30000'
+          )
+        );
       case ColumnsId.dnsid: {
         return singleContainer(
           typeof value === 'number' && !isNaN(value) ? simpleTextWithTooltip(String(value)) : emptyDnsErrorText()
