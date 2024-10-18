@@ -79,7 +79,15 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
 
   // hide empty columns
   const getVisibleColumns = React.useCallback(() => {
-    const forbiddenColumns = [ColumnsId.ifdirs, ColumnsId.interfaces];
+    const forbiddenColumns = [
+      ColumnsId.ifdirs,
+      ColumnsId.interfaces,
+      ColumnsId.dropbytes,
+      ColumnsId.droppackets,
+      ColumnsId.dropstate,
+      ColumnsId.dropcause,
+      ColumnsId.dropflags
+    ];
     return columns.filter((c: Column) => {
       const value = c.value(record);
       return !forbiddenColumns.includes(c.id) && value !== null && value !== '' && !Number.isNaN(value);
