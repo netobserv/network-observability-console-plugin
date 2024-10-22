@@ -68,6 +68,7 @@ export interface TopologyMetricPeer {
   resource?: NameAndType;
   hostName?: string;
   zone?: string;
+  udn?: string;
   clusterName?: string;
   resourceKind?: string;
   isAmbiguous: boolean;

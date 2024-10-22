@@ -28,6 +28,9 @@ export const getPeerId = (fields: Partial<TopologyMetricPeer>): string => {
   if (fields.clusterName) {
     parts.push('c=' + fields.clusterName);
   }
+  if (fields.udn) {
+    parts.push('u=' + fields.udn);
+  }
   if (fields.zone) {
     parts.push('z=' + fields.zone);
   }

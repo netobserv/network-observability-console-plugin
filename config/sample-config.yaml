@@ -13,6 +13,7 @@ loki:
     - DstK8S_Type
     - K8S_FlowLayer
     - FlowDirection
+    - UDN
     #    - Duplicate
     #    - _RecordType
     #    - K8S_ClusterName
@@ -82,7 +83,7 @@ frontend:
     merge: false
     # The following configuration is taken from Network Observability Operator
     # see https://github.com/netobserv/network-observability-operator/blob/main/controllers/consoleplugin/config/static-frontend-config.yaml
-    panels: 
+  panels: 
     # Protocol
     - Proto_Bytes
     - sum_Proto_Bytes
@@ -152,6 +153,20 @@ frontend:
     # flow on current scope
     - Flows
     - DnsFlows
+    # UDN
+    - UDN_Bytes
+    - UDN_Packets
+    - min_UDN_TimeFlowRttNs
+    - max_UDN_TimeFlowRttNs
+    - avg_UDN_TimeFlowRttNs
+    - p90_UDN_TimeFlowRttNs
+    - p99_UDN_TimeFlowRttNs
+    - min_UDN_DnsLatencyMs
+    - max_UDN_DnsLatencyMs
+    - avg_UDN_DnsLatencyMs
+    - p90_UDN_DnsLatencyMs
+    - p99_UDN_DnsLatencyMs
+    - UDN_Flows
   columns:
     - id: StartTime
       name: Start Time
@@ -555,6 +570,13 @@ frontend:
       field: Interfaces
       default: false
       width: 15
+    - id: UDN
+      name: User Defined Network
+      tooltip: The user defined network Name.
+      field: UDN
+      filter: udn
+      default: false
+      width: 15
     - id: Bytes
       name: Bytes
       tooltip: The total aggregated number of bytes.
@@ -932,6 +954,10 @@ frontend:
       component: autocomplete
       placeholder: 'E.g: Ingress, Egress'
       hint: Specify the direction of the Flow observed at the network interface observation point.
+    - id: udn
+      name: User Defined Network
+      component: autocomplete
+      hint: Specify a user defined network name.
     - id: id
       name: Conversation Id
       component: text
@@ -1153,6 +1179,10 @@ frontend:
     - name: K8S_ClusterName
       type: string
       description: Cluster name or identifier
+      lokiLabel: true
+    - name: UDN
+      type: string
+      description: User Defined Network
       lokiLabel: true
     - name: _RecordType
       type: string

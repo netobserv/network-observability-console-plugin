@@ -647,6 +647,12 @@ export const RecordField: React.FC<RecordFieldProps> = ({
             : emptyText()
         );
       }
+      case ColumnsId.udn: {
+        return singleContainer(
+          //TODO: see how to retreive UDN namespace. Maybe add these to flows ?
+          kubeObjContent(value as string, 'UserDefinedNetwork', undefined)
+        );
+      }
       default:
         if (Array.isArray(value) && value.length) {
           // we can only show two values properly with containers

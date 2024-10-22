@@ -23,6 +23,7 @@ export type TargetedFilterId =
 
 export type FilterId =
   | 'cluster_name'
+  | 'udn'
   | `src_${TargetedFilterId}`
   | `dst_${TargetedFilterId}`
   | 'protocol'

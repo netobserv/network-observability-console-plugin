@@ -44,6 +44,35 @@ func (h *Handlers) GetClusters(ctx context.Context) func(w http.ResponseWriter, 
 	}
 }
 
+func (h *Handlers) GetUDNs(ctx context.Context) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		params := r.URL.Query()
+		namespace := params.Get(namespaceKey)
+		isDev := namespace != ""
+
+		clients, err := newClients(h.Cfg, r.Header, false, namespace)
+		if err != nil {
+			writeError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+		var code int
+		startTime := time.Now()
+		defer func() {
+			metrics.ObserveHTTPCall("GetUDNs", code, startTime)
+		}()
+
+		// Fetch and merge values for K8S_ClusterName
+		values, code, err := h.getLabelValues(ctx, clients, fields.UDN, isDev)
+		if err != nil {
+			writeError(w, code, err.Error())
+			return
+		}
+
+		code = http.StatusOK
+		writeJSON(w, code, utils.NonEmpty(utils.Dedup(values)))
+	}
+}
+
 func (h *Handlers) GetZones(ctx context.Context) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		params := r.URL.Query()

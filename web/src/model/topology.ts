@@ -44,6 +44,11 @@ export enum TopologyGroupTypes {
   clustersHosts = 'clusters+hosts',
   clustersNamespaces = 'clusters+namespaces',
   clustersOwners = 'clusters+owners',
+  udns = 'udns',
+  udnsZones = 'udns+zones',
+  udnsHosts = 'udns+hosts',
+  udnsNamespaces = 'udns+namespaces',
+  udnsOwners = 'udns+owners',
   zones = 'zones',
   zonesHosts = 'zones+hosts',
   zonesNamespaces = 'zones+namespaces',
@@ -63,12 +68,15 @@ export const getGroupsForScope = (scope: MetricScopeOptions) => {
     case MetricScopeOptions.ZONE:
       return [TopologyGroupTypes.none, TopologyGroupTypes.clusters];
     case MetricScopeOptions.HOST:
-      return [TopologyGroupTypes.none, TopologyGroupTypes.clusters, TopologyGroupTypes.zones];
+      return [TopologyGroupTypes.none, TopologyGroupTypes.clusters, TopologyGroupTypes.udns, TopologyGroupTypes.zones];
     case MetricScopeOptions.NAMESPACE:
       return [
         TopologyGroupTypes.none,
         TopologyGroupTypes.clusters,
         TopologyGroupTypes.clustersHosts,
+        TopologyGroupTypes.udns,
+        TopologyGroupTypes.udnsZones,
+        TopologyGroupTypes.udnsHosts,
         TopologyGroupTypes.zones,
         TopologyGroupTypes.zonesHosts,
         TopologyGroupTypes.hosts
@@ -78,6 +86,10 @@ export const getGroupsForScope = (scope: MetricScopeOptions) => {
         TopologyGroupTypes.none,
         TopologyGroupTypes.clusters,
         TopologyGroupTypes.clustersZones,
+        TopologyGroupTypes.udns,
+        TopologyGroupTypes.udnsZones,
+        TopologyGroupTypes.udnsHosts,
+        TopologyGroupTypes.udnsNamespaces,
         TopologyGroupTypes.zones,
         TopologyGroupTypes.zonesHosts,
         TopologyGroupTypes.zonesNamespaces,
@@ -193,6 +205,9 @@ const getDirFilterDefValue = (
     // TODO: see if clustername will become directionnal
     def = findFilter(filterDefinitions, `cluster_name`)!;
     value = `"${fields.clusterName || fields.resource?.name}"`;
+  } else if (nodeType === 'udn' && (fields.udn || fields.resource)) {
+    def = findFilter(filterDefinitions, `udn`)!;
+    value = `"${fields.udn || fields.resource?.name}"`;
   } else if (nodeType === 'zone' && (fields.zone || fields.resource)) {
     def = findFilter(filterDefinitions, `${dir}_zone`)!;
     value = `"${fields.zone || fields.resource?.name}"`;
@@ -222,6 +237,9 @@ const getFilterDefValue = (fields: Partial<TopologyMetricPeer>, filterDefinition
     // TODO: see if clustername will become directionnal
     def = findFilter(filterDefinitions, `cluster_name`)!;
     value = `"${fields.clusterName || fields.resource?.name}"`;
+  } else if (fields.udn) {
+    def = findFilter(filterDefinitions, `udn`)!;
+    value = `"${fields.udn}"`;
   }
   return def && value ? { def, value } : undefined;
 };
@@ -629,29 +647,42 @@ export const generateDataModel = (
       ].includes(options.groupTypes) && !_.isEmpty(peer.clusterName)
         ? addGroup({ clusterName: peer.clusterName }, 'cluster', undefined, true)
         : undefined;
+    const udnGroup =
+      [
+        TopologyGroupTypes.udnsOwners,
+        TopologyGroupTypes.udnsNamespaces,
+        TopologyGroupTypes.udnsHosts,
+        TopologyGroupTypes.udnsZones,
+        TopologyGroupTypes.udns
+      ].includes(options.groupTypes) && !_.isEmpty(peer.udn)
+        ? addGroup({ udn: peer.udn }, 'cluster', clusterGroup, true)
+        : undefined;
     const zoneGroup =
       [
         TopologyGroupTypes.clustersZones,
+        TopologyGroupTypes.udnsZones,
         TopologyGroupTypes.zonesHosts,
         TopologyGroupTypes.zonesNamespaces,
         TopologyGroupTypes.zonesOwners,
         TopologyGroupTypes.zones
       ].includes(options.groupTypes) && !_.isEmpty(peer.zone)
-        ? addGroup({ zone: peer.zone }, 'cluster', clusterGroup, true)
+        ? addGroup({ zone: peer.zone }, 'cluster', udnGroup || clusterGroup, true)
         : undefined;
     const hostGroup =
       [
         TopologyGroupTypes.clustersHosts,
+        TopologyGroupTypes.udnsHosts,
         TopologyGroupTypes.zonesHosts,
         TopologyGroupTypes.clustersHosts,
         TopologyGroupTypes.hostsNamespaces,
         TopologyGroupTypes.hostsOwners,
         TopologyGroupTypes.hosts
       ].includes(options.groupTypes) && !_.isEmpty(peer.hostName)
-        ? addGroup({ hostName: peer.hostName }, 'host', zoneGroup || clusterGroup, true)
+        ? addGroup({ hostName: peer.hostName }, 'host', zoneGroup || udnGroup || clusterGroup, true)
         : undefined;
     const namespaceGroup =
       [
+        TopologyGroupTypes.udnsNamespaces,
         TopologyGroupTypes.zonesNamespaces,
         TopologyGroupTypes.clustersNamespaces,
         TopologyGroupTypes.clustersNamespaces,
@@ -659,10 +690,11 @@ export const generateDataModel = (
         TopologyGroupTypes.namespacesOwners,
         TopologyGroupTypes.namespaces
       ].includes(options.groupTypes) && !_.isEmpty(peer.namespace)
-        ? addGroup({ namespace: peer.namespace }, 'namespace', hostGroup || zoneGroup || clusterGroup)
+        ? addGroup({ namespace: peer.namespace }, 'namespace', hostGroup || zoneGroup || udnGroup || clusterGroup)
         : undefined;
     const ownerGroup =
       [
+        TopologyGroupTypes.udnsOwners,
         TopologyGroupTypes.clustersOwners,
         TopologyGroupTypes.zonesOwners,
         TopologyGroupTypes.clustersOwners,
@@ -673,12 +705,12 @@ export const generateDataModel = (
         ? addGroup(
             { namespace: peer.namespace, owner: peer.owner },
             'owner',
-            namespaceGroup || hostGroup || zoneGroup || clusterGroup,
+            namespaceGroup || hostGroup || zoneGroup || udnGroup || clusterGroup,
             namespaceGroup === undefined
           )
         : undefined;
 
-    return ownerGroup || namespaceGroup || hostGroup || zoneGroup || clusterGroup;
+    return ownerGroup || namespaceGroup || hostGroup || zoneGroup || udnGroup || clusterGroup;
   };
 
   const peerToNodeData = (p: TopologyMetricPeer): NodeData => {

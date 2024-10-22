@@ -108,22 +108,6 @@ export const ElementFields: React.FC<ElementFieldsProps> = ({
     );
     forceLabel = forceAsText = undefined;
   }
-  if (data.peer.clusterName) {
-    fragments.push(
-      <ElementField
-        id={id + '-cluster'}
-        key={id + '-cluster'}
-        label={forceLabel || t('Cluster')}
-        forcedText={forceAsText ? data.peer.clusterName : undefined}
-        activeFilters={activeFilters}
-        filterType={'cluster'}
-        peer={createPeer({ clusterName: data.peer.clusterName })}
-        setFilters={setFilters}
-        filterDefinitions={filterDefinitions}
-      />
-    );
-    forceLabel = forceAsText = undefined;
-  }
   if (data.peer.addr) {
     fragments.push(
       <ElementField
@@ -141,7 +125,7 @@ export const ElementFields: React.FC<ElementFieldsProps> = ({
 
   return (
     <>
-      {fragments.length > 0 ? (
+      {fragments.length > 0 || data.peer.clusterName || data.peer.udn ? (
         fragments
       ) : (
         <TextContent id={id + '-no-infos'} className="record-field-container">
