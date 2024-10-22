@@ -116,6 +116,7 @@ export const createPeer = (fields: Partial<TopologyMetricPeer>): TopologyMetricP
     owner: fields.owner,
     hostName: fields.hostName,
     zone: fields.zone,
+    udn: fields.udn,
     clusterName: fields.clusterName,
     isAmbiguous: false,
     getDisplayName: () => undefined
@@ -153,6 +154,10 @@ export const createPeer = (fields: Partial<TopologyMetricPeer>): TopologyMetricP
     newPeer.getDisplayName = () => fields.clusterName;
   } else if (fields.addr) {
     newPeer.getDisplayName = () => fields.addr;
+  } else if (fields.udn) {
+    // If none of above are set but UDN is set, this is a UDN group
+    newPeer.resourceKind = 'UDN';
+    newPeer.getDisplayName = () => fields.udn;
   }
   return newPeer;
 };
@@ -178,6 +183,7 @@ const parseTopologyMetric = (
     namespace: raw.metric.SrcK8S_Namespace,
     hostName: raw.metric.SrcK8S_HostName,
     zone: raw.metric.SrcK8S_Zone,
+    udn: raw.metric.UDN,
     // TODO: see if clustername will become directionnal
     clusterName: raw.metric.K8S_ClusterName
   });
@@ -188,6 +194,7 @@ const parseTopologyMetric = (
     namespace: raw.metric.DstK8S_Namespace,
     hostName: raw.metric.DstK8S_HostName,
     zone: raw.metric.DstK8S_Zone,
+    udn: raw.metric.UDN,
     // TODO: see if clustername will become directionnal
     clusterName: raw.metric.K8S_ClusterName
   });
