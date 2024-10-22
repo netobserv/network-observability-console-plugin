@@ -44,6 +44,10 @@ export const pages = [
   {
     id: 'dev-tab',
     name: 'Dev tab'
+  },
+  {
+    id: 'udn-tab',
+    name: 'UDN tab'
   }
 ];
 
@@ -75,6 +79,8 @@ export class App extends React.Component<{}, AppState> {
   private getPageContent = (id: string) => {
     console.debug('getPageContent', id);
     switch (id) {
+      case 'udn-tab':
+        return <NetflowTrafficTab obj={{ kind: 'UserDefinedNetwork', metadata: { name: 'my-udn', namespace: 'default' } }} />;
       case 'pod-tab':
         return <NetflowTrafficTab obj={{ kind: 'Pod', metadata: { name: 'test', namespace: 'default' } }} />;
       case 'namespace-tab':
