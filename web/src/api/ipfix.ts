@@ -179,6 +179,14 @@ export interface Fields {
   _IsFirst?: string;
   /** In conversation tracking, a counter of flow logs per conversation */
   numFlowLogs?: number;
+  /** Xlat Source IP address (ipv4 or ipv6) */
+  XlatSrcAddr?: string;
+  /** Xlat Destination IP address (ipv4 or ipv6) */
+  XlatDstAddr?: string;
+  /** Xlat Source port */
+  XlatSrcPort?: number;
+  /** Xlat Destination port */
+  XlatDstPort?: number;
 }
 
 export type Field = keyof Fields | keyof Labels;
