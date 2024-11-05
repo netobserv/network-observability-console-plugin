@@ -69,8 +69,7 @@ func IsNumeric(v string) bool {
 		Packets,
 		Proto,
 		Bytes,
-		DSCP,
-		TCPFlags:
+		DSCP:
 		return true
 	default:
 		return false

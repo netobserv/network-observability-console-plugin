@@ -174,8 +174,8 @@ export const getDSCPOptions = (value: string): Promise<FilterOption[]> => {
 export const getTCPFlagsOptions = (value: string): Promise<FilterOption[]> => {
   return Promise.resolve(
     tcpFlagsList
-      .filter(opt => String(opt.value).includes(value) || opt.name.toLowerCase().includes(value.toLowerCase()))
-      .map(v => ({ name: v.name, value: String(v.value) }))
+      .filter(opt => opt.name.toLowerCase().includes(value.toLowerCase()))
+      .map(v => ({ name: v.name, value: v.name }))
   );
 };
 

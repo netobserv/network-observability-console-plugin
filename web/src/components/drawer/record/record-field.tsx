@@ -21,7 +21,7 @@ import {
 import { dropCausesNames, getDropCauseDescription, getDropCauseDocUrl } from '../../../utils/pkt-drop';
 import { formatPort } from '../../../utils/port';
 import { formatProtocol, getProtocolDocUrl } from '../../../utils/protocol';
-import { decomposeTCPFlagsBitfield, getTCPFlagsDocUrl } from '../../../utils/tcp-flags';
+import { getFlagsList, getTCPFlagsDocUrl } from '../../../utils/tcp-flags';
 import { Size } from '../../dropdowns/table-display-dropdown';
 import './record-field.css';
 
@@ -473,23 +473,21 @@ export const RecordField: React.FC<RecordFieldProps> = ({
       }
       case ColumnsId.tcpflags: {
         let child = emptyText();
-        if (typeof value === 'number' && !isNaN(value)) {
-          const flags = decomposeTCPFlagsBitfield(value);
-          const name = flags.length > 0 ? flags.map(f => f.name).join(', ') : String(value);
-          if (detailed) {
-            let description = `${t('Value')}: ${value}`;
-            if (flags.length === 1) {
-              description += '. ' + flags[0].description;
-            } else if (flags.length > 1) {
-              description +=
-                '. ' +
-                t('The flow contains packets with various flags: ') +
-                flags.map(f => f.name + ' (' + f.description + ')').join('; ');
-            }
-            child = clickableContent(name, description, getTCPFlagsDocUrl());
-          } else {
-            child = simpleTextWithTooltip(name)!;
+        const sVal = String(value);
+        const flags = getFlagsList(sVal);
+        if (detailed) {
+          let description = `${t('Value')}: ${value}`;
+          if (flags.length === 1) {
+            description += '. ' + flags[0].description;
+          } else if (flags.length > 1) {
+            description +=
+              '. ' +
+              t('The flow contains packets with various flags: ') +
+              flags.map(f => f.name + ' (' + f.description + ')').join('; ');
           }
+          child = clickableContent(sVal, description, getTCPFlagsDocUrl());
+        } else {
+          child = simpleTextWithTooltip(sVal)!;
         }
         return singleContainer(child);
       }
