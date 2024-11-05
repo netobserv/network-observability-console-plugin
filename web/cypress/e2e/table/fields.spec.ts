@@ -1,29 +1,19 @@
 /// <reference types="cypress" />
-
-import * as c from '../../support/const';
-import data from './../../../../mocks/loki/flow_records.json';
+import r from './../../../../mocks/loki/flow_records.json';
 
 describe('netflow-table', () => {
-  function reload(clearCache = true) {
+  beforeEach(() => {
     // this test bench only work with mocks
-    cy.intercept('GET', c.url + '/api/loki/flow/records?*', (req) => {
-      req.continue((res) => {
-        res.body = data;
-      })
+    cy.intercept('GET', '/api/loki/flow/records?*', {
+      statusCode: 200,
+      body: r.data,
     });
-
-    cy.openNetflowTrafficPage(clearCache);
+    cy.openNetflowTrafficPage(true);
 
     //move to table view
     cy.get('.tableTabButton').click();
     //clear default app filters
-    if (clearCache === true) {
-      cy.get('#clear-all-filters-button').click();
-    }
-  }
-
-  beforeEach(() => {
-    reload();
+    cy.get('#clear-all-filters-button').click();
   });
 
   it('display content correctly', () => {
