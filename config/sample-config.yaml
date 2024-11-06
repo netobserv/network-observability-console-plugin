@@ -13,7 +13,7 @@ loki:
     - DstK8S_Type
     - K8S_FlowLayer
     - FlowDirection
-    - UDN
+    - UdnId
     #    - Duplicate
     #    - _RecordType
     #    - K8S_ClusterName
@@ -154,19 +154,19 @@ frontend:
     - Flows
     - DnsFlows
     # UDN
-    - UDN_Bytes
-    - UDN_Packets
-    - min_UDN_TimeFlowRttNs
-    - max_UDN_TimeFlowRttNs
-    - avg_UDN_TimeFlowRttNs
-    - p90_UDN_TimeFlowRttNs
-    - p99_UDN_TimeFlowRttNs
-    - min_UDN_DnsLatencyMs
-    - max_UDN_DnsLatencyMs
-    - avg_UDN_DnsLatencyMs
-    - p90_UDN_DnsLatencyMs
-    - p99_UDN_DnsLatencyMs
-    - UDN_Flows
+    - UdnId_Bytes
+    - UdnId_Packets
+    - min_UdnId_TimeFlowRttNs
+    - max_UdnId_TimeFlowRttNs
+    - avg_UdnId_TimeFlowRttNs
+    - p90_UdnId_TimeFlowRttNs
+    - p99_UdnId_TimeFlowRttNs
+    - min_UdnId_DnsLatencyMs
+    - max_UdnId_DnsLatencyMs
+    - avg_UdnId_DnsLatencyMs
+    - p90_UdnId_DnsLatencyMs
+    - p99_UdnId_DnsLatencyMs
+    - UdnId_Flows
   columns:
     - id: StartTime
       name: Start Time
@@ -572,8 +572,8 @@ frontend:
       width: 15
     - id: UDN
       name: User Defined Network
-      tooltip: The user defined network Name.
-      field: UDN
+      tooltip: The user defined network identifier.
+      field: UdnId
       filter: udn
       default: false
       width: 15
@@ -1180,7 +1180,7 @@ frontend:
       type: string
       description: Cluster name or identifier
       lokiLabel: true
-    - name: UDN
+    - name: UdnId
       type: string
       description: User Defined Network
       lokiLabel: true

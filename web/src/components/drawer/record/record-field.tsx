@@ -648,10 +648,15 @@ export const RecordField: React.FC<RecordFieldProps> = ({
         );
       }
       case ColumnsId.udn: {
-        return singleContainer(
-          //TODO: see how to retreive UDN namespace. Maybe add these to flows ?
-          kubeObjContent(value as string, 'UserDefinedNetwork', undefined)
-        );
+        const id = value as string;
+        let child: JSX.Element | undefined;
+        if (id.includes('.')) {
+          const parts = id.split('.');
+          child = kubeObjContent(parts[1], 'UserDefinedNetwork', parts[0]);
+        } else {
+          child = kubeObjContent(id, 'ClusterUserDefinedNetwork', undefined);
+        }
+        return singleContainer(child);
       }
       default:
         if (Array.isArray(value) && value.length) {

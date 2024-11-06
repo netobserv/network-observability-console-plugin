@@ -6,7 +6,7 @@
       {
         "metric": {
           "SrcK8S_Namespace": "netobserv",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -22,7 +22,7 @@
       {
         "metric": {
           "SrcK8S_Namespace": "openshift-console",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -38,7 +38,7 @@
       {
         "metric": {
           "SrcK8S_Namespace": "openshift-console-operator",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -54,7 +54,7 @@
       {
         "metric": {
           "SrcK8S_Namespace": "openshift-insights",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -70,7 +70,7 @@
       {
         "metric": {
           "SrcK8S_Namespace": "openshift-kube-storage-version-migrator-operator",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -86,7 +86,7 @@
       {
         "metric": {
           "SrcK8S_Namespace": "openshift-monitoring",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -102,7 +102,7 @@
       {
         "metric": {
           "SrcK8S_Namespace": "openshift-multus",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -114,7 +114,7 @@
       {
         "metric": {
           "SrcK8S_Namespace": "openshift-network-diagnostics",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -130,7 +130,7 @@
       {
         "metric": {
           "SrcK8S_Namespace": "openshift-service-ca",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -146,7 +146,7 @@
       {
         "metric": {
           "SrcK8S_Namespace": "openshift-service-ca-operator",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [

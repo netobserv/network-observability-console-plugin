@@ -12,7 +12,7 @@
           "SrcK8S_OwnerName": "ip-10-0-1-7.ec2.internal",
           "SrcK8S_OwnerType": "Node",
           "SrcK8S_Type": "Node",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -35,7 +35,7 @@
           "SrcK8S_OwnerName": "console-operator",
           "SrcK8S_OwnerType": "Deployment",
           "SrcK8S_Type": "Pod",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -58,7 +58,7 @@
           "SrcK8S_OwnerName": "kube-storage-version-migrator-operator",
           "SrcK8S_OwnerType": "Deployment",
           "SrcK8S_Type": "Pod",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -81,7 +81,7 @@
           "SrcK8S_OwnerName": "insights-operator",
           "SrcK8S_OwnerType": "Deployment",
           "SrcK8S_Type": "Pod",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -104,7 +104,7 @@
           "SrcK8S_OwnerName": "network-check-source",
           "SrcK8S_OwnerType": "Deployment",
           "SrcK8S_Type": "Pod",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -127,7 +127,7 @@
           "SrcK8S_OwnerName": "prometheus-k8s",
           "SrcK8S_OwnerType": "StatefulSet",
           "SrcK8S_Type": "Pod",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -150,7 +150,7 @@
           "SrcK8S_OwnerName": "console",
           "SrcK8S_OwnerType": "Deployment",
           "SrcK8S_Type": "Pod",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -173,7 +173,7 @@
           "SrcK8S_OwnerName": "flowlogs-pipeline",
           "SrcK8S_OwnerType": "DaemonSet",
           "SrcK8S_Type": "Pod",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -196,7 +196,7 @@
           "SrcK8S_OwnerName": "network-metrics-daemon",
           "SrcK8S_OwnerType": "DaemonSet",
           "SrcK8S_Type": "Pod",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -215,7 +215,7 @@
           "SrcK8S_OwnerName": "service-ca-operator",
           "SrcK8S_OwnerType": "Deployment",
           "SrcK8S_Type": "Pod",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -238,7 +238,7 @@
           "SrcK8S_OwnerName": "service-ca",
           "SrcK8S_OwnerType": "Deployment",
           "SrcK8S_Type": "Pod",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -261,7 +261,7 @@
           "SrcK8S_OwnerName": "prometheus-k8s",
           "SrcK8S_OwnerType": "StatefulSet",
           "SrcK8S_Type": "Pod",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -280,7 +280,7 @@
           "SrcK8S_OwnerName": "console",
           "SrcK8S_OwnerType": "Deployment",
           "SrcK8S_Type": "Pod",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -303,7 +303,7 @@
           "SrcK8S_OwnerName": "network-metrics-daemon",
           "SrcK8S_OwnerType": "DaemonSet",
           "SrcK8S_Type": "Pod",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -322,7 +322,7 @@
           "SrcK8S_OwnerName": "flowlogs-pipeline",
           "SrcK8S_OwnerType": "DaemonSet",
           "SrcK8S_Type": "Pod",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [

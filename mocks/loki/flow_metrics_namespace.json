@@ -7,7 +7,7 @@
         "metric": {
           "DstK8S_Namespace": "default",
           "SrcK8S_Namespace": "netobserv",
-          "UDN": "yet-another-udn"
+          "UdnId": "yet-another-udn"
         },
         "values": [
           [
@@ -44,7 +44,7 @@
         "metric": {
           "DstK8S_Namespace": "default",
           "SrcK8S_Namespace": "openshift-backplane",
-          "UDN": "another-udn"
+          "UdnId": "another-udn"
         },
         "values": [
           [
@@ -57,7 +57,7 @@
         "metric": {
           "DstK8S_Namespace": "default",
           "SrcK8S_Namespace": "openshift-console",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -94,7 +94,7 @@
         "metric": {
           "DstK8S_Namespace": "default",
           "SrcK8S_Namespace": "openshift-console-operator",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -131,7 +131,7 @@
         "metric": {
           "DstK8S_Namespace": "default",
           "SrcK8S_Namespace": "openshift-deployment-validation-operator",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -168,7 +168,7 @@
         "metric": {
           "DstK8S_Namespace": "default",
           "SrcK8S_Namespace": "openshift-image-registry",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -205,7 +205,7 @@
         "metric": {
           "DstK8S_Namespace": "default",
           "SrcK8S_Namespace": "openshift-ingress",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -242,7 +242,7 @@
         "metric": {
           "DstK8S_Namespace": "default",
           "SrcK8S_Namespace": "openshift-insights",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -259,7 +259,7 @@
         "metric": {
           "DstK8S_Namespace": "default",
           "SrcK8S_Namespace": "openshift-kube-storage-version-migrator-operator",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -296,7 +296,7 @@
         "metric": {
           "DstK8S_Namespace": "default",
           "SrcK8S_Namespace": "openshift-monitoring",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -333,7 +333,7 @@
         "metric": {
           "DstK8S_Namespace": "default",
           "SrcK8S_Namespace": "openshift-multus",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -358,7 +358,7 @@
         "metric": {
           "DstK8S_Namespace": "default",
           "SrcK8S_Namespace": "openshift-network-diagnostics",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -395,7 +395,7 @@
         "metric": {
           "DstK8S_Namespace": "default",
           "SrcK8S_Namespace": "openshift-route-monitor-operator",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -432,7 +432,7 @@
         "metric": {
           "DstK8S_Namespace": "default",
           "SrcK8S_Namespace": "openshift-service-ca",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -469,7 +469,7 @@
         "metric": {
           "DstK8S_Namespace": "default",
           "SrcK8S_Namespace": "openshift-service-ca-operator",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -506,7 +506,7 @@
         "metric": {
           "DstK8S_Namespace": "default",
           "SrcK8S_Namespace": "openshift-user-workload-monitoring",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -542,7 +542,7 @@
       {
         "metric": {
           "DstK8S_Namespace": "default",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -579,7 +579,7 @@
         "metric": {
           "DstK8S_Namespace": "netobserv",
           "SrcK8S_Namespace": "netobserv",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -616,7 +616,7 @@
         "metric": {
           "DstK8S_Namespace": "netobserv",
           "SrcK8S_Namespace": "openshift-console",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -633,7 +633,7 @@
         "metric": {
           "DstK8S_Namespace": "netobserv",
           "SrcK8S_Namespace": "openshift-monitoring",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -669,7 +669,7 @@
       {
         "metric": {
           "DstK8S_Namespace": "netobserv",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -682,7 +682,7 @@
         "metric": {
           "DstK8S_Namespace": "openshift-console",
           "SrcK8S_Namespace": "openshift-ingress",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -718,7 +718,7 @@
       {
         "metric": {
           "DstK8S_Namespace": "openshift-deployment-validation-operator",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -755,7 +755,7 @@
         "metric": {
           "DstK8S_Namespace": "openshift-dns",
           "SrcK8S_Namespace": "netobserv",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -792,7 +792,7 @@
         "metric": {
           "DstK8S_Namespace": "openshift-dns",
           "SrcK8S_Namespace": "openshift-console",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -809,7 +809,7 @@
         "metric": {
           "DstK8S_Namespace": "openshift-dns",
           "SrcK8S_Namespace": "openshift-monitoring",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -846,7 +846,7 @@
         "metric": {
           "DstK8S_Namespace": "openshift-ingress",
           "SrcK8S_Namespace": "openshift-console",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -883,7 +883,7 @@
         "metric": {
           "DstK8S_Namespace": "openshift-ingress",
           "SrcK8S_Namespace": "openshift-ingress-canary",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -900,7 +900,7 @@
         "metric": {
           "DstK8S_Namespace": "openshift-ingress",
           "SrcK8S_Namespace": "openshift-monitoring",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -937,7 +937,7 @@
         "metric": {
           "DstK8S_Namespace": "openshift-ingress",
           "SrcK8S_Namespace": "openshift-user-workload-monitoring",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -974,7 +974,7 @@
         "metric": {
           "DstK8S_Namespace": "openshift-ingress-canary",
           "SrcK8S_Namespace": "openshift-ingress",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -1011,7 +1011,7 @@
         "metric": {
           "DstK8S_Namespace": "openshift-monitoring",
           "SrcK8S_Namespace": "netobserv",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -1048,7 +1048,7 @@
         "metric": {
           "DstK8S_Namespace": "openshift-monitoring",
           "SrcK8S_Namespace": "openshift-console",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -1085,7 +1085,7 @@
         "metric": {
           "DstK8S_Namespace": "openshift-monitoring",
           "SrcK8S_Namespace": "openshift-ingress",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -1122,7 +1122,7 @@
         "metric": {
           "DstK8S_Namespace": "openshift-monitoring",
           "SrcK8S_Namespace": "openshift-monitoring",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -1159,7 +1159,7 @@
         "metric": {
           "DstK8S_Namespace": "openshift-monitoring",
           "SrcK8S_Namespace": "openshift-user-workload-monitoring",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -1195,7 +1195,7 @@
       {
         "metric": {
           "DstK8S_Namespace": "openshift-monitoring",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -1232,7 +1232,7 @@
         "metric": {
           "DstK8S_Namespace": "openshift-user-workload-monitoring",
           "SrcK8S_Namespace": "openshift-ingress",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -1269,7 +1269,7 @@
         "metric": {
           "DstK8S_Namespace": "openshift-user-workload-monitoring",
           "SrcK8S_Namespace": "openshift-monitoring",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [

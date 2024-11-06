@@ -11,7 +11,7 @@
           "SrcK8S_Namespace": "netobserv",
           "SrcK8S_OwnerName": "netobserv-controller-manager",
           "SrcK8S_OwnerType": "Deployment",
-          "UDN": "yet-another-udn"
+          "UdnId": "yet-another-udn"
         },
         "values": [
           [
@@ -52,7 +52,7 @@
           "SrcK8S_Namespace": "openshift-console",
           "SrcK8S_OwnerName": "console",
           "SrcK8S_OwnerType": "Deployment",
-          "UDN": "another-udn"
+          "UdnId": "another-udn"
         },
         "values": [
           [
@@ -93,7 +93,7 @@
           "SrcK8S_Namespace": "openshift-console-operator",
           "SrcK8S_OwnerName": "console-operator",
           "SrcK8S_OwnerType": "Deployment",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -134,7 +134,7 @@
           "SrcK8S_Namespace": "openshift-deployment-validation-operator",
           "SrcK8S_OwnerName": "deployment-validation-operator",
           "SrcK8S_OwnerType": "Deployment",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -175,7 +175,7 @@
           "SrcK8S_Namespace": "openshift-insights",
           "SrcK8S_OwnerName": "insights-operator",
           "SrcK8S_OwnerType": "Deployment",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -196,7 +196,7 @@
           "SrcK8S_Namespace": "openshift-monitoring",
           "SrcK8S_OwnerName": "cluster-monitoring-operator",
           "SrcK8S_OwnerType": "Deployment",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -233,7 +233,7 @@
           "SrcK8S_Namespace": "openshift-monitoring",
           "SrcK8S_OwnerName": "kube-state-metrics",
           "SrcK8S_OwnerType": "Deployment",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -274,7 +274,7 @@
           "SrcK8S_Namespace": "openshift-monitoring",
           "SrcK8S_OwnerName": "prometheus-k8s",
           "SrcK8S_OwnerType": "StatefulSet",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -311,7 +311,7 @@
           "SrcK8S_Namespace": "openshift-route-monitor-operator",
           "SrcK8S_OwnerName": "route-monitor-operator-controller-manager",
           "SrcK8S_OwnerType": "Deployment",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -352,7 +352,7 @@
           "SrcK8S_Namespace": "netobserv",
           "SrcK8S_OwnerName": "loki",
           "SrcK8S_OwnerType": "Pod",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -393,7 +393,7 @@
           "SrcK8S_Namespace": "netobserv",
           "SrcK8S_OwnerName": "flowlogs-pipeline",
           "SrcK8S_OwnerType": "DaemonSet",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -434,7 +434,7 @@
           "SrcK8S_Namespace": "netobserv",
           "SrcK8S_OwnerName": "flowlogs-pipeline",
           "SrcK8S_OwnerType": "DaemonSet",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -475,7 +475,7 @@
           "SrcK8S_Namespace": "openshift-ingress",
           "SrcK8S_OwnerName": "router-default",
           "SrcK8S_OwnerType": "Deployment",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -516,7 +516,7 @@
           "SrcK8S_Namespace": "netobserv",
           "SrcK8S_OwnerName": "flowlogs-pipeline",
           "SrcK8S_OwnerType": "DaemonSet",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -557,7 +557,7 @@
           "SrcK8S_Namespace": "openshift-monitoring",
           "SrcK8S_OwnerName": "thanos-querier",
           "SrcK8S_OwnerType": "Deployment",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -598,7 +598,7 @@
           "SrcK8S_Namespace": "openshift-console",
           "SrcK8S_OwnerName": "console",
           "SrcK8S_OwnerType": "Deployment",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -639,7 +639,7 @@
           "SrcK8S_Namespace": "openshift-monitoring",
           "SrcK8S_OwnerName": "prometheus-k8s",
           "SrcK8S_OwnerType": "StatefulSet",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -680,7 +680,7 @@
           "SrcK8S_Namespace": "openshift-ingress",
           "SrcK8S_OwnerName": "router-default",
           "SrcK8S_OwnerType": "Deployment",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -721,7 +721,7 @@
           "SrcK8S_Namespace": "openshift-monitoring",
           "SrcK8S_OwnerName": "alertmanager-main",
           "SrcK8S_OwnerType": "StatefulSet",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -762,7 +762,7 @@
           "SrcK8S_Namespace": "openshift-monitoring",
           "SrcK8S_OwnerName": "prometheus-k8s",
           "SrcK8S_OwnerType": "StatefulSet",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -803,7 +803,7 @@
           "SrcK8S_Namespace": "openshift-ingress",
           "SrcK8S_OwnerName": "router-default",
           "SrcK8S_OwnerType": "Deployment",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -844,7 +844,7 @@
           "SrcK8S_Namespace": "openshift-monitoring",
           "SrcK8S_OwnerName": "kube-state-metrics",
           "SrcK8S_OwnerType": "Deployment",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -885,7 +885,7 @@
           "SrcK8S_Namespace": "openshift-monitoring",
           "SrcK8S_OwnerName": "prometheus-k8s",
           "SrcK8S_OwnerType": "StatefulSet",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -926,7 +926,7 @@
           "SrcK8S_Namespace": "openshift-monitoring",
           "SrcK8S_OwnerName": "thanos-querier",
           "SrcK8S_OwnerType": "Deployment",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -967,7 +967,7 @@
           "SrcK8S_Namespace": "openshift-ingress",
           "SrcK8S_OwnerName": "router-default",
           "SrcK8S_OwnerType": "Deployment",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -1008,7 +1008,7 @@
           "SrcK8S_Namespace": "openshift-monitoring",
           "SrcK8S_OwnerName": "prometheus-k8s",
           "SrcK8S_OwnerType": "StatefulSet",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -1049,7 +1049,7 @@
           "SrcK8S_Namespace": "openshift-user-workload-monitoring",
           "SrcK8S_OwnerName": "prometheus-user-workload",
           "SrcK8S_OwnerType": "StatefulSet",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -1086,7 +1086,7 @@
           "SrcK8S_Namespace": "openshift-user-workload-monitoring",
           "SrcK8S_OwnerName": "thanos-ruler-user-workload",
           "SrcK8S_OwnerType": "StatefulSet",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -1127,7 +1127,7 @@
           "SrcK8S_Namespace": "openshift-ingress",
           "SrcK8S_OwnerName": "router-default",
           "SrcK8S_OwnerType": "Deployment",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -1168,7 +1168,7 @@
           "SrcK8S_Namespace": "openshift-monitoring",
           "SrcK8S_OwnerName": "thanos-querier",
           "SrcK8S_OwnerType": "Deployment",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -1209,7 +1209,7 @@
           "SrcK8S_Namespace": "openshift-ingress",
           "SrcK8S_OwnerName": "router-default",
           "SrcK8S_OwnerType": "Deployment",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -1250,7 +1250,7 @@
           "SrcK8S_Namespace": "openshift-monitoring",
           "SrcK8S_OwnerName": "thanos-querier",
           "SrcK8S_OwnerType": "Deployment",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -1290,7 +1290,7 @@
           "SrcK8S_Namespace": "openshift-monitoring",
           "SrcK8S_OwnerName": "prometheus-k8s",
           "SrcK8S_OwnerType": "StatefulSet",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -1329,7 +1329,7 @@
           "DstK8S_OwnerType": "Node",
           "SrcK8S_OwnerName": "ip-10-0-1-7.ec2.internal",
           "SrcK8S_OwnerType": "Node",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -1369,7 +1369,7 @@
           "SrcK8S_Namespace": "netobserv",
           "SrcK8S_OwnerName": "netobserv-controller-manager",
           "SrcK8S_OwnerType": "Deployment",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -1385,7 +1385,7 @@
           "SrcK8S_Namespace": "openshift-monitoring",
           "SrcK8S_OwnerName": "prometheus-k8s",
           "SrcK8S_OwnerType": "StatefulSet",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -1424,7 +1424,7 @@
           "DstK8S_OwnerType": "Node",
           "SrcK8S_OwnerName": "ip-10-0-1-137.ec2.internal",
           "SrcK8S_OwnerType": "Node",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [

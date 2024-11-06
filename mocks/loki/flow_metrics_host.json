@@ -7,7 +7,7 @@
         "metric": {
           "DstK8S_HostName": "ip-10-0-1-137.ec2.internal",
           "SrcK8S_HostName": "ip-10-0-1-7.ec2.internal",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [
@@ -79,7 +79,7 @@
         "metric": {
           "DstK8S_HostName": "ip-10-0-1-7.ec2.internal",
           "SrcK8S_HostName": "ip-10-0-1-137.ec2.internal",
-          "UDN": "my-udn"
+          "UdnId": "my-udn"
         },
         "values": [
           [

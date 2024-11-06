@@ -10,7 +10,7 @@
           "SrcK8S_Namespace": "openshift-service-ca-operator",
           "SrcK8S_OwnerName": "service-ca-operator",
           "SrcK8S_Type": "Pod",
-          "UDN": "my-udn",
+          "UdnId": "my-udn",
           "app": "netobserv-flowcollector"
         },
         "values": [
@@ -27,7 +27,7 @@
           "SrcK8S_Namespace": "openshift-service-ca",
           "SrcK8S_OwnerName": "service-ca",
           "SrcK8S_Type": "Pod",
-          "UDN": "my-udn",
+          "UdnId": "my-udn",
           "app": "netobserv-flowcollector"
         },
         "values": [
@@ -44,7 +44,7 @@
           "SrcK8S_Namespace": "openshift-network-diagnostics",
           "SrcK8S_OwnerName": "network-check-source",
           "SrcK8S_Type": "Pod",
-          "UDN": "my-udn",
+          "UdnId": "my-udn",
           "app": "netobserv-flowcollector"
         },
         "values": [
@@ -61,7 +61,7 @@
           "SrcK8S_Namespace": "openshift-console-operator",
           "SrcK8S_OwnerName": "console-operator",
           "SrcK8S_Type": "Pod",
-          "UDN": "my-udn",
+          "UdnId": "my-udn",
           "app": "netobserv-flowcollector"
         },
         "values": [
@@ -78,7 +78,7 @@
           "SrcK8S_Namespace": "openshift-console",
           "SrcK8S_OwnerName": "console",
           "SrcK8S_Type": "Pod",
-          "UDN": "my-udn",
+          "UdnId": "my-udn",
           "app": "netobserv-flowcollector"
         },
         "values": [
@@ -108,7 +108,7 @@
           "K8S_FlowLayer": "infra",
           "SrcK8S_OwnerName": "ip-10-0-1-137.ec2.internal",
           "SrcK8S_Type": "Node",
-          "UDN": "my-udn",
+          "UdnId": "my-udn",
           "app": "netobserv-flowcollector"
         },
         "values": [
@@ -127,7 +127,7 @@
           "SrcK8S_Namespace": "openshift-monitoring",
           "SrcK8S_OwnerName": "prometheus-k8s",
           "SrcK8S_Type": "Pod",
-          "UDN": "my-udn",
+          "UdnId": "my-udn",
           "app": "netobserv-flowcollector"
         },
         "values": [
@@ -150,7 +150,7 @@
           "SrcK8S_Namespace": "openshift-monitoring",
           "SrcK8S_OwnerName": "prometheus-adapter",
           "SrcK8S_Type": "Pod",
-          "UDN": "my-udn",
+          "UdnId": "my-udn",
           "app": "netobserv-flowcollector"
         },
         "values": [
@@ -168,7 +168,7 @@
           "K8S_FlowLayer": "infra",
           "SrcK8S_OwnerName": "ip-10-0-1-7.ec2.internal",
           "SrcK8S_Type": "Node",
-          "UDN": "my-udn",
+          "UdnId": "my-udn",
           "app": "netobserv-flowcollector"
         },
         "values": [
@@ -192,7 +192,7 @@
           "SrcK8S_Namespace": "openshift-monitoring",
           "SrcK8S_OwnerName": "prometheus-k8s",
           "SrcK8S_Type": "Pod",
-          "UDN": "my-udn",
+          "UdnId": "my-udn",
           "app": "netobserv-flowcollector"
         },
         "values": [
@@ -211,7 +211,7 @@
           "K8S_FlowLayer": "infra",
           "SrcK8S_OwnerName": "ip-10-0-1-137.ec2.internal",
           "SrcK8S_Type": "Node",
-          "UDN": "my-udn",
+          "UdnId": "my-udn",
           "app": "netobserv-flowcollector"
         },
         "values": [
@@ -235,7 +235,7 @@
           "SrcK8S_Namespace": "openshift-dns",
           "SrcK8S_OwnerName": "dns-default",
           "SrcK8S_Type": "Pod",
-          "UDN": "my-udn",
+          "UdnId": "my-udn",
           "app": "netobserv-flowcollector"
         },
         "values": [
@@ -255,7 +255,7 @@
           "SrcK8S_Namespace": "openshift-console",
           "SrcK8S_OwnerName": "console",
           "SrcK8S_Type": "Pod",
-          "UDN": "my-udn",
+          "UdnId": "my-udn",
           "app": "netobserv-flowcollector"
         },
         "values": [
@@ -274,7 +274,7 @@
           "K8S_FlowLayer": "infra",
           "SrcK8S_OwnerName": "ip-10-0-1-7.ec2.internal",
           "SrcK8S_Type": "Node",
-          "UDN": "my-udn",
+          "UdnId": "my-udn",
           "app": "netobserv-flowcollector"
         },
         "values": [
@@ -294,7 +294,7 @@
           "SrcK8S_Namespace": "openshift-user-workload-monitoring",
           "SrcK8S_OwnerName": "prometheus-operator",
           "SrcK8S_Type": "Pod",
-          "UDN": "my-udn",
+          "UdnId": "my-udn",
           "app": "netobserv-flowcollector"
         },
         "values": [
@@ -314,7 +314,7 @@
           "SrcK8S_Namespace": "netobserv",
           "SrcK8S_OwnerName": "netobserv-controller-manager",
           "SrcK8S_Type": "Pod",
-          "UDN": "my-udn",
+          "UdnId": "my-udn",
           "app": "netobserv-flowcollector"
         },
         "values": [
@@ -333,7 +333,7 @@
           "K8S_FlowLayer": "infra",
           "SrcK8S_OwnerName": "ip-10-0-1-7.ec2.internal",
           "SrcK8S_Type": "Node",
-          "UDN": "my-udn",
+          "UdnId": "my-udn",
           "app": "netobserv-flowcollector"
         },
         "values": [
@@ -353,7 +353,7 @@
           "SrcK8S_Namespace": "openshift-monitoring",
           "SrcK8S_OwnerName": "prometheus-k8s",
           "SrcK8S_Type": "Pod",
-          "UDN": "my-udn",
+          "UdnId": "my-udn",
           "app": "netobserv-flowcollector"
         },
         "values": [
@@ -373,7 +373,7 @@
           "SrcK8S_Namespace": "openshift-monitoring",
           "SrcK8S_OwnerName": "prometheus-k8s",
           "SrcK8S_Type": "Pod",
-          "UDN": "my-udn",
+          "UdnId": "my-udn",
           "app": "netobserv-flowcollector"
         },
         "values": [
@@ -393,7 +393,7 @@
           "SrcK8S_Namespace": "openshift-monitoring",
           "SrcK8S_OwnerName": "prometheus-k8s",
           "SrcK8S_Type": "Pod",
-          "UDN": "my-udn",
+          "UdnId": "my-udn",
           "app": "netobserv-flowcollector"
         },
         "values": [
@@ -413,7 +413,7 @@
           "SrcK8S_Namespace": "openshift-monitoring",
           "SrcK8S_OwnerName": "prometheus-k8s",
           "SrcK8S_Type": "Pod",
-          "UDN": "my-udn",
+          "UdnId": "my-udn",
           "app": "netobserv-flowcollector"
         },
         "values": [
@@ -433,7 +433,7 @@
           "SrcK8S_Namespace": "openshift-monitoring",
           "SrcK8S_OwnerName": "prometheus-k8s",
           "SrcK8S_Type": "Pod",
-          "UDN": "my-udn",
+          "UdnId": "my-udn",
           "app": "netobserv-flowcollector"
         },
         "values": [
@@ -453,7 +453,7 @@
           "SrcK8S_Namespace": "openshift-console",
           "SrcK8S_OwnerName": "console",
           "SrcK8S_Type": "Pod",
-          "UDN": "my-udn",
+          "UdnId": "my-udn",
           "app": "netobserv-flowcollector"
         },
         "values": [
@@ -473,7 +473,7 @@
           "SrcK8S_Namespace": "openshift-monitoring",
           "SrcK8S_OwnerName": "prometheus-k8s",
           "SrcK8S_Type": "Pod",
-          "UDN": "my-udn",
+          "UdnId": "my-udn",
           "app": "netobserv-flowcollector"
         },
         "values": [
@@ -493,7 +493,7 @@
           "SrcK8S_Namespace": "openshift-monitoring",
           "SrcK8S_OwnerName": "prometheus-k8s",
           "SrcK8S_Type": "Pod",
-          "UDN": "my-udn",
+          "UdnId": "my-udn",
           "app": "netobserv-flowcollector"
         },
         "values": [
@@ -513,7 +513,7 @@
           "SrcK8S_Namespace": "openshift-monitoring",
           "SrcK8S_OwnerName": "prometheus-k8s",
           "SrcK8S_Type": "Pod",
-          "UDN": "my-udn",
+          "UdnId": "my-udn",
           "app": "netobserv-flowcollector"
         },
         "values": [
@@ -533,7 +533,7 @@
           "SrcK8S_Namespace": "openshift-ingress",
           "SrcK8S_OwnerName": "router-default",
           "SrcK8S_Type": "Pod",
-          "UDN": "my-udn",
+          "UdnId": "my-udn",
           "app": "netobserv-flowcollector"
         },
         "values": [
@@ -557,7 +557,7 @@
           "SrcK8S_Namespace": "netobserv",
           "SrcK8S_OwnerName": "loki",
           "SrcK8S_Type": "Service",
-          "UDN": "my-udn",
+          "UdnId": "my-udn",
           "app": "netobserv-flowcollector"
         },
         "values": [
@@ -629,7 +629,7 @@
           "SrcK8S_Namespace": "openshift-monitoring",
           "SrcK8S_OwnerName": "prometheus-k8s",
           "SrcK8S_Type": "Pod",
-          "UDN": "my-udn",
+          "UdnId": "my-udn",
           "app": "netobserv-flowcollector"
         },
         "values": [
@@ -649,7 +649,7 @@
           "SrcK8S_Namespace": "netobserv",
           "SrcK8S_OwnerName": "netobserv-plugin",
           "SrcK8S_Type": "Pod",
-          "UDN": "my-udn",
+          "UdnId": "my-udn",
           "app": "netobserv-flowcollector"
         },
         "values": [
