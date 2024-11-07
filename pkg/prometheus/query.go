@@ -10,10 +10,11 @@ import (
 )
 
 type QueryBuilder struct {
-	in        *loki.TopologyInput
-	filters   filters.SingleQuery
-	orMetrics []string
-	qRange    v1.Range
+	aggregateKeyLabels map[string][]string
+	in                 *loki.TopologyInput
+	filters            filters.SingleQuery
+	orMetrics          []string
+	qRange             v1.Range
 }
 
 type Query struct {
@@ -21,17 +22,18 @@ type Query struct {
 	PromQL string
 }
 
-func NewQuery(in *loki.TopologyInput, qr *v1.Range, filters filters.SingleQuery, orMetrics []string) *QueryBuilder {
+func NewQuery(kl map[string][]string, in *loki.TopologyInput, qr *v1.Range, filters filters.SingleQuery, orMetrics []string) *QueryBuilder {
 	return &QueryBuilder{
-		in:        in,
-		filters:   filters,
-		orMetrics: orMetrics,
-		qRange:    *qr,
+		aggregateKeyLabels: kl,
+		in:                 in,
+		filters:            filters,
+		orMetrics:          orMetrics,
+		qRange:             *qr,
 	}
 }
 
 func (q *QueryBuilder) Build() Query {
-	labels, extraFilter := GetLabelsAndFilter(q.in.Aggregate, q.in.Groups)
+	labels, extraFilter := GetLabelsAndFilter(q.aggregateKeyLabels, q.in.Aggregate, q.in.Groups)
 	if extraFilter != "" {
 		q.filters = append(q.filters, filters.NewNotMatch(extraFilter, `""`))
 	}
@@ -156,12 +158,12 @@ func appendFilteredMetric(sb *strings.Builder, metric string, filters filters.Si
 	sb.WriteRune('}')
 }
 
-func GetLabelsAndFilter(aggregate, groups string) ([]string, string) {
+func GetLabelsAndFilter(kl map[string][]string, aggregate, groups string) ([]string, string) {
 	if aggregate == "app" {
 		// ignore app: it's a noop aggregation needed for Loki, not relevant in promQL
 		return nil, ""
 	}
-	return loki.GetLabelsAndFilter(aggregate, groups)
+	return loki.GetLabelsAndFilter(kl, aggregate, groups)
 }
 
 func QueryFilters(metric string, filters filters.SingleQuery) string {

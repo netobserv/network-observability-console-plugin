@@ -3,16 +3,17 @@ import { useTranslation } from 'react-i18next';
 import { FlowScope } from '../../model/flow-query';
 import { Slider, SliderStepObject } from './slider';
 
+import { getScopeName, getScopeShortName, ScopeConfigDef } from '../../model/scope';
 import './scope-slider.css';
 
 export interface ScopeSliderProps {
   scope: FlowScope;
   setScope: (ms: FlowScope) => void;
-  allowedScopes: FlowScope[];
+  scopeDefs: ScopeConfigDef[];
   sizePx: number;
 }
 
-export const ScopeSlider: React.FC<ScopeSliderProps> = ({ scope, setScope, allowedScopes, sizePx }) => {
+export const ScopeSlider: React.FC<ScopeSliderProps> = ({ scope, setScope, scopeDefs, sizePx }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   /* TODO: refactor vertical slider
@@ -24,57 +25,19 @@ export const ScopeSlider: React.FC<ScopeSliderProps> = ({ scope, setScope, allow
     return null;
   }
 
-  let scopes: [FlowScope, SliderStepObject][] = [
-    [
-      'resource',
-      {
-        value: 0,
-        label: sizePx > 450 ? t('Resource') : t('Res'),
-        tooltip: t('Base resource, such as a Pod, a Service or a Node')
-      }
-    ],
-    [
-      'owner',
-      {
-        value: 1,
-        label: sizePx > 450 ? t('Owner') : t('Own'),
-        tooltip: t('Controller owner, such as a Deployment')
-      }
-    ],
-    [
-      'namespace',
-      {
-        value: 2,
-        label: sizePx > 450 ? t('Namespace') : t('NS'),
-        tooltip: t('Resource namespace')
-      }
-    ],
-    [
-      'host',
-      {
-        value: 3,
-        label: sizePx > 450 ? t('Node') : t('Node'),
-        tooltip: t('Node on which the resources are running')
-      }
-    ],
-    [
-      'zone',
-      {
-        value: 4,
-        label: sizePx > 450 ? t('Zone') : t('AZ'),
-        tooltip: t('Availability zone')
-      }
-    ],
-    [
-      'cluster',
-      {
-        value: 5,
-        label: sizePx > 450 ? t('Cluster') : t('Cl'),
-        tooltip: t('Cluster name or identifier')
-      }
-    ]
-  ];
-  scopes = scopes.filter(s => allowedScopes.includes(s[0]));
+  const scopes: [FlowScope, SliderStepObject][] = scopeDefs
+    .slice()
+    .reverse()
+    .map((sd, idx) => {
+      return [
+        sd.id,
+        {
+          value: idx,
+          label: sizePx > 450 ? getScopeName(sd, t) : getScopeShortName(sd, t),
+          tooltip: sd.description
+        }
+      ];
+    });
 
   const index = scopes.findIndex(s => s[0] === scope);
   const isBig = sizePx > 700;

@@ -13,28 +13,6 @@ const (
 	topologyDefaultLimit = "100"
 )
 
-var (
-	aggregateKeyLabels = map[string][]string{
-		"app":          {"app"},
-		"droppedState": {"PktDropLatestState"},
-		"droppedCause": {"PktDropLatestDropCause"},
-		"dnsRCode":     {"DnsFlagsResponseCode"},
-		"cluster":      {"K8S_ClusterName"},
-		"zone":         {"SrcK8S_Zone", "DstK8S_Zone"},
-		"host":         {"SrcK8S_HostName", "DstK8S_HostName"},
-		"namespace":    {"SrcK8S_Namespace", "DstK8S_Namespace"},
-		"owner":        {"SrcK8S_OwnerName", "SrcK8S_OwnerType", "DstK8S_OwnerName", "DstK8S_OwnerType", "SrcK8S_Namespace", "DstK8S_Namespace"},
-		"resource":     {"SrcK8S_Name", "SrcK8S_Type", "SrcK8S_OwnerName", "SrcK8S_OwnerType", "SrcK8S_Namespace", "SrcAddr", "SrcK8S_HostName", "DstK8S_Name", "DstK8S_Type", "DstK8S_OwnerName", "DstK8S_OwnerType", "DstK8S_Namespace", "DstAddr", "DstK8S_HostName"},
-	}
-	groupKeyLabels = map[string][]string{
-		"clusters":   {"K8S_ClusterName"},
-		"zones":      {"SrcK8S_Zone", "DstK8S_Zone"},
-		"hosts":      {"SrcK8S_HostName", "DstK8S_HostName"},
-		"namespaces": {"SrcK8S_Namespace", "DstK8S_Namespace"},
-		"owners":     {"SrcK8S_OwnerName", "SrcK8S_OwnerType", "DstK8S_OwnerName", "DstK8S_OwnerType"},
-	}
-)
-
 type TopologyInput struct {
 	Start          string
 	End            string
@@ -53,10 +31,11 @@ type TopologyInput struct {
 
 type TopologyQueryBuilder struct {
 	*FlowQueryBuilder
-	topology *TopologyInput
+	topology           *TopologyInput
+	aggregateKeyLabels map[string][]string
 }
 
-func NewTopologyQuery(cfg *config.Loki, in *TopologyInput) (*TopologyQueryBuilder, error) {
+func NewTopologyQuery(cfg *config.Loki, kl map[string][]string, in *TopologyInput) (*TopologyQueryBuilder, error) {
 	var dedup bool
 	var rt constants.RecordType
 	if slices.Contains(constants.AnyConnectionType, string(in.RecordType)) {
@@ -69,20 +48,21 @@ func NewTopologyQuery(cfg *config.Loki, in *TopologyInput) (*TopologyQueryBuilde
 
 	fqb := NewFlowQueryBuilder(cfg, in.Start, in.End, in.Top, dedup, rt, in.PacketLoss)
 	return &TopologyQueryBuilder{
-		FlowQueryBuilder: fqb,
-		topology:         in,
+		FlowQueryBuilder:   fqb,
+		topology:           in,
+		aggregateKeyLabels: kl,
 	}, nil
 }
 
-func GetLabelsAndFilter(aggregate, groups string) ([]string, string) {
+func GetLabelsAndFilter(kl map[string][]string, aggregate, groups string) ([]string, string) {
 	var fields []string
 	var filter string
-	if fields = aggregateKeyLabels[aggregate]; fields == nil {
+	if fields = kl[aggregate]; fields == nil {
 		fields = []string{aggregate}
 		filter = aggregate
 	}
 	if groups != "" {
-		for gr, labels := range groupKeyLabels {
+		for gr, labels := range kl {
 			if strings.Contains(groups, gr) {
 				for _, label := range labels {
 					if !slices.Contains(fields, label) {
@@ -142,7 +122,7 @@ func (q *TopologyQueryBuilder) Build() string {
 		top = topologyDefaultLimit
 	}
 
-	labels, extraFilter := GetLabelsAndFilter(q.topology.Aggregate, q.topology.Groups)
+	labels, extraFilter := GetLabelsAndFilter(q.aggregateKeyLabels, q.topology.Aggregate, q.topology.Groups)
 	if q.config.IsLabel(extraFilter) {
 		extraFilter = ""
 	}

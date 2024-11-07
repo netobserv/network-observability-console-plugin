@@ -8,7 +8,7 @@ export type PacketLoss = 'dropped' | 'hasDrops' | 'sent' | 'all';
 export type MetricFunction = 'count' | 'sum' | 'avg' | 'min' | 'max' | 'p90' | 'p99' | 'rate';
 export type StatFunction = MetricFunction | 'last';
 export type MetricType = 'Flows' | 'DnsFlows' | Field;
-export type FlowScope = 'app' | 'cluster' | 'zone' | 'host' | 'namespace' | 'owner' | 'resource';
+export type FlowScope = 'app' | 'cluster' | 'zone' | 'host' | 'namespace' | 'owner' | 'resource' | string;
 export type AggregateBy = FlowScope | Field;
 export type NodeType = FlowScope | 'unknown';
 export type Groups =
@@ -26,7 +26,8 @@ export type Groups =
   | 'hosts+owners'
   | 'namespaces'
   | 'namespaces+owners'
-  | 'owners';
+  | 'owners'
+  | string;
 
 export interface FlowQuery {
   timeRange?: number;

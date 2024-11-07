@@ -7,10 +7,9 @@ import { useTranslation } from 'react-i18next';
 import { defaultNetflowMetrics, Stats } from '../api/loki';
 import { Config } from '../model/config';
 import { Filters, getDisabledFiltersRecord, getEnabledFilters } from '../model/filters';
-import { filtersToString, FlowQuery, FlowScope, MetricType } from '../model/flow-query';
+import { filtersToString, FlowQuery, MetricType } from '../model/flow-query';
 import { netflowTrafficModel } from '../model/netflow-traffic';
 import { parseQuickFilters } from '../model/quick-filters';
-import { TopologyGroupTypes } from '../model/topology';
 import { getFetchFunctions as getBackAndForthFetch } from '../utils/back-and-forth';
 import { ColumnsId, getDefaultColumns } from '../utils/columns';
 import { loadConfig } from '../utils/config';
@@ -149,28 +148,15 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
     return isPromOnly() ? dataSourceHasLabels(['SrcK8S_Zone', 'DstK8S_Zone']) : model.config.features.includes('zones');
   }, [model.config.features, dataSourceHasLabels, isPromOnly]);
 
-  const getAllowedScopes = React.useCallback(() => {
-    const scopes: FlowScope[] = [];
-    if (isMultiCluster()) {
-      scopes.push('cluster');
-    }
-    if (isZones()) {
-      scopes.push('zone');
-    }
-    if (dataSourceHasLabels(['SrcK8S_HostName', 'DstK8S_HostName'])) {
-      scopes.push('host');
-    }
-    if (dataSourceHasLabels(['SrcK8S_Namespace', 'DstK8S_Namespace'])) {
-      scopes.push('namespace');
-    }
-    if (dataSourceHasLabels(['SrcK8S_OwnerName', 'DstK8S_OwnerName'])) {
-      scopes.push('owner');
-    }
-    if (dataSourceHasLabels(['SrcK8S_Name', 'DstK8S_Name'])) {
-      scopes.push('resource');
-    }
-    return scopes;
-  }, [isMultiCluster, isZones, dataSourceHasLabels]);
+  const getAvailableScopes = React.useCallback(() => {
+    return model.config.scopes.filter(sc => {
+      if (sc.feature) {
+        return model.config.features.includes(sc.feature);
+      } else {
+        return dataSourceHasLabels(sc.labels);
+      }
+    });
+  }, [model.config.scopes, model.config.features, dataSourceHasLabels]);
 
   const getAllowedMetricTypes = React.useCallback(() => {
     let options: MetricType[] = ['Bytes', 'Packets'];
@@ -318,8 +304,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
       query.aggregateBy = model.metricScope;
       if (model.selectedViewId === 'topology') {
         query.type = model.topologyMetricType;
-        query.groups =
-          model.topologyOptions.groupTypes !== TopologyGroupTypes.none ? model.topologyOptions.groupTypes : undefined;
+        query.groups = model.topologyOptions.groupTypes !== 'none' ? model.topologyOptions.groupTypes : undefined;
       } else if (model.selectedViewId === 'overview') {
         query.limit = topValues.includes(model.limit) ? model.limit : topValues[0];
         query.groups = undefined;
@@ -553,11 +538,16 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
 
   // invalidate metric scope / group if not available
   React.useEffect(() => {
-    if (initState.current.includes('configLoaded') && !getAllowedScopes().includes(model.metricScope)) {
+    if (
+      initState.current.includes('configLoaded') &&
+      !getAvailableScopes()
+        .map(sc => sc.id)
+        .includes(model.metricScope)
+    ) {
       model.setMetricScope(defaultMetricScope);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [getAllowedScopes, model.metricScope, model.setMetricScope]);
+  }, [getAvailableScopes, model.metricScope, model.setMetricScope]);
 
   // invalidate metric type / function if not available
   React.useEffect(() => {
@@ -889,7 +879,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
           {...model}
           isDarkTheme={isDarkTheme}
           allowedTypes={getAllowedMetricTypes()}
-          allowedScopes={getAllowedScopes()}
+          scopes={getAvailableScopes()}
           ref={searchRef}
         />
       )}
@@ -908,7 +898,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
           clearFilters={clearFilters}
           filterDefinitions={getFilterDefs()}
           searchHandle={searchRef.current}
-          allowedScopes={getAllowedScopes()}
+          scopes={getAvailableScopes()}
           canSwitchTypes={isFlow() && isConnectionTracking()}
           clearSelections={clearSelections}
           availableColumns={getAvailableColumns(true)}

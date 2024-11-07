@@ -429,9 +429,8 @@ export const Slider: React.FunctionComponent<SliderProps> = ({
 
               if (stepObj.tooltip) {
                 return (
-                  <Tooltip content={stepObj.tooltip} className="slider-tooltip">
+                  <Tooltip key={stepObj.value} content={stepObj.tooltip} className="slider-tooltip">
                     <SliderStep
-                      key={stepObj.value}
                       value={stepValue}
                       label={stepObj.label}
                       isLabelHidden={stepObj.isLabelHidden}

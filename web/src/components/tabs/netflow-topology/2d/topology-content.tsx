@@ -22,7 +22,8 @@ import { TopologyMetrics } from '../../../../api/loki';
 import { Config } from '../../../../model/config';
 import { Filter, FilterDefinition, Filters } from '../../../../model/filters';
 import { FlowScope, MetricType, StatFunction } from '../../../../model/flow-query';
-import { getStat, MetricScopeOptions } from '../../../../model/metrics';
+import { getStat } from '../../../../model/metrics';
+import { ScopeConfigDef } from '../../../../model/scope';
 import {
   Decorated,
   ElementData,
@@ -59,7 +60,7 @@ export interface TopologyContentProps {
   metricType: MetricType;
   metricScope: FlowScope;
   setMetricScope: (ms: FlowScope) => void;
-  allowedScopes: FlowScope[];
+  scopes: ScopeConfigDef[];
   metrics: TopologyMetrics[];
   droppedMetrics: TopologyMetrics[];
   options: TopologyOptions;
@@ -82,7 +83,7 @@ export const TopologyContent: React.FC<TopologyContentProps> = ({
   metricType,
   metricScope,
   setMetricScope,
-  allowedScopes,
+  scopes,
   metrics,
   droppedMetrics,
   options,
@@ -205,24 +206,8 @@ export const TopologyContent: React.FC<TopologyContentProps> = ({
 
   const onStepInto = React.useCallback(
     (data: Decorated<ElementData>) => {
-      let groupTypes: TopologyGroupTypes;
-      switch (metricScope) {
-        case MetricScopeOptions.CLUSTER:
-          groupTypes = TopologyGroupTypes.clusters;
-          break;
-        case MetricScopeOptions.ZONE:
-          groupTypes = TopologyGroupTypes.zones;
-          break;
-        case MetricScopeOptions.HOST:
-          groupTypes = TopologyGroupTypes.hosts;
-          break;
-        case MetricScopeOptions.NAMESPACE:
-          groupTypes = TopologyGroupTypes.namespaces;
-          break;
-        default:
-          groupTypes = TopologyGroupTypes.owners;
-      }
-      const scope = getStepIntoNext(metricScope, allowedScopes);
+      const groupTypes: TopologyGroupTypes = metricScope;
+      const scope = getStepIntoNext(metricScope, scopes);
       if (data.nodeType && data.peer && scope) {
         setMetricScope(scope);
         setOptions({ ...options, groupTypes });
@@ -246,17 +231,7 @@ export const TopologyContent: React.FC<TopologyContentProps> = ({
         onSelect(undefined);
       }
     },
-    [
-      metricScope,
-      setMetricScope,
-      allowedScopes,
-      setOptions,
-      options,
-      filters.list,
-      filterDefinitions,
-      onSelect,
-      setFilters
-    ]
+    [metricScope, setMetricScope, scopes, setOptions, options, filters.list, filterDefinitions, onSelect, setFilters]
   );
 
   const onHover = React.useCallback((data: Decorated<ElementData>) => {
@@ -361,7 +336,7 @@ export const TopologyContent: React.FC<TopologyContentProps> = ({
       droppedMetrics,
       getOptions(),
       metricScope,
-      allowedScopes,
+      scopes,
       searchEvent?.searchValue || '',
       highlightedId,
       filters,
@@ -404,7 +379,7 @@ export const TopologyContent: React.FC<TopologyContentProps> = ({
     selectedIds,
     getOptions,
     metricScope,
-    allowedScopes,
+    scopes,
     searchEvent?.searchValue,
     filters,
     t,

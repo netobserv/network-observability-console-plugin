@@ -310,14 +310,14 @@ describe('matchPeers', () => {
       createPeer({ namespace: '' }),
       createPeer({
         namespace: 'ns1',
-        hostName: 'host1',
+        host: 'host1',
         owner: { name: 'depl-a', type: 'Deployment' },
         resource: { name: 'depl-a-12345', type: 'Pod' },
         addr: '1.2.3.4'
       }),
       createPeer({
         namespace: 'ns1',
-        hostName: 'host2',
+        host: 'host2',
         owner: { name: 'depl-b', type: 'Deployment' },
         resource: { name: 'depl-b-6789', type: 'Pod' },
         addr: '1.2.3.5'
@@ -329,7 +329,7 @@ describe('matchPeers', () => {
       }),
       createPeer({
         namespace: 'ns2',
-        hostName: 'host1',
+        host: 'host1',
         owner: { name: 'depl-a', type: 'Deployment' },
         resource: { name: 'depl-a-12345', type: 'Pod' },
         addr: '1.2.3.7'
@@ -347,13 +347,13 @@ describe('matchPeers', () => {
 
     // With node group
     data.nodeType = 'host';
-    data.peer = createPeer({ hostName: 'host1' });
+    data.peer = createPeer({ host: 'host1' });
 
     matches = peers.filter(p => matchPeer(data, p));
     expect(matches).toEqual([peers[1], peers[4]]);
 
     // With node+namespace
-    data.peer = createPeer({ namespace: 'ns2', hostName: 'host1' });
+    data.peer = createPeer({ namespace: 'ns2', host: 'host1' });
 
     matches = peers.filter(p => matchPeer(data, p));
     expect(matches).toEqual([peers[4]]);
