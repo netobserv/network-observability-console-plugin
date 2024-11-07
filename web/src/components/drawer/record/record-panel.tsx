@@ -82,7 +82,13 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
     const forbiddenColumns = [ColumnsId.ifdirs, ColumnsId.interfaces];
     return columns.filter((c: Column) => {
       const value = c.value(record);
-      return !forbiddenColumns.includes(c.id) && value !== null && value !== '' && !Number.isNaN(value);
+      return (
+        !forbiddenColumns.includes(c.id) &&
+        value !== undefined &&
+        value !== null &&
+        value !== '' &&
+        !Number.isNaN(value)
+      );
     });
   }, [columns, record]);
 

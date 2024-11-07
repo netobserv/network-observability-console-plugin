@@ -5,7 +5,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { FlowDirection, getDirectionDisplayString, Record } from '../../../api/ipfix';
-import { Column, ColumnsId, getFullColumnName } from '../../../utils/columns';
+import { Column, ColumnsId, getFullColumnName, isKubeObj, KubeObj } from '../../../utils/columns';
 import { dateFormatter, getFormattedDate, timeMSFormatter, utcDateTimeFormatter } from '../../../utils/datetime';
 import { dnsCodesNames, dnsErrorsValues, getDNSErrorDescription, getDNSRcodeDescription } from '../../../utils/dns';
 import { getDSCPDocUrl, getDSCPServiceClassDescription, getDSCPServiceClassName } from '../../../utils/dscp';
@@ -129,11 +129,19 @@ export const RecordField: React.FC<RecordFieldProps> = ({
         <TextContent className={`co-resource-item ${size} netobserv-no-child-margin`}>
           <ResourceIcon kind={kind} />
           <Text component={TextVariants.p} className="co-resource-item__resource-name" data-test-id={value}>
-            {value}
+            &nbsp;{value}
           </Text>
         </TextContent>
       )
     );
+  };
+
+  const kubeObjContainer = (k: KubeObj) => {
+    const main = kubeObjContent(k.name, k.kind, k.namespace);
+    if (k.showNamespace && k.namespace) {
+      return doubleContainer(main, kindContent('Namespace', k.namespace), false);
+    }
+    return singleContainer(main);
   };
 
   const kubeObjContent = (value: string | undefined, kind: string | undefined, ns: string | undefined) => {
@@ -143,6 +151,7 @@ export const RecordField: React.FC<RecordFieldProps> = ({
         <div data-test={`field-resource-${kind}.${ns}.${value}`} className="force-truncate">
           {resourceIconText(value, kind, ns)}
           <TextContent className="record-field-tooltip netobserv-no-child-margin">
+            {/* Note: THIS IS THE TOOLTIP */}
             {ns && (
               <>
                 <Text component={TextVariants.h4}>{t('Namespace')}</Text>
@@ -158,15 +167,6 @@ export const RecordField: React.FC<RecordFieldProps> = ({
     return undefined;
   };
 
-  const explicitKubeObjContent = (ip: string, port: number, kind?: string, namespace?: string, name?: string) => {
-    // Note: namespace is not mandatory here (e.g. Node objects)
-    if (name && kind) {
-      return doubleContainer(kubeObjContent(name, kind, namespace), kindContent('Namespace', namespace), false);
-    } else {
-      return ipPortContent(ip, port);
-    }
-  };
-
   const kindContent = (kind: 'Namespace' | 'Node', value?: string) => {
     if (value) {
       return (
@@ -180,18 +180,6 @@ export const RecordField: React.FC<RecordFieldProps> = ({
       );
     }
     return undefined;
-  };
-
-  const ipPortContent = (ip: string, port: number, singleText = false) => {
-    if (singleText) {
-      return singleContainer(simpleTextWithTooltip(port && !Number.isNaN(port) ? `${ip}:${String(port)}` : ip));
-    } else {
-      return doubleContainer(
-        simpleTextWithTooltip(ip),
-        simpleTextWithTooltip(port && !Number.isNaN(port) ? String(port) : undefined),
-        false
-      );
-    }
   };
 
   const dateTimeContent = (date: Date | undefined) => {
@@ -310,129 +298,6 @@ export const RecordField: React.FC<RecordFieldProps> = ({
               )
             : undefined
         );
-      case ColumnsId.name:
-        return doubleContainer(
-          kubeObjContent(flow.fields.SrcK8S_Name, flow.labels.SrcK8S_Type, flow.labels.SrcK8S_Namespace),
-          kubeObjContent(flow.fields.DstK8S_Name, flow.labels.DstK8S_Type, flow.labels.DstK8S_Namespace)
-        );
-      case ColumnsId.srcname:
-        return singleContainer(kubeObjContent(value as string, flow.labels.SrcK8S_Type, flow.labels.SrcK8S_Namespace));
-      case ColumnsId.dstname:
-        return singleContainer(kubeObjContent(value as string, flow.labels.DstK8S_Type, flow.labels.DstK8S_Namespace));
-      case ColumnsId.owner:
-        return doubleContainer(
-          kubeObjContent(flow.labels.SrcK8S_OwnerName, flow.fields.SrcK8S_OwnerType, flow.labels.SrcK8S_Namespace),
-          kubeObjContent(flow.labels.DstK8S_OwnerName, flow.fields.DstK8S_OwnerType, flow.labels.DstK8S_Namespace)
-        );
-      case ColumnsId.srcowner:
-        return singleContainer(
-          kubeObjContent(value as string, flow.fields.SrcK8S_OwnerType, flow.labels.SrcK8S_Namespace)
-        );
-      case ColumnsId.dstowner:
-        return singleContainer(
-          kubeObjContent(value as string, flow.fields.DstK8S_OwnerType, flow.labels.DstK8S_Namespace)
-        );
-      case ColumnsId.addrport:
-        return doubleContainer(
-          ipPortContent(flow.fields.SrcAddr || '', flow.fields.SrcPort || NaN),
-          ipPortContent(flow.fields.DstAddr || '', flow.fields.DstPort || NaN)
-        );
-      case ColumnsId.srcaddrport:
-        return singleContainer(ipPortContent(flow.fields.SrcAddr || '', flow.fields.SrcPort || NaN));
-      case ColumnsId.dstaddrport:
-        return singleContainer(ipPortContent(flow.fields.DstAddr || '', flow.fields.DstPort || NaN));
-      case ColumnsId.kubeobject:
-        return doubleContainer(
-          explicitKubeObjContent(
-            flow.fields.SrcAddr || '',
-            flow.fields.SrcPort || NaN,
-            flow.labels.SrcK8S_Type,
-            flow.labels.SrcK8S_Namespace,
-            flow.fields.SrcK8S_Name
-          ),
-          explicitKubeObjContent(
-            flow.fields.DstAddr || '',
-            flow.fields.DstPort || NaN,
-            flow.labels.DstK8S_Type,
-            flow.labels.DstK8S_Namespace,
-            flow.fields.DstK8S_Name
-          )
-        );
-      case ColumnsId.srckubeobject:
-        return singleContainer(
-          explicitKubeObjContent(
-            flow.fields.SrcAddr || '',
-            flow.fields.SrcPort || NaN,
-            flow.labels.SrcK8S_Type,
-            flow.labels.SrcK8S_Namespace,
-            flow.fields.SrcK8S_Name
-          )
-        );
-      case ColumnsId.dstkubeobject:
-        return singleContainer(
-          explicitKubeObjContent(
-            flow.fields.DstAddr || '',
-            flow.fields.DstPort || NaN,
-            flow.labels.DstK8S_Type,
-            flow.labels.DstK8S_Namespace,
-            flow.fields.DstK8S_Name
-          )
-        );
-      case ColumnsId.ownerkubeobject:
-        return doubleContainer(
-          explicitKubeObjContent(
-            flow.fields.SrcAddr || '',
-            flow.fields.SrcPort || NaN,
-            flow.fields.SrcK8S_OwnerType,
-            flow.labels.SrcK8S_Namespace,
-            flow.labels.SrcK8S_OwnerName
-          ),
-          explicitKubeObjContent(
-            flow.fields.DstAddr || '',
-            flow.fields.DstPort || NaN,
-            flow.fields.DstK8S_OwnerType,
-            flow.labels.DstK8S_Namespace,
-            flow.labels.DstK8S_OwnerName
-          )
-        );
-      case ColumnsId.srcownerkubeobject:
-        return singleContainer(
-          explicitKubeObjContent(
-            flow.fields.SrcAddr || '',
-            flow.fields.SrcPort || NaN,
-            flow.fields.SrcK8S_OwnerType,
-            flow.labels.SrcK8S_Namespace,
-            flow.labels.DstK8S_OwnerName
-          )
-        );
-      case ColumnsId.dstownerkubeobject:
-        return singleContainer(
-          explicitKubeObjContent(
-            flow.fields.DstAddr || '',
-            flow.fields.DstPort || NaN,
-            flow.fields.DstK8S_OwnerType,
-            flow.labels.DstK8S_Namespace,
-            flow.labels.DstK8S_OwnerName
-          )
-        );
-      case ColumnsId.namespace:
-        return doubleContainer(
-          kindContent('Namespace', flow.labels.SrcK8S_Namespace),
-          kindContent('Namespace', flow.labels.DstK8S_Namespace)
-        );
-      case ColumnsId.srcnamespace:
-      case ColumnsId.dstnamespace: {
-        return singleContainer(kindContent('Namespace', value as string));
-      }
-      case ColumnsId.hostname:
-        return doubleContainer(
-          kindContent('Node', flow.fields.SrcK8S_HostName),
-          kindContent('Node', flow.fields.DstK8S_HostName)
-        );
-      case ColumnsId.srchostname:
-      case ColumnsId.dsthostname: {
-        return singleContainer(kindContent('Node', value as string));
-      }
       case ColumnsId.port:
         return doubleContainer(
           simpleTextWithTooltip(flow.fields.SrcPort ? formatPort(flow.fields.SrcPort) : ''),
@@ -648,13 +513,19 @@ export const RecordField: React.FC<RecordFieldProps> = ({
         );
       }
       default:
+        if (value === undefined) {
+          return emptyText();
+        }
         if (Array.isArray(value) && value.length) {
           // we can only show two values properly with containers
           if (value.length === 2) {
-            return doubleContainer(simpleTextWithTooltip(String(value[0])), simpleTextWithTooltip(String(value[1])));
+            const contents = value.map(v => (isKubeObj(v) ? kubeObjContainer(v) : simpleTextWithTooltip(String(v))));
+            return doubleContainer(contents[0], contents[1]);
           }
           // else we will show values as single joigned string
           return singleContainer(simpleTextWithTooltip(value.map(v => String(v)).join(', ')));
+        } else if (value && isKubeObj(value)) {
+          return kubeObjContainer(value);
         } else {
           return singleContainer(simpleTextWithTooltip(String(value)));
         }
