@@ -183,7 +183,7 @@ const parseTopologyMetric = (
     namespace: raw.metric.SrcK8S_Namespace,
     hostName: raw.metric.SrcK8S_HostName,
     zone: raw.metric.SrcK8S_Zone,
-    udn: raw.metric.UDN,
+    udn: raw.metric.UdnId,
     // TODO: see if clustername will become directionnal
     clusterName: raw.metric.K8S_ClusterName
   });
@@ -194,7 +194,7 @@ const parseTopologyMetric = (
     namespace: raw.metric.DstK8S_Namespace,
     hostName: raw.metric.DstK8S_HostName,
     zone: raw.metric.DstK8S_Zone,
-    udn: raw.metric.UDN,
+    udn: raw.metric.UdnId,
     // TODO: see if clustername will become directionnal
     clusterName: raw.metric.K8S_ClusterName
   });
