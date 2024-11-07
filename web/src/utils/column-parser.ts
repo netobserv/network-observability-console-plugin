@@ -69,23 +69,20 @@ const funcs: { [name: string]: (columns: Column[], record: Record, args: string[
   }
 };
 
-const parse = (columns: Column[], record: Record, calculatedValue: string) => {
-  // OR
+const parseORs = (columns: Column[], calculatedValue: string): ((record: Record) => ColValue)[] => {
+  // parseORs returns a closure [(Record) => ColValue] to pre-process as much as possible
   const ors = calculatedValue.split(' or ');
-  for (const or of ors) {
+  return ors.map(or => {
     for (const name in funcs) {
       if (or.startsWith(name + '(')) {
         const regex = new RegExp(name + '|\\(|\\)', 'g');
         const repl = or.replaceAll(regex, '');
         const args = repl.split(',');
-        const result = funcs[name](columns, record, args);
-        if (result) {
-          return result;
-        }
+        return (record: Record) => funcs[name](columns, record, args);
       }
     }
-  }
-  return undefined;
+    return (_: Record) => undefined;
+  });
 };
 
 const forceType = (id: ColumnsId, value: ColValue, type?: FieldType): ColValue => {
@@ -123,7 +120,16 @@ export const computeValueFunc = (
         return result.flatMap(r => r) as ColValue;
       };
     }
-    return (r: Record) => parse(columns, r, def.calculated!);
+    const orFuncs = parseORs(columns, def.calculated!);
+    return (r: Record) => {
+      for (const orFunc of orFuncs) {
+        const result = orFunc(r);
+        if (result) {
+          return result;
+        }
+      }
+      return undefined;
+    };
   } else if (fields) {
     return (r: Record) => {
       const result: ColValue[] = fields.map(fc => {
