@@ -1,9 +1,8 @@
 import * as React from 'react';
-import { useTranslation } from 'react-i18next';
 import { FlowScope } from '../../model/flow-query';
 import { Slider, SliderStepObject } from './slider';
 
-import { getScopeName, getScopeShortName, ScopeConfigDef } from '../../model/scope';
+import { ScopeConfigDef } from '../../model/scope';
 import './scope-slider.css';
 
 export interface ScopeSliderProps {
@@ -14,8 +13,6 @@ export interface ScopeSliderProps {
 }
 
 export const ScopeSlider: React.FC<ScopeSliderProps> = ({ scope, setScope, scopeDefs, sizePx }) => {
-  const { t } = useTranslation('plugin__netobserv-plugin');
-
   /* TODO: refactor vertical slider
    * In between the display is block to working dimensions managing two cases
    * Non supported dimensions simply hide the slider from the view
@@ -33,7 +30,7 @@ export const ScopeSlider: React.FC<ScopeSliderProps> = ({ scope, setScope, scope
         sd.id,
         {
           value: idx,
-          label: sizePx > 450 ? getScopeName(sd, t) : getScopeShortName(sd, t),
+          label: sizePx > 450 ? sd.name : sd.shortName,
           tooltip: sd.description
         }
       ];

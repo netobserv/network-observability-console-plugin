@@ -5,9 +5,9 @@ import { TopologyGroupTypes } from './topology';
 
 export type ScopeConfigDef = {
   id: FlowScope;
-  name?: string;
-  shortName?: string;
-  description?: string;
+  name: string;
+  shortName: string;
+  description: string;
   labels: string[];
   feature?: Feature;
   groups?: string[];
@@ -49,7 +49,7 @@ export const getGroupName = (group: TopologyGroupTypes, scopes: ScopeConfigDef[]
   } else {
     const found = scopes.find(sc => `${sc.id}s` === group);
     if (found) {
-      return getScopeName(found, t);
+      return found.name;
     } else {
       return `invalid ${group}`;
     }

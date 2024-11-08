@@ -2,7 +2,7 @@ import { Text, TextContent, TextVariants } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Filter, FilterDefinition } from '../../../model/filters';
-import { getCustomScopes, getScopeName } from '../../../model/scope';
+import { getCustomScopes } from '../../../model/scope';
 import { NodeData } from '../../../model/topology';
 import { createPeer } from '../../../utils/metrics';
 import { ElementField } from './element-field';
@@ -69,7 +69,7 @@ export const ElementFields: React.FC<ElementFieldsProps> = ({
         <ElementField
           id={`${id}-${sc}`}
           key={`${id}-${sc}`}
-          label={forceLabel || getScopeName(sc, t)}
+          label={forceLabel || sc.name}
           forcedText={forceAsText ? value : undefined}
           activeFilters={activeFilters}
           filterType={sc.id}

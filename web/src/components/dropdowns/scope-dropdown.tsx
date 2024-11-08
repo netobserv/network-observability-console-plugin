@@ -2,7 +2,7 @@ import { Dropdown, DropdownItem, DropdownPosition, DropdownToggle } from '@patte
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { FlowScope } from '../../model/flow-query';
-import { getScopeName, ScopeConfigDef } from '../../model/scope';
+import { ScopeConfigDef } from '../../model/scope';
 
 export interface ScopeDropdownProps {
   selected: FlowScope;
@@ -26,10 +26,7 @@ export const ScopeDropdown: React.FC<ScopeDropdownProps> = ({ selected, setScope
           id={`${id}-dropdown`}
           onToggle={() => setScopeDropdownOpen(!scopeDropdownOpen)}
         >
-          {getScopeName(
-            scopes.find(sc => sc.id === selected),
-            t
-          )}
+          {scopes.find(sc => sc.id === selected)?.name || t('n/a')}
         </DropdownToggle>
       }
       isOpen={scopeDropdownOpen}
@@ -43,7 +40,7 @@ export const ScopeDropdown: React.FC<ScopeDropdownProps> = ({ selected, setScope
             setScopeType(sc.id);
           }}
         >
-          {getScopeName(sc, t)}
+          {sc.name}
         </DropdownItem>
       ))}
     />

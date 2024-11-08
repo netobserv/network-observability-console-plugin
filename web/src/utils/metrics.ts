@@ -12,7 +12,7 @@ import {
   TopologyMetrics
 } from '../api/loki';
 import { FlowScope, MetricFunction, MetricType } from '../model/flow-query';
-import { getCustomScopes, getScopeName } from '../model/scope';
+import { getCustomScopes } from '../model/scope';
 import { NodeData } from '../model/topology';
 import { roundTwoDigits } from './count';
 import { computeStepInterval, rangeToSeconds, TimeRange } from './datetime';
@@ -141,7 +141,7 @@ export const createPeer = (fields: Partial<TopologyMetricPeer>): TopologyMetricP
     .forEach(sc => {
       newPeer[sc.id] = fields[sc.id] as string;
       if (!newPeer.resourceKind && newPeer[sc.id]) {
-        newPeer.resourceKind = getScopeName(sc, v => v);
+        newPeer.resourceKind = sc.name;
         newPeer.getDisplayName = () => newPeer[sc.id] as string;
       }
     });
