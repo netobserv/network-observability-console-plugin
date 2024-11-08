@@ -21,6 +21,7 @@ export const ScopeDefSample: ScopeConfigDef[] = [
   {
     id: 'host',
     name: 'Node',
+    shortName: 'Nd',
     description: 'Node on which the resources are running',
     labels: ['SrcK8S_HostName', 'DstK8S_HostName'],
     groups: ['clusters', 'zones', 'clusters+zones']

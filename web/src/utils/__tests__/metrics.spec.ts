@@ -1,5 +1,7 @@
 import { RawTopologyMetrics, TopologyMetricPeer, TopologyMetrics } from '../../api/loki';
+import { ScopeDefSample } from '../../components/__tests-data__/scopes';
 import { NodeData } from '../../model/topology';
+import { ContextSingleton } from '../context';
 import {
   calibrateRange,
   computeStats,
@@ -13,6 +15,10 @@ import {
 const t = (k: string) => k;
 
 describe('normalize and computeStats', () => {
+  beforeEach(() => {
+    ContextSingleton.setScopes(ScopeDefSample);
+  });
+
   it('should normalize and compute simple stats', () => {
     const values: [number, unknown][] = [
       [1664372000, '5'],
@@ -191,6 +197,10 @@ describe('normalize and computeStats', () => {
 });
 
 describe('matchPeers', () => {
+  beforeEach(() => {
+    ContextSingleton.setScopes(ScopeDefSample);
+  });
+
   it('should match namespace nodes', () => {
     const peers: TopologyMetricPeer[] = [createPeer({ namespace: '' }), createPeer({ namespace: 'test' })];
 
