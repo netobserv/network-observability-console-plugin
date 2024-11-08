@@ -100,8 +100,8 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
   );
 
   const getFilter = (col: Column) => {
-    if (record && col.value) {
-      const value = col.value(record);
+    if (record && col.fieldValue) {
+      const value = col.fieldValue(record);
       switch (col.id) {
         case ColumnsId.endtime:
           return getTimeRangeFilter(col, value);
