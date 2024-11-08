@@ -77,7 +77,7 @@ type Column struct {
 	Filter     string   `yaml:"filter,omitempty" json:"filter,omitempty"`
 	Default    bool     `yaml:"default,omitempty" json:"default,omitempty"`
 	Width      int      `yaml:"width,omitempty" json:"width,omitempty"`
-	Feature    string   `yaml:"feature" json:"feature"`
+	Feature    string   `yaml:"feature,omitempty" json:"feature,omitempty"`
 }
 
 type Filter struct {
@@ -98,8 +98,10 @@ type Scope struct {
 	ShortName   string   `yaml:"shortName" json:"shortName"`
 	Description string   `yaml:"description" json:"description"`
 	Labels      []string `yaml:"labels" json:"labels"`
-	Feature     string   `yaml:"feature" json:"feature"`
-	Groups      []string `yaml:"groups" json:"groups"`
+	Feature     string   `yaml:"feature,omitempty" json:"feature,omitempty"`
+	Groups      []string `yaml:"groups,omitempty" json:"groups,omitempty"`
+	Filter      string   `yaml:"filter,omitempty" json:"filter,omitempty"`
+	Filters     []string `yaml:"filters,omitempty" json:"filters,omitempty"`
 }
 
 type QuickFilter struct {
