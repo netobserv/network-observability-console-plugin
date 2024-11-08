@@ -325,7 +325,7 @@ func (c *Frontend) GetAggregateKeyLabels() map[string][]string {
 		"dnsRCode":     {"DnsFlagsResponseCode"},
 	}
 	for i := range c.Scopes {
-		keyLabels[c.Scopes[i].ID] = sc.Labels
+		keyLabels[c.Scopes[i].ID] = c.Scopes[i].Labels
 	}
 	return keyLabels
 }
