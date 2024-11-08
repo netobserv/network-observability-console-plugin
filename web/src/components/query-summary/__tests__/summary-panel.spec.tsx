@@ -37,11 +37,13 @@ describe('<SummaryPanel />', () => {
     const wrapper = mount(<SummaryPanelContent {...mocks} />);
 
     expect(wrapper.find(Accordion)).toHaveLength(1);
-    expect(wrapper.find(AccordionItem)).toHaveLength(3);
+    expect(wrapper.find(AccordionItem)).toHaveLength(5);
 
     expect(wrapper.find('#addresses').last().text()).toBe('5 IP(s)');
     expect(wrapper.find('#ports').last().text()).toBe('4 Port(s)');
     expect(wrapper.find('#protocols').last().text()).toBe('1 Protocol(s)');
+    expect(wrapper.find('#Pod').last().text()).toBe('2 Pod(s)');
+    expect(wrapper.find('#Namespace').last().text()).toBe('1 Namespace(s)');
   });
 
   it('should toggle panel', async () => {

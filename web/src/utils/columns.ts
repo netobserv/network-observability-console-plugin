@@ -3,7 +3,7 @@ import { Record } from '../api/ipfix';
 import { Feature } from '../model/config';
 import { FilterId } from '../model/filters';
 import { compareNumbers, compareStrings } from './base-compare';
-import { computeValueFunc } from './column-parser';
+import { computeValueFunc, fromFieldFunc } from './column-parser';
 import { FieldConfig } from './fields';
 import { compareIPs } from './ip';
 import { comparePorts } from './port';
@@ -119,6 +119,7 @@ export interface Column {
   isSelected: boolean;
   isCommon?: boolean;
   value?: (flow: Record) => ColValue;
+  fieldValue?: (flow: Record) => ColValue;
   sort(a: Record, b: Record, col: Column): number;
   // width in "em"
   width: number;
@@ -226,31 +227,29 @@ export const getDefaultColumns = (columnDefs: ColumnConfigDef[], fieldConfigs: F
       docURL: !_.isEmpty(d.docURL) ? d.docURL : undefined,
       quickFilter: !_.isEmpty(d.filter) ? (d.filter as FilterId) : undefined,
       isSelected: d.default === true,
-      isCommon: !_.isEmpty(d.calculated),
+      isCommon: d.calculated !== undefined && d.calculated.startsWith('['),
       value: computeValueFunc(d, columns, fields, field),
+      fieldValue: fromFieldFunc(d, fields, field),
       sort: (a: Record, b: Record, col: Column) => {
-        if (d.calculated) {
+        if (!col.fieldValue) {
           return -1;
-        } else {
-          if (col.value) {
-            const valA = col.value(a);
-            const valB = col.value(b);
-            if (typeof valA === 'number' && typeof valB === 'number') {
-              if (col.id.includes('Port')) {
-                return comparePorts(valA, valB);
-              } else if (col.id.includes('Proto')) {
-                return compareProtocols(valA, valB);
-              }
-              return compareNumbers(valA, valB);
-            } else if (typeof valA === 'string' && typeof valB === 'string') {
-              if (col.id.includes('IP')) {
-                return compareIPs(valA, valB);
-              }
-              return compareStrings(valA, valB);
-            }
-          }
-          return 0;
         }
+        const valA = col.fieldValue(a);
+        const valB = col.fieldValue(b);
+        if (typeof valA === 'number' && typeof valB === 'number') {
+          if (col.id.includes('Port')) {
+            return comparePorts(valA, valB);
+          } else if (col.id.includes('Proto')) {
+            return compareProtocols(valA, valB);
+          }
+          return compareNumbers(valA, valB);
+        } else if (typeof valA === 'string' && typeof valB === 'string') {
+          if (col.id.includes('IP')) {
+            return compareIPs(valA, valB);
+          }
+          return compareStrings(valA, valB);
+        }
+        return 0;
       },
       width: d.width || 15,
       feature: d.feature

@@ -45,11 +45,11 @@ describe('Columns', () => {
     expect(value).toEqual({ kind: 'Pod', name: 'client', namespace: 'foo', showNamespace: false });
   });
 
-  it('should calculate k8s service name when empty', () => {
+  it('should calculate k8s owner name when empty', () => {
     const col = defColumns.find(c => c.id === ('DstK8S_OwnerName' as ColumnsId));
     expect(col).toBeDefined();
     const value = col?.value!(flow);
-    expect(value).toEqual(undefined);
+    expect(value).toBeUndefined();
   });
 
   it('should calculate k8s namespace values', () => {
@@ -89,5 +89,12 @@ describe('Columns', () => {
       { kind: 'Pod', name: 'client', namespace: 'foo', showNamespace: true },
       { kind: 'Service', name: 'server', namespace: 'bar', showNamespace: true }
     ]);
+  });
+
+  it('should calculate src+dst K8S owner objects when empty', () => {
+    const col = defColumns.find(c => c.id === ('K8S_OwnerObject' as ColumnsId));
+    expect(col).toBeDefined();
+    const value = col?.value!(flow);
+    expect(value).toEqual([undefined, undefined]);
   });
 });

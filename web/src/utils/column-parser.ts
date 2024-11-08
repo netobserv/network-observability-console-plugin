@@ -104,6 +104,29 @@ const forceType = (id: ColumnsId, value: ColValue, type?: FieldType): ColValue =
 };
 
 export type ValueFunc = (record: Record) => ColValue;
+
+export const fromFieldFunc = (
+  def: ColumnConfigDef,
+  fields: FieldConfig[] | undefined,
+  field: FieldConfig | undefined
+): ValueFunc | undefined => {
+  if (fields) {
+    return (r: Record) => {
+      const result: ColValue[] = fields.map(fc => {
+        const value = getRecordValue(r, fc.name, undefined);
+        return forceType(def.id as ColumnsId, value, fc.type);
+      });
+      return result.flatMap(r => r) as ColValue;
+    };
+  } else if (field) {
+    return (r: Record) => {
+      const value = getRecordValue(r, field!.name, '');
+      return forceType(def.id as ColumnsId, value, field!.type);
+    };
+  }
+  return undefined;
+};
+
 export const computeValueFunc = (
   def: ColumnConfigDef,
   columns: Column[],
@@ -128,20 +151,11 @@ export const computeValueFunc = (
       }
       return undefined;
     };
-  } else if (fields) {
-    return (r: Record) => {
-      const result: ColValue[] = fields.map(fc => {
-        const value = getRecordValue(r, fc.name, undefined);
-        return forceType(def.id as ColumnsId, value, fc.type);
-      });
-      return result.flatMap(r => r) as ColValue;
-    };
-  } else if (field) {
-    return (r: Record) => {
-      const value = getRecordValue(r, field!.name, '');
-      return forceType(def.id as ColumnsId, value, field!.type);
-    };
   }
-  console.warn('column.value called on ' + def.id + ' but not configured');
-  return undefined;
+
+  const fromField = fromFieldFunc(def, fields, field);
+  if (fromField === undefined) {
+    console.warn('column.value called on ' + def.id + ' but not configured');
+  }
+  return fromField;
 };

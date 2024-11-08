@@ -37,7 +37,9 @@ export const FlowsSample: Record[] = [
       _RecordType: 'flowLog',
       FlowDirection: FlowDirection.Egress,
       SrcK8S_Namespace: 'default',
-      DstK8S_Namespace: 'default'
+      DstK8S_Namespace: 'default',
+      SrcK8S_Type: 'Pod',
+      DstK8S_Type: 'Pod'
     },
     key: 1,
     fields: {
