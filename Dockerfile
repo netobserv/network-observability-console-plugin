@@ -1,6 +1,6 @@
 # We do not use --platform feature to auto fill this ARG because of incompatibility between podman and docker
 ARG TARGETARCH
-FROM docker.io/library/node:18-alpine as web-builder
+FROM docker.io/library/node:23-alpine as web-builder
 
 USER node
 
