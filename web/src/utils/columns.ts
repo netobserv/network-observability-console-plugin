@@ -105,7 +105,7 @@ export interface KubeObj {
 }
 export type ColValue = string | number | KubeObj | string[] | number[] | KubeObj[] | undefined;
 export const isKubeObj = (v: ColValue): v is KubeObj => {
-  return (v as KubeObj).kind !== undefined;
+  return (v as KubeObj)?.kind !== undefined;
 };
 
 export interface Column {
@@ -118,7 +118,7 @@ export interface Column {
   quickFilter?: FilterId;
   isSelected: boolean;
   isCommon?: boolean;
-  value: (flow: Record) => ColValue;
+  value?: (flow: Record) => ColValue;
   sort(a: Record, b: Record, col: Column): number;
   // width in "em"
   width: number;
@@ -232,20 +232,22 @@ export const getDefaultColumns = (columnDefs: ColumnConfigDef[], fieldConfigs: F
         if (d.calculated) {
           return -1;
         } else {
-          const valA = col.value(a);
-          const valB = col.value(b);
-          if (typeof valA === 'number' && typeof valB === 'number') {
-            if (col.id.includes('Port')) {
-              return comparePorts(valA, valB);
-            } else if (col.id.includes('Proto')) {
-              return compareProtocols(valA, valB);
+          if (col.value) {
+            const valA = col.value(a);
+            const valB = col.value(b);
+            if (typeof valA === 'number' && typeof valB === 'number') {
+              if (col.id.includes('Port')) {
+                return comparePorts(valA, valB);
+              } else if (col.id.includes('Proto')) {
+                return compareProtocols(valA, valB);
+              }
+              return compareNumbers(valA, valB);
+            } else if (typeof valA === 'string' && typeof valB === 'string') {
+              if (col.id.includes('IP')) {
+                return compareIPs(valA, valB);
+              }
+              return compareStrings(valA, valB);
             }
-            return compareNumbers(valA, valB);
-          } else if (typeof valA === 'string' && typeof valB === 'string') {
-            if (col.id.includes('IP')) {
-              return compareIPs(valA, valB);
-            }
-            return compareStrings(valA, valB);
           }
           return 0;
         }

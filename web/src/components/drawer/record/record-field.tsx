@@ -129,7 +129,7 @@ export const RecordField: React.FC<RecordFieldProps> = ({
         <TextContent className={`co-resource-item ${size} netobserv-no-child-margin`}>
           <ResourceIcon kind={kind} />
           <Text component={TextVariants.p} className="co-resource-item__resource-name" data-test-id={value}>
-            &nbsp;{value}
+            {value}
           </Text>
         </TextContent>
       )
@@ -150,21 +150,26 @@ export const RecordField: React.FC<RecordFieldProps> = ({
       return (
         <div data-test={`field-resource-${kind}.${ns}.${value}`} className="force-truncate">
           {resourceIconText(value, kind, ns)}
-          <TextContent className="record-field-tooltip netobserv-no-child-margin">
-            {/* Note: THIS IS THE TOOLTIP */}
-            {ns && (
-              <>
-                <Text component={TextVariants.h4}>{t('Namespace')}</Text>
-                <Text component={TextVariants.p}>{ns}</Text>
-              </>
-            )}
-            <Text component={TextVariants.h4}>{kind}</Text>
-            <Text component={TextVariants.p}>{value}</Text>
-          </TextContent>
+          {kubeTooltip(value, kind, ns)}
         </div>
       );
     }
     return undefined;
+  };
+
+  const kubeTooltip = (value: string, kind: string, ns: string | undefined) => {
+    return (
+      <TextContent className="record-field-tooltip netobserv-no-child-margin">
+        {ns && (
+          <>
+            <Text component={TextVariants.h4}>{t('Namespace')}</Text>
+            <Text component={TextVariants.p}>{ns}</Text>
+          </>
+        )}
+        <Text component={TextVariants.h4}>{kind}</Text>
+        <Text component={TextVariants.p}>{value}</Text>
+      </TextContent>
+    );
   };
 
   const kindContent = (kind: 'Namespace' | 'Node', value?: string) => {
@@ -280,6 +285,10 @@ export const RecordField: React.FC<RecordFieldProps> = ({
   };
 
   const content = (c: Column) => {
+    if (!c.value) {
+      // Value function not configured
+      return emptyText();
+    }
     const value = c.value(flow);
     switch (c.id) {
       case ColumnsId.collectiontime:

@@ -1,5 +1,5 @@
 import { getRecordValue, Record } from '../api/ipfix';
-import { Column, ColumnConfigDef, ColumnsId, ColValue, KubeObj } from './columns';
+import { Column, ColumnConfigDef, ColumnsId, ColValue } from './columns';
 import { FieldConfig, FieldType } from './fields';
 
 const getColumnOrRecordValue = (
@@ -14,7 +14,7 @@ const getColumnOrRecordValue = (
   } else if (arg.startsWith('column.')) {
     const colId = arg.replace('column.', '');
     const found = columns.find(c => c.id === colId);
-    if (found) {
+    if (found && found.value) {
       return found.value(record);
     }
     return defaultValue;
@@ -35,20 +35,18 @@ const funcs: { [name: string]: (columns: Column[], record: Record, args: string[
       console.error('getDefaultColumns - invalid parameters for kubeObject calculated value', args);
       return '';
     }
-    const obj: KubeObj = {
-      kind: String(getColumnOrRecordValue(columns, record, args[0], '')),
-      namespace: String(getColumnOrRecordValue(columns, record, args[1], '')),
-      name: String(getColumnOrRecordValue(columns, record, args[2], '')),
-      showNamespace: args[3] === '1'
-    };
-    if (!obj.name || !obj.kind) {
+    const kind = String(getColumnOrRecordValue(columns, record, args[0], ''));
+    const namespace = String(getColumnOrRecordValue(columns, record, args[1], ''));
+    const name = String(getColumnOrRecordValue(columns, record, args[2], ''));
+    if (!name || !kind) {
       return undefined;
     }
-    // Remove empty namespace
-    if (obj.namespace === '') {
-      delete obj.namespace;
-    }
-    return obj;
+    return {
+      kind: kind,
+      name: name,
+      namespace: namespace || undefined, // convert empty string to undefined
+      showNamespace: args[3] === '1'
+    };
   },
   substract: (columns: Column[], record: Record, args: string[]): ColValue => {
     if (args.length !== 2) {
@@ -81,7 +79,7 @@ const parseORs = (columns: Column[], calculatedValue: string): ((record: Record)
         return (record: Record) => funcs[name](columns, record, args);
       }
     }
-    return (_: Record) => undefined;
+    return () => undefined;
   });
 };
 
@@ -111,7 +109,7 @@ export const computeValueFunc = (
   columns: Column[],
   fields: FieldConfig[] | undefined,
   field: FieldConfig | undefined
-): ValueFunc => {
+): ValueFunc | undefined => {
   if (def.calculated) {
     if (def.calculated.startsWith('[') && def.calculated.endsWith(']')) {
       const values = def.calculated.replaceAll(/\[|\]/g, '').split(',');
@@ -145,5 +143,5 @@ export const computeValueFunc = (
     };
   }
   console.warn('column.value called on ' + def.id + ' but not configured');
-  return () => undefined;
+  return undefined;
 };

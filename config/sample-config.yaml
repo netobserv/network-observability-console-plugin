@@ -292,7 +292,7 @@ frontend:
     - id: SrcK8S_OwnerObject
       group: Source
       name: Owner Kubernetes Object
-      calculated: kubeObject(SrcK8S_OwnerType,SrcK8S_Namespace,SrcK8S_OwnerName,1) or concat(SrcAddr,':',SrcPort)
+      calculated: kubeObject(SrcK8S_OwnerType,SrcK8S_Namespace,SrcK8S_OwnerName,1)
       default: false
       width: 15
     - id: SrcAddrPort
