@@ -497,6 +497,26 @@ export const ColumnConfigSampleDefs = [
     filter: 'dns_flag_response_code',
     default: false,
     width: 5
+  },
+  {
+    id: 'IcmpType',
+    group: 'ICMP',
+    name: 'Type',
+    tooltip: 'The type of the ICMP message.',
+    field: 'IcmpType',
+    filter: 'icmp_type',
+    default: false,
+    width: 10
+  },
+  {
+    id: 'IcmpCode',
+    group: 'ICMP',
+    name: 'Code',
+    tooltip: 'The code of the ICMP message.',
+    field: 'IcmpCode',
+    filter: 'icmp_code',
+    default: false,
+    width: 10
   }
 ];
 

@@ -14,7 +14,6 @@ import {
   getICMPCode,
   getICMPDocUrl,
   getICMPType,
-  icmpAllCodesValues,
   icmpAllTypesValues,
   isValidICMPProto
 } from '../../../utils/icmp';
@@ -369,18 +368,19 @@ export const RecordField: React.FC<RecordFieldProps> = ({
       }
       case ColumnsId.icmptype: {
         let child = emptyText();
-        if (Array.isArray(value) && value.length) {
-          if (isValidICMPProto(Number(value[0]))) {
-            const type = getICMPType(Number(value[0]), Number(value[1]) as icmpAllTypesValues);
+        if (typeof value === 'number' && !isNaN(value)) {
+          const proto = Number(flow.fields.Proto);
+          if (isValidICMPProto(proto)) {
+            const type = getICMPType(proto, value as icmpAllTypesValues);
             if (type && detailed) {
-              child = clickableContent(type.name, type.description || '', getICMPDocUrl(Number(value[0])));
+              child = clickableContent(type.name, type.description || '', getICMPDocUrl(proto));
             } else {
-              child = simpleTextWithTooltip(type?.name || String(value[1]))!;
+              child = simpleTextWithTooltip(type?.name || String(value))!;
             }
           } else {
             child = errorTextValue(
-              String(value[1]),
-              t('ICMP type provided but protocol is {{proto}}', { proto: formatProtocol(value[0] as number, t) })
+              String(value),
+              t('ICMP type provided but protocol is {{proto}}', { proto: formatProtocol(proto, t) })
             );
           }
         }
@@ -388,22 +388,20 @@ export const RecordField: React.FC<RecordFieldProps> = ({
       }
       case ColumnsId.icmpcode: {
         let child = emptyText();
-        if (Array.isArray(value) && value.length) {
-          if (isValidICMPProto(Number(value[0]))) {
-            const code = getICMPCode(
-              Number(value[0]),
-              Number(value[1]) as icmpAllTypesValues,
-              Number(value[2]) as icmpAllCodesValues
-            );
+        if (typeof value === 'number' && !isNaN(value)) {
+          const proto = Number(flow.fields.Proto);
+          const typez = Number(flow.fields.IcmpType) as icmpAllTypesValues;
+          if (isValidICMPProto(proto)) {
+            const code = getICMPCode(proto, typez, value);
             if (code && detailed) {
-              child = clickableContent(code.name, code.description || '', getICMPDocUrl(Number(value[0])));
+              child = clickableContent(code.name, code.description || '', getICMPDocUrl(proto));
             } else {
-              child = simpleTextWithTooltip(code?.name || String(value[2]))!;
+              child = simpleTextWithTooltip(code?.name || String(value))!;
             }
           } else {
             child = errorTextValue(
-              String(value[1]),
-              t('ICMP code provided but protocol is {{proto}}', { proto: formatProtocol(value[0] as number, t) })
+              String(value),
+              t('ICMP code provided but protocol is {{proto}}', { proto: formatProtocol(proto, t) })
             );
           }
         }
