@@ -10,13 +10,7 @@ import { dateFormatter, getFormattedDate, timeMSFormatter, utcDateTimeFormatter 
 import { dnsCodesNames, dnsErrorsValues, getDNSErrorDescription, getDNSRcodeDescription } from '../../../utils/dns';
 import { getDSCPDocUrl, getDSCPServiceClassDescription, getDSCPServiceClassName } from '../../../utils/dscp';
 import { formatDurationAboveMillisecond, formatDurationAboveNanosecond } from '../../../utils/duration';
-import {
-  getICMPCode,
-  getICMPDocUrl,
-  getICMPType,
-  icmpAllTypesValues,
-  isValidICMPProto
-} from '../../../utils/icmp';
+import { getICMPCode, getICMPDocUrl, getICMPType, icmpAllTypesValues, isValidICMPProto } from '../../../utils/icmp';
 import { dropCausesNames, getDropCauseDescription, getDropCauseDocUrl } from '../../../utils/pkt-drop';
 import { formatPort } from '../../../utils/port';
 import { formatProtocol, getProtocolDocUrl } from '../../../utils/protocol';

@@ -52,9 +52,9 @@ describe('<RecordPanel />', () => {
       fields: {
         ...mocks.record.fields,
         IcmpType: 8,
-        IcmpCode: 0,
+        IcmpCode: 0
       }
-    }
+    };
     const wrapper = shallow(<RecordPanel {...mocks} record={flowWithICMP} />);
     expect(wrapper.find(RecordPanel)).toBeTruthy();
     expect(wrapper.find({ 'data-test-id': 'drawer-field-IcmpType' })).toHaveLength(1);
