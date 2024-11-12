@@ -23,13 +23,12 @@ import { Config } from '../../../../model/config';
 import { Filter, FilterDefinition, Filters } from '../../../../model/filters';
 import { FlowScope, MetricType, StatFunction } from '../../../../model/flow-query';
 import { getStat } from '../../../../model/metrics';
-import { ScopeConfigDef } from '../../../../model/scope';
+import { getStepInto, ScopeConfigDef } from '../../../../model/scope';
 import {
   Decorated,
   ElementData,
   FilterDir,
   generateDataModel,
-  getStepIntoNext,
   GraphElementPeer,
   isDirElementFiltered,
   LayoutName,
@@ -207,7 +206,7 @@ export const TopologyContent: React.FC<TopologyContentProps> = ({
   const onStepInto = React.useCallback(
     (data: Decorated<ElementData>) => {
       const groupTypes: TopologyGroupTypes = metricScope;
-      const scope = getStepIntoNext(metricScope, scopes);
+      const scope = getStepInto(metricScope, scopes);
       if (data.nodeType && data.peer && scope) {
         setMetricScope(scope);
         setOptions({ ...options, groupTypes });

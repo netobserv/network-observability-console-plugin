@@ -25,7 +25,7 @@ import { createPeer, getFormattedValue } from '../utils/metrics';
 import { defaultMetricFunction, defaultMetricType } from '../utils/router';
 import { FlowScope, Groups, MetricFunction, MetricType, NodeType, StatFunction } from './flow-query';
 import { getStat } from './metrics';
-import { isDirectionnal, ScopeConfigDef } from './scope';
+import { getStepInto, isDirectionnal, ScopeConfigDef } from './scope';
 
 export enum LayoutName {
   threeD = '3d',
@@ -40,15 +40,6 @@ export enum LayoutName {
 }
 
 export type TopologyGroupTypes = 'none' | Groups;
-
-export const getStepIntoNext = (current: FlowScope, scopes: ScopeConfigDef[]): FlowScope | undefined => {
-  let next: FlowScope | undefined = undefined;
-  const index = scopes.findIndex(sc => sc.id === current);
-  if (index >= 0 && index < scopes.length) {
-    next = scopes[index].id;
-  }
-  return next;
-};
 
 export interface TopologyOptions {
   maxEdgeStat: number;
@@ -114,6 +105,9 @@ const getDirFilterDefValue = (
   if (fields.resource && fields.namespace) {
     def = findFilter(filterDefinitions, `${dir}_resource`)!;
     value = `${fields.resource.type}.${fields.namespace}.${fields.resource.name}`;
+  } else if (nodeType === 'owner' && fields.owner) {
+    def = findFilter(filterDefinitions, `${dir}_owner_name`)!;
+    value = `"${fields.owner.name}"`;
   } else {
     // try by scope definitions
     ContextSingleton.getScopes().forEach(sc => {
@@ -552,7 +546,7 @@ export const generateDataModel = (
   };
 
   const peerToNodeData = (p: TopologyMetricPeer): NodeData => {
-    const canStepInto = getStepIntoNext(metricScope, scopes) !== undefined;
+    const canStepInto = getStepInto(metricScope, scopes) !== undefined;
     switch (metricScope) {
       case 'owner':
         return p.owner ? { peer: p, nodeType: 'owner', canStepInto } : { peer: p, nodeType: 'unknown' };

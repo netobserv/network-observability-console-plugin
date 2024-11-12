@@ -13,6 +13,7 @@ export type ScopeConfigDef = {
   groups?: string[];
   filter?: string;
   filters?: string[];
+  stepInto?: string;
 };
 
 export const getScopeName = (sc: ScopeConfigDef | undefined, t: (k: string) => string) => {
@@ -74,4 +75,8 @@ export const getNonDirectionnalScopes = () => {
 
 export const getDirectionnalScopes = () => {
   return ContextSingleton.getScopes().filter(sc => isDirectionnal(sc));
+};
+
+export const getStepInto = (scopeId: FlowScope, scopes: ScopeConfigDef[]): FlowScope | undefined => {
+  return scopes.find(sc => sc.id === scopeId)?.stepInto;
 };
