@@ -1,3 +1,4 @@
+import * as _ from 'lodash';
 import { FlowQuery } from './flow-query';
 
 export const buildExportQuery = (flowQuery: FlowQuery, columns?: string[]) => {
@@ -11,5 +12,6 @@ export const buildExportQuery = (flowQuery: FlowQuery, columns?: string[]) => {
   if (columns) {
     query.columns = String(columns);
   }
-  return new URLSearchParams(query).toString();
+  const omitEmpty = _.omitBy(query, a => a === undefined);
+  return new URLSearchParams(omitEmpty).toString();
 };
