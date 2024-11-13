@@ -546,7 +546,11 @@ export const generateDataModel = (
   };
 
   const peerToNodeData = (p: TopologyMetricPeer): NodeData => {
-    const canStepInto = getStepInto(metricScope, scopes) !== undefined;
+    const canStepInto =
+      getStepInto(
+        metricScope,
+        scopes.map(sc => sc.id)
+      ) !== undefined;
     switch (metricScope) {
       case 'owner':
         return p.owner ? { peer: p, nodeType: 'owner', canStepInto } : { peer: p, nodeType: 'unknown' };

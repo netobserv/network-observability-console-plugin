@@ -206,7 +206,10 @@ export const TopologyContent: React.FC<TopologyContentProps> = ({
   const onStepInto = React.useCallback(
     (data: Decorated<ElementData>) => {
       const groupTypes: TopologyGroupTypes = metricScope;
-      const scope = getStepInto(metricScope, scopes);
+      const scope = getStepInto(
+        metricScope,
+        scopes.map(sc => sc.id)
+      );
       if (data.nodeType && data.peer && scope) {
         setMetricScope(scope);
         setOptions({ ...options, groupTypes });

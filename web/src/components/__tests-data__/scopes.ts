@@ -7,7 +7,8 @@ export const ScopeDefSample: ScopeConfigDef[] = [
     shortName: 'Cl',
     description: 'Cluster name or identifier',
     labels: ['K8S_ClusterName'],
-    feature: 'multiCluster'
+    feature: 'multiCluster',
+    stepInto: 'zone'
   },
   {
     id: 'zone',
@@ -16,7 +17,8 @@ export const ScopeDefSample: ScopeConfigDef[] = [
     description: 'Availability zone',
     labels: ['SrcK8S_Zone', 'DstK8S_Zone'],
     feature: 'zones',
-    groups: ['clusters']
+    groups: ['clusters'],
+    stepInto: 'host'
   },
   {
     id: 'host',
@@ -24,7 +26,8 @@ export const ScopeDefSample: ScopeConfigDef[] = [
     shortName: 'Nd',
     description: 'Node on which the resources are running',
     labels: ['SrcK8S_HostName', 'DstK8S_HostName'],
-    groups: ['clusters', 'zones', 'clusters+zones']
+    groups: ['clusters', 'zones', 'clusters+zones'],
+    stepInto: 'resource'
   },
   {
     id: 'namespace',
@@ -32,7 +35,8 @@ export const ScopeDefSample: ScopeConfigDef[] = [
     shortName: 'NS',
     description: 'Resource namespace',
     labels: ['SrcK8S_Namespace', 'DstK8S_Namespace'],
-    groups: ['clusters', 'clusters+zones', 'clusters+hosts', 'zones', 'zones+hosts', 'hosts']
+    groups: ['clusters', 'clusters+zones', 'clusters+hosts', 'zones', 'zones+hosts', 'hosts'],
+    stepInto: 'owner'
   },
   {
     id: 'owner',
@@ -58,7 +62,8 @@ export const ScopeDefSample: ScopeConfigDef[] = [
       'hosts',
       'hosts+namespaces',
       'namespaces'
-    ]
+    ],
+    stepInto: 'resource'
   },
   {
     id: 'resource',
