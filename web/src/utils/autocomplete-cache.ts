@@ -1,5 +1,6 @@
 class AutoCompleteCache {
   private clusters: string[] | undefined = undefined;
+  private udns: string[] | undefined = undefined;
   private zones: string[] | undefined = undefined;
   private namespaces: string[] | undefined = undefined;
   // Kinds are hard-coded for now.
@@ -14,6 +15,14 @@ class AutoCompleteCache {
 
   setClusters(cs: string[]) {
     this.clusters = cs;
+  }
+
+  getUDNs() {
+    return this.udns;
+  }
+
+  setUDNs(nets: string[]) {
+    this.udns = nets;
   }
 
   getZones() {

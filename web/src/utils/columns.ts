@@ -13,6 +13,7 @@ export enum ColumnsId {
   endtime = 'EndTime',
   type = 'K8S_Type',
   clustername = 'ClusterName',
+  udn = 'UDN',
   srczone = 'SrcZone',
   dstzone = 'DstZone',
   srctype = 'SrcK8S_Type',

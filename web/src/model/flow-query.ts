@@ -10,13 +10,18 @@ export type StatFunction = MetricFunction | 'last';
 export type MetricType = 'Flows' | 'DnsFlows' | Field;
 export type FlowScope = 'app' | 'cluster' | 'zone' | 'host' | 'namespace' | 'owner' | 'resource';
 export type AggregateBy = FlowScope | Field;
-export type NodeType = FlowScope | 'unknown';
+export type NodeType = FlowScope | 'udn' | 'unknown';
 export type Groups =
   | 'clusters'
   | 'clusters+zones'
   | 'clusters+hosts'
   | 'clusters+namespaces'
   | 'clusters+owners'
+  | 'udns'
+  | 'udns+zones'
+  | 'udns+hosts'
+  | 'udns+namespaces'
+  | 'udns+owners'
   | 'zones'
   | 'zones+hosts'
   | 'zones+namespaces'

@@ -38,6 +38,17 @@ export const GroupDropdown: React.FC<GroupDropdownProps> = ({
         return t('Clusters + Namespaces');
       case TopologyGroupTypes.clustersOwners:
         return t('Clusters + Owners');
+      /** UDNS */
+      case TopologyGroupTypes.udns:
+        return t('UDNs');
+      case TopologyGroupTypes.udnsZones:
+        return t('UDNs + Zones');
+      case TopologyGroupTypes.udnsHosts:
+        return t('UDNs + Nodes');
+      case TopologyGroupTypes.udnsNamespaces:
+        return t('UDNs + Namespaces');
+      case TopologyGroupTypes.udnsOwners:
+        return t('UDNs + Owners');
       /** Zones aggregation and groups */
       case TopologyGroupTypes.zones:
         return t('Zones');

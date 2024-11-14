@@ -193,6 +193,17 @@ export const NetflowTrafficTab: React.FC<NetflowTrafficTabProps> = ({ match, obj
           backAndForth: true
         });
         break;
+      case 'UserDefinedNetwork':
+        setForcedFilters({
+          list: [
+            {
+              def: findFilter(filterDefinitions, 'udn')!,
+              values: [{ v: obj!.metadata!.name as string }]
+            }
+          ],
+          backAndForth: true
+        });
+        break;
     }
   }, [config, obj, previous, t]);
 

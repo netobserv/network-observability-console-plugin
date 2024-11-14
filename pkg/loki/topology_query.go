@@ -28,6 +28,7 @@ var (
 	}
 	groupKeyLabels = map[string][]string{
 		"clusters":   {"K8S_ClusterName"},
+		"udns":       {"UdnId"},
 		"zones":      {"SrcK8S_Zone", "DstK8S_Zone"},
 		"hosts":      {"SrcK8S_HostName", "DstK8S_HostName"},
 		"namespaces": {"SrcK8S_Namespace", "DstK8S_Namespace"},

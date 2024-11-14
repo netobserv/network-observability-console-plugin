@@ -647,6 +647,17 @@ export const RecordField: React.FC<RecordFieldProps> = ({
             : emptyText()
         );
       }
+      case ColumnsId.udn: {
+        const id = value as string;
+        let child: JSX.Element | undefined;
+        if (id.includes('.')) {
+          const parts = id.split('.');
+          child = kubeObjContent(parts[1], 'UserDefinedNetwork', parts[0]);
+        } else {
+          child = kubeObjContent(id, 'ClusterUserDefinedNetwork', undefined);
+        }
+        return singleContainer(child);
+      }
       default:
         if (Array.isArray(value) && value.length) {
           // we can only show two values properly with containers

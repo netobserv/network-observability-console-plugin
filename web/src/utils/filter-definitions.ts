@@ -30,6 +30,7 @@ import {
   getProtocolOptions,
   getResourceOptions,
   getTCPFlagsOptions,
+  getUDNOptions,
   getZoneOptions,
   noOption
 } from './filter-options';
@@ -263,6 +264,8 @@ export const getFilterDefinitions = (
       validate = k8sNameValidation;
     } else if (d.id.includes('cluster')) {
       getOptions = getClusterOptions;
+    } else if (d.id.includes('udn')) {
+      getOptions = getUDNOptions;
     } else if (d.id.includes('zone')) {
       getOptions = getZoneOptions;
     } else if (d.id.includes('name')) {
