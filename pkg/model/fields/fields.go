@@ -94,7 +94,8 @@ func IsArray(v string) bool {
 	case
 		IfDirections,
 		Interfaces,
-		NetworkEvents:
+		NetworkEvents,
+		TCPFlags:
 		return true
 	default:
 		return false
