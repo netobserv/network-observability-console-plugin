@@ -1,12 +1,9 @@
-# We do not use --platform feature to auto fill this ARG because of incompatibility between podman and docker
 ARG TARGETARCH
 FROM docker.io/library/node:18-alpine as web-builder
 
 USER node
 
 ARG BUILDSCRIPT
-ARG TARGETPLATFORM
-ARG TARGETARCH=amd64
 WORKDIR /opt/app-root
 
 COPY --chown=node web/package.json web/package.json
