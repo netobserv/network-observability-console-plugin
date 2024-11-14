@@ -16,7 +16,6 @@ export const tcpFlagsList = [
   { name: 'RST_ACK', description: 'Acknowledgement of RST (custom flag)' }
 ] as const;
 
-export const getFlagsList = (joined: string): { name: string, description: string}[] => {
-  const names = joined.split(',');
+export const getFlagsList = (names: string[]): { name: string, description: string}[] => {
   return tcpFlagsList.filter(f => names.includes(f.name));
 };

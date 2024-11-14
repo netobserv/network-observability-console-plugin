@@ -473,21 +473,23 @@ export const RecordField: React.FC<RecordFieldProps> = ({
       }
       case ColumnsId.tcpflags: {
         let child = emptyText();
-        const sVal = String(value);
-        const flags = getFlagsList(sVal);
-        if (detailed) {
-          let description = `${t('Value')}: ${value}`;
-          if (flags.length === 1) {
-            description += '. ' + flags[0].description;
-          } else if (flags.length > 1) {
-            description +=
-              '. ' +
-              t('The flow contains packets with various flags: ') +
-              flags.map(f => f.name + ' (' + f.description + ')').join('; ');
+        if (Array.isArray(value) && value.length > 0) {
+          const flags = getFlagsList(value as string[]);
+          const joined = value.join(', ');
+          if (detailed) {
+            let description = `${t('Value')}: ${value}`;
+            if (flags.length === 1) {
+              description += '. ' + flags[0].description;
+            } else if (flags.length > 1) {
+              description +=
+                '. ' +
+                t('The flow contains packets with various flags: ') +
+                flags.map(f => f.name + ' (' + f.description + ')').join('; ');
+            }
+            child = clickableContent(joined, description, getTCPFlagsDocUrl());
+          } else {
+            child = simpleTextWithTooltip(joined)!;
           }
-          child = clickableContent(sVal, description, getTCPFlagsDocUrl());
-        } else {
-          child = simpleTextWithTooltip(sVal)!;
         }
         return singleContainer(child);
       }

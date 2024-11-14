@@ -118,7 +118,7 @@ export interface Fields {
   /** Network Events */
   NetworkEvents?: string[];
   /** Logical OR combination of unique TCP flags comprised in the flow, as per RFC-9293, with additional custom flags to represent the following per-packet combinations: SYN+ACK (0x100), FIN+ACK (0x200) and RST+ACK (0x400). */
-  Flags?: string;
+  Flags?: string[];
   /** Number of packets */
   Packets?: number;
   /** In conversation tracking, A to B packets counter per conversation */
