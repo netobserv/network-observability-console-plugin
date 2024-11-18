@@ -17,7 +17,6 @@ import { formatProtocol, getProtocolDocUrl } from '../../../utils/protocol';
 import { decomposeTCPFlagsBitfield, getTCPFlagsDocUrl } from '../../../utils/tcp-flags';
 import { Size } from '../../dropdowns/table-display-dropdown';
 import './record-field.css';
-import { networkEventToString } from '../../../model/network-events';
 
 export type RecordFieldFilter = {
   type: 'filter' | 'switch';
@@ -513,16 +512,6 @@ export const RecordField: React.FC<RecordFieldProps> = ({
               )
             : emptyText()
         );
-      }
-      case ColumnsId.networkEvents: {
-        if (flow.fields.NetworkEvents && flow.fields.NetworkEvents.length > 0) {
-          const asStrings = flow.fields.NetworkEvents.map(networkEventToString);
-          if (asStrings.length === 2) {
-            return doubleContainer(simpleTextWithTooltip(asStrings[0]), simpleTextWithTooltip(asStrings[1]));
-          }
-          // else we will show values as single joigned string
-          return singleContainer(simpleTextWithTooltip(asStrings.join(', ')));
-        }
       }
       default:
         if (value === undefined) {
