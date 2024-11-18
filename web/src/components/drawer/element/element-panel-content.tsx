@@ -49,16 +49,16 @@ export const ElementPanelContent: React.FC<ElementPanelContentProps> = ({
 
   const clusterName = React.useCallback(
     (d: NodeData) => {
-      if (!d.peer.clusterName) {
+      if (!d.peer.cluster) {
         return <></>;
       }
-      const fields = createPeer({ clusterName: d.peer.clusterName });
+      const fields = createPeer({ cluster: d.peer.cluster });
       const isFiltered = isElementFiltered(fields, filters, filterDefinitions);
       return (
         <TextContent id="clusterName" className="record-field-container">
           <Text component={TextVariants.h4}>{t('Cluster name')}</Text>
           <Flex>
-            <FlexItem flex={{ default: 'flex_1' }}>{d.peer.clusterName}</FlexItem>
+            <FlexItem flex={{ default: 'flex_1' }}>{d.peer.cluster}</FlexItem>
             <FlexItem>
               <Button
                 id={'clustername-filter'}

@@ -1,9 +1,11 @@
 import { FlowMetricsResult, RawTopologyMetrics } from '../../api/loki';
 import { getFlowMetrics, getFlowRecords } from '../../api/routes';
 import { FilterDefinitionSample } from '../../components/__tests-data__/filters';
+import { ScopeDefSample } from '../../components/__tests-data__/scopes';
 import { Filter, FilterId, Filters, FilterValue } from '../../model/filters';
 import { filtersToString } from '../../model/flow-query';
 import { getFetchFunctions, mergeMetricsBNF } from '../back-and-forth';
+import { ContextSingleton } from '../context';
 import { findFilter } from '../filter-definitions';
 import { parseTopologyMetrics } from '../metrics';
 
@@ -354,6 +356,8 @@ describe('Merge topology BNF', () => {
   };
 
   it('should merge without overlap', () => {
+    ContextSingleton.setScopes(ScopeDefSample);
+
     const rsOrig: FlowMetricsResult = {
       metrics: parseTopologyMetrics(
         [

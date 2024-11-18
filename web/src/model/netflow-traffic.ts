@@ -60,8 +60,8 @@ import {
   RecordType,
   StatFunction
 } from './flow-query';
-import { MetricScopeOptions } from './metrics';
-import { DefaultOptions, getGroupsForScope, GraphElementPeer, TopologyGroupTypes, TopologyOptions } from './topology';
+import { getGroupsForScope } from './scope';
+import { DefaultOptions, GraphElementPeer, TopologyOptions } from './topology';
 
 // NetflowTraffic model holding current states and localStorages
 export function netflowTrafficModel() {
@@ -146,13 +146,12 @@ export function netflowTrafficModel() {
     (scope: FlowScope) => {
       setMetricScope(scope);
       // Invalidate groups if necessary, when metrics scope changed
-      const groups = getGroupsForScope(scope as MetricScopeOptions);
+      const groups = getGroupsForScope(scope, config.scopes);
       if (!groups.includes(topologyOptions.groupTypes)) {
-        setTopologyOptions({ ...topologyOptions, groupTypes: TopologyGroupTypes.none });
+        setTopologyOptions({ ...topologyOptions, groupTypes: 'none' });
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [setMetricScope, topologyOptions, setTopologyOptions]
+    [setMetricScope, config.scopes, topologyOptions, setTopologyOptions]
   );
 
   const updateTopologyMetricType = React.useCallback(
@@ -174,9 +173,17 @@ export function netflowTrafficModel() {
     [topologyMetricFunction, setTopologyMetricFunction, setTopologyMetricType]
   );
 
+  const updateConfig = React.useCallback(
+    (c: Config) => {
+      setConfig(c);
+      ContextSingleton.setScopes(c.scopes);
+    },
+    [setConfig]
+  );
+
   return {
     config,
-    setConfig,
+    setConfig: updateConfig,
     k8sModels,
     queryParams,
     setQueryParams,

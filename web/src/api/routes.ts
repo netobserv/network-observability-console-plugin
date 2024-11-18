@@ -169,6 +169,7 @@ export const getConfig = (): Promise<Config> => {
           : defaultConfig.portNaming.portNames
       },
       filters: r.data.filters,
+      scopes: r.data.scopes,
       quickFilters: r.data.quickFilters,
       alertNamespaces: r.data.alertNamespaces,
       sampling: r.data.sampling,

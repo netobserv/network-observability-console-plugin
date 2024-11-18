@@ -2,6 +2,7 @@ import { Select, Text, TextVariants } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { FlowScope } from '../../model/flow-query';
+import { ScopeConfigDef } from '../../model/scope';
 import './overview-display-dropdown.css';
 import { OverviewDisplayOptions } from './overview-display-options';
 import { TruncateLength } from './truncate-dropdown';
@@ -15,7 +16,7 @@ export interface OverviewDisplayDropdownProps {
   setTruncateLength: (v: TruncateLength) => void;
   focus: boolean;
   setFocus: (v: boolean) => void;
-  allowedScopes: FlowScope[];
+  scopes: ScopeConfigDef[];
 }
 
 export const OverviewDisplayDropdown: React.FC<OverviewDisplayDropdownProps> = ({
@@ -25,7 +26,7 @@ export const OverviewDisplayDropdown: React.FC<OverviewDisplayDropdownProps> = (
   setTruncateLength,
   focus,
   setFocus,
-  allowedScopes
+  scopes
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [isOpen, setOpen] = React.useState<boolean>(false);
@@ -45,7 +46,7 @@ export const OverviewDisplayDropdown: React.FC<OverviewDisplayDropdownProps> = (
             setTruncateLength={setTruncateLength}
             focus={focus}
             setFocus={setFocus}
-            allowedScopes={allowedScopes}
+            scopes={scopes}
           />
         }
       />

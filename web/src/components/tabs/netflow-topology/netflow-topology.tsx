@@ -24,6 +24,7 @@ import {
   MetricType,
   StatFunction
 } from '../../../model/flow-query';
+import { ScopeConfigDef } from '../../../model/scope';
 import { GraphElementPeer, LayoutName, TopologyOptions } from '../../../model/topology';
 import { Warning } from '../../../model/warnings';
 import { TimeRange } from '../../../utils/datetime';
@@ -73,7 +74,7 @@ export interface NetflowTopologyProps {
   searchHandle: SearchHandle | null;
   searchEvent?: SearchEvent;
   isDark?: boolean;
-  allowedScopes: FlowScope[];
+  scopes: ScopeConfigDef[];
   resetDefaultFilters?: (c?: Config) => void;
   clearFilters?: () => void;
 }
@@ -219,7 +220,7 @@ export const NetflowTopology: React.FC<NetflowTopologyProps> = React.forwardRef(
               sizePx={containerSize?.height || 300}
               scope={props.metricScope}
               setScope={props.setMetricScope}
-              allowedScopes={props.allowedScopes}
+              scopeDefs={props.scopes}
             />
             <TopologyContent
               k8sModels={props.k8sModels}
@@ -227,7 +228,7 @@ export const NetflowTopology: React.FC<NetflowTopologyProps> = React.forwardRef(
               metricType={props.metricType}
               metricScope={props.metricScope}
               setMetricScope={props.setMetricScope}
-              allowedScopes={props.allowedScopes}
+              scopes={props.scopes}
               metrics={displayedMetrics}
               droppedMetrics={props.droppedMetrics}
               options={props.options}

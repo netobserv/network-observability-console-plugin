@@ -5,6 +5,7 @@ import {
   ResolvedExtension
 } from '@openshift-console/dynamic-plugin-sdk';
 import _ from 'lodash';
+import { ScopeConfigDef } from '../model/scope';
 
 export const DEFAULT_HOST = '/api/proxy/plugin/netobserv-plugin/backend';
 export class ContextSingleton {
@@ -13,6 +14,7 @@ export class ContextSingleton {
   private host: string;
   private forcedNamespace?: string;
   private flowCollectorK8SModel?: K8sModel;
+  private scopes: ScopeConfigDef[] = [];
 
   private constructor() {
     this.host = DEFAULT_HOST;
@@ -66,5 +68,13 @@ export class ContextSingleton {
 
   public static getFlowCollectorK8SModel() {
     return ContextSingleton.getInstance().flowCollectorK8SModel;
+  }
+
+  public static setScopes(scps: ScopeConfigDef[]) {
+    ContextSingleton.getInstance().scopes = scps;
+  }
+
+  public static getScopes() {
+    return ContextSingleton.getInstance().scopes;
   }
 }

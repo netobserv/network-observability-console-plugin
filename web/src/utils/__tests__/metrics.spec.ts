@@ -1,5 +1,7 @@
 import { RawTopologyMetrics, TopologyMetricPeer, TopologyMetrics } from '../../api/loki';
+import { ScopeDefSample } from '../../components/__tests-data__/scopes';
 import { NodeData } from '../../model/topology';
+import { ContextSingleton } from '../context';
 import {
   calibrateRange,
   computeStats,
@@ -13,6 +15,10 @@ import {
 const t = (k: string) => k;
 
 describe('normalize and computeStats', () => {
+  beforeEach(() => {
+    ContextSingleton.setScopes(ScopeDefSample);
+  });
+
   it('should normalize and compute simple stats', () => {
     const values: [number, unknown][] = [
       [1664372000, '5'],
@@ -191,6 +197,10 @@ describe('normalize and computeStats', () => {
 });
 
 describe('matchPeers', () => {
+  beforeEach(() => {
+    ContextSingleton.setScopes(ScopeDefSample);
+  });
+
   it('should match namespace nodes', () => {
     const peers: TopologyMetricPeer[] = [createPeer({ namespace: '' }), createPeer({ namespace: 'test' })];
 
@@ -310,14 +320,14 @@ describe('matchPeers', () => {
       createPeer({ namespace: '' }),
       createPeer({
         namespace: 'ns1',
-        hostName: 'host1',
+        host: 'host1',
         owner: { name: 'depl-a', type: 'Deployment' },
         resource: { name: 'depl-a-12345', type: 'Pod' },
         addr: '1.2.3.4'
       }),
       createPeer({
         namespace: 'ns1',
-        hostName: 'host2',
+        host: 'host2',
         owner: { name: 'depl-b', type: 'Deployment' },
         resource: { name: 'depl-b-6789', type: 'Pod' },
         addr: '1.2.3.5'
@@ -329,7 +339,7 @@ describe('matchPeers', () => {
       }),
       createPeer({
         namespace: 'ns2',
-        hostName: 'host1',
+        host: 'host1',
         owner: { name: 'depl-a', type: 'Deployment' },
         resource: { name: 'depl-a-12345', type: 'Pod' },
         addr: '1.2.3.7'
@@ -347,13 +357,13 @@ describe('matchPeers', () => {
 
     // With node group
     data.nodeType = 'host';
-    data.peer = createPeer({ hostName: 'host1' });
+    data.peer = createPeer({ host: 'host1' });
 
     matches = peers.filter(p => matchPeer(data, p));
     expect(matches).toEqual([peers[1], peers[4]]);
 
     // With node+namespace
-    data.peer = createPeer({ namespace: 'ns2', hostName: 'host1' });
+    data.peer = createPeer({ namespace: 'ns2', host: 'host1' });
 
     matches = peers.filter(p => matchPeer(data, p));
     expect(matches).toEqual([peers[4]]);

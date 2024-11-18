@@ -10,6 +10,7 @@ import {
 } from '@patternfly/react-topology';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
+import { getDirectionnalScopes, getNonDirectionnalScopes } from '../../../../../model/scope';
 import { Decorated, FilterDir, NodeData } from '../../../../../model/topology';
 import { ClickableDecorator, ContextMenuDecorator } from './styleDecorator';
 
@@ -102,29 +103,12 @@ export const NodeDecorators: React.FC<NodeDecoratorsProps> = ({
     [element, getShapeDecoratorCenter]
   );
 
-  const filterMenu: React.ReactElement[] = [
-    <ContextMenuItem key={'src'} onClick={onFilterDirClick('src')}>
-      <Checkbox
-        id={'context-src-checkbox'}
-        label={t('Source')}
-        isChecked={isSrcFiltered}
-        onChange={() => onFilterDirClick('src')}
-      />
-    </ContextMenuItem>,
-    <ContextMenuItem key={'dst'} onClick={onFilterDirClick('dst')}>
-      <Checkbox
-        id={'context-dst-checkbox'}
-        label={t('Destination')}
-        isChecked={isDstFiltered}
-        onChange={() => onFilterDirClick('dst')}
-      />
-    </ContextMenuItem>
-  ];
-
   if (!data.showDecorators) {
     return null;
   }
 
+  const hasDirectionnalFilters = getDirectionnalScopes().some(sc => data.peer[sc.id]);
+  const hasNonDirectionnalFilter = getNonDirectionnalScopes().some(sc => data.peer[sc.id]);
   return (
     <>
       {data.canStepInto && (
@@ -137,22 +121,35 @@ export const NodeDecorators: React.FC<NodeDecoratorsProps> = ({
           padding={mediumDecoratorPadding}
         />
       )}
-      {(data.peer.namespace ||
-        data.peer.resource ||
-        data.peer.owner ||
-        data.peer.addr ||
-        data.peer.hostName ||
-        data.peer.zone) && (
+
+      {hasDirectionnalFilters && (
         <ContextMenuDecorator
           pos={getPosition(TopologyQuadrant.lowerLeft)}
           icon={<FilterIcon />}
           tooltip={t('Filter by source or destination {{name}}', { name: data.peer.resourceKind?.toLowerCase() })}
           isActive={isSrcFiltered || isDstFiltered}
           padding={isSrcFiltered || isDstFiltered ? defaultDecoratorPadding : largeDecoratorPadding}
-          menuItems={filterMenu}
+          menuItems={[
+            <ContextMenuItem key={'src'} onClick={onFilterDirClick('src')}>
+              <Checkbox
+                id={'context-src-checkbox'}
+                label={t('Source')}
+                isChecked={isSrcFiltered}
+                onChange={() => onFilterDirClick('src')}
+              />
+            </ContextMenuItem>,
+            <ContextMenuItem key={'dst'} onClick={onFilterDirClick('dst')}>
+              <Checkbox
+                id={'context-dst-checkbox'}
+                label={t('Destination')}
+                isChecked={isDstFiltered}
+                onChange={() => onFilterDirClick('dst')}
+              />
+            </ContextMenuItem>
+          ]}
         />
       )}
-      {data.peer.clusterName && (
+      {hasNonDirectionnalFilter && (
         <ClickableDecorator
           pos={getPosition(TopologyQuadrant.lowerLeft)}
           icon={<FilterIcon />}

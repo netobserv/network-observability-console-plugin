@@ -17,6 +17,7 @@ import {
   hasNonIndexFields
 } from '../../model/filters';
 import { FlowScope, Match, MetricType, RecordType, StatFunction } from '../../model/flow-query';
+import { ScopeConfigDef } from '../../model/scope';
 import { Warning } from '../../model/warnings';
 import { Column, ColumnSizeMap } from '../../utils/columns';
 import { isPromUnsupportedError } from '../../utils/errors';
@@ -81,7 +82,7 @@ export interface NetflowTrafficDrawerProps {
   selectedElement: GraphElementPeer | undefined;
   searchHandle: SearchHandle | null;
   searchEvent?: SearchEvent;
-  allowedScopes: FlowScope[];
+  scopes: ScopeConfigDef[];
   isShowQuerySummary: boolean;
   lastRefresh: Date | undefined;
   range: TimeRange | number;
@@ -305,7 +306,7 @@ export const NetflowTrafficDrawer: React.FC<NetflowTrafficDrawerProps> = React.f
                 searchHandle={props.searchHandle}
                 searchEvent={props.searchEvent}
                 isDark={props.isDarkTheme}
-                allowedScopes={props.allowedScopes}
+                scopes={props.scopes}
                 resetDefaultFilters={getResetDefaultFiltersProp()}
                 clearFilters={getClearFiltersProp()}
               />

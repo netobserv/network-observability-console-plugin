@@ -2,6 +2,7 @@ import { Select, Text, TextVariants } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { FlowScope, MetricType, StatFunction } from '../../model/flow-query';
+import { ScopeConfigDef } from '../../model/scope';
 import { TopologyOptions } from '../../model/topology';
 import './topology-display-dropdown.css';
 import { TopologyDisplayOptions } from './topology-display-options';
@@ -16,7 +17,7 @@ export const TopologyDisplayDropdown: React.FC<{
   topologyOptions: TopologyOptions;
   setTopologyOptions: (o: TopologyOptions) => void;
   allowedTypes: MetricType[];
-  allowedScopes: FlowScope[];
+  scopes: ScopeConfigDef[];
 }> = ({
   metricFunction,
   setMetricFunction,
@@ -27,7 +28,7 @@ export const TopologyDisplayDropdown: React.FC<{
   topologyOptions,
   setTopologyOptions,
   allowedTypes,
-  allowedScopes
+  scopes
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [isOpen, setOpen] = React.useState<boolean>(false);
@@ -50,7 +51,7 @@ export const TopologyDisplayDropdown: React.FC<{
             topologyOptions={topologyOptions}
             setTopologyOptions={setTopologyOptions}
             allowedTypes={allowedTypes}
-            allowedScopes={allowedScopes}
+            scopes={scopes}
           />
         }
       />

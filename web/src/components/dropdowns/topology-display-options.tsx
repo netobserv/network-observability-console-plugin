@@ -9,6 +9,7 @@ import GroupDropdown from './group-dropdown';
 import LayoutDropdown from './layout-dropdown';
 import TruncateDropdown, { TruncateLength } from './truncate-dropdown';
 
+import { ScopeConfigDef } from '../../model/scope';
 import MetricFunctionDropdown from './metric-function-dropdown';
 import MetricTypeDropdown from './metric-type-dropdown';
 import ScopeDropdown from './scope-dropdown';
@@ -25,7 +26,7 @@ export interface TopologyDisplayOptionsProps {
   topologyOptions: TopologyOptions;
   setTopologyOptions: (o: TopologyOptions) => void;
   allowedTypes: MetricType[];
-  allowedScopes: FlowScope[];
+  scopes: ScopeConfigDef[];
 }
 
 export const TopologyDisplayOptions: React.FC<TopologyDisplayOptionsProps> = ({
@@ -38,7 +39,7 @@ export const TopologyDisplayOptions: React.FC<TopologyDisplayOptionsProps> = ({
   topologyOptions,
   setTopologyOptions,
   allowedTypes,
-  allowedScopes
+  scopes
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
@@ -110,7 +111,7 @@ export const TopologyDisplayOptions: React.FC<TopologyDisplayOptionsProps> = ({
             id="scope"
             selected={metricScope}
             setScopeType={setMetricScope}
-            allowedScopes={allowedScopes}
+            scopes={scopes}
           />
         </div>
       </div>
@@ -129,7 +130,7 @@ export const TopologyDisplayOptions: React.FC<TopologyDisplayOptionsProps> = ({
             scope={metricScope as MetricScopeOptions}
             selected={topologyOptions.groupTypes}
             setGroupType={setGroupType}
-            allowedScopes={allowedScopes}
+            scopes={scopes}
           />
         </div>
       </div>
@@ -212,8 +213,8 @@ export const TopologyDisplayOptions: React.FC<TopologyDisplayOptionsProps> = ({
           <Switch
             id="group-collapsed-switch"
             label={t('Collapse groups')}
-            isDisabled={topologyOptions.groupTypes === TopologyGroupTypes.none}
-            isChecked={topologyOptions.groupTypes !== TopologyGroupTypes.none && !topologyOptions.startCollapsed}
+            isDisabled={topologyOptions.groupTypes === 'none'}
+            isChecked={topologyOptions.groupTypes !== 'none' && !topologyOptions.startCollapsed}
             onChange={() =>
               setTopologyOptions({
                 ...topologyOptions,
