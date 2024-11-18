@@ -1,6 +1,7 @@
 /* eslint-disable max-len */
 import { TFunction } from 'i18next';
 import { RecordType } from '../model/flow-query';
+import { NetworkEvent } from '../model/network-events';
 
 // Please keep this file documented: it is used in doc generation
 // To regenerate doc, run `make generate-doc` - and also check this page:
@@ -18,7 +19,7 @@ export const getRecordValue = (record: Record, fieldOrLabel: string, defaultValu
    * This is mandatory to ensure fields types
    */
   if (record.fields[fieldOrLabel as keyof Fields] !== undefined) {
-    return record.fields[fieldOrLabel as keyof Fields];
+    return record.fields[fieldOrLabel as keyof Fields] as string | number | string[] | undefined;
   }
   // check if label exists
   if (record.labels[fieldOrLabel as keyof Labels] !== undefined) {
@@ -116,7 +117,7 @@ export interface Fields {
   /** Flow direction array from the network interface observation point */
   IfDirections?: IfDirection[];
   /** Network Events */
-  NetworkEvents?: string[];
+  NetworkEvents?: NetworkEvent[];
   /** Logical OR combination of unique TCP flags comprised in the flow, as per RFC-9293, with additional custom flags to represent the following per-packet combinations: SYN+ACK (0x100), FIN+ACK (0x200) and RST+ACK (0x400). */
   Flags?: number;
   /** Number of packets */

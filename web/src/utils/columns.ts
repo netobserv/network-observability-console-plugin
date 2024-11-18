@@ -79,7 +79,8 @@ export enum ColumnsId {
   packetsab = 'Packets_AB',
   packetsba = 'Packets_BA',
   isfirst = 'IsFirst',
-  numflow = 'numFlowLogs'
+  numflow = 'numFlowLogs',
+  networkEvents = 'NetworkEvents'
 }
 
 export interface ColumnConfigDef {
