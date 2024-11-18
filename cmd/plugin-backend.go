@@ -5,10 +5,13 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"slices"
 
 	"github.com/sirupsen/logrus"
 
 	"github.com/netobserv/network-observability-console-plugin/pkg/config"
+	"github.com/netobserv/network-observability-console-plugin/pkg/decoders"
+	"github.com/netobserv/network-observability-console-plugin/pkg/model"
 	"github.com/netobserv/network-observability-console-plugin/pkg/server"
 )
 
@@ -52,6 +55,11 @@ func main() {
 	checker, err := cfg.GetAuthChecker()
 	if err != nil {
 		log.WithError(err).Fatal("auth checker error")
+	}
+
+	if slices.Contains(cfg.Frontend.Features, "NetworkEvents") {
+		// Add decoder hook
+		model.AddFlowLineMapping(decoders.NetworkEventsToString)
 	}
 
 	go server.StartMetrics(&server.MetricsConfig{
