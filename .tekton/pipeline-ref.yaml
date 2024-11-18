@@ -252,6 +252,8 @@ spec:
       - "true"
   - name: build-source-image
     params:
+    - name: BASE_IMAGES
+      value: $(tasks.build-image-index.results.IMAGE_URL)
     - name: BINARY_IMAGE
       value: $(params.output-image)
     - name: SOURCE_ARTIFACT
