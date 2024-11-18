@@ -52,7 +52,7 @@ func TestQueryResponseUnmarshalLineMapping(t *testing.T) {
         },
         "values": [
           [
-            "1731926700000000000",
+            "1731930300000000000",
             "{\"SrcK8S_Name\":\"ip-10-0-1-7.ec2.internal\",\"Bytes\":66,\"Packets\":1,\"Interfaces\":[\"br-ex\"]}"
           ]
         ]
@@ -80,7 +80,7 @@ func TestQueryResponseUnmarshalLineMapping(t *testing.T) {
 		},
 		Entries: []Entry{
 			{
-				Timestamp: time.Date(2024, time.November, 18, 11, 45, 0, 0, time.Local),
+				Timestamp: time.Unix(1731930300, 0),
 				Line:      `{"SrcK8S_Name":"ip-10-0-1-7.ec2.internal","Bytezz":66,"Packets":1,"Interfaces":["br-ex"]}`,
 			},
 		},

@@ -57,7 +57,7 @@ func main() {
 		log.WithError(err).Fatal("auth checker error")
 	}
 
-	if slices.Contains(cfg.Frontend.Features, "NetworkEvents") {
+	if slices.Contains(cfg.Frontend.Features, "networkEvents") {
 		// Add decoder hook
 		model.AddFlowLineMapping(decoders.NetworkEventsToString)
 	}
