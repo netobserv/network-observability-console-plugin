@@ -81,8 +81,11 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
   const getVisibleColumns = React.useCallback(() => {
     const forbiddenColumns = [ColumnsId.ifdirs, ColumnsId.interfaces];
     return columns.filter((c: Column) => {
-      const value = c.value(record);
-      return !forbiddenColumns.includes(c.id) && value !== null && value !== '' && !Number.isNaN(value);
+      if (!c.fieldValue) {
+        return false;
+      }
+      const value = c.fieldValue(record);
+      return !forbiddenColumns.includes(c.id) && value !== '' && !Number.isNaN(value);
     });
   }, [columns, record]);
 
@@ -97,8 +100,8 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
   );
 
   const getFilter = (col: Column) => {
-    if (record) {
-      const value = col.value(record);
+    if (record && col.fieldValue) {
+      const value = col.fieldValue(record);
       switch (col.id) {
         case ColumnsId.endtime:
           return getTimeRangeFilter(col, value);

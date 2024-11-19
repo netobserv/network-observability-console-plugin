@@ -187,17 +187,13 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
     return getAvailablePanels().filter(panel => panel.isSelected);
   }, [getAvailablePanels]);
 
-  const getAvailableColumns = React.useCallback(
-    (isSidePanel = false) => {
-      return model.columns.filter(
-        col =>
-          (!isSidePanel || !col.isCommon) &&
-          (isConnectionTracking() || ![ColumnsId.recordtype, ColumnsId.hashid].includes(col.id)) &&
-          (!col.feature || model.config.features.includes(col.feature))
-      );
-    },
-    [model.columns, model.config.features, isConnectionTracking]
-  );
+  const getAvailableColumns = React.useCallback(() => {
+    return model.columns.filter(
+      col =>
+        (isConnectionTracking() || ![ColumnsId.recordtype, ColumnsId.hashid].includes(col.id)) &&
+        (!col.feature || model.config.features.includes(col.feature))
+    );
+  }, [model.columns, model.config.features, isConnectionTracking]);
 
   const getSelectedColumns = React.useCallback(() => {
     return getAvailableColumns().filter(column => column.isSelected);
@@ -901,7 +897,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
           scopes={getAvailableScopes()}
           canSwitchTypes={isFlow() && isConnectionTracking()}
           clearSelections={clearSelections}
-          availableColumns={getAvailableColumns(true)}
+          availableColumns={getAvailableColumns()}
           maxChunkAge={model.config.maxChunkAgeMs}
           selectedColumns={getSelectedColumns()}
         />

@@ -47,7 +47,7 @@ describe('<RecordField />', () => {
           name: 'DNS Latency',
           isSelected: true,
           value: f => (f.fields.DnsLatencyMs === undefined ? Number.NaN : f.fields.DnsLatencyMs),
-          sort: (a, b, col) => compareNumbers(col.value(a) as number, col.value(b) as number),
+          sort: (a, b, col) => compareNumbers(col.value!(a) as number, col.value!(b) as number),
           width: 5
         }}
         {...mocks}
