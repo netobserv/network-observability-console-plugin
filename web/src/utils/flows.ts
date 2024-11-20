@@ -7,7 +7,11 @@ const electMostRelevant = (flowsFor5Tuples: Record[]): Record => {
   // Fallback on first entry
   return (
     flowsFor5Tuples.find(
-      f => f.fields.DnsId !== undefined || f.fields.PktDropBytes !== undefined || f.fields.PktDropPackets !== undefined
+      f =>
+        f.fields.DnsId !== undefined ||
+        f.fields.PktDropBytes !== undefined ||
+        f.fields.PktDropPackets !== undefined ||
+        f.fields.NetworkEvents !== undefined
     ) || flowsFor5Tuples[0]
   );
 };
