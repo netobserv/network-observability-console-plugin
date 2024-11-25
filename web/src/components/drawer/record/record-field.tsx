@@ -52,7 +52,7 @@ export const RecordField: React.FC<RecordFieldProps> = ({
       const isTruncated =
         event.currentTarget.offsetHeight < event.currentTarget.scrollHeight ||
         event.currentTarget.offsetWidth < event.currentTarget.scrollWidth ||
-        event.currentTarget.children[0].className === 'force-truncate';
+        (event.currentTarget.children.length > 0 && event.currentTarget.children[0].className === 'force-truncate');
       event.currentTarget.className = isTruncated ? `${className} truncated ${size}` : `${className} ${size}`;
     }
   };
