@@ -8,25 +8,18 @@ export type PacketLoss = 'dropped' | 'hasDrops' | 'sent' | 'all';
 export type MetricFunction = 'count' | 'sum' | 'avg' | 'min' | 'max' | 'p90' | 'p99' | 'rate';
 export type StatFunction = MetricFunction | 'last';
 export type MetricType = 'Flows' | 'DnsFlows' | Field;
-export type FlowScope = 'app' | 'cluster' | 'zone' | 'host' | 'namespace' | 'owner' | 'resource';
+// scope are configurable and can be any string
+// such as 'app', 'cluster', 'zone', 'host', 'namespace', 'owner', 'resource'...
+export type FlowScope = string;
 export type AggregateBy = FlowScope | Field;
 export type NodeType = FlowScope | 'unknown';
-export type Groups =
-  | 'clusters'
-  | 'clusters+zones'
-  | 'clusters+hosts'
-  | 'clusters+namespaces'
-  | 'clusters+owners'
-  | 'zones'
-  | 'zones+hosts'
-  | 'zones+namespaces'
-  | 'zones+owners'
-  | 'hosts'
-  | 'hosts+namespaces'
-  | 'hosts+owners'
-  | 'namespaces'
-  | 'namespaces+owners'
-  | 'owners';
+// groups are configurable and can be any string
+// such as 'clusters', 'clusters+zones', 'clusters+hosts', 'clusters+namespaces', 'clusters+owners',
+// 'zones', 'zones+hosts', 'zones+namespaces', 'zones+owners',
+// 'hosts', 'hosts+namespaces', 'hosts+owners',
+// 'namespaces', 'namespaces+owners',
+// 'owners'...
+export type Groups = string;
 
 export interface FlowQuery {
   timeRange?: number;

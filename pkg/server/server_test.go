@@ -336,6 +336,13 @@ func TestLokiConfigurationForTopology(t *testing.T) {
 	authM := &authMock{}
 	authM.MockGranted()
 
+	cfg, err := config.ReadFile("", "", "")
+	assert.Nil(t, err)
+	cfg.Frontend.Deduper = config.Deduper{
+		Mark:  true,
+		Merge: false,
+	}
+
 	// THAT is accessed behind the NOO console plugin backend
 	backendRoutes := setupRoutes(context.TODO(), &config.Config{
 		Loki: config.Loki{
@@ -343,10 +350,7 @@ func TestLokiConfigurationForTopology(t *testing.T) {
 			Timeout: config.Duration{Duration: time.Second},
 			Labels:  []string{fields.SrcNamespace, fields.DstNamespace, fields.SrcOwnerName, fields.DstOwnerName, fields.SrcType, fields.DstType, fields.FlowDirection},
 		},
-		Frontend: config.Frontend{Deduper: config.Deduper{
-			Mark:  true,
-			Merge: false,
-		}},
+		Frontend: cfg.Frontend,
 	}, authM)
 	backendSvc := httptest.NewServer(backendRoutes)
 	defer backendSvc.Close()
@@ -394,6 +398,13 @@ func TestLokiConfigurationForTableHistogram(t *testing.T) {
 	authM := &authMock{}
 	authM.MockGranted()
 
+	cfg, err := config.ReadFile("", "", "")
+	assert.Nil(t, err)
+	cfg.Frontend.Deduper = config.Deduper{
+		Mark:  true,
+		Merge: false,
+	}
+
 	// THAT is accessed behind the NOO console plugin backend
 	backendRoutes := setupRoutes(context.TODO(), &config.Config{
 		Loki: config.Loki{
@@ -401,10 +412,7 @@ func TestLokiConfigurationForTableHistogram(t *testing.T) {
 			Timeout: config.Duration{Duration: time.Second},
 			Labels:  []string{fields.SrcNamespace, fields.DstNamespace, fields.SrcOwnerName, fields.DstOwnerName, fields.SrcType, fields.DstType, fields.FlowDirection},
 		},
-		Frontend: config.Frontend{Deduper: config.Deduper{
-			Mark:  true,
-			Merge: false,
-		}},
+		Frontend: cfg.Frontend,
 	}, authM)
 	backendSvc := httptest.NewServer(backendRoutes)
 	defer backendSvc.Close()

@@ -96,11 +96,11 @@ export const getNamespaces = (forcedNamespace?: string): Promise<string[]> => {
 };
 
 export const getResources = (namespace: string, kind: string, forcedNamespace?: string): Promise<string[]> => {
-  const params = { namespace: forcedNamespace };
-  const url = namespace
-    ? `${ContextSingleton.getHost()}/api/resources/namespace/${namespace}/kind/${kind}/names`
-    : `${ContextSingleton.getHost()}/api/resources/kind/${kind}/names`;
-  return axios.get(url, { params }).then(r => {
+  const params = {
+    namespace: forcedNamespace || namespace,
+    kind
+  };
+  return axios.get(ContextSingleton.getHost() + '/api/resources/names', { params }).then(r => {
     if (r.status >= 400) {
       throw new Error(`${r.statusText} [code=${r.status}]`);
     }
@@ -169,6 +169,7 @@ export const getConfig = (): Promise<Config> => {
           : defaultConfig.portNaming.portNames
       },
       filters: r.data.filters,
+      scopes: r.data.scopes,
       quickFilters: r.data.quickFilters,
       alertNamespaces: r.data.alertNamespaces,
       sampling: r.data.sampling,

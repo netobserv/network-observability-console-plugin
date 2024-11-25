@@ -5,19 +5,12 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { FlowDirection, getDirectionDisplayString, Record } from '../../../api/ipfix';
-import { Column, ColumnsId, getFullColumnName } from '../../../utils/columns';
+import { Column, ColumnsId, getFullColumnName, isKubeObj, KubeObj } from '../../../utils/columns';
 import { dateFormatter, getFormattedDate, timeMSFormatter, utcDateTimeFormatter } from '../../../utils/datetime';
 import { dnsCodesNames, dnsErrorsValues, getDNSErrorDescription, getDNSRcodeDescription } from '../../../utils/dns';
 import { getDSCPDocUrl, getDSCPServiceClassDescription, getDSCPServiceClassName } from '../../../utils/dscp';
 import { formatDurationAboveMillisecond, formatDurationAboveNanosecond } from '../../../utils/duration';
-import {
-  getICMPCode,
-  getICMPDocUrl,
-  getICMPType,
-  icmpAllCodesValues,
-  icmpAllTypesValues,
-  isValidICMPProto
-} from '../../../utils/icmp';
+import { getICMPCode, getICMPDocUrl, getICMPType, icmpAllTypesValues, isValidICMPProto } from '../../../utils/icmp';
 import { dropCausesNames, getDropCauseDescription, getDropCauseDocUrl } from '../../../utils/pkt-drop';
 import { formatPort } from '../../../utils/port';
 import { formatProtocol, getProtocolDocUrl } from '../../../utils/protocol';
@@ -136,35 +129,40 @@ export const RecordField: React.FC<RecordFieldProps> = ({
     );
   };
 
+  const kubeObjContainer = (k: KubeObj) => {
+    const main = kubeObjContent(k.name, k.kind, k.namespace);
+    if (k.showNamespace && k.namespace) {
+      return doubleContainer(main, kindContent('Namespace', k.namespace), false);
+    }
+    return singleContainer(main);
+  };
+
   const kubeObjContent = (value: string | undefined, kind: string | undefined, ns: string | undefined) => {
     // Note: namespace is not mandatory here (e.g. Node objects)
     if (value && kind) {
       return (
         <div data-test={`field-resource-${kind}.${ns}.${value}`} className="force-truncate">
           {resourceIconText(value, kind, ns)}
-          <TextContent className="record-field-tooltip netobserv-no-child-margin">
-            {ns && (
-              <>
-                <Text component={TextVariants.h4}>{t('Namespace')}</Text>
-                <Text component={TextVariants.p}>{ns}</Text>
-              </>
-            )}
-            <Text component={TextVariants.h4}>{kind}</Text>
-            <Text component={TextVariants.p}>{value}</Text>
-          </TextContent>
+          {kubeTooltip(value, kind, ns)}
         </div>
       );
     }
     return undefined;
   };
 
-  const explicitKubeObjContent = (ip: string, port: number, kind?: string, namespace?: string, name?: string) => {
-    // Note: namespace is not mandatory here (e.g. Node objects)
-    if (name && kind) {
-      return doubleContainer(kubeObjContent(name, kind, namespace), kindContent('Namespace', namespace), false);
-    } else {
-      return ipPortContent(ip, port);
-    }
+  const kubeTooltip = (value: string, kind: string, ns: string | undefined) => {
+    return (
+      <TextContent className="record-field-tooltip netobserv-no-child-margin">
+        {ns && (
+          <>
+            <Text component={TextVariants.h4}>{t('Namespace')}</Text>
+            <Text component={TextVariants.p}>{ns}</Text>
+          </>
+        )}
+        <Text component={TextVariants.h4}>{kind}</Text>
+        <Text component={TextVariants.p}>{value}</Text>
+      </TextContent>
+    );
   };
 
   const kindContent = (kind: 'Namespace' | 'Node', value?: string) => {
@@ -180,18 +178,6 @@ export const RecordField: React.FC<RecordFieldProps> = ({
       );
     }
     return undefined;
-  };
-
-  const ipPortContent = (ip: string, port: number, singleText = false) => {
-    if (singleText) {
-      return singleContainer(simpleTextWithTooltip(port && !Number.isNaN(port) ? `${ip}:${String(port)}` : ip));
-    } else {
-      return doubleContainer(
-        simpleTextWithTooltip(ip),
-        simpleTextWithTooltip(port && !Number.isNaN(port) ? String(port) : undefined),
-        false
-      );
-    }
   };
 
   const dateTimeContent = (date: Date | undefined) => {
@@ -292,6 +278,10 @@ export const RecordField: React.FC<RecordFieldProps> = ({
   };
 
   const content = (c: Column) => {
+    if (!c.value) {
+      // Value function not configured
+      return emptyText();
+    }
     const value = c.value(flow);
     switch (c.id) {
       case ColumnsId.collectiontime:
@@ -310,129 +300,6 @@ export const RecordField: React.FC<RecordFieldProps> = ({
               )
             : undefined
         );
-      case ColumnsId.name:
-        return doubleContainer(
-          kubeObjContent(flow.fields.SrcK8S_Name, flow.labels.SrcK8S_Type, flow.labels.SrcK8S_Namespace),
-          kubeObjContent(flow.fields.DstK8S_Name, flow.labels.DstK8S_Type, flow.labels.DstK8S_Namespace)
-        );
-      case ColumnsId.srcname:
-        return singleContainer(kubeObjContent(value as string, flow.labels.SrcK8S_Type, flow.labels.SrcK8S_Namespace));
-      case ColumnsId.dstname:
-        return singleContainer(kubeObjContent(value as string, flow.labels.DstK8S_Type, flow.labels.DstK8S_Namespace));
-      case ColumnsId.owner:
-        return doubleContainer(
-          kubeObjContent(flow.labels.SrcK8S_OwnerName, flow.fields.SrcK8S_OwnerType, flow.labels.SrcK8S_Namespace),
-          kubeObjContent(flow.labels.DstK8S_OwnerName, flow.fields.DstK8S_OwnerType, flow.labels.DstK8S_Namespace)
-        );
-      case ColumnsId.srcowner:
-        return singleContainer(
-          kubeObjContent(value as string, flow.fields.SrcK8S_OwnerType, flow.labels.SrcK8S_Namespace)
-        );
-      case ColumnsId.dstowner:
-        return singleContainer(
-          kubeObjContent(value as string, flow.fields.DstK8S_OwnerType, flow.labels.DstK8S_Namespace)
-        );
-      case ColumnsId.addrport:
-        return doubleContainer(
-          ipPortContent(flow.fields.SrcAddr || '', flow.fields.SrcPort || NaN),
-          ipPortContent(flow.fields.DstAddr || '', flow.fields.DstPort || NaN)
-        );
-      case ColumnsId.srcaddrport:
-        return singleContainer(ipPortContent(flow.fields.SrcAddr || '', flow.fields.SrcPort || NaN));
-      case ColumnsId.dstaddrport:
-        return singleContainer(ipPortContent(flow.fields.DstAddr || '', flow.fields.DstPort || NaN));
-      case ColumnsId.kubeobject:
-        return doubleContainer(
-          explicitKubeObjContent(
-            flow.fields.SrcAddr || '',
-            flow.fields.SrcPort || NaN,
-            flow.labels.SrcK8S_Type,
-            flow.labels.SrcK8S_Namespace,
-            flow.fields.SrcK8S_Name
-          ),
-          explicitKubeObjContent(
-            flow.fields.DstAddr || '',
-            flow.fields.DstPort || NaN,
-            flow.labels.DstK8S_Type,
-            flow.labels.DstK8S_Namespace,
-            flow.fields.DstK8S_Name
-          )
-        );
-      case ColumnsId.srckubeobject:
-        return singleContainer(
-          explicitKubeObjContent(
-            flow.fields.SrcAddr || '',
-            flow.fields.SrcPort || NaN,
-            flow.labels.SrcK8S_Type,
-            flow.labels.SrcK8S_Namespace,
-            flow.fields.SrcK8S_Name
-          )
-        );
-      case ColumnsId.dstkubeobject:
-        return singleContainer(
-          explicitKubeObjContent(
-            flow.fields.DstAddr || '',
-            flow.fields.DstPort || NaN,
-            flow.labels.DstK8S_Type,
-            flow.labels.DstK8S_Namespace,
-            flow.fields.DstK8S_Name
-          )
-        );
-      case ColumnsId.ownerkubeobject:
-        return doubleContainer(
-          explicitKubeObjContent(
-            flow.fields.SrcAddr || '',
-            flow.fields.SrcPort || NaN,
-            flow.fields.SrcK8S_OwnerType,
-            flow.labels.SrcK8S_Namespace,
-            flow.labels.SrcK8S_OwnerName
-          ),
-          explicitKubeObjContent(
-            flow.fields.DstAddr || '',
-            flow.fields.DstPort || NaN,
-            flow.fields.DstK8S_OwnerType,
-            flow.labels.DstK8S_Namespace,
-            flow.labels.DstK8S_OwnerName
-          )
-        );
-      case ColumnsId.srcownerkubeobject:
-        return singleContainer(
-          explicitKubeObjContent(
-            flow.fields.SrcAddr || '',
-            flow.fields.SrcPort || NaN,
-            flow.fields.SrcK8S_OwnerType,
-            flow.labels.SrcK8S_Namespace,
-            flow.labels.DstK8S_OwnerName
-          )
-        );
-      case ColumnsId.dstownerkubeobject:
-        return singleContainer(
-          explicitKubeObjContent(
-            flow.fields.DstAddr || '',
-            flow.fields.DstPort || NaN,
-            flow.fields.DstK8S_OwnerType,
-            flow.labels.DstK8S_Namespace,
-            flow.labels.DstK8S_OwnerName
-          )
-        );
-      case ColumnsId.namespace:
-        return doubleContainer(
-          kindContent('Namespace', flow.labels.SrcK8S_Namespace),
-          kindContent('Namespace', flow.labels.DstK8S_Namespace)
-        );
-      case ColumnsId.srcnamespace:
-      case ColumnsId.dstnamespace: {
-        return singleContainer(kindContent('Namespace', value as string));
-      }
-      case ColumnsId.hostname:
-        return doubleContainer(
-          kindContent('Node', flow.fields.SrcK8S_HostName),
-          kindContent('Node', flow.fields.DstK8S_HostName)
-        );
-      case ColumnsId.srchostname:
-      case ColumnsId.dsthostname: {
-        return singleContainer(kindContent('Node', value as string));
-      }
       case ColumnsId.port:
         return doubleContainer(
           simpleTextWithTooltip(flow.fields.SrcPort ? formatPort(flow.fields.SrcPort) : ''),
@@ -496,18 +363,19 @@ export const RecordField: React.FC<RecordFieldProps> = ({
       }
       case ColumnsId.icmptype: {
         let child = emptyText();
-        if (Array.isArray(value) && value.length) {
-          if (isValidICMPProto(Number(value[0]))) {
-            const type = getICMPType(Number(value[0]), Number(value[1]) as icmpAllTypesValues);
+        if (typeof value === 'number' && !isNaN(value)) {
+          const proto = Number(flow.fields.Proto);
+          if (isValidICMPProto(proto)) {
+            const type = getICMPType(proto, value as icmpAllTypesValues);
             if (type && detailed) {
-              child = clickableContent(type.name, type.description || '', getICMPDocUrl(Number(value[0])));
+              child = clickableContent(type.name, type.description || '', getICMPDocUrl(proto));
             } else {
-              child = simpleTextWithTooltip(type?.name || String(value[1]))!;
+              child = simpleTextWithTooltip(type?.name || String(value))!;
             }
           } else {
             child = errorTextValue(
-              String(value[1]),
-              t('ICMP type provided but protocol is {{proto}}', { proto: formatProtocol(value[0] as number, t) })
+              String(value),
+              t('ICMP type provided but protocol is {{proto}}', { proto: formatProtocol(proto, t) })
             );
           }
         }
@@ -515,22 +383,20 @@ export const RecordField: React.FC<RecordFieldProps> = ({
       }
       case ColumnsId.icmpcode: {
         let child = emptyText();
-        if (Array.isArray(value) && value.length) {
-          if (isValidICMPProto(Number(value[0]))) {
-            const code = getICMPCode(
-              Number(value[0]),
-              Number(value[1]) as icmpAllTypesValues,
-              Number(value[2]) as icmpAllCodesValues
-            );
+        if (typeof value === 'number' && !isNaN(value)) {
+          const proto = Number(flow.fields.Proto);
+          const typez = Number(flow.fields.IcmpType) as icmpAllTypesValues;
+          if (isValidICMPProto(proto)) {
+            const code = getICMPCode(proto, typez, value);
             if (code && detailed) {
-              child = clickableContent(code.name, code.description || '', getICMPDocUrl(Number(value[0])));
+              child = clickableContent(code.name, code.description || '', getICMPDocUrl(proto));
             } else {
-              child = simpleTextWithTooltip(code?.name || String(value[2]))!;
+              child = simpleTextWithTooltip(code?.name || String(value))!;
             }
           } else {
             child = errorTextValue(
-              String(value[1]),
-              t('ICMP code provided but protocol is {{proto}}', { proto: formatProtocol(value[0] as number, t) })
+              String(value),
+              t('ICMP code provided but protocol is {{proto}}', { proto: formatProtocol(proto, t) })
             );
           }
         }
@@ -659,13 +525,19 @@ export const RecordField: React.FC<RecordFieldProps> = ({
         );
       }
       default:
+        if (value === undefined) {
+          return emptyText();
+        }
         if (Array.isArray(value) && value.length) {
           // we can only show two values properly with containers
           if (value.length === 2) {
-            return doubleContainer(simpleTextWithTooltip(String(value[0])), simpleTextWithTooltip(String(value[1])));
+            const contents = value.map(v => (isKubeObj(v) ? kubeObjContainer(v) : simpleTextWithTooltip(String(v))));
+            return doubleContainer(contents[0], contents[1]);
           }
           // else we will show values as single joigned string
           return singleContainer(simpleTextWithTooltip(value.map(v => String(v)).join(', ')));
+        } else if (value && isKubeObj(value)) {
+          return kubeObjContainer(value);
         } else {
           return singleContainer(simpleTextWithTooltip(String(value)));
         }

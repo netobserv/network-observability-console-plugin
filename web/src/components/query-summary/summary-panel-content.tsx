@@ -264,9 +264,9 @@ export const SummaryPanelContent: React.FC<SummaryPanelContentProps> = ({
       }
 
       rateMetrics.forEach(m => {
-        manageTypeCardinality(m.source.hostName, m.source.namespace, m.source.resource?.type, m.source.resource?.name);
+        manageTypeCardinality(m.source.host, m.source.namespace, m.source.resource?.type, m.source.resource?.name);
         manageTypeCardinality(
-          m.destination.hostName,
+          m.destination.host,
           m.destination.namespace,
           m.destination.resource?.type,
           m.destination.resource?.name

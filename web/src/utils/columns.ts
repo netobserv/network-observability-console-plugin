@@ -1,9 +1,10 @@
 import _ from 'lodash';
-import { getRecordValue, Record } from '../api/ipfix';
+import { Record } from '../api/ipfix';
 import { Feature } from '../model/config';
 import { FilterId } from '../model/filters';
 import { compareNumbers, compareStrings } from './base-compare';
-import { FieldConfig, FieldType } from './fields';
+import { computeValueFunc, fromFieldFunc } from './column-parser';
+import { FieldConfig } from './fields';
 import { compareIPs } from './ip';
 import { comparePorts } from './port';
 import { compareProtocols } from './protocol';
@@ -36,8 +37,6 @@ export enum ColumnsId {
   srcport = 'SrcPort',
   dstport = 'DstPort',
   addrport = 'AddrPort',
-  srcaddrport = 'SrcAddrPort',
-  dstaddrport = 'DstAddrPort',
   proto = 'Proto',
   icmptype = 'IcmpType',
   icmpcode = 'IcmpCode',
@@ -103,6 +102,17 @@ export interface ColumnConfigDef {
   feature?: Feature;
 }
 
+export interface KubeObj {
+  name: string;
+  kind: string;
+  namespace?: string;
+  showNamespace: boolean;
+}
+export type ColValue = string | number | KubeObj | string[] | number[] | KubeObj[] | undefined;
+export const isKubeObj = (v: ColValue): v is KubeObj => {
+  return (v as KubeObj)?.kind !== undefined;
+};
+
 export interface Column {
   id: ColumnsId;
   group?: string;
@@ -113,7 +123,8 @@ export interface Column {
   quickFilter?: FilterId;
   isSelected: boolean;
   isCommon?: boolean;
-  value: (flow: Record) => string | number | string[] | number[];
+  value?: (flow: Record) => ColValue;
+  fieldValue?: (flow: Record) => ColValue;
   sort(a: Record, b: Record, col: Column): number;
   // width in "em"
   width: number;
@@ -195,114 +206,8 @@ export const getShortColumnName = (col?: Column): string => {
   return '';
 };
 
-export const getSrcOrDstValue = (v1?: string | number, v2?: string | number): string[] | number[] => {
-  if (v1 && !Number.isNaN(v1) && v2 && !Number.isNaN(v2)) {
-    return [v1 as number, v2 as number];
-  } else if (v1 || v2) {
-    return [v1 ? (v1 as string) : '', v2 ? (v2 as string) : ''];
-  } else {
-    return [];
-  }
-};
-
-/* concatenate kind / namespace / pod or ip / port for display
- * if kubernetes objects Kind Namespace & Pod field are not resolved, will fallback on
- * ip:port or ip only if port is not provided
- */
-export const getConcatenatedValue = (
-  ip: string,
-  port: number,
-  kind?: string,
-  namespace?: string,
-  pod?: string
-): string => {
-  if (kind && namespace && pod) {
-    return `${kind}.${namespace}.${pod}`;
-  }
-  if (!Number.isNaN(port)) {
-    return `${ip}:${String(port)}`;
-  }
-  return ip;
-};
-
 export const getDefaultColumns = (columnDefs: ColumnConfigDef[], fieldConfigs: FieldConfig[]): Column[] => {
   const columns: Column[] = [];
-
-  function getColumnOrRecordValue(record: Record, arg: string, defaultValue: string | number) {
-    if (arg.startsWith('column.')) {
-      const colId = arg.replace('column.', '');
-      const found = columns.find(c => c.id === colId);
-      if (found) {
-        return found.value(record);
-      }
-      return defaultValue;
-    }
-    return getRecordValue(record, arg, defaultValue);
-  }
-
-  function calculatedValue(record: Record, calculatedValue: string) {
-    if (calculatedValue.startsWith('getSrcOrDstValue')) {
-      const args = calculatedValue.replaceAll(/getSrcOrDstValue|\(|\)/g, '').split(',');
-      if (args.length !== 2) {
-        console.error('getDefaultColumns - invalid parameters for getSrcOrDstValue calculated value', calculatedValue);
-        return '';
-      }
-      return getSrcOrDstValue(...args.flatMap(f => getColumnOrRecordValue(record, f, '')));
-    } else if (calculatedValue.startsWith('getConcatenatedValue')) {
-      const args = calculatedValue.replaceAll(/getConcatenatedValue|\(|\)/g, '').split(',');
-      if (args.length < 2) {
-        console.error(
-          'getDefaultColumns - invalid parameters for getConcatenatedValue calculated value',
-          calculatedValue
-        );
-        return '';
-      }
-      return getConcatenatedValue(
-        getColumnOrRecordValue(record, args[0], '') as string,
-        getColumnOrRecordValue(record, args[1], NaN) as number,
-        args.length > 2 ? (getColumnOrRecordValue(record, args[2], '') as string) : undefined,
-        args.length > 3 ? (getColumnOrRecordValue(record, args[3], '') as string) : undefined
-      );
-    } else if (calculatedValue.startsWith('substract')) {
-      const args = calculatedValue.replaceAll(/substract|\(|\)/g, '').split(',');
-      if (args.length < 2) {
-        console.error('getDefaultColumns - invalid parameters for substract calculated value', calculatedValue);
-        return '';
-      }
-      return (
-        (getColumnOrRecordValue(record, args[0], 0) as number) - (getColumnOrRecordValue(record, args[1], 0) as number)
-      );
-    } else if (calculatedValue.startsWith('multiply')) {
-      const args = calculatedValue.replaceAll(/multiply|\(|\)/g, '').split(',');
-      if (args.length < 2) {
-        console.error('getDefaultColumns - invalid parameters for multiply calculated value', calculatedValue);
-        return '';
-      }
-      return (getColumnOrRecordValue(record, args[0], 0) as number) * Number(args[1]);
-    }
-    return '';
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  function forceType(id: ColumnsId, value: any, type?: FieldType) {
-    if (!type) {
-      console.error('Column ' + id + " doesn't specify type");
-    }
-    // check if value type match and convert it if needed
-    if (value && value !== '' && typeof value !== type && !Array.isArray(value)) {
-      switch (type) {
-        case 'number':
-          return Number(value);
-        case 'string':
-          return String(value);
-        default:
-          throw new Error('forceType error: type ' + type + ' is not managed');
-      }
-    } else {
-      // else return value directly
-      return value;
-    }
-  }
 
   // add a column for each definition
   columnDefs.forEach(d => {
@@ -327,65 +232,29 @@ export const getDefaultColumns = (columnDefs: ColumnConfigDef[], fieldConfigs: F
       docURL: !_.isEmpty(d.docURL) ? d.docURL : undefined,
       quickFilter: !_.isEmpty(d.filter) ? (d.filter as FilterId) : undefined,
       isSelected: d.default === true,
-      isCommon: !_.isEmpty(d.calculated),
-      value: (r: Record) => {
-        if (!_.isEmpty(d.calculated)) {
-          if (d.calculated!.startsWith('[') && d.calculated!.endsWith(']')) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const result: any = [];
-            if (d.calculated?.includes('column')) {
-              // consider all items as columns or fields
-              const values = d.calculated!.replaceAll(/\[|\]/g, '').split(',');
-              values.forEach(v => {
-                result.push(getColumnOrRecordValue(r, v, ''));
-              });
-            } else {
-              // consider all items as functions
-              const values = d.calculated!.replaceAll(/\[|\]/g, '').split('),');
-              values.forEach(v => {
-                result.push(calculatedValue(r, `${v})`));
-              });
-            }
-            return result;
-          } else {
-            return calculatedValue(r, d.calculated!);
-          }
-        } else if (fields) {
-          const arr: (string | number | undefined)[] = [];
-          fields.forEach(fc => {
-            const value = getRecordValue(r, fc.name, undefined);
-            arr.push(forceType(id, value, fc.type));
-          });
-          return arr;
-        } else if (field) {
-          const value = getRecordValue(r, field!.name, '');
-          return forceType(id, value, field!.type);
-        } else {
-          console.warn('column.value called on ' + id + ' but not configured');
-          return null;
-        }
-      },
+      isCommon: d.calculated !== undefined && d.calculated.startsWith('['),
+      value: computeValueFunc(d, columns, fields, field),
+      fieldValue: fromFieldFunc(d, fields, field),
       sort: (a: Record, b: Record, col: Column) => {
-        if (d.calculated) {
+        if (!col.fieldValue) {
           return -1;
-        } else {
-          const valA = col.value(a);
-          const valB = col.value(b);
-          if (typeof valA === 'number' && typeof valB === 'number') {
-            if (col.id.includes('Port')) {
-              return comparePorts(valA, valB);
-            } else if (col.id.includes('Proto')) {
-              return compareProtocols(valA, valB);
-            }
-            return compareNumbers(valA, valB);
-          } else if (typeof valA === 'string' && typeof valB === 'string') {
-            if (col.id.includes('IP')) {
-              return compareIPs(valA, valB);
-            }
-            return compareStrings(valA, valB);
-          }
-          return 0;
         }
+        const valA = col.fieldValue(a);
+        const valB = col.fieldValue(b);
+        if (typeof valA === 'number' && typeof valB === 'number') {
+          if (col.id.includes('Port')) {
+            return comparePorts(valA, valB);
+          } else if (col.id.includes('Proto')) {
+            return compareProtocols(valA, valB);
+          }
+          return compareNumbers(valA, valB);
+        } else if (typeof valA === 'string' && typeof valB === 'string') {
+          if (col.id.includes('IP')) {
+            return compareIPs(valA, valB);
+          }
+          return compareStrings(valA, valB);
+        }
+        return 0;
       },
       width: d.width || 15,
       feature: d.feature

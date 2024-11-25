@@ -14,6 +14,19 @@ import (
 
 var qr = v1.Range{Start: time.Now().Add(-15 * time.Minute), End: time.Now(), Step: 30 * time.Second}
 
+var kl = map[string][]string{
+	"app":          {"app"},
+	"droppedState": {"PktDropLatestState"},
+	"droppedCause": {"PktDropLatestDropCause"},
+	"dnsRCode":     {"DnsFlagsResponseCode"},
+	"cluster":      {"K8S_ClusterName"},
+	"zone":         {"SrcK8S_Zone", "DstK8S_Zone"},
+	"host":         {"SrcK8S_HostName", "DstK8S_HostName"},
+	"namespace":    {"SrcK8S_Namespace", "DstK8S_Namespace"},
+	"owner":        {"SrcK8S_OwnerName", "SrcK8S_OwnerType", "DstK8S_OwnerName", "DstK8S_OwnerType", "SrcK8S_Namespace", "DstK8S_Namespace"},
+	"resource":     {"SrcK8S_Name", "SrcK8S_Type", "SrcK8S_OwnerName", "SrcK8S_OwnerType", "SrcK8S_Namespace", "SrcAddr", "SrcK8S_HostName", "DstK8S_Name", "DstK8S_Type", "DstK8S_OwnerName", "DstK8S_OwnerType", "DstK8S_Namespace", "DstAddr", "DstK8S_HostName"},
+}
+
 func TestBuildQuery_PromQLSimpleRateIgnoreApp(t *testing.T) {
 	in := loki.TopologyInput{
 		Top:            "50",
@@ -25,7 +38,7 @@ func TestBuildQuery_PromQLSimpleRateIgnoreApp(t *testing.T) {
 		Aggregate:      "app",
 	}
 	f := filters.SingleQuery{}
-	q := NewQuery(&in, &qr, f, []string{"my_metric"})
+	q := NewQuery(kl, &in, &qr, f, []string{"my_metric"})
 	result := q.Build()
 	assert.Equal(
 		t,
@@ -45,7 +58,7 @@ func TestBuildQuery_PromQLSimpleRateNoFilter(t *testing.T) {
 		Aggregate:      "namespace",
 	}
 	f := filters.SingleQuery{}
-	q := NewQuery(&in, &qr, f, []string{"my_metric"})
+	q := NewQuery(kl, &in, &qr, f, []string{"my_metric"})
 	result := q.Build()
 	assert.Equal(
 		t,
@@ -70,7 +83,7 @@ func TestBuildQuery_PromQLSimpleRateAndFilter(t *testing.T) {
 			Values: `"a"`,
 		},
 	}
-	q := NewQuery(&in, &qr, f, []string{"my_metric"})
+	q := NewQuery(kl, &in, &qr, f, []string{"my_metric"})
 	result := q.Build()
 	assert.Equal(
 		t,
@@ -95,7 +108,7 @@ func TestBuildQuery_PromQLRateMultiFilter(t *testing.T) {
 			Values: `"a","b"`,
 		},
 	}
-	q := NewQuery(&in, &qr, f, []string{"my_metric"})
+	q := NewQuery(kl, &in, &qr, f, []string{"my_metric"})
 	result := q.Build()
 	assert.Equal(
 		t,
@@ -120,7 +133,7 @@ func TestBuildQuery_PromQLHistogramAverage(t *testing.T) {
 			Values: `"a"`,
 		},
 	}
-	q := NewQuery(&in, &qr, f, []string{"my_metric"})
+	q := NewQuery(kl, &in, &qr, f, []string{"my_metric"})
 	result := q.Build()
 	assert.Equal(
 		t,
@@ -145,7 +158,7 @@ func TestBuildQuery_PromQLHistogramP99(t *testing.T) {
 			Values: `"a"`,
 		},
 	}
-	q := NewQuery(&in, &qr, f, []string{"my_metric"})
+	q := NewQuery(kl, &in, &qr, f, []string{"my_metric"})
 	result := q.Build()
 	assert.Equal(
 		t,
@@ -165,7 +178,7 @@ func TestBuildQuery_PromQLByDNSResponseCode(t *testing.T) {
 		Aggregate:      "DnsFlagsResponseCode",
 	}
 	f := filters.SingleQuery{}
-	q := NewQuery(&in, &qr, f, []string{"netobserv_namespace_dns_latency_seconds_count"})
+	q := NewQuery(kl, &in, &qr, f, []string{"netobserv_namespace_dns_latency_seconds_count"})
 	result := q.Build()
 	assert.Equal(
 		t,
@@ -190,7 +203,7 @@ func TestBuildQuery_PromQLORMetrics(t *testing.T) {
 			Values: `"a"`,
 		},
 	}
-	q := NewQuery(&in, &qr, f, []string{"ingress_metric", "egress_metric"})
+	q := NewQuery(kl, &in, &qr, f, []string{"ingress_metric", "egress_metric"})
 	result := q.Build()
 	assert.Equal(
 		t,

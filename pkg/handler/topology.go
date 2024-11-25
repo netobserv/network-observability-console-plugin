@@ -139,7 +139,7 @@ func (h *Handlers) extractTopologyQueryParams(params url.Values, ds constants.Da
 			namespace,
 			func(filters filters.SingleQuery) bool {
 				// Do not expand if this is managed from prometheus
-				sr, _ := getEligiblePromMetric(h.PromInventory, filters, &in, namespace != "")
+				sr, _ := getEligiblePromMetric(h.Cfg.Frontend.GetAggregateKeyLabels(), h.PromInventory, filters, &in, namespace != "")
 				return sr != nil && len(sr.Found) > 0
 			},
 		)
@@ -276,12 +276,12 @@ func buildTopologyQuery(
 	qr *v1.Range,
 	isDev bool,
 ) (string, *prometheus.Query, int, error) {
-	search, unsupportedReason := getEligiblePromMetric(promInventory, filters, in, isDev)
+	search, unsupportedReason := getEligiblePromMetric(cfg.Frontend.GetAggregateKeyLabels(), promInventory, filters, in, isDev)
 	if unsupportedReason != "" {
 		hlog.Debugf("Unsupported Prometheus query; reason: %s.", unsupportedReason)
 	} else if search != nil && len(search.Found) > 0 {
 		// Success, we can use Prometheus
-		qb := prometheus.NewQuery(in, qr, filters, search.Found)
+		qb := prometheus.NewQuery(cfg.Frontend.GetAggregateKeyLabels(), in, qr, filters, search.Found)
 		q := qb.Build()
 		return "", &q, http.StatusOK, nil
 	}
@@ -310,7 +310,7 @@ func buildTopologyQuery(
 			"this request could not be performed with Prometheus metrics%s: it requires installing and enabling Loki", reason)
 	}
 
-	qb, err := loki.NewTopologyQuery(&cfg.Loki, in)
+	qb, err := loki.NewTopologyQuery(&cfg.Loki, cfg.Frontend.GetAggregateKeyLabels(), in)
 	if err != nil {
 		return "", nil, http.StatusBadRequest, err
 	}
@@ -321,7 +321,7 @@ func buildTopologyQuery(
 	return EncodeQuery(qb.Build()), nil, http.StatusOK, nil
 }
 
-func getEligiblePromMetric(promInventory *prometheus.Inventory, filters filters.SingleQuery, in *loki.TopologyInput, isDev bool) (*prometheus.SearchResult, string) {
+func getEligiblePromMetric(kl map[string][]string, promInventory *prometheus.Inventory, filters filters.SingleQuery, in *loki.TopologyInput, isDev bool) (*prometheus.SearchResult, string) {
 	if in.DataSource != constants.DataSourceAuto && in.DataSource != constants.DataSourceProm {
 		return nil, ""
 	}
@@ -332,7 +332,7 @@ func getEligiblePromMetric(promInventory *prometheus.Inventory, filters filters.
 		return nil, fmt.Sprintf("RecordType not managed: %s", in.RecordType)
 	}
 
-	labelsNeeded, _ := prometheus.GetLabelsAndFilter(in.Aggregate, in.Groups)
+	labelsNeeded, _ := prometheus.GetLabelsAndFilter(kl, in.Aggregate, in.Groups)
 	fromFilters, unsupportedReason := prometheus.FiltersToLabels(filters)
 	if unsupportedReason != "" {
 		return nil, unsupportedReason

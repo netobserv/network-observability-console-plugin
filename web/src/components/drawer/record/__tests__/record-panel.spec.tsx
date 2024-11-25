@@ -27,19 +27,37 @@ describe('<RecordPanel />', () => {
     expect(wrapper.find(RecordPanel)).toBeTruthy();
     expect(wrapper.find('#record-panel-test')).toHaveLength(1);
     // all columns with data + JSON field
-    // sample contains 18 fields
+    // sample contains 20 fields
     // JSON tab represent 1 extra field
-    expect(wrapper.find('.record-field-container')).toHaveLength(18 + 1);
-
+    expect(wrapper.find('.record-field-container')).toHaveLength(20 + 1);
+    // No ICMP
+    expect(wrapper.find({ 'data-test-id': 'drawer-field-IcmpType' })).toHaveLength(0);
+    expect(wrapper.find({ 'data-test-id': 'drawer-field-IcmpCode' })).toHaveLength(0);
     // same with 4 valid fields + json
     wrapper.setProps({ record: UnknownFlow });
     expect(wrapper.find('.record-field-container')).toHaveLength(4 + 1);
   });
+
   it('should close on click', async () => {
     const wrapper = shallow(<RecordPanel {...mocks} />);
     const closeButton = wrapper.find(DrawerCloseButton);
     expect(closeButton).toHaveLength(1);
     closeButton.simulate('click');
     expect(mocks.onClose).toHaveBeenCalled();
+  });
+
+  it('should render ICMP', async () => {
+    const flowWithICMP = {
+      ...mocks.record,
+      fields: {
+        ...mocks.record.fields,
+        IcmpType: 8,
+        IcmpCode: 0
+      }
+    };
+    const wrapper = shallow(<RecordPanel {...mocks} record={flowWithICMP} />);
+    expect(wrapper.find(RecordPanel)).toBeTruthy();
+    expect(wrapper.find({ 'data-test-id': 'drawer-field-IcmpType' })).toHaveLength(1);
+    expect(wrapper.find({ 'data-test-id': 'drawer-field-IcmpCode' })).toHaveLength(1);
   });
 });

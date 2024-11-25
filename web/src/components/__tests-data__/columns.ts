@@ -45,6 +45,7 @@ export const ColumnConfigSampleDefs = [
     docURL: 'http://kubernetes.io/docs/user-guide/identifiers#names',
     field: 'SrcK8S_Name',
     filter: 'src_name',
+    calculated: 'kubeObject(SrcK8S_Type,SrcK8S_Namespace,SrcK8S_Name,0)',
     default: true,
     width: 15
   },
@@ -66,6 +67,7 @@ export const ColumnConfigSampleDefs = [
     docURL: 'https://kubernetes.io/docs/concepts/overview/working-with-objects/owners-dependents/',
     field: 'SrcK8S_OwnerName',
     filter: 'src_owner_name',
+    calculated: 'kubeObject(SrcK8S_OwnerType,SrcK8S_Namespace,SrcK8S_OwnerName,0)',
     default: false,
     width: 15
   },
@@ -88,6 +90,7 @@ export const ColumnConfigSampleDefs = [
     docURL: 'http://kubernetes.io/docs/user-guide/identifiers#namespaces',
     field: 'SrcK8S_Namespace',
     filter: 'src_namespace',
+    calculated: `kubeObject('Namespace','',SrcK8S_Namespace,0)`,
     default: true,
     width: 15
   },
@@ -139,6 +142,7 @@ export const ColumnConfigSampleDefs = [
     docURL: 'https://kubernetes.io/docs/concepts/architecture/nodes/',
     field: 'SrcK8S_HostName',
     filter: 'src_host_name',
+    calculated: `kubeObject('Node','',SrcK8S_HostName,0)`,
     default: false,
     width: 15
   },
@@ -146,6 +150,7 @@ export const ColumnConfigSampleDefs = [
     id: 'SrcK8S_Object',
     group: 'Source',
     name: 'Kubernetes Object',
+    calculated: `kubeObject(SrcK8S_Type,SrcK8S_Namespace,SrcK8S_Name,1) or concat(SrcAddr,':',SrcPort)`,
     default: false,
     width: 15
   },
@@ -153,6 +158,7 @@ export const ColumnConfigSampleDefs = [
     id: 'SrcK8S_OwnerObject',
     group: 'Source',
     name: 'Owner Kubernetes Object',
+    calculated: `kubeObject(SrcK8S_OwnerType,SrcK8S_Namespace,SrcK8S_OwnerName,1)`,
     default: false,
     width: 15
   },
@@ -160,6 +166,7 @@ export const ColumnConfigSampleDefs = [
     id: 'SrcAddrPort',
     group: 'Source',
     name: 'IP & Port',
+    calculated: `concat(SrcAddr,':',SrcPort)`,
     default: false,
     width: 15
   },
@@ -171,6 +178,7 @@ export const ColumnConfigSampleDefs = [
     docURL: 'http://kubernetes.io/docs/user-guide/identifiers#names',
     field: 'DstK8S_Name',
     filter: 'dst_name',
+    calculated: `kubeObject(DstK8S_Type,DstK8S_Namespace,DstK8S_Name,0)`,
     default: true,
     width: 15
   },
@@ -192,6 +200,7 @@ export const ColumnConfigSampleDefs = [
     docURL: 'https://kubernetes.io/docs/concepts/overview/working-with-objects/owners-dependents/',
     field: 'DstK8S_OwnerName',
     filter: 'dst_owner_name',
+    calculated: `kubeObject(DstK8S_OwnerType,DstK8S_Namespace,DstK8S_OwnerName,0)`,
     default: false,
     width: 15
   },
@@ -214,6 +223,7 @@ export const ColumnConfigSampleDefs = [
     docURL: 'http://kubernetes.io/docs/user-guide/identifiers#namespaces',
     field: 'DstK8S_Namespace',
     filter: 'dst_namespace',
+    calculated: `kubeObject('Namespace','',DstK8S_Namespace,0)`,
     default: true,
     width: 15
   },
@@ -265,6 +275,7 @@ export const ColumnConfigSampleDefs = [
     docURL: 'https://kubernetes.io/docs/concepts/architecture/nodes/',
     field: 'DstK8S_HostName',
     filter: 'dst_host_name',
+    calculated: `kubeObject('Node','',DstK8S_HostName,0)`,
     default: false,
     width: 15
   },
@@ -272,6 +283,7 @@ export const ColumnConfigSampleDefs = [
     id: 'DstK8S_Object',
     group: 'Destination',
     name: 'Kubernetes Object',
+    calculated: `kubeObject(DstK8S_Type,DstK8S_Namespace,DstK8S_Name,1) or concat(DstAddr,':',DstPort)`,
     default: false,
     width: 15
   },
@@ -279,6 +291,7 @@ export const ColumnConfigSampleDefs = [
     id: 'DstK8S_OwnerObject',
     group: 'Destination',
     name: 'Owner Kubernetes Object',
+    calculated: `kubeObject(DstK8S_OwnerType,DstK8S_Namespace,DstK8S_OwnerName,1)`,
     default: false,
     width: 15
   },
@@ -286,84 +299,98 @@ export const ColumnConfigSampleDefs = [
     id: 'DstAddrPort',
     group: 'Destination',
     name: 'IP & Port',
+    calculated: `concat(DstAddr,':',DstPort)`,
     default: false,
     width: 15
   },
   {
     id: 'K8S_Name',
     name: 'Names',
+    calculated: '[SrcK8S_Name,DstK8S_Name]',
     default: false,
     width: 15
   },
   {
     id: 'K8S_Type',
     name: 'Kinds',
+    calculated: '[SrcK8S_Type,DstK8S_Type]',
     default: false,
     width: 10
   },
   {
     id: 'K8S_OwnerName',
     name: 'Owners',
+    calculated: '[SrcK8S_OwnerName,DstK8S_OwnerName]',
     default: false,
     width: 15
   },
   {
     id: 'K8S_OwnerType',
     name: 'Owner Kinds',
+    calculated: '[SrcK8S_OwnerType,DstK8S_OwnerType]',
     default: false,
     width: 10
   },
   {
     id: 'K8S_Namespace',
     name: 'Namespaces',
+    calculated: '[SrcK8S_Namespace,DstK8S_Namespace]',
     default: false,
     width: 15
   },
   {
     id: 'Addr',
     name: 'IP',
+    calculated: '[SrcAddr,DstAddr]',
     default: false,
     width: 10
   },
   {
     id: 'Port',
     name: 'Ports',
+    calculated: '[SrcPort,DstPort]',
     default: false,
     width: 10
   },
   {
     id: 'Mac',
     name: 'MAC',
+    calculated: '[SrcMac,DstMac]',
     default: false,
     width: 10
   },
   {
     id: 'K8S_HostIP',
     name: 'Node IP',
+    calculated: '[SrcK8S_HostIP,DstK8S_HostIP]',
     default: false,
     width: 10
   },
   {
     id: 'K8S_HostName',
     name: 'Node Name',
+    calculated: '[SrcK8S_HostName,DstK8S_HostName]',
     default: false,
     width: 15
   },
   {
     id: 'K8S_Object',
     name: 'Kubernetes Objects',
+    calculated: '[column.SrcK8S_Object,column.DstK8S_Object]',
     default: false,
     width: 15
   },
   {
     id: 'K8S_OwnerObject',
     name: 'Owner Kubernetes Objects',
+    calculated: '[column.SrcK8S_OwnerObject,column.DstK8S_OwnerObject]',
     default: false,
     width: 15
   },
   {
     id: 'AddrPort',
     name: 'IPs & Ports',
+    calculated: '[column.SrcAddrPort,column.DstAddrPort]',
     default: false,
     width: 15
   },
@@ -470,6 +497,26 @@ export const ColumnConfigSampleDefs = [
     filter: 'dns_flag_response_code',
     default: false,
     width: 5
+  },
+  {
+    id: 'IcmpType',
+    group: 'ICMP',
+    name: 'Type',
+    tooltip: 'The type of the ICMP message.',
+    field: 'IcmpType',
+    filter: 'icmp_type',
+    default: false,
+    width: 10
+  },
+  {
+    id: 'IcmpCode',
+    group: 'ICMP',
+    name: 'Code',
+    tooltip: 'The code of the ICMP message.',
+    field: 'IcmpCode',
+    filter: 'icmp_code',
+    default: false,
+    width: 10
   }
 ];
 

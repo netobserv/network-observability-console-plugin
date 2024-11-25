@@ -15,6 +15,7 @@ import { ColumnsIcon, EllipsisVIcon, ExportIcon } from '@patternfly/react-icons'
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { FlowScope, MetricType, StatFunction } from 'src/model/flow-query';
+import { ScopeConfigDef } from '../../model/scope';
 import { TopologyOptions } from '../../model/topology';
 import { exportToPng } from '../../utils/export';
 import OverviewDisplayDropdown, { Size } from '../dropdowns/overview-display-dropdown';
@@ -45,7 +46,7 @@ export interface ViewOptionsToolbarProps {
   topologyOptions: TopologyOptions;
   setTopologyOptions: (o: TopologyOptions) => void;
   allowedTypes: MetricType[];
-  allowedScopes: FlowScope[];
+  scopes: ScopeConfigDef[];
   size: Size;
   setSize: (v: Size) => void;
   setSearchEvent: (se: SearchEvent) => void;
@@ -236,7 +237,7 @@ export const ViewOptionsToolbar: React.FC<ViewOptionsToolbarProps> = React.forwa
                 setTruncateLength={props.setOverviewTruncateLength}
                 focus={props.overviewFocus}
                 setFocus={props.setOverviewFocus}
-                allowedScopes={props.allowedScopes}
+                scopes={props.scopes}
               />
             )}
             {props.selectedViewId === 'table' && <TableDisplayDropdown size={props.size} setSize={props.setSize} />}
@@ -251,7 +252,7 @@ export const ViewOptionsToolbar: React.FC<ViewOptionsToolbarProps> = React.forwa
                 topologyOptions={props.topologyOptions}
                 setTopologyOptions={props.setTopologyOptions}
                 allowedTypes={props.allowedTypes}
-                allowedScopes={props.allowedScopes}
+                scopes={props.scopes}
               />
             )}
           </OverflowMenuItem>
