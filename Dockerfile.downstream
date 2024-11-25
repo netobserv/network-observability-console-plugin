@@ -21,7 +21,9 @@ RUN npm run build$BUILDSCRIPT
 
 FROM brew.registry.redhat.io/rh-osbs/openshift-golang-builder:v1.22.5-202407301806.g4c8b32d.el9 as go-builder
 
-ARG LDFLAGS
+ARG BUILDVERSION
+ARG DATE
+
 WORKDIR /opt/app-root
 
 COPY go.mod go.mod
@@ -31,7 +33,7 @@ COPY .mk/ .mk/
 COPY cmd/ cmd/
 COPY pkg/ pkg/
 
-RUN CGO_ENABLED=0 go build -ldflags "$LDFLAGS" -mod vendor -o plugin-backend cmd/plugin-backend.go
+RUN CGO_ENABLED=0 go build -ldflags "-X main.buildVersion=$BUILDVERSION -X main.buildDate=$DATE" -mod vendor -o plugin-backend cmd/plugin-backend.go
 
 FROM registry.access.redhat.com/ubi9/ubi-minimal:9.5
 
