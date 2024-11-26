@@ -17,7 +17,7 @@ func TestReencode_UpdateEvent(t *testing.T) {
 	out := NetworkEventsToString(js)
 	assert.Equal(
 		t,
-		`{"Bytes":66,"Interfaces":["br-ex"],"NetworkEvents":["Allowed by default allow from local node policy, direction ingress"],"Packets":1,"SrcK8S_Name":"ip-10-0-1-7.ec2.internal"}`,
+		`{"Bytes":66,"Interfaces":["br-ex"],"NetworkEvents":["Allowed by default allow from local node policy, direction Ingress"],"Packets":1,"SrcK8S_Name":"ip-10-0-1-7.ec2.internal"}`,
 		out,
 	)
 
