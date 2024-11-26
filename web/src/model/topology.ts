@@ -531,13 +531,18 @@ export const generateDataModel = (
   // addPossibleGroups adds peer to one or more groups when relevant, and returns the smallest one
   const addPossibleGroups = (peer: TopologyMetricPeer): NodeModel | undefined => {
     // groups are all possible scopes except last one
-    const parentScopes = ContextSingleton.getScopes().slice(0, -1).reverse();
+    const parentScopes = ContextSingleton.getScopes().slice(0, -1);
 
     // build parent tree from biggest to smallest group
     let parent: NodeModel | undefined = undefined;
     parentScopes.forEach(sc => {
       if (options.groupTypes.includes(`${sc.id}s`) && !_.isEmpty(peer[sc.id])) {
-        parent = addGroup({ [sc.id]: peer[sc.id] }, sc.id, parent, true);
+        parent = addGroup(
+          { [sc.id]: peer[sc.id], namespace: ['namespace', 'owner'].includes(sc.id) ? peer.namespace : undefined },
+          sc.id,
+          parent,
+          true
+        );
       }
     });
 
