@@ -75,6 +75,16 @@ export const getClusters = (forcedNamespace?: string): Promise<string[]> => {
   });
 };
 
+export const getUDNs = (forcedNamespace?: string): Promise<string[]> => {
+  const params = { namespace: forcedNamespace };
+  return axios.get(ContextSingleton.getHost() + '/api/resources/udns', { params }).then(r => {
+    if (r.status >= 400) {
+      throw new Error(`${r.statusText} [code=${r.status}]`);
+    }
+    return r.data;
+  });
+};
+
 export const getZones = (forcedNamespace?: string): Promise<string[]> => {
   const params = { namespace: forcedNamespace };
   return axios.get(ContextSingleton.getHost() + '/api/resources/zones', { params }).then(r => {
