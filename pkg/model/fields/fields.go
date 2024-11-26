@@ -69,8 +69,7 @@ func IsNumeric(v string) bool {
 		Packets,
 		Proto,
 		Bytes,
-		DSCP,
-		TCPFlags:
+		DSCP:
 		return true
 	default:
 		return false
@@ -95,7 +94,8 @@ func IsArray(v string) bool {
 	case
 		IfDirections,
 		Interfaces,
-		NetworkEvents:
+		NetworkEvents,
+		TCPFlags:
 		return true
 	default:
 		return false

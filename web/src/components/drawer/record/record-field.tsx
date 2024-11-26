@@ -14,7 +14,7 @@ import { getICMPCode, getICMPDocUrl, getICMPType, icmpAllTypesValues, isValidICM
 import { dropCausesNames, getDropCauseDescription, getDropCauseDocUrl } from '../../../utils/pkt-drop';
 import { formatPort } from '../../../utils/port';
 import { formatProtocol, getProtocolDocUrl } from '../../../utils/protocol';
-import { decomposeTCPFlagsBitfield, getTCPFlagsDocUrl } from '../../../utils/tcp-flags';
+import { getFlagsList, getTCPFlagsDocUrl } from '../../../utils/tcp-flags';
 import { Size } from '../../dropdowns/table-display-dropdown';
 import './record-field.css';
 
@@ -340,9 +340,9 @@ export const RecordField: React.FC<RecordFieldProps> = ({
       }
       case ColumnsId.tcpflags: {
         let child = emptyText();
-        if (typeof value === 'number' && !isNaN(value)) {
-          const flags = decomposeTCPFlagsBitfield(value);
-          const name = flags.length > 0 ? flags.map(f => f.name).join(', ') : String(value);
+        if (Array.isArray(value) && value.length > 0) {
+          const flags = getFlagsList(value as string[]);
+          const joined = value.join(', ');
           if (detailed) {
             let description = `${t('Value')}: ${value}`;
             if (flags.length === 1) {
@@ -353,9 +353,9 @@ export const RecordField: React.FC<RecordFieldProps> = ({
                 t('The flow contains packets with various flags: ') +
                 flags.map(f => f.name + ' (' + f.description + ')').join('; ');
             }
-            child = clickableContent(name, description, getTCPFlagsDocUrl());
+            child = clickableContent(joined, description, getTCPFlagsDocUrl());
           } else {
-            child = simpleTextWithTooltip(name)!;
+            child = simpleTextWithTooltip(joined)!;
           }
         }
         return singleContainer(child);
