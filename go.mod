@@ -8,7 +8,7 @@ require (
 	github.com/gorilla/mux v1.8.1
 	github.com/json-iterator/go v1.1.12
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/ovn-org/ovn-kubernetes/go-controller v0.0.0-20240902083137-5d2310e77f87
+	github.com/ovn-org/ovn-kubernetes/go-controller v0.0.0-20241126140656-c95491e46334
 	github.com/prometheus/client_golang v1.20.2
 	github.com/prometheus/common v0.57.0
 	github.com/sirupsen/logrus v1.9.3
@@ -82,5 +82,3 @@ require (
 	sigs.k8s.io/structured-merge-diff/v4 v4.4.1 // indirect
 	sigs.k8s.io/yaml v1.4.0 // indirect
 )
-
-replace github.com/ovn-org/ovn-kubernetes/go-controller => github.com/jotak/ovn-kubernetes/go-controller v0.0.0-20241113125023-088b4a3228a8

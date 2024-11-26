@@ -147,7 +147,7 @@ github.com/ovn-org/libovsdb/model
 github.com/ovn-org/libovsdb/ovsdb
 github.com/ovn-org/libovsdb/ovsdb/serverdb
 github.com/ovn-org/libovsdb/updates
-# github.com/ovn-org/ovn-kubernetes/go-controller v0.0.0-20240902083137-5d2310e77f87 => github.com/jotak/ovn-kubernetes/go-controller v0.0.0-20241113125023-088b4a3228a8
+# github.com/ovn-org/ovn-kubernetes/go-controller v0.0.0-20241126140656-c95491e46334
 ## explicit; go 1.22.0
 github.com/ovn-org/ovn-kubernetes/go-controller/observability-lib/model
 github.com/ovn-org/ovn-kubernetes/go-controller/pkg/cni/types
@@ -591,4 +591,3 @@ sigs.k8s.io/structured-merge-diff/v4/value
 ## explicit; go 1.12
 sigs.k8s.io/yaml
 sigs.k8s.io/yaml/goyaml.v2
-# github.com/ovn-org/ovn-kubernetes/go-controller => github.com/jotak/ovn-kubernetes/go-controller v0.0.0-20241113125023-088b4a3228a8
