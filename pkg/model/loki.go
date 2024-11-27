@@ -10,6 +10,16 @@ import (
 	"github.com/prometheus/common/model"
 )
 
+type FlowLineMapping = func(string) string
+
+var (
+	flowLineMappings = []FlowLineMapping{}
+)
+
+func AddFlowLineMapping(f FlowLineMapping) {
+	flowLineMappings = append(flowLineMappings, f)
+}
+
 // QueryResponse represents the http json response to a logQL query
 type QueryResponse struct {
 	Status string            `json:"status"`
@@ -128,6 +138,13 @@ func unmarshalQueryResponseData(data []byte) (ResultType, ResultValue, interface
 	case ResultTypeStream:
 		var s Streams
 		err = json.Unmarshal(unmarshal.Result, &s)
+		for _, mapping := range flowLineMappings {
+			for i := range s {
+				for ii := range s[i].Entries {
+					s[i].Entries[ii].Line = mapping(s[i].Entries[ii].Line)
+				}
+			}
+		}
 		value = s
 	case ResultTypeMatrix:
 		var m Matrix
