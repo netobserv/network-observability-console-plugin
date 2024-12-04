@@ -99,14 +99,14 @@ export const QueryOptionsPanel: React.FC<QueryOptionsProps> = ({
 
   return (
     <>
-      <div className="pf-c-select__menu-group">
+      <div className="pf-v5-c-menu__group">
         <Tooltip
           content={t(
             // eslint-disable-next-line max-len
             'Log type to query. A conversation is an aggregation of flows between same peers. Only ended conversations will appear in Overview and Topology tabs.'
           )}
         >
-          <div className="pf-c-select__menu-group-title">
+          <div className="pf-v5-c-menu__group-title">
             <Text component={TextVariants.p}>
               {t('Log type')} <InfoAltIcon />
             </Text>
@@ -117,7 +117,7 @@ export const QueryOptionsPanel: React.FC<QueryOptionsProps> = ({
             (!allowFlow && opt.value === 'flowLog') || (!allowConnection && opt.value === 'allConnections');
           return (
             <div key={`recordType-${opt.value}`}>
-              <label className="pf-c-select__menu-item">
+              <label className="display-dropdown-padding pf-v5-c-menu__menu-item">
                 <Tooltip
                   trigger={disabled ? 'mouseenter focus' : ''}
                   content={
@@ -150,14 +150,14 @@ export const QueryOptionsPanel: React.FC<QueryOptionsProps> = ({
           );
         })}
       </div>
-      <div className="pf-c-select__menu-group">
+      <div className="pf-v5-c-menu__group">
         <Tooltip
           content={t(
             // eslint-disable-next-line max-len
             'Which datasource to query from console plugin pod. Prometheus holds a subset of metrics compared to Loki with better performances. Select "Auto" to pick the best datasource automatically.'
           )}
         >
-          <div className="pf-c-select__menu-group-title">
+          <div className="pf-v5-c-menu__group-title">
             <Text component={TextVariants.p}>
               {t('Datasource')} <InfoAltIcon />
             </Text>
@@ -167,7 +167,7 @@ export const QueryOptionsPanel: React.FC<QueryOptionsProps> = ({
           const disabled = (!allowProm && opt.value === 'prom') || (!allowLoki && opt.value === 'loki');
           return (
             <div key={`dataSource-${opt.value}`}>
-              <label className="pf-c-select__menu-item">
+              <label className="display-dropdown-padding pf-v5-c-menu__menu-item">
                 <Tooltip
                   trigger={disabled ? 'mouseenter focus' : ''}
                   content={
@@ -203,20 +203,20 @@ export const QueryOptionsPanel: React.FC<QueryOptionsProps> = ({
         })}
       </div>
       {deduperMark && (
-        <div className="pf-c-select__menu-group">
+        <div className="pf-v5-c-menu__group">
           <Tooltip
             content={t(
               // eslint-disable-next-line max-len
               'A flow might be reported from several interfaces, and from both source and destination nodes, making it appear several times. By default, duplicates are hidden. Showing duplicates is not possible in Overview and Topology tabs to avoid altering metric calculations. Use the Direction filter to switch between ingress, egress and inner-node traffic.'
             )}
           >
-            <div className="pf-c-select__menu-group-title">
+            <div className="pf-v5-c-menu__group-title">
               <Text component={TextVariants.p}>
                 {t('Duplicated flows')} <InfoAltIcon />
               </Text>
             </div>
           </Tooltip>
-          <label className="pf-c-select__menu-item">
+          <label className="display-dropdown-padding pf-v5-c-menu__menu-item">
             <Checkbox
               isChecked={allowShowDuplicates ? showDuplicates : false}
               isDisabled={!allowShowDuplicates}
@@ -229,14 +229,14 @@ export const QueryOptionsPanel: React.FC<QueryOptionsProps> = ({
           </label>
         </div>
       )}
-      <div className="pf-c-select__menu-group">
+      <div className="pf-v5-c-menu__group">
         <Tooltip
           content={t(
             // eslint-disable-next-line max-len
             'Whether each query result has to match all the filters or just any of them'
           )}
         >
-          <div className="pf-c-select__menu-group-title">
+          <div className="pf-v5-c-menu__group-title">
             <Text component={TextVariants.p}>
               {t('Match filters')} <InfoAltIcon />
             </Text>
@@ -244,7 +244,7 @@ export const QueryOptionsPanel: React.FC<QueryOptionsProps> = ({
         </Tooltip>
         {matchOptions.map(opt => (
           <div key={`match-${opt.value}`}>
-            <label className="pf-c-select__menu-item">
+            <label className="display-dropdown-padding pf-v5-c-menu__menu-item">
               <Radio
                 isChecked={opt.value === match}
                 name={`match-${opt.value}`}
@@ -258,7 +258,7 @@ export const QueryOptionsPanel: React.FC<QueryOptionsProps> = ({
           </div>
         ))}
       </div>
-      <div className="pf-c-select__menu-group">
+      <div className="pf-v5-c-menu__group">
         <Tooltip
           content={
             <TextContent className="netobserv-tooltip-text">
@@ -280,7 +280,7 @@ export const QueryOptionsPanel: React.FC<QueryOptionsProps> = ({
             </TextContent>
           }
         >
-          <div className="pf-c-select__menu-group-title">
+          <div className="pf-v5-c-menu__group-title">
             <Text component={TextVariants.p}>
               {t('Drops filter')} <InfoAltIcon />
             </Text>
@@ -290,7 +290,7 @@ export const QueryOptionsPanel: React.FC<QueryOptionsProps> = ({
           const disabled = !allowPktDrops && opt.value !== 'all';
           return (
             <div key={`packet-loss-${opt.value}`}>
-              <label className="pf-c-select__menu-item">
+              <label className="display-dropdown-padding pf-v5-c-menu__menu-item">
                 <Tooltip
                   trigger={disabled ? 'mouseenter focus' : ''}
                   content={
@@ -318,7 +318,7 @@ export const QueryOptionsPanel: React.FC<QueryOptionsProps> = ({
           );
         })}
       </div>
-      <div className="pf-c-select__menu-group">
+      <div className="pf-v5-c-menu__group">
         <Tooltip
           content={
             (useTopK ? t('Top items for internal backend queries.') : t('Limit for internal backend queries.')) +
@@ -329,7 +329,7 @@ export const QueryOptionsPanel: React.FC<QueryOptionsProps> = ({
             )
           }
         >
-          <div className="pf-c-select__menu-group-title">
+          <div className="pf-v5-c-menu__group-title">
             <Text component={TextVariants.p}>
               {useTopK ? t('Top / Bottom') : t('Limit')} <InfoAltIcon />
             </Text>
@@ -337,7 +337,7 @@ export const QueryOptionsPanel: React.FC<QueryOptionsProps> = ({
         </Tooltip>
         {values.map(l => (
           <div key={'limit-' + l}>
-            <label className="pf-c-select__menu-item">
+            <label className="display-dropdown-padding pf-v5-c-menu__menu-item">
               <Radio
                 data-test={'limit-' + l}
                 id={'limit-' + l}

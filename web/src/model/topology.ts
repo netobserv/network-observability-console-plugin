@@ -32,11 +32,12 @@ export enum LayoutName {
   breadthFirst = 'BreadthFirst',
   cola = 'Cola',
   colaNoForce = 'ColaNoForce',
+  colaGroups = 'ColaGroups',
   concentric = 'Concentric',
   dagre = 'Dagre',
+  dagreGroup = 'DagreGroup',
   force = 'Force',
-  grid = 'Grid',
-  colaGroups = 'ColaGroups'
+  grid = 'Grid'
 }
 
 export type TopologyGroupTypes = 'none' | Groups;

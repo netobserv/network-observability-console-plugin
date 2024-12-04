@@ -3,6 +3,8 @@ import {
   Dropdown,
   DropdownGroup,
   DropdownItem,
+  MenuToggle,
+  MenuToggleElement,
   OverflowMenu,
   OverflowMenuContent,
   OverflowMenuControl,
@@ -24,6 +26,7 @@ import TopologyDisplayDropdown from '../dropdowns/topology-display-dropdown';
 import { TruncateLength } from '../dropdowns/truncate-dropdown';
 import { ViewId } from '../netflow-traffic';
 import SearchComponent, { SearchEvent, SearchHandle } from '../search/search';
+import './view-options-toolbar.css';
 
 export interface ViewOptionsToolbarProps {
   isDarkTheme: boolean;
@@ -203,21 +206,27 @@ export const ViewOptionsToolbar: React.FC<ViewOptionsToolbarProps> = React.forwa
           data-test="view-options-dropdown"
           id="view-options-dropdown"
           onSelect={() => props.setViewOptionOverflowMenuOpen(false)}
-          toggle={
-            <Button
+          isOpen={props.isViewOptionOverflowMenuOpen}
+          toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+            <MenuToggle
+              ref={toggleRef}
               data-test="view-options-button"
               id="view-options-button"
-              variant="link"
+              variant="plain"
               className="overflow-button"
               icon={<EllipsisVIcon />}
+              isExpanded={props.isViewOptionOverflowMenuOpen}
               onClick={() => props.setViewOptionOverflowMenuOpen(!props.isViewOptionOverflowMenuOpen)}
+              onBlur={() => props.setViewOptionOverflowMenuOpen(false)}
             >
-              {t('More options')}
-            </Button>
-          }
-          isOpen={props.isViewOptionOverflowMenuOpen}
-          dropdownItems={dropdownItems}
-        />
+              <>
+                <EllipsisVIcon /> {t('More options')}
+              </>
+            </MenuToggle>
+          )}
+        >
+          {dropdownItems}
+        </Dropdown>
       );
     };
 
@@ -262,10 +271,10 @@ export const ViewOptionsToolbar: React.FC<ViewOptionsToolbarProps> = React.forwa
             <SearchComponent ref={ref} setSearchEvent={props.setSearchEvent} isDark={props.isDarkTheme} />
           </ToolbarItem>
         )}
-        <ToolbarItem className="flex-start view-options-last" alignment={{ default: 'alignRight' }}>
+        <ToolbarItem className="flex-start view-options-last" align={{ default: 'alignRight' }}>
           <OverflowMenu breakpoint="2xl">
             <OverflowMenuContent isPersistent>
-              <OverflowMenuGroup groupType="button" isPersistent className="flex-start">
+              <OverflowMenuGroup groupType="button" isPersistent className="view-options-group flex-start">
                 {viewOptionsContent()}
               </OverflowMenuGroup>
             </OverflowMenuContent>

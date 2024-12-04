@@ -5,3 +5,23 @@
 #topology-container.light {
   background: #f0f0f0;
 }
+
+#topology-container-div {
+  display: grid;
+  grid-template-areas: "inner-div";
+}
+
+#topology-scope-slider-div {
+  height: 100%;
+  width: fit-content;
+  grid-area: inner-div;
+  margin: 1rem;
+  z-index: 2;
+  align-content: center;
+}
+
+#topology-view-div {
+  height: 100%;
+  width: 100%;
+  grid-area: inner-div;
+}

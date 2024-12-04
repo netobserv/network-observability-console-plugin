@@ -1,3 +1,7 @@
-#table-display-dropdown>.pf-c-select__menu-group{
+#table-display-dropdown {
+  padding-bottom: 1em !important;
+}
+
+#table-display-dropdown>.pf-v5-c-menu__group {
   width: 100%;
 }

@@ -33,7 +33,7 @@ export const ChipsPopover: React.FC<ChipsPopoverProps> = ({ chipsPopoverMessage,
         </Flex>
       }
       bodyContent={<Text> {chipsPopoverMessage}</Text>}
-      reference={() => document.getElementsByClassName('custom-chip-group disabled-group')?.[0] as HTMLElement}
+      triggerRef={() => document.getElementsByClassName('custom-chip-group disabled-group')?.[0] as HTMLElement}
     />
   );
 };

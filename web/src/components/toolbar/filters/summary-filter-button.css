@@ -1,3 +1,8 @@
-.pf-c-options-menu.summary-filter-menu ul {
+.pf-v5-c-options-menu.summary-filter-menu ul {
   padding-left: 0;
+}
+
+.summary-filters-list {
+  margin: 0 !important;
+  padding: 0.5em !important;
 }

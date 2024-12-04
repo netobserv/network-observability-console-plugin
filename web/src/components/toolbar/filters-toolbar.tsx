@@ -13,6 +13,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Filter, FilterDefinition, Filters, FilterValue, findFromFilters } from '../../model/filters';
 import { QuickFilter } from '../../model/quick-filters';
+import { autoCompleteCache } from '../../utils/autocomplete-cache';
 import { findFilter } from '../../utils/filter-definitions';
 import { Indicator } from '../../utils/filters-helper';
 import { localStorageShowFiltersKey, useLocalStorage } from '../../utils/local-storage-hook';
@@ -202,7 +203,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
           </ToolbarItem>
         )}
         {!isForced && getFilterToolbar()}
-        {showHideText && (
+        {showHideText && countActiveFilters > 0 && (
           <ToolbarItem className="flex-start">
             <Button
               data-test="show-filters-button"
@@ -224,11 +225,20 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
                 label: isFullScreen ? t('Collapse') : t('Expand'),
                 onClick: () => setFullScreen(!isFullScreen),
                 icon: isFullScreen ? <CompressIcon /> : <ExpandIcon />
+              },
+              {
+                id: 'set-default-filters',
+                label: t('Default filters'),
+                onClick: () => {
+                  resetFilters();
+                  autoCompleteCache.clear();
+                },
+                enabled: countActiveFilters === 0
               }
             ]}
           />
         </ToolbarItem>
-        {showFilters && (
+        {showFilters && countActiveFilters > 0 && (
           <FiltersChips
             isForced={isForced}
             filters={filtersOrForced!}

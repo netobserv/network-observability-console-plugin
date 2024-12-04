@@ -1,16 +1,10 @@
 import { TextInput, ValidatedOptions } from '@patternfly/react-core';
 import { mount } from 'enzyme';
 import * as React from 'react';
-import { act } from 'react-dom/test-utils';
 import { FilterDefinitionSample } from '../../../../components/__tests-data__/filters';
+import { actOn } from '../../../../components/__tests__/common.spec';
 import { findFilter } from '../../../../utils/filter-definitions';
 import AutocompleteFilter, { AutocompleteFilterProps } from '../autocomplete-filter';
-
-const waitForComponentToPaint = async (): Promise<void> => {
-  await act(async () => {
-    await new Promise(resolve => setTimeout(resolve, 0));
-  });
-};
 
 describe('<AutocompleteFilter />', () => {
   const props: AutocompleteFilterProps = {
@@ -42,11 +36,8 @@ describe('<AutocompleteFilter />', () => {
     expect(textInput.props().validated).toBe(ValidatedOptions.default);
 
     // Filter for source name
-    await act(() => {
-      textInput.props().onChange!('ftp', null!);
-      return waitForComponentToPaint();
-    });
-    textInput.simulate('keypress', { key: 'Enter' });
+    await actOn(() => wrapper.find(TextInput).last().props().onChange!(null!, 'ftp'), wrapper);
+    await actOn(() => wrapper.find('#autocomplete-search').last().simulate('keydown', { key: 'Enter' }), wrapper);
 
     expect(props.addFilter).toHaveBeenNthCalledWith(1, { v: '21', display: 'ftp' });
   });
@@ -68,13 +59,10 @@ describe('<AutocompleteFilter />', () => {
     expect(textInput.props().validated).toBe(ValidatedOptions.default);
 
     // Filter for source name
-    await act(() => {
-      textInput.props().onChange!('no match', null!);
-      return waitForComponentToPaint();
-    });
+    await actOn(() => textInput.props().onChange!(null!, 'no match'), wrapper);
     wrapper.update();
     expect(props.setIndicator).toHaveBeenNthCalledWith(2, ValidatedOptions.warning);
-    textInput.simulate('keypress', { key: 'Enter' });
+    await actOn(() => wrapper.find('#autocomplete-search').last().simulate('keydown', { key: 'Enter' }), wrapper);
 
     expect(props.setIndicator).toHaveBeenNthCalledWith(3, ValidatedOptions.error);
     expect(props.addFilter).toHaveBeenCalledTimes(0);

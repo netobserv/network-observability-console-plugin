@@ -32,8 +32,8 @@
     "@babel/preset-env": "^7.17.12",
     "@babel/preset-react": "^7.17.12",
     "@babel/preset-typescript": "^7.17.12",
-    "@openshift-console/dynamic-plugin-sdk": "0.0.19",
-    "@openshift-console/dynamic-plugin-sdk-webpack": "0.0.10",
+    "@openshift-console/dynamic-plugin-sdk": "1.0.0",
+    "@openshift-console/dynamic-plugin-sdk-webpack": "1.0.2",
     "@testing-library/react": "^12.1.2",
     "@types/copy-webpack-plugin": "8.0.1",
     "@types/enzyme": "3.10.x",
@@ -69,7 +69,7 @@
     "jsdom": "19.0.0",
     "jsdom-global": "3.0.2",
     "mini-css-extract-plugin": "^2.6.0",
-    "mobx": "^5.15.7",
+    "mobx": "^6.9.0",
     "parse-duration": "^1.1.0",
     "prettier": "^2.5.1",
     "prettier-plugin-organize-imports": "^3.2.4",
@@ -83,10 +83,10 @@
     "typedoc": "^0.23.25",
     "typedoc-plugin-markdown": "^3.14.0",
     "typescript": "4.7.4",
-    "webpack": "^5.94.0",
-    "webpack-cli": "^4.10.0",
-    "webpack-dev-server": "^4.6.0",
-    "webpack-node-externals": "^3.0.0"
+    "webpack": "5.75.0",
+    "webpack-cli": "5.1.4",
+    "webpack-dev-server": "5.0.2",
+    "webpack-node-externals": "3.0.0"
   },
   "consolePlugin": {
     "name": "netobserv-plugin",
@@ -103,11 +103,14 @@
     }
   },
   "dependencies": {
-    "@patternfly/patternfly": "4.224.2",
-    "@patternfly/react-charts": "6.94.19",
-    "@patternfly/react-core": "4.276.11",
-    "@patternfly/react-table": "4.113.0",
-    "@patternfly/react-topology": "4.93.6",
+    "@patternfly/patternfly": "^5.4.0",
+    "@patternfly/react-icons": "^5.4.0",
+    "@patternfly/react-charts": "^7.4.0",
+    "@patternfly/react-core": "^5.4.0",
+    "@patternfly/react-styles": "^5.4.0",
+    "@patternfly/react-table": "^5.4.0",
+    "@patternfly/react-tokens": "^5.4.0",
+    "@patternfly/react-topology": "^5.4.0",
     "axios": "^1.7.4",
     "html-to-image": "^1.11.11",
     "i18next": "^21.8.14",
@@ -120,8 +123,8 @@
     "react-dom": "^17.0.2",
     "react-i18next": "^11.8.11",
     "react-modal": "^3.14.4",
-    "react-router": "^6.14.0",
-    "react-router-dom": "^6.14.0"
+    "react-router": "^5.3.0",
+    "react-router-dom": "^5.3.0"
   },
   "overrides": {
     "glob-parent": "^6.0.1"
@@ -162,7 +165,7 @@
       "^.+\\.[t|j]sx?$": "ts-jest"
     },
     "transformIgnorePatterns": [
-      "<rootDir>/node_modules/(?!(@patternfly|@openshift-console|@spice-project\\S*?)/.*)"
+      "<rootDir>/node_modules/(?!(@patternfly|@openshift-console|@spice-project|d3.*|internmap|delaunator|robust-predicates\\S*?)/.*)"
     ],
     "resolver": "ts-jest-resolver"
   }

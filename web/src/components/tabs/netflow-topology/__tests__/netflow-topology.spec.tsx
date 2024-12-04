@@ -5,6 +5,7 @@ import * as React from 'react';
 import { TopologyMetrics } from '../../../../api/loki';
 import { FilterDefinitionSample } from '../../../../components/__tests-data__/filters';
 import { ScopeDefSample } from '../../../../components/__tests-data__/scopes';
+import { waitForRender } from '../../../../components/__tests__/common.spec';
 import { FlowScope, MetricType, StatFunction } from '../../../../model/flow-query';
 import { DefaultOptions, LayoutName } from '../../../../model/topology';
 import { defaultTimeRange } from '../../../../utils/router';
@@ -42,11 +43,13 @@ describe('<NetflowTopology />', () => {
 
   it('should render component', async () => {
     const wrapper = shallow(<NetflowTopology {...mocks} />);
+    await waitForRender(wrapper);
     expect(wrapper.find(NetflowTopology)).toBeTruthy();
   });
 
   it('should have topology view', async () => {
     const wrapper = shallow(<TopologyContent {...mocks} metrics={dataSample} />);
+    await waitForRender(wrapper);
     expect(wrapper.find(TopologyView)).toHaveLength(1);
     expect(wrapper.find(VisualizationSurface)).toHaveLength(1);
   });
@@ -54,6 +57,7 @@ describe('<NetflowTopology />', () => {
   it('should render loading', async () => {
     mocks.loading = true;
     const wrapper = shallow(<NetflowTopology {...mocks} />);
+    await waitForRender(wrapper);
     expect(wrapper.find(Spinner)).toHaveLength(1);
   });
 });

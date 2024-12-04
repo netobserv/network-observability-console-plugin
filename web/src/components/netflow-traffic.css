@@ -33,7 +33,7 @@
     align-self: end;
 }
 
-span.pf-c-button__icon.pf-m-start {
+span.pf-v5-c-button__icon.pf-v5-m-start {
     width: 14px;
     display: flex;
 }
@@ -52,7 +52,7 @@ span.pf-c-button__icon.pf-m-start {
 
 /*allow new lines for error text*/
 
-.pf-c-empty-state__body {
+.pf-v5-c-empty-state__body {
     white-space: pre-line;
 }
 
@@ -84,7 +84,7 @@ span.pf-c-button__icon.pf-m-start {
     overflow: hidden;
 }
 
-.pf-c-drawer__panel.pf-m-resizable {
+.pf-v5-c-drawer__panel.pf-v5-m-resizable {
     overflow: hidden;
 }
 
@@ -123,7 +123,7 @@ span.pf-c-button__icon.pf-m-start {
 #export-button,
 #view-options-button,
 #more-options-button,
-.pf-c-overflow-menu .overflow-button {
+.pf-v5-c-overflow-menu .overflow-button {
     display: flex;
     align-items: center;
     margin-left: 0;
@@ -160,7 +160,7 @@ span.pf-c-button__icon.pf-m-start {
 }
 
 /*remove bullets from dropdown*/
-.pf-c-dropdown__group>ul {
+.pf-v5-c-dropdown__group>ul {
     list-style: none;
     padding-left: 10px;
 }
@@ -249,4 +249,9 @@ span.pf-c-button__icon.pf-m-start {
 
 .chips-popover-close-button {
     padding: 0 !important;
+}
+
+.centered-list button,
+.centered-list .center {
+    align-self: center;
 }

@@ -1,7 +1,9 @@
-import { Select, Text, TextVariants } from '@patternfly/react-core';
+import { MenuToggle, MenuToggleElement, Select } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { DataSource, Match, PacketLoss, RecordType } from '../../model/flow-query';
+import { useOutsideClickEvent } from '../../utils/outside-hook';
+import './query-options-dropdown.css';
 import { QueryOptionsPanel } from './query-options-panel';
 
 export interface QueryOptionsProps {
@@ -29,17 +31,23 @@ export interface QueryOptionsProps {
 
 export const QueryOptionsDropdown: React.FC<QueryOptionsProps> = props => {
   const { t } = useTranslation('plugin__netobserv-plugin');
+  const ref = useOutsideClickEvent(() => setOpen(false));
   const [isOpen, setOpen] = React.useState<boolean>(false);
   return (
-    <div data-test="query-options-dropdown-container">
+    <div data-test="query-options-dropdown-container" ref={ref}>
       <Select
         data-test="query-options-dropdown"
         id="query-options-dropdown"
-        placeholderText={<Text component={TextVariants.p}>{t('Query options')}</Text>}
+        placeholder={t('Query options')}
         isOpen={isOpen}
-        onToggle={() => setOpen(!isOpen)}
-        customContent={<QueryOptionsPanel {...props} />}
-      />
+        toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+          <MenuToggle ref={toggleRef} onClick={() => setOpen(!isOpen)} isExpanded={isOpen}>
+            {t('Query options')}
+          </MenuToggle>
+        )}
+      >
+        <QueryOptionsPanel {...props} />
+      </Select>
     </div>
   );
 };

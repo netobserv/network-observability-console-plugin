@@ -175,7 +175,7 @@ export const GuidedTourPopover: React.FC<GuidedTourPopoverProps> = React.forward
             </FlexItem>
           </Flex>
         }
-        reference={currentItem!.ref}
+        triggerRef={currentItem!.ref}
       />
     ) : null;
   }

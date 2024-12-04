@@ -17,6 +17,7 @@ describe('<NetflowTableRow />', () => {
     tableWidth: 100,
     showContent: true
   };
+
   it('should render component', async () => {
     flows = FlowsSample;
     const wrapper = shallow(
@@ -26,6 +27,7 @@ describe('<NetflowTableRow />', () => {
     expect(wrapper.find(Tr)).toHaveLength(1);
     expect(wrapper.find(Td)).toHaveLength(DefaultColumnSample.length);
   });
+
   it('should render given columns', async () => {
     flows = FlowsSample;
     const reducedColumns = DefaultColumnSample.slice(2, 4);
