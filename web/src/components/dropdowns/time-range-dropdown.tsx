@@ -1,7 +1,8 @@
 import {
   Dropdown,
   DropdownItem,
-  DropdownToggle,
+  MenuToggle,
+  MenuToggleElement,
   Text,
   TextContent,
   TextVariants,
@@ -29,7 +30,7 @@ export interface TimeRangeDropdownProps {
 export const customTimeRangeKey = 'CUSTOM_TIME_RANGE_KEY';
 
 export const TimeRangeDropdown: React.FC<TimeRangeDropdownProps> = ({ id, range, setRange, openCustomModal }) => {
-  const [isOpen, setIsOpen] = React.useState<boolean>(false);
+  const [isOpen, setOpen] = React.useState<boolean>(false);
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   const onChange = React.useCallback(
@@ -74,30 +75,37 @@ export const TimeRangeDropdown: React.FC<TimeRangeDropdownProps> = ({ id, range,
   };
 
   return (
-    <Dropdown
-      data-test={id}
-      id={id}
-      dropdownItems={_.map(timeRangeOptions, (name, key) => (
-        <DropdownItem data-test={key} id={key} component="button" key={key} onClick={() => onChange(key)}>
-          {name}
-        </DropdownItem>
-      ))}
-      isOpen={isOpen}
-      onSelect={() => setIsOpen(false)}
-      toggle={
-        <Tooltip
-          trigger={selectedKey === customTimeRangeKey ? 'mouseenter focus' : ''}
-          position="top"
-          content={textContent()}
-        >
-          <DropdownToggle data-test={`${id}-dropdown`} id={`${id}-dropdown`} onToggle={() => setIsOpen(!isOpen)}>
+    <Tooltip
+      trigger={selectedKey === customTimeRangeKey ? 'mouseenter focus' : ''}
+      position="top"
+      content={textContent()}
+    >
+      <Dropdown
+        data-test={id}
+        id={id}
+        isOpen={isOpen}
+        onSelect={() => setOpen(false)}
+        toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+          <MenuToggle
+            ref={toggleRef}
+            data-test={`${id}-dropdown`}
+            id={`${id}-dropdown`}
+            onClick={() => setOpen(!isOpen)}
+            onBlur={() => setTimeout(() => setOpen(false), 100)}
+          >
             {selectedKey === customTimeRangeKey
               ? textContent(false)
               : timeRangeOptions[selectedKey as keyof typeof timeRangeOptions]}
-          </DropdownToggle>
-        </Tooltip>
-      }
-    />
+          </MenuToggle>
+        )}
+      >
+        {_.map(timeRangeOptions, (name, key) => (
+          <DropdownItem data-test={key} id={key} component="button" key={key} onClick={() => onChange(key)}>
+            {name}
+          </DropdownItem>
+        ))}
+      </Dropdown>
+    </Tooltip>
   );
 };
 

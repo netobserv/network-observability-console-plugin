@@ -11,7 +11,7 @@ export const chartVoronoi = (legendData: LegendDataItem[], f: (v: number) => str
       labels={(dp: { datum: ChartDataPoint }) => {
         return dp.datum.y || dp.datum.y === 0 ? f(dp.datum.y) : 'n/a';
       }}
-      labelComponent={<ChartLegendTooltip legendData={tooltipData} title={(datum: ChartDataPoint) => datum.date} />}
+      labelComponent={<ChartLegendTooltip legendData={tooltipData} title={({ datum }) => datum?.date} />}
       mouseFollowTooltips
       voronoiDimension="x"
       voronoiPadding={50}

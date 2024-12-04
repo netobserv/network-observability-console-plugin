@@ -1,8 +1,9 @@
+import { Popover, ProgressStep, ProgressStepper } from '@patternfly/react-core';
 import * as React from 'react';
 import { FlowScope } from '../../model/flow-query';
-import { Slider, SliderStepObject } from './slider';
-
 import { ScopeConfigDef } from '../../model/scope';
+// TODO: remove this when https://issues.redhat.com/browse/OCPBUGS-41672 is solved and backported
+import '@patternfly/patternfly/components/ProgressStepper/progress-stepper.css';
 import './scope-slider.css';
 
 export interface ScopeSliderProps {
@@ -13,48 +14,26 @@ export interface ScopeSliderProps {
 }
 
 export const ScopeSlider: React.FC<ScopeSliderProps> = ({ scope, setScope, scopeDefs, sizePx }) => {
-  /* TODO: refactor vertical slider
-   * In between the display is block to working dimensions managing two cases
-   * Non supported dimensions simply hide the slider from the view
-   * since we can manage scopes from advanced view
-   */
-  if (sizePx < 270 || sizePx > 2000) {
-    return null;
-  }
-
-  const scopes: [FlowScope, SliderStepObject][] = scopeDefs
-    .slice()
-    .reverse()
-    .map((sd, idx) => {
-      return [
-        sd.id,
-        {
-          value: idx,
-          label: sizePx > 450 ? sd.name : sd.shortName,
-          tooltip: sd.description
-        }
-      ];
-    });
-
-  const index = scopes.findIndex(s => s[0] === scope);
-  const isBig = sizePx > 700;
   return (
-    <div
-      id={'scope-slider'}
-      style={{
-        width: sizePx * (isBig ? 0.85 : 0.7),
-        top: sizePx * (isBig ? 0.45 : 0.4),
-        left: -sizePx * (isBig ? 0.38 : 0.28)
-      }}
-    >
-      <Slider
-        value={index < 0 ? 2 : index}
-        showTicks
-        max={scopes.length - 1}
-        customSteps={scopes.map(s => s[1])}
-        onChange={(value: number) => setScope(scopes[value][0])}
-        vertical
-      />
-    </div>
+    <ProgressStepper isVertical isCenterAligned>
+      {scopeDefs.map((sd, i) => (
+        <ProgressStep
+          key={`scope-step-${i}`}
+          variant={sd.id === scope ? 'info' : 'pending'}
+          isCurrent={sd.id === scope}
+          onClick={() => setScope(sd.id)}
+          popoverRender={stepRef => (
+            <Popover
+              headerContent={<div>{sd.name}</div>}
+              bodyContent={<div>{sd.description}</div>}
+              triggerRef={stepRef}
+              position="right"
+            />
+          )}
+        >
+          {sizePx > 450 ? sd.name : sd.shortName}
+        </ProgressStep>
+      ))}
+    </ProgressStepper>
   );
 };
