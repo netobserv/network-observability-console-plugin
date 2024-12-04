@@ -66,9 +66,9 @@ export const TopologyDisplayOptions: React.FC<TopologyDisplayOptionsProps> = ({
 
   return (
     <>
-      <div className="pf-c-select__menu-group">
+      <div className="pf-v5-c-menu__group">
         <Tooltip content={t('Measurement to show as edge labels.')}>
-          <div className="pf-c-select__menu-group-title">
+          <div className="pf-v5-c-menu__group-title">
             <Text component={TextVariants.p}>
               {t('Edge labels')} <InfoAltIcon />
             </Text>
@@ -97,9 +97,9 @@ export const TopologyDisplayOptions: React.FC<TopologyDisplayOptionsProps> = ({
           </Flex>
         </div>
       </div>
-      <div className="pf-c-select__menu-group">
+      <div className="pf-v5-c-menu__group">
         <Tooltip content={t('The level of details represented.')}>
-          <div className="pf-c-select__menu-group-title">
+          <div className="pf-v5-c-menu__group-title">
             <Text component={TextVariants.p}>
               {t('Scope')} <InfoAltIcon />
             </Text>
@@ -115,9 +115,9 @@ export const TopologyDisplayOptions: React.FC<TopologyDisplayOptionsProps> = ({
           />
         </div>
       </div>
-      <div className="pf-c-select__menu-group">
+      <div className="pf-v5-c-menu__group">
         <Tooltip content={t('Grouping items helps to better understand ownership.')}>
-          <div className="pf-c-select__menu-group-title">
+          <div className="pf-v5-c-menu__group-title">
             <Text component={TextVariants.p}>
               {t('Groups')} <InfoAltIcon />
             </Text>
@@ -134,9 +134,9 @@ export const TopologyDisplayOptions: React.FC<TopologyDisplayOptionsProps> = ({
           />
         </div>
       </div>
-      <div className="pf-c-select__menu-group">
+      <div className="pf-v5-c-menu__group">
         <Tooltip content={t('The way in which topology items are arranged.')}>
-          <div className="pf-c-select__menu-group-title">
+          <div className="pf-v5-c-menu__group-title">
             <Text component={TextVariants.p}>
               {t('Layout')} <InfoAltIcon />
             </Text>
@@ -146,55 +146,54 @@ export const TopologyDisplayOptions: React.FC<TopologyDisplayOptionsProps> = ({
           <LayoutDropdown id="layout" selected={topologyOptions.layout} setLayout={setLayout} />
         </div>
       </div>
-      <div className="pf-c-select__menu-group">
+      <div className="pf-v5-c-menu__group">
         <Tooltip content={t('Various options to show / hide view details.')}>
-          <div className="pf-c-select__menu-group-title">
+          <div className="pf-v5-c-menu__group-title">
             <Text component={TextVariants.p}>
               {t('Show')} <InfoAltIcon />
             </Text>
           </div>
         </Tooltip>
-        <Checkbox
-          id="edges-switch"
-          className="display-dropdown-padding"
-          label={t('Edges')}
-          isChecked={topologyOptions.edges}
-          onChange={() =>
-            setTopologyOptions({
-              ...topologyOptions,
-              edges: !topologyOptions.edges
-            })
-          }
-        />
-        <Checkbox
-          id="edges-tag-switch"
-          className="display-dropdown-padding"
-          label={t('Edges label')}
-          isDisabled={!topologyOptions.edges}
-          isChecked={topologyOptions.edges && topologyOptions.edgeTags}
-          onChange={() =>
-            setTopologyOptions({
-              ...topologyOptions,
-              edgeTags: !topologyOptions.edgeTags
-            })
-          }
-        />
-        <Checkbox
-          id="badge-switch"
-          className="display-dropdown-padding"
-          label={t('Badges')}
-          isChecked={topologyOptions.nodeBadges}
-          onChange={() =>
-            setTopologyOptions({
-              ...topologyOptions,
-              nodeBadges: !topologyOptions.nodeBadges
-            })
-          }
-        />
+        <div className="display-dropdown-padding">
+          <Checkbox
+            id="edges-switch"
+            label={t('Edges')}
+            isChecked={topologyOptions.edges}
+            onChange={() =>
+              setTopologyOptions({
+                ...topologyOptions,
+                edges: !topologyOptions.edges
+              })
+            }
+          />
+          <Checkbox
+            id="edges-tag-switch"
+            label={t('Edges label')}
+            isDisabled={!topologyOptions.edges}
+            isChecked={topologyOptions.edges && topologyOptions.edgeTags}
+            onChange={() =>
+              setTopologyOptions({
+                ...topologyOptions,
+                edgeTags: !topologyOptions.edgeTags
+              })
+            }
+          />
+          <Checkbox
+            id="badge-switch"
+            label={t('Badges')}
+            isChecked={topologyOptions.nodeBadges}
+            onChange={() =>
+              setTopologyOptions({
+                ...topologyOptions,
+                nodeBadges: !topologyOptions.nodeBadges
+              })
+            }
+          />
+        </div>
       </div>
-      <div className="pf-c-select__menu-group">
+      <div className="pf-v5-c-menu__group">
         <Tooltip content={t('Long labels can reduce visibility.')}>
-          <div className="pf-c-select__menu-group-title">
+          <div className="pf-v5-c-menu__group-title">
             <Text component={TextVariants.p}>
               {t('Truncate labels')} <InfoAltIcon />
             </Text>
@@ -208,13 +207,13 @@ export const TopologyDisplayOptions: React.FC<TopologyDisplayOptionsProps> = ({
           />
         </div>
       </div>
-      <div className="pf-c-select__menu-group">
-        <div className="display-dropdown-padding">
+      <div className="pf-v5-c-menu__group">
+        <div className="display-dropdown-switch-padding">
           <Switch
             id="group-collapsed-switch"
             label={t('Collapse groups')}
             isDisabled={topologyOptions.groupTypes === 'none'}
-            isChecked={topologyOptions.groupTypes !== 'none' && !topologyOptions.startCollapsed}
+            isChecked={topologyOptions.groupTypes !== 'none' && topologyOptions.startCollapsed}
             onChange={() =>
               setTopologyOptions({
                 ...topologyOptions,

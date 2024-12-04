@@ -3,6 +3,7 @@ import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 import { NetflowMetrics } from 'src/api/loki';
 import { FlowsSample } from '../../../components/__tests-data__/flows';
+import { waitForRender } from '../../../components/__tests__/common.spec';
 import { RecordType } from '../../../model/flow-query';
 import { SummaryPanel } from '../summary-panel';
 import { SummaryPanelContent } from '../summary-panel-content';
@@ -29,12 +30,15 @@ describe('<SummaryPanel />', () => {
 
   it('should shallow component', async () => {
     const wrapper = shallow(<SummaryPanel {...mocks} />);
+    await waitForRender(wrapper);
+
     expect(wrapper.find(SummaryPanelContent)).toBeTruthy();
     expect(wrapper.find(SummaryPanelContent)).toHaveLength(1);
   });
 
   it('should show cardinality', async () => {
     const wrapper = mount(<SummaryPanelContent {...mocks} />);
+    await waitForRender(wrapper);
 
     expect(wrapper.find(Accordion)).toHaveLength(1);
     expect(wrapper.find(AccordionItem)).toHaveLength(5);
@@ -48,6 +52,8 @@ describe('<SummaryPanel />', () => {
 
   it('should toggle panel', async () => {
     const wrapper = shallow(<SummaryPanel {...mocks} />);
+    await waitForRender(wrapper);
+
     const closeButton = wrapper.find(DrawerCloseButton);
     expect(closeButton).toHaveLength(1);
     closeButton.simulate('click');

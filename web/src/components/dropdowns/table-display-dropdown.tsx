@@ -1,6 +1,7 @@
-import { Select, Text, TextVariants } from '@patternfly/react-core';
+import { MenuToggle, MenuToggleElement, Select } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
+import { useOutsideClickEvent } from '../../utils/outside-hook';
 import './table-display-dropdown.css';
 import { TableDisplayOptions } from './table-display-options';
 
@@ -13,17 +14,22 @@ export interface TableDisplayDropdownProps {
 
 export const TableDisplayDropdown: React.FC<TableDisplayDropdownProps> = ({ size, setSize }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
+  const ref = useOutsideClickEvent(() => setOpen(false));
   const [isOpen, setOpen] = React.useState<boolean>(false);
-
   return (
-    <div id="display-dropdown-container" data-test="display-dropdown-container">
+    <div id="display-dropdown-container" data-test="display-dropdown-container" ref={ref}>
       <Select
         id="table-display-dropdown"
-        placeholderText={<Text component={TextVariants.p}>{t('Display options')}</Text>}
+        placeholder={t('Display options')}
         isOpen={isOpen}
-        onToggle={() => setOpen(!isOpen)}
-        customContent={<TableDisplayOptions size={size} setSize={setSize} />}
-      />
+        toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+          <MenuToggle ref={toggleRef} onClick={() => setOpen(!isOpen)} isExpanded={isOpen}>
+            {t('Display options')}
+          </MenuToggle>
+        )}
+      >
+        <TableDisplayOptions size={size} setSize={setSize} />
+      </Select>
     </div>
   );
 };

@@ -19,9 +19,11 @@ import {
   TotalRateMetrics
 } from '../../../api/loki';
 import { getFlowGenericMetrics } from '../../../api/routes';
+import { ScopeSlider } from '../../../components/slider/scope-slider';
 import { Config, Feature } from '../../../model/config';
 import { FlowQuery, FlowScope, RecordType } from '../../../model/flow-query';
 import { getStat } from '../../../model/metrics';
+import { ScopeConfigDef } from '../../../model/scope';
 import { TimeRange } from '../../../utils/datetime';
 import { getDNSErrorDescription, getDNSRcodeDescription } from '../../../utils/dns';
 import { getDSCPServiceClassName } from '../../../utils/dscp';
@@ -88,6 +90,9 @@ export interface NetflowOverviewProps {
   focus?: boolean;
   setFocus?: (v: boolean) => void;
   forcedSize?: DOMRect;
+  metricScope: FlowScope;
+  setMetricScope: (ms: FlowScope) => void;
+  scopes: ScopeConfigDef[];
 }
 
 // eslint-disable-next-line react/display-name
@@ -1133,6 +1138,27 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
 
       return (
         <>
+          {!allowFocus && (
+            <div
+              id={'overview-scope-slider-div'}
+              style={{
+                position: 'absolute',
+                top: offsetTop,
+                right: containerSize.width * 0.92 + sidePanelWidth,
+                height: containerSize.height,
+                overflow: 'hidden',
+                alignContent: 'center',
+                width: containerSize.width * 0.1
+              }}
+            >
+              <ScopeSlider
+                sizePx={containerSize?.height || 300}
+                scope={props.metricScope}
+                setScope={props.setMetricScope}
+                scopeDefs={props.scopes}
+              />
+            </div>
+          )}
           {allowFocus && selectedPanel && (
             <div
               id="overview-absolute-graph"
@@ -1157,7 +1183,9 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
                     width: containerSize.width / 5 - containerPadding,
                     marginLeft: (containerSize.width * 4) / 5 - containerPadding
                   }
-                : undefined
+                : {
+                    marginLeft: containerSize.width * 0.075
+                  }
             }
           >
             <Flex id="overview-flex" justifyContent={{ default: 'justifyContentSpaceBetween' }}>
@@ -1167,15 +1195,19 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
         </>
       );
     }, [
-      containerSize,
+      containerSize.width,
+      containerSize.height,
+      props.metricScope,
+      props.setMetricScope,
+      props.scopes,
+      props.panels,
       allowFocus,
       selectedPanel,
       offsetTop,
       sidePanelWidth,
       containerPadding,
       cardPadding,
-      getPanelView,
-      props.panels
+      getPanelView
     ]);
 
     return (

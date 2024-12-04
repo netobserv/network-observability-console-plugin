@@ -59,7 +59,7 @@ export const SearchComponent: React.FC<SearchComponentProps> = React.forwardRef(
           type={searchValidated !== ValidatedOptions.default ? 'text' : 'search'}
           aria-label="search"
           onKeyPress={e => e.key === 'Enter' && props.setSearchEvent({ searchValue, type: 'searchNext' })}
-          onChange={onChangeSearch}
+          onChange={(event, value) => onChangeSearch(value)}
           value={searchValue}
           validated={searchValidated}
         />

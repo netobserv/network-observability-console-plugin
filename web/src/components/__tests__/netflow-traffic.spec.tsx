@@ -12,6 +12,7 @@ import NetflowTrafficParent from '../netflow-traffic-parent';
 import { FullConfigResultSample, SimpleConfigResultSample } from '../__tests-data__/config';
 import { extensionsMock } from '../__tests-data__/extensions';
 import { FlowsResultSample } from '../__tests-data__/flows';
+import { actOn, waitForRender } from './common.spec';
 
 const useResolvedExtensionsMock = useResolvedExtensions as jest.Mock;
 
@@ -72,7 +73,7 @@ describe('<NetflowTraffic />', () => {
   it('should render refresh components', async () => {
     act(() => {
       const cheerio = render(<NetflowTrafficParent />);
-      expect(cheerio.find('#refresh-dropdown').length).toEqual(1);
+      expect(cheerio.find('#refresh-dropdown-container').length).toEqual(1);
       expect(cheerio.find('#refresh-button').length).toEqual(1);
     });
   });
@@ -110,6 +111,7 @@ describe('<NetflowTraffic />', () => {
       { ...defaultQuery, function: 'count', type: 'DnsFlows', aggregateBy: 'DnsFlagsResponseCode' },
       { ...defaultQuery, function: 'count', type: 'DnsFlows', aggregateBy: 'app' }
     ];
+    await waitForRender(wrapper);
     await waitFor(() => {
       //config is get only once
       expect(getConfigMock).toHaveBeenCalledTimes(1);
@@ -120,9 +122,7 @@ describe('<NetflowTraffic />', () => {
       );
       expect(getGenericMetricsMock).toHaveBeenCalledTimes(expectedGenericMetricsQueries.length);
     });
-    await act(async () => {
-      wrapper.find('#refresh-button').at(0).simulate('click');
-    });
+    await actOn(() => wrapper.find('#refresh-button').last().simulate('click'), wrapper);
     await waitFor(() => {
       //config is get only once
       expect(getConfigMock).toHaveBeenCalledTimes(1);

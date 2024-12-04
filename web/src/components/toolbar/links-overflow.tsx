@@ -2,6 +2,8 @@ import {
   Button,
   Dropdown,
   DropdownItem,
+  MenuToggle,
+  MenuToggleElement,
   OverflowMenu,
   OverflowMenuContent,
   OverflowMenuControl,
@@ -13,7 +15,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { MaybeTooltip } from '../tooltip/maybe-tooltip';
 
-interface Item {
+export interface Item {
   id: string;
   icon?: JSX.Element;
   label: string;
@@ -39,7 +41,7 @@ export const LinksOverflow: React.FC<LinksOverflowProps> = ({ id, items }) => {
   return (
     <OverflowMenu breakpoint="2xl">
       <OverflowMenuContent isPersistent>
-        <OverflowMenuGroup groupType="button" isPersistent className="flex-start">
+        <OverflowMenuGroup groupType="button" isPersistent className="toolbar-group flex-start">
           {enabledItems.map(item => (
             <OverflowMenuItem key={item.id}>
               <MaybeTooltip content={item.tooltip}>
@@ -63,25 +65,31 @@ export const LinksOverflow: React.FC<LinksOverflowProps> = ({ id, items }) => {
           data-test={id + '-dropdown'}
           id={id + '-dropdown'}
           onSelect={() => setOpen(false)}
-          toggle={
-            <Button
+          isOpen={isOpen}
+          toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+            <MenuToggle
+              ref={toggleRef}
               data-test={id + '-button'}
               id={id + '-button'}
-              variant="link"
+              variant="plain"
               className="overflow-button"
               icon={<EllipsisVIcon />}
+              isExpanded={isOpen}
               onClick={() => setOpen(!isOpen)}
+              onBlur={() => setTimeout(() => setOpen(false), 100)}
             >
-              {t('More options')}
-            </Button>
-          }
-          isOpen={isOpen}
-          dropdownItems={enabledItems.map(item => (
+              <>
+                <EllipsisVIcon /> {t('More options')}
+              </>
+            </MenuToggle>
+          )}
+        >
+          {enabledItems.map(item => (
             <DropdownItem key={item.id} onClick={item.onClick} data-test={item.id + '-button'}>
               {item.label}
             </DropdownItem>
           ))}
-        />
+        </Dropdown>
       </OverflowMenuControl>
     </OverflowMenu>
   );
