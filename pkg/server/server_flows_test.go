@@ -65,6 +65,12 @@ func TestLokiFiltering(t *testing.T) {
 			"?query={app=\"netobserv-flowcollector\"}|~`SrcK8S_Name\":\"(?i)[^\"]*name1.*\"|SrcK8S_Name\":\"(?i)[^\"]*name2.*\"`",
 		},
 	}, {
+		name:      "NOT line filter same key",
+		inputPath: "?filters=" + url.QueryEscape(`SrcK8S_Name!="name1","name2"`),
+		outputQueries: []string{
+			"?query={app=\"netobserv-flowcollector\"}|~`\"SrcK8S_Name\"`!~`SrcK8S_Name\":\"name1\"`!~`SrcK8S_Name\":\"name2\"`",
+		},
+	}, {
 		name:      "OR label filter same key",
 		inputPath: "?filters=" + url.QueryEscape("SrcK8S_Namespace=ns1,ns2"),
 		outputQueries: []string{
@@ -89,6 +95,12 @@ func TestLokiFiltering(t *testing.T) {
 		inputPath: "?filters=" + url.QueryEscape("SrcAddr=10.128.0.1,10.128.0.2"),
 		outputQueries: []string{
 			"?query={app=\"netobserv-flowcollector\"}|json|SrcAddr=ip(\"10.128.0.1\")+or+SrcAddr=ip(\"10.128.0.2\")",
+		},
+	}, {
+		name:      "NOT IP filters",
+		inputPath: "?filters=" + url.QueryEscape(`SrcAddr!=10.128.0.1,10.128.0.2`),
+		outputQueries: []string{
+			"?query={app=\"netobserv-flowcollector\"}|json|SrcAddr!=ip(\"10.128.0.1\")|SrcAddr!=ip(\"10.128.0.2\")",
 		},
 	}, {
 		name:      "Several OR filters",

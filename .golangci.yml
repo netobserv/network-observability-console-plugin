@@ -26,5 +26,8 @@ linters-settings:
       - rangeValCopy
       - indexAlloc
       - deprecatedComment
+    settings:
+      ifElseChain:
+        minThreshold: 3
   cyclop:
     max-complexity: 20
