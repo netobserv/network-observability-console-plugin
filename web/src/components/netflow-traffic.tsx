@@ -455,9 +455,11 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
           })
           .catch(err => {
             const errStr = getHTTPErrorDetails(err, true);
+            const promErrStr = getPromError(errStr);
 
-            // check if it's a prom missing label error
-            if (isPromMissingLabelError(errStr)) {
+            // check if it's a prom missing label error and remove filters
+            // when the prom error is different to the new one
+            if (isPromMissingLabelError(errStr) && promErrStr !== model.chipsPopoverMessage) {
               let filtersDisabled = false;
               model.filters.list.forEach(filter => {
                 const fieldName = model.config.columns.find(col => col.filter === filter.def.id)?.field;
@@ -471,16 +473,18 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
               if (filtersDisabled) {
                 // update filters to retrigger query without showing the error
                 updateTableFilters({ ...model.filters });
-                model.setChipsPopoverMessage(getPromError(errStr));
+                model.setChipsPopoverMessage(promErrStr);
                 return;
               }
             }
 
             // clear flows and metrics + show error
+            // always clear chip message to focus on the error
             model.setFlows([]);
             model.setMetrics(defaultNetflowMetrics);
             model.setError(errStr);
             model.setWarning(undefined);
+            model.setChipsPopoverMessage(undefined);
           })
           .finally(() => {
             const endDate = new Date();
