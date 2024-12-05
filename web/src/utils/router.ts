@@ -30,6 +30,7 @@ export const defaultMatch: Match = 'all';
 export const defaultPacketLoss: PacketLoss = 'all';
 export const defaultMetricFunction: StatFunction = 'last';
 export const defaultMetricType: MetricType = 'Bytes';
+export const defaultMetricScope = 'namespace';
 const defaultShowDuplicates = false;
 
 export const getRangeFromURL = (): number | TimeRange => {
@@ -148,6 +149,10 @@ export const setURLRange = (range: number | TimeRange, replace?: boolean) => {
 
 export const setURLRecortType = (recordType: RecordType, replace?: boolean) => {
   setURLParam(URLParam.RecordType, recordType, replace);
+};
+
+export const setURLDatasource = (datasource: DataSource, replace?: boolean) => {
+  setURLParam(URLParam.DataSource, datasource, replace);
 };
 
 export const setURLLimit = (limit: number, replace?: boolean) => {

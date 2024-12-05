@@ -2,6 +2,7 @@ import { Select, Text, TextVariants } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { FlowScope, MetricType, StatFunction } from '../../model/flow-query';
+import { ScopeConfigDef } from '../../model/scope';
 import { TopologyOptions } from '../../model/topology';
 import './topology-display-dropdown.css';
 import { TopologyDisplayOptions } from './topology-display-options';
@@ -15,10 +16,8 @@ export const TopologyDisplayDropdown: React.FC<{
   setMetricScope: (s: FlowScope) => void;
   topologyOptions: TopologyOptions;
   setTopologyOptions: (o: TopologyOptions) => void;
-  allowPktDrop: boolean;
-  allowDNSMetric: boolean;
-  allowRTTMetric: boolean;
-  allowedScopes: FlowScope[];
+  allowedTypes: MetricType[];
+  scopes: ScopeConfigDef[];
 }> = ({
   metricFunction,
   setMetricFunction,
@@ -28,10 +27,8 @@ export const TopologyDisplayDropdown: React.FC<{
   setMetricScope,
   topologyOptions,
   setTopologyOptions,
-  allowPktDrop,
-  allowDNSMetric,
-  allowRTTMetric,
-  allowedScopes
+  allowedTypes,
+  scopes
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [isOpen, setOpen] = React.useState<boolean>(false);
@@ -53,10 +50,8 @@ export const TopologyDisplayDropdown: React.FC<{
             setMetricScope={setMetricScope}
             topologyOptions={topologyOptions}
             setTopologyOptions={setTopologyOptions}
-            allowPktDrop={allowPktDrop}
-            allowDNSMetric={allowDNSMetric}
-            allowRTTMetric={allowRTTMetric}
-            allowedScopes={allowedScopes}
+            allowedTypes={allowedTypes}
+            scopes={scopes}
           />
         }
       />

@@ -63,15 +63,16 @@ export interface NameAndType {
 export interface TopologyMetricPeer {
   id: string;
   addr?: string;
-  namespace?: string;
   owner?: NameAndType;
   resource?: NameAndType;
-  hostName?: string;
-  zone?: string;
-  clusterName?: string;
   resourceKind?: string;
   isAmbiguous: boolean;
   getDisplayName: (inclNamespace: boolean, disambiguate: boolean) => string | undefined;
+  // any FlowScope can appear here as optionnal field
+  [name: string]: unknown;
+  namespace?: string;
+  host?: string;
+  cluster?: string;
 }
 
 export type GenericMetric = {
@@ -197,3 +198,16 @@ export const isValidTopologyMetrics = (metric: any): metric is TopologyMetrics =
     typeof metric.scope === 'string'
   );
 };
+
+export interface Status {
+  loki: DatasourceStatus;
+  prometheus: DatasourceStatus;
+}
+
+export interface DatasourceStatus {
+  isEnabled: boolean;
+  namespacesCount: number;
+  isReady: boolean;
+  error: string;
+  errorCode: number;
+}

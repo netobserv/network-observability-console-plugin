@@ -67,9 +67,9 @@ export const ThreeDTopologyContent: React.FC<ThreeDTopologyContentProps> = ({
       allNamespaces.push(m.destination.namespace!);
     }
 
-    if (!_.isEmpty(m.source.hostName)) {
+    if (!_.isEmpty(m.source.host)) {
       from = {
-        name: m.source.hostName!,
+        name: m.source.host!,
         type: 'Node',
         children: [],
         color: k8sModels['Node']?.color || defaultColor
@@ -79,9 +79,9 @@ export const ThreeDTopologyContent: React.FC<ThreeDTopologyContentProps> = ({
       }
     }
 
-    if (!_.isEmpty(m.destination.hostName)) {
+    if (!_.isEmpty(m.destination.host)) {
       to = {
-        name: m.destination.hostName!,
+        name: m.destination.host!,
         type: 'Node',
         children: [],
         color: k8sModels['Node']?.color || defaultColor
@@ -91,7 +91,7 @@ export const ThreeDTopologyContent: React.FC<ThreeDTopologyContentProps> = ({
       }
     }
 
-    const srcNode = nodes.find(n => n.name === m.source.hostName);
+    const srcNode = nodes.find(n => n.name === m.source.host);
     if (srcNode && !_.isEmpty(m.source.namespace)) {
       from = {
         name: m.source.namespace!,
@@ -104,7 +104,7 @@ export const ThreeDTopologyContent: React.FC<ThreeDTopologyContentProps> = ({
       }
     }
 
-    const dstNode = nodes.find((n: RTTopology.Item) => n.name === m.destination.hostName);
+    const dstNode = nodes.find((n: RTTopology.Item) => n.name === m.destination.host);
     if (dstNode && !_.isEmpty(m.destination.namespace)) {
       to = {
         name: m.destination.namespace!,
@@ -286,7 +286,7 @@ export const ThreeDTopologyContent: React.FC<ThreeDTopologyContentProps> = ({
                   type: owner.type!
                 }
               : undefined,
-            hostName: host?.name
+            host: host?.name
           })
         } as NodeData);
         onSelect(selectedNode);

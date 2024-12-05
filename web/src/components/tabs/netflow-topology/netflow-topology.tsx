@@ -14,7 +14,7 @@ import {
   Stats,
   TopologyMetrics
 } from '../../../api/loki';
-import { Feature } from '../../../model/config';
+import { Config, Feature } from '../../../model/config';
 import { Filter, FilterDefinition, Filters } from '../../../model/filters';
 import {
   FlowQuery,
@@ -24,6 +24,7 @@ import {
   MetricType,
   StatFunction
 } from '../../../model/flow-query';
+import { ScopeConfigDef } from '../../../model/scope';
 import { GraphElementPeer, LayoutName, TopologyOptions } from '../../../model/topology';
 import { Warning } from '../../../model/warnings';
 import { TimeRange } from '../../../utils/datetime';
@@ -73,7 +74,9 @@ export interface NetflowTopologyProps {
   searchHandle: SearchHandle | null;
   searchEvent?: SearchEvent;
   isDark?: boolean;
-  allowedScopes: FlowScope[];
+  scopes: ScopeConfigDef[];
+  resetDefaultFilters?: (c?: Config) => void;
+  clearFilters?: () => void;
 }
 
 // eslint-disable-next-line react/display-name
@@ -217,7 +220,7 @@ export const NetflowTopology: React.FC<NetflowTopologyProps> = React.forwardRef(
               sizePx={containerSize?.height || 300}
               scope={props.metricScope}
               setScope={props.setMetricScope}
-              allowedScopes={props.allowedScopes}
+              scopeDefs={props.scopes}
             />
             <TopologyContent
               k8sModels={props.k8sModels}
@@ -225,7 +228,7 @@ export const NetflowTopology: React.FC<NetflowTopologyProps> = React.forwardRef(
               metricType={props.metricType}
               metricScope={props.metricScope}
               setMetricScope={props.setMetricScope}
-              allowedScopes={props.allowedScopes}
+              scopes={props.scopes}
               metrics={displayedMetrics}
               droppedMetrics={props.droppedMetrics}
               options={props.options}
@@ -238,6 +241,8 @@ export const NetflowTopology: React.FC<NetflowTopologyProps> = React.forwardRef(
               searchHandle={props.searchHandle}
               searchEvent={props.searchEvent}
               isDark={props.isDark}
+              resetDefaultFilters={props.resetDefaultFilters}
+              clearFilters={props.clearFilters}
             />
           </VisualizationProvider>
         );

@@ -19,6 +19,7 @@ func (h *Handlers) GetClusters(ctx context.Context) func(w http.ResponseWriter, 
 	return func(w http.ResponseWriter, r *http.Request) {
 		params := r.URL.Query()
 		namespace := params.Get(namespaceKey)
+		isDev := namespace != ""
 
 		clients, err := newClients(h.Cfg, r.Header, false, namespace)
 		if err != nil {
@@ -32,9 +33,9 @@ func (h *Handlers) GetClusters(ctx context.Context) func(w http.ResponseWriter, 
 		}()
 
 		// Fetch and merge values for K8S_ClusterName
-		values, code, err := h.getLabelValues(ctx, clients, fields.Cluster)
+		values, code, err := h.getLabelValues(ctx, clients, fields.Cluster, isDev)
 		if err != nil {
-			writeError(w, code, "Error while fetching label cluster values from Loki: "+err.Error())
+			writeError(w, code, err.Error())
 			return
 		}
 
@@ -47,6 +48,7 @@ func (h *Handlers) GetZones(ctx context.Context) func(w http.ResponseWriter, r *
 	return func(w http.ResponseWriter, r *http.Request) {
 		params := r.URL.Query()
 		namespace := params.Get(namespaceKey)
+		isDev := namespace != ""
 
 		clients, err := newClients(h.Cfg, r.Header, false, namespace)
 		if err != nil {
@@ -63,16 +65,16 @@ func (h *Handlers) GetZones(ctx context.Context) func(w http.ResponseWriter, r *
 		values := []string{}
 
 		// Fetch and merge values for SrcK8S_Zone and DstK8S_Zone
-		values1, code, err := h.getLabelValues(ctx, clients, fields.SrcZone)
+		values1, code, err := h.getLabelValues(ctx, clients, fields.SrcZone, isDev)
 		if err != nil {
-			writeError(w, code, "Error while fetching label source zone values from Loki: "+err.Error())
+			writeError(w, code, err.Error())
 			return
 		}
 		values = append(values, values1...)
 
-		values2, code, err := h.getLabelValues(ctx, clients, fields.DstZone)
+		values2, code, err := h.getLabelValues(ctx, clients, fields.DstZone, isDev)
 		if err != nil {
-			writeError(w, code, "Error while fetching label destination zone values from Loki: "+err.Error())
+			writeError(w, code, err.Error())
 			return
 		}
 		values = append(values, values2...)
@@ -82,10 +84,31 @@ func (h *Handlers) GetZones(ctx context.Context) func(w http.ResponseWriter, r *
 	}
 }
 
+func (h *Handlers) getNamespacesValues(ctx context.Context, clients clients, isDev bool) ([]string, int, error) {
+	// Initialize values explicitly to avoid null json when empty
+	values := []string{}
+
+	// Fetch and merge values for SrcK8S_Namespace and DstK8S_Namespace
+	values1, code, err := h.getLabelValues(ctx, clients, fields.SrcNamespace, isDev)
+	if err != nil {
+		return []string{}, code, err
+	}
+	values = append(values, values1...)
+
+	values2, code, err := h.getLabelValues(ctx, clients, fields.DstNamespace, isDev)
+	if err != nil {
+		return []string{}, code, err
+	}
+	values = append(values, values2...)
+
+	return values, http.StatusOK, nil
+}
+
 func (h *Handlers) GetNamespaces(ctx context.Context) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		params := r.URL.Query()
 		namespace := params.Get(namespaceKey)
+		isDev := namespace != ""
 
 		clients, err := newClients(h.Cfg, r.Header, false, namespace)
 		if err != nil {
@@ -98,35 +121,41 @@ func (h *Handlers) GetNamespaces(ctx context.Context) func(w http.ResponseWriter
 			metrics.ObserveHTTPCall("GetNamespaces", code, startTime)
 		}()
 
-		// Initialize values explicitly to avoid null json when empty
-		values := []string{}
-
-		// Fetch and merge values for SrcK8S_Namespace and DstK8S_Namespace
-		values1, code, err := h.getLabelValues(ctx, clients, fields.SrcNamespace)
+		values, code, err := h.getNamespacesValues(ctx, clients, isDev)
 		if err != nil {
-			writeError(w, code, "Error while fetching label source namespace values from Loki: "+err.Error())
+			writeError(w, code, err.Error())
 			return
 		}
-		values = append(values, values1...)
-
-		values2, code, err := h.getLabelValues(ctx, clients, fields.DstNamespace)
-		if err != nil {
-			writeError(w, code, "Error while fetching label destination namespace values from Loki: "+err.Error())
-			return
-		}
-		values = append(values, values2...)
-
-		code = http.StatusOK
 		writeJSON(w, code, utils.NonEmpty(utils.Dedup(values)))
 	}
 }
 
-func (h *Handlers) getLabelValues(ctx context.Context, cl clients, label string) ([]string, int, error) {
+func (h *Handlers) getLabelValues(ctx context.Context, cl clients, label string, isDev bool) ([]string, int, error) {
 	if h.PromInventory != nil && h.PromInventory.LabelExists(label) {
-		return prometheus.GetLabelValues(ctx, cl.promAdmin, label, nil)
+		client := cl.getPromClient(isDev)
+		if client != nil {
+			resp, code, err := prometheus.GetLabelValues(ctx, client, label, nil)
+			if err != nil {
+				if code == http.StatusUnauthorized || code == http.StatusForbidden {
+					// In case this was a prometheus 401 / 403 error, the query is repeated with Loki
+					// This is because multi-tenancy is currently not managed for prom datasource, hence such queries have to go with Loki
+					// Unfortunately we don't know a safe and generic way to pre-flight check if the user will be authorized
+					hlog.Info("Retrying with Loki...")
+					// continuing with loki below
+				} else {
+					return nil, code, fmt.Errorf("error while fetching label %s values from Prometheus: %w", label, err)
+				}
+			} else {
+				return resp, code, nil
+			}
+		}
 	}
-	if h.Cfg.IsLokiEnabled() {
-		return getLokiLabelValues(h.Cfg.Loki.URL, cl.loki, label)
+	if cl.loki != nil {
+		resp, code, err := getLokiLabelValues(h.Cfg.Loki.URL, cl.loki, label)
+		if err != nil {
+			return nil, code, fmt.Errorf("error while fetching label %s values from Loki: %w", label, err)
+		}
+		return resp, code, nil
 	}
 	// Loki disabled AND label not managed in metrics => send an error
 	return nil, http.StatusBadRequest, fmt.Errorf("label %s not found in Prometheus metrics", label)
@@ -186,7 +215,7 @@ func (h *Handlers) getNamesForPrefix(ctx context.Context, cl clients, prefix, ki
 		searchField = prefix + fields.Name
 	}
 
-	if h.Cfg.IsPromEnabled() {
+	if h.Cfg.IsPromEnabled() && h.PromInventory.LabelExists(searchField) {
 		// Label match query (any metric)
 		q := prometheus.QueryFilters("", filts)
 		return prometheus.GetLabelValues(ctx, cl.promAdmin, searchField, []string{q})

@@ -56,8 +56,9 @@ func TestServerRunning(t *testing.T) {
 
 	go func() {
 		Start(context.TODO(), &config.Config{
-			Loki:   config.Loki{URL: "http://localhost:3100"},
-			Server: config.Server{Port: testPort},
+			Loki:       config.Loki{URL: ""},
+			Prometheus: config.Prometheus{URL: ""},
+			Server:     config.Server{Port: testPort},
 		}, &authM)
 	}()
 
@@ -172,7 +173,8 @@ func TestSecureComm(t *testing.T) {
 	defer os.Remove(testClientKeyFile)
 
 	conf := &config.Config{
-		Loki: config.Loki{URL: "http://localhost:3100"},
+		Loki:       config.Loki{URL: ""},
+		Prometheus: config.Prometheus{URL: ""},
 		Server: config.Server{
 			Port:     testPort,
 			CertPath: testServerCertFile,
@@ -334,23 +336,27 @@ func TestLokiConfigurationForTopology(t *testing.T) {
 	authM := &authMock{}
 	authM.MockGranted()
 
+	cfg, err := config.ReadFile("", "", "")
+	assert.Nil(t, err)
+	cfg.Frontend.Deduper = config.Deduper{
+		Mark:  true,
+		Merge: false,
+	}
+
 	// THAT is accessed behind the NOO console plugin backend
 	backendRoutes := setupRoutes(context.TODO(), &config.Config{
 		Loki: config.Loki{
 			URL:     lokiSvc.URL,
 			Timeout: config.Duration{Duration: time.Second},
-			Labels:  []string{fields.SrcNamespace, fields.DstNamespace, fields.SrcOwnerName, fields.DstOwnerName, fields.FlowDirection},
+			Labels:  []string{fields.SrcNamespace, fields.DstNamespace, fields.SrcOwnerName, fields.DstOwnerName, fields.SrcType, fields.DstType, fields.FlowDirection},
 		},
-		Frontend: config.Frontend{Deduper: config.Deduper{
-			Mark:  true,
-			Merge: false,
-		}},
+		Frontend: cfg.Frontend,
 	}, authM)
 	backendSvc := httptest.NewServer(backendRoutes)
 	defer backendSvc.Close()
 
-	// WHEN the Loki flows endpoint is queried in the backend
-	resp, err := backendSvc.Client().Get(backendSvc.URL + "/api/loki/flow/metrics?aggregateBy=resource")
+	// WHEN the flows endpoint is queried in the backend
+	resp, err := backendSvc.Client().Get(backendSvc.URL + "/api/flow/metrics?aggregateBy=resource")
 	require.NoError(t, err)
 
 	// THEN the query has been properly forwarded to Loki
@@ -361,7 +367,7 @@ func TestLokiConfigurationForTopology(t *testing.T) {
 	queries := []string{req1.URL.Query().Get("query"), req2.URL.Query().Get("query")}
 	expected := []string{
 		`topk(100,sum by(SrcK8S_Name,SrcK8S_Type,SrcK8S_OwnerName,SrcK8S_OwnerType,SrcK8S_Namespace,SrcAddr,SrcK8S_HostName,DstK8S_Name,DstK8S_Type,DstK8S_OwnerName,DstK8S_OwnerType,DstK8S_Namespace,DstAddr,DstK8S_HostName)(rate({app="netobserv-flowcollector",FlowDirection=~"^0$|^2$"}!~` + "`" + `Duplicate":true` + "`" + `|json|unwrap Bytes|__error__=""[1m])))`,
-		`topk(100,sum by(SrcK8S_Name,SrcK8S_Type,SrcK8S_OwnerName,SrcK8S_OwnerType,SrcK8S_Namespace,SrcAddr,SrcK8S_HostName,DstK8S_Name,DstK8S_Type,DstK8S_OwnerName,DstK8S_OwnerType,DstK8S_Namespace,DstAddr,DstK8S_HostName)(rate({app="netobserv-flowcollector",FlowDirection="1",DstK8S_OwnerName=""}!~` + "`" + `Duplicate":true` + "`" + `|json|unwrap Bytes|__error__=""[1m])))`,
+		`topk(100,sum by(SrcK8S_Name,SrcK8S_Type,SrcK8S_OwnerName,SrcK8S_OwnerType,SrcK8S_Namespace,SrcAddr,SrcK8S_HostName,DstK8S_Name,DstK8S_Type,DstK8S_OwnerName,DstK8S_OwnerType,DstK8S_Namespace,DstAddr,DstK8S_HostName)(rate({app="netobserv-flowcollector",FlowDirection="1",DstK8S_Type=~"^$|^Service$"}!~` + "`" + `Duplicate":true` + "`" + `|json|unwrap Bytes|__error__=""[1m])))`,
 	}
 	// We don't predict the order so sort both actual and expected
 	sort.Strings(queries)
@@ -392,23 +398,27 @@ func TestLokiConfigurationForTableHistogram(t *testing.T) {
 	authM := &authMock{}
 	authM.MockGranted()
 
+	cfg, err := config.ReadFile("", "", "")
+	assert.Nil(t, err)
+	cfg.Frontend.Deduper = config.Deduper{
+		Mark:  true,
+		Merge: false,
+	}
+
 	// THAT is accessed behind the NOO console plugin backend
 	backendRoutes := setupRoutes(context.TODO(), &config.Config{
 		Loki: config.Loki{
 			URL:     lokiSvc.URL,
 			Timeout: config.Duration{Duration: time.Second},
-			Labels:  []string{fields.SrcNamespace, fields.DstNamespace, fields.SrcOwnerName, fields.DstOwnerName, fields.FlowDirection},
+			Labels:  []string{fields.SrcNamespace, fields.DstNamespace, fields.SrcOwnerName, fields.DstOwnerName, fields.SrcType, fields.DstType, fields.FlowDirection},
 		},
-		Frontend: config.Frontend{Deduper: config.Deduper{
-			Mark:  true,
-			Merge: false,
-		}},
+		Frontend: cfg.Frontend,
 	}, authM)
 	backendSvc := httptest.NewServer(backendRoutes)
 	defer backendSvc.Close()
 
 	// WHEN the Loki flows endpoint is queried in the backend using flow count type
-	resp, err := backendSvc.Client().Get(backendSvc.URL + "/api/loki/flow/metrics?type=Flows&function=count&aggregateBy=resource")
+	resp, err := backendSvc.Client().Get(backendSvc.URL + "/api/flow/metrics?type=Flows&function=count&aggregateBy=resource")
 	require.NoError(t, err)
 
 	// THEN the query has been properly forwarded to Loki

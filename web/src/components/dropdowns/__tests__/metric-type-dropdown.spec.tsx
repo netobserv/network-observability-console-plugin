@@ -1,10 +1,12 @@
 import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 
+import { MetricType } from '../../../model/flow-query';
 import { MetricTypeDropdown } from '../metric-type-dropdown';
 
 describe('<MetricDropdown />', () => {
   const props = {
+    allowedTypes: ['Bytes', 'Packets'] as MetricType[],
     selected: 'Bytes',
     setMetricType: jest.fn(),
     id: 'metric'

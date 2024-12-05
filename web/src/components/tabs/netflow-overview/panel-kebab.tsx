@@ -174,7 +174,8 @@ export const PanelKebab: React.FC<PanelKebabProps> = ({ id, options, setOptions,
         <Divider key="first-divider" component="li" />
       </div>
     );
-  }, [id, options, setGraph, t]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, options, setGraph]);
 
   const items = [];
   if (options?.graph?.options?.length) {

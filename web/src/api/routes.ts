@@ -15,6 +15,7 @@ import {
   RawTopologyMetrics,
   RecordsResult,
   Stats,
+  Status,
   StreamResult
 } from './loki';
 
@@ -54,8 +55,9 @@ export const getExportFlowsURL = (params: FlowQuery, columns?: string[]): string
   return `${ContextSingleton.getHost()}/api/loki/export?${exportQuery}`;
 };
 
-export const getClusters = (): Promise<string[]> => {
-  return axios.get(ContextSingleton.getHost() + '/api/resources/clusters').then(r => {
+export const getStatus = (forcedNamespace?: string): Promise<Status> => {
+  const params = { namespace: forcedNamespace };
+  return axios.get(ContextSingleton.getHost() + '/api/status', { params }).then(r => {
     if (r.status >= 400) {
       throw new Error(`${r.statusText} [code=${r.status}]`);
     }
@@ -63,8 +65,9 @@ export const getClusters = (): Promise<string[]> => {
   });
 };
 
-export const getZones = (): Promise<string[]> => {
-  return axios.get(ContextSingleton.getHost() + '/api/resources/zones').then(r => {
+export const getClusters = (forcedNamespace?: string): Promise<string[]> => {
+  const params = { namespace: forcedNamespace };
+  return axios.get(ContextSingleton.getHost() + '/api/resources/clusters', { params }).then(r => {
     if (r.status >= 400) {
       throw new Error(`${r.statusText} [code=${r.status}]`);
     }
@@ -72,8 +75,9 @@ export const getZones = (): Promise<string[]> => {
   });
 };
 
-export const getNamespaces = (): Promise<string[]> => {
-  return axios.get(ContextSingleton.getHost() + '/api/resources/namespaces').then(r => {
+export const getZones = (forcedNamespace?: string): Promise<string[]> => {
+  const params = { namespace: forcedNamespace };
+  return axios.get(ContextSingleton.getHost() + '/api/resources/zones', { params }).then(r => {
     if (r.status >= 400) {
       throw new Error(`${r.statusText} [code=${r.status}]`);
     }
@@ -81,11 +85,22 @@ export const getNamespaces = (): Promise<string[]> => {
   });
 };
 
-export const getResources = (namespace: string, kind: string): Promise<string[]> => {
-  const url = namespace
-    ? `${ContextSingleton.getHost()}/api/resources/namespace/${namespace}/kind/${kind}/names`
-    : `${ContextSingleton.getHost()}/api/resources/kind/${kind}/names`;
-  return axios.get(url).then(r => {
+export const getNamespaces = (forcedNamespace?: string): Promise<string[]> => {
+  const params = { namespace: forcedNamespace };
+  return axios.get(ContextSingleton.getHost() + '/api/resources/namespaces', { params }).then(r => {
+    if (r.status >= 400) {
+      throw new Error(`${r.statusText} [code=${r.status}]`);
+    }
+    return r.data;
+  });
+};
+
+export const getResources = (namespace: string, kind: string, forcedNamespace?: string): Promise<string[]> => {
+  const params = {
+    namespace: forcedNamespace || namespace,
+    kind
+  };
+  return axios.get(ContextSingleton.getHost() + '/api/resources/names', { params }).then(r => {
     if (r.status >= 400) {
       throw new Error(`${r.statusText} [code=${r.status}]`);
     }
@@ -123,7 +138,7 @@ const getFlowMetricsGeneric = <T>(
   params: FlowQuery,
   mapper: (raw: AggregatedQueryResponse) => T
 ): Promise<{ metrics: T; stats: Stats }> => {
-  return axios.get(ContextSingleton.getHost() + '/api/loki/flow/metrics', { params }).then(r => {
+  return axios.get(ContextSingleton.getHost() + '/api/flow/metrics', { params }).then(r => {
     if (r.status >= 400) {
       throw new Error(`${r.statusText} [code=${r.status}]`);
     }
@@ -154,6 +169,7 @@ export const getConfig = (): Promise<Config> => {
           : defaultConfig.portNaming.portNames
       },
       filters: r.data.filters,
+      scopes: r.data.scopes,
       quickFilters: r.data.quickFilters,
       alertNamespaces: r.data.alertNamespaces,
       sampling: r.data.sampling,

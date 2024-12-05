@@ -1,20 +1,11 @@
-import {
-  Bullseye,
-  EmptyState,
-  EmptyStateBody,
-  EmptyStateIcon,
-  EmptyStateVariant,
-  Spinner,
-  Title
-} from '@patternfly/react-core';
-import { SearchIcon } from '@patternfly/react-icons';
+import { Bullseye, Spinner } from '@patternfly/react-core';
 import { SortByDirection, TableComposable, Tbody } from '@patternfly/react-table';
 import * as _ from 'lodash';
 import * as React from 'react';
-import { useTranslation } from 'react-i18next';
 
 import { Record } from '../../../api/ipfix';
 import { FlowMetricsResult, NetflowMetrics, RecordsResult, Stats } from '../../../api/loki';
+import { Config } from '../../../model/config';
 import { FlowQuery } from '../../../model/flow-query';
 import { Column, ColumnsId, ColumnSizeMap } from '../../../utils/columns';
 import { TimeRange } from '../../../utils/datetime';
@@ -27,6 +18,7 @@ import {
 import { convertRemToPixels } from '../../../utils/panel';
 import { usePrevious } from '../../../utils/previous-hook';
 import { Size } from '../../dropdowns/table-display-dropdown';
+import { Empty } from '../../messages/empty';
 import { NetflowTableHeader } from './netflow-table-header';
 import NetflowTableRow from './netflow-table-row';
 import './netflow-table.css';
@@ -59,15 +51,14 @@ export interface NetflowTableProps {
   size: Size;
   onSelect: (record?: Record) => void;
   loading?: boolean;
-  filterActionLinks: JSX.Element;
+  resetDefaultFilters?: (c?: Config) => void;
+  clearFilters?: () => void;
   isDark?: boolean;
 }
 
 // eslint-disable-next-line react/display-name
 export const NetflowTable: React.FC<NetflowTableProps> = React.forwardRef(
   (props, ref: React.Ref<NetflowTableHandle>) => {
-    const { t } = useTranslation('plugin__netobserv-plugin');
-
     //default to 300 to allow content to be rendered in tests
     const [containerHeight, setContainerHeight] = React.useState(300);
     const previousContainerHeight = usePrevious(containerHeight);
@@ -307,14 +298,11 @@ export const NetflowTable: React.FC<NetflowTableProps> = React.forwardRef(
       } else {
         return (
           <Bullseye data-test="no-results-found">
-            <EmptyState variant={EmptyStateVariant.small}>
-              <EmptyStateIcon icon={SearchIcon} />
-              <Title headingLevel="h2" size="lg">
-                {t('No results found')}
-              </Title>
-              <EmptyStateBody>{t('Clear or reset filters and try again.')}</EmptyStateBody>
-              {props.filterActionLinks}
-            </EmptyState>
+            <Empty
+              showDetails={true}
+              resetDefaultFilters={props.resetDefaultFilters}
+              clearFilters={props.clearFilters}
+            />
           </Bullseye>
         );
       }

@@ -9,6 +9,7 @@ import GroupDropdown from './group-dropdown';
 import LayoutDropdown from './layout-dropdown';
 import TruncateDropdown, { TruncateLength } from './truncate-dropdown';
 
+import { ScopeConfigDef } from '../../model/scope';
 import MetricFunctionDropdown from './metric-function-dropdown';
 import MetricTypeDropdown from './metric-type-dropdown';
 import ScopeDropdown from './scope-dropdown';
@@ -24,10 +25,8 @@ export interface TopologyDisplayOptionsProps {
   setMetricScope: (s: FlowScope) => void;
   topologyOptions: TopologyOptions;
   setTopologyOptions: (o: TopologyOptions) => void;
-  allowPktDrop: boolean;
-  allowDNSMetric: boolean;
-  allowRTTMetric: boolean;
-  allowedScopes: FlowScope[];
+  allowedTypes: MetricType[];
+  scopes: ScopeConfigDef[];
 }
 
 export const TopologyDisplayOptions: React.FC<TopologyDisplayOptionsProps> = ({
@@ -39,10 +38,8 @@ export const TopologyDisplayOptions: React.FC<TopologyDisplayOptionsProps> = ({
   setMetricScope,
   topologyOptions,
   setTopologyOptions,
-  allowPktDrop,
-  allowDNSMetric,
-  allowRTTMetric,
-  allowedScopes
+  allowedTypes,
+  scopes
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
@@ -92,12 +89,9 @@ export const TopologyDisplayOptions: React.FC<TopologyDisplayOptionsProps> = ({
               <MetricTypeDropdown
                 data-test="metricType"
                 id="metricType"
-                isTopology
                 selected={metricType}
                 setMetricType={setMetricType}
-                allowPktDrop={allowPktDrop}
-                allowDNSMetric={allowDNSMetric}
-                allowRTTMetric={allowRTTMetric}
+                allowedTypes={allowedTypes}
               />
             </FlexItem>
           </Flex>
@@ -117,7 +111,7 @@ export const TopologyDisplayOptions: React.FC<TopologyDisplayOptionsProps> = ({
             id="scope"
             selected={metricScope}
             setScopeType={setMetricScope}
-            allowedScopes={allowedScopes}
+            scopes={scopes}
           />
         </div>
       </div>
@@ -136,7 +130,7 @@ export const TopologyDisplayOptions: React.FC<TopologyDisplayOptionsProps> = ({
             scope={metricScope as MetricScopeOptions}
             selected={topologyOptions.groupTypes}
             setGroupType={setGroupType}
-            allowedScopes={allowedScopes}
+            scopes={scopes}
           />
         </div>
       </div>
@@ -219,8 +213,8 @@ export const TopologyDisplayOptions: React.FC<TopologyDisplayOptionsProps> = ({
           <Switch
             id="group-collapsed-switch"
             label={t('Collapse groups')}
-            isDisabled={topologyOptions.groupTypes === TopologyGroupTypes.none}
-            isChecked={topologyOptions.groupTypes !== TopologyGroupTypes.none && !topologyOptions.startCollapsed}
+            isDisabled={topologyOptions.groupTypes === 'none'}
+            isChecked={topologyOptions.groupTypes !== 'none' && !topologyOptions.startCollapsed}
             onChange={() =>
               setTopologyOptions({
                 ...topologyOptions,

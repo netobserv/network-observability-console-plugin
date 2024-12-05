@@ -12,6 +12,7 @@ import {
   TopologyMetrics
 } from '../api/loki';
 import { FlowScope, MetricFunction, MetricType } from '../model/flow-query';
+import { getCustomScopes } from '../model/scope';
 import { NodeData } from '../model/topology';
 import { roundTwoDigits } from './count';
 import { computeStepInterval, rangeToSeconds, TimeRange } from './datetime';
@@ -112,14 +113,11 @@ export const createPeer = (fields: Partial<TopologyMetricPeer>): TopologyMetricP
     id: getPeerId(fields),
     addr: fields.addr,
     resource: fields.resource,
-    namespace: fields.namespace,
     owner: fields.owner,
-    hostName: fields.hostName,
-    zone: fields.zone,
-    clusterName: fields.clusterName,
     isAmbiguous: false,
     getDisplayName: () => undefined
   };
+
   const setForNameAndType = (nt: NameAndType) => {
     const { type, name } = nt;
     newPeer.resourceKind = type;
@@ -135,23 +133,21 @@ export const createPeer = (fields: Partial<TopologyMetricPeer>): TopologyMetricP
   } else if (fields.owner) {
     // Owner kind
     setForNameAndType(fields.owner);
-  } else if (fields.namespace) {
-    // Since name / ownerName aren't defined then it must be a namespace-kind aggregation
-    newPeer.resourceKind = 'Namespace';
-    newPeer.getDisplayName = () => fields.namespace;
-  } else if (fields.hostName) {
-    // Fallback on host-kind aggregation if available
-    newPeer.resourceKind = 'Node';
-    newPeer.getDisplayName = () => fields.hostName;
-  } else if (fields.zone) {
-    // Fallback on zone aggregation if available
-    newPeer.resourceKind = 'Zone';
-    newPeer.getDisplayName = () => fields.zone;
-  } else if (fields.clusterName) {
-    // Fallback on cluster aggregation if available
-    newPeer.resourceKind = 'Cluster';
-    newPeer.getDisplayName = () => fields.clusterName;
-  } else if (fields.addr) {
+  }
+
+  // append custom scope fields to peer and set kind + display if not already done
+  getCustomScopes()
+    .reverse()
+    .forEach(sc => {
+      newPeer[sc.id] = fields[sc.id] as string;
+      if (!newPeer.resourceKind && newPeer[sc.id]) {
+        newPeer.resourceKind = sc.name;
+        newPeer.getDisplayName = () => newPeer[sc.id] as string;
+      }
+    });
+
+  // fallback on address if nothing else available
+  if (!newPeer.resourceKind && fields.addr) {
     newPeer.getDisplayName = () => fields.addr;
   }
   return newPeer;
@@ -171,29 +167,29 @@ const parseTopologyMetric = (
 ): TopologyMetrics => {
   const normalized = normalizeMetrics(raw.values, start, end, step, forceZeros);
   const stats = computeStats(normalized);
-  const source = createPeer({
+  const sourceFields: Partial<TopologyMetricPeer> = {
     addr: raw.metric.SrcAddr,
     resource: nameAndType(raw.metric.SrcK8S_Name, raw.metric.SrcK8S_Type),
-    owner: nameAndType(raw.metric.SrcK8S_OwnerName, raw.metric.SrcK8S_OwnerType),
-    namespace: raw.metric.SrcK8S_Namespace,
-    hostName: raw.metric.SrcK8S_HostName,
-    zone: raw.metric.SrcK8S_Zone,
-    // TODO: see if clustername will become directionnal
-    clusterName: raw.metric.K8S_ClusterName
-  });
-  const destination = createPeer({
+    owner: nameAndType(raw.metric.SrcK8S_OwnerName, raw.metric.SrcK8S_OwnerType)
+  };
+  const destFields: Partial<TopologyMetricPeer> = {
     addr: raw.metric.DstAddr,
     resource: nameAndType(raw.metric.DstK8S_Name, raw.metric.DstK8S_Type),
-    owner: nameAndType(raw.metric.DstK8S_OwnerName, raw.metric.DstK8S_OwnerType),
-    namespace: raw.metric.DstK8S_Namespace,
-    hostName: raw.metric.DstK8S_HostName,
-    zone: raw.metric.DstK8S_Zone,
-    // TODO: see if clustername will become directionnal
-    clusterName: raw.metric.K8S_ClusterName
+    owner: nameAndType(raw.metric.DstK8S_OwnerName, raw.metric.DstK8S_OwnerType)
+  };
+  getCustomScopes().forEach(sc => {
+    if (!sc.labels.length) {
+      console.error('invalid scope labels', sc);
+    } else {
+      const srcField = sc.labels.length === 1 ? sc.labels[0] : sc.labels.find(l => l.startsWith('Src'))!;
+      sourceFields[sc.id] = (raw.metric as never)[srcField];
+      const dstField = sc.labels.length === 1 ? sc.labels[0] : sc.labels.find(l => l.startsWith('Dst'))!;
+      destFields[sc.id] = (raw.metric as never)[dstField];
+    }
   });
   return {
-    source: source,
-    destination: destination,
+    source: createPeer(sourceFields),
+    destination: createPeer(destFields),
     values: normalized,
     stats: stats,
     scope: aggregateBy

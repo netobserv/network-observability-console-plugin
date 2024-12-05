@@ -3,6 +3,7 @@ import { FieldConfig } from '../utils/fields';
 import { FilterConfigDef } from './filters';
 import { RecordType } from './flow-query';
 import { RawQuickFilter } from './quick-filters';
+import { ScopeConfigDef } from './scope';
 
 export type Feature = 'multiCluster' | 'zones' | 'pktDrop' | 'dnsTracking' | 'flowRTT';
 
@@ -23,6 +24,7 @@ export type Config = {
   columns: ColumnConfigDef[];
   quickFilters: RawQuickFilter[];
   filters: FilterConfigDef[];
+  scopes: ScopeConfigDef[];
   alertNamespaces: string[];
   sampling: number;
   features: Feature[];
@@ -46,6 +48,7 @@ export const defaultConfig: Config = {
   columns: [],
   quickFilters: [],
   filters: [],
+  scopes: [],
   alertNamespaces: ['netobserv'],
   sampling: 50,
   features: [],

@@ -4,6 +4,7 @@
 
 import { Record } from '../api/ipfix';
 import { TopologyMetricPeer } from '../api/loki';
+import { getCustomScopeIds } from '../model/scope';
 
 export const idUnknown = '-';
 
@@ -25,25 +26,20 @@ export const getTopologyEdgeId = (sourceId: string, targetId: string) => {
  */
 export const getPeerId = (fields: Partial<TopologyMetricPeer>): string => {
   const parts = [];
-  if (fields.clusterName) {
-    parts.push('c=' + fields.clusterName);
-  }
-  if (fields.zone) {
-    parts.push('z=' + fields.zone);
-  }
-  if (fields.hostName) {
-    parts.push('h=' + fields.hostName);
-  }
-  if (fields.namespace) {
-    parts.push('n=' + fields.namespace);
-  }
+  // add scope defined outside of the special ones
+  getCustomScopeIds().forEach(sc => {
+    if (fields[sc]) {
+      parts.push(`${sc}=${fields[sc]}`);
+    }
+  });
   if (fields.owner) {
     parts.push('o=' + fields.owner.type + '.' + fields.owner.name);
   }
+  // add either resource info or address but not both
+  // as some items can have multiple IPs
   if (fields.resource) {
     parts.push('r=' + fields.resource.type + '.' + fields.resource.name);
-  }
-  if (fields.addr) {
+  } else if (fields.addr) {
     parts.push('a=' + fields.addr);
   }
   return parts.length > 0 ? parts.join(',') : idUnknown;

@@ -1,14 +1,4 @@
-import {
-  Bullseye,
-  EmptyState,
-  EmptyStateBody,
-  EmptyStateIcon,
-  EmptyStateVariant,
-  Flex,
-  Spinner,
-  Title
-} from '@patternfly/react-core';
-import { SearchIcon } from '@patternfly/react-icons';
+import { Bullseye, Flex, Spinner } from '@patternfly/react-core';
 import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -29,7 +19,7 @@ import {
   TotalRateMetrics
 } from '../../../api/loki';
 import { getFlowGenericMetrics } from '../../../api/routes';
-import { Feature } from '../../../model/config';
+import { Config, Feature } from '../../../model/config';
 import { FlowQuery, FlowScope, RecordType } from '../../../model/flow-query';
 import { getStat } from '../../../model/metrics';
 import { TimeRange } from '../../../utils/datetime';
@@ -55,6 +45,7 @@ import { formatPort } from '../../../utils/port';
 import { usePrevious } from '../../../utils/previous-hook';
 import { formatProtocol } from '../../../utils/protocol';
 import { TruncateLength } from '../../dropdowns/truncate-dropdown';
+import { Empty } from '../../messages/empty';
 import { MetricsDonut } from '../../metrics/metrics-donut';
 import { MetricsGraph } from '../../metrics/metrics-graph';
 import { MetricsGraphWithTotal } from '../../metrics/metrics-graph-total';
@@ -91,7 +82,8 @@ export interface NetflowOverviewProps {
   metrics: NetflowMetrics;
   loading?: boolean;
   isDark?: boolean;
-  filterActionLinks: JSX.Element;
+  resetDefaultFilters?: (c?: Config) => void;
+  clearFilters?: () => void;
   truncateLength: TruncateLength;
   focus?: boolean;
   setFocus?: (v: boolean) => void;
@@ -430,28 +422,28 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
       [kebabMap]
     );
 
-    const emptyGraph = React.useCallback(() => {
-      return (
-        <div className="emptygraph">
-          {props.loading ? (
-            <Bullseye data-test="loading-contents">
-              <Spinner size="xl" />
-            </Bullseye>
-          ) : (
-            <Bullseye data-test="no-results-found">
-              <EmptyState variant={EmptyStateVariant.small}>
-                <EmptyStateIcon icon={SearchIcon} />
-                <Title headingLevel="h2" size="lg">
-                  {t('No results found')}
-                </Title>
-                <EmptyStateBody>{t('Clear or reset filters and try again.')}</EmptyStateBody>
-                {props.filterActionLinks}
-              </EmptyState>
-            </Bullseye>
-          )}
-        </div>
-      );
-    }, [props.filterActionLinks, props.loading, t]);
+    const emptyGraph = React.useCallback(
+      (showDetails: boolean) => {
+        return (
+          <div className="emptygraph">
+            {props.loading ? (
+              <Bullseye data-test="loading-contents">
+                <Spinner size="xl" />
+              </Bullseye>
+            ) : (
+              <Bullseye data-test="no-results-found">
+                <Empty
+                  showDetails={showDetails}
+                  resetDefaultFilters={props.resetDefaultFilters}
+                  clearFilters={props.clearFilters}
+                />
+              </Bullseye>
+            )}
+          </div>
+        );
+      },
+      [props.resetDefaultFilters, props.clearFilters, props.loading]
+    );
 
     React.useEffect(() => {
       observeDOMRect(containerRef, containerSize, setContainerSize);
@@ -691,7 +683,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
                     isDark={props.isDark}
                   />
                 ) : (
-                  emptyGraph()
+                  emptyGraph(!isFocus)
                 ),
               kebab: (
                 <PanelKebab
@@ -764,7 +756,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
                   isDark={props.isDark}
                 />
               ) : (
-                emptyGraph()
+                emptyGraph(!isFocus)
               ),
               kebab: <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} />,
               bodyClassSmall: false,
@@ -841,7 +833,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
                     isDark={props.isDark}
                   />
                 ) : (
-                  emptyGraph()
+                  emptyGraph(!isFocus)
                 ),
               kebab: <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} />,
               bodyClassSmall: options.graph!.type === 'donut',
@@ -920,7 +912,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
                     />
                   )
                 ) : (
-                  emptyGraph()
+                  emptyGraph(!isFocus)
                 ),
               kebab: <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} />,
               bodyClassSmall: options.graph!.type === 'donut',
@@ -981,7 +973,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
                     />
                   )
                 ) : (
-                  emptyGraph()
+                  emptyGraph(!isFocus)
                 ),
               kebab: <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} />,
               bodyClassSmall: options.graph!.type === 'donut',
@@ -1042,7 +1034,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
                       />
                     )
                   ) : (
-                    emptyGraph()
+                    emptyGraph(!isFocus)
                   ),
                 kebab: <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} />,
                 bodyClassSmall: options.graph!.type === 'donut',

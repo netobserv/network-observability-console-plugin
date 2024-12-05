@@ -43,7 +43,7 @@ func newClient(timeout time.Duration, skipTLS bool, caPath string, forwardUserTo
 		h := requestHeader.Get(auth.AuthHeader)
 		if h != "" && strings.HasPrefix(h, "Bearer ") {
 			token := strings.TrimPrefix(h, "Bearer ")
-			roundTripper = pconf.NewAuthorizationCredentialsRoundTripper("Bearer", pconf.Secret(token), maybeTLS)
+			roundTripper = pconf.NewAuthorizationCredentialsRoundTripper("Bearer", pconf.NewInlineSecret(token), maybeTLS)
 		} else {
 			log.Debug("Missing Authorization token in user request")
 		}
@@ -52,7 +52,7 @@ func newClient(timeout time.Duration, skipTLS bool, caPath string, forwardUserTo
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse authorization path '%s': %w", tokenPath, err)
 		}
-		roundTripper = pconf.NewAuthorizationCredentialsRoundTripper("Bearer", pconf.Secret(string(bytes)), maybeTLS)
+		roundTripper = pconf.NewAuthorizationCredentialsRoundTripper("Bearer", pconf.NewInlineSecret(string(bytes)), maybeTLS)
 	} else {
 		roundTripper = maybeTLS
 	}
@@ -79,15 +79,7 @@ func executeQueryRange(ctx context.Context, cl api.Client, q *Query) (pmod.Value
 	}
 	if err != nil {
 		log.Tracef("Error:\n%v", err)
-		code = http.StatusServiceUnavailable
-		var promError *v1.Error
-		if errors.As(err, &promError) {
-			if promError.Type == v1.ErrClient && strings.Contains(promError.Msg, "401") {
-				code = http.StatusUnauthorized
-			} else if promError.Type == v1.ErrClient && strings.Contains(promError.Msg, "403") {
-				code = http.StatusForbidden
-			}
-		}
+		code = translateErrorCode(err)
 		return nil, code, fmt.Errorf("error from Prometheus query: %w", err)
 	}
 
@@ -125,11 +117,12 @@ func GetLabelValues(ctx context.Context, cl api.Client, label string, match []st
 	log.Debugf("GetLabelValues: %s", label)
 	v1api := v1.NewAPI(cl)
 	result, warnings, err := v1api.LabelValues(ctx, label, match, time.Now().Add(-3*time.Hour), time.Now())
-	if err != nil {
-		return nil, http.StatusServiceUnavailable, err
-	}
 	if len(warnings) > 0 {
 		log.Infof("GetLabelValues warnings: %v", warnings)
+	}
+	if err != nil {
+		code := translateErrorCode(err)
+		return nil, code, fmt.Errorf("could not get label values: %w", err)
 	}
 	log.Tracef("Result:\n%v", result)
 	var asStrings []string
@@ -137,4 +130,16 @@ func GetLabelValues(ctx context.Context, cl api.Client, label string, match []st
 		asStrings = append(asStrings, string(s))
 	}
 	return asStrings, http.StatusOK, nil
+}
+
+func translateErrorCode(err error) int {
+	var promError *v1.Error
+	if errors.As(err, &promError) {
+		if promError.Type == v1.ErrClient && strings.Contains(promError.Msg, "401") {
+			return http.StatusUnauthorized
+		} else if promError.Type == v1.ErrClient && strings.Contains(promError.Msg, "403") {
+			return http.StatusForbidden
+		}
+	}
+	return http.StatusServiceUnavailable
 }

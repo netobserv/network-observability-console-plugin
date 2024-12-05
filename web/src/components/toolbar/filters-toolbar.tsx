@@ -59,8 +59,8 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [indicator, setIndicator] = React.useState<Indicator>(ValidatedOptions.default);
   const [message, setMessage] = React.useState<string | undefined>();
-  const [selectedFilter, setSelectedFilter] = React.useState<FilterDefinition>(
-    findFilter(filterDefinitions, 'src_namespace')!
+  const [selectedFilter, setSelectedFilter] = React.useState<FilterDefinition | null>(
+    findFilter(filterDefinitions, 'src_namespace') || filterDefinitions.length ? filterDefinitions[0] : null
   );
   const [selectedCompare, setSelectedCompare] = React.useState<FilterCompare>(FilterCompare.equal);
   const [showFilters, setShowFilters] = useLocalStorage<boolean>(localStorageShowFiltersKey, true);
@@ -89,6 +89,10 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
 
   const addFilter = React.useCallback(
     (filterValue: FilterValue) => {
+      if (selectedFilter === null) {
+        console.error('addFilter called with', selectedFilter);
+        return false;
+      }
       const newFilters = _.cloneDeep(filters?.list) || [];
       const not = selectedCompare === FilterCompare.notEqual;
       const moreThan = selectedCompare === FilterCompare.moreThanOrEqual;
@@ -111,6 +115,10 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
   );
 
   const getFilterControl = React.useCallback(() => {
+    if (selectedFilter === null) {
+      return <></>;
+    }
+
     const commonProps = {
       filterDefinition: selectedFilter,
       addFilter: addFilter,
@@ -121,11 +129,54 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
     switch (selectedFilter.component) {
       case 'text':
       case 'number':
-        return <TextFilter {...commonProps} regexp={selectedFilter.component === 'number' ? /\D/g : undefined} />;
+        return (
+          <TextFilter
+            {...commonProps}
+            allowEmpty={selectedCompare !== FilterCompare.moreThanOrEqual}
+            regexp={selectedFilter.component === 'number' ? /\D/g : undefined}
+          />
+        );
       case 'autocomplete':
         return <AutocompleteFilter {...commonProps} />;
     }
-  }, [selectedFilter, addFilter, indicator, setIndicator, setMessageWithDelay]);
+  }, [selectedFilter, addFilter, setMessageWithDelay, indicator, selectedCompare]);
+
+  const getFilterToolbar = React.useCallback(() => {
+    if (selectedFilter === null) {
+      return <></>;
+    }
+
+    return (
+      <ToolbarItem className="flex-start">
+        <Tooltip
+          //css hide tooltip here to avoid render issue
+          className={`filters-tooltip${_.isEmpty(message) ? '-empty' : ''}`}
+          isVisible={!_.isEmpty(message)}
+          content={message}
+          trigger={_.isEmpty(message) ? 'manual' : 'click'}
+          enableFlip={false}
+          position={'top'}
+        >
+          <div>
+            <InputGroup>
+              <FiltersDropdown
+                filterDefinitions={filterDefinitions}
+                selectedFilter={selectedFilter}
+                setSelectedFilter={setSelectedFilter}
+              />
+              <CompareFilter
+                value={selectedCompare}
+                setValue={setSelectedCompare}
+                component={selectedFilter.component}
+              />
+              {getFilterControl()}
+            </InputGroup>
+            <FilterHints def={selectedFilter} />
+          </div>
+        </Tooltip>
+      </ToolbarItem>
+    );
+  }, [filterDefinitions, getFilterControl, message, selectedCompare, selectedFilter]);
 
   const isForced = !_.isEmpty(forcedFilters);
   const filtersOrForced = isForced ? forcedFilters : filters;
@@ -150,38 +201,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
             <QuickFilters quickFilters={quickFilters} activeFilters={filters?.list || []} setFilters={setFiltersList} />
           </ToolbarItem>
         )}
-        {!isForced && (
-          <>
-            <ToolbarItem className="flex-start">
-              <Tooltip
-                //css hide tooltip here to avoid render issue
-                className={`filters-tooltip${_.isEmpty(message) ? '-empty' : ''}`}
-                isVisible={!_.isEmpty(message)}
-                content={message}
-                trigger={_.isEmpty(message) ? 'manual' : 'click'}
-                enableFlip={false}
-                position={'top'}
-              >
-                <div>
-                  <InputGroup>
-                    <FiltersDropdown
-                      filterDefinitions={filterDefinitions}
-                      selectedFilter={selectedFilter}
-                      setSelectedFilter={setSelectedFilter}
-                    />
-                    <CompareFilter
-                      value={selectedCompare}
-                      setValue={setSelectedCompare}
-                      component={selectedFilter.component}
-                    />
-                    {getFilterControl()}
-                  </InputGroup>
-                  <FilterHints def={selectedFilter} />
-                </div>
-              </Tooltip>
-            </ToolbarItem>
-          </>
-        )}
+        {!isForced && getFilterToolbar()}
         {showHideText && (
           <ToolbarItem className="flex-start">
             <Button

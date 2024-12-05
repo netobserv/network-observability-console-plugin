@@ -15,6 +15,7 @@ import { ColumnsIcon, EllipsisVIcon, ExportIcon } from '@patternfly/react-icons'
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { FlowScope, MetricType, StatFunction } from 'src/model/flow-query';
+import { ScopeConfigDef } from '../../model/scope';
 import { TopologyOptions } from '../../model/topology';
 import { exportToPng } from '../../utils/export';
 import OverviewDisplayDropdown, { Size } from '../dropdowns/overview-display-dropdown';
@@ -41,13 +42,11 @@ export interface ViewOptionsToolbarProps {
   topologyMetricFunction: StatFunction;
   setTopologyMetricFunction: (f: StatFunction) => void;
   topologyMetricType: MetricType;
-  setMetricType: (t: MetricType) => void;
+  setTopologyMetricType: (t: MetricType) => void;
   topologyOptions: TopologyOptions;
   setTopologyOptions: (o: TopologyOptions) => void;
-  allowPktDrop: boolean;
-  allowDNSMetric: boolean;
-  allowRTTMetric: boolean;
-  allowedScopes: FlowScope[];
+  allowedTypes: MetricType[];
+  scopes: ScopeConfigDef[];
   size: Size;
   setSize: (v: Size) => void;
   setSearchEvent: (se: SearchEvent) => void;
@@ -238,7 +237,7 @@ export const ViewOptionsToolbar: React.FC<ViewOptionsToolbarProps> = React.forwa
                 setTruncateLength={props.setOverviewTruncateLength}
                 focus={props.overviewFocus}
                 setFocus={props.setOverviewFocus}
-                allowedScopes={props.allowedScopes}
+                scopes={props.scopes}
               />
             )}
             {props.selectedViewId === 'table' && <TableDisplayDropdown size={props.size} setSize={props.setSize} />}
@@ -247,15 +246,13 @@ export const ViewOptionsToolbar: React.FC<ViewOptionsToolbarProps> = React.forwa
                 metricFunction={props.topologyMetricFunction}
                 setMetricFunction={props.setTopologyMetricFunction}
                 metricType={props.topologyMetricType}
-                setMetricType={props.setMetricType}
+                setMetricType={props.setTopologyMetricType}
                 metricScope={props.metricScope}
                 setMetricScope={props.setMetricScope}
                 topologyOptions={props.topologyOptions}
                 setTopologyOptions={props.setTopologyOptions}
-                allowPktDrop={props.allowPktDrop}
-                allowDNSMetric={props.allowDNSMetric}
-                allowRTTMetric={props.allowRTTMetric}
-                allowedScopes={props.allowedScopes}
+                allowedTypes={props.allowedTypes}
+                scopes={props.scopes}
               />
             )}
           </OverflowMenuItem>

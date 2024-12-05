@@ -1,5 +1,5 @@
 import { K8sModel } from '@openshift-console/dynamic-plugin-sdk';
-import { ValidatedOptions } from '@patternfly/react-core';
+import { Bullseye, ValidatedOptions } from '@patternfly/react-core';
 import {
   createTopologyControlButtons,
   defaultControlButtonsOptions,
@@ -19,15 +19,16 @@ import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { TopologyMetrics } from '../../../../api/loki';
+import { Config } from '../../../../model/config';
 import { Filter, FilterDefinition, Filters } from '../../../../model/filters';
 import { FlowScope, MetricType, StatFunction } from '../../../../model/flow-query';
-import { getStat, MetricScopeOptions } from '../../../../model/metrics';
+import { getStat } from '../../../../model/metrics';
+import { getStepInto, ScopeConfigDef } from '../../../../model/scope';
 import {
   Decorated,
   ElementData,
   FilterDir,
   generateDataModel,
-  getStepIntoNext,
   GraphElementPeer,
   isDirElementFiltered,
   LayoutName,
@@ -37,6 +38,7 @@ import {
   TopologyOptions
 } from '../../../../model/topology';
 import { usePrevious } from '../../../../utils/previous-hook';
+import { Empty } from '../../../messages/empty';
 import { SearchEvent, SearchHandle } from '../../../search/search';
 import { filterEvent, stepIntoEvent } from './styles/styleDecorators';
 import './topology-content.css';
@@ -57,7 +59,7 @@ export interface TopologyContentProps {
   metricType: MetricType;
   metricScope: FlowScope;
   setMetricScope: (ms: FlowScope) => void;
-  allowedScopes: FlowScope[];
+  scopes: ScopeConfigDef[];
   metrics: TopologyMetrics[];
   droppedMetrics: TopologyMetrics[];
   options: TopologyOptions;
@@ -70,6 +72,8 @@ export interface TopologyContentProps {
   searchHandle: SearchHandle | null;
   searchEvent?: SearchEvent;
   isDark?: boolean;
+  resetDefaultFilters?: (c?: Config) => void;
+  clearFilters?: () => void;
 }
 
 export const TopologyContent: React.FC<TopologyContentProps> = ({
@@ -78,7 +82,7 @@ export const TopologyContent: React.FC<TopologyContentProps> = ({
   metricType,
   metricScope,
   setMetricScope,
-  allowedScopes,
+  scopes,
   metrics,
   droppedMetrics,
   options,
@@ -90,7 +94,9 @@ export const TopologyContent: React.FC<TopologyContentProps> = ({
   onSelect,
   searchHandle,
   searchEvent,
-  isDark
+  isDark,
+  resetDefaultFilters,
+  clearFilters
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const controller = useVisualizationController();
@@ -199,24 +205,11 @@ export const TopologyContent: React.FC<TopologyContentProps> = ({
 
   const onStepInto = React.useCallback(
     (data: Decorated<ElementData>) => {
-      let groupTypes: TopologyGroupTypes;
-      switch (metricScope) {
-        case MetricScopeOptions.CLUSTER:
-          groupTypes = TopologyGroupTypes.clusters;
-          break;
-        case MetricScopeOptions.ZONE:
-          groupTypes = TopologyGroupTypes.zones;
-          break;
-        case MetricScopeOptions.HOST:
-          groupTypes = TopologyGroupTypes.hosts;
-          break;
-        case MetricScopeOptions.NAMESPACE:
-          groupTypes = TopologyGroupTypes.namespaces;
-          break;
-        default:
-          groupTypes = TopologyGroupTypes.owners;
-      }
-      const scope = getStepIntoNext(metricScope, allowedScopes);
+      const groupTypes: TopologyGroupTypes = metricScope;
+      const scope = getStepInto(
+        metricScope,
+        scopes.map(sc => sc.id)
+      );
       if (data.nodeType && data.peer && scope) {
         setMetricScope(scope);
         setOptions({ ...options, groupTypes });
@@ -240,17 +233,7 @@ export const TopologyContent: React.FC<TopologyContentProps> = ({
         onSelect(undefined);
       }
     },
-    [
-      metricScope,
-      setMetricScope,
-      allowedScopes,
-      setOptions,
-      options,
-      filters.list,
-      filterDefinitions,
-      onSelect,
-      setFilters
-    ]
+    [metricScope, setMetricScope, scopes, setOptions, options, filters.list, filterDefinitions, onSelect, setFilters]
   );
 
   const onHover = React.useCallback((data: Decorated<ElementData>) => {
@@ -355,7 +338,7 @@ export const TopologyContent: React.FC<TopologyContentProps> = ({
       droppedMetrics,
       getOptions(),
       metricScope,
-      allowedScopes,
+      scopes,
       searchEvent?.searchValue || '',
       highlightedId,
       filters,
@@ -398,7 +381,7 @@ export const TopologyContent: React.FC<TopologyContentProps> = ({
     selectedIds,
     getOptions,
     metricScope,
-    allowedScopes,
+    scopes,
     searchEvent?.searchValue,
     filters,
     t,
@@ -483,6 +466,14 @@ export const TopologyContent: React.FC<TopologyContentProps> = ({
   useEventListener(hoverEvent, onHover);
   useEventListener(graphLayoutEndEvent, onLayoutEnd);
   useEventListener(graphPositionChangeEvent, onLayoutPositionChange);
+
+  if (_.isEmpty(metrics) && _.isEmpty(droppedMetrics)) {
+    return (
+      <Bullseye data-test="no-results-found">
+        <Empty showDetails={true} resetDefaultFilters={resetDefaultFilters} clearFilters={clearFilters} />
+      </Bullseye>
+    );
+  }
 
   return (
     <TopologyView

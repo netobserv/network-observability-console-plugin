@@ -72,7 +72,7 @@ func TestGetLabelValues(t *testing.T) {
 		)
 	})
 	cl := clients{loki: lokiClientMock}
-	_, _, _ = h.getLabelValues(context.Background(), cl, "DstK8S_Namespace")
+	_, _, _ = h.getLabelValues(context.Background(), cl, "DstK8S_Namespace", false)
 
 	lokiClientMock.AssertNumberOfCalls(t, "Get", 1)
 }

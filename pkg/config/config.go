@@ -77,7 +77,7 @@ type Column struct {
 	Filter     string   `yaml:"filter,omitempty" json:"filter,omitempty"`
 	Default    bool     `yaml:"default,omitempty" json:"default,omitempty"`
 	Width      int      `yaml:"width,omitempty" json:"width,omitempty"`
-	Feature    string   `yaml:"feature" json:"feature"`
+	Feature    string   `yaml:"feature,omitempty" json:"feature,omitempty"`
 }
 
 type Filter struct {
@@ -90,6 +90,19 @@ type Filter struct {
 	Examples               string `yaml:"examples,omitempty" json:"examples,omitempty"`
 	DocURL                 string `yaml:"docUrl,omitempty" json:"docUrl,omitempty"`
 	Placeholder            string `yaml:"placeholder,omitempty" json:"placeholder,omitempty"`
+}
+
+type Scope struct {
+	ID          string   `yaml:"id" json:"id"`
+	Name        string   `yaml:"name" json:"name"`
+	ShortName   string   `yaml:"shortName" json:"shortName"`
+	Description string   `yaml:"description" json:"description"`
+	Labels      []string `yaml:"labels" json:"labels"`
+	Feature     string   `yaml:"feature,omitempty" json:"feature,omitempty"`
+	Groups      []string `yaml:"groups,omitempty" json:"groups,omitempty"`
+	Filter      string   `yaml:"filter,omitempty" json:"filter,omitempty"`
+	Filters     []string `yaml:"filters,omitempty" json:"filters,omitempty"`
+	StepInto    string   `yaml:"stepInto,omitempty" json:"stepInto,omitempty"`
 }
 
 type QuickFilter struct {
@@ -120,6 +133,7 @@ type Frontend struct {
 	Panels          []string      `yaml:"panels" json:"panels"`
 	Columns         []Column      `yaml:"columns" json:"columns"`
 	Filters         []Filter      `yaml:"filters" json:"filters"`
+	Scopes          []Scope       `yaml:"scopes" json:"scopes"`
 	QuickFilters    []QuickFilter `yaml:"quickFilters" json:"quickFilters"`
 	AlertNamespaces []string      `yaml:"alertNamespaces" json:"alertNamespaces"`
 	Sampling        int           `yaml:"sampling" json:"sampling"`
@@ -167,7 +181,13 @@ func ReadFile(version, date, filename string) (*Config, error) {
 				{ID: "SrcAddr", Name: "IP", Group: "Source", Field: "SrcAddr", Default: true, Width: 15},
 				{ID: "DstAddr", Name: "IP", Group: "Destination", Field: "DstAddr", Default: true, Width: 15},
 			},
-			Filters:      []Filter{},
+			Filters: []Filter{},
+			Scopes: []Scope{
+				{ID: "host", Name: "Node", Labels: []string{"SrcK8S_HostName", "DstK8S_HostName"}},
+				{ID: "namespace", Name: "Namespace", Labels: []string{"SrcK8S_Namespace", "DstK8S_Namespace"}},
+				{ID: "owner", Name: "Owner", Labels: []string{"SrcK8S_OwnerName", "SrcK8S_OwnerType", "DstK8S_OwnerName", "DstK8S_OwnerType", "SrcK8S_Namespace", "DstK8S_Namespace"}},
+				{ID: "resource", Name: "Resource", Labels: []string{"SrcK8S_Name", "SrcK8S_Type", "SrcK8S_OwnerName", "SrcK8S_OwnerType", "SrcK8S_Namespace", "SrcAddr", "SrcK8S_HostName", "DstK8S_Name", "DstK8S_Type", "DstK8S_OwnerName", "DstK8S_OwnerType", "DstK8S_Namespace", "DstAddr", "DstK8S_HostName"}},
+			},
 			QuickFilters: []QuickFilter{},
 			Features:     []string{},
 			Deduper: Deduper{
@@ -300,4 +320,17 @@ func (c *Config) GetAuthChecker() (auth.Checker, error) {
 		log.Warn("INSECURE: auth checker is disabled")
 	}
 	return auth.NewChecker(checkType, client.NewInCluster)
+}
+
+func (c *Frontend) GetAggregateKeyLabels() map[string][]string {
+	keyLabels := map[string][]string{
+		"app":          {"app"},
+		"droppedState": {"PktDropLatestState"},
+		"droppedCause": {"PktDropLatestDropCause"},
+		"dnsRCode":     {"DnsFlagsResponseCode"},
+	}
+	for i := range c.Scopes {
+		keyLabels[c.Scopes[i].ID] = c.Scopes[i].Labels
+	}
+	return keyLabels
 }

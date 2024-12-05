@@ -20,7 +20,9 @@ export function isModelFeatureFlag(e: never) {
 export function useResolvedExtensions(isModelFeatureFlag: boolean) {
   return [
     [{
-      flags: "dummy",
+      flags: {
+        required: ["dummy"],
+      },
       model: "",
     }],
     undefined, undefined];

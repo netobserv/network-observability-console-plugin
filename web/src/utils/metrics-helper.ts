@@ -139,9 +139,7 @@ const getPeerName = (
     case 'zone':
     case 'host':
       return t('(non nodes)');
-    case 'namespace':
-    case 'owner':
-    case 'resource':
+    default:
       return t('(non pods)');
   }
 };

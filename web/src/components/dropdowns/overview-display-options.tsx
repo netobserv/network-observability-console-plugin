@@ -4,6 +4,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { FlowScope } from '../../model/flow-query';
 
+import { ScopeConfigDef } from '../../model/scope';
 import ScopeDropdown from './scope-dropdown';
 import TruncateDropdown, { TruncateLength } from './truncate-dropdown';
 
@@ -16,7 +17,7 @@ export interface OverviewDisplayOptionsProps {
   setTruncateLength: (v: TruncateLength) => void;
   focus: boolean;
   setFocus: (v: boolean) => void;
-  allowedScopes: FlowScope[];
+  scopes: ScopeConfigDef[];
 }
 
 export const OverviewDisplayOptions: React.FC<OverviewDisplayOptionsProps> = ({
@@ -26,7 +27,7 @@ export const OverviewDisplayOptions: React.FC<OverviewDisplayOptionsProps> = ({
   setTruncateLength,
   focus,
   setFocus,
-  allowedScopes
+  scopes
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
@@ -46,7 +47,7 @@ export const OverviewDisplayOptions: React.FC<OverviewDisplayOptionsProps> = ({
             id="scope"
             selected={metricScope}
             setScopeType={setMetricScope}
-            allowedScopes={allowedScopes}
+            scopes={scopes}
           />
         </div>
       </div>

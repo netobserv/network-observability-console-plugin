@@ -38,6 +38,8 @@ import { validateK8SName, validateStrictK8SName } from './label';
 
 // Convenience string to filter by undefined field values
 export const undefinedValue = '""';
+// Unique double are allowed while typing but invalid
+export const doubleQuoteValue = '"';
 
 const matcher = (left: string, right: string[], not: boolean, moreThan: boolean) =>
   `${left}${not ? '!=' : moreThan ? '>=' : '='}${right.join(',')}`;
@@ -136,15 +138,19 @@ export const getFilterDefinitions = (
     if (_.isEmpty(value)) {
       return invalid(t('Value is empty'));
     }
+    if (value === doubleQuoteValue) {
+      return invalid(t('Value is malformed'));
+    }
     return valid(value);
   };
 
   const k8sNameValidation = (value: string) => {
     if (_.isEmpty(value)) {
-      // Replace with exact match
-      return valid('""');
+      return invalid(t('Value is empty'));
     }
-    return value === '""' || validateK8SName(value) ? valid(value) : invalid(t('Not a valid Kubernetes name'));
+    return value === undefinedValue || validateK8SName(value)
+      ? valid(value)
+      : invalid(t('Not a valid Kubernetes name'));
   };
 
   const k8sResourceValidation = (value: string) => {
@@ -208,7 +214,7 @@ export const getFilterDefinitions = (
     if (_.isEmpty(value)) {
       return invalid(t('Value is empty'));
     }
-    return /^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})/.test(value)
+    return value == undefinedValue || /^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})/.test(value)
       ? valid(value)
       : invalid(t('Not a valid MAC address'));
   };

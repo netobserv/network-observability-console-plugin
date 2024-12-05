@@ -4,17 +4,6 @@
 # - use the VERSION as arg of the bundle target (e.g make bundle VERSION=0.0.2)
 # - use environment variables to overwrite this value (e.g export VERSION=0.0.2)
 VERSION ?= main
-BUILD_DATE := $(shell date +%Y-%m-%d\ %H:%M)
-TAG_COMMIT := $(shell git rev-list --abbrev-commit --tags --max-count=1)
-TAG := $(shell git describe --abbrev=0 --tags ${TAG_COMMIT} 2>/dev/null || true)
-BUILD_SHA := $(shell git rev-parse --short HEAD)
-BUILD_VERSION := $(TAG:v%=%)
-ifneq ($(COMMIT), $(TAG_COMMIT))
-	BUILD_VERSION := $(BUILD_VERSION)-$(BUILD_SHA)
-endif
-ifneq ($(shell git status --porcelain),)
-	BUILD_VERSION := $(BUILD_VERSION)-dirty
-endif
 
 # Go architecture and targets images to build
 GOARCH ?= amd64
@@ -41,25 +30,27 @@ endif
 # Image URL to use all building/pushing image targets
 IMAGE ?= ${IMAGE_TAG_BASE}:${VERSION}
 
-OCI_BUILD_OPTS ?=
-
 # Image building tool (docker / podman) - docker is preferred in CI
 OCI_BIN_PATH = $(shell which docker 2>/dev/null || which podman)
 OCI_BIN ?= $(shell basename ${OCI_BIN_PATH})
+OCI_BUILD_OPTS ?=
+
+ifneq ($(CLEAN_BUILD),)
+	BUILD_DATE := $(shell date +%Y-%m-%d\ %H:%M)
+	BUILD_SHA := $(shell git rev-parse --short HEAD)
+	LDFLAGS ?= -X 'main.buildVersion=${VERSION}-${BUILD_SHA}' -X 'main.buildDate=${BUILD_DATE}'
+endif
 
 GOLANGCI_LINT_VERSION = v1.53.3
 NPM_INSTALL ?= install
 CMDLINE_ARGS ?= --loglevel trace --config config/config.yaml
-LDFLAGS := -X 'main.buildVersion=${BUILD_VERSION}' -X 'main.buildDate=${BUILD_DATE}'
-# You can add GO Build flags like -gcflags=all="-N -l" here to remove optimizations for debugging
-BUILD_FLAGS ?= -ldflags "${LDFLAGS}"
 
 .DEFAULT_GOAL := help
 
 # build a single arch target provided as argument
 define build_target
 	echo 'building image for arch $(1)'; \
-	DOCKER_BUILDKIT=1 $(OCI_BIN) buildx build --ulimit nofile=20480:20480 --load --build-arg LDFLAGS="${LDFLAGS}" --build-arg BUILDSCRIPT=${BUILDSCRIPT} --build-arg TARGETPLATFORM=linux/$(1) --build-arg TARGETARCH=$(1) --build-arg BUILDPLATFORM=linux/amd64 ${OCI_BUILD_OPTS} -t ${IMAGE}-$(1) -f Dockerfile .;
+	DOCKER_BUILDKIT=1 $(OCI_BIN) buildx build --ulimit nofile=20480:20480 --load --build-arg LDFLAGS="${LDFLAGS}" --build-arg BUILDSCRIPT=${BUILDSCRIPT} --build-arg TARGETARCH=$(1) ${OCI_BUILD_OPTS} -t ${IMAGE}-$(1) -f Dockerfile .;
 endef
 
 # push a single arch target image
@@ -122,7 +113,7 @@ start: YQ build-backend install-frontend ## Run backend and frontend
 	$(YQ) '.server.port |= 9002 | .server.metricsPort |= 9003 | .loki.useMocks |= false' ./config/sample-config.yaml > ./config/config.yaml
 	@echo "### Starting backend on http://localhost:9002"
 	bash -c "trap 'fuser -k 9002/tcp' EXIT; \
-					./plugin-backend $(CMDLINE_ARGS) & cd web && npm run start" 
+					./plugin-backend $(CMDLINE_ARGS) & cd web && npm run start"
 
 .PHONY: start-backend
 start-backend: YQ build-backend
@@ -159,7 +150,7 @@ fmt-frontend: i18n ## Run frontend i18n and fmt
 lint-frontend: ## Lint frontend code
 	@echo "### Linting frontend code"
 	cd web && npm run lint
-	
+
 .PHONY: test-frontend
 test-frontend: ## Test frontend using jest
 	@echo "### Testing frontend"

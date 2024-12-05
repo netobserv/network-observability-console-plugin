@@ -15,6 +15,7 @@ export interface SliderStepObject {
   label: string;
   /** Value of the step. This value is a percentage of the slider where the tick is drawn. */
   value: number;
+  tooltip?: string;
 }
 
 /** The main slider component. */
@@ -426,6 +427,18 @@ export const Slider: React.FunctionComponent<SliderProps> = ({
               const maxValue = customSteps[customSteps.length - 1].value;
               const stepValue = getStepValue(stepObj.value, minValue, maxValue);
 
+              if (stepObj.tooltip) {
+                return (
+                  <Tooltip key={stepObj.value} content={stepObj.tooltip} className="slider-tooltip">
+                    <SliderStep
+                      value={stepValue}
+                      label={stepObj.label}
+                      isLabelHidden={stepObj.isLabelHidden}
+                      isActive={stepObj.value <= localValue}
+                    />
+                  </Tooltip>
+                );
+              }
               return (
                 <SliderStep
                   key={stepObj.value}

@@ -7,11 +7,9 @@ import { useTranslation } from 'react-i18next';
 import { defaultNetflowMetrics, Stats } from '../api/loki';
 import { Config } from '../model/config';
 import { Filters, getDisabledFiltersRecord, getEnabledFilters } from '../model/filters';
-import { filtersToString, FlowQuery, FlowScope, isTimeMetric, MetricType } from '../model/flow-query';
-import { MetricScopeOptions } from '../model/metrics';
+import { filtersToString, FlowQuery, MetricType } from '../model/flow-query';
 import { netflowTrafficModel } from '../model/netflow-traffic';
 import { parseQuickFilters } from '../model/quick-filters';
-import { getGroupsForScope, TopologyGroupTypes } from '../model/topology';
 import { getFetchFunctions as getBackAndForthFetch } from '../utils/back-and-forth';
 import { ColumnsId, getDefaultColumns } from '../utils/columns';
 import { loadConfig } from '../utils/config';
@@ -29,8 +27,11 @@ import { mergeStats } from '../utils/metrics';
 import { dnsIdMatcher, droppedIdMatcher, getDefaultOverviewPanels, rttIdMatcher } from '../utils/overview-panels';
 import { usePoll } from '../utils/poll-hook';
 import {
+  defaultMetricScope,
+  defaultMetricType,
   defaultTimeRange,
   getFiltersFromURL,
+  setURLDatasource,
   setURLFilters,
   setURLLimit,
   setURLMatch,
@@ -44,7 +45,6 @@ import {
 import { useTheme } from '../utils/theme-hook';
 import { getURLParams, hasEmptyParams, netflowTrafficPath, removeURLParam, setURLParams, URLParam } from '../utils/url';
 import NetflowTrafficDrawer, { NetflowTrafficDrawerHandle } from './drawer/netflow-traffic-drawer';
-import { rateMetricFunctions, timeMetricFunctions } from './dropdowns/metric-function-dropdown';
 import { limitValues, topValues } from './dropdowns/query-options-panel';
 import { RefreshDropdown } from './dropdowns/refresh-dropdown';
 import TimeRangeDropdown from './dropdowns/time-range-dropdown';
@@ -76,7 +76,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
   const { t } = useTranslation('plugin__netobserv-plugin');
   const isDarkTheme = useTheme();
   const [extensions] = useResolvedExtensions<ModelFeatureFlag>(isModelFeatureFlag);
-  ContextSingleton.setContext(extensions);
+  ContextSingleton.setContext(extensions, forcedNamespace);
 
   const model = netflowTrafficModel();
 
@@ -148,28 +148,31 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
     return isPromOnly() ? dataSourceHasLabels(['SrcK8S_Zone', 'DstK8S_Zone']) : model.config.features.includes('zones');
   }, [model.config.features, dataSourceHasLabels, isPromOnly]);
 
-  const getAllowedScopes = React.useCallback(() => {
-    const scopes: FlowScope[] = [];
-    if (isMultiCluster()) {
-      scopes.push('cluster');
+  const getAvailableScopes = React.useCallback(() => {
+    return model.config.scopes.filter(sc => {
+      if (sc.feature) {
+        return model.config.features.includes(sc.feature);
+      } else {
+        return dataSourceHasLabels(sc.labels);
+      }
+    });
+  }, [model.config.scopes, model.config.features, dataSourceHasLabels]);
+
+  const getAllowedMetricTypes = React.useCallback(() => {
+    let options: MetricType[] = ['Bytes', 'Packets'];
+    if (model.selectedViewId === 'topology') {
+      if (isPktDrop()) {
+        options = options.concat('PktDropBytes', 'PktDropPackets');
+      }
+      if (isDNSTracking()) {
+        options.push('DnsLatencyMs');
+      }
+      if (isFlowRTT()) {
+        options.push('TimeFlowRttNs');
+      }
     }
-    if (isZones()) {
-      scopes.push('zone');
-    }
-    if (dataSourceHasLabels(['SrcK8S_HostName', 'DstK8S_HostName'])) {
-      scopes.push('host');
-    }
-    if (dataSourceHasLabels(['SrcK8S_Namespace', 'DstK8S_Namespace'])) {
-      scopes.push('namespace');
-    }
-    if (dataSourceHasLabels(['SrcK8S_OwnerName', 'DstK8S_OwnerName'])) {
-      scopes.push('owner');
-    }
-    if (dataSourceHasLabels(['SrcK8S_Name', 'DstK8S_Name'])) {
-      scopes.push('resource');
-    }
-    return scopes;
-  }, [isMultiCluster, isZones, dataSourceHasLabels]);
+    return options;
+  }, [isDNSTracking, isFlowRTT, isPktDrop, model.selectedViewId]);
 
   const getAvailablePanels = React.useCallback(() => {
     return model.panels.filter(
@@ -184,40 +187,17 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
     return getAvailablePanels().filter(panel => panel.isSelected);
   }, [getAvailablePanels]);
 
-  const getAvailableColumns = React.useCallback(
-    (isSidePanel = false) => {
-      return model.columns.filter(
-        col =>
-          (!isSidePanel || !col.isCommon) &&
-          (isConnectionTracking() || ![ColumnsId.recordtype, ColumnsId.hashid].includes(col.id)) &&
-          (!col.feature || model.config.features.includes(col.feature))
-      );
-    },
-    [model.columns, model.config.features, isConnectionTracking]
-  );
+  const getAvailableColumns = React.useCallback(() => {
+    return model.columns.filter(
+      col =>
+        (isConnectionTracking() || ![ColumnsId.recordtype, ColumnsId.hashid].includes(col.id)) &&
+        (!col.feature || model.config.features.includes(col.feature))
+    );
+  }, [model.columns, model.config.features, isConnectionTracking]);
 
   const getSelectedColumns = React.useCallback(() => {
     return getAvailableColumns().filter(column => column.isSelected);
   }, [getAvailableColumns]);
-
-  const updateTopologyMetricType = React.useCallback(
-    (metricType: MetricType) => {
-      if (isTimeMetric(metricType)) {
-        // fallback on average if current function not available for time queries
-        if (!timeMetricFunctions.includes(model.topologyMetricFunction)) {
-          model.setTopologyMetricFunction('avg');
-        }
-      } else {
-        // fallback on average if current function not available for rate queries
-        if (!rateMetricFunctions.includes(model.topologyMetricFunction)) {
-          model.setTopologyMetricFunction('avg');
-        }
-      }
-      model.setTopologyMetricType(metricType);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [model.topologyMetricFunction, model.setTopologyMetricFunction, model.setTopologyMetricType]
-  );
 
   const getFilterDefs = React.useCallback(() => {
     return getFilterDefinitions(model.config.filters, model.config.columns, t).filter(
@@ -320,8 +300,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
       query.aggregateBy = model.metricScope;
       if (model.selectedViewId === 'topology') {
         query.type = model.topologyMetricType;
-        query.groups =
-          model.topologyOptions.groupTypes !== TopologyGroupTypes.none ? model.topologyOptions.groupTypes : undefined;
+        query.groups = model.topologyOptions.groupTypes !== 'none' ? model.topologyOptions.groupTypes : undefined;
       } else if (model.selectedViewId === 'overview') {
         query.limit = topValues.includes(model.limit) ? model.limit : topValues[0];
         query.groups = undefined;
@@ -386,6 +365,10 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
     } else if (model.isTRModalOpen || model.isOverviewModalOpen || model.isColModalOpen || model.isExportModalOpen) {
       // also skip tick if modal is open
       console.debug('tick skipped since modal is open');
+      return;
+    } else if (drawerRef.current == null) {
+      console.debug('tick called before drawer rendering. Retrying after render');
+      setTimeout(tick);
       return;
     }
 
@@ -504,19 +487,6 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
   ]);
   usePoll(tick, model.interval);
 
-  const setMetricScope = React.useCallback(
-    (scope: FlowScope) => {
-      model.setMetricScope(scope);
-      // Invalidate groups if necessary, when metrics scope changed
-      const groups = getGroupsForScope(scope as MetricScopeOptions);
-      if (!groups.includes(model.topologyOptions.groupTypes)) {
-        model.setTopologyOptions({ ...model.topologyOptions, groupTypes: TopologyGroupTypes.none });
-      }
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [model.setMetricScope, model.topologyOptions, model.setTopologyOptions]
-  );
-
   const clearFilters = React.useCallback(() => {
     if (forcedFilters) {
       navigate(netflowTrafficPath);
@@ -529,6 +499,8 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
   }, [forcedFilters, model.filters, updateTableFilters]);
 
   // Effects
+
+  // invalidate record type if not available
   React.useEffect(() => {
     if (initState.current.includes('configLoaded')) {
       if (model.recordType === 'flowLog' && !isFlow() && isConnectionTracking()) {
@@ -540,6 +512,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [model.config.recordTypes, isConnectionTracking, isFlow, model.recordType]);
 
+  // invalidate datasource if not available
   React.useEffect(() => {
     if (
       initState.current.includes('configLoaded') &&
@@ -551,6 +524,36 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allowLoki, allowProm, model.dataSource]);
 
+  // invalidate packet loss if not available
+  React.useEffect(() => {
+    if (initState.current.includes('configLoaded') && !isPktDrop() && model.packetLoss !== 'all') {
+      model.setPacketLoss('all');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isPktDrop, model.packetLoss, model.setPacketLoss]);
+
+  // invalidate metric scope / group if not available
+  React.useEffect(() => {
+    if (
+      initState.current.includes('configLoaded') &&
+      !getAvailableScopes()
+        .map(sc => sc.id)
+        .includes(model.metricScope)
+    ) {
+      model.setMetricScope(defaultMetricScope);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [getAvailableScopes, model.metricScope, model.setMetricScope]);
+
+  // invalidate metric type / function if not available
+  React.useEffect(() => {
+    if (initState.current.includes('configLoaded') && !getAllowedMetricTypes().includes(model.topologyMetricType)) {
+      model.setTopologyMetricType(defaultMetricType);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [getAllowedMetricTypes, model.topologyMetricType, model.setTopologyMetricType]);
+
+  // select columns / panels from local storage
   React.useEffect(() => {
     if (initState.current.includes('configLoaded')) {
       model.setColumns(
@@ -671,6 +674,10 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
     setURLRecortType(model.recordType, !initState.current.includes('configLoaded'));
   }, [model.recordType]);
 
+  React.useEffect(() => {
+    setURLDatasource(model.dataSource, !initState.current.includes('configLoaded'));
+  }, [model.dataSource]);
+
   // update local storage saved query params
   React.useEffect(() => {
     if (!forcedFilters) {
@@ -691,7 +698,9 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
 
   // update local storage enabled filters
   React.useEffect(() => {
-    model.setDisabledFilters(getDisabledFiltersRecord(model.filters.list));
+    if (initState.current.includes('configLoaded')) {
+      model.setDisabledFilters(getDisabledFiltersRecord(model.filters.list));
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [model.filters]);
 
@@ -865,12 +874,8 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
         <ViewOptionsToolbar
           {...model}
           isDarkTheme={isDarkTheme}
-          setMetricType={updateTopologyMetricType}
-          allowPktDrop={isPktDrop()}
-          allowDNSMetric={isDNSTracking()}
-          allowRTTMetric={isFlowRTT()}
-          allowedScopes={getAllowedScopes()}
-          setMetricScope={setMetricScope}
+          allowedTypes={getAllowedMetricTypes()}
+          scopes={getAvailableScopes()}
           ref={searchRef}
         />
       )}
@@ -885,15 +890,14 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
           allowPktDrop={isPktDrop()}
           allowDNSMetric={isDNSTracking()}
           allowRTTMetric={isFlowRTT()}
-          setMetricScope={setMetricScope}
           resetDefaultFilters={resetDefaultFilters}
           clearFilters={clearFilters}
           filterDefinitions={getFilterDefs()}
           searchHandle={searchRef.current}
-          allowedScopes={getAllowedScopes()}
+          scopes={getAvailableScopes()}
           canSwitchTypes={isFlow() && isConnectionTracking()}
           clearSelections={clearSelections}
-          availableColumns={getAvailableColumns(true)}
+          availableColumns={getAvailableColumns()}
           maxChunkAge={model.config.maxChunkAgeMs}
           selectedColumns={getSelectedColumns()}
         />

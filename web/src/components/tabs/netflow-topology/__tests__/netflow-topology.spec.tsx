@@ -4,6 +4,7 @@ import { shallow } from 'enzyme';
 import * as React from 'react';
 import { TopologyMetrics } from '../../../../api/loki';
 import { FilterDefinitionSample } from '../../../../components/__tests-data__/filters';
+import { ScopeDefSample } from '../../../../components/__tests-data__/scopes';
 import { FlowScope, MetricType, StatFunction } from '../../../../model/flow-query';
 import { DefaultOptions, LayoutName } from '../../../../model/topology';
 import { defaultTimeRange } from '../../../../utils/router';
@@ -36,7 +37,7 @@ describe('<NetflowTopology />', () => {
     onSelect: jest.fn(),
     searchHandle: null,
     searchEvent: undefined,
-    allowedScopes: ['host', 'namespace', 'owner', 'resource'] as FlowScope[]
+    scopes: ScopeDefSample
   };
 
   it('should render component', async () => {
