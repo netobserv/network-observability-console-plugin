@@ -11,7 +11,11 @@ import (
 	"github.com/netobserv/network-observability-console-plugin/pkg/model"
 )
 
-const codePrometheusUnsupported = 901 // code to use internally to notify a Bad Request, unsupported for prometheus queries
+const (
+	codePrometheusUnsupported     = 901 // code to use internally to notify a Bad Request, unsupported for prometheus queries
+	codePrometheusDisabledMetrics = 902 // code to use internally to notify a Bad Request, disabled metrics for prometheus queries
+	codePrometheusMissingLabels   = 903 // code to use internally to notify a Bad Request, missing labels for prometheus queries
+)
 
 func writeText(w http.ResponseWriter, code int, bytes []byte) {
 	w.Header().Set("Content-Type", "text/plain")
@@ -65,16 +69,25 @@ func writeCSV(w http.ResponseWriter, code int, qr *model.AggregatedQueryResponse
 }
 
 type errorResponse struct {
-	Message         string `json:"message,omitempty"`
-	PromUnsupported string `json:"promUnsupported,omitempty"`
+	Message             string `json:"message,omitempty"`
+	PromUnsupported     string `json:"promUnsupported,omitempty"`
+	PromDisabledMetrics string `json:"promDisabledMetrics,omitempty"`
+	PromMissingLabels   string `json:"promMissingLabels,omitempty"`
 }
 
 func writeError(w http.ResponseWriter, code int, message string) {
 	var resp errorResponse
-	if code == codePrometheusUnsupported {
+	switch code {
+	case codePrometheusUnsupported:
 		code = http.StatusBadRequest
 		resp = errorResponse{PromUnsupported: message}
-	} else {
+	case codePrometheusDisabledMetrics:
+		code = http.StatusBadRequest
+		resp = errorResponse{PromDisabledMetrics: message}
+	case codePrometheusMissingLabels:
+		code = http.StatusBadRequest
+		resp = errorResponse{PromMissingLabels: message}
+	default:
 		resp = errorResponse{Message: message}
 	}
 	response, err := json.Marshal(resp)
