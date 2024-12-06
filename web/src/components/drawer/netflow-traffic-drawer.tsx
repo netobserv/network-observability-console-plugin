@@ -20,7 +20,7 @@ import { FlowScope, Match, MetricType, RecordType, StatFunction } from '../../mo
 import { ScopeConfigDef } from '../../model/scope';
 import { Warning } from '../../model/warnings';
 import { Column, ColumnSizeMap } from '../../utils/columns';
-import { isPromUnsupportedError } from '../../utils/errors';
+import { isPromError } from '../../utils/errors';
 import { OverviewPanel } from '../../utils/overview-panels';
 import { TruncateLength } from '../dropdowns/truncate-dropdown';
 import { Error, Size } from '../messages/error';
@@ -239,7 +239,7 @@ export const NetflowTrafficDrawer: React.FC<NetflowTrafficDrawerProps> = React.f
               item: props.currentState.includes('configLoadError') ? t('config') : props.selectedViewId
             })}
             error={props.error}
-            isLokiRelated={!props.currentState.includes('configLoadError') && !isPromUnsupportedError(props.error)}
+            isLokiRelated={!props.currentState.includes('configLoadError') && !isPromError(props.error)}
           />
         );
       } else {
