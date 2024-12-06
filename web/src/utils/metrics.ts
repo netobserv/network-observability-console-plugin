@@ -170,12 +170,18 @@ const parseTopologyMetric = (
   const sourceFields: Partial<TopologyMetricPeer> = {
     addr: raw.metric.SrcAddr,
     resource: nameAndType(raw.metric.SrcK8S_Name, raw.metric.SrcK8S_Type),
-    owner: nameAndType(raw.metric.SrcK8S_OwnerName, raw.metric.SrcK8S_OwnerType)
+    owner:
+      raw.metric.SrcK8S_Type !== raw.metric.SrcK8S_OwnerType
+        ? nameAndType(raw.metric.SrcK8S_OwnerName, raw.metric.SrcK8S_OwnerType)
+        : undefined
   };
   const destFields: Partial<TopologyMetricPeer> = {
     addr: raw.metric.DstAddr,
     resource: nameAndType(raw.metric.DstK8S_Name, raw.metric.DstK8S_Type),
-    owner: nameAndType(raw.metric.DstK8S_OwnerName, raw.metric.DstK8S_OwnerType)
+    owner:
+      raw.metric.DstK8S_Type !== raw.metric.DstK8S_OwnerType
+        ? nameAndType(raw.metric.DstK8S_OwnerName, raw.metric.DstK8S_OwnerType)
+        : undefined
   };
   getCustomScopes().forEach(sc => {
     if (!sc.labels.length) {
