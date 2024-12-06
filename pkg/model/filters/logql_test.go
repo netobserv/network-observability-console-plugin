@@ -74,3 +74,22 @@ func TestWriteInto_7654(t *testing.T) {
 		assert.Equal(t, reg.MatchString(val), i >= 7654, fmt.Sprintf("Value: %d", i))
 	}
 }
+
+func TestMultiStrings(t *testing.T) {
+	lf, ok := StringLineFilterCheckExact("foo", []string{`"a"`, `"b"`}, false)
+	assert.False(t, ok)
+	sb := strings.Builder{}
+	lf.WriteInto(&sb)
+	assert.Equal(t, "|~"+backtick(`foo":"a"|foo":"b"`), sb.String())
+
+	// Repeat with "not" (here we expect foo being neither a nor b)
+	lf, ok = StringLineFilterCheckExact("foo", []string{`"a"`, `"b"`}, true)
+	assert.False(t, ok)
+	sb = strings.Builder{}
+	lf.WriteInto(&sb)
+	assert.Equal(t, "|~"+backtick(`"foo"`)+"!~"+backtick(`foo":"a"`)+"!~"+backtick(`foo":"b"`), sb.String())
+}
+
+func backtick(str string) string {
+	return "`" + str + "`"
+}
