@@ -6,6 +6,7 @@
 
 .co-resource-item {
   display: flex;
+  padding-left: 0.5em !important;
 }
 
 /* max content lines to show */
@@ -50,7 +51,7 @@
   flex-direction: column;
 }
 
-/* table tooltips - check pf-c-tooltip__content for values */
+/* table tooltips - check pf-v5-c-tooltip__content for values */
 .record-field-tooltip {
   display: flex;
   flex-direction: column;
@@ -86,8 +87,12 @@
 }
 
 .record-field-date {
-  align-items: baseline;
-  flex-wrap: nowrap;
+  align-items: baseline !important;
+  flex-wrap: nowrap !important;
+}
+
+.record-field-date-icon-container {
+  margin-right: 1em !important;
 }
 
 .record-field-date-icon {
