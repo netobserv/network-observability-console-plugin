@@ -75,10 +75,39 @@ export const ElementPanelContent: React.FC<ElementPanelContentProps> = ({
     [filterDefinitions, filters, setFilters, t]
   );
 
+  const udnName = React.useCallback(
+    (d: NodeData) => {
+      if (!d.peer.udn) {
+        return <></>;
+      }
+      const fields = createPeer({ udn: d.peer.udn });
+      const isFiltered = isElementFiltered(fields, filters, filterDefinitions);
+      return (
+        <TextContent id="udn" className="record-field-container">
+          <Text component={TextVariants.h4}>{t('UDN')}</Text>
+          <Flex>
+            <FlexItem flex={{ default: 'flex_1' }}>{d.peer.udn}</FlexItem>
+            <FlexItem>
+              <Button
+                id={'udn-filter'}
+                variant="plain"
+                className="overflow-button"
+                icon={isFiltered ? <TimesIcon /> : <FilterIcon />}
+                onClick={() => toggleElementFilter(fields, isFiltered, filters, setFilters, filterDefinitions)}
+              />
+            </FlexItem>
+          </Flex>
+        </TextContent>
+      );
+    },
+    [filterDefinitions, filters, setFilters, t]
+  );
+
   if (element instanceof BaseNode && data) {
     return (
       <>
         {clusterName(data)}
+        {udnName(data)}
         <ElementFields
           id="node-info"
           data={data}
@@ -93,60 +122,69 @@ export const ElementPanelContent: React.FC<ElementPanelContentProps> = ({
     // Edge A to B (prefering neutral naming here as there is no assumption about what is source, what is destination
     const aData: NodeData = element.getSource().getData();
     const bData: NodeData = element.getTarget().getData();
+    const combinedData = Object.assign({}, aData, bData);
     return (
-      <Accordion asDefinitionList={false}>
-        <div className="record-group-container" key={'source'} data-test-id={'source'}>
-          <AccordionItem data-test-id={'source'}>
-            {
-              <AccordionToggle
+      <>
+        {clusterName(combinedData)}
+        {udnName(combinedData)}
+        <Accordion asDefinitionList={false}>
+          <div className="record-group-container" key={'source'} data-test-id={'source'}>
+            <AccordionItem data-test-id={'source'}>
+              {
+                <AccordionToggle
+                  className="borderless-accordion"
+                  onClick={() => toggle('source')}
+                  isExpanded={!hidden.includes('source')}
+                  id={'source'}
+                >
+                  {t('Source')}
+                </AccordionToggle>
+              }
+              <AccordionContent
                 className="borderless-accordion"
-                onClick={() => toggle('source')}
-                isExpanded={!hidden.includes('source')}
-                id={'source'}
+                id="source-content"
+                isHidden={hidden.includes('source')}
               >
-                {t('Source')}
-              </AccordionToggle>
-            }
-            <AccordionContent className="borderless-accordion" id="source-content" isHidden={hidden.includes('source')}>
-              <ElementFields
-                id="source-info"
-                data={aData}
-                activeFilters={filters}
-                setFilters={setFilters}
-                filterDefinitions={filterDefinitions}
-              />
-            </AccordionContent>
-          </AccordionItem>
-        </div>
-        <div className="record-group-container" key={'destination'} data-test-id={'destination'}>
-          <Divider />
-          <AccordionItem data-test-id={'destination'}>
-            {
-              <AccordionToggle
+                <ElementFields
+                  id="source-info"
+                  data={aData}
+                  activeFilters={filters}
+                  setFilters={setFilters}
+                  filterDefinitions={filterDefinitions}
+                />
+              </AccordionContent>
+            </AccordionItem>
+          </div>
+          <div className="record-group-container" key={'destination'} data-test-id={'destination'}>
+            <Divider />
+            <AccordionItem data-test-id={'destination'}>
+              {
+                <AccordionToggle
+                  className="borderless-accordion"
+                  onClick={() => toggle('destination')}
+                  isExpanded={!hidden.includes('destination')}
+                  id={'destination'}
+                >
+                  {t('Destination')}
+                </AccordionToggle>
+              }
+              <AccordionContent
                 className="borderless-accordion"
-                onClick={() => toggle('destination')}
-                isExpanded={!hidden.includes('destination')}
-                id={'destination'}
+                id="destination-content"
+                isHidden={hidden.includes('destination')}
               >
-                {t('Destination')}
-              </AccordionToggle>
-            }
-            <AccordionContent
-              className="borderless-accordion"
-              id="destination-content"
-              isHidden={hidden.includes('destination')}
-            >
-              <ElementFields
-                id="destination-info"
-                data={bData}
-                activeFilters={filters}
-                setFilters={setFilters}
-                filterDefinitions={filterDefinitions}
-              />
-            </AccordionContent>
-          </AccordionItem>
-        </div>
-      </Accordion>
+                <ElementFields
+                  id="destination-info"
+                  data={bData}
+                  activeFilters={filters}
+                  setFilters={setFilters}
+                  filterDefinitions={filterDefinitions}
+                />
+              </AccordionContent>
+            </AccordionItem>
+          </div>
+        </Accordion>
+      </>
     );
   }
   return <></>;
