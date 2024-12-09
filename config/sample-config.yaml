@@ -1105,7 +1105,6 @@ frontend:
   scopes:
     - id: cluster
       name: Cluster
-      shortName: Cl
       description: Cluster name or identifier
       labels:
         - K8S_ClusterName
@@ -1122,7 +1121,6 @@ frontend:
       stepInto: host
     - id: zone
       name: Zone
-      shortName: AZ
       description: Availability zone
       labels:
         - SrcK8S_Zone
@@ -1154,7 +1152,6 @@ frontend:
       stepInto: resource
     - id: namespace
       name: Namespace
-      shortName: NS
       description: Resource namespace
       labels:
         - SrcK8S_Namespace
@@ -1175,7 +1172,6 @@ frontend:
       stepInto: owner
     - id: owner
       name: Owner
-      shortName: Own
       description: Controller owner, such as a Deployment
       labels:
         - SrcK8S_OwnerName
@@ -1205,7 +1201,6 @@ frontend:
       stepInto: resource
     - id: resource
       name: Resource
-      shortName: Res
       description: Base resource, such as a Pod, a Service or a Node
       labels:
         - SrcK8S_Name

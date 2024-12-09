@@ -242,12 +242,7 @@ export const NetflowTopology: React.FC<NetflowTopologyProps> = React.forwardRef(
     return (
       <div id="topology-container-div" style={{ width: '100%', height: '100%' }} ref={containerRef}>
         <div id={'topology-scope-slider-div'}>
-          <ScopeSlider
-            sizePx={containerSize?.height || 300}
-            scope={props.metricScope}
-            setScope={props.setMetricScope}
-            scopeDefs={props.scopes}
-          />
+          <ScopeSlider scope={props.metricScope} setScope={props.setMetricScope} scopeDefs={props.scopes} />
         </div>
         <div id="topology-view-div">{getContent()}</div>
       </div>
