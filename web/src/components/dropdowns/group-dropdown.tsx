@@ -1,4 +1,4 @@
-import { Dropdown, DropdownItem, DropdownToggle } from '@patternfly/react-core';
+import { Dropdown, DropdownItem, MenuToggle, MenuToggleElement } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { MetricScopeOptions } from '../../model/metrics';
@@ -23,37 +23,41 @@ export const GroupDropdown: React.FC<GroupDropdownProps> = ({
   scopes
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
-  const [groupDropdownOpen, setGroupDropdownOpen] = React.useState(false);
+  const [isOpen, setOpen] = React.useState(false);
 
   return (
     <Dropdown
       data-test={id}
       id={id}
-      toggle={
-        <DropdownToggle
+      isOpen={isOpen}
+      toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+        <MenuToggle
+          ref={toggleRef}
           data-test={`${id}-dropdown`}
           id={`${id}-dropdown`}
           isDisabled={disabled}
-          onToggle={() => setGroupDropdownOpen(!groupDropdownOpen)}
+          isExpanded={isOpen}
+          onClick={() => setOpen(!isOpen)}
+          onBlur={() => setTimeout(() => setOpen(false), 100)}
         >
           {getGroupName(selected, scopes, t)}
-        </DropdownToggle>
-      }
-      isOpen={groupDropdownOpen}
-      dropdownItems={getGroupsForScope(scope, scopes).map(v => (
+        </MenuToggle>
+      )}
+    >
+      {getGroupsForScope(scope, scopes).map(v => (
         <DropdownItem
           data-test={v}
           id={v}
           key={v}
           onClick={() => {
-            setGroupDropdownOpen(false);
+            setOpen(false);
             setGroupType(v);
           }}
         >
           {getGroupName(v, scopes, t)}
         </DropdownItem>
       ))}
-    />
+    </Dropdown>
   );
 };
 

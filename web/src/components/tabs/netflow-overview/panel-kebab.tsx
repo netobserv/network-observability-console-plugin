@@ -4,16 +4,18 @@ import {
   Dropdown,
   DropdownGroup,
   DropdownItem,
-  DropdownPosition,
-  KebabToggle,
+  MenuToggle,
+  MenuToggleElement,
   Radio,
   Text,
   TextVariants,
   Tooltip
 } from '@patternfly/react-core';
+import { EllipsisVIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { exportToPng } from '../../../utils/export';
+import { useOutsideClickEvent } from '../../../utils/outside-hook';
 import { OverviewPanelId } from '../../../utils/overview-panels';
 import './panel-kebab.css';
 
@@ -44,59 +46,60 @@ export interface PanelKebabProps {
 
 export const PanelKebab: React.FC<PanelKebabProps> = ({ id, options, setOptions, isDark }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
+  const ref = useOutsideClickEvent(() => setShowOptions(false));
   const [showOptions, setShowOptions] = React.useState(false);
 
   const setShowTop = React.useCallback(
-    (checked: boolean) => {
+    (event: React.FormEvent<HTMLInputElement>, checked: boolean) => {
       setOptions!({ ...options, showTop: checked });
     },
     [setOptions, options]
   );
 
   const setShowApp = React.useCallback(
-    (checked: boolean) => {
+    (event: React.FormEvent<HTMLInputElement>, checked: boolean) => {
       setOptions!({ ...options, showApp: { ...options!.showApp!, value: checked } });
     },
     [setOptions, options]
   );
 
   const setShowAppDrop = React.useCallback(
-    (checked: boolean) => {
+    (event: React.FormEvent<HTMLInputElement>, checked: boolean) => {
       setOptions!({ ...options, showAppDrop: { ...options!.showAppDrop!, value: checked } });
     },
     [setOptions, options]
   );
 
   const setShowOthers = React.useCallback(
-    (checked: boolean) => {
+    (event: React.FormEvent<HTMLInputElement>, checked: boolean) => {
       setOptions!({ ...options, showOthers: checked });
     },
     [setOptions, options]
   );
 
   const setShowNoError = React.useCallback(
-    (checked: boolean) => {
+    (event: React.FormEvent<HTMLInputElement>, checked: boolean) => {
       setOptions!({ ...options, showNoError: checked });
     },
     [setOptions, options]
   );
 
   const setShowInternal = React.useCallback(
-    (checked: boolean) => {
+    (event: React.FormEvent<HTMLInputElement>, checked: boolean) => {
       setOptions!({ ...options, showInternal: checked });
     },
     [setOptions, options]
   );
 
   const setShowOutOfScope = React.useCallback(
-    (checked: boolean) => {
+    (event: React.FormEvent<HTMLInputElement>, checked: boolean) => {
       setOptions!({ ...options, showOutOfScope: checked });
     },
     [setOptions, options]
   );
 
   const setShowLast = React.useCallback(
-    (checked: boolean) => {
+    (event: React.FormEvent<HTMLInputElement>, checked: boolean) => {
       setOptions!({ ...options, showLast: checked });
     },
     [setOptions, options]
@@ -111,9 +114,10 @@ export const PanelKebab: React.FC<PanelKebabProps> = ({ id, options, setOptions,
 
   const onOverviewExport = React.useCallback(() => {
     const overview_flex = document.getElementById(id)?.children[0] as HTMLElement | undefined;
-
     setShowOptions(false);
-    exportToPng('overview_panel', overview_flex as HTMLElement, isDark, id);
+    setTimeout(() => {
+      exportToPng('overview_panel', overview_flex as HTMLElement, isDark, id);
+    }, 100);
   }, [id, isDark]);
 
   const getGraphTypes = React.useCallback(() => {
@@ -352,13 +356,28 @@ export const PanelKebab: React.FC<PanelKebabProps> = ({ id, options, setOptions,
   );
 
   return (
-    <Dropdown
-      className="panel-kebab"
-      toggle={<KebabToggle onToggle={() => setShowOptions(!showOptions)} />}
-      dropdownItems={items}
-      isPlain={true}
-      isOpen={showOptions}
-      position={DropdownPosition.right}
-    />
+    <div id={`panel-kebab-${id}-container`} ref={ref}>
+      <Dropdown
+        id={`panel-kebab-${id}`}
+        className="panel-kebab"
+        toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+          <MenuToggle
+            ref={toggleRef}
+            aria-label="kebab dropdown toggle"
+            variant="plain"
+            onClick={() => setShowOptions(!showOptions)}
+            isExpanded={showOptions}
+          >
+            <EllipsisVIcon />
+          </MenuToggle>
+        )}
+        isOpen={showOptions}
+        popperProps={{
+          position: 'right'
+        }}
+      >
+        {items}
+      </Dropdown>
+    </div>
   );
 };

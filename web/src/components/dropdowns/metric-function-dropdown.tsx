@@ -1,7 +1,8 @@
-import { Dropdown, DropdownItem, DropdownPosition, DropdownToggle } from '@patternfly/react-core';
+import { Dropdown, DropdownItem, MenuToggle, MenuToggleElement } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { isTimeMetric, MetricType, StatFunction } from '../../model/flow-query';
+import { useOutsideClickEvent } from '../../utils/outside-hook';
 
 export const timeMetricFunctions: StatFunction[] = ['avg', 'min', 'max', 'p90', 'p99'];
 export const rateMetricFunctions: StatFunction[] = ['last', 'avg', 'min', 'max', 'sum'];
@@ -20,7 +21,8 @@ export const MetricFunctionDropdown: React.FC<MetricFunctionDropdownProps> = ({
   id
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
-  const [metricDropdownOpen, setMetricDropdownOpen] = React.useState(false);
+  const ref = useOutsideClickEvent(() => setOpen(false));
+  const [isOpen, setOpen] = React.useState(false);
 
   const getAvailableFunctions = React.useCallback((): StatFunction[] => {
     switch (metricType) {
@@ -58,34 +60,42 @@ export const MetricFunctionDropdown: React.FC<MetricFunctionDropdownProps> = ({
   );
 
   return (
-    <Dropdown
-      data-test={id}
-      id={id}
-      position={DropdownPosition.right}
-      toggle={
-        <DropdownToggle
-          data-test={`${id}-dropdown`}
-          id={`${id}-dropdown`}
-          onToggle={() => setMetricDropdownOpen(!metricDropdownOpen)}
-        >
-          {getMetricDisplay(selected as StatFunction)}
-        </DropdownToggle>
-      }
-      isOpen={metricDropdownOpen}
-      dropdownItems={getAvailableFunctions().map(v => (
-        <DropdownItem
-          data-test={v}
-          id={v}
-          key={v}
-          onClick={() => {
-            setMetricDropdownOpen(false);
-            setMetricFunction(v);
-          }}
-        >
-          {getMetricDisplay(v)}
-        </DropdownItem>
-      ))}
-    />
+    <div id={`${id}-container`} ref={ref}>
+      <Dropdown
+        data-test={id}
+        id={id}
+        isOpen={isOpen}
+        popperProps={{
+          position: 'right'
+        }}
+        toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+          <MenuToggle
+            ref={toggleRef}
+            data-test={`${id}-dropdown`}
+            id={`${id}-dropdown`}
+            isExpanded={isOpen}
+            onClick={() => setOpen(!isOpen)}
+          >
+            {getMetricDisplay(selected as StatFunction)}
+          </MenuToggle>
+        )}
+      >
+        {isOpen &&
+          getAvailableFunctions().map(v => (
+            <DropdownItem
+              data-test={v}
+              id={v}
+              key={v}
+              onClick={() => {
+                setOpen(false);
+                setMetricFunction(v);
+              }}
+            >
+              {getMetricDisplay(v)}
+            </DropdownItem>
+          ))}
+      </Dropdown>
+    </div>
   );
 };
 
