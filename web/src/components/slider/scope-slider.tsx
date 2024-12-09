@@ -10,10 +10,9 @@ export interface ScopeSliderProps {
   scope: FlowScope;
   setScope: (ms: FlowScope) => void;
   scopeDefs: ScopeConfigDef[];
-  sizePx: number;
 }
 
-export const ScopeSlider: React.FC<ScopeSliderProps> = ({ scope, setScope, scopeDefs, sizePx }) => {
+export const ScopeSlider: React.FC<ScopeSliderProps> = ({ scope, setScope, scopeDefs }) => {
   return (
     <ProgressStepper isVertical isCenterAligned>
       {scopeDefs.map((sd, i) => (
@@ -31,7 +30,7 @@ export const ScopeSlider: React.FC<ScopeSliderProps> = ({ scope, setScope, scope
             />
           )}
         >
-          {sizePx > 450 ? sd.name : sd.shortName}
+          {sd.name}
         </ProgressStep>
       ))}
     </ProgressStepper>
