@@ -23,20 +23,20 @@ loki:
 prometheus:
   timeout: 30s
   metrics:
-  - enabled: false
-    name: netobserv_node_egress_bytes_total
-    type: counter
-    valueField: Bytes
-    labels:
-    - SrcK8S_HostName
-    - DstK8S_HostName
-  - enabled: true
-    name: netobserv_node_ingress_bytes_total
-    type: counter
-    valueField: Bytes
-    labels:
-    - SrcK8S_HostName
-    - DstK8S_HostName
+    - enabled: false
+      name: netobserv_node_egress_bytes_total
+      type: counter
+      valueField: Bytes
+      labels:
+        - SrcK8S_HostName
+        - DstK8S_HostName
+    - enabled: true
+      name: netobserv_node_ingress_bytes_total
+      type: counter
+      valueField: Bytes
+      labels:
+        - SrcK8S_HostName
+        - DstK8S_HostName
 frontend:
   recordTypes:
     - flowLog
@@ -82,88 +82,86 @@ frontend:
     merge: false
     # The following configuration is taken from Network Observability Operator
     # see https://github.com/netobserv/network-observability-operator/blob/main/controllers/consoleplugin/config/static-frontend-config.yaml
-    panels: 
-    # Protocol
-    - Proto_Bytes
-    - sum_Proto_Bytes
-    - avg_Proto_Bytes
-    - Proto_Packets
-    - sum_Proto_Packets
-    - avg_Proto_Packets
-    - Proto_Flows
-    # DSCP
-    - Dscp_Bytes
-    - Dscp_Packets
-    - min_Dscp_TimeFlowRttNs
-    - max_Dscp_TimeFlowRttNs
-    - avg_Dscp_TimeFlowRttNs
-    - p90_Dscp_TimeFlowRttNs
-    - p99_Dscp_TimeFlowRttNs
-    - min_Dscp_DnsLatencyMs
-    - max_Dscp_DnsLatencyMs
-    - avg_Dscp_DnsLatencyMs
-    - p90_Dscp_DnsLatencyMs
-    - p99_Dscp_DnsLatencyMs
-    - Dscp_Flows
-    # Port numbers
-    - SrcPort_Bytes
-    - sum_SrcPort_Bytes
-    - SrcPort_Packets
-    - sum_SrcPort_Packets
-    - SrcPort_TimeFlowRttNs
-    - min_SrcPort_TimeFlowRttNs
-    - max_SrcPort_TimeFlowRttNs
-    - avg_SrcPort_TimeFlowRttNs
-    - p90_SrcPort_TimeFlowRttNs
-    - p99_SrcPort_TimeFlowRttNs
-    - DstPort_Bytes
-    - sum_DstPort_Bytes
-    - DstPort_Packets
-    - sum_DstPort_Packets
-    - min_DstPort_TimeFlowRttNs
-    - max_DstPort_TimeFlowRttNs
-    - avg_DstPort_TimeFlowRttNs
-    - p90_DstPort_TimeFlowRttNs
-    - p99_DstPort_TimeFlowRttNs
-    # Node Directions
-    - FlowDirection_Bytes
-    - FlowDirection_Packets
-    - FlowDirection_Flows
-    # TODO: implement a way to manage plurals for interfaces
-    # Interfaces Directions
-    #- IfDirections_Bytes
-    #- IfDirections_Packets
-    #- IfDirections_Flows
-    # Interfaces names
-    #- Interfaces_Bytes
-    #- sum_Interfaces_Bytes
-    #- avg_Interfaces_Bytes
-    #- Interfaces_Packets
-    #- sum_Interfaces_Packets
-    #- avg_Interfaces_Packets
-    #- Interfaces_Flows
-    # DNS capture errors
-    - DnsErrno_Flows
-    # Connection tracking flow count
-    - numFlowLogs_Flows
-    # Bytes / Packets rates on current scope
-    - Bytes
-    - Packets
-    # flow on current scope
-    - Flows
-    - DnsFlows
+    panels:
+      # Protocol
+      - Proto_Bytes
+      - sum_Proto_Bytes
+      - avg_Proto_Bytes
+      - Proto_Packets
+      - sum_Proto_Packets
+      - avg_Proto_Packets
+      - Proto_Flows
+      # DSCP
+      - Dscp_Bytes
+      - Dscp_Packets
+      - min_Dscp_TimeFlowRttNs
+      - max_Dscp_TimeFlowRttNs
+      - avg_Dscp_TimeFlowRttNs
+      - p90_Dscp_TimeFlowRttNs
+      - p99_Dscp_TimeFlowRttNs
+      - min_Dscp_DnsLatencyMs
+      - max_Dscp_DnsLatencyMs
+      - avg_Dscp_DnsLatencyMs
+      - p90_Dscp_DnsLatencyMs
+      - p99_Dscp_DnsLatencyMs
+      - Dscp_Flows
+      # Port numbers
+      - SrcPort_Bytes
+      - sum_SrcPort_Bytes
+      - SrcPort_Packets
+      - sum_SrcPort_Packets
+      - SrcPort_TimeFlowRttNs
+      - min_SrcPort_TimeFlowRttNs
+      - max_SrcPort_TimeFlowRttNs
+      - avg_SrcPort_TimeFlowRttNs
+      - p90_SrcPort_TimeFlowRttNs
+      - p99_SrcPort_TimeFlowRttNs
+      - DstPort_Bytes
+      - sum_DstPort_Bytes
+      - DstPort_Packets
+      - sum_DstPort_Packets
+      - min_DstPort_TimeFlowRttNs
+      - max_DstPort_TimeFlowRttNs
+      - avg_DstPort_TimeFlowRttNs
+      - p90_DstPort_TimeFlowRttNs
+      - p99_DstPort_TimeFlowRttNs
+      # Node Directions
+      - FlowDirection_Bytes
+      - FlowDirection_Packets
+      - FlowDirection_Flows
+      # TODO: implement a way to manage plurals for interfaces
+      # Interfaces Directions
+      #- IfDirections_Bytes
+      #- IfDirections_Packets
+      #- IfDirections_Flows
+      # Interfaces names
+      #- Interfaces_Bytes
+      #- sum_Interfaces_Bytes
+      #- avg_Interfaces_Bytes
+      #- Interfaces_Packets
+      #- sum_Interfaces_Packets
+      #- avg_Interfaces_Packets
+      #- Interfaces_Flows
+      # DNS capture errors
+      - DnsErrno_Flows
+      # Connection tracking flow count
+      - numFlowLogs_Flows
+      # Bytes / Packets rates on current scope
+      - Bytes
+      - Packets
+      # flow on current scope
+      - Flows
+      - DnsFlows
   columns:
     - id: StartTime
       name: Start Time
-      tooltip: Time of the first packet observed. Unlike End Time, it is not used in queries
-        to select records in an interval.
+      tooltip: Time of the first packet observed. Unlike End Time, it is not used in queries to select records in an interval.
       field: TimeFlowStartMs
       default: false
       width: 15
     - id: EndTime
       name: End Time
-      tooltip: Time of the last packet observed. This is what is used in queries to select
-        records in an interval.
+      tooltip: Time of the last packet observed. This is what is used in queries to select records in an interval.
       field: TimeFlowEndMs
       default: true
       width: 15
@@ -543,9 +541,6 @@ frontend:
       name: Type
       tooltip: The type of the ICMP message
       field: IcmpType
-      fields: 
-      - Proto
-      - IcmpType
       filter: icmp_type
       default: false
       width: 10
@@ -554,10 +549,6 @@ frontend:
       name: Code
       tooltip: The code of the ICMP message
       field: IcmpCode
-      fields: 
-      - Proto
-      - IcmpType
-      - IcmpCode
       filter: icmp_code
       default: false
       width: 10
@@ -971,21 +962,9 @@ frontend:
     - id: tcp_flags
       name: TCP flags
       component: autocomplete
-      hint: Specify a TCP flags value as integer number.
+      hint: Specify a TCP flags value.
       examples: |-
-        Logical OR combination of unique TCP flags comprised in the flow, as per RFC-9293, with additional custom flags
-        users can specify either numeric value or string representation of the flags as follows :
-        - FIN or 1,
-        - SYN or 2,
-        - RST or 4,
-        - PSH or 8,
-        - ACK or 16,
-        - URG or 32,
-        - ECE or 64,
-        - CWR or 128,
-        - SYN_ACK or 256,
-        - FIN_ACK or 512,
-        - RST_ACK or 1024,
+        Logical OR combination of unique TCP flags comprised in the flow, as per RFC-9293, with additional custom flags (SYN_ACK, FIN_ACK and RST_ACK).
     - id: node_direction
       name: Node Direction
       component: autocomplete
@@ -1087,7 +1066,7 @@ frontend:
     - id: host
       name: Node
       description: Node on which the resources are running
-      labels: 
+      labels:
         - SrcK8S_HostName
         - DstK8S_HostName
       groups:
@@ -1102,7 +1081,7 @@ frontend:
       name: Namespace
       shortName: NS
       description: Resource namespace
-      labels: 
+      labels:
         - SrcK8S_Namespace
         - DstK8S_Namespace
       groups:
@@ -1120,7 +1099,7 @@ frontend:
       name: Owner
       shortName: Own
       description: Controller owner, such as a Deployment
-      labels: 
+      labels:
         - SrcK8S_OwnerName
         - SrcK8S_OwnerType
         - DstK8S_OwnerName
@@ -1146,7 +1125,7 @@ frontend:
       name: Resource
       shortName: Res
       description: Base resource, such as a Pod, a Service or a Node
-      labels: 
+      labels:
         - SrcK8S_Name
         - SrcK8S_Type
         - SrcK8S_OwnerName
@@ -1184,144 +1163,102 @@ frontend:
     - name: TimeFlowStartMs
       type: number
       description: Start timestamp of this flow, in milliseconds
-      cardinalityWarn: avoid
     - name: TimeFlowEndMs
       type: number
       description: End timestamp of this flow, in milliseconds
-      cardinalityWarn: avoid
     - name: TimeReceived
       type: number
       description: Timestamp when this flow was received and processed by the flow collector, in seconds
-      cardinalityWarn: avoid
     - name: SrcK8S_Name
       type: string
       description: Name of the source Kubernetes object, such as Pod name, Service name or Node name.
-      cardinalityWarn: careful
     - name: SrcK8S_Type
       type: string
       description: Kind of the source Kubernetes object, such as Pod, Service or Node.
-      lokiLabel: true
-      cardinalityWarn: fine
     - name: SrcK8S_OwnerName
       type: string
       description: Name of the source owner, such as Deployment name, StatefulSet name, etc.
-      lokiLabel: true
-      cardinalityWarn: fine
     - name: SrcK8S_OwnerType
       type: string
       description: Kind of the source owner, such as Deployment, StatefulSet, etc.
-      cardinalityWarn: fine
     - name: SrcK8S_Namespace
       type: string
       description: Source namespace
-      lokiLabel: true
-      cardinalityWarn: fine
     - name: SrcAddr
       type: string
       description: Source IP address (ipv4 or ipv6)
-      cardinalityWarn: avoid
     - name: SrcPort
       type: number
       description: Source port
-      cardinalityWarn: careful
     - name: SrcMac
       type: string
       description: Source MAC address
-      cardinalityWarn: avoid
     - name: SrcK8S_HostIP
       type: string
       description: Source node IP
-      cardinalityWarn: fine
     - name: SrcK8S_HostName
       type: string
       description: Source node name
-      cardinalityWarn: fine
     - name: SrcK8S_Zone
       type: string
       description: Source availability zone
-      lokiLabel: true
-      cardinalityWarn: fine
     - name: SrcSubnetLabel
       type: string
       description: Source subnet label
-      cardinalityWarn: fine
     - name: DstK8S_Name
       type: string
       description: Name of the destination Kubernetes object, such as Pod name, Service name or Node name.
-      cardinalityWarn: careful
     - name: DstK8S_Type
       type: string
       description: Kind of the destination Kubernetes object, such as Pod, Service or Node.
-      lokiLabel: true
-      cardinalityWarn: fine
     - name: DstK8S_OwnerName
       type: string
       description: Name of the destination owner, such as Deployment name, StatefulSet name, etc.
-      lokiLabel: true
-      cardinalityWarn: fine
     - name: DstK8S_OwnerType
       type: string
       description: Kind of the destination owner, such as Deployment, StatefulSet, etc.
-      cardinalityWarn: fine
     - name: DstK8S_Namespace
       type: string
       description: Destination namespace
-      lokiLabel: true
-      cardinalityWarn: fine
     - name: DstAddr
       type: string
       description: Destination IP address (ipv4 or ipv6)
-      cardinalityWarn: avoid
     - name: DstPort
       type: number
       description: Destination port
-      cardinalityWarn: careful
     - name: DstMac
       type: string
       description: Destination MAC address
-      cardinalityWarn: avoid
     - name: DstK8S_HostIP
       type: string
       description: Destination node IP
-      cardinalityWarn: fine
     - name: DstK8S_HostName
       type: string
       description: Destination node name
-      cardinalityWarn: fine
     - name: DstK8S_Zone
       type: string
       description: Destination availability zone
-      lokiLabel: true
-      cardinalityWarn: fine
     - name: DstSubnetLabel
       type: string
       description: Destination subnet label
-      cardinalityWarn: fine
     - name: K8S_FlowLayer
       type: string
       description: "Flow layer: 'app' or 'infra'"
-      cardinalityWarn: fine
     - name: Proto
       type: number
       description: L4 protocol
-      cardinalityWarn: fine
     - name: Dscp
       type: number
       description: Differentiated Services Code Point (DSCP) value
-      cardinalityWarn: fine
     - name: IcmpType
       type: number
       description: ICMP type
-      cardinalityWarn: fine
     - name: IcmpCode
       type: number
       description: ICMP code
-      cardinalityWarn: fine
     - name: Duplicate
       type: boolean
       description: Indicates if this flow was also captured from another interface on the same host
-      lokiLabel: true
-      cardinalityWarn: fine
     - name: FlowDirection
       type: number
       description: |
@@ -1329,96 +1266,72 @@ frontend:
         - 0: Ingress (incoming traffic, from the node observation point) +
         - 1: Egress (outgoing traffic, from the node observation point) +
         - 2: Inner (with the same source and destination node)
-      lokiLabel: true
-      cardinalityWarn: fine
     - name: IfDirections
       type: number
       description: |
         Flow directions from the network interface observation point. Can be one of: +
         - 0: Ingress (interface incoming traffic) +
         - 1: Egress (interface outgoing traffic)
-      cardinalityWarn: fine
     - name: Interfaces
       type: string
       description: Network interfaces
-      cardinalityWarn: careful
     - name: Flags
-      type: number
+      type: string
       description: |
         Logical OR combination of unique TCP flags comprised in the flow, as per RFC-9293, with additional custom flags to represent the following per-packet combinations: +
         - SYN+ACK (0x100) +
         - FIN+ACK (0x200) +
         - RST+ACK (0x400)
-      cardinalityWarn: fine
     - name: Bytes
       type: number
       description: Number of bytes
-      cardinalityWarn: avoid
     - name: Packets
       type: number
       description: Number of packets
-      cardinalityWarn: avoid
     - name: PktDropBytes
       type: number
       description: Number of bytes dropped by the kernel
-      cardinalityWarn: avoid
     - name: PktDropPackets
       type: number
       description: Number of packets dropped by the kernel
-      cardinalityWarn: avoid
     - name: PktDropLatestState
       type: string
       description: TCP state on last dropped packet
       filter: pkt_drop_state # couldn't guess from config
-      cardinalityWarn: fine
     - name: PktDropLatestDropCause
       type: string
       description: Latest drop cause
       filter: pkt_drop_cause # couldn't guess from config
-      cardinalityWarn: fine
     - name: PktDropLatestFlags
       type: number
       description: TCP flags on last dropped packet
-      cardinalityWarn: fine
     - name: DnsId
       type: number
       description: DNS record id
-      cardinalityWarn: avoid
     - name: DnsLatencyMs
       type: number
       description: Time between a DNS request and response, in milliseconds
-      cardinalityWarn: avoid
     - name: DnsFlags
       type: number
       description: DNS flags for DNS record
-      cardinalityWarn: fine
     - name: DnsFlagsResponseCode
       type: string
       description: Parsed DNS header RCODEs name
-      cardinalityWarn: fine
     - name: DnsErrno
       type: number
       description: Error number returned from DNS tracker ebpf hook function
-      cardinalityWarn: fine
     - name: TimeFlowRttNs
       type: number
       description: TCP Smoothed Round Trip Time (SRTT), in nanoseconds
-      cardinalityWarn: avoid
     - name: NetworkEvents
       type: string
       description: Network events flow monitoring
-      cardinalityWarn: avoid
     - name: K8S_ClusterName
       type: string
       description: Cluster name or identifier
-      lokiLabel: true
-      cardinalityWarn: fine
     - name: _RecordType
       type: string
       description: "Type of record: 'flowLog' for regular flow logs, or 'newConnection', 'heartbeat', 'endConnection' for conversation tracking"
-      lokiLabel: true
-      cardinalityWarn: fine
     - name: _HashId
       type: string
       description: In conversation tracking, the conversation identifier
-      cardinalityWarn: avoid
