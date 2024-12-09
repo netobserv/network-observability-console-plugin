@@ -8,6 +8,7 @@ import { Size } from '../../dropdowns/table-display-dropdown';
 import './netflow-table-row.css';
 
 export interface NetflowTableRowProps {
+  rowNumber?: number;
   allowPktDrops: boolean;
   lastRender?: string;
   flow: Record;
@@ -23,6 +24,7 @@ export interface NetflowTableRowProps {
 }
 
 export const NetflowTableRow: React.FC<NetflowTableRowProps> = ({
+  rowNumber,
   allowPktDrops,
   lastRender,
   flow,
@@ -43,6 +45,7 @@ export const NetflowTableRow: React.FC<NetflowTableRowProps> = ({
   return (
     <CSSTransition in={highlight} appear={highlight} timeout={100} classNames="newflow">
       <Tr
+        id={`netflow-table-row-${rowNumber || 0}`}
         data-last-render={lastRender || ''}
         data-test={`tr-${flow.key}`}
         isRowSelected={flow.key === selectedRecord?.key}

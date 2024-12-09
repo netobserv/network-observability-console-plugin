@@ -189,7 +189,7 @@ export const getICMPType = (p: number, v: icmpAllTypesValues): ReadOnlyValue | u
 };
 
 export const getICMPCode = (p: number, t?: icmpAllTypesValues, c?: icmpAllCodesValues): ReadOnlyValue | undefined => {
-  if (!isValidICMPProto(p) || !t || !c) {
+  if (!isValidICMPProto(p) || t === undefined || c === undefined) {
     return undefined;
   }
 
