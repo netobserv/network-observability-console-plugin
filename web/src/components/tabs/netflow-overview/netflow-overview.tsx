@@ -1151,12 +1151,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
                 width: containerSize.width * 0.1
               }}
             >
-              <ScopeSlider
-                sizePx={containerSize?.height || 300}
-                scope={props.metricScope}
-                setScope={props.setMetricScope}
-                scopeDefs={props.scopes}
-              />
+              <ScopeSlider scope={props.metricScope} setScope={props.setMetricScope} scopeDefs={props.scopes} />
             </div>
           )}
           {allowFocus && selectedPanel && (
