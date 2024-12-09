@@ -138,7 +138,7 @@ const StyleNode: React.FC<StyleNodeProps> = ({ element, showLabel, dragging, get
           showStatusDecorator={detailsLevel === ScaleDetailsLevel.high && passedData.showStatusDecorator}
           statusDecoratorTooltip={nodeElement.getNodeStatus()}
           attachments={
-            (hover || detailsLevel === ScaleDetailsLevel.high) && (
+            (hover || updatedRest.selected) && (
               <NodeDecorators
                 element={element}
                 data={data}

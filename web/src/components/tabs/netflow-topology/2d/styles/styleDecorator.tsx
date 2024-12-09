@@ -6,7 +6,7 @@ type Reference = React.ComponentProps<typeof ContextMenu>['reference'];
 
 type ClickableDecoratorProps = {
   pos: { x: number; y: number };
-  icon: React.ReactNode;
+  icon: React.ReactElement;
   tooltip: string;
   isActive: boolean;
   onClick: (event: React.MouseEvent<SVGGElement, MouseEvent>) => void;
@@ -21,8 +21,10 @@ export const ClickableDecorator: React.FC<ClickableDecoratorProps> = ({
   onClick,
   padding
 }) => {
+  const ref = React.useRef<SVGGElement>(null);
+
   return (
-    <Tooltip content={tooltip} position={TooltipPosition.right}>
+    <>
       <Decorator
         x={pos.x}
         y={pos.y}
@@ -32,8 +34,10 @@ export const ClickableDecorator: React.FC<ClickableDecoratorProps> = ({
         icon={icon}
         className={isActive ? 'selected-decorator' : ''}
         onClick={onClick}
+        innerRef={ref}
       />
-    </Tooltip>
+      <Tooltip content={tooltip} position={TooltipPosition.right} triggerRef={ref} />
+    </>
   );
 };
 
