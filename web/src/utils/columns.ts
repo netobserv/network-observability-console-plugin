@@ -27,6 +27,8 @@ export enum ColumnsId {
   kubeobject = 'K8S_Object',
   srckubeobject = 'SrcK8S_Object',
   dstkubeobject = 'DstK8S_Object',
+  xlatsrckubeobject = 'XlatSrcK8S_Object',
+  xlatdstkubeobject = 'XlatDstK8S_Object',
   addr = 'Addr',
   srcaddr = 'SrcAddr',
   dstaddr = 'DstAddr',
