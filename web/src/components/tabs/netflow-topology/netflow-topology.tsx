@@ -28,7 +28,7 @@ import { ScopeConfigDef } from '../../../model/scope';
 import { GraphElementPeer, LayoutName, TopologyOptions } from '../../../model/topology';
 import { Warning } from '../../../model/warnings';
 import { TimeRange } from '../../../utils/datetime';
-import { getHTTPErrorDetails, getPromUnsupportedError, isPromUnsupportedError } from '../../../utils/errors';
+import { getHTTPErrorDetails, getPromError, isPromError } from '../../../utils/errors';
 import { observeDOMRect } from '../../../utils/metrics-helper';
 import { SearchEvent, SearchHandle } from '../../search/search';
 import { ScopeSlider } from '../../slider/scope-slider';
@@ -162,8 +162,8 @@ export const NetflowTopology: React.FC<NetflowTopologyProps> = React.forwardRef(
                 // Error might occur for instance when fetching node-based topology with drop feature enabled, and Loki disabled
                 // We don't want to break the whole topology due to missing drops enrichement
                 let strErr = getHTTPErrorDetails(err, true);
-                if (isPromUnsupportedError(strErr)) {
-                  strErr = getPromUnsupportedError(strErr);
+                if (isPromError(strErr)) {
+                  strErr = getPromError(strErr);
                 }
                 setWarning({
                   type: 'cantfetchdrops',
