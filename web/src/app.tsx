@@ -44,6 +44,10 @@ export const pages = [
   {
     id: 'dev-tab',
     name: 'Dev tab'
+  },
+  {
+    id: 'udn-tab',
+    name: 'UDN tab'
   }
 ];
 
@@ -93,6 +97,10 @@ export class App extends React.Component<{}, AppState> {
               }
             }}
           />
+        );
+      case 'udn-tab':
+        return (
+          <NetflowTrafficTab obj={{ kind: 'UserDefinedNetwork', metadata: { name: 'my-udn', namespace: 'default' } }} />
         );
       default:
         return <NetflowTrafficParent />;

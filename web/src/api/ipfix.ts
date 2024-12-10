@@ -179,6 +179,8 @@ export interface Fields {
   _IsFirst?: string;
   /** In conversation tracking, a counter of flow logs per conversation */
   numFlowLogs?: number;
+  /** User Defined Network identifier */
+  UdnId?: string;
 }
 
 export type Field = keyof Fields | keyof Labels;

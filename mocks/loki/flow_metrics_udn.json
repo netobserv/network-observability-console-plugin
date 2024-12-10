@@ -1,0 +1,345 @@
+{
+  "status": "success",
+  "data": {
+    "resultType": "matrix",
+    "result": [
+      {
+        "metric": {
+          "UdnId": "my-udn"
+        },
+        "values": [
+          [
+            1708009560,
+            "30.462500000000002"
+          ],
+          [
+            1708009920,
+            "83.63333333333333"
+          ],
+          [
+            1708010280,
+            "106.85972222222223"
+          ],
+          [
+            1708010640,
+            "107.56805555555555"
+          ],
+          [
+            1708011000,
+            "106.51805555555556"
+          ],
+          [
+            1708011360,
+            "109.6125"
+          ],
+          [
+            1708011720,
+            "110.91944444444444"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "UdnId": "my-udn-2"
+        },
+        "values": [
+          [
+            1708009560,
+            "0.004166666666666667"
+          ],
+          [
+            1708009920,
+            "0.016666666666666666"
+          ],
+          [
+            1708010280,
+            "0.034722222222222224"
+          ],
+          [
+            1708010640,
+            "0.041666666666666664"
+          ],
+          [
+            1708011000,
+            "0.06388888888888888"
+          ],
+          [
+            1708011360,
+            "0.04861111111111111"
+          ],
+          [
+            1708011720,
+            "0.02361111111111111"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "UdnId": "my-udn-3"
+        },
+        "values": [
+          [
+            1708009560,
+            "31.53055555555556"
+          ],
+          [
+            1708009920,
+            "83.43611111111112"
+          ],
+          [
+            1708010280,
+            "104.72083333333335"
+          ],
+          [
+            1708010640,
+            "105.5486111111111"
+          ],
+          [
+            1708011000,
+            "104.40833333333333"
+          ],
+          [
+            1708011360,
+            "110.03055555555555"
+          ],
+          [
+            1708011720,
+            "110.98749999999998"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "UdnId": "my-udn-4"
+        },
+        "values": [
+          [
+            1708009560,
+            "0.09444444444444444"
+          ],
+          [
+            1708009920,
+            "0.3902777777777778"
+          ],
+          [
+            1708010280,
+            "0.4361111111111111"
+          ],
+          [
+            1708010640,
+            "0.3138888888888889"
+          ],
+          [
+            1708011000,
+            "0.4388888888888889"
+          ],
+          [
+            1708011360,
+            "0.5305555555555554"
+          ],
+          [
+            1708011720,
+            "0.5791666666666667"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "UdnId": "my-udn-5"
+        },
+        "values": [
+          [
+            1708009560,
+            "28.173611111111114"
+          ],
+          [
+            1708009920,
+            "69.80277777777779"
+          ],
+          [
+            1708010280,
+            "90.45694444444445"
+          ],
+          [
+            1708010640,
+            "98.41944444444445"
+          ],
+          [
+            1708011000,
+            "90.15416666666668"
+          ],
+          [
+            1708011360,
+            "111.44027777777778"
+          ],
+          [
+            1708011720,
+            "113.11527777777778"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "UdnId": "my-udn-6"
+        },
+        "values": [
+          [
+            1708009560,
+            "57.96527777777777"
+          ],
+          [
+            1708009920,
+            "134.44583333333335"
+          ],
+          [
+            1708010280,
+            "147.5902777777778"
+          ],
+          [
+            1708010640,
+            "162.97222222222226"
+          ],
+          [
+            1708011000,
+            "162.59444444444446"
+          ],
+          [
+            1708011360,
+            "175.71666666666664"
+          ],
+          [
+            1708011720,
+            "179.0402777777778"
+          ]
+        ]
+      },
+      {
+        "metric": {},
+        "values": [
+          [
+            1708009560,
+            "1.0333333333333334"
+          ],
+          [
+            1708009920,
+            "2.9722222222222223"
+          ],
+          [
+            1708010280,
+            "3.791666666666667"
+          ],
+          [
+            1708010640,
+            "3.6625"
+          ],
+          [
+            1708011000,
+            "3.808333333333333"
+          ],
+          [
+            1708011360,
+            "3.8805555555555555"
+          ],
+          [
+            1708011720,
+            "3.863888888888889"
+          ]
+        ]
+      }
+    ],
+    "stats": {
+      "summary": {
+        "bytesProcessedPerSecond": 328874222,
+        "linesProcessedPerSecond": 500497,
+        "totalBytesProcessed": 211370848,
+        "totalLinesProcessed": 321675,
+        "execTime": 0.642710294,
+        "queueTime": 8.042418995,
+        "subqueries": 0,
+        "totalEntriesReturned": 7,
+        "splits": 6,
+        "shards": 48,
+        "totalPostFilterLines": 199944,
+        "totalStructuredMetadataBytesProcessed": 0
+      },
+      "querier": {
+        "store": {
+          "totalChunksRef": 0,
+          "totalChunksDownloaded": 0,
+          "chunksDownloadTime": 0,
+          "chunk": {
+            "headChunkBytes": 0,
+            "headChunkLines": 0,
+            "decompressedBytes": 0,
+            "decompressedLines": 0,
+            "compressedBytes": 0,
+            "totalDuplicates": 0,
+            "postFilterLines": 0,
+            "headChunkStructuredMetadataBytes": 0,
+            "decompressedStructuredMetadataBytes": 0
+          }
+        }
+      },
+      "ingester": {
+        "totalReached": 48,
+        "totalChunksMatched": 375,
+        "totalBatches": 394,
+        "totalLinesSent": 168379,
+        "store": {
+          "totalChunksRef": 16,
+          "totalChunksDownloaded": 16,
+          "chunksDownloadTime": 13901153,
+          "chunk": {
+            "headChunkBytes": 18864260,
+            "headChunkLines": 28785,
+            "decompressedBytes": 192506588,
+            "decompressedLines": 292890,
+            "compressedBytes": 43190086,
+            "totalDuplicates": 0,
+            "postFilterLines": 199944,
+            "headChunkStructuredMetadataBytes": 0,
+            "decompressedStructuredMetadataBytes": 0
+          }
+        }
+      },
+      "cache": {
+        "chunk": {
+          "entriesFound": 0,
+          "entriesRequested": 0,
+          "entriesStored": 0,
+          "bytesReceived": 0,
+          "bytesSent": 0,
+          "requests": 0,
+          "downloadTime": 0
+        },
+        "index": {
+          "entriesFound": 0,
+          "entriesRequested": 0,
+          "entriesStored": 0,
+          "bytesReceived": 0,
+          "bytesSent": 0,
+          "requests": 0,
+          "downloadTime": 0
+        },
+        "result": {
+          "entriesFound": 4,
+          "entriesRequested": 6,
+          "entriesStored": 3,
+          "bytesReceived": 3008,
+          "bytesSent": 0,
+          "requests": 9,
+          "downloadTime": 59230
+        },
+        "statsResult": {
+          "entriesFound": 0,
+          "entriesRequested": 0,
+          "entriesStored": 0,
+          "bytesReceived": 0,
+          "bytesSent": 0,
+          "requests": 0,
+          "downloadTime": 0
+        }
+      }
+    }
+  }
+}
