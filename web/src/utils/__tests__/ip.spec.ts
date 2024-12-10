@@ -55,6 +55,7 @@ describe('validate IP filter', () => {
     expect(validateIPFilter('2001:db8:3:4::192.0.2.33')).toBe(true);
     expect(validateIPFilter('64:ff9b::192.0.2.33')).toBe(true);
   });
+
   it('should not validate wrong IP filters', () => {
     expect(validateIPFilter('1.3.3')).toBe(false);
     expect(validateIPFilter('1.3.3.4-1.3.4.678')).toBe(false);
@@ -69,6 +70,7 @@ describe('validate IP filter', () => {
     expect(validateIPFilter('1.3.3.4/')).toBe(false);
     expect(validateIPFilter('1.3.3.4/3.2.1.0')).toBe(false);
   });
+
   it('should validate empty IPs', () => {
     expect(validateIPFilter('""')).toBe(true);
   });

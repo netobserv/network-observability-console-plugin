@@ -216,12 +216,6 @@ export const NetflowTopology: React.FC<NetflowTopologyProps> = React.forwardRef(
       } else {
         return (
           <VisualizationProvider data-test="visualization-provider" controller={controller}>
-            <ScopeSlider
-              sizePx={containerSize?.height || 300}
-              scope={props.metricScope}
-              setScope={props.setMetricScope}
-              scopeDefs={props.scopes}
-            />
             <TopologyContent
               k8sModels={props.k8sModels}
               metricFunction={props.metricFunction}
@@ -247,7 +241,7 @@ export const NetflowTopology: React.FC<NetflowTopologyProps> = React.forwardRef(
           </VisualizationProvider>
         );
       }
-    }, [controller, props, displayedMetrics, containerSize?.height]);
+    }, [controller, props, displayedMetrics]);
 
     //create controller on startup and register factories
     React.useEffect(() => {
@@ -264,8 +258,11 @@ export const NetflowTopology: React.FC<NetflowTopologyProps> = React.forwardRef(
     }, [containerRef, containerSize]);
 
     return (
-      <div style={{ width: '100%', height: '100%' }} ref={containerRef}>
-        {getContent()}
+      <div id="topology-container-div" style={{ width: '100%', height: '100%' }} ref={containerRef}>
+        <div id={'topology-scope-slider-div'}>
+          <ScopeSlider scope={props.metricScope} setScope={props.setMetricScope} scopeDefs={props.scopes} />
+        </div>
+        <div id="topology-view-div">{getContent()}</div>
       </div>
     );
   }

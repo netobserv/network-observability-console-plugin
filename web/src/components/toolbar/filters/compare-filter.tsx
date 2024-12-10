@@ -1,4 +1,4 @@
-import { Dropdown, DropdownItem, DropdownToggle, DropdownToggleAction } from '@patternfly/react-core';
+import { Dropdown, DropdownItem, MenuToggle, MenuToggleAction, MenuToggleElement } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { FilterComponent } from '../../../model/filters';
@@ -17,7 +17,7 @@ export interface CompareFilterProps {
 
 export const CompareFilter: React.FC<CompareFilterProps> = ({ value, setValue, component }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
-  const [isOpen, setIsOpen] = React.useState(false);
+  const [isOpen, setOpen] = React.useState(false);
   const prevComponent = usePrevious(component);
 
   const dropdownItems = [
@@ -42,13 +42,9 @@ export const CompareFilter: React.FC<CompareFilterProps> = ({ value, setValue, c
     );
   }
 
-  const onToggle = (v: boolean) => {
-    setIsOpen(v);
-  };
-
   const onSelect = (v: FilterCompare) => {
     setValue(v);
-    setIsOpen(false);
+    setOpen(false);
   };
 
   const onSwitch = React.useCallback(() => {
@@ -87,22 +83,28 @@ export const CompareFilter: React.FC<CompareFilterProps> = ({ value, setValue, c
   return (
     <>
       <Dropdown
-        toggle={
-          <DropdownToggle
-            id="filter-compare-toggle-button"
-            splitButtonItems={[
-              <DropdownToggleAction key="action" id="filter-compare-switch-button" onClick={onSwitch}>
-                {getSymbol()}
-              </DropdownToggleAction>
-            ]}
-            toggleVariant="default"
-            splitButtonVariant="action"
-            onToggle={onToggle}
-          />
-        }
+        id="filter-compare"
         isOpen={isOpen}
-        dropdownItems={dropdownItems}
-      />
+        toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+          <MenuToggle
+            ref={toggleRef}
+            id="filter-compare-toggle-button"
+            splitButtonOptions={{
+              variant: 'action',
+              items: [
+                <MenuToggleAction key="action" id="filter-compare-switch-button" onClick={onSwitch}>
+                  {getSymbol()}
+                </MenuToggleAction>
+              ]
+            }}
+            onClick={() => setOpen(!isOpen)}
+            isExpanded={isOpen}
+            onBlur={() => setTimeout(() => setOpen(false), 100)}
+          />
+        )}
+      >
+        {dropdownItems}
+      </Dropdown>
     </>
   );
 };

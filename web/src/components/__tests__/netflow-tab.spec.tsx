@@ -11,6 +11,7 @@ import NetflowTrafficTab from '../netflow-traffic-tab';
 import { FullConfigResultSample } from '../__tests-data__/config';
 import { extensionsMock } from '../__tests-data__/extensions';
 import { PodTabParam, ServiceTabParam, UnknownTabParam } from '../__tests-data__/tabs';
+import { waitForRender } from './common.spec';
 
 const useResolvedExtensionsMock = useResolvedExtensions as jest.Mock;
 
@@ -46,6 +47,7 @@ describe('<NetflowTrafficTab />', () => {
 
   it('should mount component for Pod', async () => {
     const wrapper = mount(<NetflowTrafficTab obj={PodTabParam} />);
+    await waitForRender(wrapper);
     await waitFor(() => {
       expect(getConfigMock).toHaveBeenCalled();
 
@@ -56,6 +58,7 @@ describe('<NetflowTrafficTab />', () => {
   });
   it('should mount component for Service', async () => {
     const wrapper = mount(<NetflowTrafficTab obj={ServiceTabParam} />);
+    await waitForRender(wrapper);
     await waitFor(() => {
       expect(getConfigMock).toHaveBeenCalled();
 
@@ -66,6 +69,7 @@ describe('<NetflowTrafficTab />', () => {
   });
   it('should mount empty state', async () => {
     const wrapper = mount(<NetflowTrafficTab obj={UnknownTabParam} />);
+    await waitForRender(wrapper);
     await waitFor(() => {
       expect(getConfigMock).toHaveBeenCalled();
 
