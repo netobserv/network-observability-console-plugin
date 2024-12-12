@@ -252,6 +252,7 @@ func NotContainsKeyLineFilter(key string) LineFilter {
 	}
 }
 
+// NumericLineFilter returns a LineFilter and true if it has an empty match
 func NumericLineFilter(key string, values []string, not, moreThan bool) (LineFilter, bool) {
 	return checkExact(
 		LineFilter{
@@ -271,6 +272,7 @@ func ArrayLineFilter(key string, values []string, not bool) LineFilter {
 	return lf
 }
 
+// StringLineFilterCheckExact returns a LineFilter and true if it has an empty match
 func StringLineFilterCheckExact(key string, values []string, not bool) (LineFilter, bool) {
 	return checkExact(LineFilter{key: key, not: not}, values, typeRegexContains)
 }
@@ -364,21 +366,11 @@ func moreThanRegex(sb *strings.Builder, value string) {
 // under construction (contained in the provided strings.Builder)
 func (f *LineFilter) WriteInto(sb *strings.Builder) {
 	if f.not {
-		if !f.allowEmpty {
-			// the record must contains the field if values are specified
-			// since FLP skip empty fields / zeros values
-			if len(f.values) > 0 {
-				sb.WriteString("|~`\"")
-				sb.WriteString(f.key)
-				sb.WriteString("\"`")
-			}
-		}
-		// then we exclude match results
-		sb.WriteString("!~`")
-	} else {
-		sb.WriteString("|~`")
+		f.writeIntoNot(sb)
+		return
 	}
 
+	sb.WriteString("|~`")
 	if len(f.values) == 0 {
 		// match only the end of KEY if not 'strictKey'
 		// no value will be provided here as we only check if key exists
@@ -392,49 +384,85 @@ func (f *LineFilter) WriteInto(sb *strings.Builder) {
 			if i > 0 {
 				sb.WriteByte('|')
 			}
-
-			// match only the end of KEY + regex VALUE if not 'strictKey'
-			// if numeric, KEY":VALUE,
-			// if string KEY":"VALUE"
-			// ie 'Port' key will match both 'SrcPort":"XXX"' and 'DstPort":"XXX"
-			// VALUE can be quoted for exact match or contains * to inject regex any
-			// For numeric values, exact match is implicit
-			// 	(the trick is to match for the ending coma; it works as long as the filtered field
-			// 	is not the last one (they're in alphabetic order); a less performant alternative
-			// 	but more future-proof/less hacky could be to move that to a json filter, if needed)
-			if f.strictKey {
-				sb.WriteByte('"')
-			}
-			sb.WriteString(f.key)
-			sb.WriteString(`":`)
-			switch v.valueType {
-			case typeNumber, typeRegex:
-				if f.moreThan {
-					moreThanRegex(sb, v.value)
-				} else {
-					sb.WriteString(v.value)
-				}
-				// a number or regex can be followed by } if it's the last property of a JSON document
-				sb.WriteString("[,}]")
-			case typeBool:
-				sb.WriteString(v.value)
-			case typeString, typeIP:
-				// exact matches are specified as just strings
-				sb.WriteByte('"')
-				sb.WriteString(valueReplacer.Replace(v.value))
-				sb.WriteByte('"')
-			// contains-match are specified as regular expressions
-			case typeRegexContains:
-				sb.WriteString(`"(?i)[^"]*`)
-				sb.WriteString(valueReplacer.Replace(v.value))
-				sb.WriteString(`.*"`)
-			// for array, we ensure it starts by [ and ends by ]
-			case typeRegexArrayContains:
-				sb.WriteString(`\[(?i)[^]]*`)
-				sb.WriteString(valueReplacer.Replace(v.value))
-				sb.WriteString(`[^]]*]`)
-			}
+			f.writeValueInto(sb, v)
 		}
 	}
 	sb.WriteRune('`')
+}
+
+// WriteInto transforms a LineFilter to its corresponding part of a LogQL query
+// under construction (contained in the provided strings.Builder)
+func (f *LineFilter) writeIntoNot(sb *strings.Builder) {
+	if !f.allowEmpty {
+		// the record must contains the field if values are specified
+		// since FLP skip empty fields / zeros values
+		if len(f.values) > 0 {
+			sb.WriteString("|~`\"")
+			sb.WriteString(f.key)
+			sb.WriteString("\"`")
+		}
+	}
+
+	if len(f.values) == 0 {
+		// then we exclude match results
+		sb.WriteString("!~`")
+
+		// match only the end of KEY if not 'strictKey'
+		// no value will be provided here as we only check if key exists
+		if f.strictKey {
+			sb.WriteByte('"')
+		}
+		sb.WriteString(f.key)
+		sb.WriteString("\"`")
+	} else {
+		for _, v := range f.values {
+			sb.WriteString("!~`")
+			f.writeValueInto(sb, v)
+			sb.WriteRune('`')
+		}
+	}
+}
+
+func (f *LineFilter) writeValueInto(sb *strings.Builder, v lineMatch) {
+	// match only the end of KEY + regex VALUE if not 'strictKey'
+	// if numeric, KEY":VALUE,
+	// if string KEY":"VALUE"
+	// ie 'Port' key will match both 'SrcPort":"XXX"' and 'DstPort":"XXX"
+	// VALUE can be quoted for exact match or contains * to inject regex any
+	// For numeric values, exact match is implicit
+	// 	(the trick is to match for the ending coma; it works as long as the filtered field
+	// 	is not the last one (they're in alphabetic order); a less performant alternative
+	// 	but more future-proof/less hacky could be to move that to a json filter, if needed)
+	if f.strictKey {
+		sb.WriteByte('"')
+	}
+	sb.WriteString(f.key)
+	sb.WriteString(`":`)
+	switch v.valueType {
+	case typeNumber, typeRegex:
+		if f.moreThan {
+			moreThanRegex(sb, v.value)
+		} else {
+			sb.WriteString(v.value)
+		}
+		// a number or regex can be followed by } if it's the last property of a JSON document
+		sb.WriteString("[,}]")
+	case typeBool:
+		sb.WriteString(v.value)
+	case typeString, typeIP:
+		// exact matches are specified as just strings
+		sb.WriteByte('"')
+		sb.WriteString(valueReplacer.Replace(v.value))
+		sb.WriteByte('"')
+	// contains-match are specified as regular expressions
+	case typeRegexContains:
+		sb.WriteString(`"(?i)[^"]*`)
+		sb.WriteString(valueReplacer.Replace(v.value))
+		sb.WriteString(`.*"`)
+	// for array, we ensure it starts by [ and ends by ]
+	case typeRegexArrayContains:
+		sb.WriteString(`\[(?i)[^]]*`)
+		sb.WriteString(valueReplacer.Replace(v.value))
+		sb.WriteString(`[^]]*]`)
+	}
 }

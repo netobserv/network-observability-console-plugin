@@ -2,7 +2,9 @@ package model
 
 import (
 	"encoding/json"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/netobserv/network-observability-console-plugin/pkg/utils/constants"
 	"github.com/stretchr/testify/assert"
@@ -32,6 +34,57 @@ func TestQueryResponseUnmarshal(t *testing.T) {
 	assert.Empty(t, qr.Data.Result)
 	var expType Streams
 	assert.IsType(t, expType, qr.Data.Result)
+}
+
+func TestQueryResponseUnmarshalLineMapping(t *testing.T) {
+	AddFlowLineMapping(func(in string) string {
+		return strings.ReplaceAll(in, "Bytes", "Bytezz")
+	})
+	js := `
+{
+  "status": "success",
+  "data": {
+    "resultType": "streams",
+    "result": [
+      {
+        "stream": {
+          "app": "netobserv-flowcollector"
+        },
+        "values": [
+          [
+            "1731930300000000000",
+            "{\"SrcK8S_Name\":\"ip-10-0-1-7.ec2.internal\",\"Bytes\":66,\"Packets\":1,\"Interfaces\":[\"br-ex\"]}"
+          ]
+        ]
+      }
+    ],
+    "stats": {
+      "summary": {}
+    }
+  }
+}
+	`
+
+	var qr QueryResponse
+	err := json.Unmarshal([]byte(js), &qr)
+	require.NoError(t, err)
+	assert.Equal(t, ResultTypeStream, string(qr.Data.ResultType))
+	assert.NotNil(t, qr.Data.Result)
+	var expType Streams
+	assert.IsType(t, expType, qr.Data.Result)
+	data := qr.Data.Result.(Streams)
+	assert.Len(t, data, 1)
+	assert.Equal(t, Stream{
+		Labels: map[string]string{
+			"app": "netobserv-flowcollector",
+		},
+		Entries: []Entry{
+			{
+				Timestamp: time.Unix(1731930300, 0),
+				Line:      `{"SrcK8S_Name":"ip-10-0-1-7.ec2.internal","Bytezz":66,"Packets":1,"Interfaces":["br-ex"]}`,
+			},
+		},
+	}, data[0])
 }
 
 func TestAggregatedQueryResponseMarshal(t *testing.T) {

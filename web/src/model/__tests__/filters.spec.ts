@@ -1,6 +1,7 @@
 import { FilterDefinitionSample } from '../../components/__tests-data__/filters';
 import { findFilter } from '../../utils/filter-definitions';
 import { doesIncludeFilter, Filter, filtersEqual } from '../filters';
+import { filtersToString } from '../flow-query';
 
 describe('doesIncludeFilter', () => {
   const srcNameFilter = findFilter(FilterDefinitionSample, 'src_name')!;
@@ -17,6 +18,11 @@ describe('doesIncludeFilter', () => {
       values: [{ v: 'abc' }, { v: 'def' }]
     }
   ];
+
+  it('should encode as', () => {
+    const asString = filtersToString(activeFilters, false);
+    expect(asString).toEqual(encodeURIComponent('SrcK8S_Name=abc,def&DstK8S_Name!=abc,def'));
+  });
 
   it('should not include filter due to different key', () => {
     const isIncluded = doesIncludeFilter(activeFilters, { def: findFilter(FilterDefinitionSample, 'protocol')! }, [

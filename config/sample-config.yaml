@@ -1006,21 +1006,9 @@ frontend:
     - id: tcp_flags
       name: TCP flags
       component: autocomplete
-      hint: Specify a TCP flags value as integer number.
+      hint: Specify a TCP flags value.
       examples: |-
-        Logical OR combination of unique TCP flags comprised in the flow, as per RFC-9293, with additional custom flags
-        users can specify either numeric value or string representation of the flags as follows :
-        - FIN or 1,
-        - SYN or 2,
-        - RST or 4,
-        - PSH or 8,
-        - ACK or 16,
-        - URG or 32,
-        - ECE or 64,
-        - CWR or 128,
-        - SYN_ACK or 256,
-        - FIN_ACK or 512,
-        - RST_ACK or 1024,
+        Logical OR combination of unique TCP flags comprised in the flow, as per RFC-9293, with additional custom flags (SYN_ACK, FIN_ACK and RST_ACK).
     - id: node_direction
       name: Node Direction
       component: autocomplete
@@ -1122,7 +1110,7 @@ frontend:
     - id: host
       name: Node
       description: Node on which the resources are running
-      labels: 
+      labels:
         - SrcK8S_HostName
         - DstK8S_HostName
       groups:
@@ -1137,7 +1125,7 @@ frontend:
       name: Namespace
       shortName: NS
       description: Resource namespace
-      labels: 
+      labels:
         - SrcK8S_Namespace
         - DstK8S_Namespace
       groups:
@@ -1155,7 +1143,7 @@ frontend:
       name: Owner
       shortName: Own
       description: Controller owner, such as a Deployment
-      labels: 
+      labels:
         - SrcK8S_OwnerName
         - SrcK8S_OwnerType
         - DstK8S_OwnerName
@@ -1181,7 +1169,7 @@ frontend:
       name: Resource
       shortName: Res
       description: Base resource, such as a Pod, a Service or a Node
-      labels: 
+      labels:
         - SrcK8S_Name
         - SrcK8S_Type
         - SrcK8S_OwnerName
@@ -1332,7 +1320,7 @@ frontend:
       type: string
       description: Network interfaces
     - name: Flags
-      type: number
+      type: string
       description: |
         Logical OR combination of unique TCP flags comprised in the flow, as per RFC-9293, with additional custom flags to represent the following per-packet combinations: +
         - SYN+ACK (0x100) +
