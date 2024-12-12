@@ -45,12 +45,12 @@ frontend:
     #    - endConnection
   features:
   # eBPF agent features
-     - pktDrop
-     - dnsTracking
-     - flowRTT
+  #    - pktDrop
+  #    - dnsTracking
+  #    - flowRTT
   # processor features
-     - multiCluster
-     - zones
+  #    - multiCluster
+  #    - zones
   portNaming:
     enable: true
     portNames:
