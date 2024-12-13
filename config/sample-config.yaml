@@ -541,9 +541,6 @@ frontend:
       name: Type
       tooltip: The type of the ICMP message
       field: IcmpType
-      fields:
-        - Proto
-        - IcmpType
       filter: icmp_type
       default: false
       width: 10
@@ -552,10 +549,6 @@ frontend:
       name: Code
       tooltip: The code of the ICMP message
       field: IcmpCode
-      fields:
-        - Proto
-        - IcmpType
-        - IcmpCode
       filter: icmp_code
       default: false
       width: 10
@@ -1080,7 +1073,7 @@ frontend:
       component: number
       hint: Specify a TCP smoothed Round Trip Time in nanoseconds.
     - id: network_events
-      name: Network events flow monitoring
+      name: Network Events
       component: text
       hint: Specify a single network event.
   scopes:
