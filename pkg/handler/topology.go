@@ -291,12 +291,12 @@ func buildTopologyQuery(
 		if search != nil {
 			if len(search.Candidates) > 0 {
 				// Some candidate metrics exist but they are disabled; tell the user
-				return "", nil, codePrometheusUnsupported, fmt.Errorf(
+				return "", nil, codePrometheusDisabledMetrics, fmt.Errorf(
 					"this request requires any of the following metric(s) to be enabled: %s."+
 						" Metrics can be configured in the FlowCollector resource via 'spec.processor.metrics.includeList'."+
 						" Alternatively, you may also install and enable Loki", search.FormatCandidates())
 			} else if len(search.MissingLabels) > 0 {
-				return "", nil, codePrometheusUnsupported, fmt.Errorf(
+				return "", nil, codePrometheusMissingLabels, fmt.Errorf(
 					"this request could not be performed with Prometheus metrics, as they are missing some of the required labels."+
 						" Try using different filters and/or aggregations. For example, try removing these dependencies from your query: %s."+
 						" Alternatively, you may also install and enable Loki", search.FormatMissingLabels())
