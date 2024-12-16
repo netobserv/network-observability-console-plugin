@@ -18,7 +18,7 @@ import {
   ScaleDetailsLevel,
   ShapeProps,
   TopologyQuadrant,
-  TOP_LAYER as topLayer,
+  TOP_LAYER,
   useHover,
   WithDragNodeProps,
   WithSelectionProps
@@ -27,7 +27,7 @@ import useDetailsLevel from '@patternfly/react-topology/dist/esm/hooks/useDetail
 import * as _ from 'lodash';
 import * as React from 'react';
 import { Decorated, NodeData } from '../../../../../model/topology';
-import BaseNode from '../components/node';
+import DefaultNode from '../components/node';
 import { NodeDecorators } from './styleDecorators';
 
 export enum DataTypes {
@@ -89,14 +89,8 @@ const renderIcon = (data: Decorated<NodeData>, element: NodePeer): React.ReactNo
   );
 };
 
-const StyleNode: React.FC<StyleNodeProps> = ({
-  element,
-  showLabel,
-  dragging,
-  regrouping,
-  getShapeDecoratorCenter,
-  ...rest
-}) => {
+const StyleNode: React.FC<StyleNodeProps> = ({ element, showLabel, dragging, getShapeDecoratorCenter, ...rest }) => {
+  const nodeElement = element as Node;
   const data = element.getData() as Decorated<NodeData> | undefined;
   //TODO: check if we can have intelligent pin on view change
   const [isPinned, setPinned] = React.useState<boolean>(data?.isPinned === true);
@@ -129,22 +123,22 @@ const StyleNode: React.FC<StyleNodeProps> = ({
   }
 
   return (
-    <Layer id={passedData.dragging ? topLayer : defaultLayer}>
+    <Layer id={passedData.dragging ? TOP_LAYER : defaultLayer}>
       <g ref={hoverRef as never}>
-        <BaseNode
+        <DefaultNode
           className="netobserv"
           element={element}
-          scaleLabel={detailsLevel !== ScaleDetailsLevel.high}
+          scaleLabel={detailsLevel !== ScaleDetailsLevel.low}
           scaleNode={hover && detailsLevel === ScaleDetailsLevel.low}
           {...updatedRest}
           {...passedData}
           dragging={isPinned ? false : dragging}
-          regrouping={isPinned ? false : regrouping}
-          showLabel={hover || (detailsLevel === ScaleDetailsLevel.high && showLabel)}
-          showStatusBackground={detailsLevel === ScaleDetailsLevel.low}
+          showLabel={hover || (detailsLevel !== ScaleDetailsLevel.low && showLabel)}
+          showStatusBackground={!hover && detailsLevel === ScaleDetailsLevel.low}
           showStatusDecorator={detailsLevel === ScaleDetailsLevel.high && passedData.showStatusDecorator}
+          statusDecoratorTooltip={nodeElement.getNodeStatus()}
           attachments={
-            (hover || detailsLevel === ScaleDetailsLevel.high) && (
+            (hover || updatedRest.selected) && (
               <NodeDecorators
                 element={element}
                 data={data}
@@ -160,7 +154,7 @@ const StyleNode: React.FC<StyleNodeProps> = ({
           }
         >
           {(hover || detailsLevel !== ScaleDetailsLevel.low) && renderIcon(passedData, element)}
-        </BaseNode>
+        </DefaultNode>
       </g>
     </Layer>
   );

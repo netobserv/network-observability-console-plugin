@@ -20,7 +20,6 @@ export enum DataTypes {
 
 type StyleGroupProps = {
   element: Node;
-  collapsible: boolean;
   collapsedWidth?: number;
   collapsedHeight?: number;
   onCollapseChange?: (group: Node, collapsed: boolean) => void;
@@ -62,6 +61,7 @@ const StyleGroup: React.FunctionComponent<StyleGroupProps> = ({
     <DefaultGroup
       className="netobserv"
       element={element}
+      collapsible
       collapsedWidth={collapsedWidth}
       collapsedHeight={collapsedHeight}
       showLabel={detailsLevel === ScaleDetailsLevel.high}

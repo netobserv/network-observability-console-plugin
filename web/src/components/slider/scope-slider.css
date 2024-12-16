@@ -1,9 +1,0 @@
-#scope-slider {
-  position: relative;
-  height: 0;
-  z-index: 2;
-}
-
-.pf-c-tooltip.slider-tooltip {
-  margin-left: 18px;
-}
