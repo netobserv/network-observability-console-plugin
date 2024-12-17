@@ -97,7 +97,7 @@ func (h *Handlers) getFlows(ctx context.Context, lokiClient httpclient.Caller, p
 				{filters.NewMatch(fields.SrcNamespace, `"`+namespace+`"`)},
 				{filters.NewMatch(fields.DstNamespace, `"`+namespace+`"`)},
 			},
-			func(sq filters.SingleQuery) bool { return false },
+			func(_ filters.SingleQuery) bool { return false },
 		)
 	}
 
