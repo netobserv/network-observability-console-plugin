@@ -15,6 +15,7 @@ var mlog = logrus.WithField("module", "lokiclientmock")
 type LokiClientMock struct {
 }
 
+//nolint:cyclop
 func (o *LokiClientMock) Get(url string) ([]byte, int, error) {
 	var path string
 	parseNetEvents := false
