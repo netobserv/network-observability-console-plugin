@@ -55,7 +55,7 @@ export const NodeDecorators: React.FC<NodeDecoratorsProps> = ({
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   const eltId = element.getId();
-  const controller = element.getController();
+  const controller = element.hasController() ? element.getController() : null;
 
   const onPinClick = React.useCallback(() => {
     const updatedIsPinned = !isPinned;
@@ -79,19 +79,19 @@ export const NodeDecorators: React.FC<NodeDecoratorsProps> = ({
   const onFilterDirClick = React.useCallback(
     (dir: FilterDir) => () => {
       const currentState = dir === 'src' ? isSrcFiltered : isDstFiltered;
-      controller.fireEvent(filterEvent, eltId, data, dir, currentState);
+      controller?.fireEvent(filterEvent, eltId, data, dir, currentState);
       dir === 'src' ? setSrcFiltered(!currentState) : setDstFiltered(!currentState);
     },
     [eltId, controller, data, isSrcFiltered, isDstFiltered, setSrcFiltered, setDstFiltered]
   );
 
   const onFilterClick = React.useCallback(() => {
-    controller.fireEvent(filterEvent, eltId, data, 'src', isSrcFiltered);
+    controller?.fireEvent(filterEvent, eltId, data, 'src', isSrcFiltered);
     setSrcFiltered(!isSrcFiltered);
   }, [controller, data, eltId, isSrcFiltered, setSrcFiltered]);
 
   const onStepIntoClick = React.useCallback(() => {
-    controller.fireEvent(stepIntoEvent, { ...data, id: eltId });
+    controller?.fireEvent(stepIntoEvent, { ...data, id: eltId });
   }, [eltId, controller, data]);
 
   const getPosition = React.useCallback(
@@ -103,7 +103,7 @@ export const NodeDecorators: React.FC<NodeDecoratorsProps> = ({
     [element, getShapeDecoratorCenter]
   );
 
-  if (!data.showDecorators) {
+  if (!controller || !data.showDecorators) {
     return null;
   }
 

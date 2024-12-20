@@ -76,13 +76,14 @@ module.exports = {
     devMiddleware: {
       writeToDisk: true,
     },
-    proxy: {
-      '/api': {
+    proxy: [
+      {
+        context: ['/api'],
         target: 'http://localhost:9000',
         router: () => 'http://localhost:9002',
         logLevel: 'debug' /*optional*/
       }
-    }
+    ],
   },
   plugins: [
     new ConsoleRemotePlugin(),
