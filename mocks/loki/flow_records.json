@@ -5,6 +5,7 @@
     "result": [
       {
         "stream": {
+          "K8S_ClusterName": "test-cluster",
           "FlowDirection": "1",
           "K8S_FlowLayer": "infra",
           "SrcK8S_OwnerName": "ip-10-0-1-7.ec2.internal",
@@ -40,6 +41,8 @@
       },
       {
         "stream": {
+          "SrcK8S_Zone": "eu-west-1",
+          "DstK8S_Zone": "us-east-2",
           "FlowDirection": "1",
           "K8S_FlowLayer": "infra",
           "SrcK8S_Namespace": "openshift-service-ca-operator",
@@ -65,7 +68,7 @@
         "values": [
           [
             "1708011867120999936",
-            "{\"TimeFlowRttNs\":7114000,\"DstPort\":50104,\"TimeFlowStartMs\":1708011867121,\"Proto\":1,\"AgentIP\":\"10.0.1.7\",\"Etype\":2048,\"Bytes\":226,\"DstK8S_Name\":\"ip-10-0-1-7.ec2.internal\",\"DstAddr\":\"10.0.1.7\",\"DstK8S_HostName\":\"ip-10-0-1-7.ec2.internal\",\"DstK8S_OwnerType\":\"Node\",\"SrcAddr\":\"10.0.1.140\",\"Packets\":1,\"TimeFlowEndMs\":1708011867121,\"DstK8S_HostIP\":\"10.0.1.7\",\"Duplicate\":true,\"TimeReceived\":1708011867,\"SrcPort\":443,\"Flags\":16,\"IfDirection\":0,\"DnsErrno\":0,\"SrcMac\":\"02:7B:32:68:BE:65\",\"Interface\":\"br-ex\",\"Dscp\":0,\"DstMac\":\"02:27:A1:A8:84:B9\",\"IcmpType\":3,\"IcmpCode\":0}"
+            "{\"TimeFlowRttNs\":7114000,\"DstPort\":50104,\"TimeFlowStartMs\":1708011867121,\"Proto\":1,\"AgentIP\":\"10.0.1.7\",\"Etype\":2048,\"Bytes\":226,\"DstK8S_Name\":\"ip-10-0-1-7.ec2.internal\",\"DstAddr\":\"10.0.1.7\",\"DstK8S_HostName\":\"ip-10-0-1-7.ec2.internal\",\"DstK8S_OwnerType\":\"Node\",\"SrcAddr\":\"10.0.1.140\",\"Packets\":1,\"TimeFlowEndMs\":1708011867121,\"DstK8S_HostIP\":\"10.0.1.7\",\"Duplicate\":true,\"TimeReceived\":1708011867,\"SrcPort\":443,\"Flags\":16,\"IfDirection\":0,\"DnsErrno\":0,\"SrcMac\":\"02:7B:32:68:BE:65\",\"Interface\":\"br-ex\",\"Dscp\":0,\"DstMac\":\"02:27:A1:A8:84:B9\",\"IcmpType\":3,\"IcmpCode\":0,\"NetworkEvents\":[{\"Feature\":\"acl\",\"Type\":\"NetpolNode\",\"Action\":\"allow\",\"Direction\":\"Ingress\"}]}"
           ],
           [
             "1708011867120999936",
