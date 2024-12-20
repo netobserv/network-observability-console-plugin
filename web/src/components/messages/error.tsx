@@ -21,7 +21,7 @@ import { Link } from 'react-router-dom';
 import { Status } from '../../api/loki';
 import { getBuildInfo, getLimits, getLokiMetrics, getStatus } from '../../api/routes';
 import { ContextSingleton } from '../../utils/context';
-import { getHTTPErrorDetails, getPromUnsupportedError, isPromUnsupportedError } from '../../utils/errors';
+import { getHTTPErrorDetails, getPromError, isPromError } from '../../utils/errors';
 import './error.css';
 import { SecondaryAction } from './secondary-action';
 import { StatusTexts } from './status-texts';
@@ -102,7 +102,7 @@ export const Error: React.FC<ErrorProps> = ({ title, error, isLokiRelated }) => 
   );
 
   const getDisplayError = React.useCallback(() => {
-    return isPromUnsupportedError(error) ? getPromUnsupportedError(error) : error;
+    return isPromError(error) ? getPromError(error) : error;
   }, [error]);
 
   React.useEffect(() => {
