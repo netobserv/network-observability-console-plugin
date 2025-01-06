@@ -2,8 +2,6 @@ import { Popover, ProgressStep, ProgressStepper } from '@patternfly/react-core';
 import * as React from 'react';
 import { FlowScope } from '../../model/flow-query';
 import { ScopeConfigDef } from '../../model/scope';
-// TODO: remove this when https://issues.redhat.com/browse/OCPBUGS-41672 is solved and backported
-import '@patternfly/patternfly/components/ProgressStepper/progress-stepper.css';
 import './scope-slider.css';
 
 export interface ScopeSliderProps {
