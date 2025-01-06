@@ -493,6 +493,9 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
             model.setLastDuration(endDate.getTime() - startDate.getTime());
           })
       );
+    } else if (model.error) {
+      // recall tick after drawer rendering to ensure query is properly loaded
+      setTimeout(tick);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
