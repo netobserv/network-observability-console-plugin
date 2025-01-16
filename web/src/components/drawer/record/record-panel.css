@@ -88,3 +88,12 @@ div.record-field-popover-footer {
   white-space: pre-line;
   word-break: break-word;
 }
+
+.record-panel-warning {
+  color: #2B9AF3;
+  margin-right: 5px;
+}
+
+#partial-flow-text {
+  margin-bottom: 10px;
+}

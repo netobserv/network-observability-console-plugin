@@ -20,6 +20,7 @@ import {
   TextContent,
   TextVariants
 } from '@patternfly/react-core';
+import { InfoCircleIcon } from '@patternfly/react-icons';
 import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -342,6 +343,8 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
     )
   );
 
+  const isPartialFlow = !record.fields.Bytes && !record.fields.Packets;
+
   return (
     <DrawerPanelContent
       data-test-id={id}
@@ -370,6 +373,12 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
           role="region"
         >
           <Tab className="drawer-tab" eventKey={'details'} title={<TabTitleText>{t('Details')}</TabTitleText>}>
+            {isPartialFlow && (
+              <Text id="partial-flow-text" component={TextVariants.p}>
+                <InfoCircleIcon className="record-panel-warning" />
+                {t('This is a partial flow: it contains only enrichment data and is missing some basic information such as byte and packet counters, TCP flags or MAC addresses. This information can likely be found in adjacent flows.')}
+              </Text>
+            )}
             <Accordion asDefinitionList={false}>
               {groups.map((g, i) =>
                 getGroup(
