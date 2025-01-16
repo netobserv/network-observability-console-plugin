@@ -54,6 +54,11 @@ const (
 	Duplicate              = "Duplicate"
 	TimeFlowRTT            = "TimeFlowRttNs"
 	TCPFlags               = "Flags"
+	XlatSrcPort            = "XlatSrcPort"
+	XlatDstPort            = "XlatDstPort"
+	XlatSrcAddr            = "XlatSrcAddr"
+	XlatDstAddr            = "XlatDstAddr"
+	XlatZoneID             = "ZoneId"
 )
 
 func IsNumeric(v string) bool {
@@ -69,7 +74,10 @@ func IsNumeric(v string) bool {
 		Packets,
 		Proto,
 		Bytes,
-		DSCP:
+		DSCP,
+		XlatDstPort,
+		XlatSrcPort,
+		XlatZoneID:
 		return true
 	default:
 		return false
@@ -82,7 +90,9 @@ func IsIP(f string) bool {
 		DstAddr,
 		SrcAddr,
 		DstHostIP,
-		SrcHostIP:
+		SrcHostIP,
+		XlatDstAddr,
+		XlatSrcAddr:
 		return true
 	default:
 		return false
