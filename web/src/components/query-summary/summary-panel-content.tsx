@@ -96,8 +96,8 @@ export const SummaryPanelContent: React.FC<SummaryPanelContentProps> = ({
       <>
         {tc.objects
           .sort((a, b) => compareStrings(a.namespace ? a.namespace : '', b.namespace ? b.namespace : ''))
-          .flatMap(o => (
-            <AccordionExpandedContentBody>
+          .flatMap((o, i) => (
+            <AccordionExpandedContentBody key={`expanded-content-body${i}`}>
               {o.namespace && <ResourceLink key={`${tc.type}-${o.namespace}`} kind={'Namespace'} name={o.namespace} />}
               {o.names
                 .sort((a, b) => compareStrings(a, b))

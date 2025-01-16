@@ -1223,6 +1223,7 @@ frontend:
       description: Source namespace
     - name: SrcAddr
       type: string
+      format: IP
       description: Source IP address (ipv4 or ipv6)
     - name: SrcPort
       type: number
@@ -1232,6 +1233,7 @@ frontend:
       description: Source MAC address
     - name: SrcK8S_HostIP
       type: string
+      format: IP
       description: Source node IP
     - name: SrcK8S_HostName
       type: string
@@ -1259,6 +1261,7 @@ frontend:
       description: Destination namespace
     - name: DstAddr
       type: string
+      format: IP
       description: Destination IP address (ipv4 or ipv6)
     - name: DstPort
       type: number
@@ -1268,6 +1271,7 @@ frontend:
       description: Destination MAC address
     - name: DstK8S_HostIP
       type: string
+      format: IP
       description: Destination node IP
     - name: DstK8S_HostName
       type: string
@@ -1304,16 +1308,16 @@ frontend:
         - 1: Egress (outgoing traffic, from the node observation point) +
         - 2: Inner (with the same source and destination node)
     - name: IfDirections
-      type: number
+      type: number array
       description: |
         Flow directions from the network interface observation point. Can be one of: +
         - 0: Ingress (interface incoming traffic) +
         - 1: Egress (interface outgoing traffic)
     - name: Interfaces
-      type: string
+      type: string array
       description: Network interfaces
     - name: Flags
-      type: string
+      type: string array
       description: |
         Logical OR combination of unique TCP flags comprised in the flow, as per RFC-9293, with additional custom flags to represent the following per-packet combinations: +
         - SYN+ACK (0x100) +
@@ -1361,7 +1365,7 @@ frontend:
       type: number
       description: TCP Smoothed Round Trip Time (SRTT), in nanoseconds
     - name: NetworkEvents
-      type: string
+      type: string array
       description: Network events flow monitoring
     - name: K8S_ClusterName
       type: string
