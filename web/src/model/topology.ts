@@ -240,6 +240,7 @@ export type NodeData = {
   peer: TopologyMetricPeer;
   canStepInto?: boolean;
   badgeColor?: string;
+  noMetrics?: boolean;
 };
 
 const generateNode = (
@@ -399,6 +400,7 @@ export const generateDataModel = (
   t: TFunction,
   filterDefinitions: FilterDefinition[],
   k8sModels: { [key: string]: K8sModel },
+  expectedNodes: string[],
   isDark?: boolean
 ): Model => {
   let nodes: NodeModel[] = [];
@@ -602,5 +604,15 @@ export const generateDataModel = (
 
   //remove empty groups
   nodes = nodes.filter(n => n.type !== 'group' || (n.children && n.children.length));
+
+  // add missing nodes to the view
+  const currentNodes = nodes.map(n => n.label);
+  const missingNodes = expectedNodes.filter(n => !currentNodes.includes(n));
+  missingNodes.forEach(n => {
+    const fields: Partial<TopologyMetricPeer> = { id: n };
+    fields[metricScope] = n;
+    addNode({ peer: createPeer(fields), nodeType: metricScope, canStepInto: false, noMetrics: true });
+  });
+
   return { nodes, edges };
 };
