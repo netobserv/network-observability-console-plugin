@@ -57,6 +57,6 @@ func (l *Loki) IsIP(v string) bool {
 func (l *Loki) IsArray(v string) bool {
 	// check on Field / SrcField / DstField since we remove prefix in some cases for common filtering
 	types := fmt.Sprintf("%s|%s|%s", l.FieldsType[v], l.FieldsType["Src"+v], l.FieldsType["Dst"+v])
-	return strings.Contains(types, "array")
+	return strings.Contains(types, "[]")
 
 }

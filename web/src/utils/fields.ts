@@ -1,4 +1,4 @@
-export type FieldType = 'string' | 'string array' | 'number' | 'number array';
+export type FieldType = 'string' | 'string[]' | 'number' | 'number[]';
 
 export type FieldFormat = 'IP';
 

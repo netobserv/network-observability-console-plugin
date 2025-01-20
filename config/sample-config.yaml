@@ -1308,16 +1308,16 @@ frontend:
         - 1: Egress (outgoing traffic, from the node observation point) +
         - 2: Inner (with the same source and destination node)
     - name: IfDirections
-      type: number array
+      type: number[]
       description: |
         Flow directions from the network interface observation point. Can be one of: +
         - 0: Ingress (interface incoming traffic) +
         - 1: Egress (interface outgoing traffic)
     - name: Interfaces
-      type: string array
+      type: string[]
       description: Network interfaces
     - name: Flags
-      type: string array
+      type: string[]
       description: |
         Logical OR combination of unique TCP flags comprised in the flow, as per RFC-9293, with additional custom flags to represent the following per-packet combinations: +
         - SYN+ACK (0x100) +
@@ -1365,7 +1365,7 @@ frontend:
       type: number
       description: TCP Smoothed Round Trip Time (SRTT), in nanoseconds
     - name: NetworkEvents
-      type: string array
+      type: string[]
       description: Network events flow monitoring
     - name: K8S_ClusterName
       type: string
