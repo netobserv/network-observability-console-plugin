@@ -52,7 +52,7 @@ export type NetflowTopologyHandle = {
     setWarning: (v?: Warning) => void,
     initFunction: () => void
   ) => Promise<Stats[]> | undefined;
-  fetchUDNs: () => void;
+  fetchUDNs: () => Promise<string[]>;
 };
 
 export interface NetflowTopologyProps {
@@ -62,6 +62,7 @@ export interface NetflowTopologyProps {
   metricFunction: StatFunction;
   metricType: MetricType;
   metricScope: FlowScope;
+  expectedNodes: string[];
   setMetricScope: (ms: FlowScope) => void;
   metrics: TopologyMetrics[];
   droppedMetrics: TopologyMetrics[];
@@ -184,13 +185,7 @@ export const NetflowTopology: React.FC<NetflowTopologyProps> = React.forwardRef(
     );
 
     const fetchUDNs = React.useCallback(() => {
-      getK8SUDNIds()
-        .then(ids => {
-          console.log('fetchUDNs', ids);
-        })
-        .catch(err => {
-          console.error('fetchUDNs', err);
-        });
+      return getK8SUDNIds();
     }, []);
 
     React.useImperativeHandle(ref, () => ({
@@ -212,6 +207,7 @@ export const NetflowTopology: React.FC<NetflowTopologyProps> = React.forwardRef(
           <VisualizationProvider data-test="visualization-provider" controller={controller}>
             <TopologyContent
               k8sModels={props.k8sModels}
+              expectedNodes={props.expectedNodes}
               metricFunction={props.metricFunction}
               metricType={props.metricType}
               metricScope={props.metricScope}

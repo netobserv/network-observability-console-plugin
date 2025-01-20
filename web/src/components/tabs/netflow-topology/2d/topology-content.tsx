@@ -55,6 +55,7 @@ const fitPadding = 80;
 
 export interface TopologyContentProps {
   k8sModels: { [key: string]: K8sModel };
+  expectedNodes: string[];
   metricFunction: StatFunction;
   metricType: MetricType;
   metricScope: FlowScope;
@@ -78,6 +79,7 @@ export interface TopologyContentProps {
 
 export const TopologyContent: React.FC<TopologyContentProps> = ({
   k8sModels,
+  expectedNodes,
   metricFunction,
   metricType,
   metricScope,
@@ -345,6 +347,7 @@ export const TopologyContent: React.FC<TopologyContentProps> = ({
       t,
       filterDefinitions,
       k8sModels,
+      expectedNodes,
       isDark
     );
     const allIds = [...(updatedModel.nodes || []), ...(updatedModel.edges || [])].map(item => item.id);
@@ -387,6 +390,7 @@ export const TopologyContent: React.FC<TopologyContentProps> = ({
     t,
     filterDefinitions,
     k8sModels,
+    expectedNodes,
     isDark
   ]);
 

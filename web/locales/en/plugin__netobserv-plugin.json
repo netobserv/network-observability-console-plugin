@@ -11,6 +11,7 @@
   "No information available for this content. Change scope to get more details.": "No information available for this content. Change scope to get more details.",
   "Cluster name": "Cluster name",
   "UDN": "UDN",
+  "Can't find metrics for this element. Check your capture filters to ensure we can monitor it. Else it probably means there is no traffic here.": "Can't find metrics for this element. Check your capture filters to ensure we can monitor it. Else it probably means there is no traffic here.",
   "Source": "Source",
   "Destination": "Destination",
   "Stats": "Stats",
