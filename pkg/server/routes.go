@@ -56,6 +56,9 @@ func setupRoutes(ctx context.Context, cfg *config.Config, authChecker auth.Check
 	api.HandleFunc("/resources/namespaces", h.GetNamespaces(ctx))
 	api.HandleFunc("/resources/names", h.GetNames(ctx))
 
+	// K8S endpoints
+	api.HandleFunc("/k8s/resources/udnIds", h.GetUDNIdss(ctx))
+
 	// Frontend files
 	api.HandleFunc("/frontend-config", h.GetFrontendConfig())
 	r.PathPrefix("/").Handler(http.FileServer(http.Dir("./web/dist/")))

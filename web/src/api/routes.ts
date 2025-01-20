@@ -118,6 +118,15 @@ export const getResources = (namespace: string, kind: string, forcedNamespace?: 
   });
 };
 
+export const getK8SUDNIds = (): Promise<string[]> => {
+  return axios.get(ContextSingleton.getHost() + '/api/k8s/resources/udnIds').then(r => {
+    if (r.status >= 400) {
+      throw new Error(`${r.statusText} [code=${r.status}]`);
+    }
+    return r.data;
+  });
+};
+
 export const getFlowMetrics = (params: FlowQuery, range: number | TimeRange): Promise<FlowMetricsResult> => {
   return getFlowMetricsGeneric(params, res => {
     return parseTopologyMetrics(

@@ -73,7 +73,7 @@ func (b *DenyAllChecker) CheckAdmin(_ context.Context, _ http.Header) error {
 	return errors.New("deny all auth mode selected")
 }
 
-func getUserToken(header http.Header) (string, error) {
+func GetUserToken(header http.Header) (string, error) {
 	authValue := header.Get(AuthHeader)
 	if authValue != "" {
 		parts := strings.Split(authValue, "Bearer ")
@@ -130,7 +130,7 @@ type BearerTokenChecker struct {
 
 func (c *BearerTokenChecker) CheckAuth(ctx context.Context, header http.Header) error {
 	hlog.Debug("Checking authenticated user")
-	token, err := getUserToken(header)
+	token, err := GetUserToken(header)
 	if err != nil {
 		return err
 	}
@@ -145,7 +145,7 @@ func (c *BearerTokenChecker) CheckAuth(ctx context.Context, header http.Header) 
 
 func (c *BearerTokenChecker) CheckAdmin(ctx context.Context, header http.Header) error {
 	hlog.Debug("Checking admin user")
-	token, err := getUserToken(header)
+	token, err := GetUserToken(header)
 	if err != nil {
 		return err
 	}

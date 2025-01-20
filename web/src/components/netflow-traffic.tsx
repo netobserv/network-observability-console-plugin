@@ -453,6 +453,9 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
             model.setWarning,
             clearFlows
           );
+
+        // TODO: do something with UDN Ids to highlight empty / unused
+        drawerRef.current?.getTopologyHandle()?.fetchUDNs();
         break;
       default:
         console.error('tick called on not implemented view Id', model.selectedViewId);
