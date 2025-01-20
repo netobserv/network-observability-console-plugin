@@ -14,6 +14,7 @@ import {
   Stats,
   TopologyMetrics
 } from '../../../api/loki';
+import { getK8SUDNIds } from '../../../api/routes';
 import { Config, Feature } from '../../../model/config';
 import { Filter, FilterDefinition, Filters } from '../../../model/filters';
 import {
@@ -52,6 +53,7 @@ export type NetflowTopologyHandle = {
     setWarning: (v?: Warning) => void,
     initFunction: () => void
   ) => Promise<Stats[]> | undefined;
+  fetchUDNs: () => void;
 };
 
 export interface NetflowTopologyProps {
@@ -182,8 +184,19 @@ export const NetflowTopology: React.FC<NetflowTopologyProps> = React.forwardRef(
       [t]
     );
 
+    const fetchUDNs = React.useCallback(() => {
+      getK8SUDNIds()
+        .then(ids => {
+          console.log('fetchUDNs', ids);
+        })
+        .catch(err => {
+          console.error('fetchUDNs', err);
+        });
+    }, []);
+
     React.useImperativeHandle(ref, () => ({
-      fetch
+      fetch,
+      fetchUDNs
     }));
 
     const getContent = React.useCallback(() => {
