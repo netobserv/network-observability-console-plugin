@@ -152,6 +152,20 @@ frontend:
       # flow on current scope
       - Flows
       - DnsFlows
+      # UDN
+      - UdnId_Bytes
+      - UdnId_Packets
+      - min_UdnId_TimeFlowRttNs
+      - max_UdnId_TimeFlowRttNs
+      - avg_UdnId_TimeFlowRttNs
+      - p90_UdnId_TimeFlowRttNs
+      - p99_UdnId_TimeFlowRttNs
+      - min_UdnId_DnsLatencyMs
+      - max_UdnId_DnsLatencyMs
+      - avg_UdnId_DnsLatencyMs
+      - p90_UdnId_DnsLatencyMs
+      - p99_UdnId_DnsLatencyMs
+      - UdnId_Flows
   columns:
     - id: StartTime
       name: Start Time
@@ -584,6 +598,13 @@ frontend:
       name: Interfaces and Directions
       tooltip: Pairs of network interface and direction of the Flow observed at the network interface observation point.
       field: Interfaces
+      default: false
+      width: 15
+    - id: UDN
+      name: User Defined Network
+      tooltip: The user defined network identifier.
+      field: UdnId
+      filter: udn
       default: false
       width: 15
     - id: Bytes
@@ -1022,6 +1043,10 @@ frontend:
       component: autocomplete
       placeholder: 'E.g: Ingress, Egress'
       hint: Specify the direction of the Flow observed at the network interface observation point.
+    - id: udn
+      name: User Defined Network
+      component: autocomplete
+      hint: Specify a user defined network name.
     - id: id
       name: Conversation Id
       component: text
@@ -1086,6 +1111,14 @@ frontend:
       feature: multiCluster
       filter: cluster_name
       stepInto: zone
+    - id: udn
+      name: UDN
+      shortName: UDN
+      description: User Defined Network
+      labels:
+        - UdnId
+      filter: udn
+      stepInto: host
     - id: zone
       name: Zone
       shortName: AZ
@@ -1099,17 +1132,21 @@ frontend:
       filters:
         - src_zone
         - dst_zone
-      stepInto: host
+      stepInto: namespace
     - id: host
       name: Node
+      shortName: Node
       description: Node on which the resources are running
       labels:
         - SrcK8S_HostName
         - DstK8S_HostName
       groups:
-        - clusters
+        - udns
         - zones
+        - clusters
         - clusters+zones
+        - clusters+udns
+        - udns+zones
       filters:
         - src_host_name
         - dst_host_name
@@ -1128,6 +1165,9 @@ frontend:
         - zones
         - zones+hosts
         - hosts
+        - udns
+        - udns+zones
+        - udns+hosts
       filters:
         - src_namespace
         - dst_namespace
@@ -1154,6 +1194,10 @@ frontend:
         - hosts
         - hosts+namespaces
         - namespaces
+        - udns
+        - udns+zones
+        - udns+hosts
+        - udns+namespaces
       filters:
         - src_owner_name
         - dst_owner_name
@@ -1193,6 +1237,11 @@ frontend:
         - namespaces
         - namespaces+owners
         - owners
+        - udns
+        - udns+zones
+        - udns+hosts
+        - udns+namespaces
+        - udns+owners
       filters:
         - src_resource
         - dst_resource
@@ -1366,6 +1415,10 @@ frontend:
     - name: K8S_ClusterName
       type: string
       description: Cluster name or identifier
+    - name: UdnId
+      type: string
+      description: User Defined Network
+      lokiLabel: true
     - name: _RecordType
       type: string
       description: "Type of record: 'flowLog' for regular flow logs, or 'newConnection', 'heartbeat', 'endConnection' for conversation tracking"

@@ -524,6 +524,20 @@ export const RecordField: React.FC<RecordFieldProps> = ({
             : emptyText()
         );
       }
+      case ColumnsId.udn: {
+        const id = value as string;
+        let child: JSX.Element | undefined;
+        // TODO: define how to split the UDN ID
+        // an alternative could be to use `calculated: kubeObject(K8S_UDN_Type,K8S_UDN_Namespace,K8S_UDN_Name,0)`
+        // from config within 3 separated fields
+        if (id.includes('.')) {
+          const parts = id.split('.');
+          child = kubeObjContent(parts[1], 'UserDefinedNetwork', parts[0]);
+        } else {
+          child = kubeObjContent(id, 'ClusterUserDefinedNetwork', undefined);
+        }
+        return singleContainer(child);
+      }
       default:
         if (value === undefined) {
           return emptyText();

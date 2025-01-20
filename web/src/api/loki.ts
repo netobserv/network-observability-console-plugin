@@ -73,6 +73,7 @@ export interface TopologyMetricPeer {
   namespace?: string;
   host?: string;
   cluster?: string;
+  udn?: string;
 }
 
 export type GenericMetric = {

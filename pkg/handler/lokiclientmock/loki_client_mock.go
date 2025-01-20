@@ -36,6 +36,8 @@ func (o *LokiClientMock) Get(url string) ([]byte, int, error) {
 				path += "_cause.json"
 			} else if strings.Contains(url, "by(K8S_ClusterName)") {
 				path += "_cluster.json"
+			} else if strings.Contains(url, "by(UdnId)") {
+				path += "_udn.json"
 			} else if strings.Contains(url, "by(SrcK8S_Zone,DstK8S_Zone)") {
 				path += "_zone.json"
 			} else if strings.Contains(url, "by(SrcK8S_HostName,DstK8S_HostName)") {

@@ -2,7 +2,7 @@ import { TFunction } from 'i18next';
 import * as _ from 'lodash';
 import protocols from 'protocol-numbers';
 import { FlowDirection } from '../api/ipfix';
-import { getClusters, getNamespaces, getResources, getZones } from '../api/routes';
+import { getClusters, getNamespaces, getResources, getUDNs, getZones } from '../api/routes';
 import { FilterOption } from '../model/filters';
 import { splitResource, SplitStage } from '../model/resource';
 import { autoCompleteCache } from './autocomplete-cache';
@@ -66,6 +66,17 @@ export const getClusterOptions = (value: string): Promise<FilterOption[]> => {
   return getClusters(ContextSingleton.getForcedNamespace()).then(cs => {
     autoCompleteCache.setClusters(cs);
     return matchOptions(cs.map(toFilterOption), value);
+  });
+};
+
+export const getUDNOptions = (value: string): Promise<FilterOption[]> => {
+  const clusters = autoCompleteCache.getUDNs();
+  if (clusters) {
+    return Promise.resolve(matchOptions(clusters.map(toFilterOption), value));
+  }
+  return getUDNs(ContextSingleton.getForcedNamespace()).then(udns => {
+    autoCompleteCache.setUDNs(udns);
+    return matchOptions(udns.map(toFilterOption), value);
   });
 };
 
