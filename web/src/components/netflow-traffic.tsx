@@ -15,7 +15,7 @@ import { ColumnsId, getDefaultColumns } from '../utils/columns';
 import { loadConfig } from '../utils/config';
 import { ContextSingleton } from '../utils/context';
 import { computeStepInterval } from '../utils/datetime';
-import { getHTTPErrorDetails } from '../utils/errors';
+import { getHTTPErrorDetails, getPromError, isPromMissingLabelError } from '../utils/errors';
 import { checkFilterAvailable, getFilterDefinitions } from '../utils/filter-definitions';
 import {
   defaultArraySelectionOptions,
@@ -55,6 +55,7 @@ import './netflow-traffic.css';
 import { SearchHandle } from './search/search';
 import TabsContainer from './tabs/tabs-container';
 import { FiltersToolbar } from './toolbar/filters-toolbar';
+import ChipsPopover from './toolbar/filters/chips-popover';
 import HistogramToolbar from './toolbar/histogram-toolbar';
 import ViewOptionsToolbar from './toolbar/view-options-toolbar';
 
@@ -453,10 +454,37 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
             model.setStats(stats);
           })
           .catch(err => {
+            const errStr = getHTTPErrorDetails(err, true);
+            const promErrStr = getPromError(errStr);
+
+            // check if it's a prom missing label error and remove filters
+            // when the prom error is different to the new one
+            if (isPromMissingLabelError(errStr) && promErrStr !== model.chipsPopoverMessage) {
+              let filtersDisabled = false;
+              model.filters.list.forEach(filter => {
+                const fieldName = model.config.columns.find(col => col.filter === filter.def.id)?.field;
+                if (!fieldName || errStr.includes(fieldName)) {
+                  filtersDisabled = true;
+                  filter.values.forEach(fv => {
+                    fv.disabled = true;
+                  });
+                }
+              });
+              if (filtersDisabled) {
+                // update filters to retrigger query without showing the error
+                updateTableFilters({ ...model.filters });
+                model.setChipsPopoverMessage(promErrStr);
+                return;
+              }
+            }
+
+            // clear flows and metrics + show error
+            // always clear chip message to focus on the error
             model.setFlows([]);
             model.setMetrics(defaultNetflowMetrics);
-            model.setError(getHTTPErrorDetails(err, true));
+            model.setError(errStr);
             model.setWarning(undefined);
+            model.setChipsPopoverMessage(undefined);
           })
           .finally(() => {
             const endDate = new Date();
@@ -465,6 +493,9 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
             model.setLastDuration(endDate.getTime() - startDate.getTime());
           })
       );
+    } else if (model.error) {
+      // recall tick after drawer rendering to ensure query is properly loaded
+      setTimeout(tick);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -913,6 +944,10 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
         />
       )}
       <GuidedTourPopover id="netobserv" ref={guidedTourRef} isDark={isDarkTheme} />
+      <ChipsPopover
+        chipsPopoverMessage={model.chipsPopoverMessage}
+        setChipsPopoverMessage={model.setChipsPopoverMessage}
+      />
     </PageSection>
   ) : null;
 };

@@ -122,6 +122,7 @@ export function netflowTrafficModel() {
   const [isShowQuerySummary, setShowQuerySummary] = React.useState<boolean>(false);
   const [lastRefresh, setLastRefresh] = React.useState<Date | undefined>(undefined);
   const [lastDuration, setLastDuration] = React.useState<number | undefined>(undefined);
+  const [chipsPopoverMessage, setChipsPopoverMessage] = React.useState<string | undefined>();
   const [error, setError] = React.useState<string | undefined>();
   const [isTRModalOpen, setTRModalOpen] = React.useState(false);
   const [isOverviewModalOpen, setOverviewModalOpen] = React.useState(false);
@@ -241,6 +242,8 @@ export function netflowTrafficModel() {
     setLastRefresh,
     lastDuration,
     setLastDuration,
+    chipsPopoverMessage,
+    setChipsPopoverMessage,
     error,
     setError,
     isTRModalOpen,
