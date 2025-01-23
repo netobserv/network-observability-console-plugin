@@ -259,6 +259,15 @@ func TestLokiFiltering(t *testing.T) {
 		Loki: config.Loki{
 			URL:    lokiSvc.URL,
 			Labels: []string{"SrcK8S_Namespace", "SrcK8S_OwnerName", "DstK8S_Namespace", "DstK8S_OwnerName", "FlowDirection"},
+			FieldsType: map[string]string{
+				"Proto":   "number",
+				"SrcPort": "number",
+				"DstPort": "number",
+			},
+			FieldsFormat: map[string]string{
+				"SrcAddr": "IP",
+				"DstAddr": "IP",
+			},
 		},
 		Frontend: config.Frontend{Deduper: config.Deduper{Mark: true}},
 	}, &authM)

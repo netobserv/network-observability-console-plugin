@@ -115,6 +115,7 @@ type QuickFilter struct {
 type FieldConfig struct {
 	Name        string `yaml:"name" json:"name"`
 	Type        string `yaml:"type" json:"type"`
+	Format      string `yaml:"format,omitempty" json:"format,omitempty"`
 	Description string `yaml:"description" json:"description"`
 	// lokiLabel flag is for documentation only. Use loki.labels instead
 	Filter string `yaml:"filter,omitempty" json:"filter,omitempty"`
@@ -218,6 +219,12 @@ func ReadFile(version, date, filename string) (*Config, error) {
 	if cfg.IsLokiEnabled() {
 		cfg.Frontend.DataSources = append(cfg.Frontend.DataSources, string(constants.DataSourceLoki))
 		cfg.Frontend.LokiMocks = cfg.Loki.UseMocks
+		cfg.Loki.FieldsType = make(map[string]string)
+		cfg.Loki.FieldsFormat = make(map[string]string)
+		for _, f := range cfg.Frontend.Fields {
+			cfg.Loki.FieldsType[f.Name] = f.Type
+			cfg.Loki.FieldsFormat[f.Name] = f.Format
+		}
 	}
 
 	if cfg.IsPromEnabled() {
