@@ -1,5 +1,5 @@
 import { K8sModel } from '@openshift-console/dynamic-plugin-sdk';
-import { Bullseye, Spinner } from '@patternfly/react-core';
+import { Bullseye, Spinner, Text } from '@patternfly/react-core';
 import { Visualization, VisualizationProvider } from '@patternfly/react-topology';
 import _ from 'lodash';
 import * as React from 'react';
@@ -15,7 +15,7 @@ import {
   TopologyMetrics
 } from '../../../api/loki';
 import { Config, Feature } from '../../../model/config';
-import { Filter, FilterDefinition, Filters } from '../../../model/filters';
+import { FilterDefinition, Filters } from '../../../model/filters';
 import {
   FlowQuery,
   FlowScope,
@@ -36,7 +36,6 @@ import componentFactory from './2d/componentFactories/componentFactory';
 import stylesComponentFactory from './2d/componentFactories/stylesComponentFactory';
 import layoutFactory from './2d/layouts/layoutFactory';
 import { TopologyContent } from './2d/topology-content';
-import ThreeDTopologyContent from './3d/three-d-topology-content';
 import './netflow-topology.css';
 
 export type NetflowTopologyHandle = {
@@ -194,25 +193,7 @@ export const NetflowTopology: React.FC<NetflowTopologyProps> = React.forwardRef(
           </Bullseye>
         );
       } else if (props.options.layout === LayoutName.threeD) {
-        return (
-          <ThreeDTopologyContent
-            k8sModels={props.k8sModels}
-            metricFunction={props.metricFunction}
-            metricType={props.metricType}
-            metricScope={props.metricScope}
-            setMetricScope={props.setMetricScope}
-            metrics={displayedMetrics}
-            options={props.options}
-            setOptions={props.setOptions}
-            filters={props.filters.list}
-            setFilters={(l: Filter[]) => props.setFilters({ ...props.filters, list: l })}
-            selected={props.selected}
-            onSelect={props.onSelect}
-            searchHandle={props.searchHandle}
-            searchEvent={props.searchEvent}
-            isDark={props.isDark}
-          />
-        );
+        return <Text>{t('Sorry, 3D view is not implemented anymore.')}</Text>;
       } else {
         return (
           <VisualizationProvider data-test="visualization-provider" controller={controller}>
@@ -247,6 +228,7 @@ export const NetflowTopology: React.FC<NetflowTopologyProps> = React.forwardRef(
           </VisualizationProvider>
         );
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [controller, props, displayedMetrics, containerSize?.height]);
 
     //create controller on startup and register factories
