@@ -35,6 +35,23 @@ const getInvolvedInterfaces = (flowsFor5Tuples: Record[]): { ifnames: string[]; 
   return { ifnames, ifdirs };
 };
 
+const getInvolvedUdns = (flowsFor5Tuples: Record[]): string[] => {
+  const cache = new Set();
+  const udns: string[] = [];
+  flowsFor5Tuples.forEach(f => {
+    if (f.fields.Udns) {
+      _.zip(f.fields.Udns).forEach(([udn]) => {
+        const key = `${udn}`;
+        if (!cache.has(key)) {
+          cache.add(key);
+          udns.push(udn!);
+        }
+      });
+    }
+  });
+  return udns;
+};
+
 export const mergeFlowReporters = (flows: Record[]): Record[] => {
   // The purpose of this function is to determine if, for a given 5 tuple, we'll look at INGRESS, EGRESS or INNER reporter
   // The assumption is that INGRESS alone, EGRESS alone or INNER alone always provide a complete visiblity
@@ -42,16 +59,22 @@ export const mergeFlowReporters = (flows: Record[]): Record[] => {
   const grouped = _.groupBy(flows, get5Tuple);
   const filtersIndex = _.mapValues(grouped, (records: Record[]) => electMostRelevant(records));
   const involvedInterfaces = _.mapValues(grouped, (records: Record[]) => getInvolvedInterfaces(records));
-  // Filter and inject other interfaces in elected flows
-  // An assumption is made that interfaces involved for a 5 tuples will keep being involved in the whole flows sequence
+  const involvedUdns = _.mapValues(grouped, (records: Record[]) => getInvolvedUdns(records));
+  // Filter and inject other interfaces and udns in elected flows
+  // An assumption is made that interfaces and udns involved for a 5 tuples will keep being involved in the whole flows sequence
   // If that assumption proves wrong, we may refine by looking at time overlaps between flows
   return flows
     .filter((r: Record) => r.labels.FlowDirection === filtersIndex[get5Tuple(r)].labels.FlowDirection)
     .map(r => {
-      const interfaces = involvedInterfaces[get5Tuple(r)];
+      const key = get5Tuple(r);
+      const interfaces = involvedInterfaces[key];
       if (interfaces) {
         r.fields.Interfaces = interfaces.ifnames;
         r.fields.IfDirections = interfaces.ifdirs;
+      }
+      const udns = involvedUdns[key];
+      if (udns) {
+        r.fields.Udns = udns;
       }
       return r;
     });

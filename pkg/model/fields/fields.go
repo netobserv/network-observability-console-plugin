@@ -35,6 +35,7 @@ const (
 	DstZone                = Dst + Zone
 	Cluster                = "K8S_ClusterName"
 	UDN                    = "UDN"
+	Udns                   = "Udns"
 	Layer                  = "K8S_FlowLayer"
 	Packets                = "Packets"
 	Proto                  = "Proto"

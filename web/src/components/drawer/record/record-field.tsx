@@ -423,6 +423,16 @@ export const RecordField: React.FC<RecordFieldProps> = ({
         }
         return singleContainer(simpleTextWithTooltip(String(value)));
       }
+      case ColumnsId.udns: {
+        if (Array.isArray(value)) {
+          return nthContainer(
+            value.map(iName => simpleTextWithTooltip(iName !== '' ? String(iName) : t('None'))),
+            true,
+            false
+          );
+        }
+        return singleContainer(simpleTextWithTooltip(String(value)));
+      }
       case ColumnsId.flowdirints: {
         if (
           flow.fields.Interfaces &&
