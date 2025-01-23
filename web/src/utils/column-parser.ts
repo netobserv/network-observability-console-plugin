@@ -88,14 +88,32 @@ const forceType = (id: ColumnsId, value: ColValue, type?: FieldType): ColValue =
     console.error('Column ' + id + " doesn't specify type");
   }
   // check if value type match and convert it if needed
-  if (value && value !== '' && typeof value !== type && !Array.isArray(value)) {
-    switch (type) {
-      case 'number':
-        return Number(value);
-      case 'string':
-        return String(value);
-      default:
-        throw new Error('forceType error: type ' + type + ' is not managed');
+  if (value && value !== '' && typeof value !== type) {
+    if (Array.isArray(value)) {
+      switch (type) {
+        case 'number[]':
+          return value.map(v => Number(v));
+        case 'string[]':
+          return value.map(v => String(v));
+        case 'number':
+        case 'string':
+          throw new Error("forceType error: can't convert an array to " + type);
+        default:
+          throw new Error('forceType error: type ' + type + ' is not managed for arrays');
+      }
+    } else {
+      switch (type) {
+        case 'number[]':
+          return [Number(value)] as number[];
+        case 'number':
+          return Number(value);
+        case 'string[]':
+          return [String(value)] as string[];
+        case 'string':
+          return String(value);
+        default:
+          throw new Error('forceType error: type ' + type + ' is not managed');
+      }
     }
   } else {
     // else return value directly
