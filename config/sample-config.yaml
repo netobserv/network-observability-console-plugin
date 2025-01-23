@@ -48,6 +48,7 @@ frontend:
   #    - pktDrop
   #    - dnsTracking
   #    - flowRTT
+  #    - networkEvents
   # processor features
   #    - multiCluster
   #    - zones

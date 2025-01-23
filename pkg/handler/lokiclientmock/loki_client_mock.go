@@ -1,9 +1,12 @@
 package lokiclientmock
 
 import (
+	"encoding/json"
 	"os"
 	"strings"
 
+	"github.com/netobserv/network-observability-console-plugin/pkg/decoders"
+	"github.com/netobserv/network-observability-console-plugin/pkg/model"
 	"github.com/sirupsen/logrus"
 )
 
@@ -12,8 +15,10 @@ var mlog = logrus.WithField("module", "lokiclientmock")
 type LokiClientMock struct {
 }
 
+//nolint:cyclop
 func (o *LokiClientMock) Get(url string) ([]byte, int, error) {
 	var path string
+	parseNetEvents := false
 	mlog.Debugf("Get url: %s", url)
 
 	isLabel := strings.Contains(url, "/label/")
@@ -60,6 +65,7 @@ func (o *LokiClientMock) Get(url string) ([]byte, int, error) {
 				path += "_sent.json"
 			} else {
 				path += ".json"
+				parseNetEvents = true
 			}
 		}
 	}
@@ -68,6 +74,23 @@ func (o *LokiClientMock) Get(url string) ([]byte, int, error) {
 	file, err := os.ReadFile(path)
 	if err != nil {
 		return nil, 500, err
+	}
+
+	if parseNetEvents {
+		var qr model.QueryResponse
+		err = json.Unmarshal(file, &qr)
+		if err != nil {
+			return nil, 500, err
+		}
+		for _, s := range qr.Data.Result.(model.Streams) {
+			for i := range s.Entries {
+				s.Entries[i].Line = decoders.NetworkEventsToString(s.Entries[i].Line)
+			}
+		}
+		file, err = json.Marshal(qr)
+		if err != nil {
+			return nil, 500, err
+		}
 	}
 
 	return []byte(file), 200, nil
