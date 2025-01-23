@@ -454,7 +454,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
             clearFlows
           );
 
-        if (model.metricScope === 'udn') {
+        if (model.topologyOptions.showEmpty && model.metricScope === 'udn') {
           drawerRef.current
             ?.getTopologyHandle()
             ?.fetchUDNs()
@@ -541,6 +541,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
     model.config.features,
     model.topologyMetricType,
     model.topologyMetricFunction,
+    model.topologyOptions.showEmpty,
     model.selectedViewId,
     buildFlowQuery,
     manageWarnings,

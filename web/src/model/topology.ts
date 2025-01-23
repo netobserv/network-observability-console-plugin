@@ -55,6 +55,7 @@ export interface TopologyOptions {
   medScale: number;
   metricFunction: StatFunction;
   metricType: MetricType;
+  showEmpty?: boolean;
 }
 
 export const DefaultOptions: TopologyOptions = {
@@ -69,7 +70,8 @@ export const DefaultOptions: TopologyOptions = {
   lowScale: 0.3,
   medScale: 0.5,
   metricFunction: defaultMetricFunction,
-  metricType: defaultMetricType
+  metricType: defaultMetricType,
+  showEmpty: true
 };
 
 export type GraphElementPeer = GraphElement<ElementModel, NodeData>;
@@ -606,14 +608,16 @@ export const generateDataModel = (
   //remove empty groups
   nodes = nodes.filter(n => n.type !== 'group' || (n.children && n.children.length));
 
-  // add missing nodes to the view
-  const currentNodes = nodes.map(n => n.label);
-  const missingNodes = expectedNodes.filter(n => !currentNodes.includes(n));
-  missingNodes.forEach(n => {
-    const fields: Partial<TopologyMetricPeer> = { id: n };
-    fields[metricScope] = n;
-    addNode({ peer: createPeer(fields), nodeType: metricScope, canStepInto: false, noMetrics: true });
-  });
+  // add missing nodes to the view if available
+  if (!_.isEmpty(expectedNodes)) {
+    const currentNodes = nodes.map(n => n.label);
+    const missingNodes = expectedNodes.filter(n => !currentNodes.includes(n));
+    missingNodes.forEach(n => {
+      const fields: Partial<TopologyMetricPeer> = { id: n };
+      fields[metricScope] = n;
+      addNode({ peer: createPeer(fields), nodeType: metricScope, canStepInto: false, noMetrics: true });
+    });
+  }
 
   return { nodes, edges };
 };
