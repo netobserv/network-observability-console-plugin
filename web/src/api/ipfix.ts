@@ -54,7 +54,9 @@ export enum FlowDirection {
   /** Outgoing traffic, from the node observation point */
   Egress = '1',
   /** Inner traffic, with the same source and destination node */
-  Inner = '2'
+  Inner = '2',
+  /** Both traffic (for Interface direction only), flow seen on both Ingress and Egress */
+  Both = '3'
 }
 
 export const getDirectionDisplayString = (value: FlowDirection, t: TFunction) => {
@@ -64,6 +66,8 @@ export const getDirectionDisplayString = (value: FlowDirection, t: TFunction) =>
     ? t('Egress')
     : value === FlowDirection.Inner
     ? t('Inner')
+    : value === FlowDirection.Both
+    ? t('Both')
     : t('n/a');
 };
 
