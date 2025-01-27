@@ -107,6 +107,10 @@ export interface Fields {
   SrcK8S_Zone?: string;
   /** Destination zone */
   DstK8S_Zone?: string;
+  /** Source network name (e.g. secondary networks or UDN) */
+  SrcK8S_NetworkName?: string;
+  /** Destination network name (e.g. secondary networks or UDN) */
+  DstK8S_NetworkName?: string;
   /** Cluster name */
   K8S_ClusterName?: string;
   /** L4 protocol */

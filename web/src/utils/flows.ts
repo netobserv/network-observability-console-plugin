@@ -1,6 +1,6 @@
 import * as _ from 'lodash';
 import { IfDirection, Record } from '../api/ipfix';
-import { get5Tuple } from './ids';
+import { get7Tuple } from './ids';
 
 const electMostRelevant = (flowsFor5Tuples: Record[]): Record => {
   // Get most relevant record, in priority with Dns or Drops info
@@ -56,7 +56,7 @@ export const mergeFlowReporters = (flows: Record[]): Record[] => {
   // The purpose of this function is to determine if, for a given 5 tuple, we'll look at INGRESS, EGRESS or INNER reporter
   // The assumption is that INGRESS alone, EGRESS alone or INNER alone always provide a complete visiblity
   // Favor whichever contains pktDrop and/or DNS responses
-  const grouped = _.groupBy(flows, get5Tuple);
+  const grouped = _.groupBy(flows, get7Tuple);
   const filtersIndex = _.mapValues(grouped, (records: Record[]) => electMostRelevant(records));
   const involvedInterfaces = _.mapValues(grouped, (records: Record[]) => getInvolvedInterfaces(records));
   const involvedUdns = _.mapValues(grouped, (records: Record[]) => getInvolvedUdns(records));
@@ -64,9 +64,9 @@ export const mergeFlowReporters = (flows: Record[]): Record[] => {
   // An assumption is made that interfaces and udns involved for a 5 tuples will keep being involved in the whole flows sequence
   // If that assumption proves wrong, we may refine by looking at time overlaps between flows
   return flows
-    .filter((r: Record) => r.labels.FlowDirection === filtersIndex[get5Tuple(r)].labels.FlowDirection)
+    .filter((r: Record) => r.labels.FlowDirection === filtersIndex[get7Tuple(r)].labels.FlowDirection)
     .map(r => {
-      const key = get5Tuple(r);
+      const key = get7Tuple(r);
       const interfaces = involvedInterfaces[key];
       if (interfaces) {
         r.fields.Interfaces = interfaces.ifnames;
