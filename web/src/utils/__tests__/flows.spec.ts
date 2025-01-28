@@ -76,7 +76,8 @@ describe('mergeFlowReporters', () => {
           SrcAddr: '10.0.0.1',
           DstAddr: '10.0.0.2',
           IfDirections: [IfDirection.Ingress, IfDirection.Egress],
-          Interfaces: ['eth0', 'abcd']
+          Interfaces: ['eth0', 'abcd'],
+          Udns: ['udn1', 'udn2']
         } as Fields,
         labels: { FlowDirection: FlowDirection.Ingress }
       },
@@ -86,7 +87,8 @@ describe('mergeFlowReporters', () => {
           SrcAddr: '10.0.0.1',
           DstAddr: '10.0.0.2',
           IfDirections: [IfDirection.Ingress],
-          Interfaces: ['genev']
+          Interfaces: ['genev'],
+          Udns: ['udn3']
         } as Fields,
         labels: { FlowDirection: FlowDirection.Egress }
       }
@@ -99,7 +101,8 @@ describe('mergeFlowReporters', () => {
         SrcAddr: '10.0.0.1',
         DstAddr: '10.0.0.2',
         IfDirections: [IfDirection.Ingress, IfDirection.Egress, IfDirection.Ingress],
-        Interfaces: ['eth0', 'abcd', 'genev']
+        Interfaces: ['eth0', 'abcd', 'genev'],
+        Udns: ['udn1', 'udn2', 'udn3']
       } as Fields,
       labels: { FlowDirection: FlowDirection.Ingress }
     });

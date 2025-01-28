@@ -79,6 +79,7 @@ export enum ColumnsId {
   interfaces = 'Interfaces',
   ifdirs = 'IfDirections',
   flowdirints = 'FlowDirInts',
+  udns = 'Udns',
   recordtype = 'RecordType',
   bytesab = 'Bytes_AB',
   bytesba = 'Bytes_BA',

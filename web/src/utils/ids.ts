@@ -45,8 +45,8 @@ export const getPeerId = (fields: Partial<TopologyMetricPeer>): string => {
   return parts.length > 0 ? parts.join(',') : idUnknown;
 };
 
-export const get5Tuple = (r: Record): string => {
-  return `${r.fields.SrcAddr}:${r.fields.SrcPort || 'x'}→${r.fields.DstAddr}:${r.fields.DstPort || 'x'}@${
-    r.fields.Proto
-  }`;
+export const get7Tuple = (r: Record): string => {
+  return `${r.fields.SrcAddr}:${r.fields.SrcPort || 'x'}:${r.fields.SrcK8S_NetworkName || 'x'}→${r.fields.DstAddr}:${
+    r.fields.DstPort || 'x'
+  }:${r.fields.DstK8S_NetworkName || 'x'}@${r.fields.Proto}`;
 };

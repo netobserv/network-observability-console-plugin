@@ -111,6 +111,10 @@ export interface Fields {
   SrcK8S_Zone?: string;
   /** Destination zone */
   DstK8S_Zone?: string;
+  /** Source network name (e.g. secondary networks or UDN) */
+  SrcK8S_NetworkName?: string;
+  /** Destination network name (e.g. secondary networks or UDN) */
+  DstK8S_NetworkName?: string;
   /** Cluster name */
   K8S_ClusterName?: string;
   /** L4 protocol */
@@ -119,6 +123,8 @@ export interface Fields {
   Interfaces?: string[];
   /** Flow direction array from the network interface observation point */
   IfDirections?: IfDirection[];
+  /** UDNs labels array */
+  Udns?: string[];
   /** Network Events */
   NetworkEvents?: string[];
   /** Logical OR combination of unique TCP flags comprised in the flow, as per RFC-9293, with additional custom flags to represent the following per-packet combinations: SYN+ACK (0x100), FIN+ACK (0x200) and RST+ACK (0x400). */
