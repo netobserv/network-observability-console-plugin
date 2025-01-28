@@ -6,11 +6,11 @@ export const pod = 'flowlogs-pipeline';
 export const waitTime = 3000;
 
 // overview specific config
-export const availablePanelsCount = 4;
+export const availablePanelsCount = 52;
 export const defaultPanelsCount = 2;
 
 // table specific config
 export const availableColumnGroupCount = 31;
-export const availableColumnCount = 57;
+export const availableColumnCount = 59;
 export const defaultColumnGroupCount = 6;
 export const defaultColumnCount = 11;
