@@ -11,6 +11,10 @@ export interface ChipsPopoverProps {
 export const ChipsPopover: React.FC<ChipsPopoverProps> = ({ chipsPopoverMessage, setChipsPopoverMessage }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
+  if (!chipsPopoverMessage) {
+    return <></>;
+  }
+
   return (
     <Popover
       id="chips-popover"
