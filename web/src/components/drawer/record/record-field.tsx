@@ -24,6 +24,9 @@ export type RecordFieldFilter = {
   isDelete: boolean;
 };
 
+export type FlexValue = 'flexDefault' | 'flexNone' | 'flex_1' | 'flex_2' | 'flex_3' | 'flex_4';
+export type FlexWrapValue = 'wrap' | 'wrapReverse' | 'nowrap';
+
 export interface RecordFieldProps {
   allowPktDrops: boolean;
   flow: Record;
@@ -46,16 +49,7 @@ export const RecordField: React.FC<RecordFieldProps> = ({
   isDark
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
-
-  const onMouseOver = (event: React.MouseEvent<HTMLDivElement, MouseEvent>, className: string) => {
-    if (event.currentTarget) {
-      const isTruncated =
-        event.currentTarget.offsetHeight < event.currentTarget.scrollHeight ||
-        event.currentTarget.offsetWidth < event.currentTarget.scrollWidth ||
-        (event.currentTarget.children.length > 0 && event.currentTarget.children[0].className === 'force-truncate');
-      event.currentTarget.className = isTruncated ? `${className} truncated ${size}` : `${className} ${size}`;
-    }
-  };
+  const multiLineSize = size === 'l' ? 'm' : 's';
 
   const errorTextValue = (value: string, text: string) => {
     return (
@@ -96,10 +90,13 @@ export const RecordField: React.FC<RecordFieldProps> = ({
     );
   };
 
-  const simpleTextWithTooltip = (text?: string, color?: string, child?: JSX.Element) => {
+  const simpleTextWithTooltip = (text?: string, color?: string, child?: JSX.Element, forcedSize?: Size) => {
     if (text) {
       return (
-        <TextContent className="netobserv-no-child-margin" data-test={`field-text-${text}`}>
+        <TextContent
+          className={`field-text ${forcedSize || size} netobserv-no-child-margin`}
+          data-test={`field-text-${text}`}
+        >
           <Text className="record-field-value" component={TextVariants.p} style={{ color }}>
             {text}
           </Text>
@@ -113,13 +110,13 @@ export const RecordField: React.FC<RecordFieldProps> = ({
     return undefined;
   };
 
-  const resourceIconText = (value: string, kind: string, ns?: string) => {
+  const resourceIconText = (value: string, kind: string, ns?: string, forcedSize?: Size) => {
     return (
       //force ResourceLink when ResourceIcon is not defined (ie OCP < 4.12)
       !ResourceIcon || useLinks ? (
         <ResourceLink className={size} inline={true} kind={kind} name={value} namespace={ns} />
       ) : (
-        <TextContent className={`co-resource-item ${size} netobserv-no-child-margin`}>
+        <TextContent className={`co-resource-item ${forcedSize || size} netobserv-no-child-margin`}>
           <ResourceIcon kind={kind} />
           <Text component={TextVariants.p} className="co-resource-item__resource-name" data-test-id={value}>
             {value}
@@ -130,19 +127,24 @@ export const RecordField: React.FC<RecordFieldProps> = ({
   };
 
   const kubeObjContainer = (k: KubeObj) => {
-    const main = kubeObjContent(k.name, k.kind, k.namespace);
+    const main = kubeObjContent(k.name, k.kind, k.namespace, multiLineSize);
     if (k.showNamespace && k.namespace) {
-      return doubleContainer(main, kindContent('Namespace', k.namespace), false);
+      return doubleContainer(main, kindContent('Namespace', k.namespace, multiLineSize), false, true, 'm');
     }
     return singleContainer(main);
   };
 
-  const kubeObjContent = (value: string | undefined, kind: string | undefined, ns: string | undefined) => {
+  const kubeObjContent = (
+    value: string | undefined,
+    kind: string | undefined,
+    ns: string | undefined,
+    forcedSize?: Size
+  ) => {
     // Note: namespace is not mandatory here (e.g. Node objects)
     if (value && kind) {
       return (
         <div data-test={`field-resource-${kind}.${ns}.${value}`} className="force-truncate">
-          {resourceIconText(value, kind, ns)}
+          {resourceIconText(value, kind, ns, forcedSize)}
           {kubeTooltip(value, kind, ns)}
         </div>
       );
@@ -165,11 +167,11 @@ export const RecordField: React.FC<RecordFieldProps> = ({
     );
   };
 
-  const kindContent = (kind: 'Namespace' | 'Node', value?: string) => {
+  const kindContent = (kind: 'Namespace' | 'Node', value?: string, forcedSize?: Size) => {
     if (value) {
       return (
         <div data-test={`field-kind-${kind}.${value}`} className="force-truncate">
-          {resourceIconText(value, kind)}
+          {resourceIconText(value, kind, undefined, forcedSize)}
           <TextContent className="record-field-tooltip netobserv-no-child-margin">
             <Text component={TextVariants.h4}>{t(kind)}</Text>
             <Text component={TextVariants.p}>{value}</Text>
@@ -213,43 +215,48 @@ export const RecordField: React.FC<RecordFieldProps> = ({
     );
   };
 
-  const nthContainer = (children: (JSX.Element | undefined)[], asChild = true, childIcon = true) => {
+  const nthContainer = (children: (JSX.Element | undefined)[], asChild = true, childIcon = true, forcedSize?: Size) => {
     return (
-      <Flex className={`record-field-flex-container ${asChild ? size : ''}`} flex={{ default: 'flex_1' }}>
-        {children.map((c, i) => (
-          <FlexItem
-            key={i}
-            className={`record-field-content`}
-            onMouseOver={e => onMouseOver(e, `record-field-content`)}
-            flex={{ default: 'flex_1' }}
-          >
-            {i > 0 && asChild && childIcon && <span className="child-arrow">{'↪'}</span>}
-            {c ? c : emptyText()}
-          </FlexItem>
-        ))}
+      <Flex className={`record-field-flex-container ${forcedSize || size}`} flex={{ default: 'flex_1' }}>
+        {children.map((c, i) => {
+          const child = c ? c : emptyText();
+          if (i > 0 && asChild && childIcon) {
+            const arrow = <span className="child-arrow">{'↪'}</span>;
+            return sideBySideContainer(arrow, child, 'flexNone', 'flex_1', 'nowrap');
+          }
+          return child;
+        })}
       </Flex>
     );
   };
 
-  const doubleContainer = (child1?: JSX.Element, child2?: JSX.Element, asChild = true, childIcon = true) => {
-    return nthContainer([child1, child2], asChild, childIcon);
+  const doubleContainer = (
+    child1?: JSX.Element,
+    child2?: JSX.Element,
+    asChild = true,
+    childIcon = true,
+    forcedSize?: Size
+  ) => {
+    return nthContainer([child1, child2], asChild, childIcon, forcedSize);
   };
 
-  const sideBySideContainer = (leftElement?: JSX.Element, rightElement?: JSX.Element) => {
+  const sideBySideContainer = (
+    leftElement?: JSX.Element,
+    rightElement?: JSX.Element,
+    leftFlex: FlexValue = 'flex_1',
+    rightFlex: FlexValue = 'flex_1',
+    wrap: FlexWrapValue = 'wrap'
+  ) => {
     return (
-      <Flex direction={{ default: 'row' }} flex={{ default: 'flex_1' }}>
-        <FlexItem flex={{ default: 'flex_1' }}>{leftElement || emptyText()}</FlexItem>
-        <FlexItem flex={{ default: 'flex_1' }}>{rightElement || emptyText()}</FlexItem>
+      <Flex direction={{ default: 'row' }} flex={{ default: 'flex_1' }} flexWrap={{ default: wrap }}>
+        <FlexItem flex={{ default: leftFlex }}>{leftElement || emptyText()}</FlexItem>
+        <FlexItem flex={{ default: rightFlex }}>{rightElement || emptyText()}</FlexItem>
       </Flex>
     );
   };
 
   const singleContainer = (child?: JSX.Element) => {
-    return (
-      <div className={`record-field-content ${size}`} onMouseOver={e => onMouseOver(e, 'record-field-content')}>
-        {child ? child : emptyText()}
-      </div>
-    );
+    return <div className={`record-field-content ${size}`}>{child ? child : emptyText()}</div>;
   };
 
   const clickableContent = (text: string, content: string, docUrl?: string) => {
@@ -408,7 +415,8 @@ export const RecordField: React.FC<RecordFieldProps> = ({
           return nthContainer(
             value.map(dir => simpleTextWithTooltip(getDirectionDisplayString(String(dir) as FlowDirection, t))),
             true,
-            false
+            false,
+            multiLineSize
           );
         }
         return singleContainer(simpleTextWithTooltip(getDirectionDisplayString(String(value) as FlowDirection, t)));
@@ -418,7 +426,8 @@ export const RecordField: React.FC<RecordFieldProps> = ({
           return nthContainer(
             value.map(iName => simpleTextWithTooltip(String(iName))),
             true,
-            false
+            false,
+            multiLineSize
           );
         }
         return singleContainer(simpleTextWithTooltip(String(value)));
@@ -444,9 +453,12 @@ export const RecordField: React.FC<RecordFieldProps> = ({
           return nthContainer(
             flow.fields.Interfaces.map((iName, i) =>
               sideBySideContainer(
-                simpleTextWithTooltip(iName),
+                simpleTextWithTooltip(iName, undefined, undefined, multiLineSize),
                 simpleTextWithTooltip(
-                  getDirectionDisplayString(String(flow.fields.IfDirections![i]) as FlowDirection, t)
+                  getDirectionDisplayString(String(flow.fields.IfDirections![i]) as FlowDirection, t),
+                  undefined,
+                  undefined,
+                  multiLineSize
                 )
               )
             ),
@@ -477,13 +489,16 @@ export const RecordField: React.FC<RecordFieldProps> = ({
           return doubleContainer(
             simpleTextWithTooltip(
               detailed ? `${sentCount} ${c.name.toLowerCase()} ${t('sent')}` : sentCount,
-              allowPktDrops ? (isDark ? '#3E8635' : '#1E4F18') : undefined
+              allowPktDrops ? (isDark ? '#3E8635' : '#1E4F18') : undefined,
+              undefined,
+              multiLineSize
             ),
             droppedCount ? (
               simpleTextWithTooltip(
                 detailed ? `${droppedCount} ${c.name.toLowerCase()} ${droppedText}` : droppedCount,
                 isDark ? '#C9190B' : '#A30000',
-                child
+                child,
+                multiLineSize
               )
             ) : (
               <></>
@@ -555,8 +570,10 @@ export const RecordField: React.FC<RecordFieldProps> = ({
         if (Array.isArray(value) && value.length) {
           // we can only show two values properly with containers
           if (value.length === 2) {
-            const contents = value.map(v => (isKubeObj(v) ? kubeObjContainer(v) : simpleTextWithTooltip(String(v))));
-            return doubleContainer(contents[0], contents[1]);
+            const contents = value.map(v =>
+              isKubeObj(v) ? kubeObjContainer(v) : simpleTextWithTooltip(String(v), undefined, undefined, multiLineSize)
+            );
+            return doubleContainer(contents[0], contents[1], undefined, undefined, multiLineSize);
           }
           // else we will show values as single joigned string
           return singleContainer(simpleTextWithTooltip(value.map(v => String(v)).join(', ')));
