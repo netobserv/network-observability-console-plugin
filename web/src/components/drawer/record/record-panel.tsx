@@ -376,7 +376,9 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
             {isPartialFlow && (
               <Text id="partial-flow-text" component={TextVariants.p}>
                 <InfoCircleIcon className="record-panel-warning" />
-                {t('This is a partial flow: it contains only enrichment data and is missing some basic information such as byte and packet counters, TCP flags or MAC addresses. This information can likely be found in adjacent flows.')}
+                {t(
+                  'This is a partial flow: it contains only enrichment data and is missing some basic information such as byte and packet counters, TCP flags or MAC addresses. This information can likely be found in adjacent flows.'
+                )}
               </Text>
             )}
             <Accordion asDefinitionList={false}>
