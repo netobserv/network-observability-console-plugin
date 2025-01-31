@@ -377,6 +377,7 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
               <Text id="partial-flow-text" component={TextVariants.p}>
                 <InfoCircleIcon className="record-panel-warning" />
                 {t(
+                  // eslint-disable-next-line max-len
                   'This is a partial flow: it contains only enrichment data and is missing some basic information such as byte and packet counters, TCP flags or MAC addresses. This information can likely be found in adjacent flows.'
                 )}
               </Text>
