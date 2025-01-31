@@ -52,6 +52,7 @@
   "Switch {{name}} option": "Switch {{name}} option",
   "Conversation event information": "Conversation event information",
   "Flow information": "Flow information",
+  "This is a partial flow: it contains only enrichment data and is missing some basic information such as byte and packet counters, TCP flags or MAC addresses. This information can likely be found in adjacent flows.": "This is a partial flow: it contains only enrichment data and is missing some basic information such as byte and packet counters, TCP flags or MAC addresses. This information can likely be found in adjacent flows.",
   "More info": "More info",
   "Raw": "Raw",
   "JSON": "JSON",
