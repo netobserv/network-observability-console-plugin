@@ -163,30 +163,34 @@ export const ViewOptionsToolbar: React.FC<ViewOptionsToolbarProps> = React.forwa
 
       if (props.selectedViewId === 'overview') {
         dropdownItems.push(
-          <DropdownGroup key="panels" label={t('Manage')}>
-            <DropdownItem key="export" onClick={() => props.setOverviewModalOpen(true)}>
+          <DropdownGroup key="panels-group" label={t('Manage')}>
+            <DropdownItem
+              key="panels"
+              id="manage-overview-panels-button"
+              onClick={() => props.setOverviewModalOpen(true)}
+            >
               {t('Panels')}
             </DropdownItem>
           </DropdownGroup>
         );
         dropdownItems.push(
           <DropdownGroup key="export-group" label={t('Actions')}>
-            <DropdownItem key="export" onClick={() => onOverviewExport()}>
+            <DropdownItem key="export" id="export-button" onClick={() => onOverviewExport()}>
               {t('Export overview')}
             </DropdownItem>
           </DropdownGroup>
         );
       } else if (props.selectedViewId === 'table') {
         dropdownItems.push(
-          <DropdownGroup key="columns" label={t('Manage')}>
-            <DropdownItem key="export" onClick={() => props.setColModalOpen(true)}>
+          <DropdownGroup key="columns-group" label={t('Manage')}>
+            <DropdownItem key="columns" id="manage-columns-button" onClick={() => props.setColModalOpen(true)}>
               {t('Columns')}
             </DropdownItem>
           </DropdownGroup>
         );
         dropdownItems.push(
           <DropdownGroup key="export-group" label={t('Actions')}>
-            <DropdownItem key="export" onClick={() => props.setExportModalOpen(true)}>
+            <DropdownItem key="export" id="export-button" onClick={() => props.setExportModalOpen(true)}>
               {t('Export')}
             </DropdownItem>
           </DropdownGroup>
@@ -194,7 +198,7 @@ export const ViewOptionsToolbar: React.FC<ViewOptionsToolbarProps> = React.forwa
       } else if (props.selectedViewId === 'topology') {
         dropdownItems.push(
           <DropdownGroup key="export-group" label={t('Actions')}>
-            <DropdownItem key="export" onClick={() => onTopologyExport()}>
+            <DropdownItem key="export" id="export-button" onClick={() => onTopologyExport()}>
               {t('Export view')}
             </DropdownItem>
           </DropdownGroup>
