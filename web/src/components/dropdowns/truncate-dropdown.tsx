@@ -50,7 +50,7 @@ export const TruncateDropdown: React.FC<TruncateDropdownProps> = ({ selected, se
           id={`${id}-dropdown`}
           isExpanded={isOpen}
           onClick={() => setOpen(!isOpen)}
-          onBlur={() => setTimeout(() => setOpen(false), 100)}
+          onBlur={() => setTimeout(() => setOpen(false), 500)}
         >
           {getTruncateDisplay(selected)}
         </MenuToggle>

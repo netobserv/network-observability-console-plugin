@@ -76,7 +76,7 @@ export const LinksOverflow: React.FC<LinksOverflowProps> = ({ id, items }) => {
               icon={<EllipsisVIcon />}
               isExpanded={isOpen}
               onClick={() => setOpen(!isOpen)}
-              onBlur={() => setTimeout(() => setOpen(false), 100)}
+              onBlur={() => setTimeout(() => setOpen(false), 500)}
             >
               <>
                 <EllipsisVIcon /> {t('More options')}

@@ -30,7 +30,7 @@ export const ScopeDropdown: React.FC<ScopeDropdownProps> = ({ selected, setScope
           id={`${id}-dropdown`}
           isExpanded={isOpen}
           onClick={() => setOpen(!isOpen)}
-          onBlur={() => setTimeout(() => setOpen(false), 100)}
+          onBlur={() => setTimeout(() => setOpen(false), 500)}
         >
           {scopes.find(sc => sc.id === selected)?.name || t('n/a')}
         </MenuToggle>

@@ -58,7 +58,7 @@ export const RefreshDropdown: React.FC<RefreshDropdownProps> = ({ disabled, id, 
             id={`${id}-dropdown`}
             isDisabled={disabled}
             onClick={() => setOpen(!isOpen)}
-            onBlur={() => setTimeout(() => setOpen(false), 100)}
+            onBlur={() => setTimeout(() => setOpen(false), 500)}
             isExpanded={isOpen}
           >
             {refreshOptions[selectedKey as keyof typeof refreshOptions]}
