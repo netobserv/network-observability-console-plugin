@@ -22,9 +22,9 @@ export const TableDisplayOptions: React.FC<TableDisplayOptionsProps> = ({ size, 
 
   return (
     <>
-      <div className="pf-c-select__menu-group">
+      <div className="pf-v5-c-menu__group">
         <Tooltip content={t('Force table rows to specific sizing.')}>
-          <div className="pf-c-select__menu-group-title">
+          <div className="pf-v5-c-menu__group-title">
             <Text component={TextVariants.p}>
               {t('Row size')} <InfoAltIcon />
             </Text>
@@ -33,7 +33,7 @@ export const TableDisplayOptions: React.FC<TableDisplayOptionsProps> = ({ size, 
         {_.map(sizeOptions, (name, key) => {
           return (
             <div key={`size-${key}`}>
-              <label className="pf-c-select__menu-item">
+              <label className="display-dropdown-padding pf-v5-c-menu__menu-item">
                 <Radio
                   isChecked={key === size}
                   name={`size-${key}`}
