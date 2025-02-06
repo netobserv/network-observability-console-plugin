@@ -1,6 +1,7 @@
 import { DrawerCloseButton } from '@patternfly/react-core';
 import { shallow } from 'enzyme';
 import * as React from 'react';
+import { waitForRender } from '../../../../components/__tests__/common.spec';
 import { DefaultColumnSample } from '../../../__tests-data__/columns';
 import { FilterDefinitionSample, FiltersSample } from '../../../__tests-data__/filters';
 import { FlowsSample, UnknownFlow } from '../../../__tests-data__/flows';
@@ -22,24 +23,28 @@ describe('<RecordPanel />', () => {
     onClose: jest.fn(),
     id: 'record-panel-test'
   };
+
   it('should render component', async () => {
     const wrapper = shallow(<RecordPanel {...mocks} />);
+    await waitForRender(wrapper);
+
     expect(wrapper.find(RecordPanel)).toBeTruthy();
     expect(wrapper.find('#record-panel-test')).toHaveLength(1);
     // all columns with data + JSON field
     // sample contains 20 fields
-    // JSON tab represent 1 extra field
-    expect(wrapper.find('.record-field-container')).toHaveLength(20 + 1);
+    expect(wrapper.find('.record-field-container')).toHaveLength(20);
     // No ICMP
     expect(wrapper.find({ 'data-test-id': 'drawer-field-IcmpType' })).toHaveLength(0);
     expect(wrapper.find({ 'data-test-id': 'drawer-field-IcmpCode' })).toHaveLength(0);
-    // same with 4 valid fields + json
+    // same with 4 valid fields
     wrapper.setProps({ record: UnknownFlow });
-    expect(wrapper.find('.record-field-container')).toHaveLength(4 + 1);
+    expect(wrapper.find('.record-field-container')).toHaveLength(4);
   });
 
   it('should close on click', async () => {
     const wrapper = shallow(<RecordPanel {...mocks} />);
+    await waitForRender(wrapper);
+
     const closeButton = wrapper.find(DrawerCloseButton);
     expect(closeButton).toHaveLength(1);
     closeButton.simulate('click');
@@ -56,6 +61,8 @@ describe('<RecordPanel />', () => {
       }
     };
     const wrapper = shallow(<RecordPanel {...mocks} record={flowWithICMP} />);
+    await waitForRender(wrapper);
+
     expect(wrapper.find(RecordPanel)).toBeTruthy();
     expect(wrapper.find({ 'data-test-id': 'drawer-field-IcmpType' })).toHaveLength(1);
     expect(wrapper.find({ 'data-test-id': 'drawer-field-IcmpCode' })).toHaveLength(1);
