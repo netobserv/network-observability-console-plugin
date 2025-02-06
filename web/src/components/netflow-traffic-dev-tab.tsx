@@ -44,7 +44,13 @@ export const NetflowTrafficDevTab: React.FC<NetflowTrafficDevTabProps> = props =
   }
   return (
     <div className="netobserv-tab-container" style={{ height: containerHeight - 200 }}>
-      <NetflowTrafficParent forcedFilters={null} isTab={true} parentConfig={undefined} forcedNamespace={namespace} />
+      <NetflowTrafficParent
+        forcedFilters={null}
+        isTab={true}
+        hideTitle={true}
+        parentConfig={undefined}
+        forcedNamespace={namespace}
+      />
     </div>
   );
 };
