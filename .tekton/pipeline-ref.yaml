@@ -42,6 +42,11 @@ spec:
       path-context
     name: dockerfile
     type: string
+  - default: "Dockerfile.front.downstream"
+    description: Path to the frontend Dockerfile inside the context specified by parameter
+      path-context
+    name: front-dockerfile
+    type: string
   - default: "false"
     description: Force rebuild image
     name: rebuild
@@ -173,6 +178,52 @@ spec:
       workspace: git-auth
     - name: netrc
       workspace: netrc
+  - name: build-front-container
+    params:
+    - name: IMAGE
+      value: "$(params.output-image)-front"
+    - name: DOCKERFILE
+      value: $(params.front-dockerfile)
+    - name: CONTEXT
+      value: $(params.path-context)
+    - name: HERMETIC
+      value: $(params.hermetic)
+    - name: PREFETCH_INPUT
+      value: $(params.prefetch-input)
+    - name: IMAGE_EXPIRES_AFTER
+      value: $(params.image-expires-after)
+    - name: COMMIT_SHA
+      value: $(tasks.clone-repository.results.commit)
+    - name: BUILD_ARGS
+      value:
+      - $(params.build-args[*])
+      - "COMMIT=$(tasks.clone-repository.results.commit)"
+      - "BUILDVERSION=$(params.build-version)"
+      - "DATE=$(tasks.clone-repository.results.commit-timestamp)"
+    - name: BUILD_ARGS_FILE
+      value: $(params.build-args-file)
+    - name: SOURCE_ARTIFACT
+      value: $(tasks.prefetch-dependencies.results.SOURCE_ARTIFACT)
+    - name: CACHI2_ARTIFACT
+      value: $(tasks.prefetch-dependencies.results.CACHI2_ARTIFACT)
+    - name: PLATFORM
+      value: "linux/x86_64"
+    runAfter:
+    - prefetch-dependencies
+    taskRef:
+      params:
+      - name: name
+        value: buildah-remote-oci-ta
+      - name: bundle
+        value:  quay.io/konflux-ci/tekton-catalog/task-buildah-remote-oci-ta:0.3@sha256:3070ee1a75e9a5a0a082008e1f9b3d2df7a9508ca107678b2613dc201eb2e279
+      - name: kind
+        value: task
+      resolver: bundles
+    when:
+    - input: $(tasks.init.results.build)
+      operator: in
+      values:
+      - "true"
   - name: build-container
     matrix:
       params:
@@ -200,6 +251,7 @@ spec:
       - "COMMIT=$(tasks.clone-repository.results.commit)"
       - "BUILDVERSION=$(params.build-version)"
       - "DATE=$(tasks.clone-repository.results.commit-timestamp)"
+      - "FRONTBUILD=$(params.output-image)-front"
     - name: BUILD_ARGS_FILE
       value: $(params.build-args-file)
     - name: SOURCE_ARTIFACT
@@ -210,6 +262,7 @@ spec:
       value: "true"
     runAfter:
     - prefetch-dependencies
+    - build-front-container
     taskRef:
       params:
       - name: name
