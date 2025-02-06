@@ -38,7 +38,7 @@ export const GroupDropdown: React.FC<GroupDropdownProps> = ({
           isDisabled={disabled}
           isExpanded={isOpen}
           onClick={() => setOpen(!isOpen)}
-          onBlur={() => setTimeout(() => setOpen(false), 100)}
+          onBlur={() => setTimeout(() => setOpen(false), 500)}
         >
           {getGroupName(selected, scopes, t)}
         </MenuToggle>

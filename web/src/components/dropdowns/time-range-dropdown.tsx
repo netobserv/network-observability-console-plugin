@@ -91,7 +91,7 @@ export const TimeRangeDropdown: React.FC<TimeRangeDropdownProps> = ({ id, range,
             data-test={`${id}-dropdown`}
             id={`${id}-dropdown`}
             onClick={() => setOpen(!isOpen)}
-            onBlur={() => setTimeout(() => setOpen(false), 100)}
+            onBlur={() => setTimeout(() => setOpen(false), 500)}
           >
             {selectedKey === customTimeRangeKey
               ? textContent(false)

@@ -56,7 +56,7 @@ export const MetricTypeDropdown: React.FC<MetricTypeDropdownProps> = ({
           id={`${id}-dropdown`}
           isExpanded={isOpen}
           onClick={() => setOpen(!isOpen)}
-          onBlur={() => setTimeout(() => setOpen(false), 100)}
+          onBlur={() => setTimeout(() => setOpen(false), 500)}
         >
           {getMetricDisplay(selected as MetricType)}
         </MenuToggle>

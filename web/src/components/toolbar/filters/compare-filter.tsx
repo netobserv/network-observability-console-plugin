@@ -99,7 +99,7 @@ export const CompareFilter: React.FC<CompareFilterProps> = ({ value, setValue, c
             }}
             onClick={() => setOpen(!isOpen)}
             isExpanded={isOpen}
-            onBlur={() => setTimeout(() => setOpen(false), 100)}
+            onBlur={() => setTimeout(() => setOpen(false), 500)}
           />
         )}
       >
