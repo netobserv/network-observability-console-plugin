@@ -50,7 +50,7 @@ CMDLINE_ARGS ?= --loglevel trace --config config/config.yaml
 # build a single arch target provided as argument
 define build_target
 	echo 'building image for arch $(1)'; \
-	DOCKER_BUILDKIT=1 $(OCI_BIN) buildx build --ulimit nofile=20480:20480 --load --build-arg LDFLAGS="${LDFLAGS}" --build-arg BUILDSCRIPT=${BUILDSCRIPT} --build-arg TARGETARCH=$(1) ${OCI_BUILD_OPTS} -t ${IMAGE}-$(1) -f Dockerfile .;
+	DOCKER_BUILDKIT=1 $(OCI_BIN) buildx build --load --build-arg LDFLAGS="${LDFLAGS}" --build-arg TARGETARCH=$(1) ${OCI_BUILD_OPTS} -t ${IMAGE}-$(1) -f Dockerfile .;
 endef
 
 # push a single arch target image
@@ -196,6 +196,7 @@ serve-mock: YQ ## Run backend using mocks
 # note: to build and push custom image tag use: IMAGE_ORG=myuser VERSION=dev make images
 .PHONY: image-build
 image-build: ## Build MULTIARCH_TARGETS images
+	$(OCI_BIN) build --ulimit nofile=20480:20480 --build-arg BUILDSCRIPT=${BUILDSCRIPT} ${OCI_BUILD_OPTS} -t localhost/local-front-build:latest -f Dockerfile.front .
 	trap 'exit' INT; \
 	$(foreach target,$(MULTIARCH_TARGETS),$(call build_target,$(target)))
 
