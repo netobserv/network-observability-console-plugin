@@ -65,6 +65,7 @@ export interface NetflowTrafficProps {
   forcedNamespace?: string;
   forcedFilters?: Filters | null;
   isTab?: boolean;
+  hideTitle?: boolean;
   parentConfig?: Config;
 }
 
@@ -72,6 +73,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
   forcedNamespace,
   forcedFilters,
   isTab,
+  hideTitle,
   parentConfig
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
@@ -845,17 +847,13 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
 
   const isShowViewOptions =
     model.selectedViewId === 'table' ? model.showViewOptions && !model.showHistogram : model.showViewOptions;
-  const isForced = forcedFilters || forcedNamespace;
 
   return !_.isEmpty(extensions) ? (
     <PageSection id="pageSection" className={`${isDarkTheme ? 'dark' : 'light'} ${isTab ? 'tab' : ''}`}>
-      {
-        //display title only if forced filters is not set
-        !forcedFilters && !forcedNamespace && pageHeader()
-      }
+      {!hideTitle && pageHeader()}
       {!_.isEmpty(getFilterDefs()) && (
-        <Flex direction={{ default: 'row' }} style={{ paddingRight: isForced ? '1.5rem' : undefined }}>
-          <FlexItem style={{ paddingTop: isForced ? '1.8rem' : undefined }} flex={{ default: 'flex_1' }}>
+        <Flex direction={{ default: 'row' }} style={{ paddingRight: hideTitle ? '1.5rem' : undefined }}>
+          <FlexItem style={{ paddingTop: hideTitle ? '1.8rem' : undefined }} flex={{ default: 'flex_1' }}>
             <FiltersToolbar
               {...model}
               id="filter-toolbar"
@@ -878,7 +876,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
               filterDefinitions={getFilterDefs()}
             />
           </FlexItem>
-          {isForced && <FlexItem style={{ alignSelf: 'flex-start' }}>{actions()}</FlexItem>}
+          {hideTitle && <FlexItem style={{ alignSelf: 'flex-start' }}>{actions()}</FlexItem>}
         </Flex>
       )}
       {
@@ -888,7 +886,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
           selectView={selectView}
           isAllowLoki={allowLoki()}
           isShowViewOptions={isShowViewOptions}
-          style={{ paddingRight: isForced ? '1.5rem' : undefined }}
+          style={{ paddingRight: hideTitle ? '1.5rem' : undefined }}
         />
       }
       {model.selectedViewId === 'table' && model.showHistogram && (
