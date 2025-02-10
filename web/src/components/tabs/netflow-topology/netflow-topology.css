@@ -12,12 +12,13 @@
 }
 
 #topology-scope-slider-div {
-  height: 100%;
+  height: fit-content;
   width: fit-content;
   grid-area: inner-div;
   margin: 1rem;
   z-index: 2;
   align-content: center;
+  align-self: center;
 }
 
 #topology-view-div {
