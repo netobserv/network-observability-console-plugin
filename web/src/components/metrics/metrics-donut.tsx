@@ -1,4 +1,4 @@
-import { ChartDonut, ChartLabel, ChartLegend, ChartThemeColor } from '@patternfly/react-charts';
+import { ChartDonut, ChartLabel, ChartLegend, ChartThemeColor } from '@patternfly/react-charts/victory';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { GenericMetric, MetricStats, NamedMetric } from '../../api/loki';

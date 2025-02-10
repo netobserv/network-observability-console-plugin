@@ -10,8 +10,8 @@
   padding: .5rem !important;
 }
 
-#type>.pf-v5-c-menu__content,
-#scope>.pf-v5-c-menu__content {
+#type>.pf-v6-c-menu__content,
+#scope>.pf-v6-c-menu__content {
   top: 0;
   left: 100%;
 }

@@ -1,4 +1,4 @@
-import { Button, InputGroup, TextInput, ValidatedOptions } from '@patternfly/react-core';
+import { Button, InputGroup, SearchInput, ValidatedOptions } from '@patternfly/react-core';
 import { AngleDownIcon, AngleUpIcon, SearchIcon, TimesIcon } from '@patternfly/react-icons';
 import _ from 'lodash';
 import * as React from 'react';
@@ -50,7 +50,7 @@ export const SearchComponent: React.FC<SearchComponentProps> = React.forwardRef(
 
     return (
       <InputGroup>
-        <TextInput
+        <SearchInput
           data-test="search-topology-element-input"
           id="search-topology-element-input"
           className={'search'}
@@ -61,10 +61,9 @@ export const SearchComponent: React.FC<SearchComponentProps> = React.forwardRef(
           onKeyPress={e => e.key === 'Enter' && props.setSearchEvent({ searchValue, type: 'searchNext' })}
           onChange={(event, value) => onChangeSearch(value)}
           value={searchValue}
-          validated={searchValidated}
         />
         {!_.isEmpty(searchResultCount) ? (
-          <TextInput
+          <SearchInput
             value={searchResultCount}
             isDisabled
             id="topology-search-result-count"

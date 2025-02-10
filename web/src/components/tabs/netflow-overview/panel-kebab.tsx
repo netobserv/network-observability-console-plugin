@@ -1,5 +1,7 @@
 import {
   Checkbox,
+  Content,
+  ContentVariants,
   Divider,
   Dropdown,
   DropdownGroup,
@@ -7,8 +9,6 @@ import {
   MenuToggle,
   MenuToggleElement,
   Radio,
-  Text,
-  TextVariants,
   Tooltip
 } from '@patternfly/react-core';
 import { EllipsisVIcon } from '@patternfly/react-icons';
@@ -191,12 +191,12 @@ export const PanelKebab: React.FC<PanelKebabProps> = ({ id, options, setOptions,
       <DropdownItem key={`${id}-show-internal`}>
         <Tooltip
           content={
-            <Text component={TextVariants.p}>
+            <Content component={ContentVariants.p}>
               {t(
                 // eslint-disable-next-line max-len
                 'Show scope-internal traffic, depending on the selected scope (e.g. node-internal traffic, namespace-internal traffic)'
               )}
-            </Text>
+            </Content>
           }
         >
           <Checkbox
@@ -216,9 +216,9 @@ export const PanelKebab: React.FC<PanelKebabProps> = ({ id, options, setOptions,
       <DropdownItem key={`${id}-show-out-of-scope`}>
         <Tooltip
           content={
-            <Text component={TextVariants.p}>
+            <Content component={ContentVariants.p}>
               {t('Show out of scope traffic (e.g. host-network traffic when scope is different from "Node")')}
-            </Text>
+            </Content>
           }
         >
           <Checkbox
@@ -240,7 +240,9 @@ export const PanelKebab: React.FC<PanelKebabProps> = ({ id, options, setOptions,
         items.push(
           <DropdownItem key={`${id}-show-others`}>
             <Tooltip
-              content={<Text component={TextVariants.p}>{t('Show other traffic grouped in a separate series')}</Text>}
+              content={
+                <Content component={ContentVariants.p}>{t('Show other traffic grouped in a separate series')}</Content>
+              }
             >
               <Checkbox
                 id={`${id}-show-others`}
@@ -258,7 +260,9 @@ export const PanelKebab: React.FC<PanelKebabProps> = ({ id, options, setOptions,
         items.push(
           <DropdownItem key={`${id}-last`}>
             <Tooltip
-              content={<Text component={TextVariants.p}>{t('Show latest metrics of the selected timerange.')}</Text>}
+              content={
+                <Content component={ContentVariants.p}>{t('Show latest metrics of the selected timerange.')}</Content>
+              }
             >
               <Checkbox
                 id={`${id}-last`}
@@ -278,7 +282,11 @@ export const PanelKebab: React.FC<PanelKebabProps> = ({ id, options, setOptions,
       if (options?.showTop !== undefined) {
         items.push(
           <DropdownItem key={`${id}-show-top`}>
-            <Tooltip content={<Text component={TextVariants.p}>{t('Show top traffic for the selected filters')}</Text>}>
+            <Tooltip
+              content={
+                <Content component={ContentVariants.p}>{t('Show top traffic for the selected filters')}</Content>
+              }
+            >
               <Checkbox
                 id={`${id}-show-top`}
                 isChecked={options.showTop}
@@ -294,7 +302,9 @@ export const PanelKebab: React.FC<PanelKebabProps> = ({ id, options, setOptions,
       if (options?.showApp !== undefined) {
         items.push(
           <DropdownItem key={`${id}-show-app`}>
-            <Tooltip content={<Text component={TextVariants.p}>{t('Show overall for the selected filters')}</Text>}>
+            <Tooltip
+              content={<Content component={ContentVariants.p}>{t('Show overall for the selected filters')}</Content>}
+            >
               <Checkbox
                 id={`${id}-show-app`}
                 isChecked={options.showApp.value}
@@ -310,7 +320,9 @@ export const PanelKebab: React.FC<PanelKebabProps> = ({ id, options, setOptions,
           items.push(
             <DropdownItem key={`${id}-show-app-drop`}>
               <Tooltip
-                content={<Text component={TextVariants.p}>{t('Show overall dropped for the selected filters')}</Text>}
+                content={
+                  <Content component={ContentVariants.p}>{t('Show overall dropped for the selected filters')}</Content>
+                }
               >
                 <Checkbox
                   id={`${id}-show-app-drop`}
@@ -331,7 +343,9 @@ export const PanelKebab: React.FC<PanelKebabProps> = ({ id, options, setOptions,
     items.push(
       <DropdownItem key={`${id}-show-noerror`}>
         <Tooltip
-          content={<Text component={TextVariants.p}>{t('Show NoError responses grouped in a separate series')}</Text>}
+          content={
+            <Content component={ContentVariants.p}>{t('Show NoError responses grouped in a separate series')}</Content>
+          }
         >
           <Checkbox
             id={`${id}-show-noerror`}

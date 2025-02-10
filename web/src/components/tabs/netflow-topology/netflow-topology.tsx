@@ -1,5 +1,5 @@
 import { K8sModel } from '@openshift-console/dynamic-plugin-sdk';
-import { Bullseye, Spinner, Text } from '@patternfly/react-core';
+import { Bullseye, Content, Spinner } from '@patternfly/react-core';
 import { Visualization, VisualizationProvider } from '@patternfly/react-topology';
 import _ from 'lodash';
 import * as React from 'react';
@@ -193,7 +193,7 @@ export const NetflowTopology: React.FC<NetflowTopologyProps> = React.forwardRef(
           </Bullseye>
         );
       } else if (props.options.layout === LayoutName.threeD) {
-        return <Text>{t('Sorry, 3D view is not implemented anymore.')}</Text>;
+        return <Content>{t('Sorry, 3D view is not implemented anymore.')}</Content>;
       } else {
         return (
           <VisualizationProvider data-test="visualization-provider" controller={controller}>

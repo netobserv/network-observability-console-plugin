@@ -10,7 +10,7 @@ import {
   ChartScatter,
   ChartStack,
   ChartThemeColor
-} from '@patternfly/react-charts';
+} from '@patternfly/react-charts/victory';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { GenericMetric, NamedMetric } from '../../api/loki';

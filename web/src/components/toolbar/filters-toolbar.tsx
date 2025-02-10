@@ -25,7 +25,7 @@ import { FilterHints } from './filters/filter-hints';
 import { FiltersChips } from './filters/filters-chips';
 import FiltersDropdown from './filters/filters-dropdown';
 import { QuickFilters } from './filters/quick-filters';
-import TextFilter from './filters/text-filter';
+import { TextFilter } from './filters/text-filter';
 import { LinksOverflow } from './links-overflow';
 
 export interface FiltersToolbarProps {

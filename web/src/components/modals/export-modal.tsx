@@ -1,8 +1,8 @@
 import {
   Button,
   Checkbox,
-  Chip,
-  ChipGroup,
+  Content,
+  ContentVariants,
   DataList,
   DataListCell,
   DataListCheck,
@@ -10,9 +10,8 @@ import {
   DataListItem,
   DataListItemCells,
   DataListItemRow,
-  Text,
-  TextContent,
-  TextVariants
+  Label,
+  LabelGroup
 } from '@patternfly/react-core';
 import _ from 'lodash';
 import * as React from 'react';
@@ -146,29 +145,29 @@ export const ExportModal: React.FC<ExportModalProps> = ({
       onClose={() => setModalOpen(false)}
       description={
         <>
-          <TextContent>
-            <Text component={TextVariants.p}>{t('Following query will be exported as CSV format:')}&nbsp;</Text>
-          </TextContent>
-          <div data-test="export-chips" id="export-chips">
-            <ChipGroup isClosable={false} categoryName={t('Time Range')}>
-              <Chip isReadOnly={true}>{rangeText()}</Chip>
-            </ChipGroup>
+          <div>
+            <Content component={ContentVariants.p}>
+              {t('Following query will be exported as CSV format:')}&nbsp;
+            </Content>
+          </div>
+          <div data-test="export-Labels" id="export-Labels">
+            <LabelGroup isClosable={false} categoryName={t('Time Range')}>
+              <Label>{rangeText()}</Label>
+            </LabelGroup>
             {flowQuery.dedup && (
-              <ChipGroup isClosable={false} categoryName={t('Deduplicate')}>
-                <Chip isReadOnly={true}>true</Chip>
-              </ChipGroup>
+              <LabelGroup isClosable={false} categoryName={t('Deduplicate')}>
+                <Label>true</Label>
+              </LabelGroup>
             )}
-            <ChipGroup isClosable={false} categoryName={t('Limit')}>
-              <Chip isReadOnly={true}>{flowQuery.limit}</Chip>
-            </ChipGroup>
+            <LabelGroup isClosable={false} categoryName={t('Limit')}>
+              <Label>{flowQuery.limit}</Label>
+            </LabelGroup>
             {filters.map((filter, fIndex) => (
-              <ChipGroup key={fIndex} isClosable={false} categoryName={getFilterFullName(filter.def, t)}>
+              <LabelGroup key={fIndex} isClosable={false} categoryName={getFilterFullName(filter.def, t)}>
                 {filter.values.map((value, fvIndex) => (
-                  <Chip key={fvIndex} isReadOnly={true}>
-                    {value.display ? value.display : value.v}
-                  </Chip>
+                  <Label key={fvIndex}>{value.display ? value.display : value.v}</Label>
                 ))}
-              </ChipGroup>
+              </LabelGroup>
             ))}
           </div>
         </>
@@ -206,12 +205,12 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           label={t('Export all datas')}
           aria-label="Export all"
           description={
-            <TextContent className="netobserv-no-child-margin">
-              <Text component={TextVariants.p}>
+            <div className="netobserv-no-child-margin">
+              <Content component={ContentVariants.p}>
                 {t('Use this option to export every fields and labels from flows.')}
-              </Text>
-              <Text component={TextVariants.p}>{t('Else pick from available columns.')}</Text>
-            </TextContent>
+              </Content>
+              <Content component={ContentVariants.p}>{t('Else pick from available columns.')}</Content>
+            </div>
           }
           body={
             !isExportAll && (

@@ -1,7 +1,15 @@
-import { Chart, ChartAxis, ChartBar, ChartStack, ChartThemeColor, createContainer } from '@patternfly/react-charts';
+import {
+  Chart,
+  ChartAxis,
+  ChartBar,
+  ChartStack,
+  ChartThemeColor,
+  createContainer
+} from '@patternfly/react-charts/victory';
 import {
   Bullseye,
   Button,
+  Content,
   EmptyState,
   EmptyStateBody,
   EmptyStateVariant,
@@ -9,7 +17,6 @@ import {
   FlexItem,
   PopoverPosition,
   Spinner,
-  Text,
   Title,
   Tooltip
 } from '@patternfly/react-core';
@@ -255,7 +262,7 @@ export const Histogram: React.FC<HistogramProps> = ({
     >
       <Flex className="histogram-range-container" direction={{ default: 'row' }}>
         <FlexItem flex={{ default: 'flex_1' }}>
-          <Text>{t('Number of logs over time')}</Text>
+          <Content>{t('Number of logs over time')}</Content>
         </FlexItem>
         <FlexItem>
           <Tooltip
@@ -288,7 +295,7 @@ export const Histogram: React.FC<HistogramProps> = ({
           </Tooltip>
         </FlexItem>
         <FlexItem>
-          <Text>{getDomainDisplayText(displayedRange || range || defaultRange)}</Text>
+          <Content>{getDomainDisplayText(displayedRange || range || defaultRange)}</Content>
         </FlexItem>
         <FlexItem>
           <Tooltip

@@ -5,9 +5,8 @@ import {
   AccordionExpandableContentBody,
   AccordionItem,
   AccordionToggle,
-  Text,
-  TextContent,
-  TextVariants
+  Content,
+  ContentVariants
 } from '@patternfly/react-core';
 import _ from 'lodash';
 import * as React from 'react';
@@ -70,7 +69,7 @@ export const SummaryPanelContent: React.FC<SummaryPanelContentProps> = ({
 
   const accordionItem = (id: string, label: string, content: JSX.Element) => {
     return (
-      <AccordionItem key={id}>
+      <AccordionItem key={id} isExpanded={expanded === id}>
         <AccordionToggle
           onClick={() => {
             if (id === expanded) {
@@ -79,12 +78,11 @@ export const SummaryPanelContent: React.FC<SummaryPanelContentProps> = ({
               setExpanded(id);
             }
           }}
-          isExpanded={expanded === id}
           id={id}
         >
           {label}
         </AccordionToggle>
-        <AccordionContent id={`${id}-content`} isHidden={expanded !== id} isCustomContent>
+        <AccordionContent id={`${id}-content`} isCustomContent>
           {content}
         </AccordionContent>
       </AccordionItem>
@@ -127,7 +125,7 @@ export const SummaryPanelContent: React.FC<SummaryPanelContentProps> = ({
       <>
         {sortedStrings.map((v: string) => (
           <AccordionExpandableContentBody key={v}>
-            <Text>{v}</Text>
+            <Content>{v}</Content>
           </AccordionExpandableContentBody>
         ))}
       </>
@@ -136,23 +134,23 @@ export const SummaryPanelContent: React.FC<SummaryPanelContentProps> = ({
 
   const configContent = () => {
     return (
-      <TextContent className="summary-text-container">
-        <Text component={TextVariants.h3}>{`${t('Configuration')}`}</Text>
-        <Text className="summary-config-item">{`${t('Sampling')}: ${config.sampling}`}</Text>
+      <div className="summary-text-container">
+        <Content component={ContentVariants.h3}>{`${t('Configuration')}`}</Content>
+        <Content className="summary-config-item">{`${t('Sampling')}: ${config.sampling}`}</Content>
         {maxChunkAge && (
-          <Text className="summary-config-item">{`${t('Max chunk age')}: ${formatDuration(maxChunkAge)}`}</Text>
+          <Content className="summary-config-item">{`${t('Max chunk age')}: ${formatDuration(maxChunkAge)}`}</Content>
         )}
-      </TextContent>
+      </div>
     );
   };
 
   const versionContent = () => {
     return (
-      <TextContent className="summary-text-container">
-        <Text component={TextVariants.h3}>{`${t('Version')}`}</Text>
-        <Text className="summary-config-item">{`${t('Number')}: ${config.buildVersion}`}</Text>
-        <Text className="summary-config-item">{`${t('Date')}: ${config.buildDate}`}</Text>
-      </TextContent>
+      <div className="summary-text-container">
+        <Content component={ContentVariants.h3}>{`${t('Version')}`}</Content>
+        <Content className="summary-config-item">{`${t('Number')}: ${config.buildVersion}`}</Content>
+        <Content className="summary-config-item">{`${t('Date')}: ${config.buildDate}`}</Content>
+      </div>
     );
   };
 
@@ -286,10 +284,10 @@ export const SummaryPanelContent: React.FC<SummaryPanelContentProps> = ({
     }
 
     return addresses.length || typesCardinality.length || ports.length || protocols.length ? (
-      <TextContent className="summary-text-container">
-        <Text component={TextVariants.h3}>{`${t('Cardinality')} ${
+      <div className="summary-text-container">
+        <Content component={ContentVariants.h3}>{`${t('Cardinality')} ${
           !_.isEmpty(rateMetrics) ? t('(top {{count}} metrics)', { count: limit }) : ''
-        }`}</Text>
+        }`}</Content>
         <Accordion id="cardinality-accordion">
           {addresses.length
             ? accordionItem(
@@ -328,7 +326,7 @@ export const SummaryPanelContent: React.FC<SummaryPanelContentProps> = ({
               )
             : undefined}
         </Accordion>
-      </TextContent>
+      </div>
     ) : undefined;
   };
 
@@ -340,9 +338,9 @@ export const SummaryPanelContent: React.FC<SummaryPanelContentProps> = ({
       : NaN;
 
     return (
-      <Text className="summary-config-item">{`${t('DNS latency')}: ${
+      <Content className="summary-config-item">{`${t('DNS latency')}: ${
         isNaN(dnsLatency) ? t('n/a') : formatDurationAboveMillisecond(dnsLatency)
-      }`}</Text>
+      }`}</Content>
     );
   };
 
@@ -354,9 +352,9 @@ export const SummaryPanelContent: React.FC<SummaryPanelContentProps> = ({
       : NaN;
 
     return (
-      <Text className="summary-config-item">{`${t('Flow RTT')}: ${
+      <Content className="summary-config-item">{`${t('Flow RTT')}: ${
         isNaN(rtt) ? t('n/a') : formatDurationAboveNanosecond(rtt)
-      }`}</Text>
+      }`}</Content>
     );
   };
 
@@ -374,15 +372,17 @@ export const SummaryPanelContent: React.FC<SummaryPanelContentProps> = ({
       : 0;
 
     return flows && flows.length ? (
-      <TextContent className="summary-text-container">
-        <Text component={TextVariants.h3}>{`${t('Average time')}`}</Text>
-        <Text className="summary-config-item">{`${t('Duration')}: ${formatDurationAboveMillisecond(duration)}`}</Text>
+      <div className="summary-text-container">
+        <Content component={ContentVariants.h3}>{`${t('Average time')}`}</Content>
+        <Content className="summary-config-item">{`${t('Duration')}: ${formatDurationAboveMillisecond(
+          duration
+        )}`}</Content>
         {showRTTLatency ? rttLatency(filteredFlows) : <></>}
-        <Text className="summary-config-item">{`${t('Collection latency')}: ${formatDurationAboveMillisecond(
+        <Content className="summary-config-item">{`${t('Collection latency')}: ${formatDurationAboveMillisecond(
           collectionLatency
-        )}`}</Text>
+        )}`}</Content>
         {showDNSLatency ? dnsLatency(filteredFlows) : <></>}
-      </TextContent>
+      </div>
     ) : (
       <></>
     );
@@ -390,18 +390,18 @@ export const SummaryPanelContent: React.FC<SummaryPanelContentProps> = ({
 
   return (
     <div className="scrollable-panel">
-      <TextContent className="summary-text-container">
+      <div className="summary-text-container">
         {!_.isEmpty(flows) && stats?.limitReached && (
-          <Text component={TextVariants.p}>
+          <Content component={ContentVariants.p}>
             {t(
               // eslint-disable-next-line max-len
               'Flow per request limit reached, following metrics can be inaccurate. Narrow down your search or increase limit.'
             )}
-          </Text>
+          </Content>
         )}
-        <Text component={TextVariants.h3}>{`${t('Results')} ${
+        <Content component={ContentVariants.h3}>{`${t('Results')} ${
           _.isEmpty(flows) ? t('(top {{count}} metrics)', { count: limit }) : ''
-        }`}</Text>
+        }`}</Content>
         {_.isEmpty(flows) ? (
           <MetricsQuerySummaryContent
             className="summary-container-grouped"
@@ -427,7 +427,7 @@ export const SummaryPanelContent: React.FC<SummaryPanelContentProps> = ({
             warning={warning}
           />
         )}
-      </TextContent>
+      </div>
 
       {timeContent()}
 

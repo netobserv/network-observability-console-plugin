@@ -1,4 +1,4 @@
-import { Button, Flex, FlexItem, Popover, PopoverPosition, Text, TextVariants } from '@patternfly/react-core';
+import { Button, Content, ContentVariants, Flex, FlexItem, Popover, PopoverPosition } from '@patternfly/react-core';
 import { TimesIcon } from '@patternfly/react-icons';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -155,9 +155,9 @@ export const GuidedTourPopover: React.FC<GuidedTourPopoverProps> = React.forward
         footerContent={
           <Flex direction={{ default: 'row' }}>
             <FlexItem flex={{ default: 'flex_1' }}>
-              <Text component={TextVariants.p} className="text-muted">
+              <Content component={ContentVariants.p} className="text-muted">
                 {t('Step {{index}}/{{count}}', { index: (index || 0) + 1, count: items.length })}
-              </Text>
+              </Content>
             </FlexItem>
             <FlexItem>
               {index ? (

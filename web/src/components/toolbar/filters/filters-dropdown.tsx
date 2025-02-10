@@ -36,16 +36,15 @@ export const FiltersDropdown: React.FC<FiltersDropdownProps> = ({
     return [
       <Accordion data-test="filter-accordion" key="accordion">
         {groups.map((g, i) => (
-          <AccordionItem key={`group-${i}`}>
+          <AccordionItem key={`group-${i}`} isExpanded={expandedGroup === i}>
             <AccordionToggle
               onClick={() => setExpandedGroup(expandedGroup !== i ? i : -1)}
-              isExpanded={expandedGroup === i}
               data-test={`group-${i}-toggle`}
               id={`group-${i}-toggle`}
             >
-              {g.title && <h1 className="pf-v5-c-dropdown__group-title">{g.title}</h1>}
+              {g.title && <h1 className="pf-v6-c-dropdown__group-title">{g.title}</h1>}
             </AccordionToggle>
-            <AccordionContent isHidden={expandedGroup !== i}>
+            <AccordionContent>
               {g.filters.map((f, index) => (
                 <DropdownItem
                   data-test={f.id}

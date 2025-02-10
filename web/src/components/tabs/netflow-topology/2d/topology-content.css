@@ -92,11 +92,11 @@ g.netobserv.pf-topology__group>.pf-topology__group__background {
   fill-opacity: 0.5;
 }
 
-g.netobserv.pf-topology__group.pf-v5-m-hover>.pf-topology__group__background {
+g.netobserv.pf-topology__group.pf-v6-m-hover>.pf-topology__group__background {
   stroke: #4F5255;
 }
 
-g.netobserv.pf-topology__group.pf-v5-m-selected>.pf-topology__group__background {
+g.netobserv.pf-topology__group.pf-v6-m-selected>.pf-topology__group__background {
   stroke: #0066CC;
   fill: #A5C4E2;
 }
