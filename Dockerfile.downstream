@@ -24,6 +24,10 @@ FROM registry.access.redhat.com/ubi9/ubi-minimal:9.5-1738816775
 COPY --from=web-builder /opt/app-root/web/dist ./web/dist
 COPY --from=go-builder /opt/app-root/plugin-backend ./
 
+USER 65532:65532
+
+COPY LICENSE /licenses/
+
 ENTRYPOINT ["./plugin-backend"]
 
 LABEL com.redhat.component="network-observability-console-plugin-container"
