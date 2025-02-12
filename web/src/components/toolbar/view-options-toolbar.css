@@ -1,0 +1,6 @@
+.view-options-group {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 1em !important;
+}

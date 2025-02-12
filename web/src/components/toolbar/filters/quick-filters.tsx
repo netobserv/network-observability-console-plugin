@@ -1,10 +1,11 @@
-import { Select, SelectOption, SelectVariant } from '@patternfly/react-core';
+import { Badge, MenuToggle, MenuToggleElement, Select, SelectOption } from '@patternfly/react-core';
 import { FilterIcon } from '@patternfly/react-icons';
 import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { doesIncludeFilter, Filter, findFromFilters, removeFromFilters } from '../../../model/filters';
 import { QuickFilter } from '../../../model/quick-filters';
+import { useOutsideClickEvent } from '../../../utils/outside-hook';
 
 export interface QuickFiltersProps {
   quickFilters: QuickFilter[];
@@ -14,7 +15,8 @@ export interface QuickFiltersProps {
 
 export const QuickFilters: React.FC<QuickFiltersProps> = ({ quickFilters, activeFilters, setFilters }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
-  const [isOpen, setIsOpen] = React.useState(false);
+  const ref = useOutsideClickEvent(() => setOpen(false));
+  const [isOpen, setOpen] = React.useState(false);
   const [selectedList, setSelectedList] = React.useState([] as string[]);
 
   React.useEffect(() => {
@@ -60,27 +62,30 @@ export const QuickFilters: React.FC<QuickFiltersProps> = ({ quickFilters, active
   };
 
   return (
-    <Select
-      data-test="quick-filters-dropdown"
-      id="quick-filters-dropdown"
-      variant={SelectVariant.checkbox}
-      onToggle={setIsOpen}
-      onSelect={onSelect}
-      placeholderText={
-        <>
-          <FilterIcon /> {t('Quick filters')}
-        </>
-      }
-      selections={selectedList}
-      isOpen={isOpen}
-    >
-      {quickFilters.map(qf => {
-        return (
-          <SelectOption key={qf.name} value={qf.name}>
-            {qf.name}
-          </SelectOption>
-        );
-      })}
-    </Select>
+    <div id="quick-filters-dropdown-container" data-test="quick-filters-dropdown-container" ref={ref}>
+      <Select
+        data-test="quick-filters-dropdown"
+        id="quick-filters-dropdown"
+        isOpen={isOpen}
+        onSelect={onSelect}
+        toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+          <MenuToggle ref={toggleRef} onClick={() => setOpen(!isOpen)} isExpanded={isOpen}>
+            <>
+              <FilterIcon /> {t('Quick filters')}
+              {selectedList.length > 0 && <Badge isRead>{selectedList.length}</Badge>}
+            </>
+          </MenuToggle>
+        )}
+        selected={selectedList}
+      >
+        {quickFilters.map(qf => {
+          return (
+            <SelectOption hasCheckbox isSelected={selectedList.includes(qf.name)} key={qf.name} value={qf.name}>
+              {qf.name}
+            </SelectOption>
+          );
+        })}
+      </Select>
+    </div>
   );
 };

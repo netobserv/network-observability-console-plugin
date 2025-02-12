@@ -100,7 +100,8 @@ export const OverviewPanelsModal: React.FC<OverviewPanelsModalProps> = ({
   );
 
   const onCheck = React.useCallback(
-    (checked, event) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    (event, checked) => {
       if (event?.target?.id) {
         const result = [...updatedPanels];
         const selectedPanel = result.find(p => p.id === event.target.id);
@@ -195,7 +196,7 @@ export const OverviewPanelsModal: React.FC<OverviewPanelsModalProps> = ({
           data-test={'data-' + i}
           id={'data-' + i}
         >
-          <DataListItemRow key={'data-list-item-row-' + i}>
+          <DataListItemRow key={'data-list-item-row-' + i} className="center">
             <DataListControl>
               <DataListDragButton aria-label="Reorder" aria-labelledby={'overview-panel-management-item' + i} />
               <DataListCheck
