@@ -11,23 +11,25 @@ describe('<DisplayDropdown />', () => {
     size: 's' as Size,
     setSize: jest.fn()
   };
+
   it('should render component', async () => {
     const wrapper = shallow(<TableDisplayDropdown {...props} />);
     expect(wrapper.find(TableDisplayDropdown)).toBeTruthy();
   });
+
   it('should setSize on select', async () => {
     const wrapper = mount(<TableDisplayOptions {...props} />);
 
     //select compact
     act(() => {
-      wrapper.find('#size-s').find(Radio).props().onChange!(true, {} as React.FormEvent<HTMLInputElement>);
+      wrapper.find('#size-s').find(Radio).props().onChange!({} as React.FormEvent<HTMLInputElement>, true);
     });
     expect(props.setSize).toHaveBeenCalledWith('s');
     expect(wrapper.find('li').length).toBe(0);
 
     //select large
     act(() => {
-      wrapper.find('#size-l').find(Radio).props().onChange!(true, {} as React.FormEvent<HTMLInputElement>);
+      wrapper.find('#size-l').find(Radio).props().onChange!({} as React.FormEvent<HTMLInputElement>, true);
     });
     expect(props.setSize).toHaveBeenCalledWith('l');
 
