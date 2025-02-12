@@ -80,7 +80,13 @@ export const QuickFilters: React.FC<QuickFiltersProps> = ({ quickFilters, active
       >
         {quickFilters.map(qf => {
           return (
-            <SelectOption hasCheckbox isSelected={selectedList.includes(qf.name)} key={qf.name} value={qf.name}>
+            <SelectOption
+              hasCheckbox
+              isSelected={selectedList.includes(qf.name)}
+              id={`quick-filter-option-${qf.name}`}
+              key={qf.name}
+              value={qf.name}
+            >
               {qf.name}
             </SelectOption>
           );
