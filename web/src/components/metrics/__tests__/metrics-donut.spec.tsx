@@ -1,7 +1,7 @@
 import { mount } from 'enzyme';
 import * as React from 'react';
 
-import { ChartDonut } from '@patternfly/react-charts';
+import { ChartDonut } from '@patternfly/react-charts/victory';
 import { NamedMetric } from '../../../api/loki';
 import { metrics } from '../../__tests-data__/metrics';
 import { MetricsDonut, MetricsDonutProps } from '../metrics-donut';
@@ -18,6 +18,7 @@ describe('<StatDonut />', () => {
     showOthers: true,
     showOutOfScope: false
   };
+
   it('should render donut', async () => {
     const wrapper = mount(<MetricsDonut {...props} />);
     expect(wrapper.find('VictoryLabel').last().text()).toBe('500 BpsTotal');

@@ -1,5 +1,5 @@
 import { K8sModel } from '@openshift-console/dynamic-plugin-sdk';
-import { Bullseye, Spinner, Text } from '@patternfly/react-core';
+import { Bullseye, Content, Spinner } from '@patternfly/react-core';
 import { Visualization, VisualizationProvider } from '@patternfly/react-topology';
 import _ from 'lodash';
 import * as React from 'react';
@@ -193,16 +193,10 @@ export const NetflowTopology: React.FC<NetflowTopologyProps> = React.forwardRef(
           </Bullseye>
         );
       } else if (props.options.layout === LayoutName.threeD) {
-        return <Text>{t('Sorry, 3D view is not implemented anymore.')}</Text>;
+        return <Content>{t('Sorry, 3D view is not implemented anymore.')}</Content>;
       } else {
         return (
           <VisualizationProvider data-test="visualization-provider" controller={controller}>
-            <ScopeSlider
-              sizePx={containerSize?.height || 300}
-              scope={props.metricScope}
-              setScope={props.setMetricScope}
-              scopeDefs={props.scopes}
-            />
             <TopologyContent
               k8sModels={props.k8sModels}
               metricFunction={props.metricFunction}
@@ -229,7 +223,7 @@ export const NetflowTopology: React.FC<NetflowTopologyProps> = React.forwardRef(
         );
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [controller, props, displayedMetrics, containerSize?.height]);
+    }, [controller, props, displayedMetrics]);
 
     //create controller on startup and register factories
     React.useEffect(() => {
@@ -246,8 +240,11 @@ export const NetflowTopology: React.FC<NetflowTopologyProps> = React.forwardRef(
     }, [containerRef, containerSize]);
 
     return (
-      <div style={{ width: '100%', height: '100%' }} ref={containerRef}>
-        {getContent()}
+      <div id="topology-container-div" style={{ width: '100%', height: '100%' }} ref={containerRef}>
+        <div id={'topology-scope-slider-div'}>
+          <ScopeSlider scope={props.metricScope} setScope={props.setMetricScope} scopeDefs={props.scopes} />
+        </div>
+        <div id="topology-view-div">{getContent()}</div>
       </div>
     );
   }

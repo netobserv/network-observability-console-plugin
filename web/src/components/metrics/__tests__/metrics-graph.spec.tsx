@@ -1,7 +1,7 @@
 import { mount } from 'enzyme';
 import * as React from 'react';
 
-import { Chart, ChartArea, ChartBar, ChartDonut, ChartGroup, ChartScatter } from '@patternfly/react-charts';
+import { Chart, ChartArea, ChartBar, ChartDonut, ChartGroup, ChartScatter } from '@patternfly/react-charts/victory';
 import { metrics } from '../../__tests-data__/metrics';
 import { MetricsGraph, MetricsGraphProps } from '../metrics-graph';
 
@@ -15,11 +15,13 @@ describe('<MetricsContent />', () => {
     limit: 5,
     tooltipsTruncate: true
   };
+
   it('should render component', async () => {
     const wrapper = mount(<MetricsGraph {...props} />);
     expect(wrapper.find(MetricsGraph)).toBeTruthy();
     expect(wrapper.find('#chart-chart-test').last()).toBeTruthy();
   });
+
   it('should render bar', async () => {
     const wrapper = mount(<MetricsGraph {...props} showBar={true} />);
 
@@ -29,6 +31,7 @@ describe('<MetricsContent />', () => {
     expect(wrapper.find(ChartArea)).toHaveLength(0);
     expect(wrapper.find(ChartScatter)).toHaveLength(0);
   });
+
   it('should render area', async () => {
     const wrapper = mount(<MetricsGraph {...props} showArea={true} />);
 
@@ -39,6 +42,7 @@ describe('<MetricsContent />', () => {
     expect(wrapper.find(ChartArea)).toHaveLength(metrics.length);
     expect(wrapper.find(ChartScatter)).toHaveLength(0);
   });
+
   it('should render area with scatter', async () => {
     const wrapper = mount(<MetricsGraph {...props} showArea={true} showScatter={true} />);
 

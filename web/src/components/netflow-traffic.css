@@ -20,9 +20,10 @@
 
 /*hack to keep refresh button size while loading*/
 
-.co-action-refresh-button {
-    width: 45px !important;
-    height: 33px !important;
+#refresh-button {
+    width: 37px;
+    height: 37px;
+    margin-left: 0.5rem;
 }
 
 .netobserv-refresh-interval-container {
@@ -33,7 +34,7 @@
     align-self: end;
 }
 
-span.pf-c-button__icon.pf-m-start {
+span.pf-v6-c-button__icon.pf-v6-m-start {
     width: 14px;
     display: flex;
 }
@@ -52,11 +53,18 @@ span.pf-c-button__icon.pf-m-start {
 
 /*allow new lines for error text*/
 
-.pf-c-empty-state__body {
+.pf-v6-c-empty-state__body {
     white-space: pre-line;
 }
 
 #pageSection {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 0;
+}
+
+#pageSection>.pf-v6-c-page__main-body {
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -84,7 +92,7 @@ span.pf-c-button__icon.pf-m-start {
     overflow: hidden;
 }
 
-.pf-c-drawer__panel.pf-m-resizable {
+.pf-v6-c-drawer__panel.pf-v6-m-resizable {
     overflow: hidden;
 }
 
@@ -123,7 +131,7 @@ span.pf-c-button__icon.pf-m-start {
 #export-button,
 #view-options-button,
 #more-options-button,
-.pf-c-overflow-menu .overflow-button {
+.pf-v6-c-overflow-menu .overflow-button {
     display: flex;
     align-items: center;
     margin-left: 0;
@@ -160,7 +168,7 @@ span.pf-c-button__icon.pf-m-start {
 }
 
 /*remove bullets from dropdown*/
-.pf-c-dropdown__group>ul {
+.pf-v6-c-dropdown__group>ul {
     list-style: none;
     padding-left: 10px;
 }
@@ -249,4 +257,9 @@ span.pf-c-button__icon.pf-m-start {
 
 .chips-popover-close-button {
     padding: 0 !important;
+}
+
+.centered-list button,
+.centered-list .center {
+    align-self: center;
 }

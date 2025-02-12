@@ -1,4 +1,4 @@
-import { Text, TextVariants } from '@patternfly/react-core';
+import { Content, ContentVariants } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Status } from '../../api/loki';
@@ -15,50 +15,52 @@ export const StatusTexts: React.FC<StatusProps> = ({ status }) => {
       {status.loki.isEnabled && (
         <>
           {status.loki.isReady === false && (
-            <Text component={TextVariants.blockquote}>
+            <Content component={ContentVariants.blockquote}>
               {t(`Check if Loki is running correctly. '/ready' endpoint should respond "ready"`)}
-            </Text>
+            </Content>
           )}
           {status.loki.error && (
-            <Text component={TextVariants.blockquote}>
+            <Content component={ContentVariants.blockquote}>
               {t('Loki status check error: [{{code}}] {{err}}', {
                 err: status.loki.error,
                 code: status.loki.errorCode
               })}
-            </Text>
+            </Content>
           )}
         </>
       )}
       {status.prometheus.isEnabled && (
         <>
           {status.prometheus.error && (
-            <Text component={TextVariants.blockquote}>
+            <Content component={ContentVariants.blockquote}>
               {t('Prometheus status check error: [{{code}}] {{err}}', {
                 err: status.prometheus.error,
                 code: status.prometheus.errorCode
               })}
-            </Text>
+            </Content>
           )}
         </>
       )}
 
       {status.loki.isEnabled && !status.loki.error && status.loki.namespacesCount === 0 && (
-        <Text component={TextVariants.blockquote}>{t(`Can't find any namespace label in your Loki storage.`)}</Text>
+        <Content component={ContentVariants.blockquote}>
+          {t(`Can't find any namespace label in your Loki storage.`)}
+        </Content>
       )}
       {status.prometheus.isEnabled && !status.prometheus.error && status.prometheus.namespacesCount === 0 && (
-        <Text component={TextVariants.blockquote}>
+        <Content component={ContentVariants.blockquote}>
           {t(`Can't find any namespace label in your Prometheus storage.`)}
-        </Text>
+        </Content>
       )}
       {status &&
         ((status.loki.isEnabled && !status.loki.error && status.loki.namespacesCount === 0) ||
           (status.prometheus.isEnabled && !status.prometheus.error && status.prometheus.namespacesCount === 0)) && (
-          <Text component={TextVariants.blockquote}>
+          <Content component={ContentVariants.blockquote}>
             {t(
               // eslint-disable-next-line max-len
               `If this is the first time you run the operator, check FlowCollector status and health dashboard to ensure there is no error and flows are ingested. This can take some time.`
             )}
-          </Text>
+          </Content>
         )}
       {status &&
         // Loki is operationnal and not returning error
@@ -73,11 +75,11 @@ export const StatusTexts: React.FC<StatusProps> = ({ status }) => {
         // This ensure the message is not displayed because of retention config
         ((status.loki.namespacesCount > 0 && status.prometheus.namespacesCount === 0) ||
           (status.loki.namespacesCount === 0 && status.prometheus.namespacesCount > 0)) && (
-          <Text component={TextVariants.blockquote}>
+          <Content component={ContentVariants.blockquote}>
             {t(
               `Loki and Prometheus storages are diverging. The number of captured namespaces does't match. Check health dashboard for errors.`
             )}
-          </Text>
+          </Content>
         )}
     </>
   );

@@ -1,11 +1,12 @@
 import {
+  Content,
+  ContentVariants,
+  Divider,
   DrawerActions,
   DrawerCloseButton,
   DrawerHead,
   DrawerPanelBody,
-  DrawerPanelContent,
-  Text,
-  TextVariants
+  DrawerPanelContent
 } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -55,20 +56,24 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
 
   return (
     <DrawerPanelContent
-      data-test={id}
+      data-test-id={id}
       id={id}
+      className="drawer-panel-content"
       isResizable
       defaultSize={defaultSize}
       minSize={minSize}
       maxSize={maxSize}
     >
-      <DrawerHead>
-        <Text component={TextVariants.h2}>{t('Query summary')}</Text>
+      <DrawerHead id={`${id}-drawer-head`} data-test-id="drawer-head" className="drawer-head">
+        <Content data-test-id="drawer-head-text" component={ContentVariants.h2}>
+          {t('Query summary')}
+        </Content>
         <DrawerActions>
           <DrawerCloseButton id={`${id ? id : 'summary-panel'}-close-button`} onClick={onClose} />
         </DrawerActions>
       </DrawerHead>
-      <DrawerPanelBody>
+      <Divider />
+      <DrawerPanelBody id={`${id}-drawer-body`} className="drawer-body scrollable" data-test-id="drawer-body">
         <SummaryPanelContent
           flows={flows}
           metrics={metrics}

@@ -1,4 +1,4 @@
-import { Button, Flex, FlexItem, Popover, Text } from '@patternfly/react-core';
+import { Button, Content, Flex, FlexItem, Popover } from '@patternfly/react-core';
 import { TimesIcon } from '@patternfly/react-icons';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -10,6 +10,10 @@ export interface ChipsPopoverProps {
 
 export const ChipsPopover: React.FC<ChipsPopoverProps> = ({ chipsPopoverMessage, setChipsPopoverMessage }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
+
+  if (!chipsPopoverMessage) {
+    return <></>;
+  }
 
   return (
     <Popover
@@ -32,8 +36,8 @@ export const ChipsPopover: React.FC<ChipsPopoverProps> = ({ chipsPopoverMessage,
           </FlexItem>
         </Flex>
       }
-      bodyContent={<Text> {chipsPopoverMessage}</Text>}
-      reference={() => document.getElementsByClassName('custom-chip-group disabled-group')?.[0] as HTMLElement}
+      bodyContent={<Content> {chipsPopoverMessage}</Content>}
+      triggerRef={() => document.getElementsByClassName('custom-chip-group disabled-group')?.[0] as HTMLElement}
     />
   );
 };

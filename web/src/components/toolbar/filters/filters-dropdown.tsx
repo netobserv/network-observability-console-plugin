@@ -5,12 +5,15 @@ import {
   AccordionToggle,
   Dropdown,
   DropdownItem,
-  DropdownToggle
+  MenuToggle,
+  MenuToggleElement
 } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { FilterDefinition } from '../../../model/filters';
 import { buildGroups, getFilterFullName } from '../../../utils/filters-helper';
+import { useOutsideClickEvent } from '../../../utils/outside-hook';
+import './filters-dropdown.css';
 
 export interface FiltersDropdownProps {
   filterDefinitions: FilterDefinition[];
@@ -25,23 +28,23 @@ export const FiltersDropdown: React.FC<FiltersDropdownProps> = ({
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const groups = buildGroups(filterDefinitions, t);
-  const [isSearchFiltersOpen, setSearchFiltersOpen] = React.useState<boolean>(false);
+  const ref = useOutsideClickEvent(() => setOpen(false));
+  const [isOpen, setOpen] = React.useState<boolean>(false);
   const [expandedGroup, setExpandedGroup] = React.useState(0);
 
   const getFiltersDropdownItems = () => {
     return [
       <Accordion data-test="filter-accordion" key="accordion">
         {groups.map((g, i) => (
-          <AccordionItem key={`group-${i}`}>
+          <AccordionItem key={`group-${i}`} isExpanded={expandedGroup === i}>
             <AccordionToggle
               onClick={() => setExpandedGroup(expandedGroup !== i ? i : -1)}
-              isExpanded={expandedGroup === i}
               data-test={`group-${i}-toggle`}
               id={`group-${i}-toggle`}
             >
-              {g.title && <h1 className="pf-c-dropdown__group-title">{g.title}</h1>}
+              {g.title && <h1 className="pf-v6-c-dropdown__group-title">{g.title}</h1>}
             </AccordionToggle>
-            <AccordionContent isHidden={expandedGroup !== i}>
+            <AccordionContent>
               {g.filters.map((f, index) => (
                 <DropdownItem
                   data-test={f.id}
@@ -49,7 +52,7 @@ export const FiltersDropdown: React.FC<FiltersDropdownProps> = ({
                   className={`column-filter-item ${g.title ? 'grouped' : ''}`}
                   component="button"
                   onClick={() => {
-                    setSearchFiltersOpen(false);
+                    setOpen(false);
                     setSelectedFilter(f);
                   }}
                   key={index}
@@ -65,21 +68,28 @@ export const FiltersDropdown: React.FC<FiltersDropdownProps> = ({
   };
 
   return (
-    <Dropdown
-      data-test="column-filter-dropdown"
-      id="column-filter-dropdown"
-      dropdownItems={getFiltersDropdownItems()}
-      isOpen={isSearchFiltersOpen}
-      toggle={
-        <DropdownToggle
-          data-test="column-filter-toggle"
-          id="column-filter-toggle"
-          onToggle={() => setSearchFiltersOpen(!isSearchFiltersOpen)}
-        >
-          {getFilterFullName(selectedFilter, t)}
-        </DropdownToggle>
-      }
-    />
+    <div id="column-filter-dropdown-container" data-test="column-filter-dropdown-container" ref={ref}>
+      <Dropdown
+        data-test="column-filter-dropdown"
+        id="column-filter-dropdown"
+        isOpen={isOpen}
+        toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+          <MenuToggle
+            ref={toggleRef}
+            data-test="column-filter-toggle"
+            id="column-filter-toggle"
+            onClick={() => {
+              setOpen(!isOpen);
+            }}
+            isExpanded={isOpen}
+          >
+            {getFilterFullName(selectedFilter, t)}
+          </MenuToggle>
+        )}
+      >
+        {getFiltersDropdownItems()}
+      </Dropdown>
+    </div>
   );
 };
 

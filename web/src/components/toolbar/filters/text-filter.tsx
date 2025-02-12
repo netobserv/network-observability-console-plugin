@@ -1,4 +1,4 @@
-import { Button, TextInput, ValidatedOptions } from '@patternfly/react-core';
+import { Button, SearchInput, ValidatedOptions } from '@patternfly/react-core';
 import { SearchIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
 import * as React from 'react';
@@ -83,12 +83,11 @@ export const TextFilter: React.FC<TextFilterProps> = ({
 
   return (
     <>
-      <TextInput
+      <SearchInput
         type="search"
         aria-label="search"
-        validated={indicator}
         placeholder={filterDefinition.placeholder}
-        onChange={updateValue}
+        onChange={(event, value) => updateValue(value)}
         onKeyPress={e => e.key === 'Enter' && onSelect()}
         value={currentValue}
         ref={searchInputRef}

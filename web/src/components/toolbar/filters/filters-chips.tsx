@@ -1,4 +1,4 @@
-import { Button, Text, TextContent, TextVariants, ToolbarGroup, ToolbarItem, Tooltip } from '@patternfly/react-core';
+import { Button, Content, ContentVariants, ToolbarGroup, ToolbarItem, Tooltip } from '@patternfly/react-core';
 import { LongArrowAltDownIcon, LongArrowAltUpIcon, TimesCircleIcon, TimesIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
 import * as React from 'react';
@@ -17,6 +17,7 @@ import { getFilterFullName, hasSrcDstFilters, swapFilters } from '../../../utils
 import { getPathWithParams, netflowTrafficPath } from '../../../utils/url';
 import { navigate } from '../../dynamic-loader/dynamic-loader';
 import { LinksOverflow } from '../links-overflow';
+import './filters-chips.css';
 
 export interface FiltersChipsProps {
   isForced: boolean;
@@ -66,7 +67,7 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
 
   return (
     <ToolbarGroup
-      className="flex-start"
+      className="toolbar-group flex-start"
       data-test={`${isForced ? 'forced-' : ''}filters`}
       id={`${isForced ? 'forced-' : ''}filters`}
       variant="filter-group"
@@ -85,9 +86,9 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
             return (
               <div key={cfIndex} className={`custom-chip-group ${someEnabled ? '' : 'disabled-group'}`}>
                 <Tooltip content={`${someEnabled ? t('Disable') : t('Enable')} '${fullName}' ${t('group filter')}`}>
-                  <Text
-                    className="pf-c-chip-group__label"
-                    component={TextVariants.p}
+                  <Content
+                    className="pf-v6-c-chip-group__label"
+                    component={ContentVariants.p}
                     onClick={() => {
                       //switch all values if no remaining
                       chipFilter.values.forEach(fv => {
@@ -97,7 +98,7 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
                     }}
                   >
                     {fullName}
-                  </Text>
+                  </Content>
                 </Tooltip>
                 {chipFilter.values.map((chipFilterValue, fvIndex) => {
                   return (
@@ -107,8 +108,8 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
                           chipFilterValue.display || chipFilterValue.v
                         }' ${t('filter')}`}
                       >
-                        <Text
-                          component={TextVariants.p}
+                        <Content
+                          component={ContentVariants.p}
                           onClick={() => {
                             //switch value
                             chipFilterValue.disabled = !chipFilterValue.disabled;
@@ -116,7 +117,7 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
                           }}
                         >
                           {chipFilterValue.display ? chipFilterValue.display : chipFilterValue.v}
-                        </Text>
+                        </Content>
                       </Tooltip>
                       {!isForced && (
                         <Button
@@ -196,15 +197,17 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
                   <LongArrowAltUpIcon />
                 ),
                 tooltip: (
-                  <TextContent className="netobserv-tooltip-text">
-                    <Text component={TextVariants.p}>{t('Switch between one way / back and forth filtering')}</Text>
-                    <Text component={TextVariants.p} className="netobserv-align-start">
+                  <div className="netobserv-tooltip-text">
+                    <Content component={ContentVariants.p}>
+                      {t('Switch between one way / back and forth filtering')}
+                    </Content>
+                    <Content component={ContentVariants.p} className="netobserv-align-start">
                       - {t('One way shows traffic strictly as defined per your filters')}
-                    </Text>
-                    <Text component={TextVariants.p} className="netobserv-align-start">
+                    </Content>
+                    <Content component={ContentVariants.p} className="netobserv-align-start">
                       - {t('Back and forth shows traffic according to your filters, plus the related return traffic')}
-                    </Text>
-                  </TextContent>
+                    </Content>
+                  </div>
                 ),
                 enabled: isSrcDst
               }

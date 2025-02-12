@@ -1,4 +1,4 @@
-import { Button, EmptyStateSecondaryActions } from '@patternfly/react-core';
+import { Button, EmptyStateActions } from '@patternfly/react-core';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
@@ -25,7 +25,7 @@ export const SecondaryAction: React.FC<EmptyProps> = ({
 
   return (
     <>
-      <EmptyStateSecondaryActions>
+      <EmptyStateActions>
         {flowCollectorK8SModel && (
           <Button
             variant="link"
@@ -79,7 +79,7 @@ export const SecondaryAction: React.FC<EmptyProps> = ({
             {t('Show configuration limits')}
           </Button>
         )}
-      </EmptyStateSecondaryActions>
+      </EmptyStateActions>
     </>
   );
 };

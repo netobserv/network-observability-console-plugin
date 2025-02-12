@@ -4,7 +4,7 @@ import * as React from 'react';
 import { act } from 'react-dom/test-utils';
 import { FilterDefinitionSample } from '../../../../components/__tests-data__/filters';
 import { findFilter } from '../../../../utils/filter-definitions';
-import TextFilter, { TextFilterProps } from '../text-filter';
+import { TextFilter, TextFilterProps } from '../text-filter';
 
 describe('<TextFilter />', () => {
   const props: TextFilterProps = {
@@ -34,7 +34,7 @@ describe('<TextFilter />', () => {
 
     // Filter for source name
     act(() => {
-      textInput.props().onChange!('abcd', null!);
+      textInput.props().onChange!(null!, 'abcd');
     });
     setImmediate(() => {
       wrapper.update();
@@ -70,7 +70,7 @@ describe('<TextFilter />', () => {
 
     // Filter for dest IP
     act(() => {
-      textInput.props().onChange!('10.0.0.1', null!);
+      textInput.props().onChange!(null!, '10.0.0.1');
     });
 
     // Add filter
@@ -101,7 +101,7 @@ describe('<TextFilter />', () => {
 
     // Filter for dest IP
     act(() => {
-      textInput.props().onChange!('10.0.', null!);
+      textInput.props().onChange!(null!, '10.0.');
     });
     setImmediate(() => {
       wrapper.update();

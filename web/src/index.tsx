@@ -5,8 +5,6 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { initReactI18next } from 'react-i18next';
 
-import '@patternfly/patternfly/patternfly-charts-theme-dark.css';
-import '@patternfly/patternfly/patternfly-theme-dark.css';
 import '@patternfly/react-core/dist/styles/base.css';
 
 import App from './app';

@@ -5,7 +5,7 @@ import {
   MenuItem,
   MenuList,
   Popper,
-  TextInput,
+  SearchInput,
   ValidatedOptions
 } from '@patternfly/react-core';
 import { CaretDownIcon, SearchIcon } from '@patternfly/react-icons';
@@ -179,14 +179,13 @@ export const AutocompleteFilter: React.FC<AutocompleteFilterProps> = ({
       <div data-test="autocomplete-container" ref={autocompleteContainerRef}>
         <Popper
           trigger={
-            <TextInput
+            <SearchInput
               type="search"
               aria-label="search"
-              validated={indicator}
               placeholder={filterDefinition.placeholder}
               value={currentValue}
-              onKeyPress={e => e.key === 'Enter' && onEnter()}
-              onChange={onAutoCompleteChange}
+              onKeyDown={e => e.key === 'Enter' && onEnter()}
+              onChange={(event, value) => onAutoCompleteChange(value)}
               onBlur={onBlur}
               ref={searchInputRef}
               data-test="autocomplete-search"

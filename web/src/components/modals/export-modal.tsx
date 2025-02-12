@@ -1,8 +1,8 @@
 import {
   Button,
   Checkbox,
-  Chip,
-  ChipGroup,
+  Content,
+  ContentVariants,
   DataList,
   DataListCell,
   DataListCheck,
@@ -10,9 +10,8 @@ import {
   DataListItem,
   DataListItemCells,
   DataListItemRow,
-  Text,
-  TextContent,
-  TextVariants
+  Label,
+  LabelGroup
 } from '@patternfly/react-core';
 import _ from 'lodash';
 import * as React from 'react';
@@ -87,7 +86,8 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   }, [options, range, t]);
 
   const onCheck = React.useCallback(
-    (checked, event) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    (event, checked) => {
       if (event?.target?.id) {
         const result = [...selectedColumns];
         const selectedColumn = result.find(col => col.id === event.target.id);
@@ -145,29 +145,29 @@ export const ExportModal: React.FC<ExportModalProps> = ({
       onClose={() => setModalOpen(false)}
       description={
         <>
-          <TextContent>
-            <Text component={TextVariants.p}>{t('Following query will be exported as CSV format:')}&nbsp;</Text>
-          </TextContent>
-          <div data-test="export-chips" id="export-chips">
-            <ChipGroup isClosable={false} categoryName={t('Time Range')}>
-              <Chip isReadOnly={true}>{rangeText()}</Chip>
-            </ChipGroup>
+          <div>
+            <Content component={ContentVariants.p}>
+              {t('Following query will be exported as CSV format:')}&nbsp;
+            </Content>
+          </div>
+          <div data-test="export-Labels" id="export-Labels">
+            <LabelGroup isClosable={false} categoryName={t('Time Range')}>
+              <Label>{rangeText()}</Label>
+            </LabelGroup>
             {flowQuery.dedup && (
-              <ChipGroup isClosable={false} categoryName={t('Deduplicate')}>
-                <Chip isReadOnly={true}>true</Chip>
-              </ChipGroup>
+              <LabelGroup isClosable={false} categoryName={t('Deduplicate')}>
+                <Label>true</Label>
+              </LabelGroup>
             )}
-            <ChipGroup isClosable={false} categoryName={t('Limit')}>
-              <Chip isReadOnly={true}>{flowQuery.limit}</Chip>
-            </ChipGroup>
+            <LabelGroup isClosable={false} categoryName={t('Limit')}>
+              <Label>{flowQuery.limit}</Label>
+            </LabelGroup>
             {filters.map((filter, fIndex) => (
-              <ChipGroup key={fIndex} isClosable={false} categoryName={getFilterFullName(filter.def, t)}>
+              <LabelGroup key={fIndex} isClosable={false} categoryName={getFilterFullName(filter.def, t)}>
                 {filter.values.map((value, fvIndex) => (
-                  <Chip key={fvIndex} isReadOnly={true}>
-                    {value.display ? value.display : value.v}
-                  </Chip>
+                  <Label key={fvIndex}>{value.display ? value.display : value.v}</Label>
                 ))}
-              </ChipGroup>
+              </LabelGroup>
             ))}
           </div>
         </>
@@ -201,16 +201,16 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           data-test="export-all"
           id="export-all"
           isChecked={isExportAll}
-          onChange={checked => setExportAll(checked)}
+          onChange={(event, checked) => setExportAll(checked)}
           label={t('Export all datas')}
           aria-label="Export all"
           description={
-            <TextContent className="netobserv-no-child-margin">
-              <Text component={TextVariants.p}>
+            <div className="netobserv-no-child-margin">
+              <Content component={ContentVariants.p}>
                 {t('Use this option to export every fields and labels from flows.')}
-              </Text>
-              <Text component={TextVariants.p}>{t('Else pick from available columns.')}</Text>
-            </TextContent>
+              </Content>
+              <Content component={ContentVariants.p}>{t('Else pick from available columns.')}</Content>
+            </div>
           }
           body={
             !isExportAll && (
@@ -218,7 +218,8 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                 <Button isInline onClick={onSelectAll} variant="link">
                   {isAllSelected ? t('Unselect all') : t('Select all')}
                 </Button>
-                <DataList aria-label="Exported fields" id="exported-fields" isCompact>
+                <DataList aria-label="Exported fields" id="exported-fields" className="centered-list" isCompact>
+                  {' '}
                   {selectedColumns.map((column, i) => (
                     <DataListItem
                       key={'data-list-item-' + i}
@@ -239,7 +240,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                         </DataListControl>
                         <DataListItemCells
                           dataListCells={[
-                            <DataListCell key={'data-list-cell-' + i}>
+                            <DataListCell key={'data-list-cell-' + i} className="center">
                               <label htmlFor={column.id}>{getFullColumnName(column)}</label>
                             </DataListCell>
                           ]}
