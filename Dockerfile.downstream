@@ -17,7 +17,8 @@ COPY .mk/ .mk/
 COPY cmd/ cmd/
 COPY pkg/ pkg/
 
-RUN CGO_ENABLED=0 go build -ldflags "-X main.buildVersion=$BUILDVERSION -X main.buildDate=$DATE" -mod vendor -o plugin-backend cmd/plugin-backend.go
+ENV GOEXPERIMENT strictfipsruntime
+RUN go build -tags strictfipsruntime -ldflags "-X main.buildVersion=$BUILDVERSION -X main.buildDate=$DATE" -mod vendor -o plugin-backend cmd/plugin-backend.go
 
 FROM registry.access.redhat.com/ubi9/ubi-minimal:9.5-1738816775
 
