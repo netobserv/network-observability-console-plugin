@@ -16,6 +16,7 @@ export const ScopeSlider: React.FC<ScopeSliderProps> = ({ scope, setScope, scope
       {scopeDefs.map((sd, i) => (
         <ProgressStep
           key={`scope-step-${i}`}
+          id={`scope-step-${i}`}
           variant={sd.id === scope ? 'info' : 'pending'}
           isCurrent={sd.id === scope}
           onClick={() => setScope(sd.id)}
