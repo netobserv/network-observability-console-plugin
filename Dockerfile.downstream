@@ -1,7 +1,23 @@
 ARG COMMIT
-ARG FRONTBUILD
 
-FROM $FRONTBUILD as web-builder
+FROM registry.access.redhat.com/ubi9/nodejs-18:1-108.1716477799 as web-builder
+
+ARG BUILDSCRIPT
+WORKDIR /opt/app-root
+
+COPY  --chown=default web/package.json web/package.json
+COPY  --chown=default web/package-lock.json web/package-lock.json
+WORKDIR /opt/app-root/web
+
+RUN CYPRESS_INSTALL_BINARY=0 node --max-old-space-size=6000 $(which npm) --legacy-peer-deps ci
+
+WORKDIR /opt/app-root
+COPY  --chown=default web web
+COPY  --chown=default mocks mocks
+
+WORKDIR /opt/app-root/web
+RUN npm run format-all
+RUN npm run build$BUILDSCRIPT
 
 FROM brew.registry.redhat.io/rh-osbs/openshift-golang-builder:v1.23 as go-builder
 
