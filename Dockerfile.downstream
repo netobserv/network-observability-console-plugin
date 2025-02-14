@@ -9,7 +9,9 @@ COPY  --chown=default web/package.json web/package.json
 COPY  --chown=default web/package-lock.json web/package-lock.json
 WORKDIR /opt/app-root/web
 
-RUN CYPRESS_INSTALL_BINARY=0 node --max-old-space-size=6000 $(which npm) --legacy-peer-deps ci
+RUN CYPRESS_INSTALL_BINARY=0 npm install npm@11.1.0
+
+RUN CYPRESS_INSTALL_BINARY=0 node --max-old-space-size=600 $($(which npm) bin)/npm --legacy-peer-deps ci
 
 WORKDIR /opt/app-root
 COPY  --chown=default web web
