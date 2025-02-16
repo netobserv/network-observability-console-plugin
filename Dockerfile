@@ -19,7 +19,7 @@ WORKDIR /opt/app-root/web
 RUN npm run format-all
 RUN npm run build$BUILDSCRIPT
 
-FROM docker.io/library/golang:1.23 as go-builder
+FROM docker.io/library/golang:1.24 as go-builder
 
 ARG TARGETARCH=amd64
 ARG LDFLAGS
