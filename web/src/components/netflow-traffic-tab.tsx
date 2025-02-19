@@ -211,6 +211,7 @@ export const NetflowTrafficTab: React.FC<NetflowTrafficTabProps> = ({ match, obj
           forcedNamespace={params?.ns || match?.params?.ns}
           forcedFilters={forcedFilters}
           isTab={true}
+          hideTitle={true}
           parentConfig={config}
         />
       </div>
@@ -218,7 +219,7 @@ export const NetflowTrafficTab: React.FC<NetflowTrafficTabProps> = ({ match, obj
   } else {
     return (
       <PageSection id="pageSection" data-test="tab-page-section">
-        <EmptyState data-test="error-state" variant={EmptyStateVariant.small}>
+        <EmptyState data-test="error-state" variant={EmptyStateVariant.sm}>
           <Title headingLevel="h2" size="lg">
             {t('Kind not managed')}
           </Title>

@@ -33,6 +33,7 @@ import { NetflowOverview, NetflowOverviewHandle } from '../tabs/netflow-overview
 import { NetflowTable, NetflowTableHandle } from '../tabs/netflow-table/netflow-table';
 import { NetflowTopology, NetflowTopologyHandle } from '../tabs/netflow-topology/netflow-topology';
 import ElementPanel from './element/element-panel';
+import './netflow-traffic-drawer.css';
 import RecordPanel from './record/record-panel';
 
 export type NetflowTrafficDrawerHandle = {
@@ -251,6 +252,9 @@ export const NetflowTrafficDrawer: React.FC<NetflowTrafficDrawerProps> = React.f
                 limit={props.limit}
                 panels={props.panels}
                 recordType={props.recordType}
+                scopes={props.scopes}
+                metricScope={props.metricScope}
+                setMetricScope={props.setMetricScope}
                 metrics={props.metrics}
                 loading={props.loading}
                 isDark={props.isDarkTheme}

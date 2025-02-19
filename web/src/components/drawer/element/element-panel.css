@@ -1,5 +1,5 @@
-#source-content>.pf-c-accordion__expanded-content-body,
-#destination-content>.pf-c-accordion__expanded-content-body {
+#source-content>.pf-v5-c-accordion__expandable-content.pf-m-expanded,
+#destination-content>.pf-v5-c-accordion__expandable-content.pf-m-expanded {
   padding-left: 2.2em !important;
   margin-bottom: 15px;
 }
@@ -18,16 +18,26 @@
   height: 400px;
 }
 
-.element-metrics-container .pf-c-radio {
+.element-metrics-container .pf-v5-c-radio {
   grid-gap: 0;
 }
 
 #pf-tab-section-details-drawer-tabs,
 #pf-tab-section-metrics-drawer-tabs,
 #pf-tab-section-dropped-drawer-tabs {
-  padding: var(--pf-c-drawer--child--PaddingTop) var(--pf-c-drawer--child--PaddingRight) var(--pf-c-drawer--child--PaddingBottom) var(--pf-c-drawer--child--PaddingLeft);
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  padding: 1.5rem !important;
 }
 
 .metrics-justify-content {
   justify-content: space-evenly;
+}
+
+.drawer-panel-content {
+  display: table !important;
+}
+
+#elementPanel-drawer-body {
+  padding-bottom: 5.5em !important;
 }

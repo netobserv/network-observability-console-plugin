@@ -1,4 +1,4 @@
-import { Dropdown, DropdownItem, DropdownToggle } from '@patternfly/react-core';
+import { Dropdown, DropdownItem, MenuToggle, MenuToggleElement } from '@patternfly/react-core';
 import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -14,7 +14,7 @@ export interface RefreshDropdownProps {
 const offKey = 'OFF_KEY';
 
 export const RefreshDropdown: React.FC<RefreshDropdownProps> = ({ disabled, id, interval, setInterval }) => {
-  const [isOpen, setIsOpen] = React.useState<boolean>(false);
+  const [isOpen, setOpen] = React.useState<boolean>(false);
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   const onChange = React.useCallback(
@@ -45,27 +45,33 @@ export const RefreshDropdown: React.FC<RefreshDropdownProps> = ({ disabled, id, 
   }, [disabled, interval, setInterval]);
 
   return (
-    <Dropdown
-      data-test={id}
-      id={id}
-      dropdownItems={_.map(refreshOptions, (name, key) => (
-        <DropdownItem data-test={key} id={key} component="button" key={key} onClick={() => onChange(key)}>
-          {name}
-        </DropdownItem>
-      ))}
-      isOpen={isOpen}
-      onSelect={() => setIsOpen(false)}
-      toggle={
-        <DropdownToggle
-          data-test={`${id}-dropdown`}
-          id={`${id}-dropdown`}
-          isDisabled={disabled}
-          onToggle={() => setIsOpen(!isOpen)}
-        >
-          {refreshOptions[selectedKey as keyof typeof refreshOptions]}
-        </DropdownToggle>
-      }
-    />
+    <div id={`${id}-container`}>
+      <Dropdown
+        data-test={id}
+        id={id}
+        isOpen={isOpen}
+        onSelect={() => setOpen(false)}
+        toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+          <MenuToggle
+            ref={toggleRef}
+            data-test={`${id}-dropdown`}
+            id={`${id}-dropdown`}
+            isDisabled={disabled}
+            onClick={() => setOpen(!isOpen)}
+            onBlur={() => setTimeout(() => setOpen(false), 500)}
+            isExpanded={isOpen}
+          >
+            {refreshOptions[selectedKey as keyof typeof refreshOptions]}
+          </MenuToggle>
+        )}
+      >
+        {_.map(refreshOptions, (name, key) => (
+          <DropdownItem data-test={key} id={key} component="button" key={key} onClick={() => onChange(key)}>
+            {name}
+          </DropdownItem>
+        ))}
+      </Dropdown>
+    </div>
   );
 };
 
