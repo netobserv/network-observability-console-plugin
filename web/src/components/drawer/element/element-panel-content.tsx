@@ -103,6 +103,25 @@ export const ElementPanelContent: React.FC<ElementPanelContentProps> = ({
     [filterDefinitions, filters, setFilters, t]
   );
 
+  const metricsInfo = React.useCallback(
+    (d: NodeData) => {
+      if (!d.noMetrics) {
+        return <></>;
+      }
+
+      return (
+        <TextContent id="noMetrics" className="record-field-container">
+          <Text component={TextVariants.p}>
+            {t(
+              "Can't find metrics for this element. Check your capture filters to ensure we can monitor it. Else it probably means there is no traffic here."
+            )}
+          </Text>
+        </TextContent>
+      );
+    },
+    [t]
+  );
+
   if (element instanceof BaseNode && data) {
     return (
       <>
@@ -116,6 +135,7 @@ export const ElementPanelContent: React.FC<ElementPanelContentProps> = ({
           setFilters={setFilters}
           filterDefinitions={filterDefinitions}
         />
+        {metricsInfo(data)}
       </>
     );
   } else if (element instanceof BaseEdge) {

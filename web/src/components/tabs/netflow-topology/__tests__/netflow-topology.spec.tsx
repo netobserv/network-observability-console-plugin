@@ -37,7 +37,8 @@ describe('<NetflowTopology />', () => {
     onSelect: jest.fn(),
     searchHandle: null,
     searchEvent: undefined,
-    scopes: ScopeDefSample
+    scopes: ScopeDefSample,
+    expectedNodes: []
   };
 
   it('should render component', async () => {

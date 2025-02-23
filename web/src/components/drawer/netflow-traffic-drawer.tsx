@@ -73,6 +73,7 @@ export interface NetflowTrafficDrawerProps {
   k8sModels: { [key: string]: K8sModel };
   topologyMetricFunction: StatFunction;
   topologyMetricType: MetricType;
+  topologyUDNIds: string[];
   metricScope: FlowScope;
   setMetricScope: (ms: FlowScope) => void;
   topologyOptions: TopologyOptions;
@@ -293,6 +294,7 @@ export const NetflowTrafficDrawer: React.FC<NetflowTrafficDrawerProps> = React.f
                 metricFunction={props.topologyMetricFunction}
                 metricType={props.topologyMetricType}
                 metricScope={props.metricScope}
+                expectedNodes={[...props.topologyUDNIds]} // concat all expected nodes here
                 setMetricScope={props.setMetricScope}
                 metrics={getTopologyMetrics() || []}
                 droppedMetrics={getTopologyDroppedMetrics() || []}

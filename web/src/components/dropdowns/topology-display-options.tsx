@@ -191,6 +191,18 @@ export const TopologyDisplayOptions: React.FC<TopologyDisplayOptionsProps> = ({
             })
           }
         />
+        <Checkbox
+          id="empty-switch"
+          className="display-dropdown-padding"
+          label={t('Empty')}
+          isChecked={topologyOptions.showEmpty}
+          onChange={() =>
+            setTopologyOptions({
+              ...topologyOptions,
+              showEmpty: !topologyOptions.showEmpty
+            })
+          }
+        />
       </div>
       <div className="pf-c-select__menu-group">
         <Tooltip content={t('Long labels can reduce visibility.')}>
