@@ -1,5 +1,5 @@
-#source-content>.pf-v5-c-accordion__expandable-content.pf-m-expanded,
-#destination-content>.pf-v5-c-accordion__expandable-content.pf-m-expanded {
+#source-content>.pf-v6-c-accordion__expandable-content.pf-m-expanded,
+#destination-content>.pf-v6-c-accordion__expandable-content.pf-m-expanded {
   padding-left: 2.2em !important;
   margin-bottom: 15px;
 }
@@ -18,7 +18,7 @@
   height: 400px;
 }
 
-.element-metrics-container .pf-v5-c-radio {
+.element-metrics-container .pf-v6-c-radio {
   grid-gap: 0;
 }
 

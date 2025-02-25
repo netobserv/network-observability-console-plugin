@@ -66,7 +66,7 @@
   flex-wrap: nowrap;
 }
 
-/* table tooltips - check pf-v5-c-tooltip__content for values */
+/* table tooltips - check pf-v6-c-tooltip__content for values */
 .record-field-tooltip {
   display: flex;
   flex-direction: column;

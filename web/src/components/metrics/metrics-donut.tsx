@@ -1,4 +1,4 @@
-import { ChartDonut, ChartLabel, ChartLegend, ChartThemeColor } from '@patternfly/react-charts';
+import { ChartDonut, ChartLabel, ChartLegend, ChartThemeColor } from '@patternfly/react-charts/victory';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { GenericMetric, MetricStats, NamedMetric } from '../../api/loki';
@@ -6,7 +6,7 @@ import { MetricFunction, MetricType } from '../../model/flow-query';
 import { getStat } from '../../model/metrics';
 import { localStorageOverviewDonutDimensionKey, useLocalStorage } from '../../utils/local-storage-hook';
 import { getFormattedValue, isUnknownPeer } from '../../utils/metrics';
-import { defaultDimensions, Dimensions, observeDimensions } from '../../utils/metrics-helper';
+import { defaultDimensions, Dimensions, handleDimensionsChange } from '../../utils/metrics-helper';
 import './metrics-content.css';
 
 export interface MetricsDonutProps {
@@ -128,7 +128,7 @@ export const MetricsDonut: React.FC<MetricsDonutProps> = ({
     defaultDimensions
   );
   React.useEffect(() => {
-    observeDimensions(containerRef, dimensions, setDimensions);
+    handleDimensionsChange(containerRef, dimensions, setDimensions);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [containerRef, dimensions]);
 

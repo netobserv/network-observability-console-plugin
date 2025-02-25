@@ -1,4 +1,4 @@
-import { Flex, FlexItem, Text, TextVariants, Tooltip } from '@patternfly/react-core';
+import { Content, ContentVariants, Flex, FlexItem, Tooltip } from '@patternfly/react-core';
 import { InfoCircleIcon } from '@patternfly/react-icons';
 import _ from 'lodash';
 import * as React from 'react';
@@ -56,28 +56,28 @@ export const FlowsQuerySummaryContent: React.FC<FlowsQuerySummaryContentProps> =
       <>
         {bytes > 0 && (
           <FlexItem>
-            <Tooltip content={<Text component={TextVariants.p}>{t('Filtered sum of bytes')}</Text>}>
-              <Text id="bytesCount" component={TextVariants.p}>
+            <Tooltip content={<Content component={ContentVariants.p}>{t('Filtered sum of bytes')}</Content>}>
+              <Content id="bytesCount" component={ContentVariants.p}>
                 {valueFormat(bytes, 0, t('B'), limitReached)}
-              </Text>
+              </Content>
             </Tooltip>
           </FlexItem>
         )}
         {packets > 0 && (
           <FlexItem>
-            <Tooltip content={<Text component={TextVariants.p}>{t('Filtered sum of packets')}</Text>}>
-              <Text id="packetsCount" component={TextVariants.p}>
+            <Tooltip content={<Content component={ContentVariants.p}>{t('Filtered sum of packets')}</Content>}>
+              <Content id="packetsCount" component={ContentVariants.p}>
                 {valueFormat(packets, 0, t('Packets'), limitReached, true)}
-              </Text>
+              </Content>
             </Tooltip>
           </FlexItem>
         )}
         {bytes > 0 && (
           <FlexItem>
-            <Tooltip content={<Text component={TextVariants.p}>{t('Filtered average speed')}</Text>}>
-              <Text id="bytesPerSecondsCount" component={TextVariants.p}>
+            <Tooltip content={<Content component={ContentVariants.p}>{t('Filtered average speed')}</Content>}>
+              <Content id="bytesPerSecondsCount" component={ContentVariants.p}>
                 {valueFormat(bytes / rangeInSeconds, 2, t('Bps'), limitReached)}
-              </Text>
+              </Content>
             </Tooltip>
           </FlexItem>
         )}
@@ -93,9 +93,9 @@ export const FlowsQuerySummaryContent: React.FC<FlowsQuerySummaryContentProps> =
     >
       {direction === 'row' && (
         <FlexItem>
-          <Text id="query-summary-title" component={TextVariants.h4}>
+          <Content id="query-summary-title" component={ContentVariants.h4}>
             {t('Summary')}
-          </Text>
+          </Content>
         </FlexItem>
       )}
       <StatsQuerySummary
@@ -111,7 +111,7 @@ export const FlowsQuerySummaryContent: React.FC<FlowsQuerySummaryContentProps> =
           <Flex direction={{ default: 'row' }}>
             {limitReached && (
               <FlexItem id="query-summary-warning-icon-container">
-                <Tooltip content={<Text component={TextVariants.p}>{t('Query limit reached')}</Text>}>
+                <Tooltip content={<Content component={ContentVariants.p}>{t('Query limit reached')}</Content>}>
                   <InfoCircleIcon className="query-summary-warning" />
                 </Tooltip>
               </FlexItem>
@@ -119,12 +119,12 @@ export const FlowsQuerySummaryContent: React.FC<FlowsQuerySummaryContentProps> =
             <FlexItem>
               <Tooltip
                 content={
-                  <Text component={TextVariants.p}>
+                  <Content component={ContentVariants.p}>
                     {type === 'flowLog' ? t('Filtered flows count') : t('Filtered ended conversations count')}
-                  </Text>
+                  </Content>
                 }
               >
-                <Text id="flowsCount" component={TextVariants.p}>
+                <Content id="flowsCount" component={ContentVariants.p}>
                   {valueFormat(
                     filteredFlows!.length,
                     0,
@@ -132,7 +132,7 @@ export const FlowsQuerySummaryContent: React.FC<FlowsQuerySummaryContentProps> =
                     limitReached,
                     true
                   )}
-                </Text>
+                </Content>
               </Tooltip>
             </FlexItem>
           </Flex>
@@ -141,9 +141,9 @@ export const FlowsQuerySummaryContent: React.FC<FlowsQuerySummaryContentProps> =
       {counters()}
       {direction === 'row' && toggleQuerySummary && (
         <FlexItem>
-          <Text id="query-summary-toggle" component={TextVariants.a} onClick={toggleQuerySummary}>
+          <Content id="query-summary-toggle" component={ContentVariants.a} onClick={toggleQuerySummary}>
             {isShowQuerySummary ? t('See less') : t('See more')}
-          </Text>
+          </Content>
         </FlexItem>
       )}
     </Flex>

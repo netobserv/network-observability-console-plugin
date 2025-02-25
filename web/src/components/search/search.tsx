@@ -1,4 +1,4 @@
-import { Button, InputGroup, TextInput, ValidatedOptions } from '@patternfly/react-core';
+import { Button, InputGroup, SearchInput, ValidatedOptions } from '@patternfly/react-core';
 import { AngleDownIcon, AngleUpIcon, SearchIcon, TimesIcon } from '@patternfly/react-icons';
 import _ from 'lodash';
 import * as React from 'react';
@@ -22,7 +22,6 @@ export interface SearchComponentProps {
   children?: React.ReactNode;
 }
 
-// eslint-disable-next-line react/display-name
 export const SearchComponent: React.FC<SearchComponentProps> = React.forwardRef(
   (props, ref: React.Ref<SearchHandle>) => {
     const { t } = useTranslation('plugin__netobserv-plugin');
@@ -50,7 +49,7 @@ export const SearchComponent: React.FC<SearchComponentProps> = React.forwardRef(
 
     return (
       <InputGroup>
-        <TextInput
+        <SearchInput
           data-test="search-topology-element-input"
           id="search-topology-element-input"
           className={'search'}
@@ -61,10 +60,9 @@ export const SearchComponent: React.FC<SearchComponentProps> = React.forwardRef(
           onKeyPress={e => e.key === 'Enter' && props.setSearchEvent({ searchValue, type: 'searchNext' })}
           onChange={(event, value) => onChangeSearch(value)}
           value={searchValue}
-          validated={searchValidated}
         />
         {!_.isEmpty(searchResultCount) ? (
-          <TextInput
+          <SearchInput
             value={searchResultCount}
             isDisabled
             id="topology-search-result-count"
@@ -91,32 +89,29 @@ export const SearchComponent: React.FC<SearchComponentProps> = React.forwardRef(
         ) : (
           <>
             <Button
+              icon={<AngleUpIcon />}
               data-test="prev-search-topology-element-button"
               id="prev-search-topology-element-button"
               variant="control"
               aria-label="previous button for search element"
               onClick={() => props.setSearchEvent({ searchValue, type: 'searchPrevious' })}
-            >
-              <AngleUpIcon />
-            </Button>
+            />
             <Button
+              icon={<AngleDownIcon />}
               data-test="next-search-topology-element-button"
               id="next-search-topology-element-button"
               variant="control"
               aria-label="next button for search element"
               onClick={() => props.setSearchEvent({ searchValue, type: 'searchNext' })}
-            >
-              <AngleDownIcon />
-            </Button>
+            />
             <Button
+              icon={<TimesIcon />}
               data-test="clear-search-topology-element-button"
               id="clear-search-topology-element-button"
               variant="control"
               aria-label="clear button for search element"
               onClick={() => onChangeSearch()}
-            >
-              <TimesIcon />
-            </Button>
+            />
           </>
         )}
       </InputGroup>

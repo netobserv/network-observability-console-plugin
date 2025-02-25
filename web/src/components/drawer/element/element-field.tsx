@@ -1,4 +1,4 @@
-import { Flex, FlexItem, Text, TextContent, TextVariants } from '@patternfly/react-core';
+import { Content, ContentVariants, Flex, FlexItem } from '@patternfly/react-core';
 import * as React from 'react';
 import { TopologyMetricPeer } from '../../../api/loki';
 import { Filter, FilterDefinition } from '../../../model/filters';
@@ -28,11 +28,11 @@ export const ElementField: React.FC<ElementFieldProps> = ({
   filterDefinitions
 }) => {
   return (
-    <TextContent id={id} className="record-field-container">
-      <Text component={TextVariants.h4}>{label}</Text>
+    <div id={id} className="record-field-container">
+      <Content component={ContentVariants.h4}>{label}</Content>
       <Flex>
         <FlexItem flex={{ default: 'flex_1' }}>
-          {forcedText ? <Text>{forcedText}</Text> : <PeerResourceLink peer={peer} />}
+          {forcedText ? <Content>{forcedText}</Content> : <PeerResourceLink peer={peer} />}
         </FlexItem>
         <FlexItem>
           <SummaryFilterButton
@@ -45,6 +45,6 @@ export const ElementField: React.FC<ElementFieldProps> = ({
           />
         </FlexItem>
       </Flex>
-    </TextContent>
+    </div>
   );
 };

@@ -6,6 +6,8 @@ import {
   Button,
   ClipboardCopy,
   ClipboardCopyVariant,
+  Content,
+  ContentVariants,
   Divider,
   DrawerActions,
   DrawerCloseButton,
@@ -15,10 +17,7 @@ import {
   Popover,
   Tab,
   Tabs,
-  TabTitleText,
-  Text,
-  TextContent,
-  TextVariants
+  TabTitleText
 } from '@patternfly/react-core';
 import { InfoCircleIcon } from '@patternfly/react-icons';
 import _ from 'lodash';
@@ -272,22 +271,13 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
       return g.title ? (
         <div className="record-group-container" key={key} data-test-id={key}>
           <Divider />
-          <AccordionItem data-test-id={key}>
+          <AccordionItem data-test-id={key} isExpanded={!hidden.includes(toggleId)}>
             {
-              <AccordionToggle
-                className="borderless-accordion"
-                onClick={() => toggle(toggleId)}
-                isExpanded={!hidden.includes(toggleId)}
-                id={toggleId}
-              >
+              <AccordionToggle className="borderless-accordion" onClick={() => toggle(toggleId)} id={toggleId}>
                 {g.title}
               </AccordionToggle>
             }
-            <AccordionContent
-              className="borderless-accordion"
-              id={toggleId + '-content'}
-              isHidden={hidden.includes(toggleId)}
-            >
+            <AccordionContent className="borderless-accordion" id={toggleId + '-content'}>
               {content}
             </AccordionContent>
           </AccordionItem>
@@ -356,9 +346,9 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
       maxSize={maxSize}
     >
       <DrawerHead id={`${id}-drawer-head`} data-test-id="drawer-head" className="drawer-head">
-        <Text data-test-id="drawer-head-text" component={TextVariants.h2}>
+        <Content data-test-id="drawer-head-text" component={ContentVariants.h2}>
           {getTitle()}
-        </Text>
+        </Content>
         <DrawerActions>
           <DrawerCloseButton data-test-id="drawer-close-button" className="drawer-close-button" onClick={onClose} />
         </DrawerActions>
@@ -374,13 +364,13 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
         >
           <Tab className="drawer-tab" eventKey={'details'} title={<TabTitleText>{t('Details')}</TabTitleText>}>
             {isPartialFlow && (
-              <Text id="partial-flow-text" component={TextVariants.p}>
+              <Content id="partial-flow-text" component={ContentVariants.p}>
                 <InfoCircleIcon className="record-panel-warning" />
                 {t(
                   // eslint-disable-next-line max-len
                   'This is a partial flow: it contains only enrichment data and is missing some basic information such as byte and packet counters, TCP flags or MAC addresses. This information can likely be found in adjacent flows.'
                 )}
-              </Text>
+              </Content>
             )}
             <Accordion asDefinitionList={false}>
               {groups.map((g, i) =>
@@ -389,7 +379,7 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
                   i,
                   <div className="record-group-container">
                     {g.columns.map(c => (
-                      <TextContent
+                      <div
                         className={`record-field-container ${g.title ? 'grouped' : ''}`}
                         key={c.id}
                         data-test-id={`drawer-field-${c.id}`}
@@ -410,13 +400,13 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
                             }
                           >
                             <Button variant="plain" className="record-field-title-popover-button">
-                              <Text component={TextVariants.h4}>{getShortColumnName(c)}</Text>
+                              <Content component={ContentVariants.h4}>{getShortColumnName(c)}</Content>
                             </Button>
                           </Popover>
                         ) : (
-                          <Text component={TextVariants.h4} className="record-field-title">
+                          <Content component={ContentVariants.h4} className="record-field-title">
                             {c.name}
-                          </Text>
+                          </Content>
                         )}
                         <RecordField
                           allowPktDrops={allowPktDrops}
@@ -428,7 +418,7 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
                           detailed={true}
                           isDark={isDark}
                         />
-                      </TextContent>
+                      </div>
                     ))}
                   </div>
                 )

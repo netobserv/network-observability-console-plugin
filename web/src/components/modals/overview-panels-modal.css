@@ -7,7 +7,7 @@
 
 /* vertical align drag icon*/
 
-.pf-v5-c-data-list__cell {
+.pf-v6-c-data-list__cell {
     margin-top: auto;
     margin-bottom: auto;
 }
@@ -15,7 +15,7 @@
 
 /* vertical align label*/
 
-button.pf-v5-c-data-list__item-draggable-button {
+button.pf-v6-c-data-list__item-draggable-button {
     margin-top: auto;
     margin-bottom: auto;
 }

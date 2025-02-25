@@ -12,7 +12,6 @@ describe('buildExportQuery', () => {
       timeRange: 300
     });
     expect(query).toEqual(
-      // eslint-disable-next-line max-len
       'filters=SrcK8S_Name%253Dtest1%252Ctest2&recordType=flowLog&dataSource=auto&packetLoss=all&limit=500&timeRange=300&format=csv'
     );
   });

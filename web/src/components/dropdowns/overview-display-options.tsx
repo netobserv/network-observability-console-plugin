@@ -1,4 +1,4 @@
-import { Switch, Text, TextVariants, Tooltip } from '@patternfly/react-core';
+import { Content, ContentVariants, Switch, Tooltip } from '@patternfly/react-core';
 import { InfoAltIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -18,6 +18,7 @@ export interface OverviewDisplayOptionsProps {
   focus: boolean;
   setFocus: (v: boolean) => void;
   scopes: ScopeConfigDef[];
+  appendTo?: () => HTMLElement;
 }
 
 export const OverviewDisplayOptions: React.FC<OverviewDisplayOptionsProps> = ({
@@ -27,18 +28,19 @@ export const OverviewDisplayOptions: React.FC<OverviewDisplayOptionsProps> = ({
   setTruncateLength,
   focus,
   setFocus,
-  scopes
+  scopes,
+  appendTo
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   return (
     <>
-      <div className="pf-v5-c-menu__group">
+      <div className="pf-v6-c-menu__group">
         <Tooltip content={t('The level of details represented.')}>
-          <div className="pf-v5-c-menu__group-title">
-            <Text component={TextVariants.p}>
+          <div className="pf-v6-c-menu__group-title">
+            <Content component={ContentVariants.p}>
               {t('Scope')} <InfoAltIcon />
-            </Text>
+            </Content>
           </div>
         </Tooltip>
         <div className="display-dropdown-padding">
@@ -48,22 +50,28 @@ export const OverviewDisplayOptions: React.FC<OverviewDisplayOptionsProps> = ({
             selected={metricScope}
             setScopeType={setMetricScope}
             scopes={scopes}
+            appendTo={appendTo}
           />
         </div>
       </div>
-      <div className="pf-v5-c-menu__group">
+      <div className="pf-v6-c-menu__group">
         <Tooltip content={t('Long labels can reduce visibility.')}>
-          <div className="pf-v5-c-menu__group-title">
-            <Text component={TextVariants.p}>
+          <div className="pf-v6-c-menu__group-title">
+            <Content component={ContentVariants.p}>
               {t('Truncate labels')} <InfoAltIcon />
-            </Text>
+            </Content>
           </div>
         </Tooltip>
         <div className="display-dropdown-padding">
-          <TruncateDropdown id="truncate" selected={truncateLength} setTruncateLength={setTruncateLength} />
+          <TruncateDropdown
+            id="truncate"
+            selected={truncateLength}
+            setTruncateLength={setTruncateLength}
+            appendTo={appendTo}
+          />
         </div>
       </div>
-      <div className="pf-v5-c-menu__group">
+      <div className="pf-v6-c-menu__group">
         <div className="display-dropdown-switch-padding">
           <Switch
             id="focus-switch"

@@ -1,4 +1,4 @@
-/* table stripping from pf-v5-color-black-150 value */
+/* table stripping from pf-v6-color-black-150 value */
 :not(.newflow-appear).light-stripped:nth-child(even) {
   background-color: #f5f5f5;
 }
