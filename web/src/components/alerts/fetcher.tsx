@@ -71,7 +71,7 @@ export const AlertFetcher: React.FC<AlertFetcherProps> = ({ children }) => {
           <AlertBanner key={a.name} rule={a} onDelete={() => setAlerts(alerts.filter(alert => alert.name != a.name))} />
         ))}
       </div>
-      {!!children ? children : ''}
+      {children ? children : ''}
     </>
   );
 };

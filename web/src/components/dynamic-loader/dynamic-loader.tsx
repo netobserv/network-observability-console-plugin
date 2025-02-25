@@ -41,7 +41,7 @@ export const navigate = (to: string, opts?: any) => {
 
 export const DynamicLoader: React.FC<{}> = ({ children }) => {
   loadNavFunction();
-  return <>{!!children ? children : ''}</>;
+  return <>{children ? children : ''}</>;
 };
 
 export default DynamicLoader;

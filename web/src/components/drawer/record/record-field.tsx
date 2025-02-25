@@ -1,5 +1,5 @@
 import { ResourceIcon, ResourceLink } from '@openshift-console/dynamic-plugin-sdk';
-import { Button, Flex, FlexItem, Popover, Text, TextContent, TextVariants, Tooltip } from '@patternfly/react-core';
+import { Button, Content, ContentVariants, Flex, FlexItem, Popover, Tooltip } from '@patternfly/react-core';
 import { FilterIcon, GlobeAmericasIcon, TimesIcon, ToggleOffIcon, ToggleOnIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -56,18 +56,18 @@ export const RecordField: React.FC<RecordFieldProps> = ({
       <div className="record-field-flex">
         <Tooltip
           content={[
-            <Text component={TextVariants.p} className="record-field-value co-nowrap" key="co-error-text">
+            <Content component={ContentVariants.p} className="record-field-value co-nowrap" key="co-error-text">
               {text}
-            </Text>
+            </Content>
           ]}
         >
-          <Text
-            component={TextVariants.p}
+          <Content
+            component={ContentVariants.p}
             style={{ color: isDark ? '#C9190B' : '#A30000' }}
             className="record-field-flex"
           >
             {value}
-          </Text>
+          </Content>
         </Tooltip>
       </div>
     );
@@ -77,7 +77,7 @@ export const RecordField: React.FC<RecordFieldProps> = ({
     if (errorText) {
       return errorTextValue(t('n/a'), errorText);
     }
-    return <Text className="record-field-flex text-muted record-field-value">{t('n/a')}</Text>;
+    return <Content className="record-field-flex text-muted record-field-value">{t('n/a')}</Content>;
   };
 
   const emptyDnsErrorText = () => {
@@ -93,18 +93,15 @@ export const RecordField: React.FC<RecordFieldProps> = ({
   const simpleTextWithTooltip = (text?: string, color?: string, child?: JSX.Element, forcedSize?: Size) => {
     if (text) {
       return (
-        <TextContent
-          className={`field-text ${forcedSize || size} netobserv-no-child-margin`}
-          data-test={`field-text-${text}`}
-        >
-          <Text className="record-field-value" component={TextVariants.p} style={{ color }}>
+        <div className={`field-text ${forcedSize || size} netobserv-no-child-margin`} data-test={`field-text-${text}`}>
+          <Content className="record-field-value" component={ContentVariants.p} style={{ color }}>
             {text}
-          </Text>
-          <Text component={TextVariants.p} className="record-field-tooltip">
+          </Content>
+          <Content component={ContentVariants.p} className="record-field-tooltip">
             {text}
-          </Text>
+          </Content>
           {child}
-        </TextContent>
+        </div>
       );
     }
     return undefined;
@@ -116,12 +113,12 @@ export const RecordField: React.FC<RecordFieldProps> = ({
       !ResourceIcon || useLinks ? (
         <ResourceLink className={size} inline={true} kind={kind} name={value} namespace={ns} />
       ) : (
-        <TextContent className={`co-resource-item ${forcedSize || size} netobserv-no-child-margin`}>
+        <div className={`co-resource-item ${forcedSize || size} netobserv-no-child-margin`}>
           <ResourceIcon kind={kind} />
-          <Text component={TextVariants.p} className="co-resource-item__resource-name" data-test-id={value}>
+          <Content component={ContentVariants.p} className="co-resource-item__resource-name" data-test-id={value}>
             {value}
-          </Text>
-        </TextContent>
+          </Content>
+        </div>
       )
     );
   };
@@ -154,16 +151,16 @@ export const RecordField: React.FC<RecordFieldProps> = ({
 
   const kubeTooltip = (value: string, kind: string, ns: string | undefined) => {
     return (
-      <TextContent className="record-field-tooltip netobserv-no-child-margin">
+      <div className="record-field-tooltip netobserv-no-child-margin">
         {ns && (
           <>
-            <Text component={TextVariants.h4}>{t('Namespace')}</Text>
-            <Text component={TextVariants.p}>{ns}</Text>
+            <Content component={ContentVariants.h4}>{t('Namespace')}</Content>
+            <Content component={ContentVariants.p}>{ns}</Content>
           </>
         )}
-        <Text component={TextVariants.h4}>{kind}</Text>
-        <Text component={TextVariants.p}>{value}</Text>
-      </TextContent>
+        <Content component={ContentVariants.h4}>{kind}</Content>
+        <Content component={ContentVariants.p}>{value}</Content>
+      </div>
     );
   };
 
@@ -172,10 +169,10 @@ export const RecordField: React.FC<RecordFieldProps> = ({
       return (
         <div data-test={`field-kind-${kind}.${value}`} className="force-truncate">
           {resourceIconText(value, kind, undefined, forcedSize)}
-          <TextContent className="record-field-tooltip netobserv-no-child-margin">
-            <Text component={TextVariants.h4}>{t(kind)}</Text>
-            <Text component={TextVariants.p}>{value}</Text>
-          </TextContent>
+          <div className="record-field-tooltip netobserv-no-child-margin">
+            <Content component={ContentVariants.h4}>{t(kind)}</Content>
+            <Content component={ContentVariants.p}>{value}</Content>
+          </div>
         </div>
       );
     }
@@ -198,17 +195,17 @@ export const RecordField: React.FC<RecordFieldProps> = ({
         <FlexItem>
           <Tooltip
             content={[
-              <Text component={TextVariants.p} className="co-nowrap" key="co-timestamp">
+              <Content component={ContentVariants.p} className="co-nowrap" key="co-timestamp">
                 {fullDateText}
-              </Text>
+              </Content>
             ]}
           >
-            <TextContent className={`datetime ${size} netobserv-no-child-margin`}>
-              <Text component={TextVariants.p}>{dateText}</Text>{' '}
-              <Text component={TextVariants.p} className="text-muted">
+            <div className={`datetime ${size} netobserv-no-child-margin`}>
+              <Content component={ContentVariants.p}>{dateText}</Content>{' '}
+              <Content component={ContentVariants.p} className="text-muted">
                 {timeText}
-              </Text>
-            </TextContent>
+              </Content>
+            </div>
           </Tooltip>
         </FlexItem>
       </Flex>
@@ -222,7 +219,7 @@ export const RecordField: React.FC<RecordFieldProps> = ({
           const child = c ? c : emptyText();
           if (i > 0 && asChild && childIcon) {
             const arrow = <span className="child-arrow">{'↪'}</span>;
-            return sideBySideContainer(arrow, child, 'flexNone', 'flex_1', 'nowrap');
+            return sideBySideContainer(arrow, child, `nth-${i}`, 'flexNone', 'flex_1', 'nowrap');
           }
           return child;
         })}
@@ -243,12 +240,13 @@ export const RecordField: React.FC<RecordFieldProps> = ({
   const sideBySideContainer = (
     leftElement?: JSX.Element,
     rightElement?: JSX.Element,
+    key?: string,
     leftFlex: FlexValue = 'flex_1',
     rightFlex: FlexValue = 'flex_1',
     wrap: FlexWrapValue = 'wrap'
   ) => {
     return (
-      <Flex direction={{ default: 'row' }} flex={{ default: 'flex_1' }} flexWrap={{ default: wrap }}>
+      <Flex key={key} direction={{ default: 'row' }} flex={{ default: 'flex_1' }} flexWrap={{ default: wrap }}>
         <FlexItem flex={{ default: leftFlex }}>{leftElement || emptyText()}</FlexItem>
         <FlexItem flex={{ default: rightFlex }}>{rightElement || emptyText()}</FlexItem>
       </Flex>
@@ -278,7 +276,7 @@ export const RecordField: React.FC<RecordFieldProps> = ({
         }
       >
         <Button variant="plain" className="record-field-value-popover-button">
-          <Text component={TextVariants.h4}>{text}</Text>
+          <Content component={ContentVariants.h4}>{text}</Content>
         </Button>
       </Popover>
     );
@@ -459,7 +457,8 @@ export const RecordField: React.FC<RecordFieldProps> = ({
                   undefined,
                   undefined,
                   multiLineSize
-                )
+                ),
+                `interface-${i}`
               )
             ),
             true,

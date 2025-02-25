@@ -5,7 +5,7 @@ export const getService = (p: number): string | null => {
   if (config.portNaming.enable != undefined && !config.portNaming.enable) {
     return null;
   }
-  if (!!config.portNaming.portNames) {
+  if (config.portNaming.portNames) {
     //cannot use .has() in if test and then return get() because then
     //linter complains we may returns undefined
     const customPort = config.portNaming.portNames.get(p.toString());
@@ -15,7 +15,7 @@ export const getService = (p: number): string | null => {
   }
   if (p < 1024) {
     const service = portnumbers.getService(p);
-    if (!!service) {
+    if (service) {
       return service.name;
     } else {
       return null;
@@ -30,9 +30,9 @@ export const getPort = (p: string): string | null => {
   if (!config.portNaming.enable) {
     return null;
   }
-  if (!!config.portNaming.portNames) {
+  if (config.portNaming.portNames) {
     const customPort = [...config.portNaming.portNames].find(([{}, v]) => v === p);
-    if (!!customPort) {
+    if (customPort) {
       return customPort[0];
     }
   }

@@ -1,9 +1,13 @@
 /* eslint-disable max-len */
 import {
   Brand,
+  Button,
+  Content,
+  ContentVariants,
   Masthead,
   MastheadBrand,
   MastheadContent,
+  MastheadLogo,
   MastheadMain,
   MastheadToggle,
   Nav,
@@ -13,7 +17,6 @@ import {
   PageSection,
   PageSidebar,
   PageSidebarBody,
-  PageToggleButton,
   Tab,
   Tabs,
   Title,
@@ -77,9 +80,9 @@ export const App: React.FunctionComponent = () => {
     const htmlElement = document.getElementsByTagName('html')[0];
     if (htmlElement) {
       if (isDarkTheme) {
-        htmlElement.classList.add('pf-v5-theme-dark');
+        htmlElement.classList.add('pf-v6-theme-dark');
       } else {
-        htmlElement.classList.remove('pf-v5-theme-dark');
+        htmlElement.classList.remove('pf-v6-theme-dark');
       }
     }
   };
@@ -87,8 +90,10 @@ export const App: React.FunctionComponent = () => {
   const headerToolbar = (
     <Toolbar id="vertical-toolbar">
       <ToolbarContent>
-        <ToolbarItem>Netobserv</ToolbarItem>
-        <ToolbarItem align={{ default: 'alignRight' }}>
+        <ToolbarItem>
+          <Content component={ContentVariants.h1}>Netobserv</Content>
+        </ToolbarItem>
+        <ToolbarItem align={{ default: 'alignEnd' }}>
           <ToggleGroup>
             <ToggleGroupItem text="Light" isSelected={!isDark} onClick={() => onThemeSelect(false)} />
             <ToggleGroupItem text="Dark" isSelected={isDark} onClick={() => onThemeSelect(true)} />
@@ -100,20 +105,20 @@ export const App: React.FunctionComponent = () => {
 
   const header = (
     <Masthead>
-      <MastheadToggle>
-        <PageToggleButton
-          variant="plain"
-          aria-label="Global navigation"
-          isSidebarOpen={isSidebarOpen}
-          onSidebarToggle={onSidebarToggle}
-          id="vertical-nav-toggle"
-        >
-          <BarsIcon />
-        </PageToggleButton>
-      </MastheadToggle>
       <MastheadMain>
+        <MastheadToggle>
+          <Button
+            id="vertical-nav-toggle"
+            variant="plain"
+            onClick={() => onSidebarToggle()}
+            aria-label="Global navigation"
+            icon={<BarsIcon />}
+          />
+        </MastheadToggle>
         <MastheadBrand>
-          <Brand src={'https://avatars.githubusercontent.com/u/91939379?s=35'} alt="Netobserv Logo" />
+          <MastheadLogo>
+            <Brand src={'https://avatars.githubusercontent.com/u/91939379?s=35'} alt="Netobserv Logo" />
+          </MastheadLogo>
         </MastheadBrand>
       </MastheadMain>
       <MastheadContent>{headerToolbar}</MastheadContent>
@@ -176,7 +181,7 @@ export const App: React.FunctionComponent = () => {
         return <>{content}</>;
       default:
         return (
-          <PageSection id="consolePageSection" className={`tab' ${isDark ? 'dark' : 'light'}`}>
+          <PageSection hasBodyWrapper={false} id="consolePageSection" className={`tab' ${isDark ? 'dark' : 'light'}`}>
             <div style={{ padding: '1rem' }}>
               <Title headingLevel="h1">{`${page.name} example`}</Title>
             </div>
@@ -197,7 +202,7 @@ export const App: React.FunctionComponent = () => {
 
   return (
     <BrowserRouter>
-      <Page header={header} sidebar={sidebar}>
+      <Page id="page" masthead={header} sidebar={sidebar}>
         {pageContext()}
       </Page>
     </BrowserRouter>

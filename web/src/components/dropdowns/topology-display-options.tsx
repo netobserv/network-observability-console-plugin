@@ -1,4 +1,4 @@
-import { Checkbox, Flex, FlexItem, Switch, Text, TextVariants, Tooltip } from '@patternfly/react-core';
+import { Checkbox, Content, ContentVariants, Flex, FlexItem, Switch, Tooltip } from '@patternfly/react-core';
 import { InfoAltIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -66,12 +66,12 @@ export const TopologyDisplayOptions: React.FC<TopologyDisplayOptionsProps> = ({
 
   return (
     <>
-      <div className="pf-v5-c-menu__group">
+      <div className="pf-v6-c-menu__group">
         <Tooltip content={t('Measurement to show as edge labels.')}>
-          <div className="pf-v5-c-menu__group-title">
-            <Text component={TextVariants.p}>
+          <div className="pf-v6-c-menu__group-title">
+            <Content component={ContentVariants.p}>
               {t('Edge labels')} <InfoAltIcon />
-            </Text>
+            </Content>
           </div>
         </Tooltip>
         <div className="display-dropdown-padding">
@@ -97,12 +97,12 @@ export const TopologyDisplayOptions: React.FC<TopologyDisplayOptionsProps> = ({
           </Flex>
         </div>
       </div>
-      <div className="pf-v5-c-menu__group">
+      <div className="pf-v6-c-menu__group">
         <Tooltip content={t('The level of details represented.')}>
-          <div className="pf-v5-c-menu__group-title">
-            <Text component={TextVariants.p}>
+          <div className="pf-v6-c-menu__group-title">
+            <Content component={ContentVariants.p}>
               {t('Scope')} <InfoAltIcon />
-            </Text>
+            </Content>
           </div>
         </Tooltip>
         <div className="display-dropdown-padding">
@@ -115,12 +115,12 @@ export const TopologyDisplayOptions: React.FC<TopologyDisplayOptionsProps> = ({
           />
         </div>
       </div>
-      <div className="pf-v5-c-menu__group">
+      <div className="pf-v6-c-menu__group">
         <Tooltip content={t('Grouping items helps to better understand ownership.')}>
-          <div className="pf-v5-c-menu__group-title">
-            <Text component={TextVariants.p}>
+          <div className="pf-v6-c-menu__group-title">
+            <Content component={ContentVariants.p}>
               {t('Groups')} <InfoAltIcon />
-            </Text>
+            </Content>
           </div>
         </Tooltip>
         <div className="display-dropdown-padding">
@@ -134,24 +134,24 @@ export const TopologyDisplayOptions: React.FC<TopologyDisplayOptionsProps> = ({
           />
         </div>
       </div>
-      <div className="pf-v5-c-menu__group">
+      <div className="pf-v6-c-menu__group">
         <Tooltip content={t('The way in which topology items are arranged.')}>
-          <div className="pf-v5-c-menu__group-title">
-            <Text component={TextVariants.p}>
+          <div className="pf-v6-c-menu__group-title">
+            <Content component={ContentVariants.p}>
               {t('Layout')} <InfoAltIcon />
-            </Text>
+            </Content>
           </div>
         </Tooltip>
         <div className="display-dropdown-padding">
           <LayoutDropdown id="layout" selected={topologyOptions.layout} setLayout={setLayout} />
         </div>
       </div>
-      <div className="pf-v5-c-menu__group">
+      <div className="pf-v6-c-menu__group">
         <Tooltip content={t('Various options to show / hide view details.')}>
-          <div className="pf-v5-c-menu__group-title">
-            <Text component={TextVariants.p}>
+          <div className="pf-v6-c-menu__group-title">
+            <Content component={ContentVariants.p}>
               {t('Show')} <InfoAltIcon />
-            </Text>
+            </Content>
           </div>
         </Tooltip>
         <div className="display-dropdown-padding">
@@ -191,12 +191,12 @@ export const TopologyDisplayOptions: React.FC<TopologyDisplayOptionsProps> = ({
           />
         </div>
       </div>
-      <div className="pf-v5-c-menu__group">
+      <div className="pf-v6-c-menu__group">
         <Tooltip content={t('Long labels can reduce visibility.')}>
-          <div className="pf-v5-c-menu__group-title">
-            <Text component={TextVariants.p}>
+          <div className="pf-v6-c-menu__group-title">
+            <Content component={ContentVariants.p}>
               {t('Truncate labels')} <InfoAltIcon />
-            </Text>
+            </Content>
           </div>
         </Tooltip>
         <div className="display-dropdown-padding">
@@ -207,7 +207,7 @@ export const TopologyDisplayOptions: React.FC<TopologyDisplayOptionsProps> = ({
           />
         </div>
       </div>
-      <div className="pf-v5-c-menu__group">
+      <div className="pf-v6-c-menu__group">
         <div className="display-dropdown-switch-padding">
           <Switch
             id="group-collapsed-switch"

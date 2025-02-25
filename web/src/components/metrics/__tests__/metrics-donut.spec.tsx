@@ -1,7 +1,7 @@
 import { mount } from 'enzyme';
 import * as React from 'react';
 
-import { ChartDonut } from '@patternfly/react-charts';
+import { ChartDonut } from '@patternfly/react-charts/victory';
 import { NamedMetric } from '../../../api/loki';
 import { metrics } from '../../__tests-data__/metrics';
 import { MetricsDonut, MetricsDonutProps } from '../metrics-donut';

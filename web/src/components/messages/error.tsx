@@ -3,15 +3,13 @@ import {
   Button,
   ClipboardCopy,
   ClipboardCopyVariant,
+  Content,
+  ContentVariants,
   EmptyState,
   EmptyStateBody,
-  EmptyStateIcon,
+  List,
+  ListItem,
   Spinner,
-  Text,
-  TextContent,
-  TextList,
-  TextListItem,
-  TextVariants,
   Title
 } from '@patternfly/react-core';
 import { ExclamationCircleIcon, ExternalLinkSquareAltIcon } from '@patternfly/react-icons';
@@ -130,80 +128,86 @@ export const Error: React.FC<ErrorProps> = ({ title, error, isLokiRelated }) => 
 
   return (
     <div id="netobserv-error-container">
-      <EmptyState data-test="error-state">
-        <EmptyStateIcon className="netobserv-error-icon" icon={ExclamationCircleIcon} />
-        <Title headingLevel="h2" size="lg">
-          {title}
-        </Title>
+      <EmptyState
+        titleText={
+          <Title headingLevel="h2" size="lg">
+            {title}
+          </Title>
+        }
+        data-test="error-state"
+        icon={ExclamationCircleIcon}
+      >
         <EmptyStateBody className="error-body">
-          <Text className="netobserv-error-message" component={TextVariants.p}>
+          <Content className="netobserv-error-message" component={ContentVariants.p}>
             {getDisplayError()}
-          </Text>
+          </Content>
           {
-            <TextContent className="error-text-content">
-              <Text component={TextVariants.p}>{t('You may consider the following changes to avoid this error:')}</Text>
+            <div className="error-text-content">
+              <Content component={ContentVariants.p}>
+                {t('You may consider the following changes to avoid this error:')}
+              </Content>
               {error.includes('promUnsupported') && (
                 <>
-                  <Text component={TextVariants.blockquote}>
+                  <Content component={ContentVariants.blockquote}>
                     {t('Add missing metrics to prometheus in the FlowCollector API (processor.metrics.includeList)')}
-                  </Text>
-                  <Text component={TextVariants.blockquote}>
+                  </Content>
+                  <Content component={ContentVariants.blockquote}>
                     {t('Enable Loki in the FlowCollector API (loki.enable)')}
-                  </Text>
+                  </Content>
                 </>
               )}
               {error.includes('max entries limit') && (
                 <>
-                  <Text component={TextVariants.blockquote}>
+                  <Content component={ContentVariants.blockquote}>
                     {t('Reduce the Query Options -> limit to reduce the number of results')}
-                  </Text>
-                  <Text component={TextVariants.blockquote}>
+                  </Content>
+                  <Content component={ContentVariants.blockquote}>
                     {t('Increase Loki "max_entries_limit_per_query" entry in configuration file')}
-                  </Text>
+                  </Content>
                 </>
               )}
               {(error.includes('deadline exceeded') ||
                 error.includes('maximum of series') ||
                 error.includes('too many outstanding requests')) && (
                 <>
-                  <Text component={TextVariants.blockquote}>
+                  <Content component={ContentVariants.blockquote}>
                     {t(
                       // eslint-disable-next-line max-len
                       'Add Namespace, Owner or Resource filters (which use indexed fields) to improve the query performance'
                     )}
-                  </Text>
-                  <Text component={TextVariants.blockquote}>
+                  </Content>
+                  <Content component={ContentVariants.blockquote}>
                     {t('Reduce limit and time range to decrease the number of results')}
-                  </Text>
-                  <Text component={TextVariants.blockquote}>
+                  </Content>
+                  <Content component={ContentVariants.blockquote}>
                     {t('Increase time step to decrease the number of parallel queries')}
-                  </Text>
+                  </Content>
                   {error.includes('too many outstanding requests') && (
-                    <Text component={TextVariants.blockquote}>
+                    <Content component={ContentVariants.blockquote}>
                       {t(
                         // eslint-disable-next-line max-len
                         'Ensure Loki config contains "parallelise_shardable_queries: true" and "max_outstanding_requests_per_tenant: 2048"'
                       )}
-                    </Text>
+                    </Content>
                   )}
                 </>
               )}
               {(error.includes('time range exceeds') || error.includes('maximum resolution')) && (
                 <>
-                  <Text component={TextVariants.blockquote}>
+                  <Content component={ContentVariants.blockquote}>
                     {t('Reduce the time range to decrease the number of results')}
-                  </Text>
-                  <Text component={TextVariants.blockquote}>
+                  </Content>
+                  <Content component={ContentVariants.blockquote}>
                     {t('Increase Loki "max_query_length" entry in configuration file')}
-                  </Text>
+                  </Content>
                 </>
               )}
               {error.includes('input size too long') && (
                 <>
-                  <Text component={TextVariants.blockquote}>
+                  <Content component={ContentVariants.blockquote}>
                     {t('This error is generally seen when cluster admin groups are not properly configured.')}{' '}
                     {t('Click the link below for more help.')}
-                  </Text>
+                  </Content>
                   <Button
                     variant="link"
                     icon={<ExternalLinkSquareAltIcon />}
@@ -224,70 +228,70 @@ export const Error: React.FC<ErrorProps> = ({ title, error, isLokiRelated }) => 
                 </>
               )}
               {error.includes('Network Error') && (
-                <Text component={TextVariants.blockquote}>
+                <Content component={ContentVariants.blockquote}>
                   {t(`Check your connectivity with cluster / console plugin pod`)}
-                </Text>
+                </Content>
               )}
 
               {(error.includes('status code 401') || error.includes('status code 403')) && (
                 <>
-                  <Text component={TextVariants.blockquote}>{t(`Check current user permissions`)}</Text>
+                  <Content component={ContentVariants.blockquote}>{t(`Check current user permissions`)}</Content>
                   {error.includes('user not an admin') ? (
-                    <Text component={TextVariants.blockquote}>
+                    <Content component={ContentVariants.blockquote}>
                       {t(
                         `This deployment mode does not support non-admin users. Check FlowCollector spec.loki.manual.authToken`
                       )}
-                    </Text>
+                    </Content>
                   ) : (
                     <>
                       {error.includes('from Loki') && (
                         <>
-                          <Text component={TextVariants.blockquote}>
+                          <Content component={ContentVariants.blockquote}>
                             {t(`For LokiStack, your user must either:`)}
-                            <TextList>
-                              <TextListItem>
+                            <List>
+                              <ListItem>
                                 {t(`have the 'netobserv-reader' cluster role, which allows multi-tenancy`)}
-                              </TextListItem>
-                              <TextListItem>
+                              </ListItem>
+                              <ListItem>
                                 {t(`or be in the 'cluster-admin' group (not the same as the 'cluster-admin' role)`)}
-                              </TextListItem>
-                              <TextListItem>
+                              </ListItem>
+                              <ListItem>
                                 {t(
                                   `or LokiStack spec.tenants.openshift.adminGroups must be configured with a group this user belongs to`
                                 )}
-                              </TextListItem>
-                            </TextList>
-                          </Text>
-                          <Text component={TextVariants.blockquote}>
+                              </ListItem>
+                            </List>
+                          </Content>
+                          <Content component={ContentVariants.blockquote}>
                             {t(`For other configurations, refer to FlowCollector spec.loki.manual.authToken`)}
-                          </Text>
+                          </Content>
                         </>
                       )}
                     </>
                   )}
                   {error.includes('from Prometheus') && (
-                    <Text component={TextVariants.blockquote}>
+                    <Content component={ContentVariants.blockquote}>
                       {t(`For metrics access, your user must either:`)}
-                      <TextList>
-                        <TextListItem>{t(`have the 'netobserv-metrics-reader' namespace-scoped role`)}</TextListItem>
-                        <TextListItem>
+                      <List>
+                        <ListItem>{t(`have the 'netobserv-metrics-reader' namespace-scoped role`)}</ListItem>
+                        <ListItem>
                           {t(`or for cluster-wide access, have the 'cluster-monitoring-view' cluster role`)}
-                        </TextListItem>
-                      </TextList>
-                    </Text>
+                        </ListItem>
+                      </List>
+                    </Content>
                   )}
                 </>
               )}
 
               {status && <StatusTexts status={status} />}
               {statusError && (
-                <Text component={TextVariants.blockquote}>
+                <Content component={ContentVariants.blockquote}>
                   {t('Check for errors in health dashboard. Status endpoint is returning: {{statusError}}', {
                     statusError
                   })}
-                </Text>
+                </Content>
               )}
-            </TextContent>
+            </div>
           }
         </EmptyStateBody>
         {isLokiRelated && (
@@ -339,8 +343,8 @@ export const Error: React.FC<ErrorProps> = ({ title, error, isLokiRelated }) => 
         </Bullseye>
       ) : (
         info && (
-          <TextContent>
-            <Text component={TextVariants.h4}>{infoName}</Text>
+          <div>
+            <Content component={ContentVariants.h4}>{infoName}</Content>
             <ClipboardCopy
               isCode
               isExpanded
@@ -350,7 +354,7 @@ export const Error: React.FC<ErrorProps> = ({ title, error, isLokiRelated }) => 
             >
               {info}
             </ClipboardCopy>
-          </TextContent>
+          </div>
         )
       )}
     </div>

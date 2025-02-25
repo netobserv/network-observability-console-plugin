@@ -7,11 +7,11 @@ import { AlertsResult, SilencedAlert } from '../../api/alert';
 import { FlowMetricsResult, GenericMetricsResult } from '../../api/loki';
 import { getConfig, getFlowGenericMetrics, getFlowMetrics, getFlowRecords } from '../../api/routes';
 import { FlowQuery } from '../../model/flow-query';
-import NetflowTraffic from '../netflow-traffic';
-import NetflowTrafficParent from '../netflow-traffic-parent';
 import { FullConfigResultSample, SimpleConfigResultSample } from '../__tests-data__/config';
 import { extensionsMock } from '../__tests-data__/extensions';
 import { FlowsResultSample } from '../__tests-data__/flows';
+import NetflowTraffic from '../netflow-traffic';
+import NetflowTrafficParent from '../netflow-traffic-parent';
 import { actOn, waitForRender } from './common.spec';
 
 const useResolvedExtensionsMock = useResolvedExtensions as jest.Mock;

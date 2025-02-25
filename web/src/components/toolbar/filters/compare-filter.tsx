@@ -89,14 +89,11 @@ export const CompareFilter: React.FC<CompareFilterProps> = ({ value, setValue, c
           <MenuToggle
             ref={toggleRef}
             id="filter-compare-toggle-button"
-            splitButtonOptions={{
-              variant: 'action',
-              items: [
-                <MenuToggleAction key="action" id="filter-compare-switch-button" onClick={onSwitch}>
-                  {getSymbol()}
-                </MenuToggleAction>
-              ]
-            }}
+            splitButtonItems={[
+              <MenuToggleAction key="action" id="filter-compare-switch-button" onClick={onSwitch}>
+                {getSymbol()}
+              </MenuToggleAction>
+            ]}
             onClick={() => setOpen(!isOpen)}
             isExpanded={isOpen}
             onBlur={() => setTimeout(() => setOpen(false), 500)}

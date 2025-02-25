@@ -1,4 +1,4 @@
-import { Button, Text, TextContent, TextVariants } from '@patternfly/react-core';
+import { Button, Content, ContentVariants } from '@patternfly/react-core';
 import { CloseIcon } from '@patternfly/react-icons';
 import React from 'react';
 import Modal from 'react-modal';
@@ -44,11 +44,12 @@ const CustomModal: React.FC<CustomModalProps> = ({
     >
       <div className={`modal-content modal-content--no-inner-scroll ${isDarkTheme ? 'dark' : 'light'}`}>
         <div data-test={`${id}-header`} className="modal-header">
-          <TextContent>
-            <Text component={TextVariants.h1}>
+          <div>
+            <Content component={ContentVariants.h1}>
               {title}
               {onClose && (
                 <Button
+                  icon={<CloseIcon />}
                   data-test={`${id}-close-button`}
                   className={'co-close-button co-close-button--float-right'}
                   onClick={e => {
@@ -56,12 +57,10 @@ const CustomModal: React.FC<CustomModalProps> = ({
                     onClose();
                   }}
                   variant="plain"
-                >
-                  <CloseIcon />
-                </Button>
+                />
               )}
-            </Text>
-          </TextContent>
+            </Content>
+          </div>
           {description && <div className="modal-description">{description}</div>}
         </div>
         {children && (

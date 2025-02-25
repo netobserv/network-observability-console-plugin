@@ -1,4 +1,4 @@
-import { FlexItem, Text, TextVariants, Tooltip } from '@patternfly/react-core';
+import { Content, ContentVariants, FlexItem, Tooltip } from '@patternfly/react-core';
 import { ExclamationTriangleIcon, GlobeAmericasIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -39,21 +39,23 @@ export const StatsQuerySummary: React.FC<StatsQuerySummaryProps> = ({
       <Tooltip
         content={
           <>
-            <Text>
+            <Content>
               {lastRefresh
                 ? t('Last refresh: {{time}}', {
                     time: dateText
                   })
                 : dateText}
-            </Text>
-            {dataSources?.length && <Text>{t('Datasource(s): {{sources}}', { sources: formatDatasources() })}</Text>}
-            {numQueries && <Text>{t('Query count: {{count}}', { count: numQueries })}</Text>}
-            {durationText !== '' && <Text>{t('Duration: {{duration}}', { duration: durationText })}</Text>}
+            </Content>
+            {dataSources?.length && (
+              <Content>{t('Datasource(s): {{sources}}', { sources: formatDatasources() })}</Content>
+            )}
+            {numQueries && <Content>{t('Query count: {{count}}', { count: numQueries })}</Content>}
+            {durationText !== '' && <Content>{t('Duration: {{duration}}', { duration: durationText })}</Content>}
             {warning !== undefined && (
               <>
                 <br />
-                <Text>{warning.summary}</Text>
-                <Text>{warning.details}</Text>
+                <Content>{warning.summary}</Content>
+                <Content>{warning.details}</Content>
               </>
             )}
           </>
@@ -61,12 +63,12 @@ export const StatsQuerySummary: React.FC<StatsQuerySummaryProps> = ({
       >
         <div className={`stats-query-summary-container-with-icon ${loading ? 'stats-loading-blink' : ''}`}>
           {warning !== undefined ? <ExclamationTriangleIcon /> : <GlobeAmericasIcon />}
-          <Text id="lastRefresh" component={TextVariants.p}>
+          <Content id="lastRefresh" component={ContentVariants.p}>
             {dateText}
             {detailed && numQueries && ` ${t('running')} ${numQueries} ${numQueries > 1 ? t('queries') : t('query')}`}
             {detailed && dataSources?.length && ` ${t('from')} ${formatDatasources()}`}
             {detailed && durationText !== '' && ` ${t('in')} ${durationText}`}
-          </Text>
+          </Content>
         </div>
       </Tooltip>
     </FlexItem>

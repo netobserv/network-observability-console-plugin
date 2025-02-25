@@ -27,10 +27,10 @@ export const dnsRCodes: ReadOnlyValues = [
 ] as const;
 
 const dnsRcodesValues = dnsRCodes.map(v => v.value);
-export type dnsRCodesValues = typeof dnsRcodesValues[number];
+export type dnsRCodesValues = (typeof dnsRcodesValues)[number];
 
 const dnsRcodesNames = dnsRCodes.map(v => v.name);
-export type dnsCodesNames = typeof dnsRcodesNames[number];
+export type dnsCodesNames = (typeof dnsRcodesNames)[number];
 
 export const getDNSRcodeDescription = (name: dnsCodesNames): string => {
   return dnsRCodes.find(v => v.name === name)?.description || 'Unassigned';
@@ -75,10 +75,10 @@ export const dnsErrors: ReadOnlyValues = [
 ] as const;
 
 const dnsErrorsValues = dnsErrors.map(v => v.value);
-export type dnsErrorsValues = typeof dnsErrorsValues[number];
+export type dnsErrorsValues = (typeof dnsErrorsValues)[number];
 
 const dnsErrorsNames = dnsErrors.map(v => v.name);
-export type dnsErrorsNames = typeof dnsErrorsNames[number];
+export type dnsErrorsNames = (typeof dnsErrorsNames)[number];
 
 export const getDNSErrorDescription = (value: dnsErrorsValues): string => {
   return dnsErrors.find(v => v.value === value)?.description || '';

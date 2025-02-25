@@ -217,11 +217,16 @@ export const NetflowTrafficTab: React.FC<NetflowTrafficTabProps> = ({ match, obj
     );
   } else {
     return (
-      <PageSection id="pageSection" data-test="tab-page-section">
-        <EmptyState data-test="error-state" variant={EmptyStateVariant.sm}>
-          <Title headingLevel="h2" size="lg">
-            {t('Kind not managed')}
-          </Title>
+      <PageSection hasBodyWrapper={false} id="pageSection" data-test="tab-page-section">
+        <EmptyState
+          titleText={
+            <Title headingLevel="h2" size="lg">
+              {t('Kind not managed')}
+            </Title>
+          }
+          data-test="error-state"
+          variant={EmptyStateVariant.sm}
+        >
           <EmptyStateBody>{obj?.kind}</EmptyStateBody>
         </EmptyState>
       </PageSection>

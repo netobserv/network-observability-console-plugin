@@ -35,7 +35,7 @@ export const NetflowTrafficDevTab: React.FC<NetflowTrafficDevTabProps> = props =
   const namespace = props.params?.ns || props.match?.params?.ns;
   if (!namespace) {
     return (
-      <PageSection id="pageSection">
+      <PageSection hasBodyWrapper={false} id="pageSection">
         <Bullseye data-test="loading-tab">
           <Spinner size="xl" />
         </Bullseye>

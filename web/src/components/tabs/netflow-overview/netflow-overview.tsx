@@ -28,7 +28,7 @@ import { TimeRange } from '../../../utils/datetime';
 import { getDNSErrorDescription, getDNSRcodeDescription } from '../../../utils/dns';
 import { getDSCPServiceClassName } from '../../../utils/dscp';
 import { localStorageOverviewKebabKey, useLocalStorage } from '../../../utils/local-storage-hook';
-import { observeDOMRect, toNamedMetric } from '../../../utils/metrics-helper';
+import { handleRectChange, toNamedMetric } from '../../../utils/metrics-helper';
 import {
   customPanelMatcher,
   dnsIdMatcher,
@@ -451,7 +451,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
     );
 
     React.useEffect(() => {
-      observeDOMRect(containerRef, containerSize, setContainerSize);
+      handleRectChange(containerRef, containerSize, setContainerSize);
       setSidePanelWidth(document.getElementById('summaryPanel')?.clientWidth || 0);
       setOffsetTop(containerRef.current?.offsetTop || 0);
     }, [containerRef, containerSize]);
@@ -1160,10 +1160,10 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
               style={{
                 position: 'absolute',
                 top: offsetTop,
-                right: containerSize.width / 5 + sidePanelWidth,
+                right: containerSize.width / 4 + sidePanelWidth,
                 height: containerSize.height,
                 overflow: 'hidden',
-                width: (containerSize.width * 4) / 5,
+                width: (containerSize.width * 6) / 8,
                 padding: `${containerPadding}px ${cardPadding}px ${containerPadding}px ${containerPadding}px`
               }}
             >
@@ -1179,7 +1179,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
                     marginLeft: (containerSize.width * 4) / 5 - containerPadding
                   }
                 : {
-                    marginLeft: containerSize.width * 0.075
+                    marginLeft: containerSize.width * 0.1
                   }
             }
           >
@@ -1207,6 +1207,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
 
     return (
       <div
+        id="overview-container-div"
         style={{
           width: '100%',
           height: '100%',

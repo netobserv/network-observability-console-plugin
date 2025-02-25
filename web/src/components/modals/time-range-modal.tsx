@@ -1,12 +1,11 @@
 import {
   Button,
+  Content,
+  ContentVariants,
   DatePicker,
   Flex,
   FlexItem,
   isValidDate,
-  Text,
-  TextContent,
-  TextVariants,
   TimePicker,
   Tooltip
 } from '@patternfly/react-core';
@@ -155,7 +154,7 @@ export const TimeRangeModal: React.FC<TimeRangeModalProps> = ({
       return (
         <Flex className="date-time-pickers-container" direction={{ default: 'column' }}>
           <FlexItem>
-            <Text component={TextVariants.h4}>{t('From')}</Text>
+            <Content component={ContentVariants.h4}>{t('From')}</Content>
             <Flex direction={{ default: 'row' }} className="time-range-row">
               <FlexItem>
                 <DatePicker
@@ -183,7 +182,7 @@ export const TimeRangeModal: React.FC<TimeRangeModalProps> = ({
             </Flex>
           </FlexItem>
           <FlexItem>
-            <Text component={TextVariants.h4}>{t('To')}</Text>
+            <Content component={ContentVariants.h4}>{t('To')}</Content>
             <Flex direction={{ default: 'row' }} className="time-range-row">
               <FlexItem>
                 <DatePicker
@@ -273,21 +272,21 @@ export const TimeRangeModal: React.FC<TimeRangeModalProps> = ({
         </div>
       }
     >
-      <TextContent>
-        <Text component={TextVariants.p}>
+      <div>
+        <Content component={ContentVariants.p}>
           {t('Select a custom time range. Flows are selected based on their End Time value.')}
-        </Text>
-      </TextContent>
+        </Content>
+      </div>
       {getDateTimePickers()}
       {maxChunkAge && (
-        <TextContent>
-          <Text component={TextVariants.blockquote}>
+        <div>
+          <Content component={ContentVariants.blockquote}>
             {t(
               'Collection latency could be up to {{maxChunkAge}} corresponding to the current Loki "max_chunk_age" ingester configuration.',
               { maxChunkAge: formatDuration(maxChunkAge) }
             )}
-          </Text>
-        </TextContent>
+          </Content>
+        </div>
       )}
     </Modal>
   );
