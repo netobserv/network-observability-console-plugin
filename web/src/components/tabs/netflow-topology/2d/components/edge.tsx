@@ -128,9 +128,13 @@ const DefaultEdgeInner: React.FunctionComponent<DefaultEdgeInnerProps> = observe
 
     React.useLayoutEffect(() => {
       if (hover && !dragging) {
-        onShowRemoveConnector && onShowRemoveConnector();
+        if (onShowRemoveConnector) {
+          onShowRemoveConnector();
+        }
       } else {
-        onHideRemoveConnector && onHideRemoveConnector();
+        if (onHideRemoveConnector) {
+          onHideRemoveConnector();
+        }
       }
     }, [hover, dragging, onShowRemoveConnector, onHideRemoveConnector]);
 

@@ -5,6 +5,7 @@ import AlertBanner from './banner';
 
 import { murmur3 } from 'murmurhash-js';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface AlertFetcherProps {}
 
 export const AlertFetcher: React.FC<AlertFetcherProps> = ({ children }) => {

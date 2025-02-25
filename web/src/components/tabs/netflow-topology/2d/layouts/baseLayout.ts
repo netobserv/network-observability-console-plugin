@@ -90,7 +90,6 @@ export class BaseLayout implements Layout {
     return this.options;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
   protected onSimulationEnd = () => {};
 
   destroy(): void {
@@ -106,10 +105,10 @@ export class BaseLayout implements Layout {
     this.forceSimulation.destroy();
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected initDrag(element: Node, event: DragEvent, operation: DragOperationWithType): void {}
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected endDrag(element: Node, event: DragEvent, operation: DragOperationWithType): void {}
 
   handleDragStart = (element: Node, event: DragEvent, operation: DragOperationWithType) => {
@@ -247,8 +246,9 @@ export class BaseLayout implements Layout {
         try {
           this.runLayout(false, this.scheduleRestart);
           this.scheduleRestart = false;
-          // eslint-disable-next-line no-empty
-        } catch (e) {}
+        } catch (e) {
+          console.error(e);
+        }
       });
     }
   };
@@ -409,14 +409,13 @@ export class BaseLayout implements Layout {
     nodes: LayoutNode[], // eslint-disable-line @typescript-eslint/no-unused-vars
     edges: LayoutLink[], // eslint-disable-line @typescript-eslint/no-unused-vars
     groups: LayoutGroup[] // eslint-disable-line @typescript-eslint/no-unused-vars
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
   ): void {}
 
   protected stopSimulation(): void {
     this.forceSimulation.haltForceSimulation();
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected startLayout(graph: Graph, initialRun: boolean, addingNodes: boolean, onEnd?: () => void): void {}
 
   // Interim, remove and update startLayout to public in next breaking change build

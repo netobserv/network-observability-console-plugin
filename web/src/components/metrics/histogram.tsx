@@ -178,7 +178,6 @@ export const Histogram: React.FC<HistogramProps> = ({
 
   const pageButtonTips = React.useCallback(() => {
     return t(
-      // eslint-disable-next-line max-len
       'Move the selected range to filter the table below as time based pagination. You can also use the page up or down buttons while the histogram is focused.'
     );
   }, [t]);

@@ -23,7 +23,7 @@
     "lint": "./node_modules/.bin/eslint \"./src/**/*.{ts,tsx}\"",
     "format": "pretty-quick --branch main",
     "format-all": "prettier --write \"./src/**/*.{ts,tsx}\" && npm run fix-imports",
-    "fix-imports": "eslint --no-inline-config --parser '@typescript-eslint/parser' --plugin 'unused-imports' --plugin 'react-hooks' --rule 'unused-imports/no-unused-imports:error' --fix",
+    "fix-imports": "eslint --parser '@typescript-eslint/parser' --plugin 'unused-imports' --plugin 'react-hooks' --rule 'unused-imports/no-unused-imports:error' --fix",
     "generate-doc": "typedoc --sort source-order --categorizeByGroup false --githubPages false --readme none --disableSources --out docs src/api/ipfix.ts --hideBreadcrumbs true --hideInPageTOC true"
   },
   "devDependencies": {

@@ -77,7 +77,6 @@ export interface NetflowTopologyProps {
   clearFilters?: () => void;
 }
 
-// eslint-disable-next-line react/display-name
 export const NetflowTopology: React.FC<NetflowTopologyProps> = React.forwardRef(
   (props, ref: React.Ref<NetflowTopologyHandle>) => {
     const { t } = useTranslation('plugin__netobserv-plugin');
@@ -228,7 +227,6 @@ export const NetflowTopology: React.FC<NetflowTopologyProps> = React.forwardRef(
       c.registerComponentFactory(componentFactory);
       c.registerComponentFactory(stylesComponentFactory);
       setController(c);
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (

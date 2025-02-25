@@ -10,7 +10,6 @@ export interface TextFilterProps {
   filterDefinition: FilterDefinition;
   addFilter: (filter: FilterValue) => boolean;
   setMessageWithDelay: (m: string | undefined) => void;
-  indicator: Indicator;
   setIndicator: (ind: Indicator) => void;
   allowEmpty?: boolean;
   regexp?: RegExp;
@@ -20,7 +19,6 @@ export const TextFilter: React.FC<TextFilterProps> = ({
   filterDefinition,
   addFilter,
   setMessageWithDelay,
-  indicator,
   setIndicator,
   allowEmpty,
   regexp

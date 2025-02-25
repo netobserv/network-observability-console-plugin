@@ -8,7 +8,7 @@ import {
   ValidatedOptions
 } from '@patternfly/react-core';
 import { CompressIcon, ExpandIcon } from '@patternfly/react-icons';
-import * as _ from 'lodash';
+import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Filter, FilterDefinition, Filters, FilterValue, findFromFilters } from '../../model/filters';
@@ -58,7 +58,9 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
   ...props
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
+  // TODO: restore broken indicator
   const [indicator, setIndicator] = React.useState<Indicator>(ValidatedOptions.default);
+  console.log('indicator', indicator);
   const [message, setMessage] = React.useState<string | undefined>();
   const [selectedFilter, setSelectedFilter] = React.useState<FilterDefinition | null>(
     findFilter(filterDefinitions, 'src_namespace') || filterDefinitions.length ? filterDefinitions[0] : null
@@ -124,7 +126,6 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
       filterDefinition: selectedFilter,
       addFilter: addFilter,
       setMessageWithDelay: setMessageWithDelay,
-      indicator: indicator,
       setIndicator: setIndicator
     };
     switch (selectedFilter.component) {
@@ -140,7 +141,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
       case 'autocomplete':
         return <AutocompleteFilter {...commonProps} />;
     }
-  }, [selectedFilter, addFilter, setMessageWithDelay, indicator, selectedCompare]);
+  }, [selectedFilter, addFilter, setMessageWithDelay, selectedCompare]);
 
   const getFilterToolbar = React.useCallback(() => {
     if (selectedFilter === null) {

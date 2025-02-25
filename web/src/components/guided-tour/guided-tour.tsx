@@ -31,7 +31,7 @@ export interface GuidedTourPopoverProps {
 }
 
 const onIndexChangeFunctions: IndexChangeFunction[] = [];
-// eslint-disable-next-line react/display-name
+
 export const GuidedTourPopover: React.FC<GuidedTourPopoverProps> = React.forwardRef(
   (props, ref: React.Ref<GuidedTourHandle>) => {
     const { t } = useTranslation('plugin__netobserv-plugin');

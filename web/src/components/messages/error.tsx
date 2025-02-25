@@ -172,7 +172,6 @@ export const Error: React.FC<ErrorProps> = ({ title, error, isLokiRelated }) => 
                 <>
                   <Content component={ContentVariants.blockquote}>
                     {t(
-                      // eslint-disable-next-line max-len
                       'Add Namespace, Owner or Resource filters (which use indexed fields) to improve the query performance'
                     )}
                   </Content>
@@ -185,7 +184,6 @@ export const Error: React.FC<ErrorProps> = ({ title, error, isLokiRelated }) => 
                   {error.includes('too many outstanding requests') && (
                     <Content component={ContentVariants.blockquote}>
                       {t(
-                        // eslint-disable-next-line max-len
                         'Ensure Loki config contains "parallelise_shardable_queries: true" and "max_outstanding_requests_per_tenant: 2048"'
                       )}
                     </Content>
@@ -306,7 +304,6 @@ export const Error: React.FC<ErrorProps> = ({ title, error, isLokiRelated }) => 
                   target="_blank"
                   to={{
                     pathname:
-                      // eslint-disable-next-line max-len
                       'https://docs.openshift.com/container-platform/latest/observability/network_observability/installing-operators.html',
                     hash: 'network-observability-loki-installation_network_observability'
                   }}

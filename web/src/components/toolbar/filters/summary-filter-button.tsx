@@ -46,7 +46,9 @@ export const SummaryFilterButton: React.FC<SummaryFilterButtonProps> = ({
       setFilters,
       filterDefinitions
     );
-    e && e.preventDefault && e.preventDefault();
+    if (e && e.preventDefault) {
+      e.preventDefault();
+    }
   };
 
   const menuItem = (id: FilterDir, label: string) => (

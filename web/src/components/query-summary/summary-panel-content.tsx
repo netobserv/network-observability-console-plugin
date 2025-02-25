@@ -394,7 +394,6 @@ export const SummaryPanelContent: React.FC<SummaryPanelContentProps> = ({
         {!_.isEmpty(flows) && stats?.limitReached && (
           <Content component={ContentVariants.p}>
             {t(
-              // eslint-disable-next-line max-len
               'Flow per request limit reached, following metrics can be inaccurate. Narrow down your search or increase limit.'
             )}
           </Content>

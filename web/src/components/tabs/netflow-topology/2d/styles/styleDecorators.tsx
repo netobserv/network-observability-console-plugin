@@ -80,7 +80,11 @@ export const NodeDecorators: React.FC<NodeDecoratorsProps> = ({
     (dir: FilterDir) => () => {
       const currentState = dir === 'src' ? isSrcFiltered : isDstFiltered;
       controller?.fireEvent(filterEvent, eltId, data, dir, currentState);
-      dir === 'src' ? setSrcFiltered(!currentState) : setDstFiltered(!currentState);
+      if (dir === 'src') {
+        setSrcFiltered(!currentState);
+      } else {
+        setDstFiltered(!currentState);
+      }
     },
     [eltId, controller, data, isSrcFiltered, isDstFiltered, setSrcFiltered, setDstFiltered]
   );

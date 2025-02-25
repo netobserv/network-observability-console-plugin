@@ -25,7 +25,6 @@ describe('common test functions', () => {
   const wrapper = mount(<></>);
 
   it('should run without error', async () => {
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
     await actOn(() => {}, wrapper);
     await waitForRender(wrapper);
   });

@@ -18,6 +18,7 @@ const StyleEdge: React.FC<StyleEdgeProps> = ({ element, ...rest }) => {
     }
     Object.keys(newData).forEach(key => {
       if (newData[key] === undefined) {
+        // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
         delete newData[key];
       }
     });

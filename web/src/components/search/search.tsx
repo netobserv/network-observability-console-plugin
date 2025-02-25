@@ -22,7 +22,6 @@ export interface SearchComponentProps {
   children?: React.ReactNode;
 }
 
-// eslint-disable-next-line react/display-name
 export const SearchComponent: React.FC<SearchComponentProps> = React.forwardRef(
   (props, ref: React.Ref<SearchHandle>) => {
     const { t } = useTranslation('plugin__netobserv-plugin');

@@ -95,7 +95,6 @@ export interface NetflowOverviewProps {
   scopes: ScopeConfigDef[];
 }
 
-// eslint-disable-next-line react/display-name
 export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
   (props, ref: React.Ref<NetflowOverviewHandle>) => {
     const { t } = useTranslation('plugin__netobserv-plugin');
@@ -1112,7 +1111,9 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
               isFocusable
                 ? (id?: string) => {
                     setSelectedPanel(props.panels.find(p => p.id === id));
-                    props.setFocus ? props.setFocus(!allowFocus) : undefined;
+                    if (props.setFocus) {
+                      props.setFocus(!allowFocus);
+                    }
                   }
                 : undefined
             }

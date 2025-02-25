@@ -9,7 +9,6 @@ import { TextFilter, TextFilterProps } from '../text-filter';
 describe('<TextFilter />', () => {
   const props: TextFilterProps = {
     filterDefinition: findFilter(FilterDefinitionSample, 'src_name')!,
-    indicator: ValidatedOptions.default,
     addFilter: jest.fn(),
     setMessageWithDelay: jest.fn(),
     setIndicator: jest.fn()

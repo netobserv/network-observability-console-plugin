@@ -102,7 +102,6 @@ export const QueryOptionsPanel: React.FC<QueryOptionsProps> = ({
       <div className="pf-v6-c-menu__group">
         <Tooltip
           content={t(
-            // eslint-disable-next-line max-len
             'Log type to query. A conversation is an aggregation of flows between same peers. Only ended conversations will appear in Overview and Topology tabs.'
           )}
         >
@@ -124,13 +123,9 @@ export const QueryOptionsPanel: React.FC<QueryOptionsProps> = ({
                     disabled
                       ? opt.value === 'allConnections'
                         ? t(
-                            // eslint-disable-next-line max-len
                             'Only available when FlowCollector.processor.logTypes option equals "CONNECTIONS", "ENDED_CONNECTIONS" or "ALL"'
                           )
-                        : t(
-                            // eslint-disable-next-line max-len
-                            'Only available when FlowCollector.processor.logTypes option equals "FLOWS" or "ALL"'
-                          )
+                        : t('Only available when FlowCollector.processor.logTypes option equals "FLOWS" or "ALL"')
                       : undefined
                   }
                 >
@@ -174,14 +169,10 @@ export const QueryOptionsPanel: React.FC<QueryOptionsProps> = ({
                     disabled
                       ? opt.value === 'prom'
                         ? t(
-                            // eslint-disable-next-line max-len
                             'Only available when FlowCollector.prometheus.enable is true for Overview and Topology tabs'
                           )
                         : opt.value === 'loki'
-                        ? t(
-                            // eslint-disable-next-line max-len
-                            'Only available when FlowCollector.loki.enable is true'
-                          )
+                        ? t('Only available when FlowCollector.loki.enable is true')
                         : undefined
                       : undefined
                   }
@@ -230,12 +221,7 @@ export const QueryOptionsPanel: React.FC<QueryOptionsProps> = ({
         </div>
       )}
       <div className="pf-v6-c-menu__group">
-        <Tooltip
-          content={t(
-            // eslint-disable-next-line max-len
-            'Whether each query result has to match all the filters or just any of them'
-          )}
-        >
+        <Tooltip content={t('Whether each query result has to match all the filters or just any of them')}>
           <div className="pf-v6-c-menu__group-title">
             <Content component={ContentVariants.p}>
               {t('Match filters')} <InfoAltIcon />
@@ -295,10 +281,7 @@ export const QueryOptionsPanel: React.FC<QueryOptionsProps> = ({
                   trigger={disabled ? 'mouseenter focus' : ''}
                   content={
                     disabled
-                      ? t(
-                          // eslint-disable-next-line max-len
-                          'Only available using eBPF with FlowCollector.agent.ebpf.features containing "PacketDrop"'
-                        )
+                      ? t('Only available using eBPF with FlowCollector.agent.ebpf.features containing "PacketDrop"')
                       : undefined
                   }
                 >

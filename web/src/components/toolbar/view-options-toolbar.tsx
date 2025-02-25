@@ -56,7 +56,6 @@ export interface ViewOptionsToolbarProps {
   ref?: React.Ref<SearchHandle>;
 }
 
-// eslint-disable-next-line react/display-name
 export const ViewOptionsToolbar: React.FC<ViewOptionsToolbarProps> = React.forwardRef(
   (props, ref: React.Ref<SearchHandle>) => {
     const { t } = useTranslation('plugin__netobserv-plugin');

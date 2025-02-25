@@ -31,7 +31,7 @@ export const getPort = (p: string): string | null => {
     return null;
   }
   if (config.portNaming.portNames) {
-    const customPort = [...config.portNaming.portNames].find(([{}, v]) => v === p);
+    const customPort = [...config.portNaming.portNames].find(v => v[1] === p);
     if (customPort) {
       return customPort[0];
     }

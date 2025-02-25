@@ -28,7 +28,6 @@ export interface AutocompleteFilterProps {
   filterDefinition: FilterDefinition;
   addFilter: (filter: FilterValue) => boolean;
   setMessageWithDelay: (m: string | undefined) => void;
-  indicator: Indicator;
   setIndicator: (ind: Indicator) => void;
 }
 
@@ -36,7 +35,6 @@ export const AutocompleteFilter: React.FC<AutocompleteFilterProps> = ({
   filterDefinition,
   addFilter: addFilterParent,
   setMessageWithDelay,
-  indicator,
   setIndicator
 }) => {
   const autocompleteContainerRef = React.useRef<HTMLDivElement | null>(null);
