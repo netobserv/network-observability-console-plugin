@@ -68,28 +68,27 @@ export const FiltersDropdown: React.FC<FiltersDropdownProps> = ({
   };
 
   return (
-    <div id="column-filter-dropdown-container" data-test="column-filter-dropdown-container" ref={ref}>
-      <Dropdown
-        data-test="column-filter-dropdown"
-        id="column-filter-dropdown"
-        isOpen={isOpen}
-        toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
-          <MenuToggle
-            ref={toggleRef}
-            data-test="column-filter-toggle"
-            id="column-filter-toggle"
-            onClick={() => {
-              setOpen(!isOpen);
-            }}
-            isExpanded={isOpen}
-          >
-            {getFilterFullName(selectedFilter, t)}
-          </MenuToggle>
-        )}
-      >
-        {getFiltersDropdownItems()}
-      </Dropdown>
-    </div>
+    <Dropdown
+      data-test="column-filter-dropdown"
+      id="column-filter-dropdown"
+      ref={ref}
+      isOpen={isOpen}
+      toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+        <MenuToggle
+          ref={toggleRef}
+          data-test="column-filter-toggle"
+          id="column-filter-toggle"
+          onClick={() => {
+            setOpen(!isOpen);
+          }}
+          isExpanded={isOpen}
+        >
+          {getFilterFullName(selectedFilter, t)}
+        </MenuToggle>
+      )}
+    >
+      {getFiltersDropdownItems()}
+    </Dropdown>
   );
 };
 

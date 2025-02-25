@@ -58,32 +58,31 @@ export const SummaryFilterButton: React.FC<SummaryFilterButtonProps> = ({
   );
 
   return (
-    <div id="summary-filters-dropdown-container" data-test="summary-filters-dropdown-container" ref={ref}>
-      <Select
-        isOpen={isOpen}
-        toggle={toggleRef => (
-          <MenuToggle
-            ref={toggleRef}
-            className="summary-filters-toggle"
-            onClick={() => setOpen(!isOpen)}
-            isExpanded={isOpen}
-            variant="plain"
-          >
-            <FilterIcon />
-          </MenuToggle>
-        )}
-        popperProps={{
-          position: 'right'
-        }}
-        id={id}
-        selected={selected}
-        onSelect={(event, value) => value && onSelect(value as FilterDir, event)}
-      >
-        <SelectList className="summary-filters-list">
-          {menuItem('src', t('Source'))}
-          {menuItem('dst', t('Destination'))}
-        </SelectList>
-      </Select>
-    </div>
+    <Select
+      isOpen={isOpen}
+      ref={ref}
+      toggle={toggleRef => (
+        <MenuToggle
+          ref={toggleRef}
+          className="summary-filters-toggle"
+          onClick={() => setOpen(!isOpen)}
+          isExpanded={isOpen}
+          variant="plain"
+        >
+          <FilterIcon />
+        </MenuToggle>
+      )}
+      popperProps={{
+        position: 'right'
+      }}
+      id={id}
+      selected={selected}
+      onSelect={(event, value) => value && onSelect(value as FilterDir, event)}
+    >
+      <SelectList className="summary-filters-list">
+        {menuItem('src', t('Source'))}
+        {menuItem('dst', t('Destination'))}
+      </SelectList>
+    </Select>
   );
 };

@@ -18,6 +18,7 @@ export interface OverviewDisplayOptionsProps {
   focus: boolean;
   setFocus: (v: boolean) => void;
   scopes: ScopeConfigDef[];
+  appendTo?: () => HTMLElement;
 }
 
 export const OverviewDisplayOptions: React.FC<OverviewDisplayOptionsProps> = ({
@@ -27,7 +28,8 @@ export const OverviewDisplayOptions: React.FC<OverviewDisplayOptionsProps> = ({
   setTruncateLength,
   focus,
   setFocus,
-  scopes
+  scopes,
+  appendTo
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
@@ -48,6 +50,7 @@ export const OverviewDisplayOptions: React.FC<OverviewDisplayOptionsProps> = ({
             selected={metricScope}
             setScopeType={setMetricScope}
             scopes={scopes}
+            appendTo={appendTo}
           />
         </div>
       </div>
@@ -60,7 +63,12 @@ export const OverviewDisplayOptions: React.FC<OverviewDisplayOptionsProps> = ({
           </div>
         </Tooltip>
         <div className="display-dropdown-padding">
-          <TruncateDropdown id="truncate" selected={truncateLength} setTruncateLength={setTruncateLength} />
+          <TruncateDropdown
+            id="truncate"
+            selected={truncateLength}
+            setTruncateLength={setTruncateLength}
+            appendTo={appendTo}
+          />
         </div>
       </div>
       <div className="pf-v6-c-menu__group">

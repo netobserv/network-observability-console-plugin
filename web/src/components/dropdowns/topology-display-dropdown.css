@@ -1,6 +1,7 @@
 #topology-display-dropdown {
   min-width: 260px;
   padding-bottom: 1rem;
+  overflow: visible;
 }
 
 #scope>.pf-v6-c-menu__content,

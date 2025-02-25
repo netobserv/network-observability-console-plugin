@@ -32,34 +32,35 @@ export const TopologyDisplayDropdown: React.FC<{
   scopes
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
+  const id = 'topology-display-dropdown';
   const ref = useOutsideClickEvent(() => setOpen(false));
   const [isOpen, setOpen] = React.useState<boolean>(false);
   return (
-    <div id="display-dropdown-container" data-test="display-dropdown-container" ref={ref}>
-      <Select
-        id="topology-display-dropdown"
-        placeholder={t('Display options')}
-        isOpen={isOpen}
-        toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
-          <MenuToggle ref={toggleRef} onClick={() => setOpen(!isOpen)} isExpanded={isOpen}>
-            {t('Display options')}
-          </MenuToggle>
-        )}
-      >
-        <TopologyDisplayOptions
-          metricFunction={metricFunction}
-          setMetricFunction={setMetricFunction}
-          metricType={metricType}
-          setMetricType={setMetricType}
-          metricScope={metricScope}
-          setMetricScope={setMetricScope}
-          topologyOptions={topologyOptions}
-          setTopologyOptions={setTopologyOptions}
-          allowedTypes={allowedTypes}
-          scopes={scopes}
-        />
-      </Select>
-    </div>
+    <Select
+      id={id}
+      placeholder={t('Display options')}
+      ref={ref}
+      isOpen={isOpen}
+      toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+        <MenuToggle ref={toggleRef} onClick={() => setOpen(!isOpen)} isExpanded={isOpen}>
+          {t('Display options')}
+        </MenuToggle>
+      )}
+    >
+      <TopologyDisplayOptions
+        metricFunction={metricFunction}
+        setMetricFunction={setMetricFunction}
+        metricType={metricType}
+        setMetricType={setMetricType}
+        metricScope={metricScope}
+        setMetricScope={setMetricScope}
+        topologyOptions={topologyOptions}
+        setTopologyOptions={setTopologyOptions}
+        allowedTypes={allowedTypes}
+        scopes={scopes}
+        appendTo={() => document.getElementById(id)!}
+      />
+    </Select>
   );
 };
 

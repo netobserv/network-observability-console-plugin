@@ -12,12 +12,14 @@ export interface MetricFunctionDropdownProps {
   setMetricFunction: (v: StatFunction) => void;
   metricType?: MetricType;
   id?: string;
+  appendTo?: () => HTMLElement;
 }
 
 export const MetricFunctionDropdown: React.FC<MetricFunctionDropdownProps> = ({
   selected,
   setMetricFunction,
   metricType,
+  appendTo,
   id
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
@@ -60,42 +62,42 @@ export const MetricFunctionDropdown: React.FC<MetricFunctionDropdownProps> = ({
   );
 
   return (
-    <div id={`${id}-container`} ref={ref}>
-      <Dropdown
-        data-test={id}
-        id={id}
-        isOpen={isOpen}
-        popperProps={{
-          position: 'right'
-        }}
-        toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
-          <MenuToggle
-            ref={toggleRef}
-            data-test={`${id}-dropdown`}
-            id={`${id}-dropdown`}
-            isExpanded={isOpen}
-            onClick={() => setOpen(!isOpen)}
+    <Dropdown
+      data-test={id}
+      id={id}
+      ref={ref}
+      isOpen={isOpen}
+      popperProps={{
+        position: 'right',
+        appendTo
+      }}
+      toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+        <MenuToggle
+          ref={toggleRef}
+          data-test={`${id}-dropdown`}
+          id={`${id}-dropdown`}
+          isExpanded={isOpen}
+          onClick={() => setOpen(!isOpen)}
+        >
+          {getMetricDisplay(selected as StatFunction)}
+        </MenuToggle>
+      )}
+    >
+      {isOpen &&
+        getAvailableFunctions().map(v => (
+          <DropdownItem
+            data-test={v}
+            id={v}
+            key={v}
+            onClick={() => {
+              setOpen(false);
+              setMetricFunction(v);
+            }}
           >
-            {getMetricDisplay(selected as StatFunction)}
-          </MenuToggle>
-        )}
-      >
-        {isOpen &&
-          getAvailableFunctions().map(v => (
-            <DropdownItem
-              data-test={v}
-              id={v}
-              key={v}
-              onClick={() => {
-                setOpen(false);
-                setMetricFunction(v);
-              }}
-            >
-              {getMetricDisplay(v)}
-            </DropdownItem>
-          ))}
-      </Dropdown>
-    </div>
+            {getMetricDisplay(v)}
+          </DropdownItem>
+        ))}
+    </Dropdown>
   );
 };
 

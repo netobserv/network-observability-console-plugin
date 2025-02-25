@@ -34,21 +34,20 @@ export const QueryOptionsDropdown: React.FC<QueryOptionsProps> = props => {
   const ref = useOutsideClickEvent(() => setOpen(false));
   const [isOpen, setOpen] = React.useState<boolean>(false);
   return (
-    <div data-test="query-options-dropdown-container" ref={ref}>
-      <Select
-        data-test="query-options-dropdown"
-        id="query-options-dropdown"
-        placeholder={t('Query options')}
-        isOpen={isOpen}
-        toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
-          <MenuToggle ref={toggleRef} onClick={() => setOpen(!isOpen)} isExpanded={isOpen}>
-            {t('Query options')}
-          </MenuToggle>
-        )}
-      >
-        <QueryOptionsPanel {...props} />
-      </Select>
-    </div>
+    <Select
+      data-test="query-options-dropdown"
+      id="query-options-dropdown"
+      placeholder={t('Query options')}
+      ref={ref}
+      isOpen={isOpen}
+      toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+        <MenuToggle ref={toggleRef} onClick={() => setOpen(!isOpen)} isExpanded={isOpen}>
+          {t('Query options')}
+        </MenuToggle>
+      )}
+    >
+      <QueryOptionsPanel {...props} />
+    </Select>
   );
 };
 

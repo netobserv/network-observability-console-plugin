@@ -369,28 +369,27 @@ export const PanelKebab: React.FC<PanelKebabProps> = ({ id, options, setOptions,
   );
 
   return (
-    <div id={`panel-kebab-${id}-container`} ref={ref}>
-      <Dropdown
-        id={`panel-kebab-${id}`}
-        className="panel-kebab"
-        toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
-          <MenuToggle
-            ref={toggleRef}
-            aria-label="kebab dropdown toggle"
-            variant="plain"
-            onClick={() => setShowOptions(!showOptions)}
-            isExpanded={showOptions}
-          >
-            <EllipsisVIcon />
-          </MenuToggle>
-        )}
-        isOpen={showOptions}
-        popperProps={{
-          position: 'right'
-        }}
-      >
-        {items}
-      </Dropdown>
-    </div>
+    <Dropdown
+      id={`panel-kebab-${id}`}
+      ref={ref}
+      className="panel-kebab"
+      toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+        <MenuToggle
+          ref={toggleRef}
+          aria-label="kebab dropdown toggle"
+          variant="plain"
+          onClick={() => setShowOptions(!showOptions)}
+          isExpanded={showOptions}
+        >
+          <EllipsisVIcon />
+        </MenuToggle>
+      )}
+      isOpen={showOptions}
+      popperProps={{
+        position: 'right'
+      }}
+    >
+      {items}
+    </Dropdown>
   );
 };

@@ -1,6 +1,5 @@
 .display-dropdown-padding {
   display: block !important;
-  padding-top: 1rem !important;
   padding-left: 2rem !important;
   padding-right: 1rem !important;
 }
@@ -18,4 +17,5 @@
 
 #overview-display-dropdown {
   min-width: 230px;
+  overflow: visible;
 }

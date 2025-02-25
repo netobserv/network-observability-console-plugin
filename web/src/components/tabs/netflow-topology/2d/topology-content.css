@@ -17,10 +17,6 @@
   width: 250px;
 }
 
-span.pf-topology-control-bar {
-  left: 0;
-}
-
 g.netobserv.topology.shadowed {
   opacity: 0.5;
 }

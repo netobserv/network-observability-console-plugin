@@ -27,6 +27,7 @@ export interface TopologyDisplayOptionsProps {
   setTopologyOptions: (o: TopologyOptions) => void;
   allowedTypes: MetricType[];
   scopes: ScopeConfigDef[];
+  appendTo?: () => HTMLElement;
 }
 
 export const TopologyDisplayOptions: React.FC<TopologyDisplayOptionsProps> = ({
@@ -39,9 +40,11 @@ export const TopologyDisplayOptions: React.FC<TopologyDisplayOptionsProps> = ({
   topologyOptions,
   setTopologyOptions,
   allowedTypes,
-  scopes
+  scopes,
+  appendTo
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
+  const ref = React.createRef<HTMLDivElement>();
 
   const setLayout = (layout: LayoutName) => {
     setTopologyOptions({
@@ -65,7 +68,7 @@ export const TopologyDisplayOptions: React.FC<TopologyDisplayOptionsProps> = ({
   };
 
   return (
-    <>
+    <div ref={ref}>
       <div className="pf-v6-c-menu__group">
         <Tooltip content={t('Measurement to show as edge labels.')}>
           <div className="pf-v6-c-menu__group-title">
@@ -83,6 +86,7 @@ export const TopologyDisplayOptions: React.FC<TopologyDisplayOptionsProps> = ({
                 selected={metricFunction}
                 setMetricFunction={setMetricFunction}
                 metricType={metricType}
+                appendTo={appendTo}
               />
             </FlexItem>
             <FlexItem>
@@ -92,6 +96,7 @@ export const TopologyDisplayOptions: React.FC<TopologyDisplayOptionsProps> = ({
                 selected={metricType}
                 setMetricType={setMetricType}
                 allowedTypes={allowedTypes}
+                appendTo={appendTo}
               />
             </FlexItem>
           </Flex>
@@ -112,6 +117,7 @@ export const TopologyDisplayOptions: React.FC<TopologyDisplayOptionsProps> = ({
             selected={metricScope}
             setScopeType={setMetricScope}
             scopes={scopes}
+            appendTo={appendTo}
           />
         </div>
       </div>
@@ -131,6 +137,7 @@ export const TopologyDisplayOptions: React.FC<TopologyDisplayOptionsProps> = ({
             selected={topologyOptions.groupTypes}
             setGroupType={setGroupType}
             scopes={scopes}
+            appendTo={appendTo}
           />
         </div>
       </div>
@@ -143,7 +150,7 @@ export const TopologyDisplayOptions: React.FC<TopologyDisplayOptionsProps> = ({
           </div>
         </Tooltip>
         <div className="display-dropdown-padding">
-          <LayoutDropdown id="layout" selected={topologyOptions.layout} setLayout={setLayout} />
+          <LayoutDropdown id="layout" selected={topologyOptions.layout} setLayout={setLayout} appendTo={appendTo} />
         </div>
       </div>
       <div className="pf-v6-c-menu__group">
@@ -204,6 +211,7 @@ export const TopologyDisplayOptions: React.FC<TopologyDisplayOptionsProps> = ({
             id="truncate"
             selected={topologyOptions.truncateLength}
             setTruncateLength={setTruncateLength}
+            appendTo={appendTo}
           />
         </div>
       </div>
@@ -224,7 +232,7 @@ export const TopologyDisplayOptions: React.FC<TopologyDisplayOptionsProps> = ({
           />
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

@@ -12,6 +12,7 @@ export interface GroupDropdownProps {
   setGroupType: (v: TopologyGroupTypes) => void;
   id?: string;
   scopes: ScopeConfigDef[];
+  appendTo?: () => HTMLElement;
 }
 
 export const GroupDropdown: React.FC<GroupDropdownProps> = ({
@@ -20,7 +21,8 @@ export const GroupDropdown: React.FC<GroupDropdownProps> = ({
   selected,
   setGroupType,
   id,
-  scopes
+  scopes,
+  appendTo
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [isOpen, setOpen] = React.useState(false);
@@ -30,6 +32,9 @@ export const GroupDropdown: React.FC<GroupDropdownProps> = ({
       data-test={id}
       id={id}
       isOpen={isOpen}
+      popperProps={{
+        appendTo
+      }}
       toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
         <MenuToggle
           ref={toggleRef}
