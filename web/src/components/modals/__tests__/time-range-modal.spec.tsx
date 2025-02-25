@@ -3,6 +3,7 @@ import * as React from 'react';
 
 import { DatePicker, TimePicker } from '@patternfly/react-core';
 import { act } from 'react-dom/test-utils';
+import { actOn } from '../../../components/__tests__/common.spec';
 import { TimeRange } from '../../../utils/datetime';
 import TimeRangeModal, { TimeRangeModalProps } from '../time-range-modal';
 
@@ -16,18 +17,21 @@ describe('<ColumnsModal />', () => {
     setRange: jest.fn(),
     id: 'time-range-modal'
   };
+
   it('should render component', async () => {
     const wrapper = shallow(<TimeRangeModal {...props} />);
     expect(wrapper.find(TimeRangeModal)).toBeTruthy();
   });
+
   it('should save once', async () => {
     const wrapper = mount(<TimeRangeModal {...props} />);
-    const confirmButton = wrapper.find('.pf-c-button.pf-m-primary');
+    const confirmButton = wrapper.find('.pf-v5-c-button.pf-m-primary');
     expect(confirmButton.length).toEqual(1);
 
-    confirmButton.at(0).simulate('click');
+    await actOn(() => confirmButton.last().simulate('click'), wrapper);
     expect(props.setRange).toHaveBeenCalledTimes(1);
   });
+
   it('should update range on save', async () => {
     const nowRange: TimeRange = {
       from: new Date().setHours(0, 0, 0, 0) / 1000,
@@ -47,7 +51,7 @@ describe('<ColumnsModal />', () => {
     });
     nowRange.from = new Date('2021-12-01').setHours(10, 15, 30, 0) / 1000;
 
-    wrapper.find('.pf-c-button.pf-m-primary').at(0).simulate('click');
+    await actOn(() => wrapper.find('.pf-v5-c-button.pf-m-primary').at(0).simulate('click'), wrapper);
     expect(props.setRange).toHaveBeenNthCalledWith(2, nowRange);
 
     //set end date & time and press button
@@ -58,7 +62,7 @@ describe('<ColumnsModal />', () => {
     });
     nowRange.to = new Date('2021-12-15').setHours(23, 0, 0, 0) / 1000;
 
-    wrapper.find('.pf-c-button.pf-m-primary').at(0).simulate('click');
+    await actOn(() => wrapper.find('.pf-v5-c-button.pf-m-primary').at(0).simulate('click'), wrapper);
     expect(props.setRange).toHaveBeenNthCalledWith(3, nowRange);
   });
 });

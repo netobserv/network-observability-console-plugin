@@ -80,7 +80,8 @@ export const ColumnsModal: React.FC<ColumnsModalProps> = ({
   );
 
   const onCheck = React.useCallback(
-    (checked, event) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    (event, checked) => {
       if (event?.target?.id) {
         const result = [...updatedColumns];
         const selectedColumn = result.find(col => col.id === event.target.id);
@@ -190,7 +191,7 @@ export const ColumnsModal: React.FC<ColumnsModalProps> = ({
           </DataListControl>
           <DataListItemCells
             dataListCells={[
-              <DataListCell key={'data-list-cell-' + i}>
+              <DataListCell key={'data-list-cell-' + i} className="center">
                 <label htmlFor={column.id}>{getFullColumnName(column)}</label>
               </DataListCell>
             ]}
@@ -279,6 +280,7 @@ export const ColumnsModal: React.FC<ColumnsModalProps> = ({
               aria-label="Table column management"
               data-test="table-column-management"
               id="table-column-management"
+              className="centered-list"
               isCompact
             >
               {draggableItems}

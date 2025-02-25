@@ -1,0 +1,6 @@
+#recordPanel,
+#summaryPanel,
+#elementPanel {
+  display: flex !important;
+  overflow-y: hidden;
+}

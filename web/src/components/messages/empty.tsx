@@ -58,7 +58,7 @@ export const Empty: React.FC<EmptyProps> = ({ showDetails, resetDefaultFilters, 
   }, [showDetails]);
 
   return (
-    <EmptyState variant={!showDetails ? EmptyStateVariant.small : undefined} data-test="empty-state">
+    <EmptyState variant={!showDetails ? EmptyStateVariant.sm : undefined} data-test="empty-state">
       <EmptyStateIcon className={`netobserv-empty-icon${showDetails ? '' : '-small'}`} icon={SearchIcon} />
       <Title headingLevel="h2" size="lg">
         {t('No results found')}

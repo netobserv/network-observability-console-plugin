@@ -1,6 +1,7 @@
 import { Button } from '@patternfly/react-core';
 import { shallow } from 'enzyme';
 import * as React from 'react';
+import { waitForRender } from '../../../../components/__tests__/common.spec';
 import { compareNumbers } from '../../../../utils/base-compare';
 import { ColumnsId } from '../../../../utils/columns';
 import { Size } from '../../../dropdowns/table-display-dropdown';
@@ -19,16 +20,22 @@ describe('<RecordField />', () => {
     size: 'm' as Size,
     useLinks: true
   };
+
   it('should render single field', async () => {
     //datetime column will produce a single field
     const wrapper = shallow(<RecordField flow={FlowsSample[0]} column={DefaultColumnSample[0]} {...mocks} />);
+    await waitForRender(wrapper);
+
     expect(wrapper.find(RecordField)).toBeTruthy();
     expect(wrapper.find('.record-field-content.m')).toHaveLength(1);
   });
+
   it('should filter', async () => {
     const wrapper = shallow(
       <RecordField flow={FlowsSample[0]} column={DefaultColumnSample[0]} filter={filterMock} {...mocks} />
     );
+    await waitForRender(wrapper);
+
     expect(wrapper.find(RecordField)).toBeTruthy();
     expect(wrapper.find('.record-field-flex-container')).toHaveLength(1);
     expect(wrapper.find('.record-field-flex')).toHaveLength(1);
@@ -37,6 +44,7 @@ describe('<RecordField />', () => {
     button.simulate('click');
     expect(filterMock.onClick).toHaveBeenCalledTimes(1);
   });
+
   it('should display <1ms DNS latency', async () => {
     const wrapper = shallow(
       <RecordField
@@ -53,6 +61,8 @@ describe('<RecordField />', () => {
         {...mocks}
       />
     );
+    await waitForRender(wrapper);
+
     expect(wrapper.find(RecordField)).toBeTruthy();
     expect(wrapper.find('.record-field-value')).toHaveLength(1);
     expect(wrapper.find('.record-field-value').childAt(0).text()).toBe('< 1ms');

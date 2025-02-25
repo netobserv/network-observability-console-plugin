@@ -1,28 +1,34 @@
+/* eslint-disable max-len */
 import {
   Brand,
+  Masthead,
+  MastheadBrand,
+  MastheadContent,
+  MastheadMain,
+  MastheadToggle,
   Nav,
   NavItem,
   NavList,
   Page,
-  PageHeader,
-  PageHeaderTools,
-  PageHeaderToolsGroup,
-  PageHeaderToolsItem,
   PageSection,
   PageSidebar,
-  Radio
+  PageSidebarBody,
+  PageToggleButton,
+  Tab,
+  Tabs,
+  Title,
+  ToggleGroup,
+  ToggleGroupItem,
+  Toolbar,
+  ToolbarContent,
+  ToolbarItem
 } from '@patternfly/react-core';
+import { BarsIcon } from '@patternfly/react-icons';
 import React from 'react';
-import { BrowserRouter, Link, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Link } from 'react-router-dom';
 import NetflowTrafficDevTab from './components/netflow-traffic-dev-tab';
 import NetflowTrafficParent from './components/netflow-traffic-parent';
-import NetflowTrafficTab from './components/netflow-traffic-tab';
-
-interface AppState {
-  activeItem: number | string;
-  isNavOpen: boolean;
-  isDarkTheme: boolean;
-}
+import NetflowTab from './components/netflow-traffic-tab';
 
 export const pages = [
   {
@@ -51,40 +57,96 @@ export const pages = [
   }
 ];
 
-export class App extends React.Component<{}, AppState> {
-  state: AppState = {
-    activeItem: '',
-    isNavOpen: true,
-    isDarkTheme: false
+export const App: React.FunctionComponent = () => {
+  const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
+  const [pageIndex, setPageIndex] = React.useState(0);
+  const [isDark, setDark] = React.useState(false);
+
+  const onSidebarToggle = () => {
+    setIsSidebarOpen(!isSidebarOpen);
   };
 
-  private onNavSelect = (selectedItem: { itemId: number | string }) => {
-    console.debug('onNavSelect', selectedItem);
-    this.setState({ activeItem: selectedItem.itemId });
+  const onNavSelect = (_event: React.FormEvent<HTMLInputElement>, result: { itemId: number | string }) => {
+    console.debug('onNavSelect', result);
+    setPageIndex(result.itemId as number);
   };
 
-  private onThemeSelect = (isDarkTheme: boolean) => {
+  const onThemeSelect = (isDarkTheme: boolean) => {
     console.debug('onThemeSelect', isDarkTheme);
-    this.setState({ isDarkTheme });
+    setDark(isDarkTheme);
     const htmlElement = document.getElementsByTagName('html')[0];
     if (htmlElement) {
       if (isDarkTheme) {
-        htmlElement.classList.add('pf-theme-dark');
+        htmlElement.classList.add('pf-v5-theme-dark');
       } else {
-        htmlElement.classList.remove('pf-theme-dark');
+        htmlElement.classList.remove('pf-v5-theme-dark');
       }
     }
   };
 
-  private getPageContent = (id: string) => {
-    console.debug('getPageContent', id);
+  const headerToolbar = (
+    <Toolbar id="vertical-toolbar">
+      <ToolbarContent>
+        <ToolbarItem>Netobserv</ToolbarItem>
+        <ToolbarItem align={{ default: 'alignRight' }}>
+          <ToggleGroup>
+            <ToggleGroupItem text="Light" isSelected={!isDark} onClick={() => onThemeSelect(false)} />
+            <ToggleGroupItem text="Dark" isSelected={isDark} onClick={() => onThemeSelect(true)} />
+          </ToggleGroup>
+        </ToolbarItem>
+      </ToolbarContent>
+    </Toolbar>
+  );
+
+  const header = (
+    <Masthead>
+      <MastheadToggle>
+        <PageToggleButton
+          variant="plain"
+          aria-label="Global navigation"
+          isSidebarOpen={isSidebarOpen}
+          onSidebarToggle={onSidebarToggle}
+          id="vertical-nav-toggle"
+        >
+          <BarsIcon />
+        </PageToggleButton>
+      </MastheadToggle>
+      <MastheadMain>
+        <MastheadBrand>
+          <Brand src={'https://avatars.githubusercontent.com/u/91939379?s=35'} alt="Netobserv Logo" />
+        </MastheadBrand>
+      </MastheadMain>
+      <MastheadContent>{headerToolbar}</MastheadContent>
+    </Masthead>
+  );
+
+  const sidebar = (
+    <PageSidebar isSidebarOpen={isSidebarOpen} id="vertical-sidebar">
+      <PageSidebarBody>
+        <Nav onSelect={onNavSelect} aria-label="Nav">
+          <NavList>
+            {pages.map((page, index) => (
+              <NavItem itemId={index} isActive={pageIndex === index} key={page.id}>
+                <Link id={`${page.id}-nav-item-link`} to={`/${page.id}`}>
+                  {page.name}
+                </Link>
+              </NavItem>
+            ))}
+          </NavList>
+        </Nav>
+      </PageSidebarBody>
+    </PageSidebar>
+  );
+
+  const pageContent = (id: string) => {
+    console.debug('pageContent', id);
     switch (id) {
       case 'pod-tab':
-        return <NetflowTrafficTab obj={{ kind: 'Pod', metadata: { name: 'test', namespace: 'default' } }} />;
+        return <NetflowTab obj={{ kind: 'Pod', metadata: { name: 'test', namespace: 'default' } }} />;
       case 'namespace-tab':
-        return <NetflowTrafficTab obj={{ kind: 'Namespace', metadata: { name: 'test' } }} />;
+        return <NetflowTab obj={{ kind: 'Namespace', metadata: { name: 'test' } }} />;
       case 'node-tab':
-        return <NetflowTrafficTab obj={{ kind: 'Node', metadata: { name: 'test' } }} />;
+        return <NetflowTab obj={{ kind: 'Node', metadata: { name: 'test' } }} />;
       case 'dev-tab':
         return (
           <NetflowTrafficDevTab
@@ -99,105 +161,47 @@ export class App extends React.Component<{}, AppState> {
           />
         );
       case 'udn-tab':
-        return (
-          <NetflowTrafficTab obj={{ kind: 'UserDefinedNetwork', metadata: { name: 'my-udn', namespace: 'default' } }} />
-        );
+        return <NetflowTab obj={{ kind: 'UserDefinedNetwork', metadata: { name: 'my-udn', namespace: 'default' } }} />;
       default:
         return <NetflowTrafficParent />;
     }
   };
 
-  private getPageContext = (id: string, name: string) => {
-    console.debug('getPageContext', id);
-    const content = this.getPageContent(id);
-    switch (id) {
+  const pageContext = () => {
+    const page = pages[pageIndex];
+    console.debug('pageContext', pageIndex, page.id);
+    const content = pageContent(page.id);
+    switch (page.id) {
       case 'netflow-traffic':
         return <>{content}</>;
       default:
         return (
-          <PageSection id="pageSection">
-            <div id="pageHeader">
-              <h1>{`${name} example`}</h1>
+          <PageSection id="consolePageSection" className={`tab' ${isDark ? 'dark' : 'light'}`}>
+            <div style={{ padding: '1rem' }}>
+              <Title headingLevel="h1">{`${page.name} example`}</Title>
             </div>
-            {content}
+            <Tabs activeKey={1}>
+              <Tab title="A" eventKey={0} />
+              <Tab title="B" eventKey={0} />
+              <Tab title="C" eventKey={0} />
+              <Tab title="D" eventKey={0} />
+              <Tab title="E" eventKey={0} />
+              <Tab title="Network traffic" eventKey={1}>
+                {content}
+              </Tab>
+            </Tabs>
           </PageSection>
         );
     }
   };
 
-  private getPages = () => (
-    <Routes>
-      {pages.map(page => (
-        <Route path={page.id} key={page.id} element={this.getPageContext(page.id, page.name)} />
-      ))}
-    </Routes>
+  return (
+    <BrowserRouter>
+      <Page header={header} sidebar={sidebar}>
+        {pageContext()}
+      </Page>
+    </BrowserRouter>
   );
-
-  render() {
-    const { isNavOpen, activeItem, isDarkTheme } = this.state;
-
-    const AppToolbar = (
-      <PageHeaderTools>
-        <PageHeaderToolsGroup>
-          <PageHeaderToolsItem style={{ marginRight: '10px' }}>
-            <Radio
-              id="light-theme"
-              aria-label="Light theme"
-              label={`Light theme`}
-              name="light-theme"
-              isChecked={!isDarkTheme}
-              onChange={(checked: boolean) => checked && this.onThemeSelect(false)}
-            />
-          </PageHeaderToolsItem>
-          <PageHeaderToolsItem>
-            <Radio
-              id="dark-theme"
-              label="Dark theme"
-              aria-label="Dark theme"
-              name="dark-theme"
-              isChecked={isDarkTheme}
-              onChange={(checked: boolean) => checked && this.onThemeSelect(true)}
-            />
-          </PageHeaderToolsItem>
-        </PageHeaderToolsGroup>
-      </PageHeaderTools>
-    );
-
-    const AppHeader = (
-      <PageHeader
-        id="page-main-header"
-        //show netobserv logo from github
-        logo={<Brand src={'https://avatars.githubusercontent.com/u/91939379?s=35'} alt="Netobserv Logo" />}
-        headerTools={AppToolbar}
-        showNavToggle
-        isNavOpen={isNavOpen}
-        onNavToggle={() => this.setState({ isNavOpen: !isNavOpen })}
-      />
-    );
-
-    const nav = (
-      <Nav onSelect={this.onNavSelect} aria-label="Nav">
-        <NavList>
-          {pages.map((page, index) => (
-            <NavItem itemId={index} isActive={activeItem === index} key={page.id}>
-              <Link id={`${page.id}-nav-item-link`} to={`/${page.id}`}>
-                {page.name}
-              </Link>
-            </NavItem>
-          ))}
-        </NavList>
-      </Nav>
-    );
-
-    const AppSidebar = <PageSidebar isNavOpen={isNavOpen} nav={nav} />;
-    return (
-      <BrowserRouter>
-        <Page id="content-scrollable" header={AppHeader} sidebar={AppSidebar} isManagedSidebar>
-          {this.getPages()}
-        </Page>
-      </BrowserRouter>
-    );
-  }
-}
+};
 
 export default App;

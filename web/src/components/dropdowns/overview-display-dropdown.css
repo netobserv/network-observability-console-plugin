@@ -1,9 +1,17 @@
 .display-dropdown-padding {
-  padding: 0 1em 1em 1em !important;
+  display: block !important;
+  padding-top: 1rem !important;
+  padding-left: 2rem !important;
+  padding-right: 1rem !important;
 }
 
-#type>.pf-c-dropdown__menu,
-#scope>.pf-c-dropdown__menu {
+.display-dropdown-switch-padding {
+  display: block !important;
+  padding: .5rem !important;
+}
+
+#type>.pf-v5-c-menu__content,
+#scope>.pf-v5-c-menu__content {
   top: 0;
   left: 100%;
 }

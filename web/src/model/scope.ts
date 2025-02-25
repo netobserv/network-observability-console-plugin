@@ -6,7 +6,6 @@ import { TopologyGroupTypes } from './topology';
 export type ScopeConfigDef = {
   id: FlowScope;
   name: string;
-  shortName: string;
   description: string;
   labels: string[];
   feature?: Feature;
@@ -21,13 +20,6 @@ export const getScopeName = (sc: ScopeConfigDef | undefined, t: (k: string) => s
     return t('n/a');
   }
   return sc.name || sc.id;
-};
-
-export const getScopeShortName = (sc: ScopeConfigDef | undefined, t: (k: string) => string) => {
-  if (!sc) {
-    return t('n/a');
-  }
-  return sc.shortName || sc.id;
 };
 
 export const getGroupsForScope = (scopeId: FlowScope, scopes: ScopeConfigDef[]) => {

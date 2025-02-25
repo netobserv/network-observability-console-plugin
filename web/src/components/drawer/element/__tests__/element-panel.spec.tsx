@@ -1,8 +1,10 @@
-import { DrawerCloseButton, OptionsMenuToggle } from '@patternfly/react-core';
+import { Checkbox } from '@patternfly/react-core';
 import { BaseEdge, BaseNode, NodeModel } from '@patternfly/react-topology';
+import { waitFor } from '@testing-library/react';
 import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 import { TopologyMetrics } from '../../../../api/loki';
+import { actOn, waitForRender } from '../../../../components/__tests__/common.spec';
 import { Filter } from '../../../../model/filters';
 import { FlowScope, MetricType } from '../../../../model/flow-query';
 import { NodeData } from '../../../../model/topology';
@@ -50,20 +52,24 @@ describe('<ElementPanel />', () => {
 
   it('should render component', async () => {
     const wrapper = shallow(<ElementPanel {...mocks} />);
+    await waitForRender(wrapper);
+
     expect(wrapper.find(ElementPanel)).toBeTruthy();
     expect(wrapper.find('#element-panel-test')).toHaveLength(1);
   });
 
   it('should close on click', async () => {
     const wrapper = shallow(<ElementPanel {...mocks} />);
-    const closeButton = wrapper.find(DrawerCloseButton);
-    expect(closeButton).toHaveLength(1);
-    closeButton.simulate('click');
+    await waitForRender(wrapper);
+
+    expect(wrapper.find('.drawer-close-button')).toHaveLength(1);
+    await actOn(() => wrapper.find('.drawer-close-button').last().simulate('click'), wrapper);
     expect(mocks.onClose).toHaveBeenCalled();
   });
 
   it('should render <ElementPanelDetailsContent />', async () => {
     const wrapper = mount(<ElementPanelContent {...mocks} />);
+    await waitForRender(wrapper);
     expect(wrapper.find(ElementPanelContent)).toBeTruthy();
 
     //check node infos
@@ -85,6 +91,7 @@ describe('<ElementPanel />', () => {
         isGroup={false}
       />
     );
+    await waitForRender(wrapper);
     expect(wrapper.find(ElementPanelMetrics)).toBeTruthy();
 
     //check node metrics
@@ -108,6 +115,7 @@ describe('<ElementPanel />', () => {
         isGroup={false}
       />
     );
+    await waitForRender(wrapper);
     expect(wrapper.find(ElementPanelMetrics)).toBeTruthy();
 
     expect(wrapper.find('#metrics-stats-total-in').last().text()).toBe('1.1 MB');
@@ -120,17 +128,24 @@ describe('<ElementPanel />', () => {
 
   it('should filter <ElementPanelDetailsContent />', async () => {
     const wrapper = mount(<ElementPanelContent {...mocks} />);
-    const ipFilters = wrapper.find(OptionsMenuToggle).last();
+    await waitForRender(wrapper);
+
     // Two buttons: first for pod filter, second for IP filter => click on second
-    ipFilters.last().simulate('click');
+    await actOn(() => wrapper.find('.summary-filters-toggle').last().simulate('click'), wrapper);
+
     // Two items: source or destination
     expect(wrapper.find('li').length).toBe(2);
-    wrapper.find('[id="src"]').at(0).simulate('click');
-    expect(mocks.setFilters).toHaveBeenCalledWith([
-      {
-        def: expect.any(Object),
-        values: [{ v: '10.129.0.15' }]
-      }
-    ]);
+    await actOn(() => {
+      wrapper.find('[id="src"]').find(Checkbox).props().onChange!({} as React.FormEvent<HTMLInputElement>, true);
+    }, wrapper);
+    await waitFor(() => {
+      expect(mocks.setFilters).toHaveBeenCalledTimes(1);
+      expect(mocks.setFilters).toHaveBeenCalledWith([
+        {
+          def: expect.any(Object),
+          values: [{ v: '10.129.0.15' }]
+        }
+      ]);
+    });
   });
 });

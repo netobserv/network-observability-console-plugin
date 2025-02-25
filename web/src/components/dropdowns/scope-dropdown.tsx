@@ -1,4 +1,4 @@
-import { Dropdown, DropdownItem, DropdownPosition, DropdownToggle } from '@patternfly/react-core';
+import { Dropdown, DropdownItem, MenuToggle, MenuToggleElement } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { FlowScope } from '../../model/flow-query';
@@ -13,37 +13,43 @@ export interface ScopeDropdownProps {
 
 export const ScopeDropdown: React.FC<ScopeDropdownProps> = ({ selected, setScopeType, id, scopes }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
-  const [scopeDropdownOpen, setScopeDropdownOpen] = React.useState(false);
+  const [isOpen, setOpen] = React.useState(false);
 
   return (
     <Dropdown
       data-test={id}
       id={id}
-      position={DropdownPosition.right}
-      toggle={
-        <DropdownToggle
+      popperProps={{
+        position: 'right'
+      }}
+      isOpen={isOpen}
+      toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+        <MenuToggle
+          ref={toggleRef}
           data-test={`${id}-dropdown`}
           id={`${id}-dropdown`}
-          onToggle={() => setScopeDropdownOpen(!scopeDropdownOpen)}
+          isExpanded={isOpen}
+          onClick={() => setOpen(!isOpen)}
+          onBlur={() => setTimeout(() => setOpen(false), 500)}
         >
           {scopes.find(sc => sc.id === selected)?.name || t('n/a')}
-        </DropdownToggle>
-      }
-      isOpen={scopeDropdownOpen}
-      dropdownItems={scopes.map(sc => (
+        </MenuToggle>
+      )}
+    >
+      {scopes.map(sc => (
         <DropdownItem
           data-test={sc.id}
           id={sc.id}
           key={sc.id}
           onClick={() => {
-            setScopeDropdownOpen(false);
+            setOpen(false);
             setScopeType(sc.id);
           }}
         >
           {sc.name}
         </DropdownItem>
       ))}
-    />
+    </Dropdown>
   );
 };
 

@@ -95,7 +95,6 @@ type Filter struct {
 type Scope struct {
 	ID          string   `yaml:"id" json:"id"`
 	Name        string   `yaml:"name" json:"name"`
-	ShortName   string   `yaml:"shortName" json:"shortName"`
 	Description string   `yaml:"description" json:"description"`
 	Labels      []string `yaml:"labels" json:"labels"`
 	Feature     string   `yaml:"feature,omitempty" json:"feature,omitempty"`

@@ -1,8 +1,9 @@
-import { Select, Text, TextVariants } from '@patternfly/react-core';
+import { MenuToggle, MenuToggleElement, Select } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { FlowScope } from '../../model/flow-query';
 import { ScopeConfigDef } from '../../model/scope';
+import { useOutsideClickEvent } from '../../utils/outside-hook';
 import './overview-display-dropdown.css';
 import { OverviewDisplayOptions } from './overview-display-options';
 import { TruncateLength } from './truncate-dropdown';
@@ -29,27 +30,30 @@ export const OverviewDisplayDropdown: React.FC<OverviewDisplayDropdownProps> = (
   scopes
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
+  const ref = useOutsideClickEvent(() => setOpen(false));
   const [isOpen, setOpen] = React.useState<boolean>(false);
-
   return (
-    <div id="display-dropdown-container" data-test="display-dropdown-container">
+    <div id="display-dropdown-container" data-test="display-dropdown-container" ref={ref}>
       <Select
         id="overview-display-dropdown"
-        placeholderText={<Text component={TextVariants.p}>{t('Display options')}</Text>}
+        placeholder={t('Display options')}
         isOpen={isOpen}
-        onToggle={() => setOpen(!isOpen)}
-        customContent={
-          <OverviewDisplayOptions
-            metricScope={metricScope}
-            setMetricScope={setMetricScope}
-            truncateLength={truncateLength}
-            setTruncateLength={setTruncateLength}
-            focus={focus}
-            setFocus={setFocus}
-            scopes={scopes}
-          />
-        }
-      />
+        toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+          <MenuToggle ref={toggleRef} onClick={() => setOpen(!isOpen)} isExpanded={isOpen}>
+            {t('Display options')}
+          </MenuToggle>
+        )}
+      >
+        <OverviewDisplayOptions
+          metricScope={metricScope}
+          setMetricScope={setMetricScope}
+          truncateLength={truncateLength}
+          setTruncateLength={setTruncateLength}
+          focus={focus}
+          setFocus={setFocus}
+          scopes={scopes}
+        />
+      </Select>
     </div>
   );
 };

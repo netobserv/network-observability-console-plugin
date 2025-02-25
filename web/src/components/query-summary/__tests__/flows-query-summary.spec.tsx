@@ -1,5 +1,6 @@
 import { mount, shallow } from 'enzyme';
 import * as React from 'react';
+import { waitForRender } from '../../../components/__tests__/common.spec';
 import { MetricType, RecordType } from '../../../model/flow-query';
 import { FlowsSample, getTestFlows } from '../../__tests-data__/flows';
 import { FlowsQuerySummary } from '../flows-query-summary';
@@ -25,12 +26,16 @@ describe('<FlowsQuerySummary />', () => {
 
   it('should shallow component', async () => {
     const wrapper = shallow(<FlowsQuerySummary {...mocks} />);
+    await waitForRender(wrapper);
+
     expect(wrapper.find(FlowsQuerySummaryContent)).toBeTruthy();
     expect(wrapper.find(FlowsQuerySummaryContent)).toHaveLength(1);
   });
 
   it('should show summary', async () => {
     const wrapper = mount(<FlowsQuerySummary {...mocks} />);
+    await waitForRender(wrapper);
+
     expect(wrapper.find('#flowsCount').last().text()).toBe('3 Flows');
     expect(wrapper.find('#bytesCount').last().text()).toBe('161 kB');
     expect(wrapper.find('#packetsCount').last().text()).toBe('1k Packets');
@@ -46,6 +51,8 @@ describe('<FlowsQuerySummary />', () => {
         stats={{ limitReached: true, numQueries: 1, dataSources: ['loki'] }}
       />
     );
+    await waitForRender(wrapper);
+
     expect(wrapper.find('#flowsCount').last().text()).toBe('1k+ Flows');
     expect(wrapper.find('#bytesCount').last().text()).toBe('757+ MB');
     expect(wrapper.find('#packetsCount').last().text()).toBe('1k+ Packets');
@@ -55,6 +62,8 @@ describe('<FlowsQuerySummary />', () => {
 
   it('should toggle panel', async () => {
     const wrapper = mount(<FlowsQuerySummary {...mocks} />);
+    await waitForRender(wrapper);
+
     wrapper.find('#query-summary-toggle').last().simulate('click');
     expect(mocks.toggleQuerySummary).toHaveBeenCalledTimes(1);
   });

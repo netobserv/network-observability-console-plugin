@@ -13,18 +13,18 @@ export function useK8sModelsWithColors() {
     /* This part inject missing colors in k8sModels
      * check console/frontend/public/style/_vars.scss for values
      */
-    //$color-application-dark = $pf-color-green-500 = #3E8635
+    //$color-application-dark = $pf-v5-color-green-500 = #3E8635
     setColor('Application', '#3E8635');
 
-    //$color-rbac-role-dark = $pf-color-gold-600 = #795600
+    //$color-rbac-role-dark = $pf-v5-color-gold-600 = #795600
     setColor('ClusterRole', '#795600');
     setColor('Role', '#795600');
 
-    //$color-rbac-binding-dark = $pf-color-light-blue-500 = #008BAD
+    //$color-rbac-binding-dark = $pf-v5-color-light-blue-500 = #008BAD
     setColor('ClusterRoleBinding', '#008BAD');
     setColor('RoleBinding', '#008BAD');
 
-    //$color-pod-overlord = $pf-color-blue-500 = #004080
+    //$color-pod-overlord = $pf-v5-color-blue-500 = #004080
     setColor('DaemonSet', '#004080');
     setColor('Deployment', '#004080');
     setColor('DeploymentConfig', '#004080');
@@ -33,7 +33,7 @@ export function useK8sModelsWithColors() {
     setColor('ReplicaSet', '#004080');
     setColor('ReplicationController', '#004080');
 
-    //$color-node-dark = $pf-color-purple-400 = #8476D1
+    //$color-node-dark = $pf-v5-color-purple-400 = #8476D1
     setColor('Machine', '#8476D1');
     setColor('MachineAutoscaler', '#8476D1');
     setColor('MachineClass', '#8476D1');
@@ -45,33 +45,33 @@ export function useK8sModelsWithColors() {
     setColor('Node', '#8476D1');
     setColor('Policy', '#8476D1');
 
-    //$color-configmap-dark = $pf-color-purple-600 = #40199A
+    //$color-configmap-dark = $pf-v5-color-purple-600 = #40199A
     setColor('AlertRule', '#40199A');
     setColor('ConfigMap', '#40199A');
     //$color-serviceaccount-dark = $color-configmap-dark
     setColor('ServiceAccount', '#40199A');
 
-    //$color-container-dark = $pf-color-blue-300 = #2B9AF3
+    //$color-container-dark = $pf-v5-color-blue-300 = #2B9AF3
     setColor('Alert', '#2B9AF3');
     setColor('Container', '#2B9AF3');
 
-    //$color-pod-dark = $pf-color-cyan-300 = #009596
+    //$color-pod-dark = $pf-v5-color-cyan-300 = #009596
     setColor('Pod', '#009596');
 
-    //$color-namespace-dark = $pf-color-green-600 = #1E4F18
+    //$color-namespace-dark = $pf-v5-color-green-600 = #1E4F18
     setColor('Namespace', '#1E4F18');
     setColor('Project', '#1E4F18');
 
-    //$color-secret-dark = $pf-color-orange-400 = #C46100
+    //$color-secret-dark = $pf-v5-color-orange-400 = #C46100
     setColor('Secret', '#C46100');
 
-    //$color-alertmanager-dark = $pf-color-orange-600 = #773D00
+    //$color-alertmanager-dark = $pf-v5-color-orange-600 = #773D00
     setColor('AlertManager', '#773D00');
 
-    //$color-service-dark = $pf-color-light-green-500 = #3E8635
+    //$color-service-dark = $pf-v5-color-light-green-500 = #3E8635
     setColor('Service', '#3E8635');
 
-    //$color-ingress-dark = $pf-color-purple-700 = #1F0066
+    //$color-ingress-dark = $pf-v5-color-purple-700 = #1F0066
     setColor('Ingress', '#1F0066');
   }
 

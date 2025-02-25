@@ -1,4 +1,4 @@
-import { Dropdown, DropdownItem, DropdownToggle } from '@patternfly/react-core';
+import { Dropdown, DropdownItem, MenuToggle, MenuToggleElement } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { LayoutName } from '../../model/topology';
@@ -12,7 +12,7 @@ export interface LayoutDropdownProps {
 
 export const LayoutDropdown: React.FC<LayoutDropdownProps> = ({ selected, setLayout, id }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
-  const [layoutDropdownOpen, setLayoutDropdownOpen] = React.useState(false);
+  const [isOpen, setOpen] = React.useState(false);
 
   const getLayoutDisplay = (layoutName: LayoutName) => {
     switch (layoutName) {
@@ -22,18 +22,20 @@ export const LayoutDropdown: React.FC<LayoutDropdownProps> = ({ selected, setLay
         return t('BreadthFirst');
       case LayoutName.cola:
         return t('Cola');
+      case LayoutName.colaGroups:
+        return t('ColaGroups');
       case LayoutName.colaNoForce:
         return t('ColaNoForce');
       case LayoutName.concentric:
         return t('Concentric');
       case LayoutName.dagre:
         return t('Dagre');
+      case LayoutName.dagreGroup:
+        return t('DagreGroup');
       case LayoutName.force:
         return t('Force');
       case LayoutName.grid:
         return t('Grid');
-      case LayoutName.colaGroups:
-        return t('ColaGroups');
       default:
         return t('Invalid');
     }
@@ -43,17 +45,21 @@ export const LayoutDropdown: React.FC<LayoutDropdownProps> = ({ selected, setLay
     <Dropdown
       data-test={id}
       id={id}
-      toggle={
-        <DropdownToggle
+      isOpen={isOpen}
+      toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+        <MenuToggle
+          ref={toggleRef}
           data-test={`${id}-dropdown`}
           id={`${id}-dropdown`}
-          onToggle={() => setLayoutDropdownOpen(!layoutDropdownOpen)}
+          isExpanded={isOpen}
+          onClick={() => setOpen(!isOpen)}
+          onBlur={() => setTimeout(() => setOpen(false), 500)}
         >
           {getLayoutDisplay(selected)}
-        </DropdownToggle>
-      }
-      isOpen={layoutDropdownOpen}
-      dropdownItems={Object.values(LayoutName)
+        </MenuToggle>
+      )}
+    >
+      {Object.values(LayoutName)
         .filter(v => v != LayoutName.threeD || isAllowed(Feature.ThreeD))
         .map(v => (
           <DropdownItem
@@ -61,14 +67,14 @@ export const LayoutDropdown: React.FC<LayoutDropdownProps> = ({ selected, setLay
             id={v}
             key={v}
             onClick={() => {
-              setLayoutDropdownOpen(false);
+              setOpen(false);
               setLayout(v);
             }}
           >
             {getLayoutDisplay(v)}
           </DropdownItem>
         ))}
-    />
+    </Dropdown>
   );
 };
 

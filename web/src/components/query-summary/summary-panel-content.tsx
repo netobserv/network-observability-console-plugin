@@ -2,7 +2,7 @@ import { ResourceLink } from '@openshift-console/dynamic-plugin-sdk';
 import {
   Accordion,
   AccordionContent,
-  AccordionExpandedContentBody,
+  AccordionExpandableContentBody,
   AccordionItem,
   AccordionToggle,
   Text,
@@ -96,9 +96,9 @@ export const SummaryPanelContent: React.FC<SummaryPanelContentProps> = ({
       <>
         {tc.objects
           .sort((a, b) => compareStrings(a.namespace ? a.namespace : '', b.namespace ? b.namespace : ''))
-          .flatMap((o, i) => (
-            <AccordionExpandedContentBody key={`expanded-content-body${i}`}>
-              {o.namespace && <ResourceLink key={`${tc.type}-${o.namespace}`} kind={'Namespace'} name={o.namespace} />}
+          .flatMap(o => (
+            <AccordionExpandableContentBody key={`${tc.type}-${o.namespace}`}>
+              {o.namespace && <ResourceLink kind={'Namespace'} name={o.namespace} />}
               {o.names
                 .sort((a, b) => compareStrings(a, b))
                 .map(n => (
@@ -110,7 +110,7 @@ export const SummaryPanelContent: React.FC<SummaryPanelContentProps> = ({
                     namespace={o.namespace}
                   />
                 ))}
-            </AccordionExpandedContentBody>
+            </AccordionExpandableContentBody>
           ))}
       </>
     );
@@ -126,9 +126,9 @@ export const SummaryPanelContent: React.FC<SummaryPanelContentProps> = ({
     return (
       <>
         {sortedStrings.map((v: string) => (
-          <AccordionExpandedContentBody key={v}>
+          <AccordionExpandableContentBody key={v}>
             <Text>{v}</Text>
-          </AccordionExpandedContentBody>
+          </AccordionExpandableContentBody>
         ))}
       </>
     );
@@ -389,7 +389,7 @@ export const SummaryPanelContent: React.FC<SummaryPanelContentProps> = ({
   };
 
   return (
-    <>
+    <div className="scrollable-panel">
       <TextContent className="summary-text-container">
         {!_.isEmpty(flows) && stats?.limitReached && (
           <Text component={TextVariants.p}>
@@ -437,7 +437,7 @@ export const SummaryPanelContent: React.FC<SummaryPanelContentProps> = ({
       {configContent()}
 
       {versionContent()}
-    </>
+    </div>
   );
 };
 

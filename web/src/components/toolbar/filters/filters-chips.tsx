@@ -17,6 +17,7 @@ import { getFilterFullName, hasSrcDstFilters, swapFilters } from '../../../utils
 import { getPathWithParams, netflowTrafficPath } from '../../../utils/url';
 import { navigate } from '../../dynamic-loader/dynamic-loader';
 import { LinksOverflow } from '../links-overflow';
+import './filters-chips.css';
 
 export interface FiltersChipsProps {
   isForced: boolean;
@@ -66,7 +67,7 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
 
   return (
     <ToolbarGroup
-      className="flex-start"
+      className="toolbar-group flex-start"
       data-test={`${isForced ? 'forced-' : ''}filters`}
       id={`${isForced ? 'forced-' : ''}filters`}
       variant="filter-group"
@@ -86,7 +87,7 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
               <div key={cfIndex} className={`custom-chip-group ${someEnabled ? '' : 'disabled-group'}`}>
                 <Tooltip content={`${someEnabled ? t('Disable') : t('Enable')} '${fullName}' ${t('group filter')}`}>
                   <Text
-                    className="pf-c-chip-group__label"
+                    className="pf-v5-c-chip-group__label"
                     component={TextVariants.p}
                     onClick={() => {
                       //switch all values if no remaining

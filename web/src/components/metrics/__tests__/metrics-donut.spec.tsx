@@ -18,6 +18,7 @@ describe('<StatDonut />', () => {
     showOthers: true,
     showOutOfScope: false
   };
+
   it('should render donut', async () => {
     const wrapper = mount(<MetricsDonut {...props} />);
     expect(wrapper.find('VictoryLabel').last().text()).toBe('500 BpsTotal');

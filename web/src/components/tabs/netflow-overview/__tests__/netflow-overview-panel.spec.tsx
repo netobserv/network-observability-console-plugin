@@ -2,6 +2,7 @@ import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 
 import { Card } from '@patternfly/react-core';
+import { waitForRender } from '../../../../components/__tests__/common.spec';
 import { MetricType } from '../../../../model/flow-query';
 import { MetricsGraph, MetricsGraphProps } from '../../../metrics/metrics-graph';
 import { metrics } from '../../../__tests-data__/metrics';
@@ -24,16 +25,22 @@ describe('<NetflowOverviewPanel />', () => {
     limit: 5,
     tooltipsTruncate: true
   };
+
   it('should render component', async () => {
     const wrapper = shallow(<NetflowOverviewPanel {...panelProps} />);
+    await waitForRender(wrapper);
+
     expect(wrapper.find(NetflowOverview)).toBeTruthy();
   });
+
   it('should render content', async () => {
     const wrapper = mount(
       <NetflowOverviewPanel {...panelProps}>
         <MetricsGraph {...contentProps} />
       </NetflowOverviewPanel>
     );
+    await waitForRender(wrapper);
+
     expect(wrapper.find(Card)).toHaveLength(1);
   });
 });

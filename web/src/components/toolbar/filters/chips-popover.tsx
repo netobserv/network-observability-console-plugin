@@ -11,6 +11,10 @@ export interface ChipsPopoverProps {
 export const ChipsPopover: React.FC<ChipsPopoverProps> = ({ chipsPopoverMessage, setChipsPopoverMessage }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
+  if (!chipsPopoverMessage) {
+    return <></>;
+  }
+
   return (
     <Popover
       id="chips-popover"
@@ -33,7 +37,7 @@ export const ChipsPopover: React.FC<ChipsPopoverProps> = ({ chipsPopoverMessage,
         </Flex>
       }
       bodyContent={<Text> {chipsPopoverMessage}</Text>}
-      reference={() => document.getElementsByClassName('custom-chip-group disabled-group')?.[0] as HTMLElement}
+      triggerRef={() => document.getElementsByClassName('custom-chip-group disabled-group')?.[0] as HTMLElement}
     />
   );
 };

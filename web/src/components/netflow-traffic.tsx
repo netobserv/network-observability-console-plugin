@@ -1,5 +1,5 @@
 import { isModelFeatureFlag, ModelFeatureFlag, useResolvedExtensions } from '@openshift-console/dynamic-plugin-sdk';
-import { Button, Flex, FlexItem, PageSection, Text, TextVariants } from '@patternfly/react-core';
+import { Button, Flex, FlexItem, PageSection, Text, TextVariants, Title } from '@patternfly/react-core';
 import { SyncAltIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
 import * as React from 'react';
@@ -835,7 +835,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
       <div id="pageHeader">
         <Flex direction={{ default: 'row' }}>
           <FlexItem flex={{ default: 'flex_1' }}>
-            <Text component={TextVariants.h1}>{t('Network Traffic')}</Text>
+            <Title headingLevel={TextVariants.h1}>{t('Network Traffic')}</Title>
           </FlexItem>
           <FlexItem>{actions()}</FlexItem>
         </Flex>

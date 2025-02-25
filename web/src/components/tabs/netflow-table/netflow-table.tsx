@@ -1,5 +1,5 @@
 import { Bullseye, Spinner } from '@patternfly/react-core';
-import { SortByDirection, TableComposable, Tbody } from '@patternfly/react-table';
+import { SortByDirection, Table, Tbody } from '@patternfly/react-table';
 import * as _ from 'lodash';
 import * as React from 'react';
 
@@ -193,7 +193,7 @@ export const NetflowTable: React.FC<NetflowTableProps> = React.forwardRef(
     const handleScroll = React.useCallback(() => {
       const rowHeight = getRowHeight();
       const container = document.getElementById('table-container');
-      const header = container?.children[0]?.children[0];
+      const header = container?.children[0]?.children[0]?.children[0];
       if (container && header) {
         const position = container.scrollTop - header.clientHeight;
         //updates only when position moved more than one row height
@@ -309,31 +309,33 @@ export const NetflowTable: React.FC<NetflowTableProps> = React.forwardRef(
     }
 
     return (
-      <TableComposable
-        data-test="table-composable"
-        data-test-cols-count={props.columns.length}
-        data-test-rows-count={props.flows.length}
-        aria-label="Netflow table"
-        variant="compact"
-        style={{ minWidth: `${width}em` }}
-        isStickyHeader
-      >
-        <NetflowTableHeader
-          data-test="table-header"
-          onSort={onSort}
-          sortDirection={activeSortDirection}
-          sortId={activeSortId}
-          columns={props.columns}
-          setColumns={props.setColumns}
-          columnSizes={props.columnSizes}
-          setColumnSizes={props.setColumnSizes}
-          tableWidth={width}
-          isDark={props.isDark}
-        />
-        <Tbody id="table-body" data-test="table-body">
-          {getBody()}
-        </Tbody>
-      </TableComposable>
+      <div id="table-container">
+        <Table
+          data-test="table-composable"
+          data-test-cols-count={props.columns.length}
+          data-test-rows-count={props.flows.length}
+          aria-label="Netflow table"
+          variant="compact"
+          style={{ minWidth: `${width}em` }}
+          isStickyHeader
+        >
+          <NetflowTableHeader
+            data-test="table-header"
+            onSort={onSort}
+            sortDirection={activeSortDirection}
+            sortId={activeSortId}
+            columns={props.columns}
+            setColumns={props.setColumns}
+            columnSizes={props.columnSizes}
+            setColumnSizes={props.setColumnSizes}
+            tableWidth={width}
+            isDark={props.isDark}
+          />
+          <Tbody id="table-body" data-test="table-body">
+            {getBody()}
+          </Tbody>
+        </Table>
+      </div>
     );
   }
 );

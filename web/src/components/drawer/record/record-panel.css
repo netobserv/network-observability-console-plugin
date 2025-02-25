@@ -1,4 +1,4 @@
-.pf-c-content.record-field-container {
+.pf-v5-c-content.record-field-container {
   margin-bottom: 10px;
 }
 
@@ -6,19 +6,19 @@
   padding-left: 2em;
 }
 
-.borderless-accordion>.pf-c-accordion__expanded-content-body::after,
+.borderless-accordion>.pf-v5-c-accordion__expandable-content.pf-m-expanded::after,
 .borderless-accordion::after {
   display: none;
 }
 
-.borderless-accordion>.pf-c-accordion__toggle-text {
+.borderless-accordion>.pf-v5-c-accordion__toggle-text {
   padding-left: 0.8em;
   font-size: 14px;
   font-weight: 400 !important;
   line-height: 1.5;
 }
 
-.borderless-accordion>.pf-c-accordion__toggle-icon {
+.borderless-accordion>.pf-v5-c-accordion__toggle-icon {
   position: absolute;
   left: 0;
 }
@@ -28,8 +28,8 @@ button.borderless-accordion {
   padding-bottom: 1em;
 }
 
-.borderless-accordion>.pf-c-accordion__expanded-content-body,
-.drawer-panel-content>.pf-c-drawer__panel-main>.pf-c-drawer__body {
+.borderless-accordion>.pf-v5-c-accordion__expandable-content.pf-m-expanded,
+.drawer-panel-content>.pf-v5-c-drawer__panel-main>.pf-v5-c-drawer__body {
   padding: 0 !important;
 }
 
@@ -41,7 +41,7 @@ button.borderless-accordion {
   font-size: 15px;
 }
 
-.drawer-panel-content>.pf-c-drawer__panel-main {
+.drawer-panel-content>.pf-v5-c-drawer__panel-main {
   overflow: hidden;
 }
 
@@ -52,20 +52,25 @@ button.borderless-accordion {
   align-items: baseline;
 }
 
-.drawer-body {
+.pf-v5-c-drawer__body.drawer-body {
   display: flex;
   flex-direction: column;
+  height: -webkit-fill-available;
+  flex: none !important;
+}
+
+#recordPanel-drawer-body {
+  padding-bottom: 5.5em !important;
 }
 
 .drawer-tab {
   flex: 1;
-  overflow-x: hidden;
-  overflow-y: auto;
 }
 
 #pf-tab-section-details-drawer-tabs,
 #pf-tab-section-raw-drawer-tabs {
-  padding: var(--pf-c-drawer--child--PaddingTop) var(--pf-c-drawer--child--PaddingRight) var(--pf-c-drawer--child--PaddingBottom) var(--pf-c-drawer--child--PaddingLeft);
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
 }
 
 h4.record-field-title,
@@ -77,7 +82,7 @@ button.record-field-title-popover-button {
 }
 
 button.record-field-title-popover-button {
-  background-image: linear-gradient(to right, var(--pf-c-button--m-plain--Color) 33%, rgba(255, 255, 255, 0) 0%);
+  background-image: linear-gradient(to right, var(--pf-v5-c-button--m-plain--Color) 33%, rgba(255, 255, 255, 0) 0%);
   background-position: bottom;
   background-size: 3px 1px;
   background-repeat: repeat-x;

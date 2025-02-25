@@ -33,9 +33,9 @@ export const OverviewDisplayOptions: React.FC<OverviewDisplayOptionsProps> = ({
 
   return (
     <>
-      <div className="pf-c-select__menu-group">
+      <div className="pf-v5-c-menu__group">
         <Tooltip content={t('The level of details represented.')}>
-          <div className="pf-c-select__menu-group-title">
+          <div className="pf-v5-c-menu__group-title">
             <Text component={TextVariants.p}>
               {t('Scope')} <InfoAltIcon />
             </Text>
@@ -51,9 +51,9 @@ export const OverviewDisplayOptions: React.FC<OverviewDisplayOptionsProps> = ({
           />
         </div>
       </div>
-      <div className="pf-c-select__menu-group">
+      <div className="pf-v5-c-menu__group">
         <Tooltip content={t('Long labels can reduce visibility.')}>
-          <div className="pf-c-select__menu-group-title">
+          <div className="pf-v5-c-menu__group-title">
             <Text component={TextVariants.p}>
               {t('Truncate labels')} <InfoAltIcon />
             </Text>
@@ -63,14 +63,16 @@ export const OverviewDisplayOptions: React.FC<OverviewDisplayOptionsProps> = ({
           <TruncateDropdown id="truncate" selected={truncateLength} setTruncateLength={setTruncateLength} />
         </div>
       </div>
-      <div className="pf-c-select__menu-group">
-        <Switch
-          id="focus-switch"
-          className="display-dropdown-padding"
-          label={t('Single graph focus')}
-          isChecked={focus}
-          onChange={setFocus}
-        />
+      <div className="pf-v5-c-menu__group">
+        <div className="display-dropdown-switch-padding">
+          <Switch
+            id="focus-switch"
+            label={t('Single graph focus')}
+            isChecked={focus}
+            onChange={(event, value) => setFocus(value)}
+            isReversed
+          />
+        </div>
       </div>
     </>
   );

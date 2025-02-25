@@ -1,5 +1,6 @@
 import { mount, shallow } from 'enzyme';
 import * as React from 'react';
+import { actOn, waitForRender } from '../../../../components/__tests__/common.spec';
 import CompareFilter, { CompareFilterProps, FilterCompare } from '../compare-filter';
 
 describe('<CompareFilter />', () => {
@@ -8,41 +9,44 @@ describe('<CompareFilter />', () => {
     setValue: jest.fn(),
     component: 'text'
   };
+
   it('should render component', async () => {
     const wrapper = shallow(<CompareFilter {...props} />);
     expect(wrapper.find(CompareFilter)).toBeTruthy();
   });
+
   it('should update value', async () => {
     const wrapper = mount(<CompareFilter {...props} />);
-    const switchButton = wrapper.find('#filter-compare-switch-button').last();
-    const dropdownToggleButton = wrapper.find('#filter-compare-toggle-button').last();
+    await waitForRender(wrapper);
 
-    expect(switchButton).toBeDefined();
-    expect(dropdownToggleButton).toBeDefined();
+    expect(wrapper.find('#filter-compare-switch-button')).toBeDefined();
+    expect(wrapper.find('#filter-compare-toggle-button')).toBeDefined();
 
     // No initial call
     expect(props.setValue).toHaveBeenCalledTimes(0);
 
-    //open dropdown and select not equal
-    dropdownToggleButton.last().simulate('click');
-    wrapper.find('[id="not-equal"]').last().simulate('click');
+    //open dropdown
+    await actOn(() => wrapper.find('#filter-compare-toggle-button').last().simulate('click'), wrapper);
+    //select not equal
+    await actOn(() => wrapper.find('[id="not-equal"]').last().simulate('click'), wrapper);
     expect(props.setValue).toHaveBeenCalledWith(FilterCompare.notEqual);
     expect(wrapper.find('li').length).toBe(0);
 
-    //open dropdown and select EQUAL
-    dropdownToggleButton.last().simulate('click');
-    wrapper.find('[id="equal"]').last().simulate('click');
+    //open dropdown and
+    await actOn(() => wrapper.find('#filter-compare-toggle-button').last().simulate('click'), wrapper);
+    //select EQUAL
+    await actOn(() => wrapper.find('[id="equal"]').last().simulate('click'), wrapper);
     expect(props.setValue).toHaveBeenCalledWith(FilterCompare.equal);
     expect(wrapper.find('li').length).toBe(0);
 
     //open dropdown and check for more than or equal
-    dropdownToggleButton.last().simulate('click');
+    await actOn(() => wrapper.find('#filter-compare-toggle-button').last().simulate('click'), wrapper);
     expect(wrapper.find('[id="more-than"]').length).toBe(0);
 
     //switch directly
-    switchButton.last().simulate('click');
+    await actOn(() => wrapper.find('#filter-compare-switch-button').last().simulate('click'), wrapper);
     expect(props.setValue).toHaveBeenCalledWith(FilterCompare.notEqual);
-    switchButton.last().simulate('click');
+    await actOn(() => wrapper.find('#filter-compare-switch-button').last().simulate('click'), wrapper);
     expect(props.setValue).toHaveBeenCalledWith(FilterCompare.equal);
 
     //setState should be called 3 times
@@ -51,21 +55,22 @@ describe('<CompareFilter />', () => {
 
   it('number should have more than', async () => {
     const wrapper = mount(<CompareFilter {...props} component={'number'} />);
-    const switchButton = wrapper.find('#filter-compare-switch-button').last();
-    const dropdownToggleButton = wrapper.find('#filter-compare-toggle-button').last();
+    await waitForRender(wrapper);
 
-    //open dropdown and select more than or equal
-    dropdownToggleButton.last().simulate('click');
-    wrapper.find('[id="more-than"]').last().simulate('click');
+    //open dropdown
+    await actOn(() => wrapper.find('#filter-compare-toggle-button').last().simulate('click'), wrapper);
+    //select more than or equal
+    await actOn(() => wrapper.find('[id="more-than"]').last().simulate('click'), wrapper);
+
     expect(props.setValue).toHaveBeenCalledWith(FilterCompare.moreThanOrEqual);
     expect(wrapper.find('li').length).toBe(0);
 
     //switch directly
-    switchButton.last().simulate('click');
+    await actOn(() => wrapper.find('#filter-compare-switch-button').last().simulate('click'), wrapper);
     expect(props.setValue).toHaveBeenCalledWith(FilterCompare.notEqual);
-    switchButton.last().simulate('click');
+    await actOn(() => wrapper.find('#filter-compare-switch-button').last().simulate('click'), wrapper);
     expect(props.setValue).toHaveBeenCalledWith(FilterCompare.moreThanOrEqual);
-    switchButton.last().simulate('click');
+    await actOn(() => wrapper.find('#filter-compare-switch-button').last().simulate('click'), wrapper);
     expect(props.setValue).toHaveBeenCalledWith(FilterCompare.equal);
   });
 });

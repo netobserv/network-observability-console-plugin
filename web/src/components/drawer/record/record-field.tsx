@@ -192,7 +192,7 @@ export const RecordField: React.FC<RecordFieldProps> = ({
     const timeText = getFormattedDate(date, timeMSFormatter);
     return singleContainer(
       <Flex data-test={`field-date-${dateText}-${timeText}`} className="record-field-date">
-        <FlexItem>
+        <FlexItem className="record-field-date-icon-container">
           <GlobeAmericasIcon className="record-field-date-icon" />
         </FlexItem>
         <FlexItem>

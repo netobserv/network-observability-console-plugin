@@ -14,6 +14,7 @@ describe('<ExportModal />', () => {
     flowQuery: { recordType: 'flowLog', dataSource: 'auto', limit: 100, filters: '', packetLoss: 'all' },
     id: 'export-modal'
   };
+
   it('should render component', async () => {
     const wrapper = shallow(<ExportModal {...props} />);
     expect(wrapper.find(ExportModal)).toBeTruthy();

@@ -1,4 +1,4 @@
-import { Checkbox, OptionsMenu, OptionsMenuItem, OptionsMenuPosition, OptionsMenuToggle } from '@patternfly/react-core';
+import { MenuToggle, Select, SelectList, SelectOption } from '@patternfly/react-core';
 import { FilterIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -6,6 +6,7 @@ import { TopologyMetricPeer } from '../../../api/loki';
 import { Filter, FilterDefinition } from '../../../model/filters';
 import { NodeType } from '../../../model/flow-query';
 import { FilterDir, isDirElementFiltered, toggleDirElementFilter } from '../../../model/topology';
+import { useOutsideClickEvent } from '../../../utils/outside-hook';
 import './summary-filter-button.css';
 
 export interface SummaryFilterButtonProps {
@@ -29,13 +30,13 @@ export const SummaryFilterButton: React.FC<SummaryFilterButtonProps> = ({
   filterDefinitions
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
-  const [isOpen, setIsOpen] = React.useState(false);
-
+  const ref = useOutsideClickEvent(() => setOpen(false));
+  const [isOpen, setOpen] = React.useState(false);
   const selected = [srcFilter, dstFilter].filter(dir =>
     isDirElementFiltered(filterType, fields, dir, activeFilters, filterDefinitions)
   );
 
-  const onSelect = (dir: FilterDir, e: React.BaseSyntheticEvent) => {
+  const onSelect = (dir: FilterDir, e?: React.BaseSyntheticEvent) => {
     toggleDirElementFilter(
       filterType,
       fields,
@@ -45,30 +46,42 @@ export const SummaryFilterButton: React.FC<SummaryFilterButtonProps> = ({
       setFilters,
       filterDefinitions
     );
-    e.preventDefault();
+    e && e.preventDefault && e.preventDefault();
   };
 
   const menuItem = (id: FilterDir, label: string) => (
-    <OptionsMenuItem id={id} key={id} onSelect={e => onSelect(id, e!)}>
-      <Checkbox
-        id={id + '-checkbox'}
-        label={label}
-        isChecked={selected.includes(id)}
-        onChange={(_, e) => onSelect(id, e)}
-      />
-    </OptionsMenuItem>
+    <SelectOption id={id} key={id} value={id} hasCheckbox isSelected={selected.includes(id)}>
+      {label}
+    </SelectOption>
   );
 
   return (
-    <OptionsMenu
-      id={id}
-      className={'summary-filter-menu'}
-      data-test={id}
-      toggle={<OptionsMenuToggle toggleTemplate={<FilterIcon />} onToggle={setIsOpen} hideCaret />}
-      menuItems={[menuItem('src', t('Source')), menuItem('dst', t('Destination'))]}
-      isOpen={isOpen}
-      position={OptionsMenuPosition.right}
-      isPlain
-    />
+    <div id="summary-filters-dropdown-container" data-test="summary-filters-dropdown-container" ref={ref}>
+      <Select
+        isOpen={isOpen}
+        toggle={toggleRef => (
+          <MenuToggle
+            ref={toggleRef}
+            className="summary-filters-toggle"
+            onClick={() => setOpen(!isOpen)}
+            isExpanded={isOpen}
+            variant="plain"
+          >
+            <FilterIcon />
+          </MenuToggle>
+        )}
+        popperProps={{
+          position: 'right'
+        }}
+        id={id}
+        selected={selected}
+        onSelect={(event, value) => value && onSelect(value as FilterDir, event)}
+      >
+        <SelectList className="summary-filters-list">
+          {menuItem('src', t('Source'))}
+          {menuItem('dst', t('Destination'))}
+        </SelectList>
+      </Select>
+    </div>
   );
 };
