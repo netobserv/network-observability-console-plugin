@@ -32,6 +32,7 @@ export type FilterId =
   | 'dscp'
   | 'icmp_type'
   | 'icmp_code'
+  | 'udns'
   | 'id'
   | 'pkt_drop_state'
   | 'pkt_drop_cause'
@@ -39,7 +40,13 @@ export type FilterId =
   | 'dns_latency'
   | 'dns_flag_response_code'
   | 'dns_errno'
-  | 'time_flow_rtt';
+  | 'time_flow_rtt'
+  | 'network_events'
+  | 'xlat_zone_id'
+  | 'xlat_src_address'
+  | 'xlat_dst_address'
+  | 'xlat_src_port'
+  | 'xlat_dst_port';
 
 export interface FilterConfigDef {
   id: string;

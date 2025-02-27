@@ -122,6 +122,18 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
     return model.config.features.includes('pktDrop');
   }, [model.config.features]);
 
+  const isUdn = React.useCallback(() => {
+    return model.config.features.includes('udnMapping');
+  }, [model.config.features]);
+
+  const isPktXlat = React.useCallback(() => {
+    return model.config.features.includes('packetTranslation');
+  }, [model.config.features]);
+
+  const isNetEvents = React.useCallback(() => {
+    return model.config.features.includes('networkEvents');
+  }, [model.config.features]);
+
   const isPromOnly = React.useCallback(() => {
     return !allowLoki() || model.dataSource === 'prom';
   }, [allowLoki, model.dataSource]);
@@ -209,6 +221,9 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
         (isDNSTracking() || !fd.id.startsWith('dns_')) &&
         (isPktDrop() || !fd.id.startsWith('pkt_drop_')) &&
         (isFlowRTT() || fd.id !== 'time_flow_rtt') &&
+        (isUdn() || fd.id !== 'udns') &&
+        (isPktXlat() || !fd.id.startsWith('xlat_')) &&
+        (isNetEvents() || fd.id !== 'network_events') &&
         (!isPromOnly() || checkFilterAvailable(fd, model.config.promLabels))
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps

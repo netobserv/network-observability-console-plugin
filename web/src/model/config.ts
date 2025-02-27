@@ -5,7 +5,15 @@ import { RecordType } from './flow-query';
 import { RawQuickFilter } from './quick-filters';
 import { ScopeConfigDef } from './scope';
 
-export type Feature = 'multiCluster' | 'zones' | 'pktDrop' | 'dnsTracking' | 'flowRTT';
+export type Feature =
+  | 'multiCluster'
+  | 'zones'
+  | 'pktDrop'
+  | 'dnsTracking'
+  | 'flowRTT'
+  | 'udnMapping'
+  | 'packetTranslation'
+  | 'networkEvents';
 
 export type Deduper = {
   mark: boolean;
