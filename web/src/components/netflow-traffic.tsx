@@ -222,7 +222,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
         (isPktDrop() || !fd.id.startsWith('pkt_drop_')) &&
         (isFlowRTT() || fd.id !== 'time_flow_rtt') &&
         (isUdn() || fd.id !== 'udns') &&
-        (isPktXlat() || fd.id.startsWith('xlat_')) &&
+        (isPktXlat() || !fd.id.startsWith('xlat_')) &&
         (isNetEvents() || fd.id !== 'network_events') &&
         (!isPromOnly() || checkFilterAvailable(fd, model.config.promLabels))
     );
