@@ -5,7 +5,7 @@ import * as React from 'react';
 import { act } from 'react-dom/test-utils';
 import { AlertsResult, SilencedAlert } from '../../api/alert';
 import { FlowMetricsResult, GenericMetricsResult } from '../../api/loki';
-import { getConfig, getFlowGenericMetrics, getFlowMetrics, getFlowRecords } from '../../api/routes';
+import { getConfig, getFlowGenericMetrics, getFlowMetrics, getFlowRecords, getRole } from '../../api/routes';
 import { FlowQuery } from '../../model/flow-query';
 import NetflowTraffic from '../netflow-traffic';
 import NetflowTrafficParent from '../netflow-traffic-parent';
@@ -19,6 +19,7 @@ const useResolvedExtensionsMock = useResolvedExtensions as jest.Mock;
 jest.mock('../../api/routes', () => ({
   // mock the most complete configuration to test all queries
   getConfig: jest.fn(() => Promise.resolve(FullConfigResultSample)),
+  getRole: jest.fn(() => Promise.resolve('admin')),
   getFlowRecords: jest.fn(() => Promise.resolve(FlowsResultSample)),
   getFlowMetrics: jest.fn(() =>
     Promise.resolve({
@@ -37,6 +38,7 @@ jest.mock('../../api/routes', () => ({
 }));
 
 const getConfigMock = getConfig as jest.Mock;
+const getRoleMock = getRole as jest.Mock;
 const getFlowsMock = getFlowRecords as jest.Mock;
 const getMetricsMock = getFlowMetrics as jest.Mock;
 const getGenericMetricsMock = getFlowGenericMetrics as jest.Mock;
@@ -72,7 +74,7 @@ describe('<NetflowTraffic />', () => {
 
   it('should render refresh components', async () => {
     act(() => {
-      const cheerio = render(<NetflowTrafficParent />);
+      const cheerio = render(<NetflowTraffic />);
       expect(cheerio.find('#refresh-dropdown-container').length).toEqual(1);
       expect(cheerio.find('#refresh-button').length).toEqual(1);
     });
@@ -115,6 +117,7 @@ describe('<NetflowTraffic />', () => {
     await waitFor(() => {
       //config is get only once
       expect(getConfigMock).toHaveBeenCalledTimes(1);
+      expect(getRoleMock).toHaveBeenCalledTimes(1);
       expect(getFlowsMock).toHaveBeenCalledTimes(0);
       expect(getMetricsMock).toHaveBeenCalledTimes(expectedMetricsQueries.length);
       expectedMetricsQueries.forEach((q, i) =>
@@ -126,6 +129,7 @@ describe('<NetflowTraffic />', () => {
     await waitFor(() => {
       //config is get only once
       expect(getConfigMock).toHaveBeenCalledTimes(1);
+      expect(getRoleMock).toHaveBeenCalledTimes(1);
       expect(getFlowsMock).toHaveBeenCalledTimes(0);
       //should have called getMetricsMock & getGenericMetricsMock original count twice
       expect(getMetricsMock).toHaveBeenCalledTimes(expectedMetricsQueries.length * 2);
@@ -135,8 +139,10 @@ describe('<NetflowTraffic />', () => {
 
   it('should render toolbar components when config loaded', async () => {
     const wrapper = mount(<NetflowTrafficParent />);
+    await waitForRender(wrapper);
     await waitFor(() => {
       expect(getConfigMock).toHaveBeenCalled();
+      expect(getRoleMock).toHaveBeenCalled();
     });
     await act(async () => {
       expect(wrapper.find('#filter-toolbar').last()).toBeTruthy();
@@ -149,9 +155,11 @@ describe('<NetflowTraffic />', () => {
     getConfigMock.mockReturnValue(Promise.resolve(SimpleConfigResultSample));
 
     const wrapper = mount(<NetflowTrafficParent />);
+    await waitForRender(wrapper);
     await waitFor(() => {
       //config is get only once
       expect(getConfigMock).toHaveBeenCalledTimes(1);
+      expect(getRoleMock).toHaveBeenCalledTimes(1);
       expect(getFlowsMock).toHaveBeenCalledTimes(0);
       /** should have called getMetricsMock 2 times on render:
        * 2 queries for metrics on current scope & app scope
@@ -161,11 +169,12 @@ describe('<NetflowTraffic />', () => {
       expect(getGenericMetricsMock).toHaveBeenCalledTimes(0);
     });
     await act(async () => {
-      wrapper.find('#refresh-button').at(0).simulate('click');
+      wrapper.find('#refresh-button').last().simulate('click');
     });
     await waitFor(() => {
       //config is get only once
       expect(getConfigMock).toHaveBeenCalledTimes(1);
+      expect(getRoleMock).toHaveBeenCalledTimes(1);
       expect(getFlowsMock).toHaveBeenCalledTimes(0);
       //should have called getMetricsMock 4 times after click (2 * 2)
       expect(getMetricsMock).toHaveBeenCalledTimes(4);
