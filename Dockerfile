@@ -1,5 +1,5 @@
 ARG TARGETARCH
-FROM docker.io/library/node:18-alpine as web-builder
+FROM docker.io/library/node:22-alpine as web-builder
 
 USER node
 
