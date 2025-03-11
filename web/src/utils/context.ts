@@ -1,10 +1,4 @@
-import {
-  ExtensionK8sModel,
-  K8sModel,
-  ModelFeatureFlag,
-  ResolvedExtension
-} from '@openshift-console/dynamic-plugin-sdk';
-import _ from 'lodash';
+import { K8sModel } from '@openshift-console/dynamic-plugin-sdk';
 import { ScopeConfigDef } from '../model/scope';
 
 export const DEFAULT_HOST = '/api/proxy/plugin/netobserv-plugin/backend';
@@ -28,22 +22,15 @@ export class ContextSingleton {
     return ContextSingleton.instance;
   }
 
-  public static setContext(
-    extensions: ResolvedExtension<
-      ModelFeatureFlag,
-      {
-        flag: string;
-        model: ExtensionK8sModel;
-      }
-    >[],
-    forcedNamespace?: string
-  ) {
-    const isStandalone = (!_.isEmpty(extensions) && extensions[0]?.flags?.required?.includes('dummy')) || false;
+  public static setStandalone() {
     const instance = ContextSingleton.getInstance();
-    instance.isStandalone = isStandalone;
-    if (isStandalone) {
-      instance.host = '';
-    } else {
+    instance.isStandalone = true;
+    instance.host = '';
+  }
+
+  public static setContext(forcedNamespace?: string) {
+    const instance = ContextSingleton.getInstance();
+    if (!instance.isStandalone) {
       instance.host = DEFAULT_HOST;
     }
     instance.forcedNamespace = forcedNamespace;
