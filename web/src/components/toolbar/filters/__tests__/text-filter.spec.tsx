@@ -4,12 +4,11 @@ import * as React from 'react';
 import { act } from 'react-dom/test-utils';
 import { FilterDefinitionSample } from '../../../../components/__tests-data__/filters';
 import { findFilter } from '../../../../utils/filter-definitions';
-import TextFilter, { TextFilterProps } from '../text-filter';
+import { TextFilter, TextFilterProps } from '../text-filter';
 
 describe('<TextFilter />', () => {
   const props: TextFilterProps = {
     filterDefinition: findFilter(FilterDefinitionSample, 'src_name')!,
-    indicator: ValidatedOptions.default,
     addFilter: jest.fn(),
     setMessageWithDelay: jest.fn(),
     setIndicator: jest.fn()

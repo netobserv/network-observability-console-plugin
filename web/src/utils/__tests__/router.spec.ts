@@ -1,5 +1,5 @@
-import { setNavFunction } from '../../components/dynamic-loader/dynamic-loader';
 import { FilterDefinitionSample } from '../../components/__tests-data__/filters';
+import { setNavFunction } from '../../components/dynamic-loader/dynamic-loader';
 import { Filters } from '../../model/filters';
 import { findFilter } from '../filter-definitions';
 import { getFiltersFromURL, setURLFilters } from '../router';

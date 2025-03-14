@@ -56,7 +56,6 @@ export interface ViewOptionsToolbarProps {
   ref?: React.Ref<SearchHandle>;
 }
 
-// eslint-disable-next-line react/display-name
 export const ViewOptionsToolbar: React.FC<ViewOptionsToolbarProps> = React.forwardRef(
   (props, ref: React.Ref<SearchHandle>) => {
     const { t } = useTranslation('plugin__netobserv-plugin');
@@ -275,7 +274,7 @@ export const ViewOptionsToolbar: React.FC<ViewOptionsToolbarProps> = React.forwa
             <SearchComponent ref={ref} setSearchEvent={props.setSearchEvent} isDark={props.isDarkTheme} />
           </ToolbarItem>
         )}
-        <ToolbarItem className="flex-start view-options-last" align={{ default: 'alignRight' }}>
+        <ToolbarItem className="flex-start view-options-last" align={{ default: 'alignEnd' }}>
           <OverflowMenu breakpoint="2xl">
             <OverflowMenuContent isPersistent>
               <OverflowMenuGroup groupType="button" isPersistent className="view-options-group flex-start">

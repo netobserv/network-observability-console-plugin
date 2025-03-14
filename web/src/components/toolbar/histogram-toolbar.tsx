@@ -105,7 +105,7 @@ export const HistogramToolbar: React.FC<HistogramToolbarProps> = props => {
       isFullHeight
       className={props.isDarkTheme ? 'dark' : ''}
     >
-      <ToolbarItem className="histogram" widths={{ default: '100%' }}>
+      <ToolbarItem className="histogram">
         <HistogramContainer
           id={'histogram'}
           loading={props.loading}
