@@ -1,6 +1,6 @@
 ARG COMMIT
 
-FROM registry.access.redhat.com/ubi9/nodejs-18:1-1739782539 as web-builder
+FROM registry.access.redhat.com/ubi9/nodejs-18:9.5-1741891089 as web-builder
 
 ARG BUILDSCRIPT
 WORKDIR /opt/app-root
