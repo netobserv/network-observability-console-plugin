@@ -24,6 +24,7 @@ FROM registry.access.redhat.com/ubi9/ubi-minimal:9.5-1739420147
 
 COPY --from=web-builder /opt/app-root/web/dist ./web/dist
 COPY --from=go-builder /opt/app-root/plugin-backend ./
+COPY LICENSE ./
 
 ENTRYPOINT ["./plugin-backend"]
 
@@ -36,5 +37,5 @@ LABEL maintainer="support@redhat.com"
 LABEL io.openshift.tags="network-observability-console-plugin"
 LABEL upstream-vcs-ref="$COMMIT"
 LABEL upstream-vcs-type="git"
-LABEL description="Based on Openshift Console dynamic plugin, this plugin implement the console elements for Network Observability."
+LABEL description="Network Observability visualization tool for the OpenShift Console."
 LABEL version="1.9.0"
