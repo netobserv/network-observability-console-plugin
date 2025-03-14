@@ -29,6 +29,8 @@ import { BrowserRouter, Link } from 'react-router-dom';
 import NetflowTrafficDevTab from './components/netflow-traffic-dev-tab';
 import NetflowTrafficParent from './components/netflow-traffic-parent';
 import NetflowTab from './components/netflow-traffic-tab';
+import FlowCollectorForm from './components/forms/flowCollector';
+import FlowMetricForm from './components/forms/flowMetric';
 
 export const pages = [
   {
@@ -54,6 +56,14 @@ export const pages = [
   {
     id: 'udn-tab',
     name: 'UDN tab'
+  },
+  {
+    id: 'flowcollector',
+    name: 'FlowCollector form'
+  },
+  {
+    id: 'flowmetric',
+    name: 'FlowMetric form'
   }
 ];
 
@@ -162,6 +172,10 @@ export const App: React.FunctionComponent = () => {
         );
       case 'udn-tab':
         return <NetflowTab obj={{ kind: 'UserDefinedNetwork', metadata: { name: 'my-udn', namespace: 'default' } }} />;
+      case 'flowcollector':
+        return <FlowCollectorForm />;
+      case 'flowmetric':
+        return <FlowMetricForm />;
       default:
         return <NetflowTrafficParent />;
     }
