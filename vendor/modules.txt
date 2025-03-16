@@ -100,7 +100,7 @@ github.com/munnerz/goautoneg
 # github.com/mwitkow/go-conntrack v0.0.0-20190716064945-2f068394615f
 ## explicit
 github.com/mwitkow/go-conntrack
-# github.com/ovn-org/ovn-kubernetes/go-controller v0.0.0-20250227173154-57a2590a1d16
+# github.com/ovn-org/ovn-kubernetes/go-controller v0.0.0-20250314182307-95b6ca544bdf
 ## explicit; go 1.22.0
 github.com/ovn-org/ovn-kubernetes/go-controller/observability-lib/model
 # github.com/pkg/errors v0.9.1
