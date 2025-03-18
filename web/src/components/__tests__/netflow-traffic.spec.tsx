@@ -43,7 +43,6 @@ const getGenericMetricsMock = getFlowGenericMetrics as jest.Mock;
 
 const defaultQuery = {
   aggregateBy: 'namespace',
-  dedup: true,
   filters: '',
   groups: undefined,
   limit: 5,
