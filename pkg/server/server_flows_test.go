@@ -77,16 +77,16 @@ func TestLokiFiltering(t *testing.T) {
 			`?query={app="netobserv-flowcollector",SrcK8S_Namespace=~"(?i).*ns1.*|(?i).*ns2.*"}`,
 		},
 	}, {
-		name:      "Several filters with dedup",
-		inputPath: "?filters=" + url.QueryEscape("SrcPort=8080&SrcAddr=10.128.0.1&SrcK8S_Namespace=default") + "&dedup=true",
+		name:      "Several filters",
+		inputPath: "?filters=" + url.QueryEscape("SrcPort=8080&SrcAddr=10.128.0.1&SrcK8S_Namespace=default"),
 		outputQueries: []string{
-			"?query={app=\"netobserv-flowcollector\",SrcK8S_Namespace=~\"(?i).*default.*\"}!~`Duplicate\":true`|~`SrcPort\":8080[,}]`|json|SrcAddr=ip(\"10.128.0.1\")",
+			"?query={app=\"netobserv-flowcollector\",SrcK8S_Namespace=~\"(?i).*default.*\"}|~`SrcPort\":8080[,}]`|json|SrcAddr=ip(\"10.128.0.1\")",
 		},
 	}, {
-		name:      "AND IP filters with dedup",
-		inputPath: "?filters=" + url.QueryEscape("SrcAddr=10.128.0.1&DstAddr=10.128.0.2") + "&dedup=true",
+		name:      "AND IP filters",
+		inputPath: "?filters=" + url.QueryEscape("SrcAddr=10.128.0.1&DstAddr=10.128.0.2"),
 		outputQueryParts: []string{
-			"?query={app=\"netobserv-flowcollector\"}!~`Duplicate\":true`|json",
+			"?query={app=\"netobserv-flowcollector\"}|json",
 			"|SrcAddr=ip(\"10.128.0.1\")",
 			"|DstAddr=ip(\"10.128.0.2\")",
 		},
@@ -269,7 +269,7 @@ func TestLokiFiltering(t *testing.T) {
 				"DstAddr": "IP",
 			},
 		},
-		Frontend: config.Frontend{Deduper: config.Deduper{Mark: true}},
+		Frontend: config.Frontend{},
 	}, &authM)
 	backendSvc := httptest.NewServer(backendRoutes)
 	defer backendSvc.Close()

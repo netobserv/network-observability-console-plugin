@@ -18,7 +18,6 @@ export interface QueryOptionsProps {
   allowFlow: boolean;
   allowConnection: boolean;
   allowShowDuplicates: boolean;
-  deduperMark: boolean;
   allowPktDrops: boolean;
   useTopK: boolean;
   limit: number;

@@ -237,7 +237,6 @@
   "Export": "Export",
   "Following query will be exported as CSV format:": "Following query will be exported as CSV format:",
   "Time Range": "Time Range",
-  "Deduplicate": "Deduplicate",
   "Close": "Close",
   "Export all datas": "Export all datas",
   "Use this option to export every fields and labels from flows.": "Use this option to export every fields and labels from flows.",
