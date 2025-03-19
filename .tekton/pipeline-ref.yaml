@@ -21,10 +21,6 @@ spec:
   - description: Source Repository URL
     name: git-url
     type: string
-  - description: Version to build
-    name: build-version
-    type: string
-    default: "main"
   - default: ""
     description: Revision of the Source Repository
     name: revision
@@ -248,9 +244,6 @@ spec:
     - name: BUILD_ARGS
       value:
       - $(params.build-args[*])
-      - "COMMIT=$(tasks.clone-repository.results.commit)"
-      - "BUILDVERSION=$(params.build-version)"
-      - "DATE=$(tasks.clone-repository.results.commit-timestamp)"
       - "FRONTBUILD=$(params.output-image)-front"
     - name: BUILD_ARGS_FILE
       value: $(params.build-args-file)
@@ -332,28 +325,6 @@ spec:
       operator: in
       values:
       - "true"
-  - name: rpms-signature-scan
-    params:
-    - name: image-url
-      value: $(tasks.build-image-index.results.IMAGE_URL)
-    - name: image-digest
-      value: $(tasks.build-image-index.results.IMAGE_DIGEST)
-    runAfter:
-    - build-image-index
-    taskRef:
-      params:
-      - name: name
-        value: rpms-signature-scan
-      - name: bundle
-        value: quay.io/konflux-ci/tekton-catalog/task-rpms-signature-scan:0.2@sha256:e603b3df510aeefeaa12e8778c4642b21743cb0ae68704359dc7ffd2814249d2
-      - name: kind
-        value: task
-      resolver: bundles
-    when:
-    - input: $(params.skip-checks)
-      operator: in
-      values:
-      - "false"
   - name: deprecated-base-image-check
     params:
     - name: IMAGE_URL
@@ -368,6 +339,28 @@ spec:
         value: deprecated-image-check
       - name: bundle
         value: quay.io/konflux-ci/tekton-catalog/task-deprecated-image-check:0.5@sha256:ced089bd8d86f95ee70f6ee1a6941d677f1c66c3b8f02fa60f9309c6c32e1929
+      - name: kind
+        value: task
+      resolver: bundles
+    when:
+    - input: $(params.skip-checks)
+      operator: in
+      values:
+      - "false"
+  - name: rpms-signature-scan
+    params:
+    - name: image-url
+      value: $(tasks.build-image-index.results.IMAGE_URL)
+    - name: image-digest
+      value: $(tasks.build-image-index.results.IMAGE_DIGEST)
+    runAfter:
+    - build-image-index
+    taskRef:
+      params:
+      - name: name
+        value: rpms-signature-scan
+      - name: bundle
+        value: quay.io/konflux-ci/tekton-catalog/task-rpms-signature-scan:0.2@sha256:e603b3df510aeefeaa12e8778c4642b21743cb0ae68704359dc7ffd2814249d2
       - name: kind
         value: task
       resolver: bundles
