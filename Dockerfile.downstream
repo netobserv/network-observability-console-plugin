@@ -25,6 +25,8 @@ COPY --from=web-builder /opt/app-root/web/dist ./web/dist
 COPY --from=go-builder /opt/app-root/plugin-backend ./
 COPY LICENSE /licenses/
 
+USER 65532:65532
+
 ENTRYPOINT ["./plugin-backend"]
 
 LABEL com.redhat.component="network-observability-console-plugin-container"
