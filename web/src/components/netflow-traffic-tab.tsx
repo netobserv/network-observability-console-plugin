@@ -211,6 +211,7 @@ export const NetflowTrafficTab: React.FC<NetflowTrafficTabProps> = ({ match, obj
           forcedNamespace={params?.ns || match?.params?.ns}
           forcedFilters={forcedFilters}
           isTab={true}
+          hideTitle={true}
           parentConfig={config}
         />
       </div>
