@@ -9,9 +9,9 @@ import NetflowTableRow from '../netflow-table-row';
 import { actOn, waitForRender } from '../../../../components/__tests__/common.spec';
 import { ColumnsId } from '../../../../utils/columns';
 import { dateTimeMSFormatter, getFormattedDate } from '../../../../utils/datetime';
-import { Size } from '../../../dropdowns/table-display-dropdown';
 import { ShuffledColumnSample } from '../../../__tests-data__/columns';
 import { FlowsMock, FlowsSample } from '../../../__tests-data__/flows';
+import { Size } from '../../../dropdowns/table-display-dropdown';
 
 const errorStateQuery = `EmptyState[data-test="error-state"]`;
 const loadingContentsQuery = `Bullseye[data-test="loading-contents"]`;

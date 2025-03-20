@@ -1,4 +1,4 @@
-import { Button, Popover, Text, TextVariants } from '@patternfly/react-core';
+import { Button, Content, ContentVariants, Popover } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
@@ -15,7 +15,7 @@ export const FilterHints: React.FC<FilterHintsProps> = ({ def }) => {
   }
   return (
     <div data-test="tips" id="tips">
-      <Text component={TextVariants.p}>{def.hint}</Text>
+      <Content component={ContentVariants.p}>{def.hint}</Content>
       {def.examples && (
         <Popover
           aria-label="Hint popover"

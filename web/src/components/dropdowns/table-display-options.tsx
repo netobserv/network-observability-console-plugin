@@ -1,4 +1,4 @@
-import { Radio, Text, TextVariants, Tooltip } from '@patternfly/react-core';
+import { Content, ContentVariants, Radio, Tooltip } from '@patternfly/react-core';
 import { InfoAltIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
 import * as React from 'react';
@@ -22,18 +22,18 @@ export const TableDisplayOptions: React.FC<TableDisplayOptionsProps> = ({ size, 
 
   return (
     <>
-      <div className="pf-v5-c-menu__group">
+      <div className="pf-v6-c-menu__group">
         <Tooltip content={t('Force table rows to specific sizing.')}>
-          <div className="pf-v5-c-menu__group-title">
-            <Text component={TextVariants.p}>
+          <div className="pf-v6-c-menu__group-title">
+            <Content component={ContentVariants.p}>
               {t('Row size')} <InfoAltIcon />
-            </Text>
+            </Content>
           </div>
         </Tooltip>
         {_.map(sizeOptions, (name, key) => {
           return (
             <div key={`size-${key}`}>
-              <label className="display-dropdown-padding pf-v5-c-menu__menu-item">
+              <label className="display-dropdown-padding pf-v6-c-menu__menu-item">
                 <Radio
                   isChecked={key === size}
                   name={`size-${key}`}

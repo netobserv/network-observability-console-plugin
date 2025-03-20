@@ -9,7 +9,6 @@ import AutocompleteFilter, { AutocompleteFilterProps } from '../autocomplete-fil
 describe('<AutocompleteFilter />', () => {
   const props: AutocompleteFilterProps = {
     filterDefinition: findFilter(FilterDefinitionSample, 'src_name')!,
-    indicator: ValidatedOptions.default,
     addFilter: jest.fn(),
     setMessageWithDelay: jest.fn(),
     setIndicator: jest.fn()
