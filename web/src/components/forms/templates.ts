@@ -1,0 +1,285 @@
+import { K8sResourceKind } from '@openshift-console/dynamic-plugin-sdk';
+import { safeYAMLToJS } from '../../utils/yaml';
+
+export const FlowCollector = `
+apiVersion: flows.netobserv.io/v1beta2
+kind: FlowCollector
+metadata:
+  name: cluster
+spec:
+  namespace: netobserv
+  deploymentModel: Direct
+  networkPolicy:
+    enable: false
+    additionalNamespaces: []
+  agent:
+    type: eBPF
+    ebpf:
+      imagePullPolicy: IfNotPresent
+      logLevel: info
+      sampling: 50
+      cacheActiveTimeout: 5s
+      cacheMaxFlows: 100000
+      # Change privileged to "true" on old kernel version not knowing CAP_BPF or when using "PacketDrop" feature
+      privileged: false
+      # features:
+      # - "PacketDrop"
+      # - "DNSTracking"
+      # - "FlowRTT"
+      # - "NetworkEvents"
+      # - "PacketTranslation"
+      # - "EbpfManager"
+      # - "UDNMapping"
+      interfaces: []
+      excludeInterfaces: ["lo"]
+      kafkaBatchSize: 1048576
+      #flowFilter:
+      #  enable: true
+      #  rules:
+      #  - action: Accept
+      #    cidr: 0.0.0.0/0
+      #  - action: Accept
+      #    cidr: 10.128.0.1/24
+      #    peerCIDR: 0.0.0.0/0
+      #    ports: 6443
+      #    protocol: TCP
+      #    sampling: 10
+      #  - action: Accept
+      #    cidr: 10.129.0.1/24
+      #    ports: 53
+      #    protocol: UDP
+      #    sampling: 20
+      #    sourcePorts: 443
+      #  - action: Accept
+      #    tcpFlags: "SYN"
+      #    cidr: 2.2.2.2/24
+      #    protocol: TCP
+      #    sourcePorts: 53
+      metrics:
+        server:
+          port: 9400
+      # Custom optionnal resources configuration
+      resources:
+        requests:
+          memory: 50Mi
+          cpu: 100m
+        limits:
+          memory: 800Mi
+  kafka:
+    address: "kafka-cluster-kafka-bootstrap.netobserv"
+    topic: network-flows
+    tls:
+      enable: false
+      caCert:
+        type: secret
+        name: kafka-cluster-cluster-ca-cert
+        certFile: ca.crt
+      userCert:
+        type: secret
+        name: flp-kafka
+        certFile: user.crt
+        certKey: user.key
+  processor:
+    imagePullPolicy: IfNotPresent
+    logLevel: info
+    # Change logTypes to "Conversations", "EndedConversations" or "All" to enable conversation tracking
+    logTypes: Flows
+    # Append a unique cluster name to each record
+    # clusterName: <CLUSTER NAME>
+    # addZone: true
+    # subnetLabels:
+    #   openShiftAutoDetect: true
+    #   customLabels:
+    #   - cidrs: []
+    #     name: ""
+    metrics:
+      server:
+        port: 9401
+      disableAlerts: []
+      # includeList:
+      #   - "node_ingress_bytes_total"
+      #   - "workload_ingress_bytes_total"
+      #   - "namespace_flows_total"
+      #   - "namespace_drop_packets_total"
+      #   - "namespace_rtt_seconds"
+    # Kafka consumer stage configuration
+    kafkaConsumerReplicas: 3
+    kafkaConsumerAutoscaler: null
+    kafkaConsumerQueueCapacity: 1000
+    kafkaConsumerBatchSize: 10485760
+    # Custom optionnal resources configuration
+    resources:
+      requests:
+        memory: 100Mi
+        cpu: 100m
+      limits:
+        memory: 800Mi
+    # deduper:
+    #   mode: Sample
+    #   sampling: 100
+    # filters:
+    #   - allOf:
+    #       - matchType: Equal
+    #         field: SrcK8S_Namespace
+    #         value: netobserv
+    #     outputTarget: Loki
+    #     sampling: 10
+    # advanced:
+    #   secondaryNetworks:
+    #     - name: "my-vms/custom-nad"
+    #       # Any of: MAC, IP, Interface
+    #       index: [MAC]
+  loki:
+    enable: true
+    # Change mode to "LokiStack" to use with the loki operator
+    mode: Monolithic
+    monolithic:
+      url: 'http://loki.netobserv.svc:3100/'
+      tenantID: netobserv
+      tls:
+        enable: false
+        caCert:
+          type: configmap
+          name: loki-gateway-ca-bundle
+          certFile: service-ca.crt
+    lokiStack:
+      name: loki
+      # Change loki operator instance namespace
+      # namespace: loki-operator
+    # Console plugin read timeout
+    readTimeout: 30s
+    # Write stage configuration
+    writeTimeout: 10s
+    writeBatchWait: 1s
+    writeBatchSize: 10485760
+  prometheus:
+    querier:
+      enable: true
+      mode: Auto
+      timeout: 30s
+  consolePlugin:
+    enable: true
+    imagePullPolicy: IfNotPresent
+    logLevel: info
+    # Scaling configuration
+    # replicas: 1
+    # autoscaler:
+    #   status: Disabled
+    #   minReplicas: 1
+    #   maxReplicas: 3
+    #   metrics:
+    #   - type: Resource
+    #     resource:
+    #       name: cpu
+    #       target:
+    #         type: Utilization
+    #         averageUtilization: 50
+    # Custom optionnal port-to-service name translation
+    portNaming:
+      enable: true
+      portNames:
+        "3100": loki
+    # Custom optionnal filter presets
+    quickFilters:
+    - name: Applications
+      filter:
+        flow_layer: '"app"'
+      default: true
+    - name: Infrastructure
+      filter:
+        flow_layer: '"infra"'
+    - name: Pods network
+      filter:
+        src_kind: '"Pod"'
+        dst_kind: '"Pod"'
+      default: true
+    - name: Services network
+      filter:
+        dst_kind: '"Service"'
+    # Custom optionnal resources configuration
+    resources:
+      requests:
+        memory: 50Mi
+        cpu: 100m
+      limits:
+        memory: 100Mi
+  exporters: []
+    # - type: Kafka
+    #   kafka:
+    #     address: "kafka-cluster-kafka-bootstrap.netobserv"
+    #     topic: netobserv-flows-export
+    # or
+    # - type: IPFIX
+    #   ipfix:
+    #     targetHost: "ipfix-collector.ipfix.svc.cluster.local"
+    #     targetPort: 4739
+    #     transport: TCP or UDP (optional - defaults to TCP)
+    # or
+    # - type: OpenTelemetry
+    #   openTelemetry:
+    #     targetHost: "1.2.3.4:443"
+    #     targetPort: 4317
+    #     protocol: grpc
+    #     logs:
+    #       enable: true
+    #     metrics:
+    #       enable: true
+    #       prefix: netobserv
+    #       pushTimeInterval: 20s
+    #       expiryTime: 2m
+`;
+
+let flowCollectorJS: K8sResourceKind | null = null;
+export const GetFlowCollectorJS = (): K8sResourceKind => {
+  if (flowCollectorJS === null) {
+    flowCollectorJS = safeYAMLToJS(FlowCollector);
+  }
+  return flowCollectorJS!;
+};
+
+export const FlowMetric = `
+apiVersion: flows.netobserv.io/v1alpha1
+kind: FlowMetric
+metadata:
+  labels:
+    app.kubernetes.io/name: flowmetric
+    app.kubernetes.io/instance: flowmetric-sample
+    app.kubernetes.io/part-of: netobserv-operator
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: netobserv-operator
+  name: flowmetric-sample
+spec:
+  # More examples in https://github.com/netobserv/network-observability-operator/tree/main/config/samples/flowmetrics
+  metricName: cluster_external_ingress_bytes_total
+  type: Counter
+  valueField: Bytes
+  direction: Ingress
+  labels: [DstK8S_HostName,DstK8S_Namespace,DstK8S_OwnerName,DstK8S_OwnerType]
+  filters:
+  - field: SrcSubnetLabel
+    matchType: Absence
+  charts:
+  - dashboardName: Main
+    title: External ingress traffic
+    unit: Bps
+    type: SingleStat
+    queries:
+    - promQL: "sum(rate($METRIC[2m]))"
+      legend: ""
+  - dashboardName: Main
+    sectionName: External
+    title: Top external ingress traffic per workload
+    unit: Bps
+    type: StackArea
+    queries:
+    - promQL: "sum(rate($METRIC{DstK8S_Namespace!=\"\"}[2m])) by (DstK8S_Namespace, DstK8S_OwnerName)"
+      legend: "{{DstK8S_Namespace}} / {{DstK8S_OwnerName}}"
+`;
+
+let flowMetricJS: K8sResourceKind | null = null;
+export const GetFlowMetricJS = (): K8sResourceKind => {
+  if (flowMetricJS === null) {
+    flowMetricJS = safeYAMLToJS(FlowMetric);
+  }
+  return flowMetricJS!;
+};
