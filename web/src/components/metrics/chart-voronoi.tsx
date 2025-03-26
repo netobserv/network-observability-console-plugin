@@ -1,4 +1,4 @@
-import { ChartLegendTooltip, createContainer } from '@patternfly/react-charts';
+import { ChartLegendTooltip, createContainer } from '@patternfly/react-charts/victory';
 import React from 'react';
 import { ChartDataPoint, LegendDataItem } from '../../utils/metrics-helper';
 

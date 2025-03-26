@@ -56,7 +56,6 @@ export interface NetflowTableProps {
   isDark?: boolean;
 }
 
-// eslint-disable-next-line react/display-name
 export const NetflowTable: React.FC<NetflowTableProps> = React.forwardRef(
   (props, ref: React.Ref<NetflowTableHandle>) => {
     //default to 300 to allow content to be rendered in tests
@@ -179,7 +178,6 @@ export const NetflowTable: React.FC<NetflowTableProps> = React.forwardRef(
         default:
           return convertRemToPixels(containsDoubleLine ? 4 : 2.5);
       }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [props.columns, props.size]);
 
     //update table container height on window resize

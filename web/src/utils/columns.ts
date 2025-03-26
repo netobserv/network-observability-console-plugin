@@ -59,7 +59,6 @@ export enum ColumnsId {
   ownerkubeobject = 'K8S_OwnerObject',
   srcownerkubeobject = 'SrcK8S_OwnerObject',
   dstownerkubeobject = 'DstK8S_OwnerObject',
-  host = 'K8S_HostIP',
   duration = 'FlowDuration',
   collectiontime = 'CollectionTime',
   collectionlatency = 'CollectionLatency',
