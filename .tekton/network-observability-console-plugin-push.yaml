@@ -11,10 +11,10 @@ metadata:
       == "main"
   creationTimestamp: null
   labels:
-    appstudio.openshift.io/application: netobserv-operator
-    appstudio.openshift.io/component: network-observability-console-plugin
+    appstudio.openshift.io/application: netobserv-ystream
+    appstudio.openshift.io/component: network-observability-console-plugin-ystream
     pipelines.appstudio.openshift.io/type: build
-  name: network-observability-console-plugin-on-push
+  name: network-observability-console-plugin-ystream-on-push
   namespace: ocp-network-observab-tenant
 spec:
   params:
