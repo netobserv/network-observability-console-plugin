@@ -192,7 +192,7 @@
   "or LokiStack spec.tenants.openshift.adminGroups must be configured with a group this user belongs to": "or LokiStack spec.tenants.openshift.adminGroups must be configured with a group this user belongs to",
   "For other configurations, refer to FlowCollector spec.loki.manual.authToken": "For other configurations, refer to FlowCollector spec.loki.manual.authToken",
   "For metrics access, your user must either:": "For metrics access, your user must either:",
-  "have the 'netobserv-metrics-reader' namespace-scoped role": "have the 'netobserv-metrics-reader' namespace-scoped role",
+  "have the 'netobserv-metrics-reader' namespace-scoped role, and use only the Developer view of the Console": "have the 'netobserv-metrics-reader' namespace-scoped role, and use only the Developer view of the Console",
   "or for cluster-wide access, have the 'cluster-monitoring-view' cluster role": "or for cluster-wide access, have the 'cluster-monitoring-view' cluster role",
   "Configuring the Loki Operator": "Configuring the Loki Operator",
   "Configuring Grafana Loki (community)": "Configuring Grafana Loki (community)",

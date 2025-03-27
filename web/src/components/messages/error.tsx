@@ -269,7 +269,11 @@ export const Error: React.FC<ErrorProps> = ({ title, error, isLokiRelated }) => 
                     <Text component={TextVariants.blockquote}>
                       {t(`For metrics access, your user must either:`)}
                       <TextList>
-                        <TextListItem>{t(`have the 'netobserv-metrics-reader' namespace-scoped role`)}</TextListItem>
+                        <TextListItem>
+                          {t(
+                            `have the 'netobserv-metrics-reader' namespace-scoped role, and use only the Developer view of the Console`
+                          )}
+                        </TextListItem>
                         <TextListItem>
                           {t(`or for cluster-wide access, have the 'cluster-monitoring-view' cluster role`)}
                         </TextListItem>
