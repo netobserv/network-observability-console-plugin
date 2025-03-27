@@ -16,7 +16,7 @@ import { Filters } from '../model/filters';
 import { loadConfig } from '../utils/config';
 import { findFilter, getFilterDefinitions } from '../utils/filter-definitions';
 import { usePrevious } from '../utils/previous-hook';
-import Error from './messages/error';
+import ErrorComponent from './messages/error';
 import NetflowTrafficParent from './netflow-traffic-parent';
 
 type NetflowTrafficTabProps<R extends K8sResourceCommon = K8sResourceCommon> = {
@@ -197,7 +197,9 @@ export const NetflowTrafficTab: React.FC<NetflowTrafficTabProps> = ({ match, obj
   }, [config, obj, previous, t]);
 
   if (error) {
-    return <Error title={t('Unable to get {{item}}', { item: t('config') })} error={error} isLokiRelated={false} />;
+    return (
+      <ErrorComponent title={t('Unable to get {{item}}', { item: t('config') })} error={error} isLokiRelated={false} />
+    );
   } else if (!initState.current.includes('forcedFiltersLoaded')) {
     return (
       <Bullseye data-test="loading-tab">

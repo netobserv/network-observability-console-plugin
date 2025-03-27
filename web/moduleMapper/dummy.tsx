@@ -1,6 +1,17 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import {
+  K8sGroupVersionKind,
+  K8sModel,
+  K8sResourceKindReference,
+  ResourceIconProps,
+  ResourceLinkProps,
+  ResourceYAMLEditorProps
+} from '@openshift-console/dynamic-plugin-sdk';
+import { CodeEditor, Language } from '@patternfly/react-code-editor';
 import * as React from 'react';
-import { ResourceIconProps, ResourceLinkProps } from '@openshift-console/dynamic-plugin-sdk';
 import { useK8sModelsWithColors } from '../src/utils/k8s-models-hook';
+import { useTheme } from '../src/utils/theme-hook';
+import { safeJSToYAML } from '../src/utils/yaml';
 import { k8sModels } from './k8s-models';
 
 // This dummy file is used to resolve @Console imports from @openshift-console for JEST / Standalone
@@ -33,6 +44,46 @@ export function useK8sModels() {
     k8sModels,
     false
   ]
+}
+
+export function getK8sModel(k8s: any, k8sGroupVersionKind?: K8sResourceKindReference | K8sGroupVersionKind): K8sModel {
+  const models = Object.keys(k8sModels);
+
+  for (let i = 0; i < models.length; i++) {
+    const model = (k8sModels as any)[models[i]];
+    if (model.kind === k8s.kind) {
+      return model;
+    }
+  }
+
+  return {
+    abbr: '',
+    kind: '',
+    label: '',
+    labelPlural: '',
+    plural: '',
+    apiVersion: ''
+  };
+}
+
+export function k8sGet(k8s: any): Promise<any> {
+  console.log("k8sGet", k8s);
+  return Promise.resolve(k8s);
+}
+
+export function k8sCreate(k8s: any): Promise<any> {
+  console.log("k8sCreate", k8s);
+  return Promise.resolve(k8s);
+}
+
+export function k8sUpdate(k8s: any): Promise<any> {
+  console.log("k8sUpdate", k8s);
+  return Promise.resolve(k8s);
+}
+
+export function useK8sWatchResource(req: any) {
+  console.log("useK8sWatchResource", req);
+  return [null, true, null];
 }
 
 export const ResourceIcon: React.FC<ResourceIconProps> = ({
@@ -80,4 +131,27 @@ export const ResourceLink: React.FC<ResourceLinkProps> = ({
       {children}
     </span>
   );
+};
+
+export const ResourceYAMLEditor: React.FC<ResourceYAMLEditorProps> = ({
+  initialResource,
+  header,
+  onSave,
+}) => {
+  const isDarkTheme = useTheme();
+  const containerHeight = document.getElementById("editor-content-container")?.clientHeight || 800;
+  const footerHeight = document.getElementById("editor-toggle-footer")?.clientHeight || 0;
+  return (<>
+    <CodeEditor
+      isDarkTheme={isDarkTheme}
+      isLineNumbersVisible={true}
+      isReadOnly={false}
+      isMinimapVisible={true}
+      isLanguageLabelVisible
+      code={safeJSToYAML(initialResource)}
+      language={Language.yaml}
+      height={`${containerHeight - footerHeight}px`}
+      onChange={(value) => onSave && onSave(value)}
+    />
+  </>);
 };

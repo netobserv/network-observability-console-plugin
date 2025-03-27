@@ -38,6 +38,7 @@
     "@types/copy-webpack-plugin": "8.0.1",
     "@types/enzyme": "3.10.x",
     "@types/jest": "27.0.3",
+    "@types/js-yaml": "^4.0.9",
     "@types/jsdom": "^16.2.13",
     "@types/lodash": "^4.14.178",
     "@types/murmurhash-js": "^1.0.3",
@@ -96,7 +97,11 @@
     "exposedModules": {
       "netflowParent": "./components/netflow-traffic-parent.tsx",
       "netflowTab": "./components/netflow-traffic-tab.tsx",
-      "netflowDevTab": "./components/netflow-traffic-dev-tab.tsx"
+      "netflowDevTab": "./components/netflow-traffic-dev-tab.tsx",
+      "yamlTemplates": "./components/forms/templates.ts",
+      "flowCollectorForm": "./components/forms/flowCollector.tsx",
+      "flowMetricForm": "./components/forms/flowMetric.tsx",
+      "wizard": "./components/forms/wizard.tsx"
     },
     "dependencies": {
       "@console/pluginAPI": "*"
@@ -104,17 +109,21 @@
   },
   "dependencies": {
     "@patternfly/patternfly": "^5.4.0",
-    "@patternfly/react-icons": "^5.4.0",
     "@patternfly/react-charts": "^7.4.0",
+    "@patternfly/react-code-editor": "^5.4.0",
     "@patternfly/react-core": "^5.4.0",
+    "@patternfly/react-icons": "^5.4.0",
     "@patternfly/react-styles": "^5.4.0",
     "@patternfly/react-table": "^5.4.0",
     "@patternfly/react-tokens": "^5.4.0",
     "@patternfly/react-topology": "^5.4.0",
+    "@rjsf/core": "^5.24.7",
+    "@rjsf/validator-ajv8": "^5.24.7",
     "axios": "^1.7.4",
     "html-to-image": "^1.11.11",
     "i18next": "^21.8.14",
     "i18next-http-backend": "^1.0.21",
+    "js-yaml": "^4.1.0",
     "murmurhash-js": "^1.0.0",
     "percentile": "^1.6.0",
     "port-numbers": "^6.0.1",
