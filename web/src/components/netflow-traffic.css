@@ -60,6 +60,7 @@ span.pf-v5-c-button__icon.pf-v5-m-start {
     display: flex;
     flex-direction: column;
     height: 100%;
+    flex: 1;
     padding: 0;
 }
 
