@@ -1,5 +1,5 @@
+import { NamespaceBarProps, ResourceIconProps, ResourceLinkProps } from '@openshift-console/dynamic-plugin-sdk';
 import * as React from 'react';
-import { ResourceIconProps, ResourceLinkProps } from '@openshift-console/dynamic-plugin-sdk';
 import { useK8sModelsWithColors } from '../src/utils/k8s-models-hook';
 import { k8sModels } from './k8s-models';
 
@@ -80,4 +80,12 @@ export const ResourceLink: React.FC<ResourceLinkProps> = ({
       {children}
     </span>
   );
+};
+
+export const NamespaceBar: React.FC<NamespaceBarProps> = ({
+  children
+}) => {
+  return (
+    <div>{children}</div>
+  )
 };

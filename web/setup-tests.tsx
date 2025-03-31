@@ -106,6 +106,7 @@ jest.mock('./src/api/routes', () => ({
   getPods: jest.fn(async () => ['ABCD']),
   getNamespaces: jest.fn(async () => ['EFGH']),
   getConfig: jest.fn(async () => ({ portNaming: { enable: true, portNames: new Map() } })),
+  getRole: jest.fn(async () => ('admin')),
   getLokiReady: jest.fn(async () => 'ready'),
 }));
 
