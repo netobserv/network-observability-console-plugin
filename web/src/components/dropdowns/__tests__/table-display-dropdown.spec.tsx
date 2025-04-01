@@ -9,7 +9,9 @@ import { TableDisplayOptions } from '../table-display-options';
 describe('<DisplayDropdown />', () => {
   const props = {
     size: 's' as Size,
-    setSize: jest.fn()
+    setSize: jest.fn(),
+    showDuplicates: true,
+    setShowDuplicates: jest.fn()
   };
 
   it('should render component', async () => {
