@@ -875,7 +875,6 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
                 allowProm: allowProm(),
                 allowFlow: isFlow(),
                 allowConnection: isConnectionTracking(),
-                allowShowDuplicates: model.selectedViewId === 'table' && model.recordType !== 'allConnections',
                 allowPktDrops: isPktDrop(),
                 useTopK: model.selectedViewId === 'overview'
               }}

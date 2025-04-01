@@ -11,13 +11,10 @@ export interface QueryOptionsProps {
   setRecordType: (recordType: RecordType) => void;
   dataSource: DataSource;
   setDataSource: (dataSource: DataSource) => void;
-  showDuplicates: boolean;
-  setShowDuplicates: (showDuplicates: boolean) => void;
   allowLoki: boolean;
   allowProm: boolean;
   allowFlow: boolean;
   allowConnection: boolean;
-  allowShowDuplicates: boolean;
   allowPktDrops: boolean;
   useTopK: boolean;
   limit: number;
