@@ -67,8 +67,8 @@ describe('<QueryOptionsPanel />', () => {
 
   it('should render component', async () => {
     const wrapper = shallow(<QueryOptionsPanel {...props} />);
-    expect(wrapper.find('.pf-v5-c-menu__group').length).toBe(6);
-    expect(wrapper.find('.pf-v5-c-menu__group-title').length).toBe(6);
+    expect(wrapper.find('.pf-v6-c-menu__group').length).toBe(6);
+    expect(wrapper.find('.pf-v6-c-menu__group-title').length).toBe(6);
     expect(wrapper.find(Radio)).toHaveLength(15);
 
     //setOptions should not be called at startup, because it is supposed to be already initialized from URL

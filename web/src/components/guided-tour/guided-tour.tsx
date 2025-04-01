@@ -1,4 +1,4 @@
-import { Button, Flex, FlexItem, Popover, PopoverPosition, Text, TextVariants } from '@patternfly/react-core';
+import { Button, Content, ContentVariants, Flex, FlexItem, Popover, PopoverPosition } from '@patternfly/react-core';
 import { TimesIcon } from '@patternfly/react-icons';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -31,7 +31,7 @@ export interface GuidedTourPopoverProps {
 }
 
 const onIndexChangeFunctions: IndexChangeFunction[] = [];
-// eslint-disable-next-line react/display-name
+
 export const GuidedTourPopover: React.FC<GuidedTourPopoverProps> = React.forwardRef(
   (props, ref: React.Ref<GuidedTourHandle>) => {
     const { t } = useTranslation('plugin__netobserv-plugin');
@@ -134,9 +134,12 @@ export const GuidedTourPopover: React.FC<GuidedTourPopoverProps> = React.forward
           <Flex direction={{ default: 'row' }}>
             <FlexItem flex={{ default: 'flex_1' }}>{currentItem!.title}</FlexItem>
             <FlexItem>
-              <Button variant="plain" className="guided-tour-close-button" onClick={() => clearIndex()}>
-                <TimesIcon />
-              </Button>
+              <Button
+                icon={<TimesIcon />}
+                variant="plain"
+                className="guided-tour-close-button"
+                onClick={() => clearIndex()}
+              />
             </FlexItem>
           </Flex>
         }
@@ -155,9 +158,9 @@ export const GuidedTourPopover: React.FC<GuidedTourPopoverProps> = React.forward
         footerContent={
           <Flex direction={{ default: 'row' }}>
             <FlexItem flex={{ default: 'flex_1' }}>
-              <Text component={TextVariants.p} className="text-muted">
+              <Content component={ContentVariants.p} className="text-muted">
                 {t('Step {{index}}/{{count}}', { index: (index || 0) + 1, count: items.length })}
-              </Text>
+              </Content>
             </FlexItem>
             <FlexItem>
               {index ? (

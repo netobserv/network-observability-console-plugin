@@ -5,6 +5,7 @@ import AlertBanner from './banner';
 
 import { murmur3 } from 'murmurhash-js';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface AlertFetcherProps {}
 
 export const AlertFetcher: React.FC<AlertFetcherProps> = ({ children }) => {
@@ -71,7 +72,7 @@ export const AlertFetcher: React.FC<AlertFetcherProps> = ({ children }) => {
           <AlertBanner key={a.name} rule={a} onDelete={() => setAlerts(alerts.filter(alert => alert.name != a.name))} />
         ))}
       </div>
-      {!!children ? children : ''}
+      {children ? children : ''}
     </>
   );
 };

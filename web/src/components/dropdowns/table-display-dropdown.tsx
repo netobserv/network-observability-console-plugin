@@ -17,20 +17,19 @@ export const TableDisplayDropdown: React.FC<TableDisplayDropdownProps> = ({ size
   const ref = useOutsideClickEvent(() => setOpen(false));
   const [isOpen, setOpen] = React.useState<boolean>(false);
   return (
-    <div id="display-dropdown-container" data-test="display-dropdown-container" ref={ref}>
-      <Select
-        id="table-display-dropdown"
-        placeholder={t('Display options')}
-        isOpen={isOpen}
-        toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
-          <MenuToggle ref={toggleRef} onClick={() => setOpen(!isOpen)} isExpanded={isOpen}>
-            {t('Display options')}
-          </MenuToggle>
-        )}
-      >
-        <TableDisplayOptions size={size} setSize={setSize} />
-      </Select>
-    </div>
+    <Select
+      id="table-display-dropdown"
+      placeholder={t('Display options')}
+      ref={ref}
+      isOpen={isOpen}
+      toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+        <MenuToggle ref={toggleRef} onClick={() => setOpen(!isOpen)} isExpanded={isOpen}>
+          {t('Display options')}
+        </MenuToggle>
+      )}
+    >
+      <TableDisplayOptions size={size} setSize={setSize} />
+    </Select>
   );
 };
 

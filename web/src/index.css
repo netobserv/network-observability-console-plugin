@@ -7,7 +7,7 @@ div#app {
 }
 
 /* fix page background color & spacing*/
-.pf-v5-c-page__main-section,
+.pf-v6-c-page__main-section,
 section#pageSection {
   background: transparent !important;
   padding: 10px;
@@ -21,6 +21,10 @@ section#pageSection.light {
   background: #fff !important;
 }
 
+#page>.pf-v6-c-page__main-container{
+  height: -webkit-fill-available;
+}
+
 #consolePageSection {
   display: contents;
 }
@@ -29,15 +33,15 @@ section#pageSection.light {
   flex: 1;
 }
 
-body>#app>.pf-v5-c-page {
+body>#app>.pf-v6-c-page {
   background: #fff;
 }
 
-.pf-v5-theme-dark>body>#app>.pf-v5-c-page {
-  background: var(--pf-v5-c-page__main-section--BackgroundColor);
+.pf-v6-theme-dark>body>#app>.pf-v6-c-page {
+  background: var(--pf-v6-c-page__main-section--BackgroundColor);
 }
 
-.pf-v5-c-page__main-section {
+.pf-v6-c-page__main-section {
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -45,7 +49,7 @@ body>#app>.pf-v5-c-page {
 }
 
 /* TODO: fix select. For now it only reduce size but doesn't match with console style */
-label.pf-v5-c-menu__menu-item {
+label.pf-v6-c-menu__menu-item {
   position: relative;
   left: 16px;
   padding: 0;
@@ -53,10 +57,10 @@ label.pf-v5-c-menu__menu-item {
 
 /*set font & titles styles*/
 :root {
-  --pf-v5-c-code-block--BackgroundColor: var(--pf-global--BackgroundColor--200);
-  --pf-v5-c-code-block__pre--FontFamily: var(--pf-global--FontFamily--monospace);
-  --pf-v5-c-code-block__pre--FontSize: var(--pf-global--FontSize--sm);
-  --pf-v5-c-content--MarginBottom: var(--pf-global--spacer--md);
+  --pf-v6-c-code-block--BackgroundColor: var(--pf-global--BackgroundColor--200);
+  --pf-v6-c-code-block__pre--FontFamily: var(--pf-global--FontFamily--monospace);
+  --pf-v6-c-code-block__pre--FontSize: var(--pf-global--FontSize--sm);
+  --pf-v6-c-content--MarginBottom: var(--pf-global--spacer--md);
   --pf-global--FontSize--md: 14px;
   --pf-global--FontSize--sm: 13px;
 }
@@ -98,7 +102,7 @@ input,
 optgroup,
 select,
 textarea,
-.pf-v5-c-badge {
+.pf-v6-c-badge {
   font-family: var(--pf-global--FontFamily--sans-serif);
 }
 
@@ -192,36 +196,36 @@ textarea,
 }
 
 /* fix selector color*/
-.pf-v5-theme-dark .pf-v5-c-toggle-group__button.pf-v5-m-selected {
-  --pf-v5-c-toggle-group__button--BackgroundColor: #06c;
-  --pf-v5-c-toggle-group__button--ZIndex: 100;
-  --pf-v5-c-toggle-group__button--before--BorderColor: #1fa7f8;
+.pf-v6-theme-dark .pf-v6-c-toggle-group__button.pf-v6-m-selected {
+  --pf-v6-c-toggle-group__button--BackgroundColor: #06c;
+  --pf-v6-c-toggle-group__button--ZIndex: 100;
+  --pf-v6-c-toggle-group__button--before--BorderColor: #1fa7f8;
 }
 
 /* fix primary button color*/
-.pf-v5-theme-dark .pf-m-primary {
+.pf-v6-theme-dark .pf-m-primary {
   color: #fff;
   background-color: #06c;
 }
 
 /* fix chip background colors */
-.pf-v5-theme-dark .pf-v5-c-chip {
-  --pf-v5-c-chip--BackgroundColor: var(--pf-global--BackgroundColor--100);
-  --pf-v5-c-chip--before--BorderColor: var(--pf-global--BorderColor--100);
-  --pf-v5-c-chip--m-draggable--BackgroundColor: var(--pf-global--palette--black-600);
+.pf-v6-theme-dark .pf-v6-c-chip {
+  --pf-v6-c-chip--BackgroundColor: var(--pf-global--BackgroundColor--100);
+  --pf-v6-c-chip--before--BorderColor: var(--pf-global--BorderColor--100);
+  --pf-v6-c-chip--m-draggable--BackgroundColor: var(--pf-global--palette--black-600);
 }
 
 /* hide options texts */
-.pf-v5-u-screen-reader {
+.pf-v6-u-screen-reader {
   display: none;
 }
 
 /* fix search input*/
-.pf-v5-theme-dark .pf-v5-c-input-group {
-  --pf-v5-c-input-group--BackgroundColor: transparent;
-  --pf-v5-c-input-group__text--BorderTopColor: transparent;
-  --pf-v5-c-input-group__text--BorderRightColor: transparent;
-  --pf-v5-c-input-group__text--BorderBottomColor: var(--pf-global--BorderColor--400);
-  --pf-v5-c-input-group__text--BorderLeftColor: transparent;
-  --pf-v5-c-input-group__text--BackgroundColor: var(--pf-global--palette--black-600);
+.pf-v6-theme-dark .pf-v6-c-input-group {
+  --pf-v6-c-input-group--BackgroundColor: transparent;
+  --pf-v6-c-input-group__text--BorderTopColor: transparent;
+  --pf-v6-c-input-group__text--BorderRightColor: transparent;
+  --pf-v6-c-input-group__text--BorderBottomColor: var(--pf-global--BorderColor--400);
+  --pf-v6-c-input-group__text--BorderLeftColor: transparent;
+  --pf-v6-c-input-group__text--BackgroundColor: var(--pf-global--palette--black-600);
 }

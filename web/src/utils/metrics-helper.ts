@@ -1,5 +1,5 @@
-import { getResizeObserver } from '@patternfly/react-core';
 import { TFunction } from 'i18next';
+import _ from 'lodash';
 import * as React from 'react';
 import { GenericMetric, NamedMetric, TopologyMetricPeer, TopologyMetrics } from '../api/loki';
 import { TruncateLength } from '../components/dropdowns/truncate-dropdown';
@@ -208,59 +208,46 @@ export const defaultDimensions: Dimensions = {
   height: 500
 };
 
-export const observeDimensions = (
+export const listenResizeEvents = (resize: () => void) => {
+  // first call to init
+  resize();
+
+  // then listen to event
+  const debouncedResize = _.debounce(resize, 100);
+  window.addEventListener('resize', debouncedResize);
+  return () => {
+    window.removeEventListener('resize', debouncedResize);
+  };
+};
+
+export const handleDimensionsChange = (
   containerRef: React.RefObject<HTMLDivElement>,
   dimensions: Dimensions,
   setDimensions: React.Dispatch<React.SetStateAction<Dimensions>>
 ) => {
-  getResizeObserver(
-    containerRef.current!,
-    () => {
-      if (containerRef?.current?.clientWidth || containerRef?.current?.clientHeight) {
-        const newDimension = {
-          width: containerRef?.current?.clientWidth || defaultDimensions.width,
-          height: containerRef?.current?.clientHeight || defaultDimensions.height
-        };
+  listenResizeEvents(() => {
+    if (containerRef.current) {
+      const newDimension = {
+        width: containerRef.current.clientWidth || defaultDimensions.width,
+        height: containerRef.current.clientHeight || defaultDimensions.height
+      };
 
-        // in some cases, newDimension is increasing which result of infinite loop in the observer
-        // making graphs growing endlessly
-        const toleration = 10;
-        if (
-          Math.abs(newDimension.width - dimensions.width) > toleration ||
-          Math.abs(newDimension.height - dimensions.height) > toleration
-        ) {
-          setDimensions(newDimension);
-        }
+      if (newDimension.width !== dimensions.width || newDimension.height !== dimensions.height) {
+        setDimensions(newDimension);
       }
-    },
-    true
-  );
+    }
+  });
 };
 
-export const observeDOMRect = (
+export const handleRectChange = (
   containerRef: React.RefObject<HTMLDivElement>,
-  rect: DOMRect | undefined,
+  rect: DOMRect,
   setRect: React.Dispatch<React.SetStateAction<DOMRect>>
 ) => {
-  getResizeObserver(
-    containerRef.current!,
-    () => {
-      const newRect = containerRef?.current?.getBoundingClientRect();
-      if (newRect?.width || newRect?.height || newRect?.left || newRect?.top) {
-        // in some cases, rect is increasing which result of infinite loop in the observer
-        // making graphs growing endlessly
-        const toleration = 10;
-        if (
-          !rect ||
-          Math.abs(newRect.width - rect.width) > toleration ||
-          Math.abs(newRect.height - rect.height) > toleration ||
-          Math.abs(newRect.left - rect.left) > toleration ||
-          Math.abs(newRect.top - rect.top) > toleration
-        ) {
-          setRect(newRect);
-        }
-      }
-    },
-    true
-  );
+  listenResizeEvents(() => {
+    if (containerRef.current) {
+      const updatedRect = containerRef.current.getBoundingClientRect();
+      if (updatedRect.width !== rect.width || updatedRect.height !== rect.height) setRect(updatedRect);
+    }
+  });
 };

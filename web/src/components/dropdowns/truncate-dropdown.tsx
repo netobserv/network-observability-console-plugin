@@ -15,9 +15,10 @@ export interface TruncateDropdownProps {
   selected: TruncateLength;
   setTruncateLength: (v: TruncateLength) => void;
   id?: string;
+  appendTo?: () => HTMLElement;
 }
 
-export const TruncateDropdown: React.FC<TruncateDropdownProps> = ({ selected, setTruncateLength, id }) => {
+export const TruncateDropdown: React.FC<TruncateDropdownProps> = ({ selected, setTruncateLength, id, appendTo }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [isOpen, setOpen] = React.useState(false);
 
@@ -43,6 +44,9 @@ export const TruncateDropdown: React.FC<TruncateDropdownProps> = ({ selected, se
       data-test={id}
       id={id}
       isOpen={isOpen}
+      popperProps={{
+        appendTo
+      }}
       toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
         <MenuToggle
           ref={toggleRef}
