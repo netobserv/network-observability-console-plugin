@@ -43,7 +43,7 @@ export interface ErrorProps {
   isLokiRelated: boolean;
 }
 
-export const Error: React.FC<ErrorProps> = ({ title, error, isLokiRelated }) => {
+export const ErrorComponent: React.FC<ErrorProps> = ({ title, error, isLokiRelated }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [lokiLoading, setLokiLoading] = React.useState(isLokiRelated);
   const [statusLoading, setStatusLoading] = React.useState(true);
@@ -357,4 +357,4 @@ export const Error: React.FC<ErrorProps> = ({ title, error, isLokiRelated }) => 
   );
 };
 
-export default Error;
+export default ErrorComponent;
