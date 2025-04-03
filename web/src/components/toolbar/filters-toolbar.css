@@ -45,11 +45,6 @@ button.pf-v5-c-button.pf-v5-m-link.pf-v5-m-inline:empty {
   padding: 5px 0px 0px 5px;
 }
 
-#filters {
-  width: 100%;
-  margin-top: 1em;
-}
-
 /* align toolbar with title and table */
 div#filter-toolbar-search-filters {
   padding: 0;

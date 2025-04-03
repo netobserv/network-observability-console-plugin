@@ -1,0 +1,39 @@
+.dynamic-form {
+  margin-left: 1.5rem;
+  margin-right: 1.5rem;
+}
+
+.description {
+  font-size: small !important;
+  padding: 0;
+}
+
+.description.padding {
+  padding-left: 1rem !important;
+}
+
+.description.border {
+  border-left: solid;
+  border-width: 3px;
+}
+
+.description.border.light {
+  border-left-color: #06c !important;
+}
+
+.description.border.dark {
+  border-left-color: #1fa7f8 !important;
+}
+
+.co-pre-line {
+  white-space: pre-line;
+}
+
+.form-group.spaced {
+  margin-left: 1rem;
+  margin-top: 0.5rem;
+}
+
+.form-group.spaced > *:not(:last-child) {
+  margin-right: 0.5rem;
+}
