@@ -55,6 +55,12 @@ export const getExportFlowsURL = (params: FlowQuery, columns?: string[]): string
   return `${ContextSingleton.getHost()}/api/loki/export?${exportQuery}`;
 };
 
+export const getRole = (): Promise<string> => {
+  return axios.get(ContextSingleton.getHost() + '/role').then(r => {
+    return r.data;
+  });
+};
+
 export const getStatus = (forcedNamespace?: string): Promise<Status> => {
   const params = { namespace: forcedNamespace };
   return axios.get(ContextSingleton.getHost() + '/api/status', { params }).then(r => {

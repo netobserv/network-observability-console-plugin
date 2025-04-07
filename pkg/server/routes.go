@@ -22,6 +22,10 @@ func setupRoutes(ctx context.Context, cfg *config.Config, authChecker auth.Check
 	r := mux.NewRouter()
 	h := handler.Handlers{Cfg: cfg, PromInventory: promInventory}
 
+	// Role
+	r.PathPrefix("/").Subrouter().HandleFunc("/role", getRole(authChecker))
+
+	// API role checks
 	api := r.PathPrefix("/api").Subrouter()
 	api.Use(func(orig http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -60,6 +64,19 @@ func setupRoutes(ctx context.Context, cfg *config.Config, authChecker auth.Check
 	api.HandleFunc("/frontend-config", h.GetFrontendConfig())
 	r.PathPrefix("/").Handler(http.FileServer(http.Dir("./web/dist/")))
 	return r
+}
+
+func getRole(authChecker auth.Checker) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		role := "dev"
+		if err := authChecker.CheckAdmin(context.TODO(), r.Header); err == nil {
+			role = "admin"
+		}
+		_, err := w.Write([]byte(role))
+		if err != nil {
+			logrus.Errorf("Error: %v", err)
+		}
+	}
 }
 
 func forceCheckAdmin(authChecker auth.Checker, handle func(http.ResponseWriter, *http.Request)) func(http.ResponseWriter, *http.Request) {

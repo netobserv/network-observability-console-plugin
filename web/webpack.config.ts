@@ -78,7 +78,7 @@ module.exports = {
     },
     proxy: [
       {
-        context: ['/api'],
+        context: ['/api', '/role'],
         target: 'http://localhost:9000',
         router: () => 'http://localhost:9002',
         logLevel: 'debug' /*optional*/

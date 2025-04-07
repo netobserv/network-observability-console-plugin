@@ -17,6 +17,7 @@ const useResolvedExtensionsMock = useResolvedExtensions as jest.Mock;
 
 jest.mock('../../api/routes', () => ({
   getConfig: jest.fn(() => Promise.resolve(FullConfigResultSample)),
+  getRole: jest.fn(() => Promise.resolve('admin')),
   getFlowRecords: jest.fn(() => Promise.resolve([])),
   getFlowMetrics: jest.fn(() =>
     Promise.resolve({

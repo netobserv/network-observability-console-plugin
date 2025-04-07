@@ -29,6 +29,7 @@ import { BrowserRouter, Link } from 'react-router-dom';
 import NetflowTrafficDevTab from './components/netflow-traffic-dev-tab';
 import NetflowTrafficParent from './components/netflow-traffic-parent';
 import NetflowTab from './components/netflow-traffic-tab';
+import { ContextSingleton } from './utils/context';
 
 export const pages = [
   {
@@ -61,6 +62,7 @@ export const App: React.FunctionComponent = () => {
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
   const [pageIndex, setPageIndex] = React.useState(0);
   const [isDark, setDark] = React.useState(false);
+  ContextSingleton.setStandalone();
 
   const onSidebarToggle = () => {
     setIsSidebarOpen(!isSidebarOpen);
