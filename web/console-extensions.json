@@ -277,5 +277,60 @@
         "$codeRef": "netflowDevTab.default"
       }
     }
+  },
+  {
+    "type": "console.yaml-template",
+    "properties": {
+      "model": {
+        "version": "v1beta2",
+        "group": "flows.netobserv.io",
+        "kind": "FlowCollector"
+      },
+      "name": "default",
+      "template": {
+        "$codeRef": "yamlTemplates.FlowCollector"
+      }
+    }
+  },
+  {
+    "type": "console.page/route",
+    "properties": {
+      "path": "/k8s/cluster/flows.netobserv.io~v1beta2~FlowCollector/~new/wizard",
+      "component": {
+        "$codeRef": "flowCollectorWizard.default"
+      }
+    }
+  },
+  {
+    "type": "console.page/route",
+    "properties": {
+      "path": "/k8s/cluster/flows.netobserv.io~v1beta2~FlowCollector/~new/form",
+      "component": {
+        "$codeRef": "flowCollectorForm.default"
+      }
+    }
+  },
+  {
+    "type": "console.yaml-template",
+    "properties": {
+      "model": {
+        "version": "v1alpha1",
+        "group": "flows.netobserv.io",
+        "kind": "FlowMetric"
+      },
+      "name": "default",
+      "template": {
+        "$codeRef": "yamlTemplates.FlowMetric"
+      }
+    }
+  },
+  {
+    "type": "console.page/route",
+    "properties": {
+      "path": "/k8s/cluster/flows.netobserv.io~v1alpha1~FlowMetric/~new/form",
+      "component": {
+        "$codeRef": "flowMetricForm.default"
+      }
+    }
   }
 ]
