@@ -9,9 +9,10 @@ export interface ScopeDropdownProps {
   setScopeType: (v: FlowScope) => void;
   id?: string;
   scopes: ScopeConfigDef[];
+  appendTo?: () => HTMLElement;
 }
 
-export const ScopeDropdown: React.FC<ScopeDropdownProps> = ({ selected, setScopeType, id, scopes }) => {
+export const ScopeDropdown: React.FC<ScopeDropdownProps> = ({ selected, setScopeType, id, scopes, appendTo }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [isOpen, setOpen] = React.useState(false);
 
@@ -20,7 +21,8 @@ export const ScopeDropdown: React.FC<ScopeDropdownProps> = ({ selected, setScope
       data-test={id}
       id={id}
       popperProps={{
-        position: 'right'
+        position: 'right',
+        appendTo
       }}
       isOpen={isOpen}
       toggle={(toggleRef: React.Ref<MenuToggleElement>) => (

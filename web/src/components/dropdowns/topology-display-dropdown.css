@@ -1,12 +1,13 @@
 #topology-display-dropdown {
   min-width: 260px;
   padding-bottom: 1rem;
+  overflow: visible;
 }
 
-#scope>.pf-v5-c-menu__content,
-#layout>.pf-v5-c-menu__content,
-#group>.pf-v5-c-menu__content,
-#truncate>.pf-v5-c-menu__content {
+#scope>.pf-v6-c-menu__content,
+#layout>.pf-v6-c-menu__content,
+#group>.pf-v6-c-menu__content,
+#truncate>.pf-v6-c-menu__content {
   top: 0;
   left: 100%;
 }

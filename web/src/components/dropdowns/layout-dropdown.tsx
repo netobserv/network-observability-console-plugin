@@ -8,9 +8,10 @@ export interface LayoutDropdownProps {
   selected: LayoutName;
   setLayout: (l: LayoutName) => void;
   id?: string;
+  appendTo?: () => HTMLElement;
 }
 
-export const LayoutDropdown: React.FC<LayoutDropdownProps> = ({ selected, setLayout, id }) => {
+export const LayoutDropdown: React.FC<LayoutDropdownProps> = ({ selected, setLayout, id, appendTo }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [isOpen, setOpen] = React.useState(false);
 
@@ -46,6 +47,9 @@ export const LayoutDropdown: React.FC<LayoutDropdownProps> = ({ selected, setLay
       data-test={id}
       id={id}
       isOpen={isOpen}
+      popperProps={{
+        appendTo
+      }}
       toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
         <MenuToggle
           ref={toggleRef}

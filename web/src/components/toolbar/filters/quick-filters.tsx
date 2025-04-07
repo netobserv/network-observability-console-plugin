@@ -62,36 +62,35 @@ export const QuickFilters: React.FC<QuickFiltersProps> = ({ quickFilters, active
   };
 
   return (
-    <div id="quick-filters-dropdown-container" data-test="quick-filters-dropdown-container" ref={ref}>
-      <Select
-        data-test="quick-filters-dropdown"
-        id="quick-filters-dropdown"
-        isOpen={isOpen}
-        onSelect={onSelect}
-        toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
-          <MenuToggle ref={toggleRef} onClick={() => setOpen(!isOpen)} isExpanded={isOpen}>
-            <>
-              <FilterIcon /> {t('Quick filters')}
-              {selectedList.length > 0 && <Badge isRead>{selectedList.length}</Badge>}
-            </>
-          </MenuToggle>
-        )}
-        selected={selectedList}
-      >
-        {quickFilters.map(qf => {
-          return (
-            <SelectOption
-              hasCheckbox
-              isSelected={selectedList.includes(qf.name)}
-              id={`quick-filter-option-${qf.name}`}
-              key={qf.name}
-              value={qf.name}
-            >
-              {qf.name}
-            </SelectOption>
-          );
-        })}
-      </Select>
-    </div>
+    <Select
+      data-test="quick-filters-dropdown"
+      id="quick-filters-dropdown"
+      ref={ref}
+      isOpen={isOpen}
+      onSelect={onSelect}
+      toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+        <MenuToggle ref={toggleRef} onClick={() => setOpen(!isOpen)} isExpanded={isOpen}>
+          <>
+            <FilterIcon /> {t('Quick filters')}
+            {selectedList.length > 0 && <Badge isRead>{selectedList.length}</Badge>}
+          </>
+        </MenuToggle>
+      )}
+      selected={selectedList}
+    >
+      {quickFilters.map(qf => {
+        return (
+          <SelectOption
+            hasCheckbox
+            isSelected={selectedList.includes(qf.name)}
+            id={`quick-filter-option-${qf.name}`}
+            key={qf.name}
+            value={qf.name}
+          >
+            {qf.name}
+          </SelectOption>
+        );
+      })}
+    </Select>
   );
 };

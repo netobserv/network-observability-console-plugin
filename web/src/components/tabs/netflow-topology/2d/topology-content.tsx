@@ -7,8 +7,8 @@ import {
   GRAPH_POSITION_CHANGE_EVENT as graphPositionChangeEvent,
   Model,
   Node,
-  SelectionEventListener,
   SELECTION_EVENT as selectionEvent,
+  SelectionEventListener,
   TopologyControlBar,
   TopologyView,
   useEventListener,
@@ -486,10 +486,14 @@ export const TopologyContent: React.FC<TopologyContentProps> = ({
             ...defaultControlButtonsOptions,
             fitToScreen: false,
             zoomInCallback: () => {
-              controller && controller.getGraph().scaleBy(zoomIn);
+              if (controller) {
+                controller.getGraph().scaleBy(zoomIn);
+              }
             },
             zoomOutCallback: () => {
-              controller && controller.getGraph().scaleBy(zoomOut);
+              if (controller) {
+                controller.getGraph().scaleBy(zoomOut);
+              }
             },
             resetViewCallback: () => {
               if (controller) {

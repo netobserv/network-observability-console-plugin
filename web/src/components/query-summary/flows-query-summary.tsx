@@ -36,7 +36,7 @@ export const FlowsQuerySummary: React.FC<FlowQuerySummaryProps> = ({
 }) => {
   if (!_.isEmpty(flows) && stats) {
     return (
-      <Card id="query-summary" isFlat>
+      <Card id="query-summary" isPlain>
         <FlowsQuerySummaryContent
           direction="row"
           flows={flows}

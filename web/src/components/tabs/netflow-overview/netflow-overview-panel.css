@@ -28,6 +28,7 @@
 
 .overview-card {
   margin: 0 1em 1em 0 !important;
+  overflow: hidden;
 }
 
 .overview-expand-button-container {

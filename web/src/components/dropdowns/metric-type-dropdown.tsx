@@ -8,13 +8,15 @@ export interface MetricTypeDropdownProps {
   setMetricType: (v: MetricType) => void;
   allowedTypes: MetricType[];
   id?: string;
+  appendTo?: () => HTMLElement;
 }
 
 export const MetricTypeDropdown: React.FC<MetricTypeDropdownProps> = ({
   selected,
   setMetricType,
   id,
-  allowedTypes
+  allowedTypes,
+  appendTo
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [isOpen, setOpen] = React.useState(false);
@@ -47,7 +49,8 @@ export const MetricTypeDropdown: React.FC<MetricTypeDropdownProps> = ({
       id={id}
       isOpen={isOpen}
       popperProps={{
-        position: 'right'
+        position: 'right',
+        appendTo
       }}
       toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
         <MenuToggle

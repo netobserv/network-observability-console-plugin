@@ -51,6 +51,7 @@ const StyleGroup: React.FunctionComponent<StyleGroupProps> = ({
     const newData = { ...data };
     Object.keys(newData).forEach(key => {
       if (newData[key] === undefined) {
+        // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
         delete newData[key];
       }
     });

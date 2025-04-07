@@ -39,9 +39,10 @@ export const navigate = (to: string, opts?: any) => {
   }
 };
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export const DynamicLoader: React.FC<{}> = ({ children }) => {
   loadNavFunction();
-  return <>{!!children ? children : ''}</>;
+  return <>{children ? children : ''}</>;
 };
 
 export default DynamicLoader;

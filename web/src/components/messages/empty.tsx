@@ -1,13 +1,11 @@
 import {
   Bullseye,
+  Content,
+  ContentVariants,
   EmptyState,
   EmptyStateBody,
-  EmptyStateIcon,
   EmptyStateVariant,
   Spinner,
-  Text,
-  TextContent,
-  TextVariants,
   Title
 } from '@patternfly/react-core';
 import { SearchIcon } from '@patternfly/react-icons';
@@ -58,33 +56,38 @@ export const Empty: React.FC<EmptyProps> = ({ showDetails, resetDefaultFilters, 
   }, [showDetails]);
 
   return (
-    <EmptyState variant={!showDetails ? EmptyStateVariant.sm : undefined} data-test="empty-state">
-      <EmptyStateIcon className={`netobserv-empty-icon${showDetails ? '' : '-small'}`} icon={SearchIcon} />
-      <Title headingLevel="h2" size="lg">
-        {t('No results found')}
-      </Title>
+    <EmptyState
+      titleText={
+        <Title headingLevel="h2" size="lg">
+          {t('No results found')}
+        </Title>
+      }
+      variant={!showDetails ? EmptyStateVariant.sm : undefined}
+      data-test="empty-state"
+      icon={SearchIcon}
+    >
       {showDetails && (
         <EmptyStateBody className="empty-body">
           {statusError === undefined && (
-            <Text className="netobserv-empty-message" component={TextVariants.p}>
+            <Content className="netobserv-empty-message" component={ContentVariants.p}>
               {t('Clear or reset filters and try again.')}
-            </Text>
+            </Content>
           )}
           {statusError !== undefined && (
-            <Text className="netobserv-error-message" component={TextVariants.p}>
+            <Content className="netobserv-error-message" component={ContentVariants.p}>
               {t('Check for errors in health dashboard. Status endpoint is returning: {{statusError}}', {
                 statusError
               })}
-            </Text>
+            </Content>
           )}
-          <TextContent className="empty-text-content">
+          <div className="empty-text-content">
             {namespacesLoading && (
               <Bullseye data-test="loading-empty">
                 <Spinner size="xl" />
               </Bullseye>
             )}
             {status && <StatusTexts status={status} />}
-          </TextContent>
+          </div>
         </EmptyStateBody>
       )}
       {showDetails && <SecondaryAction resetDefaultFilters={resetDefaultFilters} clearFilters={clearFilters} />}

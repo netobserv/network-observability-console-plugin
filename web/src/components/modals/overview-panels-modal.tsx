@@ -1,23 +1,18 @@
 import {
   Button,
+  Content,
+  ContentVariants,
   DataList,
   DataListCell,
   DataListCheck,
   DataListControl,
   DataListDragButton,
-  DataListItem,
   DataListItemCells,
-  DataListItemRow,
-  DragDrop,
-  Draggable,
-  Droppable,
   Flex,
   FlexItem,
-  Text,
-  TextContent,
-  TextVariants,
   Tooltip
 } from '@patternfly/react-core';
+import { DragDropSort, DraggableObject } from '@patternfly/react-drag-drop';
 import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -185,18 +180,18 @@ export const OverviewPanelsModal: React.FC<OverviewPanelsModalProps> = ({
     [filterKeys, getFilterKeys]
   );
 
-  const draggableItems = filteredPanels().map((panel, i) => {
-    const info = getOverviewPanelInfo(t, panel.id, undefined, recordType === 'flowLog' ? t('flow') : t('conversation'));
-    return (
-      <Draggable key={i} hasNoWrapper>
-        <DataListItem
-          key={'data-list-item-' + i}
-          aria-labelledby={'overview-panel-management-item' + i}
-          className="data-list-item"
-          data-test={'data-' + i}
-          id={'data-' + i}
-        >
-          <DataListItemRow key={'data-list-item-row-' + i} className="center">
+  const draggableItems: DraggableObject[] = Array.from(
+    filteredPanels().map((panel, i) => {
+      const info = getOverviewPanelInfo(
+        t,
+        panel.id,
+        undefined,
+        recordType === 'flowLog' ? t('flow') : t('conversation')
+      );
+      return {
+        id: 'data-' + i,
+        content: (
+          <>
             <DataListControl>
               <DataListDragButton aria-label="Reorder" aria-labelledby={'overview-panel-management-item' + i} />
               <DataListCheck
@@ -216,11 +211,11 @@ export const OverviewPanelsModal: React.FC<OverviewPanelsModalProps> = ({
                 </DataListCell>
               ]}
             />
-          </DataListItemRow>
-        </DataListItem>
-      </Draggable>
-    );
-  });
+          </>
+        )
+      };
+    })
+  );
 
   return (
     <Modal
@@ -232,12 +227,12 @@ export const OverviewPanelsModal: React.FC<OverviewPanelsModalProps> = ({
       onClose={() => onClose()}
       description={
         <>
-          <TextContent>
-            <Text component={TextVariants.p}>
+          <div>
+            <Content component={ContentVariants.p}>
               {t('Selected panels will appear in the overview tab.')}&nbsp;
               {t('Click and drag the items to reorder the panels in the overview tab.')}
-            </Text>
-          </TextContent>
+            </Content>
+          </div>
           <Flex className="popup-header-margin">
             <FlexItem flex={{ default: 'flex_4' }}>
               <Flex className="flex-gap">
@@ -250,7 +245,7 @@ export const OverviewPanelsModal: React.FC<OverviewPanelsModalProps> = ({
                         filterKeys.includes(key) ? 'selected' : 'unselected'
                       } buttonless gap pointer`}
                     >
-                      <Text component={TextVariants.p}>{key}</Text>
+                      <Content component={ContentVariants.p}>{key}</Content>
                     </FlexItem>
                   );
                 })}
@@ -295,18 +290,14 @@ export const OverviewPanelsModal: React.FC<OverviewPanelsModalProps> = ({
       }
     >
       <div className="co-m-form-row">
-        <DragDrop onDrop={onDrop}>
-          <Droppable hasNoWrapper>
-            <DataList
-              aria-label="Overview panel management"
-              data-test="overview-panel-management"
-              id="overview-panel-management"
-              isCompact
-            >
-              {draggableItems}
-            </DataList>
-          </Droppable>
-        </DragDrop>
+        <DragDropSort items={draggableItems} onDrop={onDrop} variant="DataList" overlayProps={{ isCompact: true }}>
+          <DataList
+            aria-label="Overview panel management"
+            data-test="overview-panel-management"
+            id="overview-panel-management"
+            isCompact
+          />
+        </DragDropSort>
       </div>
     </Modal>
   );

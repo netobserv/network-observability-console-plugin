@@ -26,11 +26,11 @@ export const dnsRCodes: ReadOnlyValues = [
   { value: 23, name: 'BADCOOKIE', description: 'Bad/missing Server Cookie' }
 ] as const;
 
-const dnsRcodesValues = dnsRCodes.map(v => v.value);
-export type dnsRCodesValues = typeof dnsRcodesValues[number];
+export const dnsRcodesValues = dnsRCodes.map(v => v.value);
+export type dnsRCodesValues = (typeof dnsRcodesValues)[number];
 
-const dnsRcodesNames = dnsRCodes.map(v => v.name);
-export type dnsCodesNames = typeof dnsRcodesNames[number];
+export const dnsRcodesNames = dnsRCodes.map(v => v.name);
+export type dnsCodesNames = (typeof dnsRcodesNames)[number];
 
 export const getDNSRcodeDescription = (name: dnsCodesNames): string => {
   return dnsRCodes.find(v => v.name === name)?.description || 'Unassigned';
@@ -74,11 +74,11 @@ export const dnsErrors: ReadOnlyValues = [
   { value: 34, name: 'ERANGE', description: 'Math result not representable' }
 ] as const;
 
-const dnsErrorsValues = dnsErrors.map(v => v.value);
-export type dnsErrorsValues = typeof dnsErrorsValues[number];
+export const dnsErrorsValues = dnsErrors.map(v => v.value);
+export type dnsErrorsValues = (typeof dnsErrorsValues)[number];
 
-const dnsErrorsNames = dnsErrors.map(v => v.name);
-export type dnsErrorsNames = typeof dnsErrorsNames[number];
+export const dnsErrorsNames = dnsErrors.map(v => v.name);
+export type dnsErrorsNames = (typeof dnsErrorsNames)[number];
 
 export const getDNSErrorDescription = (value: dnsErrorsValues): string => {
   return dnsErrors.find(v => v.value === value)?.description || '';

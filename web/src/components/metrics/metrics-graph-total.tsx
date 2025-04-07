@@ -10,7 +10,7 @@ import {
   ChartScatter,
   ChartStack,
   ChartThemeColor
-} from '@patternfly/react-charts';
+} from '@patternfly/react-charts/victory';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { GenericMetric, NamedMetric } from '../../api/loki';
@@ -21,8 +21,8 @@ import {
   ChartDataPoint,
   defaultDimensions,
   Dimensions,
+  handleDimensionsChange,
   LegendDataItem,
-  observeDimensions,
   toDatapoints
 } from '../../utils/metrics-helper';
 import { chartVoronoi } from './chart-voronoi';
@@ -129,7 +129,7 @@ export const MetricsGraphWithTotal: React.FC<MetricsGraphWithTotalProps> = ({
   );
 
   React.useEffect(() => {
-    observeDimensions(containerRef, dimensions, setDimensions);
+    handleDimensionsChange(containerRef, dimensions, setDimensions);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [containerRef, dimensions]);
 

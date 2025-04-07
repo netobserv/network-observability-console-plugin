@@ -5,7 +5,7 @@ import {
   MenuItem,
   MenuList,
   Popper,
-  TextInput,
+  SearchInput,
   ValidatedOptions
 } from '@patternfly/react-core';
 import { CaretDownIcon, SearchIcon } from '@patternfly/react-icons';
@@ -28,7 +28,6 @@ export interface AutocompleteFilterProps {
   filterDefinition: FilterDefinition;
   addFilter: (filter: FilterValue) => boolean;
   setMessageWithDelay: (m: string | undefined) => void;
-  indicator: Indicator;
   setIndicator: (ind: Indicator) => void;
 }
 
@@ -36,7 +35,6 @@ export const AutocompleteFilter: React.FC<AutocompleteFilterProps> = ({
   filterDefinition,
   addFilter: addFilterParent,
   setMessageWithDelay,
-  indicator,
   setIndicator
 }) => {
   const autocompleteContainerRef = React.useRef<HTMLDivElement | null>(null);
@@ -179,10 +177,9 @@ export const AutocompleteFilter: React.FC<AutocompleteFilterProps> = ({
       <div data-test="autocomplete-container" ref={autocompleteContainerRef}>
         <Popper
           trigger={
-            <TextInput
+            <SearchInput
               type="search"
               aria-label="search"
-              validated={indicator}
               placeholder={filterDefinition.placeholder}
               value={currentValue}
               onKeyDown={e => e.key === 'Enter' && onEnter()}
@@ -212,6 +209,7 @@ export const AutocompleteFilter: React.FC<AutocompleteFilterProps> = ({
         />
       </div>
       <Button
+        icon={<CaretDownIcon />}
         data-test="autocomplete-menu-button"
         id="autocomplete-menu-button"
         variant="control"
@@ -225,18 +223,15 @@ export const AutocompleteFilter: React.FC<AutocompleteFilterProps> = ({
             }
           }, 100)
         }
-      >
-        <CaretDownIcon />
-      </Button>
+      />
       <Button
+        icon={<SearchIcon />}
         data-test="search-button"
         id="search-button"
         variant="control"
         aria-label="search button for filter"
         onClick={() => onEnter()}
-      >
-        <SearchIcon />
-      </Button>
+      />
     </>
   );
 };

@@ -1,4 +1,4 @@
-import { Button, Flex, FlexItem, Popover, Text } from '@patternfly/react-core';
+import { Button, Content, Flex, FlexItem, Popover } from '@patternfly/react-core';
 import { TimesIcon } from '@patternfly/react-icons';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -27,16 +27,15 @@ export const ChipsPopover: React.FC<ChipsPopoverProps> = ({ chipsPopoverMessage,
           <FlexItem flex={{ default: 'flex_1' }}>{t('Some filters have been automatically disabled')}</FlexItem>
           <FlexItem>
             <Button
+              icon={<TimesIcon />}
               variant="plain"
               className="chips-popover-close-button"
               onClick={() => setChipsPopoverMessage(undefined)}
-            >
-              <TimesIcon />
-            </Button>
+            />
           </FlexItem>
         </Flex>
       }
-      bodyContent={<Text> {chipsPopoverMessage}</Text>}
+      bodyContent={<Content> {chipsPopoverMessage}</Content>}
       triggerRef={() => document.getElementsByClassName('custom-chip-group disabled-group')?.[0] as HTMLElement}
     />
   );

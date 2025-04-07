@@ -1,4 +1,4 @@
-import { Checkbox, Radio, Text, TextContent, TextVariants, Tooltip } from '@patternfly/react-core';
+import { Checkbox, Content, ContentVariants, Radio, Tooltip } from '@patternfly/react-core';
 import { InfoAltIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -99,17 +99,16 @@ export const QueryOptionsPanel: React.FC<QueryOptionsProps> = ({
 
   return (
     <>
-      <div className="pf-v5-c-menu__group">
+      <div className="pf-v6-c-menu__group">
         <Tooltip
           content={t(
-            // eslint-disable-next-line max-len
             'Log type to query. A conversation is an aggregation of flows between same peers. Only ended conversations will appear in Overview and Topology tabs.'
           )}
         >
-          <div className="pf-v5-c-menu__group-title">
-            <Text component={TextVariants.p}>
+          <div className="pf-v6-c-menu__group-title">
+            <Content component={ContentVariants.p}>
               {t('Log type')} <InfoAltIcon />
-            </Text>
+            </Content>
           </div>
         </Tooltip>
         {recordTypeOptions.map(opt => {
@@ -117,20 +116,16 @@ export const QueryOptionsPanel: React.FC<QueryOptionsProps> = ({
             (!allowFlow && opt.value === 'flowLog') || (!allowConnection && opt.value === 'allConnections');
           return (
             <div key={`recordType-${opt.value}`}>
-              <label className="display-dropdown-padding pf-v5-c-menu__menu-item">
+              <label className="display-dropdown-padding pf-v6-c-menu__menu-item">
                 <Tooltip
                   trigger={disabled ? 'mouseenter focus' : ''}
                   content={
                     disabled
                       ? opt.value === 'allConnections'
                         ? t(
-                            // eslint-disable-next-line max-len
                             'Only available when FlowCollector.processor.logTypes option equals "CONNECTIONS", "ENDED_CONNECTIONS" or "ALL"'
                           )
-                        : t(
-                            // eslint-disable-next-line max-len
-                            'Only available when FlowCollector.processor.logTypes option equals "FLOWS" or "ALL"'
-                          )
+                        : t('Only available when FlowCollector.processor.logTypes option equals "FLOWS" or "ALL"')
                       : undefined
                   }
                 >
@@ -150,38 +145,34 @@ export const QueryOptionsPanel: React.FC<QueryOptionsProps> = ({
           );
         })}
       </div>
-      <div className="pf-v5-c-menu__group">
+      <div className="pf-v6-c-menu__group">
         <Tooltip
           content={t(
             // eslint-disable-next-line max-len
             'Which datasource to query from console plugin pod. Prometheus holds a subset of metrics compared to Loki with better performances. Select "Auto" to pick the best datasource automatically.'
           )}
         >
-          <div className="pf-v5-c-menu__group-title">
-            <Text component={TextVariants.p}>
+          <div className="pf-v6-c-menu__group-title">
+            <Content component={ContentVariants.p}>
               {t('Datasource')} <InfoAltIcon />
-            </Text>
+            </Content>
           </div>
         </Tooltip>
         {dataSourceOptions.map(opt => {
           const disabled = (!allowProm && opt.value === 'prom') || (!allowLoki && opt.value === 'loki');
           return (
             <div key={`dataSource-${opt.value}`}>
-              <label className="display-dropdown-padding pf-v5-c-menu__menu-item">
+              <label className="display-dropdown-padding pf-v6-c-menu__menu-item">
                 <Tooltip
                   trigger={disabled ? 'mouseenter focus' : ''}
                   content={
                     disabled
                       ? opt.value === 'prom'
                         ? t(
-                            // eslint-disable-next-line max-len
                             'Only available when FlowCollector.prometheus.enable is true for Overview and Topology tabs'
                           )
                         : opt.value === 'loki'
-                        ? t(
-                            // eslint-disable-next-line max-len
-                            'Only available when FlowCollector.loki.enable is true'
-                          )
+                        ? t('Only available when FlowCollector.loki.enable is true')
                         : undefined
                       : undefined
                   }
@@ -203,20 +194,20 @@ export const QueryOptionsPanel: React.FC<QueryOptionsProps> = ({
         })}
       </div>
       {deduperMark && (
-        <div className="pf-v5-c-menu__group">
+        <div className="pf-v6-c-menu__group">
           <Tooltip
             content={t(
               // eslint-disable-next-line max-len
               'A flow might be reported from several interfaces, and from both source and destination nodes, making it appear several times. By default, duplicates are hidden. Showing duplicates is not possible in Overview and Topology tabs to avoid altering metric calculations. Use the Direction filter to switch between ingress, egress and inner-node traffic.'
             )}
           >
-            <div className="pf-v5-c-menu__group-title">
-              <Text component={TextVariants.p}>
+            <div className="pf-v6-c-menu__group-title">
+              <Content component={ContentVariants.p}>
                 {t('Duplicated flows')} <InfoAltIcon />
-              </Text>
+              </Content>
             </div>
           </Tooltip>
-          <label className="display-dropdown-padding pf-v5-c-menu__menu-item">
+          <label className="display-dropdown-padding pf-v6-c-menu__menu-item">
             <Checkbox
               isChecked={allowShowDuplicates ? showDuplicates : false}
               isDisabled={!allowShowDuplicates}
@@ -229,22 +220,17 @@ export const QueryOptionsPanel: React.FC<QueryOptionsProps> = ({
           </label>
         </div>
       )}
-      <div className="pf-v5-c-menu__group">
-        <Tooltip
-          content={t(
-            // eslint-disable-next-line max-len
-            'Whether each query result has to match all the filters or just any of them'
-          )}
-        >
-          <div className="pf-v5-c-menu__group-title">
-            <Text component={TextVariants.p}>
+      <div className="pf-v6-c-menu__group">
+        <Tooltip content={t('Whether each query result has to match all the filters or just any of them')}>
+          <div className="pf-v6-c-menu__group-title">
+            <Content component={ContentVariants.p}>
               {t('Match filters')} <InfoAltIcon />
-            </Text>
+            </Content>
           </div>
         </Tooltip>
         {matchOptions.map(opt => (
           <div key={`match-${opt.value}`}>
-            <label className="display-dropdown-padding pf-v5-c-menu__menu-item">
+            <label className="display-dropdown-padding pf-v6-c-menu__menu-item">
               <Radio
                 isChecked={opt.value === match}
                 name={`match-${opt.value}`}
@@ -258,47 +244,44 @@ export const QueryOptionsPanel: React.FC<QueryOptionsProps> = ({
           </div>
         ))}
       </div>
-      <div className="pf-v5-c-menu__group">
+      <div className="pf-v6-c-menu__group">
         <Tooltip
           content={
-            <TextContent className="netobserv-tooltip-text">
-              <Text component={TextVariants.p}>
+            <div className="netobserv-tooltip-text">
+              <Content component={ContentVariants.p}>
                 {t('Filter flows by their drop status. Only packets dropped by the kernel are monitored here.')}
-              </Text>
-              <Text component={TextVariants.p} className="netobserv-align-start">
+              </Content>
+              <Content component={ContentVariants.p} className="netobserv-align-start">
                 - {t('Fully dropped shows the flows that are 100% dropped')}
-              </Text>
-              <Text component={TextVariants.p} className="netobserv-align-start">
+              </Content>
+              <Content component={ContentVariants.p} className="netobserv-align-start">
                 - {t('Containing drops shows the flows having at least one packet dropped')}
-              </Text>
-              <Text component={TextVariants.p} className="netobserv-align-start">
+              </Content>
+              <Content component={ContentVariants.p} className="netobserv-align-start">
                 - {t('Without drops show the flows having 0% dropped')}
-              </Text>
-              <Text component={TextVariants.p} className="netobserv-align-start">
+              </Content>
+              <Content component={ContentVariants.p} className="netobserv-align-start">
                 - {t('All shows everything')}
-              </Text>
-            </TextContent>
+              </Content>
+            </div>
           }
         >
-          <div className="pf-v5-c-menu__group-title">
-            <Text component={TextVariants.p}>
+          <div className="pf-v6-c-menu__group-title">
+            <Content component={ContentVariants.p}>
               {t('Drops filter')} <InfoAltIcon />
-            </Text>
+            </Content>
           </div>
         </Tooltip>
         {packetLossOptions.map(opt => {
           const disabled = !allowPktDrops && opt.value !== 'all';
           return (
             <div key={`packet-loss-${opt.value}`}>
-              <label className="display-dropdown-padding pf-v5-c-menu__menu-item">
+              <label className="display-dropdown-padding pf-v6-c-menu__menu-item">
                 <Tooltip
                   trigger={disabled ? 'mouseenter focus' : ''}
                   content={
                     disabled
-                      ? t(
-                          // eslint-disable-next-line max-len
-                          'Only available using eBPF with FlowCollector.agent.ebpf.features containing "PacketDrop"'
-                        )
+                      ? t('Only available using eBPF with FlowCollector.agent.ebpf.features containing "PacketDrop"')
                       : undefined
                   }
                 >
@@ -318,7 +301,7 @@ export const QueryOptionsPanel: React.FC<QueryOptionsProps> = ({
           );
         })}
       </div>
-      <div className="pf-v5-c-menu__group">
+      <div className="pf-v6-c-menu__group">
         <Tooltip
           content={
             (useTopK ? t('Top items for internal backend queries.') : t('Limit for internal backend queries.')) +
@@ -329,15 +312,15 @@ export const QueryOptionsPanel: React.FC<QueryOptionsProps> = ({
             )
           }
         >
-          <div className="pf-v5-c-menu__group-title">
-            <Text component={TextVariants.p}>
+          <div className="pf-v6-c-menu__group-title">
+            <Content component={ContentVariants.p}>
               {useTopK ? t('Top / Bottom') : t('Limit')} <InfoAltIcon />
-            </Text>
+            </Content>
           </div>
         </Tooltip>
         {values.map(l => (
           <div key={'limit-' + l}>
-            <label className="display-dropdown-padding pf-v5-c-menu__menu-item">
+            <label className="display-dropdown-padding pf-v6-c-menu__menu-item">
               <Radio
                 data-test={'limit-' + l}
                 id={'limit-' + l}

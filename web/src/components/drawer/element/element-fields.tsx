@@ -1,4 +1,4 @@
-import { Text, TextContent, TextVariants } from '@patternfly/react-core';
+import { Content, ContentVariants } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Filter, FilterDefinition } from '../../../model/filters';
@@ -101,13 +101,13 @@ export const ElementFields: React.FC<ElementFieldsProps> = ({
       {fragments.length > 0 ? (
         fragments
       ) : (
-        <TextContent id={id + '-no-infos'} className="record-field-container">
+        <div id={id + '-no-infos'} className="record-field-container">
           {
-            <Text component={TextVariants.p}>
+            <Content component={ContentVariants.p}>
               {t('No information available for this content. Change scope to get more details.')}
-            </Text>
+            </Content>
           }
-        </TextContent>
+        </div>
       )}
     </>
   );

@@ -172,7 +172,7 @@ export const setURLMatch = (match: Match, replace?: boolean) => {
 };
 
 export const setURLPacketLoss = (pl: PacketLoss, replace?: boolean) => {
-  setURLParam(URLParam.PacketLoss, pl), replace;
+  setURLParam(URLParam.PacketLoss, pl, replace);
 };
 
 export const setURLMetricFunction = (metricFunction?: StatFunction, replace?: boolean) => {

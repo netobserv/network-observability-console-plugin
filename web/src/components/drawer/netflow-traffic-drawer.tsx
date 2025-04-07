@@ -101,7 +101,6 @@ export interface NetflowTrafficDrawerProps {
   setSelectedElement: (v: GraphElementPeer | undefined) => void;
 }
 
-// eslint-disable-next-line react/display-name
 export const NetflowTrafficDrawer: React.FC<NetflowTrafficDrawerProps> = React.forwardRef(
   (props, ref: React.Ref<NetflowTrafficDrawerHandle>) => {
     const overviewRef = React.useRef<NetflowOverviewHandle>(null);
@@ -218,7 +217,6 @@ export const NetflowTrafficDrawer: React.FC<NetflowTrafficDrawerProps> = React.f
             );
           } else if (match === 'all' && !hasIndexFields(filters.list)) {
             reason = t(
-              // eslint-disable-next-line max-len
               'Add Namespace, Owner or Resource filters (which use indexed fields), or decrease limit / range, to improve the query performance'
             );
           } else {

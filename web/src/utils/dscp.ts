@@ -19,15 +19,15 @@ export const DSCP_VALUES: ReadOnlyValues = [
   { value: 8, name: 'Low-Priority Data', description: 'Any flow that has no BW assurance' }
 ] as const;
 
-const dscpNames = DSCP_VALUES.map(v => v.name);
-export type DSCP_SERVICE_CLASS_NAMES = typeof dscpNames[number];
+export const dscpNames = DSCP_VALUES.map(v => v.name);
+export type DSCP_SERVICE_CLASS_NAMES = (typeof dscpNames)[number];
 
 export const getDSCPServiceClassName = (dscp: number): DSCP_SERVICE_CLASS_NAMES | undefined => {
   return DSCP_VALUES.find(v => v.value === dscp)?.name;
 };
 
-const dscpDescriptions = DSCP_VALUES.map(v => v.description);
-export type DSCP_SERVICE_CLASS_DESCRIPTIONS = typeof dscpDescriptions[number];
+export const dscpDescriptions = DSCP_VALUES.map(v => v.description);
+export type DSCP_SERVICE_CLASS_DESCRIPTIONS = (typeof dscpDescriptions)[number];
 
 export const getDSCPServiceClassDescription = (dscp: number): DSCP_SERVICE_CLASS_DESCRIPTIONS | undefined => {
   return DSCP_VALUES.find(v => v.value === dscp)?.description;

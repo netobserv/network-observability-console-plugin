@@ -1,12 +1,12 @@
 import {
+  Content,
+  ContentVariants,
   Divider,
   DrawerActions,
   DrawerCloseButton,
   DrawerHead,
   DrawerPanelBody,
-  DrawerPanelContent,
-  Text,
-  TextVariants
+  DrawerPanelContent
 } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -65,9 +65,9 @@ export const SummaryPanel: React.FC<SummaryPanelProps> = ({
       maxSize={maxSize}
     >
       <DrawerHead id={`${id}-drawer-head`} data-test-id="drawer-head" className="drawer-head">
-        <Text data-test-id="drawer-head-text" component={TextVariants.h2}>
+        <Content data-test-id="drawer-head-text" component={ContentVariants.h2}>
           {t('Query summary')}
-        </Text>
+        </Content>
         <DrawerActions>
           <DrawerCloseButton id={`${id ? id : 'summary-panel'}-close-button`} onClick={onClose} />
         </DrawerActions>

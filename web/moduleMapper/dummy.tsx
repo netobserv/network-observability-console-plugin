@@ -13,10 +13,12 @@ export class Dummy extends Error {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function isModelFeatureFlag(e: never) {
   return null;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function useResolvedExtensions(isModelFeatureFlag: boolean) {
   return [
     [{
