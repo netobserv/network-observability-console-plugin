@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -9,6 +10,7 @@ import (
 	"github.com/netobserv/network-observability-console-plugin/pkg/kubernetes/resources"
 	"github.com/netobserv/network-observability-console-plugin/pkg/utils"
 
+	kerr "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
@@ -25,7 +27,12 @@ func (h *Handlers) GetUDNIdss(ctx context.Context) func(w http.ResponseWriter, r
 			Resource: "clusteruserdefinednetworks",
 		})
 		if err != nil {
-			writeError(w, http.StatusInternalServerError, err.Error())
+			var k8sErr *kerr.StatusError
+			if errors.As(err, &k8sErr) {
+				writeError(w, int(k8sErr.ErrStatus.Code), err.Error())
+			} else {
+				writeError(w, http.StatusInternalServerError, err.Error())
+			}
 		}
 
 		udns, err := resources.List(ctx, token, schema.GroupVersionResource{
@@ -34,7 +41,12 @@ func (h *Handlers) GetUDNIdss(ctx context.Context) func(w http.ResponseWriter, r
 			Resource: "userdefinednetworks",
 		})
 		if err != nil {
-			writeError(w, http.StatusInternalServerError, err.Error())
+			var k8sErr *kerr.StatusError
+			if errors.As(err, &k8sErr) {
+				writeError(w, int(k8sErr.ErrStatus.Code), err.Error())
+			} else {
+				writeError(w, http.StatusInternalServerError, err.Error())
+			}
 		}
 
 		values := []string{}
