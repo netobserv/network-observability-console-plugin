@@ -680,12 +680,6 @@ export const FieldConfigSample = [
     description: 'ICMP code'
   },
   {
-    name: 'Duplicate',
-    type: 'boolean',
-    description: 'Indicates if this flow was also captured from another interface on the same host',
-    lokiLabel: true
-  },
-  {
     name: 'FlowDirection',
     type: 'number',
     description:

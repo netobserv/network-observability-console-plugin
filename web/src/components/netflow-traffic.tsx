@@ -43,7 +43,7 @@ import {
   setURLShowDup
 } from '../utils/router';
 import { useTheme } from '../utils/theme-hook';
-import { getURLParams, hasEmptyParams, netflowTrafficPath, removeURLParam, setURLParams, URLParam } from '../utils/url';
+import { getURLParams, hasEmptyParams, netflowTrafficPath, setURLParams } from '../utils/url';
 import NetflowTrafficDrawer, { NetflowTrafficDrawerHandle } from './drawer/netflow-traffic-drawer';
 import { limitValues, topValues } from './dropdowns/query-options-panel';
 import { RefreshDropdown } from './dropdowns/refresh-dropdown';
@@ -296,8 +296,6 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
       limit: limitValues.includes(model.limit) ? model.limit : limitValues[0],
       recordType: model.recordType,
       dataSource: model.dataSource,
-      //only manage duplicates when mark is enabled
-      dedup: model.config.deduper.mark && !model.showDuplicates,
       packetLoss: model.packetLoss
     };
     if (model.range) {
@@ -333,8 +331,6 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
     model.limit,
     model.recordType,
     model.dataSource,
-    model.config.deduper.mark,
-    model.showDuplicates,
     model.packetLoss,
     model.range,
     model.selectedViewId,
@@ -696,12 +692,8 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
   }, [model.match]);
 
   React.useEffect(() => {
-    if (model.config.deduper.mark) {
-      setURLShowDup(model.showDuplicates, !initState.current.includes('configLoaded'));
-    } else {
-      removeURLParam(URLParam.ShowDuplicates);
-    }
-  }, [model.config.deduper.mark, model.showDuplicates]);
+    setURLShowDup(model.showDuplicates, !initState.current.includes('configLoaded'));
+  }, [model.showDuplicates]);
 
   React.useEffect(() => {
     setURLMetricFunction(
@@ -881,8 +873,6 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
                 allowProm: allowProm(),
                 allowFlow: isFlow(),
                 allowConnection: isConnectionTracking(),
-                allowShowDuplicates: model.selectedViewId === 'table' && model.recordType !== 'allConnections',
-                deduperMark: model.config.deduper.mark,
                 allowPktDrops: isPktDrop(),
                 useTopK: model.selectedViewId === 'overview'
               }}

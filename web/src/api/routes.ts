@@ -190,10 +190,6 @@ export const getConfig = (): Promise<Config> => {
       alertNamespaces: r.data.alertNamespaces,
       sampling: r.data.sampling,
       features: r.data.features || defaultConfig.features,
-      deduper: {
-        mark: r.data.deduper.mark ?? defaultConfig.deduper.mark,
-        merge: r.data.deduper.merge ?? defaultConfig.deduper.merge
-      },
       fields: r.data.fields || defaultConfig.fields,
       dataSources: r.data.dataSources || defaultConfig.dataSources,
       promLabels: r.data.promLabels || defaultConfig.promLabels,

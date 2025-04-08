@@ -5,7 +5,6 @@ import (
 	"errors"
 	"net/http"
 	"net/url"
-	"slices"
 	"time"
 
 	"github.com/netobserv/network-observability-console-plugin/pkg/httpclient"
@@ -14,7 +13,6 @@ import (
 	"github.com/netobserv/network-observability-console-plugin/pkg/model"
 	"github.com/netobserv/network-observability-console-plugin/pkg/model/fields"
 	"github.com/netobserv/network-observability-console-plugin/pkg/model/filters"
-	"github.com/netobserv/network-observability-console-plugin/pkg/utils/constants"
 )
 
 const (
@@ -22,7 +20,6 @@ const (
 	endTimeKey    = "endTime"
 	timeRangeKey  = "timeRange"
 	limitKey      = "limit"
-	dedupKey      = "dedup"
 	recordTypeKey = "recordType"
 	dataSourceKey = "dataSource"
 	filtersKey    = "filters"
@@ -75,10 +72,6 @@ func (h *Handlers) getFlows(ctx context.Context, lokiClient httpclient.Caller, p
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
-	dedup := params.Get(dedupKey) == "true"
-	if !h.Cfg.Frontend.Deduper.Mark || slices.Contains(constants.AnyConnectionType, string(recordType)) {
-		dedup = false
-	}
 	packetLoss, err := getPacketLoss(params)
 	if err != nil {
 		return nil, http.StatusBadRequest, err
@@ -107,7 +100,7 @@ func (h *Handlers) getFlows(ctx context.Context, lokiClient httpclient.Caller, p
 		// match any, and multiple filters => run in parallel then aggregate
 		var queries []string
 		for _, group := range filterGroups {
-			qb := loki.NewFlowQueryBuilder(&h.Cfg.Loki, start, end, limit, dedup, recordType, packetLoss)
+			qb := loki.NewFlowQueryBuilder(&h.Cfg.Loki, start, end, limit, recordType, packetLoss)
 			err := qb.Filters(group)
 			if err != nil {
 				return nil, http.StatusBadRequest, errors.New("Can't build query: " + err.Error())
@@ -120,7 +113,7 @@ func (h *Handlers) getFlows(ctx context.Context, lokiClient httpclient.Caller, p
 		}
 	} else {
 		// else, run all at once
-		qb := loki.NewFlowQueryBuilder(&h.Cfg.Loki, start, end, limit, dedup, recordType, packetLoss)
+		qb := loki.NewFlowQueryBuilder(&h.Cfg.Loki, start, end, limit, recordType, packetLoss)
 		if len(filterGroups) > 0 {
 			err := qb.Filters(filterGroups[0])
 			if err != nil {

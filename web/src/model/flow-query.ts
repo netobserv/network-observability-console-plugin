@@ -27,7 +27,6 @@ export interface FlowQuery {
   endTime?: string;
   namespace?: string;
   filters: string;
-  dedup?: boolean;
   recordType: RecordType;
   dataSource: DataSource;
   packetLoss: PacketLoss;

@@ -83,7 +83,7 @@ func (h *Handlers) GetTopology(ctx context.Context) func(w http.ResponseWriter, 
 }
 
 func (h *Handlers) extractTopologyQueryParams(params url.Values, ds constants.DataSource) (*loki.TopologyInput, filters.MultiQueries, v1.Range, int, error) {
-	in := loki.TopologyInput{DedupMark: h.Cfg.Frontend.Deduper.Mark, DataSource: ds}
+	in := loki.TopologyInput{DataSource: ds}
 	qr := v1.Range{}
 	var reqLimit int
 	var err error

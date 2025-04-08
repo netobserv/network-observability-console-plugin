@@ -13,7 +13,6 @@ loki:
     - DstK8S_Type
     - K8S_FlowLayer
     - FlowDirection
-    #    - Duplicate
     #    - _RecordType
     #    - K8S_ClusterName
     #    - SrcK8S_Zone
@@ -79,9 +78,6 @@ frontend:
   alertNamespaces:
     - netobserv
   sampling: 50
-  deduper:
-    mark: true
-    merge: false
   # The following configuration is taken from Network Observability Operator
   # see https://github.com/netobserv/network-observability-operator/blob/main/controllers/consoleplugin/config/static-frontend-config.yaml
   panels:
@@ -1474,9 +1470,6 @@ frontend:
     - name: IcmpCode
       type: number
       description: ICMP code
-    - name: Duplicate
-      type: boolean
-      description: Indicates if this flow was also captured from another interface on the same host
     - name: FlowDirection
       type: number
       description: |

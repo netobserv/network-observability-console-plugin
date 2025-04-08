@@ -10,9 +10,16 @@ export type Size = 's' | 'm' | 'l';
 export interface TableDisplayDropdownProps {
   size: Size;
   setSize: (v: Size) => void;
+  showDuplicates: boolean;
+  setShowDuplicates: (showDuplicates: boolean) => void;
 }
 
-export const TableDisplayDropdown: React.FC<TableDisplayDropdownProps> = ({ size, setSize }) => {
+export const TableDisplayDropdown: React.FC<TableDisplayDropdownProps> = ({
+  size,
+  setSize,
+  showDuplicates,
+  setShowDuplicates
+}) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const ref = useOutsideClickEvent(() => setOpen(false));
   const [isOpen, setOpen] = React.useState<boolean>(false);
@@ -28,7 +35,12 @@ export const TableDisplayDropdown: React.FC<TableDisplayDropdownProps> = ({ size
           </MenuToggle>
         )}
       >
-        <TableDisplayOptions size={size} setSize={setSize} />
+        <TableDisplayOptions
+          size={size}
+          setSize={setSize}
+          showDuplicates={showDuplicates}
+          setShowDuplicates={setShowDuplicates}
+        />
       </Select>
     </div>
   );
