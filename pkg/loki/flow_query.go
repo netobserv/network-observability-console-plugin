@@ -36,7 +36,7 @@ type FlowQueryBuilder struct {
 	jsonFilters  [][]filters.LabelFilter
 }
 
-func NewFlowQueryBuilder(cfg *config.Loki, start, end, limit string, dedup bool,
+func NewFlowQueryBuilder(cfg *config.Loki, start, end, limit string,
 	recordType constants.RecordType, packetLoss constants.PacketLoss) *FlowQueryBuilder {
 	// Always use following stream selectors
 	labelFilters := []filters.LabelFilter{
@@ -56,14 +56,6 @@ func NewFlowQueryBuilder(cfg *config.Loki, start, end, limit string, dedup bool,
 	}
 
 	lineFilters := []filters.LineFilter{}
-	if dedup {
-		if cfg.IsLabel(fields.Duplicate) {
-			labelFilters = append(labelFilters, filters.NotStringLabelFilter(fields.Duplicate, "true"))
-		} else {
-			lineFilters = append(lineFilters, filters.NewEmptyLineFilter(fields.Duplicate, true, false, true).MatchTrue())
-		}
-	}
-
 	if packetLoss == constants.PacketLossDropped {
 		// match records that doesn't contains "Packets" field and 1+ packets dropped
 		// as FLP will ensure the filtering
@@ -95,7 +87,7 @@ func NewFlowQueryBuilder(cfg *config.Loki, start, end, limit string, dedup bool,
 }
 
 func NewFlowQueryBuilderWithDefaults(cfg *config.Loki) *FlowQueryBuilder {
-	return NewFlowQueryBuilder(cfg, "", "", "", false, constants.RecordTypeLog, constants.PacketLossAll)
+	return NewFlowQueryBuilder(cfg, "", "", "", constants.RecordTypeLog, constants.PacketLossAll)
 }
 
 func (q *FlowQueryBuilder) Filters(queryFilters filters.SingleQuery) error {

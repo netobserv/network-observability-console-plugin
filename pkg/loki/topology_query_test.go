@@ -39,7 +39,6 @@ func TestBuildTopologyQuery_SimpleAggregate(t *testing.T) {
 		RecordType:     constants.RecordTypeLog,
 		DataSource:     constants.DataSourceAuto,
 		Aggregate:      "namespace",
-		DedupMark:      true,
 	}
 	q, err := NewTopologyQuery(&lokiConfig, aggregateKeyLabels, &in)
 	require.NoError(t, err)
@@ -47,7 +46,7 @@ func TestBuildTopologyQuery_SimpleAggregate(t *testing.T) {
 	assert.Equal(
 		t,
 		"http://loki/loki/api/v1/query_range?query="+
-			"topk(50,sum by(SrcK8S_Namespace,DstK8S_Namespace)(rate({app=\"netobserv-flowcollector\"}!~`Duplicate\":true`|json|unwrap Bytes|__error__=\"\"[2m])))&start=(start)&limit=50&step=10s",
+			"topk(50,sum by(SrcK8S_Namespace,DstK8S_Namespace)(rate({app=\"netobserv-flowcollector\"}|json|unwrap Bytes|__error__=\"\"[2m])))&start=(start)&limit=50&step=10s",
 		result,
 	)
 }
@@ -65,7 +64,6 @@ func TestBuildTopologyQuery_GroupsAndAggregate(t *testing.T) {
 		DataSource:     constants.DataSourceAuto,
 		Aggregate:      "namespace",
 		Groups:         "hosts",
-		DedupMark:      true,
 	}
 	q, err := NewTopologyQuery(&lokiConfig, aggregateKeyLabels, &in)
 	require.NoError(t, err)
@@ -73,7 +71,7 @@ func TestBuildTopologyQuery_GroupsAndAggregate(t *testing.T) {
 	assert.Equal(
 		t,
 		"http://loki/loki/api/v1/query_range?query="+
-			"topk(50,sum by(SrcK8S_Namespace,DstK8S_Namespace,SrcK8S_HostName,DstK8S_HostName)(rate({app=\"netobserv-flowcollector\"}!~`Duplicate\":true`|json|unwrap Bytes|__error__=\"\"[2m])))&start=(start)&limit=50&step=10s",
+			"topk(50,sum by(SrcK8S_Namespace,DstK8S_Namespace,SrcK8S_HostName,DstK8S_HostName)(rate({app=\"netobserv-flowcollector\"}|json|unwrap Bytes|__error__=\"\"[2m])))&start=(start)&limit=50&step=10s",
 		result,
 	)
 }
@@ -90,7 +88,6 @@ func TestBuildTopologyQuery_CustomAggregate(t *testing.T) {
 		RecordType:     constants.RecordTypeLog,
 		DataSource:     constants.DataSourceAuto,
 		Aggregate:      "SomeField",
-		DedupMark:      true,
 	}
 	q, err := NewTopologyQuery(&lokiConfig, aggregateKeyLabels, &in)
 	require.NoError(t, err)
@@ -98,7 +95,7 @@ func TestBuildTopologyQuery_CustomAggregate(t *testing.T) {
 	assert.Equal(
 		t,
 		"http://loki/loki/api/v1/query_range?query="+
-			"topk(50,sum by(SomeField)(rate({app=\"netobserv-flowcollector\"}!~`Duplicate\":true`|~`\"SomeField\"`|json|unwrap Bytes|__error__=\"\"[2m])))&start=(start)&limit=50&step=10s",
+			"topk(50,sum by(SomeField)(rate({app=\"netobserv-flowcollector\"}|~`\"SomeField\"`|json|unwrap Bytes|__error__=\"\"[2m])))&start=(start)&limit=50&step=10s",
 		result,
 	)
 }
@@ -115,7 +112,6 @@ func TestBuildTopologyQuery_CustomLabelAggregate(t *testing.T) {
 		RecordType:     constants.RecordTypeLog,
 		DataSource:     constants.DataSourceAuto,
 		Aggregate:      "FlowDirection",
-		DedupMark:      true,
 	}
 	q, err := NewTopologyQuery(&lokiConfig, aggregateKeyLabels, &in)
 	require.NoError(t, err)
@@ -123,7 +119,7 @@ func TestBuildTopologyQuery_CustomLabelAggregate(t *testing.T) {
 	assert.Equal(
 		t,
 		"http://loki/loki/api/v1/query_range?query="+
-			"topk(50,sum by(FlowDirection)(rate({app=\"netobserv-flowcollector\"}!~`Duplicate\":true`|json|unwrap Bytes|__error__=\"\"[2m])))&start=(start)&limit=50&step=10s",
+			"topk(50,sum by(FlowDirection)(rate({app=\"netobserv-flowcollector\"}|json|unwrap Bytes|__error__=\"\"[2m])))&start=(start)&limit=50&step=10s",
 		result,
 	)
 }

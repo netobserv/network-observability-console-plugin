@@ -121,11 +121,6 @@ type FieldConfig struct {
 	Filter string `yaml:"filter,omitempty" json:"filter,omitempty"`
 }
 
-type Deduper struct {
-	Mark  bool `yaml:"mark" json:"mark"`
-	Merge bool `yaml:"merge" json:"merge"`
-}
-
 type Frontend struct {
 	BuildVersion    string        `yaml:"buildVersion" json:"buildVersion"`
 	BuildDate       string        `yaml:"buildDate" json:"buildDate"`
@@ -139,7 +134,6 @@ type Frontend struct {
 	AlertNamespaces []string      `yaml:"alertNamespaces" json:"alertNamespaces"`
 	Sampling        int           `yaml:"sampling" json:"sampling"`
 	Features        []string      `yaml:"features" json:"features"`
-	Deduper         Deduper       `yaml:"deduper" json:"deduper"`
 	Fields          []FieldConfig `yaml:"fields" json:"fields"`
 	DataSources     []string      `yaml:"dataSources" json:"dataSources"`
 	LokiMocks       bool          `yaml:"lokiMocks,omitempty" json:"lokiMocks,omitempty"`
@@ -191,10 +185,6 @@ func ReadFile(version, date, filename string) (*Config, error) {
 			},
 			QuickFilters: []QuickFilter{},
 			Features:     []string{},
-			Deduper: Deduper{
-				Mark:  false,
-				Merge: true,
-			},
 			Fields: []FieldConfig{
 				{Name: "TimeFlowEndMs", Type: "number"},
 				{Name: "SrcAddr", Type: "string"},

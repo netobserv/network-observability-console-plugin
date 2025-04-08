@@ -152,11 +152,6 @@ export const ExportModal: React.FC<ExportModalProps> = ({
             <ChipGroup isClosable={false} categoryName={t('Time Range')}>
               <Chip isReadOnly={true}>{rangeText()}</Chip>
             </ChipGroup>
-            {flowQuery.dedup && (
-              <ChipGroup isClosable={false} categoryName={t('Deduplicate')}>
-                <Chip isReadOnly={true}>true</Chip>
-              </ChipGroup>
-            )}
             <ChipGroup isClosable={false} categoryName={t('Limit')}>
               <Chip isReadOnly={true}>{flowQuery.limit}</Chip>
             </ChipGroup>

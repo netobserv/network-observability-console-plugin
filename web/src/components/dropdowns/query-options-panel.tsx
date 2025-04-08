@@ -1,4 +1,4 @@
-import { Checkbox, Radio, Text, TextContent, TextVariants, Tooltip } from '@patternfly/react-core';
+import { Radio, Text, TextContent, TextVariants, Tooltip } from '@patternfly/react-core';
 import { InfoAltIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -20,14 +20,10 @@ export const QueryOptionsPanel: React.FC<QueryOptionsProps> = ({
   setRecordType,
   dataSource,
   setDataSource,
-  showDuplicates,
-  setShowDuplicates,
   allowLoki,
   allowProm,
   allowFlow,
   allowConnection,
-  allowShowDuplicates,
-  deduperMark,
   allowPktDrops,
   useTopK,
   limit,
@@ -202,33 +198,6 @@ export const QueryOptionsPanel: React.FC<QueryOptionsProps> = ({
           );
         })}
       </div>
-      {deduperMark && (
-        <div className="pf-c-select__menu-group">
-          <Tooltip
-            content={t(
-              // eslint-disable-next-line max-len
-              'A flow might be reported from several interfaces, and from both source and destination nodes, making it appear several times. By default, duplicates are hidden. Showing duplicates is not possible in Overview and Topology tabs to avoid altering metric calculations. Use the Direction filter to switch between ingress, egress and inner-node traffic.'
-            )}
-          >
-            <div className="pf-c-select__menu-group-title">
-              <Text component={TextVariants.p}>
-                {t('Duplicated flows')} <InfoAltIcon />
-              </Text>
-            </div>
-          </Tooltip>
-          <label className="pf-c-select__menu-item">
-            <Checkbox
-              isChecked={allowShowDuplicates ? showDuplicates : false}
-              isDisabled={!allowShowDuplicates}
-              name={'show-duplicates'}
-              onChange={() => setShowDuplicates(!showDuplicates)}
-              label={t('Show duplicates')}
-              data-test={'show-duplicates'}
-              id={'show-duplicates'}
-            />
-          </label>
-        </div>
-      )}
       <div className="pf-c-select__menu-group">
         <Tooltip
           content={t(

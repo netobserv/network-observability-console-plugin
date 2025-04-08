@@ -13,7 +13,6 @@ loki:
     - DstK8S_Type
     - K8S_FlowLayer
     - FlowDirection
-    #    - Duplicate
     #    - _RecordType
     #    - K8S_ClusterName
     #    - SrcK8S_Zone
@@ -78,95 +77,92 @@ frontend:
   alertNamespaces:
     - netobserv
   sampling: 50
-  deduper:
-    mark: true
-    merge: false
-    # The following configuration is taken from Network Observability Operator
-    # see https://github.com/netobserv/network-observability-operator/blob/main/controllers/consoleplugin/config/static-frontend-config.yaml
-    panels:
-      # Protocol
-      - Proto_Bytes
-      - sum_Proto_Bytes
-      - avg_Proto_Bytes
-      - Proto_Packets
-      - sum_Proto_Packets
-      - avg_Proto_Packets
-      - Proto_Flows
-      # DSCP
-      - Dscp_Bytes
-      - Dscp_Packets
-      - min_Dscp_TimeFlowRttNs
-      - max_Dscp_TimeFlowRttNs
-      - avg_Dscp_TimeFlowRttNs
-      - p90_Dscp_TimeFlowRttNs
-      - p99_Dscp_TimeFlowRttNs
-      - min_Dscp_DnsLatencyMs
-      - max_Dscp_DnsLatencyMs
-      - avg_Dscp_DnsLatencyMs
-      - p90_Dscp_DnsLatencyMs
-      - p99_Dscp_DnsLatencyMs
-      - Dscp_Flows
-      # Port numbers
-      - SrcPort_Bytes
-      - sum_SrcPort_Bytes
-      - SrcPort_Packets
-      - sum_SrcPort_Packets
-      - SrcPort_TimeFlowRttNs
-      - min_SrcPort_TimeFlowRttNs
-      - max_SrcPort_TimeFlowRttNs
-      - avg_SrcPort_TimeFlowRttNs
-      - p90_SrcPort_TimeFlowRttNs
-      - p99_SrcPort_TimeFlowRttNs
-      - DstPort_Bytes
-      - sum_DstPort_Bytes
-      - DstPort_Packets
-      - sum_DstPort_Packets
-      - min_DstPort_TimeFlowRttNs
-      - max_DstPort_TimeFlowRttNs
-      - avg_DstPort_TimeFlowRttNs
-      - p90_DstPort_TimeFlowRttNs
-      - p99_DstPort_TimeFlowRttNs
-      # Node Directions
-      - FlowDirection_Bytes
-      - FlowDirection_Packets
-      - FlowDirection_Flows
-      # TODO: implement a way to manage plurals for interfaces
-      # Interfaces Directions
-      #- IfDirections_Bytes
-      #- IfDirections_Packets
-      #- IfDirections_Flows
-      # Interfaces names
-      #- Interfaces_Bytes
-      #- sum_Interfaces_Bytes
-      #- avg_Interfaces_Bytes
-      #- Interfaces_Packets
-      #- sum_Interfaces_Packets
-      #- avg_Interfaces_Packets
-      #- Interfaces_Flows
-      # DNS capture errors
-      - DnsErrno_Flows
-      # Connection tracking flow count
-      - numFlowLogs_Flows
-      # Bytes / Packets rates on current scope
-      - Bytes
-      - Packets
-      # flow on current scope
-      - Flows
-      - DnsFlows
-      # UDN
-      - UdnId_Bytes
-      - UdnId_Packets
-      - min_UdnId_TimeFlowRttNs
-      - max_UdnId_TimeFlowRttNs
-      - avg_UdnId_TimeFlowRttNs
-      - p90_UdnId_TimeFlowRttNs
-      - p99_UdnId_TimeFlowRttNs
-      - min_UdnId_DnsLatencyMs
-      - max_UdnId_DnsLatencyMs
-      - avg_UdnId_DnsLatencyMs
-      - p90_UdnId_DnsLatencyMs
-      - p99_UdnId_DnsLatencyMs
-      - UdnId_Flows
+  # The following configuration is taken from Network Observability Operator
+  # see https://github.com/netobserv/network-observability-operator/blob/main/controllers/consoleplugin/config/static-frontend-config.yaml
+  panels:
+    # Protocol
+    - Proto_Bytes
+    - sum_Proto_Bytes
+    - avg_Proto_Bytes
+    - Proto_Packets
+    - sum_Proto_Packets
+    - avg_Proto_Packets
+    - Proto_Flows
+    # DSCP
+    - Dscp_Bytes
+    - Dscp_Packets
+    - min_Dscp_TimeFlowRttNs
+    - max_Dscp_TimeFlowRttNs
+    - avg_Dscp_TimeFlowRttNs
+    - p90_Dscp_TimeFlowRttNs
+    - p99_Dscp_TimeFlowRttNs
+    - min_Dscp_DnsLatencyMs
+    - max_Dscp_DnsLatencyMs
+    - avg_Dscp_DnsLatencyMs
+    - p90_Dscp_DnsLatencyMs
+    - p99_Dscp_DnsLatencyMs
+    - Dscp_Flows
+    # Port numbers
+    - SrcPort_Bytes
+    - sum_SrcPort_Bytes
+    - SrcPort_Packets
+    - sum_SrcPort_Packets
+    - SrcPort_TimeFlowRttNs
+    - min_SrcPort_TimeFlowRttNs
+    - max_SrcPort_TimeFlowRttNs
+    - avg_SrcPort_TimeFlowRttNs
+    - p90_SrcPort_TimeFlowRttNs
+    - p99_SrcPort_TimeFlowRttNs
+    - DstPort_Bytes
+    - sum_DstPort_Bytes
+    - DstPort_Packets
+    - sum_DstPort_Packets
+    - min_DstPort_TimeFlowRttNs
+    - max_DstPort_TimeFlowRttNs
+    - avg_DstPort_TimeFlowRttNs
+    - p90_DstPort_TimeFlowRttNs
+    - p99_DstPort_TimeFlowRttNs
+    # Node Directions
+    - FlowDirection_Bytes
+    - FlowDirection_Packets
+    - FlowDirection_Flows
+    # TODO: implement a way to manage plurals for interfaces
+    # Interfaces Directions
+    #- IfDirections_Bytes
+    #- IfDirections_Packets
+    #- IfDirections_Flows
+    # Interfaces names
+    #- Interfaces_Bytes
+    #- sum_Interfaces_Bytes
+    #- avg_Interfaces_Bytes
+    #- Interfaces_Packets
+    #- sum_Interfaces_Packets
+    #- avg_Interfaces_Packets
+    #- Interfaces_Flows
+    # DNS capture errors
+    - DnsErrno_Flows
+    # Connection tracking flow count
+    - numFlowLogs_Flows
+    # Bytes / Packets rates on current scope
+    - Bytes
+    - Packets
+    # flow on current scope
+    - Flows
+    - DnsFlows
+    # UDN
+    - UdnId_Bytes
+    - UdnId_Packets
+    - min_UdnId_TimeFlowRttNs
+    - max_UdnId_TimeFlowRttNs
+    - avg_UdnId_TimeFlowRttNs
+    - p90_UdnId_TimeFlowRttNs
+    - p99_UdnId_TimeFlowRttNs
+    - min_UdnId_DnsLatencyMs
+    - max_UdnId_DnsLatencyMs
+    - avg_UdnId_DnsLatencyMs
+    - p90_UdnId_DnsLatencyMs
+    - p99_UdnId_DnsLatencyMs
+    - UdnId_Flows
   columns:
     - id: StartTime
       name: Start Time
@@ -1347,9 +1343,6 @@ frontend:
     - name: IcmpCode
       type: number
       description: ICMP code
-    - name: Duplicate
-      type: boolean
-      description: Indicates if this flow was also captured from another interface on the same host
     - name: FlowDirection
       type: number
       description: |

@@ -49,6 +49,8 @@ export interface ViewOptionsToolbarProps {
   scopes: ScopeConfigDef[];
   size: Size;
   setSize: (v: Size) => void;
+  showDuplicates: boolean;
+  setShowDuplicates: (showDuplicates: boolean) => void;
   setSearchEvent: (se: SearchEvent) => void;
   ref?: React.Ref<SearchHandle>;
 }
@@ -240,7 +242,14 @@ export const ViewOptionsToolbar: React.FC<ViewOptionsToolbarProps> = React.forwa
                 scopes={props.scopes}
               />
             )}
-            {props.selectedViewId === 'table' && <TableDisplayDropdown size={props.size} setSize={props.setSize} />}
+            {props.selectedViewId === 'table' && (
+              <TableDisplayDropdown
+                size={props.size}
+                setSize={props.setSize}
+                showDuplicates={props.showDuplicates}
+                setShowDuplicates={props.setShowDuplicates}
+              />
+            )}
             {props.selectedViewId === 'topology' && (
               <TopologyDisplayDropdown
                 metricFunction={props.topologyMetricFunction}

@@ -26,7 +26,6 @@ type TopologyInput struct {
 	PacketLoss     constants.PacketLoss
 	Aggregate      string
 	Groups         string
-	DedupMark      bool
 }
 
 type TopologyQueryBuilder struct {
@@ -36,17 +35,14 @@ type TopologyQueryBuilder struct {
 }
 
 func NewTopologyQuery(cfg *config.Loki, kl map[string][]string, in *TopologyInput) (*TopologyQueryBuilder, error) {
-	var dedup bool
 	var rt constants.RecordType
 	if slices.Contains(constants.AnyConnectionType, string(in.RecordType)) {
-		dedup = false
 		rt = "endConnection"
 	} else {
-		dedup = in.DedupMark
 		rt = "flowLog"
 	}
 
-	fqb := NewFlowQueryBuilder(cfg, in.Start, in.End, in.Top, dedup, rt, in.PacketLoss)
+	fqb := NewFlowQueryBuilder(cfg, in.Start, in.End, in.Top, rt, in.PacketLoss)
 	return &TopologyQueryBuilder{
 		FlowQueryBuilder:   fqb,
 		topology:           in,

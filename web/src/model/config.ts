@@ -16,11 +16,6 @@ export type Feature =
   | 'networkEvents'
   | 'ipsec';
 
-export type Deduper = {
-  mark: boolean;
-  merge: boolean;
-};
-
 export type Config = {
   buildVersion: string;
   buildDate: string;
@@ -37,7 +32,6 @@ export type Config = {
   alertNamespaces: string[];
   sampling: number;
   features: Feature[];
-  deduper: Deduper;
   fields: FieldConfig[];
   dataSources: string[];
   lokiMocks: boolean;
@@ -61,10 +55,6 @@ export const defaultConfig: Config = {
   alertNamespaces: ['netobserv'],
   sampling: 50,
   features: [],
-  deduper: {
-    mark: true,
-    merge: false
-  },
   fields: [],
   dataSources: ['loki', 'prom'],
   lokiMocks: false,
