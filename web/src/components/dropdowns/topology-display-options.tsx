@@ -189,6 +189,17 @@ export const TopologyDisplayOptions: React.FC<TopologyDisplayOptionsProps> = ({
               })
             }
           />
+          <Checkbox
+            id="empty-switch"
+            label={t('Empty')}
+            isChecked={topologyOptions.showEmpty}
+            onChange={() =>
+              setTopologyOptions({
+                ...topologyOptions,
+                showEmpty: !topologyOptions.showEmpty
+              })
+            }
+          />
         </div>
       </div>
       <div className="pf-v5-c-menu__group">
