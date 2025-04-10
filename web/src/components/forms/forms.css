@@ -26,7 +26,7 @@
 .wizard-editor-container>div {
   display: flex;
   flex-direction: column;
-  flex:1
+  flex: 1
 }
 
 .editor-toggle-container {
@@ -47,4 +47,8 @@
 #editor-toggle-footer {
   margin-left: 1.5rem;
   margin-right: 1.5rem;
+}
+
+.status-container {
+  flex: 1;
 }
