@@ -57,6 +57,7 @@ export const ElementPanel: React.FC<ElementPanelProps> = ({
   const [activeTab, setActiveTab] = React.useState<string>('details');
 
   const data = element.getData();
+  const noMetrics = data && data.noMetrics === true;
   let aData: NodeData;
   let bData: NodeData | undefined;
   if (element instanceof BaseEdge) {
@@ -117,7 +118,7 @@ export const ElementPanel: React.FC<ElementPanelProps> = ({
               filterDefinitions={filterDefinitions}
             />
           </Tab>
-          {!_.isEmpty(metrics) && (
+          {!noMetrics && !_.isEmpty(metrics) && (
             <Tab className="drawer-tab" eventKey={'metrics'} title={<TabTitleText>{t('Metrics')}</TabTitleText>}>
               <ElementPanelMetrics
                 aData={aData}
@@ -130,7 +131,7 @@ export const ElementPanel: React.FC<ElementPanelProps> = ({
               />
             </Tab>
           )}
-          {!_.isEmpty(droppedMetrics) && (
+          {!noMetrics && !_.isEmpty(droppedMetrics) && (
             <Tab className="drawer-tab" eventKey={'dropped'} title={<TabTitleText>{t('Drops')}</TabTitleText>}>
               <ElementPanelMetrics
                 aData={aData}
