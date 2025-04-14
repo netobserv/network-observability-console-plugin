@@ -186,7 +186,7 @@
   "Check current user permissions": "Check current user permissions",
   "This deployment mode does not support non-admin users. Check FlowCollector spec.loki.manual.authToken": "This deployment mode does not support non-admin users. Check FlowCollector spec.loki.manual.authToken",
   "For LokiStack, your user must either:": "For LokiStack, your user must either:",
-  "have the 'netobserv-reader' cluster role, which allows multi-tenancy": "have the 'netobserv-reader' cluster role, which allows multi-tenancy",
+  "have the 'netobserv-loki-reader' cluster role, which allows multi-tenancy": "have the 'netobserv-loki-reader' cluster role, which allows multi-tenancy",
   "or be in the 'cluster-admin' group (not the same as the 'cluster-admin' role)": "or be in the 'cluster-admin' group (not the same as the 'cluster-admin' role)",
   "or LokiStack spec.tenants.openshift.adminGroups must be configured with a group this user belongs to": "or LokiStack spec.tenants.openshift.adminGroups must be configured with a group this user belongs to",
   "For other configurations, refer to FlowCollector spec.loki.manual.authToken": "For other configurations, refer to FlowCollector spec.loki.manual.authToken",

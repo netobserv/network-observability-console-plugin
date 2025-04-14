@@ -246,7 +246,7 @@ export const Error: React.FC<ErrorProps> = ({ title, error, isLokiRelated }) => 
                             {t(`For LokiStack, your user must either:`)}
                             <TextList>
                               <TextListItem>
-                                {t(`have the 'netobserv-reader' cluster role, which allows multi-tenancy`)}
+                                {t(`have the 'netobserv-loki-reader' cluster role, which allows multi-tenancy`)}
                               </TextListItem>
                               <TextListItem>
                                 {t(`or be in the 'cluster-admin' group (not the same as the 'cluster-admin' role)`)}
