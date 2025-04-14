@@ -112,7 +112,7 @@
     "@patternfly/react-table": "^5.4.0",
     "@patternfly/react-tokens": "^5.4.0",
     "@patternfly/react-topology": "^5.4.0",
-    "axios": "^1.7.4",
+    "axios": "^1.8.2",
     "html-to-image": "^1.11.11",
     "i18next": "^21.8.14",
     "i18next-http-backend": "^1.0.21",
