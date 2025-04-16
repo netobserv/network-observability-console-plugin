@@ -23,7 +23,7 @@ import { Column, ColumnSizeMap } from '../../utils/columns';
 import { isPromError } from '../../utils/errors';
 import { OverviewPanel } from '../../utils/overview-panels';
 import { TruncateLength } from '../dropdowns/truncate-dropdown';
-import { Error, Size } from '../messages/error';
+import { ErrorComponent, Size } from '../messages/error';
 import { ViewId } from '../netflow-traffic';
 import FlowsQuerySummary from '../query-summary/flows-query-summary';
 import MetricsQuerySummary from '../query-summary/metrics-query-summary';
@@ -236,7 +236,7 @@ export const NetflowTrafficDrawer: React.FC<NetflowTrafficDrawerProps> = React.f
       let content: JSX.Element | null = null;
       if (props.error) {
         content = (
-          <Error
+          <ErrorComponent
             title={t('Unable to get {{item}}', {
               item: props.currentState.includes('configLoadError') ? t('config') : props.selectedViewId
             })}

@@ -144,12 +144,15 @@ type Config struct {
 	Frontend   Frontend   `yaml:"frontend" json:"frontend"`
 	Server     Server     `yaml:"server,omitempty" json:"server,omitempty"`
 	Path       string     `yaml:"-" json:"-"`
+	Static     bool
 }
 
 func ReadFile(version, date, filename string) (*Config, error) {
+	isStatic := len(filename) == 0
 	// set default values
 	cfg := Config{
-		Path: filename,
+		Path:   filename,
+		Static: isStatic,
 		Server: Server{
 			Port:        9001,
 			MetricsPort: 9002,
@@ -191,7 +194,10 @@ func ReadFile(version, date, filename string) (*Config, error) {
 			PromLabels:  []string{},
 		},
 	}
-	if len(filename) == 0 {
+	if isStatic {
+		// Force TLS
+		cfg.Server.CertPath = "/var/serving-cert/tls.crt"
+		cfg.Server.KeyPath = "/var/serving-cert/tls.key"
 		return &cfg, nil
 	}
 	yamlFile, err := os.ReadFile(filename)
@@ -241,7 +247,7 @@ func (c *Config) IsPromEnabled() bool {
 }
 
 func (c *Config) Validate() error {
-	if !c.IsLokiEnabled() && !c.IsPromEnabled() {
+	if !c.Static && !c.IsLokiEnabled() && !c.IsPromEnabled() {
 		return errors.New("neither Loki nor Prometheus is configured; at least one of them should have a URL defined")
 	}
 
