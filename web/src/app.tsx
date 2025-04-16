@@ -26,6 +26,11 @@ import {
 import { BarsIcon } from '@patternfly/react-icons';
 import React from 'react';
 import { BrowserRouter, Link } from 'react-router-dom';
+import FlowCollectorForm from './components/forms/flowCollector';
+import FlowCollectorStatus from './components/forms/flowCollector-status';
+import FlowCollectorWizard from './components/forms/flowCollector-wizard';
+import FlowMetricForm from './components/forms/flowMetric';
+import FlowMetricWizard from './components/forms/flowMetric-wizard';
 import NetflowTrafficDevTab from './components/netflow-traffic-dev-tab';
 import NetflowTrafficParent from './components/netflow-traffic-parent';
 import NetflowTab from './components/netflow-traffic-tab';
@@ -55,6 +60,26 @@ export const pages = [
   {
     id: 'udn-tab',
     name: 'UDN tab'
+  },
+  {
+    id: 'flowCollector-wizard',
+    name: 'FlowCollector wizard'
+  },
+  {
+    id: 'flowCollector',
+    name: 'FlowCollector form'
+  },
+  {
+    id: 'flowCollector-status',
+    name: 'FlowCollector status'
+  },
+  {
+    id: 'flowMetric-wizard',
+    name: 'FlowMetric wizard'
+  },
+  {
+    id: 'flowMetric',
+    name: 'FlowMetric form'
   }
 ];
 
@@ -164,6 +189,16 @@ export const App: React.FunctionComponent = () => {
         );
       case 'udn-tab':
         return <NetflowTab obj={{ kind: 'UserDefinedNetwork', metadata: { name: 'my-udn', namespace: 'default' } }} />;
+      case 'flowCollector-wizard':
+        return <FlowCollectorWizard />;
+      case 'flowCollector':
+        return <FlowCollectorForm />;
+      case 'flowCollector-status':
+        return <FlowCollectorStatus />;
+      case 'flowMetric-wizard':
+        return <FlowMetricWizard />;
+      case 'flowMetric':
+        return <FlowMetricForm />;
       default:
         return <NetflowTrafficParent />;
     }
@@ -175,6 +210,11 @@ export const App: React.FunctionComponent = () => {
     const content = pageContent(page.id);
     switch (page.id) {
       case 'netflow-traffic':
+      case 'flowCollector-wizard':
+      case 'flowCollector':
+      case 'flowCollector-status':
+      case 'flowMetric-wizard':
+      case 'flowMetric':
         return <>{content}</>;
       default:
         return (
