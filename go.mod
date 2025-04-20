@@ -8,7 +8,7 @@ require (
 	github.com/gorilla/mux v1.8.1
 	github.com/json-iterator/go v1.1.12
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/ovn-org/ovn-kubernetes/go-controller v0.0.0-20250325200454-5518ba106938
+	github.com/ovn-org/ovn-kubernetes/go-controller 8ca7a17e9ab3
 	github.com/prometheus/client_golang v1.21.1
 	github.com/prometheus/common v0.62.0
 	github.com/sirupsen/logrus v1.9.3
