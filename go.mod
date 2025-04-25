@@ -8,7 +8,7 @@ require (
 	github.com/gorilla/mux v1.8.1
 	github.com/json-iterator/go v1.1.12
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/netobserv/netobserv-ebpf-agent v1.7.0-community.0.20250220123714-ff37a09f6232
+	github.com/netobserv/netobserv-ebpf-agent v1.9.0-crc0
 	github.com/prometheus/client_golang v1.22.0
 	github.com/prometheus/common v0.63.0
 	github.com/sirupsen/logrus v1.9.3
@@ -42,8 +42,8 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/mwitkow/go-conntrack v0.0.0-20190716064945-2f068394615f // indirect
-	github.com/netobserv/flowlogs-pipeline v1.7.0-community.0.20241217113023-fa0540a1658e // indirect
-	github.com/ovn-org/ovn-kubernetes/go-controller v0.0.0-20250215040159-dd2a70c928d3 // indirect
+	github.com/netobserv/flowlogs-pipeline v1.7.0-community.0.20250407055901-c9a2490f9235 // indirect
+	github.com/ovn-org/ovn-kubernetes/go-controller v0.0.0-20250227173154-57a2590a1d16 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/prometheus/client_model v0.6.1 // indirect
@@ -52,12 +52,12 @@ require (
 	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	golang.org/x/net v0.38.0 // indirect
-	golang.org/x/oauth2 v0.25.0 // indirect
+	golang.org/x/oauth2 v0.26.0 // indirect
 	golang.org/x/sys v0.31.0 // indirect
 	golang.org/x/term v0.30.0 // indirect
 	golang.org/x/text v0.23.0 // indirect
 	golang.org/x/time v0.7.0 // indirect
-	google.golang.org/protobuf v1.36.5 // indirect
+	google.golang.org/protobuf v1.36.6 // indirect
 	gopkg.in/evanphx/json-patch.v4 v4.12.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
