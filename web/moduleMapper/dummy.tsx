@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   K8sGroupVersionKind,
@@ -5,6 +6,8 @@ import {
   K8sResourceKind,
   K8sResourceKindReference,
   NamespaceBarProps,
+  PrometheusPollProps,
+  PrometheusResponse,
   ResourceIconProps,
   ResourceLinkProps,
   ResourceYAMLEditorProps
@@ -261,3 +264,58 @@ export const ResourceYAMLEditor: React.FC<ResourceYAMLEditorProps> = ({
     />
   </>);
 };
+
+export enum K8sResourceConditionStatus {
+  True = "True",
+  False = "False",
+  Unknown = "Unknown"
+}
+
+export enum PrometheusEndpoint {
+  LABEL = "api/v1/label",
+  QUERY = "api/v1/query",
+  QUERY_RANGE = "api/v1/query_range",
+  RULES = "api/v1/rules",
+  TARGETS = "api/v1/targets"
+}
+
+export function usePrometheusPoll(props: PrometheusPollProps) {
+  console.log("usePrometheusPoll", props);
+
+  const [response, setResponse] = React.useState<PrometheusResponse | null>(null);
+
+  React.useEffect(() => {
+    // simulate a loading
+    if (response == null) {
+      setTimeout(() => {
+        setResponse({
+          status: "success",
+          data: {
+            resultType: "vector",
+            result: [
+              {
+                metric: {
+                  node: "node-1",
+                  namespace: "ns-1",
+                  pod: "pod-1",
+                },
+                value: [
+                  1745832954.698,
+                  "2670.494073495783"
+                ]
+              },
+            ],
+          }
+        });
+      }, 1000);
+    }
+  }, [response]);
+
+  return React.useMemo(() => {
+    if (response == null) {
+      return [null, false, null];
+    } else {
+      return [response, true, null];
+    }
+  }, [response]);
+}
