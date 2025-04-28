@@ -107,6 +107,17 @@ export const FlowCollectorWizard: FC<FlowCollectorWizardProps> = props => {
     []
   );
 
+  const setSampling = React.useCallback(
+    (sampling: number) => {
+      if (!data) {
+        return;
+      }
+      data.spec.agent.ebpf.sampling = sampling;
+      setData({ ...data });
+    },
+    [data]
+  );
+
   return (
     <DynamicLoader>
       <ResourceWatcher
@@ -157,7 +168,7 @@ export const FlowCollectorWizard: FC<FlowCollectorWizardProps> = props => {
                     {form()}
                   </WizardStep>
                   <WizardStep name={t('Consumption')} id="consumption">
-                    <Consumption flowCollector={data} />
+                    <Consumption flowCollector={data} setSampling={setSampling} />
                   </WizardStep>
                   <WizardStep
                     name={t('Review')}
