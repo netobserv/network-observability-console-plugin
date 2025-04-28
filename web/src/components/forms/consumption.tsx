@@ -14,9 +14,10 @@ import './forms.css';
 
 export type ResourceCalculatorProps = {
   flowCollector: K8sResourceKind | null;
+  setSampling?: (sampling: number) => void;
 };
 
-export const Consumption: FC<ResourceCalculatorProps> = ({ flowCollector }) => {
+export const Consumption: FC<ResourceCalculatorProps> = ({ flowCollector, setSampling }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   const [receivedPackets, rpLoaded, rpError] = usePrometheusPoll({
@@ -64,8 +65,8 @@ export const Consumption: FC<ResourceCalculatorProps> = ({ flowCollector }) => {
         return t('n/a');
       }
       return _.uniq(_.map(receivedPackets.data.result, r => r.metric[label])).length;
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [receivedPackets, rpError, rpLoaded]
   );
 
@@ -114,7 +115,13 @@ export const Consumption: FC<ResourceCalculatorProps> = ({ flowCollector }) => {
             {getSamplings().map((sampling, i) => {
               const current = getCurrentSampling() === sampling;
               return (
-                <Tr key={i} isRowSelected={current}>
+                <Tr
+                  key={i}
+                  isSelectable={setSampling !== undefined}
+                  isClickable={setSampling !== undefined}
+                  isRowSelected={current}
+                  onClick={() => setSampling && setSampling(sampling)}
+                >
                   <Td>{`${sampling} ${current ? t('(current)') : ''}`}</Td>
                   <Td></Td>
                   <Td></Td>
