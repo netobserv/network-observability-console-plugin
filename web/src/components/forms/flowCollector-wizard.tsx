@@ -11,6 +11,7 @@ import DynamicLoader, { navigate } from '../dynamic-loader/dynamic-loader';
 import { FlowCollectorSchema } from './config/schema';
 import { GetFlowCollectorJS } from './config/templates';
 import { FlowCollectorUISchema } from './config/uiSchema';
+import Consumption from './consumption';
 import { DynamicForm } from './dynamic-form/dynamic-form';
 import './forms.css';
 import ResourceWatcher, { Consumer } from './resource-watcher';
@@ -154,6 +155,9 @@ export const FlowCollectorWizard: FC<FlowCollectorWizardProps> = props => {
                   />
                   <WizardStep name={t('Integration')} id="console">
                     {form()}
+                  </WizardStep>
+                  <WizardStep name={t('Consumption')} id="consumption">
+                    <Consumption flowCollector={data} />
                   </WizardStep>
                   <WizardStep
                     name={t('Review')}
