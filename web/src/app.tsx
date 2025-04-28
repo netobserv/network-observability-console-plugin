@@ -26,6 +26,8 @@ import {
 import { BarsIcon } from '@patternfly/react-icons';
 import React from 'react';
 import { BrowserRouter, Link } from 'react-router-dom';
+import { GetFlowCollectorJS } from './components/forms/config/templates';
+import Consumption from './components/forms/consumption';
 import FlowCollectorForm from './components/forms/flowCollector';
 import FlowCollectorStatus from './components/forms/flowCollector-status';
 import FlowCollectorWizard from './components/forms/flowCollector-wizard';
@@ -68,6 +70,10 @@ export const pages = [
   {
     id: 'flowCollector',
     name: 'FlowCollector form'
+  },
+  {
+    id: 'flowCollector-consumption',
+    name: 'FlowCollector consumption'
   },
   {
     id: 'flowCollector-status',
@@ -193,6 +199,8 @@ export const App: React.FunctionComponent = () => {
         return <FlowCollectorWizard />;
       case 'flowCollector':
         return <FlowCollectorForm />;
+      case 'flowCollector-consumption':
+        return <Consumption flowCollector={GetFlowCollectorJS()} />;
       case 'flowCollector-status':
         return <FlowCollectorStatus />;
       case 'flowMetric-wizard':
@@ -216,6 +224,12 @@ export const App: React.FunctionComponent = () => {
       case 'flowMetric-wizard':
       case 'flowMetric':
         return <>{content}</>;
+      case 'flowCollector-consumption':
+        return (
+          <PageSection id="pageSection" className={isDark ? 'dark' : 'light'}>
+            {content}
+          </PageSection>
+        );
       default:
         return (
           <PageSection id="consolePageSection" className={`tab' ${isDark ? 'dark' : 'light'}`}>

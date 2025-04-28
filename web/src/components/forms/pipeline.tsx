@@ -4,6 +4,7 @@ import {
   K8sResourceConditionStatus,
   K8sResourceKind
 } from '@openshift-console/dynamic-plugin-sdk';
+
 import {
   DefaultTaskGroup,
   DEFAULT_EDGE_TYPE,
@@ -30,6 +31,7 @@ import {
   VisualizationSurface,
   WhenDecorator
 } from '@patternfly/react-topology';
+
 import { t } from 'i18next';
 import _ from 'lodash';
 import * as React from 'react';
