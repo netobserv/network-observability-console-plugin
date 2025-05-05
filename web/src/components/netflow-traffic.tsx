@@ -451,6 +451,21 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
             model.setWarning,
             clearFlows
           );
+
+        if (model.topologyOptions.showEmpty && model.metricScope === 'network') {
+          drawerRef.current
+            ?.getTopologyHandle()
+            ?.fetchUDNs()
+            .then(ids => {
+              model.setTopologyUDNIds(ids);
+            })
+            .catch(err => {
+              console.error('fetchUDNs error', err);
+              model.setTopologyUDNIds([]);
+            });
+        } else {
+          model.setTopologyUDNIds([]);
+        }
         break;
       default:
         console.error('tick called on not implemented view Id', model.selectedViewId);
@@ -524,6 +539,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
     model.config.features,
     model.topologyMetricType,
     model.topologyMetricFunction,
+    model.topologyOptions.showEmpty,
     model.selectedViewId,
     buildFlowQuery,
     manageWarnings,

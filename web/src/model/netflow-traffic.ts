@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/rules-of-hooks */
-import React from 'react';
+import React, { useState } from 'react';
 import { Record } from '../api/ipfix';
 import { defaultNetflowMetrics, NetflowMetrics, Stats } from '../api/loki';
 import { rateMetricFunctions, timeMetricFunctions } from '../components/dropdowns/metric-function-dropdown';
@@ -91,6 +91,7 @@ export function netflowTrafficModel() {
     localStorageMetricTypeKey,
     defaultMetricType
   );
+  const [topologyUDNIds, setTopologyUDNIds] = useState<string[]>([]);
   const [interval, setInterval] = useLocalStorage<number | undefined>(localStorageRefreshKey);
   const [showViewOptions, setShowViewOptions] = useLocalStorage<boolean>(localStorageShowOptionsKey, false);
   const [showHistogram, setShowHistogram] = useLocalStorage<boolean>(localStorageShowHistogramKey, false);
@@ -204,6 +205,8 @@ export function netflowTrafficModel() {
     setTopologyMetricFunction,
     topologyMetricType,
     setTopologyMetricType: updateTopologyMetricType,
+    topologyUDNIds,
+    setTopologyUDNIds,
     interval,
     setInterval,
     showViewOptions,
