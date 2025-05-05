@@ -7,6 +7,7 @@ toolchain go1.23.5
 require (
 	github.com/gorilla/mux v1.8.1
 	github.com/json-iterator/go v1.1.12
+	github.com/mark3labs/mcp-go v0.16.0
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/netobserv/netobserv-ebpf-agent v1.9.0-crc0
 	github.com/prometheus/client_golang v1.22.0
@@ -51,6 +52,7 @@ require (
 	github.com/spf13/pflag v1.0.6 // indirect
 	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
+	github.com/yosida95/uritemplate/v3 v3.0.2 // indirect
 	golang.org/x/net v0.39.0 // indirect
 	golang.org/x/oauth2 v0.29.0 // indirect
 	golang.org/x/sys v0.32.0 // indirect
