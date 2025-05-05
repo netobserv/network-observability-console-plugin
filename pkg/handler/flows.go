@@ -34,7 +34,7 @@ func (h *Handlers) GetFlows(ctx context.Context) func(w http.ResponseWriter, r *
 			return
 		}
 
-		cl := newLokiClient(&h.Cfg.Loki, r.Header, false)
+		cl := NewLokiClient(&h.Cfg.Loki, r.Header, false)
 		var code int
 		startTime := time.Now()
 		defer func() {
@@ -44,7 +44,7 @@ func (h *Handlers) GetFlows(ctx context.Context) func(w http.ResponseWriter, r *
 		params := r.URL.Query()
 		hlog.Debugf("GetFlows query params: %s", params)
 
-		flows, code, err := h.getFlows(ctx, cl, params)
+		flows, code, err := h.QueryFlows(ctx, cl, params)
 		if err != nil {
 			writeError(w, code, err.Error())
 			return
@@ -55,7 +55,7 @@ func (h *Handlers) GetFlows(ctx context.Context) func(w http.ResponseWriter, r *
 	}
 }
 
-func (h *Handlers) getFlows(ctx context.Context, lokiClient httpclient.Caller, params url.Values) (*model.AggregatedQueryResponse, int, error) {
+func (h *Handlers) QueryFlows(ctx context.Context, lokiClient httpclient.Caller, params url.Values) (*model.AggregatedQueryResponse, int, error) {
 	start, _, err := getStartTime(params)
 	if err != nil {
 		return nil, http.StatusBadRequest, err

@@ -21,7 +21,7 @@ func (h *Handlers) GetClusters(ctx context.Context) func(w http.ResponseWriter, 
 		namespace := params.Get(namespaceKey)
 		isDev := namespace != ""
 
-		clients, err := newClients(h.Cfg, r.Header, false, namespace)
+		clients, err := NewClients(h.Cfg, r.Header, false, namespace)
 		if err != nil {
 			writeError(w, http.StatusInternalServerError, err.Error())
 			return
@@ -50,7 +50,7 @@ func (h *Handlers) GetUDNs(ctx context.Context) func(w http.ResponseWriter, r *h
 		namespace := params.Get(namespaceKey)
 		isDev := namespace != ""
 
-		clients, err := newClients(h.Cfg, r.Header, false, namespace)
+		clients, err := NewClients(h.Cfg, r.Header, false, namespace)
 		if err != nil {
 			writeError(w, http.StatusInternalServerError, err.Error())
 			return
@@ -79,7 +79,7 @@ func (h *Handlers) GetZones(ctx context.Context) func(w http.ResponseWriter, r *
 		namespace := params.Get(namespaceKey)
 		isDev := namespace != ""
 
-		clients, err := newClients(h.Cfg, r.Header, false, namespace)
+		clients, err := NewClients(h.Cfg, r.Header, false, namespace)
 		if err != nil {
 			writeError(w, http.StatusInternalServerError, err.Error())
 			return
@@ -139,7 +139,7 @@ func (h *Handlers) GetNamespaces(ctx context.Context) func(w http.ResponseWriter
 		namespace := params.Get(namespaceKey)
 		isDev := namespace != ""
 
-		clients, err := newClients(h.Cfg, r.Header, false, namespace)
+		clients, err := NewClients(h.Cfg, r.Header, false, namespace)
 		if err != nil {
 			writeError(w, http.StatusInternalServerError, err.Error())
 			return
@@ -196,7 +196,7 @@ func (h *Handlers) GetNames(ctx context.Context) func(w http.ResponseWriter, r *
 		namespace := params.Get(namespaceKey)
 		kind := params.Get("kind")
 
-		clients, err := newClients(h.Cfg, r.Header, false, namespace)
+		clients, err := NewClients(h.Cfg, r.Header, false, namespace)
 		if err != nil {
 			writeError(w, http.StatusInternalServerError, err.Error())
 			return

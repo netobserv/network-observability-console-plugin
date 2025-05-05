@@ -39,7 +39,7 @@ const (
 	lokiOrgIDHeader = "X-Scope-OrgID"
 )
 
-func newLokiClient(cfg *config.Loki, requestHeader http.Header, useStatusConfig bool) httpclient.Caller {
+func NewLokiClient(cfg *config.Loki, requestHeader http.Header, useStatusConfig bool) httpclient.Caller {
 	headers := map[string][]string{}
 	if cfg.TenantID != "" {
 		headers[lokiOrgIDHeader] = []string{cfg.TenantID}
@@ -198,7 +198,7 @@ func getLokiNamesForPrefix(cfg *config.Loki, lokiClient httpclient.Caller, filts
 }
 
 func (h *Handlers) getLokiStatus(r *http.Request) ([]byte, int, error) {
-	lokiClient := newLokiClient(&h.Cfg.Loki, r.Header, true)
+	lokiClient := NewLokiClient(&h.Cfg.Loki, r.Header, true)
 	baseURL := strings.TrimRight(h.Cfg.Loki.GetStatusURL(), "/")
 	return executeLokiQuery(fmt.Sprintf("%s/%s", baseURL, "ready"), lokiClient)
 }
@@ -231,7 +231,7 @@ func (h *Handlers) LokiMetrics() func(w http.ResponseWriter, r *http.Request) {
 			writeError(w, http.StatusBadRequest, "Loki is disabled")
 			return
 		}
-		lokiClient := newLokiClient(&h.Cfg.Loki, r.Header, true)
+		lokiClient := NewLokiClient(&h.Cfg.Loki, r.Header, true)
 		baseURL := strings.TrimRight(h.Cfg.Loki.GetStatusURL(), "/")
 
 		resp, code, err := executeLokiQuery(fmt.Sprintf("%s/%s", baseURL, "metrics"), lokiClient)
@@ -250,7 +250,7 @@ func (h *Handlers) LokiBuildInfos() func(w http.ResponseWriter, r *http.Request)
 			writeError(w, http.StatusBadRequest, "Loki is disabled")
 			return
 		}
-		lokiClient := newLokiClient(&h.Cfg.Loki, r.Header, true)
+		lokiClient := NewLokiClient(&h.Cfg.Loki, r.Header, true)
 		baseURL := strings.TrimRight(h.Cfg.Loki.GetStatusURL(), "/")
 
 		resp, code, err := executeLokiQuery(fmt.Sprintf("%s/%s", baseURL, "loki/api/v1/status/buildinfo"), lokiClient)
@@ -293,7 +293,7 @@ func (h *Handlers) LokiLimits() func(w http.ResponseWriter, r *http.Request) {
 			writeJSON(w, http.StatusNoContent, "Loki is disabled")
 			return
 		}
-		lokiClient := newLokiClient(&h.Cfg.Loki, r.Header, true)
+		lokiClient := NewLokiClient(&h.Cfg.Loki, r.Header, true)
 		limits, err := h.fetchLokiLimits(lokiClient)
 		if err != nil {
 			hlog.WithError(err).Error("cannot fetch Loki limits")

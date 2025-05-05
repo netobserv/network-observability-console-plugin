@@ -38,19 +38,18 @@ const (
 func (h *Handlers) GetTopology(ctx context.Context) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		params := r.URL.Query()
-		namespace := params.Get(namespaceKey)
-
-		clients, err := newClients(h.Cfg, r.Header, false, namespace)
-		if err != nil {
-			writeError(w, http.StatusInternalServerError, err.Error())
-			return
-		}
-
 		var code int
 		startTime := time.Now()
 		defer func() {
 			metrics.ObserveHTTPCall("GetTopology", code, startTime)
 		}()
+
+		namespace := params.Get(namespaceKey)
+		clients, err := NewClients(h.Cfg, r.Header, false, namespace)
+		if err != nil {
+			writeError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
 
 		ds, err := getDatasource(params)
 		if err != nil {
@@ -58,7 +57,7 @@ func (h *Handlers) GetTopology(ctx context.Context) func(w http.ResponseWriter, 
 			return
 		}
 
-		flows, code, err := h.getTopologyFlows(ctx, clients, params, ds)
+		flows, code, err := h.QueryMetrics(ctx, clients, params, ds)
 		var dsErr *datasourceError
 		if err != nil &&
 			ds == constants.DataSourceAuto &&
@@ -70,7 +69,7 @@ func (h *Handlers) GetTopology(ctx context.Context) func(w http.ResponseWriter, 
 			// This is because multi-tenancy is currently not managed for prom datasource, hence such queries have to go with Loki
 			// Unfortunately we don't know a safe and generic way to pre-flight check if the user will be authorized
 			hlog.Info("Retrying with Loki...")
-			flows, code, err = h.getTopologyFlows(ctx, clients, params, constants.DataSourceLoki)
+			flows, code, err = h.QueryMetrics(ctx, clients, params, constants.DataSourceLoki)
 		}
 		if err != nil {
 			writeError(w, code, err.Error())
@@ -148,7 +147,7 @@ func (h *Handlers) extractTopologyQueryParams(params url.Values, ds constants.Da
 	return &in, filterGroups, qr, reqLimit, err
 }
 
-func (h *Handlers) getTopologyFlows(ctx context.Context, cl clients, params url.Values, ds constants.DataSource) (*model.AggregatedQueryResponse, int, error) {
+func (h *Handlers) QueryMetrics(ctx context.Context, cl clients, params url.Values, ds constants.DataSource) (*model.AggregatedQueryResponse, int, error) {
 	hlog.Debugf("GetTopology query params: %s", params)
 
 	dataSources := make(map[constants.DataSource]bool)

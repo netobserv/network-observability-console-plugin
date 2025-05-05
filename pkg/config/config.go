@@ -19,6 +19,13 @@ var (
 	log = logrus.WithField("module", "config")
 )
 
+type MCP struct {
+	Enable     bool   `yaml:"enable,omitempty" json:"enable,omitempty"`
+	Transport  string `yaml:"transport,omitempty" json:"transport,omitempty"`
+	SSEAddress string `yaml:"sseAddress,omitempty" json:"sseAddress,omitempty"`
+	SSEPort    int    `yaml:"ssePort,omitempty" json:"ssePort,omitempty"`
+}
+
 type Server struct {
 	Port        int    `yaml:"port,omitempty" json:"port,omitempty"`
 	MetricsPort int    `yaml:"metricsPort,omitempty" json:"metricsPort,omitempty"`
@@ -29,6 +36,7 @@ type Server struct {
 	CORSHeaders string `yaml:"corsHeaders,omitempty" json:"corsHeaders,omitempty"`
 	CORSMaxAge  string `yaml:"corsMaxAge,omitempty" json:"corsMaxAge,omitempty"`
 	AuthCheck   string `yaml:"authCheck,omitempty" json:"authCheck,omitempty"`
+	MCP         MCP    `yaml:"mcp,omitempty" json:"mcp,omitempty"`
 }
 
 type Prometheus struct {
