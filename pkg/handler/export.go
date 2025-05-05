@@ -22,7 +22,7 @@ func (h *Handlers) ExportFlows(ctx context.Context) func(w http.ResponseWriter, 
 			writeError(w, http.StatusBadRequest, "Cannot perform flows query with disabled Loki")
 			return
 		}
-		cl := newLokiClient(&h.Cfg.Loki, r.Header, false)
+		cl := NewLokiClient(&h.Cfg.Loki, r.Header, false)
 		var code int
 		startTime := time.Now()
 		defer func() {
@@ -32,7 +32,7 @@ func (h *Handlers) ExportFlows(ctx context.Context) func(w http.ResponseWriter, 
 		params := r.URL.Query()
 		hlog.Debugf("ExportFlows query params: %s", params)
 
-		flows, code, err := h.getFlows(ctx, cl, params)
+		flows, code, err := h.QueryFlows(ctx, cl, params)
 		if err != nil {
 			writeError(w, code, err.Error())
 			return
