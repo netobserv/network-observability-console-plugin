@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 
-import * as c from '../../support/const'
+import * as c from '../../support/const';
 
 describe('netflow-table', () => {
   function reload(clearCache = true) {
@@ -25,7 +25,6 @@ describe('netflow-table', () => {
 
     cy.addFilter('src_namespace', c.namespace);
     cy.addFilter('src_name', c.pod);
-    cy.changeQueryOption('Show duplicates');
     cy.changeQueryOption('1000');
     cy.changeTimeRange('Last 1 day');
   });
