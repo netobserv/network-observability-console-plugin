@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 import * as _ from 'lodash';
-import { Column, ColumnsId, getDefaultColumns } from '../../utils/columns';
+import { Column, ColumnConfigDef, ColumnsId, getDefaultColumns } from '../../utils/columns';
 import { FieldConfig } from '../../utils/fields';
 
 export const ColumnConfigSampleDefs = [
@@ -171,6 +171,16 @@ export const ColumnConfigSampleDefs = [
     width: 15
   },
   {
+    id: 'SrcZone',
+    group: 'Source',
+    name: 'Zone',
+    field: 'SrcK8S_Zone',
+    filter: 'src_zone',
+    default: false,
+    width: 15,
+    feature: 'zones'
+  },
+  {
     id: 'DstK8S_Name',
     group: 'Destination',
     name: 'Name',
@@ -302,6 +312,16 @@ export const ColumnConfigSampleDefs = [
     calculated: `concat(DstAddr,':',DstPort)`,
     default: false,
     width: 15
+  },
+  {
+    id: 'DstZone',
+    group: 'Destination',
+    name: 'Zone',
+    field: 'DstK8S_Zone',
+    filter: 'dst_zone',
+    default: false,
+    width: 15,
+    feature: 'zones'
   },
   {
     id: 'K8S_Name',
@@ -476,6 +496,7 @@ export const ColumnConfigSampleDefs = [
     tooltip: 'DNS request identifier.',
     field: 'DnsId',
     filter: 'dns_id',
+    feature: 'dnsTracking',
     default: false,
     width: 5
   },
@@ -485,6 +506,8 @@ export const ColumnConfigSampleDefs = [
     name: 'DNS Latency',
     tooltip: 'Time elapsed between DNS request and response.',
     field: 'DnsLatencyMs',
+    filter: 'dns_latency',
+    feature: 'dnsTracking',
     default: false,
     width: 5
   },
@@ -495,6 +518,7 @@ export const ColumnConfigSampleDefs = [
     tooltip: 'DNS RCODE name from response header.',
     field: 'DnsFlagsResponseCode',
     filter: 'dns_flag_response_code',
+    feature: 'dnsTracking',
     default: false,
     width: 5
   },
@@ -518,7 +542,7 @@ export const ColumnConfigSampleDefs = [
     default: false,
     width: 10
   }
-];
+] as ColumnConfigDef[];
 
 export const FieldConfigSample = [
   {

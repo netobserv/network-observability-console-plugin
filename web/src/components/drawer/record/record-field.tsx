@@ -435,7 +435,10 @@ export const RecordField: React.FC<RecordFieldProps> = ({
       case ColumnsId.udns: {
         if (Array.isArray(value)) {
           return nthContainer(
-            value.map(iName => simpleTextWithTooltip(iName !== '' ? String(iName) : t('None'))),
+            value
+              .map(iName => String(iName))
+              .filter(iName => iName !== '')
+              .map(iName => simpleTextWithTooltip(iName)),
             true,
             false
           );
