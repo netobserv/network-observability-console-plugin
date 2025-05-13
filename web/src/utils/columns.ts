@@ -208,6 +208,15 @@ export const getShortColumnName = (col?: Column): string => {
   return '';
 };
 
+const getFieldSingleValue = (rec: Record, fvFunc: (flow: Record) => ColValue): ColValue => {
+  const val = fvFunc(rec);
+  if (Array.isArray(val) && val.length > 0) {
+    // E.g. for Bytes / Packets columns as they may include drops
+    return val[0];
+  }
+  return val;
+};
+
 export const getDefaultColumns = (columnDefs: ColumnConfigDef[], fieldConfigs: FieldConfig[]): Column[] => {
   const columns: Column[] = [];
 
@@ -241,8 +250,8 @@ export const getDefaultColumns = (columnDefs: ColumnConfigDef[], fieldConfigs: F
         if (!col.fieldValue) {
           return -1;
         }
-        const valA = col.fieldValue(a);
-        const valB = col.fieldValue(b);
+        const valA = getFieldSingleValue(a, col.fieldValue);
+        const valB = getFieldSingleValue(b, col.fieldValue);
         if (typeof valA === 'number' && typeof valB === 'number') {
           if (col.id.includes('Port')) {
             return comparePorts(valA, valB);
