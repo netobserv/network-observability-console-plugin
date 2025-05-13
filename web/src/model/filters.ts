@@ -46,7 +46,9 @@ export type FilterId =
   | 'xlat_src_address'
   | 'xlat_dst_address'
   | 'xlat_src_port'
-  | 'xlat_dst_port';
+  | 'xlat_dst_port'
+  | 'ipsec_success'
+  | 'ipsec_retcode';
 
 export interface FilterConfigDef {
   id: string;

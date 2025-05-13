@@ -134,6 +134,10 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
     return model.config.features.includes('networkEvents');
   }, [model.config.features]);
 
+  const isIPSec = React.useCallback(() => {
+    return model.config.features.includes('ipsec');
+  }, [model.config.features]);
+
   const isPromOnly = React.useCallback(() => {
     return !allowLoki() || model.dataSource === 'prom';
   }, [allowLoki, model.dataSource]);
@@ -224,7 +228,8 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
         (isUdn() || fd.id !== 'udns') &&
         (isPktXlat() || !fd.id.startsWith('xlat_')) &&
         (isNetEvents() || fd.id !== 'network_events') &&
-        (!isPromOnly() || checkFilterAvailable(fd, model.config.promLabels))
+        (!isPromOnly() || checkFilterAvailable(fd, model.config.promLabels)) &&
+        (isIPSec() || !fd.id.startsWith('ipsec_'))
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [model.config.columns, model.config.filters, model.config.promLabels, isPromOnly]);

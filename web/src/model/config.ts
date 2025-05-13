@@ -13,7 +13,8 @@ export type Feature =
   | 'flowRTT'
   | 'udnMapping'
   | 'packetTranslation'
-  | 'networkEvents';
+  | 'networkEvents'
+  | 'ipsec';
 
 export type Deduper = {
   mark: boolean;
