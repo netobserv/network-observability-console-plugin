@@ -218,14 +218,16 @@ export const RecordField: React.FC<RecordFieldProps> = ({
   const nthContainer = (children: (JSX.Element | undefined)[], asChild = true, childIcon = true, forcedSize?: Size) => {
     return (
       <Flex className={`record-field-flex-container ${forcedSize || size}`} flex={{ default: 'flex_1' }}>
-        {children.map((c, i) => {
-          const child = c ? c : emptyText();
-          if (i > 0 && asChild && childIcon) {
-            const arrow = <span className="child-arrow">{'↪'}</span>;
-            return sideBySideContainer(arrow, child, 'flexNone', 'flex_1', 'nowrap');
-          }
-          return child;
-        })}
+        {children.length > 0
+          ? children.map((c, i) => {
+              const child = c ? c : emptyText();
+              if (i > 0 && asChild && childIcon) {
+                const arrow = <span className="child-arrow">{'↪'}</span>;
+                return sideBySideContainer(arrow, child, 'flexNone', 'flex_1', 'nowrap');
+              }
+              return child;
+            })
+          : emptyText()}
       </Flex>
     );
   };
