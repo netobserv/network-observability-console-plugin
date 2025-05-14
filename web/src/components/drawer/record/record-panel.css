@@ -55,7 +55,7 @@ button.borderless-accordion {
 .pf-v5-c-drawer__body.drawer-body {
   display: flex;
   flex-direction: column;
-  height: -webkit-fill-available;
+  height: 100%;
   flex: none !important;
 }
 
