@@ -22,7 +22,7 @@ type clients struct {
 	promDev   api.Client
 }
 
-func newClients(cfg *config.Config, requestHeader http.Header, useLokiStatus bool, namespace string) (clients, error) {
+func NewClients(cfg *config.Config, requestHeader http.Header, useLokiStatus bool, namespace string) (clients, error) {
 	lokiClients := newLokiClients(cfg, requestHeader, useLokiStatus)
 	promClients, err := newPromClients(cfg, requestHeader, namespace)
 	return clients{loki: lokiClients.loki, promAdmin: promClients.promAdmin, promDev: promClients.promDev}, err
@@ -49,7 +49,7 @@ func newPromClients(cfg *config.Config, requestHeader http.Header, namespace str
 func newLokiClients(cfg *config.Config, requestHeader http.Header, useLokiStatus bool) clients {
 	var lokiClient httpclient.Caller
 	if cfg.IsLokiEnabled() {
-		lokiClient = newLokiClient(&cfg.Loki, requestHeader, useLokiStatus)
+		lokiClient = NewLokiClient(&cfg.Loki, requestHeader, useLokiStatus)
 	}
 	return clients{loki: lokiClient}
 }
