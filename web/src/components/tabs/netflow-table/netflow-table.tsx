@@ -223,9 +223,9 @@ export const NetflowTable: React.FC<NetflowTableProps> = React.forwardRef(
       if (!found) {
         return props.flows;
       } else {
-        return props.flows.sort((a: Record, b: Record) => {
-          return activeSortDirection === 'desc' ? found.sort(a, b, found) : found.sort(b, a, found);
-        });
+        return activeSortDirection === 'desc'
+          ? props.flows.sort((a: Record, b: Record) => found.sort(a, b, found))
+          : props.flows.sort((a: Record, b: Record) => found.sort(b, a, found));
       }
     }, [activeSortDirection, activeSortId, props.columns, props.flows]);
 
