@@ -4,6 +4,5 @@
 
 .netobserv-alerts-container {
     position: absolute;
-    width: -webkit-fill-available;
     z-index: 999;
 }
