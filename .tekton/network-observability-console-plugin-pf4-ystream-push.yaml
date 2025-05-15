@@ -8,13 +8,13 @@ metadata:
     build.appstudio.redhat.com/target_branch: '{{target_branch}}'
     pipelinesascode.tekton.dev/max-keep-runs: "3"
     pipelinesascode.tekton.dev/on-cel-expression: event == "push" && target_branch
-      == "main"
+      == "release-1.9-pf4"
   creationTimestamp: null
   labels:
     appstudio.openshift.io/application: netobserv-ystream
-    appstudio.openshift.io/component: network-observability-console-plugin-ystream
+    appstudio.openshift.io/component: network-observability-console-plugin-pf4-ystream
     pipelines.appstudio.openshift.io/type: build
-  name: network-observability-console-plugin-ystream-on-push
+  name: network-observability-console-plugin-pf4-ystream-on-push
   namespace: ocp-network-observab-tenant
 spec:
   params:
@@ -31,5 +31,5 @@ spec:
   pipelineRef:
     name: build-pipeline
   taskRunTemplate:
-    serviceAccountName: build-pipeline-network-observability-console-plugin-ystream
+    serviceAccountName: build-pipeline-network-observability-console-plugin-pf4-ystream
 status: {}
