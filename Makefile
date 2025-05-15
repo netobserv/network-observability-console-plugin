@@ -15,8 +15,11 @@ SHELL := /usr/bin/env bash
 # In CI, to be replaced by `netobserv`
 IMAGE_ORG ?= $(USER)
 
+# Image registry such as quay or docker
+IMAGE_REGISTRY ?= quay.io
+
 # IMAGE_TAG_BASE defines the namespace and part of the image name for remote images.
-IMAGE_TAG_BASE ?= quay.io/${IMAGE_ORG}/network-observability-console-plugin
+IMAGE_TAG_BASE ?= $(IMAGE_REGISTRY)/${IMAGE_ORG}/network-observability-console-plugin
 
 # Standalone `true` is used to build frontend outside of OCP Console environment
 # see .mk/standalone.mk
@@ -24,7 +27,7 @@ STANDALONE ?= false
 
 ifeq (${STANDALONE}, true)
 	BUILDSCRIPT = :standalone
-	IMAGE_TAG_BASE := quay.io/${IMAGE_ORG}/network-observability-standalone-frontend
+	IMAGE_TAG_BASE := $(IMAGE_REGISTRY)/${IMAGE_ORG}/network-observability-standalone-frontend
 endif
 
 # Image URL to use all building/pushing image targets
