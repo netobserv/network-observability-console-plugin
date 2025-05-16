@@ -124,22 +124,6 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
     return model.config.features.includes('pktDrop');
   }, [model.config.features]);
 
-  const isUdn = React.useCallback(() => {
-    return model.config.features.includes('udnMapping');
-  }, [model.config.features]);
-
-  const isPktXlat = React.useCallback(() => {
-    return model.config.features.includes('packetTranslation');
-  }, [model.config.features]);
-
-  const isNetEvents = React.useCallback(() => {
-    return model.config.features.includes('networkEvents');
-  }, [model.config.features]);
-
-  const isIPSec = React.useCallback(() => {
-    return model.config.features.includes('ipsec');
-  }, [model.config.features]);
-
   const isPromOnly = React.useCallback(() => {
     return !allowLoki() || model.dataSource === 'prom';
   }, [allowLoki, model.dataSource]);
@@ -158,14 +142,6 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
     },
     [model.config.promLabels, isPromOnly]
   );
-
-  const isMultiCluster = React.useCallback(() => {
-    return isPromOnly() ? dataSourceHasLabels(['K8S_ClusterName']) : model.config.features.includes('multiCluster');
-  }, [model.config.features, dataSourceHasLabels, isPromOnly]);
-
-  const isZones = React.useCallback(() => {
-    return isPromOnly() ? dataSourceHasLabels(['SrcK8S_Zone', 'DstK8S_Zone']) : model.config.features.includes('zones');
-  }, [model.config.features, dataSourceHasLabels, isPromOnly]);
 
   const getAvailableScopes = React.useCallback(() => {
     return model.config.scopes.filter(sc => {
@@ -219,22 +195,14 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
   }, [getAvailableColumns]);
 
   const getFilterDefs = React.useCallback(() => {
-    return getFilterDefinitions(model.config.filters, model.config.columns, t).filter(
-      fd =>
-        (isMultiCluster() || fd.id !== 'cluster_name') &&
-        (isZones() || !fd.id.endsWith('_zone')) &&
-        (isConnectionTracking() || fd.id !== 'id') &&
-        (isDNSTracking() || !fd.id.startsWith('dns_')) &&
-        (isPktDrop() || !fd.id.startsWith('pkt_drop_')) &&
-        (isFlowRTT() || fd.id !== 'time_flow_rtt') &&
-        (isUdn() || fd.id !== 'udns') &&
-        (isPktXlat() || !fd.id.startsWith('xlat_')) &&
-        (isNetEvents() || fd.id !== 'network_events') &&
-        (!isPromOnly() || checkFilterAvailable(fd, model.config.promLabels)) &&
-        (isIPSec() || !fd.id.startsWith('ipsec_'))
-    );
+    return getFilterDefinitions(model.config.filters, model.config.columns, t).filter(fd => {
+      if (fd.id === 'id') {
+        return isConnectionTracking();
+      }
+      return checkFilterAvailable(fd, model.config, model.dataSource);
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [model.config.columns, model.config.filters, model.config.promLabels, isPromOnly]);
+  }, [model.config, model.dataSource]);
 
   const getQuickFilters = React.useCallback(
     (c: Config = model.config) => {

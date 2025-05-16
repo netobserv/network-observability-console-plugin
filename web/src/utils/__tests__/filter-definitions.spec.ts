@@ -1,4 +1,6 @@
+import { ColumnConfigSampleDefs } from '../../components/__tests-data__/columns';
 import { FilterDefinitionSample } from '../../components/__tests-data__/filters';
+import { Config, Feature } from '../../model/config';
 import { checkFilterAvailable, findFilter } from '../filter-definitions';
 
 describe('Resource validation', () => {
@@ -99,35 +101,92 @@ describe('Resource checkCompletion', () => {
   });
 });
 
-describe('Check availability', () => {
+describe('Check availability for prometheus only', () => {
   const simpleFilter = findFilter(FilterDefinitionSample, 'src_name')!;
   const k8sFilter = findFilter(FilterDefinitionSample, 'src_resource')!;
+  const getConfig = (promLabels: string[]): Config => {
+    return { promLabels, dataSources: ['prom'] } as Config;
+  };
 
   it('should be available', () => {
-    let available = checkFilterAvailable(simpleFilter, ['SrcK8S_Name', 'DstK8S_Name']);
+    let available = checkFilterAvailable(simpleFilter, getConfig(['SrcK8S_Name', 'DstK8S_Name']), 'prom');
     expect(available).toBe(true);
 
-    available = checkFilterAvailable(k8sFilter, [
-      'SrcK8S_OwnerName',
-      'SrcK8S_OwnerType',
-      'SrcK8S_Namespace',
-      'DstK8S_OwnerName',
-      'DstK8S_OwnerType',
-      'DstK8S_Namespace'
-    ]);
+    available = checkFilterAvailable(
+      k8sFilter,
+      getConfig([
+        'SrcK8S_OwnerName',
+        'SrcK8S_OwnerType',
+        'SrcK8S_Namespace',
+        'DstK8S_OwnerName',
+        'DstK8S_OwnerType',
+        'DstK8S_Namespace'
+      ]),
+      'prom'
+    );
     expect(available).toBe(true);
   });
 
   it('should not be available', () => {
-    let available = checkFilterAvailable(simpleFilter, ['SrcK8S_OwnerName', 'DstK8S_OwnerName']);
+    let available = checkFilterAvailable(simpleFilter, getConfig(['SrcK8S_OwnerName', 'DstK8S_OwnerName']), 'prom');
     expect(available).toBe(false);
 
-    available = checkFilterAvailable(k8sFilter, [
-      'SrcK8S_OwnerName',
-      'SrcK8S_Namespace',
-      'DstK8S_OwnerName',
-      'DstK8S_Namespace'
-    ]);
+    available = checkFilterAvailable(
+      k8sFilter,
+      getConfig(['SrcK8S_OwnerName', 'SrcK8S_Namespace', 'DstK8S_OwnerName', 'DstK8S_Namespace']),
+      'prom'
+    );
     expect(available).toBe(false);
+  });
+});
+
+describe('Check availability against features', () => {
+  const getConfig = (feats: Feature[]): Config => {
+    return { features: feats, dataSources: ['loki'], columns: ColumnConfigSampleDefs } as Config;
+  };
+
+  it('with standard filters', () => {
+    const simpleFilter = findFilter(FilterDefinitionSample, 'src_name')!;
+    const k8sFilter = findFilter(FilterDefinitionSample, 'src_resource')!;
+
+    let available = checkFilterAvailable(simpleFilter, getConfig([]), 'auto');
+    expect(available).toBe(true);
+
+    available = checkFilterAvailable(k8sFilter, getConfig([]), 'auto');
+    expect(available).toBe(true);
+
+    available = checkFilterAvailable(simpleFilter, getConfig(['dnsTracking']), 'auto');
+    expect(available).toBe(true);
+
+    available = checkFilterAvailable(k8sFilter, getConfig(['dnsTracking']), 'auto');
+    expect(available).toBe(true);
+  });
+
+  it('with AZ filters', () => {
+    const azFilter = findFilter(FilterDefinitionSample, 'src_zone')!;
+
+    let available = checkFilterAvailable(azFilter, getConfig([]), 'auto');
+    expect(available).toBe(false);
+
+    available = checkFilterAvailable(azFilter, getConfig(['dnsTracking']), 'auto');
+    expect(available).toBe(false);
+
+    available = checkFilterAvailable(azFilter, getConfig(['zones']), 'auto');
+    expect(available).toBe(true);
+  });
+
+  it('with DNS filters', () => {
+    const dnsIdFilter = findFilter(FilterDefinitionSample, 'dns_id')!;
+    const dnsLatilter = findFilter(FilterDefinitionSample, 'dns_latency')!;
+
+    let available = checkFilterAvailable(dnsIdFilter, getConfig([]), 'auto');
+    expect(available).toBe(false);
+    available = checkFilterAvailable(dnsLatilter, getConfig([]), 'auto');
+    expect(available).toBe(false);
+
+    available = checkFilterAvailable(dnsIdFilter, getConfig(['dnsTracking']), 'auto');
+    expect(available).toBe(true);
+    available = checkFilterAvailable(dnsLatilter, getConfig(['dnsTracking']), 'auto');
+    expect(available).toBe(true);
   });
 });

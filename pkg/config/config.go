@@ -116,8 +116,6 @@ type FieldConfig struct {
 	Type        string `yaml:"type" json:"type"`
 	Format      string `yaml:"format,omitempty" json:"format,omitempty"`
 	Description string `yaml:"description" json:"description"`
-	// lokiLabel flag is for documentation only. Use loki.labels instead
-	Filter string `yaml:"filter,omitempty" json:"filter,omitempty"`
 }
 
 type Frontend struct {

@@ -183,6 +183,18 @@ export const FilterConfigSampleDefs = [
       'Specify a single kubernetes name following these rules:\n    - Containing any alphanumeric, hyphen, underscrore or dot character\n    - Partial text like cluster, cluster-image, image-registry\n    - Exact match using quotes like "cluster-image-registry"\n    - Case sensitive match using quotes like "Deployment"\n    - Starting text like cluster, "cluster-*"\n    - Ending text like "*-registry"\n    - Pattern like "cluster-*-registry", "c*-*-r*y", -i*e-'
   },
   {
+    id: 'src_zone',
+    name: 'Zone',
+    component: 'autocomplete',
+    category: 'source'
+  },
+  {
+    id: 'dst_zone',
+    name: 'Zone',
+    component: 'autocomplete',
+    category: 'destination'
+  },
+  {
     id: 'protocol',
     name: 'Protocol',
     component: 'autocomplete',

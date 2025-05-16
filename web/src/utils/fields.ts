@@ -7,5 +7,4 @@ export interface FieldConfig {
   type: FieldType;
   format?: FieldFormat;
   description: string;
-  filter?: string;
 }

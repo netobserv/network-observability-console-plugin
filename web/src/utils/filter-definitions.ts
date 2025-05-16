@@ -1,6 +1,7 @@
 import { TFunction } from 'i18next';
 import * as _ from 'lodash';
 import { Field } from '../api/ipfix';
+import { Config } from '../model/config';
 import {
   FilterCategory,
   FilterComponent,
@@ -11,6 +12,7 @@ import {
   FiltersEncoder,
   FilterValue
 } from '../model/filters';
+import { DataSource } from '../model/flow-query';
 import { joinResource, SplitResource, splitResource, SplitStage } from '../model/resource';
 import { getPort } from '../utils/port';
 import { ColumnConfigDef } from './columns';
@@ -336,14 +338,29 @@ export const findFilter = (filterDefinitions: FilterDefinition[], id: FilterId) 
   return filterDefinitions.find(def => def.id === id);
 };
 
-export const checkFilterAvailable = (fd: FilterDefinition, labels: string[]) => {
-  const q = fd.encoder([{ v: 'any' }], false, false, false);
-  const parts = q.split('&');
-  for (let i = 0; i < parts.length; i++) {
-    const kv = parts[i].split('=');
-    if (kv.length === 0 || !labels.includes(kv[0])) {
-      return false;
+export const checkFilterAvailable = (fd: FilterDefinition, config: Config, dataSource: DataSource) => {
+  const allowLoki = config.dataSources.some(ds => ds === 'loki');
+  const isPromOnly = !allowLoki || dataSource === 'prom';
+
+  if (isPromOnly) {
+    // "encode" a dummy query to check related labels, and make sure they're all part of available prom labels
+    const q = fd.encoder([{ v: 'any' }], false, false, false);
+    const parts = q.split('&');
+    for (let i = 0; i < parts.length; i++) {
+      const kv = parts[i].split('=');
+      if (kv.length === 0 || !config.promLabels.includes(kv[0])) {
+        return false;
+      }
     }
+    return true;
   }
+
+  // Check against enabled features
+  const colConfig = config.columns.find(c => c.filter === fd.id);
+  if (colConfig?.feature) {
+    return config.features.includes(colConfig?.feature);
+  }
+
+  // Allow by default
   return true;
 };
