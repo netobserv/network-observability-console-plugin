@@ -227,7 +227,7 @@ export const RecordField: React.FC<RecordFieldProps> = ({
               }
               return child;
             })
-          : emptyText()}
+          : <Text className="text-muted record-field-value">{t('n/a')}</Text>}
       </Flex>
     );
   };
