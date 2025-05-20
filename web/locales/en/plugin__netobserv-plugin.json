@@ -36,6 +36,7 @@
   "Add Namespace, Owner or Resource filters (which use indexed fields), or decrease limit / range, to improve the query performance": "Add Namespace, Owner or Resource filters (which use indexed fields), or decrease limit / range, to improve the query performance",
   "Add more filters or decrease limit / range to improve the query performance": "Add more filters or decrease limit / range to improve the query performance",
   "Unable to get {{item}}": "Unable to get {{item}}",
+  "more": "more",
   "DNS Error": "DNS Error",
   "Namespace": "Namespace",
   "Show related documentation": "Show related documentation",
