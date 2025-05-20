@@ -471,7 +471,7 @@ export const TopologyContent: React.FC<TopologyContentProps> = ({
   useEventListener(graphLayoutEndEvent, onLayoutEnd);
   useEventListener(graphPositionChangeEvent, onLayoutPositionChange);
 
-  if (_.isEmpty(metrics) && _.isEmpty(droppedMetrics)) {
+  if (_.isEmpty(metrics) && _.isEmpty(droppedMetrics) && _.isEmpty(expectedNodes)) {
     return (
       <Bullseye data-test="no-results-found">
         <Empty showDetails={true} resetDefaultFilters={resetDefaultFilters} clearFilters={clearFilters} />
