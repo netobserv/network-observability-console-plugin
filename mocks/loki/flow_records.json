@@ -16,7 +16,7 @@
         "values": [
           [
             "1708011867120999936",
-            "{\"SrcK8S_Name\":\"ip-10-0-1-7.ec2.internal\",\"Bytes\":66,\"TimeFlowRttNs\":10000,\"Packets\":1,\"Interfaces\":[\"br-ex\",\"test\"],\"SrcMac\":\"02:27:A1:A8:84:B9\",\"Proto\":1,\"SrcK8S_HostIP\":\"10.0.1.7\",\"SrcK8S_HostName\":\"ip-10-0-1-7.ec2.internal\",\"Flags\":16,\"DnsErrno\":0,\"TimeFlowStartMs\":1708011867121,\"TimeReceived\":1708011867,\"DstAddr\":\"10.0.1.140\",\"Etype\":2048,\"SrcPort\":50104,\"AgentIP\":\"10.0.1.7\",\"SrcK8S_OwnerType\":\"Node\",\"Dscp\":0,\"TimeFlowEndMs\":1708011867121,\"IfDirections\":[\"1\",\"0\"],\"SrcAddr\":\"10.0.1.7\",\"DstMac\":\"02:7B:32:68:BE:65\",\"DstPort\":443,\"IcmpType\":3,\"IcmpCode\":0}"
+            "{\"SrcK8S_Name\":\"ip-10-0-1-7.ec2.internal\",\"Bytes\":66,\"TimeFlowRttNs\":10000,\"Packets\":1,\"Interfaces\":[\"br-ex\",\"test1\",\"test2\",\"test3\",\"test4\",\"test5\"],\"SrcMac\":\"02:27:A1:A8:84:B9\",\"Proto\":1,\"SrcK8S_HostIP\":\"10.0.1.7\",\"SrcK8S_HostName\":\"ip-10-0-1-7.ec2.internal\",\"Flags\":16,\"DnsErrno\":0,\"TimeFlowStartMs\":1708011867121,\"TimeReceived\":1708011867,\"DstAddr\":\"10.0.1.140\",\"Etype\":2048,\"SrcPort\":50104,\"AgentIP\":\"10.0.1.7\",\"SrcK8S_OwnerType\":\"Node\",\"Dscp\":0,\"TimeFlowEndMs\":1708011867121,\"IfDirections\":[\"1\",\"0\",\"0\",\"0\",\"0\",\"0\"],\"SrcAddr\":\"10.0.1.7\",\"DstMac\":\"02:7B:32:68:BE:65\",\"DstPort\":443,\"IcmpType\":3,\"IcmpCode\":0}"
           ],
           [
             "1708011867120999936",

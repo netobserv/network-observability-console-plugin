@@ -33,6 +33,19 @@
   gap: .3rem;
 }
 
+.record-field-flex-container .flowdirints {
+  flex-direction: column !important;
+}
+
+.record-field-flex-container .flowdirints > div {
+  width: 100%;
+}
+
+.side-by-side {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
 .record-field-flex {
   align-self: center;
 }
@@ -59,7 +72,6 @@
 .record-field-flex-container.s,
 .record-field-flex-container.m,
 .record-field-flex-container.l {
-  flex-direction: column;
 }
 
 .record-field-flex-container.s {
