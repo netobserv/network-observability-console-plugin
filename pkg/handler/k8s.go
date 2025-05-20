@@ -56,7 +56,7 @@ func (h *Handlers) GetUDNIdss(ctx context.Context) func(w http.ResponseWriter, r
 		}
 		for _, udn := range udns {
 			md := udn.Object["metadata"].(map[string]interface{})
-			values = append(values, fmt.Sprintf("%s.%s", md["namespace"], md["name"]))
+			values = append(values, fmt.Sprintf("%s/%s", md["namespace"], md["name"]))
 		}
 		writeJSON(w, http.StatusOK, utils.NonEmpty(utils.Dedup(values)))
 	}
