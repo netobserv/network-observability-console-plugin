@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi9/nodejs-18:1-1746536796 as web-builder
+FROM registry.access.redhat.com/ubi9/nodejs-18:1-1747690905 as web-builder
 
 ARG BUILDSCRIPT
 WORKDIR /opt/app-root
