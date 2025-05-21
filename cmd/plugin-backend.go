@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -42,7 +43,7 @@ func main() {
 	}
 	logrus.SetLevel(lvl)
 	log.Infof("Starting %s at log level %s", appVersion, *logLevel)
-
+	log.Infof("Loading config from %s", *configPath)
 	cfg, err := config.ReadFile(buildVersion, buildDate, *configPath)
 	if err != nil {
 		log.WithError(err).Fatal("error reading config file")
@@ -62,11 +63,18 @@ func main() {
 		model.AddFlowLineMapping(decoders.NetworkEventsToString)
 	}
 
-	go server.StartMetrics(&server.MetricsConfig{
-		Port:     cfg.Server.MetricsPort,
-		CertPath: cfg.Server.CertPath,
-		KeyPath:  cfg.Server.KeyPath,
-	})
+	ctx := context.Background()
+	if cfg.Server.MCP.Enable {
+		if err := server.StartMCPServer(ctx, cfg); err != nil && !errors.Is(err, context.Canceled) {
+			panic(err)
+		}
+	} else {
+		go server.StartMetrics(&server.MetricsConfig{
+			Port:     cfg.Server.MetricsPort,
+			CertPath: cfg.Server.CertPath,
+			KeyPath:  cfg.Server.KeyPath,
+		})
 
-	server.Start(context.Background(), cfg, checker)
+		server.Start(ctx, cfg, checker)
+	}
 }
