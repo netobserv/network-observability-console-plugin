@@ -1,6 +1,6 @@
 ARG BUILDVERSION
 
-FROM registry.access.redhat.com/ubi9/nodejs-18:1-1746536796 as web-builder
+FROM registry.access.redhat.com/ubi9/nodejs-18:9.6-1747690905 as web-builder
 
 WORKDIR /opt/app-root
 
