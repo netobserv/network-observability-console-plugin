@@ -24,6 +24,8 @@ export type RecordFieldFilter = {
   isDelete: boolean;
 };
 
+export const MAX_ARRAY_INDEX = 2;
+
 export type FlexValue = 'flexDefault' | 'flexNone' | 'flex_1' | 'flex_2' | 'flex_3' | 'flex_4';
 export type FlexWrapValue = 'wrap' | 'wrapReverse' | 'nowrap';
 
@@ -78,6 +80,10 @@ export const RecordField: React.FC<RecordFieldProps> = ({
       return errorTextValue(t('n/a'), errorText);
     }
     return <Text className="record-field-flex text-muted record-field-value">{t('n/a')}</Text>;
+  };
+
+  const moreText = (count: number) => {
+    return <Text className="record-field-flex record-field-value">{`${count} ${t('more')}...`}</Text>;
   };
 
   const emptyDnsErrorText = () => {
@@ -215,21 +221,31 @@ export const RecordField: React.FC<RecordFieldProps> = ({
     );
   };
 
-  const nthContainer = (children: (JSX.Element | undefined)[], asChild = true, childIcon = true, forcedSize?: Size) => {
+  const nthContainer = (
+    children: (JSX.Element | undefined)[],
+    asChild = true,
+    childIcon = true,
+    truncate?: boolean,
+    forcedSize?: Size,
+    className = ''
+  ) => {
     return (
-      <Flex className={`record-field-flex-container ${forcedSize || size}`} flex={{ default: 'flex_1' }}>
+      <Flex className={`record-field-flex-container ${forcedSize || size} ${className}`} flex={{ default: 'flex_1' }}>
         {children.length > 0 ? (
-          children.map((c, i) => {
-            const child = c ? c : emptyText();
-            if (i > 0 && asChild && childIcon) {
-              const arrow = <span className="child-arrow">{'↪'}</span>;
-              return sideBySideContainer(arrow, child, 'flexNone', 'flex_1', 'nowrap');
-            }
-            return child;
-          })
+          children
+            .filter((_c, i) => !truncate || i < MAX_ARRAY_INDEX)
+            .map((c, i) => {
+              const child = c ? c : emptyText();
+              if (i > 0 && asChild && childIcon) {
+                const arrow = <span className="child-arrow">{'↪'}</span>;
+                return sideBySideContainer(arrow, child, 'flexNone', 'flex_1', 'nowrap');
+              }
+              return child;
+            })
         ) : (
           <Text className="text-muted record-field-value">{t('n/a')}</Text>
         )}
+        {truncate && children.length > MAX_ARRAY_INDEX && moreText(children.length - MAX_ARRAY_INDEX)}
       </Flex>
     );
   };
@@ -241,7 +257,7 @@ export const RecordField: React.FC<RecordFieldProps> = ({
     childIcon = true,
     forcedSize?: Size
   ) => {
-    return nthContainer([child1, child2], asChild, childIcon, forcedSize);
+    return nthContainer([child1, child2], asChild, childIcon, false, forcedSize);
   };
 
   const sideBySideContainer = (
@@ -253,8 +269,12 @@ export const RecordField: React.FC<RecordFieldProps> = ({
   ) => {
     return (
       <Flex direction={{ default: 'row' }} flex={{ default: 'flex_1' }} flexWrap={{ default: wrap }}>
-        <FlexItem flex={{ default: leftFlex }}>{leftElement || emptyText()}</FlexItem>
-        <FlexItem flex={{ default: rightFlex }}>{rightElement || emptyText()}</FlexItem>
+        <FlexItem className="side-by-side" flex={{ default: leftFlex }}>
+          {leftElement || emptyText()}
+        </FlexItem>
+        <FlexItem className="side-by-side" flex={{ default: rightFlex }}>
+          {rightElement || emptyText()}
+        </FlexItem>
       </Flex>
     );
   };
@@ -288,7 +308,7 @@ export const RecordField: React.FC<RecordFieldProps> = ({
     );
   };
 
-  const content = (c: Column) => {
+  const content = (c: Column, isTable: boolean) => {
     if (!c.value) {
       // Value function not configured
       return emptyText();
@@ -420,6 +440,7 @@ export const RecordField: React.FC<RecordFieldProps> = ({
             value.map(dir => simpleTextWithTooltip(getDirectionDisplayString(String(dir) as FlowDirection, t))),
             true,
             false,
+            isTable,
             multiLineSize
           );
         }
@@ -431,6 +452,7 @@ export const RecordField: React.FC<RecordFieldProps> = ({
             value.map(iName => simpleTextWithTooltip(String(iName))),
             true,
             false,
+            isTable,
             multiLineSize
           );
         }
@@ -444,7 +466,8 @@ export const RecordField: React.FC<RecordFieldProps> = ({
               .filter(iName => iName !== '')
               .map(iName => simpleTextWithTooltip(iName)),
             true,
-            false
+            false,
+            isTable
           );
         }
         return singleContainer(simpleTextWithTooltip(String(value)));
@@ -470,7 +493,10 @@ export const RecordField: React.FC<RecordFieldProps> = ({
               )
             ),
             true,
-            false
+            false,
+            isTable,
+            undefined,
+            'flowdirints'
           );
         } else {
           return singleContainer(emptyText(t('Invalid data provided. Check JSON for details.')));
@@ -594,7 +620,7 @@ export const RecordField: React.FC<RecordFieldProps> = ({
   return filter ? (
     <Flex className={`record-field-flex-container`} flex={{ default: 'flex_1' }}>
       <FlexItem className={'record-field-flex'} flex={{ default: 'flex_1' }}>
-        {content(column)}
+        {content(column, false)}
       </FlexItem>
       <FlexItem>
         <Tooltip
@@ -623,7 +649,7 @@ export const RecordField: React.FC<RecordFieldProps> = ({
       </FlexItem>
     </Flex>
   ) : (
-    content(column)
+    content(column, true)
   );
 };
 
