@@ -12,6 +12,8 @@ import (
 
 var mlog = logrus.WithField("module", "lokiclientmock")
 
+var folderPath = "/home/julien/dev/me/network-observability-console-plugin/"
+
 type LokiClientMock struct {
 }
 
@@ -23,10 +25,10 @@ func (o *LokiClientMock) Get(url string) ([]byte, int, error) {
 
 	isLabel := strings.Contains(url, "/label/")
 	if isLabel {
-		path = "mocks/loki/namespaces.json"
+		path = folderPath + "mocks/loki/namespaces.json"
 	} else {
 		if strings.Contains(url, "query=topk") {
-			path = "mocks/loki/flow_metrics"
+			path = folderPath + "mocks/loki/flow_metrics"
 
 			if strings.Contains(url, "|unwrap%20PktDrop") {
 				path += "_dropped"
@@ -55,7 +57,7 @@ func (o *LokiClientMock) Get(url string) ([]byte, int, error) {
 				path += "_resource.json"
 			}
 		} else {
-			path = "mocks/loki/flow_records"
+			path = folderPath + "mocks/loki/flow_records"
 			//nolint:gocritic // if-else is ok
 			if strings.Contains(url, "|~`\"Packets\":0[,}]|~`\"PktDropPackets\":[1-9][0-9]*[,}]") {
 				path += "_dropped.json"
