@@ -71,7 +71,7 @@ export const DefaultOptions: TopologyOptions = {
   medScale: 0.5,
   metricFunction: defaultMetricFunction,
   metricType: defaultMetricType,
-  showEmpty: true
+  showEmpty: false
 };
 
 export type GraphElementPeer = GraphElement<ElementModel, NodeData>;
