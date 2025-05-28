@@ -130,7 +130,7 @@ export const Consumption: FC<ResourceCalculatorProps> = ({ flowCollector, setSam
           </Tbody>
         </Table>
       </FlexItem>
-      <FlexItem>
+      <FlexItem className="calculator-item">
         <Text component={TextVariants.h2}>{t('Recommendations')}</Text>
         <Table>
           <Thead>
