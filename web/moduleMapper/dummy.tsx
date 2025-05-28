@@ -301,7 +301,29 @@ export function usePrometheusPoll(props: PrometheusPollProps) {
                 },
                 value: [
                   1745832954.698,
-                  "2670.494073495783"
+                  "2000"
+                ]
+              },
+              {
+                metric: {
+                  node: "node-2",
+                  namespace: "ns-2",
+                  pod: "pod-1",
+                },
+                value: [
+                  1745832954.698,
+                  "100"
+                ]
+              },
+              {
+                metric: {
+                  node: "node-3",
+                  namespace: "ns-1",
+                  pod: "pod-1",
+                },
+                value: [
+                  1745832954.698,
+                  "400"
                 ]
               },
             ],
