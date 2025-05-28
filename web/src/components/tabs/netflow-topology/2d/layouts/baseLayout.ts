@@ -2,17 +2,17 @@
 import {
   ADD_CHILD_EVENT,
   BaseEdge,
-  DragEvent,
-  DragNodeEventListener,
-  DragOperationWithType,
   DRAG_MOVE_OPERATION,
   DRAG_NODE_END_EVENT,
   DRAG_NODE_START_EVENT,
+  DragEvent,
+  DragNodeEventListener,
+  DragOperationWithType,
   Edge,
+  ELEMENT_VISIBILITY_CHANGE_EVENT,
   ElementChildEventListener,
   ElementVisibilityChangeEvent,
   ElementVisibilityChangeEventListener,
-  ELEMENT_VISIBILITY_CHANGE_EVENT,
   getClosestVisibleParent,
   Graph,
   GRAPH_LAYOUT_END_EVENT,
@@ -25,8 +25,8 @@ import {
   LayoutOptions,
   leafNodeElements,
   Node,
-  NodeCollapseChangeEventListener,
   NODE_COLLAPSE_CHANGE_EVENT,
+  NodeCollapseChangeEventListener,
   REMOVE_CHILD_EVENT
 } from '@patternfly/react-topology';
 import { ForceSimulation } from '@patternfly/react-topology/dist/esm/layouts/ForceSimulation';

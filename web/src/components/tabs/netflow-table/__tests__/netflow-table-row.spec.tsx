@@ -3,9 +3,9 @@ import { shallow } from 'enzyme';
 import * as React from 'react';
 
 import { Record } from '../../../../api/ipfix';
-import { Size } from '../../../dropdowns/table-display-dropdown';
 import { DefaultColumnSample } from '../../../__tests-data__/columns';
 import { FlowsSample } from '../../../__tests-data__/flows';
+import { Size } from '../../../dropdowns/table-display-dropdown';
 import NetflowTableRow from '../netflow-table-row';
 
 describe('<NetflowTableRow />', () => {

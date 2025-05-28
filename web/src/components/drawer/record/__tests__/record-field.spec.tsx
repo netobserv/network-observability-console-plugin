@@ -4,9 +4,9 @@ import * as React from 'react';
 import { waitForRender } from '../../../../components/__tests__/common.spec';
 import { compareNumbers } from '../../../../utils/base-compare';
 import { ColumnsId } from '../../../../utils/columns';
-import { Size } from '../../../dropdowns/table-display-dropdown';
 import { DefaultColumnSample } from '../../../__tests-data__/columns';
 import { FlowsSample } from '../../../__tests-data__/flows';
+import { Size } from '../../../dropdowns/table-display-dropdown';
 import RecordField, { RecordFieldFilter } from '../record-field';
 
 describe('<RecordField />', () => {

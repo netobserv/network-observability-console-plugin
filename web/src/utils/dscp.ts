@@ -20,14 +20,14 @@ export const DSCP_VALUES: ReadOnlyValues = [
 ] as const;
 
 const dscpNames = DSCP_VALUES.map(v => v.name);
-export type DSCP_SERVICE_CLASS_NAMES = typeof dscpNames[number];
+export type DSCP_SERVICE_CLASS_NAMES = (typeof dscpNames)[number];
 
 export const getDSCPServiceClassName = (dscp: number): DSCP_SERVICE_CLASS_NAMES | undefined => {
   return DSCP_VALUES.find(v => v.value === dscp)?.name;
 };
 
 const dscpDescriptions = DSCP_VALUES.map(v => v.description);
-export type DSCP_SERVICE_CLASS_DESCRIPTIONS = typeof dscpDescriptions[number];
+export type DSCP_SERVICE_CLASS_DESCRIPTIONS = (typeof dscpDescriptions)[number];
 
 export const getDSCPServiceClassDescription = (dscp: number): DSCP_SERVICE_CLASS_DESCRIPTIONS | undefined => {
   return DSCP_VALUES.find(v => v.value === dscp)?.description;
