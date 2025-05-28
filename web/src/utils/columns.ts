@@ -260,7 +260,7 @@ export const getDefaultColumns = (columnDefs: ColumnConfigDef[], fieldConfigs: F
           }
           return compareNumbers(valA, valB);
         } else if (typeof valA === 'string' && typeof valB === 'string') {
-          if (col.id.includes('IP')) {
+          if (col.id.includes('IP') && !col.id.includes('IPSec')) {
             return compareIPs(valA, valB);
           }
           return compareStrings(valA, valB);
