@@ -36,7 +36,7 @@ export const Consumption: FC<ResourceCalculatorProps> = ({ flowCollector, setSam
 
   const getSamplings = React.useCallback(() => {
     const current = getCurrentSampling();
-    let samplings = [1, 50, 100, 250];
+    let samplings = [1, 25, 50, 100, 125, 150];
     if (!samplings.includes(current)) {
       samplings.push(current);
       samplings = _.sortBy(samplings);
@@ -70,6 +70,37 @@ export const Consumption: FC<ResourceCalculatorProps> = ({ flowCollector, setSam
     [receivedPackets, rpError, rpLoaded]
   );
 
+  const getEstimation = React.useCallback(
+    (sampling: number) => {
+      // eslint-disable-next-line max-len
+      // taken from https://docs.redhat.com/en/documentation/openshift_container_platform/4.18/html/network_observability/configuring-network-observability-operators#network-observability-total-resource-usage-table_network_observability
+
+      // TODO: rely on more than nodes here
+      const nodes = labelsCount('node');
+      const estimatedCPU = nodes <= 25 ? -0.0096 * sampling + 1.8296 : -0.1347 * sampling + 12.1247;
+      const estimatedMemory = nodes <= 25 ? -0.1224 * sampling + 22.1224 : -0.4898 * sampling + 87.4898;
+      return {
+        cpu: estimatedCPU > 0 ? estimatedCPU.toFixed(2) : '< 0.1',
+        memory: estimatedMemory > 0 ? estimatedMemory.toFixed(0) : '< 1'
+      };
+    },
+    [labelsCount]
+  );
+
+  const getRecommendations = React.useCallback(() => {
+    // eslint-disable-next-line max-len
+    // taken from https://docs.redhat.com/en/documentation/openshift_container_platform/4.18/html/network_observability/configuring-network-observability-operators
+    const nodes = labelsCount('node');
+    return [
+      {
+        cpu: nodes <= 10 ? 4 : 16,
+        memory: nodes <= 10 ? 16 : 64,
+        lokistackSize: nodes <= 10 ? '1x.extra-small' : nodes <= 25 ? '1x.small' : '1x.medium',
+        kafka: nodes <= 10 ? 'n/a' : nodes <= 25 ? '6 consumers' : '18 consumers'
+      }
+    ];
+  }, [labelsCount]);
+
   return (
     <Flex direction={{ default: 'column' }}>
       <FlexItem className="calculator-item">
@@ -100,6 +131,31 @@ export const Consumption: FC<ResourceCalculatorProps> = ({ flowCollector, setSam
         </Table>
       </FlexItem>
       <FlexItem>
+        <Text component={TextVariants.h2}>{t('Recommendations')}</Text>
+        <Table>
+          <Thead>
+            <Tr>
+              <Th>{t('vCPU')}</Th>
+              <Th>{t('Memory')}</Th>
+              <Th>{t('LokiStack size')}</Th>
+              <Th>{t('Kafka')}</Th>
+            </Tr>
+          </Thead>
+          <Tbody>
+            {getRecommendations().map((reco, i) => {
+              return (
+                <Tr key={i}>
+                  <Td>{`${reco.cpu}vCPUs`}</Td>
+                  <Td>{`${reco.memory}GiB`}</Td>
+                  <Td>{reco.lokistackSize}</Td>
+                  <Td>{reco.kafka}</Td>
+                </Tr>
+              );
+            })}
+          </Tbody>
+        </Table>
+      </FlexItem>
+      <FlexItem>
         <Text component={TextVariants.h2}>{t('Estimation')}</Text>
         <Table>
           <Thead>
@@ -107,13 +163,12 @@ export const Consumption: FC<ResourceCalculatorProps> = ({ flowCollector, setSam
               <Th>{t('Sampling')}</Th>
               <Th>{t('vCPU')}</Th>
               <Th>{t('Memory')}</Th>
-              <Th>{t('Storage')}</Th>
-              <Th>{t('Latency overhead')}</Th>
             </Tr>
           </Thead>
           <Tbody>
             {getSamplings().map((sampling, i) => {
               const current = getCurrentSampling() === sampling;
+              const estimate = getEstimation(sampling);
               return (
                 <Tr
                   key={i}
@@ -123,10 +178,8 @@ export const Consumption: FC<ResourceCalculatorProps> = ({ flowCollector, setSam
                   onClick={() => setSampling && setSampling(sampling)}
                 >
                   <Td>{`${sampling} ${current ? t('(current)') : ''}`}</Td>
-                  <Td></Td>
-                  <Td></Td>
-                  <Td></Td>
-                  <Td></Td>
+                  <Td>{`${estimate.cpu}vCPUs`}</Td>
+                  <Td>{`${estimate.memory}GiB`}</Td>
                 </Tr>
               );
             })}
