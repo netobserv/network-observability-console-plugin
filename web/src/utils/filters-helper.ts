@@ -1,5 +1,5 @@
 import { TFunction } from 'i18next';
-import { Filter, FilterDefinition, FilterId } from '../model/filters';
+import { Filter, FilterDefinition, FilterId, FilterValue } from '../model/filters';
 import { findFilter } from './filter-definitions';
 
 export type Indicator = 'default' | 'success' | 'warning' | 'error' | undefined;
@@ -41,20 +41,53 @@ export const hasSrcDstFilters = (filters: Filter[]): boolean => {
   return filters.some(f => f.def.id.startsWith('src_') || f.def.id.startsWith('dst_'));
 };
 
+export const swapFilter = (filterDefinitions: FilterDefinition[], filter: Filter): Filter => {
+  let swappedId: FilterId | undefined;
+  if (filter.def.id.startsWith('src_')) {
+    swappedId = filter.def.id.replace('src_', 'dst_') as FilterId;
+  } else if (filter.def.id.startsWith('dst_')) {
+    swappedId = filter.def.id.replace('dst_', 'src_') as FilterId;
+  }
+  if (swappedId) {
+    const def = findFilter(filterDefinitions, swappedId);
+    if (def) {
+      return { ...filter, def };
+    }
+  }
+  return filter;
+};
+
 export const swapFilters = (filterDefinitions: FilterDefinition[], filters: Filter[]): Filter[] => {
-  return filters.map(f => {
-    let swappedId: FilterId | undefined;
-    if (f.def.id.startsWith('src_')) {
-      swappedId = f.def.id.replace('src_', 'dst_') as FilterId;
-    } else if (f.def.id.startsWith('dst_')) {
-      swappedId = f.def.id.replace('dst_', 'src_') as FilterId;
-    }
-    if (swappedId) {
-      const def = findFilter(filterDefinitions, swappedId);
-      if (def) {
-        return { ...f, def };
-      }
-    }
-    return f;
-  });
+  return filters.map(f => swapFilter(filterDefinitions, f));
+};
+
+export const swapFilterValue = (
+  filterDefinitions: FilterDefinition[],
+  filters: Filter[],
+  id: FilterId,
+  value: FilterValue
+): Filter[] => {
+  // remove value from existing filter
+  const found = filters.find(f => f.def.id === id);
+  if (!found) {
+    console.error("Can't find filter id", id);
+    return filters;
+  }
+  found.values = found.values.filter(val => val.v !== value.v);
+
+  // remove filter if no more values
+  if (!found.values.length) {
+    filters = filters.filter(f => f !== found);
+  }
+
+  // add new swapped filter
+  const swapped = swapFilter(filterDefinitions, { ...found, values: [value] });
+  const existing = filters.find(f => f.def.id === swapped.def.id);
+  if (existing) {
+    existing.values.push(swapped.values[0]);
+  } else {
+    filters.push(swapped);
+  }
+
+  return filters;
 };
