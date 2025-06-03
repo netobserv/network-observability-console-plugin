@@ -1,5 +1,26 @@
-import { Button, Text, TextContent, TextVariants, ToolbarGroup, ToolbarItem, Tooltip } from '@patternfly/react-core';
-import { LongArrowAltDownIcon, LongArrowAltUpIcon, TimesCircleIcon, TimesIcon } from '@patternfly/react-icons';
+import {
+  Button,
+  Dropdown,
+  DropdownItem,
+  DropdownList,
+  MenuToggle,
+  MenuToggleElement,
+  Text,
+  TextContent,
+  TextVariants,
+  ToolbarGroup,
+  ToolbarItem,
+  Tooltip
+} from '@patternfly/react-core';
+import {
+  ArrowsAltVIcon,
+  BanIcon,
+  CheckIcon,
+  LongArrowAltDownIcon,
+  LongArrowAltUpIcon,
+  TimesCircleIcon,
+  TimesIcon
+} from '@patternfly/react-icons';
 import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -13,7 +34,7 @@ import {
 } from '../../../model/filters';
 import { QuickFilter } from '../../../model/quick-filters';
 import { autoCompleteCache } from '../../../utils/autocomplete-cache';
-import { getFilterFullName, hasSrcDstFilters, swapFilters } from '../../../utils/filters-helper';
+import { getFilterFullName, hasSrcDstFilters, swapFilters, swapFilterValue } from '../../../utils/filters-helper';
 import { getPathWithParams, netflowTrafficPath } from '../../../utils/url';
 import { navigate } from '../../dynamic-loader/dynamic-loader';
 import { LinksOverflow } from '../links-overflow';
@@ -39,6 +60,8 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
   filterDefinitions
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
+
+  const [openedDropdown, setOpenedDropdown] = React.useState<string>();
 
   const setFiltersList = React.useCallback(
     (list: Filter[]) => {
@@ -101,27 +124,78 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
                   </Text>
                 </Tooltip>
                 {chipFilter.values.map((chipFilterValue, fvIndex) => {
+                  if (isForced || chipFilterValue.disabled) {
+                    return (
+                      <div key={fvIndex} className={`custom-chip ${chipFilterValue.disabled ? 'disabled-value' : ''}`}>
+                        <Tooltip
+                          content={`${chipFilterValue.disabled ? t('Enable') : t('Disable')} ${fullName} '${
+                            chipFilterValue.display || chipFilterValue.v
+                          }' ${t('filter')}`}
+                        >
+                          <Text
+                            component={TextVariants.p}
+                            onClick={() => {
+                              chipFilterValue.disabled = !chipFilterValue.disabled;
+                              setFilters(_.cloneDeep(filters));
+                            }}
+                          >
+                            {chipFilterValue.display ? chipFilterValue.display : chipFilterValue.v}
+                          </Text>
+                        </Tooltip>
+                      </div>
+                    );
+                  }
+
+                  const dropdownId = `${chipFilter.def.id}-${fvIndex}`;
                   return (
-                    <div key={fvIndex} className={`custom-chip ${chipFilterValue.disabled ? 'disabled-value' : ''}`}>
-                      <Tooltip
-                        content={`${chipFilterValue.disabled ? t('Enable') : t('Disable')} ${fullName} '${
-                          chipFilterValue.display || chipFilterValue.v
-                        }' ${t('filter')}`}
-                      >
-                        <Text
-                          component={TextVariants.p}
-                          onClick={() => {
-                            //switch value
-                            chipFilterValue.disabled = !chipFilterValue.disabled;
-                            setFilters(_.cloneDeep(filters));
-                          }}
+                    <Dropdown
+                      key={fvIndex}
+                      isOpen={dropdownId === openedDropdown}
+                      onOpenChange={(isOpen: boolean) => setOpenedDropdown(isOpen ? dropdownId : undefined)}
+                      toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+                        <MenuToggle
+                          ref={toggleRef}
+                          className={`custom-chip ${chipFilterValue.disabled ? 'disabled-value' : ''}`}
+                          isExpanded={dropdownId === openedDropdown}
+                          onClick={() => setOpenedDropdown(openedDropdown === dropdownId ? undefined : dropdownId)}
                         >
                           {chipFilterValue.display ? chipFilterValue.display : chipFilterValue.v}
-                        </Text>
-                      </Tooltip>
-                      {!isForced && (
-                        <Button
-                          variant="plain"
+                        </MenuToggle>
+                      )}
+                    >
+                      <DropdownList>
+                        <DropdownItem
+                          key="disable"
+                          onClick={() => {
+                            chipFilterValue.disabled = !chipFilterValue.disabled;
+                            setFilters(_.cloneDeep(filters));
+                            setOpenedDropdown(undefined);
+                          }}
+                        >
+                          {chipFilterValue.disabled && <CheckIcon />}
+                          {!chipFilterValue.disabled && <BanIcon />}
+                          &nbsp;{chipFilterValue.disabled ? t('Enable') : t('Disable')}
+                        </DropdownItem>
+                        {(chipFilter.def.id.startsWith('src_') || chipFilter.def.id.startsWith('dst_')) && (
+                          <DropdownItem
+                            key="swap"
+                            onClick={() => {
+                              const swapped = swapFilterValue(
+                                filterDefinitions,
+                                filters!.list,
+                                chipFilter.def.id,
+                                chipFilterValue
+                              );
+                              setFilters({ ...filters!, list: swapped });
+                              setOpenedDropdown(undefined);
+                            }}
+                          >
+                            <ArrowsAltVIcon style={{ transform: 'rotate(90deg)' }} />
+                            &nbsp;{t('Swap')}
+                          </DropdownItem>
+                        )}
+                        <DropdownItem
+                          key="remove"
                           onClick={() => {
                             chipFilter.values = chipFilter.values.filter(val => val.v !== chipFilterValue.v);
                             if (_.isEmpty(chipFilter.values)) {
@@ -129,12 +203,14 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
                             } else {
                               setFilters(_.cloneDeep(filters));
                             }
+                            setOpenedDropdown(undefined);
                           }}
                         >
                           <TimesIcon />
-                        </Button>
-                      )}
-                    </div>
+                          &nbsp;{t('Remove')}
+                        </DropdownItem>
+                      </DropdownList>
+                    </Dropdown>
                   );
                 })}
                 {!isForced && (
