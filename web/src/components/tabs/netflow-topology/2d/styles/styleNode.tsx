@@ -18,8 +18,8 @@ import {
   observer,
   ScaleDetailsLevel,
   ShapeProps,
-  TopologyQuadrant,
   TOP_LAYER,
+  TopologyQuadrant,
   useHover,
   WithDragNodeProps,
   WithSelectionProps
