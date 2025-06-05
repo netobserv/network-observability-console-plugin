@@ -7,7 +7,7 @@ import FiltersToolbar, { FiltersToolbarProps } from '../../../toolbar/filters-to
 
 describe('<FiltersToolbar />', () => {
   const props: FiltersToolbarProps = {
-    filters: { backAndForth: false, list: [] },
+    filters: { list: [] },
     filterDefinitions: FilterDefinitionSample,
     forcedFilters: undefined,
     skipTipsDelay: true,

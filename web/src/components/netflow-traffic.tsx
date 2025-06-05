@@ -10,7 +10,7 @@ import { Filters, getDisabledFiltersRecord, getEnabledFilters } from '../model/f
 import { filtersToString, FlowQuery, MetricType } from '../model/flow-query';
 import { netflowTrafficModel } from '../model/netflow-traffic';
 import { parseQuickFilters } from '../model/quick-filters';
-import { getFetchFunctions as getBackAndForthFetch } from '../utils/back-and-forth';
+import { getBackAndForthFetch } from '../utils/back-and-forth';
 import { ColumnsId, getDefaultColumns } from '../utils/columns';
 import { loadConfig } from '../utils/config';
 import { ContextSingleton } from '../utils/context';
@@ -240,9 +240,9 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
   const resetDefaultFilters = React.useCallback(
     (c = model.config) => {
       const def = getDefaultFilters(c);
-      updateTableFilters({ backAndForth: model.filters.backAndForth, list: def });
+      updateTableFilters({ list: def });
     },
-    [model.config, model.filters.backAndForth, getDefaultFilters, updateTableFilters]
+    [model.config, getDefaultFilters, updateTableFilters]
   );
 
   const setFiltersFromURL = React.useCallback(

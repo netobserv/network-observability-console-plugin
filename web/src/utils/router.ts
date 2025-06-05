@@ -111,8 +111,7 @@ export const getFiltersFromURL = (
       }
     }
   });
-  const backAndForth = getURLParamAsBool(URLParam.BackAndForth) || false;
-  return Promise.all(filterPromises).then(list => ({ backAndForth, list }));
+  return Promise.all(filterPromises).then(list => ({ list }));
 };
 
 export const setURLFilters = (filters: Filters, replace?: boolean) => {
@@ -121,13 +120,7 @@ export const setURLFilters = (filters: Filters, replace?: boolean) => {
       return filterKey(filter) + filterKVSeparator + filter.values.map(v => v.v).join(filterValuesSeparator);
     })
     .join(filtersSeparator);
-  setSomeURLParams(
-    new Map([
-      [URLParam.Filters, urlFilters],
-      [URLParam.BackAndForth, filters.backAndForth ? 'true' : 'false']
-    ]),
-    replace
-  );
+  setSomeURLParams(new Map([[URLParam.Filters, urlFilters]]), replace);
 };
 
 export const setURLRange = (range: number | TimeRange, replace?: boolean) => {
