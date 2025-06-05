@@ -30,7 +30,7 @@ describe('<NetflowTopology />', () => {
     setOptions: jest.fn(),
     lowScale: 0.3,
     medScale: 0.5,
-    filters: { backAndForth: false, list: [] },
+    filters: { list: [] },
     filterDefinitions: FilterDefinitionSample,
     setFilters: jest.fn(),
     toggleTopologyOptions: jest.fn(),

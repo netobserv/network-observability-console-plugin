@@ -116,8 +116,7 @@ export const NetflowTrafficTab: React.FC<NetflowTrafficTabProps> = ({ match, obj
               def: findFilter(filterDefinitions, 'src_resource')!,
               values: [{ v: `${obj.kind}.${obj.metadata!.namespace}.${obj.metadata!.name}` }]
             }
-          ],
-          backAndForth: true
+          ]
         });
         break;
       case 'Service':
@@ -128,8 +127,7 @@ export const NetflowTrafficTab: React.FC<NetflowTrafficTabProps> = ({ match, obj
               def: findFilter(filterDefinitions, 'dst_resource')!,
               values: [{ v: `${obj.kind}.${obj.metadata!.namespace}.${obj.metadata!.name}` }]
             }
-          ],
-          backAndForth: false
+          ]
         });
         break;
       case 'Route':
@@ -140,8 +138,7 @@ export const NetflowTrafficTab: React.FC<NetflowTrafficTabProps> = ({ match, obj
               def: findFilter(filterDefinitions, 'dst_resource')!,
               values: [{ v: `${route.spec.to!.kind}.${route.metadata!.namespace}.${route.spec.to!.name}` }]
             }
-          ],
-          backAndForth: false
+          ]
         });
         break;
       case 'Namespace':
@@ -151,8 +148,7 @@ export const NetflowTrafficTab: React.FC<NetflowTrafficTabProps> = ({ match, obj
               def: findFilter(filterDefinitions, 'src_namespace')!,
               values: [{ v: obj!.metadata!.name as string }]
             }
-          ],
-          backAndForth: true
+          ]
         });
         break;
       case 'Node':
@@ -162,8 +158,7 @@ export const NetflowTrafficTab: React.FC<NetflowTrafficTabProps> = ({ match, obj
               def: findFilter(filterDefinitions, 'src_host_name')!,
               values: [{ v: obj!.metadata!.name as string }]
             }
-          ],
-          backAndForth: true
+          ]
         });
         break;
       case 'ReplicaSet':
@@ -175,8 +170,7 @@ export const NetflowTrafficTab: React.FC<NetflowTrafficTabProps> = ({ match, obj
                 return { v: `${ownerRef.kind}.${obj.metadata!.namespace}.${ownerRef.name}` };
               })
             }
-          ],
-          backAndForth: true
+          ]
         });
         break;
       case 'HorizontalPodAutoscaler':
@@ -189,8 +183,7 @@ export const NetflowTrafficTab: React.FC<NetflowTrafficTabProps> = ({ match, obj
                 { v: `${hpa.spec.scaleTargetRef.kind}.${hpa.metadata!.namespace}.${hpa.spec.scaleTargetRef.name}` }
               ]
             }
-          ],
-          backAndForth: true
+          ]
         });
         break;
     }

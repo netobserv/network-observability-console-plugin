@@ -129,7 +129,7 @@ export function netflowTrafficModel() {
   const [isOverviewModalOpen, setOverviewModalOpen] = React.useState(false);
   const [isColModalOpen, setColModalOpen] = React.useState(false);
   const [isExportModalOpen, setExportModalOpen] = React.useState(false);
-  const [filters, setFilters] = React.useState<Filters>({ list: [], backAndForth: false });
+  const [filters, setFilters] = React.useState<Filters>({ list: [] });
   const [match, setMatch] = React.useState<Match>(getMatchFromURL());
   const [packetLoss, setPacketLoss] = React.useState<PacketLoss>(getPacketLossFromURL());
   const [recordType, setRecordType] = React.useState<RecordType>(getRecordTypeFromURL());

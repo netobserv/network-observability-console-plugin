@@ -6,7 +6,7 @@ export type FiltersEncoder = (values: FilterValue[], matchAny: boolean, not: boo
 
 export type FilterComponent = 'autocomplete' | 'text' | 'number';
 
-export type FilterCategory = 'source' | 'destination';
+export type FilterCategory = 'source' | 'destination' | 'bnf';
 
 export type TargetedFilterId =
   | 'zone'
@@ -23,6 +23,7 @@ export type TargetedFilterId =
 
 export type FilterId =
   | 'cluster_name'
+  | TargetedFilterId
   | `src_${TargetedFilterId}`
   | `dst_${TargetedFilterId}`
   | 'protocol'
@@ -93,7 +94,6 @@ export interface Filter {
 
 export interface Filters {
   list: Filter[];
-  backAndForth: boolean;
 }
 
 export interface FilterOption {
@@ -135,8 +135,7 @@ export const getEnabledFilters = (filters: Filters): Filters => {
         f.values = f.values.filter(fv => fv.disabled !== true);
         return f;
       })
-      .filter(f => !_.isEmpty(f.values)),
-    backAndForth: filters.backAndForth
+      .filter(f => !_.isEmpty(f.values))
   };
 };
 
