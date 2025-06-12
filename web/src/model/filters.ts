@@ -1,12 +1,13 @@
 import _ from 'lodash';
 import { isEqual } from '../utils/base-compare';
 import { undefinedValue } from '../utils/filter-definitions';
+import { Match } from './flow-query';
 
 export type FiltersEncoder = (values: FilterValue[], matchAny: boolean, not: boolean, moreThan: boolean) => string;
 
 export type FilterComponent = 'autocomplete' | 'text' | 'number';
 
-export type FilterCategory = 'source' | 'destination';
+export type FilterCategory = 'source' | 'destination' | 'targeteable';
 
 export type TargetedFilterId =
   | 'zone'
@@ -24,6 +25,7 @@ export type TargetedFilterId =
 
 export type FilterId =
   | 'cluster_name'
+  | TargetedFilterId
   | `src_${TargetedFilterId}`
   | `dst_${TargetedFilterId}`
   | 'protocol'
@@ -95,7 +97,7 @@ export interface Filter {
 
 export interface Filters {
   list: Filter[];
-  backAndForth: boolean;
+  match: Match;
 }
 
 export interface FilterOption {
@@ -127,7 +129,7 @@ export const getEnabledFilters = (filters: Filters): Filters => {
         return f;
       })
       .filter(f => !_.isEmpty(f.values)),
-    backAndForth: filters.backAndForth
+    match: filters.match
   };
 };
 

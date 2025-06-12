@@ -5,6 +5,16 @@ import { ColumnConfigSampleDefs } from './columns';
 
 export const FilterConfigSampleDefs = [
   {
+    id: 'namespace',
+    name: 'Namespace',
+    component: 'autocomplete',
+    autoCompleteAddsQuotes: true,
+    category: 'targeteable',
+    hint: 'Specify a single kubernetes name.',
+    examples:
+      'Specify a single kubernetes name following these rules:\n    - Containing any alphanumeric, hyphen, underscrore or dot character\n    - Partial text like cluster, cluster-image, image-registry\n    - Exact match using quotes like "cluster-image-registry"\n    - Case sensitive match using quotes like "Deployment"\n    - Starting text like cluster, "cluster-*"\n    - Ending text like "*-registry"\n    - Pattern like "cluster-*-registry", "c*-*-r*y", -i*e-'
+  },
+  {
     id: 'src_namespace',
     name: 'Namespace',
     component: 'autocomplete',
@@ -20,6 +30,15 @@ export const FilterConfigSampleDefs = [
     component: 'autocomplete',
     autoCompleteAddsQuotes: true,
     category: 'destination',
+    hint: 'Specify a single kubernetes name.',
+    examples:
+      'Specify a single kubernetes name following these rules:\n    - Containing any alphanumeric, hyphen, underscrore or dot character\n    - Partial text like cluster, cluster-image, image-registry\n    - Exact match using quotes like "cluster-image-registry"\n    - Case sensitive match using quotes like "Deployment"\n    - Starting text like cluster, "cluster-*"\n    - Ending text like "*-registry"\n    - Pattern like "cluster-*-registry", "c*-*-r*y", -i*e-'
+  },
+  {
+    id: 'name',
+    name: 'name',
+    component: 'text',
+    category: 'targeteable',
     hint: 'Specify a single kubernetes name.',
     examples:
       'Specify a single kubernetes name following these rules:\n    - Containing any alphanumeric, hyphen, underscrore or dot character\n    - Partial text like cluster, cluster-image, image-registry\n    - Exact match using quotes like "cluster-image-registry"\n    - Case sensitive match using quotes like "Deployment"\n    - Starting text like cluster, "cluster-*"\n    - Ending text like "*-registry"\n    - Pattern like "cluster-*-registry", "c*-*-r*y", -i*e-'
@@ -43,6 +62,13 @@ export const FilterConfigSampleDefs = [
       'Specify a single kubernetes name following these rules:\n    - Containing any alphanumeric, hyphen, underscrore or dot character\n    - Partial text like cluster, cluster-image, image-registry\n    - Exact match using quotes like "cluster-image-registry"\n    - Case sensitive match using quotes like "Deployment"\n    - Starting text like cluster, "cluster-*"\n    - Ending text like "*-registry"\n    - Pattern like "cluster-*-registry", "c*-*-r*y", -i*e-'
   },
   {
+    id: 'kind',
+    name: 'Kind',
+    component: 'autocomplete',
+    autoCompleteAddsQuotes: true,
+    category: 'targeteable'
+  },
+  {
     id: 'src_kind',
     name: 'Kind',
     component: 'autocomplete',
@@ -55,6 +81,15 @@ export const FilterConfigSampleDefs = [
     component: 'autocomplete',
     autoCompleteAddsQuotes: true,
     category: 'destination'
+  },
+  {
+    id: 'owner_name',
+    name: 'Owner Name',
+    component: 'text',
+    category: 'targeteable',
+    hint: 'Specify a single kubernetes name.',
+    examples:
+      'Specify a single kubernetes name following these rules:\n    - Containing any alphanumeric, hyphen, underscrore or dot character\n    - Partial text like cluster, cluster-image, image-registry\n    - Exact match using quotes like "cluster-image-registry"\n    - Case sensitive match using quotes like "Deployment"\n    - Starting text like cluster, "cluster-*"\n    - Ending text like "*-registry"\n    - Pattern like "cluster-*-registry", "c*-*-r*y", -i*e-'
   },
   {
     id: 'src_owner_name',
@@ -73,6 +108,16 @@ export const FilterConfigSampleDefs = [
     hint: 'Specify a single kubernetes name.',
     examples:
       'Specify a single kubernetes name following these rules:\n    - Containing any alphanumeric, hyphen, underscrore or dot character\n    - Partial text like cluster, cluster-image, image-registry\n    - Exact match using quotes like "cluster-image-registry"\n    - Case sensitive match using quotes like "Deployment"\n    - Starting text like cluster, "cluster-*"\n    - Ending text like "*-registry"\n    - Pattern like "cluster-*-registry", "c*-*-r*y", -i*e-'
+  },
+  {
+    id: 'resource',
+    name: 'Resource',
+    component: 'autocomplete',
+    category: 'targeteable',
+    placeholder: 'E.g: Pod.default.my-pod',
+    hint: 'Specify an existing resource from its kind, namespace and name.',
+    examples:
+      'Specify a kind, namespace and name from existing:\n        - Select kind first from suggestions\n        - Then Select namespace from suggestions\n        - Finally select name from suggestions\n        You can also directly specify a kind, namespace and name like pod.openshift.apiserver'
   },
   {
     id: 'src_resource',
@@ -95,6 +140,15 @@ export const FilterConfigSampleDefs = [
       'Specify a kind, namespace and name from existing:\n        - Select kind first from suggestions\n        - Then Select namespace from suggestions\n        - Finally select name from suggestions\n        You can also directly specify a kind, namespace and name like pod.openshift.apiserver'
   },
   {
+    id: 'address',
+    name: 'IP',
+    component: 'text',
+    category: 'targeteable',
+    hint: 'Specify a single IP or range.',
+    examples:
+      'Specify IP following one of these rules:\n    - A single IPv4 or IPv6 address like 192.0.2.0, ::1\n    - An IP address range like 192.168.0.1-192.189.10.12, 2001:db8::1-2001:db8::8\n    - A CIDR specification like 192.51.100.0/24, 2001:db8::/32\n    - Empty double quotes "" for an empty IP'
+  },
+  {
     id: 'src_address',
     name: 'IP',
     component: 'text',
@@ -111,6 +165,16 @@ export const FilterConfigSampleDefs = [
     hint: 'Specify a single IP or range.',
     examples:
       'Specify IP following one of these rules:\n    - A single IPv4 or IPv6 address like 192.0.2.0, ::1\n    - An IP address range like 192.168.0.1-192.189.10.12, 2001:db8::1-2001:db8::8\n    - A CIDR specification like 192.51.100.0/24, 2001:db8::/32\n    - Empty double quotes "" for an empty IP'
+  },
+  {
+    id: 'port',
+    name: 'Port',
+    component: 'autocomplete',
+    category: 'targeteable',
+    hint: 'Specify a single port number or name.',
+    examples:
+      'Specify a single port following one of these rules:\n        - A port number like 80, 21\n        - A IANA name like HTTP, FTP',
+    docUrl: 'https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml'
   },
   {
     id: 'src_port',
@@ -133,6 +197,13 @@ export const FilterConfigSampleDefs = [
     docUrl: 'https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml'
   },
   {
+    id: 'mac',
+    name: 'MAC',
+    component: 'text',
+    category: 'targeteable',
+    hint: 'Specify a single MAC address.'
+  },
+  {
     id: 'src_mac',
     name: 'MAC',
     component: 'text',
@@ -145,6 +216,15 @@ export const FilterConfigSampleDefs = [
     component: 'text',
     category: 'destination',
     hint: 'Specify a single MAC address.'
+  },
+  {
+    id: 'host_address',
+    name: 'Node IP',
+    component: 'text',
+    category: 'targeteable',
+    hint: 'Specify a single IP or range.',
+    examples:
+      'Specify IP following one of these rules:\n    - A single IPv4 or IPv6 address like 192.0.2.0, ::1\n    - An IP address range like 192.168.0.1-192.189.10.12, 2001:db8::1-2001:db8::8\n    - A CIDR specification like 192.51.100.0/24, 2001:db8::/32\n    - Empty double quotes "" for an empty IP'
   },
   {
     id: 'src_host_address',
@@ -165,6 +245,15 @@ export const FilterConfigSampleDefs = [
       'Specify IP following one of these rules:\n    - A single IPv4 or IPv6 address like 192.0.2.0, ::1\n    - An IP address range like 192.168.0.1-192.189.10.12, 2001:db8::1-2001:db8::8\n    - A CIDR specification like 192.51.100.0/24, 2001:db8::/32\n    - Empty double quotes "" for an empty IP'
   },
   {
+    id: 'host_name',
+    name: 'Node Name',
+    component: 'text',
+    category: 'targeteable',
+    hint: 'Specify a single kubernetes name.',
+    examples:
+      'Specify a single kubernetes name following these rules:\n    - Containing any alphanumeric, hyphen, underscrore or dot character\n    - Partial text like cluster, cluster-image, image-registry\n    - Exact match using quotes like "cluster-image-registry"\n    - Case sensitive match using quotes like "Deployment"\n    - Starting text like cluster, "cluster-*"\n    - Ending text like "*-registry"\n    - Pattern like "cluster-*-registry", "c*-*-r*y", -i*e-'
+  },
+  {
     id: 'src_host_name',
     name: 'Node Name',
     component: 'text',
@@ -181,6 +270,12 @@ export const FilterConfigSampleDefs = [
     hint: 'Specify a single kubernetes name.',
     examples:
       'Specify a single kubernetes name following these rules:\n    - Containing any alphanumeric, hyphen, underscrore or dot character\n    - Partial text like cluster, cluster-image, image-registry\n    - Exact match using quotes like "cluster-image-registry"\n    - Case sensitive match using quotes like "Deployment"\n    - Starting text like cluster, "cluster-*"\n    - Ending text like "*-registry"\n    - Pattern like "cluster-*-registry", "c*-*-r*y", -i*e-'
+  },
+  {
+    id: 'zone',
+    name: 'Zone',
+    component: 'autocomplete',
+    category: 'targeteable'
   },
   {
     id: 'src_zone',

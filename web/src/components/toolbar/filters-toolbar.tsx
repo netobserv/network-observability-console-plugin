@@ -15,7 +15,7 @@ import { Filter, FilterDefinition, Filters, FilterValue, findFromFilters } from 
 import { QuickFilter } from '../../model/quick-filters';
 import { autoCompleteCache } from '../../utils/autocomplete-cache';
 import { findFilter } from '../../utils/filter-definitions';
-import { Indicator } from '../../utils/filters-helper';
+import { Indicator, swapFilterDefinition } from '../../utils/filters-helper';
 import { localStorageShowFiltersKey, useLocalStorage } from '../../utils/local-storage-hook';
 import { QueryOptionsDropdown, QueryOptionsProps } from '../dropdowns/query-options-dropdown';
 import './filters-toolbar.css';
@@ -94,10 +94,12 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
         console.error('addFilter called with', selectedFilter);
         return false;
       }
+      const def =
+        filters?.match !== 'any' ? swapFilterDefinition(filterDefinitions, selectedFilter, 'src') : selectedFilter;
       const newFilters = _.cloneDeep(filters?.list) || [];
       const not = selectedCompare === FilterCompare.notEqual;
       const moreThan = selectedCompare === FilterCompare.moreThanOrEqual;
-      const found = findFromFilters(newFilters, { def: selectedFilter, not, moreThan });
+      const found = findFromFilters(newFilters, { def, not, moreThan });
       if (found) {
         if (found.values.map(value => value.v).includes(filterValue.v)) {
           setMessageWithDelay(t('Filter already exists'));
@@ -107,12 +109,21 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
           found.values.push(filterValue);
         }
       } else {
-        newFilters.push({ def: selectedFilter, not, moreThan, values: [filterValue] });
+        newFilters.push({ def, not, moreThan, values: [filterValue] });
       }
       setFiltersList(newFilters);
       return true;
     },
-    [filters, selectedCompare, selectedFilter, setFiltersList, setMessageWithDelay, t]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      filterDefinitions,
+      filters?.list,
+      filters?.match,
+      selectedCompare,
+      selectedFilter,
+      setFiltersList,
+      setMessageWithDelay
+    ]
   );
 
   const getFilterControl = React.useCallback(() => {

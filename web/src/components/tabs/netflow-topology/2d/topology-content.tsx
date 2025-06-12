@@ -223,7 +223,7 @@ export const TopologyContent: React.FC<TopologyContentProps> = ({
             false,
             filters.list,
             list => {
-              setFilters({ list: list, backAndForth: true });
+              setFilters({ list: list, match: 'peers' });
             },
             filterDefinitions
           );
