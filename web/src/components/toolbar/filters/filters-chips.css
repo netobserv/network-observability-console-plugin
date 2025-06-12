@@ -1,6 +1,14 @@
 .toolbar-group {
   display: flex !important;
   flex-direction: row !important;
-  align-items: center !important;
+  align-items: flex-end !important;
   gap: 1em !important;
+}
+
+.custom-chip>.pf-v5-c-menu-toggle__text {
+  padding: 0.25em 1em 0.25em 1em;
+}
+
+.custom-chip>.pf-v5-c-menu-toggle__controls {
+  padding: 0.25em;
 }
