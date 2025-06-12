@@ -117,7 +117,7 @@ export const NetflowTrafficTab: React.FC<NetflowTrafficTabProps> = ({ match, obj
               values: [{ v: `${obj.kind}.${obj.metadata!.namespace}.${obj.metadata!.name}` }]
             }
           ],
-          backAndForth: true
+          match: 'peers'
         });
         break;
       case 'Service':
@@ -129,7 +129,7 @@ export const NetflowTrafficTab: React.FC<NetflowTrafficTabProps> = ({ match, obj
               values: [{ v: `${obj.kind}.${obj.metadata!.namespace}.${obj.metadata!.name}` }]
             }
           ],
-          backAndForth: false
+          match: 'all'
         });
         break;
       case 'Route':
@@ -141,7 +141,7 @@ export const NetflowTrafficTab: React.FC<NetflowTrafficTabProps> = ({ match, obj
               values: [{ v: `${route.spec.to!.kind}.${route.metadata!.namespace}.${route.spec.to!.name}` }]
             }
           ],
-          backAndForth: false
+          match: 'all'
         });
         break;
       case 'Namespace':
@@ -152,7 +152,7 @@ export const NetflowTrafficTab: React.FC<NetflowTrafficTabProps> = ({ match, obj
               values: [{ v: obj!.metadata!.name as string }]
             }
           ],
-          backAndForth: true
+          match: 'peers'
         });
         break;
       case 'Node':
@@ -163,7 +163,7 @@ export const NetflowTrafficTab: React.FC<NetflowTrafficTabProps> = ({ match, obj
               values: [{ v: obj!.metadata!.name as string }]
             }
           ],
-          backAndForth: true
+          match: 'peers'
         });
         break;
       case 'ReplicaSet':
@@ -176,7 +176,7 @@ export const NetflowTrafficTab: React.FC<NetflowTrafficTabProps> = ({ match, obj
               })
             }
           ],
-          backAndForth: true
+          match: 'peers'
         });
         break;
       case 'HorizontalPodAutoscaler':
@@ -190,7 +190,7 @@ export const NetflowTrafficTab: React.FC<NetflowTrafficTabProps> = ({ match, obj
               ]
             }
           ],
-          backAndForth: true
+          match: 'peers'
         });
         break;
     }

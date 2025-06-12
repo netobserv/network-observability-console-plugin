@@ -6,18 +6,17 @@ import {
   MenuToggle,
   MenuToggleElement,
   Text,
-  TextContent,
   TextVariants,
   ToolbarGroup,
   ToolbarItem,
   Tooltip
 } from '@patternfly/react-core';
 import {
+  ArrowLeftIcon,
+  ArrowRightIcon,
   ArrowsAltVIcon,
   BanIcon,
   CheckIcon,
-  LongArrowAltDownIcon,
-  LongArrowAltUpIcon,
   TimesCircleIcon,
   TimesIcon
 } from '@patternfly/react-icons';
@@ -29,13 +28,24 @@ import {
   FilterDefinition,
   Filters,
   filtersEqual,
+  FilterValue,
   hasEnabledFilterValues,
   removeFromFilters
 } from '../../../model/filters';
+import { Match } from '../../../model/flow-query';
 import { QuickFilter } from '../../../model/quick-filters';
 import { autoCompleteCache } from '../../../utils/autocomplete-cache';
-import { getFilterFullName, hasSrcDstFilters, swapFilters, swapFilterValue } from '../../../utils/filters-helper';
+import {
+  bnfFilterValue,
+  getFilterFullName,
+  hasSrcAndDstFilters,
+  hasSrcOrDstFilters,
+  setTargeteableFilters,
+  swapFilters,
+  swapFilterValue
+} from '../../../utils/filters-helper';
 import { getPathWithParams, netflowTrafficPath } from '../../../utils/url';
+import { MatchDropdown } from '../../dropdowns/match-dropdown';
 import { navigate } from '../../dynamic-loader/dynamic-loader';
 import { LinksOverflow } from '../links-overflow';
 import './filters-chips.css';
@@ -48,6 +58,11 @@ export interface FiltersChipsProps {
   resetFilters: () => void;
   quickFilters: QuickFilter[];
   filterDefinitions: FilterDefinition[];
+}
+
+export interface FiltersGroup {
+  id: 'src' | 'dst' | 'common';
+  filters: Filter[];
 }
 
 export const FiltersChips: React.FC<FiltersChipsProps> = ({
@@ -63,6 +78,43 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
 
   const [openedDropdown, setOpenedDropdown] = React.useState<string>();
 
+  const getGroupName = React.useCallback(
+    (id: 'src' | 'dst' | 'common') => {
+      if (id === 'common') {
+        return '';
+      }
+      if (filters.match === 'peers') {
+        if (hasSrcAndDstFilters(filters.list)) {
+          return id === 'src' ? t('Peer A') : t('Peer B');
+        }
+        return t('Peer');
+      }
+      return id === 'src' ? t('Source') : t('Destination');
+    },
+    [filters.list, filters.match, t]
+  );
+
+  const getGroups = React.useCallback(() => {
+    const srcGroup: FiltersGroup = { id: 'src', filters: [] };
+    const dstGroup: FiltersGroup = { id: 'dst', filters: [] };
+    const commonGroup: FiltersGroup = { id: 'common', filters: [] };
+    filters.list.forEach(f => {
+      if (f.def.id.startsWith('src_')) {
+        srcGroup.filters.push(f);
+      } else if (f.def.id.startsWith('dst_')) {
+        dstGroup.filters.push(f);
+      } else {
+        commonGroup.filters.push(f);
+      }
+    });
+    return [srcGroup, dstGroup, commonGroup];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters.list, filters.match]);
+
+  const getDefaultFilters = React.useCallback(() => {
+    return quickFilters.filter(qf => qf.default).flatMap(qf => qf.filters);
+  }, [quickFilters]);
+
   const setFiltersList = React.useCallback(
     (list: Filter[]) => {
       setFilters({ ...filters, list: list });
@@ -70,23 +122,178 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
     [setFilters, filters]
   );
 
-  const defaultFilters = quickFilters.filter(qf => qf.default).flatMap(qf => qf.filters);
-
-  const swapSrcDst = React.useCallback(() => {
+  const swapAllSrcDst = React.useCallback(() => {
     const swapped = swapFilters(filterDefinitions, filters!.list);
     setFilters({ ...filters!, list: swapped });
   }, [filterDefinitions, filters, setFilters]);
 
-  const toggleBackAndForth = React.useCallback(() => {
-    setFilters({ ...filters!, backAndForth: !filters!.backAndForth });
-  }, [setFilters, filters]);
+  const swapValue = React.useCallback(
+    (filter: Filter, value: FilterValue, target: 'src' | 'dst') => {
+      const list = swapFilterValue(filterDefinitions, filters!.list, filter.def.id, value, target);
+      setFilters({ ...filters!, list });
+      setOpenedDropdown(undefined);
+    },
+    [filterDefinitions, filters, setFilters]
+  );
 
-  const chipFilters = filters.list;
-  if (_.isEmpty(chipFilters) && _.isEmpty(defaultFilters)) {
+  const getFilterDisplay = React.useCallback(
+    (chipFilter: Filter, cfIndex: number) => {
+      let fullName = filters.match === 'any' ? getFilterFullName(chipFilter.def, t) : chipFilter.def.name;
+      if (chipFilter.not) {
+        fullName = t('Not') + ' ' + fullName;
+      }
+      if (chipFilter.moreThan) {
+        fullName = fullName + ' ' + t('more than');
+      }
+      const someEnabled = hasEnabledFilterValues(chipFilter);
+      return (
+        <div key={cfIndex} className={`custom-chip-group ${someEnabled ? '' : 'disabled-group'}`}>
+          <Tooltip content={`${someEnabled ? t('Disable') : t('Enable')} '${fullName}' ${t('group filter')}`}>
+            <Text
+              className="pf-v5-c-chip-group__label"
+              component={TextVariants.p}
+              onClick={() => {
+                //switch all values if no remaining
+                chipFilter.values.forEach(fv => {
+                  fv.disabled = someEnabled;
+                });
+                setFilters(_.cloneDeep(filters));
+              }}
+            >
+              {fullName}
+            </Text>
+          </Tooltip>
+          {chipFilter.values.map((chipFilterValue, fvIndex) => {
+            if (isForced || chipFilterValue.disabled) {
+              return (
+                <div key={fvIndex} className={`custom-chip ${chipFilterValue.disabled ? 'disabled-value' : ''}`}>
+                  <Tooltip
+                    content={`${chipFilterValue.disabled ? t('Enable') : t('Disable')} ${fullName} '${
+                      chipFilterValue.display || chipFilterValue.v
+                    }' ${t('filter')}`}
+                  >
+                    <Text
+                      component={TextVariants.p}
+                      onClick={() => {
+                        chipFilterValue.disabled = !chipFilterValue.disabled;
+                        setFilters(_.cloneDeep(filters));
+                      }}
+                    >
+                      {chipFilterValue.display ? chipFilterValue.display : chipFilterValue.v}
+                    </Text>
+                  </Tooltip>
+                </div>
+              );
+            }
+
+            const dropdownId = `${chipFilter.def.id}-${fvIndex}`;
+            return (
+              <Dropdown
+                key={fvIndex}
+                isOpen={dropdownId === openedDropdown}
+                onOpenChange={(isOpen: boolean) => setOpenedDropdown(isOpen ? dropdownId : undefined)}
+                toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+                  <MenuToggle
+                    ref={toggleRef}
+                    className={`custom-chip ${chipFilterValue.disabled ? 'disabled-value' : ''}`}
+                    isExpanded={dropdownId === openedDropdown}
+                    onClick={() => setOpenedDropdown(openedDropdown === dropdownId ? undefined : dropdownId)}
+                  >
+                    {chipFilterValue.display ? chipFilterValue.display : chipFilterValue.v}
+                  </MenuToggle>
+                )}
+              >
+                <DropdownList>
+                  <DropdownItem
+                    key="disable"
+                    onClick={() => {
+                      chipFilterValue.disabled = !chipFilterValue.disabled;
+                      setFilters(_.cloneDeep(filters));
+                      setOpenedDropdown(undefined);
+                    }}
+                  >
+                    {chipFilterValue.disabled && <CheckIcon />}
+                    {!chipFilterValue.disabled && <BanIcon />}
+                    &nbsp;{chipFilterValue.disabled ? t('Enable') : t('Disable')}
+                  </DropdownItem>
+                  {filters.match !== 'peers' &&
+                    (chipFilter.def.id.startsWith('src_') || chipFilter.def.id.startsWith('dst_')) && (
+                      <DropdownItem
+                        key="bnf"
+                        onClick={() => {
+                          const bnf = bnfFilterValue(
+                            filterDefinitions,
+                            filters!.list,
+                            chipFilter.def.id,
+                            chipFilterValue
+                          );
+                          setFilters({ ...filters!, list: bnf });
+                          setOpenedDropdown(undefined);
+                        }}
+                      >
+                        <ArrowsAltVIcon style={{ transform: 'rotate(90deg)' }} />
+                        &nbsp;{t('Any')}
+                      </DropdownItem>
+                    )}
+                  {(chipFilter.def.category === 'targeteable' || chipFilter.def.id.startsWith('dst_')) && (
+                    <DropdownItem key="src" onClick={() => swapValue(chipFilter, chipFilterValue, 'src')}>
+                      <ArrowLeftIcon />
+                      &nbsp;{filters.match === 'peers' ? t('As peer A') : t('As source')}
+                    </DropdownItem>
+                  )}
+                  {(chipFilter.def.category === 'targeteable' || chipFilter.def.id.startsWith('src_')) && (
+                    <DropdownItem key="dst" onClick={() => swapValue(chipFilter, chipFilterValue, 'dst')}>
+                      <ArrowRightIcon />
+                      &nbsp;{filters.match === 'peers' ? t('As peer B') : t('As destination')}
+                    </DropdownItem>
+                  )}
+                  <DropdownItem
+                    key="remove"
+                    onClick={() => {
+                      chipFilter.values = chipFilter.values.filter(val => val.v !== chipFilterValue.v);
+                      if (_.isEmpty(chipFilter.values)) {
+                        setFiltersList(removeFromFilters(filters.list, chipFilter));
+                      } else {
+                        setFilters(_.cloneDeep(filters));
+                      }
+                      setOpenedDropdown(undefined);
+                    }}
+                  >
+                    <TimesIcon />
+                    &nbsp;{t('Remove')}
+                  </DropdownItem>
+                </DropdownList>
+              </Dropdown>
+            );
+          })}
+          {!isForced && (
+            <Button variant="plain" onClick={() => setFiltersList(removeFromFilters(filters.list, chipFilter))}>
+              <TimesCircleIcon />
+            </Button>
+          )}
+        </div>
+      );
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [filterDefinitions, filters, isForced, openedDropdown, setFilters, setFiltersList, swapValue]
+  );
+
+  const setMatch = React.useCallback(
+    (v: Match) => {
+      const existingFilters = filters;
+      // convert all targeteable filters to a single peer
+      if (v !== 'any') {
+        existingFilters.list = setTargeteableFilters(filterDefinitions, existingFilters.list, 'src');
+      }
+      setFilters({ ...existingFilters, match: v });
+    },
+    [filters, setFilters, filterDefinitions]
+  );
+
+  if (_.isEmpty(filters.list) && _.isEmpty(getDefaultFilters())) {
     return null;
   }
-  const isDefaultFilters = filtersEqual(chipFilters, defaultFilters);
-  const isSrcDst = hasSrcDstFilters(chipFilters!);
+  const isDefaultFilters = filtersEqual(filters.list, getDefaultFilters());
 
   return (
     <ToolbarGroup
@@ -95,129 +302,15 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
       id={`${isForced ? 'forced-' : ''}filters`}
       variant="filter-group"
     >
+      <MatchDropdown selected={filters.match} setMatch={setMatch} />
       <ToolbarItem className="flex-start flex">
-        {chipFilters &&
-          chipFilters.map((chipFilter, cfIndex) => {
-            let fullName = getFilterFullName(chipFilter.def, t);
-            if (chipFilter.not) {
-              fullName = t('Not') + ' ' + fullName;
-            }
-            if (chipFilter.moreThan) {
-              fullName = fullName + ' ' + t('more than');
-            }
-            const someEnabled = hasEnabledFilterValues(chipFilter);
+        {getGroups()
+          .filter(gp => gp.filters.length)
+          .map(gp => {
             return (
-              <div key={cfIndex} className={`custom-chip-group ${someEnabled ? '' : 'disabled-group'}`}>
-                <Tooltip content={`${someEnabled ? t('Disable') : t('Enable')} '${fullName}' ${t('group filter')}`}>
-                  <Text
-                    className="pf-v5-c-chip-group__label"
-                    component={TextVariants.p}
-                    onClick={() => {
-                      //switch all values if no remaining
-                      chipFilter.values.forEach(fv => {
-                        fv.disabled = someEnabled;
-                      });
-                      setFilters(_.cloneDeep(filters));
-                    }}
-                  >
-                    {fullName}
-                  </Text>
-                </Tooltip>
-                {chipFilter.values.map((chipFilterValue, fvIndex) => {
-                  if (isForced || chipFilterValue.disabled) {
-                    return (
-                      <div key={fvIndex} className={`custom-chip ${chipFilterValue.disabled ? 'disabled-value' : ''}`}>
-                        <Tooltip
-                          content={`${chipFilterValue.disabled ? t('Enable') : t('Disable')} ${fullName} '${
-                            chipFilterValue.display || chipFilterValue.v
-                          }' ${t('filter')}`}
-                        >
-                          <Text
-                            component={TextVariants.p}
-                            onClick={() => {
-                              chipFilterValue.disabled = !chipFilterValue.disabled;
-                              setFilters(_.cloneDeep(filters));
-                            }}
-                          >
-                            {chipFilterValue.display ? chipFilterValue.display : chipFilterValue.v}
-                          </Text>
-                        </Tooltip>
-                      </div>
-                    );
-                  }
-
-                  const dropdownId = `${chipFilter.def.id}-${fvIndex}`;
-                  return (
-                    <Dropdown
-                      key={fvIndex}
-                      isOpen={dropdownId === openedDropdown}
-                      onOpenChange={(isOpen: boolean) => setOpenedDropdown(isOpen ? dropdownId : undefined)}
-                      toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
-                        <MenuToggle
-                          ref={toggleRef}
-                          className={`custom-chip ${chipFilterValue.disabled ? 'disabled-value' : ''}`}
-                          isExpanded={dropdownId === openedDropdown}
-                          onClick={() => setOpenedDropdown(openedDropdown === dropdownId ? undefined : dropdownId)}
-                        >
-                          {chipFilterValue.display ? chipFilterValue.display : chipFilterValue.v}
-                        </MenuToggle>
-                      )}
-                    >
-                      <DropdownList>
-                        <DropdownItem
-                          key="disable"
-                          onClick={() => {
-                            chipFilterValue.disabled = !chipFilterValue.disabled;
-                            setFilters(_.cloneDeep(filters));
-                            setOpenedDropdown(undefined);
-                          }}
-                        >
-                          {chipFilterValue.disabled && <CheckIcon />}
-                          {!chipFilterValue.disabled && <BanIcon />}
-                          &nbsp;{chipFilterValue.disabled ? t('Enable') : t('Disable')}
-                        </DropdownItem>
-                        {(chipFilter.def.id.startsWith('src_') || chipFilter.def.id.startsWith('dst_')) && (
-                          <DropdownItem
-                            key="swap"
-                            onClick={() => {
-                              const swapped = swapFilterValue(
-                                filterDefinitions,
-                                filters!.list,
-                                chipFilter.def.id,
-                                chipFilterValue
-                              );
-                              setFilters({ ...filters!, list: swapped });
-                              setOpenedDropdown(undefined);
-                            }}
-                          >
-                            <ArrowsAltVIcon style={{ transform: 'rotate(90deg)' }} />
-                            &nbsp;{t('Swap')}
-                          </DropdownItem>
-                        )}
-                        <DropdownItem
-                          key="remove"
-                          onClick={() => {
-                            chipFilter.values = chipFilter.values.filter(val => val.v !== chipFilterValue.v);
-                            if (_.isEmpty(chipFilter.values)) {
-                              setFiltersList(removeFromFilters(filters.list, chipFilter));
-                            } else {
-                              setFilters(_.cloneDeep(filters));
-                            }
-                            setOpenedDropdown(undefined);
-                          }}
-                        >
-                          <TimesIcon />
-                          &nbsp;{t('Remove')}
-                        </DropdownItem>
-                      </DropdownList>
-                    </Dropdown>
-                  );
-                })}
-                {!isForced && (
-                  <Button variant="plain" onClick={() => setFiltersList(removeFromFilters(filters.list, chipFilter))}>
-                    <TimesCircleIcon />
-                  </Button>
-                )}
+              <div key={gp.id} className={`custom-chip-box ${gp.id !== 'common' ? 'custom-chip-peer' : ''}`}>
+                {hasSrcOrDstFilters(filters.list) && <Text>{getGroupName(gp.id)}&nbsp;</Text>}
+                <div className="flex">{gp.filters.map(getFilterDisplay)}</div>
               </div>
             );
           })}
@@ -242,7 +335,7 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
                   resetFilters();
                   autoCompleteCache.clear();
                 },
-                enabled: defaultFilters.length > 0 && !isDefaultFilters
+                enabled: getDefaultFilters().length > 0 && !isDefaultFilters
               },
               {
                 id: 'clear-all-filters',
@@ -251,39 +344,14 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
                   clearFilters();
                   autoCompleteCache.clear();
                 },
-                enabled: !_.isEmpty(chipFilters)
+                enabled: !_.isEmpty(filters.list)
               },
               {
                 id: 'swap-filters',
                 label: t('Swap'),
-                tooltip: t('Swap source and destination filters'),
-                onClick: swapSrcDst,
-                enabled: isSrcDst
-              },
-              {
-                id: 'back-and-forth',
-                label: filters?.backAndForth ? t('Back and forth') : t('One way'),
-                onClick: toggleBackAndForth,
-                icon: filters?.backAndForth ? (
-                  <>
-                    <LongArrowAltUpIcon />
-                    <LongArrowAltDownIcon />
-                  </>
-                ) : (
-                  <LongArrowAltUpIcon />
-                ),
-                tooltip: (
-                  <TextContent className="netobserv-tooltip-text">
-                    <Text component={TextVariants.p}>{t('Switch between one way / back and forth filtering')}</Text>
-                    <Text component={TextVariants.p} className="netobserv-align-start">
-                      - {t('One way shows traffic strictly as defined per your filters')}
-                    </Text>
-                    <Text component={TextVariants.p} className="netobserv-align-start">
-                      - {t('Back and forth shows traffic according to your filters, plus the related return traffic')}
-                    </Text>
-                  </TextContent>
-                ),
-                enabled: isSrcDst
+                tooltip: t('Swap from and to filters'),
+                onClick: swapAllSrcDst,
+                enabled: hasSrcOrDstFilters(filters.list!) && filters.match !== 'peers'
               }
             ]}
           />
