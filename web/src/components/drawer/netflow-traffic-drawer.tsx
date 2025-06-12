@@ -16,7 +16,7 @@ import {
   hasIndexFields,
   hasNonIndexFields
 } from '../../model/filters';
-import { FlowScope, Match, MetricType, RecordType, StatFunction } from '../../model/flow-query';
+import { FlowScope, MetricType, RecordType, StatFunction } from '../../model/flow-query';
 import { ScopeConfigDef } from '../../model/scope';
 import { Warning } from '../../model/warnings';
 import { Column, ColumnSizeMap } from '../../utils/columns';
@@ -95,7 +95,6 @@ export interface NetflowTrafficDrawerProps {
   stats?: Stats;
   lastDuration?: number;
   warning?: Warning;
-  match: Match;
   setShowQuerySummary: (v: boolean) => void;
   clearSelections: () => void;
   setSelectedRecord: (v: Record | undefined) => void;
@@ -118,7 +117,6 @@ export const NetflowTrafficDrawer: React.FC<NetflowTrafficDrawerProps> = React.f
       topologyMetricFunction,
       topologyMetricType,
       setFilters,
-      match,
       setShowQuerySummary,
       clearSelections,
       setSelectedRecord,
@@ -212,12 +210,12 @@ export const NetflowTrafficDrawer: React.FC<NetflowTrafficDrawerProps> = React.f
       (w: Warning | undefined): Warning | undefined => {
         if (w?.type == 'slow') {
           let reason = '';
-          if (match === 'any' && hasNonIndexFields(filters.list)) {
+          if (filters.match === 'any' && hasNonIndexFields(filters.list)) {
             reason = t(
               // eslint-disable-next-line max-len
               'When in "Match any" mode, try using only Namespace, Owner or Resource filters (which use indexed fields), or decrease limit / range, to improve the query performance'
             );
-          } else if (match === 'all' && !hasIndexFields(filters.list)) {
+          } else if (filters.match === 'all' && !hasIndexFields(filters.list)) {
             reason = t(
               // eslint-disable-next-line max-len
               'Add Namespace, Owner or Resource filters (which use indexed fields), or decrease limit / range, to improve the query performance'
@@ -229,7 +227,7 @@ export const NetflowTrafficDrawer: React.FC<NetflowTrafficDrawerProps> = React.f
         }
         return w;
       },
-      [match, filters]
+      [filters]
     );
 
     const mainContent = () => {

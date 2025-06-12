@@ -111,8 +111,8 @@ export const getFiltersFromURL = (
       }
     }
   });
-  const backAndForth = getURLParamAsBool(URLParam.BackAndForth) || false;
-  return Promise.all(filterPromises).then(list => ({ backAndForth, list }));
+  const match = (getURLParam(URLParam.Match) as Match) || defaultMatch;
+  return Promise.all(filterPromises).then(list => ({ match, list }));
 };
 
 export const setURLFilters = (filters: Filters, replace?: boolean) => {
@@ -124,7 +124,7 @@ export const setURLFilters = (filters: Filters, replace?: boolean) => {
   setSomeURLParams(
     new Map([
       [URLParam.Filters, urlFilters],
-      [URLParam.BackAndForth, filters.backAndForth ? 'true' : 'false']
+      [URLParam.Match, filters.match]
     ]),
     replace
   );

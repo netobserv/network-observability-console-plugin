@@ -3,13 +3,31 @@ import { getFlowMetrics, getFlowRecords } from '../api/routes';
 import { Filter, FilterDefinition, Filters } from '../model/filters';
 import { filtersToString, FlowQuery } from '../model/flow-query';
 import { computeStepInterval, TimeRange } from './datetime';
-import { swapFilters } from './filters-helper';
+import { setTargeteableFilters, swapFilters } from './filters-helper';
 import { mergeStats, substractMetrics, sumMetrics } from './metrics';
 
 export const getFetchFunctions = (filterDefinitions: FilterDefinition[], filters: Filters, matchAny: boolean) => {
   // check back-and-forth
-  if (filters.backAndForth) {
-    const swapped = swap(filterDefinitions, filters.list, matchAny);
+  if (filters.list.some(f => f.def.category === 'targeteable')) {
+    // set targetable filters as source filters
+    const srcList = setTargeteableFilters(filterDefinitions, filters.list, 'src');
+    // set targetable filters as dest filters
+    const dstList = setTargeteableFilters(filterDefinitions, filters.list, 'dst');
+
+    return {
+      getRecords: (q: FlowQuery) => {
+        return getFlowsBNF(q, srcList, dstList, matchAny);
+      },
+      getMetrics: (q: FlowQuery, range: number | TimeRange) => {
+        return getMetricsBNF(q, range, srcList, dstList, matchAny);
+      }
+    };
+  } else if (filters.match === 'peers') {
+    let swapped = swapFilters(filterDefinitions, filters.list);
+    if (matchAny) {
+      // In match-any mode, remove non-swappable filters as they would result in duplicates
+      swapped = swapped.filter(f => f.def.id.startsWith('src_') || f.def.id.startsWith('dst_'));
+    }
     if (swapped.length > 0) {
       return {
         getRecords: (q: FlowQuery) => {
@@ -51,7 +69,7 @@ const getMetricsBNF = (
   // OVERLAP being ORIGINAL AND SWAPPED.
   // E.g: if ORIGINAL is "SrcNs=foo", SWAPPED is "DstNs=foo" and OVERLAP is "SrcNs=foo AND DstNs=foo"
   const overlapFilters = matchAny ? undefined : [...orig, ...swapped];
-  const promOrig = getFlowMetrics(initialQuery, range);
+  const promOrig = getFlowMetrics({ ...initialQuery, filters: filtersToString(orig, matchAny) }, range);
   const promSwapped = getFlowMetrics({ ...initialQuery, filters: filtersToString(swapped, matchAny) }, range);
   const promOverlap = overlapFilters
     ? getFlowMetrics(
@@ -86,14 +104,4 @@ export const mergeMetricsBNF = (
     };
   }
   return { metrics, stats };
-};
-
-const swap = (filterDefinitions: FilterDefinition[], filters: Filter[], matchAny: boolean): Filter[] => {
-  // include swapped traffic
-  const swapped = swapFilters(filterDefinitions, filters);
-  if (matchAny) {
-    // In match-any mode, remove non-swappable filters as they would result in duplicates
-    return swapped.filter(f => f.def.id.startsWith('src_') || f.def.id.startsWith('dst_'));
-  }
-  return swapped;
 };

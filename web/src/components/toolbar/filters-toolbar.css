@@ -55,12 +55,24 @@ div#filter-toolbar-search-filters {
   margin-right: 0;
 }
 
+.custom-chip-peer,
 .custom-chip-group,
 .custom-chip {
   border-radius: 3px;
   box-shadow: 0 0.0625rem 0.125rem 0 rgb(3 3 3 / 12%), 0 0 0.125rem 0 rgb(3 3 3 / 6%);
   display: inline-flex;
   align-items: center;
+}
+
+.custom-chip-box {
+  padding: 0.2em 0.5em 0.2em 0.5em;
+  margin: 0 1em 0 0;
+  flex-direction: column;
+}
+
+.custom-chip-peer {
+  color: #000;
+  background-color: #fafafa;
 }
 
 .custom-chip-group {
@@ -110,6 +122,11 @@ div#filter-toolbar-search-filters {
 .custom-chip.disabled-value>* {
   color: #fff;
   background-color: #6A6E73;
+}
+
+.pf-v5-theme-dark .custom-chip-box {
+  color: #fff;
+  background-color: #002952;
 }
 
 .pf-v5-theme-dark .custom-chip-group,
@@ -175,6 +192,8 @@ div#filter-toolbar-search-filters {
   white-space: nowrap;
 }
 
+#swap-filters-button,
+#reset-filters-button,
 #clear-all-filters-button {
   padding: 0;
 }
