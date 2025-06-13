@@ -1,6 +1,8 @@
-# Snyk guide: https://docs.snyk.io/snyk-cli/commands/ignore
+---
 exclude:
   global:
+    - vendor/**
+    - requirements.txt
     # ignore tests
     - "**/*_test.go"
     - "test/**"
