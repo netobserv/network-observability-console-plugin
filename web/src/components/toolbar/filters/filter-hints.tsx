@@ -3,6 +3,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { FilterDefinition } from '../../../model/filters';
+import './filter-hints.css';
 
 export interface FilterHintsProps {
   def: FilterDefinition;
