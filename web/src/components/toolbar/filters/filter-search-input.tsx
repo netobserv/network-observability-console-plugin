@@ -187,7 +187,7 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
     }
 
     return (
-      <div ref={advancedSearchPaneRef} role="dialog">
+      <div id="filter-search-form" ref={advancedSearchPaneRef} role="dialog">
         <Panel variant="raised">
           <PanelMain>
             <PanelMainBody>

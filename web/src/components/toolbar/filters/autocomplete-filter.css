@@ -7,4 +7,5 @@
 #autocomplete-container {
   margin: 0;
   padding: 0;
+  min-width: 330px;
 }
