@@ -50,7 +50,7 @@ export const undefinedValue = '""';
 // Unique double are allowed while typing but invalid
 export const doubleQuoteValue = '"';
 
-const matcher = (left: string, right: string[], not: boolean, moreThan: boolean) =>
+export const matcher = (left: string, right: string[], not: boolean, moreThan: boolean) =>
   `${left}${not ? '!=' : moreThan ? '>=' : '='}${right.join(',')}`;
 
 const simpleFiltersEncoder = (field: Field): FiltersEncoder => {

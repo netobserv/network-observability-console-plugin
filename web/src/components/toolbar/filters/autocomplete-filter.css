@@ -1,4 +1,10 @@
 #autocomplete-menu-button {
-  width: 30px;
+  width: 2.2em;
+  height: 2.2em;
+  padding: 0;
+}
+
+#autocomplete-container {
+  margin: 0;
   padding: 0;
 }

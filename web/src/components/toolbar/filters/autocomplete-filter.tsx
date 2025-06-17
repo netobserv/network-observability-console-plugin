@@ -1,5 +1,7 @@
 import {
   Button,
+  Flex,
+  FlexItem,
   Menu,
   MenuContent,
   MenuItem,
@@ -8,7 +10,7 @@ import {
   TextInput,
   ValidatedOptions
 } from '@patternfly/react-core';
-import { CaretDownIcon, SearchIcon } from '@patternfly/react-icons';
+import { CaretDownIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
 import * as React from 'react';
 import { createFilterValue, FilterDefinition, FilterOption, FilterValue } from '../../../model/filters';
@@ -27,23 +29,26 @@ const isMenuOption = (elt?: Element) => {
 export interface AutocompleteFilterProps {
   filterDefinition: FilterDefinition;
   addFilter: (filter: FilterValue) => boolean;
-  setMessageWithDelay: (m: string | undefined) => void;
+  setMessage: (m: string | undefined) => void;
   indicator: Indicator;
   setIndicator: (ind: Indicator) => void;
+  currentValue: string;
+  setCurrentValue: (v: string) => void;
 }
 
 export const AutocompleteFilter: React.FC<AutocompleteFilterProps> = ({
   filterDefinition,
   addFilter: addFilterParent,
-  setMessageWithDelay,
+  setMessage,
   indicator,
-  setIndicator
+  setIndicator,
+  currentValue,
+  setCurrentValue
 }) => {
   const autocompleteContainerRef = React.useRef<HTMLDivElement | null>(null);
   const searchInputRef = React.useRef<HTMLInputElement | null>(null);
   const optionsRef = React.useRef<HTMLDivElement | null>(null);
   const [options, setOptions] = React.useState<FilterOption[]>([]);
-  const [currentValue, setCurrentValue] = React.useState<string>('');
   const previousFilterDefinition = usePrevious(filterDefinition);
 
   React.useEffect(() => {
@@ -66,9 +71,9 @@ export const AutocompleteFilter: React.FC<AutocompleteFilterProps> = ({
   const resetFilterValue = React.useCallback(() => {
     setCurrentValue('');
     setOptions([]);
-    setMessageWithDelay(undefined);
+    setMessage(undefined);
     setIndicator(ValidatedOptions.default);
-  }, [setCurrentValue, setMessageWithDelay, setIndicator, setOptions]);
+  }, [setCurrentValue, setMessage, setIndicator, setOptions]);
 
   const addFilter = React.useCallback(
     (option: FilterOption) => {
@@ -90,11 +95,11 @@ export const AutocompleteFilter: React.FC<AutocompleteFilterProps> = ({
         .then(setOptions)
         .catch(err => {
           const errorMessage = getHTTPErrorDetails(err);
-          setMessageWithDelay(errorMessage);
+          setMessage(errorMessage);
           setOptions([]);
         });
     },
-    [setOptions, setCurrentValue, filterDefinition, setMessageWithDelay]
+    [setOptions, setCurrentValue, filterDefinition, setMessage]
   );
 
   const onAutoCompleteOptionSelected = React.useCallback(
@@ -142,7 +147,7 @@ export const AutocompleteFilter: React.FC<AutocompleteFilterProps> = ({
     const validation = filterDefinition.validate(v);
     //show tooltip and icon when user try to validate filter
     if (!_.isEmpty(validation.err)) {
-      setMessageWithDelay(validation.err);
+      setMessage(validation.err);
       setIndicator(ValidatedOptions.error);
       return;
     }
@@ -156,7 +161,7 @@ export const AutocompleteFilter: React.FC<AutocompleteFilterProps> = ({
     filterDefinition,
     currentValue,
     onAutoCompleteOptionSelected,
-    setMessageWithDelay,
+    setMessage,
     setIndicator,
     addFilterParent,
     resetFilterValue
@@ -174,8 +179,8 @@ export const AutocompleteFilter: React.FC<AutocompleteFilterProps> = ({
   }, []);
 
   return (
-    <>
-      <div data-test="autocomplete-container" ref={autocompleteContainerRef}>
+    <Flex direction={{ default: 'row' }}>
+      <FlexItem id="autocomplete-container" data-test="autocomplete-container" ref={autocompleteContainerRef}>
         <Popper
           trigger={
             <TextInput
@@ -207,36 +212,29 @@ export const AutocompleteFilter: React.FC<AutocompleteFilterProps> = ({
           }
           isVisible={!_.isEmpty(options)}
           enableFlip={false}
-          appendTo={autocompleteContainerRef.current!}
+          appendTo={autocompleteContainerRef.current || undefined}
         />
-      </div>
-      <Button
-        data-test="autocomplete-menu-button"
-        id="autocomplete-menu-button"
-        variant="control"
-        aria-label="show values"
-        onClick={() =>
-          setTimeout(() => {
-            if (_.isEmpty(options)) {
-              onAutoCompleteChange(currentValue);
-            } else {
-              setOptions([]);
-            }
-          }, 100)
-        }
-      >
-        <CaretDownIcon />
-      </Button>
-      <Button
-        data-test="search-button"
-        id="search-button"
-        variant="control"
-        aria-label="search button for filter"
-        onClick={() => onEnter()}
-      >
-        <SearchIcon />
-      </Button>
-    </>
+      </FlexItem>
+      <FlexItem>
+        <Button
+          data-test="autocomplete-menu-button"
+          id="autocomplete-menu-button"
+          variant="control"
+          aria-label="show values"
+          onClick={() =>
+            setTimeout(() => {
+              if (_.isEmpty(options)) {
+                onAutoCompleteChange(currentValue);
+              } else {
+                setOptions([]);
+              }
+            }, 100)
+          }
+        >
+          <CaretDownIcon />
+        </Button>
+      </FlexItem>
+    </Flex>
   );
 };
 
