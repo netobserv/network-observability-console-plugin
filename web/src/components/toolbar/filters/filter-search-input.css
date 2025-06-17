@@ -1,3 +1,7 @@
-#filter-search-input {
-  min-width: 500px !important;
+#filter-search-input, #filter-search-form {
+  min-width: 400px !important;
+}
+
+.filters-actions {
+  margin-left: 180px;
 }

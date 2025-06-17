@@ -1,4 +1,4 @@
-import { Dropdown, DropdownItem, Flex, FlexItem, MenuToggle, MenuToggleElement } from '@patternfly/react-core';
+import { Dropdown, DropdownItem, Flex, MenuToggle, MenuToggleElement } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { FilterDefinition, FilterId } from '../../../model/filters';
@@ -24,7 +24,7 @@ export const FiltersDropdown: React.FC<FiltersDropdownProps> = ({
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
-  const directionRef = useOutsideClickEvent(() => setColumnOpen(false));
+  const directionRef = useOutsideClickEvent(() => setDirectionOpen(false));
   const [isDirectionOpen, setDirectionOpen] = React.useState<boolean>(false);
 
   const columnRef = useOutsideClickEvent(() => setColumnOpen(false));
@@ -66,12 +66,8 @@ export const FiltersDropdown: React.FC<FiltersDropdownProps> = ({
   }, [filterDefinitions, selectedDirection, selectedFilter, setSelectedFilter]);
 
   return (
-    <Flex>
-      <FlexItem
-        id="direction-filter-dropdown-container"
-        data-test="column-filter-dropdown-container"
-        ref={directionRef}
-      >
+    <Flex id="direction-column-filter-dropdowns">
+      <div id="direction-filter-dropdown-container" data-test="column-filter-dropdown-container" ref={directionRef}>
         <Dropdown
           data-test="direction-filter-dropdown"
           id="direction-filter-dropdown"
@@ -131,8 +127,8 @@ export const FiltersDropdown: React.FC<FiltersDropdownProps> = ({
             {t('Any direction')}
           </DropdownItem>
         </Dropdown>
-      </FlexItem>
-      <FlexItem id="column-filter-dropdown-container" data-test="column-filter-dropdown-container" ref={columnRef}>
+      </div>
+      <div id="column-filter-dropdown-container" data-test="column-filter-dropdown-container" ref={columnRef}>
         <Dropdown
           data-test="column-filter-dropdown"
           id="column-filter-dropdown"
@@ -154,7 +150,7 @@ export const FiltersDropdown: React.FC<FiltersDropdownProps> = ({
         >
           {getFiltersDropdownItems()}
         </Dropdown>
-      </FlexItem>
+      </div>
     </Flex>
   );
 };
