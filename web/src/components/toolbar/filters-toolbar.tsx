@@ -1,31 +1,17 @@
-import {
-  Button,
-  InputGroup,
-  Toolbar,
-  ToolbarContent,
-  ToolbarItem,
-  Tooltip,
-  ValidatedOptions
-} from '@patternfly/react-core';
+import { Button, Toolbar, ToolbarContent, ToolbarItem, Tooltip } from '@patternfly/react-core';
 import { CompressIcon, ExpandIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Filter, FilterDefinition, Filters, FilterValue, findFromFilters } from '../../model/filters';
+import { FilterDefinition, Filters } from '../../model/filters';
 import { QuickFilter } from '../../model/quick-filters';
 import { autoCompleteCache } from '../../utils/autocomplete-cache';
-import { findFilter } from '../../utils/filter-definitions';
-import { Indicator, swapFilterDefinition } from '../../utils/filters-helper';
 import { localStorageShowFiltersKey, useLocalStorage } from '../../utils/local-storage-hook';
 import { QueryOptionsDropdown, QueryOptionsProps } from '../dropdowns/query-options-dropdown';
 import './filters-toolbar.css';
-import AutocompleteFilter from './filters/autocomplete-filter';
-import CompareFilter, { FilterCompare } from './filters/compare-filter';
-import { FilterHints } from './filters/filter-hints';
+import { FilterSearchInput } from './filters/filter-search-input';
 import { FiltersChips } from './filters/filters-chips';
-import FiltersDropdown from './filters/filters-dropdown';
 import { QuickFilters } from './filters/quick-filters';
-import TextFilter from './filters/text-filter';
 import { LinksOverflow } from './links-overflow';
 
 export interface FiltersToolbarProps {
@@ -58,12 +44,8 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
   ...props
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
-  const [indicator, setIndicator] = React.useState<Indicator>(ValidatedOptions.default);
   const [message, setMessage] = React.useState<string | undefined>();
-  const [selectedFilter, setSelectedFilter] = React.useState<FilterDefinition | null>(
-    findFilter(filterDefinitions, 'src_namespace') || filterDefinitions.length ? filterDefinitions[0] : null
-  );
-  const [selectedCompare, setSelectedCompare] = React.useState<FilterCompare>(FilterCompare.equal);
+
   const [showFilters, setShowFilters] = useLocalStorage<boolean>(localStorageShowFiltersKey, true);
 
   // reset and delay message state to trigger tooltip properly
@@ -81,83 +63,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
     [skipTipsDelay]
   );
 
-  const setFiltersList = React.useCallback(
-    (list: Filter[]) => {
-      setFilters({ ...filters!, list: list });
-    },
-    [setFilters, filters]
-  );
-
-  const addFilter = React.useCallback(
-    (filterValue: FilterValue) => {
-      if (selectedFilter === null) {
-        console.error('addFilter called with', selectedFilter);
-        return false;
-      }
-      const def =
-        filters?.match !== 'any' ? swapFilterDefinition(filterDefinitions, selectedFilter, 'src') : selectedFilter;
-      const newFilters = _.cloneDeep(filters?.list) || [];
-      const not = selectedCompare === FilterCompare.notEqual;
-      const moreThan = selectedCompare === FilterCompare.moreThanOrEqual;
-      const found = findFromFilters(newFilters, { def, not, moreThan });
-      if (found) {
-        if (found.values.map(value => value.v).includes(filterValue.v)) {
-          setMessageWithDelay(t('Filter already exists'));
-          setIndicator(ValidatedOptions.error);
-          return false;
-        } else {
-          found.values.push(filterValue);
-        }
-      } else {
-        newFilters.push({ def, not, moreThan, values: [filterValue] });
-      }
-      setFiltersList(newFilters);
-      return true;
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      filterDefinitions,
-      filters?.list,
-      filters?.match,
-      selectedCompare,
-      selectedFilter,
-      setFiltersList,
-      setMessageWithDelay
-    ]
-  );
-
-  const getFilterControl = React.useCallback(() => {
-    if (selectedFilter === null) {
-      return <></>;
-    }
-
-    const commonProps = {
-      filterDefinition: selectedFilter,
-      addFilter: addFilter,
-      setMessageWithDelay: setMessageWithDelay,
-      indicator: indicator,
-      setIndicator: setIndicator
-    };
-    switch (selectedFilter.component) {
-      case 'text':
-      case 'number':
-        return (
-          <TextFilter
-            {...commonProps}
-            allowEmpty={selectedCompare !== FilterCompare.moreThanOrEqual}
-            regexp={selectedFilter.component === 'number' ? /\D/g : undefined}
-          />
-        );
-      case 'autocomplete':
-        return <AutocompleteFilter {...commonProps} />;
-    }
-  }, [selectedFilter, addFilter, setMessageWithDelay, indicator, selectedCompare]);
-
   const getFilterToolbar = React.useCallback(() => {
-    if (selectedFilter === null) {
-      return <></>;
-    }
-
     return (
       <ToolbarItem className="flex-start">
         <Tooltip
@@ -169,26 +75,16 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
           enableFlip={false}
           position={'top'}
         >
-          <div>
-            <InputGroup>
-              <FiltersDropdown
-                filterDefinitions={filterDefinitions}
-                selectedFilter={selectedFilter}
-                setSelectedFilter={setSelectedFilter}
-              />
-              <CompareFilter
-                value={selectedCompare}
-                setValue={setSelectedCompare}
-                component={selectedFilter.component}
-              />
-              {getFilterControl()}
-            </InputGroup>
-            <FilterHints def={selectedFilter} />
-          </div>
+          <FilterSearchInput
+            filterDefinitions={filterDefinitions}
+            filters={filters}
+            setFilters={setFilters}
+            setMessage={setMessageWithDelay}
+          />
         </Tooltip>
       </ToolbarItem>
     );
-  }, [filterDefinitions, getFilterControl, message, selectedCompare, selectedFilter]);
+  }, [filterDefinitions, filters, message, setFilters, setMessageWithDelay]);
 
   const isForced = !_.isEmpty(forcedFilters);
   const filtersOrForced = isForced ? forcedFilters : filters;
@@ -210,7 +106,11 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
         </ToolbarItem>
         {!isForced && quickFilters.length > 0 && (
           <ToolbarItem className="flex-start">
-            <QuickFilters quickFilters={quickFilters} activeFilters={filters?.list || []} setFilters={setFiltersList} />
+            <QuickFilters
+              quickFilters={quickFilters}
+              activeFilters={filters?.list || []}
+              setFilters={list => setFilters({ ...filters!, list })}
+            />
           </ToolbarItem>
         )}
         {!isForced && getFilterToolbar()}
