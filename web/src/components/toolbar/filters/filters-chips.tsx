@@ -37,7 +37,6 @@ import { QuickFilter } from '../../../model/quick-filters';
 import { autoCompleteCache } from '../../../utils/autocomplete-cache';
 import {
   bnfFilterValue,
-  getFilterFullName,
   hasSrcAndDstFilters,
   hasSrcOrDstFilters,
   setTargeteableFilters,
@@ -138,7 +137,7 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
 
   const getFilterDisplay = React.useCallback(
     (chipFilter: Filter, cfIndex: number) => {
-      let fullName = filters.match === 'any' ? getFilterFullName(chipFilter.def, t) : chipFilter.def.name;
+      let fullName = chipFilter.def.name;
       if (chipFilter.not) {
         fullName = t('Not') + ' ' + fullName;
       }
