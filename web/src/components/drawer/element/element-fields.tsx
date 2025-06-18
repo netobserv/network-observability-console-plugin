@@ -1,7 +1,7 @@
 import { Text, TextContent, TextVariants } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Filter, FilterDefinition } from '../../../model/filters';
+import { Filter, FilterDefinition, Filters } from '../../../model/filters';
 import { getCustomScopes } from '../../../model/scope';
 import { NodeData } from '../../../model/topology';
 import { createPeer } from '../../../utils/metrics';
@@ -11,7 +11,7 @@ export interface ElementFieldsProps {
   id: string;
   data: NodeData;
   forceFirstAsText?: boolean;
-  activeFilters: Filter[];
+  filters: Filters;
   setFilters: (filters: Filter[]) => void;
   filterDefinitions: FilterDefinition[];
 }
@@ -20,7 +20,7 @@ export const ElementFields: React.FC<ElementFieldsProps> = ({
   id,
   data,
   forceFirstAsText,
-  activeFilters,
+  filters,
   setFilters,
   filterDefinitions
 }) => {
@@ -36,7 +36,7 @@ export const ElementFields: React.FC<ElementFieldsProps> = ({
         key={id + '-resource'}
         label={forceLabel || data.peer.resource.type}
         forcedText={forceAsText ? data.peer.resource.name : undefined}
-        activeFilters={activeFilters}
+        filters={filters}
         filterType={'resource'}
         peer={data.peer}
         setFilters={setFilters}
@@ -52,7 +52,7 @@ export const ElementFields: React.FC<ElementFieldsProps> = ({
         key={id + '-owner'}
         label={forceLabel || data.peer.owner.type}
         forcedText={forceAsText ? data.peer.owner.name : undefined}
-        activeFilters={activeFilters}
+        filters={filters}
         filterType={'owner'}
         peer={createPeer({ owner: data.peer.owner, namespace: data.peer.namespace })}
         setFilters={setFilters}
@@ -71,7 +71,7 @@ export const ElementFields: React.FC<ElementFieldsProps> = ({
           key={`${id}-${sc}`}
           label={forceLabel || sc.name}
           forcedText={forceAsText ? value : undefined}
-          activeFilters={activeFilters}
+          filters={filters}
           filterType={sc.id}
           peer={createPeer({ [sc.id]: value })}
           setFilters={setFilters}
@@ -101,7 +101,7 @@ export const ElementFields: React.FC<ElementFieldsProps> = ({
         id={id + '-address'}
         key={id + '-address'}
         label={t('IP')}
-        activeFilters={activeFilters}
+        filters={filters}
         filterType={'resource'}
         peer={createPeer({ addr: data.peer.addr })}
         setFilters={setFilters}

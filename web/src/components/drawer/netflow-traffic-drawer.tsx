@@ -372,7 +372,7 @@ export const NetflowTrafficDrawer: React.FC<NetflowTrafficDrawerProps> = React.f
             droppedMetrics={getTopologyDroppedMetrics() || []}
             metricType={props.topologyMetricType}
             truncateLength={props.topologyOptions.truncateLength}
-            filters={props.filters.list}
+            filters={props.filters}
             filterDefinitions={props.filterDefinitions}
             setFilters={setFiltersList}
             onClose={() => onElementSelect(undefined)}
