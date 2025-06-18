@@ -12,3 +12,25 @@
 .custom-chip>.pf-v5-c-menu-toggle__controls {
   padding: 0.25em;
 }
+
+.match-container {
+  align-self: center;
+}
+
+.match-text {
+  text-align: center;
+}
+
+.and-or-text {
+  align-self: center;
+  padding: 0 0.5em 0 0.5em;
+}
+
+.flex-block {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  align-content: center;
+  align-self: center;
+  justify-content: center;
+}
