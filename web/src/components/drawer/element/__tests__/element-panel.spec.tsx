@@ -5,7 +5,7 @@ import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 import { TopologyMetrics } from '../../../../api/loki';
 import { actOn, waitForRender } from '../../../../components/__tests__/common.spec';
-import { Filter } from '../../../../model/filters';
+import { Filters } from '../../../../model/filters';
 import { FlowScope, MetricType } from '../../../../model/flow-query';
 import { NodeData } from '../../../../model/topology';
 import { createPeer } from '../../../../utils/metrics';
@@ -42,7 +42,7 @@ describe('<ElementPanel />', () => {
     droppedMetrics: [],
     metricType: 'Bytes' as MetricType,
     metricScope: 'resource' as FlowScope,
-    filters: [] as Filter[],
+    filters: { list: [], match: 'all' } as Filters,
     filterDefinitions: FilterDefinitionSample,
     setFilters: jest.fn(),
     onClose: jest.fn(),
