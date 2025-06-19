@@ -6,6 +6,7 @@ import { TopologyMetrics } from '../../../../api/loki';
 import { FilterDefinitionSample } from '../../../../components/__tests-data__/filters';
 import { ScopeDefSample } from '../../../../components/__tests-data__/scopes';
 import { waitForRender } from '../../../../components/__tests__/common.spec';
+import { Filters } from '../../../../model/filters';
 import { FlowScope, MetricType, StatFunction } from '../../../../model/flow-query';
 import { DefaultOptions, LayoutName } from '../../../../model/topology';
 import { defaultTimeRange } from '../../../../utils/router';
@@ -30,7 +31,7 @@ describe('<NetflowTopology />', () => {
     setOptions: jest.fn(),
     lowScale: 0.3,
     medScale: 0.5,
-    filters: { backAndForth: false, list: [] },
+    filters: { match: 'all', list: [] } as Filters,
     filterDefinitions: FilterDefinitionSample,
     setFilters: jest.fn(),
     toggleTopologyOptions: jest.fn(),

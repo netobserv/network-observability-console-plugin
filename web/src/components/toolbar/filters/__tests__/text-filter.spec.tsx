@@ -10,8 +10,10 @@ describe('<TextFilter />', () => {
   const props: TextFilterProps = {
     filterDefinition: findFilter(FilterDefinitionSample, 'src_name')!,
     indicator: ValidatedOptions.default,
+    currentValue: '',
+    setCurrentValue: jest.fn(),
     addFilter: jest.fn(),
-    setMessageWithDelay: jest.fn(),
+    setMessage: jest.fn(),
     setIndicator: jest.fn()
   };
   beforeEach(() => {
