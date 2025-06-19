@@ -7,6 +7,7 @@ describe('<FiltersChips />', () => {
   const props: FiltersChipsProps = {
     filters: { match: 'all', list: [] },
     setFilters: jest.fn(),
+    editValue: jest.fn(),
     clearFilters: jest.fn(),
     resetFilters: jest.fn(),
     quickFilters: [],

@@ -1,14 +1,17 @@
-import { Button, Toolbar, ToolbarContent, ToolbarItem, Tooltip } from '@patternfly/react-core';
+import { Button, Toolbar, ToolbarContent, ToolbarItem, Tooltip, ValidatedOptions } from '@patternfly/react-core';
 import { CompressIcon, ExpandIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { FilterDefinition, Filters } from '../../model/filters';
+import { Filter, FilterDefinition, Filters } from '../../model/filters';
 import { QuickFilter } from '../../model/quick-filters';
 import { autoCompleteCache } from '../../utils/autocomplete-cache';
+import { findFilter, matcher } from '../../utils/filter-definitions';
+import { Indicator } from '../../utils/filters-helper';
 import { localStorageShowFiltersKey, useLocalStorage } from '../../utils/local-storage-hook';
 import { QueryOptionsDropdown, QueryOptionsProps } from '../dropdowns/query-options-dropdown';
 import './filters-toolbar.css';
+import { FilterCompare } from './filters/compare-filter';
 import { FilterSearchInput } from './filters/filter-search-input';
 import { FiltersChips } from './filters/filters-chips';
 import { QuickFilters } from './filters/quick-filters';
@@ -29,6 +32,8 @@ export interface FiltersToolbarProps {
   setFullScreen: (b: boolean) => void;
 }
 
+export type Direction = 'source' | 'destination' | undefined;
+
 export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
   id,
   filters,
@@ -44,7 +49,18 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
   ...props
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
+
   const [message, setMessage] = React.useState<string | undefined>();
+  const [indicator, setIndicator] = React.useState<Indicator>(ValidatedOptions.default);
+
+  const [searchInputValue, setSearchInputValue] = React.useState('');
+
+  const [direction, setDirection] = React.useState<Direction>();
+  const [filter, setFilter] = React.useState<FilterDefinition | null>(
+    findFilter(filterDefinitions, 'src_namespace') || filterDefinitions.length ? filterDefinitions[0] : null
+  );
+  const [compare, setCompare] = React.useState<FilterCompare>(FilterCompare.equal);
+  const [value, setValue] = React.useState<string>('');
 
   const [showFilters, setShowFilters] = useLocalStorage<boolean>(localStorageShowFiltersKey, true);
 
@@ -63,7 +79,14 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
     [skipTipsDelay]
   );
 
+  const editValue = React.useCallback((f: Filter, v: string) => {
+    setSearchInputValue(matcher(f.def.id, [v], f.not === true, f.moreThan === true));
+  }, []);
+
   const getFilterToolbar = React.useCallback(() => {
+    if (!filter) {
+      return <></>;
+    }
     return (
       <ToolbarItem className="flex-start">
         <Tooltip
@@ -78,13 +101,37 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
           <FilterSearchInput
             filterDefinitions={filterDefinitions}
             filters={filters}
+            indicator={indicator}
+            direction={direction}
+            filter={filter}
+            compare={compare}
+            value={value}
+            setValue={setValue}
+            setCompare={setCompare}
+            setFilter={setFilter}
+            setDirection={setDirection}
+            setIndicator={setIndicator}
+            searchInputValue={searchInputValue}
+            setSearchInputValue={setSearchInputValue}
             setFilters={setFilters}
             setMessage={setMessageWithDelay}
           />
         </Tooltip>
       </ToolbarItem>
     );
-  }, [filterDefinitions, filters, message, setFilters, setMessageWithDelay]);
+  }, [
+    compare,
+    direction,
+    filter,
+    filterDefinitions,
+    filters,
+    indicator,
+    message,
+    searchInputValue,
+    setFilters,
+    setMessageWithDelay,
+    value
+  ]);
 
   const isForced = !_.isEmpty(forcedFilters);
   const filtersOrForced = isForced ? forcedFilters : filters;
@@ -97,7 +144,6 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
   } else if (defaultFilters.length > 0) {
     showHideText = showFilters ? t('Hide filters') : t('Show filters');
   }
-
   return (
     <Toolbar data-test={id} id={id}>
       <ToolbarContent data-test={`${id}-search-filters`} id={`${id}-search-filters`} toolbarId={id}>
@@ -154,6 +200,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
             isForced={isForced}
             filters={filtersOrForced!}
             setFilters={setFilters}
+            editValue={editValue}
             clearFilters={clearFilters}
             resetFilters={resetFilters}
             quickFilters={quickFilters}

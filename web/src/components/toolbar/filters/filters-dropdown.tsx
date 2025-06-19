@@ -86,7 +86,7 @@ export const FiltersDropdown: React.FC<FiltersDropdownProps> = ({
                 ? t('Source')
                 : selectedDirection === 'destination'
                 ? t('Destination')
-                : t('Any direction')}
+                : t('Common')}
             </MenuToggle>
           )}
         >
@@ -124,7 +124,7 @@ export const FiltersDropdown: React.FC<FiltersDropdownProps> = ({
               setSelectedDirection(undefined);
             }}
           >
-            {t('Any direction')}
+            {t('Common')}
           </DropdownItem>
         </Dropdown>
       </div>
