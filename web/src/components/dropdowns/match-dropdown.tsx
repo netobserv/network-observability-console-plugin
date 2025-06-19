@@ -21,7 +21,7 @@ export const MatchDropdown: React.FC<MatchDropdownProps> = ({ selected, setMatch
       case 'any':
         return t('Any');
       case 'all':
-        return t('One way');
+        return t('All');
       case 'peers':
         return t('Peers');
       default:
