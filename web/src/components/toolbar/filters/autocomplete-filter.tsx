@@ -14,11 +14,9 @@ import { CaretDownIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
 import * as React from 'react';
 import { createFilterValue, FilterDefinition, FilterOption, FilterValue } from '../../../model/filters';
-import { autoCompleteCache } from '../../../utils/autocomplete-cache';
 import { getHTTPErrorDetails } from '../../../utils/errors';
 import { undefinedValue } from '../../../utils/filter-definitions';
 import { Indicator } from '../../../utils/filters-helper';
-import { usePrevious } from '../../../utils/previous-hook';
 import './autocomplete-filter.css';
 
 const optionsMenuID = 'options-menu-list';
@@ -49,16 +47,9 @@ export const AutocompleteFilter: React.FC<AutocompleteFilterProps> = ({
   const searchInputRef = React.useRef<HTMLInputElement | null>(null);
   const optionsRef = React.useRef<HTMLDivElement | null>(null);
   const [options, setOptions] = React.useState<FilterOption[]>([]);
-  const previousFilterDefinition = usePrevious(filterDefinition);
 
   React.useEffect(() => {
-    if (filterDefinition !== previousFilterDefinition) {
-      //reset filter value if definition has changed
-      resetFilterValue();
-      searchInputRef.current?.focus();
-      searchInputRef.current?.setAttribute('autocomplete', 'off');
-      autoCompleteCache.clear();
-    } else if (_.isEmpty(currentValue)) {
+    if (_.isEmpty(currentValue)) {
       setIndicator(ValidatedOptions.default);
     } else {
       //update validation icon on field on value change

@@ -3,6 +3,10 @@ import {
   Button,
   Form,
   FormGroup,
+  Menu,
+  MenuContent,
+  MenuItem,
+  MenuList,
   Panel,
   PanelMain,
   PanelMainBody,
@@ -14,6 +18,7 @@ import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { FilterDefinition, Filters, FilterValue, findFromFilters } from '../../../model/filters';
+import { getHTTPErrorDetails } from '../../../utils/errors';
 import { matcher } from '../../../utils/filter-definitions';
 import { Indicator, setTargeteableFilters } from '../../../utils/filters-helper';
 import { useOutsideClickEvent } from '../../../utils/outside-hook';
@@ -24,6 +29,13 @@ import { FilterHints } from './filter-hints';
 import './filter-search-input.css';
 import FiltersDropdown from './filters-dropdown';
 import TextFilter from './text-filter';
+
+interface FormUpdateResult {
+  def?: FilterDefinition;
+  comparator?: FilterCompare;
+  value?: string;
+  hasError: boolean;
+}
 
 export interface FilterSearchInputProps {
   filterDefinitions: FilterDefinition[];
@@ -65,15 +77,21 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   const searchInputRef = React.useRef(null);
-  const advancedSearchPaneRef = useOutsideClickEvent(() => {
-    setSearchInputValue(getEncodedValue());
-    setAdvancedSearchOpen(false);
-    // clear search field to show the placeholder back
-    if (_.isEmpty(value)) {
-      setSearchInputValue('');
-    }
+  const popperRef = useOutsideClickEvent(() => {
+    // delay this to avoid conflict with onToggle event
+    // clicking on the arrow will skip the onToggle and trigger this code after the delay
+    setTimeout(() => {
+      setSearchInputValue(getEncodedValue());
+      setSuggestions([]);
+      setPopperOpen(!isPopperOpen);
+      // clear search field to show the placeholder back
+      if (_.isEmpty(value)) {
+        setSearchInputValue('');
+      }
+    }, 100);
   });
-  const [isAdvancedSearchOpen, setAdvancedSearchOpen] = React.useState(false);
+  const [suggestions, setSuggestions] = React.useState<string[]>([]);
+  const [isPopperOpen, setPopperOpen] = React.useState(false);
   const [submitPending, setSubmitPending] = React.useState(false);
 
   const reset = React.useCallback(() => {
@@ -84,10 +102,6 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
 
   const addFilter = React.useCallback(
     (filterValue: FilterValue) => {
-      if (filter === null) {
-        console.error('addFilter called with', filter);
-        return false;
-      }
       let newFilters = _.cloneDeep(filters?.list) || [];
       const def = filter;
       const not = compare === FilterCompare.notEqual;
@@ -110,7 +124,8 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
         newFilters = setTargeteableFilters(filterDefinitions, newFilters, direction === 'destination' ? 'dst' : 'src');
       }
       setFilters({ ...filters!, list: newFilters });
-      setAdvancedSearchOpen(false);
+      setPopperOpen(false);
+      setSuggestions([]);
       reset();
       return true;
     },
@@ -119,9 +134,10 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
   );
 
   const updateForm = React.useCallback(
-    (submitOnRefresh?: boolean) => {
+    (v: string = searchInputValue, submitOnRefresh?: boolean) => {
       // parse search input value to form content
-      const fieldValue = searchInputValue.replaceAll('!=', '|').replaceAll('>=', '|').replaceAll('=', '|').split('|');
+      const fieldValue = v.replaceAll('!=', '|').replaceAll('>=', '|').replaceAll('=', '|').split('|');
+      const result: FormUpdateResult = { hasError: false };
 
       // if field + value are valid, we should end with 2 items only
       if (fieldValue.length == 2) {
@@ -129,81 +145,174 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
         const def = filterDefinitions.find(def => def.id.toLowerCase() === searchValue);
         if (def) {
           // set compare
-          if (searchInputValue.includes('>=')) {
+          if (v.includes('>=')) {
             if (def.component != 'number') {
               setMessage(t('`>=` is not allowed with `{{searchValue}}`. Use `=` or `!=` instead.', { searchValue }));
               setIndicator(ValidatedOptions.error);
-              return;
+              return { ...result, hasError: true };
             }
             setCompare(FilterCompare.moreThanOrEqual);
-          } else if (searchInputValue.includes('!=')) {
+            result.comparator = FilterCompare.moreThanOrEqual;
+          } else if (v.includes('!=')) {
             setCompare(FilterCompare.notEqual);
+            result.comparator = FilterCompare.notEqual;
           } else {
             setCompare(FilterCompare.equal);
+            result.comparator = FilterCompare.equal;
           }
           // set direction
-          if (searchValue.startsWith('src')) {
+          if (def.category === 'source') {
             setDirection('source');
-          } else if (searchValue.startsWith('dst')) {
+          } else if (def.category === 'destination') {
             setDirection('destination');
           } else {
             setDirection(undefined);
           }
           //set filter
           setFilter(def);
+          result.def = def;
         } else if (submitOnRefresh) {
           setMessage(t("Can't find filter `{{searchValue}}`", { searchValue }));
           setIndicator(ValidatedOptions.error);
-          return;
+          return { ...result, hasError: true };
         }
         setValue(fieldValue[1]);
+        result.value = fieldValue[1];
       } else if (fieldValue.length === 1) {
-        // set simple value on current filter if no splitter found
-        setValue(searchInputValue);
+        // check if the value match a field
+        const searchValue = v.toLowerCase();
+        const def = filterDefinitions.find(def => def.id.toLowerCase() === searchValue);
+        if (def) {
+          // set direction
+          if (def.category === 'source') {
+            setDirection('source');
+          } else if (def.category === 'destination') {
+            setDirection('destination');
+          } else {
+            setDirection(undefined);
+          }
+          // set filter and reset the rest
+          setFilter(def);
+          setCompare(FilterCompare.equal);
+          setValue('');
+          result.def = def;
+        } else {
+          // set simple value on current filter
+          setValue(v);
+          result.value = v;
+        }
       } else {
         setMessage(t('Invalid format. The input should be <filter><comparator><value> such as `name=netobserv`.'));
         setIndicator(ValidatedOptions.error);
-        return;
+        return { ...result, hasError: true };
       }
 
       if (submitOnRefresh) {
         setSubmitPending(true);
       }
+
+      return result;
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [compare, filterDefinitions, searchInputValue, setMessage]
   );
 
-  const getEncodedValue = React.useCallback(() => {
-    if (filter === null) {
-      return '';
-    }
-    return matcher(filter.id, [value], compare === FilterCompare.notEqual, compare === FilterCompare.moreThanOrEqual);
-  }, [compare, filter, value]);
+  const getEncodedValue = React.useCallback(
+    (v: string = value) => {
+      return matcher(filter.id, [v], compare === FilterCompare.notEqual, compare === FilterCompare.moreThanOrEqual);
+    },
+    [compare, filter, value]
+  );
 
   const onToggle = React.useCallback(() => {
-    updateForm();
-    setAdvancedSearchOpen(!isAdvancedSearchOpen);
-  }, [isAdvancedSearchOpen, updateForm]);
+    setSuggestions([]);
+    if (!isPopperOpen) {
+      updateForm();
+      setPopperOpen(true);
+    }
+  }, [isPopperOpen, updateForm]);
+
+  const onSearchChange = React.useCallback(
+    (v: string) => {
+      setSearchInputValue(v);
+      const updated = updateForm(v);
+      if (!v.length || updated.hasError) {
+        setSuggestions([]);
+        return;
+      } else if (updated.def) {
+        if (updated.comparator) {
+          // suggest values if autocomplete and field set
+          if (filter.component === 'autocomplete') {
+            filter
+              .getOptions(updated.value || '')
+              .then(v => {
+                setSuggestions(v.map(o => o.value));
+              })
+              .catch(err => {
+                const errorMessage = getHTTPErrorDetails(err);
+                setMessage(errorMessage);
+                setSuggestions([]);
+              });
+          } else {
+            // cleanup suggestions if values can't be guessed
+            setSuggestions([]);
+          }
+        } else {
+          const suggestions = ['=', '!='];
+          // suggest comparators if field set but not value
+          if (filter.component === 'number') {
+            suggestions.push('>=');
+          }
+          // also suggest other definitions starting by the same id
+          setSuggestions(
+            suggestions.concat(
+              filterDefinitions
+                .filter(fd => fd.id !== updated.def!.id && fd.id.startsWith(updated.def!.id))
+                .map(fd => fd.id)
+            )
+          );
+        }
+      } else if (updated.value?.length) {
+        // suggest fields if def is not matched yet
+        const suggestions = filterDefinitions
+          .filter(fd => fd.id.startsWith(updated.value!))
+          .map(fd => fd.id) as string[];
+        if (filter.component === 'autocomplete') {
+          filter
+            .getOptions(updated.value)
+            .then(v => {
+              setSuggestions(suggestions.concat(v.map(o => o.value)));
+            })
+            .catch(err => {
+              const errorMessage = getHTTPErrorDetails(err);
+              setMessage(errorMessage);
+              setSuggestions(suggestions);
+            });
+        } else {
+          setSuggestions(suggestions);
+        }
+      }
+    },
+    [filter, filterDefinitions, setMessage, setSearchInputValue, updateForm]
+  );
 
   const searchInput = React.useCallback(
     () => (
       <SearchInput
         onClear={reset}
-        onChange={(e, v) => {
-          setSearchInputValue(v);
-        }}
+        onChange={(e, v) => onSearchChange(v)}
         onSearch={(e, v) => {
+          setSuggestions([]);
           if (_.isEmpty(v)) {
-            setAdvancedSearchOpen(true);
+            setPopperOpen(true);
           } else {
             setSearchInputValue(v);
-            updateForm(true);
+            updateForm(v, true);
           }
         }}
         onToggleAdvancedSearch={onToggle}
-        value={isAdvancedSearchOpen ? getEncodedValue() : searchInputValue}
-        isAdvancedSearchOpen={isAdvancedSearchOpen}
+        value={isPopperOpen ? getEncodedValue() : searchInputValue}
+        isAdvancedSearchOpen={isPopperOpen}
         placeholder={filter?.hint}
         ref={searchInputRef}
         id="filter-search-input"
@@ -212,7 +321,8 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
     [
       filter?.hint,
       getEncodedValue,
-      isAdvancedSearchOpen,
+      isPopperOpen,
+      onSearchChange,
       onToggle,
       reset,
       searchInputValue,
@@ -221,85 +331,134 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
     ]
   );
 
-  const advancedForm = React.useCallback(() => {
+  const popper = React.useCallback(() => {
     return (
-      <div id="filter-search-form" ref={advancedSearchPaneRef} role="dialog">
-        <Panel variant="raised">
-          <PanelMain>
-            <PanelMainBody>
-              <Form>
-                <FormGroup label={t('Filter')} fieldId="field" key="field">
-                  <FiltersDropdown
-                    filterDefinitions={filterDefinitions}
-                    selectedDirection={direction}
-                    setSelectedDirection={setDirection}
-                    selectedFilter={filter}
-                    setSelectedFilter={setFilter}
-                  />
-                  <FilterHints def={filter} />
-                </FormGroup>
-                <FormGroup label={t('Comparator')} fieldId="compare" key="compare">
-                  <CompareFilter value={compare} setValue={setCompare} component={filter.component} />
-                </FormGroup>
-                <FormGroup label={t('Value')} fieldId="value" key="value">
-                  {filter.component === 'autocomplete' ? (
-                    <AutocompleteFilter
-                      filterDefinition={filter}
-                      addFilter={addFilter}
-                      setMessage={setMessage}
-                      indicator={indicator}
-                      setIndicator={setIndicator}
-                      currentValue={value}
-                      setCurrentValue={setValue}
-                    />
-                  ) : (
-                    <TextFilter
-                      filterDefinition={filter}
-                      addFilter={addFilter}
-                      setMessage={setMessage}
-                      indicator={indicator}
-                      setIndicator={setIndicator}
-                      allowEmpty={compare !== FilterCompare.moreThanOrEqual}
-                      regexp={filter.component === 'number' ? /\D/g : undefined}
-                      currentValue={value}
-                      setCurrentValue={setValue}
-                    />
-                  )}
-                </FormGroup>
-                <ActionGroup className="filters-actions">
-                  <Button variant="link" type="reset" onClick={reset}>
-                    {t('Reset')}
-                  </Button>
-                  <Button
-                    variant="primary"
-                    type="submit"
-                    onClick={e => {
-                      e.preventDefault();
-                      console.log('Add filter', e);
-                      addFilter({ v: value });
+      <div id="filter-popper" ref={popperRef} role="dialog">
+        {suggestions.length ? (
+          <Menu>
+            <MenuContent>
+              <MenuList>
+                {suggestions.map((suggestion, index) => (
+                  <MenuItem
+                    itemId={suggestion}
+                    key={`suggestion-${index}`}
+                    onClick={() => {
+                      const updated = updateForm(searchInputValue);
+                      if (!updated.def) {
+                        if (suggestion !== searchInputValue) {
+                          onSearchChange(suggestion);
+                        } else {
+                          updateForm(searchInputValue, true);
+                        }
+                      } else if (!updated.comparator) {
+                        onSearchChange(`${updated.def.id}${suggestion}`);
+                      } else {
+                        updateForm(
+                          `${updated.def.id}${
+                            updated.comparator === FilterCompare.moreThanOrEqual
+                              ? '>='
+                              : updated.comparator === FilterCompare.notEqual
+                              ? '!='
+                              : '='
+                          }${suggestion}`,
+                          true
+                        );
+                      }
                     }}
                   >
-                    {t('Add filter')}
-                  </Button>
-                </ActionGroup>
-              </Form>
-            </PanelMainBody>
-          </PanelMain>
-        </Panel>
+                    {suggestion}
+                  </MenuItem>
+                ))}
+              </MenuList>
+            </MenuContent>
+          </Menu>
+        ) : (
+          <Panel variant="raised">
+            <PanelMain>
+              <PanelMainBody>
+                <Form>
+                  <FormGroup label={t('Filter')} fieldId="field" key="field">
+                    <FiltersDropdown
+                      filterDefinitions={filterDefinitions}
+                      selectedDirection={direction}
+                      setSelectedDirection={setDirection}
+                      selectedFilter={filter}
+                      setSelectedFilter={setFilter}
+                    />
+                    <FilterHints def={filter} />
+                  </FormGroup>
+                  <FormGroup label={t('Comparator')} fieldId="compare" key="compare">
+                    <CompareFilter value={compare} setValue={setCompare} component={filter.component} />
+                  </FormGroup>
+                  <FormGroup label={t('Value')} fieldId="value" key="value">
+                    {filter.component === 'autocomplete' ? (
+                      <AutocompleteFilter
+                        filterDefinition={filter}
+                        addFilter={addFilter}
+                        setMessage={setMessage}
+                        indicator={indicator}
+                        setIndicator={setIndicator}
+                        currentValue={value}
+                        setCurrentValue={setValue}
+                      />
+                    ) : (
+                      <TextFilter
+                        filterDefinition={filter}
+                        addFilter={addFilter}
+                        setMessage={setMessage}
+                        indicator={indicator}
+                        setIndicator={setIndicator}
+                        allowEmpty={compare !== FilterCompare.moreThanOrEqual}
+                        regexp={filter.component === 'number' ? /\D/g : undefined}
+                        currentValue={value}
+                        setCurrentValue={setValue}
+                      />
+                    )}
+                  </FormGroup>
+                  <ActionGroup className="filters-actions">
+                    <Button variant="link" type="reset" onClick={reset}>
+                      {t('Reset')}
+                    </Button>
+                    <Button
+                      variant="primary"
+                      type="submit"
+                      onClick={e => {
+                        e.preventDefault();
+                        console.log('Add filter', e);
+                        addFilter({ v: value });
+                      }}
+                    >
+                      {t('Add filter')}
+                    </Button>
+                  </ActionGroup>
+                </Form>
+              </PanelMainBody>
+            </PanelMain>
+          </Panel>
+        )}
       </div>
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    addFilter,
-    advancedSearchPaneRef,
-    compare,
-    direction,
-    filter,
+    popperRef,
+    suggestions,
     filterDefinitions,
-    indicator,
-    reset,
+    direction,
+    setDirection,
+    filter,
+    setFilter,
+    compare,
+    setCompare,
+    addFilter,
     setMessage,
-    value
+    indicator,
+    setIndicator,
+    value,
+    setValue,
+    reset,
+    updateForm,
+    searchInputValue,
+    onSearchChange
   ]);
 
   React.useEffect(() => {
@@ -309,16 +468,13 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
     }
   }, [submitPending, setSubmitPending, addFilter, value]);
 
-  if (filter == null) {
-    return <></>;
-  }
   return (
     <Popper
       trigger={searchInput()}
       triggerRef={searchInputRef}
-      popper={advancedForm()}
-      popperRef={advancedSearchPaneRef}
-      isVisible={isAdvancedSearchOpen}
+      popper={popper()}
+      popperRef={popperRef}
+      isVisible={isPopperOpen || suggestions.length > 0}
       enableFlip={false}
       appendTo={() => document.querySelector('#filter-search-input')!}
     />
