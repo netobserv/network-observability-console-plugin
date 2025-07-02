@@ -1,3 +1,4 @@
+import { FilterCompare } from '../components/toolbar/filters/compare-filter';
 import { findFilter } from '../utils/filter-definitions';
 import { Filter, FilterDefinition, fromFilterKey } from './filters';
 
@@ -25,8 +26,8 @@ export const parseQuickFilters = (filterDefinitions: FilterDefinition[], raw: Ra
       }
       const filter: Filter = {
         def: def,
-        not: not,
-        moreThan: moreThan,
+        // rely on match here since it allows to use quotes for exact match
+        compare: moreThan ? FilterCompare.moreThanOrEqual : not ? FilterCompare.notMatch : FilterCompare.match,
         values: values.split(',').map(v => ({ v: v }))
       };
       return filter;

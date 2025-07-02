@@ -1,5 +1,6 @@
 import { FlowMetricsResult, RawTopologyMetrics } from '../../api/loki';
 import { getFlowMetrics, getFlowRecords } from '../../api/routes';
+import { FilterCompare } from '../../components/toolbar/filters/compare-filter';
 import { FilterDefinitionSample } from '../../components/__tests-data__/filters';
 import { ScopeDefSample } from '../../components/__tests-data__/scopes';
 import { Filter, FilterId, Filters, FilterValue } from '../../model/filters';
@@ -19,8 +20,8 @@ const getFlowMetricsMock = getFlowMetrics as jest.Mock;
 const filter = (id: FilterId, values: FilterValue[], not?: boolean): Filter => {
   return {
     def: findFilter(FilterDefinitionSample, id)!,
-    values: values,
-    not: not
+    compare: not ? FilterCompare.notEqual : FilterCompare.equal,
+    values: values
   };
 };
 

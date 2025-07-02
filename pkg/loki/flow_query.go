@@ -114,13 +114,13 @@ func (q *FlowQueryBuilder) addFilter(filter filters.Match) error {
 	} else if q.config.IsIP(filter.Key) {
 		q.addIPFilters(filter.Key, values, filter.Not)
 	} else {
-		q.addLineFilters(filter.Key, values, filter.Not, filter.MoreThanOrEqual)
+		q.addLineFilters(filter.Key, values, filter.Not, filter.Equal, filter.MoreThanOrEqual)
 	}
 
 	return nil
 }
 
-func (q *FlowQueryBuilder) addLineFilters(key string, values []string, not bool, moreThan bool) {
+func (q *FlowQueryBuilder) addLineFilters(key string, values []string, not, equal, moreThan bool) {
 	if len(values) == 0 {
 		return
 	}
@@ -132,6 +132,8 @@ func (q *FlowQueryBuilder) addLineFilters(key string, values []string, not bool,
 		var hasEmptyMatch bool
 		if q.config.IsNumeric(key) {
 			lf, hasEmptyMatch = filters.NumericLineFilter(key, values, not, moreThan)
+		} else if equal {
+			lf, hasEmptyMatch = filters.StringLineFilter(key, values, not)
 		} else {
 			lf, hasEmptyMatch = filters.StringLineFilterCheckExact(key, values, not)
 		}
