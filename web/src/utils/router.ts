@@ -1,12 +1,5 @@
-import {
-  createFilterValue,
-  DisabledFilters,
-  Filter,
-  FilterDefinition,
-  filterKey,
-  Filters,
-  fromFilterKey
-} from '../model/filters';
+import { FilterCompare } from '../components/toolbar/filters/compare-filter';
+import { createFilterValue, DisabledFilters, Filter, FilterDefinition, Filters, fromFilterKey } from '../model/filters';
 import { DataSource, Match, MetricType, PacketLoss, RecordType, StatFunction } from '../model/flow-query';
 import { TimeRange } from './datetime';
 import { findFilter } from './filter-definitions';
@@ -21,7 +14,6 @@ import {
 } from './url';
 
 const filtersSeparator = ';';
-const filterKVSeparator = '=';
 const filterValuesSeparator = ',';
 export const defaultTimeRange = 300;
 export const defaultRecordType: RecordType = 'flowLog';
@@ -85,9 +77,9 @@ export const getFiltersFromURL = (
   const filterPromises: Promise<Filter>[] = [];
   const filters = urlParam.split(filtersSeparator);
   filters.forEach(keyValue => {
-    const pair = keyValue.split(filterKVSeparator);
+    const pair = keyValue.split(/=|~/);
     if (pair.length === 2) {
-      const { id, not, moreThan } = fromFilterKey(pair[0]);
+      const { id } = fromFilterKey(pair[0]);
       const def = findFilter(filterDefinitions, id);
       if (def) {
         const disabledValues = disabledFilters[pair[0]]?.split(',') || [];
@@ -101,8 +93,15 @@ export const getFiltersFromURL = (
             });
             const f: Filter = {
               def: def,
-              not: not,
-              moreThan: moreThan,
+              compare: keyValue.includes(FilterCompare.moreThanOrEqual)
+                ? FilterCompare.moreThanOrEqual
+                : keyValue.includes(FilterCompare.notEqual)
+                ? FilterCompare.notEqual
+                : keyValue.includes(FilterCompare.equal)
+                ? FilterCompare.equal
+                : keyValue.includes(FilterCompare.notMatch)
+                ? FilterCompare.notMatch
+                : FilterCompare.match,
               values: filterValues
             };
             return f;
@@ -118,7 +117,7 @@ export const getFiltersFromURL = (
 export const setURLFilters = (filters: Filters, replace?: boolean) => {
   const urlFilters = filters.list
     .map(filter => {
-      return filterKey(filter) + filterKVSeparator + filter.values.map(v => v.v).join(filterValuesSeparator);
+      return filter.def.id + filter.compare + filter.values.map(v => v.v).join(filterValuesSeparator);
     })
     .join(filtersSeparator);
   setSomeURLParams(

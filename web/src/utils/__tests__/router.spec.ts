@@ -1,4 +1,5 @@
 import { setNavFunction } from '../../components/dynamic-loader/dynamic-loader';
+import { FilterCompare } from '../../components/toolbar/filters/compare-filter';
 import { FilterDefinitionSample } from '../../components/__tests-data__/filters';
 import { Filters } from '../../model/filters';
 import { findFilter } from '../filter-definitions';
@@ -14,12 +15,13 @@ describe('Filters URL', () => {
       list: [
         {
           def: findFilter(FilterDefinitionSample, 'src_namespace')!,
+          compare: FilterCompare.equal,
           values: [{ v: 'test' }]
         },
         {
           def: findFilter(FilterDefinitionSample, 'dst_name')!,
-          values: [{ v: 'test' }],
-          not: true
+          compare: FilterCompare.notEqual,
+          values: [{ v: 'test' }]
         }
       ]
     };
