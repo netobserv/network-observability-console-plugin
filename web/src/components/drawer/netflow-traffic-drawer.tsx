@@ -3,8 +3,6 @@ import { Drawer, DrawerContent, DrawerContentBody, Flex, FlexItem } from '@patte
 import { t } from 'i18next';
 import _ from 'lodash';
 import React from 'react';
-import { GraphElementPeer, TopologyOptions } from 'src/model/topology';
-import { TimeRange } from 'src/utils/datetime';
 import { Record } from '../../api/ipfix';
 import { getFunctionMetricKey, getRateMetricKey, NetflowMetrics, Stats } from '../../api/loki';
 import { Config } from '../../model/config';
@@ -18,8 +16,10 @@ import {
 } from '../../model/filters';
 import { FlowScope, MetricType, RecordType, StatFunction } from '../../model/flow-query';
 import { ScopeConfigDef } from '../../model/scope';
+import { GraphElementPeer, TopologyOptions } from '../../model/topology';
 import { Warning } from '../../model/warnings';
 import { Column, ColumnSizeMap } from '../../utils/columns';
+import { TimeRange } from '../../utils/datetime';
 import { isPromError } from '../../utils/errors';
 import { OverviewPanel } from '../../utils/overview-panels';
 import { TruncateLength } from '../dropdowns/truncate-dropdown';

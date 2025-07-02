@@ -80,7 +80,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
   );
 
   const editValue = React.useCallback((f: Filter, v: string) => {
-    setSearchInputValue(matcher(f.def.id, [v], f.not === true, f.moreThan === true));
+    setSearchInputValue(matcher(f.def.id, [v], f.compare));
   }, []);
 
   const getFilterToolbar = React.useCallback(() => {

@@ -30,15 +30,18 @@ export const TextFilter: React.FC<TextFilterProps> = ({
 }) => {
   const searchInputRef = React.useRef<HTMLInputElement | null>(null);
 
-  React.useEffect(() => {
-    //update validation icon on field on value change
-    if (!_.isEmpty(currentValue)) {
-      const validation = filterDefinition.validate(String(currentValue));
-      setIndicator(!_.isEmpty(validation.err) ? ValidatedOptions.warning : ValidatedOptions.success);
-    } else {
-      setIndicator(ValidatedOptions.default);
-    }
-  }, [currentValue, filterDefinition, setIndicator]);
+  const updateIndicator = React.useCallback(
+    (v = currentValue) => {
+      //update validation icon on field on value change
+      if (!_.isEmpty(v)) {
+        const validation = filterDefinition.validate(String(v));
+        setIndicator(!_.isEmpty(validation.err) ? ValidatedOptions.warning : ValidatedOptions.success);
+      } else {
+        setIndicator(ValidatedOptions.default);
+      }
+    },
+    [currentValue, filterDefinition, setIndicator]
+  );
 
   const updateValue = React.useCallback(
     (v: string) => {
@@ -47,8 +50,9 @@ export const TextFilter: React.FC<TextFilterProps> = ({
         filteredValue = filteredValue.replace(regexp, '');
       }
       setCurrentValue(filteredValue);
+      updateIndicator(filteredValue);
     },
-    [regexp, setCurrentValue]
+    [regexp, setCurrentValue, updateIndicator]
   );
 
   const resetFilterValue = React.useCallback(() => {
@@ -57,7 +61,7 @@ export const TextFilter: React.FC<TextFilterProps> = ({
     setIndicator(ValidatedOptions.default);
   }, [setCurrentValue, setMessage, setIndicator]);
 
-  const onSelect = React.useCallback(() => {
+  const onEnter = React.useCallback(() => {
     // override empty value by undefined value
     let v = currentValue;
     if (allowEmpty) {
@@ -82,6 +86,10 @@ export const TextFilter: React.FC<TextFilterProps> = ({
     }
   }, [currentValue, allowEmpty, filterDefinition, setMessage, setIndicator, addFilter, resetFilterValue]);
 
+  React.useEffect(() => {
+    updateIndicator();
+  }, [currentValue, updateIndicator]);
+
   return (
     <TextInput
       type="search"
@@ -89,12 +97,7 @@ export const TextFilter: React.FC<TextFilterProps> = ({
       validated={indicator}
       placeholder={filterDefinition.placeholder}
       onChange={(event, value) => updateValue(value)}
-      onKeyPress={e => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          onSelect();
-        }
-      }}
+      onKeyDown={e => e.key === 'Enter' && onEnter()}
       value={currentValue}
       ref={searchInputRef}
       id="search"

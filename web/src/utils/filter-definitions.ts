@@ -1,6 +1,7 @@
 import { TFunction } from 'i18next';
 import * as _ from 'lodash';
 import { Field } from '../api/ipfix';
+import { FilterCompare } from '../components/toolbar/filters/compare-filter';
 import { Config } from '../model/config';
 import {
   FilterCategory,
@@ -50,23 +51,21 @@ export const undefinedValue = '""';
 // Unique double are allowed while typing but invalid
 export const doubleQuoteValue = '"';
 
-export const matcher = (left: string, right: string[], not: boolean, moreThan: boolean) =>
-  `${left}${not ? '!=' : moreThan ? '>=' : '='}${right.join(',')}`;
+export const matcher = (left: string, right: string[], compare: FilterCompare) => `${left}${compare}${right.join(',')}`;
 
 const simpleFiltersEncoder = (field: Field): FiltersEncoder => {
-  return (values: FilterValue[], matchAny: boolean, not: boolean, moreThan: boolean) => {
+  return (values: FilterValue[], compare: FilterCompare) => {
     return matcher(
       field,
       values.map(v => v.v),
-      not,
-      moreThan || false
+      compare
     );
   };
 };
 
 // As owner / non-owner kind filters are mixed, they are disambiguated via this function
 const kindFiltersEncoder = (base: Field, owner: Field): FiltersEncoder => {
-  return (values: FilterValue[], matchAny: boolean, not: boolean, moreThan: boolean) => {
+  return (values: FilterValue[], compare: FilterCompare, matchAny: boolean) => {
     const { baseValues, ownerValues } = _.groupBy(values, value => {
       return isOwnerKind(value.v) ? 'ownerValues' : 'baseValues';
     });
@@ -76,8 +75,7 @@ const kindFiltersEncoder = (base: Field, owner: Field): FiltersEncoder => {
         matcher(
           base,
           baseValues.map(value => value.v),
-          not,
-          moreThan || false
+          compare
         )
       );
     }
@@ -86,8 +84,7 @@ const kindFiltersEncoder = (base: Field, owner: Field): FiltersEncoder => {
         matcher(
           owner,
           ownerValues.map(value => value.v),
-          not,
-          moreThan || false
+          compare
         )
       );
     }
@@ -102,14 +99,14 @@ const k8sResourceFiltersEncoder = (
   name: Field,
   ownerName: Field
 ): FiltersEncoder => {
-  return (values: FilterValue[], matchAny: boolean, not: boolean) => {
+  return (values: FilterValue[], compare: FilterCompare, matchAny: boolean) => {
     const splitValues = values.map(value => splitResource(value.v));
     return splitValues
       .map(res => {
         if (isOwnerKind(res.kind)) {
-          return k8sSingleResourceEncode(ownerKind, namespace, ownerName, res, not);
+          return k8sSingleResourceEncode(ownerKind, namespace, ownerName, res, compare.includes('!'));
         } else {
-          return k8sSingleResourceEncode(kind, namespace, name, res, not);
+          return k8sSingleResourceEncode(kind, namespace, name, res, compare.includes('!'));
         }
       })
       .join(matchAny ? '|' : '&');
@@ -359,10 +356,10 @@ export const checkFilterAvailable = (fd: FilterDefinition, config: Config, dataS
 
   if (isPromOnly) {
     // "encode" a dummy query to check related labels, and make sure they're all part of available prom labels
-    const q = fd.encoder([{ v: 'any' }], false, false, false);
+    const q = fd.encoder([{ v: 'any' }], FilterCompare.match, false);
     const parts = q.split('&');
     for (let i = 0; i < parts.length; i++) {
-      const kv = parts[i].split('=');
+      const kv = parts[i].split(/=|~/);
       if (kv.length === 0 || !config.promLabels.includes(kv[0])) {
         return false;
       }
