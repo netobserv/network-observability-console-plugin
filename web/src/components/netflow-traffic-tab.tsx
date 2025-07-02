@@ -18,6 +18,7 @@ import { findFilter, getFilterDefinitions } from '../utils/filter-definitions';
 import { usePrevious } from '../utils/previous-hook';
 import Error from './messages/error';
 import NetflowTrafficParent from './netflow-traffic-parent';
+import { FilterCompare } from './toolbar/filters/compare-filter';
 
 type NetflowTrafficTabProps<R extends K8sResourceCommon = K8sResourceCommon> = {
   match?: {
@@ -114,6 +115,7 @@ export const NetflowTrafficTab: React.FC<NetflowTrafficTabProps> = ({ match, obj
           list: [
             {
               def: findFilter(filterDefinitions, 'src_resource')!,
+              compare: FilterCompare.equal,
               values: [{ v: `${obj.kind}.${obj.metadata!.namespace}.${obj.metadata!.name}` }]
             }
           ],
@@ -126,6 +128,7 @@ export const NetflowTrafficTab: React.FC<NetflowTrafficTabProps> = ({ match, obj
           list: [
             {
               def: findFilter(filterDefinitions, 'dst_resource')!,
+              compare: FilterCompare.equal,
               values: [{ v: `${obj.kind}.${obj.metadata!.namespace}.${obj.metadata!.name}` }]
             }
           ],
@@ -150,6 +153,7 @@ export const NetflowTrafficTab: React.FC<NetflowTrafficTabProps> = ({ match, obj
           list: [
             {
               def: findFilter(filterDefinitions, 'dst_resource')!,
+              compare: FilterCompare.equal,
               values: [{ v: `${route.spec.to!.kind}.${route.metadata!.namespace}.${route.spec.to!.name}` }]
             }
           ],
@@ -161,6 +165,7 @@ export const NetflowTrafficTab: React.FC<NetflowTrafficTabProps> = ({ match, obj
           list: [
             {
               def: findFilter(filterDefinitions, 'src_namespace')!,
+              compare: FilterCompare.equal,
               values: [{ v: obj!.metadata!.name as string }]
             }
           ],
@@ -172,6 +177,7 @@ export const NetflowTrafficTab: React.FC<NetflowTrafficTabProps> = ({ match, obj
           list: [
             {
               def: findFilter(filterDefinitions, 'src_host_name')!,
+              compare: FilterCompare.equal,
               values: [{ v: obj!.metadata!.name as string }]
             }
           ],
@@ -183,6 +189,7 @@ export const NetflowTrafficTab: React.FC<NetflowTrafficTabProps> = ({ match, obj
           list: [
             {
               def: findFilter(filterDefinitions, 'src_resource')!,
+              compare: FilterCompare.equal,
               values: obj.metadata!.ownerReferences!.map(ownerRef => {
                 return { v: `${ownerRef.kind}.${obj.metadata!.namespace}.${ownerRef.name}` };
               })
@@ -197,6 +204,7 @@ export const NetflowTrafficTab: React.FC<NetflowTrafficTabProps> = ({ match, obj
           list: [
             {
               def: findFilter(filterDefinitions, 'src_resource')!,
+              compare: FilterCompare.equal,
               values: [
                 { v: `${hpa.spec.scaleTargetRef.kind}.${hpa.metadata!.namespace}.${hpa.spec.scaleTargetRef.name}` }
               ]

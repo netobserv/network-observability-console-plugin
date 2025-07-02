@@ -1,9 +1,10 @@
 import _ from 'lodash';
+import { FilterCompare } from '../components/toolbar/filters/compare-filter';
 import { isEqual } from '../utils/base-compare';
 import { undefinedValue } from '../utils/filter-definitions';
 import { Match } from './flow-query';
 
-export type FiltersEncoder = (values: FilterValue[], matchAny: boolean, not: boolean, moreThan: boolean) => string;
+export type FiltersEncoder = (values: FilterValue[], compare: FilterCompare, matchAny: boolean) => string;
 
 export type FilterComponent = 'autocomplete' | 'text' | 'number';
 
@@ -90,8 +91,7 @@ export interface FilterValue {
 
 export interface Filter {
   def: FilterDefinition;
-  not?: boolean;
-  moreThan?: boolean;
+  compare: FilterCompare;
   values: FilterValue[];
 }
 
@@ -135,7 +135,10 @@ export const getEnabledFilters = (filters: Filters): Filters => {
 
 export type DisabledFilters = Record<string, string>;
 
-export const filterKey = (filter: Filter) => filter.def.id + (filter.not ? '!' : '') + (filter.moreThan ? '>' : '');
+export const filterKey = (filter: Filter) =>
+  filter.def.id +
+  ([FilterCompare.notEqual, FilterCompare.notMatch].includes(filter.compare) ? '!' : '') +
+  (filter.compare === FilterCompare.moreThanOrEqual ? '>' : '');
 
 export const fromFilterKey = (key: string) => {
   if (key.endsWith('!')) {
@@ -183,18 +186,14 @@ export const removeFromFilters = (activeFilters: Filter[], search: FilterKey): F
 };
 
 export const filterKeyEqual = (f1: FilterKey, f2: FilterKey): boolean => {
-  return (
-    f1.def.id === f2.def.id &&
-    (f1.not === true) === (f2.not === true) &&
-    (f1.moreThan === true) === (f2.moreThan === true)
-  );
+  return f1.def.id === f2.def.id && f1.compare === f2.compare;
 };
 
 type ComparableFilter = { key: string; values: string[] };
 
 const comparableFilter = (f: Filter): ComparableFilter => {
   return {
-    key: f.def.id + (f.not ? '!' : ''),
+    key: f.def.id + ([FilterCompare.notEqual, FilterCompare.notMatch].includes(f.compare) ? '!' : ''),
     values: f.values.map(v => v.v).sort()
   };
 };

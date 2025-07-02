@@ -1,6 +1,7 @@
 /* eslint-disable max-len */
 import { Filter, FilterId, FilterValue } from '../../model/filters';
 import { findFilter, getFilterDefinitions } from '../../utils/filter-definitions';
+import { FilterCompare } from '../toolbar/filters/compare-filter';
 import { ColumnConfigSampleDefs } from './columns';
 
 export const FilterConfigSampleDefs = [
@@ -36,7 +37,7 @@ export const FilterConfigSampleDefs = [
   },
   {
     id: 'name',
-    name: 'name',
+    name: 'Name',
     component: 'text',
     category: 'targeteable',
     hint: 'Specify a single kubernetes name.',
@@ -45,7 +46,7 @@ export const FilterConfigSampleDefs = [
   },
   {
     id: 'src_name',
-    name: 'name',
+    name: 'Name',
     component: 'text',
     category: 'source',
     hint: 'Specify a single kubernetes name.',
@@ -54,7 +55,7 @@ export const FilterConfigSampleDefs = [
   },
   {
     id: 'dst_name',
-    name: 'name',
+    name: 'Name',
     component: 'text',
     category: 'destination',
     hint: 'Specify a single kubernetes name.',
@@ -380,6 +381,7 @@ export const FilterDefinitionSample = getFilterDefinitions(FilterConfigSampleDef
 const filter = (id: FilterId, values: FilterValue[]): Filter => {
   return {
     def: findFilter(FilterDefinitionSample, id)!,
+    compare: FilterCompare.equal,
     values: values
   };
 };

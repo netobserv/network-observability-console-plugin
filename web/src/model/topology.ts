@@ -17,6 +17,7 @@ import { TFunction } from 'i18next';
 import _ from 'lodash';
 import { MetricStats, TopologyMetricPeer, TopologyMetrics } from '../api/loki';
 import { TruncateLength } from '../components/dropdowns/truncate-dropdown';
+import { FilterCompare } from '../components/toolbar/filters/compare-filter';
 import { Filter, FilterDefinition, FilterId, Filters, findFromFilters } from '../model/filters';
 import { ContextSingleton } from '../utils/context';
 import { findFilter } from '../utils/filter-definitions';
@@ -162,7 +163,7 @@ export const isDirElementFiltered = (
   if (!defValue) {
     return false;
   }
-  const filter = findFromFilters(filters, { def: defValue.def });
+  const filter = findFromFilters(filters, { def: defValue.def, compare: FilterCompare.equal });
   return filter !== undefined && filter.values.find(v => v.v === defValue.value) !== undefined;
 };
 
@@ -175,7 +176,7 @@ export const isElementFiltered = (
   if (!defValue) {
     return false;
   }
-  const filter = findFromFilters(filters, { def: defValue.def });
+  const filter = findFromFilters(filters, { def: defValue.def, compare: FilterCompare.equal });
   return filter !== undefined && filter.values.find(v => v.v === defValue.value) !== undefined;
 };
 
@@ -188,9 +189,9 @@ const toggleFilter = (
   isFiltered: boolean,
   setFilters: (filters: Filter[]) => void
 ) => {
-  let filter = findFromFilters(result, { def: defValue.def });
+  let filter = findFromFilters(result, { def: defValue.def, compare: FilterCompare.equal });
   if (!filter) {
-    filter = { def: defValue.def, values: [] };
+    filter = { def: defValue.def, compare: FilterCompare.equal, values: [] };
     result.push(filter);
   }
   if (isFiltered) {

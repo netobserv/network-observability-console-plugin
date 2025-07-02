@@ -52,7 +52,11 @@ describe('<FiltersToolbar />', () => {
 
   it('should open and close', async () => {
     const wrapper = mount(<FiltersToolbar {...props} />);
+    expect(wrapper.find('#filter-popper').length).toBe(0);
     expect(wrapper.find('.column-filter-item').length).toBe(0);
+
+    //open popper
+    await actOn(() => wrapper.find('[aria-label="Open advanced search"]').last().simulate('click'), wrapper);
 
     //open dropdow
     await actOn(() => wrapper.find('#column-filter-toggle').at(0).simulate('click'), wrapper);
@@ -63,12 +67,18 @@ describe('<FiltersToolbar />', () => {
     await actOn(() => wrapper.find('#column-filter-toggle').at(0).simulate('click'), wrapper);
     expect(wrapper.find('.column-filter-item').length).toBe(0);
 
+    //close popper
+    await actOn(() => wrapper.find('[aria-label="Open advanced search"]').last().simulate('click'), wrapper);
+
     //setFilters should not be called at startup, because filters are supposed to be already initialized from URL
     expect(props.setFilters).toHaveBeenCalledTimes(0);
   });
 
   it('should show tips on complex fields', async () => {
     const wrapper = mount(<FiltersToolbar {...props} />);
+
+    //open popper
+    await actOn(() => wrapper.find('[aria-label="Open advanced search"]').last().simulate('click'), wrapper);
 
     //open dropdow
     await actOn(() => wrapper.find('#column-filter-toggle').at(0).simulate('click'), wrapper);

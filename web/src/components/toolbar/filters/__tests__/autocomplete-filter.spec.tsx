@@ -1,6 +1,7 @@
 import { TextInput, ValidatedOptions } from '@patternfly/react-core';
 import { mount } from 'enzyme';
 import * as React from 'react';
+import { act } from 'react-dom/test-utils';
 import { FilterDefinitionSample } from '../../../../components/__tests-data__/filters';
 import { actOn } from '../../../../components/__tests__/common.spec';
 import { findFilter } from '../../../../utils/filter-definitions';
@@ -17,6 +18,7 @@ describe('<AutocompleteFilter />', () => {
     setIndicator: jest.fn()
   };
   beforeEach(() => {
+    props.setCurrentValue = jest.fn();
     props.addFilter = jest.fn();
     props.setIndicator = jest.fn();
   });
@@ -39,9 +41,16 @@ describe('<AutocompleteFilter />', () => {
 
     // Filter for source name
     await actOn(() => wrapper.find(TextInput).last().props().onChange!(null!, 'ftp'), wrapper);
+    expect(props.setCurrentValue).toHaveBeenNthCalledWith(1, 'ftp');
+
+    // update prop as if the value was stored in parent component
+    wrapper.setProps({ currentValue: 'ftp' });
     await actOn(() => wrapper.find('#autocomplete-search').last().simulate('keydown', { key: 'Enter' }), wrapper);
 
-    expect(props.addFilter).toHaveBeenNthCalledWith(1, { v: '21', display: 'ftp' });
+    act(() => {
+      wrapper.update();
+      expect(props.addFilter).toHaveBeenNthCalledWith(1, { v: '21', display: 'ftp' });
+    });
   });
 
   it('should reject invalid port by name', async () => {
@@ -62,11 +71,19 @@ describe('<AutocompleteFilter />', () => {
 
     // Filter for source name
     await actOn(() => textInput.props().onChange!(null!, 'no match'), wrapper);
-    wrapper.update();
+    expect(props.setCurrentValue).toHaveBeenNthCalledWith(1, 'no match');
+
+    // update prop as if the value was stored in parent component
+    wrapper.setProps({ currentValue: 'no match' });
     expect(props.setIndicator).toHaveBeenNthCalledWith(2, ValidatedOptions.warning);
+
+    // try to filter
     await actOn(() => wrapper.find('#autocomplete-search').last().simulate('keydown', { key: 'Enter' }), wrapper);
 
-    expect(props.setIndicator).toHaveBeenNthCalledWith(3, ValidatedOptions.error);
-    expect(props.addFilter).toHaveBeenCalledTimes(0);
+    act(() => {
+      wrapper.update();
+      expect(props.setIndicator).toHaveBeenNthCalledWith(3, ValidatedOptions.error);
+      expect(props.addFilter).toHaveBeenCalledTimes(0);
+    });
   });
 });

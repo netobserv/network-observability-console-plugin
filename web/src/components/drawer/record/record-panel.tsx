@@ -25,6 +25,7 @@ import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { FlowDirection, getDirectionDisplayString, Record } from '../../../api/ipfix';
+import { FilterCompare } from '../../../components/toolbar/filters/compare-filter';
 import {
   doesIncludeFilter,
   Filter,
@@ -170,7 +171,10 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
       console.error("getDirIntsFilter can't find interfaceCol");
       return undefined;
     }
-    const interfaceFilterKey = { def: findFilter(filterDefinitions, interfaceCol!.quickFilter!)! };
+    const interfaceFilterKey = {
+      def: findFilter(filterDefinitions, interfaceCol!.quickFilter!)!,
+      compare: FilterCompare.equal
+    };
     const interfaceFilterValues = _.uniq(record.fields.Interfaces)!.map(v => ({ v, display: v }));
     const isDeleteInterface = doesIncludeFilter(filters, interfaceFilterKey, interfaceFilterValues);
 
@@ -180,7 +184,10 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
       console.error("getDirIntsFilter can't find directionCol");
       return undefined;
     }
-    const directionFilterKey = { def: findFilter(filterDefinitions, directionCol!.quickFilter!)! };
+    const directionFilterKey = {
+      def: findFilter(filterDefinitions, directionCol!.quickFilter!)!,
+      compare: FilterCompare.equal
+    };
     const directionFilterValues = _.uniq(record.fields.IfDirections)!.map(v => ({
       v: String(v),
       display: getDirectionDisplayString(String(v) as FlowDirection, t)
@@ -202,13 +209,21 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
           if (foundInterfaceFilter) {
             foundInterfaceFilter.values = interfaceFilterValues;
           } else {
-            newFilters.push({ def: interfaceFilterKey.def, values: interfaceFilterValues });
+            newFilters.push({
+              def: interfaceFilterKey.def,
+              compare: FilterCompare.equal,
+              values: interfaceFilterValues
+            });
           }
           const foundDirectionFilter = findFromFilters(newFilters, directionFilterKey);
           if (foundDirectionFilter) {
             foundDirectionFilter.values = directionFilterValues;
           } else {
-            newFilters.push({ def: directionFilterKey.def, values: directionFilterValues });
+            newFilters.push({
+              def: directionFilterKey.def,
+              compare: FilterCompare.equal,
+              values: directionFilterValues
+            });
           }
           setFilters(newFilters);
         }
@@ -223,7 +238,7 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
       if (!def) {
         return undefined;
       }
-      const filterKey = { def: def };
+      const filterKey = { def: def, compare: FilterCompare.equal };
       const valueStr = String(value);
       const isDelete = doesIncludeFilter(filters, filterKey, [{ v: valueStr }]);
       return {
@@ -244,7 +259,7 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
             if (found) {
               found.values = values;
             } else {
-              newFilters.push({ def: def, values: values });
+              newFilters.push({ def: def, compare: FilterCompare.equal, values: values });
             }
             setFilters(newFilters);
           }

@@ -4,6 +4,7 @@ import { waitFor } from '@testing-library/react';
 import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 import { TopologyMetrics } from '../../../../api/loki';
+import { FilterCompare } from '../../../../components/toolbar/filters/compare-filter';
 import { actOn, waitForRender } from '../../../../components/__tests__/common.spec';
 import { Filters } from '../../../../model/filters';
 import { FlowScope, MetricType } from '../../../../model/flow-query';
@@ -143,6 +144,7 @@ describe('<ElementPanel />', () => {
       expect(mocks.setFilters).toHaveBeenCalledWith([
         {
           def: expect.any(Object),
+          compare: FilterCompare.equal,
           values: [{ v: '10.129.0.15' }]
         }
       ]);

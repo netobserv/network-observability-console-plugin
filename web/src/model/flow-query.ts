@@ -43,7 +43,7 @@ export interface FlowQuery {
 export const filtersToString = (filters: Filter[], matchAny: boolean): string => {
   const matches: string[] = [];
   filters.forEach(f => {
-    const str = f.def.encoder(f.values, matchAny, f.not || false, f.moreThan || false);
+    const str = f.def.encoder(f.values, f.compare, matchAny);
     matches.push(str);
   });
   return encodeURIComponent(matches.join(matchAny ? '|' : '&'));

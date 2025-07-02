@@ -1,3 +1,4 @@
+import { FilterCompare } from '../../components/toolbar/filters/compare-filter';
 import { FilterDefinitionSample } from '../../components/__tests-data__/filters';
 import { findFilter } from '../../utils/filter-definitions';
 import { doesIncludeFilter, Filter, filtersEqual } from '../filters';
@@ -9,12 +10,12 @@ describe('doesIncludeFilter', () => {
   const activeFilters: Filter[] = [
     {
       def: srcNameFilter,
-      not: false,
+      compare: FilterCompare.equal,
       values: [{ v: 'abc' }, { v: 'def' }]
     },
     {
       def: notDstNameFilter,
-      not: true,
+      compare: FilterCompare.notEqual,
       values: [{ v: 'abc' }, { v: 'def' }]
     }
   ];
@@ -25,15 +26,16 @@ describe('doesIncludeFilter', () => {
   });
 
   it('should not include filter due to different key', () => {
-    const isIncluded = doesIncludeFilter(activeFilters, { def: findFilter(FilterDefinitionSample, 'protocol')! }, [
-      { v: 'abc' },
-      { v: 'def' }
-    ]);
+    const isIncluded = doesIncludeFilter(
+      activeFilters,
+      { def: findFilter(FilterDefinitionSample, 'protocol')!, compare: FilterCompare.equal },
+      [{ v: 'abc' }, { v: 'def' }]
+    );
     expect(isIncluded).toBeFalsy();
   });
 
   it('should not include filter due to missing value', () => {
-    const isIncluded = doesIncludeFilter(activeFilters, { def: srcNameFilter, not: false }, [
+    const isIncluded = doesIncludeFilter(activeFilters, { def: srcNameFilter, compare: FilterCompare.equal }, [
       { v: 'abc' },
       { v: 'def' },
       { v: 'ghi' }
@@ -42,7 +44,7 @@ describe('doesIncludeFilter', () => {
   });
 
   it('should include filter with exact values', () => {
-    const isIncluded = doesIncludeFilter(activeFilters, { def: srcNameFilter, not: false }, [
+    const isIncluded = doesIncludeFilter(activeFilters, { def: srcNameFilter, compare: FilterCompare.equal }, [
       { v: 'abc' },
       { v: 'def' }
     ]);
@@ -50,12 +52,14 @@ describe('doesIncludeFilter', () => {
   });
 
   it('should include filter with values included', () => {
-    const isIncluded = doesIncludeFilter(activeFilters, { def: srcNameFilter, not: false }, [{ v: 'abc' }]);
+    const isIncluded = doesIncludeFilter(activeFilters, { def: srcNameFilter, compare: FilterCompare.equal }, [
+      { v: 'abc' }
+    ]);
     expect(isIncluded).toBeTruthy();
   });
 
   it('should not include filter due to different key (not)', () => {
-    const isIncluded = doesIncludeFilter(activeFilters, { def: notDstNameFilter, not: false }, [
+    const isIncluded = doesIncludeFilter(activeFilters, { def: notDstNameFilter, compare: FilterCompare.equal }, [
       { v: 'abc' },
       { v: 'def' }
     ]);
@@ -63,7 +67,7 @@ describe('doesIncludeFilter', () => {
   });
 
   it('should include filter with same key (not)', () => {
-    const isIncluded = doesIncludeFilter(activeFilters, { def: notDstNameFilter, not: true }, [
+    const isIncluded = doesIncludeFilter(activeFilters, { def: notDstNameFilter, compare: FilterCompare.notEqual }, [
       { v: 'abc' },
       { v: 'def' }
     ]);
@@ -81,12 +85,12 @@ describe('filtersEqual', () => {
 
   it('should be equal with same order', () => {
     const list1: Filter[] = [
-      { def: f1, not: false, values: values1 },
-      { def: f2, not: true, values: values1 }
+      { def: f1, compare: FilterCompare.equal, values: values1 },
+      { def: f2, compare: FilterCompare.notEqual, values: values1 }
     ];
     const list2: Filter[] = [
-      { def: f1, not: false, values: values1 },
-      { def: f2, not: true, values: values1 }
+      { def: f1, compare: FilterCompare.equal, values: values1 },
+      { def: f2, compare: FilterCompare.notEqual, values: values1 }
     ];
     expect(filtersEqual(list1, list2)).toBe(true);
     expect(filtersEqual(list2, list1)).toBe(true);
@@ -94,12 +98,12 @@ describe('filtersEqual', () => {
 
   it('should be equal with different order', () => {
     const list1: Filter[] = [
-      { def: f1, not: false, values: values1 },
-      { def: f2, not: true, values: values1 }
+      { def: f1, compare: FilterCompare.equal, values: values1 },
+      { def: f2, compare: FilterCompare.notEqual, values: values1 }
     ];
     const list2: Filter[] = [
-      { def: f2, not: true, values: values1 },
-      { def: f1, not: false, values: values1 }
+      { def: f2, compare: FilterCompare.notEqual, values: values1 },
+      { def: f1, compare: FilterCompare.equal, values: values1 }
     ];
     expect(filtersEqual(list1, list2)).toBe(true);
     expect(filtersEqual(list2, list1)).toBe(true);
@@ -107,12 +111,12 @@ describe('filtersEqual', () => {
 
   it('should be equal with different values order', () => {
     const list1: Filter[] = [
-      { def: f1, not: false, values: values1 },
-      { def: f2, not: true, values: values1 }
+      { def: f1, compare: FilterCompare.equal, values: values1 },
+      { def: f2, compare: FilterCompare.notEqual, values: values1 }
     ];
     const list2: Filter[] = [
-      { def: f1, not: false, values: values2 },
-      { def: f2, not: true, values: values2 }
+      { def: f1, compare: FilterCompare.equal, values: values2 },
+      { def: f2, compare: FilterCompare.notEqual, values: values2 }
     ];
     expect(filtersEqual(list1, list2)).toBe(true);
     expect(filtersEqual(list2, list1)).toBe(true);
@@ -120,12 +124,12 @@ describe('filtersEqual', () => {
 
   it('should be equal with different values display', () => {
     const list1: Filter[] = [
-      { def: f1, not: false, values: values1 },
-      { def: f2, not: true, values: values1 }
+      { def: f1, compare: FilterCompare.equal, values: values1 },
+      { def: f2, compare: FilterCompare.notEqual, values: values1 }
     ];
     const list2: Filter[] = [
-      { def: f1, not: false, values: values3 },
-      { def: f2, not: true, values: values3 }
+      { def: f1, compare: FilterCompare.equal, values: values3 },
+      { def: f2, compare: FilterCompare.notEqual, values: values3 }
     ];
     expect(filtersEqual(list1, list2)).toBe(true);
     expect(filtersEqual(list2, list1)).toBe(true);
@@ -133,12 +137,12 @@ describe('filtersEqual', () => {
 
   it('should differ with different keys', () => {
     const list1: Filter[] = [
-      { def: f1, not: false, values: values1 },
-      { def: f2, not: true, values: values1 }
+      { def: f1, compare: FilterCompare.equal, values: values1 },
+      { def: f2, compare: FilterCompare.notEqual, values: values1 }
     ];
     const list2: Filter[] = [
-      { def: f1, not: false, values: values1 },
-      { def: f1, not: true, values: values1 }
+      { def: f1, compare: FilterCompare.equal, values: values1 },
+      { def: f1, compare: FilterCompare.notEqual, values: values1 }
     ];
     expect(filtersEqual(list1, list2)).toBe(false);
     expect(filtersEqual(list2, list1)).toBe(false);
@@ -146,12 +150,12 @@ describe('filtersEqual', () => {
 
   it('should differ with different values', () => {
     const list1: Filter[] = [
-      { def: f1, not: false, values: values1 },
-      { def: f2, not: true, values: values1 }
+      { def: f1, compare: FilterCompare.equal, values: values1 },
+      { def: f2, compare: FilterCompare.notEqual, values: values1 }
     ];
     const list2: Filter[] = [
-      { def: f1, not: false, values: values1 },
-      { def: f2, not: true, values: values4 }
+      { def: f1, compare: FilterCompare.equal, values: values1 },
+      { def: f2, compare: FilterCompare.notEqual, values: values4 }
     ];
     expect(filtersEqual(list1, list2)).toBe(false);
     expect(filtersEqual(list2, list1)).toBe(false);

@@ -171,7 +171,12 @@ export const AutocompleteFilter: React.FC<AutocompleteFilterProps> = ({
 
   return (
     <Flex direction={{ default: 'row' }}>
-      <FlexItem id="autocomplete-container" data-test="autocomplete-container" ref={autocompleteContainerRef}>
+      <div
+        id="autocomplete-container"
+        data-test="autocomplete-container"
+        ref={autocompleteContainerRef}
+        className="flex"
+      >
         <Popper
           trigger={
             <TextInput
@@ -205,7 +210,7 @@ export const AutocompleteFilter: React.FC<AutocompleteFilterProps> = ({
           enableFlip={false}
           appendTo={autocompleteContainerRef.current || undefined}
         />
-      </FlexItem>
+      </div>
       <FlexItem>
         <Button
           data-test="autocomplete-menu-button"
