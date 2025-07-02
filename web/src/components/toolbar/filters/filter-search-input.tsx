@@ -76,6 +76,7 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
+  const filterSearchInputContainerRef = React.useRef(null);
   const searchInputRef = React.useRef(null);
   const popperRef = useOutsideClickEvent(() => {
     // delay this to avoid conflict with onToggle event
@@ -104,9 +105,7 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
     (filterValue: FilterValue) => {
       let newFilters = _.cloneDeep(filters?.list) || [];
       const def = filter;
-      const not = compare === FilterCompare.notEqual;
-      const moreThan = compare === FilterCompare.moreThanOrEqual;
-      const found = findFromFilters(newFilters, { def, not, moreThan });
+      const found = findFromFilters(newFilters, { def, compare });
       if (found) {
         if (found.values.map(value => value.v).includes(filterValue.v)) {
           setMessage(t('Filter already exists'));
@@ -116,7 +115,7 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
           found.values.push(filterValue);
         }
       } else {
-        newFilters.push({ def, not, moreThan, values: [filterValue] });
+        newFilters.push({ def, compare, values: [filterValue] });
       }
 
       // force peers mode to have directions set
@@ -136,7 +135,11 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
   const updateForm = React.useCallback(
     (v: string = searchInputValue, submitOnRefresh?: boolean) => {
       // parse search input value to form content
-      const fieldValue = v.replaceAll('!=', '|').replaceAll('>=', '|').replaceAll('=', '|').split('|');
+      let fv = v;
+      Object.values(FilterCompare).forEach(fc => {
+        fv = fv.replaceAll(fc, '|');
+      });
+      const fieldValue = fv.split('|');
       const result: FormUpdateResult = { hasError: false };
 
       // if field + value are valid, we should end with 2 items only
@@ -145,7 +148,7 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
         const def = filterDefinitions.find(def => def.id.toLowerCase() === searchValue);
         if (def) {
           // set compare
-          if (v.includes('>=')) {
+          if (v.includes(FilterCompare.moreThanOrEqual)) {
             if (def.component != 'number') {
               setMessage(t('`>=` is not allowed with `{{searchValue}}`. Use `=` or `!=` instead.', { searchValue }));
               setIndicator(ValidatedOptions.error);
@@ -156,9 +159,15 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
           } else if (v.includes('!=')) {
             setCompare(FilterCompare.notEqual);
             result.comparator = FilterCompare.notEqual;
-          } else {
+          } else if (v.includes('=')) {
             setCompare(FilterCompare.equal);
             result.comparator = FilterCompare.equal;
+          } else if (v.includes('!~')) {
+            setCompare(FilterCompare.notMatch);
+            result.comparator = FilterCompare.notMatch;
+          } else {
+            setCompare(FilterCompare.match);
+            result.comparator = FilterCompare.match;
           }
           // set direction
           if (def.category === 'source') {
@@ -193,7 +202,7 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
           }
           // set filter and reset the rest
           setFilter(def);
-          setCompare(FilterCompare.equal);
+          setCompare(FilterCompare.match);
           setValue('');
           result.def = def;
         } else {
@@ -219,7 +228,7 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
 
   const getEncodedValue = React.useCallback(
     (v: string = value) => {
-      return matcher(filter.id, [v], compare === FilterCompare.notEqual, compare === FilterCompare.moreThanOrEqual);
+      return matcher(filter.id, [v], compare);
     },
     [compare, filter, value]
   );
@@ -258,10 +267,12 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
             setSuggestions([]);
           }
         } else {
-          const suggestions = ['=', '!='];
           // suggest comparators if field set but not value
+          let suggestions = Object.values(FilterCompare) as string[];
           if (filter.component === 'number') {
-            suggestions.push('>=');
+            suggestions = suggestions.filter(s => s !== FilterCompare.match && s !== FilterCompare.notMatch);
+          } else {
+            suggestions = suggestions.filter(s => s != FilterCompare.moreThanOrEqual);
           }
           // also suggest other definitions starting by the same id
           setSuggestions(
@@ -353,16 +364,7 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
                       } else if (!updated.comparator) {
                         onSearchChange(`${updated.def.id}${suggestion}`);
                       } else {
-                        updateForm(
-                          `${updated.def.id}${
-                            updated.comparator === FilterCompare.moreThanOrEqual
-                              ? '>='
-                              : updated.comparator === FilterCompare.notEqual
-                              ? '!='
-                              : '='
-                          }${suggestion}`,
-                          true
-                        );
+                        updateForm(`${updated.def.id}${updated.comparator}${suggestion}`, true);
                       }
                     }}
                   >
@@ -416,10 +418,11 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
                     )}
                   </FormGroup>
                   <ActionGroup className="filters-actions">
-                    <Button variant="link" type="reset" onClick={reset}>
+                    <Button id="reset-form-filter" variant="link" type="reset" onClick={reset}>
                       {t('Reset')}
                     </Button>
                     <Button
+                      id="add-form-filter"
                       variant="primary"
                       type="submit"
                       onClick={e => {
@@ -464,20 +467,23 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
   React.useEffect(() => {
     if (submitPending) {
       setSubmitPending(false);
-      addFilter({ v: value });
+      addFilter(value.length ? { v: value } : { display: t('n/a'), v: `""` });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [submitPending, setSubmitPending, addFilter, value]);
 
   return (
-    <Popper
-      trigger={searchInput()}
-      triggerRef={searchInputRef}
-      popper={popper()}
-      popperRef={popperRef}
-      isVisible={isPopperOpen || suggestions.length > 0}
-      enableFlip={false}
-      appendTo={() => document.querySelector('#filter-search-input')!}
-    />
+    <div id="filter-search-input-container" ref={filterSearchInputContainerRef}>
+      <Popper
+        trigger={searchInput()}
+        triggerRef={searchInputRef}
+        popper={popper()}
+        popperRef={popperRef}
+        isVisible={isPopperOpen || suggestions.length > 0}
+        enableFlip={false}
+        appendTo={filterSearchInputContainerRef.current || undefined}
+      />
+    </div>
   );
 };
 
