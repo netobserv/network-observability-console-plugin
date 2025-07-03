@@ -84,7 +84,6 @@ export const AutocompleteFilter: React.FC<AutocompleteFilterProps> = ({
       filterDefinition
         .getOptions(newValue)
         .then(v => {
-          console.log('onAutoCompleteChange', v);
           setOptions(v);
         })
         .catch(err => {
