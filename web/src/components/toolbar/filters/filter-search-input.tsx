@@ -17,14 +17,14 @@ import {
 import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { FilterDefinition, Filters, FilterValue, findFromFilters } from '../../../model/filters';
+import { FilterDefinition, FilterOption, Filters, FilterValue, findFromFilters } from '../../../model/filters';
 import { getHTTPErrorDetails } from '../../../utils/errors';
 import { matcher } from '../../../utils/filter-definitions';
 import { Indicator, setTargeteableFilters } from '../../../utils/filters-helper';
 import { useOutsideClickEvent } from '../../../utils/outside-hook';
 import { Direction } from '../filters-toolbar';
 import AutocompleteFilter from './autocomplete-filter';
-import CompareFilter, { FilterCompare } from './compare-filter';
+import CompareFilter, { FilterCompare, getCompareText } from './compare-filter';
 import { FilterHints } from './filter-hints';
 import './filter-search-input.css';
 import FiltersDropdown from './filters-dropdown';
@@ -35,6 +35,12 @@ interface FormUpdateResult {
   comparator?: FilterCompare;
   value?: string;
   hasError: boolean;
+}
+
+interface Suggestion {
+  display?: string;
+  value: string;
+  validate: boolean;
 }
 
 export interface FilterSearchInputProps {
@@ -77,21 +83,24 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   const filterSearchInputContainerRef = React.useRef(null);
-  const searchInputRef = React.useRef(null);
+  const searchInputRef = React.useRef<HTMLInputElement>(null);
   const popperRef = useOutsideClickEvent(() => {
     // delay this to avoid conflict with onToggle event
     // clicking on the arrow will skip the onToggle and trigger this code after the delay
     setTimeout(() => {
-      setSearchInputValue(getEncodedValue());
-      setSuggestions([]);
-      setPopperOpen(!isPopperOpen);
-      // clear search field to show the placeholder back
-      if (_.isEmpty(value)) {
-        setSearchInputValue('');
+      if (suggestions.length) {
+        setSuggestions([]);
+      } else {
+        setPopperOpen(false);
+        setSearchInputValue(getEncodedValue());
+        // clear search field to show the placeholder back
+        if (_.isEmpty(value)) {
+          setSearchInputValue('');
+        }
       }
     }, 100);
   });
-  const [suggestions, setSuggestions] = React.useState<string[]>([]);
+  const [suggestions, setSuggestions] = React.useState<Suggestion[]>([]);
   const [isPopperOpen, setPopperOpen] = React.useState(false);
   const [submitPending, setSubmitPending] = React.useState(false);
 
@@ -135,11 +144,7 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
   const updateForm = React.useCallback(
     (v: string = searchInputValue, submitOnRefresh?: boolean) => {
       // parse search input value to form content
-      let fv = v;
-      Object.values(FilterCompare).forEach(fc => {
-        fv = fv.replaceAll(fc, '|');
-      });
-      const fieldValue = fv.split('|');
+      const fieldValue = v.split(/>=|!=|!~|=|~/);
       const result: FormUpdateResult = { hasError: false };
 
       // if field + value are valid, we should end with 2 items only
@@ -150,19 +155,24 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
           // set compare
           if (v.includes(FilterCompare.moreThanOrEqual)) {
             if (def.component != 'number') {
-              setMessage(t('`>=` is not allowed with `{{searchValue}}`. Use `=` or `!=` instead.', { searchValue }));
+              setMessage(
+                t(
+                  'More than operator `>=` is not allowed with `{{searchValue}}`. Use equals or contains operators instead.',
+                  { searchValue }
+                )
+              );
               setIndicator(ValidatedOptions.error);
               return { ...result, hasError: true };
             }
             setCompare(FilterCompare.moreThanOrEqual);
             result.comparator = FilterCompare.moreThanOrEqual;
-          } else if (v.includes('!=')) {
+          } else if (v.includes(FilterCompare.notEqual)) {
             setCompare(FilterCompare.notEqual);
             result.comparator = FilterCompare.notEqual;
-          } else if (v.includes('=')) {
+          } else if (v.includes(FilterCompare.equal)) {
             setCompare(FilterCompare.equal);
             result.comparator = FilterCompare.equal;
-          } else if (v.includes('!~')) {
+          } else if (v.includes(FilterCompare.notMatch)) {
             setCompare(FilterCompare.notMatch);
             result.comparator = FilterCompare.notMatch;
           } else {
@@ -243,6 +253,23 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
 
   const onSearchChange = React.useCallback(
     (v: string) => {
+      const defToSuggestion = (fd: FilterDefinition) => {
+        return {
+          display:
+            fd.category === 'source'
+              ? `${t('Source')} ${fd.name}`
+              : fd.category === 'destination'
+              ? `${t('Destination')} ${fd.name}`
+              : fd.name,
+          value: fd.id,
+          validate: false
+        };
+      };
+
+      const optionToSuggestion = (o: FilterOption) => {
+        return { display: o.name !== o.value ? o.name : undefined, value: o.value, validate: true };
+      };
+
       setSearchInputValue(v);
       const updated = updateForm(v);
       if (!v.length || updated.hasError) {
@@ -255,7 +282,7 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
             filter
               .getOptions(updated.value || '')
               .then(v => {
-                setSuggestions(v.map(o => o.value));
+                setSuggestions(v.map(optionToSuggestion));
               })
               .catch(err => {
                 const errorMessage = getHTTPErrorDetails(err);
@@ -268,18 +295,22 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
           }
         } else {
           // suggest comparators if field set but not value
-          let suggestions = Object.values(FilterCompare) as string[];
+          let suggestions = Object.values(FilterCompare).map(fc => {
+            return { display: getCompareText(fc, t), value: fc, validate: false };
+          }) as Suggestion[];
           if (filter.component === 'number') {
-            suggestions = suggestions.filter(s => s !== FilterCompare.match && s !== FilterCompare.notMatch);
+            suggestions = suggestions.filter(
+              s => s.value !== FilterCompare.match && s.value !== FilterCompare.notMatch
+            );
           } else {
-            suggestions = suggestions.filter(s => s != FilterCompare.moreThanOrEqual);
+            suggestions = suggestions.filter(s => s.value != FilterCompare.moreThanOrEqual);
           }
           // also suggest other definitions starting by the same id
           setSuggestions(
             suggestions.concat(
               filterDefinitions
                 .filter(fd => fd.id !== updated.def!.id && fd.id.startsWith(updated.def!.id))
-                .map(fd => fd.id)
+                .map(defToSuggestion)
             )
           );
         }
@@ -287,12 +318,12 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
         // suggest fields if def is not matched yet
         const suggestions = filterDefinitions
           .filter(fd => fd.id.startsWith(updated.value!))
-          .map(fd => fd.id) as string[];
+          .map(defToSuggestion) as Suggestion[];
         if (filter.component === 'autocomplete') {
           filter
             .getOptions(updated.value)
             .then(v => {
-              setSuggestions(suggestions.concat(v.map(o => o.value)));
+              setSuggestions(suggestions.concat(v.map(optionToSuggestion)));
             })
             .catch(err => {
               const errorMessage = getHTTPErrorDetails(err);
@@ -304,6 +335,7 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
         }
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [filter, filterDefinitions, setMessage, setSearchInputValue, updateForm]
   );
 
@@ -311,6 +343,21 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
     () => (
       <SearchInput
         onClear={reset}
+        onKeyDown={e => {
+          if (suggestions.length) {
+            // focus on suggestions on tab / arrow down keys
+            if (e.key === 'Tab' || e.key === 'ArrowDown') {
+              e.preventDefault();
+              document.getElementById('suggestion-0')?.focus();
+            } else if (e.key === 'Escape') {
+              // clear suggestions on esc key
+              setSuggestions([]);
+            }
+          } else if (e.key === 'ArrowDown') {
+            // get suggestions back
+            onSearchChange(searchInputValue);
+          }
+        }}
         onChange={(e, v) => onSearchChange(v)}
         onSearch={(e, v) => {
           setSuggestions([]);
@@ -338,6 +385,7 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
       reset,
       searchInputValue,
       setSearchInputValue,
+      suggestions.length,
       updateForm
     ]
   );
@@ -346,29 +394,52 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
     return (
       <div id="filter-popper" ref={popperRef} role="dialog">
         {suggestions.length ? (
-          <Menu>
+          <Menu
+            onKeyDown={e => {
+              if (e.key === 'Escape') {
+                e.preventDefault();
+                // clear suggestions on esc key
+                setSuggestions([]);
+                searchInputRef.current?.focus();
+              }
+            }}
+          >
             <MenuContent>
               <MenuList>
                 {suggestions.map((suggestion, index) => (
                   <MenuItem
+                    id={`suggestion-${index}`}
                     itemId={suggestion}
                     key={`suggestion-${index}`}
+                    description={suggestion.display}
+                    onKeyDown={e => {
+                      if (index === 0 && e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        searchInputRef.current?.focus();
+                      }
+                    }}
                     onClick={() => {
                       const updated = updateForm(searchInputValue);
                       if (!updated.def) {
-                        if (suggestion !== searchInputValue) {
-                          onSearchChange(suggestion);
+                        if (!suggestion.validate) {
+                          onSearchChange(suggestion.value);
                         } else {
-                          updateForm(searchInputValue, true);
+                          updateForm(suggestion.value, true);
                         }
                       } else if (!updated.comparator) {
-                        onSearchChange(`${updated.def.id}${suggestion}`);
+                        // check if it's a valid comparator
+                        if ((Object.values(FilterCompare) as string[]).includes(suggestion.value)) {
+                          onSearchChange(`${updated.def.id}${suggestion.value}`);
+                        } else {
+                          // else consider this as a field since ids can overlap (name / namespace)
+                          onSearchChange(suggestion.value);
+                        }
                       } else {
-                        updateForm(`${updated.def.id}${updated.comparator}${suggestion}`, true);
+                        updateForm(`${updated.def.id}${updated.comparator}${suggestion.value}`, true);
                       }
                     }}
                   >
-                    {suggestion}
+                    {suggestion.value}
                   </MenuItem>
                 ))}
               </MenuList>
