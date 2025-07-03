@@ -22,6 +22,7 @@ import { getHTTPErrorDetails } from '../../../utils/errors';
 import { matcher } from '../../../utils/filter-definitions';
 import { Indicator, setTargeteableFilters } from '../../../utils/filters-helper';
 import { useOutsideClickEvent } from '../../../utils/outside-hook';
+import { usePrevious } from '../../../utils/previous-hook';
 import { Direction } from '../filters-toolbar';
 import AutocompleteFilter from './autocomplete-filter';
 import CompareFilter, { FilterCompare, getCompareText } from './compare-filter';
@@ -40,7 +41,7 @@ interface FormUpdateResult {
 interface Suggestion {
   display?: string;
   value: string;
-  validate: boolean;
+  validate?: boolean;
 }
 
 export interface FilterSearchInputProps {
@@ -101,6 +102,7 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
     }, 100);
   });
   const [suggestions, setSuggestions] = React.useState<Suggestion[]>([]);
+  const prevSuggestions = usePrevious(suggestions);
   const [isPopperOpen, setPopperOpen] = React.useState(false);
   const [submitPending, setSubmitPending] = React.useState(false);
 
@@ -141,6 +143,23 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
     [filter, filters, filterDefinitions, compare, setFilters, setMessage]
   );
 
+  const addFilterFromSuggestions = React.useCallback(
+    (sug: Suggestion[] | undefined = prevSuggestions) => {
+      if (!value.length) {
+        addFilter({ display: t('n/a'), v: `""` });
+      }
+      // check if a previous suggestion match value, else just add it as filter
+      const found = filter.component === 'autocomplete' && sug?.find(s => s.value === value || s.display === value);
+      if (found) {
+        addFilter({ display: found.display, v: found.value });
+      } else {
+        addFilter({ v: value });
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [addFilter, filter.component, prevSuggestions, value]
+  );
+
   const updateForm = React.useCallback(
     (v: string = searchInputValue, submitOnRefresh?: boolean) => {
       // parse search input value to form content
@@ -157,7 +176,7 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
             if (def.component != 'number') {
               setMessage(
                 t(
-                  'More than operator `>=` is not allowed with `{{searchValue}}`. Use equals or contains operators instead.',
+                  'More than operator is not allowed with `{{searchValue}}`. Use equals or contains operators instead.',
                   { searchValue }
                 )
               );
@@ -172,12 +191,23 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
           } else if (v.includes(FilterCompare.equal)) {
             setCompare(FilterCompare.equal);
             result.comparator = FilterCompare.equal;
-          } else if (v.includes(FilterCompare.notMatch)) {
-            setCompare(FilterCompare.notMatch);
-            result.comparator = FilterCompare.notMatch;
           } else {
-            setCompare(FilterCompare.match);
-            result.comparator = FilterCompare.match;
+            if (def.component === 'number') {
+              setMessage(
+                t(
+                  'Contains operator is not allowed with `{{searchValue}}`. Use equals or more than operators instead.',
+                  { searchValue }
+                )
+              );
+              setIndicator(ValidatedOptions.error);
+              return { ...result, hasError: true };
+            } else if (v.includes(FilterCompare.notMatch)) {
+              setCompare(FilterCompare.notMatch);
+              result.comparator = FilterCompare.notMatch;
+            } else {
+              setCompare(FilterCompare.match);
+              result.comparator = FilterCompare.match;
+            }
           }
           // set direction
           if (def.category === 'source') {
@@ -498,8 +528,19 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
                       type="submit"
                       onClick={e => {
                         e.preventDefault();
-                        console.log('Add filter', e);
-                        addFilter({ v: value });
+                        if (filter.component === 'autocomplete' && _.isEmpty(prevSuggestions)) {
+                          filter
+                            .getOptions(value)
+                            .then(opts => {
+                              addFilterFromSuggestions(opts.map(opts => ({ display: opts.name, value: opts.value })));
+                            })
+                            .catch(err => {
+                              const errorMessage = getHTTPErrorDetails(err);
+                              setMessage(errorMessage);
+                            });
+                        } else {
+                          addFilterFromSuggestions();
+                        }
                       }}
                     >
                       {t('Add filter')}
@@ -538,7 +579,7 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
   React.useEffect(() => {
     if (submitPending) {
       setSubmitPending(false);
-      addFilter(value.length ? { v: value } : { display: t('n/a'), v: `""` });
+      addFilterFromSuggestions();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [submitPending, setSubmitPending, addFilter, value]);
