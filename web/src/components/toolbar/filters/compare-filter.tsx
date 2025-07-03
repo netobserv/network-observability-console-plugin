@@ -1,6 +1,6 @@
 import { Badge, Dropdown, DropdownItem, MenuToggle, MenuToggleElement } from '@patternfly/react-core';
 import * as React from 'react';
-import { useTranslation } from 'react-i18next';
+import { TFunction, useTranslation } from 'react-i18next';
 import { FilterComponent } from '../../../model/filters';
 import { usePrevious } from '../../../utils/previous-hook';
 
@@ -11,6 +11,23 @@ export enum FilterCompare {
   notEqual = '!=',
   moreThanOrEqual = '>='
 }
+
+export const getCompareText = (v: FilterCompare, t: TFunction) => {
+  switch (v) {
+    case FilterCompare.match:
+      return t('Contains');
+    case FilterCompare.notMatch:
+      return t('Not contains');
+    case FilterCompare.notEqual:
+      return t('Not equals');
+    case FilterCompare.moreThanOrEqual:
+      return t('More than');
+    case FilterCompare.equal:
+    default:
+      return t('Equals');
+  }
+};
+
 export interface CompareFilterProps {
   value: FilterCompare;
   setValue: (newState: FilterCompare) => void;
@@ -22,24 +39,7 @@ export const CompareFilter: React.FC<CompareFilterProps> = ({ value, setValue, c
   const [isOpen, setOpen] = React.useState(false);
   const prevComponent = usePrevious(component);
 
-  const getText = React.useCallback(
-    (v: FilterCompare) => {
-      switch (v) {
-        case FilterCompare.match:
-          return t('Contains');
-        case FilterCompare.notMatch:
-          return t('Not contains');
-        case FilterCompare.notEqual:
-          return t('Not equals');
-        case FilterCompare.moreThanOrEqual:
-          return t('More than');
-        case FilterCompare.equal:
-        default:
-          return t('Equals');
-      }
-    },
-    [t]
-  );
+  const getText = React.useCallback((v: FilterCompare) => getCompareText(v, t), [t]);
 
   const onSelect = React.useCallback(
     (v: FilterCompare) => {

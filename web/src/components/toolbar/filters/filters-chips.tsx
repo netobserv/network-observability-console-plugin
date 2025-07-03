@@ -226,7 +226,7 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
             {filter.values.map((filterValue, fvIndex) => {
               if (isForced || filterValue.disabled) {
                 return (
-                  <div key={fvIndex}>
+                  <div key={fvIndex} className="flex-block">
                     {getAndOrText('values', fvIndex)}
                     <div className={`custom-chip ${filterValue.disabled ? 'disabled-value' : ''}`}>
                       <Tooltip
@@ -251,7 +251,7 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
 
               const dropdownId = `${filter.def.id}-${fvIndex}`;
               return (
-                <div key={fvIndex}>
+                <div key={fvIndex} className="flex-block">
                   {getAndOrText('values', fvIndex)}
                   <Dropdown
                     isOpen={dropdownId === openedDropdown}
@@ -404,7 +404,7 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
           .filter(gp => gp.filters.length)
           .map((gp, index) => {
             return (
-              <div key={gp.id}>
+              <div key={gp.id} className="flex-block">
                 {getAndOrText(filters.match, index)}
                 <div className={`custom-chip-box ${gp.id !== 'common' ? 'custom-chip-peer' : ''}`}>
                   {hasSrcOrDstFilters(filters.list) && <Text>{getGroupName(gp.id)}&nbsp;</Text>}
