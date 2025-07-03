@@ -46,3 +46,13 @@ jobs:
       - name: build and push manifest with images for standalone build
         run: |
           MULTIARCH_TARGETS="${{ env.WF_MULTIARCH_TARGETS }}" IMAGE_ORG=${{ env.WF_ORG }} VERSION=${{ env.tag }} CLEAN_BUILD=1 STANDALONE=true make images
+      - name: create draft release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.tag }}
+          release_name: ${{ env.tag }}
+          draft: true
+          prerelease: false
