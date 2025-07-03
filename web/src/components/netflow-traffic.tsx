@@ -735,10 +735,29 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
 
   //update page on full screen change
   React.useEffect(() => {
+    // collapse pf6 navigation for compatibility
+    if (model.isFullScreen && document.getElementsByClassName('pf-v6-c-page__sidebar pf-m-expanded').length) {
+      document.getElementById('nav-toggle')?.click();
+    }
+
     const header = document.getElementById('page-main-header');
+    const headersV5Compat = document.getElementsByClassName('pf-v5-c-masthead');
+    const headersV6Compat = document.getElementsByClassName('pf-v6-c-masthead');
+
     const sideBar = document.getElementById('page-sidebar');
+    const sideBarsV5Compat = document.getElementsByClassName('pf-v5-c-page__sidebar');
+    const sideBarsV6Compat = document.getElementsByClassName('pf-v6-c-page__sidebar');
+
     const notification = document.getElementsByClassName('co-global-notifications');
-    [header, sideBar, ...notification].forEach(e => {
+    [
+      header,
+      ...headersV5Compat,
+      ...headersV6Compat,
+      sideBar,
+      ...sideBarsV5Compat,
+      ...sideBarsV6Compat,
+      ...notification
+    ].forEach(e => {
       if (model.isFullScreen) {
         e?.classList.add('hidden');
       } else {

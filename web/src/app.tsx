@@ -108,7 +108,7 @@ export const App: React.FunctionComponent = () => {
           aria-label="Global navigation"
           isSidebarOpen={isSidebarOpen}
           onSidebarToggle={onSidebarToggle}
-          id="vertical-nav-toggle"
+          id="nav-toggle"
         >
           <BarsIcon />
         </PageToggleButton>
