@@ -123,26 +123,33 @@ func NotIPLabelFilter(labelKey, cidr string) LabelFilter {
 	}
 }
 
-func MultiValuesRegexFilter(labelKey string, values []string, not bool) (LabelFilter, bool) {
+func MultiValuesRegexFilter(labelKey string, values []string, not bool, equal bool) (LabelFilter, bool) {
 	regexStr := strings.Builder{}
 	for i, value := range values {
 		if i > 0 {
 			regexStr.WriteByte('|')
 		}
-		// match the begining of string if quoted without a star
-		// and case insensitive if no quotes
-		if !strings.HasPrefix(value, `"`) {
-			regexStr.WriteString("(?i).*")
-		} else if !strings.HasPrefix(value, `"*`) {
-			regexStr.WriteString("^")
+
+		if !equal {
+			// match the begining of string if quoted without a star
+			// and case insensitive if no quotes
+			if !strings.HasPrefix(value, `"`) {
+				regexStr.WriteString("(?i).*")
+			} else if !strings.HasPrefix(value, `"*`) {
+				regexStr.WriteString("^")
+			}
 		}
+
 		// inject value with regex
 		regexStr.WriteString(valueReplacer.Replace(value))
-		// match the end of string if quoted without a star
-		if !strings.HasSuffix(value, `"`) {
-			regexStr.WriteString(".*")
-		} else if !strings.HasSuffix(value, `*"`) {
-			regexStr.WriteString("$")
+
+		if !equal {
+			// match the end of string if quoted without a star
+			if !strings.HasSuffix(value, `"`) {
+				regexStr.WriteString(".*")
+			} else if !strings.HasSuffix(value, `*"`) {
+				regexStr.WriteString("$")
+			}
 		}
 	}
 
@@ -270,6 +277,11 @@ func ArrayLineFilter(key string, values []string, not bool) LineFilter {
 		lf.values = append(lf.values, lineMatch{valueType: typeRegexArrayContains, value: value})
 	}
 	return lf
+}
+
+// StringLineFilter returns a LineFilter and true if it has an empty match
+func StringLineFilter(key string, values []string, not bool) (LineFilter, bool) {
+	return checkExact(LineFilter{key: key, not: not}, values, typeString)
 }
 
 // StringLineFilterCheckExact returns a LineFilter and true if it has an empty match

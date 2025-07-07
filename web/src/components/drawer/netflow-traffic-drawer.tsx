@@ -3,8 +3,6 @@ import { Drawer, DrawerContent, DrawerContentBody, Flex, FlexItem } from '@patte
 import { t } from 'i18next';
 import _ from 'lodash';
 import React from 'react';
-import { GraphElementPeer, TopologyOptions } from 'src/model/topology';
-import { TimeRange } from 'src/utils/datetime';
 import { Record } from '../../api/ipfix';
 import { getFunctionMetricKey, getRateMetricKey, NetflowMetrics, Stats } from '../../api/loki';
 import { Config } from '../../model/config';
@@ -16,10 +14,12 @@ import {
   hasIndexFields,
   hasNonIndexFields
 } from '../../model/filters';
-import { FlowScope, Match, MetricType, RecordType, StatFunction } from '../../model/flow-query';
+import { FlowScope, MetricType, RecordType, StatFunction } from '../../model/flow-query';
 import { ScopeConfigDef } from '../../model/scope';
+import { GraphElementPeer, TopologyOptions } from '../../model/topology';
 import { Warning } from '../../model/warnings';
 import { Column, ColumnSizeMap } from '../../utils/columns';
+import { TimeRange } from '../../utils/datetime';
 import { isPromError } from '../../utils/errors';
 import { OverviewPanel } from '../../utils/overview-panels';
 import { TruncateLength } from '../dropdowns/truncate-dropdown';
@@ -95,7 +95,6 @@ export interface NetflowTrafficDrawerProps {
   stats?: Stats;
   lastDuration?: number;
   warning?: Warning;
-  match: Match;
   setShowQuerySummary: (v: boolean) => void;
   clearSelections: () => void;
   setSelectedRecord: (v: Record | undefined) => void;
@@ -118,7 +117,6 @@ export const NetflowTrafficDrawer: React.FC<NetflowTrafficDrawerProps> = React.f
       topologyMetricFunction,
       topologyMetricType,
       setFilters,
-      match,
       setShowQuerySummary,
       clearSelections,
       setSelectedRecord,
@@ -212,12 +210,12 @@ export const NetflowTrafficDrawer: React.FC<NetflowTrafficDrawerProps> = React.f
       (w: Warning | undefined): Warning | undefined => {
         if (w?.type == 'slow') {
           let reason = '';
-          if (match === 'any' && hasNonIndexFields(filters.list)) {
+          if (filters.match === 'any' && hasNonIndexFields(filters.list)) {
             reason = t(
               // eslint-disable-next-line max-len
               'When in "Match any" mode, try using only Namespace, Owner or Resource filters (which use indexed fields), or decrease limit / range, to improve the query performance'
             );
-          } else if (match === 'all' && !hasIndexFields(filters.list)) {
+          } else if (filters.match === 'all' && !hasIndexFields(filters.list)) {
             reason = t(
               // eslint-disable-next-line max-len
               'Add Namespace, Owner or Resource filters (which use indexed fields), or decrease limit / range, to improve the query performance'
@@ -229,7 +227,7 @@ export const NetflowTrafficDrawer: React.FC<NetflowTrafficDrawerProps> = React.f
         }
         return w;
       },
-      [match, filters]
+      [filters]
     );
 
     const mainContent = () => {
@@ -374,7 +372,7 @@ export const NetflowTrafficDrawer: React.FC<NetflowTrafficDrawerProps> = React.f
             droppedMetrics={getTopologyDroppedMetrics() || []}
             metricType={props.topologyMetricType}
             truncateLength={props.topologyOptions.truncateLength}
-            filters={props.filters.list}
+            filters={props.filters}
             filterDefinitions={props.filterDefinitions}
             setFilters={setFiltersList}
             onClose={() => onElementSelect(undefined)}

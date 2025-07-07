@@ -1,5 +1,6 @@
 import { FlowMetricsResult, RawTopologyMetrics } from '../../api/loki';
 import { getFlowMetrics, getFlowRecords } from '../../api/routes';
+import { FilterCompare } from '../../components/toolbar/filters/compare-filter';
 import { FilterDefinitionSample } from '../../components/__tests-data__/filters';
 import { ScopeDefSample } from '../../components/__tests-data__/scopes';
 import { Filter, FilterId, Filters, FilterValue } from '../../model/filters';
@@ -19,8 +20,8 @@ const getFlowMetricsMock = getFlowMetrics as jest.Mock;
 const filter = (id: FilterId, values: FilterValue[], not?: boolean): Filter => {
   return {
     def: findFilter(FilterDefinitionSample, id)!,
-    values: values,
-    not: not
+    compare: not ? FilterCompare.notEqual : FilterCompare.equal,
+    values: values
   };
 };
 
@@ -47,7 +48,7 @@ describe('Match all, flows', () => {
 
   it('should encode', () => {
     const filters = getEncodedFilter(
-      { list: [filter('src_name', [{ v: 'test1' }, { v: 'test2' }])], backAndForth: false },
+      { list: [filter('src_name', [{ v: 'test1' }, { v: 'test2' }])], match: 'all' },
       false
     );
     expect(filters).toEqual('SrcK8S_Name%3Dtest1%2Ctest2');
@@ -57,7 +58,7 @@ describe('Match all, flows', () => {
     const grouped = getDecodedFilter(
       {
         list: [filter('src_name', [{ v: 'test1' }, { v: 'test2' }]), filter('src_namespace', [{ v: 'ns' }])],
-        backAndForth: false
+        match: 'all'
       },
       false
     );
@@ -68,7 +69,7 @@ describe('Match all, flows', () => {
     const grouped = getDecodedFilter(
       {
         list: [filter('src_name', [{ v: 'test1' }, { v: 'test2' }]), filter('dst_port', [{ v: '443' }])],
-        backAndForth: true
+        match: 'peers'
       },
       false
     );
@@ -79,7 +80,7 @@ describe('Match all, flows', () => {
     const grouped = getDecodedFilter(
       {
         list: [filter('src_namespace', [{ v: 'ns' }]), filter('dst_owner_name', [{ v: 'test' }])],
-        backAndForth: true
+        match: 'peers'
       },
       false
     );
@@ -95,7 +96,7 @@ describe('Match all, flows', () => {
           filter('src_kind', [{ v: 'Pod' }]),
           filter('protocol', [{ v: '6' }])
         ],
-        backAndForth: true
+        match: 'peers'
       },
       false
     );
@@ -105,18 +106,12 @@ describe('Match all, flows', () => {
   });
 
   it('should generate simple Src K8S resource', () => {
-    const grouped = getDecodedFilter(
-      { list: [filter('src_resource', [{ v: 'Pod.ns.test' }])], backAndForth: false },
-      false
-    );
+    const grouped = getDecodedFilter({ list: [filter('src_resource', [{ v: 'Pod.ns.test' }])], match: 'all' }, false);
     expect(grouped).toEqual('SrcK8S_Type="Pod"&SrcK8S_Namespace="ns"&SrcK8S_Name="test"');
   });
 
   it('should generate K8S resource, back and forth', () => {
-    const grouped = getDecodedFilter(
-      { list: [filter('src_resource', [{ v: 'Pod.ns.test' }])], backAndForth: true },
-      false
-    );
+    const grouped = getDecodedFilter({ list: [filter('src_resource', [{ v: 'Pod.ns.test' }])], match: 'peers' }, false);
     expect(grouped).toEqual(
       'SrcK8S_Type="Pod"&SrcK8S_Namespace="ns"&SrcK8S_Name="test"' +
         '|DstK8S_Type="Pod"&DstK8S_Namespace="ns"&DstK8S_Name="test"'
@@ -124,10 +119,7 @@ describe('Match all, flows', () => {
   });
 
   it('should generate Node Src/Dst K8S resource, back and forth', () => {
-    const grouped = getDecodedFilter(
-      { list: [filter('src_resource', [{ v: 'Node.test' }])], backAndForth: true },
-      false
-    );
+    const grouped = getDecodedFilter({ list: [filter('src_resource', [{ v: 'Node.test' }])], match: 'peers' }, false);
     expect(grouped).toEqual(
       'SrcK8S_Type="Node"&SrcK8S_Namespace=""&SrcK8S_Name="test"' +
         '|DstK8S_Type="Node"&DstK8S_Namespace=""&DstK8S_Name="test"'
@@ -136,7 +128,7 @@ describe('Match all, flows', () => {
 
   it('should generate Owner Src/Dst K8S resource, back and forth', () => {
     const grouped = getDecodedFilter(
-      { list: [filter('src_resource', [{ v: 'DaemonSet.ns.test' }])], backAndForth: true },
+      { list: [filter('src_resource', [{ v: 'DaemonSet.ns.test' }])], match: 'peers' },
       false
     );
     expect(grouped).toEqual(
@@ -149,7 +141,7 @@ describe('Match all, flows', () => {
     const grouped = getDecodedFilter(
       {
         list: [filter('src_resource', [{ v: 'Pod.ns.test' }]), filter('dst_name', [{ v: 'peer' }])],
-        backAndForth: true
+        match: 'peers'
       },
       false
     );
@@ -167,7 +159,7 @@ describe('Match any, flows', () => {
 
   it('should encode', () => {
     const grouped = getEncodedFilter(
-      { list: [filter('src_name', [{ v: 'test1' }, { v: 'test2' }])], backAndForth: false },
+      { list: [filter('src_name', [{ v: 'test1' }, { v: 'test2' }])], match: 'all' },
       true
     );
     expect(grouped).toEqual('SrcK8S_Name%3Dtest1%2Ctest2');
@@ -177,7 +169,7 @@ describe('Match any, flows', () => {
     const grouped = getDecodedFilter(
       {
         list: [filter('src_name', [{ v: 'test1' }, { v: 'test2' }]), filter('src_namespace', [{ v: 'ns' }])],
-        backAndForth: false
+        match: 'all'
       },
       true
     );
@@ -188,7 +180,7 @@ describe('Match any, flows', () => {
     const grouped = getDecodedFilter(
       {
         list: [filter('src_name', [{ v: 'test1' }, { v: 'test2' }]), filter('dst_port', [{ v: '443' }])],
-        backAndForth: true
+        match: 'peers'
       },
       true
     );
@@ -204,7 +196,7 @@ describe('Match any, flows', () => {
           filter('src_kind', [{ v: 'Pod' }]),
           filter('protocol', [{ v: '6' }])
         ],
-        backAndForth: true
+        match: 'peers'
       },
       true
     );
@@ -214,18 +206,12 @@ describe('Match any, flows', () => {
   });
 
   it('should generate simple Src K8S resource', () => {
-    const grouped = getDecodedFilter(
-      { list: [filter('src_resource', [{ v: 'Pod.ns.test' }])], backAndForth: false },
-      true
-    );
+    const grouped = getDecodedFilter({ list: [filter('src_resource', [{ v: 'Pod.ns.test' }])], match: 'all' }, true);
     expect(grouped).toEqual('SrcK8S_Type="Pod"&SrcK8S_Namespace="ns"&SrcK8S_Name="test"');
   });
 
   it('should generate K8S resource, back and forth', () => {
-    const grouped = getDecodedFilter(
-      { list: [filter('src_resource', [{ v: 'Pod.ns.test' }])], backAndForth: true },
-      true
-    );
+    const grouped = getDecodedFilter({ list: [filter('src_resource', [{ v: 'Pod.ns.test' }])], match: 'peers' }, true);
     expect(grouped).toEqual(
       'SrcK8S_Type="Pod"&SrcK8S_Namespace="ns"&SrcK8S_Name="test"' +
         '|DstK8S_Type="Pod"&DstK8S_Namespace="ns"&DstK8S_Name="test"'
@@ -233,10 +219,7 @@ describe('Match any, flows', () => {
   });
 
   it('should generate Node K8S resource, back and forth', () => {
-    const grouped = getDecodedFilter(
-      { list: [filter('src_resource', [{ v: 'Node.test' }])], backAndForth: true },
-      true
-    );
+    const grouped = getDecodedFilter({ list: [filter('src_resource', [{ v: 'Node.test' }])], match: 'peers' }, true);
     expect(grouped).toEqual(
       'SrcK8S_Type="Node"&SrcK8S_Namespace=""&SrcK8S_Name="test"' +
         '|DstK8S_Type="Node"&DstK8S_Namespace=""&DstK8S_Name="test"'
@@ -245,7 +228,7 @@ describe('Match any, flows', () => {
 
   it('should generate Owner K8S resource, back and forth', () => {
     const grouped = getDecodedFilter(
-      { list: [filter('src_resource', [{ v: 'DaemonSet.ns.test' }])], backAndForth: true },
+      { list: [filter('src_resource', [{ v: 'DaemonSet.ns.test' }])], match: 'peers' },
       true
     );
     expect(grouped).toEqual(
@@ -258,7 +241,7 @@ describe('Match any, flows', () => {
     const grouped = getDecodedFilter(
       {
         list: [filter('src_resource', [{ v: 'Pod.ns.test' }]), filter('dst_name', [{ v: 'peer' }])],
-        backAndForth: true
+        match: 'peers'
       },
       true
     );
@@ -290,7 +273,7 @@ describe('Match all, topology', () => {
   });
 
   it('should encode', () => {
-    getTopoForFilter({ list: [filter('src_name', [{ v: 'test1' }, { v: 'test2' }])], backAndForth: false }, false);
+    getTopoForFilter({ list: [filter('src_name', [{ v: 'test1' }, { v: 'test2' }])], match: 'all' }, false);
     expect(getFlowMetricsMock).toHaveBeenCalledTimes(1);
     expect(getFlowMetricsMock.mock.calls[0][0].filters).toEqual('SrcK8S_Name%3Dtest1%2Ctest2');
   });
@@ -299,7 +282,7 @@ describe('Match all, topology', () => {
     getTopoForFilter(
       {
         list: [filter('src_name', [{ v: 'test1' }, { v: 'test2' }]), filter('src_namespace', [{ v: 'ns' }])],
-        backAndForth: false
+        match: 'all'
       },
       false
     );
@@ -313,7 +296,7 @@ describe('Match all, topology', () => {
     getTopoForFilter(
       {
         list: [filter('src_name', [{ v: 'test1' }, { v: 'test2' }]), filter('dst_port', [{ v: '443' }])],
-        backAndForth: true
+        match: 'peers'
       },
       false
     );

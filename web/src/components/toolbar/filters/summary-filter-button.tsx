@@ -3,7 +3,7 @@ import { FilterIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { TopologyMetricPeer } from '../../../api/loki';
-import { Filter, FilterDefinition } from '../../../model/filters';
+import { Filter, FilterDefinition, Filters } from '../../../model/filters';
 import { NodeType } from '../../../model/flow-query';
 import { FilterDir, isDirElementFiltered, toggleDirElementFilter } from '../../../model/topology';
 import { useOutsideClickEvent } from '../../../utils/outside-hook';
@@ -13,7 +13,7 @@ export interface SummaryFilterButtonProps {
   id: string;
   filterType: NodeType;
   fields: Partial<TopologyMetricPeer>;
-  activeFilters: Filter[];
+  filters: Filters;
   setFilters: (filters: Filter[]) => void;
   filterDefinitions: FilterDefinition[];
 }
@@ -25,7 +25,7 @@ export const SummaryFilterButton: React.FC<SummaryFilterButtonProps> = ({
   id,
   filterType,
   fields,
-  activeFilters,
+  filters,
   setFilters,
   filterDefinitions
 }) => {
@@ -33,7 +33,7 @@ export const SummaryFilterButton: React.FC<SummaryFilterButtonProps> = ({
   const ref = useOutsideClickEvent(() => setOpen(false));
   const [isOpen, setOpen] = React.useState(false);
   const selected = [srcFilter, dstFilter].filter(dir =>
-    isDirElementFiltered(filterType, fields, dir, activeFilters, filterDefinitions)
+    isDirElementFiltered(filterType, fields, dir, filters.list, filterDefinitions)
   );
 
   const onSelect = (dir: FilterDir, e?: React.BaseSyntheticEvent) => {
@@ -42,7 +42,7 @@ export const SummaryFilterButton: React.FC<SummaryFilterButtonProps> = ({
       fields,
       dir,
       selected.includes(dir),
-      activeFilters,
+      filters.list,
       setFilters,
       filterDefinitions
     );
@@ -78,8 +78,8 @@ export const SummaryFilterButton: React.FC<SummaryFilterButtonProps> = ({
         onSelect={(event, value) => value && onSelect(value as FilterDir, event)}
       >
         <SelectList className="summary-filters-list">
-          {menuItem('src', t('Source'))}
-          {menuItem('dst', t('Destination'))}
+          {menuItem('src', filters.match === 'peers' ? t('Peer A') : t('Source'))}
+          {menuItem('dst', filters.match === 'peers' ? t('Peer B') : t('Destination'))}
         </SelectList>
       </Select>
     </div>
