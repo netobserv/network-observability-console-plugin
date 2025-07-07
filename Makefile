@@ -44,7 +44,7 @@ ifneq ($(CLEAN_BUILD),)
 	LDFLAGS ?= -X 'main.buildVersion=${VERSION}-${BUILD_SHA}' -X 'main.buildDate=${BUILD_DATE}'
 endif
 
-GOLANGCI_LINT_VERSION = v1.61.0
+GOLANGCI_LINT_VERSION = v2.2.1
 NPM_INSTALL ?= install
 CMDLINE_ARGS ?= --loglevel trace --config config/config.yaml
 
@@ -88,7 +88,9 @@ help: ## Display this help.
 .PHONY: prereqs
 prereqs: ## Test if prerequisites are met, and installing missing dependencies
 	@echo "### Test if prerequisites are met, and installing missing dependencies"
-	GOFLAGS="" go install github.com/golangci/golangci-lint/cmd/golangci-lint@${GOLANGCI_LINT_VERSION}
+	test -f ./bin/golangci-lint-${GOLANGCI_LINT_VERSION} || ( \
+		curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh | sh -s ${GOLANGCI_LINT_VERSION} \
+		&& mv ./bin/golangci-lint ./bin/golangci-lint-${GOLANGCI_LINT_VERSION})
 
 .PHONY: vendors
 vendors: ## Check go vendors
@@ -177,7 +179,7 @@ fmt-backend: ## Run backend go fmt
 .PHONY: lint-backend
 lint-backend: prereqs ## Lint backend code
 	@echo "### Linting backend code"
-	golangci-lint run ./...
+	./bin/golangci-lint-${GOLANGCI_LINT_VERSION} run ./...
 
 .PHONY: test-backend
 test-backend: ## Test backend using go test
