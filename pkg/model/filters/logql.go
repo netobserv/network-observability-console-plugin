@@ -352,13 +352,13 @@ func moreThanRegex(sb *strings.Builder, value string) {
 
 		if i > 1 {
 			sb.WriteString("{")
-			sb.WriteString(fmt.Sprintf("%d", i))
+			fmt.Fprintf(sb, "%d", i)
 			sb.WriteString(",}")
 		}
 	}
 
 	sb.WriteString("|[1-9][0-9]{")
-	sb.WriteString(fmt.Sprintf("%d", len(value)))
+	fmt.Fprintf(sb, "%d", len(value))
 	sb.WriteString(",})")
 }
 
