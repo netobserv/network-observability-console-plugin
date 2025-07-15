@@ -20,7 +20,7 @@ WORKDIR /opt/app-root/web
 RUN npm run format-all
 RUN npm run build$BUILDSCRIPT
 
-FROM --platform=$BUILDPLATFORM docker.io/library/golang:1.23 as go-builder
+FROM --platform=$BUILDPLATFORM docker.io/library/golang:1.24 as go-builder
 
 ARG LDFLAGS
 WORKDIR /opt/app-root
