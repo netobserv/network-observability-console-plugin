@@ -12,9 +12,9 @@ import (
 func TestFlowQuery_AddLabelFilters(t *testing.T) {
 	cfg := config.Loki{URL: "/", Labels: []string{"foo", "flis"}}
 	query := NewFlowQueryBuilderWithDefaults(&cfg)
-	err := query.addFilter(filters.NewMatch("foo", `"bar"`))
+	err := query.addFilter(filters.NewRegexMatch("foo", `"bar"`))
 	require.NoError(t, err)
-	err = query.addFilter(filters.NewMatch("flis", `"flas"`))
+	err = query.addFilter(filters.NewRegexMatch("flis", `"flas"`))
 	require.NoError(t, err)
 	urlQuery := query.Build()
 	assert.Equal(t, `/loki/api/v1/query_range?query={app="netobserv-flowcollector",foo="bar",flis="flas"}`, urlQuery)
@@ -23,15 +23,15 @@ func TestFlowQuery_AddLabelFilters(t *testing.T) {
 func TestQuery_BackQuote_Error(t *testing.T) {
 	cfg := config.Loki{URL: "/", Labels: []string{"lab1", "lab2"}}
 	query := NewFlowQueryBuilderWithDefaults(&cfg)
-	assert.Error(t, query.addFilter(filters.NewMatch("key", "backquoted`val")))
+	assert.Error(t, query.addFilter(filters.NewRegexMatch("key", "backquoted`val")))
 }
 
 func TestFlowQuery_AddNotLabelFilters(t *testing.T) {
 	cfg := config.Loki{URL: "/", Labels: []string{"foo", "flis"}}
 	query := NewFlowQueryBuilderWithDefaults(&cfg)
-	err := query.addFilter(filters.NewMatch("foo", `"bar"`))
+	err := query.addFilter(filters.NewRegexMatch("foo", `"bar"`))
 	require.NoError(t, err)
-	err = query.addFilter(filters.NewNotMatch("flis", `"flas"`))
+	err = query.addFilter(filters.NewNotRegexMatch("flis", `"flas"`))
 	require.NoError(t, err)
 	urlQuery := query.Build()
 	assert.Equal(t, `/loki/api/v1/query_range?query={app="netobserv-flowcollector",foo="bar",flis!="flas"}`, urlQuery)
@@ -44,7 +44,7 @@ func backtick(str string) string {
 func TestFlowQuery_AddLineFilterMultipleValues(t *testing.T) {
 	cfg := config.Loki{URL: "/"}
 	query := NewFlowQueryBuilderWithDefaults(&cfg)
-	err := query.addFilter(filters.NewMatch("foo", `bar,baz`))
+	err := query.addFilter(filters.NewRegexMatch("foo", `bar,baz`))
 	require.NoError(t, err)
 	urlQuery := query.Build()
 	assert.Equal(t, `/loki/api/v1/query_range?query={app="netobserv-flowcollector"}|~`+backtick(`foo":"(?i)[^"]*bar.*"|foo":"(?i)[^"]*baz.*"`), urlQuery)
@@ -53,9 +53,9 @@ func TestFlowQuery_AddLineFilterMultipleValues(t *testing.T) {
 func TestFlowQuery_AddNotLineFilters(t *testing.T) {
 	cfg := config.Loki{URL: "/"}
 	query := NewFlowQueryBuilderWithDefaults(&cfg)
-	err := query.addFilter(filters.NewMatch("foo", `"bar"`))
+	err := query.addFilter(filters.NewRegexMatch("foo", `"bar"`))
 	require.NoError(t, err)
-	err = query.addFilter(filters.NewNotMatch("flis", `"flas"`))
+	err = query.addFilter(filters.NewNotRegexMatch("flis", `"flas"`))
 	require.NoError(t, err)
 	urlQuery := query.Build()
 	assert.Equal(t, `/loki/api/v1/query_range?query={app="netobserv-flowcollector"}|~`+backtick(`foo":"bar"`)+`|~`+backtick(`"flis"`)+`!~`+backtick(`flis":"flas"`), urlQuery)
@@ -64,9 +64,9 @@ func TestFlowQuery_AddNotLineFilters(t *testing.T) {
 func TestFlowQuery_AddLineFiltersWithEmpty(t *testing.T) {
 	cfg := config.Loki{URL: "/"}
 	query := NewFlowQueryBuilderWithDefaults(&cfg)
-	err := query.addFilter(filters.NewMatch("foo", `"bar"`))
+	err := query.addFilter(filters.NewRegexMatch("foo", `"bar"`))
 	require.NoError(t, err)
-	err = query.addFilter(filters.NewMatch("flis", `""`))
+	err = query.addFilter(filters.NewRegexMatch("flis", `""`))
 	require.NoError(t, err)
 	urlQuery := query.Build()
 	assert.Equal(t, `/loki/api/v1/query_range?query={app="netobserv-flowcollector"}|~`+backtick(`foo":"bar"`)+`|json|flis=""`, urlQuery)
@@ -75,9 +75,9 @@ func TestFlowQuery_AddLineFiltersWithEmpty(t *testing.T) {
 func TestFlowQuery_AddRecordTypeLabelFilter(t *testing.T) {
 	cfg := config.Loki{URL: "/", Labels: []string{"foo", "flis", "_RecordType"}}
 	query := NewFlowQueryBuilderWithDefaults(&cfg)
-	err := query.addFilter(filters.NewMatch("foo", `"bar"`))
+	err := query.addFilter(filters.NewRegexMatch("foo", `"bar"`))
 	require.NoError(t, err)
-	err = query.addFilter(filters.NewMatch("flis", `"flas"`))
+	err = query.addFilter(filters.NewRegexMatch("flis", `"flas"`))
 	require.NoError(t, err)
 	urlQuery := query.Build()
 	assert.Equal(t, `/loki/api/v1/query_range?query={app="netobserv-flowcollector",_RecordType="flowLog",foo="bar",flis="flas"}`, urlQuery)

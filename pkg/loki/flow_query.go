@@ -132,10 +132,10 @@ func (q *FlowQueryBuilder) addLineFilters(filter filters.Match, values []string)
 		var hasEmptyMatch bool
 		if q.config.IsNumeric(filter.Key) {
 			lf, hasEmptyMatch = filters.NumericLineFilter(filter.Key, values, filter.Not, filter.MoreThanOrEqual)
-		} else if filter.Equal {
-			lf, hasEmptyMatch = filters.StringLineFilter(filter.Key, values, filter.Not)
-		} else {
+		} else if filter.Regex {
 			lf, hasEmptyMatch = filters.StringLineFilterCheckExact(filter.Key, values, filter.Not)
+		} else {
+			lf, hasEmptyMatch = filters.StringLineFilter(filter.Key, values, filter.Not)
 		}
 		// if there is at least an empty exact match, there is no uniform/safe way to filter by text,
 		// so we should use JSON label matchers instead of text line matchers
