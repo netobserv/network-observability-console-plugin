@@ -5,6 +5,10 @@
   gap: 1em !important;
 }
 
+.custom-chip.pf-v5-c-menu-toggle {
+  padding: 0 !important;
+}
+
 .custom-chip>.pf-v5-c-menu-toggle__text {
   padding: 0.25em 1em 0.25em 1em;
 }
