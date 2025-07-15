@@ -44,7 +44,7 @@ ifneq ($(CLEAN_BUILD),)
 	LDFLAGS ?= -X 'main.buildVersion=${VERSION}-${BUILD_SHA}' -X 'main.buildDate=${BUILD_DATE}'
 endif
 
-GOLANGCI_LINT_VERSION = v1.61.0
+GOLANGCI_LINT_VERSION = v2.2.1
 NPM_INSTALL ?= install
 CMDLINE_ARGS ?= --loglevel trace --config config/config.yaml
 
@@ -53,7 +53,7 @@ CMDLINE_ARGS ?= --loglevel trace --config config/config.yaml
 # build a single arch target provided as argument
 define build_target
 	echo 'building image for arch $(1)'; \
-	DOCKER_BUILDKIT=1 $(OCI_BIN) buildx build --ulimit nofile=20480:20480 --load --build-arg LDFLAGS="${LDFLAGS}" --build-arg BUILDSCRIPT=${BUILDSCRIPT} --build-arg TARGETARCH=$(1) ${OCI_BUILD_OPTS} -t ${IMAGE}-$(1) -f Dockerfile .;
+	DOCKER_BUILDKIT=1 $(OCI_BIN) buildx build --load --build-arg LDFLAGS="${LDFLAGS}" --build-arg TARGETARCH=$(1) ${OCI_BUILD_OPTS} -t ${IMAGE}-$(1) -f Dockerfile .;
 endef
 
 # push a single arch target image
@@ -88,7 +88,9 @@ help: ## Display this help.
 .PHONY: prereqs
 prereqs: ## Test if prerequisites are met, and installing missing dependencies
 	@echo "### Test if prerequisites are met, and installing missing dependencies"
-	GOFLAGS="" go install github.com/golangci/golangci-lint/cmd/golangci-lint@${GOLANGCI_LINT_VERSION}
+	test -f ./bin/golangci-lint-${GOLANGCI_LINT_VERSION} || ( \
+		curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh | sh -s ${GOLANGCI_LINT_VERSION} \
+		&& mv ./bin/golangci-lint ./bin/golangci-lint-${GOLANGCI_LINT_VERSION})
 
 .PHONY: vendors
 vendors: ## Check go vendors
@@ -177,7 +179,7 @@ fmt-backend: ## Run backend go fmt
 .PHONY: lint-backend
 lint-backend: prereqs ## Lint backend code
 	@echo "### Linting backend code"
-	golangci-lint run ./...
+	./bin/golangci-lint-${GOLANGCI_LINT_VERSION} run ./...
 
 .PHONY: test-backend
 test-backend: ## Test backend using go test
@@ -199,6 +201,7 @@ serve-mock: YQ ## Run backend using mocks
 # note: to build and push custom image tag use: IMAGE_ORG=myuser VERSION=dev make images
 .PHONY: image-build
 image-build: ## Build MULTIARCH_TARGETS images
+	$(OCI_BIN) build --ulimit nofile=20480:20480 --build-arg BUILDSCRIPT=${BUILDSCRIPT} ${OCI_BUILD_OPTS} -t localhost/local-front-build:latest -f Dockerfile.front .
 	trap 'exit' INT; \
 	$(foreach target,$(MULTIARCH_TARGETS),$(call build_target,$(target)))
 
