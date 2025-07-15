@@ -35,7 +35,7 @@ func NewQuery(kl map[string][]string, in *loki.TopologyInput, qr *v1.Range, filt
 func (q *QueryBuilder) Build() Query {
 	labels, extraFilter := GetLabelsAndFilter(q.aggregateKeyLabels, q.in.Aggregate, q.in.Groups)
 	if extraFilter != "" {
-		q.filters = append(q.filters, filters.NewNotMatch(extraFilter, `""`))
+		q.filters = append(q.filters, filters.NewNotRegexMatch(extraFilter, `""`))
 	}
 	groupBy := strings.Join(labels, ",")
 

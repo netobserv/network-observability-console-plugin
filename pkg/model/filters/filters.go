@@ -14,24 +14,24 @@ type SingleQuery = []Match
 type Match struct {
 	Key             string
 	Values          string
-	Equal           bool
+	Regex           bool
 	Not             bool
 	MoreThanOrEqual bool
 }
 
-func NewMatch(key, values string) Match {
+func NewRegexMatch(key, values string) Match {
+	return Match{Key: key, Values: values, Regex: true}
+}
+func NewEqualMatch(key, values string) Match {
 	return Match{Key: key, Values: values}
 }
-func NewEqual(key, values string) Match {
-	return Match{Key: key, Values: values, Equal: true}
+func NewNotRegexMatch(key, values string) Match {
+	return Match{Key: key, Values: values, Not: true, Regex: true}
 }
-func NewNotMatch(key, values string) Match {
+func NewNotEqualMatch(key, values string) Match {
 	return Match{Key: key, Values: values, Not: true}
 }
-func NewNotEqual(key, values string) Match {
-	return Match{Key: key, Values: values, Equal: true, Not: true}
-}
-func NewMoreThanOrEqual(key, values string) Match {
+func NewMoreThanOrEqualMatch(key, values string) Match {
 	return Match{Key: key, Values: values, MoreThanOrEqual: true}
 }
 
@@ -58,19 +58,19 @@ func Parse(raw string) (MultiQueries, error) {
 				pair := strings.Split(filter, "=")
 				if len(pair) == 2 {
 					if strings.HasSuffix(pair[0], "!") {
-						andFilters = append(andFilters, NewNotEqual(strings.TrimSuffix(pair[0], "!"), pair[1]))
+						andFilters = append(andFilters, NewNotEqualMatch(strings.TrimSuffix(pair[0], "!"), pair[1]))
 					} else if strings.HasSuffix(pair[0], ">") {
-						andFilters = append(andFilters, NewMoreThanOrEqual(strings.TrimSuffix(pair[0], ">"), pair[1]))
+						andFilters = append(andFilters, NewMoreThanOrEqualMatch(strings.TrimSuffix(pair[0], ">"), pair[1]))
 					} else {
-						andFilters = append(andFilters, NewEqual(pair[0], pair[1]))
+						andFilters = append(andFilters, NewEqualMatch(pair[0], pair[1]))
 					}
 				}
 			} else if strings.Contains(filter, "~") {
 				pair := strings.Split(filter, "~")
 				if strings.HasSuffix(pair[0], "!") {
-					andFilters = append(andFilters, NewNotMatch(strings.TrimSuffix(pair[0], "!"), pair[1]))
+					andFilters = append(andFilters, NewNotRegexMatch(strings.TrimSuffix(pair[0], "!"), pair[1]))
 				} else {
-					andFilters = append(andFilters, NewMatch(pair[0], pair[1]))
+					andFilters = append(andFilters, NewRegexMatch(pair[0], pair[1]))
 				}
 			}
 		}
@@ -101,7 +101,7 @@ func (m MultiQueries) Distribute(toDistribute []SingleQuery, ignorePred func(Sin
 
 func (m *Match) ToLabelFilter() (LabelFilter, bool) {
 	values := strings.Split(m.Values, ",")
-	if len(values) == 1 && (m.Equal || isExactMatch(values[0])) {
+	if len(values) == 1 && (!m.Regex || isExactMatch(values[0])) {
 		if m.Not {
 			return NotStringLabelFilter(m.Key, trimExactMatch(values[0])), true
 		} else if m.MoreThanOrEqual {
@@ -109,7 +109,7 @@ func (m *Match) ToLabelFilter() (LabelFilter, bool) {
 		}
 		return StringEqualLabelFilter(m.Key, trimExactMatch(values[0])), true
 	}
-	return MultiValuesRegexFilter(m.Key, values, m.Not, m.Equal)
+	return MultiValuesRegexFilter(m.Key, values, m.Not, !m.Regex)
 }
 
 func isExactMatch(value string) bool {

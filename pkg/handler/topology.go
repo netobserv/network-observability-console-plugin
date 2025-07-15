@@ -231,11 +231,11 @@ func expandQueries(queries filters.MultiQueries, namespace string, isForProm fun
 	// (Note that we use DstOwnerName both as an optimization as it's a Loki index,
 	// and as convenience because looking for empty fields won't work if they aren't indexed)
 	q1 := filters.SingleQuery{
-		filters.NewMatch(fields.FlowDirection, `"`+string(constants.Ingress)+`","`+string(constants.Inner)+`"`),
+		filters.NewRegexMatch(fields.FlowDirection, `"`+string(constants.Ingress)+`","`+string(constants.Inner)+`"`),
 	}
 	q2 := filters.SingleQuery{
-		filters.NewMatch(fields.FlowDirection, `"`+string(constants.Egress)+`"`),
-		filters.NewMatch(fields.DstType, `"","Service"`),
+		filters.NewRegexMatch(fields.FlowDirection, `"`+string(constants.Egress)+`"`),
+		filters.NewRegexMatch(fields.DstType, `"","Service"`),
 	}
 
 	shouldSkip := func(q filters.SingleQuery) bool {
@@ -258,8 +258,8 @@ func expandQueries(queries filters.MultiQueries, namespace string, isForProm fun
 		// TODO: this should actually be managed from the loki gateway, with "namespace" query param
 		expanded = expanded.Distribute(
 			[]filters.SingleQuery{
-				{filters.NewMatch(fields.SrcNamespace, `"`+namespace+`"`)},
-				{filters.NewMatch(fields.DstNamespace, `"`+namespace+`"`)},
+				{filters.NewRegexMatch(fields.SrcNamespace, `"`+namespace+`"`)},
+				{filters.NewRegexMatch(fields.DstNamespace, `"`+namespace+`"`)},
 			},
 			isForProm,
 		)

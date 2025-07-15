@@ -105,6 +105,7 @@ func TestBuildQuery_PromQLRateMultiFilter(t *testing.T) {
 	f := filters.SingleQuery{
 		{
 			Key:    fields.SrcNamespace,
+			Regex:  true,
 			Values: `"a","b"`,
 		},
 	}

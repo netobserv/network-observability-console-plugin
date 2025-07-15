@@ -15,11 +15,11 @@ func TestParseFilters(t *testing.T) {
 
 	assert.Len(t, groups, 2)
 	assert.Equal(t, SingleQuery{
-		NewMatch("foo", "a,b"),
-		NewEqual("bar", "c"),
+		NewRegexMatch("foo", "a,b"),
+		NewEqualMatch("bar", "c"),
 	}, groups[0])
 	assert.Equal(t, SingleQuery{
-		NewEqual("baz", "d"),
+		NewEqualMatch("baz", "d"),
 	}, groups[1])
 
 	// Resource path + port, match all
@@ -28,10 +28,10 @@ func TestParseFilters(t *testing.T) {
 
 	assert.Len(t, groups, 1)
 	assert.Equal(t, SingleQuery{
-		NewEqual("SrcK8S_Type", `"Pod"`),
-		NewEqual("SrcK8S_Namespace", `"default"`),
-		NewEqual("SrcK8S_Name", `"test"`),
-		NewEqual("SrcPort", "8080"),
+		NewEqualMatch("SrcK8S_Type", `"Pod"`),
+		NewEqualMatch("SrcK8S_Namespace", `"default"`),
+		NewEqualMatch("SrcK8S_Name", `"test"`),
+		NewEqualMatch("SrcPort", "8080"),
 	}, groups[0])
 
 	// Resource path + port, match any
@@ -40,13 +40,13 @@ func TestParseFilters(t *testing.T) {
 
 	assert.Len(t, groups, 2)
 	assert.Equal(t, SingleQuery{
-		NewEqual("SrcK8S_Type", `"Pod"`),
-		NewEqual("SrcK8S_Namespace", `"default"`),
-		NewEqual("SrcK8S_Name", `"test"`),
+		NewEqualMatch("SrcK8S_Type", `"Pod"`),
+		NewEqualMatch("SrcK8S_Namespace", `"default"`),
+		NewEqualMatch("SrcK8S_Name", `"test"`),
 	}, groups[0])
 
 	assert.Equal(t, SingleQuery{
-		NewEqual("SrcPort", "8080"),
+		NewEqualMatch("SrcPort", "8080"),
 	}, groups[1])
 
 	// Resource path + name, match all
@@ -55,10 +55,10 @@ func TestParseFilters(t *testing.T) {
 
 	assert.Len(t, groups, 1)
 	assert.Equal(t, SingleQuery{
-		NewEqual("SrcK8S_Type", `"Pod"`),
-		NewEqual("SrcK8S_Namespace", `"default"`),
-		NewEqual("SrcK8S_Name", `"test"`),
-		NewEqual("SrcK8S_Name", `"nomatch"`),
+		NewEqualMatch("SrcK8S_Type", `"Pod"`),
+		NewEqualMatch("SrcK8S_Namespace", `"default"`),
+		NewEqualMatch("SrcK8S_Name", `"test"`),
+		NewEqualMatch("SrcK8S_Name", `"nomatch"`),
 	}, groups[0])
 }
 
@@ -68,45 +68,45 @@ func TestParseCommon(t *testing.T) {
 
 	assert.Len(t, groups, 2)
 	assert.Equal(t, SingleQuery{
-		NewEqual("srcns", "a"),
+		NewEqualMatch("srcns", "a"),
 	}, groups[0])
 	assert.Equal(t, SingleQuery{
-		NewNotEqual("srcns", "a"),
-		NewEqual("dstns", "a"),
+		NewNotEqualMatch("srcns", "a"),
+		NewEqualMatch("dstns", "a"),
 	}, groups[1])
 }
 
 func TestDistribute(t *testing.T) {
 	mq := MultiQueries{
-		SingleQuery{NewEqual("key1", "a"), NewEqual("key2", "b")},
-		SingleQuery{NewEqual("key1", "AA"), NewEqual("key3", "CC")},
-		SingleQuery{NewEqual("key-ignore", "ZZ")},
+		SingleQuery{NewEqualMatch("key1", "a"), NewEqualMatch("key2", "b")},
+		SingleQuery{NewEqualMatch("key1", "AA"), NewEqualMatch("key3", "CC")},
+		SingleQuery{NewEqualMatch("key-ignore", "ZZ")},
 	}
-	toDistribute := []SingleQuery{{NewEqual("key10", "XX")}, {NewEqual("key11", "YY")}}
+	toDistribute := []SingleQuery{{NewEqualMatch("key10", "XX")}, {NewEqualMatch("key11", "YY")}}
 	res := mq.Distribute(toDistribute, func(q SingleQuery) bool { return q[0].Key == "key-ignore" })
 
 	assert.Len(t, res, 5)
 	assert.Equal(t, SingleQuery{
-		NewEqual("key10", "XX"),
-		NewEqual("key1", "a"),
-		NewEqual("key2", "b"),
+		NewEqualMatch("key10", "XX"),
+		NewEqualMatch("key1", "a"),
+		NewEqualMatch("key2", "b"),
 	}, res[0])
 	assert.Equal(t, SingleQuery{
-		NewEqual("key11", "YY"),
-		NewEqual("key1", "a"),
-		NewEqual("key2", "b"),
+		NewEqualMatch("key11", "YY"),
+		NewEqualMatch("key1", "a"),
+		NewEqualMatch("key2", "b"),
 	}, res[1])
 	assert.Equal(t, SingleQuery{
-		NewEqual("key10", "XX"),
-		NewEqual("key1", "AA"),
-		NewEqual("key3", "CC"),
+		NewEqualMatch("key10", "XX"),
+		NewEqualMatch("key1", "AA"),
+		NewEqualMatch("key3", "CC"),
 	}, res[2])
 	assert.Equal(t, SingleQuery{
-		NewEqual("key11", "YY"),
-		NewEqual("key1", "AA"),
-		NewEqual("key3", "CC"),
+		NewEqualMatch("key11", "YY"),
+		NewEqualMatch("key1", "AA"),
+		NewEqualMatch("key3", "CC"),
 	}, res[3])
 	assert.Equal(t, SingleQuery{
-		NewEqual("key-ignore", "ZZ"),
+		NewEqualMatch("key-ignore", "ZZ"),
 	}, res[4])
 }
