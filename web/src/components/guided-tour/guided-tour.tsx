@@ -156,7 +156,7 @@ export const GuidedTourPopover: React.FC<GuidedTourPopoverProps> = React.forward
           <Flex direction={{ default: 'row' }}>
             <FlexItem flex={{ default: 'flex_1' }}>
               <Text component={TextVariants.p} className="text-muted">
-                {t('Step {{index}}/{{count}}', { index: (index || 0) + 1, count: items.length })}
+                {t('Step {{step}}/{{total}}', { step: (index || 0) + 1, total: items.length })}
               </Text>
             </FlexItem>
             <FlexItem>

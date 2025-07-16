@@ -288,13 +288,13 @@ export const SummaryPanelContent: React.FC<SummaryPanelContentProps> = ({
     return addresses.length || typesCardinality.length || ports.length || protocols.length ? (
       <TextContent className="summary-text-container">
         <Text component={TextVariants.h3}>{`${t('Cardinality')} ${
-          !_.isEmpty(rateMetrics) ? t('(top {{count}} metrics)', { count: limit }) : ''
+          !_.isEmpty(rateMetrics) ? t('(top {{limit}} metrics)', { limit }) : ''
         }`}</Text>
         <Accordion id="cardinality-accordion">
           {addresses.length
             ? accordionItem(
                 'addresses',
-                t('{{count}} IP(s)', { count: addresses.length }),
+                t('{{n}} IP(s)', { n: addresses.length }),
                 listCardinalityContent(addresses, compareIPs)
               )
             : undefined}
@@ -310,7 +310,7 @@ export const SummaryPanelContent: React.FC<SummaryPanelContentProps> = ({
           {ports.length
             ? accordionItem(
                 'ports',
-                t('{{count}} Port(s)', { count: ports.length }),
+                t('{{n}} Port(s)', { n: ports.length }),
                 listCardinalityContent(
                   //sort ports before format to keep number order
                   ports.sort((p1, p2) => comparePorts(p1, p2)).map(p => formatPort(p))
@@ -320,7 +320,7 @@ export const SummaryPanelContent: React.FC<SummaryPanelContentProps> = ({
           {protocols.length
             ? accordionItem(
                 'protocols',
-                t('{{count}} Protocol(s)', { count: protocols.length }),
+                t('{{n}} Protocol(s)', { n: protocols.length }),
                 listCardinalityContent(
                   protocols.map(p => formatProtocol(p, t)),
                   compareStrings
@@ -400,7 +400,7 @@ export const SummaryPanelContent: React.FC<SummaryPanelContentProps> = ({
           </Text>
         )}
         <Text component={TextVariants.h3}>{`${t('Results')} ${
-          _.isEmpty(flows) ? t('(top {{count}} metrics)', { count: limit }) : ''
+          _.isEmpty(flows) ? t('(top {{limit}} metrics)', { limit }) : ''
         }`}</Text>
         {_.isEmpty(flows) ? (
           <MetricsQuerySummaryContent
