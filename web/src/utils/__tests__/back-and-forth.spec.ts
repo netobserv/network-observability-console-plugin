@@ -1,9 +1,8 @@
 import { FlowMetricsResult, RawTopologyMetrics } from '../../api/loki';
 import { getFlowMetrics, getFlowRecords } from '../../api/routes';
-import { FilterCompare } from '../../components/toolbar/filters/compare-filter';
 import { FilterDefinitionSample } from '../../components/__tests-data__/filters';
 import { ScopeDefSample } from '../../components/__tests-data__/scopes';
-import { Filter, FilterId, Filters, FilterValue } from '../../model/filters';
+import { Filter, FilterCompare, FilterId, Filters, FilterValue } from '../../model/filters';
 import { filtersToString } from '../../model/flow-query';
 import { getFetchFunctions, mergeMetricsBNF } from '../back-and-forth';
 import { ContextSingleton } from '../context';

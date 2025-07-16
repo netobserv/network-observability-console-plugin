@@ -1,7 +1,6 @@
-import { FilterCompare } from '../../components/toolbar/filters/compare-filter';
 import { FilterDefinitionSample } from '../../components/__tests-data__/filters';
 import { findFilter } from '../../utils/filter-definitions';
-import { doesIncludeFilter, Filter, filtersEqual } from '../filters';
+import { doesIncludeFilter, Filter, FilterCompare, filtersEqual } from '../filters';
 import { filtersToString } from '../flow-query';
 
 describe('doesIncludeFilter', () => {

@@ -17,7 +17,15 @@ import {
 import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { FilterDefinition, FilterOption, Filters, FilterValue, findFromFilters } from '../../../model/filters';
+import {
+  FilterCompare,
+  FilterDefinition,
+  FilterOption,
+  Filters,
+  FilterValue,
+  findFromFilters,
+  getCompareText
+} from '../../../model/filters';
 import { getHTTPErrorDetails } from '../../../utils/errors';
 import { matcher } from '../../../utils/filter-definitions';
 import { Indicator, setTargeteableFilters } from '../../../utils/filters-helper';
@@ -25,7 +33,7 @@ import { useOutsideClickEvent } from '../../../utils/outside-hook';
 import { usePrevious } from '../../../utils/previous-hook';
 import { Direction } from '../filters-toolbar';
 import AutocompleteFilter from './autocomplete-filter';
-import CompareFilter, { FilterCompare, getCompareText } from './compare-filter';
+import CompareFilter from './compare-filter';
 import { FilterHints } from './filter-hints';
 import './filter-search-input.css';
 import FiltersDropdown from './filters-dropdown';
