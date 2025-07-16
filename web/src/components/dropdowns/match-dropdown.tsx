@@ -1,5 +1,5 @@
 import { Dropdown, DropdownItem, MenuToggle, MenuToggleElement } from '@patternfly/react-core';
-import { LongArrowAltDownIcon, LongArrowAltUpIcon, RouteIcon } from '@patternfly/react-icons';
+import { BarsIcon, ListIcon, RouteIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Match } from '../../model/flow-query';
@@ -10,7 +10,7 @@ export interface MatchDropdownProps {
   id?: string;
 }
 
-export const MatchValues = ['any', 'all', 'peers'] as Match[];
+export const MatchValues = ['all', 'any', 'peers'] as Match[];
 
 export const MatchDropdown: React.FC<MatchDropdownProps> = ({ selected, setMatch, id }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
@@ -32,14 +32,9 @@ export const MatchDropdown: React.FC<MatchDropdownProps> = ({ selected, setMatch
   const getIcon = (layoutName: Match) => {
     switch (layoutName) {
       case 'any':
-        return (
-          <>
-            <LongArrowAltUpIcon />
-            <LongArrowAltDownIcon />
-          </>
-        );
+        return <BarsIcon />;
       case 'all':
-        return <LongArrowAltUpIcon />;
+        return <ListIcon />;
       case 'peers':
         return <RouteIcon />;
       default:
@@ -77,6 +72,8 @@ export const MatchDropdown: React.FC<MatchDropdownProps> = ({ selected, setMatch
             setMatch(v);
           }}
         >
+          {getIcon(v)}
+          &nbsp;
           {getMatchDisplay(v)}
         </DropdownItem>
       ))}
