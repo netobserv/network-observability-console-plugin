@@ -1,32 +1,8 @@
 import { Badge, Dropdown, DropdownItem, MenuToggle, MenuToggleElement } from '@patternfly/react-core';
 import * as React from 'react';
-import { TFunction, useTranslation } from 'react-i18next';
-import { FilterComponent } from '../../../model/filters';
+import { useTranslation } from 'react-i18next';
+import { FilterCompare, FilterComponent, getCompareText } from '../../../model/filters';
 import { usePrevious } from '../../../utils/previous-hook';
-
-export enum FilterCompare {
-  match = '~',
-  notMatch = '!~',
-  equal = '=',
-  notEqual = '!=',
-  moreThanOrEqual = '>='
-}
-
-export const getCompareText = (v: FilterCompare, t: TFunction) => {
-  switch (v) {
-    case FilterCompare.match:
-      return t('Contains');
-    case FilterCompare.notMatch:
-      return t('Not contains');
-    case FilterCompare.notEqual:
-      return t('Not equals');
-    case FilterCompare.moreThanOrEqual:
-      return t('More than');
-    case FilterCompare.equal:
-    default:
-      return t('Equals');
-  }
-};
 
 export interface CompareFilterProps {
   value: FilterCompare;

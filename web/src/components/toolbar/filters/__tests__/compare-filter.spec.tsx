@@ -1,7 +1,8 @@
 import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 import { actOn, waitForRender } from '../../../../components/__tests__/common.spec';
-import CompareFilter, { CompareFilterProps, FilterCompare } from '../compare-filter';
+import { FilterCompare } from '../../../../model/filters';
+import CompareFilter, { CompareFilterProps } from '../compare-filter';
 
 describe('<CompareFilter />', () => {
   const props: CompareFilterProps = {

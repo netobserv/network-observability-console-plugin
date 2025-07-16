@@ -30,6 +30,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Filter,
+  FilterCompare,
   FilterDefinition,
   Filters,
   filtersEqual,
@@ -52,7 +53,6 @@ import { getPathWithParams, netflowTrafficPath } from '../../../utils/url';
 import { MatchDropdown } from '../../dropdowns/match-dropdown';
 import { navigate } from '../../dynamic-loader/dynamic-loader';
 import { LinksOverflow } from '../links-overflow';
-import { FilterCompare } from './compare-filter';
 import './filters-chips.css';
 
 export interface FiltersChipsProps {
