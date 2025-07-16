@@ -12,13 +12,12 @@ import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Config, defaultConfig } from '../model/config';
-import { Filters } from '../model/filters';
+import { FilterCompare, Filters } from '../model/filters';
 import { loadConfig } from '../utils/config';
 import { findFilter, getFilterDefinitions } from '../utils/filter-definitions';
 import { usePrevious } from '../utils/previous-hook';
 import Error from './messages/error';
 import NetflowTrafficParent from './netflow-traffic-parent';
-import { FilterCompare } from './toolbar/filters/compare-filter';
 
 type NetflowTrafficTabProps<R extends K8sResourceCommon = K8sResourceCommon> = {
   match?: {

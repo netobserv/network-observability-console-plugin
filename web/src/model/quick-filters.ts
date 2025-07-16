@@ -1,6 +1,5 @@
-import { FilterCompare } from '../components/toolbar/filters/compare-filter';
 import { findFilter } from '../utils/filter-definitions';
-import { Filter, FilterDefinition, fromFilterKey } from './filters';
+import { Filter, FilterCompare, FilterDefinition, fromFilterKey } from './filters';
 
 export type RawQuickFilter = {
   name: string;

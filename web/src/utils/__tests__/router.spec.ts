@@ -1,7 +1,6 @@
 import { setNavFunction } from '../../components/dynamic-loader/dynamic-loader';
-import { FilterCompare } from '../../components/toolbar/filters/compare-filter';
 import { FilterDefinitionSample } from '../../components/__tests-data__/filters';
-import { Filters } from '../../model/filters';
+import { FilterCompare, Filters } from '../../model/filters';
 import { findFilter } from '../filter-definitions';
 import { getFiltersFromURL, setURLFilters } from '../router';
 

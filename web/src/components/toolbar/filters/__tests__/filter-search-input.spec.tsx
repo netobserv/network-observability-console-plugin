@@ -1,9 +1,9 @@
 import { SearchInput } from '@patternfly/react-core';
 import { mount } from 'enzyme';
 import * as React from 'react';
+import { FilterCompare } from '../../../../model/filters';
 import { FilterDefinitionSample } from '../../../__tests-data__/filters';
 import { actOn } from '../../../__tests__/common.spec';
-import { FilterCompare } from '../compare-filter';
 import FilterSearchInput, { FilterSearchInputProps } from '../filter-search-input';
 
 describe('<FilterSearchInput />', () => {

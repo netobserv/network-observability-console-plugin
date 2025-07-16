@@ -25,10 +25,10 @@ import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { FlowDirection, getDirectionDisplayString, Record } from '../../../api/ipfix';
-import { FilterCompare } from '../../../components/toolbar/filters/compare-filter';
 import {
   doesIncludeFilter,
   Filter,
+  FilterCompare,
   FilterDefinition,
   findFromFilters,
   removeFromFilters

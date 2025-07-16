@@ -1,10 +1,10 @@
 import { TFunction } from 'i18next';
 import * as _ from 'lodash';
 import { Field } from '../api/ipfix';
-import { FilterCompare } from '../components/toolbar/filters/compare-filter';
 import { Config } from '../model/config';
 import {
   FilterCategory,
+  FilterCompare,
   FilterComponent,
   FilterConfigDef,
   FilterDefinition,

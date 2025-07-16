@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { FilterCompare } from '../components/toolbar/filters/compare-filter';
+import { TFunction } from 'react-i18next';
 import { isEqual } from '../utils/base-compare';
 import { undefinedValue } from '../utils/filter-definitions';
 import { Match } from './flow-query';
@@ -9,6 +9,30 @@ export type FiltersEncoder = (values: FilterValue[], compare: FilterCompare, mat
 export type FilterComponent = 'autocomplete' | 'text' | 'number';
 
 export type FilterCategory = 'source' | 'destination' | 'targeteable';
+
+export enum FilterCompare {
+  match = '~',
+  notMatch = '!~',
+  equal = '=',
+  notEqual = '!=',
+  moreThanOrEqual = '>='
+}
+
+export const getCompareText = (v: FilterCompare, t: TFunction) => {
+  switch (v) {
+    case FilterCompare.match:
+      return t('Contains');
+    case FilterCompare.notMatch:
+      return t('Not contains');
+    case FilterCompare.notEqual:
+      return t('Not equals');
+    case FilterCompare.moreThanOrEqual:
+      return t('More than');
+    case FilterCompare.equal:
+    default:
+      return t('Equals');
+  }
+};
 
 export type TargetedFilterId =
   | 'zone'

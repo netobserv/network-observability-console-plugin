@@ -1,5 +1,12 @@
-import { FilterCompare } from '../components/toolbar/filters/compare-filter';
-import { createFilterValue, DisabledFilters, Filter, FilterDefinition, Filters, fromFilterKey } from '../model/filters';
+import {
+  createFilterValue,
+  DisabledFilters,
+  Filter,
+  FilterCompare,
+  FilterDefinition,
+  Filters,
+  fromFilterKey
+} from '../model/filters';
 import { DataSource, Match, MetricType, PacketLoss, RecordType, StatFunction } from '../model/flow-query';
 import { TimeRange } from './datetime';
 import { findFilter } from './filter-definitions';
