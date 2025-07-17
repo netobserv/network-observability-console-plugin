@@ -37,7 +37,7 @@
     "@testing-library/react": "^12.1.2",
     "@types/copy-webpack-plugin": "8.0.1",
     "@types/enzyme": "3.10.x",
-    "@types/jest": "27.0.3",
+    "@types/jest": "30.0.0",
     "@types/jsdom": "^16.2.13",
     "@types/lodash": "^4.14.178",
     "@types/murmurhash-js": "^1.0.3",
@@ -65,7 +65,7 @@
     "html-webpack-plugin": "^5.5.0",
     "http-server": "^14.0.0",
     "i18next-parser": "^9.3.0",
-    "jest": "27.4.4",
+    "jest": "30.0.4",
     "jsdom": "19.0.0",
     "jsdom-global": "3.0.2",
     "mini-css-extract-plugin": "^2.6.0",
@@ -76,8 +76,8 @@
     "pretty-quick": "^3.1.2",
     "react-transition-group": "^4.4.2",
     "style-loader": "^3.3.1",
-    "ts-jest": "27.1.1",
-    "ts-jest-resolver": "2.0.0",
+    "ts-jest": "29.4.0",
+    "ts-jest-resolver": "2.0.1",
     "ts-loader": "9.3.1",
     "ts-node": "10.8.2",
     "typedoc": "^0.23.25",
@@ -128,46 +128,7 @@
     "react-router-dom": "^5.3.0"
   },
   "overrides": {
-    "glob-parent": "^6.0.1"
-  },
-  "jest": {
-    "collectCoverage": true,
-    "coverageReporters": [
-      "cobertura"
-    ],
-    "testURL": "http://localhost/",
-    "maxWorkers": 1,
-    "globals": {
-      "ts-jest": {
-        "isolatedModules": true
-      }
-    },
-    "setupFiles": [
-      "<rootDir>/enzyme.config.ts"
-    ],
-    "setupFilesAfterEnv": [
-      "<rootDir>setup-tests.tsx"
-    ],
-    "preset": "ts-jest",
-    "moduleFileExtensions": [
-      "js",
-      "jsx",
-      "ts",
-      "tsx"
-    ],
-    "modulePathIgnorePatterns": [
-      "cypress"
-    ],
-    "moduleNameMapper": {
-      "\\.(css|less)$": "<rootDir>/moduleMapper/dummy.tsx",
-      "@console/*": "<rootDir>/moduleMapper/dummy.tsx"
-    },
-    "transform": {
-      "^.+\\.[t|j]sx?$": "ts-jest"
-    },
-    "transformIgnorePatterns": [
-      "<rootDir>/node_modules/(?!(@patternfly|@openshift-console|@spice-project|d3.*|internmap|delaunator|robust-predicates\\S*?)/.*)"
-    ],
-    "resolver": "ts-jest-resolver"
+    "glob-parent": "^6.0.1",
+    "cheerio": "1.0.0-rc.3"
   }
 }
