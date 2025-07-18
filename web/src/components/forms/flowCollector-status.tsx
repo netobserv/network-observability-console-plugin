@@ -34,7 +34,7 @@ export const FlowCollectorStatus: FC<FlowCollectorStatusProps> = props => {
                       <Pipeline existing={existing} />
                     </FlexItem>
                   )}
-                  <FlexItem flex={{ default: 'flex_1' }}>
+                  <FlexItem className="status-list-container" flex={{ default: 'flex_1' }}>
                     <ResourceStatus group={group} version={version} kind={kind} existing={existing} />
                   </FlexItem>
                 </Flex>

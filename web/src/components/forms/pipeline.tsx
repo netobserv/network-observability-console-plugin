@@ -17,6 +17,7 @@ import {
   getSpacerNodes,
   Graph,
   GraphComponent,
+  GRAPH_LAYOUT_END_EVENT,
   Layout,
   ModelKind,
   Node,
@@ -32,6 +33,7 @@ import {
   WhenDecorator
 } from '@patternfly/react-topology';
 
+import { getResizeObserver } from '@patternfly/react-core';
 import { t } from 'i18next';
 import _ from 'lodash';
 import * as React from 'react';
@@ -90,7 +92,16 @@ export type FlowCollectorPipelineProps = {
 };
 
 export const Pipeline: React.FC<FlowCollectorPipelineProps> = ({ existing }) => {
+  const containerRef = React.createRef<HTMLDivElement>();
   const [controller, setController] = React.useState<Visualization>();
+
+  const fit = React.useCallback(() => {
+    if (controller && controller.hasGraph()) {
+      controller.getGraph().fit();
+    } else {
+      console.error('onResize called before controller graph');
+    }
+  }, [controller]);
 
   const getStatus = React.useCallback(
     (types: string[], status: string) => {
@@ -199,11 +210,26 @@ export const Pipeline: React.FC<FlowCollectorPipelineProps> = ({ existing }) => 
   }, [existing, getStatus]);
 
   React.useEffect(() => {
+    if (containerRef.current) {
+      getResizeObserver(
+        containerRef.current,
+        () => {
+          fit();
+        },
+        true
+      );
+    }
+  }, [containerRef, controller, fit]);
+
+  React.useEffect(() => {
+    if (!controller) {
+      return;
+    }
     const steps = getSteps();
     const spacerNodes = getSpacerNodes(steps);
     const nodes = [...steps, ...spacerNodes];
     const edges = getEdgesFromNodes(steps);
-    controller?.fromModel(
+    controller.fromModel(
       {
         nodes,
         edges,
@@ -222,15 +248,17 @@ export const Pipeline: React.FC<FlowCollectorPipelineProps> = ({ existing }) => 
     const c = new Visualization();
     c.registerComponentFactory(pipelineComponentFactory);
     c.registerLayoutFactory((type: string, graph: Graph): Layout | undefined => new PipelineDagreLayout(graph));
-    c.setFitToScreenOnLayout(true);
+    c.addEventListener(GRAPH_LAYOUT_END_EVENT, fit);
     setController(c);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
-    <VisualizationProvider controller={controller}>
-      <VisualizationSurface />
-    </VisualizationProvider>
+    <div id="pipeline-container-div" style={{ width: '100%', height: '100%' }} ref={containerRef}>
+      <VisualizationProvider controller={controller}>
+        <VisualizationSurface />
+      </VisualizationProvider>
+    </div>
   );
 };
 
