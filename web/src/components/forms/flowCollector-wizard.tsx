@@ -66,10 +66,7 @@ export const FlowCollectorWizard: FC<FlowCollectorWizardProps> = props => {
         case 'overview':
           setPaths(defaultPaths);
           break;
-        case 'filters':
-          setPaths(['spec.agent.ebpf.flowFilter.enable', 'spec.agent.ebpf.flowFilter.rules', 'spec.processor.filters']);
-          break;
-        case 'options':
+        case 'capture':
           setPaths([
             'spec.agent.ebpf.sampling',
             'spec.agent.ebpf.privileged',
@@ -151,11 +148,9 @@ export const FlowCollectorWizard: FC<FlowCollectorWizardProps> = props => {
                     </span>
                     {form()}
                   </WizardStep>
-                  <WizardStep
-                    name={t('Capture')}
-                    id="capture"
-                    steps={[step('filters', t('Filters')), step('options', t('Options'))]}
-                  />
+                  <WizardStep name={t('Capture')} id="capture">
+                    {form()}
+                  </WizardStep>
                   <WizardStep name={t('Pipeline')} id="pipeline">
                     {form()}
                   </WizardStep>
