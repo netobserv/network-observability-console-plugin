@@ -15,6 +15,7 @@ export const FlowCollectorStatus: FC<FlowCollectorStatusProps> = props => {
   console.log('FlowCollectorStatus', props);
 
   const { t } = useTranslation('plugin__netobserv-plugin');
+  const [selectedTypes, setSelectedTypes] = React.useState<string[]>([]);
 
   return (
     <DynamicLoader>
@@ -31,11 +32,18 @@ export const FlowCollectorStatus: FC<FlowCollectorStatusProps> = props => {
                 <Flex className="status-container" direction={{ default: 'column' }}>
                   {existing && (
                     <FlexItem flex={{ default: 'flex_1' }}>
-                      <Pipeline existing={existing} />
+                      <Pipeline existing={existing} selectedTypes={selectedTypes} setSelectedTypes={setSelectedTypes} />
                     </FlexItem>
                   )}
                   <FlexItem className="status-list-container" flex={{ default: 'flex_1' }}>
-                    <ResourceStatus group={group} version={version} kind={kind} existing={existing} />
+                    <ResourceStatus
+                      group={group}
+                      version={version}
+                      kind={kind}
+                      existing={existing}
+                      selectedTypes={selectedTypes}
+                      setSelectedTypes={setSelectedTypes}
+                    />
                   </FlexItem>
                 </Flex>
               </PageSection>

@@ -10,9 +10,18 @@ export type ResourceStatusProps = {
   version: string;
   kind: string;
   existing: K8sResourceKind | null;
+  selectedTypes: string[];
+  setSelectedTypes: (types: string[]) => void;
 };
 
-export const ResourceStatus: FC<ResourceStatusProps> = ({ group, version, kind, existing }) => {
+export const ResourceStatus: FC<ResourceStatusProps> = ({
+  group,
+  version,
+  kind,
+  existing,
+  selectedTypes,
+  setSelectedTypes
+}) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   if (!existing) {
@@ -44,7 +53,11 @@ export const ResourceStatus: FC<ResourceStatusProps> = ({ group, version, kind, 
       </Thead>
       <Tbody>
         {conditions.map((condition, i) => (
-          <Tr key={i}>
+          <Tr
+            key={i}
+            isRowSelected={selectedTypes.includes(condition.type)}
+            onClick={() => setSelectedTypes([condition.type])}
+          >
             <Td>{condition.type}</Td>
             <Td>{condition.status}</Td>
             <Td>{condition.reason}</Td>

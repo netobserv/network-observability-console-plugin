@@ -58,7 +58,7 @@ export const StepNode: React.FunctionComponent<StepProps> = ({ element }) => {
   ) : null;
 
   return (
-    <TaskNode element={element} status={data?.status}>
+    <TaskNode element={element} selected={data?.selected} status={data?.status} onSelect={() => data?.onSelect?.()}>
       {whenDecorator}
     </TaskNode>
   );
@@ -89,9 +89,11 @@ const pipelineComponentFactory = (kind: ModelKind, type: string) => {
 
 export type FlowCollectorPipelineProps = {
   existing: K8sResourceKind | null;
+  selectedTypes: string[];
+  setSelectedTypes: (types: string[]) => void;
 };
 
-export const Pipeline: React.FC<FlowCollectorPipelineProps> = ({ existing }) => {
+export const Pipeline: React.FC<FlowCollectorPipelineProps> = ({ existing, selectedTypes, setSelectedTypes }) => {
   const containerRef = React.createRef<HTMLDivElement>();
   const [controller, setController] = React.useState<Visualization>();
 
@@ -128,23 +130,32 @@ export const Pipeline: React.FC<FlowCollectorPipelineProps> = ({ existing }) => 
     const steps: Step[] = [];
 
     if (existing?.spec?.agent?.type === 'eBPF') {
+      const types = ['Ready'];
       steps.push({
         id: 'ebpf',
         label: 'eBPF agents',
         data: {
-          status: getStatus(['Ready'], K8sResourceConditionStatus.True)
+          status: getStatus(types, K8sResourceConditionStatus.True),
+          selected: _.some(selectedTypes, t => types.includes(t)),
+          onSelect: () => setSelectedTypes(types)
         }
       });
     }
 
     const flpStatuses = ['WaitingFLPParent', 'WaitingFLPMonolith'];
     if (existing?.spec?.deploymentModel === 'Kafka') {
+      const types = ['WaitingFLPTransformer'];
       steps.push({
         id: 'kafka',
         label: 'Kafka',
-        runAfterTasks: ['ebpf']
+        runAfterTasks: ['ebpf'],
+        data: {
+          status: getStatus(types, K8sResourceConditionStatus.False),
+          selected: _.some(selectedTypes, t => types.includes(t)),
+          onSelect: () => setSelectedTypes(types)
+        }
       });
-      flpStatuses.push('WaitingFLPTransformer');
+      flpStatuses.push(...types);
     }
 
     if (existing?.spec) {
@@ -153,19 +164,24 @@ export const Pipeline: React.FC<FlowCollectorPipelineProps> = ({ existing }) => 
         label: 'Flowlogs pipeline',
         runAfterTasks: [_.last(steps)!.id],
         data: {
-          status: getStatus(flpStatuses, K8sResourceConditionStatus.False)
+          status: getStatus(flpStatuses, K8sResourceConditionStatus.False),
+          selected: _.some(selectedTypes, t => flpStatuses.includes(t)),
+          onSelect: () => setSelectedTypes(flpStatuses)
         }
       });
     }
 
     const cpRunAfter: string[] = [];
     if (existing?.spec?.loki?.enable) {
+      const types = ['LokiIssue'];
       steps.push({
         id: 'loki',
         label: 'Loki',
         runAfterTasks: ['flp'],
         data: {
-          status: getStatus(['LokiIssue'], 'NoIssue') // TODO: NoIssue / Unknown is not a valid status. That should be False.
+          status: getStatus(types, 'NoIssue'), // TODO: NoIssue / Unknown is not a valid status. That should be False.
+          selected: _.some(selectedTypes, t => types.includes(t)),
+          onSelect: () => setSelectedTypes(types)
         }
       });
       cpRunAfter.push('loki');
@@ -175,7 +191,10 @@ export const Pipeline: React.FC<FlowCollectorPipelineProps> = ({ existing }) => 
       steps.push({
         id: 'prom',
         label: 'Prometheus',
-        runAfterTasks: ['flp']
+        runAfterTasks: ['flp'],
+        data: {
+          onSelect: () => setSelectedTypes([])
+        }
       });
       cpRunAfter.push('prom');
     }
@@ -185,7 +204,10 @@ export const Pipeline: React.FC<FlowCollectorPipelineProps> = ({ existing }) => 
         steps.push({
           id: `exporter-${i}`,
           label: exporter.type || t('Unknown'),
-          runAfterTasks: ['flp']
+          runAfterTasks: ['flp'],
+          data: {
+            onSelect: () => setSelectedTypes([])
+          }
         });
       });
     }
@@ -194,7 +216,10 @@ export const Pipeline: React.FC<FlowCollectorPipelineProps> = ({ existing }) => 
       steps.push({
         id: 'plugin',
         label: 'Console plugin',
-        runAfterTasks: cpRunAfter
+        runAfterTasks: cpRunAfter,
+        data: {
+          onSelect: () => setSelectedTypes([])
+        }
       });
     }
 
@@ -207,7 +232,7 @@ export const Pipeline: React.FC<FlowCollectorPipelineProps> = ({ existing }) => 
       },
       ...s
     })) as PipelineNodeModel[];
-  }, [existing, getStatus]);
+  }, [existing, getStatus, selectedTypes, setSelectedTypes]);
 
   React.useEffect(() => {
     if (containerRef.current) {
