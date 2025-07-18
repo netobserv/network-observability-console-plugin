@@ -1,0 +1,64 @@
+#pageSection {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 0;
+}
+
+/* fix page section color for PF4 compat in OCP 4.15+ */
+#pageSection.light {
+  background: #fff;
+}
+
+#pageSection.dark {
+  background: #1b1d21;
+}
+
+#pageHeader {
+  padding: 1.5rem;
+}
+
+#pageHeader>div {
+  align-items: start;
+}
+
+.wizard-editor-container,
+.wizard-editor-container>div {
+  display: flex;
+  flex-direction: column;
+  flex: 1
+}
+
+.editor-toggle-container {
+  height: 100%;
+}
+
+.editor-toggle {
+  border-bottom: 1px solid #d2d2d2;
+  border-top: 1px solid #d2d2d2;
+  padding: 0.5rem 1.5rem;
+}
+
+#editor-content-container {
+  display: flex;
+  flex-direction: column;
+}
+
+#editor-toggle-footer {
+  margin-left: 1.5rem;
+  margin-right: 1.5rem;
+}
+
+.status-container {
+  flex: 1;
+  margin-left: 1.5rem;
+  margin-right: 1.5rem;
+}
+
+.status-list-container {
+  overflow-y: auto;
+}
+
+.calculator-item {
+  padding-bottom: 1.5rem;
+}
