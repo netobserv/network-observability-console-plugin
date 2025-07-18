@@ -96,7 +96,7 @@ export const Consumption: FC<ResourceCalculatorProps> = ({ flowCollector, setSam
         cpu: nodes <= 10 ? 4 : 16,
         memory: nodes <= 10 ? 16 : 64,
         lokistackSize: nodes <= 10 ? '1x.extra-small' : nodes <= 25 ? '1x.small' : '1x.medium',
-        kafka: nodes <= 10 ? 'n/a' : nodes <= 25 ? '6 consumers' : '18 consumers'
+        kafka: nodes <= 25 ? '6 consumers' : '18 consumers'
       }
     ];
   }, [labelsCount]);
