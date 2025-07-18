@@ -186,7 +186,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
   const countActiveFilters = (filtersOrForced?.list || []).reduce((prev, cur) => prev + cur.values.length, 0);
   let showHideText: string | undefined;
   if (countActiveFilters > 0) {
-    showHideText = showFilters ? t('Hide filters') : t('Show {{count}} filters', { count: countActiveFilters });
+    showHideText = showFilters ? t('Hide filters') : t('Show {{countActiveFilters}} filters', { countActiveFilters });
   } else if (defaultFilters.length > 0) {
     showHideText = showFilters ? t('Hide filters') : t('Show filters');
   }
