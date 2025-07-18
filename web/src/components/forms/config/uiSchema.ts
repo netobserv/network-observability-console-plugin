@@ -102,6 +102,7 @@ export const FlowCollectorUISchema: UiSchema = {
         flowFilter: {
           'ui:title': 'Filters',
           'ui:description': 'The eBPF agent configuration regarding flow filtering.',
+          'ui:widget': 'hidden',
           enable: {
             'ui:title': 'Enable flow filtering'
           },
@@ -479,6 +480,7 @@ export const FlowCollectorUISchema: UiSchema = {
         'ui:title': 'Filters',
         'ui:description':
           'Define custom filters to limit the amount of generated flows.\nThese filters provide more flexibility than the eBPF Agent filters (in `spec.agent.ebpf.flowFilter`), such as allowing to filter by Kubernetes namespace, but with a lesser improvement in performance. Unsupported.',
+        'ui:widget': 'hidden',
         items: {
           'ui:order': ['allOf', 'outputTarget', 'sampling'],
           allOf: {
