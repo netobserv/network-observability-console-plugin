@@ -159,6 +159,5 @@ export default {
   FieldTemplate,
   DescriptionFieldTemplate,
   ArrayFieldTemplate,
-  ObjectFieldTemplate,
-  map: FieldTemplate
+  ObjectFieldTemplate
 };

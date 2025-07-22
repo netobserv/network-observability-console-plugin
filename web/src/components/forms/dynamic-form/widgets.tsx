@@ -1,5 +1,14 @@
 import { CodeEditor, Language } from '@patternfly/react-code-editor';
-import { Dropdown, DropdownItem, MenuToggle, MenuToggleElement, Switch } from '@patternfly/react-core';
+import {
+  Checkbox,
+  Dropdown,
+  DropdownItem,
+  Flex,
+  FlexItem,
+  MenuToggle,
+  MenuToggleElement,
+  Switch
+} from '@patternfly/react-core';
 import { getSchemaType, WidgetProps } from '@rjsf/utils';
 import classNames from 'classnames';
 import * as _ from 'lodash';
@@ -7,6 +16,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../../utils/theme-hook';
 import { JSON_SCHEMA_NUMBER_TYPES } from './const';
+import { AtomicFieldTemplate } from './templates';
 
 export const TextWidget: React.FC<WidgetProps> = props => {
   const { disabled = false, id, onBlur, onChange, onFocus, readonly = false, schema = {}, value = '' } = props;
@@ -148,6 +158,52 @@ export const JSONWidget: React.FC<WidgetProps> = props => {
   );
 };
 
+export const ArrayCheckboxesWidget: React.FC<WidgetProps> = props => {
+  const { schema, value, id, onBlur, onChange, onFocus } = props;
+
+  const errFunc = () => console.error('Function not implemented.');
+
+  return (
+    // since schema type is 'array' and widget is 'checkboxes', we use AtomicFieldTemplate
+    // to render the field and values all at once without the add/remove buttons
+    <AtomicFieldTemplate
+      onKeyChange={() => errFunc}
+      onDropPropertyClick={() => errFunc}
+      {...{
+        ...props,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        style: props.style as React.StyleHTMLAttributes<any> | undefined,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        description: (schema.items as any)?.description || props.description,
+        readonly: props.readonly === true,
+        disabled: props.disabled === true
+      }}
+    >
+      <Flex direction={{ default: 'row' }} onBlur={() => onBlur(id, value)} onFocus={() => onFocus(id, value)}>
+        {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (schema.items as any).enum.map((option: string, index: number) => (
+            <FlexItem key={`${id}-${index}`}>
+              <Checkbox
+                id={`${id}-${index}`}
+                label={option}
+                isChecked={_.isNil(value) ? false : value.includes(option)}
+                onClick={() =>
+                  onChange(
+                    value.includes(option) ? value.filter((v: string) => v !== option) : [...value, option],
+                    undefined,
+                    id
+                  )
+                }
+              />
+            </FlexItem>
+          ))
+        }
+      </Flex>
+    </AtomicFieldTemplate>
+  );
+};
+
 export default {
   BaseInput: TextWidget,
   CheckboxWidget: SwitchWidget, // force using switch everywhere for consistency
@@ -158,5 +214,6 @@ export default {
   TextWidget,
   int32: NumberWidget,
   int64: NumberWidget,
-  map: JSONWidget
+  map: JSONWidget,
+  arrayCheckboxes: ArrayCheckboxesWidget
 };

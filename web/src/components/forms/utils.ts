@@ -49,7 +49,6 @@ export const getFilteredUISchema = (ui: UiSchema, paths: string[]) => {
   const clonedSchema = _.cloneDeep(ui);
   // hide all the fields
   const filteredUi = appendRecursive(clonedSchema, 'ui:widget', 'hidden');
-
   // show expected ones
   paths.forEach((path: string) => {
     const keys = path.split('.');

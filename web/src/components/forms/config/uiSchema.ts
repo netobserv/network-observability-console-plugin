@@ -718,6 +718,24 @@ export const FlowCollectorUISchema: UiSchema = {
       },
       advanced: {
         'ui:title': 'Advanced configuration',
+        port: {
+          'ui:widget': 'hidden'
+        },
+        conversationTerminatingTimeout: {
+          'ui:widget': 'hidden'
+        },
+        conversationEndTimeout: {
+          'ui:widget': 'hidden'
+        },
+        profilePort: {
+          'ui:widget': 'hidden'
+        },
+        env: {
+          'ui:widget': 'hidden'
+        },
+        enableKubeProbes: {
+          'ui:widget': 'hidden'
+        },
         scheduling: {
           'ui:widget': 'hidden',
           'ui:order': ['affinity', 'nodeSelector', 'priorityClassName', 'tolerations'],
@@ -902,9 +920,26 @@ export const FlowCollectorUISchema: UiSchema = {
           }
         },
         secondaryNetworks: {
+          'ui:title': 'Secondary networks',
           items: {
-            'ui:order': ['index', 'name']
+            name: {
+              'ui:title': 'Name'
+            },
+            index: {
+              'ui:title': 'Index',
+              'ui:widget': 'arrayCheckboxes'
+            },
+            'ui:order': ['name', 'index']
           }
+        },
+        healthPort: {
+          'ui:widget': 'hidden'
+        },
+        dropUnusedFields: {
+          'ui:widget': 'hidden'
+        },
+        conversationHeartbeatInterval: {
+          'ui:widget': 'hidden'
         },
         'ui:order': [
           'port',

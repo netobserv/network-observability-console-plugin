@@ -22,8 +22,6 @@ export type FlowCollectorWizardProps = {};
 const defaultPaths = ['spec.namespace', 'spec.networkPolicy'];
 
 export const FlowCollectorWizard: FC<FlowCollectorWizardProps> = props => {
-  console.log('FlowCollectorWizard', props);
-
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [data, setData] = React.useState<any>(null);
   const [paths, setPaths] = React.useState<string[]>(defaultPaths);
@@ -37,7 +35,6 @@ export const FlowCollectorWizard: FC<FlowCollectorWizardProps> = props => {
         uiSchema={filteredSchema} // see if we can regenerate this from CSV
         validator={validator}
         onChange={(event, id) => {
-          console.log('onChange', event, id);
           setData(event.formData);
         }}
       />
@@ -85,6 +82,7 @@ export const FlowCollectorWizard: FC<FlowCollectorWizardProps> = props => {
             'spec.processor.kafkaConsumerAutoscaler',
             'spec.processor.kafkaConsumerReplicas',
             'spec.processor.kafkaConsumerBatchSize',
+            'spec.processor.advanced.secondaryNetworks.items',
             'spec.exporters.items'
           ]);
           break;

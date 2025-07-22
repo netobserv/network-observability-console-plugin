@@ -10,8 +10,6 @@ import { ResourceWatcher } from './resource-watcher';
 export type FlowCollectorFormProps = {};
 
 export const FlowCollectorForm: FC<FlowCollectorFormProps> = props => {
-  console.log('FlowCollectorForm', props);
-
   return (
     <DynamicLoader>
       <ResourceWatcher defaultData={GetFlowCollectorJS()}>

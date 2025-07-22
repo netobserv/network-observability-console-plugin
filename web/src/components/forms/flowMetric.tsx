@@ -10,8 +10,6 @@ import { ResourceWatcher } from './resource-watcher';
 export type FlowMetricFormProps = {};
 
 export const FlowMetricForm: FC<FlowMetricFormProps> = props => {
-  console.log('FlowMetricForm', props);
-
   return (
     <DynamicLoader>
       <ResourceWatcher defaultData={GetFlowMetricJS()}>

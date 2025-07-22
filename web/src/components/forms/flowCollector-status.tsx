@@ -12,8 +12,6 @@ import { Consumer, ResourceWatcher } from './resource-watcher';
 export type FlowCollectorStatusProps = {};
 
 export const FlowCollectorStatus: FC<FlowCollectorStatusProps> = props => {
-  console.log('FlowCollectorStatus', props);
-
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [selectedTypes, setSelectedTypes] = React.useState<string[]>([]);
 

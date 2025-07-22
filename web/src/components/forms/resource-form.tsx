@@ -73,7 +73,6 @@ export const ResourceForm: FC<ResourceFormProps> = ({ schema, uiSchema }) => {
                     errors={errors}
                     onError={errs => setErrors(_.map(errs, error => error.stack))}
                     onChange={(event, id) => {
-                      console.log('onChange', event, id);
                       setData(event.formData);
                     }}
                   />

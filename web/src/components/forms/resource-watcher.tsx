@@ -95,7 +95,6 @@ export const ResourceWatcher: FC<ResourceWatcherProps> = ({ defaultData, onSucce
             model
           })
             .then(res => {
-              console.log('k8sCreate ok', res);
               onSuccess && onSuccess(res);
             })
             .catch(e => setErrors([e.message]));

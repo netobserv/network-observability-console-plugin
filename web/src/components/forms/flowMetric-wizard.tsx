@@ -20,8 +20,6 @@ export type FlowMetricWizardProps = {};
 const defaultPaths = ['metadata.namespace', 'metadata.name'];
 
 export const FlowMetricWizard: FC<FlowMetricWizardProps> = props => {
-  console.log('FlowMetricWizard', props);
-
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [data, setData] = React.useState<any>(null);
   const [paths, setPaths] = React.useState<string[]>(defaultPaths);
@@ -35,7 +33,6 @@ export const FlowMetricWizard: FC<FlowMetricWizardProps> = props => {
         uiSchema={filteredSchema} // see if we can regenerate this from CSV
         validator={validator}
         onChange={(event, id) => {
-          console.log('onChange', event, id);
           setData(event.formData);
         }}
       />
