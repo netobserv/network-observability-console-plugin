@@ -10,9 +10,6 @@ const config: Config = {
   ],
   maxWorkers: 1,
   globals: {
-    "ts-jest": {
-      "isolatedModules": true
-    }
   },
   setupFiles: [
     "<rootDir>/enzyme.config.ts"
