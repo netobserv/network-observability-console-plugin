@@ -6,7 +6,7 @@ import { k8sModels } from './k8s-models';
 // This dummy file is used to resolve @Console imports from @openshift-console for JEST / Standalone
 // You can add any exports needed here
 // Check "moduleNameMapper" in package.json for jest
-// and "NormalModuleReplacementPlugin" in webpack.standalone.ts 
+// and "NormalModuleReplacementPlugin" in webpack.standalone.js
 export class Dummy extends Error {
   constructor() {
     super('Dummy file for exports');
