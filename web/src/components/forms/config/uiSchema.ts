@@ -97,7 +97,9 @@ export const FlowCollectorUISchema: UiSchema = {
           'ui:title': 'Privileged mode'
         },
         features: {
-          'ui:title': 'Features'
+          'ui:title': 'Features',
+          'ui:widget': 'arrayCheckboxes',
+          'ui:descriptionFirst': 'true'
         },
         flowFilter: {
           'ui:title': 'Filters',

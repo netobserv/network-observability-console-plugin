@@ -16,6 +16,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../../utils/theme-hook';
 import { JSON_SCHEMA_NUMBER_TYPES } from './const';
+import { DescriptionField } from './fields';
 import { AtomicFieldTemplate } from './templates';
 
 export const TextWidget: React.FC<WidgetProps> = props => {
@@ -161,6 +162,8 @@ export const JSONWidget: React.FC<WidgetProps> = props => {
 export const ArrayCheckboxesWidget: React.FC<WidgetProps> = props => {
   const { schema, value, id, onBlur, onChange, onFocus } = props;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const enums = (schema.items as any).enum || [];
   const errFunc = () => console.error('Function not implemented.');
 
   return (
@@ -169,36 +172,38 @@ export const ArrayCheckboxesWidget: React.FC<WidgetProps> = props => {
     <AtomicFieldTemplate
       onKeyChange={() => errFunc}
       onDropPropertyClick={() => errFunc}
+      description={
+        <DescriptionField schema={schema} description={(schema.items as any)?.description || props.description} />
+      }
       {...{
         ...props,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         style: props.style as React.StyleHTMLAttributes<any> | undefined,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        description: (schema.items as any)?.description || props.description,
         readonly: props.readonly === true,
         disabled: props.disabled === true
       }}
     >
-      <Flex direction={{ default: 'row' }} onBlur={() => onBlur(id, value)} onFocus={() => onFocus(id, value)}>
-        {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (schema.items as any).enum.map((option: string, index: number) => (
-            <FlexItem key={`${id}-${index}`}>
-              <Checkbox
-                id={`${id}-${index}`}
-                label={option}
-                isChecked={_.isNil(value) ? false : value.includes(option)}
-                onClick={() =>
-                  onChange(
-                    value.includes(option) ? value.filter((v: string) => v !== option) : [...value, option],
-                    undefined,
-                    id
-                  )
-                }
-              />
-            </FlexItem>
-          ))
-        }
+      <Flex
+        direction={{ default: enums.length < 4 ? 'row' : 'column' }}
+        onBlur={() => onBlur(id, value)}
+        onFocus={() => onFocus(id, value)}
+      >
+        {enums.map((option: string, index: number) => (
+          <FlexItem key={`${id}-${index}`}>
+            <Checkbox
+              id={`${id}-${index}`}
+              label={option}
+              isChecked={_.isNil(value) ? false : value.includes(option)}
+              onClick={() =>
+                onChange(
+                  value.includes(option) ? value.filter((v: string) => v !== option) : [...value, option],
+                  undefined,
+                  id
+                )
+              }
+            />
+          </FlexItem>
+        ))}
       </Flex>
     </AtomicFieldTemplate>
   );
