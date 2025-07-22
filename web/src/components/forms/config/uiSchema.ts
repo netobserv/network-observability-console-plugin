@@ -62,10 +62,15 @@ export const FlowCollectorUISchema: UiSchema = {
       sasl: {
         'ui:title': 'SASL',
         'ui:description': 'SASL authentication configuration. Unsupported.',
+        type: {
+          'ui:title': 'Type'
+        },
         clientIDReference: {
+          'ui:title': 'Client ID reference',
           'ui:order': ['file', 'name', 'namespace', 'type']
         },
         clientSecretReference: {
+          'ui:title': 'Client secret reference',
           'ui:order': ['file', 'name', 'namespace', 'type']
         },
         'ui:order': ['type', 'clientIDReference', 'clientSecretReference']
@@ -994,6 +999,7 @@ export const FlowCollectorUISchema: UiSchema = {
         manual: {
           'ui:title': 'Manual',
           'ui:description': 'Prometheus configuration for manual mode.',
+          'ui:flat': 'true',
           'ui:dependency': {
             controlFieldPath: ['prometheus', 'querier', 'mode'],
             controlFieldValue: 'Manual',
@@ -1044,6 +1050,7 @@ export const FlowCollectorUISchema: UiSchema = {
       },
       manual: {
         'ui:title': 'Manual',
+        'ui:flat': 'true',
         'ui:dependency': {
           controlFieldPath: ['loki', 'mode'],
           controlFieldValue: 'Manual',
@@ -1104,6 +1111,7 @@ export const FlowCollectorUISchema: UiSchema = {
       },
       monolithic: {
         'ui:title': 'Monolithic',
+        'ui:flat': 'true',
         'ui:dependency': {
           controlFieldPath: ['loki', 'mode'],
           controlFieldValue: 'Monolithic',
@@ -1137,6 +1145,7 @@ export const FlowCollectorUISchema: UiSchema = {
       },
       microservices: {
         'ui:title': 'Microservices',
+        'ui:flat': 'true',
         'ui:dependency': {
           controlFieldPath: ['loki', 'mode'],
           controlFieldValue: 'Microservices',
@@ -1173,6 +1182,7 @@ export const FlowCollectorUISchema: UiSchema = {
       },
       lokiStack: {
         'ui:title': 'Loki stack',
+        'ui:flat': 'true',
         'ui:dependency': {
           controlFieldPath: ['loki', 'mode'],
           controlFieldValue: 'LokiStack',
@@ -1188,24 +1198,30 @@ export const FlowCollectorUISchema: UiSchema = {
       },
       readTimeout: {
         'ui:title': 'Read timeout',
-        'ui:description': 'The maximum console plugin loki query total time limit.\nA timeout of zero means no timeout.'
+        'ui:description':
+          'The maximum console plugin loki query total time limit.\nA timeout of zero means no timeout.',
+        'ui:widget': 'hidden'
       },
       writeTimeout: {
         'ui:title': 'Write timeout',
-        'ui:description': 'The maximum Loki time connection / request limit.\nA timeout of zero means no timeout.'
+        'ui:description': 'The maximum Loki time connection / request limit.\nA timeout of zero means no timeout.',
+        'ui:widget': 'hidden'
       },
       writeBatchWait: {
         'ui:title': 'Write batch wait',
-        'ui:description': 'The maximum time to wait before sending a Loki batch.'
+        'ui:description': 'The maximum time to wait before sending a Loki batch.',
+        'ui:widget': 'hidden'
       },
       writeBatchSize: {
         'ui:title': 'Write batch size',
-        'ui:description': 'The maximum batch size (in bytes) of Loki logs to accumulate before sending.'
+        'ui:description': 'The maximum batch size (in bytes) of Loki logs to accumulate before sending.',
+        'ui:widget': 'hidden'
       },
       advanced: {
         'ui:title': 'Advanced configuration',
         'ui:description':
           'Internal configuration of the Loki clients.\nThis section is aimed mostly for debugging and fine-grained performance optimizations.',
+        'ui:widget': 'hidden',
         staticLabels: {
           'ui:title': 'Static labels',
           'ui:description': 'A map of common labels to set on each flow in Loki storage.'
@@ -1255,6 +1271,7 @@ export const FlowCollectorUISchema: UiSchema = {
       portNaming: {
         'ui:title': 'Port naming',
         'ui:description': 'The configuration of the port-to-service name translation',
+        'ui:widget': 'hidden',
         enable: {
           'ui:title': 'Enable'
         },
@@ -1276,6 +1293,7 @@ export const FlowCollectorUISchema: UiSchema = {
       quickFilters: {
         'ui:title': 'Quick filters',
         'ui:description': 'Configure quick filter presets for the Console plugin',
+        'ui:widget': 'hidden',
         items: {
           'ui:order': ['filter', 'name', 'default']
         }
@@ -1364,6 +1382,7 @@ export const FlowCollectorUISchema: UiSchema = {
         'ui:title': 'Advanced configuration',
         'ui:description':
           'Internal configuration of the console plugin.\nThis section is aimed mostly for debugging and fine-grained performance optimizations, such as `GOGC` and `GOMAXPROCS` env vars. Set these values at your own risk.',
+        'ui:widget': 'hidden',
         'ui:order': ['args', 'env', 'port', 'register', 'scheduling'],
         scheduling: {
           'ui:widget': 'hidden',
@@ -1589,19 +1608,36 @@ export const FlowCollectorUISchema: UiSchema = {
         },
         ipfix: {
           'ui:title': 'IPFIX configuration',
+          'ui:flat': 'true',
           'ui:dependency': {
             controlFieldPath: ['exporters', 'type'],
             controlFieldValue: 'IPFIX',
             controlFieldName: 'type'
           },
+          targetHost: {
+            'ui:title': 'Target host'
+          },
+          targetPort: {
+            'ui:title': 'Target port'
+          },
+          transport: {
+            'ui:title': 'Transport'
+          },
           'ui:order': ['targetHost', 'targetPort', 'transport']
         },
         kafka: {
           'ui:title': 'Kafka configuration',
+          'ui:flat': 'true',
           'ui:dependency': {
             controlFieldPath: ['exporters', 'type'],
             controlFieldValue: 'Kafka',
             controlFieldName: 'type'
+          },
+          address: {
+            'ui:title': 'Address'
+          },
+          topic: {
+            'ui:title': 'Topic'
           },
           tls: {
             'ui:title': 'TLS configuration',
@@ -1624,10 +1660,15 @@ export const FlowCollectorUISchema: UiSchema = {
           sasl: {
             'ui:title': 'SASL',
             'ui:description': 'SASL authentication configuration. Unsupported.',
+            type: {
+              'ui:title': 'Type'
+            },
             clientIDReference: {
+              'ui:title': 'Client ID reference',
               'ui:order': ['file', 'name', 'namespace', 'type']
             },
             clientSecretReference: {
+              'ui:title': 'Client secret reference',
               'ui:order': ['file', 'name', 'namespace', 'type']
             },
             'ui:order': ['type', 'clientIDReference', 'clientSecretReference']
@@ -1636,18 +1677,44 @@ export const FlowCollectorUISchema: UiSchema = {
         },
         openTelemetry: {
           'ui:title': 'OpenTelemetry configuration',
+          'ui:flat': 'true',
           'ui:dependency': {
             controlFieldPath: ['exporters', 'type'],
             controlFieldValue: 'OpenTelemetry',
             controlFieldName: 'type'
           },
-          'ui:order': ['targetHost', 'targetPort', 'fieldsMapping', 'headers', 'logs', 'metrics', 'protocol', 'tls'],
+          targetHost: {
+            'ui:title': 'Target host'
+          },
+          targetPort: {
+            'ui:title': 'Target port'
+          },
+          protocol: {
+            'ui:title': 'Protocol'
+          },
           fieldsMapping: {
+            'ui:title': 'Fields mapping',
             items: {
+              input: {
+                'ui:title': 'Input field'
+              },
+              multiplier: {
+                'ui:title': 'Multiplier'
+              },
+              output: {
+                'ui:title': 'Output field'
+              },
               'ui:order': ['input', 'multiplier', 'output']
             }
           },
           metrics: {
+            'ui:title': 'Metrics',
+            enable: {
+              'ui:title': 'Enable'
+            },
+            pushTimeInterval: {
+              'ui:title': 'Push time interval'
+            },
             'ui:order': ['enable', 'pushTimeInterval']
           },
           tls: {
@@ -1667,7 +1734,8 @@ export const FlowCollectorUISchema: UiSchema = {
               'ui:title': 'Insecure skip verify'
             },
             'ui:order': ['enable', 'caCert', 'userCert', 'insecureSkipVerify']
-          }
+          },
+          'ui:order': ['targetHost', 'targetPort', 'protocol', 'fieldsMapping', 'headers', 'logs', 'metrics', 'tls']
         },
         'ui:order': ['type', 'ipfix', 'kafka', 'openTelemetry']
       }

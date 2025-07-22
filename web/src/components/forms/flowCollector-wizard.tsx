@@ -77,11 +77,6 @@ export const FlowCollectorWizard: FC<FlowCollectorWizardProps> = props => {
           setPaths([
             'spec.deploymentModel',
             'spec.kafka',
-            'spec.agent.ebpf.kafkaBatchSize',
-            'spec.processor.kafkaConsumerQueueCapacity',
-            'spec.processor.kafkaConsumerAutoscaler',
-            'spec.processor.kafkaConsumerReplicas',
-            'spec.processor.kafkaConsumerBatchSize',
             'spec.processor.advanced.secondaryNetworks.items',
             'spec.exporters.items'
           ]);
@@ -93,7 +88,7 @@ export const FlowCollectorWizard: FC<FlowCollectorWizardProps> = props => {
           setPaths(['spec.prometheus.querier']);
           break;
         case 'console':
-          setPaths(['spec.consolePlugin']);
+          setPaths(['spec.consolePlugin.enable', 'spec.consolePlugin.replicas']);
           break;
         default:
           setPaths([]);
