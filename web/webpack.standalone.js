@@ -77,7 +77,7 @@ module.exports = {
     new webpack.NormalModuleReplacementPlugin(
       /dynamic-plugin-sdk/,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      function (resource: any) {
+      function (resource) {
         resource.request = path.resolve(__dirname, "moduleMapper/dummy");
       }
     ),

@@ -47,7 +47,7 @@ export const StatsQuerySummary: React.FC<StatsQuerySummaryProps> = ({
                 : dateText}
             </Text>
             {dataSources?.length && <Text>{t('Datasource(s): {{sources}}', { sources: formatDatasources() })}</Text>}
-            {numQueries && <Text>{t('Query count: {{count}}', { count: numQueries })}</Text>}
+            {numQueries && <Text>{t('Query count: {{numQueries}}', { numQueries })}</Text>}
             {durationText !== '' && <Text>{t('Duration: {{duration}}', { duration: durationText })}</Text>}
             {warning !== undefined && (
               <>

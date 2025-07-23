@@ -197,7 +197,7 @@ export const NetflowTrafficTab: React.FC<NetflowTrafficTabProps> = ({ match, obj
   }, [config, obj, previous, t]);
 
   if (error) {
-    return <Error title={t('Unable to get {{item}}', { item: t('config') })} error={error} isLokiRelated={false} />;
+    return <Error title={t('Unable to get config')} error={error} isLokiRelated={false} />;
   } else if (!initState.current.includes('forcedFiltersLoaded')) {
     return (
       <Bullseye data-test="loading-tab">
