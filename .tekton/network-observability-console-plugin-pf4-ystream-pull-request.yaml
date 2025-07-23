@@ -8,13 +8,13 @@ metadata:
     build.appstudio.redhat.com/target_branch: '{{target_branch}}'
     pipelinesascode.tekton.dev/max-keep-runs: "3"
     pipelinesascode.tekton.dev/on-cel-expression: event == "pull_request" && target_branch
-      == "release-1.9-pf4"
+      == "main-pf4"
   creationTimestamp: null
   labels:
-    appstudio.openshift.io/application: netobserv-zstream
-    appstudio.openshift.io/component: network-observability-console-plugin-pf4-zstream
+    appstudio.openshift.io/application: netobserv-ystream
+    appstudio.openshift.io/component: network-observability-console-plugin-pf4-ystream
     pipelines.appstudio.openshift.io/type: build
-  name: network-observability-console-plugin-pf4-zstream-on-pull-request
+  name: network-observability-console-plugin-pf4-ystream-on-pull-request
   namespace: ocp-network-observab-tenant
 spec:
   params:
@@ -23,7 +23,7 @@ spec:
   - name: revision
     value: '{{revision}}'
   - name: output-image
-    value: quay.io/redhat-user-workloads/ocp-network-observab-tenant/network-observability-console-plugin-pf4-zstream:on-pr-{{revision}}
+    value: quay.io/redhat-user-workloads/ocp-network-observab-tenant/network-observability-console-plugin-pf4-ystream:on-pr-{{revision}}
   - name: image-expires-after
     value: 5d
   - name: build-args-file
@@ -36,5 +36,5 @@ spec:
   pipelineRef:
     name: build-pipeline
   taskRunTemplate:
-    serviceAccountName: build-pipeline-network-observability-console-plugin-pf4-zstream
+    serviceAccountName: build-pipeline-network-observability-console-plugin-pf4-ystream
 status: {}
