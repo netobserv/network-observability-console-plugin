@@ -17,6 +17,7 @@ COPY  --chown=default mocks mocks
 WORKDIR /opt/app-root/web
 RUN npm run format-all
 RUN npm run build
+RUN npm run build:static
 
 FROM brew.registry.redhat.io/rh-osbs/openshift-golang-builder:v1.24 as go-builder
 
