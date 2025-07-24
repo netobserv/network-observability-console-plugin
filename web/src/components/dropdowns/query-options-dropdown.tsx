@@ -1,7 +1,7 @@
 import { MenuToggle, MenuToggleElement, Select } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { DataSource, Match, PacketLoss, RecordType } from '../../model/flow-query';
+import { DataSource, PacketLoss, RecordType } from '../../model/flow-query';
 import { useOutsideClickEvent } from '../../utils/outside-hook';
 import './query-options-dropdown.css';
 import { QueryOptionsPanel } from './query-options-panel';
@@ -19,8 +19,6 @@ export interface QueryOptionsProps {
   useTopK: boolean;
   limit: number;
   setLimit: (limit: number) => void;
-  match: Match;
-  setMatch: (match: Match) => void;
   packetLoss: PacketLoss;
   setPacketLoss: (pl: PacketLoss) => void;
 }

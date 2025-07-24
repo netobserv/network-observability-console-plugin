@@ -2,7 +2,7 @@ import { Radio, Text, TextContent, TextVariants, Tooltip } from '@patternfly/rea
 import { InfoAltIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { DataSource, Match, PacketLoss, RecordType } from '../../model/flow-query';
+import { DataSource, PacketLoss, RecordType } from '../../model/flow-query';
 import { QueryOptionsProps } from './query-options-dropdown';
 
 export const topValues = [5, 10, 15];
@@ -10,8 +10,6 @@ export const limitValues = [50, 100, 500, 1000];
 
 type RecordTypeOption = { label: string; value: RecordType };
 type DataSourceOption = { label: string; value: DataSource };
-type MatchOption = { label: string; value: Match };
-
 type PacketLossOption = { label: string; value: PacketLoss };
 
 // Exported for tests
@@ -28,8 +26,6 @@ export const QueryOptionsPanel: React.FC<QueryOptionsProps> = ({
   useTopK,
   limit,
   setLimit,
-  match,
-  setMatch,
   packetLoss,
   setPacketLoss
 }) => {
@@ -58,17 +54,6 @@ export const QueryOptionsPanel: React.FC<QueryOptionsProps> = ({
     {
       label: t('Auto'),
       value: 'auto'
-    }
-  ];
-
-  const matchOptions: MatchOption[] = [
-    {
-      label: t('Match all'),
-      value: 'all'
-    },
-    {
-      label: t('Match any'),
-      value: 'any'
     }
   ];
 
@@ -197,35 +182,6 @@ export const QueryOptionsPanel: React.FC<QueryOptionsProps> = ({
             </div>
           );
         })}
-      </div>
-      <div className="pf-v5-c-menu__group">
-        <Tooltip
-          content={t(
-            // eslint-disable-next-line max-len
-            'Whether each query result has to match all the filters or just any of them'
-          )}
-        >
-          <div className="pf-v5-c-menu__group-title">
-            <Text component={TextVariants.p}>
-              {t('Match filters')} <InfoAltIcon />
-            </Text>
-          </div>
-        </Tooltip>
-        {matchOptions.map(opt => (
-          <div key={`match-${opt.value}`}>
-            <label className="display-dropdown-padding pf-v5-c-menu__menu-item">
-              <Radio
-                isChecked={opt.value === match}
-                name={`match-${opt.value}`}
-                onChange={() => setMatch(opt.value)}
-                label={opt.label}
-                data-test={`match-${opt.value}`}
-                id={`match-${opt.value}`}
-                value={opt.value}
-              />
-            </label>
-          </div>
-        ))}
       </div>
       <div className="pf-v5-c-menu__group">
         <Tooltip
