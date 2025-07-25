@@ -1,7 +1,7 @@
 import { FlowScope, MetricType, StatFunction } from '../model/flow-query';
 import { cyrb53 } from '../utils/hash';
 import { getFunctionFromId, getRateFunctionFromId } from '../utils/overview-panels';
-import { Field, Fields, Labels, Record } from './ipfix';
+import { Field, Flow, Record } from './ipfix';
 
 export interface AggregatedQueryResponse {
   resultType: string;
@@ -39,16 +39,16 @@ export class GenericMetricsResult {
 
 export const parseStream = (raw: StreamResult): Record[] => {
   return raw.values.map(v => {
-    const fields = JSON.parse(v[1]) as Fields;
+    const fields = JSON.parse(v[1]) as Flow;
     return {
-      labels: raw.stream as unknown as Labels,
+      labels: raw.stream as Flow,
       key: cyrb53(v.join(',')),
       fields: fields
     };
   });
 };
 
-export interface RawTopologyMetric extends Fields, Labels {}
+export type RawTopologyMetric = Flow;
 
 export interface RawTopologyMetrics {
   metric: RawTopologyMetric;
