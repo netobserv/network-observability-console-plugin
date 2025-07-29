@@ -3,7 +3,6 @@
 import {
   K8sGroupVersionKind,
   K8sModel,
-  K8sResourceKind,
   K8sResourceKindReference,
   NamespaceBarProps,
   PrometheusPollProps,
@@ -15,11 +14,12 @@ import {
 import { CodeEditor, Language } from '@patternfly/react-code-editor';
 import _ from 'lodash';
 import * as React from 'react';
-import { GetFlowCollectorJS } from '../src/components/forms/config/templates';
 import { useK8sModelsWithColors } from '../src/utils/k8s-models-hook';
 import { useTheme } from '../src/utils/theme-hook';
 import { safeJSToYAML } from '../src/utils/yaml';
 import { k8sModels } from './k8s-models';
+import { FlowCollectorSchema, FlowMetricSchema } from './schemas';
+import { GetFlowCollectorJS, GetFlowMetricJS } from './templates';
 
 // This dummy file is used to resolve @Console imports from @openshift-console for JEST / Standalone
 // You can add any exports needed here
@@ -92,13 +92,70 @@ export function useK8sWatchResource(req: any) {
   console.log("useK8sWatchResource", req);
 
   const [loaded, setLoaded] = React.useState(false);
-  const [resource, setResource] = React.useState<K8sResourceKind | null>(null);
+  const [resource, setResource] = React.useState<any | null>(null);
 
   React.useEffect(() => {
+    if (!req) {
+      console.error("useK8sWatchResource: No request provided");
+      return;
+    }
+
+    const kind = req.kind || req.groupVersionKind.kind;
     // simulate a loading
     if (resource == null) {
       setTimeout(() => {
-        switch (req.groupVersionKind.kind) {
+        switch (kind) {
+          case 'CustomResourceDefinition':
+            if (req.name === 'flowcollectors.flows.netobserv.io') {
+              setResource({
+                apiVersion: 'apiextensions.k8s.io/v1',
+                kind: 'CustomResourceDefinition',
+                metadata: {
+                  name: req.name
+                },
+                spec: {
+                  group: 'flows.netobserv.io',
+                  names: {
+                    kind: 'FlowCollector',
+                    plural: 'flowcollectors'
+                  },
+                  scope: 'Cluster',
+                  versions: [{
+                    name: 'v1beta2',
+                    served: true,
+                    storage: true,
+                    schema: {
+                      openAPIV3Schema: FlowCollectorSchema,
+                    }
+                  }]
+                }
+              });
+            } else {
+              setResource({
+                apiVersion: 'apiextensions.k8s.io/v1',
+                kind: 'CustomResourceDefinition',
+                metadata: {
+                  name: req.name
+                },
+                spec: {
+                  group: 'flows.netobserv.io',
+                  names: {
+                    kind: 'FlowMetric',
+                    plural: 'flowmetrics'
+                  },
+                  scope: 'Namespaced',
+                  versions: [{
+                    name: 'v1alpha1',
+                    served: true,
+                    storage: true,
+                    schema: {
+                      openAPIV3Schema: FlowMetricSchema
+                    }
+                  }]
+                }
+              });
+            }
+            break;
           case 'FlowCollector':
             const fc = _.cloneDeep(GetFlowCollectorJS());
             fc.spec!.loki.enable = false;
@@ -172,17 +229,24 @@ export function useK8sWatchResource(req: any) {
             }
             setResource(fc);
             break;
+          case 'FlowMetric':
+            if (req.name === 'flowmetric-sample') {
+              const fm = _.cloneDeep(GetFlowMetricJS());
+              fm.spec!.metricName = 'test_metric';
+              setResource(fm);
+            }
+            break;
         }
         setLoaded(true);
       }, 1000);
     }
-  }, [req.groupVersionKind.kind, req.kind, resource]);
+  }, [req, resource]);
 
   return React.useMemo(() => {
     if (!resource) {
       return [null, loaded, null];
     } else {
-      return [[resource], loaded, null];
+      return [resource, loaded, null];
     }
   }, [loaded, resource]);
 }
@@ -272,11 +336,11 @@ export enum K8sResourceConditionStatus {
 }
 
 export enum PrometheusEndpoint {
-  LABEL = "api/v1/label",
-  QUERY = "api/v1/query",
-  QUERY_RANGE = "api/v1/query_range",
-  RULES = "api/v1/rules",
-  TARGETS = "api/v1/targets"
+  label = "api/v1/label",
+  query = "api/v1/query",
+  queryRange = "api/v1/query_range",
+  rules = "api/v1/rules",
+  targets = "api/v1/targets"
 }
 
 export function usePrometheusPoll(props: PrometheusPollProps) {

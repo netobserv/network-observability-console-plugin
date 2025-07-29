@@ -1,6 +1,6 @@
 import { prune } from './utils';
 
-const PRUNE_DATA = {
+const pruneData = {
   abc: {
     '123': {}
   },
@@ -25,7 +25,7 @@ const PRUNE_DATA = {
   }
 };
 
-const PRUNE_SAMPLE = {
+const pruneSample = {
   test2: {},
   test3: {
     child: {}
@@ -37,7 +37,7 @@ const PRUNE_SAMPLE = {
 
 describe('prune', () => {
   it('Prunes all empty data when no sample is provided', () => {
-    const result = prune(PRUNE_DATA);
+    const result = prune(pruneData);
     expect(result.abc).toBeUndefined();
     expect(result.test1).toBeUndefined();
     expect(result.test2).toBeUndefined();
@@ -46,7 +46,7 @@ describe('prune', () => {
   });
 
   it('Only prunes empty data without explicit empty samples', () => {
-    const result = prune(PRUNE_DATA, PRUNE_SAMPLE);
+    const result = prune(pruneData, pruneSample);
     expect(result.abc).toBeUndefined();
     expect(result.test1).toBeUndefined();
     expect(result.test2).toEqual({});

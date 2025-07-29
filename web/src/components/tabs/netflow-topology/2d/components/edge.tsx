@@ -18,7 +18,7 @@ import {
   Point,
   ScaleDetailsLevel,
   StatusModifier,
-  TOP_LAYER,
+  TOP_LAYER as topLayer,
   useHover
 } from '@patternfly/react-topology';
 import DefaultConnectorTag from '@patternfly/react-topology/dist/esm/components/edges/DefaultConnectorTag';
@@ -186,7 +186,7 @@ const DefaultEdgeInner: React.FunctionComponent<DefaultEdgeInnerProps> = observe
     const tagPositionScale = hover && !(detailsLevel === ScaleDetailsLevel.high) ? Math.min(1, scale) : 1;
 
     return (
-      <Layer id={dragging || hover ? TOP_LAYER : undefined}>
+      <Layer id={dragging || hover ? topLayer : undefined}>
         <g
           ref={hoverRef as React.LegacyRef<SVGGElement> | undefined}
           data-test-id="edge-handler"

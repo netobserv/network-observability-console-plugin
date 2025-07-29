@@ -5,7 +5,6 @@ import { UiSchema } from '@rjsf/utils';
 
 export const FlowCollectorUISchema: UiSchema = {
   'ui:title': 'FlowCollector',
-  'ui:description': 'The API for the network flows collection, which pilots and configures the underlying deployments.',
   'ui:flat': 'true',
   metadata: {
     'ui:title': 'Metadata',
@@ -24,12 +23,10 @@ export const FlowCollectorUISchema: UiSchema = {
       'ui:title': 'Namespace'
     },
     deploymentModel: {
-      'ui:title': 'Deployment model',
-      'ui:description': 'The desired type of deployment for flow processing.'
+      'ui:title': 'Deployment model'
     },
     kafka: {
       'ui:title': 'Kafka configuration',
-      'ui:description': 'Kafka as a broker as part of the flow collection pipeline.',
       'ui:dependency': {
         controlFieldPath: ['deploymentModel'],
         controlFieldValue: 'Kafka',
@@ -61,7 +58,6 @@ export const FlowCollectorUISchema: UiSchema = {
       },
       sasl: {
         'ui:title': 'SASL',
-        'ui:description': 'SASL authentication configuration. Unsupported.',
         type: {
           'ui:title': 'Type'
         },
@@ -79,7 +75,6 @@ export const FlowCollectorUISchema: UiSchema = {
     },
     agent: {
       'ui:title': 'Agent configuration',
-      'ui:description': 'Flows extraction.',
       type: {
         'ui:widget': 'hidden'
       },
@@ -88,7 +83,6 @@ export const FlowCollectorUISchema: UiSchema = {
       },
       ebpf: {
         'ui:title': 'eBPF Agent configuration',
-        'ui:description': 'Settings related to the eBPF-based flow reporter.',
         'ui:dependency': {
           controlFieldPath: ['agent', 'type'],
           controlFieldValue: 'eBPF',
@@ -108,7 +102,6 @@ export const FlowCollectorUISchema: UiSchema = {
         },
         flowFilter: {
           'ui:title': 'Filters',
-          'ui:description': 'The eBPF agent configuration regarding flow filtering.',
           'ui:widget': 'hidden',
           enable: {
             'ui:title': 'Enable flow filtering'
@@ -157,8 +150,6 @@ export const FlowCollectorUISchema: UiSchema = {
           },
           rules: {
             'ui:title': 'Rules',
-            'ui:description':
-              'A list of filtering rules on the eBPF Agents.\nWhen filtering is enabled, by default, flows that don\'t match any rule are rejected.\nTo change the default, you can define a rule that accepts everything: `{ action: "Accept", cidr: "0.0.0.0/0" }`, and then refine with rejecting rules. Unsupported.',
             items: {
               'ui:order': [
                 'tcpFlags',
@@ -198,26 +189,19 @@ export const FlowCollectorUISchema: UiSchema = {
           ]
         },
         interfaces: {
-          'ui:title': 'Interfaces',
-          'ui:description':
-            'The interface names from where flows are collected. If empty, the agent\nfetches all the interfaces in the system, excepting the ones listed in `excludeInterfaces`.\nAn entry enclosed by slashes, such as `/br-/`, is matched as a regular expression.\nOtherwise it is matched as a case-sensitive string.'
+          'ui:title': 'Interfaces'
         },
         excludeInterfaces: {
-          'ui:title': 'Exclude interfaces',
-          'ui:description':
-            'The interface names that are excluded from flow tracing.\nAn entry enclosed by slashes, such as `/br-/`, is matched as a regular expression.\nOtherwise it is matched as a case-sensitive string.'
+          'ui:title': 'Exclude interfaces'
         },
         logLevel: {
-          'ui:title': 'Log level',
-          'ui:description': 'The log level for the network observability eBPF Agent'
+          'ui:title': 'Log level'
         },
         imagePullPolicy: {
-          'ui:title': 'Image pull policy',
-          'ui:description': 'The Kubernetes pull policy for the image defined above'
+          'ui:title': 'Image pull policy'
         },
         metrics: {
           'ui:title': 'Metrics',
-          'ui:description': 'The eBPF agent configuration regarding metrics.',
           enable: {
             'ui:widget': 'hidden'
           },
@@ -243,19 +227,13 @@ export const FlowCollectorUISchema: UiSchema = {
           'ui:order': ['enable', 'disableAlerts', 'server']
         },
         cacheMaxFlows: {
-          'ui:title': 'Cache max flows',
-          'ui:description':
-            'The max number of flows in an aggregate; when reached, the reporter sends the flows.\nIncreasing `cacheMaxFlows` and `cacheActiveTimeout` can decrease the network traffic overhead and the CPU load,\nhowever you can expect higher memory consumption and an increased latency in the flow collection.'
+          'ui:title': 'Cache max flows'
         },
         cacheActiveTimeout: {
-          'ui:title': 'Cache active timeout',
-          'ui:description':
-            'The max period during which the reporter aggregates flows before sending.\nIncreasing `cacheMaxFlows` and `cacheActiveTimeout` can decrease the network traffic overhead and the CPU load,\nhowever you can expect higher memory consumption and an increased latency in the flow collection.'
+          'ui:title': 'Cache active timeout'
         },
         kafkaBatchSize: {
           'ui:title': 'Kafka batch size',
-          'ui:description':
-            'Limits the maximum size of a request in bytes before being sent to a partition. Ignored when not using Kafka. Default: 1MB.',
           'ui:dependency': {
             controlFieldPath: ['deploymentModel'],
             controlFieldValue: 'Kafka',
@@ -481,12 +459,8 @@ export const FlowCollectorUISchema: UiSchema = {
     },
     processor: {
       'ui:title': 'Processor configuration',
-      'ui:description':
-        'The component that receives the flows from the agent, enriches them, generates metrics, and forwards them to the Loki persistence layer and/or any available exporter.',
       filters: {
         'ui:title': 'Filters',
-        'ui:description':
-          'Define custom filters to limit the amount of generated flows.\nThese filters provide more flexibility than the eBPF Agent filters (in `spec.agent.ebpf.flowFilter`), such as allowing to filter by Kubernetes namespace, but with a lesser improvement in performance. Unsupported.',
         'ui:widget': 'hidden',
         items: {
           'ui:order': ['allOf', 'outputTarget', 'sampling'],
@@ -498,13 +472,10 @@ export const FlowCollectorUISchema: UiSchema = {
         }
       },
       multiClusterDeployment: {
-        'ui:title': 'Multi-cluster deployment',
-        'ui:description': 'Enable multi clusters feature. This adds `clusterName` label to flows data'
+        'ui:title': 'Multi-cluster deployment'
       },
       clusterName: {
         'ui:title': 'Cluster name',
-        'ui:description':
-          'The name of the cluster to appear in the flows data. This is useful in a multi-cluster context. When using OpenShift, leave empty to make it automatically',
         'ui:dependency': {
           controlFieldPath: ['processor', 'multiClusterDeployment'],
           controlFieldValue: 'true',
@@ -512,21 +483,15 @@ export const FlowCollectorUISchema: UiSchema = {
         }
       },
       addZone: {
-        'ui:title': 'Availability zones',
-        'ui:description':
-          'Allows availability zone awareness by labelling flows with their source and destination zones.\nThis feature requires the "topology.kubernetes.io/zone" label to be set on nodes.'
+        'ui:title': 'Availability zones'
       },
       subnetLabels: {
         'ui:title': 'Subnet labels',
-        'ui:description':
-          'Allows to define custom labels on subnets and IPs or to enable automatic labelling of recognized subnets in OpenShift, which is used to identify cluster external traffic.\nWhen a subnet matches the source or destination IP of a flow, a corresponding field is added: `SrcSubnetLabel` or `DstSubnetLabel`.',
         openShiftAutoDetect: {
           'ui:widget': 'hidden'
         },
         customLabels: {
           'ui:title': 'Custom labels',
-          'ui:description':
-            'allows to customize subnets and IPs labelling, such as to identify cluster-external workloads or web services.\nIf you enable `openShiftAutoDetect`, `customLabels` can override the detected subnets in case they overlap.',
           items: {
             'ui:order': ['cidrs', 'name']
           }
@@ -538,17 +503,13 @@ export const FlowCollectorUISchema: UiSchema = {
         'ui:widget': 'hidden'
       },
       logLevel: {
-        'ui:title': 'Log level',
-        'ui:description': 'The log level of the processor runtime'
+        'ui:title': 'Log level'
       },
       imagePullPolicy: {
-        'ui:title': 'Image pull policy',
-        'ui:description': 'The Kubernetes pull policy for the image defined above'
+        'ui:title': 'Image pull policy'
       },
       deduper: {
         'ui:title': 'Deduper',
-        'ui:description':
-          'Allows you to sample or drop flows identified as duplicates, in order to save on resource usage. Unsupported.',
         mode: {
           'ui:title': 'Mode'
         },
@@ -663,7 +624,6 @@ export const FlowCollectorUISchema: UiSchema = {
       },
       metrics: {
         'ui:title': 'Metrics configuration',
-        'ui:description': 'The processor configuration regarding metrics',
         server: {
           'ui:title': 'Server configuration',
           tls: {
@@ -702,14 +662,10 @@ export const FlowCollectorUISchema: UiSchema = {
           'ui:order': ['tls', 'port']
         },
         disableAlerts: {
-          'ui:title': 'Disable alerts',
-          'ui:description':
-            'List of alerts that should be disabled.\nPossible values are:\n`NetObservNoFlows`, which is triggered when no flows are being observed for a certain period.\n`NetObservLokiError`, which is triggered when flows are being dropped due to Loki errors.'
+          'ui:title': 'Disable alerts'
         },
         includeList: {
-          'ui:title': 'Include list',
-          'ui:description':
-            'List of metric names to specify which ones to generate.\nThe names correspond to the names in Prometheus without the prefix. For example,\n`namespace_egress_packets_total` shows up as `netobserv_namespace_egress_packets_total` in Prometheus.\nNote that the more metrics you add, the bigger is the impact on Prometheus workload resources.\nMetrics enabled by default are:\n`namespace_flows_total`, `node_ingress_bytes_total`, `node_egress_bytes_total`, `workload_ingress_bytes_total`,\n`workload_egress_bytes_total`, `namespace_drop_packets_total` (when `PacketDrop` feature is enabled),\n`namespace_rtt_seconds` (when `FlowRTT` feature is enabled), `namespace_dns_latency_seconds` (when `DNSTracking` feature is enabled),\n`namespace_network_policy_events_total` (when `NetworkEvents` feature is enabled).\nMore information, with full list of available metrics: https://github.com/netobserv/network-observability-operator/blob/main/docs/Metrics.md'
+          'ui:title': 'Include list'
         },
         'ui:order': ['server', 'disableAlerts', 'includeList']
       },
@@ -987,18 +943,13 @@ export const FlowCollectorUISchema: UiSchema = {
       querier: {
         'ui:title': 'Prometheus querier configuration',
         enable: {
-          'ui:title': 'Use Prometheus storage',
-          'ui:description':
-            'When enabled, the Console plugin queries flow metrics from Prometheus instead of Loki whenever possible.\nIt is enbaled by default: set it to `false` to disable this feature.\nThe Console plugin can use either Loki or Prometheus as a data source for metrics (see also `spec.loki`), or both.\nNot all queries are transposable from Loki to Prometheus. Hence, if Loki is disabled, some features of the plugin are disabled as well,\nsuch as getting per-pod information or viewing raw flows.\nIf both Prometheus and Loki are enabled, Prometheus takes precedence and Loki is used as a fallback for queries that Prometheus cannot handle.\nIf they are both disabled, the Console plugin is not deployed.'
+          'ui:title': 'Use Prometheus storage'
         },
         mode: {
-          'ui:title': 'Mode',
-          'ui:description':
-            'Must be set according to the type of Prometheus installation that stores network observability metrics:\n- Use `Auto` to try configuring automatically. In OpenShift, it uses the Thanos querier from OpenShift Cluster Monitoring\n- Use `Manual` for a manual setup'
+          'ui:title': 'Mode'
         },
         manual: {
           'ui:title': 'Manual',
-          'ui:description': 'Prometheus configuration for manual mode.',
           'ui:flat': 'true',
           'ui:dependency': {
             controlFieldPath: ['prometheus', 'querier', 'mode'],
@@ -1032,16 +983,13 @@ export const FlowCollectorUISchema: UiSchema = {
           'ui:order': ['forwardUserToken', 'url', 'tls']
         },
         timeout: {
-          'ui:title': 'Timeout',
-          'ui:description':
-            'The read timeout for console plugin queries to Prometheus.\nA timeout of zero means no timeout.'
+          'ui:title': 'Timeout'
         },
         'ui:order': ['enable', 'mode', 'manual', 'timeout']
       }
     },
     loki: {
       'ui:title': 'Loki client settings',
-      'ui:description': 'Flow logs storage.',
       enable: {
         'ui:title': 'Use Loki storage'
       },
@@ -1198,45 +1146,34 @@ export const FlowCollectorUISchema: UiSchema = {
       },
       readTimeout: {
         'ui:title': 'Read timeout',
-        'ui:description':
-          'The maximum console plugin loki query total time limit.\nA timeout of zero means no timeout.',
         'ui:widget': 'hidden'
       },
       writeTimeout: {
         'ui:title': 'Write timeout',
-        'ui:description': 'The maximum Loki time connection / request limit.\nA timeout of zero means no timeout.',
         'ui:widget': 'hidden'
       },
       writeBatchWait: {
         'ui:title': 'Write batch wait',
-        'ui:description': 'The maximum time to wait before sending a Loki batch.',
         'ui:widget': 'hidden'
       },
       writeBatchSize: {
         'ui:title': 'Write batch size',
-        'ui:description': 'The maximum batch size (in bytes) of Loki logs to accumulate before sending.',
         'ui:widget': 'hidden'
       },
       advanced: {
         'ui:title': 'Advanced configuration',
-        'ui:description':
-          'Internal configuration of the Loki clients.\nThis section is aimed mostly for debugging and fine-grained performance optimizations.',
         'ui:widget': 'hidden',
         staticLabels: {
-          'ui:title': 'Static labels',
-          'ui:description': 'A map of common labels to set on each flow in Loki storage.'
+          'ui:title': 'Static labels'
         },
         writeMaxRetries: {
-          'ui:title': 'Write max retries',
-          'ui:description': 'The maximum number of retries for Loki client connections.'
+          'ui:title': 'Write max retries'
         },
         writeMaxBackoff: {
-          'ui:title': 'Write max backoff',
-          'ui:description': 'The maximum backoff time for Loki client connection between retries.'
+          'ui:title': 'Write max backoff'
         },
         writeMinBackoff: {
-          'ui:title': 'Write min backoff',
-          'ui:description': 'The initial backoff time for Loki client connection between retries.'
+          'ui:title': 'Write min backoff'
         },
         'ui:order': ['staticLabels', 'writeMaxRetries', 'writeMaxBackoff', 'writeMinBackoff']
       },
@@ -1256,21 +1193,17 @@ export const FlowCollectorUISchema: UiSchema = {
     },
     consolePlugin: {
       'ui:title': 'Console plugin configuration',
-      'ui:description': 'The OpenShift Console integration.',
       enable: {
         'ui:title': 'Deploy console plugin'
       },
       logLevel: {
-        'ui:title': 'Log level',
-        'ui:description': 'Log level for the console plugin backend'
+        'ui:title': 'Log level'
       },
       imagePullPolicy: {
-        'ui:title': 'Image pull policy',
-        'ui:description': 'The Kubernetes pull policy for the image defined above'
+        'ui:title': 'Image pull policy'
       },
       portNaming: {
         'ui:title': 'Port naming',
-        'ui:description': 'The configuration of the port-to-service name translation',
         'ui:widget': 'hidden',
         enable: {
           'ui:title': 'Enable'
@@ -1292,15 +1225,13 @@ export const FlowCollectorUISchema: UiSchema = {
       },
       quickFilters: {
         'ui:title': 'Quick filters',
-        'ui:description': 'Configure quick filter presets for the Console plugin',
         'ui:widget': 'hidden',
         items: {
           'ui:order': ['filter', 'name', 'default']
         }
       },
       replicas: {
-        'ui:title': 'Replicas',
-        'ui:description': 'The number of replicas (pods) to start.'
+        'ui:title': 'Replicas'
       },
       autoscaler: {
         'ui:title': 'Horizontal pod autoscaler',
@@ -1380,8 +1311,6 @@ export const FlowCollectorUISchema: UiSchema = {
       },
       advanced: {
         'ui:title': 'Advanced configuration',
-        'ui:description':
-          'Internal configuration of the console plugin.\nThis section is aimed mostly for debugging and fine-grained performance optimizations, such as `GOGC` and `GOMAXPROCS` env vars. Set these values at your own risk.',
         'ui:widget': 'hidden',
         'ui:order': ['args', 'env', 'port', 'register', 'scheduling'],
         scheduling: {
@@ -1582,14 +1511,11 @@ export const FlowCollectorUISchema: UiSchema = {
     },
     networkPolicy: {
       'ui:title': 'Network policy',
-      'ui:description': 'Ingress network policy settings for network observability components isolation.',
       enable: {
         'ui:title': 'Deploy policies'
       },
       additionalNamespaces: {
         'ui:title': 'Additional namespaces',
-        'ui:description':
-          'Namespaces allowed to connect to the network observability namespace.\nIt provides flexibility in the network policy configuration, but if you need a more specific\nconfiguration, you can disable it and install your own instead.',
         'ui:dependency': {
           controlFieldPath: ['networkPolicy', 'enable'],
           controlFieldValue: 'true',
@@ -1600,11 +1526,9 @@ export const FlowCollectorUISchema: UiSchema = {
     },
     exporters: {
       'ui:title': 'Exporters',
-      'ui:description': 'Additional optional exporters for custom consumption or storage.',
       items: {
         type: {
-          'ui:title': 'Type',
-          'ui:description': 'Type of exporters. The available options are `Kafka`, `IPFIX`, and `OpenTelemetry`.'
+          'ui:title': 'Type'
         },
         ipfix: {
           'ui:title': 'IPFIX configuration',
@@ -1659,7 +1583,6 @@ export const FlowCollectorUISchema: UiSchema = {
           },
           sasl: {
             'ui:title': 'SASL',
-            'ui:description': 'SASL authentication configuration. Unsupported.',
             type: {
               'ui:title': 'Type'
             },
@@ -1758,7 +1681,6 @@ export const FlowCollectorUISchema: UiSchema = {
 
 export const FlowMetricUISchema: UiSchema = {
   'ui:title': 'FlowMetric',
-  'ui:description': 'The API allowing to create custom metrics from the collected flow logs.',
   'ui:flat': 'true',
   metadata: {
     'ui:title': 'Metadata',
@@ -1776,18 +1698,13 @@ export const FlowMetricUISchema: UiSchema = {
   },
   spec: {
     metricName: {
-      'ui:title': 'Metric name',
-      'ui:description': 'Name of the metric. In Prometheus, it is automatically prefixed with "netobserv_".'
+      'ui:title': 'Metric name'
     },
     type: {
-      'ui:title': 'Type',
-      'ui:description':
-        'Metric type: "Counter" or "Histogram".\nUse "Counter" for any value that increases over time and on which you can compute a rate, such as Bytes or Packets.\nUse "Histogram" for any value that must be sampled independently, such as latencies.'
+      'ui:title': 'Type'
     },
     buckets: {
       'ui:title': 'Buckets',
-      'ui:description':
-        'A list of buckets to use when `type` is "Histogram". The list must be parsable as floats. When not set, Prometheus default buckets are used.',
       'ui:dependency': {
         controlFieldPath: ['type'],
         controlFieldValue: 'Histogram',
@@ -1795,101 +1712,68 @@ export const FlowMetricUISchema: UiSchema = {
       }
     },
     valueField: {
-      'ui:title': 'Value field',
-      'ui:description':
-        'Flow field that must be used as a value for this metric. This field must hold numeric values.\nLeave empty to count flows rather than a specific value per flow.\nRefer to the documentation for the list of available fields: https://docs.openshift.com/container-platform/latest/observability/network_observability/json-flows-format-reference.html.'
+      'ui:title': 'Value field'
     },
     divider: {
-      'ui:title': 'Divider',
-      'ui:description': 'When nonzero, scale factor (divider) of the value. Metric value = Flow value / Divider.'
+      'ui:title': 'Divider'
     },
     labels: {
-      'ui:title': 'Labels',
-      'ui:description':
-        'List of fields that should be used as Prometheus labels, also known as dimensions.\nFrom choosing labels results the level of granularity of this metric, and the available aggregations at query time.\nIt must be done carefully as it impacts the metric cardinality (cf https://rhobs-handbook.netlify.app/products/openshiftmonitoring/telemetry.md/#what-is-the-cardinality-of-a-metric).\nIn general, avoid setting very high cardinality labels such as IP or MAC addresses.\n"SrcK8S_OwnerName" or "DstK8S_OwnerName" should be preferred over "SrcK8S_Name" or "DstK8S_Name" as much as possible.\nRefer to the documentation for the list of available fields: https://docs.openshift.com/container-platform/latest/observability/network_observability/json-flows-format-reference.html.'
+      'ui:title': 'Labels'
     },
     flatten: {
-      'ui:title': 'Flatten',
-      'ui:description':
-        'List of array-type fields that must be flattened, such as Interfaces or NetworkEvents. Flattened fields generate one metric per item in that field.\nFor instance, when flattening `Interfaces` on a bytes counter, a flow having Interfaces [br-ex, ens5] increases one counter for `br-ex` and another for `ens5`.'
+      'ui:title': 'Flatten'
     },
     remap: {
       'ui:title': 'Remap',
-      'ui:description':
-        'Use different names for the generated metric labels than the flow fields. Use the origin flow fields as keys, and the desired label names as values.',
       'ui:widget': 'map'
     },
     direction: {
-      'ui:title': 'Direction',
-      'ui:description':
-        'Filter for ingress, egress or any direction flows.\nWhen set to `Ingress`, it is equivalent to adding the regular expression filter on `FlowDirection`: `0|2`.\nWhen set to `Egress`, it is equivalent to adding the regular expression filter on `FlowDirection`: `1|2`.'
+      'ui:title': 'Direction'
     },
     filters: {
       'ui:title': 'Filters',
-      'ui:description':
-        'A list of fields and values used to restrict which flows are taken into account. Oftentimes, these filters must\nbe used to eliminate duplicates: `Duplicate != "true"` and `FlowDirection = "0"`.\nRefer to the documentation for the list of available fields: https://docs.openshift.com/container-platform/latest/observability/network_observability/json-flows-format-reference.html.',
       items: {
         field: {
-          'ui:title': 'Field',
-          'ui:description': 'Name of the field to filter on'
+          'ui:title': 'Field'
         },
         matchType: {
-          'ui:title': 'Match type',
-          'ui:description': 'Type of matching to apply'
+          'ui:title': 'Match type'
         },
         value: {
-          'ui:title': 'Value',
-          'ui:description':
-            'Value to filter on. When `matchType` is `Equal` or `NotEqual`, you can use field injection with `$(SomeField)` to refer to any other field of the flow.'
+          'ui:title': 'Value'
         },
         'ui:order': ['field', 'matchType', 'value']
       }
     },
     charts: {
       'ui:title': 'Charts',
-      'ui:description': 'Charts configuration, for the OpenShift Console in the administrator view, Dashboards menu.',
       items: {
         dashboardName: {
-          'ui:title': 'Dashboard name',
-          'ui:description':
-            'Name of the containing dashboard. If this name does not refer to an existing dashboard, a new dashboard is created.'
+          'ui:title': 'Dashboard name'
         },
         sectionName: {
-          'ui:title': 'Section name',
-          'ui:description':
-            'Name of the containing dashboard section. If this name does not refer to an existing section, a new section is created.\nIf `sectionName` is omitted or empty, the chart is placed in the global top section.'
+          'ui:title': 'Section name'
         },
         title: {
-          'ui:title': 'Title',
-          'ui:description': 'Title of the chart.'
+          'ui:title': 'Title'
         },
         unit: {
-          'ui:title': 'Unit',
-          'ui:description':
-            'Unit of this chart. Only a few units are currently supported. Leave empty to use generic number.'
+          'ui:title': 'Unit'
         },
         type: {
-          'ui:title': 'Type',
-          'ui:description': 'Type of the chart.'
+          'ui:title': 'Type'
         },
         queries: {
           'ui:title': 'Queries',
-          'ui:description':
-            'List of queries to be displayed on this chart. If `type` is `SingleStat` and multiple queries are provided,\nthis chart is automatically expanded in several panels (one per query).',
           items: {
             promQL: {
-              'ui:title': 'Query',
-              'ui:description':
-                'The `promQL` query to be run against Prometheus. If the chart `type` is `SingleStat`, this query should only return\na single timeseries. For other types, a top 7 is displayed.\nYou can use `$METRIC` to refer to the metric defined in this resource. For example: `sum(rate($METRIC[2m]))`.\nTo learn more about `promQL`, refer to the Prometheus documentation: https://prometheus.io/docs/prometheus/latest/querying/basics/'
+              'ui:title': 'Query'
             },
             legend: {
-              'ui:title': 'Legend',
-              'ui:description':
-                'The query legend that applies to each timeseries represented in this chart. When multiple timeseries are displayed, you should set a legend\nthat distinguishes each of them. It can be done with the following format: `{{ Label }}`. For example, if the `promQL` groups timeseries per\nlabel such as: `sum(rate($METRIC[2m])) by (Label1, Label2)`, you may write as the legend: `Label1={{ Label1 }}, Label2={{ Label2 }}`.'
+              'ui:title': 'Legend'
             },
             top: {
-              'ui:title': 'Top',
-              'ui:description': 'Top N series to display per timestamp. Does not apply to `SingleStat` chart type.'
+              'ui:title': 'Top'
             },
             'ui:order': ['promQL', 'legend', 'top']
           }
