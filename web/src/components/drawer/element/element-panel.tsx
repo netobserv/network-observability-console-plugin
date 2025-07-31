@@ -16,7 +16,7 @@ import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { TopologyMetrics } from '../../../api/loki';
-import { Filter, FilterDefinition } from '../../../model/filters';
+import { Filter, FilterDefinition, Filters } from '../../../model/filters';
 import { MetricType } from '../../../model/flow-query';
 import { GraphElementPeer, NodeData } from '../../../model/topology';
 import { defaultSize, maxSize, minSize } from '../../../utils/panel';
@@ -32,7 +32,7 @@ export interface ElementPanelProps {
   metrics: TopologyMetrics[];
   droppedMetrics: TopologyMetrics[];
   metricType: MetricType;
-  filters: Filter[];
+  filters: Filters;
   filterDefinitions: FilterDefinition[];
   setFilters: (filters: Filter[]) => void;
   truncateLength: TruncateLength;
