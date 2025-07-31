@@ -1,4 +1,4 @@
-import { getRecordValue, Record } from '../api/ipfix';
+import { Field, getRecordValue, Record } from '../api/ipfix';
 import { Column, ColumnConfigDef, ColumnsId, ColValue } from './columns';
 import { FieldConfig, FieldType } from './fields';
 
@@ -19,7 +19,7 @@ const getColumnOrRecordValue = (
     }
     return defaultValue;
   }
-  return getRecordValue(record, arg, defaultValue);
+  return getRecordValue(record, arg as Field, defaultValue);
 };
 
 const funcs: { [name: string]: (columns: Column[], record: Record, args: string[]) => ColValue } = {
