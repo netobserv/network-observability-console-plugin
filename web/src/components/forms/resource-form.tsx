@@ -15,11 +15,10 @@ import './forms.css';
 import { Consumer } from './resource-watcher';
 
 export type ResourceFormProps = {
-  schema: any;
   uiSchema: UiSchema;
 };
 
-export const ResourceForm: FC<ResourceFormProps> = ({ schema, uiSchema }) => {
+export const ResourceForm: FC<ResourceFormProps> = ({ uiSchema }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [viewType, setViewType] = React.useState(EditorType.CUSTOM);
   const [data, setData] = React.useState<any>(null);
@@ -33,19 +32,19 @@ export const ResourceForm: FC<ResourceFormProps> = ({ schema, uiSchema }) => {
 
   return (
     <Consumer>
-      {({ kind, isUpdate, existing, defaultData, onSubmit, errors, setErrors }) => {
+      {ctx => {
         // first init data when watch resource query got results
         if (data == null) {
-          setData(existing || defaultData);
+          setData(ctx.data);
         }
         return (
           <PageSection id="pageSection">
             <div id="pageHeader">
               <Title headingLevel="h1" size="2xl">
-                {isUpdate ? t('Update {{kind}}', { kind }) : t('Create {{kind}}', { kind })}
+                {ctx.isUpdate ? t('Update {{kind}}', { kind: ctx.kind }) : t('Create {{kind}}', { kind: ctx.kind })}
               </Title>
               <FormHelperText style={{ marginTop: 'var(--pf-t--global--spacer--xs)' }}>
-                {isUpdate
+                {ctx.isUpdate
                   ? t('Update by completing the form. Current values are from the existing resource.')
                   : t('Create by completing the form. Default values are provided as example.')}
               </FormHelperText>
@@ -53,29 +52,33 @@ export const ResourceForm: FC<ResourceFormProps> = ({ schema, uiSchema }) => {
             <Suspense fallback={<></>}>
               <EditorToggle
                 type={viewType}
-                updated={hasChanged(existing)}
-                isUpdate={isUpdate}
-                onReload={() => setData(existing)}
+                updated={hasChanged(ctx.data)}
+                isUpdate={ctx.isUpdate}
+                onReload={() => setData(ctx.data)}
                 onChange={type => {
                   setViewType(type);
                 }}
                 onSubmit={() => {
-                  onSubmit(data);
+                  ctx.onSubmit(data);
                 }}
                 onCancel={() => navigate(netflowTrafficPath)}
                 customChild={
-                  <DynamicForm
-                    showAlert
-                    formData={data}
-                    schema={schema}
-                    uiSchema={uiSchema} // see if we can regenerate this from CSV
-                    validator={SchemaValidator}
-                    errors={errors}
-                    onError={errs => setErrors(_.map(errs, error => error.stack))}
-                    onChange={(event, id) => {
-                      setData(event.formData);
-                    }}
-                  />
+                  ctx.schema ? (
+                    <DynamicForm
+                      showAlert
+                      formData={data}
+                      schema={ctx.schema}
+                      uiSchema={uiSchema} // see if we can regenerate this from CSV
+                      validator={SchemaValidator}
+                      errors={ctx.errors}
+                      onError={errs => ctx.setErrors(_.map(errs, error => error.stack))}
+                      onChange={event => {
+                        setData(event.formData);
+                      }}
+                    />
+                  ) : (
+                    <></>
+                  )
                 }
                 yamlChild={
                   <ResourceYAMLEditor
@@ -83,7 +86,7 @@ export const ResourceForm: FC<ResourceFormProps> = ({ schema, uiSchema }) => {
                     onSave={content => {
                       const updatedData = safeYAMLToJS(content);
                       setData(updatedData);
-                      onSubmit(updatedData);
+                      ctx.onSubmit(updatedData);
                     }}
                   />
                 }

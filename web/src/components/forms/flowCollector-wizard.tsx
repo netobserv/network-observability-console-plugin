@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ResourceYAMLEditor } from '@openshift-console/dynamic-plugin-sdk';
-import { PageSection, Title, Wizard, WizardStep, WizardStepChangeScope, WizardStepType } from '@patternfly/react-core';
+import { PageSection, Title, Wizard, WizardStep, WizardStepType } from '@patternfly/react-core';
+import { RJSFSchema } from '@rjsf/utils';
 import validator from '@rjsf/validator-ajv8';
 import React, { FC } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom-v5-compat';
 import { ContextSingleton } from '../../utils/context';
 import { flowCollectorStatusPath } from '../../utils/url';
 import { safeYAMLToJS } from '../../utils/yaml';
 import DynamicLoader, { navigate } from '../dynamic-loader/dynamic-loader';
-import { FlowCollectorSchema } from './config/schema';
-import { GetFlowCollectorJS } from './config/templates';
 import { FlowCollectorUISchema } from './config/uiSchema';
 import Consumption from './consumption';
 import { DynamicForm } from './dynamic-form/dynamic-form';
@@ -17,29 +17,36 @@ import './forms.css';
 import ResourceWatcher, { Consumer } from './resource-watcher';
 import { getFilteredUISchema } from './utils';
 
-export type FlowCollectorWizardProps = {};
+export type FlowCollectorWizardProps = {
+  name?: string;
+};
 
 const defaultPaths = ['spec.namespace', 'spec.networkPolicy'];
 
 export const FlowCollectorWizard: FC<FlowCollectorWizardProps> = props => {
   const { t } = useTranslation('plugin__netobserv-plugin');
+  const [schema, setSchema] = React.useState<RJSFSchema | null>(null);
   const [data, setData] = React.useState<any>(null);
   const [paths, setPaths] = React.useState<string[]>(defaultPaths);
+  const params = useParams();
 
   const form = React.useCallback(() => {
+    if (!schema) {
+      return <></>;
+    }
     const filteredSchema = getFilteredUISchema(FlowCollectorUISchema, paths);
     return (
       <DynamicForm
         formData={data}
-        schema={FlowCollectorSchema}
+        schema={schema}
         uiSchema={filteredSchema} // see if we can regenerate this from CSV
         validator={validator}
-        onChange={(event, id) => {
+        onChange={event => {
           setData(event.formData);
         }}
       />
     );
-  }, [data, paths]);
+  }, [data, paths, schema]);
 
   const step = React.useCallback(
     (id, name: string) => {
@@ -52,50 +59,42 @@ export const FlowCollectorWizard: FC<FlowCollectorWizardProps> = props => {
     [form]
   );
 
-  const onStepChange = React.useCallback(
-    (
-      event: React.MouseEvent<HTMLButtonElement>,
-      step: WizardStepType,
-      prevStep: WizardStepType,
-      scope: WizardStepChangeScope
-    ) => {
-      switch (step.id) {
-        case 'overview':
-          setPaths(defaultPaths);
-          break;
-        case 'capture':
-          setPaths([
-            'spec.agent.ebpf.sampling',
-            'spec.agent.ebpf.privileged',
-            'spec.agent.ebpf.features',
-            'spec.processor.clusterName',
-            'spec.processor.multiClusterDeployment',
-            'spec.processor.addZone'
-          ]);
-          break;
-        case 'pipeline':
-          setPaths([
-            'spec.deploymentModel',
-            'spec.kafka',
-            'spec.processor.advanced.secondaryNetworks.items',
-            'spec.exporters.items'
-          ]);
-          break;
-        case 'loki':
-          setPaths(['spec.loki']);
-          break;
-        case 'prom':
-          setPaths(['spec.prometheus.querier']);
-          break;
-        case 'console':
-          setPaths(['spec.consolePlugin.enable', 'spec.consolePlugin.replicas']);
-          break;
-        default:
-          setPaths([]);
-      }
-    },
-    []
-  );
+  const onStepChange = React.useCallback((_event: React.MouseEvent<HTMLButtonElement>, step: WizardStepType) => {
+    switch (step.id) {
+      case 'overview':
+        setPaths(defaultPaths);
+        break;
+      case 'capture':
+        setPaths([
+          'spec.agent.ebpf.sampling',
+          'spec.agent.ebpf.privileged',
+          'spec.agent.ebpf.features',
+          'spec.processor.clusterName',
+          'spec.processor.multiClusterDeployment',
+          'spec.processor.addZone'
+        ]);
+        break;
+      case 'pipeline':
+        setPaths([
+          'spec.deploymentModel',
+          'spec.kafka',
+          'spec.processor.advanced.secondaryNetworks.items',
+          'spec.exporters.items'
+        ]);
+        break;
+      case 'loki':
+        setPaths(['spec.loki']);
+        break;
+      case 'prom':
+        setPaths(['spec.prometheus.querier']);
+        break;
+      case 'console':
+        setPaths(['spec.consolePlugin.enable', 'spec.consolePlugin.replicas']);
+        break;
+      default:
+        setPaths([]);
+    }
+  }, []);
 
   const setSampling = React.useCallback(
     (sampling: number) => {
@@ -111,16 +110,22 @@ export const FlowCollectorWizard: FC<FlowCollectorWizardProps> = props => {
   return (
     <DynamicLoader>
       <ResourceWatcher
-        defaultData={GetFlowCollectorJS()}
+        group="flows.netobserv.io"
+        version="v1beta2"
+        kind="FlowCollector"
+        name={params.name || props.name}
         onSuccess={() => {
           navigate(flowCollectorStatusPath);
         }}
       >
         <Consumer>
           {ctx => {
-            // first init data when watch resource query got results
+            // first init schema & data when watch resource query got results
+            if (schema == null) {
+              setSchema(ctx.schema);
+            }
             if (data == null) {
-              setData(ctx.existing || ctx.defaultData);
+              setData(ctx.data);
             }
             return (
               <PageSection id="pageSection">
