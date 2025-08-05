@@ -32,8 +32,10 @@ export const getFlowRecords = (params: FlowQuery): Promise<RecordsResult> => {
   });
 };
 
-export const getAlerts = (): Promise<AlertsResult> => {
-  return axios.get('/api/prometheus/api/v1/rules?type=alert').then(r => {
+export const getAlerts = (match: string): Promise<AlertsResult> => {
+  const matchKeyEnc = encodeURIComponent("match[]");
+  const matchValEnc = encodeURIComponent("{"+match+"}");
+  return axios.get(`/api/prometheus/api/v1/rules?type=alert&${matchKeyEnc}=${matchValEnc}`).then(r => {
     if (r.status >= 400) {
       throw new Error(`${r.statusText} [code=${r.status}]`);
     }
