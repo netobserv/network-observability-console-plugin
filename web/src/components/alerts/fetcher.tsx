@@ -11,12 +11,12 @@ export const AlertFetcher: React.FC<AlertFetcherProps> = ({ children }) => {
   const [alerts, setAlerts] = React.useState<Rule[]>([]);
   const [silencedAlerts, setSilencedAlerts] = React.useState<string[] | null>(null);
   React.useEffect(() => {
-    getAlerts()
+    getAlerts('app="netobserv"') // matching app="netobserv" catches all netobserv-owned alerts
       .then(result => {
         setAlerts(
           result.data.groups.flatMap(group => {
             return group.rules
-              .filter(rule => !!rule.labels.app && rule.labels.app == 'netobserv' && rule.state == 'firing')
+              .filter(rule => rule.state == 'firing' && !('netobserv_io_network_health' in rule.annotations))
               .map(rule => {
                 const key = [
                   group.file,
