@@ -1,10 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { k8sCreate, K8sResourceKind, k8sUpdate, useK8sWatchResource } from '@openshift-console/dynamic-plugin-sdk';
+import {
+  k8sCreate,
+  k8sDelete,
+  K8sResourceKind,
+  k8sUpdate,
+  useK8sWatchResource
+} from '@openshift-console/dynamic-plugin-sdk';
 import { Bullseye, Spinner } from '@patternfly/react-core';
 import { JSONSchema7 } from 'json-schema';
 import React, { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useK8sModel } from '../../utils/k8s-models-hook';
+import { navigate } from '../dynamic-loader/dynamic-loader';
 import { ErrorComponent } from '../messages/error';
 import { prune } from './dynamic-form/utils';
 import './forms.css';
@@ -18,6 +25,7 @@ export type ResourceWatcherProps = {
   name?: string;
   onSuccess?: (data: any) => void;
   children: JSX.Element;
+  skipErrors?: boolean;
 };
 
 export type ResourceWatcherContext = {
@@ -27,7 +35,8 @@ export type ResourceWatcherContext = {
   isUpdate: boolean;
   schema: JSONSchema7 | null;
   data: K8sResourceKind;
-  onSubmit: (data: K8sResourceKind) => void;
+  onSubmit: (data: K8sResourceKind, isDelete?: boolean) => void;
+  loadError: any;
   errors: string[];
   setErrors: (errors: string[]) => void;
 };
@@ -42,13 +51,22 @@ export const { Provider, Consumer } = React.createContext<ResourceWatcherContext
   onSubmit: () => {
     console.error('onSubmit is not initialized !');
   },
+  loadError: null,
   errors: [],
   setErrors: (errs: string[]) => {
     console.error('setErrors is not initialized !', errs);
   }
 });
 
-export const ResourceWatcher: FC<ResourceWatcherProps> = ({ group, version, kind, name, onSuccess, children }) => {
+export const ResourceWatcher: FC<ResourceWatcherProps> = ({
+  group,
+  version,
+  kind,
+  name,
+  onSuccess,
+  children,
+  skipErrors
+}) => {
   if (!group || !version || !kind) {
     throw new Error('ResourceForm error: apiVersion and kind must be provided');
   }
@@ -91,7 +109,7 @@ export const ResourceWatcher: FC<ResourceWatcherProps> = ({ group, version, kind
   const model = useK8sModel(group, version, kind);
   const [errors, setErrors] = React.useState<string[]>([]);
 
-  if (csvLoadError || crdLoadError || crLoadError) {
+  if (!skipErrors && (csvLoadError || crdLoadError || crLoadError)) {
     return (
       <ErrorComponent
         title={t('Unable to get {{kind}}', { kind })}
@@ -124,18 +142,34 @@ export const ResourceWatcher: FC<ResourceWatcherProps> = ({ group, version, kind
               kind
             )
           : {},
+        loadError: csvLoadError || crdLoadError || crLoadError,
         errors,
         setErrors,
-        onSubmit: data => {
-          const apiFunc = cr ? k8sUpdate : k8sCreate;
-          apiFunc({
-            data: prune(data),
-            model
-          })
-            .then(res => {
-              onSuccess && onSuccess(res);
+        onSubmit: (data, isDelete) => {
+          if (isDelete) {
+            k8sDelete({
+              model,
+              resource: {
+                apiVersion: data.apiVersion,
+                kind: data.kind,
+                metadata: data.metadata
+              }
             })
-            .catch(e => setErrors([e.message]));
+              .then(() => {
+                navigate('/');
+              })
+              .catch(e => setErrors([e.message]));
+          } else {
+            const apiFunc = cr ? k8sUpdate : k8sCreate;
+            apiFunc({
+              data: prune(data),
+              model
+            })
+              .then(res => {
+                onSuccess && onSuccess(res);
+              })
+              .catch(e => setErrors([e.message]));
+          }
         }
       }}
     >

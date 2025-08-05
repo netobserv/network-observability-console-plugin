@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ResourceYAMLEditor } from '@openshift-console/dynamic-plugin-sdk';
-import { FormHelperText, PageSection, Title } from '@patternfly/react-core';
+import { Button, FormHelperText, PageSection, Text, TextContent, TextVariants, Title } from '@patternfly/react-core';
 import { UiSchema } from '@rjsf/utils';
 import _ from 'lodash';
 import React, { FC, Suspense } from 'react';
@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { netflowTrafficPath } from '../../utils/url';
 import { safeYAMLToJS } from '../../utils/yaml';
 import { navigate } from '../dynamic-loader/dynamic-loader';
+import Modal from '../modals/modal';
 import { SchemaValidator } from './config/validator';
 import { DynamicForm } from './dynamic-form/dynamic-form';
 import { EditorToggle, EditorType } from './editor-toggle';
@@ -22,6 +23,7 @@ export const ResourceForm: FC<ResourceFormProps> = ({ uiSchema }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [viewType, setViewType] = React.useState(EditorType.CUSTOM);
   const [data, setData] = React.useState<any>(null);
+  const [isOpen, setOpen] = React.useState(false);
 
   const hasChanged = React.useCallback(
     (existing: any) => {
@@ -33,6 +35,7 @@ export const ResourceForm: FC<ResourceFormProps> = ({ uiSchema }) => {
   return (
     <Consumer>
       {ctx => {
+        const isFlowCollector = ctx.kind === 'FlowCollector';
         // first init data when watch resource query got results
         if (data == null) {
           setData(ctx.data);
@@ -62,6 +65,9 @@ export const ResourceForm: FC<ResourceFormProps> = ({ uiSchema }) => {
                   ctx.onSubmit(data);
                 }}
                 onCancel={() => navigate(netflowTrafficPath)}
+                onDelete={() => {
+                  setOpen(true);
+                }}
                 customChild={
                   ctx.schema ? (
                     <DynamicForm
@@ -92,6 +98,38 @@ export const ResourceForm: FC<ResourceFormProps> = ({ uiSchema }) => {
                 }
               />
             </Suspense>
+            <Modal
+              id="delete-modal"
+              title={t('Delete {{kind}}?', { kind: ctx.kind })}
+              isOpen={isOpen}
+              scrollable={false}
+              onClose={() => setOpen(false)}
+              footer={
+                <div className="footer">
+                  <Button data-test="time-range-cancel" key="cancel" variant="link" onClick={() => setOpen(false)}>
+                    {t('Cancel')}
+                  </Button>
+                  <Button key="confirm" variant="danger" onClick={() => ctx.onSubmit(data, true)}>
+                    {t('Delete')}
+                  </Button>
+                </div>
+              }
+            >
+              <TextContent>
+                <Text component={TextVariants.p}>
+                  {`${t('This action cannot be undone.')} ${
+                    isFlowCollector
+                      ? t('It will destroy all pods, services and other objects in the namespace')
+                      : t('The following metric will not be collected anymore')
+                  }`}
+                  &nbsp;
+                  <strong className="co-break-word">
+                    {ctx.data.spec ? ctx.data.spec[isFlowCollector ? 'namespace' : 'metricName'] : ''}
+                  </strong>
+                  <span>.</span>
+                </Text>
+              </TextContent>
+            </Modal>
           </PageSection>
         );
       }}

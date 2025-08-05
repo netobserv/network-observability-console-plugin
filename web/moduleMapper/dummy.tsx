@@ -88,6 +88,11 @@ export function k8sUpdate(k8s: any): Promise<any> {
   return Promise.resolve(k8s);
 }
 
+export function k8sDelete(k8s: any): Promise<any> {
+  console.log("k8sDelete", k8s);
+  return Promise.resolve(k8s);
+}
+
 export function useK8sWatchResource(req: any) {
   console.log("useK8sWatchResource", req);
 

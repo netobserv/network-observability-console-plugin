@@ -2,6 +2,8 @@ import _ from 'lodash';
 import { navigate } from '../components/dynamic-loader/dynamic-loader';
 
 export const netflowTrafficPath = '/netflow-traffic';
+export const flowCollectorNewPath = '/k8s/cluster/flows.netobserv.io~v1beta2~FlowCollector/~new';
+export const flowCollectorEditPath = '/k8s/cluster/flows.netobserv.io~v1beta2~FlowCollector/cluster';
 export const flowCollectorStatusPath = '/k8s/cluster/flows.netobserv.io~v1beta2~FlowCollector/status';
 
 // React-router query argument (not backend routes)
