@@ -59,7 +59,7 @@ import ChipsPopover from './toolbar/filters/chips-popover';
 import HistogramToolbar from './toolbar/histogram-toolbar';
 import ViewOptionsToolbar from './toolbar/view-options-toolbar';
 
-export type ViewId = 'overview' | 'table' | 'topology';
+export type ViewId = 'overview' | 'table' | 'topology' | 'health';
 
 export interface NetflowTrafficProps {
   forcedNamespace?: string;
@@ -97,8 +97,8 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
 
   // Callbacks
   const allowLoki = React.useCallback(() => {
-    return model.config.dataSources.some(ds => ds === 'loki');
-  }, [model.config.dataSources]);
+    return model.config.dataSources.some(ds => ds === 'loki') && model.selectedViewId !== 'health';
+  }, [model.config.dataSources, model.selectedViewId]);
 
   const allowProm = React.useCallback(() => {
     return model.config.dataSources.some(ds => ds === 'prom') && model.selectedViewId !== 'table';
@@ -438,6 +438,13 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
             });
         } else {
           model.setTopologyUDNIds([]);
+        }
+        break;
+      case 'health':
+        if (allowProm()) {
+          promises = drawerRef.current?.getHealthHandle()?.fetch(clearMetrics);
+        } else {
+          model.setError(t('Only available when FlowCollector.loki.enable is true'));
         }
         break;
       default:
