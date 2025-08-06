@@ -126,7 +126,9 @@ export const HealthViolationTable: React.FC<HealthViolationTableProps> = ({ titl
               <Tr>
                 <Th screenReaderText="Row expansion" />
                 {columns.map((c, i) => (
-                  <Th key={'column-' + i} sort={c.sort}>{c.title}</Th>
+                  <Th key={'column-' + i} sort={c.sort}>
+                    {c.title}
+                  </Th>
                 ))}
               </Tr>
             </Thead>
