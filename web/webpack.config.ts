@@ -96,9 +96,20 @@ module.exports = {
           "netflowParent": "./components/netflow-traffic-parent.tsx",
           "netflowTab": "./components/netflow-traffic-tab.tsx",
           "netflowDevTab": "./components/netflow-traffic-dev-tab.tsx",
+          "networkHealth": "./components/health/network-health.tsx",
         },
       },
       extensions: [
+        {
+          type: "console.navigation/href",
+          properties: {
+            "id": "network-health-link",
+            "perspective": "admin",
+            "section": "observe",
+            name: "%plugin__netobserv-plugin~Network Health%",
+            "href": "/network-health"
+          }
+        },
         {
           type: "console.navigation/href",
           properties: {
@@ -126,6 +137,15 @@ module.exports = {
             path: "/netflow-traffic",
             component: {
               "$codeRef": "netflowParent.default"
+            }
+          }
+        },
+        {
+          type: "console.page/route",
+          properties: {
+            path: "/network-health",
+            component: {
+              "$codeRef": "networkHealth.default"
             }
           }
         },

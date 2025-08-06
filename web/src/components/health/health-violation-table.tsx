@@ -1,13 +1,13 @@
 import { Bullseye, EmptyState, EmptyStateIcon, Text, TextContent, TextVariants, Title } from '@patternfly/react-core';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
-import * as React from 'react';
 import * as _ from 'lodash';
+import * as React from 'react';
 
-import { useTranslation } from 'react-i18next';
-import { ByResource, getRulesPreview } from './helper';
-import { ThSortType } from '@patternfly/react-table/dist/esm/components/Table/base/types';
 import { ResourceLink } from '@openshift-console/dynamic-plugin-sdk';
 import { CheckCircleIcon } from '@patternfly/react-icons';
+import { ThSortType } from '@patternfly/react-table/dist/esm/components/Table/base/types';
+import { useTranslation } from 'react-i18next';
+import { ByResource, getRulesPreview } from './helper';
 import { RuleDetails } from './rule-details';
 
 export interface HealthViolationTableProps {
@@ -43,16 +43,14 @@ export const HealthViolationTable: React.FC<HealthViolationTableProps> = ({ titl
         setActiveSortDirection(direction);
       }
     };
-  }
+  };
 
   const columns: Column[] = [
     {
       title: t('Name'),
       value: (r: ByResource) => r.name,
       display: (r: ByResource) => {
-        return kind ? (
-          <ResourceLink inline={true} kind={kind} name={r.name}/>
-        ) : t('(global)')
+        return kind ? <ResourceLink inline={true} kind={kind} name={r.name} /> : t('(global)');
       },
       sort: buildSortParams(0, 'asc')
     },
@@ -85,7 +83,7 @@ export const HealthViolationTable: React.FC<HealthViolationTableProps> = ({ titl
       title: t('Rules'),
       value: (r: ByResource) => getRulesPreview(r),
       sort: buildSortParams(6, 'asc')
-    },
+    }
   ];
   const nbCols = columns.length + 1;
 
@@ -105,11 +103,12 @@ export const HealthViolationTable: React.FC<HealthViolationTableProps> = ({ titl
 
   const toggleExpanded = (name: string) => {
     const index = expandedRowNames.indexOf(name);
-    const newExpanded: string[] = index >= 0
-      ? [...expandedRowNames.slice(0, index), ...expandedRowNames.slice(index + 1, expandedRowNames.length)]
-      : [...expandedRowNames, name];
+    const newExpanded: string[] =
+      index >= 0
+        ? [...expandedRowNames.slice(0, index), ...expandedRowNames.slice(index + 1, expandedRowNames.length)]
+        : [...expandedRowNames, name];
     setExpandedRowNames(newExpanded);
-  }
+  };
 
   return (
     <>
@@ -126,7 +125,9 @@ export const HealthViolationTable: React.FC<HealthViolationTableProps> = ({ titl
             <Thead>
               <Tr>
                 <Th screenReaderText="Row expansion" />
-                {columns.map(c => (<Th sort={c.sort}>{c.title}</Th>))}
+                {columns.map((c, i) => (
+                  <Th key={'column-' + i} sort={c.sort}>{c.title}</Th>
+                ))}
               </Tr>
             </Thead>
             {sorted.length === 0 && (
@@ -136,9 +137,7 @@ export const HealthViolationTable: React.FC<HealthViolationTableProps> = ({ titl
                     <Bullseye>
                       <EmptyState>
                         <EmptyStateIcon icon={CheckCircleIcon} />
-                        <Title headingLevel="h2">
-                          {t('No violations found')}
-                        </Title>
+                        <Title headingLevel="h2">{t('No violations found')}</Title>
                       </EmptyState>
                     </Bullseye>
                   </Td>
@@ -146,10 +145,10 @@ export const HealthViolationTable: React.FC<HealthViolationTableProps> = ({ titl
               </Tbody>
             )}
             {sorted.map((r, i) => (
-              <Tbody key={'table-body-'+i} data-test={'table-body-'+i}>
+              <Tbody key={'table-body-' + i} data-test={'table-body-' + i}>
                 <>
                   <Tr>
-                  {/* <Tr isExpanded={expandedRowNames.includes(String(r[colNameId]))}> */}
+                    {/* <Tr isExpanded={expandedRowNames.includes(String(r[colNameId]))}> */}
                     <Td
                       expand={{
                         rowIndex: i,
@@ -158,12 +157,14 @@ export const HealthViolationTable: React.FC<HealthViolationTableProps> = ({ titl
                         expandId: 'expandable'
                       }}
                     />
-                    {columns.map(c => (<Td>{c.display ? c.display(r) : c.value(r)}</Td>))}
+                    {columns.map((c, i) => (
+                      <Td key={'column-' + i}>{c.display ? c.display(r) : c.value(r)}</Td>
+                    ))}
                   </Tr>
                   {expandedRowNames.includes(r.name) && (
                     <Tr>
                       <Td colSpan={nbCols}>
-                        <RuleDetails info={r}/>
+                        <RuleDetails info={r} />
                       </Td>
                     </Tr>
                   )}

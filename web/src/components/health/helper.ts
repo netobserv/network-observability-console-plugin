@@ -2,7 +2,7 @@ import { PrometheusAlert, PrometheusLabels, Rule } from '@openshift-console/dyna
 import * as _ from 'lodash';
 
 export type HealthStats = {
-  global: ByResource[],
+  global: ByResource[];
   byNamespace: ByResource[];
   byNode: ByResource[];
 };
@@ -35,7 +35,7 @@ export const buildStats = (rules: Rule[]): HealthStats => {
         a.value = parseFloat(a.value);
       }
       return { ...a, ruleName: r.name, ruleID: r.id, metadata: md };
-    })
+    });
   });
 
   const namespaceLabels: string[] = [];
@@ -64,20 +64,23 @@ export const buildStats = (rules: Rule[]): HealthStats => {
 
 const filterGlobals = (alerts: AlertWithRuleName[], nonGlobalLabels: string[]): ByResource[] => {
   // Keep only rules where none of the non-global labels are set
-  const filtered = alerts.filter(a => !nonGlobalLabels.some(l => (l in a.labels)));
+  const filtered = alerts.filter(a => !nonGlobalLabels.some(l => l in a.labels));
   if (filtered.length === 0) {
     return [];
   }
-  return statsFromGrouped({"global": filtered});
+  return statsFromGrouped({ global: filtered });
 };
 
 const groupBy = (alerts: AlertWithRuleName[], labels: string[]): ByResource[] => {
   if (labels.length === 0) {
     return [];
   }
-  const groups: {[key: string]: AlertWithRuleName[]} = {};
+  const groups: { [key: string]: AlertWithRuleName[] } = {};
   labels.forEach(l => {
-    const byLabel = _.groupBy(alerts.filter(a => l in a.labels), a => a.labels[l]);
+    const byLabel = _.groupBy(
+      alerts.filter(a => l in a.labels),
+      a => a.labels[l]
+    );
     _.keys(byLabel).forEach(k => {
       if (k in groups) {
         groups[k].push(...byLabel[k]);
@@ -158,4 +161,4 @@ export const getHealthMetadata = (annotations: PrometheusLabels): HealthMetadata
     return JSON.parse(annotations['netobserv_io_network_health']) as HealthMetadata;
   }
   return undefined;
-}
+};
