@@ -71,7 +71,7 @@ export const HealthSummary: React.FC<HealthSummaryProps> = ({ rules }) => {
     details.push(t('{{firingAlerts}} critical issues, from {{firingRules}} distinct rules', stats.critical));
   } else if (stats.critical.pendingAlerts > 0) {
     details.push(
-      t('({{pendingAlerts}} pending critical issues, from {{pendingRules}} distinct rules)', stats.critical)
+      t('{{pendingAlerts}} pending critical issues, from {{pendingRules}} distinct rules', stats.critical)
     );
   } else if (variant === AlertVariant.success) {
     details.push(t('No critical issues out of {{total}} rules', stats.critical));

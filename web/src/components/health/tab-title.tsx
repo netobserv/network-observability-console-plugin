@@ -16,11 +16,11 @@ export interface HealthTabTitleProps {
 
 export const HealthTabTitle: React.FC<HealthTabTitleProps> = ({ stats, title }) => {
   const icon = stats.some(s => s.critical.firing.length > 0) ? (
-    <ExclamationCircleIcon />
+    <ExclamationCircleIcon className='icon critical' />
   ) : stats.some(s => s.warning.firing.length > 0) ? (
-    <ExclamationTriangleIcon />
+    <ExclamationTriangleIcon className='icon warning' />
   ) : stats.some(s => s.other.firing.length > 0) ? (
-    <BellIcon />
+    <BellIcon className='icon minor' />
   ) : stats.some(s => s.critical.pending.length > 0) ||
     stats.some(s => s.warning.pending.length > 0) ||
     stats.some(s => s.other.pending.length > 0) ||
@@ -29,7 +29,7 @@ export const HealthTabTitle: React.FC<HealthTabTitleProps> = ({ stats, title }) 
     stats.some(s => s.other.silenced.length > 0) ? (
     <InfoAltIcon />
   ) : (
-    <CheckCircleIcon />
+    <CheckCircleIcon className='icon healthy' />
   );
   return (
     <>
