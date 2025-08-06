@@ -1,12 +1,5 @@
 import { Rule } from '@openshift-console/dynamic-plugin-sdk';
-import {
-  Button,
-  Flex,
-  FlexItem,
-  PageSection,
-  TextVariants,
-  Title
-} from '@patternfly/react-core';
+import { Button, Flex, FlexItem, PageSection, Tab, Tabs, TextVariants, Title } from '@patternfly/react-core';
 import { SyncAltIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
 import { murmur3 } from 'murmurhash-js';
@@ -22,6 +15,7 @@ import HealthError from './health-error';
 import { HealthSummary } from './health-summary';
 import { HealthViolationTable } from './health-violation-table';
 import { buildStats, HealthStats } from './helper';
+import { HealthTabTitle } from './tab-title';
 
 import './health.css';
 
@@ -33,6 +27,7 @@ export const NetworkHealth: React.FC<{}> = ({}) => {
   const [interval, setInterval] = useLocalStorage<number | undefined>(localStorageHealthRefreshKey, 30000);
   const [rules, setRules] = React.useState<Rule[]>([]);
   const [stats, setStats] = React.useState<HealthStats>({ global: [], byNamespace: [], byNode: [] });
+  const [activeTabKey, setActiveTabKey] = React.useState<string>('global');
 
   const fetch = React.useCallback(() => {
     setLoading(true);
@@ -77,7 +72,7 @@ export const NetworkHealth: React.FC<{}> = ({}) => {
   }, []);
 
   usePoll(fetch, interval);
-  React.useEffect(fetch, []);
+  React.useEffect(fetch, [fetch]);
 
   return (
     <PageSection id="pageSection" className={`${isDarkTheme ? 'dark' : 'light'}`}>
@@ -110,23 +105,47 @@ export const NetworkHealth: React.FC<{}> = ({}) => {
       </Flex>
       {error && <HealthError title={t('Error')} body={error} />}
       <HealthSummary rules={rules} />
-      <HealthViolationTable
-        title={t('Global rule violations')}
-        stats={stats.global}
-        // isDark={props.isDark}
-      />
-      <HealthViolationTable
-        title={t('Rule violations per node')}
-        stats={stats.byNode}
-        kind={'Node'}
-        // isDark={props.isDark}
-      />
-      <HealthViolationTable
-        title={t('Rule violations per namespace')}
-        stats={stats.byNamespace}
-        kind={'Namespace'}
-        // isDark={props.isDark}
-      />
+      <Tabs
+        activeKey={activeTabKey}
+        onSelect={(_, tabIndex) => setActiveTabKey(String(tabIndex))}
+        role="region"
+      >
+        <Tab
+          eventKey={'global'}
+          title={<HealthTabTitle title={t('Global')} stats={stats.global} />}
+          aria-label="Tab global"
+        >
+          <HealthViolationTable
+            title={t('Global rule violations')}
+            stats={stats.global}
+            // isDark={props.isDark}
+          />
+        </Tab>
+        <Tab
+          eventKey={'per-node'}
+          title={<HealthTabTitle title={t('Nodes')} stats={stats.byNode} />}
+          aria-label="Tab per node"
+        >
+          <HealthViolationTable
+            title={t('Rule violations per node')}
+            stats={stats.byNode}
+            kind={'Node'}
+            // isDark={props.isDark}
+          />
+        </Tab>
+        <Tab
+          eventKey={'per-namespace'}
+          title={<HealthTabTitle title={t('Namespaces')} stats={stats.byNamespace} />}
+          aria-label="Tab per namespace"
+        >
+          <HealthViolationTable
+            title={t('Rule violations per namespace')}
+            stats={stats.byNamespace}
+            kind={'Namespace'}
+            // isDark={props.isDark}
+          />
+        </Tab>
+      </Tabs>
     </PageSection>
   );
 };
