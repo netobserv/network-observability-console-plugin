@@ -1,3 +1,27 @@
+#pageSection .icon.critical {
+    color: rgb(177, 56, 11);
+}
+
+#pageSection .dark .icon.critical {
+    color: rgb(240, 86, 29);
+}
+
+#pageSection .icon.warning {
+    color: rgb(220, 166, 20);
+}
+
+#pageSection .dark .icon.warning {
+    color: rgb(255, 204, 23);
+}
+
+#pageSection .icon.minor {
+    color: rgb(154, 216, 216);
+}
+
+#pageSection .dark .icon.minor {
+    color: rgb(154, 216, 216);
+}
+
 .netobserv-refresh-interval-container {
     margin: 0 !important;
 }
@@ -11,4 +35,40 @@
     to {
         transform: rotate(360deg);
     }
+}
+
+.card.critical {
+    border-top: 3px solid;
+    border-top-color: rgb(177, 56, 11);
+}
+
+.card.dark.critical {
+    border-top-color: rgb(240, 86, 29);
+}
+
+.card.warning {
+    border-top: 3px solid;
+    border-top-color: rgb(220, 166, 20);
+}
+
+.card.dark.warning {
+    border-top-color: rgb(255, 204, 23);
+}
+
+.card.minor {
+    border-top: 3px solid;
+    border-top-color: rgb(154, 216, 216);
+}
+
+.card.dark.minor {
+    border-top-color: rgb(154, 216, 216);
+}
+
+.card-header {
+    min-height: 80px;
+}
+
+.card-header .icon {
+    width: 28px;
+    height: 28px;
 }
