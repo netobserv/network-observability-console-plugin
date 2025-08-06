@@ -1,7 +1,7 @@
-import * as React from 'react';
-import { useTranslation } from 'react-i18next';
 import { Rule } from '@openshift-console/dynamic-plugin-sdk';
 import { Alert, AlertVariant } from '@patternfly/react-core';
+import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 
 export interface HealthSummaryProps {
   rules: Rule[];
@@ -14,8 +14,10 @@ export const HealthSummary: React.FC<HealthSummaryProps> = ({ rules }) => {
     return (
       <Alert title={t('No rules configured, health cannot be determined')}>
         <>
-          {t('Check alert definitions in FlowCollector "spec.processor.metrics.alertGroups" and "spec.processor.metrics.disableAlerts".')}
-          <br/>
+          {t(
+            'Check alert definitions in FlowCollector "spec.processor.metrics.alertGroups" and "spec.processor.metrics.disableAlerts".'
+          )}
+          <br />
           {t('Make sure that Prometheus and AlertManager are running.')}
         </>
       </Alert>
@@ -66,15 +68,10 @@ export const HealthSummary: React.FC<HealthSummaryProps> = ({ rules }) => {
 
   const details: string[] = [];
   if (stats.critical.firingAlerts > 0) {
-    details.push(
-      t('{{firingAlerts}} critical issues, from {{firingRules}} distinct rules', stats.critical)
-    );
+    details.push(t('{{firingAlerts}} critical issues, from {{firingRules}} distinct rules', stats.critical));
   } else if (stats.critical.pendingAlerts > 0) {
     details.push(
-      t(
-        '({{pendingAlerts}} pending critical issues, from {{pendingRules}} distinct rules)',
-        stats.critical
-      )
+      t('({{pendingAlerts}} pending critical issues, from {{pendingRules}} distinct rules)', stats.critical)
     );
   } else if (variant === AlertVariant.success) {
     details.push(t('No critical issues out of {{total}} rules', stats.critical));
@@ -82,18 +79,14 @@ export const HealthSummary: React.FC<HealthSummaryProps> = ({ rules }) => {
   if (stats.warning.firingAlerts > 0) {
     details.push(t('{{firingAlerts}} warnings, from {{firingRules}} distinct rules', stats.warning));
   } else if (stats.warning.pendingAlerts > 0) {
-    details.push(
-      t('{{pendingAlerts}} pending warnings, from {{pendingRules}} distinct rules', stats.warning)
-    );
+    details.push(t('{{pendingAlerts}} pending warnings, from {{pendingRules}} distinct rules', stats.warning));
   } else if (variant === AlertVariant.success) {
     details.push(t('No warnings out of {{total}} rules', stats.warning));
   }
   if (stats.info.firingAlerts > 0) {
     details.push(t('{{firingAlerts}} minor issues, from {{firingRules}} distinct rules', stats.info));
   } else if (stats.info.pendingAlerts > 0) {
-    details.push(
-      t('{{pendingAlerts}} pending minor issues, from {{pendingRules}} distinct rules', stats.info)
-    );
+    details.push(t('{{pendingAlerts}} pending minor issues, from {{pendingRules}} distinct rules', stats.info));
   } else if (variant === AlertVariant.success) {
     details.push(t('No minor issues out of {{total}} rules', stats.info));
   }

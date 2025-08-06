@@ -1,4 +1,4 @@
-import { K8sModel, Rule } from '@openshift-console/dynamic-plugin-sdk';
+import { K8sModel } from '@openshift-console/dynamic-plugin-sdk';
 import { Drawer, DrawerContent, DrawerContentBody, Flex, FlexItem } from '@patternfly/react-core';
 import { t } from 'i18next';
 import _ from 'lodash';
@@ -32,7 +32,6 @@ import { SearchEvent, SearchHandle } from '../search/search';
 import { NetflowOverview, NetflowOverviewHandle } from '../tabs/netflow-overview/netflow-overview';
 import { NetflowTable, NetflowTableHandle } from '../tabs/netflow-table/netflow-table';
 import { NetflowTopology, NetflowTopologyHandle } from '../tabs/netflow-topology/netflow-topology';
-import { Health, HealthHandle } from '../tabs/health/health';
 import ElementPanel from './element/element-panel';
 import './netflow-traffic-drawer.css';
 import RecordPanel from './record/record-panel';
@@ -41,7 +40,6 @@ export type NetflowTrafficDrawerHandle = {
   getOverviewHandle: () => NetflowOverviewHandle | null;
   getTableHandle: () => NetflowTableHandle | null;
   getTopologyHandle: () => NetflowTopologyHandle | null;
-  getHealthHandle: () => HealthHandle | null;
 };
 
 export interface NetflowTrafficDrawerProps {
@@ -110,8 +108,6 @@ export const NetflowTrafficDrawer: React.FC<NetflowTrafficDrawerProps> = React.f
     const overviewRef = React.useRef<NetflowOverviewHandle>(null);
     const tableRef = React.useRef<NetflowTableHandle>(null);
     const topologyRef = React.useRef<NetflowTopologyHandle>(null);
-    const healthRef = React.useRef<HealthHandle>(null);
-    const [selectedRule, setSelectedRule] = React.useState<Rule | undefined>(undefined);
 
     const {
       defaultFilters,
@@ -132,8 +128,7 @@ export const NetflowTrafficDrawer: React.FC<NetflowTrafficDrawerProps> = React.f
     React.useImperativeHandle(ref, () => ({
       getOverviewHandle: () => overviewRef.current,
       getTableHandle: () => tableRef.current,
-      getTopologyHandle: () => topologyRef.current,
-      getHealthHandle: () => healthRef.current
+      getTopologyHandle: () => topologyRef.current
     }));
 
     const onRecordSelect = React.useCallback(
@@ -320,19 +315,6 @@ export const NetflowTrafficDrawer: React.FC<NetflowTrafficDrawerProps> = React.f
                 scopes={props.scopes}
                 resetDefaultFilters={getResetDefaultFiltersProp()}
                 clearFilters={getClearFiltersProp()}
-              />
-            );
-            break;
-          case 'health':
-            content = (
-              <Health
-                ref={healthRef}
-                loading={props.loading}
-                selectedRule={selectedRule}
-                onSelect={setSelectedRule}
-                resetDefaultFilters={getResetDefaultFiltersProp()}
-                clearFilters={getClearFiltersProp()}
-                isDark={props.isDarkTheme}
               />
             );
             break;
