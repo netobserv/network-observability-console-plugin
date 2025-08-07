@@ -103,6 +103,7 @@
     }
   },
   "dependencies": {
+    "@jpinsonneau/html-to-image": "^1.11.13",
     "@openshift-console/plugin-shared": "^0.0.3",
     "@patternfly/patternfly": "^5.4.0",
     "@patternfly/react-charts": "^7.4.0",
@@ -113,7 +114,6 @@
     "@patternfly/react-tokens": "^5.4.0",
     "@patternfly/react-topology": "^5.4.0",
     "axios": "^1.8.2",
-    "html-to-image": "^1.11.13",
     "i18next": "^21.8.14",
     "i18next-http-backend": "^1.0.21",
     "murmurhash-js": "^1.0.0",
