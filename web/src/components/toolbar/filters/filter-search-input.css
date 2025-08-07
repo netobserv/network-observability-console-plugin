@@ -1,0 +1,7 @@
+#filter-search-input, #filter-popper {
+  min-width: 400px !important;
+}
+
+.filters-actions {
+  margin-left: 180px;
+}
