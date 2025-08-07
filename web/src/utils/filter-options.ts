@@ -8,7 +8,7 @@ import { splitResource, SplitStage } from '../model/resource';
 import { autoCompleteCache } from './autocomplete-cache';
 import { ContextSingleton } from './context';
 import { dnsErrors, dnsRCodes } from './dns';
-import { DSCP_VALUES } from './dscp';
+import { dscpValues } from './dscp';
 import { dropCauses, dropStates } from './pkt-drop';
 import { getPort, getService } from './port';
 import { tcpFlagsList } from './tcp-flags';
@@ -176,9 +176,9 @@ export const getDnsErrorCodeOptions = (value: string): Promise<FilterOption[]> =
 
 export const getDSCPOptions = (value: string): Promise<FilterOption[]> => {
   return Promise.resolve(
-    DSCP_VALUES.filter(
-      opt => String(opt.value).includes(value) || opt.name.toLowerCase().includes(value.toLowerCase())
-    ).map(v => ({ name: v.name, value: String(v.value) }))
+    dscpValues
+      .filter(opt => String(opt.value).includes(value) || opt.name.toLowerCase().includes(value.toLowerCase()))
+      .map(v => ({ name: v.name, value: String(v.value) }))
   );
 };
 

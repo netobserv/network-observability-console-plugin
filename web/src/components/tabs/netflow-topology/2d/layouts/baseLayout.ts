@@ -1,21 +1,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
-  ADD_CHILD_EVENT,
+  ADD_CHILD_EVENT as addChildEvent,
   BaseEdge,
   DragEvent,
   DragNodeEventListener,
   DragOperationWithType,
-  DRAG_MOVE_OPERATION,
-  DRAG_NODE_END_EVENT,
-  DRAG_NODE_START_EVENT,
+  DRAG_MOVE_OPERATION as dragMoveOperation,
+  DRAG_NODE_END_EVENT as dragNodeEndEvent,
+  DRAG_NODE_START_EVENT as dragNodeStartEvent,
   Edge,
   ElementChildEventListener,
   ElementVisibilityChangeEvent,
   ElementVisibilityChangeEventListener,
-  ELEMENT_VISIBILITY_CHANGE_EVENT,
+  ELEMENT_VISIBILITY_CHANGE_EVENT as elementVisibilityChangeEvent,
   getClosestVisibleParent,
   Graph,
-  GRAPH_LAYOUT_END_EVENT,
+  GRAPH_LAYOUT_END_EVENT as graphLayoutEndEvent,
   groupNodeElements,
   isNode,
   Layout,
@@ -26,13 +26,13 @@ import {
   leafNodeElements,
   Node,
   NodeCollapseChangeEventListener,
-  NODE_COLLAPSE_CHANGE_EVENT,
-  REMOVE_CHILD_EVENT
+  NODE_COLLAPSE_CHANGE_EVENT as nodeCollapseChangeEvent,
+  REMOVE_CHILD_EVENT as removeChildEvent
 } from '@patternfly/react-topology';
 import { ForceSimulation } from '@patternfly/react-topology/dist/esm/layouts/ForceSimulation';
 import { action, makeObservable } from 'mobx';
 
-export const LAYOUT_DEFAULTS: LayoutOptions = {
+export const layoutDefaults: LayoutOptions = {
   linkDistance: 60,
   nodeDistance: 35,
   groupDistance: 35,
@@ -69,7 +69,7 @@ export class BaseLayout implements Layout {
 
     this.graph = graph;
     this.options = {
-      ...LAYOUT_DEFAULTS,
+      ...layoutDefaults,
       onSimulationEnd: this.onSimulationEnd,
       listenForChanges: true,
       ...options
@@ -78,8 +78,8 @@ export class BaseLayout implements Layout {
     if (this.options.allowDrag && graph.hasController()) {
       graph
         .getController()
-        .addEventListener<DragNodeEventListener>(DRAG_NODE_START_EVENT, this.handleDragStart)
-        .addEventListener<DragNodeEventListener>(DRAG_NODE_END_EVENT, this.handleDragEnd);
+        .addEventListener<DragNodeEventListener>(dragNodeStartEvent, this.handleDragStart)
+        .addEventListener<DragNodeEventListener>(dragNodeEndEvent, this.handleDragEnd);
     }
 
     this.forceSimulation = new ForceSimulation(this.options);
@@ -97,8 +97,8 @@ export class BaseLayout implements Layout {
     if (this.options.allowDrag && this.graph.hasController()) {
       this.graph
         .getController()
-        .removeEventListener(DRAG_NODE_START_EVENT, this.handleDragStart)
-        .removeEventListener(DRAG_NODE_END_EVENT, this.handleDragEnd);
+        .removeEventListener(dragNodeStartEvent, this.handleDragStart)
+        .removeEventListener(dragNodeEndEvent, this.handleDragEnd);
     }
 
     this.stopListening();
@@ -119,7 +119,7 @@ export class BaseLayout implements Layout {
       return;
     }
 
-    if (operation.type !== DRAG_MOVE_OPERATION) {
+    if (operation.type !== dragMoveOperation) {
       this.forceSimulation.stopSimulation();
       return;
     }
@@ -154,7 +154,7 @@ export class BaseLayout implements Layout {
       return;
     }
 
-    if (operation.type !== DRAG_MOVE_OPERATION) {
+    if (operation.type !== dragMoveOperation) {
       this.forceSimulation.restart();
       return;
     }
@@ -186,10 +186,10 @@ export class BaseLayout implements Layout {
   private startListening(): void {
     const controller = this.graph.hasController() ? this.graph.getController() : undefined;
     if (controller && this.options.listenForChanges) {
-      controller.addEventListener(ADD_CHILD_EVENT, this.handleChildAdded);
-      controller.addEventListener(REMOVE_CHILD_EVENT, this.handleChildRemoved);
-      controller.addEventListener(ELEMENT_VISIBILITY_CHANGE_EVENT, this.handleElementVisibilityChange);
-      controller.addEventListener(NODE_COLLAPSE_CHANGE_EVENT, this.handleNodeCollapse);
+      controller.addEventListener(addChildEvent, this.handleChildAdded);
+      controller.addEventListener(removeChildEvent, this.handleChildRemoved);
+      controller.addEventListener(elementVisibilityChangeEvent, this.handleElementVisibilityChange);
+      controller.addEventListener(nodeCollapseChangeEvent, this.handleNodeCollapse);
     }
   }
 
@@ -203,10 +203,10 @@ export class BaseLayout implements Layout {
       cancelAnimationFrame(this.scheduleHandle);
     }
     if (controller) {
-      controller.removeEventListener(ADD_CHILD_EVENT, this.handleChildAdded);
-      controller.removeEventListener(REMOVE_CHILD_EVENT, this.handleChildRemoved);
-      controller.removeEventListener(ELEMENT_VISIBILITY_CHANGE_EVENT, this.handleElementVisibilityChange);
-      controller.removeEventListener(NODE_COLLAPSE_CHANGE_EVENT, this.handleNodeCollapse);
+      controller.removeEventListener(addChildEvent, this.handleChildAdded);
+      controller.removeEventListener(removeChildEvent, this.handleChildRemoved);
+      controller.removeEventListener(elementVisibilityChangeEvent, this.handleElementVisibilityChange);
+      controller.removeEventListener(nodeCollapseChangeEvent, this.handleNodeCollapse);
     }
   }
 
@@ -489,7 +489,7 @@ export class BaseLayout implements Layout {
 
       this.startLayout(this.graph, initialRun, addingNodes, () => {
         if (this.graph.hasController()) {
-          this.graph.getController().fireEvent(GRAPH_LAYOUT_END_EVENT, { graph: this.graph });
+          this.graph.getController().fireEvent(graphLayoutEndEvent, { graph: this.graph });
         }
       });
     } else if (restart && this.options.layoutOnDrag) {

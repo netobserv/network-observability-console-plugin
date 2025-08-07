@@ -59,7 +59,7 @@ export type OverviewPanelInfo = {
   tooltip?: string;
 };
 
-export const DEFAULT_PANEL_IDS: OverviewPanelId[] = [
+export const defaultPanelIds: OverviewPanelId[] = [
   'overview',
   'top_sankey',
   'inbound_region',
@@ -128,7 +128,7 @@ export const getDefaultOverviewPanels = (customIds?: string[]): OverviewPanel[] 
   }
 
   return ids.map(id => {
-    return { id, isSelected: DEFAULT_PANEL_IDS.includes(id) };
+    return { id, isSelected: defaultPanelIds.includes(id) };
   });
 };
 

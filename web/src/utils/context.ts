@@ -1,7 +1,7 @@
 import { K8sModel } from '@openshift-console/dynamic-plugin-sdk';
 import { ScopeConfigDef } from '../model/scope';
 
-export const DEFAULT_HOST = '/api/proxy/plugin/netobserv-plugin/backend';
+export const defaultHost = '/api/proxy/plugin/netobserv-plugin/backend';
 export class ContextSingleton {
   private static instance: ContextSingleton;
   private isStandalone: boolean;
@@ -11,7 +11,7 @@ export class ContextSingleton {
   private scopes: ScopeConfigDef[] = [];
 
   private constructor() {
-    this.host = DEFAULT_HOST;
+    this.host = defaultHost;
   }
 
   public static getInstance(): ContextSingleton {
@@ -31,7 +31,7 @@ export class ContextSingleton {
   public static setContext(forcedNamespace?: string) {
     const instance = ContextSingleton.getInstance();
     if (!instance.isStandalone) {
-      instance.host = DEFAULT_HOST;
+      instance.host = defaultHost;
     }
     instance.forcedNamespace = forcedNamespace;
   }
