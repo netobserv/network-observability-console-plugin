@@ -12,7 +12,7 @@ export const HealthSummary: React.FC<HealthSummaryProps> = ({ rules }) => {
 
   if (rules.length === 0) {
     return (
-      <Alert title={t('No rules configured, health cannot be determined')}>
+      <Alert title={t('No rules found, health cannot be determined')}>
         <>
           {t(
             'Check alert definitions in FlowCollector "spec.processor.metrics.alertGroups" and "spec.processor.metrics.disableAlerts".'
@@ -70,9 +70,7 @@ export const HealthSummary: React.FC<HealthSummaryProps> = ({ rules }) => {
   if (stats.critical.firingAlerts > 0) {
     details.push(t('{{firingAlerts}} critical issues, from {{firingRules}} distinct rules', stats.critical));
   } else if (stats.critical.pendingAlerts > 0) {
-    details.push(
-      t('{{pendingAlerts}} pending critical issues, from {{pendingRules}} distinct rules', stats.critical)
-    );
+    details.push(t('{{pendingAlerts}} pending critical issues, from {{pendingRules}} distinct rules', stats.critical));
   } else if (variant === AlertVariant.success) {
     details.push(t('No critical issues out of {{total}} rules', stats.critical));
   }
