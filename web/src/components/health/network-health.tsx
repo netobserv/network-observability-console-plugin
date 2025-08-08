@@ -11,9 +11,9 @@ import { localStorageHealthRefreshKey, useLocalStorage } from '../../utils/local
 import { usePoll } from '../../utils/poll-hook';
 import { useTheme } from '../../utils/theme-hook';
 import { RefreshDropdown } from '../dropdowns/refresh-dropdown';
+import { HealthDrawerContainer } from './health-drawer-container';
 import HealthError from './health-error';
 import { HealthSummary } from './health-summary';
-import { HealthGallery } from './health-gallery';
 import { buildStats, HealthStats } from './helper';
 import { HealthTabTitle } from './tab-title';
 
@@ -103,50 +103,49 @@ export const NetworkHealth: React.FC<{}> = ({}) => {
           </FlexItem>
         </Flex>
       </Flex>
-      {error && <HealthError title={t('Error')} body={error} />}
       <HealthSummary rules={rules} />
-      <Tabs
-        activeKey={activeTabKey}
-        onSelect={(_, tabIndex) => setActiveTabKey(String(tabIndex))}
-        role="region"
-        className={isDarkTheme ? 'dark' : ''}
-      >
-        <Tab
-          eventKey={'global'}
-          title={<HealthTabTitle title={t('Global')} stats={stats.global} />}
-          aria-label="Tab global"
+      {error ? (
+        <HealthError title={t('Error')} body={error} />
+      ) : (
+        <Tabs
+          activeKey={activeTabKey}
+          onSelect={(_, tabIndex) => setActiveTabKey(String(tabIndex))}
+          role="region"
+          className={isDarkTheme ? 'dark' : ''}
         >
-          <HealthGallery
-            title={t('Global rule violations')}
-            stats={stats.global}
-            isDark={isDarkTheme}
-          />
-        </Tab>
-        <Tab
-          eventKey={'per-node'}
-          title={<HealthTabTitle title={t('Nodes')} stats={stats.byNode} />}
-          aria-label="Tab per node"
-        >
-          <HealthGallery
-            title={t('Rule violations per node')}
-            stats={stats.byNode}
-            kind={'Node'}
-            isDark={isDarkTheme}
-          />
-        </Tab>
-        <Tab
-          eventKey={'per-namespace'}
-          title={<HealthTabTitle title={t('Namespaces')} stats={stats.byNamespace} />}
-          aria-label="Tab per namespace"
-        >
-          <HealthGallery
-            title={t('Rule violations per namespace')}
-            stats={stats.byNamespace}
-            kind={'Namespace'}
-            isDark={isDarkTheme}
-          />
-        </Tab>
-      </Tabs>
+          <Tab
+            eventKey={'global'}
+            title={<HealthTabTitle title={t('Global')} stats={stats.global} />}
+            aria-label="Tab global"
+          >
+            <HealthDrawerContainer title={t('Global rule violations')} stats={stats.global} isDark={isDarkTheme} />
+          </Tab>
+          <Tab
+            eventKey={'per-node'}
+            title={<HealthTabTitle title={t('Nodes')} stats={stats.byNode} />}
+            aria-label="Tab per node"
+          >
+            <HealthDrawerContainer
+              title={t('Rule violations per node')}
+              stats={stats.byNode}
+              kind={'Node'}
+              isDark={isDarkTheme}
+            />
+          </Tab>
+          <Tab
+            eventKey={'per-namespace'}
+            title={<HealthTabTitle title={t('Namespaces')} stats={stats.byNamespace} />}
+            aria-label="Tab per namespace"
+          >
+            <HealthDrawerContainer
+              title={t('Rule violations per namespace')}
+              stats={stats.byNamespace}
+              kind={'Namespace'}
+              isDark={isDarkTheme}
+            />
+          </Tab>
+        </Tabs>
+      )}
     </PageSection>
   );
 };

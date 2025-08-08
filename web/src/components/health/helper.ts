@@ -9,16 +9,17 @@ export type HealthStats = {
 
 export type ByResource = {
   name: string;
-  alerts: AlertWithRuleName[];
   critical: SeverityStats;
   warning: SeverityStats;
   other: SeverityStats;
+  score: number;
 };
 
 type SeverityStats = {
-  firing: string[];
-  pending: string[];
-  silenced: string[];
+  firing: AlertWithRuleName[];
+  pending: AlertWithRuleName[];
+  silenced: AlertWithRuleName[];
+  inactive: string[];
 };
 
 export type AlertWithRuleName = PrometheusAlert & {
@@ -27,14 +28,40 @@ export type AlertWithRuleName = PrometheusAlert & {
   metadata?: HealthMetadata;
 };
 
+type RuleWithMetadata = Rule & {
+  metadata?: HealthMetadata;
+};
+
+type HealthMetadata = {
+  threshold: string;
+  thresholdF: number;
+  unit: string;
+  nodeLabels?: string[];
+  namespaceLabels?: string[];
+};
+
+export const getHealthMetadata = (annotations: PrometheusLabels): HealthMetadata | undefined => {
+  if ('netobserv_io_network_health' in annotations) {
+    const md = (JSON.parse(annotations['netobserv_io_network_health']) as HealthMetadata) || undefined;
+    if (md) {
+      md.thresholdF = parseFloat(md.threshold) || 0;
+    }
+    return md;
+  }
+  return undefined;
+};
+
 export const buildStats = (rules: Rule[]): HealthStats => {
-  const alerts: AlertWithRuleName[] = rules.flatMap(r => {
+  const ruleWithMD: RuleWithMetadata[] = rules.map(r => {
     const md = getHealthMetadata(r.annotations);
+    return { ...r, metadata: md };
+  });
+  const alerts: AlertWithRuleName[] = ruleWithMD.flatMap(r => {
     return r.alerts.map(a => {
       if (typeof a.value === 'string') {
         a.value = parseFloat(a.value);
       }
-      return { ...a, ruleName: r.name, ruleID: r.id, metadata: md };
+      return { ...a, ruleName: r.name, ruleID: r.id, metadata: r.metadata };
     });
   });
 
@@ -59,6 +86,15 @@ export const buildStats = (rules: Rule[]): HealthStats => {
   const global = filterGlobals(alerts, [...namespaceLabels, ...nodeLabels]);
   const byNamespace = groupBy(alerts, namespaceLabels);
   const byNode = groupBy(alerts, nodeLabels);
+  // Inject inactive rules
+  const globalRules = ruleWithMD.filter(
+    r => _.isEmpty(r.metadata?.namespaceLabels) && _.isEmpty(r.metadata?.nodeLabels)
+  );
+  const namespaceRules = ruleWithMD.filter(r => !_.isEmpty(r.metadata?.namespaceLabels));
+  const nodeRules = ruleWithMD.filter(r => !_.isEmpty(r.metadata?.nodeLabels));
+  injectInactive(globalRules, global);
+  injectInactive(namespaceRules, byNamespace);
+  injectInactive(nodeRules, byNode);
   return { global, byNamespace, byNode };
 };
 
@@ -98,10 +134,10 @@ const statsFromGrouped = (g: _.Dictionary<AlertWithRuleName[]>): ByResource[] =>
     if (k) {
       const br: ByResource = {
         name: k,
-        alerts: g[k],
-        critical: { firing: [], pending: [], silenced: [] },
-        warning: { firing: [], pending: [], silenced: [] },
-        other: { firing: [], pending: [], silenced: [] }
+        critical: { firing: [], pending: [], silenced: [], inactive: [] },
+        warning: { firing: [], pending: [], silenced: [], inactive: [] },
+        other: { firing: [], pending: [], silenced: [], inactive: [] },
+        score: 0
       };
       stats.push(br);
       g[k].forEach(alert => {
@@ -119,46 +155,124 @@ const statsFromGrouped = (g: _.Dictionary<AlertWithRuleName[]>): ByResource[] =>
         }
         switch (alert.state) {
           case 'firing':
-            stats.firing.push(alert.ruleName);
+            stats.firing.push(alert);
             break;
           case 'pending':
-            stats.pending.push(alert.ruleName);
+            stats.pending.push(alert);
             break;
           case 'silenced':
-            stats.silenced.push(alert.ruleName);
+            stats.silenced.push(alert);
             break;
         }
       });
+      br.score = computeScore(br);
     }
   });
   return stats;
 };
 
-export const getRulesPreview = (byr: ByResource): string => {
-  const r: string[] = [];
-  [byr.critical.firing, byr.warning.firing, byr.other.firing].forEach(list => {
-    list.forEach(name => {
-      if (r.length < 3 && !r.includes(name)) {
-        r.push(name);
+const injectInactive = (rules: RuleWithMetadata[], groups: ByResource[]) => {
+  groups.forEach(g => {
+    const allAlerts = getAllAlerts(g).map(a => a.ruleName);
+    rules.forEach(r => {
+      if (allAlerts.includes(r.name)) {
+        // There's an alert for this rule, skip
+        return;
+      }
+      switch (r.labels.severity) {
+        case 'critical':
+          g.critical.inactive.push(r.name);
+          break;
+        case 'warning':
+          g.warning.inactive.push(r.name);
+          break;
+        default:
+          g.other.inactive.push(r.name);
+          break;
       }
     });
   });
-  if (r.length < 3) {
-    return r.join(', ');
-  }
-  return r.join(', ') + '...';
 };
 
-type HealthMetadata = {
-  threshold: string;
-  unit: string;
-  nodeLabels?: string[];
-  namespaceLabels?: string[];
+export const getAllAlerts = (g: ByResource): AlertWithRuleName[] => {
+  return [
+    ...g.critical.firing,
+    ...g.warning.firing,
+    ...g.other.firing,
+    ...g.critical.pending,
+    ...g.warning.pending,
+    ...g.other.pending,
+    ...g.critical.silenced,
+    ...g.warning.silenced,
+    ...g.other.silenced
+  ];
 };
 
-export const getHealthMetadata = (annotations: PrometheusLabels): HealthMetadata | undefined => {
-  if ('netobserv_io_network_health' in annotations) {
-    return JSON.parse(annotations['netobserv_io_network_health']) as HealthMetadata;
+export const getAlertFilteredLabels = (alert: AlertWithRuleName, target: string): [string, string][] => {
+  return Object.keys(alert.labels)
+    .filter(
+      k => k !== 'app' && k !== 'netobserv' && k !== 'severity' && k !== 'alertname' && alert.labels[k] !== target
+    )
+    .map(k => [k, alert.labels[k]]);
+};
+
+export const getAlertLink = (a: AlertWithRuleName): string => {
+  const labels: string[] = [];
+  Object.keys(a.labels).forEach(k => {
+    labels.push(k + '=' + a.labels[k]);
+  });
+  return `/monitoring/alerts/${a.ruleID}?${labels.join('&')}`;
+};
+
+const criticalScore = 1;
+const warningScore = 0.5;
+const minorScore = 0.25;
+const pendingScore = 0.3;
+const silencedScore = 0.1;
+
+// Score [0,10]; higher is better
+export const computeScore = (r: ByResource): number => {
+  console.log('Compute score for ' + r.name, r);
+  const allAlerts = getAllAlerts(r);
+  let score = allAlerts.map(a => computeAlertScore(a)).reduce((a, b) => a + b, 0);
+  if (score === 0) {
+    return 0;
   }
-  return undefined;
+  score /=
+    allAlerts.length +
+    r.critical.inactive.length * criticalScore +
+    r.warning.inactive.length * warningScore +
+    r.other.inactive.length * minorScore;
+  return 10 * (1 - score);
+};
+
+// Score [0,1]; lower is better
+export const computeAlertScore = (a: AlertWithRuleName, ignoreSeverity?: boolean): number => {
+  let multiplier = 1;
+  if (!ignoreSeverity) {
+    switch (a.labels.severity) {
+      case 'critical':
+        multiplier *= criticalScore;
+        break;
+      case 'warning':
+        multiplier *= warningScore;
+        break;
+      default:
+        multiplier *= minorScore;
+        break;
+    }
+  }
+  switch (a.state) {
+    case 'pending':
+      multiplier *= pendingScore;
+      break;
+    case 'silenced':
+      multiplier *= silencedScore;
+      break;
+  }
+  // Assuming the alert value is a [0-100] percentage. Needs update if more use cases come up.
+  const threshold = a.metadata?.thresholdF || 0;
+  const range = 100 - threshold;
+  const excess = Math.max((a.value as number) - threshold, 0);
+  return (excess * multiplier) / range;
 };
