@@ -5,7 +5,7 @@ import { Label } from '@patternfly/react-core';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { valueFormat } from '../../utils/format';
-import { AlertWithRuleName, ByResource, getHealthMetadata } from './helper';
+import { ByResource, getAlertFilteredLabels, getAlertLink, getAllAlerts, getHealthMetadata } from './helper';
 
 export interface RuleDetailsProps {
   info: ByResource;
@@ -14,43 +14,28 @@ export interface RuleDetailsProps {
 export const RuleDetails: React.FC<RuleDetailsProps> = ({ info }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
-  const buildLink = (r: AlertWithRuleName): string => {
-    const labels: string[] = [];
-    Object.keys(r.labels).forEach(k => {
-      labels.push(k + '=' + r.labels[k]);
-    });
-    return `/monitoring/alerts/${r.ruleID}?${labels.join('&')}`;
-  };
+  const allAlerts = getAllAlerts(info);
 
   return (
-    <Table data-test-rows-count={info.alerts.length} aria-label="Detailed alerting rules" variant="compact">
+    <Table data-test-rows-count={allAlerts.length} aria-label="Detailed alerting rules" variant="compact">
       <Tbody>
-        {info.alerts.map((a, i) => {
+        {allAlerts.map((a, i) => {
           const md = getHealthMetadata(a.annotations);
           return (
             <Tr key={'detailed-rules-row-' + i}>
               <Td>
-                <Link to={buildLink(a)} title={t('Navigate to alert details')}>
+                <Link to={getAlertLink(a)} title={t('Navigate to alert details')}>
                   {a.annotations['summary']}
                 </Link>
               </Td>
               <Td>{a.state}</Td>
               <Td>{a.labels.severity}</Td>
               <Td>
-                {Object.keys(a.labels)
-                  .filter(
-                    k =>
-                      k !== 'app' &&
-                      k !== 'netobserv' &&
-                      k !== 'severity' &&
-                      k !== 'alertname' &&
-                      a.labels[k] !== info.name
-                  )
-                  .map(k => (
-                    <Label key={k}>
-                      {k}={a.labels[k]}
-                    </Label>
-                  ))}
+                {getAlertFilteredLabels(a, info.name).map(kv => (
+                  <Label key={kv[0]}>
+                    {kv[0]}={kv[1]}
+                  </Label>
+                ))}
               </Td>
               <Td>
                 {valueFormat(a.value as number, 2)}

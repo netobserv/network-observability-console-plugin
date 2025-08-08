@@ -1,0 +1,17 @@
+.heatmap {
+  display: grid;
+  grid-template-columns: 2rem 2rem 2rem 2rem 2rem;
+  grid-template-rows:  2rem 2rem 2rem 2rem 2rem;
+  grid-gap: 0.3rem;
+  margin-left: 50px;
+}
+
+.heatmap .cell {
+  border-radius: 5px;
+  width: 100%;
+  height: 100%;
+}
+
+.heatmap .cell.greyed {
+  background-color: rgb(106, 110, 115);
+}
