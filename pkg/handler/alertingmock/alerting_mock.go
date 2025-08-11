@@ -1,7 +1,6 @@
 package alertingmock
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"math/rand/v2"
@@ -58,9 +57,8 @@ func randomState() int {
 		return silenced
 	} else if rndState < 3 {
 		return pending
-	} else {
-		return firing
 	}
+	return firing
 }
 
 func createAlert(probability float64, name, resourceName string, threshold int, targetLabels, resourceNames []string, annotations, labels model.LabelSet) (*Alert, int) {
@@ -158,8 +156,8 @@ func createRule(probability float64, name, severity string, threshold int, bynet
 	}
 }
 
-func GetRules(ctx context.Context) func(w http.ResponseWriter, r *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
+func GetRules() func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, _ *http.Request) {
 		alertingRules := []AlertingRule{
 			createRule(0.4, "Packet delivery successfully failed", "info", 5, true, []string{"SrcK8S_Namespace", "DstK8S_Namespace"}, []string{}),
 			createRule(0.3, "You have reached your hourly rate limit", "info", 5, true, []string{"SrcK8S_Namespace", "DstK8S_Namespace"}, []string{}),

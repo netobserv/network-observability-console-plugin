@@ -46,6 +46,8 @@ export const HealthDrawerContainer: React.FC<HealthDrawerContainerProps> = ({ ti
         setSelectedResource(fromStats);
       }
     }
+    // we want to update selectedResource when stats changes, no more
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stats]);
 
   return (
