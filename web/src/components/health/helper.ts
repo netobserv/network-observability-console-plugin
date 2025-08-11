@@ -278,7 +278,7 @@ export const computeAlertScore = (a: AlertWithRuleName, ignoreSeverity?: boolean
 };
 
 export const isSilenced = (silence: SilenceMatcher[], labels: PrometheusLabels): boolean => {
-  for (let matcher of silence) {
+  for (const matcher of silence) {
     if (!(matcher.name in labels)) {
       return false;
     }
