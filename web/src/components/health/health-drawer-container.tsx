@@ -89,13 +89,13 @@ export const HealthDrawerContainer: React.FC<HealthDrawerContainerProps> = ({ ti
                 </DrawerActions>
               </DrawerHead>
               {selectedResource && (
-                <>
+                <div className="health-gallery-drawer-content">
                   {selectedPanelView === 'heatmap' ? (
                     <HealthHeatmap info={selectedResource} />
                   ) : (
                     <RuleDetails info={selectedResource} />
                   )}
-                </>
+                </div>
               )}
             </DrawerPanelContent>
           }
