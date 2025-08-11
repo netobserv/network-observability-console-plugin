@@ -1,8 +1,10 @@
+import { TextContent } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
+import { valueFormat } from '../../utils/format';
 import { AlertWithRuleName, ByResource, computeAlertScore, getAllAlerts } from './helper';
 
-import { valueFormat } from '../../utils/format';
+import { AlertDetails, AlertDetailsValue } from './alert-details';
 import './heatmap.css';
 
 export interface HealthHeatmapProps {
@@ -54,6 +56,12 @@ const getCellColors = (value: number, rangeFrom: number, rangeTo: number, colorM
 
 export const HealthHeatmap: React.FC<HealthHeatmapProps> = ({ info }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
+  const [selectedItem, setSelectedItem] = React.useState<AlertWithRuleName | string | undefined>(undefined);
+
+  React.useEffect(() => {
+    // Reset selection when props.info changes
+    setSelectedItem(undefined);
+  }, [info]);
 
   const tooltip = (a: AlertWithRuleName): string => {
     let prefix = '';
@@ -71,15 +79,21 @@ export const HealthHeatmap: React.FC<HealthHeatmapProps> = ({ info }) => {
     return `${prefix}${a.annotations['summary']} | ${valueInfo}`;
   };
 
-  type CellInfo = { score: number; colorMap: ColorMap; tooltip: string };
+  type CellInfo = { score: number; colorMap: ColorMap; tooltip: string; onClick: () => void; selected: boolean };
 
   // Map inactive rules to CellInfo
   const inactive: CellInfo[] = [...info.critical.inactive, ...info.warning.inactive, ...info.other.inactive].map(
-    ruleName => ({ score: 0, colorMap: inactiveColorMap, tooltip: t('Rule {{ruleName}}: no alert', { ruleName }) })
+    ruleName => ({
+      score: 0,
+      colorMap: inactiveColorMap,
+      tooltip: t('Rule {{ruleName}}: no alert', { ruleName }),
+      onClick: () => setSelectedItem(ruleName),
+      selected: selectedItem === ruleName
+    })
   );
 
   // Map active alerts to CellInfo, then concat inactive
-  const values: CellInfo[] = getAllAlerts(info)
+  const items: CellInfo[] = getAllAlerts(info)
     .map(a => {
       const colorMap =
         a.labels.severity === 'critical'
@@ -88,26 +102,52 @@ export const HealthHeatmap: React.FC<HealthHeatmapProps> = ({ info }) => {
           ? warningColorMap
           : infoColorMap;
       const score = computeAlertScore(a, true);
-      return { score, colorMap: colorMap, tooltip: tooltip(a) };
+      return {
+        score,
+        colorMap: colorMap,
+        tooltip: tooltip(a),
+        onClick: () => setSelectedItem(a),
+        selected: selectedItem === a
+      };
     })
     .concat(inactive)
     .slice(0, 24);
 
   // Fill remaining cells for a 5x5 array
   let remains = [];
-  if (values.length < 25) {
-    remains = Array(25 - values.length).fill(undefined);
+  if (items.length < 25) {
+    remains = Array(25 - items.length).fill(undefined);
   }
 
   return (
-    <div className="heatmap">
-      {values.map((cell, i) => {
-        const style = getCellColors(cell.score, 0, 1, cell.colorMap);
-        return <div key={`heatmap_${i}`} className={'cell'} style={style} title={cell.tooltip} />;
-      })}
-      {remains.map((_, i) => {
-        return <div key={`heatmap_remains_${i}`} className={'cell greyed'} />;
-      })}
-    </div>
+    <>
+      <div className="heatmap">
+        {items.map((item, i) => {
+          const style = getCellColors(item.score, 0, 1, item.colorMap);
+          return (
+            <div
+              key={`heatmap_${i}`}
+              className={'cell' + (item.selected ? ' selected' : '')}
+              style={style}
+              title={item.tooltip}
+              onClick={item.onClick}
+            />
+          );
+        })}
+        {remains.map((_, i) => {
+          return <div key={`heatmap_remains_${i}`} className={'cell greyed'} />;
+        })}
+      </div>
+      <div className="details">
+        {selectedItem && typeof selectedItem === 'string' && (
+          <TextContent>
+            <AlertDetailsValue title={t('No alert for this rule')}>{selectedItem}</AlertDetailsValue>
+          </TextContent>
+        )}
+        {selectedItem && typeof selectedItem !== 'string' && (
+          <AlertDetails alert={selectedItem} resourceName={info.name} />
+        )}
+      </div>
+    </>
   );
 };
