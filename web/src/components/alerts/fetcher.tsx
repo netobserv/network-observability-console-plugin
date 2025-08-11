@@ -41,7 +41,7 @@ export const AlertFetcher: React.FC<AlertFetcherProps> = ({ children }) => {
   }, []);
 
   React.useEffect(() => {
-    getSilencedAlerts()
+    getSilencedAlerts('app=netobserv')
       .then(result => {
         setSilencedAlerts(
           result

@@ -1,11 +1,11 @@
-import { Rule } from '@openshift-console/dynamic-plugin-sdk';
+import { AlertStates, Rule } from '@openshift-console/dynamic-plugin-sdk';
 import { Button, Flex, FlexItem, PageSection, Tab, Tabs, TextVariants, Title } from '@patternfly/react-core';
 import { SyncAltIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
 import { murmur3 } from 'murmurhash-js';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { getAlerts } from '../../api/routes';
+import { getAlerts, getSilencedAlerts } from '../../api/routes';
 import { getHTTPErrorDetails } from '../../utils/errors';
 import { localStorageHealthRefreshKey, useLocalStorage } from '../../utils/local-storage-hook';
 import { usePoll } from '../../utils/poll-hook';
@@ -14,8 +14,9 @@ import { RefreshDropdown } from '../dropdowns/refresh-dropdown';
 import { HealthDrawerContainer } from './health-drawer-container';
 import HealthError from './health-error';
 import { HealthSummary } from './health-summary';
-import { buildStats, HealthStats } from './helper';
+import { buildStats, isSilenced } from './helper';
 import { HealthTabTitle } from './tab-title';
+import { SilenceMatcher } from '../../api/alert';
 
 import './health.css';
 
@@ -25,8 +26,8 @@ export const NetworkHealth: React.FC<{}> = ({}) => {
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | undefined>();
   const [interval, setInterval] = useLocalStorage<number | undefined>(localStorageHealthRefreshKey, 30000);
-  const [rules, setRules] = React.useState<Rule[]>([]);
-  const [stats, setStats] = React.useState<HealthStats>({ global: [], byNamespace: [], byNode: [] });
+  const [rawRules, setRawRules] = React.useState<Rule[]>([]);
+  const [silenced, setSilenced] = React.useState<SilenceMatcher[][]>([]);
   const [activeTabKey, setActiveTabKey] = React.useState<string>('global');
 
   const fetch = React.useCallback(() => {
@@ -54,8 +55,7 @@ export const NetworkHealth: React.FC<{}> = ({}) => {
           });
           return group.rules;
         });
-        setRules(rules);
-        setStats(buildStats(rules));
+        setRawRules(rules);
         return {
           limitReached: false,
           numQueries: 1,
@@ -69,10 +69,34 @@ export const NetworkHealth: React.FC<{}> = ({}) => {
       .finally(() => {
         setLoading(false);
       });
+
+    getSilencedAlerts('netobserv=true')
+      .then(res => {
+        const silenced = res.filter(a => a.status.state == 'active').map(a => a.matchers);
+        setSilenced(silenced);
+      })
+      .catch(err => {
+        console.log('Could not get silenced alerts:', err);
+        // Showing all alerts since we could not get silenced alerts list
+        setSilenced([]);
+      });
   }, []);
 
   usePoll(fetch, interval);
   React.useEffect(fetch, [fetch]);
+
+  const rules = rawRules.map(r => {
+    const alerts = r.alerts.map(a => {
+      let state = a.state;
+      const labels = { ...r.labels, ...a.labels };
+      if (silenced.some(s => isSilenced(s, labels))) {
+        state = 'silenced' as AlertStates;
+      }
+      return { ...a, state: state };
+    });
+    return { ...r, alerts: alerts };
+  });
+  const stats = buildStats(rules);
 
   return (
     <PageSection id="pageSection" className={`${isDarkTheme ? 'dark' : 'light'}`}>
