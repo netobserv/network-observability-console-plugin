@@ -1,5 +1,6 @@
 import { PrometheusAlert, PrometheusLabels, Rule } from '@openshift-console/dynamic-plugin-sdk';
 import * as _ from 'lodash';
+import { SilenceMatcher } from '../../api/alert';
 
 export type HealthStats = {
   global: ByResource[];
@@ -232,7 +233,6 @@ const silencedScore = 0.1;
 
 // Score [0,10]; higher is better
 export const computeScore = (r: ByResource): number => {
-  console.log('Compute score for ' + r.name, r);
   const allAlerts = getAllAlerts(r);
   let score = allAlerts.map(a => computeAlertScore(a)).reduce((a, b) => a + b, 0);
   if (score === 0) {
@@ -275,4 +275,16 @@ export const computeAlertScore = (a: AlertWithRuleName, ignoreSeverity?: boolean
   const range = 100 - threshold;
   const excess = Math.max((a.value as number) - threshold, 0);
   return (excess * multiplier) / range;
+};
+
+export const isSilenced = (silence: SilenceMatcher[], labels: PrometheusLabels): boolean => {
+  for (let matcher of silence) {
+    if (!(matcher.name in labels)) {
+      return false;
+    }
+    if (matcher.value !== labels[matcher.name]) {
+      return false;
+    }
+  }
+  return true;
 };

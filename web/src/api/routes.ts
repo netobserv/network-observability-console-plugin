@@ -43,8 +43,8 @@ export const getAlerts = (match: string): Promise<AlertsResult> => {
   });
 };
 
-export const getSilencedAlerts = (): Promise<SilencedAlert[]> => {
-  return axios.get('/api/alertmanager/api/v2/silences').then(r => {
+export const getSilencedAlerts = (match: string): Promise<SilencedAlert[]> => {
+  return axios.get(`/api/alertmanager/api/v2/silences?filter=${match}`).then(r => {
     if (r.status >= 400) {
       throw new Error(`${r.statusText} [code=${r.status}]`);
     }
