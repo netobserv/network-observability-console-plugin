@@ -15,7 +15,6 @@ import {
 } from '@patternfly/react-core';
 import { ListIcon, ThIcon } from '@patternfly/react-icons';
 import * as React from 'react';
-import { useTranslation } from 'react-i18next';
 import { HealthGallery } from './health-gallery';
 import { HealthHeatmap } from './health-heatmap';
 import { ByResource } from './helper';
@@ -24,13 +23,11 @@ import { RuleDetails } from './rule-details';
 export interface HealthDrawerContainerProps {
   title: string;
   stats: ByResource[];
-  kind?: string;
+  kind: string;
   isDark: boolean;
 }
 
 export const HealthDrawerContainer: React.FC<HealthDrawerContainerProps> = ({ title, stats, kind, isDark }) => {
-  const { t } = useTranslation('plugin__netobserv-plugin');
-
   const [selectedResource, setSelectedResource] = React.useState<ByResource | undefined>(undefined);
   const [selectedPanelView, setSelectedPanelView] = React.useState<'heatmap' | 'table'>('heatmap');
   const drawerRef = React.useRef<HTMLDivElement>(null);
@@ -67,9 +64,7 @@ export const HealthDrawerContainer: React.FC<HealthDrawerContainerProps> = ({ ti
               <DrawerHead>
                 <span tabIndex={selectedResource !== undefined ? 0 : -1} ref={drawerRef}>
                   {selectedResource !== undefined && (
-                    <>
-                      {kind ? <ResourceLink inline={true} kind={kind} name={selectedResource.name} /> : t('(global)')}
-                    </>
+                    <ResourceLink inline={true} kind={kind} name={selectedResource.name} />
                   )}
                 </span>
                 <DrawerActions>
@@ -93,9 +88,9 @@ export const HealthDrawerContainer: React.FC<HealthDrawerContainerProps> = ({ ti
               {selectedResource && (
                 <div className="health-gallery-drawer-content">
                   {selectedPanelView === 'heatmap' ? (
-                    <HealthHeatmap info={selectedResource} />
+                    <HealthHeatmap info={selectedResource} interactive={true} />
                   ) : (
-                    <RuleDetails info={selectedResource} />
+                    <RuleDetails info={selectedResource} detailed={false} />
                   )}
                 </div>
               )}
@@ -104,9 +99,9 @@ export const HealthDrawerContainer: React.FC<HealthDrawerContainerProps> = ({ ti
         >
           <DrawerContentBody>
             <HealthGallery
-              isDark={isDark}
               stats={stats}
               kind={kind}
+              isDark={isDark}
               selectedResource={selectedResource}
               setSelectedResource={setSelectedResource}
             />

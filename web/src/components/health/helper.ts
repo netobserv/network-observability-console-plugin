@@ -3,7 +3,7 @@ import * as _ from 'lodash';
 import { SilenceMatcher } from '../../api/alert';
 
 export type HealthStats = {
-  global: ByResource[];
+  global: ByResource;
   byNamespace: ByResource[];
   byNode: ByResource[];
 };
@@ -93,19 +93,16 @@ export const buildStats = (rules: Rule[]): HealthStats => {
   );
   const namespaceRules = ruleWithMD.filter(r => !_.isEmpty(r.metadata?.namespaceLabels));
   const nodeRules = ruleWithMD.filter(r => !_.isEmpty(r.metadata?.nodeLabels));
-  injectInactive(globalRules, global);
+  injectInactive(globalRules, [global]);
   injectInactive(namespaceRules, byNamespace);
   injectInactive(nodeRules, byNode);
   return { global, byNamespace, byNode };
 };
 
-const filterGlobals = (alerts: AlertWithRuleName[], nonGlobalLabels: string[]): ByResource[] => {
+const filterGlobals = (alerts: AlertWithRuleName[], nonGlobalLabels: string[]): ByResource => {
   // Keep only rules where none of the non-global labels are set
   const filtered = alerts.filter(a => !nonGlobalLabels.some(l => l in a.labels));
-  if (filtered.length === 0) {
-    return [];
-  }
-  return statsFromGrouped({ global: filtered });
+  return statsFromGrouped('', filtered);
 };
 
 const groupBy = (alerts: AlertWithRuleName[], labels: string[]): ByResource[] => {
@@ -126,50 +123,50 @@ const groupBy = (alerts: AlertWithRuleName[], labels: string[]): ByResource[] =>
       }
     });
   });
-  return statsFromGrouped(groups);
-};
-
-const statsFromGrouped = (g: _.Dictionary<AlertWithRuleName[]>): ByResource[] => {
   const stats: ByResource[] = [];
-  _.keys(g).forEach(k => {
+  _.keys(groups).forEach(k => {
     if (k) {
-      const br: ByResource = {
-        name: k,
-        critical: { firing: [], pending: [], silenced: [], inactive: [] },
-        warning: { firing: [], pending: [], silenced: [], inactive: [] },
-        other: { firing: [], pending: [], silenced: [], inactive: [] },
-        score: 0
-      };
-      stats.push(br);
-      g[k].forEach(alert => {
-        let stats: SeverityStats;
-        switch (alert.labels.severity) {
-          case 'critical':
-            stats = br.critical;
-            break;
-          case 'warning':
-            stats = br.warning;
-            break;
-          default:
-            stats = br.other;
-            break;
-        }
-        switch (alert.state) {
-          case 'firing':
-            stats.firing.push(alert);
-            break;
-          case 'pending':
-            stats.pending.push(alert);
-            break;
-          case 'silenced':
-            stats.silenced.push(alert);
-            break;
-        }
-      });
-      br.score = computeScore(br);
+      stats.push(statsFromGrouped(k, groups[k]));
     }
   });
   return stats;
+};
+
+const statsFromGrouped = (name: string, grouped: AlertWithRuleName[]): ByResource => {
+  const br: ByResource = {
+    name: name,
+    critical: { firing: [], pending: [], silenced: [], inactive: [] },
+    warning: { firing: [], pending: [], silenced: [], inactive: [] },
+    other: { firing: [], pending: [], silenced: [], inactive: [] },
+    score: 0
+  };
+  grouped.forEach(alert => {
+    let stats: SeverityStats;
+    switch (alert.labels.severity) {
+      case 'critical':
+        stats = br.critical;
+        break;
+      case 'warning':
+        stats = br.warning;
+        break;
+      default:
+        stats = br.other;
+        break;
+    }
+    switch (alert.state) {
+      case 'firing':
+        stats.firing.push(alert);
+        break;
+      case 'pending':
+        stats.pending.push(alert);
+        break;
+      case 'silenced':
+        stats.silenced.push(alert);
+        break;
+    }
+  });
+  br.score = computeScore(br);
+  return br;
 };
 
 const injectInactive = (rules: RuleWithMetadata[], groups: ByResource[]) => {

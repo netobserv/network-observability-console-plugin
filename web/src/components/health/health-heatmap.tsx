@@ -1,14 +1,16 @@
 import { TextContent } from '@patternfly/react-core';
+import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { valueFormat } from '../../utils/format';
+import { AlertDetails, AlertDetailsValue } from './alert-details';
 import { AlertWithRuleName, ByResource, computeAlertScore, getAllAlerts } from './helper';
 
-import { AlertDetails, AlertDetailsValue } from './alert-details';
 import './heatmap.css';
 
 export interface HealthHeatmapProps {
   info: ByResource;
+  interactive: boolean;
 }
 
 // rgb in [0,255] bounds
@@ -54,14 +56,47 @@ const getCellColors = (value: number, rangeFrom: number, rangeTo: number, colorM
   };
 };
 
-export const HealthHeatmap: React.FC<HealthHeatmapProps> = ({ info }) => {
+export const HealthHeatmap: React.FC<HealthHeatmapProps> = ({ info, interactive }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [selectedItem, setSelectedItem] = React.useState<AlertWithRuleName | string | undefined>(undefined);
 
+  const allAlerts = getAllAlerts(info);
+  const inactive = [...info.critical.inactive, ...info.warning.inactive, ...info.other.inactive];
+
   React.useEffect(() => {
-    // Reset selection when props.info changes
+    // Retrieve selection when props.info changes
+    if (selectedItem !== undefined) {
+      const selectedAlert = typeof selectedItem === 'string' ? undefined : selectedItem;
+      if (selectedAlert) {
+        // Check active
+        const retrieved = allAlerts.find(
+          a => a.ruleName === selectedAlert.ruleName && _.isEqual(a.labels, selectedAlert.labels)
+        );
+        if (retrieved) {
+          setSelectedItem(retrieved);
+          return;
+        }
+        // Check inactive
+        if (inactive.find(name => name === selectedAlert.ruleName)) {
+          setSelectedItem(selectedAlert.ruleName);
+          return;
+        }
+      } else {
+        // Was inactive; check if there's now any active alert for that rule (pick first)
+        const active = allAlerts.find(a => a.ruleName === selectedItem);
+        if (active) {
+          setSelectedItem(active);
+          return;
+        } else if (inactive.find(name => name === selectedItem)) {
+          // No change in that case, just return
+          return;
+        }
+      }
+    }
     setSelectedItem(undefined);
-  }, [info]);
+    // Ignore allAlerts and inactive as they are derived from info
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [info, selectedItem, setSelectedItem]);
 
   const tooltip = (a: AlertWithRuleName): string => {
     let prefix = '';
@@ -79,21 +114,10 @@ export const HealthHeatmap: React.FC<HealthHeatmapProps> = ({ info }) => {
     return `${prefix}${a.annotations['summary']} | ${valueInfo}`;
   };
 
-  type CellInfo = { score: number; colorMap: ColorMap; tooltip: string; onClick: () => void; selected: boolean };
-
-  // Map inactive rules to CellInfo
-  const inactive: CellInfo[] = [...info.critical.inactive, ...info.warning.inactive, ...info.other.inactive].map(
-    ruleName => ({
-      score: 0,
-      colorMap: inactiveColorMap,
-      tooltip: t('Rule {{ruleName}}: no alert', { ruleName }),
-      onClick: () => setSelectedItem(ruleName),
-      selected: selectedItem === ruleName
-    })
-  );
+  type CellInfo = { score: number; colorMap: ColorMap; tooltip: string; onClick?: () => void; selected: boolean };
 
   // Map active alerts to CellInfo, then concat inactive
-  const items: CellInfo[] = getAllAlerts(info)
+  const items: CellInfo[] = allAlerts
     .map(a => {
       const colorMap =
         a.labels.severity === 'critical'
@@ -106,11 +130,20 @@ export const HealthHeatmap: React.FC<HealthHeatmapProps> = ({ info }) => {
         score,
         colorMap: colorMap,
         tooltip: tooltip(a),
-        onClick: () => setSelectedItem(a),
+        onClick: interactive ? () => setSelectedItem(a) : undefined,
         selected: selectedItem === a
       };
     })
-    .concat(inactive)
+    .concat(
+      // Map inactive rules to CellInfo
+      inactive.map(ruleName => ({
+        score: 0,
+        colorMap: inactiveColorMap,
+        tooltip: t('Rule {{ruleName}}: no alert', { ruleName }),
+        onClick: interactive ? () => setSelectedItem(ruleName) : undefined,
+        selected: selectedItem === ruleName
+      }))
+    )
     .slice(0, 24);
 
   // Fill remaining cells for a 5x5 array
@@ -127,7 +160,7 @@ export const HealthHeatmap: React.FC<HealthHeatmapProps> = ({ info }) => {
           return (
             <div
               key={`heatmap_${i}`}
-              className={'cell' + (item.selected ? ' selected' : '')}
+              className={'cell' + (item.selected ? ' selected' : '') + (interactive ? ' interactive' : '')}
               style={style}
               title={item.tooltip}
               onClick={item.onClick}

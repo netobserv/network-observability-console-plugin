@@ -15,6 +15,7 @@ export const AlertDetails: React.FC<AlertDetailsProps> = ({ resourceName, alert 
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   const md = getHealthMetadata(alert.annotations);
+  const labels = getAlertFilteredLabels(alert, resourceName);
 
   return (
     <div className="alert-details">
@@ -27,11 +28,13 @@ export const AlertDetails: React.FC<AlertDetailsProps> = ({ resourceName, alert 
         <AlertDetailsValue title={t('State')}>{alert.state}</AlertDetailsValue>
         <AlertDetailsValue title={t('Severity')}>{alert.labels.severity}</AlertDetailsValue>
         <AlertDetailsValue title={t('Labels')}>
-          {getAlertFilteredLabels(alert, resourceName).map(kv => (
-            <Label key={kv[0]}>
-              {kv[0]}={kv[1]}
-            </Label>
-          ))}
+          {labels.length === 0
+            ? t('None')
+            : labels.map(kv => (
+                <Label key={kv[0]}>
+                  {kv[0]}={kv[1]}
+                </Label>
+              ))}
         </AlertDetailsValue>
         <AlertDetailsValue title={t('Value')}>
           <>

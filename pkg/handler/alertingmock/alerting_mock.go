@@ -159,7 +159,7 @@ func createRule(probability float64, name, severity string, threshold int, bynet
 func GetRules() func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, _ *http.Request) {
 		alertingRules := []AlertingRule{
-			createRule(0.4, "Packet delivery successfully failed", "info", 5, true, []string{"SrcK8S_Namespace", "DstK8S_Namespace"}, []string{}),
+			createRule(0.4, "Packet delivery failed", "info", 5, true, []string{"SrcK8S_Namespace", "DstK8S_Namespace"}, []string{}),
 			createRule(0.3, "You have reached your hourly rate limit", "info", 5, true, []string{"SrcK8S_Namespace", "DstK8S_Namespace"}, []string{}),
 			createRule(0.1, "It's always DNS", "warning", 15, true, []string{"SrcK8S_Namespace", "DstK8S_Namespace"}, []string{}),
 			createRule(0.1, "We're under attack", "warning", 20, true, []string{}, []string{}),
