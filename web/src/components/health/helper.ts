@@ -140,7 +140,9 @@ const statsFromGrouped = (name: string, grouped: AlertWithRuleName[]): ByResourc
     other: { firing: [], pending: [], silenced: [], inactive: [] },
     score: 0
   };
-  grouped.forEach(alert => {
+  _.uniqWith(grouped, (a, b) => {
+    return a.ruleName === b.ruleName && _.isEqual(a.labels, b.labels);
+  }).forEach(alert => {
     let stats: SeverityStats;
     switch (alert.labels.severity) {
       case 'critical':
