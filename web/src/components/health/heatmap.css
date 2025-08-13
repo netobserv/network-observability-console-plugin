@@ -9,6 +9,9 @@
   border-radius: 5px;
   width: 100%;
   height: 100%;
+}
+
+.heatmap .cell.interactive {
   cursor: pointer;
 }
 
@@ -18,7 +21,6 @@
 
 .heatmap .cell.greyed {
   background-color: rgb(106, 110, 115);
-  cursor: initial;
 }
 
 .details {

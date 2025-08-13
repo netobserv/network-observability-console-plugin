@@ -1,3 +1,8 @@
+#pageSection h3 {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
 #pageSection .icon.critical {
     color: rgb(177, 56, 11);
 }
@@ -86,4 +91,8 @@
 .card-header .icon {
     width: 28px;
     height: 28px;
+}
+
+.health-gallery-drawer-content .pf-m-no-padding {
+    padding: 0;
 }

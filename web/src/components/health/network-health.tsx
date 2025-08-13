@@ -14,6 +14,7 @@ import { useTheme } from '../../utils/theme-hook';
 import { RefreshDropdown } from '../dropdowns/refresh-dropdown';
 import { HealthDrawerContainer } from './health-drawer-container';
 import HealthError from './health-error';
+import { HealthGlobal } from './health-global';
 import { HealthSummary } from './health-summary';
 import { buildStats, isSilenced } from './helper';
 import { HealthTabTitle } from './tab-title';
@@ -25,7 +26,7 @@ export const NetworkHealth: React.FC<{}> = ({}) => {
   const isDarkTheme = useTheme();
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | undefined>();
-  const [interval, setInterval] = useLocalStorage<number | undefined>(localStorageHealthRefreshKey, 30000);
+  const [interval, setInterval] = useLocalStorage<number | undefined>(localStorageHealthRefreshKey, undefined);
   const [rawRules, setRawRules] = React.useState<Rule[]>([]);
   const [silenced, setSilenced] = React.useState<SilenceMatcher[][]>([]);
   const [activeTabKey, setActiveTabKey] = React.useState<string>('global');
@@ -139,10 +140,10 @@ export const NetworkHealth: React.FC<{}> = ({}) => {
         >
           <Tab
             eventKey={'global'}
-            title={<HealthTabTitle title={t('Global')} stats={stats.global} />}
+            title={<HealthTabTitle title={t('Global')} stats={[stats.global]} />}
             aria-label="Tab global"
           >
-            <HealthDrawerContainer title={t('Global rule violations')} stats={stats.global} isDark={isDarkTheme} />
+            <HealthGlobal info={stats.global} isDark={isDarkTheme} />
           </Tab>
           <Tab
             eventKey={'per-node'}
