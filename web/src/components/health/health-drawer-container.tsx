@@ -7,14 +7,20 @@ import {
   DrawerContentBody,
   DrawerHead,
   DrawerPanelContent,
+  Dropdown,
+  DropdownItem,
+  DropdownList,
+  MenuToggle,
+  MenuToggleElement,
   Text,
   TextContent,
   TextVariants,
   ToggleGroup,
   ToggleGroupItem
 } from '@patternfly/react-core';
-import { ListIcon, ThIcon } from '@patternfly/react-icons';
+import { EllipsisVIcon, ListIcon, ThIcon } from '@patternfly/react-icons';
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import { HealthGallery } from './health-gallery';
 import { HealthHeatmap } from './health-heatmap';
 import { ByResource } from './helper';
@@ -28,8 +34,10 @@ export interface HealthDrawerContainerProps {
 }
 
 export const HealthDrawerContainer: React.FC<HealthDrawerContainerProps> = ({ title, stats, kind, isDark }) => {
+  const { t } = useTranslation('plugin__netobserv-plugin');
   const [selectedResource, setSelectedResource] = React.useState<ByResource | undefined>(undefined);
   const [selectedPanelView, setSelectedPanelView] = React.useState<'heatmap' | 'table'>('heatmap');
+  const [isKebabOpen, setKebabOpen] = React.useState(false);
   const drawerRef = React.useRef<HTMLDivElement>(null);
 
   const onExpand = () => {
@@ -46,6 +54,16 @@ export const HealthDrawerContainer: React.FC<HealthDrawerContainerProps> = ({ ti
     // we want to update selectedResource when stats changes, no more
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stats]);
+
+  const filter = encodeURIComponent(
+    `${kind === 'Namespace' ? 'src_namespace' : 'src_node'}="${selectedResource?.name}"`
+  );
+  const kebabLinks = [
+    {
+      to: `/netflow-traffic?filters=${filter}&bnf=true`,
+      text: t('View in Network Traffic')
+    }
+  ];
 
   return (
     <>
@@ -64,7 +82,34 @@ export const HealthDrawerContainer: React.FC<HealthDrawerContainerProps> = ({ ti
               <DrawerHead>
                 <span tabIndex={selectedResource !== undefined ? 0 : -1} ref={drawerRef}>
                   {selectedResource !== undefined && (
-                    <ResourceLink inline={true} kind={kind} name={selectedResource.name} />
+                    <>
+                      <ResourceLink inline={true} kind={kind} name={selectedResource.name} />
+                      <Dropdown
+                        isOpen={isKebabOpen}
+                        onSelect={() => setKebabOpen(false)}
+                        onOpenChange={(isOpen: boolean) => setKebabOpen(isOpen)}
+                        toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+                          <MenuToggle
+                            ref={toggleRef}
+                            variant="plain"
+                            onClick={() => setKebabOpen(!isKebabOpen)}
+                            isExpanded={isKebabOpen}
+                          >
+                            <EllipsisVIcon />
+                          </MenuToggle>
+                        )}
+                      >
+                        <DropdownList>
+                          {kebabLinks.map((l, i) => {
+                            return (
+                              <DropdownItem key={'link_' + i} value={i} to={l.to}>
+                                {l.text}
+                              </DropdownItem>
+                            );
+                          })}
+                        </DropdownList>
+                      </Dropdown>
+                    </>
                   )}
                 </span>
                 <DrawerActions>
