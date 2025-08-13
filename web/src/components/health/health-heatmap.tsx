@@ -1,4 +1,5 @@
-import { TextContent } from '@patternfly/react-core';
+import { Flex, FlexItem, Grid, GridItem, Text, TextContent, TextVariants, Tooltip } from '@patternfly/react-core';
+import { InfoAltIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -27,6 +28,7 @@ const criticalColorMap: ColorMap = [
 ];
 
 const warningColorMap: ColorMap = [
+  { r: 253, g: 247, b: 231 },
   { r: 240, g: 171, b: 0 },
   { r: 236, g: 122, b: 8 },
   { r: 59, g: 31, b: 0 }
@@ -54,6 +56,11 @@ const getCellColors = (value: number, rangeFrom: number, rangeTo: number, colorM
     color: textColor,
     backgroundColor: `rgb(${r},${g},${b})`
   };
+};
+
+const buildGradientCSS = (colorMap: ColorMap): string => {
+  const colorStops = colorMap.map(c => `rgb(${c.r},${c.g},${c.b})`);
+  return 'linear-gradient(to right,' + colorStops.join(',') + ')';
 };
 
 export const HealthHeatmap: React.FC<HealthHeatmapProps> = ({ info, interactive }) => {
@@ -153,25 +160,61 @@ export const HealthHeatmap: React.FC<HealthHeatmapProps> = ({ info, interactive 
   }
 
   return (
-    <>
-      <div className="heatmap">
-        {items.map((item, i) => {
-          const style = getCellColors(item.score, 0, 1, item.colorMap);
-          return (
-            <div
-              key={`heatmap_${i}`}
-              className={'cell' + (item.selected ? ' selected' : '') + (interactive ? ' interactive' : '')}
-              style={style}
-              title={item.tooltip}
-              onClick={item.onClick}
-            />
-          );
-        })}
-        {remains.map((_, i) => {
-          return <div key={`heatmap_remains_${i}`} className={'cell greyed'} />;
-        })}
-      </div>
-      <div className="details">
+    <Flex alignItems={{ default: 'alignItemsFlexStart' }}>
+      <Flex flex={{ default: 'flex_1' }}>
+        <FlexItem>
+          <TextContent>
+            <Tooltip
+              content={t(
+                'The heatmap represents every issues related to a resource, using a color scale that depends on the severity, state and value amplitude.'
+              )}
+            >
+              <Text component={TextVariants.h4}>
+                <InfoAltIcon /> {t('Heatmap')}
+              </Text>
+            </Tooltip>
+            {interactive && <Text component={TextVariants.p}>{t('Click on a cell to show the details.')}</Text>}
+            <Text component={TextVariants.p}>
+              {t('Gradient per severity: ')}
+              <Grid>
+                <GridItem span={4}>{t('info')}</GridItem>
+                <GridItem span={8}>
+                  <span className="gradient" style={{ backgroundImage: buildGradientCSS(infoColorMap) }} />
+                </GridItem>
+                <GridItem span={4}>{t('warning')}</GridItem>
+                <GridItem span={8}>
+                  <span className="gradient" style={{ backgroundImage: buildGradientCSS(warningColorMap) }} />
+                </GridItem>
+                <GridItem span={4}>{t('critical')}</GridItem>
+                <GridItem span={8}>
+                  <span className="gradient" style={{ backgroundImage: buildGradientCSS(criticalColorMap) }} />
+                </GridItem>
+              </Grid>
+            </Text>
+          </TextContent>
+        </FlexItem>
+      </Flex>
+      <Flex flex={{ default: 'flex_1' }}>
+        <FlexItem className="heatmap">
+          {items.map((item, i) => {
+            const style = getCellColors(item.score, 0, 1, item.colorMap);
+            return (
+              <div
+                key={`heatmap_${i}`}
+                className={'cell' + (item.selected ? ' selected' : '') + (interactive ? ' interactive' : '')}
+                style={style}
+                title={item.tooltip}
+                onClick={item.onClick}
+              />
+            );
+          })}
+          {remains.map((_, i) => {
+            return <div key={`heatmap_remains_${i}`} className={'cell greyed'} />;
+          })}
+        </FlexItem>
+      </Flex>
+      <div style={{ width: '100%' }} />
+      <FlexItem className="details">
         {selectedItem && typeof selectedItem === 'string' && (
           <TextContent>
             <AlertDetailsValue title={t('No alert for this rule')}>{selectedItem}</AlertDetailsValue>
@@ -180,7 +223,7 @@ export const HealthHeatmap: React.FC<HealthHeatmapProps> = ({ info, interactive 
         {selectedItem && typeof selectedItem !== 'string' && (
           <AlertDetails alert={selectedItem} resourceName={info.name} />
         )}
-      </div>
-    </>
+      </FlexItem>
+    </Flex>
   );
 };

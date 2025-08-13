@@ -23,6 +23,14 @@
   background-color: rgb(106, 110, 115);
 }
 
+.gradient {
+  border-radius: 2px;
+  width: 5rem;
+  height: 5px;
+  display: inline-block;
+  margin-left: 5px;
+}
+
 .details {
   margin-top: 2rem;
 }

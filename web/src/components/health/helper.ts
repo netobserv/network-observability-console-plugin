@@ -223,8 +223,8 @@ export const getAlertLink = (a: AlertWithRuleName): string => {
 };
 
 const criticalScore = 1;
-const warningScore = 0.5;
-const minorScore = 0.25;
+const warningScore = 0.7;
+const minorScore = 0.4;
 const pendingScore = 0.3;
 const silencedScore = 0.1;
 
@@ -268,7 +268,7 @@ export const computeAlertScore = (a: AlertWithRuleName, ignoreSeverity?: boolean
       break;
   }
   // Assuming the alert value is a [0-100] percentage. Needs update if more use cases come up.
-  const threshold = a.metadata?.thresholdF || 0;
+  const threshold = (a.metadata?.thresholdF || 0) / 2;
   const range = 100 - threshold;
   const excess = Math.max((a.value as number) - threshold, 0);
   return (excess * multiplier) / range;
