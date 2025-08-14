@@ -25,7 +25,7 @@ export interface ColaLayoutOptions {
   gridSnapIterations: number;
 }
 
-const COLA_LAYOUT_DEFAULTS: ColaLayoutOptions = {
+const colaLayoutDefaults: ColaLayoutOptions = {
   maxTicks: 1000,
   initialUnconstrainedIterations: 200,
   initialUserConstraintIterations: 50,
@@ -58,7 +58,7 @@ class ColaLayout extends BaseLayout implements Layout {
   constructor(graph: Graph, options?: Partial<ColaLayoutOptions & LayoutOptions>) {
     super(graph, options);
     this.colaOptions = {
-      ...COLA_LAYOUT_DEFAULTS,
+      ...colaLayoutDefaults,
       ...options
     };
     this.forceSimulation = new ForceSimulation({

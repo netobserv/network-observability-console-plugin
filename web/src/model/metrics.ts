@@ -1,5 +1,5 @@
 import { MetricStats } from '../api/loki';
-import { PERCENTILE_VALUES } from '../utils/metrics';
+import { percentileValues } from '../utils/metrics';
 import { StatFunction } from './flow-query';
 
 export enum MetricScopeOptions {
@@ -26,8 +26,8 @@ export const getStat = (stats: MetricStats, mf: StatFunction): number => {
     case 'last':
       return stats.latest;
     case 'p90':
-      return stats.percentiles[PERCENTILE_VALUES.indexOf(90)];
+      return stats.percentiles[percentileValues.indexOf(90)];
     case 'p99':
-      return stats.percentiles[PERCENTILE_VALUES.indexOf(99)];
+      return stats.percentiles[percentileValues.indexOf(99)];
   }
 };

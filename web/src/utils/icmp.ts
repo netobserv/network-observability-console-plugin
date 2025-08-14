@@ -24,10 +24,10 @@ export const icmpTypes: ReadOnlyValues = [
 ] as const;
 
 const icmpTypesValues = icmpTypes.map(v => v.value);
-export type icmpTypesValues = typeof icmpTypesValues[number];
+export type ICMPTypesValues = typeof icmpTypesValues[number];
 
 const icmpTypesNames = icmpTypes.map(v => v.name);
-export type icmpTypeNames = typeof icmpTypesNames[number];
+export type ICMPTypeNames = typeof icmpTypesNames[number];
 
 export const icmpUnreachCodes: ReadOnlyValues = [
   { value: 0, name: 'ICMP_NET_UNREACH', description: 'Network Unreachable' },
@@ -50,10 +50,10 @@ export const icmpUnreachCodes: ReadOnlyValues = [
 ] as const;
 
 const icmpUnreachCodesValues = icmpUnreachCodes.map(v => v.value);
-export type icmpUnreachCodesValues = typeof icmpUnreachCodesValues[number];
+export type ICMPUnreachCodesValues = typeof icmpUnreachCodesValues[number];
 
 const icmpUnreachCodesNames = icmpUnreachCodes.map(v => v.name);
-export type icmpUnreachCodesNames = typeof icmpUnreachCodesNames[number];
+export type ICMPUnreachCodesNames = typeof icmpUnreachCodesNames[number];
 
 export const icmpRedirectCodes: ReadOnlyValues = [
   { value: 0, name: 'ICMP_REDIR_NET', description: 'Redirect Net' },
@@ -63,10 +63,10 @@ export const icmpRedirectCodes: ReadOnlyValues = [
 ] as const;
 
 const icmpRedirectCodesValues = icmpRedirectCodes.map(v => v.value);
-export type icmpRedirectCodesValues = typeof icmpRedirectCodesValues[number];
+export type ICMPRedirectCodesValues = typeof icmpRedirectCodesValues[number];
 
 const icmpRedirectCodesNames = icmpRedirectCodes.map(v => v.name);
-export type icmpRedirectCodesNames = typeof icmpRedirectCodesNames[number];
+export type ICMPRedirectCodesNames = typeof icmpRedirectCodesNames[number];
 
 export const icmpTimeExceededCodes: ReadOnlyValues = [
   { value: 0, name: 'ICMP_EXC_TTL', description: 'TTL count exceeded' },
@@ -74,10 +74,10 @@ export const icmpTimeExceededCodes: ReadOnlyValues = [
 ] as const;
 
 const icmpTimeExceededCodesValues = icmpTimeExceededCodes.map(v => v.value);
-export type icmpTimeExceededCodesValues = typeof icmpTimeExceededCodesValues[number];
+export type ICMPTimeExceededCodesValues = typeof icmpTimeExceededCodesValues[number];
 
 const icmpTimeExceededCodesNames = icmpTimeExceededCodes.map(v => v.name);
-export type icmpTimeExceededCodesNames = typeof icmpTimeExceededCodesNames[number];
+export type ICMPTimeExceededCodesNames = typeof icmpTimeExceededCodesNames[number];
 
 // https://github.com/torvalds/linux/blob/master/include/uapi/linux/icmpv6.h
 export const icmpV6Types: ReadOnlyValues = [
@@ -104,10 +104,10 @@ export const icmpV6Types: ReadOnlyValues = [
 ] as const;
 
 const icmpv6TypesValues = icmpV6Types.map(v => v.value);
-export type icmpV6TypesValues = typeof icmpv6TypesValues[number];
+export type ICMPV6TypesValues = typeof icmpv6TypesValues[number];
 
 const icmpv6TypesNames = icmpV6Types.map(v => v.name);
-export type icmpV6TypeNames = typeof icmpv6TypesNames[number];
+export type ICMPV6TypeNames = typeof icmpv6TypesNames[number];
 
 export const icmpV6UnreachCodes: ReadOnlyValues = [
   { value: 0, name: 'ICMPV6_NOROUTE', description: 'no route to destination' },
@@ -124,10 +124,10 @@ export const icmpV6UnreachCodes: ReadOnlyValues = [
 ] as const;
 
 const icmpv6UnreachCodesValues = icmpV6UnreachCodes.map(v => v.value);
-export type icmpV6UnreachCodesValues = typeof icmpv6UnreachCodesValues[number];
+export type ICMPV6UnreachCodesValues = typeof icmpv6UnreachCodesValues[number];
 
 const icmpv6UnreachCodesNames = icmpV6UnreachCodes.map(v => v.name);
-export type icmpV6UnreachCodesNames = typeof icmpv6UnreachCodesNames[number];
+export type ICMPV6UnreachCodesNames = typeof icmpv6UnreachCodesNames[number];
 
 export const icmpV6TimeExceededCodes: ReadOnlyValues = [
   { value: 0, name: 'ICMPV6_EXC_HOPLIMIT', description: 'hop limit exceeded in transit  ' },
@@ -135,10 +135,10 @@ export const icmpV6TimeExceededCodes: ReadOnlyValues = [
 ] as const;
 
 const icmpv6TimeExceededCodesValues = icmpV6TimeExceededCodes.map(v => v.value);
-export type icmpV6TimeExceededCodesValues = typeof icmpv6TimeExceededCodesValues[number];
+export type ICMPV6TimeExceededCodesValues = typeof icmpv6TimeExceededCodesValues[number];
 
 const icmpv6TimeExceededCodesNames = icmpV6TimeExceededCodes.map(v => v.name);
-export type icmpV6TimeExceededCodesNames = typeof icmpv6TimeExceededCodesNames[number];
+export type ICMPV6TimeExceededCodesNames = typeof icmpv6TimeExceededCodesNames[number];
 
 export const icmpV6ParamprobCodes: ReadOnlyValues = [
   { value: 0, name: 'ICMPV6_HDR_FIELD', description: 'erroneous header field encountered' },
@@ -148,20 +148,20 @@ export const icmpV6ParamprobCodes: ReadOnlyValues = [
 ] as const;
 
 const icmpv6ParamprobCodesValues = icmpV6ParamprobCodes.map(v => v.value);
-export type icmpV6ParamprobCodesValues = typeof icmpv6ParamprobCodesValues[number];
+export type ICMPV6ParamprobCodesValues = typeof icmpv6ParamprobCodesValues[number];
 
 const icmpv6ParamprobCodesNames = icmpV6ParamprobCodes.map(v => v.name);
-export type icmpV6ParamprobCodesNames = typeof icmpv6ParamprobCodesNames[number];
+export type ICMPV6ParamprobCodesNames = typeof icmpv6ParamprobCodesNames[number];
 
-export type icmpAllTypesValues = icmpTypesValues | icmpV6TypesValues;
+export type ICMPAllTypesValues = ICMPTypesValues | ICMPV6TypesValues;
 
-export type icmpAllCodesValues =
-  | icmpUnreachCodesValues
-  | icmpRedirectCodesValues
-  | icmpTimeExceededCodesValues
-  | icmpV6UnreachCodesValues
-  | icmpV6TimeExceededCodesValues
-  | icmpV6ParamprobCodesValues;
+export type ICMPAllCodesValues =
+  | ICMPUnreachCodesValues
+  | ICMPRedirectCodesValues
+  | ICMPTimeExceededCodesValues
+  | ICMPV6UnreachCodesValues
+  | ICMPV6TimeExceededCodesValues
+  | ICMPV6ParamprobCodesValues;
 
 export const getICMPDocUrl = (p: number): string | undefined => {
   switch (p) {
@@ -178,7 +178,7 @@ export const isValidICMPProto = (p: number) => {
   return icmpProtos.includes(p);
 };
 
-export const getICMPType = (p: number, v: icmpAllTypesValues): ReadOnlyValue | undefined => {
+export const getICMPType = (p: number, v: ICMPAllTypesValues): ReadOnlyValue | undefined => {
   if (!isValidICMPProto(p)) {
     return undefined;
   }
@@ -188,7 +188,7 @@ export const getICMPType = (p: number, v: icmpAllTypesValues): ReadOnlyValue | u
   return icmpV6Types.find(t => t.value === v);
 };
 
-export const getICMPCode = (p: number, t?: icmpAllTypesValues, c?: icmpAllCodesValues): ReadOnlyValue | undefined => {
+export const getICMPCode = (p: number, t?: ICMPAllTypesValues, c?: ICMPAllCodesValues): ReadOnlyValue | undefined => {
   if (!isValidICMPProto(p) || t === undefined || c === undefined) {
     return undefined;
   }

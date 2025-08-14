@@ -7,7 +7,7 @@ import {
   ConnectDropTarget,
   createSvgIdUrl,
   Decorator,
-  DEFAULT_DECORATOR_RADIUS,
+  DEFAULT_DECORATOR_RADIUS as decoratorRadius,
   getDefaultShapeDecoratorCenter,
   getShapeComponent,
   GraphElement,
@@ -23,14 +23,14 @@ import {
   ShapeProps,
   StatusModifier,
   TopologyQuadrant,
-  TOP_LAYER,
+  TOP_LAYER as topLayer,
   useCombineRefs,
   useHover,
   WithDndDragProps
 } from '@patternfly/react-topology';
 import {
-  NODE_SHADOW_FILTER_ID_DANGER,
-  NODE_SHADOW_FILTER_ID_HOVER
+  NODE_SHADOW_FILTER_ID_DANGER as nodeShadowFilterIdDanger,
+  NODE_SHADOW_FILTER_ID_HOVER as nodeShadowFilterIdHover
 } from '@patternfly/react-topology/dist/esm/components/nodes/NodeShadows';
 import styles from '@patternfly/react-topology/src/css/topology-components';
 import * as React from 'react';
@@ -145,7 +145,7 @@ interface DefaultNodeProps {
   isDark?: boolean;
 }
 
-const SCALE_UP_TIME = 200;
+const scaleUpTime = 200;
 
 type DefaultNodeInnerProps = Omit<DefaultNodeProps, 'element'> & { element: Node };
 
@@ -228,7 +228,7 @@ const DefaultNodeInner: React.FunctionComponent<DefaultNodeInnerProps> = observe
         <Decorator
           x={x}
           y={y}
-          radius={DEFAULT_DECORATOR_RADIUS}
+          radius={decoratorRadius}
           showBackground
           onClick={e => onStatusDecoratorClick && onStatusDecoratorClick(e, element)}
           icon={<g className={css(styles.topologyNodeDecoratorStatus)}>{icon}</g>}
@@ -289,9 +289,9 @@ const DefaultNodeInner: React.FunctionComponent<DefaultNodeInnerProps> = observe
 
     let filter;
     if (status === 'danger') {
-      filter = createSvgIdUrl(NODE_SHADOW_FILTER_ID_DANGER);
+      filter = createSvgIdUrl(nodeShadowFilterIdDanger);
     } else if (isHover || dragging || edgeDragging || dropTarget) {
-      filter = createSvgIdUrl(NODE_SHADOW_FILTER_ID_HOVER);
+      filter = createSvgIdUrl(nodeShadowFilterIdHover);
     }
 
     const nodeLabelPosition = labelPosition || element.getLabelPosition();
@@ -315,7 +315,7 @@ const DefaultNodeInner: React.FunctionComponent<DefaultNodeInnerProps> = observe
         const initTime = performance.now();
 
         const bumpScale = (bumpTime: number) => {
-          const scalePercent = (bumpTime - initTime) / SCALE_UP_TIME;
+          const scalePercent = (bumpTime - initTime) / scaleUpTime;
           const nextScale = Math.min(scale + scaleDelta * scalePercent, scaleGoal.current);
           setNodeScale(nextScale);
           if (nextScale < scaleGoal.current) {
@@ -398,7 +398,7 @@ const DefaultNodeInner: React.FunctionComponent<DefaultNodeInnerProps> = observe
             />
           )}
           {showLabel && (label || element.getLabel()) && (
-            <Layer id={isHover ? TOP_LAYER : undefined}>
+            <Layer id={isHover ? topLayer : undefined}>
               <g
                 className={groupClassName}
                 transform={

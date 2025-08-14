@@ -2,8 +2,6 @@
 /* eslint-disable max-len */
 import { RJSFSchema } from '@rjsf/utils';
 
-// Keep the schemas ordered for YAML display
-
 export const FlowCollectorSchema: RJSFSchema | any = {
   title: 'FlowCollector',
   description:
