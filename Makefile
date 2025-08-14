@@ -136,10 +136,6 @@ else
 	cd -
 endif
 
-.PHONY: generate-doc
-generate-doc: ## Generate documentation of the flows JSON format
-	cd web && npm run generate-doc
-
 .PHONY: update-config
 update-config: ## Update sample config from operator repo
 	./scripts/update-config.sh

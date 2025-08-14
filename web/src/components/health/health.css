@@ -1,0 +1,98 @@
+#pageSection h3 {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+#pageSection .icon.critical {
+    color: rgb(177, 56, 11);
+}
+
+#pageSection .dark .icon.critical {
+    color: rgb(240, 86, 29);
+}
+
+#pageSection .icon.warning {
+    color: rgb(220, 166, 20);
+}
+
+#pageSection .dark .icon.warning {
+    color: rgb(255, 204, 23);
+}
+
+#pageSection .icon.minor {
+    color: rgb(154, 216, 216);
+}
+
+#pageSection .dark .icon.minor {
+    color: rgb(154, 216, 216);
+}
+
+.health-gallery-drawer .pf-v5-c-drawer__body,
+.health-gallery-drawer>div {
+    height: initial;
+}
+
+.health-gallery-drawer-content {
+    padding: 1.5rem;
+}
+
+.netobserv-refresh-interval-container {
+    margin: 0 !important;
+}
+
+/*rotate animation for loading icon*/
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.card {
+    border-top: 3px solid;
+    border-top-color: rgb(106, 110, 115);
+}
+
+.card.dark {
+    border-top-color: rgb(134, 135, 137);
+}
+
+.card.critical {
+    border-top-color: rgb(177, 56, 11);
+}
+
+.card.dark.critical {
+    border-top-color: rgb(240, 86, 29);
+}
+
+.card.warning {
+    border-top-color: rgb(220, 166, 20);
+}
+
+.card.dark.warning {
+    border-top-color: rgb(255, 204, 23);
+}
+
+.card.minor {
+    border-top-color: rgb(154, 216, 216);
+}
+
+.card.dark.minor {
+    border-top-color: rgb(154, 216, 216);
+}
+
+.card-header {
+    min-height: 80px;
+}
+
+.card-header .icon {
+    width: 28px;
+    height: 28px;
+}
+
+.health-gallery-drawer-content .pf-m-no-padding {
+    padding: 0;
+}
