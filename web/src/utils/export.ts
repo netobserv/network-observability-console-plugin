@@ -1,4 +1,4 @@
-import { toPng } from 'html-to-image';
+import { toPng } from '@jpinsonneau/html-to-image';
 
 export const exportToPng = (
   name: string,
