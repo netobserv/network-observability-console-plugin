@@ -28,8 +28,9 @@ export const Description: React.FC<{
     return null;
   }
 
-  const parts = description.replaceAll('<br>', '').split('\n');
-  let content = <>{description}</>;
+  const desc = description.replaceAll('<br>', '');
+  const parts = desc.split('\n');
+  let content = <>{desc}</>;
   if (parts.length > 1) {
     content = (
       <Popover
