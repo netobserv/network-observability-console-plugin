@@ -1,4 +1,4 @@
-import { toPng } from 'html-to-image';
+import { toPng } from '@jpinsonneau/html-to-image'; // slightly modified from 'html-to-image' to fix a browser freeze. See NETOBSERV-2314.
 
 export const exportToPng = (
   name: string,
