@@ -61,3 +61,7 @@
 .calculator-item {
   padding-bottom: 1.5rem;
 }
+
+#wizard-container {
+  flex: 1; 
+}

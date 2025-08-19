@@ -134,51 +134,53 @@ export const FlowCollectorWizard: FC<FlowCollectorWizardProps> = props => {
                     {t('Network Observability FlowCollector setup')}
                   </Title>
                 </div>
-                <Wizard onStepChange={onStepChange} onSave={() => ctx.onSubmit(data)}>
-                  <WizardStep name={t('Overview')} id="overview">
-                    <span className="co-pre-line">
-                      {t(
-                        // eslint-disable-next-line max-len
-                        'Network Observability Operator deploys a monitoring pipeline that consists in:\n - an eBPF agent, that generates network flows from captured packets\n - flowlogs-pipeline, a component that collects, enriches and exports these flows\n - a Console plugin for flows visualization with powerful filtering options, a topology representation and more\n\nFlow data is then available in multiple ways, each optional:\n - As Prometheus metrics\n - As raw flow logs stored in Grafana Loki\n - As raw flow logs exported to a collector\n\nThe FlowCollector resource is used to configure the operator and its managed components.\nThis setup will guide you on the common aspects of the FlowCollector configuration.'
-                      )}
-                      <br /> <br />
-                      {t('Operator configuration')}
-                    </span>
-                    {form()}
-                  </WizardStep>
-                  <WizardStep name={t('Capture')} id="capture">
-                    {form()}
-                  </WizardStep>
-                  <WizardStep name={t('Pipeline')} id="pipeline">
-                    {form()}
-                  </WizardStep>
-                  <WizardStep
-                    name={t('Storage')}
-                    id="storage"
-                    steps={[step('loki', t('Loki')), step('prom', t('Prometheus'))]}
-                  />
-                  <WizardStep name={t('Integration')} id="console">
-                    {form()}
-                  </WizardStep>
-                  <WizardStep name={t('Consumption')} id="consumption">
-                    <Consumption flowCollector={data} setSampling={setSampling} />
-                  </WizardStep>
-                  <WizardStep
-                    name={t('Review')}
-                    id="review-step"
-                    body={{ className: 'wizard-editor-container' }}
-                    footer={ContextSingleton.isStandalone() ? undefined : <></>}
-                  >
-                    <ResourceYAMLEditor
-                      initialResource={data}
-                      onSave={content => {
-                        const updatedData = safeYAMLToJS(content);
-                        setData(updatedData);
-                        ctx.onSubmit(updatedData);
-                      }}
+                <div id="wizard-container">
+                  <Wizard onStepChange={onStepChange} onSave={() => ctx.onSubmit(data)}>
+                    <WizardStep name={t('Overview')} id="overview">
+                      <span className="co-pre-line">
+                        {t(
+                          // eslint-disable-next-line max-len
+                          'Network Observability Operator deploys a monitoring pipeline that consists in:\n - an eBPF agent, that generates network flows from captured packets\n - flowlogs-pipeline, a component that collects, enriches and exports these flows\n - a Console plugin for flows visualization with powerful filtering options, a topology representation and more\n\nFlow data is then available in multiple ways, each optional:\n - As Prometheus metrics\n - As raw flow logs stored in Grafana Loki\n - As raw flow logs exported to a collector\n\nThe FlowCollector resource is used to configure the operator and its managed components.\nThis setup will guide you on the common aspects of the FlowCollector configuration.'
+                        )}
+                        <br /> <br />
+                        {t('Operator configuration')}
+                      </span>
+                      {form()}
+                    </WizardStep>
+                    <WizardStep name={t('Capture')} id="capture">
+                      {form()}
+                    </WizardStep>
+                    <WizardStep name={t('Pipeline')} id="pipeline">
+                      {form()}
+                    </WizardStep>
+                    <WizardStep
+                      name={t('Storage')}
+                      id="storage"
+                      steps={[step('loki', t('Loki')), step('prom', t('Prometheus'))]}
                     />
-                  </WizardStep>
-                </Wizard>
+                    <WizardStep name={t('Integration')} id="console">
+                      {form()}
+                    </WizardStep>
+                    <WizardStep name={t('Consumption')} id="consumption">
+                      <Consumption flowCollector={data} setSampling={setSampling} />
+                    </WizardStep>
+                    <WizardStep
+                      name={t('Review')}
+                      id="review-step"
+                      body={{ className: 'wizard-editor-container' }}
+                      footer={ContextSingleton.isStandalone() ? undefined : <></>}
+                    >
+                      <ResourceYAMLEditor
+                        initialResource={data}
+                        onSave={content => {
+                          const updatedData = safeYAMLToJS(content);
+                          setData(updatedData);
+                          ctx.onSubmit(updatedData);
+                        }}
+                      />
+                    </WizardStep>
+                  </Wizard>
+                </div>
               </PageSection>
             );
           }}

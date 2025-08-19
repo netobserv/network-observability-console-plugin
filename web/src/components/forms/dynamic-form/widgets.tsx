@@ -117,13 +117,13 @@ export const SelectWidget: React.FC<WidgetProps> = props => {
       onFocus={onFocus && (() => onFocus(id, value))}
       onOpenChange={(isOpen: boolean) => setIsOpen(isOpen)}
       toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
-        <MenuToggle ref={toggleRef} onClick={() => setIsOpen(!isOpen)} isExpanded={isOpen}>
+        <MenuToggle id={`${id}-toggle`} ref={toggleRef} onClick={() => setIsOpen(!isOpen)} isExpanded={isOpen}>
           {value || t('Select {{title}}', { title: title || schema?.title || label })}
         </MenuToggle>
       )}
     >
       {enumOptions.map(option => (
-        <DropdownItem key={option.value} value={option.value}>
+        <DropdownItem id={`${id}-${option.value}`} key={option.value} value={option.value}>
           {option.label}
         </DropdownItem>
       ))}
@@ -143,6 +143,7 @@ export const JSONWidget: React.FC<WidgetProps> = props => {
       })}
     >
       <CodeEditor
+        id={id}
         isDarkTheme={isDarkTheme}
         isMinimapVisible={false}
         isLineNumbersVisible={false}

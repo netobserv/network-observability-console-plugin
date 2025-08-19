@@ -85,43 +85,45 @@ export const FlowMetricWizard: FC<FlowMetricWizardProps> = props => {
                     {t('Network Observability FlowMetric setup')}
                   </Title>
                 </div>
-                <Wizard onStepChange={onStepChange} onSave={() => ctx.onSubmit(data)}>
-                  <WizardStep name={t('Overview')} id="overview">
-                    <span className="co-pre-line">
-                      {t(
-                        // eslint-disable-next-line max-len
-                        'You can create custom metrics out of the flowlogs data using the FlowMetric API. In every flowlogs data that is collected, there are a number of fields labeled per log, such as source name and destination name. These fields can be leveraged as Prometheus labels to enable the customization of cluster information on your dashboard.\nThis setup will guide you on the common aspects of the FlowMetric configuration.'
-                      )}
-                      <br /> <br />
-                      {t('General configuration')}
-                    </span>
-                    {form()}
-                  </WizardStep>
-                  <WizardStep name={t('Metric')} id="metric">
-                    {form()}
-                  </WizardStep>
-                  <WizardStep name={t('Data')} id="data">
-                    {form()}
-                  </WizardStep>
-                  <WizardStep name={t('Charts')} id="charts">
-                    {form()}
-                  </WizardStep>
-                  <WizardStep
-                    name={t('Review')}
-                    id="review-step"
-                    body={{ className: 'wizard-editor-container' }}
-                    footer={ContextSingleton.isStandalone() ? undefined : <></>}
-                  >
-                    <ResourceYAMLEditor
-                      initialResource={data}
-                      onSave={content => {
-                        const updatedData = safeYAMLToJS(content);
-                        setData(updatedData);
-                        ctx.onSubmit(updatedData);
-                      }}
-                    />
-                  </WizardStep>
-                </Wizard>
+                <div id="wizard-container">
+                  <Wizard id="flowMetricWizard" onStepChange={onStepChange} onSave={() => ctx.onSubmit(data)}>
+                    <WizardStep name={t('Overview')} id="overview">
+                      <span className="co-pre-line">
+                        {t(
+                          // eslint-disable-next-line max-len
+                          'You can create custom metrics out of the flowlogs data using the FlowMetric API. In every flowlogs data that is collected, there are a number of fields labeled per log, such as source name and destination name. These fields can be leveraged as Prometheus labels to enable the customization of cluster information on your dashboard.\nThis setup will guide you on the common aspects of the FlowMetric configuration.'
+                        )}
+                        <br /> <br />
+                        {t('General configuration')}
+                      </span>
+                      {form()}
+                    </WizardStep>
+                    <WizardStep name={t('Metric')} id="metric">
+                      {form()}
+                    </WizardStep>
+                    <WizardStep name={t('Data')} id="data">
+                      {form()}
+                    </WizardStep>
+                    <WizardStep name={t('Charts')} id="charts">
+                      {form()}
+                    </WizardStep>
+                    <WizardStep
+                      name={t('Review')}
+                      id="review-step"
+                      body={{ className: 'wizard-editor-container' }}
+                      footer={ContextSingleton.isStandalone() ? undefined : <></>}
+                    >
+                      <ResourceYAMLEditor
+                        initialResource={data}
+                        onSave={content => {
+                          const updatedData = safeYAMLToJS(content);
+                          setData(updatedData);
+                          ctx.onSubmit(updatedData);
+                        }}
+                      />
+                    </WizardStep>
+                  </Wizard>
+                </div>
               </PageSection>
             );
           }}
