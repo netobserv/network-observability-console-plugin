@@ -1,7 +1,7 @@
 import { Accordion, AccordionItem, DrawerCloseButton } from '@patternfly/react-core';
 import { mount, shallow } from 'enzyme';
 import * as React from 'react';
-import { NetflowMetrics } from 'src/api/loki';
+import { NetflowMetrics } from '../../../api/loki';
 import { FlowsSample } from '../../../components/__tests-data__/flows';
 import { waitForRender } from '../../../components/__tests__/common.spec';
 import { RecordType } from '../../../model/flow-query';

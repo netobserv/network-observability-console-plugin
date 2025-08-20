@@ -32,55 +32,55 @@ func TestLokiFiltering(t *testing.T) {
 		outputQueries    []string
 		outputQueryParts []string
 	}{{
-		name:      "Simple line filter",
+		name:      "Simple line filter equals",
 		inputPath: "?filters=SrcK8S_Name=test-pod",
 		outputQueries: []string{
-			"?query={app=\"netobserv-flowcollector\"}|~`SrcK8S_Name\":\"(?i)[^\"]*test-pod.*\"`",
+			"?query={app=\"netobserv-flowcollector\"}|~`SrcK8S_Name\":\"test-pod\"`",
 		},
 	}, {
-		name:      "AND line filter",
-		inputPath: "?filters=" + url.QueryEscape("Proto=6&SrcK8S_Name=test"),
+		name:      "AND line filter contains",
+		inputPath: "?filters=" + url.QueryEscape("Proto=6&SrcK8S_Name~test"),
 		outputQueryParts: []string{
 			"?query={app=\"netobserv-flowcollector\"}",
 			"|~`Proto\":6[,}]`",
 			"|~`SrcK8S_Name\":\"(?i)[^\"]*test.*\"`",
 		},
 	}, {
-		name:      "OR line filter",
+		name:      "OR line filter equals",
 		inputPath: "?filters=" + url.QueryEscape("Proto=6|SrcK8S_Name=test"),
 		outputQueries: []string{
 			"?query={app=\"netobserv-flowcollector\"}|~`Proto\":6[,}]`",
-			"?query={app=\"netobserv-flowcollector\"}|~`SrcK8S_Name\":\"(?i)[^\"]*test.*\"`",
+			"?query={app=\"netobserv-flowcollector\"}|~`SrcK8S_Name\":\"test\"`",
 		},
 	}, {
-		name:      "Simple label filter",
+		name:      "Simple label filter equals",
 		inputPath: "?filters=" + url.QueryEscape("SrcK8S_Namespace=test-namespace"),
 		outputQueries: []string{
-			`?query={app="netobserv-flowcollector",SrcK8S_Namespace=~"(?i).*test-namespace.*"}`,
+			`?query={app="netobserv-flowcollector",SrcK8S_Namespace="test-namespace"}`,
 		},
 	}, {
-		name:      "OR line filter same key",
-		inputPath: "?filters=" + url.QueryEscape("SrcK8S_Name=name1,name2"),
+		name:      "OR line filter same key contains",
+		inputPath: "?filters=" + url.QueryEscape("SrcK8S_Name~name1,name2"),
 		outputQueries: []string{
 			"?query={app=\"netobserv-flowcollector\"}|~`SrcK8S_Name\":\"(?i)[^\"]*name1.*\"|SrcK8S_Name\":\"(?i)[^\"]*name2.*\"`",
 		},
 	}, {
-		name:      "NOT line filter same key",
-		inputPath: "?filters=" + url.QueryEscape(`SrcK8S_Name!="name1","name2"`),
+		name:      "NOT line filter same key contains",
+		inputPath: "?filters=" + url.QueryEscape(`SrcK8S_Name!~"name1","name2"`),
 		outputQueries: []string{
 			"?query={app=\"netobserv-flowcollector\"}|~`\"SrcK8S_Name\"`!~`SrcK8S_Name\":\"name1\"`!~`SrcK8S_Name\":\"name2\"`",
 		},
 	}, {
-		name:      "OR label filter same key",
+		name:      "OR label filter same key equals",
 		inputPath: "?filters=" + url.QueryEscape("SrcK8S_Namespace=ns1,ns2"),
 		outputQueries: []string{
-			`?query={app="netobserv-flowcollector",SrcK8S_Namespace=~"(?i).*ns1.*|(?i).*ns2.*"}`,
+			`?query={app="netobserv-flowcollector",SrcK8S_Namespace=~"ns1|ns2"}`,
 		},
 	}, {
 		name:      "Several filters",
 		inputPath: "?filters=" + url.QueryEscape("SrcPort=8080&SrcAddr=10.128.0.1&SrcK8S_Namespace=default"),
 		outputQueries: []string{
-			"?query={app=\"netobserv-flowcollector\",SrcK8S_Namespace=~\"(?i).*default.*\"}|~`SrcPort\":8080[,}]`|json|SrcAddr=ip(\"10.128.0.1\")",
+			"?query={app=\"netobserv-flowcollector\",SrcK8S_Namespace=\"default\"}|~`SrcPort\":8080[,}]`|json|SrcAddr=ip(\"10.128.0.1\")",
 		},
 	}, {
 		name:      "AND IP filters",
@@ -106,7 +106,7 @@ func TestLokiFiltering(t *testing.T) {
 		name:      "Several OR filters",
 		inputPath: "?filters=" + url.QueryEscape("SrcPort=8080|SrcAddr=10.128.0.1|SrcK8S_Namespace=default"),
 		outputQueries: []string{
-			"?query={app=\"netobserv-flowcollector\",SrcK8S_Namespace=~\"(?i).*default.*\"}",
+			"?query={app=\"netobserv-flowcollector\",SrcK8S_Namespace=\"default\"}",
 			"?query={app=\"netobserv-flowcollector\"}|json|SrcAddr=ip(\"10.128.0.1\")",
 			"?query={app=\"netobserv-flowcollector\"}|~`SrcPort\":8080[,}]`",
 		},
@@ -128,13 +128,13 @@ func TestLokiFiltering(t *testing.T) {
 		outputQueries: []string{`?query={app="netobserv-flowcollector"}&start=${timeNow-300000}`},
 	}, {
 		name:      "Strict label match",
-		inputPath: "?filters=" + url.QueryEscape("SrcK8S_Namespace=\"exact-namespace\""),
+		inputPath: "?filters=" + url.QueryEscape("SrcK8S_Namespace~\"exact-namespace\""),
 		outputQueries: []string{
 			`?query={app="netobserv-flowcollector",SrcK8S_Namespace="exact-namespace"}`,
 		},
 	}, {
 		name:      "Strict line match",
-		inputPath: "?filters=" + url.QueryEscape("SrcK8S_Name=\"exact-pod\""),
+		inputPath: "?filters=" + url.QueryEscape("SrcK8S_Name~\"exact-pod\""),
 		outputQueries: []string{
 			"?query={app=\"netobserv-flowcollector\"}|~`SrcK8S_Name\":\"exact-pod\"`",
 		},
@@ -144,28 +144,28 @@ func TestLokiFiltering(t *testing.T) {
 		outputQueryParts: []string{
 			"?query={app=\"netobserv-flowcollector\"}",
 			"|~`Port\":8080[,}]`",
-			"|~`K8S_Name\":\"(?i)[^\"]*test.*\"`",
+			"|~`K8S_Name\":\"test\"`",
 		},
 	}, {
 		name:      "Common src+dst name with OR",
 		inputPath: "?filters=" + url.QueryEscape("Port=8080|K8S_Name=test"),
 		outputQueries: []string{
-			"?query={app=\"netobserv-flowcollector\"}|~`K8S_Name\":\"(?i)[^\"]*test.*\"`",
+			"?query={app=\"netobserv-flowcollector\"}|~`K8S_Name\":\"test\"`",
 			"?query={app=\"netobserv-flowcollector\"}|~`Port\":8080[,}]`",
 		},
 	}, {
 		name:      "Common src+dst port with AND and OR",
 		inputPath: "?filters=" + url.QueryEscape("Port=8080&SrcK8S_Namespace=test|Port=8080&DstK8S_Namespace=test"),
 		outputQueries: []string{
-			"?query={app=\"netobserv-flowcollector\",SrcK8S_Namespace=~\"(?i).*test.*\"}|~`Port\":8080[,}]`",
-			"?query={app=\"netobserv-flowcollector\",DstK8S_Namespace=~\"(?i).*test.*\"}|~`Port\":8080[,}]`",
+			"?query={app=\"netobserv-flowcollector\",SrcK8S_Namespace=\"test\"}|~`Port\":8080[,}]`",
+			"?query={app=\"netobserv-flowcollector\",DstK8S_Namespace=\"test\"}|~`Port\":8080[,}]`",
 		},
 	}, {
 		name:      "Common src+dst port with multiple OR",
 		inputPath: "?filters=" + url.QueryEscape("Port=8080|SrcK8S_Namespace=test|DstK8S_Namespace=test"),
 		outputQueries: []string{
-			"?query={app=\"netobserv-flowcollector\",SrcK8S_Namespace=~\"(?i).*test.*\"}",
-			"?query={app=\"netobserv-flowcollector\",DstK8S_Namespace=~\"(?i).*test.*\"}",
+			"?query={app=\"netobserv-flowcollector\",SrcK8S_Namespace=\"test\"}",
+			"?query={app=\"netobserv-flowcollector\",DstK8S_Namespace=\"test\"}",
 			"?query={app=\"netobserv-flowcollector\"}|~`Port\":8080[,}]`",
 		},
 	}, {
@@ -184,7 +184,7 @@ func TestLokiFiltering(t *testing.T) {
 		name:      "Empty line filter OR same key",
 		inputPath: "?filters=" + url.QueryEscape(`SrcK8S_Name="",foo&DstK8S_Name="hello"`),
 		outputQueries: []string{
-			"?query={app=\"netobserv-flowcollector\"}|~`DstK8S_Name\":\"hello\"`|json|SrcK8S_Name=\"\"+or+SrcK8S_Name=~`(?i).*foo.*`",
+			"?query={app=\"netobserv-flowcollector\"}|~`DstK8S_Name\":\"hello\"`|json|SrcK8S_Name=\"\"+or+SrcK8S_Name=\"foo\"",
 		},
 	}, {
 		name:      "Empty label ORed",
@@ -205,7 +205,7 @@ func TestLokiFiltering(t *testing.T) {
 		inputPath: "?filters=" + url.QueryEscape(`SrcK8S_Name="",foo|DstK8S_Name="hello"`),
 		outputQueries: []string{
 			"?query={app=\"netobserv-flowcollector\"}|~`DstK8S_Name\":\"hello\"`",
-			"?query={app=\"netobserv-flowcollector\"}|json|SrcK8S_Name=\"\"+or+SrcK8S_Name=~`(?i).*foo.*`",
+			"?query={app=\"netobserv-flowcollector\"}|json|SrcK8S_Name=\"\"+or+SrcK8S_Name=\"foo\"",
 		},
 	}, {
 		name:      "Empty line filter ORed (ter)",
