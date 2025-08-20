@@ -1,9 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {
-  K8sResourceCondition,
-  K8sResourceConditionStatus,
-  K8sResourceKind
-} from '@openshift-console/dynamic-plugin-sdk';
+import { K8sResourceCondition, K8sResourceKind } from '@openshift-console/dynamic-plugin-sdk';
 
 import {
   DefaultTaskGroup as taskGroup,
@@ -135,7 +131,7 @@ export const Pipeline: React.FC<FlowCollectorPipelineProps> = ({ existing, selec
         id: 'ebpf',
         label: 'eBPF agents',
         data: {
-          status: getStatus(types, K8sResourceConditionStatus.True),
+          status: getStatus(types, 'True'),
           selected: _.some(selectedTypes, t => types.includes(t)),
           onSelect: () => setSelectedTypes(types)
         }
@@ -150,7 +146,7 @@ export const Pipeline: React.FC<FlowCollectorPipelineProps> = ({ existing, selec
         label: 'Kafka',
         runAfterTasks: ['ebpf'],
         data: {
-          status: getStatus(types, K8sResourceConditionStatus.False),
+          status: getStatus(types, 'False'),
           selected: _.some(selectedTypes, t => types.includes(t)),
           onSelect: () => setSelectedTypes(types)
         }
@@ -164,7 +160,7 @@ export const Pipeline: React.FC<FlowCollectorPipelineProps> = ({ existing, selec
         label: 'Flowlogs pipeline',
         runAfterTasks: [_.last(steps)!.id],
         data: {
-          status: getStatus(flpStatuses, K8sResourceConditionStatus.False),
+          status: getStatus(flpStatuses, 'False'),
           selected: _.some(selectedTypes, t => flpStatuses.includes(t)),
           onSelect: () => setSelectedTypes(flpStatuses)
         }
