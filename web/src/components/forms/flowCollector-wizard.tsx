@@ -135,7 +135,7 @@ export const FlowCollectorWizard: FC<FlowCollectorWizardProps> = props => {
                   </Title>
                 </div>
                 <div id="wizard-container">
-                  <Wizard onStepChange={onStepChange} onSave={() => ctx.onSubmit(data)}>
+                  <Wizard onStepChange={onStepChange} onSave={() => ctx.onSubmit(data)} onClose={() => navigate('/')}>
                     <WizardStep name={t('Overview')} id="overview">
                       <span className="co-pre-line">
                         {t(

@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom-v5-compat';
 import { ContextSingleton } from '../../utils/context';
 import { safeYAMLToJS } from '../../utils/yaml';
-import DynamicLoader from '../dynamic-loader/dynamic-loader';
+import DynamicLoader, { navigate } from '../dynamic-loader/dynamic-loader';
 import { FlowMetricUISchema } from './config/uiSchema';
 import { DynamicForm } from './dynamic-form/dynamic-form';
 import './forms.css';
@@ -86,7 +86,12 @@ export const FlowMetricWizard: FC<FlowMetricWizardProps> = props => {
                   </Title>
                 </div>
                 <div id="wizard-container">
-                  <Wizard id="flowMetricWizard" onStepChange={onStepChange} onSave={() => ctx.onSubmit(data)}>
+                  <Wizard
+                    id="flowMetricWizard"
+                    onStepChange={onStepChange}
+                    onSave={() => ctx.onSubmit(data)}
+                    onClose={() => navigate('/')}
+                  >
                     <WizardStep name={t('Overview')} id="overview">
                       <span className="co-pre-line">
                         {t(
