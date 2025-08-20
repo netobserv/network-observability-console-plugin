@@ -9,6 +9,7 @@ import (
 
 	"github.com/netobserv/network-observability-console-plugin/pkg/config"
 	"github.com/netobserv/network-observability-console-plugin/pkg/handler"
+	"github.com/netobserv/network-observability-console-plugin/pkg/handler/alertingmock"
 	"github.com/netobserv/network-observability-console-plugin/pkg/kubernetes/auth"
 	"github.com/netobserv/network-observability-console-plugin/pkg/prometheus"
 )
@@ -70,6 +71,11 @@ func setupRoutes(ctx context.Context, cfg *config.Config, authChecker auth.Check
 
 		// Frontend files
 		r.PathPrefix("/").Handler(http.FileServer(http.Dir("./web/dist/")))
+	}
+
+	if cfg.Loki.UseMocks {
+		// Add route for alerts (otherwise, the route is provided by the Console itself)
+		api.HandleFunc("/prometheus/api/v1/rules", alertingmock.GetRules())
 	}
 
 	return r

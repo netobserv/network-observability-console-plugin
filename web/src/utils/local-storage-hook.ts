@@ -6,6 +6,7 @@ export const localStorageColsKey = 'netflow-traffic-columns';
 export const localStorageColsSizesKey = 'netflow-traffic-column-sizes';
 export const localStorageExportColsKey = 'netflow-traffic-export-columns';
 export const localStorageRefreshKey = 'netflow-traffic-refresh';
+export const localStorageHealthRefreshKey = 'network-health-refresh';
 export const localStorageSizeKey = 'netflow-traffic-size-size';
 export const localStorageViewIdKey = 'netflow-traffic-view-id';
 export const localStorageOverviewTruncateKey = 'netflow-traffic-overview-truncate';

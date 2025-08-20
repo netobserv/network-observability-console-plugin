@@ -25,8 +25,7 @@
     "lint": "./node_modules/.bin/eslint \"./src/**/*.{ts,tsx}\"",
     "format": "pretty-quick --branch main",
     "format-all": "prettier --write \"./src/**/*.{ts,tsx}\" && npm run fix-imports",
-    "fix-imports": "eslint --no-eslintrc --no-inline-config --parser '@typescript-eslint/parser' --plugin 'unused-imports' --plugin 'react-hooks' --rule 'unused-imports/no-unused-imports:error' --fix \"./src/**/*.{ts,tsx}\"",
-    "generate-doc": "typedoc --sort source-order --categorizeByGroup false --githubPages false --readme none --disableSources --out docs src/api/ipfix.ts --hideBreadcrumbs true --hideInPageTOC true"
+    "fix-imports": "eslint --no-eslintrc --no-inline-config --parser '@typescript-eslint/parser' --plugin 'unused-imports' --plugin 'react-hooks' --rule 'unused-imports/no-unused-imports:error' --fix \"./src/**/*.{ts,tsx}\""
   },
   "devDependencies": {
     "@babel/core": "^7.17.12",
