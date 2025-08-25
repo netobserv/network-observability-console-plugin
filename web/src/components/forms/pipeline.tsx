@@ -1,23 +1,19 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {
-  K8sResourceCondition,
-  K8sResourceConditionStatus,
-  K8sResourceKind
-} from '@openshift-console/dynamic-plugin-sdk';
+import { K8sResourceCondition, K8sResourceKind } from '@openshift-console/dynamic-plugin-sdk';
 
 import {
-  DefaultTaskGroup,
-  DEFAULT_EDGE_TYPE,
-  DEFAULT_FINALLY_NODE_TYPE,
-  DEFAULT_SPACER_NODE_TYPE,
-  DEFAULT_TASK_NODE_TYPE,
-  DEFAULT_WHEN_OFFSET,
+  DefaultTaskGroup as taskGroup,
+  DEFAULT_EDGE_TYPE as edgeType,
+  DEFAULT_FINALLY_NODE_TYPE as finallyNodeType,
+  DEFAULT_SPACER_NODE_TYPE as spacerNodeType,
+  DEFAULT_TASK_NODE_TYPE as taskNodeType,
+  DEFAULT_WHEN_OFFSET as whenOffset,
   FinallyNode,
   getEdgesFromNodes,
   getSpacerNodes,
   Graph,
   GraphComponent,
-  GRAPH_LAYOUT_END_EVENT,
+  GRAPH_LAYOUT_END_EVENT as layoutEndEvent,
   Layout,
   ModelKind,
   Node,
@@ -54,7 +50,7 @@ export const StepNode: React.FunctionComponent<StepProps> = ({ element }) => {
   const data = element.getData();
 
   const whenDecorator = data?.whenStatus ? (
-    <WhenDecorator element={element} status={data.whenStatus} leftOffset={DEFAULT_WHEN_OFFSET} />
+    <WhenDecorator element={element} status={data.whenStatus} leftOffset={whenOffset} />
   ) : null;
 
   return (
@@ -69,18 +65,18 @@ const pipelineComponentFactory = (kind: ModelKind, type: string) => {
     return GraphComponent;
   }
   switch (type) {
-    case DEFAULT_TASK_NODE_TYPE:
+    case taskNodeType:
       return StepNode;
-    case DEFAULT_FINALLY_NODE_TYPE:
+    case finallyNodeType:
       return FinallyNode;
     case 'task-group':
-      return DefaultTaskGroup;
+      return taskGroup;
     case 'finally-group':
-      return DefaultTaskGroup;
-    case DEFAULT_SPACER_NODE_TYPE:
+      return taskGroup;
+    case spacerNodeType:
       return SpacerNode;
     case 'finally-spacer-edge':
-    case DEFAULT_EDGE_TYPE:
+    case edgeType:
       return TaskEdge;
     default:
       return undefined;
@@ -135,7 +131,7 @@ export const Pipeline: React.FC<FlowCollectorPipelineProps> = ({ existing, selec
         id: 'ebpf',
         label: 'eBPF agents',
         data: {
-          status: getStatus(types, K8sResourceConditionStatus.True),
+          status: getStatus(types, 'True'),
           selected: _.some(selectedTypes, t => types.includes(t)),
           onSelect: () => setSelectedTypes(types)
         }
@@ -150,7 +146,7 @@ export const Pipeline: React.FC<FlowCollectorPipelineProps> = ({ existing, selec
         label: 'Kafka',
         runAfterTasks: ['ebpf'],
         data: {
-          status: getStatus(types, K8sResourceConditionStatus.False),
+          status: getStatus(types, 'False'),
           selected: _.some(selectedTypes, t => types.includes(t)),
           onSelect: () => setSelectedTypes(types)
         }
@@ -164,7 +160,7 @@ export const Pipeline: React.FC<FlowCollectorPipelineProps> = ({ existing, selec
         label: 'Flowlogs pipeline',
         runAfterTasks: [_.last(steps)!.id],
         data: {
-          status: getStatus(flpStatuses, K8sResourceConditionStatus.False),
+          status: getStatus(flpStatuses, 'False'),
           selected: _.some(selectedTypes, t => flpStatuses.includes(t)),
           onSelect: () => setSelectedTypes(flpStatuses)
         }
@@ -224,7 +220,7 @@ export const Pipeline: React.FC<FlowCollectorPipelineProps> = ({ existing, selec
     }
 
     return steps.map(s => ({
-      type: s.type || 'DEFAULT_TASK_NODE',
+      type: s.type || taskNodeType,
       width: 180,
       height: 32,
       style: {
@@ -249,31 +245,42 @@ export const Pipeline: React.FC<FlowCollectorPipelineProps> = ({ existing, selec
   React.useEffect(() => {
     if (!controller) {
       return;
+    } else if (controller.hasGraph()) {
+      controller.getElements().forEach(e => e.getType() !== 'graph' && controller.removeElement(e));
+      controller.getGraph().destroy();
     }
-    const steps = getSteps();
-    const spacerNodes = getSpacerNodes(steps);
-    const nodes = [...steps, ...spacerNodes];
-    const edges = getEdgesFromNodes(steps);
-    controller.fromModel(
-      {
-        nodes,
-        edges,
-        graph: {
-          id: 'g1',
-          type: 'graph',
-          layout: 'pipelineLayout'
-        }
-      },
-      false
-    );
-  }, [controller, getSteps]);
+
+    setTimeout(() => {
+      const steps = getSteps();
+      const spacerNodes = getSpacerNodes(steps);
+      const nodes = [...steps, ...spacerNodes];
+      const edges = getEdgesFromNodes(steps);
+      controller.fromModel(
+        {
+          nodes,
+          edges,
+          graph: {
+            id: 'g1',
+            type: 'graph',
+            layout: 'pipelineLayout'
+          }
+        },
+        false
+      );
+
+      //TODO: find a smoother way to fit while elements are still moving
+      setTimeout(fit, 100);
+      setTimeout(fit, 250);
+      setTimeout(fit, 500);
+    }, 500);
+  }, [controller, fit, getSteps]);
 
   //create controller on startup and register factories
   React.useEffect(() => {
     const c = new Visualization();
     c.registerComponentFactory(pipelineComponentFactory);
     c.registerLayoutFactory((type: string, graph: Graph): Layout | undefined => new PipelineDagreLayout(graph));
-    c.addEventListener(GRAPH_LAYOUT_END_EVENT, fit);
+    c.addEventListener(layoutEndEvent, fit);
     setController(c);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

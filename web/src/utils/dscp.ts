@@ -4,7 +4,7 @@ export const getDSCPDocUrl = () => {
   return 'https://www.rfc-editor.org/rfc/rfc4594';
 };
 
-export const DSCP_VALUES: ReadOnlyValues = [
+export const dscpValues: ReadOnlyValues = [
   { value: 48, name: 'Network Control', description: 'Network routing' },
   { value: 46, name: 'Telephony', description: 'IP Telephony bearer' },
   { value: 40, name: 'Signaling', description: 'IP Telephony signaling' },
@@ -19,16 +19,16 @@ export const DSCP_VALUES: ReadOnlyValues = [
   { value: 8, name: 'Low-Priority Data', description: 'Any flow that has no BW assurance' }
 ] as const;
 
-const dscpNames = DSCP_VALUES.map(v => v.name);
-export type DSCP_SERVICE_CLASS_NAMES = typeof dscpNames[number];
+const dscpNames = dscpValues.map(v => v.name);
+export type DSCPServiceClassNames = typeof dscpNames[number];
 
-export const getDSCPServiceClassName = (dscp: number): DSCP_SERVICE_CLASS_NAMES | undefined => {
-  return DSCP_VALUES.find(v => v.value === dscp)?.name;
+export const getDSCPServiceClassName = (dscp: number): DSCPServiceClassNames | undefined => {
+  return dscpValues.find(v => v.value === dscp)?.name;
 };
 
-const dscpDescriptions = DSCP_VALUES.map(v => v.description);
-export type DSCP_SERVICE_CLASS_DESCRIPTIONS = typeof dscpDescriptions[number];
+const dscpDescriptions = dscpValues.map(v => v.description);
+export type DSCPServiceClassDescriptions = typeof dscpDescriptions[number];
 
-export const getDSCPServiceClassDescription = (dscp: number): DSCP_SERVICE_CLASS_DESCRIPTIONS | undefined => {
-  return DSCP_VALUES.find(v => v.value === dscp)?.description;
+export const getDSCPServiceClassDescription = (dscp: number): DSCPServiceClassDescriptions | undefined => {
+  return dscpValues.find(v => v.value === dscp)?.description;
 };

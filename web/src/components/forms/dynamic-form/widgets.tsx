@@ -9,20 +9,20 @@ import {
   MenuToggleElement,
   Switch
 } from '@patternfly/react-core';
-import { getSchemaType, WidgetProps } from '@rjsf/utils';
+import { getSchemaType, UIOptionsType, WidgetProps } from '@rjsf/utils';
 import classNames from 'classnames';
 import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../../utils/theme-hook';
-import { JSON_SCHEMA_NUMBER_TYPES } from './const';
+import { jsonSchemaNumberTypes } from './const';
 import { DescriptionField } from './fields';
 import { AtomicFieldTemplate } from './templates';
 
 export const TextWidget: React.FC<WidgetProps> = props => {
   const { disabled = false, id, onBlur, onChange, onFocus, readonly = false, schema = {}, value = '' } = props;
   const schemaType = getSchemaType(schema);
-  return JSON_SCHEMA_NUMBER_TYPES.includes(String(schemaType)) ? (
+  return jsonSchemaNumberTypes.includes(String(schemaType)) ? (
     <NumberWidget {...props} />
   ) : (
     <span
@@ -109,21 +109,21 @@ export const SelectWidget: React.FC<WidgetProps> = props => {
     <Dropdown
       id={id}
       isOpen={isOpen}
-      onBlur={onBlur && (event => onBlur(id, value))}
+      onBlur={onBlur && (() => onBlur(id, value))}
       onSelect={(e, v) => {
         onChange(v, undefined, id);
         setIsOpen(false);
       }}
-      onFocus={onFocus && (event => onFocus(id, value))}
+      onFocus={onFocus && (() => onFocus(id, value))}
       onOpenChange={(isOpen: boolean) => setIsOpen(isOpen)}
       toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
-        <MenuToggle ref={toggleRef} onClick={() => setIsOpen(!isOpen)} isExpanded={isOpen}>
+        <MenuToggle id={`${id}-toggle`} ref={toggleRef} onClick={() => setIsOpen(!isOpen)} isExpanded={isOpen}>
           {value || t('Select {{title}}', { title: title || schema?.title || label })}
         </MenuToggle>
       )}
     >
       {enumOptions.map(option => (
-        <DropdownItem key={option.value} value={option.value}>
+        <DropdownItem id={`${id}-${option.value}`} key={option.value} value={option.value}>
           {option.label}
         </DropdownItem>
       ))}
@@ -143,6 +143,7 @@ export const JSONWidget: React.FC<WidgetProps> = props => {
       })}
     >
       <CodeEditor
+        id={id}
         isDarkTheme={isDarkTheme}
         isMinimapVisible={false}
         isLineNumbersVisible={false}
@@ -173,7 +174,10 @@ export const ArrayCheckboxesWidget: React.FC<WidgetProps> = props => {
       onKeyChange={() => errFunc}
       onDropPropertyClick={() => errFunc}
       description={
-        <DescriptionField schema={schema} description={(schema.items as any)?.description || props.description} />
+        <DescriptionField
+          schema={schema}
+          description={(schema.items as UIOptionsType)?.description || props.description}
+        />
       }
       {...{
         ...props,
@@ -184,6 +188,7 @@ export const ArrayCheckboxesWidget: React.FC<WidgetProps> = props => {
       }}
     >
       <Flex
+        className="checkboxes-container"
         direction={{ default: enums.length < 4 ? 'row' : 'column' }}
         onBlur={() => onBlur(id, value)}
         onFocus={() => onFocus(id, value)}

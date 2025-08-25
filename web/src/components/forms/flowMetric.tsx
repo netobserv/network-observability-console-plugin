@@ -1,19 +1,31 @@
 import React, { FC } from 'react';
 
-import DynamicLoader from '../dynamic-loader/dynamic-loader';
-import { FlowMetricSchema } from './config/schema';
-import { GetFlowMetricJS } from './config/templates';
+import { useParams } from 'react-router-dom-v5-compat';
+import DynamicLoader, { back } from '../dynamic-loader/dynamic-loader';
 import { FlowMetricUISchema } from './config/uiSchema';
 import { ResourceForm } from './resource-form';
 import { ResourceWatcher } from './resource-watcher';
 
-export type FlowMetricFormProps = {};
+export type FlowMetricFormProps = {
+  name?: string;
+};
 
 export const FlowMetricForm: FC<FlowMetricFormProps> = props => {
+  const params = useParams();
+
   return (
     <DynamicLoader>
-      <ResourceWatcher defaultData={GetFlowMetricJS()}>
-        <ResourceForm schema={FlowMetricSchema} uiSchema={FlowMetricUISchema} />
+      <ResourceWatcher
+        group="flows.netobserv.io"
+        version="v1alpha1"
+        kind="FlowMetric"
+        name={params.name || props.name}
+        namespace={params.namespace || 'default'}
+        onSuccess={() => {
+          back();
+        }}
+      >
+        <ResourceForm uiSchema={FlowMetricUISchema} />
       </ResourceWatcher>
     </DynamicLoader>
   );

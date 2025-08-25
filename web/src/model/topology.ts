@@ -235,8 +235,8 @@ export const toggleElementFilter = (
   toggleFilter(result, defValue, isFiltered, setFilters);
 };
 
-export const DEFAULT_NODE_TRUNCATE_LENGTH = 25;
-export const DEFAULT_NODE_SIZE = 75;
+export const defaultNodeTruncateLength = 25;
+export const defaultNodeSize = 75;
 
 export type NodeData = {
   nodeType: NodeType;
@@ -273,8 +273,8 @@ const generateNode = (
     id: data.peer.id,
     type: 'node',
     label,
-    width: DEFAULT_NODE_SIZE,
-    height: DEFAULT_NODE_SIZE,
+    width: defaultNodeSize,
+    height: defaultNodeSize,
     shape: k8sModel ? NodeShape.ellipse : NodeShape.rect,
     status: NodeStatus.default,
     style: { padding: 20 },

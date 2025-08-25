@@ -5,7 +5,7 @@ import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { getUpdatedCR } from '../utils';
-import { K8S_UI_SCHEMA } from './const';
+import { K8sUISchema } from './const';
 import './dynamic-form.css';
 import { ErrorBoundary } from './error-boundary';
 import defaultFields from './fields';
@@ -97,7 +97,7 @@ export const DynamicForm: React.FC<DynamicFormProps> = ({
             schema={schema}
             // Don't show the react-jsonschema-form error list at top
             showErrorList={false}
-            uiSchema={customUISchema ? uiSchema : _.defaultsDeep({}, K8S_UI_SCHEMA, uiSchema)}
+            uiSchema={customUISchema ? uiSchema : _.defaultsDeep({}, K8sUISchema, uiSchema)}
             widgets={{ ...defaultWidgets, ...widgets }}
             templates={{ ...defaultTemplates, ...templates }}
           >
