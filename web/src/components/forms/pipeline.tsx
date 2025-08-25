@@ -245,24 +245,35 @@ export const Pipeline: React.FC<FlowCollectorPipelineProps> = ({ existing, selec
   React.useEffect(() => {
     if (!controller) {
       return;
+    } else if (controller.hasGraph()) {
+      controller.getElements().forEach(e => e.getType() !== 'graph' && controller.removeElement(e));
+      controller.getGraph().destroy();
     }
-    const steps = getSteps();
-    const spacerNodes = getSpacerNodes(steps);
-    const nodes = [...steps, ...spacerNodes];
-    const edges = getEdgesFromNodes(steps);
-    controller.fromModel(
-      {
-        nodes,
-        edges,
-        graph: {
-          id: 'g1',
-          type: 'graph',
-          layout: 'pipelineLayout'
-        }
-      },
-      false
-    );
-  }, [controller, getSteps]);
+
+    setTimeout(() => {
+      const steps = getSteps();
+      const spacerNodes = getSpacerNodes(steps);
+      const nodes = [...steps, ...spacerNodes];
+      const edges = getEdgesFromNodes(steps);
+      controller.fromModel(
+        {
+          nodes,
+          edges,
+          graph: {
+            id: 'g1',
+            type: 'graph',
+            layout: 'pipelineLayout'
+          }
+        },
+        false
+      );
+
+      //TODO: find a smoother way to fit while elements are still moving
+      setTimeout(fit, 100);
+      setTimeout(fit, 250);
+      setTimeout(fit, 500);
+    }, 500);
+  }, [controller, fit, getSteps]);
 
   //create controller on startup and register factories
   React.useEffect(() => {
