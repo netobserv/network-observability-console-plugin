@@ -1,7 +1,7 @@
 import React, { FC } from 'react';
 
 import { useParams } from 'react-router-dom-v5-compat';
-import DynamicLoader from '../dynamic-loader/dynamic-loader';
+import DynamicLoader, { back } from '../dynamic-loader/dynamic-loader';
 import { FlowCollectorUISchema } from './config/uiSchema';
 import { ResourceForm } from './resource-form';
 import { ResourceWatcher } from './resource-watcher';
@@ -20,6 +20,9 @@ export const FlowCollectorForm: FC<FlowCollectorFormProps> = props => {
         version="v1beta2"
         kind="FlowCollector"
         name={params.name || props.name}
+        onSuccess={() => {
+          back();
+        }}
       >
         <ResourceForm uiSchema={FlowCollectorUISchema} />
       </ResourceWatcher>

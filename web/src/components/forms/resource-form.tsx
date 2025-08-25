@@ -5,9 +5,8 @@ import { UiSchema } from '@rjsf/utils';
 import _ from 'lodash';
 import React, { FC, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
-import { netflowTrafficPath } from '../../utils/url';
 import { safeYAMLToJS } from '../../utils/yaml';
-import { navigate } from '../dynamic-loader/dynamic-loader';
+import { back } from '../dynamic-loader/dynamic-loader';
 import Modal from '../modals/modal';
 import { SchemaValidator } from './config/validator';
 import { DynamicForm } from './dynamic-form/dynamic-form';
@@ -64,7 +63,7 @@ export const ResourceForm: FC<ResourceFormProps> = ({ uiSchema }) => {
                 onSubmit={() => {
                   ctx.onSubmit(data);
                 }}
-                onCancel={() => navigate(netflowTrafficPath)}
+                onCancel={() => back()}
                 onDelete={() => {
                   setOpen(true);
                 }}

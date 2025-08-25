@@ -23,6 +23,7 @@ export type ResourceWatcherProps = {
   version: string;
   kind: string;
   name?: string;
+  namespace?: string;
   onSuccess?: (data: any) => void;
   children: JSX.Element;
   skipErrors?: boolean;
@@ -63,6 +64,7 @@ export const ResourceWatcher: FC<ResourceWatcherProps> = ({
   version,
   kind,
   name,
+  namespace,
   onSuccess,
   children,
   skipErrors
@@ -124,6 +126,31 @@ export const ResourceWatcher: FC<ResourceWatcherProps> = ({
       </Bullseye>
     );
   }
+
+  const data = cr
+    ? { apiVersion: `${group}/${version}`, kind, ...cr }
+    : matchingCSVs?.items?.length
+    ? exampleForModel(
+        matchingCSVs.items.find(csv => csv.spec.customresourcedefinitions?.owned?.some(crd => crd.kind === kind)),
+        group,
+        version,
+        kind
+      )
+    : {};
+  const schema = crd?.spec?.versions?.find(v => v.name === version)?.schema?.openAPIV3Schema || null;
+  // force name and namespace to be present in the form when namespaced
+  if (crd?.spec?.scope === 'Namespaced') {
+    data.metadata = {
+      namespace: namespace || 'default',
+      name: name
+    };
+    if (schema?.properties?.metadata) {
+      (schema.properties.metadata as any).properties = {
+        name: { type: 'string' },
+        namespace: { type: 'string' }
+      };
+    }
+  }
   return (
     <Provider
       value={{
@@ -131,17 +158,8 @@ export const ResourceWatcher: FC<ResourceWatcherProps> = ({
         version,
         kind,
         isUpdate: cr ? true : false,
-        schema: crd?.spec?.versions?.find(v => v.name === version)?.schema?.openAPIV3Schema || null,
-        data: cr
-          ? { apiVersion: `${group}/${version}`, kind, ...cr }
-          : matchingCSVs?.items?.length
-          ? exampleForModel(
-              matchingCSVs.items.find(csv => csv.spec.customresourcedefinitions?.owned?.some(crd => crd.kind === kind)),
-              group,
-              version,
-              kind
-            )
-          : {},
+        schema,
+        data,
         loadError: csvLoadError || crdLoadError || crLoadError,
         errors,
         setErrors,
@@ -166,6 +184,7 @@ export const ResourceWatcher: FC<ResourceWatcherProps> = ({
               model
             })
               .then(res => {
+                setErrors([]);
                 onSuccess && onSuccess(res);
               })
               .catch(e => setErrors([e.message]));

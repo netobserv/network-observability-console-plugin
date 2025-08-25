@@ -3,6 +3,7 @@ import { ResourceYAMLEditor } from '@openshift-console/dynamic-plugin-sdk';
 import { PageSection, Title, Wizard, WizardStep, WizardStepType } from '@patternfly/react-core';
 import { RJSFSchema } from '@rjsf/utils';
 import validator from '@rjsf/validator-ajv8';
+import _ from 'lodash';
 import React, { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom-v5-compat';
@@ -13,6 +14,7 @@ import DynamicLoader, { navigate } from '../dynamic-loader/dynamic-loader';
 import { FlowCollectorUISchema } from './config/uiSchema';
 import Consumption from './consumption';
 import { DynamicForm } from './dynamic-form/dynamic-form';
+import { ErrorTemplate } from './dynamic-form/templates';
 import './forms.css';
 import ResourceWatcher, { Consumer } from './resource-watcher';
 import { getFilteredUISchema } from './utils';
@@ -30,23 +32,27 @@ export const FlowCollectorWizard: FC<FlowCollectorWizardProps> = props => {
   const [paths, setPaths] = React.useState<string[]>(defaultPaths);
   const params = useParams();
 
-  const form = React.useCallback(() => {
-    if (!schema) {
-      return <></>;
-    }
-    const filteredSchema = getFilteredUISchema(FlowCollectorUISchema, paths);
-    return (
-      <DynamicForm
-        formData={data}
-        schema={schema}
-        uiSchema={filteredSchema} // see if we can regenerate this from CSV
-        validator={validator}
-        onChange={event => {
-          setData(event.formData);
-        }}
-      />
-    );
-  }, [data, paths, schema]);
+  const form = React.useCallback(
+    (errors?: string[]) => {
+      if (!schema) {
+        return <></>;
+      }
+      const filteredSchema = getFilteredUISchema(FlowCollectorUISchema, paths);
+      return (
+        <DynamicForm
+          formData={data}
+          schema={schema}
+          uiSchema={filteredSchema} // see if we can regenerate this from CSV
+          validator={validator}
+          onChange={event => {
+            setData(event.formData);
+          }}
+          errors={errors}
+        />
+      );
+    },
+    [data, paths, schema]
+  );
 
   const step = React.useCallback(
     (id, name: string) => {
@@ -145,13 +151,13 @@ export const FlowCollectorWizard: FC<FlowCollectorWizardProps> = props => {
                         <br /> <br />
                         {t('Operator configuration')}
                       </span>
-                      {form()}
+                      {form(ctx.errors)}
                     </WizardStep>
                     <WizardStep name={t('Capture')} id="capture">
-                      {form()}
+                      {form(ctx.errors)}
                     </WizardStep>
                     <WizardStep name={t('Pipeline')} id="pipeline">
-                      {form()}
+                      {form(ctx.errors)}
                     </WizardStep>
                     <WizardStep
                       name={t('Storage')}
@@ -159,7 +165,7 @@ export const FlowCollectorWizard: FC<FlowCollectorWizardProps> = props => {
                       steps={[step('loki', t('Loki')), step('prom', t('Prometheus'))]}
                     />
                     <WizardStep name={t('Integration')} id="console">
-                      {form()}
+                      {form(ctx.errors)}
                     </WizardStep>
                     <WizardStep name={t('Consumption')} id="consumption">
                       <Consumption flowCollector={data} setSampling={setSampling} />
@@ -178,6 +184,7 @@ export const FlowCollectorWizard: FC<FlowCollectorWizardProps> = props => {
                           ctx.onSubmit(updatedData);
                         }}
                       />
+                      <>{!_.isEmpty(ctx.errors) && <ErrorTemplate errors={ctx.errors} />}</>
                     </WizardStep>
                   </Wizard>
                 </div>

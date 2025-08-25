@@ -3,14 +3,16 @@ import { ResourceYAMLEditor } from '@openshift-console/dynamic-plugin-sdk';
 import { PageSection, Title, Wizard, WizardStep, WizardStepType } from '@patternfly/react-core';
 import { RJSFSchema } from '@rjsf/utils';
 import validator from '@rjsf/validator-ajv8';
+import _ from 'lodash';
 import React, { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom-v5-compat';
 import { ContextSingleton } from '../../utils/context';
 import { safeYAMLToJS } from '../../utils/yaml';
-import DynamicLoader, { navigate } from '../dynamic-loader/dynamic-loader';
+import DynamicLoader, { back, navigate } from '../dynamic-loader/dynamic-loader';
 import { FlowMetricUISchema } from './config/uiSchema';
 import { DynamicForm } from './dynamic-form/dynamic-form';
+import { ErrorTemplate } from './dynamic-form/templates';
 import './forms.css';
 import ResourceWatcher, { Consumer } from './resource-watcher';
 import { getFilteredUISchema } from './utils';
@@ -29,23 +31,27 @@ export const FlowMetricWizard: FC<FlowMetricWizardProps> = props => {
   const [paths, setPaths] = React.useState<string[]>(defaultPaths);
   const params = useParams();
 
-  const form = React.useCallback(() => {
-    if (!schema) {
-      return <></>;
-    }
-    const filteredSchema = getFilteredUISchema(FlowMetricUISchema, paths);
-    return (
-      <DynamicForm
-        formData={data}
-        schema={schema}
-        uiSchema={filteredSchema} // see if we can regenerate this from CSV
-        validator={validator}
-        onChange={event => {
-          setData(event.formData);
-        }}
-      />
-    );
-  }, [data, paths, schema]);
+  const form = React.useCallback(
+    (errors?: string[]) => {
+      if (!schema) {
+        return <></>;
+      }
+      const filteredSchema = getFilteredUISchema(FlowMetricUISchema, paths);
+      return (
+        <DynamicForm
+          formData={data}
+          schema={schema}
+          uiSchema={filteredSchema} // see if we can regenerate this from CSV
+          validator={validator}
+          onChange={event => {
+            setData(event.formData);
+          }}
+          errors={errors}
+        />
+      );
+    },
+    [data, paths, schema]
+  );
 
   const onStepChange = React.useCallback((_event: React.MouseEvent<HTMLButtonElement>, step: WizardStepType) => {
     switch (step.id) {
@@ -68,7 +74,16 @@ export const FlowMetricWizard: FC<FlowMetricWizardProps> = props => {
 
   return (
     <DynamicLoader>
-      <ResourceWatcher group="flows.netobserv.io" version="v1alpha1" kind="FlowMetric" name={params.name || props.name}>
+      <ResourceWatcher
+        group="flows.netobserv.io"
+        version="v1alpha1"
+        kind="FlowMetric"
+        name={params.name || props.name}
+        namespace={params.namespace || 'default'}
+        onSuccess={() => {
+          back();
+        }}
+      >
         <Consumer>
           {ctx => {
             // first init schema & data when watch resource query got results
@@ -101,16 +116,16 @@ export const FlowMetricWizard: FC<FlowMetricWizardProps> = props => {
                         <br /> <br />
                         {t('General configuration')}
                       </span>
-                      {form()}
+                      {form(ctx.errors)}
                     </WizardStep>
                     <WizardStep name={t('Metric')} id="metric">
-                      {form()}
+                      {form(ctx.errors)}
                     </WizardStep>
                     <WizardStep name={t('Data')} id="data">
-                      {form()}
+                      {form(ctx.errors)}
                     </WizardStep>
                     <WizardStep name={t('Charts')} id="charts">
-                      {form()}
+                      {form(ctx.errors)}
                     </WizardStep>
                     <WizardStep
                       name={t('Review')}
@@ -126,6 +141,7 @@ export const FlowMetricWizard: FC<FlowMetricWizardProps> = props => {
                           ctx.onSubmit(updatedData);
                         }}
                       />
+                      <>{!_.isEmpty(ctx.errors) && <ErrorTemplate errors={ctx.errors} />}</>
                     </WizardStep>
                   </Wizard>
                 </div>
