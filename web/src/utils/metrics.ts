@@ -31,7 +31,7 @@ const shortKindMap: { [k: string]: string } = {
   StatefulSet: 'sts'
 };
 
-export const PERCENTILE_VALUES = [90, 99];
+export const percentileValues = [90, 99];
 
 export const parseTopologyMetrics = (
   raw: RawTopologyMetrics[],
@@ -321,13 +321,13 @@ const getValueCloseTo = (values: [number, number][], timestamp: number, step: nu
  */
 export const computeStats = (ts: [number, number][]): MetricStats => {
   if (ts.length === 0) {
-    return { sum: 0, latest: 0, avg: 0, min: 0, max: 0, percentiles: PERCENTILE_VALUES.map(() => 0), total: 0 };
+    return { sum: 0, latest: 0, avg: 0, min: 0, max: 0, percentiles: percentileValues.map(() => 0), total: 0 };
   }
 
   const values = ts.map(dp => dp[1]);
   const filteredValues = values.filter(v => !Number.isNaN(v));
   if (!filteredValues.length) {
-    return { sum: 0, latest: 0, avg: 0, min: 0, max: 0, percentiles: PERCENTILE_VALUES.map(() => 0), total: 0 };
+    return { sum: 0, latest: 0, avg: 0, min: 0, max: 0, percentiles: percentileValues.map(() => 0), total: 0 };
   }
 
   // Compute stats
@@ -335,7 +335,7 @@ export const computeStats = (ts: [number, number][]): MetricStats => {
   const avg = sum / filteredValues.length;
   const min = Math.min(...filteredValues);
   const max = Math.max(...filteredValues);
-  const percentiles = percentile(PERCENTILE_VALUES, filteredValues) as number[];
+  const percentiles = percentile(percentileValues, filteredValues) as number[];
   const latest = filteredValues[filteredValues.length - 1];
 
   return {

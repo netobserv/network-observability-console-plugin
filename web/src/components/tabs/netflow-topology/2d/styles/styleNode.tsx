@@ -19,7 +19,7 @@ import {
   ScaleDetailsLevel,
   ShapeProps,
   TopologyQuadrant,
-  TOP_LAYER,
+  TOP_LAYER as topLayer,
   useHover,
   WithDragNodeProps,
   WithSelectionProps
@@ -126,7 +126,7 @@ const StyleNode: React.FC<StyleNodeProps> = ({ element, showLabel, dragging, get
   }
 
   return (
-    <Layer id={passedData.dragging ? TOP_LAYER : defaultLayer}>
+    <Layer id={passedData.dragging ? topLayer : defaultLayer}>
       <g ref={hoverRef as never}>
         <DefaultNode
           className="netobserv"

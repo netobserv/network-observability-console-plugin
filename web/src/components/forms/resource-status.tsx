@@ -41,7 +41,7 @@ export const ResourceStatus: FC<ResourceStatusProps> = ({
 
   const conditions = (existing?.status?.conditions || []) as K8sResourceCondition[];
   return (
-    <Table variant={'compact'}>
+    <Table id="resource-status-table" data-test={conditions.find(c => c.type === 'Ready')?.message} variant={'compact'}>
       <Thead>
         <Tr>
           <Th>{t('Type')}</Th>
@@ -54,6 +54,9 @@ export const ResourceStatus: FC<ResourceStatusProps> = ({
       <Tbody>
         {conditions.map((condition, i) => (
           <Tr
+            id={`${condition.type}-row`}
+            data-test-status={`${condition.status}`}
+            data-test-reason={`${condition.reason}`}
             key={i}
             isRowSelected={selectedTypes.includes(condition.type)}
             onClick={() => setSelectedTypes([condition.type])}

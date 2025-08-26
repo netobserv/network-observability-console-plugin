@@ -34,6 +34,10 @@
   margin-top: 0.5rem;
 }
 
-.form-group.spaced > *:not(:last-child) {
+.form-group.spaced>*:not(:last-child) {
   margin-right: 0.5rem;
+}
+
+.checkboxes-container {
+  padding: 1rem;
 }

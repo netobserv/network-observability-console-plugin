@@ -405,7 +405,6 @@ if (process.env.FLAVOR === 'static') {
         displayName: "NetObserv Static Plugin for OCP Console",
         description: "This plugin adds custom forms for FlowCollector and FlowMetrics API",
         exposedModules: {
-          "yamlTemplates": "./components/forms/config/templates.ts",
           "flowCollectorWizard": "./components/forms/flowCollector-wizard.tsx",
           "flowCollectorForm": "./components/forms/flowCollector.tsx",
           "flowCollectorStatus": "./components/forms/flowCollector-status.tsx",
@@ -414,20 +413,6 @@ if (process.env.FLAVOR === 'static') {
         },
       },
       extensions: [
-        {
-          type: "console.yaml-template",
-          properties: {
-            model: {
-              version: "v1beta2",
-              group: "flows.netobserv.io",
-              kind: "FlowCollector"
-            },
-            name: "default",
-            template: {
-              "$codeRef": "yamlTemplates.FlowCollector"
-            }
-          }
-        },
         {
           type: "console.page/route",
           properties: {
@@ -461,20 +446,6 @@ if (process.env.FLAVOR === 'static') {
           }
         },
         {
-          type: "console.yaml-template",
-          properties: {
-            model: {
-              version: "v1alpha1",
-              group: "flows.netobserv.io",
-              kind: "FlowMetric"
-            },
-            name: "default",
-            template: {
-              "$codeRef": "yamlTemplates.FlowMetric"
-            }
-          }
-        },
-        {
           type: "console.page/route",
           properties: {
             // add FlowMetric wizard to 'Installed Operator' -> 'Create' action
@@ -490,8 +461,8 @@ if (process.env.FLAVOR === 'static') {
             path: [
               // add FlowMetric form to 'Installed Operator' -> 'Edit' action and standard 'New' and 'Edit' actions
               "/k8s/ns/:namespace/clusterserviceversions/:operator/flows.netobserv.io~v1alpha1~FlowMetric/:name",
-              "/k8s/cluster/flows.netobserv.io~v1alpha1~FlowMetric/~new",
-              "/k8s/cluster/flows.netobserv.io~v1alpha1~FlowMetric/:name"
+              "/k8s/ns/:namespace/flows.netobserv.io~v1alpha1~FlowMetric/~new",
+              "/k8s/ns/:namespace/flows.netobserv.io~v1alpha1~FlowMetric/:name"
             ],
             component: {
               "$codeRef": "flowMetricForm.default"

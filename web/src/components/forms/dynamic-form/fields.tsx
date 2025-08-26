@@ -28,8 +28,9 @@ export const Description: React.FC<{
     return null;
   }
 
-  const parts = description.split('\n');
-  let content = <>{description}</>;
+  const desc = description.replaceAll('<br>', '');
+  const parts = desc.split('\n');
+  let content = <>{desc}</>;
   if (parts.length > 1) {
     content = (
       <Popover
@@ -39,8 +40,8 @@ export const Description: React.FC<{
         headerContent={label}
         bodyContent={<div className={`co-pre-line description`}>{content}</div>}
       >
-        <Button className={`co-pre-line description`} variant="plain">
-          {parts[0]}
+        <Button className={`co-pre-line description`} variant="plain" style={{ paddingLeft: 0 }}>
+          {`${parts[0]}...`}
         </Button>
       </Popover>
     );

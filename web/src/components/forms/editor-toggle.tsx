@@ -14,6 +14,7 @@ type EditorToggleProps = {
   onChange: (newValue: EditorType) => void;
   onSubmit: () => void;
   onCancel: () => void;
+  onDelete: () => void;
   customChild: JSX.Element;
   yamlChild: JSX.Element;
   updated: boolean;
@@ -27,6 +28,7 @@ export const EditorToggle: FC<EditorToggleProps> = ({
   onSubmit,
   onCancel,
   onReload,
+  onDelete,
   customChild,
   yamlChild,
   updated,
@@ -93,6 +95,11 @@ export const EditorToggle: FC<EditorToggleProps> = ({
             <Button onClick={onCancel} variant="secondary">
               {t('Cancel')}
             </Button>
+            {isUpdate && (
+              <Button type="submit" onClick={onDelete} variant="danger">
+                {t('Delete')}
+              </Button>
+            )}
           </ActionGroup>
         </FlexItem>
       )}

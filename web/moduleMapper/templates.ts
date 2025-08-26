@@ -1,5 +1,5 @@
 import { K8sResourceKind } from '@openshift-console/dynamic-plugin-sdk';
-import { safeYAMLToJS } from '../../../utils/yaml';
+import { safeYAMLToJS } from '../src/utils/yaml';
 
 export const FlowCollector = `
 apiVersion: flows.netobserv.io/v1beta2

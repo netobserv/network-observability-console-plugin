@@ -4,7 +4,7 @@ import { JSONSchema7 } from 'json-schema';
 import * as _ from 'lodash';
 import { DynamicFormSchemaError } from './types';
 
-const UNSUPPORTED_SCHEMA_PROPERTIES = ['allOf', 'anyOf', 'oneOf'];
+const unsupportedSchemaProperties = ['allOf', 'anyOf', 'oneOf'];
 
 export const useSchemaLabel = (schema: JSONSchema7, uiSchema: UiSchema, defaultLabel?: string) => {
   const options = getUiOptions(uiSchema ?? {});
@@ -26,7 +26,7 @@ export const getSchemaErrors = (schema: JSONSchema7): DynamicFormSchemaError[] =
           }
         ]
       : []),
-    ..._.map(_.intersection(_.keys(schema), UNSUPPORTED_SCHEMA_PROPERTIES), unsupportedProperty => ({
+    ..._.map(_.intersection(_.keys(schema), unsupportedSchemaProperties), unsupportedProperty => ({
       title: 'Unsupported Property',
       message: `Cannot generate form fields for JSON schema with ${unsupportedProperty} property.`
     }))

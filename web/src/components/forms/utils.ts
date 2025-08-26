@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { K8sResourceKind } from '@openshift-console/dynamic-plugin-sdk';
 import { UiSchema } from '@rjsf/utils';
 import _ from 'lodash';
+import { ClusterServiceVersionKind } from './types';
 
 export const appendRecursive = (obj: any, key: string, value?: string) => {
   if (!obj) {
@@ -71,4 +73,29 @@ export const getUpdatedCR = (data: any, updatedData: any) => {
   data.metadata = updatedData.metadata;
   data.spec = updatedData.spec;
   return data;
+};
+
+export const exampleForModel = (
+  csv: ClusterServiceVersionKind | undefined,
+  group: string,
+  version: string,
+  kind: string
+) =>
+  _.defaultsDeep(
+    {},
+    {
+      kind,
+      apiVersion: `${group}/${version}`
+    },
+    _.find(parseALMExamples(csv), (s: K8sResourceKind) => s.kind === kind && s.apiVersion === `${group}/${version}`)
+  ) as K8sResourceKind;
+
+export const parseALMExamples = (csv?: ClusterServiceVersionKind) => {
+  try {
+    return JSON.parse(csv?.metadata?.annotations?.['alm-examples'] ?? '[]');
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.warn('Unable to parse ALM expamples\n', e);
+    return [];
+  }
 };

@@ -1,4 +1,4 @@
-export const K8S_UI_SCHEMA = {
+export const K8sUISchema = {
   apiVersion: {
     'ui:widget': 'hidden',
     'ui:options': {
@@ -25,9 +25,9 @@ export const K8S_UI_SCHEMA = {
   'ui:order': ['metadata', 'spec', '*']
 };
 
-export const JSON_SCHEMA_GROUP_TYPES: string[] = ['object', 'array'];
-export const JSON_SCHEMA_NUMBER_TYPES: string[] = ['number', 'integer'];
+export const jsonSchemaGroupTypes: string[] = ['object', 'array'];
+export const jsonSchemaNumberTypes: string[] = ['number', 'integer'];
 
-export const THOUSAND = 10 ** 3;
-export const MILLION = 10 ** 6;
-export const BILLION = 10 ** 9;
+export const thousand = 10 ** 3;
+export const million = 10 ** 6;
+export const billion = 10 ** 9;

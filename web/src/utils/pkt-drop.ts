@@ -19,10 +19,10 @@ export const dropStates: ReadOnlyValues = [
 ] as const;
 
 const dropStatesValues = dropStates.map(v => v.value);
-export type dropStatesValues = typeof dropStatesValues[number];
+export type DropStatesValues = typeof dropStatesValues[number];
 
 const dropStatesNames = dropStates.map(v => v.name);
-export type dropStatesNames = typeof dropStatesNames[number];
+export type DropStatesNames = typeof dropStatesNames[number];
 // https://github.com/torvalds/linux/blob/master/include/net/dropreason-core.h
 export const dropCauses: ReadOnlyValues = [
   { value: coreDropSubSystem + 2, name: 'SKB_DROP_REASON_NOT_SPECIFIED', description: 'drop reason is not specified' },
@@ -341,20 +341,20 @@ export const dropCauses: ReadOnlyValues = [
 ] as const;
 
 const dropCausesValues = dropCauses.map(v => v.value);
-export type dropCausesValues = typeof dropCausesValues[number];
+export type DropCausesValues = typeof dropCausesValues[number];
 
 const dropCausesNames = dropCauses.map(v => v.name);
-export type dropCausesNames = typeof dropCausesNames[number];
+export type DropCausesNames = typeof dropCausesNames[number];
 
 export const coreDropCausesDocUrl = 'https://github.com/torvalds/linux/blob/master/include/net/dropreason-core.h';
 export const ovsDropCausesDocUrl =
   'https://git.kernel.org/pub/scm/linux/kernel/git/netdev/net-next.git/tree/net/openvswitch/drop.h';
 
-export const getDropCauseDescription = (name: dropCausesNames): string => {
+export const getDropCauseDescription = (name: DropCausesNames): string => {
   return dropCauses.find(v => v.name === name)?.description || 'Unknown';
 };
 
-export const getDropCauseDocUrl = (name: dropCausesNames): string => {
+export const getDropCauseDocUrl = (name: DropCausesNames): string => {
   if (name.startsWith('OVS_')) {
     return ovsDropCausesDocUrl;
   }

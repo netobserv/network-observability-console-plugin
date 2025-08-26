@@ -12,7 +12,7 @@ import {
 import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { JSON_SCHEMA_GROUP_TYPES } from './const';
+import { jsonSchemaGroupTypes } from './const';
 import { DescriptionField, FieldSet, FormField } from './fields';
 import { UiSchemaOptionsWithDependency } from './types';
 import { useSchemaLabel } from './utils';
@@ -75,7 +75,7 @@ export const FieldTemplate: React.FC<FieldTemplateProps> = props => {
   if (hidden || !dependencyMet) {
     return null;
   }
-  const isGroup = JSON_SCHEMA_GROUP_TYPES.includes(String(type));
+  const isGroup = jsonSchemaGroupTypes.includes(String(type));
   return isGroup ? children : <AtomicFieldTemplate {...props} />;
 };
 

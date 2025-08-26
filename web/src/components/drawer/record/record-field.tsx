@@ -10,8 +10,8 @@ import { dateFormatter, getFormattedDate, timeMSFormatter, utcDateTimeFormatter 
 import { dnsCodesNames, dnsErrorsValues, getDNSErrorDescription, getDNSRcodeDescription } from '../../../utils/dns';
 import { getDSCPDocUrl, getDSCPServiceClassDescription, getDSCPServiceClassName } from '../../../utils/dscp';
 import { formatDurationAboveMillisecond, formatDurationAboveNanosecond } from '../../../utils/duration';
-import { getICMPCode, getICMPDocUrl, getICMPType, icmpAllTypesValues, isValidICMPProto } from '../../../utils/icmp';
-import { dropCausesNames, getDropCauseDescription, getDropCauseDocUrl } from '../../../utils/pkt-drop';
+import { getICMPCode, getICMPDocUrl, getICMPType, ICMPAllTypesValues, isValidICMPProto } from '../../../utils/icmp';
+import { DropCausesNames, getDropCauseDescription, getDropCauseDocUrl } from '../../../utils/pkt-drop';
 import { formatPort } from '../../../utils/port';
 import { formatProtocol, getProtocolDocUrl } from '../../../utils/protocol';
 import { getFlagsList, getTCPFlagsDocUrl } from '../../../utils/tcp-flags';
@@ -24,7 +24,7 @@ export type RecordFieldFilter = {
   isDelete: boolean;
 };
 
-export const MAX_ARRAY_INDEX = 2;
+export const maxArrayIndex = 2;
 
 export type FlexValue = 'flexDefault' | 'flexNone' | 'flex_1' | 'flex_2' | 'flex_3' | 'flex_4';
 export type FlexWrapValue = 'wrap' | 'wrapReverse' | 'nowrap';
@@ -233,7 +233,7 @@ export const RecordField: React.FC<RecordFieldProps> = ({
       <Flex className={`record-field-flex-container ${forcedSize || size} ${className}`} flex={{ default: 'flex_1' }}>
         {children.length > 0 ? (
           children
-            .filter((_c, i) => !truncate || i < MAX_ARRAY_INDEX)
+            .filter((_c, i) => !truncate || i < maxArrayIndex)
             .map((c, i) => {
               const child = c ? c : emptyText();
               if (i > 0 && asChild && childIcon) {
@@ -245,7 +245,7 @@ export const RecordField: React.FC<RecordFieldProps> = ({
         ) : (
           <Text className="text-muted record-field-value">{t('n/a')}</Text>
         )}
-        {truncate && children.length > MAX_ARRAY_INDEX && moreText(children.length - MAX_ARRAY_INDEX)}
+        {truncate && children.length > maxArrayIndex && moreText(children.length - maxArrayIndex)}
       </Flex>
     );
   };
@@ -397,7 +397,7 @@ export const RecordField: React.FC<RecordFieldProps> = ({
         if (typeof value === 'number' && !isNaN(value)) {
           const proto = Number(flow.fields.Proto);
           if (isValidICMPProto(proto)) {
-            const type = getICMPType(proto, value as icmpAllTypesValues);
+            const type = getICMPType(proto, value as ICMPAllTypesValues);
             if (type && detailed) {
               child = clickableContent(type.name, type.description || '', getICMPDocUrl(proto));
             } else {
@@ -416,7 +416,7 @@ export const RecordField: React.FC<RecordFieldProps> = ({
         let child = emptyText();
         if (typeof value === 'number' && !isNaN(value)) {
           const proto = Number(flow.fields.Proto);
-          const typez = Number(flow.fields.IcmpType) as icmpAllTypesValues;
+          const typez = Number(flow.fields.IcmpType) as ICMPAllTypesValues;
           if (isValidICMPProto(proto)) {
             const code = getICMPCode(proto, typez, value);
             if (code && detailed) {
@@ -512,8 +512,8 @@ export const RecordField: React.FC<RecordFieldProps> = ({
             droppedText = t('dropped by');
             child = clickableContent(
               flow.fields.PktDropLatestDropCause,
-              getDropCauseDescription(flow.fields.PktDropLatestDropCause as dropCausesNames),
-              getDropCauseDocUrl(flow.fields.PktDropLatestDropCause as dropCausesNames)
+              getDropCauseDescription(flow.fields.PktDropLatestDropCause as DropCausesNames),
+              getDropCauseDocUrl(flow.fields.PktDropLatestDropCause as DropCausesNames)
             );
           }
 
