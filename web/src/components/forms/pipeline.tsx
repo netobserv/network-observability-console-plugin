@@ -108,7 +108,7 @@ export const Pipeline: React.FC<FlowCollectorPipelineProps> = ({ existing, selec
         const condition: K8sResourceCondition | null = existing?.status?.conditions?.find(
           (condition: K8sResourceCondition) => condition.type === type
         );
-        if (condition?.status !== status) {
+        if (condition?.status !== status && condition?.reason !== 'Unused') {
           if (condition?.status === 'Unknown') {
             return RunStatus.Skipped;
           } else if (condition?.type.startsWith('Waiting') || condition?.reason === 'Pending') {

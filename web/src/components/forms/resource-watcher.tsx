@@ -11,7 +11,7 @@ import { JSONSchema7 } from 'json-schema';
 import React, { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useK8sModel } from '../../utils/k8s-models-hook';
-import { navigate } from '../dynamic-loader/dynamic-loader';
+import { back } from '../dynamic-loader/dynamic-loader';
 import { ErrorComponent } from '../messages/error';
 import { prune } from './dynamic-form/utils';
 import './forms.css';
@@ -103,6 +103,7 @@ export const ResourceWatcher: FC<ResourceWatcherProps> = ({
           },
           kind,
           name,
+          namespace,
           isList: false
         }
       : null
@@ -141,6 +142,7 @@ export const ResourceWatcher: FC<ResourceWatcherProps> = ({
   // force name and namespace to be present in the form when namespaced
   if (crd?.spec?.scope === 'Namespaced') {
     data.metadata = {
+      ...data.metadata,
       namespace: namespace || 'default',
       name: name
     };
@@ -174,7 +176,7 @@ export const ResourceWatcher: FC<ResourceWatcherProps> = ({
               }
             })
               .then(() => {
-                navigate('/');
+                back();
               })
               .catch(e => setErrors([e.message]));
           } else {
