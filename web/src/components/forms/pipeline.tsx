@@ -125,15 +125,16 @@ export const Pipeline: React.FC<FlowCollectorPipelineProps> = ({ existing, selec
   const getSteps = React.useCallback(() => {
     const steps: Step[] = [];
 
+    const overallTypes = ['Ready'];
+    const overallStatus = getStatus(overallTypes, 'True');
     if (existing?.spec?.agent?.type === 'eBPF') {
-      const types = ['Ready'];
       steps.push({
         id: 'ebpf',
         label: 'eBPF agents',
         data: {
-          status: getStatus(types, 'True'),
-          selected: _.some(selectedTypes, t => types.includes(t)),
-          onSelect: () => setSelectedTypes(types)
+          status: overallStatus,
+          selected: _.some(selectedTypes, t => overallTypes.includes(t)),
+          onSelect: () => setSelectedTypes(overallTypes)
         }
       });
     }
@@ -214,7 +215,9 @@ export const Pipeline: React.FC<FlowCollectorPipelineProps> = ({ existing, selec
         label: 'Console plugin',
         runAfterTasks: cpRunAfter,
         data: {
-          onSelect: () => setSelectedTypes([])
+          status: overallStatus,
+          selected: _.some(selectedTypes, t => overallTypes.includes(t)),
+          onSelect: () => setSelectedTypes(overallTypes)
         }
       });
     }
