@@ -10,6 +10,7 @@ import {
 } from '@patternfly/react-topology';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
+import { Match } from '../../../../../model/flow-query';
 import { getDirectionnalScopes, getNonDirectionnalScopes } from '../../../../../model/scope';
 import { Decorated, FilterDir, NodeData } from '../../../../../model/topology';
 import { ClickableDecorator, ContextMenuDecorator } from './styleDecorator';
@@ -27,6 +28,7 @@ type NodeDecoratorsProps = {
   data: Decorated<NodeData>;
   isPinned: boolean;
   setPinned: (v: boolean) => void;
+  match: Match;
   isSrcFiltered: boolean;
   setSrcFiltered: (v: boolean) => void;
   isDstFiltered: boolean;
@@ -46,6 +48,7 @@ export const NodeDecorators: React.FC<NodeDecoratorsProps> = ({
   element,
   isPinned,
   setPinned,
+  match,
   isSrcFiltered,
   isDstFiltered,
   setSrcFiltered,
@@ -133,7 +136,7 @@ export const NodeDecorators: React.FC<NodeDecoratorsProps> = ({
             <ContextMenuItem key={'src'} onClick={onFilterDirClick('src')}>
               <Checkbox
                 id={'context-src-checkbox'}
-                label={t('Source')}
+                label={match === 'peers' ? t('Peer A') : t('Source')}
                 isChecked={isSrcFiltered}
                 onChange={() => onFilterDirClick('src')}
               />
@@ -141,7 +144,7 @@ export const NodeDecorators: React.FC<NodeDecoratorsProps> = ({
             <ContextMenuItem key={'dst'} onClick={onFilterDirClick('dst')}>
               <Checkbox
                 id={'context-dst-checkbox'}
-                label={t('Destination')}
+                label={match === 'peers' ? t('Peer B') : t('Destination')}
                 isChecked={isDstFiltered}
                 onChange={() => onFilterDirClick('dst')}
               />
