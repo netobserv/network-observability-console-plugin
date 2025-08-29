@@ -47,6 +47,7 @@ export const FlowCollectorStatus: FC<FlowCollectorStatusProps> = () => {
                         <FlexItem>
                           <Button
                             id="edit-flow-collector"
+                            data-test-id="edit-flow-collector"
                             variant="primary"
                             onClick={() => navigate(flowCollectorEditPath)}
                           >
@@ -54,7 +55,12 @@ export const FlowCollectorStatus: FC<FlowCollectorStatusProps> = () => {
                           </Button>
                         </FlexItem>
                         <FlexItem>
-                          <Button id="open-network-traffic" variant="link" onClick={() => navigate(netflowTrafficPath)}>
+                          <Button
+                            id="open-network-traffic"
+                            data-test-id="open-network-traffic"
+                            variant="link"
+                            onClick={() => navigate(netflowTrafficPath)}
+                          >
                             {t('Open Network Traffic page')}
                           </Button>
                         </FlexItem>

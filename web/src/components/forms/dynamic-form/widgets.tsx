@@ -197,6 +197,7 @@ export const ArrayCheckboxesWidget: React.FC<WidgetProps> = props => {
           <FlexItem key={`${id}-${index}`}>
             <Checkbox
               id={`${id}-${index}`}
+              data-test-id={`${id}-${option}`}
               label={option}
               isChecked={_.isNil(value) ? false : value.includes(option)}
               onClick={() =>

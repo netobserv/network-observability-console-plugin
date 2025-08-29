@@ -55,6 +55,7 @@ export const EditorToggle: FC<EditorToggleProps> = ({
             {t('Configure via:')}
           </label>
           <Radio
+            data-test={`${EditorType.CUSTOM}-view-input`}
             id={EditorType.CUSTOM}
             isChecked={type === EditorType.CUSTOM}
             label={t('Form view')}
@@ -84,19 +85,42 @@ export const EditorToggle: FC<EditorToggleProps> = ({
             </Alert>
           )}
           <ActionGroup className="pf-v5-c-form">
-            <Button type="submit" onClick={onSubmit} variant="primary">
+            <Button
+              id={isUpdate ? 'update-resource-button' : 'create-resource-button'}
+              data-test-id={isUpdate ? 'update-resource-button' : 'create-resource-button'}
+              type="submit"
+              onClick={onSubmit}
+              variant="primary"
+            >
               {isUpdate ? t('Update') : t('Create')}
             </Button>
             {updated && (
-              <Button type="submit" onClick={onReload} variant="secondary">
+              <Button
+                id="reload-resource-button"
+                data-test-id="reload-resource-button"
+                type="submit"
+                onClick={onReload}
+                variant="secondary"
+              >
                 {t('Reload')}
               </Button>
             )}
-            <Button onClick={onCancel} variant="secondary">
+            <Button
+              id="cancel-resource-button"
+              data-test-id="cancel-resource-button"
+              onClick={onCancel}
+              variant="secondary"
+            >
               {t('Cancel')}
             </Button>
             {isUpdate && (
-              <Button type="submit" onClick={onDelete} variant="danger">
+              <Button
+                id="delete-resource-button"
+                data-test-id="delete-resource-button"
+                type="submit"
+                onClick={onDelete}
+                variant="danger"
+              >
                 {t('Delete')}
               </Button>
             )}
