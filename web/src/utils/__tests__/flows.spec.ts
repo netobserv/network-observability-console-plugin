@@ -1,4 +1,4 @@
-import { Fields, FlowDirection, IfDirection, Record } from '../../api/ipfix';
+import { FlowDirection, IfDirection, Record } from '../../api/ipfix';
 import { mergeFlowReporters } from '../flows';
 
 describe('mergeFlowReporters', () => {
@@ -9,57 +9,57 @@ describe('mergeFlowReporters', () => {
     const flows: Record[] = [
       {
         key: 1,
-        fields: { SrcAddr: '10.0.0.1', DstAddr: '10.0.0.2' } as Fields,
+        fields: { SrcAddr: '10.0.0.1', DstAddr: '10.0.0.2' },
         labels: { FlowDirection: FlowDirection.Ingress }
       },
       {
         key: 2,
-        fields: { SrcAddr: '10.0.0.1', DstAddr: '10.0.0.2' } as Fields,
+        fields: { SrcAddr: '10.0.0.1', DstAddr: '10.0.0.2' },
         labels: { FlowDirection: FlowDirection.Egress }
       },
       {
         key: 3,
-        fields: { SrcAddr: '10.0.0.2', DstAddr: '10.0.0.1' } as Fields,
+        fields: { SrcAddr: '10.0.0.2', DstAddr: '10.0.0.1' },
         labels: { FlowDirection: FlowDirection.Ingress }
       },
       {
         key: 4,
-        fields: { SrcAddr: '10.0.0.2', DstAddr: '10.0.0.1' } as Fields,
+        fields: { SrcAddr: '10.0.0.2', DstAddr: '10.0.0.1' },
         labels: { FlowDirection: FlowDirection.Egress }
       },
       {
         key: 5,
-        fields: { SrcAddr: '10.0.0.1', DstAddr: '10.0.0.2' } as Fields,
+        fields: { SrcAddr: '10.0.0.1', DstAddr: '10.0.0.2' },
         labels: { FlowDirection: FlowDirection.Ingress }
       },
       {
         key: 6,
-        fields: { SrcAddr: '10.0.0.1', DstAddr: '10.0.0.2' } as Fields,
+        fields: { SrcAddr: '10.0.0.1', DstAddr: '10.0.0.2' },
         labels: { FlowDirection: FlowDirection.Egress }
       },
       {
         key: 7,
-        fields: { SrcAddr: '10.0.0.1', DstAddr: '43.75.13.32' } as Fields,
+        fields: { SrcAddr: '10.0.0.1', DstAddr: '43.75.13.32' },
         labels: { FlowDirection: FlowDirection.Egress }
       },
       {
         key: 8,
-        fields: { SrcAddr: '43.75.13.32', DstAddr: '10.0.0.1' } as Fields,
+        fields: { SrcAddr: '43.75.13.32', DstAddr: '10.0.0.1' },
         labels: { FlowDirection: FlowDirection.Ingress }
       },
       {
         key: 9,
-        fields: { SrcAddr: '10.0.0.1', DstAddr: '43.75.13.32' } as Fields,
+        fields: { SrcAddr: '10.0.0.1', DstAddr: '43.75.13.32' },
         labels: { FlowDirection: FlowDirection.Egress }
       },
       {
         key: 10,
-        fields: { SrcAddr: '10.0.0.1', DstAddr: '10.0.0.2', SrcPort: 8080 } as Fields,
+        fields: { SrcAddr: '10.0.0.1', DstAddr: '10.0.0.2', SrcPort: 8080 },
         labels: { FlowDirection: FlowDirection.Ingress }
       },
       {
         key: 11,
-        fields: { SrcAddr: '10.0.0.1', DstAddr: '10.0.0.2', SrcPort: 8080 } as Fields,
+        fields: { SrcAddr: '10.0.0.1', DstAddr: '10.0.0.2', SrcPort: 8080 },
         labels: { FlowDirection: FlowDirection.Egress }
       }
     ];
@@ -78,7 +78,7 @@ describe('mergeFlowReporters', () => {
           IfDirections: [IfDirection.Ingress, IfDirection.Egress],
           Interfaces: ['eth0', 'abcd'],
           Udns: ['udn1', 'udn2']
-        } as Fields,
+        },
         labels: { FlowDirection: FlowDirection.Ingress }
       },
       {
@@ -89,7 +89,7 @@ describe('mergeFlowReporters', () => {
           IfDirections: [IfDirection.Ingress],
           Interfaces: ['genev'],
           Udns: ['udn3']
-        } as Fields,
+        },
         labels: { FlowDirection: FlowDirection.Egress }
       }
     ];
@@ -103,7 +103,7 @@ describe('mergeFlowReporters', () => {
         IfDirections: [IfDirection.Ingress, IfDirection.Egress, IfDirection.Ingress],
         Interfaces: ['eth0', 'abcd', 'genev'],
         Udns: ['udn1', 'udn2', 'udn3']
-      } as Fields,
+      },
       labels: { FlowDirection: FlowDirection.Ingress }
     });
   });
