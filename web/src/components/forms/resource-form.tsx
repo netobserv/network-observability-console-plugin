@@ -105,10 +105,22 @@ export const ResourceForm: FC<ResourceFormProps> = ({ uiSchema }) => {
               onClose={() => setOpen(false)}
               footer={
                 <div className="footer">
-                  <Button data-test="time-range-cancel" key="cancel" variant="link" onClick={() => setOpen(false)}>
+                  <Button
+                    id="cancel-delete-popup-button"
+                    data-test-id="cancel-delete-popup-button"
+                    key="cancel"
+                    variant="link"
+                    onClick={() => setOpen(false)}
+                  >
                     {t('Cancel')}
                   </Button>
-                  <Button key="confirm" variant="danger" onClick={() => ctx.onSubmit(data, true)}>
+                  <Button
+                    id="confirm-delete-popup-button"
+                    data-test-id="confirm-delete-popup-button"
+                    key="confirm"
+                    variant="danger"
+                    onClick={() => ctx.onSubmit(data, true)}
+                  >
                     {t('Delete')}
                   </Button>
                 </div>
