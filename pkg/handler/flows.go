@@ -87,8 +87,8 @@ func (h *Handlers) getFlows(ctx context.Context, lokiClient httpclient.Caller, p
 		// TODO: this should actually be managed from the loki gateway, with "namespace" query param
 		filterGroups = filterGroups.Distribute(
 			[]filters.SingleQuery{
-				{filters.NewMatch(fields.SrcNamespace, `"`+namespace+`"`)},
-				{filters.NewMatch(fields.DstNamespace, `"`+namespace+`"`)},
+				{filters.NewEqualMatch(fields.SrcNamespace, namespace)},
+				{filters.NewEqualMatch(fields.DstNamespace, namespace)},
 			},
 			func(_ filters.SingleQuery) bool { return false },
 		)
