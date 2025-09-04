@@ -209,10 +209,9 @@ export const getAllAlerts = (g: ByResource): AlertWithRuleName[] => {
 };
 
 export const getAlertFilteredLabels = (alert: AlertWithRuleName, target: string): [string, string][] => {
-  return Object.entries(alert.labels)
-    .filter(
-      e => e[0] !== 'app' && e[0] !== 'netobserv' && e[0] !== 'severity' && e[0] !== 'alertname' && e[1] !== target
-    );
+  return Object.entries(alert.labels).filter(
+    e => e[0] !== 'app' && e[0] !== 'netobserv' && e[0] !== 'severity' && e[0] !== 'alertname' && e[1] !== target
+  );
 };
 
 export const getAlertLink = (a: AlertWithRuleName): string => {
