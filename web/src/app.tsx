@@ -31,6 +31,7 @@ import FlowCollectorStatus from './components/forms/flowCollector-status';
 import FlowCollectorWizard from './components/forms/flowCollector-wizard';
 import FlowMetricForm from './components/forms/flowMetric';
 import FlowMetricWizard from './components/forms/flowMetric-wizard';
+import NetworkHealth from './components/health/network-health';
 import NetflowTrafficDevTab from './components/netflow-traffic-dev-tab';
 import NetflowTrafficParent from './components/netflow-traffic-parent';
 import NetflowTab from './components/netflow-traffic-tab';
@@ -60,6 +61,10 @@ export const pages = [
   {
     id: 'udn-tab',
     name: 'UDN tab'
+  },
+  {
+    id: 'network-health',
+    name: 'Network Health'
   },
   {
     id: 'flowCollector-wizard',
@@ -199,6 +204,8 @@ export const App: React.FunctionComponent = () => {
         return <FlowMetricWizard name="flowmetric-sample" />;
       case 'flowMetric':
         return <FlowMetricForm name="flowmetric-sample" />;
+      case 'network-health':
+        return <NetworkHealth />;
       default:
         return <NetflowTrafficParent />;
     }
@@ -215,6 +222,7 @@ export const App: React.FunctionComponent = () => {
       case 'flowCollector-status':
       case 'flowMetric-wizard':
       case 'flowMetric':
+      case 'network-health':
         return <>{content}</>;
       default:
         return (
