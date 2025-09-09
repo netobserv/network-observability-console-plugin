@@ -96,6 +96,9 @@ export const buildStats = (rules: Rule[]): HealthStats => {
   injectInactive(globalRules, [global]);
   injectInactive(namespaceRules, byNamespace);
   injectInactive(nodeRules, byNode);
+  [global, ...byNamespace, ...byNode].forEach(r => {
+    r.score = computeScore(r);
+  });
   return { global, byNamespace, byNode };
 };
 
@@ -167,7 +170,6 @@ const statsFromGrouped = (name: string, grouped: AlertWithRuleName[]): ByResourc
         break;
     }
   });
-  br.score = computeScore(br);
   return br;
 };
 
@@ -222,49 +224,47 @@ export const getAlertLink = (a: AlertWithRuleName): string => {
   return `/monitoring/alerts/${a.ruleID}?${labels.join('&')}`;
 };
 
-const criticalScore = 1;
-const warningScore = 0.7;
-const minorScore = 0.4;
-const pendingScore = 0.3;
-const silencedScore = 0.1;
+const criticalWeight = 1;
+const warningWeight = 0.7;
+const minorWeight = 0.4;
+const pendingWeight = 0.3;
+const silencedWeight = 0.1;
+
+const getSeverityWeight = (a: AlertWithRuleName) => {
+  switch (a.labels.severity) {
+    case 'critical':
+      return criticalWeight;
+    case 'warning':
+      return warningWeight;
+    default:
+      return minorWeight;
+  }
+};
 
 // Score [0,10]; higher is better
 export const computeScore = (r: ByResource): number => {
   const allAlerts = getAllAlerts(r);
-  let score = allAlerts.map(a => computeAlertScore(a)).reduce((a, b) => a + b, 0);
+  const score = allAlerts.map(a => computeAlertScore(a)).reduce((a, b) => a + b, 0);
   if (score === 0) {
-    return 0;
+    return 10;
   }
-  score /=
-    allAlerts.length +
-    r.critical.inactive.length * criticalScore +
-    r.warning.inactive.length * warningScore +
-    r.other.inactive.length * minorScore;
-  return 10 * (1 - score);
+  const div =
+    allAlerts.map(getSeverityWeight).reduce((a, b) => a + b, 0) +
+    r.critical.inactive.length * criticalWeight +
+    r.warning.inactive.length * warningWeight +
+    r.other.inactive.length * minorWeight;
+  return 10 * (1 - score / div);
 };
 
 // Score [0,1]; lower is better
 export const computeAlertScore = (a: AlertWithRuleName, ignoreSeverity?: boolean): number => {
-  let multiplier = 1;
-  if (!ignoreSeverity) {
-    switch (a.labels.severity) {
-      case 'critical':
-        multiplier *= criticalScore;
-        break;
-      case 'warning':
-        multiplier *= warningScore;
-        break;
-      default:
-        multiplier *= minorScore;
-        break;
-    }
-  }
+  let multiplier = ignoreSeverity ? 1 : getSeverityWeight(a);
   switch (a.state) {
     case 'pending':
-      multiplier *= pendingScore;
+      multiplier *= pendingWeight;
       break;
     case 'silenced':
-      multiplier *= silencedScore;
+      multiplier *= silencedWeight;
       break;
   }
   // Assuming the alert value is a [0-100] percentage. Needs update if more use cases come up.
