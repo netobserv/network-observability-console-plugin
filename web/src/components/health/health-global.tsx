@@ -14,7 +14,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { HealthCard } from './health-card';
 import { HealthHeatmap } from './health-heatmap';
-import { ByResource } from './helper';
+import { ByResource, getAllAlerts } from './helper';
 import { RuleDetails } from './rule-details';
 
 export interface HealthGlobalProps {
@@ -24,13 +24,14 @@ export interface HealthGlobalProps {
 
 export const HealthGlobal: React.FC<HealthGlobalProps> = ({ info, isDark }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
+  const allAlerts = getAllAlerts(info);
 
   return (
     <>
       <TextContent>
         <Text component={TextVariants.h3}>{t('Global rule violations')}</Text>
       </TextContent>
-      {info.score === 0 ? (
+      {allAlerts.length === 0 ? (
         <Bullseye>
           <EmptyState>
             <EmptyStateIcon icon={CheckCircleIcon} />
