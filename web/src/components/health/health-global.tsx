@@ -13,7 +13,7 @@ import { CheckCircleIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { HealthCard } from './health-card';
-import { ByResource, getAllAlerts } from './helper';
+import { ByResource, getAllAlerts } from './health-helper';
 import { RuleDetails } from './rule-details';
 
 export interface HealthGlobalProps {
@@ -43,7 +43,7 @@ export const HealthGlobal: React.FC<HealthGlobalProps> = ({ info, isDark }) => {
             <HealthCard isDark={isDark} stats={info} isSelected={false} />
           </GridItem>
           <GridItem span={9}>
-            <RuleDetails info={info} header={true} />
+            <RuleDetails kind={'Global'} info={info} wide={true} />
           </GridItem>
         </Grid>
       )}

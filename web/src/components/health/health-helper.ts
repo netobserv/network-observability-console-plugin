@@ -26,21 +26,23 @@ type SeverityStats = {
 export type AlertWithRuleName = PrometheusAlert & {
   ruleName: string;
   ruleID: string;
-  metadata?: HealthMetadata;
+  metadata: HealthMetadata;
 };
 
 type RuleWithMetadata = Rule & {
-  metadata?: HealthMetadata;
+  metadata: HealthMetadata;
 };
 
 type HealthMetadata = {
-  threshold: string;
+  threshold?: string;
   thresholdF: number;
   upperBound: string;
   upperBoundF: number;
   unit: string;
   nodeLabels?: string[];
   namespaceLabels?: string[];
+  links: { name: string; url: string }[];
+  trafficLinkFilter?: string;
 };
 
 type ScoreDetail = {
@@ -48,16 +50,27 @@ type ScoreDetail = {
   weight: number;
 };
 
-export const getHealthMetadata = (annotations: PrometheusLabels): HealthMetadata | undefined => {
+const getHealthMetadata = (annotations: PrometheusLabels): HealthMetadata => {
+  const defaultMetadata: HealthMetadata = {
+    thresholdF: 0,
+    upperBound: '100',
+    upperBoundF: 100,
+    unit: '%',
+    links: []
+  };
   if ('netobserv_io_network_health' in annotations) {
     const md = (JSON.parse(annotations['netobserv_io_network_health']) as HealthMetadata) || undefined;
     if (md) {
-      md.thresholdF = parseFloat(md.threshold) || 0;
-      md.upperBoundF = parseFloat(md.upperBound) || 0;
+      // Setup defaults and derived
+      md.unit = md.unit || defaultMetadata.unit;
+      md.upperBound = md.upperBound || defaultMetadata.upperBound;
+      md.links = md.links || defaultMetadata.links;
+      md.thresholdF = md.threshold ? parseFloat(md.threshold) || 0 : 0;
+      md.upperBoundF = parseFloat(md.upperBound) || defaultMetadata.upperBoundF;
+      return md;
     }
-    return md;
   }
-  return undefined;
+  return defaultMetadata;
 };
 
 export const buildStats = (rules: Rule[]): HealthStats => {
@@ -77,14 +90,14 @@ export const buildStats = (rules: Rule[]): HealthStats => {
   const namespaceLabels: string[] = [];
   const nodeLabels: string[] = [];
   alerts.forEach(a => {
-    if (a.metadata?.namespaceLabels) {
+    if (a.metadata.namespaceLabels) {
       a.metadata.namespaceLabels.forEach(l => {
         if (!namespaceLabels.includes(l)) {
           namespaceLabels.push(l);
         }
       });
     }
-    if (a.metadata?.nodeLabels) {
+    if (a.metadata.nodeLabels) {
       a.metadata.nodeLabels.forEach(l => {
         if (!nodeLabels.includes(l)) {
           nodeLabels.push(l);
@@ -96,11 +109,9 @@ export const buildStats = (rules: Rule[]): HealthStats => {
   const byNamespace = groupBy(alerts, namespaceLabels);
   const byNode = groupBy(alerts, nodeLabels);
   // Inject inactive rules
-  const globalRules = ruleWithMD.filter(
-    r => _.isEmpty(r.metadata?.namespaceLabels) && _.isEmpty(r.metadata?.nodeLabels)
-  );
-  const namespaceRules = ruleWithMD.filter(r => !_.isEmpty(r.metadata?.namespaceLabels));
-  const nodeRules = ruleWithMD.filter(r => !_.isEmpty(r.metadata?.nodeLabels));
+  const globalRules = ruleWithMD.filter(r => _.isEmpty(r.metadata.namespaceLabels) && _.isEmpty(r.metadata.nodeLabels));
+  const namespaceRules = ruleWithMD.filter(r => !_.isEmpty(r.metadata.namespaceLabels));
+  const nodeRules = ruleWithMD.filter(r => !_.isEmpty(r.metadata.nodeLabels));
   injectInactive(globalRules, [global]);
   injectInactive(namespaceRules, byNamespace);
   injectInactive(nodeRules, byNode);
@@ -232,6 +243,25 @@ export const getAlertLink = (a: AlertWithRuleName): string => {
   return `/monitoring/alerts/${a.ruleID}?${labels.join('&')}`;
 };
 
+export const getTrafficLink = (kind: string, resourceName: string, a: AlertWithRuleName): string => {
+  const filters: string[] = [];
+  let params = '';
+  switch (kind) {
+    case 'Namespace':
+      filters.push(`src_namespace="${resourceName}"`);
+      params += '&bnf=true';
+      break;
+    case 'Node':
+      filters.push(`src_node="${resourceName}"`);
+      params += '&bnf=true';
+      break;
+  }
+  if (a.metadata.trafficLinkFilter) {
+    filters.push(a.metadata.trafficLinkFilter);
+  }
+  return `/netflow-traffic?filters=${encodeURIComponent(filters.join(';'))}${params}`;
+};
+
 const criticalWeight = 1;
 const warningWeight = 0.5;
 const minorWeight = 0.25;
@@ -278,8 +308,8 @@ export const computeScore = (r: ByResource): number => {
 // Score [0,1]; lower is better
 const computeExcessRatio = (a: AlertWithRuleName): number => {
   // Assuming the alert value is a [0-n] percentage. Needs update if more use cases come up.
-  const threshold = (a.metadata?.thresholdF || 0) / 2;
-  const upper = a.metadata?.upperBoundF || 100;
+  const threshold = a.metadata.thresholdF / 2;
+  const upper = a.metadata.upperBoundF;
   const vclamped = Math.min(Math.max(a.value as number, threshold), upper);
   const range = upper - threshold;
   return (vclamped - threshold) / range;

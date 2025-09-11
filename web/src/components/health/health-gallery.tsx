@@ -4,7 +4,7 @@ import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { HealthCard } from './health-card';
-import { ByResource } from './helper';
+import { ByResource } from './health-helper';
 
 export interface HealthGalleryProps {
   stats: ByResource[];

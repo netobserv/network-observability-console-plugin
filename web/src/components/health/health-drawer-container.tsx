@@ -5,20 +5,13 @@ import {
   DrawerContentBody,
   DrawerHead,
   DrawerPanelContent,
-  Dropdown,
-  DropdownItem,
-  DropdownList,
-  MenuToggle,
-  MenuToggleElement,
   Text,
   TextContent,
   TextVariants
 } from '@patternfly/react-core';
-import { EllipsisVIcon } from '@patternfly/react-icons';
 import * as React from 'react';
-import { useTranslation } from 'react-i18next';
 import { HealthGallery } from './health-gallery';
-import { ByResource } from './helper';
+import { ByResource } from './health-helper';
 import { RuleDetails } from './rule-details';
 
 export interface HealthDrawerContainerProps {
@@ -29,9 +22,7 @@ export interface HealthDrawerContainerProps {
 }
 
 export const HealthDrawerContainer: React.FC<HealthDrawerContainerProps> = ({ title, stats, kind, isDark }) => {
-  const { t } = useTranslation('plugin__netobserv-plugin');
   const [selectedResource, setSelectedResource] = React.useState<ByResource | undefined>(undefined);
-  const [isKebabOpen, setKebabOpen] = React.useState(false);
   const drawerRef = React.useRef<HTMLDivElement>(null);
 
   const onExpand = () => {
@@ -48,16 +39,6 @@ export const HealthDrawerContainer: React.FC<HealthDrawerContainerProps> = ({ ti
     // we want to update selectedResource when stats changes, no more
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stats]);
-
-  const filter = encodeURIComponent(
-    `${kind === 'Namespace' ? 'src_namespace' : 'src_node'}="${selectedResource?.name}"`
-  );
-  const kebabLinks = [
-    {
-      to: `/netflow-traffic?filters=${filter}&bnf=true`,
-      text: t('View in Network Traffic')
-    }
-  ];
 
   return (
     <>
@@ -78,38 +59,13 @@ export const HealthDrawerContainer: React.FC<HealthDrawerContainerProps> = ({ ti
                   {selectedResource !== undefined && (
                     <>
                       <ResourceLink inline={true} kind={kind} name={selectedResource.name} />
-                      <Dropdown
-                        isOpen={isKebabOpen}
-                        onSelect={() => setKebabOpen(false)}
-                        onOpenChange={(isOpen: boolean) => setKebabOpen(isOpen)}
-                        toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
-                          <MenuToggle
-                            ref={toggleRef}
-                            variant="plain"
-                            onClick={() => setKebabOpen(!isKebabOpen)}
-                            isExpanded={isKebabOpen}
-                          >
-                            <EllipsisVIcon />
-                          </MenuToggle>
-                        )}
-                      >
-                        <DropdownList>
-                          {kebabLinks.map((l, i) => {
-                            return (
-                              <DropdownItem key={'link_' + i} value={i} to={l.to}>
-                                {l.text}
-                              </DropdownItem>
-                            );
-                          })}
-                        </DropdownList>
-                      </Dropdown>
                     </>
                   )}
                 </span>
               </DrawerHead>
               {selectedResource && (
                 <div className="health-gallery-drawer-content">
-                  <RuleDetails info={selectedResource} header={false} />
+                  <RuleDetails kind={kind} info={selectedResource} wide={false} />
                 </div>
               )}
             </DrawerPanelContent>

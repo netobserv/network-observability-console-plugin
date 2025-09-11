@@ -1,5 +1,5 @@
 import { AlertStates } from '@openshift-console/dynamic-plugin-sdk';
-import { AlertWithRuleName, ByResource, computeAlertScore, computeScore } from '../helper';
+import { AlertWithRuleName, ByResource, computeAlertScore, computeScore } from '../health-helper';
 
 const mockAlert = (
   name: string,
@@ -14,7 +14,7 @@ const mockAlert = (
     state: state as AlertStates,
     annotations: {},
     ruleID: '',
-    metadata: { thresholdF: threshold, threshold: '', upperBoundF: 100, upperBound: '', unit: '%' },
+    metadata: { thresholdF: threshold, threshold: '', upperBoundF: 100, upperBound: '', unit: '%', links: [] },
     value: value
   };
 };

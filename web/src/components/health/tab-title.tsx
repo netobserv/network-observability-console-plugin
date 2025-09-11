@@ -7,7 +7,7 @@ import {
   InfoAltIcon
 } from '@patternfly/react-icons';
 import * as React from 'react';
-import { ByResource } from './helper';
+import { ByResource } from './health-helper';
 
 export interface HealthTabTitleProps {
   title: string;

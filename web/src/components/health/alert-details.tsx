@@ -4,7 +4,7 @@ import { Label, Text, TextContent, TextVariants } from '@patternfly/react-core';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { valueFormat } from '../../utils/format';
-import { AlertWithRuleName, getAlertFilteredLabels, getAlertLink, getHealthMetadata } from './helper';
+import { AlertWithRuleName, getAlertFilteredLabels, getAlertLink } from './health-helper';
 
 export interface AlertDetailsProps {
   resourceName: string;
@@ -13,8 +13,6 @@ export interface AlertDetailsProps {
 
 export const AlertDetails: React.FC<AlertDetailsProps> = ({ resourceName, alert }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
-
-  const md = getHealthMetadata(alert.annotations);
   const labels = getAlertFilteredLabels(alert, resourceName);
 
   return (
@@ -39,7 +37,7 @@ export const AlertDetails: React.FC<AlertDetailsProps> = ({ resourceName, alert 
         <AlertDetailsValue title={t('Value')}>
           <>
             {valueFormat(alert.value as number, 2)}
-            {md?.threshold && ' > ' + md.threshold + ' ' + md.unit}
+            {alert.metadata.threshold && ' > ' + alert.metadata.threshold + ' ' + alert.metadata.unit}
           </>
         </AlertDetailsValue>
         <AlertDetailsValue title={t('Description')}>{alert.annotations['description']}</AlertDetailsValue>

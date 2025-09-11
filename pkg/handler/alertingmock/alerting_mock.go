@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand/v2"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/prometheus/common/model"
@@ -98,7 +99,7 @@ func createAlerts(probability float64, name string, threshold, upperBound int, t
 	return alerts, ruleState
 }
 
-func createRule(probability float64, name, severity string, threshold, upperBound int, bynetobs bool, nsLbl, nodeLbl []string) AlertingRule {
+func createRule(probability float64, name, severity, extraFilter string, threshold, upperBound int, bynetobs bool, nsLbl, nodeLbl []string) AlertingRule {
 	labels := model.LabelSet{
 		"severity": model.LabelValue(severity),
 	}
@@ -125,12 +126,19 @@ func createRule(probability float64, name, severity string, threshold, upperBoun
 		}
 		jsonNodeLbl = fmt.Sprintf(`"nodeLabels":[%s],`, strings.Join(quotedLbl, ","))
 	}
+	searchURL := "https://duckduckgo.com/?q=" + url.PathEscape(name)
+	var extraFilterJSON string
+	if extraFilter != "" {
+		extraFilterJSON = fmt.Sprintf(`,"trafficLinkFilter":"%s"`, extraFilter)
+	}
 	annotations["netobserv_io_network_health"] = model.LabelValue(fmt.Sprintf(
-		`{%s%s"threshold":"%d","upperBound":"%d","unit":"%%"}`,
+		`{%s%s"threshold":"%d","upperBound":"%d","unit":"%%","links":[{"name":"Search the web", "url": "%s"}]%s}`,
 		jsonNsLbl,
 		jsonNodeLbl,
 		threshold,
 		upperBound,
+		searchURL,
+		extraFilterJSON,
 	))
 	ruleLabels := labels.Clone()
 	ruleLabels["prometheus"] = "openshift-monitoring/k8s"
@@ -160,13 +168,13 @@ func createRule(probability float64, name, severity string, threshold, upperBoun
 func GetRules() func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, _ *http.Request) {
 		alertingRules := []AlertingRule{
-			createRule(0.4, "Packet delivery failed", "info", 5, 100, true, []string{"SrcK8S_Namespace", "DstK8S_Namespace"}, []string{}),
-			createRule(0.3, "You have reached your hourly rate limit", "info", 5, 100, true, []string{"SrcK8S_Namespace", "DstK8S_Namespace"}, []string{}),
-			createRule(0.1, "It's always DNS", "warning", 15, 100, true, []string{"SrcK8S_Namespace", "DstK8S_Namespace"}, []string{}),
-			createRule(0.1, "We're under attack", "warning", 20, 100, true, []string{}, []string{}),
-			createRule(0.1, "Sh*t - Famous last words", "critical", 5, 100, true, []string{}, []string{"SrcK8S_Hostname", "DstK8S_Hostname"}),
-			createRule(0.3, "FromIngress", "info", 10, 100, false, []string{"exported_namespace"}, []string{}),
-			createRule(0.3, "Degraded latency", "info", 100, 1000, true, []string{"SrcK8S_Namespace", "DstK8S_Namespace"}, []string{}),
+			createRule(0.4, "Packet delivery failed", "info", "", 5, 100, true, []string{"SrcK8S_Namespace", "DstK8S_Namespace"}, []string{}),
+			createRule(0.3, "You have reached your hourly rate limit", "info", "", 5, 100, true, []string{"SrcK8S_Namespace", "DstK8S_Namespace"}, []string{}),
+			createRule(0.1, "It's always DNS", "warning", `dns_flag_response_code!=\"\"`, 15, 100, true, []string{"SrcK8S_Namespace", "DstK8S_Namespace"}, []string{}),
+			createRule(0.1, "We're under attack", "warning", "", 20, 100, true, []string{}, []string{}),
+			createRule(0.1, "Sh*t - Famous last words", "critical", "", 5, 100, true, []string{}, []string{"SrcK8S_Hostname", "DstK8S_Hostname"}),
+			createRule(0.3, "FromIngress", "info", "", 10, 100, false, []string{"exported_namespace"}, []string{}),
+			createRule(0.3, "Degraded latency", "info", "", 100, 1000, true, []string{"SrcK8S_Namespace", "DstK8S_Namespace"}, []string{}),
 		}
 		res := map[string]any{
 			"status": "success",

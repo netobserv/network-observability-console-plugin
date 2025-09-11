@@ -15,8 +15,8 @@ import { RefreshDropdown } from '../dropdowns/refresh-dropdown';
 import { HealthDrawerContainer } from './health-drawer-container';
 import HealthError from './health-error';
 import { HealthGlobal } from './health-global';
+import { buildStats, isSilenced } from './health-helper';
 import { HealthSummary } from './health-summary';
-import { buildStats, isSilenced } from './helper';
 import { HealthTabTitle } from './tab-title';
 
 import './health.css';

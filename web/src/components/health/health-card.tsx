@@ -14,7 +14,7 @@ import { BellIcon, ExclamationCircleIcon, ExclamationTriangleIcon, InfoAltIcon }
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { valueFormat } from '../../utils/format';
-import { ByResource } from './helper';
+import { ByResource } from './health-helper';
 
 export interface HealthCardProps {
   stats: ByResource;

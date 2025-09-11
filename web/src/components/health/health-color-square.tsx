@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { valueFormat } from '../../utils/format';
-import { AlertWithRuleName, computeAlertScore, computeExcessRatioStatusWeighted } from './helper';
+import { AlertWithRuleName, computeAlertScore, computeExcessRatioStatusWeighted } from './health-helper';
 
 import { Tooltip } from '@patternfly/react-core';
 import './health-color-square.css';
