@@ -96,7 +96,7 @@ export const HealthCard: React.FC<HealthCardProps> = ({ stats, kind, isDark, isS
           </FlexItem>
           <FlexItem>
             <TextContent>
-              <Text component={TextVariants.h1}>{valueFormat(stats.score)}</Text>
+              <Text component={TextVariants.h1}>{valueFormat(stats.score.total)}</Text>
             </TextContent>
           </FlexItem>
         </Flex>

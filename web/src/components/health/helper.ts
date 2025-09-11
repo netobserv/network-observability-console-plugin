@@ -13,7 +13,7 @@ export type ByResource = {
   critical: SeverityStats;
   warning: SeverityStats;
   other: SeverityStats;
-  score: number;
+  score: Score;
 };
 
 type SeverityStats = {
@@ -39,6 +39,17 @@ type HealthMetadata = {
   unit: string;
   nodeLabels?: string[];
   namespaceLabels?: string[];
+};
+
+type Score = {
+  total: number;
+  details: ScoreDetail[];
+};
+
+type ScoreDetail = {
+  alertName: string;
+  rawScore: number;
+  weight: number;
 };
 
 export const getHealthMetadata = (annotations: PrometheusLabels): HealthMetadata | undefined => {
@@ -141,7 +152,7 @@ const statsFromGrouped = (name: string, grouped: AlertWithRuleName[]): ByResourc
     critical: { firing: [], pending: [], silenced: [], inactive: [] },
     warning: { firing: [], pending: [], silenced: [], inactive: [] },
     other: { firing: [], pending: [], silenced: [], inactive: [] },
-    score: 0
+    score: { total: 0, details: [] }
   };
   _.uniqWith(grouped, (a, b) => {
     return a.ruleName === b.ruleName && _.isEqual(a.labels, b.labels);
@@ -241,37 +252,52 @@ const getSeverityWeight = (a: AlertWithRuleName) => {
   }
 };
 
-// Score [0,10]; higher is better
-export const computeScore = (r: ByResource): number => {
-  const allAlerts = getAllAlerts(r);
-  const score = allAlerts.map(a => computeAlertScore(a)).reduce((a, b) => a + b, 0);
-  if (score === 0) {
-    return 10;
+const getStateWeight = (a: AlertWithRuleName) => {
+  switch (a.state) {
+    case 'pending':
+      return pendingWeight;
+    case 'silenced':
+      return silencedWeight;
   }
-  const div =
-    allAlerts.map(getSeverityWeight).reduce((a, b) => a + b, 0) +
-    r.critical.inactive.length * criticalWeight +
-    r.warning.inactive.length * warningWeight +
-    r.other.inactive.length * minorWeight;
-  return 10 * (1 - score / div);
+  return 1;
+};
+
+// Score [0,10]; higher is better
+export const computeScore = (r: ByResource): Score => {
+  const allAlerts = getAllAlerts(r);
+  const allScores = allAlerts
+    .map(computeAlertScore)
+    .concat(r.critical.inactive.map(name => ({ alertName: name, rawScore: 10, weight: criticalWeight })))
+    .concat(r.warning.inactive.map(name => ({ alertName: name, rawScore: 10, weight: warningWeight })))
+    .concat(r.other.inactive.map(name => ({ alertName: name, rawScore: 10, weight: minorWeight })));
+  const sum = allScores.map(s => s.rawScore * s.weight).reduce((a, b) => a + b, 0);
+  const sumWeights = allScores.map(s => s.weight).reduce((a, b) => a + b, 0);
+  if (sumWeights === 0) {
+    return { total: 10, details: [] };
+  }
+  return { total: sum / sumWeights, details: allScores };
 };
 
 // Score [0,1]; lower is better
-export const computeAlertScore = (a: AlertWithRuleName, ignoreSeverity?: boolean): number => {
-  let multiplier = ignoreSeverity ? 1 : getSeverityWeight(a);
-  switch (a.state) {
-    case 'pending':
-      multiplier *= pendingWeight;
-      break;
-    case 'silenced':
-      multiplier *= silencedWeight;
-      break;
-  }
+const computeExcessRatio = (a: AlertWithRuleName): number => {
   // Assuming the alert value is a [0-100] percentage. Needs update if more use cases come up.
   const threshold = (a.metadata?.thresholdF || 0) / 2;
   const range = 100 - threshold;
   const excess = Math.max((a.value as number) - threshold, 0);
-  return (excess * multiplier) / range;
+  return excess / range;
+};
+
+export const computeExcessRatioStatusWeighted = (a: AlertWithRuleName): number => {
+  return computeExcessRatio(a) * getStateWeight(a);
+};
+
+// Score [0,10]; higher is better
+export const computeAlertScore = (a: AlertWithRuleName): ScoreDetail => {
+  return {
+    alertName: a.ruleName,
+    rawScore: 10 * (1 - computeExcessRatio(a)),
+    weight: getSeverityWeight(a) * getStateWeight(a)
+  };
 };
 
 export const isSilenced = (silence: SilenceMatcher[], labels: PrometheusLabels): boolean => {

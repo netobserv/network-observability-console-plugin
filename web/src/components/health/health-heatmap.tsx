@@ -5,7 +5,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { valueFormat } from '../../utils/format';
 import { AlertDetails, AlertDetailsValue } from './alert-details';
-import { AlertWithRuleName, ByResource, computeAlertScore, getAllAlerts } from './helper';
+import { AlertWithRuleName, ByResource, computeExcessRatioStatusWeighted, getAllAlerts } from './helper';
 
 import './heatmap.css';
 
@@ -132,7 +132,7 @@ export const HealthHeatmap: React.FC<HealthHeatmapProps> = ({ info, interactive 
           : a.labels.severity === 'warning'
           ? warningColorMap
           : infoColorMap;
-      const score = computeAlertScore(a, true);
+      const score = computeExcessRatioStatusWeighted(a);
       return {
         score,
         colorMap: colorMap,
