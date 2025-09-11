@@ -1,8 +1,6 @@
 import { ResourceLink } from '@openshift-console/dynamic-plugin-sdk';
 import {
   Drawer,
-  DrawerActions,
-  DrawerCloseButton,
   DrawerContent,
   DrawerContentBody,
   DrawerHead,
@@ -14,15 +12,12 @@ import {
   MenuToggleElement,
   Text,
   TextContent,
-  TextVariants,
-  ToggleGroup,
-  ToggleGroupItem
+  TextVariants
 } from '@patternfly/react-core';
-import { EllipsisVIcon, ListIcon, ThIcon } from '@patternfly/react-icons';
+import { EllipsisVIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { HealthGallery } from './health-gallery';
-import { HealthHeatmap } from './health-heatmap';
 import { ByResource } from './helper';
 import { RuleDetails } from './rule-details';
 
@@ -36,7 +31,6 @@ export interface HealthDrawerContainerProps {
 export const HealthDrawerContainer: React.FC<HealthDrawerContainerProps> = ({ title, stats, kind, isDark }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [selectedResource, setSelectedResource] = React.useState<ByResource | undefined>(undefined);
-  const [selectedPanelView, setSelectedPanelView] = React.useState<'heatmap' | 'table'>('heatmap');
   const [isKebabOpen, setKebabOpen] = React.useState(false);
   const drawerRef = React.useRef<HTMLDivElement>(null);
 
@@ -112,31 +106,10 @@ export const HealthDrawerContainer: React.FC<HealthDrawerContainerProps> = ({ ti
                     </>
                   )}
                 </span>
-                <DrawerActions>
-                  <ToggleGroup aria-label="Heatmap view">
-                    <ToggleGroupItem
-                      icon={<ThIcon />}
-                      buttonId="toggle-group-heatmap"
-                      isSelected={selectedPanelView === 'heatmap'}
-                      onChange={() => setSelectedPanelView('heatmap')}
-                    />
-                    <ToggleGroupItem
-                      icon={<ListIcon />}
-                      buttonId="toggle-group-table"
-                      isSelected={selectedPanelView === 'table'}
-                      onChange={() => setSelectedPanelView('table')}
-                    />
-                  </ToggleGroup>
-                  <DrawerCloseButton onClick={() => setSelectedResource(undefined)} />
-                </DrawerActions>
               </DrawerHead>
               {selectedResource && (
                 <div className="health-gallery-drawer-content">
-                  {selectedPanelView === 'heatmap' ? (
-                    <HealthHeatmap info={selectedResource} interactive={true} />
-                  ) : (
-                    <RuleDetails info={selectedResource} detailed={false} />
-                  )}
+                  <RuleDetails info={selectedResource} header={false} />
                 </div>
               )}
             </DrawerPanelContent>

@@ -38,7 +38,7 @@ describe('health helpers', () => {
     const alert = mockAlert('test', 'info', 'pending', 10, 10);
     const score = computeAlertScore(alert);
     expect(score.rawScore).toBeCloseTo(9.47, 2);
-    expect(score.weight).toEqual(0.12);
+    expect(score.weight).toEqual(0.075);
   });
 
   it('should compute full score', () => {
@@ -48,29 +48,29 @@ describe('health helpers', () => {
       critical: { firing: [], pending: [], silenced: [], inactive: [] },
       warning: { firing: [], pending: [], silenced: [], inactive: [] },
       other: { firing: [], pending: [], silenced: [], inactive: [] },
-      score: { total: 0, details: [] }
+      score: 0
     };
-    expect(computeScore(r).total).toEqual(10);
+    expect(computeScore(r)).toEqual(10);
 
     // Add 3 inactive alerts => still max score
     r.critical.inactive.push('test-critical');
     r.warning.inactive.push('test-warning');
     r.other.inactive.push('test-info');
-    expect(computeScore(r).total).toEqual(10);
+    expect(computeScore(r)).toEqual(10);
 
     // Turn the inactive info into pending => slightly decreasing score
     r.other.inactive = [];
     r.other.pending = [mockAlert('test-info', 'info', 'pending', 10, 20)];
-    expect(computeScore(r).total).toBeCloseTo(9.9, 1);
+    expect(computeScore(r)).toBeCloseTo(9.9, 1);
 
     // Turn the inactive warning into firing => more decreasing score
     r.warning.inactive = [];
     r.warning.firing = [mockAlert('test-warning', 'warning', 'firing', 10, 40)];
-    expect(computeScore(r).total).toBeCloseTo(8.5, 1);
+    expect(computeScore(r)).toBeCloseTo(8.8, 1);
 
     // Turn the inactive critical into firing => more decrease
     r.critical.inactive = [];
     r.critical.firing = [mockAlert('test-critical', 'critical', 'firing', 10, 40)];
-    expect(computeScore(r).total).toBeCloseTo(6.5, 1);
+    expect(computeScore(r)).toBeCloseTo(6.4, 1);
   });
 });

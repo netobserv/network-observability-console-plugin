@@ -5,21 +5,22 @@ import { Label } from '@patternfly/react-core';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { valueFormat } from '../../utils/format';
+import { HealthColorSquare } from './health-color-square';
 import { ByResource, getAlertFilteredLabels, getAlertLink, getAllAlerts, getHealthMetadata } from './helper';
 
 export interface RuleDetailsProps {
   info: ByResource;
-  detailed: boolean;
+  header: boolean;
 }
 
-export const RuleDetails: React.FC<RuleDetailsProps> = ({ info, detailed }) => {
+export const RuleDetails: React.FC<RuleDetailsProps> = ({ info, header }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   const allAlerts = getAllAlerts(info);
 
   return (
     <Table data-test-rows-count={allAlerts.length} aria-label="Detailed alerting rules" variant="compact">
-      {detailed && (
+      {header && (
         <Thead>
           <Th>{t('Summary')}</Th>
           <Th>{t('State')}</Th>
@@ -29,7 +30,7 @@ export const RuleDetails: React.FC<RuleDetailsProps> = ({ info, detailed }) => {
           <Th>{t('Description')}</Th>
         </Thead>
       )}
-      {detailed ? (
+      {header ? (
         <Tbody>
           {allAlerts.map((a, i) => {
             const md = getHealthMetadata(a.annotations);
@@ -37,6 +38,7 @@ export const RuleDetails: React.FC<RuleDetailsProps> = ({ info, detailed }) => {
             return (
               <Tr key={'detailed-rules-row-' + i}>
                 <Td>
+                  <HealthColorSquare alert={a} />
                   <Link to={getAlertLink(a)} title={t('Navigate to alert details')}>
                     {a.annotations['summary']}
                   </Link>
@@ -70,6 +72,7 @@ export const RuleDetails: React.FC<RuleDetailsProps> = ({ info, detailed }) => {
             <Tbody key={'detailed-rules-row-' + i} isExpanded>
               <Tr isExpanded>
                 <Td noPadding colSpan={4}>
+                  <HealthColorSquare alert={a} />
                   <Link to={getAlertLink(a)} title={t('Navigate to alert details')}>
                     {a.annotations['summary']}
                   </Link>

@@ -13,7 +13,7 @@ export type ByResource = {
   critical: SeverityStats;
   warning: SeverityStats;
   other: SeverityStats;
-  score: Score;
+  score: number;
 };
 
 type SeverityStats = {
@@ -41,13 +41,7 @@ type HealthMetadata = {
   namespaceLabels?: string[];
 };
 
-type Score = {
-  total: number;
-  details: ScoreDetail[];
-};
-
 type ScoreDetail = {
-  alertName: string;
   rawScore: number;
   weight: number;
 };
@@ -152,7 +146,7 @@ const statsFromGrouped = (name: string, grouped: AlertWithRuleName[]): ByResourc
     critical: { firing: [], pending: [], silenced: [], inactive: [] },
     warning: { firing: [], pending: [], silenced: [], inactive: [] },
     other: { firing: [], pending: [], silenced: [], inactive: [] },
-    score: { total: 0, details: [] }
+    score: 0
   };
   _.uniqWith(grouped, (a, b) => {
     return a.ruleName === b.ruleName && _.isEqual(a.labels, b.labels);
@@ -236,8 +230,8 @@ export const getAlertLink = (a: AlertWithRuleName): string => {
 };
 
 const criticalWeight = 1;
-const warningWeight = 0.7;
-const minorWeight = 0.4;
+const warningWeight = 0.5;
+const minorWeight = 0.25;
 const pendingWeight = 0.3;
 const silencedWeight = 0.1;
 
@@ -263,7 +257,7 @@ const getStateWeight = (a: AlertWithRuleName) => {
 };
 
 // Score [0,10]; higher is better
-export const computeScore = (r: ByResource): Score => {
+export const computeScore = (r: ByResource): number => {
   const allAlerts = getAllAlerts(r);
   const allScores = allAlerts
     .map(computeAlertScore)
@@ -273,9 +267,9 @@ export const computeScore = (r: ByResource): Score => {
   const sum = allScores.map(s => s.rawScore * s.weight).reduce((a, b) => a + b, 0);
   const sumWeights = allScores.map(s => s.weight).reduce((a, b) => a + b, 0);
   if (sumWeights === 0) {
-    return { total: 10, details: [] };
+    return 10;
   }
-  return { total: sum / sumWeights, details: allScores };
+  return sum / sumWeights;
 };
 
 // Score [0,1]; lower is better
@@ -294,7 +288,6 @@ export const computeExcessRatioStatusWeighted = (a: AlertWithRuleName): number =
 // Score [0,10]; higher is better
 export const computeAlertScore = (a: AlertWithRuleName): ScoreDetail => {
   return {
-    alertName: a.ruleName,
     rawScore: 10 * (1 - computeExcessRatio(a)),
     weight: getSeverityWeight(a) * getStateWeight(a)
   };
