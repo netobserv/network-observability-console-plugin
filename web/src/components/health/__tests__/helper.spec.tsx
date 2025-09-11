@@ -14,7 +14,7 @@ const mockAlert = (
     state: state as AlertStates,
     annotations: {},
     ruleID: '',
-    metadata: { thresholdF: threshold, threshold: '', unit: '%' },
+    metadata: { thresholdF: threshold, threshold: '', upperBoundF: 100, upperBound: '', unit: '%' },
     value: value
   };
 };
@@ -39,6 +39,26 @@ describe('health helpers', () => {
     const score = computeAlertScore(alert);
     expect(score.rawScore).toBeCloseTo(9.47, 2);
     expect(score.weight).toEqual(0.075);
+  });
+
+  it('should compute unweighted alert score with upper bound', () => {
+    const alert = mockAlert('test', 'critical', 'firing', 100, 500);
+    alert.metadata!.upperBoundF = 1000;
+    const score = computeAlertScore(alert);
+    expect(score.rawScore).toBeCloseTo(5.26, 2);
+  });
+
+  it('should compute unweighted alert score with clamping', () => {
+    // below threshold
+    const alert = mockAlert('test', 'critical', 'firing', 100, 1);
+    alert.metadata!.upperBoundF = 1000;
+    let score = computeAlertScore(alert);
+    expect(score.rawScore).toEqual(10);
+
+    // above upper bound
+    alert.value = 5000;
+    score = computeAlertScore(alert);
+    expect(score.rawScore).toEqual(0);
   });
 
   it('should compute full score', () => {

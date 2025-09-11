@@ -60,20 +60,6 @@ const buildGradientCSS = (colorMap: ColorMap): string => {
 export const HealthColorSquare: React.FC<HealthColorSquareProps> = ({ alert }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
-  let prefix = '';
-  switch (alert.state) {
-    case 'pending':
-      prefix = `[pending] `;
-      break;
-    case 'silenced':
-      prefix = `[silenced] `;
-      break;
-  }
-  const valueInfo =
-    valueFormat(alert.value as number, 2) +
-    (alert.metadata?.threshold ? '> ' + alert.metadata.threshold + ' ' + alert.metadata.unit : '');
-  const tooltip = `${prefix}${alert.annotations['summary']} | ${valueInfo}`;
-
   const colorMap =
     alert.labels.severity === 'critical'
       ? criticalColorMap
@@ -98,7 +84,7 @@ export const HealthColorSquare: React.FC<HealthColorSquareProps> = ({ alert }) =
         </>
       }
     >
-      <div className={'cell'} style={getCellColors(scoreForMap, 0, 1, colorMap)} title={tooltip} />
+      <div className={'cell'} style={getCellColors(scoreForMap, 0, 1, colorMap)} />
     </Tooltip>
   );
 };

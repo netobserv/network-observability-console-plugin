@@ -61,7 +61,7 @@ func randomState() int {
 	return firing
 }
 
-func createAlert(probability float64, name, resourceName string, threshold int, targetLabels, resourceNames []string, annotations, labels model.LabelSet) (*Alert, int) {
+func createAlert(probability float64, name, resourceName string, threshold, upperBound int, targetLabels, resourceNames []string, annotations, labels model.LabelSet) (*Alert, int) {
 	if rand.Float64() < probability {
 		alertLabels := labels.Clone()
 		alertState := randomState()
@@ -75,7 +75,7 @@ func createAlert(probability float64, name, resourceName string, threshold int, 
 				alertLabels[model.LabelName(lbl)] = model.LabelValue(resourceNames[idx])
 			}
 		}
-		val := float64(threshold) + rand.Float64()*float64(100-threshold)
+		val := float64(threshold) + rand.Float64()*float64(upperBound-threshold)
 		return &Alert{
 			Annotations: annotations,
 			Labels:      alertLabels,
@@ -86,11 +86,11 @@ func createAlert(probability float64, name, resourceName string, threshold int, 
 	return nil, 0
 }
 
-func createAlerts(probability float64, name string, threshold int, targetLabels, resourceNames []string, annotations, labels model.LabelSet) ([]*Alert, int) {
+func createAlerts(probability float64, name string, threshold, upperBound int, targetLabels, resourceNames []string, annotations, labels model.LabelSet) ([]*Alert, int) {
 	alerts := []*Alert{}
 	var ruleState int
 	for _, resourceName := range resourceNames {
-		if alert, state := createAlert(probability, name, resourceName, threshold, targetLabels, resourceNames, annotations, labels); alert != nil {
+		if alert, state := createAlert(probability, name, resourceName, threshold, upperBound, targetLabels, resourceNames, annotations, labels); alert != nil {
 			ruleState |= state
 			alerts = append(alerts, alert)
 		}
@@ -98,7 +98,7 @@ func createAlerts(probability float64, name string, threshold int, targetLabels,
 	return alerts, ruleState
 }
 
-func createRule(probability float64, name, severity string, threshold int, bynetobs bool, nsLbl, nodeLbl []string) AlertingRule {
+func createRule(probability float64, name, severity string, threshold, upperBound int, bynetobs bool, nsLbl, nodeLbl []string) AlertingRule {
 	labels := model.LabelSet{
 		"severity": model.LabelValue(severity),
 	}
@@ -126,23 +126,24 @@ func createRule(probability float64, name, severity string, threshold int, bynet
 		jsonNodeLbl = fmt.Sprintf(`"nodeLabels":[%s],`, strings.Join(quotedLbl, ","))
 	}
 	annotations["netobserv_io_network_health"] = model.LabelValue(fmt.Sprintf(
-		`{%s%s"threshold":"%d","unit":"%%"}`,
+		`{%s%s"threshold":"%d","upperBound":"%d","unit":"%%"}`,
 		jsonNsLbl,
 		jsonNodeLbl,
 		threshold,
+		upperBound,
 	))
 	ruleLabels := labels.Clone()
 	ruleLabels["prometheus"] = "openshift-monitoring/k8s"
 	var alerts []*Alert
 	var ruleState int
 	if len(nsLbl) > 0 {
-		alerts, ruleState = createAlerts(probability, name, threshold, nsLbl, namespaces, annotations, labels)
+		alerts, ruleState = createAlerts(probability, name, threshold, upperBound, nsLbl, namespaces, annotations, labels)
 	} else if len(nodeLbl) > 0 {
-		alerts, ruleState = createAlerts(probability, name, threshold, nodeLbl, nodes, annotations, labels)
+		alerts, ruleState = createAlerts(probability, name, threshold, upperBound, nodeLbl, nodes, annotations, labels)
 	} else {
 		// global
 		alerts = []*Alert{}
-		if alert, state := createAlert(probability, name, "", threshold, nil, nil, annotations, labels); alert != nil {
+		if alert, state := createAlert(probability, name, "", threshold, upperBound, nil, nil, annotations, labels); alert != nil {
 			ruleState |= state
 			alerts = append(alerts, alert)
 		}
@@ -159,12 +160,13 @@ func createRule(probability float64, name, severity string, threshold int, bynet
 func GetRules() func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, _ *http.Request) {
 		alertingRules := []AlertingRule{
-			createRule(0.4, "Packet delivery failed", "info", 5, true, []string{"SrcK8S_Namespace", "DstK8S_Namespace"}, []string{}),
-			createRule(0.3, "You have reached your hourly rate limit", "info", 5, true, []string{"SrcK8S_Namespace", "DstK8S_Namespace"}, []string{}),
-			createRule(0.1, "It's always DNS", "warning", 15, true, []string{"SrcK8S_Namespace", "DstK8S_Namespace"}, []string{}),
-			createRule(0.1, "We're under attack", "warning", 20, true, []string{}, []string{}),
-			createRule(0.1, "Sh*t - Famous last words", "critical", 5, true, []string{}, []string{"SrcK8S_Hostname", "DstK8S_Hostname"}),
-			createRule(0.3, "FromIngress", "info", 10, false, []string{"exported_namespace"}, []string{}),
+			createRule(0.4, "Packet delivery failed", "info", 5, 100, true, []string{"SrcK8S_Namespace", "DstK8S_Namespace"}, []string{}),
+			createRule(0.3, "You have reached your hourly rate limit", "info", 5, 100, true, []string{"SrcK8S_Namespace", "DstK8S_Namespace"}, []string{}),
+			createRule(0.1, "It's always DNS", "warning", 15, 100, true, []string{"SrcK8S_Namespace", "DstK8S_Namespace"}, []string{}),
+			createRule(0.1, "We're under attack", "warning", 20, 100, true, []string{}, []string{}),
+			createRule(0.1, "Sh*t - Famous last words", "critical", 5, 100, true, []string{}, []string{"SrcK8S_Hostname", "DstK8S_Hostname"}),
+			createRule(0.3, "FromIngress", "info", 10, 100, false, []string{"exported_namespace"}, []string{}),
+			createRule(0.3, "Degraded latency", "info", 100, 1000, true, []string{"SrcK8S_Namespace", "DstK8S_Namespace"}, []string{}),
 		}
 		res := map[string]any{
 			"status": "success",

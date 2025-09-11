@@ -36,6 +36,8 @@ type RuleWithMetadata = Rule & {
 type HealthMetadata = {
   threshold: string;
   thresholdF: number;
+  upperBound: string;
+  upperBoundF: number;
   unit: string;
   nodeLabels?: string[];
   namespaceLabels?: string[];
@@ -51,6 +53,7 @@ export const getHealthMetadata = (annotations: PrometheusLabels): HealthMetadata
     const md = (JSON.parse(annotations['netobserv_io_network_health']) as HealthMetadata) || undefined;
     if (md) {
       md.thresholdF = parseFloat(md.threshold) || 0;
+      md.upperBoundF = parseFloat(md.upperBound) || 0;
     }
     return md;
   }
@@ -274,11 +277,12 @@ export const computeScore = (r: ByResource): number => {
 
 // Score [0,1]; lower is better
 const computeExcessRatio = (a: AlertWithRuleName): number => {
-  // Assuming the alert value is a [0-100] percentage. Needs update if more use cases come up.
+  // Assuming the alert value is a [0-n] percentage. Needs update if more use cases come up.
   const threshold = (a.metadata?.thresholdF || 0) / 2;
-  const range = 100 - threshold;
-  const excess = Math.max((a.value as number) - threshold, 0);
-  return excess / range;
+  const upper = a.metadata?.upperBoundF || 100;
+  const vclamped = Math.min(Math.max(a.value as number, threshold), upper);
+  const range = upper - threshold;
+  return (vclamped - threshold) / range;
 };
 
 export const computeExcessRatioStatusWeighted = (a: AlertWithRuleName): number => {
