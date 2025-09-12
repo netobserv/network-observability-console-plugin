@@ -101,6 +101,12 @@ module.exports = {
       },
       extensions: [
         {
+          "type": "console.flag",
+          "properties": {
+            "handler": { "$codeRef": "networkHealth.featureFlagHandler" }
+          }
+        },
+        {
           type: "console.navigation/href",
           properties: {
             "id": "network-health-link",
@@ -108,7 +114,8 @@ module.exports = {
             "section": "observe",
             name: "%plugin__netobserv-plugin~Network Health%",
             "href": "/network-health"
-          }
+          },
+          "flags": { "required": ["NETOBSERV_NETWORK_HEALTH"] }
         },
         {
           type: "console.navigation/href",
@@ -147,7 +154,8 @@ module.exports = {
             component: {
               "$codeRef": "networkHealth.default"
             }
-          }
+          },
+          "flags": { "required": ["NETOBSERV_NETWORK_HEALTH"] }
         },
         {
           type: "console.tab/horizontalNav",

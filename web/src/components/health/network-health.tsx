@@ -1,4 +1,4 @@
-import { AlertStates, Rule } from '@openshift-console/dynamic-plugin-sdk';
+import { AlertStates, FeatureFlagHandler, Rule, SetFeatureFlag } from '@openshift-console/dynamic-plugin-sdk';
 import { Button, Flex, FlexItem, PageSection, Tab, Tabs, TextVariants, Title } from '@patternfly/react-core';
 import { SyncAltIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
@@ -18,6 +18,7 @@ import { HealthGlobal } from './health-global';
 import { buildStats, isSilenced } from './health-helper';
 import { HealthSummary } from './health-summary';
 import { HealthTabTitle } from './tab-title';
+import { loadConfig } from '../../utils/config';
 
 import './health.css';
 
@@ -173,6 +174,15 @@ export const NetworkHealth: React.FC<{}> = ({}) => {
       )}
     </PageSection>
   );
+};
+
+export const featureFlagHandler: FeatureFlagHandler = (setFeatureFlag: SetFeatureFlag) => {
+  loadConfig().then(({ config }) => {
+    if (config) {
+      const enabled = config.features.includes('experimentalAlertsHealth');
+      setFeatureFlag('NETOBSERV_NETWORK_HEALTH', enabled);
+    }
+  });
 };
 
 NetworkHealth.displayName = 'NetworkHealth';
