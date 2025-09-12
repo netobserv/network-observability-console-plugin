@@ -3572,6 +3572,49 @@ export const FlowCollectorSchema: RJSFSchema | any = {
               type: 'boolean',
               default: true
             },
+            clientType: {
+              description:
+                '`clientType` specifies the protocol to use for sending flows to Loki: `http` or `grpc`.\nThis setting is independent of the Loki installation mode and allows choosing the optimal transport protocol.\ngRPC may provide better performance for high-throughput scenarios.',
+              type: 'string',
+              default: 'http',
+              enum: ['http', 'grpc']
+            },
+            grpcConfig: {
+              description:
+                '`grpcConfig` contains gRPC-specific configuration for the Loki writer.\nThis is only used when `clientType` is set to `grpc`.',
+              type: 'object',
+              properties: {
+                keepAlive: {
+                  description: '`keepAlive` is the gRPC keep-alive interval.',
+                  type: 'string',
+                  default: '30s'
+                },
+                keepAliveTimeout: {
+                  description: '`keepAliveTimeout` is the gRPC keep-alive timeout.',
+                  type: 'string',
+                  default: '5s'
+                },
+                maxRecvMsgSize: {
+                  description: '`maxRecvMsgSize` is the maximum message size in bytes the gRPC client can receive. Default: 64MB.',
+                  type: 'integer',
+                  default: 67108864,
+                  minimum: 1024,
+                  maximum: 67108864
+                },
+                maxSendMsgSize: {
+                  description: '`maxSendMsgSize` is the maximum message size in bytes the gRPC client can send. Default: 16MB.',
+                  type: 'integer',
+                  default: 16777216,
+                  minimum: 1024,
+                  maximum: 67108864
+                },
+                useStreaming: {
+                  description: '`useStreaming` enables streaming mode for real-time log pushing when using gRPC.',
+                  type: 'boolean',
+                  default: false
+                }
+              }
+            },
             mode: {
               description:
                 '`mode` must be set according to the installation mode of Loki:\n- Use `LokiStack` when Loki is managed using the Loki Operator\n- Use `Monolithic` when Loki is installed as a monolithic workload\n- Use `Microservices` when Loki is installed as microservices, but without Loki Operator\n- Use `Manual` if none of the options above match your setup',

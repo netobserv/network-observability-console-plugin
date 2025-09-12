@@ -993,6 +993,40 @@ export const FlowCollectorUISchema: UiSchema = {
       enable: {
         'ui:title': 'Use Loki storage'
       },
+      clientType: {
+        'ui:title': 'Client type',
+        'ui:description': 'Protocol to use for sending flows to Loki: http or grpc. gRPC may provide better performance for high-throughput scenarios.'
+      },
+      grpcConfig: {
+        'ui:title': 'gRPC configuration',
+        'ui:description': 'gRPC-specific configuration for the Loki writer. Only used when clientType is set to grpc.',
+        'ui:dependency': {
+          controlFieldPath: ['loki', 'clientType'],
+          controlFieldValue: 'grpc',
+          controlFieldName: 'clientType'
+        },
+        keepAlive: {
+          'ui:title': 'Keep alive',
+          'ui:description': 'gRPC keep-alive interval'
+        },
+        keepAliveTimeout: {
+          'ui:title': 'Keep alive timeout',
+          'ui:description': 'gRPC keep-alive timeout'
+        },
+        maxRecvMsgSize: {
+          'ui:title': 'Max receive message size',
+          'ui:description': 'Maximum message size in bytes the gRPC client can receive'
+        },
+        maxSendMsgSize: {
+          'ui:title': 'Max send message size',
+          'ui:description': 'Maximum message size in bytes the gRPC client can send'
+        },
+        useStreaming: {
+          'ui:title': 'Use streaming',
+          'ui:description': 'Enable streaming mode for real-time log pushing when using gRPC'
+        },
+        'ui:order': ['keepAlive', 'keepAliveTimeout', 'maxRecvMsgSize', 'maxSendMsgSize', 'useStreaming']
+      },
       mode: {
         'ui:title': 'Mode'
       },
@@ -1179,6 +1213,8 @@ export const FlowCollectorUISchema: UiSchema = {
       },
       'ui:order': [
         'enable',
+        'clientType',
+        'grpcConfig',
         'mode',
         'manual',
         'monolithic',
