@@ -995,7 +995,8 @@ export const FlowCollectorUISchema: UiSchema = {
       },
       clientType: {
         'ui:title': 'Client type',
-        'ui:description': 'Protocol to use for sending flows to Loki: http or grpc. gRPC may provide better performance for high-throughput scenarios.'
+        'ui:description':
+          'Protocol to use for sending flows to Loki: http or grpc. gRPC may provide better performance for high-throughput scenarios.'
       },
       grpcConfig: {
         'ui:title': 'gRPC configuration',
