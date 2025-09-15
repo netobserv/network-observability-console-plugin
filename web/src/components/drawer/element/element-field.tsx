@@ -1,7 +1,7 @@
 import { Flex, FlexItem, Text, TextContent, TextVariants } from '@patternfly/react-core';
 import * as React from 'react';
 import { TopologyMetricPeer } from '../../../api/loki';
-import { Filter, FilterDefinition } from '../../../model/filters';
+import { Filter, FilterDefinition, Filters } from '../../../model/filters';
 import { NodeType } from '../../../model/flow-query';
 import { PeerResourceLink } from '../../tabs/netflow-topology/peer-resource-link';
 import { SummaryFilterButton } from '../../toolbar/filters/summary-filter-button';
@@ -12,7 +12,7 @@ export interface ElementFieldProps {
   filterType: NodeType;
   forcedText?: string;
   peer: TopologyMetricPeer;
-  activeFilters: Filter[];
+  filters: Filters;
   setFilters: (filters: Filter[]) => void;
   filterDefinitions: FilterDefinition[];
 }
@@ -23,7 +23,7 @@ export const ElementField: React.FC<ElementFieldProps> = ({
   filterType,
   forcedText,
   peer,
-  activeFilters,
+  filters,
   setFilters,
   filterDefinitions
 }) => {
@@ -37,7 +37,7 @@ export const ElementField: React.FC<ElementFieldProps> = ({
         <FlexItem>
           <SummaryFilterButton
             id={id + '-filter'}
-            activeFilters={activeFilters}
+            filters={filters}
             filterType={filterType}
             fields={peer}
             setFilters={setFilters}
