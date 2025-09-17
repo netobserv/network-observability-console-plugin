@@ -45,7 +45,8 @@ USER 65532:65532
 ENTRYPOINT ["./plugin-backend"]
 
 LABEL com.redhat.component="network-observability-console-plugin-container"
-LABEL name="network-observability-console-plugin"
+LABEL name="network-observability/network-observability-console-plugin-compat-rhel9"
+LABEL cpe="cpe:/a:redhat:network_observ_optr:1.9::el9"
 LABEL io.k8s.display-name="Network Observability Console Plugin"
 LABEL io.k8s.description="Network Observability Console Plugin"
 LABEL summary="Network Observability Console Plugin"
