@@ -51,7 +51,7 @@ export const HealthCard: React.FC<HealthCardProps> = ({ stats, kind, isDark, isS
         className="card-header"
         selectableActions={{
           selectableActionId: stats.name,
-          selectableActionAriaLabelledby: 'selectable-card-' + stats.name,
+          selectableActionAriaLabelledby: `selectable-card-${stats.name}`,
           variant: 'single',
           onClickAction: onClick
         }}
