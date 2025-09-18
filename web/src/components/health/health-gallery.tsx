@@ -39,7 +39,7 @@ export const HealthGallery: React.FC<HealthGalleryProps> = ({
         {sorted.map(r => {
           return (
             <HealthCard
-              key={`card-${r.name}` }
+              key={`card-${r.name}`}
               kind={kind}
               isDark={isDark}
               stats={r}

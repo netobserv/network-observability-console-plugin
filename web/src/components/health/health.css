@@ -1,30 +1,27 @@
 #pageSection h3 {
-    padding-top: 10px;
-    padding-bottom: 10px;
+    padding-top: 0.6rem;
+    padding-bottom: 0.6rem;
 }
 
 #pageSection .icon.critical {
-    color: rgb(177, 56, 11);
+    color: #b1380b;
 }
 
 #pageSection .dark .icon.critical {
-    color: rgb(240, 86, 29);
+    color: #f0561d;
 }
 
 #pageSection .icon.warning {
-    color: rgb(220, 166, 20);
+    color: #dca614;
 }
 
 #pageSection .dark .icon.warning {
-    color: rgb(255, 204, 23);
+    color: #ffcc17;
 }
 
-#pageSection .icon.minor {
-    color: rgb(154, 216, 216);
-}
-
+#pageSection .icon.minor,
 #pageSection .dark .icon.minor {
-    color: rgb(154, 216, 216);
+    color: #9ad8d8;
 }
 
 .health-gallery-drawer .pf-v5-c-drawer__body,
@@ -52,45 +49,42 @@
 }
 
 .card {
-    border-top: 3px solid;
-    border-top-color: rgb(106, 110, 115);
+    border-top: 0.2rem solid;
+    border-top-color: #6a6e73;
 }
 
 .card.dark {
-    border-top-color: rgb(134, 135, 137);
+    border-top-color: #868789;
 }
 
 .card.critical {
-    border-top-color: rgb(177, 56, 11);
+    border-top-color: #b1380b;
 }
 
 .card.dark.critical {
-    border-top-color: rgb(240, 86, 29);
+    border-top-color: #f0561d;
 }
 
 .card.warning {
-    border-top-color: rgb(220, 166, 20);
+    border-top-color: #dca614;
 }
 
 .card.dark.warning {
-    border-top-color: rgb(255, 204, 23);
+    border-top-color: #ffcc17;
 }
 
-.card.minor {
-    border-top-color: rgb(154, 216, 216);
-}
-
+.card.minor,
 .card.dark.minor {
-    border-top-color: rgb(154, 216, 216);
+    border-top-color: #9ad8d8;
 }
 
 .card-header {
-    min-height: 80px;
+    min-height: 5rem;
 }
 
 .card-header .icon {
-    width: 28px;
-    height: 28px;
+    width: 1.9rem;
+    height: 1.9rem;
 }
 
 .health-gallery-drawer-content .pf-m-no-padding {
