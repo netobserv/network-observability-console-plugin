@@ -228,7 +228,7 @@ export const FlowCollectorSchema: RJSFSchema | any = {
               properties: {
                 sampling: {
                   description:
-                    'Sampling rate of the flow reporter. 100 means one flow on 100 is sent. 0 or 1 means all flows are sampled.',
+                    'Sampling interval of the flow reporter. 100 means one flow on 100 is sent. 0 or 1 means all flows are sampled.',
                   type: 'integer',
                   format: 'int32',
                   default: 50,
@@ -274,7 +274,7 @@ export const FlowCollectorSchema: RJSFSchema | any = {
                     },
                     sampling: {
                       description:
-                        '`sampling` sampling rate for the matched flows, overriding the global sampling defined at `spec.agent.ebpf.sampling`.',
+                        '`sampling` sampling interval for the matched flows, overriding the global sampling defined at `spec.agent.ebpf.sampling`.',
                       type: 'integer',
                       format: 'int32'
                     },
@@ -366,7 +366,7 @@ export const FlowCollectorSchema: RJSFSchema | any = {
                           },
                           sampling: {
                             description:
-                              '`sampling` sampling rate for the matched flows, overriding the global sampling defined at `spec.agent.ebpf.sampling`.',
+                              '`sampling` sampling interval for the matched flows, overriding the global sampling defined at `spec.agent.ebpf.sampling`.',
                             type: 'integer',
                             format: 'int32'
                           },
@@ -1648,7 +1648,7 @@ export const FlowCollectorSchema: RJSFSchema | any = {
                 },
                 sampling: {
                   description:
-                    '`sampling` is the sampling rate on the reporter. 100 means one flow on 100 is sent.\nTo ensure cluster stability, it is not possible to set a value below 2.\nIf you really want to sample every packet, which might impact the cluster stability,\nrefer to `forceSampleAll`. Alternatively, you can use the eBPF Agent instead of IPFIX.',
+                    '`sampling` is the sampling interval on the reporter. 100 means one flow on 100 is sent.\nTo ensure cluster stability, it is not possible to set a value below 2.\nIf you really want to sample every packet, which might impact the cluster stability,\nrefer to `forceSampleAll`. Alternatively, you can use the eBPF Agent instead of IPFIX.',
                   type: 'integer',
                   format: 'int32',
                   default: 400,
@@ -2875,7 +2875,7 @@ export const FlowCollectorSchema: RJSFSchema | any = {
                   enum: ['Disabled', 'Drop', 'Sample']
                 },
                 sampling: {
-                  description: '`sampling` is the sampling rate when deduper `mode` is `Sample`.',
+                  description: '`sampling` is the sampling interval when deduper `mode` is `Sample`.',
                   type: 'integer',
                   format: 'int32',
                   default: 50,
@@ -3380,7 +3380,7 @@ export const FlowCollectorSchema: RJSFSchema | any = {
                     enum: ['', 'Loki', 'Metrics', 'Exporters']
                   },
                   sampling: {
-                    description: '`sampling` is an optional sampling rate to apply to this filter.',
+                    description: '`sampling` is an optional sampling interval to apply to this filter.',
                     type: 'integer',
                     format: 'int32',
                     minimum: 0
