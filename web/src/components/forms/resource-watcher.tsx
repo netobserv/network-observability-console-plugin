@@ -27,6 +27,7 @@ export type ResourceWatcherProps = {
   onSuccess?: (data: any) => void;
   children: JSX.Element;
   skipErrors?: boolean;
+  skipCRError?: boolean;
 };
 
 export type ResourceWatcherContext = {
@@ -67,7 +68,8 @@ export const ResourceWatcher: FC<ResourceWatcherProps> = ({
   namespace,
   onSuccess,
   children,
-  skipErrors
+  skipErrors,
+  skipCRError
 }) => {
   if (!group || !version || !kind) {
     throw new Error('ResourceForm error: apiVersion and kind must be provided');
@@ -112,7 +114,7 @@ export const ResourceWatcher: FC<ResourceWatcherProps> = ({
   const model = useK8sModel(group, version, kind);
   const [errors, setErrors] = React.useState<string[]>([]);
 
-  if (!skipErrors && (csvLoadError || crdLoadError || crLoadError)) {
+  if (!skipErrors && (csvLoadError || crdLoadError || (!skipCRError && crLoadError))) {
     return (
       <ErrorComponent
         title={t('Unable to get {{kind}}', { kind })}
@@ -120,7 +122,7 @@ export const ResourceWatcher: FC<ResourceWatcherProps> = ({
         isLokiRelated={false}
       />
     );
-  } else if (!csvLoaded || !crdLoaded || !crLoaded) {
+  } else if (!csvLoaded || !crdLoaded || (!skipCRError && !crLoaded)) {
     return (
       <Bullseye data-test="loading-resource">
         <Spinner size="xl" />

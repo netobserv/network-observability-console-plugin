@@ -6,7 +6,7 @@ import {
 } from '@openshift-console/dynamic-plugin-sdk';
 import { Flex, FlexItem, Spinner, Text, TextVariants } from '@patternfly/react-core';
 import { WarningTriangleIcon } from '@patternfly/react-icons';
-import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
+import { Table, TableVariant, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import _ from 'lodash';
 import React, { FC } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -105,7 +105,7 @@ export const Consumption: FC<ResourceCalculatorProps> = ({ flowCollector, setSam
     <Flex direction={{ default: 'column' }}>
       <FlexItem className="calculator-item">
         <Text component={TextVariants.h2}>{t('Cluster metrics')}</Text>
-        <Table>
+        <Table variant={TableVariant.compact}>
           <Thead>
             <Tr>
               <Th>{t('Bandwidth')}</Th>
@@ -132,7 +132,13 @@ export const Consumption: FC<ResourceCalculatorProps> = ({ flowCollector, setSam
       </FlexItem>
       <FlexItem className="calculator-item">
         <Text component={TextVariants.h2}>{t('Recommendations')}</Text>
-        <Table>
+        <span className="co-pre-line">
+          {t(
+            // eslint-disable-next-line max-len
+            'The example outlined in the table demonstrate a scenario that is tailored to your workload. Consider this example only as a baseline from which adjustments can be made to accommodate your needs.'
+          )}
+        </span>
+        <Table variant={TableVariant.compact}>
           <Thead>
             <Tr>
               <Th>{t('vCPU')}</Th>
@@ -157,7 +163,13 @@ export const Consumption: FC<ResourceCalculatorProps> = ({ flowCollector, setSam
       </FlexItem>
       <FlexItem>
         <Text component={TextVariants.h2}>{t('Estimation')}</Text>
-        <Table>
+        <span className="co-pre-line">
+          {t(
+            // eslint-disable-next-line max-len
+            'The estimations are based on the number of nodes in the cluster and the sampling rate. They do not take into account the number of namespaces or pods, as their impact is comparatively lower than that of nodes.\nThe estimations are calculated using a linear regression model based on data collected from various OpenShift clusters. Actual resource consumption may vary depending on your specific workload and cluster configuration.\n\nTo change the sampling rate, select a row in the table below.'
+          )}
+        </span>
+        <Table variant={TableVariant.compact}>
           <Thead>
             <Tr>
               <Th>{t('Sampling')}</Th>
