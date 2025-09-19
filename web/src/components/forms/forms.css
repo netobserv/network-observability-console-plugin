@@ -65,3 +65,7 @@
 #wizard-container {
   flex: 1; 
 }
+
+.no-padding {
+  padding: 0;
+}
