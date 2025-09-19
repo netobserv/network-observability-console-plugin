@@ -1,0 +1,92 @@
+#pageSection h3 {
+    padding-top: 0.6rem;
+    padding-bottom: 0.6rem;
+}
+
+#pageSection .icon.critical {
+    color: #b1380b;
+}
+
+#pageSection .dark .icon.critical {
+    color: #f0561d;
+}
+
+#pageSection .icon.warning {
+    color: #dca614;
+}
+
+#pageSection .dark .icon.warning {
+    color: #ffcc17;
+}
+
+#pageSection .icon.minor,
+#pageSection .dark .icon.minor {
+    color: #9ad8d8;
+}
+
+.health-gallery-drawer .pf-v5-c-drawer__body,
+.health-gallery-drawer>div {
+    height: initial;
+}
+
+.health-gallery-drawer-content {
+    padding: 1.5rem;
+}
+
+.netobserv-refresh-interval-container {
+    margin: 0 !important;
+}
+
+/*rotate animation for loading icon*/
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.card {
+    border-top: 0.2rem solid;
+    border-top-color: #6a6e73;
+}
+
+.card.dark {
+    border-top-color: #868789;
+}
+
+.card.critical {
+    border-top-color: #b1380b;
+}
+
+.card.dark.critical {
+    border-top-color: #f0561d;
+}
+
+.card.warning {
+    border-top-color: #dca614;
+}
+
+.card.dark.warning {
+    border-top-color: #ffcc17;
+}
+
+.card.minor,
+.card.dark.minor {
+    border-top-color: #9ad8d8;
+}
+
+.card-header {
+    min-height: 5rem;
+}
+
+.card-header .icon {
+    width: 1.9rem;
+    height: 1.9rem;
+}
+
+.health-gallery-drawer-content .pf-m-no-padding {
+    padding: 0;
+}
