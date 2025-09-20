@@ -34,7 +34,7 @@ COPY pkg/ pkg/
 
 RUN CGO_ENABLED=0 GOARCH=$TARGETARCH go build -ldflags "$LDFLAGS" -mod vendor -o plugin-backend cmd/plugin-backend.go
 
-FROM --platform=linux/$TARGETARCH registry.access.redhat.com/ubi9/ubi-minimal:9.6-1755695350
+FROM --platform=linux/$TARGETARCH registry.access.redhat.com/ubi9/ubi-minimal:9.6-1758184547
 
 COPY --from=web-builder /opt/app-root/web/dist ./web/dist
 COPY --from=go-builder /opt/app-root/plugin-backend ./
