@@ -23,6 +23,21 @@ export const Description: React.FC<{
   padding?: boolean;
 }> = ({ id, label, description, border, padding }) => {
   const isDarkTheme = useTheme();
+    const { t } = useTranslation('plugin__netobserv-plugin');
+
+  const formatText = React.useCallback((rawText: string) => {
+    const tokenized = rawText.replaceAll(/(`[a-zA-Z0-9_]+`)/g, "@@@$1@@@");
+    const tokens = tokenized.split('@@@');
+    return tokens.map(t => {
+      if (t === '') {
+        return null;
+      }
+      if (t.startsWith('`') && t.endsWith('`') && t.length > 2) {
+        return <pre className='backticks'>{t.substring(1, t.length - 1)}</pre>
+      }
+      return t;
+    });
+  }, []);
 
   if (!description) {
     return null;
@@ -30,7 +45,7 @@ export const Description: React.FC<{
 
   const desc = description.replaceAll('<br>', '');
   const parts = desc.split('\n');
-  let content = <>{desc}</>;
+  let content = <>{formatText(desc)}</>;
   if (parts.length > 1) {
     content = (
       <Popover
@@ -41,7 +56,7 @@ export const Description: React.FC<{
         bodyContent={<div className={`co-pre-line description`}>{content}</div>}
       >
         <Button className={`co-pre-line description`} variant="plain" style={{ paddingLeft: 0 }}>
-          {`${parts[0]}...`}
+          {formatText(parts[0])} {t('(see more...)')}
         </Button>
       </Popover>
     );
