@@ -7,6 +7,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { SilenceMatcher } from '../../api/alert';
 import { getAlerts, getSilencedAlerts } from '../../api/routes';
+import { loadConfig } from '../../utils/config';
 import { getHTTPErrorDetails } from '../../utils/errors';
 import { localStorageHealthRefreshKey, useLocalStorage } from '../../utils/local-storage-hook';
 import { usePoll } from '../../utils/poll-hook';
@@ -18,7 +19,6 @@ import { HealthGlobal } from './health-global';
 import { buildStats, isSilenced } from './health-helper';
 import { HealthSummary } from './health-summary';
 import { HealthTabTitle } from './tab-title';
-import { loadConfig } from '../../utils/config';
 
 import './health.css';
 
