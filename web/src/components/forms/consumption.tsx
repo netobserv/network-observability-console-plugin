@@ -14,11 +14,10 @@ import './forms.css';
 
 export type ResourceCalculatorProps = {
   flowCollector: K8sResourceKind | null;
-  changedSampling: number | null;
-  setChangedSampling: (sampling: number | null) => void;
+  setSampling?: (sampling: number) => void;
 };
 
-export const Consumption: FC<ResourceCalculatorProps> = ({ flowCollector, changedSampling, setChangedSampling }) => {
+export const Consumption: FC<ResourceCalculatorProps> = ({ flowCollector, setSampling }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   const [receivedPackets, rpLoaded, rpError] = usePrometheusPoll({
@@ -31,19 +30,19 @@ export const Consumption: FC<ResourceCalculatorProps> = ({ flowCollector, change
     query: `sort_desc(sum(irate(container_network_transmit_packets_total{cluster="",namespace=~".+"}[4h])) by (node,namespace,pod))`
   });
 
-  const getCRSampling = React.useCallback(() => {
-    return (flowCollector?.spec?.agent?.ebpf?.sampling as number) || 50;
+  const getCurrentSampling = React.useCallback(() => {
+    return flowCollector?.spec?.agent?.ebpf?.sampling || 50;
   }, [flowCollector?.spec?.agent?.ebpf?.sampling]);
 
   const getSamplings = React.useCallback(() => {
-    const current = getCRSampling();
-    let samplings = [1, 25, 50, 100, 125, 150];
+    const current = getCurrentSampling();
+    let samplings = [1, 25, 50, 100, 500, 1000];
     if (!samplings.includes(current)) {
       samplings.push(current);
       samplings = _.sortBy(samplings);
     }
     return samplings;
-  }, [getCRSampling]);
+  }, [getCurrentSampling]);
 
   const loadingComponent = () => <Spinner size="lg" />;
 
@@ -101,9 +100,6 @@ export const Consumption: FC<ResourceCalculatorProps> = ({ flowCollector, change
       }
     ];
   }, [labelsCount]);
-
-  const initialSampling = getCRSampling();
-  const currentSampling = changedSampling !== null ? changedSampling : initialSampling;
 
   return (
     <Flex direction={{ default: 'column' }}>
@@ -183,23 +179,17 @@ export const Consumption: FC<ResourceCalculatorProps> = ({ flowCollector, change
           </Thead>
           <Tbody>
             {getSamplings().map((sampling, i) => {
-              const isCurrent = currentSampling === sampling;
-              let extraText = '';
-              if (isCurrent) {
-                extraText = changedSampling === null ? t('(current)') : t('(new value)');
-              } else if (sampling === initialSampling) {
-                extraText = t('(previous value)');
-              }
+              const current = getCurrentSampling() === sampling;
               const estimate = getEstimation(sampling);
               return (
                 <Tr
                   key={i}
-                  isSelectable
-                  isClickable
-                  isRowSelected={isCurrent}
-                  onClick={() => setChangedSampling(sampling === initialSampling ? null : sampling)}
+                  isSelectable={setSampling !== undefined}
+                  isClickable={setSampling !== undefined}
+                  isRowSelected={current}
+                  onClick={() => setSampling && setSampling(sampling)}
                 >
-                  <Td>{`${sampling} ${extraText}`}</Td>
+                  <Td>{`${sampling} ${current ? t('(current)') : ''}`}</Td>
                   <Td>{`${estimate.cpu}vCPUs`}</Td>
                   <Td>{`${estimate.memory}GiB`}</Td>
                 </Tr>
