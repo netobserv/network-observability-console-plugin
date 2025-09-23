@@ -26,7 +26,7 @@ export const Description: React.FC<{
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   const formatText = React.useCallback((rawText: string) => {
-    const tokenized = rawText.replaceAll(/(`[a-zA-Z0-9_]+`)/g, '@@@$1@@@');
+    const tokenized = rawText.replaceAll(/(`[a-zA-Z0-9_.]+`)/g, '@@@$1@@@');
     const tokens = tokenized.split('@@@');
     return tokens.map(t => {
       if (t === '') {

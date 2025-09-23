@@ -177,8 +177,6 @@
   "The estimations are based on the number of nodes in the cluster and the sampling rate. They do not take into account the number of namespaces or pods, as their impact is comparatively lower than that of nodes.\nThe estimations are calculated using a linear regression model based on data collected from various OpenShift clusters. Actual resource consumption may vary depending on your specific workload and cluster configuration.\n\nTo change the sampling rate, select a row in the table below.": "The estimations are based on the number of nodes in the cluster and the sampling rate. They do not take into account the number of namespaces or pods, as their impact is comparatively lower than that of nodes.\nThe estimations are calculated using a linear regression model based on data collected from various OpenShift clusters. Actual resource consumption may vary depending on your specific workload and cluster configuration.\n\nTo change the sampling rate, select a row in the table below.",
   "Sampling": "Sampling",
   "(current)": "(current)",
-  "(new value)": "(new value)",
-  "(previous value)": "(previous value)",
   "There is some issue in this form view. Please select \"YAML view\" for full control.": "There is some issue in this form view. Please select \"YAML view\" for full control.",
   "Note: Some fields may not be represented in this form view. Please select \"YAML view\" for full control.": "Note: Some fields may not be represented in this form view. Please select \"YAML view\" for full control.",
   "(see more...)": "(see more...)",
