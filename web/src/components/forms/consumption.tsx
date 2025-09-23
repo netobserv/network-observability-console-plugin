@@ -14,10 +14,11 @@ import './forms.css';
 
 export type ResourceCalculatorProps = {
   flowCollector: K8sResourceKind | null;
-  setSampling?: (sampling: number) => void;
+  changedSampling: number | null;
+  setChangedSampling: (sampling: number | null) => void;
 };
 
-export const Consumption: FC<ResourceCalculatorProps> = ({ flowCollector, setSampling }) => {
+export const Consumption: FC<ResourceCalculatorProps> = ({ flowCollector, changedSampling, setChangedSampling }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   const [receivedPackets, rpLoaded, rpError] = usePrometheusPoll({
@@ -30,19 +31,19 @@ export const Consumption: FC<ResourceCalculatorProps> = ({ flowCollector, setSam
     query: `sort_desc(sum(irate(container_network_transmit_packets_total{cluster="",namespace=~".+"}[4h])) by (node,namespace,pod))`
   });
 
-  const getCurrentSampling = React.useCallback(() => {
-    return flowCollector?.spec?.agent?.ebpf?.sampling || 50;
+  const getCRSampling = React.useCallback(() => {
+    return (flowCollector?.spec?.agent?.ebpf?.sampling as number) || 50;
   }, [flowCollector?.spec?.agent?.ebpf?.sampling]);
 
   const getSamplings = React.useCallback(() => {
-    const current = getCurrentSampling();
+    const current = getCRSampling();
     let samplings = [1, 25, 50, 100, 125, 150];
     if (!samplings.includes(current)) {
       samplings.push(current);
       samplings = _.sortBy(samplings);
     }
     return samplings;
-  }, [getCurrentSampling]);
+  }, [getCRSampling]);
 
   const loadingComponent = () => <Spinner size="lg" />;
 
@@ -101,6 +102,9 @@ export const Consumption: FC<ResourceCalculatorProps> = ({ flowCollector, setSam
     ];
   }, [labelsCount]);
 
+  const initialSampling = getCRSampling();
+  const currentSampling = changedSampling !== null ? changedSampling : initialSampling;
+
   return (
     <Flex direction={{ default: 'column' }}>
       <FlexItem className="calculator-item">
@@ -135,7 +139,7 @@ export const Consumption: FC<ResourceCalculatorProps> = ({ flowCollector, setSam
         <span className="co-pre-line">
           {t(
             // eslint-disable-next-line max-len
-            'The example outlined in the table demonstrate a scenario that is tailored to your workload. Consider this example only as a baseline from which adjustments can be made to accommodate your needs.'
+            'The example outlined in the table demonstrates a scenario that is tailored to your workload. Consider this example only as a baseline from which adjustments can be made to accommodate your needs.'
           )}
         </span>
         <Table variant={TableVariant.compact}>
@@ -179,17 +183,23 @@ export const Consumption: FC<ResourceCalculatorProps> = ({ flowCollector, setSam
           </Thead>
           <Tbody>
             {getSamplings().map((sampling, i) => {
-              const current = getCurrentSampling() === sampling;
+              const isCurrent = currentSampling === sampling;
+              let extraText = '';
+              if (isCurrent) {
+                extraText = changedSampling === null ? t('(current)') : t('(new value)');
+              } else if (sampling === initialSampling) {
+                extraText = t('(previous value)');
+              }
               const estimate = getEstimation(sampling);
               return (
                 <Tr
                   key={i}
-                  isSelectable={setSampling !== undefined}
-                  isClickable={setSampling !== undefined}
-                  isRowSelected={current}
-                  onClick={() => setSampling && setSampling(sampling)}
+                  isSelectable
+                  isClickable
+                  isRowSelected={isCurrent}
+                  onClick={() => setChangedSampling(sampling === initialSampling ? null : sampling)}
                 >
-                  <Td>{`${sampling} ${current ? t('(current)') : ''}`}</Td>
+                  <Td>{`${sampling} ${extraText}`}</Td>
                   <Td>{`${estimate.cpu}vCPUs`}</Td>
                   <Td>{`${estimate.memory}GiB`}</Td>
                 </Tr>

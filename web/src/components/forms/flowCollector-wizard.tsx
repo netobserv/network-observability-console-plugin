@@ -34,6 +34,7 @@ export const FlowCollectorWizard: FC<FlowCollectorWizardProps> = props => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [schema, setSchema] = React.useState<RJSFSchema | null>(null);
   const [data, setData] = React.useState<any>(null);
+  const [changedSampling, setChangedSampling] = React.useState<number | null>(null);
   const [paths, setPaths] = React.useState<string[]>(defaultPaths);
   const params = useParams();
 
@@ -85,17 +86,6 @@ export const FlowCollectorWizard: FC<FlowCollectorWizardProps> = props => {
     }
   }, []);
 
-  const setSampling = React.useCallback(
-    (sampling: number) => {
-      if (!data) {
-        return;
-      }
-      data.spec.agent.ebpf.sampling = sampling;
-      setData({ ...data });
-    },
-    [data]
-  );
-
   return (
     <DynamicLoader>
       <ResourceWatcher
@@ -124,6 +114,12 @@ export const FlowCollectorWizard: FC<FlowCollectorWizardProps> = props => {
               // slightly modify default example when creating a new resource
               if (params.name !== 'cluster') {
                 const updatedData = _.cloneDeep(ctx.data) as any;
+                if (!updatedData.spec) {
+                  updatedData.spec = {};
+                }
+                if (!updatedData.spec.loki) {
+                  updatedData.spec.loki = {};
+                }
                 updatedData.spec.loki.mode = 'LokiStack'; // default to lokistack
                 setData(updatedData);
               } else {
@@ -143,12 +139,12 @@ export const FlowCollectorWizard: FC<FlowCollectorWizardProps> = props => {
                       <span className="co-pre-line">
                         {t(
                           // eslint-disable-next-line max-len
-                          'Network Observability Operator deploys a monitoring pipeline that consists in:\n - an eBPF agent, that generates network flows from captured packets\n - flowlogs-pipeline, a component that collects, enriches and exports these flows\n - a Console plugin for flows visualization with powerful filtering options, a topology representation and more\n\nFlow data is then available in multiple ways, each optional:\n - As Prometheus metrics\n - As raw flow logs stored in Grafana Loki\n - As raw flow logs exported to a collector\n\nThe FlowCollector resource is used to configure the operator and its managed components.'
+                          'The FlowCollector resource is used to configure the Network Observability operator and its managed components. When it is created, network flows start being collected.'
                         )}
                         <br /> <br />
                         {t(
                           // eslint-disable-next-line max-len
-                          'This wizard is a helper to create a first FlowCollector resource. It does not cover all the available configuration options, but only the most common ones.\nFor advanced configuration, please use the'
+                          'This wizard is a helper to create a first FlowCollector resource. It does not cover all the available configuration options, but only the most common ones.\nFor advanced configuration, please use YAML or the'
                         )}{' '}
                         <Button
                           id="open-flow-collector-form"
@@ -159,7 +155,10 @@ export const FlowCollectorWizard: FC<FlowCollectorWizardProps> = props => {
                         >
                           {t('FlowCollector form')}
                         </Button>
-                        {'.'}
+                        {t(
+                          // eslint-disable-next-line max-len
+                          ', which includes more options such as:\n- Filtering options\n- Configuring custom exporters\n- Custom labels based on IP\n- Pod identification for secondary networks\n- Performance fine-tuning\nYou can always edit a FlowCollector later when you start with the simplified configuration.'
+                        )}
                         <br /> <br />
                         {t('Operator configuration')}
                       </span>
@@ -176,7 +175,15 @@ export const FlowCollectorWizard: FC<FlowCollectorWizardProps> = props => {
                       id="consumption"
                       footer={
                         <WizardFooterWrapper>
-                          <Button variant="primary" onClick={() => ctx.onSubmit(data)}>
+                          <Button
+                            variant="primary"
+                            onClick={() => {
+                              if (changedSampling !== null) {
+                                data.spec.agent.ebpf.sampling = changedSampling;
+                              }
+                              ctx.onSubmit(data);
+                            }}
+                          >
                             {t('Submit')}
                           </Button>
                           <Button variant="link" onClick={() => navigate('/')}>
@@ -185,7 +192,11 @@ export const FlowCollectorWizard: FC<FlowCollectorWizardProps> = props => {
                         </WizardFooterWrapper>
                       }
                     >
-                      <Consumption flowCollector={data} setSampling={setSampling} />
+                      <Consumption
+                        flowCollector={data}
+                        changedSampling={changedSampling}
+                        setChangedSampling={setChangedSampling}
+                      />
                       <>{!_.isEmpty(ctx.errors) && <ErrorTemplate errors={ctx.errors} />}</>
                     </WizardStep>
                   </Wizard>
