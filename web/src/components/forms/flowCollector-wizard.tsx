@@ -34,7 +34,6 @@ export const FlowCollectorWizard: FC<FlowCollectorWizardProps> = props => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [schema, setSchema] = React.useState<RJSFSchema | null>(null);
   const [data, setData] = React.useState<any>(null);
-  const [changedSampling, setChangedSampling] = React.useState<number | null>(null);
   const [paths, setPaths] = React.useState<string[]>(defaultPaths);
   const params = useParams();
 
@@ -71,7 +70,6 @@ export const FlowCollectorWizard: FC<FlowCollectorWizardProps> = props => {
           'spec.kafka.address',
           'spec.kafka.topic',
           'spec.kafka.tls',
-          'spec.agent.ebpf.sampling',
           'spec.agent.ebpf.privileged',
           'spec.agent.ebpf.features',
           'spec.processor.clusterName',
@@ -85,6 +83,17 @@ export const FlowCollectorWizard: FC<FlowCollectorWizardProps> = props => {
         setPaths([]);
     }
   }, []);
+
+  const setSampling = React.useCallback(
+    (sampling: number) => {
+      if (!data) {
+        return;
+      }
+      data.spec.agent.ebpf.sampling = sampling;
+      setData({ ...data });
+    },
+    [data]
+  );
 
   return (
     <DynamicLoader>
@@ -177,12 +186,7 @@ export const FlowCollectorWizard: FC<FlowCollectorWizardProps> = props => {
                         <WizardFooterWrapper>
                           <Button
                             variant="primary"
-                            onClick={() => {
-                              if (changedSampling !== null) {
-                                data.spec.agent.ebpf.sampling = changedSampling;
-                              }
-                              ctx.onSubmit(data);
-                            }}
+                            onClick={() => ctx.onSubmit(data)}
                           >
                             {t('Submit')}
                           </Button>
@@ -192,11 +196,7 @@ export const FlowCollectorWizard: FC<FlowCollectorWizardProps> = props => {
                         </WizardFooterWrapper>
                       }
                     >
-                      <Consumption
-                        flowCollector={data}
-                        changedSampling={changedSampling}
-                        setChangedSampling={setChangedSampling}
-                      />
+                      <Consumption flowCollector={data} setSampling={setSampling} />
                       <>{!_.isEmpty(ctx.errors) && <ErrorTemplate errors={ctx.errors} />}</>
                     </WizardStep>
                   </Wizard>
