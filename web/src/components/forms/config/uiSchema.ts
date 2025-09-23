@@ -1661,7 +1661,17 @@ export const FlowCollectorUISchema: UiSchema = {
             },
             'ui:order': ['enable', 'caCert', 'userCert', 'insecureSkipVerify', '*']
           },
-          'ui:order': ['targetHost', 'targetPort', 'protocol', 'fieldsMapping', 'headers', 'logs', 'metrics', 'tls', '*']
+          'ui:order': [
+            'targetHost',
+            'targetPort',
+            'protocol',
+            'fieldsMapping',
+            'headers',
+            'logs',
+            'metrics',
+            'tls',
+            '*'
+          ]
         },
         'ui:order': ['type', 'ipfix', 'kafka', 'openTelemetry', '*']
       }

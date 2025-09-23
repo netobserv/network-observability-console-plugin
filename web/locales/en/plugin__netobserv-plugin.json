@@ -179,6 +179,7 @@
   "(current)": "(current)",
   "There is some issue in this form view. Please select \"YAML view\" for full control.": "There is some issue in this form view. Please select \"YAML view\" for full control.",
   "Note: Some fields may not be represented in this form view. Please select \"YAML view\" for full control.": "Note: Some fields may not be represented in this form view. Please select \"YAML view\" for full control.",
+  "(see more...)": "(see more...)",
   "Remove {{singularLabel}}": "Remove {{singularLabel}}",
   "Add {{singularLabel}}": "Add {{singularLabel}}",
   "Error": "Error",
