@@ -23,17 +23,17 @@ export const Description: React.FC<{
   padding?: boolean;
 }> = ({ id, label, description, border, padding }) => {
   const isDarkTheme = useTheme();
-    const { t } = useTranslation('plugin__netobserv-plugin');
+  const { t } = useTranslation('plugin__netobserv-plugin');
 
   const formatText = React.useCallback((rawText: string) => {
-    const tokenized = rawText.replaceAll(/(`[a-zA-Z0-9_]+`)/g, "@@@$1@@@");
+    const tokenized = rawText.replaceAll(/(`[a-zA-Z0-9_]+`)/g, '@@@$1@@@');
     const tokens = tokenized.split('@@@');
     return tokens.map(t => {
       if (t === '') {
         return null;
       }
       if (t.startsWith('`') && t.endsWith('`') && t.length > 2) {
-        return <pre className='backticks'>{t.substring(1, t.length - 1)}</pre>
+        return <pre className="backticks">{t.substring(1, t.length - 1)}</pre>;
       }
       return t;
     });
