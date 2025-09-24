@@ -164,13 +164,11 @@ Cypress.Commands.add('changeTimeRange', (name, topology) => {
   cy.checkContent(topology);
 });
 
-Cypress.Commands.add('changeMetricFunction', (name) => {
+Cypress.Commands.add('clickShowDuplicates', () => {
   cy.showAdvancedOptions();
   cy.showDisplayOptions();
-
-  cy.get('#metricFunction-dropdown').click();
-  cy.get('.pf-v5-c-menu__content').contains(name).click();
-  cy.get('[data-layer-id="default"]').children().its('length').should('be.gte', 5);
+  cy.get('#table-display-dropdown').contains('Show duplicates').click();
+  cy.checkContent();
 });
 
 Cypress.Commands.add('changeMetricType', (name) => {
@@ -212,6 +210,7 @@ declare global {
       changeMetricFunction(name: string): Chainable<Element>
       changeMetricType(name: string): Chainable<Element>
       checkRecordField(field: string, name: string, values: string[])
+      clickShowDuplicates()
     }
   }
 }

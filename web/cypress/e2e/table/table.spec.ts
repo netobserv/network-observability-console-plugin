@@ -25,10 +25,12 @@ describe('netflow-table', () => {
 
     cy.addFilter('src_namespace', c.namespace);
     cy.addFilter('src_name', c.pod);
-    cy.changeQueryOption('Show duplicates');
     cy.changeQueryOption('1000');
+    cy.clickShowDuplicates();
     cy.changeTimeRange('Last 1 day');
   });
+
+
 
   it('manage columns', () => {
     //first open modal
