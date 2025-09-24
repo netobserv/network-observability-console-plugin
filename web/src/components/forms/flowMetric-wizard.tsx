@@ -59,13 +59,10 @@ export const FlowMetricWizard: FC<FlowMetricWizardProps> = props => {
         setPaths(defaultPaths);
         break;
       case 'metric':
-        setPaths(['spec.metricName', 'spec.type', 'spec.buckets', 'spec.valueField', 'spec.divider', 'spec.labels']);
+        setPaths(['spec.metricName', 'spec.type', 'spec.valueField', 'spec.labels', 'spec.buckets']);
         break;
       case 'data':
-        setPaths(['spec.flatten', 'spec.remap', 'spec.direction', 'spec.filters']);
-        break;
-      case 'charts':
-        setPaths(['spec.charts']);
+        setPaths(['spec.remap', 'spec.direction', 'spec.filters']);
         break;
       default:
         setPaths([]);
@@ -83,6 +80,7 @@ export const FlowMetricWizard: FC<FlowMetricWizardProps> = props => {
         onSuccess={() => {
           back();
         }}
+        ignoreCSVExample={true}
       >
         <Consumer>
           {ctx => {
@@ -111,7 +109,7 @@ export const FlowMetricWizard: FC<FlowMetricWizardProps> = props => {
                       <span className="co-pre-line">
                         {t(
                           // eslint-disable-next-line max-len
-                          'You can create custom metrics out of the flowlogs data using the FlowMetric API. In every flowlogs data that is collected, there are a number of fields labeled per log, such as source name and destination name. These fields can be leveraged as Prometheus labels to enable the customization of cluster information on your dashboard.\nThis setup will guide you on the common aspects of the FlowMetric configuration.'
+                          'You can create custom metrics out of the network flows using the FlowMetric API. A FlowCollector resource must be created as well in order to produce the flows. Each flow consists in a set of fields with values, such as source name and destination name. These fields can be leveraged as Prometheus labels to enable customized metrics and dashboards.\nThis setup will guide you through the common aspects of the FlowMetric configuration.'
                         )}
                         <br /> <br />
                         {t('General configuration')}
@@ -122,9 +120,6 @@ export const FlowMetricWizard: FC<FlowMetricWizardProps> = props => {
                       {form(ctx.errors)}
                     </WizardStep>
                     <WizardStep name={t('Data')} id="data">
-                      {form(ctx.errors)}
-                    </WizardStep>
-                    <WizardStep name={t('Charts')} id="charts">
                       {form(ctx.errors)}
                     </WizardStep>
                     <WizardStep
