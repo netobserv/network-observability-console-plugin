@@ -28,6 +28,7 @@ export type ResourceWatcherProps = {
   children: JSX.Element;
   skipErrors?: boolean;
   skipCRError?: boolean;
+  ignoreCSVExample?: boolean;
 };
 
 export type ResourceWatcherContext = {
@@ -69,7 +70,8 @@ export const ResourceWatcher: FC<ResourceWatcherProps> = ({
   onSuccess,
   children,
   skipErrors,
-  skipCRError
+  skipCRError,
+  ignoreCSVExample
 }) => {
   if (!group || !version || !kind) {
     throw new Error('ResourceForm error: apiVersion and kind must be provided');
@@ -132,14 +134,14 @@ export const ResourceWatcher: FC<ResourceWatcherProps> = ({
 
   const data = cr
     ? { apiVersion: `${group}/${version}`, kind, ...cr }
-    : matchingCSVs?.items?.length
+    : !ignoreCSVExample && matchingCSVs?.items?.length
     ? exampleForModel(
         matchingCSVs.items.find(csv => csv.spec.customresourcedefinitions?.owned?.some(crd => crd.kind === kind)),
         group,
         version,
         kind
       )
-    : {};
+    : { apiVersion: `${group}/${version}`, kind };
   const schema = crd?.spec?.versions?.find(v => v.name === version)?.schema?.openAPIV3Schema || null;
   // force name and namespace to be present in the form when namespaced
   if (crd?.spec?.scope === 'Namespaced') {
