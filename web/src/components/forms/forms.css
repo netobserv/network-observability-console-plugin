@@ -70,6 +70,6 @@
   padding: 0;
 }
 
-#estimation-table tr.selected td {
+#estimation-table tr.pf-m-selected td {
   font-weight: 700;
 }
