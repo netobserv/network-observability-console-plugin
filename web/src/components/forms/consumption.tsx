@@ -4,8 +4,8 @@ import {
   PrometheusResponse,
   usePrometheusPoll
 } from '@openshift-console/dynamic-plugin-sdk';
-import { Flex, FlexItem, Spinner, Text, TextVariants } from '@patternfly/react-core';
-import { WarningTriangleIcon } from '@patternfly/react-icons';
+import { Flex, FlexItem, Slider, Spinner, Text, TextVariants } from '@patternfly/react-core';
+import { InfoAltIcon, WarningTriangleIcon } from '@patternfly/react-icons';
 import { Table, TableVariant, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import _ from 'lodash';
 import React, { FC } from 'react';
@@ -14,7 +14,7 @@ import './forms.css';
 
 export type ResourceCalculatorProps = {
   flowCollector: K8sResourceKind | null;
-  setSampling?: (sampling: number) => void;
+  setSampling: (sampling: number) => void;
 };
 
 export const Consumption: FC<ResourceCalculatorProps> = ({ flowCollector, setSampling }) => {
@@ -31,7 +31,7 @@ export const Consumption: FC<ResourceCalculatorProps> = ({ flowCollector, setSam
   });
 
   const getCurrentSampling = React.useCallback(() => {
-    return flowCollector?.spec?.agent?.ebpf?.sampling || 50;
+    return (flowCollector?.spec?.agent?.ebpf?.sampling as number) || 50;
   }, [flowCollector?.spec?.agent?.ebpf?.sampling]);
 
   const getSamplings = React.useCallback(() => {
@@ -43,6 +43,15 @@ export const Consumption: FC<ResourceCalculatorProps> = ({ flowCollector, setSam
     }
     return samplings;
   }, [getCurrentSampling]);
+
+  const getSamplingIndex = React.useCallback(() => {
+    const current = getCurrentSampling();
+    const idx = getSamplings().indexOf(current);
+    if (idx < 0) {
+      return 0;
+    }
+    return idx;
+  }, [getSamplings, getCurrentSampling]);
 
   const loadingComponent = () => <Spinner size="lg" />;
 
@@ -162,17 +171,40 @@ export const Consumption: FC<ResourceCalculatorProps> = ({ flowCollector, setSam
         </Table>
       </FlexItem>
       <FlexItem>
-        <Text component={TextVariants.h2}>{t('Estimation')}</Text>
+        <Text component={TextVariants.h2}>{t('Performance tuning and estimation')}</Text>
         <span className="co-pre-line">
           {t(
             // eslint-disable-next-line max-len
-            'The estimations are based on the number of nodes in the cluster and the sampling rate. They do not take into account the number of namespaces or pods, as their impact is comparatively lower than that of nodes.\nThe estimations are calculated using a linear regression model based on data collected from various OpenShift clusters. Actual resource consumption may vary depending on your specific workload and cluster configuration.\n\nTo change the sampling rate, select a row in the table below.'
+            'The sampling interval is one of the main settings used to balance performance and accuracy. The lower the interval, the higher the accuracy.'
+          )}
+          <br />
+          {t(
+            // eslint-disable-next-line max-len
+            'Use the slider below to configure the desired sampling interval.'
           )}
         </span>
-        <Table variant={TableVariant.compact}>
+        <Slider
+          value={getSamplingIndex()}
+          isInputVisible
+          inputValue={getCurrentSampling()}
+          customSteps={getSamplings().map((s, i) => ({ value: i, label: String(s) }))}
+          max={getSamplings().length - 1}
+          onChange={(_, value, inputValue, setLocalInputValue) => {
+            if (inputValue !== undefined) {
+              const newValue = Math.min(1000, Math.max(1, inputValue));
+              setSampling(newValue);
+              if (setLocalInputValue && newValue !== inputValue) {
+                setLocalInputValue(newValue);
+              }
+            } else {
+              setSampling(getSamplings()[value]);
+            }
+          }}
+        />
+        <Table id={'estimation-table'} variant={TableVariant.compact}>
           <Thead>
             <Tr>
-              <Th>{t('Sampling')}</Th>
+              <Th>{t('Sampling interval')}</Th>
               <Th>{t('vCPU')}</Th>
               <Th>{t('Memory')}</Th>
             </Tr>
@@ -188,8 +220,9 @@ export const Consumption: FC<ResourceCalculatorProps> = ({ flowCollector, setSam
                   isClickable={setSampling !== undefined}
                   isRowSelected={current}
                   onClick={() => setSampling && setSampling(sampling)}
+                  className={current ? 'selected' : ''}
                 >
-                  <Td>{`${sampling} ${current ? t('(current)') : ''}`}</Td>
+                  <Td>{sampling}</Td>
                   <Td>{`${estimate.cpu}vCPUs`}</Td>
                   <Td>{`${estimate.memory}GiB`}</Td>
                 </Tr>
@@ -197,6 +230,13 @@ export const Consumption: FC<ResourceCalculatorProps> = ({ flowCollector, setSam
             })}
           </Tbody>
         </Table>
+        <span>
+          <InfoAltIcon />{' '}
+          {t(
+            // eslint-disable-next-line max-len
+            'The estimations are based on the number of nodes in the cluster and the sampling rate. They do not take into account the number of namespaces or pods, as their impact is comparatively lower than that of nodes.\nThey are calculated using a linear regression model based on data collected from various OpenShift clusters. Actual resource consumption may vary depending on your specific workload and cluster configuration.'
+          )}
+        </span>
       </FlexItem>
     </Flex>
   );
