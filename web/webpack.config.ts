@@ -107,6 +107,12 @@ module.exports = {
           }
         },
         {
+          "type": "console.flag",
+          "properties": {
+            "handler": { "$codeRef": "netflowTab.featureFlagHandler" }
+          }
+        },
+        {
           type: "console.navigation/href",
           properties: {
             "id": "network-health-link",
@@ -172,7 +178,8 @@ module.exports = {
               name: "%plugin__netobserv-plugin~Network Traffic%",
               "href": "netflow"
             }
-          }
+          },
+          "flags": { "required": ["NETOBSERV_LOKI_ENABLED"] }
         },
         {
           type: "console.tab/horizontalNav",
@@ -189,7 +196,8 @@ module.exports = {
               name: "%plugin__netobserv-plugin~Network Traffic%",
               "href": "netflow"
             }
-          }
+          },
+          "flags": { "required": ["NETOBSERV_LOKI_ENABLED"] }
         },
         {
           type: "console.tab/horizontalNav",
@@ -206,7 +214,8 @@ module.exports = {
               name: "%plugin__netobserv-plugin~Network Traffic%",
               "href": "netflow"
             }
-          }
+          },
+          "flags": { "required": ["NETOBSERV_LOKI_ENABLED"] }
         },
         {
           type: "console.tab/horizontalNav",
@@ -223,7 +232,8 @@ module.exports = {
               name: "%plugin__netobserv-plugin~Network Traffic%",
               "href": "netflow"
             }
-          }
+          },
+          "flags": { "required": ["NETOBSERV_LOKI_ENABLED"] }
         },
         {
           type: "console.tab/horizontalNav",
@@ -240,7 +250,8 @@ module.exports = {
               name: "%plugin__netobserv-plugin~Network Traffic%",
               "href": "netflow"
             }
-          }
+          },
+          "flags": { "required": ["NETOBSERV_LOKI_ENABLED"] }
         },
         {
           type: "console.tab/horizontalNav",
@@ -257,7 +268,8 @@ module.exports = {
               name: "%plugin__netobserv-plugin~Network Traffic%",
               "href": "netflow"
             }
-          }
+          },
+          "flags": { "required": ["NETOBSERV_LOKI_ENABLED"] }
         },
         {
           type: "console.tab/horizontalNav",
@@ -274,7 +286,8 @@ module.exports = {
               name: "%plugin__netobserv-plugin~Network Traffic%",
               "href": "netflow"
             }
-          }
+          },
+          "flags": { "required": ["NETOBSERV_LOKI_ENABLED"] }
         },
         {
           type: "console.tab/horizontalNav",
@@ -291,7 +304,8 @@ module.exports = {
               name: "%plugin__netobserv-plugin~Network Traffic%",
               "href": "netflow"
             }
-          }
+          },
+          "flags": { "required": ["NETOBSERV_LOKI_ENABLED"] }
         },
         {
           type: "console.tab/horizontalNav",
@@ -308,7 +322,8 @@ module.exports = {
               name: "%plugin__netobserv-plugin~Network Traffic%",
               "href": "netflow"
             }
-          }
+          },
+          "flags": { "required": ["NETOBSERV_LOKI_ENABLED"] }
         },
         {
           type: "console.tab/horizontalNav",
@@ -325,7 +340,8 @@ module.exports = {
               name: "%plugin__netobserv-plugin~Network Traffic%",
               "href": "netflow"
             }
-          }
+          },
+          "flags": { "required": ["NETOBSERV_LOKI_ENABLED"] }
         },
         {
           type: "console.tab/horizontalNav",
@@ -342,7 +358,8 @@ module.exports = {
               name: "%plugin__netobserv-plugin~Network Traffic%",
               "href": "netflow"
             }
-          }
+          },
+          "flags": { "required": ["NETOBSERV_LOKI_ENABLED"] }
         },
         {
           type: "console.tab/horizontalNav",
@@ -359,7 +376,8 @@ module.exports = {
               name: "%plugin__netobserv-plugin~Network Traffic%",
               "href": "netflow"
             }
-          }
+          },
+          "flags": { "required": ["NETOBSERV_LOKI_ENABLED"] }
         },
         {
           type: "console.tab/horizontalNav",
@@ -376,7 +394,8 @@ module.exports = {
               name: "%plugin__netobserv-plugin~Network Traffic%",
               "href": "netflow"
             }
-          }
+          },
+          "flags": { "required": ["NETOBSERV_LOKI_ENABLED"] }
         },
         {
           type: "console.tab/horizontalNav",
@@ -393,7 +412,8 @@ module.exports = {
               name: "%plugin__netobserv-plugin~Network Traffic%",
               "href": "netflow"
             }
-          }
+          },
+          "flags": { "required": ["NETOBSERV_LOKI_ENABLED"] }
         },
         {
           type: "console.tab",
