@@ -155,6 +155,7 @@ export const ResourceWatcher: FC<ResourceWatcherProps> = ({
         name: { type: 'string' },
         namespace: { type: 'string' }
       };
+      (schema.properties.metadata as any).required = ['name', 'namespace'];
     }
   }
   return (
