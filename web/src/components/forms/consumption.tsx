@@ -178,27 +178,14 @@ export const Consumption: FC<ResourceCalculatorProps> = ({ flowCollector, setSam
             'The sampling interval is one of the main settings used to balance performance and accuracy. The lower the interval, the higher the accuracy.'
           )}
           <br />
-          {t(
-            // eslint-disable-next-line max-len
-            'Use the slider below to configure the desired sampling interval.'
-          )}
+          {t('Use the slider below to configure the desired sampling interval.')}
         </span>
         <Slider
           value={getSamplingIndex()}
-          isInputVisible
-          inputValue={getCurrentSampling()}
           customSteps={getSamplings().map((s, i) => ({ value: i, label: String(s) }))}
           max={getSamplings().length - 1}
-          onChange={(_, value, inputValue, setLocalInputValue) => {
-            if (inputValue !== undefined) {
-              const newValue = Math.min(1000, Math.max(1, inputValue));
-              setSampling(newValue);
-              if (setLocalInputValue && newValue !== inputValue) {
-                setLocalInputValue(newValue);
-              }
-            } else {
-              setSampling(getSamplings()[value]);
-            }
+          onChange={(_, value) => {
+            setSampling(getSamplings()[value]);
           }}
         />
         <Table id={'estimation-table'} variant={TableVariant.compact}>
@@ -220,7 +207,6 @@ export const Consumption: FC<ResourceCalculatorProps> = ({ flowCollector, setSam
                   isClickable={setSampling !== undefined}
                   isRowSelected={current}
                   onClick={() => setSampling && setSampling(sampling)}
-                  className={current ? 'selected' : ''}
                 >
                   <Td>{sampling}</Td>
                   <Td>{`${estimate.cpu}vCPUs`}</Td>
