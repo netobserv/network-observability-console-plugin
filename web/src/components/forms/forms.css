@@ -69,3 +69,7 @@
 .no-padding {
   padding: 0;
 }
+
+#estimation-table tr.selected td {
+  font-weight: 700;
+}
