@@ -65,3 +65,11 @@
 #wizard-container {
   flex: 1; 
 }
+
+.no-padding {
+  padding: 0;
+}
+
+#estimation-table tr.pf-m-selected td {
+  font-weight: 700;
+}
