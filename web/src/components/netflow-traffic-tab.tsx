@@ -1,4 +1,4 @@
-import { K8sResourceCommon } from '@openshift-console/dynamic-plugin-sdk';
+import { FeatureFlagHandler, K8sResourceCommon, SetFeatureFlag } from '@openshift-console/dynamic-plugin-sdk';
 import {
   Bullseye,
   EmptyState,
@@ -228,6 +228,15 @@ export const NetflowTrafficTab: React.FC<NetflowTrafficTabProps> = ({ match, obj
       </PageSection>
     );
   }
+};
+
+export const featureFlagHandler: FeatureFlagHandler = (setFeatureFlag: SetFeatureFlag) => {
+  loadConfig().then(({ config }) => {
+    if (config) {
+      const lokiEnabled = config.dataSources.some(ds => ds === 'loki');
+      setFeatureFlag('NETOBSERV_LOKI_ENABLED', lokiEnabled);
+    }
+  });
 };
 
 export default NetflowTrafficTab;
