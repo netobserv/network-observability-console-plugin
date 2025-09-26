@@ -81,6 +81,20 @@ export const ElementFields: React.FC<ElementFieldsProps> = ({
       forceLabel = forceAsText = undefined;
     }
   });
+  if (data.peer.subnetLabel) {
+    fragments.push(
+      <ElementField
+        id={id + '-subnet-label'}
+        key={id + '-subnet-label'}
+        label={t('Subnet label')}
+        activeFilters={activeFilters}
+        filterType={'resource'}
+        peer={createPeer({ subnetLabel: data.peer.subnetLabel })}
+        setFilters={setFilters}
+        filterDefinitions={filterDefinitions}
+      />
+    );
+  }
   if (data.peer.addr) {
     fragments.push(
       <ElementField
