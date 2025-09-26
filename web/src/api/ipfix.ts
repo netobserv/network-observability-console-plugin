@@ -53,6 +53,8 @@ export interface Flow {
   DstK8S_Zone?: string;
   SrcK8S_NetworkName?: string;
   DstK8S_NetworkName?: string;
+  SrcSubnetLabel?: string;
+  DstSubnetLabel?: string;
   K8S_ClusterName?: string;
   Proto?: number;
   Interfaces?: string[];
