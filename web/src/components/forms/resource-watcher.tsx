@@ -147,7 +147,8 @@ export const ResourceWatcher: FC<ResourceWatcherProps> = ({
   if (crd?.spec?.scope === 'Namespaced') {
     data.metadata = {
       ...data.metadata,
-      namespace: namespace || 'default',
+      namespace: data.metadata?.namespace || 'netobserv', // for now, keep namespace if exists, or use netobserv by default
+      // namespace: namespace || 'netobserv', TODO: uncomment alongside with https://issues.redhat.com/browse/NETOBSERV-1690
       name: name
     };
     if (schema?.properties?.metadata) {
