@@ -28,10 +28,10 @@ import {
 import useDetailsLevel from '@patternfly/react-topology/dist/esm/hooks/useDetailsLevel';
 import * as _ from 'lodash';
 import * as React from 'react';
+import { TopologyMetricPeer } from '../../../../../api/loki';
 import { Decorated, NodeData } from '../../../../../model/topology';
 import DefaultNode from '../components/node';
 import { NodeDecorators } from './styleDecorators';
-import { TopologyMetricPeer } from '../../../../../api/loki';
 
 export enum DataTypes {
   Default
@@ -74,7 +74,7 @@ const getTypeIcon = (peer: TopologyMetricPeer): React.ComponentClass<any, any> =
     case 'StatefulSet':
     case 'Job':
       return CubesIcon;
-    }
+  }
   if (peer.addr || peer.subnetLabel) {
     return ExternalLinkAltIcon;
   }
