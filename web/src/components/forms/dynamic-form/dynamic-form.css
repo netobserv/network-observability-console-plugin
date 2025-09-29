@@ -41,3 +41,11 @@
 .checkboxes-container {
   padding: 1rem;
 }
+
+pre.backticks {
+  display: inline;
+}
+
+#open-flow-collector-form, #open-flow-metrics-form {
+  padding: 0;
+}

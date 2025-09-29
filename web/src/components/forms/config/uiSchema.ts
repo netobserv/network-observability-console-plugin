@@ -45,16 +45,16 @@ export const FlowCollectorUISchema: UiSchema = {
         },
         caCert: {
           'ui:title': 'CA certificate',
-          'ui:order': ['certFile', 'certKey', 'name', 'namespace', 'type']
+          'ui:order': ['certFile', 'certKey', 'name', 'namespace', 'type', '*']
         },
         userCert: {
           'ui:title': 'User certificate when using mTLS',
-          'ui:order': ['certFile', 'certKey', 'name', 'namespace', 'type']
+          'ui:order': ['certFile', 'certKey', 'name', 'namespace', 'type', '*']
         },
         insecureSkipVerify: {
           'ui:title': 'Insecure skip verify'
         },
-        'ui:order': ['enable', 'caCert', 'userCert', 'insecureSkipVerify']
+        'ui:order': ['enable', 'caCert', 'userCert', 'insecureSkipVerify', '*']
       },
       sasl: {
         'ui:title': 'SASL',
@@ -63,15 +63,15 @@ export const FlowCollectorUISchema: UiSchema = {
         },
         clientIDReference: {
           'ui:title': 'Client ID reference',
-          'ui:order': ['file', 'name', 'namespace', 'type']
+          'ui:order': ['file', 'name', 'namespace', 'type', '*']
         },
         clientSecretReference: {
           'ui:title': 'Client secret reference',
-          'ui:order': ['file', 'name', 'namespace', 'type']
+          'ui:order': ['file', 'name', 'namespace', 'type', '*']
         },
-        'ui:order': ['type', 'clientIDReference', 'clientSecretReference']
+        'ui:order': ['type', 'clientIDReference', 'clientSecretReference', '*']
       },
-      'ui:order': ['address', 'topic', 'tls', 'sasl']
+      'ui:order': ['address', 'topic', 'tls', 'sasl', '*']
     },
     agent: {
       'ui:title': 'Agent configuration',
@@ -213,18 +213,18 @@ export const FlowCollectorUISchema: UiSchema = {
             port: {
               'ui:title': 'Port'
             },
-            'ui:order': ['port', 'tls'],
+            'ui:order': ['port', 'tls', '*'],
             tls: {
-              'ui:order': ['type', 'insecureSkipVerify', 'provided', 'providedCaFile'],
+              'ui:order': ['type', 'insecureSkipVerify', 'provided', 'providedCaFile', '*'],
               provided: {
-                'ui:order': ['certFile', 'certKey', 'name', 'namespace', 'type']
+                'ui:order': ['certFile', 'certKey', 'name', 'namespace', 'type', '*']
               },
               providedCaFile: {
-                'ui:order': ['file', 'name', 'namespace', 'type']
+                'ui:order': ['file', 'name', 'namespace', 'type', '*']
               }
             }
           },
-          'ui:order': ['enable', 'disableAlerts', 'server']
+          'ui:order': ['enable', 'disableAlerts', 'server', '*']
         },
         cacheMaxFlows: {
           'ui:title': 'Cache max flows'
@@ -243,21 +243,21 @@ export const FlowCollectorUISchema: UiSchema = {
         resources: {
           'ui:title': 'Resource Requirements',
           'ui:widget': 'hidden',
-          'ui:order': ['claims', 'limits', 'requests'],
+          'ui:order': ['claims', 'limits', 'requests', '*'],
           claims: {
             items: {
-              'ui:order': ['name', 'request']
+              'ui:order': ['name', 'request', '*']
             }
           }
         },
         advanced: {
           'ui:title': 'Advanced configuration',
           'ui:widget': 'hidden',
-          'ui:order': ['env', 'scheduling'],
+          'ui:order': ['env', 'scheduling', '*'],
           scheduling: {
             'ui:widget': 'hidden',
             affinity: {
-              'ui:order': ['nodeAffinity', 'podAffinity', 'podAntiAffinity'],
+              'ui:order': ['nodeAffinity', 'podAffinity', 'podAntiAffinity', '*'],
               nodeAffinity: {
                 'ui:order': [
                   'preferredDuringSchedulingIgnoredDuringExecution',
@@ -265,17 +265,17 @@ export const FlowCollectorUISchema: UiSchema = {
                 ],
                 preferredDuringSchedulingIgnoredDuringExecution: {
                   items: {
-                    'ui:order': ['preference', 'weight'],
+                    'ui:order': ['preference', 'weight', '*'],
                     preference: {
-                      'ui:order': ['matchExpressions', 'matchFields'],
+                      'ui:order': ['matchExpressions', 'matchFields', '*'],
                       matchExpressions: {
                         items: {
-                          'ui:order': ['key', 'operator', 'values']
+                          'ui:order': ['key', 'operator', 'values', '*']
                         }
                       },
                       matchFields: {
                         items: {
-                          'ui:order': ['key', 'operator', 'values']
+                          'ui:order': ['key', 'operator', 'values', '*']
                         }
                       }
                     }
@@ -284,15 +284,15 @@ export const FlowCollectorUISchema: UiSchema = {
                 requiredDuringSchedulingIgnoredDuringExecution: {
                   nodeSelectorTerms: {
                     items: {
-                      'ui:order': ['matchExpressions', 'matchFields'],
+                      'ui:order': ['matchExpressions', 'matchFields', '*'],
                       matchExpressions: {
                         items: {
-                          'ui:order': ['key', 'operator', 'values']
+                          'ui:order': ['key', 'operator', 'values', '*']
                         }
                       },
                       matchFields: {
                         items: {
-                          'ui:order': ['key', 'operator', 'values']
+                          'ui:order': ['key', 'operator', 'values', '*']
                         }
                       }
                     }
@@ -306,7 +306,7 @@ export const FlowCollectorUISchema: UiSchema = {
                 ],
                 preferredDuringSchedulingIgnoredDuringExecution: {
                   items: {
-                    'ui:order': ['podAffinityTerm', 'weight'],
+                    'ui:order': ['podAffinityTerm', 'weight', '*'],
                     podAffinityTerm: {
                       'ui:order': [
                         'topologyKey',
@@ -317,18 +317,18 @@ export const FlowCollectorUISchema: UiSchema = {
                         'namespaces'
                       ],
                       labelSelector: {
-                        'ui:order': ['matchExpressions', 'matchLabels'],
+                        'ui:order': ['matchExpressions', 'matchLabels', '*'],
                         matchExpressions: {
                           items: {
-                            'ui:order': ['key', 'operator', 'values']
+                            'ui:order': ['key', 'operator', 'values', '*']
                           }
                         }
                       },
                       namespaceSelector: {
-                        'ui:order': ['matchExpressions', 'matchLabels'],
+                        'ui:order': ['matchExpressions', 'matchLabels', '*'],
                         matchExpressions: {
                           items: {
-                            'ui:order': ['key', 'operator', 'values']
+                            'ui:order': ['key', 'operator', 'values', '*']
                           }
                         }
                       }
@@ -346,18 +346,18 @@ export const FlowCollectorUISchema: UiSchema = {
                       'namespaces'
                     ],
                     labelSelector: {
-                      'ui:order': ['matchExpressions', 'matchLabels'],
+                      'ui:order': ['matchExpressions', 'matchLabels', '*'],
                       matchExpressions: {
                         items: {
-                          'ui:order': ['key', 'operator', 'values']
+                          'ui:order': ['key', 'operator', 'values', '*']
                         }
                       }
                     },
                     namespaceSelector: {
-                      'ui:order': ['matchExpressions', 'matchLabels'],
+                      'ui:order': ['matchExpressions', 'matchLabels', '*'],
                       matchExpressions: {
                         items: {
-                          'ui:order': ['key', 'operator', 'values']
+                          'ui:order': ['key', 'operator', 'values', '*']
                         }
                       }
                     }
@@ -371,7 +371,7 @@ export const FlowCollectorUISchema: UiSchema = {
                 ],
                 preferredDuringSchedulingIgnoredDuringExecution: {
                   items: {
-                    'ui:order': ['podAffinityTerm', 'weight'],
+                    'ui:order': ['podAffinityTerm', 'weight', '*'],
                     podAffinityTerm: {
                       'ui:order': [
                         'topologyKey',
@@ -382,18 +382,18 @@ export const FlowCollectorUISchema: UiSchema = {
                         'namespaces'
                       ],
                       labelSelector: {
-                        'ui:order': ['matchExpressions', 'matchLabels'],
+                        'ui:order': ['matchExpressions', 'matchLabels', '*'],
                         matchExpressions: {
                           items: {
-                            'ui:order': ['key', 'operator', 'values']
+                            'ui:order': ['key', 'operator', 'values', '*']
                           }
                         }
                       },
                       namespaceSelector: {
-                        'ui:order': ['matchExpressions', 'matchLabels'],
+                        'ui:order': ['matchExpressions', 'matchLabels', '*'],
                         matchExpressions: {
                           items: {
-                            'ui:order': ['key', 'operator', 'values']
+                            'ui:order': ['key', 'operator', 'values', '*']
                           }
                         }
                       }
@@ -411,18 +411,18 @@ export const FlowCollectorUISchema: UiSchema = {
                       'namespaces'
                     ],
                     labelSelector: {
-                      'ui:order': ['matchExpressions', 'matchLabels'],
+                      'ui:order': ['matchExpressions', 'matchLabels', '*'],
                       matchExpressions: {
                         items: {
-                          'ui:order': ['key', 'operator', 'values']
+                          'ui:order': ['key', 'operator', 'values', '*']
                         }
                       }
                     },
                     namespaceSelector: {
-                      'ui:order': ['matchExpressions', 'matchLabels'],
+                      'ui:order': ['matchExpressions', 'matchLabels', '*'],
                       matchExpressions: {
                         items: {
-                          'ui:order': ['key', 'operator', 'values']
+                          'ui:order': ['key', 'operator', 'values', '*']
                         }
                       }
                     }
@@ -432,10 +432,10 @@ export const FlowCollectorUISchema: UiSchema = {
             },
             tolerations: {
               items: {
-                'ui:order': ['effect', 'key', 'operator', 'tolerationSeconds', 'value']
+                'ui:order': ['effect', 'key', 'operator', 'tolerationSeconds', 'value', '*']
               }
             },
-            'ui:order': ['affinity', 'nodeSelector', 'priorityClassName', 'tolerations']
+            'ui:order': ['affinity', 'nodeSelector', 'priorityClassName', 'tolerations', '*']
           }
         },
         'ui:order': [
@@ -455,7 +455,7 @@ export const FlowCollectorUISchema: UiSchema = {
           'advanced'
         ]
       },
-      'ui:order': ['ipfix', 'type', 'ebpf']
+      'ui:order': ['ipfix', 'type', 'ebpf', '*']
     },
     processor: {
       'ui:title': 'Processor configuration',
@@ -463,10 +463,10 @@ export const FlowCollectorUISchema: UiSchema = {
         'ui:title': 'Filters',
         'ui:widget': 'hidden',
         items: {
-          'ui:order': ['allOf', 'outputTarget', 'sampling'],
+          'ui:order': ['allOf', 'outputTarget', 'sampling', '*'],
           allOf: {
             items: {
-              'ui:order': ['field', 'matchType', 'value']
+              'ui:order': ['field', 'matchType', 'value', '*']
             }
           }
         }
@@ -493,10 +493,10 @@ export const FlowCollectorUISchema: UiSchema = {
         customLabels: {
           'ui:title': 'Custom labels',
           items: {
-            'ui:order': ['cidrs', 'name']
+            'ui:order': ['cidrs', 'name', '*']
           }
         },
-        'ui:order': ['openShiftAutoDetect', 'customLabels']
+        'ui:order': ['openShiftAutoDetect', 'customLabels', '*']
       },
       logTypes: {
         'ui:title': 'Log types',
@@ -516,7 +516,7 @@ export const FlowCollectorUISchema: UiSchema = {
         sampling: {
           'ui:title': 'Sampling'
         },
-        'ui:order': ['mode', 'sampling']
+        'ui:order': ['mode', 'sampling', '*']
       },
       kafkaConsumerQueueCapacity: {
         'ui:title': 'Kafka consumer queue capacity',
@@ -533,74 +533,74 @@ export const FlowCollectorUISchema: UiSchema = {
           controlFieldValue: 'Kafka',
           controlFieldName: 'deploymentModel'
         },
-        'ui:order': ['maxReplicas', 'metrics', 'minReplicas', 'status'],
+        'ui:order': ['maxReplicas', 'metrics', 'minReplicas', 'status', '*'],
         metrics: {
           items: {
-            'ui:order': ['type', 'containerResource', 'external', 'object', 'pods', 'resource'],
+            'ui:order': ['type', 'containerResource', 'external', 'object', 'pods', 'resource', '*'],
             containerResource: {
-              'ui:order': ['container', 'name', 'target'],
+              'ui:order': ['container', 'name', 'target', '*'],
               target: {
-                'ui:order': ['type', 'averageUtilization', 'averageValue', 'value']
+                'ui:order': ['type', 'averageUtilization', 'averageValue', 'value', '*']
               }
             },
             external: {
-              'ui:order': ['metric', 'target'],
+              'ui:order': ['metric', 'target', '*'],
               metric: {
-                'ui:order': ['name', 'selector'],
+                'ui:order': ['name', 'selector', '*'],
                 selector: {
-                  'ui:order': ['matchExpressions', 'matchLabels'],
+                  'ui:order': ['matchExpressions', 'matchLabels', '*'],
                   matchExpressions: {
                     items: {
-                      'ui:order': ['key', 'operator', 'values']
+                      'ui:order': ['key', 'operator', 'values', '*']
                     }
                   }
                 }
               },
               target: {
-                'ui:order': ['type', 'averageUtilization', 'averageValue', 'value']
+                'ui:order': ['type', 'averageUtilization', 'averageValue', 'value', '*']
               }
             },
             object: {
-              'ui:order': ['describedObject', 'metric', 'target'],
+              'ui:order': ['describedObject', 'metric', 'target', '*'],
               describedObject: {
-                'ui:order': ['kind', 'name', 'apiVersion']
+                'ui:order': ['kind', 'name', 'apiVersion', '*']
               },
               metric: {
-                'ui:order': ['name', 'selector'],
+                'ui:order': ['name', 'selector', '*'],
                 selector: {
-                  'ui:order': ['matchExpressions', 'matchLabels'],
+                  'ui:order': ['matchExpressions', 'matchLabels', '*'],
                   matchExpressions: {
                     items: {
-                      'ui:order': ['key', 'operator', 'values']
+                      'ui:order': ['key', 'operator', 'values', '*']
                     }
                   }
                 }
               },
               target: {
-                'ui:order': ['type', 'averageUtilization', 'averageValue', 'value']
+                'ui:order': ['type', 'averageUtilization', 'averageValue', 'value', '*']
               }
             },
             pods: {
-              'ui:order': ['metric', 'target'],
+              'ui:order': ['metric', 'target', '*'],
               metric: {
-                'ui:order': ['name', 'selector'],
+                'ui:order': ['name', 'selector', '*'],
                 selector: {
-                  'ui:order': ['matchExpressions', 'matchLabels'],
+                  'ui:order': ['matchExpressions', 'matchLabels', '*'],
                   matchExpressions: {
                     items: {
-                      'ui:order': ['key', 'operator', 'values']
+                      'ui:order': ['key', 'operator', 'values', '*']
                     }
                   }
                 }
               },
               target: {
-                'ui:order': ['type', 'averageUtilization', 'averageValue', 'value']
+                'ui:order': ['type', 'averageUtilization', 'averageValue', 'value', '*']
               }
             },
             resource: {
-              'ui:order': ['name', 'target'],
+              'ui:order': ['name', 'target', '*'],
               target: {
-                'ui:order': ['type', 'averageUtilization', 'averageValue', 'value']
+                'ui:order': ['type', 'averageUtilization', 'averageValue', 'value', '*']
               }
             }
           }
@@ -643,7 +643,7 @@ export const FlowCollectorUISchema: UiSchema = {
                 controlFieldValue: 'Provided',
                 controlFieldName: 'type'
               },
-              'ui:order': ['certFile', 'certKey', 'name', 'namespace', 'type']
+              'ui:order': ['certFile', 'certKey', 'name', 'namespace', 'type', '*']
             },
             providedCaFile: {
               'ui:title': 'CA',
@@ -652,30 +652,33 @@ export const FlowCollectorUISchema: UiSchema = {
                 controlFieldValue: 'Provided',
                 controlFieldName: 'type'
               },
-              'ui:order': ['file', 'name', 'namespace', 'type']
+              'ui:order': ['file', 'name', 'namespace', 'type', '*']
             },
-            'ui:order': ['type', 'insecureSkipVerify', 'provided', 'providedCaFile']
+            'ui:order': ['type', 'insecureSkipVerify', 'provided', 'providedCaFile', '*']
           },
           port: {
             'ui:title': 'Port'
           },
-          'ui:order': ['tls', 'port']
-        },
-        disableAlerts: {
-          'ui:title': 'Disable alerts'
+          'ui:order': ['tls', 'port', '*']
         },
         includeList: {
           'ui:title': 'Include list'
         },
-        'ui:order': ['server', 'disableAlerts', 'includeList']
+        alerts: {
+          'ui:title': 'Alerts'
+        },
+        disableAlerts: {
+          'ui:title': 'Disable alerts'
+        },
+        'ui:order': ['server', 'includeList', 'alerts', 'disableAlerts', '*']
       },
       resources: {
         'ui:title': 'Resource Requirements',
         'ui:widget': 'hidden',
-        'ui:order': ['claims', 'limits', 'requests'],
+        'ui:order': ['claims', 'limits', 'requests', '*'],
         claims: {
           items: {
-            'ui:order': ['name', 'request']
+            'ui:order': ['name', 'request', '*']
           }
         }
       },
@@ -701,9 +704,9 @@ export const FlowCollectorUISchema: UiSchema = {
         },
         scheduling: {
           'ui:widget': 'hidden',
-          'ui:order': ['affinity', 'nodeSelector', 'priorityClassName', 'tolerations'],
+          'ui:order': ['affinity', 'nodeSelector', 'priorityClassName', 'tolerations', '*'],
           affinity: {
-            'ui:order': ['nodeAffinity', 'podAffinity', 'podAntiAffinity'],
+            'ui:order': ['nodeAffinity', 'podAffinity', 'podAntiAffinity', '*'],
             nodeAffinity: {
               'ui:order': [
                 'preferredDuringSchedulingIgnoredDuringExecution',
@@ -711,17 +714,17 @@ export const FlowCollectorUISchema: UiSchema = {
               ],
               preferredDuringSchedulingIgnoredDuringExecution: {
                 items: {
-                  'ui:order': ['preference', 'weight'],
+                  'ui:order': ['preference', 'weight', '*'],
                   preference: {
-                    'ui:order': ['matchExpressions', 'matchFields'],
+                    'ui:order': ['matchExpressions', 'matchFields', '*'],
                     matchExpressions: {
                       items: {
-                        'ui:order': ['key', 'operator', 'values']
+                        'ui:order': ['key', 'operator', 'values', '*']
                       }
                     },
                     matchFields: {
                       items: {
-                        'ui:order': ['key', 'operator', 'values']
+                        'ui:order': ['key', 'operator', 'values', '*']
                       }
                     }
                   }
@@ -730,15 +733,15 @@ export const FlowCollectorUISchema: UiSchema = {
               requiredDuringSchedulingIgnoredDuringExecution: {
                 nodeSelectorTerms: {
                   items: {
-                    'ui:order': ['matchExpressions', 'matchFields'],
+                    'ui:order': ['matchExpressions', 'matchFields', '*'],
                     matchExpressions: {
                       items: {
-                        'ui:order': ['key', 'operator', 'values']
+                        'ui:order': ['key', 'operator', 'values', '*']
                       }
                     },
                     matchFields: {
                       items: {
-                        'ui:order': ['key', 'operator', 'values']
+                        'ui:order': ['key', 'operator', 'values', '*']
                       }
                     }
                   }
@@ -752,7 +755,7 @@ export const FlowCollectorUISchema: UiSchema = {
               ],
               preferredDuringSchedulingIgnoredDuringExecution: {
                 items: {
-                  'ui:order': ['podAffinityTerm', 'weight'],
+                  'ui:order': ['podAffinityTerm', 'weight', '*'],
                   podAffinityTerm: {
                     'ui:order': [
                       'topologyKey',
@@ -763,18 +766,18 @@ export const FlowCollectorUISchema: UiSchema = {
                       'namespaces'
                     ],
                     labelSelector: {
-                      'ui:order': ['matchExpressions', 'matchLabels'],
+                      'ui:order': ['matchExpressions', 'matchLabels', '*'],
                       matchExpressions: {
                         items: {
-                          'ui:order': ['key', 'operator', 'values']
+                          'ui:order': ['key', 'operator', 'values', '*']
                         }
                       }
                     },
                     namespaceSelector: {
-                      'ui:order': ['matchExpressions', 'matchLabels'],
+                      'ui:order': ['matchExpressions', 'matchLabels', '*'],
                       matchExpressions: {
                         items: {
-                          'ui:order': ['key', 'operator', 'values']
+                          'ui:order': ['key', 'operator', 'values', '*']
                         }
                       }
                     }
@@ -792,18 +795,18 @@ export const FlowCollectorUISchema: UiSchema = {
                     'namespaces'
                   ],
                   labelSelector: {
-                    'ui:order': ['matchExpressions', 'matchLabels'],
+                    'ui:order': ['matchExpressions', 'matchLabels', '*'],
                     matchExpressions: {
                       items: {
-                        'ui:order': ['key', 'operator', 'values']
+                        'ui:order': ['key', 'operator', 'values', '*']
                       }
                     }
                   },
                   namespaceSelector: {
-                    'ui:order': ['matchExpressions', 'matchLabels'],
+                    'ui:order': ['matchExpressions', 'matchLabels', '*'],
                     matchExpressions: {
                       items: {
-                        'ui:order': ['key', 'operator', 'values']
+                        'ui:order': ['key', 'operator', 'values', '*']
                       }
                     }
                   }
@@ -817,7 +820,7 @@ export const FlowCollectorUISchema: UiSchema = {
               ],
               preferredDuringSchedulingIgnoredDuringExecution: {
                 items: {
-                  'ui:order': ['podAffinityTerm', 'weight'],
+                  'ui:order': ['podAffinityTerm', 'weight', '*'],
                   podAffinityTerm: {
                     'ui:order': [
                       'topologyKey',
@@ -828,18 +831,18 @@ export const FlowCollectorUISchema: UiSchema = {
                       'namespaces'
                     ],
                     labelSelector: {
-                      'ui:order': ['matchExpressions', 'matchLabels'],
+                      'ui:order': ['matchExpressions', 'matchLabels', '*'],
                       matchExpressions: {
                         items: {
-                          'ui:order': ['key', 'operator', 'values']
+                          'ui:order': ['key', 'operator', 'values', '*']
                         }
                       }
                     },
                     namespaceSelector: {
-                      'ui:order': ['matchExpressions', 'matchLabels'],
+                      'ui:order': ['matchExpressions', 'matchLabels', '*'],
                       matchExpressions: {
                         items: {
-                          'ui:order': ['key', 'operator', 'values']
+                          'ui:order': ['key', 'operator', 'values', '*']
                         }
                       }
                     }
@@ -857,18 +860,18 @@ export const FlowCollectorUISchema: UiSchema = {
                     'namespaces'
                   ],
                   labelSelector: {
-                    'ui:order': ['matchExpressions', 'matchLabels'],
+                    'ui:order': ['matchExpressions', 'matchLabels', '*'],
                     matchExpressions: {
                       items: {
-                        'ui:order': ['key', 'operator', 'values']
+                        'ui:order': ['key', 'operator', 'values', '*']
                       }
                     }
                   },
                   namespaceSelector: {
-                    'ui:order': ['matchExpressions', 'matchLabels'],
+                    'ui:order': ['matchExpressions', 'matchLabels', '*'],
                     matchExpressions: {
                       items: {
-                        'ui:order': ['key', 'operator', 'values']
+                        'ui:order': ['key', 'operator', 'values', '*']
                       }
                     }
                   }
@@ -878,7 +881,7 @@ export const FlowCollectorUISchema: UiSchema = {
           },
           tolerations: {
             items: {
-              'ui:order': ['effect', 'key', 'operator', 'tolerationSeconds', 'value']
+              'ui:order': ['effect', 'key', 'operator', 'tolerationSeconds', 'value', '*']
             }
           }
         },
@@ -892,7 +895,7 @@ export const FlowCollectorUISchema: UiSchema = {
               'ui:title': 'Index',
               'ui:widget': 'arrayCheckboxes'
             },
-            'ui:order': ['name', 'index']
+            'ui:order': ['name', 'index', '*']
           }
         },
         healthPort: {
@@ -969,23 +972,23 @@ export const FlowCollectorUISchema: UiSchema = {
             },
             caCert: {
               'ui:title': 'CA certificate',
-              'ui:order': ['certFile', 'certKey', 'name', 'namespace', 'type']
+              'ui:order': ['certFile', 'certKey', 'name', 'namespace', 'type', '*']
             },
             userCert: {
               'ui:title': 'User certificate when using mTLS',
-              'ui:order': ['certFile', 'certKey', 'name', 'namespace', 'type']
+              'ui:order': ['certFile', 'certKey', 'name', 'namespace', 'type', '*']
             },
             insecureSkipVerify: {
               'ui:title': 'Insecure skip verify'
             },
-            'ui:order': ['enable', 'caCert', 'userCert', 'insecureSkipVerify']
+            'ui:order': ['enable', 'caCert', 'userCert', 'insecureSkipVerify', '*']
           },
-          'ui:order': ['forwardUserToken', 'url', 'tls']
+          'ui:order': ['forwardUserToken', 'url', 'tls', '*']
         },
         timeout: {
           'ui:title': 'Timeout'
         },
-        'ui:order': ['enable', 'mode', 'manual', 'timeout']
+        'ui:order': ['enable', 'mode', 'manual', 'timeout', '*']
       }
     },
     loki: {
@@ -1019,7 +1022,7 @@ export const FlowCollectorUISchema: UiSchema = {
         tenantID: {
           'ui:title': 'Tenant id'
         },
-        'ui:order': ['authToken', 'ingesterUrl', 'querierUrl', 'statusUrl', 'tenantID', 'statusTls', 'tls'],
+        'ui:order': ['authToken', 'ingesterUrl', 'querierUrl', 'statusUrl', 'tenantID', 'statusTls', 'tls', '*'],
         statusTls: {
           'ui:title': 'TLS configuration',
           enable: {
@@ -1027,16 +1030,16 @@ export const FlowCollectorUISchema: UiSchema = {
           },
           caCert: {
             'ui:title': 'CA certificate',
-            'ui:order': ['certFile', 'certKey', 'name', 'namespace', 'type']
+            'ui:order': ['certFile', 'certKey', 'name', 'namespace', 'type', '*']
           },
           userCert: {
             'ui:title': 'User certificate when using mTLS',
-            'ui:order': ['certFile', 'certKey', 'name', 'namespace', 'type']
+            'ui:order': ['certFile', 'certKey', 'name', 'namespace', 'type', '*']
           },
           insecureSkipVerify: {
             'ui:title': 'Insecure skip verify'
           },
-          'ui:order': ['enable', 'caCert', 'userCert', 'insecureSkipVerify']
+          'ui:order': ['enable', 'caCert', 'userCert', 'insecureSkipVerify', '*']
         },
         tls: {
           'ui:title': 'TLS configuration',
@@ -1045,16 +1048,16 @@ export const FlowCollectorUISchema: UiSchema = {
           },
           caCert: {
             'ui:title': 'CA certificate',
-            'ui:order': ['certFile', 'certKey', 'name', 'namespace', 'type']
+            'ui:order': ['certFile', 'certKey', 'name', 'namespace', 'type', '*']
           },
           userCert: {
             'ui:title': 'User certificate when using mTLS',
-            'ui:order': ['certFile', 'certKey', 'name', 'namespace', 'type']
+            'ui:order': ['certFile', 'certKey', 'name', 'namespace', 'type', '*']
           },
           insecureSkipVerify: {
             'ui:title': 'Insecure skip verify'
           },
-          'ui:order': ['enable', 'caCert', 'userCert', 'insecureSkipVerify']
+          'ui:order': ['enable', 'caCert', 'userCert', 'insecureSkipVerify', '*']
         }
       },
       monolithic: {
@@ -1071,7 +1074,7 @@ export const FlowCollectorUISchema: UiSchema = {
         url: {
           'ui:title': 'Url'
         },
-        'ui:order': ['tenantID', 'url', 'tls'],
+        'ui:order': ['tenantID', 'url', 'tls', '*'],
         tls: {
           'ui:title': 'TLS configuration',
           enable: {
@@ -1079,16 +1082,16 @@ export const FlowCollectorUISchema: UiSchema = {
           },
           caCert: {
             'ui:title': 'CA certificate',
-            'ui:order': ['certFile', 'certKey', 'name', 'namespace', 'type']
+            'ui:order': ['certFile', 'certKey', 'name', 'namespace', 'type', '*']
           },
           userCert: {
             'ui:title': 'User certificate when using mTLS',
-            'ui:order': ['certFile', 'certKey', 'name', 'namespace', 'type']
+            'ui:order': ['certFile', 'certKey', 'name', 'namespace', 'type', '*']
           },
           insecureSkipVerify: {
             'ui:title': 'Insecure skip verify'
           },
-          'ui:order': ['enable', 'caCert', 'userCert', 'insecureSkipVerify']
+          'ui:order': ['enable', 'caCert', 'userCert', 'insecureSkipVerify', '*']
         }
       },
       microservices: {
@@ -1108,7 +1111,7 @@ export const FlowCollectorUISchema: UiSchema = {
         tenantID: {
           'ui:title': 'Tenant id'
         },
-        'ui:order': ['ingesterUrl', 'querierUrl', 'tenantID', 'tls'],
+        'ui:order': ['ingesterUrl', 'querierUrl', 'tenantID', 'tls', '*'],
         tls: {
           'ui:title': 'TLS configuration',
           enable: {
@@ -1116,16 +1119,16 @@ export const FlowCollectorUISchema: UiSchema = {
           },
           caCert: {
             'ui:title': 'CA certificate',
-            'ui:order': ['certFile', 'certKey', 'name', 'namespace', 'type']
+            'ui:order': ['certFile', 'certKey', 'name', 'namespace', 'type', '*']
           },
           userCert: {
             'ui:title': 'User certificate when using mTLS',
-            'ui:order': ['certFile', 'certKey', 'name', 'namespace', 'type']
+            'ui:order': ['certFile', 'certKey', 'name', 'namespace', 'type', '*']
           },
           insecureSkipVerify: {
             'ui:title': 'Insecure skip verify'
           },
-          'ui:order': ['enable', 'caCert', 'userCert', 'insecureSkipVerify']
+          'ui:order': ['enable', 'caCert', 'userCert', 'insecureSkipVerify', '*']
         }
       },
       lokiStack: {
@@ -1142,7 +1145,7 @@ export const FlowCollectorUISchema: UiSchema = {
         namespace: {
           'ui:title': 'Namespace'
         },
-        'ui:order': ['name', 'namespace']
+        'ui:order': ['name', 'namespace', '*']
       },
       readTimeout: {
         'ui:title': 'Read timeout',
@@ -1175,7 +1178,7 @@ export const FlowCollectorUISchema: UiSchema = {
         writeMinBackoff: {
           'ui:title': 'Write min backoff'
         },
-        'ui:order': ['staticLabels', 'writeMaxRetries', 'writeMaxBackoff', 'writeMinBackoff']
+        'ui:order': ['staticLabels', 'writeMaxRetries', 'writeMaxBackoff', 'writeMinBackoff', '*']
       },
       'ui:order': [
         'enable',
@@ -1211,15 +1214,15 @@ export const FlowCollectorUISchema: UiSchema = {
         portNames: {
           'ui:title': 'Port names'
         },
-        'ui:order': ['enable', 'portNames']
+        'ui:order': ['enable', 'portNames', '*']
       },
       resources: {
         'ui:title': 'Resource Requirements',
         'ui:widget': 'hidden',
-        'ui:order': ['claims', 'limits', 'requests'],
+        'ui:order': ['claims', 'limits', 'requests', '*'],
         claims: {
           items: {
-            'ui:order': ['name', 'request']
+            'ui:order': ['name', 'request', '*']
           }
         }
       },
@@ -1227,7 +1230,7 @@ export const FlowCollectorUISchema: UiSchema = {
         'ui:title': 'Quick filters',
         'ui:widget': 'hidden',
         items: {
-          'ui:order': ['filter', 'name', 'default']
+          'ui:order': ['filter', 'name', 'default', '*']
         }
       },
       replicas: {
@@ -1236,74 +1239,74 @@ export const FlowCollectorUISchema: UiSchema = {
       autoscaler: {
         'ui:title': 'Horizontal pod autoscaler',
         'ui:widget': 'hidden',
-        'ui:order': ['maxReplicas', 'metrics', 'minReplicas', 'status'],
+        'ui:order': ['maxReplicas', 'metrics', 'minReplicas', 'status', '*'],
         metrics: {
           items: {
-            'ui:order': ['type', 'containerResource', 'external', 'object', 'pods', 'resource'],
+            'ui:order': ['type', 'containerResource', 'external', 'object', 'pods', 'resource', '*'],
             containerResource: {
-              'ui:order': ['container', 'name', 'target'],
+              'ui:order': ['container', 'name', 'target', '*'],
               target: {
-                'ui:order': ['type', 'averageUtilization', 'averageValue', 'value']
+                'ui:order': ['type', 'averageUtilization', 'averageValue', 'value', '*']
               }
             },
             external: {
-              'ui:order': ['metric', 'target'],
+              'ui:order': ['metric', 'target', '*'],
               metric: {
-                'ui:order': ['name', 'selector'],
+                'ui:order': ['name', 'selector', '*'],
                 selector: {
-                  'ui:order': ['matchExpressions', 'matchLabels'],
+                  'ui:order': ['matchExpressions', 'matchLabels', '*'],
                   matchExpressions: {
                     items: {
-                      'ui:order': ['key', 'operator', 'values']
+                      'ui:order': ['key', 'operator', 'values', '*']
                     }
                   }
                 }
               },
               target: {
-                'ui:order': ['type', 'averageUtilization', 'averageValue', 'value']
+                'ui:order': ['type', 'averageUtilization', 'averageValue', 'value', '*']
               }
             },
             object: {
-              'ui:order': ['describedObject', 'metric', 'target'],
+              'ui:order': ['describedObject', 'metric', 'target', '*'],
               describedObject: {
-                'ui:order': ['kind', 'name', 'apiVersion']
+                'ui:order': ['kind', 'name', 'apiVersion', '*']
               },
               metric: {
-                'ui:order': ['name', 'selector'],
+                'ui:order': ['name', 'selector', '*'],
                 selector: {
-                  'ui:order': ['matchExpressions', 'matchLabels'],
+                  'ui:order': ['matchExpressions', 'matchLabels', '*'],
                   matchExpressions: {
                     items: {
-                      'ui:order': ['key', 'operator', 'values']
+                      'ui:order': ['key', 'operator', 'values', '*']
                     }
                   }
                 }
               },
               target: {
-                'ui:order': ['type', 'averageUtilization', 'averageValue', 'value']
+                'ui:order': ['type', 'averageUtilization', 'averageValue', 'value', '*']
               }
             },
             pods: {
-              'ui:order': ['metric', 'target'],
+              'ui:order': ['metric', 'target', '*'],
               metric: {
-                'ui:order': ['name', 'selector'],
+                'ui:order': ['name', 'selector', '*'],
                 selector: {
-                  'ui:order': ['matchExpressions', 'matchLabels'],
+                  'ui:order': ['matchExpressions', 'matchLabels', '*'],
                   matchExpressions: {
                     items: {
-                      'ui:order': ['key', 'operator', 'values']
+                      'ui:order': ['key', 'operator', 'values', '*']
                     }
                   }
                 }
               },
               target: {
-                'ui:order': ['type', 'averageUtilization', 'averageValue', 'value']
+                'ui:order': ['type', 'averageUtilization', 'averageValue', 'value', '*']
               }
             },
             resource: {
-              'ui:order': ['name', 'target'],
+              'ui:order': ['name', 'target', '*'],
               target: {
-                'ui:order': ['type', 'averageUtilization', 'averageValue', 'value']
+                'ui:order': ['type', 'averageUtilization', 'averageValue', 'value', '*']
               }
             }
           }
@@ -1312,11 +1315,11 @@ export const FlowCollectorUISchema: UiSchema = {
       advanced: {
         'ui:title': 'Advanced configuration',
         'ui:widget': 'hidden',
-        'ui:order': ['args', 'env', 'port', 'register', 'scheduling'],
+        'ui:order': ['args', 'env', 'port', 'register', 'scheduling', '*'],
         scheduling: {
           'ui:widget': 'hidden',
           affinity: {
-            'ui:order': ['nodeAffinity', 'podAffinity', 'podAntiAffinity'],
+            'ui:order': ['nodeAffinity', 'podAffinity', 'podAntiAffinity', '*'],
             nodeAffinity: {
               'ui:order': [
                 'preferredDuringSchedulingIgnoredDuringExecution',
@@ -1324,17 +1327,17 @@ export const FlowCollectorUISchema: UiSchema = {
               ],
               preferredDuringSchedulingIgnoredDuringExecution: {
                 items: {
-                  'ui:order': ['preference', 'weight'],
+                  'ui:order': ['preference', 'weight', '*'],
                   preference: {
-                    'ui:order': ['matchExpressions', 'matchFields'],
+                    'ui:order': ['matchExpressions', 'matchFields', '*'],
                     matchExpressions: {
                       items: {
-                        'ui:order': ['key', 'operator', 'values']
+                        'ui:order': ['key', 'operator', 'values', '*']
                       }
                     },
                     matchFields: {
                       items: {
-                        'ui:order': ['key', 'operator', 'values']
+                        'ui:order': ['key', 'operator', 'values', '*']
                       }
                     }
                   }
@@ -1343,15 +1346,15 @@ export const FlowCollectorUISchema: UiSchema = {
               requiredDuringSchedulingIgnoredDuringExecution: {
                 nodeSelectorTerms: {
                   items: {
-                    'ui:order': ['matchExpressions', 'matchFields'],
+                    'ui:order': ['matchExpressions', 'matchFields', '*'],
                     matchExpressions: {
                       items: {
-                        'ui:order': ['key', 'operator', 'values']
+                        'ui:order': ['key', 'operator', 'values', '*']
                       }
                     },
                     matchFields: {
                       items: {
-                        'ui:order': ['key', 'operator', 'values']
+                        'ui:order': ['key', 'operator', 'values', '*']
                       }
                     }
                   }
@@ -1365,7 +1368,7 @@ export const FlowCollectorUISchema: UiSchema = {
               ],
               preferredDuringSchedulingIgnoredDuringExecution: {
                 items: {
-                  'ui:order': ['podAffinityTerm', 'weight'],
+                  'ui:order': ['podAffinityTerm', 'weight', '*'],
                   podAffinityTerm: {
                     'ui:order': [
                       'topologyKey',
@@ -1376,18 +1379,18 @@ export const FlowCollectorUISchema: UiSchema = {
                       'namespaces'
                     ],
                     labelSelector: {
-                      'ui:order': ['matchExpressions', 'matchLabels'],
+                      'ui:order': ['matchExpressions', 'matchLabels', '*'],
                       matchExpressions: {
                         items: {
-                          'ui:order': ['key', 'operator', 'values']
+                          'ui:order': ['key', 'operator', 'values', '*']
                         }
                       }
                     },
                     namespaceSelector: {
-                      'ui:order': ['matchExpressions', 'matchLabels'],
+                      'ui:order': ['matchExpressions', 'matchLabels', '*'],
                       matchExpressions: {
                         items: {
-                          'ui:order': ['key', 'operator', 'values']
+                          'ui:order': ['key', 'operator', 'values', '*']
                         }
                       }
                     }
@@ -1405,18 +1408,18 @@ export const FlowCollectorUISchema: UiSchema = {
                     'namespaces'
                   ],
                   labelSelector: {
-                    'ui:order': ['matchExpressions', 'matchLabels'],
+                    'ui:order': ['matchExpressions', 'matchLabels', '*'],
                     matchExpressions: {
                       items: {
-                        'ui:order': ['key', 'operator', 'values']
+                        'ui:order': ['key', 'operator', 'values', '*']
                       }
                     }
                   },
                   namespaceSelector: {
-                    'ui:order': ['matchExpressions', 'matchLabels'],
+                    'ui:order': ['matchExpressions', 'matchLabels', '*'],
                     matchExpressions: {
                       items: {
-                        'ui:order': ['key', 'operator', 'values']
+                        'ui:order': ['key', 'operator', 'values', '*']
                       }
                     }
                   }
@@ -1430,7 +1433,7 @@ export const FlowCollectorUISchema: UiSchema = {
               ],
               preferredDuringSchedulingIgnoredDuringExecution: {
                 items: {
-                  'ui:order': ['podAffinityTerm', 'weight'],
+                  'ui:order': ['podAffinityTerm', 'weight', '*'],
                   podAffinityTerm: {
                     'ui:order': [
                       'topologyKey',
@@ -1441,18 +1444,18 @@ export const FlowCollectorUISchema: UiSchema = {
                       'namespaces'
                     ],
                     labelSelector: {
-                      'ui:order': ['matchExpressions', 'matchLabels'],
+                      'ui:order': ['matchExpressions', 'matchLabels', '*'],
                       matchExpressions: {
                         items: {
-                          'ui:order': ['key', 'operator', 'values']
+                          'ui:order': ['key', 'operator', 'values', '*']
                         }
                       }
                     },
                     namespaceSelector: {
-                      'ui:order': ['matchExpressions', 'matchLabels'],
+                      'ui:order': ['matchExpressions', 'matchLabels', '*'],
                       matchExpressions: {
                         items: {
-                          'ui:order': ['key', 'operator', 'values']
+                          'ui:order': ['key', 'operator', 'values', '*']
                         }
                       }
                     }
@@ -1470,18 +1473,18 @@ export const FlowCollectorUISchema: UiSchema = {
                     'namespaces'
                   ],
                   labelSelector: {
-                    'ui:order': ['matchExpressions', 'matchLabels'],
+                    'ui:order': ['matchExpressions', 'matchLabels', '*'],
                     matchExpressions: {
                       items: {
-                        'ui:order': ['key', 'operator', 'values']
+                        'ui:order': ['key', 'operator', 'values', '*']
                       }
                     }
                   },
                   namespaceSelector: {
-                    'ui:order': ['matchExpressions', 'matchLabels'],
+                    'ui:order': ['matchExpressions', 'matchLabels', '*'],
                     matchExpressions: {
                       items: {
-                        'ui:order': ['key', 'operator', 'values']
+                        'ui:order': ['key', 'operator', 'values', '*']
                       }
                     }
                   }
@@ -1491,10 +1494,10 @@ export const FlowCollectorUISchema: UiSchema = {
           },
           tolerations: {
             items: {
-              'ui:order': ['effect', 'key', 'operator', 'tolerationSeconds', 'value']
+              'ui:order': ['effect', 'key', 'operator', 'tolerationSeconds', 'value', '*']
             }
           },
-          'ui:order': ['affinity', 'nodeSelector', 'priorityClassName', 'tolerations']
+          'ui:order': ['affinity', 'nodeSelector', 'priorityClassName', 'tolerations', '*']
         }
       },
       'ui:order': [
@@ -1522,7 +1525,7 @@ export const FlowCollectorUISchema: UiSchema = {
           controlFieldName: 'enable'
         }
       },
-      'ui:order': ['enable', 'additionalNamespaces']
+      'ui:order': ['enable', 'additionalNamespaces', '*']
     },
     exporters: {
       'ui:title': 'Exporters',
@@ -1547,7 +1550,7 @@ export const FlowCollectorUISchema: UiSchema = {
           transport: {
             'ui:title': 'Transport'
           },
-          'ui:order': ['targetHost', 'targetPort', 'transport']
+          'ui:order': ['targetHost', 'targetPort', 'transport', '*']
         },
         kafka: {
           'ui:title': 'Kafka configuration',
@@ -1570,16 +1573,16 @@ export const FlowCollectorUISchema: UiSchema = {
             },
             caCert: {
               'ui:title': 'CA certificate',
-              'ui:order': ['certFile', 'certKey', 'name', 'namespace', 'type']
+              'ui:order': ['certFile', 'certKey', 'name', 'namespace', 'type', '*']
             },
             userCert: {
               'ui:title': 'User certificate when using mTLS',
-              'ui:order': ['certFile', 'certKey', 'name', 'namespace', 'type']
+              'ui:order': ['certFile', 'certKey', 'name', 'namespace', 'type', '*']
             },
             insecureSkipVerify: {
               'ui:title': 'Insecure skip verify'
             },
-            'ui:order': ['enable', 'caCert', 'userCert', 'insecureSkipVerify']
+            'ui:order': ['enable', 'caCert', 'userCert', 'insecureSkipVerify', '*']
           },
           sasl: {
             'ui:title': 'SASL',
@@ -1588,15 +1591,15 @@ export const FlowCollectorUISchema: UiSchema = {
             },
             clientIDReference: {
               'ui:title': 'Client ID reference',
-              'ui:order': ['file', 'name', 'namespace', 'type']
+              'ui:order': ['file', 'name', 'namespace', 'type', '*']
             },
             clientSecretReference: {
               'ui:title': 'Client secret reference',
-              'ui:order': ['file', 'name', 'namespace', 'type']
+              'ui:order': ['file', 'name', 'namespace', 'type', '*']
             },
-            'ui:order': ['type', 'clientIDReference', 'clientSecretReference']
+            'ui:order': ['type', 'clientIDReference', 'clientSecretReference', '*']
           },
-          'ui:order': ['address', 'topic', 'tls', 'sasl']
+          'ui:order': ['address', 'topic', 'tls', 'sasl', '*']
         },
         openTelemetry: {
           'ui:title': 'OpenTelemetry configuration',
@@ -1627,7 +1630,7 @@ export const FlowCollectorUISchema: UiSchema = {
               output: {
                 'ui:title': 'Output field'
               },
-              'ui:order': ['input', 'multiplier', 'output']
+              'ui:order': ['input', 'multiplier', 'output', '*']
             }
           },
           metrics: {
@@ -1638,7 +1641,7 @@ export const FlowCollectorUISchema: UiSchema = {
             pushTimeInterval: {
               'ui:title': 'Push time interval'
             },
-            'ui:order': ['enable', 'pushTimeInterval']
+            'ui:order': ['enable', 'pushTimeInterval', '*']
           },
           tls: {
             'ui:title': 'TLS configuration',
@@ -1647,20 +1650,30 @@ export const FlowCollectorUISchema: UiSchema = {
             },
             caCert: {
               'ui:title': 'CA certificate',
-              'ui:order': ['certFile', 'certKey', 'name', 'namespace', 'type']
+              'ui:order': ['certFile', 'certKey', 'name', 'namespace', 'type', '*']
             },
             userCert: {
               'ui:title': 'User certificate when using mTLS',
-              'ui:order': ['certFile', 'certKey', 'name', 'namespace', 'type']
+              'ui:order': ['certFile', 'certKey', 'name', 'namespace', 'type', '*']
             },
             insecureSkipVerify: {
               'ui:title': 'Insecure skip verify'
             },
-            'ui:order': ['enable', 'caCert', 'userCert', 'insecureSkipVerify']
+            'ui:order': ['enable', 'caCert', 'userCert', 'insecureSkipVerify', '*']
           },
-          'ui:order': ['targetHost', 'targetPort', 'protocol', 'fieldsMapping', 'headers', 'logs', 'metrics', 'tls']
+          'ui:order': [
+            'targetHost',
+            'targetPort',
+            'protocol',
+            'fieldsMapping',
+            'headers',
+            'logs',
+            'metrics',
+            'tls',
+            '*'
+          ]
         },
-        'ui:order': ['type', 'ipfix', 'kafka', 'openTelemetry']
+        'ui:order': ['type', 'ipfix', 'kafka', 'openTelemetry', '*']
       }
     },
     'ui:order': [
@@ -1689,7 +1702,8 @@ export const FlowMetricUISchema: UiSchema = {
       'ui:title': 'Name'
     },
     namespace: {
-      'ui:title': 'Namespace'
+      'ui:title': 'Namespace',
+      'ui:description': 'It must match the one configured in FlowCollector.'
     },
     labels: {
       'ui:widget': 'hidden'
@@ -1742,7 +1756,7 @@ export const FlowMetricUISchema: UiSchema = {
         value: {
           'ui:title': 'Value'
         },
-        'ui:order': ['field', 'matchType', 'value']
+        'ui:order': ['field', 'matchType', 'value', '*']
       }
     },
     charts: {
@@ -1775,10 +1789,10 @@ export const FlowMetricUISchema: UiSchema = {
             top: {
               'ui:title': 'Top'
             },
-            'ui:order': ['promQL', 'legend', 'top']
+            'ui:order': ['promQL', 'legend', 'top', '*']
           }
         },
-        'ui:order': ['dashboardName', 'sectionName', 'title', 'unit', 'type', 'queries']
+        'ui:order': ['dashboardName', 'sectionName', 'title', 'unit', 'type', 'queries', '*']
       }
     },
     'ui:order': [
