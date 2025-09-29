@@ -9,7 +9,7 @@ import {
   MenuToggleElement,
   Switch
 } from '@patternfly/react-core';
-import { getSchemaType, UIOptionsType, WidgetProps } from '@rjsf/utils';
+import { getSchemaType, WidgetProps } from '@rjsf/utils';
 import classNames from 'classnames';
 import * as _ from 'lodash';
 import * as React from 'react';
@@ -94,8 +94,8 @@ export const SwitchWidget: React.FC<WidgetProps> = props => {
       onBlur={onBlur && (event => onBlur(id, event.target.value))}
       onChange={(_event, v) => onChange(v, undefined, id)}
       onFocus={onFocus && (event => onFocus(id, event.target.value))}
-      label={t('Enabled')}
-      labelOff={t('Disabled')}
+      label={t('True')}
+      labelOff={t('False')}
     />
   );
 };
@@ -173,12 +173,7 @@ export const ArrayCheckboxesWidget: React.FC<WidgetProps> = props => {
     <AtomicFieldTemplate
       onKeyChange={() => errFunc}
       onDropPropertyClick={() => errFunc}
-      description={
-        <DescriptionField
-          schema={schema}
-          description={(schema.items as UIOptionsType)?.description || props.description}
-        />
-      }
+      description={<DescriptionField schema={schema} description={schema.description} />}
       {...{
         ...props,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -189,7 +184,7 @@ export const ArrayCheckboxesWidget: React.FC<WidgetProps> = props => {
     >
       <Flex
         className="checkboxes-container"
-        direction={{ default: enums.length < 4 ? 'row' : 'column' }}
+        direction={{ default: enums.length > 4 ? 'row' : 'column' }}
         onBlur={() => onBlur(id, value)}
         onFocus={() => onFocus(id, value)}
       >

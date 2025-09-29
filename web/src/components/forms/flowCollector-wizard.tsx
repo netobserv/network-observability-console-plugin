@@ -1,15 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ResourceYAMLEditor } from '@openshift-console/dynamic-plugin-sdk';
-import { PageSection, Title, Wizard, WizardStep, WizardStepType } from '@patternfly/react-core';
+import {
+  Button,
+  PageSection,
+  Title,
+  Wizard,
+  WizardFooterWrapper,
+  WizardStep,
+  WizardStepType
+} from '@patternfly/react-core';
 import { RJSFSchema } from '@rjsf/utils';
 import validator from '@rjsf/validator-ajv8';
 import _ from 'lodash';
 import React, { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom-v5-compat';
-import { ContextSingleton } from '../../utils/context';
-import { flowCollectorStatusPath } from '../../utils/url';
-import { safeYAMLToJS } from '../../utils/yaml';
+import { flowCollectorEditPath, flowCollectorNewPath, flowCollectorStatusPath } from '../../utils/url';
 import DynamicLoader, { navigate } from '../dynamic-loader/dynamic-loader';
 import { FlowCollectorUISchema } from './config/uiSchema';
 import Consumption from './consumption';
@@ -54,48 +59,25 @@ export const FlowCollectorWizard: FC<FlowCollectorWizardProps> = props => {
     [data, paths, schema]
   );
 
-  const step = React.useCallback(
-    (id, name: string) => {
-      return (
-        <WizardStep name={name} id={id} key={id}>
-          {form()}
-        </WizardStep>
-      );
-    },
-    [form]
-  );
-
   const onStepChange = React.useCallback((_event: React.MouseEvent<HTMLButtonElement>, step: WizardStepType) => {
     switch (step.id) {
       case 'overview':
         setPaths(defaultPaths);
         break;
-      case 'capture':
+      case 'processing':
         setPaths([
-          'spec.agent.ebpf.sampling',
+          'spec.deploymentModel',
+          'spec.kafka.address',
+          'spec.kafka.topic',
+          'spec.kafka.tls',
           'spec.agent.ebpf.privileged',
           'spec.agent.ebpf.features',
           'spec.processor.clusterName',
-          'spec.processor.multiClusterDeployment',
           'spec.processor.addZone'
-        ]);
-        break;
-      case 'pipeline':
-        setPaths([
-          'spec.deploymentModel',
-          'spec.kafka',
-          'spec.processor.advanced.secondaryNetworks.items',
-          'spec.exporters.items'
         ]);
         break;
       case 'loki':
         setPaths(['spec.loki']);
-        break;
-      case 'prom':
-        setPaths(['spec.prometheus.querier']);
-        break;
-      case 'console':
-        setPaths(['spec.consolePlugin.enable', 'spec.consolePlugin.replicas']);
         break;
       default:
         setPaths([]);
@@ -119,19 +101,39 @@ export const FlowCollectorWizard: FC<FlowCollectorWizardProps> = props => {
         group="flows.netobserv.io"
         version="v1beta2"
         kind="FlowCollector"
-        name={params.name || props.name}
+        name={params.name || props.name || 'cluster'} // fallback on cluster to ensure it doesn't already exists
+        skipCRError
         onSuccess={() => {
           navigate(flowCollectorStatusPath);
         }}
       >
         <Consumer>
           {ctx => {
+            // redirect to edit page if resource already exists or is created while using the wizard
+            // We can't handle edition here since this page doesn't include ResourceYAMLEditor
+            // which handle reload / update buttons
+            if (ctx.data.metadata?.resourceVersion) {
+              navigate(flowCollectorEditPath);
+            }
             // first init schema & data when watch resource query got results
             if (schema == null) {
               setSchema(ctx.schema);
             }
             if (data == null) {
-              setData(ctx.data);
+              // slightly modify default example when creating a new resource
+              if (params.name !== 'cluster') {
+                const updatedData = _.cloneDeep(ctx.data) as any;
+                if (!updatedData.spec) {
+                  updatedData.spec = {};
+                }
+                if (!updatedData.spec.loki) {
+                  updatedData.spec.loki = {};
+                }
+                updatedData.spec.loki.mode = 'LokiStack'; // default to lokistack
+                setData(updatedData);
+              } else {
+                setData(ctx.data);
+              }
             }
             return (
               <PageSection id="pageSection">
@@ -146,44 +148,52 @@ export const FlowCollectorWizard: FC<FlowCollectorWizardProps> = props => {
                       <span className="co-pre-line">
                         {t(
                           // eslint-disable-next-line max-len
-                          'Network Observability Operator deploys a monitoring pipeline that consists in:\n - an eBPF agent, that generates network flows from captured packets\n - flowlogs-pipeline, a component that collects, enriches and exports these flows\n - a Console plugin for flows visualization with powerful filtering options, a topology representation and more\n\nFlow data is then available in multiple ways, each optional:\n - As Prometheus metrics\n - As raw flow logs stored in Grafana Loki\n - As raw flow logs exported to a collector\n\nThe FlowCollector resource is used to configure the operator and its managed components.\nThis setup will guide you on the common aspects of the FlowCollector configuration.'
+                          'The FlowCollector resource is used to configure the Network Observability operator and its managed components. When it is created, network flows start being collected.'
+                        )}
+                        <br /> <br />
+                        {t(
+                          // eslint-disable-next-line max-len
+                          'This wizard is a helper to create a first FlowCollector resource. It does not cover all the available configuration options, but only the most common ones.\nFor advanced configuration, please use YAML or the'
+                        )}{' '}
+                        <Button
+                          id="open-flow-collector-form"
+                          data-test-id="open-flow-collector-form"
+                          className="no-padding"
+                          variant="link"
+                          onClick={() => navigate(flowCollectorNewPath)}
+                        >
+                          {t('FlowCollector form')}
+                        </Button>
+                        {t(
+                          // eslint-disable-next-line max-len
+                          ', which includes more options such as:\n- Filtering options\n- Configuring custom exporters\n- Custom labels based on IP\n- Pod identification for secondary networks\n- Performance fine-tuning\nYou can always edit a FlowCollector later when you start with the simplified configuration.'
                         )}
                         <br /> <br />
                         {t('Operator configuration')}
                       </span>
                       {form(ctx.errors)}
                     </WizardStep>
-                    <WizardStep name={t('Capture')} id="capture">
+                    <WizardStep name={t('Processing')} id="processing">
                       {form(ctx.errors)}
                     </WizardStep>
-                    <WizardStep name={t('Pipeline')} id="pipeline">
+                    <WizardStep name={t('Loki')} id="loki">
                       {form(ctx.errors)}
                     </WizardStep>
                     <WizardStep
-                      name={t('Storage')}
-                      id="storage"
-                      steps={[step('loki', t('Loki')), step('prom', t('Prometheus'))]}
-                    />
-                    <WizardStep name={t('Integration')} id="console">
-                      {form(ctx.errors)}
-                    </WizardStep>
-                    <WizardStep name={t('Consumption')} id="consumption">
-                      <Consumption flowCollector={data} setSampling={setSampling} />
-                    </WizardStep>
-                    <WizardStep
-                      name={t('Review')}
-                      id="review-step"
-                      body={{ className: 'wizard-editor-container' }}
-                      footer={ContextSingleton.isStandalone() ? undefined : <></>}
+                      name={t('Consumption')}
+                      id="consumption"
+                      footer={
+                        <WizardFooterWrapper>
+                          <Button variant="primary" onClick={() => ctx.onSubmit(data)}>
+                            {t('Submit')}
+                          </Button>
+                          <Button variant="link" onClick={() => navigate('/')}>
+                            {t('Cancel')}
+                          </Button>
+                        </WizardFooterWrapper>
+                      }
                     >
-                      <ResourceYAMLEditor
-                        initialResource={data}
-                        onSave={content => {
-                          const updatedData = safeYAMLToJS(content);
-                          setData(updatedData);
-                          ctx.onSubmit(updatedData);
-                        }}
-                      />
+                      <Consumption flowCollector={data} setSampling={setSampling} />
                       <>{!_.isEmpty(ctx.errors) && <ErrorTemplate errors={ctx.errors} />}</>
                     </WizardStep>
                   </Wizard>

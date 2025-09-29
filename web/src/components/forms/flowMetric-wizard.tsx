@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ResourceYAMLEditor } from '@openshift-console/dynamic-plugin-sdk';
-import { PageSection, Title, Wizard, WizardStep, WizardStepType } from '@patternfly/react-core';
+import { Button, PageSection, Title, Wizard, WizardStep, WizardStepType } from '@patternfly/react-core';
 import { RJSFSchema } from '@rjsf/utils';
 import validator from '@rjsf/validator-ajv8';
 import _ from 'lodash';
@@ -8,6 +8,7 @@ import React, { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom-v5-compat';
 import { ContextSingleton } from '../../utils/context';
+import { flowMetricNewPath } from '../../utils/url';
 import { safeYAMLToJS } from '../../utils/yaml';
 import DynamicLoader, { back, navigate } from '../dynamic-loader/dynamic-loader';
 import { FlowMetricUISchema } from './config/uiSchema';
@@ -59,13 +60,10 @@ export const FlowMetricWizard: FC<FlowMetricWizardProps> = props => {
         setPaths(defaultPaths);
         break;
       case 'metric':
-        setPaths(['spec.metricName', 'spec.type', 'spec.buckets', 'spec.valueField', 'spec.divider', 'spec.labels']);
+        setPaths(['spec.metricName', 'spec.type', 'spec.valueField', 'spec.labels', 'spec.buckets']);
         break;
       case 'data':
-        setPaths(['spec.flatten', 'spec.remap', 'spec.direction', 'spec.filters']);
-        break;
-      case 'charts':
-        setPaths(['spec.charts']);
+        setPaths(['spec.remap', 'spec.direction', 'spec.filters']);
         break;
       default:
         setPaths([]);
@@ -83,6 +81,7 @@ export const FlowMetricWizard: FC<FlowMetricWizardProps> = props => {
         onSuccess={() => {
           back();
         }}
+        ignoreCSVExample={true}
       >
         <Consumer>
           {ctx => {
@@ -111,10 +110,26 @@ export const FlowMetricWizard: FC<FlowMetricWizardProps> = props => {
                       <span className="co-pre-line">
                         {t(
                           // eslint-disable-next-line max-len
-                          'You can create custom metrics out of the flowlogs data using the FlowMetric API. In every flowlogs data that is collected, there are a number of fields labeled per log, such as source name and destination name. These fields can be leveraged as Prometheus labels to enable the customization of cluster information on your dashboard.\nThis setup will guide you on the common aspects of the FlowMetric configuration.'
+                          'You can create custom metrics out of the network flows using the FlowMetric API. A FlowCollector resource must be created as well in order to produce the flows. Each flow consists in a set of fields with values, such as source name and destination name. These fields can be leveraged as Prometheus labels to enable customized metrics and dashboards.'
                         )}
+                        <br />
+                        <br />
+                        {t(
+                          // eslint-disable-next-line max-len
+                          'This simplified setup guides you through the common aspects of the FlowMetric configuration. For advanced configuration, please use YAML or the '
+                        )}
+                        <Button
+                          id="open-flow-metrics-form"
+                          data-test-id="open-flow-metrics-form"
+                          className="no-padding"
+                          variant="link"
+                          onClick={() => navigate(flowMetricNewPath)}
+                        >
+                          {t('FlowMetric form')}
+                        </Button>
+                        {'.'}
                         <br /> <br />
-                        {t('General configuration')}
+                        {t('Resource configuration')}
                       </span>
                       {form(ctx.errors)}
                     </WizardStep>
@@ -122,9 +137,6 @@ export const FlowMetricWizard: FC<FlowMetricWizardProps> = props => {
                       {form(ctx.errors)}
                     </WizardStep>
                     <WizardStep name={t('Data')} id="data">
-                      {form(ctx.errors)}
-                    </WizardStep>
-                    <WizardStep name={t('Charts')} id="charts">
                       {form(ctx.errors)}
                     </WizardStep>
                     <WizardStep

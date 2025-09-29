@@ -27,6 +27,8 @@ export type ResourceWatcherProps = {
   onSuccess?: (data: any) => void;
   children: JSX.Element;
   skipErrors?: boolean;
+  skipCRError?: boolean;
+  ignoreCSVExample?: boolean;
 };
 
 export type ResourceWatcherContext = {
@@ -67,7 +69,9 @@ export const ResourceWatcher: FC<ResourceWatcherProps> = ({
   namespace,
   onSuccess,
   children,
-  skipErrors
+  skipErrors,
+  skipCRError,
+  ignoreCSVExample
 }) => {
   if (!group || !version || !kind) {
     throw new Error('ResourceForm error: apiVersion and kind must be provided');
@@ -112,7 +116,7 @@ export const ResourceWatcher: FC<ResourceWatcherProps> = ({
   const model = useK8sModel(group, version, kind);
   const [errors, setErrors] = React.useState<string[]>([]);
 
-  if (!skipErrors && (csvLoadError || crdLoadError || crLoadError)) {
+  if (!skipErrors && (csvLoadError || crdLoadError || (!skipCRError && crLoadError))) {
     return (
       <ErrorComponent
         title={t('Unable to get {{kind}}', { kind })}
@@ -120,7 +124,7 @@ export const ResourceWatcher: FC<ResourceWatcherProps> = ({
         isLokiRelated={false}
       />
     );
-  } else if (!csvLoaded || !crdLoaded || !crLoaded) {
+  } else if (!csvLoaded || !crdLoaded || (!skipCRError && !crLoaded)) {
     return (
       <Bullseye data-test="loading-resource">
         <Spinner size="xl" />
@@ -130,20 +134,21 @@ export const ResourceWatcher: FC<ResourceWatcherProps> = ({
 
   const data = cr
     ? { apiVersion: `${group}/${version}`, kind, ...cr }
-    : matchingCSVs?.items?.length
+    : !ignoreCSVExample && matchingCSVs?.items?.length
     ? exampleForModel(
         matchingCSVs.items.find(csv => csv.spec.customresourcedefinitions?.owned?.some(crd => crd.kind === kind)),
         group,
         version,
         kind
       )
-    : {};
+    : { apiVersion: `${group}/${version}`, kind };
   const schema = crd?.spec?.versions?.find(v => v.name === version)?.schema?.openAPIV3Schema || null;
   // force name and namespace to be present in the form when namespaced
   if (crd?.spec?.scope === 'Namespaced') {
     data.metadata = {
       ...data.metadata,
-      namespace: namespace || 'default',
+      namespace: data.metadata?.namespace || 'netobserv', // for now, keep namespace if exists, or use netobserv by default
+      // namespace: namespace || 'netobserv', TODO: uncomment alongside with https://issues.redhat.com/browse/NETOBSERV-1690
       name: name
     };
     if (schema?.properties?.metadata) {
@@ -151,6 +156,7 @@ export const ResourceWatcher: FC<ResourceWatcherProps> = ({
         name: { type: 'string' },
         namespace: { type: 'string' }
       };
+      (schema.properties.metadata as any).required = ['name', 'namespace'];
     }
   }
   return (
