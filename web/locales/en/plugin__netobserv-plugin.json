@@ -217,7 +217,7 @@
   "You can create custom metrics out of the network flows using the FlowMetric API. A FlowCollector resource must be created as well in order to produce the flows. Each flow consists in a set of fields with values, such as source name and destination name. These fields can be leveraged as Prometheus labels to enable customized metrics and dashboards.": "You can create custom metrics out of the network flows using the FlowMetric API. A FlowCollector resource must be created as well in order to produce the flows. Each flow consists in a set of fields with values, such as source name and destination name. These fields can be leveraged as Prometheus labels to enable customized metrics and dashboards.",
   "This simplified setup guides you through the common aspects of the FlowMetric configuration. For advanced configuration, please use YAML or the ": "This simplified setup guides you through the common aspects of the FlowMetric configuration. For advanced configuration, please use YAML or the ",
   "FlowMetric form": "FlowMetric form",
-  "Resource configuration\nMake sure the namespace matches the one configured in FlowCollector.": "Resource configuration\nMake sure the namespace matches the one configured in FlowCollector.",
+  "Resource configuration": "Resource configuration",
   "Metric": "Metric",
   "Data": "Data",
   "Review": "Review",

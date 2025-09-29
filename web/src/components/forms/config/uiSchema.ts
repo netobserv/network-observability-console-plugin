@@ -1702,7 +1702,8 @@ export const FlowMetricUISchema: UiSchema = {
       'ui:title': 'Name'
     },
     namespace: {
-      'ui:title': 'Namespace'
+      'ui:title': 'Namespace',
+      'ui:description': 'It must match the one configured in FlowCollector.'
     },
     labels: {
       'ui:widget': 'hidden'
