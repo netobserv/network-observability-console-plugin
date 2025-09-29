@@ -129,9 +129,7 @@ export const FlowMetricWizard: FC<FlowMetricWizardProps> = props => {
                         </Button>
                         {'.'}
                         <br /> <br />
-                        {t(
-                          'Resource configuration\nMake sure the namespace matches the one configured in FlowCollector.'
-                        )}
+                        {t('Resource configuration')}
                       </span>
                       {form(ctx.errors)}
                     </WizardStep>
