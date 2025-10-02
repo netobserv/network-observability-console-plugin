@@ -28,7 +28,12 @@ module.exports = {
           {
             loader: 'ts-loader',
             options: {
+              transpileOnly: true,
               configFile: path.resolve(__dirname, 'tsconfig.json'),
+              compilerOptions: {
+                sourceMap: process.env.NODE_ENV === 'development',
+                incremental: true,
+              },
             },
           },
         ],
@@ -428,6 +433,9 @@ module.exports = {
   optimization: {
     chunkIds: 'named',
     minimize: false,
+  },
+  cache: {
+    type: 'filesystem',
   },
 };
 
