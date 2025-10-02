@@ -114,6 +114,7 @@ export const createPeer = (fields: Partial<TopologyMetricPeer>): TopologyMetricP
     addr: fields.addr,
     resource: fields.resource,
     owner: fields.owner,
+    subnetLabel: fields.subnetLabel,
     isAmbiguous: false,
     getDisplayName: () => undefined
   };
@@ -146,9 +147,15 @@ export const createPeer = (fields: Partial<TopologyMetricPeer>): TopologyMetricP
       }
     });
 
-  // fallback on address if nothing else available
-  if (!newPeer.resourceKind && fields.addr) {
-    newPeer.getDisplayName = () => fields.addr;
+  // fallback on address and/or subnet label if nothing else available
+  if (!newPeer.resourceKind) {
+    if (fields.subnetLabel && fields.addr) {
+      newPeer.getDisplayName = () => `${fields.subnetLabel} (${fields.addr})`;
+    } else if (fields.subnetLabel) {
+      newPeer.getDisplayName = () => fields.subnetLabel;
+    } else if (fields.addr) {
+      newPeer.getDisplayName = () => fields.addr;
+    }
   }
   return newPeer;
 };
@@ -173,7 +180,8 @@ const parseTopologyMetric = (
     owner:
       raw.metric.SrcK8S_Type !== raw.metric.SrcK8S_OwnerType
         ? nameAndType(raw.metric.SrcK8S_OwnerName, raw.metric.SrcK8S_OwnerType)
-        : undefined
+        : undefined,
+    subnetLabel: raw.metric.SrcSubnetLabel
   };
   const destFields: Partial<TopologyMetricPeer> = {
     addr: raw.metric.DstAddr,
@@ -181,7 +189,8 @@ const parseTopologyMetric = (
     owner:
       raw.metric.DstK8S_Type !== raw.metric.DstK8S_OwnerType
         ? nameAndType(raw.metric.DstK8S_OwnerName, raw.metric.DstK8S_OwnerType)
-        : undefined
+        : undefined,
+    subnetLabel: raw.metric.DstSubnetLabel
   };
   getCustomScopes().forEach(sc => {
     if (!sc.labels.length) {

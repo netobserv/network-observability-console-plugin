@@ -41,6 +41,8 @@ export const getPeerId = (fields: Partial<TopologyMetricPeer>): string => {
     parts.push('r=' + fields.resource.type + '.' + fields.resource.name);
   } else if (fields.addr) {
     parts.push('a=' + fields.addr);
+  } else if (fields.subnetLabel) {
+    parts.push('sl=' + fields.subnetLabel);
   }
   return parts.length > 0 ? parts.join(',') : idUnknown;
 };
