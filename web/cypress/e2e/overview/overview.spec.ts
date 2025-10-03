@@ -22,7 +22,11 @@ describe('netflow-overview', () => {
     cy.get('#overview-panels-modal').contains('Select all').click();
 
     //Save
+    cy.setupNetworkIdleTracking('GET', '/api/flow/metrics*');
     cy.get('#overview-panels-modal').contains('Save').click();
+
+    cy.waitForNetworkIdle();
+
     cy.checkPanels(c.availablePanelsCount);
 
     //reopen modal
