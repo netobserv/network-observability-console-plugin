@@ -164,13 +164,11 @@ Cypress.Commands.add('changeTimeRange', (name, topology) => {
   cy.checkContent(topology);
 });
 
-Cypress.Commands.add('changeMetricFunction', (name) => {
+Cypress.Commands.add('clickShowDuplicates', () => {
   cy.showAdvancedOptions();
   cy.showDisplayOptions();
-
-  cy.get('#metricFunction-dropdown').click();
-  cy.get('.pf-v5-c-menu__content').contains(name).click();
-  cy.get('[data-layer-id="default"]').children().its('length').should('be.gte', 5);
+  cy.get('#table-display-dropdown').contains('Show duplicates').click();
+  cy.checkContent();
 });
 
 Cypress.Commands.add('changeMetricType', (name) => {
@@ -189,6 +187,61 @@ Cypress.Commands.add('checkRecordField', (field, name, values) => {
       .children('.record-field-content,.record-field-flex-container')
       .should('contain', v);
   });
+});
+
+
+Cypress.Commands.add('setupNetworkIdleTracking', (method: string = 'GET', urlPattern: string = '/api/**') => {
+  cy.wrap({
+    requestCount: 0,
+    lastRequestTime: 0,
+    startTime: Date.now()
+  }).as('networkIdleTracker');
+
+  cy.intercept(method, urlPattern, (req) => {
+    cy.get('@networkIdleTracker').then((tracker: Cypress.networkIdleTracker) => {
+      tracker.requestCount++;
+      tracker.lastRequestTime = Date.now();
+    });
+    req.continue();
+  }).as('networkIdleActivity');
+});
+
+
+Cypress.Commands.add('waitForNetworkIdle', (idleTime: number = 3000, timeout: number = 60000) => {
+  cy.get('@networkIdleTracker', { timeout: timeout })
+    .then((tracker: Cypress.networkIdleTracker) => {
+      const startTime = Date.now();
+
+      const checkIdleCondition = () => {
+        const now = Date.now();
+
+        if (tracker.requestCount > 0 && (now - tracker.lastRequestTime) >= idleTime) {
+          return true;
+        }
+
+        if (tracker.requestCount === 0 && (now - startTime) >= idleTime) {
+          return true;
+        }
+
+        if (now - startTime > timeout) {
+          throw new Error('Timed out waiting for network idle.');
+        }
+
+        return false; 
+      };
+
+      const pollUntilIdle = () => {
+        const isIdle = checkIdleCondition();
+
+        if (isIdle) {
+          return;
+        } else {
+          return cy.wait(1000, { log: false }).then(pollUntilIdle);
+        }
+      };
+
+      return cy.then(pollUntilIdle);
+    });
 });
 
 declare global {
@@ -211,7 +264,16 @@ declare global {
       changeTimeRange(name: string, topology?: boolean): Chainable<Element>
       changeMetricFunction(name: string): Chainable<Element>
       changeMetricType(name: string): Chainable<Element>
-      checkRecordField(field: string, name: string, values: string[])
+      checkRecordField(field: string, name: string, values: string[]): Chainable<void>
+      clickShowDuplicates():Chainable<void>
+      setupNetworkIdleTracking(method?: string, urlPattern?: string): Chainable<void>
+      waitForNetworkIdle(idleTime?: number, timeout?: number): Chainable<void>
+
+      networkIdleTracker: {
+        requestCount: number;
+        lastRequestTime: number;
+        startTime: number;
+      };
     }
   }
 }
