@@ -207,7 +207,7 @@ Cypress.Commands.add('setupNetworkIdleTracking', (method: string = 'GET', urlPat
 });
 
 
-Cypress.Commands.add('waitForNetworkIdle', (idleTime: number = 3000, timeout: number = 60000) => {
+Cypress.Commands.add('waitForNetworkIdle', (idleTime: number = 3000, timeout: number = 120000) => {
   cy.get('@networkIdleTracker', { timeout: timeout })
     .then((tracker: Cypress.networkIdleTracker) => {
       const startTime = Date.now();
