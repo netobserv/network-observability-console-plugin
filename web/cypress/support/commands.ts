@@ -248,25 +248,41 @@ declare global {
   namespace Cypress {
     interface Chainable {
       openNetflowTrafficPage(clearCache?: boolean): Chainable<void>
-      showAdvancedOptions(): Chainable<Element>
-      showDisplayOptions(): Chainable<Element>
-      checkPanels(panels?: number): Chainable<Element>
-      openPanelsModal(): Chainable<Element>
-      checkColumns(groups?: number, cols?: number): Chainable<Element>
-      openColumnsModal(): Chainable<Element>
-      selectPopupItems(id: string, names: string[]): Chainable<Element>
-      checkPopupItems(id: string, ids: string[]): Chainable<Element>
-      sortColumn(name: string): Chainable<Element>
-      dropdownSelect(id: string, name: string): Chainable<Element>
-      checkContent(topology?: boolean): Chainable<Element>
-      addFilter(filter: string, value: string, topology?: boolean): Chainable<Element>
-      changeQueryOption(name: string, topology?: boolean): Chainable<Element>
-      changeTimeRange(name: string, topology?: boolean): Chainable<Element>
-      changeMetricFunction(name: string): Chainable<Element>
-      changeMetricType(name: string): Chainable<Element>
+      showAdvancedOptions(): Chainable<void>
+      showDisplayOptions(): Chainable<void>
+      checkPanels(panels?: number): Chainable<void>
+      openPanelsModal(): Chainable<void>
+      checkColumns(groups?: number, cols?: number): Chainable<void>
+      openColumnsModal(): Chainable<void>
+      selectPopupItems(id: string, names: string[]): Chainable<void>
+      checkPopupItems(id: string, ids: string[]): Chainable<void>
+      sortColumn(name: string): Chainable<void>
+      dropdownSelect(id: string, name: string): Chainable<void>
+      checkContent(topology?: boolean): Chainable<void>
+      addFilter(filter: string, value: string, topology?: boolean): Chainable<void>
+      changeQueryOption(name: string, topology?: boolean): Chainable<void>
+      changeTimeRange(name: string, topology?: boolean): Chainable<void>
+      changeMetricType(name: string): Chainable<void>
       checkRecordField(field: string, name: string, values: string[]): Chainable<void>
       clickShowDuplicates():Chainable<void>
+
+      /**
+       * Sets up network interception to track active requests for idle detection.
+       * This command *must* be called before `cy.waitForNetworkIdle`
+       *
+       * @param method HTTP method to intercept (default: 'GET')
+       * @param urlPattern URL pattern to intercept (default: '/api/**')
+       */
       setupNetworkIdleTracking(method?: string, urlPattern?: string): Chainable<void>
+
+      /**
+       * Waits until no intercepted requests (matching the patterns
+       * set in `setupNetworkIdleTracking`) have been active for `idleTime`,
+       * or until the `timeout` is reached.
+       *
+       * @param idleTime How long the network must be idle (in ms)
+       * @param timeout Total time to wait before timing out (in ms)
+       */
       waitForNetworkIdle(idleTime?: number, timeout?: number): Chainable<void>
 
       networkIdleTracker: {
