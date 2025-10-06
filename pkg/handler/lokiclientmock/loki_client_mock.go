@@ -21,7 +21,6 @@ func (o *LokiClientMock) Get(url string) ([]byte, int, error) {
 	parseNetEvents := false
 	mlog.Debugf("Get url: %s", url)
 
-
 	isLabel := strings.Contains(url, "/label/")
 	if isLabel {
 		path = "mocks/loki/namespaces.json"
