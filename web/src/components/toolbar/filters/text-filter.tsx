@@ -74,11 +74,10 @@ export const TextFilter: React.FC<TextFilterProps> = ({
       return;
     }
 
-    createFilterValue(filterDefinition, validation.val!).then(v => {
-      if (addFilter(v)) {
-        resetFilterValue();
-      }
-    });
+    const fv = createFilterValue(filterDefinition, validation.val!);
+    if (addFilter(fv)) {
+      resetFilterValue();
+    }
   }, [currentValue, allowEmpty, filterDefinition, setMessageWithDelay, setIndicator, addFilter, resetFilterValue]);
 
   return (

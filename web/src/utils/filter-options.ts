@@ -12,11 +12,24 @@ import { dscpValues } from './dscp';
 import { dropCauses, dropStates } from './pkt-drop';
 import { getPort, getService } from './port';
 import { tcpFlagsList } from './tcp-flags';
+import { ReadOnlyValue, ReadOnlyValues } from './values';
 
-export const noOption: (value: string) => Promise<FilterOption[]> = () => Promise.resolve([]);
+export const autocompleteEmpty: (value: string) => Promise<FilterOption[]> = () => Promise.resolve([]);
 
 const toFilterOption = (name: string): FilterOption => {
   return { name, value: name };
+};
+
+const startsWithPredicate = (itemName: string, itemValue: string, search: string) => {
+  return itemValue.startsWith(search) || itemName.toLowerCase().startsWith(search.toLowerCase());
+};
+
+const includePredicate = (itemName: string, itemValue: string, search: string) => {
+  return itemValue.includes(search) || itemName.toLowerCase().includes(search.toLowerCase());
+};
+
+const equalPredicate = (itemName: string, itemValue: string, search: string) => {
+  return itemValue === search || itemName.toLowerCase() === search.toLowerCase();
 };
 
 const protocolOptions: FilterOption[] = Object.values(protocols)
@@ -24,11 +37,8 @@ const protocolOptions: FilterOption[] = Object.values(protocols)
   .filter(proto => !_.isEmpty(proto.name));
 _.orderBy(protocolOptions, 'name');
 
-export const getProtocolOptions = (value: string): Promise<FilterOption[]> => {
-  const opts = protocolOptions.filter(
-    opt => opt.value.startsWith(value) || opt.name.toLowerCase().startsWith(value.toLowerCase())
-  );
-  return Promise.resolve(opts);
+export const autocompleteProtocol = (value: string): Promise<FilterOption[]> => {
+  return Promise.resolve(protocolOptions.filter(opt => startsWithPredicate(opt.name, opt.value, value)));
 };
 
 export const getDirectionOptions = (t: TFunction, allowInner: boolean): FilterOption[] => {
@@ -42,7 +52,7 @@ export const getDirectionOptions = (t: TFunction, allowInner: boolean): FilterOp
   return directions;
 };
 
-export const getDirectionOptionsAsync = (value: string, t: TFunction, allowInner: boolean): Promise<FilterOption[]> => {
+export const autocompleteDirection = (t: TFunction, allowInner: boolean, value: string): Promise<FilterOption[]> => {
   return Promise.resolve(
     getDirectionOptions(t, allowInner).filter(
       o => o.value === value || o.name.toLowerCase().includes(value.toLowerCase())
@@ -58,7 +68,7 @@ const matchOptions = (opts: FilterOption[], match: string): FilterOption[] => {
   }
 };
 
-export const getClusterOptions = (value: string): Promise<FilterOption[]> => {
+export const autocompleteCluster = (value: string): Promise<FilterOption[]> => {
   const clusters = autoCompleteCache.getClusters();
   if (clusters) {
     return Promise.resolve(matchOptions(clusters.map(toFilterOption), value));
@@ -69,7 +79,7 @@ export const getClusterOptions = (value: string): Promise<FilterOption[]> => {
   });
 };
 
-export const getUDNOptions = (value: string): Promise<FilterOption[]> => {
+export const autocompleteUDN = (value: string): Promise<FilterOption[]> => {
   const clusters = autoCompleteCache.getUDNs();
   if (clusters) {
     return Promise.resolve(matchOptions(clusters.map(toFilterOption), value));
@@ -80,7 +90,7 @@ export const getUDNOptions = (value: string): Promise<FilterOption[]> => {
   });
 };
 
-export const getZoneOptions = (value: string): Promise<FilterOption[]> => {
+export const autocompleteZone = (value: string): Promise<FilterOption[]> => {
   const zones = autoCompleteCache.getZones();
   if (zones) {
     return Promise.resolve(matchOptions(zones.map(toFilterOption), value));
@@ -91,7 +101,7 @@ export const getZoneOptions = (value: string): Promise<FilterOption[]> => {
   });
 };
 
-export const getNamespaceOptions = (value: string): Promise<FilterOption[]> => {
+export const autocompleteNamespace = (value: string): Promise<FilterOption[]> => {
   const namespaces = autoCompleteCache.getNamespaces();
   if (namespaces) {
     return Promise.resolve(matchOptions(namespaces.map(toFilterOption), value));
@@ -102,7 +112,7 @@ export const getNamespaceOptions = (value: string): Promise<FilterOption[]> => {
   });
 };
 
-export const getNameOptions = (kind: string, namespace: string, name: string): Promise<FilterOption[]> => {
+export const autocompleteName = (kind: string, namespace: string, name: string): Promise<FilterOption[]> => {
   if (autoCompleteCache.hasNames(kind, namespace)) {
     const options = (autoCompleteCache.getNames(kind, namespace) || []).map(toFilterOption);
     return Promise.resolve(matchOptions(options, name));
@@ -113,76 +123,93 @@ export const getNameOptions = (kind: string, namespace: string, name: string): P
   });
 };
 
-export const getKindOptions = (value: string): Promise<FilterOption[]> => {
+export const autocompleteKind = (value: string): Promise<FilterOption[]> => {
   const options = autoCompleteCache.getKinds().map(toFilterOption);
   return Promise.resolve(matchOptions(options, value));
 };
 
-export const getResourceOptions = (value: string): Promise<FilterOption[]> => {
+export const autocompleteResource = (value: string): Promise<FilterOption[]> => {
   const parts = splitResource(value);
   switch (parts.stage) {
     case SplitStage.PartialKind:
-      return getKindOptions(parts.kind);
+      return autocompleteKind(parts.kind);
     case SplitStage.PartialNamespace:
-      return getNamespaceOptions(parts.namespace);
+      return autocompleteNamespace(parts.namespace);
     case SplitStage.Completed:
-      return getNameOptions(parts.kind, parts.namespace, parts.name);
+      return autocompleteName(parts.kind, parts.namespace, parts.name);
   }
 };
 
-export const getPortOptions = (value: string): Promise<FilterOption[]> => {
+export const autocompletePort = (value: string): Promise<FilterOption[]> => {
+  const opt = portValueToOption(value);
+  return Promise.resolve(opt ? [opt] : []);
+};
+
+export const portValueToOption = (value: string): FilterOption | undefined => {
   const isNumber = !isNaN(Number(value));
   const foundService = isNumber ? getService(Number(value)) : null;
   const foundPort = !isNumber ? getPort(value) : null;
   if (foundService) {
-    return Promise.resolve([{ name: foundService, value: value }]);
+    return { name: foundService, value: value };
   } else if (foundPort) {
-    return Promise.resolve([{ name: value, value: foundPort }]);
+    return { name: value, value: foundPort };
   }
-  return Promise.resolve([]);
+  return undefined;
 };
 
-export const getDropStateOptions = (value: string): Promise<FilterOption[]> => {
-  return Promise.resolve(
-    dropStates
-      .filter(opt => String(opt.value).includes(value) || opt.name.toLowerCase().includes(value.toLowerCase()))
-      .map(v => ({ name: v.name.replace('TCP_', ''), value: v.name })) // map only names here since codes are stringified in storage
-  );
+type ROVMapping = {
+  rov: ReadOnlyValues;
+  mapper: (v: ReadOnlyValue) => FilterOption;
 };
 
-export const getDropCauseOptions = (value: string): Promise<FilterOption[]> => {
-  return Promise.resolve(
-    dropCauses
-      .filter(opt => String(opt.value).includes(value) || opt.name.toLowerCase().includes(value.toLowerCase()))
-      .map(v => ({ name: v.name.replace('SKB_DROP_REASON_', ''), value: v.name })) // map only names here since codes are stringified in storage
-  );
+// map only names here since codes are stringified in storage
+const dropStateMapping: ROVMapping = {
+  rov: dropStates,
+  mapper: (v: ReadOnlyValue): FilterOption => ({ name: v.name.replace('TCP_', ''), value: v.name })
+};
+const dropCauseMapping: ROVMapping = {
+  rov: dropCauses,
+  mapper: (v: ReadOnlyValue): FilterOption => ({ name: v.name.replace('SKB_DROP_REASON_', ''), value: v.name })
+};
+const dnsRCodeMapping: ROVMapping = {
+  rov: dnsRCodes,
+  mapper: (v: ReadOnlyValue): FilterOption => ({ name: v.name, value: v.name })
+};
+const dnsErrMapping: ROVMapping = {
+  rov: dnsErrors,
+  mapper: (v: ReadOnlyValue): FilterOption => ({ name: v.name, value: String(v.value) })
+};
+const dscpMapping: ROVMapping = {
+  rov: dscpValues,
+  mapper: (v: ReadOnlyValue): FilterOption => ({ name: v.name, value: String(v.value) })
 };
 
-export const getDnsResponseCodeOptions = (value: string): Promise<FilterOption[]> => {
-  return Promise.resolve(
-    dnsRCodes
-      .filter(opt => String(opt.value).includes(value) || opt.name.toLowerCase().includes(value.toLowerCase()))
-      .map(v => ({ name: v.name, value: v.name })) // map only names here since codes are stringified in storage
-  );
+const autocompleteFromROV = (value: string, mapping: ROVMapping) => {
+  const filtered = mapping.rov.filter(opt => includePredicate(opt.name, String(opt.value), value)).map(mapping.mapper);
+  return Promise.resolve(filtered);
 };
 
-export const getDnsErrorCodeOptions = (value: string): Promise<FilterOption[]> => {
-  return Promise.resolve(
-    dnsErrors
-      .filter(opt => String(opt.value).includes(value) || opt.name.toLowerCase().includes(value.toLowerCase()))
-      .map(v => ({ name: v.name, value: String(v.value) }))
-  );
+export const autocompleteDropState = (value: string): Promise<FilterOption[]> => {
+  return autocompleteFromROV(value, dropStateMapping);
 };
 
-export const getDSCPOptions = (value: string): Promise<FilterOption[]> => {
-  return Promise.resolve(
-    dscpValues
-      .filter(opt => String(opt.value).includes(value) || opt.name.toLowerCase().includes(value.toLowerCase()))
-      .map(v => ({ name: v.name, value: String(v.value) }))
-  );
+export const autocompleteDropCause = (value: string): Promise<FilterOption[]> => {
+  return autocompleteFromROV(value, dropCauseMapping);
 };
 
-export const getTCPFlagsOptions = (value: string): Promise<FilterOption[]> => {
+export const autocompleteDnsResponseCode = (value: string): Promise<FilterOption[]> => {
+  return autocompleteFromROV(value, dnsRCodeMapping);
+};
+
+export const autocompleteDnsErrorCode = (value: string): Promise<FilterOption[]> => {
+  return autocompleteFromROV(value, dnsErrMapping);
+};
+
+export const autocompleteDSCP = (value: string): Promise<FilterOption[]> => {
+  return autocompleteFromROV(value, dscpMapping);
+};
+
+export const autocompleteTCPFlags = (value: string): Promise<FilterOption[]> => {
   return Promise.resolve(
     tcpFlagsList
       .filter(opt => opt.name.toLowerCase().includes(value.toLowerCase()))
@@ -190,12 +217,35 @@ export const getTCPFlagsOptions = (value: string): Promise<FilterOption[]> => {
   );
 };
 
-export const findProtocolOption = (nameOrVal: string) => {
-  return protocolOptions.find(p => p.name.toLowerCase() === nameOrVal.toLowerCase() || p.value === nameOrVal);
+export const findProtocolOption = (search: string) => {
+  return protocolOptions.find(opt => equalPredicate(opt.name, opt.value, search));
 };
 
-export const findDirectionOption = (nameOrVal: string, t: TFunction) => {
-  return getDirectionOptions(t, true).find(
-    o => o.name.toLowerCase() === nameOrVal.toLowerCase() || o.value === nameOrVal
-  );
+export const findDirectionOption = (t: TFunction, allowInner: boolean, search: string) => {
+  return getDirectionOptions(t, allowInner).find(opt => equalPredicate(opt.name, opt.value, search));
+};
+
+const findFromROV = (search: string, mapping: ROVMapping): FilterOption | undefined => {
+  const rov = mapping.rov.find(opt => equalPredicate(opt.name, String(opt.value), search));
+  return rov ? mapping.mapper(rov) : undefined;
+};
+
+export const findDropStateOption = (search: string): FilterOption | undefined => {
+  return findFromROV(search, dropStateMapping);
+};
+
+export const findDropCauseOption = (search: string): FilterOption | undefined => {
+  return findFromROV(search, dropCauseMapping);
+};
+
+export const findDnsResponseCodeOption = (search: string): FilterOption | undefined => {
+  return findFromROV(search, dnsRCodeMapping);
+};
+
+export const findDnsErrorCodeOption = (search: string): FilterOption | undefined => {
+  return findFromROV(search, dnsErrMapping);
+};
+
+export const findDSCPOption = (search: string): FilterOption | undefined => {
+  return findFromROV(search, dscpMapping);
 };

@@ -67,7 +67,8 @@ export interface FilterDefinition {
   name: string;
   component: FilterComponent;
   category?: FilterCategory;
-  getOptions: (value: string) => Promise<FilterOption[]>;
+  findOption: (value: string) => FilterOption | undefined;
+  autocomplete: (value: string) => Promise<FilterOption[]>;
   validate: (value: string) => { val?: string; err?: string };
   checkCompletion?: (value: string, selected: string) => { completed: boolean; option: FilterOption };
   autoCompleteAddsQuotes?: boolean;
@@ -101,22 +102,11 @@ export interface FilterOption {
   value: string;
 }
 
-export const createFilterValue = (def: FilterDefinition, value: string): Promise<FilterValue> => {
-  return (
-    def
-      .getOptions(value)
-      .then(opts => {
-        const option = opts.find(opt => opt.name === value || opt.value === value);
-        return option
-          ? { v: option.value, display: option.name }
-          : { v: value, display: value === undefinedValue ? 'n/a' : undefined };
-      })
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      .catch(_ => {
-        // In case of error, still create the minimal possible FilterValue
-        return { v: value };
-      })
-  );
+export const createFilterValue = (def: FilterDefinition, value: string): FilterValue => {
+  const option = def.findOption(value);
+  return option
+    ? { v: option.value, display: option.name }
+    : { v: value, display: value === undefinedValue ? 'n/a' : undefined };
 };
 
 export const hasEnabledFilterValues = (filter: Filter) => {

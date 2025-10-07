@@ -235,7 +235,7 @@ export const RecordPanel: React.FC<RecordDrawerProps> = ({
             const values = [
               {
                 v: Array.isArray(value) ? value.join(value.length == 2 ? '.' : ':') : valueStr,
-                display: (await def.getOptions(valueStr)).find(o => o.value === valueStr)?.name
+                display: (await def.autocomplete(valueStr)).find(o => o.value === valueStr)?.name
               }
             ];
             // TODO: is it relevant to show composed columns?
