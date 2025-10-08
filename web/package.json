@@ -104,7 +104,7 @@
   },
   "dependencies": {
     "@patternfly/patternfly": "4.224.2",
-    "@patternfly/react-charts": "6.94.19",
+    "@patternfly/react-charts": "6.94.21",
     "@patternfly/react-core": "4.276.11",
     "@patternfly/react-table": "4.113.0",
     "@patternfly/react-topology": "4.93.6",
