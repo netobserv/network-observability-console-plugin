@@ -32,7 +32,7 @@
     "@babel/preset-env": "^7.17.12",
     "@babel/preset-react": "^7.17.12",
     "@babel/preset-typescript": "^7.17.12",
-    "@openshift-console/dynamic-plugin-sdk": "0.0.19",
+    "@openshift-console/dynamic-plugin-sdk": "0.0.21",
     "@openshift-console/dynamic-plugin-sdk-webpack": "0.0.10",
     "@testing-library/react": "^12.1.2",
     "@types/copy-webpack-plugin": "8.0.1",
