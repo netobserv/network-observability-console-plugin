@@ -107,7 +107,7 @@
     "@patternfly/react-charts": "6.94.19",
     "@patternfly/react-core": "4.276.11",
     "@patternfly/react-table": "4.113.0",
-    "@patternfly/react-topology": "4.93.6",
+    "@patternfly/react-topology": "4.93.7",
     "axios": "^1.12.0",
     "html-to-image": "^1.11.11",
     "i18next": "^21.8.14",
