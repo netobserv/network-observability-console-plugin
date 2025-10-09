@@ -25,7 +25,7 @@ func (o *LokiClientMock) Get(url string) ([]byte, int, error) {
 	if isLabel {
 		path = "mocks/loki/namespaces.json"
 	} else {
-		if strings.Contains(url, "query=topk") {
+		if strings.Contains(url, "query=topk") || strings.Contains(url, "query=bottomk") {
 			path = "mocks/loki/flow_metrics"
 
 			if strings.Contains(url, "|unwrap%20PktDrop") {
@@ -72,8 +72,32 @@ func (o *LokiClientMock) Get(url string) ([]byte, int, error) {
 
 	mlog.Debugf("Reading file path: %s", path)
 	file, err := os.ReadFile(path)
+	mlog.Debugf("here")
 	if err != nil {
-		return nil, 500, err
+		// return nil, 500, err
+		emptyResponse := []byte(`{
+			"status": "success",
+			"data": {
+				"resultType": "matrix",
+				"result": []
+			}
+		}`)
+
+		var qr model.QueryResponse
+		err = json.Unmarshal(emptyResponse, &qr)
+		if err != nil {
+			return nil, 500, err
+		}
+		for _, s := range qr.Data.Result.(model.Streams) {
+			for i := range s.Entries {
+				s.Entries[i].Line = decoders.NetworkEventsToString(s.Entries[i].Line)
+			}
+		}
+		emptyResponse, err = json.Marshal(qr)
+		if err != nil {
+			return nil, 500, err
+		}
+		return emptyResponse, 200, nil
 	}
 
 	if parseNetEvents {

@@ -164,13 +164,11 @@ Cypress.Commands.add('changeTimeRange', (name, topology) => {
   cy.checkContent(topology);
 });
 
-Cypress.Commands.add('changeMetricFunction', (name) => {
+Cypress.Commands.add('clickShowDuplicates', () => {
   cy.showAdvancedOptions();
   cy.showDisplayOptions();
-
-  cy.get('#metricFunction-dropdown').click();
-  cy.get('.pf-v5-c-menu__content').contains(name).click();
-  cy.get('[data-layer-id="default"]').children().its('length').should('be.gte', 5);
+  cy.get('#table-display-dropdown').contains('Show duplicates').click();
+  cy.checkContent();
 });
 
 Cypress.Commands.add('changeMetricType', (name) => {
@@ -191,27 +189,107 @@ Cypress.Commands.add('checkRecordField', (field, name, values) => {
   });
 });
 
+
+Cypress.Commands.add('setupNetworkIdleTracking', (method: string = 'GET', urlPattern: string = '/api/**') => {
+  cy.wrap({
+    requestCount: 0,
+    lastRequestTime: 0,
+    startTime: Date.now()
+  }).as('networkIdleTracker');
+
+  cy.intercept(method, urlPattern, (req) => {
+    cy.get('@networkIdleTracker').then((tracker: Cypress.networkIdleTracker) => {
+      tracker.requestCount++;
+      tracker.lastRequestTime = Date.now();
+    });
+    req.continue();
+  }).as('networkIdleActivity');
+});
+
+
+Cypress.Commands.add('waitForNetworkIdle', (idleTime: number = 3000, timeout: number = 120000) => {
+  cy.get('@networkIdleTracker', { timeout: timeout })
+    .then((tracker: Cypress.networkIdleTracker) => {
+      const startTime = Date.now();
+
+      const checkIdleCondition = () => {
+        const now = Date.now();
+
+        if (tracker.requestCount > 0 && (now - tracker.lastRequestTime) >= idleTime) {
+          return true;
+        }
+
+        if (tracker.requestCount === 0 && (now - startTime) >= idleTime) {
+          return true;
+        }
+
+        if (now - startTime > timeout) {
+          throw new Error('Timed out waiting for network idle.');
+        }
+
+        return false; 
+      };
+
+      const pollUntilIdle = () => {
+        const isIdle = checkIdleCondition();
+
+        if (isIdle) {
+          return;
+        } else {
+          return cy.wait(1000, { log: false }).then(pollUntilIdle);
+        }
+      };
+
+      return cy.then(pollUntilIdle);
+    });
+});
+
 declare global {
   namespace Cypress {
     interface Chainable {
       openNetflowTrafficPage(clearCache?: boolean): Chainable<void>
-      showAdvancedOptions(): Chainable<Element>
-      showDisplayOptions(): Chainable<Element>
-      checkPanels(panels?: number): Chainable<Element>
-      openPanelsModal(): Chainable<Element>
-      checkColumns(groups?: number, cols?: number): Chainable<Element>
-      openColumnsModal(): Chainable<Element>
-      selectPopupItems(id: string, names: string[]): Chainable<Element>
-      checkPopupItems(id: string, ids: string[]): Chainable<Element>
-      sortColumn(name: string): Chainable<Element>
-      dropdownSelect(id: string, name: string): Chainable<Element>
-      checkContent(topology?: boolean): Chainable<Element>
-      addFilter(filter: string, value: string, topology?: boolean): Chainable<Element>
-      changeQueryOption(name: string, topology?: boolean): Chainable<Element>
-      changeTimeRange(name: string, topology?: boolean): Chainable<Element>
-      changeMetricFunction(name: string): Chainable<Element>
-      changeMetricType(name: string): Chainable<Element>
-      checkRecordField(field: string, name: string, values: string[])
+      showAdvancedOptions(): Chainable<void>
+      showDisplayOptions(): Chainable<void>
+      checkPanels(panels?: number): Chainable<void>
+      openPanelsModal(): Chainable<void>
+      checkColumns(groups?: number, cols?: number): Chainable<void>
+      openColumnsModal(): Chainable<void>
+      selectPopupItems(id: string, names: string[]): Chainable<void>
+      checkPopupItems(id: string, ids: string[]): Chainable<void>
+      sortColumn(name: string): Chainable<void>
+      dropdownSelect(id: string, name: string): Chainable<void>
+      checkContent(topology?: boolean): Chainable<void>
+      addFilter(filter: string, value: string, topology?: boolean): Chainable<void>
+      changeQueryOption(name: string, topology?: boolean): Chainable<void>
+      changeTimeRange(name: string, topology?: boolean): Chainable<void>
+      changeMetricType(name: string): Chainable<void>
+      checkRecordField(field: string, name: string, values: string[]): Chainable<void>
+      clickShowDuplicates():Chainable<void>
+
+      /**
+       * Sets up network interception to track active requests for idle detection.
+       * This command *must* be called before `cy.waitForNetworkIdle`
+       *
+       * @param method HTTP method to intercept (default: 'GET')
+       * @param urlPattern URL pattern to intercept (default: '/api/**')
+       */
+      setupNetworkIdleTracking(method?: string, urlPattern?: string): Chainable<void>
+
+      /**
+       * Waits until no intercepted requests (matching the patterns
+       * set in `setupNetworkIdleTracking`) have been active for `idleTime`,
+       * or until the `timeout` is reached.
+       *
+       * @param idleTime How long the network must be idle (in ms)
+       * @param timeout Total time to wait before timing out (in ms)
+       */
+      waitForNetworkIdle(idleTime?: number, timeout?: number): Chainable<void>
+
+      networkIdleTracker: {
+        requestCount: number;
+        lastRequestTime: number;
+        startTime: number;
+      };
     }
   }
 }
