@@ -54,7 +54,7 @@
     "@wojtekmaj/enzyme-adapter-react-17": "^0.6.6",
     "babel-loader": "^8.2.5",
     "babel-preset-react": "^6.24.1",
-    "copy-webpack-plugin": "6.4.1",
+    "copy-webpack-plugin": "13.0.1",
     "css-loader": "^6.5.1",
     "cypress": "13.6.5",
     "enzyme": "3.11.0",
