@@ -51,7 +51,7 @@
     "@typescript-eslint/eslint-plugin": "5.45.0",
     "@typescript-eslint/parser": "5.45.0",
     "@typescript-eslint/typescript-estree": "5.45.0",
-    "@wojtekmaj/enzyme-adapter-react-17": "^0.6.6",
+    "@wojtekmaj/enzyme-adapter-react-17": "^0.8.0",
     "babel-loader": "^8.2.5",
     "babel-preset-react": "^6.24.1",
     "copy-webpack-plugin": "6.4.1",
