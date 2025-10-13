@@ -39,7 +39,7 @@
     "@types/enzyme": "3.10.x",
     "@types/jest": "27.0.3",
     "@types/jsdom": "^16.2.13",
-    "@types/lodash": "^4.14.178",
+    "@types/lodash": "^4.17.20",
     "@types/murmurhash-js": "^1.0.3",
     "@types/port-numbers": "^5.0.0",
     "@types/react": "^17.0.1",
