@@ -104,7 +104,7 @@
   },
   "dependencies": {
     "@jpinsonneau/html-to-image": "^1.11.13",
-    "@patternfly/patternfly": "4.224.2",
+    "@patternfly/patternfly": "4.224.5",
     "@patternfly/react-charts": "6.94.19",
     "@patternfly/react-core": "4.276.11",
     "@patternfly/react-table": "4.113.0",
