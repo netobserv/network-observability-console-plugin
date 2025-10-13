@@ -1,4 +1,78 @@
-[
+#!/bin/bash
+
+if [ "$1" == "static" ]; then
+  echo '[
+  {
+    "type": "console.page/route",
+    "properties": {
+      "path": "/k8s/ns/:namespace/operators.coreos.com~v1alpha1~ClusterServiceVersion/:operator/flows.netobserv.io~v1beta2~FlowCollector/~new",
+      "component": {
+        "$codeRef": "flowCollectorWizard.default"
+      }
+    }
+  },
+  {
+    "type": "console.page/route",
+    "properties": {
+      "path": [
+        "/k8s/cluster/flows.netobserv.io~v1beta2~FlowCollector/~new",
+        "/k8s/cluster/flows.netobserv.io~v1beta2~FlowCollector/:name"
+      ],
+      "component": {
+        "$codeRef": "flowCollectorForm.default"
+      }
+    }
+  },
+  {
+    "type": "console.page/route",
+    "properties": {
+      "path": "/k8s/cluster/flows.netobserv.io~v1beta2~FlowCollector/status",
+      "component": {
+        "$codeRef": "flowCollectorStatus.default"
+      }
+    }
+  },
+  {
+    "type": "console.page/route",
+    "properties": {
+      "path": "k8s/ns/:namespace/operators.coreos.com~v1alpha1~ClusterServiceVersion/:operator/flows.netobserv.io~v1alpha1~FlowMetric/~new",
+      "component": {
+        "$codeRef": "flowMetricWizard.default"
+      }
+    }
+  },
+  {
+    "type": "console.page/route",
+    "properties": {
+      "path": [
+        "/k8s/ns/:namespace/clusterserviceversions/:operator/flows.netobserv.io~v1alpha1~FlowMetric/:name",
+        "/k8s/ns/:namespace/flows.netobserv.io~v1alpha1~FlowMetric/~new",
+        "/k8s/ns/:namespace/flows.netobserv.io~v1alpha1~FlowMetric/:name"
+      ],
+      "component": {
+        "$codeRef": "flowMetricForm.default"
+      }
+    }
+  }
+]' > console-extensions.json
+  echo $(cat package.json | jq '.consolePlugin = {
+    "name": "netobserv-plugin-static",
+    "version": "0.1.0",
+    "displayName": "NetObserv Static Plugin for OCP Console",
+    "description": "This plugin adds custom forms for FlowCollector and FlowMetrics API",
+    "exposedModules": {
+      "flowCollectorWizard": "./components/forms/flowCollector-wizard.tsx",
+      "flowCollectorForm": "./components/forms/flowCollector.tsx",
+      "flowCollectorStatus": "./components/forms/flowCollector-status.tsx",
+      "flowMetricWizard": "./components/forms/flowMetric-wizard.tsx",
+      "flowMetricForm": "./components/forms/flowMetric.tsx"
+    },
+    "dependencies": {
+      "@console/pluginAPI": "*"
+    }
+  }') > package.json
+else
+  echo '[
   {
     "type": "console.flag",
     "properties": {
@@ -286,4 +360,19 @@
       }
     }
   }
-]
+]' > console-extensions.json
+  echo $(cat package.json | jq '.consolePlugin = {
+    "name": "netobserv-plugin",
+    "version": "0.1.0",
+    "displayName": "NetObserv Plugin for Console",
+    "description": "This plugin adds network observability functionality to Openshift console",
+    "exposedModules": {
+      "netflowParent": "./components/netflow-traffic-parent.tsx",
+      "netflowTab": "./components/netflow-traffic-tab.tsx",
+      "netflowDevTab": "./components/netflow-traffic-dev-tab.tsx"
+    },
+    "dependencies": {
+      "@console/pluginAPI": "*"
+    }
+  }') > package.json
+fi

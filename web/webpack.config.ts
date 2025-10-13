@@ -100,6 +100,10 @@ module.exports = {
   },
 };
 
+if (process.env.FLAVOR === 'static') {
+  module.exports.output.path = path.resolve(__dirname, 'dist', 'static');
+}
+
 if (process.env.NODE_ENV === 'production') {
   module.exports.mode = 'production';
   module.exports.output.filename = '[name]-bundle-[hash].min.js';

@@ -9,6 +9,7 @@ import * as reactRouterDom from 'react-router-dom';
  */
 type NavFunc = (to: string, opts?: any) => void;
 let navFunc: NavFunc | null = null;
+let backFunc: (() => void) | null = null;
 
 export const loadNavFunction = () => {
   const genericReactRouterDom = reactRouterDom as any;
@@ -18,6 +19,7 @@ export const loadNavFunction = () => {
   } else if (genericReactRouterDom['useHistory']) {
     console.log('loading nav function from react-router useHistory');
     setNavFunction(genericReactRouterDom['useHistory']().push);
+    setBackFunction(genericReactRouterDom['useHistory']().goBack);
   } else {
     console.error("can't load nav function from react-router");
   }
@@ -25,6 +27,10 @@ export const loadNavFunction = () => {
 
 export const setNavFunction = (f: NavFunc) => {
   navFunc = f;
+};
+
+export const setBackFunction = (f: () => void) => {
+  backFunc = f;
 };
 
 export const navigate = (to: string, opts?: any) => {
@@ -36,6 +42,18 @@ export const navigate = (to: string, opts?: any) => {
     navFunc(to, opts);
   } else {
     console.error('navigate error; navFunc is not initialized', navFunc);
+  }
+};
+
+export const back = () => {
+  if (!backFunc) {
+    loadNavFunction();
+  }
+
+  if (backFunc) {
+    backFunc();
+  } else {
+    console.error('back error; backFunc is not initialized', backFunc);
   }
 };
 

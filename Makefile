@@ -228,3 +228,4 @@ endif
 include .mk/cypress.mk
 include .mk/shortcuts.mk
 include .mk/standalone.mk
+include .mk/static.mk

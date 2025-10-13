@@ -145,12 +145,16 @@ type Config struct {
 	Frontend   Frontend   `yaml:"frontend" json:"frontend"`
 	Server     Server     `yaml:"server,omitempty" json:"server,omitempty"`
 	Path       string     `yaml:"-" json:"-"`
+	Static     bool
 }
 
 func ReadFile(version, date, filename string) (*Config, error) {
+	isStatic := len(filename) == 0
+
 	// set default values
 	cfg := Config{
-		Path: filename,
+		Path:   filename,
+		Static: isStatic,
 		Server: Server{
 			Port:        9001,
 			MetricsPort: 9002,
@@ -242,7 +246,7 @@ func (c *Config) IsPromEnabled() bool {
 }
 
 func (c *Config) Validate() error {
-	if !c.IsLokiEnabled() && !c.IsPromEnabled() {
+	if !c.Static && !c.IsLokiEnabled() && !c.IsPromEnabled() {
 		return errors.New("neither Loki nor Prometheus is configured; at least one of them should have a URL defined")
 	}
 

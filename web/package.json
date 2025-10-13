@@ -3,8 +3,10 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "clean": "rm -rf ./dist",
+    "clean": "rm -rf ./dist && ./manage-extension.sh",
+    "clean:static": "rm -rf ./dist/static && ./manage-extension.sh static",
     "build": "npm run clean && NODE_ENV=production npm run ts-node ./node_modules/.bin/webpack",
+    "build:static": "npm run clean:static && FLAVOR=static NODE_ENV=production npm run ts-node ./node_modules/.bin/webpack",
     "build:dev": "npm run clean && npm run ts-node ./node_modules/.bin/webpack",
     "build:standalone": "npm run clean && webpack --config webpack.standalone.ts",
     "start": "npm run ts-node-transpile ./node_modules/.bin/webpack serve",
@@ -38,6 +40,7 @@
     "@types/copy-webpack-plugin": "8.0.1",
     "@types/enzyme": "3.10.x",
     "@types/jest": "27.0.3",
+    "@types/js-yaml": "^4.0.9",
     "@types/jsdom": "^16.2.13",
     "@types/lodash": "^4.17.20",
     "@types/murmurhash-js": "^1.0.3",
@@ -88,30 +91,20 @@
     "webpack-dev-server": "^4.6.0",
     "webpack-node-externals": "^3.0.0"
   },
-  "consolePlugin": {
-    "name": "netobserv-plugin",
-    "version": "0.1.0",
-    "displayName": "NetObserv Plugin for Console",
-    "description": "This plugin adds network observability functionality to Openshift console",
-    "exposedModules": {
-      "netflowParent": "./components/netflow-traffic-parent.tsx",
-      "netflowTab": "./components/netflow-traffic-tab.tsx",
-      "netflowDevTab": "./components/netflow-traffic-dev-tab.tsx"
-    },
-    "dependencies": {
-      "@console/pluginAPI": "*"
-    }
-  },
   "dependencies": {
     "@jpinsonneau/html-to-image": "^1.11.13",
     "@patternfly/patternfly": "4.224.2",
     "@patternfly/react-charts": "6.94.19",
+    "@patternfly/react-code-editor": "4.82.122",
     "@patternfly/react-core": "4.276.11",
     "@patternfly/react-table": "4.113.0",
     "@patternfly/react-topology": "4.93.6",
+    "@rjsf/core": "^5.24.12",
+    "@rjsf/validator-ajv8": "^5.24.12",
     "axios": "^1.12.0",
     "i18next": "^21.8.14",
     "i18next-http-backend": "^1.0.21",
+    "js-yaml": "^4.1.0",
     "murmurhash-js": "^1.0.0",
     "percentile": "^1.6.0",
     "port-numbers": "^6.0.1",
