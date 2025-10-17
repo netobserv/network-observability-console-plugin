@@ -106,7 +106,7 @@
     "@jpinsonneau/html-to-image": "^1.11.13",
     "@patternfly/patternfly": "4.224.2",
     "@patternfly/react-charts": "6.94.19",
-    "@patternfly/react-core": "4.276.11",
+    "@patternfly/react-core": "6.4.0",
     "@patternfly/react-table": "4.113.0",
     "@patternfly/react-topology": "4.93.6",
     "axios": "^1.12.0",
