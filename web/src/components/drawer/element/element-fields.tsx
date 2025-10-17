@@ -81,6 +81,20 @@ export const ElementFields: React.FC<ElementFieldsProps> = ({
       forceLabel = forceAsText = undefined;
     }
   });
+  if (data.peer.subnetLabel) {
+    fragments.push(
+      <ElementField
+        id={id + '-subnet-label'}
+        key={id + '-subnet-label'}
+        label={t('Subnet label')}
+        activeFilters={activeFilters}
+        filterType={'resource'}
+        peer={createPeer({ subnetLabel: data.peer.subnetLabel })}
+        setFilters={setFilters}
+        filterDefinitions={filterDefinitions}
+      />
+    );
+  }
   if (data.peer.addr) {
     fragments.push(
       <ElementField
@@ -104,7 +118,11 @@ export const ElementFields: React.FC<ElementFieldsProps> = ({
         <TextContent id={id + '-no-infos'} className="record-field-container">
           {
             <Text component={TextVariants.p}>
-              {t('No information available for this content. Change scope to get more details.')}
+              {t('No information available for this content. Decrease scope aggregation to get more details.')}
+              <br />
+              {t(
+                'You may also configure subnet labels in the FlowCollector resource (spec.processor.subnetLabels) to identify IP ranges that are external to the cluster.'
+              )}
             </Text>
           }
         </TextContent>

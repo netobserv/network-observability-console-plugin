@@ -68,12 +68,13 @@ export interface TopologyMetricPeer {
   resourceKind?: string;
   isAmbiguous: boolean;
   getDisplayName: (inclNamespace: boolean, disambiguate: boolean) => string | undefined;
-  // any FlowScope can appear here as optionnal field
+  // any FlowScope can appear here as optional field
   [name: string]: unknown;
   namespace?: string;
   host?: string;
   cluster?: string;
   udn?: string;
+  subnetLabel?: string;
 }
 
 export type GenericMetric = {

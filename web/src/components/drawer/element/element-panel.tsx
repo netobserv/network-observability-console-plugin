@@ -72,10 +72,11 @@ export const ElementPanel: React.FC<ElementPanelProps> = ({
       return <Text component={TextVariants.h2}>{t('Edge')}</Text>;
     } else {
       const data = element.getData();
-      if (data?.nodeType === 'unknown') {
-        return <Text component={TextVariants.h2}>{t('Unknown')}</Text>;
+      const name = data?.peer.getDisplayName(false, false);
+      if (data && name) {
+        return <PeerResourceLink peer={data.peer} />;
       }
-      return <>{data && <PeerResourceLink peer={data.peer} />}</>;
+      return <Text component={TextVariants.h2}>{t('Unknown')}</Text>;
     }
   }, [element, t]);
 

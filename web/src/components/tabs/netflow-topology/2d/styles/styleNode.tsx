@@ -2,6 +2,7 @@ import {
   ClusterIcon,
   CubeIcon,
   CubesIcon,
+  ExternalLinkAltIcon,
   NetworkIcon,
   OutlinedHddIcon,
   QuestionCircleIcon,
@@ -27,6 +28,7 @@ import {
 import useDetailsLevel from '@patternfly/react-topology/dist/esm/hooks/useDetailsLevel';
 import * as _ from 'lodash';
 import * as React from 'react';
+import { TopologyMetricPeer } from '../../../../../api/loki';
 import { Decorated, NodeData } from '../../../../../model/topology';
 import DefaultNode from '../components/node';
 import { NodeDecorators } from './styleDecorators';
@@ -50,8 +52,8 @@ type StyleNodeProps = {
   WithSelectionProps;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const getTypeIcon = (resourceKind?: string): React.ComponentClass<any, any> => {
-  switch (resourceKind) {
+const getTypeIcon = (peer: TopologyMetricPeer): React.ComponentClass<any, any> => {
+  switch (peer.resourceKind) {
     case 'Service':
       return ServiceIcon;
     case 'Pod':
@@ -72,9 +74,11 @@ const getTypeIcon = (resourceKind?: string): React.ComponentClass<any, any> => {
     case 'StatefulSet':
     case 'Job':
       return CubesIcon;
-    default:
-      return QuestionCircleIcon;
   }
+  if (peer.addr || peer.subnetLabel) {
+    return ExternalLinkAltIcon;
+  }
+  return QuestionCircleIcon;
 };
 
 const renderIcon = (data: Decorated<NodeData>, element: NodePeer): React.ReactNode => {
@@ -83,7 +87,7 @@ const renderIcon = (data: Decorated<NodeData>, element: NodePeer): React.ReactNo
   const iconSize =
     (shape === NodeShape.trapezoid ? width : Math.min(width, height)) -
     (shape === NodeShape.stadium ? 5 : iconPadding) * 2;
-  const Component = getTypeIcon(data.peer.resourceKind);
+  const Component = getTypeIcon(data.peer);
 
   return (
     <g transform={`translate(${(width - iconSize) / 2}, ${(height - iconSize) / 2})`}>
