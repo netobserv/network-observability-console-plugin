@@ -57,6 +57,7 @@ import { FiltersToolbar } from './toolbar/filters-toolbar';
 import ChipsPopover from './toolbar/filters/chips-popover';
 import HistogramToolbar from './toolbar/histogram-toolbar';
 import ViewOptionsToolbar from './toolbar/view-options-toolbar';
+import { resolveGroupTypes } from '../model/scope';
 
 export type ViewId = 'overview' | 'table' | 'topology';
 
@@ -288,7 +289,9 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
       query.aggregateBy = model.metricScope;
       if (model.selectedViewId === 'topology') {
         query.type = model.topologyMetricType;
-        query.groups = model.topologyOptions.groupTypes !== 'none' ? model.topologyOptions.groupTypes : undefined;
+        const scopes = getAvailableScopes();
+        const resolvedGroup = resolveGroupTypes(model.topologyOptions.groupTypes, model.metricScope, scopes);
+        query.groups = resolvedGroup !== 'none' ? resolvedGroup : undefined;
       } else if (model.selectedViewId === 'overview') {
         query.limit = topValues.includes(model.limit) ? model.limit : topValues[0];
         query.groups = undefined;
