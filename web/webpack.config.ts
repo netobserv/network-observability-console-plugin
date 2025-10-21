@@ -1,5 +1,6 @@
 
 /* eslint-env node */
+import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
 import { ConsoleRemotePlugin } from '@openshift-console/dynamic-plugin-sdk-webpack';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
 import * as path from 'path';
@@ -538,6 +539,16 @@ if (process.env.NODE_ENV === 'production') {
     includeInBundle: ['dependencies'],
     excludeFromBundle: ['devDependencies']
   });*/
+}
+
+if (process.env.TYPECHECK === 'true') {
+  module.exports.plugins.push(
+    new ForkTsCheckerWebpackPlugin({
+      typescript: {
+        configFile: path.resolve(__dirname, 'tsconfig.json')
+      }
+    })
+  );
 }
 
 export default module.exports;

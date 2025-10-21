@@ -43,7 +43,7 @@ jobs:
     - name: checkout
       uses: actions/checkout@v3
     - name: build and test
-      run: make frontend && git diff --exit-code
+      run: TYPECHECK=true make frontend && git diff --exit-code
     - name: Report coverage
       uses: codecov/codecov-action@v4
       with:

@@ -20,7 +20,7 @@ start-standalone-mock: YQ build-backend install-frontend ## Run backend using mo
 .PHONY: just-build-frontend
 just-build-frontend: ## Build frontend
 	@echo "### Building frontend"
-	cd web && npm run build${BUILDSCRIPT}
+	cd web && TYPECHECK=${TYPECHECK} npm run build${BUILDSCRIPT}
 
 .PHONY: build-frontend-standalone
 build-frontend-standalone: install-frontend fmt-frontend ## Run npm install, format and build frontend as standalone
