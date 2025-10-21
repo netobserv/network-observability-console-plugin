@@ -10,6 +10,7 @@ import { Filters, getDisabledFiltersRecord, getEnabledFilters } from '../model/f
 import { filtersToString, FlowQuery, MetricType } from '../model/flow-query';
 import { netflowTrafficModel } from '../model/netflow-traffic';
 import { parseQuickFilters } from '../model/quick-filters';
+import { resolveGroupTypes } from '../model/scope';
 import { getFetchFunctions as getBackAndForthFetch } from '../utils/back-and-forth';
 import { ColumnsId, getDefaultColumns } from '../utils/columns';
 import { loadConfig } from '../utils/config';
@@ -57,7 +58,6 @@ import { FiltersToolbar } from './toolbar/filters-toolbar';
 import ChipsPopover from './toolbar/filters/chips-popover';
 import HistogramToolbar from './toolbar/histogram-toolbar';
 import ViewOptionsToolbar from './toolbar/view-options-toolbar';
-import { resolveGroupTypes } from '../model/scope';
 
 export type ViewId = 'overview' | 'table' | 'topology';
 
@@ -310,7 +310,8 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
     model.selectedViewId,
     model.topologyMetricType,
     model.metricScope,
-    model.topologyOptions.groupTypes
+    model.topologyOptions.groupTypes,
+    getAvailableScopes
   ]);
 
   const getFetchFunctions = React.useCallback(() => {
