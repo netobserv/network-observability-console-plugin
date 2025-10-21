@@ -31,7 +31,11 @@ export const getGroupsForScope = (scopeId: FlowScope, scopes: ScopeConfigDef[]):
   return ['none', 'auto'];
 };
 
-export const resolveGroupTypes = (inGroupTypes: TopologyGroupTypes, scopeId: FlowScope, scopes: ScopeConfigDef[]): TopologyGroupTypes => {
+export const resolveGroupTypes = (
+  inGroupTypes: TopologyGroupTypes,
+  scopeId: FlowScope,
+  scopes: ScopeConfigDef[]
+): TopologyGroupTypes => {
   if (inGroupTypes === 'auto') {
     const groups = getGroupsForScope(scopeId, scopes);
     if (groups.includes('namespaces')) {
