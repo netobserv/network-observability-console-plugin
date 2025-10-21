@@ -534,7 +534,7 @@ export const generateDataModel = (
   };
 
   // addPossibleGroups adds peer to one or more groups when relevant, and returns the smallest one
-  const addPossibleGroups = (peer: TopologyMetricPeer): string | undefined => {
+  const addPossibleGroups = (peer: TopologyMetricPeer): NodeModel | undefined => {
     // groups are all possible scopes except last one
     const parentScopes = ContextSingleton.getScopes().slice(0, -1);
 
