@@ -16,7 +16,6 @@ COPY  --chown=default web web
 COPY  --chown=default mocks mocks
 
 WORKDIR /opt/app-root/web
-RUN npm run format-all
 RUN npm run build
 RUN npm run build:static
 
