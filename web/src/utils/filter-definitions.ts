@@ -17,24 +17,30 @@ import { joinResource, SplitResource, splitResource, SplitStage } from '../model
 import { getPort } from '../utils/port';
 import { ColumnConfigDef } from './columns';
 import {
+  autocompleteCluster,
+  autocompleteDirection,
+  autocompleteDnsErrorCode,
+  autocompleteDnsResponseCode,
+  autocompleteDropCause,
+  autocompleteDropState,
+  autocompleteDSCP,
+  autocompleteEmpty,
+  autocompleteKind,
+  autocompleteNamespace,
+  autocompletePort,
+  autocompleteProtocol,
+  autocompleteResource,
+  autocompleteTCPFlags,
+  autocompleteUDN,
+  autocompleteZone,
   findDirectionOption,
+  findDnsErrorCodeOption,
+  findDnsResponseCodeOption,
+  findDropCauseOption,
+  findDropStateOption,
+  findDSCPOption,
   findProtocolOption,
-  getClusterOptions,
-  getDirectionOptionsAsync,
-  getDnsErrorCodeOptions,
-  getDnsResponseCodeOptions,
-  getDropCauseOptions,
-  getDropStateOptions,
-  getDSCPOptions,
-  getKindOptions,
-  getNamespaceOptions,
-  getPortOptions,
-  getProtocolOptions,
-  getResourceOptions,
-  getTCPFlagsOptions,
-  getUDNOptions,
-  getZoneOptions,
-  noOption
+  portValueToOption
 } from './filter-options';
 import { validateIPFilter } from './ip';
 import { validateK8SName, validateStrictK8SName } from './label';
@@ -243,7 +249,7 @@ export const getFilterDefinitions = (
       return invalid(t('Value is empty'));
     }
     //allow 0 / 1 or Ingress / Egress
-    const found = findDirectionOption(value, t);
+    const found = findDirectionOption(t, true, value);
     if (found) {
       return valid(found.name);
     }
@@ -254,7 +260,8 @@ export const getFilterDefinitions = (
     const isSrc = d.id.includes('src');
     const colConfig = columnsDefs.find(c => c.filter === d.id);
 
-    let getOptions: (value: string) => Promise<FilterOption[]> = noOption;
+    let autocomplete: (value: string) => Promise<FilterOption[]> = autocompleteEmpty;
+    let findOption: (value: string) => FilterOption | undefined = () => undefined;
     let validate: (value: string) => { val?: string; err?: string } = rejectEmptyValue;
     let encoder: FiltersEncoder = simpleFiltersEncoder(colConfig?.field as Field);
     let checkCompletion:
@@ -262,21 +269,21 @@ export const getFilterDefinitions = (
       | undefined = undefined;
 
     if (d.id.includes('namespace')) {
-      getOptions = getNamespaceOptions;
+      autocomplete = autocompleteNamespace;
       validate = k8sNameValidation;
     } else if (d.id.includes('cluster')) {
-      getOptions = getClusterOptions;
+      autocomplete = autocompleteCluster;
     } else if (d.id.includes('udn')) {
-      getOptions = getUDNOptions;
+      autocomplete = autocompleteUDN;
     } else if (d.id.includes('zone')) {
-      getOptions = getZoneOptions;
+      autocomplete = autocompleteZone;
     } else if (d.id.includes('name')) {
       validate = k8sNameValidation;
     } else if (d.id.includes('kind')) {
-      getOptions = getKindOptions;
+      autocomplete = autocompleteKind;
       encoder = kindFiltersEncoder(`${isSrc ? 'Src' : 'Dst'}K8S_Type`, `${isSrc ? 'Src' : 'Dst'}K8S_OwnerType`);
     } else if (d.id.includes('resource')) {
-      getOptions = getResourceOptions;
+      autocomplete = autocompleteResource;
       validate = k8sResourceValidation;
       checkCompletion = k8sResourceCompletion;
       encoder = k8sResourceFiltersEncoder(
@@ -289,33 +296,41 @@ export const getFilterDefinitions = (
     } else if (d.id.includes('address')) {
       validate = addressValidation;
     } else if (d.id.includes('port')) {
-      getOptions = getPortOptions;
+      autocomplete = autocompletePort;
+      findOption = portValueToOption;
       validate = portValidation;
     } else if (d.id.includes('mac')) {
       validate = macValidation;
     } else if (d.id.includes('proto')) {
-      getOptions = getProtocolOptions;
+      autocomplete = autocompleteProtocol;
+      findOption = findProtocolOption;
       validate = protoValidation;
     } else if (d.id.includes('direction')) {
-      getOptions = v => getDirectionOptionsAsync(v, t, d.id === 'nodedirection');
+      autocomplete = v => autocompleteDirection(t, d.id === 'nodedirection', v);
+      findOption = v => findDirectionOption(t, d.id === 'nodedirection', v);
       validate = dirValidation;
     } else if (d.id.includes('drop_state')) {
-      getOptions = getDropStateOptions;
+      autocomplete = autocompleteDropState;
+      findOption = findDropStateOption;
       encoder = simpleFiltersEncoder('PktDropLatestState');
     } else if (d.id.includes('drop_cause')) {
-      getOptions = getDropCauseOptions;
+      autocomplete = autocompleteDropCause;
+      findOption = findDropCauseOption;
       encoder = simpleFiltersEncoder('PktDropLatestDropCause');
     } else if (d.id.includes('dns_flag_response_code')) {
-      getOptions = getDnsResponseCodeOptions;
+      autocomplete = autocompleteDnsResponseCode;
+      findOption = findDnsResponseCodeOption;
     } else if (d.id.includes('dns_errno')) {
-      getOptions = getDnsErrorCodeOptions;
+      autocomplete = autocompleteDnsErrorCode;
+      findOption = findDnsErrorCodeOption;
     } else if (d.id.includes('dscp')) {
-      getOptions = getDSCPOptions;
+      autocomplete = autocompleteDSCP;
+      findOption = findDSCPOption;
     } else if (d.id.includes('flags')) {
-      getOptions = getTCPFlagsOptions;
+      autocomplete = autocompleteTCPFlags;
     }
 
-    return { getOptions, validate, encoder, checkCompletion };
+    return { autocomplete, findOption, validate, encoder, checkCompletion };
   };
 
   return filterDefs.map(d => {

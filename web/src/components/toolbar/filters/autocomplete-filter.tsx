@@ -86,7 +86,7 @@ export const AutocompleteFilter: React.FC<AutocompleteFilterProps> = ({
     (newValue: string) => {
       setCurrentValue(newValue);
       filterDefinition
-        .getOptions(newValue)
+        .autocomplete(newValue)
         .then(setOptions)
         .catch(err => {
           const errorMessage = getHTTPErrorDetails(err);
@@ -147,11 +147,10 @@ export const AutocompleteFilter: React.FC<AutocompleteFilterProps> = ({
       return;
     }
 
-    createFilterValue(filterDefinition, validation.val!).then(v => {
-      if (addFilterParent(v)) {
-        resetFilterValue();
-      }
-    });
+    const fv = createFilterValue(filterDefinition, validation.val!);
+    if (addFilterParent(fv)) {
+      resetFilterValue();
+    }
   }, [
     options,
     filterDefinition,
