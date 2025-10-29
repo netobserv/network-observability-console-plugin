@@ -137,6 +137,7 @@ export type NetflowMetrics = {
   totalDroppedRateMetric?: TotalRateMetrics;
   droppedStateMetrics?: GenericMetric[];
   droppedCauseMetrics?: GenericMetric[];
+  dnsNameMetrics?: GenericMetric[];
   dnsRCodeMetrics?: GenericMetric[];
   dnsLatencyMetrics?: FunctionMetrics;
   rttMetrics?: FunctionMetrics;

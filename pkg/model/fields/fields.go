@@ -50,6 +50,7 @@ const (
 	IfDirections           = "IfDirections"
 	NetworkEvents          = "NetworkEvents"
 	DNSID                  = "DnsId"
+	DNSName                = "DnsName"
 	DNSLatency             = "DnsLatencyMs"
 	DNSErrNo               = "DnsErrno"
 	DNSCode                = "DnsFlagsResponseCode"
