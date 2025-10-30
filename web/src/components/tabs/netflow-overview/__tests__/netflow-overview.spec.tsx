@@ -41,8 +41,8 @@ describe('<NetflowOverview />', () => {
     await waitForRender(wrapper);
 
     const containerDiv = wrapper.find(EmptyState);
-    // 12 panels are expected here according to getDefaultOverviewPanels isSelected items
-    expect(containerDiv.length).toEqual(12);
+    // 13 panels are expected here according to getDefaultOverviewPanels isSelected items
+    expect(containerDiv.length).toEqual(13);
   });
 
   it('should render panels', async () => {

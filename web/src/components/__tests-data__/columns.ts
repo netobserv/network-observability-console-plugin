@@ -501,6 +501,17 @@ export const ColumnConfigSampleDefs = [
     width: 5
   },
   {
+    id: 'DNSName',
+    group: 'DNS',
+    name: 'DNS Name',
+    tooltip: 'DNS name.',
+    field: 'DnsName',
+    filter: 'dns_name',
+    feature: 'dnsTracking',
+    default: false,
+    width: 15
+  },
+  {
     id: 'DNSLatency',
     group: 'DNS',
     name: 'DNS Latency',
@@ -768,6 +779,11 @@ export const FieldConfigSample = [
     name: 'DnsId',
     type: 'number',
     description: 'DNS record id'
+  },
+  {
+    name: 'DnsName',
+    type: 'text',
+    description: 'DNS name'
   },
   {
     name: 'DnsLatencyMs',
