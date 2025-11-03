@@ -33,6 +33,7 @@ export const Description: React.FC<{
         return null;
       }
       if (t.startsWith('`') && t.endsWith('`') && t.length > 2) {
+        // eslint-disable-next-line react/jsx-key
         return <pre className="backticks">{t.substring(1, t.length - 1)}</pre>;
       }
       return t;
