@@ -318,7 +318,7 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
           // suggest values if autocomplete and field set
           if (filter.component === 'autocomplete') {
             filter
-              .getOptions(updated.value || '')
+              .autocomplete(updated.value || '')
               .then(v => {
                 setSuggestions(v.map(optionToSuggestion));
               })
@@ -359,7 +359,7 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
           .map(defToSuggestion) as Suggestion[];
         if (filter.component === 'autocomplete') {
           filter
-            .getOptions(updated.value)
+            .autocomplete(updated.value)
             .then(v => {
               setSuggestions(suggestions.concat(v.map(optionToSuggestion)));
             })
@@ -538,7 +538,7 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
                         e.preventDefault();
                         if (filter.component === 'autocomplete' && _.isEmpty(prevSuggestions)) {
                           filter
-                            .getOptions(value)
+                            .autocomplete(value)
                             .then(opts => {
                               addFilterFromSuggestions(opts.map(opts => ({ display: opts.name, value: opts.value })));
                             })
