@@ -178,3 +178,19 @@ make cypress
 ```
 
 4. Click on "Run N integration specs"
+
+## Updating schemas
+
+This console plugin comes with several panels allowing GUI-based configuration for `FlowCollector` and other managed resources, including:
+
+- Comprehensive forms for each of the resources (includes most supported settings that are pretty common to configure).
+- Simplified wizards for faster configuration.
+
+When you update the operator CRDs, you may have to update some schemas here as well, which contain some rules that drive how forms are displayed. Especially:
+
+- [uiSchema.ts](./web/src/components/forms/config/uiSchema.ts) contains a display-oriented description of every CRD field, including whether or not they should be hidden, or if they have relationships with other fields.
+- [< CRD name >-wizard.tsx](./web/src/components/forms/flowCollector-wizard.tsx) contains specific fields to be displayed in wizards.
+
+When a CRD field is added, consider whether you need to update these files.
+
+Additionally, [schema.ts](./web/moduleMapper/schemas.ts) contains the full CRD schema as JSON, used in tests and in standalone mode, and should also be kept up to date.

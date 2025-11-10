@@ -460,16 +460,7 @@ export const FlowCollectorUISchema: UiSchema = {
     processor: {
       'ui:title': 'Processor configuration',
       filters: {
-        'ui:title': 'Filters',
-        'ui:widget': 'hidden',
-        items: {
-          'ui:order': ['allOf', 'outputTarget', 'sampling', '*'],
-          allOf: {
-            items: {
-              'ui:order': ['field', 'matchType', 'value', '*']
-            }
-          }
-        }
+        'ui:widget': 'hidden'
       },
       multiClusterDeployment: {
         'ui:title': 'Multi-cluster deployment'
@@ -518,6 +509,12 @@ export const FlowCollectorUISchema: UiSchema = {
         },
         'ui:order': ['mode', 'sampling', '*']
       },
+      unmanagedReplicas: {
+        'ui:title': 'Unmanaged replicas'
+      },
+      consumerReplicas: {
+        'ui:title': 'Consumer replicas'
+      },
       kafkaConsumerQueueCapacity: {
         'ui:title': 'Kafka consumer queue capacity',
         'ui:dependency': {
@@ -527,92 +524,10 @@ export const FlowCollectorUISchema: UiSchema = {
         }
       },
       kafkaConsumerAutoscaler: {
-        'ui:title': 'kafka consumer autoscaler',
-        'ui:dependency': {
-          controlFieldPath: ['deploymentModel'],
-          controlFieldValue: 'Kafka',
-          controlFieldName: 'deploymentModel'
-        },
-        'ui:order': ['maxReplicas', 'metrics', 'minReplicas', 'status', '*'],
-        metrics: {
-          items: {
-            'ui:order': ['type', 'containerResource', 'external', 'object', 'pods', 'resource', '*'],
-            containerResource: {
-              'ui:order': ['container', 'name', 'target', '*'],
-              target: {
-                'ui:order': ['type', 'averageUtilization', 'averageValue', 'value', '*']
-              }
-            },
-            external: {
-              'ui:order': ['metric', 'target', '*'],
-              metric: {
-                'ui:order': ['name', 'selector', '*'],
-                selector: {
-                  'ui:order': ['matchExpressions', 'matchLabels', '*'],
-                  matchExpressions: {
-                    items: {
-                      'ui:order': ['key', 'operator', 'values', '*']
-                    }
-                  }
-                }
-              },
-              target: {
-                'ui:order': ['type', 'averageUtilization', 'averageValue', 'value', '*']
-              }
-            },
-            object: {
-              'ui:order': ['describedObject', 'metric', 'target', '*'],
-              describedObject: {
-                'ui:order': ['kind', 'name', 'apiVersion', '*']
-              },
-              metric: {
-                'ui:order': ['name', 'selector', '*'],
-                selector: {
-                  'ui:order': ['matchExpressions', 'matchLabels', '*'],
-                  matchExpressions: {
-                    items: {
-                      'ui:order': ['key', 'operator', 'values', '*']
-                    }
-                  }
-                }
-              },
-              target: {
-                'ui:order': ['type', 'averageUtilization', 'averageValue', 'value', '*']
-              }
-            },
-            pods: {
-              'ui:order': ['metric', 'target', '*'],
-              metric: {
-                'ui:order': ['name', 'selector', '*'],
-                selector: {
-                  'ui:order': ['matchExpressions', 'matchLabels', '*'],
-                  matchExpressions: {
-                    items: {
-                      'ui:order': ['key', 'operator', 'values', '*']
-                    }
-                  }
-                }
-              },
-              target: {
-                'ui:order': ['type', 'averageUtilization', 'averageValue', 'value', '*']
-              }
-            },
-            resource: {
-              'ui:order': ['name', 'target', '*'],
-              target: {
-                'ui:order': ['type', 'averageUtilization', 'averageValue', 'value', '*']
-              }
-            }
-          }
-        }
+        'ui:widget': 'hidden'
       },
       kafkaConsumerReplicas: {
-        'ui:title': 'Kafka consumer replicas',
-        'ui:dependency': {
-          controlFieldPath: ['deploymentModel'],
-          controlFieldValue: 'Kafka',
-          controlFieldName: 'deploymentModel'
-        }
+        'ui:widget': 'hidden'
       },
       kafkaConsumerBatchSize: {
         'ui:title': 'Kafka consumer batch size',
@@ -907,37 +822,24 @@ export const FlowCollectorUISchema: UiSchema = {
         conversationHeartbeatInterval: {
           'ui:widget': 'hidden'
         },
-        'ui:order': [
-          'port',
-          'conversationTerminatingTimeout',
-          'conversationEndTimeout',
-          'profilePort',
-          'env',
-          'enableKubeProbes',
-          'scheduling',
-          'secondaryNetworks',
-          'healthPort',
-          'dropUnusedFields',
-          'conversationHeartbeatInterval'
-        ]
+        'ui:order': ['secondaryNetworks', '*']
       },
       'ui:order': [
+        'addZone',
         'filters',
+        'metrics',
         'multiClusterDeployment',
         'clusterName',
-        'addZone',
         'subnetLabels',
-        'logTypes',
-        'logLevel',
-        'imagePullPolicy',
         'deduper',
-        'kafkaConsumerReplicas',
-        'kafkaConsumerAutoscaler',
+        'unmanagedReplicas',
+        'consumerReplicas',
         'kafkaConsumerQueueCapacity',
         'kafkaConsumerBatchSize',
-        'metrics',
-        'resources',
-        'advanced'
+        'logLevel',
+        'imagePullPolicy',
+        'advanced',
+        '*'
       ]
     },
     prometheus: {
@@ -1236,81 +1138,11 @@ export const FlowCollectorUISchema: UiSchema = {
       replicas: {
         'ui:title': 'Replicas'
       },
+      unmanagedReplicas: {
+        'ui:title': 'Unmanaged replicas'
+      },
       autoscaler: {
-        'ui:title': 'Horizontal pod autoscaler',
-        'ui:widget': 'hidden',
-        'ui:order': ['maxReplicas', 'metrics', 'minReplicas', 'status', '*'],
-        metrics: {
-          items: {
-            'ui:order': ['type', 'containerResource', 'external', 'object', 'pods', 'resource', '*'],
-            containerResource: {
-              'ui:order': ['container', 'name', 'target', '*'],
-              target: {
-                'ui:order': ['type', 'averageUtilization', 'averageValue', 'value', '*']
-              }
-            },
-            external: {
-              'ui:order': ['metric', 'target', '*'],
-              metric: {
-                'ui:order': ['name', 'selector', '*'],
-                selector: {
-                  'ui:order': ['matchExpressions', 'matchLabels', '*'],
-                  matchExpressions: {
-                    items: {
-                      'ui:order': ['key', 'operator', 'values', '*']
-                    }
-                  }
-                }
-              },
-              target: {
-                'ui:order': ['type', 'averageUtilization', 'averageValue', 'value', '*']
-              }
-            },
-            object: {
-              'ui:order': ['describedObject', 'metric', 'target', '*'],
-              describedObject: {
-                'ui:order': ['kind', 'name', 'apiVersion', '*']
-              },
-              metric: {
-                'ui:order': ['name', 'selector', '*'],
-                selector: {
-                  'ui:order': ['matchExpressions', 'matchLabels', '*'],
-                  matchExpressions: {
-                    items: {
-                      'ui:order': ['key', 'operator', 'values', '*']
-                    }
-                  }
-                }
-              },
-              target: {
-                'ui:order': ['type', 'averageUtilization', 'averageValue', 'value', '*']
-              }
-            },
-            pods: {
-              'ui:order': ['metric', 'target', '*'],
-              metric: {
-                'ui:order': ['name', 'selector', '*'],
-                selector: {
-                  'ui:order': ['matchExpressions', 'matchLabels', '*'],
-                  matchExpressions: {
-                    items: {
-                      'ui:order': ['key', 'operator', 'values', '*']
-                    }
-                  }
-                }
-              },
-              target: {
-                'ui:order': ['type', 'averageUtilization', 'averageValue', 'value', '*']
-              }
-            },
-            resource: {
-              'ui:order': ['name', 'target', '*'],
-              target: {
-                'ui:order': ['type', 'averageUtilization', 'averageValue', 'value', '*']
-              }
-            }
-          }
-        }
+        'ui:widget': 'hidden'
       },
       advanced: {
         'ui:title': 'Advanced configuration',
@@ -1506,10 +1338,11 @@ export const FlowCollectorUISchema: UiSchema = {
         'imagePullPolicy',
         'portNaming',
         'quickFilters',
+        'unmanagedReplicas',
         'replicas',
-        'autoscaler',
         'resources',
-        'advanced'
+        'advanced',
+        '*'
       ]
     },
     networkPolicy: {

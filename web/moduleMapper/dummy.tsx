@@ -1,3 +1,5 @@
+// File only used in tests or dev console
+
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
@@ -18,8 +20,8 @@ import { useK8sModelsWithColors } from '../src/utils/k8s-models-hook';
 import { useTheme } from '../src/utils/theme-hook';
 import { safeJSToYAML } from '../src/utils/yaml';
 import { k8sModels } from './k8s-models';
-import { FlowCollectorSchema, FlowMetricSchema } from './schemas';
-import { GetFlowCollectorJS, GetFlowMetricJS } from './templates';
+import { flowCollectorSchema, flowMetricSchema } from './schemas';
+import { getFlowCollectorJS, getFlowMetricJS } from './templates';
 
 // This dummy file is used to resolve @Console imports from @openshift-console for JEST / Standalone
 // You can add any exports needed here
@@ -130,7 +132,7 @@ export function useK8sWatchResource(req: any) {
                     served: true,
                     storage: true,
                     schema: {
-                      openAPIV3Schema: FlowCollectorSchema,
+                      openAPIV3Schema: flowCollectorSchema,
                     }
                   }]
                 }
@@ -154,7 +156,7 @@ export function useK8sWatchResource(req: any) {
                     served: true,
                     storage: true,
                     schema: {
-                      openAPIV3Schema: FlowMetricSchema
+                      openAPIV3Schema: flowMetricSchema
                     }
                   }]
                 }
@@ -162,7 +164,7 @@ export function useK8sWatchResource(req: any) {
             }
             break;
           case 'FlowCollector':
-            const fc = _.cloneDeep(GetFlowCollectorJS());
+            const fc = _.cloneDeep(getFlowCollectorJS());
             fc.spec!.loki.enable = false;
             fc.spec!.exporters = [{ type: "Kafka" }, { type: "OpenTelemetry" }]
             fc.status = {
@@ -236,7 +238,7 @@ export function useK8sWatchResource(req: any) {
             break;
           case 'FlowMetric':
             if (req.name === 'flowmetric-sample') {
-              const fm = _.cloneDeep(GetFlowMetricJS());
+              const fm = _.cloneDeep(getFlowMetricJS());
               fm.spec!.metricName = 'test_metric';
               setResource(fm);
             }
