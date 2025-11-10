@@ -42,7 +42,6 @@ import {
   defaultMetricType,
   getDataSourceFromURL,
   getLimitFromURL,
-  getMatchFromURL,
   getPacketLossFromURL,
   getRangeFromURL,
   getRecordTypeFromURL,
@@ -50,16 +49,7 @@ import {
 } from '../utils/router';
 import { Config, defaultConfig } from './config';
 import { DisabledFilters, Filters } from './filters';
-import {
-  DataSource,
-  FlowScope,
-  isTimeMetric,
-  Match,
-  MetricType,
-  PacketLoss,
-  RecordType,
-  StatFunction
-} from './flow-query';
+import { DataSource, FlowScope, isTimeMetric, MetricType, PacketLoss, RecordType, StatFunction } from './flow-query';
 import { getGroupsForScope } from './scope';
 import { DefaultOptions, GraphElementPeer, TopologyOptions } from './topology';
 
@@ -129,8 +119,7 @@ export function netflowTrafficModel() {
   const [isOverviewModalOpen, setOverviewModalOpen] = React.useState(false);
   const [isColModalOpen, setColModalOpen] = React.useState(false);
   const [isExportModalOpen, setExportModalOpen] = React.useState(false);
-  const [filters, setFilters] = React.useState<Filters>({ list: [], backAndForth: false });
-  const [match, setMatch] = React.useState<Match>(getMatchFromURL());
+  const [filters, setFilters] = React.useState<Filters>({ list: [], match: 'all' });
   const [packetLoss, setPacketLoss] = React.useState<PacketLoss>(getPacketLossFromURL());
   const [recordType, setRecordType] = React.useState<RecordType>(getRecordTypeFromURL());
   const [dataSource, setDataSource] = React.useState<DataSource>(getDataSourceFromURL());
@@ -259,8 +248,6 @@ export function netflowTrafficModel() {
     setExportModalOpen,
     filters,
     setFilters,
-    match,
-    setMatch,
     packetLoss,
     setPacketLoss,
     recordType,
