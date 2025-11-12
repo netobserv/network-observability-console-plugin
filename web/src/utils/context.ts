@@ -28,6 +28,12 @@ export class ContextSingleton {
     return ContextSingleton.instance;
   }
 
+  public static setStandalone() {
+    const instance = ContextSingleton.getInstance();
+    instance.isStandalone = true;
+    instance.host = '';
+  }
+
   public static setContext(
     extensions: ResolvedExtension<
       ModelFeatureFlag,
