@@ -252,6 +252,12 @@ export const FilterConfigSampleDefs = [
     hint: 'Specify a single DNS Id.'
   },
   {
+    id: 'dns_name',
+    name: 'DNS Name',
+    component: 'text',
+    hint: 'Specify a single DNS Name.'
+  },
+  {
     id: 'dns_latency',
     name: 'DNS Latency',
     component: 'number',

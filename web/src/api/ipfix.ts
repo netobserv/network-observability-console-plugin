@@ -81,6 +81,7 @@ export interface Flow {
   PktDropBytes_AB?: number;
   PktDropBytes_BA?: number;
   DnsId?: number;
+  DnsName?: string;
   DnsFlags?: number;
   DnsFlagsResponseCode?: string;
   DnsLatencyMs?: number;

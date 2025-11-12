@@ -207,9 +207,12 @@ func (q *FlowQueryBuilder) appendFilter(sb *strings.Builder, field string) {
 
 func (q *FlowQueryBuilder) appendDNSFilter(sb *strings.Builder) {
 	// ensure at least one Dns field is specified except DnsErrno
-	// |~`"DnsId`|~`"DnsLatencyMs`|~`"DnsFlagsResponseCode"`
+	// |~`"DnsId`|~`"DnsName`|~`"DnsLatencyMs`|~`"DnsFlagsResponseCode"`
 	sb.WriteString("|~`")
 	sb.WriteString(`"DnsId`)
+	sb.WriteString("`")
+	sb.WriteString("|~`")
+	sb.WriteString(`"DnsName`)
 	sb.WriteString("`")
 	sb.WriteString("|~`")
 	sb.WriteString(`"DnsLatencyMs`)

@@ -40,6 +40,7 @@ export type OverviewPanelId =
   | `${OverviewPanelRateMetric}`
   | `state_dropped_packet_rates`
   | `cause_dropped_packet_rates`
+  | 'name_dns_latency_flows'
   | 'rcode_dns_latency_flows'
   | `custom_${StatFunction}_${AggregateBy}_${MetricType}`
   | `custom_${AggregateBy}_${MetricType}`
@@ -71,6 +72,7 @@ export const defaultPanelIds: OverviewPanelId[] = [
   'cause_dropped_packet_rates',
   'top_avg_dns_latency',
   'top_p90_dns_latency',
+  'name_dns_latency_flows',
   'rcode_dns_latency_flows',
   'bottom_min_rtt',
   'top_avg_rtt',
@@ -104,7 +106,7 @@ export const getDefaultOverviewPanels = (customIds?: string[]): OverviewPanel[] 
         ids = ids.concat(['state_dropped_packet_rates', 'cause_dropped_packet_rates']);
         break;
       case 'dns_latency':
-        ids = ids.concat(['rcode_dns_latency_flows']);
+        ids = ids.concat(['name_dns_latency_flows', 'rcode_dns_latency_flows']);
         break;
     }
 
@@ -303,6 +305,15 @@ export const getOverviewPanelInfo = (
         })
       };
     }
+    case 'name_dns_latency_flows':
+      return {
+        title: t('Top {{limit}} DNS name with total', { limit }),
+        topTitle: t('Top {{limit}} DNS name', { limit }),
+        totalTitle: t('Total DNS name'),
+        chartType: t('donut or bars and lines'),
+        subtitle: t('Total DNS flow count'),
+        tooltip: t('The top DNS name extracted from DNS headers compared to total over the selected interval')
+      };
     case 'rcode_dns_latency_flows':
       return {
         title: t('Top {{limit}} DNS response code with total', { limit }),
