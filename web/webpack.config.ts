@@ -380,6 +380,96 @@ module.exports = {
           properties: {
             model: {
               version: "v1",
+              group: "gateway.networking.k8s.io",
+              kind: "Gateway"
+            },
+            component: {
+              "$codeRef": "netflowTab.default"
+            },
+            "page": {
+              name: "%plugin__netobserv-plugin~Network Traffic%",
+              "href": "netflow"
+            }
+          },
+          "flags": { "required": ["NETOBSERV_LOKI_ENABLED"] }
+        },
+        {
+          type: "console.tab/horizontalNav",
+          properties: {
+            model: {
+              version: "v1",
+              group: "gateway.networking.k8s.io",
+              kind: "HTTPRoute"
+            },
+            component: {
+              "$codeRef": "netflowTab.default"
+            },
+            "page": {
+              name: "%plugin__netobserv-plugin~Network Traffic%",
+              "href": "netflow"
+            }
+          },
+          "flags": { "required": ["NETOBSERV_LOKI_ENABLED"] }
+        },
+        {
+          type: "console.tab/horizontalNav",
+          properties: {
+            model: {
+              version: "v1alpha2",
+              group: "gateway.networking.k8s.io",
+              kind: "GRPCRoute"
+            },
+            component: {
+              "$codeRef": "netflowTab.default"
+            },
+            "page": {
+              name: "%plugin__netobserv-plugin~Network Traffic%",
+              "href": "netflow"
+            }
+          },
+          "flags": { "required": ["NETOBSERV_LOKI_ENABLED"] }
+        },
+        {
+          type: "console.tab/horizontalNav",
+          properties: {
+            model: {
+              version: "v1alpha2",
+              group: "gateway.networking.k8s.io",
+              kind: "TCPRoute"
+            },
+            component: {
+              "$codeRef": "netflowTab.default"
+            },
+            "page": {
+              name: "%plugin__netobserv-plugin~Network Traffic%",
+              "href": "netflow"
+            }
+          },
+          "flags": { "required": ["NETOBSERV_LOKI_ENABLED"] }
+        },
+        {
+          type: "console.tab/horizontalNav",
+          properties: {
+            model: {
+              version: "v1alpha2",
+              group: "gateway.networking.k8s.io",
+              kind: "UDPRoute"
+            },
+            component: {
+              "$codeRef": "netflowTab.default"
+            },
+            "page": {
+              name: "%plugin__netobserv-plugin~Network Traffic%",
+              "href": "netflow"
+            }
+          },
+          "flags": { "required": ["NETOBSERV_LOKI_ENABLED"] }
+        },
+        {
+          type: "console.tab/horizontalNav",
+          properties: {
+            model: {
+              version: "v1",
               group: "k8s.ovn.org",
               kind: "ClusterUserDefinedNetwork"
             },
