@@ -1,8 +1,11 @@
+// File only used in tests or dev console
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable max-len */
 import { RJSFSchema } from '@rjsf/utils';
 
-export const FlowCollectorSchema: RJSFSchema | any = {
+// flowCollectorSchema is only used in tests or dev console
+export const flowCollectorSchema: RJSFSchema | any = {
   title: 'FlowCollector',
   description:
     'The schema for the network flows collection API, which pilots and configures the underlying deployments.',
@@ -51,10 +54,10 @@ export const FlowCollectorSchema: RJSFSchema | any = {
         },
         deploymentModel: {
           description:
-            '`deploymentModel` defines the desired type of deployment for flow processing. Possible values are:\n- `Direct` (default) to make the flow processor listen directly from the agents.\n- `Kafka` to make flows sent to a Kafka pipeline before consumption by the processor.\nKafka can provide better scalability, resiliency, and high availability (for more details, see https://www.redhat.com/en/topics/integration/what-is-apache-kafka).',
+            '`deploymentModel` defines the desired type of deployment for flow processing. Possible values are:\n - `Direct` (default) to make the flow processor listen directly from the agents using the host network, backed by a DaemonSet.\n - `Service` to make the flow processor listen as a Kubernetes Service, backed by a scalable Deployment.\n - `Kafka` to make flows sent to a Kafka pipeline before consumption by the processor.\n Kafka can provide better scalability, resiliency, and high availability (for more details, see https://www.redhat.com/en/topics/integration/what-is-apache-kafka).<br> `Direct` is not recommended on large clusters as it is less memory efficient.',
           type: 'string',
           default: 'Direct',
-          enum: ['Direct', 'Kafka']
+          enum: ['Direct', 'Service', 'Kafka']
         },
         kafka: {
           description:
@@ -3329,9 +3332,21 @@ export const FlowCollectorSchema: RJSFSchema | any = {
               default: 'Flows',
               enum: ['Flows', 'Conversations', 'EndedConversations', 'All']
             },
+            unmanagedReplicas: {
+              description:
+                'If `unmanagedReplicas` is `true`, the operator will not reconcile `consumerReplicas`. This is useful when using a pod autoscaler.',
+              type: 'boolean'
+            },
+            consumerReplicas: {
+              description:
+                '`consumerReplicas` defines the number of replicas (pods) to start for `flowlogs-pipeline`, default is 3. This setting is ignored when `spec.deploymentModel` is `Direct` or when `spec.processor.unmanagedReplicas` is `true`.',
+              type: 'integer',
+              format: 'int32',
+              minimum: 0
+            },
             kafkaConsumerReplicas: {
               description:
-                '`kafkaConsumerReplicas` defines the number of replicas (pods) to start for `flowlogs-pipeline-transformer`, which consumes Kafka messages.\nThis setting is ignored when Kafka is disabled.',
+                '`kafkaConsumerAutoscaler` [deprecated (*)] is the spec of a horizontal pod autoscaler to set up for `flowlogs-pipeline-transformer`, which consumes Kafka messages. This setting is ignored when Kafka is disabled. Deprecation notice: managed autoscaler will be removed in a future version. You may configure instead an autoscaler of your choice, and set `spec.processor.unmanagedReplicas` to `true`.',
               type: 'integer',
               format: 'int32',
               default: 3,
@@ -5127,7 +5142,7 @@ export const FlowCollectorSchema: RJSFSchema | any = {
               enum: ['IfNotPresent', 'Always', 'Never']
             },
             autoscaler: {
-              description: '`autoscaler` spec of a horizontal pod autoscaler to set up for the plugin Deployment.',
+              description: '`autoscaler` [deprecated (*)] spec of a horizontal pod autoscaler to set up for the plugin Deployment. Deprecation notice: managed autoscaler will be removed in a future version. You may configure instead an autoscaler of your choice, and set `spec.consolePlugin.unmanagedReplicas` to `true`.',
               type: 'object',
               properties: {
                 maxReplicas: {
@@ -5547,6 +5562,10 @@ export const FlowCollectorSchema: RJSFSchema | any = {
                 }
               }
             },
+            unmanagedReplicas: {
+              description: 'If `unmanagedReplicas` is `true`, the operator will not reconcile `replicas`. This is useful when using a pod autoscaler.',
+              type: 'boolean',
+            },
             replicas: {
               description: '`replicas` defines the number of replicas (pods) to start.',
               type: 'integer',
@@ -5936,7 +5955,8 @@ export const FlowCollectorSchema: RJSFSchema | any = {
   }
 };
 
-export const FlowMetricSchema: RJSFSchema | any = {
+// flowMetricSchema is only used in tests or dev console
+export const flowMetricSchema: RJSFSchema | any = {
   title: 'FlowMetric',
   description: 'The API allowing to create custom metrics from the collected flow logs.',
   type: 'object',

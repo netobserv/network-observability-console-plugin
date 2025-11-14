@@ -1,4 +1,6 @@
-//these values comes from original useK8sModels using debug
+// File only used in tests or dev console
+
+// These values come from original useK8sModels using debug
 export const k8sModels = {
   "ImageStreamImport": {
     "label": "ImageStreamImport",

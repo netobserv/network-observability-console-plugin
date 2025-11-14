@@ -73,7 +73,8 @@ export const FlowCollectorWizard: FC<FlowCollectorWizardProps> = props => {
           'spec.agent.ebpf.privileged',
           'spec.agent.ebpf.features',
           'spec.processor.clusterName',
-          'spec.processor.addZone'
+          'spec.processor.addZone',
+          'spec.processor.consumerReplicas'
         ]);
         break;
       case 'loki':

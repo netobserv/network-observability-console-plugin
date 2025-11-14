@@ -1,7 +1,9 @@
+// File only used in tests or dev console
+
 import { K8sResourceKind } from '@openshift-console/dynamic-plugin-sdk';
 import { safeYAMLToJS } from '../src/utils/yaml';
 
-export const FlowCollector = `
+const flowCollector = `
 apiVersion: flows.netobserv.io/v1beta2
 kind: FlowCollector
 metadata:
@@ -123,60 +125,15 @@ spec:
 `;
 
 let flowCollectorJS: K8sResourceKind | null = null;
-export const GetFlowCollectorJS = (): K8sResourceKind => {
+export const getFlowCollectorJS = (): K8sResourceKind => {
   if (flowCollectorJS === null) {
-    flowCollectorJS = safeYAMLToJS(FlowCollector);
+    flowCollectorJS = safeYAMLToJS(flowCollector);
   }
   return flowCollectorJS!;
 };
 
-export const FlowMetric = `
-apiVersion: flows.netobserv.io/v1alpha1
-kind: FlowMetric
-metadata:
-  labels:
-    app.kubernetes.io/name: flowmetric
-    app.kubernetes.io/instance: flowmetric-sample
-    app.kubernetes.io/part-of: netobserv-operator
-    app.kubernetes.io/managed-by: kustomize
-    app.kubernetes.io/created-by: netobserv-operator
-  name: flowmetric-sample
-  namespace: netobserv
-spec:
-  metricName: cluster_external_ingress_bytes_total
-  type: Counter
-  valueField: Bytes
-  direction: Ingress
-  labels:
-    - DstK8S_HostName
-    - DstK8S_Namespace
-    - DstK8S_OwnerName
-    - DstK8S_OwnerType
-  filters:
-    - field: SrcSubnetLabel
-      matchType: Absence
-  charts:
-    - dashboardName: Main
-      title: External ingress traffic
-      unit: Bps
-      type: SingleStat
-      queries:
-        - promQL: 'sum(rate($METRIC[2m]))'
-          legend: ''
-    - dashboardName: Main
-      sectionName: External
-      title: Top external ingress traffic per workload
-      unit: Bps
-      type: StackArea
-      queries:
-        - promQL: >-
-            sum(rate($METRIC{DstK8S_Namespace!=""}[2m])) by (DstK8S_Namespace,
-            DstK8S_OwnerName)
-          legend: '{{DstK8S_Namespace}} / {{DstK8S_OwnerName}}'
-`;
-
 // use an alternative sample for forms to avoid forcing the user to remove the filters / queries
-export const FlowMetricDefaultForm = `
+export const flowMetricDefaultForm = `
 apiVersion: flows.netobserv.io/v1alpha1
 kind: FlowMetric
 metadata:
@@ -189,9 +146,9 @@ spec:
 `;
 
 let flowMetricJS: K8sResourceKind | null = null;
-export const GetFlowMetricJS = (): K8sResourceKind => {
+export const getFlowMetricJS = (): K8sResourceKind => {
   if (flowMetricJS === null) {
-    flowMetricJS = safeYAMLToJS(FlowMetricDefaultForm);
+    flowMetricJS = safeYAMLToJS(flowMetricDefaultForm);
   }
   return flowMetricJS!;
 };
