@@ -132,6 +132,18 @@ export const NetflowTrafficTab: React.FC<NetflowTrafficTabProps> = ({ match, obj
           backAndForth: false
         });
         break;
+      case 'Gateway':
+        // NOTE: Gateways can be both ingress (receive traffic) and egress (send traffic)
+        setForcedFilters({
+          list: [
+            {
+              def: findFilter(filterDefinitions, 'src_resource')!,
+              values: [{ v: `${obj.kind}.${obj.metadata!.namespace}.${obj.metadata!.name}` }]
+            }
+          ],
+          backAndForth: true
+        });
+        break;
       case 'Route':
         const route = obj as RouteProps;
         setForcedFilters({
