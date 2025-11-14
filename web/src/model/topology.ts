@@ -126,10 +126,15 @@ const getDirFilterDefValue = (
     });
   }
 
-  // fallback on addr if not found
-  if (!def && fields.addr) {
-    def = findFilter(filterDefinitions, `${dir}_address`)!;
-    value = fields.addr!;
+  // fallback on addr and/or subnet label if not found
+  if (!def) {
+    if (fields.subnetLabel) {
+      def = findFilter(filterDefinitions, `${dir}_subnet_label`)!;
+      value = fields.subnetLabel!;
+    } else if (fields.addr) {
+      def = findFilter(filterDefinitions, `${dir}_address`)!;
+      value = fields.addr!;
+    }
   }
   return def && value ? { def, value } : undefined;
 };
@@ -213,7 +218,7 @@ export const toggleDirElementFilter = (
   const result = _.cloneDeep(filters);
   const defValue = getDirFilterDefValue(nodeType, fields, dir, filterDefinitions);
   if (!defValue) {
-    console.error("can't find defValue for fields", fields);
+    console.error("can't find directional filter definition and value for fields", fields);
     return;
   }
   toggleFilter(result, defValue, isFiltered, setFilters);
@@ -229,7 +234,7 @@ export const toggleElementFilter = (
   const result = _.cloneDeep(filters);
   const defValue = getFilterDefValue(fields, filterDefinitions);
   if (!defValue) {
-    console.error("can't find defValue for fields", fields);
+    console.error("can't find filter definition and value for fields", fields);
     return;
   }
   toggleFilter(result, defValue, isFiltered, setFilters);
