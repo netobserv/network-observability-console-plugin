@@ -111,7 +111,7 @@
     "axios": "^1.12.0",
     "i18next": "^21.8.14",
     "i18next-http-backend": "^1.0.21",
-    "js-yaml": "^4.1.0",
+    "js-yaml": "^4.1.1",
     "murmurhash-js": "^1.0.0",
     "percentile": "^1.6.0",
     "port-numbers": "^6.0.1",
