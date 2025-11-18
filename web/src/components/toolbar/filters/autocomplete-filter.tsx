@@ -185,7 +185,12 @@ export const AutocompleteFilter: React.FC<AutocompleteFilterProps> = ({
               validated={indicator}
               placeholder={filterDefinition.placeholder}
               value={currentValue}
-              onKeyDown={e => e.key === 'Enter' && onEnter()}
+              onKeyDown={e => {
+                if (e.key === 'Enter') {
+                  onEnter();
+                  e.preventDefault();
+                }
+              }}
               onChange={(event, value) => onAutoCompleteChange(value)}
               onBlur={onBlur}
               ref={searchInputRef}
