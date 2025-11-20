@@ -7,6 +7,8 @@ WORKDIR /opt/app-root
 
 COPY  --chown=default web/package.json web/package.json
 COPY  --chown=default web/package-lock.json web/package-lock.json
+COPY --chown=node web/manage-extension.sh web/manage-extension.sh
+
 WORKDIR /opt/app-root/web
 
 RUN CYPRESS_INSTALL_BINARY=0 node --max-old-space-size=6000 $(which npm) --legacy-peer-deps ci --ignore-scripts
@@ -18,6 +20,7 @@ COPY  --chown=default mocks mocks
 WORKDIR /opt/app-root/web
 RUN npm run format-all
 RUN npm run build
+RUN npm run build:static
 
 FROM brew.registry.redhat.io/rh-osbs/openshift-golang-builder:v1.24 as go-builder
 
