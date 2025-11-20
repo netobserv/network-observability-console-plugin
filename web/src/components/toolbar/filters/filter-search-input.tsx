@@ -137,8 +137,8 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
         newFilters.push({ def, compare, values: [filterValue] });
       }
 
-      // force peers mode to have directions set
-      if (filters?.match === 'peers') {
+      // force bidirectionnal mode to have directions set
+      if (filters?.match === 'bidirectionnal') {
         newFilters = setTargeteableFilters(filterDefinitions, newFilters, direction === 'destination' ? 'dst' : 'src');
       }
       setFilters({ ...filters!, list: newFilters });
@@ -343,11 +343,11 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
           } else {
             suggestions = suggestions.filter(s => s.value != FilterCompare.moreThanOrEqual);
           }
-          // also suggest other definitions starting by the same id
+          // also suggest other definitions containing the id
           setSuggestions(
             suggestions.concat(
               filterDefinitions
-                .filter(fd => fd.id !== updated.def!.id && fd.id.startsWith(updated.def!.id))
+                .filter(fd => fd.id !== updated.def!.id && fd.id.includes(updated.def!.id))
                 .map(defToSuggestion)
             )
           );
@@ -355,7 +355,7 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
       } else if (updated.value?.length) {
         // suggest fields if def is not matched yet
         const suggestions = filterDefinitions
-          .filter(fd => fd.id.startsWith(updated.value!))
+          .filter(fd => fd.id.includes(updated.value!))
           .map(defToSuggestion) as Suggestion[];
         if (filter.component === 'autocomplete') {
           filter
@@ -495,6 +495,7 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
                       setSelectedDirection={setDirection}
                       selectedFilter={filter}
                       setSelectedFilter={setFilter}
+                      match={filters?.match}
                     />
                     <FilterHints def={filter} />
                   </FormGroup>

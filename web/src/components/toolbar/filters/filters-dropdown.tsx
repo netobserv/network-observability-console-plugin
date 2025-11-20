@@ -1,18 +1,21 @@
-import { Dropdown, DropdownItem, Flex, MenuToggle, MenuToggleElement } from '@patternfly/react-core';
+import { Dropdown, DropdownItem, Flex, MenuToggle, MenuToggleElement, Radio } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { FilterDefinition, FilterId } from '../../../model/filters';
+import { Match } from '../../../model/flow-query';
 import { findFilter } from '../../../utils/filter-definitions';
 import { swapFilterDefinition } from '../../../utils/filters-helper';
 import { useOutsideClickEvent } from '../../../utils/outside-hook';
+import { Direction } from '../filters-toolbar';
 import './filters-dropdown.css';
 
 export interface FiltersDropdownProps {
   filterDefinitions: FilterDefinition[];
-  selectedDirection?: 'source' | 'destination';
-  setSelectedDirection: (v?: 'source' | 'destination') => void;
+  selectedDirection: Direction;
+  setSelectedDirection: (v: Direction) => void;
   selectedFilter: FilterDefinition;
   setSelectedFilter: (f: FilterDefinition) => void;
+  match?: Match;
 }
 
 export const FiltersDropdown: React.FC<FiltersDropdownProps> = ({
@@ -20,19 +23,17 @@ export const FiltersDropdown: React.FC<FiltersDropdownProps> = ({
   selectedDirection,
   setSelectedDirection,
   selectedFilter,
-  setSelectedFilter
+  setSelectedFilter,
+  match
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
-
-  const directionRef = useOutsideClickEvent(() => setDirectionOpen(false));
-  const [isDirectionOpen, setDirectionOpen] = React.useState<boolean>(false);
 
   const columnRef = useOutsideClickEvent(() => setColumnOpen(false));
   const [isColumnOpen, setColumnOpen] = React.useState<boolean>(false);
 
-  const getFiltersDropdownItems = () => {
+  const getFiltersDropdownItems = React.useCallback(() => {
     return filterDefinitions
-      .filter(f => (selectedDirection ? f.category === selectedDirection : !f.category || f.category === 'targeteable'))
+      .filter(f => !f.category || f.category === 'targeteable')
       .sort((a, b) => a.name.localeCompare(b.name))
       .map((f, index) => (
         <DropdownItem
@@ -49,7 +50,21 @@ export const FiltersDropdown: React.FC<FiltersDropdownProps> = ({
           {f.name}
         </DropdownItem>
       ));
-  };
+  }, [filterDefinitions, setSelectedFilter]);
+
+  const onRadioChange = React.useCallback(
+    (event: React.FormEvent<HTMLInputElement>, checked: boolean) => {
+      if (checked) {
+        const name = event.currentTarget.name;
+        if (name === 'either') {
+          setSelectedDirection(undefined);
+        } else {
+          setSelectedDirection(name as Direction);
+        }
+      }
+    },
+    [setSelectedDirection]
+  );
 
   React.useEffect(() => {
     if (selectedDirection) {
@@ -57,77 +72,16 @@ export const FiltersDropdown: React.FC<FiltersDropdownProps> = ({
       if (selectedFilter.category) {
         setSelectedFilter(swapFilterDefinition(filterDefinitions, selectedFilter, dir));
       } else {
-        setSelectedFilter(findFilter(filterDefinitions, `${dir}_namespace`)!);
+        setSelectedDirection(undefined);
       }
     } else if (selectedFilter.id.startsWith('src_') || selectedFilter.id.startsWith('dst_')) {
       const id = selectedFilter.id.replace('src_', '').replace('dst_', '') as FilterId;
       setSelectedFilter(findFilter(filterDefinitions, id)!);
     }
-  }, [filterDefinitions, selectedDirection, selectedFilter, setSelectedFilter]);
+  }, [filterDefinitions, selectedDirection, selectedFilter, setSelectedDirection, setSelectedFilter]);
 
   return (
     <Flex id="direction-column-filter-dropdowns">
-      <div id="direction-filter-dropdown-container" data-test="column-filter-dropdown-container" ref={directionRef}>
-        <Dropdown
-          data-test="direction-filter-dropdown"
-          id="direction-filter-dropdown"
-          isOpen={isDirectionOpen}
-          toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
-            <MenuToggle
-              ref={toggleRef}
-              data-test="direction-filter-toggle"
-              id="direction-filter-toggle"
-              onClick={() => {
-                setDirectionOpen(!isDirectionOpen);
-              }}
-              isExpanded={isDirectionOpen}
-            >
-              {selectedDirection === 'source'
-                ? t('Source')
-                : selectedDirection === 'destination'
-                ? t('Destination')
-                : t('Common')}
-            </MenuToggle>
-          )}
-        >
-          <DropdownItem
-            data-test={'source'}
-            id={'source'}
-            className={`direction-filter-item`}
-            component="button"
-            onClick={() => {
-              setDirectionOpen(false);
-              setSelectedDirection('source');
-            }}
-          >
-            {t('Source')}
-          </DropdownItem>
-          <DropdownItem
-            data-test={'destination'}
-            id={'destination'}
-            className={`direction-filter-item`}
-            component="button"
-            onClick={() => {
-              setDirectionOpen(false);
-              setSelectedDirection('destination');
-            }}
-          >
-            {t('Destination')}
-          </DropdownItem>
-          <DropdownItem
-            data-test={'any'}
-            id={'any'}
-            className={`direction-filter-item`}
-            component="button"
-            onClick={() => {
-              setDirectionOpen(false);
-              setSelectedDirection(undefined);
-            }}
-          >
-            {t('Common')}
-          </DropdownItem>
-        </Dropdown>
-      </div>
       <div id="column-filter-dropdown-container" data-test="column-filter-dropdown-container" ref={columnRef}>
         <Dropdown
           data-test="column-filter-dropdown"
@@ -150,6 +104,32 @@ export const FiltersDropdown: React.FC<FiltersDropdownProps> = ({
         >
           {getFiltersDropdownItems()}
         </Dropdown>
+      </div>
+      <div id="direction-filter-dropdown-container" data-test="column-filter-dropdown-container">
+        <Radio
+          id="radio-source"
+          label={match === 'bidirectionnal' ? t('As endpoint A') : t('As source')}
+          name="source"
+          isChecked={selectedDirection === 'source'}
+          onChange={onRadioChange}
+          isDisabled={!selectedFilter.category}
+        />
+        <Radio
+          id="radio-destination"
+          label={match === 'bidirectionnal' ? t('As endpoint B') : t('As destination')}
+          name="destination"
+          isChecked={selectedDirection === 'destination'}
+          onChange={onRadioChange}
+          isDisabled={!selectedFilter.category}
+        />
+        <Radio
+          id="radio-either"
+          label={t('Either')}
+          name="either"
+          isChecked={!selectedDirection}
+          onChange={onRadioChange}
+          isDisabled={!selectedFilter.category}
+        />
       </div>
     </Flex>
   );

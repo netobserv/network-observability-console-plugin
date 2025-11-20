@@ -78,8 +78,8 @@ export const SummaryFilterButton: React.FC<SummaryFilterButtonProps> = ({
         onSelect={(event, value) => value && onSelect(value as FilterDir, event)}
       >
         <SelectList className="summary-filters-list">
-          {menuItem('src', filters.match === 'peers' ? t('Peer A') : t('Source'))}
-          {menuItem('dst', filters.match === 'peers' ? t('Peer B') : t('Destination'))}
+          {menuItem('src', filters.match === 'bidirectionnal' ? t('Endpoint A') : t('Source'))}
+          {menuItem('dst', filters.match === 'bidirectionnal' ? t('Endpoint B') : t('Destination'))}
         </SelectList>
       </Select>
     </div>

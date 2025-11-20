@@ -22,7 +22,7 @@ export const getFetchFunctions = (filterDefinitions: FilterDefinition[], filters
         return getMetricsBNF(q, range, srcList, dstList, matchAny);
       }
     };
-  } else if (filters.match === 'peers') {
+  } else if (filters.match === 'bidirectionnal') {
     let swapped = swapFilters(filterDefinitions, filters.list);
     if (matchAny) {
       // In match-any mode, remove non-swappable filters as they would result in duplicates

@@ -118,7 +118,7 @@ export const NetflowTrafficTab: React.FC<NetflowTrafficTabProps> = ({ match, obj
               values: [{ v: `${obj.kind}.${obj.metadata!.namespace}.${obj.metadata!.name}` }]
             }
           ],
-          match: 'peers'
+          match: 'bidirectionnal'
         });
         break;
       case 'Service':
@@ -168,7 +168,7 @@ export const NetflowTrafficTab: React.FC<NetflowTrafficTabProps> = ({ match, obj
               values: [{ v: obj!.metadata!.name as string }]
             }
           ],
-          match: 'peers'
+          match: 'bidirectionnal'
         });
         break;
       case 'Node':
@@ -180,7 +180,7 @@ export const NetflowTrafficTab: React.FC<NetflowTrafficTabProps> = ({ match, obj
               values: [{ v: obj!.metadata!.name as string }]
             }
           ],
-          match: 'peers'
+          match: 'bidirectionnal'
         });
         break;
       case 'ReplicaSet':
@@ -194,7 +194,7 @@ export const NetflowTrafficTab: React.FC<NetflowTrafficTabProps> = ({ match, obj
               })
             }
           ],
-          match: 'peers'
+          match: 'bidirectionnal'
         });
         break;
       case 'HorizontalPodAutoscaler':
@@ -209,7 +209,7 @@ export const NetflowTrafficTab: React.FC<NetflowTrafficTabProps> = ({ match, obj
               ]
             }
           ],
-          match: 'peers'
+          match: 'bidirectionnal'
         });
         break;
     }

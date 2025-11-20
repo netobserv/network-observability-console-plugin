@@ -1,5 +1,5 @@
 import { Dropdown, DropdownItem, MenuToggle, MenuToggleElement } from '@patternfly/react-core';
-import { BarsIcon, ListIcon, RouteIcon } from '@patternfly/react-icons';
+import { LongArrowAltDownIcon, LongArrowAltUpIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Match } from '../../model/flow-query';
@@ -7,36 +7,38 @@ import { Match } from '../../model/flow-query';
 export interface MatchDropdownProps {
   selected: Match;
   setMatch: (l: Match) => void;
+  allowBidirectionnal?: boolean;
   id?: string;
 }
 
-export const MatchValues = ['all', 'any', 'peers'] as Match[];
+export const MatchValues = ['any', 'all', 'bidirectionnal'] as Match[];
 
-export const MatchDropdown: React.FC<MatchDropdownProps> = ({ selected, setMatch, id }) => {
+export const MatchDropdown: React.FC<MatchDropdownProps> = ({ allowBidirectionnal, selected, setMatch, id }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [isOpen, setOpen] = React.useState(false);
 
-  const getMatchDisplay = (layoutName: Match) => {
+  const getMatchDisplay = (layoutName: Match, toggle?: boolean) => {
     switch (layoutName) {
       case 'any':
-        return t('Any');
+        return t('OR');
       case 'all':
-        return t('All');
-      case 'peers':
-        return t('Peers');
-      default:
-        return t('Invalid');
-    }
-  };
-
-  const getIcon = (layoutName: Match) => {
-    switch (layoutName) {
-      case 'any':
-        return <BarsIcon />;
-      case 'all':
-        return <ListIcon />;
-      case 'peers':
-        return <RouteIcon />;
+        return t('AND');
+      case 'bidirectionnal':
+        if (allowBidirectionnal) {
+          if (toggle) {
+            return (
+              <div style={{ transform: 'rotate(90deg)' }}>
+                <LongArrowAltUpIcon />
+                <LongArrowAltDownIcon />
+              </div>
+            );
+          } else {
+            return t('Bidirectional');
+          }
+        } else {
+          // display as AND if bidirectionnal is not allowed here
+          return t('AND');
+        }
       default:
         return t('Invalid');
     }
@@ -56,13 +58,11 @@ export const MatchDropdown: React.FC<MatchDropdownProps> = ({ selected, setMatch
           onClick={() => setOpen(!isOpen)}
           onBlur={() => setTimeout(() => setOpen(false), 500)}
         >
-          {getIcon(selected)}
-          &nbsp;
-          {getMatchDisplay(selected)}
+          {getMatchDisplay(selected, true)}
         </MenuToggle>
       )}
     >
-      {MatchValues.map(v => (
+      {MatchValues.filter(v => allowBidirectionnal || v !== 'bidirectionnal').map(v => (
         <DropdownItem
           data-test={v}
           id={v}
@@ -72,8 +72,6 @@ export const MatchDropdown: React.FC<MatchDropdownProps> = ({ selected, setMatch
             setMatch(v);
           }}
         >
-          {getIcon(v)}
-          &nbsp;
           {getMatchDisplay(v)}
         </DropdownItem>
       ))}
