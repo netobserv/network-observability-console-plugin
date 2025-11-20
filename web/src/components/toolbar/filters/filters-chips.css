@@ -25,9 +25,18 @@
   text-align: center;
 }
 
-.and-or-text {
+.match-dropdown-container {
   align-self: center;
   padding: 0 0.5em 0 0.5em;
+}
+
+.match-dropdown-container>button::before,
+.match-dropdown-container>button::after {
+  display: none;
+}
+
+.match-dropdown-container>button>.pf-v5-c-menu-toggle__controls {
+  padding-left: 0.25em;
 }
 
 .flex-block {

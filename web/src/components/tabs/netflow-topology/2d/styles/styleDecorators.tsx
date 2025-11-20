@@ -136,7 +136,7 @@ export const NodeDecorators: React.FC<NodeDecoratorsProps> = ({
             <ContextMenuItem key={'src'} onClick={onFilterDirClick('src')}>
               <Checkbox
                 id={'context-src-checkbox'}
-                label={match === 'peers' ? t('Peer A') : t('Source')}
+                label={match === 'bidirectionnal' ? t('Endpoint A') : t('Source')}
                 isChecked={isSrcFiltered}
                 onChange={() => onFilterDirClick('src')}
               />
@@ -144,7 +144,7 @@ export const NodeDecorators: React.FC<NodeDecoratorsProps> = ({
             <ContextMenuItem key={'dst'} onClick={onFilterDirClick('dst')}>
               <Checkbox
                 id={'context-dst-checkbox'}
-                label={match === 'peers' ? t('Peer B') : t('Destination')}
+                label={match === 'bidirectionnal' ? t('Endpoint B') : t('Destination')}
                 isChecked={isDstFiltered}
                 onChange={() => onFilterDirClick('dst')}
               />

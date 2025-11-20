@@ -68,7 +68,7 @@ describe('Match all, flows', () => {
     const grouped = getDecodedFilter(
       {
         list: [filter('src_name', [{ v: 'test1' }, { v: 'test2' }]), filter('dst_port', [{ v: '443' }])],
-        match: 'peers'
+        match: 'bidirectionnal'
       },
       false
     );
@@ -79,7 +79,7 @@ describe('Match all, flows', () => {
     const grouped = getDecodedFilter(
       {
         list: [filter('src_namespace', [{ v: 'ns' }]), filter('dst_owner_name', [{ v: 'test' }])],
-        match: 'peers'
+        match: 'bidirectionnal'
       },
       false
     );
@@ -95,7 +95,7 @@ describe('Match all, flows', () => {
           filter('src_kind', [{ v: 'Pod' }]),
           filter('protocol', [{ v: '6' }])
         ],
-        match: 'peers'
+        match: 'bidirectionnal'
       },
       false
     );
@@ -110,7 +110,10 @@ describe('Match all, flows', () => {
   });
 
   it('should generate K8S resource, back and forth', () => {
-    const grouped = getDecodedFilter({ list: [filter('src_resource', [{ v: 'Pod.ns.test' }])], match: 'peers' }, false);
+    const grouped = getDecodedFilter(
+      { list: [filter('src_resource', [{ v: 'Pod.ns.test' }])], match: 'bidirectionnal' },
+      false
+    );
     expect(grouped).toEqual(
       'SrcK8S_Type="Pod"&SrcK8S_Namespace="ns"&SrcK8S_Name="test"' +
         '|DstK8S_Type="Pod"&DstK8S_Namespace="ns"&DstK8S_Name="test"'
@@ -118,7 +121,10 @@ describe('Match all, flows', () => {
   });
 
   it('should generate Node Src/Dst K8S resource, back and forth', () => {
-    const grouped = getDecodedFilter({ list: [filter('src_resource', [{ v: 'Node.test' }])], match: 'peers' }, false);
+    const grouped = getDecodedFilter(
+      { list: [filter('src_resource', [{ v: 'Node.test' }])], match: 'bidirectionnal' },
+      false
+    );
     expect(grouped).toEqual(
       'SrcK8S_Type="Node"&SrcK8S_Namespace=""&SrcK8S_Name="test"' +
         '|DstK8S_Type="Node"&DstK8S_Namespace=""&DstK8S_Name="test"'
@@ -127,7 +133,7 @@ describe('Match all, flows', () => {
 
   it('should generate Owner Src/Dst K8S resource, back and forth', () => {
     const grouped = getDecodedFilter(
-      { list: [filter('src_resource', [{ v: 'DaemonSet.ns.test' }])], match: 'peers' },
+      { list: [filter('src_resource', [{ v: 'DaemonSet.ns.test' }])], match: 'bidirectionnal' },
       false
     );
     expect(grouped).toEqual(
@@ -140,7 +146,7 @@ describe('Match all, flows', () => {
     const grouped = getDecodedFilter(
       {
         list: [filter('src_resource', [{ v: 'Pod.ns.test' }]), filter('dst_name', [{ v: 'peer' }])],
-        match: 'peers'
+        match: 'bidirectionnal'
       },
       false
     );
@@ -179,7 +185,7 @@ describe('Match any, flows', () => {
     const grouped = getDecodedFilter(
       {
         list: [filter('src_name', [{ v: 'test1' }, { v: 'test2' }]), filter('dst_port', [{ v: '443' }])],
-        match: 'peers'
+        match: 'bidirectionnal'
       },
       true
     );
@@ -195,7 +201,7 @@ describe('Match any, flows', () => {
           filter('src_kind', [{ v: 'Pod' }]),
           filter('protocol', [{ v: '6' }])
         ],
-        match: 'peers'
+        match: 'bidirectionnal'
       },
       true
     );
@@ -210,7 +216,10 @@ describe('Match any, flows', () => {
   });
 
   it('should generate K8S resource, back and forth', () => {
-    const grouped = getDecodedFilter({ list: [filter('src_resource', [{ v: 'Pod.ns.test' }])], match: 'peers' }, true);
+    const grouped = getDecodedFilter(
+      { list: [filter('src_resource', [{ v: 'Pod.ns.test' }])], match: 'bidirectionnal' },
+      true
+    );
     expect(grouped).toEqual(
       'SrcK8S_Type="Pod"&SrcK8S_Namespace="ns"&SrcK8S_Name="test"' +
         '|DstK8S_Type="Pod"&DstK8S_Namespace="ns"&DstK8S_Name="test"'
@@ -218,7 +227,10 @@ describe('Match any, flows', () => {
   });
 
   it('should generate Node K8S resource, back and forth', () => {
-    const grouped = getDecodedFilter({ list: [filter('src_resource', [{ v: 'Node.test' }])], match: 'peers' }, true);
+    const grouped = getDecodedFilter(
+      { list: [filter('src_resource', [{ v: 'Node.test' }])], match: 'bidirectionnal' },
+      true
+    );
     expect(grouped).toEqual(
       'SrcK8S_Type="Node"&SrcK8S_Namespace=""&SrcK8S_Name="test"' +
         '|DstK8S_Type="Node"&DstK8S_Namespace=""&DstK8S_Name="test"'
@@ -227,7 +239,7 @@ describe('Match any, flows', () => {
 
   it('should generate Owner K8S resource, back and forth', () => {
     const grouped = getDecodedFilter(
-      { list: [filter('src_resource', [{ v: 'DaemonSet.ns.test' }])], match: 'peers' },
+      { list: [filter('src_resource', [{ v: 'DaemonSet.ns.test' }])], match: 'bidirectionnal' },
       true
     );
     expect(grouped).toEqual(
@@ -240,7 +252,7 @@ describe('Match any, flows', () => {
     const grouped = getDecodedFilter(
       {
         list: [filter('src_resource', [{ v: 'Pod.ns.test' }]), filter('dst_name', [{ v: 'peer' }])],
-        match: 'peers'
+        match: 'bidirectionnal'
       },
       true
     );
@@ -295,7 +307,7 @@ describe('Match all, topology', () => {
     getTopoForFilter(
       {
         list: [filter('src_name', [{ v: 'test1' }, { v: 'test2' }]), filter('dst_port', [{ v: '443' }])],
-        match: 'peers'
+        match: 'bidirectionnal'
       },
       false
     );

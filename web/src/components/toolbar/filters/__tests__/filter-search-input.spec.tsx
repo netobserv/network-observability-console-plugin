@@ -52,7 +52,7 @@ describe('<FilterSearchInput />', () => {
 
     //check form content
     const popper = wrapper.find('#filter-popper');
-    expect(popper.find('#direction-filter-toggle').last().text()).toBe('Source');
+    expect(popper.find('#radio-source').last().props().checked).toBe(true);
     expect(popper.find('#column-filter-toggle').last().text()).toBe('Name');
     expect(popper.find('#filter-compare-toggle-button').last().text()).toBe('Equals=');
     expect(popper.find('#search').last().props().value).toBe('loki');

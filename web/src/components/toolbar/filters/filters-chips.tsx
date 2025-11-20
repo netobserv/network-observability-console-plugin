@@ -3,12 +3,9 @@ import {
   Dropdown,
   DropdownItem,
   DropdownList,
-  Flex,
-  FlexItem,
   MenuToggle,
   MenuToggleElement,
   Text,
-  TextContent,
   TextVariants,
   ToolbarGroup,
   ToolbarItem,
@@ -20,7 +17,6 @@ import {
   ArrowsAltVIcon,
   BanIcon,
   CheckIcon,
-  InfoAltIcon,
   PencilAltIcon,
   TimesCircleIcon,
   TimesIcon
@@ -90,11 +86,11 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
       if (id === 'common') {
         return '';
       }
-      if (filters.match === 'peers') {
+      if (filters.match === 'bidirectionnal') {
         if (hasSrcAndDstFilters(filters.list)) {
-          return id === 'src' ? t('Peer A') : t('Peer B');
+          return id === 'src' ? t('Endpoint A') : t('Endpoint B');
         }
-        return t('Peer');
+        return t('Endpoint');
       }
       return id === 'src' ? t('Source') : t('Destination');
     },
@@ -156,31 +152,6 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
     [filters, setFilters, setFiltersList]
   );
 
-  const getAndOrText = React.useCallback(
-    (match: Match | 'values', index: number) => {
-      if (index == 0) {
-        return undefined;
-      }
-
-      return (
-        <Tooltip
-          content={
-            match === 'values'
-              ? t('When a filter has multiple values, the logical OR operator is used between each of these.')
-              : match === 'any'
-              ? t('When using match any, the logical OR operator is used between filters.')
-              : t('When using match {{match}}, the logical AND operator is used between filters.', { match })
-          }
-        >
-          <Text className="and-or-text" component="p">
-            {match === 'any' || match === 'values' ? t('OR') : t('AND')}
-          </Text>
-        </Tooltip>
-      );
-    },
-    [t]
-  );
-
   const getFullName = React.useCallback(
     (filter: Filter) => {
       switch (filter.compare) {
@@ -204,7 +175,7 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
       const someEnabled = hasEnabledFilterValues(filter);
       return (
         <div key={cfIndex} className="flex-block">
-          {getAndOrText(filters.match, cfIndex)}
+          {getAndOr(filters.match, cfIndex)}
           <div className={`custom-chip-group ${someEnabled ? '' : 'disabled-group'}`}>
             <Tooltip
               content={`${someEnabled ? t('Disable') : t('Enable')} '${getFullName(filter)}' ${t('group filter')}`}
@@ -227,7 +198,7 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
               if (isForced || filterValue.disabled) {
                 return (
                   <div key={fvIndex} className="flex-block">
-                    {getAndOrText('values', fvIndex)}
+                    {getAndOr('values', fvIndex)}
                     <div className={`custom-chip ${filterValue.disabled ? 'disabled-value' : ''}`}>
                       <Tooltip
                         content={`${filterValue.disabled ? t('Enable') : t('Disable')} ${getFullName(filter)} '${
@@ -252,7 +223,7 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
               const dropdownId = `${filter.def.id}-${fvIndex}`;
               return (
                 <div key={fvIndex} className="flex-block">
-                  {getAndOrText('values', fvIndex)}
+                  {getAndOr('values', fvIndex)}
                   <Dropdown
                     isOpen={dropdownId === openedDropdown}
                     onOpenChange={(isOpen: boolean) => setOpenedDropdown(isOpen ? dropdownId : undefined)}
@@ -278,7 +249,7 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
                         <PencilAltIcon />
                         &nbsp;{t('Edit')}
                       </DropdownItem>
-                      {filters.match !== 'peers' &&
+                      {filters.match !== 'bidirectionnal' &&
                         (filter.def.id.startsWith('src_') || filter.def.id.startsWith('dst_')) && (
                           <DropdownItem
                             key="bnf"
@@ -289,19 +260,19 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
                             }}
                           >
                             <ArrowsAltVIcon style={{ transform: 'rotate(90deg)' }} />
-                            &nbsp;{t('Any')}
+                            &nbsp;{t('Either')}
                           </DropdownItem>
                         )}
                       {(filter.def.category === 'targeteable' || filter.def.id.startsWith('dst_')) && (
                         <DropdownItem key="src" onClick={() => swapValue(filter, filterValue, 'src')}>
                           <ArrowLeftIcon />
-                          &nbsp;{filters.match === 'peers' ? t('As peer A') : t('As source')}
+                          &nbsp;{filters.match === 'bidirectionnal' ? t('As endpoint A') : t('As source')}
                         </DropdownItem>
                       )}
                       {(filter.def.category === 'targeteable' || filter.def.id.startsWith('src_')) && (
                         <DropdownItem key="dst" onClick={() => swapValue(filter, filterValue, 'dst')}>
                           <ArrowRightIcon />
-                          &nbsp;{filters.match === 'peers' ? t('As peer B') : t('As destination')}
+                          &nbsp;{filters.match === 'bidirectionnal' ? t('As endpoint B') : t('As destination')}
                         </DropdownItem>
                       )}
                       <DropdownItem
@@ -355,6 +326,42 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
     [filters, setFilters, filterDefinitions]
   );
 
+  const getAndOr = React.useCallback(
+    (match: Match | 'values', index: number, root?: boolean) => {
+      if (index == 0) {
+        return undefined;
+      }
+
+      return (
+        <Tooltip
+          content={
+            match === 'values'
+              ? t('the logical OR operator is used between each values of the same filter.')
+              : match === 'any'
+              ? t('The logical OR operator is used between filters.')
+              : match === 'bidirectionnal'
+              ? t(
+                  'The logical AND operator is used between Endpoints and common filters. The traffic is matched in both directions.'
+                )
+              : t('The logical AND operator is used between filters keeping specified directions.')
+          }
+        >
+          <div className="match-dropdown-container">
+            {match === 'values' && (
+              <Text className="and-or-text" component="p">
+                {t('OR')}
+              </Text>
+            )}
+            {match !== 'values' && (
+              <MatchDropdown selected={filters.match} setMatch={setMatch} allowBidirectionnal={root && index === 1} />
+            )}
+          </div>
+        </Tooltip>
+      );
+    },
+    [filters.match, setMatch, t]
+  );
+
   if (_.isEmpty(filters.list) && _.isEmpty(getDefaultFilters())) {
     return null;
   }
@@ -367,45 +374,13 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
       id={`${isForced ? 'forced-' : ''}filters`}
       variant="filter-group"
     >
-      {!isForced && (filters.list.length >= 2 || hasSrcOrDstFilters(filters.list)) && (
-        <ToolbarItem className="flex-start match-container">
-          <Flex direction={{ default: hasSrcOrDstFilters(filters.list) ? 'column' : 'row' }}>
-            <FlexItem>
-              <Tooltip
-                position="left"
-                content={
-                  <TextContent className="netobserv-tooltip-text">
-                    <Text component={TextVariants.p}>{t('Match filters according to your needs.')}</Text>
-                    <Text component={TextVariants.p} className="netobserv-align-start">
-                      - {t('Any will match at least one filter')}
-                    </Text>
-                    <Text component={TextVariants.p} className="netobserv-align-start">
-                      - {t('All will match all the filters')}
-                    </Text>
-                    <Text component={TextVariants.p} className="netobserv-align-start">
-                      - {t('Peers will match all the filters and include the return traffic')}
-                    </Text>
-                  </TextContent>
-                }
-              >
-                <Text className="match-text">
-                  {t('Match')} <InfoAltIcon />
-                </Text>
-              </Tooltip>
-            </FlexItem>
-            <FlexItem>
-              <MatchDropdown selected={filters.match} setMatch={setMatch} />
-            </FlexItem>
-          </Flex>
-        </ToolbarItem>
-      )}
       <ToolbarItem className="flex-start flex">
         {getGroups()
           .filter(gp => gp.filters.length)
           .map((gp, index) => {
             return (
               <div key={gp.id} className="flex-block">
-                {getAndOrText(filters.match, index)}
+                {getAndOr(filters.match, index, true)}
                 <div className={`custom-chip-box ${gp.id !== 'common' ? 'custom-chip-peer' : ''}`}>
                   {hasSrcOrDstFilters(filters.list) && <Text>{getGroupName(gp.id)}&nbsp;</Text>}
                   <div className="flex-block">{gp.filters.map(getFilterDisplay)}</div>
@@ -450,7 +425,7 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
                 label: t('Swap'),
                 tooltip: t('Swap from and to filters'),
                 onClick: swapAllSrcDst,
-                enabled: hasSrcOrDstFilters(filters.list!) && filters.match !== 'peers'
+                enabled: hasSrcOrDstFilters(filters.list!) && filters.match !== 'bidirectionnal'
               }
             ]}
           />

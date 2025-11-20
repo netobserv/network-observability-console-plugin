@@ -1,3 +1,9 @@
+#column-filter-dropdown-container {
+  align-items: center;
+  align-content: center;
+  align-self: center;
+}
+
 #direction-column-filter-dropdowns {
   min-width: 370px;
 }
