@@ -44,6 +44,9 @@ github.com/google/uuid
 # github.com/gorilla/mux v1.8.1
 ## explicit; go 1.20
 github.com/gorilla/mux
+# github.com/grafana/loki/operator/apis/loki v0.0.0-20241021105923-5e970e50b166
+## explicit; go 1.19
+github.com/grafana/loki/operator/apis/loki/v1
 # github.com/josharian/intern v1.0.0
 ## explicit; go 1.5
 github.com/josharian/intern
@@ -500,6 +503,9 @@ k8s.io/utils/clock
 k8s.io/utils/internal/third_party/forked/golang/net
 k8s.io/utils/net
 k8s.io/utils/ptr
+# sigs.k8s.io/controller-runtime v0.20.4
+## explicit; go 1.23.0
+sigs.k8s.io/controller-runtime/pkg/scheme
 # sigs.k8s.io/json v0.0.0-20241014173422-cfa47c3a1cc8
 ## explicit; go 1.23
 sigs.k8s.io/json
