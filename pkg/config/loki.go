@@ -18,6 +18,7 @@ type Loki struct {
 	TokenPath          string            `yaml:"tokenPath,omitempty" json:"tokenPath,omitempty"`
 	SkipTLS            bool              `yaml:"skipTls,omitempty" json:"skipTls,omitempty"`
 	CAPath             string            `yaml:"caPath,omitempty" json:"caPath,omitempty"`
+	Status             string            `yaml:"status,omitempty" json:"status,omitempty"`
 	StatusSkipTLS      bool              `yaml:"statusSkipTls,omitempty" json:"statusSkipTls,omitempty"`
 	StatusCAPath       string            `yaml:"statusCaPath,omitempty" json:"statusCaPath,omitempty"`
 	StatusUserCertPath string            `yaml:"statusUserCertPath,omitempty" json:"statusUserCertPath,omitempty"`
