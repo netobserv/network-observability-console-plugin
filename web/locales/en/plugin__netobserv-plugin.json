@@ -501,7 +501,7 @@
   "the logical OR operator is used between each values of the same filter.": "the logical OR operator is used between each values of the same filter.",
   "The logical OR operator is used between filters.": "The logical OR operator is used between filters.",
   "The logical AND operator is used between Endpoints and common filters. The traffic is matched in both directions.": "The logical AND operator is used between Endpoints and common filters. The traffic is matched in both directions.",
-  "The logical AND operator is used between filters keeping specified directions.": "The logical AND operator is used between filters keeping specified directions.",
+  "The logical AND operator is used between filters keeping direction source to destination.": "The logical AND operator is used between filters keeping direction source to destination.",
   "Edit filters": "Edit filters",
   "Reset defaults": "Reset defaults",
   "Clear all": "Clear all",

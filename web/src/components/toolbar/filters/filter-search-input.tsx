@@ -1,6 +1,8 @@
 import {
   ActionGroup,
   Button,
+  Flex,
+  FlexItem,
   Form,
   FormGroup,
   Menu,
@@ -449,7 +451,6 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
                     id={`suggestion-${index}`}
                     itemId={suggestion}
                     key={`suggestion-${index}`}
-                    description={suggestion.display}
                     onKeyDown={e => {
                       if (index === 0 && e.key === 'ArrowUp') {
                         e.preventDefault();
@@ -477,7 +478,14 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
                       }
                     }}
                   >
-                    {suggestion.value}
+                    <Flex direction={{ default: 'row' }}>
+                      <FlexItem className="filter-text-ellipsis" flex={{ default: 'flex_1' }}>
+                        {suggestion.value}
+                      </FlexItem>
+                      <FlexItem className="filter-text-ellipsis" flex={{ default: 'flex_1' }}>
+                        {suggestion.display}
+                      </FlexItem>
+                    </Flex>
                   </MenuItem>
                 ))}
               </MenuList>

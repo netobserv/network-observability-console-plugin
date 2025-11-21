@@ -1,4 +1,11 @@
-import { Button, Toolbar, ToolbarContent, ToolbarItem, Tooltip, ValidatedOptions } from '@patternfly/react-core';
+import {
+  ExpandableSectionToggle,
+  Toolbar,
+  ToolbarContent,
+  ToolbarItem,
+  Tooltip,
+  ValidatedOptions
+} from '@patternfly/react-core';
 import { CompressIcon, ExpandIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
 import * as React from 'react';
@@ -144,70 +151,77 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
     showHideText = showFilters ? t('Hide filters') : t('Show filters');
   }
   return (
-    <Toolbar data-test={id} id={id}>
-      <ToolbarContent data-test={`${id}-search-filters`} id={`${id}-search-filters`} toolbarId={id}>
-        <ToolbarItem className="flex-start">
-          <QueryOptionsDropdown {...props.queryOptionsProps} />
-        </ToolbarItem>
-        {!isForced && quickFilters.length > 0 && (
+    <>
+      <Toolbar data-test={id} id={id}>
+        <ToolbarContent data-test={`${id}-search-filters`} id={`${id}-search-filters`} toolbarId={id}>
           <ToolbarItem className="flex-start">
-            <QuickFilters
-              quickFilters={quickFilters}
-              activeFilters={filters?.list || []}
-              setFilters={list => setFilters({ ...filters!, list })}
+            <QueryOptionsDropdown {...props.queryOptionsProps} />
+          </ToolbarItem>
+          {!isForced && quickFilters.length > 0 && (
+            <ToolbarItem className="flex-start">
+              <QuickFilters
+                quickFilters={quickFilters}
+                activeFilters={filters?.list || []}
+                setFilters={list => setFilters({ ...filters!, list })}
+              />
+            </ToolbarItem>
+          )}
+          {!isForced && getFilterToolbar()}
+          {showHideText && countActiveFilters > 0 && (
+            <ToolbarItem className="flex-start">
+              <ExpandableSectionToggle
+                data-test="show-filters-button"
+                id="show-filters-button"
+                className="overflow-button"
+                isExpanded={showFilters}
+                onToggle={isExpanded => setShowFilters(isExpanded)}
+              >
+                {showHideText}
+              </ExpandableSectionToggle>
+            </ToolbarItem>
+          )}
+          <ToolbarItem className="flex-start">
+            <LinksOverflow
+              id={'filters-more-options'}
+              items={[
+                {
+                  id: 'fullscreen',
+                  label: isFullScreen ? t('Collapse') : t('Expand'),
+                  onClick: () => setFullScreen(!isFullScreen),
+                  icon: isFullScreen ? <CompressIcon /> : <ExpandIcon />
+                },
+                {
+                  id: 'set-default-filters',
+                  label: t('Default filters'),
+                  onClick: () => {
+                    resetFilters();
+                    autoCompleteCache.clear();
+                  },
+                  enabled: countActiveFilters === 0
+                }
+              ]}
             />
           </ToolbarItem>
-        )}
-        {!isForced && getFilterToolbar()}
-        {showHideText && countActiveFilters > 0 && (
-          <ToolbarItem className="flex-start">
-            <Button
-              data-test="show-filters-button"
-              id="show-filters-button"
-              variant="link"
-              className="overflow-button"
-              onClick={() => setShowFilters(!showFilters)}
-            >
-              {showHideText}
-            </Button>
-          </ToolbarItem>
-        )}
-        <ToolbarItem className="flex-start">
-          <LinksOverflow
-            id={'filters-more-options'}
-            items={[
-              {
-                id: 'fullscreen',
-                label: isFullScreen ? t('Collapse') : t('Expand'),
-                onClick: () => setFullScreen(!isFullScreen),
-                icon: isFullScreen ? <CompressIcon /> : <ExpandIcon />
-              },
-              {
-                id: 'set-default-filters',
-                label: t('Default filters'),
-                onClick: () => {
-                  resetFilters();
-                  autoCompleteCache.clear();
-                },
-                enabled: countActiveFilters === 0
-              }
-            ]}
-          />
-        </ToolbarItem>
-        {showFilters && countActiveFilters > 0 && (
-          <FiltersChips
-            isForced={isForced}
-            filters={filtersOrForced!}
-            setFilters={setFilters}
-            editValue={editValue}
-            clearFilters={clearFilters}
-            resetFilters={resetFilters}
-            quickFilters={quickFilters}
-            filterDefinitions={filterDefinitions}
-          />
-        )}
-      </ToolbarContent>
-    </Toolbar>
+        </ToolbarContent>
+      </Toolbar>
+      {showFilters && countActiveFilters > 0 && (
+        <Toolbar data-test={`${id}-chips`} id={`${id}-chips`}>
+          <ToolbarContent toolbarId={`${id}-chips`}>
+            <FiltersChips
+              isForced={isForced}
+              filters={filtersOrForced!}
+              setDirection={setDirection}
+              setFilters={setFilters}
+              editValue={editValue}
+              clearFilters={clearFilters}
+              resetFilters={resetFilters}
+              quickFilters={quickFilters}
+              filterDefinitions={filterDefinitions}
+            />
+          </ToolbarContent>
+        </Toolbar>
+      )}
+    </>
   );
 };
 

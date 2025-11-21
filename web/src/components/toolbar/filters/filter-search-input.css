@@ -1,7 +1,12 @@
 #filter-search-input, #filter-popper {
-  min-width: 400px !important;
+  min-width: 500px !important;
 }
 
 .filters-actions {
   margin-left: 180px;
+}
+
+.filter-text-ellipsis {
+  text-overflow: ellipsis;
+  overflow: hidden;
 }

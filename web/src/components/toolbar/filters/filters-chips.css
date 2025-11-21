@@ -26,8 +26,11 @@
 }
 
 .match-dropdown-container {
+  align-items: center;
   align-self: center;
-  padding: 0 0.5em 0 0.5em;
+  align-content: center;
+  padding: 0;
+  margin: 0;
 }
 
 .match-dropdown-container>button::before,
@@ -46,4 +49,22 @@
   align-content: center;
   align-self: center;
   justify-content: center;
+}
+
+.flex-block.first {
+  padding-left: 1.5em;
+}
+
+.flex-block.no-wrap {
+  flex-wrap: nowrap;
+}
+
+.toolbar-item-center {
+  display: contents;
+  align-items: center;
+  align-content: center;
+  align-self: center;
+  justify-items: center;
+  justify-content: center;
+  justify-self: center;
 }

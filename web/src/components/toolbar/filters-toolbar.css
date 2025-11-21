@@ -77,6 +77,21 @@ div#filter-toolbar-search-filters {
   background-color: #f0f0f0;
 }
 
+.custom-chip-text {
+  text-align: center;
+}
+
+.custom-chip-group>.filtervalues {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  align-items: center;
+  align-self: center;
+  justify-content: center;
+  justify-items: center;
+  justify-self: center;
+}
+
 .custom-chip-group>p {
   font-size: 0.85rem;
 }
