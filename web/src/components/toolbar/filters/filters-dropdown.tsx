@@ -128,7 +128,7 @@ export const FiltersDropdown: React.FC<FiltersDropdownProps> = ({
           name="either"
           isChecked={!selectedDirection}
           onChange={onRadioChange}
-          isDisabled={!selectedFilter.category}
+          isDisabled={!selectedFilter.category || match === 'bidirectionnal'}
         />
       </div>
     </Flex>
