@@ -19,7 +19,8 @@ export type TargetedFilterId =
   | 'mac'
   | 'port'
   | 'host_address'
-  | 'host_name';
+  | 'host_name'
+  | 'subnet_label';
 
 export type FilterId =
   | 'cluster_name'
