@@ -1,7 +1,7 @@
 ARG BUILDVERSION
 ARG BUILDVERSION_Y
 
-FROM registry.access.redhat.com/ubi9/nodejs-22:9.6-1761625559 as web-builder
+FROM registry.access.redhat.com/ubi9/nodejs-22:9.7-1762230782 as web-builder
 
 WORKDIR /opt/app-root
 
@@ -35,7 +35,7 @@ COPY pkg/ pkg/
 ENV GOEXPERIMENT strictfipsruntime
 RUN go build -tags strictfipsruntime -ldflags "-X 'main.buildVersion=$BUILDVERSION' -X 'main.buildDate=`date +%Y-%m-%d\ %H:%M`'" -mod vendor -o plugin-backend cmd/plugin-backend.go
 
-FROM registry.access.redhat.com/ubi9/ubi-minimal:9.6-1760515502
+FROM registry.access.redhat.com/ubi9/ubi-minimal:9.7-1762956380
 ARG BUILDVERSION
 ARG BUILDVERSION_Y
 
