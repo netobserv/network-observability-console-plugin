@@ -228,10 +228,14 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
                   <div key={fvIndex} className={`flex-block ${fvIndex == 0 ? 'first' : ''}`}>
                     {getAndOr('values', fvIndex)}
                     <Dropdown
+                      id={dropdownId}
+                      data-test={dropdownId}
                       isOpen={dropdownId === openedDropdown}
                       onOpenChange={(isOpen: boolean) => setOpenedDropdown(isOpen ? dropdownId : undefined)}
                       toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
                         <MenuToggle
+                          id={`${dropdownId}-toggle`}
+                          data-test={`${dropdownId}-toggle`}
                           ref={toggleRef}
                           className={`custom-chip ${filterValue.disabled ? 'disabled-value' : ''}`}
                           isExpanded={dropdownId === openedDropdown}
@@ -243,6 +247,8 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
                     >
                       <DropdownList>
                         <DropdownItem
+                          id="dropdown-item-edit"
+                          data-test="dropdown-item-edit"
                           key="edit"
                           onClick={() => {
                             removeValue(filter, filterValue);
@@ -255,6 +261,8 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
                         {filters.match !== 'bidirectionnal' &&
                           (filter.def.id.startsWith('src_') || filter.def.id.startsWith('dst_')) && (
                             <DropdownItem
+                              id="dropdown-item-either"
+                              data-test="dropdown-item-either"
                               key="bnf"
                               onClick={() => {
                                 const bnf = bnfFilterValue(
@@ -272,18 +280,30 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
                             </DropdownItem>
                           )}
                         {(filter.def.category === 'targeteable' || filter.def.id.startsWith('dst_')) && (
-                          <DropdownItem key="src" onClick={() => swapValue(filter, filterValue, 'src')}>
+                          <DropdownItem
+                            id="dropdown-item-src"
+                            data-test="dropdown-item-src"
+                            key="src"
+                            onClick={() => swapValue(filter, filterValue, 'src')}
+                          >
                             <ArrowLeftIcon />
                             &nbsp;{filters.match === 'bidirectionnal' ? t('As endpoint A') : t('As source')}
                           </DropdownItem>
                         )}
                         {(filter.def.category === 'targeteable' || filter.def.id.startsWith('src_')) && (
-                          <DropdownItem key="dst" onClick={() => swapValue(filter, filterValue, 'dst')}>
+                          <DropdownItem
+                            id="dropdown-item-dst"
+                            data-test="dropdown-item-src"
+                            key="dst"
+                            onClick={() => swapValue(filter, filterValue, 'dst')}
+                          >
                             <ArrowRightIcon />
                             &nbsp;{filters.match === 'bidirectionnal' ? t('As endpoint B') : t('As destination')}
                           </DropdownItem>
                         )}
                         <DropdownItem
+                          id="dropdown-item-disable"
+                          data-test="dropdown-item-disable"
                           key="disable"
                           onClick={() => {
                             filterValue.disabled = !filterValue.disabled;
@@ -296,6 +316,8 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
                           &nbsp;{filterValue.disabled ? t('Enable') : t('Disable')}
                         </DropdownItem>
                         <DropdownItem
+                          id="dropdown-item-remove"
+                          data-test="dropdown-item-remove"
                           key="remove"
                           onClick={() => {
                             removeValue(filter, filterValue);
@@ -311,7 +333,12 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
               })}
             </div>
             {!isForced && (
-              <Button variant="plain" onClick={() => setFiltersList(removeFromFilters(filters.list, filter))}>
+              <Button
+                id="button-remove-filters"
+                data-test="button-remove-filters"
+                variant="plain"
+                onClick={() => setFiltersList(removeFromFilters(filters.list, filter))}
+              >
                 <TimesCircleIcon />
               </Button>
             )}
