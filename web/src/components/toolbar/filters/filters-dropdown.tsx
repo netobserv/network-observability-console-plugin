@@ -108,6 +108,7 @@ export const FiltersDropdown: React.FC<FiltersDropdownProps> = ({
       <div id="direction-filter-dropdown-container" data-test="column-filter-dropdown-container">
         <Radio
           id="radio-source"
+          data-test="radio-source"
           label={match === 'bidirectionnal' ? t('As endpoint A') : t('As source')}
           name="source"
           isChecked={selectedDirection === 'source'}
@@ -116,6 +117,7 @@ export const FiltersDropdown: React.FC<FiltersDropdownProps> = ({
         />
         <Radio
           id="radio-destination"
+          data-test="radio-destination"
           label={match === 'bidirectionnal' ? t('As endpoint B') : t('As destination')}
           name="destination"
           isChecked={selectedDirection === 'destination'}
@@ -124,6 +126,7 @@ export const FiltersDropdown: React.FC<FiltersDropdownProps> = ({
         />
         <Radio
           id="radio-either"
+          data-test="radio-either"
           label={t('Either')}
           name="either"
           isChecked={!selectedDirection}
