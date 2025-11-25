@@ -263,6 +263,15 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
           if (dnsPanels.some(p => p.id.includes('rcode_dns_latency_flows'))) {
             promises.push(
               ...[
+                //get dns names
+                getFlowGenericMetrics(
+                  { ...fq, aggregateBy: 'DnsName', function: 'count', type: 'DnsFlows' },
+                  range
+                ).then(res => {
+                  currentMetrics = { ...currentMetrics, dnsNameMetrics: res.metrics };
+                  setMetrics(currentMetrics);
+                  return res.stats;
+                }),
                 //get dns response codes
                 getFlowGenericMetrics(
                   { ...fq, aggregateBy: 'DnsFlagsResponseCode', function: 'count', type: 'DnsFlows' },
@@ -286,6 +295,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
           setMetrics({
             ...currentMetrics,
             dnsLatencyMetrics: undefined,
+            dnsNameMetrics: undefined,
             dnsRCodeMetrics: undefined,
             totalDnsLatencyMetric: undefined,
             totalDnsCountMetric: undefined
@@ -524,6 +534,10 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
     const getTopKDroppedCauseMetrics = React.useCallback(() => {
       return props.metrics.droppedCauseMetrics?.sort((a, b) => getStat(b.stats, 'sum') - getStat(a.stats, 'sum')) || [];
     }, [props.metrics.droppedCauseMetrics]);
+
+    const getTopKDnsNameMetrics = React.useCallback(() => {
+      return props.metrics.dnsNameMetrics?.sort((a, b) => getStat(b.stats, 'sum') - getStat(a.stats, 'sum')) || [];
+    }, [props.metrics.dnsNameMetrics]);
 
     const getTopKDnsRCodeMetrics = React.useCallback(() => {
       return props.metrics.dnsRCodeMetrics?.sort((a, b) => getStat(b.stats, 'sum') - getStat(a.stats, 'sum')) || [];
@@ -924,9 +938,10 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
               doubleWidth: options.graph!.type !== 'donut'
             };
           }
+          case 'name_dns_latency_flows':
           case 'rcode_dns_latency_flows': {
-            const metricType = 'DnsFlows'; // TODO: consider adding packets graphs here
-            const topKMetrics = getTopKDnsRCodeMetrics();
+            const metricType = id === 'name_dns_latency_flows' ? 'DnsName' : 'DnsFlows'; // TODO: consider adding packets graphs here
+            const topKMetrics = id === 'name_dns_latency_flows' ? getTopKDnsNameMetrics() : getTopKDnsRCodeMetrics();
             const namedTotalMetric = getDnsCountTotalMetric();
             const options = getKebabOptions(id, {
               showNoError: true,
@@ -1060,6 +1075,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
         getNamedTotalMetric,
         getNamedTotalRateMetric,
         getNoInternalTopKRateMetrics,
+        getTopKDnsNameMetrics,
         getTopKDnsRCodeMetrics,
         getTopKDroppedCauseMetrics,
         getTopKDroppedStateMetrics,

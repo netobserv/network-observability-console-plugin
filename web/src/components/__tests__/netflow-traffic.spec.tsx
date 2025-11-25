@@ -108,7 +108,8 @@ describe('<NetflowTraffic />', () => {
       // 2 queries for packet dropped states & causes
       { ...defaultQuery, function: 'rate', type: 'PktDropPackets', aggregateBy: 'PktDropLatestState' },
       { ...defaultQuery, function: 'rate', type: 'PktDropPackets', aggregateBy: 'PktDropLatestDropCause' },
-      // 2 queries for dns response codes count
+      // 3 queries for dns names, response codes and total
+      { ...defaultQuery, function: 'count', type: 'DnsFlows', aggregateBy: 'DnsName' },
       { ...defaultQuery, function: 'count', type: 'DnsFlows', aggregateBy: 'DnsFlagsResponseCode' },
       { ...defaultQuery, function: 'count', type: 'DnsFlows', aggregateBy: 'app' }
     ];
