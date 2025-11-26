@@ -27,9 +27,7 @@ export const AlertDetails: React.FC<AlertDetailsProps> = ({ resourceName, alert 
         <AlertDetailsValue title={t('State')}>{alert.state}</AlertDetailsValue>
         <AlertDetailsValue title={t('Severity')}>{alert.labels.severity}</AlertDetailsValue>
         {alert.activeAt && (
-          <AlertDetailsValue title={t('Active since')}>
-            {formatActiveSince(alert.activeAt)}
-          </AlertDetailsValue>
+          <AlertDetailsValue title={t('Active since')}>{formatActiveSince(alert.activeAt)}</AlertDetailsValue>
         )}
         <AlertDetailsValue title={t('Labels')}>
           {labels.length === 0

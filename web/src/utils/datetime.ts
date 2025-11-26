@@ -150,9 +150,11 @@ export const formatActiveSince = (timestamp: string): string => {
   // Yesterday: show "Yesterday, HH:MM"
   const yesterday = new Date(now);
   yesterday.setDate(yesterday.getDate() - 1);
-  if (activeDate.getDate() === yesterday.getDate() &&
-      activeDate.getMonth() === yesterday.getMonth() &&
-      activeDate.getFullYear() === yesterday.getFullYear()) {
+  if (
+    activeDate.getDate() === yesterday.getDate() &&
+    activeDate.getMonth() === yesterday.getMonth() &&
+    activeDate.getFullYear() === yesterday.getFullYear()
+  ) {
     return `Yesterday, ${timeStr}`;
   }
 
