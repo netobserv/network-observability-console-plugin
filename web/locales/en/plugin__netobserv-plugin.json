@@ -246,6 +246,8 @@
   "Navigate to alert details": "Navigate to alert details",
   "State": "State",
   "Severity": "Severity",
+  "Active since": "Active since",
+  "Yesterday": "Yesterday",
   "Labels": "Labels",
   "Description": "Description",
   "Navigate to network traffic": "Navigate to network traffic",
