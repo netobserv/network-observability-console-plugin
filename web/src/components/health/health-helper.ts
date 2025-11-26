@@ -42,7 +42,13 @@ type HealthMetadata = {
   nodeLabels?: string[];
   namespaceLabels?: string[];
   links: { name: string; url: string }[];
-  trafficLinkFilter?: string;
+  trafficLink?: TrafficLink;
+};
+
+type TrafficLink = {
+  extraFilter: string;
+  backAndForth: boolean;
+  filterDestination: boolean;
 };
 
 type ScoreDetail = {
@@ -56,6 +62,11 @@ const getHealthMetadata = (annotations: PrometheusLabels): HealthMetadata => {
     upperBound: '100',
     upperBoundF: 100,
     unit: '%',
+    trafficLink: {
+      extraFilter: '',
+      backAndForth: true,
+      filterDestination: false
+    },
     links: []
   };
   if ('netobserv_io_network_health' in annotations) {
@@ -64,6 +75,7 @@ const getHealthMetadata = (annotations: PrometheusLabels): HealthMetadata => {
       // Setup defaults and derived
       md.unit = md.unit || defaultMetadata.unit;
       md.upperBound = md.upperBound || defaultMetadata.upperBound;
+      md.trafficLink = md.trafficLink || defaultMetadata.trafficLink;
       md.links = md.links || defaultMetadata.links;
       md.thresholdF = md.threshold ? parseFloat(md.threshold) || 0 : 0;
       md.upperBoundF = parseFloat(md.upperBound) || defaultMetadata.upperBoundF;
@@ -246,18 +258,20 @@ export const getAlertLink = (a: AlertWithRuleName): string => {
 export const getTrafficLink = (kind: string, resourceName: string, a: AlertWithRuleName): string => {
   const filters: string[] = [];
   let params = '';
+  const side = a.metadata.trafficLink?.filterDestination ? 'dst' : 'src';
+  const bnf = a.metadata.trafficLink?.backAndForth !== false;
   switch (kind) {
     case 'Namespace':
-      filters.push(`src_namespace="${resourceName}"`);
-      params += '&bnf=true';
+      filters.push(`${side}_namespace="${resourceName}"`);
+      params += `&bnf=${bnf}`;
       break;
     case 'Node':
-      filters.push(`src_node="${resourceName}"`);
-      params += '&bnf=true';
+      filters.push(`${side}_node="${resourceName}"`);
+      params += `&bnf=${bnf}`;
       break;
   }
-  if (a.metadata.trafficLinkFilter) {
-    filters.push(a.metadata.trafficLinkFilter);
+  if (a.metadata.trafficLink?.extraFilter) {
+    filters.push(a.metadata.trafficLink.extraFilter);
   }
   return `/netflow-traffic?filters=${encodeURIComponent(filters.join(';'))}${params}`;
 };
