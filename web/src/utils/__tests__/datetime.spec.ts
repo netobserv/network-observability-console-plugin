@@ -19,7 +19,7 @@ describe('datetime', () => {
 describe('formatActiveSince', () => {
   const FIXED_NOW = new Date('2025-11-27T15:00:00');
   const tMock: TFunction = ((key: string) => key) as unknown as TFunction;
-  
+
   beforeAll(() => {
     jest.useFakeTimers();
     jest.setSystemTime(FIXED_NOW);
@@ -46,17 +46,17 @@ describe('formatActiveSince', () => {
 
     const expectedTime = twentyFourHourTime(date, false);
 
-    const result = formatActiveSince(tMock,ts);
+    const result = formatActiveSince(tMock, ts);
 
     expect(result).toBe(`Yesterday, ${expectedTime}`);
   });
 
   it('should format dates within the last 7 days as "Weekday, HH:MM"', () => {
-    const ts = '2025-11-25T09:30:00'; 
+    const ts = '2025-11-25T09:30:00';
     const date = new Date(ts);
 
     const weekdayFormatter = new Intl.DateTimeFormat(getLanguage(), {
-      weekday: 'short',
+      weekday: 'short'
     });
     const weekday = weekdayFormatter.format(date);
     const time = twentyFourHourTime(date, false);
@@ -67,7 +67,7 @@ describe('formatActiveSince', () => {
   });
 
   it('should format older dates with "YYYY-MM-DD HH:MM"', () => {
-    const ts = '2025-11-07T14:00:00'; 
+    const ts = '2025-11-07T14:00:00';
     const date = new Date(ts);
 
     const expectedDate = toISODateString(date);

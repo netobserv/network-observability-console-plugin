@@ -516,6 +516,7 @@
   "Last 2 days": "Last 2 days",
   "Last 1 week": "Last 1 week",
   "Last 2 weeks": "Last 2 weeks",
+  "Yesterday": "Yesterday",
   "Value is empty": "Value is empty",
   "Value is malformed": "Value is malformed",
   "Not a valid Kubernetes name": "Not a valid Kubernetes name",
@@ -584,6 +585,5 @@
   "The top DNS response code extracted from DNS response headers compared to total over the selected interval": "The top DNS response code extracted from DNS response headers compared to total over the selected interval",
   "rates": "rates",
   "with total": "with total",
-  "Invalid custom panel id": "Invalid custom panel id",
-  "Yesterday": "Yesterday"
+  "Invalid custom panel id": "Invalid custom panel id"
 }
