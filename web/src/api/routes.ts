@@ -190,21 +190,22 @@ export const getConfig = (): Promise<Config> => {
       panels: r.data.panels,
       columns: r.data.columns,
       portNaming: {
-        enable: r.data.portNaming.enable ?? defaultConfig.portNaming.enable,
-        portNames: r.data.portNaming.portNames
-          ? new Map(Object.entries(r.data.portNaming.portNames))
-          : defaultConfig.portNaming.portNames
+          enable: r.data.portNaming.enable ?? defaultConfig.portNaming.enable,
+          portNames: r.data.portNaming.portNames
+		   ? new Map(Object.entries(r.data.portNaming.portNames))
+		   : defaultConfig.portNaming.portNames
       },
-      filters: r.data.filters,
-      scopes: r.data.scopes,
-      quickFilters: r.data.quickFilters,
-      alertNamespaces: r.data.alertNamespaces,
-      sampling: r.data.sampling,
-      features: r.data.features || defaultConfig.features,
-      fields: r.data.fields || defaultConfig.fields,
-      dataSources: r.data.dataSources || defaultConfig.dataSources,
-      promLabels: r.data.promLabels || defaultConfig.promLabels,
-      maxChunkAgeMs: r.data.maxChunkAgeMs
+	filters: r.data.filters,
+	scopes: r.data.scopes,
+	quickFilters: r.data.quickFilters,
+	alertNamespaces: r.data.alertNamespaces,
+	sampling: r.data.sampling,
+	features: r.data.features || defaultConfig.features,
+	fields: r.data.fields || defaultConfig.fields,
+	dataSources: r.data.dataSources || defaultConfig.dataSources,
+	promLabels: r.data.promLabels || defaultConfig.promLabels,
+	lokiLabels: r.data.lokiLabels || defaultConfig.lokiLabels,
+	maxChunkAgeMs: r.data.maxChunkAgeMs
     };
   });
 };
