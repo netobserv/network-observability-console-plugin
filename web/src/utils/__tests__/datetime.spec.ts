@@ -19,11 +19,7 @@ describe('datetime', () => {
 describe('formatActiveSince', () => {
   const FIXED_NOW = new Date('2025-11-27T15:00:00');
   const tMock: TFunction = ((key: string) => key) as unknown as TFunction;
-<<<<<<< HEAD
 
-=======
-  
->>>>>>> ec3af406 (add tests to activeSince function)
   beforeAll(() => {
     jest.useFakeTimers();
     jest.setSystemTime(FIXED_NOW);
