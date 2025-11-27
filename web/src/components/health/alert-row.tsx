@@ -40,7 +40,7 @@ export const AlertRow: React.FC<AlertRowProps> = ({ kind, resourceName, alert, w
       )}
       <Td noPadding={!wide}>{alert.state}</Td>
       <Td>{alert.labels.severity}</Td>
-      {alert.activeAt && <Td>{formatActiveSince(alert.activeAt)}</Td>}
+      {alert.activeAt && <Td>{formatActiveSince(t, alert.activeAt)}</Td>}
       <Td>
         {labels.length === 0
           ? t('None')

@@ -131,7 +131,7 @@ export const computeStepInterval = (range: TimeRange | number) => {
  * - Last 7 days: Shows day of week and time (Tue, 14:23)
  * - Older: Shows full date and time (2025-11-24 14:23)
  */
-export const formatActiveSince = (timestamp: string): string => {
+export const formatActiveSince = (t: TFunction, timestamp: string): string => {
   const activeDate = new Date(timestamp);
   const now = new Date();
 
@@ -155,7 +155,7 @@ export const formatActiveSince = (timestamp: string): string => {
     activeDate.getMonth() === yesterday.getMonth() &&
     activeDate.getFullYear() === yesterday.getFullYear()
   ) {
-    return `Yesterday, ${timeStr}`;
+    return `${t('Yesterday')}, ${timeStr}`;
   }
 
   // Last 7 days: show day of week and time

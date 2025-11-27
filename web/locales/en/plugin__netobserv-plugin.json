@@ -584,5 +584,6 @@
   "The top DNS response code extracted from DNS response headers compared to total over the selected interval": "The top DNS response code extracted from DNS response headers compared to total over the selected interval",
   "rates": "rates",
   "with total": "with total",
-  "Invalid custom panel id": "Invalid custom panel id"
+  "Invalid custom panel id": "Invalid custom panel id",
+  "Yesterday": "Yesterday"
 }
