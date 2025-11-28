@@ -1,5 +1,4 @@
-import { Button, TextInput, ValidatedOptions } from '@patternfly/react-core';
-import { SearchIcon } from '@patternfly/react-icons';
+import { TextInput, ValidatedOptions } from '@patternfly/react-core';
 import * as _ from 'lodash';
 import * as React from 'react';
 import { createFilterValue, FilterDefinition, FilterValue } from '../../../model/filters';
@@ -9,34 +8,40 @@ import { Indicator } from '../../../utils/filters-helper';
 export interface TextFilterProps {
   filterDefinition: FilterDefinition;
   addFilter: (filter: FilterValue) => boolean;
-  setMessageWithDelay: (m: string | undefined) => void;
+  setMessage: (m: string | undefined) => void;
   indicator: Indicator;
   setIndicator: (ind: Indicator) => void;
   allowEmpty?: boolean;
   regexp?: RegExp;
+  currentValue: string;
+  setCurrentValue: (v: string) => void;
 }
 
 export const TextFilter: React.FC<TextFilterProps> = ({
   filterDefinition,
   addFilter,
-  setMessageWithDelay,
+  setMessage,
   indicator,
   setIndicator,
   allowEmpty,
-  regexp
+  regexp,
+  currentValue,
+  setCurrentValue
 }) => {
   const searchInputRef = React.useRef<HTMLInputElement | null>(null);
-  const [currentValue, setCurrentValue] = React.useState<string>('');
 
-  React.useEffect(() => {
-    //update validation icon on field on value change
-    if (!_.isEmpty(currentValue)) {
-      const validation = filterDefinition.validate(String(currentValue));
-      setIndicator(!_.isEmpty(validation.err) ? ValidatedOptions.warning : ValidatedOptions.success);
-    } else {
-      setIndicator(ValidatedOptions.default);
-    }
-  }, [currentValue, filterDefinition, setIndicator]);
+  const updateIndicator = React.useCallback(
+    (v = currentValue) => {
+      //update validation icon on field on value change
+      if (!_.isEmpty(v)) {
+        const validation = filterDefinition.validate(String(v));
+        setIndicator(!_.isEmpty(validation.err) ? ValidatedOptions.warning : ValidatedOptions.success);
+      } else {
+        setIndicator(ValidatedOptions.default);
+      }
+    },
+    [currentValue, filterDefinition, setIndicator]
+  );
 
   const updateValue = React.useCallback(
     (v: string) => {
@@ -45,17 +50,18 @@ export const TextFilter: React.FC<TextFilterProps> = ({
         filteredValue = filteredValue.replace(regexp, '');
       }
       setCurrentValue(filteredValue);
+      updateIndicator(filteredValue);
     },
-    [regexp]
+    [regexp, setCurrentValue, updateIndicator]
   );
 
   const resetFilterValue = React.useCallback(() => {
     setCurrentValue('');
-    setMessageWithDelay(undefined);
+    setMessage(undefined);
     setIndicator(ValidatedOptions.default);
-  }, [setCurrentValue, setMessageWithDelay, setIndicator]);
+  }, [setCurrentValue, setMessage, setIndicator]);
 
-  const onSelect = React.useCallback(() => {
+  const onEnter = React.useCallback(() => {
     // override empty value by undefined value
     let v = currentValue;
     if (allowEmpty) {
@@ -69,7 +75,7 @@ export const TextFilter: React.FC<TextFilterProps> = ({
     const validation = filterDefinition.validate(String(v));
     //show tooltip and icon when user try to validate filter
     if (!_.isEmpty(validation.err)) {
-      setMessageWithDelay(validation.err);
+      setMessage(validation.err);
       setIndicator(ValidatedOptions.error);
       return;
     }
@@ -78,25 +84,24 @@ export const TextFilter: React.FC<TextFilterProps> = ({
     if (addFilter(fv)) {
       resetFilterValue();
     }
-  }, [currentValue, allowEmpty, filterDefinition, setMessageWithDelay, setIndicator, addFilter, resetFilterValue]);
+  }, [currentValue, allowEmpty, filterDefinition, setMessage, setIndicator, addFilter, resetFilterValue]);
+
+  React.useEffect(() => {
+    updateIndicator();
+  }, [currentValue, updateIndicator]);
 
   return (
-    <>
-      <TextInput
-        type="search"
-        aria-label="search"
-        validated={indicator}
-        placeholder={filterDefinition.placeholder}
-        onChange={(event, value) => updateValue(value)}
-        onKeyPress={e => e.key === 'Enter' && onSelect()}
-        value={currentValue}
-        ref={searchInputRef}
-        id="search"
-      />
-      <Button id="search-button" variant="control" aria-label="search button for filter" onClick={() => onSelect()}>
-        <SearchIcon />
-      </Button>
-    </>
+    <TextInput
+      type="search"
+      aria-label="search"
+      validated={indicator}
+      placeholder={filterDefinition.placeholder}
+      onChange={(event, value) => updateValue(value)}
+      onKeyDown={e => e.key === 'Enter' && onEnter()}
+      value={currentValue}
+      ref={searchInputRef}
+      id="search"
+    />
   );
 };
 

@@ -29,6 +29,7 @@ import useDetailsLevel from '@patternfly/react-topology/dist/esm/hooks/useDetail
 import * as _ from 'lodash';
 import * as React from 'react';
 import { TopologyMetricPeer } from '../../../../../api/loki';
+import { Match } from '../../../../../model/flow-query';
 import { Decorated, NodeData } from '../../../../../model/topology';
 import DefaultNode from '../components/node';
 import { NodeDecorators } from './styleDecorators';
@@ -101,6 +102,7 @@ const StyleNode: React.FC<StyleNodeProps> = ({ element, showLabel, dragging, get
   const data = element.getData() as Decorated<NodeData> | undefined;
   //TODO: check if we can have intelligent pin on view change
   const [isPinned, setPinned] = React.useState<boolean>(data?.isPinned === true);
+  const [match, setMatch] = React.useState<Match>(data?.match || 'all');
   const [isSrcFiltered, setSrcFiltered] = React.useState<boolean>(data?.isSrcFiltered === true);
   const [isDstFiltered, setDstFiltered] = React.useState<boolean>(data?.isDstFiltered === true);
   const detailsLevel = useDetailsLevel();
@@ -111,9 +113,10 @@ const StyleNode: React.FC<StyleNodeProps> = ({ element, showLabel, dragging, get
   }, [data]);
 
   React.useEffect(() => {
+    setMatch(data?.match || 'all');
     setSrcFiltered(data?.isSrcFiltered === true);
     setDstFiltered(data?.isDstFiltered === true);
-  }, [data?.isSrcFiltered, data?.isDstFiltered]);
+  }, [data?.isSrcFiltered, data?.isDstFiltered, data?.match]);
 
   if (!data || !passedData) {
     return null;
@@ -151,6 +154,7 @@ const StyleNode: React.FC<StyleNodeProps> = ({ element, showLabel, dragging, get
                 data={data}
                 isPinned={isPinned}
                 setPinned={setPinned}
+                match={match}
                 isSrcFiltered={isSrcFiltered}
                 setSrcFiltered={setSrcFiltered}
                 isDstFiltered={isDstFiltered}
