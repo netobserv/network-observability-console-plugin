@@ -11,6 +11,6 @@ export const defaultPanelsCount = 2;
 
 // table specific config
 export const availableColumnGroupCount = 31;
-export const availableColumnCount = 59;
+export const availableColumnCount = 57;
 export const defaultColumnGroupCount = 6;
 export const defaultColumnCount = 11;
