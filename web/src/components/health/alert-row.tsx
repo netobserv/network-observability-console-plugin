@@ -3,6 +3,7 @@ import * as React from 'react';
 
 import { Label, Tooltip } from '@patternfly/react-core';
 import { useTranslation } from 'react-i18next';
+import { formatActiveSince } from '../../utils/datetime';
 import { valueFormat } from '../../utils/format';
 import { HealthColorSquare } from './health-color-square';
 import { AlertWithRuleName, getAlertFilteredLabels, getAlertLink, getTrafficLink } from './health-helper';
@@ -39,6 +40,7 @@ export const AlertRow: React.FC<AlertRowProps> = ({ kind, resourceName, alert, w
       )}
       <Td noPadding={!wide}>{alert.state}</Td>
       <Td>{alert.labels.severity}</Td>
+      {alert.activeAt && <Td>{formatActiveSince(t, alert.activeAt)}</Td>}
       <Td>
         {labels.length === 0
           ? t('None')

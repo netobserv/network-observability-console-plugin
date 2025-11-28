@@ -3,6 +3,7 @@ import * as React from 'react';
 import { Label, Text, TextContent, TextVariants } from '@patternfly/react-core';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
+import { formatActiveSince } from '../../utils/datetime';
 import { valueFormat } from '../../utils/format';
 import { AlertWithRuleName, getAlertFilteredLabels, getAlertLink } from './health-helper';
 
@@ -25,6 +26,9 @@ export const AlertDetails: React.FC<AlertDetailsProps> = ({ resourceName, alert 
         </AlertDetailsValue>
         <AlertDetailsValue title={t('State')}>{alert.state}</AlertDetailsValue>
         <AlertDetailsValue title={t('Severity')}>{alert.labels.severity}</AlertDetailsValue>
+        {alert.activeAt && (
+          <AlertDetailsValue title={t('Active since')}>{formatActiveSince(t, alert.activeAt)}</AlertDetailsValue>
+        )}
         <AlertDetailsValue title={t('Labels')}>
           {labels.length === 0
             ? t('None')
