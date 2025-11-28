@@ -1,6 +1,6 @@
 echo "Downloading config from controller repo..."
 mkdir -p ./tmp
-curl -o ./tmp/config.yaml https://raw.githubusercontent.com/netobserv/network-observability-operator/main/controllers/consoleplugin/config/static-frontend-config.yaml
+curl -o ./tmp/config.yaml https://raw.githubusercontent.com/netobserv/network-observability-operator/refs/heads/main/internal/controller/consoleplugin/config/static-frontend-config.yaml
 
 echo "Updating sample-config.yaml..."
 echo " - columns..."
