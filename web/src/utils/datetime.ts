@@ -123,3 +123,48 @@ export const computeStepInterval = (range: TimeRange | number) => {
     stepSeconds: step
   };
 };
+
+/**
+ * Formats a timestamp for "Active since" display with relative or absolute time.
+ * - Today: Shows only time (14:23)
+ * - Yesterday: Shows "Yesterday, HH:MM"
+ * - Last 7 days: Shows day of week and time (Tue, 14:23)
+ * - Older: Shows full date and time (2025-11-24 14:23)
+ */
+export const formatActiveSince = (t: TFunction, timestamp: string): string => {
+  const activeDate = new Date(timestamp);
+  const now = new Date();
+
+  // Calculate time difference in milliseconds
+  const diffMs = now.getTime() - activeDate.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  // Format time as HH:MM
+  const timeStr = twentyFourHourTime(activeDate, false);
+
+  // Today: show only time
+  if (diffDays === 0 && now.getDate() === activeDate.getDate()) {
+    return timeStr;
+  }
+
+  // Yesterday: show "Yesterday, HH:MM"
+  const yesterday = new Date(now);
+  yesterday.setDate(yesterday.getDate() - 1);
+  if (
+    activeDate.getDate() === yesterday.getDate() &&
+    activeDate.getMonth() === yesterday.getMonth() &&
+    activeDate.getFullYear() === yesterday.getFullYear()
+  ) {
+    return `${t('Yesterday')}, ${timeStr}`;
+  }
+
+  // Last 7 days: show day of week and time
+  if (diffDays < 7) {
+    const weekdayFormatter = new Intl.DateTimeFormat(getLanguage(), { weekday: 'short' });
+    const weekday = weekdayFormatter.format(activeDate);
+    return `${weekday}, ${timeStr}`;
+  }
+
+  // Older: show full date and time (YYYY-MM-DD HH:MM)
+  return `${toISODateString(activeDate)} ${timeStr}`;
+};
