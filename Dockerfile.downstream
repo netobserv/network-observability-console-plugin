@@ -34,7 +34,7 @@ COPY pkg/ pkg/
 ENV GOEXPERIMENT strictfipsruntime
 RUN go build -tags strictfipsruntime -ldflags "-X 'main.buildVersion=$BUILDVERSION' -X 'main.buildDate=`date +%Y-%m-%d\ %H:%M`'" -mod vendor -o plugin-backend cmd/plugin-backend.go
 
-FROM registry.access.redhat.com/ubi9/ubi-minimal:9.7-1762956380
+FROM registry.access.redhat.com/ubi9/ubi-minimal:9.7-1764578379
 ARG BUILDVERSION
 ARG BUILDVERSION_Y
 
@@ -46,6 +46,10 @@ USER 65532:65532
 
 ENTRYPOINT ["./plugin-backend"]
 
+LABEL distribution-scope="public"
+LABEL url="https://catalog.redhat.com/en/search?searchType=containers"
+LABEL vendor="Red Hat, Inc."
+LABEL release=$BUILDVERSION
 LABEL com.redhat.component="network-observability-console-plugin-container"
 LABEL name="network-observability/network-observability-console-plugin-compat-rhel9"
 LABEL cpe="cpe:/a:redhat:network_observ_optr:$BUILDVERSION_Y::el9"
