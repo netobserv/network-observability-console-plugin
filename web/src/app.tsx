@@ -14,6 +14,11 @@ import {
 } from '@patternfly/react-core';
 import React from 'react';
 import { BrowserRouter, Link, Route, Routes } from 'react-router-dom';
+import FlowCollectorForm from './components/forms/flowCollector';
+import FlowCollectorStatus from './components/forms/flowCollector-status';
+import FlowCollectorWizard from './components/forms/flowCollector-wizard';
+import FlowMetricForm from './components/forms/flowMetric';
+import FlowMetricWizard from './components/forms/flowMetric-wizard';
 import NetflowTrafficDevTab from './components/netflow-traffic-dev-tab';
 import NetflowTrafficParent from './components/netflow-traffic-parent';
 import NetflowTrafficTab from './components/netflow-traffic-tab';
@@ -48,6 +53,26 @@ export const pages = [
   {
     id: 'udn-tab',
     name: 'UDN tab'
+  },
+  {
+    id: 'flowCollector-wizard',
+    name: 'FlowCollector wizard'
+  },
+  {
+    id: 'flowCollector',
+    name: 'FlowCollector form'
+  },
+  {
+    id: 'flowCollector-status',
+    name: 'FlowCollector status'
+  },
+  {
+    id: 'flowMetric-wizard',
+    name: 'FlowMetric wizard'
+  },
+  {
+    id: 'flowMetric',
+    name: 'FlowMetric form'
   }
 ];
 
@@ -102,6 +127,16 @@ export class App extends React.Component<{}, AppState> {
         return (
           <NetflowTrafficTab obj={{ kind: 'UserDefinedNetwork', metadata: { name: 'my-udn', namespace: 'default' } }} />
         );
+      case 'flowCollector-wizard':
+        return <FlowCollectorWizard name="cluster" />;
+      case 'flowCollector':
+        return <FlowCollectorForm name="cluster" />;
+      case 'flowCollector-status':
+        return <FlowCollectorStatus />;
+      case 'flowMetric-wizard':
+        return <FlowMetricWizard name="flowmetric-sample" />;
+      case 'flowMetric':
+        return <FlowMetricForm name="flowmetric-sample" />;
       default:
         return <NetflowTrafficParent />;
     }
