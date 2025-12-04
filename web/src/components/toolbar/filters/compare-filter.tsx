@@ -1,14 +1,9 @@
-import { Dropdown, DropdownItem, MenuToggle, MenuToggleAction, MenuToggleElement } from '@patternfly/react-core';
+import { Badge, Dropdown, DropdownItem, MenuToggle, MenuToggleElement } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { FilterComponent } from '../../../model/filters';
+import { FilterCompare, FilterComponent, getCompareText } from '../../../model/filters';
 import { usePrevious } from '../../../utils/previous-hook';
 
-export enum FilterCompare {
-  equal = 1,
-  notEqual,
-  moreThanOrEqual
-}
 export interface CompareFilterProps {
   value: FilterCompare;
   setValue: (newState: FilterCompare) => void;
@@ -20,58 +15,74 @@ export const CompareFilter: React.FC<CompareFilterProps> = ({ value, setValue, c
   const [isOpen, setOpen] = React.useState(false);
   const prevComponent = usePrevious(component);
 
-  const dropdownItems = [
-    <DropdownItem key="equal" id="equal" component="button" onClick={() => onSelect(FilterCompare.equal)}>
-      {t('Equals')}
-    </DropdownItem>,
-    <DropdownItem key="not-equal" id="not-equal" component="button" onClick={() => onSelect(FilterCompare.notEqual)}>
-      {t('Not equals')}
-    </DropdownItem>
-  ];
+  const getText = React.useCallback((v: FilterCompare) => getCompareText(v, t), [t]);
 
-  if (component === 'number') {
-    dropdownItems.push(
+  const onSelect = React.useCallback(
+    (v: FilterCompare) => {
+      setValue(v);
+      setOpen(false);
+    },
+    [setValue]
+  );
+
+  const getItems = React.useCallback(() => {
+    const dropdownItems = [
       <DropdownItem
-        key="more-than"
-        id="more-than"
+        key="equal"
+        id="equal"
         component="button"
-        onClick={() => onSelect(FilterCompare.moreThanOrEqual)}
+        description={getText(FilterCompare.equal)}
+        onClick={() => onSelect(FilterCompare.equal)}
       >
-        {t('More than')}
+        {FilterCompare.equal}
+      </DropdownItem>,
+      <DropdownItem
+        key="not-equal"
+        id="not-equal"
+        component="button"
+        description={getText(FilterCompare.notEqual)}
+        onClick={() => onSelect(FilterCompare.notEqual)}
+      >
+        {FilterCompare.notEqual}
       </DropdownItem>
-    );
-  }
+    ];
 
-  const onSelect = (v: FilterCompare) => {
-    setValue(v);
-    setOpen(false);
-  };
-
-  const onSwitch = React.useCallback(() => {
-    const filterCompareValues = [FilterCompare.equal, FilterCompare.notEqual];
     if (component === 'number') {
-      filterCompareValues.push(FilterCompare.moreThanOrEqual);
-    }
-
-    const nextIndex = filterCompareValues.indexOf(value) + 1;
-    if (nextIndex < filterCompareValues.length) {
-      setValue(filterCompareValues[nextIndex]);
+      dropdownItems.push(
+        <DropdownItem
+          key="more-than"
+          id="more-than"
+          component="button"
+          description={getText(FilterCompare.moreThanOrEqual)}
+          onClick={() => onSelect(FilterCompare.moreThanOrEqual)}
+        >
+          {FilterCompare.moreThanOrEqual}
+        </DropdownItem>
+      );
     } else {
-      setValue(filterCompareValues[0]);
+      dropdownItems.push(
+        <DropdownItem
+          key="match"
+          id="match"
+          component="button"
+          description={getText(FilterCompare.match)}
+          onClick={() => onSelect(FilterCompare.match)}
+        >
+          {FilterCompare.match}
+        </DropdownItem>,
+        <DropdownItem
+          key="not-match"
+          id="not-match"
+          component="button"
+          description={getText(FilterCompare.notMatch)}
+          onClick={() => onSelect(FilterCompare.notMatch)}
+        >
+          {FilterCompare.notMatch}
+        </DropdownItem>
+      );
     }
-  }, [component, value, setValue]);
-
-  const getSymbol = React.useCallback(() => {
-    switch (value) {
-      case FilterCompare.notEqual:
-        return '!=';
-      case FilterCompare.moreThanOrEqual:
-        return '>=';
-      case FilterCompare.equal:
-      default:
-        return '=';
-    }
-  }, [value]);
+    return dropdownItems;
+  }, [component, getText, onSelect]);
 
   React.useEffect(() => {
     // reset to equal when component change
@@ -81,31 +92,24 @@ export const CompareFilter: React.FC<CompareFilterProps> = ({ value, setValue, c
   }, [component, prevComponent, setValue]);
 
   return (
-    <>
-      <Dropdown
-        id="filter-compare"
-        isOpen={isOpen}
-        toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
-          <MenuToggle
-            ref={toggleRef}
-            id="filter-compare-toggle-button"
-            splitButtonOptions={{
-              variant: 'action',
-              items: [
-                <MenuToggleAction key="action" id="filter-compare-switch-button" onClick={onSwitch}>
-                  {getSymbol()}
-                </MenuToggleAction>
-              ]
-            }}
-            onClick={() => setOpen(!isOpen)}
-            isExpanded={isOpen}
-            onBlur={() => setTimeout(() => setOpen(false), 500)}
-          />
-        )}
-      >
-        {dropdownItems}
-      </Dropdown>
-    </>
+    <Dropdown
+      id="filter-compare"
+      isOpen={isOpen}
+      toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+        <MenuToggle
+          ref={toggleRef}
+          id="filter-compare-toggle-button"
+          badge={<Badge>{value}</Badge>}
+          onClick={() => setOpen(!isOpen)}
+          isExpanded={isOpen}
+          onBlur={() => setTimeout(() => setOpen(false), 500)}
+        >
+          {getText(value)}
+        </MenuToggle>
+      )}
+    >
+      {getItems()}
+    </Dropdown>
   );
 };
 
