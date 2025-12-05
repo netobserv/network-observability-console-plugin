@@ -3,6 +3,7 @@ import {
   CubeIcon,
   CubesIcon,
   ExternalLinkAltIcon,
+  GlobeRouteIcon,
   NetworkIcon,
   OutlinedHddIcon,
   QuestionCircleIcon,
@@ -68,6 +69,8 @@ const getTypeIcon = (peer: TopologyMetricPeer): React.ComponentClass<any, any> =
       return ZoneIcon;
     case 'UDN':
       return NetworkIcon;
+    case 'Gateway':
+      return GlobeRouteIcon;
     case 'CatalogSource':
     case 'DaemonSet':
     case 'Deployment':
