@@ -40,7 +40,7 @@ FROM registry.access.redhat.com/ubi9/ubi-minimal:9.7-1764794109
 COPY --from=web-builder /opt/app-root/web/dist ./web/dist
 COPY --from=go-builder /opt/app-root/plugin-backend ./
 
-FROM cypress/included:15.2.0
+FROM cypress/included:15.7.1
 RUN whoami
 WORKDIR /opt/app-root
 COPY --from=web-builder /opt/app-root/web/ ./web
