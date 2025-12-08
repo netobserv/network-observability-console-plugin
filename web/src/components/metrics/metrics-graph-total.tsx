@@ -173,7 +173,7 @@ export const MetricsGraphWithTotal: React.FC<MetricsGraphWithTotalProps> = ({
               }
         }
       >
-        <ChartAxis fixLabelOverlap tickFormat={showLegend ? () => '' : undefined} />
+        <ChartAxis fixLabelOverlap />
         <ChartAxis
           dependentAxis
           showGrid
