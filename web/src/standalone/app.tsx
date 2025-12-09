@@ -1,11 +1,5 @@
 /* eslint-disable max-len */
 import {
-  Brand,
-  Masthead,
-  MastheadBrand,
-  MastheadContent,
-  MastheadMain,
-  MastheadToggle,
   Nav,
   NavItem,
   NavList,
@@ -13,34 +7,36 @@ import {
   PageSection,
   PageSidebar,
   PageSidebarBody,
-  PageToggleButton,
   Tab,
   Tabs,
-  Title,
-  ToggleGroup,
-  ToggleGroupItem,
-  Toolbar,
-  ToolbarContent,
-  ToolbarItem
+  Title
 } from '@patternfly/react-core';
-import { BarsIcon } from '@patternfly/react-icons';
+import { configure } from 'mobx';
 import React from 'react';
 import { BrowserRouter, Link } from 'react-router-dom';
-import FlowCollectorForm from './components/forms/flowCollector';
-import FlowCollectorStatus from './components/forms/flowCollector-status';
-import FlowCollectorWizard from './components/forms/flowCollector-wizard';
-import FlowMetricForm from './components/forms/flowMetric';
-import FlowMetricWizard from './components/forms/flowMetric-wizard';
-import NetworkHealth from './components/health/network-health';
-import NetflowTrafficDevTab from './components/netflow-traffic-dev-tab';
-import NetflowTrafficParent from './components/netflow-traffic-parent';
-import NetflowTab from './components/netflow-traffic-tab';
-import { ContextSingleton } from './utils/context';
+import FlowCollectorForm from '../components/forms/flowCollector';
+import FlowCollectorStatus from '../components/forms/flowCollector-status';
+import FlowCollectorWizard from '../components/forms/flowCollector-wizard';
+import FlowMetricForm from '../components/forms/flowMetric';
+import FlowMetricWizard from '../components/forms/flowMetric-wizard';
+import NetworkHealth from '../components/health/network-health';
+import NetflowTrafficDevTab from '../components/netflow-traffic-dev-tab';
+import NetflowTrafficParent from '../components/netflow-traffic-parent';
+import NetflowTab from '../components/netflow-traffic-tab';
+import { ContextSingleton } from '../utils/context';
 
-export const pages = [
+import '@patternfly/patternfly/patternfly-charts-theme-dark.css';
+import '@patternfly/patternfly/patternfly-theme-dark.css';
+import '@patternfly/react-core/dist/styles/base.css';
+import Header from './header';
+import './index.css';
+
+configure({ isolateGlobalState: true });
+
+const allPages = [
   {
     id: 'netflow-traffic',
-    name: 'Netflow Traffic'
+    name: 'Network Traffic'
   },
   {
     id: 'pod-tab',
@@ -87,70 +83,22 @@ export const pages = [
     name: 'FlowMetric form'
   }
 ];
+const endUserPages = allPages.filter(p => p.id === 'netflow-traffic' || p.id === 'network-health');
 
-export const App: React.FunctionComponent = () => {
+export const App: React.FunctionComponent<{ endUser?: boolean }> = ({ endUser }) => {
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
   const [pageIndex, setPageIndex] = React.useState(0);
   const [isDark, setDark] = React.useState(false);
   ContextSingleton.setStandalone();
+  const pages = endUser ? endUserPages : allPages;
 
   const onSidebarToggle = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
   const onNavSelect = (_event: React.FormEvent<HTMLInputElement>, result: { itemId: number | string }) => {
-    console.debug('onNavSelect', result);
     setPageIndex(result.itemId as number);
   };
-
-  const onThemeSelect = (isDarkTheme: boolean) => {
-    console.debug('onThemeSelect', isDarkTheme);
-    setDark(isDarkTheme);
-    const htmlElement = document.getElementsByTagName('html')[0];
-    if (htmlElement) {
-      if (isDarkTheme) {
-        htmlElement.classList.add('pf-v5-theme-dark');
-      } else {
-        htmlElement.classList.remove('pf-v5-theme-dark');
-      }
-    }
-  };
-
-  const headerToolbar = (
-    <Toolbar id="vertical-toolbar">
-      <ToolbarContent>
-        <ToolbarItem>Netobserv</ToolbarItem>
-        <ToolbarItem align={{ default: 'alignRight' }}>
-          <ToggleGroup>
-            <ToggleGroupItem text="Light" isSelected={!isDark} onClick={() => onThemeSelect(false)} />
-            <ToggleGroupItem text="Dark" isSelected={isDark} onClick={() => onThemeSelect(true)} />
-          </ToggleGroup>
-        </ToolbarItem>
-      </ToolbarContent>
-    </Toolbar>
-  );
-
-  const header = (
-    <Masthead>
-      <MastheadToggle>
-        <PageToggleButton
-          variant="plain"
-          aria-label="Global navigation"
-          isSidebarOpen={isSidebarOpen}
-          onSidebarToggle={onSidebarToggle}
-          id="nav-toggle"
-        >
-          <BarsIcon />
-        </PageToggleButton>
-      </MastheadToggle>
-      <MastheadMain>
-        <MastheadBrand>
-          <Brand src={'https://avatars.githubusercontent.com/u/91939379?s=35'} alt="Netobserv Logo" />
-        </MastheadBrand>
-      </MastheadMain>
-      <MastheadContent>{headerToolbar}</MastheadContent>
-    </Masthead>
-  );
 
   const sidebar = (
     <PageSidebar isSidebarOpen={isSidebarOpen} id="vertical-sidebar">
@@ -213,7 +161,6 @@ export const App: React.FunctionComponent = () => {
 
   const pageContext = () => {
     const page = pages[pageIndex];
-    console.debug('pageContext', pageIndex, page.id);
     const content = pageContent(page.id);
     switch (page.id) {
       case 'netflow-traffic':
@@ -247,7 +194,12 @@ export const App: React.FunctionComponent = () => {
 
   return (
     <BrowserRouter>
-      <Page header={header} sidebar={sidebar}>
+      <Page
+        header={
+          <Header isDark={isDark} setDark={setDark} isSidebarOpen={isSidebarOpen} onSidebarToggle={onSidebarToggle} />
+        }
+        sidebar={sidebar}
+      >
         {pageContext()}
       </Page>
     </BrowserRouter>

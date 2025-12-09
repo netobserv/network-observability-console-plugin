@@ -27,6 +27,7 @@ STANDALONE ?= false
 
 ifeq (${STANDALONE}, true)
 	BUILDSCRIPT = :standalone
+	FLAVOR = enduser
 	IMAGE_TAG_BASE := $(IMAGE_REGISTRY)/${IMAGE_ORG}/network-observability-standalone-frontend
 endif
 
@@ -197,7 +198,7 @@ serve-mock: YQ ## Run backend using mocks
 # note: to build and push custom image tag use: IMAGE_ORG=myuser VERSION=dev make images
 .PHONY: image-build
 image-build: ## Build MULTIARCH_TARGETS images
-	$(OCI_BIN) build --ulimit nofile=20480:20480 --build-arg BUILDSCRIPT=${BUILDSCRIPT} ${OCI_BUILD_OPTS} -t localhost/local-front-build:latest -f Dockerfile.front .
+	$(OCI_BIN) build --ulimit nofile=20480:20480 --build-arg BUILDSCRIPT=${BUILDSCRIPT} --build-arg FLAVOR=${FLAVOR} ${OCI_BUILD_OPTS} -t localhost/local-front-build:latest -f Dockerfile.front .
 	trap 'exit' INT; \
 	$(foreach target,$(MULTIARCH_TARGETS),$(call build_target,$(target)))
 
