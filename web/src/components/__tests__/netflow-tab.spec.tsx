@@ -2,7 +2,7 @@ import { useResolvedExtensions } from '@openshift-console/dynamic-plugin-sdk';
 import { waitFor } from '@testing-library/react';
 import { mount } from 'enzyme';
 import * as React from 'react';
-import { AlertsResult, SilencedAlert } from '../../api/alert';
+import { HealthRulesResult, SilencedAlert } from '../../api/alert';
 import { FlowMetricsResult, GenericMetricsResult } from '../../api/loki';
 import { getConfig } from '../../api/routes';
 import NetflowTraffic from '../netflow-traffic';
@@ -31,7 +31,7 @@ jest.mock('../../api/routes', () => ({
       stats: { numQueries: 0, limitReached: false, dataSources: ['loki'] }
     } as GenericMetricsResult)
   ),
-  getAlerts: jest.fn(() => Promise.resolve({ data: { groups: [] }, status: 'success' } as AlertsResult)),
+  getHealthRules: jest.fn(() => Promise.resolve({ data: { groups: [] }, status: 'success' } as HealthRulesResult)),
   getSilencedAlerts: jest.fn(() => Promise.resolve([] as SilencedAlert[]))
 }));
 

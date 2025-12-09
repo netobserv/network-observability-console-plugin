@@ -5,17 +5,18 @@ import { useTranslation } from 'react-i18next';
 
 export interface HealthSummaryProps {
   rules: Rule[];
+  isDark: boolean;
 }
 
-export const HealthSummary: React.FC<HealthSummaryProps> = ({ rules }) => {
+export const HealthSummary: React.FC<HealthSummaryProps> = ({ rules, isDark }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   if (rules.length === 0) {
     return (
-      <Alert title={t('No rules found, health cannot be determined')}>
+      <Alert title={t('No rules found, health cannot be determined')} className={`health-summary-alert ${isDark ? 'dark' : ''}`}>
         <>
           {t(
-            'Check alert definitions in FlowCollector "spec.processor.metrics.alertGroups" and "spec.processor.metrics.disableAlerts".'
+            'Check health rule definitions in FlowCollector "spec.processor.metrics.healthRules" and "spec.processor.metrics.disableHealthRules".'
           )}
           <br />
           {t('Make sure that Prometheus and AlertManager are running.')}
@@ -24,33 +25,43 @@ export const HealthSummary: React.FC<HealthSummaryProps> = ({ rules }) => {
     );
   }
 
+  // Separate recording rules from alert rules
+  const recordingRulesCount = rules.filter(r => !r.alerts || r.alerts.length === 0).length;
+  const alertRules = rules.filter(r => r.alerts && r.alerts.length > 0);
+
   const stats = {
     critical: {
-      firingAlerts: rules.flatMap(r => r.alerts).filter(a => a.state === 'firing' && a.labels.severity === 'critical')
-        .length,
-      firingRules: rules.filter(a => a.state === 'firing' && a.labels.severity === 'critical').length,
-      pendingAlerts: rules.flatMap(r => r.alerts).filter(a => a.state === 'pending' && a.labels.severity === 'critical')
-        .length,
-      pendingRules: rules.filter(a => a.state === 'pending' && a.labels.severity === 'critical').length,
-      total: rules.filter(a => a.labels.severity === 'critical').length
+      firingAlerts: alertRules
+        .flatMap(r => r.alerts || [])
+        .filter(a => a.state === 'firing' && a.labels.severity === 'critical').length,
+      firingRules: alertRules.filter(a => a.state === 'firing' && a.labels.severity === 'critical').length,
+      pendingAlerts: alertRules
+        .flatMap(r => r.alerts || [])
+        .filter(a => a.state === 'pending' && a.labels.severity === 'critical').length,
+      pendingRules: alertRules.filter(a => a.state === 'pending' && a.labels.severity === 'critical').length,
+      total: alertRules.filter(a => a.labels && a.labels.severity === 'critical').length
     },
     warning: {
-      firingAlerts: rules.flatMap(r => r.alerts).filter(a => a.state === 'firing' && a.labels.severity === 'warning')
-        .length,
-      firingRules: rules.filter(a => a.state === 'firing' && a.labels.severity === 'warning').length,
-      pendingAlerts: rules.flatMap(r => r.alerts).filter(a => a.state === 'pending' && a.labels.severity === 'warning')
-        .length,
-      pendingRules: rules.filter(a => a.state === 'pending' && a.labels.severity === 'warning').length,
-      total: rules.filter(a => a.labels.severity === 'warning').length
+      firingAlerts: alertRules
+        .flatMap(r => r.alerts || [])
+        .filter(a => a.state === 'firing' && a.labels.severity === 'warning').length,
+      firingRules: alertRules.filter(a => a.state === 'firing' && a.labels.severity === 'warning').length,
+      pendingAlerts: alertRules
+        .flatMap(r => r.alerts || [])
+        .filter(a => a.state === 'pending' && a.labels.severity === 'warning').length,
+      pendingRules: alertRules.filter(a => a.state === 'pending' && a.labels.severity === 'warning').length,
+      total: alertRules.filter(a => a.labels && a.labels.severity === 'warning').length
     },
     info: {
-      firingAlerts: rules.flatMap(r => r.alerts).filter(a => a.state === 'firing' && a.labels.severity === 'info')
-        .length,
-      firingRules: rules.filter(a => a.state === 'firing' && a.labels.severity === 'info').length,
-      pendingAlerts: rules.flatMap(r => r.alerts).filter(a => a.state === 'pending' && a.labels.severity === 'info')
-        .length,
-      pendingRules: rules.filter(a => a.state === 'pending' && a.labels.severity === 'info').length,
-      total: rules.filter(a => a.labels.severity === 'info').length
+      firingAlerts: alertRules
+        .flatMap(r => r.alerts || [])
+        .filter(a => a.state === 'firing' && a.labels.severity === 'info').length,
+      firingRules: alertRules.filter(a => a.state === 'firing' && a.labels.severity === 'info').length,
+      pendingAlerts: alertRules
+        .flatMap(r => r.alerts || [])
+        .filter(a => a.state === 'pending' && a.labels.severity === 'info').length,
+      pendingRules: alertRules.filter(a => a.state === 'pending' && a.labels.severity === 'info').length,
+      total: alertRules.filter(a => a.labels && a.labels.severity === 'info').length
     }
   };
 
@@ -88,8 +99,11 @@ export const HealthSummary: React.FC<HealthSummaryProps> = ({ rules }) => {
   } else if (variant === AlertVariant.success) {
     details.push(t('No minor issues out of {{total}} rules', stats.info));
   }
+  if (recordingRulesCount > 0) {
+    details.push(t('{{count}} recording rules configured', { count: recordingRulesCount }));
+  }
   return (
-    <Alert variant={variant} title={title}>
+    <Alert variant={variant} title={title} className={`health-summary-alert ${isDark ? 'dark' : ''}`}>
       <ul>
         {details.map((text, i) => (
           <li key={'li_' + i}>{text}</li>

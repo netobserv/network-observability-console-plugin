@@ -4,10 +4,7 @@ import {
   DrawerContent,
   DrawerContentBody,
   DrawerHead,
-  DrawerPanelContent,
-  Text,
-  TextContent,
-  TextVariants
+  DrawerPanelContent
 } from '@patternfly/react-core';
 import * as React from 'react';
 import { HealthGallery } from './health-gallery';
@@ -15,13 +12,12 @@ import { ByResource } from './health-helper';
 import { RuleDetails } from './rule-details';
 
 export interface HealthDrawerContainerProps {
-  title: string;
   stats: ByResource[];
   kind: string;
   isDark: boolean;
 }
 
-export const HealthDrawerContainer: React.FC<HealthDrawerContainerProps> = ({ title, stats, kind, isDark }) => {
+export const HealthDrawerContainer: React.FC<HealthDrawerContainerProps> = ({ stats, kind, isDark }) => {
   const [selectedResource, setSelectedResource] = React.useState<ByResource | undefined>(undefined);
   const drawerRef = React.useRef<HTMLDivElement>(null);
 
@@ -42,9 +38,6 @@ export const HealthDrawerContainer: React.FC<HealthDrawerContainerProps> = ({ ti
 
   return (
     <>
-      <TextContent>
-        <Text component={TextVariants.h3}>{title}</Text>
-      </TextContent>
       <Drawer isExpanded={selectedResource !== undefined} onExpand={onExpand} isInline>
         <DrawerContent
           panelContent={

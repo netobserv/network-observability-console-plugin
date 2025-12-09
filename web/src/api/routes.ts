@@ -5,7 +5,7 @@ import { FlowQuery, FlowScope, isTimeMetric } from '../model/flow-query';
 import { ContextSingleton } from '../utils/context';
 import { TimeRange } from '../utils/datetime';
 import { parseGenericMetrics, parseTopologyMetrics } from '../utils/metrics';
-import { AlertsResult, SilencedAlert } from './alert';
+import { HealthRulesResult, HealthRuleType, SilencedAlert } from './alert';
 import { Field } from './ipfix';
 import {
   AggregatedQueryResponse,
@@ -32,10 +32,11 @@ export const getFlowRecords = (params: FlowQuery): Promise<RecordsResult> => {
   });
 };
 
-export const getAlerts = (match: string): Promise<AlertsResult> => {
+export const getHealthRules = (match: string, type: HealthRuleType = 'all'): Promise<HealthRulesResult> => {
   const matchKeyEnc = encodeURIComponent('match[]');
   const matchValEnc = encodeURIComponent('{' + match + '}');
-  return axios.get(`/api/prometheus/api/v1/rules?type=alert&${matchKeyEnc}=${matchValEnc}`).then(r => {
+  const typeParam = type === 'all' ? '' : `type=${type}&`;
+  return axios.get(`/api/prometheus/api/v1/rules?${typeParam}${matchKeyEnc}=${matchValEnc}`).then(r => {
     if (r.status >= 400) {
       throw new Error(`${r.statusText} [code=${r.status}]`);
     }
