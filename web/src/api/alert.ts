@@ -1,15 +1,17 @@
 import { Rule } from '@openshift-console/dynamic-plugin-sdk';
 
-export interface AlertsResult {
-  data: AlertsResultData;
+export type HealthRuleType = 'alert' | 'record' | 'all';
+
+export interface HealthRulesResult {
+  data: HealthRulesResultData;
   status: string;
 }
 
-export interface AlertsResultData {
-  groups: AlertsGroups[];
+export interface HealthRulesResultData {
+  groups: HealthRulesGroups[];
 }
 
-export interface AlertsGroups {
+export interface HealthRulesGroups {
   name?: string;
   file?: string;
   interval?: number;

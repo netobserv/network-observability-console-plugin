@@ -3,7 +3,7 @@ import { waitFor } from '@testing-library/react';
 import { mount, render, shallow } from 'enzyme';
 import * as React from 'react';
 import { act } from 'react-dom/test-utils';
-import { AlertsResult, SilencedAlert } from '../../api/alert';
+import { HealthRulesResult, SilencedAlert } from '../../api/alert';
 import { FlowMetricsResult, GenericMetricsResult } from '../../api/loki';
 import { getConfig, getFlowGenericMetrics, getFlowMetrics, getFlowRecords, getRole } from '../../api/routes';
 import { FlowQuery } from '../../model/flow-query';
@@ -33,7 +33,7 @@ jest.mock('../../api/routes', () => ({
       stats: { numQueries: 0, limitReached: false, dataSources: ['loki'] }
     } as GenericMetricsResult)
   ),
-  getAlerts: jest.fn(() => Promise.resolve({ data: { groups: [] }, status: 'success' } as AlertsResult)),
+  getHealthRules: jest.fn(() => Promise.resolve({ data: { groups: [] }, status: 'success' } as HealthRulesResult)),
   getSilencedAlerts: jest.fn(() => Promise.resolve([] as SilencedAlert[]))
 }));
 
