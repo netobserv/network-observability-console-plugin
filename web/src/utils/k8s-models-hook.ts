@@ -9,6 +9,29 @@ export function useK8sModelsWithColors() {
     }
   }
 
+  function setModel(kind: string, abbr: string, color: string) {
+    if (k8sModels && !k8sModels[kind]) {
+      k8sModels[kind] = {
+        abbr,
+        color,
+        kind,
+        label: kind,
+        labelKey: kind,
+        labelPlural: `${kind}s`,
+        labelPluralKey: `${kind}s`,
+        plural: `${kind.toLowerCase()}s`,
+        apiGroup: '',
+        apiVersion: 'v1',
+        id: kind.toLowerCase(),
+        crd: true,
+        namespaced: true
+      };
+    } else if (k8sModels && k8sModels[kind]) {
+      k8sModels[kind].abbr = abbr;
+      k8sModels[kind].color = color;
+    }
+  }
+
   if (k8sModels && !inFlight) {
     /* This part inject missing colors in k8sModels
      * check console/frontend/public/style/_vars.scss for values
@@ -73,6 +96,9 @@ export function useK8sModelsWithColors() {
 
     //$color-ingress-dark = $pf-v5-color-purple-700 = #1F0066
     setColor('Ingress', '#1F0066');
+
+    //$color-gateway-dark = $pf-v5-color-blue-500 = #004080 (same as deployments)
+    setModel('Gateway', 'G', '#004080');
   }
 
   return k8sModels;
