@@ -23,7 +23,7 @@ export const RuleDetails: React.FC<RuleDetailsProps> = ({ kind, info, wide }) =>
           <Th>{t('Summary')}</Th>
           <Th>{t('State')}</Th>
           <Th>{t('Severity')}</Th>
-          <Th>{t('Active since')}</Th>
+          <Th style={{ whiteSpace: 'nowrap', paddingRight: '5px' }}>{t('Active since')}</Th>
           <Th>{t('Labels')}</Th>
           <Th>{t('Value')}</Th>
           <Th>{t('Description')}</Th>
