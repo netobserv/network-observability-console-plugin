@@ -30,7 +30,7 @@ import {
 } from '../../../model/filters';
 import { getHTTPErrorDetails } from '../../../utils/errors';
 import { matcher } from '../../../utils/filter-definitions';
-import { Indicator, setTargeteableFilters } from '../../../utils/filters-helper';
+import { Indicator, setTargeteableFilterDefinition } from '../../../utils/filters-helper';
 import { useOutsideClickEvent } from '../../../utils/outside-hook';
 import { usePrevious } from '../../../utils/previous-hook';
 import { Direction } from '../filters-toolbar';
@@ -124,8 +124,12 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
 
   const addFilter = React.useCallback(
     (filterValue: FilterValue) => {
-      let newFilters = _.cloneDeep(filters?.list) || [];
-      const def = filter;
+      const newFilters = _.cloneDeep(filters?.list) || [];
+      let def = filter;
+      // force bidirectionnal mode to have directions set
+      if (filters?.match === 'bidirectionnal') {
+        def = setTargeteableFilterDefinition(filterDefinitions, def, direction === 'destination' ? 'dst' : 'src');
+      }
       const found = findFromFilters(newFilters, { def, compare });
       if (found) {
         if (found.values.map(value => value.v).includes(filterValue.v)) {
@@ -139,10 +143,6 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
         newFilters.push({ def, compare, values: [filterValue] });
       }
 
-      // force bidirectionnal mode to have directions set
-      if (filters?.match === 'bidirectionnal') {
-        newFilters = setTargeteableFilters(filterDefinitions, newFilters, direction === 'destination' ? 'dst' : 'src');
-      }
       setFilters({ ...filters!, list: newFilters });
       setPopperOpen(false);
       setSuggestions([]);
