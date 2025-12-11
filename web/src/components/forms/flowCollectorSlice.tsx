@@ -2,30 +2,31 @@ import React, { FC } from 'react';
 
 import { useParams } from 'react-router-dom-v5-compat';
 import DynamicLoader, { back } from '../dynamic-loader/dynamic-loader';
-import { flowCollectorUISchema } from './config/uiSchema';
+import { flowCollectorSliceUISchema } from './config/uiSchema';
 import { ResourceForm } from './resource-form';
 import { ResourceWatcher } from './resource-watcher';
 
-export type FlowCollectorFormProps = {
+export type FlowCollectorSliceFormProps = {
   name?: string;
 };
 
-export const FlowCollectorForm: FC<FlowCollectorFormProps> = props => {
+export const FlowCollectorSliceForm: FC<FlowCollectorSliceFormProps> = props => {
   const params = useParams();
 
   return (
     <DynamicLoader>
       <ResourceWatcher
         group="flows.netobserv.io"
-        version="v1beta2"
-        kind="FlowCollector"
+        version="v1alpha1"
+        kind="FlowCollectorSlice"
         name={params.name || props.name}
+        namespace={params.namespace || 'default'}
         onSuccess={back}
       >
-        <ResourceForm uiSchema={flowCollectorUISchema} />
+        <ResourceForm uiSchema={flowCollectorSliceUISchema} />
       </ResourceWatcher>
     </DynamicLoader>
   );
 };
 
-export default FlowCollectorForm;
+export default FlowCollectorSliceForm;

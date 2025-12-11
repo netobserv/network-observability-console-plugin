@@ -29,6 +29,7 @@ import { BrowserRouter, Link } from 'react-router-dom';
 import FlowCollectorForm from './components/forms/flowCollector';
 import FlowCollectorStatus from './components/forms/flowCollector-status';
 import FlowCollectorWizard from './components/forms/flowCollector-wizard';
+import FlowCollectorSliceForm from './components/forms/flowCollectorSlice';
 import FlowMetricForm from './components/forms/flowMetric';
 import FlowMetricWizard from './components/forms/flowMetric-wizard';
 import NetworkHealth from './components/health/network-health';
@@ -77,6 +78,10 @@ export const pages = [
   {
     id: 'flowCollector-status',
     name: 'FlowCollector status'
+  },
+  {
+    id: 'flowCollectorSlice',
+    name: 'FlowCollectorSlice form'
   },
   {
     id: 'flowMetric-wizard',
@@ -200,6 +205,8 @@ export const App: React.FunctionComponent = () => {
         return <FlowCollectorForm name="cluster" />;
       case 'flowCollector-status':
         return <FlowCollectorStatus />;
+      case 'flowCollectorSlice':
+        return <FlowCollectorSliceForm name="flowCollectorSlice-sample" />;
       case 'flowMetric-wizard':
         return <FlowMetricWizard name="flowmetric-sample" />;
       case 'flowMetric':
@@ -220,6 +227,7 @@ export const App: React.FunctionComponent = () => {
       case 'flowCollector-wizard':
       case 'flowCollector':
       case 'flowCollector-status':
+      case 'flowCollectorSlice':
       case 'flowMetric-wizard':
       case 'flowMetric':
       case 'network-health':

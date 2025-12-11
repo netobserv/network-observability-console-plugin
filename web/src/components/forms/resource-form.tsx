@@ -1,17 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ResourceYAMLEditor } from '@openshift-console/dynamic-plugin-sdk';
-import { Button, FormHelperText, PageSection, Text, TextContent, TextVariants, Title } from '@patternfly/react-core';
+import { FormHelperText, PageSection, Title } from '@patternfly/react-core';
 import { UiSchema } from '@rjsf/utils';
 import _ from 'lodash';
 import React, { FC, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { safeYAMLToJS } from '../../utils/yaml';
 import { back } from '../dynamic-loader/dynamic-loader';
-import Modal from '../modals/modal';
 import { SchemaValidator } from './config/validator';
 import { DynamicForm } from './dynamic-form/dynamic-form';
 import { EditorToggle, EditorType } from './editor-toggle';
 import './forms.css';
+import { ResourceDeleteModal } from './resource-delete-modal';
 import { Consumer } from './resource-watcher';
 
 export type ResourceFormProps = {
@@ -22,7 +22,7 @@ export const ResourceForm: FC<ResourceFormProps> = ({ uiSchema }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [viewType, setViewType] = React.useState(EditorType.CUSTOM);
   const [data, setData] = React.useState<any>(null);
-  const [isOpen, setOpen] = React.useState(false);
+  const [isDeleteModalOpen, setDeleteModalOpen] = React.useState(false);
 
   const hasChanged = React.useCallback(
     (existing: any) => {
@@ -34,7 +34,6 @@ export const ResourceForm: FC<ResourceFormProps> = ({ uiSchema }) => {
   return (
     <Consumer>
       {ctx => {
-        const isFlowCollector = ctx.kind === 'FlowCollector';
         // first init data when watch resource query got results
         if (data == null) {
           setData(ctx.data);
@@ -57,16 +56,10 @@ export const ResourceForm: FC<ResourceFormProps> = ({ uiSchema }) => {
                 updated={hasChanged(ctx.data)}
                 isUpdate={ctx.isUpdate}
                 onReload={() => setData(ctx.data)}
-                onChange={type => {
-                  setViewType(type);
-                }}
-                onSubmit={() => {
-                  ctx.onSubmit(data);
-                }}
+                onChange={setViewType}
+                onSubmit={() => ctx.onSubmit(data)}
                 onCancel={() => back()}
-                onDelete={() => {
-                  setOpen(true);
-                }}
+                onDelete={() => setDeleteModalOpen(true)}
                 customChild={
                   ctx.schema ? (
                     <DynamicForm
@@ -77,9 +70,7 @@ export const ResourceForm: FC<ResourceFormProps> = ({ uiSchema }) => {
                       validator={SchemaValidator}
                       errors={ctx.errors}
                       onError={errs => ctx.setErrors(_.map(errs, error => error.stack))}
-                      onChange={event => {
-                        setData(event.formData);
-                      }}
+                      onChange={event => setData(event.formData)}
                     />
                   ) : (
                     <></>
@@ -97,50 +88,14 @@ export const ResourceForm: FC<ResourceFormProps> = ({ uiSchema }) => {
                 }
               />
             </Suspense>
-            <Modal
-              id="delete-modal"
-              title={t('Delete {{kind}}?', { kind: ctx.kind })}
-              isOpen={isOpen}
-              scrollable={false}
-              onClose={() => setOpen(false)}
-              footer={
-                <div className="footer">
-                  <Button
-                    id="cancel-delete-popup-button"
-                    data-test-id="cancel-delete-popup-button"
-                    key="cancel"
-                    variant="link"
-                    onClick={() => setOpen(false)}
-                  >
-                    {t('Cancel')}
-                  </Button>
-                  <Button
-                    id="confirm-delete-popup-button"
-                    data-test-id="confirm-delete-popup-button"
-                    key="confirm"
-                    variant="danger"
-                    onClick={() => ctx.onSubmit(data, true)}
-                  >
-                    {t('Delete')}
-                  </Button>
-                </div>
-              }
-            >
-              <TextContent>
-                <Text component={TextVariants.p}>
-                  {`${t('This action cannot be undone.')} ${
-                    isFlowCollector
-                      ? t('It will destroy all pods, services and other objects in the namespace')
-                      : t('The following metric will not be collected anymore')
-                  }`}
-                  &nbsp;
-                  <strong className="co-break-word">
-                    {ctx.data.spec ? ctx.data.spec[isFlowCollector ? 'namespace' : 'metricName'] : ''}
-                  </strong>
-                  <span>.</span>
-                </Text>
-              </TextContent>
-            </Modal>
+            {isDeleteModalOpen && (
+              <ResourceDeleteModal
+                data={ctx.data}
+                kind={ctx.kind}
+                onDelete={() => ctx.onSubmit(data, true)}
+                onCancel={() => setDeleteModalOpen(false)}
+              />
+            )}
           </PageSection>
         );
       }}
