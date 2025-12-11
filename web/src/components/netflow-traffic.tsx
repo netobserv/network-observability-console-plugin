@@ -523,13 +523,22 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
       navigate(netflowTrafficPath);
     } else if (model.filters) {
       //set URL Param to empty value to be able to restore state coming from another page
-      const empty: Filters = { ...model.filters, list: [] };
+      const empty: Filters = { ...model.filters, list: [], match: 'all' };
       setURLFilters(empty);
       updateTableFilters(empty);
     }
   }, [forcedFilters, model.filters, updateTableFilters]);
 
   // Effects
+
+  // invalidate match filters if not set to all when filters are empty
+  React.useEffect(() => {
+    if (!model.filters || (model.filters.match !== 'all' && model.filters.list.length === 0)) {
+      const matchAll: Filters = { ...model.filters, match: 'all' };
+      setURLFilters(matchAll);
+      updateTableFilters(matchAll);
+    }
+  }, [model.filters, updateTableFilters]);
 
   // invalidate record type if not available
   React.useEffect(() => {

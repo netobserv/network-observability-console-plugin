@@ -67,6 +67,14 @@ export const setTargeteableFilters = (
   return filters.map(f => (f.def.category === 'targeteable' ? swapFilter(filterDefinitions, f, target) : f));
 };
 
+export const setTargeteableFilterDefinition = (
+  filterDefinitions: FilterDefinition[],
+  def: FilterDefinition,
+  target: 'src' | 'dst'
+): FilterDefinition => {
+  return def.category === 'targeteable' ? swapFilterDefinition(filterDefinitions, def, target) : def;
+};
+
 export const swapFilterValue = (
   filterDefinitions: FilterDefinition[],
   filters: Filter[],
@@ -91,7 +99,9 @@ export const swapFilterValue = (
   const swapped = swapFilter(filterDefinitions, { ...found, values: [value] }, target);
   const existing = filters.find(f => f.def.id === swapped.def.id);
   if (existing) {
-    existing.values.push(swapped.values[0]);
+    if (!existing.values.includes(swapped.values[0])) {
+      existing.values.push(swapped.values[0]);
+    }
   } else {
     filters.push(swapped);
   }
