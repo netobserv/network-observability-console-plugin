@@ -190,7 +190,7 @@ export const NetworkHealth: React.FC<{}> = ({}) => {
               stats.recordingRules.byNamespace.length > 0 ||
               stats.recordingRules.byNode.length > 0) && (
               <>
-                <TextContent style={{ marginTop: '2rem' }}>
+                <TextContent style={{ }}>
                   <Text component={TextVariants.h2}>{t('Recording Rules')}</Text>
                 </TextContent>
                 <RecordingRulesList stats={stats.recordingRules} isDark={isDarkTheme} />

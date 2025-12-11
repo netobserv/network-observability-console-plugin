@@ -40,7 +40,6 @@ export const RecordingRulesList: React.FC<RecordingRulesListProps> = ({ stats, i
       >
         <RecordingRulesGrid rules={stats.global} />
       </Tab>
-      {stats.byNode.length > 0 && (
         <Tab
           eventKey={'per-node'}
           title={t('Nodes')}
@@ -48,8 +47,6 @@ export const RecordingRulesList: React.FC<RecordingRulesListProps> = ({ stats, i
         >
           <RecordingRulesGrid rules={stats.byNode.flatMap(g => g.rules)} />
         </Tab>
-      )}
-      {stats.byNamespace.length > 0 && (
         <Tab
           eventKey={'per-namespace'}
           title={t('Namespaces')}
@@ -57,7 +54,6 @@ export const RecordingRulesList: React.FC<RecordingRulesListProps> = ({ stats, i
         >
           <RecordingRulesGrid rules={stats.byNamespace.flatMap(g => g.rules)} />
         </Tab>
-      )}
     </Tabs>
   );
 };

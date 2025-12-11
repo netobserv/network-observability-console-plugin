@@ -2,6 +2,7 @@ import { Rule } from '@openshift-console/dynamic-plugin-sdk';
 import { Alert, AlertVariant } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
+import { isRecordingRule } from './health-helper';
 
 export interface HealthSummaryProps {
   rules: Rule[];
@@ -25,9 +26,9 @@ export const HealthSummary: React.FC<HealthSummaryProps> = ({ rules, isDark }) =
     );
   }
 
-  // Separate recording rules from alert rules
-  const recordingRulesCount = rules.filter(r => !r.alerts || r.alerts.length === 0).length;
-  const alertRules = rules.filter(r => r.alerts && r.alerts.length > 0);
+  // Separate recording rules from alert rules based on name pattern
+  const recordingRulesCount = rules.filter(isRecordingRule).length;
+  const alertRules = rules.filter(r => !isRecordingRule(r));
 
   const stats = {
     critical: {

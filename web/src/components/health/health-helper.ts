@@ -92,6 +92,13 @@ const getHealthMetadata = (annotations: PrometheusLabels): HealthMetadata => {
   return defaultMetadata;
 };
 
+// Helper to check if a rule is a recording rule based on its name format
+// Recording rules follow the pattern: netobserv:health:<template>:...
+export const isRecordingRule = (rule: Rule): boolean => {
+  const name = rule.name || '';
+  return name.startsWith('netobserv:health:');
+};
+
 const groupRecordingRules = (rules: Rule[]): RecordingRulesStats => {
   if (!rules || rules.length === 0) {
     return { global: [], byNamespace: [], byNode: [] };
@@ -151,9 +158,9 @@ export const buildStats = (rules: Rule[]): HealthStats => {
     };
   }
 
-  // Separate recording rules (those without alerts) from alert rules
-  const recordingRules = rules.filter(r => !r.alerts || r.alerts.length === 0);
-  const alertRules = rules.filter(r => r.alerts && r.alerts.length > 0);
+  // Separate recording rules from alert rules based on name pattern
+  const recordingRules = rules.filter(isRecordingRule);
+  const alertRules = rules.filter(r => !isRecordingRule(r));
 
   const ruleWithMD: RuleWithMetadata[] = alertRules.map(r => {
     const md = getHealthMetadata(r.annotations);

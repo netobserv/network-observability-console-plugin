@@ -19,6 +19,16 @@ interface PrometheusResponse {
   };
 }
 
+// Helper to get display name from rule
+const getDisplayName = (rule: Rule): string => {
+  // Prefer template label if available (for recording rules)
+  if (rule.labels?.template) {
+    return rule.labels.template;
+  }
+  // Fallback to rule name
+  return rule.name || '';
+};
+
 export const RecordingRuleChart: React.FC<RecordingRuleChartProps> = ({ rule }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [loading, setLoading] = React.useState(true);
@@ -57,7 +67,7 @@ export const RecordingRuleChart: React.FC<RecordingRuleChartProps> = ({ rule }) 
     fetchMetricValue();
   }, [rule.name, t]);
 
-  const renderValue = () => {
+  const renderContent = () => {
     if (loading) {
       return <Skeleton height="100px" />;
     }
@@ -72,44 +82,40 @@ export const RecordingRuleChart: React.FC<RecordingRuleChartProps> = ({ rule }) 
 
     // Parse and format the value
     const numValue = parseFloat(value);
-    if (isNaN(numValue) || numValue === 0) {
+    if (isNaN(numValue)) {
       return null; // Don't render card if value is 0 or invalid
     }
 
     const formattedValue = numValue.toFixed(2);
-    const namespace = labels['namespace'];
-    const node = labels['node'];
 
     return (
-      <div style={{ padding: '1rem' }}>
-        <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--pf-global--primary-color--100)' }}>
-          {formattedValue}%
-        </div>
-        {(namespace || node) && (
-          <div style={{ marginTop: '0.5rem' }}>
-            {namespace && <Label>namespace={namespace}</Label>}
-            {namespace && node && ' '}
-            {node && <Label>node={node}</Label>}
-          </div>
-        )}
+      <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--pf-global--primary-color--100)' }}>
+        {formattedValue}%
       </div>
     );
   };
 
-  const valueContent = renderValue();
+  const content = renderContent();
 
   // Don't render card if there's no value or it's zero
-  if (!loading && !error && valueContent === null) {
+  if (!loading && !error && content === null) {
     return null;
   }
 
+  const namespace = labels['namespace'];
+  const node = labels['node'];
+
   return (
-    <GridItem sm={12} md={6} lg={4}>
+    <GridItem sm={12} md={5} lg={3}>
       <Card isCompact>
-        <CardTitle>{rule.name}</CardTitle>
-        <CardBody>
-          {valueContent}
-        </CardBody>
+        <CardTitle>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span>{getDisplayName(rule)}</span>
+            {namespace && <Label color="blue">{namespace}</Label>}
+            {!namespace && node && <Label color="purple">{node}</Label>}
+          </div>
+        </CardTitle>
+        <CardBody>{content}</CardBody>
       </Card>
     </GridItem>
   );
