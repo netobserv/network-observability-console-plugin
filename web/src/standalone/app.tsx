@@ -17,6 +17,7 @@ import { BrowserRouter, NavLink, Redirect, Route, Switch } from 'react-router-do
 import FlowCollectorForm from '../components/forms/flowCollector';
 import FlowCollectorStatus from '../components/forms/flowCollector-status';
 import FlowCollectorWizard from '../components/forms/flowCollector-wizard';
+import FlowCollectorSliceForm from '../components/forms/flowCollectorSlice';
 import FlowMetricForm from '../components/forms/flowMetric';
 import FlowMetricWizard from '../components/forms/flowMetric-wizard';
 import NetworkHealth from '../components/health/network-health';
@@ -99,6 +100,11 @@ const allPages = [
     id: 'flowCollector-status',
     name: 'FlowCollector status',
     content: <FlowCollectorStatus />
+  },
+  {
+    id: 'flowCollectorSlice',
+    name: 'FlowCollectorSlice form',
+    content: <FlowCollectorSliceForm name="flowCollectorSlice-sample" />
   },
   {
     id: 'flowMetric-wizard',

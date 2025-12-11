@@ -6,6 +6,7 @@ export const flowCollectorNewPath = '/k8s/cluster/flows.netobserv.io~v1beta2~Flo
 export const flowCollectorEditPath = '/k8s/cluster/flows.netobserv.io~v1beta2~FlowCollector/cluster';
 export const flowCollectorStatusPath = '/k8s/cluster/flows.netobserv.io~v1beta2~FlowCollector/status';
 export const flowMetricNewPath = '/k8s/cluster/flows.netobserv.io~v1alpha1~FlowMetric/~new';
+export const flowCollectorSliceNewPath = '/k8s/cluster/flows.netobserv.io~v1alpha1~FlowCollectorSlice/~new';
 
 // React-router query argument (not backend routes)
 export enum URLParam {
