@@ -482,11 +482,12 @@ if (process.env.FLAVOR === 'static') {
         name: "netobserv-plugin-static",
         version: "0.1.0",
         displayName: "NetObserv Static Plugin for OCP Console",
-        description: "This plugin adds custom forms for FlowCollector and FlowMetrics API",
+        description: "This plugin adds custom forms for FlowCollector, FlowCollectorSlice and FlowMetrics APIs",
         exposedModules: {
           "flowCollectorWizard": "./components/forms/flowCollector-wizard.tsx",
           "flowCollectorForm": "./components/forms/flowCollector.tsx",
           "flowCollectorStatus": "./components/forms/flowCollector-status.tsx",
+          "flowCollectorSliceForm": "./components/forms/flowCollectorSlice.tsx",
           "flowMetricWizard": "./components/forms/flowMetric-wizard.tsx",
           "flowMetricForm": "./components/forms/flowMetric.tsx"
         },
@@ -527,6 +528,23 @@ if (process.env.FLAVOR === 'static') {
         {
           type: "console.page/route",
           properties: {
+            path: [
+              // 'Installed Operator' -> 'Create' action
+              "k8s/ns/:namespace/operators.coreos.com~v1alpha1~ClusterServiceVersion/:operator/flows.netobserv.io~v1alpha1~FlowCollectorSlice/~new",
+              // 'Installed Operator' -> 'Edit' action and standard 'New' and 'Edit' actions
+              "/k8s/cluster/flows.netobserv.io~v1alpha1~FlowCollectorSlice/~new",
+              "/k8s/ns/:namespace/clusterserviceversions/:operator/flows.netobserv.io~v1alpha1~FlowCollectorSlice/:name",
+              "/k8s/ns/:namespace/flows.netobserv.io~v1alpha1~FlowCollectorSlice/~new",
+              "/k8s/ns/:namespace/flows.netobserv.io~v1alpha1~FlowCollectorSlice/:name"
+            ],
+            component: {
+              "$codeRef": "flowCollectorSliceForm.default"
+            }
+          }
+        },
+        {
+          type: "console.page/route",
+          properties: {
             // add FlowMetric wizard to 'Installed Operator' -> 'Create' action
             path: "k8s/ns/:namespace/operators.coreos.com~v1alpha1~ClusterServiceVersion/:operator/flows.netobserv.io~v1alpha1~FlowMetric/~new",
             component: {
@@ -539,6 +557,7 @@ if (process.env.FLAVOR === 'static') {
           properties: {
             path: [
               // add FlowMetric form to 'Installed Operator' -> 'Edit' action and standard 'New' and 'Edit' actions
+              "/k8s/cluster/flows.netobserv.io~v1alpha1~FlowMetric/~new",
               "/k8s/ns/:namespace/clusterserviceversions/:operator/flows.netobserv.io~v1alpha1~FlowMetric/:name",
               "/k8s/ns/:namespace/flows.netobserv.io~v1alpha1~FlowMetric/~new",
               "/k8s/ns/:namespace/flows.netobserv.io~v1alpha1~FlowMetric/:name"

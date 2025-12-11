@@ -3,7 +3,7 @@ import { UiSchema } from '@rjsf/utils';
 
 // Keep the UISchemas ordered for form display
 
-export const FlowCollectorUISchema: UiSchema = {
+export const flowCollectorUISchema: UiSchema = {
   'ui:title': 'FlowCollector',
   'ui:flat': 'true',
   metadata: {
@@ -198,7 +198,7 @@ export const FlowCollectorUISchema: UiSchema = {
           'ui:title': 'Log level'
         },
         imagePullPolicy: {
-          'ui:title': 'Image pull policy'
+          'ui:widget': 'hidden'
         },
         metrics: {
           'ui:title': 'Metrics',
@@ -497,7 +497,25 @@ export const FlowCollectorUISchema: UiSchema = {
         'ui:title': 'Log level'
       },
       imagePullPolicy: {
-        'ui:title': 'Image pull policy'
+        'ui:widget': 'hidden'
+      },
+      slicesConfig: {
+        'ui:title': 'Slices configuration',
+        enable: {
+          'ui:title': 'Enable'
+        },
+        collectionMode: {
+          'ui:title': 'Collection mode',
+          'ui:dependency': {
+            controlFieldPath: ['processor', 'slicesConfig', 'enable'],
+            controlFieldValue: 'true',
+            controlFieldName: 'enable'
+          }
+        },
+        namespacesAllowList: {
+          'ui:title': 'Namespaces allow-list'
+        },
+        'ui:order': ['enable', 'collectionMode', 'namespacesAllowList', '*']
       },
       deduper: {
         'ui:title': 'Deduper',
@@ -831,6 +849,7 @@ export const FlowCollectorUISchema: UiSchema = {
         'multiClusterDeployment',
         'clusterName',
         'subnetLabels',
+        'slicesConfig',
         'deduper',
         'unmanagedReplicas',
         'consumerReplicas',
@@ -1105,7 +1124,7 @@ export const FlowCollectorUISchema: UiSchema = {
         'ui:title': 'Log level'
       },
       imagePullPolicy: {
-        'ui:title': 'Image pull policy'
+        'ui:widget': 'hidden'
       },
       portNaming: {
         'ui:title': 'Port naming',
@@ -1525,7 +1544,7 @@ export const FlowCollectorUISchema: UiSchema = {
   'ui:order': ['metadata', 'spec', '*']
 };
 
-export const FlowMetricUISchema: UiSchema = {
+export const flowMetricUISchema: UiSchema = {
   'ui:title': 'FlowMetric',
   'ui:flat': 'true',
   metadata: {
@@ -1549,6 +1568,9 @@ export const FlowMetricUISchema: UiSchema = {
     },
     type: {
       'ui:title': 'Type'
+    },
+    help: {
+      'ui:title': 'Help'
     },
     buckets: {
       'ui:title': 'Buckets',
@@ -1631,6 +1653,7 @@ export const FlowMetricUISchema: UiSchema = {
     'ui:order': [
       'metricName',
       'type',
+      'help',
       'buckets',
       'valueField',
       'divider',
@@ -1639,8 +1662,41 @@ export const FlowMetricUISchema: UiSchema = {
       'direction',
       'labels',
       'filters',
-      'charts'
+      'charts',
+      '*'
     ]
+  },
+  'ui:order': ['metadata', 'spec', '*']
+};
+
+export const flowCollectorSliceUISchema: UiSchema = {
+  'ui:title': 'FlowCollectorSlice',
+  'ui:flat': 'true',
+  metadata: {
+    'ui:title': 'Metadata',
+    'ui:flat': 'true',
+    name: {
+      'ui:title': 'Name'
+    },
+    namespace: {
+      'ui:title': 'Namespace'
+    },
+    labels: {
+      'ui:widget': 'hidden'
+    },
+    'ui:order': ['name', 'namespace', 'labels', '*']
+  },
+  spec: {
+    subnetLabels: {
+      'ui:title': 'Subnet labels',
+      items: {
+        'ui:order': ['cidrs', 'name', '*']
+      }
+    },
+    sampling: {
+      'ui:title': 'Sampling'
+    },
+    'ui:order': ['subnetLabels', 'sampling', '*']
   },
   'ui:order': ['metadata', 'spec', '*']
 };
