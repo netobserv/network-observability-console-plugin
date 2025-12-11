@@ -3,6 +3,18 @@
     padding-bottom: 0.6rem;
 }
 
+#pageSection .health-header {
+    padding: 1.5rem 1.5rem 0 1.5rem;
+}
+
+#pageSection .health-tabs {
+    padding: 0 1.5rem 0 1.5rem;
+}
+
+#pageSection .health-summary-alert {
+    margin-top: 1.5rem;
+}
+
 #pageSection .icon.critical {
     color: #b1380b;
 }
@@ -24,6 +36,14 @@
     color: #9ad8d8;
 }
 
+#pageSection .icon.success {
+    color: #3e8635;
+}
+
+#pageSection .dark .icon.success {
+    color: #5ba352;
+}
+
 .health-gallery-drawer .pf-v5-c-drawer__body,
 .health-gallery-drawer>div {
     height: initial;
@@ -35,6 +55,22 @@
 
 .netobserv-refresh-interval-container {
     margin: 0 !important;
+}
+
+.netobserv-refresh-container {
+    align-self: end;
+}
+
+.netobserv-action-title {
+    height: 2em;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/*hack to keep refresh button size while loading*/
+.co-action-refresh-button {
+    width: 45px !important;
+    height: 33px !important;
 }
 
 /*rotate animation for loading icon*/
@@ -76,6 +112,14 @@
 .card.minor,
 .card.dark.minor {
     border-top-color: #9ad8d8;
+}
+
+.card.success {
+    border-top-color: #3e8635;
+}
+
+.card.dark.success {
+    border-top-color: #5ba352;
 }
 
 .card-header {
