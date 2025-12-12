@@ -11,6 +11,7 @@ import { CompressIcon, ExpandIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
+import { Config } from '../../model/config';
 import { Filter, FilterDefinition, Filters, FilterValue, findFromFilters } from '../../model/filters';
 import { QuickFilter } from '../../model/quick-filters';
 import { autoCompleteCache } from '../../utils/autocomplete-cache';
@@ -30,6 +31,7 @@ import { LinksOverflow } from './links-overflow';
 
 export interface FiltersToolbarProps {
   id: string;
+  config: Config;
   filters?: Filters;
   forcedFilters?: Filters | null;
   skipTipsDelay?: boolean;
@@ -45,6 +47,7 @@ export interface FiltersToolbarProps {
 
 export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
   id,
+  config,
   filters,
   forcedFilters,
   skipTipsDelay,
@@ -161,6 +164,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
           <div>
             <InputGroup>
               <FiltersDropdown
+                config={config}
                 filterDefinitions={filterDefinitions}
                 selectedFilter={selectedFilter}
                 setSelectedFilter={setSelectedFilter}
@@ -177,7 +181,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
         </Tooltip>
       </ToolbarItem>
     );
-  }, [filterDefinitions, getFilterControl, message, selectedCompare, selectedFilter]);
+  }, [config, filterDefinitions, getFilterControl, message, selectedCompare, selectedFilter]);
 
   const isForced = !_.isEmpty(forcedFilters);
   const filtersOrForced = isForced ? forcedFilters : filters;
