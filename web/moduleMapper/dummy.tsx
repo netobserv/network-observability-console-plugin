@@ -20,8 +20,8 @@ import { useK8sModelsWithColors } from '../src/utils/k8s-models-hook';
 import { useTheme } from '../src/utils/theme-hook';
 import { safeJSToYAML } from '../src/utils/yaml';
 import { k8sModels } from './k8s-models';
-import { flowCollectorSchema, flowMetricSchema } from './schemas';
-import { getFlowCollectorJS, getFlowMetricJS } from './templates';
+import { flowCollectorSchema, flowMetricSchema, flowCollectorSliceSchema } from './schemas';
+import { getFlowCollectorJS, getFlowMetricJS, getFlowCollectorSliceJS } from './templates';
 
 // This dummy file is used to resolve @Console imports from @openshift-console for JEST / Standalone
 // You can add any exports needed here
@@ -137,6 +137,30 @@ export function useK8sWatchResource(req: any) {
                   }]
                 }
               });
+            } else if (req.name === 'flowcollectorslices.flows.netobserv.io') {
+              setResource({
+                apiVersion: 'apiextensions.k8s.io/v1',
+                kind: 'CustomResourceDefinition',
+                metadata: {
+                  name: req.name
+                },
+                spec: {
+                  group: 'flows.netobserv.io',
+                  names: {
+                    kind: 'FlowCollectorSlice',
+                    plural: 'flowcollectorslices'
+                  },
+                  scope: 'Namespaced',
+                  versions: [{
+                    name: 'v1alpha1',
+                    served: true,
+                    storage: true,
+                    schema: {
+                      openAPIV3Schema: flowCollectorSliceSchema
+                    }
+                  }]
+                }
+              });
             } else {
               setResource({
                 apiVersion: 'apiextensions.k8s.io/v1',
@@ -235,6 +259,12 @@ export function useK8sWatchResource(req: any) {
               ]
             }
             setResource(fc);
+            break;
+          case 'FlowCollectorSlice':
+            if (req.name === 'flowcollectorslice-sample') {
+              const fcs = _.cloneDeep(getFlowCollectorSliceJS());
+              setResource(fcs);
+            }
             break;
           case 'FlowMetric':
             if (req.name === 'flowmetric-sample') {

@@ -16,7 +16,7 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom-v5-compat';
 import { flowCollectorEditPath, flowCollectorNewPath, flowCollectorStatusPath } from '../../utils/url';
 import DynamicLoader, { navigate } from '../dynamic-loader/dynamic-loader';
-import { FlowCollectorUISchema } from './config/uiSchema';
+import { flowCollectorUISchema } from './config/uiSchema';
 import Consumption from './consumption';
 import { DynamicForm } from './dynamic-form/dynamic-form';
 import { ErrorTemplate } from './dynamic-form/templates';
@@ -42,7 +42,7 @@ export const FlowCollectorWizard: FC<FlowCollectorWizardProps> = props => {
       if (!schema) {
         return <></>;
       }
-      const filteredSchema = getFilteredUISchema(FlowCollectorUISchema, paths);
+      const filteredSchema = getFilteredUISchema(flowCollectorUISchema, paths);
       return (
         <DynamicForm
           formData={data}
