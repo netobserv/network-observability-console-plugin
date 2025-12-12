@@ -191,7 +191,15 @@ textarea,
   white-space: nowrap;
 }
 
-/* fix selector color*/
+/* fix standalone selector color*/
+.pf-v5-c-toggle-group__button.pf-m-selected {
+  color: black;
+}
+.pf-v5-theme-dark .pf-v5-c-toggle-group__button.pf-m-selected {
+  color: var(--pf-v5-c-toggle-group__button--Color);
+}
+
+/* fix selector color (dark)*/
 .pf-v5-theme-dark .pf-v5-c-toggle-group__button.pf-v5-m-selected {
   --pf-v5-c-toggle-group__button--BackgroundColor: #06c;
   --pf-v5-c-toggle-group__button--ZIndex: 100;
@@ -224,4 +232,14 @@ textarea,
   --pf-v5-c-input-group__text--BorderBottomColor: var(--pf-global--BorderColor--400);
   --pf-v5-c-input-group__text--BorderLeftColor: transparent;
   --pf-v5-c-input-group__text--BackgroundColor: var(--pf-global--palette--black-600);
+}
+
+/* masthead links */
+.pf-v5-c-masthead .masthead-link a {
+  text-decoration: none;
+  font-weight: bold;
+  color: #e0e0e0;
+}
+.pf-v5-c-masthead .masthead-link a:hover {
+  color: #bbb;
 }

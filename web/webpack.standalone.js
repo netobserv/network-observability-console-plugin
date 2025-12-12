@@ -7,7 +7,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = {
   mode: 'development',
-  entry: "./index.tsx",
+  entry: process.env.FLAVOR === 'enduser' ? './standalone/index-enduser.tsx' : './standalone/index.tsx',
   context: path.resolve(__dirname, 'src'),
   output: {
     path: path.resolve(__dirname, "dist"),
@@ -95,7 +95,7 @@ module.exports = {
     }),
     new HtmlWebpackPlugin({
       favicon: path.join(__dirname, "static", "favicon.ico"),
-      template: path.join(__dirname, "src", "index.html"),
+      template: path.join(__dirname, "src", "standalone", "index.html"),
     }),
   ],
 }

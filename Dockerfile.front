@@ -3,6 +3,7 @@ FROM docker.io/library/node:24-alpine as web-builder
 USER node
 
 ARG BUILDSCRIPT
+ARG FLAVOR
 WORKDIR /opt/app-root
 
 COPY --chown=node web/package-lock.json web/package-lock.json
@@ -15,7 +16,7 @@ COPY --chown=node web web
 COPY mocks mocks
 
 WORKDIR /opt/app-root/web
-RUN npm run build$BUILDSCRIPT
+RUN FLAVOR=$FLAVOR npm run build$BUILDSCRIPT
 RUN npm run build:static
 
 FROM scratch
