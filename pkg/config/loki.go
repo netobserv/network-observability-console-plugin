@@ -4,26 +4,28 @@ import (
 	"fmt"
 	"strings"
 
+	lokiv1 "github.com/grafana/loki/operator/apis/loki/v1"
 	"github.com/netobserv/network-observability-console-plugin/pkg/utils"
 )
 
 type Loki struct {
-	URL                string            `yaml:"url" json:"url"`
-	Labels             []string          `yaml:"labels" json:"labels"`
-	FieldsType         map[string]string `yaml:"fieldsType" json:"fieldsType"`
-	FieldsFormat       map[string]string `yaml:"fieldsFormat" json:"fieldsFormat"`
-	StatusURL          string            `yaml:"statusUrl,omitempty" json:"statusUrl,omitempty"`
-	Timeout            Duration          `yaml:"timeout,omitempty" json:"timeout,omitempty"`
-	TenantID           string            `yaml:"tenantID,omitempty" json:"tenantID,omitempty"`
-	TokenPath          string            `yaml:"tokenPath,omitempty" json:"tokenPath,omitempty"`
-	SkipTLS            bool              `yaml:"skipTls,omitempty" json:"skipTls,omitempty"`
-	CAPath             string            `yaml:"caPath,omitempty" json:"caPath,omitempty"`
-	StatusSkipTLS      bool              `yaml:"statusSkipTls,omitempty" json:"statusSkipTls,omitempty"`
-	StatusCAPath       string            `yaml:"statusCaPath,omitempty" json:"statusCaPath,omitempty"`
-	StatusUserCertPath string            `yaml:"statusUserCertPath,omitempty" json:"statusUserCertPath,omitempty"`
-	StatusUserKeyPath  string            `yaml:"statusUserKeyPath,omitempty" json:"statusUserKeyPath,omitempty"`
-	UseMocks           bool              `yaml:"useMocks,omitempty" json:"useMocks,omitempty"`
-	ForwardUserToken   bool              `yaml:"forwardUserToken,omitempty" json:"forwardUserToken,omitempty"`
+	URL                string                  `yaml:"url" json:"url"`
+	Labels             []string                `yaml:"labels" json:"labels"`
+	FieldsType         map[string]string       `yaml:"fieldsType" json:"fieldsType"`
+	FieldsFormat       map[string]string       `yaml:"fieldsFormat" json:"fieldsFormat"`
+	StatusURL          string                  `yaml:"statusUrl,omitempty" json:"statusUrl,omitempty"`
+	Timeout            Duration                `yaml:"timeout,omitempty" json:"timeout,omitempty"`
+	TenantID           string                  `yaml:"tenantID,omitempty" json:"tenantID,omitempty"`
+	TokenPath          string                  `yaml:"tokenPath,omitempty" json:"tokenPath,omitempty"`
+	SkipTLS            bool                    `yaml:"skipTls,omitempty" json:"skipTls,omitempty"`
+	CAPath             string                  `yaml:"caPath,omitempty" json:"caPath,omitempty"`
+	Status             *lokiv1.LokiStackStatus `yaml:"status,omitempty" json:"status,omitempty"`
+	StatusSkipTLS      bool                    `yaml:"statusSkipTls,omitempty" json:"statusSkipTls,omitempty"`
+	StatusCAPath       string                  `yaml:"statusCaPath,omitempty" json:"statusCaPath,omitempty"`
+	StatusUserCertPath string                  `yaml:"statusUserCertPath,omitempty" json:"statusUserCertPath,omitempty"`
+	StatusUserKeyPath  string                  `yaml:"statusUserKeyPath,omitempty" json:"statusUserKeyPath,omitempty"`
+	UseMocks           bool                    `yaml:"useMocks,omitempty" json:"useMocks,omitempty"`
+	ForwardUserToken   bool                    `yaml:"forwardUserToken,omitempty" json:"forwardUserToken,omitempty"`
 	labelsMap          map[string]struct{}
 }
 
