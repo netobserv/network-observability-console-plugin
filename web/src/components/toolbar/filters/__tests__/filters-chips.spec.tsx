@@ -5,8 +5,10 @@ import { FiltersChips, FiltersChipsProps } from '../filters-chips';
 
 describe('<FiltersChips />', () => {
   const props: FiltersChipsProps = {
-    filters: { backAndForth: false, list: [] },
+    filters: { match: 'all', list: [] },
+    setDirection: jest.fn(),
     setFilters: jest.fn(),
+    editValue: jest.fn(),
     clearFilters: jest.fn(),
     resetFilters: jest.fn(),
     quickFilters: [],

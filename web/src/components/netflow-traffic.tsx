@@ -34,7 +34,6 @@ import {
   setURLDatasource,
   setURLFilters,
   setURLLimit,
-  setURLMatch,
   setURLMetricFunction,
   setURLMetricType,
   setURLPacketLoss,
@@ -240,9 +239,9 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
   const resetDefaultFilters = React.useCallback(
     (c = model.config) => {
       const def = getDefaultFilters(c);
-      updateTableFilters({ backAndForth: model.filters.backAndForth, list: def });
+      updateTableFilters({ match: model.filters.match, list: def });
     },
-    [model.config, model.filters.backAndForth, getDefaultFilters, updateTableFilters]
+    [model.config, model.filters.match, getDefaultFilters, updateTableFilters]
   );
 
   const setFiltersFromURL = React.useCallback(
@@ -265,7 +264,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
     const enabledFilters = getEnabledFilters(forcedFilters || model.filters);
     const query: FlowQuery = {
       namespace: forcedNamespace,
-      filters: filtersToString(enabledFilters.list, model.match === 'any'),
+      filters: filtersToString(enabledFilters.list, enabledFilters.match === 'any'),
       limit: limitValues.includes(model.limit) ? model.limit : limitValues[0],
       recordType: model.recordType,
       dataSource: model.dataSource,
@@ -300,7 +299,6 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
     forcedNamespace,
     forcedFilters,
     model.filters,
-    model.match,
     model.limit,
     model.recordType,
     model.dataSource,
@@ -315,9 +313,9 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
   const getFetchFunctions = React.useCallback(() => {
     // check back-and-forth
     const enabledFilters = getEnabledFilters(forcedFilters || model.filters);
-    const matchAny = model.match === 'any';
+    const matchAny = enabledFilters.match === 'any';
     return getBackAndForthFetch(getFilterDefs(), enabledFilters, matchAny);
-  }, [forcedFilters, model.filters, model.match, getFilterDefs]);
+  }, [forcedFilters, model.filters, getFilterDefs]);
 
   const manageWarnings = React.useCallback(
     (query: Promise<unknown>) => {
@@ -525,13 +523,22 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
       navigate(netflowTrafficPath);
     } else if (model.filters) {
       //set URL Param to empty value to be able to restore state coming from another page
-      const empty: Filters = { ...model.filters, list: [] };
+      const empty: Filters = { ...model.filters, list: [], match: 'all' };
       setURLFilters(empty);
       updateTableFilters(empty);
     }
   }, [forcedFilters, model.filters, updateTableFilters]);
 
   // Effects
+
+  // invalidate match filters if not set to all when filters are empty
+  React.useEffect(() => {
+    if (!model.filters || (model.filters.match !== 'all' && model.filters.list.length === 0)) {
+      const matchAll: Filters = { ...model.filters, match: 'all' };
+      setURLFilters(matchAll);
+      updateTableFilters(matchAll);
+    }
+  }, [model.filters, updateTableFilters]);
 
   // invalidate record type if not available
   React.useEffect(() => {
@@ -677,10 +684,6 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
   }, [model.limit]);
 
   React.useEffect(() => {
-    setURLMatch(model.match, !initState.current.includes('configLoaded'));
-  }, [model.match]);
-
-  React.useEffect(() => {
     setURLShowDup(model.showDuplicates, !initState.current.includes('configLoaded'));
   }, [model.showDuplicates]);
 
@@ -717,7 +720,6 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
     model.filters,
     model.range,
     model.limit,
-    model.match,
     model.showDuplicates,
     model.topologyMetricFunction,
     model.topologyMetricType,

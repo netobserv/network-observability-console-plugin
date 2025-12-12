@@ -1,6 +1,5 @@
 import {
-  Button,
-  InputGroup,
+  ExpandableSectionToggle,
   Toolbar,
   ToolbarContent,
   ToolbarItem,
@@ -11,21 +10,17 @@ import { CompressIcon, ExpandIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Filter, FilterDefinition, Filters, FilterValue, findFromFilters } from '../../model/filters';
+import { Filter, FilterCompare, FilterDefinition, Filters } from '../../model/filters';
 import { QuickFilter } from '../../model/quick-filters';
 import { autoCompleteCache } from '../../utils/autocomplete-cache';
-import { findFilter } from '../../utils/filter-definitions';
+import { findFilter, matcher } from '../../utils/filter-definitions';
 import { Indicator } from '../../utils/filters-helper';
 import { localStorageShowFiltersKey, useLocalStorage } from '../../utils/local-storage-hook';
 import { QueryOptionsDropdown, QueryOptionsProps } from '../dropdowns/query-options-dropdown';
 import './filters-toolbar.css';
-import AutocompleteFilter from './filters/autocomplete-filter';
-import CompareFilter, { FilterCompare } from './filters/compare-filter';
-import { FilterHints } from './filters/filter-hints';
+import { FilterSearchInput } from './filters/filter-search-input';
 import { FiltersChips } from './filters/filters-chips';
-import FiltersDropdown from './filters/filters-dropdown';
 import { QuickFilters } from './filters/quick-filters';
-import TextFilter from './filters/text-filter';
 import { LinksOverflow } from './links-overflow';
 
 export interface FiltersToolbarProps {
@@ -43,6 +38,8 @@ export interface FiltersToolbarProps {
   setFullScreen: (b: boolean) => void;
 }
 
+export type Direction = 'source' | 'destination' | undefined;
+
 export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
   id,
   filters,
@@ -58,12 +55,19 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
   ...props
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
-  const [indicator, setIndicator] = React.useState<Indicator>(ValidatedOptions.default);
+
   const [message, setMessage] = React.useState<string | undefined>();
-  const [selectedFilter, setSelectedFilter] = React.useState<FilterDefinition | null>(
+  const [indicator, setIndicator] = React.useState<Indicator>(ValidatedOptions.default);
+
+  const [searchInputValue, setSearchInputValue] = React.useState('');
+
+  const [direction, setDirection] = React.useState<Direction>();
+  const [filter, setFilter] = React.useState<FilterDefinition | null>(
     findFilter(filterDefinitions, 'src_namespace') || filterDefinitions.length ? filterDefinitions[0] : null
   );
-  const [selectedCompare, setSelectedCompare] = React.useState<FilterCompare>(FilterCompare.equal);
+  const [compare, setCompare] = React.useState<FilterCompare>(FilterCompare.equal);
+  const [value, setValue] = React.useState<string>('');
+
   const [showFilters, setShowFilters] = useLocalStorage<boolean>(localStorageShowFiltersKey, true);
 
   // reset and delay message state to trigger tooltip properly
@@ -81,72 +85,14 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
     [skipTipsDelay]
   );
 
-  const setFiltersList = React.useCallback(
-    (list: Filter[]) => {
-      setFilters({ ...filters!, list: list });
-    },
-    [setFilters, filters]
-  );
-
-  const addFilter = React.useCallback(
-    (filterValue: FilterValue) => {
-      if (selectedFilter === null) {
-        console.error('addFilter called with', selectedFilter);
-        return false;
-      }
-      const newFilters = _.cloneDeep(filters?.list) || [];
-      const not = selectedCompare === FilterCompare.notEqual;
-      const moreThan = selectedCompare === FilterCompare.moreThanOrEqual;
-      const found = findFromFilters(newFilters, { def: selectedFilter, not, moreThan });
-      if (found) {
-        if (found.values.map(value => value.v).includes(filterValue.v)) {
-          setMessageWithDelay(t('Filter already exists'));
-          setIndicator(ValidatedOptions.error);
-          return false;
-        } else {
-          found.values.push(filterValue);
-        }
-      } else {
-        newFilters.push({ def: selectedFilter, not, moreThan, values: [filterValue] });
-      }
-      setFiltersList(newFilters);
-      return true;
-    },
-    [filters, selectedCompare, selectedFilter, setFiltersList, setMessageWithDelay, t]
-  );
-
-  const getFilterControl = React.useCallback(() => {
-    if (selectedFilter === null) {
-      return <></>;
-    }
-
-    const commonProps = {
-      filterDefinition: selectedFilter,
-      addFilter: addFilter,
-      setMessageWithDelay: setMessageWithDelay,
-      indicator: indicator,
-      setIndicator: setIndicator
-    };
-    switch (selectedFilter.component) {
-      case 'text':
-      case 'number':
-        return (
-          <TextFilter
-            {...commonProps}
-            allowEmpty={selectedCompare !== FilterCompare.moreThanOrEqual}
-            regexp={selectedFilter.component === 'number' ? /\D/g : undefined}
-          />
-        );
-      case 'autocomplete':
-        return <AutocompleteFilter {...commonProps} />;
-    }
-  }, [selectedFilter, addFilter, setMessageWithDelay, indicator, selectedCompare]);
+  const editValue = React.useCallback((f: Filter, v: string) => {
+    setSearchInputValue(matcher(f.def.id, [v], f.compare));
+  }, []);
 
   const getFilterToolbar = React.useCallback(() => {
-    if (selectedFilter === null) {
+    if (!filter) {
       return <></>;
     }
-
     return (
       <ToolbarItem className="flex-start">
         <Tooltip
@@ -158,26 +104,40 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
           enableFlip={false}
           position={'top'}
         >
-          <div>
-            <InputGroup>
-              <FiltersDropdown
-                filterDefinitions={filterDefinitions}
-                selectedFilter={selectedFilter}
-                setSelectedFilter={setSelectedFilter}
-              />
-              <CompareFilter
-                value={selectedCompare}
-                setValue={setSelectedCompare}
-                component={selectedFilter.component}
-              />
-              {getFilterControl()}
-            </InputGroup>
-            <FilterHints def={selectedFilter} />
-          </div>
+          <FilterSearchInput
+            filterDefinitions={filterDefinitions}
+            filters={filters}
+            indicator={indicator}
+            direction={direction}
+            filter={filter}
+            compare={compare}
+            value={value}
+            setValue={setValue}
+            setCompare={setCompare}
+            setFilter={setFilter}
+            setDirection={setDirection}
+            setIndicator={setIndicator}
+            searchInputValue={searchInputValue}
+            setSearchInputValue={setSearchInputValue}
+            setFilters={setFilters}
+            setMessage={setMessageWithDelay}
+          />
         </Tooltip>
       </ToolbarItem>
     );
-  }, [filterDefinitions, getFilterControl, message, selectedCompare, selectedFilter]);
+  }, [
+    compare,
+    direction,
+    filter,
+    filterDefinitions,
+    filters,
+    indicator,
+    message,
+    searchInputValue,
+    setFilters,
+    setMessageWithDelay,
+    value
+  ]);
 
   const isForced = !_.isEmpty(forcedFilters);
   const filtersOrForced = isForced ? forcedFilters : filters;
@@ -190,67 +150,78 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
   } else if (defaultFilters.length > 0) {
     showHideText = showFilters ? t('Hide filters') : t('Show filters');
   }
-
   return (
-    <Toolbar data-test={id} id={id}>
-      <ToolbarContent data-test={`${id}-search-filters`} id={`${id}-search-filters`} toolbarId={id}>
-        <ToolbarItem className="flex-start">
-          <QueryOptionsDropdown {...props.queryOptionsProps} />
-        </ToolbarItem>
-        {!isForced && quickFilters.length > 0 && (
+    <>
+      <Toolbar data-test={id} id={id}>
+        <ToolbarContent data-test={`${id}-search-filters`} id={`${id}-search-filters`} toolbarId={id}>
           <ToolbarItem className="flex-start">
-            <QuickFilters quickFilters={quickFilters} activeFilters={filters?.list || []} setFilters={setFiltersList} />
+            <QueryOptionsDropdown {...props.queryOptionsProps} />
           </ToolbarItem>
-        )}
-        {!isForced && getFilterToolbar()}
-        {showHideText && countActiveFilters > 0 && (
+          {!isForced && quickFilters.length > 0 && (
+            <ToolbarItem className="flex-start">
+              <QuickFilters
+                quickFilters={quickFilters}
+                activeFilters={filters?.list || []}
+                setFilters={list => setFilters({ ...filters!, list })}
+              />
+            </ToolbarItem>
+          )}
+          {!isForced && getFilterToolbar()}
+          {showHideText && countActiveFilters > 0 && (
+            <ToolbarItem className="flex-start">
+              <ExpandableSectionToggle
+                data-test="show-filters-button"
+                id="show-filters-button"
+                className="overflow-button"
+                isExpanded={showFilters}
+                onToggle={isExpanded => setShowFilters(isExpanded)}
+              >
+                {showHideText}
+              </ExpandableSectionToggle>
+            </ToolbarItem>
+          )}
           <ToolbarItem className="flex-start">
-            <Button
-              data-test="show-filters-button"
-              id="show-filters-button"
-              variant="link"
-              className="overflow-button"
-              onClick={() => setShowFilters(!showFilters)}
-            >
-              {showHideText}
-            </Button>
-          </ToolbarItem>
-        )}
-        <ToolbarItem className="flex-start">
-          <LinksOverflow
-            id={'filters-more-options'}
-            items={[
-              {
-                id: 'fullscreen',
-                label: isFullScreen ? t('Collapse') : t('Expand'),
-                onClick: () => setFullScreen(!isFullScreen),
-                icon: isFullScreen ? <CompressIcon /> : <ExpandIcon />
-              },
-              {
-                id: 'set-default-filters',
-                label: t('Default filters'),
-                onClick: () => {
-                  resetFilters();
-                  autoCompleteCache.clear();
+            <LinksOverflow
+              id={'filters-more-options'}
+              items={[
+                {
+                  id: 'fullscreen',
+                  label: isFullScreen ? t('Collapse') : t('Expand'),
+                  onClick: () => setFullScreen(!isFullScreen),
+                  icon: isFullScreen ? <CompressIcon /> : <ExpandIcon />
                 },
-                enabled: countActiveFilters === 0
-              }
-            ]}
-          />
-        </ToolbarItem>
-        {showFilters && countActiveFilters > 0 && (
-          <FiltersChips
-            isForced={isForced}
-            filters={filtersOrForced!}
-            setFilters={setFilters}
-            clearFilters={clearFilters}
-            resetFilters={resetFilters}
-            quickFilters={quickFilters}
-            filterDefinitions={filterDefinitions}
-          />
-        )}
-      </ToolbarContent>
-    </Toolbar>
+                {
+                  id: 'set-default-filters',
+                  label: t('Default filters'),
+                  onClick: () => {
+                    resetFilters();
+                    autoCompleteCache.clear();
+                  },
+                  enabled: countActiveFilters === 0
+                }
+              ]}
+            />
+          </ToolbarItem>
+        </ToolbarContent>
+      </Toolbar>
+      {showFilters && countActiveFilters > 0 && (
+        <Toolbar data-test={`${id}-chips`} id={`${id}-chips`}>
+          <ToolbarContent toolbarId={`${id}-chips`}>
+            <FiltersChips
+              isForced={isForced}
+              filters={filtersOrForced!}
+              setDirection={setDirection}
+              setFilters={setFilters}
+              editValue={editValue}
+              clearFilters={clearFilters}
+              resetFilters={resetFilters}
+              quickFilters={quickFilters}
+              filterDefinitions={filterDefinitions}
+            />
+          </ToolbarContent>
+        </Toolbar>
+      )}
+    </>
   );
 };
 
