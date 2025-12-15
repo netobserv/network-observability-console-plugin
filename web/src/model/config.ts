@@ -14,8 +14,7 @@ export type Feature =
   | 'udnMapping'
   | 'packetTranslation'
   | 'networkEvents'
-  | 'ipsec'
-  | 'experimentalAlertsHealth';
+  | 'ipsec';
 
 export type Config = {
   buildVersion: string;
