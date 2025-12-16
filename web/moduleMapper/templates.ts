@@ -133,7 +133,7 @@ export const getFlowCollectorJS = (): K8sResourceKind => {
 };
 
 // use an alternative sample for forms to avoid forcing the user to remove the filters / queries
-export const flowMetricDefaultForm = `
+const flowMetricDefaultForm = `
 apiVersion: flows.netobserv.io/v1alpha1
 kind: FlowMetric
 metadata:
@@ -151,4 +151,21 @@ export const getFlowMetricJS = (): K8sResourceKind => {
     flowMetricJS = safeYAMLToJS(flowMetricDefaultForm);
   }
   return flowMetricJS!;
+};
+
+const flowCollectorSliceDefaultForm = `
+apiVersion: flows.netobserv.io/v1alpha1
+kind: FlowCollectorSlice
+metadata:
+  name: flowCollectorSlice-sample
+spec:
+  sampling: 1
+`;
+
+let flowCollectorSliceJS: K8sResourceKind | null = null;
+export const getFlowCollectorSliceJS = (): K8sResourceKind => {
+  if (flowCollectorSliceJS === null) {
+    flowCollectorSliceJS = safeYAMLToJS(flowCollectorSliceDefaultForm);
+  }
+  return flowCollectorSliceJS!;
 };
