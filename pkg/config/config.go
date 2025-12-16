@@ -32,14 +32,21 @@ type Server struct {
 }
 
 type Prometheus struct {
-	URL              string       `yaml:"url" json:"url"`
-	DevURL           string       `yaml:"devUrl,omitempty" json:"devUrl,omitempty"`
-	Timeout          Duration     `yaml:"timeout,omitempty" json:"timeout,omitempty"`
-	TokenPath        string       `yaml:"tokenPath,omitempty" json:"tokenPath,omitempty"`
-	SkipTLS          bool         `yaml:"skipTls,omitempty" json:"skipTls,omitempty"`
-	CAPath           string       `yaml:"caPath,omitempty" json:"caPath,omitempty"`
-	ForwardUserToken bool         `yaml:"forwardUserToken,omitempty" json:"forwardUserToken,omitempty"`
-	Metrics          []MetricInfo `yaml:"metrics,omitempty" json:"metrics,omitempty"`
+	URL              string             `yaml:"url" json:"url"`
+	DevURL           string             `yaml:"devUrl,omitempty" json:"devUrl,omitempty"`
+	Timeout          Duration           `yaml:"timeout,omitempty" json:"timeout,omitempty"`
+	TokenPath        string             `yaml:"tokenPath,omitempty" json:"tokenPath,omitempty"`
+	SkipTLS          bool               `yaml:"skipTls,omitempty" json:"skipTls,omitempty"`
+	CAPath           string             `yaml:"caPath,omitempty" json:"caPath,omitempty"`
+	ForwardUserToken bool               `yaml:"forwardUserToken,omitempty" json:"forwardUserToken,omitempty"`
+	Metrics          []MetricInfo       `yaml:"metrics,omitempty" json:"metrics,omitempty"`
+	AlertManager     AlertManagerConfig `yaml:"alertManager" json:"alertManager"`
+}
+
+type AlertManagerConfig struct {
+	URL     string `yaml:"url" json:"url"`
+	SkipTLS bool   `yaml:"skipTls,omitempty" json:"skipTls,omitempty"`
+	CAPath  string `yaml:"caPath,omitempty" json:"caPath,omitempty"`
 }
 
 type FlowDirection string
