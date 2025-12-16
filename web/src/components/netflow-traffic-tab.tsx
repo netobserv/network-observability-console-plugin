@@ -140,10 +140,11 @@ export const NetflowTrafficTab: React.FC<NetflowTrafficTabProps> = ({ match, obj
           list: [
             {
               def: findFilter(filterDefinitions, 'src_resource')!,
+              compare: FilterCompare.equal,
               values: [{ v: `${obj.kind}.${obj.metadata!.namespace}.${obj.metadata!.name}` }]
             }
           ],
-          backAndForth: true
+          match: 'bidirectional'
         });
         break;
       case 'Route':
