@@ -55,7 +55,7 @@ export const Header: React.FunctionComponent<{
         <Toolbar id="vertical-toolbar">
           <ToolbarContent>
             <ToolbarItem className="masthead-link">
-              <a href="https://netobserv.io" title="Open netobserv.io" target="_blank">
+              <a href="https://netobserv.io" title="Open netobserv.io" target="_blank" rel="noreferrer">
                 NetObserv
               </a>
             </ToolbarItem>
