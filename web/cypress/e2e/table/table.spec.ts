@@ -23,8 +23,8 @@ describe('netflow-table', () => {
     cy.get('#table-container').find('tr').its('length').should('be.gte', 50);
     cy.get('#flowsCount').contains('+ Flows');
 
-    cy.addFilter('src_namespace', c.namespace);
-    cy.addFilter('src_name', c.pod);
+    cy.addFilter('namespace', c.namespace);
+    cy.addFilter('name', c.pod);
     cy.changeQueryOption('1000');
     cy.clickShowDuplicates();
     cy.changeTimeRange('Last 1 day');
