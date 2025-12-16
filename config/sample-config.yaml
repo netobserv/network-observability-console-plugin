@@ -858,7 +858,7 @@ frontend:
       name: Namespace
       component: autocomplete
       autoCompleteAddsQuotes: true
-      category: targeteable
+      category: endpoint
       placeholder: 'E.g: netobserv'
       hint: Specify a single kubernetes name.
       examples: |-
@@ -905,7 +905,7 @@ frontend:
     - id: name
       name: Name
       component: text
-      category: targeteable
+      category: endpoint
       placeholder: 'E.g: my-pod'
       hint: Specify a single kubernetes name.
       examples: |-
@@ -951,7 +951,7 @@ frontend:
       name: Kind
       component: autocomplete
       autoCompleteAddsQuotes: true
-      category: targeteable
+      category: endpoint
       placeholder: 'E.g: Pod, Service'
     - id: src_kind
       name: Kind
@@ -968,7 +968,7 @@ frontend:
     - id: owner_name
       name: Owner Name
       component: text
-      category: targeteable
+      category: endpoint
       placeholder: 'E.g: my-deployment'
       hint: Specify a single kubernetes name.
       examples: |-
@@ -1013,7 +1013,7 @@ frontend:
     - id: zone
       name: Zone
       component: autocomplete
-      category: targeteable
+      category: endpoint
       hint: Specify a single zone.
     - id: src_zone
       name: Zone
@@ -1028,7 +1028,7 @@ frontend:
     - id: subnet_label
       name: Subnet Label
       component: autocomplete
-      category: targeteable
+      category: endpoint
       hint: Specify a subnet label, or an empty string to get unmatched sources.
     - id: src_subnet_label
       name: Subnet Label
@@ -1043,7 +1043,7 @@ frontend:
     - id: resource
       name: Resource
       component: autocomplete
-      category: targeteable
+      category: endpoint
       placeholder: 'E.g: Deployment.example.my-dep or Pod.default.my-pod'
       hint: Specify an existing resource from its kind, namespace and name.
       examples: |-
@@ -1076,7 +1076,7 @@ frontend:
     - id: address
       name: IP
       component: text
-      category: targeteable
+      category: endpoint
       hint: Specify a single IP or range.
       placeholder: 'E.g: 192.0.2.0'
       examples: |-
@@ -1109,7 +1109,7 @@ frontend:
     - id: port
       name: Port
       component: autocomplete
-      category: targeteable
+      category: endpoint
       hint: Specify a single port number or name.
       placeholder: 'E.g: 80'
       examples: |-
@@ -1142,7 +1142,7 @@ frontend:
     - id: mac
       name: MAC
       component: text
-      category: targeteable
+      category: endpoint
       placeholder: 'E.g: 42:01:0A:00:00:01'
       hint: Specify a single MAC address.
     - id: src_mac
@@ -1160,7 +1160,7 @@ frontend:
     - id: host_address
       name: Node IP
       component: text
-      category: targeteable
+      category: endpoint
       placeholder: 'E.g: 10.0.0.1'
       hint: Specify a single IP or range.
       examples: |-
@@ -1193,7 +1193,7 @@ frontend:
     - id: host_name
       name: Node Name
       component: text
-      category: targeteable
+      category: endpoint
       placeholder: 'E.g: my-node'
       hint: Specify a single kubernetes name.
       examples: |-
@@ -1238,7 +1238,7 @@ frontend:
     - id: network
       name: Network Name
       component: text
-      category: targeteable
+      category: endpoint
     - id: src_network
       name: Network Name
       component: text

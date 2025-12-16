@@ -33,7 +33,7 @@ export const FiltersDropdown: React.FC<FiltersDropdownProps> = ({
 
   const getFiltersDropdownItems = React.useCallback(() => {
     return filterDefinitions
-      .filter(f => !f.category || f.category === 'targeteable')
+      .filter(f => !f.category || f.category === 'endpoint')
       .sort((a, b) => a.name.localeCompare(b.name))
       .map((f, index) => (
         <DropdownItem
@@ -109,7 +109,7 @@ export const FiltersDropdown: React.FC<FiltersDropdownProps> = ({
         <Radio
           id="radio-source"
           data-test="radio-source"
-          label={match === 'bidirectionnal' ? t('As endpoint A') : t('As source')}
+          label={match === 'bidirectional' ? t('As endpoint A') : t('As source')}
           name="source"
           isChecked={selectedDirection === 'source'}
           onChange={onRadioChange}
@@ -118,7 +118,7 @@ export const FiltersDropdown: React.FC<FiltersDropdownProps> = ({
         <Radio
           id="radio-destination"
           data-test="radio-destination"
-          label={match === 'bidirectionnal' ? t('As endpoint B') : t('As destination')}
+          label={match === 'bidirectional' ? t('As endpoint B') : t('As destination')}
           name="destination"
           isChecked={selectedDirection === 'destination'}
           onChange={onRadioChange}
@@ -131,7 +131,7 @@ export const FiltersDropdown: React.FC<FiltersDropdownProps> = ({
           name="either"
           isChecked={!selectedDirection}
           onChange={onRadioChange}
-          isDisabled={!selectedFilter.category || match === 'bidirectionnal'}
+          isDisabled={!selectedFilter.category || match === 'bidirectional'}
         />
       </div>
     </Flex>

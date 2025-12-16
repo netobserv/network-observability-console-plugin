@@ -30,7 +30,7 @@ import {
 } from '../../../model/filters';
 import { getHTTPErrorDetails } from '../../../utils/errors';
 import { matcher } from '../../../utils/filter-definitions';
-import { Indicator, setTargeteableFilterDefinition } from '../../../utils/filters-helper';
+import { Indicator, setEndpointFilterDefinition } from '../../../utils/filters-helper';
 import { useOutsideClickEvent } from '../../../utils/outside-hook';
 import { usePrevious } from '../../../utils/previous-hook';
 import { Direction } from '../filters-toolbar';
@@ -126,9 +126,9 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
     (filterValue: FilterValue) => {
       const newFilters = _.cloneDeep(filters?.list) || [];
       let def = filter;
-      // force bidirectionnal mode to have directions set
-      if (filters?.match === 'bidirectionnal') {
-        def = setTargeteableFilterDefinition(filterDefinitions, def, direction === 'destination' ? 'dst' : 'src');
+      // force bidirectional mode to have directions set
+      if (filters?.match === 'bidirectional') {
+        def = setEndpointFilterDefinition(filterDefinitions, def, direction === 'destination' ? 'dst' : 'src');
       }
       const found = findFromFilters(newFilters, { def, compare });
       if (found) {

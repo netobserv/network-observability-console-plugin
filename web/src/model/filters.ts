@@ -8,7 +8,7 @@ export type FiltersEncoder = (values: FilterValue[], compare: FilterCompare, mat
 
 export type FilterComponent = 'autocomplete' | 'text' | 'number';
 
-export type FilterCategory = 'source' | 'destination' | 'targeteable';
+export type FilterCategory = 'source' | 'destination' | 'endpoint';
 
 export enum FilterCompare {
   match = '~',

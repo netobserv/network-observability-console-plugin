@@ -38,7 +38,7 @@ export const swapFilterDefinition = (
     swappedId = def.id.replace('src_', target ? `${target}_` : 'dst_') as FilterId;
   } else if (def.id.startsWith('dst_')) {
     swappedId = def.id.replace('dst_', target ? `${target}_` : 'src_') as FilterId;
-  } else if (def.category === 'targeteable' && target) {
+  } else if (def.category === 'endpoint' && target) {
     swappedId = `${target}_${def.id}` as FilterId;
   }
   if (swappedId) {
@@ -59,20 +59,20 @@ export const swapFilters = (filterDefinitions: FilterDefinition[], filters: Filt
   return filters.map(f => swapFilter(filterDefinitions, f));
 };
 
-export const setTargeteableFilters = (
+export const setEndpointFilters = (
   filterDefinitions: FilterDefinition[],
   filters: Filter[],
   target: 'src' | 'dst'
 ): Filter[] => {
-  return filters.map(f => (f.def.category === 'targeteable' ? swapFilter(filterDefinitions, f, target) : f));
+  return filters.map(f => (f.def.category === 'endpoint' ? swapFilter(filterDefinitions, f, target) : f));
 };
 
-export const setTargeteableFilterDefinition = (
+export const setEndpointFilterDefinition = (
   filterDefinitions: FilterDefinition[],
   def: FilterDefinition,
   target: 'src' | 'dst'
 ): FilterDefinition => {
-  return def.category === 'targeteable' ? swapFilterDefinition(filterDefinitions, def, target) : def;
+  return def.category === 'endpoint' ? swapFilterDefinition(filterDefinitions, def, target) : def;
 };
 
 export const swapFilterValue = (

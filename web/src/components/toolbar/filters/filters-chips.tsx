@@ -40,7 +40,7 @@ import {
   bnfFilterValue,
   hasSrcAndDstFilters,
   hasSrcOrDstFilters,
-  setTargeteableFilters,
+  setEndpointFilters,
   swapFilters,
   swapFilterValue
 } from '../../../utils/filters-helper';
@@ -88,7 +88,7 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
       if (id === 'common') {
         return '';
       }
-      if (filters.match === 'bidirectionnal') {
+      if (filters.match === 'bidirectional') {
         if (hasSrcAndDstFilters(filters.list)) {
           return id === 'src' ? t('Endpoint A') : t('Endpoint B');
         }
@@ -258,7 +258,7 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
                           <PencilAltIcon />
                           &nbsp;{t('Edit')}
                         </DropdownItem>
-                        {filters.match !== 'bidirectionnal' &&
+                        {filters.match !== 'bidirectional' &&
                           (filter.def.id.startsWith('src_') || filter.def.id.startsWith('dst_')) && (
                             <DropdownItem
                               id="dropdown-item-either"
@@ -279,7 +279,7 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
                               &nbsp;{t('Either')}
                             </DropdownItem>
                           )}
-                        {(filter.def.category === 'targeteable' || filter.def.id.startsWith('dst_')) && (
+                        {(filter.def.category === 'endpoint' || filter.def.id.startsWith('dst_')) && (
                           <DropdownItem
                             id="dropdown-item-src"
                             data-test="dropdown-item-src"
@@ -287,10 +287,10 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
                             onClick={() => swapValue(filter, filterValue, 'src')}
                           >
                             <ArrowLeftIcon />
-                            &nbsp;{filters.match === 'bidirectionnal' ? t('As endpoint A') : t('As source')}
+                            &nbsp;{filters.match === 'bidirectional' ? t('As endpoint A') : t('As source')}
                           </DropdownItem>
                         )}
-                        {(filter.def.category === 'targeteable' || filter.def.id.startsWith('src_')) && (
+                        {(filter.def.category === 'endpoint' || filter.def.id.startsWith('src_')) && (
                           <DropdownItem
                             id="dropdown-item-dst"
                             data-test="dropdown-item-src"
@@ -298,7 +298,7 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
                             onClick={() => swapValue(filter, filterValue, 'dst')}
                           >
                             <ArrowRightIcon />
-                            &nbsp;{filters.match === 'bidirectionnal' ? t('As endpoint B') : t('As destination')}
+                            &nbsp;{filters.match === 'bidirectional' ? t('As endpoint B') : t('As destination')}
                           </DropdownItem>
                         )}
                         <DropdownItem
@@ -353,9 +353,9 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
   const setMatch = React.useCallback(
     (v: Match) => {
       const existingFilters = filters;
-      // convert all targeteable filters to a single peer
+      // convert all endpoint filters to a single peer
       if (v !== 'any') {
-        existingFilters.list = setTargeteableFilters(filterDefinitions, existingFilters.list, 'src');
+        existingFilters.list = setEndpointFilters(filterDefinitions, existingFilters.list, 'src');
         setDirection('source');
       }
       setFilters({ ...existingFilters, match: v });
@@ -376,7 +376,7 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
               ? t('the logical OR operator is used between each values of the same filter.')
               : match === 'any'
               ? t('The logical OR operator is used between filters.')
-              : match === 'bidirectionnal'
+              : match === 'bidirectional'
               ? t(
                   'The logical AND operator is used between Endpoints and common filters. The traffic is matched in both directions.'
                 )
@@ -390,7 +390,7 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
               </Text>
             )}
             {match !== 'values' && (
-              <MatchDropdown selected={filters.match} setMatch={setMatch} allowBidirectionnal={root && index === 1} />
+              <MatchDropdown selected={filters.match} setMatch={setMatch} allowBidirectional={root && index === 1} />
             )}
           </div>
         </Tooltip>
@@ -461,7 +461,7 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
                 label: t('Swap'),
                 tooltip: t('Swap from and to filters'),
                 onClick: swapAllSrcDst,
-                enabled: hasSrcOrDstFilters(filters.list!) && filters.match !== 'bidirectionnal'
+                enabled: hasSrcOrDstFilters(filters.list!) && filters.match !== 'bidirectional'
               }
             ]}
           />

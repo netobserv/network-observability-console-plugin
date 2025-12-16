@@ -7,13 +7,13 @@ import { Match } from '../../model/flow-query';
 export interface MatchDropdownProps {
   selected: Match;
   setMatch: (l: Match) => void;
-  allowBidirectionnal?: boolean;
+  allowBidirectional?: boolean;
   id?: string;
 }
 
-export const MatchValues = ['any', 'all', 'bidirectionnal'] as Match[];
+export const MatchValues = ['any', 'all', 'bidirectional'] as Match[];
 
-export const MatchDropdown: React.FC<MatchDropdownProps> = ({ allowBidirectionnal, selected, setMatch, id }) => {
+export const MatchDropdown: React.FC<MatchDropdownProps> = ({ allowBidirectional, selected, setMatch, id }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [isOpen, setOpen] = React.useState(false);
 
@@ -23,8 +23,8 @@ export const MatchDropdown: React.FC<MatchDropdownProps> = ({ allowBidirectionna
         return t('OR');
       case 'all':
         return t('AND');
-      case 'bidirectionnal':
-        if (allowBidirectionnal) {
+      case 'bidirectional':
+        if (allowBidirectional) {
           if (toggle) {
             return (
               <div style={{ transform: 'rotate(90deg)' }}>
@@ -36,7 +36,7 @@ export const MatchDropdown: React.FC<MatchDropdownProps> = ({ allowBidirectionna
             return t('Bidirectional');
           }
         } else {
-          // display as AND if bidirectionnal is not allowed here
+          // display as AND if bidirectional is not allowed here
           return t('AND');
         }
       default:
@@ -62,7 +62,7 @@ export const MatchDropdown: React.FC<MatchDropdownProps> = ({ allowBidirectionna
         </MenuToggle>
       )}
     >
-      {MatchValues.filter(v => allowBidirectionnal || v !== 'bidirectionnal').map(v => (
+      {MatchValues.filter(v => allowBidirectional || v !== 'bidirectional').map(v => (
         <DropdownItem
           data-test={v}
           id={v}

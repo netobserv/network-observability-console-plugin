@@ -385,7 +385,7 @@ const generateEdge = (
       filtered,
       highlighted,
       isDark,
-      //edges are directed from src to dst. It will become bidirectionnal if inverted pair is found
+      //edges are directed from src to dst. It will become bidirectional if inverted pair is found
       startTerminalType: EdgeTerminalType.none,
       startTerminalStatus: NodeStatus.default,
       endTerminalType: stat > 0 ? EdgeTerminalType.directional : EdgeTerminalType.none,
@@ -525,7 +525,7 @@ export const generateDataModel = (
         shadowed,
         filtered,
         isDark,
-        //edges are directed from src to dst. It will become bidirectionnal if inverted pair is found
+        //edges are directed from src to dst. It will become bidirectional if inverted pair is found
         startTerminalType: edge.data.sourceId !== sourceId ? EdgeTerminalType.directional : edge.data.startTerminalType,
         tag: getEdgeTag(stat, options, t),
         tagStatus: getTagStatus(stat, options.maxEdgeStat),

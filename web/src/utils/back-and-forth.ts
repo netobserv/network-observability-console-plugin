@@ -3,16 +3,16 @@ import { getFlowMetrics, getFlowRecords } from '../api/routes';
 import { Filter, FilterDefinition, Filters } from '../model/filters';
 import { filtersToString, FlowQuery } from '../model/flow-query';
 import { computeStepInterval, TimeRange } from './datetime';
-import { setTargeteableFilters, swapFilters } from './filters-helper';
+import { setEndpointFilters, swapFilters } from './filters-helper';
 import { mergeStats, substractMetrics, sumMetrics } from './metrics';
 
 export const getFetchFunctions = (filterDefinitions: FilterDefinition[], filters: Filters, matchAny: boolean) => {
   // check back-and-forth
-  if (filters.list.some(f => f.def.category === 'targeteable')) {
-    // set targetable filters as source filters
-    const srcList = setTargeteableFilters(filterDefinitions, filters.list, 'src');
-    // set targetable filters as dest filters
-    const dstList = setTargeteableFilters(filterDefinitions, filters.list, 'dst');
+  if (filters.list.some(f => f.def.category === 'endpoint')) {
+    // set endpoint filters as source filters
+    const srcList = setEndpointFilters(filterDefinitions, filters.list, 'src');
+    // set endpoint filters as dest filters
+    const dstList = setEndpointFilters(filterDefinitions, filters.list, 'dst');
 
     return {
       getRecords: (q: FlowQuery) => {
@@ -22,7 +22,7 @@ export const getFetchFunctions = (filterDefinitions: FilterDefinition[], filters
         return getMetricsBNF(q, range, srcList, dstList, matchAny);
       }
     };
-  } else if (filters.match === 'bidirectionnal') {
+  } else if (filters.match === 'bidirectional') {
     let swapped = swapFilters(filterDefinitions, filters.list);
     if (matchAny) {
       // In match-any mode, remove non-swappable filters as they would result in duplicates

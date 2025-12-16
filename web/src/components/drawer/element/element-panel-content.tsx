@@ -157,7 +157,7 @@ export const ElementPanelContent: React.FC<ElementPanelContentProps> = ({
                   isExpanded={!hidden.includes('source')}
                   id={'source'}
                 >
-                  {filters.match === 'bidirectionnal' ? t('Endpoint A') : t('Source')}
+                  {filters.match === 'bidirectional' ? t('Endpoint A') : t('Source')}
                 </AccordionToggle>
               }
               <AccordionContent
@@ -185,7 +185,7 @@ export const ElementPanelContent: React.FC<ElementPanelContentProps> = ({
                   isExpanded={!hidden.includes('destination')}
                   id={'destination'}
                 >
-                  {filters.match === 'bidirectionnal' ? t('Endpoint B') : t('Destination')}
+                  {filters.match === 'bidirectional' ? t('Endpoint B') : t('Destination')}
                 </AccordionToggle>
               }
               <AccordionContent

@@ -196,7 +196,7 @@ describe('normalize and computeStats', () => {
   });
 });
 
-describe('matchBidirectionnal', () => {
+describe('matchBidirectional', () => {
   beforeEach(() => {
     ContextSingleton.setScopes(ScopeDefSample);
   });

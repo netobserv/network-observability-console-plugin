@@ -68,7 +68,7 @@ describe('Match all, flows', () => {
     const grouped = getDecodedFilter(
       {
         list: [filter('src_name', [{ v: 'test1' }, { v: 'test2' }]), filter('dst_port', [{ v: '443' }])],
-        match: 'bidirectionnal'
+        match: 'bidirectional'
       },
       false
     );
@@ -79,7 +79,7 @@ describe('Match all, flows', () => {
     const grouped = getDecodedFilter(
       {
         list: [filter('src_namespace', [{ v: 'ns' }]), filter('dst_owner_name', [{ v: 'test' }])],
-        match: 'bidirectionnal'
+        match: 'bidirectional'
       },
       false
     );
@@ -95,7 +95,7 @@ describe('Match all, flows', () => {
           filter('src_kind', [{ v: 'Pod' }]),
           filter('protocol', [{ v: '6' }])
         ],
-        match: 'bidirectionnal'
+        match: 'bidirectional'
       },
       false
     );
@@ -111,7 +111,7 @@ describe('Match all, flows', () => {
 
   it('should generate K8S resource, back and forth', () => {
     const grouped = getDecodedFilter(
-      { list: [filter('src_resource', [{ v: 'Pod.ns.test' }])], match: 'bidirectionnal' },
+      { list: [filter('src_resource', [{ v: 'Pod.ns.test' }])], match: 'bidirectional' },
       false
     );
     expect(grouped).toEqual(
@@ -122,7 +122,7 @@ describe('Match all, flows', () => {
 
   it('should generate Node Src/Dst K8S resource, back and forth', () => {
     const grouped = getDecodedFilter(
-      { list: [filter('src_resource', [{ v: 'Node.test' }])], match: 'bidirectionnal' },
+      { list: [filter('src_resource', [{ v: 'Node.test' }])], match: 'bidirectional' },
       false
     );
     expect(grouped).toEqual(
@@ -133,7 +133,7 @@ describe('Match all, flows', () => {
 
   it('should generate Owner Src/Dst K8S resource, back and forth', () => {
     const grouped = getDecodedFilter(
-      { list: [filter('src_resource', [{ v: 'DaemonSet.ns.test' }])], match: 'bidirectionnal' },
+      { list: [filter('src_resource', [{ v: 'DaemonSet.ns.test' }])], match: 'bidirectional' },
       false
     );
     expect(grouped).toEqual(
@@ -146,7 +146,7 @@ describe('Match all, flows', () => {
     const grouped = getDecodedFilter(
       {
         list: [filter('src_resource', [{ v: 'Pod.ns.test' }]), filter('dst_name', [{ v: 'peer' }])],
-        match: 'bidirectionnal'
+        match: 'bidirectional'
       },
       false
     );
@@ -185,7 +185,7 @@ describe('Match any, flows', () => {
     const grouped = getDecodedFilter(
       {
         list: [filter('src_name', [{ v: 'test1' }, { v: 'test2' }]), filter('dst_port', [{ v: '443' }])],
-        match: 'bidirectionnal'
+        match: 'bidirectional'
       },
       true
     );
@@ -201,7 +201,7 @@ describe('Match any, flows', () => {
           filter('src_kind', [{ v: 'Pod' }]),
           filter('protocol', [{ v: '6' }])
         ],
-        match: 'bidirectionnal'
+        match: 'bidirectional'
       },
       true
     );
@@ -217,7 +217,7 @@ describe('Match any, flows', () => {
 
   it('should generate K8S resource, back and forth', () => {
     const grouped = getDecodedFilter(
-      { list: [filter('src_resource', [{ v: 'Pod.ns.test' }])], match: 'bidirectionnal' },
+      { list: [filter('src_resource', [{ v: 'Pod.ns.test' }])], match: 'bidirectional' },
       true
     );
     expect(grouped).toEqual(
@@ -228,7 +228,7 @@ describe('Match any, flows', () => {
 
   it('should generate Node K8S resource, back and forth', () => {
     const grouped = getDecodedFilter(
-      { list: [filter('src_resource', [{ v: 'Node.test' }])], match: 'bidirectionnal' },
+      { list: [filter('src_resource', [{ v: 'Node.test' }])], match: 'bidirectional' },
       true
     );
     expect(grouped).toEqual(
@@ -239,7 +239,7 @@ describe('Match any, flows', () => {
 
   it('should generate Owner K8S resource, back and forth', () => {
     const grouped = getDecodedFilter(
-      { list: [filter('src_resource', [{ v: 'DaemonSet.ns.test' }])], match: 'bidirectionnal' },
+      { list: [filter('src_resource', [{ v: 'DaemonSet.ns.test' }])], match: 'bidirectional' },
       true
     );
     expect(grouped).toEqual(
@@ -252,7 +252,7 @@ describe('Match any, flows', () => {
     const grouped = getDecodedFilter(
       {
         list: [filter('src_resource', [{ v: 'Pod.ns.test' }]), filter('dst_name', [{ v: 'peer' }])],
-        match: 'bidirectionnal'
+        match: 'bidirectional'
       },
       true
     );
@@ -307,7 +307,7 @@ describe('Match all, topology', () => {
     getTopoForFilter(
       {
         list: [filter('src_name', [{ v: 'test1' }, { v: 'test2' }]), filter('dst_port', [{ v: '443' }])],
-        match: 'bidirectionnal'
+        match: 'bidirectional'
       },
       false
     );
