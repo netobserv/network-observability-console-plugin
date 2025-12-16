@@ -1,21 +1,4 @@
-import {
-  ActionGroup,
-  Button,
-  Flex,
-  FlexItem,
-  Form,
-  FormGroup,
-  Menu,
-  MenuContent,
-  MenuItem,
-  MenuList,
-  Panel,
-  PanelMain,
-  PanelMainBody,
-  Popper,
-  SearchInput,
-  ValidatedOptions
-} from '@patternfly/react-core';
+import { Popper, SearchInput, ValidatedOptions } from '@patternfly/react-core';
 import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -34,21 +17,18 @@ import { Indicator, setEndpointFilterDefinition } from '../../../utils/filters-h
 import { useOutsideClickEvent } from '../../../utils/outside-hook';
 import { usePrevious } from '../../../utils/previous-hook';
 import { Direction } from '../filters-toolbar';
-import AutocompleteFilter from './autocomplete-filter';
-import CompareFilter from './compare-filter';
-import { FilterHints } from './filter-hints';
 import './filter-search-input.css';
-import FiltersDropdown from './filters-dropdown';
-import TextFilter from './text-filter';
+import { FilterSearchPanel } from './filter-search-panel';
+import { FilterSearchSuggestions } from './filter-search-suggestions';
 
-interface FormUpdateResult {
+export interface FormUpdateResult {
   def?: FilterDefinition;
   comparator?: FilterCompare;
   value?: string;
   hasError: boolean;
 }
 
-interface Suggestion {
+export interface Suggestion {
   display?: string;
   value: string;
   validate?: boolean;
@@ -434,139 +414,34 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
     return (
       <div id="filter-popper" ref={popperRef} role="dialog">
         {suggestions.length ? (
-          <Menu
-            onKeyDown={e => {
-              if (e.key === 'Escape') {
-                e.preventDefault();
-                // clear suggestions on esc key
-                setSuggestions([]);
-                searchInputRef.current?.focus();
-              }
-            }}
-          >
-            <MenuContent>
-              <MenuList>
-                {suggestions.map((suggestion, index) => (
-                  <MenuItem
-                    id={`suggestion-${index}`}
-                    itemId={suggestion}
-                    key={`suggestion-${index}`}
-                    onKeyDown={e => {
-                      if (index === 0 && e.key === 'ArrowUp') {
-                        e.preventDefault();
-                        searchInputRef.current?.focus();
-                      }
-                    }}
-                    onClick={() => {
-                      const updated = updateForm(searchInputValue);
-                      if (!updated.def) {
-                        if (!suggestion.validate) {
-                          onSearchChange(suggestion.value);
-                        } else {
-                          updateForm(suggestion.value, true);
-                        }
-                      } else if (!updated.comparator) {
-                        // check if it's a valid comparator
-                        if ((Object.values(FilterCompare) as string[]).includes(suggestion.value)) {
-                          onSearchChange(`${updated.def.id}${suggestion.value}`);
-                        } else {
-                          // else consider this as a field since ids can overlap (name / namespace)
-                          onSearchChange(suggestion.value);
-                        }
-                      } else {
-                        updateForm(`${updated.def.id}${updated.comparator}${suggestion.value}`, true);
-                      }
-                    }}
-                  >
-                    <Flex direction={{ default: 'row' }}>
-                      <FlexItem className="filter-text-ellipsis" flex={{ default: 'flex_1' }}>
-                        {suggestion.value}
-                      </FlexItem>
-                      <FlexItem className="filter-text-ellipsis" flex={{ default: 'flex_1' }}>
-                        {suggestion.display}
-                      </FlexItem>
-                    </Flex>
-                  </MenuItem>
-                ))}
-              </MenuList>
-            </MenuContent>
-          </Menu>
+          <FilterSearchSuggestions
+            suggestions={suggestions}
+            setSuggestions={setSuggestions}
+            searchInput={searchInputRef.current}
+            searchInputValue={searchInputValue}
+            updateForm={updateForm}
+            onSearchChange={onSearchChange}
+          />
         ) : (
-          <Panel variant="raised">
-            <PanelMain>
-              <PanelMainBody>
-                <Form>
-                  <FormGroup label={t('Filter')} fieldId="field" key="field">
-                    <FiltersDropdown
-                      filterDefinitions={filterDefinitions}
-                      selectedDirection={direction}
-                      setSelectedDirection={setDirection}
-                      selectedFilter={filter}
-                      setSelectedFilter={setFilter}
-                      match={filters?.match}
-                    />
-                    <FilterHints def={filter} />
-                  </FormGroup>
-                  <FormGroup label={t('Comparator')} fieldId="compare" key="compare">
-                    <CompareFilter value={compare} setValue={setCompare} component={filter.component} />
-                  </FormGroup>
-                  <FormGroup label={t('Value')} fieldId="value" key="value">
-                    {filter.component === 'autocomplete' ? (
-                      <AutocompleteFilter
-                        filterDefinition={filter}
-                        addFilter={addFilter}
-                        setMessage={setMessage}
-                        indicator={indicator}
-                        setIndicator={setIndicator}
-                        currentValue={value}
-                        setCurrentValue={setValue}
-                      />
-                    ) : (
-                      <TextFilter
-                        filterDefinition={filter}
-                        addFilter={addFilter}
-                        setMessage={setMessage}
-                        indicator={indicator}
-                        setIndicator={setIndicator}
-                        allowEmpty={compare !== FilterCompare.moreThanOrEqual}
-                        regexp={filter.component === 'number' ? /\D/g : undefined}
-                        currentValue={value}
-                        setCurrentValue={setValue}
-                      />
-                    )}
-                  </FormGroup>
-                  <ActionGroup className="filters-actions">
-                    <Button id="reset-form-filter" variant="link" type="reset" onClick={reset}>
-                      {t('Reset')}
-                    </Button>
-                    <Button
-                      id="add-form-filter"
-                      variant="primary"
-                      type="submit"
-                      onClick={e => {
-                        e.preventDefault();
-                        if (filter.component === 'autocomplete' && _.isEmpty(prevSuggestions)) {
-                          filter
-                            .autocomplete(value)
-                            .then(opts => {
-                              addFilterFromSuggestions(opts.map(opts => ({ display: opts.name, value: opts.value })));
-                            })
-                            .catch(err => {
-                              const errorMessage = getHTTPErrorDetails(err);
-                              setMessage(errorMessage);
-                            });
-                        } else {
-                          addFilterFromSuggestions();
-                        }
-                      }}
-                    >
-                      {t('Add filter')}
-                    </Button>
-                  </ActionGroup>
-                </Form>
-              </PanelMainBody>
-            </PanelMain>
-          </Panel>
+          <FilterSearchPanel
+            filterDefinitions={filterDefinitions}
+            direction={direction}
+            setDirection={setDirection}
+            filter={filter}
+            setFilter={setFilter}
+            filters={filters}
+            compare={compare}
+            setCompare={setCompare}
+            addFilter={addFilter}
+            addFilterFromSuggestions={addFilterFromSuggestions}
+            setMessage={setMessage}
+            indicator={indicator}
+            setIndicator={setIndicator}
+            value={value}
+            setValue={setValue}
+            reset={reset}
+            prevSuggestions={prevSuggestions}
+          />
         )}
       </div>
     );
