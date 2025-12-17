@@ -156,7 +156,11 @@ export const App: React.FunctionComponent<{ endUser?: boolean }> = ({ endUser })
                 <NavList>
                   {pages.map((page, index) => (
                     <NavItem itemId={index} key={page.id}>
-                      <NavLink id={`${page.id}-nav-item-link`} to={`/console-${page.id}`} activeClassName="pf-m-current">
+                      <NavLink
+                        id={`${page.id}-nav-item-link`}
+                        to={`/console-${page.id}`}
+                        activeClassName="pf-m-current"
+                      >
                         {page.name}
                       </NavLink>
                     </NavItem>
@@ -182,7 +186,7 @@ export const App: React.FunctionComponent<{ endUser?: boolean }> = ({ endUser })
               </Route>
             );
           })}
-          <Redirect to={`/console-${pages[0].id}`}  />
+          <Redirect to={`/console-${pages[0].id}`} />
         </Switch>
       </Page>
     </BrowserRouter>

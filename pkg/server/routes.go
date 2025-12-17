@@ -80,8 +80,8 @@ func setupRoutes(ctx context.Context, cfg *config.Config, authChecker auth.Check
 
 	if cfg.Prometheus.AlertManager.URL != "" {
 		// When AlertManager URL is configured, we don't use the Console proxy; doing our own proxy instead (likely, we're in standalone mode)
-		api.HandleFunc("/prometheus/api/v1/rules", h.PromProxyRules(context.Background()))
-		api.HandleFunc("/alertmanager/api/v2/silences", h.PromProxySilences(context.Background()))
+		api.HandleFunc("/prometheus/api/v1/rules", h.PromProxyRules())
+		api.HandleFunc("/alertmanager/api/v2/silences", h.PromProxySilences())
 	} else if cfg.Loki.UseMocks {
 		// Add route for alerts (otherwise, the route is provided by the Console itself)
 		api.HandleFunc("/prometheus/api/v1/rules", alertingmock.GetRules())

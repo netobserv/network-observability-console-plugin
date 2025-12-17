@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"context"
 	"io"
 	"net/http"
 	"net/url"
@@ -10,13 +9,13 @@ import (
 	"github.com/netobserv/network-observability-console-plugin/pkg/prometheus"
 )
 
-func (h *Handlers) PromProxyRules(ctx context.Context) func(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) PromProxyRules() func(w http.ResponseWriter, r *http.Request) {
 	u, _ := url.JoinPath(h.Cfg.Prometheus.URL, "/api/v1/rules")
 	cfg := &h.Cfg.Prometheus
 	return simpleProxy(u, cfg.Timeout.Duration, cfg.SkipTLS, cfg.CAPath, cfg.ForwardUserToken, cfg.TokenPath)
 }
 
-func (h *Handlers) PromProxySilences(ctx context.Context) func(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) PromProxySilences() func(w http.ResponseWriter, r *http.Request) {
 	u, _ := url.JoinPath(h.Cfg.Prometheus.AlertManager.URL, "/api/v2/silences")
 	cfg := &h.Cfg.Prometheus
 	return simpleProxy(u, cfg.Timeout.Duration, cfg.SkipTLS, cfg.CAPath, cfg.ForwardUserToken, cfg.TokenPath)
@@ -48,6 +47,11 @@ func simpleProxy(toURL string, timeout time.Duration, skipTLS bool, caPath strin
 		w.WriteHeader(resp.StatusCode)
 		defer resp.Body.Close()
 		body, err := io.ReadAll(resp.Body)
-		w.Write(body)
+		if err != nil {
+			hlog.Errorf("Error reading response from proxy on %s: %v", toURL, err)
+		}
+		if _, err := w.Write(body); err != nil {
+			hlog.Errorf("Error proxying response from %s: %v", toURL, err)
+		}
 	}
 }
