@@ -283,7 +283,7 @@ func (c *Config) Validate() error {
 	}
 
 	if c.IsPromEnabled() {
-		log.Infof("Prometheus is enabled:\n - admin: %s\n - dev: %s\n", c.Prometheus.URL, c.Prometheus.DevURL)
+		log.Infof("Prometheus is enabled [admin: %s, dev: %s, alert-manager: %s]", c.Prometheus.URL, c.Prometheus.DevURL, c.Prometheus.AlertManager.URL)
 		// parse config urls
 		_, err := url.Parse(c.Prometheus.URL)
 		if err != nil {
