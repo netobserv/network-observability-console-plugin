@@ -370,6 +370,8 @@
   "Select a custom time range. Flows are selected based on their End Time value.": "Select a custom time range. Flows are selected based on their End Time value.",
   "Collection latency could be up to {{maxChunkAge}} corresponding to the current Loki \"max_chunk_age\" ingester configuration.": "Collection latency could be up to {{maxChunkAge}} corresponding to the current Loki \"max_chunk_age\" ingester configuration.",
   "Unable to get config": "Unable to get config",
+  "This Deployment is managed by a Gateway": "This Deployment is managed by a Gateway",
+  "To view the Gateway traffic, visit the Gateway resource page.": "To view the Gateway traffic, visit the Gateway resource page.",
   "Kind not managed": "Kind not managed",
   "Query is slow": "Query is slow",
   "Time range": "Time range",
@@ -585,7 +587,5 @@
   "The top DNS response code extracted from DNS response headers compared to total over the selected interval": "The top DNS response code extracted from DNS response headers compared to total over the selected interval",
   "rates": "rates",
   "with total": "with total",
-  "Invalid custom panel id": "Invalid custom panel id",
-  "This Deployment is managed by a Gateway": "This Deployment is managed by a Gateway",
-  "To view the Gateway traffic, visit the Gateway resource page.": "To view the Gateway traffic, visit the Gateway resource page."
+  "Invalid custom panel id": "Invalid custom panel id"
 }

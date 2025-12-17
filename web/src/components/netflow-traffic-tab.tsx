@@ -1,4 +1,9 @@
-import { FeatureFlagHandler, K8sResourceCommon, ResourceLink, SetFeatureFlag } from '@openshift-console/dynamic-plugin-sdk';
+import {
+  FeatureFlagHandler,
+  K8sResourceCommon,
+  ResourceLink,
+  SetFeatureFlag
+} from '@openshift-console/dynamic-plugin-sdk';
 import {
   Alert,
   AlertActionLink,
