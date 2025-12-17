@@ -585,5 +585,7 @@
   "The top DNS response code extracted from DNS response headers compared to total over the selected interval": "The top DNS response code extracted from DNS response headers compared to total over the selected interval",
   "rates": "rates",
   "with total": "with total",
-  "Invalid custom panel id": "Invalid custom panel id"
+  "Invalid custom panel id": "Invalid custom panel id",
+  "This Deployment is managed by a Gateway": "This Deployment is managed by a Gateway",
+  "To view the Gateway traffic, visit the Gateway resource page.": "To view the Gateway traffic, visit the Gateway resource page."
 }
