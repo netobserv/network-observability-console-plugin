@@ -145,13 +145,10 @@ const groupRecordingRules = (rules: Rule[]): RecordingRulesStats => {
   });
 
   // Group namespace and node rules
-  const byNamespace: RecordingRulesByResource[] = namespaceRules.length > 0
-    ? [{ name: 'By Namespace', rules: namespaceRules }]
-    : [];
+  const byNamespace: RecordingRulesByResource[] =
+    namespaceRules.length > 0 ? [{ name: 'By Namespace', rules: namespaceRules }] : [];
 
-  const byNode: RecordingRulesByResource[] = nodeRules.length > 0
-    ? [{ name: 'By Node', rules: nodeRules }]
-    : [];
+  const byNode: RecordingRulesByResource[] = nodeRules.length > 0 ? [{ name: 'By Node', rules: nodeRules }] : [];
 
   return { global: globalRules, byNamespace, byNode };
 };
@@ -159,7 +156,13 @@ const groupRecordingRules = (rules: Rule[]): RecordingRulesStats => {
 export const buildStats = (rules: Rule[]): HealthStats => {
   if (!rules || !Array.isArray(rules)) {
     return {
-      global: { name: '', critical: { firing: [], pending: [], silenced: [], inactive: [] }, warning: { firing: [], pending: [], silenced: [], inactive: [] }, other: { firing: [], pending: [], silenced: [], inactive: [] }, score: 10 },
+      global: {
+        name: '',
+        critical: { firing: [], pending: [], silenced: [], inactive: [] },
+        warning: { firing: [], pending: [], silenced: [], inactive: [] },
+        other: { firing: [], pending: [], silenced: [], inactive: [] },
+        score: 10
+      },
       byNamespace: [],
       byNode: [],
       recordingRules: { global: [], byNamespace: [], byNode: [] }

@@ -1,11 +1,5 @@
 import { ResourceLink } from '@openshift-console/dynamic-plugin-sdk';
-import {
-  Drawer,
-  DrawerContent,
-  DrawerContentBody,
-  DrawerHead,
-  DrawerPanelContent
-} from '@patternfly/react-core';
+import { Drawer, DrawerContent, DrawerContentBody, DrawerHead, DrawerPanelContent } from '@patternfly/react-core';
 import * as React from 'react';
 import { HealthGallery } from './health-gallery';
 import { ByResource } from './health-helper';

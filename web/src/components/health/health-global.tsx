@@ -1,11 +1,4 @@
-import {
-  Bullseye,
-  EmptyState,
-  EmptyStateIcon,
-  Grid,
-  GridItem,
-  Title
-} from '@patternfly/react-core';
+import { Bullseye, EmptyState, EmptyStateIcon, Grid, GridItem, Title } from '@patternfly/react-core';
 import { CheckCircleIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';

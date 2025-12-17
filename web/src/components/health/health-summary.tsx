@@ -14,7 +14,10 @@ export const HealthSummary: React.FC<HealthSummaryProps> = ({ rules, isDark }) =
 
   if (rules.length === 0) {
     return (
-      <Alert title={t('No rules found, health cannot be determined')} className={`health-summary-alert ${isDark ? 'dark' : ''}`}>
+      <Alert
+        title={t('No rules found, health cannot be determined')}
+        className={`health-summary-alert ${isDark ? 'dark' : ''}`}
+      >
         <>
           {t(
             'Check health rule definitions in FlowCollector "spec.processor.metrics.healthRules" and "spec.processor.metrics.disableHealthRules".'

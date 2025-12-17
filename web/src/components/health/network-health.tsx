@@ -1,5 +1,16 @@
 import { AlertStates, FeatureFlagHandler, Rule, SetFeatureFlag } from '@openshift-console/dynamic-plugin-sdk';
-import { Button, Flex, FlexItem, PageSection, Tab, Tabs, Text, TextContent, TextVariants, Title } from '@patternfly/react-core';
+import {
+  Button,
+  Flex,
+  FlexItem,
+  PageSection,
+  Tab,
+  Tabs,
+  Text,
+  TextContent,
+  TextVariants,
+  Title
+} from '@patternfly/react-core';
 import { SyncAltIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
 import { murmur3 } from 'murmurhash-js';
@@ -17,8 +28,8 @@ import HealthError from './health-error';
 import { HealthGlobal } from './health-global';
 import { buildStats, isSilenced } from './health-helper';
 import { HealthSummary } from './health-summary';
-import { HealthTabTitle } from './tab-title';
 import { RecordingRulesList } from './recording-rules-list';
+import { HealthTabTitle } from './tab-title';
 
 import './health.css';
 
@@ -167,29 +178,21 @@ export const NetworkHealth: React.FC<{}> = ({}) => {
                 title={<HealthTabTitle title={t('Nodes')} stats={stats.byNode} />}
                 aria-label="Tab per node"
               >
-                <HealthDrawerContainer
-                  stats={stats.byNode}
-                  kind={'Node'}
-                  isDark={isDarkTheme}
-                />
+                <HealthDrawerContainer stats={stats.byNode} kind={'Node'} isDark={isDarkTheme} />
               </Tab>
               <Tab
                 eventKey={'per-namespace'}
                 title={<HealthTabTitle title={t('Namespaces')} stats={stats.byNamespace} />}
                 aria-label="Tab per namespace"
               >
-                <HealthDrawerContainer
-                  stats={stats.byNamespace}
-                  kind={'Namespace'}
-                  isDark={isDarkTheme}
-                />
+                <HealthDrawerContainer stats={stats.byNamespace} kind={'Namespace'} isDark={isDarkTheme} />
               </Tab>
             </Tabs>
             {(stats.recordingRules.global.length > 0 ||
               stats.recordingRules.byNamespace.length > 0 ||
               stats.recordingRules.byNode.length > 0) && (
               <>
-                <TextContent style={{ }}>
+                <TextContent style={{}}>
                   <Text component={TextVariants.h2}>{t('Recording Rules')}</Text>
                 </TextContent>
                 <RecordingRulesList stats={stats.recordingRules} isDark={isDarkTheme} />

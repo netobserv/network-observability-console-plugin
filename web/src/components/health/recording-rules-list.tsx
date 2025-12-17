@@ -13,7 +13,8 @@ export const RecordingRulesList: React.FC<RecordingRulesListProps> = ({ stats, i
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [activeTabKey, setActiveTabKey] = React.useState<string>('global');
 
-  const totalRules = stats.global.length +
+  const totalRules =
+    stats.global.length +
     stats.byNamespace.reduce((sum, ns) => sum + ns.rules.length, 0) +
     stats.byNode.reduce((sum, node) => sum + node.rules.length, 0);
 
@@ -33,27 +34,15 @@ export const RecordingRulesList: React.FC<RecordingRulesListProps> = ({ stats, i
       className={isDark ? 'dark' : ''}
       style={{ marginTop: '1rem' }}
     >
-      <Tab
-        eventKey={'global'}
-        title={t('Global')}
-        aria-label="Tab recording global"
-      >
+      <Tab eventKey={'global'} title={t('Global')} aria-label="Tab recording global">
         <RecordingRulesGrid rules={stats.global} />
       </Tab>
-        <Tab
-          eventKey={'per-node'}
-          title={t('Nodes')}
-          aria-label="Tab recording per node"
-        >
-          <RecordingRulesGrid rules={stats.byNode.flatMap(g => g.rules)} />
-        </Tab>
-        <Tab
-          eventKey={'per-namespace'}
-          title={t('Namespaces')}
-          aria-label="Tab recording per namespace"
-        >
-          <RecordingRulesGrid rules={stats.byNamespace.flatMap(g => g.rules)} />
-        </Tab>
+      <Tab eventKey={'per-node'} title={t('Nodes')} aria-label="Tab recording per node">
+        <RecordingRulesGrid rules={stats.byNode.flatMap(g => g.rules)} />
+      </Tab>
+      <Tab eventKey={'per-namespace'} title={t('Namespaces')} aria-label="Tab recording per namespace">
+        <RecordingRulesGrid rules={stats.byNamespace.flatMap(g => g.rules)} />
+      </Tab>
     </Tabs>
   );
 };
