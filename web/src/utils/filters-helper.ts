@@ -1,4 +1,5 @@
 import { TFunction } from 'i18next';
+import { Config } from '../model/config';
 import { Filter, FilterDefinition, FilterId } from '../model/filters';
 import { findFilter } from './filter-definitions';
 
@@ -57,4 +58,22 @@ export const swapFilters = (filterDefinitions: FilterDefinition[], filters: Filt
     }
     return f;
   });
+};
+
+export const isLokiLabel = (filter: FilterDefinition, config: Config): boolean => {
+  const allowLoki = config.dataSources.some(ds => ds === 'loki');
+  if (!allowLoki) {
+    return false;
+  }
+
+  // Encode a dummy query to check related labels
+  const q = filter.encoder([{ v: 'any' }], false, false, false);
+  const parts = q.split('&');
+  for (let i = 0; i < parts.length; i++) {
+    const kv = parts[i].split('=');
+    if (kv.length === 0 || config.lokiLabels.includes(kv[0])) {
+      return true;
+    }
+  }
+  return false;
 };

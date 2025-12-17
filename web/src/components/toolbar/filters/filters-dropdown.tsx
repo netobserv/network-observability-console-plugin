@@ -10,18 +10,21 @@ import {
 } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
+import { Config } from '../../../model/config';
 import { FilterDefinition } from '../../../model/filters';
-import { buildGroups, getFilterFullName } from '../../../utils/filters-helper';
+import { buildGroups, getFilterFullName, isLokiLabel } from '../../../utils/filters-helper';
 import { useOutsideClickEvent } from '../../../utils/outside-hook';
 import './filters-dropdown.css';
 
 export interface FiltersDropdownProps {
+  config: Config;
   filterDefinitions: FilterDefinition[];
   selectedFilter: FilterDefinition;
   setSelectedFilter: (f: FilterDefinition) => void;
 }
 
 export const FiltersDropdown: React.FC<FiltersDropdownProps> = ({
+  config,
   filterDefinitions,
   selectedFilter,
   setSelectedFilter
@@ -58,7 +61,7 @@ export const FiltersDropdown: React.FC<FiltersDropdownProps> = ({
                   }}
                   key={index}
                 >
-                  {f.name}
+                  {isLokiLabel(f, config) ? <strong>{f.name}</strong> : f.name}
                 </DropdownItem>
               ))}
             </AccordionContent>
