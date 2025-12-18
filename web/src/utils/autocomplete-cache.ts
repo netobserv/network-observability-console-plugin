@@ -6,7 +6,7 @@ class AutoCompleteCache {
   // Kinds are hard-coded for now.
   // The some other controller kinds might not be in the list (e.g. DeploymentConfig),
   // but it should still be possible to type manually
-  private kinds = ['Pod', 'Service', 'Node', 'Deployment', 'StatefulSet', 'DaemonSet', 'Job', 'CronJob'];
+  private kinds = ['Pod', 'Service', 'Node', 'Gateway', 'Deployment', 'StatefulSet', 'DaemonSet', 'Job', 'CronJob'];
   private names: Map<string, string[]> = new Map();
 
   getClusters() {

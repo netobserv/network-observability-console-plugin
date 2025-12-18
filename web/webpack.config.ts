@@ -396,6 +396,23 @@ module.exports = {
           type: "console.tab/horizontalNav",
           properties: {
             model: {
+              version: "v1beta1",
+              group: "gateway.networking.k8s.io",
+              kind: "Gateway"
+            },
+            component: {
+              "$codeRef": "netflowTab.default"
+            },
+            "page": {
+              name: "%plugin__netobserv-plugin~Network Traffic%",
+              "href": "netflow"
+            }
+          }
+        },
+        {
+          type: "console.tab/horizontalNav",
+          properties: {
+            model: {
               version: "v1",
               group: "k8s.ovn.org",
               kind: "ClusterUserDefinedNetwork"

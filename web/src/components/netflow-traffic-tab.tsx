@@ -1,5 +1,12 @@
-import { FeatureFlagHandler, K8sResourceCommon, SetFeatureFlag } from '@openshift-console/dynamic-plugin-sdk';
 import {
+  FeatureFlagHandler,
+  K8sResourceCommon,
+  ResourceLink,
+  SetFeatureFlag
+} from '@openshift-console/dynamic-plugin-sdk';
+import {
+  Alert,
+  AlertActionLink,
   Bullseye,
   EmptyState,
   EmptyStateBody,
@@ -60,6 +67,7 @@ export const NetflowTrafficTab: React.FC<NetflowTrafficTabProps> = ({ match, obj
   const [config, setConfig] = React.useState<Config>(defaultConfig);
   const [error, setError] = React.useState<string | undefined>();
   const [forcedFilters, setForcedFilters] = React.useState<Filters>();
+  const [gatewayInfo, setGatewayInfo] = React.useState<{ name: string; namespace: string } | undefined>();
   const previous = usePrevious({ obj });
 
   React.useEffect(() => {
@@ -103,13 +111,28 @@ export const NetflowTrafficTab: React.FC<NetflowTrafficTabProps> = ({ match, obj
     }
 
     initState.current.push('forcedFiltersLoaded');
+
+    // Reset gateway info by default
+    setGatewayInfo(undefined);
+
     switch (obj?.kind) {
       case 'Pod':
       case 'Deployment':
       case 'StatefulSet':
       case 'DaemonSet':
       case 'Job':
-      case 'CronJob':
+      case 'CronJob': {
+        // Check for Gateway label on Deployments
+        if (obj.kind === 'Deployment') {
+          const gatewayLabel = obj.metadata?.labels?.['gateway.networking.k8s.io/gateway-name'];
+          if (gatewayLabel) {
+            setGatewayInfo({
+              name: gatewayLabel,
+              namespace: obj.metadata!.namespace!
+            });
+          }
+        }
+
         setForcedFilters({
           list: [
             {
@@ -121,6 +144,7 @@ export const NetflowTrafficTab: React.FC<NetflowTrafficTabProps> = ({ match, obj
           match: 'bidirectional'
         });
         break;
+      }
       case 'Service':
         // NOTE: Services are always on the destination side
         setForcedFilters({
@@ -227,6 +251,30 @@ export const NetflowTrafficTab: React.FC<NetflowTrafficTabProps> = ({ match, obj
   } else if (forcedFilters) {
     return (
       <div className="netobserv-tab-container" style={{ height: containerHeight - 190 }}>
+        {gatewayInfo && (
+          <Alert
+            variant="info"
+            isInline
+            title={t('This Deployment is managed by a Gateway')}
+            style={{ margin: '0 1rem 1rem 1rem' }}
+            actionLinks={
+              <AlertActionLink>
+                <ResourceLink
+                  inline={true}
+                  groupVersionKind={{
+                    group: 'gateway.networking.k8s.io',
+                    version: 'v1',
+                    kind: 'Gateway'
+                  }}
+                  name={gatewayInfo.name}
+                  namespace={gatewayInfo.namespace}
+                />
+              </AlertActionLink>
+            }
+          >
+            {t('To view the Gateway traffic, visit the Gateway resource page.')}
+          </Alert>
+        )}
         <NetflowTrafficParent
           forcedNamespace={params?.ns || match?.params?.ns}
           forcedFilters={forcedFilters}
