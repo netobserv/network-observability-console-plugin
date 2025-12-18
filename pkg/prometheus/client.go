@@ -36,6 +36,14 @@ func NewDevClient(cfg *config.Prometheus, requestHeader http.Header, namespace s
 }
 
 func newClient(timeout time.Duration, skipTLS bool, caPath string, forwardUserToken bool, tokenPath string, url string, requestHeader http.Header) (api.Client, error) {
+	roundTripper, err := CreateRoundTripper(timeout, skipTLS, caPath, forwardUserToken, tokenPath, requestHeader)
+	if err != nil {
+		return nil, err
+	}
+	return api.NewClient(api.Config{Address: url, RoundTripper: roundTripper})
+}
+
+func CreateRoundTripper(timeout time.Duration, skipTLS bool, caPath string, forwardUserToken bool, tokenPath string, requestHeader http.Header) (http.RoundTripper, error) {
 	maybeTLS := httpclient.NewTransport(timeout, skipTLS, caPath, "", "")
 
 	var roundTripper http.RoundTripper
@@ -57,10 +65,7 @@ func newClient(timeout time.Duration, skipTLS bool, caPath string, forwardUserTo
 		roundTripper = maybeTLS
 	}
 
-	return api.NewClient(api.Config{
-		Address:      url,
-		RoundTripper: roundTripper,
-	})
+	return roundTripper, nil
 }
 
 func executeQueryRange(ctx context.Context, cl api.Client, q *Query) (pmod.Value, int, error) {
