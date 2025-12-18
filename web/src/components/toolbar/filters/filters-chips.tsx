@@ -390,7 +390,12 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
               </Text>
             )}
             {match !== 'values' && (
-              <MatchDropdown selected={filters.match} setMatch={setMatch} allowBidirectional={root && index === 1} />
+              <MatchDropdown
+                id={`match-${index}`}
+                selected={filters.match}
+                setMatch={setMatch}
+                allowBidirectional={root && index === 1}
+              />
             )}
           </div>
         </Tooltip>

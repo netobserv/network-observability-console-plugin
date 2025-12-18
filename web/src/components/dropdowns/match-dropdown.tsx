@@ -54,6 +54,7 @@ export const MatchDropdown: React.FC<MatchDropdownProps> = ({ allowBidirectional
           ref={toggleRef}
           data-test={`${id}-dropdown`}
           id={`${id}-dropdown`}
+          className="match-dropdown"
           isExpanded={isOpen}
           onClick={() => setOpen(!isOpen)}
           onBlur={() => setTimeout(() => setOpen(false), 500)}
