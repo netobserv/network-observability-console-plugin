@@ -1,6 +1,69 @@
 .toolbar-group {
   display: flex !important;
   flex-direction: row !important;
-  align-items: center !important;
+  align-items: flex-end !important;
   gap: 1em !important;
+}
+
+.custom-chip.pf-v5-c-menu-toggle {
+  padding: 0 !important;
+}
+
+.custom-chip>.pf-v5-c-menu-toggle__text {
+  padding: 0.25em 1em 0.25em 1em;
+}
+
+.custom-chip>.pf-v5-c-menu-toggle__controls {
+  padding: 0.25em;
+}
+
+.match-container {
+  align-self: center;
+}
+
+.match-text {
+  text-align: center;
+}
+
+.match-dropdown-container {
+  align-items: center;
+  align-self: center;
+  align-content: center;
+  padding: 0;
+  margin: 0;
+}
+
+.match-dropdown-container>button::before,
+.match-dropdown-container>button::after {
+  display: none;
+}
+
+.match-dropdown-container>button>.pf-v5-c-menu-toggle__controls {
+  padding-left: 0.25em;
+}
+
+.flex-block {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  align-content: center;
+  align-self: center;
+  justify-content: center;
+}
+
+.flex-block.first {
+  padding-left: 1.5em;
+}
+
+.flex-block.no-wrap {
+  flex-wrap: nowrap;
+}
+
+.toolbar-item-center {
+  align-items: center;
+  align-content: center;
+  align-self: center;
+  justify-items: center;
+  justify-content: center;
+  justify-self: center;
 }

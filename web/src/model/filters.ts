@@ -1,12 +1,38 @@
 import _ from 'lodash';
+import { TFunction } from 'react-i18next';
 import { isEqual } from '../utils/base-compare';
 import { undefinedValue } from '../utils/filter-definitions';
+import { Match } from './flow-query';
 
-export type FiltersEncoder = (values: FilterValue[], matchAny: boolean, not: boolean, moreThan: boolean) => string;
+export type FiltersEncoder = (values: FilterValue[], compare: FilterCompare, matchAny: boolean) => string;
 
 export type FilterComponent = 'autocomplete' | 'text' | 'number';
 
-export type FilterCategory = 'source' | 'destination';
+export type FilterCategory = 'source' | 'destination' | 'endpoint';
+
+export enum FilterCompare {
+  match = '~',
+  notMatch = '!~',
+  equal = '=',
+  notEqual = '!=',
+  moreThanOrEqual = '>='
+}
+
+export const getCompareText = (v: FilterCompare, t: TFunction) => {
+  switch (v) {
+    case FilterCompare.match:
+      return t('Contains');
+    case FilterCompare.notMatch:
+      return t('Not contains');
+    case FilterCompare.notEqual:
+      return t('Not equals');
+    case FilterCompare.moreThanOrEqual:
+      return t('More than');
+    case FilterCompare.equal:
+    default:
+      return t('Equals');
+  }
+};
 
 export type TargetedFilterId =
   | 'zone'
@@ -24,6 +50,7 @@ export type TargetedFilterId =
 
 export type FilterId =
   | 'cluster_name'
+  | TargetedFilterId
   | `src_${TargetedFilterId}`
   | `dst_${TargetedFilterId}`
   | 'protocol'
@@ -88,14 +115,13 @@ export interface FilterValue {
 
 export interface Filter {
   def: FilterDefinition;
-  not?: boolean;
-  moreThan?: boolean;
+  compare: FilterCompare;
   values: FilterValue[];
 }
 
 export interface Filters {
   list: Filter[];
-  backAndForth: boolean;
+  match: Match;
 }
 
 export interface FilterOption {
@@ -127,13 +153,16 @@ export const getEnabledFilters = (filters: Filters): Filters => {
         return f;
       })
       .filter(f => !_.isEmpty(f.values)),
-    backAndForth: filters.backAndForth
+    match: filters.match
   };
 };
 
 export type DisabledFilters = Record<string, string>;
 
-export const filterKey = (filter: Filter) => filter.def.id + (filter.not ? '!' : '') + (filter.moreThan ? '>' : '');
+export const filterKey = (filter: Filter) =>
+  filter.def.id +
+  ([FilterCompare.notEqual, FilterCompare.notMatch].includes(filter.compare) ? '!' : '') +
+  (filter.compare === FilterCompare.moreThanOrEqual ? '>' : '');
 
 export const fromFilterKey = (key: string) => {
   if (key.endsWith('!')) {
@@ -181,18 +210,14 @@ export const removeFromFilters = (activeFilters: Filter[], search: FilterKey): F
 };
 
 export const filterKeyEqual = (f1: FilterKey, f2: FilterKey): boolean => {
-  return (
-    f1.def.id === f2.def.id &&
-    (f1.not === true) === (f2.not === true) &&
-    (f1.moreThan === true) === (f2.moreThan === true)
-  );
+  return f1.def.id === f2.def.id && f1.compare === f2.compare;
 };
 
 type ComparableFilter = { key: string; values: string[] };
 
 const comparableFilter = (f: Filter): ComparableFilter => {
   return {
-    key: f.def.id + (f.not ? '!' : ''),
+    key: f.def.id + ([FilterCompare.notEqual, FilterCompare.notMatch].includes(f.compare) ? '!' : ''),
     values: f.values.map(v => v.v).sort()
   };
 };

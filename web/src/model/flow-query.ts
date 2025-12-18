@@ -3,7 +3,7 @@ import { Filter } from './filters';
 
 export type RecordType = 'allConnections' | 'newConnection' | 'heartbeat' | 'endConnection' | 'flowLog';
 export type DataSource = 'auto' | 'loki' | 'prom';
-export type Match = 'all' | 'any';
+export type Match = 'any' | 'all' | 'bidirectional';
 export type PacketLoss = 'dropped' | 'hasDrops' | 'sent' | 'all';
 export type MetricFunction = 'count' | 'sum' | 'avg' | 'min' | 'max' | 'p90' | 'p99' | 'rate';
 export type StatFunction = MetricFunction | 'last';
@@ -43,7 +43,7 @@ export interface FlowQuery {
 export const filtersToString = (filters: Filter[], matchAny: boolean): string => {
   const matches: string[] = [];
   filters.forEach(f => {
-    const str = f.def.encoder(f.values, matchAny, f.not || false, f.moreThan || false);
+    const str = f.def.encoder(f.values, f.compare, matchAny);
     matches.push(str);
   });
   return encodeURIComponent(matches.join(matchAny ? '|' : '&'));

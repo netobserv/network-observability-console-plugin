@@ -16,7 +16,7 @@ import {
 import { ColumnsIcon, EllipsisVIcon, ExportIcon } from '@patternfly/react-icons';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { FlowScope, MetricType, StatFunction } from 'src/model/flow-query';
+import { FlowScope, MetricType, StatFunction } from '../../model/flow-query';
 import { ScopeConfigDef } from '../../model/scope';
 import { TopologyOptions } from '../../model/topology';
 import { exportToPng } from '../../utils/export';

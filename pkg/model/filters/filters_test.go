@@ -10,16 +10,16 @@ import (
 
 func TestParseFilters(t *testing.T) {
 	// 2 groups
-	groups, err := Parse(url.QueryEscape("foo=a,b&bar=c|baz=d"))
+	groups, err := Parse(url.QueryEscape("foo~a,b&bar=c|baz=d"))
 	require.NoError(t, err)
 
 	assert.Len(t, groups, 2)
 	assert.Equal(t, SingleQuery{
-		NewMatch("foo", "a,b"),
-		NewMatch("bar", "c"),
+		NewRegexMatch("foo", "a,b"),
+		NewEqualMatch("bar", "c"),
 	}, groups[0])
 	assert.Equal(t, SingleQuery{
-		NewMatch("baz", "d"),
+		NewEqualMatch("baz", "d"),
 	}, groups[1])
 
 	// Resource path + port, match all
@@ -28,10 +28,10 @@ func TestParseFilters(t *testing.T) {
 
 	assert.Len(t, groups, 1)
 	assert.Equal(t, SingleQuery{
-		NewMatch("SrcK8S_Type", `"Pod"`),
-		NewMatch("SrcK8S_Namespace", `"default"`),
-		NewMatch("SrcK8S_Name", `"test"`),
-		NewMatch("SrcPort", "8080"),
+		NewEqualMatch("SrcK8S_Type", `"Pod"`),
+		NewEqualMatch("SrcK8S_Namespace", `"default"`),
+		NewEqualMatch("SrcK8S_Name", `"test"`),
+		NewEqualMatch("SrcPort", "8080"),
 	}, groups[0])
 
 	// Resource path + port, match any
@@ -40,13 +40,13 @@ func TestParseFilters(t *testing.T) {
 
 	assert.Len(t, groups, 2)
 	assert.Equal(t, SingleQuery{
-		NewMatch("SrcK8S_Type", `"Pod"`),
-		NewMatch("SrcK8S_Namespace", `"default"`),
-		NewMatch("SrcK8S_Name", `"test"`),
+		NewEqualMatch("SrcK8S_Type", `"Pod"`),
+		NewEqualMatch("SrcK8S_Namespace", `"default"`),
+		NewEqualMatch("SrcK8S_Name", `"test"`),
 	}, groups[0])
 
 	assert.Equal(t, SingleQuery{
-		NewMatch("SrcPort", "8080"),
+		NewEqualMatch("SrcPort", "8080"),
 	}, groups[1])
 
 	// Resource path + name, match all
@@ -55,10 +55,10 @@ func TestParseFilters(t *testing.T) {
 
 	assert.Len(t, groups, 1)
 	assert.Equal(t, SingleQuery{
-		NewMatch("SrcK8S_Type", `"Pod"`),
-		NewMatch("SrcK8S_Namespace", `"default"`),
-		NewMatch("SrcK8S_Name", `"test"`),
-		NewMatch("SrcK8S_Name", `"nomatch"`),
+		NewEqualMatch("SrcK8S_Type", `"Pod"`),
+		NewEqualMatch("SrcK8S_Namespace", `"default"`),
+		NewEqualMatch("SrcK8S_Name", `"test"`),
+		NewEqualMatch("SrcK8S_Name", `"nomatch"`),
 	}, groups[0])
 }
 
@@ -68,45 +68,45 @@ func TestParseCommon(t *testing.T) {
 
 	assert.Len(t, groups, 2)
 	assert.Equal(t, SingleQuery{
-		NewMatch("srcns", "a"),
+		NewEqualMatch("srcns", "a"),
 	}, groups[0])
 	assert.Equal(t, SingleQuery{
-		NewNotMatch("srcns", "a"),
-		NewMatch("dstns", "a"),
+		NewNotEqualMatch("srcns", "a"),
+		NewEqualMatch("dstns", "a"),
 	}, groups[1])
 }
 
 func TestDistribute(t *testing.T) {
 	mq := MultiQueries{
-		SingleQuery{NewMatch("key1", "a"), NewMatch("key2", "b")},
-		SingleQuery{NewMatch("key1", "AA"), NewMatch("key3", "CC")},
-		SingleQuery{NewMatch("key-ignore", "ZZ")},
+		SingleQuery{NewEqualMatch("key1", "a"), NewEqualMatch("key2", "b")},
+		SingleQuery{NewEqualMatch("key1", "AA"), NewEqualMatch("key3", "CC")},
+		SingleQuery{NewEqualMatch("key-ignore", "ZZ")},
 	}
-	toDistribute := []SingleQuery{{NewMatch("key10", "XX")}, {NewMatch("key11", "YY")}}
+	toDistribute := []SingleQuery{{NewEqualMatch("key10", "XX")}, {NewEqualMatch("key11", "YY")}}
 	res := mq.Distribute(toDistribute, func(q SingleQuery) bool { return q[0].Key == "key-ignore" })
 
 	assert.Len(t, res, 5)
 	assert.Equal(t, SingleQuery{
-		NewMatch("key10", "XX"),
-		NewMatch("key1", "a"),
-		NewMatch("key2", "b"),
+		NewEqualMatch("key10", "XX"),
+		NewEqualMatch("key1", "a"),
+		NewEqualMatch("key2", "b"),
 	}, res[0])
 	assert.Equal(t, SingleQuery{
-		NewMatch("key11", "YY"),
-		NewMatch("key1", "a"),
-		NewMatch("key2", "b"),
+		NewEqualMatch("key11", "YY"),
+		NewEqualMatch("key1", "a"),
+		NewEqualMatch("key2", "b"),
 	}, res[1])
 	assert.Equal(t, SingleQuery{
-		NewMatch("key10", "XX"),
-		NewMatch("key1", "AA"),
-		NewMatch("key3", "CC"),
+		NewEqualMatch("key10", "XX"),
+		NewEqualMatch("key1", "AA"),
+		NewEqualMatch("key3", "CC"),
 	}, res[2])
 	assert.Equal(t, SingleQuery{
-		NewMatch("key11", "YY"),
-		NewMatch("key1", "AA"),
-		NewMatch("key3", "CC"),
+		NewEqualMatch("key11", "YY"),
+		NewEqualMatch("key1", "AA"),
+		NewEqualMatch("key3", "CC"),
 	}, res[3])
 	assert.Equal(t, SingleQuery{
-		NewMatch("key-ignore", "ZZ"),
+		NewEqualMatch("key-ignore", "ZZ"),
 	}, res[4])
 }

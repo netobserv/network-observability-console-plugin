@@ -15,14 +15,14 @@ import { FilterIcon, TimesIcon } from '@patternfly/react-icons';
 import { BaseEdge, BaseNode } from '@patternfly/react-topology';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Filter, FilterDefinition } from '../../../model/filters';
+import { Filter, FilterDefinition, Filters } from '../../../model/filters';
 import { GraphElementPeer, isElementFiltered, NodeData, toggleElementFilter } from '../../../model/topology';
 import { createPeer } from '../../../utils/metrics';
 import { ElementFields } from './element-fields';
 
 export interface ElementPanelContentProps {
   element: GraphElementPeer;
-  filters: Filter[];
+  filters: Filters;
   setFilters: (filters: Filter[]) => void;
   filterDefinitions: FilterDefinition[];
 }
@@ -53,7 +53,7 @@ export const ElementPanelContent: React.FC<ElementPanelContentProps> = ({
         return <></>;
       }
       const fields = createPeer({ cluster: d.peer.cluster });
-      const isFiltered = isElementFiltered(fields, filters, filterDefinitions);
+      const isFiltered = isElementFiltered(fields, filters.list, filterDefinitions);
       return (
         <TextContent id="clusterName" className="record-field-container">
           <Text component={TextVariants.h4}>{t('Cluster name')}</Text>
@@ -65,7 +65,7 @@ export const ElementPanelContent: React.FC<ElementPanelContentProps> = ({
                 variant="plain"
                 className="overflow-button"
                 icon={isFiltered ? <TimesIcon /> : <FilterIcon />}
-                onClick={() => toggleElementFilter(fields, isFiltered, filters, setFilters, filterDefinitions)}
+                onClick={() => toggleElementFilter(fields, isFiltered, filters.list, setFilters, filterDefinitions)}
               />
             </FlexItem>
           </Flex>
@@ -81,7 +81,7 @@ export const ElementPanelContent: React.FC<ElementPanelContentProps> = ({
         return <></>;
       }
       const fields = createPeer({ udn: d.peer.udn });
-      const isFiltered = isElementFiltered(fields, filters, filterDefinitions);
+      const isFiltered = isElementFiltered(fields, filters.list, filterDefinitions);
       return (
         <TextContent id="udn" className="record-field-container">
           <Text component={TextVariants.h4}>{t('UDN')}</Text>
@@ -93,7 +93,7 @@ export const ElementPanelContent: React.FC<ElementPanelContentProps> = ({
                 variant="plain"
                 className="overflow-button"
                 icon={isFiltered ? <TimesIcon /> : <FilterIcon />}
-                onClick={() => toggleElementFilter(fields, isFiltered, filters, setFilters, filterDefinitions)}
+                onClick={() => toggleElementFilter(fields, isFiltered, filters.list, setFilters, filterDefinitions)}
               />
             </FlexItem>
           </Flex>
@@ -131,7 +131,7 @@ export const ElementPanelContent: React.FC<ElementPanelContentProps> = ({
           id="node-info"
           data={data}
           forceFirstAsText={true}
-          activeFilters={filters}
+          filters={filters}
           setFilters={setFilters}
           filterDefinitions={filterDefinitions}
         />
@@ -157,7 +157,7 @@ export const ElementPanelContent: React.FC<ElementPanelContentProps> = ({
                   isExpanded={!hidden.includes('source')}
                   id={'source'}
                 >
-                  {t('Source')}
+                  {filters.match === 'bidirectional' ? t('Endpoint A') : t('Source')}
                 </AccordionToggle>
               }
               <AccordionContent
@@ -168,7 +168,7 @@ export const ElementPanelContent: React.FC<ElementPanelContentProps> = ({
                 <ElementFields
                   id="source-info"
                   data={aData}
-                  activeFilters={filters}
+                  filters={filters}
                   setFilters={setFilters}
                   filterDefinitions={filterDefinitions}
                 />
@@ -185,7 +185,7 @@ export const ElementPanelContent: React.FC<ElementPanelContentProps> = ({
                   isExpanded={!hidden.includes('destination')}
                   id={'destination'}
                 >
-                  {t('Destination')}
+                  {filters.match === 'bidirectional' ? t('Endpoint B') : t('Destination')}
                 </AccordionToggle>
               }
               <AccordionContent
@@ -196,7 +196,7 @@ export const ElementPanelContent: React.FC<ElementPanelContentProps> = ({
                 <ElementFields
                   id="destination-info"
                   data={bData}
-                  activeFilters={filters}
+                  filters={filters}
                   setFilters={setFilters}
                   filterDefinitions={filterDefinitions}
                 />

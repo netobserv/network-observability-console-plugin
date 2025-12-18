@@ -114,26 +114,28 @@ func (q *FlowQueryBuilder) addFilter(filter filters.Match) error {
 	} else if q.config.IsIP(filter.Key) {
 		q.addIPFilters(filter.Key, values, filter.Not)
 	} else {
-		q.addLineFilters(filter.Key, values, filter.Not, filter.MoreThanOrEqual)
+		q.addLineFilters(filter, values)
 	}
 
 	return nil
 }
 
-func (q *FlowQueryBuilder) addLineFilters(key string, values []string, not bool, moreThan bool) {
+func (q *FlowQueryBuilder) addLineFilters(filter filters.Match, values []string) {
 	if len(values) == 0 {
 		return
 	}
 
-	if q.config.IsArray(key) {
-		q.lineFilters = append(q.lineFilters, filters.ArrayLineFilter(key, values, not))
+	if q.config.IsArray(filter.Key) {
+		q.lineFilters = append(q.lineFilters, filters.ArrayLineFilter(filter.Key, values, filter.Not))
 	} else {
 		var lf filters.LineFilter
 		var hasEmptyMatch bool
-		if q.config.IsNumeric(key) {
-			lf, hasEmptyMatch = filters.NumericLineFilter(key, values, not, moreThan)
+		if q.config.IsNumeric(filter.Key) {
+			lf, hasEmptyMatch = filters.NumericLineFilter(filter.Key, values, filter.Not, filter.MoreThanOrEqual)
+		} else if filter.Regex {
+			lf, hasEmptyMatch = filters.StringLineFilterCheckExact(filter.Key, values, filter.Not)
 		} else {
-			lf, hasEmptyMatch = filters.StringLineFilterCheckExact(key, values, not)
+			lf, hasEmptyMatch = filters.StringLineFilter(filter.Key, values, filter.Not)
 		}
 		// if there is at least an empty exact match, there is no uniform/safe way to filter by text,
 		// so we should use JSON label matchers instead of text line matchers

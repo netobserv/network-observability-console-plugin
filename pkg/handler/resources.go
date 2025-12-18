@@ -233,14 +233,14 @@ func (h *Handlers) GetNames(ctx context.Context) func(w http.ResponseWriter, r *
 func (h *Handlers) getNamesForPrefix(ctx context.Context, cl clients, prefix, kind, namespace string) ([]string, int, error) {
 	filts := filters.SingleQuery{}
 	if namespace != "" {
-		filts = append(filts, filters.NewMatch(prefix+fields.Namespace, exact(namespace)))
+		filts = append(filts, filters.NewRegexMatch(prefix+fields.Namespace, exact(namespace)))
 	}
 	var searchField string
 	if utils.IsOwnerKind(kind) {
-		filts = append(filts, filters.NewMatch(prefix+fields.OwnerType, exact(kind)))
+		filts = append(filts, filters.NewRegexMatch(prefix+fields.OwnerType, exact(kind)))
 		searchField = prefix + fields.OwnerName
 	} else {
-		filts = append(filts, filters.NewMatch(prefix+fields.Type, exact(kind)))
+		filts = append(filts, filters.NewRegexMatch(prefix+fields.Type, exact(kind)))
 		searchField = prefix + fields.Name
 	}
 

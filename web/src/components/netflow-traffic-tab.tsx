@@ -12,7 +12,7 @@ import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Config, defaultConfig } from '../model/config';
-import { Filters } from '../model/filters';
+import { FilterCompare, Filters } from '../model/filters';
 import { loadConfig } from '../utils/config';
 import { findFilter, getFilterDefinitions } from '../utils/filter-definitions';
 import { usePrevious } from '../utils/previous-hook';
@@ -114,10 +114,11 @@ export const NetflowTrafficTab: React.FC<NetflowTrafficTabProps> = ({ match, obj
           list: [
             {
               def: findFilter(filterDefinitions, 'src_resource')!,
+              compare: FilterCompare.equal,
               values: [{ v: `${obj.kind}.${obj.metadata!.namespace}.${obj.metadata!.name}` }]
             }
           ],
-          backAndForth: true
+          match: 'bidirectional'
         });
         break;
       case 'Service':
@@ -126,10 +127,11 @@ export const NetflowTrafficTab: React.FC<NetflowTrafficTabProps> = ({ match, obj
           list: [
             {
               def: findFilter(filterDefinitions, 'dst_resource')!,
+              compare: FilterCompare.equal,
               values: [{ v: `${obj.kind}.${obj.metadata!.namespace}.${obj.metadata!.name}` }]
             }
           ],
-          backAndForth: false
+          match: 'all'
         });
         break;
       case 'Gateway':
@@ -138,10 +140,11 @@ export const NetflowTrafficTab: React.FC<NetflowTrafficTabProps> = ({ match, obj
           list: [
             {
               def: findFilter(filterDefinitions, 'src_resource')!,
+              compare: FilterCompare.equal,
               values: [{ v: `${obj.kind}.${obj.metadata!.namespace}.${obj.metadata!.name}` }]
             }
           ],
-          backAndForth: true
+          match: 'bidirectional'
         });
         break;
       case 'Route':
@@ -150,10 +153,11 @@ export const NetflowTrafficTab: React.FC<NetflowTrafficTabProps> = ({ match, obj
           list: [
             {
               def: findFilter(filterDefinitions, 'dst_resource')!,
+              compare: FilterCompare.equal,
               values: [{ v: `${route.spec.to!.kind}.${route.metadata!.namespace}.${route.spec.to!.name}` }]
             }
           ],
-          backAndForth: false
+          match: 'all'
         });
         break;
       case 'Namespace':
@@ -161,10 +165,11 @@ export const NetflowTrafficTab: React.FC<NetflowTrafficTabProps> = ({ match, obj
           list: [
             {
               def: findFilter(filterDefinitions, 'src_namespace')!,
+              compare: FilterCompare.equal,
               values: [{ v: obj!.metadata!.name as string }]
             }
           ],
-          backAndForth: true
+          match: 'bidirectional'
         });
         break;
       case 'Node':
@@ -172,10 +177,11 @@ export const NetflowTrafficTab: React.FC<NetflowTrafficTabProps> = ({ match, obj
           list: [
             {
               def: findFilter(filterDefinitions, 'src_host_name')!,
+              compare: FilterCompare.equal,
               values: [{ v: obj!.metadata!.name as string }]
             }
           ],
-          backAndForth: true
+          match: 'bidirectional'
         });
         break;
       case 'ReplicaSet':
@@ -183,12 +189,13 @@ export const NetflowTrafficTab: React.FC<NetflowTrafficTabProps> = ({ match, obj
           list: [
             {
               def: findFilter(filterDefinitions, 'src_resource')!,
+              compare: FilterCompare.equal,
               values: obj.metadata!.ownerReferences!.map(ownerRef => {
                 return { v: `${ownerRef.kind}.${obj.metadata!.namespace}.${ownerRef.name}` };
               })
             }
           ],
-          backAndForth: true
+          match: 'bidirectional'
         });
         break;
       case 'HorizontalPodAutoscaler':
@@ -197,12 +204,13 @@ export const NetflowTrafficTab: React.FC<NetflowTrafficTabProps> = ({ match, obj
           list: [
             {
               def: findFilter(filterDefinitions, 'src_resource')!,
+              compare: FilterCompare.equal,
               values: [
                 { v: `${hpa.spec.scaleTargetRef.kind}.${hpa.metadata!.namespace}.${hpa.spec.scaleTargetRef.name}` }
               ]
             }
           ],
-          backAndForth: true
+          match: 'bidirectional'
         });
         break;
     }

@@ -144,9 +144,10 @@ Cypress.Commands.add('checkContent', (topology) => {
 });
 
 Cypress.Commands.add('addFilter', (filter, value, topology) => {
+  cy.get('[aria-label="Open advanced search"]').click();
   cy.get('#column-filter-toggle').click();
-  cy.get('.pf-v5-c-accordion__expandable-content.pf-m-expanded').find(`#${filter}`).click();
-  cy.get('.pf-v5-c-accordion__expandable-content.pf-m-expanded').should('not.exist');
+  cy.get('#column-filter-dropdown').find(`#${filter}`).click();
+  cy.get('#column-filter-dropdown').should('not.exist');
   cy.get('input[type="search"]').type(`${value}{enter}`);
   cy.checkContent(topology);
 });
