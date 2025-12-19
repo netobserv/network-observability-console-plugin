@@ -1,12 +1,23 @@
 import { AlertStates, FeatureFlagHandler, Rule, SetFeatureFlag } from '@openshift-console/dynamic-plugin-sdk';
-import { Button, Flex, FlexItem, PageSection, Tab, Tabs, TextVariants, Title } from '@patternfly/react-core';
+import {
+  Button,
+  Flex,
+  FlexItem,
+  PageSection,
+  Tab,
+  Tabs,
+  Text,
+  TextContent,
+  TextVariants,
+  Title
+} from '@patternfly/react-core';
 import { SyncAltIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
 import { murmur3 } from 'murmurhash-js';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { SilenceMatcher } from '../../api/alert';
-import { getAlerts, getSilencedAlerts } from '../../api/routes';
+import { getHealthRules, getSilencedAlerts } from '../../api/routes';
 import { getHTTPErrorDetails } from '../../utils/errors';
 import { localStorageHealthRefreshKey, useLocalStorage } from '../../utils/local-storage-hook';
 import { usePoll } from '../../utils/poll-hook';
@@ -17,6 +28,7 @@ import HealthError from './health-error';
 import { HealthGlobal } from './health-global';
 import { buildStats, isSilenced } from './health-helper';
 import { HealthSummary } from './health-summary';
+import { RecordingRulesList } from './recording-rules-list';
 import { HealthTabTitle } from './tab-title';
 
 import './health.css';
@@ -35,8 +47,8 @@ export const NetworkHealth: React.FC<{}> = ({}) => {
     setLoading(true);
     setError(undefined);
 
-    // matching netobserv="true" catches all alerts designed for netobserv (not necessarily owned by it)
-    getAlerts('netobserv="true"')
+    // matching netobserv="true" catches all health rules designed for netobserv (not necessarily owned by it)
+    getHealthRules('netobserv="true"', 'all')
       .then(res => {
         const rules = res.data.groups.flatMap(group => {
           // Inject rule id, for links to the alerting page
@@ -87,6 +99,10 @@ export const NetworkHealth: React.FC<{}> = ({}) => {
   React.useEffect(fetch, [fetch]);
 
   const rules = rawRules.map(r => {
+    // Recording rules don't have alerts array
+    if (!r.alerts || r.alerts.length === 0) {
+      return r;
+    }
     const alerts = r.alerts.map(a => {
       let state = a.state;
       const labels = { ...r.labels, ...a.labels };
@@ -101,7 +117,7 @@ export const NetworkHealth: React.FC<{}> = ({}) => {
 
   return (
     <PageSection id="pageSection" className={`${isDarkTheme ? 'dark' : 'light'}`}>
-      <Flex>
+      <Flex className="health-header">
         <Flex grow={{ default: 'grow' }}>
           <FlexItem>
             <Title headingLevel={TextVariants.h1}>{t('Network Health')}</Title>
@@ -109,12 +125,19 @@ export const NetworkHealth: React.FC<{}> = ({}) => {
         </Flex>
         <Flex>
           <FlexItem className="netobserv-refresh-interval-container">
-            <RefreshDropdown
-              data-test="refresh-dropdown"
-              id="refresh-dropdown"
-              interval={interval}
-              setInterval={setInterval}
-            />
+            <Flex direction={{ default: 'column' }}>
+              <FlexItem className="netobserv-action-title">
+                <Text component={TextVariants.h4}>{t('Refresh interval')}</Text>
+              </FlexItem>
+              <FlexItem flex={{ default: 'flex_1' }}>
+                <RefreshDropdown
+                  data-test="refresh-dropdown"
+                  id="refresh-dropdown"
+                  interval={interval}
+                  setInterval={setInterval}
+                />
+              </FlexItem>
+            </Flex>
           </FlexItem>
           <FlexItem className="netobserv-refresh-container">
             <Button
@@ -128,49 +151,56 @@ export const NetworkHealth: React.FC<{}> = ({}) => {
           </FlexItem>
         </Flex>
       </Flex>
-      <HealthSummary rules={rules} />
-      {error ? (
-        <HealthError title={t('Error')} body={error} />
-      ) : (
-        <Tabs
-          activeKey={activeTabKey}
-          onSelect={(_, tabIndex) => setActiveTabKey(String(tabIndex))}
-          role="region"
-          className={isDarkTheme ? 'dark' : ''}
-        >
-          <Tab
-            eventKey={'global'}
-            title={<HealthTabTitle title={t('Global')} stats={[stats.global]} />}
-            aria-label="Tab global"
-          >
-            <HealthGlobal info={stats.global} isDark={isDarkTheme} />
-          </Tab>
-          <Tab
-            eventKey={'per-node'}
-            title={<HealthTabTitle title={t('Nodes')} stats={stats.byNode} />}
-            aria-label="Tab per node"
-          >
-            <HealthDrawerContainer
-              title={t('Rule violations per node')}
-              stats={stats.byNode}
-              kind={'Node'}
-              isDark={isDarkTheme}
-            />
-          </Tab>
-          <Tab
-            eventKey={'per-namespace'}
-            title={<HealthTabTitle title={t('Namespaces')} stats={stats.byNamespace} />}
-            aria-label="Tab per namespace"
-          >
-            <HealthDrawerContainer
-              title={t('Rule violations per namespace')}
-              stats={stats.byNamespace}
-              kind={'Namespace'}
-              isDark={isDarkTheme}
-            />
-          </Tab>
-        </Tabs>
-      )}
+      <div className="health-tabs">
+        <HealthSummary rules={rules} isDark={isDarkTheme} />
+        {error ? (
+          <HealthError title={t('Error')} body={error} />
+        ) : (
+          <>
+            <TextContent style={{ marginTop: '1.5rem' }}>
+              <Text component={TextVariants.h2}>{t('Alerts')}</Text>
+            </TextContent>
+            <Tabs
+              activeKey={activeTabKey}
+              onSelect={(_, tabIndex) => setActiveTabKey(String(tabIndex))}
+              role="region"
+              className={isDarkTheme ? 'dark' : ''}
+            >
+              <Tab
+                eventKey={'global'}
+                title={<HealthTabTitle title={t('Global')} stats={[stats.global]} />}
+                aria-label="Tab global"
+              >
+                <HealthGlobal info={stats.global} isDark={isDarkTheme} />
+              </Tab>
+              <Tab
+                eventKey={'per-node'}
+                title={<HealthTabTitle title={t('Nodes')} stats={stats.byNode} />}
+                aria-label="Tab per node"
+              >
+                <HealthDrawerContainer stats={stats.byNode} kind={'Node'} isDark={isDarkTheme} />
+              </Tab>
+              <Tab
+                eventKey={'per-namespace'}
+                title={<HealthTabTitle title={t('Namespaces')} stats={stats.byNamespace} />}
+                aria-label="Tab per namespace"
+              >
+                <HealthDrawerContainer stats={stats.byNamespace} kind={'Namespace'} isDark={isDarkTheme} />
+              </Tab>
+            </Tabs>
+            {(stats.recordingRules.global.length > 0 ||
+              stats.recordingRules.byNamespace.length > 0 ||
+              stats.recordingRules.byNode.length > 0) && (
+              <>
+                <TextContent style={{}}>
+                  <Text component={TextVariants.h2}>{t('Recording Rules')}</Text>
+                </TextContent>
+                <RecordingRulesList stats={stats.recordingRules} isDark={isDarkTheme} />
+              </>
+            )}
+          </>
+        )}
+      </div>
     </PageSection>
   );
 };

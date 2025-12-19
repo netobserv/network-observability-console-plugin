@@ -1,6 +1,6 @@
 import { Rule } from '@openshift-console/dynamic-plugin-sdk';
 import * as React from 'react';
-import { getAlerts, getSilencedAlerts } from '../../api/routes';
+import { getHealthRules, getSilencedAlerts } from '../../api/routes';
 import AlertBanner from './banner';
 
 import { murmur3 } from 'murmurhash-js';
@@ -11,7 +11,7 @@ export const AlertFetcher: React.FC<AlertFetcherProps> = ({ children }) => {
   const [alerts, setAlerts] = React.useState<Rule[]>([]);
   const [silencedAlerts, setSilencedAlerts] = React.useState<string[] | null>(null);
   React.useEffect(() => {
-    getAlerts('app="netobserv"') // matching app="netobserv" catches all netobserv-owned alerts
+    getHealthRules('app="netobserv"', 'alert') // matching app="netobserv" catches all netobserv-owned alerts
       .then(result => {
         setAlerts(
           result.data.groups.flatMap(group => {

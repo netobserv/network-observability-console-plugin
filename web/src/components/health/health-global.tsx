@@ -1,14 +1,4 @@
-import {
-  Bullseye,
-  EmptyState,
-  EmptyStateIcon,
-  Grid,
-  GridItem,
-  Text,
-  TextContent,
-  TextVariants,
-  Title
-} from '@patternfly/react-core';
+import { Bullseye, EmptyState, EmptyStateIcon, Grid, GridItem, Title } from '@patternfly/react-core';
 import { CheckCircleIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -27,14 +17,11 @@ export const HealthGlobal: React.FC<HealthGlobalProps> = ({ info, isDark }) => {
 
   return (
     <>
-      <TextContent>
-        <Text component={TextVariants.h3}>{t('Global rule violations')}</Text>
-      </TextContent>
       {allAlerts.length === 0 ? (
         <Bullseye>
           <EmptyState>
             <EmptyStateIcon icon={CheckCircleIcon} />
-            <Title headingLevel="h2">{t('No violations found')}</Title>
+            <Title headingLevel="h2">{t('No alerts found')}</Title>
           </EmptyState>
         </Bullseye>
       ) : (
