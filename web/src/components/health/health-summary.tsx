@@ -12,7 +12,7 @@ export const HealthSummary: React.FC<HealthSummaryProps> = ({ rules }) => {
 
   if (rules.length === 0) {
     return (
-      <Alert title={t('No rules found, health cannot be determined')}>
+      <Alert title={t('No rules found, health cannot be determined')} className="health-summary-alert">
         <>
           {t(
             'Check alert definitions in FlowCollector "spec.processor.metrics.alertGroups" and "spec.processor.metrics.disableAlerts".'
@@ -89,7 +89,7 @@ export const HealthSummary: React.FC<HealthSummaryProps> = ({ rules }) => {
     details.push(t('No minor issues out of {{total}} rules', stats.info));
   }
   return (
-    <Alert variant={variant} title={title}>
+    <Alert variant={variant} title={title} className="health-summary-alert">
       <ul>
         {details.map((text, i) => (
           <li key={'li_' + i}>{text}</li>

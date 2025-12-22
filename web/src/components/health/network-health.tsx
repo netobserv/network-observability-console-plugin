@@ -1,5 +1,16 @@
 import { AlertStates, FeatureFlagHandler, Rule, SetFeatureFlag } from '@openshift-console/dynamic-plugin-sdk';
-import { Button, Flex, FlexItem, PageSection, Tab, Tabs, TextVariants, Title } from '@patternfly/react-core';
+import {
+  Button,
+  Flex,
+  FlexItem,
+  PageSection,
+  Tab,
+  Tabs,
+  Text,
+  TextContent,
+  TextVariants,
+  Title
+} from '@patternfly/react-core';
 import { SyncAltIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
 import { murmur3 } from 'murmurhash-js';
@@ -21,7 +32,7 @@ import { HealthTabTitle } from './tab-title';
 
 import './health.css';
 
-export const NetworkHealth: React.FC<{}> = ({}) => {
+export const NetworkHealth: React.FC<{}> = ({ }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const isDarkTheme = useTheme();
   const [loading, setLoading] = React.useState(false);
@@ -101,20 +112,27 @@ export const NetworkHealth: React.FC<{}> = ({}) => {
 
   return (
     <PageSection id="pageSection" className={`${isDarkTheme ? 'dark' : 'light'}`}>
-      <Flex>
+      <Flex className="health-header" alignItems={{ default: 'alignItemsFlexStart' }}>
         <Flex grow={{ default: 'grow' }}>
           <FlexItem>
             <Title headingLevel={TextVariants.h1}>{t('Network Health')}</Title>
           </FlexItem>
         </Flex>
-        <Flex>
+        <Flex direction={{ default: 'row' }}>
           <FlexItem className="netobserv-refresh-interval-container">
-            <RefreshDropdown
-              data-test="refresh-dropdown"
-              id="refresh-dropdown"
-              interval={interval}
-              setInterval={setInterval}
-            />
+            <Flex direction={{ default: 'column' }}>
+              <FlexItem className="netobserv-action-title">
+                <Text component={TextVariants.h4}>{t('Refresh interval')}</Text>
+              </FlexItem>
+              <FlexItem flex={{ default: 'flex_1' }}>
+                <RefreshDropdown
+                  data-test="refresh-dropdown"
+                  id="refresh-dropdown"
+                  interval={interval}
+                  setInterval={setInterval}
+                />
+              </FlexItem>
+            </Flex>
           </FlexItem>
           <FlexItem className="netobserv-refresh-container">
             <Button
@@ -128,11 +146,12 @@ export const NetworkHealth: React.FC<{}> = ({}) => {
           </FlexItem>
         </Flex>
       </Flex>
-      <HealthSummary rules={rules} />
-      {error ? (
-        <HealthError title={t('Error')} body={error} />
-      ) : (
-        <Tabs
+      <div className="health-tabs">
+        <HealthSummary rules={rules} />
+        {error ? (
+          <HealthError title={t('Error')} body={error} />
+        ) : (
+          <Tabs
           activeKey={activeTabKey}
           onSelect={(_, tabIndex) => setActiveTabKey(String(tabIndex))}
           role="region"
@@ -170,7 +189,8 @@ export const NetworkHealth: React.FC<{}> = ({}) => {
             />
           </Tab>
         </Tabs>
-      )}
+        )}
+      </div>
     </PageSection>
   );
 };
