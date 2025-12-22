@@ -3,6 +3,23 @@
     padding-bottom: 0.6rem;
 }
 
+#pageSection .health-header {
+    padding: 1.5rem 1.5rem 0 1.5rem;
+}
+
+#pageSection .health-header>div {
+    align-items: start;
+}
+
+#pageSection .health-tabs {
+    padding: 0 1.5rem 0 1.5rem;
+}
+
+#pageSection .health-summary-alert {
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
 #pageSection .icon.critical {
     color: #b1380b;
 }
@@ -35,6 +52,22 @@
 
 .netobserv-refresh-interval-container {
     margin: 0 !important;
+}
+
+.netobserv-refresh-container {
+    align-self: end;
+}
+
+.netobserv-action-title {
+    height: 2em;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/*hack to keep refresh button size while loading*/
+.co-action-refresh-button {
+    width: 45px !important;
+    height: 33px !important;
 }
 
 /*rotate animation for loading icon*/
