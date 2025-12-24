@@ -236,7 +236,7 @@ func (h *Handlers) LokiMetrics() func(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if h.Cfg.Loki.Status != nil {
-			writeError(w, http.StatusBadRequest, "Loki status URL is not usable with Loki operator")
+			writeError(w, http.StatusBadRequest, "Status URL endpoints are unavailable when using LokiStack operator. Status is provided via operator conditions.")
 			return
 		}
 		lokiClient := newLokiClient(&h.Cfg.Loki, r.Header, true)
