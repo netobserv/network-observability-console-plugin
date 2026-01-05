@@ -14,7 +14,6 @@ import {
 import { BellIcon, ExclamationCircleIcon, ExclamationTriangleIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { valueFormat } from '../../utils/format';
 import { RecordingRulesByResource } from './health-helper';
 
 export interface RecordingRuleCardProps {
