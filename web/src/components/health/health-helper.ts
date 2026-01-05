@@ -1,11 +1,33 @@
 import { PrometheusAlert, PrometheusLabels, Rule } from '@openshift-console/dynamic-plugin-sdk';
 import * as _ from 'lodash';
 import { SilenceMatcher } from '../../api/alert';
+import { HealthRuleMetadata } from '../../model/config';
+
+export type RecordingRuleItem = {
+  name: string;
+  value: number;
+  severity: 'critical' | 'warning' | 'info';
+  template: string;
+  threshold?: string;
+  labels: PrometheusLabels;
+};
+
+export type RecordingRulesByResource = {
+  name: string;
+  critical: RecordingRuleItem[];
+  warning: RecordingRuleItem[];
+  other: RecordingRuleItem[];
+};
 
 export type HealthStats = {
   global: ByResource;
   byNamespace: ByResource[];
   byNode: ByResource[];
+  recordingRules: {
+    global: RecordingRulesByResource;
+    byNamespace: RecordingRulesByResource[];
+    byNode: RecordingRulesByResource[];
+  };
 };
 
 export type ByResource = {
@@ -85,7 +107,114 @@ const getHealthMetadata = (annotations: PrometheusLabels): HealthMetadata => {
   return defaultMetadata;
 };
 
-export const buildStats = (rules: Rule[]): HealthStats => {
+const processRecordingRules = (
+  recordingRulesMetrics: any[],
+  healthRulesMetadata: HealthRuleMetadata[]
+): {
+  global: RecordingRulesByResource;
+  byNamespace: RecordingRulesByResource[];
+  byNode: RecordingRulesByResource[];
+} => {
+  const recordingRuleItems: RecordingRuleItem[] = [];
+
+  // Process each recording rule metric
+  recordingRulesMetrics.forEach(metric => {
+    const template = metric.template;
+    if (!template) {
+      return; // Skip if no template
+    }
+
+    // Find the metadata for this template
+    const metadata = healthRulesMetadata.find(m => m.template === template);
+    if (!metadata) {
+      return;
+    }
+
+    // Process each value (each value represents a different resource/label combination)
+    metric.values.forEach((valueData: any) => {
+      // Find the variant that matches the groupBy in the labels
+      let variant = metadata.variants[0]; // Default to first variant
+      for (const v of metadata.variants) {
+        // Check if the groupBy label exists in the metric labels
+        if (v.groupBy && valueData.labels[v.groupBy.toLowerCase()]) {
+          variant = v;
+          break;
+        }
+      }
+
+      const value = valueData.value;
+
+      // Determine severity based on thresholds
+      let severity: 'critical' | 'warning' | 'info' = 'info';
+      if (variant.thresholds.critical && value >= parseFloat(variant.thresholds.critical)) {
+        severity = 'critical';
+      } else if (variant.thresholds.warning && value >= parseFloat(variant.thresholds.warning)) {
+        severity = 'warning';
+      }
+
+      // Only include if value exceeds the minimum threshold (info)
+      const minThreshold = variant.thresholds.info ? parseFloat(variant.thresholds.info) : 0;
+      if (value >= minThreshold) {
+        recordingRuleItems.push({
+          name: metric.name,
+          value: value,
+          severity: severity,
+          template: template,
+          threshold: variant.thresholds[severity],
+          labels: valueData.labels
+        });
+      }
+    });
+  });
+
+  // Group by namespace and node
+  const namespaceGroups: { [key: string]: RecordingRuleItem[] } = {};
+  const nodeGroups: { [key: string]: RecordingRuleItem[] } = {};
+  const globalItems: RecordingRuleItem[] = [];
+
+  recordingRuleItems.forEach(item => {
+    // Check for namespace labels
+    const namespace = item.labels.namespace || item.labels.Namespace || item.labels.SrcK8S_Namespace || item.labels.DstK8S_Namespace;
+    // Check for node labels
+    const node = item.labels.node || item.labels.Node || item.labels.SrcK8S_HostName || item.labels.DstK8S_HostNode;
+
+    if (namespace) {
+      if (!namespaceGroups[namespace]) {
+        namespaceGroups[namespace] = [];
+      }
+      namespaceGroups[namespace].push(item);
+    } else if (node) {
+      if (!nodeGroups[node]) {
+        nodeGroups[node] = [];
+      }
+      nodeGroups[node].push(item);
+    } else {
+      globalItems.push(item);
+    }
+  });
+
+  // Build the result structures
+  const buildResourceGroup = (name: string, items: RecordingRuleItem[]): RecordingRulesByResource => {
+    return {
+      name: name,
+      critical: items.filter(i => i.severity === 'critical'),
+      warning: items.filter(i => i.severity === 'warning'),
+      other: items.filter(i => i.severity === 'info')
+    };
+  };
+
+  return {
+    global: buildResourceGroup('', globalItems),
+    byNamespace: Object.keys(namespaceGroups).map(ns => buildResourceGroup(ns, namespaceGroups[ns])),
+    byNode: Object.keys(nodeGroups).map(n => buildResourceGroup(n, nodeGroups[n]))
+  };
+};
+
+export const buildStats = (
+  rules: Rule[],
+  healthRulesMetadata: HealthRuleMetadata[],
+  recordingRulesMetrics: any[] = []
+): HealthStats => {
   const ruleWithMD: RuleWithMetadata[] = rules.map(r => {
     const md = getHealthMetadata(r.annotations);
     return { ...r, metadata: md };
@@ -130,7 +259,11 @@ export const buildStats = (rules: Rule[]): HealthStats => {
   [global, ...byNamespace, ...byNode].forEach(r => {
     r.score = computeScore(r);
   });
-  return { global, byNamespace, byNode };
+
+  // Process recording rules
+  const recordingRulesProcessed = processRecordingRules(recordingRulesMetrics, healthRulesMetadata);
+
+  return { global, byNamespace, byNode, recordingRules: recordingRulesProcessed };
 };
 
 const filterGlobals = (alerts: AlertWithRuleName[], nonGlobalLabels: string[]): ByResource => {
@@ -253,6 +386,28 @@ export const getAlertLink = (a: AlertWithRuleName): string => {
     labels.push(k + '=' + a.labels[k]);
   });
   return `/monitoring/alerts/${a.ruleID}?${labels.join('&')}`;
+};
+
+export const getRecordingRuleMetricLink = (rule: RecordingRuleItem, resourceName?: string): string => {
+  let query = rule.name;
+
+  // Filter by namespace or node if available
+  if (resourceName) {
+    const namespaceLabel = Object.keys(rule.labels).find(k =>
+      k.toLowerCase().includes('namespace') || k === 'Namespace'
+    );
+    const nodeLabel = Object.keys(rule.labels).find(k =>
+      k.toLowerCase().includes('node') || k.toLowerCase().includes('hostname') || k === 'Node'
+    );
+
+    if (namespaceLabel) {
+      query += `{${namespaceLabel}="${resourceName}"}`;
+    } else if (nodeLabel) {
+      query += `{${nodeLabel}="${resourceName}"}`;
+    }
+  }
+
+  return `/monitoring/query-browser?query0=${encodeURIComponent(query)}`;
 };
 
 export const getTrafficLink = (kind: string, resourceName: string, a: AlertWithRuleName): string => {

@@ -13,24 +13,32 @@ import { CheckCircleIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { HealthCard } from './health-card';
-import { ByResource, getAllAlerts } from './health-helper';
+import { ByResource, getAllAlerts, RecordingRulesByResource } from './health-helper';
+import { RecordingRuleCard } from './recording-rule-card';
+import { RecordingRuleDetails } from './recording-rule-details';
 import { RuleDetails } from './rule-details';
 
 export interface HealthGlobalProps {
   info: ByResource;
+  recordingRules?: RecordingRulesByResource;
   isDark: boolean;
 }
 
-export const HealthGlobal: React.FC<HealthGlobalProps> = ({ info, isDark }) => {
+export const HealthGlobal: React.FC<HealthGlobalProps> = ({ info, recordingRules, isDark }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const allAlerts = getAllAlerts(info);
+  const hasRecordingRules =
+    recordingRules &&
+    (recordingRules.critical.length > 0 || recordingRules.warning.length > 0 || recordingRules.other.length > 0);
+
+  const hasAnyViolations = allAlerts.length > 0 || hasRecordingRules;
 
   return (
     <>
       <TextContent>
         <Text component={TextVariants.h3}>{t('Global rule violations')}</Text>
       </TextContent>
-      {allAlerts.length === 0 ? (
+      {!hasAnyViolations ? (
         <Bullseye>
           <EmptyState>
             <EmptyStateIcon icon={CheckCircleIcon} />
@@ -40,10 +48,20 @@ export const HealthGlobal: React.FC<HealthGlobalProps> = ({ info, isDark }) => {
       ) : (
         <Grid hasGutter>
           <GridItem span={3}>
-            <HealthCard isDark={isDark} stats={info} isSelected={false} />
+            {allAlerts.length > 0 && <HealthCard isDark={isDark} stats={info} isSelected={false} />}
+            {hasRecordingRules && (
+              <div style={{ marginTop: allAlerts.length > 0 ? '1rem' : '0' }}>
+                <RecordingRuleCard isDark={isDark} stats={recordingRules} isSelected={false} />
+              </div>
+            )}
           </GridItem>
           <GridItem span={9}>
-            <RuleDetails kind={'Global'} info={info} wide={true} />
+            {allAlerts.length > 0 && <RuleDetails kind={'Global'} info={info} wide={true} />}
+            {hasRecordingRules && (
+              <div style={{ marginTop: allAlerts.length > 0 ? '1rem' : '0' }}>
+                <RecordingRuleDetails kind={'Global'} info={recordingRules} wide={true} />
+              </div>
+            )}
           </GridItem>
         </Grid>
       )}
