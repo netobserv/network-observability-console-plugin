@@ -15,6 +15,7 @@ import {
   Title
 } from '@patternfly/react-core';
 import { CheckCircleIcon } from '@patternfly/react-icons';
+import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { HealthCard } from './health-card';
@@ -22,7 +23,6 @@ import { ByResource, RecordingRulesByResource } from './health-helper';
 import { RecordingRuleCard } from './recording-rule-card';
 import { RecordingRuleDetails } from './recording-rule-details';
 import { RuleDetails } from './rule-details';
-import * as _ from 'lodash';
 
 export interface HealthDrawerContainerProps {
   title: string;

@@ -130,9 +130,7 @@ export const HealthSummary: React.FC<HealthSummaryProps> = ({ rules, stats }) =>
     }
     details.push(t('{{total}} warnings ({{breakdown}})', { total, breakdown: parts.join(', ') }));
   } else if (summaryStats.warning.pendingAlerts > 0) {
-    details.push(
-      t('{{pendingAlerts}} pending warnings, from {{pendingRules}} distinct rules', summaryStats.warning)
-    );
+    details.push(t('{{pendingAlerts}} pending warnings, from {{pendingRules}} distinct rules', summaryStats.warning));
   } else if (variant === AlertVariant.success) {
     details.push(t('No warnings out of {{total}} rules', summaryStats.warning));
   }
