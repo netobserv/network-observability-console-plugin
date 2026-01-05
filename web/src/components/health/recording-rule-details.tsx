@@ -68,9 +68,7 @@ export const RecordingRuleDetails: React.FC<RecordingRuleDetailsProps> = ({ kind
                 <Badge isRead style={{ marginLeft: '0.5rem' }}>
                   {t('Recording')}
                 </Badge>
-                {direction && (
-                  <Badge style={{ marginLeft: '0.5rem' }}>{direction}</Badge>
-                )}
+                {direction && <Badge style={{ marginLeft: '0.5rem' }}>{direction}</Badge>}
               </Td>
               <Td dataLabel={t('Severity')}>
                 <Label color={getSeverityColor(rule.severity)}>{rule.severity}</Label>

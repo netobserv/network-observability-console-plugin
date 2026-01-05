@@ -2,8 +2,8 @@ import { Bullseye, EmptyState, EmptyStateIcon, Gallery, Title } from '@patternfl
 import { CheckCircleIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { RecordingRuleCard } from './recording-rule-card';
 import { RecordingRulesByResource } from './health-helper';
+import { RecordingRuleCard } from './recording-rule-card';
 
 export interface RecordingRulesGalleryProps {
   stats: RecordingRulesByResource[];
