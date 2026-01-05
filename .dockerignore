@@ -1,3 +1,46 @@
+# More info: https://docs.docker.com/engine/reference/builder/#dockerignore-file
+
+# Build artifacts
+**/bin/
+plugin-backend
 ./web/node_modules
 ./web/dist
-./plugin-backend
+./web/coverage/
+./web/cypress/screenshots/
+./web/cypress/videos/
+
+# Test files and directories
+**/*_test.go
+cover*.out
+test.out
+
+# Documentation
+**/docs/
+CONTRIBUTING.md
+*.md
+!README.md
+
+# CI/CD and development files
+**/.git/
+.gitignore
+.gitattributes
+OWNERS
+renovate.json
+Makefile
+
+# Dockerfiles (not needed in build context)
+Dockerfile*
+!Dockerfile
+
+# IDE and editor files
+**/.vscode/
+**/.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Temporary files
+**/_tmp/
+*.tmp
+*.log
