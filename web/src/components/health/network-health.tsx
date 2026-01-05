@@ -17,8 +17,10 @@ import { murmur3 } from 'murmurhash-js';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { SilenceMatcher } from '../../api/alert';
-import { getAlerts, getSilencedAlerts } from '../../api/routes';
+import { getAlerts, getRecordingRules, getSilencedAlerts, queryPrometheusMetric } from '../../api/routes';
+import { Config, defaultConfig } from '../../model/config';
 import { getHTTPErrorDetails } from '../../utils/errors';
+import { loadConfig } from '../../utils/config';
 import { localStorageHealthRefreshKey, useLocalStorage } from '../../utils/local-storage-hook';
 import { usePoll } from '../../utils/poll-hook';
 import { useTheme } from '../../utils/theme-hook';
@@ -39,8 +41,10 @@ export const NetworkHealth: React.FC<{}> = ({ }) => {
   const [error, setError] = React.useState<string | undefined>();
   const [interval, setInterval] = useLocalStorage<number | undefined>(localStorageHealthRefreshKey, undefined);
   const [rawRules, setRawRules] = React.useState<Rule[]>([]);
+  const [recordingRulesMetrics, setRecordingRulesMetrics] = React.useState<any[]>([]);
   const [silenced, setSilenced] = React.useState<SilenceMatcher[][]>([]);
   const [activeTabKey, setActiveTabKey] = React.useState<string>('global');
+  const [config, setConfig] = React.useState<Config>(defaultConfig);
 
   const fetch = React.useCallback(() => {
     setLoading(true);
@@ -92,6 +96,49 @@ export const NetworkHealth: React.FC<{}> = ({ }) => {
         // Showing all alerts since we could not get silenced alerts list
         setSilenced([]);
       });
+
+    // Fetch recording rules and their current values
+    getRecordingRules('netobserv="true"')
+      .then(res => {
+        const recordingRules = res.data.groups.flatMap(group => group.rules);
+
+        // For each recording rule, query its current metric values
+        const queries = recordingRules.map(rule => {
+          return queryPrometheusMetric(rule.name).then((metricRes: any) => {
+            // Store the raw metric results with the rule metadata
+            if (metricRes.data && metricRes.data.result) {
+              return {
+                template: rule.labels?.template,
+                name: rule.name,
+                values: metricRes.data.result.map((item: any) => ({
+                  labels: item.metric,
+                  value: parseFloat(item.value[1])
+                }))
+              };
+            }
+            return { template: rule.labels?.template, name: rule.name, values: [] };
+          }).catch(() => {
+            return { template: rule.labels?.template, name: rule.name, values: [] };
+          });
+        });
+
+        Promise.all(queries).then(metrics => {
+          setRecordingRulesMetrics(metrics);
+        });
+      })
+      .catch(() => {
+        // Recording rules not available
+      });
+  }, []);
+
+  // Load config on mount
+  React.useEffect(() => {
+    loadConfig().then(v => {
+      setConfig(v.config);
+      if (v.error) {
+        console.error('Error loading config:', v.error);
+      }
+    });
   }, []);
 
   usePoll(fetch, interval);
@@ -108,7 +155,8 @@ export const NetworkHealth: React.FC<{}> = ({ }) => {
     });
     return { ...r, alerts: alerts };
   });
-  const stats = buildStats(rules);
+
+  const stats = buildStats(rules, config.healthRules || [], recordingRulesMetrics);
 
   return (
     <PageSection id="pageSection" className={`${isDarkTheme ? 'dark' : 'light'}`}>
@@ -147,7 +195,7 @@ export const NetworkHealth: React.FC<{}> = ({ }) => {
         </Flex>
       </Flex>
       <div className="health-tabs">
-        <HealthSummary rules={rules} />
+        <HealthSummary rules={rules} stats={stats} />
         {error ? (
           <HealthError title={t('Error')} body={error} />
         ) : (
@@ -162,7 +210,11 @@ export const NetworkHealth: React.FC<{}> = ({ }) => {
             title={<HealthTabTitle title={t('Global')} stats={[stats.global]} />}
             aria-label="Tab global"
           >
-            <HealthGlobal info={stats.global} isDark={isDarkTheme} />
+            <HealthGlobal
+              info={stats.global}
+              recordingRules={stats.recordingRules.global}
+              isDark={isDarkTheme}
+            />
           </Tab>
           <Tab
             eventKey={'per-node'}
@@ -172,6 +224,7 @@ export const NetworkHealth: React.FC<{}> = ({ }) => {
             <HealthDrawerContainer
               title={t('Rule violations per node')}
               stats={stats.byNode}
+              recordingRulesStats={stats.recordingRules.byNode}
               kind={'Node'}
               isDark={isDarkTheme}
             />
@@ -184,6 +237,7 @@ export const NetworkHealth: React.FC<{}> = ({ }) => {
             <HealthDrawerContainer
               title={t('Rule violations per namespace')}
               stats={stats.byNamespace}
+              recordingRulesStats={stats.recordingRules.byNamespace}
               kind={'Namespace'}
               isDark={isDarkTheme}
             />
