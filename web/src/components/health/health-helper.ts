@@ -19,6 +19,17 @@ export type RecordingRulesByResource = {
   other: RecordingRuleItem[];
 };
 
+export type RecordingRuleMetricValue = {
+  labels: PrometheusLabels;
+  value: number;
+};
+
+export type RecordingRuleMetric = {
+  template?: string;
+  name: string;
+  values: RecordingRuleMetricValue[];
+};
+
 export type HealthStats = {
   global: ByResource;
   byNamespace: ByResource[];
@@ -108,7 +119,7 @@ const getHealthMetadata = (annotations: PrometheusLabels): HealthMetadata => {
 };
 
 const processRecordingRules = (
-  recordingRulesMetrics: any[],
+  recordingRulesMetrics: RecordingRuleMetric[],
   healthRulesMetadata: HealthRuleMetadata[]
 ): {
   global: RecordingRulesByResource;
@@ -131,7 +142,7 @@ const processRecordingRules = (
     }
 
     // Process each value (each value represents a different resource/label combination)
-    metric.values.forEach((valueData: any) => {
+    metric.values.forEach((valueData: RecordingRuleMetricValue) => {
       // Find the variant that matches the groupBy in the labels
       let variant = metadata.variants[0]; // Default to first variant
       for (const v of metadata.variants) {
@@ -174,7 +185,8 @@ const processRecordingRules = (
 
   recordingRuleItems.forEach(item => {
     // Check for namespace labels
-    const namespace = item.labels.namespace || item.labels.Namespace || item.labels.SrcK8S_Namespace || item.labels.DstK8S_Namespace;
+    const namespace =
+      item.labels.namespace || item.labels.Namespace || item.labels.SrcK8S_Namespace || item.labels.DstK8S_Namespace;
     // Check for node labels
     const node = item.labels.node || item.labels.Node || item.labels.SrcK8S_HostName || item.labels.DstK8S_HostNode;
 
@@ -213,7 +225,7 @@ const processRecordingRules = (
 export const buildStats = (
   rules: Rule[],
   healthRulesMetadata: HealthRuleMetadata[],
-  recordingRulesMetrics: any[] = []
+  recordingRulesMetrics: RecordingRuleMetric[] = []
 ): HealthStats => {
   const ruleWithMD: RuleWithMetadata[] = rules.map(r => {
     const md = getHealthMetadata(r.annotations);
@@ -393,11 +405,11 @@ export const getRecordingRuleMetricLink = (rule: RecordingRuleItem, resourceName
 
   // Filter by namespace or node if available
   if (resourceName) {
-    const namespaceLabel = Object.keys(rule.labels).find(k =>
-      k.toLowerCase().includes('namespace') || k === 'Namespace'
+    const namespaceLabel = Object.keys(rule.labels).find(
+      k => k.toLowerCase().includes('namespace') || k === 'Namespace'
     );
-    const nodeLabel = Object.keys(rule.labels).find(k =>
-      k.toLowerCase().includes('node') || k.toLowerCase().includes('hostname') || k === 'Node'
+    const nodeLabel = Object.keys(rule.labels).find(
+      k => k.toLowerCase().includes('node') || k.toLowerCase().includes('hostname') || k === 'Node'
     );
 
     if (namespaceLabel) {
