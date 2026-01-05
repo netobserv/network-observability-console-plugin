@@ -11,7 +11,7 @@ export interface RecordingRuleDetailsProps {
   wide: boolean;
 }
 
-export const RecordingRuleDetails: React.FC<RecordingRuleDetailsProps> = ({ kind, info, wide }) => {
+export const RecordingRuleDetails: React.FC<RecordingRuleDetailsProps> = ({ info, wide }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const resourceName = info.name || undefined;
 

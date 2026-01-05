@@ -1,16 +1,11 @@
-import { AlertStates, FeatureFlagHandler, Rule, SetFeatureFlag } from '@openshift-console/dynamic-plugin-sdk';
 import {
-  Button,
-  Flex,
-  FlexItem,
-  PageSection,
-  Tab,
-  Tabs,
-  Text,
-  TextContent,
-  TextVariants,
-  Title
-} from '@patternfly/react-core';
+  AlertStates,
+  FeatureFlagHandler,
+  PrometheusResponse,
+  Rule,
+  SetFeatureFlag
+} from '@openshift-console/dynamic-plugin-sdk';
+import { Button, Flex, FlexItem, PageSection, Tab, Tabs, Text, TextVariants, Title } from '@patternfly/react-core';
 import { SyncAltIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
 import { murmur3 } from 'murmurhash-js';
@@ -19,8 +14,8 @@ import { useTranslation } from 'react-i18next';
 import { SilenceMatcher } from '../../api/alert';
 import { getAlerts, getRecordingRules, getSilencedAlerts, queryPrometheusMetric } from '../../api/routes';
 import { Config, defaultConfig } from '../../model/config';
-import { getHTTPErrorDetails } from '../../utils/errors';
 import { loadConfig } from '../../utils/config';
+import { getHTTPErrorDetails } from '../../utils/errors';
 import { localStorageHealthRefreshKey, useLocalStorage } from '../../utils/local-storage-hook';
 import { usePoll } from '../../utils/poll-hook';
 import { useTheme } from '../../utils/theme-hook';
@@ -28,20 +23,20 @@ import { RefreshDropdown } from '../dropdowns/refresh-dropdown';
 import { HealthDrawerContainer } from './health-drawer-container';
 import HealthError from './health-error';
 import { HealthGlobal } from './health-global';
-import { buildStats, isSilenced } from './health-helper';
+import { buildStats, isSilenced, RecordingRuleMetric } from './health-helper';
 import { HealthSummary } from './health-summary';
 import { HealthTabTitle } from './tab-title';
 
 import './health.css';
 
-export const NetworkHealth: React.FC<{}> = ({ }) => {
+export const NetworkHealth: React.FC<{}> = ({}) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const isDarkTheme = useTheme();
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | undefined>();
   const [interval, setInterval] = useLocalStorage<number | undefined>(localStorageHealthRefreshKey, undefined);
   const [rawRules, setRawRules] = React.useState<Rule[]>([]);
-  const [recordingRulesMetrics, setRecordingRulesMetrics] = React.useState<any[]>([]);
+  const [recordingRulesMetrics, setRecordingRulesMetrics] = React.useState<RecordingRuleMetric[]>([]);
   const [silenced, setSilenced] = React.useState<SilenceMatcher[][]>([]);
   const [activeTabKey, setActiveTabKey] = React.useState<string>('global');
   const [config, setConfig] = React.useState<Config>(defaultConfig);
@@ -104,22 +99,26 @@ export const NetworkHealth: React.FC<{}> = ({ }) => {
 
         // For each recording rule, query its current metric values
         const queries = recordingRules.map(rule => {
-          return queryPrometheusMetric(rule.name).then((metricRes: any) => {
-            // Store the raw metric results with the rule metadata
-            if (metricRes.data && metricRes.data.result) {
-              return {
-                template: rule.labels?.template,
-                name: rule.name,
-                values: metricRes.data.result.map((item: any) => ({
-                  labels: item.metric,
-                  value: parseFloat(item.value[1])
-                }))
-              };
-            }
-            return { template: rule.labels?.template, name: rule.name, values: [] };
-          }).catch(() => {
-            return { template: rule.labels?.template, name: rule.name, values: [] };
-          });
+          return queryPrometheusMetric(rule.name)
+            .then((metricRes: PrometheusResponse) => {
+              // Store the raw metric results with the rule metadata
+              if (metricRes.data && metricRes.data.result) {
+                return {
+                  template: rule.labels?.template,
+                  name: rule.name,
+                  values: metricRes.data.result
+                    .filter(item => item.value && item.value.length > 1)
+                    .map(item => ({
+                      labels: item.metric,
+                      value: parseFloat(item.value![1])
+                    }))
+                } as RecordingRuleMetric;
+              }
+              return { template: rule.labels?.template, name: rule.name, values: [] } as RecordingRuleMetric;
+            })
+            .catch((): RecordingRuleMetric => {
+              return { template: rule.labels?.template, name: rule.name, values: [] };
+            });
         });
 
         Promise.all(queries).then(metrics => {
@@ -200,49 +199,45 @@ export const NetworkHealth: React.FC<{}> = ({ }) => {
           <HealthError title={t('Error')} body={error} />
         ) : (
           <Tabs
-          activeKey={activeTabKey}
-          onSelect={(_, tabIndex) => setActiveTabKey(String(tabIndex))}
-          role="region"
-          className={isDarkTheme ? 'dark' : ''}
-        >
-          <Tab
-            eventKey={'global'}
-            title={<HealthTabTitle title={t('Global')} stats={[stats.global]} />}
-            aria-label="Tab global"
+            activeKey={activeTabKey}
+            onSelect={(_, tabIndex) => setActiveTabKey(String(tabIndex))}
+            role="region"
+            className={isDarkTheme ? 'dark' : ''}
           >
-            <HealthGlobal
-              info={stats.global}
-              recordingRules={stats.recordingRules.global}
-              isDark={isDarkTheme}
-            />
-          </Tab>
-          <Tab
-            eventKey={'per-node'}
-            title={<HealthTabTitle title={t('Nodes')} stats={stats.byNode} />}
-            aria-label="Tab per node"
-          >
-            <HealthDrawerContainer
-              title={t('Rule violations per node')}
-              stats={stats.byNode}
-              recordingRulesStats={stats.recordingRules.byNode}
-              kind={'Node'}
-              isDark={isDarkTheme}
-            />
-          </Tab>
-          <Tab
-            eventKey={'per-namespace'}
-            title={<HealthTabTitle title={t('Namespaces')} stats={stats.byNamespace} />}
-            aria-label="Tab per namespace"
-          >
-            <HealthDrawerContainer
-              title={t('Rule violations per namespace')}
-              stats={stats.byNamespace}
-              recordingRulesStats={stats.recordingRules.byNamespace}
-              kind={'Namespace'}
-              isDark={isDarkTheme}
-            />
-          </Tab>
-        </Tabs>
+            <Tab
+              eventKey={'global'}
+              title={<HealthTabTitle title={t('Global')} stats={[stats.global]} />}
+              aria-label="Tab global"
+            >
+              <HealthGlobal info={stats.global} recordingRules={stats.recordingRules.global} isDark={isDarkTheme} />
+            </Tab>
+            <Tab
+              eventKey={'per-node'}
+              title={<HealthTabTitle title={t('Nodes')} stats={stats.byNode} />}
+              aria-label="Tab per node"
+            >
+              <HealthDrawerContainer
+                title={t('Rule violations per node')}
+                stats={stats.byNode}
+                recordingRulesStats={stats.recordingRules.byNode}
+                kind={'Node'}
+                isDark={isDarkTheme}
+              />
+            </Tab>
+            <Tab
+              eventKey={'per-namespace'}
+              title={<HealthTabTitle title={t('Namespaces')} stats={stats.byNamespace} />}
+              aria-label="Tab per namespace"
+            >
+              <HealthDrawerContainer
+                title={t('Rule violations per namespace')}
+                stats={stats.byNamespace}
+                recordingRulesStats={stats.recordingRules.byNamespace}
+                kind={'Namespace'}
+                isDark={isDarkTheme}
+              />
+            </Tab>
+          </Tabs>
         )}
       </div>
     </PageSection>
