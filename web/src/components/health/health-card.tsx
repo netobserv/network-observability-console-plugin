@@ -1,5 +1,6 @@
 import { ResourceLink } from '@openshift-console/dynamic-plugin-sdk';
 import {
+  Badge,
   Card,
   CardBody,
   CardHeader,
@@ -60,6 +61,9 @@ export const HealthCard: React.FC<HealthCardProps> = ({ stats, kind, isDark, isS
           <FlexItem>{icon}</FlexItem>
           <FlexItem>
             <CardTitle>{kind ? <ResourceLink inline={true} kind={kind} name={stats.name} /> : t('Global')}</CardTitle>
+          </FlexItem>
+          <FlexItem>
+            <Badge isRead>{t('Alert')}</Badge>
           </FlexItem>
         </Flex>
       </CardHeader>
