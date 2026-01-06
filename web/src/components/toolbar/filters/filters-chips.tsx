@@ -176,7 +176,7 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
     (filter: Filter, cfIndex: number) => {
       const someEnabled = hasEnabledFilterValues(filter);
       return (
-        <div key={cfIndex} className="toolbar-item-center">
+        <div key={cfIndex} className={`${filter.def.category ? 'flex-block' : ''} toolbar-item-center`}>
           {getAndOr(filters.match, cfIndex)}
           <div className={`custom-chip-group ${someEnabled ? '' : 'disabled-group'}`}>
             <Tooltip
@@ -354,7 +354,7 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
     (v: Match) => {
       const existingFilters = filters;
       // convert all endpoint filters to a single peer
-      if (v !== 'any') {
+      if (v == 'bidirectional') {
         existingFilters.list = setEndpointFilters(filterDefinitions, existingFilters.list, 'src');
         setDirection('source');
       }
@@ -469,6 +469,7 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
                 enabled: hasSrcOrDstFilters(filters.list!) && filters.match !== 'bidirectional'
               }
             ]}
+            text={t('More actions')}
           />
         )}
       </ToolbarItem>

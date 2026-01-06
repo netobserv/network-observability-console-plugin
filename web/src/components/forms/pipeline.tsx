@@ -30,9 +30,9 @@ import {
 } from '@patternfly/react-topology';
 
 import { getResizeObserver } from '@patternfly/react-core';
-import { t } from 'i18next';
 import _ from 'lodash';
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 
 export interface Step {
   id: string;
@@ -90,6 +90,8 @@ export type FlowCollectorPipelineProps = {
 };
 
 export const Pipeline: React.FC<FlowCollectorPipelineProps> = ({ existing, selectedTypes, setSelectedTypes }) => {
+  const { t } = useTranslation('plugin__netobserv-plugin');
+
   const containerRef = React.createRef<HTMLDivElement>();
   const [controller, setController] = React.useState<Visualization>();
 
