@@ -27,15 +27,32 @@ export interface Item {
 export interface LinksOverflowProps {
   id: string;
   items: Item[];
+  text?: string;
 }
 
-export const LinksOverflow: React.FC<LinksOverflowProps> = ({ id, items }) => {
+export const LinksOverflow: React.FC<LinksOverflowProps> = ({ id, items, text }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [isOpen, setOpen] = React.useState(false);
 
   const enabledItems = items.filter(i => i.enabled !== false);
   if (enabledItems.length === 0) {
     return null;
+  } else if (enabledItems.length === 1) {
+    const item = enabledItems[0];
+    return (
+      <MaybeTooltip content={item.tooltip}>
+        <Button
+          data-test={item.id + '-button'}
+          id={item.id + '-button'}
+          variant="link"
+          className="overflow-button"
+          icon={item.icon}
+          onClick={item.onClick}
+        >
+          {item.label}
+        </Button>
+      </MaybeTooltip>
+    );
   }
 
   return (
@@ -79,7 +96,7 @@ export const LinksOverflow: React.FC<LinksOverflowProps> = ({ id, items }) => {
               onBlur={() => setTimeout(() => setOpen(false), 500)}
             >
               <>
-                <EllipsisVIcon /> {t('More options')}
+                <EllipsisVIcon /> {text || t('More options')}
               </>
             </MenuToggle>
           )}

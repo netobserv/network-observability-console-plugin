@@ -3,7 +3,9 @@
 }
 
 .filters-actions {
-  margin-left: 180px;
+  width: fit-content;
+  margin-right: 0;
+  margin-left: auto;
 }
 
 .filter-text-ellipsis {

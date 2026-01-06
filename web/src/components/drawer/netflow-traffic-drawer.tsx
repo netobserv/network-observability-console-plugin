@@ -1,8 +1,8 @@
 import { K8sModel } from '@openshift-console/dynamic-plugin-sdk';
 import { Drawer, DrawerContent, DrawerContentBody, Flex, FlexItem } from '@patternfly/react-core';
-import { t } from 'i18next';
 import _ from 'lodash';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Record } from '../../api/ipfix';
 import { getFunctionMetricKey, getRateMetricKey, NetflowMetrics, Stats } from '../../api/loki';
 import { Config } from '../../model/config';
@@ -104,6 +104,8 @@ export interface NetflowTrafficDrawerProps {
 // eslint-disable-next-line react/display-name
 export const NetflowTrafficDrawer: React.FC<NetflowTrafficDrawerProps> = React.forwardRef(
   (props, ref: React.Ref<NetflowTrafficDrawerHandle>) => {
+    const { t } = useTranslation('plugin__netobserv-plugin');
+
     const overviewRef = React.useRef<NetflowOverviewHandle>(null);
     const tableRef = React.useRef<NetflowTableHandle>(null);
     const topologyRef = React.useRef<NetflowTopologyHandle>(null);
