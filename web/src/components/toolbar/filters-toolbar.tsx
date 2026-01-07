@@ -10,6 +10,7 @@ import { CompressIcon, ExpandIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
+import { Config } from '../../model/config';
 import { Filter, FilterCompare, FilterDefinition, Filters } from '../../model/filters';
 import { QuickFilter } from '../../model/quick-filters';
 import { autoCompleteCache } from '../../utils/autocomplete-cache';
@@ -25,6 +26,7 @@ import { LinksOverflow } from './links-overflow';
 
 export interface FiltersToolbarProps {
   id: string;
+  config: Config;
   filters?: Filters;
   forcedFilters?: Filters | null;
   skipTipsDelay?: boolean;
@@ -42,6 +44,7 @@ export type Direction = 'source' | 'destination' | undefined;
 
 export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
   id,
+  config,
   filters,
   forcedFilters,
   skipTipsDelay,
@@ -105,6 +108,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
           position={'top'}
         >
           <FilterSearchInput
+            config={config}
             filterDefinitions={filterDefinitions}
             filters={filters}
             indicator={indicator}
@@ -126,6 +130,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
       </ToolbarItem>
     );
   }, [
+    config,
     compare,
     direction,
     filter,

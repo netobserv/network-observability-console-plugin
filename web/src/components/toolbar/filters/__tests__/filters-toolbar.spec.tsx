@@ -1,12 +1,14 @@
 import { Button, Dropdown, DropdownItem, Toolbar, ToolbarItem } from '@patternfly/react-core';
 import { mount, shallow } from 'enzyme';
 import * as React from 'react';
+import { defaultConfig } from '../../../../model/config';
 import { FilterDefinitionSample } from '../../../../components/__tests-data__/filters';
 import { actOn } from '../../../../components/__tests__/common.spec';
 import FiltersToolbar, { FiltersToolbarProps } from '../../../toolbar/filters-toolbar';
 
 describe('<FiltersToolbar />', () => {
   const props: FiltersToolbarProps = {
+    config: defaultConfig,
     filters: { match: 'all', list: [] },
     filterDefinitions: FilterDefinitionSample,
     forcedFilters: undefined,

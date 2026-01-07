@@ -204,6 +204,7 @@ export const getConfig = (): Promise<Config> => {
       fields: r.data.fields || defaultConfig.fields,
       dataSources: r.data.dataSources || defaultConfig.dataSources,
       promLabels: r.data.promLabels || defaultConfig.promLabels,
+      lokiLabels: r.data.lokiLabels || defaultConfig.lokiLabels,
       maxChunkAgeMs: r.data.maxChunkAgeMs
     };
   });
