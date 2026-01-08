@@ -1,17 +1,4 @@
 import {
-  ClusterIcon,
-  CubeIcon,
-  CubesIcon,
-  ExternalLinkAltIcon,
-  GlobeRouteIcon,
-  NetworkIcon,
-  OutlinedHddIcon,
-  QuestionCircleIcon,
-  ServiceIcon,
-  UsersIcon,
-  ZoneIcon
-} from '@patternfly/react-icons';
-import {
   DEFAULT_LAYER as defaultLayer,
   Layer,
   Node,
@@ -29,9 +16,13 @@ import {
 import useDetailsLevel from '@patternfly/react-topology/dist/esm/hooks/useDetailsLevel';
 import * as _ from 'lodash';
 import * as React from 'react';
+import { FaQuestion } from 'react-icons/fa';
+import { TbWorldWww } from 'react-icons/tb';
 import { TopologyMetricPeer } from '../../../../../api/loki';
 import { Match } from '../../../../../model/flow-query';
 import { Decorated, NodeData } from '../../../../../model/topology';
+import { useTheme } from '../../../../../utils/theme-hook';
+import { getK8sResourceIcon } from '../../../../icons/kubernetes-icons';
 import DefaultNode from '../components/node';
 import { NodeDecorators } from './styleDecorators';
 
@@ -54,38 +45,21 @@ type StyleNodeProps = {
   WithSelectionProps;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const getTypeIcon = (peer: TopologyMetricPeer): React.ComponentClass<any, any> => {
-  switch (peer.resourceKind) {
-    case 'Service':
-      return ServiceIcon;
-    case 'Pod':
-      return CubeIcon;
-    case 'Namespace':
-      return UsersIcon;
-    case 'Node':
-      return OutlinedHddIcon;
-    case 'Cluster':
-      return ClusterIcon;
-    case 'Zone':
-      return ZoneIcon;
-    case 'UDN':
-      return NetworkIcon;
-    case 'Gateway':
-      return GlobeRouteIcon;
-    case 'CatalogSource':
-    case 'DaemonSet':
-    case 'Deployment':
-    case 'StatefulSet':
-    case 'Job':
-      return CubesIcon;
+const getTypeIcon = (peer: TopologyMetricPeer): React.ComponentType<any> => {
+  const icon = getK8sResourceIcon(peer.resourceKind);
+  if (icon === null) {
+    if (peer.addr || peer.subnetLabel) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return TbWorldWww as any;
+    } else {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return FaQuestion as any;
+    }
   }
-  if (peer.addr || peer.subnetLabel) {
-    return ExternalLinkAltIcon;
-  }
-  return QuestionCircleIcon;
+  return icon;
 };
 
-const renderIcon = (data: Decorated<NodeData>, element: NodePeer): React.ReactNode => {
+const renderIcon = (data: Decorated<NodeData>, element: NodePeer, isDarkTheme: boolean): React.ReactNode => {
   const { width, height } = element.getDimensions();
   const shape = element.getNodeShape();
   const iconSize =
@@ -95,12 +69,19 @@ const renderIcon = (data: Decorated<NodeData>, element: NodePeer): React.ReactNo
 
   return (
     <g transform={`translate(${(width - iconSize) / 2}, ${(height - iconSize) / 2})`}>
-      <Component width={iconSize} height={iconSize} />
+      <Component
+        width={iconSize}
+        height={iconSize}
+        size={iconSize}
+        style={{ color: isDarkTheme ? '#ffffff' : '#393f44' }}
+      />
     </g>
   );
 };
 
 const StyleNode: React.FC<StyleNodeProps> = ({ element, showLabel, dragging, getShapeDecoratorCenter, ...rest }) => {
+  const isDarkTheme = useTheme();
+
   const nodeElement = element as Node;
   const data = element.getData() as Decorated<NodeData> | undefined;
   //TODO: check if we can have intelligent pin on view change
@@ -167,7 +148,7 @@ const StyleNode: React.FC<StyleNodeProps> = ({ element, showLabel, dragging, get
             )
           }
         >
-          {(hover || detailsLevel !== ScaleDetailsLevel.low) && renderIcon(passedData, element)}
+          {(hover || detailsLevel !== ScaleDetailsLevel.low) && renderIcon(passedData, element, isDarkTheme)}
         </DefaultNode>
       </g>
     </Layer>

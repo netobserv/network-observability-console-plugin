@@ -1,11 +1,11 @@
 import { Badge, MenuToggle, MenuToggleElement, Select, SelectOption } from '@patternfly/react-core';
-import { FilterIcon } from '@patternfly/react-icons';
 import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { doesIncludeFilter, Filter, findFromFilters, removeFromFilters } from '../../../model/filters';
 import { QuickFilter } from '../../../model/quick-filters';
 import { useOutsideClickEvent } from '../../../utils/outside-hook';
+import { QuickFiltersIcon } from '../../icons';
 
 export interface QuickFiltersProps {
   quickFilters: QuickFilter[];
@@ -71,7 +71,7 @@ export const QuickFilters: React.FC<QuickFiltersProps> = ({ quickFilters, active
         toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
           <MenuToggle ref={toggleRef} onClick={() => setOpen(!isOpen)} isExpanded={isOpen}>
             <>
-              <FilterIcon /> {t('Quick filters')}
+              <QuickFiltersIcon /> {t('Quick filters')}
               {selectedList.length > 0 && <Badge isRead>{selectedList.length}</Badge>}
             </>
           </MenuToggle>

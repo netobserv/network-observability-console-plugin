@@ -1,5 +1,5 @@
 import { Flex, FlexItem, Text, TextVariants, Tooltip } from '@patternfly/react-core';
-import { InfoCircleIcon } from '@patternfly/react-icons';
+import { InfoCircleIcon, TachometerAltIcon } from '@patternfly/react-icons';
 import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -8,6 +8,7 @@ import { RecordType } from '../../model/flow-query';
 import { Warning } from '../../model/warnings';
 import { rangeToSeconds, TimeRange } from '../../utils/datetime';
 import { valueFormat } from '../../utils/format';
+import { BytesIcon, PacketsIcon } from '../icons';
 import StatsQuerySummary from './stats-query-summary';
 
 export interface FlowsQuerySummaryContentProps {
@@ -57,27 +58,36 @@ export const FlowsQuerySummaryContent: React.FC<FlowsQuerySummaryContentProps> =
         {bytes > 0 && (
           <FlexItem>
             <Tooltip content={<Text component={TextVariants.p}>{t('Filtered sum of bytes')}</Text>}>
-              <Text id="bytesCount" component={TextVariants.p}>
-                {valueFormat(bytes, 0, t('B'), limitReached)}
-              </Text>
+              <div className="stats-query-summary-container-with-icon">
+                <BytesIcon />
+                <Text id="bytesCount" component={TextVariants.p}>
+                  {valueFormat(bytes, 0, t('B'), limitReached)}
+                </Text>
+              </div>
             </Tooltip>
           </FlexItem>
         )}
         {packets > 0 && (
           <FlexItem>
             <Tooltip content={<Text component={TextVariants.p}>{t('Filtered sum of packets')}</Text>}>
-              <Text id="packetsCount" component={TextVariants.p}>
-                {valueFormat(packets, 0, t('Packets'), limitReached, true)}
-              </Text>
+              <div className="stats-query-summary-container-with-icon">
+                <PacketsIcon />
+                <Text id="packetsCount" component={TextVariants.p}>
+                  {valueFormat(packets, 0, t('Packets'), limitReached, true)}
+                </Text>
+              </div>
             </Tooltip>
           </FlexItem>
         )}
         {bytes > 0 && (
           <FlexItem>
             <Tooltip content={<Text component={TextVariants.p}>{t('Filtered average speed')}</Text>}>
-              <Text id="bytesPerSecondsCount" component={TextVariants.p}>
-                {valueFormat(bytes / rangeInSeconds, 2, t('Bps'), limitReached)}
-              </Text>
+              <div className="stats-query-summary-container-with-icon">
+                <TachometerAltIcon />
+                <Text id="bytesPerSecondsCount" component={TextVariants.p}>
+                  {valueFormat(bytes / rangeInSeconds, 2, t('Bps'), limitReached)}
+                </Text>
+              </div>
             </Tooltip>
           </FlexItem>
         )}
