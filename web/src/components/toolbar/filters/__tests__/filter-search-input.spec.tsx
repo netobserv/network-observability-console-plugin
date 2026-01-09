@@ -1,6 +1,7 @@
 import { SearchInput } from '@patternfly/react-core';
 import { mount } from 'enzyme';
 import * as React from 'react';
+import { defaultConfig } from '../../../../model/config';
 import { FilterCompare } from '../../../../model/filters';
 import { FilterDefinitionSample } from '../../../__tests-data__/filters';
 import { actOn } from '../../../__tests__/common.spec';
@@ -8,6 +9,7 @@ import FilterSearchInput, { FilterSearchInputProps } from '../filter-search-inpu
 
 describe('<FilterSearchInput />', () => {
   const props: FilterSearchInputProps = {
+    config: defaultConfig,
     filters: { match: 'all', list: [] },
     filterDefinitions: FilterDefinitionSample,
     searchInputValue: '',
