@@ -1,9 +1,9 @@
 import { Button, Dropdown, DropdownItem, Toolbar, ToolbarItem } from '@patternfly/react-core';
 import { mount, shallow } from 'enzyme';
 import * as React from 'react';
-import { defaultConfig } from '../../../../model/config';
 import { FilterDefinitionSample } from '../../../../components/__tests-data__/filters';
 import { actOn } from '../../../../components/__tests__/common.spec';
+import { defaultConfig } from '../../../../model/config';
 import FiltersToolbar, { FiltersToolbarProps } from '../../../toolbar/filters-toolbar';
 
 describe('<FiltersToolbar />', () => {

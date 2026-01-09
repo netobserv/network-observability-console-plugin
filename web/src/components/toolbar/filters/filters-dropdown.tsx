@@ -87,7 +87,9 @@ export const FiltersDropdown: React.FC<FiltersDropdownProps> = ({
       <div id="column-filter-dropdown-container" data-test="column-filter-dropdown-container" ref={columnRef}>
         <Tooltip
           content={
-            <div>Select a field name to filter on. Use indexed fields in bold to improve your query performances.</div>
+            <div>
+              {t('Select a field name to filter on. Use indexed fields in bold to improve your query performances.')}
+            </div>
           }
           isVisible={isColumnOpen}
           enableFlip={false}
