@@ -5,13 +5,16 @@
  * using inline SVGs from the official Kubernetes community icons:
  * https://github.com/kubernetes/community/tree/master/icons
  *
- * and react icons:
+ * react icons:
  * https://react-icons.github.io/react-icons/
+ *
+ * and patternfly icons:
+ * https://www.patternfly.org/v4/icons/
  */
 
-import { ExternalLinkAltIcon } from '@patternfly/react-icons';
+import { ExternalLinkAltIcon, GlobeRouteIcon } from '@patternfly/react-icons';
 import * as React from 'react';
-import { GrGateway, GrHost, GrMultiple, GrServerCluster } from 'react-icons/gr';
+import { GrHost, GrMultiple, GrServerCluster } from 'react-icons/gr';
 import { PiNetwork } from 'react-icons/pi';
 import { TbWorldPin } from 'react-icons/tb';
 import { IconWrapper } from './react-icons-wrapper';
@@ -435,14 +438,6 @@ class NetworkIcon extends React.Component<SVGIconProps> {
   }
 }
 
-class GatewayIcon extends React.Component<SVGIconProps> {
-  render() {
-    const { size, className, style } = this.props;
-    const sizeValue = typeof size === 'number' ? size : parseFloat(size as string) || 18;
-    return <IconWrapper icon={GrGateway} size={sizeValue} className={className} style={style} />;
-  }
-}
-
 /**
  * Get the appropriate icon component for a Kubernetes resource kind
  * Uses official Kubernetes community icons as inline SVGs
@@ -470,7 +465,7 @@ export const getK8sResourceIcon = (resourceKind: string | undefined): React.Comp
     cluster: ClusterIcon,
     zone: ZoneIcon,
     udn: NetworkIcon,
-    gateway: GatewayIcon,
+    gateway: GlobeRouteIcon,
     daemonset: DaemonSetIcon,
     ds: DaemonSetIcon,
     deployment: DeploymentIcon,
@@ -521,7 +516,7 @@ export const K8sIconComponents = {
   Cluster: ClusterIcon,
   Zone: ZoneIcon,
   UDN: NetworkIcon,
-  Gateway: GatewayIcon,
+  Gateway: GlobeRouteIcon, // Using GlobeRouteIcon from PatternFly
   Deployment: DeploymentIcon,
   CatalogSource: DeploymentIcon, // No specific icon available
   DaemonSet: DaemonSetIcon,
