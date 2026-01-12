@@ -219,8 +219,7 @@ class DaemonSetIcon extends React.Component<SVGIconProps> {
           />
           <path
             d="m 6.169549,6.6940855 6.524989,0 0,4.5833355 -6.524989,0 z"
-            fill="#326ce5"
-            fillOpacity="1"
+            fill="none"
             stroke="currentColor"
             strokeWidth="0.52914584"
             strokeLinecap="square"
@@ -273,8 +272,7 @@ class StatefulSetIcon extends React.Component<SVGIconProps> {
           />
           <path
             d="m 6.5142849,6.5403876 6.5250071,0 0,4.5833354 -6.5250071,0 z"
-            fill="#326ce5"
-            fillOpacity="1"
+            fill="none"
             stroke="currentColor"
             strokeWidth="0.52914584"
             strokeLinecap="square"
@@ -310,7 +308,7 @@ class StatefulSetIcon extends React.Component<SVGIconProps> {
               '-2.7291614,-0.777506 l 0,-2.1033228'
             }
             fill="none"
-            stroke="#326ce5"
+            stroke="#f0f0f0"
             strokeWidth="0.5291667"
             strokeLinecap="butt"
             strokeLinejoin="round"
@@ -367,8 +365,7 @@ class ReplicaSetIcon extends React.Component<SVGIconProps> {
         <g transform="translate(-0.82964531,-0.50523985)">
           <path
             d="m 8.123609,5.5524084 6.52499,0 0,4.5833346 -6.52499,0 z"
-            fill="#326ce5"
-            fillOpacity="1"
+            fill="none"
             stroke="currentColor"
             strokeWidth="0.52899998"
             strokeLinecap="square"
@@ -379,8 +376,7 @@ class ReplicaSetIcon extends React.Component<SVGIconProps> {
           />
           <path
             d="m 6.5848588,6.9637194 6.5249902,0 0,4.5833346 -6.5249902,0 z"
-            fill="#326ce5"
-            fillOpacity="1"
+            fill="none"
             stroke="currentColor"
             strokeWidth="0.52914584"
             strokeLinecap="square"
