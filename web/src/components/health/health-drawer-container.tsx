@@ -41,9 +41,7 @@ export const HealthDrawerContainer: React.FC<HealthDrawerContainerProps> = ({
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [selectedResource, setSelectedResource] = React.useState<ByResource | undefined>(undefined);
-  const [selectedRecordingResource, setSelectedRecordingResource] = React.useState<
-    RecordingRulesByResource
-  >();
+  const [selectedRecordingResource, setSelectedRecordingResource] = React.useState<RecordingRulesByResource>();
   const drawerRef = React.useRef<HTMLDivElement>(null);
 
   const onExpand = () => {

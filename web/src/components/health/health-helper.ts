@@ -3,10 +3,12 @@ import * as _ from 'lodash';
 import { SilenceMatcher } from '../../api/alert';
 import { HealthRuleMetadata } from '../../model/config';
 
+export type Severity = 'critical' | 'warning' | 'info';
+
 export type RecordingRuleItem = {
   name: string;
   value: number;
-  severity: 'critical' | 'warning' | 'info';
+  severity: Severity;
   template: string;
   threshold?: string;
   labels: PrometheusLabels;
@@ -156,7 +158,7 @@ const processRecordingRules = (
       const value = valueData.value;
 
       // Determine severity based on thresholds
-      let severity: 'critical' | 'warning' | 'info' = 'info';
+      let severity: Severity = 'info';
       if (variant.thresholds.critical && value >= parseFloat(variant.thresholds.critical)) {
         severity = 'critical';
       } else if (variant.thresholds.warning && value >= parseFloat(variant.thresholds.warning)) {
