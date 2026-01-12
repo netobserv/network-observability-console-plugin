@@ -125,8 +125,9 @@ export const NetworkHealth: React.FC<{}> = ({}) => {
           setRecordingRulesMetrics(metrics);
         });
       })
-      .catch(() => {
+      .catch(err => {
         // Recording rules not available
+        console.error('Failed to fetch recording rules:', err);
       });
   }, []);
 
