@@ -51,7 +51,7 @@ export const HealthDrawerContainer: React.FC<HealthDrawerContainerProps> = ({
   };
 
   // When selecting a violation, deselect recording rule
-  const handleSelectResource = (r: ByResource | undefined) => {
+  const handleSelectResource = (r?: ByResource) => {
     setSelectedResource(r);
     if (r) {
       setSelectedRecordingResource(undefined);
