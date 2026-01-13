@@ -23,11 +23,15 @@ export const RecordingRulesGallery: React.FC<RecordingRulesGalleryProps> = ({
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   // Sort by severity: most critical first
-  const sorted = [...stats].sort((a, b) => {
-    const aScore = a.critical.length * 3 + a.warning.length * 2 + a.other.length;
-    const bScore = b.critical.length * 3 + b.warning.length * 2 + b.other.length;
-    return bScore - aScore;
-  });
+  const sorted = React.useMemo(
+    () =>
+      [...stats].sort((a, b) => {
+        const aScore = a.critical.length * 3 + a.warning.length * 2 + a.other.length;
+        const bScore = b.critical.length * 3 + b.warning.length * 2 + b.other.length;
+        return bScore - aScore;
+      }),
+    [stats]
+  );
 
   return (
     <>
