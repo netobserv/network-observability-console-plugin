@@ -1144,6 +1144,9 @@ export const FlowCollectorUISchema: UiSchema = {
       autoscaler: {
         'ui:widget': 'hidden'
       },
+      standalone: {
+        'ui:widget': 'hidden'
+      },
       advanced: {
         'ui:title': 'Advanced configuration',
         'ui:widget': 'hidden',
