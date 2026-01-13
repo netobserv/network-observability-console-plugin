@@ -2,7 +2,7 @@ import React, { FC } from 'react';
 
 import { useParams } from 'react-router-dom-v5-compat';
 import DynamicLoader, { back } from '../dynamic-loader/dynamic-loader';
-import { FlowMetricUISchema } from './config/uiSchema';
+import { flowMetricUISchema } from './config/uiSchema';
 import { ResourceForm } from './resource-form';
 import { ResourceWatcher } from './resource-watcher';
 
@@ -21,11 +21,9 @@ export const FlowMetricForm: FC<FlowMetricFormProps> = props => {
         kind="FlowMetric"
         name={params.name || props.name}
         namespace={params.namespace || 'default'}
-        onSuccess={() => {
-          back();
-        }}
+        onSuccess={back}
       >
-        <ResourceForm uiSchema={FlowMetricUISchema} />
+        <ResourceForm uiSchema={flowMetricUISchema} />
       </ResourceWatcher>
     </DynamicLoader>
   );

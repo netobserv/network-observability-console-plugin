@@ -11,7 +11,7 @@ import { ContextSingleton } from '../../utils/context';
 import { flowMetricNewPath } from '../../utils/url';
 import { safeYAMLToJS } from '../../utils/yaml';
 import DynamicLoader, { back, navigate } from '../dynamic-loader/dynamic-loader';
-import { FlowMetricUISchema } from './config/uiSchema';
+import { flowMetricUISchema } from './config/uiSchema';
 import { DynamicForm } from './dynamic-form/dynamic-form';
 import { ErrorTemplate } from './dynamic-form/templates';
 import './forms.css';
@@ -37,7 +37,7 @@ export const FlowMetricWizard: FC<FlowMetricWizardProps> = props => {
       if (!schema) {
         return <></>;
       }
-      const filteredSchema = getFilteredUISchema(FlowMetricUISchema, paths);
+      const filteredSchema = getFilteredUISchema(flowMetricUISchema, paths);
       return (
         <DynamicForm
           formData={data}

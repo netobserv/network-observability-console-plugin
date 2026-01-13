@@ -18,10 +18,12 @@ import './forms.css';
 import { ClusterServiceVersionList, CustomResourceDefinitionKind } from './types';
 import { exampleForModel } from './utils';
 
+export type SupportedKind = 'FlowCollector' | 'FlowCollectorSlice' | 'FlowMetric';
+
 export type ResourceWatcherProps = {
   group: string;
   version: string;
-  kind: string;
+  kind: SupportedKind;
   name?: string;
   namespace?: string;
   onSuccess?: (data: any) => void;
@@ -34,7 +36,7 @@ export type ResourceWatcherProps = {
 export type ResourceWatcherContext = {
   group: string;
   version: string;
-  kind: string;
+  kind: SupportedKind;
   isUpdate: boolean;
   schema: JSONSchema7 | null;
   data: K8sResourceKind;
@@ -47,7 +49,7 @@ export type ResourceWatcherContext = {
 export const { Provider, Consumer } = React.createContext<ResourceWatcherContext>({
   group: '',
   version: '',
-  kind: '',
+  kind: '' as SupportedKind,
   isUpdate: false,
   schema: null,
   data: {},
@@ -94,7 +96,12 @@ export const ResourceWatcher: FC<ResourceWatcherProps> = ({
       kind: 'CustomResourceDefinition'
     },
     kind: 'CustomResourceDefinition',
-    name: kind === 'FlowCollector' ? 'flowcollectors.flows.netobserv.io' : 'flowmetrics.flows.netobserv.io',
+    name:
+      kind === 'FlowCollector'
+        ? 'flowcollectors.flows.netobserv.io'
+        : kind === 'FlowCollectorSlice'
+        ? 'flowcollectorslices.flows.netobserv.io'
+        : 'flowmetrics.flows.netobserv.io',
     isList: false
   });
   const [cr, crLoaded, crLoadError] = useK8sWatchResource<K8sResourceKind>(
@@ -143,14 +150,11 @@ export const ResourceWatcher: FC<ResourceWatcherProps> = ({
       )
     : { apiVersion: `${group}/${version}`, kind };
   const schema = crd?.spec?.versions?.find(v => v.name === version)?.schema?.openAPIV3Schema || null;
-  // force name and namespace to be present in the form when namespaced
+  // force namespace to be present in the form when namespaced
   if (crd?.spec?.scope === 'Namespaced') {
-    data.metadata = {
-      ...data.metadata,
-      namespace: data.metadata?.namespace || 'netobserv', // for now, keep namespace if exists, or use netobserv by default
-      // namespace: namespace || 'netobserv', TODO: uncomment alongside with https://issues.redhat.com/browse/NETOBSERV-1690
-      name: name
-    };
+    if (!data.metadata?.namespace) {
+      data.metadata = { ...data.metadata, namespace: kind === 'FlowMetric' ? 'netobserv' : namespace || 'default' };
+    }
     if (schema?.properties?.metadata) {
       (schema.properties.metadata as any).properties = {
         name: { type: 'string' },

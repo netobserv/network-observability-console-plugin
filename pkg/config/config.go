@@ -32,14 +32,21 @@ type Server struct {
 }
 
 type Prometheus struct {
-	URL              string       `yaml:"url" json:"url"`
-	DevURL           string       `yaml:"devUrl,omitempty" json:"devUrl,omitempty"`
-	Timeout          Duration     `yaml:"timeout,omitempty" json:"timeout,omitempty"`
-	TokenPath        string       `yaml:"tokenPath,omitempty" json:"tokenPath,omitempty"`
-	SkipTLS          bool         `yaml:"skipTls,omitempty" json:"skipTls,omitempty"`
-	CAPath           string       `yaml:"caPath,omitempty" json:"caPath,omitempty"`
-	ForwardUserToken bool         `yaml:"forwardUserToken,omitempty" json:"forwardUserToken,omitempty"`
-	Metrics          []MetricInfo `yaml:"metrics,omitempty" json:"metrics,omitempty"`
+	URL              string             `yaml:"url" json:"url"`
+	DevURL           string             `yaml:"devUrl,omitempty" json:"devUrl,omitempty"`
+	Timeout          Duration           `yaml:"timeout,omitempty" json:"timeout,omitempty"`
+	TokenPath        string             `yaml:"tokenPath,omitempty" json:"tokenPath,omitempty"`
+	SkipTLS          bool               `yaml:"skipTls,omitempty" json:"skipTls,omitempty"`
+	CAPath           string             `yaml:"caPath,omitempty" json:"caPath,omitempty"`
+	ForwardUserToken bool               `yaml:"forwardUserToken,omitempty" json:"forwardUserToken,omitempty"`
+	Metrics          []MetricInfo       `yaml:"metrics,omitempty" json:"metrics,omitempty"`
+	AlertManager     AlertManagerConfig `yaml:"alertManager" json:"alertManager"`
+}
+
+type AlertManagerConfig struct {
+	URL     string `yaml:"url" json:"url"`
+	SkipTLS bool   `yaml:"skipTls,omitempty" json:"skipTls,omitempty"`
+	CAPath  string `yaml:"caPath,omitempty" json:"caPath,omitempty"`
 }
 
 type FlowDirection string
@@ -279,7 +286,7 @@ func (c *Config) Validate() error {
 	}
 
 	if c.IsPromEnabled() {
-		log.Infof("Prometheus is enabled:\n - admin: %s\n - dev: %s\n", c.Prometheus.URL, c.Prometheus.DevURL)
+		log.Infof("Prometheus is enabled [admin: %s, dev: %s, alert-manager: %s]", c.Prometheus.URL, c.Prometheus.DevURL, c.Prometheus.AlertManager.URL)
 		// parse config urls
 		_, err := url.Parse(c.Prometheus.URL)
 		if err != nil {

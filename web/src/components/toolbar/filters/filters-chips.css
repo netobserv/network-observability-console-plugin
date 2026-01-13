@@ -60,10 +60,10 @@
 }
 
 .toolbar-item-center {
-  align-items: center;
-  align-content: center;
-  align-self: center;
-  justify-items: center;
-  justify-content: center;
-  justify-self: center;
+  align-items: center !important;
+  align-content: center !important;
+  align-self: center !important;
+  justify-items: center !important;
+  justify-content: center !important;
+  justify-self: center !important;
 }

@@ -1,8 +1,8 @@
 import { ActionGroup, Button, Form, FormGroup, Panel, PanelMain, PanelMainBody } from '@patternfly/react-core';
-import { t } from 'i18next';
 import _ from 'lodash';
 import React from 'react';
 import { Config } from '../../../model/config';
+import { useTranslation } from 'react-i18next';
 import { FilterCompare, FilterDefinition, Filters, FilterValue } from '../../../model/filters';
 import { getHTTPErrorDetails } from '../../../utils/errors';
 import { Indicator } from '../../../utils/filters-helper';
@@ -55,6 +55,8 @@ export const FilterSearchPanel: React.FC<FilterSearchPanelProps> = ({
   reset,
   prevSuggestions
 }) => {
+  const { t } = useTranslation('plugin__netobserv-plugin');
+
   return (
     <Panel variant="raised">
       <PanelMain>
@@ -101,13 +103,12 @@ export const FilterSearchPanel: React.FC<FilterSearchPanelProps> = ({
               )}
             </FormGroup>
             <ActionGroup className="filters-actions">
-              <Button id="reset-form-filter" variant="link" type="reset" onClick={reset}>
+              <Button id="reset-form-filter" variant="link" onClick={reset}>
                 {t('Reset')}
               </Button>
               <Button
                 id="add-form-filter"
                 variant="primary"
-                type="submit"
                 onClick={e => {
                   e.preventDefault();
                   if (filter.component === 'autocomplete' && _.isEmpty(prevSuggestions)) {
