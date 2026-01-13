@@ -15,9 +15,12 @@ export const RecordingRuleDetails: React.FC<RecordingRuleDetailsProps> = ({ info
   const { t } = useTranslation('plugin__netobserv-plugin');
   const resourceName = info.name || undefined;
 
-  const allRules = [...info.critical, ...info.warning, ...info.other];
+  const allRules = React.useMemo(
+    () => [...info.critical, ...info.warning, ...info.other],
+    [info.critical, info.warning, info.other]
+  );
 
-  const getSeverityColor = (severity: string) => {
+  const getSeverityColor = React.useCallback((severity: string) => {
     switch (severity) {
       case 'critical':
         return 'red';
@@ -26,9 +29,9 @@ export const RecordingRuleDetails: React.FC<RecordingRuleDetailsProps> = ({ info
       default:
         return 'blue';
     }
-  };
+  }, []);
 
-  const getDirection = (metricName: string): string | undefined => {
+  const getDirection = React.useCallback((metricName: string): string | undefined => {
     // Returns Src or Dst based on metric name pattern
     if (metricName.includes(':src:')) {
       return 'Src';
@@ -36,7 +39,7 @@ export const RecordingRuleDetails: React.FC<RecordingRuleDetailsProps> = ({ info
       return 'Dst';
     }
     return undefined;
-  };
+  }, []);
 
   return (
     <Table data-test-rows-count={allRules.length} aria-label="Recording rules" variant="compact">
