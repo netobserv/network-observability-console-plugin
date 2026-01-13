@@ -90,16 +90,20 @@ export const HealthDrawerContainer: React.FC<HealthDrawerContainerProps> = ({
   const isExpanded = selectedResource !== undefined || selectedRecordingResource !== undefined;
 
   // Sort alerts by score (best score = lowest value)
-  const sortedAlerts = _.orderBy(stats, r => r.score, 'asc');
+  const sortedAlerts = React.useMemo(() => _.orderBy(stats, r => r.score, 'asc'), [stats]);
 
   // Sort recording rules by severity (most critical first)
-  const sortedRecordingRules = hasRecordingRules
-    ? [...recordingRulesStats!].sort((a, b) => {
-        const aScore = a.critical.length * 3 + a.warning.length * 2 + a.other.length;
-        const bScore = b.critical.length * 3 + b.warning.length * 2 + b.other.length;
-        return bScore - aScore;
-      })
-    : [];
+  const sortedRecordingRules = React.useMemo(
+    () =>
+      hasRecordingRules
+        ? [...recordingRulesStats!].sort((a, b) => {
+            const aScore = a.critical.length * 3 + a.warning.length * 2 + a.other.length;
+            const bScore = b.critical.length * 3 + b.warning.length * 2 + b.other.length;
+            return bScore - aScore;
+          })
+        : [],
+    [hasRecordingRules, recordingRulesStats]
+  );
 
   const hasAnyViolations = sortedAlerts.length > 0 || sortedRecordingRules.length > 0;
 
