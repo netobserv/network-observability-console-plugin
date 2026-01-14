@@ -19,6 +19,7 @@ export type RecordingRulesByResource = {
   critical: RecordingRuleItem[];
   warning: RecordingRuleItem[];
   other: RecordingRuleItem[];
+  score: number;
 };
 
 export type RecordingRuleMetricValue = {
@@ -213,14 +214,24 @@ const processRecordingRules = (
       name: name,
       critical: items.filter(i => i.severity === 'critical'),
       warning: items.filter(i => i.severity === 'warning'),
-      other: items.filter(i => i.severity === 'info')
+      other: items.filter(i => i.severity === 'info'),
+      score: 0 // Will be computed below
     };
   };
 
+  const global = buildResourceGroup('', globalItems);
+  const byNamespace = Object.keys(namespaceGroups).map(ns => buildResourceGroup(ns, namespaceGroups[ns]));
+  const byNode = Object.keys(nodeGroups).map(n => buildResourceGroup(n, nodeGroups[n]));
+
+  // Compute scores for all resource groups
+  [global, ...byNamespace, ...byNode].forEach(r => {
+    r.score = computeRecordingRulesScore(r);
+  });
+
   return {
-    global: buildResourceGroup('', globalItems),
-    byNamespace: Object.keys(namespaceGroups).map(ns => buildResourceGroup(ns, namespaceGroups[ns])),
-    byNode: Object.keys(nodeGroups).map(n => buildResourceGroup(n, nodeGroups[n]))
+    global,
+    byNamespace,
+    byNode
   };
 };
 
@@ -489,8 +500,58 @@ export const computeScore = (r: ByResource): number => {
   return sum / sumWeights;
 };
 
+// Score [0,10]; higher is better
+export const computeRecordingRulesScore = (r: RecordingRulesByResource): number => {
+  const allRules = [...r.critical, ...r.warning, ...r.other];
+
+  if (allRules.length === 0) {
+    return 10; // Perfect score if no rules
+  }
+
+  const allScores: ScoreDetail[] = allRules.map(rule => {
+    // Determine weight based on severity
+    let weight = minorWeight;
+    if (rule.severity === 'critical') {
+      weight = criticalWeight;
+    } else if (rule.severity === 'warning') {
+      weight = warningWeight;
+    }
+
+    // Calculate raw score based on value vs threshold
+    let rawScore = 10; // Default to perfect if no threshold
+    if (rule.threshold) {
+      const thresholdValue = parseFloat(rule.threshold);
+      if (!isNaN(thresholdValue) && thresholdValue > 0) {
+        // Create a compatible object to use the same computeExcessRatio function as alerts
+        // Use same default upperBound as alerts (100)
+        const mockAlert = {
+          value: rule.value,
+          metadata: {
+            thresholdF: thresholdValue,
+            upperBoundF: 100
+          }
+        } as AlertWithRuleName;
+
+        const excessRatio = computeExcessRatio(mockAlert);
+        rawScore = 10 * (1 - excessRatio);
+      }
+    }
+
+    return { rawScore, weight };
+  });
+
+  const sum = allScores.map(s => s.rawScore * s.weight).reduce((a, b) => a + b, 0);
+  const sumWeights = allScores.map(s => s.weight).reduce((a, b) => a + b, 0);
+
+  if (sumWeights === 0) {
+    return 10;
+  }
+
+  return sum / sumWeights;
+};
+
 // Score [0,1]; lower is better
-const computeExcessRatio = (a: AlertWithRuleName): number => {
+export const computeExcessRatio = (a: AlertWithRuleName): number => {
   // Assuming the alert value is a [0-n] percentage. Needs update if more use cases come up.
   const threshold = a.metadata.thresholdF / 2;
   const upper = a.metadata.upperBoundF;
@@ -509,6 +570,25 @@ export const computeAlertScore = (a: AlertWithRuleName): ScoreDetail => {
     rawScore: 10 * (1 - computeExcessRatio(a)),
     weight: getSeverityWeight(a) * getStateWeight(a)
   };
+};
+
+// Mapping of severity levels to PatternFly Label colors
+// critical -> red (danger)
+// warning -> orange (warning)
+// info -> blue (info)
+const SEVERITY_LABEL_COLORS = {
+  critical: 'red',
+  warning: 'orange',
+  info: 'blue'
+} as const;
+
+export const getSeverityColor = (
+  severity: string | undefined
+): 'red' | 'orange' | 'blue' | 'grey' | 'purple' | 'cyan' | 'green' | 'gold' => {
+  if (severity && severity in SEVERITY_LABEL_COLORS) {
+    return SEVERITY_LABEL_COLORS[severity as keyof typeof SEVERITY_LABEL_COLORS];
+  }
+  return 'blue'; // default for info/undefined
 };
 
 export const isSilenced = (silence: SilenceMatcher[], labels: PrometheusLabels): boolean => {

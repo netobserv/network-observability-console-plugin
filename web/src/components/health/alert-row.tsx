@@ -6,7 +6,13 @@ import { useTranslation } from 'react-i18next';
 import { formatActiveSince } from '../../utils/datetime';
 import { valueFormat } from '../../utils/format';
 import { HealthColorSquare } from './health-color-square';
-import { AlertWithRuleName, getAlertFilteredLabels, getAlertLink, getTrafficLink } from './health-helper';
+import {
+  AlertWithRuleName,
+  getAlertFilteredLabels,
+  getAlertLink,
+  getSeverityColor,
+  getTrafficLink
+} from './health-helper';
 
 export interface AlertRowProps {
   kind: string;
@@ -39,7 +45,9 @@ export const AlertRow: React.FC<AlertRowProps> = ({ kind, resourceName, alert, w
         </Td>
       )}
       <Td noPadding={!wide}>{alert.state}</Td>
-      <Td>{alert.labels.severity}</Td>
+      <Td>
+        <Label color={getSeverityColor(alert.labels.severity)}>{alert.labels.severity}</Label>
+      </Td>
       {alert.activeAt && <Td>{formatActiveSince(t, alert.activeAt)}</Td>}
       <Td>
         {labels.length === 0
@@ -51,9 +59,10 @@ export const AlertRow: React.FC<AlertRowProps> = ({ kind, resourceName, alert, w
             ))}
       </Td>
       <Td>
-        {valueFormat(alert.value as number, 2)}
-        {alert.metadata.threshold && ' > ' + alert.metadata.threshold + ' ' + alert.metadata.unit}
+        {valueFormat(alert.value as number, 2)} {alert.metadata.unit}
+        {!wide && alert.metadata.threshold && ' > ' + alert.metadata.threshold}
       </Td>
+      {wide && <Td>{alert.metadata.threshold ? '> ' + alert.metadata.threshold : ''}</Td>}
       {wide && <Td>{alert.annotations['description']}</Td>}
       <Td noPadding>
         <ActionsColumn

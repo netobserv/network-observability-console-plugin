@@ -24,6 +24,12 @@ import { RecordingRuleCard } from './recording-rule-card';
 import { RecordingRuleDetails } from './recording-rule-details';
 import { RuleDetails } from './rule-details';
 
+// Type guard to differentiate between ByResource and RecordingRulesByResource
+const isAlertResource = (item: ByResource | RecordingRulesByResource): item is ByResource => {
+  // ByResource has critical.firing, RecordingRulesByResource has critical as array
+  return 'firing' in item.critical;
+};
+
 export interface HealthDrawerContainerProps {
   title: string;
   stats: ByResource[];
@@ -40,54 +46,37 @@ export const HealthDrawerContainer: React.FC<HealthDrawerContainerProps> = ({
   isDark
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
-  const [selectedResource, setSelectedResource] = React.useState<ByResource | undefined>(undefined);
-  const [selectedRecordingResource, setSelectedRecordingResource] = React.useState<RecordingRulesByResource>();
+  const [selectedItem, setSelectedItem] = React.useState<ByResource | RecordingRulesByResource | undefined>(undefined);
   const drawerRef = React.useRef<HTMLDivElement>(null);
 
   const onExpand = () => {
     drawerRef.current && drawerRef.current.focus();
   };
 
-  // When selecting a violation, deselect recording rule
-  const handleSelectResource = (r?: ByResource) => {
-    setSelectedResource(r);
-    if (r) {
-      setSelectedRecordingResource(undefined);
-    }
-  };
-
-  // When selecting a recording rule, deselect violation
-  const handleSelectRecordingResource = (r: RecordingRulesByResource | undefined) => {
-    setSelectedRecordingResource(r);
-    if (r) {
-      setSelectedResource(undefined);
-    }
+  const handleSelectItem = (item?: ByResource | RecordingRulesByResource) => {
+    setSelectedItem(item);
   };
 
   React.useEffect(() => {
-    if (selectedResource) {
-      const fromStats = stats.find(s => s.name === selectedResource.name);
-      if (fromStats !== selectedResource) {
-        setSelectedResource(fromStats);
+    if (selectedItem) {
+      if (isAlertResource(selectedItem)) {
+        const fromStats = stats.find(s => s.name === selectedItem.name);
+        if (fromStats !== selectedItem) {
+          setSelectedItem(fromStats);
+        }
+      } else if (recordingRulesStats) {
+        const fromStats = recordingRulesStats.find(s => s.name === selectedItem.name);
+        if (fromStats !== selectedItem) {
+          setSelectedItem(fromStats);
+        }
       }
     }
-    // we want to update selectedResource when stats changes, no more
+    // we want to update selectedItem when stats or recordingRulesStats changes, no more
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stats]);
-
-  React.useEffect(() => {
-    if (selectedRecordingResource && recordingRulesStats) {
-      const fromStats = recordingRulesStats.find(s => s.name === selectedRecordingResource.name);
-      if (fromStats !== selectedRecordingResource) {
-        setSelectedRecordingResource(fromStats);
-      }
-    }
-    // we want to update selectedRecordingResource when recordingRulesStats changes, no more
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [recordingRulesStats]);
+  }, [stats, recordingRulesStats]);
 
   const hasRecordingRules = recordingRulesStats && recordingRulesStats.length > 0;
-  const isExpanded = selectedResource !== undefined || selectedRecordingResource !== undefined;
+  const isExpanded = selectedItem !== undefined;
 
   // Sort alerts by score (best score = lowest value)
   const sortedAlerts = React.useMemo(() => _.orderBy(stats, r => r.score, 'asc'), [stats]);
@@ -123,26 +112,16 @@ export const HealthDrawerContainer: React.FC<HealthDrawerContainerProps> = ({
             >
               <DrawerHead>
                 <span tabIndex={isExpanded ? 0 : -1} ref={drawerRef}>
-                  {selectedResource !== undefined && (
-                    <>
-                      <ResourceLink inline={true} kind={kind} name={selectedResource.name} />
-                    </>
-                  )}
-                  {selectedRecordingResource !== undefined && (
-                    <>
-                      <ResourceLink inline={true} kind={kind} name={selectedRecordingResource.name} />
-                    </>
-                  )}
+                  {selectedItem && <ResourceLink inline={true} kind={kind} name={selectedItem.name} />}
                 </span>
               </DrawerHead>
-              {selectedResource && (
+              {selectedItem && (
                 <div className="health-gallery-drawer-content">
-                  <RuleDetails kind={kind} info={selectedResource} wide={false} />
-                </div>
-              )}
-              {selectedRecordingResource && (
-                <div className="health-gallery-drawer-content">
-                  <RecordingRuleDetails kind={kind} info={selectedRecordingResource} wide={false} />
+                  {isAlertResource(selectedItem) ? (
+                    <RuleDetails kind={kind} info={selectedItem} wide={false} />
+                  ) : (
+                    <RecordingRuleDetails kind={kind} info={selectedItem} wide={false} />
+                  )}
                 </div>
               )}
             </DrawerPanelContent>
@@ -165,9 +144,9 @@ export const HealthDrawerContainer: React.FC<HealthDrawerContainerProps> = ({
                     kind={kind}
                     isDark={isDark}
                     stats={r}
-                    isSelected={r.name === selectedResource?.name}
+                    isSelected={r.name === selectedItem?.name}
                     onClick={() => {
-                      handleSelectResource(r.name !== selectedResource?.name ? r : undefined);
+                      handleSelectItem(r.name !== selectedItem?.name ? r : undefined);
                     }}
                   />
                 ))}
@@ -177,9 +156,9 @@ export const HealthDrawerContainer: React.FC<HealthDrawerContainerProps> = ({
                     kind={kind}
                     isDark={isDark}
                     stats={r}
-                    isSelected={r.name === selectedRecordingResource?.name}
+                    isSelected={r.name === selectedItem?.name}
                     onClick={() => {
-                      handleSelectRecordingResource(r.name !== selectedRecordingResource?.name ? r : undefined);
+                      handleSelectItem(r.name !== selectedItem?.name ? r : undefined);
                     }}
                   />
                 ))}
