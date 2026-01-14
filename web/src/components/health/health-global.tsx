@@ -15,8 +15,7 @@ import { useTranslation } from 'react-i18next';
 import { HealthCard } from './health-card';
 import { ByResource, getAllAlerts, RecordingRulesByResource } from './health-helper';
 import { RecordingRuleCard } from './recording-rule-card';
-import { RecordingRuleDetails } from './recording-rule-details';
-import { RuleDetails } from './rule-details';
+import { UnifiedRuleDetails } from './unified-rule-details';
 
 export interface HealthGlobalProps {
   info: ByResource;
@@ -56,12 +55,11 @@ export const HealthGlobal: React.FC<HealthGlobalProps> = ({ info, recordingRules
             )}
           </GridItem>
           <GridItem span={9}>
-            {allAlerts.length > 0 && <RuleDetails kind={'Global'} info={info} wide={true} />}
-            {hasRecordingRules && (
-              <div style={{ marginTop: allAlerts.length > 0 ? '1rem' : '0' }}>
-                <RecordingRuleDetails kind={'Global'} info={recordingRules} wide={true} />
-              </div>
-            )}
+            <UnifiedRuleDetails
+              kind={'Global'}
+              alertInfo={allAlerts.length > 0 ? info : undefined}
+              recordingRuleInfo={hasRecordingRules ? recordingRules : undefined}
+            />
           </GridItem>
         </Grid>
       )}

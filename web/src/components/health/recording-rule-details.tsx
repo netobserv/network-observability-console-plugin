@@ -3,7 +3,7 @@ import { ActionsColumn, Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/reac
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { valueFormat } from '../../utils/format';
-import { getRecordingRuleMetricLink, RecordingRulesByResource } from './health-helper';
+import { getRecordingRuleMetricLink, getSeverityColor, RecordingRulesByResource } from './health-helper';
 
 export interface RecordingRuleDetailsProps {
   kind: string;
@@ -19,17 +19,6 @@ export const RecordingRuleDetails: React.FC<RecordingRuleDetailsProps> = ({ info
     () => [...info.critical, ...info.warning, ...info.other],
     [info.critical, info.warning, info.other]
   );
-
-  const getSeverityColor = React.useCallback((severity: string) => {
-    switch (severity) {
-      case 'critical':
-        return 'red';
-      case 'warning':
-        return 'orange';
-      default:
-        return 'blue';
-    }
-  }, []);
 
   const getDirection = React.useCallback((metricName: string): string | undefined => {
     // Returns Src or Dst based on metric name pattern
@@ -76,8 +65,10 @@ export const RecordingRuleDetails: React.FC<RecordingRuleDetailsProps> = ({ info
               <Td dataLabel={t('Severity')}>
                 <Label color={getSeverityColor(rule.severity)}>{rule.severity}</Label>
               </Td>
-              <Td dataLabel={t('Value')}>{valueFormat(rule.value)}</Td>
-              <Td dataLabel={t('Threshold')}>{rule.threshold || '-'}</Td>
+              <Td dataLabel={t('Value')}>
+                {valueFormat(rule.value, 2)} %{!wide && rule.threshold && ' > ' + rule.threshold}
+              </Td>
+              {wide && <Td dataLabel={t('Threshold')}>{rule.threshold ? '> ' + rule.threshold : '-'}</Td>}
               <Td noPadding>
                 <ActionsColumn
                   items={links.map(l => {

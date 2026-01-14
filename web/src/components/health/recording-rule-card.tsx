@@ -14,6 +14,7 @@ import {
 import { BellIcon, ExclamationCircleIcon, ExclamationTriangleIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
+import { valueFormat } from '../../utils/format';
 import { RecordingRulesByResource } from './health-helper';
 
 export interface RecordingRuleCardProps {
@@ -42,8 +43,6 @@ export const RecordingRuleCard: React.FC<RecordingRuleCardProps> = ({ stats, kin
   if (isDark) {
     classes.push('dark');
   }
-
-  const totalRules = stats.critical.length + stats.warning.length + stats.other.length;
 
   return (
     <Card className={classes.join(' ')} isClickable={onClick !== undefined} isClicked={isSelected}>
@@ -89,7 +88,7 @@ export const RecordingRuleCard: React.FC<RecordingRuleCardProps> = ({ stats, kin
           </FlexItem>
           <FlexItem>
             <TextContent>
-              <Text component={TextVariants.h1}>{totalRules}</Text>
+              <Text component={TextVariants.h1}>{valueFormat(stats.score, 1)}</Text>
             </TextContent>
           </FlexItem>
         </Flex>
