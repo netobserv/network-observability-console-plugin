@@ -52,6 +52,27 @@ export const getSilencedAlerts = (match: string): Promise<SilencedAlert[]> => {
   });
 };
 
+export const getRecordingRules = (match: string): Promise<AlertsResult> => {
+  const matchKeyEnc = encodeURIComponent('match[]');
+  const matchValEnc = encodeURIComponent('{' + match + '}');
+  return axios.get(`/api/prometheus/api/v1/rules?type=record&${matchKeyEnc}=${matchValEnc}`).then(r => {
+    if (r.status >= 400) {
+      throw new Error(`${r.statusText} [code=${r.status}]`);
+    }
+    return r.data;
+  });
+};
+
+export const queryPrometheusMetric = (query: string): Promise<unknown> => {
+  const queryEnc = encodeURIComponent(query);
+  return axios.get(`/api/prometheus/api/v1/query?query=${queryEnc}`).then(r => {
+    if (r.status >= 400) {
+      throw new Error(`${r.statusText} [code=${r.status}]`);
+    }
+    return r.data;
+  });
+};
+
 export const getExportFlowsURL = (params: FlowQuery, columns?: string[]): string => {
   const exportQuery = buildExportQuery(params, columns);
   return `${ContextSingleton.getHost()}/api/loki/export?${exportQuery}`;
@@ -205,7 +226,8 @@ export const getConfig = (): Promise<Config> => {
       dataSources: r.data.dataSources || defaultConfig.dataSources,
       promLabels: r.data.promLabels || defaultConfig.promLabels,
       lokiLabels: r.data.lokiLabels || defaultConfig.lokiLabels,
-      maxChunkAgeMs: r.data.maxChunkAgeMs
+      maxChunkAgeMs: r.data.maxChunkAgeMs,
+      healthRules: r.data.healthRules || defaultConfig.healthRules
     };
   });
 };

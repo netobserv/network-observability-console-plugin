@@ -26,6 +26,7 @@ export const RuleDetails: React.FC<RuleDetailsProps> = ({ kind, info, wide }) =>
           <Th style={{ whiteSpace: 'nowrap', paddingRight: '5px' }}>{t('Active since')}</Th>
           <Th>{t('Labels')}</Th>
           <Th>{t('Value')}</Th>
+          <Th>{t('Threshold')}</Th>
           <Th>{t('Description')}</Th>
           <Th screenReaderText="Links" />
         </Thead>
