@@ -31,6 +31,7 @@ export const MetricsQuerySummary: React.FC<MetricsQuerySummaryProps> = ({
   return (
     <Card id="query-summary" isFlat>
       <MetricsQuerySummaryContent
+        className="summary-container"
         direction="row"
         metrics={metrics}
         numQueries={stats?.numQueries}

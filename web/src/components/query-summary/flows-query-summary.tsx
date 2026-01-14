@@ -38,6 +38,7 @@ export const FlowsQuerySummary: React.FC<FlowQuerySummaryProps> = ({
     return (
       <Card id="query-summary" isFlat>
         <FlowsQuerySummaryContent
+          className="summary-container"
           direction="row"
           flows={flows}
           type={type}

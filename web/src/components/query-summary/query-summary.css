@@ -38,3 +38,7 @@
     opacity: 0;
   }
 }
+
+.summary-container.center {
+  align-items: center !important;
+}

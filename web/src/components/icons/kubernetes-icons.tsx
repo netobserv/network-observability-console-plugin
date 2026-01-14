@@ -12,11 +12,12 @@
  * https://www.patternfly.org/v4/icons/
  */
 
-import { ExternalLinkAltIcon, GlobeRouteIcon } from '@patternfly/react-icons';
+import { GlobeRouteIcon } from '@patternfly/react-icons';
 import * as React from 'react';
-import { GrHost, GrMultiple, GrServerCluster } from 'react-icons/gr';
+import { GrHost, GrMultiple, GrServerCluster, GrVirtualMachine } from 'react-icons/gr';
+import { IoLocationOutline } from 'react-icons/io5';
 import { PiNetwork } from 'react-icons/pi';
-import { TbWorldPin } from 'react-icons/tb';
+import { TbCloudNetwork } from 'react-icons/tb';
 import { IconWrapper } from './react-icons-wrapper';
 
 // All Kubernetes icons return SVG <g> elements directly for use in SVG contexts (like topology)
@@ -426,7 +427,7 @@ class ZoneIcon extends React.Component<SVGIconProps> {
   render() {
     const { size, className, style } = this.props;
     const sizeValue = typeof size === 'number' ? size : parseFloat(size as string) || 18;
-    return <IconWrapper icon={TbWorldPin} size={sizeValue} className={className} style={style} />;
+    return <IconWrapper icon={IoLocationOutline} size={sizeValue} className={className} style={style} />;
   }
 }
 
@@ -435,6 +436,22 @@ class NetworkIcon extends React.Component<SVGIconProps> {
     const { size, className, style } = this.props;
     const sizeValue = typeof size === 'number' ? size : parseFloat(size as string) || 18;
     return <IconWrapper icon={PiNetwork} size={sizeValue} className={className} style={style} />;
+  }
+}
+
+class CloudNetworkIcon extends React.Component<SVGIconProps> {
+  render() {
+    const { size, className, style } = this.props;
+    const sizeValue = typeof size === 'number' ? size : parseFloat(size as string) || 18;
+    return <IconWrapper icon={TbCloudNetwork} size={sizeValue} className={className} style={style} />;
+  }
+}
+
+class VMIcon extends React.Component<SVGIconProps> {
+  render() {
+    const { size, className, style } = this.props;
+    const sizeValue = typeof size === 'number' ? size : parseFloat(size as string) || 18;
+    return <IconWrapper icon={GrVirtualMachine} size={sizeValue} className={className} style={style} />;
   }
 }
 
@@ -458,13 +475,22 @@ export const getK8sResourceIcon = (resourceKind: string | undefined): React.Comp
   const kindMap: { [key: string]: React.ComponentClass<any> } = {
     service: ServiceIcon,
     svc: ServiceIcon,
+    ingress: ServiceIcon,
+    ing: ServiceIcon,
     pod: PodIcon,
     namespace: NamespaceIcon,
     ns: NamespaceIcon,
     node: NodeIcon,
     cluster: ClusterIcon,
     zone: ZoneIcon,
+    network: NetworkIcon,
     udn: NetworkIcon,
+    userdefinednetwork: NetworkIcon,
+    clusteruserdefinednetwork: CloudNetworkIcon,
+    vm: VMIcon,
+    vmi: VMIcon,
+    virtualmachine: VMIcon,
+    virtualmachineinstance: VMIcon,
     gateway: GlobeRouteIcon,
     daemonset: DaemonSetIcon,
     ds: DaemonSetIcon,
@@ -475,6 +501,8 @@ export const getK8sResourceIcon = (resourceKind: string | undefined): React.Comp
     statefulset: StatefulSetIcon,
     sts: StatefulSetIcon,
     job: JobIcon,
+    cronjob: JobIcon,
+    cj: JobIcon,
     replicaset: ReplicaSetIcon,
     rs: ReplicaSetIcon,
     rc: DeploymentIcon
@@ -503,26 +531,3 @@ export const TopologyGroupIcon: React.FC<{
   className?: string;
   style?: React.CSSProperties;
 }> = ({ size, className, style }) => <IconWrapper icon={GrMultiple} size={size} className={className} style={style} />;
-
-/**
- * Kubernetes icon components map
- * Uses official Kubernetes community icons as inline SVGs
- */
-export const K8sIconComponents = {
-  Service: ServiceIcon,
-  Pod: PodIcon,
-  Namespace: NamespaceIcon,
-  Node: NodeIcon,
-  Cluster: ClusterIcon,
-  Zone: ZoneIcon,
-  UDN: NetworkIcon,
-  Gateway: GlobeRouteIcon, // Using GlobeRouteIcon from PatternFly
-  Deployment: DeploymentIcon,
-  CatalogSource: DeploymentIcon, // No specific icon available
-  DaemonSet: DaemonSetIcon,
-  StatefulSet: StatefulSetIcon,
-  Job: JobIcon,
-  ReplicaSet: ReplicaSetIcon,
-  ReplicationController: ReplicaSetIcon, // No specific icon available
-  External: ExternalLinkAltIcon
-};
