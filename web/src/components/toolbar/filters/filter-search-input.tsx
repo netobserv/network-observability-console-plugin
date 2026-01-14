@@ -2,6 +2,7 @@ import { Popper, SearchInput, ValidatedOptions } from '@patternfly/react-core';
 import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
+import { Config } from '../../../model/config';
 import {
   FilterCompare,
   FilterDefinition,
@@ -32,9 +33,11 @@ export interface Suggestion {
   display?: string;
   value: string;
   validate?: boolean;
+  filterDef?: FilterDefinition;
 }
 
 export interface FilterSearchInputProps {
+  config: Config;
   filterDefinitions: FilterDefinition[];
   filters?: Filters;
   searchInputValue: string;
@@ -54,6 +57,7 @@ export interface FilterSearchInputProps {
 }
 
 export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
+  config,
   filterDefinitions,
   filters,
   searchInputValue,
@@ -282,7 +286,8 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
               ? `${t('Destination')} ${fd.name}`
               : fd.name,
           value: fd.id,
-          validate: false
+          validate: false,
+          filterDef: fd
         };
       };
 
@@ -424,6 +429,7 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
           />
         ) : (
           <FilterSearchPanel
+            config={config}
             filterDefinitions={filterDefinitions}
             direction={direction}
             setDirection={setDirection}

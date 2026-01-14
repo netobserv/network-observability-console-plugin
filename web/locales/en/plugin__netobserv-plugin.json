@@ -510,6 +510,7 @@
   "Swap": "Swap",
   "Swap from and to filters": "Swap from and to filters",
   "More actions": "More actions",
+  "Select a field name to filter on. Use indexed fields in bold to improve your query performances.": "Select a field name to filter on. Use indexed fields in bold to improve your query performances.",
   "Quick filters": "Quick filters",
   "More options": "More options",
   "Export overview": "Export overview",

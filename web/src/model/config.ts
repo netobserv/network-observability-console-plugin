@@ -35,6 +35,7 @@ export type Config = {
   fields: FieldConfig[];
   dataSources: string[];
   lokiMocks: boolean;
+  lokiLabels: string[];
   promLabels: string[];
   maxChunkAgeMs?: number;
 };
@@ -58,6 +59,7 @@ export const defaultConfig: Config = {
   fields: [],
   dataSources: ['loki', 'prom'],
   lokiMocks: false,
+  lokiLabels: [],
   promLabels: [],
   maxChunkAgeMs: undefined
 };

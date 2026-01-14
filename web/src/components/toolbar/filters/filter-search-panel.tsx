@@ -2,6 +2,7 @@ import { ActionGroup, Button, Form, FormGroup, Panel, PanelMain, PanelMainBody }
 import _ from 'lodash';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { Config } from '../../../model/config';
 import { FilterCompare, FilterDefinition, Filters, FilterValue } from '../../../model/filters';
 import { getHTTPErrorDetails } from '../../../utils/errors';
 import { Indicator } from '../../../utils/filters-helper';
@@ -14,6 +15,7 @@ import FiltersDropdown from './filters-dropdown';
 import TextFilter from './text-filter';
 
 export interface FilterSearchPanelProps {
+  config: Config;
   filterDefinitions: FilterDefinition[];
   direction: Direction;
   setDirection: (direction: Direction) => void;
@@ -34,6 +36,7 @@ export interface FilterSearchPanelProps {
 }
 
 export const FilterSearchPanel: React.FC<FilterSearchPanelProps> = ({
+  config,
   filterDefinitions,
   direction,
   setDirection,
@@ -61,6 +64,7 @@ export const FilterSearchPanel: React.FC<FilterSearchPanelProps> = ({
           <Form>
             <FormGroup label={t('Filter')} fieldId="field" key="field">
               <FiltersDropdown
+                config={config}
                 filterDefinitions={filterDefinitions}
                 selectedDirection={direction}
                 setSelectedDirection={setDirection}

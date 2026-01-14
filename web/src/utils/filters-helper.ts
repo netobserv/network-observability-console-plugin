@@ -1,4 +1,5 @@
 import { TFunction } from 'i18next';
+import { Config } from '../model/config';
 import { Filter, FilterDefinition, FilterId, FilterValue } from '../model/filters';
 import { findFilter } from './filter-definitions';
 
@@ -143,4 +144,23 @@ export const bnfFilterValue = (
   }
 
   return filters;
+};
+
+export const isLokiLabel = (filter: FilterDefinition, config: Config): boolean => {
+  console.log('#################');
+  const allowLoki = config.dataSources.some(ds => ds === 'loki');
+  if (!allowLoki) {
+    return false;
+  }
+
+  const colConfig = config.columns.find(c => c.filter === filter.id);
+  if (!colConfig) {
+    return false;
+  }
+  if (!filter.category) {
+    return config.lokiLabels.includes(colConfig.id);
+  } else {
+    return config.lokiLabels.includes('Src' + colConfig.id);
+  }
+  return false;
 };

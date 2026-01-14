@@ -141,6 +141,7 @@ type Frontend struct {
 	Fields          []FieldConfig `yaml:"fields" json:"fields"`
 	DataSources     []string      `yaml:"dataSources" json:"dataSources"`
 	LokiMocks       bool          `yaml:"lokiMocks,omitempty" json:"lokiMocks,omitempty"`
+	LokiLabels      []string      `yaml:"lokiLabels" json:"lokiLabels"`
 	PromLabels      []string      `yaml:"promLabels" json:"promLabels"`
 	MaxChunkAgeMs   int           `yaml:"maxChunkAgeMs,omitempty" json:"maxChunkAgeMs,omitempty"` // populated at query time
 }
@@ -198,6 +199,7 @@ func ReadFile(version, date, filename string) (*Config, error) {
 				{Name: "DstAddr", Type: "string"},
 			},
 			DataSources: []string{},
+			LokiLabels:  []string{},
 			PromLabels:  []string{},
 		},
 	}
@@ -219,6 +221,7 @@ func ReadFile(version, date, filename string) (*Config, error) {
 	if cfg.IsLokiEnabled() {
 		cfg.Frontend.DataSources = append(cfg.Frontend.DataSources, string(constants.DataSourceLoki))
 		cfg.Frontend.LokiMocks = cfg.Loki.UseMocks
+		cfg.Frontend.LokiLabels = cfg.Loki.Labels
 		cfg.Loki.FieldsType = make(map[string]string)
 		cfg.Loki.FieldsFormat = make(map[string]string)
 		for _, f := range cfg.Frontend.Fields {
