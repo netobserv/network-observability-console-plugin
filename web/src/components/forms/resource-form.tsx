@@ -71,6 +71,7 @@ export const ResourceForm: FC<ResourceFormProps> = ({ uiSchema }) => {
                       errors={ctx.errors}
                       onError={errs => ctx.setErrors(_.map(errs, error => error.stack))}
                       onChange={event => setData(event.formData)}
+                      skipDefaults={ctx.skipDefaults}
                     />
                   ) : (
                     <></>

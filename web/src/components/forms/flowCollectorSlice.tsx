@@ -22,6 +22,7 @@ export const FlowCollectorSliceForm: FC<FlowCollectorSliceFormProps> = props => 
         name={params.name || props.name}
         namespace={params.namespace || 'default'}
         onSuccess={back}
+        defaultFrom="CSVExample"
       >
         <ResourceForm uiSchema={flowCollectorSliceUISchema} />
       </ResourceWatcher>
