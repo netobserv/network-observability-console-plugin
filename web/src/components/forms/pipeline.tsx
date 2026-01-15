@@ -105,6 +105,7 @@ export const Pipeline: React.FC<FlowCollectorPipelineProps> = ({ existing, selec
 
   const getStatus = React.useCallback(
     (types: string[], status: string) => {
+      let hasWarning = false;
       for (let i = 0; i < types.length; i++) {
         const type = types[i];
         const condition: K8sResourceCondition | null = existing?.status?.conditions?.find(
@@ -116,8 +117,20 @@ export const Pipeline: React.FC<FlowCollectorPipelineProps> = ({ existing, selec
           } else if (condition?.type.startsWith('Waiting') || condition?.reason === 'Pending') {
             return RunStatus.Pending;
           }
+          // Check if this is a warning type
+          if (type.toLowerCase().includes('warning')) {
+            hasWarning = true;
+            continue; // Don't return immediately, check for failures first
+          }
           return RunStatus.Failed;
         }
+      }
+      // If we have a warning but no failures, return a warning status
+      if (hasWarning) {
+        // PatternFly topology doesn't have a dedicated Warning status,
+        // but we can use the same color scheme by using RunStatus.Cancelled
+        // which typically shows yellow/orange
+        return RunStatus.Cancelled;
       }
       return RunStatus.Succeeded;
     },
@@ -172,7 +185,7 @@ export const Pipeline: React.FC<FlowCollectorPipelineProps> = ({ existing, selec
 
     const cpRunAfter: string[] = [];
     if (existing?.spec?.loki?.enable) {
-      const types = ['LokiIssue'];
+      const types = ['LokiIssue', 'LokiWarning'];
       steps.push({
         id: 'loki',
         label: 'Loki',
