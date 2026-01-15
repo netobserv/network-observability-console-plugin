@@ -178,7 +178,7 @@ export const Pipeline: React.FC<FlowCollectorPipelineProps> = ({ existing, selec
         label: 'Loki',
         runAfterTasks: ['flp'],
         data: {
-          status: getStatus(types, 'NoIssue'), // TODO: NoIssue / Unknown is not a valid status. That should be False.
+          status: getStatus(types, 'False'),
           selected: _.some(selectedTypes, t => types.includes(t)),
           onSelect: () => setSelectedTypes(types)
         }
