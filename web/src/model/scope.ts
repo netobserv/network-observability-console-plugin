@@ -38,7 +38,9 @@ export const resolveGroupTypes = (
 ): TopologyGroupTypes => {
   if (inGroupTypes === 'auto') {
     const groups = getGroupsForScope(scopeId, scopes);
-    if (groups.includes('namespaces')) {
+    if (groups.includes('namespaces+owners')) {
+      return 'namespaces+owners';
+    } else if (groups.includes('namespaces')) {
       return 'namespaces';
     }
     // More logic can be added here for more default behaviours

@@ -33,7 +33,7 @@ describe('Check enabled groups', () => {
 
   it('should resolve auto group', () => {
     let group = resolveGroupTypes('auto', 'resource', ScopeDefSample);
-    expect(group).toEqual('namespaces');
+    expect(group).toEqual('namespaces+owners');
 
     group = resolveGroupTypes('auto', 'owner', ScopeDefSample);
     expect(group).toEqual('namespaces');
