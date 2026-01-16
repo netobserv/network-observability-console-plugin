@@ -246,7 +246,16 @@ export const NetworkHealth: React.FC<{}> = ({}) => {
 };
 
 export const featureFlagHandler: FeatureFlagHandler = (setFeatureFlag: SetFeatureFlag) => {
-  setFeatureFlag('NETOBSERV_NETWORK_HEALTH', true);
+  // Check if user has permission to access Prometheus rules
+  getAlerts('netobserv="true"')
+    .then(() => {
+      // User has access to Prometheus alerts
+      setFeatureFlag('NETOBSERV_NETWORK_HEALTH', true);
+    })
+    .catch(err => {
+      // User doesn't have access - hide Network Health
+      setFeatureFlag('NETOBSERV_NETWORK_HEALTH', false);
+    });
 };
 
 NetworkHealth.displayName = 'NetworkHealth';
