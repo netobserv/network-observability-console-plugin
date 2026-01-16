@@ -22,18 +22,38 @@ export const getScopeName = (sc: ScopeConfigDef | undefined, t: (k: string) => s
   return sc.name || sc.id;
 };
 
-export const getGroupsForScope = (scopeId: FlowScope, scopes: ScopeConfigDef[]) => {
+export const getGroupsForScope = (scopeId: FlowScope, scopes: ScopeConfigDef[]): TopologyGroupTypes[] => {
   const scope = scopes.find(sc => sc.id === scopeId);
   if (scope?.groups?.length) {
     const availableParts = scopes.map(sc => `${sc.id}s`);
-    return ['none', ...scope.groups.filter(gp => gp.split('+').every(part => availableParts.includes(part)))];
+    return ['none', 'auto', ...scope.groups.filter(gp => gp.split('+').every(part => availableParts.includes(part)))];
   }
-  return ['none'];
+  return ['none', 'auto'];
+};
+
+export const resolveGroupTypes = (
+  inGroupTypes: TopologyGroupTypes,
+  scopeId: FlowScope,
+  scopes: ScopeConfigDef[]
+): TopologyGroupTypes => {
+  if (inGroupTypes === 'auto') {
+    const groups = getGroupsForScope(scopeId, scopes);
+    if (groups.includes('namespaces+owners')) {
+      return 'namespaces+owners';
+    } else if (groups.includes('namespaces')) {
+      return 'namespaces';
+    }
+    // More logic can be added here for more default behaviours
+    return 'none';
+  }
+  return inGroupTypes;
 };
 
 export const getGroupName = (group: TopologyGroupTypes, scopes: ScopeConfigDef[], t: (k: string) => string) => {
   if (group === 'none') {
     return t('None');
+  } else if (group === 'auto') {
+    return t('Auto');
   } else if (group.includes('+')) {
     return group
       .split('+')

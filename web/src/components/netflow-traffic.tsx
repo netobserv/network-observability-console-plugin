@@ -10,6 +10,7 @@ import { Filters, getDisabledFiltersRecord, getEnabledFilters } from '../model/f
 import { filtersToString, FlowQuery, MetricType } from '../model/flow-query';
 import { netflowTrafficModel } from '../model/netflow-traffic';
 import { parseQuickFilters } from '../model/quick-filters';
+import { resolveGroupTypes } from '../model/scope';
 import { getFetchFunctions as getBackAndForthFetch } from '../utils/back-and-forth';
 import { ColumnsId, getDefaultColumns } from '../utils/columns';
 import { loadConfig } from '../utils/config';
@@ -288,7 +289,9 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
       query.aggregateBy = model.metricScope;
       if (model.selectedViewId === 'topology') {
         query.type = model.topologyMetricType;
-        query.groups = model.topologyOptions.groupTypes !== 'none' ? model.topologyOptions.groupTypes : undefined;
+        const scopes = getAvailableScopes();
+        const resolvedGroup = resolveGroupTypes(model.topologyOptions.groupTypes, model.metricScope, scopes);
+        query.groups = resolvedGroup !== 'none' ? resolvedGroup : undefined;
       } else if (model.selectedViewId === 'overview') {
         query.limit = topValues.includes(model.limit) ? model.limit : topValues[0];
         query.groups = undefined;
@@ -307,7 +310,8 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
     model.selectedViewId,
     model.topologyMetricType,
     model.metricScope,
-    model.topologyOptions.groupTypes
+    model.topologyOptions.groupTypes,
+    getAvailableScopes
   ]);
 
   const getFetchFunctions = React.useCallback(() => {

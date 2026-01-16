@@ -1,6 +1,6 @@
 import { ScopeDefSample } from '../../components/__tests-data__/scopes';
 import { ContextSingleton } from '../../utils/context';
-import { getGroupName, getGroupsForScope, getStepInto } from '../scope';
+import { getGroupName, getGroupsForScope, getStepInto, resolveGroupTypes } from '../scope';
 
 describe('Check enabled groups', () => {
   beforeEach(() => {
@@ -9,14 +9,15 @@ describe('Check enabled groups', () => {
 
   it('should get group from scope', () => {
     let groups = getGroupsForScope('cluster', ScopeDefSample);
-    expect(groups).toEqual(['none']);
+    expect(groups).toEqual(['none', 'auto']);
 
     groups = getGroupsForScope('host', ScopeDefSample);
-    expect(groups).toEqual(['none', 'clusters', 'zones', 'clusters+zones']);
+    expect(groups).toEqual(['none', 'auto', 'clusters', 'zones', 'clusters+zones']);
 
     groups = getGroupsForScope('owner', ScopeDefSample);
     expect(groups).toEqual([
       'none',
+      'auto',
       'clusters',
       'clusters+zones',
       'clusters+hosts',
@@ -28,6 +29,23 @@ describe('Check enabled groups', () => {
       'hosts+namespaces',
       'namespaces'
     ]);
+  });
+
+  it('should resolve auto group', () => {
+    let group = resolveGroupTypes('auto', 'resource', ScopeDefSample);
+    expect(group).toEqual('namespaces+owners');
+
+    group = resolveGroupTypes('auto', 'owner', ScopeDefSample);
+    expect(group).toEqual('namespaces');
+
+    group = resolveGroupTypes('auto', 'namespace', ScopeDefSample);
+    expect(group).toEqual('none');
+
+    group = resolveGroupTypes('auto', 'host', ScopeDefSample);
+    expect(group).toEqual('none');
+
+    group = resolveGroupTypes('hosts', 'resource', ScopeDefSample);
+    expect(group).toEqual('hosts');
   });
 
   it('should get group name', () => {
