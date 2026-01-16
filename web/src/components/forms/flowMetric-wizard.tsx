@@ -48,6 +48,7 @@ export const FlowMetricWizard: FC<FlowMetricWizardProps> = props => {
             setData(event.formData);
           }}
           errors={errors}
+          skipDefaults
         />
       );
     },
@@ -81,7 +82,7 @@ export const FlowMetricWizard: FC<FlowMetricWizardProps> = props => {
         onSuccess={() => {
           back();
         }}
-        ignoreCSVExample={true}
+        defaultFrom="CRD"
       >
         <Consumer>
           {ctx => {

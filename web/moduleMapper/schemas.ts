@@ -1,4 +1,4 @@
-// Auto-generated on Thu Dec 11 09:59:21 AM CET 2025 by scripts/generate-schemas.sh ; DO NOT EDIT (edit the script instead).
+// Auto-generated on Wed Jan 14 11:03:05 AM CET 2026 by scripts/generate-schemas.sh ; DO NOT EDIT (edit the script instead).
 // File only used in tests or dev console
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -885,7 +885,7 @@ export const flowCollectorSchema: RJSFSchema | any = {
                 "features": {
                   "description": "List of additional features to enable. They are all disabled by default. Enabling additional features might have performance impacts. Possible values are:<br>\n- `PacketDrop`: Enable the packets drop flows logging feature. This feature requires mounting\nthe kernel debug filesystem, so the eBPF agent pods must run as privileged via `spec.agent.ebpf.privileged`.<br>\n- `DNSTracking`: Enable the DNS tracking feature.<br>\n- `FlowRTT`: Enable flow latency (sRTT) extraction in the eBPF agent from TCP traffic.<br>\n- `NetworkEvents`: Enable the network events monitoring feature, such as correlating flows and network policies.\nThis feature requires mounting the kernel debug filesystem, so the eBPF agent pods must run as privileged via `spec.agent.ebpf.privileged`.\nIt requires using the OVN-Kubernetes network plugin with the Observability feature.\nIMPORTANT: This feature is available as a Technology Preview.<br>\n- `PacketTranslation`: Enable enriching flows with packet translation information, such as Service NAT.<br>\n- `EbpfManager`: [Unsupported (*)]. Use eBPF Manager to manage NetObserv eBPF programs. Pre-requisite: the eBPF Manager operator (or upstream bpfman operator) must be installed.<br>\n- `UDNMapping`: Enable interfaces mapping to User Defined Networks (UDN). <br>\nThis feature requires mounting the kernel debug filesystem, so the eBPF agent pods must run as privileged via `spec.agent.ebpf.privileged`.\nIt requires using the OVN-Kubernetes network plugin with the Observability feature. <br>\n- `IPSec`, to track flows between nodes with IPsec encryption. <br>",
                   "items": {
-                    "description": "Agent feature, can be one of:<br>\n- `PacketDrop`, to track packet drops.<br>\n- `DNSTracking`, to track specific information on DNS traffic.<br>\n- `FlowRTT`, to track TCP latency.<br>\n- `NetworkEvents`, to track network events [Technology Preview].<br>\n- `PacketTranslation`, to enrich flows with packets translation information, such as Service NAT.<br>\n- `EbpfManager`, to enable using eBPF Manager to manage NetObserv eBPF programs. [Unsupported (*)].<br>\n- `UDNMapping`, to enable interfaces mapping to UDN. <br>\n- `IPSec`, to track flows between nodes with IPsec encryption. <br>",
+                    "description": "Agent feature, can be one of:<br>\n- `PacketDrop`, to track packet drops.<br>\n- `DNSTracking`, to track specific information on DNS traffic.<br>\n- `FlowRTT`, to track TCP latency.<br>\n- `NetworkEvents`, to track network events [Technology Preview].<br>\n- `PacketTranslation`, to enrich flows with packets translation information, such as Service NAT.<br>\n- `EbpfManager`, to enable using eBPF Manager to manage NetObserv eBPF programs. [Unsupported (*)].<br>\n- `UDNMapping`, to enable interfaces mapping to UDN.<br>\n- `IPSec`, to track flows between nodes with IPsec encryption.<br>",
                     "enum": [
                       "PacketDrop",
                       "DNSTracking",
@@ -2935,6 +2935,10 @@ export const flowCollectorSchema: RJSFSchema | any = {
               },
               "type": "object"
             },
+            "standalone": {
+              "description": "Deploy as a standalone console, instead of a plugin of the OpenShift Console.\nThis is not recommended when using with OpenShift, as it doesn't provide an integrated experience.\n[Unsupported (*)].",
+              "type": "boolean"
+            },
             "unmanagedReplicas": {
               "description": "If `unmanagedReplicas` is `true`, the operator will not reconcile `replicas`. This is useful when using a pod autoscaler.",
               "type": "boolean"
@@ -2943,11 +2947,11 @@ export const flowCollectorSchema: RJSFSchema | any = {
           "type": "object"
         },
         "deploymentModel": {
-          "default": "Direct",
-          "description": "`deploymentModel` defines the desired type of deployment for flow processing. Possible values are:<br>\n- `Direct` (default) to make the flow processor listen directly from the agents using the host network, backed by a DaemonSet. Only recommended on small clusters, below 15 nodes.<br>\n- `Service` to make the flow processor listen as a Kubernetes Service, backed by a scalable Deployment.<br>\n- `Kafka` to make flows sent to a Kafka pipeline before consumption by the processor.<br>\nKafka can provide better scalability, resiliency, and high availability (for more details, see https://www.redhat.com/en/topics/integration/what-is-apache-kafka).<br>\n`Direct` is not recommended on large clusters as it is less memory efficient.",
+          "default": "Service",
+          "description": "`deploymentModel` defines the desired type of deployment for flow processing. Possible values are:<br>\n- `Service` (default) to make the flow processor listen as a Kubernetes Service, backed by a scalable Deployment.<br>\n- `Kafka` to make flows sent to a Kafka pipeline before consumption by the processor.<br>\n- `Direct` to make the flow processor listen directly from the agents using the host network, backed by a DaemonSet. Only recommended on small clusters, below 15 nodes.<br>\nKafka can provide better scalability, resiliency, and high availability (for more details, see https://www.redhat.com/en/topics/integration/what-is-apache-kafka).<br>\n`Direct` is not recommended on large clusters as it is less memory efficient.",
           "enum": [
-            "Direct",
             "Service",
+            "Direct",
             "Kafka"
           ],
           "type": "string"
@@ -5492,11 +5496,11 @@ export const flowCollectorSchema: RJSFSchema | any = {
               "description": "`Metrics` define the processor configuration regarding metrics",
               "properties": {
                 "alerts": {
-                  "description": "`alerts` is a list of alerts to be created for Prometheus AlertManager, organized by templates and variants [Unsupported (*)].\nThis is currently an experimental feature behind a feature gate. To enable, edit `spec.processor.advanced.env` by adding `EXPERIMENTAL_ALERTS_HEALTH` set to `true`.\nMore information on alerts: https://github.com/netobserv/network-observability-operator/blob/main/docs/Alerts.md",
+                  "description": "`alerts` is a list of alerts to be created for Prometheus AlertManager, organized by templates and variants.\nMore information on alerts: https://github.com/netobserv/network-observability-operator/blob/main/docs/Alerts.md",
                   "items": {
                     "properties": {
                       "template": {
-                        "description": "Alert template name.\nPossible values are: `PacketDropsByKernel`, `PacketDropsByDevice`, `IPsecErrors`, `NetpolDenied`,\n`LatencyHighTrend`, `DNSErrors`, `ExternalEgressHighTrend`, `ExternalIngressHighTrend`, `CrossAZ`.\nMore information on alerts: https://github.com/netobserv/network-observability-operator/blob/main/docs/Alerts.md",
+                        "description": "Alert template name.\nPossible values are: `PacketDropsByKernel`, `PacketDropsByDevice`, `IPsecErrors`, `NetpolDenied`,\n`LatencyHighTrend`, `DNSErrors`, `DNSNxDomain`, `ExternalEgressHighTrend`, `ExternalIngressHighTrend`.\nMore information on alerts: https://github.com/netobserv/network-observability-operator/blob/main/docs/Alerts.md",
                         "enum": [
                           "PacketDropsByKernel",
                           "PacketDropsByDevice",
@@ -5504,9 +5508,9 @@ export const flowCollectorSchema: RJSFSchema | any = {
                           "NetpolDenied",
                           "LatencyHighTrend",
                           "DNSErrors",
+                          "DNSNxDomain",
                           "ExternalEgressHighTrend",
-                          "ExternalIngressHighTrend",
-                          "CrossAZ"
+                          "ExternalIngressHighTrend"
                         ],
                         "type": "string"
                       },
@@ -5572,7 +5576,7 @@ export const flowCollectorSchema: RJSFSchema | any = {
                   "type": "array"
                 },
                 "disableAlerts": {
-                  "description": "`disableAlerts` is a list of alert groups that should be disabled from the default set of alerts.\nPossible values are: `NetObservNoFlows`, `NetObservLokiError`, `PacketDropsByKernel`, `PacketDropsByDevice`, `IPsecErrors`, `NetpolDenied`,\n`LatencyHighTrend`, `DNSErrors`, `ExternalEgressHighTrend`, `ExternalIngressHighTrend`, `CrossAZ`.\nMore information on alerts: https://github.com/netobserv/network-observability-operator/blob/main/docs/Alerts.md",
+                  "description": "`disableAlerts` is a list of alert groups that should be disabled from the default set of alerts.\nPossible values are: `NetObservNoFlows`, `NetObservLokiError`, `PacketDropsByKernel`, `PacketDropsByDevice`, `IPsecErrors`, `NetpolDenied`,\n`LatencyHighTrend`, `DNSErrors`, `DNSNxDomain`, `ExternalEgressHighTrend`, `ExternalIngressHighTrend`.\nMore information on alerts: https://github.com/netobserv/network-observability-operator/blob/main/docs/Alerts.md",
                   "items": {
                     "type": "string"
                   },
@@ -5881,6 +5885,97 @@ export const flowCollectorSchema: RJSFSchema | any = {
                 "manual": {
                   "description": "Prometheus configuration for `Manual` mode.",
                   "properties": {
+                    "alertManager": {
+                      "description": "AlertManager configuration. This is used in the console to query silenced alerts, for displaying health information.\nWhen used in OpenShift it can be left empty to use the Console API instead.\n[Unsupported (*)].",
+                      "properties": {
+                        "tls": {
+                          "description": "TLS client configuration for Prometheus AlertManager URL.",
+                          "properties": {
+                            "caCert": {
+                              "description": "`caCert` defines the reference of the certificate for the Certificate Authority.",
+                              "properties": {
+                                "certFile": {
+                                  "description": "`certFile` defines the path to the certificate file name within the config map or secret.",
+                                  "type": "string"
+                                },
+                                "certKey": {
+                                  "description": "`certKey` defines the path to the certificate private key file name within the config map or secret. Omit when the key is not necessary.",
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "description": "Name of the config map or secret containing certificates.",
+                                  "type": "string"
+                                },
+                                "namespace": {
+                                  "default": "",
+                                  "description": "Namespace of the config map or secret containing certificates. If omitted, the default is to use the same namespace as where NetObserv is deployed.\nIf the namespace is different, the config map or the secret is copied so that it can be mounted as required.",
+                                  "type": "string"
+                                },
+                                "type": {
+                                  "description": "Type for the certificate reference: `configmap` or `secret`.",
+                                  "enum": [
+                                    "configmap",
+                                    "secret"
+                                  ],
+                                  "type": "string"
+                                }
+                              },
+                              "type": "object"
+                            },
+                            "enable": {
+                              "default": false,
+                              "description": "Enable TLS",
+                              "type": "boolean"
+                            },
+                            "insecureSkipVerify": {
+                              "default": false,
+                              "description": "`insecureSkipVerify` allows skipping client-side verification of the server certificate.\nIf set to `true`, the `caCert` field is ignored.",
+                              "type": "boolean"
+                            },
+                            "userCert": {
+                              "description": "`userCert` defines the user certificate reference and is used for mTLS. When you use one-way TLS, you can ignore this property.",
+                              "properties": {
+                                "certFile": {
+                                  "description": "`certFile` defines the path to the certificate file name within the config map or secret.",
+                                  "type": "string"
+                                },
+                                "certKey": {
+                                  "description": "`certKey` defines the path to the certificate private key file name within the config map or secret. Omit when the key is not necessary.",
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "description": "Name of the config map or secret containing certificates.",
+                                  "type": "string"
+                                },
+                                "namespace": {
+                                  "default": "",
+                                  "description": "Namespace of the config map or secret containing certificates. If omitted, the default is to use the same namespace as where NetObserv is deployed.\nIf the namespace is different, the config map or the secret is copied so that it can be mounted as required.",
+                                  "type": "string"
+                                },
+                                "type": {
+                                  "description": "Type for the certificate reference: `configmap` or `secret`.",
+                                  "enum": [
+                                    "configmap",
+                                    "secret"
+                                  ],
+                                  "type": "string"
+                                }
+                              },
+                              "type": "object"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "url": {
+                          "description": "`url` is the address of an existing Prometheus AlertManager service to use for querying alerts.",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "url"
+                      ],
+                      "type": "object"
+                    },
                     "forwardUserToken": {
                       "description": "Set `true` to forward logged in user token in queries to Prometheus",
                       "type": "boolean"

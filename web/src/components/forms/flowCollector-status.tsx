@@ -17,7 +17,14 @@ export const FlowCollectorStatus: FC<FlowCollectorStatusProps> = () => {
 
   return (
     <DynamicLoader>
-      <ResourceWatcher group="flows.netobserv.io" version="v1beta2" kind="FlowCollector" name="cluster" skipErrors>
+      <ResourceWatcher
+        group="flows.netobserv.io"
+        version="v1beta2"
+        kind="FlowCollector"
+        name="cluster"
+        skipErrors
+        defaultFrom="None"
+      >
         <Consumer>
           {ctx => {
             return (

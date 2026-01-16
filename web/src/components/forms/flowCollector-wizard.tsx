@@ -53,6 +53,7 @@ export const FlowCollectorWizard: FC<FlowCollectorWizardProps> = props => {
             setData(event.formData);
           }}
           errors={errors}
+          skipDefaults
         />
       );
     },
@@ -107,6 +108,7 @@ export const FlowCollectorWizard: FC<FlowCollectorWizardProps> = props => {
         onSuccess={() => {
           navigate(flowCollectorStatusPath);
         }}
+        defaultFrom="CSVExample"
       >
         <Consumer>
           {ctx => {

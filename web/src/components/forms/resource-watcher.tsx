@@ -15,10 +15,11 @@ import { back } from '../dynamic-loader/dynamic-loader';
 import { ErrorComponent } from '../messages/error';
 import { prune } from './dynamic-form/utils';
 import './forms.css';
-import { ClusterServiceVersionList, CustomResourceDefinitionKind } from './types';
+import { ClusterServiceVersionKind, CustomResourceDefinitionKind } from './types';
 import { exampleForModel } from './utils';
 
 export type SupportedKind = 'FlowCollector' | 'FlowCollectorSlice' | 'FlowMetric';
+type DefaultFrom = 'CSVExample' | 'CRD' | 'None';
 
 export type ResourceWatcherProps = {
   group: string;
@@ -30,7 +31,7 @@ export type ResourceWatcherProps = {
   children: JSX.Element;
   skipErrors?: boolean;
   skipCRError?: boolean;
-  ignoreCSVExample?: boolean;
+  defaultFrom: DefaultFrom;
 };
 
 export type ResourceWatcherContext = {
@@ -44,6 +45,7 @@ export type ResourceWatcherContext = {
   loadError: any;
   errors: string[];
   setErrors: (errors: string[]) => void;
+  skipDefaults: boolean;
 };
 
 export const { Provider, Consumer } = React.createContext<ResourceWatcherContext>({
@@ -60,7 +62,8 @@ export const { Provider, Consumer } = React.createContext<ResourceWatcherContext
   errors: [],
   setErrors: (errs: string[]) => {
     console.error('setErrors is not initialized !', errs);
-  }
+  },
+  skipDefaults: false
 });
 
 export const ResourceWatcher: FC<ResourceWatcherProps> = ({
@@ -73,21 +76,22 @@ export const ResourceWatcher: FC<ResourceWatcherProps> = ({
   children,
   skipErrors,
   skipCRError,
-  ignoreCSVExample
+  defaultFrom
 }) => {
   if (!group || !version || !kind) {
     throw new Error('ResourceForm error: apiVersion and kind must be provided');
   }
   const { t } = useTranslation('plugin__netobserv-plugin');
 
-  const [matchingCSVs, csvLoaded, csvLoadError] = useK8sWatchResource<ClusterServiceVersionList>({
+  const [matchingCSVs, csvLoaded, csvLoadError] = useK8sWatchResource<ClusterServiceVersionKind[]>({
     groupVersionKind: {
       group: 'operators.coreos.com',
       version: 'v1alpha1',
       kind: 'ClusterServiceVersion'
     },
     kind: 'ClusterServiceVersion',
-    namespace: 'openshift-netobserv-operator'
+    namespace: 'openshift-netobserv-operator',
+    isList: true
   });
   const [crd, crdLoaded, crdLoadError] = useK8sWatchResource<CustomResourceDefinitionKind>({
     groupVersionKind: {
@@ -139,16 +143,28 @@ export const ResourceWatcher: FC<ResourceWatcherProps> = ({
     );
   }
 
-  const data = cr
-    ? { apiVersion: `${group}/${version}`, kind, ...cr }
-    : !ignoreCSVExample && matchingCSVs?.items?.length
-    ? exampleForModel(
-        matchingCSVs.items.find(csv => csv.spec.customresourcedefinitions?.owned?.some(crd => crd.kind === kind)),
-        group,
-        version,
-        kind
-      )
-    : { apiVersion: `${group}/${version}`, kind };
+  let data: K8sResourceKind | undefined;
+  let useCRDDefaults = false;
+  if (cr) {
+    data = { apiVersion: `${group}/${version}`, kind, ...cr };
+  } else if (defaultFrom === 'CSVExample') {
+    const csv = matchingCSVs?.find(csv => csv.spec.customresourcedefinitions?.owned?.some(crd => crd.kind === kind));
+    if (csv) {
+      data = exampleForModel(csv, group, version, kind);
+    }
+  } else if (defaultFrom === 'CRD') {
+    data = { apiVersion: `${group}/${version}`, kind };
+    useCRDDefaults = true;
+  }
+  if (!data) {
+    return (
+      <ErrorComponent
+        title={t('Unable to initialize {{kind}} resource', { kind })}
+        error={t('Some resource might be missing.')}
+        isLokiRelated={false}
+      />
+    );
+  }
   const schema = crd?.spec?.versions?.find(v => v.name === version)?.schema?.openAPIV3Schema || null;
   // force namespace to be present in the form when namespaced
   if (crd?.spec?.scope === 'Namespaced') {
@@ -163,6 +179,7 @@ export const ResourceWatcher: FC<ResourceWatcherProps> = ({
       (schema.properties.metadata as any).required = ['name', 'namespace'];
     }
   }
+
   return (
     <Provider
       value={{
@@ -175,6 +192,7 @@ export const ResourceWatcher: FC<ResourceWatcherProps> = ({
         loadError: csvLoadError || crdLoadError || crLoadError,
         errors,
         setErrors,
+        skipDefaults: !useCRDDefaults,
         onSubmit: (data, isDelete) => {
           if (isDelete) {
             k8sDelete({

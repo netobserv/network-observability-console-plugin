@@ -22,6 +22,7 @@ export const FlowMetricForm: FC<FlowMetricFormProps> = props => {
         name={params.name || props.name}
         namespace={params.namespace || 'default'}
         onSuccess={back}
+        defaultFrom="CRD"
       >
         <ResourceForm uiSchema={flowMetricUISchema} />
       </ResourceWatcher>
