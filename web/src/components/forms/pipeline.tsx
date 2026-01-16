@@ -94,17 +94,23 @@ export const Pipeline: React.FC<FlowCollectorPipelineProps> = ({ existing, selec
 
   const containerRef = React.createRef<HTMLDivElement>();
   const [controller, setController] = React.useState<Visualization>();
+  const [isLayouting, setIsLayouting] = React.useState(false);
 
   const fit = React.useCallback(() => {
     if (controller && controller.hasGraph()) {
       controller.getGraph().fit();
-    } else {
-      console.error('onResize called before controller graph');
+      // Only reveal after fit completes
+      requestAnimationFrame(() => {
+        setIsLayouting(false);
+      });
     }
   }, [controller]);
 
   const getStatus = React.useCallback(
     (types: string[], status: string) => {
+      let hasWarning = false;
+      let hasFailure = false;
+
       for (let i = 0; i < types.length; i++) {
         const type = types[i];
         const condition: K8sResourceCondition | null = existing?.status?.conditions?.find(
@@ -116,8 +122,23 @@ export const Pipeline: React.FC<FlowCollectorPipelineProps> = ({ existing, selec
           } else if (condition?.type.startsWith('Waiting') || condition?.reason === 'Pending') {
             return RunStatus.Pending;
           }
-          return RunStatus.Failed;
+          // Check if this is a warning type
+          if (type.toLowerCase().includes('warning')) {
+            hasWarning = true;
+          } else {
+            hasFailure = true;
+          }
         }
+      }
+      // Failures take priority over warnings
+      if (hasFailure) {
+        return RunStatus.Failed;
+      }
+      if (hasWarning) {
+        // PatternFly topology doesn't have a dedicated Warning status,
+        // but we can use the same color scheme by using RunStatus.Cancelled
+        // which typically shows yellow/orange
+        return RunStatus.Cancelled;
       }
       return RunStatus.Succeeded;
     },
@@ -172,13 +193,13 @@ export const Pipeline: React.FC<FlowCollectorPipelineProps> = ({ existing, selec
 
     const cpRunAfter: string[] = [];
     if (existing?.spec?.loki?.enable) {
-      const types = ['LokiIssue'];
+      const types = ['LokiIssue', 'LokiWarning'];
       steps.push({
         id: 'loki',
         label: 'Loki',
         runAfterTasks: ['flp'],
         data: {
-          status: getStatus(types, 'NoIssue'), // TODO: NoIssue / Unknown is not a valid status. That should be False.
+          status: getStatus(types, 'False'),
           selected: _.some(selectedTypes, t => types.includes(t)),
           onSelect: () => setSelectedTypes(types)
         }
@@ -233,65 +254,80 @@ export const Pipeline: React.FC<FlowCollectorPipelineProps> = ({ existing, selec
       },
       ...s
     })) as PipelineNodeModel[];
-  }, [existing, getStatus, selectedTypes, setSelectedTypes]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [existing?.spec, getStatus, selectedTypes, setSelectedTypes]);
 
   React.useEffect(() => {
     if (containerRef.current) {
       getResizeObserver(
         containerRef.current,
         () => {
-          fit();
+          setTimeout(() => fit(), 100); // slight delay to allow for any layout thrashing
         },
         true
       );
     }
   }, [containerRef, controller, fit]);
 
+  const { nodes, edges } = React.useMemo(() => {
+    const steps = getSteps();
+    const spacerNodes = getSpacerNodes(steps);
+    const nodes = [...steps, ...spacerNodes];
+    const edges = getEdgesFromNodes(steps);
+    return { nodes, edges };
+  }, [getSteps]);
+
   React.useEffect(() => {
     if (!controller) {
       return;
-    } else if (controller.hasGraph()) {
-      controller.getElements().forEach(e => e.getType() !== 'graph' && controller.removeElement(e));
-      controller.getGraph().destroy();
     }
 
-    setTimeout(() => {
-      const steps = getSteps();
-      const spacerNodes = getSpacerNodes(steps);
-      const nodes = [...steps, ...spacerNodes];
-      const edges = getEdgesFromNodes(steps);
-      controller.fromModel(
-        {
-          nodes,
-          edges,
-          graph: {
-            id: 'g1',
-            type: 'graph',
-            layout: 'pipelineLayout'
-          }
-        },
-        false
-      );
+    // Hide graph during layout to prevent visible repositioning
+    setIsLayouting(true);
 
-      //TODO: find a smoother way to fit while elements are still moving
-      setTimeout(fit, 100);
-      setTimeout(fit, 250);
-      setTimeout(fit, 500);
-    }, 500);
-  }, [controller, fit, getSteps]);
+    // Update the model - the layoutEndEvent listener will call fit() when layout completes
+    // This ensures layout and fit happen together without visible intermediate states
+    controller.fromModel(
+      {
+        nodes,
+        edges,
+        graph: {
+          id: 'g1',
+          type: 'graph',
+          layout: 'pipelineLayout'
+        }
+      },
+      false
+    );
+  }, [controller, nodes, edges]);
 
   //create controller on startup and register factories
   React.useEffect(() => {
     const c = new Visualization();
     c.registerComponentFactory(pipelineComponentFactory);
     c.registerLayoutFactory((type: string, graph: Graph): Layout | undefined => new PipelineDagreLayout(graph));
-    c.addEventListener(layoutEndEvent, fit);
     setController(c);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Register layout end event listener separately to avoid stale closure
+  React.useEffect(() => {
+    if (!controller) return;
+
+    const handleLayoutEnd = () => fit();
+    controller.addEventListener(layoutEndEvent, handleLayoutEnd);
+
+    return () => {
+      controller.removeEventListener(layoutEndEvent, handleLayoutEnd);
+    };
+  }, [controller, fit]);
+
   return (
-    <div id="pipeline-container-div" style={{ width: '100%', height: '100%' }} ref={containerRef}>
+    <div
+      id="pipeline-container-div"
+      style={{ width: '100%', height: '100%', opacity: isLayouting ? 0 : 1, transition: 'opacity 0.15s ease-in-out' }}
+      ref={containerRef}
+    >
       <VisualizationProvider controller={controller}>
         <VisualizationSurface />
       </VisualizationProvider>
