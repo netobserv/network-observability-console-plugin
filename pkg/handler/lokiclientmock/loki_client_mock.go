@@ -41,7 +41,7 @@ func (o *LokiClientMock) Get(url string) ([]byte, int, error) {
 				path += "_cause.json"
 			} else if strings.Contains(url, "by(K8S_ClusterName)") {
 				path += "_cluster.json"
-			} else if strings.Contains(url, "by(UdnId)") {
+			} else if strings.Contains(url, "by(SrcK8S_NetworkName,DstK8S_NetworkName)") {
 				path += "_udn.json"
 			} else if strings.Contains(url, "by(SrcK8S_Zone,DstK8S_Zone)") {
 				path += "_zone.json"
@@ -72,32 +72,42 @@ func (o *LokiClientMock) Get(url string) ([]byte, int, error) {
 
 	mlog.Debugf("Reading file path: %s", path)
 	file, err := os.ReadFile(path)
-	mlog.Debugf("here")
 	if err != nil {
-		// return nil, 500, err
-		emptyResponse := []byte(`{
-			"status": "success",
-			"data": {
-				"resultType": "matrix",
-				"result": []
+		// If dropped file doesn't exist, try falling back to non-dropped version
+		if strings.Contains(path, "_dropped") {
+			fallbackPath := strings.Replace(path, "_dropped", "", 1)
+			mlog.Debugf("Dropped file not found, trying fallback: %s", fallbackPath)
+			file, err = os.ReadFile(fallbackPath)
+			if err == nil {
+				mlog.Debugf("Using fallback file: %s", fallbackPath)
 			}
-		}`)
+		}
+		// If still error (or not a dropped file), return empty response
+		if err != nil {
+			emptyResponse := []byte(`{
+				"status": "success",
+				"data": {
+					"resultType": "matrix",
+					"result": []
+				}
+			}`)
 
-		var qr model.QueryResponse
-		err = json.Unmarshal(emptyResponse, &qr)
-		if err != nil {
-			return nil, 500, err
-		}
-		for _, s := range qr.Data.Result.(model.Streams) {
-			for i := range s.Entries {
-				s.Entries[i].Line = decoders.NetworkEventsToString(s.Entries[i].Line)
+			var qr model.QueryResponse
+			err = json.Unmarshal(emptyResponse, &qr)
+			if err != nil {
+				return nil, 500, err
 			}
+			for _, s := range qr.Data.Result.(model.Streams) {
+				for i := range s.Entries {
+					s.Entries[i].Line = decoders.NetworkEventsToString(s.Entries[i].Line)
+				}
+			}
+			emptyResponse, err = json.Marshal(qr)
+			if err != nil {
+				return nil, 500, err
+			}
+			return emptyResponse, 200, nil
 		}
-		emptyResponse, err = json.Marshal(qr)
-		if err != nil {
-			return nil, 500, err
-		}
-		return emptyResponse, 200, nil
 	}
 
 	if parseNetEvents {

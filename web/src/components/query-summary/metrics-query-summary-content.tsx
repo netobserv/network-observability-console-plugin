@@ -7,6 +7,7 @@ import { getRateMetricKey, NetflowMetrics } from '../../api/loki';
 import { MetricType } from '../../model/flow-query';
 import { Warning } from '../../model/warnings';
 import { valueFormat } from '../../utils/format';
+import { BytesIcon, PacketsIcon } from '../icons';
 import StatsQuerySummary from './stats-query-summary';
 
 const exposedMetrics: MetricType[] = [
@@ -119,7 +120,8 @@ export const MetricsQuerySummaryContent: React.FC<MetricsQuerySummaryContentProp
           return [
             <FlexItem key={`${metricType}Count`}>
               <Tooltip content={<Text component={TextVariants.p}>{textAbs}</Text>}>
-                <div className="stats-query-summary-container">
+                <div className="stats-query-summary-container-with-icon">
+                  <BytesIcon />
                   <Text id={`${_.lowerFirst(metricType)}Count`} component={TextVariants.p} style={{ color: textColor }}>
                     {valAbs}
                   </Text>
@@ -154,7 +156,8 @@ export const MetricsQuerySummaryContent: React.FC<MetricsQuerySummaryContentProp
           return [
             <FlexItem key={`${metricType}Count`}>
               <Tooltip content={<Text component={TextVariants.p}>{textAbs}</Text>}>
-                <div className="stats-query-summary-container">
+                <div className="stats-query-summary-container-with-icon">
+                  <PacketsIcon />
                   <Text id={`${_.lowerFirst(metricType)}Count`} component={TextVariants.p} style={{ color: textColor }}>
                     {valAbs}
                   </Text>

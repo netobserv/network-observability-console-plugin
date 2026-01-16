@@ -5,7 +5,8 @@
     "result": [
       {
         "metric": {
-          "UdnId": "my-udn"
+          "SrcK8S_NetworkName": "my-udn",
+          "DstK8S_NetworkName": "my-udn-2"
         },
         "values": [
           [
@@ -40,7 +41,8 @@
       },
       {
         "metric": {
-          "UdnId": "my-udn-2"
+          "SrcK8S_NetworkName": "my-udn",
+          "DstK8S_NetworkName": "my-udn-2"
         },
         "values": [
           [
@@ -245,6 +247,128 @@
             "3.863888888888889"
           ]
         ]
+      },
+      {
+        "metric": {
+          "DstK8S_NetworkName": "production-network",
+          "DstK8S_Type": "UserDefinedNetwork",
+          "SrcAddr": "10.128.0.90",
+          "SrcK8S_Name": "app-pod-1",
+          "SrcK8S_Namespace": "production",
+          "SrcK8S_OwnerName": "app-deployment",
+          "SrcK8S_OwnerType": "Deployment",
+          "SrcK8S_Type": "Pod"
+        },
+        "values": [
+          [
+            1708009560,
+            "75.3"
+          ],
+          [
+            1708009920,
+            "82.7"
+          ],
+          [
+            1708010280,
+            "88.1"
+          ],
+          [
+            1708010640,
+            "92.5"
+          ],
+          [
+            1708011000,
+            "89.8"
+          ],
+          [
+            1708011360,
+            "95.2"
+          ],
+          [
+            1708011720,
+            "98.7"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_NetworkName": "development-network",
+          "DstK8S_Type": "UserDefinedNetwork",
+          "SrcK8S_NetworkName": "production-network",
+          "SrcK8S_Type": "UserDefinedNetwork"
+        },
+        "values": [
+          [
+            1708009560,
+            "35.2"
+          ],
+          [
+            1708009920,
+            "38.9"
+          ],
+          [
+            1708010280,
+            "42.1"
+          ],
+          [
+            1708010640,
+            "44.8"
+          ],
+          [
+            1708011000,
+            "43.5"
+          ],
+          [
+            1708011360,
+            "46.2"
+          ],
+          [
+            1708011720,
+            "48.7"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_NetworkName": "cluster-network",
+          "DstK8S_Type": "ClusterUserDefinedNetwork",
+          "SrcAddr": "10.128.0.100",
+          "SrcK8S_Name": "cluster-pod",
+          "SrcK8S_Namespace": "kube-system",
+          "SrcK8S_OwnerName": "cluster-deployment",
+          "SrcK8S_OwnerType": "Deployment",
+          "SrcK8S_Type": "Pod"
+        },
+        "values": [
+          [
+            1708009560,
+            "55.8"
+          ],
+          [
+            1708009920,
+            "62.3"
+          ],
+          [
+            1708010280,
+            "68.1"
+          ],
+          [
+            1708010640,
+            "71.5"
+          ],
+          [
+            1708011000,
+            "69.8"
+          ],
+          [
+            1708011360,
+            "74.2"
+          ],
+          [
+            1708011720,
+            "77.9"
+          ]
+        ]
       }
     ],
     "stats": {
@@ -256,7 +380,7 @@
         "execTime": 0.642710294,
         "queueTime": 8.042418995,
         "subqueries": 0,
-        "totalEntriesReturned": 7,
+        "totalEntriesReturned": 10,
         "splits": 6,
         "shards": 48,
         "totalPostFilterLines": 199944,

@@ -10,16 +10,7 @@ import {
   ToolbarItem,
   Tooltip
 } from '@patternfly/react-core';
-import {
-  ArrowLeftIcon,
-  ArrowRightIcon,
-  ArrowsAltVIcon,
-  BanIcon,
-  CheckIcon,
-  PencilAltIcon,
-  TimesCircleIcon,
-  TimesIcon
-} from '@patternfly/react-icons';
+import { ArrowsAltVIcon, BanIcon, CheckIcon, PencilAltIcon, TimesCircleIcon, TimesIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -47,6 +38,7 @@ import {
 import { getPathWithParams, netflowTrafficPath } from '../../../utils/url';
 import { MatchDropdown } from '../../dropdowns/match-dropdown';
 import { navigate } from '../../dynamic-loader/dynamic-loader';
+import { DestinationIcon, EndpointIcon, SourceIcon } from '../../icons';
 import { Direction } from '../filters-toolbar';
 import { LinksOverflow } from '../links-overflow';
 import './filters-chips.css';
@@ -286,18 +278,18 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
                             key="src"
                             onClick={() => swapValue(filter, filterValue, 'src')}
                           >
-                            <ArrowLeftIcon />
+                            <SourceIcon />
                             &nbsp;{filters.match === 'bidirectional' ? t('As endpoint A') : t('As source')}
                           </DropdownItem>
                         )}
                         {(filter.def.category === 'endpoint' || filter.def.id.startsWith('src_')) && (
                           <DropdownItem
                             id="dropdown-item-dst"
-                            data-test="dropdown-item-src"
+                            data-test="dropdown-item-dst"
                             key="dst"
                             onClick={() => swapValue(filter, filterValue, 'dst')}
                           >
-                            <ArrowRightIcon />
+                            <DestinationIcon />
                             &nbsp;{filters.match === 'bidirectional' ? t('As endpoint B') : t('As destination')}
                           </DropdownItem>
                         )}
@@ -423,7 +415,18 @@ export const FiltersChips: React.FC<FiltersChipsProps> = ({
               <div key={gp.id} className="flex-block no-wrap">
                 {getAndOr(filters.match, index, true)}
                 <div className={`custom-chip-box ${gp.id !== 'common' ? 'custom-chip-peer' : ''}`}>
-                  {hasSrcOrDstFilters(gp.filters) && <Text>{getGroupName(gp.id)}&nbsp;</Text>}
+                  {hasSrcOrDstFilters(gp.filters) && (
+                    <Text>
+                      {filters.match === 'bidirectional' ? (
+                        <EndpointIcon />
+                      ) : gp.id === 'src' ? (
+                        <SourceIcon />
+                      ) : gp.id === 'dst' ? (
+                        <DestinationIcon />
+                      ) : null}
+                      &nbsp;{getGroupName(gp.id)}&nbsp;
+                    </Text>
+                  )}
                   <div className="flex-block">{gp.filters.map(getFilterDisplay)}</div>
                 </div>
               </div>

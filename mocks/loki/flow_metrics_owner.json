@@ -1977,6 +1977,206 @@
             "2.2222222222222223"
           ]
         ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "production",
+          "DstK8S_OwnerName": "gateway-api",
+          "DstK8S_OwnerType": "Gateway",
+          "SrcK8S_Namespace": "production",
+          "SrcK8S_OwnerName": "web-deployment",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1708009560,
+            "200.5"
+          ],
+          [
+            1708009920,
+            "225.8"
+          ],
+          [
+            1708010280,
+            "245.3"
+          ],
+          [
+            1708010640,
+            "258.7"
+          ],
+          [
+            1708011000,
+            "252.1"
+          ],
+          [
+            1708011360,
+            "265.4"
+          ],
+          [
+            1708011720,
+            "270.2"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "gateway-system",
+          "DstK8S_OwnerName": "gateway-external",
+          "DstK8S_OwnerType": "Gateway",
+          "SrcK8S_Namespace": "gateway-system",
+          "SrcK8S_OwnerName": "gateway-internal",
+          "SrcK8S_OwnerType": "Gateway"
+        },
+        "values": [
+          [
+            1708009560,
+            "150.2"
+          ],
+          [
+            1708009920,
+            "168.5"
+          ],
+          [
+            1708010280,
+            "182.3"
+          ],
+          [
+            1708010640,
+            "195.8"
+          ],
+          [
+            1708011000,
+            "188.1"
+          ],
+          [
+            1708011360,
+            "202.5"
+          ],
+          [
+            1708011720,
+            "210.7"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "vms",
+          "DstK8S_OwnerName": "vm-ubuntu-server",
+          "DstK8S_OwnerType": "VirtualMachine",
+          "SrcK8S_Namespace": "vms",
+          "SrcK8S_OwnerName": "vm-centos-server",
+          "SrcK8S_OwnerType": "VirtualMachine"
+        },
+        "values": [
+          [
+            1708009560,
+            "95.3"
+          ],
+          [
+            1708009920,
+            "108.7"
+          ],
+          [
+            1708010280,
+            "118.2"
+          ],
+          [
+            1708010640,
+            "125.8"
+          ],
+          [
+            1708011000,
+            "122.1"
+          ],
+          [
+            1708011360,
+            "132.5"
+          ],
+          [
+            1708011720,
+            "138.9"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "vms",
+          "DstK8S_OwnerName": "vmi-windows",
+          "DstK8S_OwnerType": "VirtualMachineInstance",
+          "SrcK8S_Namespace": "vms",
+          "SrcK8S_OwnerName": "vmi-linux",
+          "SrcK8S_OwnerType": "VirtualMachineInstance"
+        },
+        "values": [
+          [
+            1708009560,
+            "88.2"
+          ],
+          [
+            1708009920,
+            "98.5"
+          ],
+          [
+            1708010280,
+            "105.8"
+          ],
+          [
+            1708010640,
+            "112.3"
+          ],
+          [
+            1708011000,
+            "109.1"
+          ],
+          [
+            1708011360,
+            "118.7"
+          ],
+          [
+            1708011720,
+            "125.2"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "production",
+          "DstK8S_OwnerName": "app-deployment",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "vms",
+          "SrcK8S_OwnerName": "vm-ubuntu-server",
+          "SrcK8S_OwnerType": "VirtualMachine"
+        },
+        "values": [
+          [
+            1708009560,
+            "65.4"
+          ],
+          [
+            1708009920,
+            "72.8"
+          ],
+          [
+            1708010280,
+            "78.1"
+          ],
+          [
+            1708010640,
+            "82.5"
+          ],
+          [
+            1708011000,
+            "79.9"
+          ],
+          [
+            1708011360,
+            "85.2"
+          ],
+          [
+            1708011720,
+            "88.7"
+          ]
+        ]
       }
     ],
     "stats": {
@@ -1988,7 +2188,7 @@
         "execTime": 0.77872763,
         "queueTime": 13.016442995,
         "subqueries": 0,
-        "totalEntriesReturned": 53,
+        "totalEntriesReturned": 58,
         "splits": 6,
         "shards": 48,
         "totalPostFilterLines": 199944,

@@ -2432,6 +2432,263 @@
             "5.2555555555555555"
           ]
         ]
+      },
+      {
+        "metric": {
+          "DstAddr": "10.128.0.70",
+          "DstK8S_Name": "gateway-api",
+          "DstK8S_Namespace": "istio-system",
+          "DstK8S_Type": "Gateway",
+          "SrcAddr": "10.128.0.71",
+          "SrcK8S_Name": "web-pod",
+          "SrcK8S_Namespace": "production",
+          "SrcK8S_OwnerName": "web-deployment",
+          "SrcK8S_OwnerType": "Deployment",
+          "SrcK8S_Type": "Pod"
+        },
+        "values": [
+          [
+            1708009560,
+            "200.5"
+          ],
+          [
+            1708009920,
+            "225.8"
+          ],
+          [
+            1708010280,
+            "245.3"
+          ],
+          [
+            1708010640,
+            "258.7"
+          ],
+          [
+            1708011000,
+            "252.1"
+          ],
+          [
+            1708011360,
+            "265.4"
+          ],
+          [
+            1708011720,
+            "270.2"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstAddr": "10.128.0.80",
+          "DstK8S_Name": "gateway-external",
+          "DstK8S_Namespace": "gateway-system",
+          "DstK8S_Type": "Gateway",
+          "SrcAddr": "10.128.0.81",
+          "SrcK8S_Name": "gateway-internal",
+          "SrcK8S_Namespace": "gateway-system",
+          "SrcK8S_Type": "Gateway"
+        },
+        "values": [
+          [
+            1708009560,
+            "150.2"
+          ],
+          [
+            1708009920,
+            "168.5"
+          ],
+          [
+            1708010280,
+            "182.3"
+          ],
+          [
+            1708010640,
+            "195.8"
+          ],
+          [
+            1708011000,
+            "188.1"
+          ],
+          [
+            1708011360,
+            "202.5"
+          ],
+          [
+            1708011720,
+            "210.7"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstAddr": "10.128.0.110",
+          "DstK8S_Name": "vm-ubuntu-server",
+          "DstK8S_Namespace": "vms",
+          "DstK8S_Type": "VirtualMachine",
+          "SrcAddr": "10.128.0.111",
+          "SrcK8S_Name": "vm-centos-server",
+          "SrcK8S_Namespace": "vms",
+          "SrcK8S_Type": "VirtualMachine"
+        },
+        "values": [
+          [
+            1708009560,
+            "95.3"
+          ],
+          [
+            1708009920,
+            "108.7"
+          ],
+          [
+            1708010280,
+            "118.2"
+          ],
+          [
+            1708010640,
+            "125.8"
+          ],
+          [
+            1708011000,
+            "122.1"
+          ],
+          [
+            1708011360,
+            "132.5"
+          ],
+          [
+            1708011720,
+            "138.9"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstAddr": "10.128.0.120",
+          "DstK8S_Name": "vmi-windows",
+          "DstK8S_Namespace": "vms",
+          "DstK8S_Type": "VirtualMachineInstance",
+          "SrcAddr": "10.128.0.121",
+          "SrcK8S_Name": "vmi-linux",
+          "SrcK8S_Namespace": "vms",
+          "SrcK8S_Type": "VirtualMachineInstance"
+        },
+        "values": [
+          [
+            1708009560,
+            "88.2"
+          ],
+          [
+            1708009920,
+            "98.5"
+          ],
+          [
+            1708010280,
+            "105.8"
+          ],
+          [
+            1708010640,
+            "112.3"
+          ],
+          [
+            1708011000,
+            "109.1"
+          ],
+          [
+            1708011360,
+            "118.7"
+          ],
+          [
+            1708011720,
+            "125.2"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstAddr": "10.128.0.130",
+          "DstK8S_Name": "app-pod",
+          "DstK8S_Namespace": "production",
+          "DstK8S_OwnerName": "app-deployment",
+          "DstK8S_OwnerType": "Deployment",
+          "DstK8S_Type": "Pod",
+          "SrcAddr": "10.128.0.110",
+          "SrcK8S_Name": "vm-ubuntu-server",
+          "SrcK8S_Namespace": "vms",
+          "SrcK8S_Type": "VirtualMachine"
+        },
+        "values": [
+          [
+            1708009560,
+            "65.4"
+          ],
+          [
+            1708009920,
+            "72.8"
+          ],
+          [
+            1708010280,
+            "78.1"
+          ],
+          [
+            1708010640,
+            "82.5"
+          ],
+          [
+            1708011000,
+            "79.9"
+          ],
+          [
+            1708011360,
+            "85.2"
+          ],
+          [
+            1708011720,
+            "88.7"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstAddr": "10.128.0.150",
+          "DstK8S_Name": "vm-database",
+          "DstK8S_Namespace": "vms",
+          "DstK8S_Type": "VirtualMachine",
+          "SrcK8S_Name": "db-pod-0",
+          "SrcK8S_Namespace": "production",
+          "SrcK8S_OwnerName": "db-statefulset",
+          "SrcK8S_OwnerType": "StatefulSet",
+          "SrcK8S_Type": "Pod"
+        },
+        "values": [
+          [
+            1708009560,
+            "42.5"
+          ],
+          [
+            1708009920,
+            "48.2"
+          ],
+          [
+            1708010280,
+            "52.8"
+          ],
+          [
+            1708010640,
+            "55.3"
+          ],
+          [
+            1708011000,
+            "53.9"
+          ],
+          [
+            1708011360,
+            "57.1"
+          ],
+          [
+            1708011720,
+            "59.7"
+          ]
+        ]
       }
     ],
     "stats": {
@@ -2443,7 +2700,7 @@
         "execTime": 0.800734384,
         "queueTime": 8.669621995,
         "subqueries": 0,
-        "totalEntriesReturned": 59,
+        "totalEntriesReturned": 65,
         "splits": 6,
         "shards": 48,
         "totalPostFilterLines": 199944,

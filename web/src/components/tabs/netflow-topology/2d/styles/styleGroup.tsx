@@ -1,4 +1,3 @@
-import { CubesIcon } from '@patternfly/react-icons';
 import {
   DefaultGroup,
   Node,
@@ -10,6 +9,7 @@ import {
 } from '@patternfly/react-topology';
 import useDetailsLevel from '@patternfly/react-topology/dist/esm/hooks/useDetailsLevel';
 import * as React from 'react';
+import { TopologyGroupIcon } from '../../../../icons';
 
 const iconPadding = 20;
 
@@ -42,7 +42,7 @@ const StyleGroup: React.FunctionComponent<StyleGroupProps> = ({
 
     return (
       <g transform={`translate(${(collapsedWidth - iconSize) / 2}, ${(collapsedHeight - iconSize) / 2})`}>
-        <CubesIcon style={{ color: '#393F44' }} width={iconSize} height={iconSize} />
+        <TopologyGroupIcon size={iconSize} style={{ color: '#393F44' }} />
       </g>
     );
   };
