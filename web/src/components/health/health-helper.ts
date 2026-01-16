@@ -266,7 +266,8 @@ export const getTrafficLink = (kind: string, resourceName: string, a: AlertWithR
       params += `&bnf=${bnf}`;
       break;
     case 'Node':
-      filters.push(`${side}_node="${resourceName}"`);
+      filters.push(`${side}_owner_name="${resourceName}"`);
+      filters.push(`${side}_kind="Node"`);
       params += `&bnf=${bnf}`;
       break;
   }
