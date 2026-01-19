@@ -6,7 +6,7 @@ import {
   SetFeatureFlag
 } from '@openshift-console/dynamic-plugin-sdk';
 import { Button, Flex, FlexItem, PageSection, Tab, Tabs, Text, TextVariants, Title } from '@patternfly/react-core';
-import { SyncAltIcon } from '@patternfly/react-icons';
+import { QuestionCircleIcon, SyncAltIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
 import { murmur3 } from 'murmurhash-js';
 import * as React from 'react';
@@ -24,12 +24,13 @@ import { HealthDrawerContainer } from './health-drawer-container';
 import HealthError from './health-error';
 import { HealthGlobal } from './health-global';
 import { buildStats, isSilenced, RecordingRuleMetric } from './health-helper';
+import { HealthScoringDrawer } from './health-scoring-drawer';
 import { HealthSummary } from './health-summary';
 import { HealthTabTitle } from './tab-title';
 
 import './health.css';
 
-export const NetworkHealth: React.FC<{}> = ({}) => {
+export const NetworkHealth: React.FC<{}> = ({ }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const isDarkTheme = useTheme();
   const [loading, setLoading] = React.useState(false);
@@ -40,6 +41,7 @@ export const NetworkHealth: React.FC<{}> = ({}) => {
   const [silenced, setSilenced] = React.useState<SilenceMatcher[][]>([]);
   const [activeTabKey, setActiveTabKey] = React.useState<string>('global');
   const [config, setConfig] = React.useState<Config>(defaultConfig);
+  const [isScoringDrawerOpen, setIsScoringDrawerOpen] = React.useState<boolean>(false);
 
   const fetch = React.useCallback(() => {
     setLoading(true);
@@ -194,53 +196,75 @@ export const NetworkHealth: React.FC<{}> = ({}) => {
           </FlexItem>
         </Flex>
       </Flex>
-      <div className="health-tabs">
-        <HealthSummary rules={rules} stats={stats} />
-        {error ? (
-          <HealthError title={t('Error')} body={error} />
-        ) : (
-          <Tabs
-            activeKey={activeTabKey}
-            onSelect={(_, tabIndex) => setActiveTabKey(String(tabIndex))}
-            role="region"
-            className={isDarkTheme ? 'dark' : ''}
-          >
-            <Tab
-              eventKey={'global'}
-              title={<HealthTabTitle title={t('Global')} stats={[stats.global]} />}
-              aria-label="Tab global"
-            >
-              <HealthGlobal info={stats.global} recordingRules={stats.recordingRules.global} isDark={isDarkTheme} />
-            </Tab>
-            <Tab
-              eventKey={'per-node'}
-              title={<HealthTabTitle title={t('Nodes')} stats={stats.byNode} />}
-              aria-label="Tab per node"
-            >
-              <HealthDrawerContainer
-                title={t('Rule violations per node')}
-                stats={stats.byNode}
-                recordingRulesStats={stats.recordingRules.byNode}
-                kind={'Node'}
-                isDark={isDarkTheme}
-              />
-            </Tab>
-            <Tab
-              eventKey={'per-namespace'}
-              title={<HealthTabTitle title={t('Namespaces')} stats={stats.byNamespace} />}
-              aria-label="Tab per namespace"
-            >
-              <HealthDrawerContainer
-                title={t('Rule violations per namespace')}
-                stats={stats.byNamespace}
-                recordingRulesStats={stats.recordingRules.byNamespace}
-                kind={'Namespace'}
-                isDark={isDarkTheme}
-              />
-            </Tab>
-          </Tabs>
-        )}
-      </div>
+      <HealthScoringDrawer isOpen={isScoringDrawerOpen} onClose={() => setIsScoringDrawerOpen(false)}>
+        <div className="health-tabs">
+          <HealthSummary rules={rules} stats={stats} />
+          {error ? (
+            <HealthError title={t('Error')} body={error} />
+          ) : (
+            <>
+              <Flex className={`health-tabs-container ${isDarkTheme ? 'dark' : ''}`}>
+                <FlexItem flex={{ default: 'flex_1' }}>
+                  <Tabs
+                    activeKey={activeTabKey}
+                    onSelect={(_, tabIndex) => setActiveTabKey(String(tabIndex))}
+                    role="region"
+                    className={isDarkTheme ? 'dark' : ''}
+                  >
+                    <Tab
+                      eventKey={'global'}
+                      title={<HealthTabTitle title={t('Global')} stats={[stats.global]} />}
+                      aria-label="Tab global"
+                    />
+                    <Tab
+                      eventKey={'per-node'}
+                      title={<HealthTabTitle title={t('Nodes')} stats={stats.byNode} />}
+                      aria-label="Tab per node"
+                    />
+                    <Tab
+                      eventKey={'per-namespace'}
+                      title={<HealthTabTitle title={t('Namespaces')} stats={stats.byNamespace} />}
+                      aria-label="Tab per namespace"
+                    />
+                  </Tabs>
+                </FlexItem>
+                <FlexItem className={`${isDarkTheme ? 'dark' : 'light'}-bottom-border`}>
+                  <Button
+                    data-test="health-scoring-info-button"
+                    className="overflow-button"
+                    variant="link"
+                    onClick={() => setIsScoringDrawerOpen(!isScoringDrawerOpen)}
+                    icon={<QuestionCircleIcon />}
+                  >
+                    {isScoringDrawerOpen ? t('Hide scoring information') : t('Show scoring information')}
+                  </Button>
+                </FlexItem>
+              </Flex>
+              {activeTabKey === 'global' && (
+                <HealthGlobal info={stats.global} recordingRules={stats.recordingRules.global} isDark={isDarkTheme} />
+              )}
+              {activeTabKey === 'per-node' && (
+                <HealthDrawerContainer
+                  title={t('Rule violations per node')}
+                  stats={stats.byNode}
+                  recordingRulesStats={stats.recordingRules.byNode}
+                  kind={'Node'}
+                  isDark={isDarkTheme}
+                />
+              )}
+              {activeTabKey === 'per-namespace' && (
+                <HealthDrawerContainer
+                  title={t('Rule violations per namespace')}
+                  stats={stats.byNamespace}
+                  recordingRulesStats={stats.recordingRules.byNamespace}
+                  kind={'Namespace'}
+                  isDark={isDarkTheme}
+                />
+              )}
+            </>
+          )}
+        </div>
+      </HealthScoringDrawer>
     </PageSection>
   );
 };
