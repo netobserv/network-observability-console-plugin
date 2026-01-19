@@ -143,27 +143,24 @@ export const ResourceWatcher: FC<ResourceWatcherProps> = ({
     );
   }
 
-  let data: K8sResourceKind | undefined;
+  let data: K8sResourceKind = { apiVersion: `${group}/${version}`, kind, metadata: { name: '' } };
   let useCRDDefaults = false;
   if (cr) {
     data = { apiVersion: `${group}/${version}`, kind, ...cr };
   } else if (defaultFrom === 'CSVExample') {
     const csv = matchingCSVs?.find(csv => csv.spec.customresourcedefinitions?.owned?.some(crd => crd.kind === kind));
     if (csv) {
-      data = exampleForModel(csv, group, version, kind);
+      const fromCSV = exampleForModel(csv, group, version, kind);
+      if (fromCSV) {
+        data = fromCSV;
+      } else {
+        console.warn('could not find CR example in CSV for kind:', kind);
+      }
+    } else {
+      console.warn('could not find CSV owning kind:', kind);
     }
   } else if (defaultFrom === 'CRD') {
-    data = { apiVersion: `${group}/${version}`, kind };
     useCRDDefaults = true;
-  }
-  if (!data) {
-    return (
-      <ErrorComponent
-        title={t('Unable to initialize {{kind}} resource', { kind })}
-        error={t('Some resource might be missing.')}
-        isLokiRelated={false}
-      />
-    );
   }
   const schema = crd?.spec?.versions?.find(v => v.name === version)?.schema?.openAPIV3Schema || null;
   // force namespace to be present in the form when namespaced

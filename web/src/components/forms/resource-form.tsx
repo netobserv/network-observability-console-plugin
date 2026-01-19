@@ -13,6 +13,7 @@ import { EditorToggle, EditorType } from './editor-toggle';
 import './forms.css';
 import { ResourceDeleteModal } from './resource-delete-modal';
 import { Consumer } from './resource-watcher';
+import { ErrorTemplate } from './dynamic-form/templates';
 
 export type ResourceFormProps = {
   uiSchema: UiSchema;
@@ -78,14 +79,17 @@ export const ResourceForm: FC<ResourceFormProps> = ({ uiSchema }) => {
                   )
                 }
                 yamlChild={
-                  <ResourceYAMLEditor
-                    initialResource={data}
-                    onSave={content => {
-                      const updatedData = safeYAMLToJS(content);
-                      setData(updatedData);
-                      ctx.onSubmit(updatedData);
-                    }}
-                  />
+                  <>
+                    <ResourceYAMLEditor
+                      initialResource={data}
+                      onSave={content => {
+                        const updatedData = safeYAMLToJS(content);
+                        setData(updatedData);
+                        ctx.onSubmit(updatedData);
+                      }}
+                    />
+                    <>{ctx.errors.length > 0 && <ErrorTemplate errors={ctx.errors} />}</>
+                  </>
                 }
               />
             </Suspense>
