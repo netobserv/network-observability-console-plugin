@@ -1,9 +1,7 @@
 import {
   AlertStates,
-  FeatureFlagHandler,
   PrometheusResponse,
-  Rule,
-  SetFeatureFlag
+  Rule
 } from '@openshift-console/dynamic-plugin-sdk';
 import { Button, Flex, FlexItem, PageSection, Tab, Tabs, Text, TextVariants, Title } from '@patternfly/react-core';
 import { SyncAltIcon } from '@patternfly/react-icons';
@@ -243,19 +241,6 @@ export const NetworkHealth: React.FC<{}> = ({}) => {
       </div>
     </PageSection>
   );
-};
-
-export const featureFlagHandler: FeatureFlagHandler = (setFeatureFlag: SetFeatureFlag) => {
-  // Check if user has permission to access Prometheus rules
-  getAlerts('netobserv="true"')
-    .then(() => {
-      // User has access to Prometheus alerts
-      setFeatureFlag('NETOBSERV_NETWORK_HEALTH', true);
-    })
-    .catch(err => {
-      // User doesn't have access - hide Network Health
-      setFeatureFlag('NETOBSERV_NETWORK_HEALTH', false);
-    });
 };
 
 NetworkHealth.displayName = 'NetworkHealth';
