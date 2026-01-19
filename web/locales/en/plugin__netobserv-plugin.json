@@ -239,8 +239,6 @@
   "Message": "Message",
   "Changed": "Changed",
   "Unable to get {{kind}}": "Unable to get {{kind}}",
-  "Unable to initialize {{kind}} resource": "Unable to initialize {{kind}} resource",
-  "Some resource might be missing.": "Some resource might be missing.",
   "Step {{step}}/{{total}}": "Step {{step}}/{{total}}",
   "Previous tip": "Previous tip",
   "Next tip": "Next tip",

@@ -75,14 +75,9 @@ export const getUpdatedCR = (data: any, updatedData: any) => {
   return data;
 };
 
-export const exampleForModel = (
-  csv: ClusterServiceVersionKind,
-  group: string,
-  version: string,
-  kind: string
-) => {
+export const exampleForModel = (csv: ClusterServiceVersionKind, group: string, version: string, kind: string) => {
   return parseALMExamples(csv).find((s: K8sResourceKind) => s.kind === kind && s.apiVersion === `${group}/${version}`);
-}
+};
 
 export const parseALMExamples = (csv: ClusterServiceVersionKind): K8sResourceKind[] => {
   try {

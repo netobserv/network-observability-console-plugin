@@ -9,11 +9,11 @@ import { safeYAMLToJS } from '../../utils/yaml';
 import { back } from '../dynamic-loader/dynamic-loader';
 import { SchemaValidator } from './config/validator';
 import { DynamicForm } from './dynamic-form/dynamic-form';
+import { ErrorTemplate } from './dynamic-form/templates';
 import { EditorToggle, EditorType } from './editor-toggle';
 import './forms.css';
 import { ResourceDeleteModal } from './resource-delete-modal';
 import { Consumer } from './resource-watcher';
-import { ErrorTemplate } from './dynamic-form/templates';
 
 export type ResourceFormProps = {
   uiSchema: UiSchema;
