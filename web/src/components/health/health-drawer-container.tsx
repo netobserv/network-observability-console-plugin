@@ -53,10 +53,6 @@ export const HealthDrawerContainer: React.FC<HealthDrawerContainerProps> = ({
     drawerRef.current && drawerRef.current.focus();
   };
 
-  const handleSelectItem = (item?: ByResource | RecordingRulesByResource) => {
-    setSelectedItem(item);
-  };
-
   React.useEffect(() => {
     if (selectedItem) {
       if (isAlertResource(selectedItem)) {
@@ -81,16 +77,9 @@ export const HealthDrawerContainer: React.FC<HealthDrawerContainerProps> = ({
   // Sort alerts by score (best score = lowest value)
   const sortedAlerts = React.useMemo(() => _.orderBy(stats, r => r.score, 'asc'), [stats]);
 
-  // Sort recording rules by severity (most critical first)
+  // Sort recording rules by score (best score = lowest value)
   const sortedRecordingRules = React.useMemo(
-    () =>
-      hasRecordingRules
-        ? [...recordingRulesStats!].sort((a, b) => {
-            const aScore = a.critical.length * 3 + a.warning.length * 2 + a.other.length;
-            const bScore = b.critical.length * 3 + b.warning.length * 2 + b.other.length;
-            return bScore - aScore;
-          })
-        : [],
+    () => (hasRecordingRules ? _.orderBy(recordingRulesStats!, r => r.score, 'asc') : []),
     [hasRecordingRules, recordingRulesStats]
   );
 
@@ -146,7 +135,7 @@ export const HealthDrawerContainer: React.FC<HealthDrawerContainerProps> = ({
                     stats={r}
                     isSelected={r.name === selectedItem?.name}
                     onClick={() => {
-                      handleSelectItem(r.name !== selectedItem?.name ? r : undefined);
+                      setSelectedItem(r.name !== selectedItem?.name ? r : undefined);
                     }}
                   />
                 ))}
@@ -158,7 +147,7 @@ export const HealthDrawerContainer: React.FC<HealthDrawerContainerProps> = ({
                     stats={r}
                     isSelected={r.name === selectedItem?.name}
                     onClick={() => {
-                      handleSelectItem(r.name !== selectedItem?.name ? r : undefined);
+                      setSelectedItem(r.name !== selectedItem?.name ? r : undefined);
                     }}
                   />
                 ))}

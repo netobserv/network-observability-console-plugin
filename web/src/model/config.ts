@@ -26,6 +26,7 @@ export type HealthRuleVariant = {
   groupBy: string;
   lowVolumeThreshold?: string;
   thresholds: HealthRuleThresholds;
+  upperBound?: string;
 };
 
 export type HealthRuleMetadata = {

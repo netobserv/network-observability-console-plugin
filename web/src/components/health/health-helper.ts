@@ -11,6 +11,7 @@ export type RecordingRuleItem = {
   severity: Severity;
   template: string;
   threshold?: string;
+  upperBound?: string;
   labels: PrometheusLabels;
 };
 
@@ -175,6 +176,7 @@ const processRecordingRules = (
           severity: severity,
           template: template,
           threshold: variant.thresholds[severity],
+          upperBound: variant.upperBound,
           labels: valueData.labels
         });
       }
@@ -522,13 +524,14 @@ export const computeRecordingRulesScore = (r: RecordingRulesByResource): number 
     if (rule.threshold) {
       const thresholdValue = parseFloat(rule.threshold);
       if (!isNaN(thresholdValue) && thresholdValue > 0) {
+        // Use upperBound from variant metadata if available, otherwise default to 100
+        const upperBoundValue = rule.upperBound ? parseFloat(rule.upperBound) : 100;
         // Create a compatible object to use the same computeExcessRatio function as alerts
-        // Use same default upperBound as alerts (100)
         const mockAlert = {
           value: rule.value,
           metadata: {
             thresholdF: thresholdValue,
-            upperBoundF: 100
+            upperBoundF: upperBoundValue
           }
         } as AlertWithRuleName;
 
