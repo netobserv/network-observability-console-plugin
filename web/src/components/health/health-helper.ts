@@ -471,7 +471,8 @@ const getSeverityScoreRange = (severity: string): { min: number; max: number } =
       return { min: 0, max: 6 };
     case 'warning':
       return { min: 4, max: 8 };
-    default: // 'info'
+    default:
+      // 'info'
       return { min: 6, max: 10 };
   }
 };

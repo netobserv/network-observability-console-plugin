@@ -30,7 +30,7 @@ import { HealthTabTitle } from './tab-title';
 
 import './health.css';
 
-export const NetworkHealth: React.FC<{}> = ({ }) => {
+export const NetworkHealth: React.FC<{}> = ({}) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const isDarkTheme = useTheme();
   const [loading, setLoading] = React.useState(false);

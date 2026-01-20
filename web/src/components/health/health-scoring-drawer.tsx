@@ -29,10 +29,7 @@ export const HealthScoringDrawer: React.FC<HealthScoringDrawerProps> = ({ isOpen
     <DrawerPanelContent isResizable widths={{ default: 'width_50' }} minSize="400px">
       <DrawerHead>
         <span tabIndex={isOpen ? 0 : -1} ref={drawerRef}>
-          <Text
-            component={TextVariants.h2}
-            style={{ fontSize: '1.75rem', fontWeight: 'bold' }}
-          >
+          <Text component={TextVariants.h2} style={{ fontSize: '1.75rem', fontWeight: 'bold' }}>
             {t('Understanding Network Health Scores')}
           </Text>
         </span>
@@ -112,10 +109,16 @@ export const HealthScoringDrawer: React.FC<HealthScoringDrawerProps> = ({ isOpen
               'Pre-calculated metrics that are continuously evaluated. Unlike alerts, they always have a current value and are classified by severity based on threshold ranges:'
             )}
           </Text>
-          <Text className="health-scoring-list-item">{`• ${t('Value < info threshold: Not included in scoring')}`}</Text>
+          <Text className="health-scoring-list-item">{`• ${t(
+            'Value < info threshold: Not included in scoring'
+          )}`}</Text>
           <Text className="health-scoring-list-item">{`• ${t('Value ≥ info threshold: Classified as info')}`}</Text>
-          <Text className="health-scoring-list-item">{`• ${t('Value ≥ warning threshold: Classified as warning')}`}</Text>
-          <Text className="health-scoring-list-item">{`• ${t('Value ≥ critical threshold: Classified as critical')}`}</Text>
+          <Text className="health-scoring-list-item">{`• ${t(
+            'Value ≥ warning threshold: Classified as warning'
+          )}`}</Text>
+          <Text className="health-scoring-list-item">{`• ${t(
+            'Value ≥ critical threshold: Classified as critical'
+          )}`}</Text>
           <Text component={TextVariants.p}>
             {t('Recording rules provide real-time health insights even when no alerts have fired.')}
           </Text>
@@ -131,8 +134,7 @@ export const HealthScoringDrawer: React.FC<HealthScoringDrawerProps> = ({ isOpen
             {t('The distance between the current value and the threshold, mapped to the severity range')}
           </Text>
           <Text className="health-scoring-list-item">
-            <strong>{t('Its severity level')}</strong>:{' '}
-            {t('Critical issues have more weight than warnings or info')}
+            <strong>{t('Its severity level')}</strong>: {t('Critical issues have more weight than warnings or info')}
           </Text>
           <Text className="health-scoring-list-item">
             <strong>{t('Its state')}</strong>:{' '}
