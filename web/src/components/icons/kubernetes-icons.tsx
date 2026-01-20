@@ -12,7 +12,7 @@
  * https://www.patternfly.org/v4/icons/
  */
 
-import { GlobeRouteIcon } from '@patternfly/react-icons';
+import { GlobeRouteIcon, ServiceIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { GrHost, GrMultiple, GrServerCluster, GrVirtualMachine } from 'react-icons/gr';
 import { IoLocationOutline } from 'react-icons/io5';
@@ -56,56 +56,6 @@ class PodIcon extends React.Component<SVGIconProps> {
           />
           <path d="m 6.2617914,7.43817 0,3.852778 3.3736103,1.868749 0.0167,-4.713193 z" fill="currentColor" />
           <path d="m 13.503462,7.43817 0,3.852778 -3.37361,1.868749 -0.0167,-4.713193 z" fill="currentColor" />
-        </g>
-      </g>
-    );
-  }
-}
-
-// Service icon - actual SVG from https://github.com/kubernetes/community/blob/master/icons/svg/resources/unlabeled/svc.svg
-class ServiceIcon extends React.Component<SVGIconProps> {
-  render() {
-    const { size, className, style } = this.props;
-    const sizeValue = typeof size === 'number' ? size : parseFloat(size as string) || 18;
-    const scale = (sizeValue / 18.035334) * 2;
-    // Center the icon: viewBox center is at (9.017667, 8.750189)
-    const centerX = 9.017667;
-    const centerY = 8.750189;
-    return (
-      <g
-        className={className}
-        style={style}
-        transform={`translate(${sizeValue / 2 - centerX * scale}, ${sizeValue / 2 - centerY * scale}) scale(${scale})`}
-      >
-        <g transform="translate(-0.90023837,-0.50520354)">
-          <path d="m 4.4949896,11.260826 2.9083311,0 0,2.041667 -2.9083311,0 z" fill="currentColor" />
-          <path d="m 8.4637407,11.260826 2.9083303,0 0,2.041667 -2.9083303,0 z" fill="currentColor" />
-          <path d="m 12.432491,11.260826 2.90833,0 0,2.041667 -2.90833,0 z" fill="currentColor" />
-          <path d="m 7.6137407,5.2082921 4.6083303,0 0,2.041667 -4.6083303,0 z" fill="currentColor" />
-          <path
-            d="m 9.9179005,7.2499601 0,2.005449 -3.966671,0 0,2.0028859"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="0.52916664"
-            strokeLinecap="butt"
-            strokeLinejoin="round"
-          />
-          <path
-            d="m 9.9179005,7.2499601 0,2.005449 3.9666705,0 0,2.0028859"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="0.52899998"
-            strokeLinecap="butt"
-            strokeLinejoin="round"
-          />
-          <path
-            d="m 9.9095538,7.2512251 0,2.005449 0.0167,0 0,2.0028859"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="0.52916664"
-            strokeLinecap="butt"
-            strokeLinejoin="round"
-          />
         </g>
       </g>
     );
@@ -473,10 +423,11 @@ export const getK8sResourceIcon = (resourceKind: string | undefined): React.Comp
   // Use a map for more flexible matching - ensure stable references
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const kindMap: { [key: string]: React.ComponentClass<any> } = {
-    service: ServiceIcon,
+    service: ServiceIcon, // PF ServiceIcon for Service is consistent with GlobeRouteIcon for Gateway
     svc: ServiceIcon,
     ingress: ServiceIcon,
     ing: ServiceIcon,
+    gateway: GlobeRouteIcon, // PF GlobeRouteIcon for Gateway is consistent with ServiceIcon for Service/Ingress
     pod: PodIcon,
     namespace: NamespaceIcon,
     ns: NamespaceIcon,
@@ -491,7 +442,6 @@ export const getK8sResourceIcon = (resourceKind: string | undefined): React.Comp
     vmi: VMIcon,
     virtualmachine: VMIcon,
     virtualmachineinstance: VMIcon,
-    gateway: GlobeRouteIcon,
     daemonset: DaemonSetIcon,
     ds: DaemonSetIcon,
     deployment: DeploymentIcon,
