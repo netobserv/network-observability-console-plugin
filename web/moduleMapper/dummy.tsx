@@ -229,11 +229,20 @@ export function useK8sWatchResource(req: any) {
                   "type": "ConfigurationIssue"
                 },
                 {
-                  "lastTransitionTime": "2025-04-08T09:01:43Z",
-                  "message": "Loki is not configured in LokiStack mode",
-                  "reason": "Unused",
-                  "status": "Unknown",
+                  "lastTransitionTime": "2026-01-15T15:44:51Z",
+                  // eslint-disable-next-line max-len
+                  "message": "LokiStack has issues [name: loki, namespace: netobserv]: Warning: The schema configuration does not contain the most recent schema version and needs an update; Degraded: Missing object storage secret",
+                  "reason": "LokiStackIssues",
+                  "status": "False",
                   "type": "LokiIssue"
+                },
+                {
+                  "lastTransitionTime": "2026-01-15T16:05:26Z",
+                  // eslint-disable-next-line max-len
+                  "message": "LokiStack has warnings [name: loki, namespace: netobserv]: Warning: The schema configuration does not contain the most recent schema version and needs an update",
+                  "reason": "LokiStackWarnings",
+                  "status": "True",
+                  "type": "LokiWarning"
                 },
                 {
                   "lastTransitionTime": "2025-04-08T09:01:45Z",
@@ -276,6 +285,23 @@ export function useK8sWatchResource(req: any) {
         }
         setLoaded(true);
       }, 1000);
+    } else if (kind === 'FlowCollector') {
+      // simulate an update
+      setTimeout(() => {
+        const fc = _.cloneDeep(resource);
+        // 70% chance to update, 30% chance to skip
+        if (Math.random() < 0.7 && fc.status && fc.status.conditions) {
+          const randomIndex = Math.floor(Math.random() * fc.status.conditions.length);
+          const condition = fc.status.conditions[randomIndex];
+          condition.status = condition.status === 'True' ? 'False' : 'True';
+          
+          // Enable/disable Loki based on LokiIssue status
+          if (condition.type === 'LokiIssue' || condition.type === 'LokiWarning') {
+            fc.spec!.loki.enable = condition.status === 'True';
+          }
+        }
+        setResource(fc);
+      }, 10000);
     }
   }, [req, resource]);
 
