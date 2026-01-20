@@ -29,7 +29,12 @@ export const HealthScoringDrawer: React.FC<HealthScoringDrawerProps> = ({ isOpen
     <DrawerPanelContent isResizable widths={{ default: 'width_50' }} minSize="400px">
       <DrawerHead>
         <span tabIndex={isOpen ? 0 : -1} ref={drawerRef}>
-          <Text component={TextVariants.h2}>{t('Understanding Network Health Scores')}</Text>
+          <Text
+            component={TextVariants.h2}
+            style={{ fontSize: '1.75rem', fontWeight: 'bold' }}
+          >
+            {t('Understanding Network Health Scores')}
+          </Text>
         </span>
       </DrawerHead>
       <div style={{ padding: '1.5rem', overflowY: 'auto', height: '100%' }}>
