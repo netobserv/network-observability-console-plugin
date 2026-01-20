@@ -125,6 +125,23 @@ type FieldConfig struct {
 	Description string `yaml:"description" json:"description"`
 }
 
+type HealthRuleThresholds struct {
+	Info     string `yaml:"info,omitempty" json:"info,omitempty"`
+	Warning  string `yaml:"warning,omitempty" json:"warning,omitempty"`
+	Critical string `yaml:"critical,omitempty" json:"critical,omitempty"`
+}
+
+type HealthRuleVariant struct {
+	GroupBy    string               `yaml:"groupBy,omitempty" json:"groupBy,omitempty"`
+	Thresholds HealthRuleThresholds `yaml:"thresholds" json:"thresholds"`
+}
+
+type HealthRule struct {
+	Template string              `yaml:"template" json:"template"`
+	Mode     string              `yaml:"mode,omitempty" json:"mode,omitempty"`
+	Variants []HealthRuleVariant `yaml:"variants" json:"variants"`
+}
+
 type Frontend struct {
 	BuildVersion    string        `yaml:"buildVersion" json:"buildVersion"`
 	BuildDate       string        `yaml:"buildDate" json:"buildDate"`
@@ -144,6 +161,7 @@ type Frontend struct {
 	LokiLabels      []string      `yaml:"lokiLabels" json:"lokiLabels"`
 	PromLabels      []string      `yaml:"promLabels" json:"promLabels"`
 	MaxChunkAgeMs   int           `yaml:"maxChunkAgeMs,omitempty" json:"maxChunkAgeMs,omitempty"` // populated at query time
+	HealthRules     []HealthRule  `yaml:"healthRules,omitempty" json:"healthRules,omitempty"`
 }
 
 type Config struct {

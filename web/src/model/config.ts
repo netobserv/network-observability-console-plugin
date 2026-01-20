@@ -16,6 +16,25 @@ export type Feature =
   | 'networkEvents'
   | 'ipsec';
 
+export type HealthRuleThresholds = {
+  info?: string;
+  warning?: string;
+  critical?: string;
+};
+
+export type HealthRuleVariant = {
+  groupBy: string;
+  lowVolumeThreshold?: string;
+  thresholds: HealthRuleThresholds;
+  upperBound?: string;
+};
+
+export type HealthRuleMetadata = {
+  template: string;
+  mode: string;
+  variants: HealthRuleVariant[];
+};
+
 export type Config = {
   buildVersion: string;
   buildDate: string;
@@ -38,6 +57,7 @@ export type Config = {
   lokiLabels: string[];
   promLabels: string[];
   maxChunkAgeMs?: number;
+  healthRules?: HealthRuleMetadata[];
 };
 
 export const defaultConfig: Config = {
@@ -61,5 +81,6 @@ export const defaultConfig: Config = {
   lokiMocks: false,
   lokiLabels: [],
   promLabels: [],
-  maxChunkAgeMs: undefined
+  maxChunkAgeMs: undefined,
+  healthRules: []
 };

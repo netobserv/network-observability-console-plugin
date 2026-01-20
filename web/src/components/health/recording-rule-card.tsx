@@ -11,34 +11,32 @@ import {
   TextContent,
   TextVariants
 } from '@patternfly/react-core';
-import { BellIcon, ExclamationCircleIcon, ExclamationTriangleIcon, InfoAltIcon } from '@patternfly/react-icons';
+import { BellIcon, ExclamationCircleIcon, ExclamationTriangleIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { valueFormat } from '../../utils/format';
-import { ByResource } from './health-helper';
+import { RecordingRulesByResource } from './health-helper';
 
-export interface HealthCardProps {
-  stats: ByResource;
+export interface RecordingRuleCardProps {
+  stats: RecordingRulesByResource;
   kind?: string;
   isDark: boolean;
   isSelected: boolean;
   onClick?: () => void;
 }
 
-export const HealthCard: React.FC<HealthCardProps> = ({ stats, kind, isDark, isSelected, onClick }) => {
+export const RecordingRuleCard: React.FC<RecordingRuleCardProps> = ({ stats, kind, isDark, isSelected, onClick }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
-  const pending = [...stats.critical.pending, ...stats.warning.pending, ...stats.other.pending];
-  const silenced = [...stats.critical.silenced, ...stats.warning.silenced, ...stats.other.silenced];
   const classes = ['card'];
-  let icon = <InfoAltIcon className="icon" />;
-  if (stats.critical.firing.length > 0) {
+  let icon = <BellIcon className="icon" />;
+  if (stats.critical.length > 0) {
     classes.push('critical');
     icon = <ExclamationCircleIcon className="icon critical" />;
-  } else if (stats.warning.firing.length > 0) {
+  } else if (stats.warning.length > 0) {
     classes.push('warning');
     icon = <ExclamationTriangleIcon className="icon warning" />;
-  } else if (stats.other.firing.length > 0) {
+  } else if (stats.other.length > 0) {
     classes.push('minor');
     icon = <BellIcon className="icon minor" />;
   }
@@ -51,8 +49,8 @@ export const HealthCard: React.FC<HealthCardProps> = ({ stats, kind, isDark, isS
       <CardHeader
         className="card-header"
         selectableActions={{
-          selectableActionId: `alert-${stats.name}`,
-          selectableActionAriaLabelledby: `selectable-card-alert-${stats.name}`,
+          selectableActionId: `recording-${stats.name}`,
+          selectableActionAriaLabelledby: `selectable-card-recording-${stats.name}`,
           variant: 'single',
           onClickAction: onClick
         }}
@@ -63,7 +61,7 @@ export const HealthCard: React.FC<HealthCardProps> = ({ stats, kind, isDark, isS
             <CardTitle>{kind ? <ResourceLink inline={true} kind={kind} name={stats.name} /> : t('Global')}</CardTitle>
           </FlexItem>
           <FlexItem>
-            <Badge isRead>{t('Alert')}</Badge>
+            <Badge isRead>{t('Recording')}</Badge>
           </FlexItem>
         </Flex>
       </CardHeader>
@@ -71,36 +69,26 @@ export const HealthCard: React.FC<HealthCardProps> = ({ stats, kind, isDark, isS
         <Flex gap={{ default: 'gapSm' }} alignItems={{ default: 'alignItemsCenter' }} flexWrap={{ default: 'nowrap' }}>
           <FlexItem grow={{ default: 'grow' }}>
             <ul style={{ listStyleType: 'none' }}>
-              {stats.critical.firing.length > 0 && (
+              {stats.critical.length > 0 && (
                 <li>
-                  {stats.critical.firing.length} {t('critical issues')}
+                  {stats.critical.length} {t('critical metrics')}
                 </li>
               )}
-              {stats.warning.firing.length > 0 && (
+              {stats.warning.length > 0 && (
                 <li>
-                  {stats.warning.firing.length} {t('warnings')}
+                  {stats.warning.length} {t('warning metrics')}
                 </li>
               )}
-              {stats.other.firing.length > 0 && (
+              {stats.other.length > 0 && (
                 <li>
-                  {stats.other.firing.length} {t('minor issues')}
-                </li>
-              )}
-              {pending.length > 0 && (
-                <li>
-                  {pending.length} {t('pending issues')}
-                </li>
-              )}
-              {silenced.length > 0 && (
-                <li>
-                  {silenced.length} {t('silenced issues')}
+                  {stats.other.length} {t('info metrics')}
                 </li>
               )}
             </ul>
           </FlexItem>
           <FlexItem>
             <TextContent>
-              <Text component={TextVariants.h1}>{valueFormat(stats.score)}</Text>
+              <Text component={TextVariants.h1}>{valueFormat(stats.score, 1)}</Text>
             </TextContent>
           </FlexItem>
         </Flex>
