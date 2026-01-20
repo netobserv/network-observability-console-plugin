@@ -109,12 +109,6 @@ module.exports = {
         {
           "type": "console.flag",
           "properties": {
-            "handler": { "$codeRef": "networkHealth.featureFlagHandler" }
-          }
-        },
-        {
-          "type": "console.flag",
-          "properties": {
             "handler": { "$codeRef": "netflowTab.featureFlagHandler" }
           }
         },
@@ -127,7 +121,7 @@ module.exports = {
             name: "%plugin__netobserv-plugin~Network Health%",
             "href": "/network-health"
           },
-          "flags": { "required": ["NETOBSERV_NETWORK_HEALTH"] }
+          "flags": { "required": ["CAN_LIST_NS"] }
         },
         {
           type: "console.navigation/href",
@@ -167,7 +161,7 @@ module.exports = {
               "$codeRef": "networkHealth.default"
             }
           },
-          "flags": { "required": ["NETOBSERV_NETWORK_HEALTH"] }
+          "flags": { "required": ["CAN_LIST_NS"] }
         },
         {
           type: "console.tab/horizontalNav",

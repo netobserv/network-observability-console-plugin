@@ -1,10 +1,4 @@
-import {
-  AlertStates,
-  FeatureFlagHandler,
-  PrometheusResponse,
-  Rule,
-  SetFeatureFlag
-} from '@openshift-console/dynamic-plugin-sdk';
+import { AlertStates, PrometheusResponse, Rule } from '@openshift-console/dynamic-plugin-sdk';
 import { Button, Flex, FlexItem, PageSection, Tab, Tabs, Text, TextVariants, Title } from '@patternfly/react-core';
 import { SyncAltIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
@@ -243,10 +237,6 @@ export const NetworkHealth: React.FC<{}> = ({}) => {
       </div>
     </PageSection>
   );
-};
-
-export const featureFlagHandler: FeatureFlagHandler = (setFeatureFlag: SetFeatureFlag) => {
-  setFeatureFlag('NETOBSERV_NETWORK_HEALTH', true);
 };
 
 NetworkHealth.displayName = 'NetworkHealth';
