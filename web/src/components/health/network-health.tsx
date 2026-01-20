@@ -1,8 +1,4 @@
-import {
-  AlertStates,
-  PrometheusResponse,
-  Rule
-} from '@openshift-console/dynamic-plugin-sdk';
+import { AlertStates, PrometheusResponse, Rule } from '@openshift-console/dynamic-plugin-sdk';
 import { Button, Flex, FlexItem, PageSection, Tab, Tabs, Text, TextVariants, Title } from '@patternfly/react-core';
 import { SyncAltIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
