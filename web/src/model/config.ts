@@ -33,6 +33,8 @@ export type HealthRuleMetadata = {
   template: string;
   mode: string;
   variants: HealthRuleVariant[];
+  description?: string;
+  summary?: string;
 };
 
 export type Config = {

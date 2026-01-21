@@ -12,20 +12,6 @@ export interface HealthSummaryProps {
 export const HealthSummary: React.FC<HealthSummaryProps> = ({ rules, stats }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
-  if (rules.length === 0) {
-    return (
-      <Alert title={t('No rules found, health cannot be determined')} className="health-summary-alert">
-        <>
-          {t(
-            'Check alert definitions in FlowCollector "spec.processor.metrics.alertGroups" and "spec.processor.metrics.disableAlerts".'
-          )}
-          <br />
-          {t('Make sure that Prometheus and AlertManager are running.')}
-        </>
-      </Alert>
-    );
-  }
-
   // Count recording rules by severity
   let recordingRulesCritical = 0;
   let recordingRulesWarning = 0;
@@ -50,6 +36,22 @@ export const HealthSummary: React.FC<HealthSummaryProps> = ({ rules, stats }) =>
       recordingRulesWarning += node.warning.length;
       recordingRulesInfo += node.other.length;
     });
+  }
+
+  // Check if there are no rules at all (neither alerts nor recording rules)
+  const totalRecordingRules = recordingRulesCritical + recordingRulesWarning + recordingRulesInfo;
+  if (rules.length === 0 && totalRecordingRules === 0) {
+    return (
+      <Alert title={t('No rules found, health cannot be determined')} className="health-summary-alert">
+        <>
+          {t(
+            'Check alert definitions in FlowCollector "spec.processor.metrics.alertGroups" and "spec.processor.metrics.disableAlerts".'
+          )}
+          <br />
+          {t('Make sure that Prometheus and AlertManager are running.')}
+        </>
+      </Alert>
+    );
   }
 
   const summaryStats = {

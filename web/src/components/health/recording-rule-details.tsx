@@ -1,9 +1,14 @@
-import { Badge, Label } from '@patternfly/react-core';
+import { Badge, Label, Tooltip } from '@patternfly/react-core';
 import { ActionsColumn, Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { valueFormat } from '../../utils/format';
-import { getRecordingRuleMetricLink, getSeverityColor, RecordingRulesByResource } from './health-helper';
+import {
+  getRecordingRuleMetricLink,
+  getSeverityColor,
+  parseRecordingRuleDescription,
+  RecordingRulesByResource
+} from './health-helper';
 
 export interface RecordingRuleDetailsProps {
   kind: string;
@@ -34,15 +39,70 @@ export const RecordingRuleDetails: React.FC<RecordingRuleDetailsProps> = ({ info
     <Table data-test-rows-count={allRules.length} aria-label="Recording rules" variant="compact">
       {wide && (
         <Thead>
-          <Th>{t('Template')}</Th>
-          <Th>{t('Severity')}</Th>
-          <Th>{t('Value')}</Th>
-          <Th>{t('Threshold')}</Th>
+          <Th style={{ paddingRight: '5px' }}>{t('Summary')}</Th>
+          <Th style={{ paddingRight: '5px' }}>{t('Severity')}</Th>
+          <Th style={{ paddingRight: '5px' }}>{t('Value')}</Th>
+          <Th style={{ paddingRight: '5px' }}>{t('Threshold')}</Th>
+          <Th style={{ paddingRight: '5px' }}>{t('Description')}</Th>
           <Th screenReaderText="Links" />
         </Thead>
       )}
-      <Tbody>
-        {allRules.map((rule, i) => {
+      {wide ? (
+        <Tbody>
+          {allRules.map((rule, i) => {
+            const metricLink = getRecordingRuleMetricLink(rule, resourceName);
+            const links = [
+              {
+                name: t('View metric in query browser'),
+                url: metricLink
+              }
+            ];
+
+            const direction = getDirection(rule.name);
+            const parsedDescription = rule.description
+              ? parseRecordingRuleDescription(rule.description, rule, resourceName)
+              : '';
+
+            return (
+              <Tr key={'recording-rule-row-' + i}>
+                {wide && (
+                  <Td>
+                    {parsedDescription ? (
+                      <Tooltip content={parsedDescription}>
+                        <span>{rule.summary || rule.template}</span>
+                      </Tooltip>
+                    ) : (
+                      <span>{rule.summary || rule.template}</span>
+                    )}
+                    <Badge isRead style={{ marginLeft: '0.5rem' }}>
+                      {t('Recording')}
+                    </Badge>
+                    {direction && <Badge style={{ marginLeft: '0.5rem' }}>{direction}</Badge>}
+                  </Td>
+                )}
+                <Td noPadding={!wide}>
+                  <Label color={getSeverityColor(rule.severity)}>{rule.severity}</Label>
+                </Td>
+                <Td noPadding={!wide}>
+                  {valueFormat(rule.value, 2)} %{!wide && rule.threshold && ' > ' + rule.threshold}
+                </Td>
+                {wide && <Td>{rule.threshold ? '> ' + rule.threshold : '-'}</Td>}
+                {wide && <Td>{parsedDescription}</Td>}
+                <Td noPadding style={{ textAlign: 'right' }}>
+                  <ActionsColumn
+                    items={links.map(l => {
+                      return {
+                        title: <a href={l.url}>{l.name}</a>
+                      };
+                    })}
+                  />
+                </Td>
+              </Tr>
+            );
+          })}
+        </Tbody>
+      ) : (
+        allRules.map((rule, i) => {
           const metricLink = getRecordingRuleMetricLink(rule, resourceName);
           const links = [
             {
@@ -52,36 +112,49 @@ export const RecordingRuleDetails: React.FC<RecordingRuleDetailsProps> = ({ info
           ];
 
           const direction = getDirection(rule.name);
+          const parsedDescription = rule.description
+            ? parseRecordingRuleDescription(rule.description, rule, resourceName)
+            : '';
 
+          // in non-detailed mode, summary takes full cols span, and the other fields are displayed below; requires to have a Tbody for each row.
           return (
-            <Tr key={'recording-rule-row-' + i}>
-              <Td dataLabel={t('Template')}>
-                {rule.template}
-                <Badge isRead style={{ marginLeft: '0.5rem' }}>
-                  {t('Recording')}
-                </Badge>
-                {direction && <Badge style={{ marginLeft: '0.5rem' }}>{direction}</Badge>}
-              </Td>
-              <Td dataLabel={t('Severity')}>
-                <Label color={getSeverityColor(rule.severity)}>{rule.severity}</Label>
-              </Td>
-              <Td dataLabel={t('Value')}>
-                {valueFormat(rule.value, 2)} %{!wide && rule.threshold && ' > ' + rule.threshold}
-              </Td>
-              {wide && <Td dataLabel={t('Threshold')}>{rule.threshold ? '> ' + rule.threshold : '-'}</Td>}
-              <Td noPadding>
-                <ActionsColumn
-                  items={links.map(l => {
-                    return {
-                      title: <a href={l.url}>{l.name}</a>
-                    };
-                  })}
-                />
-              </Td>
-            </Tr>
+            <Tbody key={'recording-rule-row-' + i} isExpanded>
+              <Tr isExpanded>
+                <Td noPadding colSpan={4}>
+                  {parsedDescription ? (
+                    <Tooltip content={parsedDescription}>
+                      <span>{rule.summary || rule.template}</span>
+                    </Tooltip>
+                  ) : (
+                    <span>{rule.summary || rule.template}</span>
+                  )}
+                  <Badge isRead style={{ marginLeft: '0.5rem' }}>
+                    {t('Recording')}
+                  </Badge>
+                  {direction && <Badge style={{ marginLeft: '0.5rem' }}>{direction}</Badge>}
+                </Td>
+              </Tr>
+              <Tr>
+                <Td noPadding>
+                  <Label color={getSeverityColor(rule.severity)}>{rule.severity}</Label>
+                </Td>
+                <Td noPadding>
+                  {valueFormat(rule.value, 2)} % {rule.threshold && '> ' + rule.threshold}
+                </Td>
+                <Td noPadding style={{ textAlign: 'right' }}>
+                  <ActionsColumn
+                    items={links.map(l => {
+                      return {
+                        title: <a href={l.url}>{l.name}</a>
+                      };
+                    })}
+                  />
+                </Td>
+              </Tr>
+            </Tbody>
           );
-        })}
-      </Tbody>
+        })
+      )}
     </Table>
   );
 };

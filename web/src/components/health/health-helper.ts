@@ -13,6 +13,8 @@ export type RecordingRuleItem = {
   threshold?: string;
   upperBound?: string;
   labels: PrometheusLabels;
+  summary?: string;
+  description?: string;
 };
 
 export type RecordingRulesByResource = {
@@ -177,7 +179,9 @@ const processRecordingRules = (
           template: template,
           threshold: variant.thresholds[severity],
           upperBound: variant.upperBound,
-          labels: valueData.labels
+          labels: valueData.labels,
+          summary: metadata.summary,
+          description: metadata.description
         });
       }
     });
@@ -592,6 +596,48 @@ export const getSeverityColor = (
     return SEVERITY_LABEL_COLORS[severity as keyof typeof SEVERITY_LABEL_COLORS];
   }
   return 'blue'; // default for info/undefined
+};
+
+// Parse description pattern for recording rules by replacing placeholders
+export const parseRecordingRuleDescription = (
+  pattern: string,
+  rule: RecordingRuleItem,
+  resourceName?: string
+): string => {
+  if (!pattern) {
+    return '';
+  }
+
+  // Build legend based on labels
+  let legend = '';
+  if (resourceName) {
+    const namespaceLabel = Object.keys(rule.labels).find(
+      k => k.toLowerCase().includes('namespace') || k === 'Namespace'
+    );
+    const nodeLabel = Object.keys(rule.labels).find(
+      k => k.toLowerCase().includes('node') || k.toLowerCase().includes('hostname') || k === 'Node'
+    );
+
+    if (namespaceLabel) {
+      legend = ` [namespace=${resourceName}]`;
+    } else if (nodeLabel) {
+      legend = ` [node=${resourceName}]`;
+    }
+  }
+
+  // Replace placeholders with actual values
+  // First %s = threshold, second %s = legend
+  let result = pattern;
+  const threshold = rule.threshold || '0';
+
+  // Replace first %s with threshold
+  result = result.replace('%s', threshold);
+  // Replace second %s with legend
+  result = result.replace('%s', legend);
+  // Replace %% with % (Go escape sequence)
+  result = result.replace(/%%/g, '%');
+
+  return result;
 };
 
 export const isSilenced = (silence: SilenceMatcher[], labels: PrometheusLabels): boolean => {

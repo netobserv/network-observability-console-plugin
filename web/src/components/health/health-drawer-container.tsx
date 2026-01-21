@@ -133,9 +133,15 @@ export const HealthDrawerContainer: React.FC<HealthDrawerContainerProps> = ({
                     kind={kind}
                     isDark={isDark}
                     stats={r}
-                    isSelected={r.name === selectedItem?.name}
+                    isSelected={
+                      r.name === selectedItem?.name && selectedItem !== undefined && isAlertResource(selectedItem)
+                    }
                     onClick={() => {
-                      setSelectedItem(r.name !== selectedItem?.name ? r : undefined);
+                      setSelectedItem(
+                        r.name !== selectedItem?.name || (selectedItem && !isAlertResource(selectedItem))
+                          ? r
+                          : undefined
+                      );
                     }}
                   />
                 ))}
@@ -145,9 +151,13 @@ export const HealthDrawerContainer: React.FC<HealthDrawerContainerProps> = ({
                     kind={kind}
                     isDark={isDark}
                     stats={r}
-                    isSelected={r.name === selectedItem?.name}
+                    isSelected={
+                      r.name === selectedItem?.name && selectedItem !== undefined && !isAlertResource(selectedItem)
+                    }
                     onClick={() => {
-                      setSelectedItem(r.name !== selectedItem?.name ? r : undefined);
+                      setSelectedItem(
+                        r.name !== selectedItem?.name || (selectedItem && isAlertResource(selectedItem)) ? r : undefined
+                      );
                     }}
                   />
                 ))}

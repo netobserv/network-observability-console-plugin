@@ -1,4 +1,4 @@
-import { Badge, Label } from '@patternfly/react-core';
+import { Badge, Label, Tooltip } from '@patternfly/react-core';
 import { ActionsColumn, Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -14,6 +14,7 @@ import {
   getRecordingRuleMetricLink,
   getSeverityColor,
   getTrafficLink,
+  parseRecordingRuleDescription,
   RecordingRuleItem,
   RecordingRulesByResource
 } from './health-helper';
@@ -71,15 +72,15 @@ export const UnifiedRuleDetails: React.FC<UnifiedRuleDetailsProps> = ({ kind, al
   return (
     <Table data-test-rows-count={unifiedItems.length} aria-label="Unified rules" variant="compact">
       <Thead>
-        <Th>{t('Summary')}</Th>
-        <Th>{t('Mode')}</Th>
-        <Th>{t('State')}</Th>
-        <Th>{t('Severity')}</Th>
+        <Th style={{ paddingRight: '5px' }}>{t('Summary')}</Th>
+        <Th style={{ paddingRight: '5px' }}>{t('Mode')}</Th>
+        <Th style={{ paddingRight: '5px' }}>{t('State')}</Th>
+        <Th style={{ paddingRight: '5px' }}>{t('Severity')}</Th>
         <Th style={{ whiteSpace: 'nowrap', paddingRight: '5px' }}>{t('Active since')}</Th>
-        <Th>{t('Labels')}</Th>
-        <Th>{t('Value')}</Th>
-        <Th>{t('Threshold')}</Th>
-        <Th>{t('Description')}</Th>
+        <Th style={{ paddingRight: '5px' }}>{t('Labels')}</Th>
+        <Th style={{ paddingRight: '5px' }}>{t('Value')}</Th>
+        <Th style={{ paddingRight: '5px' }}>{t('Threshold')}</Th>
+        <Th style={{ paddingRight: '5px' }}>{t('Description')}</Th>
         <Th screenReaderText="Links" />
       </Thead>
       <Tbody>
@@ -161,12 +162,21 @@ export const UnifiedRuleDetails: React.FC<UnifiedRuleDetailsProps> = ({ kind, al
               }
             ];
             const direction = getDirection(rule.name);
+            const parsedDescription = rule.description
+              ? parseRecordingRuleDescription(rule.description, rule, resourceName)
+              : '';
 
             return (
               <Tr key={'unified-rule-row-' + i}>
                 {/* Summary/Template */}
                 <Td dataLabel={t('Summary')}>
-                  {rule.template}
+                  {parsedDescription ? (
+                    <Tooltip content={parsedDescription}>
+                      <span>{rule.summary || rule.template}</span>
+                    </Tooltip>
+                  ) : (
+                    <span>{rule.summary || rule.template}</span>
+                  )}
                   {direction && <Badge style={{ marginLeft: '0.5rem' }}>{direction}</Badge>}
                 </Td>
                 {/* Mode */}
@@ -187,8 +197,8 @@ export const UnifiedRuleDetails: React.FC<UnifiedRuleDetailsProps> = ({ kind, al
                 <Td dataLabel={t('Value')}>{valueFormat(rule.value, 2)} %</Td>
                 {/* Threshold */}
                 <Td dataLabel={t('Threshold')}>{rule.threshold ? '> ' + rule.threshold : '-'}</Td>
-                {/* Description - Empty for recording rules */}
-                <Td dataLabel={t('Description')}>{''}</Td>
+                {/* Description */}
+                <Td dataLabel={t('Description')}>{parsedDescription}</Td>
                 {/* Links */}
                 <Td noPadding>
                   <ActionsColumn
