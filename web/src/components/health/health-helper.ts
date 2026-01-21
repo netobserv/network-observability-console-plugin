@@ -15,6 +15,7 @@ export type RecordingRuleItem = {
   labels: PrometheusLabels;
   summary?: string;
   description?: string;
+  links?: { name: string; url: string }[];
 };
 
 export type RecordingRulesByResource = {
@@ -181,7 +182,8 @@ const processRecordingRules = (
           upperBound: variant.upperBound,
           labels: valueData.labels,
           summary: metadata.summary,
-          description: metadata.description
+          description: metadata.description,
+          links: metadata.links
         });
       }
     });

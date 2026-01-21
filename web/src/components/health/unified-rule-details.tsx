@@ -174,7 +174,8 @@ export const UnifiedRuleDetails: React.FC<UnifiedRuleDetailsProps> = ({
                 {
                   name: t('View metric in query browser'),
                   url: metricLink
-                }
+                },
+                ...(rule.links || [])
               ];
               const direction = getDirection(rule.name);
               const parsedDescription = rule.description
@@ -302,7 +303,8 @@ export const UnifiedRuleDetails: React.FC<UnifiedRuleDetailsProps> = ({
               {
                 name: t('View metric in query browser'),
                 url: metricLink
-              }
+              },
+              ...(rule.links || [])
             ];
             const direction = getDirection(rule.name);
             const parsedDescription = rule.description
