@@ -9,6 +9,7 @@ import {
   FunctionMetrics,
   getFunctionMetricKey,
   getRateMetricKey,
+  MetricError,
   NetflowMetrics,
   RateMetrics,
   Stats,
@@ -27,9 +28,8 @@ import {
 } from '../../../model/flow-query';
 import { ScopeConfigDef } from '../../../model/scope';
 import { GraphElementPeer, LayoutName, TopologyOptions } from '../../../model/topology';
-import { Warning } from '../../../model/warnings';
 import { TimeRange } from '../../../utils/datetime';
-import { getHTTPErrorDetails, getPromError, isPromError } from '../../../utils/errors';
+import { getHTTPErrorDetails } from '../../../utils/errors';
 import { observeDOMRect } from '../../../utils/metrics-helper';
 import { SearchEvent, SearchHandle } from '../../search/search';
 import { ScopeSlider } from '../../slider/scope-slider';
@@ -49,7 +49,6 @@ export type NetflowTopologyHandle = {
     metricsRef: React.MutableRefObject<NetflowMetrics>,
     getMetrics: (q: FlowQuery, range: number | TimeRange) => Promise<FlowMetricsResult>,
     setMetrics: (v: NetflowMetrics) => void,
-    setWarning: (v?: Warning) => void,
     initFunction: () => void
   ) => Promise<Stats[]> | undefined;
   fetchUDNs: () => Promise<string[]>;
@@ -103,7 +102,6 @@ export const NetflowTopology: React.FC<NetflowTopologyProps> = React.forwardRef(
         metricsRef: React.MutableRefObject<NetflowMetrics>,
         getMetrics: (q: FlowQuery, range: number | TimeRange) => Promise<FlowMetricsResult>,
         setMetrics: (v: NetflowMetrics) => void,
-        setWarning: (v?: Warning) => void,
         initFunction: () => void
       ) => {
         initFunction();
@@ -115,7 +113,7 @@ export const NetflowTopology: React.FC<NetflowTopologyProps> = React.forwardRef(
             ? 'PktDropPackets'
             : undefined
           : undefined;
-        let currentMetrics = metricsRef.current;
+        let currentMetrics = { ...metricsRef.current, errors: [] as MetricError[] };
 
         const promises: Promise<Stats>[] = [
           getMetrics(
@@ -163,15 +161,14 @@ export const NetflowTopology: React.FC<NetflowTopologyProps> = React.forwardRef(
               .catch(err => {
                 // Error might occur for instance when fetching node-based topology with drop feature enabled, and Loki disabled
                 // We don't want to break the whole topology due to missing drops enrichement
-                let strErr = getHTTPErrorDetails(err, true);
-                if (isPromError(strErr)) {
-                  strErr = getPromError(strErr);
-                }
-                setWarning({
-                  type: 'cantfetchdrops',
-                  summary: t('Could not fetch drop information'),
-                  details: strErr
-                });
+                const errorMsg = getHTTPErrorDetails(err, true);
+                const droppedMetricType = droppedType === 'PktDropBytes' ? t('Dropped bytes') : t('Dropped packets');
+                const metricError: MetricError = { metricType: droppedMetricType, error: errorMsg };
+                currentMetrics = {
+                  ...currentMetrics,
+                  errors: [...currentMetrics.errors, metricError]
+                };
+                setMetrics(currentMetrics);
                 return { numQueries: 0, dataSources: [], limitReached: false };
               })
           );

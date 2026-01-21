@@ -419,7 +419,6 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
             metricsRef,
             getMetrics,
             model.setMetrics,
-            model.setWarning,
             clearFlows
           );
 
@@ -432,6 +431,11 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
             })
             .catch(err => {
               console.error('fetchUDNs error', err);
+              const errorMsg = getHTTPErrorDetails(err, true);
+              model.setMetrics({
+                ...model.metrics,
+                errors: [...model.metrics.errors, { metricType: t('User-Defined Networks'), error: errorMsg }]
+              });
               model.setTopologyUDNIds([]);
             });
         } else {
