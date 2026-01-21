@@ -12,9 +12,9 @@
  * https://www.patternfly.org/v4/icons/
  */
 
-import { GlobeRouteIcon, ServiceIcon } from '@patternfly/react-icons';
+import { GlobeRouteIcon, ServiceIcon, VirtualMachineIcon } from '@patternfly/react-icons';
 import * as React from 'react';
-import { GrHost, GrMultiple, GrServerCluster, GrVirtualMachine } from 'react-icons/gr';
+import { GrHost, GrMultiple, GrServerCluster } from 'react-icons/gr';
 import { IoLocationOutline } from 'react-icons/io5';
 import { PiNetwork } from 'react-icons/pi';
 import { TbCloudNetwork } from 'react-icons/tb';
@@ -397,14 +397,6 @@ class CloudNetworkIcon extends React.Component<SVGIconProps> {
   }
 }
 
-class VMIcon extends React.Component<SVGIconProps> {
-  render() {
-    const { size, className, style } = this.props;
-    const sizeValue = typeof size === 'number' ? size : parseFloat(size as string) || 18;
-    return <IconWrapper icon={GrVirtualMachine} size={sizeValue} className={className} style={style} />;
-  }
-}
-
 /**
  * Get the appropriate icon component for a Kubernetes resource kind
  * Uses official Kubernetes community icons as inline SVGs
@@ -438,10 +430,10 @@ export const getK8sResourceIcon = (resourceKind: string | undefined): React.Comp
     udn: NetworkIcon,
     userdefinednetwork: NetworkIcon,
     clusteruserdefinednetwork: CloudNetworkIcon,
-    vm: VMIcon,
-    vmi: VMIcon,
-    virtualmachine: VMIcon,
-    virtualmachineinstance: VMIcon,
+    vm: VirtualMachineIcon, // PF VirtualMachineIcon is preferred over GrVirtualMachine from react-icons
+    vmi: VirtualMachineIcon,
+    virtualmachine: VirtualMachineIcon,
+    virtualmachineinstance: VirtualMachineIcon,
     daemonset: DaemonSetIcon,
     ds: DaemonSetIcon,
     deployment: DeploymentIcon,
