@@ -26,6 +26,36 @@ func (o *LokiClientMock) Get(url string) ([]byte, int, error) {
 		path = "mocks/loki/namespaces.json"
 	} else {
 		if strings.Contains(url, "query=topk") || strings.Contains(url, "query=bottomk") {
+			// Simulate error for packet rate metrics (non-dropped packets)
+			if strings.Contains(url, "unwrap%20Packets") && !strings.Contains(url, "|unwrap%20PktDrop") {
+				errorResponse := []byte(`{
+					"status": "error",
+					"errorType": "timeout",
+					"error": "context deadline exceeded: query timed out"
+				}`)
+				return errorResponse, 500, nil
+			}
+
+			// Simulate error for DNS Name metrics
+			if strings.Contains(url, "by(DnsName)") {
+				errorResponse := []byte(`{
+					"status": "error",
+					"errorType": "bad_data",
+					"error": "parse error: label name \"DnsName\" must match regex [a-zA-Z_][a-zA-Z0-9_]*"
+				}`)
+				return errorResponse, 400, nil
+			}
+
+			// Simulate error for RTT metrics
+			if strings.Contains(url, "unwrap%20TimeFlowRttNs") {
+				errorResponse := []byte(`{
+					"status": "error",
+					"errorType": "timeout",
+					"error": "maximum of series (50000) reached for a single query"
+				}`)
+				return errorResponse, 500, nil
+			}
+
 			path = "mocks/loki/flow_metrics"
 
 			if strings.Contains(url, "|unwrap%20PktDrop") {

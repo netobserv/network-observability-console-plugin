@@ -10,6 +10,7 @@ import {
   initFunctionMetricKeys,
   initRateMetricKeys,
   isValidTopologyMetrics,
+  MetricError,
   NamedMetric,
   NetflowMetrics,
   RateMetrics,
@@ -27,6 +28,7 @@ import { ScopeConfigDef } from '../../../model/scope';
 import { TimeRange } from '../../../utils/datetime';
 import { getDNSErrorDescription, getDNSRcodeDescription } from '../../../utils/dns';
 import { getDSCPServiceClassName } from '../../../utils/dscp';
+import { getHTTPErrorDetails } from '../../../utils/errors';
 import { localStorageOverviewKebabKey, useLocalStorage } from '../../../utils/local-storage-hook';
 import { observeDOMRect, toNamedMetric } from '../../../utils/metrics-helper';
 import {
@@ -48,6 +50,7 @@ import { usePrevious } from '../../../utils/previous-hook';
 import { formatProtocol } from '../../../utils/protocol';
 import { TruncateLength } from '../../dropdowns/truncate-dropdown';
 import { Empty } from '../../messages/empty';
+import { PanelErrorIndicator } from '../../messages/panel-error-indicator';
 import { MetricsDonut } from '../../metrics/metrics-donut';
 import { MetricsGraph } from '../../metrics/metrics-graph';
 import { MetricsGraphWithTotal } from '../../metrics/metrics-graph-total';
@@ -100,6 +103,20 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
   (props, ref: React.Ref<NetflowOverviewHandle>) => {
     const { t } = useTranslation('plugin__netobserv-plugin');
 
+    // Helper to wrap promises with error handling
+    const wrapWithErrorHandling = React.useCallback(
+      (promise: Promise<Stats>, metricType: string, errorArray: MetricError[]): Promise<Stats> => {
+        return promise.catch(err => {
+          const errorMsg = getHTTPErrorDetails(err, true);
+          const metricError: MetricError = { metricType, error: errorMsg };
+          errorArray.push(metricError);
+          // Return a default Stats object to keep Promise.all working
+          return { numQueries: 0, limitReached: false, dataSources: [] } as Stats;
+        });
+      },
+      []
+    );
+
     const fetch = React.useCallback(
       (
         fq: FlowQuery,
@@ -113,7 +130,10 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
       ) => {
         initFunction();
 
-        let currentMetrics = metricsRef.current;
+        // Don't reset errors immediately to avoid banner flashing
+        // Errors will be collected fresh during this fetch
+        let currentMetrics = { ...metricsRef.current };
+        const metricErrors: MetricError[] = [];
         const promises: Promise<Stats>[] = [];
 
         const ratePanels = props.panels.filter(p => p.id.endsWith('_rates'));
@@ -123,15 +143,18 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
             //run queries for bytes / packets rates
             const rateMetrics = initRateMetricKeys(ratePanels.map(p => p.id)) as RateMetrics;
             (Object.keys(rateMetrics) as (keyof typeof rateMetrics)[]).map(key => {
+              const metricType = key === 'bytes' ? 'Bytes' : 'Packets';
               promises.push(
-                getMetrics({ ...fq, function: 'rate', type: key === 'bytes' ? 'Bytes' : 'Packets' }, range).then(
-                  res => {
+                wrapWithErrorHandling(
+                  getMetrics({ ...fq, function: 'rate', type: metricType }, range).then(res => {
                     //set matching value and apply changes on the entire object to trigger refresh
                     rateMetrics[key] = res.metrics;
                     currentMetrics = { ...currentMetrics, rateMetrics };
                     setMetrics(currentMetrics);
                     return res.stats;
-                  }
+                  }),
+                  t('{{metricType}} rate', { metricType }),
+                  metricErrors
                 )
               );
             });
@@ -141,17 +164,19 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
             [...ratePanels, ...totalDroppedPanels].map(p => p.id)
           ) as TotalRateMetrics;
           (Object.keys(totalRateMetric) as (keyof typeof totalRateMetric)[]).map(key => {
+            const metricType = key === 'bytes' ? 'Bytes' : 'Packets';
             promises.push(
-              getMetrics(
-                { ...fq, function: 'rate', aggregateBy: 'app', type: key === 'bytes' ? 'Bytes' : 'Packets' },
-                range
-              ).then(res => {
-                //set matching value and apply changes on the entire object to trigger refresh
-                totalRateMetric[key] = res.metrics[0];
-                currentMetrics = { ...currentMetrics, totalRateMetric };
-                setMetrics(currentMetrics);
-                return res.stats;
-              })
+              wrapWithErrorHandling(
+                getMetrics({ ...fq, function: 'rate', aggregateBy: 'app', type: metricType }, range).then(res => {
+                  //set matching value and apply changes on the entire object to trigger refresh
+                  totalRateMetric[key] = res.metrics[0];
+                  currentMetrics = { ...currentMetrics, totalRateMetric };
+                  setMetrics(currentMetrics);
+                  return res.stats;
+                }),
+                t('Total {{metricType}} rate', { metricType }),
+                metricErrors
+              )
             );
           });
         } else {
@@ -164,60 +189,67 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
           //run same queries for drops
           const droppedRateMetrics = initRateMetricKeys(droppedPanels.map(p => p.id)) as RateMetrics;
           (Object.keys(droppedRateMetrics) as (keyof typeof droppedRateMetrics)[]).map(key => {
+            const metricType = key === 'bytes' ? 'PktDropBytes' : 'PktDropPackets';
             promises.push(
-              getMetrics(
-                { ...fq, function: 'rate', type: key === 'bytes' ? 'PktDropBytes' : 'PktDropPackets' },
-                range
-              ).then(res => {
-                //set matching value and apply changes on the entire object to trigger refresh
-                droppedRateMetrics[key] = res.metrics;
-                currentMetrics = { ...currentMetrics, droppedRateMetrics };
-                setMetrics(currentMetrics);
-                return res.stats;
-              })
+              wrapWithErrorHandling(
+                getMetrics({ ...fq, function: 'rate', type: metricType }, range).then(res => {
+                  //set matching value and apply changes on the entire object to trigger refresh
+                  droppedRateMetrics[key] = res.metrics;
+                  currentMetrics = { ...currentMetrics, droppedRateMetrics };
+                  setMetrics(currentMetrics);
+                  return res.stats;
+                }),
+                t('Dropped {{key}} rate', { key }),
+                metricErrors
+              )
             );
           });
 
           const totalDroppedRateMetric = initRateMetricKeys(droppedPanels.map(p => p.id)) as TotalRateMetrics;
           (Object.keys(totalDroppedRateMetric) as (keyof typeof totalDroppedRateMetric)[]).map(key => {
+            const metricType = key === 'bytes' ? 'PktDropBytes' : 'PktDropPackets';
             promises.push(
-              getMetrics(
-                {
-                  ...fq,
-                  function: 'rate',
-                  aggregateBy: 'app',
-                  type: key === 'bytes' ? 'PktDropBytes' : 'PktDropPackets'
-                },
-                range
-              ).then(res => {
-                //set matching value and apply changes on the entire object to trigger refresh
-                totalDroppedRateMetric[key] = res.metrics[0];
-                currentMetrics = { ...currentMetrics, totalDroppedRateMetric };
-                setMetrics(currentMetrics);
-                return res.stats;
-              })
+              wrapWithErrorHandling(
+                getMetrics({ ...fq, function: 'rate', aggregateBy: 'app', type: metricType }, range).then(res => {
+                  //set matching value and apply changes on the entire object to trigger refresh
+                  totalDroppedRateMetric[key] = res.metrics[0];
+                  currentMetrics = { ...currentMetrics, totalDroppedRateMetric };
+                  setMetrics(currentMetrics);
+                  return res.stats;
+                }),
+                t('Total dropped {{key}} rate', { key }),
+                metricErrors
+              )
             );
           });
 
           //get drop state & cause
           promises.push(
             ...[
-              getFlowGenericMetrics(
-                { ...fq, function: 'rate', type: 'PktDropPackets', aggregateBy: 'PktDropLatestState' },
-                range
-              ).then(res => {
-                currentMetrics = { ...currentMetrics, droppedStateMetrics: res.metrics };
-                setMetrics(currentMetrics);
-                return res.stats;
-              }),
-              getFlowGenericMetrics(
-                { ...fq, function: 'rate', type: 'PktDropPackets', aggregateBy: 'PktDropLatestDropCause' },
-                range
-              ).then(res => {
-                currentMetrics = { ...currentMetrics, droppedCauseMetrics: res.metrics };
-                setMetrics(currentMetrics);
-                return res.stats;
-              })
+              wrapWithErrorHandling(
+                getFlowGenericMetrics(
+                  { ...fq, function: 'rate', type: 'PktDropPackets', aggregateBy: 'PktDropLatestState' },
+                  range
+                ).then(res => {
+                  currentMetrics = { ...currentMetrics, droppedStateMetrics: res.metrics };
+                  setMetrics(currentMetrics);
+                  return res.stats;
+                }),
+                t('Dropped state metrics'),
+                metricErrors
+              ),
+              wrapWithErrorHandling(
+                getFlowGenericMetrics(
+                  { ...fq, function: 'rate', type: 'PktDropPackets', aggregateBy: 'PktDropLatestDropCause' },
+                  range
+                ).then(res => {
+                  currentMetrics = { ...currentMetrics, droppedCauseMetrics: res.metrics };
+                  setMetrics(currentMetrics);
+                  return res.stats;
+                }),
+                t('Dropped cause metrics'),
+                metricErrors
+              )
             ]
           );
         } else {
@@ -236,26 +268,34 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
           const dnsLatencyMetrics = initFunctionMetricKeys(dnsPanels.map(p => p.id)) as FunctionMetrics;
           (Object.keys(dnsLatencyMetrics) as (keyof typeof dnsLatencyMetrics)[]).map(fn => {
             promises.push(
-              getMetrics({ ...fq, function: fn, type: 'DnsLatencyMs' }, range).then(res => {
-                //set matching value and apply changes on the entire object to trigger refresh
-                dnsLatencyMetrics[fn] = res.metrics;
-                currentMetrics = { ...currentMetrics, dnsLatencyMetrics };
-                setMetrics(currentMetrics);
-                return res.stats;
-              })
+              wrapWithErrorHandling(
+                getMetrics({ ...fq, function: fn, type: 'DnsLatencyMs' }, range).then(res => {
+                  //set matching value and apply changes on the entire object to trigger refresh
+                  dnsLatencyMetrics[fn] = res.metrics;
+                  currentMetrics = { ...currentMetrics, dnsLatencyMetrics };
+                  setMetrics(currentMetrics);
+                  return res.stats;
+                }),
+                t('DNS latency {{fn}}', { fn }),
+                metricErrors
+              )
             );
           });
 
           const totalDnsLatencyMetric = initFunctionMetricKeys(dnsPanels.map(p => p.id)) as TotalFunctionMetrics;
           (Object.keys(totalDnsLatencyMetric) as (keyof typeof totalDnsLatencyMetric)[]).map(fn => {
             promises.push(
-              getMetrics({ ...fq, function: fn, aggregateBy: 'app', type: 'DnsLatencyMs' }, range).then(res => {
-                //set matching value and apply changes on the entire object to trigger refresh
-                totalDnsLatencyMetric[fn] = res.metrics[0];
-                currentMetrics = { ...currentMetrics, totalDnsLatencyMetric };
-                setMetrics(currentMetrics);
-                return res.stats;
-              })
+              wrapWithErrorHandling(
+                getMetrics({ ...fq, function: fn, aggregateBy: 'app', type: 'DnsLatencyMs' }, range).then(res => {
+                  //set matching value and apply changes on the entire object to trigger refresh
+                  totalDnsLatencyMetric[fn] = res.metrics[0];
+                  currentMetrics = { ...currentMetrics, totalDnsLatencyMetric };
+                  setMetrics(currentMetrics);
+                  return res.stats;
+                }),
+                t('Total DNS latency {{fn}}', { fn }),
+                metricErrors
+              )
             );
           });
 
@@ -264,29 +304,41 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
             promises.push(
               ...[
                 //get dns names
-                getFlowGenericMetrics(
-                  { ...fq, aggregateBy: 'DnsName', function: 'count', type: 'DnsFlows' },
-                  range
-                ).then(res => {
-                  currentMetrics = { ...currentMetrics, dnsNameMetrics: res.metrics };
-                  setMetrics(currentMetrics);
-                  return res.stats;
-                }),
-                //get dns response codes
-                getFlowGenericMetrics(
-                  { ...fq, aggregateBy: 'DnsFlagsResponseCode', function: 'count', type: 'DnsFlows' },
-                  range
-                ).then(res => {
-                  currentMetrics = { ...currentMetrics, dnsRCodeMetrics: res.metrics };
-                  setMetrics(currentMetrics);
-                  return res.stats;
-                }),
-                getFlowGenericMetrics({ ...fq, aggregateBy: 'app', function: 'count', type: 'DnsFlows' }, range).then(
-                  res => {
-                    currentMetrics = { ...currentMetrics, totalDnsCountMetric: res.metrics[0] };
+                wrapWithErrorHandling(
+                  getFlowGenericMetrics(
+                    { ...fq, aggregateBy: 'DnsName', function: 'count', type: 'DnsFlows' },
+                    range
+                  ).then(res => {
+                    currentMetrics = { ...currentMetrics, dnsNameMetrics: res.metrics };
                     setMetrics(currentMetrics);
                     return res.stats;
-                  }
+                  }),
+                  t('DNS names'),
+                  metricErrors
+                ),
+                //get dns response codes
+                wrapWithErrorHandling(
+                  getFlowGenericMetrics(
+                    { ...fq, aggregateBy: 'DnsFlagsResponseCode', function: 'count', type: 'DnsFlows' },
+                    range
+                  ).then(res => {
+                    currentMetrics = { ...currentMetrics, dnsRCodeMetrics: res.metrics };
+                    setMetrics(currentMetrics);
+                    return res.stats;
+                  }),
+                  t('DNS response codes'),
+                  metricErrors
+                ),
+                wrapWithErrorHandling(
+                  getFlowGenericMetrics({ ...fq, aggregateBy: 'app', function: 'count', type: 'DnsFlows' }, range).then(
+                    res => {
+                      currentMetrics = { ...currentMetrics, totalDnsCountMetric: res.metrics[0] };
+                      setMetrics(currentMetrics);
+                      return res.stats;
+                    }
+                  ),
+                  t('Total DNS count'),
+                  metricErrors
                 )
               ]
             );
@@ -308,26 +360,34 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
           const rttMetrics = initFunctionMetricKeys(rttPanels.map(p => p.id)) as FunctionMetrics;
           (Object.keys(rttMetrics) as (keyof typeof rttMetrics)[]).map(fn => {
             promises.push(
-              getMetrics({ ...fq, function: fn, type: 'TimeFlowRttNs' }, range).then(res => {
-                //set matching value and apply changes on the entire object to trigger refresh
-                rttMetrics[fn] = res.metrics;
-                currentMetrics = { ...currentMetrics, rttMetrics };
-                setMetrics(currentMetrics);
-                return res.stats;
-              })
+              wrapWithErrorHandling(
+                getMetrics({ ...fq, function: fn, type: 'TimeFlowRttNs' }, range).then(res => {
+                  //set matching value and apply changes on the entire object to trigger refresh
+                  rttMetrics[fn] = res.metrics;
+                  currentMetrics = { ...currentMetrics, rttMetrics };
+                  setMetrics(currentMetrics);
+                  return res.stats;
+                }),
+                t('RTT {{fn}}', { fn }),
+                metricErrors
+              )
             );
           });
 
           const totalRttMetric = initFunctionMetricKeys(rttPanels.map(p => p.id)) as TotalFunctionMetrics;
           (Object.keys(totalRttMetric) as (keyof typeof totalRttMetric)[]).map(fn => {
             promises.push(
-              getMetrics({ ...fq, function: fn, aggregateBy: 'app', type: 'TimeFlowRttNs' }, range).then(res => {
-                //set matching value and apply changes on the entire object to trigger refresh
-                totalRttMetric[fn] = res.metrics[0];
-                currentMetrics = { ...currentMetrics, totalRttMetric };
-                setMetrics(currentMetrics);
-                return res.stats;
-              })
+              wrapWithErrorHandling(
+                getMetrics({ ...fq, function: fn, aggregateBy: 'app', type: 'TimeFlowRttNs' }, range).then(res => {
+                  //set matching value and apply changes on the entire object to trigger refresh
+                  totalRttMetric[fn] = res.metrics[0];
+                  currentMetrics = { ...currentMetrics, totalRttMetric };
+                  setMetrics(currentMetrics);
+                  return res.stats;
+                }),
+                t('Total RTT {{fn}}', { fn }),
+                metricErrors
+              )
             );
           });
         } else {
@@ -346,49 +406,61 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
               if (parsedId.isValid) {
                 promises.push(
                   ...[
-                    getMetricFunc(
-                      {
-                        ...fq,
-                        type: parsedId.type,
-                        function: parsedId.fn,
-                        aggregateBy: parsedId.aggregateBy || metricScope
-                      },
-                      range
-                    ).then(res => {
-                      //set matching value and apply changes on the entire object to trigger refresh
-                      currentMetrics = {
-                        ...currentMetrics,
-                        customMetrics: currentMetrics.customMetrics.set(key, res.metrics)
-                      };
-                      setMetrics(currentMetrics);
-                      return res.stats;
-                    }),
-                    getMetricFunc(
-                      {
-                        ...fq,
-                        type: parsedId.type,
-                        function: parsedId.fn,
-                        aggregateBy: 'app'
-                      },
-                      range
-                    ).then(res => {
-                      //set matching value and apply changes on the entire object to trigger refresh
-                      currentMetrics = {
-                        ...currentMetrics,
-                        totalCustomMetrics: currentMetrics.totalCustomMetrics.set(key, res.metrics[0])
-                      };
-                      setMetrics(currentMetrics);
-                      return res.stats;
-                    })
+                    wrapWithErrorHandling(
+                      getMetricFunc(
+                        {
+                          ...fq,
+                          type: parsedId.type,
+                          function: parsedId.fn,
+                          aggregateBy: parsedId.aggregateBy || metricScope
+                        },
+                        range
+                      ).then(res => {
+                        //set matching value and apply changes on the entire object to trigger refresh
+                        currentMetrics = {
+                          ...currentMetrics,
+                          customMetrics: currentMetrics.customMetrics.set(key, res.metrics)
+                        };
+                        setMetrics(currentMetrics);
+                        return res.stats;
+                      }),
+                      t('Custom metric {{key}}', { key }),
+                      metricErrors
+                    ),
+                    wrapWithErrorHandling(
+                      getMetricFunc(
+                        {
+                          ...fq,
+                          type: parsedId.type,
+                          function: parsedId.fn,
+                          aggregateBy: 'app'
+                        },
+                        range
+                      ).then(res => {
+                        //set matching value and apply changes on the entire object to trigger refresh
+                        currentMetrics = {
+                          ...currentMetrics,
+                          totalCustomMetrics: currentMetrics.totalCustomMetrics.set(key, res.metrics[0])
+                        };
+                        setMetrics(currentMetrics);
+                        return res.stats;
+                      }),
+                      t('Total custom metric {{key}}', { key }),
+                      metricErrors
+                    )
                   ]
                 );
               }
             });
         }
 
-        return Promise.all(promises);
+        // After all promises complete, set the collected errors
+        return Promise.all(promises).then(results => {
+          setMetrics({ ...currentMetrics, errors: metricErrors });
+          return results;
+        });
       },
-      [props.panels]
+      [props.panels, wrapWithErrorHandling, t]
     );
 
     React.useImperativeHandle(ref, () => ({
@@ -411,6 +483,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
     );
     const [sidePanelWidth, setSidePanelWidth] = React.useState<number>(0);
     const [offsetTop, setOffsetTop] = React.useState<number>(0);
+    const [errorBannerHeight, setErrorBannerHeight] = React.useState<number>(0);
 
     const setKebabOptions = React.useCallback(
       (id: OverviewPanelId, options: PanelKebabOptions) => {
@@ -464,7 +537,10 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
       observeDOMRect(containerRef, containerSize, setContainerSize);
       setSidePanelWidth(document.getElementById('summaryPanel')?.clientWidth || 0);
       setOffsetTop(containerRef.current?.offsetTop || 0);
-    }, [containerRef, containerSize]);
+      // Measure the error banner from the parent drawer
+      const bannerElement = document.querySelector('.netobserv-error-banner');
+      setErrorBannerHeight(bannerElement?.clientHeight || 0);
+    }, [containerRef, containerSize, props.metrics.errors.length]);
 
     React.useEffect(() => {
       if (props.panels.length && (selectedPanel === undefined || !props.panels.find(p => p.id === selectedPanel.id))) {
@@ -651,6 +727,30 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
       [getTotalCustomMetrics, t, props.truncateLength]
     );
 
+    const getPanelError = React.useCallback(
+      (id: OverviewPanelId): string | undefined => {
+        // Check if there's an error for this specific panel's metric type
+        const panelErrors = props.metrics.errors.filter(err => {
+          const lowerMetricType = err.metricType.toLowerCase();
+          const lowerId = id.toLowerCase();
+
+          // Match based on metric type keywords in panel id
+          if (lowerId.includes('byte') && lowerMetricType.includes('byte')) return true;
+          if (lowerId.includes('packet') && lowerMetricType.includes('packet')) return true;
+          if (lowerId.includes('dns') && lowerMetricType.includes('dns')) return true;
+          if (lowerId.includes('rtt') && lowerMetricType.includes('rtt')) return true;
+          if (lowerId.includes('dropped') && lowerMetricType.includes('dropped')) return true;
+          if (lowerId.includes('state') && lowerMetricType.includes('state')) return true;
+          if (lowerId.includes('cause') && lowerMetricType.includes('cause')) return true;
+
+          return false;
+        });
+
+        return panelErrors.length > 0 ? panelErrors[0].error : undefined;
+      },
+      [props.metrics.errors]
+    );
+
     const smallerTexts = props.truncateLength >= TruncateLength.M;
     const getPanelContent = React.useCallback(
       (id: OverviewPanelId, info: OverviewPanelInfo, isFocus: boolean, animate: boolean): PanelContent => {
@@ -669,6 +769,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
           case 'top_avg_dropped_byte_rates':
           case 'top_avg_packet_rates':
           case 'top_avg_dropped_packet_rates': {
+            const panelError = getPanelError(id);
             const options = getKebabOptions(id, {
               showOthers: true,
               showInternal: true,
@@ -682,36 +783,37 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
             const metrics = getTopKRateMetrics(id);
             const namedTotalMetric = getNamedTotalRateMetric(id);
             return {
-              element:
-                !_.isEmpty(metrics) && namedTotalMetric ? (
-                  <MetricsDonut
-                    id={id}
-                    subTitle={info.subtitle}
-                    limit={props.limit}
-                    metricType={metricType}
-                    metricFunction={'rate'}
-                    topKMetrics={metrics}
-                    totalMetric={namedTotalMetric}
-                    showOthers={options.showOthers!}
-                    showLast={options.showLast}
-                    showInternal={options.showInternal!}
-                    showOutOfScope={options.showOutOfScope!}
-                    smallerTexts={smallerTexts}
-                    showLegend={!isFocus}
-                    animate={animate}
-                    isDark={props.isDark}
-                  />
-                ) : (
-                  emptyGraph(!isFocus)
-                ),
-              kebab: (
+              element: panelError ? (
+                <PanelErrorIndicator error={panelError} metricType={metricType} showDetails={!isFocus} />
+              ) : !_.isEmpty(metrics) && namedTotalMetric ? (
+                <MetricsDonut
+                  id={id}
+                  subTitle={info.subtitle}
+                  limit={props.limit}
+                  metricType={metricType}
+                  metricFunction={'rate'}
+                  topKMetrics={metrics}
+                  totalMetric={namedTotalMetric}
+                  showOthers={options.showOthers!}
+                  showLast={options.showLast}
+                  showInternal={options.showInternal!}
+                  showOutOfScope={options.showOutOfScope!}
+                  smallerTexts={smallerTexts}
+                  showLegend={!isFocus}
+                  animate={animate}
+                  isDark={props.isDark}
+                />
+              ) : (
+                emptyGraph(!isFocus)
+              ),
+              kebab: !panelError ? (
                 <PanelKebab
                   id={id}
                   options={options}
                   setOptions={opts => setKebabOptions(id, opts)}
                   isDark={props.isDark}
                 />
-              ),
+              ) : undefined,
               bodyClassSmall: true,
               doubleWidth: false
             };
@@ -720,6 +822,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
           case 'dropped_byte_rates':
           case 'packet_rates':
           case 'dropped_packet_rates': {
+            const panelError = getPanelError(id);
             const isDrop = id.startsWith('dropped');
             const options = getKebabOptions(id, {
               showOutOfScope: false,
@@ -736,7 +839,9 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
             const namedTotalDroppedMetric = getNamedTotalRateMetric(id);
             return {
               calculatedTitle: showTopOnly ? info.topTitle : showTotalOnly ? info.totalTitle : undefined,
-              element: showTopOnly ? (
+              element: panelError ? (
+                <PanelErrorIndicator error={panelError} metricType={metricType} showDetails={!isFocus} />
+              ) : showTopOnly ? (
                 <MetricsGraph
                   id={id}
                   metricType={metricType}
@@ -777,13 +882,16 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
               ) : (
                 emptyGraph(!isFocus)
               ),
-              kebab: <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} />,
+              kebab: !panelError ? (
+                <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} />
+              ) : undefined,
               bodyClassSmall: false,
               doubleWidth: true
             };
           }
           case 'state_dropped_packet_rates':
           case 'cause_dropped_packet_rates': {
+            const panelError = getPanelError(id);
             const isState = id === 'state_dropped_packet_rates';
             const metricType = 'Packets'; // TODO: consider adding bytes graphs here
             const topKMetrics = isState ? getTopKDroppedStateMetrics() : getTopKDroppedCauseMetrics();
@@ -799,62 +907,69 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
             const showTotalOnly = !options.showTop && options.showApp!.value;
             return {
               calculatedTitle: showTopOnly ? info.topTitle : showTotalOnly ? info.totalTitle : undefined,
-              element:
-                isDonut && !_.isEmpty(topKMetrics) && namedTotalMetric ? (
-                  <MetricsDonut
-                    id={id}
-                    subTitle={info.subtitle}
-                    limit={props.limit}
-                    metricType={metricType}
-                    metricFunction="rate"
-                    topKMetrics={topKMetrics}
-                    totalMetric={namedTotalMetric}
-                    showOthers={options.showOthers!}
-                    smallerTexts={smallerTexts}
-                    showLegend={!isFocus}
-                    animate={animate}
-                    isDark={props.isDark}
-                  />
-                ) : showTopOnly ? (
-                  <MetricsGraph
-                    id={id}
-                    metricType={metricType}
-                    metricFunction="rate"
-                    metrics={topKMetrics}
-                    limit={props.limit}
-                    showBar={false}
-                    showArea={true}
-                    showLine={true}
-                    showScatter={true}
-                    itemsPerRow={2}
-                    smallerTexts={smallerTexts}
-                    tooltipsTruncate={false}
-                    showLegend={!isFocus}
-                    animate={animate}
-                    isDark={props.isDark}
-                  />
-                ) : namedTotalMetric ? (
-                  <MetricsGraphWithTotal
-                    id={id}
-                    metricType={metricType}
-                    metricFunction="rate"
-                    topKMetrics={topKMetrics}
-                    totalMetric={namedTotalMetric}
-                    limit={props.limit}
-                    topAsBars={true}
-                    showTop={options.showTop!}
-                    showTotal={options.showApp!.value}
-                    smallerTexts={smallerTexts}
-                    showTotalDrop={false}
-                    showOthers={false}
-                    showLegend={!isFocus}
-                    animate={animate}
-                    isDark={props.isDark}
-                  />
-                ) : (
-                  emptyGraph(!isFocus)
-                ),
-              kebab: <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} />,
+              element: panelError ? (
+                <PanelErrorIndicator
+                  error={panelError}
+                  metricType={isState ? 'Dropped state' : 'Dropped cause'}
+                  showDetails={!isFocus}
+                />
+              ) : isDonut && !_.isEmpty(topKMetrics) && namedTotalMetric ? (
+                <MetricsDonut
+                  id={id}
+                  subTitle={info.subtitle}
+                  limit={props.limit}
+                  metricType={metricType}
+                  metricFunction="rate"
+                  topKMetrics={topKMetrics}
+                  totalMetric={namedTotalMetric}
+                  showOthers={options.showOthers!}
+                  smallerTexts={smallerTexts}
+                  showLegend={!isFocus}
+                  animate={animate}
+                  isDark={props.isDark}
+                />
+              ) : showTopOnly ? (
+                <MetricsGraph
+                  id={id}
+                  metricType={metricType}
+                  metricFunction="rate"
+                  metrics={topKMetrics}
+                  limit={props.limit}
+                  showBar={false}
+                  showArea={true}
+                  showLine={true}
+                  showScatter={true}
+                  itemsPerRow={2}
+                  smallerTexts={smallerTexts}
+                  tooltipsTruncate={false}
+                  showLegend={!isFocus}
+                  animate={animate}
+                  isDark={props.isDark}
+                />
+              ) : namedTotalMetric ? (
+                <MetricsGraphWithTotal
+                  id={id}
+                  metricType={metricType}
+                  metricFunction="rate"
+                  topKMetrics={topKMetrics}
+                  totalMetric={namedTotalMetric}
+                  limit={props.limit}
+                  topAsBars={true}
+                  showTop={options.showTop!}
+                  showTotal={options.showApp!.value}
+                  smallerTexts={smallerTexts}
+                  showTotalDrop={false}
+                  showOthers={false}
+                  showLegend={!isFocus}
+                  animate={animate}
+                  isDark={props.isDark}
+                />
+              ) : (
+                emptyGraph(!isFocus)
+              ),
+              kebab: !panelError ? (
+                <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} />
+              ) : undefined,
               bodyClassSmall: options.graph!.type === 'donut',
               doubleWidth: options.graph!.type !== 'donut'
             };
@@ -869,6 +984,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
           case 'top_p90_rtt':
           case 'top_p99_rtt':
           case 'bottom_min_rtt': {
+            const panelError = getPanelError(id);
             const isAvg = id.includes('_avg_');
             const metricType = id.endsWith('Bytes')
               ? 'Bytes'
@@ -892,54 +1008,58 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
             const showTotalOnly = !options.showTop && options.showApp!.value;
             return {
               calculatedTitle: showTopOnly ? info.topTitle : showTotalOnly ? info.totalTitle : undefined,
-              element:
-                !_.isEmpty(metrics) && namedTotalMetric ? (
-                  options!.graph!.type === 'donut' ? (
-                    <MetricsDonut
-                      id={id}
-                      subTitle={info.subtitle}
-                      limit={props.limit}
-                      metricType={metricType}
-                      metricFunction={getFunctionFromId(id)}
-                      topKMetrics={metrics}
-                      totalMetric={namedTotalMetric}
-                      showOthers={false}
-                      smallerTexts={smallerTexts}
-                      showLegend={!isFocus}
-                      animate={animate}
-                      isDark={props.isDark}
-                    />
-                  ) : (
-                    <MetricsGraphWithTotal
-                      id={id}
-                      metricType={metricType}
-                      metricFunction={getFunctionFromId(id)}
-                      topKMetrics={metrics}
-                      totalMetric={namedTotalMetric}
-                      limit={props.limit}
-                      topAsBars={false}
-                      showTop={options.showTop!}
-                      showTotal={options.showApp!.value}
-                      showInternal={false}
-                      showOutOfScope={false}
-                      smallerTexts={smallerTexts}
-                      showTotalDrop={false}
-                      showOthers={false}
-                      showLegend={!isFocus}
-                      animate={animate}
-                      isDark={props.isDark}
-                    />
-                  )
+              element: panelError ? (
+                <PanelErrorIndicator error={panelError} metricType={metricType} showDetails={!isFocus} />
+              ) : !_.isEmpty(metrics) && namedTotalMetric ? (
+                options!.graph!.type === 'donut' ? (
+                  <MetricsDonut
+                    id={id}
+                    subTitle={info.subtitle}
+                    limit={props.limit}
+                    metricType={metricType}
+                    metricFunction={getFunctionFromId(id)}
+                    topKMetrics={metrics}
+                    totalMetric={namedTotalMetric}
+                    showOthers={false}
+                    smallerTexts={smallerTexts}
+                    showLegend={!isFocus}
+                    animate={animate}
+                    isDark={props.isDark}
+                  />
                 ) : (
-                  emptyGraph(!isFocus)
-                ),
-              kebab: <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} />,
+                  <MetricsGraphWithTotal
+                    id={id}
+                    metricType={metricType}
+                    metricFunction={getFunctionFromId(id)}
+                    topKMetrics={metrics}
+                    totalMetric={namedTotalMetric}
+                    limit={props.limit}
+                    topAsBars={false}
+                    showTop={options.showTop!}
+                    showTotal={options.showApp!.value}
+                    showInternal={false}
+                    showOutOfScope={false}
+                    smallerTexts={smallerTexts}
+                    showTotalDrop={false}
+                    showOthers={false}
+                    showLegend={!isFocus}
+                    animate={animate}
+                    isDark={props.isDark}
+                  />
+                )
+              ) : (
+                emptyGraph(!isFocus)
+              ),
+              kebab: !panelError ? (
+                <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} />
+              ) : undefined,
               bodyClassSmall: options.graph!.type === 'donut',
               doubleWidth: options.graph!.type !== 'donut'
             };
           }
           case 'name_dns_latency_flows':
           case 'rcode_dns_latency_flows': {
+            const panelError = getPanelError(id);
             const metricType = id === 'name_dns_latency_flows' ? 'DnsName' : 'DnsFlows'; // TODO: consider adding packets graphs here
             const topKMetrics = id === 'name_dns_latency_flows' ? getTopKDnsNameMetrics() : getTopKDnsRCodeMetrics();
             const namedTotalMetric = getDnsCountTotalMetric();
@@ -954,53 +1074,57 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
             const showTotalOnly = !options.showTop && options.showApp!.value;
             return {
               calculatedTitle: showTopOnly ? info.topTitle : showTotalOnly ? info.totalTitle : undefined,
-              element:
-                !_.isEmpty(topKMetrics) && namedTotalMetric ? (
-                  isDonut ? (
-                    <MetricsDonut
-                      id={id}
-                      subTitle={info.subtitle}
-                      limit={props.limit}
-                      metricType={metricType}
-                      metricFunction="sum"
-                      topKMetrics={topKMetrics}
-                      totalMetric={namedTotalMetric}
-                      showOthers={options.showNoError!}
-                      othersName={'NoError'}
-                      smallerTexts={smallerTexts}
-                      showLegend={!isFocus}
-                      animate={animate}
-                      isDark={props.isDark}
-                    />
-                  ) : (
-                    <MetricsGraphWithTotal
-                      id={id}
-                      metricType={metricType}
-                      metricFunction="sum"
-                      topKMetrics={topKMetrics}
-                      totalMetric={namedTotalMetric}
-                      limit={props.limit}
-                      topAsBars={true}
-                      showTop={options.showTop!}
-                      showTotal={options.showApp!.value}
-                      showOthers={options.showNoError!}
-                      othersName={'NoError'}
-                      smallerTexts={smallerTexts}
-                      showTotalDrop={false}
-                      showLegend={!isFocus}
-                      animate={animate}
-                      isDark={props.isDark}
-                    />
-                  )
+              element: panelError ? (
+                <PanelErrorIndicator error={panelError} metricType={metricType} showDetails={!isFocus} />
+              ) : !_.isEmpty(topKMetrics) && namedTotalMetric ? (
+                isDonut ? (
+                  <MetricsDonut
+                    id={id}
+                    subTitle={info.subtitle}
+                    limit={props.limit}
+                    metricType={metricType}
+                    metricFunction="sum"
+                    topKMetrics={topKMetrics}
+                    totalMetric={namedTotalMetric}
+                    showOthers={options.showNoError!}
+                    othersName={'NoError'}
+                    smallerTexts={smallerTexts}
+                    showLegend={!isFocus}
+                    animate={animate}
+                    isDark={props.isDark}
+                  />
                 ) : (
-                  emptyGraph(!isFocus)
-                ),
-              kebab: <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} />,
+                  <MetricsGraphWithTotal
+                    id={id}
+                    metricType={metricType}
+                    metricFunction="sum"
+                    topKMetrics={topKMetrics}
+                    totalMetric={namedTotalMetric}
+                    limit={props.limit}
+                    topAsBars={true}
+                    showTop={options.showTop!}
+                    showTotal={options.showApp!.value}
+                    showOthers={options.showNoError!}
+                    othersName={'NoError'}
+                    smallerTexts={smallerTexts}
+                    showTotalDrop={false}
+                    showLegend={!isFocus}
+                    animate={animate}
+                    isDark={props.isDark}
+                  />
+                )
+              ) : (
+                emptyGraph(!isFocus)
+              ),
+              kebab: !panelError ? (
+                <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} />
+              ) : undefined,
               bodyClassSmall: options.graph!.type === 'donut',
               doubleWidth: options.graph!.type !== 'donut'
             };
           }
           default: {
+            const panelError = getPanelError(id);
             const parsedId = parseCustomMetricId(id);
             if (parsedId.isValid) {
               const metricType = parsedId.type!;
@@ -1017,46 +1141,49 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
               const showTotalOnly = !options.showTop && options.showApp!.value;
               return {
                 calculatedTitle: showTopOnly ? info.topTitle : showTotalOnly ? info.totalTitle : undefined,
-                element:
-                  !_.isEmpty(topKMetrics) && namedTotalMetric ? (
-                    isDonut ? (
-                      <MetricsDonut
-                        id={id}
-                        subTitle={info.subtitle}
-                        limit={props.limit}
-                        metricType={metricType}
-                        metricFunction={metricFunction}
-                        topKMetrics={topKMetrics}
-                        totalMetric={namedTotalMetric}
-                        showOthers={false}
-                        smallerTexts={smallerTexts}
-                        showLegend={!isFocus}
-                        animate={animate}
-                        isDark={props.isDark}
-                      />
-                    ) : (
-                      <MetricsGraphWithTotal
-                        id={id}
-                        metricType={metricType}
-                        metricFunction={metricFunction}
-                        topKMetrics={topKMetrics}
-                        totalMetric={namedTotalMetric}
-                        limit={props.limit}
-                        topAsBars={true}
-                        showTop={options.showTop!}
-                        showTotal={options.showApp!.value}
-                        showOthers={false}
-                        smallerTexts={smallerTexts}
-                        showTotalDrop={false}
-                        showLegend={!isFocus}
-                        animate={animate}
-                        isDark={props.isDark}
-                      />
-                    )
+                element: panelError ? (
+                  <PanelErrorIndicator error={panelError} metricType={metricType} showDetails={!isFocus} />
+                ) : !_.isEmpty(topKMetrics) && namedTotalMetric ? (
+                  isDonut ? (
+                    <MetricsDonut
+                      id={id}
+                      subTitle={info.subtitle}
+                      limit={props.limit}
+                      metricType={metricType}
+                      metricFunction={metricFunction}
+                      topKMetrics={topKMetrics}
+                      totalMetric={namedTotalMetric}
+                      showOthers={false}
+                      smallerTexts={smallerTexts}
+                      showLegend={!isFocus}
+                      animate={animate}
+                      isDark={props.isDark}
+                    />
                   ) : (
-                    emptyGraph(!isFocus)
-                  ),
-                kebab: <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} />,
+                    <MetricsGraphWithTotal
+                      id={id}
+                      metricType={metricType}
+                      metricFunction={metricFunction}
+                      topKMetrics={topKMetrics}
+                      totalMetric={namedTotalMetric}
+                      limit={props.limit}
+                      topAsBars={true}
+                      showTop={options.showTop!}
+                      showTotal={options.showApp!.value}
+                      showOthers={false}
+                      smallerTexts={smallerTexts}
+                      showTotalDrop={false}
+                      showLegend={!isFocus}
+                      animate={animate}
+                      isDark={props.isDark}
+                    />
+                  )
+                ) : (
+                  emptyGraph(!isFocus)
+                ),
+                kebab: !panelError ? (
+                  <PanelKebab id={id} options={options} setOptions={opts => setKebabOptions(id, opts)} />
+                ) : undefined,
                 bodyClassSmall: options.graph!.type === 'donut',
                 doubleWidth: options.graph!.type !== 'donut'
               };
@@ -1075,6 +1202,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
         getNamedTotalMetric,
         getNamedTotalRateMetric,
         getNoInternalTopKRateMetrics,
+        getPanelError,
         getTopKDnsNameMetrics,
         getTopKDnsRCodeMetrics,
         getTopKDroppedCauseMetrics,
@@ -1159,9 +1287,9 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
               id={'overview-scope-slider-div'}
               style={{
                 position: 'absolute',
-                top: offsetTop,
+                top: offsetTop + errorBannerHeight,
                 right: containerSize.width * 0.92 + sidePanelWidth,
-                height: containerSize.height,
+                height: containerSize.height - errorBannerHeight,
                 overflow: 'hidden',
                 alignContent: 'center',
                 width: containerSize.width * 0.1
@@ -1177,7 +1305,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
                 position: 'absolute',
                 top: offsetTop,
                 right: containerSize.width / 5 + sidePanelWidth,
-                height: containerSize.height,
+                height: containerSize.height - errorBannerHeight,
                 overflow: 'hidden',
                 width: (containerSize.width * 4) / 5,
                 padding: `${containerPadding}px ${cardPadding}px ${containerPadding}px ${containerPadding}px`
@@ -1218,6 +1346,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
       sidePanelWidth,
       containerPadding,
       cardPadding,
+      errorBannerHeight,
       getPanelView
     ]);
 

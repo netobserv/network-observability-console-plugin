@@ -24,6 +24,7 @@ import { isPromError } from '../../utils/errors';
 import { OverviewPanel } from '../../utils/overview-panels';
 import { TruncateLength } from '../dropdowns/truncate-dropdown';
 import { ErrorComponent, Size } from '../messages/error';
+import { ErrorBanner } from '../messages/error-banner';
 import { ViewId } from '../netflow-traffic';
 import FlowsQuerySummary from '../query-summary/flows-query-summary';
 import MetricsQuerySummary from '../query-summary/metrics-query-summary';
@@ -229,12 +230,15 @@ export const NetflowTrafficDrawer: React.FC<NetflowTrafficDrawerProps> = React.f
         }
         return w;
       },
-      [filters]
+      [filters, t]
     );
 
     const mainContent = () => {
       let content: JSX.Element | null = null;
-      if (props.error) {
+
+      // For overview tab: show error banner and partial metrics when possible
+      // For other tabs or config errors: show full error page
+      if (props.error && (props.currentState.includes('configLoadError') || props.selectedViewId !== 'overview')) {
         content = (
           <ErrorComponent
             title={t('Unable to get {{item}}', {
@@ -248,23 +252,26 @@ export const NetflowTrafficDrawer: React.FC<NetflowTrafficDrawerProps> = React.f
         switch (props.selectedViewId) {
           case 'overview':
             content = (
-              <NetflowOverview
-                ref={overviewRef}
-                limit={props.limit}
-                panels={props.panels}
-                recordType={props.recordType}
-                scopes={props.scopes}
-                metricScope={props.metricScope}
-                setMetricScope={props.setMetricScope}
-                metrics={props.metrics}
-                loading={props.loading}
-                isDark={props.isDarkTheme}
-                resetDefaultFilters={getResetDefaultFiltersProp()}
-                clearFilters={getClearFiltersProp()}
-                truncateLength={props.overviewTruncateLength}
-                focus={props.overviewFocus}
-                setFocus={props.setOverviewFocus}
-              />
+              <>
+                {props.metrics.errors.length > 0 && <ErrorBanner errors={props.metrics.errors} />}
+                <NetflowOverview
+                  ref={overviewRef}
+                  limit={props.limit}
+                  panels={props.panels}
+                  recordType={props.recordType}
+                  scopes={props.scopes}
+                  metricScope={props.metricScope}
+                  setMetricScope={props.setMetricScope}
+                  metrics={props.metrics}
+                  loading={props.loading}
+                  isDark={props.isDarkTheme}
+                  resetDefaultFilters={getResetDefaultFiltersProp()}
+                  clearFilters={getClearFiltersProp()}
+                  truncateLength={props.overviewTruncateLength}
+                  focus={props.overviewFocus}
+                  setFocus={props.setOverviewFocus}
+                />
+              </>
             );
             break;
           case 'table':

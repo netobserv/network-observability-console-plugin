@@ -1,0 +1,56 @@
+.error-suggestions {
+  margin-top: 0.5rem;
+}
+
+.error-suggestions blockquote {
+  margin: 0.5rem 0;
+  padding-left: 1rem;
+  border-left: 2px solid var(--pf-v5-global--BorderColor--300);
+  color: var(--pf-v5-global--Color--200);
+}
+
+.error-suggestions ul {
+  margin-top: 0.25rem;
+  padding-left: 1.5rem;
+}
+
+.error-suggestions .pf-v5-c-button {
+  margin-top: 0.5rem;
+}
+
+.error-suggestions-links {
+  margin-top: 1rem;
+}
+
+/* Compact mode for banner display */
+.error-suggestions-compact {
+  margin-top: 0;
+}
+
+.error-suggestions-compact blockquote {
+  margin: 0.25rem 0;
+  padding: 0;
+  padding-left: 0.5rem;
+  border-left-width: 1px;
+  font-size: var(--pf-v5-global--FontSize--sm);
+}
+
+.error-suggestions-compact ul {
+  margin-top: 0;
+  padding-left: 1rem;
+}
+
+.error-suggestions-compact .pf-v5-c-button {
+  margin-top: 0.25rem;
+  font-size: var(--pf-v5-global--FontSize--sm);
+}
+
+.error-suggestions-compact .error-suggestions-links {
+  margin-top: 0.5rem;
+}
+
+.error-suggestions-compact .error-suggestions-links .pf-v5-c-button {
+  padding: 0;
+  font-size: var(--pf-v5-global--FontSize--sm);
+  margin-top: 0;
+}

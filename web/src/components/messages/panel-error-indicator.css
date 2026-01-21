@@ -1,0 +1,38 @@
+.panel-error-indicator {
+  min-height: 200px;
+  max-height: 100%;
+  padding: 1rem;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.panel-error-indicator .pf-v5-c-empty-state {
+  max-height: 100%;
+  max-width: 100%;
+}
+
+.panel-error-icon {
+  font-size: 2rem;
+}
+
+.panel-error-message {
+  color: var(--pf-v5-global--Color--200);
+  margin-top: 0.5rem;
+  word-break: break-word;
+}
+
+.panel-error-body {
+  max-height: 50vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.panel-error-indicator .error-suggestions {
+  margin-top: 1rem;
+  text-align: left;
+  max-width: 600px;
+}
+
+.panel-error-indicator .error-suggestions blockquote {
+  font-size: var(--pf-v5-global--FontSize--sm);
+}

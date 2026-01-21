@@ -20,7 +20,8 @@ describe('<NetflowOverview />', () => {
     recordType: 'flowLog' as RecordType,
     metrics: {
       customMetrics: new Map(),
-      totalCustomMetrics: new Map()
+      totalCustomMetrics: new Map(),
+      errors: []
     },
     truncateLength: TruncateLength.M,
     forcedSize: { width: 800, height: 800 } as DOMRect,
