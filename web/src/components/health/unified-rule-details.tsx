@@ -32,6 +32,12 @@ type UnifiedRuleItem = {
   recordingRule?: RecordingRuleItem;
 };
 
+// Reusable styles for table headers and cells
+const thStyle = { paddingRight: '5px' };
+const thNoWrapStyle = { whiteSpace: 'nowrap' as const, paddingRight: '5px' };
+const tdNoWrapStyle = { whiteSpace: 'nowrap' as const };
+const tdRightAlignStyle = { textAlign: 'right' as const };
+
 export const UnifiedRuleDetails: React.FC<UnifiedRuleDetailsProps> = ({
   kind,
   alertInfo,
@@ -79,15 +85,15 @@ export const UnifiedRuleDetails: React.FC<UnifiedRuleDetailsProps> = ({
     <Table data-test-rows-count={unifiedItems.length} aria-label="Unified rules" variant="compact">
       {wide && (
         <Thead>
-          <Th style={{ paddingRight: '5px' }}>{t('Summary')}</Th>
-          <Th style={{ paddingRight: '5px' }}>{t('Mode')}</Th>
-          <Th style={{ paddingRight: '5px' }}>{t('State')}</Th>
-          <Th style={{ paddingRight: '5px' }}>{t('Severity')}</Th>
-          <Th style={{ whiteSpace: 'nowrap', paddingRight: '5px' }}>{t('Active since')}</Th>
-          <Th style={{ paddingRight: '5px' }}>{t('Labels')}</Th>
-          <Th style={{ whiteSpace: 'nowrap', paddingRight: '5px' }}>{t('Value')}</Th>
-          <Th style={{ paddingRight: '5px' }}>{t('Threshold')}</Th>
-          <Th style={{ paddingRight: '5px' }}>{t('Description')}</Th>
+          <Th style={thStyle}>{t('Summary')}</Th>
+          <Th style={thStyle}>{t('Mode')}</Th>
+          <Th style={thStyle}>{t('State')}</Th>
+          <Th style={thStyle}>{t('Severity')}</Th>
+          <Th style={thNoWrapStyle}>{t('Active since')}</Th>
+          <Th style={thStyle}>{t('Labels')}</Th>
+          <Th style={thNoWrapStyle}>{t('Value')}</Th>
+          <Th style={thStyle}>{t('Threshold')}</Th>
+          <Th style={thStyle}>{t('Description')}</Th>
           <Th screenReaderText="Links" />
         </Thead>
       )}
@@ -141,7 +147,7 @@ export const UnifiedRuleDetails: React.FC<UnifiedRuleDetailsProps> = ({
                         ))}
                   </Td>
                   {/* Value */}
-                  <Td dataLabel={t('Value')} style={{ whiteSpace: 'nowrap' }}>
+                  <Td dataLabel={t('Value')} style={tdNoWrapStyle}>
                     {valueFormat(alert.value as number, 2)} {alert.metadata.unit}
                   </Td>
                   {/* Threshold */}
@@ -204,7 +210,7 @@ export const UnifiedRuleDetails: React.FC<UnifiedRuleDetailsProps> = ({
                   {/* Labels - Empty for recording rules */}
                   <Td dataLabel={t('Labels')}>{''}</Td>
                   {/* Value */}
-                  <Td dataLabel={t('Value')} style={{ whiteSpace: 'nowrap' }}>
+                  <Td dataLabel={t('Value')} style={tdNoWrapStyle}>
                     {valueFormat(rule.value, 2)} %
                   </Td>
                   {/* Threshold */}
@@ -272,7 +278,7 @@ export const UnifiedRuleDetails: React.FC<UnifiedRuleDetailsProps> = ({
                           </Label>
                         ))}
                   </Td>
-                  <Td style={{ whiteSpace: 'nowrap' }}>
+                  <Td style={tdNoWrapStyle}>
                     {valueFormat(alert.value as number, 2)} {alert.metadata.unit}
                     {alert.metadata.threshold && ' > ' + alert.metadata.threshold}
                   </Td>
@@ -325,10 +331,10 @@ export const UnifiedRuleDetails: React.FC<UnifiedRuleDetailsProps> = ({
                   <Td noPadding>
                     <Label color={getSeverityColor(rule.severity)}>{rule.severity}</Label>
                   </Td>
-                  <Td noPadding style={{ whiteSpace: 'nowrap' }}>
+                  <Td noPadding style={tdNoWrapStyle}>
                     {valueFormat(rule.value, 2)} % {rule.threshold && '> ' + rule.threshold}
                   </Td>
-                  <Td noPadding style={{ textAlign: 'right' }}>
+                  <Td noPadding style={tdRightAlignStyle}>
                     <ActionsColumn
                       items={links.map(l => {
                         return {
