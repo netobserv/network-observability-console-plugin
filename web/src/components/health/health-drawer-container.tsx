@@ -21,8 +21,7 @@ import { useTranslation } from 'react-i18next';
 import { HealthCard } from './health-card';
 import { ByResource, RecordingRulesByResource } from './health-helper';
 import { RecordingRuleCard } from './recording-rule-card';
-import { RecordingRuleDetails } from './recording-rule-details';
-import { RuleDetails } from './rule-details';
+import { UnifiedRuleDetails } from './unified-rule-details';
 
 // Type guard to differentiate between ByResource and RecordingRulesByResource
 const isAlertResource = (item: ByResource | RecordingRulesByResource): item is ByResource => {
@@ -106,11 +105,12 @@ export const HealthDrawerContainer: React.FC<HealthDrawerContainerProps> = ({
               </DrawerHead>
               {selectedItem && (
                 <div className="health-gallery-drawer-content">
-                  {isAlertResource(selectedItem) ? (
-                    <RuleDetails kind={kind} info={selectedItem} wide={false} />
-                  ) : (
-                    <RecordingRuleDetails kind={kind} info={selectedItem} wide={false} />
-                  )}
+                  <UnifiedRuleDetails
+                    kind={kind}
+                    alertInfo={isAlertResource(selectedItem) ? selectedItem : undefined}
+                    recordingRuleInfo={!isAlertResource(selectedItem) ? selectedItem : undefined}
+                    wide={false}
+                  />
                 </div>
               )}
             </DrawerPanelContent>

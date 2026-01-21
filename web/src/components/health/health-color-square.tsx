@@ -1,13 +1,19 @@
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { valueFormat } from '../../utils/format';
-import { AlertWithRuleName, computeAlertScore, computeExcessRatioStatusWeighted } from './health-helper';
+import {
+  AlertWithRuleName,
+  computeAlertScore,
+  computeExcessRatioStatusWeighted,
+  RecordingRuleItem
+} from './health-helper';
 
 import { Tooltip } from '@patternfly/react-core';
 import './health-color-square.css';
 
 export interface HealthColorSquareProps {
-  alert: AlertWithRuleName;
+  alert?: AlertWithRuleName;
+  recordingRule?: RecordingRuleItem;
 }
 
 // rgb in [0,255] bounds
@@ -57,26 +63,55 @@ const buildGradientCSS = (colorMap: ColorMap): string => {
   return 'linear-gradient(to right,' + colorStops.join(',') + ')';
 };
 
-export const HealthColorSquare: React.FC<HealthColorSquareProps> = ({ alert }) => {
+export const HealthColorSquare: React.FC<HealthColorSquareProps> = ({ alert, recordingRule }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
-  const colorMap =
-    alert.labels.severity === 'critical'
-      ? criticalColorMap
-      : alert.labels.severity === 'warning'
-      ? warningColorMap
-      : infoColorMap;
+  let severity: string;
+  let scoreForMap: number;
+  let rawScore: number;
+  let weight: number;
 
-  const scoreForMap = computeExcessRatioStatusWeighted(alert);
-  const score = computeAlertScore(alert);
+  if (alert) {
+    // Alert mode
+    severity = alert.labels.severity;
+    scoreForMap = computeExcessRatioStatusWeighted(alert);
+    const score = computeAlertScore(alert);
+    rawScore = score.rawScore;
+    weight = score.weight;
+  } else if (recordingRule) {
+    // Recording rule mode
+    severity = recordingRule.severity;
+
+    // Calculate excess ratio similar to computeRecordingRulesScore
+    const thresholdValue = recordingRule.threshold ? parseFloat(recordingRule.threshold) : 0;
+    const upperBoundValue = recordingRule.upperBound ? parseFloat(recordingRule.upperBound) : 100;
+
+    if (thresholdValue > 0) {
+      const threshold = thresholdValue / 2;
+      const vclamped = Math.min(Math.max(recordingRule.value, threshold), upperBoundValue);
+      const range = upperBoundValue - threshold;
+      scoreForMap = (vclamped - threshold) / range;
+    } else {
+      scoreForMap = 0;
+    }
+
+    rawScore = 10 * (1 - scoreForMap);
+
+    // Weight based on severity
+    weight = severity === 'critical' ? 100 : severity === 'warning' ? 10 : 1;
+  } else {
+    return null;
+  }
+
+  const colorMap = severity === 'critical' ? criticalColorMap : severity === 'warning' ? warningColorMap : infoColorMap;
 
   return (
     <Tooltip
       content={
         <>
-          {t('Score') + ': ' + valueFormat(score.rawScore)}
+          {t('Score') + ': ' + valueFormat(rawScore)}
           <br />
-          {t('Weight') + ': ' + score.weight}
+          {t('Weight') + ': ' + weight}
           <br />
           <div className="gradient" style={{ backgroundImage: buildGradientCSS(colorMap) }}>
             <span className="vertical-mark" style={{ width: 100 * scoreForMap + '%' }} />
