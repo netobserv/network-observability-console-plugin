@@ -66,7 +66,7 @@ const buildGradientCSS = (colorMap: ColorMap): string => {
 export const HealthColorSquare: React.FC<HealthColorSquareProps> = ({ alert, recordingRule }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
-  let severity: string;
+  let severity: string | undefined;
   let scoreForMap: number;
   let rawScore: number;
   let weight: number;
@@ -100,6 +100,10 @@ export const HealthColorSquare: React.FC<HealthColorSquareProps> = ({ alert, rec
     // Weight based on severity
     weight = severity === 'critical' ? 100 : severity === 'warning' ? 10 : 1;
   } else {
+    return null;
+  }
+
+  if (!severity) {
     return null;
   }
 
