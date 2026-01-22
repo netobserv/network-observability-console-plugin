@@ -18,6 +18,7 @@ export type DynamicFormProps = FormProps<any> & {
   ErrorTemplate?: React.FC<{ errors: string[] }>;
   customUISchema?: boolean;
   showAlert?: boolean;
+  skipDefaults: boolean;
 };
 
 export const DynamicFormFormErrorFallback: React.FC<ErrorBoundaryFallbackProps> = () => {
@@ -49,6 +50,7 @@ export const DynamicForm: React.FC<DynamicFormProps> = ({
   widgets = {},
   customUISchema,
   showAlert = false,
+  skipDefaults,
   ...restProps
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
@@ -74,6 +76,14 @@ export const DynamicForm: React.FC<DynamicFormProps> = ({
             fields={{ ...defaultFields, ...fields }}
             formContext={{ ...formContext, formData }}
             formData={formData}
+            experimental_defaultFormStateBehavior={
+              skipDefaults
+                ? {
+                    // We assume the input data already has the desired defaults
+                    emptyObjectFields: 'skipDefaults'
+                  }
+                : undefined
+            }
             noHtml5Validate
             liveValidate
             onChange={(event, id) => {

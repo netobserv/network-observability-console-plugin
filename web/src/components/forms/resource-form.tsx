@@ -9,6 +9,7 @@ import { safeYAMLToJS } from '../../utils/yaml';
 import { back } from '../dynamic-loader/dynamic-loader';
 import { SchemaValidator } from './config/validator';
 import { DynamicForm } from './dynamic-form/dynamic-form';
+import { ErrorTemplate } from './dynamic-form/templates';
 import { EditorToggle, EditorType } from './editor-toggle';
 import './forms.css';
 import { ResourceDeleteModal } from './resource-delete-modal';
@@ -71,20 +72,24 @@ export const ResourceForm: FC<ResourceFormProps> = ({ uiSchema }) => {
                       errors={ctx.errors}
                       onError={errs => ctx.setErrors(_.map(errs, error => error.stack))}
                       onChange={event => setData(event.formData)}
+                      skipDefaults={ctx.skipDefaults}
                     />
                   ) : (
                     <></>
                   )
                 }
                 yamlChild={
-                  <ResourceYAMLEditor
-                    initialResource={data}
-                    onSave={content => {
-                      const updatedData = safeYAMLToJS(content);
-                      setData(updatedData);
-                      ctx.onSubmit(updatedData);
-                    }}
-                  />
+                  <>
+                    <ResourceYAMLEditor
+                      initialResource={data}
+                      onSave={content => {
+                        const updatedData = safeYAMLToJS(content);
+                        setData(updatedData);
+                        ctx.onSubmit(updatedData);
+                      }}
+                    />
+                    <>{ctx.errors.length > 0 && <ErrorTemplate errors={ctx.errors} />}</>
+                  </>
                 }
               />
             </Suspense>

@@ -21,6 +21,7 @@ export const FlowCollectorForm: FC<FlowCollectorFormProps> = props => {
         kind="FlowCollector"
         name={params.name || props.name}
         onSuccess={back}
+        defaultFrom="CSVExample"
       >
         <ResourceForm uiSchema={flowCollectorUISchema} />
       </ResourceWatcher>
