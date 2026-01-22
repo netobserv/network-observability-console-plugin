@@ -104,15 +104,19 @@ BUILDSCRIPT=:dev make images
 
 ### Testing in OpenShift
 
-Probably the easiest way to test without dev mode (e.g. to test a pull request) is to use the [operator](https://github.com/netobserv/network-observability-operator/), build and push the image to your own registry account and update the `FlowCollector` CR to update the plugin image.
+Probably the easiest way to test without dev mode (e.g. to test a pull request) is to use the [operator](https://github.com/netobserv/network-observability-operator/), build and push the image to your own registry account and update the `network-observability-operator.vx.y.z` csv to update the plugin image.
 
 E.g:
 
 ```bash
 IMAGE=quay.io/${USER}/network-observability-console-plugin:pr-xx make images
 
-oc edit FlowCollector cluster
-# Here replace image with the newly created one under .spec.consolePlugin.image
+oc get csv
+NAME                                     DISPLAY                 VERSION   REPLACES                                 PHASE
+network-observability-operator.v1.10.1   Network Observability   1.10.2    network-observability-operator.v1.10.0   Succeeded
+
+oc edit csv network-observability-operator.v1.10.1
+# Here replace image in the RELATED_IMAGE_CONSOLE_PLUGIN environment veriable with the newly created one under .spec.install.spec.deployments[0].spec.template.spec.containers[0].env
 ```
 
 If you had previously used the console with the plugin installed, you may need to restart console pods to clear cache:
