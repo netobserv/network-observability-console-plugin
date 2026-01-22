@@ -334,7 +334,9 @@ class NamespaceIcon extends React.Component<SVGIconProps> {
   render() {
     const { size, className, style } = this.props;
     const sizeValue = typeof size === 'number' ? size : parseFloat(size as string) || 18;
-    return <IconWrapper icon={LuGroup} size={sizeValue} className={className} style={style} />;
+    return (
+      <IconWrapper icon={LuGroup} size={sizeValue} className={className} style={{ ...style, fill: 'transparent' }} />
+    );
   }
 }
 
