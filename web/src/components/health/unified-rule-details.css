@@ -1,0 +1,17 @@
+/* Table header styles */
+.unified-rule-details th {
+  padding-right: 5px;
+}
+
+.unified-rule-details th.no-wrap {
+  white-space: nowrap;
+}
+
+/* Table cell styles */
+.unified-rule-details td.no-wrap {
+  white-space: nowrap;
+}
+
+.unified-rule-details td.right-align {
+  text-align: right;
+}
