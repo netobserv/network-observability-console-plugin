@@ -16,6 +16,7 @@ import { GlobeRouteIcon, ServiceIcon, VirtualMachineIcon } from '@patternfly/rea
 import * as React from 'react';
 import { GrHost, GrMultiple, GrServerCluster } from 'react-icons/gr';
 import { IoLocationOutline } from 'react-icons/io5';
+import { LuGroup } from 'react-icons/lu';
 import { PiNetwork } from 'react-icons/pi';
 import { TbCloudNetwork } from 'react-icons/tb';
 import { IconWrapper } from './react-icons-wrapper';
@@ -56,42 +57,6 @@ class PodIcon extends React.Component<SVGIconProps> {
           />
           <path d="m 6.2617914,7.43817 0,3.852778 3.3736103,1.868749 0.0167,-4.713193 z" fill="currentColor" />
           <path d="m 13.503462,7.43817 0,3.852778 -3.37361,1.868749 -0.0167,-4.713193 z" fill="currentColor" />
-        </g>
-      </g>
-    );
-  }
-}
-
-// Namespace icon - actual SVG from https://github.com/kubernetes/community/blob/master/icons/svg/resources/unlabeled/ns.svg
-class NamespaceIcon extends React.Component<SVGIconProps> {
-  render() {
-    const { size, className, style } = this.props;
-    const sizeValue = typeof size === 'number' ? size : parseFloat(size as string) || 18;
-    const scale = (sizeValue / 18.035334) * 2;
-    // Center the icon: viewBox center is at (9.017667, 8.750189)
-    const centerX = 9.017667;
-    const centerY = 8.750189;
-    return (
-      <g
-        className={className}
-        style={style}
-        transform={`translate(${sizeValue / 2 - centerX * scale}, ${sizeValue / 2 - centerY * scale}) scale(${scale})`}
-      >
-        <g transform="translate(-0.99262638,-1.174181)">
-          <rect
-            y="6.5793304"
-            x="6.1734986"
-            height="6.6900792"
-            width="7.6735892"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="0.40000001"
-            strokeLinecap="butt"
-            strokeLinejoin="round"
-            strokeMiterlimit="10"
-            strokeDasharray="0.80000001, 0.4"
-            strokeDashoffset="3.44000006"
-          />
         </g>
       </g>
     );
@@ -362,6 +327,14 @@ class NodeIcon extends React.Component<SVGIconProps> {
     const { size, className, style } = this.props;
     const sizeValue = typeof size === 'number' ? size : parseFloat(size as string) || 18;
     return <IconWrapper icon={GrHost} size={sizeValue} className={className} style={style} />;
+  }
+}
+
+class NamespaceIcon extends React.Component<SVGIconProps> {
+  render() {
+    const { size, className, style } = this.props;
+    const sizeValue = typeof size === 'number' ? size : parseFloat(size as string) || 18;
+    return <IconWrapper icon={LuGroup} size={sizeValue} className={className} style={style} />;
   }
 }
 
