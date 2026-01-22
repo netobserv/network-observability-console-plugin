@@ -66,46 +66,56 @@ const buildGradientCSS = (colorMap: ColorMap): string => {
 export const HealthColorSquare: React.FC<HealthColorSquareProps> = ({ alert, recordingRule }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
-  let severity: string | undefined;
-  let scoreForMap: number;
-  let rawScore: number;
-  let weight: number;
+  const scoreData = React.useMemo(() => {
+    if (alert) {
+      // Alert mode
+      const severity = alert.labels.severity;
+      const scoreForMap = computeExcessRatioStatusWeighted(alert);
+      const score = computeAlertScore(alert);
+      return {
+        severity,
+        scoreForMap,
+        rawScore: score.rawScore,
+        weight: score.weight
+      };
+    } else if (recordingRule) {
+      // Recording rule mode
+      const severity = recordingRule.severity;
 
-  if (alert) {
-    // Alert mode
-    severity = alert.labels.severity;
-    scoreForMap = computeExcessRatioStatusWeighted(alert);
-    const score = computeAlertScore(alert);
-    rawScore = score.rawScore;
-    weight = score.weight;
-  } else if (recordingRule) {
-    // Recording rule mode
-    severity = recordingRule.severity;
+      // Calculate excess ratio similar to computeRecordingRulesScore
+      const thresholdValue = recordingRule.threshold ? parseFloat(recordingRule.threshold) : 0;
+      const upperBoundValue = recordingRule.upperBound ? parseFloat(recordingRule.upperBound) : 100;
 
-    // Calculate excess ratio similar to computeRecordingRulesScore
-    const thresholdValue = recordingRule.threshold ? parseFloat(recordingRule.threshold) : 0;
-    const upperBoundValue = recordingRule.upperBound ? parseFloat(recordingRule.upperBound) : 100;
+      let scoreForMap: number;
+      if (thresholdValue > 0) {
+        const threshold = thresholdValue / 2;
+        const vclamped = Math.min(Math.max(recordingRule.value, threshold), upperBoundValue);
+        const range = upperBoundValue - threshold;
+        scoreForMap = (vclamped - threshold) / range;
+      } else {
+        scoreForMap = 0;
+      }
 
-    if (thresholdValue > 0) {
-      const threshold = thresholdValue / 2;
-      const vclamped = Math.min(Math.max(recordingRule.value, threshold), upperBoundValue);
-      const range = upperBoundValue - threshold;
-      scoreForMap = (vclamped - threshold) / range;
-    } else {
-      scoreForMap = 0;
+      const rawScore = 10 * (1 - scoreForMap);
+
+      // Weight based on severity
+      const weight = severity === 'critical' ? 100 : severity === 'warning' ? 10 : 1;
+
+      return {
+        severity,
+        scoreForMap,
+        rawScore,
+        weight
+      };
     }
+    return null;
+  }, [alert, recordingRule]);
 
-    rawScore = 10 * (1 - scoreForMap);
-
-    // Weight based on severity
-    weight = severity === 'critical' ? 100 : severity === 'warning' ? 10 : 1;
-  } else {
+  if (!scoreData || !scoreData.severity) {
     return null;
   }
 
-  if (!severity) {
-    return null;
-  }
+  const { severity, scoreForMap, rawScore, weight } = scoreData;
 
   const colorMap = severity === 'critical' ? criticalColorMap : severity === 'warning' ? warningColorMap : infoColorMap;
 
