@@ -1,7 +1,7 @@
 import {
+  Drawer,
   DrawerActions,
   DrawerCloseButton,
-  Drawer,
   DrawerContent,
   DrawerContentBody,
   DrawerHead,
