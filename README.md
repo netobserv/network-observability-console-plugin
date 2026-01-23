@@ -116,7 +116,7 @@ NAME                                     DISPLAY                 VERSION   REPLA
 network-observability-operator.v1.10.1   Network Observability   1.10.2    network-observability-operator.v1.10.0   Succeeded
 
 oc edit csv network-observability-operator.v1.10.1
-# Here replace image in the RELATED_IMAGE_CONSOLE_PLUGIN environment veriable with the newly created one under .spec.install.spec.deployments[0].spec.template.spec.containers[0].env
+# Here replace image in the RELATED_IMAGE_CONSOLE_PLUGIN environment variable with the newly created one under .spec.install.spec.deployments[0].spec.template.spec.containers[0].env
 ```
 
 If you had previously used the console with the plugin installed, you may need to restart console pods to clear cache:
