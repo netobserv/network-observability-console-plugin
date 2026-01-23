@@ -137,9 +137,11 @@ type HealthRuleVariant struct {
 }
 
 type HealthRule struct {
-	Template string              `yaml:"template" json:"template"`
-	Mode     string              `yaml:"mode,omitempty" json:"mode,omitempty"`
-	Variants []HealthRuleVariant `yaml:"variants" json:"variants"`
+	Template    string              `yaml:"template" json:"template"`
+	Mode        string              `yaml:"mode,omitempty" json:"mode,omitempty"`
+	Variants    []HealthRuleVariant `yaml:"variants" json:"variants"`
+	Description string              `yaml:"description,omitempty" json:"description,omitempty"` // Description pattern from centralized metadata
+	Summary     string              `yaml:"summary,omitempty" json:"summary,omitempty"`         // Summary from centralized metadata
 }
 
 type Frontend struct {

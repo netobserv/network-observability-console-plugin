@@ -29,10 +29,18 @@ export type HealthRuleVariant = {
   upperBound?: string;
 };
 
+export type HealthRuleLink = {
+  name: string;
+  url: string;
+};
+
 export type HealthRuleMetadata = {
   template: string;
   mode: string;
   variants: HealthRuleVariant[];
+  description?: string;
+  summary?: string;
+  links?: HealthRuleLink[];
 };
 
 export type Config = {
