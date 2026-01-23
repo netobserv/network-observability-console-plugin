@@ -40,6 +40,7 @@ export const HealthScoringDrawer: React.FC<HealthScoringDrawerProps> = ({ isOpen
           <Text component={TextVariants.h3}>{t('What is the Health Score?')}</Text>
           <Text component={TextVariants.p}>
             {t(
+              // eslint-disable-next-line max-len
               'The Network Health Score is a value between 0 and 10 that indicates the overall health of your network, where 10 represents perfect health and 0 represents critical issues.'
             )}
           </Text>
@@ -106,6 +107,7 @@ export const HealthScoringDrawer: React.FC<HealthScoringDrawerProps> = ({ isOpen
           <Text component={TextVariants.h4}>{t('Recording Rules (Recording Mode)')}</Text>
           <Text component={TextVariants.p}>
             {t(
+              // eslint-disable-next-line max-len
               'Pre-calculated metrics that are continuously evaluated. Unlike alerts, they always have a current value and are classified by severity based on threshold ranges:'
             )}
           </Text>
