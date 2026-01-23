@@ -1,4 +1,6 @@
 import {
+  DrawerActions,
+  DrawerCloseButton,
   Drawer,
   DrawerContent,
   DrawerContentBody,
@@ -33,6 +35,9 @@ export const HealthScoringDrawer: React.FC<HealthScoringDrawerProps> = ({ isOpen
             {t('Understanding Network Health Scores')}
           </Text>
         </span>
+        <DrawerActions>
+          <DrawerCloseButton onClick={onClose} />
+        </DrawerActions>
       </DrawerHead>
       <div style={{ padding: '1.5rem', overflowY: 'auto', height: '100%' }}>
         <TextContent className="health-scoring-content">
