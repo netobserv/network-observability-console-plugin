@@ -23,7 +23,7 @@ describe('health helpers', () => {
   it('should compute unweighted alert min score', () => {
     const alert = mockAlert('test', 'critical', 'firing', 10, 10);
     const score = computeAlertScore(alert);
-    expect(score.rawScore).toBeCloseTo(9.47, 2);
+    expect(score.rawScore).toBeCloseTo(6.0, 2);
     expect(score.weight).toEqual(1);
   });
 
@@ -37,7 +37,7 @@ describe('health helpers', () => {
   it('should compute weighted alert score', () => {
     const alert = mockAlert('test', 'info', 'pending', 10, 10);
     const score = computeAlertScore(alert);
-    expect(score.rawScore).toBeCloseTo(9.47, 2);
+    expect(score.rawScore).toBeCloseTo(10.0, 2);
     expect(score.weight).toEqual(0.075);
   });
 
@@ -45,7 +45,7 @@ describe('health helpers', () => {
     const alert = mockAlert('test', 'critical', 'firing', 100, 500);
     alert.metadata!.upperBoundF = 1000;
     const score = computeAlertScore(alert);
-    expect(score.rawScore).toBeCloseTo(5.26, 2);
+    expect(score.rawScore).toBeCloseTo(3.33, 2);
   });
 
   it('should compute unweighted alert score with clamping', () => {
@@ -53,7 +53,7 @@ describe('health helpers', () => {
     const alert = mockAlert('test', 'critical', 'firing', 100, 1);
     alert.metadata!.upperBoundF = 1000;
     let score = computeAlertScore(alert);
-    expect(score.rawScore).toEqual(10);
+    expect(score.rawScore).toEqual(6);
 
     // above upper bound
     alert.value = 5000;
@@ -81,16 +81,16 @@ describe('health helpers', () => {
     // Turn the inactive info into pending => slightly decreasing score
     r.other.inactive = [];
     r.other.pending = [mockAlert('test-info', 'info', 'pending', 10, 20)];
-    expect(computeScore(r)).toBeCloseTo(9.9, 1);
+    expect(computeScore(r)).toBeCloseTo(9.98, 2);
 
     // Turn the inactive warning into firing => more decreasing score
     r.warning.inactive = [];
     r.warning.firing = [mockAlert('test-warning', 'warning', 'firing', 10, 40)];
-    expect(computeScore(r)).toBeCloseTo(8.8, 1);
+    expect(computeScore(r)).toBeCloseTo(8.92, 2);
 
     // Turn the inactive critical into firing => more decrease
     r.critical.inactive = [];
     r.critical.firing = [mockAlert('test-critical', 'critical', 'firing', 10, 40)];
-    expect(computeScore(r)).toBeCloseTo(6.4, 1);
+    expect(computeScore(r)).toBeCloseTo(5.11, 2);
   });
 });

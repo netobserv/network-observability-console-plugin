@@ -123,3 +123,77 @@
 .health-gallery-drawer-content .pf-m-no-padding {
     padding: 0;
 }
+
+.health-tabs-container {
+    margin: 0;
+    padding: 0;
+    position: relative;
+}
+
+.health-tabs-container::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background-color: #d2d2d2;
+}
+
+.health-tabs-container.dark::after {
+    background-color: #444548;
+}
+
+.health-tabs-container > div:last-child {
+    margin-right: 1.5rem;
+}
+
+.overflow-button {
+    display: flex;
+    align-items: center;
+    margin-left: 0;
+    margin-right: 5px;
+    padding-left: 0;
+}
+
+.overflow-button .pf-v5-c-button__icon {
+    margin-right: 0.25rem;
+}
+
+/* outside bottom border */
+.light-bottom-border {
+    margin: 0 !important;
+    align-self: flex-end;
+    border-bottom: 1px #d2d2d2 solid;
+}
+
+.dark-bottom-border {
+    margin: 0 !important;
+    align-self: flex-end;
+    border-bottom: 1px #444548 solid;
+}
+
+/* Health scoring drawer styles */
+.health-scoring-content h3 {
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.health-scoring-content h3:first-child {
+    margin-top: 0;
+}
+
+.health-scoring-content h4 {
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.health-scoring-content p {
+    margin-bottom: 0.5rem;
+}
+
+.health-scoring-list-item {
+    display: block;
+    margin-bottom: 0.25rem;
+    margin-left: 0.5rem;
+}

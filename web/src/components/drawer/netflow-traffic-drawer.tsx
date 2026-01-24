@@ -229,7 +229,7 @@ export const NetflowTrafficDrawer: React.FC<NetflowTrafficDrawerProps> = React.f
         }
         return w;
       },
-      [filters]
+      [filters, t]
     );
 
     const mainContent = () => {

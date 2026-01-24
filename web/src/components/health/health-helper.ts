@@ -471,6 +471,18 @@ const minorWeight = 0.25;
 const pendingWeight = 0.3;
 const silencedWeight = 0.1;
 
+const getSeverityScoreRange = (severity: string): { min: number; max: number } => {
+  switch (severity) {
+    case 'critical':
+      return { min: 0, max: 6 };
+    case 'warning':
+      return { min: 4, max: 8 };
+    default:
+      // 'info'
+      return { min: 6, max: 10 };
+  }
+};
+
 const getSeverityWeight = (a: AlertWithRuleName) => {
   switch (a.labels.severity) {
     case 'critical':
@@ -525,8 +537,11 @@ export const computeRecordingRulesScore = (r: RecordingRulesByResource): number 
       weight = warningWeight;
     }
 
+    // Get severity range
+    const severityRange = getSeverityScoreRange(rule.severity);
+
     // Calculate raw score based on value vs threshold
-    let rawScore = 10; // Default to perfect if no threshold
+    let rawScore = severityRange.max; // Default to best score in the severity range
     if (rule.threshold) {
       const thresholdValue = parseFloat(rule.threshold);
       if (!isNaN(thresholdValue) && thresholdValue > 0) {
@@ -538,11 +553,13 @@ export const computeRecordingRulesScore = (r: RecordingRulesByResource): number 
           metadata: {
             thresholdF: thresholdValue,
             upperBoundF: upperBoundValue
-          }
+          },
+          labels: { severity: rule.severity }
         } as AlertWithRuleName;
 
         const excessRatio = computeExcessRatio(mockAlert);
-        rawScore = 10 * (1 - excessRatio);
+        const scoreRange = severityRange.max - severityRange.min;
+        rawScore = severityRange.min + scoreRange * (1 - excessRatio);
       }
     }
 
@@ -562,7 +579,7 @@ export const computeRecordingRulesScore = (r: RecordingRulesByResource): number 
 // Score [0,1]; lower is better
 export const computeExcessRatio = (a: AlertWithRuleName): number => {
   // Assuming the alert value is a [0-n] percentage. Needs update if more use cases come up.
-  const threshold = a.metadata.thresholdF / 2;
+  const threshold = a.metadata.thresholdF;
   const upper = a.metadata.upperBoundF;
   const vclamped = Math.min(Math.max(a.value as number, threshold), upper);
   const range = upper - threshold;
@@ -575,8 +592,15 @@ export const computeExcessRatioStatusWeighted = (a: AlertWithRuleName): number =
 
 // Score [0,10]; higher is better
 export const computeAlertScore = (a: AlertWithRuleName): ScoreDetail => {
+  const excessRatio = computeExcessRatio(a);
+  const severity = a.labels.severity || 'info';
+  const range = getSeverityScoreRange(severity);
+
+  const scoreRange = range.max - range.min;
+  const rawScore = range.min + scoreRange * (1 - excessRatio);
+
   return {
-    rawScore: 10 * (1 - computeExcessRatio(a)),
+    rawScore: rawScore,
     weight: getSeverityWeight(a) * getStateWeight(a)
   };
 };
