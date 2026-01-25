@@ -12,8 +12,8 @@ import {
 import { CheckCircleIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { ByResource, getAllAlerts, RecordingRulesByResource } from './health-helper';
 import { HealthCard } from './health-card';
+import { ByResource, getAllAlerts, RecordingRulesByResource } from './health-helper';
 import { RuleDetails } from './rule-details';
 
 export interface HealthGlobalProps {

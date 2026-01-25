@@ -78,22 +78,26 @@ const RuleTableRow: React.FC<{
   const value = alert ? (alert.value as number) : rule?.value || 0;
   const unit = alert ? alert.metadata.unit : '%';
   const threshold = alert ? alert.metadata.threshold : rule?.threshold;
-  const description = alert ? alert.annotations['description'] :
-    (rule?.description ? parseRecordingRuleDescription(rule.description, rule, resourceName) : '');
+  const description = alert
+    ? alert.annotations['description']
+    : rule?.description
+    ? parseRecordingRuleDescription(rule.description, rule, resourceName)
+    : '';
 
   const labels = alert ? getAlertFilteredLabels(alert, resourceName) : [];
-  const links = isAlert && alert
-    ? [
-        { name: t('Navigate to alert details'), url: getAlertLink(alert) },
-        { name: t('Navigate to network traffic'), url: getTrafficLink(kind, resourceName, alert) },
-        ...alert.metadata.links
-      ]
-    : rule
-    ? [
-        { name: t('View metric in query browser'), url: getRecordingRuleMetricLink(rule, resourceName) },
-        ...(rule.links || [])
-      ]
-    : [];
+  const links =
+    isAlert && alert
+      ? [
+          { name: t('Navigate to alert details'), url: getAlertLink(alert) },
+          { name: t('Navigate to network traffic'), url: getTrafficLink(kind, resourceName, alert) },
+          ...alert.metadata.links
+        ]
+      : rule
+      ? [
+          { name: t('View metric in query browser'), url: getRecordingRuleMetricLink(rule, resourceName) },
+          ...(rule.links || [])
+        ]
+      : [];
 
   const direction = rule?.name.includes(':src:') ? 'src' : rule?.name.includes(':dst:') ? 'dst' : undefined;
 
@@ -115,12 +119,12 @@ const RuleTableRow: React.FC<{
           </FlexItem>
         </Flex>
       </Td>
-      <Td dataLabel={t('Mode')}>
-        {mode}
-      </Td>
+      <Td dataLabel={t('Mode')}>{mode}</Td>
       <Td dataLabel={t('State')}>{state}</Td>
       <Td dataLabel={t('Severity')}>
-        <Label isCompact color={getSeverityColor(severity)}>{severity}</Label>
+        <Label isCompact color={getSeverityColor(severity)}>
+          {severity}
+        </Label>
       </Td>
       <Td dataLabel={t('Active since')}>{activeAt ? formatActiveSince(t, activeAt) : ''}</Td>
       <Td dataLabel={t('Labels')}>
@@ -135,9 +139,7 @@ const RuleTableRow: React.FC<{
       <Td dataLabel={t('Value')} className="no-wrap">
         {valueFormat(value, 2)} {unit}
       </Td>
-      <Td dataLabel={t('Threshold')}>
-        {threshold ? `${threshold} ${unit}` : ''}
-      </Td>
+      <Td dataLabel={t('Threshold')}>{threshold ? `${threshold} ${unit}` : ''}</Td>
       <Td dataLabel={t('Direction')}>{direction || ''}</Td>
       <Td dataLabel={t('Description')}>{description}</Td>
       <Td noPadding>
@@ -171,22 +173,26 @@ const RuleCard: React.FC<{
   const value = alert ? (alert.value as number) : rule?.value || 0;
   const unit = alert ? alert.metadata.unit : '%';
   const threshold = alert ? alert.metadata.threshold : rule?.threshold;
-  const description = alert ? alert.annotations['description'] :
-    (rule?.description ? parseRecordingRuleDescription(rule.description, rule, resourceName) : '');
+  const description = alert
+    ? alert.annotations['description']
+    : rule?.description
+    ? parseRecordingRuleDescription(rule.description, rule, resourceName)
+    : '';
 
   const labels = alert ? getAlertFilteredLabels(alert, resourceName) : [];
-  const links = isAlert && alert
-    ? [
-        { name: t('Navigate to alert details'), url: getAlertLink(alert) },
-        { name: t('Navigate to network traffic'), url: getTrafficLink(kind, resourceName, alert) },
-        ...alert.metadata.links
-      ]
-    : rule
-    ? [
-        { name: t('View metric in query browser'), url: getRecordingRuleMetricLink(rule, resourceName) },
-        ...(rule.links || [])
-      ]
-    : [];
+  const links =
+    isAlert && alert
+      ? [
+          { name: t('Navigate to alert details'), url: getAlertLink(alert) },
+          { name: t('Navigate to network traffic'), url: getTrafficLink(kind, resourceName, alert) },
+          ...alert.metadata.links
+        ]
+      : rule
+      ? [
+          { name: t('View metric in query browser'), url: getRecordingRuleMetricLink(rule, resourceName) },
+          ...(rule.links || [])
+        ]
+      : [];
 
   const direction = rule?.name.includes(':src:') ? 'src' : rule?.name.includes(':dst:') ? 'dst' : undefined;
 
@@ -194,7 +200,10 @@ const RuleCard: React.FC<{
     <div className="rule-details-row">
       <Flex direction={{ default: 'column' }} gap={{ default: 'gapSm' }}>
         {/* Header with summary and actions */}
-        <Flex justifyContent={{ default: 'justifyContentSpaceBetween' }} alignItems={{ default: 'alignItemsFlexStart' }}>
+        <Flex
+          justifyContent={{ default: 'justifyContentSpaceBetween' }}
+          alignItems={{ default: 'alignItemsFlexStart' }}
+        >
           <Flex gap={{ default: 'gapXs' }} alignItems={{ default: 'alignItemsFlexStart' }} flex={{ default: 'flex_1' }}>
             <FlexItem>
               <HealthColorSquare alert={alert} recordingRule={rule} />
@@ -219,14 +228,12 @@ const RuleCard: React.FC<{
 
         {/* Mode, State, Severity, Value, Threshold, Direction row */}
         <Flex gap={{ default: 'gapSm' }}>
-          <VerticalField label={t('Mode')}>
-            {mode}
-          </VerticalField>
-          {state && (
-            <VerticalField label={t('State')}>{state}</VerticalField>
-          )}
+          <VerticalField label={t('Mode')}>{mode}</VerticalField>
+          {state && <VerticalField label={t('State')}>{state}</VerticalField>}
           <VerticalField label={t('Severity')}>
-            <Label isCompact color={getSeverityColor(severity)}>{severity}</Label>
+            <Label isCompact color={getSeverityColor(severity)}>
+              {severity}
+            </Label>
           </VerticalField>
           <VerticalField label={t('Value')}>
             {valueFormat(value, 2)} {unit}
@@ -236,11 +243,7 @@ const RuleCard: React.FC<{
               {threshold} {unit}
             </VerticalField>
           )}
-          {direction && (
-            <VerticalField label={t('Direction')}>
-              {direction}
-            </VerticalField>
-          )}
+          {direction && <VerticalField label={t('Direction')}>{direction}</VerticalField>}
         </Flex>
 
         {/* Labels */}
@@ -266,18 +269,16 @@ const RuleCard: React.FC<{
 
         {/* Description */}
         {description && (
-          <Text component={TextVariants.small} style={{ marginTop: '0.25rem' }}>{description}</Text>
+          <Text component={TextVariants.small} style={{ marginTop: '0.25rem' }}>
+            {description}
+          </Text>
         )}
       </Flex>
     </div>
   );
 };
 
-export const RuleDetails: React.FC<RuleDetailsProps> = ({
-  kind,
-  alertInfo,
-  recordingRuleInfo
-}) => {
+export const RuleDetails: React.FC<RuleDetailsProps> = ({ kind, alertInfo, recordingRuleInfo }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   const resourceName = alertInfo?.name || recordingRuleInfo?.name || 'Global';
@@ -328,13 +329,7 @@ export const RuleDetails: React.FC<RuleDetailsProps> = ({
         </Thead>
         <Tbody>
           {unifiedItems.map((item, i) => (
-            <RuleTableRow
-              key={`rule-row-${i}`}
-              item={item}
-              resourceName={resourceName}
-              kind={kind}
-              t={t}
-            />
+            <RuleTableRow key={`rule-row-${i}`} item={item} resourceName={resourceName} kind={kind} t={t} />
           ))}
         </Tbody>
       </Table>
@@ -345,13 +340,7 @@ export const RuleDetails: React.FC<RuleDetailsProps> = ({
   return (
     <Flex direction={{ default: 'column' }} gap={{ default: 'gapMd' }}>
       {unifiedItems.map((item, i) => (
-        <RuleCard
-          key={`rule-card-${i}`}
-          item={item}
-          resourceName={resourceName}
-          kind={kind}
-          t={t}
-        />
+        <RuleCard key={`rule-card-${i}`} item={item} resourceName={resourceName} kind={kind} t={t} />
       ))}
     </Flex>
   );

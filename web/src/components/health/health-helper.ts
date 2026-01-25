@@ -628,10 +628,7 @@ export const computeAlertScore = (a: AlertWithRuleName): ScoreDetail => {
 
 // Unified score combining both alerts and recording rules
 // Score [0,10]; higher is better
-export const computeUnifiedScore = (
-  alertInfo?: ByResource,
-  recordingInfo?: RecordingRulesByResource
-): number => {
+export const computeUnifiedScore = (alertInfo?: ByResource, recordingInfo?: RecordingRulesByResource): number => {
   const scores: ScoreDetail[] = [];
 
   // Collect alert scores

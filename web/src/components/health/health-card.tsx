@@ -8,13 +8,13 @@ import {
   FlexItem,
   Text,
   TextContent,
-  TextVariants,
+  TextVariants
 } from '@patternfly/react-core';
 import { BellIcon, ExclamationCircleIcon, ExclamationTriangleIcon, InfoAltIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { ByResource, computeUnifiedScore, RecordingRulesByResource } from './health-helper';
 import { valueFormat } from '../../utils/format';
+import { ByResource, computeUnifiedScore, RecordingRulesByResource } from './health-helper';
 
 export interface HealthCardProps {
   name?: string;
@@ -51,9 +51,7 @@ export const HealthCard: React.FC<HealthCardProps> = ({
     (recordingInfo?.warning.length || 0);
 
   const infoCount =
-    (alertInfo?.other.firing.length || 0) +
-    (alertInfo?.other.pending.length || 0) +
-    (recordingInfo?.other.length || 0);
+    (alertInfo?.other.firing.length || 0) + (alertInfo?.other.pending.length || 0) + (recordingInfo?.other.length || 0);
 
   const silencedCount = (alertInfo?.critical.silenced.length || 0) + (alertInfo?.warning.silenced.length || 0);
 
@@ -88,9 +86,7 @@ export const HealthCard: React.FC<HealthCardProps> = ({
         <Flex gap={{ default: 'gapSm' }} alignItems={{ default: 'alignItemsCenter' }} flexWrap={{ default: 'nowrap' }}>
           <FlexItem>{icon}</FlexItem>
           <FlexItem>
-            <CardTitle>
-              {kind && name ? <ResourceLink inline={true} kind={kind} name={name} /> : t('Global')}
-            </CardTitle>
+            <CardTitle>{kind && name ? <ResourceLink inline={true} kind={kind} name={name} /> : t('Global')}</CardTitle>
           </FlexItem>
         </Flex>
       </CardHeader>

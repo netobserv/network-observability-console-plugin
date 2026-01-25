@@ -1,15 +1,5 @@
 import { Rule } from '@openshift-console/dynamic-plugin-sdk';
-import {
-  Alert,
-  Card,
-  CardBody,
-  Flex,
-  FlexItem,
-  Grid,
-  GridItem,
-  Text,
-  TextVariants
-} from '@patternfly/react-core';
+import { Alert, Card, CardBody, Flex, FlexItem, Grid, GridItem, Text, TextVariants } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { HealthStats } from './health-helper';
@@ -219,7 +209,8 @@ export const HealthSummary: React.FC<HealthSummaryProps> = ({ rules, stats }) =>
                 {infoTotal > 0 && (
                   <FlexItem>
                     <Text component={TextVariants.small} className="metric-detail">
-                      {summaryStats.info.firingAlerts > 0 && t('{{count}} alerts', { count: summaryStats.info.firingAlerts })}
+                      {summaryStats.info.firingAlerts > 0 &&
+                        t('{{count}} alerts', { count: summaryStats.info.firingAlerts })}
                       {summaryStats.info.firingAlerts > 0 && summaryStats.info.recordingRules > 0 && ', '}
                       {summaryStats.info.recordingRules > 0 &&
                         t('{{count}} recording', { count: summaryStats.info.recordingRules })}

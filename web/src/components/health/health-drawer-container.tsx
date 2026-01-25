@@ -97,7 +97,6 @@ export const HealthDrawerContainer: React.FC<HealthDrawerContainerProps> = ({
 
   return (
     <>
-
       <Drawer isExpanded={isExpanded} onExpand={onExpand} isInline>
         <DrawerContent
           panelContent={
