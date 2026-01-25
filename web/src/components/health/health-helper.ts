@@ -170,6 +170,13 @@ const processRecordingRules = (
         severity = 'warning';
       }
 
+      // Get the threshold for this severity, or fallback to the lowest available threshold
+      let threshold = variant.thresholds[severity];
+      if (!threshold) {
+        // Fallback: use the lowest threshold available (info -> warning -> critical)
+        threshold = variant.thresholds.info || variant.thresholds.warning || variant.thresholds.critical;
+      }
+
       // Only include if value exceeds the minimum threshold (info)
       const minThreshold = variant.thresholds.info ? parseFloat(variant.thresholds.info) : 0;
       if (value >= minThreshold) {
@@ -178,7 +185,7 @@ const processRecordingRules = (
           value: value,
           severity: severity,
           template: template,
-          threshold: variant.thresholds[severity],
+          threshold: threshold,
           upperBound: variant.upperBound,
           labels: valueData.labels,
           summary: metadata.summary,
@@ -483,8 +490,8 @@ const getSeverityScoreRange = (severity: string): { min: number; max: number } =
   }
 };
 
-const getSeverityWeight = (a: AlertWithRuleName) => {
-  switch (a.labels.severity) {
+const getSeverityWeight = (severity: Severity): number => {
+  switch (severity) {
     case 'critical':
       return criticalWeight;
     case 'warning':
@@ -492,6 +499,14 @@ const getSeverityWeight = (a: AlertWithRuleName) => {
     default:
       return minorWeight;
   }
+};
+
+const getAlertSeverityWeight = (a: AlertWithRuleName) => {
+  const severity = a.labels.severity;
+  if (severity === 'critical' || severity === 'warning' || severity === 'info') {
+    return getSeverityWeight(severity);
+  }
+  return minorWeight; // Default to info weight
 };
 
 const getStateWeight = (a: AlertWithRuleName) => {
@@ -504,6 +519,28 @@ const getStateWeight = (a: AlertWithRuleName) => {
   return 1;
 };
 
+// Generic weighted score calculator - eliminates code duplication
+// Score [0,10]; higher is better
+const computeWeightedScore = (scores: ScoreDetail[]): number => {
+  if (scores.length === 0) {
+    return 10; // Perfect score if no violations
+  }
+
+  // Filter out any scores with NaN rawScore to prevent contamination
+  const validScores = scores.filter(s => !isNaN(s.rawScore) && isFinite(s.rawScore));
+
+  if (validScores.length === 0) {
+    return 10;
+  }
+
+  const sum = validScores.map(s => s.rawScore * s.weight).reduce((a, b) => a + b, 0);
+  const sumWeights = validScores.map(s => s.weight).reduce((a, b) => a + b, 0);
+  if (sumWeights === 0) {
+    return 10;
+  }
+  return sum / sumWeights;
+};
+
 // Score [0,10]; higher is better
 export const computeScore = (r: ByResource): number => {
   const allAlerts = getAllAlerts(r);
@@ -512,68 +549,52 @@ export const computeScore = (r: ByResource): number => {
     .concat(r.critical.inactive.map(name => ({ alertName: name, rawScore: 10, weight: criticalWeight })))
     .concat(r.warning.inactive.map(name => ({ alertName: name, rawScore: 10, weight: warningWeight })))
     .concat(r.other.inactive.map(name => ({ alertName: name, rawScore: 10, weight: minorWeight })));
-  const sum = allScores.map(s => s.rawScore * s.weight).reduce((a, b) => a + b, 0);
-  const sumWeights = allScores.map(s => s.weight).reduce((a, b) => a + b, 0);
-  if (sumWeights === 0) {
-    return 10;
-  }
-  return sum / sumWeights;
+  return computeWeightedScore(allScores);
 };
 
 // Score [0,10]; higher is better
 export const computeRecordingRulesScore = (r: RecordingRulesByResource): number => {
   const allRules = [...r.critical, ...r.warning, ...r.other];
 
-  if (allRules.length === 0) {
-    return 10; // Perfect score if no rules
-  }
+  const allScores: ScoreDetail[] = allRules
+    .filter(rule => {
+      // Skip rules without valid value
+      const isValid = rule.value !== undefined && rule.value !== null && !isNaN(rule.value as number);
+      return isValid;
+    })
+    .map(rule => {
+      const weight = getSeverityWeight(rule.severity);
 
-  const allScores: ScoreDetail[] = allRules.map(rule => {
-    // Determine weight based on severity
-    let weight = minorWeight;
-    if (rule.severity === 'critical') {
-      weight = criticalWeight;
-    } else if (rule.severity === 'warning') {
-      weight = warningWeight;
-    }
+      // Get severity range
+      const severityRange = getSeverityScoreRange(rule.severity);
 
-    // Get severity range
-    const severityRange = getSeverityScoreRange(rule.severity);
-
-    // Calculate raw score based on value vs threshold
-    let rawScore = severityRange.max; // Default to best score in the severity range
-    if (rule.threshold) {
-      const thresholdValue = parseFloat(rule.threshold);
-      if (!isNaN(thresholdValue) && thresholdValue > 0) {
-        // Use upperBound from variant metadata if available, otherwise default to 100
+      // Calculate raw score based on value vs threshold
+      let rawScore = severityRange.max; // Default to best score in the severity range
+      if (rule.threshold) {
+        const thresholdValue = parseFloat(rule.threshold);
         const upperBoundValue = rule.upperBound ? parseFloat(rule.upperBound) : 100;
-        // Create a compatible object to use the same computeExcessRatio function as alerts
-        const mockAlert = {
-          value: rule.value,
-          metadata: {
-            thresholdF: thresholdValue,
-            upperBoundF: upperBoundValue
-          },
-          labels: { severity: rule.severity }
-        } as AlertWithRuleName;
 
-        const excessRatio = computeExcessRatio(mockAlert);
-        const scoreRange = severityRange.max - severityRange.min;
-        rawScore = severityRange.min + scoreRange * (1 - excessRatio);
+        // Validate all parsed values
+        if (!isNaN(thresholdValue) && thresholdValue > 0 && !isNaN(upperBoundValue) && upperBoundValue > 0) {
+          // Create a compatible object to use the same computeExcessRatio function as alerts
+          const mockAlert = {
+            value: rule.value,
+            metadata: {
+              thresholdF: thresholdValue,
+              upperBoundF: upperBoundValue
+            }
+          } as AlertWithRuleName;
+
+          const excessRatio = computeExcessRatio(mockAlert);
+          const scoreRange = severityRange.max - severityRange.min;
+          rawScore = severityRange.min + scoreRange * (1 - excessRatio);
+        }
       }
-    }
 
-    return { rawScore, weight };
-  });
+      return { rawScore, weight };
+    });
 
-  const sum = allScores.map(s => s.rawScore * s.weight).reduce((a, b) => a + b, 0);
-  const sumWeights = allScores.map(s => s.weight).reduce((a, b) => a + b, 0);
-
-  if (sumWeights === 0) {
-    return 10;
-  }
-
-  return sum / sumWeights;
+  return computeWeightedScore(allScores);
 };
 
 // Score [0,1]; lower is better
@@ -601,8 +622,72 @@ export const computeAlertScore = (a: AlertWithRuleName): ScoreDetail => {
 
   return {
     rawScore: rawScore,
-    weight: getSeverityWeight(a) * getStateWeight(a)
+    weight: getAlertSeverityWeight(a) * getStateWeight(a)
   };
+};
+
+// Unified score combining both alerts and recording rules
+// Score [0,10]; higher is better
+export const computeUnifiedScore = (
+  alertInfo?: ByResource,
+  recordingInfo?: RecordingRulesByResource
+): number => {
+  const scores: ScoreDetail[] = [];
+
+  // Collect alert scores
+  if (alertInfo) {
+    const allAlerts = getAllAlerts(alertInfo);
+    const alertScores = allAlerts
+      .map(computeAlertScore)
+      .concat(alertInfo.critical.inactive.map(name => ({ alertName: name, rawScore: 10, weight: criticalWeight })))
+      .concat(alertInfo.warning.inactive.map(name => ({ alertName: name, rawScore: 10, weight: warningWeight })))
+      .concat(alertInfo.other.inactive.map(name => ({ alertName: name, rawScore: 10, weight: minorWeight })));
+    scores.push(...alertScores);
+  }
+
+  // Collect recording rule scores
+  if (recordingInfo) {
+    const allRules = [...recordingInfo.critical, ...recordingInfo.warning, ...recordingInfo.other];
+
+    const recordingScores = allRules
+      .filter(rule => {
+        // Skip rules without valid value
+        return rule.value !== undefined && rule.value !== null && !isNaN(rule.value as number);
+      })
+      .map(rule => {
+        const weight = getSeverityWeight(rule.severity);
+
+        // Get severity range
+        const severityRange = getSeverityScoreRange(rule.severity);
+        let rawScore = severityRange.max; // Default to best score in the severity range
+
+        if (rule.threshold) {
+          const thresholdValue = parseFloat(rule.threshold);
+          const upperBoundValue = rule.upperBound ? parseFloat(rule.upperBound) : 100;
+
+          // Validate all parsed values
+          if (!isNaN(thresholdValue) && thresholdValue > 0 && !isNaN(upperBoundValue) && upperBoundValue > 0) {
+            const mockAlert = {
+              value: rule.value,
+              metadata: {
+                thresholdF: thresholdValue,
+                upperBoundF: upperBoundValue
+              }
+            } as AlertWithRuleName;
+
+            const excessRatio = computeExcessRatio(mockAlert);
+            const scoreRange = severityRange.max - severityRange.min;
+            rawScore = severityRange.min + scoreRange * (1 - excessRatio);
+          }
+        }
+
+        return { rawScore, weight };
+      });
+    scores.push(...recordingScores);
+  }
+
+  // Calculate unified weighted score
+  return computeWeightedScore(scores);
 };
 
 // Mapping of severity levels to PatternFly Label colors

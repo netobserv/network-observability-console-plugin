@@ -1,5 +1,15 @@
 import { Rule } from '@openshift-console/dynamic-plugin-sdk';
-import { Alert, AlertVariant } from '@patternfly/react-core';
+import {
+  Alert,
+  Card,
+  CardBody,
+  Flex,
+  FlexItem,
+  Grid,
+  GridItem,
+  Text,
+  TextVariants
+} from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { HealthStats } from './health-helper';
@@ -42,15 +52,17 @@ export const HealthSummary: React.FC<HealthSummaryProps> = ({ rules, stats }) =>
   const totalRecordingRules = recordingRulesCritical + recordingRulesWarning + recordingRulesInfo;
   if (rules.length === 0 && totalRecordingRules === 0) {
     return (
-      <Alert title={t('No rules found, health cannot be determined')} className="health-summary-alert">
-        <>
-          {t(
-            'Check alert definitions in FlowCollector "spec.processor.metrics.alertGroups" and "spec.processor.metrics.disableAlerts".'
-          )}
-          <br />
-          {t('Make sure that Prometheus and AlertManager are running.')}
-        </>
-      </Alert>
+      <div className="health-summary-dashboard">
+        <Alert title={t('No rules found, health cannot be determined')} variant="info">
+          <>
+            {t(
+              'Check alert definitions in FlowCollector "spec.processor.metrics.alertGroups" and "spec.processor.metrics.disableAlerts".'
+            )}
+            <br />
+            {t('Make sure that Prometheus and AlertManager are running.')}
+          </>
+        </Alert>
+      </div>
     );
   }
 
@@ -87,79 +99,138 @@ export const HealthSummary: React.FC<HealthSummaryProps> = ({ rules, stats }) =>
     }
   };
 
-  let variant: AlertVariant = AlertVariant.success;
   let title = t('The network looks healthy');
+  let statusClass = 'success';
   if (summaryStats.critical.firingAlerts > 0 || summaryStats.critical.recordingRules > 0) {
-    variant = AlertVariant.danger;
+    statusClass = 'critical';
     title = t('There are critical network issues');
   } else if (summaryStats.warning.firingAlerts > 0 || summaryStats.warning.recordingRules > 0) {
-    variant = AlertVariant.warning;
+    statusClass = 'warning';
     title = t('There are network warnings');
   } else if (summaryStats.info.firingAlerts > 0 || summaryStats.info.recordingRules > 0) {
+    statusClass = 'info';
     title = t('The network looks relatively healthy, with minor issues');
   }
 
-  const details: string[] = [];
+  const criticalTotal = summaryStats.critical.firingAlerts + summaryStats.critical.recordingRules;
+  const warningTotal = summaryStats.warning.firingAlerts + summaryStats.warning.recordingRules;
+  const infoTotal = summaryStats.info.firingAlerts + summaryStats.info.recordingRules;
 
-  // Critical
-  if (summaryStats.critical.firingAlerts > 0 || summaryStats.critical.recordingRules > 0) {
-    const total = summaryStats.critical.firingAlerts + summaryStats.critical.recordingRules;
-    const parts = [];
-    if (summaryStats.critical.firingAlerts > 0) {
-      parts.push(t('{{count}} from alerts', { count: summaryStats.critical.firingAlerts }));
-    }
-    if (summaryStats.critical.recordingRules > 0) {
-      parts.push(t('{{count}} from recording rules', { count: summaryStats.critical.recordingRules }));
-    }
-    details.push(t('{{total}} critical issues ({{breakdown}})', { total, breakdown: parts.join(', ') }));
-  } else if (summaryStats.critical.pendingAlerts > 0) {
-    details.push(
-      t('{{pendingAlerts}} pending critical issues, from {{pendingRules}} distinct rules', summaryStats.critical)
-    );
-  } else if (variant === AlertVariant.success) {
-    details.push(t('No critical issues out of {{total}} rules', summaryStats.critical));
-  }
-
-  // Warning
-  if (summaryStats.warning.firingAlerts > 0 || summaryStats.warning.recordingRules > 0) {
-    const total = summaryStats.warning.firingAlerts + summaryStats.warning.recordingRules;
-    const parts = [];
-    if (summaryStats.warning.firingAlerts > 0) {
-      parts.push(t('{{count}} from alerts', { count: summaryStats.warning.firingAlerts }));
-    }
-    if (summaryStats.warning.recordingRules > 0) {
-      parts.push(t('{{count}} from recording rules', { count: summaryStats.warning.recordingRules }));
-    }
-    details.push(t('{{total}} warnings ({{breakdown}})', { total, breakdown: parts.join(', ') }));
-  } else if (summaryStats.warning.pendingAlerts > 0) {
-    details.push(t('{{pendingAlerts}} pending warnings, from {{pendingRules}} distinct rules', summaryStats.warning));
-  } else if (variant === AlertVariant.success) {
-    details.push(t('No warnings out of {{total}} rules', summaryStats.warning));
-  }
-
-  // Info
-  if (summaryStats.info.firingAlerts > 0 || summaryStats.info.recordingRules > 0) {
-    const total = summaryStats.info.firingAlerts + summaryStats.info.recordingRules;
-    const parts = [];
-    if (summaryStats.info.firingAlerts > 0) {
-      parts.push(t('{{count}} from alerts', { count: summaryStats.info.firingAlerts }));
-    }
-    if (summaryStats.info.recordingRules > 0) {
-      parts.push(t('{{count}} from recording rules', { count: summaryStats.info.recordingRules }));
-    }
-    details.push(t('{{total}} minor issues ({{breakdown}})', { total, breakdown: parts.join(', ') }));
-  } else if (summaryStats.info.pendingAlerts > 0) {
-    details.push(t('{{pendingAlerts}} pending minor issues, from {{pendingRules}} distinct rules', summaryStats.info));
-  } else if (variant === AlertVariant.success) {
-    details.push(t('No minor issues out of {{total}} rules', summaryStats.info));
-  }
   return (
-    <Alert variant={variant} title={title} className="health-summary-alert">
-      <ul>
-        {details.map((text, i) => (
-          <li key={'li_' + i}>{text}</li>
-        ))}
-      </ul>
-    </Alert>
+    <div className="health-summary-dashboard">
+      <Grid hasGutter>
+        {/* Status card */}
+        <GridItem lg={3} md={6} sm={12}>
+          <Card className={`health-metric-card status ${statusClass}`}>
+            <CardBody>
+              <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsNone' }}>
+                <FlexItem>
+                  <Text component={TextVariants.small} className="metric-label">
+                    {t('Status')}
+                  </Text>
+                </FlexItem>
+                <FlexItem>
+                  <Text component={TextVariants.p} className="metric-status">
+                    {title}
+                  </Text>
+                </FlexItem>
+              </Flex>
+            </CardBody>
+          </Card>
+        </GridItem>
+
+        {/* Critical card */}
+        <GridItem lg={3} md={6} sm={12}>
+          <Card className="health-metric-card critical">
+            <CardBody>
+              <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsNone' }}>
+                <FlexItem>
+                  <Text component={TextVariants.small} className="metric-label">
+                    {t('Critical')}
+                  </Text>
+                </FlexItem>
+                <FlexItem>
+                  <Text component={TextVariants.h1} className="metric-value">
+                    {criticalTotal}
+                  </Text>
+                </FlexItem>
+                {criticalTotal > 0 && (
+                  <FlexItem>
+                    <Text component={TextVariants.small} className="metric-detail">
+                      {summaryStats.critical.firingAlerts > 0 &&
+                        t('{{count}} alerts', { count: summaryStats.critical.firingAlerts })}
+                      {summaryStats.critical.firingAlerts > 0 && summaryStats.critical.recordingRules > 0 && ', '}
+                      {summaryStats.critical.recordingRules > 0 &&
+                        t('{{count}} recording', { count: summaryStats.critical.recordingRules })}
+                    </Text>
+                  </FlexItem>
+                )}
+              </Flex>
+            </CardBody>
+          </Card>
+        </GridItem>
+
+        {/* Warning card */}
+        <GridItem lg={3} md={6} sm={12}>
+          <Card className="health-metric-card warning">
+            <CardBody>
+              <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsNone' }}>
+                <FlexItem>
+                  <Text component={TextVariants.small} className="metric-label">
+                    {t('Warning')}
+                  </Text>
+                </FlexItem>
+                <FlexItem>
+                  <Text component={TextVariants.h1} className="metric-value">
+                    {warningTotal}
+                  </Text>
+                </FlexItem>
+                {warningTotal > 0 && (
+                  <FlexItem>
+                    <Text component={TextVariants.small} className="metric-detail">
+                      {summaryStats.warning.firingAlerts > 0 &&
+                        t('{{count}} alerts', { count: summaryStats.warning.firingAlerts })}
+                      {summaryStats.warning.firingAlerts > 0 && summaryStats.warning.recordingRules > 0 && ', '}
+                      {summaryStats.warning.recordingRules > 0 &&
+                        t('{{count}} recording', { count: summaryStats.warning.recordingRules })}
+                    </Text>
+                  </FlexItem>
+                )}
+              </Flex>
+            </CardBody>
+          </Card>
+        </GridItem>
+
+        {/* Info card */}
+        <GridItem lg={3} md={6} sm={12}>
+          <Card className="health-metric-card info">
+            <CardBody>
+              <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsNone' }}>
+                <FlexItem>
+                  <Text component={TextVariants.small} className="metric-label">
+                    {t('Info')}
+                  </Text>
+                </FlexItem>
+                <FlexItem>
+                  <Text component={TextVariants.h1} className="metric-value">
+                    {infoTotal}
+                  </Text>
+                </FlexItem>
+                {infoTotal > 0 && (
+                  <FlexItem>
+                    <Text component={TextVariants.small} className="metric-detail">
+                      {summaryStats.info.firingAlerts > 0 && t('{{count}} alerts', { count: summaryStats.info.firingAlerts })}
+                      {summaryStats.info.firingAlerts > 0 && summaryStats.info.recordingRules > 0 && ', '}
+                      {summaryStats.info.recordingRules > 0 &&
+                        t('{{count}} recording', { count: summaryStats.info.recordingRules })}
+                    </Text>
+                  </FlexItem>
+                )}
+              </Flex>
+            </CardBody>
+          </Card>
+        </GridItem>
+      </Grid>
+    </div>
   );
 };

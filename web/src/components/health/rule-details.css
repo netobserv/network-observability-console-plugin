@@ -1,0 +1,39 @@
+/* Table header styles */
+.rule-details th {
+  padding-right: 5px;
+  padding-left: 1rem;
+  vertical-align: top;
+}
+
+.rule-details th.no-wrap {
+  white-space: nowrap;
+}
+
+/* Table cell styles */
+.rule-details td {
+  padding-left: 1rem;
+  vertical-align: top;
+}
+
+.rule-details td.no-wrap {
+  white-space: nowrap;
+}
+
+.rule-details td.right-align {
+  text-align: right;
+}
+
+/* Card-like row styles (for drawer view) */
+.rule-details-row {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--pf-v5-global--BorderColor--100);
+}
+
+.rule-details-row:last-child {
+  border-bottom: none;
+}
+
+.rule-details-row:first-child {
+  padding-top: 0;
+}
+

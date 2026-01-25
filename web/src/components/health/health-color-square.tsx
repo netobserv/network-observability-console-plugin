@@ -35,18 +35,29 @@ const warningColorMap: ColorMap = [
 ];
 
 const infoColorMap: ColorMap = [
-  { r: 62, g: 134, b: 53 },
   { r: 228, g: 245, b: 188 },
-  { r: 154, g: 216, b: 216 }
+  { r: 154, g: 216, b: 216 },
+  { r: 62, g: 134, b: 53 }
 ];
 
 const getCellColors = (value: number, rangeFrom: number, rangeTo: number, colorMap: ColorMap) => {
+  // Ensure value is valid and within range
+  if (!isFinite(value) || isNaN(value)) {
+    value = rangeFrom;
+  }
+
   const clamped = Math.max(rangeFrom, Math.min(rangeTo, value));
   const ratio = (clamped - rangeFrom) / (rangeTo - rangeFrom); // e.g. 0.8 | 0 | 1
   const colorRatio = ratio * (colorMap.length - 1); // e.g. (length is 3) 1.6 | 0 | 2
-  const colorLow = colorMap[Math.floor(colorRatio)]; // e.g. m[1] | m[0] | m[2]
-  const colorHigh = colorMap[Math.ceil(colorRatio)]; // e.g. m[2] | m[0] | m[2]
+
+  // Ensure indices are within bounds
+  const lowIndex = Math.min(Math.max(0, Math.floor(colorRatio)), colorMap.length - 1);
+  const highIndex = Math.min(Math.max(0, Math.ceil(colorRatio)), colorMap.length - 1);
+
+  const colorLow = colorMap[lowIndex];
+  const colorHigh = colorMap[highIndex];
   const remains = colorRatio - Math.floor(colorRatio); // e.g. 0.6 | 0 | 0
+
   const r = Math.floor((colorHigh.r - colorLow.r) * remains + colorLow.r);
   const g = Math.floor((colorHigh.g - colorLow.g) * remains + colorLow.g);
   const b = Math.floor((colorHigh.b - colorLow.b) * remains + colorLow.b);
@@ -87,14 +98,21 @@ export const HealthColorSquare: React.FC<HealthColorSquareProps> = ({ alert, rec
       const upperBoundValue = recordingRule.upperBound ? parseFloat(recordingRule.upperBound) : 100;
 
       let scoreForMap: number;
-      if (thresholdValue > 0) {
+      if (thresholdValue > 0 && upperBoundValue > thresholdValue) {
         const threshold = thresholdValue / 2;
         const vclamped = Math.min(Math.max(recordingRule.value, threshold), upperBoundValue);
         const range = upperBoundValue - threshold;
-        scoreForMap = (vclamped - threshold) / range;
+        if (range > 0) {
+          scoreForMap = (vclamped - threshold) / range;
+        } else {
+          scoreForMap = 0;
+        }
       } else {
         scoreForMap = 0;
       }
+
+      // Clamp scoreForMap to [0, 1] range
+      scoreForMap = Math.max(0, Math.min(1, scoreForMap));
 
       const rawScore = 10 * (1 - scoreForMap);
 
