@@ -10,6 +10,7 @@ import {
   TextVariants,
   Tooltip
 } from '@patternfly/react-core';
+import { InfoCircleIcon } from '@patternfly/react-icons';
 import { ActionsColumn, Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import * as React from 'react';
 import { TFunction, useTranslation } from 'react-i18next';
@@ -209,13 +210,16 @@ const RuleCard: React.FC<{
               <HealthColorSquare alert={alert} recordingRule={rule} />
             </FlexItem>
             <FlexItem flex={{ default: 'flex_1' }}>
-              {description && !isAlert ? (
-                <Tooltip content={description}>
-                  <span>{summary}</span>
-                </Tooltip>
-              ) : (
-                summary
-              )}
+              <Flex gap={{ default: 'gapXs' }} alignItems={{ default: 'alignItemsCenter' }}>
+                <FlexItem>{summary}</FlexItem>
+                {description && (
+                  <FlexItem>
+                    <Tooltip content={description}>
+                      <InfoCircleIcon style={{ color: 'var(--pf-v5-global--Color--200)' }} />
+                    </Tooltip>
+                  </FlexItem>
+                )}
+              </Flex>
             </FlexItem>
           </Flex>
           <FlexItem>
@@ -226,7 +230,7 @@ const RuleCard: React.FC<{
           </FlexItem>
         </Flex>
 
-        {/* Mode, State, Severity, Value, Threshold, Direction row */}
+        {/* Mode, State, Severity, Value, Threshold, Active since, Direction row */}
         <Flex gap={{ default: 'gapSm' }}>
           <VerticalField label={t('Mode')}>{mode}</VerticalField>
           {state && <VerticalField label={t('State')}>{state}</VerticalField>}
@@ -243,6 +247,9 @@ const RuleCard: React.FC<{
               {threshold} {unit}
             </VerticalField>
           )}
+          {activeAt && (
+            <VerticalField label={t('Active since')}>{formatActiveSince(t, activeAt)}</VerticalField>
+          )}
           {direction && <VerticalField label={t('Direction')}>{direction}</VerticalField>}
         </Flex>
 
@@ -255,23 +262,6 @@ const RuleCard: React.FC<{
               </Label>
             ))}
           </Flex>
-        )}
-
-        {/* Other details */}
-        {activeAt && (
-          <DescriptionList isCompact isHorizontal>
-            <DescriptionListGroup>
-              <DescriptionListTerm>{t('Active since')}</DescriptionListTerm>
-              <DescriptionListDescription>{formatActiveSince(t, activeAt)}</DescriptionListDescription>
-            </DescriptionListGroup>
-          </DescriptionList>
-        )}
-
-        {/* Description */}
-        {description && (
-          <Text component={TextVariants.small} style={{ marginTop: '0.25rem' }}>
-            {description}
-          </Text>
         )}
       </Flex>
     </div>
