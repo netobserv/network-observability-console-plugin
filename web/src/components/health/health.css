@@ -28,10 +28,10 @@
     min-height: 140px;
 }
 
-.health-metric-card:not(.status) .pf-v5-c-card__body {
+.health-metric-card .pf-v5-c-card__body {
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
 }
 
 /* Status card */
@@ -56,6 +56,23 @@
     font-weight: 500;
     line-height: 1.4;
     margin-top: 0.5rem;
+}
+
+.health-metric-card .status-details {
+    margin-top: 1rem;
+}
+
+.health-metric-card .status-details ul {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+.health-metric-card .status-details li {
+    font-size: 0.875rem;
+    color: var(--pf-v5-global--Color--200);
+    line-height: 1.5;
+    margin-bottom: 0.25rem;
 }
 
 /* Severity cards */

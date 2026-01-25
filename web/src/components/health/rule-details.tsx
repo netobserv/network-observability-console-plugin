@@ -1,15 +1,4 @@
-import {
-  DescriptionList,
-  DescriptionListDescription,
-  DescriptionListGroup,
-  DescriptionListTerm,
-  Flex,
-  FlexItem,
-  Label,
-  Text,
-  TextVariants,
-  Tooltip
-} from '@patternfly/react-core';
+import { Flex, FlexItem, Label, Text, TextVariants, Tooltip } from '@patternfly/react-core';
 import { InfoCircleIcon } from '@patternfly/react-icons';
 import { ActionsColumn, Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import * as React from 'react';
@@ -247,9 +236,7 @@ const RuleCard: React.FC<{
               {threshold} {unit}
             </VerticalField>
           )}
-          {activeAt && (
-            <VerticalField label={t('Active since')}>{formatActiveSince(t, activeAt)}</VerticalField>
-          )}
+          {activeAt && <VerticalField label={t('Active since')}>{formatActiveSince(t, activeAt)}</VerticalField>}
           {direction && <VerticalField label={t('Direction')}>{direction}</VerticalField>}
         </Flex>
 

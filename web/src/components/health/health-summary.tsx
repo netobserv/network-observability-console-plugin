@@ -12,6 +12,18 @@ export interface HealthSummaryProps {
 export const HealthSummary: React.FC<HealthSummaryProps> = ({ rules, stats }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
+  // Helper function to format metric details
+  const formatMetricDetail = (firingAlerts: number, recordingRules: number): string => {
+    const parts = [];
+    if (firingAlerts > 0) {
+      parts.push(t('{{count}} alerts', { count: firingAlerts }));
+    }
+    if (recordingRules > 0) {
+      parts.push(t('{{count}} recording rules', { count: recordingRules }));
+    }
+    return parts.join(', ');
+  };
+
   // Count recording rules by severity
   let recordingRulesCritical = 0;
   let recordingRulesWarning = 0;
@@ -106,11 +118,68 @@ export const HealthSummary: React.FC<HealthSummaryProps> = ({ rules, stats }) =>
   const warningTotal = summaryStats.warning.firingAlerts + summaryStats.warning.recordingRules;
   const infoTotal = summaryStats.info.firingAlerts + summaryStats.info.recordingRules;
 
+  // Build details like the old Alert summary
+  const hasViolations = criticalTotal > 0 || warningTotal > 0 || infoTotal > 0;
+  const details: string[] = [];
+
+  // Critical
+  if (summaryStats.critical.firingAlerts > 0 || summaryStats.critical.recordingRules > 0) {
+    const total = summaryStats.critical.firingAlerts + summaryStats.critical.recordingRules;
+    const parts = [];
+    if (summaryStats.critical.firingAlerts > 0) {
+      parts.push(t('{{count}} from alerts', { count: summaryStats.critical.firingAlerts }));
+    }
+    if (summaryStats.critical.recordingRules > 0) {
+      parts.push(t('{{count}} from recording rules', { count: summaryStats.critical.recordingRules }));
+    }
+    details.push(t('{{total}} critical issues ({{breakdown}})', { total, breakdown: parts.join(', ') }));
+  } else if (summaryStats.critical.pendingAlerts > 0) {
+    details.push(
+      t('{{pendingAlerts}} pending critical issues, from {{pendingRules}} distinct rules', summaryStats.critical)
+    );
+  } else if (!hasViolations) {
+    details.push(t('No critical issues out of {{total}} rules', summaryStats.critical));
+  }
+
+  // Warning
+  if (summaryStats.warning.firingAlerts > 0 || summaryStats.warning.recordingRules > 0) {
+    const total = summaryStats.warning.firingAlerts + summaryStats.warning.recordingRules;
+    const parts = [];
+    if (summaryStats.warning.firingAlerts > 0) {
+      parts.push(t('{{count}} from alerts', { count: summaryStats.warning.firingAlerts }));
+    }
+    if (summaryStats.warning.recordingRules > 0) {
+      parts.push(t('{{count}} from recording rules', { count: summaryStats.warning.recordingRules }));
+    }
+    details.push(t('{{total}} warnings ({{breakdown}})', { total, breakdown: parts.join(', ') }));
+  } else if (summaryStats.warning.pendingAlerts > 0) {
+    details.push(t('{{pendingAlerts}} pending warnings, from {{pendingRules}} distinct rules', summaryStats.warning));
+  } else if (!hasViolations) {
+    details.push(t('No warnings out of {{total}} rules', summaryStats.warning));
+  }
+
+  // Info
+  if (summaryStats.info.firingAlerts > 0 || summaryStats.info.recordingRules > 0) {
+    const total = summaryStats.info.firingAlerts + summaryStats.info.recordingRules;
+    const parts = [];
+    if (summaryStats.info.firingAlerts > 0) {
+      parts.push(t('{{count}} from alerts', { count: summaryStats.info.firingAlerts }));
+    }
+    if (summaryStats.info.recordingRules > 0) {
+      parts.push(t('{{count}} from recording rules', { count: summaryStats.info.recordingRules }));
+    }
+    details.push(t('{{total}} minor issues ({{breakdown}})', { total, breakdown: parts.join(', ') }));
+  } else if (summaryStats.info.pendingAlerts > 0) {
+    details.push(t('{{pendingAlerts}} pending minor issues, from {{pendingRules}} distinct rules', summaryStats.info));
+  } else if (!hasViolations) {
+    details.push(t('No minor issues out of {{total}} rules', summaryStats.info));
+  }
+
   return (
     <div className="health-summary-dashboard">
       <Grid hasGutter>
         {/* Status card */}
-        <GridItem lg={3} md={6} sm={12}>
+        <GridItem lg={6} md={6} sm={12}>
           <Card className={`health-metric-card status ${statusClass}`}>
             <CardBody>
               <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsNone' }}>
@@ -124,13 +193,22 @@ export const HealthSummary: React.FC<HealthSummaryProps> = ({ rules, stats }) =>
                     {title}
                   </Text>
                 </FlexItem>
+                {details.length > 0 && (
+                  <FlexItem className="status-details">
+                    <ul>
+                      {details.map((text, i) => (
+                        <li key={'li_' + i}>{text}</li>
+                      ))}
+                    </ul>
+                  </FlexItem>
+                )}
               </Flex>
             </CardBody>
           </Card>
         </GridItem>
 
         {/* Critical card */}
-        <GridItem lg={3} md={6} sm={12}>
+        <GridItem lg={2} md={6} sm={12}>
           <Card className="health-metric-card critical">
             <CardBody>
               <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsNone' }}>
@@ -147,11 +225,7 @@ export const HealthSummary: React.FC<HealthSummaryProps> = ({ rules, stats }) =>
                 {criticalTotal > 0 && (
                   <FlexItem>
                     <Text component={TextVariants.small} className="metric-detail">
-                      {summaryStats.critical.firingAlerts > 0 &&
-                        t('{{count}} alerts', { count: summaryStats.critical.firingAlerts })}
-                      {summaryStats.critical.firingAlerts > 0 && summaryStats.critical.recordingRules > 0 && ', '}
-                      {summaryStats.critical.recordingRules > 0 &&
-                        t('{{count}} recording', { count: summaryStats.critical.recordingRules })}
+                      {formatMetricDetail(summaryStats.critical.firingAlerts, summaryStats.critical.recordingRules)}
                     </Text>
                   </FlexItem>
                 )}
@@ -161,7 +235,7 @@ export const HealthSummary: React.FC<HealthSummaryProps> = ({ rules, stats }) =>
         </GridItem>
 
         {/* Warning card */}
-        <GridItem lg={3} md={6} sm={12}>
+        <GridItem lg={2} md={6} sm={12}>
           <Card className="health-metric-card warning">
             <CardBody>
               <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsNone' }}>
@@ -178,11 +252,7 @@ export const HealthSummary: React.FC<HealthSummaryProps> = ({ rules, stats }) =>
                 {warningTotal > 0 && (
                   <FlexItem>
                     <Text component={TextVariants.small} className="metric-detail">
-                      {summaryStats.warning.firingAlerts > 0 &&
-                        t('{{count}} alerts', { count: summaryStats.warning.firingAlerts })}
-                      {summaryStats.warning.firingAlerts > 0 && summaryStats.warning.recordingRules > 0 && ', '}
-                      {summaryStats.warning.recordingRules > 0 &&
-                        t('{{count}} recording', { count: summaryStats.warning.recordingRules })}
+                      {formatMetricDetail(summaryStats.warning.firingAlerts, summaryStats.warning.recordingRules)}
                     </Text>
                   </FlexItem>
                 )}
@@ -192,7 +262,7 @@ export const HealthSummary: React.FC<HealthSummaryProps> = ({ rules, stats }) =>
         </GridItem>
 
         {/* Info card */}
-        <GridItem lg={3} md={6} sm={12}>
+        <GridItem lg={2} md={6} sm={12}>
           <Card className="health-metric-card info">
             <CardBody>
               <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsNone' }}>
@@ -209,11 +279,7 @@ export const HealthSummary: React.FC<HealthSummaryProps> = ({ rules, stats }) =>
                 {infoTotal > 0 && (
                   <FlexItem>
                     <Text component={TextVariants.small} className="metric-detail">
-                      {summaryStats.info.firingAlerts > 0 &&
-                        t('{{count}} alerts', { count: summaryStats.info.firingAlerts })}
-                      {summaryStats.info.firingAlerts > 0 && summaryStats.info.recordingRules > 0 && ', '}
-                      {summaryStats.info.recordingRules > 0 &&
-                        t('{{count}} recording', { count: summaryStats.info.recordingRules })}
+                      {formatMetricDetail(summaryStats.info.firingAlerts, summaryStats.info.recordingRules)}
                     </Text>
                   </FlexItem>
                 )}
