@@ -12,7 +12,7 @@ import {
 } from '@patternfly/react-core';
 import { ActionsColumn, Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import * as React from 'react';
-import { useTranslation } from 'react-i18next';
+import { TFunction, useTranslation } from 'react-i18next';
 import { formatActiveSince } from '../../utils/datetime';
 import { valueFormat } from '../../utils/format';
 import { HealthColorSquare } from './health-color-square';
@@ -62,7 +62,7 @@ const RuleTableRow: React.FC<{
   item: RuleItem;
   resourceName: string;
   kind: string;
-  t: any;
+  t: TFunction;
 }> = ({ item, resourceName, kind, t }) => {
   const isAlert = item.type === 'alert';
   const alert = item.alert;
@@ -155,7 +155,7 @@ const RuleCard: React.FC<{
   item: RuleItem;
   resourceName: string;
   kind: string;
-  t: any;
+  t: TFunction;
 }> = ({ item, resourceName, kind, t }) => {
   const isAlert = item.type === 'alert';
   const alert = item.alert;
