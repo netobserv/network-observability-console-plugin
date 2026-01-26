@@ -203,6 +203,7 @@
   "Cancel": "Cancel",
   "Delete": "Delete",
   "Network Observability FlowCollector status": "Network Observability FlowCollector status",
+  "Network Observability is on hold": "Network Observability is on hold",
   "Edit FlowCollector": "Edit FlowCollector",
   "Open Network Traffic page": "Open Network Traffic page",
   "An error occured while retreiving FlowCollector: {{error}}": "An error occured while retreiving FlowCollector: {{error}}",
