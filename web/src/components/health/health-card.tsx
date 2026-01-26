@@ -65,7 +65,10 @@ export const HealthCard: React.FC<HealthCardProps> = ({
   );
 
   const silencedCount = React.useMemo(
-    () => (alertInfo?.critical.silenced.length || 0) + (alertInfo?.warning.silenced.length || 0) + (alertInfo?.other.silenced.length || 0),
+    () =>
+      (alertInfo?.critical.silenced.length || 0) +
+      (alertInfo?.warning.silenced.length || 0) +
+      (alertInfo?.other.silenced.length || 0),
     [alertInfo]
   );
 

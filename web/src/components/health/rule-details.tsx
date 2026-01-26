@@ -28,7 +28,6 @@ export interface RuleDetailsProps {
 }
 
 type RuleItem = {
-  type: 'alert' | 'recording';
   alert?: AlertWithRuleName;
   recordingRule?: RecordingRuleItem;
 };
@@ -60,7 +59,7 @@ const RuleTableRow: React.FC<{
   kind: string;
   t: TFunction;
 }> = ({ item, resourceName, kind, t }) => {
-  const isAlert = item.type === 'alert';
+  const isAlert = item.alert !== undefined;
   const alert = item.alert;
   const rule = item.recordingRule;
 
@@ -162,7 +161,7 @@ const RuleCard: React.FC<{
   kind: string;
   t: TFunction;
 }> = ({ item, resourceName, kind, t }) => {
-  const isAlert = item.type === 'alert';
+  const isAlert = item.alert !== undefined;
   const alert = item.alert;
   const rule = item.recordingRule;
 
@@ -288,14 +287,14 @@ export const RuleDetails: React.FC<RuleDetailsProps> = ({ kind, alertInfo, recor
     if (alertInfo) {
       const allAlerts = getAllAlerts(alertInfo);
       allAlerts.forEach(alert => {
-        items.push({ type: 'alert', alert });
+        items.push({ alert });
       });
     }
 
     if (recordingRuleInfo) {
       const allRules = [...recordingRuleInfo.critical, ...recordingRuleInfo.warning, ...recordingRuleInfo.other];
       allRules.forEach(rule => {
-        items.push({ type: 'recording', recordingRule: rule });
+        items.push({ recordingRule: rule });
       });
     }
 
