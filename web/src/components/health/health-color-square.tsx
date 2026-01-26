@@ -35,9 +35,9 @@ const warningColorMap: ColorMap = [
 ];
 
 const infoColorMap: ColorMap = [
+  { r: 62, g: 134, b: 53 },
   { r: 228, g: 245, b: 188 },
-  { r: 154, g: 216, b: 216 },
-  { r: 62, g: 134, b: 53 }
+  { r: 154, g: 216, b: 216 }
 ];
 
 const getCellColors = (value: number, rangeFrom: number, rangeTo: number, colorMap: ColorMap) => {
