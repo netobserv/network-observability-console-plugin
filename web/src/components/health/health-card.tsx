@@ -37,23 +37,37 @@ export const HealthCard: React.FC<HealthCardProps> = ({
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
-  const score = computeUnifiedScore(alertInfo, recordingInfo);
+  const score = React.useMemo(() => computeUnifiedScore(alertInfo, recordingInfo), [alertInfo, recordingInfo]);
 
   // Combine counts from both alerts and recording rules
-  const criticalCount =
-    (alertInfo?.critical.firing.length || 0) +
-    (alertInfo?.critical.pending.length || 0) +
-    (recordingInfo?.critical.length || 0);
+  const criticalCount = React.useMemo(
+    () =>
+      (alertInfo?.critical.firing.length || 0) +
+      (alertInfo?.critical.pending.length || 0) +
+      (recordingInfo?.critical.length || 0),
+    [alertInfo, recordingInfo]
+  );
 
-  const warningCount =
-    (alertInfo?.warning.firing.length || 0) +
-    (alertInfo?.warning.pending.length || 0) +
-    (recordingInfo?.warning.length || 0);
+  const warningCount = React.useMemo(
+    () =>
+      (alertInfo?.warning.firing.length || 0) +
+      (alertInfo?.warning.pending.length || 0) +
+      (recordingInfo?.warning.length || 0),
+    [alertInfo, recordingInfo]
+  );
 
-  const infoCount =
-    (alertInfo?.other.firing.length || 0) + (alertInfo?.other.pending.length || 0) + (recordingInfo?.other.length || 0);
+  const infoCount = React.useMemo(
+    () =>
+      (alertInfo?.other.firing.length || 0) +
+      (alertInfo?.other.pending.length || 0) +
+      (recordingInfo?.other.length || 0),
+    [alertInfo, recordingInfo]
+  );
 
-  const silencedCount = (alertInfo?.critical.silenced.length || 0) + (alertInfo?.warning.silenced.length || 0);
+  const silencedCount = React.useMemo(
+    () => (alertInfo?.critical.silenced.length || 0) + (alertInfo?.warning.silenced.length || 0),
+    [alertInfo]
+  );
 
   // Build CSS classes like other health cards
   const classes = ['card'];

@@ -3,6 +3,9 @@ import { Alert, Card, CardBody, Flex, FlexItem, Grid, GridItem, Text, TextVarian
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { HealthStats } from './health-helper';
+import { HealthMetricCard } from './health-metric-card';
+
+type StatusClass = 'success' | 'critical' | 'warning' | 'info';
 
 export interface HealthSummaryProps {
   rules: Rule[];
@@ -102,7 +105,7 @@ export const HealthSummary: React.FC<HealthSummaryProps> = ({ rules, stats }) =>
   };
 
   let title = t('The network looks healthy');
-  let statusClass = 'success';
+  let statusClass: StatusClass = 'success';
   if (summaryStats.critical.firingAlerts > 0 || summaryStats.critical.recordingRules > 0) {
     statusClass = 'critical';
     title = t('There are critical network issues');
@@ -209,83 +212,44 @@ export const HealthSummary: React.FC<HealthSummaryProps> = ({ rules, stats }) =>
 
         {/* Critical card */}
         <GridItem lg={2} md={6} sm={12}>
-          <Card className="health-metric-card critical">
-            <CardBody>
-              <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsNone' }}>
-                <FlexItem>
-                  <Text component={TextVariants.small} className="metric-label">
-                    {t('Critical')}
-                  </Text>
-                </FlexItem>
-                <FlexItem>
-                  <Text component={TextVariants.h1} className="metric-value">
-                    {criticalTotal}
-                  </Text>
-                </FlexItem>
-                {criticalTotal > 0 && (
-                  <FlexItem>
-                    <Text component={TextVariants.small} className="metric-detail">
-                      {formatMetricDetail(summaryStats.critical.firingAlerts, summaryStats.critical.recordingRules)}
-                    </Text>
-                  </FlexItem>
-                )}
-              </Flex>
-            </CardBody>
-          </Card>
+          <HealthMetricCard
+            severity="critical"
+            label={t('Critical')}
+            total={criticalTotal}
+            detail={
+              criticalTotal > 0
+                ? formatMetricDetail(summaryStats.critical.firingAlerts, summaryStats.critical.recordingRules)
+                : undefined
+            }
+          />
         </GridItem>
 
         {/* Warning card */}
         <GridItem lg={2} md={6} sm={12}>
-          <Card className="health-metric-card warning">
-            <CardBody>
-              <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsNone' }}>
-                <FlexItem>
-                  <Text component={TextVariants.small} className="metric-label">
-                    {t('Warning')}
-                  </Text>
-                </FlexItem>
-                <FlexItem>
-                  <Text component={TextVariants.h1} className="metric-value">
-                    {warningTotal}
-                  </Text>
-                </FlexItem>
-                {warningTotal > 0 && (
-                  <FlexItem>
-                    <Text component={TextVariants.small} className="metric-detail">
-                      {formatMetricDetail(summaryStats.warning.firingAlerts, summaryStats.warning.recordingRules)}
-                    </Text>
-                  </FlexItem>
-                )}
-              </Flex>
-            </CardBody>
-          </Card>
+          <HealthMetricCard
+            severity="warning"
+            label={t('Warning')}
+            total={warningTotal}
+            detail={
+              warningTotal > 0
+                ? formatMetricDetail(summaryStats.warning.firingAlerts, summaryStats.warning.recordingRules)
+                : undefined
+            }
+          />
         </GridItem>
 
         {/* Info card */}
         <GridItem lg={2} md={6} sm={12}>
-          <Card className="health-metric-card info">
-            <CardBody>
-              <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsNone' }}>
-                <FlexItem>
-                  <Text component={TextVariants.small} className="metric-label">
-                    {t('Info')}
-                  </Text>
-                </FlexItem>
-                <FlexItem>
-                  <Text component={TextVariants.h1} className="metric-value">
-                    {infoTotal}
-                  </Text>
-                </FlexItem>
-                {infoTotal > 0 && (
-                  <FlexItem>
-                    <Text component={TextVariants.small} className="metric-detail">
-                      {formatMetricDetail(summaryStats.info.firingAlerts, summaryStats.info.recordingRules)}
-                    </Text>
-                  </FlexItem>
-                )}
-              </Flex>
-            </CardBody>
-          </Card>
+          <HealthMetricCard
+            severity="info"
+            label={t('Info')}
+            total={infoTotal}
+            detail={
+              infoTotal > 0
+                ? formatMetricDetail(summaryStats.info.firingAlerts, summaryStats.info.recordingRules)
+                : undefined
+            }
+          />
         </GridItem>
       </Grid>
     </div>

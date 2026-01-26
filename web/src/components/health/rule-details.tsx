@@ -33,6 +33,12 @@ type RuleItem = {
   recordingRule?: RecordingRuleItem;
 };
 
+// Helper: Get direction from recording rule name
+const getDirection = (ruleName?: string): 'src' | 'dst' | undefined => {
+  if (!ruleName) return undefined;
+  return ruleName.includes(':src:') ? 'src' : ruleName.includes(':dst:') ? 'dst' : undefined;
+};
+
 // Helper: Vertical label/value column
 const VerticalField: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
   <FlexItem>
@@ -58,8 +64,6 @@ const RuleTableRow: React.FC<{
   const alert = item.alert;
   const rule = item.recordingRule;
 
-  if (!alert && !rule) return null;
-
   const summary = alert ? alert.annotations['summary'] : rule?.summary || rule?.template || '';
   const mode = isAlert ? t('alert') : t('recording');
   const state = alert?.state || '';
@@ -68,28 +72,37 @@ const RuleTableRow: React.FC<{
   const value = alert ? (alert.value as number) : rule?.value || 0;
   const unit = alert ? alert.metadata.unit : '%';
   const threshold = alert ? alert.metadata.threshold : rule?.threshold;
-  const description = alert
-    ? alert.annotations['description']
-    : rule?.description
-    ? parseRecordingRuleDescription(rule.description, rule, resourceName)
-    : '';
+  const description = React.useMemo(
+    () =>
+      alert
+        ? alert.annotations['description']
+        : rule?.description
+        ? parseRecordingRuleDescription(rule.description, rule, resourceName)
+        : '',
+    [alert, rule, resourceName]
+  );
 
-  const labels = alert ? getAlertFilteredLabels(alert, resourceName) : [];
-  const links =
-    isAlert && alert
-      ? [
-          { name: t('Navigate to alert details'), url: getAlertLink(alert) },
-          { name: t('Navigate to network traffic'), url: getTrafficLink(kind, resourceName, alert) },
-          ...alert.metadata.links
-        ]
-      : rule
-      ? [
-          { name: t('View metric in query browser'), url: getRecordingRuleMetricLink(rule, resourceName) },
-          ...(rule.links || [])
-        ]
-      : [];
+  const labels = React.useMemo(() => (alert ? getAlertFilteredLabels(alert, resourceName) : []), [alert, resourceName]);
+  const links = React.useMemo(
+    () =>
+      isAlert && alert
+        ? [
+            { name: t('Navigate to alert details'), url: getAlertLink(alert) },
+            { name: t('Navigate to network traffic'), url: getTrafficLink(kind, resourceName, alert) },
+            ...alert.metadata.links
+          ]
+        : rule
+        ? [
+            { name: t('View metric in query browser'), url: getRecordingRuleMetricLink(rule, resourceName) },
+            ...(rule.links || [])
+          ]
+        : [],
+    [isAlert, alert, rule, kind, resourceName, t]
+  );
 
-  const direction = rule?.name.includes(':src:') ? 'src' : rule?.name.includes(':dst:') ? 'dst' : undefined;
+  const direction = React.useMemo(() => getDirection(rule?.name), [rule]);
+
+  if (!alert && !rule) return null;
 
   return (
     <Tr>
@@ -153,8 +166,6 @@ const RuleCard: React.FC<{
   const alert = item.alert;
   const rule = item.recordingRule;
 
-  if (!alert && !rule) return null;
-
   const summary = alert ? alert.annotations['summary'] : rule?.summary || rule?.template || '';
   const mode = isAlert ? t('alert') : t('recording');
   const state = alert?.state;
@@ -163,28 +174,37 @@ const RuleCard: React.FC<{
   const value = alert ? (alert.value as number) : rule?.value || 0;
   const unit = alert ? alert.metadata.unit : '%';
   const threshold = alert ? alert.metadata.threshold : rule?.threshold;
-  const description = alert
-    ? alert.annotations['description']
-    : rule?.description
-    ? parseRecordingRuleDescription(rule.description, rule, resourceName)
-    : '';
+  const description = React.useMemo(
+    () =>
+      alert
+        ? alert.annotations['description']
+        : rule?.description
+        ? parseRecordingRuleDescription(rule.description, rule, resourceName)
+        : '',
+    [alert, rule, resourceName]
+  );
 
-  const labels = alert ? getAlertFilteredLabels(alert, resourceName) : [];
-  const links =
-    isAlert && alert
-      ? [
-          { name: t('Navigate to alert details'), url: getAlertLink(alert) },
-          { name: t('Navigate to network traffic'), url: getTrafficLink(kind, resourceName, alert) },
-          ...alert.metadata.links
-        ]
-      : rule
-      ? [
-          { name: t('View metric in query browser'), url: getRecordingRuleMetricLink(rule, resourceName) },
-          ...(rule.links || [])
-        ]
-      : [];
+  const labels = React.useMemo(() => (alert ? getAlertFilteredLabels(alert, resourceName) : []), [alert, resourceName]);
+  const links = React.useMemo(
+    () =>
+      isAlert && alert
+        ? [
+            { name: t('Navigate to alert details'), url: getAlertLink(alert) },
+            { name: t('Navigate to network traffic'), url: getTrafficLink(kind, resourceName, alert) },
+            ...alert.metadata.links
+          ]
+        : rule
+        ? [
+            { name: t('View metric in query browser'), url: getRecordingRuleMetricLink(rule, resourceName) },
+            ...(rule.links || [])
+          ]
+        : [],
+    [isAlert, alert, rule, kind, resourceName, t]
+  );
 
-  const direction = rule?.name.includes(':src:') ? 'src' : rule?.name.includes(':dst:') ? 'dst' : undefined;
+  const direction = React.useMemo(() => getDirection(rule?.name), [rule]);
+
+  if (!alert && !rule) return null;
 
   return (
     <div className="rule-details-row">
