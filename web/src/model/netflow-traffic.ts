@@ -139,7 +139,7 @@ export function netflowTrafficModel() {
       // Invalidate groups if necessary, when metrics scope changed
       const groups = getGroupsForScope(scope, config.scopes);
       if (!groups.includes(topologyOptions.groupTypes)) {
-        setTopologyOptions({ ...topologyOptions, groupTypes: 'none' });
+        setTopologyOptions({ ...topologyOptions, groupTypes: 'auto' });
       }
     },
     [setMetricScope, config.scopes, topologyOptions, setTopologyOptions]

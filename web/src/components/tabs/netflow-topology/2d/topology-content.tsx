@@ -34,7 +34,6 @@ import {
   LayoutName,
   NodeData,
   toggleDirElementFilter,
-  TopologyGroupTypes,
   TopologyOptions
 } from '../../../../model/topology';
 import { usePrevious } from '../../../../utils/previous-hook';
@@ -207,14 +206,12 @@ export const TopologyContent: React.FC<TopologyContentProps> = ({
 
   const onStepInto = React.useCallback(
     (data: Decorated<ElementData>) => {
-      const groupTypes: TopologyGroupTypes = metricScope;
       const scope = getStepInto(
         metricScope,
         scopes.map(sc => sc.id)
       );
       if (data.nodeType && data.peer && scope) {
         setMetricScope(scope);
-        setOptions({ ...options, groupTypes });
         if (!isDirElementFiltered(data.nodeType, data.peer, 'src', filters.list, filterDefinitions)) {
           toggleDirElementFilter(
             data.nodeType,

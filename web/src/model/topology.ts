@@ -25,7 +25,7 @@ import { createPeer, getFormattedValue } from '../utils/metrics';
 import { defaultMetricFunction, defaultMetricType } from '../utils/router';
 import { FlowScope, Groups, Match, MetricFunction, MetricType, NodeType, StatFunction } from './flow-query';
 import { getStat } from './metrics';
-import { getStepInto, isDirectionnal, ScopeConfigDef } from './scope';
+import { getStepInto, isDirectionnal, resolveGroupTypes, ScopeConfigDef } from './scope';
 
 export enum LayoutName {
   threeD = '3d',
@@ -40,7 +40,7 @@ export enum LayoutName {
   grid = 'Grid'
 }
 
-export type TopologyGroupTypes = 'none' | Groups;
+export type TopologyGroupTypes = 'none' | 'auto' | Groups;
 
 export interface TopologyOptions {
   maxEdgeStat: number;
@@ -66,7 +66,7 @@ export const DefaultOptions: TopologyOptions = {
   startCollapsed: false,
   truncateLength: TruncateLength.M,
   layout: LayoutName.colaNoForce,
-  groupTypes: 'none',
+  groupTypes: 'auto',
   lowScale: 0.3,
   medScale: 0.5,
   metricFunction: defaultMetricFunction,
@@ -544,11 +544,12 @@ export const generateDataModel = (
   const addPossibleGroups = (peer: TopologyMetricPeer): NodeModel | undefined => {
     // groups are all possible scopes except last one
     const parentScopes = ContextSingleton.getScopes().slice(0, -1);
+    const resolvedGroups = resolveGroupTypes(options.groupTypes, metricScope, scopes);
 
     // build parent tree from biggest to smallest group
     let parent: NodeModel | undefined = undefined;
     parentScopes.forEach(sc => {
-      if (options.groupTypes.includes(`${sc.id}s`) && !_.isEmpty(peer[sc.id])) {
+      if (resolvedGroups.includes(`${sc.id}s`) && !_.isEmpty(peer[sc.id])) {
         parent = addGroup(
           { [sc.id]: peer[sc.id], namespace: ['namespace', 'owner'].includes(sc.id) ? peer.namespace : undefined },
           sc.id,
