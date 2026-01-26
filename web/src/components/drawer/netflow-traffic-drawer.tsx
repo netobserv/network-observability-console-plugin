@@ -24,6 +24,7 @@ import { isPromError } from '../../utils/errors';
 import { OverviewPanel } from '../../utils/overview-panels';
 import { TruncateLength } from '../dropdowns/truncate-dropdown';
 import { ErrorComponent, Size } from '../messages/error';
+import { ErrorBanner } from '../messages/error-banner';
 import { ViewId } from '../netflow-traffic';
 import FlowsQuerySummary from '../query-summary/flows-query-summary';
 import MetricsQuerySummary from '../query-summary/metrics-query-summary';
@@ -234,37 +235,51 @@ export const NetflowTrafficDrawer: React.FC<NetflowTrafficDrawerProps> = React.f
 
     const mainContent = () => {
       let content: JSX.Element | null = null;
-      if (props.error) {
+
+      // For overview and topology tabs: show error banner and partial metrics when possible
+      // For table tab or config errors: show full error page
+      // For topology: if main metrics are missing, show full error page
+      const hasTopologyMetrics = props.selectedViewId === 'topology' && (getTopologyMetrics()?.length || 0) > 0;
+      const showFullError =
+        props.error &&
+        (props.currentState.includes('configLoadError') ||
+          props.selectedViewId === 'table' ||
+          (props.selectedViewId === 'topology' && !hasTopologyMetrics));
+
+      if (showFullError) {
         content = (
           <ErrorComponent
             title={t('Unable to get {{item}}', {
               item: props.currentState.includes('configLoadError') ? t('config') : props.selectedViewId
             })}
-            error={props.error}
-            isLokiRelated={!props.currentState.includes('configLoadError') && !isPromError(props.error)}
+            error={props.error || t('Unknown error')}
+            isLokiRelated={!props.currentState.includes('configLoadError') && !isPromError(props.error || '')}
           />
         );
       } else {
         switch (props.selectedViewId) {
           case 'overview':
             content = (
-              <NetflowOverview
-                ref={overviewRef}
-                limit={props.limit}
-                panels={props.panels}
-                recordType={props.recordType}
-                scopes={props.scopes}
-                metricScope={props.metricScope}
-                setMetricScope={props.setMetricScope}
-                metrics={props.metrics}
-                loading={props.loading}
-                isDark={props.isDarkTheme}
-                resetDefaultFilters={getResetDefaultFiltersProp()}
-                clearFilters={getClearFiltersProp()}
-                truncateLength={props.overviewTruncateLength}
-                focus={props.overviewFocus}
-                setFocus={props.setOverviewFocus}
-              />
+              <>
+                {props.metrics.errors.length > 0 && <ErrorBanner errors={props.metrics.errors} />}
+                <NetflowOverview
+                  ref={overviewRef}
+                  limit={props.limit}
+                  panels={props.panels}
+                  recordType={props.recordType}
+                  scopes={props.scopes}
+                  metricScope={props.metricScope}
+                  setMetricScope={props.setMetricScope}
+                  metrics={props.metrics}
+                  loading={props.loading}
+                  isDark={props.isDarkTheme}
+                  resetDefaultFilters={getResetDefaultFiltersProp()}
+                  clearFilters={getClearFiltersProp()}
+                  truncateLength={props.overviewTruncateLength}
+                  focus={props.overviewFocus}
+                  setFocus={props.setOverviewFocus}
+                />
+              </>
             );
             break;
           case 'table':
@@ -291,31 +306,34 @@ export const NetflowTrafficDrawer: React.FC<NetflowTrafficDrawerProps> = React.f
             break;
           case 'topology':
             content = (
-              <NetflowTopology
-                ref={topologyRef}
-                loading={props.loading}
-                k8sModels={props.k8sModels}
-                metricFunction={props.topologyMetricFunction}
-                metricType={props.topologyMetricType}
-                metricScope={props.metricScope}
-                expectedNodes={[...props.topologyUDNIds]} // concat all expected nodes here
-                setMetricScope={props.setMetricScope}
-                metrics={getTopologyMetrics() || []}
-                droppedMetrics={getTopologyDroppedMetrics() || []}
-                options={props.topologyOptions}
-                setOptions={props.setTopologyOptions}
-                filters={props.filters}
-                filterDefinitions={props.filterDefinitions}
-                setFilters={props.setFilters}
-                selected={props.selectedElement}
-                onSelect={onElementSelect}
-                searchHandle={props.searchHandle}
-                searchEvent={props.searchEvent}
-                isDark={props.isDarkTheme}
-                scopes={props.scopes}
-                resetDefaultFilters={getResetDefaultFiltersProp()}
-                clearFilters={getClearFiltersProp()}
-              />
+              <>
+                {props.metrics.errors.length > 0 && <ErrorBanner errors={props.metrics.errors} />}
+                <NetflowTopology
+                  ref={topologyRef}
+                  loading={props.loading}
+                  k8sModels={props.k8sModels}
+                  metricFunction={props.topologyMetricFunction}
+                  metricType={props.topologyMetricType}
+                  metricScope={props.metricScope}
+                  expectedNodes={[...props.topologyUDNIds]} // concat all expected nodes here
+                  setMetricScope={props.setMetricScope}
+                  metrics={getTopologyMetrics() || []}
+                  droppedMetrics={getTopologyDroppedMetrics() || []}
+                  options={props.topologyOptions}
+                  setOptions={props.setTopologyOptions}
+                  filters={props.filters}
+                  filterDefinitions={props.filterDefinitions}
+                  setFilters={props.setFilters}
+                  selected={props.selectedElement}
+                  onSelect={onElementSelect}
+                  searchHandle={props.searchHandle}
+                  searchEvent={props.searchEvent}
+                  isDark={props.isDarkTheme}
+                  scopes={props.scopes}
+                  resetDefaultFilters={getResetDefaultFiltersProp()}
+                  clearFilters={getClearFiltersProp()}
+                />
+              </>
             );
             break;
           default:

@@ -130,6 +130,11 @@ export type TotalRateMetrics = {
   packets?: TopologyMetrics;
 };
 
+export type MetricError = {
+  metricType: string;
+  error: string;
+};
+
 export type NetflowMetrics = {
   rateMetrics?: RateMetrics;
   droppedRateMetrics?: RateMetrics;
@@ -147,11 +152,13 @@ export type NetflowMetrics = {
   totalRttMetric?: TotalFunctionMetrics;
   customMetrics: Map<string, TopologyMetrics[] | GenericMetric[]>;
   totalCustomMetrics: Map<string, TopologyMetrics | GenericMetric>;
+  errors: MetricError[];
 };
 
 export const defaultNetflowMetrics = {
   customMetrics: new Map(),
-  totalCustomMetrics: new Map()
+  totalCustomMetrics: new Map(),
+  errors: []
 };
 
 export const initRateMetricKeys = (ids: string[]) => {
