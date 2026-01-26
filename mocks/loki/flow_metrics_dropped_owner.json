@@ -184,6 +184,106 @@
             "0.001388888888888889"
           ]
         ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "production",
+          "DstK8S_OwnerName": "gateway-api",
+          "DstK8S_OwnerType": "Gateway",
+          "SrcK8S_Namespace": "production",
+          "SrcK8S_OwnerName": "web-deployment",
+          "SrcK8S_OwnerType": "Deployment"
+        },
+        "values": [
+          [
+            1708011360,
+            "0.5"
+          ],
+          [
+            1708011720,
+            "0.8"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "gateway-system",
+          "DstK8S_OwnerName": "gateway-external",
+          "DstK8S_OwnerType": "Gateway",
+          "SrcK8S_Namespace": "gateway-system",
+          "SrcK8S_OwnerName": "gateway-internal",
+          "SrcK8S_OwnerType": "Gateway"
+        },
+        "values": [
+          [
+            1708011360,
+            "0.3"
+          ],
+          [
+            1708011720,
+            "0.6"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "vms",
+          "DstK8S_OwnerName": "vm-ubuntu-server",
+          "DstK8S_OwnerType": "VirtualMachine",
+          "SrcK8S_Namespace": "vms",
+          "SrcK8S_OwnerName": "vm-centos-server",
+          "SrcK8S_OwnerType": "VirtualMachine"
+        },
+        "values": [
+          [
+            1708011360,
+            "0.2"
+          ],
+          [
+            1708011720,
+            "0.4"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "vms",
+          "DstK8S_OwnerName": "vmi-windows",
+          "DstK8S_OwnerType": "VirtualMachineInstance",
+          "SrcK8S_Namespace": "vms",
+          "SrcK8S_OwnerName": "vmi-linux",
+          "SrcK8S_OwnerType": "VirtualMachineInstance"
+        },
+        "values": [
+          [
+            1708011360,
+            "0.15"
+          ],
+          [
+            1708011720,
+            "0.35"
+          ]
+        ]
+      },
+      {
+        "metric": {
+          "DstK8S_Namespace": "production",
+          "DstK8S_OwnerName": "app-deployment",
+          "DstK8S_OwnerType": "Deployment",
+          "SrcK8S_Namespace": "vms",
+          "SrcK8S_OwnerName": "vm-ubuntu-server",
+          "SrcK8S_OwnerType": "VirtualMachine"
+        },
+        "values": [
+          [
+            1708011360,
+            "0.1"
+          ],
+          [
+            1708011720,
+            "0.25"
+          ]
+        ]
       }
     ],
     "stats": {
@@ -195,7 +295,7 @@
         "execTime": 0.509199253,
         "queueTime": 5.761458995,
         "subqueries": 0,
-        "totalEntriesReturned": 11,
+        "totalEntriesReturned": 16,
         "splits": 6,
         "shards": 48,
         "totalPostFilterLines": 810,

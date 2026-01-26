@@ -1,8 +1,8 @@
 import { Dropdown, DropdownItem, MenuToggle, MenuToggleElement } from '@patternfly/react-core';
-import { LongArrowAltDownIcon, LongArrowAltUpIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Match } from '../../model/flow-query';
+import { BackAndForthIcon } from '../icons';
 
 export interface MatchDropdownProps {
   selected: Match;
@@ -26,12 +26,7 @@ export const MatchDropdown: React.FC<MatchDropdownProps> = ({ allowBidirectional
       case 'bidirectional':
         if (allowBidirectional) {
           if (toggle) {
-            return (
-              <div style={{ transform: 'rotate(90deg)' }}>
-                <LongArrowAltUpIcon />
-                <LongArrowAltDownIcon />
-              </div>
-            );
+            return <BackAndForthIcon size="1.5em" />;
           } else {
             return t('Bidirectional');
           }

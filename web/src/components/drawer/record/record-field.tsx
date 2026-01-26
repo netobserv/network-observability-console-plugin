@@ -1,6 +1,6 @@
 import { ResourceIcon, ResourceLink } from '@openshift-console/dynamic-plugin-sdk';
 import { Button, Flex, FlexItem, Popover, Text, TextContent, TextVariants, Tooltip } from '@patternfly/react-core';
-import { FilterIcon, GlobeAmericasIcon, TimesIcon, ToggleOffIcon, ToggleOnIcon } from '@patternfly/react-icons';
+import { GlobeAmericasIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
@@ -16,6 +16,7 @@ import { formatPort } from '../../../utils/port';
 import { formatProtocol, getProtocolDocUrl } from '../../../utils/protocol';
 import { getFlagsList, getTCPFlagsDocUrl } from '../../../utils/tcp-flags';
 import { Size } from '../../dropdowns/table-display-dropdown';
+import { FilterAddIcon, FilterRemoveIcon, FilterToggleOffIcon, FilterToggleOnIcon } from '../../icons';
 import './record-field.css';
 
 export type RecordFieldFilter = {
@@ -635,14 +636,14 @@ export const RecordField: React.FC<RecordFieldProps> = ({
           <Button variant="link" aria-label="Filter" onClick={filter.onClick}>
             {filter.type === 'filter' ? (
               filter.isDelete ? (
-                <TimesIcon />
+                <FilterRemoveIcon />
               ) : (
-                <FilterIcon />
+                <FilterAddIcon />
               )
             ) : filter.isDelete ? (
-              <ToggleOffIcon />
+              <FilterToggleOffIcon />
             ) : (
-              <ToggleOnIcon />
+              <FilterToggleOnIcon />
             )}
           </Button>
         </Tooltip>
