@@ -17,7 +17,7 @@ import { RefreshDropdown } from '../dropdowns/refresh-dropdown';
 import { HealthDrawerContainer } from './health-drawer-container';
 import HealthError from './health-error';
 import { HealthGlobal } from './health-global';
-import { buildStats, isSilenced, RecordingRuleMetric } from './health-helper';
+import { buildStats, isSilenced, RecordingRuleMetric, rulesToHealthItems } from './health-helper';
 import { HealthScoringDrawer } from './health-scoring-drawer';
 import { HealthSummary } from './health-summary';
 import { HealthTabTitle } from './tab-title';
@@ -94,31 +94,32 @@ export const NetworkHealth: React.FC<{}> = ({}) => {
         const recordingRules = res.data.groups.flatMap(group => group.rules);
 
         // For each recording rule, query its current metric values
-        const queries = recordingRules.map(rule => {
-          return queryPrometheusMetric(rule.name)
-            .then((metricRes: PrometheusResponse) => {
-              // Store the raw metric results with the rule metadata
-              if (metricRes.data && metricRes.data.result) {
-                return {
-                  template: rule.labels?.template,
-                  name: rule.name,
-                  values: metricRes.data.result
-                    .filter(item => item.value && item.value.length > 1)
-                    .map(item => ({
-                      labels: item.metric,
-                      value: parseFloat(item.value![1])
-                    }))
-                } as RecordingRuleMetric;
-              }
-              return { template: rule.labels?.template, name: rule.name, values: [] } as RecordingRuleMetric;
-            })
-            .catch((): RecordingRuleMetric => {
-              return { template: rule.labels?.template, name: rule.name, values: [] };
-            });
-        });
+        const queries = recordingRules
+          .filter(rule => !!rule.labels?.template)
+          .map(rule => {
+            return queryPrometheusMetric(rule.name)
+              .then((metricRes: PrometheusResponse): RecordingRuleMetric | undefined => {
+                // Store the raw metric results with the rule metadata
+                if (metricRes.data && metricRes.data.result) {
+                  return {
+                    name: rule.name,
+                    values: metricRes.data.result
+                      .filter(item => item.value && item.value.length > 1)
+                      .map(item => ({
+                        labels: item.metric,
+                        value: parseFloat(item.value![1])
+                      }))
+                  };
+                }
+                return undefined;
+              })
+              .catch(() => {
+                return undefined;
+              });
+          });
 
         Promise.all(queries).then(metrics => {
-          setRecordingRulesMetrics(metrics);
+          setRecordingRulesMetrics(metrics.filter((m?: RecordingRuleMetric): m is RecordingRuleMetric => !!m));
         });
       })
       .catch(err => {
@@ -152,7 +153,8 @@ export const NetworkHealth: React.FC<{}> = ({}) => {
     return { ...r, alerts: alerts };
   });
 
-  const stats = buildStats(rules, config.healthRules || [], recordingRulesMetrics);
+  const healthItems = rulesToHealthItems(rules, config.recordingAnnotations || {}, recordingRulesMetrics);
+  const stats = buildStats(healthItems);
 
   return (
     <PageSection id="pageSection" className={`${isDarkTheme ? 'dark' : 'light'}`}>
@@ -239,14 +241,11 @@ export const NetworkHealth: React.FC<{}> = ({}) => {
                   </Button>
                 </FlexItem>
               </Flex>
-              {activeTabKey === 'global' && (
-                <HealthGlobal info={stats.global} recordingRules={stats.recordingRules.global} isDark={isDarkTheme} />
-              )}
+              {activeTabKey === 'global' && <HealthGlobal info={stats.global} isDark={isDarkTheme} />}
               {activeTabKey === 'per-node' && (
                 <HealthDrawerContainer
                   title={t('Rule violations per node')}
                   stats={stats.byNode}
-                  recordingRulesStats={stats.recordingRules.byNode}
                   kind={'Node'}
                   isDark={isDarkTheme}
                 />
@@ -255,7 +254,6 @@ export const NetworkHealth: React.FC<{}> = ({}) => {
                 <HealthDrawerContainer
                   title={t('Rule violations per namespace')}
                   stats={stats.byNamespace}
-                  recordingRulesStats={stats.recordingRules.byNamespace}
                   kind={'Namespace'}
                   isDark={isDarkTheme}
                 />
@@ -264,7 +262,6 @@ export const NetworkHealth: React.FC<{}> = ({}) => {
                 <HealthDrawerContainer
                   title={t('Rule violations per workload')}
                   stats={stats.byOwner}
-                  recordingRulesStats={stats.recordingRules.byOwner}
                   kind={'Owner'}
                   isDark={isDarkTheme}
                 />

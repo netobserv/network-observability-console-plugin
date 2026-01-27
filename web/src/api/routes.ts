@@ -227,7 +227,7 @@ export const getConfig = (): Promise<Config> => {
       promLabels: r.data.promLabels || defaultConfig.promLabels,
       lokiLabels: r.data.lokiLabels || defaultConfig.lokiLabels,
       maxChunkAgeMs: r.data.maxChunkAgeMs,
-      healthRules: r.data.healthRules || defaultConfig.healthRules
+      recordingAnnotations: r.data.recordingAnnotations || defaultConfig.recordingAnnotations
     };
   });
 };
