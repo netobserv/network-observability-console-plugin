@@ -41,10 +41,12 @@ export type HealthStats = {
   global: HealthStat;
   byNamespace: HealthStat[];
   byNode: HealthStat[];
+  byOwner: HealthStat[];
   recordingRules: {
     global: RecordingRulesByResource;
     byNamespace: RecordingRulesByResource[];
     byNode: RecordingRulesByResource[];
+    byOwner: RecordingRulesByResource[];
   };
 };
 
@@ -81,6 +83,7 @@ type HealthMetadata = {
   unit: string;
   nodeLabels?: string[];
   namespaceLabels?: string[];
+  ownerLabels?: string[];
   links: { name: string; url: string }[];
   trafficLink?: TrafficLink;
 };
@@ -132,6 +135,7 @@ const processRecordingRules = (
   global: RecordingRulesByResource;
   byNamespace: RecordingRulesByResource[];
   byNode: RecordingRulesByResource[];
+  byOwner: RecordingRulesByResource[];
 } => {
   const recordingRuleItems: RecordingRuleItem[] = [];
 
@@ -199,6 +203,7 @@ const processRecordingRules = (
   // Group by namespace and node
   const namespaceGroups: { [key: string]: RecordingRuleItem[] } = {};
   const nodeGroups: { [key: string]: RecordingRuleItem[] } = {};
+  const ownerGroups: { [key: string]: RecordingRuleItem[] } = {};
   const globalItems: RecordingRuleItem[] = [];
 
   recordingRuleItems.forEach(item => {
@@ -207,6 +212,9 @@ const processRecordingRules = (
       item.labels.namespace || item.labels.Namespace || item.labels.SrcK8S_Namespace || item.labels.DstK8S_Namespace;
     // Check for node labels
     const node = item.labels.node || item.labels.Node || item.labels.SrcK8S_HostName || item.labels.DstK8S_HostNode;
+    // Check for owner labels
+    const owner =
+      item.labels.owner || item.labels.Owner || item.labels.SrcK8S_OwnerName || item.labels.DstK8S_OwnerName;
 
     if (namespace) {
       if (!namespaceGroups[namespace]) {
@@ -218,6 +226,11 @@ const processRecordingRules = (
         nodeGroups[node] = [];
       }
       nodeGroups[node].push(item);
+    } else if (owner) {
+      if (!ownerGroups[owner]) {
+        ownerGroups[owner] = [];
+      }
+      ownerGroups[owner].push(item);
     } else {
       globalItems.push(item);
     }
@@ -237,23 +250,26 @@ const processRecordingRules = (
   const global = buildResourceGroup('', globalItems);
   const byNamespace = Object.keys(namespaceGroups).map(ns => buildResourceGroup(ns, namespaceGroups[ns]));
   const byNode = Object.keys(nodeGroups).map(n => buildResourceGroup(n, nodeGroups[n]));
+  const byOwner = Object.keys(ownerGroups).map(o => buildResourceGroup(o, ownerGroups[o]));
 
   // Compute scores for all resource groups
-  [global, ...byNamespace, ...byNode].forEach(r => {
+  [global, ...byNamespace, ...byNode, ...byOwner].forEach(r => {
     r.score = computeRecordingRulesScore(r);
   });
 
   return {
     global,
     byNamespace,
-    byNode
+    byNode,
+    byOwner
   };
 };
 
 export const buildStats = (
   rules: Rule[],
-  healthRulesMetadata: HealthRuleMetadata[],
-  recordingRulesMetrics: RecordingRuleMetric[] = []
+  healthRulesMetadata: HealthRuleMetadata[] = [],
+  recordingRulesMetrics: RecordingRuleMetric[] = [],
+  skipInactive = false
 ): HealthStats => {
   const ruleWithMD: RuleWithMetadata[] = rules.map(r => {
     const md = getHealthMetadata(r.annotations);
@@ -270,6 +286,7 @@ export const buildStats = (
 
   const namespaceLabels: string[] = [];
   const nodeLabels: string[] = [];
+  const ownerLabels: string[] = [];
   alerts.forEach(a => {
     if (a.metadata.namespaceLabels) {
       a.metadata.namespaceLabels.forEach(l => {
@@ -285,25 +302,42 @@ export const buildStats = (
         }
       });
     }
+    if (a.metadata.ownerLabels) {
+      a.metadata.ownerLabels.forEach(l => {
+        if (!ownerLabels.includes(l)) {
+          ownerLabels.push(l);
+        }
+      });
+    }
   });
-  const global = filterGlobals(alerts, [...namespaceLabels, ...nodeLabels]);
+  const global = filterGlobals(alerts, [...namespaceLabels, ...nodeLabels, ...ownerLabels]);
   const byNamespace = groupBy(alerts, namespaceLabels);
   const byNode = groupBy(alerts, nodeLabels);
-  // Inject inactive rules
-  const globalRules = ruleWithMD.filter(r => _.isEmpty(r.metadata.namespaceLabels) && _.isEmpty(r.metadata.nodeLabels));
-  const namespaceRules = ruleWithMD.filter(r => !_.isEmpty(r.metadata.namespaceLabels));
-  const nodeRules = ruleWithMD.filter(r => !_.isEmpty(r.metadata.nodeLabels));
-  injectInactive(globalRules, [global]);
-  injectInactive(namespaceRules, byNamespace);
-  injectInactive(nodeRules, byNode);
-  [global, ...byNamespace, ...byNode].forEach(r => {
+  const byOwner = groupBy(alerts, ownerLabels);
+
+  // Inject inactive rules (skip if requested, e.g., for topology)
+  if (!skipInactive) {
+    const globalRules = ruleWithMD.filter(
+      r =>
+        _.isEmpty(r.metadata.namespaceLabels) && _.isEmpty(r.metadata.nodeLabels) && _.isEmpty(r.metadata.ownerLabels)
+    );
+    const namespaceRules = ruleWithMD.filter(r => !_.isEmpty(r.metadata.namespaceLabels));
+    const nodeRules = ruleWithMD.filter(r => !_.isEmpty(r.metadata.nodeLabels));
+    const ownerRules = ruleWithMD.filter(r => !_.isEmpty(r.metadata.ownerLabels));
+    injectInactive(globalRules, [global]);
+    injectInactive(namespaceRules, byNamespace);
+    injectInactive(nodeRules, byNode);
+    injectInactive(ownerRules, byOwner);
+  }
+
+  [global, ...byNamespace, ...byNode, ...byOwner].forEach(r => {
     r.score = computeScore(r);
   });
 
   // Process recording rules
   const recordingRulesProcessed = processRecordingRules(recordingRulesMetrics, healthRulesMetadata);
 
-  return { global, byNamespace, byNode, recordingRules: recordingRulesProcessed };
+  return { global, byNamespace, byNode, byOwner, recordingRules: recordingRulesProcessed };
 };
 
 const filterGlobals = (alerts: AlertWithRuleName[], nonGlobalLabels: string[]): HealthStat => {
@@ -463,6 +497,21 @@ export const getTrafficLink = (kind: string, resourceName: string, a: AlertWithR
     case 'Node':
       filters.push(`${side}_owner_name="${resourceName}"`);
       filters.push(`${side}_kind="Node"`);
+      params += `&bnf=${bnf}`;
+      break;
+    case 'Owner':
+      // Filter by owner name
+      filters.push(`${side}_owner_name="${resourceName}"`);
+      // For workload alerts, namespace and kind are directly in the labels
+      const namespace = a.labels.namespace;
+      const ownerKind = a.labels.kind;
+
+      if (namespace) {
+        filters.push(`${side}_namespace="${namespace}"`);
+      }
+      if (ownerKind) {
+        filters.push(`${side}_kind="${ownerKind}"`);
+      }
       params += `&bnf=${bnf}`;
       break;
   }
@@ -758,101 +807,4 @@ export const isSilenced = (silence: SilenceMatcher[], labels: PrometheusLabels):
     }
   }
   return true;
-};
-
-// Build alerts for topology view - only includes firing alerts and dynamically discovers all label dimensions
-export const buildTopologyAlerts = (rules: Rule[]): { [dimension: string]: HealthStat[] } => {
-  // Extract all firing alerts from rules
-  const firingAlerts: AlertWithRuleName[] = [];
-
-  rules.forEach(r => {
-    r.alerts.forEach(a => {
-      if (a.state === 'firing') {
-        if (typeof a.value === 'string') {
-          a.value = parseFloat(a.value);
-        }
-        firingAlerts.push({
-          ...a,
-          ruleName: r.name,
-          ruleID: r.id,
-          metadata: getHealthMetadata(r.annotations)
-        });
-      }
-    });
-  });
-
-  if (firingAlerts.length === 0) {
-    return {
-      byNamespace: [],
-      byNode: [],
-      byWorkload: [],
-      byCluster: []
-    };
-  }
-
-  // Discover all unique label keys across firing alerts (excluding system labels)
-  const systemLabels = new Set(['alertname', 'app', 'netobserv', 'severity']);
-  const allLabelKeys = new Set<string>();
-
-  firingAlerts.forEach(a => {
-    Object.keys(a.labels).forEach(key => {
-      if (!systemLabels.has(key)) {
-        allLabelKeys.add(key);
-      }
-    });
-  });
-
-  // Group by each discovered label dimension
-  const result: { [dimension: string]: HealthStat[] } = {};
-
-  allLabelKeys.forEach(labelKey => {
-    const grouped: { [value: string]: AlertWithRuleName[] } = {};
-
-    firingAlerts.forEach(alert => {
-      if (labelKey in alert.labels) {
-        const labelValue = alert.labels[labelKey] as string;
-        if (!grouped[labelValue]) {
-          grouped[labelValue] = [];
-        }
-        grouped[labelValue].push(alert);
-      }
-    });
-
-    // Convert grouped alerts to ByResource format
-    const dimensionAlerts: HealthStat[] = [];
-    Object.entries(grouped).forEach(([name, alerts]) => {
-      const br: HealthStat = {
-        name,
-        critical: { firing: [], pending: [], silenced: [], inactive: [] },
-        warning: { firing: [], pending: [], silenced: [], inactive: [] },
-        other: { firing: [], pending: [], silenced: [], inactive: [] },
-        score: 0
-      };
-
-      _.uniqWith(alerts, (a, b) => {
-        return a.ruleName === b.ruleName && _.isEqual(a.labels, b.labels);
-      }).forEach(alert => {
-        let stats: SeverityStats;
-        switch (alert.labels.severity) {
-          case 'critical':
-            stats = br.critical;
-            break;
-          case 'warning':
-            stats = br.warning;
-            break;
-          default:
-            stats = br.other;
-            break;
-        }
-        // Only populate firing alerts for topology
-        stats.firing.push(alert);
-      });
-
-      dimensionAlerts.push(br);
-    });
-
-    result[`by${labelKey.charAt(0).toUpperCase()}${labelKey.slice(1)}`] = dimensionAlerts;
-  });
-
-  return result;
 };

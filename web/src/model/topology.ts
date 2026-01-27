@@ -500,18 +500,27 @@ const getResourceAlerts = (
     };
     let hasAlerts = false;
 
-    // Check in priority order: critical > warning > info (other)
+    // Check all alert states: firing, pending, silenced
     for (const severity of ['critical', 'warning', 'other'] as const) {
-      if (resource[severity].firing.length > 0) {
-        for (const alert of resource[severity].firing) {
-          if (matchesAlert(peer, alert.labels)) {
-            matchedResource[severity].firing.push(alert);
-            hasAlerts = true;
-          }
+      for (const alert of resource[severity].firing) {
+        if (matchesAlert(peer, alert.labels)) {
+          matchedResource[severity].firing.push(alert);
+          hasAlerts = true;
         }
       }
-
-      // skip pending, silenced and inactive alerts since those are not relevant in topology view
+      for (const alert of resource[severity].pending) {
+        if (matchesAlert(peer, alert.labels)) {
+          matchedResource[severity].pending.push(alert);
+          hasAlerts = true;
+        }
+      }
+      for (const alert of resource[severity].silenced) {
+        if (matchesAlert(peer, alert.labels)) {
+          matchedResource[severity].silenced.push(alert);
+          hasAlerts = true;
+        }
+      }
+      // Note: inactive alerts don't have labels to match against, so we skip them
     }
 
     if (hasAlerts) {

@@ -32,7 +32,7 @@ import { GraphElementPeer, LayoutName, TopologyOptions } from '../../../model/to
 import { TimeRange } from '../../../utils/datetime';
 import { getHTTPErrorDetails } from '../../../utils/errors';
 import { observeDOMRect } from '../../../utils/metrics-helper';
-import { buildTopologyAlerts, HealthStat } from '../../health/health-helper';
+import { buildStats, HealthStat } from '../../health/health-helper';
 import { SearchEvent, SearchHandle } from '../../search/search';
 import { ScopeSlider } from '../../slider/scope-slider';
 import componentFactory from './2d/componentFactories/componentFactory';
@@ -120,8 +120,14 @@ export const NetflowTopology: React.FC<NetflowTopologyProps> = React.forwardRef(
           return group.rules;
         });
 
-        // Build topology alerts (only firing alerts, auto-discovers all label dimensions)
-        const topologyAlerts = buildTopologyAlerts(rules);
+        // Build topology alerts (includes all alert states, skip inactive rules and recording rules)
+        const stats = buildStats(rules, [], [], true);
+        // Convert HealthStats to dictionary format for topology
+        const topologyAlerts: { [dimension: string]: HealthStat[] } = {
+          byNamespace: stats.byNamespace,
+          byNode: stats.byNode,
+          byOwner: stats.byOwner
+        };
         setAlerts(topologyAlerts);
         setLastStatsUpdateTime(Date.now());
       } catch (err) {

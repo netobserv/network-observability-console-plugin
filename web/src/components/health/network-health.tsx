@@ -220,6 +220,11 @@ export const NetworkHealth: React.FC<{}> = ({}) => {
                       title={<HealthTabTitle title={t('Namespaces')} stats={stats.byNamespace} />}
                       aria-label="Tab per namespace"
                     />
+                    <Tab
+                      eventKey={'per-owner'}
+                      title={<HealthTabTitle title={t('Workloads')} stats={stats.byOwner} />}
+                      aria-label="Tab per owner"
+                    />
                   </Tabs>
                 </FlexItem>
                 <FlexItem className={`${isDarkTheme ? 'dark' : 'light'}-bottom-border`}>
@@ -252,6 +257,15 @@ export const NetworkHealth: React.FC<{}> = ({}) => {
                   stats={stats.byNamespace}
                   recordingRulesStats={stats.recordingRules.byNamespace}
                   kind={'Namespace'}
+                  isDark={isDarkTheme}
+                />
+              )}
+              {activeTabKey === 'per-owner' && (
+                <HealthDrawerContainer
+                  title={t('Rule violations per workload')}
+                  stats={stats.byOwner}
+                  recordingRulesStats={stats.recordingRules.byOwner}
+                  kind={'Owner'}
                   isDark={isDarkTheme}
                 />
               )}

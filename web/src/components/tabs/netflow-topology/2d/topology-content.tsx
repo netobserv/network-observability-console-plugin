@@ -237,7 +237,7 @@ export const TopologyContent: React.FC<TopologyContentProps> = ({
         onSelect(undefined);
       }
     },
-    [metricScope, setMetricScope, scopes, setOptions, options, filters.list, filterDefinitions, onSelect, setFilters]
+    [metricScope, setMetricScope, scopes, filters.list, filterDefinitions, onSelect, setFilters]
   );
 
   const onHover = React.useCallback((data: Decorated<ElementData>) => {
