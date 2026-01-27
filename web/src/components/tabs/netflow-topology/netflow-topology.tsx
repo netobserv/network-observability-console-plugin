@@ -276,7 +276,6 @@ export const NetflowTopology: React.FC<NetflowTopologyProps> = React.forwardRef(
               metrics={displayedMetrics}
               droppedMetrics={props.droppedMetrics}
               options={props.options}
-              setOptions={props.setOptions}
               filters={props.filters}
               filterDefinitions={props.filterDefinitions}
               setFilters={props.setFilters}

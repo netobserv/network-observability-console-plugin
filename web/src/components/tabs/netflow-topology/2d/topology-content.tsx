@@ -65,7 +65,6 @@ export interface TopologyContentProps {
   metrics: TopologyMetrics[];
   droppedMetrics: TopologyMetrics[];
   options: TopologyOptions;
-  setOptions: (o: TopologyOptions) => void;
   filters: Filters;
   filterDefinitions: FilterDefinition[];
   setFilters: (v: Filters) => void;
@@ -91,7 +90,6 @@ export const TopologyContent: React.FC<TopologyContentProps> = ({
   metrics,
   droppedMetrics,
   options,
-  setOptions,
   filters,
   filterDefinitions,
   setFilters,
