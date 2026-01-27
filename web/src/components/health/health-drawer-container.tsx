@@ -19,20 +19,20 @@ import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { HealthCard } from './health-card';
-import { ByResource, RecordingRulesByResource } from './health-helper';
+import { HealthStat, RecordingRulesByResource } from './health-helper';
 import { RuleDetails } from './rule-details';
 
 // Unified item that can contain both alerts and recording rules
 interface UnifiedResourceItem {
   name: string;
-  alertInfo?: ByResource;
+  alertInfo?: HealthStat;
   recordingInfo?: RecordingRulesByResource;
   score: number;
 }
 
 export interface HealthDrawerContainerProps {
   title: string;
-  stats: ByResource[];
+  stats: HealthStat[];
   recordingRulesStats?: RecordingRulesByResource[];
   kind: string;
   isDark: boolean;

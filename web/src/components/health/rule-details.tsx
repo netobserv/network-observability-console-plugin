@@ -8,13 +8,13 @@ import { valueFormat } from '../../utils/format';
 import { HealthColorSquare } from './health-color-square';
 import {
   AlertWithRuleName,
-  ByResource,
   getAlertFilteredLabels,
   getAlertLink,
   getAllAlerts,
   getRecordingRuleMetricLink,
   getSeverityColor,
   getTrafficLink,
+  HealthStat,
   parseRecordingRuleDescription,
   RecordingRuleItem,
   RecordingRulesByResource
@@ -23,7 +23,7 @@ import './rule-details.css';
 
 export interface RuleDetailsProps {
   kind: string;
-  alertInfo?: ByResource;
+  alertInfo?: HealthStat;
   recordingRuleInfo?: RecordingRulesByResource;
 }
 

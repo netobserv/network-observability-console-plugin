@@ -7,11 +7,11 @@ import {
   InfoAltIcon
 } from '@patternfly/react-icons';
 import * as React from 'react';
-import { ByResource } from './health-helper';
+import { HealthStat } from './health-helper';
 
 export interface HealthTabTitleProps {
   title: string;
-  stats: ByResource[];
+  stats: HealthStat[];
 }
 
 export const HealthTabTitle: React.FC<HealthTabTitleProps> = ({ stats, title }) => {

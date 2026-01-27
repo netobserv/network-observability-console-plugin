@@ -46,6 +46,8 @@ const getStatusIcon = (status: NodeStatus) => {
       return <ExclamationTriangleIcon className="pf-m-warning" />;
     case NodeStatus.success:
       return <CheckCircleIcon className="pf-m-success" />;
+    case NodeStatus.info:
+      return <CheckCircleIcon className="pf-m-info" />;
     default:
       return null;
   }

@@ -14,12 +14,12 @@ import { BellIcon, ExclamationCircleIcon, ExclamationTriangleIcon, InfoAltIcon }
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { valueFormat } from '../../utils/format';
-import { ByResource, computeUnifiedScore, RecordingRulesByResource } from './health-helper';
+import { computeUnifiedScore, HealthStat, RecordingRulesByResource } from './health-helper';
 
 export interface HealthCardProps {
   name?: string;
   kind?: string;
-  alertInfo?: ByResource;
+  alertInfo?: HealthStat;
   recordingInfo?: RecordingRulesByResource;
   isDark: boolean;
   isSelected: boolean;

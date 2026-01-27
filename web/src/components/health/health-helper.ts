@@ -38,9 +38,9 @@ export type RecordingRuleMetric = {
 };
 
 export type HealthStats = {
-  global: ByResource;
-  byNamespace: ByResource[];
-  byNode: ByResource[];
+  global: HealthStat;
+  byNamespace: HealthStat[];
+  byNode: HealthStat[];
   recordingRules: {
     global: RecordingRulesByResource;
     byNamespace: RecordingRulesByResource[];
@@ -48,7 +48,7 @@ export type HealthStats = {
   };
 };
 
-export type ByResource = {
+export type HealthStat = {
   name: string;
   critical: SeverityStats;
   warning: SeverityStats;
@@ -109,7 +109,7 @@ const getHealthMetadata = (annotations: PrometheusLabels): HealthMetadata => {
     },
     links: []
   };
-  if ('netobserv_io_network_health' in annotations) {
+  if (annotations && 'netobserv_io_network_health' in annotations) {
     const md = (JSON.parse(annotations['netobserv_io_network_health']) as HealthMetadata) || undefined;
     if (md) {
       // Setup defaults and derived
@@ -306,13 +306,13 @@ export const buildStats = (
   return { global, byNamespace, byNode, recordingRules: recordingRulesProcessed };
 };
 
-const filterGlobals = (alerts: AlertWithRuleName[], nonGlobalLabels: string[]): ByResource => {
+const filterGlobals = (alerts: AlertWithRuleName[], nonGlobalLabels: string[]): HealthStat => {
   // Keep only rules where none of the non-global labels are set
   const filtered = alerts.filter(a => !nonGlobalLabels.some(l => l in a.labels));
   return statsFromGrouped('', filtered);
 };
 
-const groupBy = (alerts: AlertWithRuleName[], labels: string[]): ByResource[] => {
+const groupBy = (alerts: AlertWithRuleName[], labels: string[]): HealthStat[] => {
   if (labels.length === 0) {
     return [];
   }
@@ -330,7 +330,7 @@ const groupBy = (alerts: AlertWithRuleName[], labels: string[]): ByResource[] =>
       }
     });
   });
-  const stats: ByResource[] = [];
+  const stats: HealthStat[] = [];
   _.keys(groups).forEach(k => {
     if (k) {
       stats.push(statsFromGrouped(k, groups[k]));
@@ -339,8 +339,8 @@ const groupBy = (alerts: AlertWithRuleName[], labels: string[]): ByResource[] =>
   return stats;
 };
 
-const statsFromGrouped = (name: string, grouped: AlertWithRuleName[]): ByResource => {
-  const br: ByResource = {
+const statsFromGrouped = (name: string, grouped: AlertWithRuleName[]): HealthStat => {
+  const br: HealthStat = {
     name: name,
     critical: { firing: [], pending: [], silenced: [], inactive: [] },
     warning: { firing: [], pending: [], silenced: [], inactive: [] },
@@ -377,7 +377,7 @@ const statsFromGrouped = (name: string, grouped: AlertWithRuleName[]): ByResourc
   return br;
 };
 
-const injectInactive = (rules: RuleWithMetadata[], groups: ByResource[]) => {
+const injectInactive = (rules: RuleWithMetadata[], groups: HealthStat[]) => {
   groups.forEach(g => {
     const allAlerts = getAllAlerts(g).map(a => a.ruleName);
     rules.forEach(r => {
@@ -400,7 +400,7 @@ const injectInactive = (rules: RuleWithMetadata[], groups: ByResource[]) => {
   });
 };
 
-export const getAllAlerts = (g: ByResource): AlertWithRuleName[] => {
+export const getAllAlerts = (g: HealthStat): AlertWithRuleName[] => {
   return [
     ...g.critical.firing,
     ...g.warning.firing,
@@ -542,7 +542,7 @@ const computeWeightedScore = (scores: ScoreDetail[]): number => {
 };
 
 // Score [0,10]; higher is better
-export const computeScore = (r: ByResource): number => {
+export const computeScore = (r: HealthStat): number => {
   const allAlerts = getAllAlerts(r);
   const allScores = allAlerts
     .map(computeAlertScore)
@@ -628,7 +628,7 @@ export const computeAlertScore = (a: AlertWithRuleName): ScoreDetail => {
 
 // Unified score combining both alerts and recording rules
 // Score [0,10]; higher is better
-export const computeUnifiedScore = (alertInfo?: ByResource, recordingInfo?: RecordingRulesByResource): number => {
+export const computeUnifiedScore = (alertInfo?: HealthStat, recordingInfo?: RecordingRulesByResource): number => {
   const scores: ScoreDetail[] = [];
 
   // Collect alert scores
@@ -758,4 +758,101 @@ export const isSilenced = (silence: SilenceMatcher[], labels: PrometheusLabels):
     }
   }
   return true;
+};
+
+// Build alerts for topology view - only includes firing alerts and dynamically discovers all label dimensions
+export const buildTopologyAlerts = (rules: Rule[]): { [dimension: string]: HealthStat[] } => {
+  // Extract all firing alerts from rules
+  const firingAlerts: AlertWithRuleName[] = [];
+
+  rules.forEach(r => {
+    r.alerts.forEach(a => {
+      if (a.state === 'firing') {
+        if (typeof a.value === 'string') {
+          a.value = parseFloat(a.value);
+        }
+        firingAlerts.push({
+          ...a,
+          ruleName: r.name,
+          ruleID: r.id,
+          metadata: getHealthMetadata(r.annotations)
+        });
+      }
+    });
+  });
+
+  if (firingAlerts.length === 0) {
+    return {
+      byNamespace: [],
+      byNode: [],
+      byWorkload: [],
+      byCluster: []
+    };
+  }
+
+  // Discover all unique label keys across firing alerts (excluding system labels)
+  const systemLabels = new Set(['alertname', 'app', 'netobserv', 'severity']);
+  const allLabelKeys = new Set<string>();
+
+  firingAlerts.forEach(a => {
+    Object.keys(a.labels).forEach(key => {
+      if (!systemLabels.has(key)) {
+        allLabelKeys.add(key);
+      }
+    });
+  });
+
+  // Group by each discovered label dimension
+  const result: { [dimension: string]: HealthStat[] } = {};
+
+  allLabelKeys.forEach(labelKey => {
+    const grouped: { [value: string]: AlertWithRuleName[] } = {};
+
+    firingAlerts.forEach(alert => {
+      if (labelKey in alert.labels) {
+        const labelValue = alert.labels[labelKey] as string;
+        if (!grouped[labelValue]) {
+          grouped[labelValue] = [];
+        }
+        grouped[labelValue].push(alert);
+      }
+    });
+
+    // Convert grouped alerts to ByResource format
+    const dimensionAlerts: HealthStat[] = [];
+    Object.entries(grouped).forEach(([name, alerts]) => {
+      const br: HealthStat = {
+        name,
+        critical: { firing: [], pending: [], silenced: [], inactive: [] },
+        warning: { firing: [], pending: [], silenced: [], inactive: [] },
+        other: { firing: [], pending: [], silenced: [], inactive: [] },
+        score: 0
+      };
+
+      _.uniqWith(alerts, (a, b) => {
+        return a.ruleName === b.ruleName && _.isEqual(a.labels, b.labels);
+      }).forEach(alert => {
+        let stats: SeverityStats;
+        switch (alert.labels.severity) {
+          case 'critical':
+            stats = br.critical;
+            break;
+          case 'warning':
+            stats = br.warning;
+            break;
+          default:
+            stats = br.other;
+            break;
+        }
+        // Only populate firing alerts for topology
+        stats.firing.push(alert);
+      });
+
+      dimensionAlerts.push(br);
+    });
+
+    result[`by${labelKey.charAt(0).toUpperCase()}${labelKey.slice(1)}`] = dimensionAlerts;
+  });
+
+  return result;
 };
