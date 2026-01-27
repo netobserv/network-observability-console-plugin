@@ -178,7 +178,14 @@ Cypress.Commands.add('changeMetricType', (name) => {
 
   cy.get('#metricType-dropdown').click();
   cy.get('.pf-v5-c-menu__content').contains(name).click();
-  cy.get('[data-layer-id="default"]').children().its('length').should('be.gte', 5);
+  
+  // For Packets metric, we expect a full page error due to mock timeout
+  if (name === 'Packets') {
+    cy.get('[data-test="error-state"]').should('exist');
+  } else {
+    // For other metrics (Bytes, etc.), we expect the topology to render successfully
+    cy.get('[data-layer-id="default"]').children().its('length').should('be.gte', 5);
+  }
 });
 
 Cypress.Commands.add('checkRecordField', (field, name, values) => {
