@@ -11,7 +11,7 @@ type StatusClass = 'success' | 'critical' | 'warning' | 'info';
 
 export interface HealthSummaryProps {
   rules: Rule[];
-  stats?: HealthStats;
+  stats: HealthStats;
   forceCollapsed?: boolean;
 }
 
@@ -39,33 +39,31 @@ export const HealthSummary: React.FC<HealthSummaryProps> = ({ rules, stats, forc
   let recordingRulesWarning = 0;
   let recordingRulesInfo = 0;
 
-  if (stats) {
-    // Count from global
-    recordingRulesCritical += stats.recordingRules.global.critical.length;
-    recordingRulesWarning += stats.recordingRules.global.warning.length;
-    recordingRulesInfo += stats.recordingRules.global.other.length;
+  // Count from global
+  recordingRulesCritical += stats.global.critical.recording.length;
+  recordingRulesWarning += stats.global.warning.recording.length;
+  recordingRulesInfo += stats.global.other.recording.length;
 
-    // Count from all namespaces
-    stats.recordingRules.byNamespace.forEach(ns => {
-      recordingRulesCritical += ns.critical.length;
-      recordingRulesWarning += ns.warning.length;
-      recordingRulesInfo += ns.other.length;
-    });
+  // Count from all namespaces
+  stats.byNamespace.forEach(ns => {
+    recordingRulesCritical += ns.critical.recording.length;
+    recordingRulesWarning += ns.warning.recording.length;
+    recordingRulesInfo += ns.other.recording.length;
+  });
 
-    // Count from all nodes
-    stats.recordingRules.byNode.forEach(node => {
-      recordingRulesCritical += node.critical.length;
-      recordingRulesWarning += node.warning.length;
-      recordingRulesInfo += node.other.length;
-    });
+  // Count from all nodes
+  stats.byNode.forEach(node => {
+    recordingRulesCritical += node.critical.recording.length;
+    recordingRulesWarning += node.warning.recording.length;
+    recordingRulesInfo += node.other.recording.length;
+  });
 
-    // Count from all owners (workloads)
-    stats.recordingRules.byOwner.forEach(owner => {
-      recordingRulesCritical += owner.critical.length;
-      recordingRulesWarning += owner.warning.length;
-      recordingRulesInfo += owner.other.length;
-    });
-  }
+  // Count from all owners (workloads)
+  stats.byOwner.forEach(owner => {
+    recordingRulesCritical += owner.critical.recording.length;
+    recordingRulesWarning += owner.warning.recording.length;
+    recordingRulesInfo += owner.other.recording.length;
+  });
 
   // Check if there are no rules at all (neither alerts nor recording rules)
   const totalRecordingRules = recordingRulesCritical + recordingRulesWarning + recordingRulesInfo;
