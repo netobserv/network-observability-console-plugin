@@ -18,8 +18,15 @@ describe('netflow-topology', () => {
 
     cy.addFilter('namespace', c.namespace, true);
     cy.addFilter('name', c.pod, true);
+    
+    // Packets metric should show a full page error due to mock timeout
     cy.changeMetricType('Packets');
+    cy.get('[data-test="error-state"]').should('exist');
+    
+    // Bytes metric should work normally
     cy.changeMetricType('Bytes');
+    cy.get('[data-layer-id="default"]').children().its('length').should('be.gte', 5);
+    
     cy.changeTimeRange('Last 1 day', true);
   });
 
