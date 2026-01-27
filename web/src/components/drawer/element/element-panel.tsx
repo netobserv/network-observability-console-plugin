@@ -57,7 +57,6 @@ export const ElementPanel: React.FC<ElementPanelProps> = ({
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [activeTab, setActiveTab] = React.useState<string>('details');
-  const [selectedAlertName, setSelectedAlertName] = React.useState<string>();
 
   const data = element.getData();
   const noMetrics = data && data.noMetrics === true;
@@ -79,6 +78,18 @@ export const ElementPanel: React.FC<ElementPanelProps> = ({
     }
   }, [element, data]);
 
+  const healthKind = React.useMemo(() => {
+    const nodeType = data?.nodeType;
+    if (nodeType === 'host') {
+      return 'Node';
+    } else if (nodeType === 'namespace') {
+      return 'Namespace';
+    } else if (nodeType === 'owner') {
+      return 'Owner';
+    }
+    return undefined;
+  }, [data]);
+
   const titleContent = React.useCallback(() => {
     if (element instanceof BaseEdge) {
       return <Text component={TextVariants.h2}>{t('Edge')}</Text>;
@@ -97,21 +108,10 @@ export const ElementPanel: React.FC<ElementPanelProps> = ({
   }, [metrics, droppedMetrics, activeTab]);
 
   React.useEffect(() => {
-    if (activeTab === 'health' && _.isEmpty(data?.alerts)) {
+    if (activeTab === 'health' && _.isEmpty(data?.health)) {
       setActiveTab('details');
     }
-  }, [activeTab, data?.alerts]);
-
-  React.useEffect(() => {
-    setSelectedAlertName(undefined);
-  }, [element]);
-
-  // Auto-select alert if there's only one
-  React.useEffect(() => {
-    if (data?.alerts && data.alerts.length === 1) {
-      setSelectedAlertName(data.alerts[0].name);
-    }
-  }, [data?.alerts]);
+  }, [activeTab, data?.health]);
 
   return (
     <DrawerPanelContent
@@ -172,31 +172,22 @@ export const ElementPanel: React.FC<ElementPanelProps> = ({
               />
             </Tab>
           )}
-          {!_.isEmpty(data?.alerts) && (
+          {data?.health !== undefined && healthKind !== undefined && (
             <Tab className="drawer-tab" eventKey={'health'} title={<TabTitleText>{t('Health')}</TabTitleText>}>
-              {data!.alerts?.map(alert => {
-                // Hide title if the alert name matches the element panel name
-                const hideTitle = elementName === alert.name;
-                return (
-                  <>
-                    <HealthCard
-                      key={`card-${alert.name}`}
-                      alertInfo={alert}
-                      name={alert.name}
-                      kind={data!.peer.resourceKind || '?'}
-                      isDark={isDark || false}
-                      isSelected={selectedAlertName === alert.name}
-                      onClick={() => setSelectedAlertName(alert.name !== selectedAlertName ? alert.name : undefined)}
-                      hideTitle={hideTitle}
-                    />
-                    {alert.name === selectedAlertName && (
-                      <div className="health-details">
-                        <RuleDetails kind={data!.peer.resourceKind || '?'} alertInfo={alert} />
-                      </div>
-                    )}
-                  </>
-                );
-              })}
+              <>
+                <HealthCard
+                  key={`card-${alert.name}`}
+                  resourceHealth={data.health}
+                  name={data.health.name}
+                  kind={healthKind}
+                  isDark={isDark || false}
+                  isSelected={true}
+                  hideTitle={true}
+                />
+                <div className="health-details">
+                  <RuleDetails kind={healthKind} resourceHealth={data.health} />
+                </div>
+              </>
             </Tab>
           )}
         </Tabs>

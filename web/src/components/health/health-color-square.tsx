@@ -1,19 +1,13 @@
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { valueFormat } from '../../utils/format';
-import {
-  AlertWithRuleName,
-  computeAlertScore,
-  computeExcessRatioStatusWeighted,
-  RecordingRuleItem
-} from './health-helper';
+import { computeExcessRatioStatusWeighted, computeHealthItemScore, HealthItem } from './health-helper';
 
 import { Tooltip } from '@patternfly/react-core';
 import './health-color-square.css';
 
 export interface HealthColorSquareProps {
-  alert?: AlertWithRuleName;
-  recordingRule?: RecordingRuleItem;
+  item: HealthItem;
 }
 
 // rgb in [0,255] bounds
@@ -74,60 +68,19 @@ const buildGradientCSS = (colorMap: ColorMap): string => {
   return 'linear-gradient(to right,' + colorStops.join(',') + ')';
 };
 
-export const HealthColorSquare: React.FC<HealthColorSquareProps> = ({ alert, recordingRule }) => {
+export const HealthColorSquare: React.FC<HealthColorSquareProps> = ({ item }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
   const scoreData = React.useMemo(() => {
-    if (alert) {
-      // Alert mode
-      const severity = alert.labels.severity;
-      const scoreForMap = computeExcessRatioStatusWeighted(alert);
-      const score = computeAlertScore(alert);
-      return {
-        severity,
-        scoreForMap,
-        rawScore: score.rawScore,
-        weight: score.weight
-      };
-    } else if (recordingRule) {
-      // Recording rule mode
-      const severity = recordingRule.severity;
-
-      // Calculate excess ratio similar to computeRecordingRulesScore
-      const thresholdValue = recordingRule.threshold ? parseFloat(recordingRule.threshold) : 0;
-      const upperBoundValue = recordingRule.upperBound ? parseFloat(recordingRule.upperBound) : 100;
-
-      let scoreForMap: number;
-      if (thresholdValue > 0 && upperBoundValue > thresholdValue) {
-        const threshold = thresholdValue / 2;
-        const vclamped = Math.min(Math.max(recordingRule.value, threshold), upperBoundValue);
-        const range = upperBoundValue - threshold;
-        if (range > 0) {
-          scoreForMap = (vclamped - threshold) / range;
-        } else {
-          scoreForMap = 0;
-        }
-      } else {
-        scoreForMap = 0;
-      }
-
-      // Clamp scoreForMap to [0, 1] range
-      scoreForMap = Math.max(0, Math.min(1, scoreForMap));
-
-      const rawScore = 10 * (1 - scoreForMap);
-
-      // Weight based on severity
-      const weight = severity === 'critical' ? 100 : severity === 'warning' ? 10 : 1;
-
-      return {
-        severity,
-        scoreForMap,
-        rawScore,
-        weight
-      };
-    }
-    return null;
-  }, [alert, recordingRule]);
+    const scoreForMap = computeExcessRatioStatusWeighted(item);
+    const score = computeHealthItemScore(item);
+    return {
+      severity: item.severity,
+      scoreForMap,
+      rawScore: score.rawScore,
+      weight: score.weight
+    };
+  }, [item]);
 
   if (!scoreData || !scoreData.severity) {
     return null;

@@ -1,40 +1,32 @@
 import { PrometheusAlert, PrometheusLabels, Rule } from '@openshift-console/dynamic-plugin-sdk';
+import { TFunction } from 'i18next';
 import * as _ from 'lodash';
 import { SilenceMatcher } from '../../api/alert';
-import { HealthRuleMetadata } from '../../model/config';
+import { RecordingAnnotations } from '../../model/config';
 
 export type Severity = 'critical' | 'warning' | 'info';
+export type AlertState = 'firing' | 'pending' | 'silenced' | 'recording' | 'inactive';
 
-export type RecordingRuleItem = {
-  name: string;
+// HealthItem can be either based on an Alert or based on a RecordingRule metric
+export type HealthItem = {
+  ruleName: string;
+  ruleID?: string;
+  metadata: HealthMetadata;
   value: number;
   severity: Severity;
-  template: string;
-  threshold?: string;
-  upperBound?: string;
+  state: AlertState;
+  threshold: string;
+  thresholdF: number;
+  upperBound: string;
   labels: PrometheusLabels;
-  summary?: string;
-  description?: string;
-  links?: { name: string; url: string }[];
-};
-
-export type RecordingRulesByResource = {
-  name: string;
-  critical: RecordingRuleItem[];
-  warning: RecordingRuleItem[];
-  other: RecordingRuleItem[];
-  score: number;
-};
-
-export type RecordingRuleMetricValue = {
-  labels: PrometheusLabels;
-  value: number;
+  summary: string;
+  description: string;
+  activeAt?: string;
 };
 
 export type RecordingRuleMetric = {
-  template?: string;
   name: string;
-  values: RecordingRuleMetricValue[];
+  values: { labels: PrometheusLabels; value: number }[];
 };
 
 export type HealthStats = {
@@ -42,42 +34,28 @@ export type HealthStats = {
   byNamespace: HealthStat[];
   byNode: HealthStat[];
   byOwner: HealthStat[];
-  recordingRules: {
-    global: RecordingRulesByResource;
-    byNamespace: RecordingRulesByResource[];
-    byNode: RecordingRulesByResource[];
-    byOwner: RecordingRulesByResource[];
-  };
 };
 
 export type HealthStat = {
   name: string;
-  critical: SeverityStats;
-  warning: SeverityStats;
-  other: SeverityStats;
+  critical: PerState;
+  warning: PerState;
+  other: PerState;
   score: number;
 };
 
-type SeverityStats = {
-  firing: AlertWithRuleName[];
-  pending: AlertWithRuleName[];
-  silenced: AlertWithRuleName[];
+type PerState = {
+  firing: HealthItem[];
+  pending: HealthItem[];
+  silenced: HealthItem[];
+  recording: HealthItem[];
   inactive: string[];
 };
 
-export type AlertWithRuleName = PrometheusAlert & {
-  ruleName: string;
-  ruleID: string;
-  metadata: HealthMetadata;
-};
-
-type RuleWithMetadata = Rule & {
-  metadata: HealthMetadata;
-};
-
 type HealthMetadata = {
-  threshold?: string;
-  thresholdF: number;
+  alertThreshold?: string;
+  alertThresholdF: number;
+  recordingThresholds?: RecordingThresholds;
   upperBound: string;
   upperBoundF: number;
   unit: string;
@@ -86,6 +64,15 @@ type HealthMetadata = {
   ownerLabels?: string[];
   links: { name: string; url: string }[];
   trafficLink?: TrafficLink;
+};
+
+type RecordingThresholds = {
+  info?: string;
+  warning?: string;
+  critical?: string;
+  infoF: number;
+  warningF: number;
+  criticalF: number;
 };
 
 type TrafficLink = {
@@ -99,9 +86,86 @@ type ScoreDetail = {
   weight: number;
 };
 
+const alertToHealth = (a: PrometheusAlert, r: Rule, md: HealthMetadata): HealthItem => {
+  return {
+    ruleID: r.id,
+    ruleName: r.name,
+    metadata: md,
+    threshold: md.alertThreshold || '',
+    thresholdF: md.alertThresholdF,
+    upperBound: md.upperBound,
+    labels: a.labels,
+    severity: (a.labels.severity as Severity) || 'info',
+    state: (a.state as AlertState) || 'inactive',
+    summary: a.annotations.summary || a.labels.template || '',
+    description: a.annotations.description || '',
+    value: (a.value as number) || 0,
+    activeAt: a.activeAt
+  };
+};
+
+const recordingToHealth = (metric: RecordingRuleMetric, annotations: { [key: string]: string }): HealthItem[] => {
+  // Parse metadata
+  const md = getHealthMetadata(annotations);
+  return metric.values.flatMap(valueData => {
+    // Process each value (each value represents a different resource/label combination)
+    const value = !isNaN(valueData.value) && isFinite(valueData.value) ? valueData.value : 0;
+
+    // Determine severity based on thresholds
+    let severity: Severity = 'info';
+    let state: AlertState = 'inactive';
+    let threshold: string | undefined = undefined;
+    let thresholdF = 0;
+    if (md.recordingThresholds) {
+      if (md.recordingThresholds.criticalF && value >= md.recordingThresholds.criticalF) {
+        severity = 'critical';
+        state = 'recording';
+        threshold = md.recordingThresholds.critical!;
+        thresholdF = md.recordingThresholds.criticalF;
+      } else if (md.recordingThresholds.warning && value >= md.recordingThresholds.warningF) {
+        severity = 'warning';
+        state = 'recording';
+        threshold = md.recordingThresholds.warning!;
+        thresholdF = md.recordingThresholds.warningF;
+      } else if (md.recordingThresholds.info && value >= md.recordingThresholds.infoF) {
+        severity = 'info';
+        state = 'recording';
+        threshold = md.recordingThresholds.info;
+        thresholdF = md.recordingThresholds.infoF;
+      }
+      if (!threshold) {
+        // Fallback: use the lowest threshold available (info -> warning -> critical)
+        threshold = md.recordingThresholds.info || md.recordingThresholds.warning || md.recordingThresholds.critical;
+        thresholdF =
+          md.recordingThresholds.infoF || md.recordingThresholds.warningF || md.recordingThresholds.criticalF;
+      }
+    }
+
+    // Inject labels in description
+    let description = annotations.description || '';
+    for (const [key, value] of Object.entries(valueData.labels)) {
+      description = description.replaceAll(`{{ $labels.${key} }}`, value);
+    }
+
+    return {
+      ruleName: metric.name,
+      metadata: md,
+      threshold: threshold || '',
+      thresholdF: thresholdF,
+      upperBound: md.upperBound,
+      labels: valueData.labels,
+      severity: severity,
+      state: state,
+      summary: annotations.summary || valueData.labels.template || '',
+      description: description,
+      value: value
+    };
+  });
+};
+
 const getHealthMetadata = (annotations: PrometheusLabels): HealthMetadata => {
   const defaultMetadata: HealthMetadata = {
-    thresholdF: 0,
+    alertThresholdF: 0,
     upperBound: '100',
     upperBoundF: 100,
     unit: '%',
@@ -112,6 +176,7 @@ const getHealthMetadata = (annotations: PrometheusLabels): HealthMetadata => {
     },
     links: []
   };
+  const parseFloat0 = (s?: string) => (s ? parseFloat(s) || 0 : 0);
   if (annotations && 'netobserv_io_network_health' in annotations) {
     const md = (JSON.parse(annotations['netobserv_io_network_health']) as HealthMetadata) || undefined;
     if (md) {
@@ -120,174 +185,61 @@ const getHealthMetadata = (annotations: PrometheusLabels): HealthMetadata => {
       md.upperBound = md.upperBound || defaultMetadata.upperBound;
       md.trafficLink = md.trafficLink || defaultMetadata.trafficLink;
       md.links = md.links || defaultMetadata.links;
-      md.thresholdF = md.threshold ? parseFloat(md.threshold) || 0 : 0;
+      md.alertThresholdF = parseFloat0(md.alertThreshold);
       md.upperBoundF = parseFloat(md.upperBound) || defaultMetadata.upperBoundF;
+      if (md.recordingThresholds) {
+        md.recordingThresholds.criticalF = parseFloat0(md.recordingThresholds.critical);
+        md.recordingThresholds.warningF = parseFloat0(md.recordingThresholds.warning);
+        md.recordingThresholds.infoF = parseFloat0(md.recordingThresholds.info);
+      }
       return md;
     }
   }
   return defaultMetadata;
 };
 
-const processRecordingRules = (
-  recordingRulesMetrics: RecordingRuleMetric[],
-  healthRulesMetadata: HealthRuleMetadata[]
-): {
-  global: RecordingRulesByResource;
-  byNamespace: RecordingRulesByResource[];
-  byNode: RecordingRulesByResource[];
-  byOwner: RecordingRulesByResource[];
-} => {
-  const recordingRuleItems: RecordingRuleItem[] = [];
-
-  // Process each recording rule metric
-  recordingRulesMetrics.forEach(metric => {
-    const template = metric.template;
-    if (!template) {
-      return; // Skip if no template
+export const rulesToHealthItems = (
+  alertRules: Rule[],
+  recordingAnnotations: RecordingAnnotations,
+  recordingRulesMetrics: RecordingRuleMetric[] = []
+): HealthItem[] => {
+  const alertItems = alertRules.flatMap(ar => {
+    const md = getHealthMetadata(ar.annotations);
+    if (ar.alerts.length === 0) {
+      // set as inactive
+      return [
+        alertToHealth(
+          {
+            annotations: ar.annotations,
+            labels: { severity: 'inactive' }
+          } as PrometheusAlert,
+          ar,
+          md
+        )
+      ];
     }
-
-    // Find the metadata for this template
-    const metadata = healthRulesMetadata.find(m => m.template === template);
-    if (!metadata) {
-      return;
-    }
-
-    // Process each value (each value represents a different resource/label combination)
-    metric.values.forEach((valueData: RecordingRuleMetricValue) => {
-      // Find the variant that matches the groupBy in the labels
-      let variant = metadata.variants[0]; // Default to first variant
-      for (const v of metadata.variants) {
-        // Check if the groupBy label exists in the metric labels
-        if (v.groupBy && valueData.labels[v.groupBy.toLowerCase()]) {
-          variant = v;
-          break;
-        }
-      }
-
-      const value = valueData.value;
-
-      // Determine severity based on thresholds
-      let severity: Severity = 'info';
-      if (variant.thresholds.critical && value >= parseFloat(variant.thresholds.critical)) {
-        severity = 'critical';
-      } else if (variant.thresholds.warning && value >= parseFloat(variant.thresholds.warning)) {
-        severity = 'warning';
-      }
-
-      // Get the threshold for this severity, or fallback to the lowest available threshold
-      let threshold = variant.thresholds[severity];
-      if (!threshold) {
-        // Fallback: use the lowest threshold available (info -> warning -> critical)
-        threshold = variant.thresholds.info || variant.thresholds.warning || variant.thresholds.critical;
-      }
-
-      // Only include if value exceeds the minimum threshold (info)
-      const minThreshold = variant.thresholds.info ? parseFloat(variant.thresholds.info) : 0;
-      if (value >= minThreshold) {
-        recordingRuleItems.push({
-          name: metric.name,
-          value: value,
-          severity: severity,
-          template: template,
-          threshold: threshold,
-          upperBound: variant.upperBound,
-          labels: valueData.labels,
-          summary: metadata.summary,
-          description: metadata.description,
-          links: metadata.links
-        });
-      }
-    });
-  });
-
-  // Group by namespace and node
-  const namespaceGroups: { [key: string]: RecordingRuleItem[] } = {};
-  const nodeGroups: { [key: string]: RecordingRuleItem[] } = {};
-  const ownerGroups: { [key: string]: RecordingRuleItem[] } = {};
-  const globalItems: RecordingRuleItem[] = [];
-
-  recordingRuleItems.forEach(item => {
-    // Check for namespace labels
-    const namespace =
-      item.labels.namespace || item.labels.Namespace || item.labels.SrcK8S_Namespace || item.labels.DstK8S_Namespace;
-    // Check for node labels
-    const node = item.labels.node || item.labels.Node || item.labels.SrcK8S_HostName || item.labels.DstK8S_HostNode;
-    // Check for owner labels
-    const owner =
-      item.labels.owner || item.labels.Owner || item.labels.SrcK8S_OwnerName || item.labels.DstK8S_OwnerName;
-
-    if (namespace) {
-      if (!namespaceGroups[namespace]) {
-        namespaceGroups[namespace] = [];
-      }
-      namespaceGroups[namespace].push(item);
-    } else if (node) {
-      if (!nodeGroups[node]) {
-        nodeGroups[node] = [];
-      }
-      nodeGroups[node].push(item);
-    } else if (owner) {
-      if (!ownerGroups[owner]) {
-        ownerGroups[owner] = [];
-      }
-      ownerGroups[owner].push(item);
-    } else {
-      globalItems.push(item);
-    }
-  });
-
-  // Build the result structures
-  const buildResourceGroup = (name: string, items: RecordingRuleItem[]): RecordingRulesByResource => {
-    return {
-      name: name,
-      critical: items.filter(i => i.severity === 'critical'),
-      warning: items.filter(i => i.severity === 'warning'),
-      other: items.filter(i => i.severity === 'info'),
-      score: 0 // Will be computed below
-    };
-  };
-
-  const global = buildResourceGroup('', globalItems);
-  const byNamespace = Object.keys(namespaceGroups).map(ns => buildResourceGroup(ns, namespaceGroups[ns]));
-  const byNode = Object.keys(nodeGroups).map(n => buildResourceGroup(n, nodeGroups[n]));
-  const byOwner = Object.keys(ownerGroups).map(o => buildResourceGroup(o, ownerGroups[o]));
-
-  // Compute scores for all resource groups
-  [global, ...byNamespace, ...byNode, ...byOwner].forEach(r => {
-    r.score = computeRecordingRulesScore(r);
-  });
-
-  return {
-    global,
-    byNamespace,
-    byNode,
-    byOwner
-  };
-};
-
-export const buildStats = (
-  rules: Rule[],
-  healthRulesMetadata: HealthRuleMetadata[] = [],
-  recordingRulesMetrics: RecordingRuleMetric[] = [],
-  skipInactive = false
-): HealthStats => {
-  const ruleWithMD: RuleWithMetadata[] = rules.map(r => {
-    const md = getHealthMetadata(r.annotations);
-    return { ...r, metadata: md };
-  });
-  const alerts: AlertWithRuleName[] = ruleWithMD.flatMap(r => {
-    return r.alerts.map(a => {
+    return ar.alerts.map(a => {
       if (typeof a.value === 'string') {
         a.value = parseFloat(a.value);
       }
-      return { ...a, ruleName: r.name, ruleID: r.id, metadata: r.metadata };
+      return alertToHealth(a, ar, md);
     });
   });
+  const recordingItems = recordingRulesMetrics.flatMap(rm => {
+    const annotations = recordingAnnotations[rm.name];
+    if (annotations) {
+      return recordingToHealth(rm, annotations);
+    }
+    return [];
+  });
+  return [...alertItems, ...recordingItems];
+};
 
+export const buildStats = (items: HealthItem[]): HealthStats => {
   const namespaceLabels: string[] = [];
   const nodeLabels: string[] = [];
   const ownerLabels: string[] = [];
-  alerts.forEach(a => {
+  items.forEach(a => {
     if (a.metadata.namespaceLabels) {
       a.metadata.namespaceLabels.forEach(l => {
         if (!namespaceLabels.includes(l)) {
@@ -310,50 +262,37 @@ export const buildStats = (
       });
     }
   });
-  const global = filterGlobals(alerts, [...namespaceLabels, ...nodeLabels, ...ownerLabels]);
-  const byNamespace = groupBy(alerts, namespaceLabels);
-  const byNode = groupBy(alerts, nodeLabels);
-  const byOwner = groupBy(alerts, ownerLabels);
-
-  // Inject inactive rules (skip if requested, e.g., for topology)
-  if (!skipInactive) {
-    const globalRules = ruleWithMD.filter(
-      r =>
-        _.isEmpty(r.metadata.namespaceLabels) && _.isEmpty(r.metadata.nodeLabels) && _.isEmpty(r.metadata.ownerLabels)
-    );
-    const namespaceRules = ruleWithMD.filter(r => !_.isEmpty(r.metadata.namespaceLabels));
-    const nodeRules = ruleWithMD.filter(r => !_.isEmpty(r.metadata.nodeLabels));
-    const ownerRules = ruleWithMD.filter(r => !_.isEmpty(r.metadata.ownerLabels));
-    injectInactive(globalRules, [global]);
-    injectInactive(namespaceRules, byNamespace);
-    injectInactive(nodeRules, byNode);
-    injectInactive(ownerRules, byOwner);
-  }
-
+  const global = filterGlobals(items, [...namespaceLabels, ...nodeLabels]);
+  const byNamespace = groupBy(items, namespaceLabels);
+  const byNode = groupBy(items, nodeLabels);
+  // TODO: should be grouped by namespace + owner
+  const byOwner = groupBy(items, ownerLabels);
   [global, ...byNamespace, ...byNode, ...byOwner].forEach(r => {
-    r.score = computeScore(r);
+    r.score = computeResourceScore(r);
   });
 
-  // Process recording rules
-  const recordingRulesProcessed = processRecordingRules(recordingRulesMetrics, healthRulesMetadata);
-
-  return { global, byNamespace, byNode, byOwner, recordingRules: recordingRulesProcessed };
+  return {
+    global,
+    byNode: _.sortBy(byNode, r => r.score, 'asc'),
+    byNamespace: _.sortBy(byNamespace, r => r.score, 'asc'),
+    byOwner: _.sortBy(byOwner, r => r.score, 'asc')
+  };
 };
 
-const filterGlobals = (alerts: AlertWithRuleName[], nonGlobalLabels: string[]): HealthStat => {
+const filterGlobals = (items: HealthItem[], nonGlobalLabels: string[]): HealthStat => {
   // Keep only rules where none of the non-global labels are set
-  const filtered = alerts.filter(a => !nonGlobalLabels.some(l => l in a.labels));
+  const filtered = items.filter(a => !nonGlobalLabels.some(l => l in a.labels));
   return statsFromGrouped('', filtered);
 };
 
-const groupBy = (alerts: AlertWithRuleName[], labels: string[]): HealthStat[] => {
+const groupBy = (items: HealthItem[], labels: string[]): HealthStat[] => {
   if (labels.length === 0) {
     return [];
   }
-  const groups: { [key: string]: AlertWithRuleName[] } = {};
+  const groups: { [key: string]: HealthItem[] } = {};
   labels.forEach(l => {
     const byLabel = _.groupBy(
-      alerts.filter(a => l in a.labels),
+      items.filter(a => l in a.labels),
       a => a.labels[l]
     );
     _.keys(byLabel).forEach(k => {
@@ -367,25 +306,30 @@ const groupBy = (alerts: AlertWithRuleName[], labels: string[]): HealthStat[] =>
   const stats: HealthStat[] = [];
   _.keys(groups).forEach(k => {
     if (k) {
-      stats.push(statsFromGrouped(k, groups[k]));
+      const br = statsFromGrouped(k, groups[k]);
+      // Ignore if all are inactive
+      const countInactive = br.critical.inactive.length + br.warning.inactive.length + br.other.inactive.length;
+      if (countInactive !== groups[k].length) {
+        stats.push(br);
+      }
     }
   });
   return stats;
 };
 
-const statsFromGrouped = (name: string, grouped: AlertWithRuleName[]): HealthStat => {
+const statsFromGrouped = (name: string, grouped: HealthItem[]): HealthStat => {
   const br: HealthStat = {
     name: name,
-    critical: { firing: [], pending: [], silenced: [], inactive: [] },
-    warning: { firing: [], pending: [], silenced: [], inactive: [] },
-    other: { firing: [], pending: [], silenced: [], inactive: [] },
+    critical: { firing: [], pending: [], silenced: [], inactive: [], recording: [] },
+    warning: { firing: [], pending: [], silenced: [], inactive: [], recording: [] },
+    other: { firing: [], pending: [], silenced: [], inactive: [], recording: [] },
     score: 0
   };
   _.uniqWith(grouped, (a, b) => {
     return a.ruleName === b.ruleName && _.isEqual(a.labels, b.labels);
-  }).forEach(alert => {
-    let stats: SeverityStats;
-    switch (alert.labels.severity) {
+  }).forEach(item => {
+    let stats: PerState;
+    switch (item.severity) {
       case 'critical':
         stats = br.critical;
         break;
@@ -396,45 +340,28 @@ const statsFromGrouped = (name: string, grouped: AlertWithRuleName[]): HealthSta
         stats = br.other;
         break;
     }
-    switch (alert.state) {
+    switch (item.state) {
       case 'firing':
-        stats.firing.push(alert);
+        stats.firing.push(item);
         break;
       case 'pending':
-        stats.pending.push(alert);
+        stats.pending.push(item);
         break;
       case 'silenced':
-        stats.silenced.push(alert);
+        stats.silenced.push(item);
+        break;
+      case 'recording':
+        stats.recording.push(item);
+        break;
+      case 'inactive':
+        stats.inactive.push(item.ruleName);
         break;
     }
   });
   return br;
 };
 
-const injectInactive = (rules: RuleWithMetadata[], groups: HealthStat[]) => {
-  groups.forEach(g => {
-    const allAlerts = getAllAlerts(g).map(a => a.ruleName);
-    rules.forEach(r => {
-      if (allAlerts.includes(r.name)) {
-        // There's an alert for this rule, skip
-        return;
-      }
-      switch (r.labels.severity) {
-        case 'critical':
-          g.critical.inactive.push(r.name);
-          break;
-        case 'warning':
-          g.warning.inactive.push(r.name);
-          break;
-        default:
-          g.other.inactive.push(r.name);
-          break;
-      }
-    });
-  });
-};
-
-export const getAllAlerts = (g: HealthStat): AlertWithRuleName[] => {
+export const getAllHealthItems = (g: HealthStat): HealthItem[] => {
   return [
     ...g.critical.firing,
     ...g.warning.firing,
@@ -444,51 +371,74 @@ export const getAllAlerts = (g: HealthStat): AlertWithRuleName[] => {
     ...g.other.pending,
     ...g.critical.silenced,
     ...g.warning.silenced,
-    ...g.other.silenced
+    ...g.other.silenced,
+    ...g.critical.recording,
+    ...g.warning.recording,
+    ...g.other.recording
   ];
 };
 
-export const getAlertFilteredLabels = (alert: AlertWithRuleName, target: string): [string, string][] => {
-  return Object.entries(alert.labels).filter(
-    e => e[0] !== 'app' && e[0] !== 'netobserv' && e[0] !== 'severity' && e[0] !== 'alertname' && e[1] !== target
+export const getItemFilteredLabels = (item: HealthItem, target: string): [string, string][] => {
+  return Object.entries(item.labels).filter(
+    e =>
+      e[0] !== 'app' &&
+      e[0] !== 'netobserv' &&
+      e[0] !== 'severity' &&
+      e[0] !== '__name__' &&
+      e[0] !== 'prometheus' &&
+      e[0] !== 'template' &&
+      e[0] !== 'alertname' &&
+      e[1] !== target
   );
 };
 
-export const getAlertLink = (a: AlertWithRuleName): string => {
-  const labels: string[] = [];
-  Object.keys(a.labels).forEach(k => {
-    labels.push(k + '=' + a.labels[k]);
-  });
-  return `/monitoring/alerts/${a.ruleID}?${labels.join('&')}`;
+export const getLinks = (t: TFunction, kind: string, item: HealthItem, resourceName: string) => {
+  if (item.state === 'recording') {
+    return [
+      { name: t('Inspect metric'), url: getRecordingRuleMetricLink(item, resourceName) },
+      { name: t('Inspect network traffic'), url: getTrafficLink(kind, resourceName, item) },
+      ...item.metadata.links
+    ];
+  }
+  return [
+    { name: t('Inspect alert'), url: getAlertLink(item) },
+    { name: t('Inspect network traffic'), url: getTrafficLink(kind, resourceName, item) },
+    ...item.metadata.links
+  ];
 };
 
-export const getRecordingRuleMetricLink = (rule: RecordingRuleItem, resourceName?: string): string => {
-  let query = rule.name;
+const getAlertLink = (item: HealthItem): string | undefined => {
+  if (item.ruleID) {
+    const labels: string[] = [];
+    Object.keys(item.labels).forEach(k => {
+      labels.push(k + '=' + item.labels[k]);
+    });
+    return `/monitoring/alerts/${item.ruleID}?${labels.join('&')}`;
+  }
+  return undefined;
+};
+
+const getRecordingRuleMetricLink = (item: HealthItem, resourceName?: string): string => {
+  let query = item.ruleName;
 
   // Filter by namespace or node if available
   if (resourceName) {
-    const namespaceLabel = Object.keys(rule.labels).find(
-      k => k.toLowerCase().includes('namespace') || k === 'Namespace'
-    );
-    const nodeLabel = Object.keys(rule.labels).find(
-      k => k.toLowerCase().includes('node') || k.toLowerCase().includes('hostname') || k === 'Node'
-    );
-
-    if (namespaceLabel) {
-      query += `{${namespaceLabel}="${resourceName}"}`;
-    } else if (nodeLabel) {
-      query += `{${nodeLabel}="${resourceName}"}`;
+    if (item.metadata.namespaceLabels && item.metadata.namespaceLabels.length > 0) {
+      query += `{${item.metadata.namespaceLabels[0]}="${resourceName}"}`;
+    } else if (item.metadata.nodeLabels && item.metadata.nodeLabels.length > 0) {
+      query += `{${item.metadata.nodeLabels[0]}="${resourceName}"}`;
     }
+    // TODO: workloads
   }
 
   return `/monitoring/query-browser?query0=${encodeURIComponent(query)}`;
 };
 
-export const getTrafficLink = (kind: string, resourceName: string, a: AlertWithRuleName): string => {
+const getTrafficLink = (kind: string, resourceName: string, item: HealthItem): string => {
   const filters: string[] = [];
   let params = '';
-  const side = a.metadata.trafficLink?.filterDestination ? 'dst' : 'src';
-  const bnf = a.metadata.trafficLink?.backAndForth !== false;
+  const side = item.metadata.trafficLink?.filterDestination ? 'dst' : 'src';
+  const bnf = item.metadata.trafficLink?.backAndForth !== false;
   switch (kind) {
     case 'Namespace':
       filters.push(`${side}_namespace="${resourceName}"`);
@@ -503,9 +453,9 @@ export const getTrafficLink = (kind: string, resourceName: string, a: AlertWithR
       // Filter by owner name
       filters.push(`${side}_owner_name="${resourceName}"`);
       // For workload alerts, namespace and kind are directly in the labels
-      const namespace = a.labels.namespace;
-      const ownerKind = a.labels.kind;
-
+      // TODO: find a fix; not always true
+      const namespace = item.labels.namespace;
+      const ownerKind = item.labels.kind;
       if (namespace) {
         filters.push(`${side}_namespace="${namespace}"`);
       }
@@ -515,8 +465,8 @@ export const getTrafficLink = (kind: string, resourceName: string, a: AlertWithR
       params += `&bnf=${bnf}`;
       break;
   }
-  if (a.metadata.trafficLink?.extraFilter) {
-    filters.push(a.metadata.trafficLink.extraFilter);
+  if (item.metadata.trafficLink?.extraFilter) {
+    filters.push(item.metadata.trafficLink.extraFilter);
   }
   return `/netflow-traffic?filters=${encodeURIComponent(filters.join(';'))}${params}`;
 };
@@ -550,20 +500,14 @@ const getSeverityWeight = (severity: Severity): number => {
   }
 };
 
-const getAlertSeverityWeight = (a: AlertWithRuleName) => {
-  const severity = a.labels.severity;
-  if (severity === 'critical' || severity === 'warning' || severity === 'info') {
-    return getSeverityWeight(severity);
-  }
-  return minorWeight; // Default to info weight
-};
-
-const getStateWeight = (a: AlertWithRuleName) => {
-  switch (a.state) {
+const getStateWeight = (state: AlertState) => {
+  switch (state) {
     case 'pending':
       return pendingWeight;
     case 'silenced':
       return silencedWeight;
+    case 'inactive':
+      return 0;
   }
   return 1;
 };
@@ -591,156 +535,49 @@ const computeWeightedScore = (scores: ScoreDetail[]): number => {
 };
 
 // Score [0,10]; higher is better
-export const computeScore = (r: HealthStat): number => {
-  const allAlerts = getAllAlerts(r);
+export const computeResourceScore = (r: HealthStat): number => {
+  const allAlerts = getAllHealthItems(r);
   const allScores = allAlerts
-    .map(computeAlertScore)
+    .map(computeHealthItemScore)
     .concat(r.critical.inactive.map(name => ({ alertName: name, rawScore: 10, weight: criticalWeight })))
     .concat(r.warning.inactive.map(name => ({ alertName: name, rawScore: 10, weight: warningWeight })))
     .concat(r.other.inactive.map(name => ({ alertName: name, rawScore: 10, weight: minorWeight })));
   return computeWeightedScore(allScores);
 };
 
-// Score [0,10]; higher is better
-export const computeRecordingRulesScore = (r: RecordingRulesByResource): number => {
-  const allRules = [...r.critical, ...r.warning, ...r.other];
-
-  const allScores: ScoreDetail[] = allRules
-    .filter(rule => {
-      // Skip rules without valid value
-      const isValid = rule.value !== undefined && rule.value !== null && !isNaN(rule.value as number);
-      return isValid;
-    })
-    .map(rule => {
-      const weight = getSeverityWeight(rule.severity);
-
-      // Get severity range
-      const severityRange = getSeverityScoreRange(rule.severity);
-
-      // Calculate raw score based on value vs threshold
-      let rawScore = severityRange.max; // Default to best score in the severity range
-      if (rule.threshold) {
-        const thresholdValue = parseFloat(rule.threshold);
-        const upperBoundValue = rule.upperBound ? parseFloat(rule.upperBound) : 100;
-
-        // Validate all parsed values
-        if (!isNaN(thresholdValue) && thresholdValue > 0 && !isNaN(upperBoundValue) && upperBoundValue > 0) {
-          // Create a compatible object to use the same computeExcessRatio function as alerts
-          const mockAlert = {
-            value: rule.value,
-            metadata: {
-              thresholdF: thresholdValue,
-              upperBoundF: upperBoundValue
-            }
-          } as AlertWithRuleName;
-
-          const excessRatio = computeExcessRatio(mockAlert);
-          const scoreRange = severityRange.max - severityRange.min;
-          rawScore = severityRange.min + scoreRange * (1 - excessRatio);
-        }
-      }
-
-      return { rawScore, weight };
-    });
-
-  return computeWeightedScore(allScores);
-};
-
 // Score [0,1]; lower is better
-export const computeExcessRatio = (a: AlertWithRuleName): number => {
+export const computeExcessRatio = (item: HealthItem): number => {
   // Assuming the alert value is a [0-n] percentage. Needs update if more use cases come up.
-  const threshold = a.metadata.thresholdF;
-  const upper = a.metadata.upperBoundF;
-  const vclamped = Math.min(Math.max(a.value as number, threshold), upper);
+  const threshold = item.thresholdF;
+  const upper = item.metadata.upperBoundF;
+  const vclamped = Math.min(Math.max(item.value, threshold), upper);
   const range = upper - threshold;
   return (vclamped - threshold) / range;
 };
 
-export const computeExcessRatioStatusWeighted = (a: AlertWithRuleName): number => {
-  return computeExcessRatio(a) * getStateWeight(a);
+export const computeExcessRatioStatusWeighted = (item: HealthItem): number => {
+  return computeExcessRatio(item) * getStateWeight(item.state);
 };
 
 // Score [0,10]; higher is better
-export const computeAlertScore = (a: AlertWithRuleName): ScoreDetail => {
-  const excessRatio = computeExcessRatio(a);
-  const severity = a.labels.severity || 'info';
-  const range = getSeverityScoreRange(severity);
+export const computeHealthItemScore = (item: HealthItem): ScoreDetail => {
+  const excessRatio = computeExcessRatio(item);
+  const range = getSeverityScoreRange(item.severity);
 
   const scoreRange = range.max - range.min;
   const rawScore = range.min + scoreRange * (1 - excessRatio);
 
   return {
     rawScore: rawScore,
-    weight: getAlertSeverityWeight(a) * getStateWeight(a)
+    weight: getSeverityWeight(item.severity) * getStateWeight(item.state)
   };
-};
-
-// Unified score combining both alerts and recording rules
-// Score [0,10]; higher is better
-export const computeUnifiedScore = (alertInfo?: HealthStat, recordingInfo?: RecordingRulesByResource): number => {
-  const scores: ScoreDetail[] = [];
-
-  // Collect alert scores
-  if (alertInfo) {
-    const allAlerts = getAllAlerts(alertInfo);
-    const alertScores = allAlerts
-      .map(computeAlertScore)
-      .concat(alertInfo.critical.inactive.map(name => ({ alertName: name, rawScore: 10, weight: criticalWeight })))
-      .concat(alertInfo.warning.inactive.map(name => ({ alertName: name, rawScore: 10, weight: warningWeight })))
-      .concat(alertInfo.other.inactive.map(name => ({ alertName: name, rawScore: 10, weight: minorWeight })));
-    scores.push(...alertScores);
-  }
-
-  // Collect recording rule scores
-  if (recordingInfo) {
-    const allRules = [...recordingInfo.critical, ...recordingInfo.warning, ...recordingInfo.other];
-
-    const recordingScores = allRules
-      .filter(rule => {
-        // Skip rules without valid value
-        return rule.value !== undefined && rule.value !== null && !isNaN(rule.value as number);
-      })
-      .map(rule => {
-        const weight = getSeverityWeight(rule.severity);
-
-        // Get severity range
-        const severityRange = getSeverityScoreRange(rule.severity);
-        let rawScore = severityRange.max; // Default to best score in the severity range
-
-        if (rule.threshold) {
-          const thresholdValue = parseFloat(rule.threshold);
-          const upperBoundValue = rule.upperBound ? parseFloat(rule.upperBound) : 100;
-
-          // Validate all parsed values
-          if (!isNaN(thresholdValue) && thresholdValue > 0 && !isNaN(upperBoundValue) && upperBoundValue > 0) {
-            const mockAlert = {
-              value: rule.value,
-              metadata: {
-                thresholdF: thresholdValue,
-                upperBoundF: upperBoundValue
-              }
-            } as AlertWithRuleName;
-
-            const excessRatio = computeExcessRatio(mockAlert);
-            const scoreRange = severityRange.max - severityRange.min;
-            rawScore = severityRange.min + scoreRange * (1 - excessRatio);
-          }
-        }
-
-        return { rawScore, weight };
-      });
-    scores.push(...recordingScores);
-  }
-
-  // Calculate unified weighted score
-  return computeWeightedScore(scores);
 };
 
 // Mapping of severity levels to PatternFly Label colors
 // critical -> red (danger)
 // warning -> orange (warning)
 // info -> blue (info)
-const SEVERITY_LABEL_COLORS = {
+const severityLabelsColors = {
   critical: 'red',
   warning: 'orange',
   info: 'blue'
@@ -749,52 +586,10 @@ const SEVERITY_LABEL_COLORS = {
 export const getSeverityColor = (
   severity: string | undefined
 ): 'red' | 'orange' | 'blue' | 'grey' | 'purple' | 'cyan' | 'green' | 'gold' => {
-  if (severity && severity in SEVERITY_LABEL_COLORS) {
-    return SEVERITY_LABEL_COLORS[severity as keyof typeof SEVERITY_LABEL_COLORS];
+  if (severity && severity in severityLabelsColors) {
+    return severityLabelsColors[severity as keyof typeof severityLabelsColors];
   }
   return 'blue'; // default for info/undefined
-};
-
-// Parse description pattern for recording rules by replacing placeholders
-export const parseRecordingRuleDescription = (
-  pattern: string,
-  rule: RecordingRuleItem,
-  resourceName?: string
-): string => {
-  if (!pattern) {
-    return '';
-  }
-
-  // Build legend based on labels
-  let legend = '';
-  if (resourceName) {
-    const namespaceLabel = Object.keys(rule.labels).find(
-      k => k.toLowerCase().includes('namespace') || k === 'Namespace'
-    );
-    const nodeLabel = Object.keys(rule.labels).find(
-      k => k.toLowerCase().includes('node') || k.toLowerCase().includes('hostname') || k === 'Node'
-    );
-
-    if (namespaceLabel) {
-      legend = ` [namespace=${resourceName}]`;
-    } else if (nodeLabel) {
-      legend = ` [node=${resourceName}]`;
-    }
-  }
-
-  // Replace placeholders with actual values
-  // First %s = threshold, second %s = legend
-  let result = pattern;
-  const threshold = rule.threshold || '0';
-
-  // Replace first %s with threshold
-  result = result.replace('%s', threshold);
-  // Replace second %s with legend
-  result = result.replace('%s', legend);
-  // Replace %% with % (Go escape sequence)
-  result = result.replace(/%%/g, '%');
-
-  return result;
 };
 
 export const isSilenced = (silence: SilenceMatcher[], labels: PrometheusLabels): boolean => {
@@ -807,4 +602,17 @@ export const isSilenced = (silence: SilenceMatcher[], labels: PrometheusLabels):
     }
   }
   return true;
+};
+
+export const getResourceSeverity = (s: HealthStat): Severity | undefined => {
+  if (s.critical.firing.length > 0 || s.critical.pending.length > 0 || s.critical.recording.length > 0) {
+    return 'critical';
+  }
+  if (s.warning.firing.length > 0 || s.warning.pending.length > 0 || s.warning.recording.length > 0) {
+    return 'warning';
+  }
+  if (s.other.firing.length > 0 || s.other.pending.length > 0 || s.other.recording.length > 0) {
+    return 'info';
+  }
+  return undefined;
 };
