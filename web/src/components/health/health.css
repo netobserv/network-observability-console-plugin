@@ -15,9 +15,110 @@
     padding: 0 1.5rem 0 1.5rem;
 }
 
-#pageSection .health-summary-alert {
+/* Health summary dashboard */
+.health-summary-dashboard {
     margin-top: 1.5rem;
     margin-bottom: 1.5rem;
+}
+
+/* Metric cards - all same height */
+.health-metric-card {
+    border-top: 3px solid;
+    height: 100%;
+    min-height: 140px;
+}
+
+.health-metric-card .pf-v5-c-card__body {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+/* Status card */
+.health-metric-card.status.success {
+    border-top-color: var(--pf-v5-global--success-color--100);
+}
+
+.health-metric-card.status.critical {
+    border-top-color: var(--pf-v5-global--danger-color--100);
+}
+
+.health-metric-card.status.warning {
+    border-top-color: var(--pf-v5-global--warning-color--100);
+}
+
+.health-metric-card.status.info {
+    border-top-color: #9ad8d8;
+}
+
+.health-metric-card .metric-status {
+    font-size: 1rem;
+    font-weight: 500;
+    line-height: 1.4;
+    margin-top: 0.5rem;
+}
+
+.health-metric-card .status-details {
+    margin-top: 1rem;
+}
+
+.health-metric-card .status-details ul {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+.health-metric-card .status-details li {
+    font-size: 0.875rem;
+    color: var(--pf-v5-global--Color--200);
+    line-height: 1.5;
+    margin-bottom: 0.25rem;
+}
+
+/* Severity cards */
+.health-metric-card.critical {
+    border-top-color: var(--pf-v5-global--danger-color--100);
+}
+
+.health-metric-card.warning {
+    border-top-color: var(--pf-v5-global--warning-color--100);
+}
+
+.health-metric-card.info {
+    border-top-color: #9ad8d8;
+}
+
+.health-metric-card .metric-label {
+    color: var(--pf-v5-global--Color--200);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.75rem;
+}
+
+.health-metric-card .metric-value {
+    font-size: 2.5rem;
+    font-weight: 300;
+    line-height: 1.2;
+    margin: 0.5rem 0;
+}
+
+.health-metric-card.critical .metric-value {
+    color: var(--pf-v5-global--danger-color--100);
+}
+
+.health-metric-card.warning .metric-value {
+    color: var(--pf-v5-global--warning-color--100);
+}
+
+.health-metric-card.info .metric-value {
+    color: #9ad8d8;
+}
+
+.health-metric-card .metric-detail {
+    color: var(--pf-v5-global--Color--200);
+    margin-top: 0.25rem;
+    font-size: 0.875rem;
 }
 
 #pageSection .icon.critical {

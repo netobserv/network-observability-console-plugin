@@ -1,8 +1,11 @@
 import { Rule } from '@openshift-console/dynamic-plugin-sdk';
-import { Alert, AlertVariant } from '@patternfly/react-core';
+import { Alert, Card, CardBody, Flex, FlexItem, Grid, GridItem, Text, TextVariants } from '@patternfly/react-core';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { HealthStats } from './health-helper';
+import { HealthMetricCard } from './health-metric-card';
+
+type StatusClass = 'success' | 'critical' | 'warning' | 'info';
 
 export interface HealthSummaryProps {
   rules: Rule[];
@@ -11,6 +14,18 @@ export interface HealthSummaryProps {
 
 export const HealthSummary: React.FC<HealthSummaryProps> = ({ rules, stats }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
+
+  // Helper function to format metric details
+  const formatMetricDetail = (firingAlerts: number, recordingRules: number): string => {
+    const parts = [];
+    if (firingAlerts > 0) {
+      parts.push(t('{{count}} alerts', { count: firingAlerts }));
+    }
+    if (recordingRules > 0) {
+      parts.push(t('{{count}} recording rules', { count: recordingRules }));
+    }
+    return parts.join(', ');
+  };
 
   // Count recording rules by severity
   let recordingRulesCritical = 0;
@@ -42,15 +57,17 @@ export const HealthSummary: React.FC<HealthSummaryProps> = ({ rules, stats }) =>
   const totalRecordingRules = recordingRulesCritical + recordingRulesWarning + recordingRulesInfo;
   if (rules.length === 0 && totalRecordingRules === 0) {
     return (
-      <Alert title={t('No rules found, health cannot be determined')} className="health-summary-alert">
-        <>
-          {t(
-            'Check alert definitions in FlowCollector "spec.processor.metrics.alertGroups" and "spec.processor.metrics.disableAlerts".'
-          )}
-          <br />
-          {t('Make sure that Prometheus and AlertManager are running.')}
-        </>
-      </Alert>
+      <div className="health-summary-dashboard">
+        <Alert title={t('No rules found, health cannot be determined')} variant="info">
+          <>
+            {t(
+              'Check alert definitions in FlowCollector "spec.processor.metrics.alertGroups" and "spec.processor.metrics.disableAlerts".'
+            )}
+            <br />
+            {t('Make sure that Prometheus and AlertManager are running.')}
+          </>
+        </Alert>
+      </div>
     );
   }
 
@@ -87,18 +104,25 @@ export const HealthSummary: React.FC<HealthSummaryProps> = ({ rules, stats }) =>
     }
   };
 
-  let variant: AlertVariant = AlertVariant.success;
   let title = t('The network looks healthy');
+  let statusClass: StatusClass = 'success';
   if (summaryStats.critical.firingAlerts > 0 || summaryStats.critical.recordingRules > 0) {
-    variant = AlertVariant.danger;
+    statusClass = 'critical';
     title = t('There are critical network issues');
   } else if (summaryStats.warning.firingAlerts > 0 || summaryStats.warning.recordingRules > 0) {
-    variant = AlertVariant.warning;
+    statusClass = 'warning';
     title = t('There are network warnings');
   } else if (summaryStats.info.firingAlerts > 0 || summaryStats.info.recordingRules > 0) {
+    statusClass = 'info';
     title = t('The network looks relatively healthy, with minor issues');
   }
 
+  const criticalTotal = summaryStats.critical.firingAlerts + summaryStats.critical.recordingRules;
+  const warningTotal = summaryStats.warning.firingAlerts + summaryStats.warning.recordingRules;
+  const infoTotal = summaryStats.info.firingAlerts + summaryStats.info.recordingRules;
+
+  // Build details like the old Alert summary
+  const hasViolations = criticalTotal > 0 || warningTotal > 0 || infoTotal > 0;
   const details: string[] = [];
 
   // Critical
@@ -116,7 +140,7 @@ export const HealthSummary: React.FC<HealthSummaryProps> = ({ rules, stats }) =>
     details.push(
       t('{{pendingAlerts}} pending critical issues, from {{pendingRules}} distinct rules', summaryStats.critical)
     );
-  } else if (variant === AlertVariant.success) {
+  } else if (!hasViolations) {
     details.push(t('No critical issues out of {{total}} rules', summaryStats.critical));
   }
 
@@ -133,7 +157,7 @@ export const HealthSummary: React.FC<HealthSummaryProps> = ({ rules, stats }) =>
     details.push(t('{{total}} warnings ({{breakdown}})', { total, breakdown: parts.join(', ') }));
   } else if (summaryStats.warning.pendingAlerts > 0) {
     details.push(t('{{pendingAlerts}} pending warnings, from {{pendingRules}} distinct rules', summaryStats.warning));
-  } else if (variant === AlertVariant.success) {
+  } else if (!hasViolations) {
     details.push(t('No warnings out of {{total}} rules', summaryStats.warning));
   }
 
@@ -150,16 +174,84 @@ export const HealthSummary: React.FC<HealthSummaryProps> = ({ rules, stats }) =>
     details.push(t('{{total}} minor issues ({{breakdown}})', { total, breakdown: parts.join(', ') }));
   } else if (summaryStats.info.pendingAlerts > 0) {
     details.push(t('{{pendingAlerts}} pending minor issues, from {{pendingRules}} distinct rules', summaryStats.info));
-  } else if (variant === AlertVariant.success) {
+  } else if (!hasViolations) {
     details.push(t('No minor issues out of {{total}} rules', summaryStats.info));
   }
+
   return (
-    <Alert variant={variant} title={title} className="health-summary-alert">
-      <ul>
-        {details.map((text, i) => (
-          <li key={'li_' + i}>{text}</li>
-        ))}
-      </ul>
-    </Alert>
+    <div className="health-summary-dashboard">
+      <Grid hasGutter>
+        {/* Status card */}
+        <GridItem lg={6} md={6} sm={12}>
+          <Card className={`health-metric-card status ${statusClass}`}>
+            <CardBody>
+              <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsNone' }}>
+                <FlexItem>
+                  <Text component={TextVariants.small} className="metric-label">
+                    {t('Status')}
+                  </Text>
+                </FlexItem>
+                <FlexItem>
+                  <Text component={TextVariants.p} className="metric-status">
+                    {title}
+                  </Text>
+                </FlexItem>
+                {details.length > 0 && (
+                  <FlexItem className="status-details">
+                    <ul>
+                      {details.map((text, i) => (
+                        <li key={'li_' + i}>{text}</li>
+                      ))}
+                    </ul>
+                  </FlexItem>
+                )}
+              </Flex>
+            </CardBody>
+          </Card>
+        </GridItem>
+
+        {/* Critical card */}
+        <GridItem lg={2} md={6} sm={12}>
+          <HealthMetricCard
+            severity="critical"
+            label={t('Critical')}
+            total={criticalTotal}
+            detail={
+              criticalTotal > 0
+                ? formatMetricDetail(summaryStats.critical.firingAlerts, summaryStats.critical.recordingRules)
+                : undefined
+            }
+          />
+        </GridItem>
+
+        {/* Warning card */}
+        <GridItem lg={2} md={6} sm={12}>
+          <HealthMetricCard
+            severity="warning"
+            label={t('Warning')}
+            total={warningTotal}
+            detail={
+              warningTotal > 0
+                ? formatMetricDetail(summaryStats.warning.firingAlerts, summaryStats.warning.recordingRules)
+                : undefined
+            }
+          />
+        </GridItem>
+
+        {/* Info card */}
+        <GridItem lg={2} md={6} sm={12}>
+          <HealthMetricCard
+            severity="info"
+            label={t('Info')}
+            total={infoTotal}
+            detail={
+              infoTotal > 0
+                ? formatMetricDetail(summaryStats.info.firingAlerts, summaryStats.info.recordingRules)
+                : undefined
+            }
+          />
+        </GridItem>
+      </Grid>
+    </div>
   );
 };

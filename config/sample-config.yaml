@@ -20,7 +20,12 @@ loki:
   tenantID: netobserv
   useMocks: false
 prometheus:
+  url: https://localhost:9090
   timeout: 30s
+  skipTls: true
+  tokenPath: /tmp/oc-token.txt
+  alertManager:
+    # url: https://localhost:9094
   metrics:
     - enabled: false
       name: netobserv_node_egress_bytes_total
@@ -78,6 +83,91 @@ frontend:
   alertNamespaces:
     - netobserv
   sampling: 50
+  healthRules:
+    - template: PacketDropsByKernel
+      mode: recording
+      description: Packet drops by kernel
+      summary: Percentage of packets dropped by kernel
+      variants:
+        - groupBy: Namespace
+          lowVolumeThreshold: "5"
+          thresholds:
+            info: "10"
+            warning: "20"
+        - groupBy: Node
+          thresholds:
+            info: "5"
+            warning: "10"
+    - template: PacketDropsByDevice
+      mode: recording
+      description: Packet drops by network device
+      summary: Percentage of packets dropped at device level
+      variants:
+        - groupBy: Node
+          thresholds:
+            warning: "5"
+    - template: DNSErrors
+      mode: recording
+      description: DNS resolution errors
+      summary: Percentage of failed DNS queries
+      variants:
+        - groupBy: ""
+          thresholds:
+            warning: "5"
+        - groupBy: Namespace
+          thresholds:
+            info: "5"
+            warning: "10"
+    - template: DNSNxDomain
+      mode: recording
+      description: DNS NXDOMAIN responses
+      summary: Percentage of DNS queries returning NXDOMAIN
+      variants:
+        - groupBy: Namespace
+          thresholds:
+            info: "10"
+            warning: "80"
+    - template: NetpolDenied
+      mode: recording
+      description: Network policy denials
+      summary: Percentage of flows denied by network policies
+      variants:
+        - groupBy: Namespace
+          thresholds:
+            info: "5"
+            warning: "10"
+    - template: LatencyHighTrend
+      mode: recording
+      description: Latency trending high
+      summary: RTT increase compared to baseline
+      variants:
+        - groupBy: Namespace
+          thresholds:
+            info: "100"
+    - template: ExternalEgressHighTrend
+      mode: recording
+      description: External egress trending high
+      summary: Egress to external endpoints increase
+      variants:
+        - groupBy: Node
+          thresholds:
+            warning: "200"
+        - groupBy: Namespace
+          thresholds:
+            info: "100"
+            warning: "500"
+    - template: ExternalIngressHighTrend
+      mode: recording
+      description: External ingress trending high
+      summary: Ingress from external endpoints increase
+      variants:
+        - groupBy: Node
+          thresholds:
+            warning: "200"
+        - groupBy: Namespace
+          thresholds:
+            info: "100"
+            warning: "500"
   # The following configuration is taken from Network Observability Operator
   # see https://github.com/netobserv/network-observability-operator/blob/main/controllers/consoleplugin/config/static-frontend-config.yaml
   panels:

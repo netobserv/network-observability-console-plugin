@@ -14,8 +14,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { HealthCard } from './health-card';
 import { ByResource, getAllAlerts, RecordingRulesByResource } from './health-helper';
-import { RecordingRuleCard } from './recording-rule-card';
-import { UnifiedRuleDetails } from './unified-rule-details';
+import { RuleDetails } from './rule-details';
 
 export interface HealthGlobalProps {
   info: ByResource;
@@ -46,16 +45,18 @@ export const HealthGlobal: React.FC<HealthGlobalProps> = ({ info, recordingRules
         </Bullseye>
       ) : (
         <Grid hasGutter>
-          <GridItem span={3}>
-            {allAlerts.length > 0 && <HealthCard isDark={isDark} stats={info} isSelected={false} />}
-            {hasRecordingRules && (
-              <div style={{ marginTop: allAlerts.length > 0 ? '1rem' : '0' }}>
-                <RecordingRuleCard isDark={isDark} stats={recordingRules} isSelected={false} />
-              </div>
-            )}
+          {/* Unified card row */}
+          <GridItem span={12}>
+            <HealthCard
+              isDark={isDark}
+              alertInfo={allAlerts.length > 0 ? info : undefined}
+              recordingInfo={hasRecordingRules ? recordingRules : undefined}
+              isSelected={false}
+            />
           </GridItem>
-          <GridItem span={9}>
-            <UnifiedRuleDetails
+          {/* Table row */}
+          <GridItem span={12}>
+            <RuleDetails
               kind={'Global'}
               alertInfo={allAlerts.length > 0 ? info : undefined}
               recordingRuleInfo={hasRecordingRules ? recordingRules : undefined}

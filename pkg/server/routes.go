@@ -85,6 +85,8 @@ func setupRoutes(ctx context.Context, cfg *config.Config, authChecker auth.Check
 	} else if cfg.Loki.UseMocks {
 		// Add route for alerts (otherwise, the route is provided by the Console itself)
 		api.HandleFunc("/prometheus/api/v1/rules", alertingmock.GetRules())
+		api.HandleFunc("/prometheus/api/v1/query", alertingmock.GetQuery())
+		api.HandleFunc("/alertmanager/api/v2/silences", alertingmock.GetSilences())
 	}
 
 	return r

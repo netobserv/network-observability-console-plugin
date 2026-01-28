@@ -20,14 +20,15 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { HealthCard } from './health-card';
 import { ByResource, RecordingRulesByResource } from './health-helper';
-import { RecordingRuleCard } from './recording-rule-card';
-import { UnifiedRuleDetails } from './unified-rule-details';
+import { RuleDetails } from './rule-details';
 
-// Type guard to differentiate between ByResource and RecordingRulesByResource
-const isAlertResource = (item: ByResource | RecordingRulesByResource): item is ByResource => {
-  // ByResource has critical.firing, RecordingRulesByResource has critical as array
-  return 'firing' in item.critical;
-};
+// Unified item that can contain both alerts and recording rules
+interface UnifiedResourceItem {
+  name: string;
+  alertInfo?: ByResource;
+  recordingInfo?: RecordingRulesByResource;
+  score: number;
+}
 
 export interface HealthDrawerContainerProps {
   title: string;
@@ -45,50 +46,57 @@ export const HealthDrawerContainer: React.FC<HealthDrawerContainerProps> = ({
   isDark
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
-  const [selectedItem, setSelectedItem] = React.useState<ByResource | RecordingRulesByResource | undefined>(undefined);
+  const [selectedItemName, setSelectedItemName] = React.useState<string | undefined>(undefined);
   const drawerRef = React.useRef<HTMLDivElement>(null);
 
   const onExpand = () => {
     drawerRef.current && drawerRef.current.focus();
   };
 
-  React.useEffect(() => {
-    if (selectedItem) {
-      if (isAlertResource(selectedItem)) {
-        const fromStats = stats.find(s => s.name === selectedItem.name);
-        if (fromStats !== selectedItem) {
-          setSelectedItem(fromStats);
-        }
-      } else if (recordingRulesStats) {
-        const fromStats = recordingRulesStats.find(s => s.name === selectedItem.name);
-        if (fromStats !== selectedItem) {
-          setSelectedItem(fromStats);
-        }
+  // Combine alerts and recording rules by resource name
+  const unifiedItems = React.useMemo(() => {
+    const itemsMap = new Map<string, UnifiedResourceItem>();
+
+    // Add alerts
+    stats.forEach(alert => {
+      itemsMap.set(alert.name, {
+        name: alert.name,
+        alertInfo: alert,
+        recordingInfo: undefined,
+        score: alert.score
+      });
+    });
+
+    // Add or merge recording rules
+    recordingRulesStats?.forEach(recordingRule => {
+      const existing = itemsMap.get(recordingRule.name);
+      if (existing) {
+        existing.recordingInfo = recordingRule;
+        // Use minimum score (best score)
+        existing.score = Math.min(existing.score, recordingRule.score);
+      } else {
+        itemsMap.set(recordingRule.name, {
+          name: recordingRule.name,
+          alertInfo: undefined,
+          recordingInfo: recordingRule,
+          score: recordingRule.score
+        });
       }
-    }
-    // we want to update selectedItem when stats or recordingRulesStats changes, no more
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    });
+
+    // Sort by score (best score = lowest value)
+    return _.orderBy(Array.from(itemsMap.values()), item => item.score, 'asc');
   }, [stats, recordingRulesStats]);
 
-  const hasRecordingRules = recordingRulesStats && recordingRulesStats.length > 0;
+  const selectedItem = React.useMemo(() => {
+    return selectedItemName ? unifiedItems.find(item => item.name === selectedItemName) : undefined;
+  }, [selectedItemName, unifiedItems]);
+
   const isExpanded = selectedItem !== undefined;
-
-  // Sort alerts by score (best score = lowest value)
-  const sortedAlerts = React.useMemo(() => _.orderBy(stats, r => r.score, 'asc'), [stats]);
-
-  // Sort recording rules by score (best score = lowest value)
-  const sortedRecordingRules = React.useMemo(
-    () => (hasRecordingRules ? _.orderBy(recordingRulesStats!, r => r.score, 'asc') : []),
-    [hasRecordingRules, recordingRulesStats]
-  );
-
-  const hasAnyViolations = sortedAlerts.length > 0 || sortedRecordingRules.length > 0;
+  const hasAnyViolations = unifiedItems.length > 0;
 
   return (
     <>
-      <TextContent>
-        <Text component={TextVariants.h3}>{title}</Text>
-      </TextContent>
       <Drawer isExpanded={isExpanded} onExpand={onExpand} isInline>
         <DrawerContent
           panelContent={
@@ -105,11 +113,10 @@ export const HealthDrawerContainer: React.FC<HealthDrawerContainerProps> = ({
               </DrawerHead>
               {selectedItem && (
                 <div className="health-gallery-drawer-content">
-                  <UnifiedRuleDetails
+                  <RuleDetails
                     kind={kind}
-                    alertInfo={isAlertResource(selectedItem) ? selectedItem : undefined}
-                    recordingRuleInfo={!isAlertResource(selectedItem) ? selectedItem : undefined}
-                    wide={false}
+                    alertInfo={selectedItem.alertInfo}
+                    recordingRuleInfo={selectedItem.recordingInfo}
                   />
                 </div>
               )}
@@ -117,6 +124,9 @@ export const HealthDrawerContainer: React.FC<HealthDrawerContainerProps> = ({
           }
         >
           <DrawerContentBody>
+            <TextContent>
+              <Text component={TextVariants.h3}>{title}</Text>
+            </TextContent>
             {!hasAnyViolations && (
               <Bullseye>
                 <EmptyState>
@@ -126,38 +136,18 @@ export const HealthDrawerContainer: React.FC<HealthDrawerContainerProps> = ({
               </Bullseye>
             )}
             {hasAnyViolations && (
-              <Gallery hasGutter minWidths={{ default: '300px' }}>
-                {sortedAlerts.map(r => (
+              <Gallery hasGutter minWidths={{ default: '300px' }} style={{ marginRight: '1.5rem' }}>
+                {unifiedItems.map(item => (
                   <HealthCard
-                    key={`card-${r.name}`}
+                    key={`card-${item.name}`}
+                    name={item.name}
                     kind={kind}
                     isDark={isDark}
-                    stats={r}
-                    isSelected={
-                      r.name === selectedItem?.name && selectedItem !== undefined && isAlertResource(selectedItem)
-                    }
+                    alertInfo={item.alertInfo}
+                    recordingInfo={item.recordingInfo}
+                    isSelected={item.name === selectedItemName}
                     onClick={() => {
-                      setSelectedItem(
-                        r.name !== selectedItem?.name || (selectedItem && !isAlertResource(selectedItem))
-                          ? r
-                          : undefined
-                      );
-                    }}
-                  />
-                ))}
-                {sortedRecordingRules.map(r => (
-                  <RecordingRuleCard
-                    key={`recording-card-${r.name}`}
-                    kind={kind}
-                    isDark={isDark}
-                    stats={r}
-                    isSelected={
-                      r.name === selectedItem?.name && selectedItem !== undefined && !isAlertResource(selectedItem)
-                    }
-                    onClick={() => {
-                      setSelectedItem(
-                        r.name !== selectedItem?.name || (selectedItem && isAlertResource(selectedItem)) ? r : undefined
-                      );
+                      setSelectedItemName(item.name !== selectedItemName ? item.name : undefined);
                     }}
                   />
                 ))}
