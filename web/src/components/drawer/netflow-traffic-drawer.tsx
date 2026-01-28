@@ -100,6 +100,7 @@ export interface NetflowTrafficDrawerProps {
   clearSelections: () => void;
   setSelectedRecord: (v: Record | undefined) => void;
   setSelectedElement: (v: GraphElementPeer | undefined) => void;
+  config: Config;
 }
 
 // eslint-disable-next-line react/display-name
@@ -332,6 +333,7 @@ export const NetflowTrafficDrawer: React.FC<NetflowTrafficDrawerProps> = React.f
                   scopes={props.scopes}
                   resetDefaultFilters={getResetDefaultFiltersProp()}
                   clearFilters={getClearFiltersProp()}
+                  config={props.config}
                 />
               </>
             );

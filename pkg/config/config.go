@@ -125,45 +125,26 @@ type FieldConfig struct {
 	Description string `yaml:"description" json:"description"`
 }
 
-type HealthRuleThresholds struct {
-	Info     string `yaml:"info,omitempty" json:"info,omitempty"`
-	Warning  string `yaml:"warning,omitempty" json:"warning,omitempty"`
-	Critical string `yaml:"critical,omitempty" json:"critical,omitempty"`
-}
-
-type HealthRuleVariant struct {
-	GroupBy    string               `yaml:"groupBy,omitempty" json:"groupBy,omitempty"`
-	Thresholds HealthRuleThresholds `yaml:"thresholds" json:"thresholds"`
-}
-
-type HealthRule struct {
-	Template    string              `yaml:"template" json:"template"`
-	Mode        string              `yaml:"mode,omitempty" json:"mode,omitempty"`
-	Variants    []HealthRuleVariant `yaml:"variants" json:"variants"`
-	Description string              `yaml:"description,omitempty" json:"description,omitempty"` // Description pattern from centralized metadata
-	Summary     string              `yaml:"summary,omitempty" json:"summary,omitempty"`         // Summary from centralized metadata
-}
-
 type Frontend struct {
-	BuildVersion    string        `yaml:"buildVersion" json:"buildVersion"`
-	BuildDate       string        `yaml:"buildDate" json:"buildDate"`
-	RecordTypes     []string      `yaml:"recordTypes" json:"recordTypes"`
-	PortNaming      PortNaming    `yaml:"portNaming" json:"portNaming"`
-	Panels          []string      `yaml:"panels" json:"panels"`
-	Columns         []Column      `yaml:"columns" json:"columns"`
-	Filters         []Filter      `yaml:"filters" json:"filters"`
-	Scopes          []Scope       `yaml:"scopes" json:"scopes"`
-	QuickFilters    []QuickFilter `yaml:"quickFilters" json:"quickFilters"`
-	AlertNamespaces []string      `yaml:"alertNamespaces" json:"alertNamespaces"`
-	Sampling        int           `yaml:"sampling" json:"sampling"`
-	Features        []string      `yaml:"features" json:"features"`
-	Fields          []FieldConfig `yaml:"fields" json:"fields"`
-	DataSources     []string      `yaml:"dataSources" json:"dataSources"`
-	LokiMocks       bool          `yaml:"lokiMocks,omitempty" json:"lokiMocks,omitempty"`
-	LokiLabels      []string      `yaml:"lokiLabels" json:"lokiLabels"`
-	PromLabels      []string      `yaml:"promLabels" json:"promLabels"`
-	MaxChunkAgeMs   int           `yaml:"maxChunkAgeMs,omitempty" json:"maxChunkAgeMs,omitempty"` // populated at query time
-	HealthRules     []HealthRule  `yaml:"healthRules,omitempty" json:"healthRules,omitempty"`
+	BuildVersion         string                       `yaml:"buildVersion" json:"buildVersion"`
+	BuildDate            string                       `yaml:"buildDate" json:"buildDate"`
+	RecordTypes          []string                     `yaml:"recordTypes" json:"recordTypes"`
+	PortNaming           PortNaming                   `yaml:"portNaming" json:"portNaming"`
+	Panels               []string                     `yaml:"panels" json:"panels"`
+	Columns              []Column                     `yaml:"columns" json:"columns"`
+	Filters              []Filter                     `yaml:"filters" json:"filters"`
+	Scopes               []Scope                      `yaml:"scopes" json:"scopes"`
+	QuickFilters         []QuickFilter                `yaml:"quickFilters" json:"quickFilters"`
+	AlertNamespaces      []string                     `yaml:"alertNamespaces" json:"alertNamespaces"`
+	Sampling             int                          `yaml:"sampling" json:"sampling"`
+	Features             []string                     `yaml:"features" json:"features"`
+	Fields               []FieldConfig                `yaml:"fields" json:"fields"`
+	DataSources          []string                     `yaml:"dataSources" json:"dataSources"`
+	LokiMocks            bool                         `yaml:"lokiMocks,omitempty" json:"lokiMocks,omitempty"`
+	LokiLabels           []string                     `yaml:"lokiLabels" json:"lokiLabels"`
+	PromLabels           []string                     `yaml:"promLabels" json:"promLabels"`
+	MaxChunkAgeMs        int                          `yaml:"maxChunkAgeMs,omitempty" json:"maxChunkAgeMs,omitempty"` // populated at query time
+	RecordingAnnotations map[string]map[string]string `yaml:"recordingAnnotations,omitempty" json:"recordingAnnotations,omitempty"`
 }
 
 type Config struct {

@@ -57,7 +57,6 @@ export const ElementPanel: React.FC<ElementPanelProps> = ({
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [activeTab, setActiveTab] = React.useState<string>('details');
-  const [selectedAlertName, setSelectedAlertName] = React.useState<string>();
 
   const data = element.getData();
   const noMetrics = data && data.noMetrics === true;
@@ -69,6 +68,18 @@ export const ElementPanel: React.FC<ElementPanelProps> = ({
   } else {
     aData = data!;
   }
+
+  const healthKind = React.useMemo(() => {
+    const nodeType = element.getData()?.nodeType;
+    if (nodeType === 'host') {
+      return 'Node';
+    } else if (nodeType === 'namespace') {
+      return 'Namespace';
+    } else if (nodeType === 'owner') {
+      return 'Owner';
+    }
+    return undefined;
+  }, [element]);
 
   const titleContent = React.useCallback(() => {
     if (element instanceof BaseEdge) {
@@ -88,10 +99,6 @@ export const ElementPanel: React.FC<ElementPanelProps> = ({
       setActiveTab('details');
     }
   }, [metrics, droppedMetrics, activeTab]);
-
-  React.useEffect(() => {
-    setSelectedAlertName(undefined);
-  }, [element]);
 
   return (
     <DrawerPanelContent
@@ -152,25 +159,20 @@ export const ElementPanel: React.FC<ElementPanelProps> = ({
               />
             </Tab>
           )}
-          {!_.isEmpty(data?.alerts) && (
+          {data?.health !== undefined && healthKind !== undefined && (
             <Tab className="drawer-tab" eventKey={'health'} title={<TabTitleText>{t('Health')}</TabTitleText>}>
-              {data!.alerts?.map(alert => (
-                <>
-                  <HealthCard
-                    key={`card-${alert.name}`}
-                    alertInfo={alert}
-                    kind={data!.peer.resourceKind || '?'}
-                    isDark={isDark || false}
-                    isSelected={selectedAlertName === alert.name}
-                    onClick={() => setSelectedAlertName(alert.name !== selectedAlertName ? alert.name : undefined)}
-                  />
-                  {alert.name === selectedAlertName && (
-                    <div className="health-details">
-                      <RuleDetails kind={data!.peer.resourceKind || '?'} alertInfo={alert} />
-                    </div>
-                  )}
-                </>
-              ))}
+              <>
+                <HealthCard
+                  key={`card-${alert.name}`}
+                  resourceHealth={data.health}
+                  kind={healthKind}
+                  isDark={isDark || false}
+                  isSelected={true}
+                />
+                <div className="health-details">
+                  <RuleDetails kind={healthKind} resourceHealth={data.health} />
+                </div>
+              </>
             </Tab>
           )}
         </Tabs>

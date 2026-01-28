@@ -16,32 +16,7 @@ export type Feature =
   | 'networkEvents'
   | 'ipsec';
 
-export type HealthRuleThresholds = {
-  info?: string;
-  warning?: string;
-  critical?: string;
-};
-
-export type HealthRuleVariant = {
-  groupBy: string;
-  lowVolumeThreshold?: string;
-  thresholds: HealthRuleThresholds;
-  upperBound?: string;
-};
-
-export type HealthRuleLink = {
-  name: string;
-  url: string;
-};
-
-export type HealthRuleMetadata = {
-  template: string;
-  mode: string;
-  variants: HealthRuleVariant[];
-  description?: string;
-  summary?: string;
-  links?: HealthRuleLink[];
-};
+export type RecordingAnnotations = { [recordName: string]: { [key: string]: string } };
 
 export type Config = {
   buildVersion: string;
@@ -65,7 +40,7 @@ export type Config = {
   lokiLabels: string[];
   promLabels: string[];
   maxChunkAgeMs?: number;
-  healthRules?: HealthRuleMetadata[];
+  recordingAnnotations?: RecordingAnnotations;
 };
 
 export const defaultConfig: Config = {
@@ -90,5 +65,5 @@ export const defaultConfig: Config = {
   lokiLabels: [],
   promLabels: [],
   maxChunkAgeMs: undefined,
-  healthRules: []
+  recordingAnnotations: {}
 };

@@ -19,7 +19,7 @@ import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { TopologyMetrics } from '../../../../api/loki';
-import { HealthStat } from '../../../../components/health/health-helper';
+import { HealthStats } from '../../../../components/health/health-helper';
 import { Config } from '../../../../model/config';
 import { Filter, FilterDefinition, Filters } from '../../../../model/filters';
 import { FlowScope, MetricType, StatFunction } from '../../../../model/flow-query';
@@ -75,7 +75,7 @@ export interface TopologyContentProps {
   isDark?: boolean;
   resetDefaultFilters?: (c?: Config) => void;
   clearFilters?: () => void;
-  resourceStats?: HealthStat[];
+  resourceStats: HealthStats;
 }
 
 export const TopologyContent: React.FC<TopologyContentProps> = ({
@@ -100,7 +100,7 @@ export const TopologyContent: React.FC<TopologyContentProps> = ({
   isDark,
   resetDefaultFilters,
   clearFilters,
-  resourceStats = []
+  resourceStats
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const controller = useVisualizationController();
