@@ -1,7 +1,7 @@
 FROM localhost/local-front-build:latest as web-builder
 
 ARG TARGETARCH
-FROM docker.io/library/golang:1.24 as go-builder
+FROM docker.io/library/golang:1.25 as go-builder
 
 ARG TARGETARCH=amd64
 ARG LDFLAGS
