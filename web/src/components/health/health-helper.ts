@@ -176,6 +176,7 @@ const getHealthMetadata = (annotations: PrometheusLabels): HealthMetadata => {
     },
     links: []
   };
+  const parseFloat0 = (s?: string) => (s ? parseFloat(s) || 0 : 0);
   if (annotations && 'netobserv_io_network_health' in annotations) {
     const md = (JSON.parse(annotations['netobserv_io_network_health']) as HealthMetadata) || undefined;
     if (md) {
@@ -184,16 +185,12 @@ const getHealthMetadata = (annotations: PrometheusLabels): HealthMetadata => {
       md.upperBound = md.upperBound || defaultMetadata.upperBound;
       md.trafficLink = md.trafficLink || defaultMetadata.trafficLink;
       md.links = md.links || defaultMetadata.links;
-      md.alertThresholdF = md.alertThreshold ? parseFloat(md.alertThreshold) || 0 : 0;
+      md.alertThresholdF = parseFloat0(md.alertThreshold);
       md.upperBoundF = parseFloat(md.upperBound) || defaultMetadata.upperBoundF;
       if (md.recordingThresholds) {
-        md.recordingThresholds.criticalF = md.recordingThresholds.critical
-          ? parseFloat(md.recordingThresholds.critical) || 0
-          : 0;
-        md.recordingThresholds.warningF = md.recordingThresholds.warning
-          ? parseFloat(md.recordingThresholds.warning) || 0
-          : 0;
-        md.recordingThresholds.infoF = md.recordingThresholds.info ? parseFloat(md.recordingThresholds.info) || 0 : 0;
+        md.recordingThresholds.criticalF = parseFloat0(md.recordingThresholds.critical);
+        md.recordingThresholds.warningF = parseFloat0(md.recordingThresholds.warning);
+        md.recordingThresholds.infoF = parseFloat0(md.recordingThresholds.info);
       }
       return md;
     }

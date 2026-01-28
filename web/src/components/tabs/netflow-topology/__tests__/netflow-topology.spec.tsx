@@ -13,6 +13,8 @@ import { defaultTimeRange } from '../../../../utils/router';
 import { TopologyContent } from '../2d/topology-content';
 import { NetflowTopology } from '../netflow-topology';
 import { dataSample } from '../__tests-data__/metrics';
+import { Config } from '../../../../model/config';
+import { HealthStats } from '../../../health/health-helper';
 
 describe('<NetflowTopology />', () => {
   const mocks = {
@@ -40,7 +42,9 @@ describe('<NetflowTopology />', () => {
     searchHandle: null,
     searchEvent: undefined,
     scopes: ScopeDefSample,
-    expectedNodes: []
+    expectedNodes: [],
+    resourceStats: {} as HealthStats,
+    config: {} as Config
   };
 
   it('should render component', async () => {
