@@ -199,6 +199,10 @@ func getLokiNamesForPrefix(cfg *config.Loki, lokiClient httpclient.Caller, filts
 }
 
 func (h *Handlers) getLokiStatus(r *http.Request) ([]byte, int, error) {
+	// Check if the status was provided by the operator
+	if h.Cfg.Loki.Status != "" {
+		return []byte(h.Cfg.Loki.Status), 200, nil
+	}
 	lokiClient := newLokiClient(&h.Cfg.Loki, r.Header, true)
 	baseURL := strings.TrimRight(h.Cfg.Loki.GetStatusURL(), "/")
 	return executeLokiQuery(fmt.Sprintf("%s/%s", baseURL, "ready"), lokiClient)
@@ -232,6 +236,10 @@ func (h *Handlers) LokiMetrics() func(w http.ResponseWriter, r *http.Request) {
 			writeError(w, http.StatusBadRequest, "Loki is disabled")
 			return
 		}
+		if h.Cfg.Loki.Status != "" {
+			writeError(w, http.StatusBadRequest, "Status URL endpoints are unavailable when using LokiStack operator. Status is provided via operator conditions.")
+			return
+		}
 		lokiClient := newLokiClient(&h.Cfg.Loki, r.Header, true)
 		baseURL := strings.TrimRight(h.Cfg.Loki.GetStatusURL(), "/")
 
@@ -251,6 +259,10 @@ func (h *Handlers) LokiBuildInfos() func(w http.ResponseWriter, r *http.Request)
 			writeError(w, http.StatusBadRequest, "Loki is disabled")
 			return
 		}
+		if h.Cfg.Loki.Status != "" {
+			writeError(w, http.StatusBadRequest, "Loki status URL is not usable with Loki operator")
+			return
+		}
 		lokiClient := newLokiClient(&h.Cfg.Loki, r.Header, true)
 		baseURL := strings.TrimRight(h.Cfg.Loki.GetStatusURL(), "/")
 
@@ -265,6 +277,10 @@ func (h *Handlers) LokiBuildInfos() func(w http.ResponseWriter, r *http.Request)
 }
 
 func (h *Handlers) fetchLokiConfig(cl httpclient.Caller, output any) error {
+	if h.Cfg.Loki.Status != "" {
+		return fmt.Errorf("loki status url is not usable with Loki operator")
+	}
+
 	baseURL := strings.TrimRight(h.Cfg.Loki.GetStatusURL(), "/")
 
 	resp, _, err := executeLokiQuery(fmt.Sprintf("%s/%s", baseURL, "config"), cl)
