@@ -19,6 +19,7 @@ import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { TopologyMetrics } from '../../../../api/loki';
+import { HealthStat } from '../../../../components/health/health-helper';
 import { Config } from '../../../../model/config';
 import { Filter, FilterDefinition, Filters } from '../../../../model/filters';
 import { FlowScope, MetricType, StatFunction } from '../../../../model/flow-query';
@@ -53,6 +54,7 @@ const zoomOut = 3 / 4;
 const fitPadding = 80;
 
 export interface TopologyContentProps {
+  containerRef?: React.RefObject<HTMLDivElement>;
   k8sModels: { [key: string]: K8sModel };
   expectedNodes: string[];
   metricFunction: StatFunction;
@@ -63,7 +65,6 @@ export interface TopologyContentProps {
   metrics: TopologyMetrics[];
   droppedMetrics: TopologyMetrics[];
   options: TopologyOptions;
-  setOptions: (o: TopologyOptions) => void;
   filters: Filters;
   filterDefinitions: FilterDefinition[];
   setFilters: (v: Filters) => void;
@@ -74,9 +75,11 @@ export interface TopologyContentProps {
   isDark?: boolean;
   resetDefaultFilters?: (c?: Config) => void;
   clearFilters?: () => void;
+  resourceStats?: HealthStat[];
 }
 
 export const TopologyContent: React.FC<TopologyContentProps> = ({
+  containerRef,
   k8sModels,
   expectedNodes,
   metricFunction,
@@ -87,7 +90,6 @@ export const TopologyContent: React.FC<TopologyContentProps> = ({
   metrics,
   droppedMetrics,
   options,
-  setOptions,
   filters,
   filterDefinitions,
   setFilters,
@@ -97,7 +99,8 @@ export const TopologyContent: React.FC<TopologyContentProps> = ({
   searchEvent,
   isDark,
   resetDefaultFilters,
-  clearFilters
+  clearFilters,
+  resourceStats = []
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const controller = useVisualizationController();
@@ -232,7 +235,7 @@ export const TopologyContent: React.FC<TopologyContentProps> = ({
         onSelect(undefined);
       }
     },
-    [metricScope, setMetricScope, scopes, setOptions, options, filters.list, filterDefinitions, onSelect, setFilters]
+    [metricScope, setMetricScope, scopes, filters.list, filterDefinitions, onSelect, setFilters]
   );
 
   const onHover = React.useCallback((data: Decorated<ElementData>) => {
@@ -255,10 +258,17 @@ export const TopologyContent: React.FC<TopologyContentProps> = ({
       if ([LayoutName.concentric, LayoutName.dagre, LayoutName.grid].includes(options.layout)) {
         fitView();
       } else {
-        //TODO: find a smoother way to fit while elements are still moving
-        setTimeout(fitView, 100);
-        setTimeout(fitView, 250);
-        setTimeout(fitView, 500);
+        // Use requestAnimationFrame to fit after elements have settled
+        let frameCount = 0;
+        const maxFrames = 10; // Allow up to 10 frames for animations to complete
+        const fitOnFrame = () => {
+          frameCount++;
+          fitView();
+          if (frameCount < maxFrames) {
+            requestAnimationFrame(fitOnFrame);
+          }
+        };
+        requestAnimationFrame(fitOnFrame);
       }
     }
   }, [fitView, options.layout]);
@@ -315,6 +325,17 @@ export const TopologyContent: React.FC<TopologyContentProps> = ({
     setDetailsLevel();
   }, [controller, options.lowScale, options.medScale, setDetailsLevel]);
 
+  //fit on container resize
+  React.useEffect(() => {
+    if (containerRef?.current) {
+      const resizeObserver = new ResizeObserver(() => {
+        setTimeout(() => fitView(), 500); // slight delay to allow for layout settling
+      });
+      resizeObserver.observe(containerRef.current);
+      return () => resizeObserver.disconnect();
+    }
+  }, [containerRef, fitView]);
+
   //update model merging existing nodes / edges
   const updateModel = React.useCallback(() => {
     if (!controller) {
@@ -345,7 +366,8 @@ export const TopologyContent: React.FC<TopologyContentProps> = ({
       filterDefinitions,
       k8sModels,
       expectedNodes,
-      isDark
+      isDark,
+      resourceStats
     );
     const allIds = [...(updatedModel.nodes || []), ...(updatedModel.edges || [])].map(item => item.id);
     controller.getElements().forEach(e => {
@@ -388,7 +410,8 @@ export const TopologyContent: React.FC<TopologyContentProps> = ({
     filterDefinitions,
     k8sModels,
     expectedNodes,
-    isDark
+    isDark,
+    resourceStats
   ]);
 
   //update model on layout / metrics / filters change

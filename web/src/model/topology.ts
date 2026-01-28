@@ -1,4 +1,4 @@
-import { K8sModel } from '@openshift-console/dynamic-plugin-sdk';
+import { AlertSeverity, K8sModel, PrometheusLabels } from '@openshift-console/dynamic-plugin-sdk';
 import {
   EdgeAnimationSpeed,
   EdgeModel,
@@ -17,6 +17,7 @@ import { TFunction } from 'i18next';
 import _ from 'lodash';
 import { MetricStats, TopologyMetricPeer, TopologyMetrics } from '../api/loki';
 import { TruncateLength } from '../components/dropdowns/truncate-dropdown';
+import { HealthStat } from '../components/health/health-helper';
 import { Filter, FilterCompare, FilterDefinition, FilterId, Filters, findFromFilters } from '../model/filters';
 import { ContextSingleton } from '../utils/context';
 import { findFilter } from '../utils/filter-definitions';
@@ -247,6 +248,7 @@ export const defaultNodeSize = 75;
 export type NodeData = {
   nodeType: NodeType;
   peer: TopologyMetricPeer;
+  alerts?: HealthStat[];
   canStepInto?: boolean;
   badgeColor?: string;
   noMetrics?: boolean;
@@ -262,7 +264,8 @@ const generateNode = (
   t: TFunction,
   filterDefinitions: FilterDefinition[],
   k8sModels: { [key: string]: K8sModel },
-  isDark?: boolean
+  isDark?: boolean,
+  alerts?: HealthStat[]
 ): NodeModel => {
   const label = data.peer.getDisplayName(false, false) || (scope === 'host' ? t('External') : t('Unknown'))!;
   const resourceKind = data.peer.resourceKind;
@@ -274,6 +277,7 @@ const generateNode = (
   const k8sModel = options.nodeBadges && resourceKind ? k8sModels[resourceKind] : undefined;
   const isSrcFiltered = isDirElementFiltered(data.nodeType, data.peer, 'src', filters.list, filterDefinitions);
   const isDstFiltered = isDirElementFiltered(data.nodeType, data.peer, 'dst', filters.list, filterDefinitions);
+  const status = getResourceStatus(data.peer, alerts);
 
   return {
     id: data.peer.id,
@@ -282,7 +286,7 @@ const generateNode = (
     width: defaultNodeSize,
     height: defaultNodeSize,
     shape: k8sModel ? NodeShape.ellipse : NodeShape.rect,
-    status: NodeStatus.default,
+    status: status || NodeStatus.default,
     style: { padding: 20 },
     data: {
       ...data,
@@ -298,8 +302,10 @@ const generateNode = (
       badgeColor: k8sModel?.color ? k8sModel.color : '#2b9af3',
       badgeClassName: 'topology-icon',
       showDecorators: true,
+      showStatusDecorator: status !== undefined,
       secondaryLabel,
-      truncateLength: options.truncateLength !== TruncateLength.OFF ? options.truncateLength : undefined
+      truncateLength: options.truncateLength !== TruncateLength.OFF ? options.truncateLength : undefined,
+      alerts
     }
   };
 };
@@ -398,6 +404,245 @@ const generateEdge = (
   };
 };
 
+type AlertLabel = PrometheusLabels & {
+  alertname: string;
+  severity?: AlertSeverity | string;
+};
+
+// Helper to extract source fields from alert labels
+const extractSourceFields = (labels: AlertLabel): Partial<TopologyMetricPeer> => {
+  return extractFields(labels, 'Src');
+};
+
+// Helper to extract destination fields from alert labels
+const extractDestinationFields = (labels: AlertLabel): Partial<TopologyMetricPeer> => {
+  return extractFields(labels, 'Dst');
+};
+
+// Helper to extract fields from alert labels
+const extractFields = (labels: AlertLabel, prefix: 'Src' | 'Dst'): Partial<TopologyMetricPeer> => {
+  const fields: Partial<TopologyMetricPeer> = {};
+  let foundPrefixedFields = false;
+  let ownerName: string | undefined;
+  let ownerType: string | undefined;
+
+  Object.entries(labels).forEach(([key, value]) => {
+    if (key.startsWith(prefix)) {
+      foundPrefixedFields = true;
+      const fieldName = key.replace(prefix, '').replace('K8S_', '').toLowerCase();
+      if (fieldName === 'hostname' || fieldName === 'node') {
+        fields.host = value as string;
+      } else if (fieldName === 'namespace') {
+        fields.namespace = value as string;
+      } else if (fieldName === 'workload') {
+        ownerName = value as string;
+      } else if (fieldName === 'kind') {
+        ownerType = value as string;
+      } else if (fieldName === 'clustername') {
+        fields.cluster = value as string;
+      } else {
+        fields[fieldName] = value;
+      }
+    }
+  });
+
+  // Set owner if we have both name and type
+  if (ownerName && ownerType) {
+    fields.owner = { name: ownerName, type: ownerType };
+  }
+
+  // If no prefixed fields found, try to extract from direct dimension labels
+  // This handles aggregated alerts that have labels like 'namespace', 'node', etc.
+  if (!foundPrefixedFields) {
+    if (labels.namespace) {
+      fields.namespace = labels.namespace as string;
+    }
+    if (labels.node) {
+      fields.host = labels.node as string;
+    }
+    if (labels.instance) {
+      fields.host = labels.instance as string;
+    }
+    if (labels.workload && labels.kind) {
+      fields.owner = {
+        name: labels.workload as string,
+        type: labels.kind as string
+      };
+    }
+  }
+
+  return fields;
+};
+
+const getResourceAlerts = (
+  peer: TopologyMetricPeer,
+  nodeType: NodeType,
+  resourceStats?: HealthStat[]
+): HealthStat[] | undefined => {
+  if (!resourceStats || resourceStats.length === 0) {
+    return undefined;
+  }
+
+  const alerts: HealthStat[] = [];
+  // Check all resource stats for this peer
+  for (const resource of resourceStats) {
+    // First, check if the resource name matches this peer's dimension (namespace, node, or workload based on nodeType)
+    if (!resourceMatchesPeer(peer, resource.name, nodeType)) {
+      continue;
+    }
+
+    const matchedResource: HealthStat = {
+      name: resource.name,
+      score: resource.score,
+      critical: { firing: [], pending: [], silenced: [], inactive: [] },
+      warning: { firing: [], pending: [], silenced: [], inactive: [] },
+      other: { firing: [], pending: [], silenced: [], inactive: [] }
+    };
+    let hasAlerts = false;
+
+    // Check all alert states: firing, pending, silenced
+    for (const severity of ['critical', 'warning', 'other'] as const) {
+      for (const alert of resource[severity].firing) {
+        if (matchesAlert(peer, alert.labels)) {
+          matchedResource[severity].firing.push(alert);
+          hasAlerts = true;
+        }
+      }
+      for (const alert of resource[severity].pending) {
+        if (matchesAlert(peer, alert.labels)) {
+          matchedResource[severity].pending.push(alert);
+          hasAlerts = true;
+        }
+      }
+      for (const alert of resource[severity].silenced) {
+        if (matchesAlert(peer, alert.labels)) {
+          matchedResource[severity].silenced.push(alert);
+          hasAlerts = true;
+        }
+      }
+      // Note: inactive alerts don't have labels to match against, so we skip them
+    }
+
+    if (hasAlerts) {
+      alerts.push(matchedResource);
+    }
+  }
+
+  return alerts.length > 0 ? alerts : undefined;
+};
+
+// Helper function to check if a resource name matches a peer for a given scope/dimension
+// Only matches if the resource belongs to the same dimension as nodeType
+const resourceMatchesPeer = (peer: TopologyMetricPeer, resourceName: string, nodeType: NodeType): boolean => {
+  // Global alerts have empty resource name - only match if nodeType is a direct dimension
+  if (!resourceName) {
+    return true;
+  }
+
+  // Match based on the current scope being viewed
+  switch (nodeType) {
+    case 'namespace':
+      return peer.namespace === resourceName;
+    case 'host':
+      return peer.host === resourceName;
+    case 'owner':
+      return peer.owner?.name === resourceName;
+    default:
+      // For other scopes, try to match by the scope name
+      return (peer as never)[nodeType] === resourceName;
+  }
+};
+
+// Helper function to check if two peers are the same by comparing identifying fields
+// Ignores non-identifying fields like subnetLabel
+const peersMatch = (peer1: TopologyMetricPeer, peer2: TopologyMetricPeer): boolean => {
+  // Compare owner
+  if (peer1.owner && peer2.owner) {
+    return peer1.owner.name === peer2.owner.name && peer1.owner.type === peer2.owner.type;
+  }
+  if ((peer1.owner === undefined) !== (peer2.owner === undefined)) {
+    return false;
+  }
+
+  // Compare resource
+  if (peer1.resource && peer2.resource) {
+    return peer1.resource.name === peer2.resource.name && peer1.resource.type === peer2.resource.type;
+  }
+  if ((peer1.resource === undefined) !== (peer2.resource === undefined)) {
+    return false;
+  }
+
+  // Compare host
+  if (peer1.host !== peer2.host) {
+    return false;
+  }
+
+  // Compare namespace
+  if (peer1.namespace !== peer2.namespace) {
+    return false;
+  }
+
+  // Compare cluster
+  if (peer1.cluster !== peer2.cluster) {
+    return false;
+  }
+
+  // Compare address (if no other identifying info)
+  if (!peer1.owner && !peer1.resource && peer1.addr !== peer2.addr) {
+    return false;
+  }
+
+  return true;
+};
+
+// Helper function to check if an alert matches a peer
+const matchesAlert = (peer: TopologyMetricPeer, labels: AlertLabel): boolean => {
+  const srcPeer = createPeer(extractSourceFields(labels));
+  const dstPeer = createPeer(extractDestinationFields(labels));
+
+  // For aggregated alerts (those without explicit Src/Dst labels),
+  // srcPeer and dstPeer will have the same values from dimension labels
+  if (peersMatch(srcPeer, peer) || peersMatch(dstPeer, peer)) {
+    return true;
+  }
+
+  return false;
+};
+
+// Find alert status for a specific peer by comparing alert labels to peer fields
+const getResourceStatus = (peer: TopologyMetricPeer, alerts?: HealthStat[]): NodeStatus => {
+  if (!alerts || alerts.length === 0) {
+    return NodeStatus.default;
+  }
+
+  // Check in priority order: critical > warning > info (other)
+  for (const resource of alerts) {
+    if (resource.critical.firing.length > 0) {
+      for (const alert of resource.critical.firing) {
+        if (matchesAlert(peer, alert.labels)) {
+          return NodeStatus.danger;
+        }
+      }
+    }
+    if (resource.warning.firing.length > 0) {
+      for (const alert of resource.warning.firing) {
+        if (matchesAlert(peer, alert.labels)) {
+          return NodeStatus.warning;
+        }
+      }
+    }
+    if (resource.other.firing.length > 0) {
+      for (const alert of resource.other.firing) {
+        if (matchesAlert(peer, alert.labels)) {
+          return NodeStatus.info;
+        }
+      }
+    }
+  }
+
+  return NodeStatus.default;
+};
+
 export const generateDataModel = (
   metrics: TopologyMetrics[],
   droppedMetrics: TopologyMetrics[],
@@ -411,7 +656,8 @@ export const generateDataModel = (
   filterDefinitions: FilterDefinition[],
   k8sModels: { [key: string]: K8sModel },
   expectedNodes: string[],
-  isDark?: boolean
+  isDark?: boolean,
+  resourceStats?: HealthStat[]
 ): Model => {
   let nodes: NodeModel[] = [];
   const edges: EdgeModel[] = [];
@@ -474,6 +720,7 @@ export const generateDataModel = (
     const parent = data.nodeType !== 'unknown' ? addPossibleGroups(data.peer) : undefined;
     let node = nodes.find(n => n.type === 'node' && n.id === data.peer.id);
     if (!node) {
+      const alerts = getResourceAlerts(data.peer, data.nodeType, resourceStats);
       node = generateNode(
         data,
         metricScope,
@@ -484,7 +731,8 @@ export const generateDataModel = (
         t,
         filterDefinitions,
         k8sModels,
-        isDark
+        isDark,
+        alerts
       );
       nodes.push(node);
     }

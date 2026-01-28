@@ -51,6 +51,13 @@ export const HealthSummary: React.FC<HealthSummaryProps> = ({ rules, stats }) =>
       recordingRulesWarning += node.warning.length;
       recordingRulesInfo += node.other.length;
     });
+
+    // Count from all owners (workloads)
+    stats.recordingRules.byOwner.forEach(owner => {
+      recordingRulesCritical += owner.critical.length;
+      recordingRulesWarning += owner.warning.length;
+      recordingRulesInfo += owner.other.length;
+    });
   }
 
   // Check if there are no rules at all (neither alerts nor recording rules)

@@ -24,10 +24,15 @@
 
 #pf-tab-section-details-drawer-tabs,
 #pf-tab-section-metrics-drawer-tabs,
-#pf-tab-section-dropped-drawer-tabs {
+#pf-tab-section-dropped-drawer-tabs,
+#pf-tab-section-health-drawer-tabs {
   overflow-x: hidden !important;
   overflow-y: auto !important;
   padding: 1.5rem !important;
+}
+
+.health-details {
+  margin-top: 1.5rem;
 }
 
 .metrics-justify-content {

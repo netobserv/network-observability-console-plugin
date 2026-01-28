@@ -55,9 +55,10 @@ func newLokiClient(cfg *config.Loki, requestHeader http.Header, useStatusConfig 
 	} else if cfg.TokenPath != "" {
 		bytes, err := os.ReadFile(cfg.TokenPath)
 		if err != nil {
-			hlog.WithError(err).Fatalf("failed to parse authorization path: %s", cfg.TokenPath)
+			hlog.WithError(err).Warnf("Failed to read authorization token from path '%s'. Continuing without token authentication. This may cause authentication failures if the Loki server requires authentication.", cfg.TokenPath)
+		} else {
+			headers[auth.AuthHeader] = []string{"Bearer " + string(bytes)}
 		}
-		headers[auth.AuthHeader] = []string{"Bearer " + string(bytes)}
 	}
 
 	if cfg.UseMocks {

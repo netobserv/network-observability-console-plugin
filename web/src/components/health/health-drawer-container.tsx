@@ -19,20 +19,20 @@ import * as _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { HealthCard } from './health-card';
-import { ByResource, RecordingRulesByResource } from './health-helper';
+import { AlertWithRuleName, HealthStat, RecordingRuleItem, RecordingRulesByResource } from './health-helper';
 import { RuleDetails } from './rule-details';
 
 // Unified item that can contain both alerts and recording rules
 interface UnifiedResourceItem {
   name: string;
-  alertInfo?: ByResource;
+  alertInfo?: HealthStat;
   recordingInfo?: RecordingRulesByResource;
   score: number;
 }
 
 export interface HealthDrawerContainerProps {
   title: string;
-  stats: ByResource[];
+  stats: HealthStat[];
   recordingRulesStats?: RecordingRulesByResource[];
   kind: string;
   isDark: boolean;
@@ -93,6 +93,55 @@ export const HealthDrawerContainer: React.FC<HealthDrawerContainerProps> = ({
   }, [selectedItemName, unifiedItems]);
 
   const isExpanded = selectedItem !== undefined;
+
+  // Helper function to compute the kind for an item
+  // For Owner kind, extract the actual Kubernetes resource kind from labels
+  const getItemKind = React.useCallback(
+    (item: UnifiedResourceItem): string => {
+      if (kind !== 'Owner') {
+        return kind;
+      }
+
+      // Extract the kind from the alerts' labels
+      if (item.alertInfo) {
+        const allAlerts: AlertWithRuleName[] = [
+          ...item.alertInfo.critical.firing,
+          ...item.alertInfo.critical.pending,
+          ...item.alertInfo.critical.silenced,
+          ...item.alertInfo.warning.firing,
+          ...item.alertInfo.warning.pending,
+          ...item.alertInfo.warning.silenced,
+          ...item.alertInfo.other.firing,
+          ...item.alertInfo.other.pending,
+          ...item.alertInfo.other.silenced
+        ];
+        const alertWithKind = allAlerts.find(a => a.labels.kind);
+        if (alertWithKind) {
+          return alertWithKind.labels.kind;
+        }
+      }
+
+      // Extract the kind from recording rules' labels
+      if (item.recordingInfo) {
+        const allRules: RecordingRuleItem[] = [
+          ...item.recordingInfo.critical,
+          ...item.recordingInfo.warning,
+          ...item.recordingInfo.other
+        ];
+        const ruleWithKind = allRules.find(r => r.labels.kind);
+        if (ruleWithKind) {
+          return ruleWithKind.labels.kind;
+        }
+      }
+
+      return kind; // fallback
+    },
+    [kind]
+  );
+
+  // Compute the kind for the selected item
+  const selectedKind = selectedItem ? getItemKind(selectedItem) : kind;
+
   const hasAnyViolations = unifiedItems.length > 0;
 
   return (
@@ -108,13 +157,13 @@ export const HealthDrawerContainer: React.FC<HealthDrawerContainerProps> = ({
             >
               <DrawerHead>
                 <span tabIndex={isExpanded ? 0 : -1} ref={drawerRef}>
-                  {selectedItem && <ResourceLink inline={true} kind={kind} name={selectedItem.name} />}
+                  {selectedItem && <ResourceLink inline={true} kind={selectedKind} name={selectedItem.name} />}
                 </span>
               </DrawerHead>
               {selectedItem && (
                 <div className="health-gallery-drawer-content">
                   <RuleDetails
-                    kind={kind}
+                    kind={selectedKind}
                     alertInfo={selectedItem.alertInfo}
                     recordingRuleInfo={selectedItem.recordingInfo}
                   />
@@ -141,7 +190,7 @@ export const HealthDrawerContainer: React.FC<HealthDrawerContainerProps> = ({
                   <HealthCard
                     key={`card-${item.name}`}
                     name={item.name}
-                    kind={kind}
+                    kind={getItemKind(item)}
                     isDark={isDark}
                     alertInfo={item.alertInfo}
                     recordingInfo={item.recordingInfo}

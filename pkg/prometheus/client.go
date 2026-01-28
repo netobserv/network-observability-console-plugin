@@ -58,9 +58,11 @@ func CreateRoundTripper(timeout time.Duration, skipTLS bool, caPath string, forw
 	} else if tokenPath != "" {
 		bytes, err := os.ReadFile(tokenPath)
 		if err != nil {
-			return nil, fmt.Errorf("failed to parse authorization path '%s': %w", tokenPath, err)
+			log.WithError(err).Warnf("Failed to read authorization token from path '%s'. Continuing without token authentication. This may cause authentication failures if the Prometheus server requires authentication.", tokenPath)
+			roundTripper = maybeTLS
+		} else {
+			roundTripper = pconf.NewAuthorizationCredentialsRoundTripper("Bearer", pconf.NewInlineSecret(string(bytes)), maybeTLS)
 		}
-		roundTripper = pconf.NewAuthorizationCredentialsRoundTripper("Bearer", pconf.NewInlineSecret(string(bytes)), maybeTLS)
 	} else {
 		roundTripper = maybeTLS
 	}

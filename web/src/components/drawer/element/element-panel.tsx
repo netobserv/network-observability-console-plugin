@@ -16,11 +16,13 @@ import _ from 'lodash';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { TopologyMetrics } from '../../../api/loki';
+import { RuleDetails } from '../../../components/health/rule-details';
 import { Filter, FilterDefinition, Filters } from '../../../model/filters';
 import { MetricType } from '../../../model/flow-query';
 import { GraphElementPeer, NodeData } from '../../../model/topology';
 import { defaultSize, maxSize, minSize } from '../../../utils/panel';
 import { TruncateLength } from '../../dropdowns/truncate-dropdown';
+import { HealthCard } from '../../health/health-card';
 import { PeerResourceLink } from '../../tabs/netflow-topology/peer-resource-link';
 import { ElementPanelContent } from './element-panel-content';
 import { ElementPanelMetrics } from './element-panel-metrics';
@@ -55,6 +57,7 @@ export const ElementPanel: React.FC<ElementPanelProps> = ({
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [activeTab, setActiveTab] = React.useState<string>('details');
+  const [selectedAlertName, setSelectedAlertName] = React.useState<string>();
 
   const data = element.getData();
   const noMetrics = data && data.noMetrics === true;
@@ -85,6 +88,10 @@ export const ElementPanel: React.FC<ElementPanelProps> = ({
       setActiveTab('details');
     }
   }, [metrics, droppedMetrics, activeTab]);
+
+  React.useEffect(() => {
+    setSelectedAlertName(undefined);
+  }, [element]);
 
   return (
     <DrawerPanelContent
@@ -143,6 +150,27 @@ export const ElementPanel: React.FC<ElementPanelProps> = ({
                 truncateLength={truncateLength}
                 isDark={isDark}
               />
+            </Tab>
+          )}
+          {!_.isEmpty(data?.alerts) && (
+            <Tab className="drawer-tab" eventKey={'health'} title={<TabTitleText>{t('Health')}</TabTitleText>}>
+              {data!.alerts?.map(alert => (
+                <>
+                  <HealthCard
+                    key={`card-${alert.name}`}
+                    alertInfo={alert}
+                    kind={data!.peer.resourceKind || '?'}
+                    isDark={isDark || false}
+                    isSelected={selectedAlertName === alert.name}
+                    onClick={() => setSelectedAlertName(alert.name !== selectedAlertName ? alert.name : undefined)}
+                  />
+                  {alert.name === selectedAlertName && (
+                    <div className="health-details">
+                      <RuleDetails kind={data!.peer.resourceKind || '?'} alertInfo={alert} />
+                    </div>
+                  )}
+                </>
+              ))}
             </Tab>
           )}
         </Tabs>

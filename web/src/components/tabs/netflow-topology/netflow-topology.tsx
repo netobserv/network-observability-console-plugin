@@ -2,6 +2,7 @@ import { K8sModel } from '@openshift-console/dynamic-plugin-sdk';
 import { Bullseye, Spinner, Text } from '@patternfly/react-core';
 import { Visualization, VisualizationProvider } from '@patternfly/react-topology';
 import _ from 'lodash';
+import { murmur3 } from 'murmurhash-js';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -15,7 +16,7 @@ import {
   Stats,
   TopologyMetrics
 } from '../../../api/loki';
-import { getK8SUDNIds } from '../../../api/routes';
+import { getAlerts, getK8SUDNIds } from '../../../api/routes';
 import { Config, Feature } from '../../../model/config';
 import { FilterDefinition, Filters } from '../../../model/filters';
 import {
@@ -31,6 +32,7 @@ import { GraphElementPeer, LayoutName, TopologyOptions } from '../../../model/to
 import { TimeRange } from '../../../utils/datetime';
 import { getHTTPErrorDetails } from '../../../utils/errors';
 import { observeDOMRect } from '../../../utils/metrics-helper';
+import { buildStats, HealthStat } from '../../health/health-helper';
 import { SearchEvent, SearchHandle } from '../../search/search';
 import { ScopeSlider } from '../../slider/scope-slider';
 import componentFactory from './2d/componentFactories/componentFactory';
@@ -88,9 +90,59 @@ export const NetflowTopology: React.FC<NetflowTopologyProps> = React.forwardRef(
     const containerRef = React.createRef<HTMLDivElement>();
     const [containerSize, setContainerSize] = React.useState<DOMRect>({ width: 0, height: 0 } as DOMRect);
     const [controller, setController] = React.useState<Visualization>();
+    const [alerts, setAlerts] = React.useState<{ [dimension: string]: HealthStat[] }>({});
+    const [lastStatsUpdateTime, setLastStatsUpdateTime] = React.useState<number>(0);
+    const statsRefreshIntervalMs = 30000; // Refresh stats every 30 seconds if outdated
 
     //show fully dropped metrics if no metrics available
     const displayedMetrics = _.isEmpty(props.metrics) ? props.droppedMetrics : props.metrics;
+
+    const fetchAlerts = React.useCallback(async () => {
+      try {
+        // matching netobserv="true" catches all alerts designed for netobserv (not necessarily owned by it)
+        const res = await getAlerts('netobserv="true"');
+        const rules = res.data.groups.flatMap(group => {
+          // Inject rule id, for links to the alerting page
+          // Warning: ID generation may in theory differ with openshift version (in practice, this has been stable across versions since 4.12 at least)
+          // See https://github.com/openshift/console/blob/29374f38308c4ebe9ea461a5d69eb3e4956c7086/frontend/public/components/monitoring/utils.ts#L47-L56
+          group.rules.forEach(r => {
+            const key = [
+              group.file,
+              group.name,
+              r.name,
+              r.duration,
+              r.query,
+              ..._.map(r.labels, (k, v) => `${k}=${v}`)
+            ].join(',');
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            r.id = String(murmur3(key, 'monitoring-salt' as any));
+          });
+          return group.rules;
+        });
+
+        // Build topology alerts (includes all alert states, skip inactive rules and recording rules)
+        const stats = buildStats(rules, [], [], true);
+        // Convert HealthStats to dictionary format for topology
+        const topologyAlerts: { [dimension: string]: HealthStat[] } = {
+          byNamespace: stats.byNamespace,
+          byNode: stats.byNode,
+          byOwner: stats.byOwner
+        };
+        setAlerts(topologyAlerts);
+        setLastStatsUpdateTime(Date.now());
+      } catch (err) {
+        console.log('Could not fetch topology alerts:', err);
+        setAlerts({});
+      }
+    }, []);
+
+    // Trigger stats refresh if outdated
+    const refreshResourceStatsIfNeeded = React.useCallback(() => {
+      const now = Date.now();
+      if (now - lastStatsUpdateTime > statsRefreshIntervalMs) {
+        fetchAlerts();
+      }
+    }, [lastStatsUpdateTime, statsRefreshIntervalMs, fetchAlerts]);
 
     const fetch = React.useCallback(
       (
@@ -105,6 +157,9 @@ export const NetflowTopology: React.FC<NetflowTopologyProps> = React.forwardRef(
         initFunction: () => void
       ) => {
         initFunction();
+
+        // Refresh resource stats if outdated
+        refreshResourceStatsIfNeeded();
 
         const droppedType = features.includes('pktDrop')
           ? fq.type === 'Bytes'
@@ -178,12 +233,19 @@ export const NetflowTopology: React.FC<NetflowTopologyProps> = React.forwardRef(
         }
         return Promise.all(promises);
       },
-      [t]
+      [t, refreshResourceStatsIfNeeded]
     );
 
+    // Initial fetch and setup update trigger
+    React.useEffect(() => {
+      fetchAlerts();
+    }, [fetchAlerts]);
+
     const fetchUDNs = React.useCallback(() => {
+      // Refresh resource stats if outdated
+      refreshResourceStatsIfNeeded();
       return getK8SUDNIds();
-    }, []);
+    }, [refreshResourceStatsIfNeeded]);
 
     React.useImperativeHandle(ref, () => ({
       fetch,
@@ -203,6 +265,7 @@ export const NetflowTopology: React.FC<NetflowTopologyProps> = React.forwardRef(
         return (
           <VisualizationProvider data-test="visualization-provider" controller={controller}>
             <TopologyContent
+              containerRef={containerRef}
               k8sModels={props.k8sModels}
               expectedNodes={props.expectedNodes}
               metricFunction={props.metricFunction}
@@ -213,7 +276,6 @@ export const NetflowTopology: React.FC<NetflowTopologyProps> = React.forwardRef(
               metrics={displayedMetrics}
               droppedMetrics={props.droppedMetrics}
               options={props.options}
-              setOptions={props.setOptions}
               filters={props.filters}
               filterDefinitions={props.filterDefinitions}
               setFilters={props.setFilters}
@@ -224,6 +286,7 @@ export const NetflowTopology: React.FC<NetflowTopologyProps> = React.forwardRef(
               isDark={props.isDark}
               resetDefaultFilters={props.resetDefaultFilters}
               clearFilters={props.clearFilters}
+              resourceStats={Object.values(alerts).flat()}
             />
           </VisualizationProvider>
         );

@@ -1,5 +1,5 @@
 import { AlertStates } from '@openshift-console/dynamic-plugin-sdk';
-import { AlertWithRuleName, ByResource, computeAlertScore, computeScore } from '../health-helper';
+import { AlertWithRuleName, computeAlertScore, computeScore, HealthStat } from '../health-helper';
 
 const mockAlert = (
   name: string,
@@ -63,7 +63,7 @@ describe('health helpers', () => {
 
   it('should compute full score', () => {
     // Start with an empty one => max score
-    const r: ByResource = {
+    const r: HealthStat = {
       name: 'test',
       critical: { firing: [], pending: [], silenced: [], inactive: [] },
       warning: { firing: [], pending: [], silenced: [], inactive: [] },
