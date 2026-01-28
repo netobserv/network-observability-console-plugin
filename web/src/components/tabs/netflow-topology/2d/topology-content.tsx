@@ -24,7 +24,7 @@ import { Config } from '../../../../model/config';
 import { Filter, FilterDefinition, Filters } from '../../../../model/filters';
 import { FlowScope, MetricType, StatFunction } from '../../../../model/flow-query';
 import { getStat } from '../../../../model/metrics';
-import { getStepInto, ScopeConfigDef } from '../../../../model/scope';
+import { getStepInto, resolveGroupTypes, ScopeConfigDef } from '../../../../model/scope';
 import {
   Decorated,
   ElementData,
@@ -109,6 +109,13 @@ export const TopologyContent: React.FC<TopologyContentProps> = ({
   const prevMetricType = usePrevious(metricType);
   const prevMetricScope = usePrevious(metricScope);
   const prevOptions = usePrevious(options);
+
+  // Track resolved group types to detect when auto resolution changes
+  const resolvedGroupTypes = React.useMemo(
+    () => resolveGroupTypes(options.groupTypes, metricScope, scopes),
+    [options.groupTypes, metricScope, scopes]
+  );
+  const prevResolvedGroupTypes = usePrevious(resolvedGroupTypes);
 
   const [selectedIds, setSelectedIds] = React.useState<string[]>([]);
   const [hoveredId, setHoveredId] = React.useState<string>('');
@@ -416,25 +423,38 @@ export const TopologyContent: React.FC<TopologyContentProps> = ({
 
   //update model on layout / metrics / filters change
   React.useEffect(() => {
-    //update graph
+    //update graph if layout changes or if resolved group types changed (including via 'auto' resolution)
     if (
       !controller.hasGraph() ||
       prevOptions?.layout !== options.layout ||
       prevOptions?.groupTypes !== options.groupTypes ||
+      prevResolvedGroupTypes !== resolvedGroupTypes ||
       prevOptions.startCollapsed !== options.startCollapsed
     ) {
       resetGraph();
     }
 
-    //skip refresh if scope / group changed. It will refresh after getting new metrics
-    if (prevOptions && (prevMetricScope !== metricScope || prevOptions.groupTypes !== options.groupTypes)) {
+    //skip refresh if scope changed or if resolved groups changed. It will refresh after getting new metrics
+    if (prevOptions && (prevMetricScope !== metricScope || prevResolvedGroupTypes !== resolvedGroupTypes)) {
       waitForMetrics = true;
       return;
     }
 
     //then update model
     updateModel();
-  }, [controller, metrics, filters, options, prevOptions, resetGraph, updateModel, prevMetricScope, metricScope]);
+  }, [
+    controller,
+    metrics,
+    filters,
+    options,
+    prevOptions,
+    resetGraph,
+    updateModel,
+    prevMetricScope,
+    metricScope,
+    resolvedGroupTypes,
+    prevResolvedGroupTypes
+  ]);
 
   //request fit on layout end when filter / options change
   React.useEffect(() => {
