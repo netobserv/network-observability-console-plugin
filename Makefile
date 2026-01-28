@@ -45,7 +45,7 @@ ifneq ($(CLEAN_BUILD),)
 	LDFLAGS ?= -X 'main.buildVersion=${VERSION}-${BUILD_SHA}' -X 'main.buildDate=${BUILD_DATE}'
 endif
 
-GOLANGCI_LINT_VERSION = v2.2.1
+GOLANGCI_LINT_VERSION = v2.8.0
 NPM_INSTALL ?= install
 CMDLINE_ARGS ?= --loglevel trace --config config/config.yaml
 
