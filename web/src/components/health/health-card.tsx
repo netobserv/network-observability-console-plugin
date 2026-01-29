@@ -24,6 +24,7 @@ export interface HealthCardProps {
   isDark: boolean;
   isSelected: boolean;
   onClick?: () => void;
+  hideTitle?: boolean;
 }
 
 export const HealthCard: React.FC<HealthCardProps> = ({
@@ -33,7 +34,8 @@ export const HealthCard: React.FC<HealthCardProps> = ({
   recordingInfo,
   isDark,
   isSelected,
-  onClick
+  onClick,
+  hideTitle
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
@@ -92,7 +94,7 @@ export const HealthCard: React.FC<HealthCardProps> = ({
   return (
     <Card className={classes.join(' ')} isClickable={onClick !== undefined} isClicked={isSelected}>
       <CardHeader
-        className="card-header"
+        className={hideTitle ? 'card-header-hidden' : 'card-header'}
         selectableActions={{
           selectableActionId: `health-card-${name || 'global'}`,
           selectableActionAriaLabelledby: `selectable-card-${name || 'global'}`,
@@ -100,15 +102,24 @@ export const HealthCard: React.FC<HealthCardProps> = ({
           onClickAction: onClick
         }}
       >
-        <Flex gap={{ default: 'gapSm' }} alignItems={{ default: 'alignItemsCenter' }} flexWrap={{ default: 'nowrap' }}>
-          <FlexItem>{icon}</FlexItem>
-          <FlexItem>
-            <CardTitle>{kind && name ? <ResourceLink inline={true} kind={kind} name={name} /> : t('Global')}</CardTitle>
-          </FlexItem>
-        </Flex>
+        {!hideTitle && (
+          <Flex
+            gap={{ default: 'gapSm' }}
+            alignItems={{ default: 'alignItemsCenter' }}
+            flexWrap={{ default: 'nowrap' }}
+          >
+            <FlexItem>{icon}</FlexItem>
+            <FlexItem>
+              <CardTitle>
+                {kind && name ? <ResourceLink inline={true} kind={kind} name={name} /> : t('Global')}
+              </CardTitle>
+            </FlexItem>
+          </Flex>
+        )}
       </CardHeader>
       <CardBody>
         <Flex gap={{ default: 'gapSm' }} alignItems={{ default: 'alignItemsCenter' }} flexWrap={{ default: 'nowrap' }}>
+          {hideTitle && <FlexItem className="card-body-icon">{icon}</FlexItem>}
           <FlexItem grow={{ default: 'grow' }}>
             <ul style={{ listStyleType: 'none' }}>
               {criticalCount > 0 && (
