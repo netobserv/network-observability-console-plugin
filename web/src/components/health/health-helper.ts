@@ -6,6 +6,7 @@ import { RecordingAnnotations } from '../../model/config';
 
 export type Severity = 'critical' | 'warning' | 'info';
 export type AlertState = 'firing' | 'pending' | 'silenced' | 'recording' | 'inactive';
+export type HealthSuperKind = 'Global' | 'Node' | 'Namespace' | 'Owner';
 
 // HealthItem can be either based on an Alert or based on a RecordingRule metric
 export type HealthItem = {
@@ -38,6 +39,8 @@ export type HealthStats = {
 
 export type HealthStat = {
   name: string;
+  k8sKind?: string;
+  namespace?: string;
   critical: PerState;
   warning: PerState;
   other: PerState;
@@ -61,7 +64,8 @@ type HealthMetadata = {
   unit: string;
   nodeLabels?: string[];
   namespaceLabels?: string[];
-  ownerLabels?: string[];
+  workloadLabels?: string[];
+  kindLabels?: string[];
   links: { name: string; url: string }[];
   trafficLink?: TrafficLink;
 };
@@ -236,95 +240,89 @@ export const rulesToHealthItems = (
 };
 
 export const buildStats = (items: HealthItem[]): HealthStats => {
-  const namespaceLabels: string[] = [];
-  const nodeLabels: string[] = [];
-  const ownerLabels: string[] = [];
-  items.forEach(a => {
-    if (a.metadata.namespaceLabels) {
-      a.metadata.namespaceLabels.forEach(l => {
-        if (!namespaceLabels.includes(l)) {
-          namespaceLabels.push(l);
-        }
-      });
-    }
-    if (a.metadata.nodeLabels) {
-      a.metadata.nodeLabels.forEach(l => {
-        if (!nodeLabels.includes(l)) {
-          nodeLabels.push(l);
-        }
-      });
-    }
-    if (a.metadata.ownerLabels) {
-      a.metadata.ownerLabels.forEach(l => {
-        if (!ownerLabels.includes(l)) {
-          ownerLabels.push(l);
-        }
-      });
-    }
-  });
-  const global = filterGlobals(items, [...namespaceLabels, ...nodeLabels]);
-  const byNamespace = groupBy(items, namespaceLabels);
-  const byNode = groupBy(items, nodeLabels);
-  // TODO: should be grouped by namespace + owner
-  const byOwner = groupBy(items, ownerLabels);
-  [global, ...byNamespace, ...byNode, ...byOwner].forEach(r => {
-    r.score = computeResourceScore(r);
-  });
-
-  return {
-    global,
-    byNode: _.sortBy(byNode, r => r.score, 'asc'),
-    byNamespace: _.sortBy(byNamespace, r => r.score, 'asc'),
-    byOwner: _.sortBy(byOwner, r => r.score, 'asc')
+  // Filter-out undefined
+  const namedItems = items.map(toNamedItem).filter((i?: NamedItem): i is NamedItem => !!i);
+  // First group by superKind
+  const bySuperKind = _.groupBy(namedItems, i => i.superKind);
+  // For each superKind except Global, group by name
+  const stats: HealthStats = {
+    global: statsFromGrouped(bySuperKind['Global'] || []) || emptyStat(''),
+    byNode: groupAndSortByResource(bySuperKind['Node']),
+    byNamespace: groupAndSortByResource(bySuperKind['Namespace']),
+    byOwner: groupAndSortByResource(bySuperKind['Owner'])
   };
-};
-
-const filterGlobals = (items: HealthItem[], nonGlobalLabels: string[]): HealthStat => {
-  // Keep only rules where none of the non-global labels are set
-  const filtered = items.filter(a => !nonGlobalLabels.some(l => l in a.labels));
-  return statsFromGrouped('', filtered);
-};
-
-const groupBy = (items: HealthItem[], labels: string[]): HealthStat[] => {
-  if (labels.length === 0) {
-    return [];
-  }
-  const groups: { [key: string]: HealthItem[] } = {};
-  labels.forEach(l => {
-    const byLabel = _.groupBy(
-      items.filter(a => l in a.labels),
-      a => a.labels[l]
-    );
-    _.keys(byLabel).forEach(k => {
-      if (k in groups) {
-        groups[k].push(...byLabel[k]);
-      } else {
-        groups[k] = byLabel[k];
-      }
-    });
-  });
-  const stats: HealthStat[] = [];
-  _.keys(groups).forEach(k => {
-    if (k) {
-      const br = statsFromGrouped(k, groups[k]);
-      // Ignore if all are inactive
-      const countInactive = br.critical.inactive.length + br.warning.inactive.length + br.other.inactive.length;
-      if (countInactive !== groups[k].length) {
-        stats.push(br);
-      }
-    }
-  });
+  stats.global.score = computeResourceScore(stats.global);
   return stats;
 };
 
-const statsFromGrouped = (name: string, grouped: HealthItem[]): HealthStat => {
-  const br: HealthStat = {
-    name: name,
+const groupAndSortByResource = (items: NamedItem[]): HealthStat[] => {
+  const byResource = _.groupBy(items, i => `${i.name}/${i.namespace}/${i.k8sKind}`);
+  const stats: HealthStat[] = [];
+  Object.values(byResource).forEach(items => {
+    const stat = statsFromGrouped(items);
+    if (stat) {
+      // Ignore if all are inactive
+      const countInactive = stat.critical.inactive.length + stat.warning.inactive.length + stat.other.inactive.length;
+      if (countInactive !== items.length) {
+        stat.score = computeResourceScore(stat);
+        stats.push(stat);
+      }
+    }
+  });
+  return _.sortBy(stats, s => s.score, 'asc');
+};
+
+export const emptyStat = (name: string, namespace?: string, k8sKind?: string): HealthStat => {
+  return {
+    name,
+    namespace,
+    k8sKind,
     critical: { firing: [], pending: [], silenced: [], inactive: [], recording: [] },
     warning: { firing: [], pending: [], silenced: [], inactive: [], recording: [] },
     other: { firing: [], pending: [], silenced: [], inactive: [], recording: [] },
     score: 0
   };
+};
+
+type NamedItem = HealthItem & { name: string; superKind: HealthSuperKind; k8sKind: string; namespace?: string };
+const toNamedItem = (item: HealthItem): NamedItem | undefined => {
+  if (item.metadata.workloadLabels && item.metadata.namespaceLabels && item.metadata.kindLabels) {
+    const name = getLabelValue(item, item.metadata.workloadLabels);
+    const namespace = getLabelValue(item, item.metadata.namespaceLabels);
+    const k8sKind = getLabelValue(item, item.metadata.kindLabels);
+    if (name && k8sKind && namespace) {
+      return { superKind: 'Owner', name, namespace, k8sKind, ...item };
+    }
+    return undefined;
+  }
+  if (item.metadata.namespaceLabels) {
+    const name = getLabelValue(item, item.metadata.namespaceLabels);
+    if (name) {
+      return { superKind: 'Namespace', k8sKind: 'Namespace', name, ...item };
+    }
+    return undefined;
+  }
+  if (item.metadata.nodeLabels) {
+    const name = getLabelValue(item, item.metadata.nodeLabels);
+    if (name) {
+      return { superKind: 'Node', k8sKind: 'Node', name, ...item };
+    }
+    return undefined;
+  }
+  return { superKind: 'Global', k8sKind: '', name: '', ...item };
+};
+
+const getLabelValue = (item: HealthItem, keys: string[]): string | undefined => {
+  const kv = Object.entries(item.labels).find(l => keys.includes(l[0]));
+  return kv ? kv[1] : undefined;
+};
+
+const statsFromGrouped = (grouped: NamedItem[]): HealthStat | undefined => {
+  if (grouped.length === 0) {
+    return undefined;
+  }
+  // All provided items are expected to have same name/kind/namespace, so pick [0]
+  const br = emptyStat(grouped[0].name, grouped[0].namespace, grouped[0].k8sKind);
   _.uniqWith(grouped, (a, b) => {
     return a.ruleName === b.ruleName && _.isEqual(a.labels, b.labels);
   }).forEach(item => {
@@ -392,19 +390,23 @@ export const getItemFilteredLabels = (item: HealthItem, target: string): [string
   );
 };
 
-export const getLinks = (t: TFunction, kind: string, item: HealthItem, resourceName: string) => {
+export const getLinks = (
+  t: TFunction,
+  kind: HealthSuperKind,
+  item: HealthItem,
+  name: string,
+  namespace?: string,
+  k8sKind?: string
+) => {
+  const trafficLink = { name: t('Inspect network traffic'), url: getTrafficLink(kind, item, name, namespace, k8sKind) };
   if (item.state === 'recording') {
     return [
-      { name: t('Inspect metric'), url: getRecordingRuleMetricLink(item, resourceName) },
-      { name: t('Inspect network traffic'), url: getTrafficLink(kind, resourceName, item) },
+      { name: t('Inspect metric'), url: getRecordingRuleMetricLink(item, name) },
+      trafficLink,
       ...item.metadata.links
     ];
   }
-  return [
-    { name: t('Inspect alert'), url: getAlertLink(item) },
-    { name: t('Inspect network traffic'), url: getTrafficLink(kind, resourceName, item) },
-    ...item.metadata.links
-  ];
+  return [{ name: t('Inspect alert'), url: getAlertLink(item) }, trafficLink, ...item.metadata.links];
 };
 
 const getAlertLink = (item: HealthItem): string | undefined => {
@@ -428,40 +430,38 @@ const getRecordingRuleMetricLink = (item: HealthItem, resourceName?: string): st
     } else if (item.metadata.nodeLabels && item.metadata.nodeLabels.length > 0) {
       query += `{${item.metadata.nodeLabels[0]}="${resourceName}"}`;
     }
-    // TODO: workloads
+    // TODO: Health: workloads
   }
 
   return `/monitoring/query-browser?query0=${encodeURIComponent(query)}`;
 };
 
-const getTrafficLink = (kind: string, resourceName: string, item: HealthItem): string => {
+const getTrafficLink = (
+  kind: HealthSuperKind,
+  item: HealthItem,
+  name: string,
+  namespace?: string,
+  k8sKind?: string
+): string => {
   const filters: string[] = [];
   let params = '';
   const side = item.metadata.trafficLink?.filterDestination ? 'dst' : 'src';
   const bnf = item.metadata.trafficLink?.backAndForth !== false;
   switch (kind) {
     case 'Namespace':
-      filters.push(`${side}_namespace="${resourceName}"`);
+      filters.push(`${side}_namespace="${name}"`);
       params += `&bnf=${bnf}`;
       break;
     case 'Node':
-      filters.push(`${side}_owner_name="${resourceName}"`);
+      filters.push(`${side}_owner_name="${name}"`);
       filters.push(`${side}_kind="Node"`);
       params += `&bnf=${bnf}`;
       break;
     case 'Owner':
       // Filter by owner name
-      filters.push(`${side}_owner_name="${resourceName}"`);
-      // For workload alerts, namespace and kind are directly in the labels
-      // TODO: find a fix; not always true
-      const namespace = item.labels.namespace;
-      const ownerKind = item.labels.kind;
-      if (namespace) {
-        filters.push(`${side}_namespace="${namespace}"`);
-      }
-      if (ownerKind) {
-        filters.push(`${side}_kind="${ownerKind}"`);
-      }
+      filters.push(`${side}_owner_name="${name}"`);
+      filters.push(`${side}_namespace="${namespace}"`);
+      filters.push(`${side}_kind="${k8sKind}"`);
       params += `&bnf=${bnf}`;
       break;
   }

@@ -23,6 +23,7 @@ import { GraphElementPeer, NodeData } from '../../../model/topology';
 import { defaultSize, maxSize, minSize } from '../../../utils/panel';
 import { TruncateLength } from '../../dropdowns/truncate-dropdown';
 import { HealthCard } from '../../health/health-card';
+import { HealthSuperKind } from '../../health/health-helper';
 import { PeerResourceLink } from '../../tabs/netflow-topology/peer-resource-link';
 import { ElementPanelContent } from './element-panel-content';
 import { ElementPanelMetrics } from './element-panel-metrics';
@@ -78,7 +79,7 @@ export const ElementPanel: React.FC<ElementPanelProps> = ({
     }
   }, [element, data]);
 
-  const healthKind = React.useMemo(() => {
+  const healthKind: HealthSuperKind | undefined = React.useMemo(() => {
     const nodeType = data?.nodeType;
     if (nodeType === 'host') {
       return 'Node';
@@ -179,7 +180,7 @@ export const ElementPanel: React.FC<ElementPanelProps> = ({
                   key={`card-${alert.name}`}
                   resourceHealth={data.health}
                   name={data.health.name}
-                  kind={healthKind}
+                  k8sKind={data.health.k8sKind}
                   isDark={isDark || false}
                   isSelected={true}
                   hideTitle={true}

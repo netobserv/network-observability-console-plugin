@@ -1,5 +1,7 @@
+import { PrometheusLabels } from '@openshift-console/dynamic-plugin-sdk';
 import {
   AlertState,
+  buildStats,
   computeHealthItemScore,
   computeResourceScore,
   HealthItem,
@@ -7,10 +9,17 @@ import {
   Severity
 } from '../health-helper';
 
-const mockAlert = (name: string, severity: string, state: string, threshold: number, value: number): HealthItem => {
-  return {
+const mockAlert = (
+  name: string,
+  severity: string,
+  state: string,
+  threshold: number,
+  value: number,
+  labels?: PrometheusLabels
+): HealthItem => {
+  const item: HealthItem = {
     ruleName: name,
-    labels: { alertname: name, severity: severity },
+    labels: { alertname: name, severity: severity, ...labels },
     severity: severity as Severity,
     state: state as AlertState,
     ruleID: '',
@@ -29,9 +38,22 @@ const mockAlert = (name: string, severity: string, state: string, threshold: num
     },
     value: value
   };
+  if (labels?.namespace) {
+    item.metadata.namespaceLabels = ['namespace'];
+  }
+  if (labels?.node) {
+    item.metadata.nodeLabels = ['node'];
+  }
+  if (labels?.workload) {
+    item.metadata.workloadLabels = ['workload'];
+  }
+  if (labels?.kind) {
+    item.metadata.kindLabels = ['kind'];
+  }
+  return item;
 };
 
-describe('health helpers', () => {
+describe('health helpers, score', () => {
   it('should compute unweighted alert min score', () => {
     const alert = mockAlert('test', 'critical', 'firing', 10, 10);
     const score = computeHealthItemScore(alert);
@@ -104,5 +126,32 @@ describe('health helpers', () => {
     r.critical.inactive = [];
     r.critical.firing = [mockAlert('test-critical', 'critical', 'firing', 10, 40)];
     expect(computeResourceScore(r)).toBeCloseTo(5.11, 2);
+  });
+});
+
+describe('health helpers, grouping', () => {
+  it('should group', () => {
+    const a1 = mockAlert('test1', 'info', 'pending', 15, 10, { namespace: 'a' });
+    const a2 = mockAlert('test2', 'warning', 'firing', 20, 30, { namespace: 'a' });
+    const b = mockAlert('test2', 'warning', 'firing', 20, 30, { namespace: 'b' });
+    const w = mockAlert('test3', 'warning', 'firing', 20, 30, { namespace: 'a', workload: 'w', kind: 'k' });
+    const g = mockAlert('test4', 'warning', 'firing', 20, 30, {});
+
+    const s = buildStats([a1, a2, b, w, g]);
+    expect(s.global.score).toBeCloseTo(7.5, 2);
+    expect(s.global.warning.firing.length).toEqual(1);
+    expect(s.byNamespace.length).toEqual(2);
+    expect(s.byNamespace[0].name).toEqual('b');
+    expect(s.byNamespace[0].score).toBeCloseTo(7.5, 2);
+    expect(s.byNamespace[0].warning.firing.length).toEqual(1);
+    expect(s.byNamespace[1].name).toEqual('a');
+    expect(s.byNamespace[1].score).toBeCloseTo(7.8, 1);
+    expect(s.byNamespace[1].other.pending.length).toEqual(1);
+    expect(s.byNamespace[1].warning.firing.length).toEqual(1);
+    expect(s.byNode).toEqual([]);
+    expect(s.byOwner.length).toEqual(1);
+    expect(s.byOwner[0].name).toEqual('w');
+    expect(s.byOwner[0].score).toBeCloseTo(7.5, 2);
+    expect(s.byOwner[0].warning.firing.length).toEqual(1);
   });
 });

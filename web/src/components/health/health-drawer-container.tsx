@@ -18,13 +18,13 @@ import { CheckCircleIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { HealthCard } from './health-card';
-import { getAllHealthItems, HealthStat } from './health-helper';
+import { HealthStat, HealthSuperKind } from './health-helper';
 import { RuleDetails } from './rule-details';
 
 export interface HealthDrawerContainerProps {
   title: string;
   stats: HealthStat[];
-  kind: string;
+  kind: HealthSuperKind;
   isDark: boolean;
 }
 
@@ -42,31 +42,6 @@ export const HealthDrawerContainer: React.FC<HealthDrawerContainerProps> = ({ ti
   }, [selectedItemName, stats]);
 
   const isExpanded = selectedItem !== undefined;
-
-  // Helper function to compute the kind for an item
-  // For Owner kind, extract the actual Kubernetes resource kind from labels
-  const getItemKind = React.useCallback(
-    (stat: HealthStat): string => {
-      // TODO: figure out a more deterministic way to get owner kind
-      if (kind !== 'Owner') {
-        return kind;
-      }
-
-      // Extract the kind from the alerts' labels
-      const all = getAllHealthItems(stat);
-      const itemWithKind = all.find(a => a.labels.kind);
-      if (itemWithKind) {
-        return itemWithKind.labels.kind;
-      }
-
-      return kind; // fallback
-    },
-    [kind]
-  );
-
-  // Compute the kind for the selected item
-  const selectedKind = selectedItem ? getItemKind(selectedItem) : kind;
-
   const hasAnyViolations = stats.length > 0;
 
   return (
@@ -82,12 +57,12 @@ export const HealthDrawerContainer: React.FC<HealthDrawerContainerProps> = ({ ti
             >
               <DrawerHead>
                 <span tabIndex={isExpanded ? 0 : -1} ref={drawerRef}>
-                  {selectedItem && <ResourceLink inline={true} kind={selectedKind} name={selectedItem.name} />}
+                  {selectedItem && <ResourceLink inline={true} kind={selectedItem.k8sKind} name={selectedItem.name} />}
                 </span>
               </DrawerHead>
               {selectedItem && (
                 <div className="health-gallery-drawer-content">
-                  <RuleDetails kind={getItemKind(selectedItem)} resourceHealth={selectedItem} />
+                  <RuleDetails kind={kind} resourceHealth={selectedItem} />
                 </div>
               )}
             </DrawerPanelContent>
@@ -111,7 +86,7 @@ export const HealthDrawerContainer: React.FC<HealthDrawerContainerProps> = ({ ti
                   <HealthCard
                     key={`card-${item.name}`}
                     name={item.name}
-                    kind={getItemKind(item)}
+                    k8sKind={item.k8sKind}
                     isDark={isDark}
                     resourceHealth={item}
                     isSelected={item.name === selectedItemName}
