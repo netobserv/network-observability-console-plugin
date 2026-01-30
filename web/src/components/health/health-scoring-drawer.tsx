@@ -1,9 +1,6 @@
 import {
-  Drawer,
   DrawerActions,
   DrawerCloseButton,
-  DrawerContent,
-  DrawerContentBody,
   DrawerHead,
   DrawerPanelContent,
   Text,
@@ -16,18 +13,13 @@ import { useTranslation } from 'react-i18next';
 export interface HealthScoringDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  children: React.ReactNode;
 }
 
-export const HealthScoringDrawer: React.FC<HealthScoringDrawerProps> = ({ isOpen, onClose, children }) => {
+export const HealthScoringDrawer: React.FC<HealthScoringDrawerProps> = ({ isOpen, onClose }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const drawerRef = React.useRef<HTMLDivElement>(null);
 
-  const onExpand = () => {
-    drawerRef.current && drawerRef.current.focus();
-  };
-
-  const panelContent = (
+  return (
     <DrawerPanelContent isResizable widths={{ default: 'width_50' }} minSize="400px">
       <DrawerHead>
         <span tabIndex={isOpen ? 0 : -1} ref={drawerRef}>
@@ -150,13 +142,5 @@ export const HealthScoringDrawer: React.FC<HealthScoringDrawerProps> = ({ isOpen
         </TextContent>
       </div>
     </DrawerPanelContent>
-  );
-
-  return (
-    <Drawer isExpanded={isOpen} onExpand={onExpand} isInline position="right">
-      <DrawerContent panelContent={panelContent}>
-        <DrawerContentBody>{children}</DrawerContentBody>
-      </DrawerContent>
-    </Drawer>
   );
 };

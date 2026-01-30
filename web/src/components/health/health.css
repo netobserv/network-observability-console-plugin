@@ -1,24 +1,284 @@
+/* Page section full height */
+#pageSection {
+    padding: 0 !important;
+    height: 100%;
+}
+
+#pageSection.light {
+    background-color: var(--pf-v5-global--BackgroundColor--100);
+}
+
+#pageSection.dark {
+    background-color: var(--pf-v5-global--BackgroundColor--dark-100);
+}
+
+/* Health drawer layout */
+#health-drawer {
+    overflow: hidden;
+}
+
+#healthDrawerContent {
+    overflow: hidden;
+}
+
+#healthDrawerBody {
+    overflow: hidden;
+    padding: 0;
+}
+
+/* Health drawer panel - scoring drawer */
+#health-drawer .pf-v5-c-drawer__panel-main {
+    overflow-y: auto;
+}
+
+#health-page-content-flex {
+    height: 100%;
+}
+
+#health-page-content-flex > div {
+    overflow-y: auto;
+}
+
+/* Header container - no scroll */
+.health-header-container {
+    overflow-y: visible !important;
+    width: 100%;
+}
+
+#pageSection .health-header {
+    padding: 1.5rem 1.5rem 1.5rem 1.5rem;
+    width: 100%;
+}
+
+/* Health summary in header - no extra margins */
+#pageSection .health-header .health-summary-dashboard {
+    margin-top: 0.5rem;
+    margin-bottom: 0;
+    width: 100%;
+    max-width: 100%;
+}
+
+/* Ensure refresh controls stay on same row */
+.netobserv-refresh-interval-container {
+    margin: 0 !important;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.netobserv-refresh-container {
+    align-self: flex-end;
+    flex-shrink: 0;
+}
+
+/* Content container - no scroll, contains main content */
+#health-content-container {
+    padding: 0 1.5rem 1.5rem 1.5rem;
+    display: flex !important;
+    overflow: hidden !important;
+}
+
+/* Main content wrapper */
+.health-main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Tabs container - always visible, no scroll */
+.health-main-content .health-tabs-container {
+    flex-shrink: 0;
+    overflow: visible;
+}
+
+/* For content with drawers (HealthDrawerContainer) */
+.health-main-content .pf-v5-c-drawer {
+    flex: 0 1 auto;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.health-main-content .pf-v5-c-drawer__content {
+    overflow: hidden;
+    min-height: 0;
+}
+
+.health-main-content .pf-v5-c-drawer__body {
+    overflow-y: auto;
+    min-height: 0;
+}
+
+/* For simple content without drawers (HealthGlobal, HealthError) */
+.health-main-content > div:not(.pf-v5-c-drawer):not(.health-tabs-container) {
+    overflow-y: auto;
+    flex: 0 1 auto;
+}
+
+/* Prevent empty states from forcing full height */
+.health-main-content .pf-v5-c-bullseye,
+.health-main-content .pf-v5-l-bullseye {
+    min-height: 200px;
+    max-height: 400px;
+    height: auto !important;
+}
+
+.health-main-content .pf-v5-c-drawer__content .pf-v5-c-bullseye,
+.health-main-content .pf-v5-c-drawer__content .pf-v5-l-bullseye {
+    min-height: 200px;
+    max-height: 400px;
+    height: auto !important;
+}
+
+/* Health gallery drawer panel */
+.health-gallery-drawer {
+    display: flex;
+    flex-direction: column;
+}
+
+.health-gallery-drawer .pf-v5-c-drawer__content {
+    overflow-y: auto;
+}
+
+.health-gallery-drawer .pf-v5-c-drawer__body {
+    overflow: hidden !important;
+}
+
+.health-gallery-drawer .pf-v5-c-drawer__panel-main {
+    overflow-y: auto;
+}
+
+.health-gallery-drawer-content {
+    padding: 1.5rem;
+}
+
 #pageSection h3 {
     padding-top: 0.6rem;
     padding-bottom: 0.6rem;
 }
 
-#pageSection .health-header {
-    padding: 1.5rem 1.5rem 0 1.5rem;
-}
-
-#pageSection .health-header>div {
-    align-items: start;
-}
-
-#pageSection .health-tabs {
-    padding: 0 1.5rem 0 1.5rem;
-}
-
-/* Health summary dashboard */
+/* Health summary dashboard - clickable */
 .health-summary-dashboard {
-    margin-top: 1.5rem;
-    margin-bottom: 1.5rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    padding: 0.5rem;
+    border-radius: var(--pf-v5-global--BorderRadius--sm);
+}
+
+.health-summary-dashboard:hover {
+    background-color: var(--pf-v5-global--BackgroundColor--200);
+}
+
+.health-summary-dashboard:focus {
+    outline: 2px solid var(--pf-v5-global--primary-color--100);
+    outline-offset: 2px;
+}
+
+.health-summary-dashboard:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* Force collapsed state - disable interactions */
+.health-summary-dashboard.force-collapsed {
+    cursor: default;
+}
+
+.health-summary-dashboard.force-collapsed:hover {
+    background-color: transparent;
+}
+
+.health-summary-dashboard.force-collapsed:focus {
+    outline: none;
+}
+
+/* Health summary toggle icon */
+.health-summary-toggle-icon {
+    display: flex;
+    align-items: center;
+    color: var(--pf-v5-global--Color--100);
+    font-size: 1rem;
+}
+
+/* Compact view styles */
+.health-summary-compact-item {
+    padding: 0.25rem 0.5rem;
+    border-radius: 3px;
+}
+
+.health-summary-compact-item.status {
+    background-color: transparent;
+}
+
+.health-summary-compact-item.critical {
+    background-color: rgba(201, 25, 11, 0.1);
+}
+
+.health-summary-compact-item.warning {
+    background-color: rgba(240, 171, 0, 0.1);
+}
+
+.health-summary-compact-item.info {
+    background-color: rgba(154, 216, 216, 0.1);
+}
+
+.health-summary-compact-icon {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.health-summary-compact-icon.status {
+    background-color: var(--pf-v5-global--success-color--100);
+}
+
+.health-summary-compact-item.critical .health-summary-compact-icon.status {
+    background-color: #b1380b;
+}
+
+.health-summary-compact-item.warning .health-summary-compact-icon.status {
+    background-color: #dca614;
+}
+
+.health-summary-compact-item.info .health-summary-compact-icon.status {
+    background-color: #9ad8d8;
+}
+
+.dark .health-summary-compact-item.critical .health-summary-compact-icon.status {
+    background-color: #f0561d;
+}
+
+.dark .health-summary-compact-item.warning .health-summary-compact-icon.status {
+    background-color: #ffcc17;
+}
+
+.health-summary-compact-icon.critical {
+    background-color: #b1380b;
+}
+
+.health-summary-compact-icon.warning {
+    background-color: #dca614;
+}
+
+.health-summary-compact-icon.info {
+    background-color: #9ad8d8;
+}
+
+.dark .health-summary-compact-icon.critical {
+    background-color: #f0561d;
+}
+
+.dark .health-summary-compact-icon.warning {
+    background-color: #ffcc17;
+}
+
+.health-summary-compact-text {
+    font-weight: 500;
+    font-size: 0.875rem;
+    margin: 0;
 }
 
 /* Metric cards - all same height */
@@ -142,15 +402,6 @@
     color: #9ad8d8;
 }
 
-.health-gallery-drawer .pf-v5-c-drawer__body,
-.health-gallery-drawer>div {
-    height: initial;
-}
-
-.health-gallery-drawer-content {
-    padding: 1.5rem;
-}
-
 .netobserv-refresh-interval-container {
     margin: 0 !important;
 }
@@ -216,9 +467,27 @@
     min-height: 5rem;
 }
 
+.card-header-hidden {
+    min-height: 0;
+    height: 0;
+    padding: 0.5rem !important;
+    overflow: hidden;
+}
+
 .card-header .icon {
     width: 1.9rem;
     height: 1.9rem;
+}
+
+.card-body-icon .icon {
+    width: 1.9rem;
+    height: 1.9rem;
+    margin-right: 1rem;
+}
+
+.health-card-body-icon .icon {
+    width: 3rem;
+    height: 3rem;
 }
 
 .health-gallery-drawer-content .pf-m-no-padding {
