@@ -1,7 +1,5 @@
 package config
 
-// TODO: move this file in a new netobserv-libs repo ? (Same in FLP)
-
 import (
 	"encoding/json"
 	"fmt"
