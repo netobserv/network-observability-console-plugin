@@ -420,8 +420,9 @@ const getResourceHealth = (
   } else if (nodeType === 'namespace' && peer.namespace) {
     return healthStats.byNamespace.find(h => h.name === peer.namespace);
   } else if (nodeType === 'owner' && peer.owner) {
-    // TODO: should have a kind and namespace check as well
-    return healthStats.byOwner.find(h => h.name === peer.owner?.name);
+    return healthStats.byOwner.find(
+      h => h.name === peer.owner?.name && h.namespace === peer.namespace && h.k8sKind === peer.owner?.type
+    );
   }
   return undefined;
 };

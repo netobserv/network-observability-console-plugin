@@ -12,12 +12,13 @@ import {
   getLinks,
   getSeverityColor,
   HealthItem,
-  HealthStat
+  HealthStat,
+  HealthSuperKind
 } from './health-helper';
 import './rule-details.css';
 
 export interface RuleDetailsProps {
-  kind: string;
+  kind: HealthSuperKind;
   resourceHealth: HealthStat;
 }
 
@@ -45,7 +46,7 @@ const VerticalField: React.FC<{ label: string; children: React.ReactNode }> = ({
 const RuleTableRow: React.FC<{
   item: HealthItem;
   resourceName: string;
-  kind: string;
+  kind: HealthSuperKind;
   t: TFunction;
 }> = ({ item, resourceName, kind, t }) => {
   const isAlert = item.state !== 'recording';
@@ -108,7 +109,7 @@ const RuleTableRow: React.FC<{
 const RuleCard: React.FC<{
   item: HealthItem;
   resourceName: string;
-  kind: string;
+  kind: HealthSuperKind;
   t: TFunction;
 }> = ({ item, resourceName, kind, t }) => {
   const isAlert = item.state !== 'recording';

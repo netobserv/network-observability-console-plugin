@@ -18,7 +18,7 @@ import { computeResourceScore, HealthStat } from './health-helper';
 
 export interface HealthCardProps {
   name?: string;
-  kind?: string;
+  k8sKind?: string;
   resourceHealth: HealthStat;
   isDark: boolean;
   isSelected: boolean;
@@ -28,7 +28,7 @@ export interface HealthCardProps {
 
 export const HealthCard: React.FC<HealthCardProps> = ({
   name,
-  kind,
+  k8sKind,
   resourceHealth,
   isDark,
   isSelected,
@@ -109,7 +109,7 @@ export const HealthCard: React.FC<HealthCardProps> = ({
             <FlexItem>{icon}</FlexItem>
             <FlexItem>
               <CardTitle>
-                {kind && name ? <ResourceLink inline={true} kind={kind} name={name} /> : t('Global')}
+                {k8sKind && name ? <ResourceLink inline={true} kind={k8sKind} name={name} /> : t('Global')}
               </CardTitle>
             </FlexItem>
           </Flex>

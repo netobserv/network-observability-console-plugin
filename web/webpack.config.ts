@@ -29,7 +29,7 @@ module.exports = {
           {
             loader: 'ts-loader',
             options: {
-              transpileOnly: true,
+              transpileOnly: process.env.TRANSPILE_ONLY === 'true',
               configFile: path.resolve(__dirname, 'tsconfig.json'),
               compilerOptions: {
                 sourceMap: process.env.NODE_ENV === 'development',
