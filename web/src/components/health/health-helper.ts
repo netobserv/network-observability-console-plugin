@@ -23,6 +23,7 @@ export type HealthItem = {
   summary: string;
   description: string;
   activeAt?: string;
+  runbookUrl?: string;
 };
 
 export type RecordingRuleMetric = {
@@ -103,6 +104,7 @@ const alertToHealth = (a: PrometheusAlert, r: Rule, md: HealthMetadata): HealthI
     state: (a.state as AlertState) || 'inactive',
     summary: a.annotations.summary || a.labels.template || '',
     description: a.annotations.description || '',
+    runbookUrl: a.annotations.runbook_url,
     value: (a.value as number) || 0,
     activeAt: a.activeAt
   };
@@ -162,6 +164,7 @@ const recordingToHealth = (metric: RecordingRuleMetric, annotations: { [key: str
       state: state,
       summary: annotations.summary || valueData.labels.template || '',
       description: description,
+      runbookUrl: annotations.runbook_url,
       value: value
     };
   });
@@ -398,15 +401,14 @@ export const getLinks = (
   namespace?: string,
   k8sKind?: string
 ) => {
-  const trafficLink = { name: t('Inspect network traffic'), url: getTrafficLink(kind, item, name, namespace, k8sKind) };
-  if (item.state === 'recording') {
-    return [
-      { name: t('Inspect metric'), url: getRecordingRuleMetricLink(item, name) },
-      trafficLink,
-      ...item.metadata.links
-    ];
-  }
-  return [{ name: t('Inspect alert'), url: getAlertLink(item) }, trafficLink, ...item.metadata.links];
+  return [
+    ...item.runbookUrl ? [{ name: t('View runbook'), url: item.runbookUrl }] : [],
+    item.state === 'recording'
+      ? { name: t('Inspect metric'), url: getRecordingRuleMetricLink(item, name) }
+      : { name: t('Inspect alert'), url: getAlertLink(item) },
+    { name: t('Inspect network traffic'), url: getTrafficLink(kind, item, name, namespace, k8sKind) },
+    ...item.metadata.links
+  ];
 };
 
 const getAlertLink = (item: HealthItem): string | undefined => {
