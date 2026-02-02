@@ -165,7 +165,7 @@ export const NetworkHealth: React.FC<{}> = ({}) => {
   };
 
   return (
-    <PageSection id="pageSection" className={`${isDarkTheme ? 'dark' : 'light'}`}>
+    <PageSection id="health-page" className={`${isDarkTheme ? 'dark' : 'light'}`}>
       <Drawer id="health-drawer" isInline isExpanded={isScoringDrawerOpen}>
         <DrawerContent id="healthDrawerContent" panelContent={panelContent()}>
           <DrawerContentBody id="healthDrawerBody">
