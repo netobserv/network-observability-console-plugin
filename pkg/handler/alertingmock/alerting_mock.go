@@ -14,8 +14,114 @@ import (
 
 var mlog = logrus.WithField("module", "alertingmock")
 
-var namespaces = []string{"uss-enterprise", "uss-raven", "la-sirena", "sh-raan", "the-whale-probe", "uss-defiant", "scimitar", "romulan-warbird", "uss-excelsior", "galileo", "phoenix"}
-var nodes = []string{"caldonia", "denobula", "vulcan"}
+// Actual namespace pairs from topology mock data
+type namespacePair struct {
+	src string
+	dst string
+}
+
+var namespacePairs = []namespacePair{
+	{"default", "netobserv"},
+	{"netobserv", "default"},
+	{"openshift-console", "default"},
+	{"openshift-console-operator", "default"},
+	{"openshift-deployment-validation-operator", "default"},
+	{"openshift-monitoring", "default"},
+	{"openshift-ingress", "default"},
+	{"openshift-ingress", "openshift-console"},
+	{"openshift-console", "openshift-ingress"},
+	{"openshift-ingress", "openshift-monitoring"},
+	{"openshift-monitoring", "openshift-ingress"},
+	{"openshift-monitoring", "openshift-monitoring"},
+	{"netobserv", "netobserv"},
+	{"openshift-console", "openshift-monitoring"},
+	{"netobserv", "openshift-dns"},
+	{"openshift-monitoring", "openshift-dns"},
+	{"openshift-user-workload-monitoring", "openshift-ingress"},
+	{"openshift-ingress", "openshift-user-workload-monitoring"},
+	{"openshift-user-workload-monitoring", "openshift-monitoring"},
+	{"openshift-monitoring", "openshift-user-workload-monitoring"},
+	{"netobserv", "openshift-monitoring"},
+	{"production", "production"},
+	{"gateway-system", "gateway-system"},
+	{"vms", "vms"},
+	{"vms", "production"},
+}
+
+// Get unique namespaces from pairs for single-label alerts
+func getUniqueNamespaces() []string {
+	nsMap := make(map[string]bool)
+	for _, pair := range namespacePairs {
+		nsMap[pair.src] = true
+		nsMap[pair.dst] = true
+	}
+	var namespaces []string
+	for ns := range nsMap {
+		namespaces = append(namespaces, ns)
+	}
+	return namespaces
+}
+
+// Get unique nodes from pairs for single-label alerts
+func getUniqueNodes() []string {
+	nodeMap := make(map[string]bool)
+	for _, pair := range nodePairs {
+		nodeMap[pair.src] = true
+		nodeMap[pair.dst] = true
+	}
+	var nodes []string
+	for node := range nodeMap {
+		nodes = append(nodes, node)
+	}
+	return nodes
+}
+
+// Actual node pairs from topology mock data
+type nodePair struct {
+	src string
+	dst string
+}
+
+var nodePairs = []nodePair{
+	{"ip-10-0-1-7.ec2.internal", "ip-10-0-1-137.ec2.internal"},
+	{"ip-10-0-1-137.ec2.internal", "ip-10-0-1-7.ec2.internal"},
+}
+
+type workload struct {
+	namespace string
+	name      string
+	ownerType string
+}
+
+// Actual workloads from topology mock data
+var workloads = []workload{
+	{"netobserv", "netobserv-controller-manager", "Deployment"},
+	{"netobserv", "flowlogs-pipeline", "DaemonSet"},
+	{"netobserv", "loki", "Pod"},
+	{"openshift-console", "console", "Deployment"},
+	{"openshift-console-operator", "console-operator", "Deployment"},
+	{"openshift-deployment-validation-operator", "deployment-validation-operator", "Deployment"},
+	{"openshift-monitoring", "prometheus-k8s", "StatefulSet"},
+	{"openshift-monitoring", "alertmanager-main", "StatefulSet"},
+	{"openshift-monitoring", "kube-state-metrics", "Deployment"},
+	{"openshift-monitoring", "thanos-querier", "Deployment"},
+	{"openshift-monitoring", "cluster-monitoring-operator", "Deployment"},
+	{"openshift-ingress", "router-default", "Deployment"},
+	{"openshift-dns", "dns-default", "DaemonSet"},
+	{"openshift-image-registry", "image-registry", "Deployment"},
+	{"openshift-user-workload-monitoring", "prometheus-user-workload", "StatefulSet"},
+	{"openshift-user-workload-monitoring", "thanos-ruler-user-workload", "StatefulSet"},
+	{"openshift-insights", "insights-operator", "Deployment"},
+	{"production", "web-deployment", "Deployment"},
+	{"production", "app-deployment", "Deployment"},
+	{"production", "gateway-api", "Gateway"},
+	{"gateway-system", "gateway-internal", "Gateway"},
+	{"gateway-system", "gateway-external", "Gateway"},
+	{"vms", "vm-ubuntu-server", "VirtualMachine"},
+	{"vms", "vm-centos-server", "VirtualMachine"},
+	{"vms", "vmi-linux", "VirtualMachineInstance"},
+	{"vms", "vmi-windows", "VirtualMachineInstance"},
+}
 
 // We duplicate prom model due to missing json information
 type AlertingRule struct {
@@ -93,6 +199,42 @@ func createAlert(probability float64, name, resourceName string, threshold, uppe
 	return nil, 0
 }
 
+func createNamespacePairAlert(probability float64, name string, threshold, upperBound int, nsPair namespacePair, annotations, labels model.LabelSet) (*Alert, int) {
+	if rand.Float64() < probability {
+		alertLabels := labels.Clone()
+		alertState := randomState()
+		alertLabels["alertname"] = model.LabelValue(name)
+		alertLabels["SrcK8S_Namespace"] = model.LabelValue(nsPair.src)
+		alertLabels["DstK8S_Namespace"] = model.LabelValue(nsPair.dst)
+		val := float64(threshold) + rand.Float64()*float64(upperBound-threshold)
+		return &Alert{
+			Annotations: annotations,
+			Labels:      alertLabels,
+			State:       stateToString(alertState),
+			Value:       fmt.Sprintf("%f", val),
+		}, alertState
+	}
+	return nil, 0
+}
+
+func createNodePairAlert(probability float64, name string, threshold, upperBound int, nodePair nodePair, annotations, labels model.LabelSet) (*Alert, int) {
+	if rand.Float64() < probability {
+		alertLabels := labels.Clone()
+		alertState := randomState()
+		alertLabels["alertname"] = model.LabelValue(name)
+		alertLabels["SrcK8S_Hostname"] = model.LabelValue(nodePair.src)
+		alertLabels["DstK8S_Hostname"] = model.LabelValue(nodePair.dst)
+		val := float64(threshold) + rand.Float64()*float64(upperBound-threshold)
+		return &Alert{
+			Annotations: annotations,
+			Labels:      alertLabels,
+			State:       stateToString(alertState),
+			Value:       fmt.Sprintf("%f", val),
+		}, alertState
+	}
+	return nil, 0
+}
+
 func createAlerts(probability float64, name string, threshold, upperBound int, targetLabels, resourceNames []string, annotations, labels model.LabelSet) ([]*Alert, int) {
 	alerts := []*Alert{}
 	var ruleState int
@@ -103,6 +245,106 @@ func createAlerts(probability float64, name string, threshold, upperBound int, t
 		}
 	}
 	return alerts, ruleState
+}
+
+func createNamespacePairAlerts(probability float64, name string, threshold, upperBound int, annotations, labels model.LabelSet) ([]*Alert, int) {
+	alerts := []*Alert{}
+	var ruleState int
+	for _, nsPair := range namespacePairs {
+		if alert, state := createNamespacePairAlert(probability, name, threshold, upperBound, nsPair, annotations, labels); alert != nil {
+			ruleState |= state
+			alerts = append(alerts, alert)
+		}
+	}
+	return alerts, ruleState
+}
+
+func createNodePairAlerts(probability float64, name string, threshold, upperBound int, annotations, labels model.LabelSet) ([]*Alert, int) {
+	alerts := []*Alert{}
+	var ruleState int
+	for _, nodePair := range nodePairs {
+		if alert, state := createNodePairAlert(probability, name, threshold, upperBound, nodePair, annotations, labels); alert != nil {
+			ruleState |= state
+			alerts = append(alerts, alert)
+		}
+	}
+	return alerts, ruleState
+}
+
+func createWorkloadAlert(probability float64, name string, threshold, upperBound int, wl workload, annotations, labels model.LabelSet) (*Alert, int) {
+	if rand.Float64() < probability {
+		alertLabels := labels.Clone()
+		alertState := randomState()
+		alertLabels["alertname"] = model.LabelValue(name)
+		alertLabels["SrcK8S_Namespace"] = model.LabelValue(wl.namespace)
+		alertLabels["SrcK8S_OwnerName"] = model.LabelValue(wl.name)
+		alertLabels["SrcK8S_Type"] = model.LabelValue(wl.ownerType)
+		val := float64(threshold) + rand.Float64()*float64(upperBound-threshold)
+		return &Alert{
+			Annotations: annotations,
+			Labels:      alertLabels,
+			State:       stateToString(alertState),
+			Value:       fmt.Sprintf("%f", val),
+		}, alertState
+	}
+	return nil, 0
+}
+
+func createWorkloadAlerts(probability float64, name string, threshold, upperBound int, annotations, labels model.LabelSet) ([]*Alert, int) {
+	alerts := []*Alert{}
+	var ruleState int
+	for _, wl := range workloads {
+		if alert, state := createWorkloadAlert(probability, name, threshold, upperBound, wl, annotations, labels); alert != nil {
+			ruleState |= state
+			alerts = append(alerts, alert)
+		}
+	}
+	return alerts, ruleState
+}
+
+func createWorkloadRule(probability float64, name, severity, extraFilter string, threshold, upperBound int, bynetobs bool, workloadLabels []string) AlertingRule {
+	labels := model.LabelSet{
+		"severity": model.LabelValue(severity),
+	}
+	annotations := model.LabelSet{
+		"description": model.LabelValue(name + " (a complete description...)"),
+		"summary":     model.LabelValue(name + " (a summary...)"),
+	}
+	if bynetobs {
+		labels["app"] = "netobserv"
+	}
+	labels["netobserv"] = "true"
+	var jsonWorkloadLbl string
+	if len(workloadLabels) > 0 {
+		var quotedLbl []string
+		for _, lbl := range workloadLabels {
+			quotedLbl = append(quotedLbl, `"`+lbl+`"`)
+		}
+		jsonWorkloadLbl = fmt.Sprintf(`"workloadLabels":[%s],`, strings.Join(quotedLbl, ","))
+	}
+	searchURL := "https://duckduckgo.com/?q=" + url.PathEscape(name)
+	var extraFilterJSON string
+	if extraFilter != "" {
+		extraFilterJSON = fmt.Sprintf(`,"trafficLinkFilter":"%s"`, extraFilter)
+	}
+	annotations["netobserv_io_network_health"] = model.LabelValue(fmt.Sprintf(
+		`{%s"threshold":"%d","upperBound":"%d","unit":"%%","links":[{"name":"Search the web", "url": "%s"}]%s}`,
+		jsonWorkloadLbl,
+		threshold,
+		upperBound,
+		searchURL,
+		extraFilterJSON,
+	))
+	ruleLabels := labels.Clone()
+	ruleLabels["prometheus"] = "openshift-monitoring/k8s"
+	alerts, ruleState := createWorkloadAlerts(probability, name, threshold, upperBound, annotations, labels)
+	return AlertingRule{
+		Name:        name,
+		Annotations: annotations,
+		Labels:      labels,
+		State:       stateToString(ruleState),
+		Alerts:      alerts,
+	}
 }
 
 func createRule(probability float64, name, severity, extraFilter string, threshold, upperBound int, bynetobs bool, nsLbl, nodeLbl []string) AlertingRule {
@@ -151,9 +393,23 @@ func createRule(probability float64, name, severity, extraFilter string, thresho
 	var alerts []*Alert
 	var ruleState int
 	if len(nsLbl) > 0 {
-		alerts, ruleState = createAlerts(probability, name, threshold, upperBound, nsLbl, namespaces, annotations, labels)
+		// Check if this is a pair (two labels) or single label
+		if len(nsLbl) == 2 && nsLbl[0] == "SrcK8S_Namespace" && nsLbl[1] == "DstK8S_Namespace" {
+			// Use actual namespace pairs from topology
+			alerts, ruleState = createNamespacePairAlerts(probability, name, threshold, upperBound, annotations, labels)
+		} else {
+			// Single namespace label - use unique namespaces
+			alerts, ruleState = createAlerts(probability, name, threshold, upperBound, nsLbl, getUniqueNamespaces(), annotations, labels)
+		}
 	} else if len(nodeLbl) > 0 {
-		alerts, ruleState = createAlerts(probability, name, threshold, upperBound, nodeLbl, nodes, annotations, labels)
+		// Check if this is a pair (two labels) or single label
+		if len(nodeLbl) == 2 && nodeLbl[0] == "SrcK8S_HostName" && nodeLbl[1] == "DstK8S_HostName" {
+			// Use actual node pairs from topology
+			alerts, ruleState = createNodePairAlerts(probability, name, threshold, upperBound, annotations, labels)
+		} else {
+			// Single node label - use unique nodes
+			alerts, ruleState = createAlerts(probability, name, threshold, upperBound, nodeLbl, getUniqueNodes(), annotations, labels)
+		}
 	} else {
 		// global
 		alerts = []*Alert{}
@@ -275,6 +531,12 @@ func GetRules() func(w http.ResponseWriter, r *http.Request) {
 				createRule(0.8, "High overall traffic volume", "warning", "", 1000, 5000, true, []string{}, []string{}),
 				createRule(0.6, "Cluster-wide packet loss detected", "critical", "", 10, 50, true, []string{}, []string{}),
 				createRule(0.5, "Global DNS resolution issues", "info", "", 100, 500, true, []string{}, []string{}),
+				// Workload-specific alerts
+				createWorkloadRule(0.2, "High workload packet drops", "warning", "", 10, 50, true, []string{"SrcK8S_Namespace", "SrcK8S_OwnerName", "SrcK8S_Type"}),
+				createWorkloadRule(0.15, "Workload connection errors", "info", "", 5, 30, true, []string{"SrcK8S_Namespace", "SrcK8S_OwnerName", "SrcK8S_Type"}),
+				createWorkloadRule(0.1, "Workload DNS issues", "warning", `dns_flag_response_code!=\"\"`, 15, 60, true, []string{"SrcK8S_Namespace", "SrcK8S_OwnerName", "SrcK8S_Type"}),
+				createWorkloadRule(0.12, "Workload high latency", "info", "", 100, 500, true, []string{"SrcK8S_Namespace", "SrcK8S_OwnerName", "SrcK8S_Type"}),
+				createWorkloadRule(0.08, "Workload network policy denied", "warning", "", 5, 25, true, []string{"SrcK8S_Namespace", "SrcK8S_OwnerName", "SrcK8S_Type"}),
 			}
 		}
 

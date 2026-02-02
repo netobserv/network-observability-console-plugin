@@ -70,18 +70,25 @@ export const ElementPanel: React.FC<ElementPanelProps> = ({
     aData = data!;
   }
 
+  // Get the element panel display name to compare with card names
+  const elementName = React.useMemo(() => {
+    if (element instanceof BaseEdge) {
+      return undefined;
+    } else {
+      return data?.peer.getDisplayName(false, false);
+    }
+  }, [element, data]);
+
   const titleContent = React.useCallback(() => {
     if (element instanceof BaseEdge) {
       return <Text component={TextVariants.h2}>{t('Edge')}</Text>;
     } else {
-      const data = element.getData();
-      const name = data?.peer.getDisplayName(false, false);
-      if (data && name) {
+      if (data && elementName) {
         return <PeerResourceLink peer={data.peer} />;
       }
       return <Text component={TextVariants.h2}>{t('Unknown')}</Text>;
     }
-  }, [element, t]);
+  }, [element, elementName, data, t]);
 
   React.useEffect(() => {
     if ((activeTab === 'metrics' && _.isEmpty(metrics)) || (activeTab === 'dropped' && _.isEmpty(droppedMetrics))) {
@@ -90,8 +97,21 @@ export const ElementPanel: React.FC<ElementPanelProps> = ({
   }, [metrics, droppedMetrics, activeTab]);
 
   React.useEffect(() => {
+    if (activeTab === 'health' && _.isEmpty(data?.alerts)) {
+      setActiveTab('details');
+    }
+  }, [activeTab, data?.alerts]);
+
+  React.useEffect(() => {
     setSelectedAlertName(undefined);
   }, [element]);
+
+  // Auto-select alert if there's only one
+  React.useEffect(() => {
+    if (data?.alerts && data.alerts.length === 1) {
+      setSelectedAlertName(data.alerts[0].name);
+    }
+  }, [data?.alerts]);
 
   return (
     <DrawerPanelContent
@@ -154,23 +174,29 @@ export const ElementPanel: React.FC<ElementPanelProps> = ({
           )}
           {!_.isEmpty(data?.alerts) && (
             <Tab className="drawer-tab" eventKey={'health'} title={<TabTitleText>{t('Health')}</TabTitleText>}>
-              {data!.alerts?.map(alert => (
-                <>
-                  <HealthCard
-                    key={`card-${alert.name}`}
-                    alertInfo={alert}
-                    kind={data!.peer.resourceKind || '?'}
-                    isDark={isDark || false}
-                    isSelected={selectedAlertName === alert.name}
-                    onClick={() => setSelectedAlertName(alert.name !== selectedAlertName ? alert.name : undefined)}
-                  />
-                  {alert.name === selectedAlertName && (
-                    <div className="health-details">
-                      <RuleDetails kind={data!.peer.resourceKind || '?'} alertInfo={alert} />
-                    </div>
-                  )}
-                </>
-              ))}
+              {data!.alerts?.map(alert => {
+                // Hide title if the alert name matches the element panel name
+                const hideTitle = elementName === alert.name;
+                return (
+                  <>
+                    <HealthCard
+                      key={`card-${alert.name}`}
+                      alertInfo={alert}
+                      name={alert.name}
+                      kind={data!.peer.resourceKind || '?'}
+                      isDark={isDark || false}
+                      isSelected={selectedAlertName === alert.name}
+                      onClick={() => setSelectedAlertName(alert.name !== selectedAlertName ? alert.name : undefined)}
+                      hideTitle={hideTitle}
+                    />
+                    {alert.name === selectedAlertName && (
+                      <div className="health-details">
+                        <RuleDetails kind={data!.peer.resourceKind || '?'} alertInfo={alert} />
+                      </div>
+                    )}
+                  </>
+                );
+              })}
             </Tab>
           )}
         </Tabs>
