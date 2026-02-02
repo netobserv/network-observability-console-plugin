@@ -1,14 +1,14 @@
 /* Page section full height */
-#pageSection {
+#health-page {
     padding: 0 !important;
     height: 100%;
 }
 
-#pageSection.light {
+#health-page.light {
     background-color: var(--pf-v5-global--BackgroundColor--100);
 }
 
-#pageSection.dark {
+#health-page.dark {
     background-color: var(--pf-v5-global--BackgroundColor--dark-100);
 }
 
@@ -45,13 +45,13 @@
     width: 100%;
 }
 
-#pageSection .health-header {
+#health-page .health-header {
     padding: 1.5rem 1.5rem 1.5rem 1.5rem;
     width: 100%;
 }
 
 /* Health summary in header - no extra margins */
-#pageSection .health-header .health-summary-dashboard {
+#health-page .health-header .health-summary-dashboard {
     margin-top: 0.5rem;
     margin-bottom: 0;
     width: 100%;
@@ -151,7 +151,7 @@
     padding: 1.5rem;
 }
 
-#pageSection h3 {
+#health-page h3 {
     padding-top: 0.6rem;
     padding-bottom: 0.6rem;
 }
@@ -381,24 +381,24 @@
     font-size: 0.875rem;
 }
 
-#pageSection .icon.critical {
+#health-page .icon.critical {
     color: #b1380b;
 }
 
-#pageSection .dark .icon.critical {
+#health-page .dark .icon.critical {
     color: #f0561d;
 }
 
-#pageSection .icon.warning {
+#health-page .icon.warning {
     color: #dca614;
 }
 
-#pageSection .dark .icon.warning {
+#health-page .dark .icon.warning {
     color: #ffcc17;
 }
 
-#pageSection .icon.minor,
-#pageSection .dark .icon.minor {
+#health-page .icon.minor,
+#health-page .dark .icon.minor {
     color: #9ad8d8;
 }
 
@@ -431,63 +431,6 @@
     to {
         transform: rotate(360deg);
     }
-}
-
-.card {
-    border-top: 0.2rem solid;
-    border-top-color: #6a6e73;
-}
-
-.card.dark {
-    border-top-color: #868789;
-}
-
-.card.critical {
-    border-top-color: #b1380b;
-}
-
-.card.dark.critical {
-    border-top-color: #f0561d;
-}
-
-.card.warning {
-    border-top-color: #dca614;
-}
-
-.card.dark.warning {
-    border-top-color: #ffcc17;
-}
-
-.card.minor,
-.card.dark.minor {
-    border-top-color: #9ad8d8;
-}
-
-.card-header {
-    min-height: 5rem;
-}
-
-.card-header-hidden {
-    min-height: 0;
-    height: 0;
-    padding: 0.5rem !important;
-    overflow: hidden;
-}
-
-.card-header .icon {
-    width: 1.9rem;
-    height: 1.9rem;
-}
-
-.card-body-icon .icon {
-    width: 1.9rem;
-    height: 1.9rem;
-    margin-right: 1rem;
-}
-
-.health-card-body-icon .icon {
-    width: 3rem;
-    height: 3rem;
 }
 
 .health-gallery-drawer-content .pf-m-no-padding {

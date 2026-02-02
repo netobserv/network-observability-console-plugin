@@ -16,6 +16,8 @@ import { useTranslation } from 'react-i18next';
 import { valueFormat } from '../../utils/format';
 import { computeResourceScore, HealthStat } from './health-helper';
 
+import './health-card.css';
+
 export interface HealthCardProps {
   name?: string;
   k8sKind?: string;
@@ -73,7 +75,7 @@ export const HealthCard: React.FC<HealthCardProps> = ({
   );
 
   // Build CSS classes like other health cards
-  const classes = ['card'];
+  const classes = ['health-card'];
   let icon = <InfoAltIcon className="icon" />;
   if (criticalCount > 0) {
     classes.push('critical');
