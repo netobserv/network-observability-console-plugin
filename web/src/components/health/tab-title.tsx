@@ -22,7 +22,7 @@ export const HealthTabTitle: React.FC<HealthTabTitleProps> = ({ stats, title }) 
     <ExclamationTriangleIcon className="icon warning" />
   ) : severities.includes('info') ? (
     <BellIcon className="icon minor" />
-  ) : severities.length > 0 ? (
+  ) : severities.filter(s => s !== undefined).length > 0 ? (
     <InfoAltIcon />
   ) : (
     <CheckCircleIcon className="icon healthy" />

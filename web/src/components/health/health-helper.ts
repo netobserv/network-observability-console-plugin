@@ -402,7 +402,7 @@ export const getLinks = (
   k8sKind?: string
 ) => {
   return [
-    ...item.runbookUrl ? [{ name: t('View runbook'), url: item.runbookUrl }] : [],
+    ...(item.runbookUrl ? [{ name: t('View runbook'), url: item.runbookUrl }] : []),
     item.state === 'recording'
       ? { name: t('Inspect metric'), url: getRecordingRuleMetricLink(item, name) }
       : { name: t('Inspect alert'), url: getAlertLink(item) },
