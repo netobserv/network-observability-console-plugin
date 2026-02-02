@@ -42,7 +42,6 @@ export const fetchNetworkHealth = (recordingAnnotations: RecordingAnnotations) =
   // Fetch recording rules and their current values
   const recordingP = getRecordingRules('netobserv="true"').then(res => {
     const recordingRules = res.data.groups.flatMap(group => group.rules);
-    console.log('recordingRules', recordingRules);
 
     // For each recording rule, query its current metric values
     const queries = recordingRules
@@ -70,14 +69,11 @@ export const fetchNetworkHealth = (recordingAnnotations: RecordingAnnotations) =
       });
 
     return Promise.all(queries).then(metrics => {
-      console.log('metrics', metrics);
       return metrics.filter((m?: RecordingRuleMetric): m is RecordingRuleMetric => !!m);
     });
   });
 
   return Promise.all([alertsP, silencedP, recordingP]).then(([rawRules, silenced, recording]) => {
-    console.log('recording', recording);
-    console.log('recordingAnnotations', recordingAnnotations);
     const alertRules = rawRules.map(r => {
       const alerts = r.alerts.map(a => {
         let state = a.state;
