@@ -116,6 +116,14 @@ export const bnfFilterValue = (
   id: FilterId,
   value: FilterValue
 ): Filter[] => {
+  // find the base filter definition first (before modifying anything)
+  const bnfId = id.replace('src_', '').replace('dst_', '') as FilterId;
+  const def = findFilter(filterDefinitions, bnfId);
+  if (!def) {
+    console.error("Can't find filter def", bnfId);
+    return filters;
+  }
+
   // remove value from existing filter
   const found = filters.find(f => f.def.id === id);
   if (!found) {
@@ -130,16 +138,10 @@ export const bnfFilterValue = (
   }
 
   // add new back and forth filter value
-  const bnfId = id.replace('src_', '').replace('dst_', '') as FilterId;
-  const def = findFilter(filterDefinitions, bnfId);
-  if (!def) {
-    console.error("Can't find filter def", bnfId);
-    return filters;
-  }
   const existing = filters.find(f => f.def.id === bnfId);
   if (!existing) {
     filters.push({ ...found, def, values: [value] });
-  } else if (existing.values.includes(value)) {
+  } else if (!existing.values.includes(value)) {
     existing.values.push(value);
   }
 
