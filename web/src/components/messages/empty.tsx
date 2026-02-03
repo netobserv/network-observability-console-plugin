@@ -40,21 +40,33 @@ export const Empty: React.FC<EmptyProps> = ({ showDetails, resetDefaultFilters, 
       return;
     }
 
+    let isMounted = true;
+
     getStatus(ContextSingleton.getForcedNamespace())
       .then(status => {
-        console.info('status result', status);
-        setStatus(status);
-        setStatusError(undefined);
+        if (isMounted) {
+          console.info('status result', status);
+          setStatus(status);
+          setStatusError(undefined);
+        }
       })
       .catch(err => {
-        const errorMessage = getHTTPErrorDetails(err);
-        console.error(errorMessage);
-        setStatusError(errorMessage);
-        setStatus(undefined);
+        if (isMounted) {
+          const errorMessage = getHTTPErrorDetails(err);
+          console.error(errorMessage);
+          setStatusError(errorMessage);
+          setStatus(undefined);
+        }
       })
       .finally(() => {
-        setNamespacesLoading(false);
+        if (isMounted) {
+          setNamespacesLoading(false);
+        }
       });
+
+    return () => {
+      isMounted = false;
+    };
   }, [showDetails]);
 
   return (
