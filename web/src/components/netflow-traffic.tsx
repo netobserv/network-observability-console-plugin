@@ -195,11 +195,12 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
   }, [getAvailableColumns]);
 
   const getFilterDefs = React.useCallback(() => {
-    return getFilterDefinitions(model.config.filters, model.config.columns, t).filter(fd => {
+    const allFilterDefs = getFilterDefinitions(model.config.filters, model.config.columns, t);
+    return allFilterDefs.filter(fd => {
       if (fd.id === 'id') {
         return isConnectionTracking();
       }
-      return checkFilterAvailable(fd, model.config, model.dataSource);
+      return checkFilterAvailable(fd, model.config, model.dataSource, allFilterDefs);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [model.config, model.dataSource]);
