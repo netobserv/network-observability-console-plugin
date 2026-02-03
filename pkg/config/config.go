@@ -97,6 +97,7 @@ type Filter struct {
 	Examples               string `yaml:"examples,omitempty" json:"examples,omitempty"`
 	DocURL                 string `yaml:"docUrl,omitempty" json:"docUrl,omitempty"`
 	Placeholder            string `yaml:"placeholder,omitempty" json:"placeholder,omitempty"`
+	Feature                string `yaml:"feature,omitempty" json:"feature,omitempty"`
 }
 
 type Scope struct {
