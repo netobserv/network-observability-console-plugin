@@ -1,9 +1,9 @@
 /* eslint-disable max-len */
-import { Filter, FilterCompare, FilterId, FilterValue } from '../../model/filters';
+import { Filter, FilterCompare, FilterConfigDef, FilterId, FilterValue } from '../../model/filters';
 import { findFilter, getFilterDefinitions } from '../../utils/filter-definitions';
 import { ColumnConfigSampleDefs } from './columns';
 
-export const FilterConfigSampleDefs = [
+export const FilterConfigSampleDefs: FilterConfigDef[] = [
   {
     id: 'namespace',
     name: 'Namespace',
@@ -275,19 +275,22 @@ export const FilterConfigSampleDefs = [
     id: 'zone',
     name: 'Zone',
     component: 'autocomplete',
-    category: 'endpoint'
+    category: 'endpoint',
+    feature: 'zones'
   },
   {
     id: 'src_zone',
     name: 'Zone',
     component: 'autocomplete',
-    category: 'source'
+    category: 'source',
+    feature: 'zones'
   },
   {
     id: 'dst_zone',
     name: 'Zone',
     component: 'autocomplete',
-    category: 'destination'
+    category: 'destination',
+    feature: 'zones'
   },
   {
     id: 'protocol',
@@ -344,19 +347,22 @@ export const FilterConfigSampleDefs = [
     id: 'dns_id',
     name: 'DNS Id',
     component: 'number',
-    hint: 'Specify a single DNS Id.'
+    hint: 'Specify a single DNS Id.',
+    feature: 'dnsTracking'
   },
   {
     id: 'dns_name',
     name: 'DNS Name',
     component: 'text',
-    hint: 'Specify a single DNS Name.'
+    hint: 'Specify a single DNS Name.',
+    feature: 'dnsTracking'
   },
   {
     id: 'dns_latency',
     name: 'DNS Latency',
     component: 'number',
-    hint: 'Specify a DNS Latency in miliseconds.'
+    hint: 'Specify a DNS Latency in miliseconds.',
+    feature: 'dnsTracking'
   },
   {
     id: 'dns_flag_response_code',
@@ -365,7 +371,8 @@ export const FilterConfigSampleDefs = [
     hint: 'Specify a single DNS RCODE name.',
     examples:
       'Specify a single DNS RCODE name like:\n        - A IANA RCODE number like 0, 3, 9\n        - A IANA RCODE name like NoError, NXDomain, NotAuth',
-    docUrl: 'https://www.iana.org/assignments/dns-parameters/dns-parameters.xhtml#dns-parameters-6'
+    docUrl: 'https://www.iana.org/assignments/dns-parameters/dns-parameters.xhtml#dns-parameters-6',
+    feature: 'dnsTracking'
   },
   {
     id: 'time_flow_rtt',
