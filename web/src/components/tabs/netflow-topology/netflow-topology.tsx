@@ -88,15 +88,21 @@ export const NetflowTopology: React.FC<NetflowTopologyProps> = React.forwardRef(
   (props, ref: React.Ref<NetflowTopologyHandle>) => {
     const { t } = useTranslation('plugin__netobserv-plugin');
 
-    const containerRef = React.createRef<HTMLDivElement>();
+    const containerRef = React.useRef<HTMLDivElement>(null);
     const [containerSize, setContainerSize] = React.useState<DOMRect>({ width: 0, height: 0 } as DOMRect);
     const [controller, setController] = React.useState<Visualization>();
     const [health, setHealth] = React.useState<HealthStats>(buildStats([]));
     const [lastStatsUpdateTime, setLastStatsUpdateTime] = React.useState<number>(0);
     const statsRefreshIntervalMs = 30000; // Refresh stats every 30 seconds if outdated
 
+    // Memoize health to prevent unnecessary getContent re-creation
+    const memoizedHealth = React.useMemo(() => health, [health]);
+
     //show fully dropped metrics if no metrics available
-    const displayedMetrics = _.isEmpty(props.metrics) ? props.droppedMetrics : props.metrics;
+    const displayedMetrics = React.useMemo(
+      () => (_.isEmpty(props.metrics) ? props.droppedMetrics : props.metrics),
+      [props.metrics, props.droppedMetrics]
+    );
 
     const fetchHealth = React.useCallback(async () => {
       try {
@@ -226,16 +232,40 @@ export const NetflowTopology: React.FC<NetflowTopologyProps> = React.forwardRef(
     }));
 
     const getContent = React.useCallback(() => {
-      if (!controller || (_.isEmpty(props.metrics) && props.loading)) {
+      if (props.options.layout === LayoutName.threeD) {
+        return <Text>{t('Sorry, 3D view is not implemented anymore.')}</Text>;
+      }
+
+      // Always render TopologyContent once controller is ready
+      // Show loading overlay instead of unmounting
+      if (!controller) {
         return (
           <Bullseye data-test="loading-contents">
             <Spinner size="xl" />
           </Bullseye>
         );
-      } else if (props.options.layout === LayoutName.threeD) {
-        return <Text>{t('Sorry, 3D view is not implemented anymore.')}</Text>;
-      } else {
-        return (
+      }
+
+      const showLoadingOverlay = _.isEmpty(props.metrics) && props.loading;
+
+      return (
+        <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+          {showLoadingOverlay && (
+            <Bullseye
+              data-test="loading-contents"
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: props.isDark ? '#151515' : '#ffffff',
+                zIndex: 1000
+              }}
+            >
+              <Spinner size="xl" />
+            </Bullseye>
+          )}
           <VisualizationProvider data-test="visualization-provider" controller={controller}>
             <TopologyContent
               containerRef={containerRef}
@@ -259,11 +289,11 @@ export const NetflowTopology: React.FC<NetflowTopologyProps> = React.forwardRef(
               isDark={props.isDark}
               resetDefaultFilters={props.resetDefaultFilters}
               clearFilters={props.clearFilters}
-              resourceStats={health}
+              resourceStats={memoizedHealth}
             />
           </VisualizationProvider>
-        );
-      }
+        </div>
+      );
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [controller, props, displayedMetrics]);
 
