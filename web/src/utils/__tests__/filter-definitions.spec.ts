@@ -1,5 +1,5 @@
 import { ColumnConfigSampleDefs } from '../../components/__tests-data__/columns';
-import { FilterDefinitionSample } from '../../components/__tests-data__/filters';
+import { FilterConfigSampleDefs, FilterDefinitionSample } from '../../components/__tests-data__/filters';
 import { Config, Feature } from '../../model/config';
 import { checkFilterAvailable, findFilter } from '../filter-definitions';
 
@@ -142,7 +142,12 @@ describe('Check availability for prometheus only', () => {
 
 describe('Check availability against features', () => {
   const getConfig = (feats: Feature[]): Config => {
-    return { features: feats, dataSources: ['loki'], columns: ColumnConfigSampleDefs } as Config;
+    return {
+      features: feats,
+      dataSources: ['loki'],
+      columns: ColumnConfigSampleDefs,
+      filters: FilterConfigSampleDefs
+    } as Config;
   };
 
   it('with standard filters', () => {
@@ -163,15 +168,25 @@ describe('Check availability against features', () => {
   });
 
   it('with AZ filters', () => {
-    const azFilter = findFilter(FilterDefinitionSample, 'src_zone')!;
+    const srcZoneFilter = findFilter(FilterDefinitionSample, 'src_zone')!;
+    const zoneFilter = findFilter(FilterDefinitionSample, 'zone')!;
 
-    let available = checkFilterAvailable(azFilter, getConfig([]), 'auto');
+    // Test that zone filters are unavailable without zones feature
+    let available = checkFilterAvailable(srcZoneFilter, getConfig([]), 'auto');
+    expect(available).toBe(false);
+    available = checkFilterAvailable(zoneFilter, getConfig([]), 'auto');
     expect(available).toBe(false);
 
-    available = checkFilterAvailable(azFilter, getConfig(['dnsTracking']), 'auto');
+    // Test that zone filters are unavailable with other features
+    available = checkFilterAvailable(srcZoneFilter, getConfig(['dnsTracking']), 'auto');
+    expect(available).toBe(false);
+    available = checkFilterAvailable(zoneFilter, getConfig(['dnsTracking']), 'auto');
     expect(available).toBe(false);
 
-    available = checkFilterAvailable(azFilter, getConfig(['zones']), 'auto');
+    // Test that zone filters are available with zones feature
+    available = checkFilterAvailable(srcZoneFilter, getConfig(['zones']), 'auto');
+    expect(available).toBe(true);
+    available = checkFilterAvailable(zoneFilter, getConfig(['zones']), 'auto');
     expect(available).toBe(true);
   });
 
