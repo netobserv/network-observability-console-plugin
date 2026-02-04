@@ -14,7 +14,7 @@ import {
   getCompareText
 } from '../../../model/filters';
 import { getHTTPErrorDetails } from '../../../utils/errors';
-import { matcher } from '../../../utils/filter-definitions';
+import { matcher, undefinedValue } from '../../../utils/filter-definitions';
 import { Indicator, setEndpointFilterDefinition } from '../../../utils/filters-helper';
 import { useOutsideClickEvent } from '../../../utils/outside-hook';
 import { Direction } from '../filters-toolbar';
@@ -139,7 +139,9 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
   const addFilterFromSuggestions = React.useCallback(
     () => {
       // Use createFilterValue to get proper display text via findOption
-      const filterValue = createFilterValue(filter, value);
+      // Convert empty strings to undefinedValue for proper "n/a" display
+      const valueToUse = value === '' ? undefinedValue : value;
+      const filterValue = createFilterValue(filter, valueToUse);
       addFilter(filterValue);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
