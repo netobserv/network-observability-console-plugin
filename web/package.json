@@ -28,7 +28,7 @@
     "fix-imports": "eslint --no-eslintrc --no-inline-config --parser '@typescript-eslint/parser' --plugin 'unused-imports' --plugin 'react-hooks' --rule 'unused-imports/no-unused-imports:error' --fix \"./src/**/*.{ts,tsx}\""
   },
   "devDependencies": {
-    "@babel/core": "^7.17.12",
+    "@babel/core": "^7.29.0",
     "@babel/plugin-transform-typescript": "^7.17.12",
     "@babel/preset-env": "^7.17.12",
     "@babel/preset-react": "^7.17.12",
