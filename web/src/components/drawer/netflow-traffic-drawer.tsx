@@ -25,6 +25,7 @@ import { OverviewPanel } from '../../utils/overview-panels';
 import { TruncateLength } from '../dropdowns/truncate-dropdown';
 import { ErrorComponent, Size } from '../messages/error';
 import { ErrorBanner } from '../messages/error-banner';
+import { WarningBanner } from '../messages/warning-banner';
 import { ViewId } from '../netflow-traffic';
 import FlowsQuerySummary from '../query-summary/flows-query-summary';
 import MetricsQuerySummary from '../query-summary/metrics-query-summary';
@@ -86,6 +87,7 @@ export interface NetflowTrafficDrawerProps {
   searchHandle: SearchHandle | null;
   searchEvent?: SearchEvent;
   scopes: ScopeConfigDef[];
+  scopeWarning?: string;
   isShowQuerySummary: boolean;
   lastRefresh: Date | undefined;
   range: TimeRange | number;
@@ -238,13 +240,13 @@ export const NetflowTrafficDrawer: React.FC<NetflowTrafficDrawerProps> = React.f
 
       // For overview and topology tabs: show error banner and partial metrics when possible
       // For table tab or config errors: show full error page
-      // For topology: if main metrics are missing, show full error page
+      // For topology: if main metrics are missing or scope warning is not set, show full error page
       const hasTopologyMetrics = props.selectedViewId === 'topology' && (getTopologyMetrics()?.length || 0) > 0;
       const showFullError =
         props.error &&
         (props.currentState.includes('configLoadError') ||
           props.selectedViewId === 'table' ||
-          (props.selectedViewId === 'topology' && !hasTopologyMetrics));
+          (props.selectedViewId === 'topology' && !hasTopologyMetrics && !props.scopeWarning));
 
       if (showFullError) {
         content = (
@@ -308,6 +310,7 @@ export const NetflowTrafficDrawer: React.FC<NetflowTrafficDrawerProps> = React.f
             content = (
               <>
                 {props.metrics.errors.length > 0 && <ErrorBanner errors={props.metrics.errors} />}
+                {props.scopeWarning && <WarningBanner warning={props.scopeWarning} />}
                 <NetflowTopology
                   ref={topologyRef}
                   loading={props.loading}

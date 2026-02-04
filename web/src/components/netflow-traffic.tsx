@@ -465,19 +465,46 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
             const errStr = getHTTPErrorDetails(err, true);
             const promErrStr = getPromError(errStr);
 
-            // check if it's a prom missing label error and remove filters
-            // when the prom error is different to the new one
-            if (isPromMissingLabelError(errStr) && promErrStr !== model.chipsPopoverMessage) {
+            // check if it's a prom missing label error
+            if (isPromMissingLabelError(errStr)) {
+              // First, check if scope needs to be changed (topology only)
+              const currentScope = model.config.scopes.find(sc => sc.id === model.metricScope);
+              if (model.selectedViewId === 'topology' && currentScope?.labels) {
+                const missingLabels = currentScope.labels.some(label => errStr.includes(label));
+                if (missingLabels) {
+                  // Find first available scope that doesn't have missing labels
+                  const fallbackScope = getAvailableScopes().find(sc => {
+                    return !sc.labels || !sc.labels.some(label => errStr.includes(label));
+                  });
+                  if (fallbackScope && fallbackScope.id !== currentScope.id) {
+                    // Set the fallback scope - this will trigger a new query
+                    // Filters might be available on the new scope, so don't disable them yet
+                    model.setMetricScope(fallbackScope.id);
+                    model.setScopeWarning(
+                      t('Scope "{{currentScope}}" requires missing labels. Switched to "{{fallbackScope}}".', {
+                        currentScope: currentScope.name,
+                        fallbackScope: fallbackScope.name
+                      })
+                    );
+                    return;
+                  }
+                }
+              }
+
+              // If scope didn't change (or not in topology), check and disable filters with missing labels
               let filtersDisabled = false;
               model.filters.list.forEach(filter => {
                 const fieldName = model.config.columns.find(col => col.filter === filter.def.id)?.field;
                 if (!fieldName || errStr.includes(fieldName)) {
-                  filtersDisabled = true;
                   filter.values.forEach(fv => {
-                    fv.disabled = true;
+                    if (!fv.disabled) {
+                      fv.disabled = true;
+                      filtersDisabled = true;
+                    }
                   });
                 }
               });
+
               if (filtersDisabled) {
                 // update filters to retrigger query without showing the error
                 updateTableFilters({ ...model.filters });

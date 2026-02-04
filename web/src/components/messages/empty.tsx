@@ -26,9 +26,10 @@ export interface EmptyProps {
   showDetails: boolean;
   resetDefaultFilters?: (c?: Config) => void;
   clearFilters?: () => void;
+  isTopology?: boolean;
 }
 
-export const Empty: React.FC<EmptyProps> = ({ showDetails, resetDefaultFilters, clearFilters }) => {
+export const Empty: React.FC<EmptyProps> = ({ showDetails, resetDefaultFilters, clearFilters, isTopology }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
   const [namespacesLoading, setNamespacesLoading] = React.useState(showDetails);
   const [status, setStatus] = React.useState<Status | undefined>();
@@ -79,7 +80,9 @@ export const Empty: React.FC<EmptyProps> = ({ showDetails, resetDefaultFilters, 
         <EmptyStateBody className="empty-body">
           {statusError === undefined && (
             <Text className="netobserv-empty-message" component={TextVariants.p}>
-              {t('Clear or reset filters and try again.')}
+              {isTopology
+                ? t('Clear or reset filters and try again. You may also try changing the scope.')
+                : t('Clear or reset filters and try again.')}
             </Text>
           )}
           {statusError !== undefined && (
