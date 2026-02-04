@@ -64,14 +64,56 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
 
   const [searchInputValue, setSearchInputValue] = React.useState('');
 
-  const [direction, setDirection] = React.useState<Direction>();
-  const [filter, setFilter] = React.useState<FilterDefinition | null>(
-    findFilter(filterDefinitions, 'src_namespace') || filterDefinitions.length ? filterDefinitions[0] : null
+  const getDefaultFilter = React.useCallback((defs: FilterDefinition[]): FilterDefinition => {
+    // Parent guarantees non-empty definitions
+    return findFilter(defs, 'src_namespace') || defs[0];
+  }, []);
+
+  const getDefaultDirection = React.useCallback((filter: FilterDefinition): Direction => {
+    // Set direction based on filter's category or id prefix
+    if (filter.category === 'source' || filter.id.startsWith('src_')) {
+      return 'source';
+    } else if (filter.category === 'destination' || filter.id.startsWith('dst_')) {
+      return 'destination';
+    }
+    return undefined;
+  }, []);
+
+  const [filter, setFilter] = React.useState<FilterDefinition>(() => getDefaultFilter(filterDefinitions));
+  const [direction, setDirection] = React.useState<Direction>(() =>
+    getDefaultDirection(getDefaultFilter(filterDefinitions))
   );
   const [compare, setCompare] = React.useState<FilterCompare>(FilterCompare.equal);
   const [value, setValue] = React.useState<string>('');
 
   const [showFilters, setShowFilters] = useLocalStorage<boolean>(localStorageShowFiltersKey, true);
+
+  // Safe filter setter that validates the filter exists in filterDefinitions
+  const setSafeFilter = React.useCallback(
+    (f: FilterDefinition | null | undefined) => {
+      if (!f) {
+        // If null/undefined, use default filter
+        setFilter(getDefaultFilter(filterDefinitions));
+      } else if (filterDefinitions.find(fd => fd.id === f.id)) {
+        // If filter exists in definitions, use it
+        setFilter(f);
+      } else {
+        // If filter doesn't exist, fallback to default
+        setFilter(getDefaultFilter(filterDefinitions));
+      }
+    },
+    [filterDefinitions, getDefaultFilter]
+  );
+
+  // Update filter if filterDefinitions changes and current filter is no longer valid
+  React.useEffect(() => {
+    if (!filterDefinitions.find(fd => fd.id === filter.id)) {
+      const newFilter = getDefaultFilter(filterDefinitions);
+      setFilter(newFilter);
+      // Sync direction with the new filter
+      setDirection(getDefaultDirection(newFilter));
+    }
+  }, [filterDefinitions, filter, getDefaultFilter, getDefaultDirection]);
 
   // reset and delay message state to trigger tooltip properly
   const setMessageWithDelay = React.useCallback(
@@ -93,9 +135,6 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
   }, []);
 
   const getFilterToolbar = React.useCallback(() => {
-    if (!filter) {
-      return <></>;
-    }
     return (
       <ToolbarItem className="flex-start">
         <Tooltip
@@ -118,7 +157,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
             value={value}
             setValue={setValue}
             setCompare={setCompare}
-            setFilter={setFilter}
+            setFilter={setSafeFilter}
             setDirection={setDirection}
             setIndicator={setIndicator}
             searchInputValue={searchInputValue}
@@ -141,6 +180,7 @@ export const FiltersToolbar: React.FC<FiltersToolbarProps> = ({
     searchInputValue,
     setFilters,
     setMessageWithDelay,
+    setSafeFilter,
     value
   ]);
 
