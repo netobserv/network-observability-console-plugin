@@ -7,30 +7,20 @@ import { formatActiveSince } from '../../utils/datetime';
 import { valueFormat } from '../../utils/format';
 import { HealthColorSquare } from './health-color-square';
 import {
-  AlertWithRuleName,
-  getAlertFilteredLabels,
-  getAlertLink,
-  getAllAlerts,
-  getRecordingRuleMetricLink,
+  getAllHealthItems,
+  getItemFilteredLabels,
+  getLinks,
   getSeverityColor,
-  getTrafficLink,
+  HealthItem,
   HealthStat,
-  parseRecordingRuleDescription,
-  RecordingRuleItem,
-  RecordingRulesByResource
+  HealthSuperKind
 } from './health-helper';
 import './rule-details.css';
 
 export interface RuleDetailsProps {
-  kind: string;
-  alertInfo?: HealthStat;
-  recordingRuleInfo?: RecordingRulesByResource;
+  kind: HealthSuperKind;
+  resourceHealth: HealthStat;
 }
-
-type RuleItem = {
-  alert?: AlertWithRuleName;
-  recordingRule?: RecordingRuleItem;
-};
 
 // Helper: Get direction from recording rule name
 const getDirection = (ruleName?: string): 'src' | 'dst' | undefined => {
@@ -54,81 +44,42 @@ const VerticalField: React.FC<{ label: string; children: React.ReactNode }> = ({
 
 // Helper: Render table row (used for Global table view)
 const RuleTableRow: React.FC<{
-  item: RuleItem;
+  item: HealthItem;
   resourceName: string;
-  kind: string;
+  kind: HealthSuperKind;
   t: TFunction;
 }> = ({ item, resourceName, kind, t }) => {
-  const isAlert = item.alert !== undefined;
-  const alert = item.alert;
-  const rule = item.recordingRule;
-
-  const summary = alert ? alert.annotations['summary'] : rule?.summary || rule?.template || '';
-  const mode = isAlert ? t('alert') : t('recording');
-  const state = alert?.state || '';
-  const severity = alert?.labels.severity || rule?.severity || '';
-  const activeAt = alert?.activeAt;
-  const value = alert ? (alert.value as number) : rule?.value || 0;
-  const unit = alert ? alert.metadata.unit : '%';
-  const threshold = alert ? alert.metadata.threshold : rule?.threshold;
-  const description = React.useMemo(
-    () =>
-      alert
-        ? alert.annotations['description']
-        : rule?.description
-        ? parseRecordingRuleDescription(rule.description, rule, resourceName)
-        : '',
-    [alert, rule, resourceName]
-  );
-
-  const labels = React.useMemo(() => (alert ? getAlertFilteredLabels(alert, resourceName) : []), [alert, resourceName]);
-  const links = React.useMemo(
-    () =>
-      isAlert && alert
-        ? [
-            { name: t('Navigate to alert details'), url: getAlertLink(alert) },
-            { name: t('Navigate to network traffic'), url: getTrafficLink(kind, resourceName, alert) },
-            ...alert.metadata.links
-          ]
-        : rule
-        ? [
-            { name: t('View metric in query browser'), url: getRecordingRuleMetricLink(rule, resourceName) },
-            ...(rule.links || [])
-          ]
-        : [],
-    [isAlert, alert, rule, kind, resourceName, t]
-  );
-
-  const direction = React.useMemo(() => getDirection(rule?.name), [rule]);
-
-  if (!alert && !rule) return null;
+  const isAlert = item.state !== 'recording';
+  const labels = React.useMemo(() => getItemFilteredLabels(item, resourceName), [item, resourceName]);
+  const links = React.useMemo(() => getLinks(t, kind, item, resourceName), [item, kind, resourceName, t]);
+  const direction = React.useMemo(() => getDirection(item.ruleName), [item]);
 
   return (
     <Tr>
       <Td dataLabel={t('Summary')}>
         <Flex gap={{ default: 'gapXs' }} alignItems={{ default: 'alignItemsCenter' }} flexWrap={{ default: 'nowrap' }}>
           <FlexItem>
-            <HealthColorSquare alert={alert} recordingRule={rule} />
+            <HealthColorSquare item={item} />
           </FlexItem>
           <FlexItem>
-            {description && !isAlert ? (
-              <Tooltip content={description}>
-                <span>{summary}</span>
+            {item.description ? (
+              <Tooltip content={item.description}>
+                <span>{item.summary}</span>
               </Tooltip>
             ) : (
-              <span>{summary}</span>
+              <span>{item.summary}</span>
             )}
           </FlexItem>
         </Flex>
       </Td>
-      <Td dataLabel={t('Mode')}>{mode}</Td>
-      <Td dataLabel={t('State')}>{state}</Td>
+      <Td dataLabel={t('Mode')}>{isAlert ? t('alert') : t('recording')}</Td>
+      <Td dataLabel={t('State')}>{isAlert ? item.state : ''}</Td>
       <Td dataLabel={t('Severity')}>
-        <Label isCompact color={getSeverityColor(severity)}>
-          {severity}
+        <Label isCompact color={getSeverityColor(item.severity)}>
+          {item.severity}
         </Label>
       </Td>
-      <Td dataLabel={t('Active since')}>{activeAt ? formatActiveSince(t, activeAt) : ''}</Td>
+      <Td dataLabel={t('Active since')}>{item.activeAt ? formatActiveSince(t, item.activeAt) : ''}</Td>
       <Td dataLabel={t('Labels')}>
         {labels.length === 0
           ? ''
@@ -139,11 +90,11 @@ const RuleTableRow: React.FC<{
             ))}
       </Td>
       <Td dataLabel={t('Value')} className="no-wrap">
-        {valueFormat(value, 2)} {unit}
+        {valueFormat(item.value, 2)} {item.metadata.unit}
       </Td>
-      <Td dataLabel={t('Threshold')}>{threshold ? `${threshold} ${unit}` : ''}</Td>
+      <Td dataLabel={t('Threshold')}>{item.threshold ? `${item.threshold} ${item.metadata.unit}` : ''}</Td>
       <Td dataLabel={t('Direction')}>{direction || ''}</Td>
-      <Td dataLabel={t('Description')}>{description}</Td>
+      <Td dataLabel={t('Description')}>{item.description}</Td>
       <Td noPadding>
         <ActionsColumn
           isDisabled={links.length === 0}
@@ -156,54 +107,15 @@ const RuleTableRow: React.FC<{
 
 // Helper: Render card (used for Node/Namespace drawer view)
 const RuleCard: React.FC<{
-  item: RuleItem;
+  item: HealthItem;
   resourceName: string;
-  kind: string;
+  kind: HealthSuperKind;
   t: TFunction;
 }> = ({ item, resourceName, kind, t }) => {
-  const isAlert = item.alert !== undefined;
-  const alert = item.alert;
-  const rule = item.recordingRule;
-
-  const summary = alert ? alert.annotations['summary'] : rule?.summary || rule?.template || '';
-  const mode = isAlert ? t('alert') : t('recording');
-  const state = alert?.state;
-  const severity = alert?.labels.severity || rule?.severity || '';
-  const activeAt = alert?.activeAt;
-  const value = alert ? (alert.value as number) : rule?.value || 0;
-  const unit = alert ? alert.metadata.unit : '%';
-  const threshold = alert ? alert.metadata.threshold : rule?.threshold;
-  const description = React.useMemo(
-    () =>
-      alert
-        ? alert.annotations['description']
-        : rule?.description
-        ? parseRecordingRuleDescription(rule.description, rule, resourceName)
-        : '',
-    [alert, rule, resourceName]
-  );
-
-  const labels = React.useMemo(() => (alert ? getAlertFilteredLabels(alert, resourceName) : []), [alert, resourceName]);
-  const links = React.useMemo(
-    () =>
-      isAlert && alert
-        ? [
-            { name: t('Navigate to alert details'), url: getAlertLink(alert) },
-            { name: t('Navigate to network traffic'), url: getTrafficLink(kind, resourceName, alert) },
-            ...alert.metadata.links
-          ]
-        : rule
-        ? [
-            { name: t('View metric in query browser'), url: getRecordingRuleMetricLink(rule, resourceName) },
-            ...(rule.links || [])
-          ]
-        : [],
-    [isAlert, alert, rule, kind, resourceName, t]
-  );
-
-  const direction = React.useMemo(() => getDirection(rule?.name), [rule]);
-
-  if (!alert && !rule) return null;
+  const isAlert = item.state !== 'recording';
+  const labels = React.useMemo(() => getItemFilteredLabels(item, resourceName), [item, resourceName]);
+  const links = React.useMemo(() => getLinks(t, kind, item, resourceName), [item, kind, resourceName, t]);
+  const direction = React.useMemo(() => getDirection(item.ruleName), [item]);
 
   return (
     <div className="rule-details-row">
@@ -215,14 +127,14 @@ const RuleCard: React.FC<{
         >
           <Flex gap={{ default: 'gapXs' }} alignItems={{ default: 'alignItemsFlexStart' }} flex={{ default: 'flex_1' }}>
             <FlexItem>
-              <HealthColorSquare alert={alert} recordingRule={rule} />
+              <HealthColorSquare item={item} />
             </FlexItem>
             <FlexItem flex={{ default: 'flex_1' }}>
               <Flex gap={{ default: 'gapXs' }} alignItems={{ default: 'alignItemsCenter' }}>
-                <FlexItem>{summary}</FlexItem>
-                {description && (
+                <FlexItem>{item.summary}</FlexItem>
+                {item.description && (
                   <FlexItem>
-                    <Tooltip content={description}>
+                    <Tooltip content={item.description}>
                       <InfoCircleIcon style={{ color: 'var(--pf-v5-global--Color--200)' }} />
                     </Tooltip>
                   </FlexItem>
@@ -240,22 +152,24 @@ const RuleCard: React.FC<{
 
         {/* Mode, State, Severity, Value, Threshold, Active since, Direction row */}
         <Flex gap={{ default: 'gapSm' }}>
-          <VerticalField label={t('Mode')}>{mode}</VerticalField>
-          {state && <VerticalField label={t('State')}>{state}</VerticalField>}
+          <VerticalField label={t('Mode')}>{isAlert ? t('alert') : t('recording')}</VerticalField>
+          {isAlert && <VerticalField label={t('State')}>{item.state}</VerticalField>}
           <VerticalField label={t('Severity')}>
-            <Label isCompact color={getSeverityColor(severity)}>
-              {severity}
+            <Label isCompact color={getSeverityColor(item.severity)}>
+              {item.severity}
             </Label>
           </VerticalField>
           <VerticalField label={t('Value')}>
-            {valueFormat(value, 2)} {unit}
+            {valueFormat(item.value, 2)} {item.metadata.unit}
           </VerticalField>
-          {threshold && (
+          {item.threshold && (
             <VerticalField label={t('Threshold')}>
-              {threshold} {unit}
+              {item.threshold} {item.metadata.unit}
             </VerticalField>
           )}
-          {activeAt && <VerticalField label={t('Active since')}>{formatActiveSince(t, activeAt)}</VerticalField>}
+          {item.activeAt && (
+            <VerticalField label={t('Active since')}>{formatActiveSince(t, item.activeAt)}</VerticalField>
+          )}
           {direction && <VerticalField label={t('Direction')}>{direction}</VerticalField>}
         </Flex>
 
@@ -274,39 +188,19 @@ const RuleCard: React.FC<{
   );
 };
 
-export const RuleDetails: React.FC<RuleDetailsProps> = ({ kind, alertInfo, recordingRuleInfo }) => {
+export const RuleDetails: React.FC<RuleDetailsProps> = ({ kind, resourceHealth }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
-  const resourceName = alertInfo?.name || recordingRuleInfo?.name || 'Global';
+  const resourceName = resourceHealth.name || 'Global';
   const isGlobal = kind === 'Global';
-
-  // Combine alerts and recording rules into a unified array
-  const unifiedItems = React.useMemo(() => {
-    const items: RuleItem[] = [];
-
-    if (alertInfo) {
-      const allAlerts = getAllAlerts(alertInfo);
-      allAlerts.forEach(alert => {
-        items.push({ alert });
-      });
-    }
-
-    if (recordingRuleInfo) {
-      const allRules = [...recordingRuleInfo.critical, ...recordingRuleInfo.warning, ...recordingRuleInfo.other];
-      allRules.forEach(rule => {
-        items.push({ recordingRule: rule });
-      });
-    }
-
-    return items;
-  }, [alertInfo, recordingRuleInfo]);
+  const allItems = getAllHealthItems(resourceHealth);
 
   // Global view: render table
   if (isGlobal) {
     return (
       <Table
         className="rule-details"
-        data-test-rows-count={unifiedItems.length}
+        data-test-rows-count={allItems.length}
         aria-label="Rule details"
         variant="compact"
       >
@@ -324,7 +218,7 @@ export const RuleDetails: React.FC<RuleDetailsProps> = ({ kind, alertInfo, recor
           <Th screenReaderText="Links" />
         </Thead>
         <Tbody>
-          {unifiedItems.map((item, i) => (
+          {allItems.map((item, i) => (
             <RuleTableRow key={`rule-row-${i}`} item={item} resourceName={resourceName} kind={kind} t={t} />
           ))}
         </Tbody>
@@ -335,7 +229,7 @@ export const RuleDetails: React.FC<RuleDetailsProps> = ({ kind, alertInfo, recor
   // Node/Namespace view: render cards
   return (
     <Flex direction={{ default: 'column' }} gap={{ default: 'gapMd' }}>
-      {unifiedItems.map((item, i) => (
+      {allItems.map((item, i) => (
         <RuleCard key={`rule-card-${i}`} item={item} resourceName={resourceName} kind={kind} t={t} />
       ))}
     </Flex>

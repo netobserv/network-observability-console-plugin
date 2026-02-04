@@ -1,0 +1,94 @@
+import { AlertStates, PrometheusResponse } from '@openshift-console/dynamic-plugin-sdk';
+import * as _ from 'lodash';
+import { murmur3 } from 'murmurhash-js';
+import { SilenceMatcher } from '../../api/alert';
+import { getAlerts, getRecordingRules, getSilencedAlerts, queryPrometheusMetric } from '../../api/routes';
+import { RecordingAnnotations } from '../../model/config';
+import { buildStats, isSilenced, RecordingRuleMetric, rulesToHealthItems } from './health-helper';
+
+export const fetchNetworkHealth = (recordingAnnotations: RecordingAnnotations) => {
+  // matching netobserv="true" catches all alerts designed for netobserv (not necessarily owned by it)
+  const alertsP = getAlerts('netobserv="true"').then(res => {
+    return res.data.groups.flatMap(group => {
+      // Inject rule id, for links to the alerting page
+      // Warning: ID generation may in theory differ with openshift version (in practice, this has been stable across versions since 4.12 at least)
+      // See https://github.com/openshift/console/blob/29374f38308c4ebe9ea461a5d69eb3e4956c7086/frontend/public/components/monitoring/utils.ts#L47-L56
+      group.rules.forEach(r => {
+        const key = [
+          group.file,
+          group.name,
+          r.name,
+          r.duration,
+          r.query,
+          ..._.map(r.labels, (k, v) => `${k}=${v}`)
+        ].join(',');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        r.id = String(murmur3(key, 'monitoring-salt' as any));
+      });
+      return group.rules;
+    });
+  });
+
+  const silencedP = getSilencedAlerts('netobserv=true')
+    .then(res => {
+      return res.filter(a => a.status.state == 'active').map(a => a.matchers);
+    })
+    .catch(err => {
+      console.log('Could not get silenced alerts:', err);
+      // Showing all alerts since we could not get silenced alerts list
+      return [] as SilenceMatcher[][];
+    });
+
+  // Fetch recording rules and their current values
+  const recordingP = getRecordingRules('netobserv="true"').then(res => {
+    const recordingRules = res.data.groups.flatMap(group => group.rules);
+
+    // For each recording rule, query its current metric values
+    const queries = recordingRules
+      .filter(rule => !!rule.labels?.template)
+      .map(rule => {
+        return queryPrometheusMetric(rule.name)
+          .then((metricRes: PrometheusResponse): RecordingRuleMetric | undefined => {
+            // Store the raw metric results with the rule metadata
+            if (metricRes.data && metricRes.data.result) {
+              return {
+                name: rule.name,
+                values: metricRes.data.result
+                  .filter(item => item.value && item.value.length > 1)
+                  .map(item => ({
+                    labels: item.metric,
+                    value: parseFloat(item.value![1])
+                  }))
+              };
+            }
+            return undefined;
+          })
+          .catch(() => {
+            return undefined;
+          });
+      });
+
+    return Promise.all(queries).then(metrics => {
+      return metrics.filter((m?: RecordingRuleMetric): m is RecordingRuleMetric => !!m);
+    });
+  });
+
+  return Promise.all([alertsP, silencedP, recordingP]).then(([rawRules, silenced, recording]) => {
+    const alertRules = rawRules.map(r => {
+      const alerts = r.alerts.map(a => {
+        let state = a.state;
+        const labels = { ...r.labels, ...a.labels };
+        if (silenced.some(s => isSilenced(s, labels))) {
+          state = 'silenced' as AlertStates;
+        }
+        return { ...a, state: state };
+      });
+      return { ...r, alerts: alerts };
+    });
+    const healthItems = rulesToHealthItems(alertRules, recordingAnnotations || {}, recording);
+    return {
+      stats: buildStats(healthItems),
+      alertRules: alertRules
+    };
+  });
+};

@@ -13,30 +13,24 @@ import { CheckCircleIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { HealthCard } from './health-card';
-import { getAllAlerts, HealthStat, RecordingRulesByResource } from './health-helper';
+import { getAllHealthItems, HealthStat } from './health-helper';
 import { RuleDetails } from './rule-details';
 
 export interface HealthGlobalProps {
   info: HealthStat;
-  recordingRules?: RecordingRulesByResource;
   isDark: boolean;
 }
 
-export const HealthGlobal: React.FC<HealthGlobalProps> = ({ info, recordingRules, isDark }) => {
+export const HealthGlobal: React.FC<HealthGlobalProps> = ({ info, isDark }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
-  const allAlerts = getAllAlerts(info);
-  const hasRecordingRules =
-    recordingRules &&
-    (recordingRules.critical.length > 0 || recordingRules.warning.length > 0 || recordingRules.other.length > 0);
-
-  const hasAnyViolations = allAlerts.length > 0 || hasRecordingRules;
+  const all = getAllHealthItems(info);
 
   return (
     <>
       <TextContent>
         <Text component={TextVariants.h3}>{t('Global rule violations')}</Text>
       </TextContent>
-      {!hasAnyViolations ? (
+      {all.length === 0 ? (
         <Bullseye>
           <EmptyState>
             <EmptyStateIcon icon={CheckCircleIcon} />
@@ -47,20 +41,11 @@ export const HealthGlobal: React.FC<HealthGlobalProps> = ({ info, recordingRules
         <Grid hasGutter>
           {/* Unified card row */}
           <GridItem span={12}>
-            <HealthCard
-              isDark={isDark}
-              alertInfo={allAlerts.length > 0 ? info : undefined}
-              recordingInfo={hasRecordingRules ? recordingRules : undefined}
-              isSelected={false}
-            />
+            <HealthCard isDark={isDark} resourceHealth={info} isSelected={false} />
           </GridItem>
           {/* Table row */}
           <GridItem span={12}>
-            <RuleDetails
-              kind={'Global'}
-              alertInfo={allAlerts.length > 0 ? info : undefined}
-              recordingRuleInfo={hasRecordingRules ? recordingRules : undefined}
-            />
+            <RuleDetails kind={'Global'} resourceHealth={info} />
           </GridItem>
         </Grid>
       )}

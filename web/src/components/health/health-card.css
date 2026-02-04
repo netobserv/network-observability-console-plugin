@@ -1,0 +1,72 @@
+.health-card .icon.critical {
+    color: #b1380b;
+}
+
+.health-card .dark .icon.critical {
+    color: #f0561d;
+}
+
+.health-card .icon.warning {
+    color: #dca614;
+}
+
+.health-card .dark .icon.warning {
+    color: #ffcc17;
+}
+
+.health-card .icon.minor,
+.health-card .dark .icon.minor {
+    color: #9ad8d8;
+} */
+
+.health-card {
+    border-top: 0.2rem solid;
+    border-top-color: #6a6e73;
+}
+
+.health-card.dark {
+    border-top-color: #868789;
+}
+
+.health-card.critical {
+    border-top-color: #b1380b;
+}
+
+.health-card.dark.critical {
+    border-top-color: #f0561d;
+}
+
+.health-card.warning {
+    border-top-color: #dca614;
+}
+
+.health-card.dark.warning {
+    border-top-color: #ffcc17;
+}
+
+.health-card.minor,
+.health-card.dark.minor {
+    border-top-color: #9ad8d8;
+}
+
+.health-card .card-header {
+    min-height: 5rem;
+}
+
+.health-card .card-header-hidden {
+    min-height: 0;
+    height: 0;
+    padding: 0.5rem !important;
+    overflow: hidden;
+}
+
+.health-card .card-header .icon {
+    width: 1.9rem;
+    height: 1.9rem;
+}
+
+.health-card .card-body-icon .icon {
+    width: 1.9rem;
+    height: 1.9rem;
+    margin-right: 1rem;
+}

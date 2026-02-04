@@ -17,8 +17,8 @@ COPY --chown=node web web
 COPY mocks mocks
 
 WORKDIR /opt/app-root/web
-RUN npm run build$BUILDSCRIPT
-RUN npm run build:static
+RUN TRANSPILE_ONLY=true npm run build$BUILDSCRIPT
+RUN TRANSPILE_ONLY=true npm run build:static
 
 FROM --platform=$BUILDPLATFORM docker.io/library/golang:1.25 as go-builder
 

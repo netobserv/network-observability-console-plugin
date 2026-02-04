@@ -6,10 +6,12 @@ import { TopologyMetrics } from '../../../../api/loki';
 import { FilterDefinitionSample } from '../../../../components/__tests-data__/filters';
 import { ScopeDefSample } from '../../../../components/__tests-data__/scopes';
 import { waitForRender } from '../../../../components/__tests__/common.spec';
+import { Config } from '../../../../model/config';
 import { Filters } from '../../../../model/filters';
 import { FlowScope, MetricType, StatFunction } from '../../../../model/flow-query';
 import { DefaultOptions, LayoutName } from '../../../../model/topology';
 import { defaultTimeRange } from '../../../../utils/router';
+import { buildStats } from '../../../health/health-helper';
 import { TopologyContent } from '../2d/topology-content';
 import { NetflowTopology } from '../netflow-topology';
 import { dataSample } from '../__tests-data__/metrics';
@@ -40,7 +42,9 @@ describe('<NetflowTopology />', () => {
     searchHandle: null,
     searchEvent: undefined,
     scopes: ScopeDefSample,
-    expectedNodes: []
+    expectedNodes: [],
+    resourceStats: buildStats([]),
+    config: {} as Config
   };
 
   it('should render component', async () => {

@@ -432,7 +432,6 @@ export const SummaryPanelContent: React.FC<SummaryPanelContentProps> = ({
       {timeContent()}
 
       {cardinalityContent()}
-      {/*TODO: NETOBSERV-225 for extra stats on query*/}
 
       {configContent()}
 
