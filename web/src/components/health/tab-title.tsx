@@ -7,7 +7,7 @@ import {
   InfoAltIcon
 } from '@patternfly/react-icons';
 import * as React from 'react';
-import { HealthStat } from './health-helper';
+import { getResourceSeverity, HealthStat } from './health-helper';
 
 export interface HealthTabTitleProps {
   title: string;
@@ -15,18 +15,14 @@ export interface HealthTabTitleProps {
 }
 
 export const HealthTabTitle: React.FC<HealthTabTitleProps> = ({ stats, title }) => {
-  const icon = stats.some(s => s.critical.firing.length > 0) ? (
+  const severities = stats.map(getResourceSeverity);
+  const icon = severities.includes('critical') ? (
     <ExclamationCircleIcon className="icon critical" />
-  ) : stats.some(s => s.warning.firing.length > 0) ? (
+  ) : severities.includes('warning') ? (
     <ExclamationTriangleIcon className="icon warning" />
-  ) : stats.some(s => s.other.firing.length > 0) ? (
+  ) : severities.includes('info') ? (
     <BellIcon className="icon minor" />
-  ) : stats.some(s => s.critical.pending.length > 0) ||
-    stats.some(s => s.warning.pending.length > 0) ||
-    stats.some(s => s.other.pending.length > 0) ||
-    stats.some(s => s.critical.silenced.length > 0) ||
-    stats.some(s => s.warning.silenced.length > 0) ||
-    stats.some(s => s.other.silenced.length > 0) ? (
+  ) : severities.filter(s => s !== undefined).length > 0 ? (
     <InfoAltIcon />
   ) : (
     <CheckCircleIcon className="icon healthy" />

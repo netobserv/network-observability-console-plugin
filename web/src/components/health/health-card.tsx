@@ -14,13 +14,14 @@ import { BellIcon, ExclamationCircleIcon, ExclamationTriangleIcon, InfoAltIcon }
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { valueFormat } from '../../utils/format';
-import { computeUnifiedScore, HealthStat, RecordingRulesByResource } from './health-helper';
+import { computeResourceScore, HealthStat } from './health-helper';
+
+import './health-card.css';
 
 export interface HealthCardProps {
   name?: string;
-  kind?: string;
-  alertInfo?: HealthStat;
-  recordingInfo?: RecordingRulesByResource;
+  k8sKind?: string;
+  resourceHealth: HealthStat;
   isDark: boolean;
   isSelected: boolean;
   onClick?: () => void;
@@ -29,9 +30,8 @@ export interface HealthCardProps {
 
 export const HealthCard: React.FC<HealthCardProps> = ({
   name,
-  kind,
-  alertInfo,
-  recordingInfo,
+  k8sKind,
+  resourceHealth,
   isDark,
   isSelected,
   onClick,
@@ -39,43 +39,43 @@ export const HealthCard: React.FC<HealthCardProps> = ({
 }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
-  const score = React.useMemo(() => computeUnifiedScore(alertInfo, recordingInfo), [alertInfo, recordingInfo]);
+  const score = React.useMemo(() => computeResourceScore(resourceHealth), [resourceHealth]);
 
   // Combine counts from both alerts and recording rules
   const criticalCount = React.useMemo(
     () =>
-      (alertInfo?.critical.firing.length || 0) +
-      (alertInfo?.critical.pending.length || 0) +
-      (recordingInfo?.critical.length || 0),
-    [alertInfo, recordingInfo]
+      (resourceHealth.critical.firing.length || 0) +
+      (resourceHealth.critical.pending.length || 0) +
+      (resourceHealth.critical.recording.length || 0),
+    [resourceHealth]
   );
 
   const warningCount = React.useMemo(
     () =>
-      (alertInfo?.warning.firing.length || 0) +
-      (alertInfo?.warning.pending.length || 0) +
-      (recordingInfo?.warning.length || 0),
-    [alertInfo, recordingInfo]
+      (resourceHealth.warning.firing.length || 0) +
+      (resourceHealth.warning.pending.length || 0) +
+      (resourceHealth.warning.recording.length || 0),
+    [resourceHealth]
   );
 
   const infoCount = React.useMemo(
     () =>
-      (alertInfo?.other.firing.length || 0) +
-      (alertInfo?.other.pending.length || 0) +
-      (recordingInfo?.other.length || 0),
-    [alertInfo, recordingInfo]
+      (resourceHealth.other.firing.length || 0) +
+      (resourceHealth.other.pending.length || 0) +
+      (resourceHealth.other.recording.length || 0),
+    [resourceHealth]
   );
 
   const silencedCount = React.useMemo(
     () =>
-      (alertInfo?.critical.silenced.length || 0) +
-      (alertInfo?.warning.silenced.length || 0) +
-      (alertInfo?.other.silenced.length || 0),
-    [alertInfo]
+      (resourceHealth.critical.silenced.length || 0) +
+      (resourceHealth.warning.silenced.length || 0) +
+      (resourceHealth.other.silenced.length || 0),
+    [resourceHealth]
   );
 
   // Build CSS classes like other health cards
-  const classes = ['card'];
+  const classes = ['health-card'];
   let icon = <InfoAltIcon className="icon" />;
   if (criticalCount > 0) {
     classes.push('critical');
@@ -111,7 +111,7 @@ export const HealthCard: React.FC<HealthCardProps> = ({
             <FlexItem>{icon}</FlexItem>
             <FlexItem>
               <CardTitle>
-                {kind && name ? <ResourceLink inline={true} kind={kind} name={name} /> : t('Global')}
+                {k8sKind && name ? <ResourceLink inline={true} kind={k8sKind} name={name} /> : t('Global')}
               </CardTitle>
             </FlexItem>
           </Flex>

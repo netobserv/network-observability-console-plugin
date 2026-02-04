@@ -16,8 +16,8 @@ COPY --chown=node web web
 COPY mocks mocks
 
 WORKDIR /opt/app-root/web
-RUN FLAVOR=$FLAVOR npm run build$BUILDSCRIPT
-RUN npm run build:static
+RUN TRANSPILE_ONLY=true FLAVOR=$FLAVOR npm run build$BUILDSCRIPT
+RUN TRANSPILE_ONLY=true npm run build:static
 
 FROM scratch
 
