@@ -23,7 +23,7 @@ prometheus:
   url: https://localhost:9090
   timeout: 30s
   skipTls: true
-  tokenPath: /tmp/oc-token.txt
+  # tokenPath: /tmp/oc-token.txt
   alertManager:
     # url: https://localhost:9094
   metrics:
