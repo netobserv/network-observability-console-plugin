@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { MetricError } from '../../api/loki';
 import { isPromError } from '../../utils/errors';
 import './error-banner.css';
-import { ErrorSuggestions } from './error-suggestions';
+import { ErrorSuggestions, hasSuggestionsForError } from './error-suggestions';
 
 const MAX_VISIBLE_METRICS = 3;
 
@@ -95,19 +95,22 @@ export const ErrorBanner: React.FC<ErrorBannerProps> = ({ errors, onDismiss }) =
         >
           {Object.entries(errorGroups).map(([errorMessage, metricTypes]) => {
             const errorKey = errorMessage;
+            const hasSuggestions = hasSuggestionsForError(errorMessage);
             return (
               <div key={errorMessage} className="netobserv-error-banner-item">
                 <div>
                   {renderMetricTypes(metricTypes)} {errorMessage}
                 </div>
-                <ExpandableSection
-                  toggleText={expandedErrors[errorKey] ? t('Hide suggestions') : t('Show suggestions')}
-                  onToggle={() => toggleExpanded(errorKey)}
-                  isExpanded={expandedErrors[errorKey]}
-                  isIndented
-                >
-                  <ErrorSuggestions error={errorMessage} isLokiRelated={isLokiRelated} compact={true} />
-                </ExpandableSection>
+                {hasSuggestions && (
+                  <ExpandableSection
+                    toggleText={expandedErrors[errorKey] ? t('Hide suggestions') : t('Show suggestions')}
+                    onToggle={() => toggleExpanded(errorKey)}
+                    isExpanded={expandedErrors[errorKey]}
+                    isIndented
+                  >
+                    <ErrorSuggestions error={errorMessage} isLokiRelated={isLokiRelated} compact={true} />
+                  </ExpandableSection>
+                )}
               </div>
             );
           })}

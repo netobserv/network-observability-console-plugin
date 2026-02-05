@@ -264,6 +264,7 @@ export const NetflowTrafficDrawer: React.FC<NetflowTrafficDrawerProps> = React.f
             content = (
               <>
                 {props.metrics.errors.length > 0 && <ErrorBanner errors={props.metrics.errors} />}
+                {props.scopeWarning && <WarningBanner warning={props.scopeWarning} />}
                 <NetflowOverview
                   ref={overviewRef}
                   limit={props.limit}

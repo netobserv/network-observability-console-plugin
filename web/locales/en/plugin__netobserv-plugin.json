@@ -455,7 +455,7 @@
   "Kind not managed": "Kind not managed",
   "Query is slow": "Query is slow",
   "User-Defined Networks": "User-Defined Networks",
-  "Scope \"{{currentScope}}\" requires missing labels. Switched to \"{{fallbackScope}}\".": "Scope \"{{currentScope}}\" requires missing labels. Switched to \"{{fallbackScope}}\".",
+  "Scope \"{{currentScope}}\" requires missing labels{{missingLabels}}. Switched to \"{{fallbackScope}}\".": "Scope \"{{currentScope}}\" requires missing labels{{missingLabels}}. Switched to \"{{fallbackScope}}\".",
   "Time range": "Time range",
   "Network Traffic": "Network Traffic",
   "Filtered sum of bytes": "Filtered sum of bytes",

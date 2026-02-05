@@ -514,7 +514,12 @@ export const TopologyContent: React.FC<TopologyContentProps> = ({
   if (_.isEmpty(metrics) && _.isEmpty(droppedMetrics) && _.isEmpty(expectedNodes)) {
     return (
       <Bullseye data-test="no-results-found">
-        <Empty showDetails={true} resetDefaultFilters={resetDefaultFilters} clearFilters={clearFilters} isTopology />
+        <Empty
+          showDetails={true}
+          resetDefaultFilters={resetDefaultFilters}
+          clearFilters={clearFilters}
+          showScopeWarning
+        />
       </Bullseye>
     );
   }

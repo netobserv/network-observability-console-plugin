@@ -48,7 +48,12 @@ func (r *SearchResult) FormatCandidates() string {
 	for _, m := range r.Candidates {
 		names = append(names, strings.TrimPrefix(m, "netobserv_"))
 	}
-	return strings.Join(names, ", ")
+	result := strings.Join(names, ", ")
+	// Append missing labels if available
+	if missingLabels := r.FormatMissingLabels(); missingLabels != "" {
+		result += " (requires: " + missingLabels + ")"
+	}
+	return result
 }
 
 func (r *SearchResult) FormatMissingLabels() string {
@@ -94,6 +99,10 @@ func (i *Inventory) searchWithDir(neededLabels []string, valueField string, dir 
 				return sr
 			}
 			sr.Candidates = append(sr.Candidates, m.Name)
+			// For disabled metrics that match, capture the labels required for this metric
+			if sr.MissingLabels == nil {
+				sr.MissingLabels = neededLabels
+			}
 		} else if m.Enabled && len(missingLabels) > 0 && (sr.MissingLabels == nil || len(missingLabels) < len(sr.MissingLabels)) {
 			// Keep smaller possible set of missing labels
 			sr.MissingLabels = missingLabels
