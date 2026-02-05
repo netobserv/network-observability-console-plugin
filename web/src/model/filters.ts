@@ -2,6 +2,7 @@ import _ from 'lodash';
 import { TFunction } from 'react-i18next';
 import { isEqual } from '../utils/base-compare';
 import { undefinedValue } from '../utils/filter-definitions';
+import { Feature } from './config';
 import { Match } from './flow-query';
 
 export type FiltersEncoder = (values: FilterValue[], compare: FilterCompare, matchAny: boolean) => string;
@@ -88,6 +89,7 @@ export interface FilterConfigDef {
   examples?: string;
   docUrl?: string;
   placeholder?: string;
+  feature?: Feature;
 }
 
 export interface FilterDefinition {

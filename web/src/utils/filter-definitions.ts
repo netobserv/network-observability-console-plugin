@@ -368,6 +368,11 @@ export const checkFilterAvailable = (fd: FilterDefinition, config: Config, dataS
   }
 
   // Check against enabled features
+  const filterConfig = config.filters.find(f => f.id === fd.id);
+  if (filterConfig?.feature) {
+    return config.features.includes(filterConfig.feature);
+  }
+
   const colConfig = config.columns.find(c => c.filter === fd.id);
   if (colConfig?.feature) {
     return config.features.includes(colConfig?.feature);

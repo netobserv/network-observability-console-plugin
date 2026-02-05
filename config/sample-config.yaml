@@ -23,7 +23,7 @@ prometheus:
   url: https://localhost:9090
   timeout: 30s
   skipTls: true
-  tokenPath: /tmp/oc-token.txt
+  # tokenPath: /tmp/oc-token.txt
   alertManager:
     # url: https://localhost:9094
   metrics:
@@ -944,6 +944,7 @@ frontend:
       name: Cluster
       component: autocomplete
       hint: Specify a cluster ID or name.
+      feature: multiCluster
     - id: namespace
       name: Namespace
       component: autocomplete
@@ -1105,31 +1106,37 @@ frontend:
       component: autocomplete
       category: endpoint
       hint: Specify a single zone.
+      feature: zones
     - id: src_zone
       name: Zone
       component: autocomplete
       category: source
       hint: Specify a single zone.
+      feature: zones
     - id: dst_zone
       name: Zone
       component: autocomplete
       category: destination
       hint: Specify a single zone.
+      feature: zones
     - id: subnet_label
       name: Subnet Label
       component: autocomplete
       category: endpoint
       hint: Specify a subnet label, or an empty string to get unmatched sources.
+      feature: subnetLabels
     - id: src_subnet_label
       name: Subnet Label
       component: autocomplete
       category: source
       hint: Specify a subnet label, or an empty string to get unmatched sources.
+      feature: subnetLabels
     - id: dst_subnet_label
       name: Subnet Label
       component: autocomplete
       category: destination
       hint: Specify a subnet label, or an empty string to get unmatched destinations.
+      feature: subnetLabels
     - id: resource
       name: Resource
       component: autocomplete
@@ -1329,14 +1336,17 @@ frontend:
       name: Network Name
       component: text
       category: endpoint
+      feature: multiNetworks
     - id: src_network
       name: Network Name
       component: text
       category: source
+      feature: multiNetworks
     - id: dst_network
       name: Network Name
       component: text
       category: destination
+      feature: multiNetworks
     - id: protocol
       name: Protocol
       component: autocomplete
@@ -1393,6 +1403,7 @@ frontend:
       name: User Defined Network
       component: autocomplete
       hint: Specify a user defined network name.
+      feature: udnMapping
     - id: id
       name: Conversation Id
       component: text
@@ -1407,6 +1418,7 @@ frontend:
                 - A _LINUX_TCP_STATES_H number like 1, 2, 3
                 - A _LINUX_TCP_STATES_H TCP name like ESTABLISHED, SYN_SENT, SYN_RECV
       docUrl: https://github.com/torvalds/linux/blob/master/include/net/tcp_states.h
+      feature: pktDrop
     - id: pkt_drop_cause
       name: Packet drop latest cause
       component: autocomplete
@@ -1417,18 +1429,22 @@ frontend:
                 - A _LINUX_DROPREASON_CORE_H number like 2, 3, 4
                 - A _LINUX_DROPREASON_CORE_H SKB_DROP_REASON name like NOT_SPECIFIED, NO_SOCKET, PKT_TOO_SMALL
       docUrl: https://github.com/torvalds/linux/blob/master/include/net/dropreason-core.h
+      feature: pktDrop
     - id: dns_id
       name: DNS Id
       component: number
       hint: Specify a single DNS Id.
+      feature: dnsTracking
     - id: dns_name
       name: DNS Name
       component: text
       hint: Specify a single DNS name.
+      feature: dnsTracking
     - id: dns_latency
       name: DNS Latency
       component: number
       hint: Specify a DNS Latency in miliseconds.
+      feature: dnsTracking
     - id: dns_flag_response_code
       name: DNS Response Code
       component: autocomplete
@@ -1439,46 +1455,56 @@ frontend:
                 - A IANA RCODE number like 0, 3, 9
                 - A IANA RCODE name like NoError, NXDomain, NotAuth
       docUrl: https://www.iana.org/assignments/dns-parameters/dns-parameters.xhtml#dns-parameters-6
+      feature: dnsTracking
     - id: dns_errno
       name: DNS Error
       component: autocomplete
       hint: Specify a single DNS error number.
+      feature: dnsTracking
     - id: time_flow_rtt
       name: Flow RTT
       component: number
       hint: Specify a TCP smoothed Round Trip Time in nanoseconds.
+      feature: flowRTT
     - id: network_events
       name: Network Events
       component: text
       hint: Specify a single network event.
+      feature: networkEvents
     - id: xlat_zone_id
       name: Xlat Zone Id
       component: number
+      feature: packetTranslation
     - id: xlat_src_address
       name: Xlat source address
       component: text
       category: source
       hint: Specify a single IP or range.
+      feature: packetTranslation
     - id: xlat_dst_address
       name: Xlat destination address
       component: text
       category: destination
       hint: Specify a single IP or range.
+      feature: packetTranslation
     - id: xlat_src_port
       name: Xlat source port
       component: autocomplete
       category: source
       hint: Specify a single port number or name.
+      feature: packetTranslation
     - id: xlat_dst_port
       name: Xlat destination port
       component: autocomplete
       category: destination
       hint: Specify a single port number or name.
+      feature: packetTranslation
     - id: ipsec_status
       name: IPsec Status
       component: text
       placeholder: 'E.g: success, error'
       hint: Status of the IPsec encryption (on egress, provided by the kernel function xfrm_output) or decryption (on ingress, via xfrm_input).
+      feature: ipsec
   scopes:
     - id: cluster
       name: Cluster
