@@ -208,7 +208,7 @@ describe('Check availability against features', () => {
 
 describe('Check endpoint filters availability with Prometheus only', () => {
   const getConfig = (promLabels: string[], dataSources: string[] = ['prom']): Config => {
-    return { promLabels, dataSources, columns: ColumnConfigSampleDefs } as Config;
+    return { promLabels, dataSources, columns: ColumnConfigSampleDefs, filters: FilterConfigSampleDefs } as Config;
   };
 
   it('should be available when both src_ and dst_ variants are available', () => {
