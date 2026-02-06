@@ -48,7 +48,7 @@ export interface FilterSearchInputProps {
   value: string;
   setValue: (v: string) => void;
   setCompare: (v: FilterCompare) => void;
-  setFilter: (v: FilterDefinition) => void;
+  setFilter: (v: FilterDefinition | null | undefined) => void;
   setDirection: (v: Direction) => void;
   setIndicator: (v: Indicator) => void;
   setSearchInputValue: (v: string) => void;

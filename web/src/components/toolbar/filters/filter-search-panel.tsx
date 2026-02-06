@@ -20,7 +20,7 @@ export interface FilterSearchPanelProps {
   direction: Direction;
   setDirection: (direction: Direction) => void;
   filter: FilterDefinition;
-  setFilter: (filter: FilterDefinition) => void;
+  setFilter: (filter: FilterDefinition | null | undefined) => void;
   filters?: Filters;
   compare: FilterCompare;
   setCompare: (compare: FilterCompare) => void;
