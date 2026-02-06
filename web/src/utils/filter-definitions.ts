@@ -350,9 +350,40 @@ export const findFilter = (filterDefinitions: FilterDefinition[], id: FilterId) 
   return filterDefinitions.find(def => def.id === id);
 };
 
-export const checkFilterAvailable = (fd: FilterDefinition, config: Config, dataSource: DataSource) => {
+export const checkFilterAvailable = (
+  fd: FilterDefinition,
+  config: Config,
+  dataSource: DataSource,
+  filterDefinitions?: FilterDefinition[]
+) => {
   const allowLoki = config.dataSources.some(ds => ds === 'loki');
   const isPromOnly = !allowLoki || dataSource === 'prom';
+
+  // For endpoint category filters, check if both src_ and dst_ variants are available
+  // If both work, the base endpoint filter should be available for "Either" functionality
+  if (fd.category === 'endpoint' && isPromOnly && filterDefinitions) {
+    const srcFilterId = `src_${fd.id}` as FilterId;
+    const dstFilterId = `dst_${fd.id}` as FilterId;
+    const srcFilter = filterDefinitions.find(def => def.id === srcFilterId);
+    const dstFilter = filterDefinitions.find(def => def.id === dstFilterId);
+
+    // Check both src_ and dst_ variants
+    const checkVariant = (filter: FilterDefinition | undefined) => {
+      if (!filter) return false;
+      const q = filter.encoder([{ v: 'any' }], FilterCompare.match, false);
+      const parts = q.split('&');
+      return parts.every(part => {
+        const kv = part.split(/=|~/);
+        return kv.length > 0 && config.promLabels.includes(kv[0]);
+      });
+    };
+
+    const srcAvailable = checkVariant(srcFilter);
+    const dstAvailable = checkVariant(dstFilter);
+
+    // Endpoint filter is available if both src_ and dst_ variants are available
+    return srcAvailable && dstAvailable;
+  }
 
   if (isPromOnly) {
     // "encode" a dummy query to check related labels, and make sure they're all part of available prom labels

@@ -205,3 +205,48 @@ describe('Check availability against features', () => {
     expect(available).toBe(true);
   });
 });
+
+describe('Check endpoint filters availability with Prometheus only', () => {
+  const getConfig = (promLabels: string[], dataSources: string[] = ['prom']): Config => {
+    return { promLabels, dataSources, columns: ColumnConfigSampleDefs, filters: FilterConfigSampleDefs } as Config;
+  };
+
+  it('should be available when both src_ and dst_ variants are available', () => {
+    const namespaceFilter = findFilter(FilterDefinitionSample, 'namespace')!;
+    const nameFilter = findFilter(FilterDefinitionSample, 'name')!;
+
+    // Both src and dst variants have their labels available
+    const available = checkFilterAvailable(
+      namespaceFilter,
+      getConfig(['SrcK8S_Namespace', 'DstK8S_Namespace']),
+      'prom',
+      FilterDefinitionSample
+    );
+    expect(available).toBe(true);
+
+    const nameAvailable = checkFilterAvailable(
+      nameFilter,
+      getConfig(['SrcK8S_Name', 'DstK8S_Name']),
+      'prom',
+      FilterDefinitionSample
+    );
+    expect(nameAvailable).toBe(true);
+  });
+
+  it('should not be available when variants are missing', () => {
+    const namespaceFilter = findFilter(FilterDefinitionSample, 'namespace')!;
+
+    // Neither src_ nor dst_ variant available
+    const available = checkFilterAvailable(namespaceFilter, getConfig([]), 'prom', FilterDefinitionSample);
+    expect(available).toBe(false);
+  });
+
+  it('should be available with Loki enabled', () => {
+    const namespaceFilter = findFilter(FilterDefinitionSample, 'namespace')!;
+
+    // With Loki, endpoint filters follow the default behavior
+    const available = checkFilterAvailable(namespaceFilter, getConfig([], ['loki']), 'auto', FilterDefinitionSample);
+    // Should fall through to default "allow by default" behavior
+    expect(available).toBe(true);
+  });
+});

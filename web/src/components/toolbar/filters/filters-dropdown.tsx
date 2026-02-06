@@ -16,7 +16,7 @@ export interface FiltersDropdownProps {
   selectedDirection: Direction;
   setSelectedDirection: (v: Direction) => void;
   selectedFilter: FilterDefinition;
-  setSelectedFilter: (f: FilterDefinition) => void;
+  setSelectedFilter: (f: FilterDefinition | null | undefined) => void;
   match?: Match;
 }
 
@@ -79,7 +79,7 @@ export const FiltersDropdown: React.FC<FiltersDropdownProps> = ({
       }
     } else if (selectedFilter.id.startsWith('src_') || selectedFilter.id.startsWith('dst_')) {
       const id = selectedFilter.id.replace('src_', '').replace('dst_', '') as FilterId;
-      setSelectedFilter(findFilter(filterDefinitions, id)!);
+      setSelectedFilter(findFilter(filterDefinitions, id));
     }
   }, [filterDefinitions, selectedDirection, selectedFilter, setSelectedDirection, setSelectedFilter]);
   return (
