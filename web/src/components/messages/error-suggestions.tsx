@@ -11,11 +11,11 @@ export interface ErrorSuggestionsProps {
   compact?: boolean;
 }
 
-export const ErrorSuggestions: React.FC<ErrorSuggestionsProps> = ({ error, isLokiRelated = true, compact = false }) => {
-  const { t } = useTranslation('plugin__netobserv-plugin');
-
-  const hasSuggestions =
+export const hasSuggestionsForError = (error: string): boolean => {
+  return (
     error.includes('promUnsupported') ||
+    error.includes('promDisabledMetrics') ||
+    error.includes('promMissingLabels') ||
     error.includes('max entries limit') ||
     error.includes('deadline exceeded') ||
     error.includes('maximum of series') ||
@@ -25,7 +25,17 @@ export const ErrorSuggestions: React.FC<ErrorSuggestionsProps> = ({ error, isLok
     error.includes('input size too long') ||
     error.includes('Network Error') ||
     error.includes('status code 401') ||
-    error.includes('status code 403');
+    error.includes('status code 403') ||
+    error.includes('user not an admin') ||
+    error.includes('from Loki') ||
+    error.includes('from Prometheus')
+  );
+};
+
+export const ErrorSuggestions: React.FC<ErrorSuggestionsProps> = ({ error, isLokiRelated = true, compact = false }) => {
+  const { t } = useTranslation('plugin__netobserv-plugin');
+
+  const hasSuggestions = hasSuggestionsForError(error);
 
   if (!hasSuggestions && !isLokiRelated) {
     return null;
@@ -40,6 +50,15 @@ export const ErrorSuggestions: React.FC<ErrorSuggestionsProps> = ({ error, isLok
       )}
 
       {error.includes('promUnsupported') && (
+        <>
+          <Text component={TextVariants.blockquote}>
+            {t('Add missing metrics to prometheus in the FlowCollector API (processor.metrics.includeList)')}
+          </Text>
+          <Text component={TextVariants.blockquote}>{t('Enable Loki in the FlowCollector API (loki.enable)')}</Text>
+        </>
+      )}
+
+      {error.includes('promDisabledMetrics') && (
         <>
           <Text component={TextVariants.blockquote}>
             {t('Add missing metrics to prometheus in the FlowCollector API (processor.metrics.includeList)')}

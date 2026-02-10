@@ -25,15 +25,15 @@ export const getHTTPErrorDetails = (err: any, checkPromErrors = false) => {
 };
 
 export const isPromUnsupportedError = (err: string) => {
-  return err.startsWith('promUnsupported:');
+  return err.includes('promUnsupported:');
 };
 
 export const isPromDisabledMetricsError = (err: string) => {
-  return err.startsWith('promDisabledMetrics:');
+  return err.includes('promDisabledMetrics:');
 };
 
 export const isPromMissingLabelError = (err: string) => {
-  return err.startsWith('promMissingLabels:');
+  return err.includes('promMissingLabels:');
 };
 
 export const isPromError = (err: string) => {
