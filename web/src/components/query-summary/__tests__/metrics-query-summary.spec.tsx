@@ -2,6 +2,7 @@ import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 import { NetflowMetrics } from '../../../api/loki';
 import { waitForRender } from '../../../components/__tests__/common.spec';
+import { Result } from '../../../utils/result';
 import { metrics } from '../../__tests-data__/metrics';
 import { MetricsQuerySummary } from '../metrics-query-summary';
 import { MetricsQuerySummaryContent } from '../metrics-query-summary-content';
@@ -11,7 +12,7 @@ describe('<MetricsQuerySummary />', () => {
 
   const mocks = {
     toggleQuerySummary: jest.fn(),
-    metrics: { rateMetrics: { bytes: metrics } } as NetflowMetrics,
+    metrics: { rate: Result.success({ bytes: metrics }) } as NetflowMetrics,
     stats: {
       limitReached: false,
       numQueries: 1,
