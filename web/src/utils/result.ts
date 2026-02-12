@@ -25,6 +25,10 @@ export class Result<T, E> {
     return this.result || ifError;
   }
 
+  static empty = <T, E>(): Result<T, E> => {
+    return new Result<T, E>(undefined, undefined);
+  };
+
   static success = <T, E>(result: T): Result<T, E> => {
     return new Result<T, E>(result, undefined);
   };

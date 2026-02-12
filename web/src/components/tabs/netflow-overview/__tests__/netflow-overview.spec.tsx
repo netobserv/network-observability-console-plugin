@@ -4,6 +4,7 @@ import * as React from 'react';
 import { EmptyState } from '@patternfly/react-core';
 import { droppedMetrics, metrics } from '../../../../components/__tests-data__/metrics';
 
+import { defaultNetflowMetrics } from '../../../../api/loki';
 import { TruncateLength } from '../../../../components/dropdowns/truncate-dropdown';
 import { ScopeDefSample } from '../../../../components/__tests-data__/scopes';
 import { actOn, waitForRender } from '../../../../components/__tests__/common.spec';
@@ -19,10 +20,7 @@ describe('<NetflowOverview />', () => {
     panels: ShuffledDefaultPanels,
     loading: false,
     recordType: 'flowLog' as RecordType,
-    metrics: {
-      custom: new Map(),
-      totalCustom: new Map()
-    },
+    metrics: defaultNetflowMetrics,
     truncateLength: TruncateLength.M,
     forcedSize: { width: 800, height: 800 } as DOMRect,
     scopes: ScopeDefSample,

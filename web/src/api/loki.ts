@@ -132,25 +132,39 @@ export type TotalRateMetrics = {
 };
 
 export type NetflowMetrics = {
-  rate?: Result<RateMetrics, string>;
-  droppedRate?: Result<RateMetrics, string>;
-  totalRate?: Result<TotalRateMetrics, string>;
-  totalDroppedRate?: Result<TotalRateMetrics, string>;
-  droppedState?: Result<GenericMetric[], string>;
-  droppedCause?: Result<GenericMetric[], string>;
-  dnsName?: Result<GenericMetric[], string>;
-  dnsRCode?: Result<GenericMetric[], string>;
-  dnsLatency?: Result<FunctionMetrics, string>;
-  rtt?: Result<FunctionMetrics, string>;
-  totalFlowCount?: Result<TopologyMetrics, string>;
-  totalDnsLatency?: Result<TotalFunctionMetrics, string>;
-  totalDnsCount?: Result<GenericMetric, string>;
-  totalRtt?: Result<TotalFunctionMetrics, string>;
+  rate: Result<RateMetrics, string>;
+  droppedRate: Result<RateMetrics, string>;
+  totalRate: Result<TotalRateMetrics, string>;
+  totalDroppedRate: Result<TotalRateMetrics, string>;
+  droppedState: Result<GenericMetric[], string>;
+  droppedCause: Result<GenericMetric[], string>;
+  dnsName: Result<GenericMetric[], string>;
+  dnsRCode: Result<GenericMetric[], string>;
+  dnsLatency: Result<FunctionMetrics, string>;
+  rtt: Result<FunctionMetrics, string>;
+  totalFlowCount: Result<TopologyMetrics, string>;
+  totalDnsLatency: Result<TotalFunctionMetrics, string>;
+  totalDnsCount: Result<GenericMetric, string>;
+  totalRtt: Result<TotalFunctionMetrics, string>;
   custom: Map<string, Result<TopologyMetrics[] | GenericMetric[], string>>;
   totalCustom: Map<string, Result<TopologyMetrics | GenericMetric, string>>;
 };
 
 export const defaultNetflowMetrics: NetflowMetrics = {
+  rate: Result.empty(),
+  droppedRate: Result.empty(),
+  totalRate: Result.empty(),
+  totalDroppedRate: Result.empty(),
+  droppedState: Result.empty(),
+  droppedCause: Result.empty(),
+  dnsName: Result.empty(),
+  dnsRCode: Result.empty(),
+  dnsLatency: Result.empty(),
+  rtt: Result.empty(),
+  totalFlowCount: Result.empty(),
+  totalDnsLatency: Result.empty(),
+  totalDnsCount: Result.empty(),
+  totalRtt: Result.empty(),
   custom: new Map(),
   totalCustom: new Map()
 };
