@@ -122,7 +122,7 @@ export const NetflowTable: React.FC<NetflowTableProps> = React.forwardRef(
             )
           );
         } else {
-          currentMetrics = { ...currentMetrics, totalRate: undefined };
+          currentMetrics = { ...currentMetrics, totalRate: Result.empty() };
           setMetrics(currentMetrics);
         }
         return Promise.all(promises);

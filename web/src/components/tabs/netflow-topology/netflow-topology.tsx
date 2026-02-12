@@ -165,8 +165,8 @@ export const NetflowTopology: React.FC<NetflowTopologyProps> = React.forwardRef(
               currentMetrics = {
                 ...currentMetrics,
                 rate: Result.success(rateMetrics),
-                dnsLatency: undefined,
-                rtt: undefined
+                dnsLatency: Result.empty(),
+                rtt: Result.empty()
               };
               setMetrics(currentMetrics);
             } else if (['PktDropBytes', 'PktDropPackets'].includes(metricType)) {
@@ -179,9 +179,9 @@ export const NetflowTopology: React.FC<NetflowTopologyProps> = React.forwardRef(
               dnsLatencyMetrics[getFunctionMetricKey(metricFunction)] = res.metrics;
               currentMetrics = {
                 ...currentMetrics,
-                rate: undefined,
+                rate: Result.empty(),
                 dnsLatency: Result.success(dnsLatencyMetrics),
-                rtt: undefined
+                rtt: Result.empty()
               };
               setMetrics(currentMetrics);
             } else if (['TimeFlowRttNs'].includes(metricType)) {
@@ -189,8 +189,8 @@ export const NetflowTopology: React.FC<NetflowTopologyProps> = React.forwardRef(
               rttMetrics[getFunctionMetricKey(metricFunction)] = res.metrics;
               currentMetrics = {
                 ...currentMetrics,
-                rate: undefined,
-                dnsLatency: undefined,
+                rate: Result.empty(),
+                dnsLatency: Result.empty(),
                 rtt: Result.success(rttMetrics)
               };
               setMetrics(currentMetrics);
@@ -221,7 +221,7 @@ export const NetflowTopology: React.FC<NetflowTopologyProps> = React.forwardRef(
               })
           );
         } else if (!['PktDropBytes', 'PktDropPackets'].includes(metricType)) {
-          currentMetrics = { ...currentMetrics, droppedRate: undefined };
+          currentMetrics = { ...currentMetrics, droppedRate: Result.empty() };
           setMetrics(currentMetrics);
         }
         return Promise.all(promises);

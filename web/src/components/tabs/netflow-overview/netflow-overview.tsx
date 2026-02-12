@@ -172,7 +172,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
             );
           });
         } else {
-          currentMetrics = { ...currentMetrics, rate: undefined, totalRate: undefined };
+          currentMetrics = { ...currentMetrics, rate: Result.empty(), totalRate: Result.empty() };
           setMetrics(currentMetrics);
         }
 
@@ -255,10 +255,10 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
         } else {
           setMetrics({
             ...currentMetrics,
-            droppedRate: undefined,
-            totalDroppedRate: undefined,
-            droppedState: undefined,
-            droppedCause: undefined
+            droppedRate: Result.empty(),
+            totalDroppedRate: Result.empty(),
+            droppedState: Result.empty(),
+            droppedCause: Result.empty()
           });
         }
 
@@ -345,11 +345,11 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
         } else {
           setMetrics({
             ...currentMetrics,
-            dnsLatency: undefined,
-            dnsName: undefined,
-            dnsRCode: undefined,
-            totalDnsLatency: undefined,
-            totalDnsCount: undefined
+            dnsLatency: Result.empty(),
+            dnsName: Result.empty(),
+            dnsRCode: Result.empty(),
+            totalDnsLatency: Result.empty(),
+            totalDnsCount: Result.empty()
           });
         }
 
@@ -394,7 +394,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
             );
           });
         } else {
-          setMetrics({ ...currentMetrics, rtt: undefined, totalRtt: undefined });
+          setMetrics({ ...currentMetrics, rtt: Result.empty(), totalRtt: Result.empty() });
         }
 
         const customPanels = props.panels.filter(p => p.id.startsWith(customPanelMatcher));
@@ -546,14 +546,9 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
     const allowFocus = props.focus === true && props.panels.length > 1;
     const wasAllowFocus = usePrevious(allowFocus);
 
-    const sortMetrics = React.useCallback(
-      <T extends { stats: MetricStats }, E>(metrics: Result<T[], E> | undefined) => {
-        return Result.fromNullable(metrics).map(m =>
-          m.sort((a, b) => getStat(b.stats, 'sum') - getStat(a.stats, 'sum'))
-        );
-      },
-      []
-    );
+    const sortMetrics = React.useCallback(<T extends { stats: MetricStats }, E>(metrics: Result<T[], E>) => {
+      return metrics.map(m => m.sort((a, b) => getStat(b.stats, 'sum') - getStat(a.stats, 'sum')));
+    }, []);
 
     //skip metrics with sources equals to destinations
     //sort by top total item first
@@ -562,7 +557,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
       (id: OverviewPanelId): Result<NamedMetric[], string> => {
         const rootMetric = id.includes('dropped') ? props.metrics.droppedRate : props.metrics.rate;
         return sortMetrics(
-          Result.fromNullable(rootMetric).map(m => {
+          rootMetric.map(m => {
             return m[getRateFunctionFromId(id)]?.map(m => toNamedMetric(t, m, props.truncateLength, true, true));
           })
         );
@@ -573,7 +568,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
     const getNamedTotalRateMetric = React.useCallback(
       (id: OverviewPanelId) => {
         const rootMetric = id.includes('dropped') ? props.metrics.totalDroppedRate : props.metrics.totalRate;
-        return Result.fromNullable(rootMetric)
+        return rootMetric
           .map(metric => metric[getRateFunctionFromId(id)])
           .map(m => toNamedMetric(t, m, props.truncateLength, false, false));
       },
@@ -582,14 +577,14 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
 
     const getLatencyMetrics = React.useCallback(
       (id: OverviewPanelId) => {
-        let rootMetric = undefined;
+        let rootMetric: Result<FunctionMetrics, string> = Result.empty();
         if (id.endsWith('dns_latency')) {
           rootMetric = props.metrics.dnsLatency;
         } else if (id.endsWith('rtt')) {
           rootMetric = props.metrics.rtt;
         }
         return sortMetrics(
-          Result.fromNullable(rootMetric).map(m => {
+          rootMetric.map(m => {
             return m[getFunctionFromId(id)]?.map(m => toNamedMetric(t, m, props.truncateLength, true, true));
           })
         );
@@ -599,13 +594,13 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
 
     const getNamedTotalLatencyMetric = React.useCallback(
       (id: OverviewPanelId) => {
-        let m = undefined;
+        let rootMetric: Result<TotalFunctionMetrics, string> = Result.empty();
         if (id.endsWith('dns_latency')) {
-          m = props.metrics.totalDnsLatency;
+          rootMetric = props.metrics.totalDnsLatency;
         } else if (id.endsWith('rtt')) {
-          m = props.metrics.totalRtt;
+          rootMetric = props.metrics.totalRtt;
         }
-        return Result.fromNullable(m)
+        return rootMetric
           .map(metric => metric[getFunctionFromId(id)])
           .map(m => toNamedMetric(t, m, props.truncateLength, false, false));
       },
@@ -638,9 +633,9 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
 
     const getNamedTopKCustomMetrics = React.useCallback(
       (id: string) => {
-        const rootMetric = props.metrics.custom.get(id.replaceAll(customPanelMatcher + '_', ''));
+        const rootMetric = props.metrics.custom.get(id.replaceAll(customPanelMatcher + '_', '')) || Result.empty();
         return sortMetrics(
-          Result.fromNullable(rootMetric).map(m => {
+          rootMetric.map(m => {
             return m.map(metric => {
               if (isValidTopologyMetrics(metric)) {
                 return toNamedMetric(t, metric, props.truncateLength, true, true);
@@ -655,8 +650,8 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
 
     const getNamedTotalCustomMetric = React.useCallback(
       (id: OverviewPanelId) => {
-        const rootMetric = props.metrics.totalCustom.get(id.replaceAll(customPanelMatcher + '_', ''));
-        return Result.fromNullable(rootMetric).map(m => {
+        const rootMetric = props.metrics.totalCustom.get(id.replaceAll(customPanelMatcher + '_', '')) || Result.empty();
+        return rootMetric.map(m => {
           if (isValidTopologyMetrics(m)) {
             return toNamedMetric(t, m, props.truncateLength, false, false);
           }
