@@ -9,6 +9,7 @@ import { Config } from '../../../model/config';
 import { FlowQuery } from '../../../model/flow-query';
 import { Column, ColumnsId, ColumnSizeMap } from '../../../utils/columns';
 import { TimeRange } from '../../../utils/datetime';
+import { getHTTPErrorDetails } from '../../../utils/errors';
 import { mergeFlowReporters } from '../../../utils/flows';
 import {
   localStorageSortDirectionKey,
@@ -17,6 +18,7 @@ import {
 } from '../../../utils/local-storage-hook';
 import { convertRemToPixels } from '../../../utils/panel';
 import { usePrevious } from '../../../utils/previous-hook';
+import { Result } from '../../../utils/result';
 import { Size } from '../../dropdowns/table-display-dropdown';
 import { Empty } from '../../messages/empty';
 import { NetflowTableHeader } from './netflow-table-header';
@@ -110,15 +112,17 @@ export const NetflowTable: React.FC<NetflowTableProps> = React.forwardRef(
         ];
         if (showHistogram) {
           promises.push(
-            getMetrics({ ...fq, function: 'count', aggregateBy: 'app', type: 'Flows' }, range).then(res => {
-              const totalFlowCountMetric = res.metrics[0];
-              currentMetrics = { ...currentMetrics, totalFlowCountMetric };
-              setMetrics(currentMetrics);
-              return res.stats;
-            })
+            Result.fromPromise(getMetrics({ ...fq, function: 'count', aggregateBy: 'app', type: 'Flows' }, range)).then(
+              res => {
+                const totalFlowCount = res.map(m => m.metrics[0]).mapError(err => getHTTPErrorDetails(err, true));
+                currentMetrics = { ...currentMetrics, totalFlowCount };
+                setMetrics(currentMetrics);
+                return res.map(r => r.stats).or({ numQueries: 0, limitReached: false, dataSources: [] } as Stats);
+              }
+            )
           );
         } else {
-          currentMetrics = { ...currentMetrics, totalRateMetric: undefined };
+          currentMetrics = { ...currentMetrics, totalRate: undefined };
           setMetrics(currentMetrics);
         }
         return Promise.all(promises);

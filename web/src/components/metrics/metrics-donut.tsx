@@ -15,7 +15,7 @@ export interface MetricsDonutProps {
   limit: number;
   metricType: MetricType;
   metricFunction: MetricFunction;
-  topKMetrics: GenericMetric[] | NamedMetric[];
+  topKMetrics: (GenericMetric | NamedMetric)[];
   totalMetric: GenericMetric | NamedMetric;
   showOthers: boolean;
   othersName?: string;

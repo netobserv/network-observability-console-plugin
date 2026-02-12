@@ -23,6 +23,7 @@ import { formatDuration, formatDurationAboveMillisecond, formatDurationAboveNano
 import { compareIPs } from '../../utils/ip';
 import { comparePorts, formatPort } from '../../utils/port';
 import { formatProtocol } from '../../utils/protocol';
+import { Result } from '../../utils/result';
 import { FlowsQuerySummaryContent } from './flows-query-summary-content';
 import { MetricsQuerySummaryContent } from './metrics-query-summary-content';
 
@@ -157,11 +158,9 @@ export const SummaryPanelContent: React.FC<SummaryPanelContentProps> = ({
   };
 
   const cardinalityContent = () => {
-    const rateMetrics = !_.isEmpty(metrics.rateMetrics?.bytes)
-      ? metrics.rateMetrics!.bytes!
-      : !_.isEmpty(metrics.rateMetrics?.packets)
-      ? metrics.rateMetrics!.packets!
-      : [];
+    const rateMetrics = Result.fromNullable(metrics.rate)
+      .map(r => r.bytes || r.packets)
+      .or([]);
 
     //regroup all k8s objects per type + namespace
     const namespaces: string[] = [];
