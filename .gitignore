@@ -10,7 +10,15 @@
 /web/dist
 /web/node_modules
 /web/yarn-error.log
+/web/src/**/*.js
+/web/src/**/*.spec.js
 /plugin-backend
 /cover.out
 tmp.Dockerfile
 tmp/
+**/gui_test_screenshots/
+/web/cypress/results/
+
+# htpasswd test user files
+htpasswd-test-users
+test-users-credentials.txt

@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dns-traffic
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: dnsutils
+  namespace: dns-traffic
+spec:
+  securityContext:
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+  dnsConfig:
+    options:
+      - name: "use-vc"
+  containers:
+    - name: utils
+      image: docker.io/massenz/dnsutils:2.4.0
+      # do dns requests to non-existent service to induce dns errors
+      command: ["/bin/sh", "-ec", "while :; do dig nginx-service.test.svc.cluster.local; sleep 1 ; done"]
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop: ["ALL"]

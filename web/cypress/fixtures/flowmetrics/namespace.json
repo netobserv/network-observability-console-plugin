@@ -1,0 +1,664 @@
+{
+    "resultType": "matrix",
+    "result": [
+        {
+            "metric": {
+                "DstK8S_Namespace": "netobserv",
+                "SrcK8S_Namespace": "netobserv"
+            },
+            "values": [
+                [
+                    1717521780,
+                    "197664.3"
+                ],
+                [
+                    1717521795,
+                    "197209.76666666666"
+                ],
+                [
+                    1717521810,
+                    "195691.49999999997"
+                ],
+                [
+                    1717521825,
+                    "214910.2"
+                ],
+                [
+                    1717521840,
+                    "216813.9"
+                ],
+                [
+                    1717521855,
+                    "196142.8333333333"
+                ],
+                [
+                    1717521870,
+                    "194888.03333333333"
+                ],
+                [
+                    1717521885,
+                    "195592.23333333334"
+                ],
+                [
+                    1717521900,
+                    "195919.9"
+                ],
+                [
+                    1717521915,
+                    "194589.2333333333"
+                ],
+                [
+                    1717521930,
+                    "196207.09999999998"
+                ],
+                [
+                    1717521945,
+                    "198811.8"
+                ],
+                [
+                    1717521960,
+                    "196288.06666666665"
+                ],
+                [
+                    1717521975,
+                    "192801.36666666664"
+                ],
+                [
+                    1717521990,
+                    "191477.56666666665"
+                ],
+                [
+                    1717522005,
+                    "192611.13333333333"
+                ],
+                [
+                    1717522020,
+                    "193974.69999999998"
+                ],
+                [
+                    1717522035,
+                    "194625.86666666664"
+                ],
+                [
+                    1717522050,
+                    "194643.2333333333"
+                ],
+                [
+                    1717522065,
+                    "196494.43333333332"
+                ],
+                [
+                    1717522080,
+                    "166873.73333333334"
+                ]
+            ]
+        },
+        {
+            "metric": {
+                "DstK8S_Namespace": "openshift-console",
+                "SrcK8S_Namespace": "netobserv"
+            },
+            "values": [
+                [
+                    1717521780,
+                    "922.1333333333333"
+                ],
+                [
+                    1717521795,
+                    "928.7333333333333"
+                ],
+                [
+                    1717521810,
+                    "926.5333333333333"
+                ],
+                [
+                    1717521825,
+                    "919.9333333333334"
+                ],
+                [
+                    1717521840,
+                    "919.9333333333334"
+                ],
+                [
+                    1717521855,
+                    "922.1333333333333"
+                ],
+                [
+                    1717521870,
+                    "922.1333333333333"
+                ],
+                [
+                    1717521885,
+                    "922.1333333333333"
+                ],
+                [
+                    1717521900,
+                    "924.3333333333334"
+                ],
+                [
+                    1717521915,
+                    "926.5333333333333"
+                ],
+                [
+                    1717521930,
+                    "4612.533333333333"
+                ],
+                [
+                    1717521945,
+                    "6161.2"
+                ],
+                [
+                    1717521960,
+                    "2466.4"
+                ],
+                [
+                    1717521975,
+                    "904.5333333333333"
+                ],
+                [
+                    1717521990,
+                    "908.9333333333333"
+                ],
+                [
+                    1717522005,
+                    "913.3333333333334"
+                ],
+                [
+                    1717522020,
+                    "913.3333333333334"
+                ],
+                [
+                    1717522035,
+                    "913.3333333333334"
+                ],
+                [
+                    1717522050,
+                    "913.3333333333334"
+                ],
+                [
+                    1717522065,
+                    "930.9333333333333"
+                ],
+                [
+                    1717522080,
+                    "922.1333333333333"
+                ]
+            ]
+        },
+        {
+            "metric": {
+                "DstK8S_Namespace": "openshift-dns",
+                "SrcK8S_Namespace": "netobserv"
+            },
+            "values": [
+                [
+                    1717521780,
+                    "784.8"
+                ],
+                [
+                    1717521795,
+                    "784.8"
+                ],
+                [
+                    1717521810,
+                    "784.8"
+                ],
+                [
+                    1717521825,
+                    "784.8"
+                ],
+                [
+                    1717521840,
+                    "784.8"
+                ],
+                [
+                    1717521855,
+                    "784.8"
+                ],
+                [
+                    1717521870,
+                    "784.8"
+                ],
+                [
+                    1717521885,
+                    "784.8"
+                ],
+                [
+                    1717521900,
+                    "784.8"
+                ],
+                [
+                    1717521915,
+                    "784.8"
+                ],
+                [
+                    1717521930,
+                    "806.5999999999999"
+                ],
+                [
+                    1717521945,
+                    "850.1999999999999"
+                ],
+                [
+                    1717521960,
+                    "828.4"
+                ],
+                [
+                    1717521975,
+                    "784.8"
+                ],
+                [
+                    1717521990,
+                    "784.8"
+                ],
+                [
+                    1717522005,
+                    "784.8"
+                ],
+                [
+                    1717522020,
+                    "784.8"
+                ],
+                [
+                    1717522035,
+                    "784.8"
+                ],
+                [
+                    1717522050,
+                    "784.8"
+                ],
+                [
+                    1717522065,
+                    "784.8"
+                ],
+                [
+                    1717522080,
+                    "654"
+                ]
+            ]
+        },
+        {
+            "metric": {
+                "DstK8S_Namespace": "openshift-monitoring",
+                "SrcK8S_Namespace": "netobserv"
+            },
+            "values": [
+                [
+                    1717521780,
+                    "5873.666666666667"
+                ],
+                [
+                    1717521795,
+                    "5939.566666666667"
+                ],
+                [
+                    1717521810,
+                    "5906.233333333334"
+                ],
+                [
+                    1717521825,
+                    "5863.666666666666"
+                ],
+                [
+                    1717521840,
+                    "5937.2"
+                ],
+                [
+                    1717521855,
+                    "5959.866666666667"
+                ],
+                [
+                    1717521870,
+                    "5975.5"
+                ],
+                [
+                    1717521885,
+                    "5991.3"
+                ],
+                [
+                    1717521900,
+                    "5984.566666666667"
+                ],
+                [
+                    1717521915,
+                    "5964.466666666667"
+                ],
+                [
+                    1717521930,
+                    "5983.766666666667"
+                ],
+                [
+                    1717521945,
+                    "6010.933333333333"
+                ],
+                [
+                    1717521960,
+                    "6021.133333333333"
+                ],
+                [
+                    1717521975,
+                    "6019.733333333334"
+                ],
+                [
+                    1717521990,
+                    "6013.533333333333"
+                ],
+                [
+                    1717522005,
+                    "6074.066666666667"
+                ],
+                [
+                    1717522020,
+                    "6018.133333333333"
+                ],
+                [
+                    1717522035,
+                    "5864.7"
+                ],
+                [
+                    1717522050,
+                    "5847.633333333333"
+                ],
+                [
+                    1717522065,
+                    "5881.166666666666"
+                ],
+                [
+                    1717522080,
+                    "5731.233333333333"
+                ]
+            ]
+        },
+        {
+            "metric": {
+                "SrcK8S_Namespace": "netobserv"
+            },
+            "values": [
+                [
+                    1717521780,
+                    "1013.4666666666667"
+                ],
+                [
+                    1717521795,
+                    "1014.4000000000001"
+                ],
+                [
+                    1717521810,
+                    "977.8666666666668"
+                ],
+                [
+                    1717521825,
+                    "947.6666666666666"
+                ],
+                [
+                    1717521840,
+                    "952.0333333333333"
+                ],
+                [
+                    1717521855,
+                    "913.6"
+                ],
+                [
+                    1717521870,
+                    "901.7333333333332"
+                ],
+                [
+                    1717521885,
+                    "1009.6333333333333"
+                ],
+                [
+                    1717521900,
+                    "1080.9"
+                ],
+                [
+                    1717521915,
+                    "961"
+                ],
+                [
+                    1717521930,
+                    "943.4333333333333"
+                ],
+                [
+                    1717521945,
+                    "961.3000000000001"
+                ],
+                [
+                    1717521960,
+                    "915.5333333333333"
+                ],
+                [
+                    1717521975,
+                    "899.1"
+                ],
+                [
+                    1717521990,
+                    "943.7"
+                ],
+                [
+                    1717522005,
+                    "952.0666666666666"
+                ],
+                [
+                    1717522020,
+                    "923.4333333333333"
+                ],
+                [
+                    1717522035,
+                    "953.5666666666666"
+                ],
+                [
+                    1717522050,
+                    "952.8"
+                ],
+                [
+                    1717522065,
+                    "917"
+                ],
+                [
+                    1717522080,
+                    "819.6666666666666"
+                ]
+            ]
+        }
+    ],
+    "stats": {
+        "numQueries": 2,
+        "totalEntries": 0,
+        "duplicates": 0,
+        "limitReached": false,
+        "queriesStats": [
+            {
+                "cache": {
+                    "chunk": {
+                        "bytesReceived": 0,
+                        "bytesSent": 0,
+                        "downloadTime": 0,
+                        "entriesFound": 0,
+                        "entriesRequested": 0,
+                        "entriesStored": 0,
+                        "requests": 0
+                    },
+                    "index": {
+                        "bytesReceived": 0,
+                        "bytesSent": 0,
+                        "downloadTime": 0,
+                        "entriesFound": 0,
+                        "entriesRequested": 0,
+                        "entriesStored": 0,
+                        "requests": 0
+                    },
+                    "result": {
+                        "bytesReceived": 0,
+                        "bytesSent": 0,
+                        "downloadTime": 12283,
+                        "entriesFound": 0,
+                        "entriesRequested": 1,
+                        "entriesStored": 1,
+                        "requests": 2
+                    },
+                    "statsResult": {
+                        "bytesReceived": 0,
+                        "bytesSent": 0,
+                        "downloadTime": 0,
+                        "entriesFound": 0,
+                        "entriesRequested": 0,
+                        "entriesStored": 0,
+                        "requests": 0
+                    }
+                },
+                "ingester": {
+                    "store": {
+                        "chunk": {
+                            "compressedBytes": 0,
+                            "decompressedBytes": 0,
+                            "decompressedLines": 0,
+                            "decompressedStructuredMetadataBytes": 0,
+                            "headChunkBytes": 0,
+                            "headChunkLines": 0,
+                            "headChunkStructuredMetadataBytes": 0,
+                            "postFilterLines": 0,
+                            "totalDuplicates": 0
+                        },
+                        "chunksDownloadTime": 0,
+                        "totalChunksDownloaded": 0,
+                        "totalChunksRef": 0
+                    },
+                    "totalBatches": 80,
+                    "totalChunksMatched": 0,
+                    "totalLinesSent": 0,
+                    "totalReached": 80
+                },
+                "querier": {
+                    "store": {
+                        "chunk": {
+                            "compressedBytes": 0,
+                            "decompressedBytes": 0,
+                            "decompressedLines": 0,
+                            "decompressedStructuredMetadataBytes": 0,
+                            "headChunkBytes": 0,
+                            "headChunkLines": 0,
+                            "headChunkStructuredMetadataBytes": 0,
+                            "postFilterLines": 0,
+                            "totalDuplicates": 0
+                        },
+                        "chunksDownloadTime": 0,
+                        "totalChunksDownloaded": 0,
+                        "totalChunksRef": 0
+                    }
+                },
+                "summary": {
+                    "bytesProcessedPerSecond": 0,
+                    "execTime": 0.095537741,
+                    "linesProcessedPerSecond": 0,
+                    "queueTime": 1.65102299,
+                    "shards": 80,
+                    "splits": 5,
+                    "subqueries": 0,
+                    "totalBytesProcessed": 0,
+                    "totalEntriesReturned": 0,
+                    "totalLinesProcessed": 0,
+                    "totalPostFilterLines": 0,
+                    "totalStructuredMetadataBytesProcessed": 0
+                }
+            },
+            {
+                "cache": {
+                    "chunk": {
+                        "bytesReceived": 0,
+                        "bytesSent": 0,
+                        "downloadTime": 0,
+                        "entriesFound": 0,
+                        "entriesRequested": 0,
+                        "entriesStored": 0,
+                        "requests": 0
+                    },
+                    "index": {
+                        "bytesReceived": 0,
+                        "bytesSent": 0,
+                        "downloadTime": 0,
+                        "entriesFound": 0,
+                        "entriesRequested": 0,
+                        "entriesStored": 0,
+                        "requests": 0
+                    },
+                    "result": {
+                        "bytesReceived": 0,
+                        "bytesSent": 0,
+                        "downloadTime": 8174,
+                        "entriesFound": 0,
+                        "entriesRequested": 1,
+                        "entriesStored": 1,
+                        "requests": 2
+                    },
+                    "statsResult": {
+                        "bytesReceived": 0,
+                        "bytesSent": 0,
+                        "downloadTime": 0,
+                        "entriesFound": 0,
+                        "entriesRequested": 0,
+                        "entriesStored": 0,
+                        "requests": 0
+                    }
+                },
+                "ingester": {
+                    "store": {
+                        "chunk": {
+                            "compressedBytes": 2057862,
+                            "decompressedBytes": 9132667,
+                            "decompressedLines": 12282,
+                            "decompressedStructuredMetadataBytes": 0,
+                            "headChunkBytes": 1549633,
+                            "headChunkLines": 2145,
+                            "headChunkStructuredMetadataBytes": 0,
+                            "postFilterLines": 14427,
+                            "totalDuplicates": 0
+                        },
+                        "chunksDownloadTime": 0,
+                        "totalChunksDownloaded": 0,
+                        "totalChunksRef": 0
+                    },
+                    "totalBatches": 146,
+                    "totalChunksMatched": 101,
+                    "totalLinesSent": 5391,
+                    "totalReached": 80
+                },
+                "querier": {
+                    "store": {
+                        "chunk": {
+                            "compressedBytes": 0,
+                            "decompressedBytes": 0,
+                            "decompressedLines": 0,
+                            "decompressedStructuredMetadataBytes": 0,
+                            "headChunkBytes": 0,
+                            "headChunkLines": 0,
+                            "headChunkStructuredMetadataBytes": 0,
+                            "postFilterLines": 0,
+                            "totalDuplicates": 0
+                        },
+                        "chunksDownloadTime": 0,
+                        "totalChunksDownloaded": 0,
+                        "totalChunksRef": 0
+                    }
+                },
+                "summary": {
+                    "bytesProcessedPerSecond": 99805634,
+                    "execTime": 0.107031031,
+                    "linesProcessedPerSecond": 134792,
+                    "queueTime": 1.909549991,
+                    "shards": 80,
+                    "splits": 5,
+                    "subqueries": 0,
+                    "totalBytesProcessed": 10682300,
+                    "totalEntriesReturned": 5,
+                    "totalLinesProcessed": 14427,
+                    "totalPostFilterLines": 14427,
+                    "totalStructuredMetadataBytesProcessed": 0
+                }
+            }
+        ],
+        "dataSources": [
+            "loki"
+        ]
+    },
+    "unixTimestamp": 1717522080
+}

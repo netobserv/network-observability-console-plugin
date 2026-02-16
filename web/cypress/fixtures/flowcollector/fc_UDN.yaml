@@ -1,0 +1,18 @@
+kind: FlowCollector
+apiVersion: flows.netobserv.io/v1beta2
+metadata:
+  name: cluster
+spec:
+  agent:
+    ebpf:
+      sampling: 1
+      privileged: true
+      features:
+        - UDNMapping
+    type: eBPF
+  loki:
+    enable: true
+    mode: Monolithic
+    namespace: netobserv
+    monolithic:
+      installDemoLoki: true
