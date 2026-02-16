@@ -1,0 +1,22 @@
+kind: FlowCollector
+apiVersion: flows.netobserv.io/v1beta2
+metadata:
+  name: cluster
+spec:
+  agent:
+    ebpf:
+      sampling: 1
+    type: eBPF
+  loki:
+    enable: true
+    mode: Monolithic
+    namespace: netobserv
+    monolithic:
+      installDemoLoki: true
+  processor:
+    subnetLabels:
+      customLabels:
+        - name: testcustomlabel
+          cidrs:
+            - 52.200.142.0/24
+      openShiftAutoDetect: true

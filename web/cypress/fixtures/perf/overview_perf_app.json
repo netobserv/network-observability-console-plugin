@@ -1,0 +1,150 @@
+{
+    "resultType": "matrix",
+    "result": [
+        {
+            "metric": {
+                "app": "netobserv-flowcollector"
+            },
+            "values": [
+                [
+                    1686858495,
+                    "3201731.033333334"
+                ],
+                [
+                    1686858510,
+                    "4570573.133333334"
+                ],
+                [
+                    1686858525,
+                    "4499798.633333335"
+                ],
+                [
+                    1686858540,
+                    "2758475.366666667"
+                ],
+                [
+                    1686858555,
+                    "10760865.733333332"
+                ],
+                [
+                    1686858570,
+                    "11405891.03333333"
+                ],
+                [
+                    1686858585,
+                    "5918738.066666666"
+                ],
+                [
+                    1686858600,
+                    "5623226.4333333345"
+                ],
+                [
+                    1686858615,
+                    "31970331.199999996"
+                ],
+                [
+                    1686858630,
+                    "34038560.46666667"
+                ],
+                [
+                    1686858645,
+                    "5157872.000000001"
+                ],
+                [
+                    1686858660,
+                    "3440526.899999999"
+                ],
+                [
+                    1686858675,
+                    "4823679.6000000015"
+                ],
+                [
+                    1686858690,
+                    "3407676.4333333336"
+                ],
+                [
+                    1686858705,
+                    "505817.70000000007"
+                ],
+                [
+                    1686858720,
+                    "172426.90000000002"
+                ],
+                [
+                    1686858735,
+                    "80406.36666666667"
+                ],
+                [
+                    1686858750,
+                    "67755.26666666666"
+                ],
+                [
+                    1686858765,
+                    "68964.13333333335"
+                ],
+                [
+                    1686858780,
+                    "61928.03333333332"
+                ],
+                [
+                    1686858795,
+                    "67873.23333333334"
+                ]
+            ]
+        }
+    ],
+    "stats": {
+        "numQueries": 1,
+        "limitReached": false,
+        "queriesStats": [
+            {
+                "ingester": {
+                    "store": {
+                        "chunk": {
+                            "compressedBytes": 56218200,
+                            "decompressedBytes": 257178667,
+                            "decompressedLines": 329046,
+                            "headChunkBytes": 31647617,
+                            "headChunkLines": 42185,
+                            "totalDuplicates": 0
+                        },
+                        "chunksDownloadTime": 38604093,
+                        "totalChunksDownloaded": 50,
+                        "totalChunksRef": 50
+                    },
+                    "totalBatches": 350,
+                    "totalChunksMatched": 2344,
+                    "totalLinesSent": 152457,
+                    "totalReached": 96
+                },
+                "querier": {
+                    "store": {
+                        "chunk": {
+                            "compressedBytes": 0,
+                            "decompressedBytes": 0,
+                            "decompressedLines": 0,
+                            "headChunkBytes": 0,
+                            "headChunkLines": 0,
+                            "totalDuplicates": 0
+                        },
+                        "chunksDownloadTime": 0,
+                        "totalChunksDownloaded": 0,
+                        "totalChunksRef": 0
+                    }
+                },
+                "summary": {
+                    "bytesProcessedPerSecond": 288547519,
+                    "execTime": 1.000966097,
+                    "linesProcessedPerSecond": 370872,
+                    "queueTime": 20.505935991,
+                    "subqueries": 6,
+                    "totalBytesProcessed": 288826284,
+                    "totalEntriesReturned": 1,
+                    "totalLinesProcessed": 371231
+                }
+            }
+        ]
+    },
+    "isMock": false,
+    "unixTimestamp": 1686858804
+}

@@ -1,0 +1,67 @@
+{
+  "status": "success",
+  "data": {
+    "resultType": "streams",
+    "result": [
+      {
+        "stream": {
+          "Duplicate": "false",
+          "FlowDirection": "0",
+          "app": "netobserv-flowcollector"
+        },
+        "values": [
+          [
+            "1696965015489999872",
+            "{\"DstAddr\":\"::1\",\"SrcMac\":\"00:00:00:00:00:00\",\"TimeFlowStartMs\":1696965015490,\"DstMac\":\"00:00:00:00:00:00\",\"SrcAddr\":\"::1\",\"Flags\":16,\"PktDropLatestState\":\"TCP_INVALID_STATE\",\"PktDropLatestFlags\":16,\"SrcPort\":56382,\"TimeReceived\":1696965016,\"K8S_ClusterName\":\"3239c6b5-7dd1-47f3-b1e0-fcc51bc76088\",\"DstPort\":2379,\"Proto\":6,\"Etype\":34525,\"Interface\":\"lo\",\"PktDropBytes\":32,\"IfDirection\":0,\"PktDropPackets\":1,\"PktDropLatestDropCause\":\"SKB_DROP_REASON_TCP_INVALID_SEQUENCE\",\"AgentIP\":\"10.0.14.70\",\"TimeFlowEndMs\":1696965015490}"
+          ]
+        ]
+      }
+    ],
+    "stats": {
+      "summary": {
+        "bytesProcessedPerSecond": 0,
+        "linesProcessedPerSecond": 0,
+        "totalBytesProcessed": 0,
+        "totalLinesProcessed": 0,
+        "execTime": 0.76474218,
+        "queueTime": 16.713512855,
+        "subqueries": 61,
+        "totalEntriesReturned": 0
+      },
+      "querier": {
+        "store": {
+          "totalChunksRef": 0,
+          "totalChunksDownloaded": 0,
+          "chunksDownloadTime": 0,
+          "chunk": {
+            "headChunkBytes": 0,
+            "headChunkLines": 0,
+            "decompressedBytes": 0,
+            "decompressedLines": 0,
+            "compressedBytes": 0,
+            "totalDuplicates": 0
+          }
+        }
+      },
+      "ingester": {
+        "totalReached": 976,
+        "totalChunksMatched": 0,
+        "totalBatches": 0,
+        "totalLinesSent": 0,
+        "store": {
+          "totalChunksRef": 0,
+          "totalChunksDownloaded": 0,
+          "chunksDownloadTime": 0,
+          "chunk": {
+            "headChunkBytes": 0,
+            "headChunkLines": 0,
+            "decompressedBytes": 0,
+            "decompressedLines": 0,
+            "compressedBytes": 0,
+            "totalDuplicates": 0
+          }
+        }
+      }
+    }
+  }
+}

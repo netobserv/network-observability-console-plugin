@@ -2,7 +2,9 @@
   "compilerOptions": {
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "baseUrl": ".",
+    "types": [
+      "node"
+    ],
     "module": "esnext",
     "moduleResolution": "node",
     "target": "es2020",
@@ -18,9 +20,15 @@
     "noUnusedLocals": true,
     "skipLibCheck": true,
     "strictNullChecks": true,
-    "isolatedModules": true
+    "isolatedModules": true,
+    "noEmit": true
   },
   "include": [
     "src"
+  ],
+  "exclude": [
+    "src/**/*.spec.ts",
+    "src/**/*.spec.tsx",
+    "src/**/__tests__"
   ]
 }

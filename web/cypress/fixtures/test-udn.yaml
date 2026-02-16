@@ -1,0 +1,62 @@
+---
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: netobserv-test-udn-81751
+  labels:
+    name: netobserv-test-udn-81751
+    k8s.ovn.org/primary-user-defined-network: null
+  annotations:
+    k8s.ovn.org/primary-user-defined-network: null
+---
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: netobserv-test1-cudn-81751
+  labels:
+    name: netobserv-test1-cudn-81751
+    test: netobserv
+    k8s.ovn.org/primary-user-defined-network: null
+  annotations:
+    k8s.ovn.org/primary-user-defined-network: null
+---
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: netobserv-test2-cudn-81751
+  labels:
+    name: netobserv-test2-cudn-81751
+    test: netobserv
+    k8s.ovn.org/primary-user-defined-network: null
+  annotations:
+    k8s.ovn.org/primary-user-defined-network: null
+---
+apiVersion: k8s.ovn.org/v1
+kind: UserDefinedNetwork
+metadata:
+  name: netobserv-udn-81751
+  namespace: netobserv-test-udn-81751
+spec:
+  topology: Layer2
+  layer2:
+    role: Primary
+    mtu: 1400
+    subnets:
+    - 10.151.0.0/16
+---
+apiVersion: k8s.ovn.org/v1
+kind: ClusterUserDefinedNetwork
+metadata:
+  name: netobserv-cudn-81751
+spec:
+  namespaceSelector:
+    matchLabels:
+      test: netobserv
+  network:
+    topology: Layer3
+    layer3:
+      role: Primary
+      mtu: 1300
+      subnets:
+        - cidr: 10.150.0.0/16
+          hostSubnet: 24

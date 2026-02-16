@@ -1,0 +1,11 @@
+kind: FlowCollector
+apiVersion: flows.netobserv.io/v1beta2
+metadata:
+  name: cluster
+spec:
+  agent:
+    ebpf:
+      sampling: 1
+    type: eBPF
+  loki:
+    enable: false
