@@ -9,7 +9,6 @@ import {
   FunctionMetrics,
   getFunctionMetricKey,
   getRateMetricKey,
-  MetricError,
   NetflowMetrics,
   RateMetrics,
   Stats,
@@ -30,8 +29,9 @@ import { ScopeConfigDef } from '../../../model/scope';
 import { GraphElementPeer, LayoutName, TopologyOptions } from '../../../model/topology';
 import { config } from '../../../utils/config';
 import { TimeRange } from '../../../utils/datetime';
-import { getHTTPErrorDetails } from '../../../utils/errors';
+import { getHTTPErrorDetails, getPromError, isPromError } from '../../../utils/errors';
 import { observeDOMRect } from '../../../utils/metrics-helper';
+import { Result } from '../../../utils/result';
 import { fetchNetworkHealth } from '../../health/health-fetcher';
 import { buildStats, HealthStats } from '../../health/health-helper';
 import { SearchEvent, SearchHandle } from '../../search/search';
@@ -52,6 +52,7 @@ export type NetflowTopologyHandle = {
     metricsRef: React.MutableRefObject<NetflowMetrics>,
     getMetrics: (q: FlowQuery, range: number | TimeRange) => Promise<FlowMetricsResult>,
     setMetrics: (v: NetflowMetrics) => void,
+    setError: (err?: string) => void,
     initFunction: () => void
   ) => Promise<Stats[]> | undefined;
   fetchUDNs: () => Promise<string[]>;
@@ -133,6 +134,7 @@ export const NetflowTopology: React.FC<NetflowTopologyProps> = React.forwardRef(
         metricsRef: React.MutableRefObject<NetflowMetrics>,
         getMetrics: (q: FlowQuery, range: number | TimeRange) => Promise<FlowMetricsResult>,
         setMetrics: (v: NetflowMetrics) => void,
+        setError: (err?: string) => void,
         initFunction: () => void
       ) => {
         initFunction();
@@ -147,7 +149,7 @@ export const NetflowTopology: React.FC<NetflowTopologyProps> = React.forwardRef(
             ? 'PktDropPackets'
             : undefined
           : undefined;
-        let currentMetrics = { ...metricsRef.current, errors: [] as MetricError[] };
+        let currentMetrics = { ...metricsRef.current };
 
         const promises: Promise<Stats>[] = [
           getMetrics(
@@ -160,22 +162,37 @@ export const NetflowTopology: React.FC<NetflowTopologyProps> = React.forwardRef(
             if (['Bytes', 'Packets'].includes(metricType)) {
               const rateMetrics = {} as RateMetrics;
               rateMetrics[getRateMetricKey(metricType)] = res.metrics;
-              currentMetrics = { ...currentMetrics, rateMetrics, dnsLatencyMetrics: undefined, rttMetrics: undefined };
+              currentMetrics = {
+                ...currentMetrics,
+                rate: Result.success(rateMetrics),
+                dnsLatency: Result.empty(),
+                rtt: Result.empty()
+              };
               setMetrics(currentMetrics);
             } else if (['PktDropBytes', 'PktDropPackets'].includes(metricType)) {
               const droppedRateMetrics = {} as RateMetrics;
               droppedRateMetrics[getRateMetricKey(metricType)] = res.metrics;
-              currentMetrics = { ...currentMetrics, droppedRateMetrics };
+              currentMetrics = { ...currentMetrics, droppedRate: Result.success(droppedRateMetrics) };
               setMetrics(currentMetrics);
             } else if (['DnsLatencyMs'].includes(metricType)) {
               const dnsLatencyMetrics = {} as FunctionMetrics;
               dnsLatencyMetrics[getFunctionMetricKey(metricFunction)] = res.metrics;
-              currentMetrics = { ...currentMetrics, rateMetrics: undefined, dnsLatencyMetrics, rttMetrics: undefined };
+              currentMetrics = {
+                ...currentMetrics,
+                rate: Result.empty(),
+                dnsLatency: Result.success(dnsLatencyMetrics),
+                rtt: Result.empty()
+              };
               setMetrics(currentMetrics);
             } else if (['TimeFlowRttNs'].includes(metricType)) {
               const rttMetrics = {} as FunctionMetrics;
               rttMetrics[getFunctionMetricKey(metricFunction)] = res.metrics;
-              currentMetrics = { ...currentMetrics, rateMetrics: undefined, dnsLatencyMetrics: undefined, rttMetrics };
+              currentMetrics = {
+                ...currentMetrics,
+                rate: Result.empty(),
+                dnsLatency: Result.empty(),
+                rtt: Result.success(rttMetrics)
+              };
               setMetrics(currentMetrics);
             }
             return res.stats;
@@ -188,31 +205,28 @@ export const NetflowTopology: React.FC<NetflowTopologyProps> = React.forwardRef(
               .then(res => {
                 const droppedRateMetrics = {} as RateMetrics;
                 droppedRateMetrics[getRateMetricKey(metricType)] = res.metrics;
-                currentMetrics = { ...currentMetrics, droppedRateMetrics };
+                currentMetrics = { ...currentMetrics, droppedRate: Result.success(droppedRateMetrics) };
                 setMetrics(currentMetrics);
                 return res.stats;
               })
               .catch(err => {
                 // Error might occur for instance when fetching node-based topology with drop feature enabled, and Loki disabled
                 // We don't want to break the whole topology due to missing drops enrichement
-                const errorMsg = getHTTPErrorDetails(err, true);
-                const droppedMetricType = droppedType === 'PktDropBytes' ? t('Dropped bytes') : t('Dropped packets');
-                const metricError: MetricError = { metricType: droppedMetricType, error: errorMsg };
-                currentMetrics = {
-                  ...currentMetrics,
-                  errors: [...currentMetrics.errors, metricError]
-                };
-                setMetrics(currentMetrics);
+                let strErr = getHTTPErrorDetails(err, true);
+                if (isPromError(strErr)) {
+                  strErr = getPromError(strErr);
+                }
+                setError(strErr);
                 return { numQueries: 0, dataSources: [], limitReached: false };
               })
           );
         } else if (!['PktDropBytes', 'PktDropPackets'].includes(metricType)) {
-          currentMetrics = { ...currentMetrics, droppedRateMetrics: undefined };
+          currentMetrics = { ...currentMetrics, droppedRate: Result.empty() };
           setMetrics(currentMetrics);
         }
         return Promise.all(promises);
       },
-      [t, refreshResourceStatsIfNeeded]
+      [refreshResourceStatsIfNeeded]
     );
 
     // Initial fetch and setup update trigger

@@ -4,10 +4,12 @@ import * as React from 'react';
 import { EmptyState } from '@patternfly/react-core';
 import { droppedMetrics, metrics } from '../../../../components/__tests-data__/metrics';
 
+import { defaultNetflowMetrics } from '../../../../api/loki';
 import { TruncateLength } from '../../../../components/dropdowns/truncate-dropdown';
 import { ScopeDefSample } from '../../../../components/__tests-data__/scopes';
 import { actOn, waitForRender } from '../../../../components/__tests__/common.spec';
 import { FlowScope, RecordType } from '../../../../model/flow-query';
+import { Result } from '../../../../utils/result';
 import { SamplePanel, ShuffledDefaultPanels } from '../../../__tests-data__/panels';
 import { NetflowOverview, NetflowOverviewProps } from '../netflow-overview';
 import { NetflowOverviewPanel } from '../netflow-overview-panel';
@@ -18,11 +20,7 @@ describe('<NetflowOverview />', () => {
     panels: ShuffledDefaultPanels,
     loading: false,
     recordType: 'flowLog' as RecordType,
-    metrics: {
-      customMetrics: new Map(),
-      totalCustomMetrics: new Map(),
-      errors: []
-    },
+    metrics: defaultNetflowMetrics,
     truncateLength: TruncateLength.M,
     forcedSize: { width: 800, height: 800 } as DOMRect,
     scopes: ScopeDefSample,
@@ -52,10 +50,10 @@ describe('<NetflowOverview />', () => {
         {...props}
         metrics={{
           ...props.metrics,
-          rateMetrics: { bytes: metrics },
-          droppedRateMetrics: { bytes: droppedMetrics },
-          totalRateMetric: { bytes: metrics[0] },
-          totalDroppedRateMetric: { bytes: droppedMetrics[0] }
+          rate: Result.success({ bytes: metrics }),
+          droppedRate: Result.success({ bytes: droppedMetrics }),
+          totalRate: Result.success({ bytes: metrics[0] }),
+          totalDroppedRate: Result.success({ bytes: droppedMetrics[0] })
         }}
       />
     );

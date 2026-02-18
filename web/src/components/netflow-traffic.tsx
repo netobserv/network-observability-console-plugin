@@ -424,6 +424,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
             metricsRef,
             getMetrics,
             model.setMetrics,
+            model.setError,
             clearFlows
           );
 
@@ -437,10 +438,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
             .catch(err => {
               console.error('fetchUDNs error', err);
               const errorMsg = getHTTPErrorDetails(err, true);
-              model.setMetrics({
-                ...model.metrics,
-                errors: [...model.metrics.errors, { metricType: t('User-Defined Networks'), error: errorMsg }]
-              });
+              model.setError(t('User-Defined Networks: ') + errorMsg);
               model.setTopologyUDNIds([]);
             });
         } else {
@@ -917,7 +915,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
         <HistogramToolbar
           {...model}
           isDarkTheme={isDarkTheme}
-          totalMetric={model.metrics.totalFlowCountMetric}
+          totalMetric={model.metrics.totalFlowCount?.result}
           guidedTourHandle={guidedTourRef.current}
           resetRange={() => model.setRange(defaultTimeRange)}
           tick={tick}
