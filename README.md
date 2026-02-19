@@ -1,9 +1,9 @@
-# Network Observability plugin for Openshift Console
+# NetObserv Web Console
 
 [![Docker Repository on Quay](https://quay.io/repository/netobserv/network-observability-console-plugin/status "Docker Repository on Quay")](https://quay.io/repository/netobserv/network-observability-console-plugin)
 [![Go Report Card](https://goreportcard.com/badge/github.com/netobserv/network-observability-console-plugin)](https://goreportcard.com/report/github.com/netobserv/network-observability-console-plugin)
 
-Based on [Openshift Console dynamic plugin](https://github.com/openshift/console/tree/master/frontend/packages/console-dynamic-plugin-sdk), this plugin implement the console elements for Network Observability.
+The web console can be deployed either as a standalone console, or as a [console plugin](https://github.com/openshift/console/tree/master/frontend/packages/console-dynamic-plugin-sdk) for OpenShift.
 
 ## First setup
 
@@ -46,15 +46,41 @@ BUILDSCRIPT=:dev make frontend
 
 It will skip optimizations for production.
 
-
 ## Development environment
+
+### Standalone console
+
+To build a standalone frontend (ie. not tied to the OpenShift Console as a plugin), run these steps:
+
+```bash
+# build and push on your own quay.io account (quay.io/myuser/network-observability-standalone-frontend:dev):
+STANDALONE=true IMAGE_ORG=myuser VERSION=dev make images
+```
+
+If you have a running cluster with NetObserv and Loki installed, you can serve the standalone frontend using a port-forwarded Loki:
+
+```bash
+kubectl port-forward service/loki 3100:3100
+make start-standalone
+```
+
+Alternatively, you can start it without Loki/NetObserv, using mocked flows:
+
+```bash
+make serve-mock
+```
+
+Both options will start the standalone console server on http://localhost:9001/.
+
+Note: this will provide a single page showing the main Netflow Traffic and Network Health pages. However, the OpenShift Console integration goes further, by providing more views directly integrated in other pages. These views obviously cannot be rendered without the OpenShift Console.
+
+### Console plugin
 
 Plugin can be served locally using the following command:
 
 ```bash
 make serve
 ```
-
 
 Make sure you are logged in your OpenShift cluster before with the CLI (`oc login -u kubeadmin` ...)
 
@@ -73,11 +99,9 @@ Then open http://localhost:9000/.
 
 If you have troubles trying to run the console, refer to their doc: https://github.com/openshift/console/#openshift-no-authentication.
 
-### Loki in dev mode
+#### Loki in dev mode
 
-You need to deploy Loki and port-forward on your host: `oc port-forward service/loki 3100:3100`
-
-(You don't need Grafana)
+You need to deploy Loki and port-forward on your host: `kubectl port-forward service/loki 3100:3100`
 
 ## OCI Image
 
@@ -125,49 +149,11 @@ If you had previously used the console with the plugin installed, you may need t
 oc delete pods -n openshift-console -l app=console
 ```
 
-## Standalone frontend
-
-To build a standalone frontend (ie. not tied to the OpenShift Console as a plugin), simply run these steps:
-
-```bash
-# build and push on your own quay.io account (quay.io/myuser/network-observability-standalone-frontend:dev):
-STANDALONE=true IMAGE_ORG=myuser VERSION=dev make images
-```
-
-If you have a running cluster with NetObserv and Loki installed, you can serve the standalone frontend using a port-forwarded Loki:
-
-```bash
-kubectl port-forward service/loki 3100:3100
-make start-standalone
-```
-
-Alternatively, you can start it without Loki/NetObserv, using mocked flows:
-
-```bash
-make serve-mock
-```
-
-Both options will start the standalone console server on http://localhost:9001/.
-
-Note: this will provide a single page showing the main Netflow Traffic page. However, the OpenShift Console integration goes further, by providing more views directly integrated in other pages. These views obviously cannot be rendered without the OpenShift Console.
-
 ## Cypress tests
 
 [Cypress](https://www.cypress.io/) is a framework for running frontend integration tests. Our tests are defined in [cypress/integration](./web/cypress/integration/).
 
 You can run the cypress tests either with the OpenShift Console + NetObserv as a plugin, or with the NetObserv console deployed as a standalone as documented above.
-
-### With OpenShift Console and NetObserv as a plugin
-
-1. Start your [dev environment](#development-environment) as documented above, including port-forwarding Loki. You should have the console accessible and working on http://localhost:9000/netflow-traffic
-
-2. Start cypress:
-
-```bash
-make cypress
-```
-
-3. Click on "Run N integration specs"
 
 ### With the standalone mode
 
@@ -182,6 +168,18 @@ make cypress
 ```
 
 4. Click on "Run N integration specs"
+
+### With OpenShift Console and NetObserv as a plugin
+
+1. Start your [dev environment](#development-environment) as documented above, including port-forwarding Loki. You should have the console accessible and working on http://localhost:9000/netflow-traffic
+
+2. Start cypress:
+
+```bash
+make cypress
+```
+
+3. Click on "Run N integration specs"
 
 ## Updating schemas
 
