@@ -15,6 +15,12 @@ func (h *Handlers) PromProxyRules() func(w http.ResponseWriter, r *http.Request)
 	return simpleProxy(u, cfg.Timeout.Duration, cfg.SkipTLS, cfg.CAPath, cfg.ForwardUserToken, cfg.TokenPath)
 }
 
+func (h *Handlers) PromProxyQuery() func(w http.ResponseWriter, r *http.Request) {
+	u, _ := url.JoinPath(h.Cfg.Prometheus.URL, "/api/v1/query")
+	cfg := &h.Cfg.Prometheus
+	return simpleProxy(u, cfg.Timeout.Duration, cfg.SkipTLS, cfg.CAPath, cfg.ForwardUserToken, cfg.TokenPath)
+}
+
 func (h *Handlers) PromProxySilences() func(w http.ResponseWriter, r *http.Request) {
 	u, _ := url.JoinPath(h.Cfg.Prometheus.AlertManager.URL, "/api/v2/silences")
 	cfg := &h.Cfg.Prometheus
