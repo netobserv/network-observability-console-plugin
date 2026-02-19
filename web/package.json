@@ -31,7 +31,7 @@
     "@babel/core": "^7.29.0",
     "@babel/plugin-transform-typescript": "^7.17.12",
     "@babel/preset-env": "^7.17.12",
-    "@babel/preset-react": "^7.17.12",
+    "@babel/preset-react": "^7.28.5",
     "@babel/preset-typescript": "^7.17.12",
     "@openshift-console/dynamic-plugin-sdk": "1.0.0",
     "@openshift-console/dynamic-plugin-sdk-webpack": "1.0.2",
