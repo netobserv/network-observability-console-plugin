@@ -615,6 +615,9 @@ export const flowCollectorUISchema: UiSchema = {
           }
         }
       },
+      service: {
+        'ui:widget': 'hidden'
+      },
       advanced: {
         'ui:title': 'Advanced configuration',
         port: {
