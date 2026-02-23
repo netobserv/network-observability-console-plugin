@@ -27,9 +27,9 @@ func (h *Handlers) PromProxySilences() func(w http.ResponseWriter, r *http.Reque
 	return simpleProxy(u, cfg.Timeout.Duration, cfg.SkipTLS, cfg.CAPath, cfg.ForwardUserToken, cfg.TokenPath)
 }
 
-func simpleProxy(toURL string, timeout time.Duration, skipTLS bool, caPath string, forwardUserToken bool, tokenPath string) func(w http.ResponseWriter, r *http.Request) {
-	hlog.Infof("Proxying to: %s", toURL)
-	backendURL, _ := url.Parse(toURL)
+func simpleProxy(toURLStr string, timeout time.Duration, skipTLS bool, caPath string, forwardUserToken bool, tokenPath string) func(w http.ResponseWriter, r *http.Request) {
+	hlog.Infof("Proxying to: %s", toURLStr)
+	toURL, _ := url.Parse(toURLStr)
 	return func(w http.ResponseWriter, r *http.Request) {
 		roundTripper, err := prometheus.CreateRoundTripper(timeout, skipTLS, caPath, forwardUserToken, tokenPath, r.Header)
 		if err != nil {
@@ -37,10 +37,11 @@ func simpleProxy(toURL string, timeout time.Duration, skipTLS bool, caPath strin
 			writeError(w, http.StatusInternalServerError, err.Error())
 			return
 		}
+		backendURL := *toURL
 		backendURL.RawQuery = r.URL.RawQuery
 		rq := http.Request{
 			Method:        r.Method,
-			URL:           backendURL,
+			URL:           &backendURL,
 			Body:          r.Body,
 			ContentLength: r.ContentLength,
 		}
