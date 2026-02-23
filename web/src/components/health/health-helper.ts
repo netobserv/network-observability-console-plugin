@@ -3,6 +3,7 @@ import { TFunction } from 'i18next';
 import * as _ from 'lodash';
 import { SilenceMatcher } from '../../api/alert';
 import { RecordingAnnotations } from '../../model/config';
+import { ContextSingleton } from '../../utils/context';
 
 export type Severity = 'critical' | 'warning' | 'info';
 export type AlertState = 'firing' | 'pending' | 'silenced' | 'recording' | 'inactive';
@@ -403,9 +404,11 @@ export const getLinks = (
 ) => {
   return [
     ...(item.runbookUrl ? [{ name: t('View runbook'), url: item.runbookUrl }] : []),
-    item.state === 'recording'
-      ? { name: t('Inspect metric'), url: getRecordingRuleMetricLink(item, name) }
-      : { name: t('Inspect alert'), url: getAlertLink(item) },
+    ...(ContextSingleton.isStandalone() ? [] : [
+      item.state === 'recording'
+        ? { name: t('Inspect metric'), url: getRecordingRuleMetricLink(item, name) }
+        : { name: t('Inspect alert'), url: getAlertLink(item) }
+    ]),
     { name: t('Inspect network traffic'), url: getTrafficLink(kind, item, name, namespace, k8sKind) },
     ...item.metadata.links
   ];
@@ -470,7 +473,8 @@ const getTrafficLink = (
   if (item.metadata.trafficLink?.extraFilter) {
     filters.push(item.metadata.trafficLink.extraFilter);
   }
-  return `/netflow-traffic?filters=${encodeURIComponent(filters.join(';'))}${params}`;
+  const root = ContextSingleton.isStandalone() ? '/console-netflow-traffic' : '/netflow-traffic';
+  return `${root}?filters=${encodeURIComponent(filters.join(';'))}${params}`;
 };
 
 const criticalWeight = 1;
