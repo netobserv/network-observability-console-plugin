@@ -404,11 +404,13 @@ export const getLinks = (
 ) => {
   return [
     ...(item.runbookUrl ? [{ name: t('View runbook'), url: item.runbookUrl }] : []),
-    ...(ContextSingleton.isStandalone() ? [] : [
-      item.state === 'recording'
-        ? { name: t('Inspect metric'), url: getRecordingRuleMetricLink(item, name) }
-        : { name: t('Inspect alert'), url: getAlertLink(item) }
-    ]),
+    ...(ContextSingleton.isStandalone()
+      ? []
+      : [
+          item.state === 'recording'
+            ? { name: t('Inspect metric'), url: getRecordingRuleMetricLink(item, name) }
+            : { name: t('Inspect alert'), url: getAlertLink(item) }
+        ]),
     { name: t('Inspect network traffic'), url: getTrafficLink(kind, item, name, namespace, k8sKind) },
     ...item.metadata.links
   ];
