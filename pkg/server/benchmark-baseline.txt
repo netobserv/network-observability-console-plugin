@@ -1,0 +1,30 @@
+goos: darwin
+goarch: amd64
+pkg: github.com/netobserv/network-observability-console-plugin/pkg/server
+cpu: Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz
+BenchmarkTable/Basic-12         	     655	    589038 ns/op	   63590 B/op	     438 allocs/op
+BenchmarkTable/WithHistogram-12 	     357	   1034855 ns/op	  132133 B/op	     917 allocs/op
+PASS
+ok  	github.com/netobserv/network-observability-console-plugin/pkg/server	2.492s
+BenchmarkTopologyLoki/Bytes-12         	     494	    661508 ns/op	  108716 B/op	     738 allocs/op
+BenchmarkTopologyLoki/Packets-12       	     584	    704746 ns/op	  105930 B/op	     736 allocs/op
+BenchmarkTopologyLoki/DNSLatency-12    	     650	    993091 ns/op	   66474 B/op	     463 allocs/op
+BenchmarkTopologyLoki/RTT-12           	     626	    577959 ns/op	   65928 B/op	     463 allocs/op
+BenchmarkTopologyLoki/Dropped-12       	     596	    641529 ns/op	   67943 B/op	     463 allocs/op
+BenchmarkTopologyLoki/BytesWithDrops-12         	     284	   2612656 ns/op	  177334 B/op	    1199 allocs/op
+BenchmarkTopologyAuto/Bytes-12         	     547	    726242 ns/op	  108756 B/op	     780 allocs/op
+BenchmarkTopologyAuto/Packets-12       	     530	    653982 ns/op	  108008 B/op	     780 allocs/op
+BenchmarkTopologyAuto/DNSLatency-12    	     396	    839520 ns/op	   68855 B/op	     484 allocs/op
+BenchmarkTopologyAuto/RTT-12           	     591	    578087 ns/op	   67975 B/op	     484 allocs/op
+BenchmarkTopologyAuto/Dropped-12       	     636	    514976 ns/op	   67907 B/op	     484 allocs/op
+BenchmarkTopologyAuto/BytesWithDrops-12         	     252	   1413271 ns/op	  178459 B/op	    1264 allocs/op
+BenchmarkOverviewLoki/Basic-12         	     123	   3161764 ns/op	  429410 B/op	    2945 allocs/op
+BenchmarkOverviewLoki/DNS-12           	      55	   6463257 ns/op	  887069 B/op	    6181 allocs/op
+BenchmarkOverviewLoki/RTT-12           	      56	   5822485 ns/op	  835894 B/op	    5717 allocs/op
+BenchmarkOverviewLoki/Dropped-12       	      48	   7890088 ns/op	  817015 B/op	    5721 allocs/op
+BenchmarkOverviewLoki/Full-12          	      21	  15213024 ns/op	 1710218 B/op	   11733 allocs/op
+BenchmarkOverviewAuto/Basic-12         	     118	   3084384 ns/op	  433055 B/op	    3100 allocs/op
+BenchmarkOverviewAuto/DNS-12           	      55	   6556638 ns/op	  914957 B/op	    6479 allocs/op
+BenchmarkOverviewAuto/RTT-12           	      50	   7468385 ns/op	  845743 B/op	    5990 allocs/op
+BenchmarkOverviewAuto/Dropped-12       	      55	   6910571 ns/op	  853432 B/op	    5994 allocs/op
+BenchmarkOverviewAuto/Full-12          	      20	  15241360 ns/op	 1757702 B/op	   12261 allocs/op
