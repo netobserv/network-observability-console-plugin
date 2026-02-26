@@ -148,11 +148,18 @@ const recordingToHealth = (metric: RecordingRuleMetric, annotations: { [key: str
       }
     }
 
-    // Inject labels in description
-    let description = annotations.description || '';
-    for (const [key, value] of Object.entries(valueData.labels)) {
-      description = description.replaceAll(`{{ $labels.${key} }}`, value);
-    }
+    // Inject $value and $labels.* in description and summary
+    const substitute = (template: string): string => {
+      let out = template.replace(/\{\{\s*\$value\s*\}\}/g, String(value));
+      for (const [k, v] of Object.entries(valueData.labels)) {
+        out = out.replaceAll(`{{ $labels.${k} }}`, v);
+      }
+      return out;
+    };
+    const rawSummary = annotations.summary || valueData.labels.template || '';
+    const rawDescription = annotations.description || '';
+    const summary = substitute(rawSummary);
+    const description = substitute(rawDescription);
 
     return {
       ruleName: metric.name,
@@ -163,8 +170,8 @@ const recordingToHealth = (metric: RecordingRuleMetric, annotations: { [key: str
       labels: valueData.labels,
       severity: severity,
       state: state,
-      summary: annotations.summary || valueData.labels.template || '',
-      description: description,
+      summary,
+      description,
       runbookUrl: annotations.runbook_url,
       value: value
     };
