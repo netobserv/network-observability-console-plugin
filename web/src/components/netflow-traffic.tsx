@@ -16,7 +16,12 @@ import { ColumnsId, getDefaultColumns } from '../utils/columns';
 import { loadConfig } from '../utils/config';
 import { ContextSingleton } from '../utils/context';
 import { computeStepInterval } from '../utils/datetime';
-import { getHTTPErrorDetails, getPromError, isPromMissingLabelError } from '../utils/errors';
+import {
+  getHTTPErrorDetails,
+  getPromError,
+  isPromDisabledMetricsError,
+  isPromMissingLabelError
+} from '../utils/errors';
 import { checkFilterAvailable, getFilterDefinitions } from '../utils/filter-definitions';
 import {
   defaultArraySelectionOptions,
@@ -465,19 +470,56 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
             const errStr = getHTTPErrorDetails(err, true);
             const promErrStr = getPromError(errStr);
 
-            // check if it's a prom missing label error and remove filters
-            // when the prom error is different to the new one
-            if (isPromMissingLabelError(errStr) && promErrStr !== model.chipsPopoverMessage) {
+            // check if it's a prom missing label error
+            if (isPromMissingLabelError(errStr) || isPromDisabledMetricsError(errStr)) {
+              // First, check if scope needs to be changed (overview or topology)
+              const currentScope = model.config.scopes.find(sc => sc.id === model.metricScope);
+              if (
+                (model.selectedViewId === 'overview' || model.selectedViewId === 'topology') &&
+                currentScope?.labels
+              ) {
+                const missingLabels = currentScope.labels.some(label => errStr.includes(label));
+                if (missingLabels) {
+                  // Find first available scope that doesn't have missing labels
+                  const fallbackScope = getAvailableScopes().find(sc => {
+                    return !sc.labels || !sc.labels.some(label => errStr.includes(label));
+                  });
+                  if (fallbackScope && fallbackScope.id !== currentScope.id) {
+                    // Set the fallback scope - this will trigger a new query
+                    // Filters might be available on the new scope, so don't disable them yet
+                    // Extract missing labels from error for display
+                    const missingLabelsList = currentScope.labels?.filter(label => errStr.includes(label)) || [];
+                    const missingLabelsText = missingLabelsList.length > 0 ? ` (${missingLabelsList.join(', ')})` : '';
+                    model.setMetricScope(fallbackScope.id);
+                    model.setScopeWarning(
+                      t(
+                        'Scope "{{currentScope}}" requires missing labels{{missingLabels}}. Switched to "{{fallbackScope}}".',
+                        {
+                          currentScope: currentScope.name,
+                          missingLabels: missingLabelsText,
+                          fallbackScope: fallbackScope.name
+                        }
+                      )
+                    );
+                    return;
+                  }
+                }
+              }
+
+              // If scope didn't change (or not in topology), check and disable filters with missing labels
               let filtersDisabled = false;
               model.filters.list.forEach(filter => {
                 const fieldName = model.config.columns.find(col => col.filter === filter.def.id)?.field;
                 if (!fieldName || errStr.includes(fieldName)) {
-                  filtersDisabled = true;
                   filter.values.forEach(fv => {
-                    fv.disabled = true;
+                    if (!fv.disabled) {
+                      fv.disabled = true;
+                      filtersDisabled = true;
+                    }
                   });
                 }
               });
+
               if (filtersDisabled) {
                 // update filters to retrigger query without showing the error
                 updateTableFilters({ ...model.filters });
@@ -489,7 +531,10 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
             // clear flows and metrics + show error
             // always clear chip message to focus on the error
             model.setFlows([]);
-            model.setMetrics(defaultNetflowMetrics);
+            // overview metrics are handled per graph; only reset topology metrics in that case to keep showing available graphs
+            if (model.selectedViewId === 'topology') {
+              model.setMetrics(defaultNetflowMetrics);
+            }
             model.setError(errStr);
             model.setWarning(undefined);
             model.setChipsPopoverMessage(undefined);

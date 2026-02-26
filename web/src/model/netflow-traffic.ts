@@ -114,6 +114,7 @@ export function netflowTrafficModel() {
   const [lastRefresh, setLastRefresh] = React.useState<Date | undefined>(undefined);
   const [lastDuration, setLastDuration] = React.useState<number | undefined>(undefined);
   const [chipsPopoverMessage, setChipsPopoverMessage] = React.useState<string | undefined>();
+  const [scopeWarning, setScopeWarning] = React.useState<string | undefined>();
   const [error, setError] = React.useState<string | undefined>();
   const [isTRModalOpen, setTRModalOpen] = React.useState(false);
   const [isOverviewModalOpen, setOverviewModalOpen] = React.useState(false);
@@ -136,6 +137,8 @@ export function netflowTrafficModel() {
   const updateMetricScope = React.useCallback(
     (scope: FlowScope) => {
       setMetricScope(scope);
+      // Clear scope warning when user manually changes scope
+      setScopeWarning(undefined);
       // Invalidate groups if necessary, when metrics scope changed
       const groups = getGroupsForScope(scope, config.scopes);
       if (!groups.includes(topologyOptions.groupTypes)) {
@@ -236,6 +239,8 @@ export function netflowTrafficModel() {
     setLastDuration,
     chipsPopoverMessage,
     setChipsPopoverMessage,
+    scopeWarning,
+    setScopeWarning,
     error,
     setError,
     isTRModalOpen,
