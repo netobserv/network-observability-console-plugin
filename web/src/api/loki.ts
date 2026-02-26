@@ -1,6 +1,7 @@
 import { FlowScope, MetricType, StatFunction } from '../model/flow-query';
 import { cyrb53 } from '../utils/hash';
 import { getFunctionFromId, getRateFunctionFromId } from '../utils/overview-panels';
+import { Result } from '../utils/result';
 import { Field, Flow, Record } from './ipfix';
 
 export interface AggregatedQueryResponse {
@@ -130,35 +131,42 @@ export type TotalRateMetrics = {
   packets?: TopologyMetrics;
 };
 
-export type MetricError = {
-  metricType: string;
-  error: string;
-};
-
 export type NetflowMetrics = {
-  rateMetrics?: RateMetrics;
-  droppedRateMetrics?: RateMetrics;
-  totalRateMetric?: TotalRateMetrics;
-  totalDroppedRateMetric?: TotalRateMetrics;
-  droppedStateMetrics?: GenericMetric[];
-  droppedCauseMetrics?: GenericMetric[];
-  dnsNameMetrics?: GenericMetric[];
-  dnsRCodeMetrics?: GenericMetric[];
-  dnsLatencyMetrics?: FunctionMetrics;
-  rttMetrics?: FunctionMetrics;
-  totalFlowCountMetric?: TopologyMetrics;
-  totalDnsLatencyMetric?: TotalFunctionMetrics;
-  totalDnsCountMetric?: GenericMetric;
-  totalRttMetric?: TotalFunctionMetrics;
-  customMetrics: Map<string, TopologyMetrics[] | GenericMetric[]>;
-  totalCustomMetrics: Map<string, TopologyMetrics | GenericMetric>;
-  errors: MetricError[];
+  rate: Result<RateMetrics, string>;
+  droppedRate: Result<RateMetrics, string>;
+  totalRate: Result<TotalRateMetrics, string>;
+  totalDroppedRate: Result<TotalRateMetrics, string>;
+  droppedState: Result<GenericMetric[], string>;
+  droppedCause: Result<GenericMetric[], string>;
+  dnsName: Result<GenericMetric[], string>;
+  dnsRCode: Result<GenericMetric[], string>;
+  dnsLatency: Result<FunctionMetrics, string>;
+  rtt: Result<FunctionMetrics, string>;
+  totalFlowCount: Result<TopologyMetrics, string>;
+  totalDnsLatency: Result<TotalFunctionMetrics, string>;
+  totalDnsCount: Result<GenericMetric, string>;
+  totalRtt: Result<TotalFunctionMetrics, string>;
+  custom: Map<string, Result<TopologyMetrics[] | GenericMetric[], string>>;
+  totalCustom: Map<string, Result<TopologyMetrics | GenericMetric, string>>;
 };
 
-export const defaultNetflowMetrics = {
-  customMetrics: new Map(),
-  totalCustomMetrics: new Map(),
-  errors: []
+export const defaultNetflowMetrics: NetflowMetrics = {
+  rate: Result.empty(),
+  droppedRate: Result.empty(),
+  totalRate: Result.empty(),
+  totalDroppedRate: Result.empty(),
+  droppedState: Result.empty(),
+  droppedCause: Result.empty(),
+  dnsName: Result.empty(),
+  dnsRCode: Result.empty(),
+  dnsLatency: Result.empty(),
+  rtt: Result.empty(),
+  totalFlowCount: Result.empty(),
+  totalDnsLatency: Result.empty(),
+  totalDnsCount: Result.empty(),
+  totalRtt: Result.empty(),
+  custom: new Map(),
+  totalCustom: new Map()
 };
 
 export const initRateMetricKeys = (ids: string[]) => {

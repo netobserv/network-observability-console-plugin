@@ -74,7 +74,7 @@ export const defaultPanelIds: OverviewPanelId[] = [
   'top_p90_dns_latency',
   'name_dns_latency_flows',
   'rcode_dns_latency_flows',
-  'bottom_min_rtt',
+  'bottom_min_rtt', // should remove from defaults?
   'top_avg_rtt',
   'top_p90_rtt'
 ];

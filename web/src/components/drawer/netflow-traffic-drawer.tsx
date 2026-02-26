@@ -24,7 +24,6 @@ import { isPromError } from '../../utils/errors';
 import { OverviewPanel } from '../../utils/overview-panels';
 import { TruncateLength } from '../dropdowns/truncate-dropdown';
 import { ErrorComponent, Size } from '../messages/error';
-import { ErrorBanner } from '../messages/error-banner';
 import { ViewId } from '../netflow-traffic';
 import FlowsQuerySummary from '../query-summary/flows-query-summary';
 import MetricsQuerySummary from '../query-summary/metrics-query-summary';
@@ -181,21 +180,15 @@ export const NetflowTrafficDrawer: React.FC<NetflowTrafficDrawerProps> = React.f
       switch (topologyMetricType) {
         case 'Bytes':
         case 'Packets':
-          return metrics.rateMetrics?.[getRateMetricKey(topologyMetricType)];
+          return metrics.rate?.result?.[getRateMetricKey(topologyMetricType)];
         case 'DnsLatencyMs':
-          return metrics.dnsLatencyMetrics?.[getFunctionMetricKey(topologyMetricFunction)];
+          return metrics.dnsLatency?.result?.[getFunctionMetricKey(topologyMetricFunction)];
         case 'TimeFlowRttNs':
-          return metrics.rttMetrics?.[getFunctionMetricKey(topologyMetricFunction)];
+          return metrics.rtt?.result?.[getFunctionMetricKey(topologyMetricFunction)];
         default:
           return undefined;
       }
-    }, [
-      metrics.dnsLatencyMetrics,
-      topologyMetricFunction,
-      topologyMetricType,
-      metrics.rateMetrics,
-      metrics.rttMetrics
-    ]);
+    }, [metrics.dnsLatency, topologyMetricFunction, topologyMetricType, metrics.rate, metrics.rtt]);
 
     const getTopologyDroppedMetrics = React.useCallback(() => {
       switch (topologyMetricType) {
@@ -203,11 +196,11 @@ export const NetflowTrafficDrawer: React.FC<NetflowTrafficDrawerProps> = React.f
         case 'Packets':
         case 'PktDropBytes':
         case 'PktDropPackets':
-          return metrics.droppedRateMetrics?.[getRateMetricKey(topologyMetricType)];
+          return metrics.droppedRate?.result?.[getRateMetricKey(topologyMetricType)];
         default:
           return undefined;
       }
-    }, [metrics.droppedRateMetrics, topologyMetricType]);
+    }, [metrics.droppedRate, topologyMetricType]);
 
     const checkSlownessReason = React.useCallback(
       (w: Warning | undefined): Warning | undefined => {
@@ -261,7 +254,6 @@ export const NetflowTrafficDrawer: React.FC<NetflowTrafficDrawerProps> = React.f
           case 'overview':
             content = (
               <>
-                {props.metrics.errors.length > 0 && <ErrorBanner errors={props.metrics.errors} />}
                 <NetflowOverview
                   ref={overviewRef}
                   limit={props.limit}
@@ -307,7 +299,6 @@ export const NetflowTrafficDrawer: React.FC<NetflowTrafficDrawerProps> = React.f
           case 'topology':
             content = (
               <>
-                {props.metrics.errors.length > 0 && <ErrorBanner errors={props.metrics.errors} />}
                 <NetflowTopology
                   ref={topologyRef}
                   loading={props.loading}

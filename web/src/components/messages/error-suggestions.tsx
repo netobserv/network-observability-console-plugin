@@ -41,6 +41,7 @@ export const ErrorSuggestions: React.FC<ErrorSuggestionsProps> = ({ error, isLok
 
       {error.includes('promUnsupported') && (
         <>
+          <Text component={TextVariants.blockquote}>{t('Use a different scope of aggregation')}</Text>
           <Text component={TextVariants.blockquote}>
             {t('Add missing metrics to prometheus in the FlowCollector API (processor.metrics.includeList)')}
           </Text>

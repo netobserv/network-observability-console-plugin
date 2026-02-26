@@ -32,7 +32,7 @@ export interface MetricsGraphWithTotalProps {
   id: string;
   metricType: MetricType;
   metricFunction: MetricFunction;
-  topKMetrics: GenericMetric[] | NamedMetric[];
+  topKMetrics: (GenericMetric | NamedMetric)[];
   totalMetric?: GenericMetric | NamedMetric;
   totalDropMetric?: NamedMetric;
   limit: number;

@@ -157,11 +157,7 @@ export const SummaryPanelContent: React.FC<SummaryPanelContentProps> = ({
   };
 
   const cardinalityContent = () => {
-    const rateMetrics = !_.isEmpty(metrics.rateMetrics?.bytes)
-      ? metrics.rateMetrics!.bytes!
-      : !_.isEmpty(metrics.rateMetrics?.packets)
-      ? metrics.rateMetrics!.packets!
-      : [];
+    const rateMetrics = metrics.rate.map(r => r.bytes || r.packets).or([]);
 
     //regroup all k8s objects per type + namespace
     const namespaces: string[] = [];
