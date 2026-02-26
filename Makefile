@@ -188,6 +188,34 @@ test-backend: ## Test backend using go test
 	@echo "### Testing backend"
 	go test ./... -coverpkg=./... -coverprofile cover.out
 
+##@ Performance Testing
+
+.PHONY: benchmark-server
+benchmark-server: ## Run server performance benchmarks
+	@echo "### Running server performance benchmarks..."
+	go test -bench=. -benchmem -benchtime=300ms ./pkg/server/ -run=^$$ | tee pkg/server/benchmark-results.txt
+	@echo "Results saved to pkg/server/benchmark-results.txt"
+
+.PHONY: benchmark-server-compare
+benchmark-server-compare: ## Compare benchmark results with baseline using benchstat
+	@echo "### Running benchmarks and comparing with baseline..."
+	@GOPATH=$$(go env GOPATH); \
+	BENCHSTAT="$$GOPATH/bin/benchstat"; \
+	if [ ! -x "$$BENCHSTAT" ]; then \
+		echo "Installing benchstat..."; \
+		go install golang.org/x/perf/cmd/benchstat@latest; \
+	fi; \
+	if [ ! -f pkg/server/benchmark-baseline.txt ]; then \
+		echo "No baseline found. Creating baseline..."; \
+		go test -bench=. -benchmem -benchtime=300ms ./pkg/server/ -run=^$$ | tee pkg/server/benchmark-baseline.txt; \
+		echo "Baseline created. Run 'make benchmark-server-compare' again to compare."; \
+	else \
+		go test -bench=. -benchmem -benchtime=300ms ./pkg/server/ -run=^$$ | tee pkg/server/benchmark-current.txt; \
+		echo ""; \
+		echo "=== Performance Comparison (baseline vs current) ==="; \
+		$$BENCHSTAT pkg/server/benchmark-baseline.txt pkg/server/benchmark-current.txt; \
+	fi
+
 .PHONY: serve
 serve: YQ ## Run backend
 	$(YQ) '.server.port |= 9001 | .server.metricsPort |= 9002 | .loki.useMocks |= false' ./config/sample-config.yaml > ./config/config.yaml

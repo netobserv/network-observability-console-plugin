@@ -14,3 +14,9 @@
 /cover.out
 tmp.Dockerfile
 tmp/
+
+# Benchmark results (generated files, but keep baseline)
+benchmark-*.txt
+/pkg/server/benchmark-current.txt
+/pkg/server/benchmark-results.txt
+!/pkg/server/benchmark-baseline.txt
