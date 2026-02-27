@@ -93,11 +93,7 @@ type ScoreDetail = {
 };
 
 /* Replaces {{ $value }} and {{ $labels.<key> }} in alert/recording templates. */
-const substituteTemplate = (
-  template: string,
-  labels: PrometheusLabels,
-  value: number | string
-): string => {
+const substituteTemplate = (template: string, labels: PrometheusLabels, value: number | string): string => {
   let out = template.replace(/\{\{\s*\$value\s*\}\}/g, String(value));
   for (const [k, v] of Object.entries(labels)) {
     out = out.replaceAll(`{{ $labels.${k} }}`, v);
