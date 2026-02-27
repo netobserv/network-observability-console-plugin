@@ -92,7 +92,23 @@ type ScoreDetail = {
   weight: number;
 };
 
+/* Replaces {{ $value }} and {{ $labels.<key> }} in alert/recording templates. */
+const substituteTemplate = (template: string, labels: PrometheusLabels, value: number | string): string => {
+  let out = template.replace(/\{\{\s*\$value\s*\}\}/g, String(value));
+  for (const [k, v] of Object.entries(labels)) {
+    out = out.replaceAll(`{{ $labels.${k} }}`, v);
+  }
+  return out;
+};
+
 const alertToHealth = (a: PrometheusAlert, r: Rule, md: HealthMetadata): HealthItem => {
+  const rawSummary = a.annotations.summary || a.labels.template || '';
+  // description is the usual key for long text; message is a common alternative (e.g. OpenShift samples)
+  const rawDescription = a.annotations.description || a.annotations.message || '';
+  const value = (a.value as number) || 0;
+  // Apply template substitution so {{ $labels.xxx }} and {{ $value }} work even if the API returned unevaluated annotations
+  const summary = substituteTemplate(rawSummary, a.labels, value);
+  const description = substituteTemplate(rawDescription, a.labels, value);
   return {
     ruleID: r.id,
     ruleName: r.name,
@@ -103,10 +119,10 @@ const alertToHealth = (a: PrometheusAlert, r: Rule, md: HealthMetadata): HealthI
     labels: a.labels,
     severity: (a.labels.severity as Severity) || 'info',
     state: (a.state as AlertState) || 'inactive',
-    summary: a.annotations.summary || a.labels.template || '',
-    description: a.annotations.description || '',
+    summary,
+    description,
     runbookUrl: a.annotations.runbook_url,
-    value: (a.value as number) || 0,
+    value,
     activeAt: a.activeAt
   };
 };
@@ -148,11 +164,11 @@ const recordingToHealth = (metric: RecordingRuleMetric, annotations: { [key: str
       }
     }
 
-    // Inject labels in description
-    let description = annotations.description || '';
-    for (const [key, value] of Object.entries(valueData.labels)) {
-      description = description.replaceAll(`{{ $labels.${key} }}`, value);
-    }
+    // Inject $value and $labels.* in description and summary
+    const rawSummary = annotations.summary || valueData.labels.template || '';
+    const rawDescription = annotations.description || '';
+    const summary = substituteTemplate(rawSummary, valueData.labels, value);
+    const description = substituteTemplate(rawDescription, valueData.labels, value);
 
     return {
       ruleName: metric.name,
@@ -163,8 +179,8 @@ const recordingToHealth = (metric: RecordingRuleMetric, annotations: { [key: str
       labels: valueData.labels,
       severity: severity,
       state: state,
-      summary: annotations.summary || valueData.labels.template || '',
-      description: description,
+      summary,
+      description,
       runbookUrl: annotations.runbook_url,
       value: value
     };
@@ -402,6 +418,10 @@ export const getLinks = (
   namespace?: string,
   k8sKind?: string
 ) => {
+  const customLinks = item.metadata.links.map(l => ({
+    name: l.name,
+    url: substituteLabelsInUrl(l.url, item.labels)
+  }));
   return [
     ...(item.runbookUrl ? [{ name: t('View runbook'), url: item.runbookUrl }] : []),
     ...(ContextSingleton.isStandalone()
@@ -412,8 +432,17 @@ export const getLinks = (
             : { name: t('Inspect alert'), url: getAlertLink(item) }
         ]),
     { name: t('Inspect network traffic'), url: getTrafficLink(kind, item, name, namespace, k8sKind) },
-    ...item.metadata.links
+    ...customLinks
   ];
+};
+
+/* Replaces {{ $labels.<key> }} in a string with values from labels (used for alert/recording rule link URLs). */
+const substituteLabelsInUrl = (url: string, labels: PrometheusLabels): string => {
+  let out = url;
+  for (const [k, v] of Object.entries(labels)) {
+    out = out.replaceAll(`{{ $labels.${k} }}`, v);
+  }
+  return out;
 };
 
 const getAlertLink = (item: HealthItem): string | undefined => {
