@@ -227,6 +227,14 @@ else
 	DOCKER_BUILDKIT=1 $(OCI_BIN) manifest push ${IMAGE} docker://${IMAGE};
 endif
 
+.PHONY: tar-image
+tar-image: MULTIARCH_TARGETS=amd64
+tar-image: image-build ## Build single arch (amd64) and save as a tar
+	$(OCI_BIN) tag $(IMAGE)-amd64 $(IMAGE)
+	mkdir -p ./out
+	$(OCI_BIN) save -o out/image.tar $(IMAGE)
+	echo $(IMAGE) > ./out/name
+
 include .mk/cypress.mk
 include .mk/shortcuts.mk
 include .mk/standalone.mk
