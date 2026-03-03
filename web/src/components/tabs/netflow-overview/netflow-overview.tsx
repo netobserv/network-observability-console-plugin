@@ -454,9 +454,16 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
             });
         }
 
-        // After all promises complete, set the collected errors
+        // After all promises complete, set the collected errors and propagate if any
         return Promise.all(promises).then(results => {
           setMetrics({ ...currentMetrics, errors: metricErrors });
+          // If errors were collected, reject to reach catch block in netflow-traffic.tsx
+          // This preserves error messages for scope handling and filter disabling logic
+          if (metricErrors.length > 0) {
+            const allErrorMessages = metricErrors.map(e => e.error).join(' | ');
+            const err = new Error(allErrorMessages);
+            throw err;
+          }
           return results;
         });
       },
@@ -524,6 +531,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
                   showDetails={showDetails}
                   resetDefaultFilters={props.resetDefaultFilters}
                   clearFilters={props.clearFilters}
+                  showScopeWarning
                 />
               </Bullseye>
             )}
