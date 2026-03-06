@@ -1,30 +1,30 @@
-goos: darwin
+goos: linux
 goarch: amd64
 pkg: github.com/netobserv/network-observability-console-plugin/pkg/server
-cpu: Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz
-BenchmarkTable/Basic-12         	     655	    589038 ns/op	   63590 B/op	     438 allocs/op
-BenchmarkTable/WithHistogram-12 	     357	   1034855 ns/op	  132133 B/op	     917 allocs/op
+cpu: AMD EPYC 7763 64-Core Processor
+BenchmarkTable/Basic-4    	     606	    602502 ns/op	   62100 B/op	     437 allocs/op
+BenchmarkTable/WithHistogram-4         	     315	   1172944 ns/op	  129887 B/op	     916 allocs/op
+BenchmarkTopologyLoki/Bytes-4          	     499	    729528 ns/op	  101965 B/op	     730 allocs/op
+BenchmarkTopologyLoki/Packets-4        	     507	    720296 ns/op	  104229 B/op	     735 allocs/op
+BenchmarkTopologyLoki/DNSLatency-4     	     603	    585273 ns/op	   66175 B/op	     463 allocs/op
+BenchmarkTopologyLoki/RTT-4            	     596	    586978 ns/op	   66489 B/op	     463 allocs/op
+BenchmarkTopologyLoki/Dropped-4        	     591	    599821 ns/op	   63890 B/op	     463 allocs/op
+BenchmarkTopologyLoki/BytesWithDrops-4 	     277	   1328118 ns/op	  169465 B/op	    1199 allocs/op
+BenchmarkTopologyAuto/Bytes-4          	     444	    767098 ns/op	  104182 B/op	     774 allocs/op
+BenchmarkTopologyAuto/Packets-4        	     474	    845161 ns/op	  104971 B/op	     774 allocs/op
+BenchmarkTopologyAuto/DNSLatency-4     	     541	    661254 ns/op	   66692 B/op	     481 allocs/op
+BenchmarkTopologyAuto/RTT-4            	     586	    610029 ns/op	   67278 B/op	     481 allocs/op
+BenchmarkTopologyAuto/Dropped-4        	     596	    605610 ns/op	   65546 B/op	     481 allocs/op
+BenchmarkTopologyAuto/BytesWithDrops-4 	     274	   1329751 ns/op	  173610 B/op	    1255 allocs/op
+BenchmarkOverviewLoki/Basic-4          	     130	   2727437 ns/op	  405783 B/op	    2916 allocs/op
+BenchmarkOverviewLoki/DNS-4            	      48	   6844226 ns/op	  860952 B/op	    6134 allocs/op
+BenchmarkOverviewLoki/RTT-4            	      51	   6400747 ns/op	  796954 B/op	    5674 allocs/op
+BenchmarkOverviewLoki/Dropped-4        	      51	   6411911 ns/op	  797308 B/op	    5675 allocs/op
+BenchmarkOverviewLoki/Full-4           	      24	  14175968 ns/op	 1660295 B/op	   11649 allocs/op
+BenchmarkOverviewAuto/Basic-4          	     120	   2806035 ns/op	  415170 B/op	    3075 allocs/op
+BenchmarkOverviewAuto/DNS-4            	      46	   6970015 ns/op	  884510 B/op	    6427 allocs/op
+BenchmarkOverviewAuto/RTT-4            	      51	   6545770 ns/op	  807100 B/op	    5945 allocs/op
+BenchmarkOverviewAuto/Dropped-4        	      50	   6550758 ns/op	  827196 B/op	    5952 allocs/op
+BenchmarkOverviewAuto/Full-4           	      24	  14357481 ns/op	 1659128 B/op	   12176 allocs/op
 PASS
-ok  	github.com/netobserv/network-observability-console-plugin/pkg/server	2.492s
-BenchmarkTopologyLoki/Bytes-12         	     494	    661508 ns/op	  108716 B/op	     738 allocs/op
-BenchmarkTopologyLoki/Packets-12       	     584	    704746 ns/op	  105930 B/op	     736 allocs/op
-BenchmarkTopologyLoki/DNSLatency-12    	     650	    993091 ns/op	   66474 B/op	     463 allocs/op
-BenchmarkTopologyLoki/RTT-12           	     626	    577959 ns/op	   65928 B/op	     463 allocs/op
-BenchmarkTopologyLoki/Dropped-12       	     596	    641529 ns/op	   67943 B/op	     463 allocs/op
-BenchmarkTopologyLoki/BytesWithDrops-12         	     284	   2612656 ns/op	  177334 B/op	    1199 allocs/op
-BenchmarkTopologyAuto/Bytes-12         	     547	    726242 ns/op	  108756 B/op	     780 allocs/op
-BenchmarkTopologyAuto/Packets-12       	     530	    653982 ns/op	  108008 B/op	     780 allocs/op
-BenchmarkTopologyAuto/DNSLatency-12    	     396	    839520 ns/op	   68855 B/op	     484 allocs/op
-BenchmarkTopologyAuto/RTT-12           	     591	    578087 ns/op	   67975 B/op	     484 allocs/op
-BenchmarkTopologyAuto/Dropped-12       	     636	    514976 ns/op	   67907 B/op	     484 allocs/op
-BenchmarkTopologyAuto/BytesWithDrops-12         	     252	   1413271 ns/op	  178459 B/op	    1264 allocs/op
-BenchmarkOverviewLoki/Basic-12         	     123	   3161764 ns/op	  429410 B/op	    2945 allocs/op
-BenchmarkOverviewLoki/DNS-12           	      55	   6463257 ns/op	  887069 B/op	    6181 allocs/op
-BenchmarkOverviewLoki/RTT-12           	      56	   5822485 ns/op	  835894 B/op	    5717 allocs/op
-BenchmarkOverviewLoki/Dropped-12       	      48	   7890088 ns/op	  817015 B/op	    5721 allocs/op
-BenchmarkOverviewLoki/Full-12          	      21	  15213024 ns/op	 1710218 B/op	   11733 allocs/op
-BenchmarkOverviewAuto/Basic-12         	     118	   3084384 ns/op	  433055 B/op	    3100 allocs/op
-BenchmarkOverviewAuto/DNS-12           	      55	   6556638 ns/op	  914957 B/op	    6479 allocs/op
-BenchmarkOverviewAuto/RTT-12           	      50	   7468385 ns/op	  845743 B/op	    5990 allocs/op
-BenchmarkOverviewAuto/Dropped-12       	      55	   6910571 ns/op	  853432 B/op	    5994 allocs/op
-BenchmarkOverviewAuto/Full-12          	      20	  15241360 ns/op	 1757702 B/op	   12261 allocs/op
+ok  	github.com/netobserv/network-observability-console-plugin/pkg/server	11.806s
