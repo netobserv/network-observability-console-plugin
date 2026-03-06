@@ -133,7 +133,11 @@ const RuleCard: React.FC<{
               {item.summary}
             </FlexItem>
           </Flex>
-          <Flex gap={{ default: 'gapSm' }} alignItems={{ default: 'alignItemsCenter' }} flexWrap={{ default: 'nowrap' }}>
+          <Flex
+            gap={{ default: 'gapSm' }}
+            alignItems={{ default: 'alignItemsCenter' }}
+            flexWrap={{ default: 'nowrap' }}
+          >
             {item.description && (
               <FlexItem>
                 <Tooltip content={item.description}>
