@@ -129,25 +129,25 @@ const RuleCard: React.FC<{
             <FlexItem>
               <HealthColorSquare item={item} />
             </FlexItem>
-            <FlexItem flex={{ default: 'flex_1' }}>
-              <Flex gap={{ default: 'gapXs' }} alignItems={{ default: 'alignItemsCenter' }}>
-                <FlexItem>{item.summary}</FlexItem>
-                {item.description && (
-                  <FlexItem>
-                    <Tooltip content={item.description}>
-                      <InfoCircleIcon style={{ color: 'var(--pf-v5-global--Color--200)' }} />
-                    </Tooltip>
-                  </FlexItem>
-                )}
-              </Flex>
+            <FlexItem flex={{ default: 'flex_1' }} style={{ minWidth: 0 }}>
+              {item.summary}
             </FlexItem>
           </Flex>
-          <FlexItem>
-            <ActionsColumn
-              isDisabled={links.length === 0}
-              items={links.map(l => ({ title: <a href={l.url}>{l.name}</a> }))}
-            />
-          </FlexItem>
+          <Flex gap={{ default: 'gapSm' }} alignItems={{ default: 'alignItemsCenter' }} flexWrap={{ default: 'nowrap' }}>
+            {item.description && (
+              <FlexItem>
+                <Tooltip content={item.description}>
+                  <InfoCircleIcon style={{ color: 'var(--pf-v5-global--Color--200)' }} />
+                </Tooltip>
+              </FlexItem>
+            )}
+            <FlexItem>
+              <ActionsColumn
+                isDisabled={links.length === 0}
+                items={links.map(l => ({ title: <a href={l.url}>{l.name}</a> }))}
+              />
+            </FlexItem>
+          </Flex>
         </Flex>
 
         {/* Mode, State, Severity, Value, Threshold, Active since, Direction row */}
@@ -205,17 +205,19 @@ export const RuleDetails: React.FC<RuleDetailsProps> = ({ kind, resourceHealth }
         variant="compact"
       >
         <Thead>
-          <Th>{t('Summary')}</Th>
-          <Th>{t('Mode')}</Th>
-          <Th>{t('State')}</Th>
-          <Th>{t('Severity')}</Th>
-          <Th className="no-wrap">{t('Active since')}</Th>
-          <Th>{t('Labels')}</Th>
-          <Th>{t('Value')}</Th>
-          <Th>{t('Threshold')}</Th>
-          <Th>{t('Direction')}</Th>
-          <Th>{t('Description')}</Th>
-          <Th screenReaderText="Links" />
+          <Tr>
+            <Th>{t('Summary')}</Th>
+            <Th>{t('Mode')}</Th>
+            <Th>{t('State')}</Th>
+            <Th>{t('Severity')}</Th>
+            <Th className="no-wrap">{t('Active since')}</Th>
+            <Th>{t('Labels')}</Th>
+            <Th>{t('Value')}</Th>
+            <Th>{t('Threshold')}</Th>
+            <Th>{t('Direction')}</Th>
+            <Th>{t('Description')}</Th>
+            <Th screenReaderText="Links" />
+          </Tr>
         </Thead>
         <Tbody>
           {allItems.map((item, i) => (
