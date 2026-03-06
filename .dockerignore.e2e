@@ -1,0 +1,52 @@
+# Docker ignore file for E2E test image builds
+
+# Node modules (will be installed fresh)
+web/node_modules
+
+# Build artifacts
+web/dist
+web/.cache
+
+# Test results and artifacts
+web/gui_test_screenshots
+web/cypress/results
+web/cypress/screenshots
+web/cypress/videos
+web/cypress/downloads
+
+# Development files
+.git
+.github
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Documentation
+*.md
+!E2E_TESTING.md
+LICENSE
+
+# CI/CD
+.gitlab-ci.yml
+Jenkinsfile
+
+# Other Dockerfiles
+Dockerfile*
+!Dockerfile.e2e
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# OS files
+.DS_Store
+Thumbs.db

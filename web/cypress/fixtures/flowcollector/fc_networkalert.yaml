@@ -1,0 +1,62 @@
+kind: FlowCollector
+apiVersion: flows.netobserv.io/v1beta2
+metadata:
+  name: cluster
+spec:
+  agent:
+    ebpf:
+      sampling: 1
+      features:
+      - DNSTracking
+    type: eBPF
+  loki:
+    enable: true
+    mode: Monolithic
+    namespace: netobserv
+    monolithic:
+      installDemoLoki: true
+  consolePlugin:
+    portNaming:
+      enable: true
+      portNames:
+        '3100': loki
+  processor:
+    advanced:
+      env:
+        EXPERIMENTAL_ALERTS_HEALTH: "true"
+    metrics:
+      includeList:
+      - workload_dns_latency_seconds
+      - node_dns_latency_seconds
+      - node_egress_bytes_total
+      - namespace_egress_bytes_total
+      - workload_egress_bytes_total
+      - node_ingress_bytes_total
+      - namespace_ingress_bytes_total
+      - workload_ingress_bytes_total
+      healthRules:
+      - mode: Alert
+        template: DNSNxDomain
+        variants:
+        - groupBy: "" # global
+          mode: Recording
+          thresholds:
+            critical: "15"
+            info: "2"
+            warning: "5"
+        - groupBy: Namespace
+          thresholds:
+            critical: "15"
+            info: "2"
+            warning: "5"
+        - groupBy: Node
+          mode: Recording
+          thresholds:
+            critical: "15"
+            info: "2"
+            warning: "5"
+        - groupBy: Workload
+          thresholds:
+            critical: "15"
+            info: "2"
+            warning: "5"
