@@ -62,6 +62,16 @@ Performance benchmarks run automatically on every pull request via GitHub Action
 - Review the benchstat output for performance regressions marked with `~`
 - The same `benchmark-server-compare` target works both locally and in CI
 
+**Understanding CI Benchmark Output:**
+- CI runs single-sample benchmarks for speed (completes in ~1-2 minutes)
+- You'll see `± ∞` with footnote "need >= 6 samples for confidence interval"
+- This is expected and doesn't prevent regression detection
+- Percentage changes between baseline and current will still be shown
+- For detailed statistical analysis with confidence intervals, run locally with `-count=6`:
+  ```bash
+  go test -bench=. -benchmem -benchtime=300ms -count=6 ./pkg/server/ -run=^$
+  ```
+
 ### Benchmark Scenarios
 
 **Table View:**
@@ -142,11 +152,24 @@ These benchmarks measure **server-side processing time only**, with:
 
 Use `make benchmark-server-compare` to track performance over time and detect regressions.
 
+**In CI (Single Sample Mode):**
+- CI benchmarks provide quick feedback with single-sample runs
+- Look for percentage differences between baseline and current values
+- Example: `Table/Basic-4: 602.5µs (baseline) vs 649.1µs (current) = +7.7% slower`
+- Confidence intervals won't be shown (requires ≥6 samples)
+- Even without confidence intervals, large differences (>10-15%) indicate potential regressions worth investigating
+
+**Locally (Multi-Sample Mode with `-count=6`):**
+- Run with `-count=6` to get statistical confidence intervals
+- benchstat will show `~` symbol for statistically significant changes at 95% confidence
+- Confidence intervals help distinguish real changes from random variation
+- Use this when investigating performance issues found in CI
+
 **When to Investigate:**
-- ⚠️ Significant latency increase between baseline and current runs
+- ⚠️ Latency increase >10-15% between baseline and current runs
 - ⚠️ Memory usage growing unexpectedly
 - ⚠️ Allocation count increasing significantly
-- ⚠️ benchstat shows statistically significant regressions
+- ⚠️ benchstat shows `~` (statistically significant regressions in local runs)
 
 ### Port Exhaustion on macOS
 
