@@ -39,6 +39,29 @@ The `benchmark-server-compare` target uses [benchstat](https://pkg.go.dev/golang
 - Shows percentage changes in latency, memory, and allocations
 - Automatically installs benchstat if not present
 
+### CI/CD Integration
+
+Performance benchmarks run automatically on every pull request via GitHub Actions:
+
+```yaml
+- Job: benchmark-server
+- Runs on: ubuntu-latest
+- Go version: 1.25
+```
+
+**What happens in CI:**
+1. Checks out your PR branch
+2. Installs `benchstat` automatically
+3. Runs `make benchmark-server-compare`
+4. Compares results against the committed baseline
+5. Uploads benchmark results as artifacts (30-day retention)
+
+**Reviewing CI Results:**
+- Check the "Server performance benchmarks" job in the GitHub Actions tab
+- Download benchmark artifacts to see detailed comparison
+- Review the benchstat output for performance regressions marked with `~`
+- The same `benchmark-server-compare` target works both locally and in CI
+
 ### Benchmark Scenarios
 
 **Table View:**

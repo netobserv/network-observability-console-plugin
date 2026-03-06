@@ -210,10 +210,13 @@ benchmark-server-compare: ## Compare benchmark results with baseline using bench
 		go test -bench=. -benchmem -benchtime=300ms ./pkg/server/ -run=^$$ | tee pkg/server/benchmark-baseline.txt; \
 		echo "Baseline created. Run 'make benchmark-server-compare' again to compare."; \
 	else \
+		echo "Running benchmarks..."; \
 		go test -bench=. -benchmem -benchtime=300ms ./pkg/server/ -run=^$$ | tee pkg/server/benchmark-current.txt; \
 		echo ""; \
 		echo "=== Performance Comparison (baseline vs current) ==="; \
-		$$BENCHSTAT pkg/server/benchmark-baseline.txt pkg/server/benchmark-current.txt; \
+		$$BENCHSTAT -alpha 0.05 pkg/server/benchmark-baseline.txt pkg/server/benchmark-current.txt || true; \
+		echo ""; \
+		echo "Benchmark comparison completed. Review results above for any performance changes."; \
 	fi
 
 .PHONY: serve

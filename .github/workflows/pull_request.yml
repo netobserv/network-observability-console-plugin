@@ -51,3 +51,25 @@ jobs:
         flags: uitests
         fail_ci_if_error: false
         verbose: true
+
+  benchmark-server:
+    name: Server performance benchmarks
+    runs-on: ubuntu-latest
+    steps:
+    - name: install make
+      run: sudo apt-get install make
+    - name: set up go 1.x
+      uses: actions/setup-go@v3
+      with:
+        go-version: '1.25'
+    - name: checkout
+      uses: actions/checkout@v3
+    - name: run benchmark comparison
+      run: make benchmark-server-compare
+    - name: upload benchmark results
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: benchmark-results
+        path: pkg/server/benchmark-current.txt
+        retention-days: 30
