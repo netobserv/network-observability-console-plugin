@@ -28,7 +28,7 @@ import { ScopeConfigDef } from '../../../model/scope';
 import { TimeRange } from '../../../utils/datetime';
 import { getDNSErrorDescription, getDNSRcodeDescription } from '../../../utils/dns';
 import { getDSCPServiceClassName } from '../../../utils/dscp';
-import { getHTTPErrorDetails } from '../../../utils/errors';
+import { getStructuredHTTPError, StructuredError } from '../../../utils/errors';
 import { localStorageOverviewKebabKey, useLocalStorage } from '../../../utils/local-storage-hook';
 import { observeDOMRect, toNamedMetric } from '../../../utils/metrics-helper';
 import {
@@ -141,7 +141,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
                       rateMetrics[key] = success.metrics;
                       return rateMetrics;
                     })
-                    .mapError(err => t('{{metricType}} Rate: ', { metricType }) + getHTTPErrorDetails(err, true));
+                    .mapError(err => getStructuredHTTPError(err, `${metricType} Rate`));
                   currentMetrics = { ...currentMetrics, rate };
                   setMetrics(currentMetrics);
                   return res.map(r => r.stats).or(emptyStats);
@@ -164,7 +164,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
                     totalRateMetric[key] = success.metrics[0];
                     return totalRateMetric;
                   })
-                  .mapError(err => t('Total {{metricType}} Rate: ', { metricType }) + getHTTPErrorDetails(err, true));
+                  .mapError(err => getStructuredHTTPError(err, `Total ${metricType} Rate`));
                 currentMetrics = { ...currentMetrics, totalRate };
                 setMetrics(currentMetrics);
                 return res.map(r => r.stats).or(emptyStats);
@@ -191,7 +191,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
                     droppedRateMetrics[key] = success.metrics;
                     return droppedRateMetrics;
                   })
-                  .mapError(err => t('Dropped {{key}} Rate: ', { key }) + getHTTPErrorDetails(err, true));
+                  .mapError(err => getStructuredHTTPError(err, `Dropped ${key} Rate`));
                 currentMetrics = { ...currentMetrics, droppedRate };
                 setMetrics(currentMetrics);
                 return res.map(r => r.stats).or(emptyStats);
@@ -211,7 +211,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
                     totalDroppedRateMetric[key] = success.metrics[0];
                     return totalDroppedRateMetric;
                   })
-                  .mapError(err => t('Total Dropped {{key}} Rate: ', { key }) + getHTTPErrorDetails(err, true));
+                  .mapError(err => getStructuredHTTPError(err, `Total Dropped ${key} Rate`));
                 currentMetrics = { ...currentMetrics, totalDroppedRate };
                 setMetrics(currentMetrics);
                 return res.map(r => r.stats).or(emptyStats);
@@ -237,7 +237,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
               Result.fromPromise(getFlowGenericMetrics(fqState, range)).then(res => {
                 const droppedState = res
                   .map(success => success.metrics)
-                  .mapError(err => t('Drop State: ') + getHTTPErrorDetails(err, true));
+                  .mapError(err => getStructuredHTTPError(err, `Drop State`));
                 currentMetrics = { ...currentMetrics, droppedState };
                 setMetrics(currentMetrics);
                 return res.map(r => r.stats).or(emptyStats);
@@ -245,7 +245,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
               Result.fromPromise(getFlowGenericMetrics(fqCause, range)).then(res => {
                 const droppedCause = res
                   .map(success => success.metrics)
-                  .mapError(err => t('Drop Cause: ') + getHTTPErrorDetails(err, true));
+                  .mapError(err => getStructuredHTTPError(err, `Drop Cause`));
                 currentMetrics = { ...currentMetrics, droppedCause };
                 setMetrics(currentMetrics);
                 return res.map(r => r.stats).or(emptyStats);
@@ -275,7 +275,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
                     dnsLatencyMetrics[fn] = success.metrics;
                     return dnsLatencyMetrics;
                   })
-                  .mapError(err => t('DNS Latency: ') + getHTTPErrorDetails(err, true));
+                  .mapError(err => getStructuredHTTPError(err, `DNS Latency`));
                 currentMetrics = { ...currentMetrics, dnsLatency };
                 setMetrics(currentMetrics);
                 return res.map(r => r.stats).or(emptyStats);
@@ -293,7 +293,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
                     totalDnsLatencyMetric[fn] = success.metrics[0];
                     return totalDnsLatencyMetric;
                   })
-                  .mapError(err => t('Total DNS Latency: ') + getHTTPErrorDetails(err, true));
+                  .mapError(err => getStructuredHTTPError(err, `Total DNS Latency`));
                 currentMetrics = { ...currentMetrics, totalDnsLatency };
                 setMetrics(currentMetrics);
                 return res.map(r => r.stats).or(emptyStats);
@@ -317,7 +317,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
                 Result.fromPromise(getFlowGenericMetrics(fqNames, range)).then(res => {
                   const dnsName = res
                     .map(success => success.metrics)
-                    .mapError(err => t('DNS Names: ') + getHTTPErrorDetails(err, true));
+                    .mapError(err => getStructuredHTTPError(err, `DNS Names`));
                   currentMetrics = { ...currentMetrics, dnsName };
                   setMetrics(currentMetrics);
                   return res.map(r => r.stats).or(emptyStats);
@@ -326,7 +326,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
                 Result.fromPromise(getFlowGenericMetrics(fqCodes, range)).then(res => {
                   const dnsRCode = res
                     .map(success => success.metrics)
-                    .mapError(err => t('DNS RCodes: ') + getHTTPErrorDetails(err, true));
+                    .mapError(err => getStructuredHTTPError(err, `DNS RCodes`));
                   currentMetrics = { ...currentMetrics, dnsRCode };
                   setMetrics(currentMetrics);
                   return res.map(r => r.stats).or(emptyStats);
@@ -334,7 +334,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
                 Result.fromPromise(getFlowGenericMetrics(fqTotal, range)).then(res => {
                   const totalDnsCount = res
                     .map(success => success.metrics[0])
-                    .mapError(err => t('DNS Total: ') + getHTTPErrorDetails(err, true));
+                    .mapError(err => getStructuredHTTPError(err, `DNS Total`));
                   currentMetrics = { ...currentMetrics, totalDnsCount };
                   setMetrics(currentMetrics);
                   return res.map(r => r.stats).or(emptyStats);
@@ -367,7 +367,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
                     rttMetrics[fn] = success.metrics;
                     return rttMetrics;
                   })
-                  .mapError(err => t('RTT: ') + getHTTPErrorDetails(err, true));
+                  .mapError(err => getStructuredHTTPError(err, `RTT`));
                 currentMetrics = { ...currentMetrics, rtt };
                 setMetrics(currentMetrics);
                 return res.map(r => r.stats).or(emptyStats);
@@ -386,7 +386,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
                     totalRttMetric[fn] = success.metrics[0];
                     return totalRttMetric;
                   })
-                  .mapError(err => t('Total RTT: ') + getHTTPErrorDetails(err, true));
+                  .mapError(err => getStructuredHTTPError(err, `Total RTT`));
                 currentMetrics = { ...currentMetrics, totalRtt };
                 setMetrics(currentMetrics);
                 return res.map(r => r.stats).or(emptyStats);
@@ -427,7 +427,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
                       //set matching value and apply changes on the entire object to trigger refresh
                       const customResult = res
                         .map(success => success.metrics)
-                        .mapError(err => t('Custom metric {{key}}', { key }) + getHTTPErrorDetails(err, true));
+                        .mapError(err => getStructuredHTTPError(err, `Custom metric ${key}`));
                       currentMetrics = { ...currentMetrics, custom: currentMetrics.custom.set(key, customResult) };
                       setMetrics(currentMetrics);
                       return res.map(r => r.stats).or(emptyStats);
@@ -438,7 +438,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
                       //set matching value and apply changes on the entire object to trigger refresh
                       const customResult = res
                         .map(success => success.metrics[0])
-                        .mapError(err => t('Total custom metric {{key}}', { key }) + getHTTPErrorDetails(err, true));
+                        .mapError(err => getStructuredHTTPError(err, `Total custom metric ${key}`));
                       currentMetrics = {
                         ...currentMetrics,
                         totalCustom: currentMetrics.totalCustom.set(key, customResult)
@@ -458,7 +458,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
           return results;
         });
       },
-      [props.panels, t]
+      [props.panels]
     );
 
     React.useImperativeHandle(ref, () => ({
@@ -554,7 +554,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
     //sort by top total item first
     //limit to top X since multiple queries can run in parallel
     const getTopKRateMetrics = React.useCallback(
-      (id: OverviewPanelId): Result<NamedMetric[], string> => {
+      (id: OverviewPanelId): Result<NamedMetric[], StructuredError | string> => {
         const rootMetric = id.includes('dropped') ? props.metrics.droppedRate : props.metrics.rate;
         return sortMetrics(
           rootMetric.map(m => {
@@ -577,7 +577,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
 
     const getLatencyMetrics = React.useCallback(
       (id: OverviewPanelId) => {
-        let rootMetric: Result<FunctionMetrics, string> = Result.empty();
+        let rootMetric: Result<FunctionMetrics, StructuredError | string> = Result.empty();
         if (id.endsWith('dns_latency')) {
           rootMetric = props.metrics.dnsLatency;
         } else if (id.endsWith('rtt')) {
@@ -594,7 +594,7 @@ export const NetflowOverview: React.FC<NetflowOverviewProps> = React.forwardRef(
 
     const getNamedTotalLatencyMetric = React.useCallback(
       (id: OverviewPanelId) => {
-        let rootMetric: Result<TotalFunctionMetrics, string> = Result.empty();
+        let rootMetric: Result<TotalFunctionMetrics, StructuredError | string> = Result.empty();
         if (id.endsWith('dns_latency')) {
           rootMetric = props.metrics.totalDnsLatency;
         } else if (id.endsWith('rtt')) {

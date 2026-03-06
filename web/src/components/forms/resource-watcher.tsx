@@ -132,7 +132,6 @@ export const ResourceWatcher: FC<ResourceWatcherProps> = ({
       <ErrorComponent
         title={t('Unable to get {{kind}}', { kind })}
         error={`${csvLoadError || crdLoadError || crLoadError}`}
-        isLokiRelated={false}
       />
     );
   } else if (!csvLoaded || !crdLoaded || (!skipCRError && !crLoaded)) {

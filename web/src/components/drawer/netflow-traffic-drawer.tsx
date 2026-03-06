@@ -20,7 +20,7 @@ import { GraphElementPeer, TopologyOptions } from '../../model/topology';
 import { Warning } from '../../model/warnings';
 import { Column, ColumnSizeMap } from '../../utils/columns';
 import { TimeRange } from '../../utils/datetime';
-import { isPromError } from '../../utils/errors';
+import { StructuredError } from '../../utils/errors';
 import { OverviewPanel } from '../../utils/overview-panels';
 import { TruncateLength } from '../dropdowns/truncate-dropdown';
 import { ErrorComponent, Size } from '../messages/error';
@@ -46,7 +46,7 @@ export interface NetflowTrafficDrawerProps {
   ref?: React.Ref<NetflowTrafficDrawerHandle>;
   isDarkTheme: boolean;
   defaultFilters: Filter[];
-  error: string | undefined;
+  error: string | StructuredError | undefined;
   currentState: string[];
   selectedViewId: ViewId;
   limit: number;
@@ -232,9 +232,10 @@ export const NetflowTrafficDrawer: React.FC<NetflowTrafficDrawerProps> = React.f
       // For overview and topology tabs: show error banner and partial metrics when possible
       // For table tab or config errors: show full error page
       // For topology: if main metrics are missing, show full error page
+      const err = props.error;
       const hasTopologyMetrics = props.selectedViewId === 'topology' && (getTopologyMetrics()?.length || 0) > 0;
       const showFullError =
-        props.error &&
+        err &&
         (props.currentState.includes('configLoadError') ||
           props.selectedViewId === 'table' ||
           (props.selectedViewId === 'topology' && !hasTopologyMetrics));
@@ -245,8 +246,7 @@ export const NetflowTrafficDrawer: React.FC<NetflowTrafficDrawerProps> = React.f
             title={t('Unable to get {{item}}', {
               item: props.currentState.includes('configLoadError') ? t('config') : props.selectedViewId
             })}
-            error={props.error || t('Unknown error')}
-            isLokiRelated={!props.currentState.includes('configLoadError') && !isPromError(props.error || '')}
+            error={err}
           />
         );
       } else {

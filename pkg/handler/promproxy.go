@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/netobserv/network-observability-console-plugin/pkg/handler/apierrors"
 	"github.com/netobserv/network-observability-console-plugin/pkg/prometheus"
 )
 
@@ -34,7 +35,7 @@ func simpleProxy(toURLStr string, timeout time.Duration, skipTLS bool, caPath st
 		roundTripper, err := prometheus.CreateRoundTripper(timeout, skipTLS, caPath, forwardUserToken, tokenPath, r.Header)
 		if err != nil {
 			hlog.Errorf("Proxying to %s; CreateRoundTripper error: %v", toURL, err)
-			writeError(w, http.StatusInternalServerError, err.Error())
+			apierrors.Write(w, http.StatusInternalServerError, err)
 			return
 		}
 		backendURL := *toURL
@@ -48,7 +49,7 @@ func simpleProxy(toURLStr string, timeout time.Duration, skipTLS bool, caPath st
 		resp, err := roundTripper.RoundTrip(&rq)
 		if err != nil {
 			hlog.Errorf("Proxying to %s; RoundTrip error: %v", toURL, err)
-			writeError(w, http.StatusInternalServerError, err.Error())
+			apierrors.Write(w, http.StatusInternalServerError, err)
 			return
 		}
 		w.WriteHeader(resp.StatusCode)

@@ -29,7 +29,7 @@ import { ScopeConfigDef } from '../../../model/scope';
 import { GraphElementPeer, LayoutName, TopologyOptions } from '../../../model/topology';
 import { config } from '../../../utils/config';
 import { TimeRange } from '../../../utils/datetime';
-import { getHTTPErrorDetails, getPromError, isPromError } from '../../../utils/errors';
+import { getStructuredHTTPError, StructuredError } from '../../../utils/errors';
 import { observeDOMRect } from '../../../utils/metrics-helper';
 import { Result } from '../../../utils/result';
 import { fetchNetworkHealth } from '../../health/health-fetcher';
@@ -52,7 +52,7 @@ export type NetflowTopologyHandle = {
     metricsRef: React.MutableRefObject<NetflowMetrics>,
     getMetrics: (q: FlowQuery, range: number | TimeRange) => Promise<FlowMetricsResult>,
     setMetrics: (v: NetflowMetrics) => void,
-    setError: (err?: string) => void,
+    setError: (err?: StructuredError | string) => void,
     initFunction: () => void
   ) => Promise<Stats[]> | undefined;
   fetchUDNs: () => Promise<string[]>;
@@ -134,7 +134,7 @@ export const NetflowTopology: React.FC<NetflowTopologyProps> = React.forwardRef(
         metricsRef: React.MutableRefObject<NetflowMetrics>,
         getMetrics: (q: FlowQuery, range: number | TimeRange) => Promise<FlowMetricsResult>,
         setMetrics: (v: NetflowMetrics) => void,
-        setError: (err?: string) => void,
+        setError: (err?: StructuredError | string) => void,
         initFunction: () => void
       ) => {
         initFunction();
@@ -212,11 +212,8 @@ export const NetflowTopology: React.FC<NetflowTopologyProps> = React.forwardRef(
               .catch(err => {
                 // Error might occur for instance when fetching node-based topology with drop feature enabled, and Loki disabled
                 // We don't want to break the whole topology due to missing drops enrichement
-                let strErr = getHTTPErrorDetails(err, true);
-                if (isPromError(strErr)) {
-                  strErr = getPromError(strErr);
-                }
-                setError(strErr);
+                const pErr = getStructuredHTTPError(err);
+                setError(pErr);
                 return { numQueries: 0, dataSources: [], limitReached: false };
               })
           );

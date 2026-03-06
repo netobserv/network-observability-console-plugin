@@ -1,4 +1,5 @@
 import { FlowScope, MetricType, StatFunction } from '../model/flow-query';
+import { StructuredError } from '../utils/errors';
 import { cyrb53 } from '../utils/hash';
 import { getFunctionFromId, getRateFunctionFromId } from '../utils/overview-panels';
 import { Result } from '../utils/result';
@@ -132,22 +133,22 @@ export type TotalRateMetrics = {
 };
 
 export type NetflowMetrics = {
-  rate: Result<RateMetrics, string>;
-  droppedRate: Result<RateMetrics, string>;
-  totalRate: Result<TotalRateMetrics, string>;
-  totalDroppedRate: Result<TotalRateMetrics, string>;
-  droppedState: Result<GenericMetric[], string>;
-  droppedCause: Result<GenericMetric[], string>;
-  dnsName: Result<GenericMetric[], string>;
-  dnsRCode: Result<GenericMetric[], string>;
-  dnsLatency: Result<FunctionMetrics, string>;
-  rtt: Result<FunctionMetrics, string>;
-  totalFlowCount: Result<TopologyMetrics, string>;
-  totalDnsLatency: Result<TotalFunctionMetrics, string>;
-  totalDnsCount: Result<GenericMetric, string>;
-  totalRtt: Result<TotalFunctionMetrics, string>;
-  custom: Map<string, Result<TopologyMetrics[] | GenericMetric[], string>>;
-  totalCustom: Map<string, Result<TopologyMetrics | GenericMetric, string>>;
+  rate: Result<RateMetrics, StructuredError | string>;
+  droppedRate: Result<RateMetrics, StructuredError | string>;
+  totalRate: Result<TotalRateMetrics, StructuredError | string>;
+  totalDroppedRate: Result<TotalRateMetrics, StructuredError | string>;
+  droppedState: Result<GenericMetric[], StructuredError | string>;
+  droppedCause: Result<GenericMetric[], StructuredError | string>;
+  dnsName: Result<GenericMetric[], StructuredError | string>;
+  dnsRCode: Result<GenericMetric[], StructuredError | string>;
+  dnsLatency: Result<FunctionMetrics, StructuredError | string>;
+  rtt: Result<FunctionMetrics, StructuredError | string>;
+  totalFlowCount: Result<TopologyMetrics, StructuredError | string>;
+  totalDnsLatency: Result<TotalFunctionMetrics, StructuredError | string>;
+  totalDnsCount: Result<GenericMetric, StructuredError | string>;
+  totalRtt: Result<TotalFunctionMetrics, StructuredError | string>;
+  custom: Map<string, Result<TopologyMetrics[] | GenericMetric[], StructuredError | string>>;
+  totalCustom: Map<string, Result<TopologyMetrics | GenericMetric, StructuredError | string>>;
 };
 
 export const defaultNetflowMetrics: NetflowMetrics = {

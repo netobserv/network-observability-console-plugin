@@ -9,7 +9,7 @@ import { Config } from '../../../model/config';
 import { FlowQuery } from '../../../model/flow-query';
 import { Column, ColumnsId, ColumnSizeMap } from '../../../utils/columns';
 import { TimeRange } from '../../../utils/datetime';
-import { getHTTPErrorDetails } from '../../../utils/errors';
+import { getStructuredHTTPError } from '../../../utils/errors';
 import { mergeFlowReporters } from '../../../utils/flows';
 import {
   localStorageSortDirectionKey,
@@ -114,7 +114,7 @@ export const NetflowTable: React.FC<NetflowTableProps> = React.forwardRef(
           promises.push(
             Result.fromPromise(getMetrics({ ...fq, function: 'count', aggregateBy: 'app', type: 'Flows' }, range)).then(
               res => {
-                const totalFlowCount = res.map(m => m.metrics[0]).mapError(err => getHTTPErrorDetails(err, true));
+                const totalFlowCount = res.map(m => m.metrics[0]).mapError(err => getStructuredHTTPError(err));
                 currentMetrics = { ...currentMetrics, totalFlowCount };
                 setMetrics(currentMetrics);
                 return res.map(r => r.stats).or({ numQueries: 0, limitReached: false, dataSources: [] } as Stats);

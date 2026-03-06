@@ -3,29 +3,44 @@ import { ExternalLinkSquareAltIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
+import {
+  LokiClientError,
+  LokiResponseError,
+  PromDisabledMetrics,
+  PromMissingLabels,
+  PromUnsupported,
+  StructuredError
+} from '../../utils/errors';
 import './error-suggestions.css';
 
 export interface ErrorSuggestionsProps {
-  error: string;
-  isLokiRelated?: boolean;
+  error: StructuredError;
   compact?: boolean;
 }
 
-export const ErrorSuggestions: React.FC<ErrorSuggestionsProps> = ({ error, isLokiRelated = true, compact = false }) => {
+export const ErrorSuggestions: React.FC<ErrorSuggestionsProps> = ({ error, compact = false }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
+  const msg = React.useMemo(() => error.toString(), [error]);
+
+  // Display only if related to Loki or if we have a suggestion
+  const isLokiRelated = LokiResponseError.isTypeOf(error) || LokiClientError.isTypeOf(error);
+  const suggestions =
+    PromUnsupported.isTypeOf(error) || PromMissingLabels.isTypeOf(error) || PromDisabledMetrics.isTypeOf(error)
+      ? error.getSuggestions()
+      : [];
   const hasSuggestions =
-    error.includes('promUnsupported') ||
-    error.includes('max entries limit') ||
-    error.includes('deadline exceeded') ||
-    error.includes('maximum of series') ||
-    error.includes('too many outstanding requests') ||
-    error.includes('time range exceeds') ||
-    error.includes('maximum resolution') ||
-    error.includes('input size too long') ||
-    error.includes('Network Error') ||
-    error.includes('status code 401') ||
-    error.includes('status code 403');
+    suggestions.length > 0 ||
+    msg.includes('max entries limit') ||
+    msg.includes('deadline exceeded') ||
+    msg.includes('maximum of series') ||
+    msg.includes('too many outstanding requests') ||
+    msg.includes('time range exceeds') ||
+    msg.includes('maximum resolution') ||
+    msg.includes('input size too long') ||
+    msg.includes('Network Error') ||
+    msg.includes('status code 401') ||
+    msg.includes('status code 403');
 
   if (!hasSuggestions && !isLokiRelated) {
     return null;
@@ -39,17 +54,15 @@ export const ErrorSuggestions: React.FC<ErrorSuggestionsProps> = ({ error, isLok
         </Text>
       )}
 
-      {error.includes('promUnsupported') && (
-        <>
-          <Text component={TextVariants.blockquote}>{t('Use a different scope of aggregation')}</Text>
-          <Text component={TextVariants.blockquote}>
-            {t('Add missing metrics to prometheus in the FlowCollector API (processor.metrics.includeList)')}
+      {suggestions.map((sugg, idx) => {
+        return (
+          <Text key={`suggestion_${idx}`} component={TextVariants.blockquote}>
+            {sugg}
           </Text>
-          <Text component={TextVariants.blockquote}>{t('Enable Loki in the FlowCollector API (loki.enable)')}</Text>
-        </>
-      )}
+        );
+      })}
 
-      {error.includes('max entries limit') && (
+      {msg.includes('max entries limit') && (
         <>
           <Text component={TextVariants.blockquote}>
             {t('Reduce the Query Options -> limit to reduce the number of results')}
@@ -60,9 +73,9 @@ export const ErrorSuggestions: React.FC<ErrorSuggestionsProps> = ({ error, isLok
         </>
       )}
 
-      {(error.includes('deadline exceeded') ||
-        error.includes('maximum of series') ||
-        error.includes('too many outstanding requests')) && (
+      {(msg.includes('deadline exceeded') ||
+        msg.includes('maximum of series') ||
+        msg.includes('too many outstanding requests')) && (
         <>
           <Text component={TextVariants.blockquote}>
             {t('Add Namespace, Owner or Resource filters (which use indexed fields) to improve the query performance')}
@@ -73,7 +86,7 @@ export const ErrorSuggestions: React.FC<ErrorSuggestionsProps> = ({ error, isLok
           <Text component={TextVariants.blockquote}>
             {t('Increase time step to decrease the number of parallel queries')}
           </Text>
-          {error.includes('too many outstanding requests') && (
+          {msg.includes('too many outstanding requests') && (
             <Text component={TextVariants.blockquote}>
               {t(
                 'Ensure Loki config contains "parallelise_shardable_queries: true" and "max_outstanding_requests_per_tenant: 2048"'
@@ -83,7 +96,7 @@ export const ErrorSuggestions: React.FC<ErrorSuggestionsProps> = ({ error, isLok
         </>
       )}
 
-      {(error.includes('time range exceeds') || error.includes('maximum resolution')) && (
+      {(msg.includes('time range exceeds') || msg.includes('maximum resolution')) && (
         <>
           <Text component={TextVariants.blockquote}>
             {t('Reduce the time range to decrease the number of results')}
@@ -94,7 +107,7 @@ export const ErrorSuggestions: React.FC<ErrorSuggestionsProps> = ({ error, isLok
         </>
       )}
 
-      {error.includes('input size too long') && (
+      {msg.includes('input size too long') && (
         <>
           <Text component={TextVariants.blockquote}>
             {t('This error is generally seen when cluster admin groups are not properly configured.')}{' '}
@@ -120,16 +133,16 @@ export const ErrorSuggestions: React.FC<ErrorSuggestionsProps> = ({ error, isLok
         </>
       )}
 
-      {error.includes('Network Error') && (
+      {msg.includes('Network Error') && (
         <Text component={TextVariants.blockquote}>
           {t(`Check your connectivity with cluster / console plugin pod`)}
         </Text>
       )}
 
-      {(error.includes('status code 401') || error.includes('status code 403')) && (
+      {(msg.includes('status code 401') || msg.includes('status code 403')) && (
         <>
           <Text component={TextVariants.blockquote}>{t(`Check current user permissions`)}</Text>
-          {error.includes('user not an admin') ? (
+          {msg.includes('user not an admin') ? (
             <Text component={TextVariants.blockquote}>
               {t(
                 `This deployment mode does not support non-admin users. Check FlowCollector spec.loki.manual.authToken`
@@ -137,7 +150,7 @@ export const ErrorSuggestions: React.FC<ErrorSuggestionsProps> = ({ error, isLok
             </Text>
           ) : (
             <>
-              {error.includes('from Loki') && (
+              {msg.includes('from Loki') && (
                 <>
                   <Text component={TextVariants.blockquote}>
                     {t(`For LokiStack, your user must either:`)}
@@ -162,7 +175,7 @@ export const ErrorSuggestions: React.FC<ErrorSuggestionsProps> = ({ error, isLok
               )}
             </>
           )}
-          {error.includes('from Prometheus') && (
+          {msg.includes('from Prometheus') && (
             <Text component={TextVariants.blockquote}>
               {t(`For metrics access, your user must either:`)}
               <TextList>
@@ -189,7 +202,7 @@ export const ErrorSuggestions: React.FC<ErrorSuggestionsProps> = ({ error, isLok
                 target="_blank"
                 to={{
                   pathname:
-                    'https://docs.openshift.com/container-platform/latest/observability/network_observability/installing-operators.html',
+                    'https://docs.redhat.com/en/documentation/openshift_container_platform/latest/html/network_observability/installing-network-observability-operators',
                   hash: 'network-observability-loki-installation_network_observability'
                 }}
               />
