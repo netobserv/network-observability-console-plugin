@@ -92,7 +92,11 @@ type ScoreDetail = {
   weight: number;
 };
 
-/* Replaces {{ $value }} and {{ $labels.<key> }} in alert/recording templates. */
+/* Replaces {{ $value }} and {{ $labels.<key> }} in recording rule templates.
+ * Recording rules don't have native annotations in Prometheus - these come from operator metadata
+ * (netobserv.io/network-health) and need manual template substitution.
+ * Note: Alert annotations are evaluated by Prometheus, so we don't substitute them here.
+ */
 const substituteTemplate = (template: string, labels: PrometheusLabels, value: number | string): string => {
   let out = template.replace(/\{\{\s*\$value\s*\}\}/g, String(value));
   for (const [k, v] of Object.entries(labels)) {
@@ -102,13 +106,7 @@ const substituteTemplate = (template: string, labels: PrometheusLabels, value: n
 };
 
 const alertToHealth = (a: PrometheusAlert, r: Rule, md: HealthMetadata): HealthItem => {
-  const rawSummary = a.annotations.summary || a.labels.template || '';
-  // description is the usual key for long text; message is a common alternative (e.g. OpenShift samples)
-  const rawDescription = a.annotations.description || a.annotations.message || '';
-  const value = (a.value as number) || 0;
-  // Apply template substitution so {{ $labels.xxx }} and {{ $value }} work even if the API returned unevaluated annotations
-  const summary = substituteTemplate(rawSummary, a.labels, value);
-  const description = substituteTemplate(rawDescription, a.labels, value);
+  // Prometheus evaluates alert annotations automatically, so we use them directly
   return {
     ruleID: r.id,
     ruleName: r.name,
@@ -119,10 +117,10 @@ const alertToHealth = (a: PrometheusAlert, r: Rule, md: HealthMetadata): HealthI
     labels: a.labels,
     severity: (a.labels.severity as Severity) || 'info',
     state: (a.state as AlertState) || 'inactive',
-    summary,
-    description,
+    summary: a.annotations.summary || a.labels.template || '',
+    description: a.annotations.description || a.annotations.message || '',
     runbookUrl: a.annotations.runbook_url,
-    value,
+    value: (a.value as number) || 0,
     activeAt: a.activeAt
   };
 };
