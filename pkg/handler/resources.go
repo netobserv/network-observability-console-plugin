@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/netobserv/network-observability-console-plugin/pkg/handler/apierrors"
 	"github.com/netobserv/network-observability-console-plugin/pkg/metrics"
 	"github.com/netobserv/network-observability-console-plugin/pkg/model"
 	"github.com/netobserv/network-observability-console-plugin/pkg/model/fields"
@@ -23,7 +24,7 @@ func (h *Handlers) GetClusters(ctx context.Context) func(w http.ResponseWriter, 
 
 		clients, err := newClients(h.Cfg, r.Header, false, namespace)
 		if err != nil {
-			writeError(w, http.StatusInternalServerError, err.Error())
+			err.Write(w, http.StatusInternalServerError)
 			return
 		}
 		var code int
@@ -35,7 +36,7 @@ func (h *Handlers) GetClusters(ctx context.Context) func(w http.ResponseWriter, 
 		// Fetch and merge values for K8S_ClusterName
 		values, code, err := h.getLabelValues(ctx, clients, fields.Cluster, isDev)
 		if err != nil {
-			writeError(w, code, err.Error())
+			err.Write(w, code)
 			return
 		}
 
@@ -52,7 +53,7 @@ func (h *Handlers) GetUDNs(ctx context.Context) func(w http.ResponseWriter, r *h
 
 		clients, err := newClients(h.Cfg, r.Header, false, namespace)
 		if err != nil {
-			writeError(w, http.StatusInternalServerError, err.Error())
+			err.Write(w, http.StatusInternalServerError)
 			return
 		}
 		var code int
@@ -64,7 +65,7 @@ func (h *Handlers) GetUDNs(ctx context.Context) func(w http.ResponseWriter, r *h
 		// Fetch and merge values for K8S_ClusterName
 		values, code, err := h.getLabelValues(ctx, clients, fields.UDN, isDev)
 		if err != nil {
-			writeError(w, code, err.Error())
+			err.Write(w, code)
 			return
 		}
 
@@ -81,7 +82,7 @@ func (h *Handlers) GetZones(ctx context.Context) func(w http.ResponseWriter, r *
 
 		clients, err := newClients(h.Cfg, r.Header, false, namespace)
 		if err != nil {
-			writeError(w, http.StatusInternalServerError, err.Error())
+			err.Write(w, http.StatusInternalServerError)
 			return
 		}
 		var code int
@@ -96,14 +97,14 @@ func (h *Handlers) GetZones(ctx context.Context) func(w http.ResponseWriter, r *
 		// Fetch and merge values for SrcK8S_Zone and DstK8S_Zone
 		values1, code, err := h.getLabelValues(ctx, clients, fields.SrcZone, isDev)
 		if err != nil {
-			writeError(w, code, err.Error())
+			err.Write(w, code)
 			return
 		}
 		values = append(values, values1...)
 
 		values2, code, err := h.getLabelValues(ctx, clients, fields.DstZone, isDev)
 		if err != nil {
-			writeError(w, code, err.Error())
+			err.Write(w, code)
 			return
 		}
 		values = append(values, values2...)
@@ -113,7 +114,7 @@ func (h *Handlers) GetZones(ctx context.Context) func(w http.ResponseWriter, r *
 	}
 }
 
-func (h *Handlers) getNamespacesValues(ctx context.Context, clients clients, isDev bool) ([]string, int, error) {
+func (h *Handlers) getNamespacesValues(ctx context.Context, clients clients, isDev bool) ([]string, int, apierrors.StructuredError) {
 	// Initialize values explicitly to avoid null json when empty
 	values := []string{}
 
@@ -141,7 +142,7 @@ func (h *Handlers) GetNamespaces(ctx context.Context) func(w http.ResponseWriter
 
 		clients, err := newClients(h.Cfg, r.Header, false, namespace)
 		if err != nil {
-			writeError(w, http.StatusInternalServerError, err.Error())
+			err.Write(w, http.StatusInternalServerError)
 			return
 		}
 		var code int
@@ -152,14 +153,14 @@ func (h *Handlers) GetNamespaces(ctx context.Context) func(w http.ResponseWriter
 
 		values, code, err := h.getNamespacesValues(ctx, clients, isDev)
 		if err != nil {
-			writeError(w, code, err.Error())
+			err.Write(w, code)
 			return
 		}
 		writeJSON(w, code, utils.NonEmpty(utils.Dedup(values)))
 	}
 }
 
-func (h *Handlers) getLabelValues(ctx context.Context, cl clients, label string, isDev bool) ([]string, int, error) {
+func (h *Handlers) getLabelValues(ctx context.Context, cl clients, label string, isDev bool) ([]string, int, apierrors.StructuredError) {
 	if h.PromInventory != nil && h.PromInventory.LabelExists(label) {
 		client := cl.getPromClient(isDev)
 		if client != nil {
@@ -172,7 +173,7 @@ func (h *Handlers) getLabelValues(ctx context.Context, cl clients, label string,
 					hlog.Info("Retrying with Loki...")
 					// continuing with loki below
 				} else {
-					return nil, code, fmt.Errorf("error while fetching label %s values from Prometheus: %w", label, err)
+					return nil, code, apierrors.NewPromClientError(fmt.Errorf("error while fetching label %s values from Prometheus: %w", label, err))
 				}
 			} else {
 				return resp, code, nil
@@ -182,12 +183,12 @@ func (h *Handlers) getLabelValues(ctx context.Context, cl clients, label string,
 	if cl.loki != nil {
 		resp, code, err := getLokiLabelValues(h.Cfg.Loki.URL, cl.loki, label)
 		if err != nil {
-			return nil, code, fmt.Errorf("error while fetching label %s values from Loki: %w", label, err)
+			return nil, code, err
 		}
 		return resp, code, nil
 	}
 	// Loki disabled AND label not managed in metrics => send an error
-	return nil, http.StatusBadRequest, fmt.Errorf("label %s not found in Prometheus metrics", label)
+	return nil, http.StatusBadRequest, apierrors.NewPromMissingLabels([]string{label})
 }
 
 func (h *Handlers) GetNames(ctx context.Context) func(w http.ResponseWriter, r *http.Request) {
@@ -198,7 +199,7 @@ func (h *Handlers) GetNames(ctx context.Context) func(w http.ResponseWriter, r *
 
 		clients, err := newClients(h.Cfg, r.Header, false, namespace)
 		if err != nil {
-			writeError(w, http.StatusInternalServerError, err.Error())
+			err.Write(w, http.StatusInternalServerError)
 			return
 		}
 		var code int
@@ -213,14 +214,14 @@ func (h *Handlers) GetNames(ctx context.Context) func(w http.ResponseWriter, r *
 		// TODO: parallelize
 		names1, code, err := h.getNamesForPrefix(ctx, clients, fields.Src, kind, namespace)
 		if err != nil {
-			writeError(w, code, err.Error())
+			err.Write(w, code)
 			return
 		}
 		names = append(names, names1...)
 
 		names2, code, err := h.getNamesForPrefix(ctx, clients, fields.Dst, kind, namespace)
 		if err != nil {
-			writeError(w, code, err.Error())
+			err.Write(w, code)
 			return
 		}
 		names = append(names, names2...)
@@ -230,7 +231,7 @@ func (h *Handlers) GetNames(ctx context.Context) func(w http.ResponseWriter, r *
 	}
 }
 
-func (h *Handlers) getNamesForPrefix(ctx context.Context, cl clients, prefix, kind, namespace string) ([]string, int, error) {
+func (h *Handlers) getNamesForPrefix(ctx context.Context, cl clients, prefix, kind, namespace string) ([]string, int, apierrors.StructuredError) {
 	filts := filters.SingleQuery{}
 	if namespace != "" {
 		filts = append(filts, filters.NewRegexMatch(prefix+fields.Namespace, exact(namespace)))
@@ -247,7 +248,11 @@ func (h *Handlers) getNamesForPrefix(ctx context.Context, cl clients, prefix, ki
 	if h.Cfg.IsPromEnabled() && h.PromInventory.LabelExists(searchField) {
 		// Label match query (any metric)
 		q := prometheus.QueryFilters("", filts)
-		return prometheus.GetLabelValues(ctx, cl.promAdmin, searchField, []string{q})
+		values, code, err := prometheus.GetLabelValues(ctx, cl.promAdmin, searchField, []string{q})
+		if err != nil {
+			return values, code, apierrors.NewPromClientError(err)
+		}
+		return values, code, nil
 	}
 	return getLokiNamesForPrefix(&h.Cfg.Loki, cl.loki, filts, searchField)
 }
@@ -268,7 +273,7 @@ func extractDistinctValues(field string, streams model.Streams) []string {
 				var line map[string]interface{}
 				err := json.Unmarshal([]byte(entry.Line), &line)
 				if err != nil {
-					hlog.Errorf("Could not unmarshal line: %v. Error was: %v", entry.Line, err.Error())
+					hlog.Errorf("Could not unmarshal line: %v. Error was: %v", entry.Line, err)
 					continue
 				}
 				if v, ok := line[field]; ok {

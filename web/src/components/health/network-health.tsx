@@ -18,7 +18,7 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Config, defaultConfig } from '../../model/config';
 import { loadConfig } from '../../utils/config';
-import { getHTTPErrorDetails } from '../../utils/errors';
+import { getGenericHTTPError } from '../../utils/errors';
 import { localStorageHealthRefreshKey, useLocalStorage } from '../../utils/local-storage-hook';
 import { usePoll } from '../../utils/poll-hook';
 import { useTheme } from '../../utils/theme-hook';
@@ -66,7 +66,7 @@ export const NetworkHealth: React.FC<{}> = ({}) => {
         setRules(res.alertRules);
       })
       .catch(err => {
-        const errStr = getHTTPErrorDetails(err, true);
+        const errStr = getGenericHTTPError(err);
         setError(errStr);
       })
       .finally(() => {

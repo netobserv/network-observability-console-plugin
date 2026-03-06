@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/netobserv/network-observability-console-plugin/pkg/handler/apierrors"
 	"github.com/netobserv/network-observability-console-plugin/pkg/metrics"
 )
 
@@ -19,7 +20,8 @@ const (
 func (h *Handlers) ExportFlows(ctx context.Context) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if !h.Cfg.IsLokiEnabled() {
-			writeError(w, http.StatusBadRequest, "Cannot perform flows query with disabled Loki")
+			err := apierrors.NewLokiDisabledError("cannot perform flows query with disabled Loki")
+			err.Write(w, http.StatusBadRequest)
 			return
 		}
 		cl := newLokiClient(&h.Cfg.Loki, r.Header, false)
@@ -34,7 +36,7 @@ func (h *Handlers) ExportFlows(ctx context.Context) func(w http.ResponseWriter, 
 
 		flows, code, err := h.getFlows(ctx, cl, params)
 		if err != nil {
-			writeError(w, code, err.Error())
+			apierrors.Write(w, code, err)
 			return
 		}
 
@@ -50,7 +52,7 @@ func (h *Handlers) ExportFlows(ctx context.Context) func(w http.ResponseWriter, 
 			writeCSV(w, code, flows, exportColumns)
 		default:
 			code = http.StatusBadRequest
-			writeError(w, code, fmt.Sprintf("export format %q is not valid", exportFormat))
+			apierrors.Write(w, code, fmt.Errorf("export format %q is not valid", exportFormat))
 		}
 	}
 }

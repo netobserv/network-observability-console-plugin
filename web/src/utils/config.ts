@@ -1,6 +1,6 @@
 import { getConfig } from '../api/routes';
 import { defaultConfig } from '../model/config';
-import { getHTTPErrorDetails } from './errors';
+import { ConfigLoadError } from './errors';
 
 export let config = defaultConfig;
 
@@ -9,7 +9,7 @@ export const loadConfig = async () => {
   try {
     config = await getConfig();
   } catch (err) {
-    error = getHTTPErrorDetails(err);
+    error = new ConfigLoadError(err);
     console.log(error);
   }
   return { config, error };

@@ -2,11 +2,12 @@ package handler
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"net/http"
 	"net/url"
 	"time"
 
+	"github.com/netobserv/network-observability-console-plugin/pkg/handler/apierrors"
 	"github.com/netobserv/network-observability-console-plugin/pkg/httpclient"
 	"github.com/netobserv/network-observability-console-plugin/pkg/loki"
 	"github.com/netobserv/network-observability-console-plugin/pkg/metrics"
@@ -30,7 +31,8 @@ const (
 func (h *Handlers) GetFlows(ctx context.Context) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if !h.Cfg.IsLokiEnabled() {
-			writeError(w, http.StatusBadRequest, "Cannot perform flows query with disabled Loki")
+			err := apierrors.NewLokiDisabledError("cannot perform flows query with disabled Loki")
+			err.Write(w, http.StatusBadRequest)
 			return
 		}
 
@@ -46,7 +48,7 @@ func (h *Handlers) GetFlows(ctx context.Context) func(w http.ResponseWriter, r *
 
 		flows, code, err := h.getFlows(ctx, cl, params)
 		if err != nil {
-			writeError(w, code, err.Error())
+			apierrors.Write(w, code, err)
 			return
 		}
 
@@ -103,7 +105,7 @@ func (h *Handlers) getFlows(ctx context.Context, lokiClient httpclient.Caller, p
 			qb := loki.NewFlowQueryBuilder(&h.Cfg.Loki, start, end, limit, recordType, packetLoss)
 			err := qb.Filters(group)
 			if err != nil {
-				return nil, http.StatusBadRequest, errors.New("Can't build query: " + err.Error())
+				return nil, http.StatusBadRequest, fmt.Errorf("can't build query: %w", err)
 			}
 			queries = append(queries, qb.Build())
 		}

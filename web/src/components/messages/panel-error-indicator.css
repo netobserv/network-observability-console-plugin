@@ -9,6 +9,7 @@
 .panel-error-indicator .pf-v5-c-empty-state {
   max-height: 100%;
   max-width: 100%;
+  display: block;
 }
 
 .panel-error-icon {

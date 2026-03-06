@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/netobserv/network-observability-console-plugin/pkg/handler/apierrors"
 	"github.com/netobserv/network-observability-console-plugin/pkg/kubernetes/auth"
 	"github.com/netobserv/network-observability-console-plugin/pkg/kubernetes/resources"
 	"github.com/netobserv/network-observability-console-plugin/pkg/utils"
@@ -18,7 +19,7 @@ func (h *Handlers) GetUDNIdss(ctx context.Context) func(w http.ResponseWriter, r
 	return func(w http.ResponseWriter, r *http.Request) {
 		token, err := auth.GetUserToken(r.Header)
 		if err != nil {
-			writeError(w, http.StatusInternalServerError, err.Error())
+			apierrors.Write(w, http.StatusInternalServerError, err)
 		}
 
 		cudns, err := resources.List(ctx, token, schema.GroupVersionResource{
@@ -29,9 +30,9 @@ func (h *Handlers) GetUDNIdss(ctx context.Context) func(w http.ResponseWriter, r
 		if err != nil {
 			var k8sErr *kerr.StatusError
 			if errors.As(err, &k8sErr) {
-				writeError(w, int(k8sErr.ErrStatus.Code), err.Error())
+				apierrors.Write(w, int(k8sErr.ErrStatus.Code), err)
 			} else {
-				writeError(w, http.StatusInternalServerError, err.Error())
+				apierrors.Write(w, http.StatusInternalServerError, err)
 			}
 		}
 
@@ -43,9 +44,9 @@ func (h *Handlers) GetUDNIdss(ctx context.Context) func(w http.ResponseWriter, r
 		if err != nil {
 			var k8sErr *kerr.StatusError
 			if errors.As(err, &k8sErr) {
-				writeError(w, int(k8sErr.ErrStatus.Code), err.Error())
+				apierrors.Write(w, int(k8sErr.ErrStatus.Code), err)
 			} else {
-				writeError(w, http.StatusInternalServerError, err.Error())
+				apierrors.Write(w, http.StatusInternalServerError, err)
 			}
 		}
 

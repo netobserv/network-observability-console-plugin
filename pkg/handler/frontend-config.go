@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/netobserv/network-observability-console-plugin/pkg/config"
+	"github.com/netobserv/network-observability-console-plugin/pkg/handler/apierrors"
 )
 
 func (h *Handlers) GetFrontendConfig() func(w http.ResponseWriter, r *http.Request) {
@@ -15,7 +16,7 @@ func (h *Handlers) GetFrontendConfig() func(w http.ResponseWriter, r *http.Reque
 		if err != nil {
 			cfg, err = config.ReadFile(h.Cfg.Frontend.BuildVersion, h.Cfg.Frontend.BuildDate, h.Cfg.Path)
 			if err != nil {
-				writeError(w, http.StatusInternalServerError, err.Error())
+				apierrors.Write(w, http.StatusInternalServerError, err)
 			}
 		}
 		if h.Cfg.IsLokiEnabled() {

@@ -11,13 +11,21 @@ import {
   TextVariants,
   Title
 } from '@patternfly/react-core';
-import { ExclamationCircleIcon } from '@patternfly/react-icons';
+import { ExclamationCircleIcon, ExclamationTriangleIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Status } from '../../api/loki';
 import { getBuildInfo, getLimits, getLokiMetrics, getStatus } from '../../api/routes';
 import { ContextSingleton } from '../../utils/context';
-import { getHTTPErrorDetails, getPromError, isPromError } from '../../utils/errors';
+import {
+  getGenericHTTPError,
+  LokiClientError,
+  LokiResponseError,
+  PromDisabledMetrics,
+  PromMissingLabels,
+  PromUnsupported,
+  StructuredError
+} from '../../utils/errors';
 import { ErrorSuggestions } from './error-suggestions';
 import './error.css';
 import { SecondaryAction } from './secondary-action';
@@ -34,15 +42,14 @@ enum LokiInfo {
 
 export interface ErrorProps {
   title: string;
-  error: string;
-  // TODO: (NETOBSERV-1877) refactor error type handling.
-  // "isLokiRelated" actually means here: "is neither prom-unsupported nor config loading error". But could actually be other than Loki related.
-  isLokiRelated: boolean;
+  error: string | StructuredError;
 }
 
-export const ErrorComponent: React.FC<ErrorProps> = ({ title, error, isLokiRelated }) => {
+export const ErrorComponent: React.FC<ErrorProps> = ({ title, error }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
-  const [lokiLoading, setLokiLoading] = React.useState(isLokiRelated);
+  const [lokiLoading, setLokiLoading] = React.useState(
+    LokiClientError.isTypeOf(error) || LokiResponseError.isTypeOf(error)
+  );
   const [statusLoading, setStatusLoading] = React.useState(true);
   const [status, setStatus] = React.useState<Status | undefined>();
   const [statusError, setStatusError] = React.useState<string | undefined>();
@@ -59,7 +66,7 @@ export const ErrorComponent: React.FC<ErrorProps> = ({ title, error, isLokiRelat
           getBuildInfo()
             .then(data => setInfo(JSON.stringify(data, null, 2)))
             .catch(err => {
-              setInfo(getHTTPErrorDetails(err));
+              setInfo(getGenericHTTPError(err));
             })
             .finally(() => {
               setLokiLoading(false);
@@ -70,7 +77,7 @@ export const ErrorComponent: React.FC<ErrorProps> = ({ title, error, isLokiRelat
           getLimits()
             .then(data => setInfo(JSON.stringify(data, null, 2)))
             .catch(err => {
-              setInfo(getHTTPErrorDetails(err));
+              setInfo(getGenericHTTPError(err));
             })
             .finally(() => {
               setLokiLoading(false);
@@ -81,7 +88,7 @@ export const ErrorComponent: React.FC<ErrorProps> = ({ title, error, isLokiRelat
           getLokiMetrics()
             .then(data => setInfo(data))
             .catch(err => {
-              setInfo(getHTTPErrorDetails(err));
+              setInfo(getGenericHTTPError(err));
             })
             .finally(() => {
               setLokiLoading(false);
@@ -98,10 +105,6 @@ export const ErrorComponent: React.FC<ErrorProps> = ({ title, error, isLokiRelat
     [t]
   );
 
-  const getDisplayError = React.useCallback(() => {
-    return isPromError(error) ? getPromError(error) : error;
-  }, [error]);
-
   React.useEffect(() => {
     //jest crashing on getStatus not defined so we need to ensure the function is defined here
     if (!getStatus) {
@@ -115,7 +118,7 @@ export const ErrorComponent: React.FC<ErrorProps> = ({ title, error, isLokiRelat
         setStatusError(undefined);
       })
       .catch(err => {
-        const errorMessage = getHTTPErrorDetails(err);
+        const errorMessage = getGenericHTTPError(err);
         console.error(errorMessage);
         setStatusError(errorMessage);
         setStatus(undefined);
@@ -125,20 +128,26 @@ export const ErrorComponent: React.FC<ErrorProps> = ({ title, error, isLokiRelat
       });
   }, []);
 
+  // Set different error icon depending on the severity (e.g. configuration error is less severe)
+  const isCritical =
+    !PromUnsupported.isTypeOf(error) && !PromDisabledMetrics.isTypeOf(error) && !PromMissingLabels.isTypeOf(error);
+
   return (
     <div id="netobserv-error-container">
       <EmptyState data-test="error-state">
-        <EmptyStateIcon className="netobserv-error-icon" icon={ExclamationCircleIcon} />
+        <EmptyStateIcon
+          className={isCritical ? 'netobserv-error-icon' : ''}
+          icon={isCritical ? ExclamationCircleIcon : ExclamationTriangleIcon}
+        />
         <Title headingLevel="h2" size="lg">
           {title}
         </Title>
         <EmptyStateBody className="error-body">
-          <Text className="netobserv-error-message" component={TextVariants.p}>
-            {getDisplayError()}
+          <Text className={isCritical ? 'netobserv-error-message' : ''} component={TextVariants.p}>
+            {String(error)}
           </Text>
           <TextContent className="error-text-content">
-            <Text component={TextVariants.p}>{t('You may consider the following changes to avoid this error:')}</Text>
-            <ErrorSuggestions error={error} isLokiRelated={isLokiRelated} compact={false} />
+            {typeof error !== 'string' && <ErrorSuggestions error={error} compact={false} />}
             {status && <StatusTexts status={status} />}
             {statusError && (
               <Text component={TextVariants.blockquote}>
