@@ -164,7 +164,8 @@ const recordingToHealth = (metric: RecordingRuleMetric, annotations: { [key: str
 
     // Inject $value and $labels.* in description and summary
     const rawSummary = annotations.summary || valueData.labels.template || '';
-    const rawDescription = annotations.description || '';
+    // Use 'message' as fallback if 'description' is not present (common in some Prometheus rule conventions)
+    const rawDescription = annotations.description || annotations.message || '';
     const summary = substituteTemplate(rawSummary, valueData.labels, value);
     const description = substituteTemplate(rawDescription, valueData.labels, value);
 
