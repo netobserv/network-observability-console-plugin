@@ -1,7 +1,6 @@
 import React, { FC } from 'react';
 
 import { Alert, AlertVariant, Button, Flex, FlexItem, PageSection, TextContent, Title } from '@patternfly/react-core';
-import _ from 'lodash';
 import { useTranslation } from 'react-i18next';
 import { flowCollectorEditPath, flowCollectorNewPath, netflowTrafficPath } from '../../utils/url';
 import DynamicLoader, { navigate } from '../dynamic-loader/dynamic-loader';
@@ -29,8 +28,7 @@ export const FlowCollectorStatus: FC<FlowCollectorStatusProps> = () => {
         <Consumer>
           {ctx => {
             // Check if operator is in hold mode
-            const onHoldMessage = ctx.data?.status?.onHold;
-            const isOnHold = !_.isEmpty(onHoldMessage);
+            const isOnHold = ctx.data?.spec?.execution?.mode === 'OnHold';
 
             return (
               <PageSection id="pageSection">
@@ -44,7 +42,10 @@ export const FlowCollectorStatus: FC<FlowCollectorStatusProps> = () => {
                     <FlexItem flex={{ default: 'flex_1' }}>
                       {isOnHold ? (
                         <Alert variant={AlertVariant.info} isInline title={t('Network Observability is on hold')}>
-                          {onHoldMessage}
+                          {t(
+                            // eslint-disable-next-line max-len
+                            'Execution mode is set to OnHold. All operator-managed workloads have been deleted, while preserving other resources. To change execution mode, update or remove "spec.execution.mode" in the FlowCollector resource.'
+                          )}
                         </Alert>
                       ) : (
                         <Pipeline
