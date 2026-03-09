@@ -16,7 +16,7 @@ import { ColumnsId, getDefaultColumns } from '../utils/columns';
 import { loadConfig } from '../utils/config';
 import { ContextSingleton } from '../utils/context';
 import { computeStepInterval } from '../utils/datetime';
-import { getHTTPErrorDetails, getPromError, isPromMissingLabelError } from '../utils/errors';
+import { getStructuredHTTPError, PromMissingLabels } from '../utils/errors';
 import { checkFilterAvailable, getFilterDefinitions } from '../utils/filter-definitions';
 import {
   defaultArraySelectionOptions,
@@ -424,6 +424,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
             metricsRef,
             getMetrics,
             model.setMetrics,
+            model.setError,
             clearFlows
           );
 
@@ -436,11 +437,8 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
             })
             .catch(err => {
               console.error('fetchUDNs error', err);
-              const errorMsg = getHTTPErrorDetails(err, true);
-              model.setMetrics({
-                ...model.metrics,
-                errors: [...model.metrics.errors, { metricType: t('User-Defined Networks'), error: errorMsg }]
-              });
+              const erro = getStructuredHTTPError('User-Defined Networks', err);
+              model.setError(erro);
               model.setTopologyUDNIds([]);
             });
         } else {
@@ -462,27 +460,29 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
             model.setStats(stats);
           })
           .catch(err => {
-            const errStr = getHTTPErrorDetails(err, true);
-            const promErrStr = getPromError(errStr);
+            const genErr = getStructuredHTTPError(err);
 
             // check if it's a prom missing label error and remove filters
             // when the prom error is different to the new one
-            if (isPromMissingLabelError(errStr) && promErrStr !== model.chipsPopoverMessage) {
-              let filtersDisabled = false;
-              model.filters.list.forEach(filter => {
-                const fieldName = model.config.columns.find(col => col.filter === filter.def.id)?.field;
-                if (!fieldName || errStr.includes(fieldName)) {
-                  filtersDisabled = true;
-                  filter.values.forEach(fv => {
-                    fv.disabled = true;
-                  });
+            if (PromMissingLabels.isTypeOf(genErr)) {
+              const errStr = genErr.toString();
+              if (errStr !== model.chipsPopoverMessage) {
+                let filtersDisabled = false;
+                model.filters.list.forEach(filter => {
+                  const fieldName = model.config.columns.find(col => col.filter === filter.def.id)?.field;
+                  if (!fieldName || genErr.missing.includes(fieldName)) {
+                    filtersDisabled = true;
+                    filter.values.forEach(fv => {
+                      fv.disabled = true;
+                    });
+                  }
+                });
+                if (filtersDisabled) {
+                  // update filters to retrigger query without showing the error
+                  updateTableFilters({ ...model.filters });
+                  model.setChipsPopoverMessage(errStr);
+                  return;
                 }
-              });
-              if (filtersDisabled) {
-                // update filters to retrigger query without showing the error
-                updateTableFilters({ ...model.filters });
-                model.setChipsPopoverMessage(promErrStr);
-                return;
               }
             }
 
@@ -490,7 +490,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
             // always clear chip message to focus on the error
             model.setFlows([]);
             model.setMetrics(defaultNetflowMetrics);
-            model.setError(errStr);
+            model.setError(genErr);
             model.setWarning(undefined);
             model.setChipsPopoverMessage(undefined);
           })
@@ -917,7 +917,7 @@ export const NetflowTraffic: React.FC<NetflowTrafficProps> = ({
         <HistogramToolbar
           {...model}
           isDarkTheme={isDarkTheme}
-          totalMetric={model.metrics.totalFlowCountMetric}
+          totalMetric={model.metrics.totalFlowCount?.result}
           guidedTourHandle={guidedTourRef.current}
           resetRange={() => model.setRange(defaultTimeRange)}
           tick={tick}

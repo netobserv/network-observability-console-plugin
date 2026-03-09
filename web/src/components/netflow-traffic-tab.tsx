@@ -21,6 +21,7 @@ import { useTranslation } from 'react-i18next';
 import { Config, defaultConfig } from '../model/config';
 import { FilterCompare, Filters } from '../model/filters';
 import { loadConfig } from '../utils/config';
+import { ConfigLoadError } from '../utils/errors';
 import { findFilter, getFilterDefinitions } from '../utils/filter-definitions';
 import { usePrevious } from '../utils/previous-hook';
 import Error from './messages/error';
@@ -65,7 +66,7 @@ export const NetflowTrafficTab: React.FC<NetflowTrafficTabProps> = ({ match, obj
     Array<'initDone' | 'configLoading' | 'configLoaded' | 'configLoadError' | 'forcedFiltersLoaded'>
   >([]);
   const [config, setConfig] = React.useState<Config>(defaultConfig);
-  const [error, setError] = React.useState<string | undefined>();
+  const [error, setError] = React.useState<ConfigLoadError | undefined>();
   const [forcedFilters, setForcedFilters] = React.useState<Filters>();
   const [gatewayInfo, setGatewayInfo] = React.useState<{ name: string; namespace: string } | undefined>();
   const previous = usePrevious({ obj });
@@ -241,7 +242,7 @@ export const NetflowTrafficTab: React.FC<NetflowTrafficTabProps> = ({ match, obj
   }, [config, obj, previous, t]);
 
   if (error) {
-    return <Error title={t('Unable to get config')} error={error} isLokiRelated={false} />;
+    return <Error title={t('Unable to get config')} error={error} />;
   } else if (!initState.current.includes('forcedFiltersLoaded')) {
     return (
       <Bullseye data-test="loading-tab">

@@ -12,6 +12,7 @@ import { Warning } from '../model/warnings';
 import { Column, ColumnSizeMap } from '../utils/columns';
 import { ContextSingleton } from '../utils/context';
 import { TimeRange } from '../utils/datetime';
+import { StructuredError } from '../utils/errors';
 import { useK8sModelsWithColors } from '../utils/k8s-models-hook';
 import {
   defaultArraySelectionOptions,
@@ -114,7 +115,7 @@ export function netflowTrafficModel() {
   const [lastRefresh, setLastRefresh] = React.useState<Date | undefined>(undefined);
   const [lastDuration, setLastDuration] = React.useState<number | undefined>(undefined);
   const [chipsPopoverMessage, setChipsPopoverMessage] = React.useState<string | undefined>();
-  const [error, setError] = React.useState<string | undefined>();
+  const [error, setError] = React.useState<string | StructuredError | undefined>();
   const [isTRModalOpen, setTRModalOpen] = React.useState(false);
   const [isOverviewModalOpen, setOverviewModalOpen] = React.useState(false);
   const [isColModalOpen, setColModalOpen] = React.useState(false);
