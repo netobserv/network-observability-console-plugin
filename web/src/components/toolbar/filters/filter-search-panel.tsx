@@ -4,7 +4,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Config } from '../../../model/config';
 import { FilterCompare, FilterDefinition, Filters, FilterValue } from '../../../model/filters';
-import { getHTTPErrorDetails } from '../../../utils/errors';
+import { getGenericHTTPError } from '../../../utils/errors';
 import { Indicator } from '../../../utils/filters-helper';
 import { Direction } from '../filters-toolbar';
 import AutocompleteFilter from './autocomplete-filter';
@@ -118,7 +118,7 @@ export const FilterSearchPanel: React.FC<FilterSearchPanelProps> = ({
                         addFilterFromSuggestions(opts.map(opts => ({ display: opts.name, value: opts.value })));
                       })
                       .catch(err => {
-                        const errorMessage = getHTTPErrorDetails(err);
+                        const errorMessage = getGenericHTTPError(err);
                         setMessage(errorMessage);
                       });
                   } else {

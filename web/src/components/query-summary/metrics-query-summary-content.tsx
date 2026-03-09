@@ -55,14 +55,14 @@ export const MetricsQuerySummaryContent: React.FC<MetricsQuerySummaryContentProp
       switch (metricType) {
         case 'Bytes':
         case 'Packets':
-          return metrics.rateMetrics?.[getRateMetricKey(metricType)];
+          return metrics.rate?.result?.[getRateMetricKey(metricType)];
         case 'PktDropBytes':
         case 'PktDropPackets':
-          return metrics.droppedRateMetrics?.[getRateMetricKey(metricType)];
+          return metrics.droppedRate?.result?.[getRateMetricKey(metricType)];
         case 'DnsLatencyMs':
-          return metrics.dnsLatencyMetrics?.avg;
+          return metrics.dnsLatency?.result?.avg;
         case 'TimeFlowRttNs':
-          return metrics.rttMetrics?.avg;
+          return metrics.rtt?.result?.avg;
         default:
           return undefined;
       }
@@ -75,14 +75,14 @@ export const MetricsQuerySummaryContent: React.FC<MetricsQuerySummaryContentProp
       switch (metricType) {
         case 'Bytes':
         case 'Packets':
-          return metrics.totalRateMetric?.[getRateMetricKey(metricType)];
+          return metrics.totalRate?.result?.[getRateMetricKey(metricType)];
         case 'PktDropBytes':
         case 'PktDropPackets':
-          return metrics.totalDroppedRateMetric?.[getRateMetricKey(metricType)];
+          return metrics.totalDroppedRate?.result?.[getRateMetricKey(metricType)];
         case 'DnsLatencyMs':
-          return metrics.totalDnsLatencyMetric?.avg;
+          return metrics.totalDnsLatency?.result?.avg;
         case 'TimeFlowRttNs':
-          return metrics.totalRttMetric?.avg;
+          return metrics.totalRtt?.result?.avg;
         default:
           return undefined;
       }

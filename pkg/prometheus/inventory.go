@@ -43,18 +43,6 @@ type SearchResult struct {
 	MissingLabels []string
 }
 
-func (r *SearchResult) FormatCandidates() string {
-	var names []string
-	for _, m := range r.Candidates {
-		names = append(names, strings.TrimPrefix(m, "netobserv_"))
-	}
-	return strings.Join(names, ", ")
-}
-
-func (r *SearchResult) FormatMissingLabels() string {
-	return strings.Join(r.MissingLabels, ", ")
-}
-
 func (i *Inventory) Search(neededLabels []string, valueField string) SearchResult {
 	// Search for any direction
 	r0 := i.searchWithDir(neededLabels, valueField, config.AnyDirection)

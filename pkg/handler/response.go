@@ -7,14 +7,9 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/netobserv/network-observability-console-plugin/pkg/handler/apierrors"
 	csvdata "github.com/netobserv/network-observability-console-plugin/pkg/handler/csv"
 	"github.com/netobserv/network-observability-console-plugin/pkg/model"
-)
-
-const (
-	codePrometheusUnsupported     = 901 // code to use internally to notify a Bad Request, unsupported for prometheus queries
-	codePrometheusDisabledMetrics = 902 // code to use internally to notify a Bad Request, disabled metrics for prometheus queries
-	codePrometheusMissingLabels   = 903 // code to use internally to notify a Bad Request, missing labels for prometheus queries
 )
 
 func writeText(w http.ResponseWriter, code int, bytes []byte) {
@@ -30,7 +25,7 @@ func writeJSON(w http.ResponseWriter, code int, payload interface{}) {
 	response, err := json.Marshal(payload)
 	if err != nil {
 		hlog.Errorf("Marshalling error while responding JSON: %v", err)
-		writeError(w, http.StatusInternalServerError, err.Error())
+		apierrors.Write(w, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -45,7 +40,7 @@ func writeJSON(w http.ResponseWriter, code int, payload interface{}) {
 func writeCSV(w http.ResponseWriter, code int, qr *model.AggregatedQueryResponse, columns []string) {
 	data, err := csvdata.GetCSVData(qr, columns)
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, err.Error())
+		apierrors.Write(w, http.StatusInternalServerError, err)
 		return
 	}
 	hlog.Tracef("CSV data: %v", data)
@@ -61,44 +56,9 @@ func writeCSV(w http.ResponseWriter, code int, qr *model.AggregatedQueryResponse
 		// write csv row
 		err := writer.Write(row)
 		if err != nil {
-			writeError(w, http.StatusInternalServerError, fmt.Sprintf("Cannot write row %s", row))
+			apierrors.Write(w, http.StatusInternalServerError, fmt.Errorf("cannot write row %s", row))
 			return
 		}
 	}
 	writer.Flush()
-}
-
-type errorResponse struct {
-	Message             string `json:"message,omitempty"`
-	PromUnsupported     string `json:"promUnsupported,omitempty"`
-	PromDisabledMetrics string `json:"promDisabledMetrics,omitempty"`
-	PromMissingLabels   string `json:"promMissingLabels,omitempty"`
-}
-
-func writeError(w http.ResponseWriter, code int, message string) {
-	var resp errorResponse
-	switch code {
-	case codePrometheusUnsupported:
-		code = http.StatusBadRequest
-		resp = errorResponse{PromUnsupported: message}
-	case codePrometheusDisabledMetrics:
-		code = http.StatusBadRequest
-		resp = errorResponse{PromDisabledMetrics: message}
-	case codePrometheusMissingLabels:
-		code = http.StatusBadRequest
-		resp = errorResponse{PromMissingLabels: message}
-	default:
-		resp = errorResponse{Message: message}
-	}
-	response, err := json.Marshal(resp)
-	if err != nil {
-		hlog.Errorf("Marshalling error while responding an error: %v (message was: %s)", err, message)
-		code = http.StatusInternalServerError
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(code)
-	_, err = w.Write(response)
-	if err != nil {
-		hlog.Errorf("Error while responding an error: %v (message was: %s)", err, message)
-	}
 }

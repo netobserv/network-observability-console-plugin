@@ -1,13 +1,13 @@
 import { Bullseye, EmptyState, EmptyStateBody, EmptyStateIcon, Text, TextVariants } from '@patternfly/react-core';
-import { ExclamationCircleIcon } from '@patternfly/react-icons';
+import { ExclamationCircleIcon, ExclamationTriangleIcon } from '@patternfly/react-icons';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
-import { isPromError } from '../../utils/errors';
+import { PromDisabledMetrics, PromMissingLabels, PromUnsupported, StructuredError } from '../../utils/errors';
 import { ErrorSuggestions } from './error-suggestions';
 import './panel-error-indicator.css';
 
 export interface PanelErrorIndicatorProps {
-  error?: string;
+  error: StructuredError | string;
   metricType?: string;
   showDetails?: boolean;
 }
@@ -15,25 +15,25 @@ export interface PanelErrorIndicatorProps {
 export const PanelErrorIndicator: React.FC<PanelErrorIndicatorProps> = ({ error, metricType, showDetails = true }) => {
   const { t } = useTranslation('plugin__netobserv-plugin');
 
-  if (!error) {
-    return null;
-  }
+  // Set different error icon depending on the severity (e.g. configuration error is less severe)
+  const isCritical =
+    !PromUnsupported.isTypeOf(error) && !PromDisabledMetrics.isTypeOf(error) && !PromMissingLabels.isTypeOf(error);
 
   return (
     <Bullseye className="panel-error-indicator">
       <EmptyState>
         <EmptyStateIcon
           className="panel-error-icon"
-          icon={ExclamationCircleIcon}
-          color="var(--pf-v5-global--danger-color--100)"
+          icon={isCritical ? ExclamationCircleIcon : ExclamationTriangleIcon}
+          color={isCritical ? 'var(--pf-v5-global--danger-color--100)' : undefined}
         />
         <Text component={TextVariants.h3}>{t('Failed to load {{metric}}', { metric: metricType || t('metric') })}</Text>
         {showDetails && (
           <EmptyStateBody className="panel-error-body">
             <Text component={TextVariants.p} className="panel-error-message">
-              {error}
+              {String(error)}
             </Text>
-            <ErrorSuggestions error={error} isLokiRelated={!isPromError(error)} />
+            {typeof error !== 'string' && <ErrorSuggestions error={error} />}
           </EmptyStateBody>
         )}
       </EmptyState>

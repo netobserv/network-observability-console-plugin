@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/netobserv/network-observability-console-plugin/pkg/config"
+	"github.com/netobserv/network-observability-console-plugin/pkg/handler/apierrors"
 	"github.com/netobserv/network-observability-console-plugin/pkg/loki"
 	"github.com/netobserv/network-observability-console-plugin/pkg/metrics"
 	"github.com/netobserv/network-observability-console-plugin/pkg/model"
@@ -40,9 +41,9 @@ func (h *Handlers) GetTopology(ctx context.Context) func(w http.ResponseWriter, 
 		params := r.URL.Query()
 		namespace := params.Get(namespaceKey)
 
-		clients, err := newClients(h.Cfg, r.Header, false, namespace)
-		if err != nil {
-			writeError(w, http.StatusInternalServerError, err.Error())
+		clients, sterr := newClients(h.Cfg, r.Header, false, namespace)
+		if sterr != nil {
+			sterr.Write(w, http.StatusInternalServerError)
 			return
 		}
 
@@ -54,18 +55,17 @@ func (h *Handlers) GetTopology(ctx context.Context) func(w http.ResponseWriter, 
 
 		ds, err := getDatasource(params)
 		if err != nil {
-			writeError(w, http.StatusBadRequest, err.Error())
+			apierrors.Write(w, http.StatusBadRequest, err)
 			return
 		}
 
 		flows, code, err := h.getTopologyFlows(ctx, clients, params, ds)
-		var dsErr *datasourceError
+		var promClErr *apierrors.PromClientError
 		if err != nil &&
 			ds == constants.DataSourceAuto &&
 			h.Cfg.IsLokiEnabled() &&
 			(code == http.StatusForbidden || code == http.StatusUnauthorized) &&
-			errors.As(err, &dsErr) &&
-			dsErr.datasource == constants.DataSourceProm {
+			errors.As(err, &promClErr) {
 			// In case this was a prometheus 401 / 403 error, the query is repeated with Loki
 			// This is because multi-tenancy is currently not managed for prom datasource, hence such queries have to go with Loki
 			// Unfortunately we don't know a safe and generic way to pre-flight check if the user will be authorized
@@ -73,7 +73,7 @@ func (h *Handlers) GetTopology(ctx context.Context) func(w http.ResponseWriter, 
 			flows, code, err = h.getTopologyFlows(ctx, clients, params, constants.DataSourceLoki)
 		}
 		if err != nil {
-			writeError(w, code, err.Error())
+			apierrors.Write(w, code, err)
 			return
 		}
 
@@ -291,23 +291,12 @@ func buildTopologyQuery(
 		if search != nil {
 			if len(search.Candidates) > 0 {
 				// Some candidate metrics exist but they are disabled; tell the user
-				return "", nil, codePrometheusDisabledMetrics, fmt.Errorf(
-					"this request requires any of the following metric(s) to be enabled: %s."+
-						" Metrics can be configured in the FlowCollector resource via 'spec.processor.metrics.includeList'."+
-						" Alternatively, you may also install and enable Loki", search.FormatCandidates())
+				return "", nil, http.StatusBadRequest, apierrors.NewPromDisabledMetrics(search.Candidates)
 			} else if len(search.MissingLabels) > 0 {
-				return "", nil, codePrometheusMissingLabels, fmt.Errorf(
-					"this request could not be performed with Prometheus metrics, as they are missing some of the required labels."+
-						" Try using different filters and/or aggregations. For example, try removing these dependencies from your query: %s."+
-						" Alternatively, you may also install and enable Loki", search.FormatMissingLabels())
+				return "", nil, http.StatusBadRequest, apierrors.NewPromMissingLabels(search.MissingLabels)
 			}
 		}
-		var reason string
-		if unsupportedReason != "" {
-			reason = fmt.Sprintf(" (reason: %s)", unsupportedReason)
-		}
-		return "", nil, codePrometheusUnsupported, fmt.Errorf(
-			"this request could not be performed with Prometheus metrics%s: it requires installing and enabling Loki", reason)
+		return "", nil, http.StatusBadRequest, apierrors.NewPromUnsupported(unsupportedReason)
 	}
 
 	qb, err := loki.NewTopologyQuery(&cfg.Loki, cfg.Frontend.GetAggregateKeyLabels(), in)

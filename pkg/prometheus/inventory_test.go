@@ -76,7 +76,6 @@ func TestInventory_Search(t *testing.T) {
 	search = inv.Search([]string{"SrcK8S_Namespace", "DstK8S_Namespace"}, "Packets")
 	assert.Empty(t, search.Found)
 	assert.Equal(t, []string{"netobserv_metric_2"}, search.Candidates)
-	assert.Equal(t, "metric_2", search.FormatCandidates())
 
 	search = inv.Search([]string{"SrcK8S_HostName", "DstK8S_HostName"}, "Packets")
 	assert.Empty(t, search.Found)

@@ -14,7 +14,7 @@ import { CaretDownIcon } from '@patternfly/react-icons';
 import * as _ from 'lodash';
 import * as React from 'react';
 import { createFilterValue, FilterDefinition, FilterOption, FilterValue } from '../../../model/filters';
-import { getHTTPErrorDetails } from '../../../utils/errors';
+import { getGenericHTTPError } from '../../../utils/errors';
 import { undefinedValue } from '../../../utils/filter-definitions';
 import { Indicator } from '../../../utils/filters-helper';
 import './autocomplete-filter.css';
@@ -85,7 +85,7 @@ export const AutocompleteFilter: React.FC<AutocompleteFilterProps> = ({
         .autocomplete(newValue)
         .then(setOptions)
         .catch(err => {
-          const errorMessage = getHTTPErrorDetails(err);
+          const errorMessage = getGenericHTTPError(err);
           setMessage(errorMessage);
           setOptions([]);
         });

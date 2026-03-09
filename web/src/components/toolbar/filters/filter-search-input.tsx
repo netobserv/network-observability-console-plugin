@@ -12,7 +12,7 @@ import {
   findFromFilters,
   getCompareText
 } from '../../../model/filters';
-import { getHTTPErrorDetails } from '../../../utils/errors';
+import { getGenericHTTPError } from '../../../utils/errors';
 import { matcher } from '../../../utils/filter-definitions';
 import { Indicator, setEndpointFilterDefinition } from '../../../utils/filters-helper';
 import { useOutsideClickEvent } from '../../../utils/outside-hook';
@@ -310,7 +310,7 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
                 setSuggestions(v.map(optionToSuggestion));
               })
               .catch(err => {
-                const errorMessage = getHTTPErrorDetails(err);
+                const errorMessage = getGenericHTTPError(err);
                 setMessage(errorMessage);
                 setSuggestions([]);
               });
@@ -351,7 +351,7 @@ export const FilterSearchInput: React.FC<FilterSearchInputProps> = ({
               setSuggestions(suggestions.concat(v.map(optionToSuggestion)));
             })
             .catch(err => {
-              const errorMessage = getHTTPErrorDetails(err);
+              const errorMessage = getGenericHTTPError(err);
               setMessage(errorMessage);
               setSuggestions(suggestions);
             });

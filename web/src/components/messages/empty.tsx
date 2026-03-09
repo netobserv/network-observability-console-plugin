@@ -17,7 +17,7 @@ import { Status } from '../../api/loki';
 import { getStatus } from '../../api/routes';
 import { Config } from '../../model/config';
 import { ContextSingleton } from '../../utils/context';
-import { getHTTPErrorDetails } from '../../utils/errors';
+import { getGenericHTTPError } from '../../utils/errors';
 import './empty.css';
 import { SecondaryAction } from './secondary-action';
 import { StatusTexts } from './status-texts';
@@ -52,7 +52,7 @@ export const Empty: React.FC<EmptyProps> = ({ showDetails, resetDefaultFilters, 
       })
       .catch(err => {
         if (isMounted) {
-          const errorMessage = getHTTPErrorDetails(err);
+          const errorMessage = getGenericHTTPError(err);
           console.error(errorMessage);
           setStatusError(errorMessage);
           setStatus(undefined);
