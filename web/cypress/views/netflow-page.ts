@@ -1,12 +1,9 @@
+/* eslint-disable @typescript-eslint/no-namespace */
 declare global {
     namespace Cypress {
         interface Chainable {
-            showAdvancedOptions(): Chainable<Element>
             checkPanelsNum(panels?: number): Chainable<Element>
             checkPanel(panelName: string[]): Chainable<Element>
-            openPanelsModal(): Chainable<Element>
-            openColumnsModal(): Chainable<Element>
-            selectPopupItems(id: string, names: string[]): Chainable<Element>
             checkPopupItems(id: string, names: string[]): Chainable<Element>
             checkQuerySummary(metric: JQuery<HTMLElement>): Chainable<Element>
             checkPerformance(page: string, loadTime: number, memoryUsage: number): Chainable<Element>
@@ -314,29 +311,10 @@ Cypress.Commands.add('checkPanel', (panelName) => {
     }
 });
 
-Cypress.Commands.add('openPanelsModal', () => {
-    cy.showAdvancedOptions();
-    cy.get('#manage-overview-panels-button').click();
-    cy.get('#overview-panels-modal').should('exist');
-});
-
-Cypress.Commands.add('openColumnsModal', () => {
-    cy.showAdvancedOptions();
-    cy.get('#manage-columns-button').click();
-    cy.get('#columns-modal').should('exist');
-});
-
 Cypress.Commands.add('checkPopupItems', (id, names) => {
     for (let i = 0; i < names.length; i++) {
         cy.get(id).contains(names[i])
             .closest('.pf-v5-c-data-list__item-row').find('.pf-v5-c-data-list__check');
-    }
-});
-
-Cypress.Commands.add('selectPopupItems', (id, names) => {
-    for (let i = 0; i < names.length; i++) {
-        cy.get(id).contains(names[i])
-            .closest('.pf-v5-c-data-list__item-row').find('.pf-v5-c-data-list__check').click();
     }
 });
 
