@@ -3,7 +3,6 @@
 # Script to run Cypress E2E tests in OpenShift CI against a real cluster
 # This script expects:
 # - KUBECONFIG environment variable to be set
-# - Network Observability operator to be installed on the cluster
 # - Console route to be accessible
 #
 # Usage:
@@ -13,6 +12,7 @@
 #   --spec <spec-list>    Comma-separated list of spec files to run
 #                         Example: --spec "cypress/integration-tests/overview_page.cy.ts,cypress/integration-tests/topology_view.cy.ts"
 
+# Set PROVISION_HTPASSWD=true environment variable to provision htpasswd IDP.
 set -euo pipefail
 
 # Parse command line arguments

@@ -54,8 +54,8 @@ describe('(OCP-67087 Network_Observability) DNSTracking test', { tags: ['Network
 
         // verify default DNS columns: DNS Latency and DNS Response Code
         cy.byTestID('table-composable').should('exist').within(() => {
-            cy.get(colSelectors.DNSLatency).should('exist')
-            cy.get(colSelectors.DNSResponseCode).should('exist')
+            cy.get(colSelectors.dnsLatency).should('exist')
+            cy.get(colSelectors.dnsResponseCode).should('exist')
         })
 
         // add filter for dst_ns=netobserv and DNSName=loki
@@ -74,9 +74,9 @@ describe('(OCP-67087 Network_Observability) DNSTracking test', { tags: ['Network
 
         // verify they are visible in table view
         cy.byTestID('table-composable').should('exist').within(() => {
-            cy.get(colSelectors.DNSId).should('exist')
-            cy.get(colSelectors.DNSError).should('exist')
-            cy.get(colSelectors.DNSName).should('exist')
+            cy.get(colSelectors.dnsId).should('exist')
+            cy.get(colSelectors.dnsError).should('exist')
+            cy.get(colSelectors.dnsName).should('exist')
         })
 
         // Verify DNSName column for all rows

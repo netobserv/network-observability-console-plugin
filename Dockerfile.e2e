@@ -1,5 +1,5 @@
 # Dockerfile for running Cypress E2E tests in OpenShift CI
-# This runs tests against a real OpenShift cluster with Network Observability installed
+# This runs tests against a real OpenShift cluster
 
 FROM cypress/included:15.9.0
 
