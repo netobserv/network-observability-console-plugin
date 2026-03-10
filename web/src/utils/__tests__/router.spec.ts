@@ -32,14 +32,8 @@ describe('Filters URL', () => {
   });
 
   it('should get URL -> Filters', async () => {
-    const location = {
-      ...window.location,
-      search: '?filters=src_namespace%3Dtest%3Bdst_name%21%3Dtest&match=bidirectional'
-    };
-    Object.defineProperty(window, 'location', {
-      writable: true,
-      value: location
-    });
+    const href = `${window.origin}${window.location.pathname}?filters=src_namespace%3Dtest%3Bdst_name%21%3Dtest&match=bidirectional`;
+    history.replaceState(history.state, '', href);
 
     const prom = getFiltersFromURL(FilterDefinitionSample, {});
     expect(prom).toBeDefined();

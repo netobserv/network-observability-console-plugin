@@ -26,9 +26,10 @@ const config: Config = {
     "cypress"
   ],
   moduleNameMapper: {
-    "\\.(css|less)$": "<rootDir>/moduleMapper/dummy.tsx",
+    "\\.(s?css|less)$": "<rootDir>/moduleMapper/dummy.tsx",
     "@console/*": "<rootDir>/moduleMapper/dummy.tsx"
   },
+  testEnvironment: 'jsdom',
   transform: {
     "^.+\\.[t|j]sx?$": "ts-jest"
   },
