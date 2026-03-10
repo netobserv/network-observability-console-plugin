@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
 
-import { Button, Flex, FlexItem, PageSection, TextContent, Title } from '@patternfly/react-core';
+import { Alert, AlertVariant, Button, Flex, FlexItem, PageSection, TextContent, Title } from '@patternfly/react-core';
 import { useTranslation } from 'react-i18next';
 import { flowCollectorEditPath, flowCollectorNewPath, netflowTrafficPath } from '../../utils/url';
 import DynamicLoader, { navigate } from '../dynamic-loader/dynamic-loader';
@@ -27,6 +27,9 @@ export const FlowCollectorStatus: FC<FlowCollectorStatusProps> = () => {
       >
         <Consumer>
           {ctx => {
+            // Check if operator is in hold mode
+            const isOnHold = ctx.data?.spec?.execution?.mode === 'OnHold';
+
             return (
               <PageSection id="pageSection">
                 <div id="pageHeader">
@@ -37,7 +40,20 @@ export const FlowCollectorStatus: FC<FlowCollectorStatusProps> = () => {
                 {ctx.data && (
                   <Flex className="status-container" direction={{ default: 'column' }}>
                     <FlexItem flex={{ default: 'flex_1' }}>
-                      <Pipeline existing={ctx.data} selectedTypes={selectedTypes} setSelectedTypes={setSelectedTypes} />
+                      {isOnHold ? (
+                        <Alert variant={AlertVariant.info} isInline title={t('Network Observability is on hold')}>
+                          {t(
+                            // eslint-disable-next-line max-len
+                            'Execution mode is set to OnHold. All operator-managed workloads have been deleted, while preserving other resources. To change execution mode, update or remove "spec.execution.mode" in the FlowCollector resource.'
+                          )}
+                        </Alert>
+                      ) : (
+                        <Pipeline
+                          existing={ctx.data}
+                          selectedTypes={selectedTypes}
+                          setSelectedTypes={setSelectedTypes}
+                        />
+                      )}
                     </FlexItem>
                     <FlexItem className="status-list-container" flex={{ default: 'flex_1' }}>
                       <ResourceStatus
@@ -61,16 +77,18 @@ export const FlowCollectorStatus: FC<FlowCollectorStatusProps> = () => {
                             {t('Edit FlowCollector')}
                           </Button>
                         </FlexItem>
-                        <FlexItem>
-                          <Button
-                            id="open-network-traffic"
-                            data-test-id="open-network-traffic"
-                            variant="link"
-                            onClick={() => navigate(netflowTrafficPath)}
-                          >
-                            {t('Open Network Traffic page')}
-                          </Button>
-                        </FlexItem>
+                        {!isOnHold && (
+                          <FlexItem>
+                            <Button
+                              id="open-network-traffic"
+                              data-test-id="open-network-traffic"
+                              variant="link"
+                              onClick={() => navigate(netflowTrafficPath)}
+                            >
+                              {t('Open Network Traffic page')}
+                            </Button>
+                          </FlexItem>
+                        )}
                       </Flex>
                     </FlexItem>
                   </Flex>

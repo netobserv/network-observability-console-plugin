@@ -1531,6 +1531,9 @@ export const flowCollectorUISchema: UiSchema = {
         'ui:order': ['type', 'ipfix', 'kafka', 'openTelemetry', '*']
       }
     },
+    execution: {
+      'ui:title': 'Execution'
+    },
     'ui:order': [
       'namespace',
       'deploymentModel',
@@ -1541,7 +1544,9 @@ export const flowCollectorUISchema: UiSchema = {
       'loki',
       'consolePlugin',
       'networkPolicy',
-      'exporters'
+      'exporters',
+      'execution',
+      '*'
     ]
   },
   'ui:order': ['metadata', 'spec', '*']
