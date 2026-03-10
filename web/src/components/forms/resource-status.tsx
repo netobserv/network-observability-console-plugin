@@ -43,11 +43,11 @@ export const ResourceStatus: FC<ResourceStatusProps> = ({
     // 1. Global Ready
     (c: K8sResourceCondition) => c.type === 'Ready',
     // 2. Used components / conditions
-    (c: K8sResourceCondition) => c.reason !== 'ComponentUnused',
+    (c: K8sResourceCondition) => c.reason !== 'ComponentUnused'
     // 3. Others (unused components)
   ];
   const conditions = ((existing?.status?.conditions || []) as K8sResourceCondition[]).sort((a, b) => {
-    for (let pred of sortConditions) {
+    for (const pred of sortConditions) {
       if (pred(a) && pred(b)) {
         return 0;
       } else if (pred(a)) {
