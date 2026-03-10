@@ -1,33 +1,7 @@
 import * as React from 'react';
-import { JSDOM } from 'jsdom';
+import '@testing-library/jest-dom'
 
-const jsdom = new JSDOM('<!doctype html><html><body></body></html>', {
-  url: 'http://localhost/'
-});
-const { window } = jsdom;
-
-function copyProps(src, target) {
-  Object.defineProperties(target, {
-    ...Object.getOwnPropertyDescriptors(src),
-    ...Object.getOwnPropertyDescriptors(target)
-  });
-}
-
-global.window = window as any;
-global.document = window.document;
-global.navigator = {
-  userAgent: 'node.js'
-} as any;
-global.requestAnimationFrame = function (callback) {
-  return setTimeout(callback, 0);
-};
-window.requestAnimationFrame = global.requestAnimationFrame;
-global.cancelAnimationFrame = function (id) {
-  clearTimeout(id);
-};
-copyProps(window, global);
-
-//Mock i18n translation to return key
+// Mock i18n translation to return key
 jest.mock('react-i18next', () => {
   return {
     useTranslation: () => {
@@ -47,7 +21,7 @@ jest.mock('react-i18next', () => {
   };
 });
 
-//Mock all console sdk components used here
+// Mock all console sdk components used here
 jest.mock('@openshift-console/dynamic-plugin-sdk', () => {
   return {
     isModelFeatureFlag(e: never) {
@@ -66,30 +40,16 @@ jest.mock('@openshift-console/dynamic-plugin-sdk', () => {
   };
 });
 
-//Mock useLayoutEffect to useEffect
+// Mock useLayoutEffect to useEffect
 jest.mock('react', () => ({
   ...jest.requireActual('react'),
   useLayoutEffect: jest.requireActual('react').useEffect
 }));
 
-//Mock patternfly Tooltip, DatePicker & OverflowMenuControl components
-jest.mock('@patternfly/react-core', () => ({
-  ...jest.requireActual('@patternfly/react-core'),
-  Tooltip: (props: any) => {
-    return props.children;
-  },
-  DatePicker: () => {
-    return null;
-  },
-  OverflowMenuControl: () => {
-    return null;
-  }
-}));
-
-//SpyOn localStorage setItem
+// SpyOn localStorage setItem
 jest.spyOn(window.localStorage.__proto__, 'setItem');
 
-//Mock react-router-dom
+// Mock react-router-dom
 jest.mock('react-router-dom', () => ({
   useHistory: () => ({
     push: jest.fn(),
@@ -101,7 +61,7 @@ jest.mock('react-router-dom', () => ({
   }
 }));
 
-//Mock routes
+// Mock routes
 jest.mock('./src/api/routes', () => ({
   getPods: jest.fn(async () => ['ABCD']),
   getNamespaces: jest.fn(async () => ['EFGH']),
