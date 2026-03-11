@@ -149,15 +149,27 @@ export const Pipeline: React.FC<FlowCollectorPipelineProps> = ({ existing, selec
     const steps: Step[] = [];
 
     const overallTypes = ['Ready'];
-    const overallStatus = getStatus(overallTypes, 'True');
+
+    steps.push({
+      id: 'overall',
+      label: 'Overall',
+      data: {
+        status: getStatus(overallTypes, 'True'),
+        selected: _.some(selectedTypes, t => overallTypes.includes(t)),
+        onSelect: () => setSelectedTypes(overallTypes)
+      }
+    });
+
     if (existing?.spec?.agent?.type === 'eBPF') {
+      const types = ['WaitingEBPFAgents'];
       steps.push({
         id: 'ebpf',
         label: 'eBPF agents',
+        runAfterTasks: ['overall'],
         data: {
-          status: overallStatus,
-          selected: _.some(selectedTypes, t => overallTypes.includes(t)),
-          onSelect: () => setSelectedTypes(overallTypes)
+          status: getStatus(types, 'False'),
+          selected: _.some(selectedTypes, t => types.includes(t)),
+          onSelect: () => setSelectedTypes(types)
         }
       });
     }
@@ -193,7 +205,7 @@ export const Pipeline: React.FC<FlowCollectorPipelineProps> = ({ existing, selec
 
     const cpRunAfter: string[] = [];
     if (existing?.spec?.loki?.enable) {
-      const types = ['LokiIssue', 'LokiWarning'];
+      const types = ['WaitingLokiStack', 'WaitingDemoLoki'];
       steps.push({
         id: 'loki',
         label: 'Loki',
@@ -233,14 +245,15 @@ export const Pipeline: React.FC<FlowCollectorPipelineProps> = ({ existing, selec
     }
 
     if (existing?.spec?.consolePlugin?.enable && cpRunAfter.length) {
+      const types = ['WaitingWebConsole'];
       steps.push({
         id: 'plugin',
         label: 'Console plugin',
         runAfterTasks: cpRunAfter,
         data: {
-          status: overallStatus,
-          selected: _.some(selectedTypes, t => overallTypes.includes(t)),
-          onSelect: () => setSelectedTypes(overallTypes)
+          status: getStatus(types, 'False'),
+          selected: _.some(selectedTypes, t => types.includes(t)),
+          onSelect: () => setSelectedTypes(types)
         }
       });
     }
