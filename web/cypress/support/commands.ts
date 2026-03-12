@@ -1,5 +1,10 @@
 /* eslint-disable @typescript-eslint/no-namespace */
 
+// Import Cypress custom commands
+import { nav } from '@views/nav';
+import './console-utilities';
+import './selectors';
+
 /// <reference types="cypress" />
 // ***********************************************
 // This example commands.ts shows you how to
@@ -178,7 +183,7 @@ Cypress.Commands.add('changeMetricType', (name) => {
 
   cy.get('#metricType-dropdown').click();
   cy.get('.pf-v5-c-menu__content').contains(name).click();
-  
+
   // For Packets metric, we expect a full page error due to mock timeout
   if (name === 'Packets') {
     cy.get('[data-test="error-state"]').should('exist');
@@ -235,7 +240,7 @@ Cypress.Commands.add('waitForNetworkIdle', (idleTime: number = 3000, timeout: nu
           throw new Error('Timed out waiting for network idle.');
         }
 
-        return false; 
+        return false;
       };
 
       const pollUntilIdle = () => {
@@ -250,6 +255,109 @@ Cypress.Commands.add('waitForNetworkIdle', (idleTime: number = 3000, timeout: nu
 
       return cy.then(pollUntilIdle);
     });
+});
+
+Cypress.Commands.add("switchPerspective", (perspective: string) => {
+
+  /* if side bar is collapsed then expand it
+  before switching perspecting */
+  cy.get('body').then((body) => {
+    if (body.find('.pf-m-collapsed').length > 0) {
+      cy.get('#nav-toggle').click()
+    }
+  });
+  nav.sidenav.switcher.changePerspectiveTo(perspective);
+  nav.sidenav.switcher.shouldHaveText(perspective);
+});
+
+// Execute OpenShift CLI commands (from openshift-tests-private/frontend)
+Cypress.Commands.add('adminCLI', (command: string, options?: Partial<Cypress.ExecOptions>) => {
+  const kubeconfig = Cypress.env('KUBECONFIG_PATH');
+  cy.log(`Run admin command: ${command}`);
+  cy.exec(`${command} --kubeconfig ${kubeconfig}`, options);
+});
+
+// to avoid influence from upstream login change
+Cypress.Commands.add('uiLogin', (provider: string, username: string, password: string) => {
+  const baseUrl = Cypress.config('baseUrl');
+  const baseOrigin = new URL(baseUrl!).origin;
+
+  cy.clearAllCookies();
+  cy.visit('/');
+
+  // Wait a moment for potential redirect to OAuth server
+  cy.url({ timeout: 30000 }).should('include', '/oauth/authorize').then((url) => {
+    const currentUrl = new URL(url);
+
+    cy.log(`Current URL: ${url}`);
+    cy.log(`Current origin: ${currentUrl.origin}`);
+    cy.log(`Base origin: ${baseOrigin}`);
+
+    // We're on OAuth server (different origin), use cy.origin()
+    cy.origin(currentUrl.origin, { args: { username, password, provider } }, ({ username, password, provider }) => {
+      // Click the login button on the OAuth page
+      cy.get('[data-test-id="login"]', { timeout: 10000 }).should('be.visible').click();
+
+      // Check if we need to select identity provider
+      cy.get('body').then(($body) => {
+        if ($body.text().includes(provider)) {
+          cy.contains(provider).should('be.visible').click();
+        } else if ($body.find('li.idp').length > 0) {
+          // Using the last idp if provider name not found
+          cy.get('li.idp').last().click();
+        }
+      });
+
+      // Wait for the login form to be ready
+      cy.get('#inputUsername', { timeout: 10000 }).should('be.visible').type(username);
+      cy.get('#inputPassword').should('be.visible').type(password);
+      cy.get('button[type=submit]').should('be.visible').click();
+    });
+  });
+
+  // Wait for redirect back and verify login
+  cy.byTestID("username", { timeout: 120000 }).should('be.visible');
+});
+
+Cypress.Commands.add('uiLogout', () => {
+  cy.window().then((win: any) => {
+    if (win.SERVER_FLAGS?.authDisabled) {
+      cy.log('Skipping logout, console is running with auth disabled');
+      return;
+    }
+    cy.log('Loggin out UI');
+    cy.byTestID('user-dropdown-toggle').click();
+    cy.byTestID('log-out').should('be.visible');
+    cy.byTestID('log-out').click({ force: true });
+  })
+});
+
+Cypress.Commands.add('retryTask', (command, expectedOutput, options?) => {
+  const { retries, interval } = options || DEFAULT_RETRY_OPTIONS;
+  const retryTaskFn = (currentRetries) => {
+    return cy.adminCLI(command)
+      .then(result => {
+        if (result.stdout.includes(expectedOutput)) {
+          return cy.wrap(true);
+        } else if (currentRetries < retries) {
+          return cy.wait(interval).then(() => retryTaskFn(currentRetries + 1));
+        } else {
+          return cy.wrap(false);
+        }
+      });
+  };
+  return retryTaskFn(0);
+});
+
+Cypress.Commands.add("checkCommandResult", (command, expectedoutput, options?) => {
+  return cy.retryTask(command, expectedoutput, options)
+    .then(conditionMet => {
+      if (conditionMet) {
+        return;
+      } else {
+        throw new Error(`"${command}" failed to meet expectedoutput ${expectedoutput} within ${options?.retries || 'default'} retries`);
+      }
+    })
 });
 
 declare global {
@@ -272,7 +380,16 @@ declare global {
       changeTimeRange(name: string, topology?: boolean): Chainable<void>
       changeMetricType(name: string): Chainable<void>
       checkRecordField(field: string, name: string, values: string[]): Chainable<void>
-      clickShowDuplicates():Chainable<void>
+      clickShowDuplicates(): Chainable<void>
+      adminCLI(command: string, options?: Partial<Cypress.ExecOptions>): Chainable<void>
+      uiLogin(provider: string, username: string, password: string): Chainable<void>
+      uiLogout(): Chainable<void>
+      switchPerspective(perspective: string): Chainable<void>
+      checkCommandResult(command: string, expectedoutput: string, options?: { retries?: number; interval?: number }): Chainable<void>
+      retryTask(condition: string, expectedoutput: string, options?: { retries?: number; interval?: number }): Chainable<void>
+
+
+
 
       /**
        * Sets up network interception to track active requests for idle detection.

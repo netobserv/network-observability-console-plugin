@@ -20,3 +20,9 @@ benchmark-*.txt
 /pkg/server/benchmark-current.txt
 /pkg/server/benchmark-results.txt
 !/pkg/server/benchmark-baseline.txt
+**/gui_test_screenshots/
+/web/cypress/results/
+
+# htpasswd test user files
+htpasswd-test-users
+test-users-credentials.txt

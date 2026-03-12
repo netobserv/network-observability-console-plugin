@@ -1,0 +1,103 @@
+---
+kind: ProjectRequest
+apiVersion: project.openshift.io/v1
+metadata:
+  name: "test-server"
+  labels:
+    name: "test-server"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  namespace: test-server
+  labels:
+    app: nginx
+spec:
+  securityContext:     
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: ["ALL"]
+            privileged: false
+        image: quay.io/openshifttest/nginx-alpine:1.2.3
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: test-server
+  name: nginx-service
+spec:
+  selector:
+    app: nginx
+  type: NodePort
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  namespace: test-server
+  name: nginx-route
+spec:
+  port:
+    targetPort: 8080
+  to:
+    kind: Service
+    name: nginx-service
+---
+kind: ProjectRequest
+apiVersion: project.openshift.io/v1
+metadata:
+  name: "test-client"
+  labels:
+    name: "test-client"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: client
+  name: client
+  namespace: test-client
+spec:
+  containers:
+  - command:
+      - sh
+      - -c
+      - "
+        \  while : ; do\n
+        \        curl nginx-service.test-server.svc:80/data/100K  2>&1 >  /dev/null ; sleep 5 \n
+        \  done"
+    image: quay.io/openshifttest/hello-openshift:multiarch
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop: ["ALL"]
+        privileged: false
+      runAsNonRoot: true
+      seccompProfile:
+        type: RuntimeDefault
+    name: client
+    resources: {}
+status: {}

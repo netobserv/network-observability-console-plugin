@@ -1,0 +1,65 @@
+# Dockerfile for running Cypress E2E tests in OpenShift CI
+# This runs tests against a real OpenShift cluster
+
+FROM cypress/included:15.9.0
+
+# Install additional dependencies
+USER root
+RUN apt-get update && apt-get install -y \
+    curl \
+    jq \
+    apache2-utils \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install oc CLI for OpenShift interactions
+RUN curl -LO https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable/openshift-client-linux.tar.gz && \
+    tar -xzf openshift-client-linux.tar.gz && \
+    mv oc /usr/local/bin/ && \
+    mv kubectl /usr/local/bin/ && \
+    rm openshift-client-linux.tar.gz && \
+    chmod +x /usr/local/bin/oc /usr/local/bin/kubectl
+
+WORKDIR /opt/app-root
+
+# Copy scripts first
+COPY scripts/run-e2e-tests.sh ./scripts/
+RUN chmod +x ./scripts/run-e2e-tests.sh
+
+# Copy web directory
+WORKDIR /opt/app-root/web
+
+# Copy package files first for better layer caching
+COPY web/package.json web/package-lock.json ./
+
+# Install npm dependencies
+RUN npm ci
+
+# Copy the rest of the web application
+COPY web/ ./
+
+# Create directories for test results and screenshots
+RUN mkdir -p gui_test_screenshots/cypress/screenshots \
+    gui_test_screenshots/cypress/videos \
+    cypress/results/junit && \
+    chmod -R 777 gui_test_screenshots cypress/results
+
+# Set environment variables
+ENV CYPRESS_CACHE_FOLDER=/tmp/.cache/Cypress
+ENV HOME=/tmp
+ENV NO_COLOR=1
+
+# Make cache directory writable for OpenShift arbitrary UIDs
+RUN mkdir -p /tmp/.cache/Cypress && chmod -R 777 /tmp
+
+# Create a non-root user for OpenShift compatibility
+RUN useradd -u 1001 -r -g 0 -m -d /tmp -s /sbin/nologin \
+    -c "Default Application User" default && \
+    chown -R 1001:0 /opt/app-root && \
+    chmod -R g+rwX /opt/app-root /tmp
+
+USER 1001
+
+WORKDIR /opt/app-root
+
+# Use the run-e2e-tests.sh script as the entrypoint
+ENTRYPOINT ["/opt/app-root/scripts/run-e2e-tests.sh"]

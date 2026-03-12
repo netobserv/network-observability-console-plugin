@@ -2,7 +2,6 @@
   "compilerOptions": {
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "baseUrl": ".",
     "module": "esnext",
     "moduleResolution": "node",
     "target": "es2020",
@@ -18,7 +17,8 @@
     "noUnusedLocals": true,
     "skipLibCheck": true,
     "strictNullChecks": true,
-    "isolatedModules": true
+    "isolatedModules": true,
+    "noEmit": true
   },
   "include": [
     "src"
