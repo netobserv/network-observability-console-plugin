@@ -4,6 +4,8 @@ declare global {
         interface Chainable {
             checkPanelsNum(panels?: number): Chainable<Element>
             checkPanel(panelName: string[]): Chainable<Element>
+            openPanelsModal(): Chainable<Element>
+            openColumnsModal(): Chainable<Element>
             checkPopupItems(id: string, names: string[]): Chainable<Element>
             checkQuerySummary(metric: JQuery<HTMLElement>): Chainable<Element>
             checkPerformance(page: string, loadTime: number, memoryUsage: number): Chainable<Element>
@@ -289,17 +291,6 @@ export namespace histogramSelectors {
     export const doubleLeftShift = backwardShift + "> div:nth-child(1) > button"
 }
 
-Cypress.Commands.add('showAdvancedOptions', () => {
-    cy.get('#show-view-options-button')
-        .then(function ($button) {
-            if ($button.text() === 'Hide advanced options') {
-                return;
-            } else {
-                cy.get('#show-view-options-button').click();
-            }
-        })
-});
-
 Cypress.Commands.add('checkPanelsNum', (panels = 2) => {
     cy.get('#overview-flex').find('.overview-card').its('length').should('eq', panels);
 });
@@ -316,6 +307,18 @@ Cypress.Commands.add('checkPopupItems', (id, names) => {
         cy.get(id).contains(names[i])
             .closest('.pf-v5-c-data-list__item-row').find('.pf-v5-c-data-list__check');
     }
+});
+
+Cypress.Commands.add('openPanelsModal', () => {
+    cy.showAdvancedOptions();
+    cy.get('#manage-overview-panels-button').click();
+    cy.get('#overview-panels-modal').should('exist');
+});
+
+Cypress.Commands.add('openColumnsModal', () => {
+    cy.showAdvancedOptions();
+    cy.get('#manage-columns-button').click();
+    cy.get('#columns-modal').should('exist');
 });
 
 Cypress.Commands.add('checkQuerySummary', (metric) => {
