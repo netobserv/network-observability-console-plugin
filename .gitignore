@@ -10,8 +10,6 @@
 /web/dist
 /web/node_modules
 /web/yarn-error.log
-/web/src/**/*.js
-/web/src/**/*.spec.js
 /plugin-backend
 /cover.out
 tmp.Dockerfile
