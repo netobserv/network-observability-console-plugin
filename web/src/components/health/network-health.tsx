@@ -44,12 +44,14 @@ export const NetworkHealth: React.FC<{}> = ({}) => {
   const [health, setHealth] = React.useState<HealthStats>(buildStats([]));
   const [activeTabKey, setActiveTabKey] = React.useState<string>('global');
   const [config, setConfig] = React.useState<Config>(defaultConfig);
+  const [configLoaded, setConfigLoaded] = React.useState(false);
   const [isScoringDrawerOpen, setIsScoringDrawerOpen] = React.useState<boolean>(false);
 
   // Load config on mount
   React.useEffect(() => {
     loadConfig().then(v => {
       setConfig(v.config);
+      setConfigLoaded(true);
       if (v.error) {
         console.error('Error loading config:', v.error);
       }
@@ -75,7 +77,12 @@ export const NetworkHealth: React.FC<{}> = ({}) => {
   }, [config]);
 
   usePoll(fetch, interval);
-  React.useEffect(fetch, [fetch]);
+  // Run first fetch only after config is loaded so recordingAnnotations (including third-party rules without template label) is available
+  React.useEffect(() => {
+    if (configLoaded) {
+      fetch();
+    }
+  }, [configLoaded, fetch]);
 
   const panelContent = () => {
     if (isScoringDrawerOpen) {

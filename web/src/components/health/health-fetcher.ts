@@ -42,10 +42,11 @@ export const fetchNetworkHealth = (recordingAnnotations: RecordingAnnotations) =
   // Fetch recording rules and their current values
   const recordingP = getRecordingRules('netobserv="true"').then(res => {
     const recordingRules = res.data.groups.flatMap(group => group.rules);
+    const hasAnnotation = (name: string) => recordingAnnotations && name in recordingAnnotations;
 
-    // For each recording rule, query its current metric values
+    // Include rules that have template label (built-in) OR have recording annotations (third-party)
     const queries = recordingRules
-      .filter(rule => !!rule.labels?.template)
+      .filter(rule => !!rule.labels?.template || hasAnnotation(rule.name))
       .map(rule => {
         return queryPrometheusMetric(rule.name)
           .then((metricRes: PrometheusResponse): RecordingRuleMetric | undefined => {

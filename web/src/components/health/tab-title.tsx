@@ -27,10 +27,11 @@ export const HealthTabTitle: React.FC<HealthTabTitleProps> = ({ stats, title }) 
   ) : (
     <CheckCircleIcon className="icon healthy" />
   );
+  const count = stats.length;
   return (
     <>
       <TabTitleIcon>{icon}</TabTitleIcon>
-      <TabTitleText>{title}</TabTitleText>
+      <TabTitleText>{`${title} (${count})`}</TabTitleText>
     </>
   );
 };
